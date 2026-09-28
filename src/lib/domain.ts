@@ -98,7 +98,7 @@ export function targetMastery(system: string | null, value: string | null): numb
       return Number.isFinite(n) ? Math.min(100, Math.max(40, n * 10)) : 80;
     }
     case "yo": {
-      const map: Record<string, number> = { L: 95, E: 88, M: 78, C: 68, B: 58, A: 48, I: 30 };
+      const map: Record<string, number> = { L: 100, E: 90, M: 80, C: 70, B: 60, A: 50, I: 40 };
       return map[v] ?? 75;
     }
     case "percent": {
@@ -302,7 +302,7 @@ export function risks(input: {
 
 export function nextReviewDate(fromISO: string, level: number): string {
   const gaps = [1, 2, 4, 7, 14, 28];
-  return addDays(fromISO, gaps[Math.max(0, Math.min(5, level))]);
+  return addDays(fromISO, gaps[Math.max(0, Math.min(5, level))] ?? 28);
 }
 
 /** ---------- plan generation ---------- */
