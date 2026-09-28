@@ -598,3 +598,102 @@ html.dark .app-mobile-header {
     min-height: calc(100% + env(safe-area-inset-top, 0px));
   }
 }
+
+
+/* ---------- tablet navigation ---------- */
+@media (min-width: 768px) and (max-width: 1100px) {
+  .desktop-sidebar {
+    width: 5rem !important;
+    padding-inline: 0.65rem !important;
+  }
+
+  .desktop-sidebar .sidebar-label {
+    display: none !important;
+  }
+
+  .desktop-sidebar nav button,
+  .desktop-sidebar > button,
+  .desktop-sidebar .mt-auto button {
+    justify-content: center;
+    padding-inline: 0.65rem;
+  }
+
+  .desktop-sidebar > div:first-child {
+    justify-content: center;
+    padding-inline: 0;
+  }
+}
+
+
+@media (forced-colors: active) {
+  .panel,
+  .glass-base,
+  button,
+  input,
+  select,
+  textarea {
+    border: 1px solid CanvasText !important;
+  }
+
+  :focus-visible {
+    outline: 2px solid Highlight !important;
+    outline-offset: 2px !important;
+  }
+
+  [aria-current="page"],
+  [aria-pressed="true"] {
+    outline: 2px solid Highlight;
+    outline-offset: -2px;
+  }
+}
+
+
+.skip-link {
+  position: fixed;
+  top: max(0.5rem, env(safe-area-inset-top, 0px));
+  left: 0.75rem;
+  z-index: 100;
+  transform: translateY(-160%);
+  border-radius: 0.75rem;
+  background: var(--foreground);
+  color: var(--background);
+  padding: 0.65rem 0.9rem;
+  font-weight: 600;
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+}
+
+
+/* ---------- hard breakpoint isolation ---------- */
+/* Mobile shell components set display explicitly. These rules ensure they can
+   never leak into the desktop shell, regardless of utility ordering. */
+@media (min-width: 768px) {
+  .app-mobile-header,
+  .app-tabbar,
+  .app-sheet-backdrop {
+    display: none !important;
+  }
+
+  .app-main {
+    padding-bottom: 2.5rem;
+  }
+
+  .app-desktop-main {
+    width: auto;
+    max-width: none;
+    margin-left: 6.5rem;
+    margin-right: 1.5rem;
+    padding-inline: 1.5rem;
+  }
+}
+
+@media (min-width: 1101px) {
+  .app-desktop-main {
+    max-width: 1180px;
+    margin-left: 17rem;
+    margin-right: 2rem;
+    padding-inline: 0;
+  }
+}

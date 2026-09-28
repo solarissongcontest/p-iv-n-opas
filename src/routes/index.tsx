@@ -2,8 +2,6 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { BookOpen, CalendarDays, ChartNoAxesCombined, Ellipsis, FlaskConical, Home, Plus, Search, Settings2, X } from "lucide-react";
 import { toast, Toaster } from "sonner";
-import type { User } from "@supabase/supabase-js";
-import { supabase } from "@/integrations/supabase/client";
 import { LiquidGlass } from "@/components/LiquidGlass";
 import { ensureKe04ForCurrentUser, useCourses, useExams, useMistakes, usePlan, usePreferences, useSessions, useTests, useTopics } from "@/lib/data";
 import { longDate, greeting, today } from "@/lib/fi";
@@ -12,6 +10,12 @@ import { CourseForm, SessionForm, SearchPanel } from "@/components/StudyDialogs"
 import { Onboarding } from "@/components/Onboarding";
 import { pendingCount, setOfflineOwner, startSyncWatcher, subscribePending } from "@/lib/offline";
 import { applyTheme, storedThemeIsDark } from "@/lib/theme";
+import {
+  type DeviceUser,
+  isTrustedArthurDevice,
+  readDeviceSession,
+  storeDeviceSession,
+} from "@/lib/deviceSession";
 
 type Page = "today" | "plan" | "courses" | "exams" | "progress" | "settings";
 const nav = [
@@ -23,10 +27,7 @@ const nav = [
 ] as const;
 export const Route = createFileRoute("/")({ component: App });
 
-const DEVICE_AUTH_KEY = "opk.device-authorized";
-const DEVICE_OWNER_KEY = "opk.owner-id";
-
-async function getArthurSession() {
+async function getArthurSession(): Promise<DeviceUser> {
   const response = await fetch("/api/device-auth", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -34,70 +35,51 @@ async function getArthurSession() {
   });
   const payload = (await response.json().catch(() => ({}))) as {
     access_token?: string;
-    refresh_token?: string;
     user_id?: string;
+    expires_at?: number;
     error?: string;
   };
-  if (!response.ok || !payload.access_token || !payload.refresh_token) {
-    throw new Error(payload.error ?? "Arthur-session luominen epäonnistui.");
+  if (!response.ok || !payload.access_token || !payload.user_id || !payload.expires_at) {
+    throw new Error(payload.error ?? "Arthur-laitetunnistuksen luominen epäonnistui.");
   }
-
-  const { data, error } = await supabase.auth.setSession({
-    access_token: payload.access_token,
-    refresh_token: payload.refresh_token,
+  storeDeviceSession({
+    accessToken: payload.access_token,
+    userId: payload.user_id,
+    expiresAt: payload.expires_at,
   });
-  if (error) throw error;
-  if (!data.user) throw new Error("Supabase ei palauttanut käyttäjää.");
-  return data.user;
+  return { id: payload.user_id };
 }
 
 
 function App() {
-  const [user, setUser] = useState<User | null | undefined>();
+  const [user, setUser] = useState<DeviceUser | null | undefined>();
   const [authError, setAuthError] = useState<string | null>(null);
 
   useEffect(() => {
     let active = true;
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (active) setUser(session?.user ?? null);
-    });
-
     void (async () => {
+      const existing = readDeviceSession();
+      if (existing) {
+        if (active) setUser(existing.user);
+        return;
+      }
+      if (!isTrustedArthurDevice()) {
+        if (active) setUser(null);
+        return;
+      }
       try {
-        const { data: sessionData } = await supabase.auth.getSession();
-        if (!active) return;
-
-        if (sessionData.session?.user) {
-          localStorage.setItem(DEVICE_AUTH_KEY, "Arthur");
-          localStorage.setItem(DEVICE_OWNER_KEY, sessionData.session.user.id);
-          setUser(sessionData.session.user);
-          return;
-        }
-
-        const trustedDevice = localStorage.getItem(DEVICE_AUTH_KEY) === "Arthur";
-        if (!trustedDevice) {
-          setUser(null);
-          return;
-        }
-
         const restoredUser = await getArthurSession();
-        localStorage.setItem(DEVICE_OWNER_KEY, restoredUser.id);
         if (active) {
           setAuthError(null);
           setUser(restoredUser);
         }
       } catch (error) {
         if (!active) return;
-        const message = error instanceof Error ? error.message : "Kirjautuminen epäonnistui.";
-        setAuthError(message);
+        setAuthError(error instanceof Error ? error.message : "Kirjautuminen epäonnistui.");
         setUser(null);
       }
     })();
-
-    return () => {
-      active = false;
-      subscription.unsubscribe();
-    };
+    return () => { active = false; };
   }, []);
 
   if (user === undefined) return <main className="grid min-h-screen place-items-center">Avataan opintopäiväkirjaa…</main>;
@@ -110,7 +92,7 @@ function DeviceSignIn({
   onSignedIn,
 }: {
   authError: string | null;
-  onSignedIn: (user: User) => void;
+  onSignedIn: (user: DeviceUser) => void;
 }) {
   const [username, setUsername] = useState("");
   const [busy, setBusy] = useState(false);
@@ -138,8 +120,6 @@ function DeviceSignIn({
         setBusy(true);
         try {
           const signedInUser = await getArthurSession();
-          localStorage.setItem(DEVICE_AUTH_KEY, "Arthur");
-          localStorage.setItem(DEVICE_OWNER_KEY, signedInUser.id);
           onSignedIn(signedInUser);
         } catch (error) {
           setErrorMessage(error instanceof Error ? error.message : "Kirjautuminen epäonnistui.");
@@ -170,7 +150,7 @@ function DeviceSignIn({
   </section><Toaster richColors /></main>;
 }
 
-function StudyApp({ user }: { user: User }) {
+function StudyApp({ user }: { user: DeviceUser }) {
   setOfflineOwner(user.id);
   const [page, setPage] = useState<Page>("today");
   const [courseId, setCourseId] = useState<string | null>(null);
@@ -179,6 +159,7 @@ function StudyApp({ user }: { user: User }) {
   const [search, setSearch] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
   const [pending, setPending] = useState(pendingCount());
+  const [showSkeleton, setShowSkeleton] = useState(false);
   const [defaultsReady, setDefaultsReady] = useState(false);
   const [defaultsError, setDefaultsError] = useState<string | null>(null);
   const coursesQ = useCourses(), topicsQ = useTopics(), sessionsQ = useSessions(), examsQ = useExams(), planQ = usePlan(), testsQ = useTests(), mistakesQ = useMistakes(), preferencesQ = usePreferences();
@@ -187,6 +168,15 @@ function StudyApp({ user }: { user: User }) {
   const busy = !defaultsReady || allQueries.some(q => q.isPending);
   const queryError = allQueries.find(q => q.error)?.error;
   const error = defaultsError ?? (queryError instanceof Error ? queryError.message : queryError ? String(queryError) : null);
+
+  useEffect(() => {
+    if (!busy) {
+      setShowSkeleton(false);
+      return;
+    }
+    const timer = window.setTimeout(() => setShowSkeleton(true), 180);
+    return () => window.clearTimeout(timer);
+  }, [busy]);
 
   useEffect(() => {
     const saved = localStorage.getItem("opk.last-page") as Page | null;
@@ -252,8 +242,12 @@ function StudyApp({ user }: { user: User }) {
   const selected = courses.find(c => c.id === courseId);
   const ke04 = courses.find(c => c.code === "KE04");
   const preferences = preferencesQ.data;
+  const hasUserData =
+    sessions.length > 0 ||
+    plan.some(p => p.status === "completed" || p.status === "in_progress") ||
+    courses.some(c => c.code !== "KE04");
 
-  if (!busy && !error && preferences && !preferences.onboarding_completed && ke04) {
+  if (!busy && !error && preferences && !preferences.onboarding_completed && !hasUserData && ke04) {
     return <>
       <Onboarding
         course={ke04}
@@ -273,13 +267,13 @@ function StudyApp({ user }: { user: User }) {
   }
 
   return <div className="min-h-screen">
-    <LiquidGlass lensing as="aside" className="fixed inset-y-4 left-4 z-20 hidden w-60 flex-col rounded-3xl p-4 md:flex">
-      <div className="mb-8 flex items-center gap-3 px-2 pt-2 font-semibold"><span className="grid size-10 place-items-center rounded-xl bg-primary text-primary-foreground"><BookOpen size={20}/></span>Opintopäiväkirja</div>
-      <nav aria-label="Päänavigaatio" className="space-y-1">{nav.map(({id,label,Icon}) => <button key={id} aria-current={page===id?"page":undefined} onClick={() => go(id)} className={`flex min-h-11 w-full items-center gap-3 rounded-xl px-3 text-left text-sm ${page===id?"bg-accent font-semibold":"hover:bg-muted"}`}><Icon size={19}/>{label}</button>)}</nav>
-      <button className="mt-6 min-h-11 rounded-xl bg-primary px-3 text-primary-foreground" onClick={() => setEntry("manual")}>+ Kirjaa opiskelu</button>
-      <div className="mt-auto space-y-1"><button className="flex min-h-11 w-full items-center gap-3 rounded-xl px-3 hover:bg-muted" onClick={() => setSearch(true)}><Search size={19}/>Haku <kbd className="ml-auto text-xs">⌘ K</kbd></button><button className="flex min-h-11 w-full items-center gap-3 rounded-xl px-3 hover:bg-muted" onClick={() => go("settings")}><Settings2 size={19}/>Asetukset</button></div>
+    <LiquidGlass lensing as="aside" className="desktop-sidebar fixed inset-y-4 left-4 z-20 hidden w-60 flex-col rounded-3xl p-4 md:flex">
+      <div className="mb-8 flex items-center gap-3 px-2 pt-2 font-semibold"><span className="grid size-10 shrink-0 place-items-center rounded-xl bg-primary text-primary-foreground"><BookOpen size={20}/></span><span className="sidebar-label">Opintopäiväkirja</span></div>
+      <nav aria-label="Päänavigaatio" className="space-y-1">{nav.map(({id,label,Icon}) => <button key={id} aria-label={label} aria-current={page===id?"page":undefined} onClick={() => go(id)} className={`flex min-h-11 w-full items-center gap-3 rounded-xl px-3 text-left text-sm ${page===id?"bg-accent font-semibold":"hover:bg-muted"}`}><Icon className="shrink-0" size={19}/><span className="sidebar-label">{label}</span></button>)}</nav>
+      <button aria-label="Kirjaa opiskelu" className="mt-6 flex min-h-11 items-center justify-center gap-2 rounded-xl bg-primary px-3 text-primary-foreground" onClick={() => setEntry("manual")}><Plus size={18}/><span className="sidebar-label">Kirjaa opiskelu</span></button>
+      <div className="mt-auto space-y-1"><button aria-label="Haku" className="flex min-h-11 w-full items-center gap-3 rounded-xl px-3 hover:bg-muted" onClick={() => setSearch(true)}><Search className="shrink-0" size={19}/><span className="sidebar-label">Haku</span><kbd className="sidebar-label ml-auto text-xs">⌘ K</kbd></button><button aria-label="Asetukset" className="flex min-h-11 w-full items-center gap-3 rounded-xl px-3 hover:bg-muted" onClick={() => go("settings")}><Settings2 className="shrink-0" size={19}/><span className="sidebar-label">Asetukset</span></button></div>
     </LiquidGlass>
-    <main className="app-main mx-auto max-w-[1240px] px-4 md:pl-[292px] md:pr-8 md:pb-12">
+    <main id="main-content" tabIndex={-1} className="app-main app-desktop-main px-4">
       <header className="mb-8 hidden items-center justify-between pt-7 md:flex"><div><p className="text-sm text-muted-foreground">{longDate(today())}</p><h1 className="mt-1 text-3xl font-semibold">{selected?.code ?? (page==="today"?greeting():nav.find(n=>n.id===page)?.label ?? "Asetukset")}</h1></div></header>
       <header className="app-mobile-header md:hidden">
         <div className="min-w-0">
@@ -289,14 +283,14 @@ function StudyApp({ user }: { user: User }) {
         <button aria-label="Haku" onClick={()=>setSearch(true)} className="app-icon-button"><Search size={20}/></button>
       </header>
       {pending>0 && <p role="status" className="mb-5 rounded-xl bg-accent p-3 text-sm">Tallennettu paikallisesti · {pending} muutosta synkataan yhteyden palattua.</p>}
-      {error && <div role="alert" className="panel mb-5 p-4"><p className="font-medium">Tietojen lataus tai alustus epäonnistui.</p><p className="mt-1 text-sm text-muted-foreground">{String(error)}</p><button className="mt-2 underline" onClick={()=>{setDefaultsReady(false);setDefaultsError(null);void ensureKe04ForCurrentUser().then(()=>Promise.all([coursesQ.refetch(),topicsQ.refetch(),sessionsQ.refetch(),examsQ.refetch(),planQ.refetch(),testsQ.refetch(),mistakesQ.refetch(),preferencesQ.refetch()])).then(()=>setDefaultsReady(true)).catch(err=>{setDefaultsError(err instanceof Error?err.message:"Uudelleenyritys epäonnistui.");setDefaultsReady(true);});}}>Yritä uudelleen</button></div>}
-      {busy ? <div className="space-y-4" aria-label="Ladataan"><div className="h-32 animate-pulse rounded-2xl bg-muted"/><div className="h-60 animate-pulse rounded-2xl bg-muted"/></div> :
+      {error && <div role="alert" className="panel mb-5 p-4"><p className="font-medium">{pending>0?"Kaikkea ei voitu synkata vielä.":"Tietojen lataus tai alustus epäonnistui."}</p>{pending>0&&<p className="mt-1 text-sm text-muted-foreground">Syöttämäsi tiedot ovat tallessa tässä laitteessa ja synkataan yhteyden palattua.</p>}<p className="mt-1 text-sm text-muted-foreground">{String(error)}</p><button className="mt-2 underline" onClick={()=>{setDefaultsReady(false);setDefaultsError(null);void ensureKe04ForCurrentUser().then(()=>Promise.all([coursesQ.refetch(),topicsQ.refetch(),sessionsQ.refetch(),examsQ.refetch(),planQ.refetch(),testsQ.refetch(),mistakesQ.refetch(),preferencesQ.refetch()])).then(()=>setDefaultsReady(true)).catch(err=>{setDefaultsError(err instanceof Error?err.message:"Uudelleenyritys epäonnistui.");setDefaultsReady(true);});}}>Yritä uudelleen</button></div>}
+      {busy ? (showSkeleton ? <div className="space-y-4" aria-label="Ladataan"><div className="h-32 animate-pulse rounded-2xl bg-muted"/><div className="h-60 animate-pulse rounded-2xl bg-muted"/></div> : null) :
       courses.length===0 ? <section className="panel p-6"><h2 className="text-xl font-semibold">Aloita ensimmäisestä kurssista</h2><p className="mt-2 text-muted-foreground">Lisää kurssi ja sen aiheet, jotta voit suunnitella ja kirjata opiskelua.</p><button onClick={()=>setAdding(true)} className="mt-5 min-h-11 rounded-xl bg-primary px-4 text-primary-foreground">Lisää kurssi</button></section> :
       page==="today" ? <TodayView courses={courses} topics={topics} sessions={sessions} exams={exams} plan={plan} tests={testsQ.data??[]} mistakes={mistakesQ.data??[]} onStart={setEntry} onGo={go}/> :
-      page==="plan" ? <PlanView courses={courses} topics={topics} plan={plan} onStart={setEntry}/> :
+      page==="plan" ? <PlanView courses={courses} topics={topics} plan={plan} tests={testsQ.data??[]} mistakes={mistakesQ.data??[]} studyWeekdays={preferences?.study_weekdays??[1,2,3,4,5]} onStart={setEntry}/> :
       page==="courses" ? <CourseView courses={courses} topics={topics} sessions={sessions} exams={exams} plan={plan} tests={testsQ.data??[]} mistakes={mistakesQ.data??[]} selected={courseId} onSelect={setCourseId} onAdd={()=>setAdding(true)} onStart={()=>setEntry("manual")}/> :
-      page==="exams" ? <ExamsView courses={courses} topics={topics} exams={exams} tests={testsQ.data??[]} mistakes={mistakesQ.data??[]} onCourse={id=>{setCourseId(id);setPage("courses");localStorage.setItem("opk.last-page","courses");}}/> :
-      page==="progress" ? <ProgressView courses={courses} topics={topics} sessions={sessions} plan={plan} onPlan={()=>go("plan")}/> :
+      page==="exams" ? <ExamsView courses={courses} topics={topics} exams={exams} tests={testsQ.data??[]} mistakes={mistakesQ.data??[]} sessions={sessions} plan={plan} onCourse={id=>{setCourseId(id);setPage("courses");localStorage.setItem("opk.last-page","courses");}}/> :
+      page==="progress" ? <ProgressView courses={courses} topics={topics} sessions={sessions} plan={plan} exams={exams} onPlan={()=>go("plan")}/> :
       <SettingsView user={user}/>}
     </main>
     <LiquidGlass lensing as="nav" aria-label="Mobiilinavigaatio" className="app-tabbar md:hidden">
@@ -320,7 +314,7 @@ function StudyApp({ user }: { user: User }) {
     </div>}
     {entry && <SessionForm item={plan.find(p=>p.id===entry)??null} courses={courses} topics={topics} onClose={()=>setEntry(null)}/>}
     {adding && <CourseForm onClose={()=>setAdding(false)}/>}
-    {search && <SearchPanel courses={courses} topics={topics} exams={exams} onClose={()=>setSearch(false)} onNavigate={p=>{go(p as Page);setSearch(false);}} onCourse={id=>{setCourseId(id);setPage("courses");localStorage.setItem("opk.last-page","courses");setSearch(false);}} onLog={()=>{setSearch(false);setEntry("manual");}}/>}
+    {search && <SearchPanel courses={courses} topics={topics} exams={exams} sessions={sessions} onClose={()=>setSearch(false)} onNavigate={p=>{go(p as Page);setSearch(false);}} onCourse={id=>{setCourseId(id);setPage("courses");localStorage.setItem("opk.last-page","courses");setSearch(false);}} onLog={()=>{setSearch(false);setEntry("manual");}}/>}
     <Toaster richColors/>
   </div>;
 }

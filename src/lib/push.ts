@@ -1,4 +1,4 @@
-import { supabase } from "@/integrations/supabase/client";
+import { getDeviceAccessToken } from "@/lib/deviceSession";
 
 function base64ToUint8Array(value: string) {
   const normalized = value.replace(/-/g, "+").replace(/_/g, "/");
@@ -8,10 +8,8 @@ function base64ToUint8Array(value: string) {
 }
 
 async function authToken() {
-  const { data, error } = await supabase.auth.getSession();
-  if (error) throw error;
-  const token = data.session?.access_token;
-  if (!token) throw new Error("Kirjautunut istunto puuttuu.");
+  const token = getDeviceAccessToken();
+  if (!token) throw new Error("Arthur-laitetunnistus puuttuu tai on vanhentunut.");
   return token;
 }
 

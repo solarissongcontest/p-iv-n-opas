@@ -16,15 +16,9 @@ export const Route = createFileRoute("/api/push/subscribe")({
           if (!bearer) return Response.json({ error: "Kirjautuminen puuttuu." }, { status: 401 });
 
           const url = env("SUPABASE_URL");
-          const publishable = env("SUPABASE_PUBLISHABLE_KEY");
           const secret = env("SUPABASE_SECRET_KEY");
-          const verifier = createClient(url, publishable, {
-            auth: { persistSession: false, autoRefreshToken: false },
-          });
-          const { data: auth, error: authError } = await verifier.auth.getUser(bearer);
-          if (authError || !auth.user) {
-            return Response.json({ error: "Istunto ei ole voimassa." }, { status: 401 });
-          }
+          const { verifyArthurDeviceToken } = await import("@/lib/deviceAuth.server");
+          const auth = verifyArthurDeviceToken(bearer);
 
           const body = await request.json() as {
             subscription?: { endpoint?: string; keys?: { p256dh?: string; auth?: string } };
@@ -43,7 +37,7 @@ export const Route = createFileRoute("/api/push/subscribe")({
           });
           const { error } = await admin.from("push_subscriptions").upsert(
             {
-              owner_id: auth.user.id,
+              owner_id: auth.sub,
               endpoint: subscription.endpoint,
               subscription,
               user_agent: request.headers.get("user-agent"),
@@ -56,7 +50,7 @@ export const Route = createFileRoute("/api/push/subscribe")({
 
           await admin.from("user_preferences").upsert(
             {
-              owner_id: auth.user.id,
+              owner_id: auth.sub,
               notifications_enabled: true,
             },
             { onConflict: "owner_id" },

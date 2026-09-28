@@ -6,11 +6,22 @@ export type Topic = Database["public"]["Tables"]["topics"]["Row"];
 export type Session = Database["public"]["Tables"]["study_sessions"]["Row"];
 export type Exam = Database["public"]["Tables"]["exams"]["Row"];
 export type PlanItem = Database["public"]["Tables"]["plan_items"]["Row"];
-export type Mistake = Database["public"]["Tables"]["mistakes"]["Row"];
+export type Mistake = Database["public"]["Tables"]["mistakes"]["Row"] & {
+  what_happened: string | null;
+  solution: string | null;
+  retested_at: string | null;
+  mastered_at: string | null;
+};
 export type PracticeTest = Database["public"]["Tables"]["practice_tests"]["Row"];
 export type NotificationSettings =
   Database["public"]["Tables"]["notification_settings"]["Row"];
-export type WeeklyCheckin = Database["public"]["Tables"]["weekly_checkins"]["Row"];
+export type WeeklyCheckin = Database["public"]["Tables"]["weekly_checkins"]["Row"] & {
+  adherence: number | null;
+  hardest_topic_id: string | null;
+  went_well: string | null;
+  next_focus: string | null;
+  load_rating: "light" | "good" | "heavy" | null;
+};
 export type ProgressEvent = Database["public"]["Tables"]["progress_events"]["Row"];
 
 export type PlanStatus = "planned" | "in_progress" | "completed" | "skipped" | "overdue";
@@ -154,9 +165,9 @@ export function readiness(input: {
       )
     : 0;
 
-  const open = mistakes.filter((m) => m.status === "open").length;
+  const active = mistakes.filter((m) => m.status !== "mastered").length;
   const total = mistakes.length;
-  const corrected = total === 0 ? 70 : Math.round(((total - open) / total) * 100);
+  const corrected = total === 0 ? 70 : Math.round(((total - active) / total) * 100);
 
   const value =
     0.42 * mastery + 0.24 * coverage + 0.14 * testScore + 0.1 * recency + 0.1 * corrected;
@@ -359,6 +370,8 @@ export function generatePlan(opts: {
   studyWeekdays: number[]; // 1 = Monday ... 7 = Sunday
   weeklyMinutes: number;
   fromISO?: string;
+  mistakes?: Mistake[];
+  tests?: PracticeTest[];
 }): PlanDraft[] {
   const startISO =
     opts.fromISO ??
@@ -379,11 +392,21 @@ export function generatePlan(opts: {
     Math.round(opts.weeklyMinutes / Math.max(1, opts.studyWeekdays.length)),
   );
   const ordered = [...opts.topics].sort((a, b) => a.position - b.position);
+  const progressById = new Map(opts.topics.map((t) => [t.id, t.progress]));
+  const eligibleNew = ordered.filter((t) =>
+    (t.dependencies ?? []).every((id) => (progressById.get(id) ?? 0) >= 60),
+  );
+  const activeMistakeTopics = new Set(
+    (opts.mistakes ?? []).filter((m) => m.status !== "mastered" && m.topic_id).map((m) => m.topic_id!),
+  );
+  const ownAheadOfSchool = weightedCoverage(opts.topics) - schoolCoverage(opts.topics) >= 15;
   const priorities = [...opts.topics].sort((a, b) => {
     const score = (t: Topic) => {
       const dueBoost = t.next_review && t.next_review <= startISO ? 8 : 0;
+      const mistakeBoost = activeMistakeTopics.has(t.id) ? 12 : 0;
+      const schoolBoost = ownAheadOfSchool && t.school_covered ? 5 : 0;
       const unfinished = (100 - t.progress) / 20;
-      return t.importance * (6 - t.verified_level) + dueBoost + unfinished;
+      return t.importance * (6 - t.verified_level) + dueBoost + mistakeBoost + schoolBoost + unfinished;
     };
     return score(b) - score(a);
   });
@@ -444,9 +467,15 @@ export function generatePlan(opts: {
           kind = "review";
           topic = choosePriority(date);
           title = topic ? `${topic.name} – ajastettu kertaus` : "Ajastettu kertaus";
+        } else if (ownAheadOfSchool) {
+          phase = "review";
+          kind = "review";
+          topic = choosePriority(date);
+          title = topic ? `${topic.name} – syventävä kertaus` : "Syventävä kertaus";
         } else {
           phase = "content";
-          topic = ordered[Math.min(contentIdx, Math.max(0, ordered.length - 1))];
+          const pool = eligibleNew.length ? eligibleNew : ordered;
+          topic = pool[Math.min(contentIdx, Math.max(0, pool.length - 1))];
           contentIdx += 1;
           title = topic ? topic.name : "Uusi sisältö";
         }
@@ -496,6 +525,152 @@ export function generatePlan(opts: {
   });
 
   return drafts;
+}
+
+/** ---------- decision support / balancing ---------- */
+
+export function masteryMismatch(topic: Topic) {
+  const gap = topic.self_level - topic.verified_level;
+  if (Math.abs(gap) < 2) return null;
+  return {
+    gap,
+    message:
+      gap > 0
+        ? `Oma arvio on ${gap} tasoa näyttöä korkeampi. Varmista osaaminen tehtävällä ennen vaikeampaa sisältöä.`
+        : `Näyttö on ${Math.abs(gap)} tasoa omaa arviota korkeampi. Osaaminen voi olla vahvempaa kuin miltä tuntuu.`,
+  };
+}
+
+export function courseBuffers(input: {
+  course: Course;
+  topics: Topic[];
+  plan: PlanItem[];
+  examDate: string | null;
+  todayISO?: string;
+}) {
+  const now = input.todayISO ?? today();
+  if (!input.examDate || !input.course.start_date) {
+    return { timeDays: 0, workSessions: 0, recoverySessions: 0, recoveryMinutes: 0 };
+  }
+  const span = Math.max(1, diffDays(input.examDate, input.course.start_date));
+  const elapsed = Math.max(0, Math.min(span, diffDays(now, input.course.start_date)));
+  const expected = Math.round((elapsed / span) * 100);
+  const actual = weightedCoverage(input.topics);
+  const daysLeft = Math.max(0, diffDays(input.examDate, now));
+  const dailyCoverage = 100 / span;
+  const gap = expected - actual;
+  const timeDays = Math.round((actual - expected) / Math.max(0.1, dailyCoverage));
+  const futureSessions = input.plan.filter(
+    (p) => p.date >= now && p.date < input.examDate! && p.kind !== "exam" && p.status === "planned",
+  ).length;
+  const workSessions = Math.max(0, futureSessions - Math.ceil(Math.max(0, 100 - actual) / 8));
+  const recoverySessions = Math.max(0, Math.ceil(gap / 8));
+  const avgTarget =
+    input.plan.filter((p) => p.kind !== "exam").reduce((s, p) => s + p.target_minutes, 0) /
+      Math.max(1, input.plan.filter((p) => p.kind !== "exam").length) || 35;
+  return {
+    timeDays,
+    workSessions,
+    recoverySessions,
+    recoveryMinutes: Math.round(recoverySessions * avgTarget),
+    daysLeft,
+  };
+}
+
+export function balanceDraftsAgainstPlan(
+  drafts: PlanDraft[],
+  otherPlan: Pick<PlanItem, "date" | "target_minutes" | "status" | "kind">[],
+  maxDailyMinutes = 120,
+): PlanDraft[] {
+  const result = drafts.map((d) => ({ ...d }));
+  const load = new Map<string, number>();
+  for (const p of otherPlan) {
+    if (p.status === "completed" || p.status === "skipped" || p.kind === "exam") continue;
+    load.set(p.date, (load.get(p.date) ?? 0) + p.target_minutes);
+  }
+  const allowedDates = [...new Set(result.filter((d) => d.kind !== "exam").map((d) => d.date))].sort();
+
+  for (const item of result.filter((d) => d.kind !== "exam").sort((a, b) => a.date.localeCompare(b.date))) {
+    const currentLoad = (load.get(item.date) ?? 0) + item.target_minutes;
+    if (currentLoad <= maxDailyMinutes) {
+      load.set(item.date, currentLoad);
+      continue;
+    }
+    const candidates = allowedDates
+      .filter((d) => d < item.date)
+      .sort((a, b) => b.localeCompare(a));
+    const better = candidates.find(
+      (d) => (load.get(d) ?? 0) + item.target_minutes <= maxDailyMinutes,
+    );
+    if (better) item.date = better;
+    load.set(item.date, (load.get(item.date) ?? 0) + item.target_minutes);
+  }
+  return result;
+}
+
+export function rankTodayTasks(input: {
+  items: PlanItem[];
+  courses: Course[];
+  topics: Topic[];
+  mistakes: Mistake[];
+  tests: PracticeTest[];
+  now?: string;
+}) {
+  const now = input.now ?? today();
+  return [...input.items].sort((a, b) => {
+    const score = (p: PlanItem) => {
+      const course = input.courses.find((c) => c.id === p.course_id);
+      const topic = input.topics.find((t) => t.id === p.topic_id);
+      const days = course?.exam_date ? Math.max(0, diffDays(course.exam_date, now)) : 60;
+      const examUrgency = Math.max(0, 30 - days);
+      const dueReview = topic?.next_review && topic.next_review <= now ? 20 : 0;
+      const mistake = input.mistakes.some(
+        (m) => m.course_id === p.course_id && m.status !== "mastered" && (!p.topic_id || m.topic_id === p.topic_id),
+      )
+        ? 18
+        : 0;
+      const masteryNeed = topic ? (5 - topic.verified_level) * topic.importance : 0;
+      const schoolPenalty =
+        topic && !topic.school_covered && weightedCoverage(input.topics.filter((t) => t.course_id === p.course_id)) - schoolCoverage(input.topics.filter((t) => t.course_id === p.course_id)) > 15
+          ? -12
+          : 0;
+      return examUrgency + dueReview + mistake + masteryNeed + schoolPenalty;
+    };
+    return score(b) - score(a);
+  });
+}
+
+export function studyEfficiency(input: {
+  sessions: Session[];
+  events: ProgressEvent[];
+  topicId?: string;
+}) {
+  const sessions = input.topicId ? input.sessions.filter((s) => s.topic_id === input.topicId) : input.sessions;
+  const events = input.topicId ? input.events.filter((e) => e.topic_id === input.topicId) : input.events;
+  const minutes = sessions.reduce((s, x) => s + x.minutes, 0);
+  const masteryGain = events
+    .filter((e) => e.kind === "mastery" && e.from_value != null && e.to_value != null)
+    .reduce((s, e) => s + Math.max(0, Number(e.to_value) - Number(e.from_value)), 0);
+  return {
+    minutes,
+    masteryGain,
+    minutesPerMastery: masteryGain > 0 ? Math.round(minutes / masteryGain) : null,
+    needsMethodChange: minutes >= 90 && masteryGain === 0,
+  };
+}
+
+export function weeklyStudySeries(sessions: Session[], plan: PlanItem[], weeks = 8, now = today()) {
+  return Array.from({ length: weeks }, (_, index) => {
+    const start = addDays(startOfWeek(now), -(weeks - 1 - index) * 7);
+    const end = addDays(start, 6);
+    return {
+      week: `${parseISO(start).getDate()}.${parseISO(start).getMonth() + 1}.`,
+      planned: plan
+        .filter((p) => p.date >= start && p.date <= end && p.kind !== "exam")
+        .reduce((s, p) => s + p.target_minutes, 0),
+      actual: minutesInRange(sessions, start, end),
+    };
+  });
 }
 
 /** ---------- daily / weekly aggregates ---------- */

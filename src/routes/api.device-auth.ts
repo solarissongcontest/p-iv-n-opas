@@ -1,21 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { createClient } from "@supabase/supabase-js";
-import { createHash } from "node:crypto";
-
-const ARTHUR_EMAIL = "arthur@opintopaivakirja.invalid";
+import { randomUUID } from "node:crypto";
 
 function required(name: string) {
   const value = process.env[name];
   if (!value) throw new Error(`Missing server environment variable: ${name}`);
   return value;
-}
-
-function arthurPassword(secretKey: string) {
-  return (
-    createHash("sha256")
-      .update(`opintopaivakirja:arthur:${secretKey}`)
-      .digest("base64url") + "aA1!"
-  );
 }
 
 export const Route = createFileRoute("/api/device-auth")({
@@ -36,79 +26,61 @@ export const Route = createFileRoute("/api/device-auth")({
 
           const supabaseUrl = required("SUPABASE_URL");
           const secretKey = required("SUPABASE_SECRET_KEY");
-          const publishableKey = required("SUPABASE_PUBLISHABLE_KEY");
-          const password = arthurPassword(secretKey);
-
+          const jwtSecret = required("SUPABASE_JWT_SECRET");
           const admin = createClient(supabaseUrl, secretKey, {
             auth: { persistSession: false, autoRefreshToken: false },
           });
 
-          const { data: usersData, error: listError } = await admin.auth.admin.listUsers({
-            page: 1,
-            perPage: 1000,
-          });
-          if (listError) throw listError;
+          let ownerId: string | null = null;
 
-          let arthur = usersData.users.find(
-            (candidate) => candidate.email?.toLowerCase() === ARTHUR_EMAIL,
-          );
+          const { data: preferences } = await admin
+            .from("user_preferences")
+            .select("owner_id")
+            .eq("display_name", "Arthur")
+            .not("owner_id", "is", null)
+            .limit(1);
+          ownerId = preferences?.[0]?.owner_id ?? null;
 
-          if (!arthur) {
-            const { data, error } = await admin.auth.admin.createUser({
-              email: ARTHUR_EMAIL,
-              password,
-              email_confirm: true,
-              user_metadata: { display_name: "Arthur", app: "opintopaivakirja" },
-            });
-            if (error) throw error;
-            arthur = data.user;
-          } else {
-            const { data, error } = await admin.auth.admin.updateUserById(arthur.id, {
-              password,
-              email_confirm: true,
-              user_metadata: {
-                ...(arthur.user_metadata ?? {}),
-                display_name: "Arthur",
-                app: "opintopaivakirja",
-              },
-            });
-            if (error) throw error;
-            arthur = data.user;
+          if (!ownerId) {
+            const { data: courses } = await admin
+              .from("courses")
+              .select("owner_id")
+              .eq("code", "KE04")
+              .not("owner_id", "is", null)
+              .limit(1);
+            ownerId = courses?.[0]?.owner_id ?? null;
           }
 
-          // Generate and redeem an admin-created one-time token instead of using
-          // email/password sign-in. This keeps the one-device username flow
-          // independent of the public Email Auth provider toggle.
-          const { data: linkData, error: linkError } = await admin.auth.admin.generateLink({
-            type: "magiclink",
-            email: ARTHUR_EMAIL,
-          });
-          if (linkError) throw linkError;
-
-          const tokenHash = linkData.properties?.hashed_token;
-          if (!tokenHash) {
-            throw new Error("Supabase ei palauttanut kertakäyttöistä tunnistustunnusta.");
+          if (!ownerId) {
+            const { data: users } = await admin.auth.admin.listUsers({ page: 1, perPage: 1000 });
+            const arthur = users.users.find(
+              (candidate) =>
+                candidate.user_metadata?.["display_name"] === "Arthur" ||
+                candidate.user_metadata?.["app"] === "opintopaivakirja" ||
+                candidate.email?.toLowerCase() === "arthur@opintopaivakirja.invalid",
+            );
+            ownerId = arthur?.id ?? null;
           }
 
-          const authClient = createClient(supabaseUrl, publishableKey, {
-            auth: { persistSession: false, autoRefreshToken: false },
-          });
-          const { data: sessionData, error: verifyError } = await authClient.auth.verifyOtp({
-            token_hash: tokenHash,
-            type: "email",
-          });
-          if (verifyError) throw verifyError;
-          if (!sessionData.session) throw new Error("Supabase ei palauttanut sessiota.");
+          ownerId ??= randomUUID();
+
+          const { signArthurDeviceToken } = await import("@/lib/deviceAuth.server");
+          const signed = signArthurDeviceToken({ ownerId, supabaseUrl, jwtSecret });
 
           return Response.json({
-            access_token: sessionData.session.access_token,
-            refresh_token: sessionData.session.refresh_token,
-            user_id: sessionData.user?.id ?? arthur.id,
+            access_token: signed.token,
+            user_id: ownerId,
+            expires_at: signed.expiresAt,
           });
         } catch (error) {
           console.error("[device-auth]", error);
           return Response.json(
-            { error: error instanceof Error ? error.message : "Kirjautuminen epäonnistui." },
+            {
+              error:
+                error instanceof Error
+                  ? error.message
+                  : "Arthur-laitetunnistuksen luominen epäonnistui.",
+            },
             { status: 500 },
           );
         }

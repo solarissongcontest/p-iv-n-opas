@@ -14,8 +14,10 @@ import {
   type WeeklyCheckin,
   type ProgressEvent,
   generatePlan,
+  balanceDraftsAgainstPlan,
 } from "./domain";
 import { today } from "./fi";
+import { requireDeviceOwnerId } from "./deviceSession";
 
 export type UserPreferences = {
   owner_id: string;
@@ -76,7 +78,7 @@ async function listMistakes(): Promise<Mistake[]> {
     .select("*")
     .order("created_at", { ascending: false });
   if (error) throw error;
-  return data ?? [];
+  return (data ?? []) as unknown as Mistake[];
 }
 
 async function listTests(): Promise<PracticeTest[]> {
@@ -93,7 +95,7 @@ async function listWeeklyCheckins(): Promise<WeeklyCheckin[]> {
     .order("week_start", { ascending: false })
     .limit(52);
   if (error) throw error;
-  return data ?? [];
+  return (data ?? []) as unknown as WeeklyCheckin[];
 }
 
 async function listProgressEvents(): Promise<ProgressEvent[]> {
@@ -144,14 +146,14 @@ const KE04_TOPICS = [
   { name: "Rajoittava tekijä", weight: 9, importance: 5, materials: "s. 38–44" },
   { name: "Ideaalikaasu ja kaasustoikiometria", weight: 8, importance: 4, materials: "s. 46–54" },
   { name: "Saostumis- ja hajoamisreaktiot", weight: 5, importance: 3, materials: "s. 61–88" },
-  { name: "Protoninsiirto, neutraloituminen ja titraus", weight: 8, importance: 5, materials: "s. 92–100" },
-  { name: "Palamisreaktiot", weight: 4, importance: 3, materials: "s. 103–111" },
-  { name: "Substituutioreaktiot", weight: 5, importance: 3, materials: "s. 114–122" },
-  { name: "Additioreaktiot", weight: 5, importance: 3, materials: "s. 132–161" },
-  { name: "Eliminaatioreaktiot", weight: 5, importance: 3, materials: "s. 132–161" },
-  { name: "Kondensaatioreaktiot", weight: 5, importance: 3, materials: "s. 162–210" },
-  { name: "Hydrolyysireaktiot", weight: 5, importance: 3, materials: "s. 162–210" },
-  { name: "Polymeroituminen ja polymeerit", weight: 8, importance: 4, materials: "s. 162–210" },
+  { name: "Protoninsiirto, neutraloituminen ja titraus", weight: 8, importance: 5, materials: "s. 61–88" },
+  { name: "Palamisreaktiot", weight: 4, importance: 3, materials: "s. 61–88" },
+  { name: "Substituutioreaktiot", weight: 5, importance: 3, materials: "s. 92–100" },
+  { name: "Additioreaktiot", weight: 5, importance: 3, materials: "s. 103–111" },
+  { name: "Eliminaatioreaktiot", weight: 5, importance: 3, materials: "s. 103–111" },
+  { name: "Kondensaatioreaktiot", weight: 5, importance: 3, materials: "s. 114–122" },
+  { name: "Hydrolyysireaktiot", weight: 5, importance: 3, materials: "s. 114–122" },
+  { name: "Polymeroituminen ja polymeerit", weight: 8, importance: 4, materials: "s. 132–161" },
   { name: "Biomolekyylit", weight: 7, importance: 4, materials: "s. 162–210" },
 ] as const;
 
@@ -161,9 +163,7 @@ const KE04_TOPICS = [
  * and only missing canonical topics / exam rows are added.
  */
 export async function ensureKe04ForCurrentUser(): Promise<string> {
-  const { data: authData, error: authError } = await supabase.auth.getUser();
-  if (authError) throw authError;
-  if (!authData.user) throw new Error("Kirjautunut käyttäjä puuttuu.");
+  const ownerId = requireDeviceOwnerId();
 
   const { data: existing, error: existingError } = await supabase
     .from("courses")
@@ -224,6 +224,25 @@ export async function ensureKe04ForCurrentUser(): Promise<string> {
   if (topicsReadError) throw topicsReadError;
 
   const names = new Set((existingTopics ?? []).map((t) => t.name));
+  const canonicalByName = new Map(KE04_TOPICS.map((topic) => [topic.name, topic]));
+
+  const repairs = (existingTopics ?? [])
+    .map((topic) => {
+      const canonical = canonicalByName.get(topic.name as (typeof KE04_TOPICS)[number]["name"]);
+      if (!canonical || topic.materials === canonical.materials) return null;
+      return supabase
+        .from("topics")
+        .update({ materials: canonical.materials })
+        .eq("id", topic.id);
+    })
+    .filter(Boolean);
+
+  if (repairs.length) {
+    const results = await Promise.all(repairs);
+    const repairError = results.find((result) => result?.error)?.error;
+    if (repairError) throw repairError;
+  }
+
   const missingTopics = KE04_TOPICS
     .map((topic, index) => ({ ...topic, course_id: course.id, position: index + 1 }))
     .filter((topic) => !names.has(topic.name));
@@ -277,7 +296,7 @@ export async function ensureKe04ForCurrentUser(): Promise<string> {
   if (preferencesReadError) throw preferencesReadError;
   if (!preferences) {
     const { error } = await untypedSupabase.from("user_preferences").insert({
-      owner_id: authData.user.id,
+      owner_id: ownerId,
       display_name: "Arthur",
       study_weekdays: [1, 2, 3, 4, 5],
       notifications_enabled: false,
@@ -351,9 +370,48 @@ async function doMovePlanItem(payload: unknown) {
   if (error) throw error;
 }
 
+async function doUpsertPlanItem(payload: unknown, operationId: string) {
+  const p = payload as Partial<PlanItem> & { id?: string; course_id: string; date: string };
+  if (p.id) {
+    const { id, ...rest } = p;
+    const { error } = await supabase.from("plan_items").update(rest).eq("id", id);
+    if (error) throw error;
+    return id;
+  }
+
+  const { error } = await supabase
+    .from("plan_items")
+    .upsert({ ...p, id: operationId } as never, { onConflict: "id" });
+  if (error) throw error;
+  return operationId;
+}
+
+
+async function doWeeklyCheckin(payload: unknown) {
+  const p = payload as {
+    week_start: string;
+    note: string | null;
+    planned_minutes: number | null;
+    actual_minutes: number | null;
+    adherence: number | null;
+    hardest_topic_id: string | null;
+    went_well: string | null;
+    next_focus: string | null;
+    load_rating: "light" | "good" | "heavy" | null;
+  };
+  const ownerId = requireDeviceOwnerId();
+  const { error } = await untypedSupabase.from("weekly_checkins").upsert(
+    { ...p, owner_id: ownerId },
+    { onConflict: "owner_id,week_start" },
+  );
+  if (error) throw error;
+}
+
 registerOp("logSession", doLogSession);
 registerOp("updatePlanStatus", doUpdatePlanStatus);
 registerOp("movePlanItem", doMovePlanItem);
+registerOp("upsertPlanItem", doUpsertPlanItem);
+registerOp("weeklyCheckin", doWeeklyCheckin);
 
 function useInvalidateAll() {
   const qc = useQueryClient();
@@ -392,10 +450,14 @@ export function useGeneratePlan() {
   const invalidate = useInvalidateAll();
   return useMutation({
     mutationFn: async (input: { courseId: string; drafts: PlanDraft[] }) => {
-      const { data: previous, error: readError } = await supabase
-        .from("plan_items").select("id").eq("course_id", input.courseId).eq("status", "planned");
+      const [{ data: previous, error: readError }, { data: otherPlan, error: otherError }] = await Promise.all([
+        supabase.from("plan_items").select("id").eq("course_id", input.courseId).eq("status", "planned"),
+        supabase.from("plan_items").select("*").neq("course_id", input.courseId).eq("status", "planned"),
+      ]);
       if (readError) throw readError;
-      const { data: created, error } = await supabase.from("plan_items").insert(input.drafts).select("id");
+      if (otherError) throw otherError;
+      const balancedDrafts = balanceDraftsAgainstPlan(input.drafts, otherPlan ?? []);
+      const { data: created, error } = await supabase.from("plan_items").insert(balancedDrafts).select("id");
       if (error) throw error;
       if (previous?.length) {
         const { error: deleteError } = await supabase.from("plan_items").delete().in("id", previous.map(p => p.id));
@@ -412,16 +474,8 @@ export function useGeneratePlan() {
 export function useUpsertPlanItem() {
   const invalidate = useInvalidateAll();
   return useMutation({
-    mutationFn: async (input: Partial<PlanItem> & { id?: string; course_id: string; date: string }) => {
-      if (input.id) {
-        const { id, ...rest } = input;
-        const { error } = await supabase.from("plan_items").update(rest).eq("id", id);
-        if (error) throw error;
-      } else {
-        const { error } = await supabase.from("plan_items").insert(input as never);
-        if (error) throw error;
-      }
-    },
+    mutationFn: (input: Partial<PlanItem> & { id?: string; course_id: string; date: string }) =>
+      runOrQueue("upsertPlanItem", input),
     onSuccess: invalidate,
   });
 }
@@ -492,6 +546,7 @@ export type NewCourse = {
   target_value?: string | null;
   weekly_minutes?: number;
   color?: string;
+  study_mode?: string;
   topics: { name: string; weight: number; importance: number; materials?: string | null }[];
 };
 
@@ -536,13 +591,9 @@ export function useUpdatePreferences() {
     mutationFn: async (
       input: Partial<Omit<UserPreferences, "created_at" | "updated_at">>,
     ) => {
-      const { data: auth, error: authError } = await supabase.auth.getUser();
-      if (authError) throw authError;
-      if (!auth.user) throw new Error("Kirjautunut käyttäjä puuttuu.");
-
       const payload = {
         ...input,
-        owner_id: auth.user.id,
+        owner_id: requireDeviceOwnerId(),
       };
       const { error } = await untypedSupabase
         .from("user_preferences")
@@ -581,8 +632,34 @@ export function useCreateExam() {
 export function useCreateMistake() {
   const invalidate = useInvalidateAll();
   return useMutation({
-    mutationFn: async (input: { course_id: string; topic_id: string | null; error: string; explanation?: string | null }) => {
-      const { error } = await supabase.from("mistakes").insert(input);
+    mutationFn: async (input: {
+      course_id: string;
+      topic_id: string | null;
+      type?: string | null;
+      error: string;
+      what_happened?: string | null;
+      solution?: string | null;
+      retry_date?: string | null;
+    }) => {
+      const { error } = await untypedSupabase.from("mistakes").insert({
+        ...input,
+        explanation: input.solution ?? null,
+        status: "open",
+      });
+      if (error) throw error;
+    },
+    onSuccess: invalidate,
+  });
+}
+
+export function useAdvanceMistake() {
+  const invalidate = useInvalidateAll();
+  return useMutation({
+    mutationFn: async (input: { id: string; status: "corrected" | "retested" | "mastered" }) => {
+      const patch: Record<string, unknown> = { status: input.status };
+      if (input.status === "retested") patch["retested_at"] = today();
+      if (input.status === "mastered") patch["mastered_at"] = today();
+      const { error } = await untypedSupabase.from("mistakes").update(patch).eq("id", input.id);
       if (error) throw error;
     },
     onSuccess: invalidate,
@@ -590,21 +667,34 @@ export function useCreateMistake() {
 }
 
 export function useResolveMistake() {
-  const invalidate = useInvalidateAll();
-  return useMutation({
-    mutationFn: async (id: string) => {
-      const { error } = await supabase.from("mistakes").update({ status: "corrected" }).eq("id", id);
-      if (error) throw error;
-    },
-    onSuccess: invalidate,
-  });
+  const advance = useAdvanceMistake();
+  return {
+    ...advance,
+    mutateAsync: (id: string) => advance.mutateAsync({ id, status: "corrected" as const }),
+  };
 }
 
 export function useCreatePracticeTest() {
   const invalidate = useInvalidateAll();
   return useMutation({
-    mutationFn: async (input: { course_id: string; date: string; score: number; max_score: number; duration_minutes?: number | null }) => {
-      const { error } = await supabase.from("practice_tests").insert(input);
+    mutationFn: async (input: {
+      course_id: string;
+      date: string;
+      score: number;
+      max_score: number;
+      duration_minutes?: number | null;
+      error_count?: number | null;
+      topic_results?: unknown[];
+    }) => {
+      const { error } = await untypedSupabase.rpc("record_practice_test", {
+        p_course_id: input.course_id,
+        p_date: input.date,
+        p_score: input.score,
+        p_max_score: input.max_score,
+        p_duration_minutes: input.duration_minutes ?? null,
+        p_error_count: input.error_count ?? null,
+        p_topic_results: input.topic_results ?? [],
+      });
       if (error) throw error;
     },
     onSuccess: invalidate,
@@ -614,34 +704,17 @@ export function useCreatePracticeTest() {
 export function useUpsertWeeklyCheckin() {
   const invalidate = useInvalidateAll();
   return useMutation({
-    mutationFn: async (input: {
+    mutationFn: (input: {
       week_start: string;
       note: string | null;
       planned_minutes: number | null;
       actual_minutes: number | null;
-    }) => {
-      const { data: existing, error: readError } = await supabase
-        .from("weekly_checkins")
-        .select("id")
-        .eq("week_start", input.week_start)
-        .maybeSingle();
-      if (readError) throw readError;
-
-      if (existing?.id) {
-        const { error } = await supabase
-          .from("weekly_checkins")
-          .update({
-            note: input.note,
-            planned_minutes: input.planned_minutes,
-            actual_minutes: input.actual_minutes,
-          })
-          .eq("id", existing.id);
-        if (error) throw error;
-      } else {
-        const { error } = await supabase.from("weekly_checkins").insert(input);
-        if (error) throw error;
-      }
-    },
+      adherence: number | null;
+      hardest_topic_id: string | null;
+      went_well: string | null;
+      next_focus: string | null;
+      load_rating: "light" | "good" | "heavy" | null;
+    }) => runOrQueue("weeklyCheckin", input),
     onSuccess: invalidate,
   });
 }
