@@ -13,9 +13,10 @@ import {
   useCreateTopic,
   useUpsertPlanItem,
 } from "@/lib/data";
-import type { Course, Exam, PlanItem, Topic } from "@/lib/domain";
+import type { Course, Exam, PlanItem, Session, Topic } from "@/lib/domain";
 import { TARGET_SYSTEMS } from "@/lib/domain";
 import { shortDate, today } from "@/lib/fi";
+import { COURSE_TEMPLATES, parseTopicImport, topicsToImportText } from "@/lib/courseTemplates";
 
 const input = "mt-1 w-full rounded-xl border border-border bg-surface px-3 py-2.5 outline-none focus-visible:ring-2 focus-visible:ring-ring";
 const button = "inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-primary px-4 text-primary-foreground disabled:opacity-50";
