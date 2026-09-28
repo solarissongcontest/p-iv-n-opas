@@ -17,9 +17,9 @@ function NotFoundComponent() {
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
         <h1 className="text-7xl font-bold text-foreground">404</h1>
-        <h2 className="mt-4 text-xl font-semibold text-foreground">Page not found</h2>
+        <h2 className="mt-4 text-xl font-semibold text-foreground">Sivua ei löytynyt</h2>
         <p className="mt-2 text-sm text-muted-foreground">
-          The page you're looking for doesn't exist or has been moved.
+          Hakemaasi sivua ei ole olemassa tai se on siirretty.
         </p>
         <div className="mt-6">
           <Link
@@ -45,10 +45,10 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
         <h1 className="text-xl font-semibold tracking-tight text-foreground">
-          This page didn't load
+          Sivua ei voitu ladata
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          Something went wrong on our end. You can try refreshing or head back home.
+          Jokin meni pieleen. Yritä uudelleen tai palaa etusivulle.
         </p>
         <div className="mt-6 flex flex-wrap justify-center gap-2">
           <button
@@ -90,7 +90,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:description", content: "Rauhallinen työkalu opiskelun suunnitteluun." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:site", content: "@Lovable" },
     ],
     links: [
       {
@@ -131,6 +130,7 @@ function RootShell({ children }: { children: ReactNode }) {
         />
       </head>
       <body>
+        <a href="#main-content" className="skip-link">Siirry pääsisältöön</a>
         {children}
         <Scripts />
       </body>
