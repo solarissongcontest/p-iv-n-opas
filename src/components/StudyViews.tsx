@@ -61,7 +61,7 @@ const secondary = "inline-flex min-h-11 items-center justify-center gap-2 rounde
 const statusLabel: Record<string,string> = { planned:"Suunniteltu",completed:"Valmis",skipped:"Ohitettu",in_progress:"Käynnissä",overdue:"Myöhässä" };
 
 export function Panel({ title, children, action }: { title: string; children: React.ReactNode; action?: React.ReactNode }) {
-  return <section className="panel p-5 sm:p-6"><div className="mb-4 flex items-center justify-between gap-3"><h2 className="text-lg font-semibold">{title}</h2>{action}</div>{children}</section>;
+  return <section className="panel p-4 sm:p-6"><div className="mb-3 flex items-center justify-between gap-3 sm:mb-4"><h2 className="text-base font-semibold sm:text-lg">{title}</h2>{action}</div>{children}</section>;
 }
 function Bar({ value }: { value: number }) {
   const v=Math.max(0,Math.min(100,value));
@@ -85,7 +85,7 @@ export function TodayView({courses,topics,sessions,exams,plan,tests,mistakes,onS
   const examReady=examCourse?readiness({topics:examTopics,tests:tests.filter(t=>t.course_id===examCourse.id),mistakes:mistakes.filter(m=>m.course_id===examCourse.id)}):0;
   const openMistakes=examCourse?mistakes.filter(m=>m.course_id===examCourse.id&&m.status==="open").length:0;
 
-  return <div className="space-y-5">
+  return <div className="space-y-3 sm:space-y-5">
     {mode.active&&examCourse&&<Panel title={mode.finalStretch?"Koemoodi · loppusuora":"Koemoodi · 14 päivää"}>
       <div className="grid gap-4 sm:grid-cols-3">
         <div><p className="text-sm text-muted-foreground">{examCourse.code}</p><p className="text-2xl font-semibold">{mode.days} pv</p><p className="text-sm text-muted-foreground">kokeeseen</p></div>
@@ -103,9 +103,9 @@ export function TodayView({courses,topics,sessions,exams,plan,tests,mistakes,onS
 
     {items.length>1&&<Panel title="Myöhemmin tänään">{items.slice(1,4).map(p=><button key={p.id} onClick={()=>onStart(p.id)} className="flex min-h-14 w-full items-center justify-between border-t border-border text-left"><span><b className="mr-2 text-primary">{courses.find(c=>c.id===p.course_id)?.code}</b>{p.title}</span><span className="text-sm text-muted-foreground">{minutes(p.target_minutes)}</span></button>)}</Panel>}
 
-    <div className="grid gap-5 lg:grid-cols-2">
-      <Panel title="Tämän viikon tavoite"><p className="mb-3 text-2xl font-semibold">{minutes(done)} <span className="text-base font-normal text-muted-foreground">/ {minutes(goal)}</span></p><Bar value={goal?done/goal*100:0}/><p className="mt-3 text-sm text-muted-foreground">{Math.max(0,goal-done)?`${minutes(Math.max(0,goal-done))} jäljellä tämän viikon tavoitteesta.`:"Viikon tavoite on täynnä."}</p></Panel>
-      <Panel title="Tärkeää">{upcoming?<><p className="font-medium">{courses.find(c=>c.id===upcoming.course_id)?.code} · {upcoming.name}</p><p className="mt-2 text-muted-foreground">{fullDate(upcoming.date)} · {diffDays(upcoming.date,now)} päivää</p><button className="mt-3 text-sm font-medium text-primary underline" onClick={()=>onGo("exams")}>Katso kokeet</button></>:<p className="text-muted-foreground">Lähestyviä kokeita ei ole merkitty.</p>}</Panel>
+    <div className="grid grid-cols-2 gap-3 lg:grid-cols-2 lg:gap-5">
+      <Panel title="Viikon tavoite"><p className="mb-2 text-xl font-semibold sm:mb-3 sm:text-2xl">{minutes(done)} <span className="text-sm font-normal text-muted-foreground sm:text-base">/ {minutes(goal)}</span></p><Bar value={goal?done/goal*100:0}/><p className="mt-2 text-xs leading-5 text-muted-foreground sm:mt-3 sm:text-sm">{Math.max(0,goal-done)?`${minutes(Math.max(0,goal-done))} jäljellä.`:"Tavoite täynnä."}</p></Panel>
+      <Panel title="Tärkeää">{upcoming?<><p className="text-sm font-medium sm:text-base">{courses.find(c=>c.id===upcoming.course_id)?.code} · {upcoming.name}</p><p className="mt-1 text-xs leading-5 text-muted-foreground sm:mt-2 sm:text-base">{fullDate(upcoming.date)} · {diffDays(upcoming.date,now)} pv</p><button className="mt-2 text-xs font-medium text-primary underline sm:mt-3 sm:text-sm" onClick={()=>onGo("exams")}>Katso kokeet</button></>:<p className="text-sm text-muted-foreground">Ei lähestyviä kokeita.</p>}</Panel>
     </div>
     {last&&<Panel title="Viimeisin huomio"><p className="text-muted-foreground">{last.note||last.unclear}</p><p className="mt-3 text-xs text-muted-foreground">{fullDate(last.date)} · {courses.find(c=>c.id===last.course_id)?.code}</p></Panel>}
   </div>;
