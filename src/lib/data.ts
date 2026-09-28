@@ -520,6 +520,7 @@ export type NewCourse = {
   target_value?: string | null;
   weekly_minutes?: number;
   color?: string;
+  study_mode?: string;
   topics: { name: string; weight: number; importance: number; materials?: string | null }[];
 };
 
