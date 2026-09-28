@@ -77,8 +77,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
-      { name: "theme-color", content: "#f7f7f7", media: "(prefers-color-scheme: light)" },
-      { name: "theme-color", content: "#1e1f22", media: "(prefers-color-scheme: dark)" },
+      { name: "theme-color", content: "#f7f7f7" },
+      { name: "color-scheme", content: "light dark" },
       { name: "mobile-web-app-capable", content: "yes" },
       { name: "apple-mobile-web-app-capable", content: "yes" },
       { name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" },
@@ -113,6 +113,22 @@ function RootShell({ children }: { children: ReactNode }) {
     <html lang="fi">
       <head>
         <HeadContent />
+        <script
+          suppressHydrationWarning
+          dangerouslySetInnerHTML={{
+            __html: `(() => {
+              try {
+                const dark = localStorage.getItem("opk.theme") === "dark";
+                const root = document.documentElement;
+                root.classList.toggle("dark", dark);
+                root.style.colorScheme = dark ? "dark" : "light";
+                root.style.backgroundColor = dark ? "#0f1012" : "#f7f7f7";
+                const theme = document.querySelector('meta[name="theme-color"]');
+                if (theme) theme.setAttribute("content", dark ? "#0f1012" : "#f7f7f7");
+              } catch {}
+            })();`,
+          }}
+        />
       </head>
       <body>
         {children}

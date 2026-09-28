@@ -338,11 +338,11 @@
   margin-inline: -1rem;
   margin-bottom: 1rem;
   padding:
-    max(0.8rem, env(safe-area-inset-top, 0px))
+    max(0.65rem, env(safe-area-inset-top, 0px))
     1rem
-    0.75rem;
+    0.55rem;
   background: color-mix(in oklab, var(--background) 86%, transparent);
-  border-bottom: 1px solid color-mix(in oklab, var(--border) 70%, transparent);
+  border-bottom: 1px solid color-mix(in oklab, var(--border) 45%, transparent);
   backdrop-filter: blur(20px) saturate(160%);
   -webkit-backdrop-filter: blur(20px) saturate(160%);
 }
@@ -374,21 +374,21 @@
   display: grid !important;
   grid-template-columns: repeat(5, minmax(0, 1fr));
   align-items: center;
-  min-height: 72px;
-  padding: 0.35rem 0.35rem;
-  border-radius: 26px !important;
+  min-height: 64px;
+  padding: 0.28rem 0.3rem;
+  border-radius: 22px !important;
 }
 
 .app-tab {
   display: grid;
   min-width: 0;
-  min-height: 54px;
+  min-height: 48px;
   place-items: center;
   align-content: center;
   gap: 0.18rem;
-  border-radius: 17px;
+  border-radius: 14px;
   color: var(--muted-foreground);
-  font-size: 10px;
+  font-size: 9.5px;
   line-height: 1;
   font-weight: 560;
   touch-action: manipulation;
@@ -404,7 +404,7 @@
 
 .app-tab-active {
   color: var(--primary);
-  background: color-mix(in oklab, var(--accent) 72%, transparent);
+  background: transparent;
 }
 
 .app-tab-add {
@@ -412,17 +412,17 @@
   place-items: center;
   align-content: center;
   gap: 0.15rem;
-  width: 58px;
-  height: 58px;
+  width: 48px;
+  height: 48px;
   justify-self: center;
-  margin-top: -14px;
-  border-radius: 20px;
+  margin-top: -6px;
+  border-radius: 16px;
   background: var(--primary);
   color: var(--primary-foreground);
   box-shadow:
     0 8px 22px color-mix(in oklab, var(--primary) 22%, transparent),
     0 1px 1px oklch(1 0 0 / 0.22) inset;
-  font-size: 9px;
+  font-size: 8.5px;
   font-weight: 650;
   touch-action: manipulation;
   transition: transform 120ms var(--ease-calm);
@@ -534,7 +534,22 @@
   }
 
   .panel {
-    border-radius: 20px;
+    border-radius: 18px;
+    box-shadow: none;
+  }
+
+  .app-main {
+    padding-inline: 0.85rem;
+    padding-bottom: calc(6.3rem + env(safe-area-inset-bottom, 0px));
+  }
+
+  .app-mobile-header {
+    margin-inline: -0.85rem;
+  }
+
+  .app-tabbar {
+    left: 0.6rem !important;
+    right: 0.6rem !important;
   }
 }
 
@@ -564,5 +579,22 @@
   .app-sheet,
   .app-sheet-backdrop {
     animation: none !important;
+  }
+}
+
+
+html.dark,
+html.dark body {
+  background-color: #0f1012 !important;
+}
+
+html.dark .app-mobile-header {
+  background: color-mix(in oklab, #0f1012 86%, transparent);
+}
+
+@supports (padding: max(0px)) {
+  html,
+  body {
+    min-height: calc(100% + env(safe-area-inset-top, 0px));
   }
 }

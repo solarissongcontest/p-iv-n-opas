@@ -11,6 +11,7 @@ import { CourseView, ExamsView, ProgressView, TodayView, PlanView, SettingsView 
 import { CourseForm, SessionForm, SearchPanel } from "@/components/StudyDialogs";
 import { Onboarding } from "@/components/Onboarding";
 import { pendingCount, setOfflineOwner, startSyncWatcher, subscribePending } from "@/lib/offline";
+import { applyTheme, storedThemeIsDark } from "@/lib/theme";
 
 type Page = "today" | "plan" | "courses" | "exams" | "progress" | "settings";
 const nav = [
@@ -235,8 +236,7 @@ function StudyApp({ user }: { user: User }) {
 
   useEffect(() => { const stop = subscribePending(setPending); const sync = startSyncWatcher(n => toast.success(`Synkattiin ${n} merkintää.`)); return () => { stop(); sync(); }; }, []);
   useEffect(() => {
-    const dark = localStorage.getItem("opk.theme") === "dark";
-    document.documentElement.classList.toggle("dark", dark);
+    applyTheme(storedThemeIsDark());
     const keys = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") { e.preventDefault(); setSearch(true); }
       if (e.key === "Escape") { setEntry(null); setSearch(false); setAdding(false); setMoreOpen(false); }
