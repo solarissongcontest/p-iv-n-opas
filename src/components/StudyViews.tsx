@@ -46,6 +46,7 @@ import {
 import { addDays, dateWithWeekday, diffDays, fullDate, minutes, startOfWeek, today, weekNumber } from "@/lib/fi";
 import { supabase } from "@/integrations/supabase/client";
 import { disableBackgroundPush, enableBackgroundPush, pushIsEnabledOnDevice, pushSupported, sendTestPush } from "@/lib/push";
+import { applyTheme, storedThemeIsDark } from "@/lib/theme";
 import {
   CourseEditForm,
   ExamForm,
@@ -228,7 +229,7 @@ export function ProgressView({courses,topics,sessions,plan,onPlan}:Base&{session
 }
 
 export function SettingsView({user}:{user:User}) {
-  const [dark,setDark]=useState(typeof document!=="undefined"&&document.documentElement.classList.contains("dark"));
+  const [dark,setDark]=useState(typeof window!=="undefined"?storedThemeIsDark():false);
   const [pushEnabled,setPushEnabled]=useState(false);
   const [pushBusy,setPushBusy]=useState(false);
   const preferences=usePreferences(),prefs=preferences.data,updatePreferences=useUpdatePreferences();
@@ -293,7 +294,7 @@ export function SettingsView({user}:{user:User}) {
       {pushEnabled&&<button className={secondary+" mt-4 !min-h-9"} onClick={()=>void sendTestPush().then(()=>toast.success("Testimuistutus lähetettiin palvelimelta.")).catch(error=>toast.error(error instanceof Error?error.message:"Testimuistutus epäonnistui."))}>Lähetä testimuistutus</button>}
     </Panel>
 
-    <Panel title="Ulkoasu"><label className="flex min-h-11 items-center justify-between">Tumma tila<input type="checkbox" className="size-5 accent-primary" checked={dark} onChange={e=>{setDark(e.target.checked);document.documentElement.classList.toggle("dark",e.target.checked);localStorage.setItem("opk.theme",e.target.checked?"dark":"light");}}/></label></Panel>
+    <Panel title="Ulkoasu"><label className="flex min-h-11 items-center justify-between">Tumma tila<input type="checkbox" className="size-5 accent-primary" checked={dark} onChange={e=>{const next=e.target.checked;setDark(next);localStorage.setItem("opk.theme",next?"dark":"light");applyTheme(next);}}/></label></Panel>
 
     {archived.length>0&&<Panel title="Arkistoidut kurssit">{archived.map(c=><div key={c.id} className="flex min-h-12 items-center justify-between gap-3 border-b border-border"><span><b>{c.code}</b> · {c.name}</span><button className={secondary+" !min-h-9"} onClick={()=>void archiveCourse.mutateAsync({id:c.id,archived:false}).then(()=>toast.success("Kurssi palautettu.")).catch(()=>toast.error("Palautus epäonnistui."))}>Palauta</button></div>)}</Panel>}
 
