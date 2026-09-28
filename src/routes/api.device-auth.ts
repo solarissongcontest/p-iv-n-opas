@@ -76,15 +76,28 @@ export const Route = createFileRoute("/api/device-auth")({
             arthur = data.user;
           }
 
+          // Generate and redeem an admin-created one-time token instead of using
+          // email/password sign-in. This keeps the one-device username flow
+          // independent of the public Email Auth provider toggle.
+          const { data: linkData, error: linkError } = await admin.auth.admin.generateLink({
+            type: "magiclink",
+            email: ARTHUR_EMAIL,
+          });
+          if (linkError) throw linkError;
+
+          const tokenHash = linkData.properties?.hashed_token;
+          if (!tokenHash) {
+            throw new Error("Supabase ei palauttanut kertakäyttöistä tunnistustunnusta.");
+          }
+
           const authClient = createClient(supabaseUrl, publishableKey, {
             auth: { persistSession: false, autoRefreshToken: false },
           });
-          const { data: sessionData, error: signInError } =
-            await authClient.auth.signInWithPassword({
-              email: ARTHUR_EMAIL,
-              password,
-            });
-          if (signInError) throw signInError;
+          const { data: sessionData, error: verifyError } = await authClient.auth.verifyOtp({
+            token_hash: tokenHash,
+            type: "email",
+          });
+          if (verifyError) throw verifyError;
           if (!sessionData.session) throw new Error("Supabase ei palauttanut sessiota.");
 
           return Response.json({
