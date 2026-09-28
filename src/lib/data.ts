@@ -13,6 +13,7 @@ import {
   type Topic,
   type WeeklyCheckin,
   type ProgressEvent,
+  generatePlan,
 } from "./domain";
 import { today } from "./fi";
 
@@ -147,9 +148,9 @@ export async function ensureKe04ForCurrentUser(): Promise<string> {
     .maybeSingle();
   if (existingError) throw existingError;
 
-  let courseId = existing?.id ?? null;
+  let course: Course;
 
-  if (!courseId) {
+  if (!existing) {
     const { data: created, error } = await supabase
       .from("courses")
       .insert({
@@ -166,7 +167,7 @@ export async function ensureKe04ForCurrentUser(): Promise<string> {
       .select()
       .single();
     if (error) throw error;
-    courseId = created.id;
+    course = created;
   } else {
     const patch: Partial<Course> = {};
     if (!existing.subject) patch.subject = "Kemia";
@@ -176,21 +177,31 @@ export async function ensureKe04ForCurrentUser(): Promise<string> {
       patch.target_system = "school";
       patch.target_value = "10";
     }
+
     if (Object.keys(patch).length) {
-      const { error } = await supabase.from("courses").update(patch).eq("id", courseId);
+      const { data: updated, error } = await supabase
+        .from("courses")
+        .update(patch)
+        .eq("id", existing.id)
+        .select()
+        .single();
       if (error) throw error;
+      course = updated;
+    } else {
+      course = existing;
     }
   }
 
   const { data: existingTopics, error: topicsReadError } = await supabase
     .from("topics")
-    .select("name")
-    .eq("course_id", courseId);
+    .select("*")
+    .eq("course_id", course.id)
+    .order("position");
   if (topicsReadError) throw topicsReadError;
 
   const names = new Set((existingTopics ?? []).map((t) => t.name));
   const missingTopics = KE04_TOPICS
-    .map((topic, index) => ({ ...topic, course_id: courseId!, position: index + 1 }))
+    .map((topic, index) => ({ ...topic, course_id: course.id, position: index + 1 }))
     .filter((topic) => !names.has(topic.name));
 
   if (missingTopics.length) {
@@ -198,17 +209,24 @@ export async function ensureKe04ForCurrentUser(): Promise<string> {
     if (error) throw error;
   }
 
+  const { data: topics, error: fullTopicsError } = await supabase
+    .from("topics")
+    .select("*")
+    .eq("course_id", course.id)
+    .order("position");
+  if (fullTopicsError) throw fullTopicsError;
+
   const { data: exams, error: examsReadError } = await supabase
     .from("exams")
     .select("id")
-    .eq("course_id", courseId)
+    .eq("course_id", course.id)
     .eq("name", "KE04 kurssikoe")
     .limit(1);
   if (examsReadError) throw examsReadError;
 
   if (!exams?.length) {
     const { error } = await supabase.from("exams").insert({
-      course_id: courseId,
+      course_id: course.id,
       name: "KE04 kurssikoe",
       date: "2026-11-23",
       target_system: "school",
@@ -217,7 +235,39 @@ export async function ensureKe04ForCurrentUser(): Promise<string> {
     if (error) throw error;
   }
 
-  return courseId;
+  const { data: existingPlan, error: planReadError } = await supabase
+    .from("plan_items")
+    .select("id")
+    .eq("course_id", course.id)
+    .limit(1);
+  if (planReadError) throw planReadError;
+
+  if (!existingPlan?.length && course.exam_date && topics?.length) {
+    const drafts = generatePlan({
+      course,
+      topics,
+      examDate: course.exam_date,
+      studyWeekdays: [1, 2, 3, 4, 5],
+      weeklyMinutes: course.weekly_minutes,
+    });
+    if (drafts.length) {
+      const { error } = await supabase.from("plan_items").insert(drafts);
+      if (error) throw error;
+    }
+  }
+
+  const { data: settings, error: settingsReadError } = await supabase
+    .from("notification_settings")
+    .select("id")
+    .limit(1)
+    .maybeSingle();
+  if (settingsReadError) throw settingsReadError;
+  if (!settings) {
+    const { error } = await supabase.from("notification_settings").insert({});
+    if (error) throw error;
+  }
+
+  return course.id;
 }
 
 /** ---------- writes ---------- */
