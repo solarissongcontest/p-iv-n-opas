@@ -17,6 +17,19 @@ import {
 } from "./domain";
 import { today } from "./fi";
 
+export type UserPreferences = {
+  owner_id: string;
+  display_name: string;
+  onboarding_completed: boolean;
+  study_weekdays: number[];
+  notifications_enabled: boolean;
+  timezone: string;
+  created_at: string;
+  updated_at: string;
+};
+
+const untypedSupabase = supabase as any;
+
 /** ---------- reads ---------- */
 
 async function listCourses(): Promise<Course[]> {
@@ -99,6 +112,15 @@ async function getSettings(): Promise<NotificationSettings | null> {
   return data?.[0] ?? null;
 }
 
+async function getPreferences(): Promise<UserPreferences | null> {
+  const { data, error } = await untypedSupabase
+    .from("user_preferences")
+    .select("*")
+    .maybeSingle();
+  if (error) throw error;
+  return data ?? null;
+}
+
 export const useCourses = () => useQuery({ queryKey: ["courses"], queryFn: listCourses });
 export const useTopics = () => useQuery({ queryKey: ["topics"], queryFn: listTopics });
 export const useSessions = () => useQuery({ queryKey: ["sessions"], queryFn: listSessions });
@@ -107,6 +129,8 @@ export const usePlan = () => useQuery({ queryKey: ["plan"], queryFn: listPlan })
 export const useMistakes = () => useQuery({ queryKey: ["mistakes"], queryFn: listMistakes });
 export const useTests = () => useQuery({ queryKey: ["tests"], queryFn: listTests });
 export const useSettings = () => useQuery({ queryKey: ["settings"], queryFn: getSettings });
+export const usePreferences = () =>
+  useQuery({ queryKey: ["preferences"], queryFn: getPreferences });
 export const useWeeklyCheckins = () =>
   useQuery({ queryKey: ["weekly-checkins"], queryFn: listWeeklyCheckins });
 export const useProgressEvents = () =>
@@ -235,27 +259,6 @@ export async function ensureKe04ForCurrentUser(): Promise<string> {
     if (error) throw error;
   }
 
-  const { data: existingPlan, error: planReadError } = await supabase
-    .from("plan_items")
-    .select("id")
-    .eq("course_id", course.id)
-    .limit(1);
-  if (planReadError) throw planReadError;
-
-  if (!existingPlan?.length && course.exam_date && topics?.length) {
-    const drafts = generatePlan({
-      course,
-      topics,
-      examDate: course.exam_date,
-      studyWeekdays: [1, 2, 3, 4, 5],
-      weeklyMinutes: course.weekly_minutes,
-    });
-    if (drafts.length) {
-      const { error } = await supabase.from("plan_items").insert(drafts);
-      if (error) throw error;
-    }
-  }
-
   const { data: settings, error: settingsReadError } = await supabase
     .from("notification_settings")
     .select("id")
@@ -264,6 +267,23 @@ export async function ensureKe04ForCurrentUser(): Promise<string> {
   if (settingsReadError) throw settingsReadError;
   if (!settings) {
     const { error } = await supabase.from("notification_settings").insert({});
+    if (error) throw error;
+  }
+
+  const { data: preferences, error: preferencesReadError } = await untypedSupabase
+    .from("user_preferences")
+    .select("*")
+    .maybeSingle();
+  if (preferencesReadError) throw preferencesReadError;
+  if (!preferences) {
+    const { error } = await untypedSupabase.from("user_preferences").insert({
+      owner_id: authData.user.id,
+      display_name: "Arthur",
+      study_weekdays: [1, 2, 3, 4, 5],
+      notifications_enabled: false,
+      timezone: "Europe/Helsinki",
+      onboarding_completed: false,
+    });
     if (error) throw error;
   }
 
@@ -338,7 +358,7 @@ registerOp("movePlanItem", doMovePlanItem);
 function useInvalidateAll() {
   const qc = useQueryClient();
   return () =>
-    ["courses", "topics", "sessions", "exams", "plan", "mistakes", "tests", "settings", "weekly-checkins", "progress-events"].forEach(
+    ["courses", "topics", "sessions", "exams", "plan", "mistakes", "tests", "settings", "preferences", "weekly-checkins", "progress-events"].forEach(
       (k) => qc.invalidateQueries({ queryKey: [k] }),
     );
 }
@@ -505,6 +525,29 @@ export function useCreateCourse() {
         });
       }
       return data;
+    },
+    onSuccess: invalidate,
+  });
+}
+
+export function useUpdatePreferences() {
+  const invalidate = useInvalidateAll();
+  return useMutation({
+    mutationFn: async (
+      input: Partial<Omit<UserPreferences, "created_at" | "updated_at">>,
+    ) => {
+      const { data: auth, error: authError } = await supabase.auth.getUser();
+      if (authError) throw authError;
+      if (!auth.user) throw new Error("Kirjautunut käyttäjä puuttuu.");
+
+      const payload = {
+        ...input,
+        owner_id: auth.user.id,
+      };
+      const { error } = await untypedSupabase
+        .from("user_preferences")
+        .upsert(payload, { onConflict: "owner_id" });
+      if (error) throw error;
     },
     onSuccess: invalidate,
   });
