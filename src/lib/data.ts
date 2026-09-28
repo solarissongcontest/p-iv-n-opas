@@ -13,6 +13,8 @@ import {
   type PracticeTest,
   type Session,
   type Topic,
+  type WeeklyCheckin,
+  type ProgressEvent,
 } from "./domain";
 import { today } from "./fi";
 
@@ -71,6 +73,26 @@ async function listTests(): Promise<PracticeTest[]> {
   return data ?? [];
 }
 
+async function listCheckins(): Promise<WeeklyCheckin[]> {
+  const { data, error } = await supabase
+    .from("weekly_checkins")
+    .select("*")
+    .order("week_start", { ascending: false })
+    .limit(200);
+  if (error) throw error;
+  return data ?? [];
+}
+
+async function listProgressEvents(): Promise<ProgressEvent[]> {
+  const { data, error } = await supabase
+    .from("progress_events")
+    .select("*")
+    .order("created_at", { ascending: true })
+    .limit(3000);
+  if (error) throw error;
+  return data ?? [];
+}
+
 async function getSettings(): Promise<NotificationSettings | null> {
   const { data, error } = await supabase.from("notification_settings").select("*").limit(1);
   if (error) throw error;
@@ -84,6 +106,8 @@ export const useExams = () => useQuery({ queryKey: ["exams"], queryFn: listExams
 export const usePlan = () => useQuery({ queryKey: ["plan"], queryFn: listPlan });
 export const useMistakes = () => useQuery({ queryKey: ["mistakes"], queryFn: listMistakes });
 export const useTests = () => useQuery({ queryKey: ["tests"], queryFn: listTests });
+export const useCheckins = () => useQuery({ queryKey: ["checkins"], queryFn: listCheckins });
+export const useProgressEvents = () => useQuery({ queryKey: ["events"], queryFn: listProgressEvents });
 export const useSettings = () => useQuery({ queryKey: ["settings"], queryFn: getSettings });
 
 /** ---------- writes ---------- */
@@ -214,7 +238,7 @@ registerOp("movePlanItem", doMovePlanItem);
 function useInvalidateAll() {
   const qc = useQueryClient();
   return () =>
-    ["courses", "topics", "sessions", "exams", "plan", "mistakes", "tests", "settings"].forEach(
+    ["courses", "topics", "sessions", "exams", "plan", "mistakes", "tests", "checkins", "events", "settings"].forEach(
       (k) => qc.invalidateQueries({ queryKey: [k] }),
     );
 }
@@ -343,6 +367,106 @@ export function useUpdateSettings() {
     mutationFn: async (input: { id: string } & Partial<NotificationSettings>) => {
       const { id, ...rest } = input;
       const { error } = await supabase.from("notification_settings").update(rest).eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: invalidate,
+  });
+}
+
+
+export function useUpdateCourse() {
+  const invalidate = useInvalidateAll();
+  return useMutation({
+    mutationFn: async (input: { id: string } & Partial<Course>) => {
+      const { id, ...rest } = input;
+      const { error } = await supabase.from("courses").update(rest).eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: invalidate,
+  });
+}
+
+export function useCreateExam() {
+  const invalidate = useInvalidateAll();
+  return useMutation({
+    mutationFn: async (input: {
+      course_id: string;
+      name: string;
+      date: string;
+      target_system?: string;
+      target_value?: string | null;
+    }) => {
+      const { error } = await supabase.from("exams").insert(input);
+      if (error) throw error;
+    },
+    onSuccess: invalidate,
+  });
+}
+
+export function useAddMistake() {
+  const invalidate = useInvalidateAll();
+  return useMutation({
+    mutationFn: async (input: {
+      course_id: string;
+      topic_id?: string | null;
+      error: string;
+      type?: string | null;
+      explanation?: string | null;
+      retry_date?: string | null;
+    }) => {
+      const { error } = await supabase.from("mistakes").insert({ ...input, status: "open" });
+      if (error) throw error;
+    },
+    onSuccess: invalidate,
+  });
+}
+
+export function useAdvanceMistake() {
+  const invalidate = useInvalidateAll();
+  return useMutation({
+    mutationFn: async (input: { id: string; status: string }) => {
+      const order = ["open", "corrected", "retested", "mastered"];
+      const index = Math.max(0, order.indexOf(input.status));
+      const next = order[Math.min(order.length - 1, index + 1)] ?? "mastered";
+      const { error } = await supabase.from("mistakes").update({ status: next }).eq("id", input.id);
+      if (error) throw error;
+    },
+    onSuccess: invalidate,
+  });
+}
+
+export function useAddPracticeTest() {
+  const invalidate = useInvalidateAll();
+  return useMutation({
+    mutationFn: async (input: {
+      course_id: string;
+      date: string;
+      score: number;
+      max_score: number;
+      duration_minutes?: number | null;
+      error_count?: number | null;
+      topic_results?: unknown;
+    }) => {
+      const { error } = await supabase.from("practice_tests").insert({
+        ...input,
+        topic_results: (input.topic_results ?? []) as never,
+      });
+      if (error) throw error;
+    },
+    onSuccess: invalidate,
+  });
+}
+
+export function useSaveWeeklyCheckin() {
+  const invalidate = useInvalidateAll();
+  return useMutation({
+    mutationFn: async (input: {
+      week_start: string;
+      note?: string | null;
+      planned_minutes?: number | null;
+      actual_minutes?: number | null;
+    }) => {
+      const { error } = await supabase.from("weekly_checkins").insert(input);
       if (error) throw error;
     },
     onSuccess: invalidate,
