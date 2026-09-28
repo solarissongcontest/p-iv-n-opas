@@ -45,7 +45,7 @@ import {
 } from "@/lib/data";
 import { addDays, dateWithWeekday, diffDays, fullDate, minutes, startOfWeek, today, weekNumber } from "@/lib/fi";
 import { supabase } from "@/integrations/supabase/client";
-import { disableBackgroundPush, enableBackgroundPush, pushIsEnabledOnDevice, pushSupported } from "@/lib/push";
+import { disableBackgroundPush, enableBackgroundPush, pushIsEnabledOnDevice, pushSupported, sendTestPush } from "@/lib/push";
 import {
   CourseEditForm,
   ExamForm,
@@ -290,6 +290,7 @@ export function SettingsView({user}:{user:User}) {
           : "Tämä selain ei tue Web Push -ilmoituksia."}
       </p>
       <p className="mt-3 text-xs text-muted-foreground">Aamumuistutus lähetetään valittuina opiskelupäivinä noin klo 8–9 Suomen aikaa. Saman päivän muistutus lähetetään vain kerran.</p>
+      {pushEnabled&&<button className={secondary+" mt-4 !min-h-9"} onClick={()=>void sendTestPush().then(()=>toast.success("Testimuistutus lähetettiin palvelimelta.")).catch(error=>toast.error(error instanceof Error?error.message:"Testimuistutus epäonnistui."))}>Lähetä testimuistutus</button>}
     </Panel>
 
     <Panel title="Ulkoasu"><label className="flex min-h-11 items-center justify-between">Tumma tila<input type="checkbox" className="size-5 accent-primary" checked={dark} onChange={e=>{setDark(e.target.checked);document.documentElement.classList.toggle("dark",e.target.checked);localStorage.setItem("opk.theme",e.target.checked?"dark":"light");}}/></label></Panel>
