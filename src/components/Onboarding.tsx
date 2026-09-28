@@ -55,7 +55,7 @@ export function Onboarding({
 
   const totalWeekly = course.weekly_minutes;
   const minutesPerDay = Math.max(20, Math.round(totalWeekly / Math.max(1, studyWeekdays.length)));
-  const hasPlan = plan.some((item) => item.course_id === course.id);
+  const existingCoursePlan = plan.filter((item) => item.course_id === course.id);
 
   const progress = Math.round(((step + 1) / 6) * 100);
   const timezone = useMemo(
@@ -99,7 +99,7 @@ export function Onboarding({
         onboarding_completed: true,
       });
 
-      if (!hasPlan && course.exam_date) {
+      if (course.exam_date) {
         const drafts = generatePlan({
           course: { ...course, target_system: "school", target_value: target },
           topics,
@@ -336,7 +336,7 @@ export function Onboarding({
                 <p className="text-sm font-medium text-primary">Valmis</p>
                 <h1 className="mt-1 text-3xl font-semibold">Study OS on käyttövalmis.</h1>
                 <p className="mt-3 text-muted-foreground">
-                  KE04 saa nyt suunnitelman valitsemillesi päiville. Järjestelmä alkaa päivittää osaamista,
+                  KE04 saa nyt suunnitelman valitsemillesi päiville{existingCoursePlan.length ? " ja avoimet aiemmat ehdotukset päivitetään" : ""}. Järjestelmä alkaa päivittää osaamista,
                   kertausvelkaa, riskejä ja koemoodia opiskelumerkintöjesi perusteella.
                 </p>
               </div>
