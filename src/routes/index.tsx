@@ -5,10 +5,11 @@ import { toast, Toaster } from "sonner";
 import type { User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { LiquidGlass } from "@/components/LiquidGlass";
-import { ensureKe04ForCurrentUser, useCourses, useExams, useMistakes, usePlan, useSessions, useTests, useTopics } from "@/lib/data";
+import { ensureKe04ForCurrentUser, useCourses, useExams, useMistakes, usePlan, usePreferences, useSessions, useTests, useTopics } from "@/lib/data";
 import { longDate, greeting, today } from "@/lib/fi";
 import { CourseView, ExamsView, ProgressView, TodayView, PlanView, SettingsView } from "@/components/StudyViews";
 import { CourseForm, SessionForm, SearchPanel } from "@/components/StudyDialogs";
+import { Onboarding } from "@/components/Onboarding";
 import { pendingCount, setOfflineOwner, startSyncWatcher, subscribePending } from "@/lib/offline";
 
 type Page = "today" | "plan" | "courses" | "exams" | "progress" | "settings";
@@ -178,17 +179,17 @@ function StudyApp({ user }: { user: User }) {
   const [pending, setPending] = useState(pendingCount());
   const [defaultsReady, setDefaultsReady] = useState(false);
   const [defaultsError, setDefaultsError] = useState<string | null>(null);
-  const coursesQ = useCourses(), topicsQ = useTopics(), sessionsQ = useSessions(), examsQ = useExams(), planQ = usePlan(), testsQ = useTests(), mistakesQ = useMistakes();
+  const coursesQ = useCourses(), topicsQ = useTopics(), sessionsQ = useSessions(), examsQ = useExams(), planQ = usePlan(), testsQ = useTests(), mistakesQ = useMistakes(), preferencesQ = usePreferences();
   const courses = (coursesQ.data ?? []).filter(c => !c.archived), topics = topicsQ.data ?? [], sessions = sessionsQ.data ?? [], exams = examsQ.data ?? [], plan = planQ.data ?? [];
-  const busy = !defaultsReady || [coursesQ, topicsQ, sessionsQ, examsQ, planQ, testsQ, mistakesQ].some(q => q.isPending);
-  const error = defaultsError ?? ([coursesQ, topicsQ, sessionsQ, examsQ, planQ, testsQ, mistakesQ].find(q => q.error)?.error instanceof Error
-    ? [coursesQ, topicsQ, sessionsQ, examsQ, planQ, testsQ, mistakesQ].find(q => q.error)?.error.message
-    : null);
+  const allQueries = [coursesQ, topicsQ, sessionsQ, examsQ, planQ, testsQ, mistakesQ, preferencesQ];
+  const busy = !defaultsReady || allQueries.some(q => q.isPending);
+  const queryError = allQueries.find(q => q.error)?.error;
+  const error = defaultsError ?? (queryError instanceof Error ? queryError.message : queryError ? String(queryError) : null);
   useEffect(() => {
     let active = true;
     void ensureKe04ForCurrentUser()
       .then(async () => {
-        await Promise.all([coursesQ.refetch(), topicsQ.refetch(), examsQ.refetch()]);
+        await Promise.all([coursesQ.refetch(), topicsQ.refetch(), examsQ.refetch(), preferencesQ.refetch()]);
         if (active) {
           setDefaultsError(null);
           setDefaultsReady(true);
@@ -203,25 +204,6 @@ function StudyApp({ user }: { user: User }) {
   }, [user.id]);
 
   useEffect(() => { const stop = subscribePending(setPending); const sync = startSyncWatcher(n => toast.success(`Synkattiin ${n} merkintää.`)); return () => { stop(); sync(); }; }, []);
-  useEffect(() => {
-    if (busy || typeof Notification === "undefined" || Notification.permission !== "granted") return;
-    const stamp = today();
-    if (localStorage.getItem("opk.notification-date") === stamp) return;
-
-    void supabase.from("notification_settings").select("*").limit(1).maybeSingle().then(({data}) => {
-      if (!data || Notification.permission !== "granted") return;
-      const dueToday = plan.filter(p => p.date === stamp && p.status === "planned" && p.kind !== "exam");
-      const nextExam = exams.filter(e => e.date >= stamp).sort((a,b) => a.date.localeCompare(b.date))[0];
-      if (data.study_sessions && dueToday.length) {
-        new Notification("Opintopäiväkirja", { body: `Tänään on ${dueToday.length} suunniteltua opiskelutehtävää.` });
-      } else if (data.exams && nextExam) {
-        const days = Math.round((new Date(nextExam.date+"T12:00:00").getTime()-new Date(stamp+"T12:00:00").getTime())/86400000);
-        if (days <= 3) new Notification("Koe lähestyy", { body: `${nextExam.name}: ${days === 0 ? "tänään" : days+" päivän päästä"}.` });
-      }
-      localStorage.setItem("opk.notification-date", stamp);
-    });
-  }, [busy, plan, exams]);
-
   useEffect(() => {
     const dark = localStorage.getItem("opk.theme") === "dark";
     document.documentElement.classList.toggle("dark", dark);
@@ -238,6 +220,28 @@ function StudyApp({ user }: { user: User }) {
   }, []);
   const go = (p: Page) => { setPage(p); setCourseId(null); };
   const selected = courses.find(c => c.id === courseId);
+  const ke04 = courses.find(c => c.code === "KE04");
+  const preferences = preferencesQ.data;
+
+  if (!busy && !error && preferences && !preferences.onboarding_completed && ke04) {
+    return <>
+      <Onboarding
+        course={ke04}
+        topics={topics.filter(t => t.course_id === ke04.id)}
+        plan={plan}
+        preferences={preferences}
+        onComplete={() => {
+          void Promise.all([
+            preferencesQ.refetch(),
+            coursesQ.refetch(),
+            planQ.refetch(),
+          ]);
+        }}
+      />
+      <Toaster richColors />
+    </>;
+  }
+
   return <div className="min-h-screen">
     <LiquidGlass lensing as="aside" className="fixed inset-y-4 left-4 z-20 hidden w-60 flex-col rounded-3xl p-4 md:flex">
       <div className="mb-8 flex items-center gap-3 px-2 pt-2 font-semibold"><span className="grid size-10 place-items-center rounded-xl bg-primary text-primary-foreground"><BookOpen size={20}/></span>Opintopäiväkirja</div>
@@ -248,7 +252,7 @@ function StudyApp({ user }: { user: User }) {
     <main className="mx-auto max-w-[1240px] px-4 pb-28 pt-7 md:pl-[292px] md:pr-8 md:pb-12">
       <header className="mb-8 flex items-center justify-between"><div><p className="text-sm text-muted-foreground">{longDate(today())}</p><h1 className="mt-1 text-3xl font-semibold">{selected?.code ?? (page==="today"?greeting():nav.find(n=>n.id===page)?.label ?? "Asetukset")}</h1></div><button aria-label="Haku" onClick={()=>setSearch(true)} className="grid size-11 place-items-center rounded-xl border md:hidden"><Search size={19}/></button></header>
       {pending>0 && <p role="status" className="mb-5 rounded-xl bg-accent p-3 text-sm">Tallennettu paikallisesti · {pending} muutosta synkataan yhteyden palattua.</p>}
-      {error && <div role="alert" className="panel mb-5 p-4"><p className="font-medium">Tietojen lataus tai alustus epäonnistui.</p><p className="mt-1 text-sm text-muted-foreground">{String(error)}</p><button className="mt-2 underline" onClick={()=>{setDefaultsReady(false);setDefaultsError(null);void ensureKe04ForCurrentUser().then(()=>Promise.all([coursesQ.refetch(),topicsQ.refetch(),sessionsQ.refetch(),examsQ.refetch(),planQ.refetch(),testsQ.refetch(),mistakesQ.refetch()])).then(()=>setDefaultsReady(true)).catch(err=>{setDefaultsError(err instanceof Error?err.message:"Uudelleenyritys epäonnistui.");setDefaultsReady(true);});}}>Yritä uudelleen</button></div>}
+      {error && <div role="alert" className="panel mb-5 p-4"><p className="font-medium">Tietojen lataus tai alustus epäonnistui.</p><p className="mt-1 text-sm text-muted-foreground">{String(error)}</p><button className="mt-2 underline" onClick={()=>{setDefaultsReady(false);setDefaultsError(null);void ensureKe04ForCurrentUser().then(()=>Promise.all([coursesQ.refetch(),topicsQ.refetch(),sessionsQ.refetch(),examsQ.refetch(),planQ.refetch(),testsQ.refetch(),mistakesQ.refetch(),preferencesQ.refetch()])).then(()=>setDefaultsReady(true)).catch(err=>{setDefaultsError(err instanceof Error?err.message:"Uudelleenyritys epäonnistui.");setDefaultsReady(true);});}}>Yritä uudelleen</button></div>}
       {busy ? <div className="space-y-4" aria-label="Ladataan"><div className="h-32 animate-pulse rounded-2xl bg-muted"/><div className="h-60 animate-pulse rounded-2xl bg-muted"/></div> :
       courses.length===0 ? <section className="panel p-6"><h2 className="text-xl font-semibold">Aloita ensimmäisestä kurssista</h2><p className="mt-2 text-muted-foreground">Lisää kurssi ja sen aiheet, jotta voit suunnitella ja kirjata opiskelua.</p><button onClick={()=>setAdding(true)} className="mt-5 min-h-11 rounded-xl bg-primary px-4 text-primary-foreground">Lisää kurssi</button></section> :
       page==="today" ? <TodayView courses={courses} topics={topics} sessions={sessions} exams={exams} plan={plan} tests={testsQ.data??[]} mistakes={mistakesQ.data??[]} onStart={setEntry} onGo={go}/> :
