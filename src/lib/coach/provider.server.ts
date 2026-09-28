@@ -29,8 +29,8 @@ export function remoteCoachConfigured() {
 
 export function redactStudentText(text: string) {
   return text
-    .replace(/\bArthur\b/gi, "[nimi]")
     .replace(/[\w.+-]+@[\w.-]+\.[a-z]{2,}/gi, "[sähköposti]")
+    .replace(/\bArthur\b/gi, "[nimi]")
     .replace(/https?:\/\/\S+/gi, "[linkki]")
     .replace(/\b[0-9a-f]{8}-[0-9a-f-]{27,}\b/gi, "[tunniste]")
     .replace(/\+?\d[\d ()-]{8,}\d/g, "[numero]")
