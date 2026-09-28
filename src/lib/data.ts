@@ -664,9 +664,14 @@ export function useCreatePracticeTest() {
       error_count?: number | null;
       topic_results?: unknown[];
     }) => {
-      const { error } = await supabase.from("practice_tests").insert({
-        ...input,
-        topic_results: (input.topic_results ?? []) as never,
+      const { error } = await untypedSupabase.rpc("record_practice_test", {
+        p_course_id: input.course_id,
+        p_date: input.date,
+        p_score: input.score,
+        p_max_score: input.max_score,
+        p_duration_minutes: input.duration_minutes ?? null,
+        p_error_count: input.error_count ?? null,
+        p_topic_results: input.topic_results ?? [],
       });
       if (error) throw error;
     },
