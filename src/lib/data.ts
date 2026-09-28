@@ -352,6 +352,23 @@ async function doMovePlanItem(payload: unknown) {
   if (error) throw error;
 }
 
+async function doUpsertPlanItem(payload: unknown, operationId: string) {
+  const p = payload as Partial<PlanItem> & { id?: string; course_id: string; date: string };
+  if (p.id) {
+    const { id, ...rest } = p;
+    const { error } = await supabase.from("plan_items").update(rest).eq("id", id);
+    if (error) throw error;
+    return id;
+  }
+
+  const { error } = await supabase
+    .from("plan_items")
+    .upsert({ ...p, id: operationId } as never, { onConflict: "id" });
+  if (error) throw error;
+  return operationId;
+}
+
+
 async function doWeeklyCheckin(payload: unknown) {
   const p = payload as {
     week_start: string;
@@ -377,6 +394,7 @@ async function doWeeklyCheckin(payload: unknown) {
 registerOp("logSession", doLogSession);
 registerOp("updatePlanStatus", doUpdatePlanStatus);
 registerOp("movePlanItem", doMovePlanItem);
+registerOp("upsertPlanItem", doUpsertPlanItem);
 registerOp("weeklyCheckin", doWeeklyCheckin);
 
 function useInvalidateAll() {
@@ -440,16 +458,8 @@ export function useGeneratePlan() {
 export function useUpsertPlanItem() {
   const invalidate = useInvalidateAll();
   return useMutation({
-    mutationFn: async (input: Partial<PlanItem> & { id?: string; course_id: string; date: string }) => {
-      if (input.id) {
-        const { id, ...rest } = input;
-        const { error } = await supabase.from("plan_items").update(rest).eq("id", id);
-        if (error) throw error;
-      } else {
-        const { error } = await supabase.from("plan_items").insert(input as never);
-        if (error) throw error;
-      }
-    },
+    mutationFn: (input: Partial<PlanItem> & { id?: string; course_id: string; date: string }) =>
+      runOrQueue("upsertPlanItem", input),
     onSuccess: invalidate,
   });
 }
