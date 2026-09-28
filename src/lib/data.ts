@@ -17,6 +17,7 @@ import {
   balanceDraftsAgainstPlan,
 } from "./domain";
 import { today } from "./fi";
+import { requireDeviceOwnerId } from "./deviceSession";
 
 export type UserPreferences = {
   owner_id: string;
@@ -162,9 +163,7 @@ const KE04_TOPICS = [
  * and only missing canonical topics / exam rows are added.
  */
 export async function ensureKe04ForCurrentUser(): Promise<string> {
-  const { data: authData, error: authError } = await supabase.auth.getUser();
-  if (authError) throw authError;
-  if (!authData.user) throw new Error("Kirjautunut käyttäjä puuttuu.");
+  const ownerId = requireDeviceOwnerId();
 
   const { data: existing, error: existingError } = await supabase
     .from("courses")
@@ -297,7 +296,7 @@ export async function ensureKe04ForCurrentUser(): Promise<string> {
   if (preferencesReadError) throw preferencesReadError;
   if (!preferences) {
     const { error } = await untypedSupabase.from("user_preferences").insert({
-      owner_id: authData.user.id,
+      owner_id: ownerId,
       display_name: "Arthur",
       study_weekdays: [1, 2, 3, 4, 5],
       notifications_enabled: false,
@@ -400,11 +399,9 @@ async function doWeeklyCheckin(payload: unknown) {
     next_focus: string | null;
     load_rating: "light" | "good" | "heavy" | null;
   };
-  const { data: auth, error: authError } = await supabase.auth.getUser();
-  if (authError) throw authError;
-  if (!auth.user) throw new Error("Kirjautunut käyttäjä puuttuu.");
+  const ownerId = requireDeviceOwnerId();
   const { error } = await untypedSupabase.from("weekly_checkins").upsert(
-    { ...p, owner_id: auth.user.id },
+    { ...p, owner_id: ownerId },
     { onConflict: "owner_id,week_start" },
   );
   if (error) throw error;
@@ -594,13 +591,9 @@ export function useUpdatePreferences() {
     mutationFn: async (
       input: Partial<Omit<UserPreferences, "created_at" | "updated_at">>,
     ) => {
-      const { data: auth, error: authError } = await supabase.auth.getUser();
-      if (authError) throw authError;
-      if (!auth.user) throw new Error("Kirjautunut käyttäjä puuttuu.");
-
       const payload = {
         ...input,
-        owner_id: auth.user.id,
+        owner_id: requireDeviceOwnerId(),
       };
       const { error } = await untypedSupabase
         .from("user_preferences")

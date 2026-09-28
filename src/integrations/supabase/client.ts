@@ -1,5 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "./types";
+import { getDeviceAccessToken } from "../../lib/deviceSession";
 
 function env(name: string, viteName: "VITE_SUPABASE_URL" | "VITE_SUPABASE_PUBLISHABLE_KEY") {
   const viteValue = import.meta.env[viteName];
@@ -32,9 +33,10 @@ function createSupabaseClient() {
   }
 
   return createClient<Database>(supabaseUrl, supabasePublishableKey, {
+    accessToken: async () => getDeviceAccessToken(),
     auth: {
-      persistSession: true,
-      autoRefreshToken: true,
+      persistSession: false,
+      autoRefreshToken: false,
       detectSessionInUrl: false,
     },
   });

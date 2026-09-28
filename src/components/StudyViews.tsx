@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from "react";
-import type { User } from "@supabase/supabase-js";
 import { Archive, Bell, ChevronLeft, ChevronRight, Pencil, Plus, RotateCcw } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -55,9 +54,9 @@ import {
   useWeeklyCheckins,
 } from "@/lib/data";
 import { addDays, dateWithWeekday, diffDays, fullDate, minutes, shortDate, startOfWeek, today, weekNumber } from "@/lib/fi";
-import { supabase } from "@/integrations/supabase/client";
 import { disableBackgroundPush, enableBackgroundPush, pushIsEnabledOnDevice, pushSupported, sendTestPush } from "@/lib/push";
 import { applyTheme, storedThemeIsDark } from "@/lib/theme";
+import { clearDeviceSession, type DeviceUser } from "@/lib/deviceSession";
 import {
   CourseEditForm,
   ExamForm,
@@ -348,7 +347,7 @@ export function ProgressView({courses,topics,sessions,plan,exams,onPlan}:Base&{s
   </div>;
 }
 
-export function SettingsView({user}:{user:User}) {
+export function SettingsView({user}:{user:DeviceUser}) {
   const [dark,setDark]=useState(typeof window!=="undefined"?storedThemeIsDark():false);
   const [pushEnabled,setPushEnabled]=useState(false);
   const [pushBusy,setPushBusy]=useState(false);
@@ -420,6 +419,6 @@ export function SettingsView({user}:{user:User}) {
 
     {archived.length>0&&<Panel title="Arkistoidut kurssit">{archived.map(c=><div key={c.id} className="flex min-h-12 items-center justify-between gap-3 border-b border-border"><span><b>{c.code}</b> · {c.name}</span><button className={secondary+" !min-h-9"} onClick={()=>void archiveCourse.mutateAsync({id:c.id,archived:false}).then(()=>toast.success("Kurssi palautettu.")).catch(()=>toast.error("Palautus epäonnistui."))}>Palauta</button></div>)}</Panel>}
 
-    <Panel title="Laite"><p className="mb-3 text-sm text-muted-foreground">Normaalisti kirjautumista ei enää kysytä tällä selaimella. Tämän painikkeen käyttö poistaa muistamisen ja paikallisen session, mutta Arthur-tili ja opiskelutiedot säilyvät palvelimella.</p><button className={secondary} onClick={async()=>{if(!window.confirm("Unohdetaanko tämä laite?"))return;localStorage.removeItem("opk.device-authorized");localStorage.removeItem("opk.owner-id");await supabase.auth.signOut();location.reload();}}><RotateCcw size={16}/>Unohda tämä laite</button></Panel>
+    <Panel title="Laite"><p className="mb-3 text-sm text-muted-foreground">Normaalisti kirjautumista ei enää kysytä tällä selaimella. Tämän painikkeen käyttö poistaa muistamisen ja paikallisen session, mutta Arthur-tili ja opiskelutiedot säilyvät palvelimella.</p><button className={secondary} onClick={async()=>{if(!window.confirm("Unohdetaanko tämä laite?"))return;clearDeviceSession();location.reload();}}><RotateCcw size={16}/>Unohda tämä laite</button></Panel>
   </div>;
 }

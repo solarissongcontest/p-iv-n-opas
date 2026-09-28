@@ -2,8 +2,6 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { BookOpen, CalendarDays, ChartNoAxesCombined, Ellipsis, FlaskConical, Home, Plus, Search, Settings2, X } from "lucide-react";
 import { toast, Toaster } from "sonner";
-import type { User } from "@supabase/supabase-js";
-import { supabase } from "@/integrations/supabase/client";
 import { LiquidGlass } from "@/components/LiquidGlass";
 import { ensureKe04ForCurrentUser, useCourses, useExams, useMistakes, usePlan, usePreferences, useSessions, useTests, useTopics } from "@/lib/data";
 import { longDate, greeting, today } from "@/lib/fi";
@@ -12,6 +10,12 @@ import { CourseForm, SessionForm, SearchPanel } from "@/components/StudyDialogs"
 import { Onboarding } from "@/components/Onboarding";
 import { pendingCount, setOfflineOwner, startSyncWatcher, subscribePending } from "@/lib/offline";
 import { applyTheme, storedThemeIsDark } from "@/lib/theme";
+import {
+  type DeviceUser,
+  isTrustedArthurDevice,
+  readDeviceSession,
+  storeDeviceSession,
+} from "@/lib/deviceSession";
 
 type Page = "today" | "plan" | "courses" | "exams" | "progress" | "settings";
 const nav = [
@@ -23,10 +27,7 @@ const nav = [
 ] as const;
 export const Route = createFileRoute("/")({ component: App });
 
-const DEVICE_AUTH_KEY = "opk.device-authorized";
-const DEVICE_OWNER_KEY = "opk.owner-id";
-
-async function getArthurSession() {
+async function getArthurSession(): Promise<DeviceUser> {
   const response = await fetch("/api/device-auth", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -34,70 +35,51 @@ async function getArthurSession() {
   });
   const payload = (await response.json().catch(() => ({}))) as {
     access_token?: string;
-    refresh_token?: string;
     user_id?: string;
+    expires_at?: number;
     error?: string;
   };
-  if (!response.ok || !payload.access_token || !payload.refresh_token) {
-    throw new Error(payload.error ?? "Arthur-session luominen epäonnistui.");
+  if (!response.ok || !payload.access_token || !payload.user_id || !payload.expires_at) {
+    throw new Error(payload.error ?? "Arthur-laitetunnistuksen luominen epäonnistui.");
   }
-
-  const { data, error } = await supabase.auth.setSession({
-    access_token: payload.access_token,
-    refresh_token: payload.refresh_token,
+  storeDeviceSession({
+    accessToken: payload.access_token,
+    userId: payload.user_id,
+    expiresAt: payload.expires_at,
   });
-  if (error) throw error;
-  if (!data.user) throw new Error("Supabase ei palauttanut käyttäjää.");
-  return data.user;
+  return { id: payload.user_id };
 }
 
 
 function App() {
-  const [user, setUser] = useState<User | null | undefined>();
+  const [user, setUser] = useState<DeviceUser | null | undefined>();
   const [authError, setAuthError] = useState<string | null>(null);
 
   useEffect(() => {
     let active = true;
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (active) setUser(session?.user ?? null);
-    });
-
     void (async () => {
+      const existing = readDeviceSession();
+      if (existing) {
+        if (active) setUser(existing.user);
+        return;
+      }
+      if (!isTrustedArthurDevice()) {
+        if (active) setUser(null);
+        return;
+      }
       try {
-        const { data: sessionData } = await supabase.auth.getSession();
-        if (!active) return;
-
-        if (sessionData.session?.user) {
-          localStorage.setItem(DEVICE_AUTH_KEY, "Arthur");
-          localStorage.setItem(DEVICE_OWNER_KEY, sessionData.session.user.id);
-          setUser(sessionData.session.user);
-          return;
-        }
-
-        const trustedDevice = localStorage.getItem(DEVICE_AUTH_KEY) === "Arthur";
-        if (!trustedDevice) {
-          setUser(null);
-          return;
-        }
-
         const restoredUser = await getArthurSession();
-        localStorage.setItem(DEVICE_OWNER_KEY, restoredUser.id);
         if (active) {
           setAuthError(null);
           setUser(restoredUser);
         }
       } catch (error) {
         if (!active) return;
-        const message = error instanceof Error ? error.message : "Kirjautuminen epäonnistui.";
-        setAuthError(message);
+        setAuthError(error instanceof Error ? error.message : "Kirjautuminen epäonnistui.");
         setUser(null);
       }
     })();
-
-    return () => {
-      active = false;
-      subscription.unsubscribe();
-    };
+    return () => { active = false; };
   }, []);
 
   if (user === undefined) return <main className="grid min-h-screen place-items-center">Avataan opintopäiväkirjaa…</main>;
@@ -110,7 +92,7 @@ function DeviceSignIn({
   onSignedIn,
 }: {
   authError: string | null;
-  onSignedIn: (user: User) => void;
+  onSignedIn: (user: DeviceUser) => void;
 }) {
   const [username, setUsername] = useState("");
   const [busy, setBusy] = useState(false);
@@ -138,8 +120,6 @@ function DeviceSignIn({
         setBusy(true);
         try {
           const signedInUser = await getArthurSession();
-          localStorage.setItem(DEVICE_AUTH_KEY, "Arthur");
-          localStorage.setItem(DEVICE_OWNER_KEY, signedInUser.id);
           onSignedIn(signedInUser);
         } catch (error) {
           setErrorMessage(error instanceof Error ? error.message : "Kirjautuminen epäonnistui.");
@@ -170,7 +150,7 @@ function DeviceSignIn({
   </section><Toaster richColors /></main>;
 }
 
-function StudyApp({ user }: { user: User }) {
+function StudyApp({ user }: { user: DeviceUser }) {
   setOfflineOwner(user.id);
   const [page, setPage] = useState<Page>("today");
   const [courseId, setCourseId] = useState<string | null>(null);

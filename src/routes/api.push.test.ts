@@ -17,13 +17,8 @@ export const Route = createFileRoute("/api/push/test")({
           if (!bearer) return Response.json({ error: "Kirjautuminen puuttuu." }, { status: 401 });
 
           const url = env("SUPABASE_URL");
-          const verifier = createClient(url, env("SUPABASE_PUBLISHABLE_KEY"), {
-            auth: { persistSession: false, autoRefreshToken: false },
-          });
-          const { data: auth, error: authError } = await verifier.auth.getUser(bearer);
-          if (authError || !auth.user) {
-            return Response.json({ error: "Istunto ei ole voimassa." }, { status: 401 });
-          }
+          const { verifyArthurDeviceToken } = await import("@/lib/deviceAuth.server");
+          const auth = verifyArthurDeviceToken(bearer);
 
           const admin = createClient(url, env("SUPABASE_SECRET_KEY"), {
             auth: { persistSession: false, autoRefreshToken: false },
@@ -31,7 +26,7 @@ export const Route = createFileRoute("/api/push/test")({
           const { data: subscriptions, error } = await admin
             .from("push_subscriptions")
             .select("id,subscription")
-            .eq("owner_id", auth.user.id)
+            .eq("owner_id", auth.sub)
             .eq("active", true);
           if (error) throw error;
           if (!subscriptions?.length) {
