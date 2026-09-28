@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
 import type { User } from "@supabase/supabase-js";
 import { Archive, Bell, ChevronLeft, ChevronRight, Pencil, Plus, RotateCcw } from "lucide-react";
 import { toast } from "sonner";
@@ -36,16 +35,17 @@ import {
   useGeneratePlan,
   useMovePlanItem,
   usePlanStatus,
+  usePreferences,
   useProgressEvents,
   useResolveMistake,
-  useSettings,
-  useUpdateSettings,
+  useUpdatePreferences,
   useUpdateTopic,
   useUpsertWeeklyCheckin,
   useWeeklyCheckins,
 } from "@/lib/data";
 import { addDays, dateWithWeekday, diffDays, fullDate, minutes, startOfWeek, today, weekNumber } from "@/lib/fi";
 import { supabase } from "@/integrations/supabase/client";
+import { disableBackgroundPush, enableBackgroundPush, pushIsEnabledOnDevice, pushSupported } from "@/lib/push";
 import {
   CourseEditForm,
   ExamForm,
@@ -229,27 +229,73 @@ export function ProgressView({courses,topics,sessions,plan,onPlan}:Base&{session
 
 export function SettingsView({user}:{user:User}) {
   const [dark,setDark]=useState(typeof document!=="undefined"&&document.documentElement.classList.contains("dark"));
-  const [permission,setPermission]=useState<NotificationPermission>(typeof Notification!=="undefined"?Notification.permission:"default");
-  const settings=useSettings(),s=settings.data,update=useUpdateSettings(),qc=useQueryClient();
+  const [pushEnabled,setPushEnabled]=useState(false);
+  const [pushBusy,setPushBusy]=useState(false);
+  const preferences=usePreferences(),prefs=preferences.data,updatePreferences=useUpdatePreferences();
   const allCourses=useCourses(),archiveCourse=useArchiveCourse();
   const archived=(allCourses.data??[]).filter(c=>c.archived);
-  useEffect(()=>{if(s!==null)return;void supabase.from("notification_settings").insert({owner_id:user.id}).then(({error})=>{if(!error)void qc.invalidateQueries({queryKey:["settings"]});});},[s,user.id,qc]);
+  const weekdayOptions=[[1,"Ma"],[2,"Ti"],[3,"Ke"],[4,"To"],[5,"Pe"],[6,"La"],[7,"Su"]] as const;
 
-  async function enableNotifications(){
-    if(typeof Notification==="undefined"){toast.error("Tämä selain ei tue ilmoituksia.");return;}
-    const result=await Notification.requestPermission();setPermission(result);
-    if(result==="granted"){new Notification("Opintopäiväkirja",{body:"Selainilmoitukset ovat nyt käytössä."});toast.success("Selainilmoitukset käytössä.");}
-    else toast.error("Selain ei antanut ilmoituslupaa.");
+  useEffect(()=>{
+    let active=true;
+    void pushIsEnabledOnDevice().then(enabled=>{if(active)setPushEnabled(enabled);}).catch(()=>{if(active)setPushEnabled(false);});
+    return()=>{active=false;};
+  },[]);
+
+  async function togglePush(){
+    setPushBusy(true);
+    try{
+      if(pushEnabled){
+        await disableBackgroundPush();
+        await updatePreferences.mutateAsync({notifications_enabled:false});
+        setPushEnabled(false);
+        toast.success("Taustamuistutukset poistettu käytöstä.");
+      }else{
+        await enableBackgroundPush();
+        await updatePreferences.mutateAsync({notifications_enabled:true});
+        setPushEnabled(true);
+        toast.success("Taustamuistutukset käytössä.");
+      }
+    }catch(error){
+      toast.error(error instanceof Error?error.message:"Ilmoitusasetusta ei voitu muuttaa.");
+    }finally{
+      setPushBusy(false);
+    }
+  }
+
+  async function toggleWeekday(day:number){
+    if(!prefs)return;
+    const current=prefs.study_weekdays?.length?prefs.study_weekdays:[1,2,3,4,5];
+    const selected=current.includes(day);
+    if(selected&&current.length===1){toast.error("Valitse vähintään yksi opiskelupäivä.");return;}
+    const next=(selected?current.filter(x=>x!==day):[...current,day]).sort((a,b)=>a-b);
+    try{await updatePreferences.mutateAsync({study_weekdays:next});}
+    catch{toast.error("Opiskelupäiviä ei voitu tallentaa.");}
   }
 
   return <div className="space-y-5">
-    <Panel title="Profiili"><p className="text-2xl font-semibold">Arthur</p><p className="mt-2 text-sm text-muted-foreground">Tämä laite on muistettu. Supabase-tunniste: {user.id.slice(0,8)}…</p></Panel>
-    <Panel title="Ulkoasu"><label className="flex min-h-11 items-center justify-between">Tumma tila<input type="checkbox" className="size-5 accent-primary" checked={dark} onChange={e=>{setDark(e.target.checked);document.documentElement.classList.toggle("dark",e.target.checked);localStorage.setItem("opk.theme",e.target.checked?"dark":"light");}}/></label></Panel>
-    <Panel title="Ilmoitukset" action={<button className={secondary+" !min-h-9"} onClick={()=>void enableNotifications()}><Bell size={15}/>{permission==="granted"?"Sallittu":"Ota käyttöön"}</button>}>
-      <p className="mb-3 text-sm text-muted-foreground">Kun lupa on annettu, Opintopäiväkirja muistuttaa avatessa tämän päivän tehtävistä ja lähestyvistä kokeista.</p>
-      {s?([["study_sessions","Opiskelusessiot"],["exams","Kokeet"],["plan_changes","Suunnitelman muutokset"],["weekly_summary","Viikkoyhteenveto"]] as const).map(([key,label])=><label key={key} className="flex min-h-11 items-center justify-between border-b border-border"><span>{label}</span><input type="checkbox" className="size-5 accent-primary" checked={s[key]} onChange={e=>void update.mutateAsync({id:s.id,[key]:e.target.checked}).catch(()=>toast.error("Tallennus epäonnistui."))}/></label>):<p>Asetukset eivät ole vielä saatavilla.</p>}
+    <Panel title="Profiili"><p className="text-2xl font-semibold">{prefs?.display_name||"Arthur"}</p><p className="mt-2 text-sm text-muted-foreground">Pysyvä Opintopäiväkirja-tunnus · {user.id.slice(0,8)}…</p></Panel>
+
+    <Panel title="Opiskelurytmi">
+      <p className="mb-3 text-sm text-muted-foreground">Näitä päiviä käytetään uusien adaptiivisten suunnitelmien rytmitykseen ja taustamuistutuksiin.</p>
+      <div className="flex flex-wrap gap-2">{weekdayOptions.map(([day,label])=>{const active=(prefs?.study_weekdays??[1,2,3,4,5]).includes(day);return <button key={day} type="button" aria-pressed={active} onClick={()=>void toggleWeekday(day)} className={`grid size-11 place-items-center rounded-xl border text-sm font-semibold ${active?"border-primary bg-accent text-primary":"border-border bg-surface"}`}>{label}</button>;})}</div>
     </Panel>
+
+    <Panel title="Taustamuistutukset" action={<button disabled={pushBusy||!pushSupported()} className={secondary+" !min-h-9"} onClick={()=>void togglePush()}><Bell size={15}/>{pushBusy?"Päivitetään…":pushEnabled?"Poista käytöstä":"Ota käyttöön"}</button>}>
+      <p className="text-sm text-muted-foreground">
+        {pushSupported()
+          ? pushEnabled
+            ? "Web Push on käytössä tällä laitteella. Muistutukset voivat saapua myös silloin, kun Opintopäiväkirja on suljettu."
+            : "Ota Web Push käyttöön, jotta päivän tehtävät, kertausvelka ja aivan lähellä olevat kokeet voivat muistuttaa myös sovelluksen ollessa suljettu."
+          : "Tämä selain ei tue Web Push -ilmoituksia."}
+      </p>
+      <p className="mt-3 text-xs text-muted-foreground">Aamumuistutus lähetetään valittuina opiskelupäivinä noin klo 8–9 Suomen aikaa. Saman päivän muistutus lähetetään vain kerran.</p>
+    </Panel>
+
+    <Panel title="Ulkoasu"><label className="flex min-h-11 items-center justify-between">Tumma tila<input type="checkbox" className="size-5 accent-primary" checked={dark} onChange={e=>{setDark(e.target.checked);document.documentElement.classList.toggle("dark",e.target.checked);localStorage.setItem("opk.theme",e.target.checked?"dark":"light");}}/></label></Panel>
+
     {archived.length>0&&<Panel title="Arkistoidut kurssit">{archived.map(c=><div key={c.id} className="flex min-h-12 items-center justify-between gap-3 border-b border-border"><span><b>{c.code}</b> · {c.name}</span><button className={secondary+" !min-h-9"} onClick={()=>void archiveCourse.mutateAsync({id:c.id,archived:false}).then(()=>toast.success("Kurssi palautettu.")).catch(()=>toast.error("Palautus epäonnistui."))}>Palauta</button></div>)}</Panel>}
-    <Panel title="Laite"><p className="mb-3 text-sm text-muted-foreground">Normaalisti kirjautumista ei enää kysytä tällä selaimella. Tämän painikkeen käyttö poistaa muistamisen ja paikallisen session.</p><button className={secondary} onClick={async()=>{if(!window.confirm("Unohdetaanko tämä laite?"))return;localStorage.removeItem("opk.device-authorized");localStorage.removeItem("opk.owner-id");await supabase.auth.signOut();location.reload();}}><RotateCcw size={16}/>Unohda tämä laite</button></Panel>
+
+    <Panel title="Laite"><p className="mb-3 text-sm text-muted-foreground">Normaalisti kirjautumista ei enää kysytä tällä selaimella. Tämän painikkeen käyttö poistaa muistamisen ja paikallisen session, mutta Arthur-tili ja opiskelutiedot säilyvät palvelimella.</p><button className={secondary} onClick={async()=>{if(!window.confirm("Unohdetaanko tämä laite?"))return;localStorage.removeItem("opk.device-authorized");localStorage.removeItem("opk.owner-id");await supabase.auth.signOut();location.reload();}}><RotateCcw size={16}/>Unohda tämä laite</button></Panel>
   </div>;
 }
