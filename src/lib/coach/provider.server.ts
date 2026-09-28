@@ -64,7 +64,11 @@ export class CloudflareCoachProvider implements CoachProvider {
       status,
     });
 
-    if (!remoteCoachConfigured() || !input.remoteConsent) {
+    if (
+      !remoteCoachConfigured() ||
+      !input.remoteConsent ||
+      !input.attempt.trim()
+    ) {
       return fallback("local");
     }
 
