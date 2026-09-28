@@ -279,10 +279,15 @@ test("cloud provider fails closed and never passes provider prose through", asyn
   }
 
   let called = false;
-  await new CloudflareCoachProvider(async () => {
+  const noAttemptProvider = new CloudflareCoachProvider(async () => {
     called = true;
     throw new Error("should not run");
-  }).decide(input, context);
+  });
+  await noAttemptProvider.decide(input, context);
+  await noAttemptProvider.decide(
+    { ...input, remoteConsent: true, attempt: "" },
+    context,
+  );
   assert.equal(called, false);
 
   const failure = await new CloudflareCoachProvider(async () => {
