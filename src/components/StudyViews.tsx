@@ -54,7 +54,7 @@ import {
   useUpsertWeeklyCheckin,
   useWeeklyCheckins,
 } from "@/lib/data";
-import { addDays, dateWithWeekday, diffDays, fullDate, minutes, startOfWeek, today, weekNumber } from "@/lib/fi";
+import { addDays, dateWithWeekday, diffDays, fullDate, minutes, shortDate, startOfWeek, today, weekNumber } from "@/lib/fi";
 import { supabase } from "@/integrations/supabase/client";
 import { disableBackgroundPush, enableBackgroundPush, pushIsEnabledOnDevice, pushSupported, sendTestPush } from "@/lib/push";
 import { applyTheme, storedThemeIsDark } from "@/lib/theme";
