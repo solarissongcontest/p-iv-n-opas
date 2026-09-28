@@ -6,7 +6,9 @@
 
 export type QueuedOp = { id: string; op: string; payload: unknown; at: number };
 
-const KEY = "opk.pending.v1";
+let owner = "signed-out";
+const key = () => `opk.pending.v2.${owner}`;
+export function setOfflineOwner(id: string) { owner = id; }
 const handlers = new Map<string, (payload: unknown) => Promise<unknown>>();
 const listeners = new Set<(count: number) => void>();
 
@@ -17,7 +19,7 @@ export function registerOp(op: string, fn: (payload: unknown) => Promise<unknown
 function read(): QueuedOp[] {
   if (typeof localStorage === "undefined") return [];
   try {
-    return JSON.parse(localStorage.getItem(KEY) ?? "[]") as QueuedOp[];
+    return JSON.parse(localStorage.getItem(key()) ?? "[]") as QueuedOp[];
   } catch {
     return [];
   }
@@ -25,7 +27,7 @@ function read(): QueuedOp[] {
 
 function write(items: QueuedOp[]) {
   if (typeof localStorage === "undefined") return;
-  localStorage.setItem(KEY, JSON.stringify(items));
+  localStorage.setItem(key(), JSON.stringify(items));
   listeners.forEach((l) => l(items.length));
 }
 

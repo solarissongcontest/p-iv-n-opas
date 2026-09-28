@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Check, Pause, Play, X } from "lucide-react";
 import { toast } from "sonner";
 import { LiquidGlass } from "@/components/LiquidGlass";
-import { useCreateCourse, useLogSession } from "@/lib/data";
+import { useCreateCourse, useLogSession, useCreateExam, useCreateMistake, useCreatePracticeTest } from "@/lib/data";
 import type { Course, Exam, PlanItem, Topic } from "@/lib/domain";
 import { shortDate } from "@/lib/fi";
 
@@ -10,8 +10,26 @@ const input = "mt-1 w-full rounded-xl border border-border bg-surface px-3 py-2.
 const button = "inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-primary px-4 text-primary-foreground disabled:opacity-50";
 const secondary = "inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-border bg-surface px-4";
 function Dialog({ title, onClose, children }: { title: string; onClose: () => void; children: React.ReactNode }) {
- return <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 sm:items-center sm:p-4" onMouseDown={e=>{if(e.target===e.currentTarget)onClose();}}>
-  <LiquidGlass variant="thick" role="dialog" aria-modal="true" aria-label={title} className="max-h-[92vh] w-full max-w-xl overflow-y-auto rounded-t-3xl p-5 shadow-2xl sm:rounded-3xl sm:p-7">
+ const ref = useRef<HTMLDivElement>(null);
+ const close = useRef(onClose);
+ close.current = onClose;
+ useEffect(() => {
+   const previous = document.activeElement as HTMLElement | null;
+   const focusable = () => [...(ref.current?.querySelectorAll<HTMLElement>('button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])') ?? [])];
+   focusable()[0]?.focus();
+   function trap(e: KeyboardEvent) {
+     if (e.key === "Escape") { e.stopPropagation(); close.current(); }
+     if (e.key !== "Tab") return;
+     const elements = focusable(), first = elements[0], last = elements[elements.length - 1];
+     if (!first || !last) return;
+     if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+     else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+   }
+   document.addEventListener("keydown", trap);
+   return () => { document.removeEventListener("keydown", trap); previous?.focus(); };
+ }, []);
+ return <div ref={ref} className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 sm:items-center sm:p-4" onMouseDown={e=>{if(e.target===e.currentTarget)onClose();}}>
+  <LiquidGlass lensing variant="thick" role="dialog" aria-modal="true" aria-label={title} className="max-h-[92vh] w-full max-w-xl overflow-y-auto rounded-t-3xl p-5 shadow-2xl sm:rounded-3xl sm:p-7">
    <div className="mb-5 flex items-center justify-between"><h2 className="text-xl font-semibold">{title}</h2><button type="button" aria-label="Sulje" className={secondary+" !size-11 !p-0"} onClick={onClose}><X size={18}/></button></div>{children}
   </LiquidGlass>
  </div>;
@@ -31,3 +49,17 @@ export function SessionForm({item,courses,topics,onClose}:{item:PlanItem|null;co
 }
 export function CourseForm({onClose}:{onClose:()=>void}) {const [code,setCode]=useState(""),[name,setName]=useState(""),[subject,setSubject]=useState(""),[exam,setExam]=useState(""),[raw,setRaw]=useState("");const create=useCreateCourse();return <Dialog title="Lisää kurssi" onClose={onClose}><form className="space-y-4" onSubmit={async e=>{e.preventDefault();try{await create.mutateAsync({code:code.trim(),name:name.trim(),subject:subject.trim(),exam_date:exam||null,topics:raw.split("\n").map(x=>x.trim()).filter(Boolean).map(x=>({name:x,weight:1,importance:3}))});toast.success("Kurssi lisätty.");onClose();}catch{toast.error("Kurssia ei voitu tallentaa.");}}}><label className="block text-sm font-medium">Kurssikoodi<input className={input} required value={code} onChange={e=>setCode(e.target.value)} placeholder="esim. FY04"/></label><label className="block text-sm font-medium">Kurssin nimi<input className={input} required value={name} onChange={e=>setName(e.target.value)}/></label><label className="block text-sm font-medium">Oppiaine<input className={input} value={subject} onChange={e=>setSubject(e.target.value)}/></label><label className="block text-sm font-medium">Koepäivä (valinnainen)<input type="date" className={input} value={exam} onChange={e=>setExam(e.target.value)}/></label><label className="block text-sm font-medium">Aiheet, yksi riville<textarea rows={5} className={input} value={raw} onChange={e=>setRaw(e.target.value)} placeholder={"Newtonin lait\nKitka\nLiikemäärä"}/></label><button className={button+" w-full"} disabled={create.isPending}>Tallenna kurssi</button></form></Dialog>}
 export function SearchPanel({courses,topics,exams,onClose,onNavigate,onCourse,onLog}:{courses:Course[];topics:Topic[];exams:Exam[];onClose:()=>void;onNavigate:(page:string)=>void;onCourse:(id:string)=>void;onLog:()=>void}) {const [q,setQ]=useState("");return <Dialog title="Haku ja pikatoiminnot" onClose={onClose}><input autoFocus className={input} aria-label="Hae kursseja ja aiheita" placeholder="Hae kurssia, aihetta tai koetta…" value={q} onChange={e=>setQ(e.target.value)}/><div className="mt-4 max-h-96 space-y-1 overflow-y-auto"><button className="block min-h-11 w-full rounded-xl px-3 text-left hover:bg-muted" onClick={onLog}>+ Kirjaa opiskelu</button>{[["today","Tänään"],["plan","Suunnitelma"],["courses","Kurssit"],["exams","Kokeet"],["progress","Kehitys"]].map(([id,label])=><button key={id} className="block min-h-11 w-full rounded-xl px-3 text-left hover:bg-muted" onClick={()=>onNavigate(id ?? "today")}>{label}</button>)}{courses.filter(c=>(c.code+" "+c.name).toLowerCase().includes(q.toLowerCase())).map(c=><button key={c.id} className="block min-h-11 w-full rounded-xl px-3 text-left hover:bg-muted" onClick={()=>onCourse(c.id)}>{c.code} · {c.name}</button>)}{q&&topics.filter(t=>t.name.toLowerCase().includes(q.toLowerCase())).slice(0,8).map(t=><button key={t.id} className="block min-h-11 w-full rounded-xl px-3 text-left hover:bg-muted" onClick={()=>onCourse(t.course_id)}>{t.name}</button>)}{q&&exams.filter(e=>e.name.toLowerCase().includes(q.toLowerCase())).map(e=><button key={e.id} className="block min-h-11 w-full rounded-xl px-3 text-left hover:bg-muted" onClick={()=>onCourse(e.course_id)}>{e.name} · {shortDate(e.date)}</button>)}</div></Dialog>}
+
+export function ExamForm({courses,onClose}:{courses:Course[];onClose:()=>void}) {
+ const [courseId,setCourseId]=useState(courses[0]?.id??""),[name,setName]=useState(""),[date,setDate]=useState("");const create=useCreateExam();
+ return <Dialog title="Lisää koe" onClose={onClose}><form className="space-y-4" onSubmit={async e=>{e.preventDefault();try{await create.mutateAsync({course_id:courseId,name:name.trim(),date});toast.success("Koe lisätty.");onClose();}catch{toast.error("Koetta ei voitu tallentaa.");}}}><label className="block text-sm font-medium">Kurssi<select className={input} value={courseId} onChange={e=>setCourseId(e.target.value)}>{courses.map(c=><option key={c.id} value={c.id}>{c.code} · {c.name}</option>)}</select></label><label className="block text-sm font-medium">Kokeen nimi<input className={input} required value={name} onChange={e=>setName(e.target.value)} placeholder="Kurssikoe"/></label><label className="block text-sm font-medium">Päivämäärä<input type="date" className={input} required value={date} onChange={e=>setDate(e.target.value)}/></label><button className={button+" w-full"} disabled={create.isPending}>Tallenna koe</button></form></Dialog>;
+}
+
+export function MistakeForm({courseId,topics,onClose}:{courseId:string;topics:Topic[];onClose:()=>void}) {
+ const [topicId,setTopicId]=useState(""),[description,setDescription]=useState(""),[explanation,setExplanation]=useState("");const create=useCreateMistake();
+ return <Dialog title="Kirjaa virhe" onClose={onClose}><form className="space-y-4" onSubmit={async e=>{e.preventDefault();try{await create.mutateAsync({course_id:courseId,topic_id:topicId||null,error:description.trim(),explanation:explanation.trim()||null});toast.success("Virhe kirjattu.");onClose();}catch{toast.error("Virhettä ei voitu tallentaa.");}}}><label className="block text-sm font-medium">Aihe<select className={input} value={topicId} onChange={e=>setTopicId(e.target.value)}><option value="">Yleinen</option>{topics.map(t=><option key={t.id} value={t.id}>{t.name}</option>)}</select></label><label className="block text-sm font-medium">Mikä meni väärin?<textarea required rows={3} className={input} value={description} onChange={e=>setDescription(e.target.value)}/></label><label className="block text-sm font-medium">Miten korjaan sen?<textarea rows={3} className={input} value={explanation} onChange={e=>setExplanation(e.target.value)}/></label><button className={button+" w-full"} disabled={create.isPending}>Tallenna virhe</button></form></Dialog>;
+}
+export function PracticeTestForm({courseId,onClose}:{courseId:string;onClose:()=>void}) {
+ const [date,setDate]=useState(new Date().toLocaleDateString("sv-SE")),[score,setScore]=useState(""),[maximum,setMaximum]=useState("");const create=useCreatePracticeTest();
+ return <Dialog title="Kirjaa harjoituskoe" onClose={onClose}><form className="space-y-4" onSubmit={async e=>{e.preventDefault();if(Number(maximum)<=0||Number(score)>Number(maximum)){toast.error("Tarkista pisteet.");return;}try{await create.mutateAsync({course_id:courseId,date,score:Number(score),max_score:Number(maximum)});toast.success("Harjoituskoe kirjattu.");onClose();}catch{toast.error("Harjoituskoetta ei voitu tallentaa.");}}}><label className="block text-sm font-medium">Päivä<input type="date" required className={input} value={date} onChange={e=>setDate(e.target.value)}/></label><div className="grid grid-cols-2 gap-3"><label className="block text-sm font-medium">Saadut pisteet<input type="number" min="0" step="0.5" required className={input} value={score} onChange={e=>setScore(e.target.value)}/></label><label className="block text-sm font-medium">Enimmäispisteet<input type="number" min="0.5" step="0.5" required className={input} value={maximum} onChange={e=>setMaximum(e.target.value)}/></label></div><button className={button+" w-full"} disabled={create.isPending}>Tallenna tulos</button></form></Dialog>;
+}

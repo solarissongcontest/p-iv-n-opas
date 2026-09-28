@@ -353,3 +353,49 @@ export function useUpdateSettings() {
     onSuccess: invalidate,
   });
 }
+
+export function useCreateExam() {
+  const invalidate = useInvalidateAll();
+  return useMutation({
+    mutationFn: async (input: { course_id: string; name: string; date: string; target_system?: string; target_value?: string | null }) => {
+      const { error } = await supabase.from("exams").insert(input);
+      if (error) throw error;
+      const { error: courseError } = await supabase.from("courses").update({ exam_date: input.date }).eq("id", input.course_id);
+      if (courseError) throw courseError;
+    },
+    onSuccess: invalidate,
+  });
+}
+
+export function useCreateMistake() {
+  const invalidate = useInvalidateAll();
+  return useMutation({
+    mutationFn: async (input: { course_id: string; topic_id: string | null; error: string; explanation?: string | null }) => {
+      const { error } = await supabase.from("mistakes").insert(input);
+      if (error) throw error;
+    },
+    onSuccess: invalidate,
+  });
+}
+
+export function useResolveMistake() {
+  const invalidate = useInvalidateAll();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("mistakes").update({ status: "corrected" }).eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: invalidate,
+  });
+}
+
+export function useCreatePracticeTest() {
+  const invalidate = useInvalidateAll();
+  return useMutation({
+    mutationFn: async (input: { course_id: string; date: string; score: number; max_score: number; duration_minutes?: number | null }) => {
+      const { error } = await supabase.from("practice_tests").insert(input);
+      if (error) throw error;
+    },
+    onSuccess: invalidate,
+  });
+}

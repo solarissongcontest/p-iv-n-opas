@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1">
+  <filter id="glass-lens" x="-5%" y="-5%" width="110%" height="110%" color-interpolation-filters="sRGB">
+    <feTurbulence type="fractalNoise" baseFrequency=".015" numOctaves="1" seed="3" result="texture"/>
+    <feDisplacementMap in="SourceGraphic" in2="texture" scale="3" xChannelSelector="R" yChannelSelector="G"/>
+  </filter>
+</svg>

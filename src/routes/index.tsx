@@ -9,7 +9,7 @@ import { useCourses, useExams, useMistakes, usePlan, useSessions, useTests, useT
 import { longDate, greeting, today } from "@/lib/fi";
 import { CourseView, ExamsView, ProgressView, TodayView, PlanView, SettingsView } from "@/components/StudyViews";
 import { CourseForm, SessionForm, SearchPanel } from "@/components/StudyDialogs";
-import { pendingCount, startSyncWatcher, subscribePending } from "@/lib/offline";
+import { pendingCount, setOfflineOwner, startSyncWatcher, subscribePending } from "@/lib/offline";
 
 type Page = "today" | "plan" | "courses" | "exams" | "progress" | "settings";
 const nav = [
@@ -52,6 +52,7 @@ function SignIn() {
 }
 
 function StudyApp({ user }: { user: User }) {
+  setOfflineOwner(user.id);
   const [page, setPage] = useState<Page>("today");
   const [courseId, setCourseId] = useState<string | null>(null);
   const [entry, setEntry] = useState<string | null>(null);
@@ -80,7 +81,7 @@ function StudyApp({ user }: { user: User }) {
   const go = (p: Page) => { setPage(p); setCourseId(null); };
   const selected = courses.find(c => c.id === courseId);
   return <div className="min-h-screen">
-    <LiquidGlass as="aside" className="fixed inset-y-4 left-4 z-20 hidden w-60 flex-col rounded-3xl p-4 md:flex">
+    <LiquidGlass lensing as="aside" className="fixed inset-y-4 left-4 z-20 hidden w-60 flex-col rounded-3xl p-4 md:flex">
       <div className="mb-8 flex items-center gap-3 px-2 pt-2 font-semibold"><span className="grid size-10 place-items-center rounded-xl bg-primary text-primary-foreground"><BookOpen size={20}/></span>Opintopäiväkirja</div>
       <nav aria-label="Päänavigaatio" className="space-y-1">{nav.map(({id,label,Icon}) => <button key={id} aria-current={page===id?"page":undefined} onClick={() => go(id)} className={`flex min-h-11 w-full items-center gap-3 rounded-xl px-3 text-left text-sm ${page===id?"bg-accent font-semibold":"hover:bg-muted"}`}><Icon size={19}/>{label}</button>)}</nav>
       <button className="mt-6 min-h-11 rounded-xl bg-primary px-3 text-primary-foreground" onClick={() => setEntry("manual")}>+ Kirjaa opiskelu</button>
@@ -99,7 +100,7 @@ function StudyApp({ user }: { user: User }) {
       page==="progress" ? <ProgressView courses={courses} topics={topics} sessions={sessions} plan={plan} onPlan={()=>go("plan")}/> :
       <SettingsView user={user}/>}
     </main>
-    <LiquidGlass as="nav" aria-label="Mobiilinavigaatio" className="fixed inset-x-3 bottom-3 z-20 flex h-[72px] items-center justify-around rounded-[25px] px-1 md:hidden">{[nav[0],nav[1]].map(({id,label,Icon})=><button key={id} aria-label={label} aria-current={page===id?"page":undefined} onClick={()=>go(id)} className={`grid min-h-11 min-w-12 place-items-center text-[10px] ${page===id?"text-primary":""}`}><Icon size={21}/>{label}</button>)}<button aria-label="Kirjaa opiskelu" onClick={()=>setEntry("manual")} className="grid size-12 place-items-center rounded-2xl bg-primary text-primary-foreground"><Plus/></button>{[nav[2],nav[4]].map(({id,label,Icon})=><button key={id} aria-label={label} aria-current={page===id?"page":undefined} onClick={()=>go(id)} className={`grid min-h-11 min-w-12 place-items-center text-[10px] ${page===id?"text-primary":""}`}><Icon size={21}/>{label}</button>)}</LiquidGlass>
+    <LiquidGlass lensing as="nav" aria-label="Mobiilinavigaatio" className="fixed inset-x-3 bottom-3 z-20 flex h-[72px] items-center justify-around rounded-[25px] px-1 md:hidden">{[nav[0],nav[1]].map(({id,label,Icon})=><button key={id} aria-label={label} aria-current={page===id?"page":undefined} onClick={()=>go(id)} className={`grid min-h-11 min-w-12 place-items-center text-[10px] ${page===id?"text-primary":""}`}><Icon size={21}/>{label}</button>)}<button aria-label="Kirjaa opiskelu" onClick={()=>setEntry("manual")} className="grid size-12 place-items-center rounded-2xl bg-primary text-primary-foreground"><Plus/></button>{[nav[2],nav[4]].map(({id,label,Icon})=><button key={id} aria-label={label} aria-current={page===id?"page":undefined} onClick={()=>go(id)} className={`grid min-h-11 min-w-12 place-items-center text-[10px] ${page===id?"text-primary":""}`}><Icon size={21}/>{label}</button>)}</LiquidGlass>
     {entry && <SessionForm item={plan.find(p=>p.id===entry)??null} courses={courses} topics={topics} onClose={()=>setEntry(null)}/>}
     {adding && <CourseForm onClose={()=>setAdding(false)}/>}
     {search && <SearchPanel courses={courses} topics={topics} exams={exams} onClose={()=>setSearch(false)} onNavigate={p=>{go(p as Page);setSearch(false);}} onCourse={id=>{setCourseId(id);setPage("courses");setSearch(false);}} onLog={()=>{setSearch(false);setEntry("manual");}}/>}
