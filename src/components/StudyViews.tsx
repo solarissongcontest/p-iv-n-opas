@@ -84,7 +84,10 @@ export function TodayView({courses,topics,sessions,exams,plan,tests,mistakes,onS
   onStart:(id:string)=>void;onGo:(page:"plan"|"exams")=>void
 }) {
   const now=today();
-  const items=plan.filter(p=>p.date===now&&p.status==="planned"&&p.kind!=="exam");
+  const items=rankTodayTasks({
+    items:plan.filter(p=>p.date===now&&p.status==="planned"&&p.kind!=="exam"),
+    courses,topics,mistakes,tests,now,
+  });
   const next=items[0];
   const upcoming=exams.filter(e=>e.date>=now).sort((a,b)=>a.date.localeCompare(b.date))[0];
   const goal=courses.reduce((a,c)=>a+c.weekly_minutes,0), done=weekMinutes(sessions,now), last=sessions.find(s=>s.note||s.unclear);
@@ -93,7 +96,7 @@ export function TodayView({courses,topics,sessions,exams,plan,tests,mistakes,onS
   const mode=examMode(upcoming?.date??null,now);
   const examTopics=examCourse?topics.filter(t=>t.course_id===examCourse.id):[];
   const examReady=examCourse?readiness({topics:examTopics,tests:tests.filter(t=>t.course_id===examCourse.id),mistakes:mistakes.filter(m=>m.course_id===examCourse.id)}):0;
-  const openMistakes=examCourse?mistakes.filter(m=>m.course_id===examCourse.id&&m.status==="open").length:0;
+  const openMistakes=examCourse?mistakes.filter(m=>m.course_id===examCourse.id&&m.status!=="mastered").length:0;
 
   return <div className="space-y-3 sm:space-y-5">
     {mode.active&&examCourse&&<Panel title={mode.finalStretch?"Koemoodi · loppusuora":"Koemoodi · 14 päivää"}>
@@ -104,7 +107,7 @@ export function TodayView({courses,topics,sessions,exams,plan,tests,mistakes,onS
       </div>
     </Panel>}
 
-    <Panel title="Seuraava tehtävä">{next?<><p className="text-sm font-medium text-primary">{courses.find(c=>c.id===next.course_id)?.code} · {minutes(next.target_minutes)}</p><h3 className="mt-2 text-2xl font-semibold">{next.title||topics.find(t=>t.id===next.topic_id)?.name||"Opiskelu"}</h3><button className={button+" mt-5"} onClick={()=>onStart(next.id)}>Aloita opiskelu</button></>:<><p className="text-muted-foreground">Tälle päivälle ei ole vielä suunniteltuja tehtäviä.</p><button className={secondary+" mt-4"} onClick={()=>onGo("plan")}>Avaa suunnitelma</button></>}</Panel>
+    <Panel title="Seuraava tehtävä">{next?<><p className="text-sm font-medium text-primary">{courses.find(c=>c.id===next.course_id)?.code} · {minutes(next.target_minutes)}</p><h3 className="mt-2 text-2xl font-semibold">{next.title||topics.find(t=>t.id===next.topic_id)?.name||"Opiskelu"}</h3><p className="mt-2 text-sm text-muted-foreground">Valinta painottaa koetta, kertausvelkaa, avoimia virheitä, osaamisen tasoa ja koulun etenemistä.</p><button className={button+" mt-5"} onClick={()=>onStart(next.id)}>Aloita opiskelu</button></>:<><p className="font-medium">Ei itsenäistä opiskelua tänään.</p><p className="mt-2 text-sm text-muted-foreground">Suunnitelma ei vaadi tälle päivälle omaa sessiota. Lepo ei muutu velaksi.</p><button className={secondary+" mt-4"} onClick={()=>onGo("plan")}>Avaa suunnitelma</button></>}</Panel>
 
     {due.count>0&&<Panel title="Kertausvelka" action={<span className="text-sm font-semibold text-primary">{due.count} aihetta</span>}>
       <div className="space-y-2">{due.due.slice(0,5).map(t=><div key={t.id} className="flex items-center justify-between gap-3 rounded-xl bg-muted/60 p-3"><span><b>{courses.find(c=>c.id===t.course_id)?.code}</b> · {t.name}</span><span className="text-xs text-muted-foreground">{t.next_review?fullDate(t.next_review):""}</span></div>)}</div>
@@ -121,7 +124,7 @@ export function TodayView({courses,topics,sessions,exams,plan,tests,mistakes,onS
   </div>;
 }
 
-export function PlanView({courses,topics,plan,onStart}:Base&{plan:PlanItem[];onStart:(id:string)=>void}) {
+export function PlanView({courses,topics,plan,tests,mistakes,studyWeekdays,onStart}:Base&{plan:PlanItem[];tests:PracticeTest[];mistakes:Mistake[];studyWeekdays:number[];onStart:(id:string)=>void}) {
   const [mode,setMode]=useState<"päivä"|"viikko"|"kuukausi">("viikko"),[anchor,setAnchor]=useState(today()),[creating,setCreating]=useState(false),[adding,setAdding]=useState(false),[choice,setChoice]=useState(courses[0]?.id??"");
   const move=useMovePlanItem(),status=usePlanStatus(),generate=useGeneratePlan();
   const first=mode==="viikko"?startOfWeek(anchor):mode==="kuukausi"?anchor.slice(0,7)+"-01":anchor;
@@ -134,7 +137,15 @@ export function PlanView({courses,topics,plan,onStart}:Base&{plan:PlanItem[];onS
   async function make(){
     const c=courses.find(x=>x.id===choice);
     if(!c?.exam_date){toast.error("Kurssilla ei ole koepäivää.");return;}
-    const drafts=generatePlan({course:c,topics:topics.filter(t=>t.course_id===c.id),examDate:c.exam_date,studyWeekdays:[1,2,3,4,5],weeklyMinutes:c.weekly_minutes});
+    const drafts=generatePlan({
+      course:c,
+      topics:topics.filter(t=>t.course_id===c.id),
+      examDate:c.exam_date,
+      studyWeekdays,
+      weeklyMinutes:c.weekly_minutes,
+      mistakes:mistakes.filter(m=>m.course_id===c.id),
+      tests:tests.filter(t=>t.course_id===c.id),
+    });
     if(!drafts.length){toast.error("Koe on jo mennyt.");return;}
     try{await generate.mutateAsync({courseId:c.id,drafts});setCreating(false);toast.success("Adaptiivinen suunnitelma luotu.");}catch{toast.error("Suunnitelmaa ei voitu tallentaa.");}
   }
@@ -144,7 +155,7 @@ export function PlanView({courses,topics,plan,onStart}:Base&{plan:PlanItem[];onS
     <div className="flex flex-wrap gap-2"><button className={secondary} onClick={()=>setCreating(v=>!v)}><Plus size={17}/>Luo suunnitelma</button><button className={secondary} onClick={()=>setAdding(true)}>Lisää tehtävä</button></div>
     {adding&&<TaskForm courses={courses} topics={topics} date={anchor} onClose={()=>setAdding(false)}/>}
     {creating&&<Panel title="Adaptiivinen suunnitelma koetta varten">
-      <p className="mb-3 text-sm text-muted-foreground">Suunnitelma huomioi aiheen tärkeyden, varmistetun osaamisen, erääntyneet kertaukset ja 14 päivän koemoodin. Valmiit tehtävät säilyvät.</p>
+      <p className="mb-3 text-sm text-muted-foreground">Suunnitelma huomioi tärkeyden, esitiedot, varmistetun osaamisen, kertausvelan, virhepankin, koulun etenemisen, 14 päivän koemoodin ja muiden kurssien saman päivän kuorman. Extra on vapaaehtoista eikä muutu velaksi.</p>
       <select aria-label="Kurssi" value={choice} onChange={e=>setChoice(e.target.value)} className="w-full rounded-xl border bg-surface p-3">{courses.map(c=><option key={c.id} value={c.id}>{c.code} · {c.name}</option>)}</select>
       {selectedMode.active&&<p className="mt-3 rounded-xl bg-accent p-3 text-sm">Koemoodi on aktiivinen: {selectedMode.days} päivää kokeeseen. Uusi sisältö väistyy koetason harjoittelun, virheiden ja kertauksen tieltä.</p>}
       <button disabled={generate.isPending} className={button+" mt-3"} onClick={make}>Luo ehdotus</button>
