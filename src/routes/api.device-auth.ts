@@ -55,8 +55,8 @@ export const Route = createFileRoute("/api/device-auth")({
             const { data: users } = await admin.auth.admin.listUsers({ page: 1, perPage: 1000 });
             const arthur = users.users.find(
               (candidate) =>
-                candidate.user_metadata?.display_name === "Arthur" ||
-                candidate.user_metadata?.app === "opintopaivakirja" ||
+                candidate.user_metadata?.["display_name"] === "Arthur" ||
+                candidate.user_metadata?.["app"] === "opintopaivakirja" ||
                 candidate.email?.toLowerCase() === "arthur@opintopaivakirja.invalid",
             );
             ownerId = arthur?.id ?? null;
