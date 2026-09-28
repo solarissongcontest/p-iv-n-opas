@@ -91,6 +91,7 @@ export function CourseForm({onClose}:{onClose:()=>void}) {
  const create=useCreateCourse();
  function applyTemplate(id:string){
    const t=COURSE_TEMPLATES.find(x=>x.id===id)??COURSE_TEMPLATES[0];
+   if(!t)return;
    setTemplateId(id);setCode(t.code);setName(t.name);setSubject(t.subject);setWeekly(t.weekly_minutes);setTargetSystem(t.target_system);setTargetValue(t.target_value);setColor(t.color);setStudyMode(t.study_mode);setRaw(topicsToImportText(t.topics));
  }
  return <Dialog title="Lisää kurssi" onClose={onClose}><form className="space-y-4" onSubmit={async e=>{e.preventDefault();try{const parsed=parseTopicImport(raw);await create.mutateAsync({code:code.trim(),name:name.trim(),subject:subject.trim(),start_date:start||null,exam_date:exam||null,weekly_minutes:weekly,target_system:targetSystem,target_value:targetValue||null,color,study_mode:studyMode,topics:parsed});toast.success("Kurssi lisätty.");onClose();}catch{toast.error("Kurssia ei voitu tallentaa.");}}}>
