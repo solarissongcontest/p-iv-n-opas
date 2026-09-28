@@ -32,10 +32,12 @@ import {
 } from "@/lib/domain";
 import {
   useArchiveCourse,
+  useCourses,
   useGeneratePlan,
   useMovePlanItem,
   usePlanStatus,
   useProgressEvents,
+  useResolveMistake,
   useSettings,
   useUpdateSettings,
   useUpdateTopic,
@@ -143,7 +145,7 @@ export function PlanView({courses,topics,plan,onStart}:Base&{plan:PlanItem[];onS
 
 export function CourseView({courses,topics,sessions,exams,plan,tests,mistakes,selected,onSelect,onAdd,onStart}:Base&{sessions:Session[];exams:Exam[];plan:PlanItem[];tests:PracticeTest[];mistakes:Mistake[];selected:string|null;onSelect:(id:string|null)=>void;onAdd:()=>void;onStart:()=>void}) {
   const [tab,setTab]=useState("Yleiskuva"),[form,setForm]=useState<"mistake"|"test"|"course"|"newTopic"|null>(null),[editingTopic,setEditingTopic]=useState<Topic|null>(null);
-  const resolve=useArchiveCourse(),updateTopic=useUpdateTopic();
+  const archiveCourse=useArchiveCourse(),updateTopic=useUpdateTopic(),resolveMistake=useResolveMistake();
   const c=courses.find(x=>x.id===selected);
   if(!c)return <div className="space-y-4"><button className={button} onClick={onAdd}>+ Lisää kurssi</button>{courses.map(course=>{const ts=topics.filter(t=>t.course_id===course.id),ss=sessions.filter(s=>s.course_id===course.id);return <button key={course.id} onClick={()=>{onSelect(course.id);setTab("Yleiskuva");}} className="panel block w-full p-5 text-left hover:ring-1 hover:ring-primary"><div className="flex justify-between gap-3"><div><b className="text-primary">{course.code}</b><h2 className="mt-1 text-xl font-semibold">{course.name}</h2><p className="mt-1 text-sm text-muted-foreground">{minutes(ss.reduce((a,s)=>a+s.minutes,0))} opiskeltu · {ts.length} aihetta</p></div><b>{weightedCoverage(ts)} %</b></div><div className="mt-4"><Bar value={weightedCoverage(ts)}/></div></button>})}</div>;
 
@@ -155,7 +157,7 @@ export function CourseView({courses,topics,sessions,exams,plan,tests,mistakes,se
   const advice=corridorAdvice(weightedCoverage(ts),currentPoint);
 
   return <div className="space-y-5">
-    <div className="flex flex-wrap items-center justify-between gap-2"><button className={secondary} onClick={()=>onSelect(null)}><ChevronLeft size={17}/>Kaikki kurssit</button><div className="flex gap-2"><button className={secondary} onClick={()=>setForm("course")}><Pencil size={16}/>Muokkaa</button><button className={secondary} onClick={async()=>{if(!window.confirm("Arkistoidaanko tämä kurssi?"))return;try{await resolve.mutateAsync({id:c.id,archived:true});toast.success("Kurssi arkistoitu.");onSelect(null);}catch{toast.error("Arkistointi epäonnistui.");}}}><Archive size={16}/>Arkistoi</button></div></div>
+    <div className="flex flex-wrap items-center justify-between gap-2"><button className={secondary} onClick={()=>onSelect(null)}><ChevronLeft size={17}/>Kaikki kurssit</button><div className="flex gap-2"><button className={secondary} onClick={()=>setForm("course")}><Pencil size={16}/>Muokkaa</button><button className={secondary} onClick={async()=>{if(!window.confirm("Arkistoidaanko tämä kurssi?"))return;try{await archiveCourse.mutateAsync({id:c.id,archived:true});toast.success("Kurssi arkistoitu.");onSelect(null);}catch{toast.error("Arkistointi epäonnistui.");}}}><Archive size={16}/>Arkistoi</button></div></div>
     <p className="text-muted-foreground">{c.name}</p>
     <div role="tablist" aria-label="Kurssin osiot" className="flex gap-1 overflow-x-auto rounded-xl bg-muted p-1">{["Yleiskuva","Sisältö","Historia","Analyysi"].map(name=><button key={name} role="tab" aria-selected={tab===name} onClick={()=>setTab(name)} className={`min-h-11 min-w-max flex-1 rounded-lg px-3 text-sm ${tab===name?"bg-surface font-medium shadow-sm":""}`}>{name}</button>)}</div>
 
@@ -181,7 +183,7 @@ export function CourseView({courses,topics,sessions,exams,plan,tests,mistakes,se
         <Panel title="Valmistautuminen"><p className="text-2xl font-semibold">{readiness({topics:ts,tests:tt,mistakes:mm})} %</p><p className="mt-2 text-sm text-muted-foreground">Yhdistää osaamisen, sisällön, harjoituskokeet, kertauksen ja korjatut virheet. Ei arvosanaennuste.</p></Panel>
         <Panel title="Riskit">{riskItems.map(r=><div key={r.key} className="mb-4"><div className="mb-2 flex justify-between gap-3 text-sm"><b>{r.label}</b><span>{r.level} %</span></div><Bar value={r.level}/><p className="mt-1 text-xs text-muted-foreground">{r.note}</p></div>)}</Panel>
         <Panel title="Vaikeimmat aiheet">{[...ts].sort((a,b)=>a.verified_level-b.verified_level||b.importance-a.importance).slice(0,5).map(t=><p key={t.id} className="py-1">{t.name} · {t.verified_level}/5</p>)}</Panel>
-        <Panel title="Virhepankki"><button className={secondary+" mb-3"} onClick={()=>setForm("mistake")}>+ Kirjaa virhe</button>{mm.filter(m=>m.status==="open").length?mm.filter(m=>m.status==="open").map(m=><div className="border-t border-border py-2" key={m.id}><p className="font-medium">{m.error}</p>{m.explanation&&<p className="text-sm text-muted-foreground">{m.explanation}</p>}<button className="mt-2 text-sm text-primary underline" onClick={()=>void supabase.from("mistakes").update({status:"corrected"}).eq("id",m.id).then(({error})=>{if(error)toast.error("Merkintää ei voitu päivittää.");else toast.success("Virhe korjattu.");})}>Merkitse korjatuksi</button></div>):<p className="text-sm text-muted-foreground">Ei avoimia virheitä.</p>}</Panel>
+        <Panel title="Virhepankki"><button className={secondary+" mb-3"} onClick={()=>setForm("mistake")}>+ Kirjaa virhe</button>{mm.filter(m=>m.status==="open").length?mm.filter(m=>m.status==="open").map(m=><div className="border-t border-border py-2" key={m.id}><p className="font-medium">{m.error}</p>{m.explanation&&<p className="text-sm text-muted-foreground">{m.explanation}</p>}<button className="mt-2 text-sm text-primary underline" onClick={()=>void resolveMistake.mutateAsync(m.id).then(()=>toast.success("Virhe korjattu.")).catch(()=>toast.error("Merkintää ei voitu päivittää."))}>Merkitse korjatuksi</button></div>):<p className="text-sm text-muted-foreground">Ei avoimia virheitä.</p>}</Panel>
         <Panel title="Harjoituskokeet"><button className={secondary+" mb-3"} onClick={()=>setForm("test")}>+ Kirjaa harjoituskoe</button>{tt.map(t=><p key={t.id} className="border-t border-border py-2">{fullDate(t.date)} · {t.score} / {t.max_score} p</p>)}</Panel>
       </div>
       {points.length>0&&<Panel title="Etenemiskäytävä ja ennuste">
@@ -229,6 +231,8 @@ export function SettingsView({user}:{user:User}) {
   const [dark,setDark]=useState(typeof document!=="undefined"&&document.documentElement.classList.contains("dark"));
   const [permission,setPermission]=useState<NotificationPermission>(typeof Notification!=="undefined"?Notification.permission:"default");
   const settings=useSettings(),s=settings.data,update=useUpdateSettings(),qc=useQueryClient();
+  const allCourses=useCourses(),archiveCourse=useArchiveCourse();
+  const archived=(allCourses.data??[]).filter(c=>c.archived);
   useEffect(()=>{if(s!==null)return;void supabase.from("notification_settings").insert({owner_id:user.id}).then(({error})=>{if(!error)void qc.invalidateQueries({queryKey:["settings"]});});},[s,user.id,qc]);
 
   async function enableNotifications(){
@@ -245,6 +249,7 @@ export function SettingsView({user}:{user:User}) {
       <p className="mb-3 text-sm text-muted-foreground">Kun lupa on annettu, Opintopäiväkirja muistuttaa avatessa tämän päivän tehtävistä ja lähestyvistä kokeista.</p>
       {s?([["study_sessions","Opiskelusessiot"],["exams","Kokeet"],["plan_changes","Suunnitelman muutokset"],["weekly_summary","Viikkoyhteenveto"]] as const).map(([key,label])=><label key={key} className="flex min-h-11 items-center justify-between border-b border-border"><span>{label}</span><input type="checkbox" className="size-5 accent-primary" checked={s[key]} onChange={e=>void update.mutateAsync({id:s.id,[key]:e.target.checked}).catch(()=>toast.error("Tallennus epäonnistui."))}/></label>):<p>Asetukset eivät ole vielä saatavilla.</p>}
     </Panel>
+    {archived.length>0&&<Panel title="Arkistoidut kurssit">{archived.map(c=><div key={c.id} className="flex min-h-12 items-center justify-between gap-3 border-b border-border"><span><b>{c.code}</b> · {c.name}</span><button className={secondary+" !min-h-9"} onClick={()=>void archiveCourse.mutateAsync({id:c.id,archived:false}).then(()=>toast.success("Kurssi palautettu.")).catch(()=>toast.error("Palautus epäonnistui."))}>Palauta</button></div>)}</Panel>}
     <Panel title="Laite"><p className="mb-3 text-sm text-muted-foreground">Normaalisti kirjautumista ei enää kysytä tällä selaimella. Tämän painikkeen käyttö poistaa muistamisen ja paikallisen session.</p><button className={secondary} onClick={async()=>{if(!window.confirm("Unohdetaanko tämä laite?"))return;localStorage.removeItem("opk.device-authorized");localStorage.removeItem("opk.owner-id");await supabase.auth.signOut();location.reload();}}><RotateCcw size={16}/>Unohda tämä laite</button></Panel>
   </div>;
 }
