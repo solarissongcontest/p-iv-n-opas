@@ -1,0 +1,35 @@
+name: iPhone E2E
+
+on:
+  workflow_dispatch:
+    inputs:
+      base_url:
+        description: "Deployed Opintopäiväkirja URL to test"
+        required: true
+        type: string
+
+jobs:
+  iphone-webkit-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install app dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Install Playwright
+        run: |
+          npm install --no-save @playwright/test
+          npx playwright install --with-deps webkit
+
+      - name: Run iPhone WebKit smoke test
+        env:
+          E2E_BASE_URL: ${{ inputs.base_url }}
+        run: npx playwright test e2e/iphone-smoke.spec.ts --project=iphone-webkit
