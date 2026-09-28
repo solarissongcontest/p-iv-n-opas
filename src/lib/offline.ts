@@ -9,10 +9,11 @@ export type QueuedOp = { id: string; op: string; payload: unknown; at: number };
 let owner = "signed-out";
 const key = () => `opk.pending.v2.${owner}`;
 export function setOfflineOwner(id: string) { owner = id; }
-const handlers = new Map<string, (payload: unknown) => Promise<unknown>>();
+export type OperationHandler = (payload: unknown, operationId: string) => Promise<unknown>;
+const handlers = new Map<string, OperationHandler>();
 const listeners = new Set<(count: number) => void>();
 
-export function registerOp(op: string, fn: (payload: unknown) => Promise<unknown>) {
+export function registerOp(op: string, fn: OperationHandler) {
   handlers.set(op, fn);
 }
 
@@ -41,9 +42,9 @@ export function subscribePending(fn: (count: number) => void) {
   return () => listeners.delete(fn);
 }
 
-export function enqueue(op: string, payload: unknown) {
+export function enqueue(op: string, payload: unknown, id = crypto.randomUUID()) {
   const items = read();
-  items.push({ id: crypto.randomUUID(), op, payload, at: Date.now() });
+  items.push({ id, op, payload, at: Date.now() });
   write(items);
 }
 
@@ -51,16 +52,17 @@ export function enqueue(op: string, payload: unknown) {
 export async function runOrQueue<T>(op: string, payload: unknown): Promise<T | "queued"> {
   const fn = handlers.get(op);
   if (!fn) throw new Error(`Tuntematon toiminto: ${op}`);
+  const operationId = crypto.randomUUID();
   try {
-    return (await fn(payload)) as T;
+    return (await fn(payload, operationId)) as T;
   } catch (err) {
     if (typeof navigator !== "undefined" && navigator.onLine === false) {
-      enqueue(op, payload);
+      enqueue(op, payload, operationId);
       return "queued";
     }
     const msg = err instanceof Error ? err.message : "";
     if (/fetch|network|Failed to fetch|NetworkError/i.test(msg)) {
-      enqueue(op, payload);
+      enqueue(op, payload, operationId);
       return "queued";
     }
     throw err;
@@ -79,7 +81,7 @@ export async function flushQueue(): Promise<number> {
       const fn = handlers.get(item.op);
       if (!fn) continue;
       try {
-        await fn(item.payload);
+        await fn(item.payload, item.id);
         items = read().filter((i) => i.id !== item.id);
         write(items);
         done += 1;
