@@ -252,8 +252,12 @@ function StudyApp({ user }: { user: User }) {
   const selected = courses.find(c => c.id === courseId);
   const ke04 = courses.find(c => c.code === "KE04");
   const preferences = preferencesQ.data;
+  const hasUserData =
+    sessions.length > 0 ||
+    plan.some(p => p.status === "completed" || p.status === "in_progress") ||
+    courses.some(c => c.code !== "KE04");
 
-  if (!busy && !error && preferences && !preferences.onboarding_completed && ke04) {
+  if (!busy && !error && preferences && !preferences.onboarding_completed && !hasUserData && ke04) {
     return <>
       <Onboarding
         course={ke04}
@@ -273,13 +277,13 @@ function StudyApp({ user }: { user: User }) {
   }
 
   return <div className="min-h-screen">
-    <LiquidGlass lensing as="aside" className="fixed inset-y-4 left-4 z-20 hidden w-60 flex-col rounded-3xl p-4 md:flex">
-      <div className="mb-8 flex items-center gap-3 px-2 pt-2 font-semibold"><span className="grid size-10 place-items-center rounded-xl bg-primary text-primary-foreground"><BookOpen size={20}/></span>Opintopäiväkirja</div>
-      <nav aria-label="Päänavigaatio" className="space-y-1">{nav.map(({id,label,Icon}) => <button key={id} aria-current={page===id?"page":undefined} onClick={() => go(id)} className={`flex min-h-11 w-full items-center gap-3 rounded-xl px-3 text-left text-sm ${page===id?"bg-accent font-semibold":"hover:bg-muted"}`}><Icon size={19}/>{label}</button>)}</nav>
-      <button className="mt-6 min-h-11 rounded-xl bg-primary px-3 text-primary-foreground" onClick={() => setEntry("manual")}>+ Kirjaa opiskelu</button>
-      <div className="mt-auto space-y-1"><button className="flex min-h-11 w-full items-center gap-3 rounded-xl px-3 hover:bg-muted" onClick={() => setSearch(true)}><Search size={19}/>Haku <kbd className="ml-auto text-xs">⌘ K</kbd></button><button className="flex min-h-11 w-full items-center gap-3 rounded-xl px-3 hover:bg-muted" onClick={() => go("settings")}><Settings2 size={19}/>Asetukset</button></div>
+    <LiquidGlass lensing as="aside" className="desktop-sidebar fixed inset-y-4 left-4 z-20 hidden w-60 flex-col rounded-3xl p-4 md:flex">
+      <div className="mb-8 flex items-center gap-3 px-2 pt-2 font-semibold"><span className="grid size-10 shrink-0 place-items-center rounded-xl bg-primary text-primary-foreground"><BookOpen size={20}/></span><span className="sidebar-label">Opintopäiväkirja</span></div>
+      <nav aria-label="Päänavigaatio" className="space-y-1">{nav.map(({id,label,Icon}) => <button key={id} aria-label={label} aria-current={page===id?"page":undefined} onClick={() => go(id)} className={`flex min-h-11 w-full items-center gap-3 rounded-xl px-3 text-left text-sm ${page===id?"bg-accent font-semibold":"hover:bg-muted"}`}><Icon className="shrink-0" size={19}/><span className="sidebar-label">{label}</span></button>)}</nav>
+      <button aria-label="Kirjaa opiskelu" className="mt-6 flex min-h-11 items-center justify-center gap-2 rounded-xl bg-primary px-3 text-primary-foreground" onClick={() => setEntry("manual")}><Plus size={18}/><span className="sidebar-label">Kirjaa opiskelu</span></button>
+      <div className="mt-auto space-y-1"><button aria-label="Haku" className="flex min-h-11 w-full items-center gap-3 rounded-xl px-3 hover:bg-muted" onClick={() => setSearch(true)}><Search className="shrink-0" size={19}/><span className="sidebar-label">Haku</span><kbd className="sidebar-label ml-auto text-xs">⌘ K</kbd></button><button aria-label="Asetukset" className="flex min-h-11 w-full items-center gap-3 rounded-xl px-3 hover:bg-muted" onClick={() => go("settings")}><Settings2 className="shrink-0" size={19}/><span className="sidebar-label">Asetukset</span></button></div>
     </LiquidGlass>
-    <main className="app-main mx-auto max-w-[1240px] px-4 md:pl-[292px] md:pr-8 md:pb-12">
+    <main className="app-main mx-auto max-w-[1240px] px-4 md:pl-[112px] md:pr-6 md:pb-12 min-[1101px]:pl-[292px] min-[1101px]:pr-8">
       <header className="mb-8 hidden items-center justify-between pt-7 md:flex"><div><p className="text-sm text-muted-foreground">{longDate(today())}</p><h1 className="mt-1 text-3xl font-semibold">{selected?.code ?? (page==="today"?greeting():nav.find(n=>n.id===page)?.label ?? "Asetukset")}</h1></div></header>
       <header className="app-mobile-header md:hidden">
         <div className="min-w-0">
@@ -293,10 +297,10 @@ function StudyApp({ user }: { user: User }) {
       {busy ? <div className="space-y-4" aria-label="Ladataan"><div className="h-32 animate-pulse rounded-2xl bg-muted"/><div className="h-60 animate-pulse rounded-2xl bg-muted"/></div> :
       courses.length===0 ? <section className="panel p-6"><h2 className="text-xl font-semibold">Aloita ensimmäisestä kurssista</h2><p className="mt-2 text-muted-foreground">Lisää kurssi ja sen aiheet, jotta voit suunnitella ja kirjata opiskelua.</p><button onClick={()=>setAdding(true)} className="mt-5 min-h-11 rounded-xl bg-primary px-4 text-primary-foreground">Lisää kurssi</button></section> :
       page==="today" ? <TodayView courses={courses} topics={topics} sessions={sessions} exams={exams} plan={plan} tests={testsQ.data??[]} mistakes={mistakesQ.data??[]} onStart={setEntry} onGo={go}/> :
-      page==="plan" ? <PlanView courses={courses} topics={topics} plan={plan} onStart={setEntry}/> :
+      page==="plan" ? <PlanView courses={courses} topics={topics} plan={plan} tests={testsQ.data??[]} mistakes={mistakesQ.data??[]} studyWeekdays={preferences?.study_weekdays??[1,2,3,4,5]} onStart={setEntry}/> :
       page==="courses" ? <CourseView courses={courses} topics={topics} sessions={sessions} exams={exams} plan={plan} tests={testsQ.data??[]} mistakes={mistakesQ.data??[]} selected={courseId} onSelect={setCourseId} onAdd={()=>setAdding(true)} onStart={()=>setEntry("manual")}/> :
-      page==="exams" ? <ExamsView courses={courses} topics={topics} exams={exams} tests={testsQ.data??[]} mistakes={mistakesQ.data??[]} onCourse={id=>{setCourseId(id);setPage("courses");localStorage.setItem("opk.last-page","courses");}}/> :
-      page==="progress" ? <ProgressView courses={courses} topics={topics} sessions={sessions} plan={plan} onPlan={()=>go("plan")}/> :
+      page==="exams" ? <ExamsView courses={courses} topics={topics} exams={exams} tests={testsQ.data??[]} mistakes={mistakesQ.data??[]} sessions={sessions} plan={plan} onCourse={id=>{setCourseId(id);setPage("courses");localStorage.setItem("opk.last-page","courses");}}/> :
+      page==="progress" ? <ProgressView courses={courses} topics={topics} sessions={sessions} plan={plan} exams={exams} onPlan={()=>go("plan")}/> :
       <SettingsView user={user}/>}
     </main>
     <LiquidGlass lensing as="nav" aria-label="Mobiilinavigaatio" className="app-tabbar md:hidden">
@@ -320,7 +324,7 @@ function StudyApp({ user }: { user: User }) {
     </div>}
     {entry && <SessionForm item={plan.find(p=>p.id===entry)??null} courses={courses} topics={topics} onClose={()=>setEntry(null)}/>}
     {adding && <CourseForm onClose={()=>setAdding(false)}/>}
-    {search && <SearchPanel courses={courses} topics={topics} exams={exams} onClose={()=>setSearch(false)} onNavigate={p=>{go(p as Page);setSearch(false);}} onCourse={id=>{setCourseId(id);setPage("courses");localStorage.setItem("opk.last-page","courses");setSearch(false);}} onLog={()=>{setSearch(false);setEntry("manual");}}/>}
+    {search && <SearchPanel courses={courses} topics={topics} exams={exams} sessions={sessions} onClose={()=>setSearch(false)} onNavigate={p=>{go(p as Page);setSearch(false);}} onCourse={id=>{setCourseId(id);setPage("courses");localStorage.setItem("opk.last-page","courses");setSearch(false);}} onLog={()=>{setSearch(false);setEntry("manual");}}/>}
     <Toaster richColors/>
   </div>;
 }
