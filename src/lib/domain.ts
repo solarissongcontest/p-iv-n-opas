@@ -10,6 +10,8 @@ export type Mistake = Database["public"]["Tables"]["mistakes"]["Row"];
 export type PracticeTest = Database["public"]["Tables"]["practice_tests"]["Row"];
 export type NotificationSettings =
   Database["public"]["Tables"]["notification_settings"]["Row"];
+export type WeeklyCheckin = Database["public"]["Tables"]["weekly_checkins"]["Row"];
+export type ProgressEvent = Database["public"]["Tables"]["progress_events"]["Row"];
 
 export type PlanStatus = "planned" | "in_progress" | "completed" | "skipped" | "overdue";
 export type PlanPhase = "content" | "application" | "practice" | "review" | "light" | "exam";
@@ -485,4 +487,32 @@ export function monthGrid(iso: string): string[] {
   const first = toISO(new Date(d.getFullYear(), d.getMonth(), 1));
   const gridStart = startOfWeek(first);
   return rangeDates(gridStart, 42);
+}
+
+
+/** ---------- buffers ---------- */
+export function studyBuffers(input: {
+  course: Course;
+  topics: Topic[];
+  dailyMinutes?: number;
+  now?: string;
+}) {
+  const now = input.now ?? today();
+  const dailyMinutes = Math.max(20, input.dailyMinutes ?? 45);
+  const start = input.course.start_date ?? now;
+  const exam = input.course.exam_date ?? addDays(now, 30);
+  const span = Math.max(1, diffDays(exam, start));
+  const elapsed = Math.max(0, Math.min(span, diffDays(now, start)));
+  const expected = Math.min(100, Math.max(0, (elapsed / span) * 100));
+  const actual = weightedCoverage(input.topics);
+  const pointPerDay = 100 / span;
+  const sessionsPerWeek = Math.max(1, input.course.weekly_minutes / dailyMinutes);
+  const totalSessions = Math.max(1, (span / 7) * sessionsPerWeek);
+  const pointPerSession = 100 / totalSessions;
+  const gap = actual - expected;
+  return {
+    timeDays: gap / Math.max(0.1, pointPerDay),
+    workSessions: gap / Math.max(0.1, pointPerSession),
+    recoveryDays: gap < 0 ? Math.ceil(Math.abs(gap) / Math.max(0.1, pointPerDay)) : 0,
+  };
 }
