@@ -9,7 +9,7 @@ import {
   useUpdatePreferences,
   type UserPreferences,
 } from "@/lib/data";
-import { enableBackgroundPush, pushSupported } from "@/lib/push";
+import { disableBackgroundPush, enableBackgroundPush, pushSupported } from "@/lib/push";
 import { fullDate, minutes } from "@/lib/fi";
 
 const primary =
@@ -80,6 +80,9 @@ export function Onboarding({
   async function finish() {
     setFinishing(true);
     try {
+      if (!notifications) {
+        await disableBackgroundPush().catch(() => undefined);
+      }
       if (course.target_value !== target || course.target_system !== "school") {
         await updateCourse.mutateAsync({
           id: course.id,
@@ -311,7 +314,14 @@ export function Onboarding({
                   )}
                 </div>
               )}
-              <button type="button" className="text-sm text-muted-foreground underline" onClick={() => setNotifications(false)}>
+              <button
+                type="button"
+                className="text-sm text-muted-foreground underline"
+                onClick={() => {
+                  setNotifications(false);
+                  void disableBackgroundPush().catch(() => undefined);
+                }}
+              >
                 Jatka ilman muistutuksia
               </button>
             </div>
