@@ -14,7 +14,550 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      courses: {
+        Row: {
+          archived: boolean
+          code: string
+          color: string
+          created_at: string
+          exam_date: string | null
+          id: string
+          name: string
+          owner_id: string | null
+          start_date: string | null
+          study_mode: string
+          subject: string | null
+          target_system: string
+          target_value: string | null
+          updated_at: string
+          weekly_minutes: number
+        }
+        Insert: {
+          archived?: boolean
+          code: string
+          color?: string
+          created_at?: string
+          exam_date?: string | null
+          id?: string
+          name: string
+          owner_id?: string | null
+          start_date?: string | null
+          study_mode?: string
+          subject?: string | null
+          target_system?: string
+          target_value?: string | null
+          updated_at?: string
+          weekly_minutes?: number
+        }
+        Update: {
+          archived?: boolean
+          code?: string
+          color?: string
+          created_at?: string
+          exam_date?: string | null
+          id?: string
+          name?: string
+          owner_id?: string | null
+          start_date?: string | null
+          study_mode?: string
+          subject?: string | null
+          target_system?: string
+          target_value?: string | null
+          updated_at?: string
+          weekly_minutes?: number
+        }
+        Relationships: []
+      }
+      exams: {
+        Row: {
+          course_id: string
+          created_at: string
+          date: string
+          id: string
+          name: string
+          owner_id: string | null
+          target_system: string
+          target_value: string | null
+        }
+        Insert: {
+          course_id: string
+          created_at?: string
+          date: string
+          id?: string
+          name: string
+          owner_id?: string | null
+          target_system?: string
+          target_value?: string | null
+        }
+        Update: {
+          course_id?: string
+          created_at?: string
+          date?: string
+          id?: string
+          name?: string
+          owner_id?: string | null
+          target_system?: string
+          target_value?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exams_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mistakes: {
+        Row: {
+          course_id: string
+          created_at: string
+          error: string
+          explanation: string | null
+          id: string
+          owner_id: string | null
+          retry_date: string | null
+          status: string
+          topic_id: string | null
+          type: string | null
+          updated_at: string
+        }
+        Insert: {
+          course_id: string
+          created_at?: string
+          error: string
+          explanation?: string | null
+          id?: string
+          owner_id?: string | null
+          retry_date?: string | null
+          status?: string
+          topic_id?: string | null
+          type?: string | null
+          updated_at?: string
+        }
+        Update: {
+          course_id?: string
+          created_at?: string
+          error?: string
+          explanation?: string | null
+          id?: string
+          owner_id?: string | null
+          retry_date?: string | null
+          status?: string
+          topic_id?: string | null
+          type?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mistakes_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mistakes_topic_id_fkey"
+            columns: ["topic_id"]
+            isOneToOne: false
+            referencedRelation: "topics"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notification_settings: {
+        Row: {
+          exams: boolean
+          id: string
+          owner_id: string | null
+          plan_changes: boolean
+          study_sessions: boolean
+          updated_at: string
+          weekly_summary: boolean
+        }
+        Insert: {
+          exams?: boolean
+          id?: string
+          owner_id?: string | null
+          plan_changes?: boolean
+          study_sessions?: boolean
+          updated_at?: string
+          weekly_summary?: boolean
+        }
+        Update: {
+          exams?: boolean
+          id?: string
+          owner_id?: string | null
+          plan_changes?: boolean
+          study_sessions?: boolean
+          updated_at?: string
+          weekly_summary?: boolean
+        }
+        Relationships: []
+      }
+      plan_items: {
+        Row: {
+          course_id: string
+          created_at: string
+          date: string
+          extra_minutes: number
+          id: string
+          kind: string
+          min_minutes: number
+          moved_from: string | null
+          owner_id: string | null
+          phase: string
+          session_id: string | null
+          start_time: string | null
+          status: string
+          target_minutes: number
+          title: string | null
+          topic_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          course_id: string
+          created_at?: string
+          date: string
+          extra_minutes?: number
+          id?: string
+          kind?: string
+          min_minutes?: number
+          moved_from?: string | null
+          owner_id?: string | null
+          phase?: string
+          session_id?: string | null
+          start_time?: string | null
+          status?: string
+          target_minutes?: number
+          title?: string | null
+          topic_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          course_id?: string
+          created_at?: string
+          date?: string
+          extra_minutes?: number
+          id?: string
+          kind?: string
+          min_minutes?: number
+          moved_from?: string | null
+          owner_id?: string | null
+          phase?: string
+          session_id?: string | null
+          start_time?: string | null
+          status?: string
+          target_minutes?: number
+          title?: string | null
+          topic_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "plan_items_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "plan_items_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "study_sessions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "plan_items_topic_id_fkey"
+            columns: ["topic_id"]
+            isOneToOne: false
+            referencedRelation: "topics"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      practice_tests: {
+        Row: {
+          course_id: string
+          created_at: string
+          date: string
+          duration_minutes: number | null
+          error_count: number | null
+          id: string
+          max_score: number | null
+          owner_id: string | null
+          score: number | null
+          topic_results: Json
+        }
+        Insert: {
+          course_id: string
+          created_at?: string
+          date?: string
+          duration_minutes?: number | null
+          error_count?: number | null
+          id?: string
+          max_score?: number | null
+          owner_id?: string | null
+          score?: number | null
+          topic_results?: Json
+        }
+        Update: {
+          course_id?: string
+          created_at?: string
+          date?: string
+          duration_minutes?: number | null
+          error_count?: number | null
+          id?: string
+          max_score?: number | null
+          owner_id?: string | null
+          score?: number | null
+          topic_results?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "practice_tests_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      progress_events: {
+        Row: {
+          course_id: string | null
+          created_at: string
+          detail: string | null
+          from_value: number | null
+          id: string
+          kind: string
+          owner_id: string | null
+          to_value: number | null
+          topic_id: string | null
+        }
+        Insert: {
+          course_id?: string | null
+          created_at?: string
+          detail?: string | null
+          from_value?: number | null
+          id?: string
+          kind: string
+          owner_id?: string | null
+          to_value?: number | null
+          topic_id?: string | null
+        }
+        Update: {
+          course_id?: string | null
+          created_at?: string
+          detail?: string | null
+          from_value?: number | null
+          id?: string
+          kind?: string
+          owner_id?: string | null
+          to_value?: number | null
+          topic_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "progress_events_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "progress_events_topic_id_fkey"
+            columns: ["topic_id"]
+            isOneToOne: false
+            referencedRelation: "topics"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      study_sessions: {
+        Row: {
+          competence: number | null
+          course_id: string
+          created_at: string
+          date: string
+          did: string | null
+          energy: number | null
+          focus: number | null
+          id: string
+          kind: string
+          method: string | null
+          minutes: number
+          note: string | null
+          owner_id: string | null
+          planned_minutes: number | null
+          tasks: string | null
+          topic_id: string | null
+          unclear: string | null
+        }
+        Insert: {
+          competence?: number | null
+          course_id: string
+          created_at?: string
+          date?: string
+          did?: string | null
+          energy?: number | null
+          focus?: number | null
+          id?: string
+          kind?: string
+          method?: string | null
+          minutes?: number
+          note?: string | null
+          owner_id?: string | null
+          planned_minutes?: number | null
+          tasks?: string | null
+          topic_id?: string | null
+          unclear?: string | null
+        }
+        Update: {
+          competence?: number | null
+          course_id?: string
+          created_at?: string
+          date?: string
+          did?: string | null
+          energy?: number | null
+          focus?: number | null
+          id?: string
+          kind?: string
+          method?: string | null
+          minutes?: number
+          note?: string | null
+          owner_id?: string | null
+          planned_minutes?: number | null
+          tasks?: string | null
+          topic_id?: string | null
+          unclear?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "study_sessions_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "study_sessions_topic_id_fkey"
+            columns: ["topic_id"]
+            isOneToOne: false
+            referencedRelation: "topics"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      topics: {
+        Row: {
+          basic_successes: number
+          course_id: string
+          created_at: string
+          delayed_successes: number
+          dependencies: string[]
+          exam_successes: number
+          id: string
+          importance: number
+          last_review: string | null
+          materials: string | null
+          name: string
+          next_review: string | null
+          position: number
+          progress: number
+          school_covered: boolean
+          self_level: number
+          study_minutes: number
+          updated_at: string
+          verified_level: number
+          weight: number
+        }
+        Insert: {
+          basic_successes?: number
+          course_id: string
+          created_at?: string
+          delayed_successes?: number
+          dependencies?: string[]
+          exam_successes?: number
+          id?: string
+          importance?: number
+          last_review?: string | null
+          materials?: string | null
+          name: string
+          next_review?: string | null
+          position?: number
+          progress?: number
+          school_covered?: boolean
+          self_level?: number
+          study_minutes?: number
+          updated_at?: string
+          verified_level?: number
+          weight?: number
+        }
+        Update: {
+          basic_successes?: number
+          course_id?: string
+          created_at?: string
+          delayed_successes?: number
+          dependencies?: string[]
+          exam_successes?: number
+          id?: string
+          importance?: number
+          last_review?: string | null
+          materials?: string | null
+          name?: string
+          next_review?: string | null
+          position?: number
+          progress?: number
+          school_covered?: boolean
+          self_level?: number
+          study_minutes?: number
+          updated_at?: string
+          verified_level?: number
+          weight?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "topics_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      weekly_checkins: {
+        Row: {
+          actual_minutes: number | null
+          created_at: string
+          id: string
+          note: string | null
+          owner_id: string | null
+          planned_minutes: number | null
+          week_start: string
+        }
+        Insert: {
+          actual_minutes?: number | null
+          created_at?: string
+          id?: string
+          note?: string | null
+          owner_id?: string | null
+          planned_minutes?: number | null
+          week_start: string
+        }
+        Update: {
+          actual_minutes?: number | null
+          created_at?: string
+          id?: string
+          note?: string | null
+          owner_id?: string | null
+          planned_minutes?: number | null
+          week_start?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
