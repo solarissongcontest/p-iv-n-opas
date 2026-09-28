@@ -237,10 +237,44 @@ export function CourseView({courses,topics,sessions,exams,plan,tests,mistakes,se
   </div>;
 }
 
-export function ExamsView({courses,topics,exams,tests,mistakes,onCourse}:Base&{exams:Exam[];tests:PracticeTest[];mistakes:Mistake[];onCourse:(id:string)=>void}) {
-  const [adding,setAdding]=useState(false);
+export function ExamsView({courses,topics,exams,tests,mistakes,sessions,plan,onCourse}:Base&{exams:Exam[];tests:PracticeTest[];mistakes:Mistake[];sessions:Session[];plan:PlanItem[];onCourse:(id:string)=>void}) {
+  const [adding,setAdding]=useState(false),[selectedExam,setSelectedExam]=useState<string|null>(null);
+  const selected=exams.find(e=>e.id===selectedExam);
+  if(selected){
+    const course=courses.find(c=>c.id===selected.course_id);
+    const ts=topics.filter(t=>t.course_id===selected.course_id);
+    const tt=tests.filter(t=>t.course_id===selected.course_id);
+    const mm=mistakes.filter(m=>m.course_id===selected.course_id);
+    const ss=sessions.filter(s=>s.course_id===selected.course_id);
+    const pp=plan.filter(p=>p.course_id===selected.course_id&&p.date>=today()&&p.date<=selected.date&&p.status==="planned");
+    const score=readiness({topics:ts,tests:tt,mistakes:mm});
+    const missing=ts.filter(t=>t.progress<100||t.verified_level<3).sort((a,b)=>a.verified_level-b.verified_level||b.importance-a.importance);
+    const reviews=ts.filter(t=>t.next_review&&t.next_review<=selected.date).sort((a,b)=>(a.next_review??"").localeCompare(b.next_review??""));
+    const studyMinutes=ss.reduce((sum,s)=>sum+s.minutes,0);
+    return <div className="space-y-5">
+      <button className={secondary} onClick={()=>setSelectedExam(null)}><ChevronLeft size={17}/>Kaikki kokeet</button>
+      <Panel title={selected.name}>
+        <p className="text-sm text-muted-foreground">{course?.code} · {fullDate(selected.date)} · {diffDays(selected.date,today())} päivää</p>
+        <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <div><p className="text-xs text-muted-foreground">Tavoite</p><p className="text-xl font-semibold">{selected.target_value||course?.target_value||"—"}</p></div>
+          <div><p className="text-xs text-muted-foreground">Sisältö</p><p className="text-xl font-semibold">{weightedCoverage(ts)} %</p></div>
+          <div><p className="text-xs text-muted-foreground">Osaaminen</p><p className="text-xl font-semibold">{weightedMastery(ts)} %</p></div>
+          <div><p className="text-xs text-muted-foreground">Opiskeltu</p><p className="text-xl font-semibold">{minutes(studyMinutes)}</p></div>
+        </div>
+        <p className="mt-5 text-3xl font-semibold">{score} % <span className="text-sm font-normal text-muted-foreground">koevalmius · ei arvosanaennuste</span></p>
+        <div className="mt-3"><Bar value={score}/></div>
+      </Panel>
+      <div className="grid gap-4 lg:grid-cols-2">
+        <Panel title="Puuttuvat / riskiaiheet">{missing.length?missing.slice(0,10).map(t=><div key={t.id} className="flex items-center justify-between border-b border-border py-2 text-sm"><span>{t.name}</span><span className="text-muted-foreground">{t.progress}% · {t.verified_level}/5</span></div>):<p className="text-muted-foreground">Kaikki aiheet ovat kattavasti käsiteltyjä.</p>}</Panel>
+        <Panel title="Kertausohjelma">{reviews.length?reviews.slice(0,10).map(t=><div key={t.id} className="flex items-center justify-between border-b border-border py-2 text-sm"><span>{t.name}</span><span className="text-muted-foreground">{t.next_review?fullDate(t.next_review):"—"}</span></div>):<p className="text-muted-foreground">Ei erääntyviä kertauksia ennen koetta.</p>}</Panel>
+        <Panel title="Harjoituskokeet">{tt.length?tt.map(t=><div key={t.id} className="border-b border-border py-2 text-sm"><p className="font-medium">{fullDate(t.date)} · {t.score}/{t.max_score} p</p><p className="text-xs text-muted-foreground">{t.duration_minutes?`${t.duration_minutes} min · `:""}{t.error_count!=null?`${t.error_count} virhettä`:""}</p></div>):<p className="text-muted-foreground">Harjoituskokeita ei ole vielä kirjattu.</p>}</Panel>
+        <Panel title="Suunniteltu ennen koetta">{pp.length?pp.slice(0,12).map(p=><div key={p.id} className="flex items-center justify-between border-b border-border py-2 text-sm"><span>{fullDate(p.date)} · {p.title}</span><span className="text-muted-foreground">{minutes(p.target_minutes)}</span></div>):<p className="text-muted-foreground">Ei avoimia tehtäviä ennen koetta.</p>}</Panel>
+      </div>
+      <button className={secondary} onClick={()=>onCourse(selected.course_id)}>Avaa kurssi</button>
+    </div>;
+  }
   return <div className="space-y-4"><button className={button} onClick={()=>setAdding(true)}>+ Lisää koe</button>{adding&&<ExamForm courses={courses} onClose={()=>setAdding(false)}/>}
-  {exams.length===0?<Panel title="Ei kokeita vielä"><p className="text-muted-foreground">Lisää ensimmäinen koe painamalla Lisää koe.</p></Panel>:exams.map(e=>{const ts=topics.filter(t=>t.course_id===e.course_id),score=readiness({topics:ts,tests:tests.filter(t=>t.course_id===e.course_id),mistakes:mistakes.filter(m=>m.course_id===e.course_id)}),mode=examMode(e.date);return <Panel key={e.id} title={e.name}><p className="text-sm text-muted-foreground">{courses.find(c=>c.id===e.course_id)?.code} · {fullDate(e.date)} · {diffDays(e.date,today())} päivää</p>{mode.active&&<p className="mt-2 inline-flex rounded-full bg-accent px-3 py-1 text-xs font-semibold">Koemoodi aktiivinen</p>}<p className="my-3 text-2xl font-semibold">{score} % <span className="text-sm font-normal text-muted-foreground">valmistautuminen</span></p><Bar value={score}/><p className="mt-3 text-sm text-muted-foreground">Sisältö {weightedCoverage(ts)} % · Osaaminen {weightedMastery(ts)} % · Koulussa {schoolCoverage(ts)} %</p><button className={secondary+" mt-4"} onClick={()=>onCourse(e.course_id)}>Avaa kurssi</button></Panel>})}</div>;
+  {exams.length===0?<Panel title="Ei kokeita vielä"><p className="text-muted-foreground">Lisää ensimmäinen koe painamalla Lisää koe.</p></Panel>:exams.map(e=>{const ts=topics.filter(t=>t.course_id===e.course_id),score=readiness({topics:ts,tests:tests.filter(t=>t.course_id===e.course_id),mistakes:mistakes.filter(m=>m.course_id===e.course_id)}),mode=examMode(e.date);return <button key={e.id} onClick={()=>setSelectedExam(e.id)} className="panel block w-full p-4 text-left sm:p-5"><div className="flex items-start justify-between gap-3"><div><p className="text-sm font-medium text-primary">{courses.find(c=>c.id===e.course_id)?.code}</p><h2 className="mt-1 text-lg font-semibold">{e.name}</h2><p className="mt-1 text-sm text-muted-foreground">{fullDate(e.date)} · {diffDays(e.date,today())} päivää</p></div><span className="text-xl font-semibold">{score}%</span></div>{mode.active&&<p className="mt-2 inline-flex rounded-full bg-accent px-3 py-1 text-xs font-semibold">Koemoodi aktiivinen</p>}<div className="mt-3"><Bar value={score}/></div><p className="mt-2 text-xs text-muted-foreground">Ei arvosanaennuste · avaa kokeen yksityiskohdat</p></button>})}</div>;
 }
 
 export function ProgressView({courses,topics,sessions,plan,onPlan}:Base&{sessions:Session[];plan:PlanItem[];onPlan:()=>void}) {
