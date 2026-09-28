@@ -90,6 +90,8 @@ async function completeAuthFromUrl(): Promise<User | null> {
   return null;
 }
 
+const DEVICE_AUTH_KEY = "opk.device-authorized";
+
 function App() {
   const [user, setUser] = useState<User | null | undefined>();
   const [authError, setAuthError] = useState<string | null>(null);
@@ -102,19 +104,26 @@ function App() {
 
     void (async () => {
       try {
-        const callbackUser = await completeAuthFromUrl();
+        const { data: sessionData } = await supabase.auth.getSession();
         if (!active) return;
-        if (callbackUser) {
-          setAuthError(null);
-          setUser(callbackUser);
+
+        if (sessionData.session?.user) {
+          setUser(sessionData.session.user);
           return;
         }
 
-        const { data } = await supabase.auth.getUser();
-        if (active) setUser(data.user);
+        const trustedDevice = localStorage.getItem(DEVICE_AUTH_KEY) === "Arthur";
+        if (!trustedDevice) {
+          setUser(null);
+          return;
+        }
+
+        const { data, error } = await supabase.auth.signInAnonymously();
+        if (error) throw error;
+        if (active) setUser(data.user ?? data.session?.user ?? null);
       } catch (error) {
         if (!active) return;
-        const message = error instanceof Error ? error.message : "Kirjautumislinkin vahvistus epäonnistui.";
+        const message = error instanceof Error ? error.message : "Kirjautuminen epäonnistui.";
         setAuthError(message);
         setUser(null);
       }
@@ -127,25 +136,72 @@ function App() {
   }, []);
 
   if (user === undefined) return <main className="grid min-h-screen place-items-center">Avataan opintopäiväkirjaa…</main>;
-  if (!user) return <SignIn authError={authError} />;
+  if (!user) return <DeviceSignIn authError={authError} onSignedIn={setUser} />;
   return <StudyApp user={user} />;
 }
 
-function SignIn({ authError }: { authError: string | null }) {
-  const [email, setEmail] = useState("");
-  const [sent, setSent] = useState(false);
+function DeviceSignIn({
+  authError,
+  onSignedIn,
+}: {
+  authError: string | null;
+  onSignedIn: (user: User) => void;
+}) {
+  const [username, setUsername] = useState("");
   const [busy, setBusy] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(authError);
+
   return <main className="grid min-h-screen place-items-center p-4"><section className="panel w-full max-w-md space-y-5 p-8">
     <div className="grid size-12 place-items-center rounded-2xl bg-primary text-primary-foreground"><BookOpen /></div>
-    <h1 className="text-3xl font-semibold">Opintopäiväkirja</h1>
-    <p className="text-muted-foreground">Suunnittele opiskelu ja seuraa omaa kehitystäsi.</p>
-    {authError && <p role="alert" className="rounded-xl border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive">Kirjautuminen epäonnistui: {authError}</p>}
-    {sent ? <p role="status" className="rounded-xl bg-accent p-4">Kirjautumislinkki lähetettiin osoitteeseen {email}. Avaa uusin saamasi linkki tällä laitteella.</p> :
-      <form onSubmit={async e => { e.preventDefault(); setBusy(true); const { error } = await supabase.auth.signInWithOtp({ email, options: { emailRedirectTo: window.location.origin } }); setBusy(false); if (error) toast.error(error.message); else setSent(true); }} className="space-y-3">
-        <label htmlFor="email" className="block text-sm font-medium">Sähköposti</label>
-        <input id="email" type="email" autoComplete="email" required value={email} onChange={e => setEmail(e.target.value)} className="w-full rounded-xl border bg-surface px-3 py-3" />
-        <button disabled={busy} className="min-h-11 w-full rounded-xl bg-primary px-4 text-primary-foreground">{busy ? "Lähetetään…" : "Lähetä kirjautumislinkki"}</button>
-      </form>}
+    <div>
+      <h1 className="text-3xl font-semibold">Opintopäiväkirja</h1>
+      <p className="mt-2 text-muted-foreground">Tunnista tämä laite kerran. Sen jälkeen Opintopäiväkirja avautuu suoraan.</p>
+    </div>
+    {errorMessage && <p role="alert" className="rounded-xl border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive">
+      {errorMessage.toLowerCase().includes("anonymous") ? "Anonyymi kirjautuminen ei ole käytössä Supabasessa. Ota Anonymous Sign-Ins käyttöön kohdasta Authentication → Sign In / Providers." : errorMessage}
+    </p>}
+    <form
+      onSubmit={async e => {
+        e.preventDefault();
+        setErrorMessage(null);
+
+        if (username.trim().toLowerCase() !== "arthur") {
+          setErrorMessage("Käyttäjänimeä ei tunnistettu.");
+          return;
+        }
+
+        setBusy(true);
+        const { data, error } = await supabase.auth.signInAnonymously();
+        setBusy(false);
+
+        if (error || !data.user) {
+          setErrorMessage(error?.message ?? "Kirjautuminen epäonnistui.");
+          return;
+        }
+
+        localStorage.setItem(DEVICE_AUTH_KEY, "Arthur");
+        onSignedIn(data.user);
+      }}
+      className="space-y-3"
+    >
+      <label htmlFor="username" className="block text-sm font-medium">Käyttäjänimi</label>
+      <input
+        id="username"
+        type="text"
+        autoComplete="username"
+        required
+        value={username}
+        onChange={e => setUsername(e.target.value)}
+        placeholder="Arthur"
+        className="w-full rounded-xl border bg-surface px-3 py-3"
+      />
+      <button disabled={busy} className="min-h-11 w-full rounded-xl bg-primary px-4 text-primary-foreground">
+        {busy ? "Avataan…" : "Jatka"}
+      </button>
+    </form>
+    <p className="text-xs leading-5 text-muted-foreground">
+      Tämä laite muistetaan selaimessa. Selaustietojen tyhjentäminen tai yksityinen selaus poistaa muistamisen.
+    </p>
   </section><Toaster richColors /></main>;
 }
 
