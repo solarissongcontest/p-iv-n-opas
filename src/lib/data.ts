@@ -635,8 +635,8 @@ export function useAdvanceMistake() {
   return useMutation({
     mutationFn: async (input: { id: string; status: "corrected" | "retested" | "mastered" }) => {
       const patch: Record<string, unknown> = { status: input.status };
-      if (input.status === "retested") patch.retested_at = today();
-      if (input.status === "mastered") patch.mastered_at = today();
+      if (input.status === "retested") patch["retested_at"] = today();
+      if (input.status === "mastered") patch["mastered_at"] = today();
       const { error } = await untypedSupabase.from("mistakes").update(patch).eq("id", input.id);
       if (error) throw error;
     },
