@@ -181,7 +181,7 @@
 
 /* ---------- Liquid Glass (navigation / control layer only) ---------- */
 
-@utility glass-base {
+.glass-base {
   position: relative;
   isolation: isolate;
   background-color: var(--surface);
@@ -189,61 +189,81 @@
   box-shadow: var(--shadow-card);
 }
 
-/* Tier 1: blur + saturation + adaptive tint + specular edge */
 @supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
-  @utility glass-base {
+  .glass-base {
     background-color: var(--glass-tint);
+    -webkit-backdrop-filter: blur(22px) saturate(180%);
     backdrop-filter: blur(22px) saturate(180%);
     box-shadow: var(--shadow-glass);
   }
 }
 
-@utility glass-clear {
+.glass-clear {
   background-color: var(--glass-tint-clear);
+  -webkit-backdrop-filter: blur(12px) saturate(150%);
   backdrop-filter: blur(12px) saturate(150%);
 }
 
-@utility glass-thick {
+.glass-thick {
   background-color: var(--glass-tint-thick);
+  -webkit-backdrop-filter: blur(34px) saturate(190%);
   backdrop-filter: blur(34px) saturate(190%);
 }
 
-@utility glass-specular {
-  &::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    pointer-events: none;
-    background: linear-gradient(
-      160deg,
-      var(--glass-edge) 0%,
-      transparent 32%,
-      transparent 70%,
-      color-mix(in oklab, var(--glass-edge) 55%, transparent) 100%
-    );
-    opacity: 0.8;
-    z-index: -1;
-  }
+.glass-specular::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(
+    160deg,
+    var(--glass-edge) 0%,
+    transparent 32%,
+    transparent 70%,
+    color-mix(in oklab, var(--glass-edge) 55%, transparent) 100%
+  );
+  opacity: 0.8;
+  z-index: -1;
 }
 
-@utility glass-interactive {
+.glass-interactive {
   transition:
     transform 160ms var(--ease-calm),
     background-color 160ms var(--ease-calm),
     box-shadow 200ms var(--ease-calm);
-  &:hover {
-    transform: translateY(-1px);
-  }
-  &:active {
-    transform: scale(0.98);
-  }
 }
+.glass-interactive:hover { transform: translateY(-1px); }
+.glass-interactive:active { transform: scale(0.98); }
+
+.panel {
+  background-color: var(--surface);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-2xl);
+  box-shadow: var(--shadow-card);
+}
+
+.press {
+  transition:
+    transform 120ms var(--ease-calm),
+    background-color 140ms var(--ease-calm);
+}
+.press:hover { transform: translateY(-1px); }
+.press:active { transform: scale(0.98); }
+
+.tabular { font-variant-numeric: tabular-nums; }
+
+@keyframes calm-rise {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.rise { animation: calm-rise 260ms var(--ease-calm) both; }
 
 @media (prefers-reduced-transparency: reduce) {
   .glass-base,
   .glass-clear,
   .glass-thick {
+    -webkit-backdrop-filter: none !important;
     backdrop-filter: none !important;
     background-color: var(--surface) !important;
   }
@@ -254,50 +274,12 @@
   *::before,
   *::after {
     animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
   .glass-interactive:hover,
-  .glass-interactive:active {
-    transform: none;
-  }
-}
-
-/* ---------- content layer helpers ---------- */
-
-@utility panel {
-  background-color: var(--surface);
-  border: 1px solid var(--hairline);
-  border-radius: var(--radius-2xl);
-  box-shadow: var(--shadow-card);
-}
-
-@utility press {
-  transition:
-    transform 120ms var(--ease-calm),
-    background-color 140ms var(--ease-calm);
-  &:hover {
-    transform: translateY(-1px);
-  }
-  &:active {
-    transform: scale(0.98);
-  }
-}
-
-@utility tabular {
-  font-variant-numeric: tabular-nums;
-}
-
-@keyframes calm-rise {
-  from {
-    opacity: 0;
-    transform: translateY(6px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@utility rise {
-  animation: calm-rise 260ms var(--ease-calm) both;
+  .glass-interactive:active,
+  .press:hover,
+  .press:active { transform: none; }
 }
