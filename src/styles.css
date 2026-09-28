@@ -541,16 +541,6 @@
 @media (display-mode: standalone) {
   body {
     min-height: 100dvh;
-    user-select: none;
-    -webkit-user-select: none;
-  }
-
-  input,
-  textarea,
-  [contenteditable="true"],
-  .selectable {
-    user-select: text;
-    -webkit-user-select: text;
   }
 
   .app-mobile-header {
