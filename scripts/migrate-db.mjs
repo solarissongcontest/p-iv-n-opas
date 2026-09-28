@@ -10,7 +10,11 @@ if (isVercel && !isProduction) {
 }
 
 if (!databaseUrl) {
-  console.log("[db] POSTGRES_URL is not set; skipping database migrations.");
+  if (isVercel && isProduction) {
+    console.error("[db] POSTGRES_URL is required for production deployments.");
+    process.exit(1);
+  }
+  console.log("[db] POSTGRES_URL is not set; skipping database migrations outside production.");
   process.exit(0);
 }
 
