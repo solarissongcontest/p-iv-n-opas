@@ -623,3 +623,26 @@ html.dark .app-mobile-header {
     padding-inline: 0;
   }
 }
+
+
+@media (forced-colors: active) {
+  .panel,
+  .glass-base,
+  button,
+  input,
+  select,
+  textarea {
+    border: 1px solid CanvasText !important;
+  }
+
+  :focus-visible {
+    outline: 2px solid Highlight !important;
+    outline-offset: 2px !important;
+  }
+
+  [aria-current="page"],
+  [aria-pressed="true"] {
+    outline: 2px solid Highlight;
+    outline-offset: -2px;
+  }
+}
