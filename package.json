@@ -10,7 +10,8 @@
     "preview": "vite preview",
     "lint": "eslint .",
     "format": "prettier --write .",
-    "typecheck": "vite build --mode development && tsc --noEmit"
+    "typecheck": "vite build --mode development && tsc --noEmit",
+    "test": "node --experimental-strip-types --test tests/*.test.ts"
   },
   "overrides": {
     "rolldown": "1.2.1"
