@@ -104,3 +104,21 @@ export async function pushIsEnabledOnDevice() {
   if (!pushSupported() || Notification.permission !== "granted") return false;
   return !!(await currentPushSubscription());
 }
+
+
+export async function sendTestPush() {
+  const response = await fetch("/api/push/test", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${await authToken()}`,
+    },
+  });
+  const payload = (await response.json().catch(() => ({}))) as {
+    error?: string;
+    sent?: number;
+  };
+  if (!response.ok) {
+    throw new Error(payload.error ?? "Testimuistutus epäonnistui.");
+  }
+  return payload.sent ?? 0;
+}
