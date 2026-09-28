@@ -47,18 +47,45 @@ function Dialog({ title, onClose, children }: { title: string; onClose: () => vo
  </div>;
 }
 export function SessionForm({item,courses,topics,onClose}:{item:PlanItem|null;courses:Course[];topics:Topic[];onClose:()=>void}) {
- const [courseId,setCourseId]=useState(item?.course_id??courses[0]?.id??""),[topicId,setTopicId]=useState(item?.topic_id??""),[seconds,setSeconds]=useState(0),[running,setRunning]=useState(false),[timer,setTimer]=useState(false);
+ const [courseId,setCourseId]=useState(item?.course_id??courses[0]?.id??""),[topicId,setTopicId]=useState(item?.topic_id??""),[seconds,setSeconds]=useState(0),[running,setRunning]=useState(false),[timer,setTimer]=useState(!!item);
  const [amount,setAmount]=useState(item?.target_minutes??30),[competence,setCompetence]=useState(3),[did,setDid]=useState(""),[unclear,setUnclear]=useState(""),[note,setNote]=useState("");
+ const [focus,setFocus]=useState(3),[energy,setEnergy]=useState(3),[method,setMethod]=useState("tehtävät"),[tasks,setTasks]=useState("");
  const log=useLogSession();
+ const course=courses.find(c=>c.id===courseId),topic=topics.find(t=>t.id===topicId);
  useEffect(()=>{if(!running)return;const id=window.setInterval(()=>setSeconds(v=>v+1),1000);return()=>window.clearInterval(id);},[running]);
- async function submit(e:React.FormEvent) {e.preventDefault();if(!courseId)return;try{const result=await log.mutateAsync({course_id:courseId,topic_id:topicId||null,minutes:timer?Math.max(1,Math.ceil(seconds/60)):amount,kind:"study",competence,did,unclear,note,plan_item_id:item?.id??null});toast.success(result==="queued"?"Tallennettu paikallisesti · synkataan myöhemmin.":"Opiskelu kirjattu.");onClose();}catch{toast.error("Tallennus epäonnistui. Tarkista tiedot ja yritä uudelleen.");}}
- return <Dialog title="Kirjaa opiskelu" onClose={onClose}><form onSubmit={submit} className="space-y-4"><div className="grid gap-3 sm:grid-cols-2"><label className="text-sm font-medium">Kurssi<select className={input} value={courseId} onChange={e=>{setCourseId(e.target.value);setTopicId("");}}>{courses.map(c=><option key={c.id} value={c.id}>{c.code} · {c.name}</option>)}</select></label><label className="text-sm font-medium">Aihe<select className={input} value={topicId} onChange={e=>setTopicId(e.target.value)}><option value="">Yleinen opiskelu</option>{topics.filter(t=>t.course_id===courseId).map(t=><option key={t.id} value={t.id}>{t.name}</option>)}</select></label></div>
- <div className="flex flex-wrap gap-2"><button type="button" className={timer?secondary:button} onClick={()=>{setTimer(false);setRunning(false);}}>Manuaalinen kirjaus</button><button type="button" className={timer?button:secondary} onClick={()=>setTimer(true)}>Ajastin</button></div>
- {timer?<div className="rounded-2xl bg-muted p-5 text-center"><p role="timer" className="text-5xl font-semibold tabular-nums">{String(Math.floor(seconds/3600)).padStart(2,"0")}:{String(Math.floor(seconds/60)%60).padStart(2,"0")}:{String(seconds%60).padStart(2,"0")}</p><button type="button" className={secondary+" mt-4"} onClick={()=>setRunning(v=>!v)}>{running?<><Pause size={17}/>Tauko</>:<><Play size={17}/>Aloita / jatka</>}</button></div>:<label className="block text-sm font-medium">Kesto minuutteina<input type="number" min="1" max="1440" required value={amount} onChange={e=>setAmount(Number(e.target.value))} className={input}/></label>}
- <fieldset><legend className="mb-2 text-sm font-medium">Oma arvio osaamisesta</legend><div className="flex gap-2">{[1,2,3,4,5].map(n=><button type="button" key={n} aria-pressed={competence===n} onClick={()=>setCompetence(n)} className={`grid size-11 place-items-center rounded-xl border ${competence===n?"border-primary bg-accent font-semibold":"border-border"}`}>{n}</button>)}</div></fieldset>
- <label className="block text-sm font-medium">Mitä teit?<textarea className={input} rows={2} value={did} onChange={e=>setDid(e.target.value)}/></label><label className="block text-sm font-medium">Mikä jäi epäselväksi?<textarea className={input} rows={2} value={unclear} onChange={e=>setUnclear(e.target.value)}/></label><details><summary className="cursor-pointer text-sm font-medium">Lisätiedot</summary><label className="mt-3 block text-sm">Huomio<textarea className={input} rows={3} value={note} onChange={e=>setNote(e.target.value)}/></label></details><button type="submit" disabled={log.isPending||(!timer&&amount<1)} className={button+" w-full"}><Check size={18}/>{log.isPending?"Tallennetaan…":"Tallenna sessio"}</button>
+ async function submit(e:React.FormEvent) {
+   e.preventDefault();if(!courseId)return;
+   try{
+     const result=await log.mutateAsync({
+       course_id:courseId,topic_id:topicId||null,
+       minutes:timer?Math.max(1,Math.ceil(seconds/60)):amount,
+       planned_minutes:item?.target_minutes??amount,
+       kind:item?.kind==="review"?"review":item?.kind==="test"?"test":"study",
+       competence,did,unclear,note,focus,energy,method,tasks,
+       plan_item_id:item?.id??null
+     });
+     toast.success(result==="queued"?"Tallennettu paikallisesti · synkataan myöhemmin.":"Opiskelu kirjattu.");
+     onClose();
+   }catch{toast.error("Tallennus epäonnistui. Tiedot eivät katoa, jos yhteys katkesi.");}
+ }
+ return <Dialog title={timer?"Opiskelusessio":"Kirjaa opiskelu"} onClose={onClose}><form onSubmit={submit} className="space-y-4">
+   {item&&<div className="rounded-2xl bg-muted/60 p-4"><p className="text-xs font-semibold uppercase tracking-wide text-primary">{course?.code} · {item.target_minutes} min</p><h3 className="mt-1 text-lg font-semibold">{item.title||topic?.name||"Opiskelu"}</h3><p className="mt-1 text-sm text-muted-foreground">Tavoite: {item.phase==="review"?"palauta osaaminen aktiivisesti mieleen":item.phase==="practice"?"ratkaise koetasoisesti":"etene suunniteltu osuus ja varmista ymmärrys"}.</p></div>}
+   <div className="grid gap-3 sm:grid-cols-2"><label className="text-sm font-medium">Kurssi<select className={input} value={courseId} onChange={e=>{setCourseId(e.target.value);setTopicId("");}}>{courses.map(c=><option key={c.id} value={c.id}>{c.code} · {c.name}</option>)}</select></label><label className="text-sm font-medium">Aihe<select className={input} value={topicId} onChange={e=>setTopicId(e.target.value)}><option value="">Yleinen opiskelu</option>{topics.filter(t=>t.course_id===courseId).map(t=><option key={t.id} value={t.id}>{t.name}</option>)}</select></label></div>
+   <div className="flex flex-wrap gap-2"><button type="button" className={timer?secondary:button} onClick={()=>{setTimer(false);setRunning(false);}}>Manuaalinen</button><button type="button" className={timer?button:secondary} onClick={()=>setTimer(true)}>Ajastin</button></div>
+   {timer?<div className="rounded-2xl bg-muted p-5 text-center"><p role="timer" className="text-5xl font-semibold tabular-nums">{String(Math.floor(seconds/3600)).padStart(2,"0")}:{String(Math.floor(seconds/60)%60).padStart(2,"0")}:{String(seconds%60).padStart(2,"0")}</p><p className="mt-2 text-sm text-muted-foreground">Tavoite {item?.target_minutes??amount} min</p><button type="button" className={secondary+" mt-4"} onClick={()=>setRunning(v=>!v)}>{running?<><Pause size={17}/>Tauko</>:<><Play size={17}/>Aloita / jatka</>}</button></div>:<label className="block text-sm font-medium">Todellinen kesto minuutteina<input type="number" min="1" max="1440" required value={amount} onChange={e=>setAmount(Number(e.target.value))} className={input}/></label>}
+   <fieldset><legend className="mb-2 text-sm font-medium">Oma arvio osaamisesta 1–5</legend><div className="flex gap-2">{[1,2,3,4,5].map(n=><button type="button" key={n} aria-pressed={competence===n} onClick={()=>setCompetence(n)} className={`grid size-11 place-items-center rounded-xl border ${competence===n?"border-primary bg-accent font-semibold":"border-border"}`}>{n}</button>)}</div></fieldset>
+   <label className="block text-sm font-medium">Mitä teit?<textarea className={input} rows={2} value={did} onChange={e=>setDid(e.target.value)}/></label>
+   <label className="block text-sm font-medium">Mikä jäi epäselväksi?<textarea className={input} rows={2} value={unclear} onChange={e=>setUnclear(e.target.value)}/></label>
+   <details className="rounded-2xl border border-border p-4"><summary className="cursor-pointer text-sm font-medium">Lisätiedot</summary><div className="mt-4 space-y-4">
+     <div className="grid grid-cols-2 gap-3"><label className="text-sm font-medium">Keskittyminen 1–5<input type="number" min="1" max="5" className={input} value={focus} onChange={e=>setFocus(Number(e.target.value))}/></label><label className="text-sm font-medium">Energia 1–5<input type="number" min="1" max="5" className={input} value={energy} onChange={e=>setEnergy(Number(e.target.value))}/></label></div>
+     <label className="block text-sm font-medium">Menetelmä<select className={input} value={method} onChange={e=>setMethod(e.target.value)}><option value="tehtävät">Tehtävät</option><option value="aktiivinen palautus">Aktiivinen palautus</option><option value="muistiinpanot">Muistiinpanot</option><option value="lukeminen">Lukeminen</option><option value="harjoituskoe">Harjoituskoe</option><option value="muu">Muu</option></select></label>
+     <label className="block text-sm font-medium">Tehtävänumerot / tehtävät<input className={input} value={tasks} onChange={e=>setTasks(e.target.value)} placeholder="esim. 4.12–4.18"/></label>
+     <label className="block text-sm font-medium">Pidempi muistiinpano<textarea className={input} rows={3} value={note} onChange={e=>setNote(e.target.value)}/></label>
+   </div></details>
+   <button type="submit" disabled={log.isPending||(!timer&&amount<1)} className={button+" w-full"}><Check size={18}/>{log.isPending?"Tallennetaan…":"Lopeta ja tallenna"}</button>
  </form></Dialog>;
 }
+
 export function CourseForm({onClose}:{onClose:()=>void}) {
  const [code,setCode]=useState(""),[name,setName]=useState(""),[subject,setSubject]=useState(""),[start,setStart]=useState(today()),[exam,setExam]=useState(""),[weekly,setWeekly]=useState(180),[targetSystem,setTargetSystem]=useState("school"),[targetValue,setTargetValue]=useState("10"),[raw,setRaw]=useState("");
  const create=useCreateCourse();
