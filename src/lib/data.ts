@@ -225,6 +225,25 @@ export async function ensureKe04ForCurrentUser(): Promise<string> {
   if (topicsReadError) throw topicsReadError;
 
   const names = new Set((existingTopics ?? []).map((t) => t.name));
+  const canonicalByName = new Map(KE04_TOPICS.map((topic) => [topic.name, topic]));
+
+  const repairs = (existingTopics ?? [])
+    .map((topic) => {
+      const canonical = canonicalByName.get(topic.name as (typeof KE04_TOPICS)[number]["name"]);
+      if (!canonical || topic.materials === canonical.materials) return null;
+      return supabase
+        .from("topics")
+        .update({ materials: canonical.materials })
+        .eq("id", topic.id);
+    })
+    .filter(Boolean);
+
+  if (repairs.length) {
+    const results = await Promise.all(repairs);
+    const repairError = results.find((result) => result?.error)?.error;
+    if (repairError) throw repairError;
+  }
+
   const missingTopics = KE04_TOPICS
     .map((topic, index) => ({ ...topic, course_id: course.id, position: index + 1 }))
     .filter((topic) => !names.has(topic.name));
