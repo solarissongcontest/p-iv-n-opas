@@ -10,6 +10,8 @@ export type Mistake = Database["public"]["Tables"]["mistakes"]["Row"];
 export type PracticeTest = Database["public"]["Tables"]["practice_tests"]["Row"];
 export type NotificationSettings =
   Database["public"]["Tables"]["notification_settings"]["Row"];
+export type WeeklyCheckin = Database["public"]["Tables"]["weekly_checkins"]["Row"];
+export type ProgressEvent = Database["public"]["Tables"]["progress_events"]["Row"];
 
 export type PlanStatus = "planned" | "in_progress" | "completed" | "skipped" | "overdue";
 export type PlanPhase = "content" | "application" | "practice" | "review" | "light" | "exam";
@@ -300,6 +302,24 @@ export function risks(input: {
 
 /** ---------- review scheduling ---------- */
 
+export function reviewDebt(topics: Topic[], now = today()) {
+  const due = topics
+    .filter((t) => t.verified_level > 0 && !!t.next_review && t.next_review <= now)
+    .sort((a, b) => (a.next_review ?? "").localeCompare(b.next_review ?? ""));
+  const overdueDays = due.reduce(
+    (sum, t) => sum + Math.max(0, diffDays(now, t.next_review ?? now)),
+    0,
+  );
+  return {
+    due,
+    count: due.length,
+    overdueDays,
+    pressure: topics.length
+      ? Math.min(100, Math.round((due.length / topics.length) * 75 + Math.min(25, overdueDays * 2)))
+      : 0,
+  };
+}
+
 export function nextReviewDate(fromISO: string, level: number): string {
   const gaps = [1, 2, 4, 7, 14, 28];
   return addDays(fromISO, gaps[Math.max(0, Math.min(5, level))] ?? 1);
@@ -354,61 +374,100 @@ export function generatePlan(opts: {
   }
   if (dates.length === 0) return [];
 
-  const perDay = Math.max(20, Math.round(opts.weeklyMinutes / Math.max(1, opts.studyWeekdays.length)));
-  const ordered = [...opts.topics].sort((a, b) => a.position - b.position);
-  const hardest = [...opts.topics].sort(
-    (a, b) => b.importance * (5 - b.verified_level) - a.importance * (5 - a.verified_level),
+  const perDay = Math.max(
+    20,
+    Math.round(opts.weeklyMinutes / Math.max(1, opts.studyWeekdays.length)),
   );
+  const ordered = [...opts.topics].sort((a, b) => a.position - b.position);
+  const priorities = [...opts.topics].sort((a, b) => {
+    const score = (t: Topic) => {
+      const dueBoost = t.next_review && t.next_review <= startISO ? 8 : 0;
+      const unfinished = (100 - t.progress) / 20;
+      return t.importance * (6 - t.verified_level) + dueBoost + unfinished;
+    };
+    return score(b) - score(a);
+  });
 
   const drafts: PlanDraft[] = [];
   let contentIdx = 0;
-  let reviewIdx = 0;
+  let priorityIdx = 0;
 
-  const bounds: { phase: PlanPhase; until: number }[] = [];
-  let acc = 0;
-  for (const p of PHASE_SHARE) {
-    acc += p.share;
-    bounds.push({ phase: p.phase, until: Math.round(acc * dates.length) });
-  }
+  const choosePriority = (date: string) => {
+    const due = priorities.filter((t) => t.next_review && t.next_review <= date);
+    const pool = due.length ? due : priorities;
+    if (!pool.length) return undefined;
+    const topic = pool[priorityIdx % pool.length];
+    priorityIdx += 1;
+    return topic;
+  };
 
   dates.forEach((date, i) => {
-    const phase = bounds.find((b) => i < b.until)?.phase ?? "light";
     const daysToExam = diffDays(opts.examDate, date);
-    let topic: Topic | undefined;
+    const inExamMode = daysToExam <= 14;
+    const finalStretch = daysToExam <= 2;
+
+    let phase: PlanPhase;
     let kind = "study";
     let title = "";
+    let topic: Topic | undefined;
 
-    if (phase === "content") {
-      topic = ordered[Math.min(ordered.length - 1, contentIdx)];
-      contentIdx += 1;
-      title = topic ? topic.name : "Uusi sisältö";
-    } else if (phase === "application") {
-      topic = ordered[contentIdx % Math.max(1, ordered.length)];
-      contentIdx += 1;
-      title = topic ? `${topic.name} – soveltavat tehtävät` : "Soveltavat tehtävät";
-    } else if (phase === "practice") {
-      kind = "test";
-      title = "Harjoituskoe ja virheiden läpikäynti";
-      topic = hardest[reviewIdx % Math.max(1, hardest.length)];
-      reviewIdx += 1;
-    } else if (phase === "review") {
+    if (finalStretch) {
+      phase = "light";
       kind = "review";
-      topic = hardest[reviewIdx % Math.max(1, hardest.length)];
-      reviewIdx += 1;
-      title = topic ? `${topic.name} – kertaus` : "Kertaus";
+      topic = choosePriority(date);
+      title = topic
+        ? `${topic.name} – kevyt palautus`
+        : "Kevyt palautus: virhelista, käsitteet ja kaavat";
+    } else if (inExamMode) {
+      const cycle = i % 4;
+      if (cycle === 0) {
+        phase = "practice";
+        kind = "test";
+        topic = choosePriority(date);
+        title = "Harjoituskoe ja virheiden läpikäynti";
+      } else if (cycle === 1 || cycle === 3) {
+        phase = "review";
+        kind = "review";
+        topic = choosePriority(date);
+        title = topic ? `${topic.name} – kohdennettu kertaus` : "Kohdennettu kertaus";
+      } else {
+        phase = "application";
+        topic = choosePriority(date);
+        title = topic ? `${topic.name} – koetason soveltaminen` : "Koetason soveltaminen";
+      }
     } else {
-      kind = "review";
-      topic = hardest[reviewIdx % Math.max(1, hardest.length)];
-      reviewIdx += 1;
-      title =
-        daysToExam <= 2
-          ? "Kevyt palautus: virhelista ja kaavat"
-          : topic
-            ? `${topic.name} – kevyt kertaus`
-            : "Kevyt kertaus";
+      const x = i / Math.max(1, dates.length - 1);
+      if (x < 0.42) {
+        const due = priorities.find((t) => t.next_review && t.next_review <= date);
+        if (due) {
+          phase = "review";
+          kind = "review";
+          topic = choosePriority(date);
+          title = topic ? `${topic.name} – ajastettu kertaus` : "Ajastettu kertaus";
+        } else {
+          phase = "content";
+          topic = ordered[Math.min(contentIdx, Math.max(0, ordered.length - 1))];
+          contentIdx += 1;
+          title = topic ? topic.name : "Uusi sisältö";
+        }
+      } else if (x < 0.67) {
+        phase = "application";
+        topic = choosePriority(date);
+        title = topic ? `${topic.name} – soveltavat tehtävät` : "Soveltavat tehtävät";
+      } else if (x < 0.8) {
+        phase = "practice";
+        kind = "test";
+        topic = choosePriority(date);
+        title = "Harjoituskoe ja virheiden läpikäynti";
+      } else {
+        phase = "review";
+        kind = "review";
+        topic = choosePriority(date);
+        title = topic ? `${topic.name} – kertaus` : "Kertaus";
+      }
     }
 
-    const light = daysToExam <= 2;
+    const light = finalStretch;
     drafts.push({
       course_id: opts.course.id,
       topic_id: topic?.id ?? null,
@@ -416,7 +475,7 @@ export function generatePlan(opts: {
       phase,
       kind,
       title,
-      min_minutes: light ? 10 : Math.round(perDay * 0.55),
+      min_minutes: light ? 10 : Math.max(15, Math.round(perDay * 0.55)),
       target_minutes: light ? 20 : perDay,
       extra_minutes: light ? 0 : Math.round(perDay * 0.35),
       start_time: null,

@@ -11,6 +11,8 @@ import {
   type PracticeTest,
   type Session,
   type Topic,
+  type WeeklyCheckin,
+  type ProgressEvent,
 } from "./domain";
 import { today } from "./fi";
 
@@ -69,6 +71,27 @@ async function listTests(): Promise<PracticeTest[]> {
   return data ?? [];
 }
 
+
+async function listWeeklyCheckins(): Promise<WeeklyCheckin[]> {
+  const { data, error } = await supabase
+    .from("weekly_checkins")
+    .select("*")
+    .order("week_start", { ascending: false })
+    .limit(52);
+  if (error) throw error;
+  return data ?? [];
+}
+
+async function listProgressEvents(): Promise<ProgressEvent[]> {
+  const { data, error } = await supabase
+    .from("progress_events")
+    .select("*")
+    .order("created_at", { ascending: false })
+    .limit(250);
+  if (error) throw error;
+  return data ?? [];
+}
+
 async function getSettings(): Promise<NotificationSettings | null> {
   const { data, error } = await supabase.from("notification_settings").select("*").limit(1);
   if (error) throw error;
@@ -83,6 +106,10 @@ export const usePlan = () => useQuery({ queryKey: ["plan"], queryFn: listPlan })
 export const useMistakes = () => useQuery({ queryKey: ["mistakes"], queryFn: listMistakes });
 export const useTests = () => useQuery({ queryKey: ["tests"], queryFn: listTests });
 export const useSettings = () => useQuery({ queryKey: ["settings"], queryFn: getSettings });
+export const useWeeklyCheckins = () =>
+  useQuery({ queryKey: ["weekly-checkins"], queryFn: listWeeklyCheckins });
+export const useProgressEvents = () =>
+  useQuery({ queryKey: ["progress-events"], queryFn: listProgressEvents });
 
 /** ---------- writes ---------- */
 
@@ -152,7 +179,7 @@ registerOp("movePlanItem", doMovePlanItem);
 function useInvalidateAll() {
   const qc = useQueryClient();
   return () =>
-    ["courses", "topics", "sessions", "exams", "plan", "mistakes", "tests", "settings"].forEach(
+    ["courses", "topics", "sessions", "exams", "plan", "mistakes", "tests", "settings", "weekly-checkins", "progress-events"].forEach(
       (k) => qc.invalidateQueries({ queryKey: [k] }),
     );
 }
@@ -226,6 +253,50 @@ export function useUpdateTopic() {
     mutationFn: async (input: { id: string } & Partial<Topic>) => {
       const { id, ...rest } = input;
       const { error } = await supabase.from("topics").update(rest).eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: invalidate,
+  });
+}
+
+export function useCreateTopic() {
+  const invalidate = useInvalidateAll();
+  return useMutation({
+    mutationFn: async (input: {
+      course_id: string;
+      name: string;
+      weight?: number;
+      importance?: number;
+      materials?: string | null;
+      position?: number;
+    }) => {
+      const { error } = await supabase.from("topics").insert(input);
+      if (error) throw error;
+    },
+    onSuccess: invalidate,
+  });
+}
+
+export function useUpdateCourse() {
+  const invalidate = useInvalidateAll();
+  return useMutation({
+    mutationFn: async (input: { id: string } & Partial<Course>) => {
+      const { id, ...rest } = input;
+      const { error } = await supabase.from("courses").update(rest).eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: invalidate,
+  });
+}
+
+export function useArchiveCourse() {
+  const invalidate = useInvalidateAll();
+  return useMutation({
+    mutationFn: async (input: { id: string; archived: boolean }) => {
+      const { error } = await supabase
+        .from("courses")
+        .update({ archived: input.archived })
+        .eq("id", input.id);
       if (error) throw error;
     },
     onSuccess: invalidate,
@@ -333,6 +404,41 @@ export function useCreatePracticeTest() {
     mutationFn: async (input: { course_id: string; date: string; score: number; max_score: number; duration_minutes?: number | null }) => {
       const { error } = await supabase.from("practice_tests").insert(input);
       if (error) throw error;
+    },
+    onSuccess: invalidate,
+  });
+}
+
+export function useUpsertWeeklyCheckin() {
+  const invalidate = useInvalidateAll();
+  return useMutation({
+    mutationFn: async (input: {
+      week_start: string;
+      note: string | null;
+      planned_minutes: number | null;
+      actual_minutes: number | null;
+    }) => {
+      const { data: existing, error: readError } = await supabase
+        .from("weekly_checkins")
+        .select("id")
+        .eq("week_start", input.week_start)
+        .maybeSingle();
+      if (readError) throw readError;
+
+      if (existing?.id) {
+        const { error } = await supabase
+          .from("weekly_checkins")
+          .update({
+            note: input.note,
+            planned_minutes: input.planned_minutes,
+            actual_minutes: input.actual_minutes,
+          })
+          .eq("id", existing.id);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase.from("weekly_checkins").insert(input);
+        if (error) throw error;
+      }
     },
     onSuccess: invalidate,
   });

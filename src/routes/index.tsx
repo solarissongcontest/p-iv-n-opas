@@ -91,6 +91,7 @@ async function completeAuthFromUrl(): Promise<User | null> {
 }
 
 const DEVICE_AUTH_KEY = "opk.device-authorized";
+const DEVICE_OWNER_KEY = "opk.owner-id";
 
 function App() {
   const [user, setUser] = useState<User | null | undefined>();
@@ -108,19 +109,33 @@ function App() {
         if (!active) return;
 
         if (sessionData.session?.user) {
+          localStorage.setItem(DEVICE_AUTH_KEY, "Arthur");
+          localStorage.setItem(DEVICE_OWNER_KEY, sessionData.session.user.id);
           setUser(sessionData.session.user);
           return;
         }
 
         const trustedDevice = localStorage.getItem(DEVICE_AUTH_KEY) === "Arthur";
+        const rememberedOwner = localStorage.getItem(DEVICE_OWNER_KEY);
         if (!trustedDevice) {
+          setUser(null);
+          return;
+        }
+
+        // Never silently create a second identity for a remembered device.
+        // Normally Supabase restores the persisted refresh token before this point.
+        if (rememberedOwner) {
+          setAuthError("Tämän laitteen tallennettu Supabase-istunto on vanhentunut. Älä poista käyttäjää Supabasesta, jotta opiskeluhistoria säilyy samalla tunnisteella.");
           setUser(null);
           return;
         }
 
         const { data, error } = await supabase.auth.signInAnonymously();
         if (error) throw error;
-        if (active) setUser(data.user ?? data.session?.user ?? null);
+        if (data.user) {
+          localStorage.setItem(DEVICE_OWNER_KEY, data.user.id);
+          if (active) setUser(data.user);
+        }
       } catch (error) {
         if (!active) return;
         const message = error instanceof Error ? error.message : "Kirjautuminen epäonnistui.";
@@ -180,6 +195,7 @@ function DeviceSignIn({
         }
 
         localStorage.setItem(DEVICE_AUTH_KEY, "Arthur");
+        localStorage.setItem(DEVICE_OWNER_KEY, data.user.id);
         onSignedIn(data.user);
       }}
       className="space-y-3"
@@ -219,6 +235,25 @@ function StudyApp({ user }: { user: User }) {
   const error = [coursesQ, topicsQ, sessionsQ, examsQ, planQ].find(q => q.error)?.error;
   useEffect(() => { const stop = subscribePending(setPending); const sync = startSyncWatcher(n => toast.success(`Synkattiin ${n} merkintää.`)); return () => { stop(); sync(); }; }, []);
   useEffect(() => {
+    if (busy || typeof Notification === "undefined" || Notification.permission !== "granted") return;
+    const stamp = today();
+    if (localStorage.getItem("opk.notification-date") === stamp) return;
+
+    void supabase.from("notification_settings").select("*").limit(1).maybeSingle().then(({data}) => {
+      if (!data || Notification.permission !== "granted") return;
+      const dueToday = plan.filter(p => p.date === stamp && p.status === "planned" && p.kind !== "exam");
+      const nextExam = exams.filter(e => e.date >= stamp).sort((a,b) => a.date.localeCompare(b.date))[0];
+      if (data.study_sessions && dueToday.length) {
+        new Notification("Opintopäiväkirja", { body: `Tänään on ${dueToday.length} suunniteltua opiskelutehtävää.` });
+      } else if (data.exams && nextExam) {
+        const days = Math.round((new Date(nextExam.date+"T12:00:00").getTime()-new Date(stamp+"T12:00:00").getTime())/86400000);
+        if (days <= 3) new Notification("Koe lähestyy", { body: `${nextExam.name}: ${days === 0 ? "tänään" : days+" päivän päästä"}.` });
+      }
+      localStorage.setItem("opk.notification-date", stamp);
+    });
+  }, [busy, plan, exams]);
+
+  useEffect(() => {
     const dark = localStorage.getItem("opk.theme") === "dark";
     document.documentElement.classList.toggle("dark", dark);
     const keys = (e: KeyboardEvent) => {
@@ -247,7 +282,7 @@ function StudyApp({ user }: { user: User }) {
       {error && <div role="alert" className="panel mb-5 p-4">Tietojen lataus epäonnistui. Tarkista yhteys. <button className="underline" onClick={()=>{void coursesQ.refetch();void topicsQ.refetch();void sessionsQ.refetch();void examsQ.refetch();void planQ.refetch();}}>Yritä uudelleen</button></div>}
       {busy ? <div className="space-y-4" aria-label="Ladataan"><div className="h-32 animate-pulse rounded-2xl bg-muted"/><div className="h-60 animate-pulse rounded-2xl bg-muted"/></div> :
       courses.length===0 ? <section className="panel p-6"><h2 className="text-xl font-semibold">Aloita ensimmäisestä kurssista</h2><p className="mt-2 text-muted-foreground">Lisää kurssi ja sen aiheet, jotta voit suunnitella ja kirjata opiskelua.</p><button onClick={()=>setAdding(true)} className="mt-5 min-h-11 rounded-xl bg-primary px-4 text-primary-foreground">Lisää kurssi</button></section> :
-      page==="today" ? <TodayView courses={courses} topics={topics} sessions={sessions} exams={exams} plan={plan} onStart={setEntry} onGo={go}/> :
+      page==="today" ? <TodayView courses={courses} topics={topics} sessions={sessions} exams={exams} plan={plan} tests={testsQ.data??[]} mistakes={mistakesQ.data??[]} onStart={setEntry} onGo={go}/> :
       page==="plan" ? <PlanView courses={courses} topics={topics} plan={plan} onStart={setEntry}/> :
       page==="courses" ? <CourseView courses={courses} topics={topics} sessions={sessions} exams={exams} plan={plan} tests={testsQ.data??[]} mistakes={mistakesQ.data??[]} selected={courseId} onSelect={setCourseId} onAdd={()=>setAdding(true)} onStart={()=>setEntry("manual")}/> :
       page==="exams" ? <ExamsView courses={courses} topics={topics} exams={exams} tests={testsQ.data??[]} mistakes={mistakesQ.data??[]} onCourse={id=>{setCourseId(id);setPage("courses");}}/> :
