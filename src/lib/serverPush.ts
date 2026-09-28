@@ -60,7 +60,7 @@ function privateScalarFromSecret(secret: string) {
 }
 
 export function getVapidKeys() {
-  const secret = process.env.SUPABASE_SECRET_KEY;
+  const secret = process.env["SUPABASE_SECRET_KEY"];
   if (!secret) throw new Error("SUPABASE_SECRET_KEY is required for Web Push.");
 
   const privateKey = privateScalarFromSecret(secret);
