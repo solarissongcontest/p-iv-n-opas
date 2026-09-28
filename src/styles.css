@@ -191,7 +191,7 @@
 
 /* Tier 1: blur + saturation + adaptive tint + specular edge */
 @supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
-  @utility glass-base {
+  .glass-base {
     background-color: var(--glass-tint);
     backdrop-filter: blur(22px) saturate(180%);
     box-shadow: var(--shadow-glass);

@@ -302,7 +302,7 @@ export function risks(input: {
 
 export function nextReviewDate(fromISO: string, level: number): string {
   const gaps = [1, 2, 4, 7, 14, 28];
-  return addDays(fromISO, gaps[Math.max(0, Math.min(5, level))]);
+  return addDays(fromISO, gaps[Math.max(0, Math.min(5, level))] ?? 1);
 }
 
 /** ---------- plan generation ---------- */

@@ -248,13 +248,18 @@ export function useGeneratePlan() {
   const invalidate = useInvalidateAll();
   return useMutation({
     mutationFn: async (input: { courseId: string; drafts: PlanDraft[] }) => {
-      await supabase
-        .from("plan_items")
-        .delete()
-        .eq("course_id", input.courseId)
-        .eq("status", "planned");
-      const { error } = await supabase.from("plan_items").insert(input.drafts);
+      const { data: previous, error: readError } = await supabase
+        .from("plan_items").select("id").eq("course_id", input.courseId).eq("status", "planned");
+      if (readError) throw readError;
+      const { data: created, error } = await supabase.from("plan_items").insert(input.drafts).select("id");
       if (error) throw error;
+      if (previous?.length) {
+        const { error: deleteError } = await supabase.from("plan_items").delete().in("id", previous.map(p => p.id));
+        if (deleteError) {
+          if (created?.length) await supabase.from("plan_items").delete().in("id", created.map(p => p.id));
+          throw deleteError;
+        }
+      }
     },
     onSuccess: invalidate,
   });
