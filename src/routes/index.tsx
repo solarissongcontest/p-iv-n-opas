@@ -24,6 +24,32 @@ export const Route = createFileRoute("/")({ component: App });
 const DEVICE_AUTH_KEY = "opk.device-authorized";
 const DEVICE_OWNER_KEY = "opk.owner-id";
 
+async function getArthurSession() {
+  const response = await fetch("/api/device-auth", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ username: "Arthur" }),
+  });
+  const payload = (await response.json().catch(() => ({}))) as {
+    access_token?: string;
+    refresh_token?: string;
+    user_id?: string;
+    error?: string;
+  };
+  if (!response.ok || !payload.access_token || !payload.refresh_token) {
+    throw new Error(payload.error ?? "Arthur-session luominen epäonnistui.");
+  }
+
+  const { data, error } = await supabase.auth.setSession({
+    access_token: payload.access_token,
+    refresh_token: payload.refresh_token,
+  });
+  if (error) throw error;
+  if (!data.user) throw new Error("Supabase ei palauttanut käyttäjää.");
+  return data.user;
+}
+
+
 function App() {
   const [user, setUser] = useState<User | null | undefined>();
   const [authError, setAuthError] = useState<string | null>(null);
@@ -47,25 +73,16 @@ function App() {
         }
 
         const trustedDevice = localStorage.getItem(DEVICE_AUTH_KEY) === "Arthur";
-        const rememberedOwner = localStorage.getItem(DEVICE_OWNER_KEY);
         if (!trustedDevice) {
           setUser(null);
           return;
         }
 
-        // Never silently create a second identity for a remembered device.
-        // Normally Supabase restores the persisted refresh token before this point.
-        if (rememberedOwner) {
-          setAuthError("Tämän laitteen tallennettu Supabase-istunto on vanhentunut. Älä poista käyttäjää Supabasesta, jotta opiskeluhistoria säilyy samalla tunnisteella.");
-          setUser(null);
-          return;
-        }
-
-        const { data, error } = await supabase.auth.signInAnonymously();
-        if (error) throw error;
-        if (data.user) {
-          localStorage.setItem(DEVICE_OWNER_KEY, data.user.id);
-          if (active) setUser(data.user);
+        const restoredUser = await getArthurSession();
+        localStorage.setItem(DEVICE_OWNER_KEY, restoredUser.id);
+        if (active) {
+          setAuthError(null);
+          setUser(restoredUser);
         }
       } catch (error) {
         if (!active) return;
@@ -104,7 +121,7 @@ function DeviceSignIn({
       <p className="mt-2 text-muted-foreground">Tunnista tämä laite kerran. Sen jälkeen Opintopäiväkirja avautuu suoraan.</p>
     </div>
     {errorMessage && <p role="alert" className="rounded-xl border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive">
-      {errorMessage.toLowerCase().includes("anonymous") ? "Anonyymi kirjautuminen ei ole käytössä Supabasessa. Ota Anonymous Sign-Ins käyttöön kohdasta Authentication → Sign In / Providers." : errorMessage}
+      {errorMessage}
     </p>}
     <form
       onSubmit={async e => {
@@ -117,17 +134,16 @@ function DeviceSignIn({
         }
 
         setBusy(true);
-        const { data, error } = await supabase.auth.signInAnonymously();
-        setBusy(false);
-
-        if (error || !data.user) {
-          setErrorMessage(error?.message ?? "Kirjautuminen epäonnistui.");
-          return;
+        try {
+          const signedInUser = await getArthurSession();
+          localStorage.setItem(DEVICE_AUTH_KEY, "Arthur");
+          localStorage.setItem(DEVICE_OWNER_KEY, signedInUser.id);
+          onSignedIn(signedInUser);
+        } catch (error) {
+          setErrorMessage(error instanceof Error ? error.message : "Kirjautuminen epäonnistui.");
+        } finally {
+          setBusy(false);
         }
-
-        localStorage.setItem(DEVICE_AUTH_KEY, "Arthur");
-        localStorage.setItem(DEVICE_OWNER_KEY, data.user.id);
-        onSignedIn(data.user);
       }}
       className="space-y-3"
     >
