@@ -21,21 +21,20 @@ function localDateParts(timeZone: string) {
 
   const read = (type: Intl.DateTimeFormatPartTypes) =>
     parts.find((part) => part.type === type)?.value ?? "";
-
   const weekdayMap: Record<string, number> = {
-    Mon: 1,
-    Tue: 2,
-    Wed: 3,
-    Thu: 4,
-    Fri: 5,
-    Sat: 6,
-    Sun: 7,
+    Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6, Sun: 7,
   };
 
   return {
     iso: `${read("year")}-${read("month")}-${read("day")}`,
     weekday: weekdayMap[read("weekday")] ?? 1,
   };
+}
+
+function addDays(iso: string, days: number) {
+  const d = new Date(`${iso}T12:00:00Z`);
+  d.setUTCDate(d.getUTCDate() + days);
+  return d.toISOString().slice(0, 10);
 }
 
 function daysBetween(a: string, b: string) {
@@ -50,8 +49,6 @@ export const Route = createFileRoute("/api/push/cron")({
     handlers: {
       GET: async ({ request }) => {
         try {
-          // Vercel adds this header to scheduled invocations. The database
-          // delivery key below also makes the operation idempotent.
           if (request.headers.get("x-vercel-cron-schedule") !== CRON_SCHEDULE) {
             return Response.json({ error: "Unauthorized." }, { status: 401 });
           }
@@ -63,22 +60,28 @@ export const Route = createFileRoute("/api/push/cron")({
           const { data: preferences, error: preferencesError } = await admin
             .from("user_preferences")
             .select("*")
-            .eq("onboarding_completed", true)
             .eq("notifications_enabled", true);
           if (preferencesError) throw preferencesError;
 
-          let sent = 0;
-          let skipped = 0;
-          let deactivated = 0;
+          let sent = 0, skipped = 0, deactivated = 0;
 
           for (const preference of preferences ?? []) {
             const timezone = preference.timezone || "Europe/Helsinki";
             const local = localDateParts(timezone);
             const weekdays = (preference.study_weekdays ?? [1,2,3,4,5]) as number[];
-            if (!weekdays.includes(local.weekday)) {
-              skipped += 1;
-              continue;
-            }
+
+            const { data: notificationSettings, error: settingsError } = await admin
+              .from("notification_settings")
+              .select("*")
+              .eq("owner_id", preference.owner_id)
+              .maybeSingle();
+            if (settingsError) throw settingsError;
+            const settings = notificationSettings ?? {
+              study_sessions: true,
+              exams: true,
+              plan_changes: true,
+              weekly_summary: true,
+            };
 
             const deliveryKey = `morning:${local.iso}`;
             const { data: delivered, error: deliveryReadError } = await admin
@@ -88,111 +91,96 @@ export const Route = createFileRoute("/api/push/cron")({
               .eq("delivery_key", deliveryKey)
               .limit(1);
             if (deliveryReadError) throw deliveryReadError;
-            if (delivered?.length) {
-              skipped += 1;
-              continue;
+            if (delivered?.length) { skipped += 1; continue; }
+
+            const weekStart = addDays(local.iso, -(local.weekday - 1));
+            const weekEnd = addDays(weekStart, 6);
+
+            const [
+              { data: tasks, error: taskError },
+              { data: exams, error: examError },
+              { data: reviews, error: reviewError },
+              { data: overdue, error: overdueError },
+              { data: weekSessions, error: sessionError },
+              { data: weekPlan, error: weekPlanError },
+            ] = await Promise.all([
+              admin.from("plan_items").select("id,title,target_minutes,course_id")
+                .eq("owner_id", preference.owner_id).eq("date", local.iso)
+                .eq("status", "planned").neq("kind", "exam"),
+              admin.from("exams").select("id,name,date,course_id")
+                .eq("owner_id", preference.owner_id).gte("date", local.iso)
+                .order("date", { ascending: true }).limit(1),
+              admin.from("topics").select("id,name,next_review")
+                .eq("owner_id", preference.owner_id).lte("next_review", local.iso)
+                .gt("verified_level", 0).limit(25),
+              admin.from("plan_items").select("id")
+                .eq("owner_id", preference.owner_id).eq("status", "planned")
+                .lt("date", local.iso).neq("kind", "exam"),
+              admin.from("study_sessions").select("minutes,course_id")
+                .eq("owner_id", preference.owner_id).gte("date", weekStart).lte("date", weekEnd),
+              admin.from("plan_items").select("status,target_minutes,course_id")
+                .eq("owner_id", preference.owner_id).gte("date", weekStart).lte("date", weekEnd)
+                .neq("kind", "exam"),
+            ]);
+            for (const error of [taskError,examError,reviewError,overdueError,sessionError,weekPlanError]) {
+              if (error) throw error;
             }
 
-            const [{ data: tasks, error: taskError }, { data: exams, error: examError }, { data: reviews, error: reviewError }] =
-              await Promise.all([
-                admin
-                  .from("plan_items")
-                  .select("id,title,target_minutes,course_id")
-                  .eq("owner_id", preference.owner_id)
-                  .eq("date", local.iso)
-                  .eq("status", "planned")
-                  .neq("kind", "exam"),
-                admin
-                  .from("exams")
-                  .select("id,name,date,course_id")
-                  .eq("owner_id", preference.owner_id)
-                  .gte("date", local.iso)
-                  .order("date", { ascending: true })
-                  .limit(1),
-                admin
-                  .from("topics")
-                  .select("id,name,next_review")
-                  .eq("owner_id", preference.owner_id)
-                  .lte("next_review", local.iso)
-                  .gt("verified_level", 0)
-                  .limit(25),
-              ]);
-            if (taskError) throw taskError;
-            if (examError) throw examError;
-            if (reviewError) throw reviewError;
-
-            let title = "Opintopäiväkirja";
+            let title = "";
             let body = "";
-            const taskMinutes = (tasks ?? []).reduce(
-              (sum, task) => sum + Number(task.target_minutes ?? 0),
-              0,
-            );
 
-            if (tasks?.length) {
+            if (local.weekday === 7 && settings.weekly_summary) {
+              const actual = (weekSessions ?? []).reduce((sum, s) => sum + Number(s.minutes ?? 0), 0);
+              const completed = (weekPlan ?? []).filter(p => p.status === "completed").length;
+              const percent = weekPlan?.length ? Math.round(completed / weekPlan.length * 100) : 0;
+              title = "Viikkoyhteenveto";
+              body = `Tällä viikolla ${actual} min opiskelua · ${percent} % suunnitelmasta toteutui.`;
+            } else if (weekdays.includes(local.weekday) && settings.study_sessions && tasks?.length) {
+              const taskMinutes = tasks.reduce((sum, task) => sum + Number(task.target_minutes ?? 0), 0);
               title = "Tämän päivän opiskelu";
               body = `${tasks.length} tehtävää · noin ${taskMinutes} min.`;
               if (reviews?.length) body += ` Kertauksia odottaa ${reviews.length}.`;
-            } else if (reviews?.length) {
+            } else if (weekdays.includes(local.weekday) && settings.study_sessions && reviews?.length) {
               title = "Kertaus odottaa";
               body = `${reviews.length} aihetta on kertausvuorossa tänään.`;
-            } else if (exams?.[0]) {
+            } else if (settings.plan_changes && overdue?.length) {
+              title = "Suunnitelmaa kannattaa mukauttaa";
+              body = `${overdue.length} tehtävää on jäänyt aiemmilta päiviltä. Avaa suunnitelma ja siirrä ne rauhassa.`;
+            } else if (settings.exams && exams?.[0]) {
               const days = daysBetween(exams[0].date, local.iso);
-              if (days > 3) {
-                skipped += 1;
-                continue;
+              if (days <= 3) {
+                title = "Koe lähestyy";
+                body = `${exams[0].name}: ${days === 0 ? "tänään" : days === 1 ? "huomenna" : `${days} päivän päästä`}.`;
               }
-              title = "Koe lähestyy";
-              body = `${exams[0].name}: ${days === 0 ? "tänään" : days === 1 ? "huomenna" : `${days} päivän päästä`}.`;
-            } else {
-              skipped += 1;
-              continue;
             }
 
+            if (!title) { skipped += 1; continue; }
+
             const { data: subscriptions, error: subscriptionError } = await admin
-              .from("push_subscriptions")
-              .select("id,subscription")
-              .eq("owner_id", preference.owner_id)
-              .eq("active", true);
+              .from("push_subscriptions").select("id,subscription")
+              .eq("owner_id", preference.owner_id).eq("active", true);
             if (subscriptionError) throw subscriptionError;
-            if (!subscriptions?.length) {
-              skipped += 1;
-              continue;
-            }
+            if (!subscriptions?.length) { skipped += 1; continue; }
 
             let deliveredToAny = false;
             for (const row of subscriptions) {
-              const response = await sendWebPush(
-                row.subscription as StoredPushSubscription,
-                {
-                  title,
-                  body,
-                  url: "/",
-                  tag: deliveryKey,
-                },
-              );
-
+              const response = await sendWebPush(row.subscription as StoredPushSubscription, {
+                title, body, url: "/", tag: deliveryKey,
+              });
               if (response.ok) {
-                deliveredToAny = true;
-                sent += 1;
-                await admin
-                  .from("push_subscriptions")
-                  .update({ last_success_at: new Date().toISOString() })
-                  .eq("id", row.id);
+                deliveredToAny = true; sent += 1;
+                await admin.from("push_subscriptions")
+                  .update({ last_success_at: new Date().toISOString() }).eq("id", row.id);
               } else if (response.status === 404 || response.status === 410) {
                 deactivated += 1;
-                await admin
-                  .from("push_subscriptions")
-                  .update({ active: false, updated_at: new Date().toISOString() })
-                  .eq("id", row.id);
-              } else {
-                console.error("[push/cron] Push endpoint returned", response.status);
+                await admin.from("push_subscriptions")
+                  .update({ active: false, updated_at: new Date().toISOString() }).eq("id", row.id);
               }
             }
 
             if (deliveredToAny) {
               const { error } = await admin.from("push_deliveries").insert({
-                owner_id: preference.owner_id,
-                delivery_key: deliveryKey,
+                owner_id: preference.owner_id, delivery_key: deliveryKey,
               });
               if (error && error.code !== "23505") throw error;
             }
