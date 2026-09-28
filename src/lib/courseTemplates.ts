@@ -96,7 +96,7 @@ export function normalizeTopicWeights(topics: ImportedTopic[]): ImportedTopic[] 
     const weight =
       index === topics.length - 1
         ? Math.max(0, 100 - used)
-        : Math.round((basis[index] / basisTotal) * 100);
+        : Math.round((((basis[index] ?? 0) / basisTotal) * 100));
     used += weight;
     return { ...topic, weight };
   });
