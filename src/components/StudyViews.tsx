@@ -350,9 +350,16 @@ export function SettingsView({user}:{user:User}) {
   const [pushEnabled,setPushEnabled]=useState(false);
   const [pushBusy,setPushBusy]=useState(false);
   const preferences=usePreferences(),prefs=preferences.data,updatePreferences=useUpdatePreferences();
+  const settingsQ=useSettings(),settings=settingsQ.data,updateSettings=useUpdateSettings();
   const allCourses=useCourses(),archiveCourse=useArchiveCourse();
   const archived=(allCourses.data??[]).filter(c=>c.archived);
   const weekdayOptions=[[1,"Ma"],[2,"Ti"],[3,"Ke"],[4,"To"],[5,"Pe"],[6,"La"],[7,"Su"]] as const;
+  const notificationOptions=[
+    ["study_sessions","Opiskelusessiot","Päivän suunnitellut opiskelut ja erääntyvät kertaukset"],
+    ["exams","Kokeet","Lähestyvät kokeet"],
+    ["plan_changes","Suunnitelmamuutokset","Myöhässä oleva työ ja tarve mukauttaa suunnitelmaa"],
+    ["weekly_summary","Viikkoyhteenveto","Rauhallinen yhteenveto viikon opiskelusta"],
+  ] as const;
 
   useEffect(()=>{
     let active=true;
@@ -395,19 +402,14 @@ export function SettingsView({user}:{user:User}) {
     <Panel title="Profiili"><p className="text-2xl font-semibold">{prefs?.display_name||"Arthur"}</p><p className="mt-2 text-sm text-muted-foreground">Pysyvä Opintopäiväkirja-tunnus · {user.id.slice(0,8)}…</p></Panel>
 
     <Panel title="Opiskelurytmi">
-      <p className="mb-3 text-sm text-muted-foreground">Näitä päiviä käytetään uusien adaptiivisten suunnitelmien rytmitykseen ja taustamuistutuksiin.</p>
+      <p className="mb-3 text-sm text-muted-foreground">Näitä päiviä käytetään adaptiivisten suunnitelmien rytmitykseen ja taustamuistutuksiin.</p>
       <div className="flex flex-wrap gap-2">{weekdayOptions.map(([day,label])=>{const active=(prefs?.study_weekdays??[1,2,3,4,5]).includes(day);return <button key={day} type="button" aria-pressed={active} onClick={()=>void toggleWeekday(day)} className={`grid size-11 place-items-center rounded-xl border text-sm font-semibold ${active?"border-primary bg-accent text-primary":"border-border bg-surface"}`}>{label}</button>;})}</div>
     </Panel>
 
     <Panel title="Taustamuistutukset" action={<button disabled={pushBusy||!pushSupported()} className={secondary+" !min-h-9"} onClick={()=>void togglePush()}><Bell size={15}/>{pushBusy?"Päivitetään…":pushEnabled?"Poista käytöstä":"Ota käyttöön"}</button>}>
-      <p className="text-sm text-muted-foreground">
-        {pushSupported()
-          ? pushEnabled
-            ? "Web Push on käytössä tällä laitteella. Muistutukset voivat saapua myös silloin, kun Opintopäiväkirja on suljettu."
-            : "Ota Web Push käyttöön, jotta päivän tehtävät, kertausvelka ja aivan lähellä olevat kokeet voivat muistuttaa myös sovelluksen ollessa suljettu."
-          : "Tämä selain ei tue Web Push -ilmoituksia."}
-      </p>
-      <p className="mt-3 text-xs text-muted-foreground">Aamumuistutus lähetetään valittuina opiskelupäivinä noin klo 8–9 Suomen aikaa. Saman päivän muistutus lähetetään vain kerran.</p>
+      <p className="text-sm text-muted-foreground">{pushSupported()?pushEnabled?"Web Push on käytössä tällä laitteella. Muistutukset voivat saapua myös sovelluksen ollessa suljettu.":"Ota Web Push käyttöön, jos haluat taustamuistutuksia.":"Tämä selain ei tue Web Push -ilmoituksia."}</p>
+      {settings?<div className="mt-4 divide-y divide-border">{notificationOptions.map(([key,label,description])=><label key={key} className="flex min-h-14 items-center justify-between gap-4 py-2"><span><span className="block text-sm font-medium">{label}</span><span className="block text-xs text-muted-foreground">{description}</span></span><input type="checkbox" className="size-5 accent-primary" checked={settings[key]} onChange={e=>void updateSettings.mutateAsync({id:settings.id,[key]:e.target.checked}).catch(()=>toast.error("Ilmoitusasetusta ei voitu tallentaa."))}/></label>)}</div>:<p className="mt-4 text-sm text-muted-foreground">Ilmoitusasetuksia ladataan…</p>}
+      <p className="mt-3 text-xs text-muted-foreground">Muistutukset ovat tarkoituksella rauhallisia. Saman aiheen turhaa pommitusta ei lähetetä.</p>
       {pushEnabled&&<button className={secondary+" mt-4 !min-h-9"} onClick={()=>void sendTestPush().then(()=>toast.success("Testimuistutus lähetettiin palvelimelta.")).catch(error=>toast.error(error instanceof Error?error.message:"Testimuistutus epäonnistui."))}>Lähetä testimuistutus</button>}
     </Panel>
 
