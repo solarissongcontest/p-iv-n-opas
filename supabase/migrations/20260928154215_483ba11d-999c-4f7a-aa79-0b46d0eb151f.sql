@@ -211,14 +211,14 @@ INSERT INTO public.topics (course_id, name, position, weight, importance, materi
 ('11111111-1111-4111-8111-111111111111','Rajoittava tekijä',4,9,5,'s. 38–44'),
 ('11111111-1111-4111-8111-111111111111','Ideaalikaasu ja kaasustoikiometria',5,8,4,'s. 46–54'),
 ('11111111-1111-4111-8111-111111111111','Saostumis- ja hajoamisreaktiot',6,5,3,'s. 61–88'),
-('11111111-1111-4111-8111-111111111111','Protoninsiirto, neutraloituminen ja titraus',7,8,5,'s. 92–100'),
-('11111111-1111-4111-8111-111111111111','Palamisreaktiot',8,4,3,'s. 103–111'),
-('11111111-1111-4111-8111-111111111111','Substituutioreaktiot',9,5,3,'s. 114–122'),
-('11111111-1111-4111-8111-111111111111','Additioreaktiot',10,5,3,'s. 132–161'),
-('11111111-1111-4111-8111-111111111111','Eliminaatioreaktiot',11,5,3,'s. 132–161'),
-('11111111-1111-4111-8111-111111111111','Kondensaatioreaktiot',12,5,3,'s. 162–210'),
-('11111111-1111-4111-8111-111111111111','Hydrolyysireaktiot',13,5,3,'s. 162–210'),
-('11111111-1111-4111-8111-111111111111','Polymeroituminen ja polymeerit',14,8,4,'s. 162–210'),
+('11111111-1111-4111-8111-111111111111','Protoninsiirto, neutraloituminen ja titraus',7,8,5,'s. 61–88'),
+('11111111-1111-4111-8111-111111111111','Palamisreaktiot',8,4,3,'s. 61–88'),
+('11111111-1111-4111-8111-111111111111','Substituutioreaktiot',9,5,3,'s. 92–100'),
+('11111111-1111-4111-8111-111111111111','Additioreaktiot',10,5,3,'s. 103–111'),
+('11111111-1111-4111-8111-111111111111','Eliminaatioreaktiot',11,5,3,'s. 103–111'),
+('11111111-1111-4111-8111-111111111111','Kondensaatioreaktiot',12,5,3,'s. 114–122'),
+('11111111-1111-4111-8111-111111111111','Hydrolyysireaktiot',13,5,3,'s. 114–122'),
+('11111111-1111-4111-8111-111111111111','Polymeroituminen ja polymeerit',14,8,4,'s. 132–161'),
 ('11111111-1111-4111-8111-111111111111','Biomolekyylit',15,7,4,'s. 162–210');
 
 INSERT INTO public.exams (course_id, name, date, target_system, target_value)
