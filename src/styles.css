@@ -664,3 +664,36 @@ html.dark .app-mobile-header {
 .skip-link:focus {
   transform: translateY(0);
 }
+
+
+/* ---------- hard breakpoint isolation ---------- */
+/* Mobile shell components set display explicitly. These rules ensure they can
+   never leak into the desktop shell, regardless of utility ordering. */
+@media (min-width: 768px) {
+  .app-mobile-header,
+  .app-tabbar,
+  .app-sheet-backdrop {
+    display: none !important;
+  }
+
+  .app-main {
+    padding-bottom: 2.5rem;
+  }
+
+  .app-desktop-main {
+    width: auto;
+    max-width: none;
+    margin-left: 6.5rem;
+    margin-right: 1.5rem;
+    padding-inline: 1.5rem;
+  }
+}
+
+@media (min-width: 1101px) {
+  .app-desktop-main {
+    max-width: 1180px;
+    margin-left: 17rem;
+    margin-right: 2rem;
+    padding-inline: 0;
+  }
+}
