@@ -1,4 +1,5 @@
 import { verifyArthurDeviceToken } from "../deviceAuth.server.ts";
+import { addDays } from "../fi.ts";
 import { supabaseAdmin } from "../../integrations/supabase/client.server.ts";
 import { buildCoachContext, type StudySnapshot } from "./context.ts";
 import {
@@ -146,7 +147,7 @@ export async function handleCoach(request: Request): Promise<Response> {
         .from("study_sessions")
         .select("course_id,date,minutes")
         .eq("owner_id", ownerId)
-        .gte("date", now)
+        .gte("date", addDays(now, -6))
         .limit(500),
       supabaseAdmin
         .from("exams")
