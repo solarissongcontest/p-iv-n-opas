@@ -2,8 +2,6 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { registerOp, runOrQueue } from "./offline";
 import {
-  nextReviewDate,
-  verifiedLevel,
   type Course,
   type Exam,
   type Mistake,
