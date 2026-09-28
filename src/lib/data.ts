@@ -2,8 +2,6 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { registerOp, runOrQueue } from "./offline";
 import {
-  nextReviewDate,
-  verifiedLevel,
   type Course,
   type Exam,
   type Mistake,
@@ -106,90 +104,30 @@ export type LogSessionInput = {
   date?: string;
 };
 
-async function doLogSession(payload: unknown) {
+async function doLogSession(payload: unknown, operationId: string) {
   const input = payload as LogSessionInput;
   const date = input.date ?? today();
-  const { data: session, error } = await supabase
-    .from("study_sessions")
-    .insert({
-      course_id: input.course_id,
-      topic_id: input.topic_id,
-      date,
-      minutes: input.minutes,
-      planned_minutes: input.planned_minutes ?? null,
-      kind: input.kind,
-      competence: input.competence ?? null,
-      unclear: input.unclear ?? null,
-      did: input.did ?? null,
-      focus: input.focus ?? null,
-      method: input.method ?? null,
-      energy: input.energy ?? null,
-      tasks: input.tasks ?? null,
-      note: input.note ?? null,
-    })
-    .select()
-    .single();
+  const { data: sessionId, error } = await supabase.rpc("log_study_session", {
+    p_request_id: operationId,
+    p_course_id: input.course_id,
+    p_topic_id: input.topic_id,
+    p_date: date,
+    p_minutes: input.minutes,
+    p_planned_minutes: input.planned_minutes ?? null,
+    p_kind: input.kind,
+    p_competence: input.competence ?? null,
+    p_unclear: input.unclear ?? null,
+    p_did: input.did ?? null,
+    p_focus: input.focus ?? null,
+    p_method: input.method ?? null,
+    p_energy: input.energy ?? null,
+    p_tasks: input.tasks ?? null,
+    p_note: input.note ?? null,
+    p_plan_item_id: input.plan_item_id ?? null,
+  });
   if (error) throw error;
-
-  if (input.topic_id) {
-    const { data: topic } = await supabase
-      .from("topics")
-      .select("*")
-      .eq("id", input.topic_id)
-      .single();
-    if (topic) {
-      const progressStep = input.kind === "study" ? Math.min(30, Math.round(input.minutes / 3)) : 5;
-      const progress = Math.min(100, topic.progress + progressStep);
-      const basic =
-        topic.basic_successes + ((input.competence ?? 0) >= 3 && input.kind !== "test" ? 1 : 0);
-      const exam =
-        topic.exam_successes + ((input.competence ?? 0) >= 4 && input.kind === "test" ? 1 : 0);
-      const delayed =
-        topic.delayed_successes + ((input.competence ?? 0) >= 3 && input.kind === "review" ? 1 : 0);
-      const draft = {
-        ...topic,
-        progress,
-        basic_successes: basic,
-        exam_successes: exam,
-        delayed_successes: delayed,
-        self_level: input.competence ?? topic.self_level,
-      };
-      const verified = verifiedLevel(draft);
-      await supabase
-        .from("topics")
-        .update({
-          progress,
-          basic_successes: basic,
-          exam_successes: exam,
-          delayed_successes: delayed,
-          self_level: input.competence ?? topic.self_level,
-          verified_level: verified,
-          study_minutes: topic.study_minutes + input.minutes,
-          last_review: date,
-          next_review: nextReviewDate(date, verified),
-        })
-        .eq("id", topic.id);
-
-      if (verified !== topic.verified_level) {
-        await supabase.from("progress_events").insert({
-          course_id: input.course_id,
-          topic_id: topic.id,
-          kind: "mastery",
-          from_value: topic.verified_level,
-          to_value: verified,
-          detail: topic.name,
-        });
-      }
-    }
-  }
-
-  if (input.plan_item_id) {
-    await supabase
-      .from("plan_items")
-      .update({ status: "completed", session_id: session.id })
-      .eq("id", input.plan_item_id);
-  }
-  return session;
+  if (!sessionId) throw new Error("Opiskelusession tallennus ei palauttanut tunnistetta.");
+  return sessionId;
 }
 
 async function doUpdatePlanStatus(payload: unknown) {
