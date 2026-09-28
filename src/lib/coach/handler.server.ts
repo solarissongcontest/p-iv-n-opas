@@ -217,6 +217,7 @@ export async function handleCoach(request: Request): Promise<Response> {
     if (
       !["help", "feedback"].includes(input.mode) ||
       !input.remoteConsent ||
+      !input.attempt.trim() ||
       !remoteCoachConfigured()
     ) {
       return json(local);
