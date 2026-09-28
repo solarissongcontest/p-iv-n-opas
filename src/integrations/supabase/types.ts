@@ -392,6 +392,7 @@ export type Database = {
           note: string | null
           owner_id: string | null
           planned_minutes: number | null
+          request_id: string | null
           tasks: string | null
           topic_id: string | null
           unclear: string | null
@@ -411,6 +412,7 @@ export type Database = {
           note?: string | null
           owner_id?: string | null
           planned_minutes?: number | null
+          request_id?: string | null
           tasks?: string | null
           topic_id?: string | null
           unclear?: string | null
@@ -430,6 +432,7 @@ export type Database = {
           note?: string | null
           owner_id?: string | null
           planned_minutes?: number | null
+          request_id?: string | null
           tasks?: string | null
           topic_id?: string | null
           unclear?: string | null
@@ -465,6 +468,7 @@ export type Database = {
           materials: string | null
           name: string
           next_review: string | null
+          owner_id: string | null
           position: number
           progress: number
           school_covered: boolean
@@ -487,6 +491,7 @@ export type Database = {
           materials?: string | null
           name: string
           next_review?: string | null
+          owner_id?: string | null
           position?: number
           progress?: number
           school_covered?: boolean
@@ -509,6 +514,7 @@ export type Database = {
           materials?: string | null
           name?: string
           next_review?: string | null
+          owner_id?: string | null
           position?: number
           progress?: number
           school_covered?: boolean
@@ -563,7 +569,27 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      log_study_session: {
+        Args: {
+          p_request_id: string
+          p_course_id: string
+          p_topic_id: string | null
+          p_date: string
+          p_minutes: number
+          p_planned_minutes: number | null
+          p_kind: string
+          p_competence: number | null
+          p_unclear: string | null
+          p_did: string | null
+          p_focus: number | null
+          p_method: string | null
+          p_energy: number | null
+          p_tasks: string | null
+          p_note: string | null
+          p_plan_item_id: string | null
+        }
+        Returns: string
+      }
     }
     Enums: {
       [_ in never]: never
