@@ -47,8 +47,11 @@ export function toISO(d: Date): string {
 }
 
 export function parseISO(s: string): Date {
-  const [y, m, d] = s.split("-").map(Number);
-  return new Date(y, (m ?? 1) - 1, d ?? 1);
+  const [rawY, rawM, rawD] = s.split("-").map(Number);
+  const y = rawY ?? new Date().getFullYear();
+  const m = rawM ?? 1;
+  const d = rawD ?? 1;
+  return new Date(y, m - 1, d);
 }
 
 export function today(): string {
@@ -85,7 +88,7 @@ export function weekNumber(iso: string): number {
 
 export function longDate(iso: string): string {
   const d = parseISO(iso);
-  return `${WEEKDAYS[d.getDay()]} ${d.getDate()}. ${MONTHS[d.getMonth()]} ${d.getFullYear()}`;
+  return `${WEEKDAYS[d.getDay()] ?? ""} ${d.getDate()}. ${MONTHS[d.getMonth()] ?? ""} ${d.getFullYear()}`;
 }
 
 export function shortDate(iso: string): string {
@@ -95,15 +98,15 @@ export function shortDate(iso: string): string {
 
 export function dateWithWeekday(iso: string): string {
   const d = parseISO(iso);
-  return `${WEEKDAYS_SHORT[d.getDay()]} ${d.getDate()}.${d.getMonth() + 1}.`;
+  return `${WEEKDAYS_SHORT[d.getDay()] ?? ""} ${d.getDate()}.${d.getMonth() + 1}.`;
 }
 
 export function weekdayShort(iso: string): string {
-  return WEEKDAYS_SHORT[parseISO(iso).getDay()];
+  return WEEKDAYS_SHORT[parseISO(iso).getDay()] ?? "";
 }
 
 export function monthName(iso: string): string {
-  return MONTHS_NOM[parseISO(iso).getMonth()];
+  return MONTHS_NOM[parseISO(iso).getMonth()] ?? "";
 }
 
 export function fullDate(iso: string): string {
