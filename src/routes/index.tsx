@@ -5,7 +5,7 @@ import { toast, Toaster } from "sonner";
 import type { User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { LiquidGlass } from "@/components/LiquidGlass";
-import { useCourses, useExams, useMistakes, usePlan, useSessions, useTests, useTopics } from "@/lib/data";
+import { ensureKe04ForCurrentUser, useCourses, useExams, useMistakes, usePlan, useSessions, useTests, useTopics } from "@/lib/data";
 import { longDate, greeting, today } from "@/lib/fi";
 import { CourseView, ExamsView, ProgressView, TodayView, PlanView, SettingsView } from "@/components/StudyViews";
 import { CourseForm, SessionForm, SearchPanel } from "@/components/StudyDialogs";
@@ -21,77 +21,34 @@ const nav = [
 ] as const;
 export const Route = createFileRoute("/")({ component: App });
 
-function cleanAuthUrl() {
-  if (typeof window === "undefined") return;
-  const clean = new URL(window.location.href);
-  for (const key of [
-    "code",
-    "token_hash",
-    "type",
-    "error",
-    "error_code",
-    "error_description",
-  ]) {
-    clean.searchParams.delete(key);
-  }
-  clean.hash = "";
-  const next = clean.pathname + (clean.search ? clean.search : "");
-  window.history.replaceState({}, document.title, next);
-}
-
-async function completeAuthFromUrl(): Promise<User | null> {
-  if (typeof window === "undefined") return null;
-
-  const url = new URL(window.location.href);
-  const hash = new URLSearchParams(url.hash.startsWith("#") ? url.hash.slice(1) : url.hash);
-  const authError =
-    url.searchParams.get("error_description") ??
-    hash.get("error_description") ??
-    url.searchParams.get("error") ??
-    hash.get("error");
-
-  if (authError) {
-    cleanAuthUrl();
-    throw new Error(authError.replace(/\+/g, " "));
-  }
-
-  const code = url.searchParams.get("code");
-  if (code) {
-    const { data, error } = await supabase.auth.exchangeCodeForSession(code);
-    if (error) throw error;
-    cleanAuthUrl();
-    return data.user ?? data.session?.user ?? null;
-  }
-
-  const tokenHash = url.searchParams.get("token_hash");
-  if (tokenHash) {
-    const type = url.searchParams.get("type") ?? "email";
-    const { data, error } = await supabase.auth.verifyOtp({
-      token_hash: tokenHash,
-      type: type as any,
-    });
-    if (error) throw error;
-    cleanAuthUrl();
-    return data.user ?? data.session?.user ?? null;
-  }
-
-  const accessToken = hash.get("access_token");
-  const refreshToken = hash.get("refresh_token");
-  if (accessToken && refreshToken) {
-    const { data, error } = await supabase.auth.setSession({
-      access_token: accessToken,
-      refresh_token: refreshToken,
-    });
-    if (error) throw error;
-    cleanAuthUrl();
-    return data.user ?? data.session?.user ?? null;
-  }
-
-  return null;
-}
-
 const DEVICE_AUTH_KEY = "opk.device-authorized";
 const DEVICE_OWNER_KEY = "opk.owner-id";
+
+async function getArthurSession() {
+  const response = await fetch("/api/device-auth", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ username: "Arthur" }),
+  });
+  const payload = (await response.json().catch(() => ({}))) as {
+    access_token?: string;
+    refresh_token?: string;
+    user_id?: string;
+    error?: string;
+  };
+  if (!response.ok || !payload.access_token || !payload.refresh_token) {
+    throw new Error(payload.error ?? "Arthur-session luominen epäonnistui.");
+  }
+
+  const { data, error } = await supabase.auth.setSession({
+    access_token: payload.access_token,
+    refresh_token: payload.refresh_token,
+  });
+  if (error) throw error;
+  if (!data.user) throw new Error("Supabase ei palauttanut käyttäjää.");
+  return data.user;
+}
+
 
 function App() {
   const [user, setUser] = useState<User | null | undefined>();
@@ -116,25 +73,16 @@ function App() {
         }
 
         const trustedDevice = localStorage.getItem(DEVICE_AUTH_KEY) === "Arthur";
-        const rememberedOwner = localStorage.getItem(DEVICE_OWNER_KEY);
         if (!trustedDevice) {
           setUser(null);
           return;
         }
 
-        // Never silently create a second identity for a remembered device.
-        // Normally Supabase restores the persisted refresh token before this point.
-        if (rememberedOwner) {
-          setAuthError("Tämän laitteen tallennettu Supabase-istunto on vanhentunut. Älä poista käyttäjää Supabasesta, jotta opiskeluhistoria säilyy samalla tunnisteella.");
-          setUser(null);
-          return;
-        }
-
-        const { data, error } = await supabase.auth.signInAnonymously();
-        if (error) throw error;
-        if (data.user) {
-          localStorage.setItem(DEVICE_OWNER_KEY, data.user.id);
-          if (active) setUser(data.user);
+        const restoredUser = await getArthurSession();
+        localStorage.setItem(DEVICE_OWNER_KEY, restoredUser.id);
+        if (active) {
+          setAuthError(null);
+          setUser(restoredUser);
         }
       } catch (error) {
         if (!active) return;
@@ -173,7 +121,7 @@ function DeviceSignIn({
       <p className="mt-2 text-muted-foreground">Tunnista tämä laite kerran. Sen jälkeen Opintopäiväkirja avautuu suoraan.</p>
     </div>
     {errorMessage && <p role="alert" className="rounded-xl border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive">
-      {errorMessage.toLowerCase().includes("anonymous") ? "Anonyymi kirjautuminen ei ole käytössä Supabasessa. Ota Anonymous Sign-Ins käyttöön kohdasta Authentication → Sign In / Providers." : errorMessage}
+      {errorMessage}
     </p>}
     <form
       onSubmit={async e => {
@@ -186,17 +134,16 @@ function DeviceSignIn({
         }
 
         setBusy(true);
-        const { data, error } = await supabase.auth.signInAnonymously();
-        setBusy(false);
-
-        if (error || !data.user) {
-          setErrorMessage(error?.message ?? "Kirjautuminen epäonnistui.");
-          return;
+        try {
+          const signedInUser = await getArthurSession();
+          localStorage.setItem(DEVICE_AUTH_KEY, "Arthur");
+          localStorage.setItem(DEVICE_OWNER_KEY, signedInUser.id);
+          onSignedIn(signedInUser);
+        } catch (error) {
+          setErrorMessage(error instanceof Error ? error.message : "Kirjautuminen epäonnistui.");
+        } finally {
+          setBusy(false);
         }
-
-        localStorage.setItem(DEVICE_AUTH_KEY, "Arthur");
-        localStorage.setItem(DEVICE_OWNER_KEY, data.user.id);
-        onSignedIn(data.user);
       }}
       className="space-y-3"
     >
@@ -229,10 +176,32 @@ function StudyApp({ user }: { user: User }) {
   const [adding, setAdding] = useState(false);
   const [search, setSearch] = useState(false);
   const [pending, setPending] = useState(pendingCount());
+  const [defaultsReady, setDefaultsReady] = useState(false);
+  const [defaultsError, setDefaultsError] = useState<string | null>(null);
   const coursesQ = useCourses(), topicsQ = useTopics(), sessionsQ = useSessions(), examsQ = useExams(), planQ = usePlan(), testsQ = useTests(), mistakesQ = useMistakes();
   const courses = (coursesQ.data ?? []).filter(c => !c.archived), topics = topicsQ.data ?? [], sessions = sessionsQ.data ?? [], exams = examsQ.data ?? [], plan = planQ.data ?? [];
-  const busy = [coursesQ, topicsQ, sessionsQ, examsQ, planQ].some(q => q.isPending);
-  const error = [coursesQ, topicsQ, sessionsQ, examsQ, planQ].find(q => q.error)?.error;
+  const busy = !defaultsReady || [coursesQ, topicsQ, sessionsQ, examsQ, planQ, testsQ, mistakesQ].some(q => q.isPending);
+  const error = defaultsError ?? ([coursesQ, topicsQ, sessionsQ, examsQ, planQ, testsQ, mistakesQ].find(q => q.error)?.error instanceof Error
+    ? [coursesQ, topicsQ, sessionsQ, examsQ, planQ, testsQ, mistakesQ].find(q => q.error)?.error.message
+    : null);
+  useEffect(() => {
+    let active = true;
+    void ensureKe04ForCurrentUser()
+      .then(async () => {
+        await Promise.all([coursesQ.refetch(), topicsQ.refetch(), examsQ.refetch()]);
+        if (active) {
+          setDefaultsError(null);
+          setDefaultsReady(true);
+        }
+      })
+      .catch((err) => {
+        if (!active) return;
+        setDefaultsError(err instanceof Error ? err.message : "KE04:n alustaminen epäonnistui.");
+        setDefaultsReady(true);
+      });
+    return () => { active = false; };
+  }, [user.id]);
+
   useEffect(() => { const stop = subscribePending(setPending); const sync = startSyncWatcher(n => toast.success(`Synkattiin ${n} merkintää.`)); return () => { stop(); sync(); }; }, []);
   useEffect(() => {
     if (busy || typeof Notification === "undefined" || Notification.permission !== "granted") return;
@@ -279,7 +248,7 @@ function StudyApp({ user }: { user: User }) {
     <main className="mx-auto max-w-[1240px] px-4 pb-28 pt-7 md:pl-[292px] md:pr-8 md:pb-12">
       <header className="mb-8 flex items-center justify-between"><div><p className="text-sm text-muted-foreground">{longDate(today())}</p><h1 className="mt-1 text-3xl font-semibold">{selected?.code ?? (page==="today"?greeting():nav.find(n=>n.id===page)?.label ?? "Asetukset")}</h1></div><button aria-label="Haku" onClick={()=>setSearch(true)} className="grid size-11 place-items-center rounded-xl border md:hidden"><Search size={19}/></button></header>
       {pending>0 && <p role="status" className="mb-5 rounded-xl bg-accent p-3 text-sm">Tallennettu paikallisesti · {pending} muutosta synkataan yhteyden palattua.</p>}
-      {error && <div role="alert" className="panel mb-5 p-4">Tietojen lataus epäonnistui. Tarkista yhteys. <button className="underline" onClick={()=>{void coursesQ.refetch();void topicsQ.refetch();void sessionsQ.refetch();void examsQ.refetch();void planQ.refetch();}}>Yritä uudelleen</button></div>}
+      {error && <div role="alert" className="panel mb-5 p-4"><p className="font-medium">Tietojen lataus tai alustus epäonnistui.</p><p className="mt-1 text-sm text-muted-foreground">{String(error)}</p><button className="mt-2 underline" onClick={()=>{setDefaultsReady(false);setDefaultsError(null);void ensureKe04ForCurrentUser().then(()=>Promise.all([coursesQ.refetch(),topicsQ.refetch(),sessionsQ.refetch(),examsQ.refetch(),planQ.refetch(),testsQ.refetch(),mistakesQ.refetch()])).then(()=>setDefaultsReady(true)).catch(err=>{setDefaultsError(err instanceof Error?err.message:"Uudelleenyritys epäonnistui.");setDefaultsReady(true);});}}>Yritä uudelleen</button></div>}
       {busy ? <div className="space-y-4" aria-label="Ladataan"><div className="h-32 animate-pulse rounded-2xl bg-muted"/><div className="h-60 animate-pulse rounded-2xl bg-muted"/></div> :
       courses.length===0 ? <section className="panel p-6"><h2 className="text-xl font-semibold">Aloita ensimmäisestä kurssista</h2><p className="mt-2 text-muted-foreground">Lisää kurssi ja sen aiheet, jotta voit suunnitella ja kirjata opiskelua.</p><button onClick={()=>setAdding(true)} className="mt-5 min-h-11 rounded-xl bg-primary px-4 text-primary-foreground">Lisää kurssi</button></section> :
       page==="today" ? <TodayView courses={courses} topics={topics} sessions={sessions} exams={exams} plan={plan} tests={testsQ.data??[]} mistakes={mistakesQ.data??[]} onStart={setEntry} onGo={go}/> :

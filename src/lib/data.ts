@@ -13,6 +13,7 @@ import {
   type Topic,
   type WeeklyCheckin,
   type ProgressEvent,
+  generatePlan,
 } from "./domain";
 import { today } from "./fi";
 
@@ -110,6 +111,164 @@ export const useWeeklyCheckins = () =>
   useQuery({ queryKey: ["weekly-checkins"], queryFn: listWeeklyCheckins });
 export const useProgressEvents = () =>
   useQuery({ queryKey: ["progress-events"], queryFn: listProgressEvents });
+
+
+const KE04_TOPICS = [
+  { name: "Reaktioyhtälöt ja tasapainotus", weight: 8, importance: 5, materials: "s. 14–25" },
+  { name: "Stoikiometria", weight: 10, importance: 5, materials: "s. 14–35" },
+  { name: "Reaktion saanto", weight: 8, importance: 4, materials: "s. 27–35" },
+  { name: "Rajoittava tekijä", weight: 9, importance: 5, materials: "s. 38–44" },
+  { name: "Ideaalikaasu ja kaasustoikiometria", weight: 8, importance: 4, materials: "s. 46–54" },
+  { name: "Saostumis- ja hajoamisreaktiot", weight: 5, importance: 3, materials: "s. 61–88" },
+  { name: "Protoninsiirto, neutraloituminen ja titraus", weight: 8, importance: 5, materials: "s. 92–100" },
+  { name: "Palamisreaktiot", weight: 4, importance: 3, materials: "s. 103–111" },
+  { name: "Substituutioreaktiot", weight: 5, importance: 3, materials: "s. 114–122" },
+  { name: "Additioreaktiot", weight: 5, importance: 3, materials: "s. 132–161" },
+  { name: "Eliminaatioreaktiot", weight: 5, importance: 3, materials: "s. 132–161" },
+  { name: "Kondensaatioreaktiot", weight: 5, importance: 3, materials: "s. 162–210" },
+  { name: "Hydrolyysireaktiot", weight: 5, importance: 3, materials: "s. 162–210" },
+  { name: "Polymeroituminen ja polymeerit", weight: 8, importance: 4, materials: "s. 162–210" },
+  { name: "Biomolekyylit", weight: 7, importance: 4, materials: "s. 162–210" },
+] as const;
+
+/**
+ * Make the canonical KE04 course available to the currently authenticated
+ * Arthur identity. Safe to run repeatedly: existing user data is preserved
+ * and only missing canonical topics / exam rows are added.
+ */
+export async function ensureKe04ForCurrentUser(): Promise<string> {
+  const { data: authData, error: authError } = await supabase.auth.getUser();
+  if (authError) throw authError;
+  if (!authData.user) throw new Error("Kirjautunut käyttäjä puuttuu.");
+
+  const { data: existing, error: existingError } = await supabase
+    .from("courses")
+    .select("*")
+    .eq("code", "KE04")
+    .maybeSingle();
+  if (existingError) throw existingError;
+
+  let course: Course;
+
+  if (!existing) {
+    const { data: created, error } = await supabase
+      .from("courses")
+      .insert({
+        code: "KE04",
+        name: "Kemialliset reaktiot",
+        subject: "Kemia",
+        start_date: "2026-10-05",
+        exam_date: "2026-11-23",
+        target_system: "school",
+        target_value: "10",
+        color: "sage",
+        weekly_minutes: 195,
+      })
+      .select()
+      .single();
+    if (error) throw error;
+    course = created;
+  } else {
+    const patch: Partial<Course> = {};
+    if (!existing.subject) patch.subject = "Kemia";
+    if (!existing.start_date) patch.start_date = "2026-10-05";
+    if (!existing.exam_date) patch.exam_date = "2026-11-23";
+    if (!existing.target_value) {
+      patch.target_system = "school";
+      patch.target_value = "10";
+    }
+
+    if (Object.keys(patch).length) {
+      const { data: updated, error } = await supabase
+        .from("courses")
+        .update(patch)
+        .eq("id", existing.id)
+        .select()
+        .single();
+      if (error) throw error;
+      course = updated;
+    } else {
+      course = existing;
+    }
+  }
+
+  const { data: existingTopics, error: topicsReadError } = await supabase
+    .from("topics")
+    .select("*")
+    .eq("course_id", course.id)
+    .order("position");
+  if (topicsReadError) throw topicsReadError;
+
+  const names = new Set((existingTopics ?? []).map((t) => t.name));
+  const missingTopics = KE04_TOPICS
+    .map((topic, index) => ({ ...topic, course_id: course.id, position: index + 1 }))
+    .filter((topic) => !names.has(topic.name));
+
+  if (missingTopics.length) {
+    const { error } = await supabase.from("topics").insert(missingTopics);
+    if (error) throw error;
+  }
+
+  const { data: topics, error: fullTopicsError } = await supabase
+    .from("topics")
+    .select("*")
+    .eq("course_id", course.id)
+    .order("position");
+  if (fullTopicsError) throw fullTopicsError;
+
+  const { data: exams, error: examsReadError } = await supabase
+    .from("exams")
+    .select("id")
+    .eq("course_id", course.id)
+    .eq("name", "KE04 kurssikoe")
+    .limit(1);
+  if (examsReadError) throw examsReadError;
+
+  if (!exams?.length) {
+    const { error } = await supabase.from("exams").insert({
+      course_id: course.id,
+      name: "KE04 kurssikoe",
+      date: "2026-11-23",
+      target_system: "school",
+      target_value: "10",
+    });
+    if (error) throw error;
+  }
+
+  const { data: existingPlan, error: planReadError } = await supabase
+    .from("plan_items")
+    .select("id")
+    .eq("course_id", course.id)
+    .limit(1);
+  if (planReadError) throw planReadError;
+
+  if (!existingPlan?.length && course.exam_date && topics?.length) {
+    const drafts = generatePlan({
+      course,
+      topics,
+      examDate: course.exam_date,
+      studyWeekdays: [1, 2, 3, 4, 5],
+      weeklyMinutes: course.weekly_minutes,
+    });
+    if (drafts.length) {
+      const { error } = await supabase.from("plan_items").insert(drafts);
+      if (error) throw error;
+    }
+  }
+
+  const { data: settings, error: settingsReadError } = await supabase
+    .from("notification_settings")
+    .select("id")
+    .limit(1)
+    .maybeSingle();
+  if (settingsReadError) throw settingsReadError;
+  if (!settings) {
+    const { error } = await supabase.from("notification_settings").insert({});
+    if (error) throw error;
+  }
+
+  return course.id;
+}
 
 /** ---------- writes ---------- */
 
