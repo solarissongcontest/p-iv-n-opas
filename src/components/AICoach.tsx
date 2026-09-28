@@ -315,16 +315,14 @@ export function AICoach({
       }}
     >
       <Dialog.Trigger asChild>
-        <LiquidGlass
-          as="button"
-          variant="interactive"
-          lensing
-          className="coach-trigger"
+        <button
+          type="button"
+          className="coach-trigger glass-base glass-specular glass-interactive"
           aria-label="Avaa Opintocoach"
         >
           <Sparkles size={19} />
           <span>Coach</span>
-        </LiquidGlass>
+        </button>
       </Dialog.Trigger>
 
       <Dialog.Portal>
