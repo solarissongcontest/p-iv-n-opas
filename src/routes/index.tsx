@@ -186,6 +186,35 @@ function StudyApp({ user }: { user: User }) {
   const busy = !defaultsReady || allQueries.some(q => q.isPending);
   const queryError = allQueries.find(q => q.error)?.error;
   const error = defaultsError ?? (queryError instanceof Error ? queryError.message : queryError ? String(queryError) : null);
+
+  useEffect(() => {
+    const saved = localStorage.getItem("opk.last-page") as Page | null;
+    if (saved && ["today","plan","courses","exams","progress","settings"].includes(saved)) {
+      setPage(saved);
+    }
+  }, []);
+
+  useEffect(() => {
+    const refresh = () => {
+      if (document.visibilityState !== "visible") return;
+      void Promise.all([
+        coursesQ.refetch(),
+        topicsQ.refetch(),
+        sessionsQ.refetch(),
+        examsQ.refetch(),
+        planQ.refetch(),
+        testsQ.refetch(),
+        mistakesQ.refetch(),
+        preferencesQ.refetch(),
+      ]);
+    };
+    document.addEventListener("visibilitychange", refresh);
+    window.addEventListener("focus", refresh);
+    return () => {
+      document.removeEventListener("visibilitychange", refresh);
+      window.removeEventListener("focus", refresh);
+    };
+  }, []);
   useEffect(() => {
     let active = true;
     void ensureKe04ForCurrentUser()
@@ -219,7 +248,7 @@ function StudyApp({ user }: { user: User }) {
     window.addEventListener("keydown", keys);
     return () => window.removeEventListener("keydown", keys);
   }, []);
-  const go = (p: Page) => { setPage(p); setCourseId(null); setMoreOpen(false); };
+  const go = (p: Page) => { setPage(p); localStorage.setItem("opk.last-page", p); setCourseId(null); setMoreOpen(false); };
   const selected = courses.find(c => c.id === courseId);
   const ke04 = courses.find(c => c.code === "KE04");
   const preferences = preferencesQ.data;
@@ -266,7 +295,7 @@ function StudyApp({ user }: { user: User }) {
       page==="today" ? <TodayView courses={courses} topics={topics} sessions={sessions} exams={exams} plan={plan} tests={testsQ.data??[]} mistakes={mistakesQ.data??[]} onStart={setEntry} onGo={go}/> :
       page==="plan" ? <PlanView courses={courses} topics={topics} plan={plan} onStart={setEntry}/> :
       page==="courses" ? <CourseView courses={courses} topics={topics} sessions={sessions} exams={exams} plan={plan} tests={testsQ.data??[]} mistakes={mistakesQ.data??[]} selected={courseId} onSelect={setCourseId} onAdd={()=>setAdding(true)} onStart={()=>setEntry("manual")}/> :
-      page==="exams" ? <ExamsView courses={courses} topics={topics} exams={exams} tests={testsQ.data??[]} mistakes={mistakesQ.data??[]} onCourse={id=>{setCourseId(id);setPage("courses");}}/> :
+      page==="exams" ? <ExamsView courses={courses} topics={topics} exams={exams} tests={testsQ.data??[]} mistakes={mistakesQ.data??[]} onCourse={id=>{setCourseId(id);setPage("courses");localStorage.setItem("opk.last-page","courses");}}/> :
       page==="progress" ? <ProgressView courses={courses} topics={topics} sessions={sessions} plan={plan} onPlan={()=>go("plan")}/> :
       <SettingsView user={user}/>}
     </main>
@@ -291,7 +320,7 @@ function StudyApp({ user }: { user: User }) {
     </div>}
     {entry && <SessionForm item={plan.find(p=>p.id===entry)??null} courses={courses} topics={topics} onClose={()=>setEntry(null)}/>}
     {adding && <CourseForm onClose={()=>setAdding(false)}/>}
-    {search && <SearchPanel courses={courses} topics={topics} exams={exams} onClose={()=>setSearch(false)} onNavigate={p=>{go(p as Page);setSearch(false);}} onCourse={id=>{setCourseId(id);setPage("courses");setSearch(false);}} onLog={()=>{setSearch(false);setEntry("manual");}}/>}
+    {search && <SearchPanel courses={courses} topics={topics} exams={exams} onClose={()=>setSearch(false)} onNavigate={p=>{go(p as Page);setSearch(false);}} onCourse={id=>{setCourseId(id);setPage("courses");localStorage.setItem("opk.last-page","courses");setSearch(false);}} onLog={()=>{setSearch(false);setEntry("manual");}}/>}
     <Toaster richColors/>
   </div>;
 }
