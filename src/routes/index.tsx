@@ -21,20 +21,117 @@ const nav = [
 ] as const;
 export const Route = createFileRoute("/")({ component: App });
 
+function cleanAuthUrl() {
+  if (typeof window === "undefined") return;
+  const clean = new URL(window.location.href);
+  for (const key of [
+    "code",
+    "token_hash",
+    "type",
+    "error",
+    "error_code",
+    "error_description",
+  ]) {
+    clean.searchParams.delete(key);
+  }
+  clean.hash = "";
+  const next = clean.pathname + (clean.search ? clean.search : "");
+  window.history.replaceState({}, document.title, next);
+}
+
+async function completeAuthFromUrl(): Promise<User | null> {
+  if (typeof window === "undefined") return null;
+
+  const url = new URL(window.location.href);
+  const hash = new URLSearchParams(url.hash.startsWith("#") ? url.hash.slice(1) : url.hash);
+  const authError =
+    url.searchParams.get("error_description") ??
+    hash.get("error_description") ??
+    url.searchParams.get("error") ??
+    hash.get("error");
+
+  if (authError) {
+    cleanAuthUrl();
+    throw new Error(authError.replace(/\+/g, " "));
+  }
+
+  const code = url.searchParams.get("code");
+  if (code) {
+    const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+    if (error) throw error;
+    cleanAuthUrl();
+    return data.user ?? data.session?.user ?? null;
+  }
+
+  const tokenHash = url.searchParams.get("token_hash");
+  if (tokenHash) {
+    const type = url.searchParams.get("type") ?? "email";
+    const { data, error } = await supabase.auth.verifyOtp({
+      token_hash: tokenHash,
+      type: type as any,
+    });
+    if (error) throw error;
+    cleanAuthUrl();
+    return data.user ?? data.session?.user ?? null;
+  }
+
+  const accessToken = hash.get("access_token");
+  const refreshToken = hash.get("refresh_token");
+  if (accessToken && refreshToken) {
+    const { data, error } = await supabase.auth.setSession({
+      access_token: accessToken,
+      refresh_token: refreshToken,
+    });
+    if (error) throw error;
+    cleanAuthUrl();
+    return data.user ?? data.session?.user ?? null;
+  }
+
+  return null;
+}
+
 function App() {
   const [user, setUser] = useState<User | null | undefined>();
+  const [authError, setAuthError] = useState<string | null>(null);
+
   useEffect(() => {
     let active = true;
-    void supabase.auth.getUser().then(({ data }) => { if (active) setUser(data.user); });
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => { if (active) setUser(session?.user ?? null); });
-    return () => { active = false; subscription.unsubscribe(); };
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (active) setUser(session?.user ?? null);
+    });
+
+    void (async () => {
+      try {
+        const callbackUser = await completeAuthFromUrl();
+        if (!active) return;
+        if (callbackUser) {
+          setAuthError(null);
+          setUser(callbackUser);
+          return;
+        }
+
+        const { data } = await supabase.auth.getUser();
+        if (active) setUser(data.user);
+      } catch (error) {
+        if (!active) return;
+        const message = error instanceof Error ? error.message : "Kirjautumislinkin vahvistus epäonnistui.";
+        setAuthError(message);
+        setUser(null);
+      }
+    })();
+
+    return () => {
+      active = false;
+      subscription.unsubscribe();
+    };
   }, []);
+
   if (user === undefined) return <main className="grid min-h-screen place-items-center">Avataan opintopäiväkirjaa…</main>;
-  if (!user) return <SignIn />;
+  if (!user) return <SignIn authError={authError} />;
   return <StudyApp user={user} />;
 }
 
-function SignIn() {
+function SignIn({ authError }: { authError: string | null }) {
   const [email, setEmail] = useState("");
   const [sent, setSent] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -42,7 +139,8 @@ function SignIn() {
     <div className="grid size-12 place-items-center rounded-2xl bg-primary text-primary-foreground"><BookOpen /></div>
     <h1 className="text-3xl font-semibold">Opintopäiväkirja</h1>
     <p className="text-muted-foreground">Suunnittele opiskelu ja seuraa omaa kehitystäsi.</p>
-    {sent ? <p role="status" className="rounded-xl bg-accent p-4">Kirjautumislinkki lähetettiin osoitteeseen {email}. Avaa linkki tällä laitteella.</p> :
+    {authError && <p role="alert" className="rounded-xl border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive">Kirjautuminen epäonnistui: {authError}</p>}
+    {sent ? <p role="status" className="rounded-xl bg-accent p-4">Kirjautumislinkki lähetettiin osoitteeseen {email}. Avaa uusin saamasi linkki tällä laitteella.</p> :
       <form onSubmit={async e => { e.preventDefault(); setBusy(true); const { error } = await supabase.auth.signInWithOtp({ email, options: { emailRedirectTo: window.location.origin } }); setBusy(false); if (error) toast.error(error.message); else setSent(true); }} className="space-y-3">
         <label htmlFor="email" className="block text-sm font-medium">Sähköposti</label>
         <input id="email" type="email" autoComplete="email" required value={email} onChange={e => setEmail(e.target.value)} className="w-full rounded-xl border bg-surface px-3 py-3" />
