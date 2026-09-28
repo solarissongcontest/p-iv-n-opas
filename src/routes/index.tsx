@@ -293,7 +293,7 @@ function StudyApp({ user }: { user: User }) {
       <button aria-label="Kirjaa opiskelu" className="mt-6 flex min-h-11 items-center justify-center gap-2 rounded-xl bg-primary px-3 text-primary-foreground" onClick={() => setEntry("manual")}><Plus size={18}/><span className="sidebar-label">Kirjaa opiskelu</span></button>
       <div className="mt-auto space-y-1"><button aria-label="Haku" className="flex min-h-11 w-full items-center gap-3 rounded-xl px-3 hover:bg-muted" onClick={() => setSearch(true)}><Search className="shrink-0" size={19}/><span className="sidebar-label">Haku</span><kbd className="sidebar-label ml-auto text-xs">⌘ K</kbd></button><button aria-label="Asetukset" className="flex min-h-11 w-full items-center gap-3 rounded-xl px-3 hover:bg-muted" onClick={() => go("settings")}><Settings2 className="shrink-0" size={19}/><span className="sidebar-label">Asetukset</span></button></div>
     </LiquidGlass>
-    <main className="app-main mx-auto max-w-[1240px] px-4 md:pl-[112px] md:pr-6 md:pb-12 min-[1101px]:pl-[292px] min-[1101px]:pr-8">
+    <main id="main-content" tabIndex={-1} className="app-main mx-auto max-w-[1240px] px-4 md:pl-[112px] md:pr-6 md:pb-12 min-[1101px]:pl-[292px] min-[1101px]:pr-8">
       <header className="mb-8 hidden items-center justify-between pt-7 md:flex"><div><p className="text-sm text-muted-foreground">{longDate(today())}</p><h1 className="mt-1 text-3xl font-semibold">{selected?.code ?? (page==="today"?greeting():nav.find(n=>n.id===page)?.label ?? "Asetukset")}</h1></div></header>
       <header className="app-mobile-header md:hidden">
         <div className="min-w-0">
