@@ -246,7 +246,7 @@ test("cloud provider fails closed and never passes provider prose through", asyn
   process.env["CLOUDFLARE_ACCOUNT_ID"] = "a".repeat(32);
   process.env["CLOUDFLARE_AI_TOKEN"] = "test-only";
 
-  const remote = { ...input, remoteConsent: true };
+  const remote = { ...input, remoteConsent: true, attempt: "F=ma" };
 
   const cases: [Response, string][] = [
     [new Response("", { status: 429 }), "quota"],
