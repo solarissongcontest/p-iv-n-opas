@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { BookOpen, CalendarDays, ChartNoAxesCombined, Ellipsis, FlaskConical, Home, Plus, Search, Settings2, X } from "lucide-react";
 import { toast, Toaster } from "sonner";
 import { LiquidGlass } from "@/components/LiquidGlass";
+import { AICoach } from "@/components/AICoach";
 import { ensureKe04ForCurrentUser, useCourses, useExams, useMistakes, usePlan, usePreferences, useSessions, useTests, useTopics } from "@/lib/data";
 import { longDate, greeting, today } from "@/lib/fi";
 import { CourseView, ExamsView, ProgressView, TodayView, PlanView, SettingsView } from "@/components/StudyViews";
@@ -315,6 +316,14 @@ function StudyApp({ user }: { user: DeviceUser }) {
     {entry && <SessionForm item={plan.find(p=>p.id===entry)??null} courses={courses} topics={topics} onClose={()=>setEntry(null)}/>}
     {adding && <CourseForm onClose={()=>setAdding(false)}/>}
     {search && <SearchPanel courses={courses} topics={topics} exams={exams} sessions={sessions} onClose={()=>setSearch(false)} onNavigate={p=>{go(p as Page);setSearch(false);}} onCourse={id=>{setCourseId(id);setPage("courses");localStorage.setItem("opk.last-page","courses");setSearch(false);}} onLog={()=>{setSearch(false);setEntry("manual");}}/>}
+    {!busy && !error && !entry && !adding && !search && !moreOpen && (
+      <AICoach
+        data={{ courses, topics, sessions, exams, plan, mistakes: mistakesQ.data ?? [] }}
+        selectedCourseId={courseId}
+        weekdays={preferences?.study_weekdays ?? [1, 2, 3, 4, 5]}
+        onLog={() => setEntry("manual")}
+      />
+    )}
     <Toaster richColors/>
   </div>;
 }
