@@ -87,6 +87,7 @@ import { addDays, dateWithWeekday, diffDays, fullDate, minutes, shortDate, start
 import { disableBackgroundPush, enableBackgroundPush, pushIsEnabledOnDevice, pushSupported, sendTestPush } from "@/lib/push";
 import { applyTheme, storedThemeIsDark } from "@/lib/theme";
 import { clearDeviceSession, type DeviceUser } from "@/lib/deviceSession";
+import { KnowledgeGraphEditor, MaterialImporter } from "@/components/CourseLearningTools";
 import {
   CourseEditForm,
   ExamForm,
@@ -325,13 +326,17 @@ export function CourseView({courses,topics,sessions,exams,plan,tests,mistakes,se
       <Panel title="Harjoittele seuraavaksi">{hard.length?hard.map(t=><p key={t.id} className="py-1 text-sm">{t.name} · <span className="text-muted-foreground">{MASTERY_LABELS[t.verified_level]}</span></p>):<p className="text-sm text-muted-foreground">Ei vielä aiheita.</p>}</Panel>
     </div>}
 
-    {tab==="Sisältö"&&<Panel title="Aiheet" action={<button className={secondary+" !min-h-9"} onClick={()=>setForm("newTopic")}><Plus size={15}/>Lisää aihe</button>}>
+    {tab==="Sisältö"&&<div className="space-y-4">
+      <MaterialImporter course={c} topics={topics}/>
+      <KnowledgeGraphEditor course={c} courses={courses} topics={topics}/>
+      <Panel title="Aiheet" action={<button className={secondary+" !min-h-9"} onClick={()=>setForm("newTopic")}><Plus size={15}/>Lisää aihe</button>}>
       {ts.length?ts.map(t=>{const topicSessions=ss.filter(s=>s.topic_id===t.id),lastSession=topicSessions[0],mismatch=masteryMismatch(t);return <div key={t.id} className="border-b border-border py-4">
         <div className="flex justify-between gap-3"><div className="min-w-0"><p className="font-medium"><span aria-hidden="true">{t.progress>=100?"✓":t.progress>0?"◐":"○"} </span>{t.name}</p><p className="mt-1 text-sm text-muted-foreground">Sisältö {t.progress} % · osaaminen <b className="font-medium text-foreground">{MASTERY_LABELS[t.verified_level]}</b> · {minutes(t.study_minutes)}{t.materials?` · ${t.materials}`:""}</p><p className="mt-1 text-xs text-muted-foreground">{masteryEvidence(t)} · Viimeisin opiskelu {lastSession?fullDate(lastSession.date):"—"} · viimeisin kertaus {t.last_review?fullDate(t.last_review):"—"} · seuraava kertaus {t.next_review?fullDate(t.next_review):"—"}{lastSession?.tasks?` · tehtävät ${lastSession.tasks}`:""}</p>{mismatch&&<p className="mt-2 rounded-xl bg-accent p-2 text-xs">{mismatch.message}</p>}</div><div className="flex items-start gap-2"><button aria-label="Muokkaa aihetta" className="rounded-lg p-2 hover:bg-muted" onClick={()=>setEditingTopic(t)}><Pencil size={15}/></button></div></div>
         <div className="my-2"><Bar value={t.progress}/></div>
         <label className="flex min-h-10 items-center gap-2 text-sm"><input type="checkbox" className="size-4 accent-primary" checked={t.school_covered} onChange={e=>void updateTopic.mutateAsync({id:t.id,school_covered:e.target.checked}).catch(()=>toast.error("Koulun etenemistä ei voitu päivittää."))}/>Käsitelty koulussa</label>
       </div>}):<p className="text-muted-foreground">Lisää aiheita kurssille.</p>}
-    </Panel>}
+    </Panel>
+    </div>}
 
     {tab==="Historia"&&<div className="space-y-4"><Panel title="Opiskeluhistoria">{ss.length?ss.map(s=><div className="border-b border-border py-3" key={s.id}><p className="font-medium">{fullDate(s.date)} · {minutes(s.minutes)} · {ts.find(t=>t.id===s.topic_id)?.name||c.code}</p><p className="mt-1 text-xs text-muted-foreground">{s.method||"menetelmä ei kirjattu"}{s.focus?` · keskittyminen ${s.focus}/5`:""}{s.energy?` · energia ${s.energy}/5`:""}</p>{(s.note||s.unclear)&&<p className="mt-1 text-sm text-muted-foreground">{s.note||s.unclear}</p>}</div>):<p className="text-muted-foreground">Et ole vielä kirjannut opiskelua tälle kurssille.</p>}</Panel><Panel title="Reflektiot">{ss.filter(s=>s.note||s.unclear).slice(0,8).map(s=><p key={s.id} className="border-b border-border py-2 text-sm">{fullDate(s.date)} · {s.note||s.unclear}</p>)}</Panel></div>}
 
