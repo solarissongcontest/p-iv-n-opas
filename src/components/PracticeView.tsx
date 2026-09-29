@@ -1,14 +1,14 @@
-import { useEffect, useMemo, useState } from "react";
-import { Brain, CheckCircle2, Lightbulb, Shuffle, Sparkles } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Brain, CheckCircle2, Lightbulb, Sparkles } from "lucide-react";
 import { toast } from "sonner";
+import type { Course, Mistake, PracticeAttempt, PracticeTest, Topic } from "@/lib/domain";
 import {
-  MASTERY_LABELS,
-  practicePrompt,
-  recoveryQueue,
-  type Course,
-  type PracticeAttempt,
-  type Topic,
-} from "@/lib/domain";
+  buildRecoveryQueue,
+  evidenceSummary,
+  examStage,
+  hintAt,
+  selectPracticeQuestion,
+} from "@/lib/learning-engine";
 import { useRecordPracticeAttempt } from "@/lib/data";
 import { fullDate, today } from "@/lib/fi";
 
@@ -43,38 +43,45 @@ const resultText: Record<PracticeAttempt["result"], string> = {
   not_yet: "Ei vielä",
 };
 
+const typeLabel: Record<string, string> = {
+  free_recall: "Vapaa palautus",
+  short_answer: "Lyhyt vastaus",
+  calculation: "Lasku / ratkaisurunko",
+  application: "Soveltaminen",
+  multiple_choice: "Monivalinta + perustelu",
+  explanation: "Käsitteen selitys",
+  ordering: "Järjestäminen",
+  error_detection: "Virheen tunnistaminen",
+  simulation: "Koetyylinen tehtävä",
+  recognition: "Menetelmän tunnistaminen",
+};
+
 export function PracticeView({
   courses,
   topics,
   attempts,
+  tests = [],
+  mistakes = [],
 }: {
   courses: Course[];
   topics: Topic[];
   attempts: PracticeAttempt[];
+  tests?: PracticeTest[];
+  mistakes?: Mistake[];
 }) {
   const [courseId, setCourseId] = useState(courses[0]?.id ?? "");
   const [topicId, setTopicId] = useState("");
   const [attemptIndex, setAttemptIndex] = useState(0);
   const [response, setResponse] = useState("");
-  const [hintShown, setHintShown] = useState(false);
+  const [hintLevel, setHintLevel] = useState(0);
   const [confidence, setConfidence] = useState<number | null>(null);
-  const [mixed, setMixed] = useState(false);
   const [feedback, setFeedback] = useState("");
+  const startedAt = useRef<number>(Date.now());
   const record = useRecordPracticeAttempt();
 
+  const course = courses.find((candidate) => candidate.id === courseId) ?? null;
   const courseTopics = useMemo(
-    () =>
-      topics
-        .filter((topic) => topic.course_id === courseId)
-        .sort((a, b) => {
-          const aDue = a.next_review && a.next_review <= today() ? 1 : 0;
-          const bDue = b.next_review && b.next_review <= today() ? 1 : 0;
-          return (
-            bDue - aDue ||
-            a.verified_level - b.verified_level ||
-            b.importance - a.importance
-          );
-        }),
+    () => topics.filter((topic) => topic.course_id === courseId),
     [courseId, topics],
   );
 
@@ -88,49 +95,93 @@ export function PracticeView({
     }
   }, [courseTopics, topicId]);
 
-  const topic = courseTopics.find((candidate) => candidate.id === topicId);
-  const prompt = topic ? practicePrompt(topic, attemptIndex) : null;
-  const recovery = recoveryQueue(courseTopics, today(), 3);
-  const recent = attempts.filter((attempt) => attempt.topic_id === topicId).slice(0, 6);
+  const stage = examStage({
+    topics: courseTopics,
+    attempts,
+    tests: tests.filter((test) => test.course_id === courseId),
+    mistakes: mistakes.filter((mistake) => mistake.course_id === courseId),
+    course,
+  });
+
+  const selection = useMemo(
+    () =>
+      selectPracticeQuestion({
+        topics: courseTopics,
+        attempts,
+        selectedTopicId: topicId,
+        course,
+        examStage: stage.key,
+        index: attemptIndex,
+      }),
+    [attemptIndex, attempts, course, courseTopics, stage.key, topicId],
+  );
+
+  const recovery = buildRecoveryQueue({
+    topics: courseTopics,
+    attempts,
+    courses,
+    now: today(),
+    capacityMinutes: 20,
+    maxItems: 3,
+  });
+
+  const recent = attempts
+    .filter((attempt) => attempt.topic_id === (selection?.topic.id ?? topicId))
+    .slice(0, 6);
+
+  useEffect(() => {
+    startedAt.current = Date.now();
+    setResponse("");
+    setHintLevel(0);
+    setConfidence(null);
+    setFeedback("");
+  }, [selection?.question.id, selection?.topic.id]);
 
   async function save(result: PracticeAttempt["result"]) {
-    if (!topic || !prompt) return;
+    if (!selection) return;
     if (result !== "not_yet" && response.trim().length < 2) {
       toast.error("Kirjoita ensin oma yrityksesi.");
       return;
     }
 
+    const responseTime = Math.max(0, Date.now() - startedAt.current);
+    const source = recovery.items.some((item) => item.topic.id === selection.topic.id)
+      ? "review"
+      : stage.key === "repair"
+        ? "mistake_repair"
+        : "practice";
+
     try {
       await record.mutateAsync({
-        course_id: topic.course_id,
-        topic_id: topic.id,
-        attempt_type: prompt.type,
-        prompt: prompt.prompt,
+        course_id: selection.topic.course_id,
+        topic_id: selection.topic.id,
+        attempt_type: selection.question.type,
+        prompt: selection.question.prompt,
         response: response.trim() || null,
-        difficulty: prompt.difficulty,
+        difficulty: selection.question.difficulty,
         result,
         confidence,
-        hint_used: hintShown,
+        hint_used: hintLevel > 0,
+        hints_used: hintLevel,
+        response_time_ms: responseTime,
+        source,
+        skills: selection.question.skills,
+        expected_concepts: selection.question.expectedConcepts,
+        question_payload: {
+          explanation: selection.question.explanation,
+          interleaved: selection.interleaved,
+          examStage: stage.key,
+        },
       });
 
       setFeedback(
         result === "independent"
-          ? "Hyvä retrieval-näyttö. Jos tämä onnistui viiveen jälkeen, seuraava kertaus voi siirtyä kauemmas."
+          ? `Hyvä itsenäinen näyttö. ${selection.question.explanation}`
           : result === "hinted"
-            ? "Vihje auttoi, joten tätä ei laskettu itsenäiseksi osaamisnäytöksi. Palaa aiheeseen pian ja yritä uudelleen ilman vihjettä."
-            : "Tämä ei vähennä osaamista pisteinä. Käy lyhyesti selitys tai malli läpi ja tee uusi muistista palautus pian.",
+            ? `Vihje auttoi, joten näyttö painaa vähemmän masteryssa. ${selection.question.explanation}`
+            : `Tämä tarvitsee uuden kierroksen pian. ${selection.question.explanation}`,
       );
-
-      const currentIndex = courseTopics.findIndex((candidate) => candidate.id === topic.id);
-      if (mixed && courseTopics.length > 1 && topic.verified_level >= 2) {
-        const next = courseTopics[(currentIndex + 1) % courseTopics.length];
-        if (next) setTopicId(next.id);
-      }
-
       setAttemptIndex((value) => value + 1);
-      setResponse("");
-      setHintShown(false);
-      setConfidence(null);
     } catch {
       toast.error("Harjoitusyritystä ei voitu tallentaa.");
     }
@@ -143,7 +194,7 @@ export function PracticeView({
         action={
           <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
             <Brain size={15} />
-            muistista ensin
+            {stage.stages[stage.index]?.label ?? "Harjoittelu"}
           </span>
         }
       >
@@ -157,46 +208,50 @@ export function PracticeView({
                 setCourseId(event.target.value);
                 setTopicId("");
                 setAttemptIndex(0);
-                setFeedback("");
               }}
             >
-              {courses.map((course) => (
-                <option key={course.id} value={course.id}>
-                  {course.code} · {course.name}
+              {courses.map((item) => (
+                <option key={item.id} value={item.id}>
+                  {item.code} · {item.name}
                 </option>
               ))}
             </select>
           </label>
 
           <label className="text-sm font-medium">
-            Aihe
+            Aloitusaihe
             <select
               className="mt-1 w-full rounded-xl border bg-surface p-3"
               value={topicId}
               onChange={(event) => {
                 setTopicId(event.target.value);
                 setAttemptIndex(0);
-                setFeedback("");
               }}
             >
               {courseTopics.map((candidate) => (
                 <option key={candidate.id} value={candidate.id}>
-                  {candidate.name} · {MASTERY_LABELS[candidate.verified_level]}
+                  {candidate.name}
                 </option>
               ))}
             </select>
           </label>
         </div>
 
-        {topic && prompt ? (
+        {selection ? (
           <div className="mt-5 space-y-4">
             <div className="rounded-2xl bg-muted/60 p-4">
-              <p className="text-xs font-semibold uppercase tracking-wide text-primary">
-                Yritä ilman muistiinpanoja · vaikeus {prompt.difficulty}/5
-              </p>
-              <p className="mt-2 text-lg font-semibold">{prompt.prompt}</p>
+              <div className="flex flex-wrap items-center gap-2 text-xs font-semibold uppercase tracking-wide text-primary">
+                <span>{typeLabel[selection.question.type]}</span>
+                <span>· vaikeus {selection.question.difficulty}/5</span>
+                {selection.interleaved && <span>· interleaved</span>}
+              </div>
               <p className="mt-2 text-xs text-muted-foreground">
-                Tavoite on palauttaa tieto muistista. Sovellus ei päättele osaamista siitä, kuinka pitkään katsot tätä näyttöä. Ihmiskunta selviää tästä järkytyksestä.
+                {courses.find((item) => item.id === selection.topic.course_id)?.code} · {selection.topic.name}
+              </p>
+              <p className="mt-2 text-lg font-semibold">{selection.question.prompt}</p>
+              <p className="mt-2 text-xs text-muted-foreground">
+                Moottori valitsee kysymystyypin osaamisnäytön, unohtumisriskin ja koevaiheen perusteella.
+                Aikaa ei lasketa osaamiseksi. Maailma jatkaa pyörimistään.
               </p>
             </div>
 
@@ -211,41 +266,38 @@ export function PracticeView({
               />
             </label>
 
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <button
                 type="button"
                 className={secondary}
-                onClick={() => setHintShown(true)}
-                disabled={hintShown}
+                onClick={() => setHintLevel((value) => Math.min(3, value + 1))}
+                disabled={hintLevel >= selection.question.hints.length}
               >
                 <Lightbulb size={17} />
-                {hintShown ? "Vihje näytetty" : "Näytä vihje"}
+                {hintLevel === 0 ? "Tarvitsen vihjeen" : "Seuraava vihje"}
               </button>
-              {topic.verified_level >= 2 && (
-                <button
-                  type="button"
-                  className={mixed ? primary : secondary}
-                  onClick={() => setMixed((value) => !value)}
-                  aria-pressed={mixed}
-                >
-                  <Shuffle size={17} />
-                  Mixed practice
-                </button>
-              )}
+              <span className="text-xs text-muted-foreground">
+                {hintLevel}/3 vihjettä käytetty
+              </span>
             </div>
 
-            {hintShown && (
-              <div className="rounded-xl border border-border bg-accent/50 p-3 text-sm">
-                <b>Vihje, ei vastausta:</b> {prompt.hint}
+            {hintLevel > 0 && (
+              <div className="space-y-2">
+                {Array.from({ length: hintLevel }, (_, index) => (
+                  <div key={index} className="rounded-xl border border-border bg-accent/50 p-3 text-sm">
+                    <b>Vihje {index + 1}:</b> {hintAt(selection.question, index + 1)}
+                  </div>
+                ))}
               </div>
             )}
 
             {attemptIndex % 2 === 1 && (
               <fieldset>
                 <legend className="mb-2 text-sm font-medium">
-                  Kuinka varma olit? <span className="font-normal text-muted-foreground">(kalibrointia varten)</span>
+                  Kuinka varma olet ennen tarkistusta?{" "}
+                  <span className="font-normal text-muted-foreground">(kalibrointia varten)</span>
                 </legend>
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2">
                   {[
                     [1, "Epävarma"],
                     [2, "Melko varma"],
@@ -268,26 +320,14 @@ export function PracticeView({
             <div>
               <p className="mb-2 text-sm font-medium">Miten yritys onnistui?</p>
               <div className="grid gap-2 sm:grid-cols-3">
-                <button
-                  disabled={record.isPending}
-                  className={primary}
-                  onClick={() => void save("independent")}
-                >
+                <button disabled={record.isPending} className={primary} onClick={() => void save("independent")}>
                   <CheckCircle2 size={17} />
                   Itsenäisesti
                 </button>
-                <button
-                  disabled={record.isPending}
-                  className={secondary}
-                  onClick={() => void save("hinted")}
-                >
-                  Vihjeellä
+                <button disabled={record.isPending} className={secondary} onClick={() => void save("hinted")}>
+                  Vihjeellä / osittain
                 </button>
-                <button
-                  disabled={record.isPending}
-                  className={secondary}
-                  onClick={() => void save("not_yet")}
-                >
+                <button disabled={record.isPending} className={secondary} onClick={() => void save("not_yet")}>
                   Ei vielä
                 </button>
               </div>
@@ -299,6 +339,10 @@ export function PracticeView({
                 {feedback}
               </div>
             )}
+
+            <p className="text-xs text-muted-foreground">
+              {evidenceSummary(selection.state, selection.topic, attempts)}
+            </p>
           </div>
         ) : (
           <p className="mt-4 text-sm text-muted-foreground">
@@ -313,29 +357,29 @@ export function PracticeView({
             <div className="space-y-2">
               {recovery.items.map((item) => (
                 <button
-                  key={item.id}
-                  className="flex min-h-12 w-full items-center justify-between rounded-xl bg-muted/60 px-3 text-left"
+                  key={item.topic.id}
+                  className="flex min-h-12 w-full items-center justify-between gap-3 rounded-xl bg-muted/60 px-3 text-left"
                   onClick={() => {
-                    setTopicId(item.id);
+                    setTopicId(item.topic.id);
                     setAttemptIndex(0);
-                    setFeedback("");
                   }}
                 >
-                  <span>{item.name}</span>
-                  <span className="text-xs text-muted-foreground">
-                    {MASTERY_LABELS[item.verified_level]}
+                  <span>
+                    <b>{item.topic.name}</b>
+                    <small className="mt-1 block text-muted-foreground">{item.reason}</small>
                   </span>
+                  <span className="text-xs text-muted-foreground">{item.minutes} min</span>
                 </button>
               ))}
               {recovery.hiddenCount > 0 && (
                 <p className="text-xs text-muted-foreground">
-                  {recovery.hiddenCount} muuta kertausta pysyy taustalla. Jono ei muutu rangaistuslistaksi.
+                  {recovery.hiddenCount} muuta kertausta on jätetty myöhempään vuoroon. Niitä ei tarvitse kantaa naamalla punaisena velkalukuna.
                 </p>
               )}
             </div>
           ) : (
             <p className="text-sm text-muted-foreground">
-              Ei juuri nyt erääntyviä kertauksia. Voit silti harjoitella valittua aihetta.
+              Ei juuri nyt korkealle priorisoituja kertauksia. Voit silti harjoitella valittua aihetta.
             </p>
           )}
         </Card>
@@ -346,13 +390,13 @@ export function PracticeView({
               <div key={attempt.id} className="border-b border-border py-3 text-sm">
                 <div className="flex items-center justify-between gap-3">
                   <b>{resultText[attempt.result]}</b>
-                  <span className="text-xs text-muted-foreground">
-                    {fullDate(attempt.date)}
-                  </span>
+                  <span className="text-xs text-muted-foreground">{fullDate(attempt.date)}</span>
                 </div>
                 <p className="mt-1 text-xs text-muted-foreground">
-                  {attempt.attempt_type.replace("_", " ")} · vaikeus {attempt.difficulty}/5
+                  {typeLabel[attempt.attempt_type] ?? attempt.attempt_type.replaceAll("_", " ")}
+                  {" · "}vaikeus {attempt.difficulty}/5
                   {attempt.delay_days != null ? ` · viive ${attempt.delay_days} pv` : ""}
+                  {typeof attempt.hints_used === "number" ? ` · ${attempt.hints_used} vihjettä` : ""}
                 </p>
               </div>
             ))
