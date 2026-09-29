@@ -41,13 +41,20 @@ create index if not exists question_bank_owner_course_idx
 create index if not exists question_bank_owner_topic_idx
   on public.question_bank(owner_id, topic_id, difficulty);
 
+-- Data API access is explicit. The browser only needs to read the bank;
+-- generation/writes happen in trusted server routes using service_role.
+revoke all on table public.question_bank from anon;
+grant select on table public.question_bank to authenticated;
+grant select, insert, update, delete on table public.question_bank to service_role;
+
 alter table public.question_bank enable row level security;
 drop policy if exists owner_all_question_bank on public.question_bank;
 create policy owner_all_question_bank
   on public.question_bank
   for all
-  using (owner_id = auth.uid())
-  with check (owner_id = auth.uid());
+  to authenticated
+  using ((select auth.uid()) = owner_id)
+  with check ((select auth.uid()) = owner_id);
 
 create or replace function public.question_bank_touch_updated_at()
 returns trigger
