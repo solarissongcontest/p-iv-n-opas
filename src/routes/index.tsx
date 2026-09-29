@@ -1,12 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { BookOpen, CalendarDays, ChartNoAxesCombined, Ellipsis, FlaskConical, Home, Plus, Search, Settings2, X } from "lucide-react";
+import { BookOpen, Brain, CalendarDays, ChartNoAxesCombined, Ellipsis, FlaskConical, Home, Plus, Search, Settings2, X } from "lucide-react";
 import { toast, Toaster } from "sonner";
 import { LiquidGlass } from "@/components/LiquidGlass";
 import { AICoach } from "@/components/AICoach";
-import { ensureKe04ForCurrentUser, useCourses, useExams, useMistakes, usePlan, usePreferences, useSessions, useTests, useTopics } from "@/lib/data";
+import { ensureKe04ForCurrentUser, useCourses, useExams, useMistakes, usePlan, usePracticeAttempts, usePreferences, useSessions, useTests, useTopics } from "@/lib/data";
 import { longDate, greeting, today } from "@/lib/fi";
 import { CourseView, ExamsView, ProgressView, TodayView, PlanView, SettingsView } from "@/components/StudyViews";
+import { PracticeView } from "@/components/PracticeView";
 import { CourseForm, SessionForm, SearchPanel } from "@/components/StudyDialogs";
 import { Onboarding } from "@/components/Onboarding";
 import { pendingCount, setOfflineOwner, startSyncWatcher, subscribePending } from "@/lib/offline";
@@ -18,13 +19,13 @@ import {
   storeDeviceSession,
 } from "@/lib/deviceSession";
 
-type Page = "today" | "plan" | "courses" | "exams" | "progress" | "settings";
+type Page = "today" | "plan" | "courses" | "practice" | "progress" | "exams" | "settings";
 const nav = [
   { id: "today", label: "Tänään", Icon: Home },
   { id: "plan", label: "Suunnitelma", Icon: CalendarDays },
-  { id: "courses", label: "Kurssit", Icon: BookOpen },
-  { id: "exams", label: "Kokeet", Icon: FlaskConical },
-  { id: "progress", label: "Kehitys", Icon: ChartNoAxesCombined },
+  { id: "courses", label: "Opinnot", Icon: BookOpen },
+  { id: "practice", label: "Harjoittelu", Icon: Brain },
+  { id: "progress", label: "Edistyminen", Icon: ChartNoAxesCombined },
 ] as const;
 export const Route = createFileRoute("/")({ component: App });
 
@@ -163,9 +164,9 @@ function StudyApp({ user }: { user: DeviceUser }) {
   const [showSkeleton, setShowSkeleton] = useState(false);
   const [defaultsReady, setDefaultsReady] = useState(false);
   const [defaultsError, setDefaultsError] = useState<string | null>(null);
-  const coursesQ = useCourses(), topicsQ = useTopics(), sessionsQ = useSessions(), examsQ = useExams(), planQ = usePlan(), testsQ = useTests(), mistakesQ = useMistakes(), preferencesQ = usePreferences();
+  const coursesQ = useCourses(), topicsQ = useTopics(), sessionsQ = useSessions(), examsQ = useExams(), planQ = usePlan(), testsQ = useTests(), attemptsQ = usePracticeAttempts(), mistakesQ = useMistakes(), preferencesQ = usePreferences();
   const courses = (coursesQ.data ?? []).filter(c => !c.archived), topics = topicsQ.data ?? [], sessions = sessionsQ.data ?? [], exams = examsQ.data ?? [], plan = planQ.data ?? [];
-  const allQueries = [coursesQ, topicsQ, sessionsQ, examsQ, planQ, testsQ, mistakesQ, preferencesQ];
+  const allQueries = [coursesQ, topicsQ, sessionsQ, examsQ, planQ, testsQ, attemptsQ, mistakesQ, preferencesQ];
   const busy = !defaultsReady || allQueries.some(q => q.isPending);
   const queryError = allQueries.find(q => q.error)?.error;
   const error = defaultsError ?? (queryError instanceof Error ? queryError.message : queryError ? String(queryError) : null);
@@ -181,7 +182,7 @@ function StudyApp({ user }: { user: DeviceUser }) {
 
   useEffect(() => {
     const saved = localStorage.getItem("opk.last-page") as Page | null;
-    if (saved && ["today","plan","courses","exams","progress","settings"].includes(saved)) {
+    if (saved && ["today","plan","courses","practice","exams","progress","settings"].includes(saved)) {
       setPage(saved);
     }
   }, []);
@@ -196,6 +197,7 @@ function StudyApp({ user }: { user: DeviceUser }) {
         examsQ.refetch(),
         planQ.refetch(),
         testsQ.refetch(),
+        attemptsQ.refetch(),
         mistakesQ.refetch(),
         preferencesQ.refetch(),
       ]);
@@ -243,6 +245,12 @@ function StudyApp({ user }: { user: DeviceUser }) {
   const selected = courses.find(c => c.id === courseId);
   const ke04 = courses.find(c => c.code === "KE04");
   const preferences = preferencesQ.data;
+  const capacity = {
+    studyWeekdays: preferences?.study_weekdays ?? [1,2,3,4,5],
+    weekdayMinutes: preferences?.weekday_capacity_minutes ?? 60,
+    weekendMinutes: preferences?.weekend_capacity_minutes ?? 90,
+    busyDates: preferences?.busy_dates ?? [],
+  };
   const hasUserData =
     sessions.length > 0 ||
     plan.some(p => p.status === "completed" || p.status === "in_progress") ||
@@ -281,15 +289,19 @@ function StudyApp({ user }: { user: DeviceUser }) {
           <p className="truncate text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground">{longDate(today())}</p>
           <h1 className="mt-0.5 truncate text-[28px] font-semibold leading-tight">{selected?.code ?? (page==="today"?greeting():nav.find(n=>n.id===page)?.label ?? "Asetukset")}</h1>
         </div>
-        <button aria-label="Haku" onClick={()=>setSearch(true)} className="app-icon-button"><Search size={20}/></button>
+        <div className="flex gap-1">
+          <button aria-label="Haku" onClick={()=>setSearch(true)} className="app-icon-button"><Search size={20}/></button>
+          <button aria-label="Lisää toimintoja" aria-expanded={moreOpen} onClick={()=>setMoreOpen(v=>!v)} className="app-icon-button"><Ellipsis size={21}/></button>
+        </div>
       </header>
       {pending>0 && <p role="status" className="mb-5 rounded-xl bg-accent p-3 text-sm">Tallennettu paikallisesti · {pending} muutosta synkataan yhteyden palattua.</p>}
-      {error && <div role="alert" className="panel mb-5 p-4"><p className="font-medium">{pending>0?"Kaikkea ei voitu synkata vielä.":"Tietojen lataus tai alustus epäonnistui."}</p>{pending>0&&<p className="mt-1 text-sm text-muted-foreground">Syöttämäsi tiedot ovat tallessa tässä laitteessa ja synkataan yhteyden palattua.</p>}<p className="mt-1 text-sm text-muted-foreground">{String(error)}</p><button className="mt-2 underline" onClick={()=>{setDefaultsReady(false);setDefaultsError(null);void ensureKe04ForCurrentUser().then(()=>Promise.all([coursesQ.refetch(),topicsQ.refetch(),sessionsQ.refetch(),examsQ.refetch(),planQ.refetch(),testsQ.refetch(),mistakesQ.refetch(),preferencesQ.refetch()])).then(()=>setDefaultsReady(true)).catch(err=>{setDefaultsError(err instanceof Error?err.message:"Uudelleenyritys epäonnistui.");setDefaultsReady(true);});}}>Yritä uudelleen</button></div>}
+      {error && <div role="alert" className="panel mb-5 p-4"><p className="font-medium">{pending>0?"Kaikkea ei voitu synkata vielä.":"Tietojen lataus tai alustus epäonnistui."}</p>{pending>0&&<p className="mt-1 text-sm text-muted-foreground">Syöttämäsi tiedot ovat tallessa tässä laitteessa ja synkataan yhteyden palattua.</p>}<p className="mt-1 text-sm text-muted-foreground">{String(error)}</p><button className="mt-2 underline" onClick={()=>{setDefaultsReady(false);setDefaultsError(null);void ensureKe04ForCurrentUser().then(()=>Promise.all([coursesQ.refetch(),topicsQ.refetch(),sessionsQ.refetch(),examsQ.refetch(),planQ.refetch(),testsQ.refetch(),attemptsQ.refetch(),mistakesQ.refetch(),preferencesQ.refetch()])).then(()=>setDefaultsReady(true)).catch(err=>{setDefaultsError(err instanceof Error?err.message:"Uudelleenyritys epäonnistui.");setDefaultsReady(true);});}}>Yritä uudelleen</button></div>}
       {busy ? (showSkeleton ? <div className="space-y-4" aria-label="Ladataan"><div className="h-32 animate-pulse rounded-2xl bg-muted"/><div className="h-60 animate-pulse rounded-2xl bg-muted"/></div> : null) :
       courses.length===0 ? <section className="panel p-6"><h2 className="text-xl font-semibold">Aloita ensimmäisestä kurssista</h2><p className="mt-2 text-muted-foreground">Lisää kurssi ja sen aiheet, jotta voit suunnitella ja kirjata opiskelua.</p><button onClick={()=>setAdding(true)} className="mt-5 min-h-11 rounded-xl bg-primary px-4 text-primary-foreground">Lisää kurssi</button></section> :
-      page==="today" ? <TodayView courses={courses} topics={topics} sessions={sessions} exams={exams} plan={plan} tests={testsQ.data??[]} mistakes={mistakesQ.data??[]} studyWeekdays={preferences?.study_weekdays??[1,2,3,4,5]} onStart={setEntry} onGo={go}/> :
-      page==="plan" ? <PlanView courses={courses} topics={topics} plan={plan} tests={testsQ.data??[]} mistakes={mistakesQ.data??[]} studyWeekdays={preferences?.study_weekdays??[1,2,3,4,5]} onStart={setEntry}/> :
+      page==="today" ? <TodayView courses={courses} topics={topics} sessions={sessions} exams={exams} plan={plan} tests={testsQ.data??[]} mistakes={mistakesQ.data??[]} capacity={capacity} onStart={setEntry} onGo={go}/> :
+      page==="plan" ? <PlanView courses={courses} topics={topics} plan={plan} tests={testsQ.data??[]} mistakes={mistakesQ.data??[]} capacity={capacity} onStart={setEntry}/> :
       page==="courses" ? <CourseView courses={courses} topics={topics} sessions={sessions} exams={exams} plan={plan} tests={testsQ.data??[]} mistakes={mistakesQ.data??[]} selected={courseId} onSelect={setCourseId} onAdd={()=>setAdding(true)} onStart={()=>setEntry("manual")}/> :
+      page==="practice" ? <PracticeView courses={courses} topics={topics} attempts={attemptsQ.data??[]}/> :
       page==="exams" ? <ExamsView courses={courses} topics={topics} exams={exams} tests={testsQ.data??[]} mistakes={mistakesQ.data??[]} sessions={sessions} plan={plan} onCourse={id=>{setCourseId(id);setPage("courses");localStorage.setItem("opk.last-page","courses");}}/> :
       page==="progress" ? <ProgressView courses={courses} topics={topics} sessions={sessions} plan={plan} exams={exams} onPlan={()=>go("plan")}/> :
       <SettingsView user={user}/>}
@@ -297,19 +309,19 @@ function StudyApp({ user }: { user: DeviceUser }) {
     <LiquidGlass lensing as="nav" aria-label="Mobiilinavigaatio" className="app-tabbar md:hidden">
       <button aria-label="Tänään" aria-current={page==="today"?"page":undefined} onClick={()=>go("today")} className={`app-tab ${page==="today"?"app-tab-active":""}`}><Home size={21}/><span>Tänään</span></button>
       <button aria-label="Suunnitelma" aria-current={page==="plan"?"page":undefined} onClick={()=>go("plan")} className={`app-tab ${page==="plan"?"app-tab-active":""}`}><CalendarDays size={21}/><span>Suunnitelma</span></button>
-      <button aria-label="Kirjaa opiskelu" onClick={()=>{setMoreOpen(false);setEntry("manual");}} className="app-tab-add"><Plus size={24}/><span>Kirjaa</span></button>
-      <button aria-label="Kurssit" aria-current={page==="courses"?"page":undefined} onClick={()=>go("courses")} className={`app-tab ${page==="courses"?"app-tab-active":""}`}><BookOpen size={21}/><span>Kurssit</span></button>
-      <button aria-label="Lisää" aria-expanded={moreOpen} onClick={()=>setMoreOpen(v=>!v)} className={`app-tab ${moreOpen||["exams","progress","settings"].includes(page)?"app-tab-active":""}`}><Ellipsis size={22}/><span>Lisää</span></button>
+      <button aria-label="Opinnot" aria-current={page==="courses"?"page":undefined} onClick={()=>go("courses")} className={`app-tab ${page==="courses"?"app-tab-active":""}`}><BookOpen size={21}/><span>Opinnot</span></button>
+      <button aria-label="Harjoittelu" aria-current={page==="practice"?"page":undefined} onClick={()=>go("practice")} className={`app-tab ${page==="practice"?"app-tab-active":""}`}><Brain size={21}/><span>Harjoittelu</span></button>
+      <button aria-label="Edistyminen" aria-current={page==="progress"?"page":undefined} onClick={()=>go("progress")} className={`app-tab ${page==="progress"?"app-tab-active":""}`}><ChartNoAxesCombined size={21}/><span>Edistyminen</span></button>
     </LiquidGlass>
     {moreOpen&&<div className="app-sheet-backdrop md:hidden" role="presentation" onClick={()=>setMoreOpen(false)}>
       <LiquidGlass lensing as="aside" role="dialog" aria-modal="true" aria-label="Lisää toimintoja" className="app-sheet" onClick={e=>e.stopPropagation()}>
         <div className="app-sheet-handle" aria-hidden="true"/>
         <div className="mb-4 flex items-center justify-between"><div><p className="text-sm text-muted-foreground">Opintopäiväkirja</p><h2 className="text-xl font-semibold">Lisää</h2></div><button className="app-icon-button" aria-label="Sulje" onClick={()=>setMoreOpen(false)}><X size={20}/></button></div>
         <div className="grid grid-cols-2 gap-3">
-          <button className={`app-sheet-action ${page==="exams"?"app-sheet-action-active":""}`} onClick={()=>go("exams")}><FlaskConical size={22}/><span><b>Kokeet</b><small>Kokeet ja valmius</small></span></button>
-          <button className={`app-sheet-action ${page==="progress"?"app-sheet-action-active":""}`} onClick={()=>go("progress")}><ChartNoAxesCombined size={22}/><span><b>Kehitys</b><small>Historia ja analytiikka</small></span></button>
+          <button className={`app-sheet-action ${page==="exams"?"app-sheet-action-active":""}`} onClick={()=>go("exams")}><FlaskConical size={22}/><span><b>Kokeet</b><small>Exam Mode ja valmius</small></span></button>
+          <button className="app-sheet-action" onClick={()=>{setMoreOpen(false);setEntry("manual");}}><Plus size={22}/><span><b>Kirjaa opiskelu</b><small>Nopea jälkikirjaus</small></span></button>
           <button className="app-sheet-action" onClick={()=>{setMoreOpen(false);setSearch(true);}}><Search size={22}/><span><b>Haku</b><small>Kurssit, aiheet ja toiminnot</small></span></button>
-          <button className={`app-sheet-action ${page==="settings"?"app-sheet-action-active":""}`} onClick={()=>go("settings")}><Settings2 size={22}/><span><b>Asetukset</b><small>Muistutukset ja sovellus</small></span></button>
+          <button className={`app-sheet-action ${page==="settings"?"app-sheet-action-active":""}`} onClick={()=>go("settings")}><Settings2 size={22}/><span><b>Asetukset</b><small>Kapasiteetti ja muistutukset</small></span></button>
         </div>
       </LiquidGlass>
     </div>}
@@ -322,6 +334,7 @@ function StudyApp({ user }: { user: DeviceUser }) {
         selectedCourseId={courseId}
         weekdays={preferences?.study_weekdays ?? [1, 2, 3, 4, 5]}
         onLog={() => setEntry("manual")}
+        onPractice={() => go("practice")}
       />
     )}
     <Toaster richColors/>

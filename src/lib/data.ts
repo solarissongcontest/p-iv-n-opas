@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { registerOp, runOrQueue } from "./offline";
 import {
+  type CapacityProfile,
   type Course,
   type Exam,
   type Mistake,
@@ -9,6 +10,7 @@ import {
   type PlanDraft,
   type PlanItem,
   type PracticeTest,
+  type PracticeAttempt,
   type Session,
   type Topic,
   type WeeklyCheckin,
@@ -24,6 +26,9 @@ export type UserPreferences = {
   display_name: string;
   onboarding_completed: boolean;
   study_weekdays: number[];
+  weekday_capacity_minutes: number;
+  weekend_capacity_minutes: number;
+  busy_dates: string[];
   notifications_enabled: boolean;
   timezone: string;
   created_at: string;
@@ -47,7 +52,7 @@ async function listCourses(): Promise<Course[]> {
 async function listTopics(): Promise<Topic[]> {
   const { data, error } = await supabase.from("topics").select("*").order("position");
   if (error) throw error;
-  return data ?? [];
+  return (data ?? []) as unknown as Topic[];
 }
 
 async function listSessions(): Promise<Session[]> {
@@ -57,7 +62,7 @@ async function listSessions(): Promise<Session[]> {
     .order("date", { ascending: false })
     .limit(1000);
   if (error) throw error;
-  return data ?? [];
+  return (data ?? []) as unknown as Session[];
 }
 
 async function listExams(): Promise<Exam[]> {
@@ -85,6 +90,17 @@ async function listTests(): Promise<PracticeTest[]> {
   const { data, error } = await supabase.from("practice_tests").select("*").order("date");
   if (error) throw error;
   return data ?? [];
+}
+
+
+async function listPracticeAttempts(): Promise<PracticeAttempt[]> {
+  const { data, error } = await untypedSupabase
+    .from("practice_attempts")
+    .select("*")
+    .order("created_at", { ascending: false })
+    .limit(500);
+  if (error) throw error;
+  return (data ?? []) as PracticeAttempt[];
 }
 
 
@@ -130,6 +146,8 @@ export const useExams = () => useQuery({ queryKey: ["exams"], queryFn: listExams
 export const usePlan = () => useQuery({ queryKey: ["plan"], queryFn: listPlan });
 export const useMistakes = () => useQuery({ queryKey: ["mistakes"], queryFn: listMistakes });
 export const useTests = () => useQuery({ queryKey: ["tests"], queryFn: listTests });
+export const usePracticeAttempts = () =>
+  useQuery({ queryKey: ["practice-attempts"], queryFn: listPracticeAttempts });
 export const useSettings = () => useQuery({ queryKey: ["settings"], queryFn: getSettings });
 export const usePreferences = () =>
   useQuery({ queryKey: ["preferences"], queryFn: getPreferences });
@@ -299,6 +317,9 @@ export async function ensureKe04ForCurrentUser(): Promise<string> {
       owner_id: ownerId,
       display_name: "Arthur",
       study_weekdays: [1, 2, 3, 4, 5],
+      weekday_capacity_minutes: 60,
+      weekend_capacity_minutes: 90,
+      busy_dates: [],
       notifications_enabled: false,
       timezone: "Europe/Helsinki",
       onboarding_completed: false,
@@ -327,12 +348,18 @@ export type LogSessionInput = {
   note?: string | null;
   plan_item_id?: string | null;
   date?: string;
+  objective?: string | null;
+  recall?: string | null;
+  retrieval_check?: string | null;
+  retrieval_result?: "independent" | "hinted" | "not_yet" | null;
+  retrieval_confidence?: number | null;
+  outcome?: "yes" | "partial" | "not_yet" | null;
 };
 
 async function doLogSession(payload: unknown, operationId: string) {
   const input = payload as LogSessionInput;
   const date = input.date ?? today();
-  const { data: sessionId, error } = await supabase.rpc("log_study_session", {
+  const common = {
     p_request_id: operationId,
     p_course_id: input.course_id,
     p_topic_id: input.topic_id,
@@ -349,10 +376,56 @@ async function doLogSession(payload: unknown, operationId: string) {
     p_tasks: input.tasks ?? null,
     p_note: input.note ?? null,
     p_plan_item_id: input.plan_item_id ?? null,
-  });
+  };
+
+  const result = input.retrieval_result
+    ? await untypedSupabase.rpc("log_guided_study_session", {
+        ...common,
+        p_objective: input.objective ?? null,
+        p_recall: input.recall ?? null,
+        p_retrieval_check: input.retrieval_check ?? null,
+        p_retrieval_result: input.retrieval_result,
+        p_retrieval_confidence: input.retrieval_confidence ?? null,
+        p_outcome: input.outcome ?? null,
+      })
+    : await supabase.rpc("log_study_session", common);
+
+  const { data: sessionId, error } = result;
   if (error) throw error;
   if (!sessionId) throw new Error("Opiskelusession tallennus ei palauttanut tunnistetta.");
   return sessionId;
+}
+
+type RecordPracticeAttemptInput = {
+  course_id: string;
+  topic_id: string;
+  date?: string;
+  attempt_type: PracticeAttempt["attempt_type"];
+  prompt: string;
+  response?: string | null;
+  difficulty: number;
+  result: PracticeAttempt["result"];
+  confidence?: number | null;
+  hint_used?: boolean;
+};
+
+async function doRecordPracticeAttempt(payload: unknown) {
+  const input = payload as RecordPracticeAttemptInput;
+  const { data, error } = await untypedSupabase.rpc("record_practice_attempt", {
+    p_course_id: input.course_id,
+    p_topic_id: input.topic_id,
+    p_date: input.date ?? today(),
+    p_attempt_type: input.attempt_type,
+    p_prompt: input.prompt,
+    p_response: input.response ?? null,
+    p_difficulty: input.difficulty,
+    p_result: input.result,
+    p_confidence: input.confidence ?? null,
+    p_hint_used: input.hint_used ?? false,
+  });
+  if (error) throw error;
+  if (!data) throw new Error("Harjoitusyrityksen tallennus ei palauttanut tunnistetta.");
+  return data as string;
 }
 
 async function doUpdatePlanStatus(payload: unknown) {
@@ -408,6 +481,7 @@ async function doWeeklyCheckin(payload: unknown) {
 }
 
 registerOp("logSession", doLogSession);
+registerOp("recordPracticeAttempt", doRecordPracticeAttempt);
 registerOp("updatePlanStatus", doUpdatePlanStatus);
 registerOp("movePlanItem", doMovePlanItem);
 registerOp("upsertPlanItem", doUpsertPlanItem);
@@ -416,7 +490,7 @@ registerOp("weeklyCheckin", doWeeklyCheckin);
 function useInvalidateAll() {
   const qc = useQueryClient();
   return () =>
-    ["courses", "topics", "sessions", "exams", "plan", "mistakes", "tests", "settings", "preferences", "weekly-checkins", "progress-events"].forEach(
+    ["courses", "topics", "sessions", "exams", "plan", "mistakes", "tests", "practice-attempts", "settings", "preferences", "weekly-checkins", "progress-events"].forEach(
       (k) => qc.invalidateQueries({ queryKey: [k] }),
     );
 }
@@ -425,6 +499,16 @@ export function useLogSession() {
   const invalidate = useInvalidateAll();
   return useMutation({
     mutationFn: (input: LogSessionInput) => runOrQueue("logSession", input),
+    onSuccess: invalidate,
+  });
+}
+
+
+export function useRecordPracticeAttempt() {
+  const invalidate = useInvalidateAll();
+  return useMutation({
+    mutationFn: (input: RecordPracticeAttemptInput) =>
+      runOrQueue("recordPracticeAttempt", input),
     onSuccess: invalidate,
   });
 }
@@ -449,14 +533,14 @@ export function useMovePlanItem() {
 export function useGeneratePlan() {
   const invalidate = useInvalidateAll();
   return useMutation({
-    mutationFn: async (input: { courseId: string; drafts: PlanDraft[] }) => {
+    mutationFn: async (input: { courseId: string; drafts: PlanDraft[]; capacity?: CapacityProfile }) => {
       const [{ data: previous, error: readError }, { data: otherPlan, error: otherError }] = await Promise.all([
         supabase.from("plan_items").select("id").eq("course_id", input.courseId).eq("status", "planned"),
         supabase.from("plan_items").select("*").neq("course_id", input.courseId).eq("status", "planned"),
       ]);
       if (readError) throw readError;
       if (otherError) throw otherError;
-      const balancedDrafts = balanceDraftsAgainstPlan(input.drafts, otherPlan ?? []);
+      const balancedDrafts = balanceDraftsAgainstPlan(input.drafts, otherPlan ?? [], 120, input.capacity);
       const { data: created, error } = await supabase.from("plan_items").insert(balancedDrafts).select("id");
       if (error) throw error;
       if (previous?.length) {
@@ -483,7 +567,18 @@ export function useUpsertPlanItem() {
 export function useUpdateTopic() {
   const invalidate = useInvalidateAll();
   return useMutation({
-    mutationFn: async (input: { id: string } & Partial<Topic>) => {
+    mutationFn: async (input: {
+      id: string;
+      name?: string;
+      materials?: string | null;
+      importance?: number;
+      weight?: number;
+      school_covered?: boolean;
+      position?: number;
+      dependencies?: string[];
+      progress?: number;
+      self_level?: number;
+    }) => {
       const { id, ...rest } = input;
       const { error } = await supabase.from("topics").update(rest).eq("id", id);
       if (error) throw error;
