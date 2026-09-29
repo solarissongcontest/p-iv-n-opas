@@ -247,8 +247,10 @@ function StudyApp({ user }: { user: DeviceUser }) {
   const preferences = preferencesQ.data;
   const capacity = {
     studyWeekdays: preferences?.study_weekdays ?? [1,2,3,4,5],
+    weekdayMinMinutes: preferences?.weekday_capacity_min_minutes ?? 30,
     weekdayMinutes: preferences?.weekday_capacity_minutes ?? 60,
-    weekendMinutes: preferences?.weekend_capacity_minutes ?? 90,
+    weekendMinMinutes: preferences?.weekend_capacity_min_minutes ?? 60,
+    weekendMinutes: preferences?.weekend_capacity_minutes ?? 120,
     busyDates: preferences?.busy_dates ?? [],
   };
   const hasUserData =
