@@ -14,6 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      coach_budget: {
+        Row: {
+          day_count: number
+          day_start: string
+          owner_id: string
+          window_count: number
+          window_start: string
+        }
+        Insert: {
+          day_count?: number
+          day_start?: string
+          owner_id: string
+          window_count?: number
+          window_start?: string
+        }
+        Update: {
+          day_count?: number
+          day_start?: string
+          owner_id?: string
+          window_count?: number
+          window_start?: string
+        }
+        Relationships: []
+      }
       courses: {
         Row: {
           archived: boolean
@@ -390,9 +414,15 @@ export type Database = {
           method: string | null
           minutes: number
           note: string | null
+          objective: string | null
+          outcome: string | null
           owner_id: string | null
+          plan_item_id: string | null
           planned_minutes: number | null
-          request_id: string | null
+          recall: string | null
+          retrieval_check: string | null
+          retrieval_confidence: number | null
+          retrieval_result: string | null
           tasks: string | null
           topic_id: string | null
           unclear: string | null
@@ -410,9 +440,15 @@ export type Database = {
           method?: string | null
           minutes?: number
           note?: string | null
+          objective?: string | null
+          outcome?: string | null
           owner_id?: string | null
+          plan_item_id?: string | null
           planned_minutes?: number | null
-          request_id?: string | null
+          recall?: string | null
+          retrieval_check?: string | null
+          retrieval_confidence?: number | null
+          retrieval_result?: string | null
           tasks?: string | null
           topic_id?: string | null
           unclear?: string | null
@@ -430,9 +466,15 @@ export type Database = {
           method?: string | null
           minutes?: number
           note?: string | null
+          objective?: string | null
+          outcome?: string | null
           owner_id?: string | null
+          plan_item_id?: string | null
           planned_minutes?: number | null
-          request_id?: string | null
+          recall?: string | null
+          retrieval_check?: string | null
+          retrieval_confidence?: number | null
+          retrieval_result?: string | null
           tasks?: string | null
           topic_id?: string | null
           unclear?: string | null
@@ -443,6 +485,13 @@ export type Database = {
             columns: ["course_id"]
             isOneToOne: false
             referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "study_sessions_plan_item_id_fkey"
+            columns: ["plan_item_id"]
+            isOneToOne: false
+            referencedRelation: "plan_items"
             referencedColumns: ["id"]
           },
           {
@@ -464,6 +513,8 @@ export type Database = {
           exam_successes: number
           id: string
           importance: number
+          last_retrieval_confidence: number | null
+          last_retrieval_result: string | null
           last_review: string | null
           materials: string | null
           name: string
@@ -487,6 +538,8 @@ export type Database = {
           exam_successes?: number
           id?: string
           importance?: number
+          last_retrieval_confidence?: number | null
+          last_retrieval_result?: string | null
           last_review?: string | null
           materials?: string | null
           name: string
@@ -510,6 +563,8 @@ export type Database = {
           exam_successes?: number
           id?: string
           importance?: number
+          last_retrieval_confidence?: number | null
+          last_retrieval_result?: string | null
           last_review?: string | null
           materials?: string | null
           name?: string
@@ -569,24 +624,52 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      consume_coach_budget: { Args: { p_owner: string }; Returns: boolean }
+      log_guided_study_session: {
+        Args: {
+          p_competence: number
+          p_course_id: string
+          p_date: string
+          p_did: string
+          p_energy: number
+          p_focus: number
+          p_kind: string
+          p_method: string
+          p_minutes: number
+          p_note: string
+          p_objective: string
+          p_outcome: string
+          p_plan_item_id: string
+          p_planned_minutes: number
+          p_recall: string
+          p_request_id: string
+          p_retrieval_check: string
+          p_retrieval_confidence: number
+          p_retrieval_result: string
+          p_tasks: string
+          p_topic_id: string
+          p_unclear: string
+        }
+        Returns: string
+      }
       log_study_session: {
         Args: {
-          p_request_id: string
+          p_competence: number
           p_course_id: string
-          p_topic_id: string | null
           p_date: string
-          p_minutes: number
-          p_planned_minutes: number | null
+          p_did: string
+          p_energy: number
+          p_focus: number
           p_kind: string
-          p_competence: number | null
-          p_unclear: string | null
-          p_did: string | null
-          p_focus: number | null
-          p_method: string | null
-          p_energy: number | null
-          p_tasks: string | null
-          p_note: string | null
-          p_plan_item_id: string | null
+          p_method: string
+          p_minutes: number
+          p_note: string
+          p_plan_item_id: string
+          p_planned_minutes: number
+          p_request_id: string
+          p_tasks: string
+          p_topic_id: string
+          p_unclear: string
         }
         Returns: string
       }
