@@ -32,6 +32,11 @@ export type UserPreferences = {
   weekend_capacity_minutes: number;
   busy_dates: string[];
   notifications_enabled: boolean;
+  planner_mode?: "manual" | "assisted" | "autopilot";
+  personal_experiments_enabled?: boolean;
+  quiet_hours_start?: string | null;
+  quiet_hours_end?: string | null;
+  learning_schema_version?: number;
   timezone: string;
   created_at: string;
   updated_at: string;
