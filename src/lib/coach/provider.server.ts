@@ -138,7 +138,7 @@ export class GeminiCoachProvider implements CoachProvider {
               },
               responseFormat: {
                 text: {
-                  mimeType: "application/json",
+                  mimeType: "APPLICATION_JSON",
                   schema: {
                     type: "object",
                     additionalProperties: false,
