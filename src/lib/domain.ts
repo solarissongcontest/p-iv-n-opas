@@ -87,7 +87,7 @@ export function masteryEvidence(t: Pick<
     parts.push(`${t.retrieval_attempts} muistista palautusta`);
     if (t.retrieval_failures > 0) parts.push(`${t.retrieval_failures} tarvitsee vielä harjoittelua`);
   }
-  if (t.mastery_uncertainty >= 0.65) parts.push("näyttöä vielä vähän");
+  if (parts.length > 0 && t.mastery_uncertainty >= 0.65) parts.push("näyttöä vielä vähän");
   return parts.length ? parts.join(" · ") : "Ei vielä tarpeeksi näyttöä.";
 }
 
