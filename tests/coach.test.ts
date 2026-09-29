@@ -368,14 +368,14 @@ test("Gemini provider fails closed and never passes provider prose through", asy
     };
   };
   assert.equal(geminiRequest.generationConfig?.temperature, undefined);
-  assert.equal(geminiRequest.generationConfig?.maxOutputTokens, 128);
+  assert.equal(geminiRequest.generationConfig?.maxOutputTokens, 512);
   assert.equal(
     geminiRequest.generationConfig?.thinkingConfig?.thinkingLevel,
     "low",
   );
   assert.equal(
     geminiRequest.generationConfig?.responseFormat?.text?.mimeType,
-    "application/json",
+    "APPLICATION_JSON",
   );
   assert.equal(
     geminiRequest.generationConfig?.responseFormat?.text?.schema

@@ -249,7 +249,7 @@ export async function handleQuestionGeneration(request: Request): Promise<Respon
             maxOutputTokens: 6000,
             responseFormat: {
               text: {
-                mimeType: "application/json",
+                mimeType: "APPLICATION_JSON",
                 schema: {
                   type: "object",
                   additionalProperties: false,

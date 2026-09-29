@@ -177,7 +177,7 @@ export async function handleCourseStructure(request: Request): Promise<Response>
             maxOutputTokens: 1800,
             responseFormat: {
               text: {
-                mimeType: "application/json",
+                mimeType: "APPLICATION_JSON",
                 schema: {
                   type: "object",
                   additionalProperties: false,

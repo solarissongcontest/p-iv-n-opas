@@ -132,13 +132,13 @@ export class GeminiCoachProvider implements CoachProvider {
               },
             ],
             generationConfig: {
-              maxOutputTokens: 128,
+              maxOutputTokens: 512,
               thinkingConfig: {
                 thinkingLevel: "low",
               },
               responseFormat: {
                 text: {
-                  mimeType: "application/json",
+                  mimeType: "APPLICATION_JSON",
                   schema: {
                     type: "object",
                     additionalProperties: false,
