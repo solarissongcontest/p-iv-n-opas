@@ -329,6 +329,7 @@ export function ExamsView({courses,topics,exams,tests,mistakes,sessions,plan,onC
     const pp=plan.filter(p=>p.course_id===selected.course_id&&p.date>=today()&&p.date<=selected.date&&p.status==="planned");
     const score=readiness({topics:ts,tests:tt,mistakes:mm});
     const mastery=masterySummary(ts);
+    const phases=examPhaseStatus({topics:ts,tests:tt,mistakes:mm});
     const missing=ts.filter(t=>t.progress<100||t.verified_level<3).sort((a,b)=>a.verified_level-b.verified_level||b.importance-a.importance);
     const reviews=ts.filter(t=>t.next_review&&t.next_review<=selected.date).sort((a,b)=>(a.next_review??"").localeCompare(b.next_review??""));
     const studyMinutes=ss.reduce((sum,s)=>sum+s.minutes,0);
@@ -344,6 +345,10 @@ export function ExamsView({courses,topics,exams,tests,mistakes,sessions,plan,onC
         </div>
         <p className="mt-5 text-3xl font-semibold">{score} % <span className="text-sm font-normal text-muted-foreground">koevalmius · ei arvosanaennuste</span></p>
         <div className="mt-3"><Bar value={score}/></div>
+      </Panel>
+      <Panel title="Koemoodin vaiheet">
+        <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">{phases.map((phase,index)=><div key={phase.key} className="rounded-xl bg-muted/60 p-3"><div className="flex items-center justify-between gap-2"><p className="font-medium">{index+1}. {phase.label}</p><span className={`text-xs font-semibold ${phase.done?"text-primary":"text-muted-foreground"}`}>{phase.done?"Valmis":"Seuraavana"}</span></div><p className="mt-1 text-xs text-muted-foreground">{phase.note}</p></div>)}</div>
+        <p className="mt-3 text-xs text-muted-foreground">Järjestys ei ole jäykkä lukko. Planner painottaa keskeneräisiä vaiheita ja jättää loppuun kevyttä varaa.</p>
       </Panel>
       <div className="grid gap-4 lg:grid-cols-2">
         <Panel title="Harjoittele ennen koetta">{missing.length?missing.slice(0,10).map(t=><div key={t.id} className="flex items-center justify-between gap-3 border-b border-border py-2 text-sm"><span>{t.name}</span><span className="text-right text-muted-foreground">{t.progress}% sisältö · {MASTERY_LABELS[t.verified_level]}</span></div>):<p className="text-muted-foreground">Kaikista aiheista on jo vahvaa näyttöä tai sisältö on käsitelty.</p>}</Panel>
@@ -380,6 +385,22 @@ export function ProgressView({courses,topics,sessions,plan,exams,onPlan}:Base&{s
   const weekEvents=(events.data??[]).filter(e=>e.created_at.slice(0,10)>=week&&e.created_at.slice(0,10)<=weekEnd&&e.kind==="mastery");
   const biggestGain=[...weekEvents].sort((a,b)=>(Number(b.to_value??0)-Number(b.from_value??0))-(Number(a.to_value??0)-Number(a.from_value??0)))[0];
   const nextExam=exams.filter(e=>e.date>=now).sort((a,b)=>a.date.localeCompare(b.date))[0];
+  const strengthenedTopicIds=new Set(weekEvents.map(e=>e.topic_id).filter(Boolean));
+  const strengthened=topics.filter(t=>strengthenedTopicIds.has(t.id)).slice(0,5);
+  const needsRound=recoveryQueue(topics,now,3).items.length
+    ? recoveryQueue(topics,now,3).items
+    : [...topics].filter(t=>t.verified_level>0&&t.verified_level<4).sort((a,b)=>a.verified_level-b.verified_level||b.importance-a.importance).slice(0,3);
+  const importantWeek=[...currentWeekPlan].sort((a,b)=>b.target_minutes-a.target_minutes).slice(0,5);
+  const importantDone=importantWeek.filter(p=>p.status==="completed").length;
+  const nextWeekSuggestions=courses.slice(0,6).map(course=>{
+    const ct=topics.filter(t=>t.course_id===course.id);
+    const due=recoveryQueue(ct,addDays(now,7),2);
+    const exam=exams.filter(e=>e.course_id===course.id&&e.date>=now).sort((a,b)=>a.date.localeCompare(b.date))[0];
+    const strongShare=ct.length?ct.filter(t=>t.verified_level>=3).length/ct.length:0;
+    if(due.items.length)return `${course.code}: yksi kohdennettu kertaus (${due.items[0]?.name})`;
+    if(exam&&diffDays(exam.date,now)<=21&&strongShare>=0.5)return `${course.code}: siirry mixed practiceen ja koetasoon`;
+    return `${course.code}: suunnitelma ennallaan`;
+  });
   const concreteInsights=courses.map(course=>{const cp=currentWeekPlan.filter(p=>p.course_id===course.id),plannedMins=cp.reduce((a,p)=>a+p.target_minutes,0),actualMins=currentWeekSessions.filter(s=>s.course_id===course.id).reduce((a,s)=>a+s.minutes,0);return{course,delta:actualMins-plannedMins,plannedMins,actualMins};}).filter(x=>x.plannedMins>0||x.actualMins>0).sort((a,b)=>Math.abs(b.delta)-Math.abs(a.delta));
   const masteryEvents=(events.data??[]).filter(e=>e.kind==="mastery"&&e.from_value!=null&&e.to_value!=null);
   const masterySeries=weekly.map(w=>{const startDate=(()=>{const [d,m]=w.week.split(".").map(Number);const year=new Date().getFullYear();return `${year}-${String(m).padStart(2,"0")}-${String(d).padStart(2,"0")}`;})();const endDate=addDays(startDate,6);return{week:w.week,gain:masteryEvents.filter(e=>e.created_at.slice(0,10)>=startDate&&e.created_at.slice(0,10)<=endDate).reduce((sum,e)=>sum+Math.max(0,Number(e.to_value)-Number(e.from_value)),0)}});
@@ -431,9 +452,15 @@ export function ProgressView({courses,topics,sessions,plan,exams,onPlan}:Base&{s
       <div className="mt-3 flex flex-wrap gap-2"><button className={button} disabled={saveCheckin.isPending} onClick={()=>void saveCheckin.mutateAsync({week_start:week,note:note.trim()||null,planned_minutes:planned,actual_minutes:actual,adherence,hardest_topic_id:hardest||null,went_well:wentWell.trim()||null,next_focus:nextFocus.trim()||null,load_rating:load}).then(result=>toast.success(result==="queued"?"Reflektio tallennettu paikallisesti.":"Viikkoreflektointi tallennettu.")).catch(()=>toast.error("Tallennus epäonnistui."))}>Tallenna reflektio</button><button className={secondary} onClick={onPlan}>Suunnittele ensi viikko</button></div>
     </Panel>
 
-    <Panel title={`Viikkoyhteenveto · viikko ${weekNumber(now)}`}>
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3"><div><p className="text-xs text-muted-foreground">Opiskeluaika</p><p className="text-lg font-semibold">{minutes(actual)}</p></div><div><p className="text-xs text-muted-foreground">Suunnitelmasta</p><p className="text-lg font-semibold">{currentWeekPlan.length?Math.round(weekCompleted/currentWeekPlan.length*100):0}%</p></div><div><p className="text-xs text-muted-foreground">Eniten opiskeltu</p><p className="text-lg font-semibold">{mostStudied?.mins?mostStudied.course.code:"—"}</p></div><div><p className="text-xs text-muted-foreground">Suurin mastery-nousu</p><p className="text-lg font-semibold">{biggestGain?.detail??"—"}</p></div><div className="col-span-2"><p className="text-xs text-muted-foreground">Lähestyvä koe</p><p className="text-lg font-semibold">{nextExam?`${nextExam.name} · ${fullDate(nextExam.date)}`:"—"}</p></div></div>
-      <button className={secondary+" mt-4"} onClick={onPlan}>Suunnittele ensi viikko</button>
+    <Panel title={`Viikkosi · viikko ${weekNumber(now)}`}>
+      <div className="grid gap-4 lg:grid-cols-3">
+        <div><p className="text-sm font-semibold">Vahvistui</p>{strengthened.length?strengthened.map(t=><p key={t.id} className="mt-2 text-sm">{courses.find(c=>c.id===t.course_id)?.code} · {t.name}</p>):<p className="mt-2 text-sm text-muted-foreground">Ei vielä uutta todennettua tasonnousua tällä viikolla.</p>}</div>
+        <div><p className="text-sm font-semibold">Tarvitsee vielä kierroksen</p>{needsRound.length?needsRound.map(t=><p key={t.id} className="mt-2 text-sm">{courses.find(c=>c.id===t.course_id)?.code} · {t.name}</p>):<p className="mt-2 text-sm text-muted-foreground">Ei juuri nyt erottuvaa kertaustarvetta.</p>}</div>
+        <div><p className="text-sm font-semibold">Tärkeimmät sessiot</p><p className="mt-2 text-2xl font-semibold">{importantDone} / {importantWeek.length||0}</p><p className="text-xs text-muted-foreground">viikon tärkeimmistä toteutui</p></div>
+      </div>
+      <div className="mt-5 rounded-2xl bg-muted/50 p-4"><p className="text-sm font-semibold">Ensi viikolle ehdotan</p>{nextWeekSuggestions.map((suggestion,index)=><p key={index} className="mt-2 text-sm">{suggestion}</p>)}</div>
+      <button className={button+" mt-4"} onClick={onPlan}>Tarkista ja hyväksy suunnitelma</button>
+      <p className="mt-3 text-xs text-muted-foreground">Opiskeluaika {minutes(actual)} · {studyDaysInWeek(sessions)} opiskelupäivää. Aika on alempana analytiikkaa, ei viikon pääasiallinen onnistumismittari.</p>
     </Panel>
 
     <Panel title="Osaamisen tapahtumat">{events.data?.length?events.data.slice(0,12).map(e=><div key={e.id} className="border-b border-border py-3"><p className="font-medium">{e.detail??e.kind}</p><p className="text-sm text-muted-foreground">{e.kind==="mastery"&&e.from_value!=null&&e.to_value!=null?`Osaaminen ${e.from_value} → ${e.to_value}`:e.kind} · {new Date(e.created_at).toLocaleDateString("fi-FI")}</p></div>):<p className="text-muted-foreground">Osaamisen muutokset ilmestyvät tähän opiskelun myötä.</p>}</Panel>
@@ -445,6 +472,7 @@ export function SettingsView({user}:{user:DeviceUser}) {
   const [pushEnabled,setPushEnabled]=useState(false);
   const [pushBusy,setPushBusy]=useState(false);
   const preferences=usePreferences(),prefs=preferences.data,updatePreferences=useUpdatePreferences();
+  const [weekdayCapacity,setWeekdayCapacity]=useState(60),[weekendCapacity,setWeekendCapacity]=useState(90),[busyDate,setBusyDate]=useState("");
   const settingsQ=useSettings(),settings=settingsQ.data,updateSettings=useUpdateSettings();
   const allCourses=useCourses(),archiveCourse=useArchiveCourse();
   const archived=(allCourses.data??[]).filter(c=>c.archived);
@@ -461,6 +489,11 @@ export function SettingsView({user}:{user:DeviceUser}) {
     void pushIsEnabledOnDevice().then(enabled=>{if(active)setPushEnabled(enabled);}).catch(()=>{if(active)setPushEnabled(false);});
     return()=>{active=false;};
   },[]);
+  useEffect(()=>{
+    if(!prefs)return;
+    setWeekdayCapacity(prefs.weekday_capacity_minutes??60);
+    setWeekendCapacity(prefs.weekend_capacity_minutes??90);
+  },[prefs?.weekday_capacity_minutes,prefs?.weekend_capacity_minutes]);
 
   async function togglePush(){
     setPushBusy(true);
@@ -496,9 +529,12 @@ export function SettingsView({user}:{user:DeviceUser}) {
   return <div className="space-y-5">
     <Panel title="Profiili"><p className="text-2xl font-semibold">{prefs?.display_name||"Arthur"}</p><p className="mt-2 text-sm text-muted-foreground">Pysyvä Opintopäiväkirja-tunnus · {user.id.slice(0,8)}…</p></Panel>
 
-    <Panel title="Opiskelurytmi">
-      <p className="mb-3 text-sm text-muted-foreground">Näitä päiviä käytetään adaptiivisten suunnitelmien rytmitykseen ja taustamuistutuksiin.</p>
+    <Panel title="Opiskelurytmi ja kapasiteetti">
+      <p className="mb-3 text-sm text-muted-foreground">Planner käyttää näitä rajoina. Väliin jäänyttä työmäärää ei työnnetä seuraavan päivän kapasiteetin yli.</p>
       <div className="flex flex-wrap gap-2">{weekdayOptions.map(([day,label])=>{const active=(prefs?.study_weekdays??[1,2,3,4,5]).includes(day);return <button key={day} type="button" aria-pressed={active} onClick={()=>void toggleWeekday(day)} className={`grid size-11 place-items-center rounded-xl border text-sm font-semibold ${active?"border-primary bg-accent text-primary":"border-border bg-surface"}`}>{label}</button>;})}</div>
+      <div className="mt-4 grid gap-3 sm:grid-cols-2"><label className="text-sm font-medium">Arkipäivä (min)<input type="number" min="15" max="360" step="15" className="mt-1 w-full rounded-xl border bg-surface px-3 py-2.5" value={weekdayCapacity} onChange={e=>setWeekdayCapacity(Number(e.target.value))}/></label><label className="text-sm font-medium">Viikonloppu (min)<input type="number" min="15" max="480" step="15" className="mt-1 w-full rounded-xl border bg-surface px-3 py-2.5" value={weekendCapacity} onChange={e=>setWeekendCapacity(Number(e.target.value))}/></label></div>
+      <button className={secondary+" mt-3"} disabled={!prefs||updatePreferences.isPending} onClick={()=>void updatePreferences.mutateAsync({weekday_capacity_minutes:Math.max(15,weekdayCapacity),weekend_capacity_minutes:Math.max(15,weekendCapacity)}).then(()=>toast.success("Kapasiteetti tallennettu.")).catch(()=>toast.error("Kapasiteettia ei voitu tallentaa."))}>Tallenna kapasiteetti</button>
+      <div className="mt-5 border-t border-border pt-4"><p className="text-sm font-medium">Kiireiset päivät</p><p className="mt-1 text-xs text-muted-foreground">Kiireisenä päivänä Planner varaa vain kevyen ylläpitokuorman.</p><div className="mt-3 flex flex-wrap gap-2"><input type="date" className="min-h-11 rounded-xl border bg-surface px-3" value={busyDate} onChange={e=>setBusyDate(e.target.value)}/><button className={secondary} disabled={!prefs||!busyDate} onClick={()=>{if(!prefs||!busyDate)return;const next=[...new Set([...(prefs.busy_dates??[]),busyDate])].sort();void updatePreferences.mutateAsync({busy_dates:next}).then(()=>{setBusyDate("");toast.success("Kiireinen päivä lisätty.");}).catch(()=>toast.error("Päivää ei voitu tallentaa."));}}>Merkitse kiireiseksi</button></div><div className="mt-3 flex flex-wrap gap-2">{(prefs?.busy_dates??[]).filter(d=>d>=today()).slice(0,12).map(date=><button key={date} className="rounded-full bg-muted px-3 py-1 text-xs" title="Poista kiireinen päivä" onClick={()=>prefs&&void updatePreferences.mutateAsync({busy_dates:prefs.busy_dates.filter(d=>d!==date)})}>{fullDate(date)} ×</button>)}</div></div>
     </Panel>
 
     <Panel title="Taustamuistutukset" action={<button disabled={pushBusy||!pushSupported()} className={secondary+" !min-h-9"} onClick={()=>void togglePush()}><Bell size={15}/>{pushBusy?"Päivitetään…":pushEnabled?"Poista käytöstä":"Ota käyttöön"}</button>}>
