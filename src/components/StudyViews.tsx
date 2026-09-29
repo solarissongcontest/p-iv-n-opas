@@ -30,9 +30,11 @@ import {
   adaptiveDayPlanV4,
   errorProfileV4,
   experimentInsightsV4,
+  learningAchievementsV4,
   learningOsSelfCheckV4,
   masteryModelV4,
   personalLearningProfileV4,
+  productMetricsV4,
   sessionFatigueV4,
   simulateLearningOsV4,
   yoOverviewV4,
@@ -449,6 +451,8 @@ export function ProgressView({courses,topics,attempts,sessions,plan,exams,mistak
   const fatigue=sessionFatigueV4(sessions,attempts);
   const learningProfile=personalLearningProfileV4(sessions,attempts);
   const experimentInsights=experimentInsightsV4(sessions,attempts);
+  const achievements=learningAchievementsV4(topics,attempts,mistakes,courses,now);
+  const productMetrics=productMetricsV4({courses,topics,attempts,mistakes,sessions,plan,now});
   const selfChecks=learningOsSelfCheckV4({courses,topics,plan,attempts,mistakes,capacity,now});
   const simulations=simulateLearningOsV4({courses,topics,plan,attempts,mistakes,capacity,days:60,start:now});
   const learningRows=topics.map(topic=>{
@@ -544,6 +548,26 @@ export function ProgressView({courses,topics,attempts,sessions,plan,exams,mistak
         <p className="mt-3 text-xs text-muted-foreground">Johtopäätös tehdään myöhemmästä osaamisnäytöstä, ei siitä tuntuiko sessio mukavalta.</p>
       </Panel>
     </div>
+
+    <Panel title="Mastery-milestonet">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {achievements.map(item=><div key={item.id} className={"rounded-xl border p-3 "+(item.earned?"border-primary/40 bg-accent/50":"border-border bg-muted/40")}><div className="flex items-center justify-between gap-2"><b>{item.title}</b><span aria-label={item.earned?"saavutettu":"kesken"}>{item.earned?"✓":"○"}</span></div><p className="mt-1 text-xs text-muted-foreground">{item.body}</p><div className="mt-3 h-1.5 overflow-hidden rounded-full bg-muted"><div className="h-full rounded-full bg-primary" style={{width:Math.min(100,item.progress)+"%"}}/></div></div>)}
+      </div>
+      <p className="mt-3 text-xs text-muted-foreground">Ei XP:tä, leaderboardia tai streak-rangaistusta. Edistyminen tarkoittaa osaamista ja recoveryä.</p>
+    </Panel>
+
+    <Panel title="Oppimismittarit">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+        {[
+          ["Viivepalautus",productMetrics.delayedRecallRate===null?"—":Math.round(productMetrics.delayedRecallRate*100)+" %"],
+          ["Itsenäinen onnistuminen",productMetrics.independentSuccessRate===null?"—":Math.round(productMetrics.independentSuccessRate*100)+" %"],
+          ["Mastery stability",productMetrics.masteryStability===null?"—":Math.round(productMetrics.masteryStability*100)+" %"],
+          ["Recovery success",productMetrics.recoverySuccessRate===null?"—":Math.round(productMetrics.recoverySuccessRate*100)+" %"],
+          ["Vakaata / tunti",productMetrics.studyEfficiency===null?"—":(Math.round(productMetrics.studyEfficiency*10)/10).toString()],
+        ].map(([label,value])=><div key={label} className="rounded-xl bg-muted/50 p-3"><small className="text-muted-foreground">{label}</small><p className="mt-1 text-xl font-semibold">{value}</p></div>)}
+      </div>
+      <p className="mt-3 text-xs text-muted-foreground">Ruutuaikaa ei palkita. Nämä mittarit kertovat muistamisesta, vakaudesta, recoveryistä ja oppimisen tehokkuudesta.</p>
+    </Panel>
 
     <details className="panel p-4 sm:p-5">
       <summary className="cursor-pointer font-semibold">Learning Engine · regression self-check & 60 päivän simulaatio</summary>
