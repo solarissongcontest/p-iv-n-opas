@@ -891,7 +891,8 @@ export function experimentInsightsV4(
   const interleaveB:number[]=[];
   const spacingA:number[]=[];
   const spacingB:number[]=[];
-  for(const attempt of attempts){
+  const chronological=[...attempts].sort((a,b)=>a.date.localeCompare(b.date)||a.created_at.localeCompare(b.created_at));
+  for(const [index,attempt] of chronological.entries()){
     const experimentPayload=attempt.question_payload?.["experimentVariants"];
     const variants=
       experimentPayload&&typeof experimentPayload==="object"
@@ -902,9 +903,18 @@ export function experimentInsightsV4(
     if(interleave==="A")interleaveA.push(score);
     if(interleave==="B")interleaveB.push(score);
 
-    // For spacing, use the delayed outcome and the variant that scheduled the prior interval.
-    const spacing=variants["spacing"];
     if(Number(attempt.delay_days??0)>=2){
+      const source=[...chronological.slice(0,index)].reverse().find((candidate)=>
+        candidate.topic_id===attempt.topic_id &&
+        resultScore(candidate)>=.9 &&
+        !isAssisted(candidate)
+      );
+      const sourcePayload=source?.question_payload?.["experimentVariants"];
+      const sourceVariants=
+        sourcePayload&&typeof sourcePayload==="object"
+          ? sourcePayload as Record<string,unknown>
+          : {};
+      const spacing=sourceVariants["spacing"];
       if(spacing==="A")spacingA.push(score);
       if(spacing==="B")spacingB.push(score);
     }
