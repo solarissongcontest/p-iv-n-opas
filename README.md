@@ -1,5 +1,8 @@
 # Päivän Opas
 
+> **Canonical production repository:** `solarissongcontest/p-iv-n-opas`  
+> Do not deploy, migrate the production database, or continue Opintopäiväkirja development from older repository copies. See `docs/legacy-migration-audit.md`.
+
 Rakenna production-quality full-stack -sovellus nimeltä "Opintopäiväkirja". Tämä on moderni suomalainen Study OS, jonka ydinsykli on:
 
 suunnittele → opiskele → kirjaa → arvioi → mukauta suunnitelmaa.
