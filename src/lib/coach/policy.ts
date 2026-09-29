@@ -15,6 +15,17 @@ export const COACH_TACTICS = [
   "counterexample",
 ] as const;
 
+export const COACH_DIAGNOSTICS = [
+  "auth",
+  "request",
+  "model",
+  "provider",
+  "network",
+  "timeout",
+  "budget",
+  "invalid_output",
+] as const;
+
 export const coachRequestSchema = z.object({
   mode: z.enum(COACH_MODES),
   message: z.string().trim().max(4000).default(""),
@@ -53,10 +64,13 @@ export type CoachContext = {
   suggestedDate: string;
 };
 
+export type CoachDiagnostic = (typeof COACH_DIAGNOSTICS)[number];
+
 export type CoachResponse = {
   message: string;
   source: "local" | "gemini";
   status: "local" | "ready" | "quota" | "unavailable" | "invalid_output";
+  diagnostic?: CoachDiagnostic;
   kind: "hint" | "question" | "feedback" | "insight" | "proposal";
   hintLevel: number;
   proposal?: {

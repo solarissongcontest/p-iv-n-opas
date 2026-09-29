@@ -247,11 +247,39 @@ test("Gemini provider fails closed and never passes provider prose through", asy
 
   const remote = { ...input, remoteConsent: true, attempt: "F=ma" };
 
-  const cases: [Response, string][] = [
-    [new Response("", { status: 429 }), "quota"],
-    [new Response("", { status: 500 }), "unavailable"],
-    [
-      Response.json({
+  const cases: Array<{
+    response: Response;
+    status: string;
+    diagnostic?: string;
+  }> = [
+    { response: new Response("", { status: 429 }), status: "quota" },
+    {
+      response: new Response("", { status: 401 }),
+      status: "unavailable",
+      diagnostic: "auth",
+    },
+    {
+      response: new Response("", { status: 403 }),
+      status: "unavailable",
+      diagnostic: "auth",
+    },
+    {
+      response: new Response("", { status: 400 }),
+      status: "unavailable",
+      diagnostic: "request",
+    },
+    {
+      response: new Response("", { status: 404 }),
+      status: "unavailable",
+      diagnostic: "model",
+    },
+    {
+      response: new Response("", { status: 500 }),
+      status: "unavailable",
+      diagnostic: "provider",
+    },
+    {
+      response: Response.json({
         candidates: [
           {
             content: {
@@ -262,10 +290,11 @@ test("Gemini provider fails closed and never passes provider prose through", asy
           },
         ],
       }),
-      "invalid_output",
-    ],
-    [
-      Response.json({
+      status: "invalid_output",
+      diagnostic: "invalid_output",
+    },
+    {
+      response: Response.json({
         candidates: [
           {
             content: {
@@ -274,14 +303,15 @@ test("Gemini provider fails closed and never passes provider prose through", asy
           },
         ],
       }),
-      "ready",
-    ],
+      status: "ready",
+    },
   ];
 
-  for (const [response, status] of cases) {
-    const provider = new GeminiCoachProvider(async () => response);
+  for (const testCase of cases) {
+    const provider = new GeminiCoachProvider(async () => testCase.response);
     const result = await provider.decide(remote, context);
-    assert.equal(result.status, status);
+    assert.equal(result.status, testCase.status);
+    assert.equal(result.diagnostic, testCase.diagnostic);
     assert.ok(!JSON.stringify(result).includes("2400"));
   }
 
@@ -323,30 +353,43 @@ test("Gemini provider fails closed and never passes provider prose through", asy
 
   const geminiRequest = JSON.parse(requestBody) as {
     generationConfig?: {
-      responseMimeType?: string;
-      responseJsonSchema?: {
-        additionalProperties?: boolean;
-        properties?: { tactic?: { enum?: string[] } };
+      responseFormat?: {
+        text?: {
+          mimeType?: string;
+          schema?: {
+            additionalProperties?: boolean;
+            properties?: { tactic?: { enum?: string[] } };
+          };
+        };
       };
     };
   };
   assert.equal(
-    geminiRequest.generationConfig?.responseMimeType,
+    geminiRequest.generationConfig?.responseFormat?.text?.mimeType,
     "application/json",
   );
   assert.equal(
-    geminiRequest.generationConfig?.responseJsonSchema?.additionalProperties,
+    geminiRequest.generationConfig?.responseFormat?.text?.schema
+      ?.additionalProperties,
     false,
   );
   assert.deepEqual(
-    geminiRequest.generationConfig?.responseJsonSchema?.properties?.tactic?.enum,
+    geminiRequest.generationConfig?.responseFormat?.text?.schema?.properties
+      ?.tactic?.enum,
     [...COACH_TACTICS],
   );
 
-  const failure = await new GeminiCoachProvider(async () => {
-    throw new Error("timeout");
+  const networkFailure = await new GeminiCoachProvider(async () => {
+    throw new Error("connection reset");
   }).decide(remote, context);
-  assert.equal(failure.status, "unavailable");
+  assert.equal(networkFailure.status, "unavailable");
+  assert.equal(networkFailure.diagnostic, "network");
+
+  const timeoutFailure = await new GeminiCoachProvider(async () => {
+    throw new DOMException("timed out", "TimeoutError");
+  }).decide(remote, context);
+  assert.equal(timeoutFailure.status, "unavailable");
+  assert.equal(timeoutFailure.diagnostic, "timeout");
 
   delete process.env["GEMINI_API_KEY"];
   delete process.env["GEMINI_MODEL"];

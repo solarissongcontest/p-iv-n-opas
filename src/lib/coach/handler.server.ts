@@ -228,11 +228,19 @@ export async function handleCoach(request: Request): Promise<Response> {
     });
 
     if (budget.error) {
-      return json({ ...local, status: "unavailable" });
+      return json({
+        ...local,
+        status: "unavailable",
+        diagnostic: "budget",
+      });
     }
 
     if (budget.data !== true) {
-      return json({ ...local, status: "quota" });
+      return json({
+        ...local,
+        status: "quota",
+        diagnostic: "budget",
+      });
     }
 
     const providerResult = await new GeminiCoachProvider().decide(
@@ -250,6 +258,9 @@ export async function handleCoach(request: Request): Promise<Response> {
       ...rendered,
       source: providerResult.source,
       status: providerResult.status,
+      ...(providerResult.diagnostic
+        ? { diagnostic: providerResult.diagnostic }
+        : {}),
     });
   } catch {
     return json(

@@ -4,6 +4,7 @@ import {
   parseCoachDecision,
   type CoachContext,
   type CoachDecision,
+  type CoachDiagnostic,
   type CoachRequest,
   type CoachResponse,
 } from "./policy.ts";
@@ -13,6 +14,7 @@ export type ProviderResult = {
   decision: CoachDecision;
   source: CoachResponse["source"];
   status: CoachResponse["status"];
+  diagnostic?: CoachDiagnostic;
 };
 
 export interface CoachProvider {
@@ -58,10 +60,14 @@ export class GeminiCoachProvider implements CoachProvider {
     input: CoachRequest,
     context: CoachContext,
   ): Promise<ProviderResult> {
-    const fallback = (status: CoachResponse["status"]): ProviderResult => ({
+    const fallback = (
+      status: CoachResponse["status"],
+      diagnostic?: CoachDiagnostic,
+    ): ProviderResult => ({
       decision: localCoachDecision(input),
       source: "local",
       status,
+      ...(diagnostic ? { diagnostic } : {}),
     });
 
     if (
@@ -77,7 +83,7 @@ export class GeminiCoachProvider implements CoachProvider {
       const model = process.env["GEMINI_MODEL"] ?? "gemini-3.8-flash";
 
       if (!/^[a-z0-9._-]+$/i.test(model)) {
-        return fallback("unavailable");
+        return fallback("unavailable", "model");
       }
 
       const response = await this.transport(
@@ -126,17 +132,21 @@ export class GeminiCoachProvider implements CoachProvider {
             generationConfig: {
               temperature: 0,
               maxOutputTokens: 32,
-              responseMimeType: "application/json",
-              responseJsonSchema: {
-                type: "object",
-                additionalProperties: false,
-                properties: {
-                  tactic: {
-                    type: "string",
-                    enum: [...COACH_TACTICS],
+              responseFormat: {
+                text: {
+                  mimeType: "application/json",
+                  schema: {
+                    type: "object",
+                    additionalProperties: false,
+                    properties: {
+                      tactic: {
+                        type: "string",
+                        enum: [...COACH_TACTICS],
+                      },
+                    },
+                    required: ["tactic"],
                   },
                 },
-                required: ["tactic"],
               },
             },
           }),
@@ -144,7 +154,12 @@ export class GeminiCoachProvider implements CoachProvider {
       );
 
       if (response.status === 429) return fallback("quota");
-      if (!response.ok) return fallback("unavailable");
+      if (response.status === 401 || response.status === 403) {
+        return fallback("unavailable", "auth");
+      }
+      if (response.status === 404) return fallback("unavailable", "model");
+      if (response.status === 400) return fallback("unavailable", "request");
+      if (!response.ok) return fallback("unavailable", "provider");
 
       const data = (await response.json()) as {
         candidates?: Array<{
@@ -160,11 +175,17 @@ export class GeminiCoachProvider implements CoachProvider {
         .trim();
 
       const decision = parseCoachDecision(raw);
-      if (!decision) return fallback("invalid_output");
+      if (!decision) return fallback("invalid_output", "invalid_output");
 
       return { decision, source: "gemini", status: "ready" };
-    } catch {
-      return fallback("unavailable");
+    } catch (error) {
+      if (
+        error instanceof DOMException &&
+        (error.name === "TimeoutError" || error.name === "AbortError")
+      ) {
+        return fallback("unavailable", "timeout");
+      }
+      return fallback("unavailable", "network");
     }
   }
 }
