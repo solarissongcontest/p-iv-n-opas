@@ -13,7 +13,19 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import type { CapacityProfile, Course, Exam, Mistake, PlanDraft, PlanItem, PracticeTest, Session, Topic } from "@/lib/domain";
+import type { CapacityProfile, Course, Exam, Mistake, PlanDraft, PlanItem, PracticeAttempt, PracticeTest, Session, Topic } from "@/lib/domain";
+import {
+  buildRecoveryQueue,
+  calibration,
+  capacityForDateV3,
+  deriveTopicLearningState,
+  evidenceSummary,
+  examBuffer,
+  examStage,
+  learningForecast,
+  todayPriority,
+  weeklyLearningReview,
+} from "@/lib/learning-engine";
 import {
   corridor,
   corridorAdvice,
@@ -89,31 +101,32 @@ function Bar({ value }: { value: number }) {
 }
 type Base = {courses:Course[];topics:Topic[]};
 
-export function TodayView({courses,topics,sessions,exams,plan,tests,mistakes,capacity,onStart,onGo}:Base&{
-  sessions:Session[];exams:Exam[];plan:PlanItem[];tests:PracticeTest[];mistakes:Mistake[];capacity:CapacityProfile;
+export function TodayView({courses,topics,sessions,exams,plan,tests,attempts,mistakes,capacity,onStart,onGo}:Base&{
+  sessions:Session[];exams:Exam[];plan:PlanItem[];tests:PracticeTest[];attempts:PracticeAttempt[];mistakes:Mistake[];capacity:CapacityProfile;
   onStart:(id:string)=>void;onGo:(page:"plan"|"exams"|"practice")=>void
 }) {
   const now=today();
   const move=useMovePlanItem(),upsert=useUpsertPlanItem();
   const [taskIndex,setTaskIndex]=useState(0);
-  const items=rankTodayTasks({
-    items:plan.filter(p=>p.date===now&&p.status==="planned"&&p.kind!=="exam"),
-    courses,topics,mistakes,tests,now,
-  });
+  const rankedToday=plan
+    .filter(p=>p.date===now&&p.status==="planned"&&p.kind!=="exam")
+    .map(item=>({item,...todayPriority({item,courses,topics,attempts,mistakes,now})}))
+    .sort((a,b)=>b.score-a.score);
+  const items=rankedToday.map(row=>row.item);
   useEffect(()=>{if(taskIndex>=items.length)setTaskIndex(0);},[items.length,taskIndex]);
   const next=items[taskIndex]??items[0];
   const later=items.filter(item=>item.id!==next?.id).slice(0,2);
   const upcoming=exams.filter(e=>e.date>=now).sort((a,b)=>a.date.localeCompare(b.date))[0];
   const goal=courses.reduce((a,c)=>a+c.weekly_minutes,0),done=weekMinutes(sessions,now),last=sessions.find(s=>s.note||s.unclear);
-  const recovery=recoveryQueue(topics,now,3);
+  const recovery=buildRecoveryQueue({topics,attempts,courses,now,capacityMinutes:Math.min(20,capacityForDateV3(capacity,now)),maxItems:3});
   const comeback=returnFromBreak({sessions,topics,now,days:7});
   const todayMinutes=items.reduce((sum,item)=>sum+item.target_minutes,0);
   const examCourse=upcoming?courses.find(c=>c.id===upcoming.course_id):undefined;
   const mode=examMode(upcoming?.date??null,now);
   const examTopics=examCourse?topics.filter(t=>t.course_id===examCourse.id):[];
-  const examReady=examCourse?readiness({topics:examTopics,tests:tests.filter(t=>t.course_id===examCourse.id),mistakes:mistakes.filter(m=>m.course_id===examCourse.id)}):0;
+  const examPrep=examCourse?examStage({topics:examTopics,attempts:attempts.filter(a=>a.course_id===examCourse.id),tests:tests.filter(t=>t.course_id===examCourse.id),mistakes:mistakes.filter(m=>m.course_id===examCourse.id),course:examCourse}):null;
   const openMistakes=examCourse?mistakes.filter(m=>m.course_id===examCourse.id&&m.status!=="mastered").length:0;
-  const reason=next?todayTaskReason({item:next,courses,topics,mistakes,now}):"";
+  const reason=next?todayPriority({item:next,courses,topics,attempts,mistakes,now}).reason:"";
 
   async function makeLight(){
     if(!next)return;
