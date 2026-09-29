@@ -10,33 +10,128 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ApiDeviceAuthRouteImport } from './routes/api.device-auth'
+import { Route as ApiAiCoachRouteImport } from './routes/api.ai.coach'
+import { Route as ApiPushCronRouteImport } from './routes/api.push.cron'
+import { Route as ApiPushPublicKeyRouteImport } from './routes/api.push.public-key'
+import { Route as ApiPushSubscribeRouteImport } from './routes/api.push.subscribe'
+import { Route as ApiPushTestRouteImport } from './routes/api.push.test'
+import { Route as ApiPushUnsubscribeRouteImport } from './routes/api.push.unsubscribe'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiDeviceAuthRoute = ApiDeviceAuthRouteImport.update({
+  id: '/api/device-auth',
+  path: '/api/device-auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAiCoachRoute = ApiAiCoachRouteImport.update({
+  id: '/api/ai/coach',
+  path: '/api/ai/coach',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPushCronRoute = ApiPushCronRouteImport.update({
+  id: '/api/push/cron',
+  path: '/api/push/cron',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPushPublicKeyRoute = ApiPushPublicKeyRouteImport.update({
+  id: '/api/push/public-key',
+  path: '/api/push/public-key',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPushSubscribeRoute = ApiPushSubscribeRouteImport.update({
+  id: '/api/push/subscribe',
+  path: '/api/push/subscribe',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPushTestRoute = ApiPushTestRouteImport.update({
+  id: '/api/push/test',
+  path: '/api/push/test',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPushUnsubscribeRoute = ApiPushUnsubscribeRouteImport.update({
+  id: '/api/push/unsubscribe',
+  path: '/api/push/unsubscribe',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/api/device-auth': typeof ApiDeviceAuthRoute
+  '/api/ai/coach': typeof ApiAiCoachRoute
+  '/api/push/cron': typeof ApiPushCronRoute
+  '/api/push/public-key': typeof ApiPushPublicKeyRoute
+  '/api/push/subscribe': typeof ApiPushSubscribeRoute
+  '/api/push/test': typeof ApiPushTestRoute
+  '/api/push/unsubscribe': typeof ApiPushUnsubscribeRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/api/device-auth': typeof ApiDeviceAuthRoute
+  '/api/ai/coach': typeof ApiAiCoachRoute
+  '/api/push/cron': typeof ApiPushCronRoute
+  '/api/push/public-key': typeof ApiPushPublicKeyRoute
+  '/api/push/subscribe': typeof ApiPushSubscribeRoute
+  '/api/push/test': typeof ApiPushTestRoute
+  '/api/push/unsubscribe': typeof ApiPushUnsubscribeRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/api/device-auth': typeof ApiDeviceAuthRoute
+  '/api/ai/coach': typeof ApiAiCoachRoute
+  '/api/push/cron': typeof ApiPushCronRoute
+  '/api/push/public-key': typeof ApiPushPublicKeyRoute
+  '/api/push/subscribe': typeof ApiPushSubscribeRoute
+  '/api/push/test': typeof ApiPushTestRoute
+  '/api/push/unsubscribe': typeof ApiPushUnsubscribeRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/api/device-auth'
+    | '/api/ai/coach'
+    | '/api/push/cron'
+    | '/api/push/public-key'
+    | '/api/push/subscribe'
+    | '/api/push/test'
+    | '/api/push/unsubscribe'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/api/device-auth'
+    | '/api/ai/coach'
+    | '/api/push/cron'
+    | '/api/push/public-key'
+    | '/api/push/subscribe'
+    | '/api/push/test'
+    | '/api/push/unsubscribe'
+  id:
+    | '__root__'
+    | '/'
+    | '/api/device-auth'
+    | '/api/ai/coach'
+    | '/api/push/cron'
+    | '/api/push/public-key'
+    | '/api/push/subscribe'
+    | '/api/push/test'
+    | '/api/push/unsubscribe'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ApiDeviceAuthRoute: typeof ApiDeviceAuthRoute
+  ApiAiCoachRoute: typeof ApiAiCoachRoute
+  ApiPushCronRoute: typeof ApiPushCronRoute
+  ApiPushPublicKeyRoute: typeof ApiPushPublicKeyRoute
+  ApiPushSubscribeRoute: typeof ApiPushSubscribeRoute
+  ApiPushTestRoute: typeof ApiPushTestRoute
+  ApiPushUnsubscribeRoute: typeof ApiPushUnsubscribeRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +143,67 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/device-auth': {
+      id: '/api/device-auth'
+      path: '/api/device-auth'
+      fullPath: '/api/device-auth'
+      preLoaderRoute: typeof ApiDeviceAuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/ai/coach': {
+      id: '/api/ai/coach'
+      path: '/api/ai/coach'
+      fullPath: '/api/ai/coach'
+      preLoaderRoute: typeof ApiAiCoachRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/push/cron': {
+      id: '/api/push/cron'
+      path: '/api/push/cron'
+      fullPath: '/api/push/cron'
+      preLoaderRoute: typeof ApiPushCronRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/push/public-key': {
+      id: '/api/push/public-key'
+      path: '/api/push/public-key'
+      fullPath: '/api/push/public-key'
+      preLoaderRoute: typeof ApiPushPublicKeyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/push/subscribe': {
+      id: '/api/push/subscribe'
+      path: '/api/push/subscribe'
+      fullPath: '/api/push/subscribe'
+      preLoaderRoute: typeof ApiPushSubscribeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/push/test': {
+      id: '/api/push/test'
+      path: '/api/push/test'
+      fullPath: '/api/push/test'
+      preLoaderRoute: typeof ApiPushTestRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/push/unsubscribe': {
+      id: '/api/push/unsubscribe'
+      path: '/api/push/unsubscribe'
+      fullPath: '/api/push/unsubscribe'
+      preLoaderRoute: typeof ApiPushUnsubscribeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ApiDeviceAuthRoute: ApiDeviceAuthRoute,
+  ApiAiCoachRoute: ApiAiCoachRoute,
+  ApiPushCronRoute: ApiPushCronRoute,
+  ApiPushPublicKeyRoute: ApiPushPublicKeyRoute,
+  ApiPushSubscribeRoute: ApiPushSubscribeRoute,
+  ApiPushTestRoute: ApiPushTestRoute,
+  ApiPushUnsubscribeRoute: ApiPushUnsubscribeRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
