@@ -11,11 +11,13 @@ import {
   useUpdateCourse,
   useUpdateTopic,
   useCreateTopic,
+  usePreferences,
   useUpsertPlanItem,
 } from "@/lib/data";
-import type { Course, Exam, PlanItem, Session, Topic } from "@/lib/domain";
+import type { Course, Exam, PlanItem, PracticeAttempt, Session, Topic } from "@/lib/domain";
 import { TARGET_SYSTEMS } from "@/lib/domain";
 import { shortDate, today } from "@/lib/fi";
+import { experimentVariantV4, sessionFatigueV4 } from "@/lib/learning-os-v4";
 import { COURSE_TEMPLATES, parseTopicImport, topicsToImportText } from "@/lib/courseTemplates";
 
 const input = "mt-1 w-full rounded-xl border border-border bg-surface px-3 py-2.5 outline-none focus-visible:ring-2 focus-visible:ring-ring";
@@ -46,7 +48,7 @@ function Dialog({ title, onClose, children }: { title: string; onClose: () => vo
   </LiquidGlass>
  </div>;
 }
-export function SessionForm({item,courses,topics,onClose}:{item:PlanItem|null;courses:Course[];topics:Topic[];onClose:()=>void}) {
+export function SessionForm({item,courses,topics,sessions=[],attempts=[],onClose}:{item:PlanItem|null;courses:Course[];topics:Topic[];sessions?:Session[];attempts?:PracticeAttempt[];onClose:()=>void}) {
  const initialCourse=item?.course_id??courses[0]?.id??"";
  const initialTopic=item?.topic_id??"";
  const [guided,setGuided]=useState(!!item);
@@ -62,7 +64,12 @@ export function SessionForm({item,courses,topics,onClose}:{item:PlanItem|null;co
  const [competence,setCompetence]=useState(3),[did,setDid]=useState(""),[unclear,setUnclear]=useState(""),[note,setNote]=useState("");
  const [method,setMethod]=useState("tehtävät"),[tasks,setTasks]=useState("");
  const log=useLogSession();
+ const preferences=usePreferences();
+ const experimentApplied=useRef(false);
  const course=courses.find(c=>c.id===courseId),topic=topics.find(t=>t.id===topicId);
+ const fatigue=sessionFatigueV4(sessions,attempts);
+ const sessionVariant=experimentVariantV4("session_length",today(),courseId+":"+(topicId||"general"));
+ const experimentMinutes=sessionVariant==="A"?25:40;
  const targetMinutes=timerMode==="20"?20:timerMode==="30"?30:timerMode==="custom"?customMinutes:actualMinutes;
  const phaseGoal=item?.phase==="review"
    ?"Palauta ydinasia muistista ilman materiaalia."
@@ -73,6 +80,14 @@ export function SessionForm({item,courses,topics,onClose}:{item:PlanItem|null;co
    ? `Sulje materiaalit. Selitä tai ratkaise omin sanoin, mitä osaat nyt aiheesta “${topic.name}”.`
    : "Sulje materiaalit. Kirjoita tärkeimmät asiat, jotka pystyt nyt palauttamaan muistista.";
 
+ useEffect(()=>{
+   if(experimentApplied.current||preferences.data?.personal_experiments_enabled!==true)return;
+   if(item?.target_minutes&&item.target_minutes<15)return;
+   setTimerMode("custom");
+   setCustomMinutes(experimentMinutes);
+   experimentApplied.current=true;
+ },[experimentMinutes,item?.target_minutes,preferences.data?.personal_experiments_enabled]);
+
  useEffect(()=>{if(!running)return;const id=window.setInterval(()=>setSeconds(v=>v+1),1000);return()=>window.clearInterval(id);},[running]);
  const timerTargetSeconds =
    timerMode==="20" ? 20*60 :
@@ -80,6 +95,9 @@ export function SessionForm({item,courses,topics,onClose}:{item:PlanItem|null;co
    timerMode==="custom" ? Math.max(1,customMinutes)*60 :
    null;
  const timerReached = timerTargetSeconds != null && seconds >= timerTargetSeconds;
+ const fatigueThresholdMinutes=fatigue.preferredSessionMinutes??35;
+ const liveFatigueNudge=
+   running&&fatigue.level!=="none"&&seconds>=fatigueThresholdMinutes*60;
 
  function changeMode(next:boolean){
    setGuided(next);
@@ -160,7 +178,7 @@ export function SessionForm({item,courses,topics,onClose}:{item:PlanItem|null;co
 
      {step===1&&<div className="space-y-4"><div><p className="text-sm font-medium text-primary">Recall warm-up</p><h3 className="mt-1 text-xl font-semibold">Ennen kuin avaat materiaalin</h3><p className="mt-2 text-sm text-muted-foreground">Kirjoita 2–3 asiaa, jotka muistat aiheesta jo nyt. Tyhjäkin kohta on hyödyllinen havainto, ei epäonnistuminen.</p></div><textarea autoFocus rows={6} className={input} value={recall} onChange={e=>setRecall(e.target.value)} placeholder="Mitä muistat ilman muistiinpanoja?"/></div>}
 
-     {step===2&&<div className="space-y-4"><div><p className="text-sm font-medium text-primary">Learn / Practice</p><h3 className="mt-1 text-xl font-semibold">{objective||phaseGoal}</h3><p className="mt-2 text-sm text-muted-foreground">Opiskele, ratkaise tehtäviä ja käytä materiaalia normaalisti. Ajastin on vain apuväline.</p></div>{timerMode!=="none"?<div className="rounded-2xl bg-muted p-5 text-center"><p role="timer" className="text-5xl font-semibold tabular-nums">{timerDisplay}</p><p className="mt-2 text-sm text-muted-foreground">Tavoite {timerMode==="custom"?customMinutes:Number(timerMode)} min{timerReached?" · tavoiteaika täynnä, voit jatkaa":""}</p><button type="button" className={secondary+" mt-4"} onClick={()=>setRunning(v=>!v)}>{running?<><Pause size={17}/>Tauko</>:<><Play size={17}/>Aloita / jatka</>}</button></div>:<label className="block text-sm font-medium">Todellinen kesto minuutteina<input type="number" min="1" max="240" className={input} value={actualMinutes} onChange={e=>setActualMinutes(Number(e.target.value))}/></label>}<label className="block text-sm font-medium">Mitä teit?<textarea rows={3} className={input} value={did} onChange={e=>setDid(e.target.value)} placeholder="Esim. tehtävät 4.12–4.18"/></label></div>}
+     {step===2&&<div className="space-y-4"><div><p className="text-sm font-medium text-primary">Learn / Practice</p><h3 className="mt-1 text-xl font-semibold">{objective||phaseGoal}</h3><p className="mt-2 text-sm text-muted-foreground">Opiskele, ratkaise tehtäviä ja käytä materiaalia normaalisti. Ajastin on vain apuväline.</p></div>{timerMode!=="none"?<div className="rounded-2xl bg-muted p-5 text-center"><p role="timer" className="text-5xl font-semibold tabular-nums">{timerDisplay}</p><p className="mt-2 text-sm text-muted-foreground">Tavoite {timerMode==="custom"?customMinutes:Number(timerMode)} min{timerReached?" · tavoiteaika täynnä, voit jatkaa":""}</p>{preferences.data?.personal_experiments_enabled&&timerMode==="custom"&&customMinutes===experimentMinutes&&<p className="mt-1 text-xs text-muted-foreground">Personal Experiment Engine · tämän päivän variantti {experimentMinutes} min</p>}{liveFatigueNudge&&<div className="mt-4 rounded-xl border border-border bg-surface p-3 text-left text-sm"><b>Hyvä kohta tauolle tai retrieval checkiin.</b><p className="mt-1 text-muted-foreground">{fatigue.reason}</p>{fatigue.suggestedBreakMinutes>0&&<small className="mt-1 block text-muted-foreground">Ehdotettu tauko noin {fatigue.suggestedBreakMinutes} min.</small>}</div>}<button type="button" className={secondary+" mt-4"} onClick={()=>setRunning(v=>!v)}>{running?<><Pause size={17}/>Tauko</>:<><Play size={17}/>Aloita / jatka</>}</button></div>:<label className="block text-sm font-medium">Todellinen kesto minuutteina<input type="number" min="1" max="240" className={input} value={actualMinutes} onChange={e=>setActualMinutes(Number(e.target.value))}/></label>}<label className="block text-sm font-medium">Mitä teit?<textarea rows={3} className={input} value={did} onChange={e=>setDid(e.target.value)} placeholder="Esim. tehtävät 4.12–4.18"/></label></div>}
 
      {step===3&&<div className="space-y-4"><div><p className="text-sm font-medium text-primary">Retrieval check</p><h3 className="mt-1 text-xl font-semibold">Sulje materiaali</h3><p className="mt-2 text-sm text-muted-foreground">{retrievalPrompt}</p></div><textarea autoFocus rows={6} className={input} value={retrievalCheck} onChange={e=>setRetrievalCheck(e.target.value)} placeholder="Vastaa muistista…"/><p className="text-xs text-muted-foreground">Älä arvioi vielä fiilistä. Tee ensin yritys, sitten merkitse miten se onnistui.</p></div>}
 
