@@ -1,11 +1,16 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import {
+  capacityForDate,
+  examPhaseStatus,
   findNextStudyDate,
   masteryEvidence,
   masterySummary,
   nextReviewDate,
+  practicePrompt,
   recoveryQueue,
+  returnFromBreak,
   todayTaskReason,
   type Course,
   type Mistake,
@@ -32,6 +37,13 @@ function topic(
     basic_successes: 0,
     exam_successes: 0,
     delayed_successes: 0,
+    retrieval_attempts: 0,
+    retrieval_failures: 0,
+    mastery_uncertainty: 1,
+    last_retrieval_at: null,
+    last_retrieval_result: null,
+    last_retrieval_confidence: null,
+    last_retrieval_difficulty: null,
     ...overrides,
   } as unknown as Topic;
 }
@@ -169,4 +181,100 @@ test("today task rationale is transparent without pretending to know a grade", (
   assert.match(reason, /kertaus on ajankohtainen/);
   assert.match(reason, /avoin virhe/);
   assert.ok(!/arvosana|todennäköisyys/i.test(reason));
+});
+
+
+test("capacity model distinguishes weekdays, weekends and busy dates", () => {
+  const profile = {
+    studyWeekdays: [1,2,3,4,5],
+    weekdayMinutes: 60,
+    weekendMinutes: 120,
+    busyDates: ["2026-10-01"],
+  };
+  assert.equal(capacityForDate(profile, "2026-09-30"), 60);
+  assert.equal(capacityForDate(profile, "2026-10-03"), 120);
+  assert.equal(capacityForDate(profile, "2026-10-01"), 30);
+});
+
+test("capacity-aware rescheduling avoids an overloaded day", () => {
+  const date = findNextStudyDate({
+    plan: [{
+      id: "busy",
+      date: "2026-09-30",
+      target_minutes: 55,
+      status: "planned",
+      kind: "study",
+    } as PlanItem],
+    fromISO: "2026-09-29",
+    studyWeekdays: [1,2,3,4,5],
+    minutes: 30,
+    capacity: {
+      studyWeekdays: [1,2,3,4,5],
+      weekdayMinutes: 60,
+      weekendMinutes: 90,
+      busyDates: [],
+    },
+  });
+  assert.equal(date, "2026-10-01");
+});
+
+test("return from break surfaces a capped gentle restart", () => {
+  const comeback = returnFromBreak({
+    sessions: [{ date: "2026-09-20" }] as any,
+    topics: [
+      topic("a", 2, { next_review: "2026-09-22", importance: 5 }),
+      topic("b", 2, { next_review: "2026-09-23", importance: 4 }),
+      topic("c", 3, { next_review: "2026-09-24", importance: 3 }),
+      topic("d", 1, { next_review: "2026-09-25", importance: 5 }),
+    ],
+    now: "2026-09-29",
+  });
+  assert.ok(comeback);
+  assert.equal(comeback?.awayDays, 9);
+  assert.equal(comeback?.items.length, 3);
+  assert.equal(comeback?.estimatedMinutes, 15);
+});
+
+test("practice prompts progress from recall toward transfer and recognition", () => {
+  const t = topic("newton", 3);
+  const types = Array.from({length:5},(_,index)=>practicePrompt(t,index).type);
+  assert.deepEqual(types, [
+    "free_recall",
+    "short_answer",
+    "calculation",
+    "application",
+    "recognition",
+  ]);
+  assert.match(practicePrompt(t,0).prompt,/ilman muistiinpanoja/i);
+});
+
+test("exam mode exposes all six preparation phases", () => {
+  const phases = examPhaseStatus({
+    topics: [
+      topic("a", 4, { progress: 100, basic_successes: 2, exam_successes: 1 }),
+      topic("b", 3, { progress: 100, basic_successes: 2 }),
+    ],
+    tests: [{ score: 8, max_score: 10 }] as any,
+    mistakes: [] as any,
+  });
+  assert.deepEqual(phases.map(phase=>phase.key), [
+    "coverage","retrieval","mixed","transfer","simulation","repair",
+  ]);
+  assert.equal(phases[0]?.done, true);
+  assert.equal(phases[4]?.done, true);
+});
+
+test("manual self-rating cannot create mastery evidence in the database function", () => {
+  const sql = readFileSync(
+    new URL("../supabase/migrations/20260929080000_evidence_based_guided_sessions.sql", import.meta.url),
+    "utf8",
+  );
+  const manualStart = sql.indexOf("create or replace function public.log_study_session");
+  const guidedStart = sql.indexOf("create or replace function public.log_guided_study_session");
+  assert.ok(manualStart >= 0 && guidedStart > manualStart);
+  const manual = sql.slice(manualStart, guidedStart);
+  assert.doesNotMatch(manual, /basic_successes\s*=\s*.*p_competence/is);
+  assert.doesNotMatch(manual, /exam_successes\s*=\s*.*p_competence/is);
+  assert.doesNotMatch(manual, /delayed_successes\s*=\s*.*p_competence/is);
+  assert.match(manual, /self_level\s*=\s*coalesce\(p_competence/i);
 });
