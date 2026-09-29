@@ -12,12 +12,13 @@ import {
 } from "@/lib/learning-engine";
 import {
   delayedVerificationQueueV4,
+  experimentVariantV4,
   masteryModelV4,
   practicePathV4,
   type PracticePath,
 } from "@/lib/learning-os-v4";
-import { useRecordPracticeAttempt } from "@/lib/data";
-import { fullDate, today } from "@/lib/fi";
+import { usePreferences, useRecordPracticeAttempt, useUpdateTopic } from "@/lib/data";
+import { addDays, fullDate, today } from "@/lib/fi";
 
 const primary =
   "inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-primary px-4 text-sm font-medium text-primary-foreground disabled:opacity-50";
@@ -87,6 +88,9 @@ export function PracticeView({
   const [diagnosticMode, setDiagnosticMode] = useState(false);
   const startedAt = useRef<number>(Date.now());
   const record = useRecordPracticeAttempt();
+  const updateTopic = useUpdateTopic();
+  const preferences = usePreferences();
+  const experimentsEnabled = preferences.data?.personal_experiments_enabled ?? true;
 
   const course = courses.find((candidate) => candidate.id === courseId) ?? null;
   const courseTopics = useMemo(
@@ -112,7 +116,7 @@ export function PracticeView({
     course,
   });
 
-  const diagnosticLimit = Math.min(10, Math.max(5, courseTopics.length));
+  const diagnosticLimit = Math.min(10, courseTopics.length);
   const diagnosticDone = diagnosticMode && attemptIndex >= diagnosticLimit;
   const effectiveTopicId = diagnosticMode
     ? courseTopics[attemptIndex % Math.max(1, courseTopics.length)]?.id ?? topicId
@@ -131,6 +135,21 @@ export function PracticeView({
         requiresIndependentFollowup: false,
       }
     : selectedPath;
+  const interleavingVariant =
+    experimentsEnabled && selectedTopic
+      ? experimentVariantV4("interleaving", today(), courseId + ":" + selectedTopic.id)
+      : null;
+  const spacingVariant =
+    experimentsEnabled && selectedTopic
+      ? experimentVariantV4("spacing_window", today(), courseId + ":" + selectedTopic.id)
+      : null;
+  const interleaveMode =
+    diagnosticMode || interleavingVariant === null
+      ? "auto" as const
+      : interleavingVariant === "A"
+        ? "blocked" as const
+        : "interleaved" as const;
+
   const preferredTypes: LearningAttemptType[] | undefined =
     activePath?.stage === "worked_example" || activePath?.stage === "explanation"
       ? ["explanation", "short_answer"]
@@ -156,8 +175,9 @@ export function PracticeView({
             examStage: stage.key,
             index: attemptIndex,
             preferredTypes,
+            interleaveMode,
           }),
-    [attemptIndex, attempts, course, courseTopics, diagnosticDone, effectiveTopicId, preferredTypes, stage.key],
+    [attemptIndex, attempts, course, courseTopics, diagnosticDone, effectiveTopicId, interleaveMode, preferredTypes, stage.key],
   );
 
   const recovery = buildRecoveryQueue({
@@ -219,8 +239,21 @@ export function PracticeView({
           scaffoldStage: activePath?.stage ?? "independent",
           assisted: hintLevel > 0,
           verificationRequired: activePath?.requiresIndependentFollowup ?? false,
+          experimentVariants: {
+            interleaving: interleavingVariant,
+            spacing: spacingVariant,
+          },
         },
       });
+
+      if (experimentsEnabled && spacingVariant && result === "independent") {
+        const days = spacingVariant === "A" ? 3 : 5;
+        await updateTopic.mutateAsync({
+          id: selection.topic.id,
+          // Experiment controls only the next review suggestion, never mastery itself.
+          next_review: addDays(today(), days),
+        } as Parameters<typeof updateTopic.mutateAsync>[0]);
+      }
 
       setFeedback(
         result === "independent"
