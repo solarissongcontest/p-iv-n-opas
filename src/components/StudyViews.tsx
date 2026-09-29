@@ -305,6 +305,7 @@ export function ExamsView({courses,topics,exams,tests,mistakes,sessions,plan,onC
     const ss=sessions.filter(s=>s.course_id===selected.course_id);
     const pp=plan.filter(p=>p.course_id===selected.course_id&&p.date>=today()&&p.date<=selected.date&&p.status==="planned");
     const score=readiness({topics:ts,tests:tt,mistakes:mm});
+    const mastery=masterySummary(ts);
     const missing=ts.filter(t=>t.progress<100||t.verified_level<3).sort((a,b)=>a.verified_level-b.verified_level||b.importance-a.importance);
     const reviews=ts.filter(t=>t.next_review&&t.next_review<=selected.date).sort((a,b)=>(a.next_review??"").localeCompare(b.next_review??""));
     const studyMinutes=ss.reduce((sum,s)=>sum+s.minutes,0);
@@ -315,14 +316,14 @@ export function ExamsView({courses,topics,exams,tests,mistakes,sessions,plan,onC
         <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
           <div><p className="text-xs text-muted-foreground">Tavoite</p><p className="text-xl font-semibold">{selected.target_value||course?.target_value||"—"}</p></div>
           <div><p className="text-xs text-muted-foreground">Sisältö</p><p className="text-xl font-semibold">{weightedCoverage(ts)} %</p></div>
-          <div><p className="text-xs text-muted-foreground">Osaaminen</p><p className="text-xl font-semibold">{weightedMastery(ts)} %</p></div>
+          <div><p className="text-xs text-muted-foreground">Osaaminen</p><p className="text-xl font-semibold">{mastery.label}</p></div>
           <div><p className="text-xs text-muted-foreground">Opiskeltu</p><p className="text-xl font-semibold">{minutes(studyMinutes)}</p></div>
         </div>
         <p className="mt-5 text-3xl font-semibold">{score} % <span className="text-sm font-normal text-muted-foreground">koevalmius · ei arvosanaennuste</span></p>
         <div className="mt-3"><Bar value={score}/></div>
       </Panel>
       <div className="grid gap-4 lg:grid-cols-2">
-        <Panel title="Puuttuvat / riskiaiheet">{missing.length?missing.slice(0,10).map(t=><div key={t.id} className="flex items-center justify-between border-b border-border py-2 text-sm"><span>{t.name}</span><span className="text-muted-foreground">{t.progress}% · {t.verified_level}/5</span></div>):<p className="text-muted-foreground">Kaikki aiheet ovat kattavasti käsiteltyjä.</p>}</Panel>
+        <Panel title="Harjoittele ennen koetta">{missing.length?missing.slice(0,10).map(t=><div key={t.id} className="flex items-center justify-between gap-3 border-b border-border py-2 text-sm"><span>{t.name}</span><span className="text-right text-muted-foreground">{t.progress}% sisältö · {MASTERY_LABELS[t.verified_level]}</span></div>):<p className="text-muted-foreground">Kaikista aiheista on jo vahvaa näyttöä tai sisältö on käsitelty.</p>}</Panel>
         <Panel title="Kertausohjelma">{reviews.length?reviews.slice(0,10).map(t=><div key={t.id} className="flex items-center justify-between border-b border-border py-2 text-sm"><span>{t.name}</span><span className="text-muted-foreground">{t.next_review?fullDate(t.next_review):"—"}</span></div>):<p className="text-muted-foreground">Ei erääntyviä kertauksia ennen koetta.</p>}</Panel>
         <Panel title="Harjoituskokeet">{tt.length?tt.map(t=><div key={t.id} className="border-b border-border py-2 text-sm"><p className="font-medium">{fullDate(t.date)} · {t.score}/{t.max_score} p</p><p className="text-xs text-muted-foreground">{t.duration_minutes?`${t.duration_minutes} min · `:""}{t.error_count!=null?`${t.error_count} virhettä`:""}</p></div>):<p className="text-muted-foreground">Harjoituskokeita ei ole vielä kirjattu.</p>}</Panel>
         <Panel title="Suunniteltu ennen koetta">{pp.length?pp.slice(0,12).map(p=><div key={p.id} className="flex items-center justify-between border-b border-border py-2 text-sm"><span>{fullDate(p.date)} · {p.title}</span><span className="text-muted-foreground">{minutes(p.target_minutes)}</span></div>):<p className="text-muted-foreground">Ei avoimia tehtäviä ennen koetta.</p>}</Panel>
@@ -341,6 +342,7 @@ export function ProgressView({courses,topics,sessions,plan,exams,onPlan}:Base&{s
   const recentMinutes=recent.reduce((a,s)=>a+s.minutes,0),previousMinutes=previous.reduce((a,s)=>a+s.minutes,0);
   const delta=previousMinutes?Math.round((recentMinutes-previousMinutes)/previousMinutes*100):recentMinutes?100:0;
   const byCourse=courses.map(c=>({course:c,mins:recent.filter(s=>s.course_id===c.id).reduce((a,s)=>a+s.minutes,0)})).sort((a,b)=>b.mins-a.mins);
+  const mastery=masterySummary(topics);
   const checkins=useWeeklyCheckins(),events=useProgressEvents(),saveCheckin=useUpsertWeeklyCheckin();
   const week=startOfWeek(now),weekEnd=addDays(week,6),existing=checkins.data?.find(x=>x.week_start===week);
   const [note,setNote]=useState(""),[planned,setPlanned]=useState<number>(courses.reduce((a,c)=>a+c.weekly_minutes,0)),[adherence,setAdherence]=useState(3),[hardest,setHardest]=useState(""),[wentWell,setWentWell]=useState(""),[nextFocus,setNextFocus]=useState(""),[load,setLoad]=useState<"light"|"good"|"heavy">("good");
@@ -365,8 +367,21 @@ export function ProgressView({courses,topics,sessions,plan,exams,onPlan}:Base&{s
       <div className="panel p-4"><p className="text-sm text-muted-foreground">Opiskeluaika</p><p className="mt-2 text-2xl font-semibold">{minutes(recentMinutes)}</p><p className="mt-1 text-xs text-muted-foreground">{delta>=0?"+":""}{delta}% edelliseen 30 päivään</p></div>
       <div className="panel p-4"><p className="text-sm text-muted-foreground">Suunnitelmasta</p><p className="mt-2 text-2xl font-semibold">{due.length?`${Math.round(completed.length/due.length*100)} %`:"—"}</p></div>
       <div className="panel p-4"><p className="text-sm text-muted-foreground">Opiskelurytmi</p><p className="mt-2 text-2xl font-semibold">{new Set(recent.map(s=>s.date)).size}</p><p className="mt-1 text-xs text-muted-foreground">opiskelupäivää / 30 pv</p></div>
-      <div className="panel p-4"><p className="text-sm text-muted-foreground">Osaaminen</p><p className="mt-2 text-2xl font-semibold">{topics.length?`${weightedMastery(topics)} %`:"—"}</p></div>
+      <div className="panel p-4"><p className="text-sm text-muted-foreground">Osaaminen</p><p className="mt-2 text-2xl font-semibold">{topics.length?mastery.label:"—"}</p><p className="mt-1 text-xs text-muted-foreground">{mastery.strong.length} vahvaa · {mastery.developing.length+mastery.practice.length} harjoiteltavaa</p></div>
     </div>
+
+    <Panel title="Osaamiskartta">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+        {[
+          ["Harjoittele seuraavaksi",mastery.practice],
+          ["Kehittyvä",mastery.developing],
+          ["Melko varma",mastery.fairlySure],
+          ["Vahva",mastery.strong],
+          ["Ei vielä näyttöä",mastery.unassessed],
+        ].map(([label,items])=><div key={label as string} className="rounded-xl bg-muted/50 p-3"><p className="text-sm font-semibold">{label as string}</p><p className="mt-1 text-2xl font-semibold">{(items as Topic[]).length}</p><p className="mt-1 text-xs text-muted-foreground">{(items as Topic[]).slice(0,3).map(t=>t.name).join(", ")||"—"}</p></div>)}
+      </div>
+      <p className="mt-3 text-xs text-muted-foreground">Tila perustuu tehtävä- ja kertausnäyttöön. “Ei vielä näyttöä” ei tarkoita, ettet osaisi aihetta.</p>
+    </Panel>
 
     <Panel title="Viikoittainen suunniteltu vs. toteutunut">
       <div className="h-56"><ResponsiveContainer width="100%" height="100%"><BarChart data={weekly}><CartesianGrid vertical={false}/><XAxis dataKey="week"/><YAxis width={34}/><Tooltip formatter={(value)=>minutes(Number(value))}/><RechartsBar dataKey="planned" fill="currentColor" fillOpacity={0.18}/><RechartsBar dataKey="actual" fill="currentColor" fillOpacity={0.75}/></BarChart></ResponsiveContainer></div>
@@ -379,7 +394,7 @@ export function ProgressView({courses,topics,sessions,plan,exams,onPlan}:Base&{s
 
     <Panel title="Opiskelurytmi · 5 viikkoa"><div className="grid grid-cols-7 gap-1.5">{heat.map(cell=>{const intensity=cell.mins===0?0:cell.mins<30?0.25:cell.mins<60?0.5:cell.mins<90?0.75:1;return <div key={cell.date} title={`${fullDate(cell.date)} · ${minutes(cell.mins)}`} className="aspect-square rounded-[6px] border border-border bg-primary" style={{opacity:intensity===0?0.07:intensity}}/>})}</div><p className="mt-3 text-xs text-muted-foreground">Tummempi ruutu = enemmän opiskelua. Ei streak-painostusta.</p></Panel>
 
-    <Panel title="Opiskelutehokkuus"><p className="text-2xl font-semibold">{efficiency.masteryGain} mastery-tasoa</p><p className="mt-1 text-sm text-muted-foreground">{minutes(efficiency.minutes)} opiskelua{efficiency.minutesPerMastery?` · noin ${efficiency.minutesPerMastery} min / mastery-nousu`:""}</p>{efficiency.needsMethodChange&&<p className="mt-3 rounded-xl bg-accent p-3 text-sm">Opiskeluaikaa on kertynyt vähintään 90 min ilman todennettua mastery-nousua. Kokeile menetelmän vaihtoa, esimerkiksi aktiivista palautusta, koetehtäviä tai virheiden selittämistä omin sanoin.</p>}</Panel>
+    <Panel title="Oppimisen näyttö"><p className="text-2xl font-semibold">{efficiency.masteryGain} todennettua tasonnousua</p><p className="mt-1 text-sm text-muted-foreground">Opiskeluaikaa on kirjattu {minutes(efficiency.minutes)}. Aikaa ei tulkita osaamiseksi.</p>{efficiency.needsMethodChange&&<p className="mt-3 rounded-xl bg-accent p-3 text-sm">Opiskelua on kertynyt, mutta uutta osaamisnäyttöä ei vielä ole. Kokeile aktiivista palautusta, koetehtävää tai virheen selittämistä omin sanoin pelkän lisäajan sijaan.</p>}</Panel>
 
     <Panel title="Konkreettiset havainnot">{concreteInsights.length?concreteInsights.slice(0,5).map(x=><p key={x.course.id} className="border-b border-border py-2 text-sm"><b>{x.course.code}</b> {x.delta<0?`on tällä viikolla ${minutes(Math.abs(x.delta))} alle suunnitelman`:x.delta>0?`on tällä viikolla ${minutes(x.delta)} yli tavoiteajan`:"on täsmälleen suunnitelmassa"}.</p>):<p className="text-muted-foreground">Viikon dataa ei ole vielä riittävästi.</p>}{masteryEvents.slice(0,4).map(e=><p key={e.id} className="border-b border-border py-2 text-sm">{e.detail??"Aihe"} nousi {e.from_value} → {e.to_value}/5.</p>)}</Panel>
 
