@@ -8,7 +8,7 @@ import {
   renderCoachResponse,
 } from "./policy.ts";
 import {
-  CloudflareCoachProvider,
+  GeminiCoachProvider,
   remoteCoachConfigured,
 } from "./provider.server.ts";
 
@@ -89,7 +89,7 @@ export async function handleCoach(request: Request): Promise<Response> {
 
   if (request.method === "GET") {
     return json({
-      provider: remoteCoachConfigured() ? "cloudflare" : "local",
+      provider: remoteCoachConfigured() ? "gemini" : "local",
       remoteConfigured: remoteCoachConfigured(),
     });
   }
@@ -235,7 +235,7 @@ export async function handleCoach(request: Request): Promise<Response> {
       return json({ ...local, status: "quota" });
     }
 
-    const providerResult = await new CloudflareCoachProvider().decide(
+    const providerResult = await new GeminiCoachProvider().decide(
       input,
       context,
     );
