@@ -243,7 +243,7 @@ test("redaction removes common identifying text", () => {
 
 test("Gemini provider fails closed and never passes provider prose through", async () => {
   process.env["GEMINI_API_KEY"] = "test-only";
-  process.env["GEMINI_MODEL"] = "gemini-3.8-flash";
+  process.env["GEMINI_MODEL"] = "gemini-3.7-flash";
 
   const remote = { ...input, remoteConsent: true, attempt: "F=ma" };
 
