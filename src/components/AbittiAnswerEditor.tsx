@@ -49,12 +49,12 @@ function loadAbittiEditor() {
     const script = document.createElement("script");
     script.type = "module";
     script.src = ABITTI_EDITOR_SCRIPT;
-    script.dataset.opkAbittiEditor = "true";
+    script.dataset["opkAbittiEditor"] = "true";
     script.addEventListener("load", finish, { once: true });
     script.addEventListener("error", () => reject(new Error("Abitti-editorin lataus epäonnistui.")), { once: true });
     document.head.appendChild(script);
   }).catch((error) => {
-    window.__opkAbittiEditorPromise = undefined;
+    delete window.__opkAbittiEditorPromise;
     throw error;
   });
 
