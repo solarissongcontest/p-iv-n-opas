@@ -696,6 +696,7 @@ export function useUpdateTopic() {
       dependencies?: string[];
       progress?: number;
       self_level?: number;
+      next_review?: string | null;
     }) => {
       const { id, ...rest } = input;
       const { error } = await supabase.from("topics").update(rest).eq("id", id);
