@@ -539,7 +539,7 @@ function selectBankQuestion(input: {
   const recentlyUsed = new Set(
     input.attempts
       .slice(0, 20)
-      .map((attempt) => String(attempt.question_payload?.questionBankId ?? ""))
+      .map((attempt) => String(attempt.question_payload?.["questionBankId"] ?? ""))
       .filter(Boolean),
   );
   const candidates = input.bank
