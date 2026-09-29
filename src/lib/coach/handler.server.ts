@@ -30,6 +30,34 @@ function helsinkiToday() {
   return get("year") + "-" + get("month") + "-" + get("day");
 }
 
+async function auditCoachInteraction(input: {
+  ownerId: string;
+  courseId: string;
+  topicId?: string;
+  mode: string;
+  tactic?: string;
+  hintLevel: number;
+  remoteUsed: boolean;
+  providerStatus: string;
+  answerFirewallBlocked?: boolean;
+}) {
+  try {
+    await (supabaseAdmin as any).from("ai_interactions").insert({
+      owner_id: input.ownerId,
+      course_id: input.courseId,
+      topic_id: input.topicId ?? null,
+      mode: input.mode,
+      tactic: input.tactic ?? null,
+      hint_level: input.hintLevel,
+      remote_used: input.remoteUsed,
+      provider_status: input.providerStatus,
+      answer_firewall_blocked: input.answerFirewallBlocked ?? false,
+    });
+  } catch {
+    // Audit logging must never break tutoring.
+  }
+}
+
 async function readLimitedBody(request: Request, limit = 20_000) {
   const contentLength = Number(request.headers.get("content-length") ?? "0");
   if (Number.isFinite(contentLength) && contentLength > limit) {
@@ -210,7 +238,8 @@ export async function handleCoach(request: Request): Promise<Response> {
       );
     }
 
-    const local = renderCoachResponse(input, context, localCoachDecision(input));
+    const localDecision = localCoachDecision(input);
+    const local = renderCoachResponse(input, context, localDecision);
 
     // Planning, progress and practice prompts remain deterministic.
     // Remote inference is used only to choose a tutoring strategy.
@@ -220,6 +249,16 @@ export async function handleCoach(request: Request): Promise<Response> {
       !input.attempt.trim() ||
       !remoteCoachConfigured()
     ) {
+      await auditCoachInteraction({
+        ownerId,
+        courseId: context.courseId,
+        topicId: context.selectedTopicId,
+        mode: input.mode,
+        tactic: localDecision.tactic,
+        hintLevel: input.hintLevel,
+        remoteUsed: false,
+        providerStatus: "local",
+      });
       return json(local);
     }
 
@@ -228,6 +267,16 @@ export async function handleCoach(request: Request): Promise<Response> {
     });
 
     if (budget.error) {
+      await auditCoachInteraction({
+        ownerId,
+        courseId: context.courseId,
+        topicId: context.selectedTopicId,
+        mode: input.mode,
+        tactic: localDecision.tactic,
+        hintLevel: input.hintLevel,
+        remoteUsed: false,
+        providerStatus: "budget-error",
+      });
       return json({
         ...local,
         status: "unavailable",
@@ -236,6 +285,16 @@ export async function handleCoach(request: Request): Promise<Response> {
     }
 
     if (budget.data !== true) {
+      await auditCoachInteraction({
+        ownerId,
+        courseId: context.courseId,
+        topicId: context.selectedTopicId,
+        mode: input.mode,
+        tactic: localDecision.tactic,
+        hintLevel: input.hintLevel,
+        remoteUsed: false,
+        providerStatus: "quota",
+      });
       return json({
         ...local,
         status: "quota",
@@ -253,6 +312,18 @@ export async function handleCoach(request: Request): Promise<Response> {
       context,
       providerResult.decision,
     );
+
+    await auditCoachInteraction({
+      ownerId,
+      courseId: context.courseId,
+      topicId: context.selectedTopicId,
+      mode: input.mode,
+      tactic: providerResult.decision.tactic,
+      hintLevel: input.hintLevel,
+      remoteUsed: providerResult.source === "gemini",
+      providerStatus: providerResult.status,
+      answerFirewallBlocked: providerResult.status === "invalid_output",
+    });
 
     return json({
       ...rendered,
