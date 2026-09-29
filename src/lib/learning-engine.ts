@@ -524,6 +524,8 @@ export function selectPracticeQuestion(input: {
   course?: Course | null;
   examStage?: ExamStageKey;
   index?: number;
+  preferredTypes?: LearningAttemptType[];
+  interleaveMode?: "auto" | "blocked" | "interleaved";
 }): { topic: Topic; state: TopicLearningState; question: PracticeQuestion; interleaved: boolean } | null {
   if (!input.topics.length) return null;
   const now = today();
@@ -536,7 +538,10 @@ export function selectPracticeQuestion(input: {
 
   let row = selected;
   let interleaved = false;
-  const canInterleave = selected.state.masteryLevel >= 2 && states.length > 1;
+  const canInterleave =
+    input.interleaveMode !== "blocked" &&
+    selected.state.masteryLevel >= 2 &&
+    states.length > 1;
   if (canInterleave && (input.index ?? 0) > 0) {
     const recentIds = new Set(input.attempts.slice(0, 4).map((attempt) => attempt.topic_id));
     const alternatives = states
@@ -546,13 +551,17 @@ export function selectPracticeQuestion(input: {
         const bRecent = recentIds.has(b.topic.id) ? 1 : 0;
         return aRecent - bRecent || b.state.forgettingRisk - a.state.forgettingRisk || b.state.uncertainty - a.state.uncertainty;
       });
-    if ((input.index ?? 0) % 3 === 1 && alternatives[0]) {
+    const shouldInterleave =
+      input.interleaveMode === "interleaved"
+        ? true
+        : (input.index ?? 0) % 3 === 1;
+    if (shouldInterleave && alternatives[0]) {
       row = alternatives[0];
       interleaved = true;
     }
   }
 
-  const types = desiredTypes(row.state, input.examStage);
+  const types = input.preferredTypes?.length ? input.preferredTypes : desiredTypes(row.state, input.examStage);
   const lastTypes = selectedRecent.map((attempt) => attemptType(attempt));
   const type = types.find((candidate) => !lastTypes.includes(candidate)) ?? types[(input.index ?? 0) % types.length]!;
   const difficulty =

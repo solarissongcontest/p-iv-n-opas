@@ -17,6 +17,9 @@ function localDateParts(timeZone: string) {
     month: "2-digit",
     day: "2-digit",
     weekday: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
   }).formatToParts(new Date());
 
   const read = (type: Intl.DateTimeFormatPartTypes) =>
@@ -28,7 +31,25 @@ function localDateParts(timeZone: string) {
   return {
     iso: `${read("year")}-${read("month")}-${read("day")}`,
     weekday: weekdayMap[read("weekday")] ?? 1,
+    hour: Number(read("hour") || 0),
+    minute: Number(read("minute") || 0),
   };
+}
+
+function timeMinutes(value: string | null | undefined) {
+  if (!value || !/^\d{2}:\d{2}/.test(value)) return null;
+  const hours = Number(value.slice(0, 2));
+  const minutes = Number(value.slice(3, 5));
+  if (!Number.isFinite(hours) || !Number.isFinite(minutes)) return null;
+  if (hours < 0 || hours > 23 || minutes < 0 || minutes > 59) return null;
+  return hours * 60 + minutes;
+}
+
+function inQuietHours(current: number, start: number | null, end: number | null) {
+  if (start === null || end === null || start === end) return false;
+  return start < end
+    ? current >= start && current < end
+    : current >= start || current < end;
 }
 
 function addDays(iso: string, days: number) {
@@ -69,6 +90,13 @@ export const Route = createFileRoute("/api/push/cron")({
             const timezone = preference.timezone || "Europe/Helsinki";
             const local = localDateParts(timezone);
             const weekdays = (preference.study_weekdays ?? [1,2,3,4,5]) as number[];
+            const currentMinutes = local.hour * 60 + local.minute;
+            const quietStart = timeMinutes(preference.quiet_hours_start);
+            const quietEnd = timeMinutes(preference.quiet_hours_end);
+            if (inQuietHours(currentMinutes, quietStart, quietEnd)) {
+              skipped += 1;
+              continue;
+            }
 
             const { data: notificationSettings, error: settingsError } = await admin
               .from("notification_settings")
@@ -139,13 +167,13 @@ export const Route = createFileRoute("/api/push/cron")({
               const taskMinutes = tasks.reduce((sum, task) => sum + Number(task.target_minutes ?? 0), 0);
               title = "Tämän päivän opiskelu";
               body = `${tasks.length} tehtävää · noin ${taskMinutes} min.`;
-              if (reviews?.length) body += ` Kertauksia odottaa ${reviews.length}.`;
+              if (reviews?.length) body += ` Mukana ${Math.min(3, reviews.length)} tärkeintä ajankohtaista kertausta.`;
             } else if (weekdays.includes(local.weekday) && settings.study_sessions && reviews?.length) {
-              title = "Kertaus odottaa";
-              body = `${reviews.length} aihetta on kertausvuorossa tänään.`;
+              title = "Lyhyt kertaus kannattaa tänään";
+              body = `Järjestelmä nosti esiin ${Math.min(3, reviews.length)} tärkeintä ajankohtaista aihetta. Muu jono järjestellään automaattisesti.`;
             } else if (settings.plan_changes && overdue?.length) {
-              title = "Suunnitelmaa kannattaa mukauttaa";
-              body = `${overdue.length} tehtävää on jäänyt aiemmilta päiviltä. Avaa suunnitelma ja siirrä ne rauhassa.`;
+              title = "Suunnitelma tarvitsee pienen päivityksen";
+              body = "Aiemmilta päiviltä jäi suunnitelmaa kesken. Avaa Planner: vanha kuorma järjestellään uudelleen ilman rästilistaa.";
             } else if (settings.exams && exams?.[0]) {
               const days = daysBetween(exams[0].date, local.iso);
               if (days <= 3) {

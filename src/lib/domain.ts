@@ -19,6 +19,10 @@ export type Topic = Database["public"]["Tables"]["topics"]["Row"] & {
   last_retrieval_result: "independent" | "hinted" | "not_yet" | null;
   last_retrieval_confidence: number | null;
   last_retrieval_difficulty: number | null;
+  understanding_strength?: number;
+  fluency_strength?: number;
+  calibration_strength?: number;
+  blind_spot?: boolean;
 };
 export type Session = Database["public"]["Tables"]["study_sessions"]["Row"] & {
   objective: string | null;
@@ -79,6 +83,30 @@ export type PracticeAttempt = {
   skills?: string[];
   expected_concepts?: string[];
   question_payload?: Record<string, unknown>;
+  scaffold_stage?:
+    | "worked_example"
+    | "explanation"
+    | "partial_completion"
+    | "guided"
+    | "independent"
+    | "mixed"
+    | "transfer"
+    | "delayed_verification";
+  error_category?:
+    | "concept_error"
+    | "recall_error"
+    | "formula_error"
+    | "algebra_error"
+    | "unit_error"
+    | "interpretation_error"
+    | "strategy_error"
+    | "careless_error"
+    | "incomplete_reasoning"
+    | "prerequisite_gap"
+    | null;
+  assisted?: boolean;
+  dimension_weights?: Record<string, number>;
+  independent_verification_required?: boolean;
   operation_id?: string | null;
   schema_version?: number;
   delay_days: number | null;

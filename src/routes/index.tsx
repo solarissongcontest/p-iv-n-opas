@@ -305,7 +305,7 @@ function StudyApp({ user }: { user: DeviceUser }) {
       page==="courses" ? <CourseView courses={courses} topics={topics} sessions={sessions} exams={exams} plan={plan} tests={testsQ.data??[]} mistakes={mistakesQ.data??[]} selected={courseId} onSelect={setCourseId} onAdd={()=>setAdding(true)} onStart={()=>setEntry("manual")}/> :
       page==="practice" ? <PracticeView courses={courses} topics={topics} attempts={attemptsQ.data??[]} tests={testsQ.data??[]} mistakes={mistakesQ.data??[]}/> :
       page==="exams" ? <ExamsView courses={courses} topics={topics} exams={exams} tests={testsQ.data??[]} attempts={attemptsQ.data??[]} mistakes={mistakesQ.data??[]} sessions={sessions} plan={plan} onCourse={id=>{setCourseId(id);setPage("courses");localStorage.setItem("opk.last-page","courses");}}/> :
-      page==="progress" ? <ProgressView courses={courses} topics={topics} attempts={attemptsQ.data??[]} sessions={sessions} plan={plan} exams={exams} onPlan={()=>go("plan")}/> :
+      page==="progress" ? <ProgressView courses={courses} topics={topics} attempts={attemptsQ.data??[]} sessions={sessions} plan={plan} exams={exams} mistakes={mistakesQ.data??[]} capacity={capacity} onPlan={()=>go("plan")}/> :
       <SettingsView user={user}/>}
     </main>
     <LiquidGlass lensing as="nav" aria-label="Mobiilinavigaatio" className="app-tabbar md:hidden">
@@ -327,7 +327,7 @@ function StudyApp({ user }: { user: DeviceUser }) {
         </div>
       </LiquidGlass>
     </div>}
-    {entry && <SessionForm item={plan.find(p=>p.id===entry)??null} courses={courses} topics={topics} onClose={()=>setEntry(null)}/>}
+    {entry && <SessionForm item={plan.find(p=>p.id===entry)??null} courses={courses} topics={topics} sessions={sessions} attempts={attemptsQ.data??[]} onClose={()=>setEntry(null)}/>} 
     {adding && <CourseForm onClose={()=>setAdding(false)}/>}
     {search && <SearchPanel courses={courses} topics={topics} exams={exams} sessions={sessions} onClose={()=>setSearch(false)} onNavigate={p=>{go(p as Page);setSearch(false);}} onCourse={id=>{setCourseId(id);setPage("courses");localStorage.setItem("opk.last-page","courses");setSearch(false);}} onLog={()=>{setSearch(false);setEntry("manual");}}/>}
     {!busy && !error && !entry && !adding && !search && !moreOpen && (
