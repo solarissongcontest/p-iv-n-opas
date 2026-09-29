@@ -44,6 +44,7 @@ export function KnowledgeGraphEditor({
   const query = useTopicDependencies();
   const upsert = useUpsertTopicDependency();
   const remove = useDeleteTopicDependency();
+  const updateTopic = useUpdateTopic();
   const courseTopics = topics.filter((topic) => topic.course_id === course.id);
   const [topicId, setTopicId] = useState(courseTopics[0]?.id ?? "");
   const [dependsOn, setDependsOn] = useState("");
@@ -61,6 +62,15 @@ export function KnowledgeGraphEditor({
         depends_on_topic_id: dependsOn,
         relation_type: relation,
       });
+      if (["prerequisite","depends_on","builds_on"].includes(relation)) {
+        const source = topics.find((topic) => topic.id === topicId);
+        if (source && !(source.dependencies ?? []).includes(dependsOn)) {
+          await updateTopic.mutateAsync({
+            id: topicId,
+            dependencies: [...(source.dependencies ?? []), dependsOn],
+          });
+        }
+      }
       setDependsOn("");
       toast.success("Knowledge Graph päivitetty.");
     } catch {
@@ -115,7 +125,30 @@ export function KnowledgeGraphEditor({
                 <b>{selectedTopic?.name}</b> <span className="text-muted-foreground">{row.relation_type}</span>{" "}
                 <b>{targetCourse?.code} · {target?.name ?? "Poistettu aihe"}</b>
               </span>
-              <button aria-label="Poista riippuvuus" className="grid size-10 place-items-center rounded-lg hover:bg-muted" onClick={() => void remove.mutateAsync(row.id).catch(() => toast.error("Riippuvuutta ei voitu poistaa."))}>
+              <button
+                aria-label="Poista riippuvuus"
+                className="grid size-10 place-items-center rounded-lg hover:bg-muted"
+                onClick={() => void (async () => {
+                  try {
+                    await remove.mutateAsync(row.id);
+                    const source = topics.find((topic) => topic.id === row.topic_id);
+                    const remainingSameTarget = (query.data ?? []).some((candidate) =>
+                      candidate.id !== row.id &&
+                      candidate.topic_id === row.topic_id &&
+                      candidate.depends_on_topic_id === row.depends_on_topic_id &&
+                      ["prerequisite","depends_on","builds_on"].includes(candidate.relation_type)
+                    );
+                    if (source && !remainingSameTarget && ["prerequisite","depends_on","builds_on"].includes(row.relation_type)) {
+                      await updateTopic.mutateAsync({
+                        id: source.id,
+                        dependencies: (source.dependencies ?? []).filter((id) => id !== row.depends_on_topic_id),
+                      });
+                    }
+                  } catch {
+                    toast.error("Riippuvuutta ei voitu poistaa.");
+                  }
+                })()}
+              >
                 <Trash2 size={15} />
               </button>
             </div>
