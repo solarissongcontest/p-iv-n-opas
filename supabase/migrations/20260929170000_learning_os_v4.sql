@@ -322,3 +322,186 @@ grant select,insert,update,delete on public.error_observations to authenticated;
 grant select,insert,update,delete on public.learning_experiments to authenticated;
 grant select,insert,update,delete on public.study_materials to authenticated;
 grant select,insert on public.ai_interactions to authenticated;
+
+
+-- Complete append-only event coverage for the Learning OS.
+
+create or replace function public.learning_os_v4_capture_session()
+returns trigger
+language plpgsql
+security invoker
+set search_path = ''
+as $$
+begin
+  insert into public.learning_events(
+    owner_id,event_type,course_id,topic_id,event_date,payload
+  ) values (
+    new.owner_id,'SESSION_COMPLETED',new.course_id,new.topic_id,new.date,
+    jsonb_build_object(
+      'sessionId',new.id,
+      'minutes',new.minutes,
+      'plannedMinutes',new.planned_minutes,
+      'kind',new.kind,
+      'retrievalResult',new.retrieval_result,
+      'retrievalConfidence',new.retrieval_confidence,
+      'outcome',new.outcome
+    )
+  );
+  return new;
+end;
+$$;
+
+drop trigger if exists learning_os_v4_capture_session on public.study_sessions;
+create trigger learning_os_v4_capture_session
+after insert on public.study_sessions
+for each row execute function public.learning_os_v4_capture_session();
+
+create or replace function public.learning_os_v4_capture_topic_state()
+returns trigger
+language plpgsql
+security invoker
+set search_path = ''
+as $$
+begin
+  if new.evidence_count is distinct from old.evidence_count
+     and new.evidence_count > old.evidence_count then
+    insert into public.learning_events(
+      owner_id,event_type,course_id,topic_id,event_date,payload
+    ) values (
+      new.owner_id,'TOPIC_ASSESSED',new.course_id,new.id,current_date,
+      jsonb_build_object(
+        'evidenceCount',new.evidence_count,
+        'strongEvidenceCount',new.strong_evidence_count,
+        'masteryConfidence',new.mastery_confidence
+      )
+    );
+  end if;
+
+  if new.verified_level is distinct from old.verified_level
+     or new.mastery_confidence is distinct from old.mastery_confidence
+     or new.recall_strength is distinct from old.recall_strength
+     or new.application_strength is distinct from old.application_strength
+     or new.retention_strength is distinct from old.retention_strength
+     or new.understanding_strength is distinct from old.understanding_strength
+     or new.fluency_strength is distinct from old.fluency_strength then
+    insert into public.learning_events(
+      owner_id,event_type,course_id,topic_id,event_date,payload
+    ) values (
+      new.owner_id,'MASTERY_UPDATED',new.course_id,new.id,current_date,
+      jsonb_build_object(
+        'verifiedFrom',old.verified_level,
+        'verifiedTo',new.verified_level,
+        'confidenceFrom',old.mastery_confidence,
+        'confidenceTo',new.mastery_confidence,
+        'recall',new.recall_strength,
+        'understanding',new.understanding_strength,
+        'application',new.application_strength,
+        'fluency',new.fluency_strength,
+        'retention',new.retention_strength,
+        'calibration',new.calibration_strength
+      )
+    );
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists learning_os_v4_capture_topic_state on public.topics;
+create trigger learning_os_v4_capture_topic_state
+after update of
+  evidence_count,strong_evidence_count,verified_level,mastery_confidence,
+  recall_strength,understanding_strength,application_strength,
+  fluency_strength,retention_strength,calibration_strength
+on public.topics
+for each row execute function public.learning_os_v4_capture_topic_state();
+
+create or replace function public.learning_os_v4_capture_exam()
+returns trigger
+language plpgsql
+security invoker
+set search_path = ''
+as $$
+begin
+  insert into public.learning_events(
+    owner_id,event_type,course_id,event_date,payload
+  ) values (
+    new.owner_id,'EXAM_CREATED',new.course_id,new.date,
+    jsonb_build_object(
+      'examId',new.id,
+      'name',new.name,
+      'targetSystem',new.target_system,
+      'targetValue',new.target_value
+    )
+  );
+  return new;
+end;
+$$;
+
+drop trigger if exists learning_os_v4_capture_exam on public.exams;
+create trigger learning_os_v4_capture_exam
+after insert on public.exams
+for each row execute function public.learning_os_v4_capture_exam();
+
+create or replace function public.learning_os_v4_capture_plan_item()
+returns trigger
+language plpgsql
+security invoker
+set search_path = ''
+as $$
+begin
+  insert into public.learning_events(
+    owner_id,event_type,course_id,topic_id,event_date,payload
+  ) values (
+    new.owner_id,'PLAN_REGENERATED',new.course_id,new.topic_id,new.date,
+    jsonb_build_object(
+      'planItemId',new.id,
+      'kind',new.kind,
+      'phase',new.phase,
+      'targetMinutes',new.target_minutes,
+      'minMinutes',new.min_minutes,
+      'status',new.status
+    )
+  );
+  return new;
+end;
+$$;
+
+drop trigger if exists learning_os_v4_capture_plan_item on public.plan_items;
+create trigger learning_os_v4_capture_plan_item
+after insert on public.plan_items
+for each row execute function public.learning_os_v4_capture_plan_item();
+
+-- Record hint usage as its own event so assisted evidence can be audited.
+create or replace function public.learning_os_v4_capture_hint_event()
+returns trigger
+language plpgsql
+security invoker
+set search_path = ''
+as $$
+begin
+  if coalesce(new.hints_used,0) > 0 then
+    insert into public.learning_events(
+      owner_id,event_type,course_id,topic_id,attempt_id,event_date,payload
+    ) values (
+      new.owner_id,'HINT_USED',new.course_id,new.topic_id,new.id,new.date,
+      jsonb_build_object(
+        'hintsUsed',new.hints_used,
+        'scaffoldStage',new.scaffold_stage,
+        'source',new.source
+      )
+    );
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists learning_os_v4_capture_hint_event on public.practice_attempts;
+create trigger learning_os_v4_capture_hint_event
+after insert on public.practice_attempts
+for each row execute function public.learning_os_v4_capture_hint_event();
+
+grant execute on function public.learning_os_v4_capture_session() to authenticated,service_role;
+grant execute on function public.learning_os_v4_capture_topic_state() to authenticated,service_role;
+grant execute on function public.learning_os_v4_capture_exam() to authenticated,service_role;
+grant execute on function public.learning_os_v4_capture_plan_item() to authenticated,service_role;
+grant execute on function public.learning_os_v4_capture_hint_event() to authenticated,service_role;
