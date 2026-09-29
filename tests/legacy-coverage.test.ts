@@ -9,10 +9,15 @@ function read(path: string) {
 test("repository declares the canonical production repository", () => {
   const readme = read("README.md");
   const workflow = read(".github/workflows/quality.yml");
+  const buildGuard = read("scripts/assert-canonical-repo.mjs");
+  const packageJson = read("package.json");
 
   assert.match(readme, /Canonical production repository:[\s\S]*solarissongcontest\/p-iv-n-opas/);
   assert.match(workflow, /GITHUB_REPOSITORY/);
   assert.match(workflow, /solarissongcontest\/p-iv-n-opas/);
+  assert.match(buildGuard, /VERCEL_GIT_REPO_SLUG/);
+  assert.match(buildGuard, /p-iv-n-opas/);
+  assert.match(packageJson, /assert-canonical-repo\.mjs/);
 });
 
 test("legacy migration manifest covers both accidental repositories", () => {
