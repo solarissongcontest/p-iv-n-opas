@@ -140,12 +140,16 @@ export type Database = {
           error: string
           explanation: string | null
           id: string
+          mastered_at: string | null
           owner_id: string | null
+          retested_at: string | null
           retry_date: string | null
+          solution: string | null
           status: string
           topic_id: string | null
           type: string | null
           updated_at: string
+          what_happened: string | null
         }
         Insert: {
           course_id: string
@@ -153,12 +157,16 @@ export type Database = {
           error: string
           explanation?: string | null
           id?: string
+          mastered_at?: string | null
           owner_id?: string | null
+          retested_at?: string | null
           retry_date?: string | null
+          solution?: string | null
           status?: string
           topic_id?: string | null
           type?: string | null
           updated_at?: string
+          what_happened?: string | null
         }
         Update: {
           course_id?: string
@@ -166,12 +174,16 @@ export type Database = {
           error?: string
           explanation?: string | null
           id?: string
+          mastered_at?: string | null
           owner_id?: string | null
+          retested_at?: string | null
           retry_date?: string | null
+          solution?: string | null
           status?: string
           topic_id?: string | null
           type?: string | null
           updated_at?: string
+          what_happened?: string | null
         }
         Relationships: [
           {
@@ -302,6 +314,72 @@ export type Database = {
           },
         ]
       }
+      practice_attempts: {
+        Row: {
+          attempt_type: string
+          confidence: number | null
+          course_id: string
+          created_at: string
+          date: string
+          delay_days: number | null
+          difficulty: number
+          hint_used: boolean
+          id: string
+          owner_id: string
+          prompt: string
+          response: string | null
+          result: string
+          topic_id: string
+        }
+        Insert: {
+          attempt_type?: string
+          confidence?: number | null
+          course_id: string
+          created_at?: string
+          date?: string
+          delay_days?: number | null
+          difficulty?: number
+          hint_used?: boolean
+          id?: string
+          owner_id?: string
+          prompt: string
+          response?: string | null
+          result: string
+          topic_id: string
+        }
+        Update: {
+          attempt_type?: string
+          confidence?: number | null
+          course_id?: string
+          created_at?: string
+          date?: string
+          delay_days?: number | null
+          difficulty?: number
+          hint_used?: boolean
+          id?: string
+          owner_id?: string
+          prompt?: string
+          response?: string | null
+          result?: string
+          topic_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "practice_attempts_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "practice_attempts_topic_id_fkey"
+            columns: ["topic_id"]
+            isOneToOne: false
+            referencedRelation: "topics"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       practice_tests: {
         Row: {
           course_id: string
@@ -399,6 +477,63 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      push_deliveries: {
+        Row: {
+          delivery_key: string
+          id: string
+          owner_id: string
+          sent_at: string
+        }
+        Insert: {
+          delivery_key: string
+          id?: string
+          owner_id: string
+          sent_at?: string
+        }
+        Update: {
+          delivery_key?: string
+          id?: string
+          owner_id?: string
+          sent_at?: string
+        }
+        Relationships: []
+      }
+      push_subscriptions: {
+        Row: {
+          active: boolean
+          created_at: string
+          endpoint: string
+          id: string
+          last_success_at: string | null
+          owner_id: string
+          subscription: Json
+          updated_at: string
+          user_agent: string | null
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          endpoint: string
+          id?: string
+          last_success_at?: string | null
+          owner_id: string
+          subscription: Json
+          updated_at?: string
+          user_agent?: string | null
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          endpoint?: string
+          id?: string
+          last_success_at?: string | null
+          owner_id?: string
+          subscription?: Json
+          updated_at?: string
+          user_agent?: string | null
+        }
+        Relationships: []
       }
       study_sessions: {
         Row: {
@@ -513,15 +648,20 @@ export type Database = {
           exam_successes: number
           id: string
           importance: number
+          last_retrieval_at: string | null
           last_retrieval_confidence: number | null
+          last_retrieval_difficulty: number | null
           last_retrieval_result: string | null
           last_review: string | null
+          mastery_uncertainty: number
           materials: string | null
           name: string
           next_review: string | null
           owner_id: string | null
           position: number
           progress: number
+          retrieval_attempts: number
+          retrieval_failures: number
           school_covered: boolean
           self_level: number
           study_minutes: number
@@ -538,15 +678,20 @@ export type Database = {
           exam_successes?: number
           id?: string
           importance?: number
+          last_retrieval_at?: string | null
           last_retrieval_confidence?: number | null
+          last_retrieval_difficulty?: number | null
           last_retrieval_result?: string | null
           last_review?: string | null
+          mastery_uncertainty?: number
           materials?: string | null
           name: string
           next_review?: string | null
           owner_id?: string | null
           position?: number
           progress?: number
+          retrieval_attempts?: number
+          retrieval_failures?: number
           school_covered?: boolean
           self_level?: number
           study_minutes?: number
@@ -563,15 +708,20 @@ export type Database = {
           exam_successes?: number
           id?: string
           importance?: number
+          last_retrieval_at?: string | null
           last_retrieval_confidence?: number | null
+          last_retrieval_difficulty?: number | null
           last_retrieval_result?: string | null
           last_review?: string | null
+          mastery_uncertainty?: number
           materials?: string | null
           name?: string
           next_review?: string | null
           owner_id?: string | null
           position?: number
           progress?: number
+          retrieval_attempts?: number
+          retrieval_failures?: number
           school_covered?: boolean
           self_level?: number
           study_minutes?: number
@@ -589,35 +739,100 @@ export type Database = {
           },
         ]
       }
+      user_preferences: {
+        Row: {
+          busy_dates: string[]
+          created_at: string
+          display_name: string
+          notifications_enabled: boolean
+          onboarding_completed: boolean
+          owner_id: string
+          study_weekdays: number[]
+          timezone: string
+          updated_at: string
+          weekday_capacity_minutes: number
+          weekend_capacity_minutes: number
+        }
+        Insert: {
+          busy_dates?: string[]
+          created_at?: string
+          display_name?: string
+          notifications_enabled?: boolean
+          onboarding_completed?: boolean
+          owner_id?: string
+          study_weekdays?: number[]
+          timezone?: string
+          updated_at?: string
+          weekday_capacity_minutes?: number
+          weekend_capacity_minutes?: number
+        }
+        Update: {
+          busy_dates?: string[]
+          created_at?: string
+          display_name?: string
+          notifications_enabled?: boolean
+          onboarding_completed?: boolean
+          owner_id?: string
+          study_weekdays?: number[]
+          timezone?: string
+          updated_at?: string
+          weekday_capacity_minutes?: number
+          weekend_capacity_minutes?: number
+        }
+        Relationships: []
+      }
       weekly_checkins: {
         Row: {
           actual_minutes: number | null
+          adherence: number | null
           created_at: string
+          hardest_topic_id: string | null
           id: string
+          load_rating: string | null
+          next_focus: string | null
           note: string | null
           owner_id: string | null
           planned_minutes: number | null
           week_start: string
+          went_well: string | null
         }
         Insert: {
           actual_minutes?: number | null
+          adherence?: number | null
           created_at?: string
+          hardest_topic_id?: string | null
           id?: string
+          load_rating?: string | null
+          next_focus?: string | null
           note?: string | null
           owner_id?: string | null
           planned_minutes?: number | null
           week_start: string
+          went_well?: string | null
         }
         Update: {
           actual_minutes?: number | null
+          adherence?: number | null
           created_at?: string
+          hardest_topic_id?: string | null
           id?: string
+          load_rating?: string | null
+          next_focus?: string | null
           note?: string | null
           owner_id?: string | null
           planned_minutes?: number | null
           week_start?: string
+          went_well?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "weekly_checkins_hardest_topic_id_fkey"
+            columns: ["hardest_topic_id"]
+            isOneToOne: false
+            referencedRelation: "topics"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
@@ -670,6 +885,33 @@ export type Database = {
           p_tasks: string
           p_topic_id: string
           p_unclear: string
+        }
+        Returns: string
+      }
+      record_practice_attempt: {
+        Args: {
+          p_attempt_type: string
+          p_confidence: number
+          p_course_id: string
+          p_date: string
+          p_difficulty: number
+          p_hint_used: boolean
+          p_prompt: string
+          p_response: string
+          p_result: string
+          p_topic_id: string
+        }
+        Returns: string
+      }
+      record_practice_test: {
+        Args: {
+          p_course_id: string
+          p_date: string
+          p_duration_minutes: number
+          p_error_count: number
+          p_max_score: number
+          p_score: number
+          p_topic_results: Json
         }
         Returns: string
       }
