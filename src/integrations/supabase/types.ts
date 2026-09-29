@@ -140,12 +140,16 @@ export type Database = {
           error: string
           explanation: string | null
           id: string
+          mastered_at: string | null
           owner_id: string | null
+          retested_at: string | null
           retry_date: string | null
+          solution: string | null
           status: string
           topic_id: string | null
           type: string | null
           updated_at: string
+          what_happened: string | null
         }
         Insert: {
           course_id: string
@@ -153,12 +157,16 @@ export type Database = {
           error: string
           explanation?: string | null
           id?: string
+          mastered_at?: string | null
           owner_id?: string | null
+          retested_at?: string | null
           retry_date?: string | null
+          solution?: string | null
           status?: string
           topic_id?: string | null
           type?: string | null
           updated_at?: string
+          what_happened?: string | null
         }
         Update: {
           course_id?: string
@@ -166,12 +174,16 @@ export type Database = {
           error?: string
           explanation?: string | null
           id?: string
+          mastered_at?: string | null
           owner_id?: string | null
+          retested_at?: string | null
           retry_date?: string | null
+          solution?: string | null
           status?: string
           topic_id?: string | null
           type?: string | null
           updated_at?: string
+          what_happened?: string | null
         }
         Relationships: [
           {
@@ -682,32 +694,55 @@ export type Database = {
       weekly_checkins: {
         Row: {
           actual_minutes: number | null
+          adherence: number | null
           created_at: string
+          hardest_topic_id: string | null
           id: string
+          load_rating: string | null
+          next_focus: string | null
           note: string | null
           owner_id: string | null
           planned_minutes: number | null
           week_start: string
+          went_well: string | null
         }
         Insert: {
           actual_minutes?: number | null
+          adherence?: number | null
           created_at?: string
+          hardest_topic_id?: string | null
           id?: string
+          load_rating?: string | null
+          next_focus?: string | null
           note?: string | null
           owner_id?: string | null
           planned_minutes?: number | null
           week_start: string
+          went_well?: string | null
         }
         Update: {
           actual_minutes?: number | null
+          adherence?: number | null
           created_at?: string
+          hardest_topic_id?: string | null
           id?: string
+          load_rating?: string | null
+          next_focus?: string | null
           note?: string | null
           owner_id?: string | null
           planned_minutes?: number | null
           week_start?: string
+          went_well?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "weekly_checkins_hardest_topic_id_fkey"
+            columns: ["hardest_topic_id"]
+            isOneToOne: false
+            referencedRelation: "topics"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
