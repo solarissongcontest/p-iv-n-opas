@@ -1,5 +1,5 @@
 import type { Database } from "@/integrations/supabase/types";
-import { addDays, diffDays, parseISO, startOfWeek, toISO, today } from "./fi";
+import { addDays, diffDays, parseISO, startOfWeek, toISO, today } from "./fi.ts";
 
 export type Course = Database["public"]["Tables"]["courses"]["Row"];
 export type Topic = Database["public"]["Tables"]["topics"]["Row"];
