@@ -400,6 +400,63 @@ export type Database = {
           },
         ]
       }
+      push_deliveries: {
+        Row: {
+          delivery_key: string
+          id: string
+          owner_id: string
+          sent_at: string
+        }
+        Insert: {
+          delivery_key: string
+          id?: string
+          owner_id: string
+          sent_at?: string
+        }
+        Update: {
+          delivery_key?: string
+          id?: string
+          owner_id?: string
+          sent_at?: string
+        }
+        Relationships: []
+      }
+      push_subscriptions: {
+        Row: {
+          active: boolean
+          created_at: string
+          endpoint: string
+          id: string
+          last_success_at: string | null
+          owner_id: string
+          subscription: Json
+          updated_at: string
+          user_agent: string | null
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          endpoint: string
+          id?: string
+          last_success_at?: string | null
+          owner_id: string
+          subscription: Json
+          updated_at?: string
+          user_agent?: string | null
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          endpoint?: string
+          id?: string
+          last_success_at?: string | null
+          owner_id?: string
+          subscription?: Json
+          updated_at?: string
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
       study_sessions: {
         Row: {
           competence: number | null
@@ -588,6 +645,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      user_preferences: {
+        Row: {
+          created_at: string
+          display_name: string
+          notifications_enabled: boolean
+          onboarding_completed: boolean
+          owner_id: string
+          study_weekdays: number[]
+          timezone: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          display_name?: string
+          notifications_enabled?: boolean
+          onboarding_completed?: boolean
+          owner_id?: string
+          study_weekdays?: number[]
+          timezone?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          display_name?: string
+          notifications_enabled?: boolean
+          onboarding_completed?: boolean
+          owner_id?: string
+          study_weekdays?: number[]
+          timezone?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       weekly_checkins: {
         Row: {
