@@ -343,3 +343,151 @@ execute function public.adapt_topic_review_schedule();
 
 revoke all on function public.adapt_topic_review_schedule() from public, anon;
 grant execute on function public.adapt_topic_review_schedule() to authenticated, service_role;
+
+
+-- Practice tests feed the same retrieval evidence model as Practice Mode.
+create or replace function public.record_practice_test(
+  p_course_id uuid,
+  p_date date,
+  p_score numeric,
+  p_max_score numeric,
+  p_duration_minutes integer,
+  p_error_count integer,
+  p_topic_results jsonb
+)
+returns uuid
+language plpgsql
+security invoker
+set search_path = ''
+as $$
+declare
+  v_owner uuid := auth.uid();
+  v_test_id uuid;
+  v_item jsonb;
+  v_topic public.topics%rowtype;
+  v_ratio numeric;
+  v_result text;
+  v_attempts integer;
+  v_failures integer;
+  v_exam integer;
+  v_delayed integer;
+  v_verified integer;
+  v_delay integer := null;
+  v_uncertainty real;
+begin
+  if v_owner is null then
+    raise exception 'Authentication required' using errcode = '42501';
+  end if;
+
+  perform 1 from public.courses
+  where id = p_course_id and owner_id = v_owner;
+  if not found then
+    raise exception 'Course not found' using errcode = 'P0002';
+  end if;
+
+  if p_max_score is null or p_max_score <= 0 or p_score < 0 or p_score > p_max_score then
+    raise exception 'Invalid practice test score' using errcode = '22023';
+  end if;
+
+  insert into public.practice_tests (
+    owner_id, course_id, date, score, max_score, duration_minutes, error_count, topic_results
+  )
+  values (
+    v_owner, p_course_id, coalesce(p_date,current_date), p_score, p_max_score,
+    p_duration_minutes, p_error_count, coalesce(p_topic_results,'[]'::jsonb)
+  )
+  returning id into v_test_id;
+
+  for v_item in select * from jsonb_array_elements(coalesce(p_topic_results,'[]'::jsonb))
+  loop
+    if coalesce((v_item->>'max_score')::numeric,0) <= 0 then continue; end if;
+
+    select * into v_topic
+    from public.topics
+    where id = (v_item->>'topic_id')::uuid
+      and course_id = p_course_id
+      and owner_id = v_owner
+    for update;
+
+    if not found then continue; end if;
+
+    v_ratio := coalesce((v_item->>'score')::numeric,0) /
+      nullif((v_item->>'max_score')::numeric,0);
+    v_result := case
+      when v_ratio >= 0.70 then 'independent'
+      when v_ratio >= 0.50 then 'hinted'
+      else 'not_yet'
+    end;
+
+    if v_topic.last_retrieval_at is not null then
+      v_delay := greatest(0, coalesce(p_date,current_date) - v_topic.last_retrieval_at);
+    elsif v_topic.last_review is not null then
+      v_delay := greatest(0, coalesce(p_date,current_date) - v_topic.last_review);
+    else
+      v_delay := null;
+    end if;
+
+    v_attempts := v_topic.retrieval_attempts + 1;
+    v_failures := v_topic.retrieval_failures
+      + case when v_result = 'not_yet' then 1 else 0 end;
+    v_exam := v_topic.exam_successes
+      + case when v_result = 'independent' then 1 else 0 end;
+    v_delayed := v_topic.delayed_successes
+      + case when v_result = 'independent' and coalesce(v_delay,0) >= 3 then 1 else 0 end;
+
+    v_verified := 0;
+    if v_topic.progress >= 25 then v_verified := 1; end if;
+    if v_topic.progress >= 60 and v_topic.basic_successes >= 1 then v_verified := 2; end if;
+    if v_topic.basic_successes >= 2 then v_verified := 3; end if;
+    if v_exam >= 1 and v_topic.basic_successes >= 2 then v_verified := 4; end if;
+    if v_exam >= 2 and v_delayed >= 1 then v_verified := 5; end if;
+
+    v_uncertainty := greatest(
+      0.15,
+      least(
+        1.0,
+        (
+          1.0 / sqrt(greatest(1, v_attempts + v_exam + v_delayed))
+          + case when v_result = 'not_yet' then 0.15 else 0 end
+          + case when v_result = 'hinted' then 0.08 else 0 end
+        )::real
+      )
+    );
+
+    update public.topics
+    set
+      exam_successes = v_exam,
+      delayed_successes = v_delayed,
+      retrieval_attempts = v_attempts,
+      retrieval_failures = v_failures,
+      verified_level = v_verified,
+      mastery_uncertainty = v_uncertainty,
+      last_review = coalesce(p_date,current_date),
+      last_retrieval_at = coalesce(p_date,current_date),
+      last_retrieval_result = v_result,
+      last_retrieval_confidence = null,
+      last_retrieval_difficulty = 5,
+      next_review = coalesce(p_date,current_date) + 1
+    where id = v_topic.id and owner_id = v_owner;
+
+    if v_verified <> v_topic.verified_level then
+      insert into public.progress_events (
+        owner_id, course_id, topic_id, kind, from_value, to_value, detail
+      ) values (
+        v_owner, p_course_id, v_topic.id, 'mastery',
+        v_topic.verified_level, v_verified,
+        v_topic.name || ' · harjoituskoe'
+      );
+    end if;
+  end loop;
+
+  return v_test_id;
+end;
+$$;
+
+revoke all on function public.record_practice_test(
+  uuid, date, numeric, numeric, integer, integer, jsonb
+) from public;
+grant execute on function public.record_practice_test(
+  uuid, date, numeric, numeric, integer, integer, jsonb
+) to authenticated, service_role;
