@@ -36,11 +36,13 @@ export function AICoach({
   selectedCourseId,
   weekdays,
   onLog,
+  onPractice,
 }: {
   data: StudySnapshot;
   selectedCourseId: string | null;
   weekdays: number[];
   onLog: () => void;
+  onPractice: () => void;
 }) {
   const [open, setOpen] = useState(false);
   const [courseId, setCourseId] = useState("");
@@ -427,6 +429,15 @@ export function AICoach({
             )}
 
             <div className="grid grid-cols-2 gap-2">
+              <Dialog.Close asChild>
+                <button
+                  className={buttonClass + " col-span-2 flex items-center justify-center gap-2 bg-accent font-medium"}
+                  onClick={onPractice}
+                >
+                  <Sparkles size={16} />
+                  Avaa Harjoittelu
+                </button>
+              </Dialog.Close>
               {MODES.map((mode) => (
                 <button
                   key={mode.id}
