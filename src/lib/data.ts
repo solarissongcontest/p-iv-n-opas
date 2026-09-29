@@ -567,7 +567,18 @@ export function useUpsertPlanItem() {
 export function useUpdateTopic() {
   const invalidate = useInvalidateAll();
   return useMutation({
-    mutationFn: async (input: { id: string } & Partial<Topic>) => {
+    mutationFn: async (input: {
+      id: string;
+      name?: string;
+      materials?: string | null;
+      importance?: number;
+      weight?: number;
+      school_covered?: boolean;
+      position?: number;
+      dependencies?: string[];
+      progress?: number;
+      self_level?: number;
+    }) => {
       const { id, ...rest } = input;
       const { error } = await supabase.from("topics").update(rest).eq("id", id);
       if (error) throw error;
