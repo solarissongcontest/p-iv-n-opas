@@ -1,7 +1,17 @@
 -- Learning Model v3: richer practice evidence, derived topic state and idempotent offline sync.
 
 alter table public.user_preferences
-  add column if not exists learning_schema_version smallint not null default 3;
+  add column if not exists learning_schema_version smallint not null default 3,
+  add column if not exists weekday_capacity_min_minutes integer not null default 30,
+  add column if not exists weekend_capacity_min_minutes integer not null default 60;
+
+alter table public.user_preferences
+  drop constraint if exists user_preferences_weekday_capacity_min_check,
+  add constraint user_preferences_weekday_capacity_min_check
+    check (weekday_capacity_min_minutes between 0 and weekday_capacity_minutes),
+  drop constraint if exists user_preferences_weekend_capacity_min_check,
+  add constraint user_preferences_weekend_capacity_min_check
+    check (weekend_capacity_min_minutes between 0 and weekend_capacity_minutes);
 
 alter table public.practice_attempts
   add column if not exists schema_version smallint not null default 3,
