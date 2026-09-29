@@ -1,6 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { createClient } from "@supabase/supabase-js";
 import { randomUUID } from "node:crypto";
+import {
+  isUuid,
+  reconcileLegacyOwner,
+  resolveArthurOwner,
+} from "@/lib/ownerSync.server";
 
 function required(name: string) {
   const value = process.env[name];
@@ -19,7 +24,10 @@ export const Route = createFileRoute("/api/device-auth")({
             return Response.json({ error: "Virheellinen alkuperä." }, { status: 403 });
           }
 
-          const body = (await request.json().catch(() => ({}))) as { username?: string };
+          const body = (await request.json().catch(() => ({}))) as {
+            username?: string;
+            legacy_owner_id?: string;
+          };
           if (body.username?.trim().toLowerCase() !== "arthur") {
             return Response.json({ error: "Käyttäjänimeä ei tunnistettu." }, { status: 401 });
           }
@@ -31,28 +39,14 @@ export const Route = createFileRoute("/api/device-auth")({
             auth: { persistSession: false, autoRefreshToken: false },
           });
 
-          let ownerId: string | null = null;
-
-          const { data: preferences } = await admin
-            .from("user_preferences")
-            .select("owner_id")
-            .eq("display_name", "Arthur")
-            .not("owner_id", "is", null)
-            .limit(1);
-          ownerId = preferences?.[0]?.owner_id ?? null;
+          let ownerId = await resolveArthurOwner(admin, body.legacy_owner_id);
 
           if (!ownerId) {
-            const { data: courses } = await admin
-              .from("courses")
-              .select("owner_id")
-              .eq("code", "KE04")
-              .not("owner_id", "is", null)
-              .limit(1);
-            ownerId = courses?.[0]?.owner_id ?? null;
-          }
-
-          if (!ownerId) {
-            const { data: users } = await admin.auth.admin.listUsers({ page: 1, perPage: 1000 });
+            const { data: users, error: usersError } = await admin.auth.admin.listUsers({
+              page: 1,
+              perPage: 1000,
+            });
+            if (usersError) throw usersError;
             const arthur = users.users.find(
               (candidate) =>
                 candidate.user_metadata?.["display_name"] === "Arthur" ||
@@ -63,6 +57,11 @@ export const Route = createFileRoute("/api/device-auth")({
           }
 
           ownerId ??= randomUUID();
+
+          const legacyOwnerId = isUuid(body.legacy_owner_id) ? body.legacy_owner_id : null;
+          if (legacyOwnerId && legacyOwnerId !== ownerId) {
+            await reconcileLegacyOwner(admin, legacyOwnerId, ownerId);
+          }
 
           const { signArthurDeviceToken } = await import("@/lib/deviceAuth.server");
           const signed = signArthurDeviceToken({ ownerId, supabaseUrl, jwtSecret });

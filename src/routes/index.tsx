@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { BookOpen, Brain, CalendarDays, ChartNoAxesCombined, Ellipsis, FlaskConical, Home, Plus, Search, Settings2, X } from "lucide-react";
 import { toast, Toaster } from "sonner";
@@ -14,6 +15,7 @@ import { pendingCount, setOfflineOwner, startSyncWatcher, subscribePending } fro
 import { applyTheme, storedThemeIsDark } from "@/lib/theme";
 import {
   type DeviceUser,
+  getDeviceOwnerId,
   isTrustedArthurDevice,
   readDeviceSession,
   storeDeviceSession,
@@ -29,11 +31,14 @@ const nav = [
 ] as const;
 export const Route = createFileRoute("/")({ component: App });
 
-async function getArthurSession(): Promise<DeviceUser> {
+async function getArthurSession(previousOwnerId?: string | null): Promise<DeviceUser> {
   const response = await fetch("/api/device-auth", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ username: "Arthur" }),
+    body: JSON.stringify({
+      username: "Arthur",
+      legacy_owner_id: previousOwnerId ?? undefined,
+    }),
   });
   const payload = (await response.json().catch(() => ({}))) as {
     access_token?: string;
@@ -54,6 +59,7 @@ async function getArthurSession(): Promise<DeviceUser> {
 
 
 function App() {
+  const queryClient = useQueryClient();
   const [user, setUser] = useState<DeviceUser | null | undefined>();
   const [authError, setAuthError] = useState<string | null>(null);
 
@@ -61,32 +67,76 @@ function App() {
     let active = true;
     void (async () => {
       const existing = readDeviceSession();
-      if (existing) {
-        if (active) setUser(existing.user);
-        return;
-      }
-      if (!isTrustedArthurDevice()) {
+      const rememberedOwnerId = existing?.user.id ?? getDeviceOwnerId();
+
+      // Keep a valid cached session usable immediately, including offline.
+      if (existing && active) setUser(existing.user);
+
+      if (!existing && !isTrustedArthurDevice()) {
         if (active) setUser(null);
         return;
       }
+
       try {
-        const restoredUser = await getArthurSession();
-        if (active) {
-          setAuthError(null);
-          setUser(restoredUser);
+        // Always ask the server for the canonical Arthur owner. This also
+        // reconciles data left under an older device-specific owner id.
+        const canonicalUser = await getArthurSession(rememberedOwnerId);
+        if (!active) return;
+
+        setAuthError(null);
+        if (existing?.user.id && existing.user.id !== canonicalUser.id) {
+          queryClient.clear();
         }
+        setUser(canonicalUser);
       } catch (error) {
         if (!active) return;
+
+        // A valid cached token still lets the app work offline. When the
+        // connection returns, the next app open/focus will canonicalize it.
+        if (existing) {
+          setAuthError(error instanceof Error ? error.message : "Synkronoinnin tarkistus epäonnistui.");
+          return;
+        }
         setAuthError(error instanceof Error ? error.message : "Kirjautuminen epäonnistui.");
         setUser(null);
       }
     })();
     return () => { active = false; };
-  }, []);
+  }, [queryClient]);
+
+  useEffect(() => {
+    if (!user) return;
+
+    let active = true;
+    const verifyCanonicalOwner = () => {
+      if (document.visibilityState !== "visible") return;
+      const previousOwnerId = getDeviceOwnerId() ?? user.id;
+      void getArthurSession(previousOwnerId)
+        .then((canonicalUser) => {
+          if (!active || canonicalUser.id === user.id) return;
+          queryClient.clear();
+          setUser(canonicalUser);
+        })
+        .catch(() => {
+          // Keep the current cached session. A later focus/online startup retries.
+        });
+    };
+
+    const onVisibility = () => {
+      if (document.visibilityState === "visible") verifyCanonicalOwner();
+    };
+    window.addEventListener("focus", verifyCanonicalOwner);
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => {
+      active = false;
+      window.removeEventListener("focus", verifyCanonicalOwner);
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
+  }, [queryClient, user]);
 
   if (user === undefined) return <main className="grid min-h-screen place-items-center">Avataan opintopäiväkirjaa…</main>;
   if (!user) return <DeviceSignIn authError={authError} onSignedIn={setUser} />;
-  return <StudyApp user={user} />;
+  return <StudyApp key={user.id} user={user} />;
 }
 
 function DeviceSignIn({
