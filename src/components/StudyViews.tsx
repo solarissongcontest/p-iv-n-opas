@@ -376,107 +376,126 @@ export function ExamsView({courses,topics,exams,tests,attempts,mistakes,sessions
   {exams.length===0?<Panel title="Ei kokeita vielä"><p className="text-muted-foreground">Lisää ensimmäinen koe painamalla Lisää koe.</p></Panel>:exams.map(e=>{const course=courses.find(c=>c.id===e.course_id);const ts=topics.filter(t=>t.course_id===e.course_id);const prep=examStage({topics:ts,attempts:attempts.filter(a=>a.course_id===e.course_id),tests:tests.filter(t=>t.course_id===e.course_id),mistakes:mistakes.filter(m=>m.course_id===e.course_id),course});const mode=examMode(e.date);return <button key={e.id} onClick={()=>setSelectedExam(e.id)} className="panel block w-full p-4 text-left sm:p-5"><div className="flex items-start justify-between gap-3"><div><p className="text-sm font-medium text-primary">{course?.code}</p><h2 className="mt-1 text-lg font-semibold">{e.name}</h2><p className="mt-1 text-sm text-muted-foreground">{fullDate(e.date)} · {diffDays(e.date,today())} päivää</p></div><span className="text-right"><b className="block">{prep.stages[prep.index]?.label}</b><small className="text-muted-foreground">vaihe {prep.index+1}/6</small></span></div>{mode.active&&<p className="mt-2 inline-flex rounded-full bg-accent px-3 py-1 text-xs font-semibold">Koemoodi aktiivinen</p>}<p className="mt-2 text-xs text-muted-foreground">Ei arvosanaennuste · avaa kokeen yksityiskohdat</p></button>})}</div>;
 }
 
-export function ProgressView({courses,topics,sessions,plan,exams,onPlan}:Base&{sessions:Session[];plan:PlanItem[];exams:Exam[];onPlan:()=>void}) {
-  const now=today(),from=addDays(now,-29),previousFrom=addDays(now,-59),previousTo=addDays(now,-30);
-  const recent=sessions.filter(s=>s.date>=from&&s.date<=now),previous=sessions.filter(s=>s.date>=previousFrom&&s.date<=previousTo);
-  const due=plan.filter(p=>p.date>=from&&p.date<=now&&p.kind!=="exam"),completed=due.filter(p=>p.status==="completed");
-  const recentMinutes=recent.reduce((a,s)=>a+s.minutes,0),previousMinutes=previous.reduce((a,s)=>a+s.minutes,0);
-  const delta=previousMinutes?Math.round((recentMinutes-previousMinutes)/previousMinutes*100):recentMinutes?100:0;
-  const byCourse=courses.map(c=>({course:c,mins:recent.filter(s=>s.course_id===c.id).reduce((a,s)=>a+s.minutes,0)})).sort((a,b)=>b.mins-a.mins);
-  const mastery=masterySummary(topics);
+export function ProgressView({courses,topics,attempts,sessions,plan,exams,onPlan}:Base&{attempts:PracticeAttempt[];sessions:Session[];plan:PlanItem[];exams:Exam[];onPlan:()=>void}) {
+  const now=today(),from=addDays(now,-29);
+  const recent=sessions.filter(s=>s.date>=from&&s.date<=now);
+  const due=plan.filter(p=>p.date>=from&&p.date<=now&&p.kind!=="exam");
+  const completed=due.filter(p=>p.status==="completed");
+  const recentMinutes=recent.reduce((a,s)=>a+s.minutes,0);
+  const learningRows=topics.map(topic=>{
+    const course=courses.find(candidate=>candidate.id===topic.course_id);
+    return {topic,state:deriveTopicLearningState(topic,attempts,{now,examDate:course?.exam_date??null})};
+  });
+  const groups={
+    practice:learningRows.filter(row=>row.state.masteryLabel==="Aloita tästä"||row.state.masteryLabel==="Harjoittele"),
+    developing:learningRows.filter(row=>row.state.masteryLabel==="Kehittyvä"),
+    fairlySure:learningRows.filter(row=>row.state.masteryLabel==="Melko varma"),
+    strong:learningRows.filter(row=>row.state.masteryLabel==="Vahva"),
+    unassessed:learningRows.filter(row=>row.state.masteryLabel==="Ei vielä arvioitu"),
+  };
   const checkins=useWeeklyCheckins(),events=useProgressEvents(),saveCheckin=useUpsertWeeklyCheckin();
-  const week=startOfWeek(now),weekEnd=addDays(week,6),existing=checkins.data?.find(x=>x.week_start===week);
+  const week=startOfWeek(now),existing=checkins.data?.find(x=>x.week_start===week);
   const [note,setNote]=useState(""),[planned,setPlanned]=useState<number>(courses.reduce((a,c)=>a+c.weekly_minutes,0)),[adherence,setAdherence]=useState(3),[hardest,setHardest]=useState(""),[wentWell,setWentWell]=useState(""),[nextFocus,setNextFocus]=useState(""),[load,setLoad]=useState<"light"|"good"|"heavy">("good");
   useEffect(()=>{if(existing){setNote(existing.note??"");setPlanned(existing.planned_minutes??courses.reduce((a,c)=>a+c.weekly_minutes,0));setAdherence(existing.adherence??3);setHardest(existing.hardest_topic_id??"");setWentWell(existing.went_well??"");setNextFocus(existing.next_focus??"");setLoad(existing.load_rating??"good");}},[existing,courses]);
-  const actual=weekMinutes(sessions),weekly=weeklyStudySeries(sessions,plan,8,now);
-  const efficiency=studyEfficiency({sessions:recent,events:events.data??[]});
+  const actual=weekMinutes(sessions);
+  const weekly=weeklyStudySeries(sessions,plan,8,now);
   const heat=Array.from({length:35},(_,i)=>{const date=addDays(now,-34+i),mins=sessions.filter(s=>s.date===date).reduce((a,s)=>a+s.minutes,0);return{date,mins};});
-  const currentWeekSessions=sessions.filter(s=>s.date>=week&&s.date<=weekEnd);
-  const currentWeekPlan=plan.filter(p=>p.date>=week&&p.date<=weekEnd&&p.kind!=="exam");
-  const weekCompleted=currentWeekPlan.filter(p=>p.status==="completed").length;
-  const mostStudied=[...courses].map(course=>({course,mins:currentWeekSessions.filter(s=>s.course_id===course.id).reduce((a,s)=>a+s.minutes,0)})).sort((a,b)=>b.mins-a.mins)[0];
-  const weekEvents=(events.data??[]).filter(e=>e.created_at.slice(0,10)>=week&&e.created_at.slice(0,10)<=weekEnd&&e.kind==="mastery");
-  const biggestGain=[...weekEvents].sort((a,b)=>(Number(b.to_value??0)-Number(b.from_value??0))-(Number(a.to_value??0)-Number(a.from_value??0)))[0];
+  const review=weeklyLearningReview({courses,topics,attempts,sessions,plan,now});
+  const calibrationData=calibration({attempts,window:30});
   const nextExam=exams.filter(e=>e.date>=now).sort((a,b)=>a.date.localeCompare(b.date))[0];
-  const strengthenedTopicIds=new Set(weekEvents.map(e=>e.topic_id).filter(Boolean));
-  const strengthened=topics.filter(t=>strengthenedTopicIds.has(t.id)).slice(0,5);
-  const needsRound=recoveryQueue(topics,now,3).items.length
-    ? recoveryQueue(topics,now,3).items
-    : [...topics].filter(t=>t.verified_level>0&&t.verified_level<4).sort((a,b)=>a.verified_level-b.verified_level||b.importance-a.importance).slice(0,3);
-  const importantWeek=[...currentWeekPlan].sort((a,b)=>b.target_minutes-a.target_minutes).slice(0,5);
-  const importantDone=importantWeek.filter(p=>p.status==="completed").length;
+  const forecastCourse=nextExam?courses.find(course=>course.id===nextExam.course_id):courses[0];
+  const forecast=forecastCourse?learningForecast({
+    course:forecastCourse,
+    topics:topics.filter(topic=>topic.course_id===forecastCourse.id),
+    attempts:attempts.filter(attempt=>attempt.course_id===forecastCourse.id),
+    sessions,
+    plan,
+    now,
+  }):null;
+  const currentWeekPlan=plan.filter(p=>p.date>=week&&p.date<=now&&p.kind!=="exam");
   const nextWeekSuggestions=courses.slice(0,6).map(course=>{
-    const ct=topics.filter(t=>t.course_id===course.id);
-    const due=recoveryQueue(ct,addDays(now,7),2);
+    const courseTopics=topics.filter(topic=>topic.course_id===course.id);
+    const queue=buildRecoveryQueue({
+      topics:courseTopics,
+      attempts:attempts.filter(attempt=>attempt.course_id===course.id),
+      courses:[course],
+      now:addDays(now,7),
+      capacityMinutes:20,
+      maxItems:1,
+    });
     const exam=exams.filter(e=>e.course_id===course.id&&e.date>=now).sort((a,b)=>a.date.localeCompare(b.date))[0];
-    const strongShare=ct.length?ct.filter(t=>t.verified_level>=3).length/ct.length:0;
-    if(due.items.length)return `${course.code}: yksi kohdennettu kertaus (${due.items[0]?.name})`;
-    if(exam&&diffDays(exam.date,now)<=21&&strongShare>=0.5)return `${course.code}: siirry mixed practiceen ja koetasoon`;
-    return `${course.code}: suunnitelma ennallaan`;
+    const strongShare=courseTopics.length?courseTopics.filter(topic=>deriveTopicLearningState(topic,attempts,{now,examDate:course.exam_date}).masteryLevel>=4).length/courseTopics.length:0;
+    if(queue.items[0]) return course.code+": yksi kohdennettu retrieval ("+queue.items[0].topic.name+")";
+    if(exam&&diffDays(exam.date,now)<=21&&strongShare>=0.5) return course.code+": siirry mixed practiceen";
+    return course.code+": suunnitelma ennallaan";
   });
-  const concreteInsights=courses.map(course=>{const cp=currentWeekPlan.filter(p=>p.course_id===course.id),plannedMins=cp.reduce((a,p)=>a+p.target_minutes,0),actualMins=currentWeekSessions.filter(s=>s.course_id===course.id).reduce((a,s)=>a+s.minutes,0);return{course,delta:actualMins-plannedMins,plannedMins,actualMins};}).filter(x=>x.plannedMins>0||x.actualMins>0).sort((a,b)=>Math.abs(b.delta)-Math.abs(a.delta));
-  const masteryEvents=(events.data??[]).filter(e=>e.kind==="mastery"&&e.from_value!=null&&e.to_value!=null);
-  const masterySeries=weekly.map(w=>{const startDate=(()=>{const [d,m]=w.week.split(".").map(Number);const year=new Date().getFullYear();return `${year}-${String(m).padStart(2,"0")}-${String(d).padStart(2,"0")}`;})();const endDate=addDays(startDate,6);return{week:w.week,gain:masteryEvents.filter(e=>e.created_at.slice(0,10)>=startDate&&e.created_at.slice(0,10)<=endDate).reduce((sum,e)=>sum+Math.max(0,Number(e.to_value)-Number(e.from_value)),0)}});
 
   return <div className="space-y-5">
-    <p className="text-sm text-muted-foreground">Viimeiset 30 päivää · tallennetut merkinnät</p>
+    <p className="text-sm text-muted-foreground">Oppimisnäyttö ensin · aika ja käyttömäärä ovat alempana kuormitustietoa.</p>
     <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-      <div className="panel p-4"><p className="text-sm text-muted-foreground">Opiskeluaika</p><p className="mt-2 text-2xl font-semibold">{minutes(recentMinutes)}</p><p className="mt-1 text-xs text-muted-foreground">{delta>=0?"+":""}{delta}% edelliseen 30 päivään</p></div>
-      <div className="panel p-4"><p className="text-sm text-muted-foreground">Suunnitelmasta</p><p className="mt-2 text-2xl font-semibold">{due.length?`${Math.round(completed.length/due.length*100)} %`:"—"}</p></div>
+      <div className="panel p-4"><p className="text-sm text-muted-foreground">Vahvat aiheet</p><p className="mt-2 text-2xl font-semibold">{groups.strong.length}/{topics.length}</p><p className="mt-1 text-xs text-muted-foreground">{learningRows.filter(row=>row.state.evidenceCount>0).length} aiheesta on näyttöä</p></div>
+      <div className="panel p-4"><p className="text-sm text-muted-foreground">Tärkeät sessiot</p><p className="mt-2 text-2xl font-semibold">{review.completed}/{review.planned}</p><p className="mt-1 text-xs text-muted-foreground">tähän päivään mennessä</p></div>
       <div className="panel p-4"><p className="text-sm text-muted-foreground">Opiskelurytmi</p><p className="mt-2 text-2xl font-semibold">{new Set(recent.map(s=>s.date)).size}</p><p className="mt-1 text-xs text-muted-foreground">opiskelupäivää / 30 pv</p></div>
-      <div className="panel p-4"><p className="text-sm text-muted-foreground">Osaaminen</p><p className="mt-2 text-2xl font-semibold">{topics.length?mastery.label:"—"}</p><p className="mt-1 text-xs text-muted-foreground">{mastery.strong.length} vahvaa · {mastery.developing.length+mastery.practice.length} harjoiteltavaa</p></div>
+      <div className="panel p-4"><p className="text-sm text-muted-foreground">Aikaa kirjattu</p><p className="mt-2 text-2xl font-semibold">{minutes(recentMinutes)}</p><p className="mt-1 text-xs text-muted-foreground">kuormitustieto, ei osaamispiste</p></div>
     </div>
 
     <Panel title="Osaamiskartta">
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
         {[
-          ["Harjoittele seuraavaksi",mastery.practice],
-          ["Kehittyvä",mastery.developing],
-          ["Melko varma",mastery.fairlySure],
-          ["Vahva",mastery.strong],
-          ["Ei vielä näyttöä",mastery.unassessed],
-        ].map(([label,items])=><div key={label as string} className="rounded-xl bg-muted/50 p-3"><p className="text-sm font-semibold">{label as string}</p><p className="mt-1 text-2xl font-semibold">{(items as Topic[]).length}</p><p className="mt-1 text-xs text-muted-foreground">{(items as Topic[]).slice(0,3).map(t=>t.name).join(", ")||"—"}</p></div>)}
+          ["Harjoittele seuraavaksi",groups.practice],
+          ["Kehittyvä",groups.developing],
+          ["Melko varma",groups.fairlySure],
+          ["Vahva",groups.strong],
+          ["Ei vielä tarpeeksi näyttöä",groups.unassessed],
+        ].map(([label,items])=><div key={label as string} className="rounded-xl bg-muted/50 p-3"><p className="text-sm font-semibold">{label as string}</p><p className="mt-1 text-2xl font-semibold">{(items as typeof learningRows).length}</p><p className="mt-1 text-xs text-muted-foreground">{(items as typeof learningRows).slice(0,3).map(row=>row.topic.name).join(", ")||"—"}</p></div>)}
       </div>
-      <p className="mt-3 text-xs text-muted-foreground">Tila perustuu tehtävä- ja kertausnäyttöön. “Ei vielä näyttöä” ei tarkoita, ettet osaisi aihetta.</p>
+      <div className="mt-4 divide-y divide-border">
+        {[...learningRows].sort((a,b)=>a.state.masteryLevel-b.state.masteryLevel||b.state.uncertainty-a.state.uncertainty).slice(0,15).map(row=><details key={row.topic.id} className="py-3"><summary className="cursor-pointer list-none"><div className="flex min-h-11 items-center justify-between gap-3"><span><b>{courses.find(course=>course.id===row.topic.course_id)?.code} · {row.topic.name}</b><small className="mt-1 block text-muted-foreground">{row.state.masteryLabel} · {row.state.masteryConfidence>=0.7?"näyttöä paljon":row.state.masteryConfidence>=0.45?"näyttöä jonkin verran":"näyttöä vielä vähän"}</small></span><span className="text-xs text-muted-foreground">Miksi?</span></div></summary><div className="mt-2 rounded-xl bg-muted/50 p-3 text-sm"><p>{evidenceSummary(row.state,row.topic,attempts)}</p><p className="mt-1 text-xs text-muted-foreground">Recall {Math.round(row.state.recallStrength*100)} · soveltaminen {Math.round(row.state.applicationStrength*100)} · retentio {Math.round(row.state.retentionStrength*100)} · epävarmuus {Math.round(row.state.uncertainty*100)}</p>{attempts.filter(attempt=>attempt.topic_id===row.topic.id).slice(0,4).map(attempt=><p key={attempt.id} className="mt-2 border-t border-border pt-2 text-xs">{fullDate(attempt.date)} · {attempt.attempt_type.replaceAll("_"," ")} → {attempt.outcome??attempt.result}{typeof attempt.hints_used==="number"?" · vihjeitä "+attempt.hints_used:""}</p>)}</div></details>)}
+      </div>
+      <p className="mt-3 text-xs text-muted-foreground">“Ei vielä tarpeeksi näyttöä” ei tarkoita, ettet osaisi aihetta. Se tarkoittaa kirjaimellisesti sitä, ettei järjestelmän pitäisi teeskennellä tietävänsä.</p>
     </Panel>
+
+    <Panel title={"Viikkosi · viikko "+weekNumber(now)}>
+      <div className="grid gap-4 lg:grid-cols-3">
+        <div><p className="text-sm font-semibold">Vahvistui</p>{review.strengthened.length?review.strengthened.map(row=><p key={row.topic.id} className="mt-2 text-sm">{courses.find(c=>c.id===row.topic.course_id)?.code} · {row.topic.name}</p>):<p className="mt-2 text-sm text-muted-foreground">Ei vielä riittävästi uutta näyttöä tällä viikolla.</p>}</div>
+        <div><p className="text-sm font-semibold">Tarvitsee vielä kierroksen</p>{review.needsRound.length?review.needsRound.map(row=><p key={row.topic.id} className="mt-2 text-sm">{courses.find(c=>c.id===row.topic.course_id)?.code} · {row.topic.name}</p>):<p className="mt-2 text-sm text-muted-foreground">Kertausjono on tällä hetkellä hallinnassa.</p>}</div>
+        <div><p className="text-sm font-semibold">Suunnitelma</p><p className="mt-2 text-2xl font-semibold">{review.completed}/{review.planned}</p><p className="text-xs text-muted-foreground">tärkeästä tähän päivään mennessä toteutui</p></div>
+      </div>
+      <div className="mt-5 rounded-2xl bg-muted/50 p-4"><p className="text-sm font-semibold">Ensi viikolle ehdotan</p>{nextWeekSuggestions.map((suggestion,index)=><p key={index} className="mt-2 text-sm">{suggestion}</p>)}</div>
+      <button className={button+" mt-4"} onClick={onPlan}>Tarkista ja hyväksy suunnitelma</button>
+    </Panel>
+
+    {forecast&&forecastCourse&&<Panel title="Forecast">
+      <p className="text-sm text-muted-foreground">{forecastCourse.code} · ensimmäinen sisältökierros</p>
+      <p className="mt-2 text-2xl font-semibold">{fullDate(forecast.earliest)}–{fullDate(forecast.latest)}</p>
+      {forecastCourse.exam_date&&<p className="mt-1 text-sm">Tavoite / koe {fullDate(forecastCourse.exam_date)} · {forecast.latest<=forecastCourse.exam_date?"aikataulussa":"vaatii suunnitelman tarkistuksen"}</p>}
+      <div className="mt-3 grid gap-2 sm:grid-cols-3"><div className="rounded-xl bg-muted/50 p-3"><small className="text-muted-foreground">Sessioita / vko</small><p className="font-semibold">{forecast.sessionsPerWeek.toFixed(1)}</p></div><div className="rounded-xl bg-muted/50 p-3"><small className="text-muted-foreground">Toteutumisaste</small><p className="font-semibold">{Math.round(forecast.adherence*100)} %</p></div><div className="rounded-xl bg-muted/50 p-3"><small className="text-muted-foreground">Sisältö</small><p className="font-semibold">{Math.round(forecast.coverage)} %</p></div></div>
+      <p className="mt-3 text-xs text-muted-foreground">{forecast.note}</p>
+    </Panel>}
+
+    {calibrationData&&<Panel title="Metakognitiivinen kalibrointi">
+      <p className="text-lg font-semibold">{calibrationData.label}</p>
+      <p className="mt-2 text-sm text-muted-foreground">Perustuu {calibrationData.count} harjoitusyritykseen, joissa annoit varmuusarvion ennen palautetta. Tämä ei ole pisteytys eikä ranking.</p>
+    </Panel>}
+
+    <Panel title="Opiskelurytmi · 5 viikkoa"><div className="grid grid-cols-7 gap-1.5">{heat.map(cell=>{const intensity=cell.mins===0?0:cell.mins<30?0.25:cell.mins<60?0.5:cell.mins<90?0.75:1;return <div key={cell.date} title={fullDate(cell.date)+" · "+minutes(cell.mins)} className="aspect-square rounded-[6px] border border-border bg-primary" style={{opacity:intensity===0?0.07:intensity}}/>})}</div><p className="mt-3 text-xs text-muted-foreground">Tummempi ruutu = enemmän opiskelua. Ei streak-painostusta, koska emme ole rakentamassa digitaalisia kahleita.</p></Panel>
 
     <Panel title="Viikoittainen suunniteltu vs. toteutunut">
       <div className="h-56"><ResponsiveContainer width="100%" height="100%"><BarChart data={weekly}><CartesianGrid vertical={false}/><XAxis dataKey="week"/><YAxis width={34}/><Tooltip formatter={(value)=>minutes(Number(value))}/><RechartsBar dataKey="planned" fill="currentColor" fillOpacity={0.18}/><RechartsBar dataKey="actual" fill="currentColor" fillOpacity={0.75}/></BarChart></ResponsiveContainer></div>
+      <p className="mt-2 text-xs text-muted-foreground">Tämä kertoo kuormasta ja suunnitelman toteutumisesta, ei siitä kuinka “hyvä opiskelija” olit.</p>
     </Panel>
 
-    <div className="grid gap-4 lg:grid-cols-2">
-      <Panel title="Kurssien ajankäyttö">{byCourse.filter(x=>x.mins>0).length?byCourse.filter(x=>x.mins>0).map(x=><div key={x.course.id} className="mb-4"><div className="mb-2 flex justify-between text-sm"><span>{x.course.code}</span><span>{minutes(x.mins)}</span></div><Bar value={byCourse[0]?.mins?x.mins/byCourse[0].mins*100:0}/></div>):<p className="text-muted-foreground">Kirjaa ensimmäinen sessio nähdäksesi jakauman.</p>}</Panel>
-      <Panel title="Osaamisen kehitys"><div className="h-52"><ResponsiveContainer width="100%" height="100%"><ComposedChart data={masterySeries}><CartesianGrid vertical={false}/><XAxis dataKey="week"/><YAxis width={30}/><Tooltip/><Line dataKey="gain" stroke="currentColor" strokeWidth={2}/></ComposedChart></ResponsiveContainer></div><p className="mt-2 text-xs text-muted-foreground">Näyttää todennetun mastery-tason nousut viikoittain, ei omaa fiilistä.</p></Panel>
-    </div>
-
-    <Panel title="Opiskelurytmi · 5 viikkoa"><div className="grid grid-cols-7 gap-1.5">{heat.map(cell=>{const intensity=cell.mins===0?0:cell.mins<30?0.25:cell.mins<60?0.5:cell.mins<90?0.75:1;return <div key={cell.date} title={`${fullDate(cell.date)} · ${minutes(cell.mins)}`} className="aspect-square rounded-[6px] border border-border bg-primary" style={{opacity:intensity===0?0.07:intensity}}/>})}</div><p className="mt-3 text-xs text-muted-foreground">Tummempi ruutu = enemmän opiskelua. Ei streak-painostusta.</p></Panel>
-
-    <Panel title="Oppimisen näyttö"><p className="text-2xl font-semibold">{efficiency.masteryGain} todennettua tasonnousua</p><p className="mt-1 text-sm text-muted-foreground">Opiskeluaikaa on kirjattu {minutes(efficiency.minutes)}. Aikaa ei tulkita osaamiseksi.</p>{efficiency.needsMethodChange&&<p className="mt-3 rounded-xl bg-accent p-3 text-sm">Opiskelua on kertynyt, mutta uutta osaamisnäyttöä ei vielä ole. Kokeile aktiivista palautusta, koetehtävää tai virheen selittämistä omin sanoin pelkän lisäajan sijaan.</p>}</Panel>
-
-    <Panel title="Konkreettiset havainnot">{concreteInsights.length?concreteInsights.slice(0,5).map(x=><p key={x.course.id} className="border-b border-border py-2 text-sm"><b>{x.course.code}</b> {x.delta<0?`on tällä viikolla ${minutes(Math.abs(x.delta))} alle suunnitelman`:x.delta>0?`on tällä viikolla ${minutes(x.delta)} yli tavoiteajan`:"on täsmälleen suunnitelmassa"}.</p>):<p className="text-muted-foreground">Viikon dataa ei ole vielä riittävästi.</p>}{masteryEvents.slice(0,4).map(e=><p key={e.id} className="border-b border-border py-2 text-sm">{e.detail??"Aihe"} nousi {e.from_value} → {e.to_value}/5.</p>)}</Panel>
-
-    <Panel title={`Viikko ${weekNumber(now)} · check-in`}>
+    <Panel title={"Viikko "+weekNumber(now)+" · reflektio"}>
       <div className="grid gap-3 sm:grid-cols-3"><div><p className="text-sm text-muted-foreground">Tavoite</p><input type="number" min="0" step="15" className="mt-1 w-full rounded-xl border bg-surface px-3 py-2" value={planned} onChange={e=>setPlanned(Number(e.target.value))}/></div><div><p className="text-sm text-muted-foreground">Toteutunut</p><p className="mt-2 text-xl font-semibold">{minutes(actual)}</p></div><div><p className="text-sm text-muted-foreground">Opiskelupäivät</p><p className="mt-2 text-xl font-semibold">{studyDaysInWeek(sessions)}</p></div></div>
-      <fieldset className="mt-4"><legend className="mb-2 text-sm font-medium">Suunnitelmassa pysyminen 1–5</legend><div className="flex gap-2">{[1,2,3,4,5].map(n=><button key={n} type="button" aria-pressed={adherence===n} onClick={()=>setAdherence(n)} className={`grid size-11 place-items-center rounded-xl border ${adherence===n?"border-primary bg-accent":"border-border"}`}>{n}</button>)}</div></fieldset>
+      <fieldset className="mt-4"><legend className="mb-2 text-sm font-medium">Suunnitelmassa pysyminen 1–5</legend><div className="flex gap-2">{[1,2,3,4,5].map(n=><button key={n} type="button" aria-pressed={adherence===n} onClick={()=>setAdherence(n)} className={"grid size-11 place-items-center rounded-xl border "+(adherence===n?"border-primary bg-accent":"border-border")}>{n}</button>)}</div></fieldset>
       <div className="mt-4 grid gap-3 sm:grid-cols-2"><label className="text-sm font-medium">Vaikein aihe<select className="mt-1 w-full rounded-xl border bg-surface px-3 py-2" value={hardest} onChange={e=>setHardest(e.target.value)}><option value="">Ei valintaa</option>{topics.map(t=><option key={t.id} value={t.id}>{courses.find(c=>c.id===t.course_id)?.code} · {t.name}</option>)}</select></label><label className="text-sm font-medium">Kuormitus<select className="mt-1 w-full rounded-xl border bg-surface px-3 py-2" value={load} onChange={e=>setLoad(e.target.value as "light"|"good"|"heavy")}><option value="light">Liian kevyt</option><option value="good">Sopiva</option><option value="heavy">Liian raskas</option></select></label></div>
       <label className="mt-4 block text-sm font-medium">Mikä meni hyvin?<textarea rows={2} className="mt-1 w-full rounded-xl border bg-surface px-3 py-2" value={wentWell} onChange={e=>setWentWell(e.target.value)}/></label>
       <label className="mt-4 block text-sm font-medium">Seuraavan viikon fokus<textarea rows={2} className="mt-1 w-full rounded-xl border bg-surface px-3 py-2" value={nextFocus} onChange={e=>setNextFocus(e.target.value)}/></label>
       <label className="mt-4 block text-sm font-medium">Muut huomiot<textarea rows={3} className="mt-1 w-full rounded-xl border bg-surface px-3 py-2" value={note} onChange={e=>setNote(e.target.value)}/></label>
-      <div className="mt-3 flex flex-wrap gap-2"><button className={button} disabled={saveCheckin.isPending} onClick={()=>void saveCheckin.mutateAsync({week_start:week,note:note.trim()||null,planned_minutes:planned,actual_minutes:actual,adherence,hardest_topic_id:hardest||null,went_well:wentWell.trim()||null,next_focus:nextFocus.trim()||null,load_rating:load}).then(result=>toast.success(result==="queued"?"Reflektio tallennettu paikallisesti.":"Viikkoreflektointi tallennettu.")).catch(()=>toast.error("Tallennus epäonnistui."))}>Tallenna reflektio</button><button className={secondary} onClick={onPlan}>Suunnittele ensi viikko</button></div>
+      <div className="mt-3 flex flex-wrap gap-2"><button className={button} disabled={saveCheckin.isPending} onClick={()=>void saveCheckin.mutateAsync({week_start:week,note:note.trim()||null,planned_minutes:planned,actual_minutes:actual,adherence,hardest_topic_id:hardest||null,went_well:wentWell.trim()||null,next_focus:nextFocus.trim()||null,load_rating:load}).then(result=>toast.success(result==="queued"?"Reflektio tallennettu paikallisesti.":"Viikkoreflektointi tallennettu.")).catch(()=>toast.error("Tallennus epäonnistui."))}>Tallenna reflektio</button><button className={secondary} onClick={onPlan}>Avaa ensi viikon suunnitelma</button></div>
     </Panel>
 
-    <Panel title={`Viikkosi · viikko ${weekNumber(now)}`}>
-      <div className="grid gap-4 lg:grid-cols-3">
-        <div><p className="text-sm font-semibold">Vahvistui</p>{strengthened.length?strengthened.map(t=><p key={t.id} className="mt-2 text-sm">{courses.find(c=>c.id===t.course_id)?.code} · {t.name}</p>):<p className="mt-2 text-sm text-muted-foreground">Ei vielä uutta todennettua tasonnousua tällä viikolla.</p>}</div>
-        <div><p className="text-sm font-semibold">Tarvitsee vielä kierroksen</p>{needsRound.length?needsRound.map(t=><p key={t.id} className="mt-2 text-sm">{courses.find(c=>c.id===t.course_id)?.code} · {t.name}</p>):<p className="mt-2 text-sm text-muted-foreground">Ei juuri nyt erottuvaa kertaustarvetta.</p>}</div>
-        <div><p className="text-sm font-semibold">Tärkeimmät sessiot</p><p className="mt-2 text-2xl font-semibold">{importantDone} / {importantWeek.length||0}</p><p className="text-xs text-muted-foreground">viikon tärkeimmistä toteutui</p></div>
-      </div>
-      <div className="mt-5 rounded-2xl bg-muted/50 p-4"><p className="text-sm font-semibold">Ensi viikolle ehdotan</p>{nextWeekSuggestions.map((suggestion,index)=><p key={index} className="mt-2 text-sm">{suggestion}</p>)}</div>
-      <button className={button+" mt-4"} onClick={onPlan}>Tarkista ja hyväksy suunnitelma</button>
-      <p className="mt-3 text-xs text-muted-foreground">Opiskeluaika {minutes(actual)} · {studyDaysInWeek(sessions)} opiskelupäivää. Aika on alempana analytiikkaa, ei viikon pääasiallinen onnistumismittari.</p>
-    </Panel>
-
-    <Panel title="Osaamisen tapahtumat">{events.data?.length?events.data.slice(0,12).map(e=><div key={e.id} className="border-b border-border py-3"><p className="font-medium">{e.detail??e.kind}</p><p className="text-sm text-muted-foreground">{e.kind==="mastery"&&e.from_value!=null&&e.to_value!=null?`Osaaminen ${e.from_value} → ${e.to_value}`:e.kind} · {new Date(e.created_at).toLocaleDateString("fi-FI")}</p></div>):<p className="text-muted-foreground">Osaamisen muutokset ilmestyvät tähän opiskelun myötä.</p>}</Panel>
+    <Panel title="Osaamisen tapahtumat">{events.data?.length?events.data.slice(0,12).map(e=><div key={e.id} className="border-b border-border py-3"><p className="font-medium">{e.detail??e.kind}</p><p className="text-sm text-muted-foreground">{e.kind==="mastery"&&e.from_value!=null&&e.to_value!=null?"Osaaminen "+e.from_value+" → "+e.to_value:e.kind} · {new Date(e.created_at).toLocaleDateString("fi-FI")}</p></div>):<p className="text-muted-foreground">Osaamisen muutokset ilmestyvät tähän harjoittelun myötä.</p>}</Panel>
   </div>;
 }
 
