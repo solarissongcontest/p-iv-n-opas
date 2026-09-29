@@ -37,9 +37,11 @@ function localDateParts(timeZone: string) {
 }
 
 function timeMinutes(value: string | null | undefined) {
-  if (!value) return null;
-  const [hours, minutes] = value.slice(0, 5).split(":").map(Number);
+  if (!value || !/^\d{2}:\d{2}/.test(value)) return null;
+  const hours = Number(value.slice(0, 2));
+  const minutes = Number(value.slice(3, 5));
   if (!Number.isFinite(hours) || !Number.isFinite(minutes)) return null;
+  if (hours < 0 || hours > 23 || minutes < 0 || minutes > 59) return null;
   return hours * 60 + minutes;
 }
 
