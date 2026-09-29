@@ -798,6 +798,18 @@ export type Database = {
         }
         Returns: string
       }
+      record_practice_test: {
+        Args: {
+          p_course_id: string
+          p_date: string
+          p_duration_minutes: number
+          p_error_count: number
+          p_max_score: number
+          p_score: number
+          p_topic_results: Json
+        }
+        Returns: string
+      }
     }
     Enums: {
       [_ in never]: never
