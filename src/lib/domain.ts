@@ -2,8 +2,23 @@ import type { Database } from "@/integrations/supabase/types";
 import { addDays, diffDays, parseISO, startOfWeek, toISO, today } from "./fi.ts";
 
 export type Course = Database["public"]["Tables"]["courses"]["Row"];
-export type Topic = Database["public"]["Tables"]["topics"]["Row"];
-export type Session = Database["public"]["Tables"]["study_sessions"]["Row"];
+export type Topic = Database["public"]["Tables"]["topics"]["Row"] & {
+  retrieval_attempts: number;
+  retrieval_failures: number;
+  mastery_uncertainty: number;
+  last_retrieval_at: string | null;
+  last_retrieval_result: "independent" | "hinted" | "not_yet" | null;
+  last_retrieval_confidence: number | null;
+  last_retrieval_difficulty: number | null;
+};
+export type Session = Database["public"]["Tables"]["study_sessions"]["Row"] & {
+  objective: string | null;
+  recall: string | null;
+  retrieval_check: string | null;
+  retrieval_result: "independent" | "hinted" | "not_yet" | null;
+  retrieval_confidence: number | null;
+  outcome: "yes" | "partial" | "not_yet" | null;
+};
 export type Exam = Database["public"]["Tables"]["exams"]["Row"];
 export type PlanItem = Database["public"]["Tables"]["plan_items"]["Row"];
 export type Mistake = Database["public"]["Tables"]["mistakes"]["Row"] & {
@@ -24,6 +39,30 @@ export type WeeklyCheckin = Database["public"]["Tables"]["weekly_checkins"]["Row
 };
 export type ProgressEvent = Database["public"]["Tables"]["progress_events"]["Row"];
 
+export type PracticeAttempt = {
+  id: string;
+  owner_id: string;
+  course_id: string;
+  topic_id: string;
+  date: string;
+  attempt_type: "free_recall" | "short_answer" | "calculation" | "application" | "recognition";
+  prompt: string;
+  response: string | null;
+  difficulty: number;
+  result: "independent" | "hinted" | "not_yet";
+  confidence: number | null;
+  hint_used: boolean;
+  delay_days: number | null;
+  created_at: string;
+};
+
+export type CapacityProfile = {
+  studyWeekdays: number[];
+  weekdayMinutes: number;
+  weekendMinutes: number;
+  busyDates: string[];
+};
+
 export type PlanStatus = "planned" | "in_progress" | "completed" | "skipped" | "overdue";
 export type PlanPhase = "content" | "application" | "practice" | "review" | "light" | "exam";
 
@@ -38,12 +77,17 @@ export const MASTERY_LABELS: Record<number, string> = {
 
 export function masteryEvidence(t: Pick<
   Topic,
-  "basic_successes" | "exam_successes" | "delayed_successes"
+  "basic_successes" | "exam_successes" | "delayed_successes" | "retrieval_attempts" | "retrieval_failures" | "mastery_uncertainty"
 >): string {
   const parts: string[] = [];
   if (t.basic_successes > 0) parts.push(`${t.basic_successes} perustehtävän näyttöä`);
   if (t.exam_successes > 0) parts.push(`${t.exam_successes} koetason näyttöä`);
   if (t.delayed_successes > 0) parts.push(`${t.delayed_successes} onnistunutta viivästettyä kertausta`);
+  if (t.retrieval_attempts > 0) {
+    parts.push(`${t.retrieval_attempts} muistista palautusta`);
+    if (t.retrieval_failures > 0) parts.push(`${t.retrieval_failures} tarvitsee vielä harjoittelua`);
+  }
+  if (t.mastery_uncertainty >= 0.65) parts.push("näyttöä vielä vähän");
   return parts.length ? parts.join(" · ") : "Ei vielä tarpeeksi näyttöä.";
 }
 
@@ -416,6 +460,86 @@ export function nextReviewDate(
   return addDays(fromISO, Math.max(1, Math.min(60, gap)));
 }
 
+export function capacityForDate(profile: CapacityProfile, iso: string): number {
+  if (profile.busyDates.includes(iso)) return Math.max(15, Math.min(30, profile.weekdayMinutes));
+  const weekday = ((parseISO(iso).getDay() + 6) % 7) + 1;
+  return weekday >= 6 ? profile.weekendMinutes : profile.weekdayMinutes;
+}
+
+export function returnFromBreak(input: {
+  sessions: Pick<Session, "date">[];
+  topics: Topic[];
+  now?: string;
+  days?: number;
+}) {
+  const now = input.now ?? today();
+  const threshold = input.days ?? 7;
+  const latest = [...input.sessions].sort((a,b)=>b.date.localeCompare(a.date))[0]?.date ?? null;
+  const awayDays = latest ? diffDays(now, latest) : 0;
+  if (!latest || awayDays < threshold) return null;
+  const queue = recoveryQueue(input.topics, now, 3);
+  const fallback = [...input.topics]
+    .sort((a,b)=>a.verified_level-b.verified_level||b.importance-a.importance)
+    .slice(0,3);
+  const items = queue.items.length ? queue.items : fallback;
+  return {
+    awayDays,
+    items,
+    estimatedMinutes: Math.max(5, items.length * 5),
+  };
+}
+
+export const PRACTICE_TYPES = [
+  "free_recall",
+  "short_answer",
+  "calculation",
+  "application",
+  "recognition",
+] as const;
+
+export function practicePrompt(topic: Topic, index = 0): {
+  type: PracticeAttempt["attempt_type"];
+  difficulty: number;
+  prompt: string;
+  hint: string;
+} {
+  const level = topic.verified_level;
+  const cycle = index % 5;
+  const templates = [
+    {
+      type: "free_recall" as const,
+      difficulty: Math.max(1, Math.min(3, level || 1)),
+      prompt: `Kirjoita ilman muistiinpanoja kaikki olennainen aiheesta: ${topic.name}.`,
+      hint: "Aloita keskeisistä käsitteistä, kaavoista tai vaiheista. Älä avaa materiaalia vielä.",
+    },
+    {
+      type: "short_answer" as const,
+      difficulty: 2,
+      prompt: `Selitä omin sanoin, mikä on aiheen “${topic.name}” tärkein idea ja mistä tunnistat, että osaat sen.`,
+      hint: "Muotoile vastaus yhdellä väitteellä ja yhdellä perustelulla.",
+    },
+    {
+      type: "calculation" as const,
+      difficulty: 3,
+      prompt: `Tee aiheesta “${topic.name}” yksi tyypillinen tehtävä ilman malliratkaisua. Kirjaa ratkaisutapa tai vaiheet.`,
+      hint: "Nimeä ensin mitä tietoa annetaan ja mikä menetelmä sopii ennen laskemista.",
+    },
+    {
+      type: "application" as const,
+      difficulty: 4,
+      prompt: `Keksi uusi tilanne, jossa aihetta “${topic.name}” pitää soveltaa, ja ratkaise tai selitä se ilman mallia.`,
+      hint: "Muuta pintatietoja, mutta pidä sama ydinperiaate. Mieti ensin miksi tämä menetelmä sopii.",
+    },
+    {
+      type: "recognition" as const,
+      difficulty: 2,
+      prompt: `Millaisesta tehtävästä tunnistat, että aihe “${topic.name}” on relevantti? Anna kaksi tuntomerkkiä ja yksi harhaanjohtava tuntomerkki.`,
+      hint: "Vertaa samankaltaiseen aiheeseen ja etsi ero, joka ratkaisee menetelmän valinnan.",
+    },
+  ];
+  return templates[cycle]!;
+}
+
 export function findNextStudyDate(input: {
   plan: Pick<PlanItem, "id" | "date" | "target_minutes" | "status" | "kind">[];
   fromISO: string;
@@ -424,8 +548,9 @@ export function findNextStudyDate(input: {
   ignoreItemId?: string;
   latestDate?: string | null;
   maxDailyMinutes?: number;
+  capacity?: CapacityProfile;
 }): string | null {
-  const maxDaily = input.maxDailyMinutes ?? 105;
+  const defaultMaxDaily = input.maxDailyMinutes ?? 105;
   const candidates: { date: string; load: number }[] = [];
 
   for (let offset = 1; offset <= 14; offset += 1) {
@@ -444,6 +569,7 @@ export function findNextStudyDate(input: {
       )
       .reduce((sum, item) => sum + item.target_minutes, 0);
 
+    const maxDaily = input.capacity ? capacityForDate(input.capacity, date) : defaultMaxDaily;
     candidates.push({ date, load });
     if (load + input.minutes <= maxDaily) return date;
   }
