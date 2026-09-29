@@ -19,6 +19,10 @@ import {
 } from "@/lib/learning-os-v4";
 import { usePreferences, useRecordPracticeAttempt, useUpdateTopic } from "@/lib/data";
 import { addDays, fullDate, today } from "@/lib/fi";
+import {
+  evaluatePracticeResponse,
+  type PracticeRubricEvaluation,
+} from "@/lib/practice-rubric";
 
 const primary =
   "inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-primary px-4 text-sm font-medium text-primary-foreground disabled:opacity-50";
@@ -84,6 +88,7 @@ export function PracticeView({
   const [hintLevel, setHintLevel] = useState(0);
   const [confidence, setConfidence] = useState<number | null>(null);
   const [feedback, setFeedback] = useState("");
+  const [rubricEvaluation, setRubricEvaluation] = useState<PracticeRubricEvaluation | null>(null);
   const [showExplanation, setShowExplanation] = useState(false);
   const [diagnosticMode, setDiagnosticMode] = useState(false);
   const startedAt = useRef<number>(Date.now());
@@ -199,6 +204,7 @@ export function PracticeView({
     setHintLevel(0);
     setConfidence(null);
     setFeedback("");
+    setRubricEvaluation(null);
     setShowExplanation(false);
   }, [selection?.question.id, selection?.topic.id]);
 
@@ -239,6 +245,18 @@ export function PracticeView({
           scaffoldStage: activePath?.stage ?? "independent",
           assisted: hintLevel > 0,
           verificationRequired: activePath?.requiresIndependentFollowup ?? false,
+          rubricEvaluatorUsed: rubricEvaluation !== null,
+          rubricEvaluation: rubricEvaluation
+            ? {
+                suggestedResult: rubricEvaluation.suggestedResult,
+                confidence: rubricEvaluation.confidence,
+                score: rubricEvaluation.score,
+                dimensions: rubricEvaluation.dimensions.map((dimension) => ({
+                  key: dimension.key,
+                  score: dimension.score,
+                })),
+              }
+            : null,
           experimentVariants: {
             interleaving: interleavingVariant,
             spacing: spacingVariant,
@@ -377,7 +395,10 @@ export function PracticeView({
                 rows={5}
                 className="mt-1 w-full rounded-xl border bg-surface p-3"
                 value={response}
-                onChange={(event) => setResponse(event.target.value)}
+                onChange={(event) => {
+                  setResponse(event.target.value);
+                  setRubricEvaluation(null);
+                }}
                 placeholder="Kirjoita muistista ennen materiaalin avaamista…"
               />
             </label>
@@ -432,6 +453,68 @@ export function PracticeView({
                 </div>
               </fieldset>
             )}
+
+            <div className="rounded-2xl border border-border bg-muted/40 p-4">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <p className="font-medium">Concept / Rubric Evaluator</p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Arvio on neuvo, ei automaattinen mastery-päätös. Se ei näytä mallivastausta tai puuttuvien käsitteiden nimiä.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  className={secondary}
+                  disabled={response.trim().length < 2}
+                  onClick={() => {
+                    if (!selection) return;
+                    setRubricEvaluation(
+                      evaluatePracticeResponse(selection.question, response),
+                    );
+                  }}
+                >
+                  Arvioi oma vastaus
+                </button>
+              </div>
+
+              {rubricEvaluation && (
+                <div className="mt-4" role="status">
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <span>
+                      <b>
+                        Ehdotus: {resultText[rubricEvaluation.suggestedResult]}
+                      </b>
+                      <small className="ml-2 text-muted-foreground">
+                        · rubriikkipisteet {rubricEvaluation.score}/100
+                        · varmuus {rubricEvaluation.confidence}
+                      </small>
+                    </span>
+                  </div>
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    {rubricEvaluation.summary}
+                  </p>
+                  <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                    {rubricEvaluation.dimensions.map((dimension) => (
+                      <div
+                        key={dimension.key}
+                        className="rounded-xl bg-surface p-3 text-sm"
+                      >
+                        <div className="flex items-center justify-between gap-3">
+                          <b>{dimension.label}</b>
+                          <span>{dimension.score}/{dimension.max}</span>
+                        </div>
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          {dimension.note}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                  <p className="mt-3 text-xs text-muted-foreground">
+                    Koska sait arviointipalautetta ennen tallennusta, tämä yritys merkitään avustetuksi evidenceksi ja myöhemmin tarvitaan itsenäinen varmistus.
+                  </p>
+                </div>
+              )}
+            </div>
 
             <div>
               <p className="mb-2 text-sm font-medium">Miten yritys onnistui?</p>
