@@ -104,6 +104,36 @@ function App() {
     return () => { active = false; };
   }, [queryClient]);
 
+  useEffect(() => {
+    if (!user) return;
+
+    let active = true;
+    const verifyCanonicalOwner = () => {
+      if (document.visibilityState !== "visible") return;
+      const previousOwnerId = getDeviceOwnerId() ?? user.id;
+      void getArthurSession(previousOwnerId)
+        .then((canonicalUser) => {
+          if (!active || canonicalUser.id === user.id) return;
+          queryClient.clear();
+          setUser(canonicalUser);
+        })
+        .catch(() => {
+          // Keep the current cached session. A later focus/online startup retries.
+        });
+    };
+
+    const onVisibility = () => {
+      if (document.visibilityState === "visible") verifyCanonicalOwner();
+    };
+    window.addEventListener("focus", verifyCanonicalOwner);
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => {
+      active = false;
+      window.removeEventListener("focus", verifyCanonicalOwner);
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
+  }, [queryClient, user]);
+
   if (user === undefined) return <main className="grid min-h-screen place-items-center">Avataan opintopäiväkirjaa…</main>;
   if (!user) return <DeviceSignIn authError={authError} onSignedIn={setUser} />;
   return <StudyApp key={user.id} user={user} />;
