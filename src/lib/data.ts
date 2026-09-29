@@ -332,6 +332,7 @@ export type LogSessionInput = {
   retrieval_check?: string | null;
   retrieval_result?: "independent" | "hinted" | "not_yet" | null;
   retrieval_confidence?: number | null;
+  outcome?: "yes" | "partial" | "not_yet" | null;
 };
 
 async function doLogSession(payload: unknown, operationId: string) {
@@ -364,6 +365,7 @@ async function doLogSession(payload: unknown, operationId: string) {
         p_retrieval_check: input.retrieval_check ?? null,
         p_retrieval_result: input.retrieval_result,
         p_retrieval_confidence: input.retrieval_confidence ?? null,
+        p_outcome: input.outcome ?? null,
       })
     : await supabase.rpc("log_study_session", common);
 
