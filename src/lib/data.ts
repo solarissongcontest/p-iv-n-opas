@@ -11,6 +11,7 @@ import {
   type PlanItem,
   type PracticeTest,
   type PracticeAttempt,
+  type QuestionBankItem,
   type Session,
   type Topic,
   type WeeklyCheckin,
@@ -151,6 +152,20 @@ async function listPracticeAttempts(): Promise<PracticeAttempt[]> {
 }
 
 
+async function listQuestionBank(): Promise<QuestionBankItem[]> {
+  const { data, error } = await untypedSupabase
+    .from("question_bank")
+    .select("*")
+    .in("status", ["active", "validated"])
+    .eq("curriculum", "LOPS21")
+    .order("difficulty")
+    .order("created_at", { ascending: false })
+    .limit(2000);
+  if (error) throw error;
+  return (data ?? []) as QuestionBankItem[];
+}
+
+
 async function listWeeklyCheckins(): Promise<WeeklyCheckin[]> {
   const { data, error } = await supabase
     .from("weekly_checkins")
@@ -222,6 +237,8 @@ export const useMistakes = () => useQuery({ queryKey: ["mistakes"], queryFn: lis
 export const useTests = () => useQuery({ queryKey: ["tests"], queryFn: listTests });
 export const usePracticeAttempts = () =>
   useQuery({ queryKey: ["practice-attempts"], queryFn: listPracticeAttempts });
+export const useQuestionBank = () =>
+  useQuery({ queryKey: ["question-bank"], queryFn: listQuestionBank });
 export const useSettings = () => useQuery({ queryKey: ["settings"], queryFn: getSettings });
 export const usePreferences = () =>
   useQuery({ queryKey: ["preferences"], queryFn: getPreferences });
@@ -608,7 +625,7 @@ registerOp("weeklyCheckin", doWeeklyCheckin);
 function useInvalidateAll() {
   const qc = useQueryClient();
   return () =>
-    ["courses", "topics", "sessions", "exams", "plan", "mistakes", "tests", "practice-attempts", "settings", "preferences", "weekly-checkins", "progress-events", "topic-dependencies", "study-materials", "learning-experiments"].forEach(
+    ["courses", "topics", "sessions", "exams", "plan", "mistakes", "tests", "practice-attempts", "question-bank", "settings", "preferences", "weekly-checkins", "progress-events", "topic-dependencies", "study-materials", "learning-experiments"].forEach(
       (k) => qc.invalidateQueries({ queryKey: [k] }),
     );
 }
