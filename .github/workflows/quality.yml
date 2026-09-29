@@ -14,6 +14,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Canonical repository guard
+        shell: bash
+        run: |
+          if [ "$GITHUB_REPOSITORY" != "solarissongcontest/p-iv-n-opas" ]; then
+            echo "::error::This workflow belongs only to solarissongcontest/p-iv-n-opas. Refusing to build from $GITHUB_REPOSITORY."
+            exit 1
+          fi
+
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
