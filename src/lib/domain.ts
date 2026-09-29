@@ -28,13 +28,44 @@ export type PlanStatus = "planned" | "in_progress" | "completed" | "skipped" | "
 export type PlanPhase = "content" | "application" | "practice" | "review" | "light" | "exam";
 
 export const MASTERY_LABELS: Record<number, string> = {
-  0: "Ei opiskeltu",
-  1: "Tunnistan",
-  2: "Ymmärrän mallin",
-  3: "Osaan perustehtävän itsenäisesti",
-  4: "Osaan koetasoisen tehtävän",
-  5: "Osaan soveltaa ja selittää",
+  0: "Ei vielä arvioitu",
+  1: "Harjoittele",
+  2: "Kehittyvä",
+  3: "Melko varma",
+  4: "Vahva",
+  5: "Vahva",
 };
+
+export function masteryEvidence(t: Pick<
+  Topic,
+  "basic_successes" | "exam_successes" | "delayed_successes"
+>): string {
+  const parts: string[] = [];
+  if (t.basic_successes > 0) parts.push(`${t.basic_successes} perustehtävän näyttöä`);
+  if (t.exam_successes > 0) parts.push(`${t.exam_successes} koetason näyttöä`);
+  if (t.delayed_successes > 0) parts.push(`${t.delayed_successes} onnistunutta viivästettyä kertausta`);
+  return parts.length ? parts.join(" · ") : "Ei vielä tarpeeksi näyttöä.";
+}
+
+export function masterySummary(topics: Topic[]) {
+  const groups = {
+    unassessed: topics.filter((t) => t.verified_level === 0),
+    practice: topics.filter((t) => t.verified_level === 1),
+    developing: topics.filter((t) => t.verified_level === 2),
+    fairlySure: topics.filter((t) => t.verified_level === 3),
+    strong: topics.filter((t) => t.verified_level >= 4),
+  };
+  if (!topics.length || groups.unassessed.length === topics.length) {
+    return { label: "Ei vielä arvioitu", ...groups };
+  }
+  const internal = weightedMastery(topics);
+  const label =
+    internal < 30 ? "Harjoittele" :
+    internal < 50 ? "Kehittyvä" :
+    internal < 70 ? "Melko varma" :
+    "Vahva";
+  return { label, ...groups };
+}
 
 export const PHASE_LABELS: Record<PlanPhase, string> = {
   content: "Sisältö",
@@ -331,9 +362,130 @@ export function reviewDebt(topics: Topic[], now = today()) {
   };
 }
 
-export function nextReviewDate(fromISO: string, level: number): string {
-  const gaps = [1, 2, 4, 7, 14, 28];
-  return addDays(fromISO, gaps[Math.max(0, Math.min(5, level))] ?? 1);
+export function recoveryQueue(topics: Topic[], now = today(), limit = 3) {
+  const due = topics
+    .filter((t) => t.verified_level > 0 && !!t.next_review && t.next_review <= now)
+    .map((topic) => ({
+      topic,
+      overdueDays: Math.max(0, diffDays(now, topic.next_review ?? now)),
+      priority:
+        Math.max(0, diffDays(now, topic.next_review ?? now)) * 2 +
+        topic.importance * 3 +
+        (5 - topic.verified_level) * 2,
+    }))
+    .sort((a, b) =>
+      b.priority - a.priority ||
+      (a.topic.next_review ?? "").localeCompare(b.topic.next_review ?? ""),
+    );
+  const items = due.slice(0, Math.max(0, limit)).map((item) => item.topic);
+  return {
+    items,
+    total: due.length,
+    hiddenCount: Math.max(0, due.length - items.length),
+    estimatedMinutes: items.length * 5,
+  };
+}
+
+export function nextReviewDate(
+  fromISO: string,
+  level: number,
+  options: {
+    confidence?: number | null;
+    previousReview?: string | null;
+    delayedSuccess?: boolean;
+    examSuccess?: boolean;
+  } = {},
+): string {
+  const baseGaps = [1, 2, 4, 7, 14, 28];
+  let gap = baseGaps[Math.max(0, Math.min(5, level))] ?? 1;
+  const confidence = options.confidence ?? null;
+
+  if (confidence != null && confidence <= 1) gap = Math.min(gap, 2);
+  else if (confidence === 2) gap = Math.min(gap, 4);
+
+  const elapsed = options.previousReview
+    ? Math.max(1, diffDays(fromISO, options.previousReview))
+    : 0;
+
+  if (options.delayedSuccess && level >= 3) {
+    gap = Math.max(gap, Math.round(Math.max(gap, elapsed) * 1.6));
+  } else if (options.examSuccess && level >= 3) {
+    gap = Math.max(gap, Math.round(gap * 1.25));
+  }
+
+  return addDays(fromISO, Math.max(1, Math.min(60, gap)));
+}
+
+export function findNextStudyDate(input: {
+  plan: Pick<PlanItem, "id" | "date" | "target_minutes" | "status" | "kind">[];
+  fromISO: string;
+  studyWeekdays: number[];
+  minutes: number;
+  ignoreItemId?: string;
+  latestDate?: string | null;
+  maxDailyMinutes?: number;
+}): string | null {
+  const maxDaily = input.maxDailyMinutes ?? 105;
+  const candidates: { date: string; load: number }[] = [];
+
+  for (let offset = 1; offset <= 14; offset += 1) {
+    const date = addDays(input.fromISO, offset);
+    if (input.latestDate && date > input.latestDate) break;
+    const weekday = ((parseISO(date).getDay() + 6) % 7) + 1;
+    if (!input.studyWeekdays.includes(weekday)) continue;
+
+    const load = input.plan
+      .filter(
+        (item) =>
+          item.id !== input.ignoreItemId &&
+          item.date === date &&
+          item.kind !== "exam" &&
+          !["completed", "skipped"].includes(item.status),
+      )
+      .reduce((sum, item) => sum + item.target_minutes, 0);
+
+    candidates.push({ date, load });
+    if (load + input.minutes <= maxDaily) return date;
+  }
+
+  if (!candidates.length) return null;
+  return [...candidates].sort((a, b) => a.load - b.load || a.date.localeCompare(b.date))[0]?.date ?? null;
+}
+
+export function todayTaskReason(input: {
+  item: PlanItem;
+  courses: Course[];
+  topics: Topic[];
+  mistakes: Mistake[];
+  now?: string;
+}): string {
+  const now = input.now ?? today();
+  const course = input.courses.find((candidate) => candidate.id === input.item.course_id);
+  const topic = input.topics.find((candidate) => candidate.id === input.item.topic_id);
+  const reasons: string[] = [];
+
+  if (topic?.next_review && topic.next_review <= now) {
+    reasons.push("kertaus on ajankohtainen");
+  }
+  if (
+    input.mistakes.some(
+      (mistake) =>
+        mistake.course_id === input.item.course_id &&
+        mistake.status !== "mastered" &&
+        (!input.item.topic_id || mistake.topic_id === input.item.topic_id),
+    )
+  ) {
+    reasons.push("aiheessa on avoin virhe korjattavana");
+  }
+  if (course?.exam_date) {
+    const days = diffDays(course.exam_date, now);
+    if (days >= 0 && days <= 14) reasons.push(`koe on ${days === 0 ? "tänään" : `${days} päivän päästä`}`);
+  }
+  if (topic && topic.verified_level <= 2) {
+    reasons.push("osaamisesta tarvitaan vielä lisää näyttöä");
+  }
+
+  return reasons.slice(0, 2).join(" ja ") || "tämä on suunnitelman seuraava tärkeä vaihe";
 }
 
 /** ---------- plan generation ---------- */
