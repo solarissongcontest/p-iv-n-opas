@@ -26,7 +26,9 @@ export type UserPreferences = {
   display_name: string;
   onboarding_completed: boolean;
   study_weekdays: number[];
+  weekday_capacity_min_minutes: number;
   weekday_capacity_minutes: number;
+  weekend_capacity_min_minutes: number;
   weekend_capacity_minutes: number;
   busy_dates: string[];
   notifications_enabled: boolean;
@@ -407,10 +409,17 @@ type RecordPracticeAttemptInput = {
   result: PracticeAttempt["result"];
   confidence?: number | null;
   hint_used?: boolean;
+  hints_used?: number;
+  response_time_ms?: number | null;
+  source?: NonNullable<PracticeAttempt["source"]>;
+  skills?: string[];
+  expected_concepts?: string[];
+  question_payload?: Record<string, unknown>;
 };
 
-async function doRecordPracticeAttempt(payload: unknown) {
+async function doRecordPracticeAttempt(payload: unknown, operationId: string) {
   const input = payload as RecordPracticeAttemptInput;
+  const hintsUsed = Math.max(input.hints_used ?? 0, input.hint_used ? 1 : 0);
   const { data, error } = await untypedSupabase.rpc("record_practice_attempt", {
     p_course_id: input.course_id,
     p_topic_id: input.topic_id,
@@ -421,7 +430,14 @@ async function doRecordPracticeAttempt(payload: unknown) {
     p_difficulty: input.difficulty,
     p_result: input.result,
     p_confidence: input.confidence ?? null,
-    p_hint_used: input.hint_used ?? false,
+    p_hint_used: hintsUsed > 0,
+    p_hints_used: hintsUsed,
+    p_response_time_ms: input.response_time_ms ?? null,
+    p_source: input.source ?? "practice",
+    p_skills: input.skills ?? [],
+    p_expected_concepts: input.expected_concepts ?? [],
+    p_question_payload: input.question_payload ?? {},
+    p_operation_id: operationId,
   });
   if (error) throw error;
   if (!data) throw new Error("Harjoitusyrityksen tallennus ei palauttanut tunnistetta.");
@@ -460,6 +476,29 @@ async function doUpsertPlanItem(payload: unknown, operationId: string) {
 }
 
 
+type CreateMistakeInput = {
+  course_id: string;
+  topic_id: string | null;
+  type?: string | null;
+  error: string;
+  what_happened?: string | null;
+  solution?: string | null;
+  retry_date?: string | null;
+};
+
+async function doCreateMistake(payload: unknown, operationId: string) {
+  const input = payload as CreateMistakeInput;
+  const { error } = await untypedSupabase.from("mistakes").upsert({
+    ...input,
+    id: operationId,
+    owner_id: requireDeviceOwnerId(),
+    explanation: input.solution ?? null,
+    status: "open",
+  }, { onConflict: "id" });
+  if (error) throw error;
+  return operationId;
+}
+
 async function doWeeklyCheckin(payload: unknown) {
   const p = payload as {
     week_start: string;
@@ -482,6 +521,7 @@ async function doWeeklyCheckin(payload: unknown) {
 
 registerOp("logSession", doLogSession);
 registerOp("recordPracticeAttempt", doRecordPracticeAttempt);
+registerOp("createMistake", doCreateMistake);
 registerOp("updatePlanStatus", doUpdatePlanStatus);
 registerOp("movePlanItem", doMovePlanItem);
 registerOp("upsertPlanItem", doUpsertPlanItem);
@@ -727,22 +767,7 @@ export function useCreateExam() {
 export function useCreateMistake() {
   const invalidate = useInvalidateAll();
   return useMutation({
-    mutationFn: async (input: {
-      course_id: string;
-      topic_id: string | null;
-      type?: string | null;
-      error: string;
-      what_happened?: string | null;
-      solution?: string | null;
-      retry_date?: string | null;
-    }) => {
-      const { error } = await untypedSupabase.from("mistakes").insert({
-        ...input,
-        explanation: input.solution ?? null,
-        status: "open",
-      });
-      if (error) throw error;
-    },
+    mutationFn: (input: CreateMistakeInput) => runOrQueue("createMistake", input),
     onSuccess: invalidate,
   });
 }

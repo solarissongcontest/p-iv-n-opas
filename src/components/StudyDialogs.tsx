@@ -74,11 +74,12 @@ export function SessionForm({item,courses,topics,onClose}:{item:PlanItem|null;co
    : "Sulje materiaalit. Kirjoita tärkeimmät asiat, jotka pystyt nyt palauttamaan muistista.";
 
  useEffect(()=>{if(!running)return;const id=window.setInterval(()=>setSeconds(v=>v+1),1000);return()=>window.clearInterval(id);},[running]);
- useEffect(()=>{
-   if(timerMode==="20"&&seconds>=20*60)setRunning(false);
-   if(timerMode==="30"&&seconds>=30*60)setRunning(false);
-   if(timerMode==="custom"&&seconds>=Math.max(1,customMinutes)*60)setRunning(false);
- },[seconds,timerMode,customMinutes]);
+ const timerTargetSeconds =
+   timerMode==="20" ? 20*60 :
+   timerMode==="30" ? 30*60 :
+   timerMode==="custom" ? Math.max(1,customMinutes)*60 :
+   null;
+ const timerReached = timerTargetSeconds != null && seconds >= timerTargetSeconds;
 
  function changeMode(next:boolean){
    setGuided(next);
@@ -159,7 +160,7 @@ export function SessionForm({item,courses,topics,onClose}:{item:PlanItem|null;co
 
      {step===1&&<div className="space-y-4"><div><p className="text-sm font-medium text-primary">Recall warm-up</p><h3 className="mt-1 text-xl font-semibold">Ennen kuin avaat materiaalin</h3><p className="mt-2 text-sm text-muted-foreground">Kirjoita 2–3 asiaa, jotka muistat aiheesta jo nyt. Tyhjäkin kohta on hyödyllinen havainto, ei epäonnistuminen.</p></div><textarea autoFocus rows={6} className={input} value={recall} onChange={e=>setRecall(e.target.value)} placeholder="Mitä muistat ilman muistiinpanoja?"/></div>}
 
-     {step===2&&<div className="space-y-4"><div><p className="text-sm font-medium text-primary">Learn / Practice</p><h3 className="mt-1 text-xl font-semibold">{objective||phaseGoal}</h3><p className="mt-2 text-sm text-muted-foreground">Opiskele, ratkaise tehtäviä ja käytä materiaalia normaalisti. Ajastin on vain apuväline.</p></div>{timerMode!=="none"?<div className="rounded-2xl bg-muted p-5 text-center"><p role="timer" className="text-5xl font-semibold tabular-nums">{timerDisplay}</p><p className="mt-2 text-sm text-muted-foreground">Tavoite {timerMode==="custom"?customMinutes:Number(timerMode)} min</p><button type="button" className={secondary+" mt-4"} onClick={()=>setRunning(v=>!v)}>{running?<><Pause size={17}/>Tauko</>:<><Play size={17}/>Aloita / jatka</>}</button></div>:<label className="block text-sm font-medium">Todellinen kesto minuutteina<input type="number" min="1" max="240" className={input} value={actualMinutes} onChange={e=>setActualMinutes(Number(e.target.value))}/></label>}<label className="block text-sm font-medium">Mitä teit?<textarea rows={3} className={input} value={did} onChange={e=>setDid(e.target.value)} placeholder="Esim. tehtävät 4.12–4.18"/></label></div>}
+     {step===2&&<div className="space-y-4"><div><p className="text-sm font-medium text-primary">Learn / Practice</p><h3 className="mt-1 text-xl font-semibold">{objective||phaseGoal}</h3><p className="mt-2 text-sm text-muted-foreground">Opiskele, ratkaise tehtäviä ja käytä materiaalia normaalisti. Ajastin on vain apuväline.</p></div>{timerMode!=="none"?<div className="rounded-2xl bg-muted p-5 text-center"><p role="timer" className="text-5xl font-semibold tabular-nums">{timerDisplay}</p><p className="mt-2 text-sm text-muted-foreground">Tavoite {timerMode==="custom"?customMinutes:Number(timerMode)} min{timerReached?" · tavoiteaika täynnä, voit jatkaa":""}</p><button type="button" className={secondary+" mt-4"} onClick={()=>setRunning(v=>!v)}>{running?<><Pause size={17}/>Tauko</>:<><Play size={17}/>Aloita / jatka</>}</button></div>:<label className="block text-sm font-medium">Todellinen kesto minuutteina<input type="number" min="1" max="240" className={input} value={actualMinutes} onChange={e=>setActualMinutes(Number(e.target.value))}/></label>}<label className="block text-sm font-medium">Mitä teit?<textarea rows={3} className={input} value={did} onChange={e=>setDid(e.target.value)} placeholder="Esim. tehtävät 4.12–4.18"/></label></div>}
 
      {step===3&&<div className="space-y-4"><div><p className="text-sm font-medium text-primary">Retrieval check</p><h3 className="mt-1 text-xl font-semibold">Sulje materiaali</h3><p className="mt-2 text-sm text-muted-foreground">{retrievalPrompt}</p></div><textarea autoFocus rows={6} className={input} value={retrievalCheck} onChange={e=>setRetrievalCheck(e.target.value)} placeholder="Vastaa muistista…"/><p className="text-xs text-muted-foreground">Älä arvioi vielä fiilistä. Tee ensin yritys, sitten merkitse miten se onnistui.</p></div>}
 
@@ -244,7 +245,7 @@ export function SearchPanel({courses,topics,exams,sessions,onClose,onNavigate,on
  const commandProps={ "data-command-result": true } as const;
  return <Dialog title="Haku ja pikatoiminnot" onClose={onClose}><input autoFocus className={input} aria-label="Hae" placeholder="Hae kurssia, aihetta, sessiota, muistiinpanoa tai koetta…" value={q} onChange={e=>setQ(e.target.value)} onKeyDown={e=>{if(e.key==="ArrowDown"){e.preventDefault();moveFocus(1);}else if(e.key==="ArrowUp"){e.preventDefault();moveFocus(-1);}}}/><div ref={listRef} className="mt-4 max-h-96 space-y-1 overflow-y-auto" onKeyDown={e=>{if(e.key==="ArrowDown"){e.preventDefault();moveFocus(1);}else if(e.key==="ArrowUp"){e.preventDefault();moveFocus(-1);}}}>
  <button {...commandProps} className="block min-h-11 w-full rounded-xl px-3 text-left hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring" onClick={onLog}>+ Kirjaa opiskelu</button>
- {[["today","Tänään"],["plan","Suunnitelma"],["courses","Kurssit"],["exams","Kokeet"],["progress","Kehitys"]].map(([id,label])=><button {...commandProps} key={id} className="block min-h-11 w-full rounded-xl px-3 text-left hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring" onClick={()=>onNavigate(id ?? "today")}>{label}</button>)}
+ {[["today","Tänään"],["plan","Suunnitelma"],["courses","Opinnot"],["practice","Harjoittelu"],["progress","Edistyminen"],["exams","Kokeet"]].map(([id,label])=><button {...commandProps} key={id} className="block min-h-11 w-full rounded-xl px-3 text-left hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring" onClick={()=>onNavigate(id ?? "today")}>{label}</button>)}
  {courses.filter(c=>(c.code+" "+c.name).toLowerCase().includes(normalized)).map(c=><button {...commandProps} key={c.id} className="block min-h-11 w-full rounded-xl px-3 text-left hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring" onClick={()=>onCourse(c.id)}>{c.code} · {c.name}</button>)}
  {normalized&&topics.filter(t=>(t.name+" "+(t.materials??"")).toLowerCase().includes(normalized)).slice(0,8).map(t=><button {...commandProps} key={t.id} className="block min-h-11 w-full rounded-xl px-3 text-left hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring" onClick={()=>onCourse(t.course_id)}>{t.name}</button>)}
  {normalized&&exams.filter(e=>e.name.toLowerCase().includes(normalized)).map(e=><button {...commandProps} key={e.id} className="block min-h-11 w-full rounded-xl px-3 text-left hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring" onClick={()=>onCourse(e.course_id)}>{e.name} · {shortDate(e.date)}</button>)}

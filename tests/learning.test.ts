@@ -193,7 +193,7 @@ test("capacity model distinguishes weekdays, weekends and busy dates", () => {
   };
   assert.equal(capacityForDate(profile, "2026-09-30"), 60);
   assert.equal(capacityForDate(profile, "2026-10-03"), 120);
-  assert.equal(capacityForDate(profile, "2026-10-01"), 30);
+  assert.equal(capacityForDate(profile, "2026-10-01"), 20);
 });
 
 test("capacity-aware rescheduling avoids an overloaded day", () => {

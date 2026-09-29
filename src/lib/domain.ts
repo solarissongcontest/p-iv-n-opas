@@ -6,6 +6,15 @@ export type Topic = Database["public"]["Tables"]["topics"]["Row"] & {
   retrieval_attempts: number;
   retrieval_failures: number;
   mastery_uncertainty: number;
+  mastery_confidence: number;
+  evidence_count: number;
+  strong_evidence_count: number;
+  recall_strength: number;
+  application_strength: number;
+  retention_strength: number;
+  forgetting_risk: number;
+  exam_relevance: number;
+  learning_state_updated_at: string | null;
   last_retrieval_at: string | null;
   last_retrieval_result: "independent" | "hinted" | "not_yet" | null;
   last_retrieval_confidence: number | null;
@@ -45,20 +54,42 @@ export type PracticeAttempt = {
   course_id: string;
   topic_id: string;
   date: string;
-  attempt_type: "free_recall" | "short_answer" | "calculation" | "application" | "recognition";
+  attempt_type:
+    | "free_recall"
+    | "short_answer"
+    | "calculation"
+    | "application"
+    | "multiple_choice"
+    | "explanation"
+    | "ordering"
+    | "error_detection"
+    | "simulation"
+    | "recognition";
   prompt: string;
   response: string | null;
   difficulty: number;
   result: "independent" | "hinted" | "not_yet";
+  outcome?: "correct" | "partial" | "incorrect" | null;
   confidence: number | null;
   hint_used: boolean;
+  hints_used?: number;
+  response_time_ms?: number | null;
+  source?: "practice" | "review" | "study_session" | "exam" | "mistake_repair";
+  evidence_quality?: number;
+  skills?: string[];
+  expected_concepts?: string[];
+  question_payload?: Record<string, unknown>;
+  operation_id?: string | null;
+  schema_version?: number;
   delay_days: number | null;
   created_at: string;
 };
 
 export type CapacityProfile = {
   studyWeekdays: number[];
+  weekdayMinMinutes?: number;
   weekdayMinutes: number;
+  weekendMinMinutes?: number;
   weekendMinutes: number;
   busyDates: string[];
 };
@@ -461,9 +492,17 @@ export function nextReviewDate(
 }
 
 export function capacityForDate(profile: CapacityProfile, iso: string): number {
-  if (profile.busyDates.includes(iso)) return Math.max(15, Math.min(30, profile.weekdayMinutes));
+  if (profile.busyDates.includes(iso)) return Math.max(10, Math.min(20, profile.weekdayMinutes));
   const weekday = ((parseISO(iso).getDay() + 6) % 7) + 1;
   return weekday >= 6 ? profile.weekendMinutes : profile.weekdayMinutes;
+}
+
+function capacityFloorForDate(profile: CapacityProfile, iso: string): number {
+  if (profile.busyDates.includes(iso)) return 10;
+  const weekday = ((parseISO(iso).getDay() + 6) % 7) + 1;
+  return weekday >= 6
+    ? Math.min(profile.weekendMinutes, profile.weekendMinMinutes ?? Math.min(60, profile.weekendMinutes))
+    : Math.min(profile.weekdayMinutes, profile.weekdayMinMinutes ?? Math.min(30, profile.weekdayMinutes));
 }
 
 export function returnFromBreak(input: {
@@ -888,21 +927,57 @@ export function balanceDraftsAgainstPlan(
   }
   const allowedDates = [...new Set(result.filter((d) => d.kind !== "exam").map((d) => d.date))].sort();
 
-  for (const item of result.filter((d) => d.kind !== "exam").sort((a, b) => a.date.localeCompare(b.date))) {
-    const dailyLimit = capacity ? capacityForDate(capacity, item.date) : maxDailyMinutes;
-    const currentLoad = (load.get(item.date) ?? 0) + item.target_minutes;
-    if (currentLoad <= dailyLimit) {
-      load.set(item.date, currentLoad);
+  const phasePriority: Record<PlanPhase, number> = {
+    exam: 99,
+    practice: 5,
+    application: 4,
+    content: 3,
+    review: 2,
+    light: 1,
+  };
+
+  for (const item of result
+    .filter((d) => d.kind !== "exam")
+    .sort((a, b) => a.date.localeCompare(b.date) || phasePriority[a.phase] - phasePriority[b.phase])) {
+    const limit = capacity ? capacityForDate(capacity, item.date) : maxDailyMinutes;
+    const current = load.get(item.date) ?? 0;
+    if (current + item.target_minutes <= limit) {
+      load.set(item.date, current + item.target_minutes);
       continue;
     }
+
+    // 1) Low-priority review work may be shortened to its meaningful minimum.
+    if (item.phase === "review" || item.phase === "light") {
+      const floor = capacity ? capacityFloorForDate(capacity, item.date) : item.min_minutes;
+      const shortened = Math.max(5, Math.min(item.target_minutes, item.min_minutes, floor));
+      if (current + shortened <= limit) {
+        item.target_minutes = shortened;
+        item.extra_minutes = 0;
+        load.set(item.date, current + shortened);
+        continue;
+      }
+    }
+
+    // 2) Move the lower-priority item to the closest realistic study day.
     const candidates = allowedDates
-      .filter((d) => d < item.date)
-      .sort((a, b) => b.localeCompare(a));
-    const better = candidates.find(
-      (d) => (load.get(d) ?? 0) + item.target_minutes <= (capacity ? capacityForDate(capacity, d) : maxDailyMinutes),
-    );
-    if (better) item.date = better;
-    load.set(item.date, (load.get(item.date) ?? 0) + item.target_minutes);
+      .filter((d) => d !== item.date)
+      .sort((a, b) => Math.abs(diffDays(a, item.date)) - Math.abs(diffDays(b, item.date)) || a.localeCompare(b));
+    const better = candidates.find((d) => {
+      const dayLimit = capacity ? capacityForDate(capacity, d) : maxDailyMinutes;
+      return (load.get(d) ?? 0) + item.target_minutes <= dayLimit;
+    });
+    if (better) {
+      item.date = better;
+      load.set(better, (load.get(better) ?? 0) + item.target_minutes);
+      continue;
+    }
+
+    // 3) If there is no full slot, preserve a minimum maintenance review rather than stacking hours.
+    if (item.phase === "review" || item.phase === "light") {
+      item.target_minutes = Math.max(5, item.min_minutes);
+      item.extra_minutes = 0;
+    }
+    load.set(item.date, current + item.target_minutes);
   }
   return result;
 }

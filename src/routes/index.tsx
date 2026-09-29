@@ -247,8 +247,10 @@ function StudyApp({ user }: { user: DeviceUser }) {
   const preferences = preferencesQ.data;
   const capacity = {
     studyWeekdays: preferences?.study_weekdays ?? [1,2,3,4,5],
+    weekdayMinMinutes: preferences?.weekday_capacity_min_minutes ?? 30,
     weekdayMinutes: preferences?.weekday_capacity_minutes ?? 60,
-    weekendMinutes: preferences?.weekend_capacity_minutes ?? 90,
+    weekendMinMinutes: preferences?.weekend_capacity_min_minutes ?? 60,
+    weekendMinutes: preferences?.weekend_capacity_minutes ?? 120,
     busyDates: preferences?.busy_dates ?? [],
   };
   const hasUserData =
@@ -298,12 +300,12 @@ function StudyApp({ user }: { user: DeviceUser }) {
       {error && <div role="alert" className="panel mb-5 p-4"><p className="font-medium">{pending>0?"Kaikkea ei voitu synkata vielä.":"Tietojen lataus tai alustus epäonnistui."}</p>{pending>0&&<p className="mt-1 text-sm text-muted-foreground">Syöttämäsi tiedot ovat tallessa tässä laitteessa ja synkataan yhteyden palattua.</p>}<p className="mt-1 text-sm text-muted-foreground">{String(error)}</p><button className="mt-2 underline" onClick={()=>{setDefaultsReady(false);setDefaultsError(null);void ensureKe04ForCurrentUser().then(()=>Promise.all([coursesQ.refetch(),topicsQ.refetch(),sessionsQ.refetch(),examsQ.refetch(),planQ.refetch(),testsQ.refetch(),attemptsQ.refetch(),mistakesQ.refetch(),preferencesQ.refetch()])).then(()=>setDefaultsReady(true)).catch(err=>{setDefaultsError(err instanceof Error?err.message:"Uudelleenyritys epäonnistui.");setDefaultsReady(true);});}}>Yritä uudelleen</button></div>}
       {busy ? (showSkeleton ? <div className="space-y-4" aria-label="Ladataan"><div className="h-32 animate-pulse rounded-2xl bg-muted"/><div className="h-60 animate-pulse rounded-2xl bg-muted"/></div> : null) :
       courses.length===0 ? <section className="panel p-6"><h2 className="text-xl font-semibold">Aloita ensimmäisestä kurssista</h2><p className="mt-2 text-muted-foreground">Lisää kurssi ja sen aiheet, jotta voit suunnitella ja kirjata opiskelua.</p><button onClick={()=>setAdding(true)} className="mt-5 min-h-11 rounded-xl bg-primary px-4 text-primary-foreground">Lisää kurssi</button></section> :
-      page==="today" ? <TodayView courses={courses} topics={topics} sessions={sessions} exams={exams} plan={plan} tests={testsQ.data??[]} mistakes={mistakesQ.data??[]} capacity={capacity} onStart={setEntry} onGo={go}/> :
+      page==="today" ? <TodayView courses={courses} topics={topics} sessions={sessions} exams={exams} plan={plan} tests={testsQ.data??[]} attempts={attemptsQ.data??[]} mistakes={mistakesQ.data??[]} capacity={capacity} onStart={setEntry} onGo={go}/> :
       page==="plan" ? <PlanView courses={courses} topics={topics} plan={plan} tests={testsQ.data??[]} mistakes={mistakesQ.data??[]} capacity={capacity} onStart={setEntry}/> :
       page==="courses" ? <CourseView courses={courses} topics={topics} sessions={sessions} exams={exams} plan={plan} tests={testsQ.data??[]} mistakes={mistakesQ.data??[]} selected={courseId} onSelect={setCourseId} onAdd={()=>setAdding(true)} onStart={()=>setEntry("manual")}/> :
-      page==="practice" ? <PracticeView courses={courses} topics={topics} attempts={attemptsQ.data??[]}/> :
-      page==="exams" ? <ExamsView courses={courses} topics={topics} exams={exams} tests={testsQ.data??[]} mistakes={mistakesQ.data??[]} sessions={sessions} plan={plan} onCourse={id=>{setCourseId(id);setPage("courses");localStorage.setItem("opk.last-page","courses");}}/> :
-      page==="progress" ? <ProgressView courses={courses} topics={topics} sessions={sessions} plan={plan} exams={exams} onPlan={()=>go("plan")}/> :
+      page==="practice" ? <PracticeView courses={courses} topics={topics} attempts={attemptsQ.data??[]} tests={testsQ.data??[]} mistakes={mistakesQ.data??[]}/> :
+      page==="exams" ? <ExamsView courses={courses} topics={topics} exams={exams} tests={testsQ.data??[]} attempts={attemptsQ.data??[]} mistakes={mistakesQ.data??[]} sessions={sessions} plan={plan} onCourse={id=>{setCourseId(id);setPage("courses");localStorage.setItem("opk.last-page","courses");}}/> :
+      page==="progress" ? <ProgressView courses={courses} topics={topics} attempts={attemptsQ.data??[]} sessions={sessions} plan={plan} exams={exams} onPlan={()=>go("plan")}/> :
       <SettingsView user={user}/>}
     </main>
     <LiquidGlass lensing as="nav" aria-label="Mobiilinavigaatio" className="app-tabbar md:hidden">
