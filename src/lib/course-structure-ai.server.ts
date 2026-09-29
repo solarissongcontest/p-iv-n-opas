@@ -45,9 +45,8 @@ function normalizeWeights(topics: TopicSuggestion[]) {
 
 function localStructure(text: string) {
   const rows = text
-    .split(/?
-/)
-    .map((line) => line.trim().replace(/^[-*•d.)s]+/, ""))
+    .split(/\\r?\\n/)
+    .map((line) => line.trim().replace(/^[-*•\\d.)\\s]+/, ""))
     .filter((line) => line.length >= 3 && line.length <= 140)
     .slice(0, 30);
   const topics = normalizeWeights(rows.map((name) => ({
@@ -58,7 +57,6 @@ function localStructure(text: string) {
   })));
   return { topics, dependencies: [] as DependencySuggestion[] };
 }
-
 function parseGemini(raw: string | undefined) {
   if (!raw) return null;
   try {
@@ -108,7 +106,7 @@ function parseGemini(raw: string | undefined) {
 export async function handleCourseStructure(request: Request): Promise<Response> {
   if (request.method !== "POST") return json({ error: "Menetelmä ei ole sallittu." }, 405);
   try {
-    const token = request.headers.get("authorization")?.replace(/^Bearer\s+/i, "");
+    const token = request.headers.get("authorization")?.replace(/^Bearer\\s+/i, "");
     if (!token) return json({ error: "Kirjautuminen puuttuu." }, 401);
     verifyArthurDeviceToken(token);
   } catch {
