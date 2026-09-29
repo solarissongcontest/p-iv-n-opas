@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Brain, CheckCircle2, Lightbulb, Sparkles } from "lucide-react";
+import { AbittiAnswerEditor, answerHasContent, answerPlainText } from "@/components/AbittiAnswerEditor";
 import { toast } from "sonner";
 import type { Course, Mistake, PracticeAttempt, PracticeTest, Topic } from "@/lib/domain";
 import {
@@ -17,7 +18,8 @@ import {
   practicePathV4,
   type PracticePath,
 } from "@/lib/learning-os-v4";
-import { usePreferences, useRecordPracticeAttempt, useUpdateTopic } from "@/lib/data";
+import { usePreferences, useQuestionBank, useRecordPracticeAttempt, useUpdateTopic } from "@/lib/data";
+import { getDeviceAccessToken } from "@/lib/deviceSession";
 import { addDays, fullDate, today } from "@/lib/fi";
 import {
   evaluatePracticeResponse,
@@ -85,6 +87,8 @@ export function PracticeView({
   const [topicId, setTopicId] = useState("");
   const [attemptIndex, setAttemptIndex] = useState(0);
   const [response, setResponse] = useState("");
+  const [selectedOption, setSelectedOption] = useState("");
+  const [generatingQuestions, setGeneratingQuestions] = useState(false);
   const [hintLevel, setHintLevel] = useState(0);
   const [confidence, setConfidence] = useState<number | null>(null);
   const [feedback, setFeedback] = useState("");
@@ -95,6 +99,7 @@ export function PracticeView({
   const record = useRecordPracticeAttempt();
   const updateTopic = useUpdateTopic();
   const preferences = usePreferences();
+  const questionBank = useQuestionBank();
   const experimentsEnabled = preferences.data?.personal_experiments_enabled ?? true;
 
   const course = courses.find((candidate) => candidate.id === courseId) ?? null;
@@ -181,8 +186,9 @@ export function PracticeView({
             index: attemptIndex,
             preferredTypes,
             interleaveMode,
+            questionBank: questionBank.data ?? [],
           }),
-    [attemptIndex, attempts, course, courseTopics, diagnosticDone, effectiveTopicId, interleaveMode, preferredTypes, stage.key],
+    [attemptIndex, attempts, course, courseTopics, diagnosticDone, effectiveTopicId, interleaveMode, preferredTypes, questionBank.data, stage.key],
   );
 
   const recovery = buildRecoveryQueue({
@@ -201,6 +207,7 @@ export function PracticeView({
   useEffect(() => {
     startedAt.current = Date.now();
     setResponse("");
+    setSelectedOption("");
     setHintLevel(0);
     setConfidence(null);
     setFeedback("");
@@ -208,12 +215,30 @@ export function PracticeView({
     setShowExplanation(false);
   }, [selection?.question.id, selection?.topic.id]);
 
-  async function save(result: PracticeAttempt["result"]) {
-    if (!selection) return;
-    if (result !== "not_yet" && response.trim().length < 2) {
+  async function save(requestedResult: PracticeAttempt["result"]) {
+    if (!selection || feedback) return;
+    const isMultipleChoice =
+      selection.question.type === "multiple_choice" &&
+      Boolean(selection.question.options?.length);
+    if (isMultipleChoice && !selectedOption) {
+      toast.error("Valitse ensin vaihtoehto.");
+      return;
+    }
+    if (!isMultipleChoice && requestedResult !== "not_yet" && !answerHasContent(response)) {
       toast.error("Kirjoita ensin oma yrityksesi.");
       return;
     }
+
+    const autoResult: PracticeAttempt["result"] =
+      isMultipleChoice && selection.question.correctAnswer
+        ? selectedOption === selection.question.correctAnswer
+          ? hintLevel > 0 ? "hinted" : "independent"
+          : "not_yet"
+        : requestedResult;
+    const storedResponse = [
+      selectedOption ? "Valinta: " + selectedOption : "",
+      answerHasContent(response) ? response.trim() : "",
+    ].filter(Boolean).join("\n");
 
     const responseTime = Math.max(0, Date.now() - startedAt.current);
     const source = recovery.items.some((item) => item.topic.id === selection.topic.id)
@@ -228,9 +253,9 @@ export function PracticeView({
         topic_id: selection.topic.id,
         attempt_type: selection.question.type,
         prompt: selection.question.prompt,
-        response: response.trim() || null,
+        response: storedResponse || null,
         difficulty: selection.question.difficulty,
-        result,
+        result: autoResult,
         confidence,
         hint_used: hintLevel > 0,
         hints_used: hintLevel,
@@ -240,6 +265,11 @@ export function PracticeView({
         expected_concepts: selection.question.expectedConcepts,
         question_payload: {
           explanation: selection.question.explanation,
+          questionBankId: selection.question.bankId ?? null,
+          questionSource: selection.question.source ?? "template",
+          curriculum: "LOPS21",
+          answerContentFormat: "abitti-rich-text",
+          selectedOption: selectedOption || null,
           interleaved: selection.interleaved,
           examStage: stage.key,
           scaffoldStage: activePath?.stage ?? "independent",
@@ -264,7 +294,7 @@ export function PracticeView({
         },
       });
 
-      if (experimentsEnabled && spacingVariant && result === "independent") {
+      if (experimentsEnabled && spacingVariant && autoResult === "independent") {
         const days = spacingVariant === "A" ? 3 : 5;
         await updateTopic.mutateAsync({
           id: selection.topic.id,
@@ -273,16 +303,55 @@ export function PracticeView({
         } as Parameters<typeof updateTopic.mutateAsync>[0]);
       }
 
+      const answerReveal =
+        isMultipleChoice && selection.question.correctAnswer
+          ? " Oikea vastaus: " + selection.question.correctAnswer + "."
+          : "";
       setFeedback(
-        result === "independent"
-          ? `Hyvä itsenäinen näyttö. ${selection.question.explanation}`
-          : result === "hinted"
-            ? `Vihje auttoi, joten näyttö painaa vähemmän masteryssa. ${selection.question.explanation}`
-            : `Tämä tarvitsee uuden kierroksen pian. ${selection.question.explanation}`,
+        autoResult === "independent"
+          ? `Hyvä itsenäinen näyttö.${answerReveal} ${selection.question.explanation}`
+          : autoResult === "hinted"
+            ? `Vihje auttoi, joten näyttö painaa vähemmän masteryssa.${answerReveal} ${selection.question.explanation}`
+            : `Tämä tarvitsee uuden kierroksen pian.${answerReveal} ${selection.question.explanation}`,
       );
-      setAttemptIndex((value) => value + 1);
     } catch {
       toast.error("Harjoitusyritystä ei voitu tallentaa.");
+    }
+  }
+
+  async function generateQuestionBatch() {
+    if (!courseId) return;
+    const token = getDeviceAccessToken();
+    if (!token) {
+      toast.error("Kirjautuminen on vanhentunut. Avaa sovellus uudelleen.");
+      return;
+    }
+    setGeneratingQuestions(true);
+    try {
+      const response = await fetch("/api/ai/questions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + token,
+        },
+        body: JSON.stringify({
+          courseId,
+          topicId: topicId || undefined,
+          count: 8,
+        }),
+      });
+      const payload = await response.json().catch(() => ({})) as {
+        created?: number;
+        error?: string;
+      };
+      if (!response.ok) throw new Error(payload.error ?? "Tehtävien luonti epäonnistui.");
+      await questionBank.refetch();
+      setAttemptIndex(0);
+      toast.success((payload.created ?? 0) + " LOPS21-tehtävää lisättiin tehtäväpankkiin.");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Tehtävien luonti epäonnistui.");
+    } finally {
+      setGeneratingQuestions(false);
     }
   }
 
@@ -292,6 +361,19 @@ export function PracticeView({
         title="Practice Mode"
         action={
           <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              className={secondary}
+              disabled={generatingQuestions || !courseId}
+              onClick={() => void generateQuestionBatch()}
+              title="Luo valittuun aiheeseen kahdeksan LOPS21-rajattua tehtävää"
+            >
+              <Sparkles size={16} />
+              {generatingQuestions ? "Luodaan…" : "Luo tehtäviä"}
+            </button>
+            <span className="text-xs text-muted-foreground">
+              Pankissa {(questionBank.data ?? []).filter((item) => item.course_id === courseId).length}
+            </span>
             <button
               type="button"
               className={diagnosticMode ? primary : secondary}
@@ -377,6 +459,7 @@ export function PracticeView({
                 <span>{activePath?.label ?? typeLabel[selection.question.type]}</span>
                 <span>· {typeLabel[selection.question.type]}</span>
                 <span>· vaikeus {selection.question.difficulty}/5</span>
+                <span>· {selection.question.source === "bank" ? "LOPS21-tehtäväpankki" : "fallback"}</span>
                 {selection.interleaved && <span>· interleaved</span>}
               </div>
               <p className="mt-2 text-xs text-muted-foreground">
@@ -389,19 +472,43 @@ export function PracticeView({
               </p>
             </div>
 
-            <label className="block text-sm font-medium">
-              Oma vastaus / ratkaisutapa
-              <textarea
-                rows={5}
-                className="mt-1 w-full rounded-xl border bg-surface p-3"
-                value={response}
-                onChange={(event) => {
-                  setResponse(event.target.value);
-                  setRubricEvaluation(null);
-                }}
-                placeholder="Kirjoita muistista ennen materiaalin avaamista…"
-              />
-            </label>
+            {selection.question.options?.length ? (
+              <fieldset className="space-y-2">
+                <legend className="text-sm font-medium">Valitse vastaus</legend>
+                {selection.question.options.map((option, index) => (
+                  <button
+                    key={option}
+                    type="button"
+                    disabled={Boolean(feedback)}
+                    aria-pressed={selectedOption === option}
+                    onClick={() => {
+                      setSelectedOption(option);
+                      setRubricEvaluation(null);
+                    }}
+                    className={
+                      "flex min-h-12 w-full items-start gap-3 rounded-xl border p-3 text-left " +
+                      (selectedOption === option ? "border-primary bg-accent" : "border-border bg-surface")
+                    }
+                  >
+                    <span className="font-semibold">{String.fromCharCode(65 + index)}.</span>
+                    <span>{option}</span>
+                  </button>
+                ))}
+              </fieldset>
+            ) : null}
+
+            <AbittiAnswerEditor
+              key={selection.question.id}
+              label={selection.question.options?.length ? "Perustelu / ratkaisutapa" : "Oma vastaus / ratkaisutapa"}
+              value={response}
+              disabled={Boolean(feedback)}
+              onChange={(next) => {
+                setResponse(next);
+                setRubricEvaluation(null);
+              }}
+              placeholder="Kirjoita muistista ennen materiaalin avaamista…"
+              minHeight={160}
+            />
 
             <div className="flex flex-wrap items-center gap-2">
               <button
@@ -465,11 +572,11 @@ export function PracticeView({
                 <button
                   type="button"
                   className={secondary}
-                  disabled={response.trim().length < 2}
+                  disabled={!answerHasContent(response)}
                   onClick={() => {
                     if (!selection) return;
                     setRubricEvaluation(
-                      evaluatePracticeResponse(selection.question, response),
+                      evaluatePracticeResponse(selection.question, answerPlainText(response)),
                     );
                   }}
                 >
@@ -517,19 +624,32 @@ export function PracticeView({
             </div>
 
             <div>
-              <p className="mb-2 text-sm font-medium">Miten yritys onnistui?</p>
-              <div className="grid gap-2 sm:grid-cols-3">
-                <button disabled={record.isPending} className={primary} onClick={() => void save("independent")}>
+              <p className="mb-2 text-sm font-medium">
+                {selection.question.options?.length ? "Tarkista vastaus" : "Miten yritys onnistui?"}
+              </p>
+              {selection.question.options?.length ? (
+                <button
+                  disabled={record.isPending || Boolean(feedback) || !selectedOption}
+                  className={primary}
+                  onClick={() => void save("independent")}
+                >
                   <CheckCircle2 size={17} />
-                  Itsenäisesti
+                  Tarkista ja tallenna
                 </button>
-                <button disabled={record.isPending} className={secondary} onClick={() => void save("hinted")}>
-                  Vihjeellä / osittain
-                </button>
-                <button disabled={record.isPending} className={secondary} onClick={() => void save("not_yet")}>
-                  Ei vielä
-                </button>
-              </div>
+              ) : (
+                <div className="grid gap-2 sm:grid-cols-3">
+                  <button disabled={record.isPending || Boolean(feedback)} className={primary} onClick={() => void save("independent")}>
+                    <CheckCircle2 size={17} />
+                    Itsenäisesti
+                  </button>
+                  <button disabled={record.isPending || Boolean(feedback)} className={secondary} onClick={() => void save("hinted")}>
+                    Vihjeellä / osittain
+                  </button>
+                  <button disabled={record.isPending || Boolean(feedback)} className={secondary} onClick={() => void save("not_yet")}>
+                    Ei vielä
+                  </button>
+                </div>
+              )}
             </div>
 
             {feedback && (
@@ -541,6 +661,13 @@ export function PracticeView({
                     {showExplanation ? "Piilota selitys" : "Vihjetaso 5 · näytä täysi selitys"}
                   </button>
                   {showExplanation && <p className="mt-2 rounded-lg bg-surface/70 p-3">{selection.question.explanation}</p>}
+                  <button
+                    type="button"
+                    className={primary + " mt-3 !min-h-9"}
+                    onClick={() => setAttemptIndex((value) => value + 1)}
+                  >
+                    Seuraava tehtävä
+                  </button>
                 </div>
               </div>
             )}

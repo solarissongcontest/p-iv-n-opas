@@ -113,6 +113,31 @@ export type PracticeAttempt = {
   created_at: string;
 };
 
+export type QuestionBankItem = {
+  id: string;
+  owner_id: string;
+  course_id: string;
+  topic_id: string | null;
+  curriculum: "LOPS21";
+  module_code: string;
+  question_type: PracticeAttempt["attempt_type"];
+  prompt: string;
+  options: string[];
+  correct_answer: string | null;
+  explanation: string;
+  hints: string[];
+  skills: string[];
+  expected_concepts: string[];
+  difficulty: number;
+  estimated_seconds: number | null;
+  status: "draft" | "validated" | "active" | "retired";
+  source_type: "manual" | "ai" | "material" | "seed";
+  source_ref: string | null;
+  metadata: Record<string, unknown>;
+  created_at: string;
+  updated_at: string;
+};
+
 export type CapacityProfile = {
   studyWeekdays: number[];
   weekdayMinMinutes?: number;

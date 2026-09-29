@@ -5,6 +5,7 @@ import type {
   PlanItem,
   PracticeAttempt,
   PracticeTest,
+  QuestionBankItem,
   Session,
   Topic,
 } from "./domain.ts";
@@ -72,6 +73,10 @@ export type PracticeQuestion = {
   skills: string[];
   expectedConcepts: string[];
   explanation: string;
+  options?: string[];
+  correctAnswer?: string | null;
+  source?: "bank" | "template";
+  bankId?: string;
 };
 
 export type RecoveryItem = {
@@ -505,6 +510,56 @@ function questionTemplate(topic: Topic, type: LearningAttemptType, difficulty: n
   };
 }
 
+function bankQuestion(item: QuestionBankItem): PracticeQuestion {
+  return {
+    id: "bank:" + item.id,
+    topicId: item.topic_id ?? "",
+    type: item.question_type as LearningAttemptType,
+    difficulty: Math.max(1, Math.min(5, Number(item.difficulty || 2))) as PracticeQuestion["difficulty"],
+    prompt: item.prompt,
+    hints: Array.isArray(item.hints) && item.hints.length ? item.hints : genericHints[item.question_type as LearningAttemptType],
+    skills: Array.isArray(item.skills) ? item.skills : [],
+    expectedConcepts: Array.isArray(item.expected_concepts) ? item.expected_concepts : [],
+    explanation: item.explanation,
+    options: Array.isArray(item.options) ? item.options : [],
+    correctAnswer: item.correct_answer,
+    source: "bank",
+    bankId: item.id,
+  };
+}
+
+function selectBankQuestion(input: {
+  bank: QuestionBankItem[];
+  topicId: string;
+  types: LearningAttemptType[];
+  targetDifficulty: number;
+  attempts: PracticeAttempt[];
+  index: number;
+}) {
+  const recentlyUsed = new Set(
+    input.attempts
+      .slice(0, 20)
+      .map((attempt) => String(attempt.question_payload?.["questionBankId"] ?? ""))
+      .filter(Boolean),
+  );
+  const candidates = input.bank
+    .filter((item) =>
+      item.curriculum === "LOPS21" &&
+      item.topic_id === input.topicId &&
+      (item.status === "active" || item.status === "validated") &&
+      input.types.includes(item.question_type as LearningAttemptType)
+    )
+    .sort((a, b) => {
+      const aRecent = recentlyUsed.has(a.id) ? 1 : 0;
+      const bRecent = recentlyUsed.has(b.id) ? 1 : 0;
+      const aDistance = Math.abs(Number(a.difficulty) - input.targetDifficulty);
+      const bDistance = Math.abs(Number(b.difficulty) - input.targetDifficulty);
+      return aRecent - bRecent || aDistance - bDistance || a.created_at.localeCompare(b.created_at);
+    });
+  if (!candidates.length) return null;
+  return bankQuestion(candidates[input.index % candidates.length]!);
+}
+
 function desiredTypes(state: TopicLearningState, examStage?: ExamStageKey): LearningAttemptType[] {
   if (examStage === "retrieval") return ["free_recall", "short_answer", "explanation"];
   if (examStage === "mixed") return ["recognition", "calculation", "short_answer", "error_detection"];
@@ -526,6 +581,7 @@ export function selectPracticeQuestion(input: {
   index?: number;
   preferredTypes?: LearningAttemptType[];
   interleaveMode?: "auto" | "blocked" | "interleaved";
+  questionBank?: QuestionBankItem[];
 }): { topic: Topic; state: TopicLearningState; question: PracticeQuestion; interleaved: boolean } | null {
   if (!input.topics.length) return null;
   const now = today();
@@ -569,7 +625,20 @@ export function selectPracticeQuestion(input: {
     row.state.masteryLevel === 2 ? 2 :
     row.state.masteryLevel === 3 ? 3 :
     row.state.masteryLevel === 4 ? 4 : 5;
-  return { topic: row.topic, state: row.state, question: questionTemplate(row.topic, type, difficulty), interleaved };
+  const bank = selectBankQuestion({
+    bank: input.questionBank ?? [],
+    topicId: row.topic.id,
+    types,
+    targetDifficulty: difficulty,
+    attempts: input.attempts,
+    index: input.index ?? 0,
+  });
+  return {
+    topic: row.topic,
+    state: row.state,
+    question: bank ?? { ...questionTemplate(row.topic, type, difficulty), source: "template" },
+    interleaved,
+  };
 }
 
 export function hintAt(question: PracticeQuestion, level: number) {
