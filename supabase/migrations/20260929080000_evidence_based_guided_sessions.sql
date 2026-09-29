@@ -7,7 +7,8 @@ alter table public.study_sessions
   add column if not exists recall text,
   add column if not exists retrieval_check text,
   add column if not exists retrieval_result text,
-  add column if not exists retrieval_confidence smallint;
+  add column if not exists retrieval_confidence smallint,
+  add column if not exists outcome text;
 
 alter table public.topics
   add column if not exists last_retrieval_result text,
@@ -19,7 +20,10 @@ alter table public.study_sessions
     check (retrieval_result is null or retrieval_result in ('independent','hinted','not_yet')),
   drop constraint if exists study_sessions_retrieval_confidence_check,
   add constraint study_sessions_retrieval_confidence_check
-    check (retrieval_confidence is null or retrieval_confidence between 1 and 3);
+    check (retrieval_confidence is null or retrieval_confidence between 1 and 3),
+  drop constraint if exists study_sessions_outcome_check,
+  add constraint study_sessions_outcome_check
+    check (outcome is null or outcome in ('yes','partial','not_yet'));
 
 alter table public.topics
   drop constraint if exists topics_last_retrieval_result_check,
@@ -278,7 +282,8 @@ create or replace function public.log_guided_study_session(
   p_recall text,
   p_retrieval_check text,
   p_retrieval_result text,
-  p_retrieval_confidence integer
+  p_retrieval_confidence integer,
+  p_outcome text
 )
 returns uuid
 language plpgsql
@@ -315,6 +320,15 @@ begin
      and (p_retrieval_confidence < 1 or p_retrieval_confidence > 3) then
     raise exception 'retrieval_confidence must be between 1 and 3' using errcode = '22023';
   end if;
+  if p_outcome not in ('yes','partial','not_yet') then
+    raise exception 'invalid outcome' using errcode = '22023';
+  end if;
+  if char_length(trim(coalesce(p_objective, ''))) < 3 then
+    raise exception 'objective is required' using errcode = '22023';
+  end if;
+  if char_length(trim(coalesce(p_retrieval_check, ''))) < 3 then
+    raise exception 'retrieval_check is required' using errcode = '22023';
+  end if;
 
   perform 1
   from public.courses
@@ -332,13 +346,13 @@ begin
     owner_id, request_id, course_id, topic_id, date, minutes,
     planned_minutes, kind, competence, unclear, did, focus,
     method, energy, tasks, note, objective, recall, retrieval_check,
-    retrieval_result, retrieval_confidence
+    retrieval_result, retrieval_confidence, outcome
   )
   values (
     v_owner, p_request_id, p_course_id, p_topic_id, p_date, p_minutes,
     p_planned_minutes, p_kind, p_competence, p_unclear, p_did, p_focus,
     p_method, p_energy, p_tasks, p_note, p_objective, p_recall, p_retrieval_check,
-    p_retrieval_result, p_retrieval_confidence
+    p_retrieval_result, p_retrieval_confidence, p_outcome
   )
   on conflict (owner_id, request_id) do nothing
   returning id into v_session_id;
@@ -423,10 +437,10 @@ $$;
 revoke all on function public.log_guided_study_session(
   uuid, uuid, uuid, date, integer, integer, text, integer,
   text, text, integer, text, integer, text, text, uuid,
-  text, text, text, text, integer
+  text, text, text, text, integer, text
 ) from public;
 grant execute on function public.log_guided_study_session(
   uuid, uuid, uuid, date, integer, integer, text, integer,
   text, text, integer, text, integer, text, text, uuid,
-  text, text, text, text, integer
+  text, text, text, text, integer, text
 ) to authenticated;
