@@ -314,6 +314,72 @@ export type Database = {
           },
         ]
       }
+      practice_attempts: {
+        Row: {
+          attempt_type: string
+          confidence: number | null
+          course_id: string
+          created_at: string
+          date: string
+          delay_days: number | null
+          difficulty: number
+          hint_used: boolean
+          id: string
+          owner_id: string
+          prompt: string
+          response: string | null
+          result: string
+          topic_id: string
+        }
+        Insert: {
+          attempt_type?: string
+          confidence?: number | null
+          course_id: string
+          created_at?: string
+          date?: string
+          delay_days?: number | null
+          difficulty?: number
+          hint_used?: boolean
+          id?: string
+          owner_id?: string
+          prompt: string
+          response?: string | null
+          result: string
+          topic_id: string
+        }
+        Update: {
+          attempt_type?: string
+          confidence?: number | null
+          course_id?: string
+          created_at?: string
+          date?: string
+          delay_days?: number | null
+          difficulty?: number
+          hint_used?: boolean
+          id?: string
+          owner_id?: string
+          prompt?: string
+          response?: string | null
+          result?: string
+          topic_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "practice_attempts_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "practice_attempts_topic_id_fkey"
+            columns: ["topic_id"]
+            isOneToOne: false
+            referencedRelation: "topics"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       practice_tests: {
         Row: {
           course_id: string
@@ -582,15 +648,20 @@ export type Database = {
           exam_successes: number
           id: string
           importance: number
+          last_retrieval_at: string | null
           last_retrieval_confidence: number | null
+          last_retrieval_difficulty: number | null
           last_retrieval_result: string | null
           last_review: string | null
+          mastery_uncertainty: number
           materials: string | null
           name: string
           next_review: string | null
           owner_id: string | null
           position: number
           progress: number
+          retrieval_attempts: number
+          retrieval_failures: number
           school_covered: boolean
           self_level: number
           study_minutes: number
@@ -607,15 +678,20 @@ export type Database = {
           exam_successes?: number
           id?: string
           importance?: number
+          last_retrieval_at?: string | null
           last_retrieval_confidence?: number | null
+          last_retrieval_difficulty?: number | null
           last_retrieval_result?: string | null
           last_review?: string | null
+          mastery_uncertainty?: number
           materials?: string | null
           name: string
           next_review?: string | null
           owner_id?: string | null
           position?: number
           progress?: number
+          retrieval_attempts?: number
+          retrieval_failures?: number
           school_covered?: boolean
           self_level?: number
           study_minutes?: number
@@ -632,15 +708,20 @@ export type Database = {
           exam_successes?: number
           id?: string
           importance?: number
+          last_retrieval_at?: string | null
           last_retrieval_confidence?: number | null
+          last_retrieval_difficulty?: number | null
           last_retrieval_result?: string | null
           last_review?: string | null
+          mastery_uncertainty?: number
           materials?: string | null
           name?: string
           next_review?: string | null
           owner_id?: string | null
           position?: number
           progress?: number
+          retrieval_attempts?: number
+          retrieval_failures?: number
           school_covered?: boolean
           self_level?: number
           study_minutes?: number
@@ -660,6 +741,7 @@ export type Database = {
       }
       user_preferences: {
         Row: {
+          busy_dates: string[]
           created_at: string
           display_name: string
           notifications_enabled: boolean
@@ -668,8 +750,11 @@ export type Database = {
           study_weekdays: number[]
           timezone: string
           updated_at: string
+          weekday_capacity_minutes: number
+          weekend_capacity_minutes: number
         }
         Insert: {
+          busy_dates?: string[]
           created_at?: string
           display_name?: string
           notifications_enabled?: boolean
@@ -678,8 +763,11 @@ export type Database = {
           study_weekdays?: number[]
           timezone?: string
           updated_at?: string
+          weekday_capacity_minutes?: number
+          weekend_capacity_minutes?: number
         }
         Update: {
+          busy_dates?: string[]
           created_at?: string
           display_name?: string
           notifications_enabled?: boolean
@@ -688,6 +776,8 @@ export type Database = {
           study_weekdays?: number[]
           timezone?: string
           updated_at?: string
+          weekday_capacity_minutes?: number
+          weekend_capacity_minutes?: number
         }
         Relationships: []
       }
@@ -795,6 +885,21 @@ export type Database = {
           p_tasks: string
           p_topic_id: string
           p_unclear: string
+        }
+        Returns: string
+      }
+      record_practice_attempt: {
+        Args: {
+          p_attempt_type: string
+          p_confidence: number
+          p_course_id: string
+          p_date: string
+          p_difficulty: number
+          p_hint_used: boolean
+          p_prompt: string
+          p_response: string
+          p_result: string
+          p_topic_id: string
         }
         Returns: string
       }
