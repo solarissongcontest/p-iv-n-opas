@@ -327,12 +327,17 @@ export type LogSessionInput = {
   note?: string | null;
   plan_item_id?: string | null;
   date?: string;
+  objective?: string | null;
+  recall?: string | null;
+  retrieval_check?: string | null;
+  retrieval_result?: "independent" | "hinted" | "not_yet" | null;
+  retrieval_confidence?: number | null;
 };
 
 async function doLogSession(payload: unknown, operationId: string) {
   const input = payload as LogSessionInput;
   const date = input.date ?? today();
-  const { data: sessionId, error } = await supabase.rpc("log_study_session", {
+  const common = {
     p_request_id: operationId,
     p_course_id: input.course_id,
     p_topic_id: input.topic_id,
@@ -349,7 +354,20 @@ async function doLogSession(payload: unknown, operationId: string) {
     p_tasks: input.tasks ?? null,
     p_note: input.note ?? null,
     p_plan_item_id: input.plan_item_id ?? null,
-  });
+  };
+
+  const result = input.retrieval_result
+    ? await untypedSupabase.rpc("log_guided_study_session", {
+        ...common,
+        p_objective: input.objective ?? null,
+        p_recall: input.recall ?? null,
+        p_retrieval_check: input.retrieval_check ?? null,
+        p_retrieval_result: input.retrieval_result,
+        p_retrieval_confidence: input.retrieval_confidence ?? null,
+      })
+    : await supabase.rpc("log_study_session", common);
+
+  const { data: sessionId, error } = result;
   if (error) throw error;
   if (!sessionId) throw new Error("Opiskelusession tallennus ei palauttanut tunnistetta.");
   return sessionId;
