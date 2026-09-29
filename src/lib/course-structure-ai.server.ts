@@ -108,7 +108,7 @@ function parseGemini(raw: string | undefined) {
 export async function handleCourseStructure(request: Request): Promise<Response> {
   if (request.method !== "POST") return json({ error: "Menetelmä ei ole sallittu." }, 405);
   try {
-    const token = request.headers.get("authorization")?.replace(/^Bearers+/i, "");
+    const token = request.headers.get("authorization")?.replace(/^Bearer\s+/i, "");
     if (!token) return json({ error: "Kirjautuminen puuttuu." }, 401);
     verifyArthurDeviceToken(token);
   } catch {
