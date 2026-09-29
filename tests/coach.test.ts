@@ -299,9 +299,11 @@ test("Gemini provider fails closed and never passes provider prose through", asy
 
   let requestUrl = "";
   let requestHeaders: HeadersInit | undefined;
+  let requestBody = "";
   const validProvider = new GeminiCoachProvider(async (url, init) => {
     requestUrl = String(url);
     requestHeaders = init?.headers;
+    requestBody = String(init?.body ?? "");
     return Response.json({
       candidates: [
         {
@@ -316,8 +318,30 @@ test("Gemini provider fails closed and never passes provider prose through", asy
   assert.equal(validResult.source, "gemini");
   assert.equal(validResult.status, "ready");
   assert.match(requestUrl, /generativelanguage\.googleapis\.com/);
-  assert.match(requestUrl, /gemini-3\.7-flash:generateContent$/);
+  assert.match(requestUrl, /gemini-3\.8-flash:generateContent$/);
   assert.equal(new Headers(requestHeaders).get("x-goog-api-key"), "test-only");
+
+  const geminiRequest = JSON.parse(requestBody) as {
+    generationConfig?: {
+      responseMimeType?: string;
+      responseJsonSchema?: {
+        additionalProperties?: boolean;
+        properties?: { tactic?: { enum?: string[] } };
+      };
+    };
+  };
+  assert.equal(
+    geminiRequest.generationConfig?.responseMimeType,
+    "application/json",
+  );
+  assert.equal(
+    geminiRequest.generationConfig?.responseJsonSchema?.additionalProperties,
+    false,
+  );
+  assert.deepEqual(
+    geminiRequest.generationConfig?.responseJsonSchema?.properties?.tactic?.enum,
+    [...COACH_TACTICS],
+  );
 
   const failure = await new GeminiCoachProvider(async () => {
     throw new Error("timeout");
