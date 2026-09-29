@@ -9,6 +9,7 @@ import {
   type PlanDraft,
   type PlanItem,
   type PracticeTest,
+  type PracticeAttempt,
   type Session,
   type Topic,
   type WeeklyCheckin,
@@ -24,6 +25,9 @@ export type UserPreferences = {
   display_name: string;
   onboarding_completed: boolean;
   study_weekdays: number[];
+  weekday_capacity_minutes: number;
+  weekend_capacity_minutes: number;
+  busy_dates: string[];
   notifications_enabled: boolean;
   timezone: string;
   created_at: string;
@@ -88,6 +92,17 @@ async function listTests(): Promise<PracticeTest[]> {
 }
 
 
+async function listPracticeAttempts(): Promise<PracticeAttempt[]> {
+  const { data, error } = await untypedSupabase
+    .from("practice_attempts")
+    .select("*")
+    .order("created_at", { ascending: false })
+    .limit(500);
+  if (error) throw error;
+  return (data ?? []) as PracticeAttempt[];
+}
+
+
 async function listWeeklyCheckins(): Promise<WeeklyCheckin[]> {
   const { data, error } = await supabase
     .from("weekly_checkins")
@@ -130,6 +145,8 @@ export const useExams = () => useQuery({ queryKey: ["exams"], queryFn: listExams
 export const usePlan = () => useQuery({ queryKey: ["plan"], queryFn: listPlan });
 export const useMistakes = () => useQuery({ queryKey: ["mistakes"], queryFn: listMistakes });
 export const useTests = () => useQuery({ queryKey: ["tests"], queryFn: listTests });
+export const usePracticeAttempts = () =>
+  useQuery({ queryKey: ["practice-attempts"], queryFn: listPracticeAttempts });
 export const useSettings = () => useQuery({ queryKey: ["settings"], queryFn: getSettings });
 export const usePreferences = () =>
   useQuery({ queryKey: ["preferences"], queryFn: getPreferences });
@@ -299,6 +316,9 @@ export async function ensureKe04ForCurrentUser(): Promise<string> {
       owner_id: ownerId,
       display_name: "Arthur",
       study_weekdays: [1, 2, 3, 4, 5],
+      weekday_capacity_minutes: 60,
+      weekend_capacity_minutes: 90,
+      busy_dates: [],
       notifications_enabled: false,
       timezone: "Europe/Helsinki",
       onboarding_completed: false,
@@ -375,6 +395,38 @@ async function doLogSession(payload: unknown, operationId: string) {
   return sessionId;
 }
 
+type RecordPracticeAttemptInput = {
+  course_id: string;
+  topic_id: string;
+  date?: string;
+  attempt_type: PracticeAttempt["attempt_type"];
+  prompt: string;
+  response?: string | null;
+  difficulty: number;
+  result: PracticeAttempt["result"];
+  confidence?: number | null;
+  hint_used?: boolean;
+};
+
+async function doRecordPracticeAttempt(payload: unknown) {
+  const input = payload as RecordPracticeAttemptInput;
+  const { data, error } = await untypedSupabase.rpc("record_practice_attempt", {
+    p_course_id: input.course_id,
+    p_topic_id: input.topic_id,
+    p_date: input.date ?? today(),
+    p_attempt_type: input.attempt_type,
+    p_prompt: input.prompt,
+    p_response: input.response ?? null,
+    p_difficulty: input.difficulty,
+    p_result: input.result,
+    p_confidence: input.confidence ?? null,
+    p_hint_used: input.hint_used ?? false,
+  });
+  if (error) throw error;
+  if (!data) throw new Error("Harjoitusyrityksen tallennus ei palauttanut tunnistetta.");
+  return data as string;
+}
+
 async function doUpdatePlanStatus(payload: unknown) {
   const p = payload as { id: string; status: string };
   const { error } = await supabase.from("plan_items").update({ status: p.status }).eq("id", p.id);
@@ -428,6 +480,7 @@ async function doWeeklyCheckin(payload: unknown) {
 }
 
 registerOp("logSession", doLogSession);
+registerOp("recordPracticeAttempt", doRecordPracticeAttempt);
 registerOp("updatePlanStatus", doUpdatePlanStatus);
 registerOp("movePlanItem", doMovePlanItem);
 registerOp("upsertPlanItem", doUpsertPlanItem);
@@ -436,7 +489,7 @@ registerOp("weeklyCheckin", doWeeklyCheckin);
 function useInvalidateAll() {
   const qc = useQueryClient();
   return () =>
-    ["courses", "topics", "sessions", "exams", "plan", "mistakes", "tests", "settings", "preferences", "weekly-checkins", "progress-events"].forEach(
+    ["courses", "topics", "sessions", "exams", "plan", "mistakes", "tests", "practice-attempts", "settings", "preferences", "weekly-checkins", "progress-events"].forEach(
       (k) => qc.invalidateQueries({ queryKey: [k] }),
     );
 }
@@ -445,6 +498,16 @@ export function useLogSession() {
   const invalidate = useInvalidateAll();
   return useMutation({
     mutationFn: (input: LogSessionInput) => runOrQueue("logSession", input),
+    onSuccess: invalidate,
+  });
+}
+
+
+export function useRecordPracticeAttempt() {
+  const invalidate = useInvalidateAll();
+  return useMutation({
+    mutationFn: (input: RecordPracticeAttemptInput) =>
+      runOrQueue("recordPracticeAttempt", input),
     onSuccess: invalidate,
   });
 }
