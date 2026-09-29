@@ -13,7 +13,7 @@ import {
   type StudySnapshot,
 } from "../src/lib/coach/context.ts";
 import {
-  CloudflareCoachProvider,
+  GeminiCoachProvider,
   redactStudentText,
 } from "../src/lib/coach/provider.server.ts";
 import { handleCoach } from "../src/lib/coach/handler.server.ts";
@@ -241,10 +241,9 @@ test("redaction removes common identifying text", () => {
   assert.ok(!output.includes("401234567"));
 });
 
-test("cloud provider fails closed and never passes provider prose through", async () => {
-  process.env["AI_PROVIDER"] = "cloudflare";
-  process.env["CLOUDFLARE_ACCOUNT_ID"] = "a".repeat(32);
-  process.env["CLOUDFLARE_AI_TOKEN"] = "test-only";
+test("Gemini provider fails closed and never passes provider prose through", async () => {
+  process.env["GEMINI_API_KEY"] = "test-only";
+  delete process.env["GEMINI_MODEL"];
 
   const remote = { ...input, remoteConsent: true, attempt: "F=ma" };
 
@@ -253,33 +252,41 @@ test("cloud provider fails closed and never passes provider prose through", asyn
     [new Response("", { status: 500 }), "unavailable"],
     [
       Response.json({
-        success: true,
-        result: {
-          response: '{"tactic":"units","message":"2400 N"}',
-        },
+        candidates: [
+          {
+            content: {
+              parts: [
+                { text: '{"tactic":"units","message":"2400 N"}' },
+              ],
+            },
+          },
+        ],
       }),
       "invalid_output",
     ],
     [
       Response.json({
-        success: true,
-        result: { response: '{"tactic":"units"}' },
+        candidates: [
+          {
+            content: {
+              parts: [{ text: '{"tactic":"units"}' }],
+            },
+          },
+        ],
       }),
       "ready",
     ],
   ];
 
   for (const [response, status] of cases) {
-    const provider = new CloudflareCoachProvider(
-      async () => response,
-    );
+    const provider = new GeminiCoachProvider(async () => response);
     const result = await provider.decide(remote, context);
     assert.equal(result.status, status);
     assert.ok(!JSON.stringify(result).includes("2400"));
   }
 
   let called = false;
-  const noAttemptProvider = new CloudflareCoachProvider(async () => {
+  const noAttemptProvider = new GeminiCoachProvider(async () => {
     called = true;
     throw new Error("should not run");
   });
@@ -290,14 +297,60 @@ test("cloud provider fails closed and never passes provider prose through", asyn
   );
   assert.equal(called, false);
 
-  const failure = await new CloudflareCoachProvider(async () => {
+  let requestUrl = "";
+  let requestHeaders: HeadersInit | undefined;
+  let requestBody = "";
+  const validProvider = new GeminiCoachProvider(async (url, init) => {
+    requestUrl = String(url);
+    requestHeaders = init?.headers;
+    requestBody = String(init?.body ?? "");
+    return Response.json({
+      candidates: [
+        {
+          content: {
+            parts: [{ text: '{"tactic":"check_step"}' }],
+          },
+        },
+      ],
+    });
+  });
+  const validResult = await validProvider.decide(remote, context);
+  assert.equal(validResult.source, "gemini");
+  assert.equal(validResult.status, "ready");
+  assert.match(requestUrl, /generativelanguage\.googleapis\.com/);
+  assert.match(requestUrl, /gemini-3\.8-flash:generateContent$/);
+  assert.equal(new Headers(requestHeaders).get("x-goog-api-key"), "test-only");
+
+  const geminiRequest = JSON.parse(requestBody) as {
+    generationConfig?: {
+      responseMimeType?: string;
+      responseJsonSchema?: {
+        additionalProperties?: boolean;
+        properties?: { tactic?: { enum?: string[] } };
+      };
+    };
+  };
+  assert.equal(
+    geminiRequest.generationConfig?.responseMimeType,
+    "application/json",
+  );
+  assert.equal(
+    geminiRequest.generationConfig?.responseJsonSchema?.additionalProperties,
+    false,
+  );
+  assert.deepEqual(
+    geminiRequest.generationConfig?.responseJsonSchema?.properties?.tactic?.enum,
+    [...COACH_TACTICS],
+  );
+
+  const failure = await new GeminiCoachProvider(async () => {
     throw new Error("timeout");
   }).decide(remote, context);
   assert.equal(failure.status, "unavailable");
 
-  delete process.env["AI_PROVIDER"];
-  delete process.env["CLOUDFLARE_ACCOUNT_ID"];
-  delete process.env["CLOUDFLARE_AI_TOKEN"];
+  delete process.env["GEMINI_API_KEY"];
+  delete process.env["GEMINI_MODEL"];
+  delete process.env["GOOGLE_API_KEY"];
 });
 
 test("API rejects anonymous, tampered, expired and cross-origin requests", async () => {

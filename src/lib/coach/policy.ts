@@ -55,7 +55,7 @@ export type CoachContext = {
 
 export type CoachResponse = {
   message: string;
-  source: "local" | "cloudflare";
+  source: "local" | "gemini";
   status: "local" | "ready" | "quota" | "unavailable" | "invalid_output";
   kind: "hint" | "question" | "feedback" | "insight" | "proposal";
   hintLevel: number;
