@@ -327,7 +327,7 @@ function StudyApp({ user }: { user: DeviceUser }) {
         </div>
       </LiquidGlass>
     </div>}
-    {entry && <SessionForm item={plan.find(p=>p.id===entry)??null} courses={courses} topics={topics} onClose={()=>setEntry(null)}/>}
+    {entry && <SessionForm item={plan.find(p=>p.id===entry)??null} courses={courses} topics={topics} sessions={sessions} attempts={attemptsQ.data??[]} onClose={()=>setEntry(null)}/>} 
     {adding && <CourseForm onClose={()=>setAdding(false)}/>}
     {search && <SearchPanel courses={courses} topics={topics} exams={exams} sessions={sessions} onClose={()=>setSearch(false)} onNavigate={p=>{go(p as Page);setSearch(false);}} onCourse={id=>{setCourseId(id);setPage("courses");localStorage.setItem("opk.last-page","courses");setSearch(false);}} onLog={()=>{setSearch(false);setEntry("manual");}}/>}
     {!busy && !error && !entry && !adding && !search && !moreOpen && (
