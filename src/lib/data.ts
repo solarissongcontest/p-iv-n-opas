@@ -762,13 +762,18 @@ export type NewCourse = {
   color?: string;
   study_mode?: string;
   topics: { name: string; weight: number; importance: number; materials?: string | null }[];
+  dependency_suggestions?: Array<{
+    source_name: string;
+    target_name: string;
+    relation_type: TopicDependency["relation_type"];
+  }>;
 };
 
 export function useCreateCourse() {
   const invalidate = useInvalidateAll();
   return useMutation({
     mutationFn: async (input: NewCourse) => {
-      const { topics, ...course } = input;
+      const { topics, dependency_suggestions = [], ...course } = input;
       const { data, error } = await supabase.from("courses").insert(course).select().single();
       if (error) throw error;
       const sum = topics.reduce((s, t) => s + (t.weight || 0), 0);
@@ -781,8 +786,45 @@ export function useCreateCourse() {
           importance: t.importance || 3,
           materials: t.materials ?? null,
         }));
-        const { error: tErr } = await supabase.from("topics").insert(rows);
+        const { data: insertedTopics, error: tErr } = await supabase.from("topics").insert(rows).select("id,name");
         if (tErr) throw tErr;
+
+        if (dependency_suggestions.length && insertedTopics?.length) {
+          const byName = new Map(insertedTopics.map((topic) => [topic.name, topic]));
+          const graphRows = dependency_suggestions.flatMap((suggestion) => {
+            const source = byName.get(suggestion.source_name);
+            const target = byName.get(suggestion.target_name);
+            if (!source || !target || source.id === target.id) return [];
+            return [{
+              owner_id: requireDeviceOwnerId(),
+              topic_id: source.id,
+              depends_on_topic_id: target.id,
+              relation_type: suggestion.relation_type,
+            }];
+          });
+          if (graphRows.length) {
+            const { error: graphError } = await untypedSupabase
+              .from("topic_dependencies")
+              .upsert(graphRows, { onConflict: "owner_id,topic_id,depends_on_topic_id,relation_type" });
+            if (graphError) throw graphError;
+
+            for (const source of insertedTopics) {
+              const dependencies = graphRows
+                .filter((row) =>
+                  row.topic_id === source.id &&
+                  ["prerequisite","depends_on","builds_on"].includes(row.relation_type)
+                )
+                .map((row) => row.depends_on_topic_id);
+              if (dependencies.length) {
+                const { error: dependencyError } = await untypedSupabase
+                  .from("topics")
+                  .update({ dependencies: [...new Set(dependencies)] })
+                  .eq("id", source.id);
+                if (dependencyError) throw dependencyError;
+              }
+            }
+          }
+        }
       }
       if (input.exam_date) {
         await supabase.from("exams").insert({
