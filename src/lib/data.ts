@@ -388,7 +388,7 @@ async function doLogSession(payload: unknown, operationId: string) {
         p_retrieval_confidence: input.retrieval_confidence ?? null,
         p_outcome: input.outcome ?? null,
       })
-    : await supabase.rpc("log_study_session", common);
+    : await untypedSupabase.rpc("log_study_session", common);
 
   const { data: sessionId, error } = result;
   if (error) throw error;
