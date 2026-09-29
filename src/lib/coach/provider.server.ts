@@ -74,7 +74,7 @@ export class GeminiCoachProvider implements CoachProvider {
 
     try {
       const apiKey = geminiApiKey();
-      const model = process.env["GEMINI_MODEL"] ?? "gemini-3.7-flash";
+      const model = process.env["GEMINI_MODEL"] ?? "gemini-3.8-flash";
 
       if (!/^[a-z0-9._-]+$/i.test(model)) {
         return fallback("unavailable");
@@ -127,11 +127,12 @@ export class GeminiCoachProvider implements CoachProvider {
               temperature: 0,
               maxOutputTokens: 32,
               responseMimeType: "application/json",
-              responseSchema: {
-                type: "OBJECT",
+              responseJsonSchema: {
+                type: "object",
+                additionalProperties: false,
                 properties: {
                   tactic: {
-                    type: "STRING",
+                    type: "string",
                     enum: [...COACH_TACTICS],
                   },
                 },
