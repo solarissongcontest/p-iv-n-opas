@@ -33,13 +33,13 @@ function helsinkiToday() {
 async function auditCoachInteraction(input: {
   ownerId: string;
   courseId: string;
-  topicId?: string;
+  topicId?: string | undefined;
   mode: string;
-  tactic?: string;
+  tactic?: string | undefined;
   hintLevel: number;
   remoteUsed: boolean;
   providerStatus: string;
-  answerFirewallBlocked?: boolean;
+  answerFirewallBlocked?: boolean | undefined;
 }) {
   try {
     await (supabaseAdmin as any).from("ai_interactions").insert({
