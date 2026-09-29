@@ -26,7 +26,9 @@ export type UserPreferences = {
   display_name: string;
   onboarding_completed: boolean;
   study_weekdays: number[];
+  weekday_capacity_min_minutes: number;
   weekday_capacity_minutes: number;
+  weekend_capacity_min_minutes: number;
   weekend_capacity_minutes: number;
   busy_dates: string[];
   notifications_enabled: boolean;
@@ -474,6 +476,29 @@ async function doUpsertPlanItem(payload: unknown, operationId: string) {
 }
 
 
+type CreateMistakeInput = {
+  course_id: string;
+  topic_id: string | null;
+  type?: string | null;
+  error: string;
+  what_happened?: string | null;
+  solution?: string | null;
+  retry_date?: string | null;
+};
+
+async function doCreateMistake(payload: unknown, operationId: string) {
+  const input = payload as CreateMistakeInput;
+  const { error } = await untypedSupabase.from("mistakes").upsert({
+    ...input,
+    id: operationId,
+    owner_id: requireDeviceOwnerId(),
+    explanation: input.solution ?? null,
+    status: "open",
+  }, { onConflict: "id" });
+  if (error) throw error;
+  return operationId;
+}
+
 async function doWeeklyCheckin(payload: unknown) {
   const p = payload as {
     week_start: string;
@@ -496,6 +521,7 @@ async function doWeeklyCheckin(payload: unknown) {
 
 registerOp("logSession", doLogSession);
 registerOp("recordPracticeAttempt", doRecordPracticeAttempt);
+registerOp("createMistake", doCreateMistake);
 registerOp("updatePlanStatus", doUpdatePlanStatus);
 registerOp("movePlanItem", doMovePlanItem);
 registerOp("upsertPlanItem", doUpsertPlanItem);
@@ -741,22 +767,7 @@ export function useCreateExam() {
 export function useCreateMistake() {
   const invalidate = useInvalidateAll();
   return useMutation({
-    mutationFn: async (input: {
-      course_id: string;
-      topic_id: string | null;
-      type?: string | null;
-      error: string;
-      what_happened?: string | null;
-      solution?: string | null;
-      retry_date?: string | null;
-    }) => {
-      const { error } = await untypedSupabase.from("mistakes").insert({
-        ...input,
-        explanation: input.solution ?? null,
-        status: "open",
-      });
-      if (error) throw error;
-    },
+    mutationFn: (input: CreateMistakeInput) => runOrQueue("createMistake", input),
     onSuccess: invalidate,
   });
 }
