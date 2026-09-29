@@ -435,26 +435,32 @@ export function ProgressView({courses,topics,attempts,sessions,plan,exams,mistak
   const due=plan.filter(p=>p.date>=from&&p.date<=now&&p.kind!=="exam");
   const completed=due.filter(p=>p.status==="completed");
   const recentMinutes=recent.reduce((a,s)=>a+s.minutes,0);
-  const v4Rows=topics.map(topic=>{
-    const course=courses.find(candidate=>candidate.id===topic.course_id);
-    return {topic,model:masteryModelV4(topic,attempts,{now,examDate:course?.exam_date??null})};
-  });
-  const v4Groups={
-    strong:v4Rows.filter(row=>row.model.label==="Strong"),
-    secure:v4Rows.filter(row=>row.model.label==="Secure"),
-    developing:v4Rows.filter(row=>row.model.label==="Developing"),
-    learning:v4Rows.filter(row=>row.model.label==="Learning"),
-    atRisk:v4Rows.filter(row=>row.model.label==="At risk"),
-    unassessed:v4Rows.filter(row=>row.model.label==="Not assessed"),
-  };
-  const errors30=errorProfileV4(attempts,mistakes,{since:from});
-  const fatigue=sessionFatigueV4(sessions,attempts);
-  const learningProfile=personalLearningProfileV4(sessions,attempts);
-  const experimentInsights=experimentInsightsV4(sessions,attempts);
-  const achievements=learningAchievementsV4(topics,attempts,mistakes,courses,now);
-  const productMetrics=productMetricsV4({courses,topics,attempts,mistakes,sessions,plan,now});
-  const selfChecks=learningOsSelfCheckV4({courses,topics,plan,attempts,mistakes,capacity,now});
-  const simulations=simulateLearningOsV4({courses,topics,plan,attempts,mistakes,capacity,days:60,start:now});
+  const v4Analysis=useMemo(()=>{
+    const rows=topics.map(topic=>{
+      const course=courses.find(candidate=>candidate.id===topic.course_id);
+      return {topic,model:masteryModelV4(topic,attempts,{now,examDate:course?.exam_date??null})};
+    });
+    return {
+      v4Rows:rows,
+      v4Groups:{
+        strong:rows.filter(row=>row.model.label==="Strong"),
+        secure:rows.filter(row=>row.model.label==="Secure"),
+        developing:rows.filter(row=>row.model.label==="Developing"),
+        learning:rows.filter(row=>row.model.label==="Learning"),
+        atRisk:rows.filter(row=>row.model.label==="At risk"),
+        unassessed:rows.filter(row=>row.model.label==="Not assessed"),
+      },
+      errors30:errorProfileV4(attempts,mistakes,{since:from}),
+      fatigue:sessionFatigueV4(sessions,attempts),
+      learningProfile:personalLearningProfileV4(sessions,attempts),
+      experimentInsights:experimentInsightsV4(sessions,attempts),
+      achievements:learningAchievementsV4(topics,attempts,mistakes,courses,now),
+      productMetrics:productMetricsV4({courses,topics,attempts,mistakes,sessions,plan,now}),
+      selfChecks:learningOsSelfCheckV4({courses,topics,plan,attempts,mistakes,capacity,now}),
+      simulations:simulateLearningOsV4({courses,topics,plan,attempts,mistakes,capacity,days:60,start:now}),
+    };
+  },[attempts,capacity,courses,from,mistakes,now,plan,sessions,topics]);
+  const {v4Rows,v4Groups,errors30,fatigue,learningProfile,experimentInsights,achievements,productMetrics,selfChecks,simulations}=v4Analysis;
   const learningRows=topics.map(topic=>{
     const course=courses.find(candidate=>candidate.id===topic.course_id);
     return {topic,state:deriveTopicLearningState(topic,attempts,{now,examDate:course?.exam_date??null})};
