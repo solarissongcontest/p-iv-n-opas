@@ -51,7 +51,19 @@ function geminiKey() {
 
 function normalizeQuestion(raw: unknown, topicIds: Set<string>): GeneratedQuestion | null {
   if (!raw || typeof raw !== "object") return null;
-  const row = raw as Record<string, unknown>;
+  const row = raw as {
+    topicId?: unknown;
+    type?: unknown;
+    prompt?: unknown;
+    options?: unknown;
+    correctAnswer?: unknown;
+    explanation?: unknown;
+    hints?: unknown;
+    skills?: unknown;
+    expectedConcepts?: unknown;
+    difficulty?: unknown;
+    estimatedSeconds?: unknown;
+  };
   if (typeof row.topicId !== "string" || !topicIds.has(row.topicId)) return null;
   if (typeof row.type !== "string" || !QUESTION_TYPES.includes(row.type as QuestionType)) return null;
   if (typeof row.prompt !== "string" || row.prompt.trim().length < 8) return null;
@@ -163,6 +175,7 @@ export async function handleQuestionGeneration(request: Request): Promise<Respon
     return json({ error: "Kurssitietoja ei voitu hakea." }, 503);
   }
   if (!courseResult.data) return json({ error: "Kurssia ei löytynyt." }, 404);
+  const course = courseResult.data;
 
   const allTopics = (topicsResult.data ?? []).filter((topic) =>
     !input.topicId || topic.id === input.topicId
@@ -192,7 +205,7 @@ export async function handleQuestionGeneration(request: Request): Promise<Respon
     count: input.count,
     allowedTypes,
     curriculum: curriculumContext({
-      ...courseResult.data,
+      ...course,
       topics: allTopics.map((topic) => ({ id: topic.id, name: topic.name })),
     }),
     topics: allTopics.map((topic) => ({
@@ -293,7 +306,7 @@ export async function handleQuestionGeneration(request: Request): Promise<Respon
       course_id: input.courseId,
       topic_id: question.topicId,
       curriculum: CURRICULUM_ID,
-      module_code: courseResult.data.code,
+      module_code: course.code,
       question_type: question.type,
       prompt: question.prompt,
       options: question.options,
