@@ -3,6 +3,7 @@ import * as Dialog from "@radix-ui/react-dialog";
 import { RotateCcw, Send, Sparkles, X } from "lucide-react";
 import { toast } from "sonner";
 import { LiquidGlass } from "./LiquidGlass";
+import { AbittiAnswerEditor, answerHasContent, answerPlainText } from "./AbittiAnswerEditor";
 import { useUpsertPlanItem } from "@/lib/data";
 import { getDeviceAccessToken } from "@/lib/deviceSession";
 import { today } from "@/lib/fi";
@@ -193,7 +194,7 @@ export function AICoach({
     const input: CoachRequest = {
       mode,
       message: task,
-      attempt,
+      attempt: answerPlainText(attempt),
       courseId: context.courseId,
       ...(topicId ? { topicId } : {}),
       hintLevel,
@@ -573,17 +574,14 @@ export function AICoach({
               />
             </label>
 
-            <label className="block text-sm font-medium">
-              Oma yritys
-              <textarea
-                className="mt-1 min-h-24 w-full resize-y rounded-xl border bg-surface p-3 font-normal"
-                maxLength={4000}
-                value={attempt}
-                disabled={busy}
-                onChange={(event) => setAttempt(event.target.value)}
-                placeholder="Mitä olet jo ajatellut tai laskenut?"
-              />
-            </label>
+            <AbittiAnswerEditor
+              label="Oma yritys"
+              value={attempt}
+              disabled={busy}
+              onChange={setAttempt}
+              placeholder="Mitä olet jo ajatellut tai laskenut?"
+              minHeight={120}
+            />
 
             {error && (
               <div
@@ -630,7 +628,7 @@ export function AICoach({
             </button>
             <button
               className={buttonClass + " flex-1"}
-              disabled={busy || !attempt.trim() || !context}
+              disabled={busy || !answerHasContent(attempt) || !context}
               onClick={() => void send("feedback")}
             >
               Palaute yrityksestä
