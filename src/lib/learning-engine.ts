@@ -524,6 +524,7 @@ export function selectPracticeQuestion(input: {
   course?: Course | null;
   examStage?: ExamStageKey;
   index?: number;
+  preferredTypes?: LearningAttemptType[];
 }): { topic: Topic; state: TopicLearningState; question: PracticeQuestion; interleaved: boolean } | null {
   if (!input.topics.length) return null;
   const now = today();
@@ -552,7 +553,7 @@ export function selectPracticeQuestion(input: {
     }
   }
 
-  const types = desiredTypes(row.state, input.examStage);
+  const types = input.preferredTypes?.length ? input.preferredTypes : desiredTypes(row.state, input.examStage);
   const lastTypes = selectedRecent.map((attempt) => attemptType(attempt));
   const type = types.find((candidate) => !lastTypes.includes(candidate)) ?? types[(input.index ?? 0) % types.length]!;
   const difficulty =
