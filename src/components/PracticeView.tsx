@@ -8,7 +8,14 @@ import {
   examStage,
   hintAt,
   selectPracticeQuestion,
+  type LearningAttemptType,
 } from "@/lib/learning-engine";
+import {
+  delayedVerificationQueueV4,
+  masteryModelV4,
+  practicePathV4,
+  type PracticePath,
+} from "@/lib/learning-os-v4";
 import { useRecordPracticeAttempt } from "@/lib/data";
 import { fullDate, today } from "@/lib/fi";
 
@@ -76,6 +83,8 @@ export function PracticeView({
   const [hintLevel, setHintLevel] = useState(0);
   const [confidence, setConfidence] = useState<number | null>(null);
   const [feedback, setFeedback] = useState("");
+  const [showExplanation, setShowExplanation] = useState(false);
+  const [diagnosticMode, setDiagnosticMode] = useState(false);
   const startedAt = useRef<number>(Date.now());
   const record = useRecordPracticeAttempt();
 
@@ -103,17 +112,52 @@ export function PracticeView({
     course,
   });
 
+  const diagnosticLimit = Math.min(10, Math.max(5, courseTopics.length));
+  const diagnosticDone = diagnosticMode && attemptIndex >= diagnosticLimit;
+  const effectiveTopicId = diagnosticMode
+    ? courseTopics[attemptIndex % Math.max(1, courseTopics.length)]?.id ?? topicId
+    : topicId;
+  const selectedTopic = courseTopics.find((candidate) => candidate.id === effectiveTopicId) ?? courseTopics[0] ?? null;
+  const selectedPath: PracticePath | null = selectedTopic
+    ? practicePathV4(selectedTopic, attempts, { examDate: course?.exam_date ?? null })
+    : null;
+  const activePath: PracticePath | null = diagnosticMode && selectedPath
+    ? {
+        stage: "independent",
+        label: "Diagnostiikka",
+        reason: "Lähtötaso mitataan ilman vihjeitä, jotta Planner ei aloita arvailusta.",
+        hintLimit: 0,
+        evidenceMultiplier: 1,
+        requiresIndependentFollowup: false,
+      }
+    : selectedPath;
+  const preferredTypes: LearningAttemptType[] | undefined =
+    activePath?.stage === "worked_example" || activePath?.stage === "explanation"
+      ? ["explanation", "short_answer"]
+      : activePath?.stage === "partial_completion" || activePath?.stage === "guided"
+        ? ["calculation", "short_answer", "ordering"]
+        : activePath?.stage === "transfer"
+          ? ["application", "simulation", "error_detection"]
+          : activePath?.stage === "mixed"
+            ? ["recognition", "calculation", "error_detection", "application"]
+            : activePath?.stage === "delayed_verification"
+              ? ["free_recall", "application"]
+              : ["free_recall", "short_answer", "calculation"];
+
   const selection = useMemo(
     () =>
-      selectPracticeQuestion({
-        topics: courseTopics,
-        attempts,
-        selectedTopicId: topicId,
-        course,
-        examStage: stage.key,
-        index: attemptIndex,
-      }),
-    [attemptIndex, attempts, course, courseTopics, stage.key, topicId],
+      diagnosticDone
+        ? null
+        : selectPracticeQuestion({
+            topics: courseTopics,
+            attempts,
+            selectedTopicId: effectiveTopicId,
+            course,
+            examStage: stage.key,
+            index: attemptIndex,
+            preferredTypes,
+          }),
+    [attemptIndex, attempts, course, courseTopics, diagnosticDone, effectiveTopicId, preferredTypes, stage.key],
   );
 
   const recovery = buildRecoveryQueue({
@@ -135,6 +179,7 @@ export function PracticeView({
     setHintLevel(0);
     setConfidence(null);
     setFeedback("");
+    setShowExplanation(false);
   }, [selection?.question.id, selection?.topic.id]);
 
   async function save(result: PracticeAttempt["result"]) {
@@ -171,6 +216,9 @@ export function PracticeView({
           explanation: selection.question.explanation,
           interleaved: selection.interleaved,
           examStage: stage.key,
+          scaffoldStage: activePath?.stage ?? "independent",
+          assisted: hintLevel > 0,
+          verificationRequired: activePath?.requiresIndependentFollowup ?? false,
         },
       });
 
@@ -192,10 +240,19 @@ export function PracticeView({
       <Card
         title="Practice Mode"
         action={
-          <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
-            <Brain size={15} />
-            {stage.stages[stage.index]?.label ?? "Harjoittelu"}
-          </span>
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              className={diagnosticMode ? primary : secondary}
+              onClick={() => { setDiagnosticMode((value) => !value); setAttemptIndex(0); }}
+            >
+              {diagnosticMode ? "Lopeta diagnostiikka" : "Diagnostic Mode"}
+            </button>
+            <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
+              <Brain size={15} />
+              {diagnosticMode ? `${Math.min(attemptIndex, diagnosticLimit)}/${diagnosticLimit}` : stage.stages[stage.index]?.label ?? "Harjoittelu"}
+            </span>
+          </div>
         }
       >
         <div className="grid gap-3 sm:grid-cols-2">
@@ -237,11 +294,37 @@ export function PracticeView({
           </label>
         </div>
 
-        {selection ? (
+        {diagnosticDone ? (
+          <div className="mt-5 rounded-2xl bg-accent p-4">
+            <h3 className="font-semibold">Lähtötason tarkistus valmis.</h3>
+            <p className="mt-2 text-sm text-muted-foreground">
+              {diagnosticLimit} eri aiheen retrieval-näyttö on tallennettu. Tulokset eivät suoraan “julista” aiheita osatuiksi, vaan parantavat Plannerin evidence confidencea.
+            </p>
+            <div className="mt-3 space-y-2">
+              {courseTopics.slice(0, diagnosticLimit).map((candidate) => {
+                const model = masteryModelV4(candidate, attempts, { examDate: course?.exam_date ?? null });
+                const missingPrerequisite = (candidate.dependencies ?? []).some((id) => {
+                  const dependency = courseTopics.find((topic) => topic.id === id);
+                  return dependency ? masteryModelV4(dependency, attempts, { examDate: course?.exam_date ?? null }).level <= 1 : false;
+                });
+                const classification = missingPrerequisite
+                  ? "missing_prerequisite"
+                  : model.evidenceCount === 0
+                    ? "new_material"
+                    : model.level >= 4
+                      ? "already_mastered"
+                      : "needs_review";
+                return <div key={candidate.id} className="flex items-center justify-between rounded-xl bg-surface/70 p-3 text-sm"><span>{candidate.name}</span><code>{classification}</code></div>;
+              })}
+            </div>
+            <button className={secondary+" mt-4"} onClick={() => { setDiagnosticMode(false); setAttemptIndex(0); }}>Palaa normaaliin harjoitteluun</button>
+          </div>
+        ) : selection ? (
           <div className="mt-5 space-y-4">
             <div className="rounded-2xl bg-muted/60 p-4">
               <div className="flex flex-wrap items-center gap-2 text-xs font-semibold uppercase tracking-wide text-primary">
-                <span>{typeLabel[selection.question.type]}</span>
+                <span>{activePath?.label ?? typeLabel[selection.question.type]}</span>
+                <span>· {typeLabel[selection.question.type]}</span>
                 <span>· vaikeus {selection.question.difficulty}/5</span>
                 {selection.interleaved && <span>· interleaved</span>}
               </div>
@@ -250,8 +333,8 @@ export function PracticeView({
               </p>
               <p className="mt-2 text-lg font-semibold">{selection.question.prompt}</p>
               <p className="mt-2 text-xs text-muted-foreground">
-                Moottori valitsee kysymystyypin osaamisnäytön, unohtumisriskin ja koevaiheen perusteella.
-                Aikaa ei lasketa osaamiseksi. Maailma jatkaa pyörimistään.
+                {activePath?.reason ?? "Moottori valitsee kysymystyypin osaamisnäytön, unohtumisriskin ja koevaiheen perusteella."}
+                {" "}Aikaa ei lasketa osaamiseksi. Maailma jatkaa pyörimistään.
               </p>
             </div>
 
@@ -270,14 +353,14 @@ export function PracticeView({
               <button
                 type="button"
                 className={secondary}
-                onClick={() => setHintLevel((value) => Math.min(3, value + 1))}
-                disabled={hintLevel >= selection.question.hints.length}
+                onClick={() => setHintLevel((value) => Math.min(activePath?.hintLimit ?? 3, value + 1))}
+                disabled={(activePath?.hintLimit ?? 3) === 0 || hintLevel >= Math.min(activePath?.hintLimit ?? 3, selection.question.hints.length)}
               >
                 <Lightbulb size={17} />
                 {hintLevel === 0 ? "Tarvitsen vihjeen" : "Seuraava vihje"}
               </button>
               <span className="text-xs text-muted-foreground">
-                {hintLevel}/3 vihjettä käytetty
+                {activePath?.hintLimit === 0 ? "Tämä vaihe tehdään ilman vihjeitä." : `${hintLevel}/${activePath?.hintLimit ?? 3} vihjetasoa käytetty`}
               </span>
             </div>
 
@@ -337,6 +420,12 @@ export function PracticeView({
               <div className="rounded-xl bg-accent p-3 text-sm">
                 <Sparkles className="mr-2 inline" size={16} />
                 {feedback}
+                <div className="mt-3">
+                  <button type="button" className={secondary+" !min-h-9"} onClick={() => setShowExplanation((value) => !value)}>
+                    {showExplanation ? "Piilota selitys" : "Vihjetaso 5 · näytä täysi selitys"}
+                  </button>
+                  {showExplanation && <p className="mt-2 rounded-lg bg-surface/70 p-3">{selection.question.explanation}</p>}
+                </div>
               </div>
             )}
 
@@ -405,6 +494,22 @@ export function PracticeView({
               Ensimmäinen yritys muodostaa ensimmäisen oikean retrieval-havainnon.
             </p>
           )}
+        </Card>
+
+        <Card title="Viivevarmistukset">
+          {delayedVerificationQueueV4(courses, courseTopics, attempts).length ? (
+            <div className="space-y-2">
+              {delayedVerificationQueueV4(courses, courseTopics, attempts).slice(0,4).map((row) => (
+                <button
+                  key={row.topic.id}
+                  className="flex min-h-12 w-full items-center justify-between gap-3 rounded-xl bg-muted/60 px-3 text-left"
+                  onClick={() => { setTopicId(row.topic.id); setAttemptIndex(0); }}
+                >
+                  <span><b>{row.topic.name}</b><small className="mt-1 block text-muted-foreground">Tee nyt ilman vihjeitä · tavoiteviive {row.delayDays} pv</small></span>
+                </button>
+              ))}
+            </div>
+          ) : <p className="text-sm text-muted-foreground">Ei juuri nyt erääntyviä itsenäisiä viivevarmistuksia.</p>}
         </Card>
       </div>
     </div>
