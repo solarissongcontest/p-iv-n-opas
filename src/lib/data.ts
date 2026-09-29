@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { registerOp, runOrQueue } from "./offline";
 import {
+  type CapacityProfile,
   type Course,
   type Exam,
   type Mistake,
@@ -51,7 +52,7 @@ async function listCourses(): Promise<Course[]> {
 async function listTopics(): Promise<Topic[]> {
   const { data, error } = await supabase.from("topics").select("*").order("position");
   if (error) throw error;
-  return data ?? [];
+  return (data ?? []) as unknown as Topic[];
 }
 
 async function listSessions(): Promise<Session[]> {
@@ -61,7 +62,7 @@ async function listSessions(): Promise<Session[]> {
     .order("date", { ascending: false })
     .limit(1000);
   if (error) throw error;
-  return data ?? [];
+  return (data ?? []) as unknown as Session[];
 }
 
 async function listExams(): Promise<Exam[]> {
@@ -532,14 +533,14 @@ export function useMovePlanItem() {
 export function useGeneratePlan() {
   const invalidate = useInvalidateAll();
   return useMutation({
-    mutationFn: async (input: { courseId: string; drafts: PlanDraft[] }) => {
+    mutationFn: async (input: { courseId: string; drafts: PlanDraft[]; capacity?: CapacityProfile }) => {
       const [{ data: previous, error: readError }, { data: otherPlan, error: otherError }] = await Promise.all([
         supabase.from("plan_items").select("id").eq("course_id", input.courseId).eq("status", "planned"),
         supabase.from("plan_items").select("*").neq("course_id", input.courseId).eq("status", "planned"),
       ]);
       if (readError) throw readError;
       if (otherError) throw otherError;
-      const balancedDrafts = balanceDraftsAgainstPlan(input.drafts, otherPlan ?? []);
+      const balancedDrafts = balanceDraftsAgainstPlan(input.drafts, otherPlan ?? [], 120, input.capacity);
       const { data: created, error } = await supabase.from("plan_items").insert(balancedDrafts).select("id");
       if (error) throw error;
       if (previous?.length) {
