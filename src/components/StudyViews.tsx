@@ -87,45 +87,93 @@ function Bar({ value }: { value: number }) {
 }
 type Base = {courses:Course[];topics:Topic[]};
 
-export function TodayView({courses,topics,sessions,exams,plan,tests,mistakes,onStart,onGo}:Base&{
-  sessions:Session[];exams:Exam[];plan:PlanItem[];tests:PracticeTest[];mistakes:Mistake[];
+export function TodayView({courses,topics,sessions,exams,plan,tests,mistakes,studyWeekdays,onStart,onGo}:Base&{
+  sessions:Session[];exams:Exam[];plan:PlanItem[];tests:PracticeTest[];mistakes:Mistake[];studyWeekdays:number[];
   onStart:(id:string)=>void;onGo:(page:"plan"|"exams")=>void
 }) {
   const now=today();
+  const move=useMovePlanItem(),upsert=useUpsertPlanItem();
+  const [taskIndex,setTaskIndex]=useState(0);
   const items=rankTodayTasks({
     items:plan.filter(p=>p.date===now&&p.status==="planned"&&p.kind!=="exam"),
     courses,topics,mistakes,tests,now,
   });
-  const next=items[0];
+  useEffect(()=>{if(taskIndex>=items.length)setTaskIndex(0);},[items.length,taskIndex]);
+  const next=items[taskIndex]??items[0];
+  const later=items.filter(item=>item.id!==next?.id).slice(0,2);
   const upcoming=exams.filter(e=>e.date>=now).sort((a,b)=>a.date.localeCompare(b.date))[0];
-  const goal=courses.reduce((a,c)=>a+c.weekly_minutes,0), done=weekMinutes(sessions,now), last=sessions.find(s=>s.note||s.unclear);
-  const due=reviewDebt(topics,now);
+  const goal=courses.reduce((a,c)=>a+c.weekly_minutes,0),done=weekMinutes(sessions,now),last=sessions.find(s=>s.note||s.unclear);
+  const recovery=recoveryQueue(topics,now,3);
+  const todayMinutes=items.reduce((sum,item)=>sum+item.target_minutes,0);
   const examCourse=upcoming?courses.find(c=>c.id===upcoming.course_id):undefined;
   const mode=examMode(upcoming?.date??null,now);
   const examTopics=examCourse?topics.filter(t=>t.course_id===examCourse.id):[];
   const examReady=examCourse?readiness({topics:examTopics,tests:tests.filter(t=>t.course_id===examCourse.id),mistakes:mistakes.filter(m=>m.course_id===examCourse.id)}):0;
   const openMistakes=examCourse?mistakes.filter(m=>m.course_id===examCourse.id&&m.status!=="mastered").length:0;
+  const reason=next?todayTaskReason({item:next,courses,topics,mistakes,now}):"";
+
+  async function makeLight(){
+    if(!next)return;
+    const light=Math.max(5,next.min_minutes||Math.round(next.target_minutes*0.5));
+    try{
+      await upsert.mutateAsync({id:next.id,course_id:next.course_id,date:next.date,target_minutes:light,extra_minutes:0});
+      toast.success(`Päivää kevennettiin: tämä tehtävä on nyt ${minutes(light)}.`);
+    }catch{toast.error("Tehtävää ei voitu keventää.");}
+  }
+
+  async function cannotToday(){
+    if(!next)return;
+    const course=courses.find(candidate=>candidate.id===next.course_id);
+    const date=findNextStudyDate({
+      plan,fromISO:now,studyWeekdays,minutes:next.target_minutes,ignoreItemId:next.id,latestDate:course?.exam_date??null,
+    });
+    if(!date){
+      toast.error("En löytänyt ennen koetta järkevää vapaata opiskelupäivää. Avaa suunnitelma ja valitse päivä.");
+      onGo("plan");
+      return;
+    }
+    try{
+      await move.mutateAsync({id:next.id,date,from:next.date});
+      setTaskIndex(0);
+      toast.success(`Tehtävä siirrettiin päivälle ${fullDate(date)}. Tänään ei synny opiskelusakkoa.`);
+    }catch{toast.error("Tehtävää ei voitu siirtää.");}
+  }
 
   return <div className="space-y-3 sm:space-y-5">
     {mode.active&&examCourse&&<Panel title={mode.finalStretch?"Koemoodi · loppusuora":"Koemoodi · 14 päivää"}>
       <div className="grid gap-4 sm:grid-cols-3">
         <div><p className="text-sm text-muted-foreground">{examCourse.code}</p><p className="text-2xl font-semibold">{mode.days} pv</p><p className="text-sm text-muted-foreground">kokeeseen</p></div>
-        <div><p className="text-sm text-muted-foreground">Valmistautuminen</p><p className="text-2xl font-semibold">{examReady} %</p><Bar value={examReady}/></div>
+        <div><p className="text-sm text-muted-foreground">Valmistautuminen</p><p className="text-2xl font-semibold">{examReady} %</p><Bar value={examReady}/><p className="mt-1 text-xs text-muted-foreground">Ei arvosanaennuste.</p></div>
         <div><p className="text-sm text-muted-foreground">Avoimet virheet</p><p className="text-2xl font-semibold">{openMistakes}</p><p className="text-sm text-muted-foreground">{mode.finalStretch?"Pidä kuorma kevyenä.":"Painota koetason tehtäviä ja kertausta."}</p></div>
       </div>
     </Panel>}
 
-    <Panel title="Seuraava tehtävä">{next?<><p className="text-sm font-medium text-primary">{courses.find(c=>c.id===next.course_id)?.code} · {minutes(next.target_minutes)}</p><h3 className="mt-2 text-2xl font-semibold">{next.title||topics.find(t=>t.id===next.topic_id)?.name||"Opiskelu"}</h3><p className="mt-2 text-sm text-muted-foreground">Valinta painottaa koetta, kertausvelkaa, avoimia virheitä, osaamisen tasoa ja koulun etenemistä.</p><button className={button+" mt-5"} onClick={()=>onStart(next.id)}>Aloita opiskelu</button></>:<><p className="font-medium">Ei itsenäistä opiskelua tänään.</p><p className="mt-2 text-sm text-muted-foreground">Suunnitelma ei vaadi tälle päivälle omaa sessiota. Lepo ei muutu velaksi.</p><button className={secondary+" mt-4"} onClick={()=>onGo("plan")}>Avaa suunnitelma</button></>}</Panel>
+    <Panel title="Tärkein tänään">{next?<>
+      <p className="text-sm font-medium text-primary">{courses.find(c=>c.id===next.course_id)?.code} · {minutes(next.target_minutes)}</p>
+      <h3 className="mt-2 text-2xl font-semibold">{next.title||topics.find(t=>t.id===next.topic_id)?.name||"Opiskelu"}</h3>
+      <details className="mt-3 text-sm text-muted-foreground"><summary className="cursor-pointer font-medium text-foreground">Miksi tätä ehdotetaan?</summary><p className="mt-2">Koska {reason}.</p></details>
+      <p className="mt-3 text-xs text-muted-foreground">Tänään suunniteltu yhteensä noin {minutes(todayMinutes)}. Extra on vapaaehtoista eikä muutu velaksi.</p>
+      <div className="mt-5 flex flex-wrap gap-2">
+        <button className={button} onClick={()=>onStart(next.id)}>Aloita</button>
+        {items.length>1&&<button className={secondary} onClick={()=>setTaskIndex(i=>(i+1)%items.length)}>Vaihda tehtävää</button>}
+        <button disabled={upsert.isPending} className={secondary} onClick={()=>void makeLight()}>Kevyt päivä</button>
+        <button disabled={move.isPending} className={secondary} onClick={()=>void cannotToday()}>En ehdi tänään</button>
+      </div>
+    </>:<>
+      <p className="font-medium">Ei pakollista itsenäistä opiskelua tänään.</p>
+      <p className="mt-2 text-sm text-muted-foreground">Lepo on sallittu tila. Mitään rästiä ei kasvateta vain siksi, että kalenterissa on tyhjä päivä.</p>
+      <button className={secondary+" mt-4"} onClick={()=>onGo("plan")}>Avaa suunnitelma</button>
+    </>}</Panel>
 
-    {due.count>0&&<Panel title="Kertausvelka" action={<span className="text-sm font-semibold text-primary">{due.count} aihetta</span>}>
-      <div className="space-y-2">{due.due.slice(0,5).map(t=><div key={t.id} className="flex items-center justify-between gap-3 rounded-xl bg-muted/60 p-3"><span><b>{courses.find(c=>c.id===t.course_id)?.code}</b> · {t.name}</span><span className="text-xs text-muted-foreground">{t.next_review?fullDate(t.next_review):""}</span></div>)}</div>
-      <p className="mt-3 text-sm text-muted-foreground">Kertauspaine {due.pressure} %. Adaptiivinen suunnitelma nostaa nämä aiheet automaattisesti etusijalle.</p>
+    {recovery.items.length>0&&<Panel title="Kertaa seuraavaksi" action={<span className="text-sm font-medium text-muted-foreground">noin {minutes(recovery.estimatedMinutes)}</span>}>
+      <div className="space-y-2">{recovery.items.map(t=><div key={t.id} className="flex items-center justify-between gap-3 rounded-xl bg-muted/60 p-3"><span><b>{courses.find(c=>c.id===t.course_id)?.code}</b> · {t.name}</span><span className="text-xs text-muted-foreground">{MASTERY_LABELS[t.verified_level]}</span></div>)}</div>
+      <p className="mt-3 text-sm text-muted-foreground">{recovery.hiddenCount>0?`Näytetään vain kolme tärkeintä kertausta. ${recovery.hiddenCount} muuta pysyy taustalla eikä kaadu tämän päivän työlistaksi.`:"Nämä ovat ajankohtaisimmat kertaukset. Tee mieluummin lyhyt onnistunut palautus kuin pitkä läpiluku."}</p>
     </Panel>}
 
-    {items.length>1&&<Panel title="Myöhemmin tänään">{items.slice(1,4).map(p=><button key={p.id} onClick={()=>onStart(p.id)} className="flex min-h-14 w-full items-center justify-between border-t border-border text-left"><span><b className="mr-2 text-primary">{courses.find(c=>c.id===p.course_id)?.code}</b>{p.title}</span><span className="text-sm text-muted-foreground">{minutes(p.target_minutes)}</span></button>)}</Panel>}
+    {later.length>0&&<Panel title="Jos aikaa jää">{later.map(p=><button key={p.id} onClick={()=>onStart(p.id)} className="flex min-h-14 w-full items-center justify-between border-t border-border text-left"><span><b className="mr-2 text-primary">{courses.find(c=>c.id===p.course_id)?.code}</b>{p.title}</span><span className="text-sm text-muted-foreground">{minutes(p.target_minutes)}</span></button>)}</Panel>}
 
     <div className="grid grid-cols-2 gap-3 lg:grid-cols-2 lg:gap-5">
-      <Panel title="Viikon tavoite"><p className="mb-2 text-xl font-semibold sm:mb-3 sm:text-2xl">{minutes(done)} <span className="text-sm font-normal text-muted-foreground sm:text-base">/ {minutes(goal)}</span></p><Bar value={goal?done/goal*100:0}/><p className="mt-2 text-xs leading-5 text-muted-foreground sm:mt-3 sm:text-sm">{Math.max(0,goal-done)?`${minutes(Math.max(0,goal-done))} jäljellä.`:"Tavoite täynnä."}</p></Panel>
+      <Panel title="Viikon rytmi"><p className="mb-2 text-xl font-semibold sm:mb-3 sm:text-2xl">{minutes(done)} <span className="text-sm font-normal text-muted-foreground sm:text-base">/ noin {minutes(goal)}</span></p><Bar value={goal?done/goal*100:0}/><p className="mt-2 text-xs leading-5 text-muted-foreground sm:mt-3 sm:text-sm">Aika on kuormituksen mitta, ei osaamistodistus.</p></Panel>
       <Panel title="Tärkeää">{upcoming?<><p className="text-sm font-medium sm:text-base">{courses.find(c=>c.id===upcoming.course_id)?.code} · {upcoming.name}</p><p className="mt-1 text-xs leading-5 text-muted-foreground sm:mt-2 sm:text-base">{fullDate(upcoming.date)} · {diffDays(upcoming.date,now)} pv</p><button className="mt-2 text-xs font-medium text-primary underline sm:mt-3 sm:text-sm" onClick={()=>onGo("exams")}>Katso kokeet</button></>:<p className="text-sm text-muted-foreground">Ei lähestyviä kokeita.</p>}</Panel>
     </div>
     {last&&<Panel title="Viimeisin huomio"><p className="text-muted-foreground">{last.note||last.unclear}</p><p className="mt-3 text-xs text-muted-foreground">{fullDate(last.date)} · {courses.find(c=>c.id===last.course_id)?.code}</p></Panel>}
