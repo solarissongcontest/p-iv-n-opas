@@ -5,12 +5,28 @@ const ABITTI_EDITOR_BASE =
   "https://unpkg.com/rich-text-editor@" + ABITTI_EDITOR_VERSION + "/dist/";
 const ABITTI_EDITOR_SCRIPT = ABITTI_EDITOR_BASE + "rich-text-editor-bundle.js";
 
+type AbittiAnswer = {
+  answerHtml: string;
+  answerText: string;
+  imageCount: number;
+};
+
+type MathJaxGlobal = {
+  startup?: { promise?: Promise<void> };
+  tex2svgPromise?: (latex: string, options?: { display?: boolean }) => Promise<HTMLElement>;
+  loader?: Record<string, unknown>;
+  tex?: Record<string, unknown>;
+  svg?: Record<string, unknown>;
+};
+
 type MakeRichText = (input: {
   container: HTMLElement;
   language: "FI";
   baseUrl: string;
+  initialValue?: string;
   allowedFileTypes: string[];
-  onValueChange: (value: unknown) => void;
+  onValueChange: (value: AbittiAnswer | string) => void;
+  onLatexUpdate?: (img: HTMLImageElement, latex: string) => void;
   textAreaProps?: {
     ariaLabelledBy?: string;
     editorStyle?: Record<string, string | number>;
@@ -24,6 +40,97 @@ declare global {
   interface Window {
     makeRichText?: MakeRichText;
     __opkAbittiEditorPromise?: Promise<void>;
+    __opkMathJaxPromise?: Promise<void>;
+    MathJax?: MathJaxGlobal;
+  }
+}
+
+const MATHJAX_SCRIPT =
+  "https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-svg.js";
+
+function loadMathJax() {
+  if (typeof window === "undefined") return Promise.reject(new Error("browser-only"));
+  if (window.MathJax?.tex2svgPromise) return Promise.resolve();
+  if (window.__opkMathJaxPromise) return window.__opkMathJaxPromise;
+
+  window.MathJax = {
+    loader: { load: ["[tex]/mhchem"] },
+    tex: { packages: { "[+]": ["mhchem"] } },
+    svg: { fontCache: "none" },
+  };
+
+  window.__opkMathJaxPromise = new Promise<void>((resolve, reject) => {
+    const existing = document.querySelector<HTMLScriptElement>(
+      'script[data-opk-mathjax="true"]',
+    );
+    const finish = async () => {
+      try {
+        await window.MathJax?.startup?.promise;
+        if (window.MathJax?.tex2svgPromise) resolve();
+        else reject(new Error("MathJax ei rekisteröitynyt."));
+      } catch (error) {
+        reject(error);
+      }
+    };
+
+    if (existing) {
+      existing.addEventListener("load", () => void finish(), { once: true });
+      existing.addEventListener("error", () => reject(new Error("MathJaxin lataus epäonnistui.")), { once: true });
+      return;
+    }
+
+    const script = document.createElement("script");
+    script.src = MATHJAX_SCRIPT;
+    script.async = true;
+    script.dataset["opkMathjax"] = "true";
+    script.addEventListener("load", () => void finish(), { once: true });
+    script.addEventListener("error", () => reject(new Error("MathJaxin lataus epäonnistui.")), { once: true });
+    document.head.appendChild(script);
+  }).catch((error) => {
+    delete window.__opkMathJaxPromise;
+    throw error;
+  });
+
+  return window.__opkMathJaxPromise;
+}
+
+function xmlEscape(value: string) {
+  return value
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;");
+}
+
+function latexFallbackDataUrl(latex: string) {
+  const width = Math.max(80, Math.min(1200, latex.length * 9 + 20));
+  const svg =
+    '<svg xmlns="http://www.w3.org/2000/svg" width="' + width +
+    '" height="34" viewBox="0 0 ' + width + ' 34">' +
+    '<rect width="100%" height="100%" fill="white"/>' +
+    '<text x="8" y="23" font-size="16" font-family="serif" fill="currentColor">' +
+    xmlEscape(latex) + "</text></svg>";
+  return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
+}
+
+async function renderLatexImage(img: HTMLImageElement, latex: string) {
+  img.setAttribute("alt", latex);
+  img.setAttribute("data-latex", latex);
+  const expectedLatex = latex;
+
+  try {
+    await loadMathJax();
+    if (!window.MathJax?.tex2svgPromise) throw new Error("MathJax puuttuu.");
+    const wrapper = await window.MathJax.tex2svgPromise(latex, { display: false });
+    const svg = wrapper.querySelector("svg");
+    if (!svg) throw new Error("SVG-renderöinti epäonnistui.");
+    svg.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+    const serialized = new XMLSerializer().serializeToString(svg);
+    if (img.getAttribute("data-latex") !== expectedLatex) return;
+    img.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(serialized);
+  } catch {
+    if (img.getAttribute("data-latex") !== expectedLatex) return;
+    img.src = latexFallbackDataUrl(latex);
   }
 }
 
@@ -75,6 +182,7 @@ export function answerHasContent(value: string) {
 
 export function answerPlainText(value: string) {
   return value
+    .replace(/<img\b[^>]*\balt=(["'])(.*?)\1[^>]*>/gi, (_match, _quote, alt: string) => " " + alt + " ")
     .replace(/<br\s*\/?>/gi, "\n")
     .replace(/<\/p>|<\/div>|<\/li>/gi, "\n")
     .replace(/<[^>]+>/g, " ")
@@ -139,10 +247,19 @@ export function AbittiAnswerEditor({
         window.makeRichText({
           container: hostRef.current,
           language: "FI",
-          baseUrl: ABITTI_EDITOR_BASE,
+          baseUrl: "",
+          initialValue: value,
           allowedFileTypes: ["image/png", "image/jpeg"],
+          onLatexUpdate: (img, latex) => {
+            void renderLatexImage(img, latex);
+          },
           onValueChange: (next) => {
-            const normalized = typeof next === "string" ? next : String(next ?? "");
+            const normalized =
+              typeof next === "string"
+                ? next
+                : typeof next?.answerHtml === "string"
+                  ? next.answerHtml
+                  : "";
             emittedValueRef.current = normalized;
             onChangeRef.current(normalized);
           },
@@ -179,6 +296,13 @@ export function AbittiAnswerEditor({
       host.replaceChildren();
     };
   }, [autoFocus, generatedId, generation, labelId, minHeight]);
+
+  useEffect(() => {
+    const editable = hostRef.current?.querySelector<HTMLElement>('[contenteditable="true"], [contenteditable="false"]');
+    if (!editable) return;
+    editable.setAttribute("contenteditable", disabled ? "false" : "true");
+    editable.setAttribute("aria-disabled", disabled ? "true" : "false");
+  }, [disabled, loading]);
 
   function beginFormula() {
     const target =
