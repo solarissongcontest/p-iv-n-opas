@@ -977,6 +977,81 @@ export function simulateLearningOsV4(input:{
   });
 }
 
+export type LearningAchievementV4 = {
+  id: string;
+  title: string;
+  body: string;
+  earned: boolean;
+  progress: number;
+};
+
+export type ProductMetricsV4 = {
+  delayedRecallRate: number | null;
+  independentSuccessRate: number | null;
+  assistedRate: number | null;
+  calibrationAccuracy: number | null;
+  masteryStability: number | null;
+  stableTopics: number;
+  recoverySuccessRate: number | null;
+  planCompletion: number | null;
+  studyEfficiency: number | null;
+};
+
+export function learningAchievementsV4(
+  topics: Topic[],
+  attempts: PracticeAttempt[],
+  mistakes: Mistake[],
+  courses: Course[],
+  now=today(),
+):LearningAchievementV4[]{
+  const models=topics.map(topic=>masteryModelV4(topic,attempts,{now,examDate:courses.find(c=>c.id===topic.course_id)?.exam_date??null}));
+  const strong=models.filter(model=>model.level>=4).length;
+  const retained=models.filter(model=>model.level>=4&&model.dimensions.retention.evidence>=.7).length;
+  const independent=attempts.filter(attempt=>resultScore(attempt)>=.9&&!isAssisted(attempt)).length;
+  const repaired=mistakes.filter(mistake=>mistake.status==="mastered").length;
+  const total=Math.max(1,topics.length);
+  return[
+    {id:"evidence",title:"Itsenäinen näyttö",body:"Ensimmäinen retrieval-onnistuminen ilman apua.",earned:independent>=1,progress:clamp(independent/1)*100},
+    {id:"growth",title:"Osaaminen kasvaa",body:"Vähintään 10 aihetta on Secure/Strong-tasolla.",earned:strong>=10,progress:clamp(strong/10)*100},
+    {id:"retention",title:"Osaaminen säilyy",body:"Viidestä aiheesta on myös viiveellä vahvistettua näyttöä.",earned:retained>=5,progress:clamp(retained/5)*100},
+    {id:"recovery",title:"Virheistä takaisin",body:"Viisi aiempaa virhettä on korjattu hallituksi.",earned:repaired>=5,progress:clamp(repaired/5)*100},
+    {id:"coverage",title:"Vahva osaamiskartta",body:"80 % aiheista on vähintään Secure-tasolla.",earned:strong/total>=.8,progress:clamp((strong/total)/.8)*100},
+  ];
+}
+
+export function productMetricsV4(input:{
+  courses:Course[];topics:Topic[];attempts:PracticeAttempt[];mistakes:Mistake[];sessions:Session[];plan:PlanItem[];now?:string;
+}):ProductMetricsV4{
+  const now=input.now??today();
+  const independent=input.attempts.filter(a=>!isAssisted(a));
+  const delayed=input.attempts.filter(a=>Number(a.delay_days??0)>=2&&!isAssisted(a));
+  const assisted=input.attempts.filter(a=>isAssisted(a));
+  const calibrated=input.attempts.filter(a=>typeof a.confidence==="number");
+  const delayedRecallRate=delayed.length?delayed.filter(a=>resultScore(a)>=.9).length/delayed.length:null;
+  const independentSuccessRate=independent.length?independent.filter(a=>resultScore(a)>=.9).length/independent.length:null;
+  const assistedRate=input.attempts.length?assisted.length/input.attempts.length:null;
+  const calibrationAccuracy=calibrated.length
+    ?1-calibrated.reduce((sum,a)=>{
+      const expected=clamp(((a.confidence??1)-1)/2);
+      return sum+Math.abs(expected-resultScore(a));
+    },0)/calibrated.length
+    :null;
+  const models=input.topics.map(t=>masteryModelV4(t,input.attempts,{now,examDate:input.courses.find(c=>c.id===t.course_id)?.exam_date??null}));
+  const assessed=models.filter(m=>m.evidenceCount>0);
+  const stable=models.filter(m=>m.level>=4&&m.forgettingRisk<.5);
+  const masteryStability=assessed.length?stable.length/assessed.length:null;
+  const repaired=input.mistakes.filter(m=>["retested","mastered"].includes(m.status));
+  const recoverySuccessRate=repaired.length?repaired.filter(m=>m.status==="mastered").length/repaired.length:null;
+  const relevantPlan=input.plan.filter(p=>p.kind!=="exam"&&p.date<=now);
+  const planCompletion=relevantPlan.length?relevantPlan.filter(p=>p.status==="completed").length/relevantPlan.length:null;
+  const totalHours=input.sessions.reduce((sum,s)=>sum+s.minutes,0)/60;
+  const studyEfficiency=totalHours>0?stable.length/totalHours:null;
+  return{
+    delayedRecallRate,independentSuccessRate,assistedRate,calibrationAccuracy,
+    masteryStability,stableTopics:stable.length,recoverySuccessRate,planCompletion,studyEfficiency,
+  };
+}
+
 export function learningOsSelfCheckV4(input:{
   courses:Course[];topics:Topic[];plan:PlanItem[];attempts:PracticeAttempt[];mistakes:Mistake[];capacity:CapacityProfile;now?:string;
 }){
