@@ -205,7 +205,7 @@ export function TodayView({courses,topics,sessions,exams,plan,tests,attempts,mis
 
 export function PlanView({courses,topics,plan,tests,mistakes,capacity,onStart}:Base&{plan:PlanItem[];tests:PracticeTest[];mistakes:Mistake[];capacity:CapacityProfile;onStart:(id:string)=>void}) {
   const [mode,setMode]=useState<"päivä"|"viikko"|"kuukausi">("viikko"),[anchor,setAnchor]=useState(today()),[creating,setCreating]=useState(false),[adding,setAdding]=useState(false),[choice,setChoice]=useState(courses[0]?.id??"");
-  const [proposal,setProposal]=useState<PlanDraft[]|null>(null);
+  const [proposal,setProposal]=useState<PlanDraft[]|null>(null),[editingProposal,setEditingProposal]=useState(false);
   const move=useMovePlanItem(),status=usePlanStatus(),generate=useGeneratePlan();
   const first=mode==="viikko"?startOfWeek(anchor):mode==="kuukausi"?anchor.slice(0,7)+"-01":anchor;
   const last=mode==="viikko"?addDays(first,6):mode==="kuukausi"?addDays(addDays(first,32).slice(0,7)+"-01",-1):anchor;
@@ -228,7 +228,7 @@ export function PlanView({courses,topics,plan,tests,mistakes,capacity,onStart}:B
       capacity,
     });
     if(!drafts.length){toast.error("Koe on jo mennyt.");return;}
-    setProposal(drafts);
+    setProposal(drafts);setEditingProposal(false);
   }
 
   async function acceptProposal(){
@@ -236,7 +236,7 @@ export function PlanView({courses,topics,plan,tests,mistakes,capacity,onStart}:B
     if(!c||!proposal?.length)return;
     try{
       await generate.mutateAsync({courseId:c.id,drafts:proposal,capacity});
-      setProposal(null);setCreating(false);
+      setProposal(null);setEditingProposal(false);setCreating(false);
       toast.success("Suunnitelma hyväksytty.");
     }catch{toast.error("Suunnitelmaa ei voitu tallentaa.");}
   }
@@ -250,7 +250,11 @@ export function PlanView({courses,topics,plan,tests,mistakes,capacity,onStart}:B
       <select aria-label="Kurssi" value={choice} onChange={e=>setChoice(e.target.value)} className="w-full rounded-xl border bg-surface p-3">{courses.map(c=><option key={c.id} value={c.id}>{c.code} · {c.name}</option>)}</select>
       {selectedMode.active&&<p className="mt-3 rounded-xl bg-accent p-3 text-sm">Koemoodi on aktiivinen: {selectedMode.days} päivää kokeeseen. Uusi sisältö väistyy koetason harjoittelun, virheiden ja kertauksen tieltä.</p>}
       <button disabled={generate.isPending} className={button+" mt-3"} onClick={makeProposal}>Luo ehdotus</button>
-      {proposal&&<div className="mt-4 rounded-2xl border border-border p-4"><div className="flex items-center justify-between gap-3"><div><p className="font-semibold">Ehdotettu muutos</p><p className="text-sm text-muted-foreground">Tämä ei muuta kalenteria ennen hyväksyntää.</p></div><span className="text-sm">{proposal.filter(p=>p.kind!=="exam").length} sessiota</span></div><div className="mt-3 max-h-64 space-y-2 overflow-y-auto">{proposal.filter(p=>p.kind!=="exam").slice(0,14).map((p,i)=><div key={i} className="flex items-center justify-between gap-3 rounded-xl bg-muted/60 p-3 text-sm"><span>{fullDate(p.date)} · {p.title}</span><span className="whitespace-nowrap text-muted-foreground">{minutes(p.target_minutes)}</span></div>)}</div><div className="mt-4 flex flex-wrap gap-2"><button disabled={generate.isPending} className={button} onClick={()=>void acceptProposal()}>Hyväksy</button><button className={secondary} onClick={()=>setProposal(null)}>Pidä nykyinen</button></div></div>}
+      {proposal&&<div className="mt-4 rounded-2xl border border-border p-4">
+        <div className="flex items-center justify-between gap-3"><div><p className="font-semibold">Ehdotan muutosta suunnitelmaan</p><p className="text-sm text-muted-foreground">Mikään ei muutu ennen hyväksyntää. Kapasiteettirajat pidetään voimassa myös muokkauksen jälkeen.</p></div><span className="text-sm">{proposal.filter(p=>p.kind!=="exam").length} sessiota</span></div>
+        <div className="mt-3 max-h-72 space-y-2 overflow-y-auto">{proposal.filter(p=>p.kind!=="exam").slice(0,18).map((p,i)=><div key={i} className="grid gap-2 rounded-xl bg-muted/60 p-3 text-sm sm:grid-cols-[1fr_auto_auto] sm:items-center"><span>{p.title}</span>{editingProposal?<><input aria-label={"Päivä: "+p.title} type="date" className="min-h-10 rounded-lg border bg-surface px-2" value={p.date} onChange={e=>setProposal(current=>current?.map(item=>item===p?{...item,date:e.target.value}:item)??null)}/><input aria-label={"Minuutit: "+p.title} type="number" min={p.min_minutes} max="240" step="5" className="min-h-10 w-24 rounded-lg border bg-surface px-2" value={p.target_minutes} onChange={e=>setProposal(current=>current?.map(item=>item===p?{...item,target_minutes:Math.max(item.min_minutes,Number(e.target.value)||item.min_minutes)}:item)??null)}/></>:<><span>{fullDate(p.date)}</span><span className="whitespace-nowrap text-muted-foreground">{minutes(p.target_minutes)}</span></>}</div>)}</div>
+        <div className="mt-4 flex flex-wrap gap-2"><button disabled={generate.isPending} className={button} onClick={()=>void acceptProposal()}>Hyväksy</button><button className={secondary} onClick={()=>setEditingProposal(value=>!value)}>{editingProposal?"Valmis muokkauksesta":"Muokkaa"}</button><button className={secondary} onClick={()=>{setProposal(null);setEditingProposal(false);}}>Pidä nykyinen</button></div>
+      </div>}
     </Panel>}
     {plan.length===0&&<Panel title="Ei tehtäviä vielä"><p className="text-muted-foreground">Luo ensimmäinen suunnitelma tai lisää tehtävä itse.</p></Panel>}
     <div className={mode==="kuukausi"?"grid grid-cols-2 gap-2 sm:grid-cols-7":"space-y-3"}>{days.map(date=><section className={`panel p-4 ${date===today()?"ring-1 ring-primary/50":""}`} key={date} onDragOver={e=>e.preventDefault()} onDrop={e=>{e.preventDefault();const id=e.dataTransfer.getData("text/plain");const item=plan.find(p=>p.id===id);if(item&&item.date!==date)void move.mutateAsync({id,date,from:item.date}).then(()=>toast.success("Tehtävä siirretty.")).catch(()=>toast.error("Siirto epäonnistui."));}}><h2 className="mb-3 text-sm font-semibold capitalize">{dateWithWeekday(date)}</h2>{plan.filter(p=>p.date===date).length===0?<p className="text-sm text-muted-foreground">Ei tehtäviä</p>:plan.filter(p=>p.date===date).map(p=><div key={p.id} draggable={mode!=="kuukausi"&&p.kind!=="exam"} onDragStart={e=>e.dataTransfer.setData("text/plain",p.id)} className="mb-2 rounded-xl bg-muted/60 p-3"><p className="text-xs font-semibold text-primary">{courses.find(c=>c.id===p.course_id)?.code} · {p.start_time?.slice(0,5)||minutes(p.target_minutes)}</p><p className="mt-1 text-sm font-medium">{p.title||topics.find(t=>t.id===p.topic_id)?.name||"Opiskelu"}</p><p className={`mt-1 text-xs ${statusClass[effectivePlanStatus(p)]}`}><span aria-hidden="true">{statusIcon[effectivePlanStatus(p)]} </span>{statusLabel[effectivePlanStatus(p)]} · {p.phase}</p>{mode!=="kuukausi"&&p.kind!=="exam"&&<div className="mt-3 flex flex-wrap items-center gap-1"><button className={secondary+" !min-h-9 !px-2"} onClick={()=>onStart(p.id)}>Aloita</button><details className="relative"><summary className={secondary+" list-none !min-h-9 !px-3"} aria-label="Tehtävän toiminnot">•••</summary><div className="absolute right-0 z-10 mt-1 min-w-36 rounded-xl border border-border bg-surface p-1 shadow-lg"><button className="block min-h-10 w-full rounded-lg px-3 text-left text-sm hover:bg-muted" onClick={()=>void shift(p)}>Siirrä</button>{p.status==="planned"&&<button className="block min-h-10 w-full rounded-lg px-3 text-left text-sm hover:bg-muted" onClick={()=>void status.mutateAsync({id:p.id,status:"skipped"}).then(()=>toast.success("Tehtävä ohitettu.")).catch(()=>toast.error("Muutos epäonnistui."))}>Ohita</button>}</div></details></div>}</div>)}</section>)}</div>
@@ -504,7 +508,7 @@ export function SettingsView({user}:{user:DeviceUser}) {
   const [pushEnabled,setPushEnabled]=useState(false);
   const [pushBusy,setPushBusy]=useState(false);
   const preferences=usePreferences(),prefs=preferences.data,updatePreferences=useUpdatePreferences();
-  const [weekdayCapacity,setWeekdayCapacity]=useState(60),[weekendCapacity,setWeekendCapacity]=useState(90),[busyDate,setBusyDate]=useState("");
+  const [weekdayMinCapacity,setWeekdayMinCapacity]=useState(30),[weekdayCapacity,setWeekdayCapacity]=useState(60),[weekendMinCapacity,setWeekendMinCapacity]=useState(60),[weekendCapacity,setWeekendCapacity]=useState(120),[busyDate,setBusyDate]=useState("");
   const settingsQ=useSettings(),settings=settingsQ.data,updateSettings=useUpdateSettings();
   const allCourses=useCourses(),archiveCourse=useArchiveCourse();
   const archived=(allCourses.data??[]).filter(c=>c.archived);
@@ -523,9 +527,11 @@ export function SettingsView({user}:{user:DeviceUser}) {
   },[]);
   useEffect(()=>{
     if(!prefs)return;
+    setWeekdayMinCapacity(prefs.weekday_capacity_min_minutes??30);
     setWeekdayCapacity(prefs.weekday_capacity_minutes??60);
-    setWeekendCapacity(prefs.weekend_capacity_minutes??90);
-  },[prefs?.weekday_capacity_minutes,prefs?.weekend_capacity_minutes]);
+    setWeekendMinCapacity(prefs.weekend_capacity_min_minutes??60);
+    setWeekendCapacity(prefs.weekend_capacity_minutes??120);
+  },[prefs?.weekday_capacity_min_minutes,prefs?.weekday_capacity_minutes,prefs?.weekend_capacity_min_minutes,prefs?.weekend_capacity_minutes]);
 
   async function togglePush(){
     setPushBusy(true);
@@ -564,8 +570,9 @@ export function SettingsView({user}:{user:DeviceUser}) {
     <Panel title="Opiskelurytmi ja kapasiteetti">
       <p className="mb-3 text-sm text-muted-foreground">Planner käyttää näitä rajoina. Väliin jäänyttä työmäärää ei työnnetä seuraavan päivän kapasiteetin yli.</p>
       <div className="flex flex-wrap gap-2">{weekdayOptions.map(([day,label])=>{const active=(prefs?.study_weekdays??[1,2,3,4,5]).includes(day);return <button key={day} type="button" aria-pressed={active} onClick={()=>void toggleWeekday(day)} className={`grid size-11 place-items-center rounded-xl border text-sm font-semibold ${active?"border-primary bg-accent text-primary":"border-border bg-surface"}`}>{label}</button>;})}</div>
-      <div className="mt-4 grid gap-3 sm:grid-cols-2"><label className="text-sm font-medium">Arkipäivä (min)<input type="number" min="15" max="360" step="15" className="mt-1 w-full rounded-xl border bg-surface px-3 py-2.5" value={weekdayCapacity} onChange={e=>setWeekdayCapacity(Number(e.target.value))}/></label><label className="text-sm font-medium">Viikonloppu (min)<input type="number" min="15" max="480" step="15" className="mt-1 w-full rounded-xl border bg-surface px-3 py-2.5" value={weekendCapacity} onChange={e=>setWeekendCapacity(Number(e.target.value))}/></label></div>
-      <button className={secondary+" mt-3"} disabled={!prefs||updatePreferences.isPending} onClick={()=>void updatePreferences.mutateAsync({weekday_capacity_minutes:Math.max(15,weekdayCapacity),weekend_capacity_minutes:Math.max(15,weekendCapacity)}).then(()=>toast.success("Kapasiteetti tallennettu.")).catch(()=>toast.error("Kapasiteettia ei voitu tallentaa."))}>Tallenna kapasiteetti</button>
+      <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4"><label className="text-sm font-medium">Arki min<input type="number" min="0" max="360" step="10" className="mt-1 w-full rounded-xl border bg-surface px-3 py-2.5" value={weekdayMinCapacity} onChange={e=>setWeekdayMinCapacity(Number(e.target.value))}/></label><label className="text-sm font-medium">Arki max<input type="number" min="15" max="360" step="10" className="mt-1 w-full rounded-xl border bg-surface px-3 py-2.5" value={weekdayCapacity} onChange={e=>setWeekdayCapacity(Number(e.target.value))}/></label><label className="text-sm font-medium">Viikonloppu min<input type="number" min="0" max="480" step="10" className="mt-1 w-full rounded-xl border bg-surface px-3 py-2.5" value={weekendMinCapacity} onChange={e=>setWeekendMinCapacity(Number(e.target.value))}/></label><label className="text-sm font-medium">Viikonloppu max<input type="number" min="15" max="480" step="10" className="mt-1 w-full rounded-xl border bg-surface px-3 py-2.5" value={weekendCapacity} onChange={e=>setWeekendCapacity(Number(e.target.value))}/></label></div>
+      <p className="mt-2 text-xs text-muted-foreground">Esimerkiksi arki 30–60 min tarkoittaa: Planner voi tehdä kevyen 30 min päivän, mutta ei täytä päivää yli 60 minuutin.</p>
+      <button className={secondary+" mt-3"} disabled={!prefs||updatePreferences.isPending} onClick={()=>{if(weekdayMinCapacity>weekdayCapacity||weekendMinCapacity>weekendCapacity){toast.error("Minimikapasiteetti ei voi olla maksimia suurempi.");return;}void updatePreferences.mutateAsync({weekday_capacity_min_minutes:Math.max(0,weekdayMinCapacity),weekday_capacity_minutes:Math.max(15,weekdayCapacity),weekend_capacity_min_minutes:Math.max(0,weekendMinCapacity),weekend_capacity_minutes:Math.max(15,weekendCapacity)}).then(()=>toast.success("Kapasiteettivälit tallennettu.")).catch(()=>toast.error("Kapasiteettia ei voitu tallentaa."));}}>Tallenna kapasiteetti</button>
       <div className="mt-5 border-t border-border pt-4"><p className="text-sm font-medium">Kiireiset päivät</p><p className="mt-1 text-xs text-muted-foreground">Kiireisenä päivänä Planner varaa vain kevyen ylläpitokuorman.</p><div className="mt-3 flex flex-wrap gap-2"><input type="date" className="min-h-11 rounded-xl border bg-surface px-3" value={busyDate} onChange={e=>setBusyDate(e.target.value)}/><button className={secondary} disabled={!prefs||!busyDate} onClick={()=>{if(!prefs||!busyDate)return;const next=[...new Set([...(prefs.busy_dates??[]),busyDate])].sort();void updatePreferences.mutateAsync({busy_dates:next}).then(()=>{setBusyDate("");toast.success("Kiireinen päivä lisätty.");}).catch(()=>toast.error("Päivää ei voitu tallentaa."));}}>Merkitse kiireiseksi</button></div><div className="mt-3 flex flex-wrap gap-2">{(prefs?.busy_dates??[]).filter(d=>d>=today()).slice(0,12).map(date=><button key={date} className="rounded-full bg-muted px-3 py-1 text-xs" title="Poista kiireinen päivä" onClick={()=>prefs&&void updatePreferences.mutateAsync({busy_dates:prefs.busy_dates.filter(d=>d!==date)})}>{fullDate(date)} ×</button>)}</div></div>
     </Panel>
 
