@@ -6,6 +6,15 @@ export type Topic = Database["public"]["Tables"]["topics"]["Row"] & {
   retrieval_attempts: number;
   retrieval_failures: number;
   mastery_uncertainty: number;
+  mastery_confidence: number;
+  evidence_count: number;
+  strong_evidence_count: number;
+  recall_strength: number;
+  application_strength: number;
+  retention_strength: number;
+  forgetting_risk: number;
+  exam_relevance: number;
+  learning_state_updated_at: string | null;
   last_retrieval_at: string | null;
   last_retrieval_result: "independent" | "hinted" | "not_yet" | null;
   last_retrieval_confidence: number | null;
@@ -45,13 +54,33 @@ export type PracticeAttempt = {
   course_id: string;
   topic_id: string;
   date: string;
-  attempt_type: "free_recall" | "short_answer" | "calculation" | "application" | "recognition";
+  attempt_type:
+    | "free_recall"
+    | "short_answer"
+    | "calculation"
+    | "application"
+    | "multiple_choice"
+    | "explanation"
+    | "ordering"
+    | "error_detection"
+    | "simulation"
+    | "recognition";
   prompt: string;
   response: string | null;
   difficulty: number;
   result: "independent" | "hinted" | "not_yet";
+  outcome?: "correct" | "partial" | "incorrect" | null;
   confidence: number | null;
   hint_used: boolean;
+  hints_used?: number;
+  response_time_ms?: number | null;
+  source?: "practice" | "review" | "study_session" | "exam" | "mistake_repair";
+  evidence_quality?: number;
+  skills?: string[];
+  expected_concepts?: string[];
+  question_payload?: Record<string, unknown>;
+  operation_id?: string | null;
+  schema_version?: number;
   delay_days: number | null;
   created_at: string;
 };
