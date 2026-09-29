@@ -165,7 +165,7 @@ export function TodayView({courses,topics,sessions,exams,plan,tests,attempts,mis
     {mode.active&&examCourse&&<Panel title={mode.finalStretch?"Koemoodi · loppusuora":"Koemoodi · 14 päivää"}>
       <div className="grid gap-4 sm:grid-cols-3">
         <div><p className="text-sm text-muted-foreground">{examCourse.code}</p><p className="text-2xl font-semibold">{mode.days} pv</p><p className="text-sm text-muted-foreground">kokeeseen</p></div>
-        <div><p className="text-sm text-muted-foreground">Valmistautuminen</p><p className="text-2xl font-semibold">{examReady} %</p><Bar value={examReady}/><p className="mt-1 text-xs text-muted-foreground">Ei arvosanaennuste.</p></div>
+        <div><p className="text-sm text-muted-foreground">Valmistautumisvaihe</p><p className="text-xl font-semibold">{examPrep?.stages[examPrep.index]?.label??"—"}</p><p className="mt-1 text-xs text-muted-foreground">{examPrep?`Vaihe ${examPrep.index+1}/6`:"Ei vaihetta"} · ei arvosanaennuste</p></div>
         <div><p className="text-sm text-muted-foreground">Avoimet virheet</p><p className="text-2xl font-semibold">{openMistakes}</p><p className="text-sm text-muted-foreground">{mode.finalStretch?"Pidä kuorma kevyenä.":"Painota koetason tehtäviä ja kertausta."}</p></div>
       </div>
     </Panel>}
@@ -188,8 +188,8 @@ export function TodayView({courses,topics,sessions,exams,plan,tests,attempts,mis
     </>}</Panel>
 
     {recovery.items.length>0&&<Panel title="Kertaa seuraavaksi" action={<span className="text-sm font-medium text-muted-foreground">noin {minutes(recovery.estimatedMinutes)}</span>}>
-      <div className="space-y-2">{recovery.items.map(t=><div key={t.id} className="flex items-center justify-between gap-3 rounded-xl bg-muted/60 p-3"><span><b>{courses.find(c=>c.id===t.course_id)?.code}</b> · {t.name}</span><span className="text-xs text-muted-foreground">{MASTERY_LABELS[t.verified_level]}</span></div>)}</div>
-      <p className="mt-3 text-sm text-muted-foreground">{recovery.hiddenCount>0?`Näytetään vain kolme tärkeintä kertausta. ${recovery.hiddenCount} muuta pysyy taustalla eikä kaadu tämän päivän työlistaksi.`:"Nämä ovat ajankohtaisimmat kertaukset. Tee mieluummin lyhyt onnistunut palautus kuin pitkä läpiluku."}</p>
+      <div className="space-y-2">{recovery.items.map(row=><div key={row.topic.id} className="flex items-center justify-between gap-3 rounded-xl bg-muted/60 p-3"><span><b>{courses.find(c=>c.id===row.topic.course_id)?.code}</b> · {row.topic.name}<small className="mt-1 block text-muted-foreground">{row.reason}</small></span><span className="text-xs text-muted-foreground">{row.state.masteryLabel}</span></div>)}</div>
+      <p className="mt-3 text-sm text-muted-foreground">{recovery.hiddenCount>0?`Näytetään vain tämän päivän kapasiteettiin sopivat tärkeimmät kertaukset. ${recovery.hiddenCount} muuta on jätetty myöhempään vuoroon.`:"Nämä ovat ajankohtaisimmat kertaukset. Tee mieluummin lyhyt onnistunut palautus kuin pitkä läpiluku."}</p>
       <button className={secondary+" mt-3"} onClick={()=>onGo("practice")}>Avaa Harjoittelu</button>
     </Panel>}
 
