@@ -27,6 +27,16 @@ import {
   weeklyLearningReview,
 } from "@/lib/learning-engine";
 import {
+  adaptiveDayPlanV4,
+  errorProfileV4,
+  learningOsSelfCheckV4,
+  masteryModelV4,
+  personalLearningProfileV4,
+  sessionFatigueV4,
+  simulateLearningOsV4,
+  yoOverviewV4,
+} from "@/lib/learning-os-v4";
+import {
   corridor,
   corridorAdvice,
   courseBuffers,
@@ -108,25 +118,24 @@ export function TodayView({courses,topics,sessions,exams,plan,tests,attempts,mis
   const now=today();
   const move=useMovePlanItem(),upsert=useUpsertPlanItem();
   const [taskIndex,setTaskIndex]=useState(0);
-  const rankedToday=plan
-    .filter(p=>p.date===now&&p.status==="planned"&&p.kind!=="exam")
-    .map(item=>({item,...todayPriority({item,courses,topics,attempts,mistakes,now})}))
-    .sort((a,b)=>b.score-a.score);
-  const items=rankedToday.map(row=>row.item);
-  useEffect(()=>{if(taskIndex>=items.length)setTaskIndex(0);},[items.length,taskIndex]);
-  const next=items[taskIndex]??items[0];
-  const later=items.filter(item=>item.id!==next?.id).slice(0,2);
+  const [loadMode,setLoadMode]=useState<"minimum"|"recommended"|"extra">("recommended");
+  const adaptiveDay=adaptiveDayPlanV4({courses,topics,plan,attempts,mistakes,capacity,now});
+  const actions=adaptiveDay[loadMode];
+  useEffect(()=>{if(taskIndex>=actions.length)setTaskIndex(0);},[actions.length,taskIndex]);
+  const nextAction=actions[taskIndex]??actions[0];
+  const next=nextAction?.planItem??null;
+  const later=actions.filter(action=>action.id!==nextAction?.id).slice(0,2);
   const upcoming=exams.filter(e=>e.date>=now).sort((a,b)=>a.date.localeCompare(b.date))[0];
   const goal=courses.reduce((a,c)=>a+c.weekly_minutes,0),done=weekMinutes(sessions,now),last=sessions.find(s=>s.note||s.unclear);
   const recovery=buildRecoveryQueue({topics,attempts,courses,now,capacityMinutes:Math.min(20,capacityForDateV3(capacity,now)),maxItems:3});
   const comeback=returnFromBreak({sessions,topics,now,days:7});
-  const todayMinutes=items.reduce((sum,item)=>sum+item.target_minutes,0);
+  const todayMinutes=actions.reduce((sum,item)=>sum+item.minutes,0);
   const examCourse=upcoming?courses.find(c=>c.id===upcoming.course_id):undefined;
   const mode=examMode(upcoming?.date??null,now);
   const examTopics=examCourse?topics.filter(t=>t.course_id===examCourse.id):[];
   const examPrep=examCourse?examStage({topics:examTopics,attempts:attempts.filter(a=>a.course_id===examCourse.id),tests:tests.filter(t=>t.course_id===examCourse.id),mistakes:mistakes.filter(m=>m.course_id===examCourse.id),course:examCourse}):null;
   const openMistakes=examCourse?mistakes.filter(m=>m.course_id===examCourse.id&&m.status!=="mastered").length:0;
-  const reason=next?todayPriority({item:next,courses,topics,attempts,mistakes,now}).reason:"";
+  const reason=nextAction?.reason??"";
 
   async function makeLight(){
     if(!next)return;
@@ -170,20 +179,26 @@ export function TodayView({courses,topics,sessions,exams,plan,tests,attempts,mis
       </div>
     </Panel>}
 
-    <Panel title="Tärkein tänään">{next?<>
-      <p className="text-sm font-medium text-primary">{courses.find(c=>c.id===next.course_id)?.code} · {minutes(next.target_minutes)}</p>
-      <h3 className="mt-2 text-2xl font-semibold">{next.title||topics.find(t=>t.id===next.topic_id)?.name||"Opiskelu"}</h3>
-      <details className="mt-3 text-sm text-muted-foreground"><summary className="cursor-pointer font-medium text-foreground">Miksi tätä ehdotetaan?</summary><p className="mt-2">Koska {reason}.</p></details>
-      <p className="mt-3 text-xs text-muted-foreground">Tänään suunniteltu yhteensä noin {minutes(todayMinutes)}. Extra on vapaaehtoista eikä muutu velaksi.</p>
-      <div className="mt-5 flex flex-wrap gap-2">
-        <button className={button} onClick={()=>onStart(next.id)}>Aloita</button>
-        {items.length>1&&<button className={secondary} onClick={()=>setTaskIndex(i=>(i+1)%items.length)}>Vaihda tehtävää</button>}
-        <button disabled={upsert.isPending} className={secondary} onClick={()=>void makeLight()}>Kevyt päivä</button>
-        <button disabled={move.isPending} className={secondary} onClick={()=>void cannotToday()}>En ehdi tänään</button>
+    <Panel title="Tärkein tänään" action={
+      <div className="flex rounded-xl bg-muted p-1 text-xs">
+        <button className={"min-h-9 rounded-lg px-2 "+(loadMode==="minimum"?"bg-surface shadow-sm":"")} onClick={()=>{setLoadMode("minimum");setTaskIndex(0);}}>Kevyt · {adaptiveDay.minimumMinutes} min</button>
+        <button className={"min-h-9 rounded-lg px-2 "+(loadMode==="recommended"?"bg-surface shadow-sm":"")} onClick={()=>{setLoadMode("recommended");setTaskIndex(0);}}>Suositus · {adaptiveDay.recommendedMinutes} min</button>
       </div>
+    }>{nextAction?<>
+      <p className="text-sm font-medium text-primary">{nextAction.course.code} · {minutes(nextAction.minutes)}</p>
+      <h3 className="mt-2 text-2xl font-semibold">{nextAction.title}</h3>
+      <details className="mt-3 text-sm text-muted-foreground"><summary className="cursor-pointer font-medium text-foreground">Miksi nämä?</summary><p className="mt-2">Koska {reason}.</p>{adaptiveDay.stoppedForLowMarginalGain&&<p className="mt-2">Suositus loppuu tähän, koska seuraavan tehtävän arvioitu oppimishyöty per minuutti laskee selvästi.</p>}</details>
+      <p className="mt-3 text-xs text-muted-foreground">Tämän version kokonaiskuorma on noin {minutes(todayMinutes)}. Extra ei muutu opiskelusakoksi.</p>
+      <div className="mt-5 flex flex-wrap gap-2">
+        <button className={button} onClick={()=>nextAction.planItem?onStart(nextAction.planItem.id):onGo("practice")}>Aloita</button>
+        {actions.length>1&&<button className={secondary} onClick={()=>setTaskIndex(i=>(i+1)%actions.length)}>Seuraava ehdotus</button>}
+        {loadMode!=="minimum"&&<button className={secondary} onClick={()=>{setLoadMode("minimum");setTaskIndex(0);}}>Kevyt päivä</button>}
+        {next&&<button disabled={move.isPending} className={secondary} onClick={()=>void cannotToday()}>En ehdi tänään</button>}
+      </div>
+      {later.length>0&&<div className="mt-5 border-t border-border pt-3"><p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Sen jälkeen</p>{later.map(action=><button key={action.id} className="mt-2 flex min-h-11 w-full items-center justify-between rounded-xl bg-muted/50 px-3 text-left" onClick={()=>action.planItem?onStart(action.planItem.id):onGo("practice")}><span><b className="mr-2 text-primary">{action.course.code}</b>{action.title}</span><span className="text-sm text-muted-foreground">{minutes(action.minutes)}</span></button>)}</div>}
     </>:<>
       <p className="font-medium">Ei pakollista itsenäistä opiskelua tänään.</p>
-      <p className="mt-2 text-sm text-muted-foreground">Lepo on sallittu tila. Mitään rästiä ei kasvateta vain siksi, että kalenterissa on tyhjä päivä.</p>
+      <p className="mt-2 text-sm text-muted-foreground">Tämän päivän tärkeimmät oppimistarpeet ovat hallinnassa. Tyhjä päivä ei ole järjestelmävirhe.</p>
       <button className={secondary+" mt-4"} onClick={()=>onGo("plan")}>Avaa suunnitelma</button>
     </>}</Panel>
 
@@ -193,7 +208,6 @@ export function TodayView({courses,topics,sessions,exams,plan,tests,attempts,mis
       <button className={secondary+" mt-3"} onClick={()=>onGo("practice")}>Avaa Harjoittelu</button>
     </Panel>}
 
-    {later.length>0&&<Panel title="Jos aikaa jää">{later.map(p=><button key={p.id} onClick={()=>onStart(p.id)} className="flex min-h-14 w-full items-center justify-between border-t border-border text-left"><span><b className="mr-2 text-primary">{courses.find(c=>c.id===p.course_id)?.code}</b>{p.title}</span><span className="text-sm text-muted-foreground">{minutes(p.target_minutes)}</span></button>)}</Panel>}
 
     <div className="grid grid-cols-2 gap-3 lg:grid-cols-2 lg:gap-5">
       <Panel title="Viikon rytmi"><p className="mb-2 text-xl font-semibold sm:mb-3 sm:text-2xl">{minutes(done)} <span className="text-sm font-normal text-muted-foreground sm:text-base">/ noin {minutes(goal)}</span></p><Bar value={goal?done/goal*100:0}/><p className="mt-2 text-xs leading-5 text-muted-foreground sm:mt-3 sm:text-sm">Aika on kuormituksen mitta, ei osaamistodistus.</p></Panel>
