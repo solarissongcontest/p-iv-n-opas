@@ -318,7 +318,7 @@ test("Gemini provider fails closed and never passes provider prose through", asy
   assert.equal(validResult.source, "gemini");
   assert.equal(validResult.status, "ready");
   assert.match(requestUrl, /generativelanguage\.googleapis\.com/);
-  assert.match(requestUrl, /gemini-3\.8-flash:generateContent$/);
+  assert.match(requestUrl, /gemini-3\.7-flash:generateContent$/);
   assert.equal(new Headers(requestHeaders).get("x-goog-api-key"), "test-only");
 
   const geminiRequest = JSON.parse(requestBody) as {
