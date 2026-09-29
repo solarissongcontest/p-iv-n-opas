@@ -21,6 +21,46 @@ import {
 import { today } from "./fi";
 import { requireDeviceOwnerId } from "./deviceSession";
 
+export type TopicDependency = {
+  id: string;
+  owner_id: string;
+  topic_id: string;
+  depends_on_topic_id: string;
+  relation_type: "prerequisite" | "depends_on" | "related_to" | "builds_on" | "commonly_confused_with";
+  created_at: string;
+};
+
+export type StudyMaterial = {
+  id: string;
+  owner_id: string;
+  course_id: string;
+  name: string;
+  kind: "pdf" | "text" | "slides" | "notes" | "other";
+  topic_ids: string[];
+  page_hint: string | null;
+  text_preview: string | null;
+  metadata: Record<string, unknown>;
+  created_at: string;
+};
+
+export type LearningExperiment = {
+  id: string;
+  owner_id: string;
+  experiment_key: "session_length" | "spacing_window" | "interleaving";
+  enabled: boolean;
+  variant_a: string;
+  variant_b: string;
+  observations: Array<{
+    date: string;
+    variant: "A" | "B";
+    outcome: number;
+    delayedOutcome?: number;
+    minutes?: number;
+  }>;
+  started_at: string;
+  updated_at: string;
+};
+
 export type UserPreferences = {
   owner_id: string;
   display_name: string;
@@ -137,6 +177,33 @@ async function getSettings(): Promise<NotificationSettings | null> {
   return data?.[0] ?? null;
 }
 
+async function listTopicDependencies(): Promise<TopicDependency[]> {
+  const { data, error } = await untypedSupabase
+    .from("topic_dependencies")
+    .select("*")
+    .order("created_at");
+  if (error) throw error;
+  return (data ?? []) as TopicDependency[];
+}
+
+async function listStudyMaterials(): Promise<StudyMaterial[]> {
+  const { data, error } = await untypedSupabase
+    .from("study_materials")
+    .select("*")
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+  return (data ?? []) as StudyMaterial[];
+}
+
+async function listLearningExperiments(): Promise<LearningExperiment[]> {
+  const { data, error } = await untypedSupabase
+    .from("learning_experiments")
+    .select("*")
+    .order("started_at");
+  if (error) throw error;
+  return (data ?? []) as LearningExperiment[];
+}
+
 async function getPreferences(): Promise<UserPreferences | null> {
   const { data, error } = await untypedSupabase
     .from("user_preferences")
@@ -158,6 +225,12 @@ export const usePracticeAttempts = () =>
 export const useSettings = () => useQuery({ queryKey: ["settings"], queryFn: getSettings });
 export const usePreferences = () =>
   useQuery({ queryKey: ["preferences"], queryFn: getPreferences });
+export const useTopicDependencies = () =>
+  useQuery({ queryKey: ["topic-dependencies"], queryFn: listTopicDependencies });
+export const useStudyMaterials = () =>
+  useQuery({ queryKey: ["study-materials"], queryFn: listStudyMaterials });
+export const useLearningExperiments = () =>
+  useQuery({ queryKey: ["learning-experiments"], queryFn: listLearningExperiments });
 export const useWeeklyCheckins = () =>
   useQuery({ queryKey: ["weekly-checkins"], queryFn: listWeeklyCheckins });
 export const useProgressEvents = () =>
@@ -535,7 +608,7 @@ registerOp("weeklyCheckin", doWeeklyCheckin);
 function useInvalidateAll() {
   const qc = useQueryClient();
   return () =>
-    ["courses", "topics", "sessions", "exams", "plan", "mistakes", "tests", "practice-attempts", "settings", "preferences", "weekly-checkins", "progress-events"].forEach(
+    ["courses", "topics", "sessions", "exams", "plan", "mistakes", "tests", "practice-attempts", "settings", "preferences", "weekly-checkins", "progress-events", "topic-dependencies", "study-materials", "learning-experiments"].forEach(
       (k) => qc.invalidateQueries({ queryKey: [k] }),
     );
 }
@@ -738,6 +811,71 @@ export function useUpdatePreferences() {
       const { error } = await untypedSupabase
         .from("user_preferences")
         .upsert(payload, { onConflict: "owner_id" });
+      if (error) throw error;
+    },
+    onSuccess: invalidate,
+  });
+}
+
+export function useUpsertTopicDependency() {
+  const invalidate = useInvalidateAll();
+  return useMutation({
+    mutationFn: async (input: {
+      topic_id: string;
+      depends_on_topic_id: string;
+      relation_type: TopicDependency["relation_type"];
+    }) => {
+      const { error } = await untypedSupabase.from("topic_dependencies").upsert({
+        owner_id: requireDeviceOwnerId(),
+        ...input,
+      }, { onConflict: "owner_id,topic_id,depends_on_topic_id,relation_type" });
+      if (error) throw error;
+    },
+    onSuccess: invalidate,
+  });
+}
+
+export function useDeleteTopicDependency() {
+  const invalidate = useInvalidateAll();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await untypedSupabase.from("topic_dependencies").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: invalidate,
+  });
+}
+
+export function useCreateStudyMaterial() {
+  const invalidate = useInvalidateAll();
+  return useMutation({
+    mutationFn: async (input: Omit<StudyMaterial, "id" | "owner_id" | "created_at">) => {
+      const { error } = await untypedSupabase.from("study_materials").insert({
+        owner_id: requireDeviceOwnerId(),
+        ...input,
+      });
+      if (error) throw error;
+    },
+    onSuccess: invalidate,
+  });
+}
+
+export function useUpsertLearningExperiment() {
+  const invalidate = useInvalidateAll();
+  return useMutation({
+    mutationFn: async (input: {
+      experiment_key: LearningExperiment["experiment_key"];
+      enabled: boolean;
+      variant_a: string;
+      variant_b: string;
+      observations?: LearningExperiment["observations"];
+    }) => {
+      const { error } = await untypedSupabase.from("learning_experiments").upsert({
+        owner_id: requireDeviceOwnerId(),
+        ...input,
+        observations: input.observations ?? [],
+        updated_at: new Date().toISOString(),
+      }, { onConflict: "owner_id,experiment_key" });
       if (error) throw error;
     },
     onSuccess: invalidate,
