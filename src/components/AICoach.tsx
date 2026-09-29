@@ -31,6 +31,35 @@ const MODES: { id: CoachRequest["mode"]; label: string }[] = [
 const buttonClass =
   "min-h-11 rounded-xl border border-border px-3 py-2 text-sm disabled:opacity-50";
 
+function coachFallbackReason(message: CoachMessage) {
+  if (message.status === "quota") {
+    return message.diagnostic === "budget"
+      ? "Coachin oma käyttöraja tuli vastaan."
+      : "Gemini API:n käyttöraja tuli vastaan.";
+  }
+
+  switch (message.diagnostic) {
+    case "auth":
+      return "Gemini API -avain hylättiin tai projektilla ei ole käyttöoikeutta.";
+    case "request":
+      return "Gemini hylkäsi API-pyynnön. Kutsun muoto pitää tarkistaa.";
+    case "model":
+      return "Valittu Gemini-malli ei ole käytettävissä tälle projektille.";
+    case "provider":
+      return "Gemini-palvelu palautti virheen.";
+    case "timeout":
+      return "Gemini ei vastannut ajoissa.";
+    case "network":
+      return "Yhteys Gemini-palveluun katkesi.";
+    case "budget":
+      return "Coachin käyttörajan tarkistus epäonnistui.";
+    case "invalid_output":
+      return "Geminin vastaus ei läpäissyt Answer Firewallia.";
+    default:
+      return "Gemini-vastausta ei voitu käyttää.";
+  }
+}
+
 export function AICoach({
   data,
   selectedCourseId,
@@ -80,6 +109,9 @@ export function AICoach({
   const effectiveCourseId = courseId || context?.courseId || "";
   const topicChoices = data.topics.filter(
     (topic) => topic.course_id === effectiveCourseId,
+  );
+  const geminiActive = messages.some(
+    (message) => message.source === "gemini" && message.status === "ready",
   );
 
   const resetConversation = () => {
@@ -368,9 +400,11 @@ export function AICoach({
             <p className="mt-2 text-xs text-muted-foreground" role="status">
               {!providerChecked
                 ? "Tarkistetaan yhteyttä…"
-                : remoteConfigured
-                  ? "Gemini AI käytettävissä · käyttö vapaaehtoista"
-                  : "Paikallinen ohjaus · kielimallia ei ole yhdistetty"}
+                : geminiActive
+                  ? "Gemini aktiivinen · Answer Firewall käytössä"
+                  : remoteConfigured
+                    ? "Gemini-yhteys määritetty · käyttö vapaaehtoista"
+                    : "Paikallinen ohjaus · kielimallia ei ole yhdistetty"}
             </p>
           </LiquidGlass>
 
@@ -500,10 +534,7 @@ export function AICoach({
                     message.status,
                   ) && (
                     <p className="mt-2 text-xs text-muted-foreground">
-                      {message.status === "quota"
-                        ? "AI:n käyttöraja tuli vastaan."
-                        : "AI-vastausta ei voitu käyttää."}{" "}
-                      Paikallinen ohjaus jatkuu.
+                      {coachFallbackReason(message)} Paikallinen ohjaus jatkuu.
                     </p>
                   )}
 
