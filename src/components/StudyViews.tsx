@@ -29,6 +29,7 @@ import {
 import {
   adaptiveDayPlanV4,
   errorProfileV4,
+  experimentInsightsV4,
   learningOsSelfCheckV4,
   masteryModelV4,
   personalLearningProfileV4,
@@ -447,6 +448,7 @@ export function ProgressView({courses,topics,attempts,sessions,plan,exams,mistak
   const errors30=errorProfileV4(attempts,mistakes,{since:from});
   const fatigue=sessionFatigueV4(sessions,attempts);
   const learningProfile=personalLearningProfileV4(sessions,attempts);
+  const experimentInsights=experimentInsightsV4(sessions,attempts);
   const selfChecks=learningOsSelfCheckV4({courses,topics,plan,attempts,mistakes,capacity,now});
   const simulations=simulateLearningOsV4({courses,topics,plan,attempts,mistakes,capacity,days:60,start:now});
   const learningRows=topics.map(topic=>{
@@ -533,9 +535,15 @@ export function ProgressView({courses,topics,attempts,sessions,plan,exams,mistak
       </Panel>
     </div>
 
-    <Panel title="Henkilökohtainen oppimisprofiili">
-      {learningProfile.observations.length?learningProfile.observations.map((row,index)=><div key={index} className="border-b border-border py-3"><p className="font-medium">{row.label}</p><p className="mt-1 text-xs text-muted-foreground">{row.evidence} · evidenssin varmuus {row.confidence}</p></div>):<p className="text-sm text-muted-foreground">Profiili rakentuu käytöstä. Sovellus ei arvaa “oppimistyyliä” tyhjästä.</p>}
-    </Panel>
+    <div className="grid gap-4 lg:grid-cols-2">
+      <Panel title="Henkilökohtainen oppimisprofiili">
+        {learningProfile.observations.length?learningProfile.observations.map((row,index)=><div key={index} className="border-b border-border py-3"><p className="font-medium">{row.label}</p><p className="mt-1 text-xs text-muted-foreground">{row.evidence} · evidenssin varmuus {row.confidence}</p></div>):<p className="text-sm text-muted-foreground">Profiili rakentuu käytöstä. Sovellus ei arvaa “oppimistyyliä” tyhjästä.</p>}
+      </Panel>
+      <Panel title="Personal Experiment Engine">
+        {experimentInsights.map(row=><div key={row.key} className="border-b border-border py-3"><div className="flex items-center justify-between gap-3"><b>{row.label}</b><span className="text-xs text-muted-foreground">{row.status==="clear"?"selvä signaali":row.status==="signal"?"alustava signaali":"kerätään dataa"}</span></div><p className="mt-1 text-sm text-muted-foreground">{row.description}</p><p className="mt-1 text-xs text-muted-foreground">A: {row.sampleA} havaintoa · B: {row.sampleB} havaintoa</p></div>)}
+        <p className="mt-3 text-xs text-muted-foreground">Johtopäätös tehdään myöhemmästä osaamisnäytöstä, ei siitä tuntuiko sessio mukavalta.</p>
+      </Panel>
+    </div>
 
     <details className="panel p-4 sm:p-5">
       <summary className="cursor-pointer font-semibold">Learning Engine · regression self-check & 60 päivän simulaatio</summary>
