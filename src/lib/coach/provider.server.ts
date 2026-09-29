@@ -130,8 +130,10 @@ export class GeminiCoachProvider implements CoachProvider {
               },
             ],
             generationConfig: {
-              temperature: 0,
-              maxOutputTokens: 32,
+              maxOutputTokens: 128,
+              thinkingConfig: {
+                thinkingLevel: "low",
+              },
               responseFormat: {
                 text: {
                   mimeType: "application/json",

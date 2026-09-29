@@ -353,6 +353,9 @@ test("Gemini provider fails closed and never passes provider prose through", asy
 
   const geminiRequest = JSON.parse(requestBody) as {
     generationConfig?: {
+      temperature?: number;
+      maxOutputTokens?: number;
+      thinkingConfig?: { thinkingLevel?: string };
       responseFormat?: {
         text?: {
           mimeType?: string;
@@ -364,6 +367,12 @@ test("Gemini provider fails closed and never passes provider prose through", asy
       };
     };
   };
+  assert.equal(geminiRequest.generationConfig?.temperature, undefined);
+  assert.equal(geminiRequest.generationConfig?.maxOutputTokens, 128);
+  assert.equal(
+    geminiRequest.generationConfig?.thinkingConfig?.thinkingLevel,
+    "low",
+  );
   assert.equal(
     geminiRequest.generationConfig?.responseFormat?.text?.mimeType,
     "application/json",
