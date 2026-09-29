@@ -650,6 +650,7 @@ export function generatePlan(opts: {
   fromISO?: string;
   mistakes?: Mistake[];
   tests?: PracticeTest[];
+  capacity?: CapacityProfile;
 }): PlanDraft[] {
   const startISO =
     opts.fromISO ??
@@ -720,21 +721,35 @@ export function generatePlan(opts: {
         ? `${topic.name} – kevyt palautus`
         : "Kevyt palautus: virhelista, käsitteet ja kaavat";
     } else if (inExamMode) {
-      const cycle = i % 4;
+      const cycle = i % 6;
       if (cycle === 0) {
-        phase = "practice";
-        kind = "test";
-        topic = choosePriority(date);
-        title = "Harjoituskoe ja virheiden läpikäynti";
-      } else if (cycle === 1 || cycle === 3) {
         phase = "review";
         kind = "review";
         topic = choosePriority(date);
-        title = topic ? `${topic.name} – kohdennettu kertaus` : "Kohdennettu kertaus";
-      } else {
+        title = topic ? `${topic.name} – retrieval ilman materiaalia` : "Retrieval: palauta koealue muistista";
+      } else if (cycle === 1) {
         phase = "application";
         topic = choosePriority(date);
-        title = topic ? `${topic.name} – koetason soveltaminen` : "Koetason soveltaminen";
+        title = topic ? `${topic.name} – mixed practice` : "Mixed practice: valitse oikea menetelmä";
+      } else if (cycle === 2) {
+        phase = "application";
+        topic = choosePriority(date);
+        title = topic ? `${topic.name} – soveltava transfer-tehtävä` : "Transfer: sovella uuteen tilanteeseen";
+      } else if (cycle === 3) {
+        phase = "practice";
+        kind = "test";
+        topic = choosePriority(date);
+        title = "Koesimulaatio";
+      } else if (cycle === 4) {
+        phase = "review";
+        kind = "review";
+        topic = choosePriority(date);
+        title = topic ? `${topic.name} – korjaa virheet` : "Repair: korjaa harjoituskokeen virheet";
+      } else {
+        phase = "light";
+        kind = "review";
+        topic = choosePriority(date);
+        title = topic ? `${topic.name} – kevyt varmistus` : "Kevyt varmistus ja palautuminen";
       }
     } else {
       const x = i / Math.max(1, dates.length - 1);
@@ -775,6 +790,10 @@ export function generatePlan(opts: {
     }
 
     const light = finalStretch;
+    const dailyCapacity = opts.capacity ? capacityForDate(opts.capacity, date) : perDay;
+    const targetMinutes = light
+      ? Math.min(20, dailyCapacity)
+      : Math.max(15, Math.min(perDay, dailyCapacity));
     drafts.push({
       course_id: opts.course.id,
       topic_id: topic?.id ?? null,
@@ -782,9 +801,9 @@ export function generatePlan(opts: {
       phase,
       kind,
       title,
-      min_minutes: light ? 10 : Math.max(15, Math.round(perDay * 0.55)),
-      target_minutes: light ? 20 : perDay,
-      extra_minutes: light ? 0 : Math.round(perDay * 0.35),
+      min_minutes: Math.min(targetMinutes, light ? 10 : Math.max(10, Math.round(targetMinutes * 0.55))),
+      target_minutes: targetMinutes,
+      extra_minutes: light ? 0 : Math.max(0, Math.min(Math.round(targetMinutes * 0.35), dailyCapacity - targetMinutes)),
       start_time: null,
     });
   });
@@ -859,6 +878,7 @@ export function balanceDraftsAgainstPlan(
   drafts: PlanDraft[],
   otherPlan: Pick<PlanItem, "date" | "target_minutes" | "status" | "kind">[],
   maxDailyMinutes = 120,
+  capacity?: CapacityProfile,
 ): PlanDraft[] {
   const result = drafts.map((d) => ({ ...d }));
   const load = new Map<string, number>();
@@ -869,8 +889,9 @@ export function balanceDraftsAgainstPlan(
   const allowedDates = [...new Set(result.filter((d) => d.kind !== "exam").map((d) => d.date))].sort();
 
   for (const item of result.filter((d) => d.kind !== "exam").sort((a, b) => a.date.localeCompare(b.date))) {
+    const dailyLimit = capacity ? capacityForDate(capacity, item.date) : maxDailyMinutes;
     const currentLoad = (load.get(item.date) ?? 0) + item.target_minutes;
-    if (currentLoad <= maxDailyMinutes) {
+    if (currentLoad <= dailyLimit) {
       load.set(item.date, currentLoad);
       continue;
     }
@@ -878,7 +899,7 @@ export function balanceDraftsAgainstPlan(
       .filter((d) => d < item.date)
       .sort((a, b) => b.localeCompare(a));
     const better = candidates.find(
-      (d) => (load.get(d) ?? 0) + item.target_minutes <= maxDailyMinutes,
+      (d) => (load.get(d) ?? 0) + item.target_minutes <= (capacity ? capacityForDate(capacity, d) : maxDailyMinutes),
     );
     if (better) item.date = better;
     load.set(item.date, (load.get(item.date) ?? 0) + item.target_minutes);
@@ -975,6 +996,34 @@ export function studyDaysInWeek(sessions: Session[], iso = today()): number {
 export function effectivePlanStatus(item: PlanItem, now = today()): PlanStatus {
   if (item.status === "planned" && item.date < now) return "overdue";
   return item.status as PlanStatus;
+}
+
+export function examPhaseStatus(input: {
+  topics: Topic[];
+  tests: PracticeTest[];
+  mistakes: Mistake[];
+}) {
+  const coverage = weightedCoverage(input.topics);
+  const retrievalReady = input.topics.length
+    ? input.topics.filter(t => t.basic_successes > 0 || t.delayed_successes > 0).length / input.topics.length
+    : 0;
+  const mixedReady = input.topics.length
+    ? input.topics.filter(t => t.verified_level >= 3).length / input.topics.length
+    : 0;
+  const transferReady = input.topics.length
+    ? input.topics.filter(t => t.exam_successes > 0).length / input.topics.length
+    : 0;
+  const simulated = input.tests.some(t => t.score != null && t.max_score);
+  const activeMistakes = input.mistakes.filter(m => m.status !== "mastered").length;
+
+  return [
+    { key:"coverage", label:"Coverage", done: coverage >= 90, note:`${coverage}% koealueesta käsitelty` },
+    { key:"retrieval", label:"Retrieval", done: retrievalReady >= 0.7, note:`${Math.round(retrievalReady*100)}% aiheista palautettu muistista` },
+    { key:"mixed", label:"Mixed practice", done: mixedReady >= 0.65, note:"Menetelmän valinta mukana harjoittelussa" },
+    { key:"transfer", label:"Transfer", done: transferReady >= 0.5, note:`${Math.round(transferReady*100)}% aiheista koetason näyttöä` },
+    { key:"simulation", label:"Simulation", done: simulated, note: simulated ? "Koesimulaatio kirjattu" : "Koesimulaatio vielä tekemättä" },
+    { key:"repair", label:"Repair", done: simulated && activeMistakes === 0, note: activeMistakes ? `${activeMistakes} avointa virhettä` : "Ei avoimia virheitä" },
+  ];
 }
 
 /** Exam mode: within 14 days prioritise risks, reviews, mistakes, practice tests. */
