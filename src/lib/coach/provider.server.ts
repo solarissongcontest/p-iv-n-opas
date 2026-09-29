@@ -132,7 +132,7 @@ export class GeminiCoachProvider implements CoachProvider {
               },
             ],
             generationConfig: {
-              maxOutputTokens: 128,
+              maxOutputTokens: 512,
               thinkingConfig: {
                 thinkingLevel: "low",
               },
