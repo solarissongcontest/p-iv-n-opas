@@ -816,6 +816,107 @@ export function yoOverviewV4(
   };
 }
 
+export type ExperimentKey = "session_length" | "spacing_window" | "interleaving";
+
+export type ExperimentInsightV4 = {
+  key: ExperimentKey;
+  label: string;
+  status: "collecting" | "signal" | "clear";
+  sampleA: number;
+  sampleB: number;
+  meanA: number | null;
+  meanB: number | null;
+  winner: "A" | "B" | null;
+  difference: number | null;
+  description: string;
+};
+
+export function experimentVariantV4(
+  key: ExperimentKey,
+  date: string,
+  subject: string,
+): "A" | "B" {
+  const seed = key + ":" + date + ":" + subject;
+  let hash = 2166136261;
+  for (const char of seed) {
+    hash ^= char.charCodeAt(0);
+    hash = Math.imul(hash,16777619);
+  }
+  return ((hash >>> 0) % 2) === 0 ? "A" : "B";
+}
+
+export function experimentInsightsV4(
+  sessions: Session[],
+  attempts: PracticeAttempt[],
+): ExperimentInsightV4[] {
+  const mean = (values:number[]) => values.length ? values.reduce((a,b)=>a+b,0)/values.length : null;
+  const classify = (
+    key: ExperimentKey,
+    label: string,
+    aValues:number[],
+    bValues:number[],
+    aLabel:string,
+    bLabel:string,
+  ):ExperimentInsightV4 => {
+    const meanA=mean(aValues),meanB=mean(bValues);
+    if(aValues.length<4||bValues.length<4||meanA===null||meanB===null){
+      return{
+        key,label,status:"collecting",sampleA:aValues.length,sampleB:bValues.length,
+        meanA,meanB,winner:null,difference:null,
+        description:`Kerätään näyttöä: ${aLabel} ${aValues.length} havaintoa, ${bLabel} ${bValues.length} havaintoa.`,
+      };
+    }
+    const difference=Math.abs(meanA-meanB);
+    const winner=meanA>=meanB?"A":"B";
+    const status:ExperimentInsightV4["status"]=
+      difference>=10&&aValues.length+bValues.length>=16?"clear":"signal";
+    return{
+      key,label,status,sampleA:aValues.length,sampleB:bValues.length,
+      meanA,meanB,winner,difference,
+      description:`${winner==="A"?aLabel:bLabel} on tuottanut noin ${Math.round(difference)} %-yksikköä paremman mitatun tuloksen. ${status==="clear"?"Näyttö on jo melko vahva.":"Tätä ei vielä pidä käsitellä varmana johtopäätöksenä."}`,
+    };
+  };
+
+  const sessionA:number[]=[];
+  const sessionB:number[]=[];
+  for(const session of sessions){
+    if(typeof session.competence!=="number")continue;
+    const variant=experimentVariantV4("session_length",session.date,session.course_id+(session.topic_id??""));
+    const target=variant==="A"?25:40;
+    if(Math.abs(session.minutes-target)>10)continue;
+    (variant==="A"?sessionA:sessionB).push((session.competence/5)*100);
+  }
+
+  const interleaveA:number[]=[];
+  const interleaveB:number[]=[];
+  const spacingA:number[]=[];
+  const spacingB:number[]=[];
+  for(const attempt of attempts){
+    const experimentPayload=attempt.question_payload?.["experimentVariants"];
+    const variants=
+      experimentPayload&&typeof experimentPayload==="object"
+        ? experimentPayload as Record<string,unknown>
+        : {};
+    const score=resultScore(attempt)*100;
+    const interleave=variants["interleaving"];
+    if(interleave==="A")interleaveA.push(score);
+    if(interleave==="B")interleaveB.push(score);
+
+    // For spacing, use the delayed outcome and the variant that scheduled the prior interval.
+    const spacing=variants["spacing"];
+    if(Number(attempt.delay_days??0)>=2){
+      if(spacing==="A")spacingA.push(score);
+      if(spacing==="B")spacingB.push(score);
+    }
+  }
+
+  return[
+    classify("session_length","Sessioiden pituus",sessionA,sessionB,"25 min","40 min"),
+    classify("spacing_window","Kertausväli",spacingA,spacingB,"2–3 päivää","4–5 päivää"),
+    classify("interleaving","Harjoittelun järjestys",interleaveA,interleaveB,"blocked","interleaved"),
+  ];
+}
+
 function deterministic(seed:string){
   let h=2166136261;
   for(const ch of seed){h^=ch.charCodeAt(0);h=Math.imul(h,16777619);}
