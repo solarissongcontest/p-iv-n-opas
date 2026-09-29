@@ -369,7 +369,7 @@ export function AICoach({
               {!providerChecked
                 ? "Tarkistetaan yhteyttä…"
                 : remoteConfigured
-                  ? "Cloudflare AI käytettävissä · käyttö vapaaehtoista"
+                  ? "Gemini AI käytettävissä · käyttö vapaaehtoista"
                   : "Paikallinen ohjaus · kielimallia ei ole yhdistetty"}
             </p>
           </LiquidGlass>
@@ -457,10 +457,12 @@ export function AICoach({
               <p className="mt-2 text-muted-foreground">
                 Paikallinen ohjaus toimii ilman ulkoista AI-palvelua. Jos otat
                 AI:n käyttöön, tehtäväsi, oma yrityksesi ja rajatut
-                osaamistiedot lähetetään Cloudflarelle vain seuraavan
+                osaamistiedot lähetetään Google Geminille vain seuraavan
                 ohjausaskeleen valintaa varten. Profiilia, virhepankin tekstejä
-                tai keskusteluhistoriaa ei lähetetä. Älä kirjoita
-                henkilötietoja; automaattinen peittäminen ei tunnista kaikkea.
+                tai keskusteluhistoriaa ei lähetetä. Geminin ilmaisella
+                API-tasolla Google voi käyttää lähetettyä sisältöä tuotteidensa
+                parantamiseen. Älä kirjoita henkilötietoja; automaattinen
+                peittäminen ei tunnista kaikkea.
               </p>
               <label className="mt-3 flex items-start gap-3">
                 <input
@@ -486,7 +488,7 @@ export function AICoach({
                   className="rounded-2xl bg-muted/50 p-4"
                 >
                   <p className="mb-2 text-xs font-medium text-muted-foreground">
-                    {message.source === "cloudflare"
+                    {message.source === "gemini"
                       ? "AI:n valitsema ohjaus"
                       : "Paikallinen ohjaus"}
                   </p>
