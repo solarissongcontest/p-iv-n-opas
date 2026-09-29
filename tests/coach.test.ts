@@ -375,7 +375,7 @@ test("Gemini provider fails closed and never passes provider prose through", asy
   );
   assert.equal(
     geminiRequest.generationConfig?.responseFormat?.text?.mimeType,
-    "application/json",
+    "APPLICATION_JSON",
   );
   assert.equal(
     geminiRequest.generationConfig?.responseFormat?.text?.schema
