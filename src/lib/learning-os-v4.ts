@@ -838,8 +838,7 @@ export function simulateLearningOsV4(input:{
       const date=addDays(start,d);
       const actions=nextBestActionsV4({...input,attempts,now:date}).slice(0,3);
       const cap=capacityForDateV3(input.capacity,date);let used=0;
-      for(let i=0;i<actions.length;i++){
-        const a=actions[i];
+      for(const [i,a] of actions.entries()){
         if(deterministic(profile.id+date+a.id+"adh")>profile.adherence){skipped++;continue;}
         if(used+a.minutes>cap){overloadDays++;skipped++;continue;}
         const isApplication=a.kind==="practice";
@@ -857,7 +856,7 @@ export function simulateLearningOsV4(input:{
         completed++;used+=a.minutes;if(a.kind==="review")reviews++;
       }
     }
-    const models=input.topics.map(t=>masteryModelV4(t,attempts,{now:addDays(start,days),examDate:input.courses.find(c=>c.id===t.course_id)?.exam_date}));
+    const models=input.topics.map(t=>masteryModelV4(t,attempts,{now:addDays(start,days),examDate:input.courses.find(c=>c.id===t.course_id)?.exam_date??null}));
     return{
       profile:profile.id,days,completed,skipped,reviewCount:reviews,overloadDays,
       meanMastery:Math.round(models.reduce((s,m)=>s+m.score,0)/Math.max(1,models.length)),
@@ -874,7 +873,7 @@ export function learningOsSelfCheckV4(input:{
   return[
     {id:"capacity",ok:day.minimumMinutes<=day.capacity&&day.recommendedMinutes<=day.capacity&&day.extraMinutes<=day.capacity,message:"Päiväkuormat pysyvät kapasiteetin sisällä."},
     {id:"order",ok:actions.every((a,i)=>i===0||actions[i-1]!.priority>=a.priority),message:"Next Best Action pysyy prioriteettijärjestyksessä."},
-    {id:"mastery",ok:input.topics.every(t=>{const m=masteryModelV4(t,input.attempts,{now,examDate:input.courses.find(c=>c.id===t.course_id)?.exam_date});return m.score>=0&&m.score<=100&&m.confidence>=0&&m.confidence<=1;}),message:"Mastery ja confidence pysyvät sallituissa rajoissa."},
+    {id:"mastery",ok:input.topics.every(t=>{const m=masteryModelV4(t,input.attempts,{now,examDate:input.courses.find(c=>c.id===t.course_id)?.exam_date??null});return m.score>=0&&m.score<=100&&m.confidence>=0&&m.confidence<=1;}),message:"Mastery ja confidence pysyvät sallituissa rajoissa."},
     {id:"backlog",ok:buildRecoveryQueue({topics:input.topics,attempts:input.attempts,courses:input.courses,now,capacityMinutes:20,maxItems:3}).items.length<=3,message:"Review Queue ei muutu backlog-seinäksi."},
   ];
 }
