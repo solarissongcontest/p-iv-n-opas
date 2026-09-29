@@ -209,7 +209,7 @@ export async function handleMaterialAnalysis(request: Request): Promise<Response
             maxOutputTokens: 1600,
             responseFormat: {
               text: {
-                mimeType: "application/json",
+                mimeType: "APPLICATION_JSON",
                 schema: {
                   type: "object",
                   additionalProperties: false,
