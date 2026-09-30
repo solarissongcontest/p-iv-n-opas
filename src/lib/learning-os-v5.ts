@@ -1012,7 +1012,7 @@ export function learningPolicyV5(input:{
   return{
     actions,primary,alternatives:available.slice(1,3),retentionBudget,stopDecisions,
     note:primary
-      ? "Valinta optimoi oppimishyödyn, säilymisen, koehyödyn, kuormituksen ja evidenssin varmuuden yhdessä."
+      ? "Valinta huomioi oppimishyödyn, muistissa säilymisen, koehyödyn, kuormituksen ja käytettävissä olevan näytön varmuuden."
       : "Tänään ei ole riittävästi hyödyllistä tekemistä lisättäväksi vain kalenterin täytteeksi.",
   };
 }
