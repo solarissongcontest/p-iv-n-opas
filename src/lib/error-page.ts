@@ -1,6 +1,6 @@
 export function renderErrorPage(): string {
   return `<!doctype html>
-<html lang="en">
+<html lang="fi">
   <head>
     <meta charset="utf-8" />
     <title>Sivua ei voitu ladata</title>
@@ -21,7 +21,7 @@ export function renderErrorPage(): string {
       <h1>Sivua ei voitu ladata</h1>
       <p>Jokin meni pieleen sovellusta ladattaessa. Voit yrittää päivittää sivun tai palata etusivulle.</p>
       <div class="actions">
-        <button class="primary" onclick="location.reload()">Try again</button>
+        <button class="primary" onclick="location.reload()">Päivitä sivu</button>
         <a class="secondary" href="/">Palaa etusivulle</a>
       </div>
     </div>
