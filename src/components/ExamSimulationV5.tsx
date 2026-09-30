@@ -20,6 +20,7 @@ const primary="inline-flex min-h-11 items-center justify-center rounded-xl bg-pr
 const secondary="inline-flex min-h-11 items-center justify-center rounded-xl border border-border bg-surface px-4 text-sm disabled:opacity-50";
 
 type AnswerState={text:string;sketch:string};
+type LocalExamDraft={answers?:Record<string,AnswerState>;activeIndex?:number;startedAt?:number};
 
 function Stimulus({value}:{value:Record<string,unknown>|null}) {
   if(!value||!Object.keys(value).length)return null;
@@ -142,22 +143,23 @@ export function ExamSimulationV5({courses,topics}:{courses:Course[];topics:Topic
   function resumeSimulation(){
     if(!resumable)return;
     const localKey="opk.exam-simulation:"+resumable.id;
-    let local:{answers?:Record<string,AnswerState>;activeIndex?:number;startedAt?:number}|null=null;
-    try{local=JSON.parse(localStorage.getItem(localKey)??"null") as typeof local;}catch{local=null;}
+    let local:LocalExamDraft|null=null;
+    try{local=JSON.parse(localStorage.getItem(localKey)??"null") as LocalExamDraft|null;}catch{local=null;}
     const persisted=(resumable.answers??{}) as Record<string,AnswerState>;
     const restored={...persisted,...(local?.answers??{})};
     const chosen=resumable.selected_task_ids??[];
     const tasks=(simulation?.tasks??[]).filter(task=>chosen.includes(task.id));
-    const firstUnanswered=Math.max(0,tasks.findIndex(task=>{
+    const firstUnanswered=tasks.findIndex(task=>{
       const answer=restored[task.id];
       return !(Boolean(answer?.sketch)||answerHasContent(answer?.text??""));
-    }));
+    });
+    const resumeIndex=firstUnanswered>=0?firstUnanswered:0;
     setRowId(resumable.id);
     setSelected(chosen);
     setAnswers(restored);
     answersRef.current=restored;
     setStartedAt(local?.startedAt??(resumable.started_at?Date.parse(resumable.started_at):Date.now()));
-    setActiveIndex(local?.activeIndex??(firstUnanswered<0?0:firstUnanswered));
+    setActiveIndex(local?.activeIndex??resumeIndex);
     setPhase("running");
   }
 
