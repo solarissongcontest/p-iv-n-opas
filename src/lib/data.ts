@@ -21,6 +21,11 @@ import {
 } from "./domain";
 import { today } from "./fi";
 import { requireDeviceOwnerId } from "./deviceSession";
+import type {
+  CalibrationObservationV5,
+  FrictionEventV5,
+  ImplementationIntentionV5,
+} from "./learning-os-v5/types";
 
 export type TopicDependency = {
   id: string;
@@ -62,6 +67,38 @@ export type LearningExperiment = {
   updated_at: string;
 };
 
+export type LearningPolicyState = {
+  id: string;
+  owner_id: string;
+  course_id: string | null;
+  topic_id: string;
+  desired_retention: number;
+  current_retention: number;
+  recommended_minutes: number;
+  stop_today: boolean;
+  next_useful_date: string | null;
+  recommendation_confidence: number;
+  recommendation_reason: string | null;
+  model_version: number;
+  updated_at: string;
+};
+
+export type ExamSimulationRow = {
+  id: string;
+  owner_id: string;
+  course_id: string;
+  mode: "practice" | "full";
+  task_ids: string[];
+  selected_task_ids: string[];
+  completed_task_ids: string[];
+  scores: Record<string, number>;
+  duration_minutes: number;
+  started_at: string | null;
+  completed_at: string | null;
+  task_selection_note: string | null;
+  created_at: string;
+};
+
 export type UserPreferences = {
   owner_id: string;
   display_name: string;
@@ -75,6 +112,9 @@ export type UserPreferences = {
   notifications_enabled: boolean;
   planner_mode?: "manual" | "assisted" | "autopilot";
   personal_experiments_enabled?: boolean;
+  retention_budget_enabled?: boolean;
+  reminder_taper_enabled?: boolean;
+  friction_learning_enabled?: boolean;
   quiet_hours_start?: string | null;
   quiet_hours_end?: string | null;
   learning_schema_version?: number;
@@ -219,6 +259,55 @@ async function listLearningExperiments(): Promise<LearningExperiment[]> {
   return (data ?? []) as LearningExperiment[];
 }
 
+async function listLearningPolicyStates(): Promise<LearningPolicyState[]> {
+  const { data, error } = await untypedSupabase
+    .from("learning_policy_states")
+    .select("*")
+    .order("updated_at", { ascending: false });
+  if (error) throw error;
+  return (data ?? []) as LearningPolicyState[];
+}
+
+async function listCalibrationObservations(): Promise<CalibrationObservationV5[]> {
+  const { data, error } = await untypedSupabase
+    .from("calibration_observations")
+    .select("*")
+    .order("observed_at", { ascending: false })
+    .limit(500);
+  if (error) throw error;
+  return (data ?? []) as CalibrationObservationV5[];
+}
+
+async function listFrictionEvents(): Promise<FrictionEventV5[]> {
+  const { data, error } = await untypedSupabase
+    .from("study_friction_events")
+    .select("*")
+    .order("event_date", { ascending: false })
+    .order("created_at", { ascending: false })
+    .limit(500);
+  if (error) throw error;
+  return (data ?? []) as FrictionEventV5[];
+}
+
+async function listImplementationIntentions(): Promise<ImplementationIntentionV5[]> {
+  const { data, error } = await untypedSupabase
+    .from("implementation_intentions")
+    .select("*")
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+  return (data ?? []) as ImplementationIntentionV5[];
+}
+
+async function listExamSimulations(): Promise<ExamSimulationRow[]> {
+  const { data, error } = await untypedSupabase
+    .from("exam_simulations")
+    .select("*")
+    .order("created_at", { ascending: false })
+    .limit(100);
+  if (error) throw error;
+  return (data ?? []) as ExamSimulationRow[];
+}
+
 async function getPreferences(): Promise<UserPreferences | null> {
   const { data, error } = await untypedSupabase
     .from("user_preferences")
@@ -248,6 +337,16 @@ export const useStudyMaterials = () =>
   useQuery({ queryKey: ["study-materials"], queryFn: listStudyMaterials });
 export const useLearningExperiments = () =>
   useQuery({ queryKey: ["learning-experiments"], queryFn: listLearningExperiments });
+export const useLearningPolicyStates = () =>
+  useQuery({ queryKey: ["learning-policy-states"], queryFn: listLearningPolicyStates });
+export const useCalibrationObservations = () =>
+  useQuery({ queryKey: ["calibration-observations"], queryFn: listCalibrationObservations });
+export const useFrictionEvents = () =>
+  useQuery({ queryKey: ["friction-events"], queryFn: listFrictionEvents });
+export const useImplementationIntentions = () =>
+  useQuery({ queryKey: ["implementation-intentions"], queryFn: listImplementationIntentions });
+export const useExamSimulations = () =>
+  useQuery({ queryKey: ["exam-simulations"], queryFn: listExamSimulations });
 export const useWeeklyCheckins = () =>
   useQuery({ queryKey: ["weekly-checkins"], queryFn: listWeeklyCheckins });
 export const useProgressEvents = () =>
@@ -614,6 +713,71 @@ async function doWeeklyCheckin(payload: unknown) {
   if (error) throw error;
 }
 
+async function doCreateCalibrationObservation(payload: unknown, operationId: string) {
+  const p = payload as CalibrationObservationV5 & { course_id?: string | null; attempt_id?: string | null };
+  const { error } = await untypedSupabase.from("calibration_observations").upsert({
+    id: operationId,
+    owner_id: requireDeviceOwnerId(),
+    course_id: p.course_id ?? null,
+    topic_id: p.topic_id,
+    attempt_id: p.attempt_id ?? null,
+    predicted_confidence: p.predicted_confidence,
+    actual_outcome: p.actual_outcome,
+    delay_hours: p.delay_hours,
+    observed_at: p.observed_at ?? new Date().toISOString(),
+  }, { onConflict: "id" });
+  if (error) throw error;
+  return operationId;
+}
+
+async function doCreateFrictionEvent(payload: unknown, operationId: string) {
+  const p = payload as FrictionEventV5;
+  const { error } = await untypedSupabase.from("study_friction_events").upsert({
+    id: operationId,
+    owner_id: requireDeviceOwnerId(),
+    event_date: p.date,
+    plan_item_id: p.plan_item_id ?? null,
+    course_id: p.course_id ?? null,
+    reason: p.reason,
+    note: p.note ?? null,
+    self_started: p.self_started ?? null,
+    reminder_used: p.reminder_used ?? null,
+  }, { onConflict: "id" });
+  if (error) throw error;
+  return operationId;
+}
+
+async function doUpsertImplementationIntention(payload: unknown, operationId: string) {
+  const p = payload as ImplementationIntentionV5;
+  const id = p.id ?? operationId;
+  const { error } = await untypedSupabase.from("implementation_intentions").upsert({
+    id,
+    owner_id: requireDeviceOwnerId(),
+    trigger_type: p.trigger_type,
+    trigger_value: p.trigger_value,
+    action_type: p.action_type,
+    action_value: p.action_value,
+    enabled: p.enabled,
+    suggested: p.suggested ?? false,
+    reason: p.reason ?? null,
+    updated_at: new Date().toISOString(),
+  }, { onConflict: "id" });
+  if (error) throw error;
+  return id;
+}
+
+async function doUpsertLearningPolicyState(payload: unknown, operationId: string) {
+  const p = payload as Omit<LearningPolicyState, "id" | "owner_id" | "updated_at"> & { id?: string };
+  const { error } = await untypedSupabase.from("learning_policy_states").upsert({
+    id: p.id ?? operationId,
+    owner_id: requireDeviceOwnerId(),
+    ...p,
+    updated_at: new Date().toISOString(),
+  }, { onConflict: "owner_id,topic_id" });
+  if (error) throw error;
+  return p.topic_id;
+}
+
 registerOp("logSession", doLogSession);
 registerOp("recordPracticeAttempt", doRecordPracticeAttempt);
 registerOp("createMistake", doCreateMistake);
@@ -621,11 +785,15 @@ registerOp("updatePlanStatus", doUpdatePlanStatus);
 registerOp("movePlanItem", doMovePlanItem);
 registerOp("upsertPlanItem", doUpsertPlanItem);
 registerOp("weeklyCheckin", doWeeklyCheckin);
+registerOp("createCalibrationObservation", doCreateCalibrationObservation);
+registerOp("createFrictionEvent", doCreateFrictionEvent);
+registerOp("upsertImplementationIntention", doUpsertImplementationIntention);
+registerOp("upsertLearningPolicyState", doUpsertLearningPolicyState);
 
 function useInvalidateAll() {
   const qc = useQueryClient();
   return () =>
-    ["courses", "topics", "sessions", "exams", "plan", "mistakes", "tests", "practice-attempts", "question-bank", "settings", "preferences", "weekly-checkins", "progress-events", "topic-dependencies", "study-materials", "learning-experiments"].forEach(
+    ["courses", "topics", "sessions", "exams", "plan", "mistakes", "tests", "practice-attempts", "question-bank", "settings", "preferences", "weekly-checkins", "progress-events", "topic-dependencies", "study-materials", "learning-experiments", "learning-policy-states", "calibration-observations", "friction-events", "implementation-intentions", "exam-simulations"].forEach(
       (k) => qc.invalidateQueries({ queryKey: [k] }),
     );
 }
@@ -936,6 +1104,87 @@ export function useUpsertLearningExperiment() {
         observations: input.observations ?? [],
         updated_at: new Date().toISOString(),
       }, { onConflict: "owner_id,experiment_key" });
+      if (error) throw error;
+    },
+    onSuccess: invalidate,
+  });
+}
+
+export function useCreateCalibrationObservation() {
+  const invalidate = useInvalidateAll();
+  return useMutation({
+    mutationFn: (input: CalibrationObservationV5 & { course_id?: string | null; attempt_id?: string | null }) =>
+      runOrQueue("createCalibrationObservation", input),
+    onSuccess: invalidate,
+  });
+}
+
+export function useCreateFrictionEvent() {
+  const invalidate = useInvalidateAll();
+  return useMutation({
+    mutationFn: (input: FrictionEventV5) => runOrQueue("createFrictionEvent", input),
+    onSuccess: invalidate,
+  });
+}
+
+export function useUpsertImplementationIntention() {
+  const invalidate = useInvalidateAll();
+  return useMutation({
+    mutationFn: (input: ImplementationIntentionV5) =>
+      runOrQueue("upsertImplementationIntention", input),
+    onSuccess: invalidate,
+  });
+}
+
+export function useUpsertLearningPolicyState() {
+  const invalidate = useInvalidateAll();
+  return useMutation({
+    mutationFn: (
+      input: Omit<LearningPolicyState, "id" | "owner_id" | "updated_at"> & { id?: string },
+    ) => runOrQueue("upsertLearningPolicyState", input),
+    onSuccess: invalidate,
+  });
+}
+
+export function useCreateExamSimulation() {
+  const invalidate = useInvalidateAll();
+  return useMutation({
+    mutationFn: async (input: {
+      course_id: string;
+      mode: "practice" | "full";
+      task_ids: string[];
+      selected_task_ids?: string[];
+      duration_minutes: number;
+    }) => {
+      const { data, error } = await untypedSupabase.from("exam_simulations").insert({
+        owner_id: requireDeviceOwnerId(),
+        course_id: input.course_id,
+        mode: input.mode,
+        task_ids: input.task_ids,
+        selected_task_ids: input.selected_task_ids ?? [],
+        duration_minutes: input.duration_minutes,
+        started_at: new Date().toISOString(),
+      }).select("id").single();
+      if (error) throw error;
+      return data?.id as string;
+    },
+    onSuccess: invalidate,
+  });
+}
+
+export function useUpdateExamSimulation() {
+  const invalidate = useInvalidateAll();
+  return useMutation({
+    mutationFn: async (input: {
+      id: string;
+      selected_task_ids?: string[];
+      completed_task_ids?: string[];
+      scores?: Record<string, number>;
+      completed_at?: string | null;
+      task_selection_note?: string | null;
+    }) => {
+      const { id, ...patch } = input;
+      const { error } = await untypedSupabase.from("exam_simulations").update(patch).eq("id", id);
       if (error) throw error;
     },
     onSuccess: invalidate,
