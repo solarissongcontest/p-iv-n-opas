@@ -755,6 +755,16 @@ export function SettingsView({user}:{user:DeviceUser}) {
         {(["manual","assisted","autopilot"] as const).map(mode=><button key={mode} className={(prefs?.planner_mode??"assisted")===mode?button:secondary} onClick={()=>void updatePreferences.mutateAsync({planner_mode:mode}).catch(()=>toast.error("Planner-tilaa ei voitu tallentaa."))}>{mode==="manual"?"Manual":mode==="assisted"?"Assisted":"Autopilot"}</button>)}
       </div>
       <label className="mt-4 flex min-h-12 items-center justify-between gap-4 border-t border-border pt-3"><span><b>Personal Experiment Engine</b><small className="block text-muted-foreground">Vertaa pieniä turvallisia variaatioita vasta myöhemmän retention perusteella.</small></span><input type="checkbox" className="size-5 accent-primary" checked={prefs?.personal_experiments_enabled??true} onChange={e=>void updatePreferences.mutateAsync({personal_experiments_enabled:e.target.checked}).catch(()=>toast.error("Kokeiluasetusta ei voitu tallentaa."))}/></label>
+      <div className="mt-4 divide-y divide-border border-t border-border">
+        {([
+          ["retention_budget_enabled","Adaptive Retention Budget","Suojaa tärkein muistaminen käytettävissä olevan ajan sisällä."],
+          ["pretest_enabled","Preview Challenge","Kartoita uusi aihe mastery-neutraalilla ennakkotestillä ennen opetusta."],
+          ["feedback_policy_enabled","Adaptive Feedback","Ajoita palaute eri tavalla uuden oppimisen, retrievalin ja koesimulaation mukaan."],
+          ["friction_learning_enabled","Behavior Engine","Opi miksi sessiot jäävät väliin ja ehdota kevyitä if-then-sääntöjä."],
+          ["reminder_taper_enabled","Reminder Tapering","Vähennä tavallisia muistutuksia, kun opiskelu käynnistyy jo itsenäisesti."],
+          ["abitti_simulation_enabled","YO / Abitti 2 -fidelity","Käytä tehtävävalintaa, lähdeaineistoa, piirrosvastauksia ja viivästettyä palautetta koesimulaatioissa."],
+        ] as const).map(([key,label,description])=><label key={key} className="flex min-h-14 items-center justify-between gap-4 py-3"><span><b>{label}</b><small className="block text-muted-foreground">{description}</small></span><input type="checkbox" className="size-5 accent-primary" checked={prefs?.[key]??true} onChange={e=>void updatePreferences.mutateAsync({[key]:e.target.checked}).catch(()=>toast.error("Learning OS -asetusta ei voitu tallentaa."))}/></label>)}
+      </div>
       <div className="mt-4 grid gap-3 border-t border-border pt-3 sm:grid-cols-2">
         <label className="text-sm font-medium">Hiljaiset tunnit alkavat<input type="time" className="mt-1 w-full rounded-xl border bg-surface px-3 py-2.5" value={prefs?.quiet_hours_start?.slice(0,5)??"21:30"} onChange={e=>void updatePreferences.mutateAsync({quiet_hours_start:e.target.value}).catch(()=>toast.error("Hiljaisia tunteja ei voitu tallentaa."))}/></label>
         <label className="text-sm font-medium">Hiljaiset tunnit päättyvät<input type="time" className="mt-1 w-full rounded-xl border bg-surface px-3 py-2.5" value={prefs?.quiet_hours_end?.slice(0,5)??"07:00"} onChange={e=>void updatePreferences.mutateAsync({quiet_hours_end:e.target.value}).catch(()=>toast.error("Hiljaisia tunteja ei voitu tallentaa."))}/></label>
