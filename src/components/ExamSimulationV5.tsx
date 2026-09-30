@@ -1,9 +1,11 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import type { Course, Topic } from "@/lib/domain";
 import {
   useCreateExamSimulation,
+  useExamSimulations,
   useQuestionBank,
+  useRecordPracticeAttempt,
   useUpdateExamSimulation,
 } from "@/lib/data";
 import {
@@ -11,7 +13,7 @@ import {
   reviewTaskSelectionV5,
   type ExamSimulationTaskV5,
 } from "@/lib/learning-os-v5";
-import { AbittiAnswerEditor } from "@/components/AbittiAnswerEditor";
+import { AbittiAnswerEditor, answerHasContent, answerPlainText } from "@/components/AbittiAnswerEditor";
 import { SketchAnswerCanvas } from "@/components/SketchAnswerCanvas";
 
 const primary="inline-flex min-h-11 items-center justify-center rounded-xl bg-primary px-4 text-sm font-medium text-primary-foreground disabled:opacity-50";
@@ -31,6 +33,8 @@ export function ExamSimulationV5({courses,topics}:{courses:Course[];topics:Topic
   const bank=useQuestionBank();
   const create=useCreateExamSimulation();
   const update=useUpdateExamSimulation();
+  const simulations=useExamSimulations();
+  const recordAttempt=useRecordPracticeAttempt();
   const [courseId,setCourseId]=useState(courses.find(c=>!c.archived)?.id??courses[0]?.id??"");
   const [mode,setMode]=useState<"practice"|"full">("full");
   const [selected,setSelected]=useState<string[]>([]);
@@ -41,6 +45,9 @@ export function ExamSimulationV5({courses,topics}:{courses:Course[];topics:Topic
   const [scores,setScores]=useState<Record<string,number>>({});
   const [startedAt,setStartedAt]=useState<number|null>(null);
   const [elapsed,setElapsed]=useState(0);
+  const [finishing,setFinishing]=useState(false);
+  const answersRef=useRef<Record<string,AnswerState>>({});
+  const autosaveTimer=useRef<number|null>(null);
 
   const course=courses.find(c=>c.id===courseId)??null;
   const simulation=useMemo(()=>course?buildExamSimulationV5({
@@ -49,11 +56,16 @@ export function ExamSimulationV5({courses,topics}:{courses:Course[];topics:Topic
     questions:bank.data??[],
     mode,
   }):null,[course,topics,bank.data,mode]);
+  const resumable=useMemo(()=>(simulations.data??[]).find(row=>
+    row.course_id===courseId&&row.mode===mode&&!row.completed_at
+  )??null,[simulations.data,courseId,mode]);
 
   useEffect(()=>{
     if(!simulation||phase!=="select")return;
     setSelected(current=>current.filter(id=>simulation.tasks.some(t=>t.id===id)).slice(0,simulation.maxSelected));
   },[simulation,phase]);
+
+  useEffect(()=>()=>{if(autosaveTimer.current!==null)window.clearTimeout(autosaveTimer.current);},[]);
 
   useEffect(()=>{
     if(phase!=="running"||startedAt===null)return;
@@ -68,7 +80,20 @@ export function ExamSimulationV5({courses,topics}:{courses:Course[];topics:Topic
 
   function toggle(id:string){
     if(phase!=="select"||!simulation)return;
-    setSelected(current=>current.includes(id)?current.filter(x=>x!==id):current.length>=simulation.maxSelected?current:[...current,id]);
+    setSelected(current=>{
+      if(current.includes(id))return current.filter(x=>x!==id);
+      if(current.length>=simulation.maxSelected){
+        toast.error("Tehtävien enimmäismäärä on jo valittu.");
+        return current;
+      }
+      const task=simulation.tasks.find(candidate=>candidate.id===id);
+      const currentPoints=simulation.tasks.filter(candidate=>current.includes(candidate.id)).reduce((sum,candidate)=>sum+candidate.points,0);
+      if(!task||currentPoints+task.points>simulation.maxPoints){
+        toast.error(`Valittujen tehtävien yhteispisteet eivät voi ylittää ${simulation.maxPoints} pistettä.`);
+        return current;
+      }
+      return [...current,id];
+    });
   }
 
   async function start(){
@@ -81,50 +106,128 @@ export function ExamSimulationV5({courses,topics}:{courses:Course[];topics:Topic
         selected_task_ids:selected,
         duration_minutes:simulation.durationMinutes,
       });
+      const started=Date.now();
       setRowId(id);
-      setStartedAt(Date.now());
+      setStartedAt(started);
       setElapsed(0);
       setActiveIndex(0);
+      setAnswers({});
+      answersRef.current={};
+      localStorage.setItem("opk.exam-simulation:"+id,JSON.stringify({answers:{},selected,activeIndex:0,startedAt:started}));
       setPhase("running");
     }catch{toast.error("Koetilaa ei voitu käynnistää.");}
   }
 
   function changeAnswer(task:ExamSimulationTaskV5,patch:Partial<AnswerState>){
-    setAnswers(current=>({
-      ...current,
-      [task.id]:{text:"",sketch:"",...(current[task.id]??{}),...patch},
+    const next={
+      ...answersRef.current,
+      [task.id]:{text:"",sketch:"",...(answersRef.current[task.id]??{}),...patch},
+    };
+    answersRef.current=next;
+    setAnswers(next);
+    if(!rowId)return;
+    localStorage.setItem("opk.exam-simulation:"+rowId,JSON.stringify({answers:next,selected,activeIndex,startedAt}));
+    if(autosaveTimer.current!==null)window.clearTimeout(autosaveTimer.current);
+    autosaveTimer.current=window.setTimeout(()=>{
+      update.mutate({id:rowId,answers:next});
+      autosaveTimer.current=null;
+    },800);
+  }
+
+  function answerCompleted(taskId:string){
+    const answer=answersRef.current[taskId]??answers[taskId];
+    return Boolean(answer?.sketch)||answerHasContent(answer?.text??"");
+  }
+
+  function resumeSimulation(){
+    if(!resumable)return;
+    const localKey="opk.exam-simulation:"+resumable.id;
+    let local:{answers?:Record<string,AnswerState>;activeIndex?:number;startedAt?:number}|null=null;
+    try{local=JSON.parse(localStorage.getItem(localKey)??"null") as typeof local;}catch{local=null;}
+    const persisted=(resumable.answers??{}) as Record<string,AnswerState>;
+    const restored={...persisted,...(local?.answers??{})};
+    const chosen=resumable.selected_task_ids??[];
+    const tasks=(simulation?.tasks??[]).filter(task=>chosen.includes(task.id));
+    const firstUnanswered=Math.max(0,tasks.findIndex(task=>{
+      const answer=restored[task.id];
+      return !(Boolean(answer?.sketch)||answerHasContent(answer?.text??""));
     }));
+    setRowId(resumable.id);
+    setSelected(chosen);
+    setAnswers(restored);
+    answersRef.current=restored;
+    setStartedAt(local?.startedAt??(resumable.started_at?Date.parse(resumable.started_at):Date.now()));
+    setActiveIndex(local?.activeIndex??(firstUnanswered<0?0:firstUnanswered));
+    setPhase("running");
   }
 
   function next(){
+    if(rowId)localStorage.setItem("opk.exam-simulation:"+rowId,JSON.stringify({answers:answersRef.current,selected,activeIndex:Math.min(activeIndex+1,selectedTasks.length-1),startedAt}));
     if(activeIndex+1<selectedTasks.length){setActiveIndex(i=>i+1);return;}
     setPhase("review");
   }
 
   async function finishReview(){
-    if(!simulation||!rowId)return;
+    if(!simulation||!rowId||finishing)return;
+    const completedTaskIds=selected.filter(answerCompleted);
     const review=reviewTaskSelectionV5({
       simulation,
       selectedTaskIds:selected,
-      completedTaskIds:selected,
+      completedTaskIds,
       scores,
     });
+    setFinishing(true);
     try{
       await update.mutateAsync({
         id:rowId,
-        completed_task_ids:selected,
+        completed_task_ids:completedTaskIds,
         scores,
-        answers,
+        answers:answersRef.current,
         completed_at:new Date().toISOString(),
         task_selection_note:review.note,
       });
+      for(const task of selectedTasks.filter(task=>completedTaskIds.includes(task.id))){
+        const item=(bank.data??[]).find(question=>question.id===task.id);
+        if(!item||!task.topicId)continue;
+        const earned=Math.max(0,Math.min(task.points,Number(scores[task.id]??0)));
+        const ratio=task.points>0?earned/task.points:0;
+        const answer=answersRef.current[task.id]??{text:"",sketch:""};
+        await recordAttempt.mutateAsync({
+          course_id:courseId,
+          topic_id:task.topicId,
+          attempt_type:"simulation",
+          prompt:item.prompt,
+          response:answerHasContent(answer.text)?answerPlainText(answer.text):answer.sketch?"[piirrosvastaus]":null,
+          difficulty:item.difficulty,
+          result:ratio>=.7?"independent":ratio>0?"hinted":"not_yet",
+          confidence:null,
+          hint_used:false,
+          hints_used:0,
+          source:"exam",
+          skills:item.skills,
+          expected_concepts:item.expected_concepts,
+          question_payload:{
+            examSimulationId:rowId,
+            questionBankId:item.id,
+            examTransfer:true,
+            transferLevel:6,
+            pointsEarned:earned,
+            pointsPossible:task.points,
+            feedbackTiming:"after_block",
+          },
+        });
+      }
+      localStorage.removeItem("opk.exam-simulation:"+rowId);
       setPhase("done");
-      toast.success("Koetyylinen simulaatio tallennettu.");
-    }catch{toast.error("Koetulosta ei voitu tallentaa.");}
+      toast.success("Koetyylinen simulaatio tallennettu ja koetason näyttö päivitetty.");
+    }catch{
+      toast.error("Koetulosta ei voitu tallentaa kokonaan. Luonnos säilytettiin jatkamista varten.");
+    }finally{setFinishing(false);}
   }
 
   function reset(){
-    setSelected([]);setPhase("select");setRowId(null);setActiveIndex(0);setAnswers({});setScores({});setStartedAt(null);setElapsed(0);
+    if(rowId)localStorage.removeItem("opk.exam-simulation:"+rowId);
+    setSelected([]);setPhase("select");setRowId(null);setActiveIndex(0);setAnswers({});answersRef.current={};setScores({});setStartedAt(null);setElapsed(0);setFinishing(false);
   }
 
   if(!course)return <section className="panel p-4"><p className="text-sm text-muted-foreground">Lisää kurssi ennen koesimulaatiota.</p></section>;
@@ -136,6 +239,11 @@ export function ExamSimulationV5({courses,topics}:{courses:Course[];topics:Topic
     </div>
 
     {phase==="select"&&<>
+      {resumable&&<div className="mt-5 rounded-2xl border border-primary/30 bg-accent/50 p-4">
+        <b>Kesken oleva simulaatio löytyi</b>
+        <p className="mt-1 text-sm text-muted-foreground">Vastaukset on autosavetettu. Voit jatkaa samasta tehtäväblokista ilman että luonnos katoaa.</p>
+        <button className={primary+" mt-3"} onClick={resumeSimulation}>Jatka kesken jäänyttä simulaatiota</button>
+      </div>}
       <div className="mt-5 grid gap-3 sm:grid-cols-2">
         <label className="text-sm font-medium">Kurssi<select className="mt-1 w-full rounded-xl border bg-surface p-3" value={courseId} onChange={e=>{setCourseId(e.target.value);setSelected([]);}}>{courses.filter(c=>!c.archived).map(c=><option key={c.id} value={c.id}>{c.code} · {c.name}</option>)}</select></label>
         <label className="text-sm font-medium">Tila<select className="mt-1 w-full rounded-xl border bg-surface p-3" value={mode} onChange={e=>{setMode(e.target.value as "practice"|"full");setSelected([]);}}><option value="full">Täysi koesimulaatio</option><option value="practice">Lyhyempi harjoitus</option></select></label>
@@ -154,7 +262,7 @@ export function ExamSimulationV5({courses,topics}:{courses:Course[];topics:Topic
         <p className="mt-4 text-lg font-semibold">{(bank.data??[]).find(q=>q.id===activeTask.id)?.prompt??activeTask.title}</p>
       </div>
       {(activeTask.answerMode==="text"||activeTask.answerMode==="formula"||activeTask.answerMode==="mixed")&&<div className="mt-4"><AbittiAnswerEditor label="Vastaus" value={answers[activeTask.id]?.text??""} onChange={value=>changeAnswer(activeTask,{text:value})} minHeight={220}/></div>}
-      {(activeTask.answerMode==="diagram"||activeTask.answerMode==="graph"||activeTask.answerMode==="mixed")&&<div className="mt-4"><SketchAnswerCanvas mode={activeTask.answerMode==="graph"?"graph":"diagram"} value={answers[activeTask.id]?.sketch??""} onChange={value=>changeAnswer(activeTask,{sketch:value})}/></div>}
+      {(activeTask.answerMode==="diagram"||activeTask.answerMode==="graph"||activeTask.answerMode==="mixed")&&<div className="mt-4"><SketchAnswerCanvas key={activeTask.id} mode={activeTask.answerMode==="graph"?"graph":"diagram"} value={answers[activeTask.id]?.sketch??""} onChange={value=>changeAnswer(activeTask,{sketch:value})}/></div>}
       <div className="mt-5 flex flex-wrap gap-2">
         {activeIndex>0&&<button className={secondary} onClick={()=>setActiveIndex(i=>Math.max(0,i-1))}>Edellinen</button>}
         <button className={primary} onClick={next}>{activeIndex+1===selectedTasks.length?"Päätä tehtäväblokki":"Seuraava tehtävä"}</button>
@@ -166,12 +274,18 @@ export function ExamSimulationV5({courses,topics}:{courses:Course[];topics:Topic
       <div className="mt-4 space-y-4">{selectedTasks.map(task=>{const item=(bank.data??[]).find(q=>q.id===task.id);return <div key={task.id} className="rounded-2xl border border-border p-4">
         <div className="flex justify-between gap-3"><b>{task.title}</b><span>{task.points} p</span></div>
         <p className="mt-2 text-sm">{item?.prompt}</p>
+        <div className="mt-3 rounded-xl border border-border bg-surface p-3 text-sm">
+          <b>Oma vastauksesi</b>
+          {answerHasContent(answers[task.id]?.text??"")&&<pre className="mt-2 whitespace-pre-wrap font-sans text-sm">{answerPlainText(answers[task.id]!.text)}</pre>}
+          {answers[task.id]?.sketch&&<img src={answers[task.id]!.sketch} alt="Oma piirrosvastaus" className="mt-2 max-h-80 rounded-lg border border-border bg-white object-contain"/>}
+          {!answerCompleted(task.id)&&<p className="mt-2 text-muted-foreground">Ei vastausta.</p>}
+        </div>
         <details className="mt-3 rounded-xl bg-muted/50 p-3 text-sm"><summary className="cursor-pointer font-medium">Näytä mallipalaute</summary>{item?.correct_answer&&<p className="mt-2"><b>Oikea vastaus:</b> {item.correct_answer}</p>}<p className="mt-2 text-muted-foreground">{item?.explanation||"Ei erillistä mallipalautetta."}</p></details>
         <label className="mt-3 block text-sm font-medium">Pisteet<input type="number" min="0" max={task.points} className="mt-1 w-28 rounded-xl border bg-surface p-2" value={scores[task.id]??0} onChange={e=>setScores(current=>({...current,[task.id]:Math.max(0,Math.min(task.points,Number(e.target.value)||0))}))}/></label>
       </div>})}</div>
-      <button disabled={update.isPending} className={primary+" mt-4"} onClick={()=>void finishReview()}>Tallenna simulaatio</button>
+      <button disabled={update.isPending||recordAttempt.isPending||finishing} className={primary+" mt-4"} onClick={()=>void finishReview()}>{finishing?"Tallennetaan…":"Tallenna simulaatio"}</button>
     </>}
 
-    {phase==="done"&&simulation&&<div className="mt-5"><div className="rounded-2xl bg-accent p-4"><h3 className="font-semibold">Simulaatio valmis</h3><p className="mt-2 text-sm text-muted-foreground">Pisteet {Object.values(scores).reduce((a,b)=>a+b,0)} / {selectedTasks.reduce((a,b)=>a+b.points,0)}. Tätä käytetään koetason näyttönä, ei automaattisena arvosanaennusteena.</p></div><button className={secondary+" mt-4"} onClick={reset}>Uusi simulaatio</button></div>}
+    {phase==="done"&&simulation&&<div className="mt-5"><div className="rounded-2xl bg-accent p-4"><h3 className="font-semibold">Simulaatio valmis</h3><p className="mt-2 text-sm text-muted-foreground">Pisteet {Object.values(scores).reduce((a,b)=>a+b,0)} / {selectedTasks.reduce((a,b)=>a+b.points,0)}. Vastatut tehtävät on tallennettu koetason evidenssiksi. Tätä ei käytetä automaattisena arvosanaennusteena.</p></div><button className={secondary+" mt-4"} onClick={reset}>Uusi simulaatio</button></div>}
   </section>;
 }
