@@ -27,7 +27,6 @@ import {
   weeklyLearningReview,
 } from "@/lib/learning-engine";
 import {
-  adaptiveDayPlanV4,
   errorProfileV4,
   experimentInsightsV4,
   learningAchievementsV4,
@@ -39,6 +38,7 @@ import {
   simulateLearningOsV4,
   yoOverviewV4,
 } from "@/lib/learning-os-v4";
+import { adaptiveDayPlanV5, applyImplementationIntentionsV5 } from "@/lib/learning-os-v5";
 import {
   corridor,
   corridorAdvice,
@@ -71,14 +71,17 @@ import {
 import {
   useArchiveCourse,
   useCourses,
+  useCreateFrictionEvent,
   useAdvanceMistake,
   useGeneratePlan,
+  useImplementationIntentions,
   useMovePlanItem,
   usePlanStatus,
   usePreferences,
   useProgressEvents,
   useSettings,
   useResolveMistake,
+  useTopicDependencies,
   useUpdatePreferences,
   useUpdateSettings,
   useUpdateTopic,
@@ -92,6 +95,9 @@ import { applyTheme, storedThemeIsDark } from "@/lib/theme";
 import { clearDeviceSession, type DeviceUser } from "@/lib/deviceSession";
 import { KnowledgeGraphEditor, MaterialImporter } from "@/components/CourseLearningTools";
 import { answerPlainText } from "@/components/AbittiAnswerEditor";
+import { V5LearningHealthPanel, V5PlannerPanel } from "@/components/LearningOSV5Panels";
+import { ExamSimulationV5 } from "@/components/ExamSimulationV5";
+import { ContrastiveErrorLab } from "@/components/ContrastiveErrorLab";
 import {
   CourseEditForm,
   ExamForm,
@@ -122,9 +128,20 @@ export function TodayView({courses,topics,sessions,exams,plan,tests,attempts,mis
 }) {
   const now=today();
   const move=useMovePlanItem(),upsert=useUpsertPlanItem();
+  const graph=useTopicDependencies(),friction=useCreateFrictionEvent(),intentions=useImplementationIntentions();
   const [taskIndex,setTaskIndex]=useState(0);
   const [loadMode,setLoadMode]=useState<"minimum"|"recommended"|"extra">("recommended");
-  const adaptiveDay=adaptiveDayPlanV4({courses,topics,plan,attempts,mistakes,capacity,now});
+  const [localTime,setLocalTime]=useState("00:00");
+  useEffect(()=>{
+    const update=()=>setLocalTime(new Date().toLocaleTimeString("fi-FI",{hour:"2-digit",minute:"2-digit",hour12:false}));
+    update();
+    const timer=window.setInterval(update,60_000);
+    return()=>window.clearInterval(timer);
+  },[]);
+  const adaptiveDay=adaptiveDayPlanV5({
+    courses,topics,plan,attempts,mistakes,capacity,dependencies:graph.data??[],now,
+    intentions:intentions.data??[],sessions,localTime,
+  });
   const actions=adaptiveDay[loadMode];
   useEffect(()=>{if(taskIndex>=actions.length)setTaskIndex(0);},[actions.length,taskIndex]);
   const nextAction=actions[taskIndex]??actions[0];
@@ -142,6 +159,16 @@ export function TodayView({courses,topics,sessions,exams,plan,tests,attempts,mis
   const openMistakes=examCourse?mistakes.filter(m=>m.course_id===examCourse.id&&m.status!=="mastered").length:0;
   const reason=nextAction?.reason??"";
 
+  function askFrictionReason(){
+    const raw=window.prompt("Miksi tämä ei onnistu tänään? 1 = ei aikaa, 2 = unohdin, 3 = liian väsynyt, 4 = liian vaikea, 5 = en tiedä mistä aloittaa, 6 = suunnitelmat muuttuivat","1");
+    const map:Record<string,"no_time"|"forgot"|"too_tired"|"too_hard"|"unclear_start"|"plans_changed"|"other">={"1":"no_time","2":"forgot","3":"too_tired","4":"too_hard","5":"unclear_start","6":"plans_changed"};
+    return map[raw??""]??"other";
+  }
+  function startChosen(action:(typeof actions)[number]){
+    void friction.mutateAsync({date:now,plan_item_id:action.planItem?.id??null,course_id:action.course.id,reason:"other",note:"session_start",self_started:true,reminder_used:false}).catch(()=>undefined);
+    if(action.planItem)onStart(action.planItem.id);else onGo("practice");
+  }
+
   async function makeLight(){
     if(!next)return;
     const light=Math.max(5,next.min_minutes||Math.round(next.target_minutes*0.5));
@@ -153,6 +180,7 @@ export function TodayView({courses,topics,sessions,exams,plan,tests,attempts,mis
 
   async function cannotToday(){
     if(!next)return;
+    const frictionReason=askFrictionReason();
     const course=courses.find(candidate=>candidate.id===next.course_id);
     const date=findNextStudyDate({
       plan,fromISO:now,studyWeekdays:capacity.studyWeekdays,minutes:next.target_minutes,ignoreItemId:next.id,latestDate:course?.exam_date??null,capacity,
@@ -165,6 +193,7 @@ export function TodayView({courses,topics,sessions,exams,plan,tests,attempts,mis
     try{
       await move.mutateAsync({id:next.id,date,from:next.date});
       setTaskIndex(0);
+      void friction.mutateAsync({date:now,plan_item_id:next.id,course_id:next.course_id,reason:frictionReason,self_started:false,reminder_used:false}).catch(()=>undefined);
       toast.success(`Tehtävä siirrettiin päivälle ${fullDate(date)}. Tänään ei synny opiskelusakkoa.`);
     }catch{toast.error("Tehtävää ei voitu siirtää.");}
   }
@@ -184,23 +213,35 @@ export function TodayView({courses,topics,sessions,exams,plan,tests,attempts,mis
       </div>
     </Panel>}
 
+    {adaptiveDay.runtimeIntentions.triggeredRuleIds.length>0&&<Panel title="If-then-sääntö aktiivinen">
+      <p className="text-sm text-muted-foreground">{adaptiveDay.runtimeIntentions.notes.join(" ")||"Tämän päivän kuormaa mukautettiin automaattisesti aktiivisen säännön perusteella."}</p>
+      <p className="mt-2 text-sm">{
+        adaptiveDay.runtimeIntentions.replaceWithRetrieval
+          ? "Raskas työ vaihdettiin kevyeen retrievaliin."
+          : adaptiveDay.runtimeIntentions.dropExtra
+            ? "Extra jätetään pois tältä päivältä."
+            : "Päivän kuormaa kevennettiin."
+      }{adaptiveDay.runtimeIntentions.maxMinutes ? " Yhden tehtävän yläraja on nyt "+minutes(adaptiveDay.runtimeIntentions.maxMinutes)+"." : ""}</p>
+    </Panel>}
+
     <Panel title="Tärkein tänään" action={
       <div className="flex rounded-xl bg-muted p-1 text-xs">
         <button className={"min-h-9 rounded-lg px-2 "+(loadMode==="minimum"?"bg-surface shadow-sm":"")} onClick={()=>{setLoadMode("minimum");setTaskIndex(0);}}>Kevyt · {adaptiveDay.minimumMinutes} min</button>
         <button className={"min-h-9 rounded-lg px-2 "+(loadMode==="recommended"?"bg-surface shadow-sm":"")} onClick={()=>{setLoadMode("recommended");setTaskIndex(0);}}>Suositus · {adaptiveDay.recommendedMinutes} min</button>
+        <button className={"min-h-9 rounded-lg px-2 "+(loadMode==="extra"?"bg-surface shadow-sm":"")} onClick={()=>{setLoadMode("extra");setTaskIndex(0);}}>Extra · {adaptiveDay.extraMinutes} min</button>
       </div>
     }>{nextAction?<>
       <p className="text-sm font-medium text-primary">{nextAction.course.code} · {minutes(nextAction.minutes)}</p>
       <h3 className="mt-2 text-2xl font-semibold">{nextAction.title}</h3>
-      <details className="mt-3 text-sm text-muted-foreground"><summary className="cursor-pointer font-medium text-foreground">Miksi nämä?</summary><p className="mt-2">Koska {reason}.</p>{adaptiveDay.stoppedForLowMarginalGain&&<p className="mt-2">Suositus loppuu tähän, koska seuraavan tehtävän arvioitu oppimishyöty per minuutti laskee selvästi.</p>}</details>
+      <details className="mt-3 text-sm text-muted-foreground"><summary className="cursor-pointer font-medium text-foreground">Miksi nämä?</summary><p className="mt-2">Koska {reason}.</p><p className="mt-2"><b>Suosituksen varmuus:</b> {nextAction.confidence.level.replaceAll("_"," ")} · {nextAction.confidence.text}</p><p className="mt-1 text-xs">Evidenssi: {nextAction.confidence.evidence.evidenceCount} yritystä · {nextAction.confidence.evidence.distinctDays} eri päivää · {nextAction.confidence.evidence.distinctTypes} tehtävätyyppiä.</p>{adaptiveDay.stoppedForLowMarginalGain&&<p className="mt-2">Suositus loppuu tähän, koska seuraavan tehtävän arvioitu oppimishyöty per minuutti laskee selvästi.</p>}</details>
       <p className="mt-3 text-xs text-muted-foreground">Tämän version kokonaiskuorma on noin {minutes(todayMinutes)}. Extra ei muutu opiskelusakoksi.</p>
       <div className="mt-5 flex flex-wrap gap-2">
-        <button className={button} onClick={()=>nextAction.planItem?onStart(nextAction.planItem.id):onGo("practice")}>Aloita</button>
+        <button className={button} onClick={()=>startChosen(nextAction)}>Aloita</button>
         {actions.length>1&&<button className={secondary} onClick={()=>setTaskIndex(i=>(i+1)%actions.length)}>Seuraava ehdotus</button>}
         {loadMode!=="minimum"&&<button className={secondary} onClick={()=>{setLoadMode("minimum");setTaskIndex(0);}}>Kevyt päivä</button>}
         {next&&<button disabled={move.isPending} className={secondary} onClick={()=>void cannotToday()}>En ehdi tänään</button>}
       </div>
-      {later.length>0&&<div className="mt-5 border-t border-border pt-3"><p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Sen jälkeen</p>{later.map(action=><button key={action.id} className="mt-2 flex min-h-11 w-full items-center justify-between rounded-xl bg-muted/50 px-3 text-left" onClick={()=>action.planItem?onStart(action.planItem.id):onGo("practice")}><span><b className="mr-2 text-primary">{action.course.code}</b>{action.title}</span><span className="text-sm text-muted-foreground">{minutes(action.minutes)}</span></button>)}</div>}
+      {later.length>0&&<div className="mt-5 border-t border-border pt-3"><p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Sen jälkeen</p>{later.map(action=><button key={action.id} className="mt-2 flex min-h-11 w-full items-center justify-between rounded-xl bg-muted/50 px-3 text-left" onClick={()=>startChosen(action)}><span><b className="mr-2 text-primary">{action.course.code}</b>{action.title}</span><span className="text-sm text-muted-foreground">{minutes(action.minutes)}</span></button>)}</div>}
     </>:<>
       <p className="font-medium">Ei pakollista itsenäistä opiskelua tänään.</p>
       <p className="mt-2 text-sm text-muted-foreground">Tämän päivän tärkeimmät oppimistarpeet ovat hallinnassa. Tyhjä päivä ei ole järjestelmävirhe.</p>
@@ -222,12 +263,13 @@ export function TodayView({courses,topics,sessions,exams,plan,tests,attempts,mis
   </div>;
 }
 
-export function PlanView({courses,topics,plan,tests,mistakes,capacity,onStart}:Base&{plan:PlanItem[];tests:PracticeTest[];mistakes:Mistake[];capacity:CapacityProfile;onStart:(id:string)=>void}) {
+export function PlanView({courses,topics,plan,tests,mistakes,attempts,capacity,onStart}:Base&{plan:PlanItem[];tests:PracticeTest[];mistakes:Mistake[];attempts:PracticeAttempt[];capacity:CapacityProfile;onStart:(id:string)=>void}) {
   const preferences=usePreferences();
+  const intentions=useImplementationIntentions();
   const plannerMode=preferences.data?.planner_mode??"assisted";
   const [mode,setMode]=useState<"päivä"|"viikko"|"kuukausi">("viikko"),[anchor,setAnchor]=useState(today()),[creating,setCreating]=useState(false),[adding,setAdding]=useState(false),[choice,setChoice]=useState(courses[0]?.id??"");
   const [proposal,setProposal]=useState<PlanDraft[]|null>(null),[editingProposal,setEditingProposal]=useState(false);
-  const move=useMovePlanItem(),status=usePlanStatus(),generate=useGeneratePlan();
+  const move=useMovePlanItem(),status=usePlanStatus(),generate=useGeneratePlan(),friction=useCreateFrictionEvent();
   const first=mode==="viikko"?startOfWeek(anchor):mode==="kuukausi"?anchor.slice(0,7)+"-01":anchor;
   const last=mode==="viikko"?addDays(first,6):mode==="kuukausi"?addDays(addDays(first,32).slice(0,7)+"-01",-1):anchor;
   const days=Array.from({length:Math.max(1,diffDays(last,first)+1)},(_,i)=>addDays(first,i));
@@ -235,10 +277,20 @@ export function PlanView({courses,topics,plan,tests,mistakes,capacity,onStart}:B
   const selectedMode=examMode(selectedCourse?.exam_date??null);
 
   async function shift(p:PlanItem){const date=prompt("Uusi päivä (VVVV-KK-PP)",p.date);if(!date||!/^\d{4}-\d{2}-\d{2}$/.test(date))return;try{await move.mutateAsync({id:p.id,date,from:p.date});toast.success("Tehtävä siirretty.");}catch{toast.error("Siirto epäonnistui.");}}
+  async function skipWithReason(p:PlanItem){
+    const raw=window.prompt("Miksi ohitat tämän? 1 = ei aikaa, 2 = unohdin, 3 = liian väsynyt, 4 = liian vaikea, 5 = epäselvä aloitus, 6 = suunnitelmat muuttuivat","1");
+    const map:Record<string,"no_time"|"forgot"|"too_tired"|"too_hard"|"unclear_start"|"plans_changed"|"other">={"1":"no_time","2":"forgot","3":"too_tired","4":"too_hard","5":"unclear_start","6":"plans_changed"};
+    try{
+      await status.mutateAsync({id:p.id,status:"skipped"});
+      void friction.mutateAsync({date:today(),plan_item_id:p.id,course_id:p.course_id,reason:map[raw??""]??"other",self_started:false,reminder_used:false}).catch(()=>undefined);
+      toast.success("Tehtävä ohitettu. Syytä käytetään suunnitelman parantamiseen, ei opiskelusakkona.");
+    }catch{toast.error("Muutos epäonnistui.");}
+  }
+
   async function makeProposal(){
     const c=courses.find(x=>x.id===choice);
     if(!c?.exam_date){toast.error("Kurssilla ei ole koepäivää.");return;}
-    const drafts=generatePlan({
+    const baseDrafts=generatePlan({
       course:c,
       topics:topics.filter(t=>t.course_id===c.id),
       examDate:c.exam_date,
@@ -248,12 +300,18 @@ export function PlanView({courses,topics,plan,tests,mistakes,capacity,onStart}:B
       tests:tests.filter(t=>t.course_id===c.id),
       capacity,
     });
+    const adapted=applyImplementationIntentionsV5(baseDrafts,intentions.data??[]);
+    const drafts=adapted.drafts;
     if(!drafts.length){toast.error("Koe on jo mennyt.");return;}
+    if(adapted.applied.length){
+      const count=adapted.applied.reduce((sum,row)=>sum+row.count,0);
+      toast.info(`If-then-säännöt kevensivät tai mukauttivat ${count} ehdotettua sessiota.`);
+    }
     if(plannerMode==="autopilot"){
       try{
         await generate.mutateAsync({courseId:c.id,drafts,capacity});
         setCreating(false);
-        toast.success("Autopilot päivitti suunnitelman kapasiteetin ja koetilanteen perusteella.");
+        toast.success("Autopilot päivitti suunnitelman kapasiteetin, koetilanteen ja aktiivisten if-then-sääntöjen perusteella.");
       }catch{toast.error("Autopilot ei voinut päivittää suunnitelmaa.");}
       return;
     }
@@ -273,6 +331,7 @@ export function PlanView({courses,topics,plan,tests,mistakes,capacity,onStart}:B
   return <div className="space-y-5">
     <div className="flex flex-wrap items-center justify-between gap-3"><div className="flex items-center gap-1"><button className={secondary+" !px-3"} aria-label="Edellinen" onClick={()=>setAnchor(addDays(anchor,mode==="päivä"?-1:mode==="viikko"?-7:-30))}><ChevronLeft size={18}/></button><span className="min-w-28 text-center text-sm">{fullDate(first)}{first!==last&&` – ${fullDate(last)}`}</span><button className={secondary+" !px-3"} aria-label="Seuraava" onClick={()=>setAnchor(addDays(anchor,mode==="päivä"?1:mode==="viikko"?7:30))}><ChevronRight size={18}/></button></div><div className="flex gap-1 rounded-xl bg-muted p-1">{(["päivä","viikko","kuukausi"] as const).map(m=><button key={m} aria-pressed={mode===m} onClick={()=>setMode(m)} className={`min-h-10 rounded-lg px-3 capitalize ${mode===m?"bg-surface shadow-sm":""}`}>{m}</button>)}</div></div>
     <div className="flex flex-wrap gap-2"><button className={secondary} onClick={()=>setCreating(v=>!v)}><Plus size={17}/>Luo suunnitelma</button><button className={secondary} onClick={()=>setAdding(true)}>Lisää tehtävä</button></div>
+    <V5PlannerPanel courses={courses} topics={topics} attempts={attempts} capacity={capacity} plan={plan}/>
     {adding&&<TaskForm courses={courses} topics={topics} date={anchor} onClose={()=>setAdding(false)}/>}
     {creating&&<Panel title="Adaptiivinen suunnitelma koetta varten">
       <p className="mb-3 text-sm text-muted-foreground">Suunnitelma huomioi tärkeyden, esitiedot, varmistetun osaamisen, ajankohtaiset kertaukset, virhepankin, koulun etenemisen, 14 päivän koemoodin ja muiden kurssien saman päivän kuorman. Tila: <b>{plannerMode==="manual"?"Manual":plannerMode==="autopilot"?"Autopilot":"Assisted"}</b>. Extra on vapaaehtoista eikä muutu velaksi.</p>
@@ -286,7 +345,7 @@ export function PlanView({courses,topics,plan,tests,mistakes,capacity,onStart}:B
       </div>}
     </Panel>}
     {plan.length===0&&<Panel title="Ei tehtäviä vielä"><p className="text-muted-foreground">Luo ensimmäinen suunnitelma tai lisää tehtävä itse.</p></Panel>}
-    <div className={mode==="kuukausi"?"grid grid-cols-2 gap-2 sm:grid-cols-7":"space-y-3"}>{days.map(date=><section className={`panel p-4 ${date===today()?"ring-1 ring-primary/50":""}`} key={date} onDragOver={e=>e.preventDefault()} onDrop={e=>{e.preventDefault();const id=e.dataTransfer.getData("text/plain");const item=plan.find(p=>p.id===id);if(item&&item.date!==date)void move.mutateAsync({id,date,from:item.date}).then(()=>toast.success("Tehtävä siirretty.")).catch(()=>toast.error("Siirto epäonnistui."));}}><h2 className="mb-3 text-sm font-semibold capitalize">{dateWithWeekday(date)}</h2>{plan.filter(p=>p.date===date).length===0?<p className="text-sm text-muted-foreground">Ei tehtäviä</p>:plan.filter(p=>p.date===date).map(p=><div key={p.id} draggable={mode!=="kuukausi"&&p.kind!=="exam"} onDragStart={e=>e.dataTransfer.setData("text/plain",p.id)} className="mb-2 rounded-xl bg-muted/60 p-3"><p className="text-xs font-semibold text-primary">{courses.find(c=>c.id===p.course_id)?.code} · {p.start_time?.slice(0,5)||minutes(p.target_minutes)}</p><p className="mt-1 text-sm font-medium">{p.title||topics.find(t=>t.id===p.topic_id)?.name||"Opiskelu"}</p><p className={`mt-1 text-xs ${statusClass[effectivePlanStatus(p)]}`}><span aria-hidden="true">{statusIcon[effectivePlanStatus(p)]} </span>{statusLabel[effectivePlanStatus(p)]} · {p.phase}</p>{mode!=="kuukausi"&&p.kind!=="exam"&&<div className="mt-3 flex flex-wrap items-center gap-1"><button className={secondary+" !min-h-9 !px-2"} onClick={()=>onStart(p.id)}>Aloita</button><details className="relative"><summary className={secondary+" list-none !min-h-9 !px-3"} aria-label="Tehtävän toiminnot">•••</summary><div className="absolute right-0 z-10 mt-1 min-w-36 rounded-xl border border-border bg-surface p-1 shadow-lg"><button className="block min-h-10 w-full rounded-lg px-3 text-left text-sm hover:bg-muted" onClick={()=>void shift(p)}>Siirrä</button>{p.status==="planned"&&<button className="block min-h-10 w-full rounded-lg px-3 text-left text-sm hover:bg-muted" onClick={()=>void status.mutateAsync({id:p.id,status:"skipped"}).then(()=>toast.success("Tehtävä ohitettu.")).catch(()=>toast.error("Muutos epäonnistui."))}>Ohita</button>}</div></details></div>}</div>)}</section>)}</div>
+    <div className={mode==="kuukausi"?"grid grid-cols-2 gap-2 sm:grid-cols-7":"space-y-3"}>{days.map(date=><section className={`panel p-4 ${date===today()?"ring-1 ring-primary/50":""}`} key={date} onDragOver={e=>e.preventDefault()} onDrop={e=>{e.preventDefault();const id=e.dataTransfer.getData("text/plain");const item=plan.find(p=>p.id===id);if(item&&item.date!==date)void move.mutateAsync({id,date,from:item.date}).then(()=>toast.success("Tehtävä siirretty.")).catch(()=>toast.error("Siirto epäonnistui."));}}><h2 className="mb-3 text-sm font-semibold capitalize">{dateWithWeekday(date)}</h2>{plan.filter(p=>p.date===date).length===0?<p className="text-sm text-muted-foreground">Ei tehtäviä</p>:plan.filter(p=>p.date===date).map(p=><div key={p.id} draggable={mode!=="kuukausi"&&p.kind!=="exam"} onDragStart={e=>e.dataTransfer.setData("text/plain",p.id)} className="mb-2 rounded-xl bg-muted/60 p-3"><p className="text-xs font-semibold text-primary">{courses.find(c=>c.id===p.course_id)?.code} · {p.start_time?.slice(0,5)||minutes(p.target_minutes)}</p><p className="mt-1 text-sm font-medium">{p.title||topics.find(t=>t.id===p.topic_id)?.name||"Opiskelu"}</p><p className={`mt-1 text-xs ${statusClass[effectivePlanStatus(p)]}`}><span aria-hidden="true">{statusIcon[effectivePlanStatus(p)]} </span>{statusLabel[effectivePlanStatus(p)]} · {p.phase}</p>{mode!=="kuukausi"&&p.kind!=="exam"&&<div className="mt-3 flex flex-wrap items-center gap-1"><button className={secondary+" !min-h-9 !px-2"} onClick={()=>onStart(p.id)}>Aloita</button><details className="relative"><summary className={secondary+" list-none !min-h-9 !px-3"} aria-label="Tehtävän toiminnot">•••</summary><div className="absolute right-0 z-10 mt-1 min-w-36 rounded-xl border border-border bg-surface p-1 shadow-lg"><button className="block min-h-10 w-full rounded-lg px-3 text-left text-sm hover:bg-muted" onClick={()=>void shift(p)}>Siirrä</button>{p.status==="planned"&&<button className="block min-h-10 w-full rounded-lg px-3 text-left text-sm hover:bg-muted" onClick={()=>void skipWithReason(p)}>Ohita</button>}</div></details></div>}</div>)}</section>)}</div>
   </div>;
 }
 
@@ -417,6 +476,7 @@ export function ExamsView({courses,topics,exams,tests,attempts,mistakes,sessions
         <Panel title="Harjoituskokeet">{tt.length?tt.map(t=><div key={t.id} className="border-b border-border py-2 text-sm"><p className="font-medium">{fullDate(t.date)} · {t.score}/{t.max_score} p</p><p className="text-xs text-muted-foreground">{t.duration_minutes?`${t.duration_minutes} min · `:""}{t.error_count!=null?`${t.error_count} virhettä`:""}</p></div>):<p className="text-muted-foreground">Harjoituskokeita ei ole vielä kirjattu.</p>}</Panel>
         <Panel title="Suunniteltu ennen koetta">{pp.length?pp.slice(0,12).map(p=><div key={p.id} className="flex items-center justify-between border-b border-border py-2 text-sm"><span>{fullDate(p.date)} · {p.title}</span><span className="text-muted-foreground">{minutes(p.target_minutes)}</span></div>):<p className="text-muted-foreground">Ei avoimia tehtäviä ennen koetta.</p>}</Panel>
       </div>
+      <ExamSimulationV5 courses={course?[course]:[]} topics={ts}/>
       <button className={secondary} onClick={()=>onCourse(selected.course_id)}>Avaa kurssi</button>
     </div>;
   }
@@ -426,6 +486,7 @@ export function ExamsView({courses,topics,exams,tests,attempts,mistakes,sessions
     {yo.daysToNearestExam!==null&&<p className="mt-3 text-sm text-muted-foreground">{yo.daysToNearestExam} päivää lähimpään YO-kokeeseen. Kurssikoe- ja YO-logiikka pidetään erillään.</p>}
     <div className="mt-3 space-y-2">{yo.priorities.slice(0,5).map(row=><button key={row.course.id+row.topic.id} className="flex min-h-12 w-full items-center justify-between rounded-xl bg-muted/60 px-3 text-left" onClick={()=>onCourse(row.course.id)}><span><b>{row.course.code} · {row.topic.name}</b><small className="mt-1 block text-muted-foreground">{row.reason}</small></span></button>)}</div>
   </Panel>}
+  <ExamSimulationV5 courses={courses} topics={topics}/>
   <button className={button} onClick={()=>setAdding(true)}>+ Lisää koe</button>{adding&&<ExamForm courses={courses} onClose={()=>setAdding(false)}/>}
   {exams.length===0?<Panel title="Ei kokeita vielä"><p className="text-muted-foreground">Lisää ensimmäinen koe painamalla Lisää koe.</p></Panel>:exams.map(e=>{const course=courses.find(c=>c.id===e.course_id);const ts=topics.filter(t=>t.course_id===e.course_id);const prep=examStage({topics:ts,attempts:attempts.filter(a=>a.course_id===e.course_id),tests:tests.filter(t=>t.course_id===e.course_id),mistakes:mistakes.filter(m=>m.course_id===e.course_id),course:course??null});const mode=examMode(e.date);return <button key={e.id} onClick={()=>setSelectedExam(e.id)} className="panel block w-full p-4 text-left sm:p-5"><div className="flex items-start justify-between gap-3"><div><p className="text-sm font-medium text-primary">{course?.code}</p><h2 className="mt-1 text-lg font-semibold">{e.name}</h2><p className="mt-1 text-sm text-muted-foreground">{fullDate(e.date)} · {diffDays(e.date,today())} päivää</p></div><span className="text-right"><b className="block">{prep.stages[prep.index]?.label}</b><small className="text-muted-foreground">vaihe {prep.index+1}/6</small></span></div>{mode.active&&<p className="mt-2 inline-flex rounded-full bg-accent px-3 py-1 text-xs font-semibold">Koemoodi aktiivinen</p>}<p className="mt-2 text-xs text-muted-foreground">Ei arvosanaennuste · avaa kokeen yksityiskohdat</p></button>})}</div>;
 }
@@ -518,6 +579,9 @@ export function ProgressView({courses,topics,attempts,sessions,plan,exams,mistak
       <div className="panel p-4"><p className="text-sm text-muted-foreground">Opiskelurytmi</p><p className="mt-2 text-2xl font-semibold">{new Set(recent.map(s=>s.date)).size}</p><p className="mt-1 text-xs text-muted-foreground">opiskelupäivää / 30 pv</p></div>
       <div className="panel p-4"><p className="text-sm text-muted-foreground">Aikaa kirjattu</p><p className="mt-2 text-2xl font-semibold">{minutes(recentMinutes)}</p><p className="mt-1 text-xs text-muted-foreground">kuormitustieto, ei osaamispiste</p></div>
     </div>
+
+    <V5LearningHealthPanel courses={courses} topics={topics} attempts={attempts}/>
+    <ContrastiveErrorLab courses={courses} topics={topics} mistakes={mistakes}/>
 
     <Panel title="Osaamiskartta v4">
       <div className="grid gap-2 sm:grid-cols-3 lg:grid-cols-6">
@@ -721,6 +785,16 @@ export function SettingsView({user}:{user:DeviceUser}) {
         {(["manual","assisted","autopilot"] as const).map(mode=><button key={mode} className={(prefs?.planner_mode??"assisted")===mode?button:secondary} onClick={()=>void updatePreferences.mutateAsync({planner_mode:mode}).catch(()=>toast.error("Planner-tilaa ei voitu tallentaa."))}>{mode==="manual"?"Manual":mode==="assisted"?"Assisted":"Autopilot"}</button>)}
       </div>
       <label className="mt-4 flex min-h-12 items-center justify-between gap-4 border-t border-border pt-3"><span><b>Personal Experiment Engine</b><small className="block text-muted-foreground">Vertaa pieniä turvallisia variaatioita vasta myöhemmän retention perusteella.</small></span><input type="checkbox" className="size-5 accent-primary" checked={prefs?.personal_experiments_enabled??true} onChange={e=>void updatePreferences.mutateAsync({personal_experiments_enabled:e.target.checked}).catch(()=>toast.error("Kokeiluasetusta ei voitu tallentaa."))}/></label>
+      <div className="mt-4 divide-y divide-border border-t border-border">
+        {([
+          ["retention_budget_enabled","Adaptive Retention Budget","Suojaa tärkein muistaminen käytettävissä olevan ajan sisällä."],
+          ["pretest_enabled","Preview Challenge","Kartoita uusi aihe mastery-neutraalilla ennakkotestillä ennen opetusta."],
+          ["feedback_policy_enabled","Adaptive Feedback","Ajoita palaute eri tavalla uuden oppimisen, retrievalin ja koesimulaation mukaan."],
+          ["friction_learning_enabled","Behavior Engine","Opi miksi sessiot jäävät väliin ja ehdota kevyitä if-then-sääntöjä."],
+          ["reminder_taper_enabled","Reminder Tapering","Vähennä tavallisia muistutuksia, kun opiskelu käynnistyy jo itsenäisesti."],
+          ["abitti_simulation_enabled","YO / Abitti 2 -fidelity","Käytä tehtävävalintaa, lähdeaineistoa, piirrosvastauksia ja viivästettyä palautetta koesimulaatioissa."],
+        ] as const).map(([key,label,description])=><label key={key} className="flex min-h-14 items-center justify-between gap-4 py-3"><span><b>{label}</b><small className="block text-muted-foreground">{description}</small></span><input type="checkbox" className="size-5 accent-primary" checked={prefs?.[key]??true} onChange={e=>void updatePreferences.mutateAsync({[key]:e.target.checked}).catch(()=>toast.error("Learning OS -asetusta ei voitu tallentaa."))}/></label>)}
+      </div>
       <div className="mt-4 grid gap-3 border-t border-border pt-3 sm:grid-cols-2">
         <label className="text-sm font-medium">Hiljaiset tunnit alkavat<input type="time" className="mt-1 w-full rounded-xl border bg-surface px-3 py-2.5" value={prefs?.quiet_hours_start?.slice(0,5)??"21:30"} onChange={e=>void updatePreferences.mutateAsync({quiet_hours_start:e.target.value}).catch(()=>toast.error("Hiljaisia tunteja ei voitu tallentaa."))}/></label>
         <label className="text-sm font-medium">Hiljaiset tunnit päättyvät<input type="time" className="mt-1 w-full rounded-xl border bg-surface px-3 py-2.5" value={prefs?.quiet_hours_end?.slice(0,5)??"07:00"} onChange={e=>void updatePreferences.mutateAsync({quiet_hours_end:e.target.value}).catch(()=>toast.error("Hiljaisia tunteja ei voitu tallentaa."))}/></label>

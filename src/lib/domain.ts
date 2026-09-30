@@ -23,6 +23,9 @@ export type Topic = Database["public"]["Tables"]["topics"]["Row"] & {
   fluency_strength?: number;
   calibration_strength?: number;
   blind_spot?: boolean;
+  retention_target?: number;
+  discrimination_strength?: number;
+  transfer_level?: number;
 };
 export type Session = Database["public"]["Tables"]["study_sessions"]["Row"] & {
   objective: string | null;
@@ -39,6 +42,10 @@ export type Mistake = Database["public"]["Tables"]["mistakes"]["Row"] & {
   solution: string | null;
   retested_at: string | null;
   mastered_at: string | null;
+  first_divergence?: string | null;
+  correct_principle?: string | null;
+  repair_response?: string | null;
+  delayed_verification_due?: string | null;
 };
 export type PracticeTest = Database["public"]["Tables"]["practice_tests"]["Row"];
 export type NotificationSettings =
@@ -110,6 +117,11 @@ export type PracticeAttempt = {
   operation_id?: string | null;
   schema_version?: number;
   delay_days: number | null;
+  is_pretest?: boolean;
+  transfer_level?: number | null;
+  discrimination_topic_ids?: string[];
+  feedback_timing?: "immediate" | "after_retry" | "after_item" | "after_block" | null;
+  confidence_delay_hours?: number | null;
   created_at: string;
 };
 
@@ -134,6 +146,12 @@ export type QuestionBankItem = {
   source_type: "manual" | "ai" | "material" | "seed";
   source_ref: string | null;
   metadata: Record<string, unknown>;
+  stimulus_package?: Record<string, unknown>;
+  answer_mode?: "text" | "formula" | "diagram" | "graph" | "mixed";
+  points?: number | null;
+  transfer_level?: number;
+  confusion_topic_ids?: string[];
+  pretest_eligible?: boolean;
   created_at: string;
   updated_at: string;
 };

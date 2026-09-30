@@ -48,6 +48,58 @@ test("non-AI master-plan features remain wired end-to-end", () => {
   assert.ok(route.includes('window.addEventListener("online"'));
 });
 
+test("Learning OS v5 remains wired through engine, persistence and UI", () => {
+  const v5 = read("src/lib/learning-os-v5.ts");
+  const views = read("src/components/StudyViews.tsx");
+  const practice = read("src/components/PracticeView.tsx");
+  const plannerPanels = read("src/components/LearningOSV5Panels.tsx");
+  const examUi = read("src/components/ExamSimulationV5.tsx");
+  const errorLab = read("src/components/ContrastiveErrorLab.tsx");
+  const migration = read("supabase/migrations/20260930174500_learning_os_v5.sql");
+  const extension = read("supabase/migrations/20260930180000_learning_os_v5.sql");
+
+  for (const token of [
+    "retentionBudgetV5", "retentionTargetV5", "stopRuleV5",
+    "pretestPlanV5", "instructionDecisionV5", "feedbackPolicyV5",
+    "transferStateV5", "contrastiveRepairPlanV5", "confusionSetsV5",
+    "delayedCalibrationV5", "frictionInsightV5", "reminderTaperV5",
+    "subjectTaskProfilesV5", "whatIfPlannerV5", "buildExamSimulationV5",
+    "nextBestActionsV5", "adaptiveDayPlanV5", "recommendationConfidenceV5",
+  ]) assert.ok(v5.includes(token), "Missing v5 engine capability: " + token);
+
+  assert.ok(views.includes("adaptiveDayPlanV5("));
+  assert.ok(views.includes("V5PlannerPanel"));
+  assert.ok(views.includes("V5LearningHealthPanel"));
+  assert.ok(views.includes("ExamSimulationV5"));
+  assert.ok(views.includes("ContrastiveErrorLab"));
+
+  for (const token of ["instructionDecisionV5","feedbackPolicyV5","stopRuleV5","confusionSetsV5","transferStateV5","pretest"]) {
+    assert.ok(practice.includes(token), "Missing v5 Practice integration: " + token);
+  }
+  assert.ok(plannerPanels.includes("Retention Budget v5"));
+  assert.ok(plannerPanels.includes("What-if Planner"));
+  assert.ok(plannerPanels.includes("Reminder Tapering"));
+  assert.ok(examUi.includes("YO / Abitti 2 -simulaatio"));
+  assert.ok(examUi.includes("SketchAnswerCanvas"));
+  assert.ok(errorLab.includes("Contrastive Error Lab"));
+
+  for (const token of [
+    "learning_policy_states","calibration_observations","study_friction_events",
+    "implementation_intentions","exam_simulations","is_pretest","transfer_level",
+    "stimulus_package","answer_mode","retention_target",
+  ]) assert.ok(migration.includes(token), "Missing v5 persistence: " + token);
+
+  for (const token of [
+    "pretest_attempts","retention_targets","stop_rule_events","reminder_adaptation",
+    "learning_policy_snapshots","subject_task_parameters","feedback_policy_enabled",
+    "abitti_simulation_enabled",
+  ]) assert.ok(extension.includes(token), "Missing v5 compatibility persistence: " + token);
+
+  assert.ok(migration.includes("enable row level security"));
+  assert.ok(migration.includes("to authenticated"));
+  assert.ok(extension.includes("enable row level security"));
+  assert.ok(extension.includes("grant select,insert,update,delete"));
+});
 test("master plan keeps evidence and safety invariants", () => {
   const domain = read("src/lib/domain.ts");
   const learning = read("src/lib/learning-os-v4.ts");

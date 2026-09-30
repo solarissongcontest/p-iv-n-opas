@@ -62,6 +62,109 @@ export type LearningExperiment = {
   updated_at: string;
 };
 
+export type CalibrationObservationV5 = {
+  id?: string;
+  owner_id?: string;
+  course_id?: string | null;
+  topic_id: string;
+  attempt_id?: string | null;
+  predicted_confidence: number;
+  actual_outcome: "correct" | "partial" | "incorrect";
+  delay_hours: number;
+  observed_at?: string;
+};
+
+export type FrictionEventV5 = {
+  id?: string;
+  date: string;
+  plan_item_id?: string | null;
+  course_id?: string | null;
+  reason: "started" | "no_time" | "forgot" | "too_tired" | "too_hard" | "unclear_start" | "plans_changed" | "other";
+  note?: string | null;
+  self_started?: boolean | null;
+  reminder_used?: boolean | null;
+};
+
+export type ImplementationIntentionV5 = {
+  id?: string;
+  trigger_type: "late_home" | "low_energy" | "missed_days" | "busy_day" | "custom";
+  trigger_value: string;
+  action_type: "lighten" | "move" | "replace_with_retrieval" | "protect_rest" | "custom";
+  action_value: string;
+  enabled: boolean;
+  suggested?: boolean;
+  reason?: string | null;
+};
+
+export type PretestAttemptV5 = {
+  id: string;
+  owner_id: string;
+  course_id: string;
+  topic_id: string;
+  question_bank_id: string | null;
+  prompt: string;
+  response: string | null;
+  predicted_confidence: number | null;
+  outcome: "correct" | "partial" | "incorrect" | "unknown";
+  created_at: string;
+};
+
+export type ReminderAdaptationV5 = {
+  owner_id: string;
+  recommended_level: "none" | "light" | "normal";
+  independent_start_rate: number | null;
+  sample_size: number;
+  metadata: Record<string, unknown>;
+  updated_at: string;
+};
+
+export type SubjectTaskParameterV5 = {
+  id: string;
+  owner_id: string;
+  subject: string;
+  attempt_type: string;
+  observations: number;
+  success_rate: number;
+  mean_delay_days: number;
+  preferred_spacing_days: number;
+  confidence: "very_low" | "low" | "medium" | "high";
+  active: boolean;
+  updated_at: string;
+};
+
+export type LearningPolicyState = {
+  id: string;
+  owner_id: string;
+  course_id: string | null;
+  topic_id: string;
+  desired_retention: number;
+  current_retention: number;
+  recommended_minutes: number;
+  stop_today: boolean;
+  next_useful_date: string | null;
+  recommendation_confidence: number;
+  recommendation_reason: string | null;
+  model_version: number;
+  updated_at: string;
+};
+
+export type ExamSimulationRow = {
+  id: string;
+  owner_id: string;
+  course_id: string;
+  mode: "practice" | "full";
+  task_ids: string[];
+  selected_task_ids: string[];
+  completed_task_ids: string[];
+  scores: Record<string, number>;
+  answers: Record<string, unknown>;
+  duration_minutes: number;
+  started_at: string | null;
+  completed_at: string | null;
+  task_selection_note: string | null;
+  created_at: string;
+};
+
 export type UserPreferences = {
   owner_id: string;
   display_name: string;
@@ -75,6 +178,12 @@ export type UserPreferences = {
   notifications_enabled: boolean;
   planner_mode?: "manual" | "assisted" | "autopilot";
   personal_experiments_enabled?: boolean;
+  retention_budget_enabled?: boolean;
+  reminder_taper_enabled?: boolean;
+  friction_learning_enabled?: boolean;
+  pretest_enabled?: boolean;
+  feedback_policy_enabled?: boolean;
+  abitti_simulation_enabled?: boolean;
   quiet_hours_start?: string | null;
   quiet_hours_end?: string | null;
   learning_schema_version?: number;
@@ -219,6 +328,86 @@ async function listLearningExperiments(): Promise<LearningExperiment[]> {
   return (data ?? []) as LearningExperiment[];
 }
 
+async function listLearningPolicyStates(): Promise<LearningPolicyState[]> {
+  const { data, error } = await untypedSupabase
+    .from("learning_policy_states")
+    .select("*")
+    .order("updated_at", { ascending: false });
+  if (error) throw error;
+  return (data ?? []) as LearningPolicyState[];
+}
+
+async function listCalibrationObservations(): Promise<CalibrationObservationV5[]> {
+  const { data, error } = await untypedSupabase
+    .from("calibration_observations")
+    .select("*")
+    .order("observed_at", { ascending: false })
+    .limit(500);
+  if (error) throw error;
+  return (data ?? []) as CalibrationObservationV5[];
+}
+
+async function listFrictionEvents(): Promise<FrictionEventV5[]> {
+  const { data, error } = await untypedSupabase
+    .from("study_friction_events")
+    .select("*")
+    .order("event_date", { ascending: false })
+    .order("created_at", { ascending: false })
+    .limit(500);
+  if (error) throw error;
+  return (data ?? []).map((row: Record<string, unknown>) => ({
+    ...row,
+    date: String(row["event_date"] ?? ""),
+  })) as FrictionEventV5[];
+}
+
+async function listImplementationIntentions(): Promise<ImplementationIntentionV5[]> {
+  const { data, error } = await untypedSupabase
+    .from("implementation_intentions")
+    .select("*")
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+  return (data ?? []) as ImplementationIntentionV5[];
+}
+
+async function listExamSimulations(): Promise<ExamSimulationRow[]> {
+  const { data, error } = await untypedSupabase
+    .from("exam_simulations")
+    .select("*")
+    .order("created_at", { ascending: false })
+    .limit(100);
+  if (error) throw error;
+  return (data ?? []) as ExamSimulationRow[];
+}
+
+async function listPretestAttempts(): Promise<PretestAttemptV5[]> {
+  const { data, error } = await untypedSupabase
+    .from("pretest_attempts")
+    .select("*")
+    .order("created_at", { ascending: false })
+    .limit(500);
+  if (error) throw error;
+  return (data ?? []) as PretestAttemptV5[];
+}
+
+async function getReminderAdaptation(): Promise<ReminderAdaptationV5 | null> {
+  const { data, error } = await untypedSupabase
+    .from("reminder_adaptation")
+    .select("*")
+    .maybeSingle();
+  if (error) throw error;
+  return (data ?? null) as ReminderAdaptationV5 | null;
+}
+
+async function listSubjectTaskParameters(): Promise<SubjectTaskParameterV5[]> {
+  const { data, error } = await untypedSupabase
+    .from("subject_task_parameters")
+    .select("*")
+    .order("observations", { ascending: false });
+  if (error) throw error;
+  return (data ?? []) as SubjectTaskParameterV5[];
+}
+
 async function getPreferences(): Promise<UserPreferences | null> {
   const { data, error } = await untypedSupabase
     .from("user_preferences")
@@ -248,6 +437,22 @@ export const useStudyMaterials = () =>
   useQuery({ queryKey: ["study-materials"], queryFn: listStudyMaterials });
 export const useLearningExperiments = () =>
   useQuery({ queryKey: ["learning-experiments"], queryFn: listLearningExperiments });
+export const useLearningPolicyStates = () =>
+  useQuery({ queryKey: ["learning-policy-states"], queryFn: listLearningPolicyStates });
+export const useCalibrationObservations = () =>
+  useQuery({ queryKey: ["calibration-observations"], queryFn: listCalibrationObservations });
+export const useFrictionEvents = () =>
+  useQuery({ queryKey: ["friction-events"], queryFn: listFrictionEvents });
+export const useImplementationIntentions = () =>
+  useQuery({ queryKey: ["implementation-intentions"], queryFn: listImplementationIntentions });
+export const useExamSimulations = () =>
+  useQuery({ queryKey: ["exam-simulations"], queryFn: listExamSimulations });
+export const usePretestAttempts = () =>
+  useQuery({ queryKey: ["pretest-attempts"], queryFn: listPretestAttempts });
+export const useReminderAdaptation = () =>
+  useQuery({ queryKey: ["reminder-adaptation"], queryFn: getReminderAdaptation });
+export const useSubjectTaskParameters = () =>
+  useQuery({ queryKey: ["subject-task-parameters"], queryFn: listSubjectTaskParameters });
 export const useWeeklyCheckins = () =>
   useQuery({ queryKey: ["weekly-checkins"], queryFn: listWeeklyCheckins });
 export const useProgressEvents = () =>
@@ -614,6 +819,89 @@ async function doWeeklyCheckin(payload: unknown) {
   if (error) throw error;
 }
 
+async function doCreateCalibrationObservation(payload: unknown, operationId: string) {
+  const p = payload as CalibrationObservationV5 & { course_id?: string | null; attempt_id?: string | null };
+  const { error } = await untypedSupabase.from("calibration_observations").upsert({
+    id: operationId,
+    owner_id: requireDeviceOwnerId(),
+    course_id: p.course_id ?? null,
+    topic_id: p.topic_id,
+    attempt_id: p.attempt_id ?? null,
+    predicted_confidence: p.predicted_confidence,
+    actual_outcome: p.actual_outcome,
+    delay_hours: p.delay_hours,
+    observed_at: p.observed_at ?? new Date().toISOString(),
+  }, { onConflict: "id" });
+  if (error) throw error;
+  return operationId;
+}
+
+async function doCreateFrictionEvent(payload: unknown, operationId: string) {
+  const p = payload as FrictionEventV5;
+  const { error } = await untypedSupabase.from("study_friction_events").upsert({
+    id: operationId,
+    owner_id: requireDeviceOwnerId(),
+    event_date: p.date,
+    plan_item_id: p.plan_item_id ?? null,
+    course_id: p.course_id ?? null,
+    reason: p.reason,
+    note: p.note ?? null,
+    self_started: p.self_started ?? null,
+    reminder_used: p.reminder_used ?? null,
+  }, { onConflict: "id" });
+  if (error) throw error;
+  return operationId;
+}
+
+async function doUpsertImplementationIntention(payload: unknown, operationId: string) {
+  const p = payload as ImplementationIntentionV5;
+  const id = p.id ?? operationId;
+  const { error } = await untypedSupabase.from("implementation_intentions").upsert({
+    id,
+    owner_id: requireDeviceOwnerId(),
+    trigger_type: p.trigger_type,
+    trigger_value: p.trigger_value,
+    action_type: p.action_type,
+    action_value: p.action_value,
+    enabled: p.enabled,
+    suggested: p.suggested ?? false,
+    reason: p.reason ?? null,
+    updated_at: new Date().toISOString(),
+  }, { onConflict: "id" });
+  if (error) throw error;
+  return id;
+}
+
+async function doUpsertLearningPolicyState(payload: unknown, operationId: string) {
+  const p = payload as Omit<LearningPolicyState, "id" | "owner_id" | "updated_at"> & { id?: string };
+  const { error } = await untypedSupabase.from("learning_policy_states").upsert({
+    id: p.id ?? operationId,
+    owner_id: requireDeviceOwnerId(),
+    ...p,
+    updated_at: new Date().toISOString(),
+  }, { onConflict: "owner_id,topic_id" });
+  if (error) throw error;
+  return p.topic_id;
+}
+
+async function doCreatePretestAttempt(payload: unknown, operationId: string) {
+  const p = payload as Omit<PretestAttemptV5, "id" | "owner_id" | "created_at">;
+  const { error } = await untypedSupabase.from("pretest_attempts").upsert({
+    id: operationId,
+    owner_id: requireDeviceOwnerId(),
+    course_id: p.course_id,
+    topic_id: p.topic_id,
+    question_bank_id: p.question_bank_id ?? null,
+    prompt: p.prompt,
+    response: p.response ?? null,
+    predicted_confidence: p.predicted_confidence ?? null,
+    outcome: p.outcome ?? "unknown",
+  }, { onConflict: "id" });
+  if (error) throw error;
+  return operationId;
+}
+
+registerOp("createPretestAttempt", doCreatePretestAttempt);
 registerOp("logSession", doLogSession);
 registerOp("recordPracticeAttempt", doRecordPracticeAttempt);
 registerOp("createMistake", doCreateMistake);
@@ -621,11 +909,15 @@ registerOp("updatePlanStatus", doUpdatePlanStatus);
 registerOp("movePlanItem", doMovePlanItem);
 registerOp("upsertPlanItem", doUpsertPlanItem);
 registerOp("weeklyCheckin", doWeeklyCheckin);
+registerOp("createCalibrationObservation", doCreateCalibrationObservation);
+registerOp("createFrictionEvent", doCreateFrictionEvent);
+registerOp("upsertImplementationIntention", doUpsertImplementationIntention);
+registerOp("upsertLearningPolicyState", doUpsertLearningPolicyState);
 
 function useInvalidateAll() {
   const qc = useQueryClient();
   return () =>
-    ["courses", "topics", "sessions", "exams", "plan", "mistakes", "tests", "practice-attempts", "question-bank", "settings", "preferences", "weekly-checkins", "progress-events", "topic-dependencies", "study-materials", "learning-experiments"].forEach(
+    ["courses", "topics", "sessions", "exams", "plan", "mistakes", "tests", "practice-attempts", "question-bank", "settings", "preferences", "weekly-checkins", "progress-events", "topic-dependencies", "study-materials", "learning-experiments", "learning-policy-states", "calibration-observations", "friction-events", "implementation-intentions", "exam-simulations", "pretest-attempts", "reminder-adaptation", "subject-task-parameters"].forEach(
       (k) => qc.invalidateQueries({ queryKey: [k] }),
     );
 }
@@ -942,6 +1234,128 @@ export function useUpsertLearningExperiment() {
   });
 }
 
+export function useCreatePretestAttempt() {
+  const invalidate = useInvalidateAll();
+  return useMutation({
+    mutationFn: (input: Omit<PretestAttemptV5, "id" | "owner_id" | "created_at">) =>
+      runOrQueue("createPretestAttempt", input),
+    onSuccess: invalidate,
+  });
+}
+
+export function useUpsertReminderAdaptation() {
+  const invalidate = useInvalidateAll();
+  return useMutation({
+    mutationFn: async (input: Omit<ReminderAdaptationV5, "owner_id" | "updated_at">) => {
+      const { error } = await untypedSupabase.from("reminder_adaptation").upsert({
+        owner_id: requireDeviceOwnerId(),
+        ...input,
+        updated_at: new Date().toISOString(),
+      }, { onConflict: "owner_id" });
+      if (error) throw error;
+    },
+    onSuccess: invalidate,
+  });
+}
+
+export function useUpsertSubjectTaskParameters() {
+  const invalidate = useInvalidateAll();
+  return useMutation({
+    mutationFn: async (rows: Array<Omit<SubjectTaskParameterV5, "id" | "owner_id" | "updated_at">>) => {
+      if (!rows.length) return;
+      const ownerId = requireDeviceOwnerId();
+      const { error } = await untypedSupabase.from("subject_task_parameters").upsert(
+        rows.map((row) => ({ owner_id: ownerId, ...row, updated_at: new Date().toISOString() })),
+        { onConflict: "owner_id,subject,attempt_type" },
+      );
+      if (error) throw error;
+    },
+    onSuccess: invalidate,
+  });
+}
+
+export function useCreateCalibrationObservation() {
+  const invalidate = useInvalidateAll();
+  return useMutation({
+    mutationFn: (input: CalibrationObservationV5 & { course_id?: string | null; attempt_id?: string | null }) =>
+      runOrQueue("createCalibrationObservation", input),
+    onSuccess: invalidate,
+  });
+}
+
+export function useCreateFrictionEvent() {
+  const invalidate = useInvalidateAll();
+  return useMutation({
+    mutationFn: (input: FrictionEventV5) => runOrQueue("createFrictionEvent", input),
+    onSuccess: invalidate,
+  });
+}
+
+export function useUpsertImplementationIntention() {
+  const invalidate = useInvalidateAll();
+  return useMutation({
+    mutationFn: (input: ImplementationIntentionV5) =>
+      runOrQueue("upsertImplementationIntention", input),
+    onSuccess: invalidate,
+  });
+}
+
+export function useUpsertLearningPolicyState() {
+  const invalidate = useInvalidateAll();
+  return useMutation({
+    mutationFn: (
+      input: Omit<LearningPolicyState, "id" | "owner_id" | "updated_at"> & { id?: string },
+    ) => runOrQueue("upsertLearningPolicyState", input),
+    onSuccess: invalidate,
+  });
+}
+
+export function useCreateExamSimulation() {
+  const invalidate = useInvalidateAll();
+  return useMutation({
+    mutationFn: async (input: {
+      course_id: string;
+      mode: "practice" | "full";
+      task_ids: string[];
+      selected_task_ids?: string[];
+      duration_minutes: number;
+    }) => {
+      const { data, error } = await untypedSupabase.from("exam_simulations").insert({
+        owner_id: requireDeviceOwnerId(),
+        course_id: input.course_id,
+        mode: input.mode,
+        task_ids: input.task_ids,
+        selected_task_ids: input.selected_task_ids ?? [],
+        duration_minutes: input.duration_minutes,
+        started_at: new Date().toISOString(),
+      }).select("id").single();
+      if (error) throw error;
+      return data?.id as string;
+    },
+    onSuccess: invalidate,
+  });
+}
+
+export function useUpdateExamSimulation() {
+  const invalidate = useInvalidateAll();
+  return useMutation({
+    mutationFn: async (input: {
+      id: string;
+      selected_task_ids?: string[];
+      completed_task_ids?: string[];
+      scores?: Record<string, number>;
+      answers?: Record<string, unknown>;
+      completed_at?: string | null;
+      task_selection_note?: string | null;
+    }) => {
+      const { id, ...patch } = input;
+      const { error } = await untypedSupabase.from("exam_simulations").update(patch).eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: invalidate,
+  });
+}
+
 export function useUpdateSettings() {
   const invalidate = useInvalidateAll();
   return useMutation({
@@ -983,6 +1397,28 @@ export function useAdvanceMistake() {
       if (input.status === "retested") patch["retested_at"] = today();
       if (input.status === "mastered") patch["mastered_at"] = today();
       const { error } = await untypedSupabase.from("mistakes").update(patch).eq("id", input.id);
+      if (error) throw error;
+    },
+    onSuccess: invalidate,
+  });
+}
+
+export function useUpdateMistakeRepair() {
+  const invalidate = useInvalidateAll();
+  return useMutation({
+    mutationFn: async (input: {
+      id: string;
+      first_divergence?: string | null;
+      correct_principle?: string | null;
+      repair_response?: string | null;
+      delayed_verification_due?: string | null;
+      status?: "open" | "corrected" | "retested" | "mastered";
+    }) => {
+      const { id, ...patch } = input;
+      const { error } = await untypedSupabase.from("mistakes").update({
+        ...patch,
+        updated_at: new Date().toISOString(),
+      }).eq("id", id);
       if (error) throw error;
     },
     onSuccess: invalidate,

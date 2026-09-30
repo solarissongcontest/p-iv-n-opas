@@ -150,7 +150,7 @@ function isApplication(type: LearningAttemptType) {
 
 function evidenceRows(topic: Topic, attempts: PracticeAttempt[]) {
   return attempts
-    .filter((attempt) => attempt.topic_id === topic.id)
+    .filter((attempt) => attempt.topic_id === topic.id && !attempt.is_pretest)
     .sort((a, b) => (a.created_at ?? a.date).localeCompare(b.created_at ?? b.date));
 }
 

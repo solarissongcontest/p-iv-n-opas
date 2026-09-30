@@ -15,10 +15,29 @@ import {
   delayedVerificationQueueV4,
   experimentVariantV4,
   masteryModelV4,
-  practicePathV4,
-  type PracticePath,
 } from "@/lib/learning-os-v4";
-import { usePreferences, useQuestionBank, useRecordPracticeAttempt, useUpdateTopic } from "@/lib/data";
+import {
+  confusionSetsV5,
+  feedbackPolicyV5,
+  instructionDecisionV5,
+  pretestPlanV5,
+  retentionTargetV5,
+  stopRuleV5,
+  subjectTaskProfilesV5,
+  transferStateV5,
+  type FeedbackPolicyV5,
+} from "@/lib/learning-os-v5/index";
+import {
+  useCalibrationObservations,
+  usePreferences,
+  usePretestAttempts,
+  useQuestionBank,
+  useCreatePretestAttempt,
+  useRecordPracticeAttempt,
+  useTopicDependencies,
+  useUpdateTopic,
+  useUpsertLearningPolicyState,
+} from "@/lib/data";
 import { getDeviceAccessToken } from "@/lib/deviceSession";
 import { addDays, fullDate, today } from "@/lib/fi";
 import {
@@ -92,14 +111,22 @@ export function PracticeView({
   const [hintLevel, setHintLevel] = useState(0);
   const [confidence, setConfidence] = useState<number | null>(null);
   const [feedback, setFeedback] = useState("");
+  const [feedbackPolicy, setFeedbackPolicy] = useState<FeedbackPolicyV5 | null>(null);
+  const [retryCount, setRetryCount] = useState(0);
+  const [delayedPrediction, setDelayedPrediction] = useState<number | null>(null);
   const [rubricEvaluation, setRubricEvaluation] = useState<PracticeRubricEvaluation | null>(null);
   const [showExplanation, setShowExplanation] = useState(false);
   const [diagnosticMode, setDiagnosticMode] = useState(false);
   const startedAt = useRef<number>(Date.now());
   const record = useRecordPracticeAttempt();
+  const recordPretest = useCreatePretestAttempt();
+  const pretestAttempts = usePretestAttempts();
   const updateTopic = useUpdateTopic();
   const preferences = usePreferences();
   const questionBank = useQuestionBank();
+  const dependencies = useTopicDependencies();
+  const calibrationObservations = useCalibrationObservations();
+  const syncPolicyState = useUpsertLearningPolicyState();
   const experimentsEnabled = preferences.data?.personal_experiments_enabled ?? true;
 
   const course = courses.find((candidate) => candidate.id === courseId) ?? null;
@@ -132,19 +159,61 @@ export function PracticeView({
     ? courseTopics[attemptIndex % Math.max(1, courseTopics.length)]?.id ?? topicId
     : topicId;
   const selectedTopic = courseTopics.find((candidate) => candidate.id === effectiveTopicId) ?? courseTopics[0] ?? null;
-  const selectedPath: PracticePath | null = selectedTopic
-    ? practicePathV4(selectedTopic, attempts, { examDate: course?.exam_date ?? null })
+  const selectedInstruction = selectedTopic
+    ? instructionDecisionV5(selectedTopic, attempts, { examDate: course?.exam_date ?? null })
     : null;
-  const activePath: PracticePath | null = diagnosticMode && selectedPath
+  const previewPlan = selectedTopic ? pretestPlanV5(selectedTopic, attempts) : null;
+  const completedPretests = selectedTopic
+    ? (pretestAttempts.data ?? []).filter((row) => row.topic_id === selectedTopic.id).length
+    : 0;
+  const previewActive =
+    !diagnosticMode &&
+    (preferences.data?.pretest_enabled ?? true) &&
+    Boolean(previewPlan?.enabled) &&
+    completedPretests < (previewPlan?.questionCount ?? 0);
+  const activePath = diagnosticMode && selectedInstruction
     ? {
-        stage: "independent",
+        ...selectedInstruction,
+        stage: "independent" as const,
         label: "Diagnostiikka",
         reason: "Lähtötaso mitataan ilman vihjeitä, jotta Planner ei aloita arvailusta.",
-        hintLimit: 0,
-        evidenceMultiplier: 1,
+        revealWorkedSolution: false,
+        maxHints: 0,
         requiresIndependentFollowup: false,
       }
-    : selectedPath;
+    : previewActive && selectedInstruction
+      ? {
+          ...selectedInstruction,
+          stage: "pretest" as const,
+          label: "Preview Challenge",
+          reason: previewPlan?.reason ?? "Ennakkotesti kartoittaa esitiedot ilman mastery-rangaistusta.",
+          revealWorkedSolution: false,
+          maxHints: 0,
+          requiresIndependentFollowup: false,
+        }
+      : selectedInstruction?.stage === "pretest"
+        ? {
+            ...selectedInstruction,
+            stage: "worked_example" as const,
+            label: "Worked example",
+            reason: "Preview Challenge on jo tehty. Nyt rakennetaan ratkaisumalli ennen itsenäistä harjoittelua.",
+            revealWorkedSolution: true,
+            maxHints: Math.max(2, selectedInstruction.maxHints),
+            requiresIndependentFollowup: true,
+          }
+        : selectedInstruction;
+  const stopDecision = selectedTopic ? stopRuleV5(selectedTopic, attempts) : null;
+  const transferState = selectedTopic ? transferStateV5(selectedTopic, attempts) : null;
+  const confusionSet = useMemo(
+    () => selectedTopic
+      ? confusionSetsV5({
+          topics: courseTopics,
+          dependencies: dependencies.data ?? [],
+          attempts,
+        }).find((set) => set.topicIds.includes(selectedTopic.id) && set.priority >= .55) ?? null
+      : null,
+    [attempts, courseTopics, dependencies.data, selectedTopic],
+  );
   const interleavingVariant =
     experimentsEnabled && selectedTopic
       ? experimentVariantV4("interleaving", today(), courseId + ":" + selectedTopic.id)
@@ -153,25 +222,33 @@ export function PracticeView({
     experimentsEnabled && selectedTopic
       ? experimentVariantV4("spacing_window", today(), courseId + ":" + selectedTopic.id)
       : null;
+  const subjectProfiles = useMemo(
+    () => subjectTaskProfilesV5(attempts, (id) => courses.find((candidate) => candidate.id === id)?.subject ?? "Muu"),
+    [attempts, courses],
+  );
   const interleaveMode =
-    diagnosticMode || interleavingVariant === null
-      ? "auto" as const
-      : interleavingVariant === "A"
-        ? "blocked" as const
-        : "interleaved" as const;
+    confusionSet
+      ? "interleaved" as const
+      : diagnosticMode || interleavingVariant === null
+        ? "auto" as const
+        : interleavingVariant === "A"
+          ? "blocked" as const
+          : "interleaved" as const;
 
   const preferredTypes: LearningAttemptType[] | undefined =
-    activePath?.stage === "worked_example" || activePath?.stage === "explanation"
-      ? ["explanation", "short_answer"]
-      : activePath?.stage === "partial_completion" || activePath?.stage === "guided"
-        ? ["calculation", "short_answer", "ordering"]
-        : activePath?.stage === "transfer"
-          ? ["application", "simulation", "error_detection"]
-          : activePath?.stage === "mixed"
-            ? ["recognition", "calculation", "error_detection", "application"]
-            : activePath?.stage === "delayed_verification"
-              ? ["free_recall", "application"]
-              : ["free_recall", "short_answer", "calculation"];
+    activePath?.stage === "pretest"
+      ? ["recognition", "multiple_choice", "short_answer"]
+      : activePath?.stage === "worked_example" || activePath?.stage === "self_explanation"
+        ? ["explanation", "short_answer"]
+        : activePath?.stage === "completion" || activePath?.stage === "guided"
+          ? ["calculation", "short_answer", "ordering"]
+          : activePath?.stage === "varied_context"
+            ? ["application", "recognition", "error_detection"]
+            : activePath?.stage === "transfer"
+              ? ["application", "simulation", "error_detection"]
+              : activePath?.stage === "delayed_verification"
+                ? ["free_recall", "application"]
+                : ["free_recall", "short_answer", "calculation"];
 
   const selection = useMemo(
     () =>
@@ -204,16 +281,37 @@ export function PracticeView({
     .filter((attempt) => attempt.topic_id === (selection?.topic.id ?? topicId))
     .slice(0, 6);
 
+  const latestPriorAttempt = selectedTopic
+    ? attempts
+        .filter((attempt) => attempt.topic_id === selectedTopic.id)
+        .sort((a, b) => b.created_at.localeCompare(a.created_at))[0] ?? null
+    : null;
+  const delayedHours = latestPriorAttempt
+    ? Math.max(0, Math.floor((Date.now() - Date.parse(latestPriorAttempt.created_at)) / 3_600_000))
+    : 0;
+  const shouldAskDelayedPrediction =
+    !diagnosticMode &&
+    delayedHours >= 12 &&
+    Boolean(selectedTopic) &&
+    !(calibrationObservations.data ?? []).some((row) =>
+      row.topic_id === selectedTopic?.id &&
+      row.observed_at &&
+      Date.parse(row.observed_at) > Date.now() - 6 * 60 * 60 * 1000
+    );
+
   useEffect(() => {
     startedAt.current = Date.now();
     setResponse("");
     setSelectedOption("");
-    setHintLevel(0);
+    setHintLevel(activePath?.stage === "completion" ? 1 : 0);
     setConfidence(null);
+    setDelayedPrediction(null);
     setFeedback("");
+    setFeedbackPolicy(null);
+    setRetryCount(0);
     setRubricEvaluation(null);
     setShowExplanation(false);
-  }, [selection?.question.id, selection?.topic.id]);
+  }, [activePath?.stage, selection?.question.id, selection?.topic.id]);
 
   async function save(requestedResult: PracticeAttempt["result"]) {
     if (!selection || feedback) return;
@@ -247,8 +345,62 @@ export function PracticeView({
         ? "mistake_repair"
         : "practice";
 
+    const resultOutcome = autoResult === "independent" ? "correct" : autoResult === "hinted" ? "partial" : "incorrect";
+    const baseFeedbackPolicy = feedbackPolicyV5({
+      mode: activePath?.stage === "pretest"
+        ? "pretest"
+        : stage.key === "repair"
+          ? "error_repair"
+          : ["worked_example","self_explanation","completion","guided"].includes(activePath?.stage ?? "")
+            ? "learning"
+            : "retrieval",
+      result: resultOutcome,
+      ...(activePath?.stage ? { stage: activePath.stage } : {}),
+    });
+    const effectiveFeedbackPolicy = retryCount >= baseFeedbackPolicy.retriesBeforeReveal && baseFeedbackPolicy.timing === "after_retry"
+      ? { ...baseFeedbackPolicy, timing: "after_item" as const }
+      : baseFeedbackPolicy;
+    const scaffoldStage =
+      activePath?.stage === "worked_example" ? "worked_example" :
+      activePath?.stage === "self_explanation" ? "explanation" :
+      activePath?.stage === "completion" ? "partial_completion" :
+      activePath?.stage === "guided" ? "guided" :
+      activePath?.stage === "varied_context" ? "mixed" :
+      activePath?.stage === "transfer" ? "transfer" :
+      activePath?.stage === "delayed_verification" ? "delayed_verification" :
+      "independent";
+    const automaticAssistance = ["worked_example","self_explanation","completion","guided"].includes(activePath?.stage ?? "");
+    const transferLevel =
+      activePath?.stage === "transfer" ? Math.max(5, transferState?.nextLevel ?? 5) :
+      activePath?.stage === "varied_context" ? Math.max(3, transferState?.nextLevel ?? 3) :
+      activePath?.stage === "independent" ? Math.max(2, transferState?.level ?? 2) :
+      activePath?.stage === "self_explanation" ? 1 : 0;
+
     try {
-      await record.mutateAsync({
+      if (activePath?.stage === "pretest") {
+        await recordPretest.mutateAsync({
+          course_id: selection.topic.course_id,
+          topic_id: selection.topic.id,
+          question_bank_id: typeof selection.question.bankId === "string" ? selection.question.bankId : null,
+          prompt: selection.question.prompt,
+          response: storedResponse || null,
+          predicted_confidence: confidence,
+          outcome: resultOutcome === "correct" ? "correct" : resultOutcome === "partial" ? "partial" : "incorrect",
+        });
+        setFeedbackPolicy(effectiveFeedbackPolicy);
+        const answerReveal =
+          isMultipleChoice && selection.question.correctAnswer
+            ? " Oikea vastaus: " + selection.question.correctAnswer + "."
+            : "";
+        setFeedback(
+          "Preview Challenge tallennettiin mastery-neutraalina havaintona." +
+          answerReveal +
+          " " + selection.question.explanation,
+        );
+        return;
+      }
+
+      const recordedAttemptId = await record.mutateAsync({
         course_id: selection.topic.course_id,
         topic_id: selection.topic.id,
         attempt_type: selection.question.type,
@@ -257,8 +409,8 @@ export function PracticeView({
         difficulty: selection.question.difficulty,
         result: autoResult,
         confidence,
-        hint_used: hintLevel > 0,
-        hints_used: hintLevel,
+        hint_used: hintLevel > 0 || automaticAssistance,
+        hints_used: Math.max(hintLevel, automaticAssistance ? 1 : 0),
         response_time_ms: responseTime,
         source,
         skills: selection.question.skills,
@@ -272,8 +424,16 @@ export function PracticeView({
           selectedOption: selectedOption || null,
           interleaved: selection.interleaved,
           examStage: stage.key,
-          scaffoldStage: activePath?.stage ?? "independent",
-          assisted: hintLevel > 0,
+          scaffoldStage,
+          instructionStage: activePath?.stage ?? "independent",
+          pretest: false,
+          masteryNeutral: false,
+          transferLevel,
+          discriminationTopicIds: confusionSet?.topicIds ?? [],
+          feedbackTiming: effectiveFeedbackPolicy.timing,
+          preRetrievalConfidence: delayedPrediction,
+          confidenceDelayHours: delayedPrediction ? delayedHours : null,
+          assisted: hintLevel > 0 || automaticAssistance,
           verificationRequired: activePath?.requiresIndependentFollowup ?? false,
           rubricEvaluatorUsed: rubricEvaluation !== null,
           rubricEvaluation: rubricEvaluation
@@ -294,25 +454,61 @@ export function PracticeView({
         },
       });
 
-      if (experimentsEnabled && spacingVariant && autoResult === "independent") {
-        const days = spacingVariant === "A" ? 3 : 5;
-        await updateTopic.mutateAsync({
-          id: selection.topic.id,
-          // Experiment controls only the next review suggestion, never mastery itself.
-          next_review: addDays(today(), days),
-        } as Parameters<typeof updateTopic.mutateAsync>[0]);
+      if (course) {
+        const retention = retentionTargetV5(selection.topic, course, attempts);
+        const stop = stopRuleV5(selection.topic, attempts);
+        void syncPolicyState.mutateAsync({
+          course_id: course.id,
+          topic_id: selection.topic.id,
+          desired_retention: retention.desiredRetention,
+          current_retention: retention.currentRetention,
+          recommended_minutes: retention.recommendedMinutes,
+          stop_today: stop.stopToday,
+          next_useful_date: stop.nextUsefulDate,
+          recommendation_confidence: retention.confidence.score,
+          recommendation_reason: retention.reason,
+          model_version: 5,
+        }).catch(() => undefined);
       }
 
+      if (autoResult === "independent") {
+        const profile = subjectProfiles.find((row) =>
+          row.subject === (course?.subject ?? "Muu") &&
+          row.attemptType === selection.question.type &&
+          row.reliability.label !== "low"
+        );
+        const experimentalDays = spacingVariant === "A" ? 3 : spacingVariant === "B" ? 5 : null;
+        const baseDays = experimentalDays ?? 4;
+        const personalizedDays = profile
+          ? Math.max(1, Math.min(14, Math.round(baseDays * profile.spacingMultiplier)))
+          : baseDays;
+        if ((experimentsEnabled && spacingVariant) || profile) {
+          await updateTopic.mutateAsync({
+            id: selection.topic.id,
+            // Personalization changes only the next review suggestion, never mastery itself.
+            next_review: addDays(today(), personalizedDays),
+          } as Parameters<typeof updateTopic.mutateAsync>[0]);
+        }
+      }
+
+      setFeedbackPolicy(effectiveFeedbackPolicy);
+      const canReveal = effectiveFeedbackPolicy.timing !== "after_retry";
       const answerReveal =
-        isMultipleChoice && selection.question.correctAnswer
+        canReveal && isMultipleChoice && selection.question.correctAnswer
           ? " Oikea vastaus: " + selection.question.correctAnswer + "."
           : "";
+      const explanationReveal =
+        canReveal && ["principle","worked_solution","next_step"].includes(effectiveFeedbackPolicy.reveal)
+          ? " " + selection.question.explanation
+          : "";
       setFeedback(
-        autoResult === "independent"
-          ? `Hyvä itsenäinen näyttö.${answerReveal} ${selection.question.explanation}`
-          : autoResult === "hinted"
-            ? `Vihje auttoi, joten näyttö painaa vähemmän masteryssa.${answerReveal} ${selection.question.explanation}`
-            : `Tämä tarvitsee uuden kierroksen pian.${answerReveal} ${selection.question.explanation}`,
+        effectiveFeedbackPolicy.timing === "after_retry"
+          ? "Älä katso ratkaisua vielä. Tee yksi uusi yritys samalla periaatteella ennen palautetta."
+          : autoResult === "independent"
+            ? `Hyvä itsenäinen näyttö.${answerReveal}${explanationReveal}`
+            : autoResult === "hinted"
+              ? `Vihje auttoi, joten näyttö painaa vähemmän masteryssa.${answerReveal}${explanationReveal}`
+              : `Tämä tarvitsee uuden kierroksen.${answerReveal}${explanationReveal}`,
       );
     } catch {
       toast.error("Harjoitusyritystä ei voitu tallentaa.");
@@ -461,9 +657,11 @@ export function PracticeView({
                 <span>· vaikeus {selection.question.difficulty}/5</span>
                 <span>· {selection.question.source === "bank" ? "LOPS21-tehtäväpankki" : "fallback"}</span>
                 {selection.interleaved && <span>· interleaved</span>}
+                {confusionSet && <span>· confusion-aware</span>}
+                {activePath?.stage === "pretest" && <span>· mastery-neutraali</span>}
               </div>
               <p className="mt-2 text-xs text-muted-foreground">
-                {courses.find((item) => item.id === selection.topic.course_id)?.code} · {selection.topic.name}
+                {courses.find((item) => item.id === selection.topic.course_id)?.code} · {confusionSet ? "Erottelu: " + confusionSet.labels.join(" vs. ") : selection.topic.name}
               </p>
               <p className="mt-2 text-lg font-semibold">{selection.question.prompt}</p>
               <p className="mt-2 text-xs text-muted-foreground">
@@ -471,6 +669,29 @@ export function PracticeView({
                 {" "}Aikaa ei lasketa osaamiseksi. Maailma jatkaa pyörimistään.
               </p>
             </div>
+
+            {stopDecision?.stopToday && !diagnosticMode && (
+              <div className="rounded-xl border border-primary/30 bg-accent/60 p-3 text-sm">
+                <b>Tästä aiheesta riittää tältä päivältä.</b>
+                <p className="mt-1 text-muted-foreground">{stopDecision.reason} Seuraava hyödyllinen palautus: {fullDate(stopDecision.nextUsefulDate)}.</p>
+              </div>
+            )}
+
+            {activePath?.stage === "worked_example" && (
+              <div className="rounded-2xl border border-border bg-surface p-4">
+                <p className="text-xs font-semibold uppercase tracking-wide text-primary">Worked example</p>
+                <p className="mt-2 text-sm">{selection.question.explanation}</p>
+                <p className="mt-2 text-xs text-muted-foreground">Tutki rakennetta. Seuraavassa vaiheessa tuki häivytetään eikä tätä ratkaisua enää näytetä.</p>
+              </div>
+            )}
+
+            {shouldAskDelayedPrediction && (
+              <fieldset className="rounded-2xl border border-border p-4">
+                <legend className="px-1 text-sm font-medium">Ennen tehtävää: jos sinut testataan nyt, kuinka varma olet?</legend>
+                <p className="mb-3 text-xs text-muted-foreground">Edellisestä saman aiheen yrityksestä on noin {delayedHours} h. Tämä viive-ennuste mitataan ennen palautetta.</p>
+                <div className="flex flex-wrap gap-2">{[[1,"Epävarma"],[2,"Melko varma"],[3,"Varma"]].map(([value,label])=><button key={value} type="button" aria-pressed={delayedPrediction===value} className={delayedPrediction===value?primary:secondary} onClick={()=>setDelayedPrediction(Number(value))}>{label}</button>)}</div>
+              </fieldset>
+            )}
 
             {selection.question.options?.length ? (
               <fieldset className="space-y-2">
@@ -514,14 +735,14 @@ export function PracticeView({
               <button
                 type="button"
                 className={secondary}
-                onClick={() => setHintLevel((value) => Math.min(activePath?.hintLimit ?? 3, value + 1))}
-                disabled={(activePath?.hintLimit ?? 3) === 0 || hintLevel >= Math.min(activePath?.hintLimit ?? 3, selection.question.hints.length)}
+                onClick={() => setHintLevel((value) => Math.min(activePath?.maxHints ?? 3, value + 1))}
+                disabled={(activePath?.maxHints ?? 3) === 0 || hintLevel >= Math.min(activePath?.maxHints ?? 3, selection.question.hints.length)}
               >
                 <Lightbulb size={17} />
                 {hintLevel === 0 ? "Tarvitsen vihjeen" : "Seuraava vihje"}
               </button>
               <span className="text-xs text-muted-foreground">
-                {activePath?.hintLimit === 0 ? "Tämä vaihe tehdään ilman vihjeitä." : `${hintLevel}/${activePath?.hintLimit ?? 3} vihjetasoa käytetty`}
+                {activePath?.maxHints === 0 ? "Tämä vaihe tehdään ilman vihjeitä." : `${hintLevel}/${activePath?.maxHints ?? 3} vihjetasoa käytetty`}
               </span>
             </div>
 
@@ -657,17 +878,29 @@ export function PracticeView({
                 <Sparkles className="mr-2 inline" size={16} />
                 {feedback}
                 <div className="mt-3">
-                  <button type="button" className={secondary+" !min-h-9"} onClick={() => setShowExplanation((value) => !value)}>
-                    {showExplanation ? "Piilota selitys" : "Vihjetaso 5 · näytä täysi selitys"}
-                  </button>
-                  {showExplanation && <p className="mt-2 rounded-lg bg-surface/70 p-3">{selection.question.explanation}</p>}
-                  <button
-                    type="button"
-                    className={primary + " mt-3 !min-h-9"}
-                    onClick={() => setAttemptIndex((value) => value + 1)}
-                  >
-                    Seuraava tehtävä
-                  </button>
+                  {feedbackPolicy?.timing === "after_retry" ? (
+                    <button type="button" className={primary+" !min-h-9"} onClick={() => {
+                      setRetryCount((value) => value + 1);
+                      setFeedback("");
+                      setFeedbackPolicy(null);
+                      setResponse("");
+                      setSelectedOption("");
+                      setRubricEvaluation(null);
+                      startedAt.current = Date.now();
+                    }}>
+                      Yritä uudelleen ennen selitystä
+                    </button>
+                  ) : (
+                    <>
+                      {feedbackPolicy?.reveal !== "none" && <button type="button" className={secondary+" !min-h-9"} onClick={() => setShowExplanation((value) => !value)}>
+                        {showExplanation ? "Piilota selitys" : "Näytä täysi selitys"}
+                      </button>}
+                      {showExplanation && <p className="mt-2 rounded-lg bg-surface/70 p-3">{selection.question.explanation}</p>}
+                      <button type="button" className={primary+" mt-3 !min-h-9"} onClick={() => setAttemptIndex((value) => value + 1)}>
+                        Seuraava tehtävä
+                      </button>
+                    </>
+                  )}
                 </div>
               </div>
             )}

@@ -24,5 +24,11 @@ export default defineConfig({
         ...devices["iPhone 13"],
       },
     },
+    {
+      name: "desktop-chromium",
+      use: {
+        ...devices["Desktop Chrome"],
+      },
+    },
   ],
 });
