@@ -614,7 +614,7 @@ export function ProgressView({courses,topics,attempts,sessions,plan,exams,mistak
     <V5LearningHealthPanel courses={courses} topics={topics} attempts={attempts}/>
     <ContrastiveErrorLab courses={courses} topics={topics} mistakes={mistakes}/>
 
-    <Panel title="Osaamiskartta v4">
+    <Panel title="Osaamiskartta">
       <div className="grid gap-2 sm:grid-cols-3 lg:grid-cols-6">
         {[
           ["Ei vielä arvioitu",v4Groups.unassessed],
@@ -661,18 +661,18 @@ export function ProgressView({courses,topics,attempts,sessions,plan,exams,mistak
     <Panel title="Oppimismittarit">
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
         {[
-          ["Viivepalautus",productMetrics.delayedRecallRate===null?"—":Math.round(productMetrics.delayedRecallRate*100)+" %"],
+          ["Myöhemmin onnistunut muistaminen",productMetrics.delayedRecallRate===null?"—":Math.round(productMetrics.delayedRecallRate*100)+" %"],
           ["Itsenäinen onnistuminen",productMetrics.independentSuccessRate===null?"—":Math.round(productMetrics.independentSuccessRate*100)+" %"],
           ["Osaamisen vakaus",productMetrics.masteryStability===null?"—":Math.round(productMetrics.masteryStability*100)+" %"],
           ["Virheistä palautuminen",productMetrics.recoverySuccessRate===null?"—":Math.round(productMetrics.recoverySuccessRate*100)+" %"],
-          ["Vakaata / tunti",productMetrics.studyEfficiency===null?"—":(Math.round(productMetrics.studyEfficiency*10)/10).toString()],
+          ["Vakaat aiheet / tunti",productMetrics.studyEfficiency===null?"—":(Math.round(productMetrics.studyEfficiency*10)/10).toString()],
         ].map(([label,value])=><div key={label} className="rounded-xl bg-muted/50 p-3"><small className="text-muted-foreground">{label}</small><p className="mt-1 text-xl font-semibold">{value}</p></div>)}
       </div>
       <p className="mt-3 text-xs text-muted-foreground">Ruutuaikaa ei palkita. Nämä mittarit kertovat muistamisesta, osaamisen vakaudesta, virheistä palautumisesta ja oppimisen tehokkuudesta.</p>
     </Panel>
 
     <details className="panel p-4 sm:p-5">
-      <summary className="cursor-pointer font-semibold">Oppimismoottorin tarkistus · 60 päivän simulaatio</summary>
+      <summary className="cursor-pointer font-semibold">Järjestelmän tarkistus · 60 päivän arvio</summary>
       <div className="mt-4 space-y-2">{selfChecks.map(check=><p key={check.id} className="text-sm">{check.ok?"✓":"⚠"} {check.message}</p>)}</div>
       <div className="mt-4 grid gap-3 sm:grid-cols-3">{simulations.map(sim=><div key={sim.profile} className="rounded-xl bg-muted/50 p-3 text-sm"><b>{simulationProfileLabel(sim.profile)}</b><p className="mt-2">Osaaminen {sim.meanMastery} · varmuus {sim.meanConfidence}</p><p className="text-xs text-muted-foreground">{sim.completed} toimintoa · {sim.skipped} ohitettua · {sim.overloadDays} ylikuormapäivää</p></div>)}</div>
     </details>
