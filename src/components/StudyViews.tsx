@@ -94,6 +94,17 @@ import { addDays, dateWithWeekday, diffDays, fullDate, minutes, shortDate, start
 import { disableBackgroundPush, enableBackgroundPush, pushIsEnabledOnDevice, pushSupported, sendTestPush } from "@/lib/push";
 import { applyTheme, storedThemeIsDark } from "@/lib/theme";
 import { clearDeviceSession, type DeviceUser } from "@/lib/deviceSession";
+import {
+  confidenceLabel,
+  dimensionLabel,
+  eventKindLabel,
+  experimentStatusLabel,
+  masteryLabelFi,
+  planPhaseLabel,
+  plannerModeLabel,
+  simulationProfileLabel,
+  yoPhaseLabel,
+} from "@/lib/ui-fi";
 import { KnowledgeGraphEditor, MaterialImporter } from "@/components/CourseLearningTools";
 import { answerPlainText } from "@/components/AbittiAnswerEditor";
 import { V5LearningHealthPanel, V5PlannerPanel } from "@/components/LearningOSV5Panels";
@@ -229,13 +240,13 @@ export function TodayView({courses,topics,sessions,exams,plan,tests,attempts,mis
       </div>
     </Panel>}
 
-    {adaptiveDay.runtimeIntentions.triggeredRuleIds.length>0&&<Panel title="If-then-sääntö aktiivinen">
+    {adaptiveDay.runtimeIntentions.triggeredRuleIds.length>0&&<Panel title="Jos–niin-sääntö aktiivinen">
       <p className="text-sm text-muted-foreground">{adaptiveDay.runtimeIntentions.notes.join(" ")||"Tämän päivän kuormaa mukautettiin automaattisesti aktiivisen säännön perusteella."}</p>
       <p className="mt-2 text-sm">{
         adaptiveDay.runtimeIntentions.replaceWithRetrieval
-          ? "Raskas työ vaihdettiin kevyeen retrievaliin."
+          ? "Raskas työ vaihdettiin kevyeen muistista palauttamiseen."
           : adaptiveDay.runtimeIntentions.dropExtra
-            ? "Extra jätetään pois tältä päivältä."
+            ? "Lisäharjoittelu jätetään pois tältä päivältä."
             : "Päivän kuormaa kevennettiin."
       }{adaptiveDay.runtimeIntentions.maxMinutes ? " Yhden tehtävän yläraja on nyt "+minutes(adaptiveDay.runtimeIntentions.maxMinutes)+"." : ""}</p>
     </Panel>}
@@ -244,13 +255,13 @@ export function TodayView({courses,topics,sessions,exams,plan,tests,attempts,mis
       <div className="flex rounded-xl bg-muted p-1 text-xs">
         <button className={"min-h-9 rounded-lg px-2 "+(loadMode==="minimum"?"bg-surface shadow-sm":"")} onClick={()=>{setLoadMode("minimum");setTaskIndex(0);}}>Kevyt · {adaptiveDay.minimumMinutes} min</button>
         <button className={"min-h-9 rounded-lg px-2 "+(loadMode==="recommended"?"bg-surface shadow-sm":"")} onClick={()=>{setLoadMode("recommended");setTaskIndex(0);}}>Suositus · {adaptiveDay.recommendedMinutes} min</button>
-        <button className={"min-h-9 rounded-lg px-2 "+(loadMode==="extra"?"bg-surface shadow-sm":"")} onClick={()=>{setLoadMode("extra");setTaskIndex(0);}}>Extra · {adaptiveDay.extraMinutes} min</button>
+        <button className={"min-h-9 rounded-lg px-2 "+(loadMode==="extra"?"bg-surface shadow-sm":"")} onClick={()=>{setLoadMode("extra");setTaskIndex(0);}}>Lisä · {adaptiveDay.extraMinutes} min</button>
       </div>
     }>{nextAction?<>
       <p className="text-sm font-medium text-primary">{nextAction.course.code} · {minutes(nextAction.minutes)}</p>
       <h3 className="mt-2 text-2xl font-semibold">{nextAction.title}</h3>
-      <details className="mt-3 text-sm text-muted-foreground"><summary className="cursor-pointer font-medium text-foreground">Miksi nämä?</summary><p className="mt-2">Koska {reason}.</p><p className="mt-2"><b>Suosituksen varmuus:</b> {nextAction.confidence.level.replaceAll("_"," ")} · {nextAction.confidence.text}</p><p className="mt-1 text-xs">Evidenssi: {nextAction.confidence.evidence.evidenceCount} yritystä · {nextAction.confidence.evidence.distinctDays} eri päivää · {nextAction.confidence.evidence.distinctTypes} tehtävätyyppiä.</p>{adaptiveDay.stoppedForLowMarginalGain&&<p className="mt-2">Suositus loppuu tähän, koska seuraavan tehtävän arvioitu oppimishyöty per minuutti laskee selvästi.</p>}</details>
-      <p className="mt-3 text-xs text-muted-foreground">Tämän version kokonaiskuorma on noin {minutes(todayMinutes)}. Extra ei muutu opiskelusakoksi.</p>
+      <details className="mt-3 text-sm text-muted-foreground"><summary className="cursor-pointer font-medium text-foreground">Miksi nämä?</summary><p className="mt-2">Koska {reason}.</p><p className="mt-2"><b>Suosituksen varmuus:</b> {confidenceLabel(nextAction.confidence.level)} · {nextAction.confidence.text}</p><p className="mt-1 text-xs">Näyttö: {nextAction.confidence.evidence.evidenceCount} yritystä · {nextAction.confidence.evidence.distinctDays} eri päivää · {nextAction.confidence.evidence.distinctTypes} tehtävätyyppiä.</p>{adaptiveDay.stoppedForLowMarginalGain&&<p className="mt-2">Suositus loppuu tähän, koska seuraavan tehtävän arvioitu oppimishyöty per minuutti laskee selvästi.</p>}</details>
+      <p className="mt-3 text-xs text-muted-foreground">Tämän vaihtoehdon kokonaiskuorma on noin {minutes(todayMinutes)}. Lisäharjoittelu ei muutu opiskelusakoksi.</p>
       <div className="mt-5 flex flex-wrap gap-2">
         <button className={button} onClick={()=>startChosen(nextAction)}>Aloita</button>
         {actions.length>1&&<button className={secondary} onClick={()=>setTaskIndex(i=>(i+1)%actions.length)}>Seuraava ehdotus</button>}
@@ -322,14 +333,14 @@ export function PlanView({courses,topics,plan,tests,mistakes,attempts,capacity,o
     if(!drafts.length){toast.error("Koe on jo mennyt.");return;}
     if(adapted.applied.length){
       const count=adapted.applied.reduce((sum,row)=>sum+row.count,0);
-      toast.info(`If-then-säännöt kevensivät tai mukauttivat ${count} ehdotettua sessiota.`);
+      toast.info(`Jos–niin-säännöt kevensivät tai mukauttivat ${count} ehdotettua opiskelukertaa.`);
     }
     if(plannerMode==="autopilot"){
       try{
         await generate.mutateAsync({courseId:c.id,drafts,capacity});
         setCreating(false);
-        toast.success("Autopilot päivitti suunnitelman kapasiteetin, koetilanteen ja aktiivisten if-then-sääntöjen perusteella.");
-      }catch{toast.error("Autopilot ei voinut päivittää suunnitelmaa.");}
+        toast.success("Automaattinen tila päivitti suunnitelman kapasiteetin, koetilanteen ja aktiivisten jos–niin-sääntöjen perusteella.");
+      }catch{toast.error("Automaattinen tila ei voinut päivittää suunnitelmaa.");}
       return;
     }
     setProposal(drafts);setEditingProposal(false);
@@ -351,7 +362,7 @@ export function PlanView({courses,topics,plan,tests,mistakes,attempts,capacity,o
     <V5PlannerPanel courses={courses} topics={topics} attempts={attempts} capacity={capacity} plan={plan}/>
     {adding&&<TaskForm courses={courses} topics={topics} date={anchor} onClose={()=>setAdding(false)}/>}
     {creating&&<Panel title="Adaptiivinen suunnitelma koetta varten">
-      <p className="mb-3 text-sm text-muted-foreground">Suunnitelma huomioi tärkeyden, esitiedot, varmistetun osaamisen, ajankohtaiset kertaukset, virhepankin, koulun etenemisen, 14 päivän koemoodin ja muiden kurssien saman päivän kuorman. Tila: <b>{plannerMode==="manual"?"Manual":plannerMode==="autopilot"?"Autopilot":"Assisted"}</b>. Extra on vapaaehtoista eikä muutu velaksi.</p>
+      <p className="mb-3 text-sm text-muted-foreground">Suunnitelma huomioi tärkeyden, esitiedot, varmistetun osaamisen, ajankohtaiset kertaukset, virhepankin, koulun etenemisen, 14 päivän koemoodin ja muiden kurssien saman päivän kuorman. Tila: <b>{plannerModeLabel(plannerMode)}</b>. Lisäharjoittelu on vapaaehtoista eikä muutu velaksi.</p>
       <select aria-label="Kurssi" value={choice} onChange={e=>setChoice(e.target.value)} className="w-full rounded-xl border bg-surface p-3">{courses.map(c=><option key={c.id} value={c.id}>{c.code} · {c.name}</option>)}</select>
       {selectedMode.active&&<p className="mt-3 rounded-xl bg-accent p-3 text-sm">Koemoodi on aktiivinen: {selectedMode.days} päivää kokeeseen. Uusi sisältö väistyy koetason harjoittelun, virheiden ja kertauksen tieltä.</p>}
       <button disabled={generate.isPending} className={button+" mt-3"} onClick={()=>void makeProposal()}>{plannerMode==="autopilot"?"Mukauta suunnitelma nyt":"Luo ehdotus"}</button>
@@ -362,7 +373,7 @@ export function PlanView({courses,topics,plan,tests,mistakes,attempts,capacity,o
       </div>}
     </Panel>}
     {plan.length===0&&<Panel title="Ei tehtäviä vielä"><p className="text-muted-foreground">Luo ensimmäinen suunnitelma tai lisää tehtävä itse.</p></Panel>}
-    <div className={mode==="kuukausi"?"grid grid-cols-2 gap-2 sm:grid-cols-7":"space-y-3"}>{days.map(date=><section className={`panel p-4 ${date===today()?"ring-1 ring-primary/50":""}`} key={date} onDragOver={e=>e.preventDefault()} onDrop={e=>{e.preventDefault();const id=e.dataTransfer.getData("text/plain");const item=plan.find(p=>p.id===id);if(item&&item.date!==date)void move.mutateAsync({id,date,from:item.date}).then(()=>toast.success("Tehtävä siirretty.")).catch(()=>toast.error("Siirto epäonnistui."));}}><h2 className="mb-3 text-sm font-semibold capitalize">{dateWithWeekday(date)}</h2>{plan.filter(p=>p.date===date).length===0?<p className="text-sm text-muted-foreground">Ei tehtäviä</p>:plan.filter(p=>p.date===date).map(p=><div key={p.id} draggable={mode!=="kuukausi"&&p.kind!=="exam"} onDragStart={e=>e.dataTransfer.setData("text/plain",p.id)} className="mb-2 rounded-xl bg-muted/60 p-3"><p className="text-xs font-semibold text-primary">{courses.find(c=>c.id===p.course_id)?.code} · {p.start_time?.slice(0,5)||minutes(p.target_minutes)}</p><p className="mt-1 text-sm font-medium">{p.title||topics.find(t=>t.id===p.topic_id)?.name||"Opiskelu"}</p><p className={`mt-1 text-xs ${statusClass[effectivePlanStatus(p)]}`}><span aria-hidden="true">{statusIcon[effectivePlanStatus(p)]} </span>{statusLabel[effectivePlanStatus(p)]} · {p.phase}</p>{mode!=="kuukausi"&&p.kind!=="exam"&&<div className="mt-3 flex flex-wrap items-center gap-1"><button className={secondary+" !min-h-9 !px-2"} onClick={()=>onStart(p.id)}>Aloita</button><details className="relative"><summary className={secondary+" list-none !min-h-9 !px-3"} aria-label="Tehtävän toiminnot">•••</summary><div className="absolute right-0 z-10 mt-1 min-w-36 rounded-xl border border-border bg-surface p-1 shadow-lg"><button className="block min-h-10 w-full rounded-lg px-3 text-left text-sm hover:bg-muted" onClick={()=>void shift(p)}>Siirrä</button>{p.status==="planned"&&<button className="block min-h-10 w-full rounded-lg px-3 text-left text-sm hover:bg-muted" onClick={()=>void skipWithReason(p)}>Ohita</button>}</div></details></div>}</div>)}</section>)}</div>
+    <div className={mode==="kuukausi"?"grid grid-cols-2 gap-2 sm:grid-cols-7":"space-y-3"}>{days.map(date=><section className={`panel p-4 ${date===today()?"ring-1 ring-primary/50":""}`} key={date} onDragOver={e=>e.preventDefault()} onDrop={e=>{e.preventDefault();const id=e.dataTransfer.getData("text/plain");const item=plan.find(p=>p.id===id);if(item&&item.date!==date)void move.mutateAsync({id,date,from:item.date}).then(()=>toast.success("Tehtävä siirretty.")).catch(()=>toast.error("Siirto epäonnistui."));}}><h2 className="mb-3 text-sm font-semibold capitalize">{dateWithWeekday(date)}</h2>{plan.filter(p=>p.date===date).length===0?<p className="text-sm text-muted-foreground">Ei tehtäviä</p>:plan.filter(p=>p.date===date).map(p=><div key={p.id} draggable={mode!=="kuukausi"&&p.kind!=="exam"} onDragStart={e=>e.dataTransfer.setData("text/plain",p.id)} className="mb-2 rounded-xl bg-muted/60 p-3"><p className="text-xs font-semibold text-primary">{courses.find(c=>c.id===p.course_id)?.code} · {p.start_time?.slice(0,5)||minutes(p.target_minutes)}</p><p className="mt-1 text-sm font-medium">{p.title||topics.find(t=>t.id===p.topic_id)?.name||"Opiskelu"}</p><p className={`mt-1 text-xs ${statusClass[effectivePlanStatus(p)]}`}><span aria-hidden="true">{statusIcon[effectivePlanStatus(p)]} </span>{statusLabel[effectivePlanStatus(p)]} · {planPhaseLabel(p.phase)}</p>{mode!=="kuukausi"&&p.kind!=="exam"&&<div className="mt-3 flex flex-wrap items-center gap-1"><button className={secondary+" !min-h-9 !px-2"} onClick={()=>onStart(p.id)}>Aloita</button><details className="relative"><summary className={secondary+" list-none !min-h-9 !px-3"} aria-label="Tehtävän toiminnot">•••</summary><div className="absolute right-0 z-10 mt-1 min-w-36 rounded-xl border border-border bg-surface p-1 shadow-lg"><button className="block min-h-10 w-full rounded-lg px-3 text-left text-sm hover:bg-muted" onClick={()=>void shift(p)}>Siirrä</button>{p.status==="planned"&&<button className="block min-h-10 w-full rounded-lg px-3 text-left text-sm hover:bg-muted" onClick={()=>void skipWithReason(p)}>Ohita</button>}</div></details></div>}</div>)}</section>)}</div>
   </div>;
 }
 
