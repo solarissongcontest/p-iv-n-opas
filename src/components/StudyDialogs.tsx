@@ -21,6 +21,7 @@ import { shortDate, today } from "@/lib/fi";
 import { experimentVariantV4, sessionFatigueV4 } from "@/lib/learning-os-v4";
 import { COURSE_TEMPLATES, parseTopicImport, topicsToImportText } from "@/lib/courseTemplates";
 import { getDeviceAccessToken } from "@/lib/deviceSession";
+import { relationLabel } from "@/lib/ui-fi";
 
 const input = "mt-1 w-full rounded-xl border border-border bg-surface px-3 py-2.5 outline-none focus-visible:ring-2 focus-visible:ring-ring";
 const button = "inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-primary px-4 text-primary-foreground disabled:opacity-50";
@@ -264,7 +265,7 @@ export function CourseForm({onClose}:{onClose:()=>void}) {
    <input type="file" accept=".pdf,.txt,.md,application/pdf,text/plain" className="mt-3 block min-h-11 w-full rounded-xl border bg-surface p-2 text-sm" onChange={e=>setStructureFile(e.target.files?.[0]??null)}/>
    <button type="button" className={secondary+" mt-3"} disabled={structureBusy||(!raw.trim()&&!structureFile)} onClick={()=>void analyzeCourseStructure()}>{structureBusy?<LoaderCircle className="animate-spin" size={16}/>:<FileText size={16}/>}Ehdota aiheet ja niiden yhteydet</button>
    {structureProvider&&<p className="mt-2 text-xs text-muted-foreground">Ehdotus: {structureProvider==="gemini"?"Gemini":"paikallinen varamenetelmä"} · {dependencySuggestions.length} aiheyhteyttä. Tarkista aihelista yllä.</p>}
-   {dependencySuggestions.length>0&&<details className="mt-3 rounded-xl bg-surface p-3 text-sm"><summary className="cursor-pointer font-medium">Dependency-ehdotukset ({dependencySuggestions.length})</summary><div className="mt-2 space-y-1">{dependencySuggestions.slice(0,20).map((row,index)=><p key={index} className="text-xs text-muted-foreground">{row.sourceName} <b>{row.relationType}</b> {row.targetName}</p>)}</div></details>}
+   {dependencySuggestions.length>0&&<details className="mt-3 rounded-xl bg-surface p-3 text-sm"><summary className="cursor-pointer font-medium">Aiheyhteysehdotukset ({dependencySuggestions.length})</summary><div className="mt-2 space-y-1">{dependencySuggestions.slice(0,20).map((row,index)=><p key={index} className="text-xs text-muted-foreground">{row.sourceName} <b>{relationLabel(row.relationType)}</b> {row.targetName}</p>)}</div></details>}
  </section>
  <button className={button+" w-full"} disabled={create.isPending}>Tallenna kurssi</button></form></Dialog>;
 }
