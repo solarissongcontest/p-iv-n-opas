@@ -138,7 +138,7 @@ export function SessionForm({item,courses,topics,sessions=[],attempts=[],onClose
        planned_minutes:item?.target_minutes??targetMinutes,
        kind:item?.kind==="review"?"review":item?.kind==="test"?"test":"study",
        competence,did,unclear,note,focus:null,energy:null,
-       method:method||"ohjattu sessio",tasks,
+       method:method||"ohjattu opiskelukerta",tasks,
        plan_item_id:item?.id??null,
        objective:objective.trim(),
        recall:recall.trim()||null,
@@ -147,16 +147,16 @@ export function SessionForm({item,courses,topics,sessions=[],attempts=[],onClose
        retrieval_confidence:retrievalConfidence,
        outcome,
      });
-     toast.success(result==="queued"?"Sessio tallennettu paikallisesti.":"Oppimissessio tallennettu.");
+     toast.success(result==="queued"?"Opiskelukerta tallennettu paikallisesti.":"Opiskelukerta tallennettu.");
      onClose();
-   }catch{toast.error("Sessioita ei voitu tallentaa. Tiedot eivät katoa, jos yhteys katkesi.");}
+   }catch{toast.error("Opiskelukertaa ei voitu tallentaa. Tiedot eivät katoa, jos yhteys katkesi.");}
  }
 
  const timerDisplay=`${String(Math.floor(seconds/3600)).padStart(2,"0")}:${String(Math.floor(seconds/60)%60).padStart(2,"0")}:${String(seconds%60).padStart(2,"0")}`;
 
- return <Dialog title={guided?"Ohjattu Study Session":"Kirjaa opiskelu"} onClose={onClose}>
+ return <Dialog title={guided?"Ohjattu opiskelukerta":"Kirjaa opiskelu"} onClose={onClose}>
    <div className="mb-5 flex rounded-xl bg-muted p-1">
-     <button type="button" onClick={()=>changeMode(true)} className={`min-h-10 flex-1 rounded-lg px-3 text-sm ${guided?"bg-surface font-semibold shadow-sm":""}`}>Ohjattu sessio</button>
+     <button type="button" onClick={()=>changeMode(true)} className={`min-h-10 flex-1 rounded-lg px-3 text-sm ${guided?"bg-surface font-semibold shadow-sm":""}`}>Ohjattu opiskelukerta</button>
      <button type="button" onClick={()=>changeMode(false)} className={`min-h-10 flex-1 rounded-lg px-3 text-sm ${!guided?"bg-surface font-semibold shadow-sm":""}`}>Nopea kirjaus</button>
    </div>
 
@@ -169,7 +169,7 @@ export function SessionForm({item,courses,topics,sessions=[],attempts=[],onClose
      <details className="rounded-2xl border border-border p-4"><summary className="cursor-pointer text-sm font-medium">Lisätiedot</summary><div className="mt-4 space-y-4"><label className="block text-sm font-medium">Menetelmä<select className={input} value={method} onChange={e=>setMethod(e.target.value)}><option value="tehtävät">Tehtävät</option><option value="aktiivinen palautus">Aktiivinen palautus</option><option value="muistiinpanot">Muistiinpanot</option><option value="lukeminen">Lukeminen</option><option value="harjoituskoe">Harjoituskoe</option><option value="muu">Muu</option></select></label><label className="block text-sm font-medium">Tehtävät<input className={input} value={tasks} onChange={e=>setTasks(e.target.value)}/></label><label className="block text-sm font-medium">Muistiinpano<textarea className={input} rows={3} value={note} onChange={e=>setNote(e.target.value)}/></label></div></details>
      <button type="submit" disabled={log.isPending} className={button+" w-full"}><Check size={18}/>{log.isPending?"Tallennetaan…":"Tallenna"}</button>
    </form>:<div className="space-y-5">
-     <div className="flex items-center gap-2" aria-label="Opiskelusession vaiheet">{["Tavoite","Muistelu","Harjoittelu","Palautus","Yhteenveto"].map((label,index)=><div key={label} className="flex-1"><div className={`h-1.5 rounded-full ${index<=step?"bg-primary":"bg-muted"}`}/><span className="mt-1 hidden text-[10px] text-muted-foreground sm:block">{label}</span></div>)}</div>
+     <div className="flex items-center gap-2" aria-label="Opiskelukerran vaiheet">{["Tavoite","Muistelu","Harjoittelu","Palautus","Yhteenveto"].map((label,index)=><div key={label} className="flex-1"><div className={`h-1.5 rounded-full ${index<=step?"bg-primary":"bg-muted"}`}/><span className="mt-1 hidden text-[10px] text-muted-foreground sm:block">{label}</span></div>)}</div>
 
      {step===0&&<>
        {item&&<div className="rounded-2xl bg-muted/60 p-4"><p className="text-xs font-semibold uppercase tracking-wide text-primary">{course?.code} · {item.target_minutes} min</p><h3 className="mt-1 text-lg font-semibold">{item.title||topic?.name||"Opiskelu"}</h3><p className="mt-1 text-sm text-muted-foreground">{phaseGoal}</p></div>}
