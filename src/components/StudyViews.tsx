@@ -72,6 +72,7 @@ import {
   useArchiveCourse,
   useCourses,
   useCreateFrictionEvent,
+  useFrictionEvents,
   useAdvanceMistake,
   useGeneratePlan,
   useImplementationIntentions,
@@ -128,7 +129,7 @@ export function TodayView({courses,topics,sessions,exams,plan,tests,attempts,mis
 }) {
   const now=today();
   const move=useMovePlanItem(),upsert=useUpsertPlanItem();
-  const graph=useTopicDependencies(),friction=useCreateFrictionEvent(),intentions=useImplementationIntentions();
+  const graph=useTopicDependencies(),friction=useCreateFrictionEvent(),frictionEvents=useFrictionEvents(),intentions=useImplementationIntentions();
   const [taskIndex,setTaskIndex]=useState(0);
   const [loadMode,setLoadMode]=useState<"minimum"|"recommended"|"extra">("recommended");
   const [localTime,setLocalTime]=useState("00:00");
@@ -140,7 +141,7 @@ export function TodayView({courses,topics,sessions,exams,plan,tests,attempts,mis
   },[]);
   const adaptiveDay=adaptiveDayPlanV5({
     courses,topics,plan,attempts,mistakes,capacity,dependencies:graph.data??[],now,
-    intentions:intentions.data??[],sessions,localTime,
+    intentions:intentions.data??[],sessions,frictionEvents:frictionEvents.data??[],localTime,
   });
   const actions=adaptiveDay[loadMode];
   useEffect(()=>{if(taskIndex>=actions.length)setTaskIndex(0);},[actions.length,taskIndex]);
@@ -165,7 +166,22 @@ export function TodayView({courses,topics,sessions,exams,plan,tests,attempts,mis
     return map[raw??""]??"other";
   }
   function startChosen(action:(typeof actions)[number]){
-    void friction.mutateAsync({date:now,plan_item_id:action.planItem?.id??null,course_id:action.course.id,reason:"other",note:"session_start",self_started:true,reminder_used:false}).catch(()=>undefined);
+    const params=new URLSearchParams(window.location.search);
+    const fromReminder=params.get("source")==="push";
+    void friction.mutateAsync({
+      date:now,
+      plan_item_id:action.planItem?.id??null,
+      course_id:action.course.id,
+      reason:"started",
+      note:fromReminder?"session_start_from_push":"session_start",
+      self_started:!fromReminder,
+      reminder_used:fromReminder,
+    }).catch(()=>undefined);
+    if(fromReminder){
+      params.delete("source");
+      const query=params.toString();
+      window.history.replaceState(null,"",window.location.pathname+(query?"?"+query:""));
+    }
     if(action.planItem)onStart(action.planItem.id);else onGo("practice");
   }
 
@@ -266,6 +282,7 @@ export function TodayView({courses,topics,sessions,exams,plan,tests,attempts,mis
 export function PlanView({courses,topics,plan,tests,mistakes,attempts,capacity,onStart}:Base&{plan:PlanItem[];tests:PracticeTest[];mistakes:Mistake[];attempts:PracticeAttempt[];capacity:CapacityProfile;onStart:(id:string)=>void}) {
   const preferences=usePreferences();
   const intentions=useImplementationIntentions();
+  const frictionHistory=useFrictionEvents();
   const plannerMode=preferences.data?.planner_mode??"assisted";
   const [mode,setMode]=useState<"päivä"|"viikko"|"kuukausi">("viikko"),[anchor,setAnchor]=useState(today()),[creating,setCreating]=useState(false),[adding,setAdding]=useState(false),[choice,setChoice]=useState(courses[0]?.id??"");
   const [proposal,setProposal]=useState<PlanDraft[]|null>(null),[editingProposal,setEditingProposal]=useState(false);
@@ -300,7 +317,7 @@ export function PlanView({courses,topics,plan,tests,mistakes,attempts,capacity,o
       tests:tests.filter(t=>t.course_id===c.id),
       capacity,
     });
-    const adapted=applyImplementationIntentionsV5(baseDrafts,intentions.data??[]);
+    const adapted=applyImplementationIntentionsV5(baseDrafts,intentions.data??[],frictionHistory.data??[]);
     const drafts=adapted.drafts;
     if(!drafts.length){toast.error("Koe on jo mennyt.");return;}
     if(adapted.applied.length){
