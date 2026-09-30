@@ -99,7 +99,7 @@ test("stop rule ends low-value same-day repetition only after independent eviden
 });
 
 test("new topic gets mastery-neutral preview challenge",()=>{
-  const t=topic("t3","Osmosi");
+  const t=topic("t3","Osmosi",{progress:0,verified_level:0,self_level:0});
   const preview=pretestPlanV5(t,[]);
   assert.equal(preview.enabled,true);
   assert.equal(preview.masteryNeutral,true);
