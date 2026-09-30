@@ -977,13 +977,13 @@ export function nextBestActionsV5(input:{
       ...v5,
       ...(dueRepair ? {
         kind:"verification" as const,
-        title:topic.name+" · virheen viivevarmistus",
+        title:topic.name+" · virheen myöhempi varmistus",
         minutes:Math.min(v5.minutes,12),
       } : {}),
       policyScore:v5.policyScore+bonus,
       v5Reasons:[
         ...v5.v5Reasons,
-        dueRepair ? "korjatun virheen viivevarmistus on nyt ajankohtainen" : null,
+        dueRepair ? "korjatun virheen myöhempi varmistus on nyt ajankohtainen" : null,
         confusion ? "sekoittuva käsite kannattaa erotella rinnakkain" : null,
       ].filter(Boolean) as string[],
     };
