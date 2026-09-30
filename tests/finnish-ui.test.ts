@@ -59,6 +59,19 @@ test("user-facing UI does not regress to known English product jargon", () => {
     "Session Fatigue",
     "Learning Engine ·",
     "Contrastive Error Lab",
+    ">Not assessed<",
+    ">Developing<",
+    ">At risk<",
+    'title="Forecast"',
+    ">Forecast<",
+    "Recovery success",
+    "recoveryistä",
+    "autosavetettu",
+    "tehtäväblokki",
+    "koetason evidenssiksi",
+    "Dataa ei ole vielä tarpeeksi",
+    "Osaamiskartta v4",
+    "viivevarmistus",
     "Opittu esimerkki",
     "Transfer-tehtävä",
     "Mixed practice",
@@ -189,4 +202,20 @@ test("shared accessibility and fatal-error copy is Finnish", () => {
     const text = readFileSync(new URL(file, import.meta.url), "utf8");
     for (const phrase of phrases) assert.equal(text.includes(phrase), true, file + ": " + phrase);
   }
+});
+
+
+test("unknown display enums stay Finnish instead of exposing raw identifiers", () => {
+  const labels = readFileSync(new URL("../src/lib/ui-fi.ts", import.meta.url), "utf8");
+  assert.equal(labels.includes('value.replaceAll("_", " ")'), false);
+  for (const phrase of [
+    "muu yhteys",
+    "ei vielä arvioitu",
+    "muu osa-alue",
+    "muu tehtävätyyppi",
+    "muu vaihe",
+    "muu tila",
+    "ei luokiteltu",
+    "muu vastaustapa",
+  ]) assert.equal(labels.includes(phrase), true, phrase);
 });

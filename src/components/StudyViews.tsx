@@ -264,7 +264,7 @@ export function TodayView({courses,topics,sessions,exams,plan,tests,attempts,mis
       <p className="text-sm font-medium text-primary">{nextAction.course.code} · {minutes(nextAction.minutes)}</p>
       <h3 className="mt-2 text-2xl font-semibold">{nextAction.title}</h3>
       <details className="mt-3 text-sm text-muted-foreground"><summary className="cursor-pointer font-medium text-foreground">Miksi nämä?</summary><p className="mt-2">Koska {reason}.</p><p className="mt-2"><b>Suosituksen varmuus:</b> {confidenceLabel(nextAction.confidence.level)} · {nextAction.confidence.text}</p><p className="mt-1 text-xs">Näyttö: {nextAction.confidence.evidence.evidenceCount} yritystä · {nextAction.confidence.evidence.distinctDays} eri päivää · {nextAction.confidence.evidence.distinctTypes} tehtävätyyppiä.</p>{adaptiveDay.stoppedForLowMarginalGain&&<p className="mt-2">Suositus loppuu tähän, koska seuraavan tehtävän arvioitu oppimishyöty per minuutti laskee selvästi.</p>}</details>
-      <p className="mt-3 text-xs text-muted-foreground">Tämän vaihtoehdon kokonaiskuorma on noin {minutes(todayMinutes)}. Lisäharjoittelu ei muutu opiskelusakoksi.</p>
+      <p className="mt-3 text-xs text-muted-foreground">Tämän vaihtoehdon kokonaiskuorma on noin {minutes(todayMinutes)}. Lisäharjoittelusta ei synny myöhemmin korvattavaa velkaa.</p>
       <div className="mt-5 flex flex-wrap gap-2">
         <button className={button} onClick={()=>startChosen(nextAction)}>Aloita</button>
         {actions.length>1&&<button className={secondary} onClick={()=>setTaskIndex(i=>(i+1)%actions.length)}>Seuraava ehdotus</button>}
@@ -614,15 +614,15 @@ export function ProgressView({courses,topics,attempts,sessions,plan,exams,mistak
     <V5LearningHealthPanel courses={courses} topics={topics} attempts={attempts}/>
     <ContrastiveErrorLab courses={courses} topics={topics} mistakes={mistakes}/>
 
-    <Panel title="Osaamiskartta v4">
+    <Panel title="Osaamiskartta · tarkempi arvio">
       <div className="grid gap-2 sm:grid-cols-3 lg:grid-cols-6">
         {[
-          ["Not assessed",v4Groups.unassessed],
+          ["Ei vielä arvioitu",v4Groups.unassessed],
           ["Harjoittele",v4Groups.learning],
-          ["Developing",v4Groups.developing],
+          ["Kehittyvä",v4Groups.developing],
           ["Melko varma",v4Groups.secure],
           ["Vahva",v4Groups.strong],
-          ["At risk",v4Groups.atRisk],
+          ["Riskissä",v4Groups.atRisk],
         ].map(([label,rows])=><div key={label as string} className="rounded-xl bg-muted/50 p-3"><p className="text-xs font-semibold">{label as string}</p><p className="mt-1 text-2xl font-semibold">{(rows as typeof v4Rows).length}</p></div>)}
       </div>
       <div className="mt-4 divide-y divide-border">
@@ -668,7 +668,7 @@ export function ProgressView({courses,topics,attempts,sessions,plan,exams,mistak
           ["Vakaata / tunti",productMetrics.studyEfficiency===null?"—":(Math.round(productMetrics.studyEfficiency*10)/10).toString()],
         ].map(([label,value])=><div key={label} className="rounded-xl bg-muted/50 p-3"><small className="text-muted-foreground">{label}</small><p className="mt-1 text-xl font-semibold">{value}</p></div>)}
       </div>
-      <p className="mt-3 text-xs text-muted-foreground">Ruutuaikaa ei palkita. Nämä mittarit kertovat muistamisesta, vakaudesta, recoveryistä ja oppimisen tehokkuudesta.</p>
+      <p className="mt-3 text-xs text-muted-foreground">Ruutuaikaa ei palkita. Nämä mittarit kertovat muistamisesta, osaamisen vakaudesta, virheistä palautumisesta ja oppimisen tehokkuudesta.</p>
     </Panel>
 
     <details className="panel p-4 sm:p-5">
@@ -703,7 +703,7 @@ export function ProgressView({courses,topics,attempts,sessions,plan,exams,mistak
       <button className={button+" mt-4"} onClick={onPlan}>Tarkista ja hyväksy suunnitelma</button>
     </Panel>
 
-    {forecast&&forecastCourse&&<Panel title="Forecast">
+    {forecast&&forecastCourse&&<Panel title="Aikatauluennuste">
       <p className="text-sm text-muted-foreground">{forecastCourse.code} · ensimmäinen sisältökierros</p>
       <p className="mt-2 text-2xl font-semibold">{fullDate(forecast.earliest)}–{fullDate(forecast.latest)}</p>
       {forecastCourse.exam_date&&<p className="mt-1 text-sm">Tavoite / koe {fullDate(forecastCourse.exam_date)} · {forecast.latest<=forecastCourse.exam_date?"aikataulussa":"vaatii suunnitelman tarkistuksen"}</p>}

@@ -24,7 +24,7 @@ test("non-AI master-plan features remain wired end-to-end", () => {
   const requiredUi = [
     "yoOverviewV4(", "experimentInsightsV4(", "learningOsSelfCheckV4(",
     "productMetricsV4(", "learningAchievementsV4(", "personalLearningProfileV4(",
-    "KnowledgeGraphEditor", "Viikkosi · viikko", "Avaa ensi viikon suunnitelma", "Koemoodi", "Osaamiskartta v4",
+    "KnowledgeGraphEditor", "Viikkosi · viikko", "Avaa ensi viikon suunnitelma", "Koemoodi", "Osaamiskartta · tarkempi arvio",
   ];
   for (const token of requiredUi) assert.ok(views.includes(token), "Missing UI integration: " + token);
 

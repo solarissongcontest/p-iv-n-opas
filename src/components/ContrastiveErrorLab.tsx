@@ -177,7 +177,7 @@ export function ContrastiveErrorLab({
           {course?.code} · {topic?.name ?? "Yleinen virhe"}
         </p>
         <p className="mt-2 font-medium">{activeMistake.error}</p>
-        {activeMistake.what_happened && <p className="mt-2 text-sm text-muted-foreground">Oma ratkaisu / tapahtuma: {activeMistake.what_happened}</p>}
+        {activeMistake.what_happened && <p className="mt-2 text-sm text-muted-foreground">Oma aiempi ratkaisu: {activeMistake.what_happened}</p>}
         {activeMistake.solution && <p className="mt-2 text-sm text-muted-foreground">Aiempi korjaus: {activeMistake.solution}</p>}
       </div>
 
@@ -266,7 +266,7 @@ export function ContrastiveErrorLab({
       </div>
 
       <p className="mt-3 text-xs text-muted-foreground">
-        Seuraava vaihe: {plan.next} Viivevarmistus ajoitetaan automaattisesti muutaman päivän päähän.
+        Seuraava vaihe: {plan.next} Myöhempi varmistustehtävä ajoitetaan automaattisesti muutaman päivän päähän.
       </p>
     </section>
   );

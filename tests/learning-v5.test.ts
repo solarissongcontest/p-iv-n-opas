@@ -461,7 +461,7 @@ test("due repaired mistakes are surfaced as actionable delayed verifications",()
   const source=readFileSync(new URL("../src/components/PracticeView.tsx",import.meta.url),"utf8");
   const engine=readFileSync(new URL("../src/lib/learning-os-v5.ts",import.meta.url),"utf8");
   assert.match(source,/dueMistakeVerifications/);
-  assert.match(source,/Virheen viivevarmistus/);
+  assert.match(source,/Virheen myöhempi varmistus/);
   assert.match(source,/advanceMistake\.mutateAsync\(\{id:dueMistakeVerification\.id,status:"mastered"\}\)/);
   assert.match(engine,/delayed_verification_due/);
   assert.match(engine,/kind:"verification"/);
