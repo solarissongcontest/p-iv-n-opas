@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
-import type { CapacityProfile, Course, PracticeAttempt, Topic } from "@/lib/domain";
+import type { CapacityProfile, Course, PlanItem, PracticeAttempt, Topic } from "@/lib/domain";
 import {
   useCalibrationObservations,
   useFrictionEvents,
@@ -18,6 +18,7 @@ import {
   retentionBudgetV5,
   subjectTaskProfilesV5,
   whatIfPlannerV5,
+  whatIfStudySimulatorV5,
 } from "@/lib/learning-os-v5";
 
 const button="inline-flex min-h-11 items-center justify-center rounded-xl bg-primary px-4 text-sm font-medium text-primary-foreground disabled:opacity-50";
@@ -31,10 +32,61 @@ function Panel({title,children,action}:{title:string;children:React.ReactNode;ac
   </section>;
 }
 
-export function V5PlannerPanel({courses,topics,attempts,capacity}:{courses:Course[];topics:Topic[];attempts:PracticeAttempt[];capacity:CapacityProfile}) {
+export function V5PlannerPanel({
+  courses,topics,attempts,capacity,plan=[],
+}:{
+  courses:Course[];
+  topics:Topic[];
+  attempts:PracticeAttempt[];
+  capacity:CapacityProfile;
+  plan?:PlanItem[];
+}) {
   const budget=useMemo(()=>retentionBudgetV5({courses,topics,attempts,capacity}),[courses,topics,attempts,capacity]);
   const scenarios=useMemo(()=>whatIfPlannerV5({courses,topics,attempts,capacity}),[courses,topics,attempts,capacity]);
   const names=new Map(topics.map(t=>[t.id,t.name]));
+  const [dailyMinutes,setDailyMinutes]=useState(40);
+  const [dayOff,setDayOff]=useState<number|null>(null);
+  const [scenarioCourseId,setScenarioCourseId]=useState(courses[0]?.id??"");
+  const currentScenarioCourse=courses.find(course=>course.id===scenarioCourseId)??courses[0]??null;
+  const [scenarioExamDate,setScenarioExamDate]=useState(currentScenarioCourse?.exam_date??"");
+  const [moveFrom,setMoveFrom]=useState<number|null>(null);
+  const [moveTo,setMoveTo]=useState<number|null>(null);
+  const weekdays=[
+    {value:1,label:"maanantai"},{value:2,label:"tiistai"},{value:3,label:"keskiviikko"},
+    {value:4,label:"torstai"},{value:5,label:"perjantai"},{value:6,label:"lauantai"},{value:0,label:"sunnuntai"},
+  ];
+
+  const customCourses=useMemo(()=>courses.map(course=>
+    course.id===scenarioCourseId&&scenarioExamDate
+      ? {...course,exam_date:scenarioExamDate}
+      : course
+  ),[courses,scenarioCourseId,scenarioExamDate]);
+  const customScenario=useMemo(()=>whatIfStudySimulatorV5({
+    courses:customCourses,
+    topics,
+    attempts,
+    scenarios:[{
+      id:"custom",
+      label:"Oma skenaario",
+      dailyMinutes,
+      skipWeekdays:dayOff===null?[]:[dayOff],
+    }],
+  })[0],[customCourses,topics,attempts,dailyMinutes,dayOff]);
+
+  const moveImpact=useMemo(()=>{
+    if(moveFrom===null||moveTo===null||moveFrom===moveTo)return null;
+    const active=plan.filter(item=>item.kind!=="exam"&&item.status==="planned");
+    const weekday=(date:string)=>new Date(date+"T12:00:00Z").getUTCDay();
+    const moved=active.filter(item=>weekday(item.date)===moveFrom).reduce((sum,item)=>sum+item.target_minutes,0);
+    const targetBefore=active.filter(item=>weekday(item.date)===moveTo).reduce((sum,item)=>sum+item.target_minutes,0);
+    const targetAfter=targetBefore+moved;
+    const targetCapacity=moveTo===0||moveTo===6?capacity.weekendMinutes:capacity.weekdayMinutes;
+    return {
+      moved,targetBefore,targetAfter,targetCapacity,
+      risk:targetAfter>targetCapacity*1.25?"high":targetAfter>targetCapacity?"medium":"low",
+    } as const;
+  },[plan,moveFrom,moveTo,capacity]);
+
   return <div className="grid gap-4 lg:grid-cols-2">
     <Panel title="Retention Budget v5">
       <div className="grid grid-cols-3 gap-2">
@@ -48,13 +100,60 @@ export function V5PlannerPanel({courses,topics,attempts,capacity}:{courses:Cours
       </div>)}</div>
       <p className="mt-3 text-xs text-muted-foreground">Rajahyöty alkaa pienentyä noin {budget.marginalGainLowAfterMinutes} minuutin jälkeen. Extra ei muutu velaksi.</p>
     </Panel>
+
     <Panel title="What-if Planner">
-      <p className="mb-3 text-sm text-muted-foreground">Vertaa kuormaa ennen suunnitelman muuttamista. Tämä ei ole arvosanaennuste.</p>
+      <p className="mb-3 text-sm text-muted-foreground">Vertaa vaihtoehtoja ennen suunnitelman muuttamista. Tämä ei ole arvosanaennuste eikä muuta kalenteria itsestään.</p>
       <div className="space-y-2">{scenarios.map(s=><div key={s.id} className="rounded-xl border border-border p-3">
         <div className="flex justify-between gap-3"><b>{s.label}</b><span className="text-sm">{s.weeklyCapacity} min / vko</span></div>
         <p className="mt-2 text-xs text-muted-foreground">retention-suoja {pct(s.protectedRetentionShare)} · backlog {s.projectedBacklogMinutes} min · ylikuormitus {s.overloadRisk} · rajahyöty {s.marginalValue}</p>
         <p className="mt-2 text-sm text-muted-foreground">{s.note}</p>
       </div>)}</div>
+
+      <div className="mt-5 rounded-2xl bg-muted/45 p-4">
+        <p className="font-semibold">Rakenna oma skenaario</p>
+        <div className="mt-3 grid gap-3 sm:grid-cols-2">
+          <label className="text-sm">Minuuttia / päivä
+            <input aria-label="What-if minuuttia päivässä" type="number" min="10" max="180" step="5" value={dailyMinutes} onChange={e=>setDailyMinutes(Math.max(10,Math.min(180,Number(e.target.value)||40)))} className="mt-1 min-h-11 w-full rounded-xl border bg-surface px-3"/>
+          </label>
+          <label className="text-sm">Pidä päivä vapaana
+            <select aria-label="What-if vapaa päivä" value={dayOff??""} onChange={e=>setDayOff(e.target.value===""?null:Number(e.target.value))} className="mt-1 min-h-11 w-full rounded-xl border bg-surface px-3">
+              <option value="">Ei erillistä vapaapäivää</option>
+              {weekdays.map(day=><option key={day.value} value={day.value}>{day.label}</option>)}
+            </select>
+          </label>
+          <label className="text-sm">Jos koepäivä muuttuu
+            <select value={scenarioCourseId} onChange={e=>{const id=e.target.value;setScenarioCourseId(id);setScenarioExamDate(courses.find(course=>course.id===id)?.exam_date??"");}} className="mt-1 min-h-11 w-full rounded-xl border bg-surface px-3">
+              {courses.map(course=><option key={course.id} value={course.id}>{course.code}</option>)}
+            </select>
+          </label>
+          <label className="text-sm">Uusi koepäivä
+            <input aria-label="What-if koepäivä" type="date" value={scenarioExamDate} onChange={e=>setScenarioExamDate(e.target.value)} className="mt-1 min-h-11 w-full rounded-xl border bg-surface px-3"/>
+          </label>
+          <label className="text-sm">Siirrä raskas työ päivältä
+            <select aria-label="Siirrä työ päivältä" value={moveFrom??""} onChange={e=>setMoveFrom(e.target.value===""?null:Number(e.target.value))} className="mt-1 min-h-11 w-full rounded-xl border bg-surface px-3">
+              <option value="">Ei siirtoa</option>
+              {weekdays.map(day=><option key={day.value} value={day.value}>{day.label}</option>)}
+            </select>
+          </label>
+          <label className="text-sm">Päivälle
+            <select aria-label="Siirrä työ päivälle" value={moveTo??""} onChange={e=>setMoveTo(e.target.value===""?null:Number(e.target.value))} className="mt-1 min-h-11 w-full rounded-xl border bg-surface px-3">
+              <option value="">Valitse päivä</option>
+              {weekdays.map(day=><option key={day.value} value={day.value}>{day.label}</option>)}
+            </select>
+          </label>
+        </div>
+
+        {customScenario&&<div className="mt-4 rounded-xl border border-border bg-surface p-3 text-sm">
+          <div className="flex flex-wrap justify-between gap-2"><b>Oman skenaarion vaikutus</b><span>{customScenario.weeklyMinutes} min / vko</span></div>
+          <p className="mt-2 text-muted-foreground">vakaita aiheita {customScenario.stableTopics} · riskissä {customScenario.atRiskTopics} · kertausjono {customScenario.estimatedReviewBacklog} · ylikuormitus {pct(customScenario.overloadRisk)}</p>
+          <p className="mt-2 text-muted-foreground">{customScenario.note}</p>
+        </div>}
+        {moveImpact&&<div className="mt-3 rounded-xl border border-border bg-surface p-3 text-sm">
+          <b>Työn siirron kuormitus</b>
+          <p className="mt-1 text-muted-foreground">Siirtyisi {moveImpact.moved} min. Kohdepäivän kuorma {moveImpact.targetBefore} → {moveImpact.targetAfter} min, kapasiteetti noin {moveImpact.targetCapacity} min.</p>
+          <p className="mt-1">Ylikuormitusriski: <b>{moveImpact.risk}</b>.</p>
+        </div>}
+      </div>
     </Panel>
   </div>;
 }
