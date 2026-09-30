@@ -1,0 +1,246 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import type {
+  CapacityProfile,
+  Course,
+  Mistake,
+  PlanItem,
+  PracticeAttempt,
+  Topic,
+} from "../src/lib/domain.ts";
+import {
+  LEARNING_OS_VERSION_V5,
+  adaptiveDayPlanV5,
+  buildExamSimulationV5,
+  confusionSetsV5,
+  delayedCalibrationV5,
+  feedbackPolicyV5,
+  frictionInsightV5,
+  instructionDecisionV5,
+  nextBestActionsV5,
+  pretestPlanV5,
+  reminderTaperV5,
+  retentionBudgetV5,
+  stopRuleV5,
+  subjectTaskProfilesV5,
+  transferStateV5,
+  whatIfPlannerV5,
+} from "../src/lib/learning-os-v5/index.ts";
+
+const NOW="2026-09-30";
+
+const course={
+  id:"11111111-1111-4111-8111-111111111111",
+  code:"FY04",name:"Fysiikka 4",subject:"Fysiikka",
+  exam_date:"2026-10-20",target_system:"school",target_value:"9",
+  weekly_minutes:180,archived:false,
+} as unknown as Course;
+
+function topic(id:string,name:string,patch:Partial<Topic>={}):Topic{
+  return {
+    id,owner_id:"owner",course_id:course.id,name,
+    progress:60,verified_level:2,self_level:3,weight:1,importance:4,
+    school_covered:true,position:0,dependencies:[],materials:null,
+    basic_successes:0,exam_successes:0,delayed_successes:0,
+    last_review:"2026-09-20",next_review:NOW,
+    retrieval_attempts:0,retrieval_failures:0,mastery_uncertainty:1,
+    mastery_confidence:.3,evidence_count:0,strong_evidence_count:0,
+    recall_strength:0,application_strength:0,retention_strength:0,
+    forgetting_risk:.55,exam_relevance:.6,learning_state_updated_at:null,
+    last_retrieval_at:null,last_retrieval_result:null,last_retrieval_confidence:null,
+    last_retrieval_difficulty:null,study_minutes:0,
+    ...patch,
+  } as unknown as Topic;
+}
+
+function attempt(id:string,topicId:string,patch:Partial<PracticeAttempt>={}):PracticeAttempt{
+  return {
+    id,owner_id:"owner",course_id:course.id,topic_id:topicId,date:NOW,
+    attempt_type:"free_recall",prompt:"Palauta muistista.",response:"Vastaus",
+    difficulty:3,result:"independent",outcome:"correct",confidence:2,
+    hint_used:false,hints_used:0,response_time_ms:30000,source:"practice",
+    evidence_quality:.8,skills:[],expected_concepts:[],question_payload:{},
+    scaffold_stage:"independent",assisted:false,dimension_weights:{},
+    independent_verification_required:false,operation_id:null,schema_version:5,
+    delay_days:2,created_at:NOW+"T12:00:00Z",
+    ...patch,
+  };
+}
+
+const capacity:CapacityProfile={
+  studyWeekdays:[1,2,3,4,5],weekdayMinMinutes:20,weekdayMinutes:60,
+  weekendMinMinutes:30,weekendMinutes:90,busyDates:[],
+};
+
+test("Learning OS v5 version is explicit",()=>{
+  assert.equal(LEARNING_OS_VERSION_V5,5);
+});
+
+test("retention budget stays inside weekly capacity and protects urgent topics",()=>{
+  const t=topic("t1","Newton II",{importance:5,retention_strength:.2});
+  const budget=retentionBudgetV5({courses:[course],topics:[t],attempts:[],capacity,now:NOW});
+  assert.ok(budget.recommendedMinutes<=budget.capacityMinutes);
+  assert.ok(budget.minimumMinutes<=budget.recommendedMinutes);
+  assert.ok(budget.extraMinutes<=budget.capacityMinutes);
+  assert.ok(budget.targets[0]!.desiredRetention>=.7);
+});
+
+test("stop rule ends low-value same-day repetition only after independent evidence",()=>{
+  const t=topic("t2","Liikemäärä");
+  const rows=[
+    attempt("a1",t.id,{attempt_type:"free_recall",created_at:NOW+"T10:00:00Z"}),
+    attempt("a2",t.id,{attempt_type:"application",created_at:NOW+"T10:10:00Z",difficulty:4}),
+  ];
+  const stop=stopRuleV5(t,rows,NOW);
+  assert.equal(stop.stopToday,true);
+  const hinted=stopRuleV5(t,rows.map(row=>({...row,result:"hinted" as const,outcome:"partial" as const,hint_used:true,hints_used:1,assisted:true})),NOW);
+  assert.equal(hinted.stopToday,false);
+});
+
+test("new topic gets mastery-neutral preview challenge",()=>{
+  const t=topic("t3","Osmosi");
+  const preview=pretestPlanV5(t,[]);
+  assert.equal(preview.enabled,true);
+  assert.equal(preview.masteryNeutral,true);
+  assert.equal(instructionDecisionV5(t,[]).stage,"pretest");
+});
+
+test("instruction engine fades support toward transfer",()=>{
+  const t=topic("t4","Energia");
+  const rows=[
+    attempt("a1",t.id,{date:"2026-09-20",attempt_type:"free_recall"}),
+    attempt("a2",t.id,{date:"2026-09-22",attempt_type:"explanation"}),
+    attempt("a3",t.id,{date:"2026-09-24",attempt_type:"calculation",difficulty:4}),
+    attempt("a4",t.id,{date:"2026-09-27",attempt_type:"application",difficulty:4}),
+  ];
+  const decision=instructionDecisionV5(t,rows,{now:NOW,examDate:course.exam_date});
+  assert.notEqual(decision.stage,"pretest");
+  assert.ok(["independent","varied_context","transfer","delayed_verification","self_explanation","completion"].includes(decision.stage));
+});
+
+test("feedback policy withholds feedback in exam simulation",()=>{
+  const policy=feedbackPolicyV5({mode:"exam_simulation",result:"incorrect"});
+  assert.equal(policy.timing,"after_block");
+  assert.equal(policy.reveal,"score_only");
+});
+
+test("confusion-aware interleaving creates discrimination set",()=>{
+  const a=topic("a","Liike-energia"),b=topic("b","Liikemäärä");
+  const sets=confusionSetsV5({
+    topics:[a,b],attempts:[],
+    dependencies:[{
+      id:"d",owner_id:"owner",topic_id:a.id,depends_on_topic_id:b.id,
+      relation_type:"commonly_confused_with",created_at:NOW,
+    }],
+    now:NOW,
+  });
+  assert.equal(sets.length,1);
+  assert.ok(sets[0]!.priority>=.55);
+  assert.equal(sets[0]!.attempts,0);
+});
+
+test("delayed calibration detects confident errors",()=>{
+  const state=delayedCalibrationV5([
+    {topic_id:"t",predicted_confidence:3,actual_outcome:"incorrect",delay_hours:24},
+    {topic_id:"t",predicted_confidence:3,actual_outcome:"partial",delay_hours:48},
+    {topic_id:"t",predicted_confidence:3,actual_outcome:"incorrect",delay_hours:72},
+  ]);
+  assert.equal(state.status,"overconfident");
+  assert.ok(state.delayedAccuracy!==null);
+});
+
+test("friction engine suggests a concrete if-then rule only after repetition",()=>{
+  const insight=frictionInsightV5([
+    {date:"2026-09-21",reason:"too_tired"},
+    {date:"2026-09-28",reason:"too_tired"},
+    {date:"2026-09-29",reason:"plans_changed"},
+  ]);
+  assert.equal(insight.repeatedReason,"too_tired");
+  assert.equal(insight.suggestion?.action_type,"replace_with_retrieval");
+});
+
+test("reminder taper rewards independent starts rather than notification clicks",()=>{
+  const decision=reminderTaperV5(Array.from({length:8},(_,i)=>({
+    date:"2026-09-"+String(20+i).padStart(2,"0"),
+    reason:"started" as const,
+    self_started:true,
+    reminder_used:false,
+  })));
+  assert.equal(decision.mode,"minimal");
+  assert.equal(decision.selfStartRate,1);
+});
+
+test("what-if planner exposes diminishing marginal value without grade predictions",()=>{
+  const t=topic("t5","Kitka");
+  const scenarios=whatIfPlannerV5({courses:[course],topics:[t],attempts:[],capacity,now:NOW});
+  const low=scenarios.find(row=>row.minutesPerDay===20)!;
+  const high=scenarios.find(row=>row.minutesPerDay===60)!;
+  assert.ok(high.weeklyCapacity>low.weeklyCapacity);
+  assert.ok(high.protectedRetentionShare>=low.protectedRetentionShare);
+  assert.doesNotMatch(high.note,/arvosana|grade/i);
+});
+
+test("transfer ladder requires varied independent evidence",()=>{
+  const t=topic("t6","Ympyräliike");
+  const state=transferStateV5(t,[
+    attempt("r1",t.id,{attempt_type:"free_recall",question_payload:{transferLevel:0}}),
+    attempt("r2",t.id,{attempt_type:"explanation",question_payload:{transferLevel:1}}),
+    attempt("r3",t.id,{attempt_type:"calculation",question_payload:{transferLevel:2}}),
+    attempt("r4",t.id,{attempt_type:"application",question_payload:{transferLevel:3}}),
+  ]);
+  assert.ok(state.level>=3);
+  assert.equal(state.strongEnoughForTopMastery,false);
+});
+
+test("subject-task model refuses fake precision with tiny samples",()=>{
+  const t=topic("t7","Voimat");
+  const profiles=subjectTaskProfilesV5([attempt("a",t.id)],()=> "Fysiikka");
+  assert.equal(profiles[0]!.reliability.label,"low");
+  assert.equal(profiles[0]!.spacingMultiplier,1);
+});
+
+test("v5 policy stays capacity-bounded",()=>{
+  const topics=[topic("p1","A",{importance:5}),topic("p2","B",{importance:5})];
+  const input={
+    courses:[course],topics,plan:[] as PlanItem[],attempts:[] as PracticeAttempt[],
+    mistakes:[] as Mistake[],dependencies:[],capacity,now:NOW,
+  };
+  const actions=nextBestActionsV5(input);
+  const day=adaptiveDayPlanV5(input);
+  assert.ok(actions.length>=0);
+  assert.ok(day.recommendedMinutes<=day.capacity);
+  assert.ok(day.extraMinutes<=day.capacity);
+});
+
+test("YO/Abitti simulation enforces closed-feedback constraints",()=>{
+  const t=topic("exam-topic","Mekaniikka");
+  const question=(id:string,index:number)=>({
+    id,owner_id:"owner",course_id:course.id,topic_id:t.id,curriculum:"LOPS21" as const,
+    module_code:"FY04",question_type:"calculation" as const,prompt:"Tehtävä "+index,
+    options:[],correct_answer:"x",explanation:"Selitys",hints:[],skills:[],expected_concepts:[],
+    difficulty:4,estimated_seconds:600,status:"active" as const,source_type:"seed" as const,
+    source_ref:null,metadata:{points:18,answerMode:index%2?"formula":"graph"},
+    created_at:NOW+"T00:00:00Z",updated_at:NOW+"T00:00:00Z",
+  });
+  const sim=buildExamSimulationV5({course,topics:[t],questions:Array.from({length:11},(_,i)=>question("q"+i,i)),mode:"full"});
+  assert.equal(sim.maxTasks,11);
+  assert.equal(sim.maxSelected,7);
+  assert.equal(sim.maxPoints,120);
+  assert.equal(sim.durationMinutes,360);
+  assert.equal(sim.hintsAllowed,false);
+  assert.equal(sim.masteryHidden,true);
+  assert.equal(sim.feedbackTiming,"after_block");
+});
+
+test("v5 migration persists every new learning signal with RLS and explicit grants",()=>{
+  const sql=readFileSync(new URL("../supabase/migrations/20260930174500_learning_os_v5.sql",import.meta.url),"utf8");
+  for(const token of [
+    "learning_policy_states","calibration_observations","study_friction_events",
+    "implementation_intentions","exam_simulations","retention_target",
+    "discrimination_strength","transfer_level","is_pretest","stimulus_package",
+    "enable row level security","to authenticated","grant select,insert,update,delete",
+    "PRETEST_COMPLETED","DISCRIMINATION_ATTEMPT_COMPLETED",
+  ]) assert.ok(sql.includes(token),token);
+  assert.match(sql,/new\.evidence_quality := 0/);
+});
