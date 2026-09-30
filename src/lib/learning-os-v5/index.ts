@@ -1,1 +1,10 @@
-export * from "../learning-os-v5.ts";
+export * from "./memory.ts";
+export * from "./instruction.ts";
+export * from "./discrimination.ts";
+export * from "./metacognition.ts";
+export * from "./behavior.ts";
+export * from "./exam.ts";
+export * from "./simulation.ts";
+export * from "./personalization.ts";
+export * from "./policy.ts";
+export { LEARNING_OS_VERSION_V5 } from "../learning-os-v5.ts";
