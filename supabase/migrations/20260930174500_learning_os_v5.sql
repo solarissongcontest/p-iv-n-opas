@@ -349,3 +349,107 @@ grant select,insert,update,delete on public.exam_simulations to service_role;
 grant execute on function public.learning_os_v5_prepare_attempt() to authenticated,service_role;
 grant execute on function public.learning_os_v5_pretest_evidence_guard() to authenticated,service_role;
 grant execute on function public.learning_os_v5_capture_attempt() to authenticated,service_role;
+
+
+-- v5 auxiliary state used by Preview Challenge, notification independence
+-- and cautious subject x task personalization.
+alter table public.user_preferences
+  add column if not exists pretest_enabled boolean not null default true,
+  add column if not exists feedback_policy_enabled boolean not null default true,
+  add column if not exists abitti_simulation_enabled boolean not null default true;
+
+create table if not exists public.pretest_attempts (
+  id uuid primary key default gen_random_uuid(),
+  owner_id uuid not null default auth.uid(),
+  course_id uuid not null references public.courses(id) on delete cascade,
+  topic_id uuid not null references public.topics(id) on delete cascade,
+  question_bank_id uuid references public.question_bank(id) on delete set null,
+  prompt text not null,
+  response text,
+  predicted_confidence smallint,
+  outcome text not null default 'unknown',
+  created_at timestamptz not null default now(),
+  check (predicted_confidence is null or predicted_confidence between 1 and 3),
+  check (outcome in ('correct','partial','incorrect','unknown'))
+);
+
+create index if not exists pretest_attempts_owner_topic_idx
+  on public.pretest_attempts(owner_id, topic_id, created_at desc);
+
+create table if not exists public.reminder_adaptation (
+  owner_id uuid primary key default auth.uid(),
+  recommended_level text not null default 'normal',
+  independent_start_rate real,
+  sample_size integer not null default 0,
+  metadata jsonb not null default '{}'::jsonb,
+  updated_at timestamptz not null default now(),
+  check (recommended_level in ('none','light','normal')),
+  check (independent_start_rate is null or independent_start_rate between 0 and 1),
+  check (sample_size >= 0)
+);
+
+create table if not exists public.subject_task_parameters (
+  id uuid primary key default gen_random_uuid(),
+  owner_id uuid not null default auth.uid(),
+  subject text not null,
+  attempt_type text not null,
+  observations integer not null default 0,
+  success_rate real not null default 0,
+  mean_delay_days real not null default 0,
+  preferred_spacing_days real not null default 4,
+  confidence text not null default 'very_low',
+  active boolean not null default false,
+  updated_at timestamptz not null default now(),
+  unique(owner_id, subject, attempt_type),
+  check (observations >= 0),
+  check (success_rate between 0 and 1),
+  check (mean_delay_days >= 0),
+  check (preferred_spacing_days between 1 and 60),
+  check (confidence in ('very_low','low','medium','high'))
+);
+
+do $$
+declare
+  t text;
+begin
+  foreach t in array array[
+    'pretest_attempts',
+    'reminder_adaptation',
+    'subject_task_parameters'
+  ]
+  loop
+    execute format('alter table public.%I enable row level security', t);
+
+    execute format('drop policy if exists %I on public.%I', 'owner_select_'||t, t);
+    execute format(
+      'create policy %I on public.%I for select to authenticated using ((select auth.uid()) = owner_id)',
+      'owner_select_'||t, t
+    );
+
+    execute format('drop policy if exists %I on public.%I', 'owner_insert_'||t, t);
+    execute format(
+      'create policy %I on public.%I for insert to authenticated with check ((select auth.uid()) = owner_id)',
+      'owner_insert_'||t, t
+    );
+
+    execute format('drop policy if exists %I on public.%I', 'owner_update_'||t, t);
+    execute format(
+      'create policy %I on public.%I for update to authenticated using ((select auth.uid()) = owner_id) with check ((select auth.uid()) = owner_id)',
+      'owner_update_'||t, t
+    );
+
+    execute format('drop policy if exists %I on public.%I', 'owner_delete_'||t, t);
+    execute format(
+      'create policy %I on public.%I for delete to authenticated using ((select auth.uid()) = owner_id)',
+      'owner_delete_'||t, t
+    );
+  end loop;
+end
+$$;
+
+grant select,insert,update,delete on public.pretest_attempts to authenticated;
+grant select,insert,update,delete on public.reminder_adaptation to authenticated;
+grant select,insert,update,delete on public.subject_task_parameters to authenticated;
+grant select,insert,update,delete on public.pretest_attempts to service_role;
+grant select,insert,update,delete on public.reminder_adaptation to service_role;
+grant select,insert,update,delete on public.subject_task_parameters to service_role;
