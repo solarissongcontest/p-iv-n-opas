@@ -4,7 +4,7 @@ import { sendWebPush, type StoredPushSubscription } from "@/lib/serverPush";
 
 function env(name: string) {
   const value = process.env[name];
-  if (!value) throw new Error(`Missing server environment variable: ${name}`);
+  if (!value) throw new Error("Palvelimen taustailmoitusasetus puuttuu.");
   return value;
 }
 
@@ -30,14 +30,14 @@ export const Route = createFileRoute("/api/push/test")({
             .eq("active", true);
           if (error) throw error;
           if (!subscriptions?.length) {
-            return Response.json({ error: "Tällä käyttäjällä ei ole aktiivista push-tilausta." }, { status: 404 });
+            return Response.json({ error: "Tällä käyttäjällä ei ole aktiivista taustailmoitustilausta." }, { status: 404 });
           }
 
           let sent = 0;
           for (const row of subscriptions) {
             const response = await sendWebPush(row.subscription as StoredPushSubscription, {
               title: "Opintopäiväkirja toimii",
-              body: "Tämä on oikea taustalta lähetetty Web Push -testimuistutus.",
+              body: "Tämä on taustalta lähetetty testimuistutus.",
               url: "/",
               tag: `test:${Date.now()}`,
             });
@@ -57,7 +57,7 @@ export const Route = createFileRoute("/api/push/test")({
           }
 
           if (!sent) {
-            return Response.json({ error: "Push-palvelu ei hyväksynyt testiviestiä." }, { status: 502 });
+            return Response.json({ error: "Taustailmoituspalvelu ei hyväksynyt testiviestiä." }, { status: 502 });
           }
           return Response.json({ ok: true, sent });
         } catch (error) {
