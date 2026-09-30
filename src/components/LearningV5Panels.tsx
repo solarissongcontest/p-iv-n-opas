@@ -58,7 +58,7 @@ export function WhatIfPlannerV5Panel({
 }
 
 function mapFriction(rows: ReturnType<typeof useFrictionEvents>["data"]): StudyFrictionEvent[] {
-  return (rows ?? []).map((row) => ({
+  return (rows ?? []).filter((row) => row.reason !== "started").map((row) => ({
     date: row.date,
     weekday: new Date(row.date+"T12:00:00").getDay(),
     reason:
