@@ -210,7 +210,11 @@ export const Route = createFileRoute("/api/push/cron")({
             let title = "";
             let body = "";
 
-            if (local.weekday === 7 && settings.weekly_summary) {
+            const nearestExamDays = exams?.[0] ? daysBetween(exams[0].date, local.iso) : null;
+            if (settings.exams && exams?.[0] && nearestExamDays !== null && nearestExamDays <= 3) {
+              title = "Koe lähestyy";
+              body = `${exams[0].name}: ${nearestExamDays === 0 ? "tänään" : nearestExamDays === 1 ? "huomenna" : `${nearestExamDays} päivän päästä`}.`;
+            } else if (local.weekday === 7 && settings.weekly_summary) {
               const actual = (weekSessions ?? []).reduce((sum, s) => sum + Number(s.minutes ?? 0), 0);
               const completed = (weekPlan ?? []).filter(p => p.status === "completed").length;
               const percent = weekPlan?.length ? Math.round(completed / weekPlan.length * 100) : 0;
@@ -227,12 +231,6 @@ export const Route = createFileRoute("/api/push/cron")({
             } else if (settings.plan_changes && overdue?.length) {
               title = "Suunnitelma tarvitsee pienen päivityksen";
               body = "Aiemmilta päiviltä jäi suunnitelmaa kesken. Avaa Planner: vanha kuorma järjestellään uudelleen ilman rästilistaa.";
-            } else if (settings.exams && exams?.[0]) {
-              const days = daysBetween(exams[0].date, local.iso);
-              if (days <= 3) {
-                title = "Koe lähestyy";
-                body = `${exams[0].name}: ${days === 0 ? "tänään" : days === 1 ? "huomenna" : `${days} päivän päästä`}.`;
-              }
             }
 
             if (!title) { skipped += 1; continue; }
