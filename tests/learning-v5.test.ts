@@ -453,7 +453,7 @@ test("Practice Mode consumes feedback preference, pins retries and limits confus
   assert.match(source,/feedback_policy_enabled/);
   assert.match(source,/setPinnedSelection\(selection\)/);
   assert.match(source,/selectionTopics = confusionSet/);
-  assert.match(source,/confusionSet\.topicIds\.includes\(selection\.topic\.id\)/);
+  assert.match(source,/confusionSet\?\.topicIds\.includes\(selection\.topic\.id\)/);
   assert.match(source,/pretestOutcomeScore >= \.75/);
 });
 
@@ -462,6 +462,7 @@ test("due repaired mistakes are surfaced as actionable delayed verifications",()
   const engine=readFileSync(new URL("../src/lib/learning-os-v5.ts",import.meta.url),"utf8");
   assert.match(source,/dueMistakeVerifications/);
   assert.match(source,/Virheen viivevarmistus/);
+  assert.match(source,/advanceMistake\.mutateAsync\(\{id:dueMistakeVerification\.id,status:"mastered"\}\)/);
   assert.match(engine,/delayed_verification_due/);
   assert.match(engine,/kind:"verification"/);
 });
