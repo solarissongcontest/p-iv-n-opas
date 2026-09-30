@@ -251,7 +251,7 @@ export function masteryModelV4(
   options: { now?: string; examDate?: string | null } = {},
 ): MasteryModelV4 {
   const now = options.now ?? today();
-  const rows = attempts.filter((a) => a.topic_id === topic.id);
+  const rows = attempts.filter((a) => a.topic_id === topic.id && !a.is_pretest);
   const legacy = deriveTopicLearningState(topic, attempts, options);
   const dimensions = {
     recall: dimensionEstimate(rows, "recall", now),
@@ -493,6 +493,7 @@ export function errorProfileV4(
   const add = (category: ErrorCategory) => counts.set(category, (counts.get(category) ?? 0) + 1);
 
   attempts
+    .filter((a) => !a.is_pretest)
     .filter((a) => !options.since || a.date >= options.since)
     .filter((a) => !options.courseId || a.course_id === options.courseId)
     .filter((a) => !options.topicId || a.topic_id === options.topicId)
