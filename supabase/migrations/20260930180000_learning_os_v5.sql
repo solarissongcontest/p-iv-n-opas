@@ -39,6 +39,14 @@ create table if not exists public.pretest_attempts (
 create index if not exists pretest_attempts_owner_topic_idx
   on public.pretest_attempts(owner_id,topic_id,created_at desc);
 
+alter table public.study_friction_events
+  drop constraint if exists study_friction_events_reason_check,
+  add constraint study_friction_events_reason_check
+    check (reason in (
+      'started','no_time','forgot','too_tired','too_hard','unclear_start','plans_changed','other'
+    ));
+
+
 create table if not exists public.retention_targets (
   id uuid primary key default gen_random_uuid(),
   owner_id uuid not null default auth.uid(),
@@ -213,6 +221,13 @@ begin
       when 'unfamiliar_scenario' then 4
       when 'mixed_topic' then 5
       when 'exam_transfer' then 6
+      when '0' then 0
+      when '1' then 1
+      when '2' then 2
+      when '3' then 3
+      when '4' then 4
+      when '5' then 5
+      when '6' then 6
       else new.transfer_level
     end;
   end if;
