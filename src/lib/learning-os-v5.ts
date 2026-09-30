@@ -997,9 +997,19 @@ export function adaptiveDayPlanV5(input:{
   capacity:CapacityProfile;
   dependencies?:TopicDependencyLike[];
   now?:string;
+  intentions?:ImplementationIntentionV5[];
+  sessions?:Session[];
+  localTime?:string;
 }){
   const now=input.now??today();
   const policy=learningPolicyV5({...input,now});
+  const runtimeContext=runtimeIntentionContextV5({
+    sessions:input.sessions??[],
+    capacity:input.capacity,
+    now,
+    localTime:input.localTime,
+  });
+  const runtimeIntentions=evaluateRuntimeIntentionsV5(input.intentions??[],runtimeContext);
   const weekday=new Date(now+"T12:00:00").getDay();
   const capacity=input.capacity.busyDates.includes(now)
     ? Math.max(10,Math.min(20,input.capacity.weekdayMinutes))
@@ -1016,8 +1026,12 @@ export function adaptiveDayPlanV5(input:{
       if(action.topic&&policy.stopDecisions[action.topic.id]?.stop&&!action.planItem)continue;
       const remaining=budget-used;
       if(remaining<5)break;
-      const actionMinutes=Math.max(5,Math.min(action.minutes,remaining));
-      selected.push({...action,minutes:actionMinutes});
+      const runtimeLimit=runtimeIntentions.maxMinutes??action.minutes;
+      const actionMinutes=Math.max(5,Math.min(action.minutes,runtimeLimit,remaining));
+      const adapted=runtimeIntentions.replaceWithRetrieval
+        ? {...action,kind:"review" as const,title:action.title+" · kevyt retrieval",minutes:actionMinutes}
+        : {...action,minutes:actionMinutes};
+      selected.push(adapted);
       used+=actionMinutes;
     }
     return selected;
@@ -1037,6 +1051,7 @@ export function adaptiveDayPlanV5(input:{
     retentionBudget:policy.retentionBudget,
     stopDecisions:policy.stopDecisions,
     policyNote:policy.note,
+    runtimeIntentions,
   };
 }
 
@@ -1575,6 +1590,110 @@ export function applyImplementationIntentionsV5(
     drafts: transformed,
     applied: [...counts.entries()].map(([id, value]) => ({ id, ...value })),
   };
+}
+
+
+export type RuntimeIntentionContextV5 = {
+  now: string;
+  localTime: string;
+  busyDates: string[];
+  latestEnergy: number | null;
+  daysSinceLastSession: number | null;
+  weekday: number;
+};
+
+export type RuntimeIntentionEffectV5 = {
+  triggeredRuleIds: string[];
+  maxMinutes: number | null;
+  replaceWithRetrieval: boolean;
+  dropExtra: boolean;
+  moveDays: number | null;
+  notes: string[];
+};
+
+export function runtimeIntentionContextV5(input:{
+  sessions: Session[];
+  capacity: CapacityProfile;
+  now?: string;
+  localTime?: string;
+}):RuntimeIntentionContextV5 {
+  const now=input.now??today();
+  const recent=[...input.sessions].filter(session=>session.date<=now).sort((a,b)=>
+    (b.date+"T"+b.created_at).localeCompare(a.date+"T"+a.created_at)
+  );
+  const latest=recent[0]??null;
+  return {
+    now,
+    localTime:input.localTime??new Date().toLocaleTimeString("fi-FI",{hour:"2-digit",minute:"2-digit",hour12:false}),
+    busyDates:input.capacity.busyDates,
+    latestEnergy:typeof latest?.energy==="number"?latest.energy:null,
+    daysSinceLastSession:latest?Math.max(0,diffDays(now,latest.date)):null,
+    weekday:new Date(now+"T12:00:00Z").getUTCDay(),
+  };
+}
+
+function timeToMinutesV5(value:string){
+  const match=/^(\d{1,2}):(\d{2})$/.exec(value.trim());
+  if(!match)return null;
+  const hour=Number(match[1]),minute=Number(match[2]);
+  if(hour<0||hour>23||minute<0||minute>59)return null;
+  return hour*60+minute;
+}
+
+export function evaluateRuntimeIntentionsV5(
+  rules:ImplementationIntentionV5[],
+  context:RuntimeIntentionContextV5,
+):RuntimeIntentionEffectV5 {
+  const effect:RuntimeIntentionEffectV5={
+    triggeredRuleIds:[],maxMinutes:null,replaceWithRetrieval:false,dropExtra:false,moveDays:null,notes:[],
+  };
+  const currentMinutes=timeToMinutesV5(context.localTime);
+
+  for(const rule of rules.filter(row=>row.enabled)){
+    let triggered=false;
+    if(rule.trigger_type==="busy_day"){
+      triggered=context.busyDates.includes(context.now)||
+        rule.trigger_value==="any"||
+        rule.trigger_value===String(context.weekday);
+    }else if(rule.trigger_type==="late_home"){
+      const threshold=timeToMinutesV5(rule.trigger_value);
+      triggered=threshold!==null&&currentMinutes!==null&&currentMinutes>=threshold;
+    }else if(rule.trigger_type==="low_energy"){
+      const threshold=Number(rule.trigger_value);
+      triggered=context.latestEnergy!==null&&context.latestEnergy<=(Number.isFinite(threshold)?threshold:2);
+    }else if(rule.trigger_type==="missed_days"){
+      const threshold=Math.max(1,Number(rule.trigger_value)||2);
+      triggered=context.daysSinceLastSession!==null&&context.daysSinceLastSession>=threshold;
+    }
+    if(!triggered)continue;
+
+    const id=rule.id??[rule.trigger_type,rule.trigger_value,rule.action_type].join(":");
+    effect.triggeredRuleIds.push(id);
+    if(rule.reason)effect.notes.push(rule.reason);
+
+    if(rule.action_type==="replace_with_retrieval"){
+      const parsed=Number(rule.action_value);
+      effect.replaceWithRetrieval=true;
+      effect.maxMinutes=Math.min(effect.maxMinutes??Infinity,Number.isFinite(parsed)?Math.max(5,Math.min(30,parsed)):15);
+    }else if(rule.action_type==="lighten"){
+      const parsed=Number(rule.action_value);
+      if(Number.isFinite(parsed)&&parsed>1)effect.maxMinutes=Math.min(effect.maxMinutes??Infinity,Math.max(5,Math.min(60,parsed)));
+      else effect.maxMinutes=Math.min(effect.maxMinutes??Infinity,20);
+      effect.dropExtra=true;
+    }else if(rule.action_type==="protect_rest"){
+      effect.dropExtra=true;
+      effect.maxMinutes=Math.min(effect.maxMinutes??Infinity,15);
+    }else if(rule.action_type==="move"){
+      const match=/^\+(\d+)$/.exec(rule.action_value);
+      effect.moveDays=match?Math.max(1,Math.min(7,Number(match[1]))):1;
+      effect.dropExtra=true;
+    }
+  }
+  if(effect.maxMinutes===Infinity)effect.maxMinutes=null;
+  if(effect.triggeredRuleIds.length&&!effect.notes.length){
+    effect.notes.push("Aktiivinen if-then-sääntö mukautti tämän päivän kuormaa.");
+  }
+  return effect;
 }
 
 export function reminderTaperV5(events: FrictionEventV5[]): ReminderTaperDecisionV5 {
