@@ -15,6 +15,7 @@ import {
 } from "@/lib/learning-os-v5";
 import { AbittiAnswerEditor, answerHasContent, answerPlainText } from "@/components/AbittiAnswerEditor";
 import { SketchAnswerCanvas } from "@/components/SketchAnswerCanvas";
+import { answerModeLabel } from "@/lib/ui-fi";
 
 const primary="inline-flex min-h-11 items-center justify-center rounded-xl bg-primary px-4 text-sm font-medium text-primary-foreground disabled:opacity-50";
 const secondary="inline-flex min-h-11 items-center justify-center rounded-xl border border-border bg-surface px-4 text-sm disabled:opacity-50";
@@ -251,14 +252,14 @@ export function ExamSimulationV5({courses,topics}:{courses:Course[];topics:Topic
         <label className="text-sm font-medium">Tila<select className="mt-1 w-full rounded-xl border bg-surface p-3" value={mode} onChange={e=>{setMode(e.target.value as "practice"|"full");setSelected([]);}}><option value="full">Täysi koesimulaatio</option><option value="practice">Lyhyempi harjoitus</option></select></label>
       </div>
       {simulation?<div className="mt-5">
-        <div className="rounded-xl bg-accent/50 p-3 text-sm">Tarjolla {simulation.maxTasks} tehtävää · valitse enintään {simulation.maxSelected} · enintään {simulation.maxPoints} p · {simulation.durationMinutes} min. Vihjeitä tai mastery-näkymää ei näytetä kesken suorituksen.</div>
-        <div className="mt-3 space-y-2">{simulation.tasks.map(task=><button type="button" key={task.id} aria-pressed={selected.includes(task.id)} onClick={()=>toggle(task.id)} className={"flex min-h-14 w-full items-center justify-between gap-3 rounded-xl border p-3 text-left "+(selected.includes(task.id)?"border-primary bg-accent":"border-border bg-surface")}><span><b>{task.title}</b><small className="mt-1 block text-muted-foreground">{task.answerMode} · {task.stimulus?"aineistotehtävä":"ei erillistä aineistoa"}</small></span><span className="font-semibold">{task.points} p</span></button>)}</div>
+        <div className="rounded-xl bg-accent/50 p-3 text-sm">Tarjolla {simulation.maxTasks} tehtävää · valitse enintään {simulation.maxSelected} · enintään {simulation.maxPoints} p · {simulation.durationMinutes} min. Vihjeitä tai osaamisnäkymää ei näytetä kesken suorituksen.</div>
+        <div className="mt-3 space-y-2">{simulation.tasks.map(task=><button type="button" key={task.id} aria-pressed={selected.includes(task.id)} onClick={()=>toggle(task.id)} className={"flex min-h-14 w-full items-center justify-between gap-3 rounded-xl border p-3 text-left "+(selected.includes(task.id)?"border-primary bg-accent":"border-border bg-surface")}><span><b>{task.title}</b><small className="mt-1 block text-muted-foreground">{answerModeLabel(task.answerMode)} · {task.stimulus?"aineistotehtävä":"ei erillistä aineistoa"}</small></span><span className="font-semibold">{task.points} p</span></button>)}</div>
         <button disabled={!selected.length||create.isPending} className={primary+" mt-4"} onClick={()=>void start()}>Aloita valitut {selected.length} tehtävää</button>
       </div>:<p className="mt-4 text-sm text-muted-foreground">Tehtäväpankissa ei ole vielä tähän kurssiin soveltuvia tehtäviä.</p>}
     </>}
 
     {phase==="running"&&activeTask&&<>
-      <div className="mt-5 rounded-2xl bg-muted/50 p-4"><p className="text-xs font-semibold uppercase tracking-wide text-primary">Tehtävä {activeIndex+1}/{selectedTasks.length} · {activeTask.points} p · {activeTask.answerMode}</p><p className="mt-2 text-sm text-muted-foreground">Palaute ja oikeat vastaukset pysyvät piilossa koko tehtäväblokin ajan.</p></div>
+      <div className="mt-5 rounded-2xl bg-muted/50 p-4"><p className="text-xs font-semibold uppercase tracking-wide text-primary">Tehtävä {activeIndex+1}/{selectedTasks.length} · {activeTask.points} p · {answerModeLabel(activeTask.answerMode)}</p><p className="mt-2 text-sm text-muted-foreground">Palaute ja oikeat vastaukset pysyvät piilossa koko tehtäväblokin ajan.</p></div>
       <div className="mt-4">
         <Stimulus value={activeTask.stimulus}/>
         <p className="mt-4 text-lg font-semibold">{(bank.data??[]).find(q=>q.id===activeTask.id)?.prompt??activeTask.title}</p>
