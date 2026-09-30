@@ -148,3 +148,14 @@ export function attemptOutcomeLabel(value: string) {
     default: return value.replaceAll("_", " ");
   }
 }
+
+export function answerModeLabel(value: string) {
+  switch (value) {
+    case "text": return "tekstivastaus";
+    case "formula": return "kaavavastaus";
+    case "diagram": return "piirros";
+    case "graph": return "kuvaaja";
+    case "mixed": return "teksti ja piirros";
+    default: return value.replaceAll("_", " ");
+  }
+}
