@@ -27,9 +27,14 @@ jobs:
       - name: Install Playwright
         run: |
           npm install --no-save @playwright/test
-          npx playwright install --with-deps webkit
+          npx playwright install --with-deps webkit chromium
 
       - name: Run iPhone WebKit smoke test
         env:
           E2E_BASE_URL: ${{ inputs.base_url }}
         run: npx playwright test e2e/iphone-smoke.spec.ts --project=iphone-webkit
+
+      - name: Run v5 offline and cross-device E2E
+        env:
+          E2E_BASE_URL: ${{ inputs.base_url }}
+        run: npx playwright test e2e/v5-cross-device.spec.ts --project=desktop-chromium
