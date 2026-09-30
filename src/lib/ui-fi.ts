@@ -145,7 +145,7 @@ export function attemptOutcomeLabel(value: string) {
     case "hinted": return "onnistui osittain";
     case "incorrect":
     case "not_yet": return "ei vielä onnistunut";
-    default: return value.replaceAll("_", " ");
+    default: return "muu tulos";
   }
 }
 
@@ -156,7 +156,7 @@ export function answerModeLabel(value: string) {
     case "diagram": return "piirros";
     case "graph": return "kuvaaja";
     case "mixed": return "teksti ja piirros";
-    default: return value.replaceAll("_", " ");
+    default: return "muu vastaustapa";
   }
 }
 
