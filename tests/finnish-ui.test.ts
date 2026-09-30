@@ -71,6 +71,7 @@ test("user-facing UI does not regress to known English product jargon", () => {
     "koetason evidenssiksi",
     "Dataa ei ole vielä tarpeeksi",
     "Osaamiskartta v4",
+    "viivevarmistus",
     "Opittu esimerkki",
     "Transfer-tehtävä",
     "Mixed practice",
