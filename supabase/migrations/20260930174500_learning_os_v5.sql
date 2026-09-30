@@ -142,6 +142,7 @@ create table if not exists public.exam_simulations (
   selected_task_ids uuid[] not null default '{}'::uuid[],
   completed_task_ids uuid[] not null default '{}'::uuid[],
   scores jsonb not null default '{}'::jsonb,
+  answers jsonb not null default '{}'::jsonb,
   duration_minutes integer not null default 90,
   started_at timestamptz,
   completed_at timestamptz,
