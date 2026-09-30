@@ -12,6 +12,7 @@ import type {
 import {
   LEARNING_OS_VERSION_V5,
   adaptiveDayPlanV5,
+  applyImplementationIntentionsV5,
   buildExamSimulationV5,
   confusionSetsV5,
   delayedCalibrationV5,
@@ -243,4 +244,34 @@ test("v5 migration persists every new learning signal with RLS and explicit gran
     "PRETEST_COMPLETED","DISCRIMINATION_ATTEMPT_COMPLETED",
   ]) assert.ok(sql.includes(token),token);
   assert.match(sql,/new\.evidence_quality := 0/);
+});
+
+
+test("active if-then rule changes planner drafts",()=>{
+  const drafts=[{
+    course_id:course.id,
+    topic_id:"topic",
+    date:"2026-10-06",
+    phase:"content" as const,
+    kind:"study",
+    title:"Newton II",
+    min_minutes:20,
+    target_minutes:50,
+    extra_minutes:15,
+    start_time:null,
+  }];
+  const result=applyImplementationIntentionsV5(drafts,[{
+    id:"rule-1",
+    trigger_type:"busy_day",
+    trigger_value:String(new Date("2026-10-06T12:00:00Z").getUTCDay()),
+    action_type:"lighten",
+    action_value:"0.4",
+    enabled:true,
+    reason:"Tiistain kuorma on toistuvasti liian raskas.",
+  }]);
+  assert.equal(result.applied.length,1);
+  assert.equal(result.drafts[0]!.target_minutes,20);
+  assert.equal(result.drafts[0]!.extra_minutes,0);
+  assert.equal(result.drafts[0]!.phase,"review");
+  assert.match(result.drafts[0]!.title,/kevyt/);
 });
