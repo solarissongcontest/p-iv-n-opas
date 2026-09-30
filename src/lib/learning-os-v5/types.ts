@@ -127,6 +127,7 @@ export type FrictionReasonV5 =
   | "too_hard"
   | "unclear_start"
   | "plans_changed"
+  | "started"
   | "other";
 
 export type FrictionEventV5 = {
