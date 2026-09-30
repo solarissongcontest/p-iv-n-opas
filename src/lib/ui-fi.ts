@@ -99,3 +99,19 @@ export function eventKindLabel(value: string) {
     default: return value.replaceAll("_", " ");
   }
 }
+
+export function attemptTypeLabel(value: string) {
+  switch (value) {
+    case "free_recall": return "vapaa muistista palautus";
+    case "short_answer": return "lyhyt vastaus";
+    case "calculation": return "laskutehtävä";
+    case "application": return "soveltaminen";
+    case "multiple_choice": return "monivalinta";
+    case "explanation": return "käsitteen selitys";
+    case "ordering": return "järjestäminen";
+    case "error_detection": return "virheen tunnistaminen";
+    case "simulation": return "koetyylinen tehtävä";
+    case "recognition": return "menetelmän tunnistaminen";
+    default: return value.replaceAll("_", " ");
+  }
+}
