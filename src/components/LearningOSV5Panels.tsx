@@ -221,8 +221,17 @@ export function V5LearningHealthPanel({courses,attempts}:{courses:Course[];topic
 
   async function accept(){
     if(!frictionState.suggestion)return;
-    try{await saveIntention.mutateAsync({...frictionState.suggestion,enabled:true});toast.success("If-then-sääntö otettiin käyttöön.");}
-    catch{toast.error("Sääntöä ei voitu tallentaa.");}
+    const suggestion=frictionState.suggestion;
+    const existing=(intentions.data??[]).find(rule=>
+      rule.trigger_type===suggestion.trigger_type&&
+      rule.trigger_value===suggestion.trigger_value&&
+      rule.action_type===suggestion.action_type&&
+      rule.action_value===suggestion.action_value
+    );
+    try{
+      await saveIntention.mutateAsync({...suggestion,...(existing?.id?{id:existing.id}:{}),enabled:true});
+      toast.success(existing?"If-then-sääntö aktivoitiin uudelleen.":"If-then-sääntö otettiin käyttöön.");
+    }catch{toast.error("Sääntöä ei voitu tallentaa.");}
   }
 
   return <div className="space-y-4">
