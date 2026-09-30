@@ -4,6 +4,7 @@ import type {
   Mistake,
   PlanItem,
   PracticeAttempt,
+  QuestionBankItem,
   Session,
   Topic,
 } from "./domain.ts";
@@ -50,11 +51,23 @@ export type RetentionBudget = {
   note: string;
 };
 
+export type EvidenceConfidenceV5 = {
+  score: number;
+  label: "low" | "medium" | "high";
+  evidenceCount: number;
+  reason: string;
+};
+
 export type StopDecision = {
   stop: boolean;
+  stopToday: boolean;
   reason: string;
   nextUsefulReview: string | null;
+  nextUsefulDate: string;
   marginalGainPerMinute: number;
+  evidenceCountToday: number;
+  independentSuccessesToday: number;
+  confidence: EvidenceConfidenceV5;
   evidence: {
     independentCorrect: number;
     distinctTypes: number;
@@ -492,11 +505,22 @@ export function stopRuleV5(
         : distinctTypes < 2
           ? "Sama onnistuminen pitää vielä näyttää toisella tehtävätyypillä."
           : "Jatka lyhyesti, koska suoritus ei ole vielä riittävän vakaa.";
+  const stopConfidence: EvidenceConfidenceV5 = {
+    score: clamp(independentCorrect / 3 * 0.45 + distinctTypes / 3 * 0.25 + Math.min(1, rows.length / 5) * 0.3),
+    label: rows.length >= 4 && independentCorrect >= 2 ? "high" : rows.length >= 2 ? "medium" : "low",
+    evidenceCount: rows.length,
+    reason: rows.length >= 4 ? "Päätös perustuu useaan tämän päivän yritykseen." : "Stop rule on vielä alustava, koska tämän päivän näyttöä on vähän.",
+  };
   return {
     stop,
+    stopToday: stop,
     reason,
     nextUsefulReview,
+    nextUsefulDate: nextUsefulReview ?? addDays(now, 1),
     marginalGainPerMinute,
+    evidenceCountToday: rows.length,
+    independentSuccessesToday: independentCorrect,
+    confidence: stopConfidence,
     evidence: { independentCorrect, distinctTypes, transferSuccesses, explanationSuccesses, assistedSuccesses },
   };
 }
@@ -630,7 +654,7 @@ export function confusionAwareInterleavingV5(
   return result.sort((a,b)=>a.strength-b.strength);
 }
 
-export function delayedCalibrationV5(
+export function topicCalibrationInsightV5(
   topic: Topic,
   attempts: PracticeAttempt[],
   now = today(),
@@ -699,7 +723,7 @@ export function transferLadderV5(
   };
 }
 
-export function feedbackPolicyV5(
+export function feedbackPolicyCoreV5(
   mode: FeedbackMode,
   instruction?: InstructionPlanV5 | null,
 ): FeedbackPolicy {
@@ -845,7 +869,7 @@ export function analyzeTaskSelectionV5(
   };
 }
 
-export function subjectTaskProfilesV5(
+export function subjectTaskProfilesFromCoursesV5(
   courses:Course[],
   attempts:PracticeAttempt[],
 ):SubjectTaskProfile[]{
@@ -885,7 +909,7 @@ function actionUtility(
   const retentionBenefit=clamp(model.forgettingRisk*.72+(1-model.dimensions.retention.score/100)*.28);
   const topicAttempts=attempts.filter(a=>a.topic_id===action.topic?.id&&!a.is_pretest);
   const recentTimed=topicAttempts.filter(a=>typeof a.response_time_ms==="number").slice(-4);
-  const fatigueCost=recentTimed.length>=3&&recentTimed.at(-1)!.response_time_ms!>(recentTimed[0]!.response_time_ms??0)*1.3?.55:.12;
+  const fatigueCost=recentTimed.length>=3 && recentTimed.at(-1)!.response_time_ms! > (recentTimed[0]!.response_time_ms ?? 0) * 1.3 ? 0.55 : 0.12;
   const confidence=recommendationConfidenceV5(action.topic!,attempts);
   const expectedLearningGain=clamp(action.learningGain*(stop.stop ? 0.35 : 1));
   const policyScore=
@@ -1008,4 +1032,563 @@ export function adaptiveDayPlanV5(input:{
     stopDecisions:policy.stopDecisions,
     policyNote:policy.note,
   };
+}
+
+
+/* -------------------------------------------------------------------------- */
+/* Learning OS v5 public UI compatibility API                                 */
+/* -------------------------------------------------------------------------- */
+
+export type RetentionTargetV5 = {
+  topicId: string;
+  desiredRetention: number;
+  currentRetention: number;
+  gap: number;
+  recommendedMinutes: number;
+  urgency: number;
+  confidence: EvidenceConfidenceV5;
+  reason: string;
+};
+
+export type RetentionBudgetV5 = {
+  capacityMinutes: number;
+  minimumMinutes: number;
+  recommendedMinutes: number;
+  extraMinutes: number;
+  targets: RetentionTargetV5[];
+  protectedTopics: string[];
+  marginalGainLowAfterMinutes: number;
+};
+
+export type InstructionDecisionV5 = {
+  stage:
+    | "pretest"
+    | "worked_example"
+    | "self_explanation"
+    | "completion"
+    | "guided"
+    | "independent"
+    | "varied_context"
+    | "transfer"
+    | "delayed_verification";
+  label: string;
+  reason: string;
+  revealWorkedSolution: boolean;
+  maxHints: number;
+  requiresIndependentFollowup: boolean;
+  confidence: EvidenceConfidenceV5;
+};
+
+export type FeedbackPolicyV5 = {
+  timing: "immediate" | "after_retry" | "after_item" | "after_block";
+  reveal: "principle" | "next_step" | "worked_solution" | "score_only" | "none";
+  retriesBeforeReveal: number;
+  explanation: string;
+};
+
+export type TransferLevelV5 = 0 | 1 | 2 | 3 | 4 | 5 | 6;
+export type TransferStateV5 = {
+  level: TransferLevelV5;
+  label: string;
+  evidenceByLevel: Record<number, number>;
+  nextLevel: TransferLevelV5 | null;
+  strongEnoughForTopMastery: boolean;
+};
+
+export type ConfusionSetV5 = {
+  id: string;
+  topicIds: string[];
+  labels: string[];
+  priority: number;
+  discriminationStrength: number;
+  attempts: number;
+  reason: string;
+};
+
+export type CalibrationObservationV5 = {
+  id?: string;
+  course_id?: string | null;
+  topic_id: string;
+  attempt_id?: string | null;
+  predicted_confidence: number;
+  actual_outcome: "correct" | "partial" | "incorrect";
+  delay_hours: number;
+  observed_at?: string;
+};
+
+export type CalibrationStateV5 = {
+  status: "well_calibrated" | "overconfident" | "underconfident" | "insufficient_evidence";
+  accuracy: number | null;
+  delayedAccuracy: number | null;
+  observations: number;
+  recommendation: string;
+};
+
+export type FrictionReasonV5 =
+  | "no_time"
+  | "forgot"
+  | "too_tired"
+  | "too_hard"
+  | "unclear_start"
+  | "plans_changed"
+  | "started"
+  | "other";
+
+export type FrictionEventV5 = {
+  id?: string;
+  date: string;
+  plan_item_id?: string | null;
+  course_id?: string | null;
+  reason: FrictionReasonV5;
+  note?: string | null;
+  self_started?: boolean | null;
+  reminder_used?: boolean | null;
+};
+
+export type ImplementationIntentionV5 = {
+  id?: string;
+  trigger_type: "late_home" | "low_energy" | "missed_days" | "busy_day" | "custom";
+  trigger_value: string;
+  action_type: "lighten" | "move" | "replace_with_retrieval" | "protect_rest" | "custom";
+  action_value: string;
+  enabled: boolean;
+  suggested?: boolean;
+  reason?: string | null;
+};
+
+export type FrictionInsightV5 = {
+  repeatedReason: FrictionReasonV5 | null;
+  repeatedWeekday: number | null;
+  count: number;
+  suggestion: ImplementationIntentionV5 | null;
+  summary: string;
+};
+
+export type ReminderTaperDecisionV5 = {
+  mode: "normal" | "taper" | "minimal" | "restore";
+  selfStartRate: number | null;
+  sampleSize: number;
+  recommendation: string;
+};
+
+export type WhatIfScenarioV5 = {
+  id: string;
+  label: string;
+  minutesPerDay: number;
+  daysOff: number[];
+  weeklyCapacity: number;
+  projectedBacklogMinutes: number;
+  protectedRetentionShare: number;
+  overloadRisk: "low" | "medium" | "high";
+  marginalValue: "low" | "medium" | "high";
+  note: string;
+};
+
+export type SubjectTaskProfileV5 = {
+  key: string;
+  subject: string;
+  attemptType: string;
+  observations: number;
+  successRate: number;
+  delayedSuccessRate: number | null;
+  medianResponseMs: number | null;
+  reliability: EvidenceConfidenceV5;
+  spacingMultiplier: number;
+  difficultyBias: number;
+};
+
+export type ExamSimulationTaskV5 = {
+  id: string;
+  title: string;
+  topicId: string | null;
+  points: number;
+  answerMode: "text" | "formula" | "diagram" | "graph" | "mixed";
+  stimulus: Record<string, unknown> | null;
+  selected?: boolean;
+};
+
+export type ExamSimulationV5 = {
+  courseId: string;
+  mode: "practice" | "full";
+  maxTasks: number;
+  maxSelected: number;
+  maxPoints: number;
+  durationMinutes: number;
+  feedbackTiming: "after_block";
+  hintsAllowed: false;
+  masteryHidden: true;
+  tasks: ExamSimulationTaskV5[];
+};
+
+export function evidenceConfidenceV5(
+  evidenceCount: number,
+  diversity = 1,
+  recency = 1,
+  reason = "oppimisnäyttöä",
+): EvidenceConfidenceV5 {
+  const score = clamp(
+    (1 - Math.exp(-Math.max(0, evidenceCount) / 5)) * 0.68 +
+    clamp(diversity) * 0.18 +
+    clamp(recency) * 0.14,
+  );
+  return {
+    score,
+    label: score >= 0.72 ? "high" : score >= 0.42 ? "medium" : "low",
+    evidenceCount,
+    reason: score >= 0.72
+      ? `Suositus perustuu ${evidenceCount} havaintoon ja monipuoliseen näyttöön.`
+      : score >= 0.42
+        ? `Suositus on käyttökelpoinen, mutta ${reason} tarvitaan vielä lisää.`
+        : `Tämä on alustava suositus: ${reason} on vielä vähän.`,
+  };
+}
+
+export function retentionTargetV5(
+  topic: Topic,
+  course: Course,
+  attempts: PracticeAttempt[],
+  now = today(),
+): RetentionTargetV5 {
+  const model = masteryModelV4(topic, attempts, { now, examDate: course.exam_date });
+  const rows = attempts.filter((attempt) => attempt.topic_id === topic.id && !attempt.is_pretest);
+  const examDays = daysToExam(course, now);
+  const urgency =
+    examDays <= 2 ? 1 :
+    examDays <= 7 ? 0.88 :
+    examDays <= 14 ? 0.72 :
+    examDays <= 30 ? 0.48 :
+    examDays <= 60 ? 0.3 : 0.18;
+  const importance = clamp(Number(topic.importance ?? 3) / 5);
+  const desiredRetention = clamp(0.72 + urgency * 0.115 + importance * 0.055 + (model.blindSpot ? 0.025 : 0), 0.7, 0.95);
+  const currentRetention = clamp(model.dimensions.retention.score / 100);
+  const gap = Math.max(0, desiredRetention - currentRetention);
+  const recommendedMinutes = gap <= 0.025 ? 0 : Math.max(5, Math.min(35, Math.round((gap * 55 + urgency * 9 + importance * 5) / 5) * 5));
+  const confidence = evidenceConfidenceV5(
+    rows.length,
+    Math.min(1, new Set(rows.map((row) => row.attempt_type)).size / 4),
+    Math.min(1, new Set(rows.map((row) => row.date)).size / 4),
+    "viive- ja retrieval-näyttöä",
+  );
+  return {
+    topicId: topic.id,
+    desiredRetention,
+    currentRetention,
+    gap,
+    recommendedMinutes,
+    urgency,
+    confidence,
+    reason: [
+      gap >= 0.18 ? "muistamisen tavoite ja nykyinen säilyminen ovat selvästi erillään" : null,
+      model.forgettingRisk >= 0.6 ? "unohtumisriski on koholla" : null,
+      urgency >= 0.72 ? "koe on lähellä" : null,
+      model.blindSpot ? "kalibroinnissa näkyy mahdollinen sokea piste" : null,
+    ].filter(Boolean).join(" · ") || "nykyinen säilyminen on lähellä tarkoituksenmukaista tasoa",
+  };
+}
+
+function capacityForDateCompat(capacity: CapacityProfile, date: string) {
+  if (capacity.busyDates.includes(date)) return 0;
+  const day = new Date(date + "T12:00:00Z").getUTCDay();
+  if (day === 0 || day === 6) return capacity.weekendMinutes;
+  return capacity.weekdayMinutes;
+}
+
+export function retentionBudgetV5(input: {
+  courses: Course[];
+  topics: Topic[];
+  attempts: PracticeAttempt[];
+  capacity: CapacityProfile;
+  now?: string;
+}): RetentionBudgetV5 {
+  const now = input.now ?? today();
+  const targets = input.topics.flatMap((topic) => {
+    const course = input.courses.find((candidate) => candidate.id === topic.course_id);
+    if (!course || course.archived || (course.start_date && course.start_date > now)) return [];
+    return [retentionTargetV5(topic, course, input.attempts, now)];
+  }).sort((a, b) => (b.gap * 0.55 + b.urgency * 0.45) - (a.gap * 0.55 + a.urgency * 0.45));
+  const capacityMinutes = Array.from({ length: 7 }, (_, index) => capacityForDateCompat(input.capacity, addDays(now, index))).reduce((sum, value) => sum + value, 0);
+  const raw = targets.reduce((sum, target) => sum + target.recommendedMinutes, 0);
+  const recommendedMinutes = Math.min(Math.round(capacityMinutes * 0.68), raw);
+  const minimumMinutes = Math.min(recommendedMinutes, Math.max(0, Math.round(recommendedMinutes * 0.58 / 5) * 5));
+  const extraMinutes = Math.min(capacityMinutes, Math.max(recommendedMinutes, Math.round(recommendedMinutes * 1.28 / 5) * 5));
+  const protectedTopics = targets.filter((target) => target.urgency >= 0.72 || target.gap >= 0.18).slice(0, 8).map((target) => target.topicId);
+  return {
+    capacityMinutes,
+    minimumMinutes,
+    recommendedMinutes,
+    extraMinutes,
+    targets,
+    protectedTopics,
+    marginalGainLowAfterMinutes: Math.max(recommendedMinutes, Math.min(extraMinutes, recommendedMinutes + 30)),
+  };
+}
+
+export function instructionDecisionV5(
+  topic: Topic,
+  attempts: PracticeAttempt[],
+  options: { now?: string; examDate?: string | null } = {},
+): InstructionDecisionV5 {
+  const confidenceRows = attempts.filter((attempt) => attempt.topic_id === topic.id && !attempt.is_pretest);
+  const confidence = evidenceConfidenceV5(
+    confidenceRows.length,
+    Math.min(1, new Set(confidenceRows.map((row) => row.attempt_type)).size / 4),
+    Math.min(1, new Set(confidenceRows.map((row) => row.date)).size / 4),
+    "eri päivien ja tehtävätyyppien näyttöä",
+  );
+  const pretest = pretestPlanV5(topic, attempts);
+  if (pretest.enabled) return {
+    stage: "pretest",
+    label: "Preview Challenge",
+    reason: "Ennen opetusta tarkistetaan mitä jo tiedät. Väärä vastaus ei laske masteryä.",
+    revealWorkedSolution: false,
+    maxHints: 0,
+    requiresIndependentFollowup: false,
+    confidence,
+  };
+  const plan = instructionPlanV5(topic, attempts, options);
+  const stage: InstructionDecisionV5["stage"] =
+    plan.stage === "worked_example" ? "worked_example" :
+    plan.stage === "explain_steps" ? "self_explanation" :
+    plan.stage === "completion_problem" || plan.stage === "faded_completion" ? "completion" :
+    plan.stage === "varied_context" ? "varied_context" :
+    plan.stage === "transfer" ? "transfer" :
+    plan.label.toLocaleLowerCase("fi-FI").includes("varmistus") ? "delayed_verification" :
+    "independent";
+  return {
+    stage,
+    label: plan.label,
+    reason: plan.reason,
+    revealWorkedSolution: stage === "worked_example" || stage === "self_explanation",
+    maxHints: plan.hintLimit,
+    requiresIndependentFollowup: plan.requiresIndependentFollowup,
+    confidence,
+  };
+}
+
+export function feedbackPolicyV5(input: {
+  mode: "pretest" | "learning" | "retrieval" | "exam_simulation" | "error_repair";
+  result?: "correct" | "partial" | "incorrect";
+  stage?: InstructionDecisionV5["stage"];
+}): FeedbackPolicyV5 {
+  if (input.mode === "exam_simulation") return {
+    timing: "after_block", reveal: "score_only", retriesBeforeReveal: 0,
+    explanation: "Koetilassa palaute pidätetään koko tehtäväblokin loppuun.",
+  };
+  if (input.mode === "pretest") return {
+    timing: "after_item", reveal: "principle", retriesBeforeReveal: 0,
+    explanation: "Preview Challenge on mastery-neutraali ja näyttää periaatteen vasta yrityksen jälkeen.",
+  };
+  if (input.mode === "error_repair") return {
+    timing: "after_retry", reveal: "next_step", retriesBeforeReveal: 1,
+    explanation: "Virheessä paikannetaan ensin poikkeama ja yritetään korjausta ennen mallia.",
+  };
+  if (input.mode === "retrieval") return {
+    timing: "after_retry", reveal: input.result === "incorrect" ? "principle" : "next_step", retriesBeforeReveal: 1,
+    explanation: "Retrievalissä tehdään yksi uusi yritys ennen täydempää palautetta.",
+  };
+  return {
+    timing: "immediate",
+    reveal: input.stage === "worked_example" ? "worked_solution" : "principle",
+    retriesBeforeReveal: 0,
+    explanation: "Uuden asian opettelussa palaute annetaan riittävän nopeasti virheellisen mallin vahvistumisen estämiseksi.",
+  };
+}
+
+const transferCompatLabels = ["Recall","Selitys","Sama konteksti","Muunneltu konteksti","Eri esitystapa","Uusi tilanne","Koetason transfer"];
+
+export function transferStateV5(topic: Topic, attempts: PracticeAttempt[]): TransferStateV5 {
+  const ladder = transferLadderV5(topic, attempts);
+  const mapping: Record<TransferLevel, TransferLevelV5> = {
+    recall: 0, same_context: 2, varied_context: 3, different_representation: 4,
+    unfamiliar_scenario: 5, mixed_topic: 5, exam_transfer: 6,
+  };
+  const evidenceByLevel: Record<number, number> = Object.fromEntries(Array.from({length:7},(_,level)=>[level,0]));
+  for (const [level, count] of Object.entries(ladder.evidenceByLevel) as Array<[TransferLevel, number]>) {
+    evidenceByLevel[mapping[level]] = (evidenceByLevel[mapping[level]] ?? 0) + count;
+  }
+  const level = mapping[ladder.highestReliableLevel];
+  return {
+    level,
+    label: transferCompatLabels[level] ?? "Recall",
+    evidenceByLevel,
+    nextLevel: level < 6 ? (level + 1) as TransferLevelV5 : null,
+    strongEnoughForTopMastery: ladder.strongEligible,
+  };
+}
+
+export function confusionSetsV5(input: {
+  topics: Topic[];
+  dependencies: TopicDependencyLike[];
+  attempts: PracticeAttempt[];
+  now?: string;
+}): ConfusionSetV5[] {
+  return confusionAwareInterleavingV5(input.topics, input.dependencies, input.attempts).map((set) => {
+    const related = input.attempts.filter((attempt) =>
+      set.topicIds.includes(attempt.topic_id) &&
+      (attempt.discrimination_topic_ids?.some((id) => set.topicIds.includes(id)) ||
+       Array.isArray(attempt.question_payload?.["discriminationTopicIds"]))
+    );
+    const correct = related.filter((attempt) => resultScore(attempt) >= 0.9).length;
+    const discriminationStrength = related.length ? correct / related.length : set.strength;
+    return {
+      id: set.id,
+      topicIds: set.topicIds,
+      labels: set.topics.map((topic) => topic.name),
+      priority: clamp(0.45 + (1 - discriminationStrength) * 0.4 + Math.min(0.15, related.filter((a)=>resultScore(a)<0.9).length*0.03)),
+      discriminationStrength,
+      attempts: related.length,
+      reason: set.reason,
+    };
+  }).sort((a,b)=>b.priority-a.priority);
+}
+
+export function delayedCalibrationV5(observations: CalibrationObservationV5[]): CalibrationStateV5 {
+  if (!observations.length) return {
+    status: "insufficient_evidence", accuracy: null, delayedAccuracy: null, observations: 0,
+    recommendation: "Kalibrointinäyttöä ei ole vielä. Arvioi myöhemmin ennen retrievaliä, kuinka varma olet.",
+  };
+  const score = (row: CalibrationObservationV5) => {
+    const predicted = clamp((row.predicted_confidence - 1) / 2);
+    const actual = row.actual_outcome === "correct" ? 1 : row.actual_outcome === "partial" ? 0.5 : 0;
+    return 1 - Math.abs(predicted - actual);
+  };
+  const accuracy = observations.reduce((sum,row)=>sum+score(row),0)/observations.length;
+  const delayed = observations.filter((row)=>row.delay_hours>=12);
+  const delayedAccuracy = delayed.length ? delayed.reduce((sum,row)=>sum+score(row),0)/delayed.length : null;
+  const over = observations.filter((row)=>row.predicted_confidence>=3&&row.actual_outcome==="incorrect").length;
+  const under = observations.filter((row)=>row.predicted_confidence<=1&&row.actual_outcome==="correct").length;
+  const status: CalibrationStateV5["status"] =
+    observations.length < 3 || !delayed.length ? "insufficient_evidence" :
+    over / observations.length >= 0.3 ? "overconfident" :
+    under / observations.length >= 0.3 ? "underconfident" :
+    "well_calibrated";
+  return {
+    status, accuracy, delayedAccuracy, observations: observations.length,
+    recommendation:
+      status === "overconfident" ? "Oma varmuus ylittää toistuvasti myöhemmän suorituksen. Lisää viive-retrievalia ennen aiheen nostamista vahvaksi." :
+      status === "underconfident" ? "Suoritus on omaa arviota parempi. Käytä toteutunutta näyttöä fiiliksen sijaan." :
+      status === "well_calibrated" ? "Arvio omasta osaamisesta vastaa melko hyvin myöhempää suoritusta." :
+      "Kerätään vielä muutama viivästetty arvio ennen johtopäätöstä.",
+  };
+}
+
+function frictionWeekday(date: string) {
+  return new Date(date + "T12:00:00Z").getUTCDay();
+}
+
+export function frictionInsightV5(events: FrictionEventV5[]): FrictionInsightV5 {
+  const rows = events.filter((event)=>event.reason!=="started");
+  if (!rows.length) return { repeatedReason:null,repeatedWeekday:null,count:0,suggestion:null,summary:"Ohitetuista sessioista ei ole vielä friction-dataa." };
+  const byReason=new Map<FrictionReasonV5,number>(), byDay=new Map<number,number>();
+  for(const event of rows){byReason.set(event.reason,(byReason.get(event.reason)??0)+1);const d=frictionWeekday(event.date);byDay.set(d,(byDay.get(d)??0)+1);}
+  const reason=[...byReason.entries()].sort((a,b)=>b[1]-a[1])[0];
+  const day=[...byDay.entries()].sort((a,b)=>b[1]-a[1])[0];
+  const repeatedReason=reason&&reason[1]>=2?reason[0]:null;
+  const repeatedWeekday=day&&day[1]>=2?day[0]:null;
+  let suggestion:ImplementationIntentionV5|null=null;
+  if(repeatedReason==="too_tired") suggestion={trigger_type:"low_energy",trigger_value:"true",action_type:"replace_with_retrieval",action_value:"15",enabled:false,suggested:true,reason:"Väsymys toistuu: vaihda raskas työ 15 min retrievaliin."};
+  else if(repeatedReason==="no_time"||repeatedReason==="plans_changed") suggestion={trigger_type:"busy_day",trigger_value:repeatedWeekday===null?"any":String(repeatedWeekday),action_type:"lighten",action_value:"0.4",enabled:false,suggested:true,reason:"Aikapula toistuu: tee automaattisesti kevyt päivä."};
+  else if(repeatedReason==="too_hard"||repeatedReason==="unclear_start") suggestion={trigger_type:"custom",trigger_value:repeatedReason,action_type:"replace_with_retrieval",action_value:"worked_example_then_10m",enabled:false,suggested:true,reason:"Aloita yhdellä esimerkillä ja rajatulla 10 min tehtävällä."};
+  else if(repeatedReason==="forgot") suggestion={trigger_type:"custom",trigger_value:"forgot_twice",action_type:"move",action_value:"anchor_to_routine",enabled:false,suggested:true,reason:"Sido sessio olemassa olevaan rutiiniin jatkuvien ilmoitusten sijaan."};
+  return {
+    repeatedReason,repeatedWeekday,count:reason?.[1]??0,suggestion,
+    summary:repeatedReason?`Yleisin toistuva este on ${repeatedReason}${repeatedWeekday===null?"":`, erityisesti viikonpäivänä ${repeatedWeekday}`}.`:"Yksittäisiä esteitä on, mutta toistuvaa mallia ei vielä näy.",
+  };
+}
+
+export function reminderTaperV5(events: FrictionEventV5[]): ReminderTaperDecisionV5 {
+  const started=events.filter((event)=>typeof event.self_started==="boolean");
+  if(started.length<5)return{mode:"normal",selfStartRate:started.length?started.filter(e=>e.self_started).length/started.length:null,sampleSize:started.length,recommendation:"Muistutuksia ei vielä säädetä, koska itsenäisistä aloituksista on liian vähän dataa."};
+  const rate=started.filter(e=>e.self_started).length/started.length;
+  const recent=started.slice(-5);
+  const recentRate=recent.filter(e=>e.self_started).length/recent.length;
+  const mode:ReminderTaperDecisionV5["mode"]=rate>=.85&&recentRate>=.8?"minimal":rate>=.7?"taper":rate<.5&&recentRate<.5?"restore":"normal";
+  return{mode,selfStartRate:rate,sampleSize:started.length,recommendation:mode==="minimal"?"Aloitat jo lähes aina itse. Pidä vain kriittiset koe- ja aikataulumuistutukset.":mode==="taper"?"Vähennä tavallisia muistutuksia asteittain.":mode==="restore"?"Palauta yksi kevyt muistutus väliaikaisesti.":"Nykyinen muistutustaso on sopiva."};
+}
+
+function attemptSuccessCompat(attempt: PracticeAttempt) {
+  return resultScore(attempt);
+}
+function medianCompat(values:number[]){if(!values.length)return null;const sorted=[...values].sort((a,b)=>a-b);const m=Math.floor(sorted.length/2);return sorted.length%2?sorted[m]!:Math.round((sorted[m-1]!+sorted[m]!)/2);}
+
+export function subjectTaskProfilesV5(
+  attempts: PracticeAttempt[],
+  subjectForCourse: (courseId: string) => string,
+): SubjectTaskProfileV5[] {
+  const groups=new Map<string,PracticeAttempt[]>();
+  for(const attempt of attempts.filter((row)=>!row.is_pretest)){
+    const subject=subjectForCourse(attempt.course_id)||"Muu";
+    const key=`${subject}::${attempt.attempt_type}`;
+    groups.set(key,[...(groups.get(key)??[]),attempt]);
+  }
+  return [...groups.entries()].map(([key,rows])=>{
+    const [subject,attemptType]=key.split("::");
+    const successRate=rows.reduce((sum,row)=>sum+attemptSuccessCompat(row),0)/rows.length;
+    const delayed=rows.filter(row=>Number(row.delay_days??0)>=2);
+    const delayedSuccessRate=delayed.length?delayed.reduce((sum,row)=>sum+attemptSuccessCompat(row),0)/delayed.length:null;
+    const responseTimes=rows.flatMap(row=>typeof row.response_time_ms==="number"?[row.response_time_ms]:[]);
+    const reliability=evidenceConfidenceV5(rows.length,Math.min(1,new Set(rows.map(row=>row.date)).size/6),Math.min(1,delayed.length/4),"subject × task -näyttöä");
+    const forgettingPenalty=delayedSuccessRate===null?0:Math.max(0,successRate-delayedSuccessRate);
+    return {
+      key,subject:subject??"Muu",attemptType:attemptType??"practice",observations:rows.length,successRate,delayedSuccessRate,
+      medianResponseMs:medianCompat(responseTimes),reliability,
+      spacingMultiplier:reliability.label==="low"?1:Math.max(.72,Math.min(1.35,1-forgettingPenalty*.45+(successRate-.7)*.18)),
+      difficultyBias:reliability.label==="low"?0:Math.max(-.2,Math.min(.2,(successRate-.72)*-.45)),
+    };
+  }).sort((a,b)=>b.observations-a.observations);
+}
+
+export function whatIfPlannerV5(input:{
+  courses:Course[];topics:Topic[];attempts:PracticeAttempt[];capacity:CapacityProfile;now?:string;customMinutes?:number[];
+}):WhatIfScenarioV5[]{
+  const budget=retentionBudgetV5(input);
+  const minutes=[...new Set([...(input.customMinutes??[]),20,40,60])].filter(v=>v>0).sort((a,b)=>a-b);
+  return minutes.map(minutesPerDay=>{
+    const weeklyCapacity=minutesPerDay*7;
+    const backlog=Math.max(0,budget.recommendedMinutes-weeklyCapacity);
+    const protectedRetentionShare=budget.recommendedMinutes<=0?1:Math.min(1,weeklyCapacity/budget.recommendedMinutes);
+    const overloadRisk:WhatIfScenarioV5["overloadRisk"]=weeklyCapacity>=budget.recommendedMinutes*1.3?"low":weeklyCapacity>=budget.minimumMinutes?"medium":"high";
+    const marginalValue:WhatIfScenarioV5["marginalValue"]=weeklyCapacity<budget.minimumMinutes?"high":weeklyCapacity<=budget.marginalGainLowAfterMinutes?"medium":"low";
+    return{id:`minutes:${minutesPerDay}`,label:`${minutesPerDay} min / päivä`,minutesPerDay,daysOff:[],weeklyCapacity,projectedBacklogMinutes:backlog,protectedRetentionShare,overloadRisk,marginalValue,note:backlog>0?`Arviolta ${backlog} min tärkeää kertausbudjettia jäisi kattamatta.`:marginalValue==="low"?"Lisäminuuttien rajahyöty on jo pieni.":"Tämä kattaa nykyisen tärkeän kertausbudjetin."};
+  });
+}
+
+export function contrastiveRepairPlanV5(mistake:Mistake){
+  return{
+    mistakeId:mistake.id,
+    stages:[
+      "Näytä alkuperäinen oma ratkaisu muuttamatta sitä.",
+      "Paikanna ensimmäinen kohta, jossa ratkaisu erkanee oikeasta periaatteesta.",
+      "Selitä omin sanoin miksi ero muuttaa lopputulosta.",
+      "Korjaa vain virheellinen vaihe ja jatka ratkaisu loppuun.",
+      "Ratkaise uusi saman periaatteen tehtävä ilman mallia.",
+      "Aikatauluta viivevarmistus muutaman päivän päähän.",
+    ],
+    completed:mistake.status==="mastered",
+    next:mistake.status==="open"?"Paikanna ensimmäinen poikkeama.":mistake.status==="corrected"?"Ratkaise uusi rinnakkaistehtävä.":mistake.status==="retested"?"Tee viivevarmistus.":"Virhe on varmennettu korjatuksi.",
+  };
+}
+
+function questionAnswerModeV5(item:QuestionBankItem):ExamSimulationTaskV5["answerMode"]{
+  const configured=item.answer_mode??String(item.metadata?.["answerMode"]??"");
+  if(["text","formula","diagram","graph","mixed"].includes(configured))return configured as ExamSimulationTaskV5["answerMode"];
+  return item.question_type==="calculation"?"formula":"text";
+}
+function questionPointsV5(item:QuestionBankItem){const n=Number(item.points??item.metadata?.["points"]??0);return Number.isFinite(n)&&n>0?Math.min(30,Math.max(2,Math.round(n))):item.difficulty>=5?20:item.difficulty>=4?18:item.difficulty>=3?16:12;}
+
+export function buildExamSimulationV5(input:{course:Course;topics:Topic[];questions:QuestionBankItem[];mode?:"practice"|"full"}):ExamSimulationV5{
+  const mode=input.mode??"full", topicIds=new Set(input.topics.map(t=>t.id));
+  const candidates=input.questions.filter(q=>q.course_id===input.course.id).filter(q=>q.topic_id===null||topicIds.has(q.topic_id)).sort((a,b)=>b.difficulty-a.difficulty||a.created_at.localeCompare(b.created_at));
+  const desired=mode==="full"?11:Math.min(6,candidates.length);
+  const tasks=candidates.slice(0,desired).map((item,index)=>({id:item.id,title:`Tehtävä ${index+1}`,topicId:item.topic_id,points:questionPointsV5(item),answerMode:questionAnswerModeV5(item),stimulus:(item.stimulus_package??item.metadata?.["stimulusPackage"]??null) as Record<string,unknown>|null}));
+  return{courseId:input.course.id,mode,maxTasks:tasks.length,maxSelected:mode==="full"?Math.min(7,tasks.length):tasks.length,maxPoints:120,durationMinutes:mode==="full"?360:90,feedbackTiming:"after_block",hintsAllowed:false,masteryHidden:true,tasks};
+}
+
+export function reviewTaskSelectionV5(input:{simulation:ExamSimulationV5;selectedTaskIds:string[];completedTaskIds:string[];scores:Record<string,number>}){
+  const selected=input.simulation.tasks.filter(task=>input.selectedTaskIds.includes(task.id));
+  const completed=selected.filter(task=>input.completedTaskIds.includes(task.id));
+  const earned=selected.reduce((sum,task)=>sum+Number(input.scores[task.id]??0),0);
+  const possible=selected.reduce((sum,task)=>sum+task.points,0);
+  const unfinished=selected.filter(task=>!input.completedTaskIds.includes(task.id));
+  return{selected:selected.length,completed:completed.length,earned,possible,unfinished:unfinished.map(t=>t.title),note:unfinished.length?"Valittuja tehtäviä jäi kesken. Arvioi tehtävän vaatima aika ennen lopullista valintaa.":"Valitut tehtävät valmistuivat. Vertaa seuraavaksi pistepotentiaalia ja ajankäyttöä."};
 }
