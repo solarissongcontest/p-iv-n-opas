@@ -15,7 +15,7 @@ import {
 } from "@/lib/learning-os-v5";
 import { AbittiAnswerEditor, answerHasContent, answerPlainText } from "@/components/AbittiAnswerEditor";
 import { SketchAnswerCanvas } from "@/components/SketchAnswerCanvas";
-import { answerModeLabel } from "@/lib/ui-fi";
+import { answerModeLabel, stimulusFieldLabel } from "@/lib/ui-fi";
 
 const primary="inline-flex min-h-11 items-center justify-center rounded-xl bg-primary px-4 text-sm font-medium text-primary-foreground disabled:opacity-50";
 const secondary="inline-flex min-h-11 items-center justify-center rounded-xl border border-border bg-surface px-4 text-sm disabled:opacity-50";
@@ -27,7 +27,7 @@ function Stimulus({value}:{value:Record<string,unknown>|null}) {
   if(!value||!Object.keys(value).length)return null;
   return <div className="rounded-2xl border border-border bg-muted/40 p-4">
     <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-primary">Aineisto</p>
-    <div className="space-y-2 text-sm">{Object.entries(value).map(([key,item])=><div key={key}><b>{key.replaceAll("_"," ")}:</b>{" "}{typeof item==="string"||typeof item==="number"?String(item):<code className="text-xs">{JSON.stringify(item)}</code>}</div>)}</div>
+    <div className="space-y-2 text-sm">{Object.entries(value).map(([key,item],index)=><div key={key}><b>{stimulusFieldLabel(key,index)}:</b>{" "}{typeof item==="string"||typeof item==="number"?String(item):<span className="text-xs text-muted-foreground">{Array.isArray(item)?item.map(String).join(", "):"Lisäaineisto"}</span>}</div>)}</div>
   </div>;
 }
 
@@ -222,7 +222,7 @@ export function ExamSimulationV5({courses,topics}:{courses:Course[];topics:Topic
       }
       localStorage.removeItem("opk.exam-simulation:"+rowId);
       setPhase("done");
-      toast.success("Koetyylinen simulaatio tallennettu ja koetason näyttö päivitetty.");
+      toast.success("Koeharjoitus tallennettiin ja koetason osaamisnäyttö päivitettiin.");
     }catch{
       toast.error("Koetulosta ei voitu tallentaa kokonaan. Luonnos säilytettiin jatkamista varten.");
     }finally{setFinishing(false);}
@@ -286,7 +286,7 @@ export function ExamSimulationV5({courses,topics}:{courses:Course[];topics:Topic
         <details className="mt-3 rounded-xl bg-muted/50 p-3 text-sm"><summary className="cursor-pointer font-medium">Näytä mallipalaute</summary>{item?.correct_answer&&<p className="mt-2"><b>Oikea vastaus:</b> {item.correct_answer}</p>}<p className="mt-2 text-muted-foreground">{item?.explanation||"Ei erillistä mallipalautetta."}</p></details>
         <label className="mt-3 block text-sm font-medium">Pisteet<input type="number" min="0" max={task.points} className="mt-1 w-28 rounded-xl border bg-surface p-2" value={scores[task.id]??0} onChange={e=>setScores(current=>({...current,[task.id]:Math.max(0,Math.min(task.points,Number(e.target.value)||0))}))}/></label>
       </div>})}</div>
-      <button disabled={update.isPending||recordAttempt.isPending||finishing} className={primary+" mt-4"} onClick={()=>void finishReview()}>{finishing?"Tallennetaan…":"Tallenna simulaatio"}</button>
+      <button disabled={update.isPending||recordAttempt.isPending||finishing} className={primary+" mt-4"} onClick={()=>void finishReview()}>{finishing?"Tallennetaan…":"Tallenna koeharjoitus"}</button>
     </>}
 
     {phase==="done"&&simulation&&<div className="mt-5"><div className="rounded-2xl bg-accent p-4"><h3 className="font-semibold">Simulaatio valmis</h3><p className="mt-2 text-sm text-muted-foreground">Pisteet {Object.values(scores).reduce((a,b)=>a+b,0)} / {selectedTasks.reduce((a,b)=>a+b.points,0)}. Vastatut tehtävät on tallennettu koetason osaamisnäytöksi. Tätä ei käytetä automaattisena arvosanaennusteena.</p></div><button className={secondary+" mt-4"} onClick={reset}>Uusi simulaatio</button></div>}
