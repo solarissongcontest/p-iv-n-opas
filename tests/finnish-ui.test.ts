@@ -83,6 +83,8 @@ test("user-facing UI does not regress to known English product jargon", () => {
     "Push-avain puuttuu",
     "Kaikkea ei voitu synkata vielä",
     "Synkattiin ",
+    "Try again",
+    '<html lang="en">',
   ];
   for (const phrase of forbidden) {
     assert.equal(source.includes(phrase), false, phrase);
@@ -171,7 +173,7 @@ test("shared accessibility and fatal-error copy is Finnish", () => {
     ["../src/components/ui/dialog.tsx", ["Sulje"]],
     ["../src/components/ui/sheet.tsx", ["Sulje"]],
     ["../src/components/ui/breadcrumb.tsx", ["Sivupolku", "Lisää"]],
-    ["../src/lib/error-page.ts", ["Sivua ei voitu ladata", "Päivitä sivu", "Palaa etusivulle"]],
+    ["../src/lib/error-page.ts", ['<html lang="fi">', "Sivua ei voitu ladata", "Päivitä sivu", "Palaa etusivulle"]],
   ]);
   for (const [file, phrases] of expected) {
     const text = readFileSync(new URL(file, import.meta.url), "utf8");
