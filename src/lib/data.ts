@@ -92,6 +92,7 @@ export type ExamSimulationRow = {
   selected_task_ids: string[];
   completed_task_ids: string[];
   scores: Record<string, number>;
+  answers: Record<string, unknown>;
   duration_minutes: number;
   started_at: string | null;
   completed_at: string | null;
@@ -1180,6 +1181,7 @@ export function useUpdateExamSimulation() {
       selected_task_ids?: string[];
       completed_task_ids?: string[];
       scores?: Record<string, number>;
+      answers?: Record<string, unknown>;
       completed_at?: string | null;
       task_selection_note?: string | null;
     }) => {
@@ -1232,6 +1234,28 @@ export function useAdvanceMistake() {
       if (input.status === "retested") patch["retested_at"] = today();
       if (input.status === "mastered") patch["mastered_at"] = today();
       const { error } = await untypedSupabase.from("mistakes").update(patch).eq("id", input.id);
+      if (error) throw error;
+    },
+    onSuccess: invalidate,
+  });
+}
+
+export function useUpdateMistakeRepair() {
+  const invalidate = useInvalidateAll();
+  return useMutation({
+    mutationFn: async (input: {
+      id: string;
+      first_divergence?: string | null;
+      correct_principle?: string | null;
+      repair_response?: string | null;
+      delayed_verification_due?: string | null;
+      status?: "open" | "corrected" | "retested" | "mastered";
+    }) => {
+      const { id, ...patch } = input;
+      const { error } = await untypedSupabase.from("mistakes").update({
+        ...patch,
+        updated_at: new Date().toISOString(),
+      }).eq("id", id);
       if (error) throw error;
     },
     onSuccess: invalidate,
