@@ -154,7 +154,7 @@ export function TodayView({courses,topics,sessions,exams,plan,tests,attempts,mis
     return map[raw??""]??"other";
   }
   function startChosen(action:(typeof actions)[number]){
-    void friction.mutateAsync({date:now,plan_item_id:action.planItem?.id??null,course_id:action.course.id,reason:"started",self_started:true,reminder_used:false}).catch(()=>undefined);
+    void friction.mutateAsync({date:now,plan_item_id:action.planItem?.id??null,course_id:action.course.id,reason:"other",note:"session_start",self_started:true,reminder_used:false}).catch(()=>undefined);
     if(action.planItem)onStart(action.planItem.id);else onGo("practice");
   }
 
