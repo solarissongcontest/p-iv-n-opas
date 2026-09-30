@@ -49,8 +49,9 @@ export function V5PlannerPanel({
   const [scenarioCourseId,setScenarioCourseId]=useState(courses[0]?.id??"");
   const currentScenarioCourse=courses.find(course=>course.id===scenarioCourseId)??courses[0]??null;
   const [scenarioExamDate,setScenarioExamDate]=useState(currentScenarioCourse?.exam_date??"");
-  const [moveFrom,setMoveFrom]=useState<number|null>(null);
-  const [moveTo,setMoveTo]=useState<number|null>(null);
+  const plannedItems=useMemo(()=>plan.filter(item=>item.kind!=="exam"&&item.status==="planned").sort((a,b)=>a.date.localeCompare(b.date)),[plan]);
+  const [moveItemId,setMoveItemId]=useState("");
+  const [moveTargetDate,setMoveTargetDate]=useState("");
   const weekdays=[
     {value:1,label:"maanantai"},{value:2,label:"tiistai"},{value:3,label:"keskiviikko"},
     {value:4,label:"torstai"},{value:5,label:"perjantai"},{value:6,label:"lauantai"},{value:0,label:"sunnuntai"},
@@ -74,18 +75,22 @@ export function V5PlannerPanel({
   })[0],[customCourses,topics,attempts,dailyMinutes,dayOff]);
 
   const moveImpact=useMemo(()=>{
-    if(moveFrom===null||moveTo===null||moveFrom===moveTo)return null;
-    const active=plan.filter(item=>item.kind!=="exam"&&item.status==="planned");
-    const weekday=(date:string)=>new Date(date+"T12:00:00Z").getUTCDay();
-    const moved=active.filter(item=>weekday(item.date)===moveFrom).reduce((sum,item)=>sum+item.target_minutes,0);
-    const targetBefore=active.filter(item=>weekday(item.date)===moveTo).reduce((sum,item)=>sum+item.target_minutes,0);
-    const targetAfter=targetBefore+moved;
-    const targetCapacity=moveTo===0||moveTo===6?capacity.weekendMinutes:capacity.weekdayMinutes;
+    const item=plannedItems.find(candidate=>candidate.id===moveItemId);
+    if(!item||!moveTargetDate||moveTargetDate===item.date)return null;
+    const targetBefore=plannedItems
+      .filter(candidate=>candidate.id!==item.id&&candidate.date===moveTargetDate)
+      .reduce((sum,candidate)=>sum+candidate.target_minutes,0);
+    const targetAfter=targetBefore+item.target_minutes;
+    const targetWeekday=new Date(moveTargetDate+"T12:00:00Z").getUTCDay();
+    const targetCapacity=targetWeekday===0||targetWeekday===6?capacity.weekendMinutes:capacity.weekdayMinutes;
     return {
-      moved,targetBefore,targetAfter,targetCapacity,
+      item,
+      targetBefore,
+      targetAfter,
+      targetCapacity,
       risk:targetAfter>targetCapacity*1.25?"high":targetAfter>targetCapacity?"medium":"low",
     } as const;
-  },[plan,moveFrom,moveTo,capacity]);
+  },[plannedItems,moveItemId,moveTargetDate,capacity]);
 
   return <div className="grid gap-4 lg:grid-cols-2">
     <Panel title="Retention Budget v5">
@@ -129,17 +134,14 @@ export function V5PlannerPanel({
           <label className="text-sm">Uusi koepäivä
             <input aria-label="What-if koepäivä" type="date" value={scenarioExamDate} onChange={e=>setScenarioExamDate(e.target.value)} className="mt-1 min-h-11 w-full rounded-xl border bg-surface px-3"/>
           </label>
-          <label className="text-sm">Siirrä raskas työ päivältä
-            <select aria-label="Siirrä työ päivältä" value={moveFrom??""} onChange={e=>setMoveFrom(e.target.value===""?null:Number(e.target.value))} className="mt-1 min-h-11 w-full rounded-xl border bg-surface px-3">
+          <label className="text-sm">Siirrä tämä suunniteltu työ
+            <select aria-label="Siirrä tämä työ" value={moveItemId} onChange={e=>{const id=e.target.value;setMoveItemId(id);const item=plannedItems.find(row=>row.id===id);setMoveTargetDate(item?.date??"");}} className="mt-1 min-h-11 w-full rounded-xl border bg-surface px-3">
               <option value="">Ei siirtoa</option>
-              {weekdays.map(day=><option key={day.value} value={day.value}>{day.label}</option>)}
+              {plannedItems.slice(0,30).map(item=><option key={item.id} value={item.id}>{item.date} · {item.title||courses.find(course=>course.id===item.course_id)?.code||"Opiskelu"} · {item.target_minutes} min</option>)}
             </select>
           </label>
-          <label className="text-sm">Päivälle
-            <select aria-label="Siirrä työ päivälle" value={moveTo??""} onChange={e=>setMoveTo(e.target.value===""?null:Number(e.target.value))} className="mt-1 min-h-11 w-full rounded-xl border bg-surface px-3">
-              <option value="">Valitse päivä</option>
-              {weekdays.map(day=><option key={day.value} value={day.value}>{day.label}</option>)}
-            </select>
+          <label className="text-sm">Uudelle päivälle
+            <input aria-label="Siirrä työ päivälle" type="date" value={moveTargetDate} onChange={e=>setMoveTargetDate(e.target.value)} disabled={!moveItemId} className="mt-1 min-h-11 w-full rounded-xl border bg-surface px-3 disabled:opacity-50"/>
           </label>
         </div>
 
@@ -150,7 +152,8 @@ export function V5PlannerPanel({
         </div>}
         {moveImpact&&<div className="mt-3 rounded-xl border border-border bg-surface p-3 text-sm">
           <b>Työn siirron kuormitus</b>
-          <p className="mt-1 text-muted-foreground">Siirtyisi {moveImpact.moved} min. Kohdepäivän kuorma {moveImpact.targetBefore} → {moveImpact.targetAfter} min, kapasiteetti noin {moveImpact.targetCapacity} min.</p>
+          <p className="mt-1 text-muted-foreground">{moveImpact.item.title||"Valittu tehtävä"} · {moveImpact.item.target_minutes} min siirtyisi päivältä {moveImpact.item.date} päivälle {moveTargetDate}.</p>
+          <p className="mt-1 text-muted-foreground">Kohdepäivän kuorma {moveImpact.targetBefore} → {moveImpact.targetAfter} min, kapasiteetti noin {moveImpact.targetCapacity} min.</p>
           <p className="mt-1">Ylikuormitusriski: <b>{moveImpact.risk}</b>.</p>
         </div>}
       </div>
