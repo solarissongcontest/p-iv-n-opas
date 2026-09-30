@@ -97,12 +97,12 @@ export type RecoveryQueue = {
 export type ExamStageKey = "coverage" | "retrieval" | "mixed" | "transfer" | "simulation" | "repair";
 
 export const EXAM_STAGES: Array<{ key: ExamStageKey; label: string; description: string }> = [
-  { key: "coverage", label: "Coverage", description: "Käsittele kaikki koealueen aiheet ainakin kerran." },
-  { key: "retrieval", label: "Retrieval", description: "Palauta asiat mieleen ilman materiaalia." },
-  { key: "mixed", label: "Mixed Practice", description: "Tunnista ensin, mitä menetelmää tehtävä vaatii." },
-  { key: "transfer", label: "Transfer", description: "Sovella osaamista uusiin tilanteisiin." },
-  { key: "simulation", label: "Simulation", description: "Tee koetta muistuttava kokonaisuus." },
-  { key: "repair", label: "Repair", description: "Korjaa harjoituskokeessa löytyneet aukot." },
+  { key: "coverage", label: "Sisältökierros", description: "Käsittele kaikki koealueen aiheet ainakin kerran." },
+  { key: "retrieval", label: "Muistista palautus", description: "Palauta asiat mieleen ilman materiaalia." },
+  { key: "mixed", label: "Vaihtelevat tehtävät", description: "Tunnista ensin, mitä menetelmää tehtävä vaatii." },
+  { key: "transfer", label: "Soveltaminen", description: "Sovella osaamista uusiin tilanteisiin." },
+  { key: "simulation", label: "Koesimulaatio", description: "Tee koetta muistuttava kokonaisuus." },
+  { key: "repair", label: "Virheiden korjaus", description: "Korjaa harjoituskokeessa löytyneet aukot." },
 ];
 
 function clamp(value: number, min = 0, max = 1) {
