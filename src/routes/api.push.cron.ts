@@ -111,6 +111,59 @@ export const Route = createFileRoute("/api/push/cron")({
               weekly_summary: true,
             };
 
+            // Learning OS v5 reminder tapering deliberately optimizes for
+            // self-started studying, not notification clicks. It only reduces
+            // ordinary study/review nudges. Exam, plan-change and weekly
+            // summary notifications remain untouched.
+            let studyReminderAllowed = true;
+            if (preference.reminder_taper_enabled ?? true) {
+              const frictionSince = addDays(local.iso, -28);
+              const { data: startEvents, error: startEventError } = await admin
+                .from("study_friction_events")
+                .select("event_date,self_started")
+                .eq("owner_id", preference.owner_id)
+                .gte("event_date", frictionSince)
+                .not("self_started", "is", null)
+                .order("event_date", { ascending: false })
+                .limit(28);
+              if (startEventError) throw startEventError;
+
+              const samples = startEvents ?? [];
+              const independentStarts = samples.filter((row) => row.self_started === true).length;
+              const selfStartRate = samples.length ? independentStarts / samples.length : null;
+              const recent = samples.slice(0, 5);
+              const recentRate = recent.length
+                ? recent.filter((row) => row.self_started === true).length / recent.length
+                : null;
+
+              const taperMode =
+                samples.length >= 8 && selfStartRate !== null && selfStartRate >= 0.8 && (recentRate ?? 0) >= 0.8
+                  ? "minimal"
+                  : samples.length >= 5 && selfStartRate !== null && selfStartRate >= 0.55
+                    ? "taper"
+                    : "normal";
+
+              studyReminderAllowed =
+                taperMode === "minimal"
+                  ? false
+                  : taperMode === "taper"
+                    ? [1, 3, 5].includes(local.weekday)
+                    : true;
+
+              await admin.from("reminder_adaptation").upsert({
+                owner_id: preference.owner_id,
+                recommended_level: taperMode === "minimal" ? "none" : taperMode === "taper" ? "light" : "normal",
+                independent_start_rate: selfStartRate,
+                sample_size: samples.length,
+                metadata: {
+                  recentRate,
+                  evaluatedFor: local.iso,
+                  ordinaryStudyReminderAllowed: studyReminderAllowed,
+                },
+                updated_at: new Date().toISOString(),
+              }, { onConflict: "owner_id" });
+            }
+
             const deliveryKey = `morning:${local.iso}`;
             const { data: delivered, error: deliveryReadError } = await admin
               .from("push_deliveries")
@@ -163,12 +216,12 @@ export const Route = createFileRoute("/api/push/cron")({
               const percent = weekPlan?.length ? Math.round(completed / weekPlan.length * 100) : 0;
               title = "Viikkoyhteenveto";
               body = `Tällä viikolla ${actual} min opiskelua · ${percent} % suunnitelmasta toteutui.`;
-            } else if (weekdays.includes(local.weekday) && settings.study_sessions && tasks?.length) {
+            } else if (studyReminderAllowed && weekdays.includes(local.weekday) && settings.study_sessions && tasks?.length) {
               const taskMinutes = tasks.reduce((sum, task) => sum + Number(task.target_minutes ?? 0), 0);
               title = "Tämän päivän opiskelu";
               body = `${tasks.length} tehtävää · noin ${taskMinutes} min.`;
               if (reviews?.length) body += ` Mukana ${Math.min(3, reviews.length)} tärkeintä ajankohtaista kertausta.`;
-            } else if (weekdays.includes(local.weekday) && settings.study_sessions && reviews?.length) {
+            } else if (studyReminderAllowed && weekdays.includes(local.weekday) && settings.study_sessions && reviews?.length) {
               title = "Lyhyt kertaus kannattaa tänään";
               body = `Järjestelmä nosti esiin ${Math.min(3, reviews.length)} tärkeintä ajankohtaista aihetta. Muu jono järjestellään automaattisesti.`;
             } else if (settings.plan_changes && overdue?.length) {
