@@ -337,7 +337,7 @@ export async function handleCoach(request: Request): Promise<Response> {
     return json(
       {
         error:
-          "Coach-yhteys ei juuri nyt toimi. Voit käyttää paikallista ohjausta.",
+          "Opiskeluohjaajan yhteys ei juuri nyt toimi. Voit käyttää paikallista ohjausta.",
       },
       503,
     );
