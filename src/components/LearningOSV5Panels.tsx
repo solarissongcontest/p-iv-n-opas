@@ -240,7 +240,7 @@ export function V5LearningHealthPanel({courses,attempts}:{courses:Course[];topic
       <Panel title="Viivästetty varmuusarvio">
         <p className="text-xl font-semibold">{calibrationState.status==="well_calibrated"?"Hyvin kalibroitu":calibrationState.status==="overconfident"?"Liikaa varmuutta":calibrationState.status==="underconfident"?"Liikaa epävarmuutta":"Kerätään näyttöä"}</p>
         <p className="mt-2 text-sm text-muted-foreground">{calibrationState.recommendation}</p>
-        <p className="mt-3 text-xs text-muted-foreground">{calibrationState.observations} havaintoa{calibrationState.delayedAccuracy==null?"":" · viivekalibrointi "+pct(calibrationState.delayedAccuracy)}</p>
+        <p className="mt-3 text-xs text-muted-foreground">{calibrationState.observations} havaintoa{calibrationState.delayedAccuracy==null?"":" · myöhempien arvioiden osumatarkkuus "+pct(calibrationState.delayedAccuracy)}</p>
       </Panel>
       <Panel title="Opiskelun esteiden tunnistus">
         <p className="text-lg font-semibold">{frictionState.summary}</p>
@@ -254,8 +254,8 @@ export function V5LearningHealthPanel({courses,attempts}:{courses:Course[];topic
       </Panel>
     </div>
     <Panel title="Oppiaine- ja tehtävätyyppikohtainen mukautus">
-      <p className="mb-3 text-sm text-muted-foreground">Mukautuksia tehdään vasta, kun havaintoja on tarpeeksi. Vähäisestä datasta ei muodosteta näennäisen tarkkaa profiilia.</p>
-      <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">{profiles.slice(0,9).map(p=><div key={p.key} className="rounded-xl bg-muted/50 p-3 text-sm"><b>{p.subject} · {attemptTypeLabel(p.attemptType)}</b><p className="mt-1 text-xs text-muted-foreground">{p.observations} havaintoa · onnistuminen {pct(p.successRate)}</p><p className="mt-1 text-xs text-muted-foreground">kertausvälin kerroin {p.spacingMultiplier.toFixed(2)} · näytön varmuus {confidenceLabel(p.reliability.label)}</p></div>)}{!profiles.length&&<p className="text-sm text-muted-foreground">Dataa ei ole vielä tarpeeksi.</p>}</div>
+      <p className="mb-3 text-sm text-muted-foreground">Mukautuksia tehdään vasta, kun havaintoja on tarpeeksi. Vähäisestä havaintomäärästä ei muodosteta näennäisen tarkkaa profiilia.</p>
+      <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">{profiles.slice(0,9).map(p=><div key={p.key} className="rounded-xl bg-muted/50 p-3 text-sm"><b>{p.subject} · {attemptTypeLabel(p.attemptType)}</b><p className="mt-1 text-xs text-muted-foreground">{p.observations} havaintoa · onnistuminen {pct(p.successRate)}</p><p className="mt-1 text-xs text-muted-foreground">kertausvälin kerroin {p.spacingMultiplier.toFixed(2)} · näytön varmuus {confidenceLabel(p.reliability.label)}</p></div>)}{!profiles.length&&<p className="text-sm text-muted-foreground">Havaintoja ei ole vielä tarpeeksi.</p>}</div>
     </Panel>
   </div>;
 }
