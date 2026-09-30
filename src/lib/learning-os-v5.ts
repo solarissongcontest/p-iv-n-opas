@@ -1563,8 +1563,8 @@ export function frictionInsightV5(events: FrictionEventV5[]): FrictionInsightV5 
   const repeatedWeekday=day&&day[1]>=2?day[0]:null;
   let suggestion:ImplementationIntentionV5|null=null;
   if(repeatedReason==="too_tired") suggestion={trigger_type:"low_energy",trigger_value:"true",action_type:"replace_with_retrieval",action_value:"15",enabled:false,suggested:true,reason:"Väsymys toistuu: vaihda raskas työ 15 minuutin muistista palauttamiseen."};
-  else if(repeatedReason==="no_time"||repeatedReason==="plans_changed") suggestion={trigger_type:"busy_day",trigger_value:repeatedWeekday===null?"any":String(repeatedWeekday),action_type:"lighten",action_value:"0.4",enabled:false,suggested:true,reason:"Aikapula toistuu: tee automaattisesti kevyt päivä."};
-  else if(repeatedReason==="too_hard"||repeatedReason==="unclear_start") suggestion={trigger_type:"custom",trigger_value:repeatedReason,action_type:"replace_with_retrieval",action_value:"worked_example_then_10m",enabled:false,suggested:true,reason:"Aloita yhdellä esimerkillä ja rajatulla 10 min tehtävällä."};
+  else if(repeatedReason==="no_time"||repeatedReason==="plans_changed") suggestion={trigger_type:"busy_day",trigger_value:repeatedWeekday===null?"any":String(repeatedWeekday),action_type:"lighten",action_value:"0.4",enabled:false,suggested:true,reason:"Aikapula toistuu: kevennä tällaiset päivät automaattisesti."};
+  else if(repeatedReason==="too_hard"||repeatedReason==="unclear_start") suggestion={trigger_type:"custom",trigger_value:repeatedReason,action_type:"replace_with_retrieval",action_value:"worked_example_then_10m",enabled:false,suggested:true,reason:"Aloita yhdellä esimerkillä ja rajatulla 10 minuutin tehtävällä."};
   else if(repeatedReason==="forgot") suggestion={trigger_type:"custom",trigger_value:"forgot_twice",action_type:"replace_with_retrieval",action_value:"10",enabled:false,suggested:true,reason:"Unohtaminen toistuu: tee seuraavasta aloituksesta 10 minuutin muistista palauttaminen ja sido se tuttuun arjen rutiiniin."};
   return {
     repeatedReason,repeatedWeekday,count:reason?.[1]??0,suggestion,
@@ -1778,7 +1778,7 @@ export function evaluateRuntimeIntentionsV5(
 
 export function reminderTaperV5(events: FrictionEventV5[]): ReminderTaperDecisionV5 {
   const started=events.filter((event)=>typeof event.self_started==="boolean");
-  if(started.length<5)return{mode:"normal",selfStartRate:started.length?started.filter(e=>e.self_started).length/started.length:null,sampleSize:started.length,recommendation:"Muistutuksia ei vielä säädetä, koska itsenäisistä aloituksista on liian vähän dataa."};
+  if(started.length<5)return{mode:"normal",selfStartRate:started.length?started.filter(e=>e.self_started).length/started.length:null,sampleSize:started.length,recommendation:"Muistutuksia ei vielä säädetä, koska itsenäisistä aloituksista on liian vähän havaintoja."};
   const rate=started.filter(e=>e.self_started).length/started.length;
   const recent=started.slice(0,5);
   const recentRate=recent.filter(e=>e.self_started).length/recent.length;
