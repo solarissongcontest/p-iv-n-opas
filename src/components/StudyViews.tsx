@@ -38,7 +38,7 @@ import {
   simulateLearningOsV4,
   yoOverviewV4,
 } from "@/lib/learning-os-v4";
-import { adaptiveDayPlanV5 } from "@/lib/learning-os-v5";
+import { adaptiveDayPlanV5, applyImplementationIntentionsV5 } from "@/lib/learning-os-v5";
 import {
   corridor,
   corridorAdvice,
@@ -74,6 +74,7 @@ import {
   useCreateFrictionEvent,
   useAdvanceMistake,
   useGeneratePlan,
+  useImplementationIntentions,
   useMovePlanItem,
   usePlanStatus,
   usePreferences,
@@ -243,6 +244,7 @@ export function TodayView({courses,topics,sessions,exams,plan,tests,attempts,mis
 
 export function PlanView({courses,topics,plan,tests,mistakes,attempts,capacity,onStart}:Base&{plan:PlanItem[];tests:PracticeTest[];mistakes:Mistake[];attempts:PracticeAttempt[];capacity:CapacityProfile;onStart:(id:string)=>void}) {
   const preferences=usePreferences();
+  const intentions=useImplementationIntentions();
   const plannerMode=preferences.data?.planner_mode??"assisted";
   const [mode,setMode]=useState<"päivä"|"viikko"|"kuukausi">("viikko"),[anchor,setAnchor]=useState(today()),[creating,setCreating]=useState(false),[adding,setAdding]=useState(false),[choice,setChoice]=useState(courses[0]?.id??"");
   const [proposal,setProposal]=useState<PlanDraft[]|null>(null),[editingProposal,setEditingProposal]=useState(false);
@@ -267,7 +269,7 @@ export function PlanView({courses,topics,plan,tests,mistakes,attempts,capacity,o
   async function makeProposal(){
     const c=courses.find(x=>x.id===choice);
     if(!c?.exam_date){toast.error("Kurssilla ei ole koepäivää.");return;}
-    const drafts=generatePlan({
+    const baseDrafts=generatePlan({
       course:c,
       topics:topics.filter(t=>t.course_id===c.id),
       examDate:c.exam_date,
@@ -277,12 +279,18 @@ export function PlanView({courses,topics,plan,tests,mistakes,attempts,capacity,o
       tests:tests.filter(t=>t.course_id===c.id),
       capacity,
     });
+    const adapted=applyImplementationIntentionsV5(baseDrafts,intentions.data??[]);
+    const drafts=adapted.drafts;
     if(!drafts.length){toast.error("Koe on jo mennyt.");return;}
+    if(adapted.applied.length){
+      const count=adapted.applied.reduce((sum,row)=>sum+row.count,0);
+      toast.info(`If-then-säännöt kevensivät tai mukauttivat ${count} ehdotettua sessiota.`);
+    }
     if(plannerMode==="autopilot"){
       try{
         await generate.mutateAsync({courseId:c.id,drafts,capacity});
         setCreating(false);
-        toast.success("Autopilot päivitti suunnitelman kapasiteetin ja koetilanteen perusteella.");
+        toast.success("Autopilot päivitti suunnitelman kapasiteetin, koetilanteen ja aktiivisten if-then-sääntöjen perusteella.");
       }catch{toast.error("Autopilot ei voinut päivittää suunnitelmaa.");}
       return;
     }
