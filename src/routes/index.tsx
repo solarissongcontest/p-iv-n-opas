@@ -94,10 +94,10 @@ function App() {
         // A valid cached token still lets the app work offline. When the
         // connection returns, the next app open/focus will canonicalize it.
         if (existing) {
-          setAuthError(error instanceof Error ? error.message : "Synkronoinnin tarkistus epäonnistui.");
+          setAuthError("Synkronoinnin tarkistus epäonnistui. Tarkista verkkoyhteys ja yritä uudelleen.");
           return;
         }
-        setAuthError(error instanceof Error ? error.message : "Kirjautuminen epäonnistui.");
+        setAuthError("Kirjautuminen epäonnistui. Tarkista verkkoyhteys ja yritä uudelleen.");
         setUser(null);
       }
     })();
@@ -174,7 +174,7 @@ function DeviceSignIn({
           const signedInUser = await getArthurSession();
           onSignedIn(signedInUser);
         } catch (error) {
-          setErrorMessage(error instanceof Error ? error.message : "Kirjautuminen epäonnistui.");
+          setErrorMessage("Kirjautuminen epäonnistui. Tarkista verkkoyhteys ja yritä uudelleen.");
         } finally {
           setBusy(false);
         }
@@ -285,7 +285,7 @@ function StudyApp({ user }: { user: DeviceUser }) {
       })
       .catch((err) => {
         if (!active) return;
-        setDefaultsError(err instanceof Error ? err.message : "KE04:n alustaminen epäonnistui.");
+        setDefaultsError("Kurssitietojen alustaminen epäonnistui. Yritä uudelleen.");
         setDefaultsReady(true);
       });
     return () => { active = false; };
@@ -370,7 +370,7 @@ function StudyApp({ user }: { user: DeviceUser }) {
         </div>
       </header>
       {pending>0 && <p role="status" className="mb-5 rounded-xl bg-accent p-3 text-sm">Tallennettu paikallisesti · {pending} muutosta synkronoidaan yhteyden palattua.</p>}
-      {error && <div role="alert" className="panel mb-5 p-4"><p className="font-medium">{pending>0?"Kaikkea ei voitu vielä synkronoida.":"Tietojen lataus tai alustus epäonnistui."}</p>{pending>0&&<p className="mt-1 text-sm text-muted-foreground">Syöttämäsi tiedot ovat tallessa tässä laitteessa ja synkronoidaan yhteyden palattua.</p>}<p className="mt-1 text-sm text-muted-foreground">{String(error)}</p><button className="mt-2 underline" onClick={()=>{setDefaultsReady(false);setDefaultsError(null);void ensureKe04ForCurrentUser().then(()=>Promise.all([coursesQ.refetch(),topicsQ.refetch(),sessionsQ.refetch(),examsQ.refetch(),planQ.refetch(),testsQ.refetch(),attemptsQ.refetch(),mistakesQ.refetch(),preferencesQ.refetch()])).then(()=>setDefaultsReady(true)).catch(err=>{setDefaultsError(err instanceof Error?err.message:"Uudelleenyritys epäonnistui.");setDefaultsReady(true);});}}>Yritä uudelleen</button></div>}
+      {error && <div role="alert" className="panel mb-5 p-4"><p className="font-medium">{pending>0?"Kaikkea ei voitu vielä synkronoida.":"Tietojen lataus tai alustus epäonnistui."}</p>{pending>0&&<p className="mt-1 text-sm text-muted-foreground">Syöttämäsi tiedot ovat tallessa tässä laitteessa ja synkronoidaan yhteyden palattua.</p>}<p className="mt-1 text-sm text-muted-foreground">Tarkista verkkoyhteys ja yritä uudelleen.</p><button className="mt-2 underline" onClick={()=>{setDefaultsReady(false);setDefaultsError(null);void ensureKe04ForCurrentUser().then(()=>Promise.all([coursesQ.refetch(),topicsQ.refetch(),sessionsQ.refetch(),examsQ.refetch(),planQ.refetch(),testsQ.refetch(),attemptsQ.refetch(),mistakesQ.refetch(),preferencesQ.refetch()])).then(()=>setDefaultsReady(true)).catch(err=>{setDefaultsError("Uudelleenyritys epäonnistui. Tarkista verkkoyhteys.");setDefaultsReady(true);});}}>Yritä uudelleen</button></div>}
       {busy ? (showSkeleton ? <div className="space-y-4" aria-label="Ladataan"><div className="h-32 animate-pulse rounded-2xl bg-muted"/><div className="h-60 animate-pulse rounded-2xl bg-muted"/></div> : null) :
       courses.length===0 ? <section className="panel p-6"><h2 className="text-xl font-semibold">Aloita ensimmäisestä kurssista</h2><p className="mt-2 text-muted-foreground">Lisää kurssi ja sen aiheet, jotta voit suunnitella ja kirjata opiskelua.</p><button onClick={()=>setAdding(true)} className="mt-5 min-h-11 rounded-xl bg-primary px-4 text-primary-foreground">Lisää kurssi</button></section> :
       page==="today" ? <TodayView courses={courses} topics={topics} sessions={sessions} exams={exams} plan={plan} tests={testsQ.data??[]} attempts={attemptsQ.data??[]} mistakes={mistakesQ.data??[]} capacity={capacity} onStart={setEntry} onGo={go}/> :
