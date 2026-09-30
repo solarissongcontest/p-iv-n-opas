@@ -1,7 +1,16 @@
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import type { Course, Mistake, Topic } from "@/lib/domain";
-import { useUpdateMistakeRepair } from "@/lib/data";
+import {
+  useQuestionBank,
+  useRecordPracticeAttempt,
+  useUpdateMistakeRepair,
+} from "@/lib/data";
+import {
+  AbittiAnswerEditor,
+  answerHasContent,
+  answerPlainText,
+} from "@/components/AbittiAnswerEditor";
 import { contrastiveRepairPlanV5 } from "@/lib/learning-os-v5";
 
 const primary =
@@ -27,7 +36,11 @@ export function ContrastiveErrorLab({
   const [divergence, setDivergence] = useState("");
   const [principle, setPrinciple] = useState("");
   const [repair, setRepair] = useState("");
+  const [parallelResponse, setParallelResponse] = useState("");
+  const [parallelSubmitted, setParallelSubmitted] = useState(false);
   const update = useUpdateMistakeRepair();
+  const bank = useQuestionBank();
+  const recordAttempt = useRecordPracticeAttempt();
 
   if (!selected) {
     return (
@@ -44,6 +57,14 @@ export function ContrastiveErrorLab({
   const topic = topics.find((candidate) => candidate.id === activeMistake.topic_id);
   const course = courses.find((candidate) => candidate.id === activeMistake.course_id);
   const plan = contrastiveRepairPlanV5(activeMistake);
+  const candidateQuestions = (bank.data ?? []).filter((question) =>
+    question.course_id === activeMistake.course_id &&
+    (activeMistake.topic_id ? question.topic_id === activeMistake.topic_id : true) &&
+    !activeMistake.error.toLowerCase().includes(question.prompt.toLowerCase().slice(0, 40)) &&
+    !(activeMistake.what_happened ?? "").toLowerCase().includes(question.prompt.toLowerCase().slice(0, 40))
+  );
+  const parallelTask = candidateQuestions
+    .sort((a, b) => Math.abs(a.difficulty - 3) - Math.abs(b.difficulty - 3))[0] ?? null;
 
   async function save(status: "corrected" | "retested") {
     try {
@@ -57,9 +78,62 @@ export function ContrastiveErrorLab({
           new Date(Date.now() + 3 * 86_400_000).toISOString().slice(0, 10),
         status,
       });
-      toast.success(status === "corrected" ? "Virhekorjaus tallennettu." : "Uusi rinnakkaisyritys tallennettu.");
+      toast.success(status === "corrected" ? "Virhekorjaus tallennettu." : "Rinnakkaisyritys tallennettu.");
     } catch {
       toast.error("Virhekorjausta ei voitu tallentaa.");
+    }
+  }
+
+  async function submitParallel(result: "independent" | "hinted" | "not_yet") {
+    if (!answerHasContent(parallelResponse)) {
+      toast.error("Kirjoita rinnakkaistehtävään vastaus ensin.");
+      return;
+    }
+    const prompt = parallelTask?.prompt ??
+      `Ratkaise uusi soveltava esimerkki aiheesta ${topic?.name ?? "tämä aihe"}. Näytä ratkaisuperiaate ja perustele, miksi sama aiempi virhe ei toistu.`;
+    try {
+      await recordAttempt.mutateAsync({
+        course_id: activeMistake.course_id,
+        topic_id: activeMistake.topic_id ?? topic?.id ?? "",
+        attempt_type: parallelTask?.question_type ?? "application",
+        prompt,
+        response: answerPlainText(parallelResponse),
+        difficulty: parallelTask?.difficulty ?? 3,
+        result,
+        confidence: null,
+        hint_used: false,
+        hints_used: 0,
+        source: "mistake_repair",
+        skills: parallelTask?.skills ?? [],
+        expected_concepts: parallelTask?.expected_concepts ?? [],
+        question_payload: {
+          mistakeId: activeMistake.id,
+          contrastiveRepair: true,
+          parallelTask: true,
+          questionBankId: parallelTask?.id ?? null,
+          delayedVerificationRequired: true,
+        },
+      });
+      await update.mutateAsync({
+        id: activeMistake.id,
+        status: result === "not_yet" ? "corrected" : "retested",
+        first_divergence: divergence.trim() || activeMistake.first_divergence || null,
+        correct_principle: principle.trim() || activeMistake.correct_principle || null,
+        repair_response: repair.trim() || activeMistake.repair_response || null,
+        delayed_verification_due:
+          activeMistake.delayed_verification_due ??
+          new Date(Date.now() + 3 * 86_400_000).toISOString().slice(0, 10),
+      });
+      setParallelSubmitted(true);
+      toast.success(
+        result === "independent"
+          ? "Rinnakkaistehtävä varmennettiin itsenäisesti. Viivevarmistus jäi jonoon."
+          : result === "hinted"
+            ? "Rinnakkaistehtävä tallennettiin, mutta itsenäinen viivevarmistus tarvitaan vielä."
+            : "Virhe tarvitsee vielä uuden korjauskierroksen.",
+      );
+    } catch {
+      toast.error("Rinnakkaistehtävää ei voitu tallentaa.");
     }
   }
 
@@ -69,7 +143,7 @@ export function ContrastiveErrorLab({
         <div>
           <h2 className="text-base font-semibold sm:text-lg">Contrastive Error Lab</h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            Virhettä ei vain kuitata vääräksi. Paikannetaan ensimmäinen kohta, jossa ajattelu erkani oikeasta periaatteesta.
+            Virhettä ei vain kuitata vääräksi. Paikannetaan ensimmäinen kohta, jossa ajattelu erkani oikeasta periaatteesta, ja testataan korjaus uudella tehtävällä.
           </p>
         </div>
         <select
@@ -80,6 +154,8 @@ export function ContrastiveErrorLab({
             setDivergence("");
             setPrinciple("");
             setRepair("");
+            setParallelResponse("");
+            setParallelSubmitted(false);
           }}
         >
           {open.map((mistake) => (
@@ -94,9 +170,9 @@ export function ContrastiveErrorLab({
         <p className="text-xs font-semibold uppercase tracking-wide text-primary">
           {course?.code} · {topic?.name ?? "Yleinen virhe"}
         </p>
-        <p className="mt-2 font-medium">{selected.error}</p>
-        {selected.what_happened && <p className="mt-2 text-sm text-muted-foreground">Oma ratkaisu / tapahtuma: {selected.what_happened}</p>}
-        {selected.solution && <p className="mt-2 text-sm text-muted-foreground">Aiempi korjaus: {selected.solution}</p>}
+        <p className="mt-2 font-medium">{activeMistake.error}</p>
+        {activeMistake.what_happened && <p className="mt-2 text-sm text-muted-foreground">Oma ratkaisu / tapahtuma: {activeMistake.what_happened}</p>}
+        {activeMistake.solution && <p className="mt-2 text-sm text-muted-foreground">Aiempi korjaus: {activeMistake.solution}</p>}
       </div>
 
       <ol className="mt-4 space-y-2 text-sm">
@@ -109,7 +185,7 @@ export function ContrastiveErrorLab({
 
       <div className="mt-5 grid gap-4">
         <label className="text-sm font-medium">
-          Missä kohtaa ratkaisut erkanevat ensimmäisen kerran?
+          Missä kohtaa ratkaisut erkaneavat ensimmäisen kerran?
           <textarea
             className="mt-1 min-h-24 w-full rounded-xl border border-border bg-surface p-3"
             value={divergence}
@@ -141,10 +217,46 @@ export function ContrastiveErrorLab({
         <button disabled={update.isPending} className={primary} onClick={() => void save("corrected")}>
           Tallenna korjaus
         </button>
-        <button disabled={update.isPending} className={secondary} onClick={() => void save("retested")}>
-          Merkitse rinnakkaistehtävä tehdyksi
-        </button>
       </div>
+
+      <div className="mt-6 rounded-2xl border border-border p-4">
+        <p className="text-xs font-semibold uppercase tracking-wide text-primary">Uusi rinnakkaistehtävä</p>
+        <p className="mt-2 font-medium">
+          {parallelTask?.prompt ??
+            `Ratkaise uusi soveltava esimerkki aiheesta ${topic?.name ?? "tämä aihe"}. Näytä ratkaisuperiaate ja perustele, miksi sama aiempi virhe ei toistu.`}
+        </p>
+        {parallelTask?.stimulus_package && Object.keys(parallelTask.stimulus_package).length > 0 && (
+          <pre className="mt-3 overflow-x-auto rounded-xl bg-muted/60 p-3 text-xs">
+            {JSON.stringify(parallelTask.stimulus_package, null, 2)}
+          </pre>
+        )}
+        <div className="mt-4">
+          <AbittiAnswerEditor
+            value={parallelResponse}
+            onChange={setParallelResponse}
+            label="Rinnakkaistehtävän vastaus"
+            placeholder="Ratkaise ilman malliratkaisua. Ctrl/Cmd+E avaa kaavaeditorin."
+            minHeight={180}
+            disabled={parallelSubmitted}
+          />
+        </div>
+        {!parallelSubmitted ? (
+          <div className="mt-4">
+            <p className="mb-2 text-sm text-muted-foreground">Arvioi yritys vasta kun olet tehnyt sen loppuun:</p>
+            <div className="flex flex-wrap gap-2">
+              <button disabled={recordAttempt.isPending} className={primary} onClick={() => void submitParallel("independent")}>Itsenäisesti oikein</button>
+              <button disabled={recordAttempt.isPending} className={secondary} onClick={() => void submitParallel("hinted")}>Osittain / epävarma</button>
+              <button disabled={recordAttempt.isPending} className={secondary} onClick={() => void submitParallel("not_yet")}>Ei vielä</button>
+            </div>
+          </div>
+        ) : (
+          <div className="mt-4 rounded-xl bg-muted/60 p-3 text-sm">
+            <b>Rinnakkaistehtävä tallennettu.</b>
+            {parallelTask?.explanation && <p className="mt-2 text-muted-foreground">{parallelTask.explanation}</p>}
+          </div>
+        )}
+      </div>
+
       <p className="mt-3 text-xs text-muted-foreground">
         Seuraava vaihe: {plan.next} Viivevarmistus ajoitetaan automaattisesti muutaman päivän päähän.
       </p>
