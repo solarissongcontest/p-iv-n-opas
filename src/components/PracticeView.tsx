@@ -163,14 +163,23 @@ export function PracticeView({
     ? instructionDecisionV5(selectedTopic, attempts, { examDate: course?.exam_date ?? null })
     : null;
   const previewPlan = selectedTopic ? pretestPlanV5(selectedTopic, attempts) : null;
-  const completedPretests = selectedTopic
-    ? (pretestAttempts.data ?? []).filter((row) => row.topic_id === selectedTopic.id).length
-    : 0;
+  const topicPretests = selectedTopic
+    ? (pretestAttempts.data ?? [])
+        .filter((row) => row.topic_id === selectedTopic.id)
+        .sort((a,b)=>b.created_at.localeCompare(a.created_at))
+    : [];
+  const completedPretests = topicPretests.length;
+  const requiredPretests = previewPlan?.questionCount ?? 0;
   const previewActive =
     !diagnosticMode &&
     (preferences.data?.pretest_enabled ?? true) &&
     Boolean(previewPlan?.enabled) &&
-    completedPretests < (previewPlan?.questionCount ?? 0);
+    completedPretests < requiredPretests;
+  const pretestOutcomeScore = completedPretests
+    ? topicPretests.slice(0,Math.max(1,requiredPretests)).reduce((sum,row)=>
+        sum+(row.outcome==="correct"?1:row.outcome==="partial"?.5:0),0
+      )/Math.min(completedPretests,Math.max(1,requiredPretests))
+    : 0;
   const activePath = diagnosticMode && selectedInstruction
     ? {
         ...selectedInstruction,
@@ -192,15 +201,35 @@ export function PracticeView({
           requiresIndependentFollowup: false,
         }
       : selectedInstruction?.stage === "pretest"
-        ? {
-            ...selectedInstruction,
-            stage: "worked_example" as const,
-            label: "Worked example",
-            reason: "Preview Challenge on jo tehty. Nyt rakennetaan ratkaisumalli ennen itsenäistä harjoittelua.",
-            revealWorkedSolution: true,
-            maxHints: Math.max(2, selectedInstruction.maxHints),
-            requiresIndependentFollowup: true,
-          }
+        ? pretestOutcomeScore >= .75
+          ? {
+              ...selectedInstruction,
+              stage: "independent" as const,
+              label: "Itsenäinen tarkistus",
+              reason: "Preview Challenge osoitti vahvat esitiedot. Malliesimerkkiä ei näytetä turhaan, vaan osaaminen varmistetaan itsenäisesti.",
+              revealWorkedSolution: false,
+              maxHints: 0,
+              requiresIndependentFollowup: false,
+            }
+          : pretestOutcomeScore >= .4
+            ? {
+                ...selectedInstruction,
+                stage: "completion" as const,
+                label: "Täydennä ratkaisu",
+                reason: "Preview Challenge osoitti osittaiset esitiedot. Aloitetaan häivytetyllä tuella eikä täydellä malliratkaisulla.",
+                revealWorkedSolution: false,
+                maxHints: 2,
+                requiresIndependentFollowup: true,
+              }
+            : {
+                ...selectedInstruction,
+                stage: "worked_example" as const,
+                label: "Worked example",
+                reason: "Preview Challenge osoitti, että perusteet tarvitsevat vielä rakennetta ennen itsenäistä harjoittelua.",
+                revealWorkedSolution: true,
+                maxHints: Math.max(2, selectedInstruction.maxHints),
+                requiresIndependentFollowup: true,
+              }
         : selectedInstruction;
   const stopDecision = selectedTopic ? stopRuleV5(selectedTopic, attempts) : null;
   const transferState = selectedTopic ? transferStateV5(selectedTopic, attempts) : null;
@@ -250,12 +279,15 @@ export function PracticeView({
                 ? ["free_recall", "application"]
                 : ["free_recall", "short_answer", "calculation"];
 
-  const selection = useMemo(
+  const selectionTopics = confusionSet
+    ? courseTopics.filter((candidate)=>confusionSet.topicIds.includes(candidate.id))
+    : courseTopics;
+  const selectionCandidate = useMemo(
     () =>
       diagnosticDone
         ? null
         : selectPracticeQuestion({
-            topics: courseTopics,
+            topics: selectionTopics,
             attempts,
             selectedTopicId: effectiveTopicId,
             course,
@@ -265,8 +297,14 @@ export function PracticeView({
             interleaveMode,
             questionBank: questionBank.data ?? [],
           }),
-    [attemptIndex, attempts, course, courseTopics, diagnosticDone, effectiveTopicId, interleaveMode, preferredTypes, questionBank.data, stage.key],
+    [attemptIndex, attempts, course, selectionTopics, diagnosticDone, effectiveTopicId, interleaveMode, preferredTypes, questionBank.data, stage.key],
   );
+  const [pinnedSelection,setPinnedSelection]=useState<typeof selectionCandidate>(null);
+  const selection=pinnedSelection??selectionCandidate;
+
+  useEffect(()=>{
+    setPinnedSelection(null);
+  },[courseId,effectiveTopicId,diagnosticMode,activePath?.stage]);
 
   const recovery = buildRecoveryQueue({
     topics: courseTopics,
@@ -346,17 +384,25 @@ export function PracticeView({
         : "practice";
 
     const resultOutcome = autoResult === "independent" ? "correct" : autoResult === "hinted" ? "partial" : "incorrect";
-    const baseFeedbackPolicy = feedbackPolicyV5({
-      mode: activePath?.stage === "pretest"
-        ? "pretest"
-        : stage.key === "repair"
-          ? "error_repair"
-          : ["worked_example","self_explanation","completion","guided"].includes(activePath?.stage ?? "")
-            ? "learning"
-            : "retrieval",
-      result: resultOutcome,
-      ...(activePath?.stage ? { stage: activePath.stage } : {}),
-    });
+    const adaptiveFeedbackEnabled=preferences.data?.feedback_policy_enabled??true;
+    const baseFeedbackPolicy:FeedbackPolicyV5 = adaptiveFeedbackEnabled
+      ? feedbackPolicyV5({
+          mode: activePath?.stage === "pretest"
+            ? "pretest"
+            : stage.key === "repair"
+              ? "error_repair"
+              : ["worked_example","self_explanation","completion","guided"].includes(activePath?.stage ?? "")
+                ? "learning"
+                : "retrieval",
+          result: resultOutcome,
+          ...(activePath?.stage ? { stage: activePath.stage } : {}),
+        })
+      : {
+          timing:"after_item",
+          reveal:activePath?.stage==="worked_example"?"worked_solution":"principle",
+          retriesBeforeReveal:0,
+          explanation:"Mukautuva palautteen ajoitus on pois päältä, joten palaute näytetään heti yrityksen jälkeen.",
+        };
     const effectiveFeedbackPolicy = retryCount >= baseFeedbackPolicy.retriesBeforeReveal && baseFeedbackPolicy.timing === "after_retry"
       ? { ...baseFeedbackPolicy, timing: "after_item" as const }
       : baseFeedbackPolicy;
@@ -376,6 +422,9 @@ export function PracticeView({
       activePath?.stage === "independent" ? Math.max(2, transferState?.level ?? 2) :
       activePath?.stage === "self_explanation" ? 1 : 0;
 
+    if(baseFeedbackPolicy.timing==="after_retry"&&retryCount<baseFeedbackPolicy.retriesBeforeReveal){
+      setPinnedSelection(selection);
+    }
     try {
       if (activePath?.stage === "pretest") {
         await recordPretest.mutateAsync({
@@ -429,7 +478,7 @@ export function PracticeView({
           pretest: false,
           masteryNeutral: false,
           transferLevel,
-          discriminationTopicIds: confusionSet?.topicIds ?? [],
+          discriminationTopicIds: confusionSet?.topicIds.includes(selection.topic.id) ? confusionSet.topicIds : [],
           feedbackTiming: effectiveFeedbackPolicy.timing,
           preRetrievalConfidence: delayedPrediction,
           confidenceDelayHours: delayedPrediction ? delayedHours : null,
@@ -896,7 +945,7 @@ export function PracticeView({
                         {showExplanation ? "Piilota selitys" : "Näytä täysi selitys"}
                       </button>}
                       {showExplanation && <p className="mt-2 rounded-lg bg-surface/70 p-3">{selection.question.explanation}</p>}
-                      <button type="button" className={primary+" mt-3 !min-h-9"} onClick={() => setAttemptIndex((value) => value + 1)}>
+                      <button type="button" className={primary+" mt-3 !min-h-9"} onClick={() => {setPinnedSelection(null);setAttemptIndex((value) => value + 1);}}>
                         Seuraava tehtävä
                       </button>
                     </>
