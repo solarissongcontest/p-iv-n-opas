@@ -12,7 +12,7 @@ import {
   type TopicDependency,
 } from "@/lib/data";
 import { getDeviceAccessToken } from "@/lib/deviceSession";
-import { relationLabel } from "@/lib/ui-fi";
+import { materialKindLabel, relationLabel } from "@/lib/ui-fi";
 
 const secondary =
   "inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-border bg-surface px-4 text-sm hover:bg-muted disabled:opacity-50";
@@ -334,7 +334,7 @@ export function MaterialImporter({
       {current.length > 0 && (
         <div className="mt-5 border-t border-border pt-3">
           <p className="text-sm font-semibold">Kurssin materiaalit</p>
-          {current.slice(0,8).map((material) => <div key={material.id} className="mt-2 flex items-center justify-between rounded-xl bg-surface px-3 py-2 text-sm"><span><b>{material.name}</b><small className="block text-muted-foreground">{material.kind.toUpperCase()} · {material.topic_ids.length} aihetta</small></span></div>)}
+          {current.slice(0,8).map((material) => <div key={material.id} className="mt-2 flex items-center justify-between rounded-xl bg-surface px-3 py-2 text-sm"><span><b>{material.name}</b><small className="block text-muted-foreground">{materialKindLabel(material.kind)} · {material.topic_ids.length} aihetta</small></span></div>)}
         </div>
       )}
     </section>
