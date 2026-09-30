@@ -78,6 +78,13 @@ const resultText: Record<PracticeAttempt["result"], string> = {
   not_yet: "Ei vielä",
 };
 
+const diagnosticLabel: Record<string,string> = {
+  missing_prerequisite: "Esitieto puuttuu",
+  new_material: "Uusi aihe",
+  already_mastered: "Vahva osaaminen",
+  needs_review: "Tarvitsee kertausta",
+};
+
 const typeLabel: Record<string, string> = {
   free_recall: "Vapaa palautus",
   short_answer: "Lyhyt vastaus",
@@ -730,7 +737,7 @@ export function PracticeView({
                     : model.level >= 4
                       ? "already_mastered"
                       : "needs_review";
-                return <div key={candidate.id} className="flex items-center justify-between rounded-xl bg-surface/70 p-3 text-sm"><span>{candidate.name}</span><code>{classification}</code></div>;
+                return <div key={candidate.id} className="flex items-center justify-between rounded-xl bg-surface/70 p-3 text-sm"><span>{candidate.name}</span><span className="text-xs font-medium text-muted-foreground">{diagnosticLabel[classification] ?? "Tarvitsee harjoittelua"}</span></div>;
               })}
             </div>
             <button className={secondary+" mt-4"} onClick={() => { setDiagnosticMode(false); setAttemptIndex(0); }}>Palaa normaaliin harjoitteluun</button>
@@ -748,7 +755,7 @@ export function PracticeView({
                 {activePath?.stage === "pretest" && <span>· ei vaikuta osaamistasoon</span>}
               </div>
               <p className="mt-2 text-xs text-muted-foreground">
-                {courses.find((item) => item.id === selection.topic.course_id)?.code} · {confusionSet ? "Erottelu: " + confusionSet.labels.join(" vs. ") : selection.topic.name}
+                {courses.find((item) => item.id === selection.topic.course_id)?.code} · {confusionSet ? "Erottele: " + confusionSet.labels.join(" ja ") : selection.topic.name}
               </p>
               <p className="mt-2 text-lg font-semibold">{selection.question.prompt}</p>
               <p className="mt-2 text-xs text-muted-foreground">
@@ -872,7 +879,7 @@ export function PracticeView({
             <div className="rounded-2xl border border-border bg-muted/40 p-4">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
-                  <p className="font-medium">Concept / Rubric Evaluator</p>
+                  <p className="font-medium">Vastauksen oma-arviointi</p>
                   <p className="mt-1 text-xs text-muted-foreground">
                     Arvio on ohjeellinen eikä muuta osaamistasoa automaattisesti. Se ei näytä mallivastausta tai paljasta puuttuvia käsitteitä ennen omaa yritystä.
                   </p>
@@ -900,7 +907,7 @@ export function PracticeView({
                         Ehdotus: {resultText[rubricEvaluation.suggestedResult]}
                       </b>
                       <small className="ml-2 text-muted-foreground">
-                        · rubriikkipisteet {rubricEvaluation.score}/100
+                        · arvio {rubricEvaluation.score}/100
                         · arvion varmuus {confidenceLabel(rubricEvaluation.confidence)}
                       </small>
                     </span>
@@ -925,7 +932,7 @@ export function PracticeView({
                     ))}
                   </div>
                   <p className="mt-3 text-xs text-muted-foreground">
-                    Koska sait arviointipalautetta ennen tallennusta, tämä yritys merkitään avustetuksi evidenceksi ja myöhemmin tarvitaan itsenäinen varmistus.
+                    Koska sait arviointipalautetta ennen tallennusta, tämä yritys merkitään avustetuksi näytöksi ja myöhemmin tarvitaan itsenäinen varmistus.
                   </p>
                 </div>
               )}
