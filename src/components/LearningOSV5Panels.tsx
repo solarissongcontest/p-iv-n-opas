@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { toast } from "sonner";
 import type { CapacityProfile, Course, PracticeAttempt, Topic } from "@/lib/domain";
 import {
@@ -8,6 +8,8 @@ import {
   usePreferences,
   useUpdatePreferences,
   useUpsertImplementationIntention,
+  useUpsertReminderAdaptation,
+  useUpsertSubjectTaskParameters,
 } from "@/lib/data";
 import {
   delayedCalibrationV5,
@@ -64,10 +66,56 @@ export function V5LearningHealthPanel({courses,attempts}:{courses:Course[];topic
   const preferences=usePreferences();
   const saveIntention=useUpsertImplementationIntention();
   const updatePreferences=useUpdatePreferences();
+  const saveReminder=useUpsertReminderAdaptation();
+  const saveSubjectParameters=useUpsertSubjectTaskParameters();
+  const lastReminderSignature=useRef("");
+  const lastProfileSignature=useRef("");
   const calibrationState=delayedCalibrationV5(calibration.data??[]);
   const frictionState=frictionInsightV5(friction.data??[]);
   const reminder=reminderTaperV5(friction.data??[]);
   const profiles=useMemo(()=>subjectTaskProfilesV5(attempts,id=>courses.find(c=>c.id===id)?.subject??"Muu"),[attempts,courses]);
+
+  useEffect(()=>{
+    if(!(preferences.data?.reminder_taper_enabled??true)||reminder.sampleSize<5)return;
+    const recommended_level =
+      reminder.mode==="minimal" ? "none" as const :
+      reminder.mode==="taper" ? "light" as const :
+      "normal" as const;
+    const signature=[recommended_level,reminder.sampleSize,reminder.selfStartRate??"null"].join(":");
+    if(lastReminderSignature.current===signature)return;
+    lastReminderSignature.current=signature;
+    saveReminder.mutate({
+      recommended_level,
+      independent_start_rate:reminder.selfStartRate,
+      sample_size:reminder.sampleSize,
+      metadata:{mode:reminder.mode,recommendation:reminder.recommendation,source:"learning-health-v5"},
+    });
+  },[preferences.data?.reminder_taper_enabled,reminder.mode,reminder.sampleSize,reminder.selfStartRate,reminder.recommendation]);
+
+  useEffect(()=>{
+    const rows=profiles.slice(0,30).map(profile=>{
+      const evidence=attempts.filter(attempt=>{
+        const subject=courses.find(course=>course.id===attempt.course_id)?.subject??"Muu";
+        return subject===profile.subject&&attempt.attempt_type===profile.attemptType&&!attempt.is_pretest;
+      });
+      const delays=evidence.map(attempt=>Number(attempt.delay_days??0)).filter(days=>days>0);
+      return {
+        subject:profile.subject,
+        attempt_type:profile.attemptType,
+        observations:profile.observations,
+        success_rate:profile.successRate,
+        mean_delay_days:delays.length?delays.reduce((sum,value)=>sum+value,0)/delays.length:0,
+        preferred_spacing_days:Math.max(1,Math.min(60,Math.round(4*profile.spacingMultiplier))),
+        confidence:profile.reliability.label,
+        active:profile.observations>=8&&profile.reliability.label!=="low",
+      };
+    });
+    if(!rows.length)return;
+    const signature=JSON.stringify(rows);
+    if(lastProfileSignature.current===signature)return;
+    lastProfileSignature.current=signature;
+    saveSubjectParameters.mutate(rows);
+  },[profiles,attempts,courses]);
 
   async function accept(){
     if(!frictionState.suggestion)return;
