@@ -9,7 +9,7 @@ function base64ToUint8Array(value: string) {
 
 async function authToken() {
   const token = getDeviceAccessToken();
-  if (!token) throw new Error("Arthur-laitetunnistus puuttuu tai on vanhentunut.");
+  if (!token) throw new Error("Kirjautuminen puuttuu tai on vanhentunut.");
   return token;
 }
 
@@ -49,7 +49,7 @@ export async function enableBackgroundPush() {
   const keyResponse = await fetch("/api/push/public-key");
   const keyPayload = (await keyResponse.json()) as { publicKey?: string; error?: string };
   if (!keyResponse.ok || !keyPayload.publicKey) {
-    throw new Error(keyPayload.error ?? "Push-avainta ei saatu.");
+    throw new Error(keyPayload.error ?? "Taustailmoitusten palvelinavainta ei saatu.");
   }
 
   let subscription = await registration.pushManager.getSubscription();
@@ -70,7 +70,7 @@ export async function enableBackgroundPush() {
   });
   const payload = (await response.json().catch(() => ({}))) as { error?: string };
   if (!response.ok) {
-    throw new Error(payload.error ?? "Push-tilauksen tallennus epäonnistui.");
+    throw new Error(payload.error ?? "Taustailmoitustilauksen tallennus epäonnistui.");
   }
 
   return subscription;
@@ -92,7 +92,7 @@ export async function disableBackgroundPush() {
   });
   const payload = (await response.json().catch(() => ({}))) as { error?: string };
   if (!response.ok) {
-    throw new Error(payload.error ?? "Push-tilauksen poisto epäonnistui.");
+    throw new Error(payload.error ?? "Taustailmoitustilauksen poisto epäonnistui.");
   }
 
   if (subscription) await subscription.unsubscribe();
