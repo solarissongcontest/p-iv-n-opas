@@ -76,9 +76,9 @@ test("Learning OS v5 remains wired through engine, persistence and UI", () => {
   for (const token of ["instructionDecisionV5","feedbackPolicyV5","stopRuleV5","confusionSetsV5","transferStateV5","pretest"]) {
     assert.ok(practice.includes(token), "Missing v5 Practice integration: " + token);
   }
-  assert.ok(plannerPanels.includes("Retention Budget v5"));
-  assert.ok(plannerPanels.includes("What-if Planner"));
-  assert.ok(plannerPanels.includes("Reminder Tapering"));
+  assert.ok(plannerPanels.includes("Mukautuva kertausbudjetti"));
+  assert.ok(plannerPanels.includes("Vaihtoehtojen vertailu"));
+  assert.ok(plannerPanels.includes("Muistutusten vähentäminen"));
   assert.ok(examUi.includes("YO / Abitti 2 -simulaatio"));
   assert.ok(examUi.includes("SketchAnswerCanvas"));
   assert.ok(errorLab.includes("Contrastive Error Lab"));
