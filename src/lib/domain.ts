@@ -149,6 +149,9 @@ export type QuestionBankItem = {
   stimulus_package?: Record<string, unknown>;
   answer_mode?: "text" | "formula" | "diagram" | "graph" | "mixed";
   points?: number | null;
+  transfer_level?: number;
+  confusion_topic_ids?: string[];
+  pretest_eligible?: boolean;
   created_at: string;
   updated_at: string;
 };
