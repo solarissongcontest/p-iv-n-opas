@@ -22,9 +22,10 @@ export function frictionInsightV5(events: FrictionEventV5[]): FrictionInsightV5 
       summary: "Ohitetuista sessioista ei ole vielä friction-dataa.",
     };
   }
+  const frictionOnly = events.filter((event) => event.reason !== "started");
   const byReason = new Map<string, number>();
   const byWeekday = new Map<number, number>();
-  for (const event of events) {
+  for (const event of frictionOnly) {
     byReason.set(event.reason, (byReason.get(event.reason) ?? 0) + 1);
     byWeekday.set(weekday(event.date), (byWeekday.get(weekday(event.date)) ?? 0) + 1);
   }
