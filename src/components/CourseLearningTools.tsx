@@ -322,7 +322,7 @@ export function MaterialImporter({
                 <label key={link.topicId} className="grid min-h-14 grid-cols-[auto_1fr_auto] items-start gap-3 rounded-xl bg-surface p-3">
                   <input className="mt-1 size-4 accent-primary" type="checkbox" checked={checked} onChange={() => setSelected((current) => checked ? current.filter((id) => id !== link.topicId) : [...current, link.topicId])} />
                   <span><b>{topic.name}</b><small className="mt-1 block text-muted-foreground">{link.reason}{link.pageHint ? " · " + link.pageHint : ""}</small></span>
-                  <span className="text-xs font-semibold">{Math.round(link.confidence * 100)} %</span>
+                  <span className="text-right text-xs font-semibold"><span className="block text-muted-foreground">varmuus</span>{Math.round(link.confidence * 100)} %</span>
                 </label>
               );
             })}
