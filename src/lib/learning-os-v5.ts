@@ -851,7 +851,7 @@ export function subjectTaskProfilesV5(
 ):SubjectTaskProfile[]{
   const courseMap=new Map(courses.map(course=>[course.id,course]));
   const groups=new Map<string,PracticeAttempt[]>();
-  for(const row of attempts){
+  for(const row of attempts.filter((attempt)=>!attempt.is_pretest)){
     const subject=courseMap.get(row.course_id)?.subject??courseMap.get(row.course_id)?.code??"other";
     const key=`${subject}:${row.attempt_type}`;
     groups.set(key,[...(groups.get(key)??[]),row]);
@@ -883,7 +883,7 @@ function actionUtility(
   const examDays=daysToExam(course,now);
   const examUtility=examDays <= 3 ? 1 : examDays <= 7 ? 0.9 : examDays <= 14 ? 0.72 : examDays <= 30 ? 0.48 : 0.2;
   const retentionBenefit=clamp(model.forgettingRisk*.72+(1-model.dimensions.retention.score/100)*.28);
-  const topicAttempts=attempts.filter(a=>a.topic_id===action.topic?.id);
+  const topicAttempts=attempts.filter(a=>a.topic_id===action.topic?.id&&!a.is_pretest);
   const recentTimed=topicAttempts.filter(a=>typeof a.response_time_ms==="number").slice(-4);
   const fatigueCost=recentTimed.length>=3&&recentTimed.at(-1)!.response_time_ms!>(recentTimed[0]!.response_time_ms??0)*1.3?.55:.12;
   const confidence=recommendationConfidenceV5(action.topic!,attempts);
@@ -954,5 +954,58 @@ export function learningPolicyV5(input:{
     note:primary
       ? "Valinta optimoi oppimishyödyn, säilymisen, koehyödyn, kuormituksen ja evidenssin varmuuden yhdessä."
       : "Tänään ei ole riittävästi hyödyllistä tekemistä lisättäväksi vain kalenterin täytteeksi.",
+  };
+}
+
+
+export function adaptiveDayPlanV5(input:{
+  courses:Course[];
+  topics:Topic[];
+  plan:PlanItem[];
+  attempts:PracticeAttempt[];
+  mistakes:Mistake[];
+  capacity:CapacityProfile;
+  dependencies?:TopicDependencyLike[];
+  now?:string;
+}){
+  const now=input.now??today();
+  const policy=learningPolicyV5({...input,now});
+  const weekday=new Date(now+"T12:00:00").getDay();
+  const capacity=input.capacity.busyDates.includes(now)
+    ? Math.max(10,Math.min(20,input.capacity.weekdayMinutes))
+    : weekday===0||weekday===6
+      ? input.capacity.weekendMinutes
+      : input.capacity.weekdayMinutes;
+  const minimumBudget=Math.min(capacity,Math.max(10,policy.retentionBudget.minimumMinutes||Math.round(capacity*.38)));
+  const recommendedBudget=Math.min(capacity,Math.max(minimumBudget,policy.retentionBudget.recommendedMinutes||Math.round(capacity*.68)));
+  const select=(budget:number,maxItems:number)=>{
+    const selected:LearningActionV5[]=[];
+    let used=0;
+    for(const action of policy.actions){
+      if(selected.length>=maxItems||used>=budget)break;
+      if(action.topic&&policy.stopDecisions[action.topic.id]?.stop&&!action.planItem)continue;
+      const remaining=budget-used;
+      if(remaining<5)break;
+      const actionMinutes=Math.max(5,Math.min(action.minutes,remaining));
+      selected.push({...action,minutes:actionMinutes});
+      used+=actionMinutes;
+    }
+    return selected;
+  };
+  const minimum=select(minimumBudget,2);
+  const recommended=select(recommendedBudget,3);
+  const extra=select(capacity,5);
+  const sum=(rows:LearningActionV5[])=>rows.reduce((total,row)=>total+row.minutes,0);
+  const nextUnused=policy.actions.find(action=>!recommended.some(row=>row.id===action.id));
+  return{
+    minimum,recommended,extra,
+    minimumMinutes:sum(minimum),
+    recommendedMinutes:sum(recommended),
+    extraMinutes:sum(extra),
+    capacity,
+    stoppedForLowMarginalGain:!nextUnused||nextUnused.policyScore<.24,
+    retentionBudget:policy.retentionBudget,
+    stopDecisions:policy.stopDecisions,
+    policyNote:policy.note,
   };
 }
