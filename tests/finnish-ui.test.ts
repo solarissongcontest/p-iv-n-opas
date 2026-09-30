@@ -107,6 +107,7 @@ test("user-facing UI does not regress to known English product jargon", () => {
     "Kaikkea ei voitu synkata vielä",
     "Synkattiin ",
     "Try again",
+    "Seuraavan viikon fokus",
     '<html lang="en">',
   ];
   for (const phrase of forbidden) {
