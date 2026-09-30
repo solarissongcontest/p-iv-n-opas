@@ -352,7 +352,7 @@ test("interactive What-if planner supports free day, exam-date change and weekda
     courses:[course],topics:[t],attempts:[],
     scenarios:[{id:"free-wed",label:"Vapaa keskiviikko",dailyMinutes:40,skipWeekdays:[3]}],
   })[0]!;
-  assert.equal(result.id,"free-wed");
+  assert.equal(result.scenario.id,"free-wed");
   assert.ok(result.weeklyMinutes>=0);
 });
 
