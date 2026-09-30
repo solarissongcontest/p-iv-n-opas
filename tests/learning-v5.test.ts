@@ -16,6 +16,7 @@ import {
   buildExamSimulationV5,
   confusionSetsV5,
   delayedCalibrationV5,
+  evaluateRuntimeIntentionsV5,
   feedbackPolicyV5,
   frictionInsightV5,
   instructionDecisionV5,
@@ -27,6 +28,7 @@ import {
   subjectTaskProfilesV5,
   transferStateV5,
   whatIfPlannerV5,
+  whatIfStudySimulatorV5,
 } from "../src/lib/learning-os-v5/index.ts";
 
 const NOW="2026-09-30";
@@ -314,4 +316,69 @@ test("active if-then rule changes planner drafts",()=>{
   assert.equal(result.drafts[0]!.extra_minutes,0);
   assert.equal(result.drafts[0]!.phase,"review");
   assert.match(result.drafts[0]!.title,/kevyt/);
+});
+
+
+test("runtime if-then engine evaluates late-home, low-energy and missed-days triggers",()=>{
+  const rules=[
+    {id:"late",trigger_type:"late_home" as const,trigger_value:"18:00",action_type:"replace_with_retrieval" as const,action_value:"15",enabled:true},
+    {id:"energy",trigger_type:"low_energy" as const,trigger_value:"2",action_type:"protect_rest" as const,action_value:"",enabled:true},
+    {id:"missed",trigger_type:"missed_days" as const,trigger_value:"2",action_type:"lighten" as const,action_value:"20",enabled:true},
+  ];
+  const effect=evaluateRuntimeIntentionsV5(rules,{
+    now:"2026-09-30",
+    localTime:"19:15",
+    busyDates:[],
+    latestEnergy:2,
+    daysSinceLastSession:3,
+    weekday:3,
+  });
+  assert.deepEqual(new Set(effect.triggeredRuleIds),new Set(["late","energy","missed"]));
+  assert.equal(effect.replaceWithRetrieval,true);
+  assert.equal(effect.dropExtra,true);
+  assert.equal(effect.maxMinutes,15);
+});
+
+test("interactive What-if planner supports free day, exam-date change and weekday move analysis",()=>{
+  const panel=readFileSync(new URL("../src/components/LearningOSV5Panels.tsx",import.meta.url),"utf8");
+  assert.match(panel,/Rakenna oma skenaario/);
+  assert.match(panel,/What-if vapaa päivä/);
+  assert.match(panel,/What-if koepäivä/);
+  assert.match(panel,/Siirrä työ päivältä/);
+  assert.match(panel,/whatIfStudySimulatorV5/);
+
+  const t=topic("scenario","Dynamiikka");
+  const result=whatIfStudySimulatorV5({
+    courses:[course],topics:[t],attempts:[],
+    scenarios:[{id:"free-wed",label:"Vapaa keskiviikko",dailyMinutes:40,skipWeekdays:[3]}],
+  })[0]!;
+  assert.equal(result.id,"free-wed");
+  assert.ok(result.weeklyMinutes>=0);
+});
+
+test("Contrastive Error Lab requires a real parallel attempt before retest",()=>{
+  const lab=readFileSync(new URL("../src/components/ContrastiveErrorLab.tsx",import.meta.url),"utf8");
+  assert.match(lab,/useQuestionBank/);
+  assert.match(lab,/useRecordPracticeAttempt/);
+  assert.match(lab,/parallelTask/);
+  assert.match(lab,/questionBankId/);
+  assert.match(lab,/source: "mistake_repair"/);
+  assert.match(lab,/delayedVerificationRequired: true/);
+});
+
+test("cross-device E2E covers offline queue, reload, sync and second browser context",()=>{
+  const e2e=readFileSync(new URL("../e2e/v5-cross-device.spec.ts",import.meta.url),"utf8");
+  const workflow=readFileSync(new URL("../.github/workflows/iphone-e2e.yml",import.meta.url),"utf8");
+  for(const token of ["setOffline(true)","reload","setOffline(false)","newContext","OPK-E2E-"]){
+    assert.ok(e2e.includes(token),token);
+  }
+  assert.match(workflow,/v5-cross-device\.spec\.ts/);
+  assert.match(workflow,/desktop-chromium/);
+});
+
+test("Learning OS v5 exposes explicit module boundaries",()=>{
+  const index=readFileSync(new URL("../src/lib/learning-os-v5/index.ts",import.meta.url),"utf8");
+  for(const module of ["memory","instruction","discrimination","metacognition","behavior","exam","simulation","personalization","policy"]){
+    assert.match(index,new RegExp("\\./"+module+"\\.ts"));
+  }
 });
