@@ -3,7 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 
 function env(name: string) {
   const value = process.env[name];
-  if (!value) throw new Error(`Missing server environment variable: ${name}`);
+  if (!value) throw new Error("Palvelimen taustailmoitusasetus puuttuu.");
   return value;
 }
 
@@ -48,7 +48,7 @@ export const Route = createFileRoute("/api/push/unsubscribe")({
         } catch (error) {
           console.error("[push/unsubscribe]", error);
           return Response.json(
-            { error: error instanceof Error ? error.message : "Push-tilauksen poisto epäonnistui." },
+            { error: error instanceof Error ? error.message : "Taustailmoitustilauksen poisto epäonnistui." },
             { status: 500 },
           );
         }

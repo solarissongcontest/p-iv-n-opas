@@ -20,6 +20,7 @@ import {
   whatIfPlannerV5,
   whatIfStudySimulatorV5,
 } from "@/lib/learning-os-v5";
+import { attemptTypeLabel, confidenceLabel, marginalValueLabel, riskLabel } from "@/lib/ui-fi";
 
 const button="inline-flex min-h-11 items-center justify-center rounded-xl bg-primary px-4 text-sm font-medium text-primary-foreground disabled:opacity-50";
 const secondary="inline-flex min-h-11 items-center justify-center rounded-xl border border-border bg-surface px-4 text-sm disabled:opacity-50";
@@ -68,7 +69,7 @@ export function V5PlannerPanel({
     attempts,
     scenarios:[{
       id:"custom",
-      label:"Oma skenaario",
+      label:"Oma vaihtoehto",
       dailyMinutes,
       skipWeekdays:dayOff===null?[]:[dayOff],
     }],
@@ -93,24 +94,24 @@ export function V5PlannerPanel({
   },[plannedItems,moveItemId,moveTargetDate,capacity]);
 
   return <div className="grid gap-4 lg:grid-cols-2">
-    <Panel title="Retention Budget v5">
+    <Panel title="Mukautuva kertausbudjetti">
       <div className="grid grid-cols-3 gap-2">
-        {[["Minimi",budget.minimumMinutes],["Suositus",budget.recommendedMinutes],["Extra",budget.extraMinutes]].map(([label,value])=><div key={String(label)} className="rounded-xl bg-muted/50 p-3"><small className="text-muted-foreground">{label}</small><p className="mt-1 text-xl font-semibold">{value} min</p></div>)}
+        {[["Minimi",budget.minimumMinutes],["Suositus",budget.recommendedMinutes],["Lisä",budget.extraMinutes]].map(([label,value])=><div key={String(label)} className="rounded-xl bg-muted/50 p-3"><small className="text-muted-foreground">{label}</small><p className="mt-1 text-xl font-semibold">{value} min</p></div>)}
       </div>
       <p className="mt-3 text-sm text-muted-foreground">Budjetti optimoi säilymistä suhteessa käytettävissä olevaan aikaan, ei ruutuajan määrää.</p>
       <div className="mt-4 space-y-2">{budget.targets.filter(r=>r.recommendedMinutes>0).slice(0,6).map(row=><div key={row.topicId} className="rounded-xl border border-border p-3 text-sm">
         <div className="flex justify-between gap-3"><b>{names.get(row.topicId)??"Aihe"}</b><span>{row.recommendedMinutes} min</span></div>
-        <p className="mt-1 text-xs text-muted-foreground">säilyminen {pct(row.currentRetention)} → tavoite {pct(row.desiredRetention)} · varmuus {row.confidence.label}</p>
+        <p className="mt-1 text-xs text-muted-foreground">säilyminen {pct(row.currentRetention)} → tavoite {pct(row.desiredRetention)} · varmuus {confidenceLabel(row.confidence.label)}</p>
         <p className="mt-1 text-xs text-muted-foreground">{row.reason}</p>
       </div>)}</div>
-      <p className="mt-3 text-xs text-muted-foreground">Rajahyöty alkaa pienentyä noin {budget.marginalGainLowAfterMinutes} minuutin jälkeen. Extra ei muutu velaksi.</p>
+      <p className="mt-3 text-xs text-muted-foreground">Rajahyöty alkaa pienentyä noin {budget.marginalGainLowAfterMinutes} minuutin jälkeen. Lisäharjoittelu ei muutu velaksi.</p>
     </Panel>
 
-    <Panel title="What-if Planner">
+    <Panel title="Vaihtoehtojen vertailu">
       <p className="mb-3 text-sm text-muted-foreground">Vertaa vaihtoehtoja ennen suunnitelman muuttamista. Tämä ei ole arvosanaennuste eikä muuta kalenteria itsestään.</p>
       <div className="space-y-2">{scenarios.map(s=><div key={s.id} className="rounded-xl border border-border p-3">
         <div className="flex justify-between gap-3"><b>{s.label}</b><span className="text-sm">{s.weeklyCapacity} min / vko</span></div>
-        <p className="mt-2 text-xs text-muted-foreground">retention-suoja {pct(s.protectedRetentionShare)} · backlog {s.projectedBacklogMinutes} min · ylikuormitus {s.overloadRisk} · rajahyöty {s.marginalValue}</p>
+        <p className="mt-2 text-xs text-muted-foreground">muistamisen suoja {pct(s.protectedRetentionShare)} · kertausjono {s.projectedBacklogMinutes} min · ylikuormitusriski {riskLabel(s.overloadRisk)} · rajahyöty {marginalValueLabel(s.marginalValue)}</p>
         <p className="mt-2 text-sm text-muted-foreground">{s.note}</p>
       </div>)}</div>
 
@@ -118,10 +119,10 @@ export function V5PlannerPanel({
         <p className="font-semibold">Rakenna oma skenaario</p>
         <div className="mt-3 grid gap-3 sm:grid-cols-2">
           <label className="text-sm">Minuuttia / päivä
-            <input aria-label="What-if minuuttia päivässä" type="number" min="10" max="180" step="5" value={dailyMinutes} onChange={e=>setDailyMinutes(Math.max(10,Math.min(180,Number(e.target.value)||40)))} className="mt-1 min-h-11 w-full rounded-xl border bg-surface px-3"/>
+            <input aria-label="Vaihtoehdon minuuttimäärä päivässä" type="number" min="10" max="180" step="5" value={dailyMinutes} onChange={e=>setDailyMinutes(Math.max(10,Math.min(180,Number(e.target.value)||40)))} className="mt-1 min-h-11 w-full rounded-xl border bg-surface px-3"/>
           </label>
           <label className="text-sm">Pidä päivä vapaana
-            <select aria-label="What-if vapaa päivä" value={dayOff??""} onChange={e=>setDayOff(e.target.value===""?null:Number(e.target.value))} className="mt-1 min-h-11 w-full rounded-xl border bg-surface px-3">
+            <select aria-label="Vaihtoehdon vapaapäivä" value={dayOff??""} onChange={e=>setDayOff(e.target.value===""?null:Number(e.target.value))} className="mt-1 min-h-11 w-full rounded-xl border bg-surface px-3">
               <option value="">Ei erillistä vapaapäivää</option>
               {weekdays.map(day=><option key={day.value} value={day.value}>{day.label}</option>)}
             </select>
@@ -132,7 +133,7 @@ export function V5PlannerPanel({
             </select>
           </label>
           <label className="text-sm">Uusi koepäivä
-            <input aria-label="What-if koepäivä" type="date" value={scenarioExamDate} onChange={e=>setScenarioExamDate(e.target.value)} className="mt-1 min-h-11 w-full rounded-xl border bg-surface px-3"/>
+            <input aria-label="Vaihtoehdon koepäivä" type="date" value={scenarioExamDate} onChange={e=>setScenarioExamDate(e.target.value)} className="mt-1 min-h-11 w-full rounded-xl border bg-surface px-3"/>
           </label>
           <label className="text-sm">Siirrä tämä suunniteltu työ
             <select aria-label="Siirrä tämä työ" value={moveItemId} onChange={e=>{const id=e.target.value;setMoveItemId(id);const item=plannedItems.find(row=>row.id===id);setMoveTargetDate(item?.date??"");}} className="mt-1 min-h-11 w-full rounded-xl border bg-surface px-3">
@@ -154,7 +155,7 @@ export function V5PlannerPanel({
           <b>Työn siirron kuormitus</b>
           <p className="mt-1 text-muted-foreground">{moveImpact.item.title||"Valittu tehtävä"} · {moveImpact.item.target_minutes} min siirtyisi päivältä {moveImpact.item.date} päivälle {moveTargetDate}.</p>
           <p className="mt-1 text-muted-foreground">Kohdepäivän kuorma {moveImpact.targetBefore} → {moveImpact.targetAfter} min, kapasiteetti noin {moveImpact.targetCapacity} min.</p>
-          <p className="mt-1">Ylikuormitusriski: <b>{moveImpact.risk}</b>.</p>
+          <p className="mt-1">Ylikuormitusriski: <b>{riskLabel(moveImpact.risk)}</b>.</p>
         </div>}
       </div>
     </Panel>
@@ -230,31 +231,31 @@ export function V5LearningHealthPanel({courses,attempts}:{courses:Course[];topic
     );
     try{
       await saveIntention.mutateAsync({...suggestion,...(existing?.id?{id:existing.id}:{}),enabled:true});
-      toast.success(existing?"If-then-sääntö aktivoitiin uudelleen.":"If-then-sääntö otettiin käyttöön.");
+      toast.success(existing?"Jos–niin-sääntö aktivoitiin uudelleen.":"Jos–niin-sääntö otettiin käyttöön.");
     }catch{toast.error("Sääntöä ei voitu tallentaa.");}
   }
 
   return <div className="space-y-4">
     <div className="grid gap-4 lg:grid-cols-3">
-      <Panel title="Delayed Calibration">
+      <Panel title="Viivästetty varmuusarvio">
         <p className="text-xl font-semibold">{calibrationState.status==="well_calibrated"?"Hyvin kalibroitu":calibrationState.status==="overconfident"?"Liikaa varmuutta":calibrationState.status==="underconfident"?"Liikaa epävarmuutta":"Kerätään näyttöä"}</p>
         <p className="mt-2 text-sm text-muted-foreground">{calibrationState.recommendation}</p>
-        <p className="mt-3 text-xs text-muted-foreground">{calibrationState.observations} havaintoa{calibrationState.delayedAccuracy==null?"":" · viivekalibrointi "+pct(calibrationState.delayedAccuracy)}</p>
+        <p className="mt-3 text-xs text-muted-foreground">{calibrationState.observations} havaintoa{calibrationState.delayedAccuracy==null?"":" · myöhempien arvioiden osumatarkkuus "+pct(calibrationState.delayedAccuracy)}</p>
       </Panel>
-      <Panel title="Friction learning">
+      <Panel title="Opiskelun esteiden tunnistus">
         <p className="text-lg font-semibold">{frictionState.summary}</p>
-        {frictionState.suggestion?<><p className="mt-2 text-sm text-muted-foreground">{frictionState.suggestion.reason}</p><button className={button+" mt-4"} disabled={saveIntention.isPending} onClick={()=>void accept()}>Käytä ehdotettua if-then-sääntöä</button></>:<p className="mt-2 text-sm text-muted-foreground">Järjestelmä ei muuta suunnitelmaa yhden huonon päivän perusteella.</p>}
-        {(intentions.data??[]).filter(x=>x.enabled).length>0&&<p className="mt-3 text-xs text-muted-foreground">{(intentions.data??[]).filter(x=>x.enabled).length} aktiivista if-then-sääntöä.</p>}
+        {frictionState.suggestion?<><p className="mt-2 text-sm text-muted-foreground">{frictionState.suggestion.reason}</p><button className={button+" mt-4"} disabled={saveIntention.isPending} onClick={()=>void accept()}>Käytä ehdotettua jos–niin-sääntöä</button></>:<p className="mt-2 text-sm text-muted-foreground">Järjestelmä ei muuta suunnitelmaa yhden huonon päivän perusteella.</p>}
+        {(intentions.data??[]).filter(x=>x.enabled).length>0&&<p className="mt-3 text-xs text-muted-foreground">{(intentions.data??[]).filter(x=>x.enabled).length} aktiivista jos–niin-sääntöä.</p>}
       </Panel>
-      <Panel title="Reminder Tapering" action={<button className={secondary+" !min-h-9 !px-3"} onClick={()=>void updatePreferences.mutateAsync({reminder_taper_enabled:!(preferences.data?.reminder_taper_enabled??true)})}>{(preferences.data?.reminder_taper_enabled??true)?"Päällä":"Pois"}</button>}>
+      <Panel title="Muistutusten vähentäminen" action={<button className={secondary+" !min-h-9 !px-3"} onClick={()=>void updatePreferences.mutateAsync({reminder_taper_enabled:!(preferences.data?.reminder_taper_enabled??true)})}>{(preferences.data?.reminder_taper_enabled??true)?"Päällä":"Pois"}</button>}>
         <p className="text-lg font-semibold">{reminder.mode==="minimal"?"Vain kriittiset":reminder.mode==="taper"?"Vähennä asteittain":reminder.mode==="restore"?"Palauta yksi muistutus":"Nykyinen taso"}</p>
         <p className="mt-2 text-sm text-muted-foreground">{reminder.recommendation}</p>
         <p className="mt-3 text-xs text-muted-foreground">{reminder.sampleSize} aloitushavaintoa{reminder.selfStartRate==null?"":" · itsenäisiä "+pct(reminder.selfStartRate)}</p>
       </Panel>
     </div>
-    <Panel title="Subject × task -personalisointi">
-      <p className="mb-3 text-sm text-muted-foreground">Parametreja personoidaan vasta, kun näyttöä on tarpeeksi. Pienestä datasta ei tehdä muka-tarkkaa profiilia.</p>
-      <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">{profiles.slice(0,9).map(p=><div key={p.key} className="rounded-xl bg-muted/50 p-3 text-sm"><b>{p.subject} · {p.attemptType.replaceAll("_"," ")}</b><p className="mt-1 text-xs text-muted-foreground">{p.observations} havaintoa · onnistuminen {pct(p.successRate)}</p><p className="mt-1 text-xs text-muted-foreground">spacing × {p.spacingMultiplier.toFixed(2)} · evidenssi {p.reliability.label}</p></div>)}{!profiles.length&&<p className="text-sm text-muted-foreground">Dataa ei ole vielä tarpeeksi.</p>}</div>
+    <Panel title="Oppiaine- ja tehtävätyyppikohtainen mukautus">
+      <p className="mb-3 text-sm text-muted-foreground">Mukautuksia tehdään vasta, kun havaintoja on tarpeeksi. Vähäisestä havaintomäärästä ei muodosteta näennäisen tarkkaa profiilia.</p>
+      <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">{profiles.slice(0,9).map(p=><div key={p.key} className="rounded-xl bg-muted/50 p-3 text-sm"><b>{p.subject} · {attemptTypeLabel(p.attemptType)}</b><p className="mt-1 text-xs text-muted-foreground">{p.observations} havaintoa · onnistuminen {pct(p.successRate)}</p><p className="mt-1 text-xs text-muted-foreground">kertausvälin mukautus × {p.spacingMultiplier.toFixed(2)} · näytön varmuus {confidenceLabel(p.reliability.label)}</p></div>)}{!profiles.length&&<p className="text-sm text-muted-foreground">Havaintoja ei ole vielä tarpeeksi.</p>}</div>
     </Panel>
   </div>;
 }

@@ -3,7 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 
 function env(name: string) {
   const value = process.env[name];
-  if (!value) throw new Error(`Missing server environment variable: ${name}`);
+  if (!value) throw new Error("Palvelimen taustailmoitusasetus puuttuu.");
   return value;
 }
 
@@ -29,7 +29,7 @@ export const Route = createFileRoute("/api/push/subscribe")({
             !subscription.keys?.p256dh ||
             !subscription.keys?.auth
           ) {
-            return Response.json({ error: "Virheellinen push-tilaus." }, { status: 400 });
+            return Response.json({ error: "Virheellinen taustailmoitustilaus." }, { status: 400 });
           }
 
           const admin = createClient(url, secret, {
@@ -60,7 +60,7 @@ export const Route = createFileRoute("/api/push/subscribe")({
         } catch (error) {
           console.error("[push/subscribe]", error);
           return Response.json(
-            { error: error instanceof Error ? error.message : "Push-tilauksen tallennus epäonnistui." },
+            { error: error instanceof Error ? error.message : "Taustailmoitustilauksen tallennus epäonnistui." },
             { status: 500 },
           );
         }

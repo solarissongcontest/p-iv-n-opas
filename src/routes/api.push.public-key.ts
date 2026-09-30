@@ -10,7 +10,7 @@ export const Route = createFileRoute("/api/push/public-key")({
         } catch (error) {
           console.error("[push/public-key]", error);
           return Response.json(
-            { error: error instanceof Error ? error.message : "Push-avain puuttuu." },
+            { error: error instanceof Error ? error.message : "Taustailmoitusten palvelinavain puuttuu." },
             { status: 500 },
           );
         }

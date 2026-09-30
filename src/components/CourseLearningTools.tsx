@@ -12,6 +12,7 @@ import {
   type TopicDependency,
 } from "@/lib/data";
 import { getDeviceAccessToken } from "@/lib/deviceSession";
+import { relationLabel } from "@/lib/ui-fi";
 
 const secondary =
   "inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-border bg-surface px-4 text-sm hover:bg-muted disabled:opacity-50";
@@ -72,19 +73,19 @@ export function KnowledgeGraphEditor({
         }
       }
       setDependsOn("");
-      toast.success("Knowledge Graph päivitetty.");
+      toast.success("Aiheiden yhteydet päivitetty.");
     } catch {
       toast.error("Riippuvuutta ei voitu tallentaa.");
     }
   }
 
   return (
-    <section className="rounded-2xl border border-border bg-muted/30 p-4">
+    <section className="min-w-0 max-w-full overflow-hidden rounded-2xl border border-border bg-muted/30 p-4">
       <div className="mb-3 flex items-start justify-between gap-3">
         <div>
-          <p className="font-semibold">Knowledge Graph</p>
+          <p className="font-semibold">Aiheiden yhteydet</p>
           <p className="mt-1 text-xs text-muted-foreground">
-            Määritä esitiedot, jatkumot ja helposti sekoittuvat aiheet. Planner käyttää niitä juurisyyn löytämiseen.
+            Määritä aiheiden esitiedot, jatkumot ja helposti sekoittuvat käsitteet. Suunnittelutoiminto käyttää näitä yhteyksiä harjoittelun kohdentamiseen.
           </p>
         </div>
         <Link2 size={18} className="text-muted-foreground" />
@@ -97,20 +98,20 @@ export function KnowledgeGraphEditor({
         </select>
       </label>
 
-      <div className="mt-3 grid gap-2 md:grid-cols-[1fr_180px_auto]">
-        <select className="min-h-11 rounded-xl border bg-surface px-3" value={dependsOn} onChange={(event) => setDependsOn(event.target.value)}>
+      <div className="mt-3 grid min-w-0 max-w-full gap-2 md:grid-cols-[minmax(0,1fr)_180px_auto]">
+        <select className="min-h-11 min-w-0 w-full max-w-full rounded-xl border bg-surface px-3" value={dependsOn} onChange={(event) => setDependsOn(event.target.value)}>
           <option value="">Valitse liittyvä aihe…</option>
           {candidates.map((topic) => {
             const parent = courses.find((item) => item.id === topic.course_id);
             return <option key={topic.id} value={topic.id}>{parent?.code ?? "?"} · {topic.name}</option>;
           })}
         </select>
-        <select className="min-h-11 rounded-xl border bg-surface px-3" value={relation} onChange={(event) => setRelation(event.target.value as TopicDependency["relation_type"])}>
-          <option value="prerequisite">prerequisite</option>
-          <option value="depends_on">depends_on</option>
-          <option value="builds_on">builds_on</option>
-          <option value="related_to">related_to</option>
-          <option value="commonly_confused_with">commonly_confused_with</option>
+        <select className="min-h-11 min-w-0 w-full max-w-full rounded-xl border bg-surface px-3" value={relation} onChange={(event) => setRelation(event.target.value as TopicDependency["relation_type"])}>
+          <option value="prerequisite">Esitieto</option>
+          <option value="depends_on">Riippuu aiheesta</option>
+          <option value="builds_on">Rakentuu aiheen varaan</option>
+          <option value="related_to">Liittyy aiheeseen</option>
+          <option value="commonly_confused_with">Sekoittuu helposti aiheeseen</option>
         </select>
         <button className={secondary} disabled={!dependsOn || upsert.isPending} onClick={() => void add()}><Plus size={16} />Lisää</button>
       </div>
@@ -120,14 +121,14 @@ export function KnowledgeGraphEditor({
           const target = topics.find((topic) => topic.id === row.depends_on_topic_id);
           const targetCourse = target ? courses.find((item) => item.id === target.course_id) : null;
           return (
-            <div key={row.id} className="flex min-h-12 items-center justify-between gap-3 rounded-xl bg-surface px-3 text-sm">
-              <span>
-                <b>{selectedTopic?.name}</b> <span className="text-muted-foreground">{row.relation_type}</span>{" "}
+            <div key={row.id} className="flex min-h-12 min-w-0 items-center justify-between gap-3 rounded-xl bg-surface px-3 text-sm">
+              <span className="min-w-0 break-words">
+                <b>{selectedTopic?.name}</b> <span className="text-muted-foreground">{relationLabel(row.relation_type)}</span>{" "}
                 <b>{targetCourse?.code} · {target?.name ?? "Poistettu aihe"}</b>
               </span>
               <button
                 aria-label="Poista riippuvuus"
-                className="grid size-10 place-items-center rounded-lg hover:bg-muted"
+                className="grid size-10 shrink-0 place-items-center rounded-lg hover:bg-muted"
                 onClick={() => void (async () => {
                   try {
                     await remove.mutateAsync(row.id);
@@ -153,7 +154,7 @@ export function KnowledgeGraphEditor({
               </button>
             </div>
           );
-        }) : <p className="text-sm text-muted-foreground">Tälle aiheelle ei ole vielä relation-tyyppisiä riippuvuuksia.</p>}
+        }) : <p className="text-sm text-muted-foreground">Tälle aiheelle ei ole vielä määritetty yhteyksiä.</p>}
       </div>
     </section>
   );
@@ -311,7 +312,7 @@ export function MaterialImporter({
 
       {links.length > 0 && (
         <div className="mt-4">
-          <p className="text-sm font-semibold">Ehdotetut linkit · {provider === "gemini" ? "Gemini" : "paikallinen fallback"}</p>
+          <p className="text-sm font-semibold">Ehdotetut linkitykset · {provider === "gemini" ? "Gemini" : "paikallinen varamenetelmä"}</p>
           <div className="mt-2 space-y-2">
             {links.map((link) => {
               const topic = courseTopics.find((candidate) => candidate.id === link.topicId);

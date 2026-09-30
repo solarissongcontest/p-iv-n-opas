@@ -836,15 +836,15 @@ export function generatePlan(opts: {
         phase = "review";
         kind = "review";
         topic = choosePriority(date);
-        title = topic ? `${topic.name} – retrieval ilman materiaalia` : "Retrieval: palauta koealue muistista";
+        title = topic ? `${topic.name} – muistista palautus ilman materiaalia` : "Palauta koealue muistista";
       } else if (cycle === 1) {
         phase = "application";
         topic = choosePriority(date);
-        title = topic ? `${topic.name} – mixed practice` : "Mixed practice: valitse oikea menetelmä";
+        title = topic ? `${topic.name} – vaihtelevat tehtävät` : "Vaihtelevat tehtävät: valitse oikea menetelmä";
       } else if (cycle === 2) {
         phase = "application";
         topic = choosePriority(date);
-        title = topic ? `${topic.name} – soveltava transfer-tehtävä` : "Transfer: sovella uuteen tilanteeseen";
+        title = topic ? `${topic.name} – soveltava tehtävä` : "Sovella osaamista uuteen tilanteeseen";
       } else if (cycle === 3) {
         phase = "practice";
         kind = "test";
@@ -854,7 +854,7 @@ export function generatePlan(opts: {
         phase = "review";
         kind = "review";
         topic = choosePriority(date);
-        title = topic ? `${topic.name} – korjaa virheet` : "Repair: korjaa harjoituskokeen virheet";
+        title = topic ? `${topic.name} – korjaa virheet` : "Korjaa harjoituskokeen virheet";
       } else {
         phase = "light";
         kind = "review";
@@ -1163,12 +1163,12 @@ export function examPhaseStatus(input: {
   const activeMistakes = input.mistakes.filter(m => m.status !== "mastered").length;
 
   return [
-    { key:"coverage", label:"Coverage", done: coverage >= 90, note:`${coverage}% koealueesta käsitelty` },
-    { key:"retrieval", label:"Retrieval", done: retrievalReady >= 0.7, note:`${Math.round(retrievalReady*100)}% aiheista palautettu muistista` },
-    { key:"mixed", label:"Mixed practice", done: mixedReady >= 0.65, note:"Menetelmän valinta mukana harjoittelussa" },
-    { key:"transfer", label:"Transfer", done: transferReady >= 0.5, note:`${Math.round(transferReady*100)}% aiheista koetason näyttöä` },
-    { key:"simulation", label:"Simulation", done: simulated, note: simulated ? "Koesimulaatio kirjattu" : "Koesimulaatio vielä tekemättä" },
-    { key:"repair", label:"Repair", done: simulated && activeMistakes === 0, note: activeMistakes ? `${activeMistakes} avointa virhettä` : "Ei avoimia virheitä" },
+    { key:"coverage", label:"Sisältökierros", done: coverage >= 90, note:`${coverage}% koealueesta käsitelty` },
+    { key:"retrieval", label:"Muistista palautus", done: retrievalReady >= 0.7, note:`${Math.round(retrievalReady*100)}% aiheista palautettu muistista` },
+    { key:"mixed", label:"Vaihtelevat tehtävät", done: mixedReady >= 0.65, note:"Menetelmän valinta mukana harjoittelussa" },
+    { key:"transfer", label:"Soveltaminen", done: transferReady >= 0.5, note:`${Math.round(transferReady*100)}% aiheista koetason näyttöä` },
+    { key:"simulation", label:"Koesimulaatio", done: simulated, note: simulated ? "Koesimulaatio kirjattu" : "Koesimulaatio vielä tekemättä" },
+    { key:"repair", label:"Virheiden korjaus", done: simulated && activeMistakes === 0, note: activeMistakes ? `${activeMistakes} avointa virhettä` : "Ei avoimia virheitä" },
   ];
 }
 

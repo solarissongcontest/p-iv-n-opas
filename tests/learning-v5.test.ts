@@ -343,8 +343,8 @@ test("runtime if-then engine evaluates late-home, low-energy and missed-days tri
 test("interactive What-if planner supports free day, exam-date change and weekday move analysis",()=>{
   const panel=readFileSync(new URL("../src/components/LearningOSV5Panels.tsx",import.meta.url),"utf8");
   assert.match(panel,/Rakenna oma skenaario/);
-  assert.match(panel,/What-if vapaa päivä/);
-  assert.match(panel,/What-if koepäivä/);
+  assert.match(panel,/Vaihtoehdon vapaapäivä/);
+  assert.match(panel,/Vaihtoehdon koepäivä/);
   assert.match(panel,/Siirrä tämä työ/);
   assert.match(panel,/whatIfStudySimulatorV5/);
 
@@ -448,7 +448,7 @@ test("custom friction if-then rules can trigger at runtime",()=>{
   assert.equal(effect.maxMinutes,10);
 });
 
-test("Practice Mode consumes feedback preference, pins retries and limits confusion practice to the pair",()=>{
+test("Harjoittelutila consumes feedback preference, pins retries and limits confusion practice to the pair",()=>{
   const source=readFileSync(new URL("../src/components/PracticeView.tsx",import.meta.url),"utf8");
   assert.match(source,/feedback_policy_enabled/);
   assert.match(source,/setPinnedSelection\(selection\)/);

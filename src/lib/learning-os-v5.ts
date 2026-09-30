@@ -395,8 +395,8 @@ export function recommendationConfidenceV5(
   const level = confidenceLevel(score);
   const text =
     level === "high" ? `Vahva suositus: ${evidence.evidenceCount} näyttöä ${evidence.distinctDays} päivältä.` :
-    level === "medium" ? `Kohtalainen varmuus: dataa on ${evidence.distinctDays} eri päivältä.` :
-    level === "low" ? "Alustava suositus: henkilökohtaista dataa on vielä vähän." :
+    level === "medium" ? `Kohtalainen varmuus: havaintoja on ${evidence.distinctDays} eri päivältä.` :
+    level === "low" ? "Alustava suositus: henkilökohtaisia havaintoja on vielä vähän." :
     "Tutkimuspohjainen oletus: henkilökohtaista näyttöä ei vielä juuri ole.";
   return { level, score, evidence, text };
 }
@@ -609,7 +609,7 @@ export function instructionPlanV5(
   };
   return {
     stage: "transfer",
-    label: "Transfer-tehtävä",
+    label: "Soveltava tehtävä",
     supportLevel: 0,
     hintLimit: 0,
     feedback: "end_of_item",
@@ -632,8 +632,8 @@ export function pretestPlanV5(
     masteryNeutral: true,
     feedbackTiming: "after_attempt",
     reason: enabled
-      ? "Preview Challenge kartoittaa ennakkotiedot ilman mastery-rangaistusta."
-      : "Aiheesta on jo riittävästi näyttöä, joten pretest ei enää lisää hyödyllistä tietoa.",
+      ? "Ennakkotesti kartoittaa ennakkotiedot ilman, että väärä vastaus heikentää osaamistasoa."
+      : "Aiheesta on jo riittävästi näyttöä, joten ennakkotesti ei enää lisää hyödyllistä tietoa.",
   };
 }
 
@@ -699,7 +699,7 @@ export function topicCalibrationInsightV5(
     status==="overconfident"?"Arvio omasta osaamisesta on toistuvasti korkeampi kuin myöhempi suoritus.":
     status==="underconfident"?"Suoritus on toistuvasti omaa ennakkoarviota parempi.":
     status==="well_calibrated"?"Ennakkoarviot ja myöhempi suoritus vastaavat melko hyvin toisiaan.":
-    "Tarvitaan vähintään muutama arvio ja yksi myöhempi retrieval ennen päätelmää.";
+    "Tarvitaan vähintään muutama arvio ja yksi myöhempi muistista palauttaminen ennen päätelmää.";
   const latest=[...rows].sort((a,b)=>b.date.localeCompare(a.date))[0];
   return {status,score,sampleSize:rows.length,delayedSampleSize,meanAbsoluteError,reason,nextCheckDue:latest?addDays(latest.date,2):addDays(now,1)};
 }
@@ -745,8 +745,8 @@ export function feedbackPolicyCoreV5(
   instruction?: InstructionPlanV5 | null,
 ): FeedbackPolicy {
   if(mode==="exam_simulation")return{mode,reveal:"after_section",allowHints:false,maxHints:0,showFullSolution:false,masteryMultiplier:1,reason:"Koetilassa palaute piilotetaan osion loppuun asti."};
-  if(mode==="pretest")return{mode,reveal:"after_item",allowHints:false,maxHints:0,showFullSolution:true,masteryMultiplier:0,reason:"Pretest aktivoi ennakkotietoa, mutta ei muuta masteryä."};
-  if(mode==="retrieval")return{mode,reveal:"after_retry",allowHints:true,maxHints:1,showFullSolution:true,masteryMultiplier:.9,reason:"Retrieval saa ensin uuden itsenäisen yrityksen ennen ratkaisua."};
+  if(mode==="pretest")return{mode,reveal:"after_item",allowHints:false,maxHints:0,showFullSolution:true,masteryMultiplier:0,reason:"Ennakkotesti aktivoi ennakkotietoa, mutta ei muuta osaamistasoa."};
+  if(mode==="retrieval")return{mode,reveal:"after_retry",allowHints:true,maxHints:1,showFullSolution:true,masteryMultiplier:.9,reason:"Muistista palauttamisessa tehdään ensin uusi itsenäinen yritys ennen ratkaisun näyttämistä."};
   if(mode==="error_repair")return{mode,reveal:"after_retry",allowHints:true,maxHints:2,showFullSolution:true,masteryMultiplier:.75,reason:"Virhe korjataan aktiivisesti ennen malliratkaisun näyttämistä."};
   if(mode==="worked_example")return{mode,reveal:"immediate",allowHints:true,maxHints:5,showFullSolution:true,masteryMultiplier:.28,reason:"Uudessa rakenteessa palaute on nopea, mutta näyttö painaa vähemmän."};
   return{
@@ -811,7 +811,7 @@ export function frictionInsightsV5(events:StudyFrictionEvent[]):FrictionInsight[
     const weekdays=[0,1,2,3,4,5,6].map(day=>({day,count:rows.filter(e=>e.weekday===day).length})).sort((a,b)=>b.count-a.count);
     const weekday=weekdays[0]&&weekdays[0].count>=2?weekdays[0].day:null;
     const recommendation=
-      reason==="too_tired"?"Lyhennä tämän päivän raskain sessio ja vaihda loppu kevyeen retrievaliin.":
+      reason==="too_tired"?"Lyhennä tämän päivän raskain opiskelukerta ja vaihda loppu kevyeen muistista palauttamiseen.":
       reason==="no_time"?"Suojaa päivän minimitaso ja siirrä vain raskas työ, älä kaikkea.":
       reason==="forgot"?"Käytä yhtä kevyttä aloitusmuistutusta, mutta vältä muistutusriippuvuutta.":
       reason==="too_large"?"Pilko tehtävä 10–20 minuutin ensimmäiseen askeleeseen.":
@@ -823,11 +823,11 @@ export function frictionInsightsV5(events:StudyFrictionEvent[]):FrictionInsight[
 }
 
 export function implementationIntentionV5(insight:FrictionInsight):ImplementationIntentionRule{
-  if(insight.reason==="too_tired")return{trigger:"low_energy",action:"switch_to_retrieval",parameter:15,label:"Jos energia on matala, vaihda raskas sessio 15 min retrievaliin."};
+  if(insight.reason==="too_tired")return{trigger:"low_energy",action:"switch_to_retrieval",parameter:15,label:"Jos energia on matala, vaihda raskas opiskelukerta 15 minuutin muistista palauttamiseen."};
   if(insight.reason==="no_time")return{trigger:"busy_day",action:"protect_minimum",parameter:15,label:"Jos päivä täyttyy, suojaa vähintään 15 min tärkeintä opiskelua."};
-  if(insight.reason==="too_large"||insight.reason==="unclear_start")return{trigger:"busy_day",action:"shorten_session",parameter:15,label:"Jos aloittaminen tökkii, tee vain ensimmäinen 15 min pala."};
+  if(insight.reason==="too_large"||insight.reason==="unclear_start")return{trigger:"busy_day",action:"shorten_session",parameter:15,label:"Jos aloittaminen on vaikeaa, tee vain ensimmäinen 15 minuutin osuus."};
   if(insight.reason==="plans_changed")return{trigger:"busy_day",action:"move_heavy_work",parameter:1,label:"Jos suunnitelmat muuttuvat, siirrä raskas työ seuraavaan kapasiteettipäivään."};
-  return{trigger:"two_missed_days",action:"drop_extra",parameter:2,label:"Jos kaksi päivää jää väliin, pudota Extra äläkä kasaa velkaa."};
+  return{trigger:"two_missed_days",action:"drop_extra",parameter:2,label:"Jos kaksi päivää jää väliin, jätä lisäharjoittelu pois äläkä kasaa velkaa."};
 }
 
 export function reminderTaperingV5(input:{
@@ -1061,7 +1061,7 @@ export function adaptiveDayPlanV5(input:{
       const runtimeLimit=runtimeIntentions.maxMinutes??action.minutes;
       const actionMinutes=Math.max(5,Math.min(action.minutes,runtimeLimit,remaining));
       const adapted=runtimeIntentions.replaceWithRetrieval
-        ? {...action,kind:"review" as const,title:action.title+" · kevyt retrieval",minutes:actionMinutes}
+        ? {...action,kind:"review" as const,title:action.title+" · kevyt muistista palautus",minutes:actionMinutes}
         : {...action,minutes:actionMinutes};
       selected.push(adapted);
       used+=actionMinutes;
@@ -1320,7 +1320,7 @@ export function retentionTargetV5(
     rows.length,
     Math.min(1, new Set(rows.map((row) => row.attempt_type)).size / 4),
     Math.min(1, new Set(rows.map((row) => row.date)).size / 4),
-    "viive- ja retrieval-näyttöä",
+    "viive- ja muistista palauttamisen näyttöä",
   );
   return {
     topicId: topic.id,
@@ -1393,8 +1393,8 @@ export function instructionDecisionV5(
   const pretest = pretestPlanV5(topic, attempts);
   if (pretest.enabled) return {
     stage: "pretest",
-    label: "Preview Challenge",
-    reason: "Ennen opetusta tarkistetaan mitä jo tiedät. Väärä vastaus ei laske masteryä.",
+    label: "Ennakkotesti",
+    reason: "Ennen opetusta tarkistetaan, mitä jo tiedät. Väärä vastaus ei laske osaamistasoa.",
     revealWorkedSolution: false,
     maxHints: 0,
     requiresIndependentFollowup: false,
@@ -1431,7 +1431,7 @@ export function feedbackPolicyV5(input: {
   };
   if (input.mode === "pretest") return {
     timing: "after_item", reveal: "principle", retriesBeforeReveal: 0,
-    explanation: "Preview Challenge on mastery-neutraali ja näyttää periaatteen vasta yrityksen jälkeen.",
+    explanation: "Ennakkotesti ei muuta osaamistasoa ja näyttää periaatteen vasta oman yrityksen jälkeen.",
   };
   if (input.mode === "error_repair") return {
     timing: "after_retry", reveal: "next_step", retriesBeforeReveal: 1,
@@ -1439,7 +1439,7 @@ export function feedbackPolicyV5(input: {
   };
   if (input.mode === "retrieval") return {
     timing: "after_retry", reveal: input.result === "incorrect" ? "principle" : "next_step", retriesBeforeReveal: 1,
-    explanation: "Retrievalissä tehdään yksi uusi yritys ennen täydempää palautetta.",
+    explanation: "Muistista palauttamisessa tehdään yksi uusi yritys ennen täydempää palautetta.",
   };
   return {
     timing: "immediate",
@@ -1449,7 +1449,7 @@ export function feedbackPolicyV5(input: {
   };
 }
 
-const transferCompatLabels = ["Recall","Selitys","Sama konteksti","Muunneltu konteksti","Eri esitystapa","Uusi tilanne","Koetason transfer"];
+const transferCompatLabels = ["Muistista palautus","Selitys","Sama konteksti","Muunneltu konteksti","Eri esitystapa","Uusi tilanne","Koetason soveltaminen"];
 
 export function transferStateV5(topic: Topic, attempts: PracticeAttempt[]): TransferStateV5 {
   const ladder = transferLadderV5(topic, attempts);
@@ -1464,7 +1464,7 @@ export function transferStateV5(topic: Topic, attempts: PracticeAttempt[]): Tran
   const level = mapping[ladder.highestReliableLevel];
   return {
     level,
-    label: transferCompatLabels[level] ?? "Recall",
+    label: transferCompatLabels[level] ?? "Muistista palautus",
     evidenceByLevel,
     nextLevel: level < 6 ? (level + 1) as TransferLevelV5 : null,
     strongEnoughForTopMastery: ladder.strongEligible,
@@ -1500,7 +1500,7 @@ export function confusionSetsV5(input: {
 export function delayedCalibrationV5(observations: CalibrationObservationV5[]): CalibrationStateV5 {
   if (!observations.length) return {
     status: "insufficient_evidence", accuracy: null, delayedAccuracy: null, observations: 0,
-    recommendation: "Kalibrointinäyttöä ei ole vielä. Arvioi myöhemmin ennen retrievaliä, kuinka varma olet.",
+    recommendation: "Kalibrointinäyttöä ei ole vielä. Arvioi myöhemmin ennen muistista palauttamista, kuinka varma olet.",
   };
   const score = (row: CalibrationObservationV5) => {
     const predicted = clamp((row.predicted_confidence - 1) / 2);
@@ -1520,8 +1520,8 @@ export function delayedCalibrationV5(observations: CalibrationObservationV5[]): 
   return {
     status, accuracy, delayedAccuracy, observations: observations.length,
     recommendation:
-      status === "overconfident" ? "Oma varmuus ylittää toistuvasti myöhemmän suorituksen. Lisää viive-retrievalia ennen aiheen nostamista vahvaksi." :
-      status === "underconfident" ? "Suoritus on omaa arviota parempi. Käytä toteutunutta näyttöä fiiliksen sijaan." :
+      status === "overconfident" ? "Oma varmuus ylittää toistuvasti myöhemmän suorituksen. Lisää viivästettyä muistista palauttamista ennen aiheen nostamista vahvaksi." :
+      status === "underconfident" ? "Suoritus on omaa arviota parempi. Käytä toteutunutta näyttöä oman tuntemuksen sijaan." :
       status === "well_calibrated" ? "Arvio omasta osaamisesta vastaa melko hyvin myöhempää suoritusta." :
       "Kerätään vielä muutama viivästetty arvio ennen johtopäätöstä.",
   };
@@ -1531,9 +1531,27 @@ function frictionWeekday(date: string) {
   return new Date(date + "T12:00:00Z").getUTCDay();
 }
 
+function frictionReasonLabelV5(reason: FrictionReasonV5) {
+  const labels: Record<FrictionReasonV5,string> = {
+    no_time:"ajan puute",
+    forgot:"unohtaminen",
+    too_tired:"väsymys",
+    too_hard:"tehtävän koettu vaikeus",
+    unclear_start:"epäselvä aloitus",
+    plans_changed:"muuttuneet suunnitelmat",
+    started:"opiskelun aloitus",
+    other:"muu syy",
+  };
+  return labels[reason];
+}
+
+function frictionWeekdayLabelV5(day:number){
+  return ["sunnuntaina","maanantaina","tiistaina","keskiviikkona","torstaina","perjantaina","lauantaina"][day]??"";
+}
+
 export function frictionInsightV5(events: FrictionEventV5[]): FrictionInsightV5 {
   const rows = events.filter((event)=>event.reason!=="started" && event.self_started!==true);
-  if (!rows.length) return { repeatedReason:null,repeatedWeekday:null,count:0,suggestion:null,summary:"Ohitetuista sessioista ei ole vielä friction-dataa." };
+  if (!rows.length) return { repeatedReason:null,repeatedWeekday:null,count:0,suggestion:null,summary:"Ohitetuista opiskelukerroista ei ole vielä riittävästi havaintoja." };
   const byReason=new Map<FrictionReasonV5,number>();
   for(const event of rows) byReason.set(event.reason,(byReason.get(event.reason)??0)+1);
   const reason=[...byReason.entries()].sort((a,b)=>b[1]-a[1])[0];
@@ -1544,13 +1562,13 @@ export function frictionInsightV5(events: FrictionEventV5[]): FrictionInsightV5 
   const day=[...byDay.entries()].sort((a,b)=>b[1]-a[1])[0];
   const repeatedWeekday=day&&day[1]>=2?day[0]:null;
   let suggestion:ImplementationIntentionV5|null=null;
-  if(repeatedReason==="too_tired") suggestion={trigger_type:"low_energy",trigger_value:"true",action_type:"replace_with_retrieval",action_value:"15",enabled:false,suggested:true,reason:"Väsymys toistuu: vaihda raskas työ 15 min retrievaliin."};
-  else if(repeatedReason==="no_time"||repeatedReason==="plans_changed") suggestion={trigger_type:"busy_day",trigger_value:repeatedWeekday===null?"any":String(repeatedWeekday),action_type:"lighten",action_value:"0.4",enabled:false,suggested:true,reason:"Aikapula toistuu: tee automaattisesti kevyt päivä."};
-  else if(repeatedReason==="too_hard"||repeatedReason==="unclear_start") suggestion={trigger_type:"custom",trigger_value:repeatedReason,action_type:"replace_with_retrieval",action_value:"worked_example_then_10m",enabled:false,suggested:true,reason:"Aloita yhdellä esimerkillä ja rajatulla 10 min tehtävällä."};
-  else if(repeatedReason==="forgot") suggestion={trigger_type:"custom",trigger_value:"forgot_twice",action_type:"replace_with_retrieval",action_value:"10",enabled:false,suggested:true,reason:"Unohtaminen toistuu: tee seuraavasta aloituksesta 10 min retrieval ja sido se tuttuun arjen rutiiniin."};
+  if(repeatedReason==="too_tired") suggestion={trigger_type:"low_energy",trigger_value:"true",action_type:"replace_with_retrieval",action_value:"15",enabled:false,suggested:true,reason:"Väsymys toistuu: vaihda raskas työ 15 minuutin muistista palauttamiseen."};
+  else if(repeatedReason==="no_time"||repeatedReason==="plans_changed") suggestion={trigger_type:"busy_day",trigger_value:repeatedWeekday===null?"any":String(repeatedWeekday),action_type:"lighten",action_value:"0.4",enabled:false,suggested:true,reason:"Aikapula toistuu: kevennä tällaiset päivät automaattisesti."};
+  else if(repeatedReason==="too_hard"||repeatedReason==="unclear_start") suggestion={trigger_type:"custom",trigger_value:repeatedReason,action_type:"replace_with_retrieval",action_value:"worked_example_then_10m",enabled:false,suggested:true,reason:"Aloita yhdellä esimerkillä ja rajatulla 10 minuutin tehtävällä."};
+  else if(repeatedReason==="forgot") suggestion={trigger_type:"custom",trigger_value:"forgot_twice",action_type:"replace_with_retrieval",action_value:"10",enabled:false,suggested:true,reason:"Unohtaminen toistuu: tee seuraavasta aloituksesta 10 minuutin muistista palauttaminen ja sido se tuttuun arjen rutiiniin."};
   return {
     repeatedReason,repeatedWeekday,count:reason?.[1]??0,suggestion,
-    summary:repeatedReason?`Yleisin toistuva este on ${repeatedReason}${repeatedWeekday===null?"":`, erityisesti viikonpäivänä ${repeatedWeekday}`}.`:"Yksittäisiä esteitä on, mutta toistuvaa mallia ei vielä näy.",
+    summary:repeatedReason?`Yleisin toistuva este on ${frictionReasonLabelV5(repeatedReason)}${repeatedWeekday===null?"":`, erityisesti ${frictionWeekdayLabelV5(repeatedWeekday)}`}.`:"Yksittäisiä esteitä on, mutta toistuvaa mallia ei vielä näy.",
   };
 }
 
@@ -1613,7 +1631,7 @@ export function applyImplementationIntentionsV5(
           target_minutes: target,
           min_minutes: Math.min(10, target),
           extra_minutes: 0,
-          title: draft.title.replace(/\s[–-].*$/, "") + " – kevyt retrieval",
+          title: draft.title.replace(/\s[–-].*$/, "") + " – kevyt muistista palautus",
         };
         changed = true;
       } else if (rule.action_type === "move" && /^\+\d+$/.test(rule.action_value)) {
@@ -1630,7 +1648,7 @@ export function applyImplementationIntentionsV5(
         const previous = counts.get(id);
         counts.set(id, {
           count: (previous?.count ?? 0) + 1,
-          reason: rule.reason ?? "Aktiivinen if-then-sääntö mukautti ehdotusta.",
+          reason: rule.reason ?? "Aktiivinen jos–niin-sääntö mukautti ehdotusta.",
         });
       }
     }
@@ -1753,14 +1771,14 @@ export function evaluateRuntimeIntentionsV5(
   }
   if(effect.maxMinutes===Infinity)effect.maxMinutes=null;
   if(effect.triggeredRuleIds.length&&!effect.notes.length){
-    effect.notes.push("Aktiivinen if-then-sääntö mukautti tämän päivän kuormaa.");
+    effect.notes.push("Aktiivinen jos–niin-sääntö mukautti tämän päivän kuormaa.");
   }
   return effect;
 }
 
 export function reminderTaperV5(events: FrictionEventV5[]): ReminderTaperDecisionV5 {
   const started=events.filter((event)=>typeof event.self_started==="boolean");
-  if(started.length<5)return{mode:"normal",selfStartRate:started.length?started.filter(e=>e.self_started).length/started.length:null,sampleSize:started.length,recommendation:"Muistutuksia ei vielä säädetä, koska itsenäisistä aloituksista on liian vähän dataa."};
+  if(started.length<5)return{mode:"normal",selfStartRate:started.length?started.filter(e=>e.self_started).length/started.length:null,sampleSize:started.length,recommendation:"Muistutuksia ei vielä säädetä, koska itsenäisistä aloituksista on liian vähän havaintoja."};
   const rate=started.filter(e=>e.self_started).length/started.length;
   const recent=started.slice(0,5);
   const recentRate=recent.filter(e=>e.self_started).length/recent.length;
@@ -1789,7 +1807,7 @@ export function subjectTaskProfilesV5(
     const delayed=rows.filter(row=>Number(row.delay_days??0)>=2);
     const delayedSuccessRate=delayed.length?delayed.reduce((sum,row)=>sum+attemptSuccessCompat(row),0)/delayed.length:null;
     const responseTimes=rows.flatMap(row=>typeof row.response_time_ms==="number"?[row.response_time_ms]:[]);
-    const reliability=evidenceConfidenceV5(rows.length,Math.min(1,new Set(rows.map(row=>row.date)).size/6),Math.min(1,delayed.length/4),"subject × task -näyttöä");
+    const reliability=evidenceConfidenceV5(rows.length,Math.min(1,new Set(rows.map(row=>row.date)).size/6),Math.min(1,delayed.length/4),"oppiaine- ja tehtävätyyppikohtaista näyttöä");
     const forgettingPenalty=delayedSuccessRate===null?0:Math.max(0,successRate-delayedSuccessRate);
     return {
       key,subject:subject??"Muu",attemptType:attemptType??"practice",observations:rows.length,successRate,delayedSuccessRate,

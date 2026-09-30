@@ -76,12 +76,12 @@ test("Learning OS v5 remains wired through engine, persistence and UI", () => {
   for (const token of ["instructionDecisionV5","feedbackPolicyV5","stopRuleV5","confusionSetsV5","transferStateV5","pretest"]) {
     assert.ok(practice.includes(token), "Missing v5 Practice integration: " + token);
   }
-  assert.ok(plannerPanels.includes("Retention Budget v5"));
-  assert.ok(plannerPanels.includes("What-if Planner"));
-  assert.ok(plannerPanels.includes("Reminder Tapering"));
+  assert.ok(plannerPanels.includes("Mukautuva kertausbudjetti"));
+  assert.ok(plannerPanels.includes("Vaihtoehtojen vertailu"));
+  assert.ok(plannerPanels.includes("Muistutusten vähentäminen"));
   assert.ok(examUi.includes("YO / Abitti 2 -simulaatio"));
   assert.ok(examUi.includes("SketchAnswerCanvas"));
-  assert.ok(errorLab.includes("Contrastive Error Lab"));
+  assert.ok(errorLab.includes("Virheen korjaus"));
 
   for (const token of [
     "learning_policy_states","calibration_observations","study_friction_events",
@@ -111,5 +111,5 @@ test("master plan keeps evidence and safety invariants", () => {
   assert.ok(domain.includes("readiness"));
   assert.ok(domain.includes("recovery"));
   assert.ok(views.includes("ei arvosanaennuste"));
-  assert.ok(views.includes("Extra ei muutu opiskelusakoksi") || views.includes("Extra ei muutu"));
+  assert.ok(views.includes("Lisäharjoittelu") && views.includes("ei muutu"));
 });

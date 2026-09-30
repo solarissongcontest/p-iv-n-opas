@@ -15,6 +15,7 @@ import {
 } from "@/lib/learning-os-v5";
 import { AbittiAnswerEditor, answerHasContent, answerPlainText } from "@/components/AbittiAnswerEditor";
 import { SketchAnswerCanvas } from "@/components/SketchAnswerCanvas";
+import { answerModeLabel, stimulusFieldLabel } from "@/lib/ui-fi";
 
 const primary="inline-flex min-h-11 items-center justify-center rounded-xl bg-primary px-4 text-sm font-medium text-primary-foreground disabled:opacity-50";
 const secondary="inline-flex min-h-11 items-center justify-center rounded-xl border border-border bg-surface px-4 text-sm disabled:opacity-50";
@@ -26,7 +27,7 @@ function Stimulus({value}:{value:Record<string,unknown>|null}) {
   if(!value||!Object.keys(value).length)return null;
   return <div className="rounded-2xl border border-border bg-muted/40 p-4">
     <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-primary">Aineisto</p>
-    <div className="space-y-2 text-sm">{Object.entries(value).map(([key,item])=><div key={key}><b>{key.replaceAll("_"," ")}:</b>{" "}{typeof item==="string"||typeof item==="number"?String(item):<code className="text-xs">{JSON.stringify(item)}</code>}</div>)}</div>
+    <div className="space-y-2 text-sm">{Object.entries(value).map(([key,item],index)=><div key={key}><b>{stimulusFieldLabel(key,index)}:</b>{" "}{typeof item==="string"||typeof item==="number"?String(item):<span className="text-xs text-muted-foreground">{Array.isArray(item)?item.map(String).join(", "):"Lisäaineisto"}</span>}</div>)}</div>
   </div>;
 }
 
@@ -221,7 +222,7 @@ export function ExamSimulationV5({courses,topics}:{courses:Course[];topics:Topic
       }
       localStorage.removeItem("opk.exam-simulation:"+rowId);
       setPhase("done");
-      toast.success("Koetyylinen simulaatio tallennettu ja koetason näyttö päivitetty.");
+      toast.success("Koeharjoitus tallennettiin ja koetason osaamisnäyttö päivitettiin.");
     }catch{
       toast.error("Koetulosta ei voitu tallentaa kokonaan. Luonnos säilytettiin jatkamista varten.");
     }finally{setFinishing(false);}
@@ -243,7 +244,7 @@ export function ExamSimulationV5({courses,topics}:{courses:Course[];topics:Topic
     {phase==="select"&&<>
       {resumable&&<div className="mt-5 rounded-2xl border border-primary/30 bg-accent/50 p-4">
         <b>Kesken oleva simulaatio löytyi</b>
-        <p className="mt-1 text-sm text-muted-foreground">Vastaukset on autosavetettu. Voit jatkaa samasta tehtäväblokista ilman että luonnos katoaa.</p>
+        <p className="mt-1 text-sm text-muted-foreground">Vastaukset tallennetaan automaattisesti. Voit jatkaa samasta kohdasta ilman, että luonnos katoaa.</p>
         <button className={primary+" mt-3"} onClick={resumeSimulation}>Jatka kesken jäänyttä simulaatiota</button>
       </div>}
       <div className="mt-5 grid gap-3 sm:grid-cols-2">
@@ -251,14 +252,14 @@ export function ExamSimulationV5({courses,topics}:{courses:Course[];topics:Topic
         <label className="text-sm font-medium">Tila<select className="mt-1 w-full rounded-xl border bg-surface p-3" value={mode} onChange={e=>{setMode(e.target.value as "practice"|"full");setSelected([]);}}><option value="full">Täysi koesimulaatio</option><option value="practice">Lyhyempi harjoitus</option></select></label>
       </div>
       {simulation?<div className="mt-5">
-        <div className="rounded-xl bg-accent/50 p-3 text-sm">Tarjolla {simulation.maxTasks} tehtävää · valitse enintään {simulation.maxSelected} · enintään {simulation.maxPoints} p · {simulation.durationMinutes} min. Vihjeitä tai mastery-näkymää ei näytetä kesken suorituksen.</div>
-        <div className="mt-3 space-y-2">{simulation.tasks.map(task=><button type="button" key={task.id} aria-pressed={selected.includes(task.id)} onClick={()=>toggle(task.id)} className={"flex min-h-14 w-full items-center justify-between gap-3 rounded-xl border p-3 text-left "+(selected.includes(task.id)?"border-primary bg-accent":"border-border bg-surface")}><span><b>{task.title}</b><small className="mt-1 block text-muted-foreground">{task.answerMode} · {task.stimulus?"aineistotehtävä":"ei erillistä aineistoa"}</small></span><span className="font-semibold">{task.points} p</span></button>)}</div>
+        <div className="rounded-xl bg-accent/50 p-3 text-sm">Tarjolla {simulation.maxTasks} tehtävää · valitse enintään {simulation.maxSelected} · enintään {simulation.maxPoints} p · {simulation.durationMinutes} min. Vihjeitä tai osaamisnäkymää ei näytetä kesken suorituksen.</div>
+        <div className="mt-3 space-y-2">{simulation.tasks.map(task=><button type="button" key={task.id} aria-pressed={selected.includes(task.id)} onClick={()=>toggle(task.id)} className={"flex min-h-14 w-full items-center justify-between gap-3 rounded-xl border p-3 text-left "+(selected.includes(task.id)?"border-primary bg-accent":"border-border bg-surface")}><span><b>{task.title}</b><small className="mt-1 block text-muted-foreground">{answerModeLabel(task.answerMode)} · {task.stimulus?"aineistotehtävä":"ei erillistä aineistoa"}</small></span><span className="font-semibold">{task.points} p</span></button>)}</div>
         <button disabled={!selected.length||create.isPending} className={primary+" mt-4"} onClick={()=>void start()}>Aloita valitut {selected.length} tehtävää</button>
       </div>:<p className="mt-4 text-sm text-muted-foreground">Tehtäväpankissa ei ole vielä tähän kurssiin soveltuvia tehtäviä.</p>}
     </>}
 
     {phase==="running"&&activeTask&&<>
-      <div className="mt-5 rounded-2xl bg-muted/50 p-4"><p className="text-xs font-semibold uppercase tracking-wide text-primary">Tehtävä {activeIndex+1}/{selectedTasks.length} · {activeTask.points} p · {activeTask.answerMode}</p><p className="mt-2 text-sm text-muted-foreground">Palaute ja oikeat vastaukset pysyvät piilossa koko tehtäväblokin ajan.</p></div>
+      <div className="mt-5 rounded-2xl bg-muted/50 p-4"><p className="text-xs font-semibold uppercase tracking-wide text-primary">Tehtävä {activeIndex+1}/{selectedTasks.length} · {activeTask.points} p · {answerModeLabel(activeTask.answerMode)}</p><p className="mt-2 text-sm text-muted-foreground">Palaute ja oikeat vastaukset pysyvät piilossa koko valitun tehtäväkokonaisuuden ajan.</p></div>
       <div className="mt-4">
         <Stimulus value={activeTask.stimulus}/>
         <p className="mt-4 text-lg font-semibold">{(bank.data??[]).find(q=>q.id===activeTask.id)?.prompt??activeTask.title}</p>
@@ -267,12 +268,12 @@ export function ExamSimulationV5({courses,topics}:{courses:Course[];topics:Topic
       {(activeTask.answerMode==="diagram"||activeTask.answerMode==="graph"||activeTask.answerMode==="mixed")&&<div className="mt-4"><SketchAnswerCanvas key={activeTask.id} mode={activeTask.answerMode==="graph"?"graph":"diagram"} value={answers[activeTask.id]?.sketch??""} onChange={value=>changeAnswer(activeTask,{sketch:value})}/></div>}
       <div className="mt-5 flex flex-wrap gap-2">
         {activeIndex>0&&<button className={secondary} onClick={()=>setActiveIndex(i=>Math.max(0,i-1))}>Edellinen</button>}
-        <button className={primary} onClick={next}>{activeIndex+1===selectedTasks.length?"Päätä tehtäväblokki":"Seuraava tehtävä"}</button>
+        <button className={primary} onClick={next}>{activeIndex+1===selectedTasks.length?"Päätä tehtäväkokonaisuus":"Seuraava tehtävä"}</button>
       </div>
     </>}
 
     {phase==="review"&&simulation&&<>
-      <div className="mt-5 rounded-2xl bg-accent/50 p-4"><h3 className="font-semibold">Palaute avautuu vasta nyt</h3><p className="mt-1 text-sm text-muted-foreground">Arvioi pisteet tehtävä kerrallaan vasta koko blokin jälkeen. Tämä vaihe ei muuta alkuperäisiä vastauksia.</p></div>
+      <div className="mt-5 rounded-2xl bg-accent/50 p-4"><h3 className="font-semibold">Palaute avautuu vasta nyt</h3><p className="mt-1 text-sm text-muted-foreground">Arvioi pisteet tehtävä kerrallaan vasta koko tehtäväkokonaisuuden jälkeen. Tämä vaihe ei muuta alkuperäisiä vastauksia.</p></div>
       <div className="mt-4 space-y-4">{selectedTasks.map(task=>{const item=(bank.data??[]).find(q=>q.id===task.id);return <div key={task.id} className="rounded-2xl border border-border p-4">
         <div className="flex justify-between gap-3"><b>{task.title}</b><span>{task.points} p</span></div>
         <p className="mt-2 text-sm">{item?.prompt}</p>
@@ -285,9 +286,9 @@ export function ExamSimulationV5({courses,topics}:{courses:Course[];topics:Topic
         <details className="mt-3 rounded-xl bg-muted/50 p-3 text-sm"><summary className="cursor-pointer font-medium">Näytä mallipalaute</summary>{item?.correct_answer&&<p className="mt-2"><b>Oikea vastaus:</b> {item.correct_answer}</p>}<p className="mt-2 text-muted-foreground">{item?.explanation||"Ei erillistä mallipalautetta."}</p></details>
         <label className="mt-3 block text-sm font-medium">Pisteet<input type="number" min="0" max={task.points} className="mt-1 w-28 rounded-xl border bg-surface p-2" value={scores[task.id]??0} onChange={e=>setScores(current=>({...current,[task.id]:Math.max(0,Math.min(task.points,Number(e.target.value)||0))}))}/></label>
       </div>})}</div>
-      <button disabled={update.isPending||recordAttempt.isPending||finishing} className={primary+" mt-4"} onClick={()=>void finishReview()}>{finishing?"Tallennetaan…":"Tallenna simulaatio"}</button>
+      <button disabled={update.isPending||recordAttempt.isPending||finishing} className={primary+" mt-4"} onClick={()=>void finishReview()}>{finishing?"Tallennetaan…":"Tallenna koeharjoitus"}</button>
     </>}
 
-    {phase==="done"&&simulation&&<div className="mt-5"><div className="rounded-2xl bg-accent p-4"><h3 className="font-semibold">Simulaatio valmis</h3><p className="mt-2 text-sm text-muted-foreground">Pisteet {Object.values(scores).reduce((a,b)=>a+b,0)} / {selectedTasks.reduce((a,b)=>a+b.points,0)}. Vastatut tehtävät on tallennettu koetason evidenssiksi. Tätä ei käytetä automaattisena arvosanaennusteena.</p></div><button className={secondary+" mt-4"} onClick={reset}>Uusi simulaatio</button></div>}
+    {phase==="done"&&simulation&&<div className="mt-5"><div className="rounded-2xl bg-accent p-4"><h3 className="font-semibold">Simulaatio valmis</h3><p className="mt-2 text-sm text-muted-foreground">Pisteet {Object.values(scores).reduce((a,b)=>a+b,0)} / {selectedTasks.reduce((a,b)=>a+b.points,0)}. Vastatut tehtävät on tallennettu koetason osaamisnäytöksi. Tätä ei käytetä automaattisena arvosanaennusteena.</p></div><button className={secondary+" mt-4"} onClick={reset}>Uusi simulaatio</button></div>}
   </section>;
 }
