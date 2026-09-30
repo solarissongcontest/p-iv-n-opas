@@ -59,6 +59,16 @@ test("user-facing UI does not regress to known English product jargon", () => {
     "Session Fatigue",
     "Learning Engine ·",
     "Contrastive Error Lab",
+    "Opittu esimerkki",
+    "Transfer-tehtävä",
+    "Mixed practice",
+    "Metakognitiivinen kalibrointi",
+    "Viivästetty varmuusarvio",
+    "Hyvin kalibroitu",
+    "Coach-yhteys",
+    "tehtäväblokki",
+    "autosavetettu",
+    "koetason evidenssiksi",
     "mastery-neutraali",
     "mastery-rangaistus",
     "evidence confidence",
@@ -128,14 +138,14 @@ test("critical adaptive-learning controls have Finnish display labels", () => {
   for (const phrase of [
     "Mukautuva kertausbudjetti",
     "Vaihtoehtojen vertailu",
-    "Viivästetty varmuusarvio",
+    "Oman arvion tarkkuus ajan myötä",
     "Opiskelun esteiden tunnistus",
     "Muistutusten vähentäminen",
     "Oppiaine- ja tehtävätyyppikohtainen mukautus",
   ]) assert.equal(panels.includes(phrase), true, phrase);
 
   for (const phrase of [
-    "Oppimisjärjestelmä",
+    "Mukautuva opiskelu",
     "Henkilökohtaiset oppimiskokeilut",
     "Mukautuva palaute",
     "YO / Abitti 2 -vastaavuus",
