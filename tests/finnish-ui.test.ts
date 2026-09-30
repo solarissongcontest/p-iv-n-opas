@@ -12,6 +12,20 @@ const files = [
   "../src/components/ContrastiveErrorLab.tsx",
   "../src/components/StudyViews.tsx",
   "../src/components/Onboarding.tsx",
+  "../src/routes/index.tsx",
+  "../src/lib/error-page.ts",
+  "../src/lib/push.ts",
+  "../src/routes/api.device-auth.ts",
+  "../src/routes/api.push.test.ts",
+  "../src/routes/api.push.subscribe.ts",
+  "../src/routes/api.push.unsubscribe.ts",
+  "../src/routes/api.push.public-key.ts",
+  "../src/components/ui/carousel.tsx",
+  "../src/components/ui/pagination.tsx",
+  "../src/components/ui/sidebar.tsx",
+  "../src/components/ui/dialog.tsx",
+  "../src/components/ui/sheet.tsx",
+  "../src/components/ui/breadcrumb.tsx",
   "../src/lib/learning-engine.ts",
   "../src/lib/learning-os-v4.ts",
   "../src/lib/learning-os-v5.ts",
@@ -51,6 +65,24 @@ test("user-facing UI does not regress to known English product jargon", () => {
     "relation-tyyppisiä",
     "paikallinen fallback",
     "Tietosuoja ja AI",
+    "Concept / Rubric Evaluator",
+    "Dependency-ehdotukset",
+    "Exam Mode ja valmius",
+    "This page didn't load",
+    "Something went wrong on our end",
+    "Missing server environment variable",
+    "Previous slide",
+    "Next slide",
+    "Toggle Sidebar",
+    ">Previous</span>",
+    ">Next</span>",
+    ">Close</span>",
+    "Web Push on käytössä",
+    "Push-tilauksen tallennus epäonnistui",
+    "Push-tilauksen poisto epäonnistui",
+    "Push-avain puuttuu",
+    "Kaikkea ei voitu synkata vielä",
+    "Synkattiin ",
   ];
   for (const phrase of forbidden) {
     assert.equal(source.includes(phrase), false, phrase);
@@ -127,5 +159,22 @@ test("exam and practice engines generate Finnish stage labels", () => {
   ]) {
     assert.equal(engine.includes(phrase), true, "engine: " + phrase);
     assert.equal(domain.includes(phrase), true, "domain: " + phrase);
+  }
+});
+
+
+test("shared accessibility and fatal-error copy is Finnish", () => {
+  const expected = new Map([
+    ["../src/components/ui/carousel.tsx", ["Edellinen dia", "Seuraava dia"]],
+    ["../src/components/ui/pagination.tsx", ["Edellinen", "Seuraava", "Lisää sivuja"]],
+    ["../src/components/ui/sidebar.tsx", ["Sivupalkki", "Näytä tai piilota sivupalkki"]],
+    ["../src/components/ui/dialog.tsx", ["Sulje"]],
+    ["../src/components/ui/sheet.tsx", ["Sulje"]],
+    ["../src/components/ui/breadcrumb.tsx", ["Sivupolku", "Lisää"]],
+    ["../src/lib/error-page.ts", ["Sivua ei voitu ladata", "Päivitä sivu", "Palaa etusivulle"]],
+  ]);
+  for (const [file, phrases] of expected) {
+    const text = readFileSync(new URL(file, import.meta.url), "utf8");
+    for (const phrase of phrases) assert.equal(text.includes(phrase), true, file + ": " + phrase);
   }
 });
