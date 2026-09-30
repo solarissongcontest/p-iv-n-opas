@@ -40,19 +40,20 @@ export function ContrastiveErrorLab({
     );
   }
 
-  const topic = topics.find((candidate) => candidate.id === selected.topic_id);
-  const course = courses.find((candidate) => candidate.id === selected.course_id);
-  const plan = contrastiveRepairPlanV5(selected);
+  const activeMistake = selected;
+  const topic = topics.find((candidate) => candidate.id === activeMistake.topic_id);
+  const course = courses.find((candidate) => candidate.id === activeMistake.course_id);
+  const plan = contrastiveRepairPlanV5(activeMistake);
 
   async function save(status: "corrected" | "retested") {
     try {
       await update.mutateAsync({
-        id: selected.id,
-        first_divergence: divergence.trim() || selected.first_divergence || null,
-        correct_principle: principle.trim() || selected.correct_principle || null,
-        repair_response: repair.trim() || selected.repair_response || null,
+        id: activeMistake.id,
+        first_divergence: divergence.trim() || activeMistake.first_divergence || null,
+        correct_principle: principle.trim() || activeMistake.correct_principle || null,
+        repair_response: repair.trim() || activeMistake.repair_response || null,
         delayed_verification_due:
-          selected.delayed_verification_due ??
+          activeMistake.delayed_verification_due ??
           new Date(Date.now() + 3 * 86_400_000).toISOString().slice(0, 10),
         status,
       });
@@ -73,7 +74,7 @@ export function ContrastiveErrorLab({
         </div>
         <select
           className="min-h-11 rounded-xl border border-border bg-surface px-3 text-sm"
-          value={selected.id}
+          value={activeMistake.id}
           onChange={(event) => {
             setSelectedId(event.target.value);
             setDivergence("");
@@ -113,7 +114,7 @@ export function ContrastiveErrorLab({
             className="mt-1 min-h-24 w-full rounded-xl border border-border bg-surface p-3"
             value={divergence}
             onChange={(event) => setDivergence(event.target.value)}
-            placeholder={selected.first_divergence ?? "Kirjoita täsmällinen vaihe, ei vain 'laskuvirhe'."}
+            placeholder={activeMistake.first_divergence ?? "Kirjoita täsmällinen vaihe, ei vain 'laskuvirhe'."}
           />
         </label>
         <label className="text-sm font-medium">
@@ -122,7 +123,7 @@ export function ContrastiveErrorLab({
             className="mt-1 min-h-24 w-full rounded-xl border border-border bg-surface p-3"
             value={principle}
             onChange={(event) => setPrinciple(event.target.value)}
-            placeholder={selected.correct_principle ?? "Selitä periaate omin sanoin."}
+            placeholder={activeMistake.correct_principle ?? "Selitä periaate omin sanoin."}
           />
         </label>
         <label className="text-sm font-medium">
@@ -131,7 +132,7 @@ export function ContrastiveErrorLab({
             className="mt-1 min-h-32 w-full rounded-xl border border-border bg-surface p-3"
             value={repair}
             onChange={(event) => setRepair(event.target.value)}
-            placeholder={selected.repair_response ?? "Kirjoita korjattu ratkaisupolku."}
+            placeholder={activeMistake.repair_response ?? "Kirjoita korjattu ratkaisupolku."}
           />
         </label>
       </div>
