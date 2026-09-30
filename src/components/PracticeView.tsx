@@ -41,7 +41,7 @@ import {
 } from "@/lib/data";
 import { getDeviceAccessToken } from "@/lib/deviceSession";
 import { addDays, fullDate, today } from "@/lib/fi";
-import { confidenceLabel } from "@/lib/ui-fi";
+import { attemptTypeLabel, confidenceLabel } from "@/lib/ui-fi";
 import {
   evaluatePracticeResponse,
   type PracticeRubricEvaluation,
@@ -1052,7 +1052,7 @@ export function PracticeView({
                   <span className="text-xs text-muted-foreground">{fullDate(attempt.date)}</span>
                 </div>
                 <p className="mt-1 text-xs text-muted-foreground">
-                  {typeLabel[attempt.attempt_type] ?? attempt.attempt_type.replaceAll("_", " ")}
+                  {typeLabel[attempt.attempt_type] ?? attemptTypeLabel(attempt.attempt_type)}
                   {" · "}vaikeus {attempt.difficulty}/5
                   {attempt.delay_days != null ? ` · viive ${attempt.delay_days} pv` : ""}
                   {typeof attempt.hints_used === "number" ? ` · ${attempt.hints_used} vihjettä` : ""}
@@ -1066,7 +1066,7 @@ export function PracticeView({
           )}
         </Card>
 
-        <Card title="Viivevarmistukset">
+        <Card title="Myöhemmät varmistukset">
           {dueMistakeVerifications.length>0&&<div className="mb-3 space-y-2">
             {dueMistakeVerifications.slice(0,4).map(mistake=>{const topic=courseTopics.find(candidate=>candidate.id===mistake.topic_id);return topic?<button
               key={"mistake:"+mistake.id}
