@@ -355,7 +355,7 @@ export function PracticeView({
             ? "learning"
             : "retrieval",
       result: resultOutcome,
-      stage: activePath?.stage,
+      ...(activePath?.stage ? { stage: activePath.stage } : {}),
     });
     const effectiveFeedbackPolicy = retryCount >= baseFeedbackPolicy.retriesBeforeReveal && baseFeedbackPolicy.timing === "after_retry"
       ? { ...baseFeedbackPolicy, timing: "after_item" as const }
@@ -381,7 +381,7 @@ export function PracticeView({
         await recordPretest.mutateAsync({
           course_id: selection.topic.course_id,
           topic_id: selection.topic.id,
-          question_bank_id: selection.question.bankId ?? null,
+          question_bank_id: typeof selection.question.bankId === "string" ? selection.question.bankId : null,
           prompt: selection.question.prompt,
           response: storedResponse || null,
           predicted_confidence: confidence,
@@ -426,8 +426,8 @@ export function PracticeView({
           examStage: stage.key,
           scaffoldStage,
           instructionStage: activePath?.stage ?? "independent",
-          pretest: activePath?.stage === "pretest",
-          masteryNeutral: activePath?.stage === "pretest",
+          pretest: false,
+          masteryNeutral: false,
           transferLevel,
           discriminationTopicIds: confusionSet?.topicIds ?? [],
           feedbackTiming: effectiveFeedbackPolicy.timing,
