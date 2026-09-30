@@ -164,10 +164,21 @@ as $$
 declare
   v_outcome text;
   v_delay_hours integer;
+  v_prediction integer;
 begin
-  if new.confidence is null or coalesce(new.is_pretest,false) then
+  if coalesce(new.is_pretest,false)
+     or nullif(new.question_payload->>'preRetrievalConfidence','') is null then
     return new;
   end if;
+
+  begin
+    v_prediction := greatest(
+      1,
+      least(3,(new.question_payload->>'preRetrievalConfidence')::integer)
+    );
+  exception when invalid_text_representation then
+    return new;
+  end;
 
   v_outcome := coalesce(
     new.outcome,
@@ -182,7 +193,7 @@ begin
     owner_id,course_id,topic_id,attempt_id,predicted_confidence,
     actual_outcome,delay_hours,observed_at
   ) values (
-    new.owner_id,new.course_id,new.topic_id,new.id,new.confidence,
+    new.owner_id,new.course_id,new.topic_id,new.id,v_prediction,
     v_outcome,v_delay_hours,now()
   )
   on conflict(owner_id,attempt_id) where attempt_id is not null do update set
