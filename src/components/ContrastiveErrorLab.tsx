@@ -45,7 +45,7 @@ export function ContrastiveErrorLab({
   if (!selected) {
     return (
       <section className="panel p-4 sm:p-6">
-        <h2 className="text-base font-semibold sm:text-lg">Contrastive Error Lab</h2>
+        <h2 className="text-base font-semibold sm:text-lg">Virheen korjaus</h2>
         <p className="mt-2 text-sm text-muted-foreground">
           Ei avoimia virheitä. Harvinainen mutta miellyttävä tilanne.
         </p>
@@ -146,7 +146,7 @@ export function ContrastiveErrorLab({
     <section className="panel p-4 sm:p-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h2 className="text-base font-semibold sm:text-lg">Contrastive Error Lab</h2>
+          <h2 className="text-base font-semibold sm:text-lg">Virheen korjaus</h2>
           <p className="mt-1 text-sm text-muted-foreground">
             Virhettä ei vain kuitata vääräksi. Paikannetaan ensimmäinen kohta, jossa ajattelu erkani oikeasta periaatteesta, ja testataan korjaus uudella tehtävällä.
           </p>
