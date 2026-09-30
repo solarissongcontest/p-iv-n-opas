@@ -41,6 +41,7 @@ import {
 } from "@/lib/data";
 import { getDeviceAccessToken } from "@/lib/deviceSession";
 import { addDays, fullDate, today } from "@/lib/fi";
+import { confidenceLabel } from "@/lib/ui-fi";
 import {
   evaluatePracticeResponse,
   type PracticeRubricEvaluation,
@@ -214,8 +215,8 @@ export function PracticeView({
       ? {
           ...selectedInstruction,
           stage: "pretest" as const,
-          label: "Preview Challenge",
-          reason: previewPlan?.reason ?? "Ennakkotesti kartoittaa esitiedot ilman mastery-rangaistusta.",
+          label: "Ennakkotesti",
+          reason: previewPlan?.reason ?? "Ennakkotesti kartoittaa esitiedot ilman, että väärä vastaus heikentää osaamistasoa.",
           revealWorkedSolution: false,
           maxHints: 0,
           requiresIndependentFollowup: false,
@@ -226,7 +227,7 @@ export function PracticeView({
               ...selectedInstruction,
               stage: "independent" as const,
               label: "Itsenäinen tarkistus",
-              reason: "Preview Challenge osoitti vahvat esitiedot. Malliesimerkkiä ei näytetä turhaan, vaan osaaminen varmistetaan itsenäisesti.",
+              reason: "Ennakkotesti osoitti vahvat esitiedot. Osaaminen varmistetaan seuraavaksi itsenäisellä tehtävällä.",
               revealWorkedSolution: false,
               maxHints: 0,
               requiresIndependentFollowup: false,
@@ -236,7 +237,7 @@ export function PracticeView({
                 ...selectedInstruction,
                 stage: "completion" as const,
                 label: "Täydennä ratkaisu",
-                reason: "Preview Challenge osoitti osittaiset esitiedot. Aloitetaan häivytetyllä tuella eikä täydellä malliratkaisulla.",
+                reason: "Ennakkotesti osoitti osittaiset esitiedot. Aloitetaan kevyesti tuetulla tehtävällä ilman täyttä malliratkaisua.",
                 revealWorkedSolution: false,
                 maxHints: 2,
                 requiresIndependentFollowup: true,
@@ -244,8 +245,8 @@ export function PracticeView({
             : {
                 ...selectedInstruction,
                 stage: "worked_example" as const,
-                label: "Worked example",
-                reason: "Preview Challenge osoitti, että perusteet tarvitsevat vielä rakennetta ennen itsenäistä harjoittelua.",
+                label: "Malliesimerkki",
+                reason: "Ennakkotesti osoitti, että perusteita kannattaa vahvistaa malliesimerkillä ennen itsenäistä harjoittelua.",
                 revealWorkedSolution: true,
                 maxHints: Math.max(2, selectedInstruction.maxHints),
                 requiresIndependentFollowup: true,
@@ -470,7 +471,7 @@ export function PracticeView({
             ? " Oikea vastaus: " + selection.question.correctAnswer + "."
             : "";
         setFeedback(
-          "Preview Challenge tallennettiin mastery-neutraalina havaintona." +
+          "Ennakkotesti tallennettiin havaintona, joka ei muuta osaamistasoa." +
           answerReveal +
           " " + selection.question.explanation,
         );
@@ -640,7 +641,7 @@ export function PracticeView({
   return (
     <div className="space-y-5">
       <Card
-        title="Practice Mode"
+        title="Harjoittelutila"
         action={
           <div className="flex flex-wrap items-center gap-2">
             <button
@@ -661,7 +662,7 @@ export function PracticeView({
               className={diagnosticMode ? primary : secondary}
               onClick={() => { setDiagnosticMode((value) => !value); setAttemptIndex(0); }}
             >
-              {diagnosticMode ? "Lopeta diagnostiikka" : "Diagnostic Mode"}
+              {diagnosticMode ? "Lopeta lähtötason kartoitus" : "Kartoita lähtötaso"}
             </button>
             <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
               <Brain size={15} />
@@ -713,7 +714,7 @@ export function PracticeView({
           <div className="mt-5 rounded-2xl bg-accent p-4">
             <h3 className="font-semibold">Lähtötason tarkistus valmis.</h3>
             <p className="mt-2 text-sm text-muted-foreground">
-              {diagnosticLimit} eri aiheen retrieval-näyttö on tallennettu. Tulokset eivät suoraan “julista” aiheita osatuiksi, vaan parantavat Plannerin evidence confidencea.
+              {diagnosticLimit} eri aiheen muistista palauttamisen näyttö on tallennettu. Tulokset eivät yksin ratkaise osaamistasoa, vaan parantavat suositusten luotettavuutta.
             </p>
             <div className="mt-3 space-y-2">
               {courseTopics.slice(0, diagnosticLimit).map((candidate) => {
@@ -741,10 +742,10 @@ export function PracticeView({
                 <span>{activePath?.label ?? typeLabel[selection.question.type]}</span>
                 <span>· {typeLabel[selection.question.type]}</span>
                 <span>· vaikeus {selection.question.difficulty}/5</span>
-                <span>· {selection.question.source === "bank" ? "LOPS21-tehtäväpankki" : "fallback"}</span>
-                {selection.interleaved && <span>· interleaved</span>}
-                {confusionSet && <span>· confusion-aware</span>}
-                {activePath?.stage === "pretest" && <span>· mastery-neutraali</span>}
+                <span>· {selection.question.source === "bank" ? "LOPS21-tehtäväpankki" : "varatehtävä"}</span>
+                {selection.interleaved && <span>· limitetty harjoittelu</span>}
+                {confusionSet && <span>· sekoittuvien käsitteiden erottelu</span>}
+                {activePath?.stage === "pretest" && <span>· ei vaikuta osaamistasoon</span>}
               </div>
               <p className="mt-2 text-xs text-muted-foreground">
                 {courses.find((item) => item.id === selection.topic.course_id)?.code} · {confusionSet ? "Erottelu: " + confusionSet.labels.join(" vs. ") : selection.topic.name}
@@ -752,7 +753,7 @@ export function PracticeView({
               <p className="mt-2 text-lg font-semibold">{selection.question.prompt}</p>
               <p className="mt-2 text-xs text-muted-foreground">
                 {activePath?.reason ?? "Moottori valitsee kysymystyypin osaamisnäytön, unohtumisriskin ja koevaiheen perusteella."}
-                {" "}Aikaa ei lasketa osaamiseksi. Maailma jatkaa pyörimistään.
+                {" "}Opiskeluaikaa ei käytetä osaamisen mittarina.
               </p>
             </div>
 
@@ -765,7 +766,7 @@ export function PracticeView({
 
             {activePath?.stage === "worked_example" && (
               <div className="rounded-2xl border border-border bg-surface p-4">
-                <p className="text-xs font-semibold uppercase tracking-wide text-primary">Worked example</p>
+                <p className="text-xs font-semibold uppercase tracking-wide text-primary">Malliesimerkki</p>
                 <p className="mt-2 text-sm">{selection.question.explanation}</p>
                 <p className="mt-2 text-xs text-muted-foreground">Tutki rakennetta. Seuraavassa vaiheessa tuki häivytetään eikä tätä ratkaisua enää näytetä.</p>
               </div>
@@ -873,7 +874,7 @@ export function PracticeView({
                 <div>
                   <p className="font-medium">Concept / Rubric Evaluator</p>
                   <p className="mt-1 text-xs text-muted-foreground">
-                    Arvio on neuvo, ei automaattinen mastery-päätös. Se ei näytä mallivastausta tai puuttuvien käsitteiden nimiä.
+                    Arvio on ohjeellinen eikä muuta osaamistasoa automaattisesti. Se ei näytä mallivastausta tai paljasta puuttuvia käsitteitä ennen omaa yritystä.
                   </p>
                 </div>
                 <button
@@ -900,7 +901,7 @@ export function PracticeView({
                       </b>
                       <small className="ml-2 text-muted-foreground">
                         · rubriikkipisteet {rubricEvaluation.score}/100
-                        · varmuus {rubricEvaluation.confidence}
+                        · arvion varmuus {confidenceLabel(rubricEvaluation.confidence)}
                       </small>
                     </span>
                   </div>
@@ -1053,7 +1054,7 @@ export function PracticeView({
             ))
           ) : (
             <p className="text-sm text-muted-foreground">
-              Ensimmäinen yritys muodostaa ensimmäisen oikean retrieval-havainnon.
+              Ensimmäinen yritys muodostaa ensimmäisen muistista palauttamisen havainnon.
             </p>
           )}
         </Card>
