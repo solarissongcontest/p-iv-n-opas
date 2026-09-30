@@ -29,7 +29,6 @@ import {
 } from "@/lib/learning-os-v5/index";
 import {
   useCalibrationObservations,
-  useCreateCalibrationObservation,
   usePreferences,
   usePretestAttempts,
   useQuestionBank,
@@ -127,7 +126,6 @@ export function PracticeView({
   const questionBank = useQuestionBank();
   const dependencies = useTopicDependencies();
   const calibrationObservations = useCalibrationObservations();
-  const createCalibration = useCreateCalibrationObservation();
   const syncPolicyState = useUpsertLearningPolicyState();
   const experimentsEnabled = preferences.data?.personal_experiments_enabled ?? true;
 
@@ -433,6 +431,7 @@ export function PracticeView({
           transferLevel,
           discriminationTopicIds: confusionSet?.topicIds ?? [],
           feedbackTiming: effectiveFeedbackPolicy.timing,
+          preRetrievalConfidence: delayedPrediction,
           confidenceDelayHours: delayedPrediction ? delayedHours : null,
           assisted: hintLevel > 0 || automaticAssistance,
           verificationRequired: activePath?.requiresIndependentFollowup ?? false,
@@ -454,17 +453,6 @@ export function PracticeView({
           },
         },
       });
-
-      if (delayedPrediction && selectedTopic && shouldAskDelayedPrediction) {
-        void createCalibration.mutateAsync({
-          course_id: selection.topic.course_id,
-          topic_id: selection.topic.id,
-          attempt_id: recordedAttemptId === "queued" ? null : recordedAttemptId,
-          predicted_confidence: delayedPrediction,
-          actual_outcome: resultOutcome,
-          delay_hours: delayedHours,
-        }).catch(() => undefined);
-      }
 
       if (course) {
         const retention = retentionTargetV5(selection.topic, course, attempts);
