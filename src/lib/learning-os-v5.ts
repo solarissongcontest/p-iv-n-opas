@@ -1012,7 +1012,7 @@ export function learningPolicyV5(input:{
   return{
     actions,primary,alternatives:available.slice(1,3),retentionBudget,stopDecisions,
     note:primary
-      ? "Valinta optimoi oppimishyödyn, säilymisen, koehyödyn, kuormituksen ja evidenssin varmuuden yhdessä."
+      ? "Valinta huomioi oppimishyödyn, muistissa säilymisen, koehyödyn, kuormituksen ja näytön varmuuden yhdessä."
       : "Tänään ei ole riittävästi hyödyllistä tekemistä lisättäväksi vain kalenterin täytteeksi.",
   };
 }
@@ -1427,7 +1427,7 @@ export function feedbackPolicyV5(input: {
 }): FeedbackPolicyV5 {
   if (input.mode === "exam_simulation") return {
     timing: "after_block", reveal: "score_only", retriesBeforeReveal: 0,
-    explanation: "Koetilassa palaute pidätetään koko tehtäväblokin loppuun.",
+    explanation: "Koetilassa palaute pidetään piilossa koko tehtäväkokonaisuuden loppuun asti.",
   };
   if (input.mode === "pretest") return {
     timing: "after_item", reveal: "principle", retriesBeforeReveal: 0,
@@ -1449,7 +1449,7 @@ export function feedbackPolicyV5(input: {
   };
 }
 
-const transferCompatLabels = ["Muistista palautus","Selitys","Sama konteksti","Muunneltu konteksti","Eri esitystapa","Uusi tilanne","Koetason soveltaminen"];
+const transferCompatLabels = ["Muistista palautus","Selitys","Sama tilanne","Muunneltu tilanne","Eri esitystapa","Uusi tilanne","Koetason soveltaminen"];
 
 export function transferStateV5(topic: Topic, attempts: PracticeAttempt[]): TransferStateV5 {
   const ladder = transferLadderV5(topic, attempts);
