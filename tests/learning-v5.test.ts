@@ -344,7 +344,7 @@ test("interactive What-if planner supports free day, exam-date change and weekda
   assert.match(panel,/Rakenna oma skenaario/);
   assert.match(panel,/What-if vapaa päivä/);
   assert.match(panel,/What-if koepäivä/);
-  assert.match(panel,/Siirrä työ päivältä/);
+  assert.match(panel,/Siirrä tämä työ/);
   assert.match(panel,/whatIfStudySimulatorV5/);
 
   const t=topic("scenario","Dynamiikka");
