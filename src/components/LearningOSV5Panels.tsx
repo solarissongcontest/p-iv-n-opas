@@ -255,7 +255,7 @@ export function V5LearningHealthPanel({courses,attempts}:{courses:Course[];topic
     </div>
     <Panel title="Oppiaine- ja tehtävätyyppikohtainen mukautus">
       <p className="mb-3 text-sm text-muted-foreground">Mukautuksia tehdään vasta, kun havaintoja on tarpeeksi. Vähäisestä havaintomäärästä ei muodosteta näennäisen tarkkaa profiilia.</p>
-      <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">{profiles.slice(0,9).map(p=><div key={p.key} className="rounded-xl bg-muted/50 p-3 text-sm"><b>{p.subject} · {attemptTypeLabel(p.attemptType)}</b><p className="mt-1 text-xs text-muted-foreground">{p.observations} havaintoa · onnistuminen {pct(p.successRate)}</p><p className="mt-1 text-xs text-muted-foreground">kertausvälin kerroin {p.spacingMultiplier.toFixed(2)} · näytön varmuus {confidenceLabel(p.reliability.label)}</p></div>)}{!profiles.length&&<p className="text-sm text-muted-foreground">Havaintoja ei ole vielä tarpeeksi.</p>}</div>
+      <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">{profiles.slice(0,9).map(p=><div key={p.key} className="rounded-xl bg-muted/50 p-3 text-sm"><b>{p.subject} · {attemptTypeLabel(p.attemptType)}</b><p className="mt-1 text-xs text-muted-foreground">{p.observations} havaintoa · onnistuminen {pct(p.successRate)}</p><p className="mt-1 text-xs text-muted-foreground">kertausvälin mukautus × {p.spacingMultiplier.toFixed(2)} · näytön varmuus {confidenceLabel(p.reliability.label)}</p></div>)}{!profiles.length&&<p className="text-sm text-muted-foreground">Havaintoja ei ole vielä tarpeeksi.</p>}</div>
     </Panel>
   </div>;
 }
