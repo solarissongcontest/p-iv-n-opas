@@ -1547,7 +1547,7 @@ export function frictionInsightV5(events: FrictionEventV5[]): FrictionInsightV5 
   if(repeatedReason==="too_tired") suggestion={trigger_type:"low_energy",trigger_value:"true",action_type:"replace_with_retrieval",action_value:"15",enabled:false,suggested:true,reason:"Väsymys toistuu: vaihda raskas työ 15 min retrievaliin."};
   else if(repeatedReason==="no_time"||repeatedReason==="plans_changed") suggestion={trigger_type:"busy_day",trigger_value:repeatedWeekday===null?"any":String(repeatedWeekday),action_type:"lighten",action_value:"0.4",enabled:false,suggested:true,reason:"Aikapula toistuu: tee automaattisesti kevyt päivä."};
   else if(repeatedReason==="too_hard"||repeatedReason==="unclear_start") suggestion={trigger_type:"custom",trigger_value:repeatedReason,action_type:"replace_with_retrieval",action_value:"worked_example_then_10m",enabled:false,suggested:true,reason:"Aloita yhdellä esimerkillä ja rajatulla 10 min tehtävällä."};
-  else if(repeatedReason==="forgot") suggestion={trigger_type:"custom",trigger_value:"forgot_twice",action_type:"move",action_value:"anchor_to_routine",enabled:false,suggested:true,reason:"Sido sessio olemassa olevaan rutiiniin jatkuvien ilmoitusten sijaan."};
+  else if(repeatedReason==="forgot") suggestion={trigger_type:"custom",trigger_value:"forgot_twice",action_type:"replace_with_retrieval",action_value:"10",enabled:false,suggested:true,reason:"Unohtaminen toistuu: tee seuraavasta aloituksesta 10 min retrieval ja sido se tuttuun arjen rutiiniin."};
   return {
     repeatedReason,repeatedWeekday,count:reason?.[1]??0,suggestion,
     summary:repeatedReason?`Yleisin toistuva este on ${repeatedReason}${repeatedWeekday===null?"":`, erityisesti viikonpäivänä ${repeatedWeekday}`}.`:"Yksittäisiä esteitä on, mutta toistuvaa mallia ei vielä näy.",
@@ -1806,7 +1806,8 @@ export function whatIfPlannerV5(input:{
   const budget=retentionBudgetV5(input);
   const minutes=[...new Set([...(input.customMinutes??[]),20,40,60])].filter(v=>v>0).sort((a,b)=>a-b);
   return minutes.map(minutesPerDay=>{
-    const weeklyCapacity=minutesPerDay*7;
+    const studyDayCount=Math.max(1,input.capacity.studyWeekdays.length);
+    const weeklyCapacity=minutesPerDay*studyDayCount;
     const backlog=Math.max(0,budget.recommendedMinutes-weeklyCapacity);
     const protectedRetentionShare=budget.recommendedMinutes<=0?1:Math.min(1,weeklyCapacity/budget.recommendedMinutes);
     const overloadRisk:WhatIfScenarioV5["overloadRisk"]=weeklyCapacity>=budget.recommendedMinutes*1.3?"low":weeklyCapacity>=budget.minimumMinutes?"medium":"high";
