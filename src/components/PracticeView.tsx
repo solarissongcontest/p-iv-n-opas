@@ -594,7 +594,7 @@ export function PracticeView({
           : autoResult === "independent"
             ? `Hyvä itsenäinen näyttö.${answerReveal}${explanationReveal}`
             : autoResult === "hinted"
-              ? `Vihje auttoi, joten näyttö painaa vähemmän masteryssa.${answerReveal}${explanationReveal}`
+              ? `Vihje auttoi, joten tämä yritys painaa osaamisarviossa vähemmän.${answerReveal}${explanationReveal}`
               : `Tämä tarvitsee uuden kierroksen.${answerReveal}${explanationReveal}`,
       );
     } catch {
@@ -1025,7 +1025,7 @@ export function PracticeView({
               ))}
               {recovery.hiddenCount > 0 && (
                 <p className="text-xs text-muted-foreground">
-                  {recovery.hiddenCount} muuta kertausta on jätetty myöhempään vuoroon. Niitä ei tarvitse kantaa naamalla punaisena velkalukuna.
+                  {recovery.hiddenCount} muuta kertausta on jätetty myöhempään vuoroon. Ne ajoitetaan myöhemmille päiville käytettävissä olevan ajan mukaan.
                 </p>
               )}
             </div>
