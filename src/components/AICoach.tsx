@@ -35,15 +35,15 @@ const buttonClass =
 function coachFallbackReason(message: CoachMessage) {
   if (message.status === "quota") {
     return message.diagnostic === "budget"
-      ? "Coachin oma käyttöraja tuli vastaan."
-      : "Gemini API:n käyttöraja tuli vastaan.";
+      ? "Opiskeluohjaajan oma käyttöraja tuli vastaan."
+      : "Geminin käyttöraja tuli vastaan.";
   }
 
   switch (message.diagnostic) {
     case "auth":
-      return "Gemini API -avain hylättiin tai projektilla ei ole käyttöoikeutta.";
+      return "Gemini-avain hylättiin tai yhteydellä ei ole käyttöoikeutta.";
     case "request":
-      return "Gemini hylkäsi API-pyynnön. Kutsun muoto pitää tarkistaa.";
+      return "Gemini hylkäsi yhteyspyynnön. Pyynnön asetukset pitää tarkistaa.";
     case "model":
       return "Valittu Gemini-malli ei ole käytettävissä tälle projektille.";
     case "provider":
@@ -53,9 +53,9 @@ function coachFallbackReason(message: CoachMessage) {
     case "network":
       return "Yhteys Gemini-palveluun katkesi.";
     case "budget":
-      return "Coachin käyttörajan tarkistus epäonnistui.";
+      return "Opiskeluohjaajan käyttörajan tarkistus epäonnistui.";
     case "invalid_output":
-      return "Geminin vastaus ei läpäissyt Answer Firewallia.";
+      return "Geminin vastaus ei läpäissyt vastaussuodatinta.";
     default:
       return "Gemini-vastausta ei voitu käyttää.";
   }
@@ -239,7 +239,7 @@ export function AICoach({
             error?: string;
           };
           if (!result.ok) {
-            throw new Error(payload.error ?? "Coach ei vastannut.");
+            throw new Error(payload.error ?? "Opiskeluohjaaja ei vastannut.");
           }
           response = payload;
         } finally {
@@ -353,10 +353,10 @@ export function AICoach({
         <button
           type="button"
           className="coach-trigger glass-base glass-specular glass-interactive"
-          aria-label="Avaa Opintocoach"
+          aria-label="Avaa opiskeluohjaaja"
         >
           <Sparkles size={19} />
-          <span>Coach</span>
+          <span>Ohjaaja</span>
         </button>
       </Dialog.Trigger>
 
@@ -377,7 +377,7 @@ export function AICoach({
             <div className="flex items-center justify-between gap-3">
               <Dialog.Title className="flex items-center gap-2 text-xl font-semibold">
                 <Sparkles size={20} />
-                Opintocoach
+                Opiskeluohjaaja
               </Dialog.Title>
               <div className="flex gap-1">
                 <button
@@ -389,7 +389,7 @@ export function AICoach({
                 </button>
                 <Dialog.Close
                   className="grid size-11 place-items-center rounded-xl"
-                  aria-label="Sulje Coach"
+                  aria-label="Sulje opiskeluohjaaja"
                 >
                   <X size={20} />
                 </Dialog.Close>
@@ -402,7 +402,7 @@ export function AICoach({
               {!providerChecked
                 ? "Tarkistetaan yhteyttä…"
                 : geminiActive
-                  ? "Gemini aktiivinen · Answer Firewall käytössä"
+                  ? "Gemini käytössä · vastaussuodatin käytössä"
                   : remoteConfigured
                     ? "Gemini-yhteys määritetty · käyttö vapaaehtoista"
                     : "Paikallinen ohjaus · kielimallia ei ole yhdistetty"}
@@ -487,15 +487,15 @@ export function AICoach({
 
             <details className="rounded-xl border p-3 text-sm">
               <summary className="cursor-pointer font-medium">
-                Tietosuoja ja AI
+                Tietosuoja ja tekoäly
               </summary>
               <p className="mt-2 text-muted-foreground">
-                Paikallinen ohjaus toimii ilman ulkoista AI-palvelua. Jos otat
-                AI:n käyttöön, tehtäväsi, oma yrityksesi ja rajatut
+                Paikallinen ohjaus toimii ilman ulkoista tekoälypalvelua. Jos otat
+                tekoälyn käyttöön, tehtäväsi, oma yrityksesi ja rajatut
                 osaamistiedot lähetetään Google Geminille vain seuraavan
                 ohjausaskeleen valintaa varten. Profiilia, virhepankin tekstejä
                 tai keskusteluhistoriaa ei lähetetä. Geminin ilmaisella
-                API-tasolla Google voi käyttää lähetettyä sisältöä tuotteidensa
+                käyttörajalla Google voi käyttää lähetettyä sisältöä tuotteidensa
                 parantamiseen. Älä kirjoita henkilötietoja; automaattinen
                 peittäminen ei tunnista kaikkea.
               </p>
@@ -507,7 +507,7 @@ export function AICoach({
                   disabled={!remoteConfigured || busy}
                   onChange={(event) => setRemoteConsent(event.target.checked)}
                 />
-                <span>Salli AI tämän istunnon aikana</span>
+                <span>Salli tekoäly tämän istunnon aikana</span>
               </label>
             </details>
 
@@ -524,7 +524,7 @@ export function AICoach({
                 >
                   <p className="mb-2 text-xs font-medium text-muted-foreground">
                     {message.source === "gemini"
-                      ? "AI:n valitsema ohjaus"
+                      ? "Tekoälyn valitsema ohjaus"
                       : "Paikallinen ohjaus"}
                   </p>
                   <p className="whitespace-pre-wrap text-sm leading-6">
@@ -599,7 +599,7 @@ export function AICoach({
             )}
 
             <p className="text-xs text-muted-foreground">
-              Coach ei anna mallivastausta eikä muuta osaamistasoa.
+              Opiskeluohjaaja ei anna mallivastausta eikä muuta osaamistasoa.
               Keskustelu ei itsessään ole osaamisnäyttö.
             </p>
 
