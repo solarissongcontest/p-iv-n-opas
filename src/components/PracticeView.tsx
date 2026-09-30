@@ -159,6 +159,14 @@ export function PracticeView({
     ? courseTopics[attemptIndex % Math.max(1, courseTopics.length)]?.id ?? topicId
     : topicId;
   const selectedTopic = courseTopics.find((candidate) => candidate.id === effectiveTopicId) ?? courseTopics[0] ?? null;
+  const dueMistakeVerification = selectedTopic
+    ? mistakes.find(mistake =>
+        mistake.topic_id===selectedTopic.id &&
+        mistake.status!=="mastered" &&
+        Boolean(mistake.delayed_verification_due) &&
+        String(mistake.delayed_verification_due)<=today()
+      ) ?? null
+    : null;
   const selectedInstruction = selectedTopic
     ? instructionDecisionV5(selectedTopic, attempts, { examDate: course?.exam_date ?? null })
     : null;
@@ -190,7 +198,17 @@ export function PracticeView({
         maxHints: 0,
         requiresIndependentFollowup: false,
       }
-    : previewActive && selectedInstruction
+    : dueMistakeVerification && selectedInstruction
+      ? {
+          ...selectedInstruction,
+          stage:"delayed_verification" as const,
+          label:"Virheen viivevarmistus",
+          reason:"Korjattu virhe on nyt testattava uudelleen ilman vihjeitä ennen kuin se voidaan merkitä hallituksi.",
+          revealWorkedSolution:false,
+          maxHints:0,
+          requiresIndependentFollowup:false,
+        }
+      : previewActive && selectedInstruction
       ? {
           ...selectedInstruction,
           stage: "pretest" as const,
@@ -305,6 +323,14 @@ export function PracticeView({
   useEffect(()=>{
     setPinnedSelection(null);
   },[courseId,effectiveTopicId,diagnosticMode,activePath?.stage]);
+
+  const dueMistakeVerifications=mistakes.filter(mistake=>
+    mistake.course_id===courseId &&
+    mistake.topic_id &&
+    mistake.status!=="mastered" &&
+    Boolean(mistake.delayed_verification_due) &&
+    String(mistake.delayed_verification_due)<=today()
+  );
 
   const recovery = buildRecoveryQueue({
     topics: courseTopics,
@@ -1022,6 +1048,13 @@ export function PracticeView({
         </Card>
 
         <Card title="Viivevarmistukset">
+          {dueMistakeVerifications.length>0&&<div className="mb-3 space-y-2">
+            {dueMistakeVerifications.slice(0,4).map(mistake=>{const topic=courseTopics.find(candidate=>candidate.id===mistake.topic_id);return topic?<button
+              key={"mistake:"+mistake.id}
+              className="flex min-h-12 w-full items-center justify-between gap-3 rounded-xl border border-primary/25 bg-accent/50 px-3 text-left"
+              onClick={()=>{setTopicId(topic.id);setAttemptIndex(0);setPinnedSelection(null);}}
+            ><span><b>{topic.name} · virheen viivevarmistus</b><small className="mt-1 block text-muted-foreground">Tee uusi tehtävä ilman vihjeitä. Korjaus ei ole valmis ennen tätä näyttöä.</small></span></button>:null})}
+          </div>}
           {delayedVerificationQueueV4(courses, courseTopics, attempts).length ? (
             <div className="space-y-2">
               {delayedVerificationQueueV4(courses, courseTopics, attempts).slice(0,4).map((row) => (
@@ -1034,7 +1067,7 @@ export function PracticeView({
                 </button>
               ))}
             </div>
-          ) : <p className="text-sm text-muted-foreground">Ei juuri nyt erääntyviä itsenäisiä viivevarmistuksia.</p>}
+          ) : dueMistakeVerifications.length===0 ? <p className="text-sm text-muted-foreground">Ei juuri nyt erääntyviä itsenäisiä viivevarmistuksia.</p> : null}
         </Card>
       </div>
     </div>
