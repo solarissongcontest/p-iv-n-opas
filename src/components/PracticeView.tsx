@@ -24,7 +24,7 @@ import {
   stopRuleV5,
   transferStateV5,
   type FeedbackPolicyV5,
-} from "@/lib/learning-os-v5";
+} from "@/lib/learning-os-v5/index";
 import {
   useCalibrationObservations,
   useCreateCalibrationObservation,
