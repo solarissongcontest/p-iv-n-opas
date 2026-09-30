@@ -178,3 +178,28 @@ export function stimulusFieldLabel(value: string, index = 0) {
     default: return "Aineiston osa " + (index + 1);
   }
 }
+
+export function errorCategoryLabel(value: string) {
+  switch (value) {
+    case "concept_error": return "käsitevirhe";
+    case "recall": return "muistivirhe";
+    case "formula": return "kaavan valinta";
+    case "algebra": return "algebravirhe";
+    case "unit": return "yksikkövirhe";
+    case "interpretation": return "tulkintavirhe";
+    case "strategy": return "ratkaisustrategia";
+    case "careless": return "huolimattomuus";
+    case "incomplete": return "puutteellinen vastaus";
+    case "prerequisite": return "puuttuva esitieto";
+    default: return "muu virhe";
+  }
+}
+
+export function materialKindLabel(value: string) {
+  switch (value) {
+    case "pdf": return "PDF";
+    case "notes": return "muistiinpanot";
+    case "text": return "teksti";
+    default: return "materiaali";
+  }
+}
