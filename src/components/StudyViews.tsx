@@ -798,7 +798,7 @@ export function SettingsView({user}:{user:DeviceUser}) {
   }
 
   return <div className="space-y-5">
-    <Panel title="Profiili"><p className="text-2xl font-semibold">{prefs?.display_name||"Arthur"}</p><p className="mt-2 text-sm text-muted-foreground">Pysyvä Opintopäiväkirja-tunnus · {user.id.slice(0,8)}…</p></Panel>
+    <Panel title="Profiili"><p className="text-2xl font-semibold">{prefs?.display_name||"Arthur"}</p><p className="mt-2 text-sm text-muted-foreground">Tämä laite on yhdistetty Opintopäiväkirja-tiliisi.</p></Panel>
 
     <Panel title="Opiskelurytmi ja kapasiteetti">
       <p className="mb-3 text-sm text-muted-foreground">Suunnittelutoiminto käyttää näitä rajoina. Väliin jäänyttä työmäärää ei työnnetä seuraavan päivän kapasiteetin yli.</p>
