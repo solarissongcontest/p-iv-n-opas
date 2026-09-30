@@ -111,7 +111,7 @@ create table if not exists public.study_friction_events (
   self_started boolean,
   reminder_used boolean,
   created_at timestamptz not null default now(),
-  check (reason in ('no_time','forgot','too_tired','too_hard','unclear_start','plans_changed','other'))
+  check (reason in ('no_time','forgot','too_tired','too_hard','unclear_start','plans_changed','started','other'))
 );
 
 create index if not exists study_friction_events_owner_date_idx
