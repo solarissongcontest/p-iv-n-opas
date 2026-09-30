@@ -11,24 +11,26 @@ update public.user_preferences
 set learning_schema_version = greatest(coalesce(learning_schema_version,4),5);
 
 alter table public.practice_attempts
-  add column if not exists pretest boolean not null default false,
-  add column if not exists feedback_mode text,
-  add column if not exists transfer_level text,
-  add column if not exists discrimination_set_id text;
+  add column if not exists is_pretest boolean not null default false,
+  add column if not exists transfer_level integer,
+  add column if not exists discrimination_topic_ids uuid[] not null default '{}'::uuid[],
+  add column if not exists feedback_timing text,
+  add column if not exists confidence_delay_hours integer;
 
 alter table public.practice_attempts
-  drop constraint if exists practice_attempts_feedback_mode_check,
-  add constraint practice_attempts_feedback_mode_check check (
-    feedback_mode is null or feedback_mode in (
-      'new_learning','worked_example','retrieval','pretest','exam_simulation','error_repair'
+  drop constraint if exists practice_attempts_feedback_timing_check,
+  add constraint practice_attempts_feedback_timing_check check (
+    feedback_timing is null or feedback_timing in (
+      'immediate','after_retry','after_item','after_block'
     )
   ),
   drop constraint if exists practice_attempts_transfer_level_check,
   add constraint practice_attempts_transfer_level_check check (
-    transfer_level is null or transfer_level in (
-      'recall','same_context','varied_context','different_representation',
-      'unfamiliar_scenario','mixed_topic','exam_transfer'
-    )
+    transfer_level is null or transfer_level between 0 and 6
+  ),
+  drop constraint if exists practice_attempts_confidence_delay_hours_check,
+  add constraint practice_attempts_confidence_delay_hours_check check (
+    confidence_delay_hours is null or confidence_delay_hours >= 0
   );
 
 create table if not exists public.retention_targets (
@@ -190,10 +192,10 @@ security invoker
 set search_path = ''
 as $$
 begin
-  if coalesce(new.pretest,false) then
+  if coalesce(new.is_pretest,false) then
     new.evidence_quality := 0;
     new.independent_verification_required := false;
-    new.feedback_mode := 'pretest';
+    new.feedback_timing := 'after_item';
     new.dimension_weights := '{}'::jsonb;
   end if;
   return new;
@@ -202,7 +204,7 @@ $$;
 
 drop trigger if exists learning_os_v5_prepare_pretest on public.practice_attempts;
 create trigger learning_os_v5_prepare_pretest
-before insert or update of pretest,evidence_quality,feedback_mode
+before insert or update of is_pretest,evidence_quality,feedback_timing
 on public.practice_attempts
 for each row execute function public.learning_os_v5_prepare_pretest();
 
@@ -219,7 +221,7 @@ declare
   v_error real;
   v_status text;
 begin
-  if new.confidence is null or coalesce(new.pretest,false) then
+  if new.confidence is null or coalesce(new.is_pretest,false) then
     return new;
   end if;
 
@@ -274,14 +276,14 @@ begin
     owner_id,event_type,course_id,topic_id,attempt_id,event_date,payload
   ) values (
     new.owner_id,
-    case when coalesce(new.pretest,false) then 'PRETEST_ATTEMPT_COMPLETED'
+    case when coalesce(new.is_pretest,false) then 'PRETEST_ATTEMPT_COMPLETED'
          else 'V5_PRACTICE_CONTEXT_CAPTURED' end,
     new.course_id,new.topic_id,new.id,new.date,
     jsonb_build_object(
-      'pretest',coalesce(new.pretest,false),
-      'feedbackMode',new.feedback_mode,
+      'pretest',coalesce(new.is_pretest,false),
+      'feedbackTiming',new.feedback_timing,
       'transferLevel',new.transfer_level,
-      'discriminationSetId',new.discrimination_set_id
+      'discriminationTopicIds',new.discrimination_topic_ids
     )
   );
   return new;
