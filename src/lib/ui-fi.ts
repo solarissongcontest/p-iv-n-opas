@@ -159,3 +159,22 @@ export function answerModeLabel(value: string) {
     default: return value.replaceAll("_", " ");
   }
 }
+
+export function stimulusFieldLabel(value: string, index = 0) {
+  switch (value) {
+    case "text": return "Teksti";
+    case "title": return "Otsikko";
+    case "source": return "Lähde";
+    case "data": return "Aineisto";
+    case "table": return "Taulukko";
+    case "chart": return "Kuvaaja";
+    case "graph": return "Kuvaaja";
+    case "image": return "Kuva";
+    case "description": return "Kuvaus";
+    case "caption": return "Kuvateksti";
+    case "excerpt": return "Katkelma";
+    case "question": return "Kysymys";
+    case "context": return "Taustatieto";
+    default: return "Aineiston osa " + (index + 1);
+  }
+}
