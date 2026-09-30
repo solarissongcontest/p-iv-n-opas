@@ -100,6 +100,7 @@ import {
   confidenceLabel,
   dimensionLabel,
   eventKindLabel,
+  errorCategoryLabel,
   experimentStatusLabel,
   masteryLabelFi,
   planPhaseLabel,
@@ -631,7 +632,7 @@ export function ProgressView({courses,topics,attempts,sessions,plan,exams,mistak
 
     <div className="grid gap-4 lg:grid-cols-2">
       <Panel title="Virheprofiili · 30 pv">
-        {errors30.length?errors30.slice(0,6).map(row=><div key={row.category} className="flex items-center justify-between border-b border-border py-2 text-sm"><span>{row.category.replaceAll("_"," ")}</span><b>{Math.round(row.share*100)} %</b></div>):<p className="text-sm text-muted-foreground">Virhehavaintoja ei ole vielä tarpeeksi.</p>}
+        {errors30.length?errors30.slice(0,6).map(row=><div key={row.category} className="flex items-center justify-between border-b border-border py-2 text-sm"><span>{errorCategoryLabel(row.category)}</span><b>{Math.round(row.share*100)} %</b></div>):<p className="text-sm text-muted-foreground">Virhehavaintoja ei ole vielä tarpeeksi.</p>}
       </Panel>
       <Panel title="Opiskelukerran kuormitus">
         <p className="text-lg font-semibold">{fatigue.level==="high"?"Tauko- ja pituussignaali on selvä":fatigue.level==="watch"?"Pieni väsymissignaali":"Ei selvää väsymissignaalia"}</p>
@@ -710,7 +711,7 @@ export function ProgressView({courses,topics,attempts,sessions,plan,exams,mistak
       <p className="mt-3 text-xs text-muted-foreground">{forecast.note}</p>
     </Panel>}
 
-    {calibrationData&&<Panel title="Metakognitiivinen kalibrointi">
+    {calibrationData&&<Panel title="Varmuusarvion osumatarkkuus">
       <p className="text-lg font-semibold">{calibrationData.label}</p>
       <p className="mt-2 text-sm text-muted-foreground">Perustuu {calibrationData.count} harjoitusyritykseen, joissa annoit varmuusarvion ennen palautetta. Tämä ei ole pisteytys eikä sijoituslista.</p>
     </Panel>}
@@ -819,7 +820,7 @@ export function SettingsView({user:_user}:{user:DeviceUser}) {
         {([
           ["retention_budget_enabled","Mukautuva kertausbudjetti","Suojaa tärkein muistaminen käytettävissä olevan ajan sisällä."],
           ["pretest_enabled","Ennakkotesti","Kartoita uusi aihe ennakkotestillä, joka ei muuta osaamistasoa."],
-          ["feedback_policy_enabled","Mukautuva palaute","Ajoita palaute eri tavalla uuden oppimisen, muistista palauttamisen ja koesimulaation mukaan."],
+          ["feedback_policy_enabled","Mukautuva palaute","Ajoita palaute eri tavalla uuden oppimisen, muistista palauttamisen ja koeharjoituksen mukaan."],
           ["friction_learning_enabled","Opiskelun esteiden tunnistus","Tunnista, miksi opiskelukertoja jää väliin, ja ehdota kevyitä jos–niin-sääntöjä."],
           ["reminder_taper_enabled","Muistutusten vähentäminen","Vähennä tavallisia muistutuksia, kun opiskelu käynnistyy jo itsenäisesti."],
           ["abitti_simulation_enabled","YO / Abitti 2 -vastaavuus","Käytä tehtävävalintaa, lähdeaineistoa, piirrosvastauksia ja viivästettyä palautetta koesimulaatioissa."],
