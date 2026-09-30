@@ -115,3 +115,24 @@ export function attemptTypeLabel(value: string) {
     default: return value.replaceAll("_", " ");
   }
 }
+
+export function planPhaseLabel(value: string) {
+  switch (value) {
+    case "content": return "uusi sisältö";
+    case "application": return "soveltaminen";
+    case "practice": return "harjoittelu";
+    case "review": return "kertaus";
+    case "light": return "kevyt päivä";
+    case "exam": return "koe";
+    default: return value.replaceAll("_", " ");
+  }
+}
+
+export function plannerModeLabel(value: string) {
+  switch (value) {
+    case "manual": return "Manuaalinen";
+    case "assisted": return "Avustettu";
+    case "autopilot": return "Automaattinen";
+    default: return value.replaceAll("_", " ");
+  }
+}
