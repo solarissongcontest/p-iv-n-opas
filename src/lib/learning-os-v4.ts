@@ -1013,10 +1013,10 @@ export function learningAchievementsV4(
   const total=Math.max(1,topics.length);
   return[
     {id:"evidence",title:"Itsenäinen näyttö",body:"Ensimmäinen onnistunut muistista palauttaminen ilman apua.",earned:independent>=1,progress:clamp(independent/1)*100},
-    {id:"growth",title:"Osaaminen kasvaa",body:"Vähintään 10 aihetta on vähintään melko varma -tasolla.",earned:strong>=10,progress:clamp(strong/10)*100},
+    {id:"growth",title:"Osaaminen kasvaa",body:"Vähintään 10 aiheesta on vähintään melko varmaa osaamisnäyttöä.",earned:strong>=10,progress:clamp(strong/10)*100},
     {id:"retention",title:"Osaaminen säilyy",body:"Viidestä aiheesta on myös myöhemmin vahvistettua osaamisnäyttöä.",earned:retained>=5,progress:clamp(retained/5)*100},
     {id:"recovery",title:"Virheistä takaisin",body:"Viisi aiempaa virhettä on korjattu hallituksi.",earned:repaired>=5,progress:clamp(repaired/5)*100},
-    {id:"coverage",title:"Vahva osaamiskartta",body:"80 % aiheista on vähintään melko varma -tasolla.",earned:strong/total>=.8,progress:clamp((strong/total)/.8)*100},
+    {id:"coverage",title:"Vahva osaamiskartta",body:"Vähintään 80 prosentista aiheita on vähintään melko varmaa osaamisnäyttöä.",earned:strong/total>=.8,progress:clamp((strong/total)/.8)*100},
   ];
 }
 
