@@ -136,3 +136,15 @@ export function plannerModeLabel(value: string) {
     default: return value.replaceAll("_", " ");
   }
 }
+
+export function attemptOutcomeLabel(value: string) {
+  switch (value) {
+    case "correct":
+    case "independent": return "onnistui itsenäisesti";
+    case "partial":
+    case "hinted": return "onnistui osittain";
+    case "incorrect":
+    case "not_yet": return "ei vielä onnistunut";
+    default: return value.replaceAll("_", " ");
+  }
+}
