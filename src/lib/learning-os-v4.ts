@@ -393,7 +393,7 @@ export function practicePathV4(
     return {
       stage: "delayed_verification",
       label: "Itsenäinen varmistus",
-      reason: "Edellinen onnistuminen käytti vihjettä tai Coachia. Tarvitaan näyttö ilman apua.",
+      reason: "Edellinen onnistuminen käytti vihjettä tai opiskeluohjaajaa. Tarvitaan näyttö ilman apua.",
       hintLimit: 0,
       evidenceMultiplier: 1,
       requiresIndependentFollowup: true,
@@ -442,7 +442,7 @@ export function practicePathV4(
   if (model.dimensions.application.score < 72) {
     return {
       stage: "transfer",
-      label: "Transfer-tehtävä",
+      label: "Soveltava tehtävä",
       reason: "Perusosaaminen on riittävä. Nyt testataan siirtyykö osaaminen uuteen tilanteeseen.",
       hintLimit: 0,
       evidenceMultiplier: 1,
@@ -461,7 +461,7 @@ export function practicePathV4(
   }
   return {
     stage: "mixed",
-    label: "Mixed practice",
+    label: "Vaihtelevat tehtävät",
     reason: "Perusosaaminen on vahva. Sekoitetaan tehtävätyyppejä, jotta menetelmä pitää tunnistaa itse.",
     hintLimit: 1,
     evidenceMultiplier: 0.9,
@@ -600,7 +600,7 @@ export function nextBestActionsV4(input: {
       ));
       const priority = (gain * 100 + (planned ? 14 : 0) + (kind === "repair" ? 18 : 0)) / Math.sqrt(minutes);
       const reasons = [
-        model.verificationRequired ? "AI- tai vihjeavun jälkeen tarvitaan itsenäinen varmistus" : null,
+        model.verificationRequired ? "tekoäly- tai vihjeavun jälkeen tarvitaan itsenäinen varmistus" : null,
         openMistakes.length ? "tästä aiheesta on avoin virhe" : null,
         topic.next_review && topic.next_review <= now ? "kertaus on ajankohtainen" : null,
         model.forgettingRisk >= .6 ? "unohtumisriski on noussut" : null,
@@ -750,7 +750,7 @@ export function sessionFatigueV4(
   return {
     level:score>=.62?"high":score>=.34?"watch":"none",
     score:Math.round(score*100),
-    reason:reasons.length?reasons.join(" ja ")+".":"Datassa ei näy selvää session sisäistä väsymissignaalia.",
+    reason:reasons.length?reasons.join(" ja ")+".":"Havainnoissa ei näy selvää opiskelukerran aikaista väsymissignaalia.",
     suggestedBreakMinutes:score>=.62?10:score>=.34?5:0,
     preferredSessionMinutes:preferred,
   };
@@ -774,7 +774,7 @@ export function personalLearningProfileV4(
   if(fatigue.preferredSessionMinutes){
     const n=sessions.filter(s=>typeof s.competence==="number").length;
     observations.push({
-      label:`Nykyisessä datassa noin ${fatigue.preferredSessionMinutes} min sessiot näyttävät toimivan parhaiten.`,
+      label:`Nykyisissä havainnoissa noin ${fatigue.preferredSessionMinutes} min opiskelukerrat näyttävät toimivan parhaiten.`,
       evidence:`${n} sessiota, joissa on osaamisarvio`,
       confidence:n>=12?"high":n>=6?"medium":"low",
     });
@@ -924,7 +924,7 @@ export function experimentInsightsV4(
   return[
     classify("session_length","Sessioiden pituus",sessionA,sessionB,"25 min","40 min"),
     classify("spacing_window","Kertausväli",spacingA,spacingB,"2–3 päivää","4–5 päivää"),
-    classify("interleaving","Harjoittelun järjestys",interleaveA,interleaveB,"blocked","interleaved"),
+    classify("interleaving","Harjoittelun järjestys",interleaveA,interleaveB,"ryhmitelty harjoittelu","limitetty harjoittelu"),
   ];
 }
 
@@ -1012,11 +1012,11 @@ export function learningAchievementsV4(
   const repaired=mistakes.filter(mistake=>mistake.status==="mastered").length;
   const total=Math.max(1,topics.length);
   return[
-    {id:"evidence",title:"Itsenäinen näyttö",body:"Ensimmäinen retrieval-onnistuminen ilman apua.",earned:independent>=1,progress:clamp(independent/1)*100},
-    {id:"growth",title:"Osaaminen kasvaa",body:"Vähintään 10 aihetta on Secure/Strong-tasolla.",earned:strong>=10,progress:clamp(strong/10)*100},
+    {id:"evidence",title:"Itsenäinen näyttö",body:"Ensimmäinen onnistunut muistista palauttaminen ilman apua.",earned:independent>=1,progress:clamp(independent/1)*100},
+    {id:"growth",title:"Osaaminen kasvaa",body:"Vähintään 10 aihetta on vähintään melko varma -tasolla.",earned:strong>=10,progress:clamp(strong/10)*100},
     {id:"retention",title:"Osaaminen säilyy",body:"Viidestä aiheesta on myös viiveellä vahvistettua näyttöä.",earned:retained>=5,progress:clamp(retained/5)*100},
     {id:"recovery",title:"Virheistä takaisin",body:"Viisi aiempaa virhettä on korjattu hallituksi.",earned:repaired>=5,progress:clamp(repaired/5)*100},
-    {id:"coverage",title:"Vahva osaamiskartta",body:"80 % aiheista on vähintään Secure-tasolla.",earned:strong/total>=.8,progress:clamp((strong/total)/.8)*100},
+    {id:"coverage",title:"Vahva osaamiskartta",body:"80 % aiheista on vähintään melko varma -tasolla.",earned:strong/total>=.8,progress:clamp((strong/total)/.8)*100},
   ];
 }
 
@@ -1059,8 +1059,8 @@ export function learningOsSelfCheckV4(input:{
   const now=input.now??today(),day=adaptiveDayPlanV4({...input,now}),actions=nextBestActionsV4({...input,now});
   return[
     {id:"capacity",ok:day.minimumMinutes<=day.capacity&&day.recommendedMinutes<=day.capacity&&day.extraMinutes<=day.capacity,message:"Päiväkuormat pysyvät kapasiteetin sisällä."},
-    {id:"order",ok:actions.every((a,i)=>i===0||actions[i-1]!.priority>=a.priority),message:"Next Best Action pysyy prioriteettijärjestyksessä."},
-    {id:"mastery",ok:input.topics.every(t=>{const m=masteryModelV4(t,input.attempts,{now,examDate:input.courses.find(c=>c.id===t.course_id)?.exam_date??null});return m.score>=0&&m.score<=100&&m.confidence>=0&&m.confidence<=1;}),message:"Mastery ja confidence pysyvät sallituissa rajoissa."},
-    {id:"backlog",ok:buildRecoveryQueue({topics:input.topics,attempts:input.attempts,courses:input.courses,now,capacityMinutes:20,maxItems:3}).items.length<=3,message:"Review Queue ei muutu backlog-seinäksi."},
+    {id:"order",ok:actions.every((a,i)=>i===0||actions[i-1]!.priority>=a.priority),message:"Seuraavaksi suositeltavat tehtävät pysyvät prioriteettijärjestyksessä."},
+    {id:"mastery",ok:input.topics.every(t=>{const m=masteryModelV4(t,input.attempts,{now,examDate:input.courses.find(c=>c.id===t.course_id)?.exam_date??null});return m.score>=0&&m.score<=100&&m.confidence>=0&&m.confidence<=1;}),message:"Osaaminen ja suosituksen varmuus pysyvät sallituissa rajoissa."},
+    {id:"backlog",ok:buildRecoveryQueue({topics:input.topics,attempts:input.attempts,courses:input.courses,now,capacityMinutes:20,maxItems:3}).items.length<=3,message:"Kertausjono ei kasva hallitsemattomaksi."},
   ];
 }
