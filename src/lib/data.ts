@@ -79,7 +79,7 @@ export type FrictionEventV5 = {
   date: string;
   plan_item_id?: string | null;
   course_id?: string | null;
-  reason: "no_time" | "forgot" | "too_tired" | "too_hard" | "unclear_start" | "plans_changed" | "other";
+  reason: "started" | "no_time" | "forgot" | "too_tired" | "too_hard" | "unclear_start" | "plans_changed" | "other";
   note?: string | null;
   self_started?: boolean | null;
   reminder_used?: boolean | null;
