@@ -28,6 +28,7 @@ import {
   type FeedbackPolicyV5,
 } from "@/lib/learning-os-v5/index";
 import {
+  useAdvanceMistake,
   useCalibrationObservations,
   usePreferences,
   usePretestAttempts,
@@ -119,6 +120,7 @@ export function PracticeView({
   const [diagnosticMode, setDiagnosticMode] = useState(false);
   const startedAt = useRef<number>(Date.now());
   const record = useRecordPracticeAttempt();
+  const advanceMistake = useAdvanceMistake();
   const recordPretest = useCreatePretestAttempt();
   const pretestAttempts = usePretestAttempts();
   const updateTopic = useUpdateTopic();
@@ -544,6 +546,15 @@ export function PracticeView({
           recommendation_reason: retention.reason,
           model_version: 5,
         }).catch(() => undefined);
+      }
+
+      if (
+        autoResult === "independent" &&
+        dueMistakeVerification &&
+        activePath?.stage === "delayed_verification"
+      ) {
+        await advanceMistake.mutateAsync({id:dueMistakeVerification.id,status:"mastered"});
+        toast.success("Virheen viivevarmistus onnistui. Virhe on nyt varmennettu hallituksi.");
       }
 
       if (autoResult === "independent") {
