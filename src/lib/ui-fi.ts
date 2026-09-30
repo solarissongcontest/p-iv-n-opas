@@ -57,7 +57,7 @@ export function dimensionLabel(value: string) {
     case "application": return "soveltaminen";
     case "fluency": return "sujuvuus";
     case "retention": return "säilyminen";
-    case "calibration": return "kalibrointi";
+    case "calibration": return "varmuusarvion osuvuus";
     default: return "muu osa-alue";
   }
 }
