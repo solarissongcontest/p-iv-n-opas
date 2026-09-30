@@ -782,7 +782,7 @@ export function PracticeView({
             {shouldAskDelayedPrediction && (
               <fieldset className="rounded-2xl border border-border p-4">
                 <legend className="px-1 text-sm font-medium">Ennen tehtävää: jos sinut testataan nyt, kuinka varma olet?</legend>
-                <p className="mb-3 text-xs text-muted-foreground">Edellisestä saman aiheen yrityksestä on noin {delayedHours} h. Tämä viive-ennuste mitataan ennen palautetta.</p>
+                <p className="mb-3 text-xs text-muted-foreground">Edellisestä saman aiheen yrityksestä on noin {delayedHours} h. Tämä myöhempää muistamista ennakoiva varmuusarvio annetaan ennen palautetta.</p>
                 <div className="flex flex-wrap gap-2">{[[1,"Epävarma"],[2,"Melko varma"],[3,"Varma"]].map(([value,label])=><button key={value} type="button" aria-pressed={delayedPrediction===value} className={delayedPrediction===value?primary:secondary} onClick={()=>setDelayedPrediction(Number(value))}>{label}</button>)}</div>
               </fieldset>
             )}
@@ -854,7 +854,7 @@ export function PracticeView({
               <fieldset>
                 <legend className="mb-2 text-sm font-medium">
                   Kuinka varma olet ennen tarkistusta?{" "}
-                  <span className="font-normal text-muted-foreground">(kalibrointia varten)</span>
+                  <span className="font-normal text-muted-foreground">(varmuusarvion osuvuuden seurantaa varten)</span>
                 </legend>
                 <div className="flex flex-wrap gap-2">
                   {[
