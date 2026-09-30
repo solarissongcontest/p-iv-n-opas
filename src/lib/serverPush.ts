@@ -61,7 +61,7 @@ function privateScalarFromSecret(secret: string) {
 
 export function getVapidKeys() {
   const secret = process.env["SUPABASE_SECRET_KEY"];
-  if (!secret) throw new Error("SUPABASE_SECRET_KEY is required for Web Push.");
+  if (!secret) throw new Error("Taustailmoitusten palvelinasetus puuttuu.");
 
   const privateKey = privateScalarFromSecret(secret);
   const ecdh = createECDH("prime256v1");
