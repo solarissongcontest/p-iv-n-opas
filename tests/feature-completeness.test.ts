@@ -49,23 +49,23 @@ test("non-AI master-plan features remain wired end-to-end", () => {
 });
 
 test("Learning OS v5 remains wired through engine, persistence and UI", () => {
-  const v5Memory = read("src/lib/learning-os-v5/memory.ts");
-  const v5Instruction = read("src/lib/learning-os-v5/instruction.ts");
-  const v5Behavior = read("src/lib/learning-os-v5/behavior.ts");
-  const v5Policy = read("src/lib/learning-os-v5/policy.ts");
-  const v5Exam = read("src/lib/learning-os-v5/exam.ts");
+  const v5 = read("src/lib/learning-os-v5.ts");
   const views = read("src/components/StudyViews.tsx");
   const practice = read("src/components/PracticeView.tsx");
   const plannerPanels = read("src/components/LearningOSV5Panels.tsx");
   const examUi = read("src/components/ExamSimulationV5.tsx");
   const errorLab = read("src/components/ContrastiveErrorLab.tsx");
   const migration = read("supabase/migrations/20260930174500_learning_os_v5.sql");
+  const extension = read("supabase/migrations/20260930180000_learning_os_v5.sql");
 
-  for (const token of ["retentionBudgetV5","stopRuleV5","delayedCalibrationV5"]) assert.ok(v5Memory.includes(token));
-  for (const token of ["pretestPlanV5","instructionDecisionV5","feedbackPolicyV5","transferStateV5","contrastiveRepairPlanV5"]) assert.ok(v5Instruction.includes(token));
-  for (const token of ["frictionInsightV5","reminderTaperV5","subjectTaskProfilesV5"]) assert.ok(v5Behavior.includes(token));
-  for (const token of ["nextBestActionsV5","adaptiveDayPlanV5","confusionSetsV5"]) assert.ok(v5Policy.includes(token));
-  assert.ok(v5Exam.includes("buildExamSimulationV5"));
+  for (const token of [
+    "retentionBudgetV5", "retentionTargetV5", "stopRuleV5",
+    "pretestPlanV5", "instructionDecisionV5", "feedbackPolicyV5",
+    "transferStateV5", "contrastiveRepairPlanV5", "confusionSetsV5",
+    "delayedCalibrationV5", "frictionInsightV5", "reminderTaperV5",
+    "subjectTaskProfilesV5", "whatIfPlannerV5", "buildExamSimulationV5",
+    "nextBestActionsV5", "adaptiveDayPlanV5", "recommendationConfidenceV5",
+  ]) assert.ok(v5.includes(token), "Missing v5 engine capability: " + token);
 
   assert.ok(views.includes("adaptiveDayPlanV5("));
   assert.ok(views.includes("V5PlannerPanel"));
@@ -88,8 +88,18 @@ test("Learning OS v5 remains wired through engine, persistence and UI", () => {
     "implementation_intentions","exam_simulations","is_pretest","transfer_level",
     "stimulus_package","answer_mode","retention_target",
   ]) assert.ok(migration.includes(token), "Missing v5 persistence: " + token);
-});
 
+  for (const token of [
+    "pretest_attempts","retention_targets","stop_rule_events","reminder_adaptation",
+    "learning_policy_snapshots","subject_task_parameters","feedback_policy_enabled",
+    "abitti_simulation_enabled",
+  ]) assert.ok(extension.includes(token), "Missing v5 compatibility persistence: " + token);
+
+  assert.ok(migration.includes("enable row level security"));
+  assert.ok(migration.includes("to authenticated"));
+  assert.ok(extension.includes("enable row level security"));
+  assert.ok(extension.includes("grant select,insert,update,delete"));
+});
 test("master plan keeps evidence and safety invariants", () => {
   const domain = read("src/lib/domain.ts");
   const learning = read("src/lib/learning-os-v4.ts");
