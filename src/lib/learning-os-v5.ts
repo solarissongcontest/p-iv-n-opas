@@ -100,6 +100,7 @@ export type PretestPlan = {
   enabled: boolean;
   questionCount: number;
   affectsMastery: false;
+  masteryNeutral: true;
   feedbackTiming: "after_attempt";
   reason: string;
 };
@@ -342,8 +343,10 @@ function daysToExam(course: Course, now: string) {
 function attemptLevel(attempt: PracticeAttempt): TransferLevel {
   const payload = attempt.question_payload ?? {};
   const storedLevel = typeof attempt.transfer_level === "number" ? attempt.transfer_level : null;
-  if (storedLevel !== null && storedLevel >= 0 && storedLevel < transferOrder.length) {
-    return transferOrder[storedLevel]!;
+  const payloadLevel = typeof payload["transferLevel"] === "number" ? Number(payload["transferLevel"]) : null;
+  const numericLevel = storedLevel ?? payloadLevel;
+  if (numericLevel !== null && numericLevel >= 0 && numericLevel < transferOrder.length) {
+    return transferOrder[numericLevel]!;
   }
   const explicit = String(payload["transferLevel"] ?? "");
   if ([
@@ -467,10 +470,11 @@ export function adaptiveRetentionBudgetV5(input: {
 export function stopRuleV5(
   topic: Topic,
   attempts: PracticeAttempt[],
-  options: { now?: string; sessionDate?: string } = {},
+  options: { now?: string; sessionDate?: string } | string = {},
 ): StopDecision {
-  const now = options.now ?? today();
-  const sessionDate = options.sessionDate ?? now;
+  const normalized = typeof options === "string" ? { now: options, sessionDate: options } : options;
+  const now = normalized.now ?? today();
+  const sessionDate = normalized.sessionDate ?? now;
   const rows = attempts.filter((a) => a.topic_id === topic.id && a.date === sessionDate && !a.is_pretest);
   const independentCorrect = rows.filter((a) => resultScore(a) >= 0.9 && !isAssisted(a)).length;
   const assistedSuccesses = rows.filter((a) => resultScore(a) >= 0.9 && isAssisted(a)).length;
@@ -485,7 +489,7 @@ export function stopRuleV5(
     distinctTypes >= 2 &&
     latestSuccessRate >= 0.88 &&
     !model.verificationRequired;
-  const transferReady = model.level <= 2 || transferSuccesses >= 1 || explanationSuccesses >= 1;
+  const transferReady = model.level <= 3 || transferSuccesses >= 1 || explanationSuccesses >= 1;
   const stop = enoughEvidence && transferReady;
   const marginalGainPerMinute = clamp(
     stop ? 0.002 + model.forgettingRisk * 0.003 :
@@ -613,6 +617,7 @@ export function pretestPlanV5(
     enabled,
     questionCount: enabled ? Math.min(4, Math.max(2, topic.importance >= 4 ? 3 : 2)) : 0,
     affectsMastery: false,
+    masteryNeutral: true,
     feedbackTiming: "after_attempt",
     reason: enabled
       ? "Preview Challenge kartoittaa ennakkotiedot ilman mastery-rangaistusta."
