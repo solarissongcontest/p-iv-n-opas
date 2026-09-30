@@ -91,10 +91,15 @@ export function ContrastiveErrorLab({
     }
     const prompt = parallelTask?.prompt ??
       `Ratkaise uusi soveltava esimerkki aiheesta ${topic?.name ?? "tämä aihe"}. Näytä ratkaisuperiaate ja perustele, miksi sama aiempi virhe ei toistu.`;
+    const attemptTopicId=activeMistake.topic_id ?? parallelTask?.topic_id ?? null;
+    if(!attemptTopicId){
+      toast.error("Rinnakkaistehtävä tarvitsee aiheen ennen kuin yritys voidaan tallentaa.");
+      return;
+    }
     try {
       await recordAttempt.mutateAsync({
         course_id: activeMistake.course_id,
-        topic_id: activeMistake.topic_id ?? topic?.id ?? "",
+        topic_id: attemptTopicId,
         attempt_type: parallelTask?.question_type ?? "application",
         prompt,
         response: answerPlainText(parallelResponse),
