@@ -328,6 +328,10 @@ function daysToExam(course: Course, now: string) {
 
 function attemptLevel(attempt: PracticeAttempt): TransferLevel {
   const payload = attempt.question_payload ?? {};
+  const storedLevel = typeof attempt.transfer_level === "number" ? attempt.transfer_level : null;
+  if (storedLevel !== null && storedLevel >= 0 && storedLevel < transferOrder.length) {
+    return transferOrder[storedLevel]!;
+  }
   const explicit = String(payload["transferLevel"] ?? "");
   if ([
     "recall","same_context","varied_context","different_representation",
@@ -347,7 +351,7 @@ export function recommendationConfidenceV5(
   topic: Topic,
   attempts: PracticeAttempt[],
 ): RecommendationConfidence {
-  const rows = attempts.filter((attempt) => attempt.topic_id === topic.id);
+  const rows = attempts.filter((attempt) => attempt.topic_id === topic.id && !attempt.is_pretest);
   const evidence: RecommendationEvidence = {
     evidenceCount: rows.length,
     distinctDays: new Set(rows.map((row) => row.date)).size,
@@ -454,7 +458,7 @@ export function stopRuleV5(
 ): StopDecision {
   const now = options.now ?? today();
   const sessionDate = options.sessionDate ?? now;
-  const rows = attempts.filter((a) => a.topic_id === topic.id && a.date === sessionDate);
+  const rows = attempts.filter((a) => a.topic_id === topic.id && a.date === sessionDate && !a.is_pretest);
   const independentCorrect = rows.filter((a) => resultScore(a) >= 0.9 && !isAssisted(a)).length;
   const assistedSuccesses = rows.filter((a) => resultScore(a) >= 0.9 && isAssisted(a)).length;
   const distinctTypes = new Set(rows.filter((a) => resultScore(a) >= 0.9).map((a) => a.attempt_type)).size;
@@ -503,7 +507,7 @@ export function instructionPlanV5(
   options: { now?: string; examDate?: string | null } = {},
 ): InstructionPlanV5 {
   const base = practicePathV4(topic, attempts, options);
-  const rows = attempts.filter((a) => a.topic_id === topic.id);
+  const rows = attempts.filter((a) => a.topic_id === topic.id && !a.is_pretest);
   const independent = rows.filter((a) => resultScore(a) >= 0.9 && !isAssisted(a)).length;
   const completion = rows.filter((a) => a.scaffold_stage === "partial_completion" && resultScore(a) >= 0.5).length;
   const explanation = rows.filter((a) => a.attempt_type === "explanation" && resultScore(a) >= 0.9 && !isAssisted(a)).length;
@@ -578,7 +582,7 @@ export function pretestPlanV5(
   topic: Topic,
   attempts: PracticeAttempt[],
 ): PretestPlan {
-  const rows = attempts.filter((a) => a.topic_id === topic.id);
+  const rows = attempts.filter((a) => a.topic_id === topic.id && !a.is_pretest);
   const independent = rows.filter((a) => !isAssisted(a)).length;
   const enabled = independent < 2 && topic.progress < 35;
   return {
@@ -631,7 +635,7 @@ export function delayedCalibrationV5(
   attempts: PracticeAttempt[],
   now = today(),
 ): CalibrationInsight {
-  const rows = attempts.filter((a)=>a.topic_id===topic.id&&typeof a.confidence==="number");
+  const rows = attempts.filter((a)=>a.topic_id===topic.id&&!a.is_pretest&&typeof a.confidence==="number");
   if (!rows.length) return {
     status:"insufficient",score:0,sampleSize:0,delayedSampleSize:0,meanAbsoluteError:1,
     reason:"Kalibrointinäyttöä ei ole vielä.",nextCheckDue:addDays(now,1),
@@ -673,7 +677,7 @@ export function transferLadderV5(
   topic: Topic,
   attempts: PracticeAttempt[],
 ): TransferLadder {
-  const rows=attempts.filter((a)=>a.topic_id===topic.id&&resultScore(a)>=.9&&!isAssisted(a));
+  const rows=attempts.filter((a)=>a.topic_id===topic.id&&!a.is_pretest&&resultScore(a)>=.9&&!isAssisted(a));
   const evidenceByLevel=Object.fromEntries(transferOrder.map(level=>[level,0])) as Record<TransferLevel,number>;
   for(const row of rows) evidenceByLevel[attemptLevel(row)] += 1;
   const completed=transferOrder.filter((level)=>evidenceByLevel[level]>0);
@@ -772,7 +776,7 @@ export function frictionInsightsV5(events:StudyFrictionEvent[]):FrictionInsight[
       reason==="too_large"?"Pilko tehtävä 10–20 minuutin ensimmäiseen askeleeseen.":
       reason==="unclear_start"?"Näytä vain yksi konkreettinen ensimmäinen tehtävä.":
       "Mukauta kalenteria muuttuneeseen päivään ilman opiskelusakkoa.";
-    const score=clamp(rows.length/5+(weekday!==null?.18:0));
+    const score=clamp(rows.length/5+(weekday !== null ? 0.18 : 0));
     return{reason,count:rows.length,weekday,recommendation,confidence:confidenceLevel(score)};
   }).sort((a,b)=>b.count-a.count);
 }
@@ -877,13 +881,13 @@ function actionUtility(
   now:string,
 ):LearningActionV5{
   const examDays=daysToExam(course,now);
-  const examUtility=examDays<=3?1:examDays<=7?.9:examDays<=14?.72:examDays<=30?.48:.2;
+  const examUtility=examDays <= 3 ? 1 : examDays <= 7 ? 0.9 : examDays <= 14 ? 0.72 : examDays <= 30 ? 0.48 : 0.2;
   const retentionBenefit=clamp(model.forgettingRisk*.72+(1-model.dimensions.retention.score/100)*.28);
   const topicAttempts=attempts.filter(a=>a.topic_id===action.topic?.id);
   const recentTimed=topicAttempts.filter(a=>typeof a.response_time_ms==="number").slice(-4);
   const fatigueCost=recentTimed.length>=3&&recentTimed.at(-1)!.response_time_ms!>(recentTimed[0]!.response_time_ms??0)*1.3?.55:.12;
   const confidence=recommendationConfidenceV5(action.topic!,attempts);
-  const expectedLearningGain=clamp(action.learningGain*(stop.stop?.35:1));
+  const expectedLearningGain=clamp(action.learningGain*(stop.stop ? 0.35 : 1));
   const policyScore=
     expectedLearningGain*.39+
     retentionBenefit*.21+
@@ -892,9 +896,9 @@ function actionUtility(
     (1-fatigueCost)*.1;
   const v5Reasons=[
     ...action.reason.split(" · ").filter(Boolean),
-    stop.stop?"tämän päivän lisätoiston rajahyöty on jo pieni":null,
-    retentionBenefit>=.6?"säilymisen suojaaminen on nyt arvokasta":null,
-    confidence.level==="very_low"?"suositus on vielä alustava":null,
+    stop.stop ? "tämän päivän lisätoiston rajahyöty on jo pieni" : null,
+    retentionBenefit >= 0.6 ? "säilymisen suojaaminen on nyt arvokasta" : null,
+    confidence.level === "very_low" ? "suositus on vielä alustava" : null,
   ].filter(Boolean) as string[];
   return{...action,expectedLearningGain,fatigueCost,retentionBenefit,examUtility,confidence,policyScore,v5Reasons};
 }
@@ -921,8 +925,8 @@ export function nextBestActionsV5(input:{
       (edge.topic_id===topic.id||edge.depends_on_topic_id===topic.id)
     );
     const ladder=transferLadderV5(topic,input.attempts);
-    const bonus=(confusion&&!ladder.strongEligible?.04:0)+(ladder.nextTarget==="exam_transfer"?.03:0);
-    return{...v5,policyScore:v5.policyScore+bonus,v5Reasons:[...v5.v5Reasons,confusion?"sekoittuva käsite kannattaa erotella rinnakkain":null].filter(Boolean) as string[]};
+    const bonus=(confusion && !ladder.strongEligible ? 0.04 : 0)+(ladder.nextTarget === "exam_transfer" ? 0.03 : 0);
+    return{...v5,policyScore:v5.policyScore+bonus,v5Reasons:[...v5.v5Reasons,confusion ? "sekoittuva käsite kannattaa erotella rinnakkain" : null].filter(Boolean) as string[]};
   }).sort((a,b)=>b.policyScore-a.policyScore);
 }
 
