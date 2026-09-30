@@ -63,7 +63,7 @@ test("user-facing UI does not regress to known English product jargon", () => {
     "Transfer-tehtävä",
     "Mixed practice",
     "Metakognitiivinen kalibrointi",
-    "Oman arvion tarkkuus ajan myötä",
+    "Viivästetty varmuusarvio",
     "Hyvin kalibroitu",
     "Coach-yhteys",
     "tehtäväblokki",
