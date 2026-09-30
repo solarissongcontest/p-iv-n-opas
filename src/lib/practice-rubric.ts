@@ -151,8 +151,8 @@ export function evaluatePracticeResponse(
       score: Math.round(concepts.ratio * 25),
       max: 25,
       note: concepts.total
-        ? `${concepts.matched}/${concepts.total} rubriikin ydinkohdasta näkyy vastauksessa.`
-        : "Tehtävällä ei ole riittävän tarkkaa käsite-rubriikkia, joten tätä osaa painotetaan vähemmän.",
+        ? `${concepts.matched}/${concepts.total} arvioinnin ydinkohdasta näkyy vastauksessa.`
+        : "Tehtävälle ei ole vielä riittävän tarkkoja käsitekohtaisia arviointiperusteita, joten tätä osaa painotetaan vähemmän.",
     },
     {
       key: "reasoning",
@@ -185,10 +185,10 @@ export function evaluatePracticeResponse(
 
   const summary =
     suggestedResult === "independent"
-      ? "Rubriikki tukee sitä, että vastaus voi olla itsenäisesti onnistunut. Tarkista silti itse ennen tallennusta."
+      ? "Automaattinen arvio tukee sitä, että vastaus on voinut onnistua itsenäisesti. Tarkista silti itse ennen tallennusta."
       : suggestedResult === "hinted"
-        ? "Rubriikki näkee osittaista osaamista, mutta vastauksessa on vielä aukko tai perustelun puute."
-        : "Rubriikki ei vielä näe riittävää näyttöä onnistuneesta vastauksesta.";
+        ? "Automaattisen arvion perusteella vastauksessa näkyy osittaista osaamista, mutta siinä on vielä aukko tai perustelun puute."
+        : "Automaattinen arvio ei vielä löydä riittävää näyttöä onnistuneesta vastauksesta.";
 
   return {
     suggestedResult,
