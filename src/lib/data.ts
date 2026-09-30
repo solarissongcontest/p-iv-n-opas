@@ -181,6 +181,9 @@ export type UserPreferences = {
   retention_budget_enabled?: boolean;
   reminder_taper_enabled?: boolean;
   friction_learning_enabled?: boolean;
+  pretest_enabled?: boolean;
+  feedback_policy_enabled?: boolean;
+  abitti_simulation_enabled?: boolean;
   quiet_hours_start?: string | null;
   quiet_hours_end?: string | null;
   learning_schema_version?: number;
