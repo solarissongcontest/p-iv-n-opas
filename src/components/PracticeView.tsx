@@ -212,7 +212,7 @@ export function PracticeView({
       ? {
           ...selectedInstruction,
           stage:"delayed_verification" as const,
-          label:"Virheen viivevarmistus",
+          label:"Virheen myöhempi varmistus",
           reason:"Korjattu virhe on nyt testattava uudelleen ilman vihjeitä ennen kuin se voidaan merkitä hallituksi.",
           revealWorkedSolution:false,
           maxHints:0,
@@ -562,7 +562,7 @@ export function PracticeView({
         activePath?.stage === "delayed_verification"
       ) {
         await advanceMistake.mutateAsync({id:dueMistakeVerification.id,status:"mastered"});
-        toast.success("Virheen viivevarmistus onnistui. Virhe on nyt varmennettu hallituksi.");
+        toast.success("Virheen myöhempi varmistus onnistui. Virhe on nyt varmennettu hallituksi.");
       }
 
       if (autoResult === "independent") {
@@ -1072,7 +1072,7 @@ export function PracticeView({
               key={"mistake:"+mistake.id}
               className="flex min-h-12 w-full items-center justify-between gap-3 rounded-xl border border-primary/25 bg-accent/50 px-3 text-left"
               onClick={()=>{setTopicId(topic.id);setAttemptIndex(0);setPinnedSelection(null);}}
-            ><span><b>{topic.name} · virheen viivevarmistus</b><small className="mt-1 block text-muted-foreground">Tee uusi tehtävä ilman vihjeitä. Korjaus ei ole valmis ennen tätä näyttöä.</small></span></button>:null})}
+            ><span><b>{topic.name} · virheen myöhempi varmistus</b><small className="mt-1 block text-muted-foreground">Tee uusi tehtävä ilman vihjeitä. Korjaus ei ole valmis ennen tätä näyttöä.</small></span></button>:null})}
           </div>}
           {delayedVerificationQueueV4(courses, courseTopics, attempts).length ? (
             <div className="space-y-2">
