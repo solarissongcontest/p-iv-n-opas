@@ -203,6 +203,7 @@ function DeviceSignIn({
 }
 
 function StudyApp({ user }: { user: DeviceUser }) {
+  const queryClient = useQueryClient();
   setOfflineOwner(user.id);
   const [page, setPage] = useState<Page>("today");
   const [courseId, setCourseId] = useState<string | null>(null);
@@ -238,27 +239,40 @@ function StudyApp({ user }: { user: DeviceUser }) {
   }, []);
 
   useEffect(() => {
-    const refresh = () => {
-      if (document.visibilityState !== "visible") return;
-      void Promise.all([
-        coursesQ.refetch(),
-        topicsQ.refetch(),
-        sessionsQ.refetch(),
-        examsQ.refetch(),
-        planQ.refetch(),
-        testsQ.refetch(),
-        attemptsQ.refetch(),
-        mistakesQ.refetch(),
-        preferencesQ.refetch(),
-      ]);
+    let refreshing = false;
+    const refresh = async () => {
+      if (refreshing || document.visibilityState !== "visible" || !navigator.onLine) return;
+      refreshing = true;
+      try {
+        // Cross-device source of truth is Supabase. Force every currently
+        // mounted study query to re-read it instead of trusting a warm PWA cache.
+        await queryClient.refetchQueries({ type: "active" });
+      } finally {
+        refreshing = false;
+      }
     };
-    document.addEventListener("visibilitychange", refresh);
-    window.addEventListener("focus", refresh);
+    const onVisible = () => {
+      if (document.visibilityState === "visible") void refresh();
+    };
+    const onOnline = () => void refresh();
+
+    document.addEventListener("visibilitychange", onVisible);
+    window.addEventListener("focus", onVisible);
+    window.addEventListener("online", onOnline);
+
+    // iOS installed PWAs can stay foregrounded for a long time without
+    // producing a reliable focus event. A restrained foreground refresh keeps
+    // phone and computer values convergent without turning the UI into polling soup.
+    const timer = window.setInterval(() => void refresh(), 30_000);
+    void refresh();
+
     return () => {
-      document.removeEventListener("visibilitychange", refresh);
-      window.removeEventListener("focus", refresh);
+      document.removeEventListener("visibilitychange", onVisible);
+      window.removeEventListener("focus", onVisible);
+      window.removeEventListener("online", onOnline);
+      window.clearInterval(timer);
     };
-  }, []);
+  }, [queryClient, user.id]);
   useEffect(() => {
     let active = true;
     void ensureKe04ForCurrentUser()
@@ -277,7 +291,16 @@ function StudyApp({ user }: { user: DeviceUser }) {
     return () => { active = false; };
   }, [user.id]);
 
-  useEffect(() => { const stop = subscribePending(setPending); const sync = startSyncWatcher(n => toast.success(`Synkattiin ${n} merkintää.`)); return () => { stop(); sync(); }; }, []);
+  useEffect(() => {
+    const stop = subscribePending(setPending);
+    const sync = startSyncWatcher(n => {
+      toast.success(`Synkattiin ${n} merkintää.`);
+      // Offline writes may have changed sessions, plan state, mastery and
+      // recovery scheduling. Re-read all active views after the queue commits.
+      void queryClient.refetchQueries({ type: "active" });
+    });
+    return () => { stop(); sync(); };
+  }, [queryClient, user.id]);
   useEffect(() => {
     applyTheme(storedThemeIsDark());
     const keys = (e: KeyboardEvent) => {
