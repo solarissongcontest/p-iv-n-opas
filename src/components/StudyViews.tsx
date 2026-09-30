@@ -617,16 +617,16 @@ export function ProgressView({courses,topics,attempts,sessions,plan,exams,mistak
     <Panel title="Osaamiskartta v4">
       <div className="grid gap-2 sm:grid-cols-3 lg:grid-cols-6">
         {[
-          ["Not assessed",v4Groups.unassessed],
+          ["Ei vielä arvioitu",v4Groups.unassessed],
           ["Harjoittele",v4Groups.learning],
-          ["Developing",v4Groups.developing],
+          ["Kehittyvä",v4Groups.developing],
           ["Melko varma",v4Groups.secure],
           ["Vahva",v4Groups.strong],
-          ["At risk",v4Groups.atRisk],
+          ["Riskissä",v4Groups.atRisk],
         ].map(([label,rows])=><div key={label as string} className="rounded-xl bg-muted/50 p-3"><p className="text-xs font-semibold">{label as string}</p><p className="mt-1 text-2xl font-semibold">{(rows as typeof v4Rows).length}</p></div>)}
       </div>
       <div className="mt-4 divide-y divide-border">
-        {[...v4Rows].sort((a,b)=>a.model.level-b.model.level||b.model.uncertainty-a.model.uncertainty).slice(0,16).map(({topic,model})=><details key={topic.id} className="py-3"><summary className="cursor-pointer list-none"><div className="flex min-h-11 items-center justify-between gap-3"><span><b>{courses.find(course=>course.id===topic.course_id)?.code} · {topic.name}</b><small className="mt-1 block text-muted-foreground">{masteryLabelFi(model.label)} · näytön varmuus {Math.round(model.confidence*100)} %{model.blindSpot?" · mahdollinen sokea piste":""}</small></span><span className="text-sm font-semibold">{model.score} %</span></div></summary><div className="mt-2 grid grid-cols-2 gap-2 rounded-xl bg-muted/50 p-3 text-xs sm:grid-cols-3"><span>Muistista palautus <b>{model.dimensions.recall.score}%</b></span><span>Ymmärrys <b>{model.dimensions.understanding.score}%</b></span><span>Soveltaminen <b>{model.dimensions.application.score}%</b></span><span>Sujuvuus <b>{model.dimensions.fluency.score}%</b></span><span>Säilyminen <b>{model.dimensions.retention.score}%</b></span><span>Kalibrointi <b>{model.dimensions.calibration.score}%</b></span><p className="col-span-full text-muted-foreground">Heikoin osa-alue: {dimensionLabel(model.weakestDimension)}. Tarkat prosentit ovat näyttöön perustuvia arvioita, eivät todistuksen numeroita.</p></div></details>)}
+        {[...v4Rows].sort((a,b)=>a.model.level-b.model.level||b.model.uncertainty-a.model.uncertainty).slice(0,16).map(({topic,model})=><details key={topic.id} className="py-3"><summary className="cursor-pointer list-none"><div className="flex min-h-11 items-center justify-between gap-3"><span><b>{courses.find(course=>course.id===topic.course_id)?.code} · {topic.name}</b><small className="mt-1 block text-muted-foreground">{masteryLabelFi(model.label)} · näytön varmuus {Math.round(model.confidence*100)} %{model.blindSpot?" · mahdollinen sokea piste":""}</small></span><span className="text-sm font-semibold">{model.score} %</span></div></summary><div className="mt-2 grid grid-cols-2 gap-2 rounded-xl bg-muted/50 p-3 text-xs sm:grid-cols-3"><span>Muistista palautus <b>{model.dimensions.recall.score}%</b></span><span>Ymmärrys <b>{model.dimensions.understanding.score}%</b></span><span>Soveltaminen <b>{model.dimensions.application.score}%</b></span><span>Sujuvuus <b>{model.dimensions.fluency.score}%</b></span><span>Säilyminen <b>{model.dimensions.retention.score}%</b></span><span>Varmuusarvion osuvuus <b>{model.dimensions.calibration.score}%</b></span><p className="col-span-full text-muted-foreground">Heikoin osa-alue: {dimensionLabel(model.weakestDimension)}. Tarkat prosentit ovat näyttöön perustuvia arvioita, eivät todistuksen numeroita.</p></div></details>)}
       </div>
     </Panel>
 
@@ -703,7 +703,7 @@ export function ProgressView({courses,topics,attempts,sessions,plan,exams,mistak
       <button className={button+" mt-4"} onClick={onPlan}>Tarkista ja hyväksy suunnitelma</button>
     </Panel>
 
-    {forecast&&forecastCourse&&<Panel title="Forecast">
+    {forecast&&forecastCourse&&<Panel title="Ennuste">
       <p className="text-sm text-muted-foreground">{forecastCourse.code} · ensimmäinen sisältökierros</p>
       <p className="mt-2 text-2xl font-semibold">{fullDate(forecast.earliest)}–{fullDate(forecast.latest)}</p>
       {forecastCourse.exam_date&&<p className="mt-1 text-sm">Tavoite / koe {fullDate(forecastCourse.exam_date)} · {forecast.latest<=forecastCourse.exam_date?"aikataulussa":"vaatii suunnitelman tarkistuksen"}</p>}
