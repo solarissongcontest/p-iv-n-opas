@@ -452,7 +452,7 @@ export function practicePathV4(
   if (model.forgettingRisk >= 0.5 || model.dimensions.retention.score < 70) {
     return {
       stage: "delayed_verification",
-      label: "Viivevarmistus",
+      label: "Myöhempi varmistus",
       reason: "Osaaminen näyttää vahvalta, mutta sen säilyminen pitää varmistaa ajan yli.",
       hintLimit: 0,
       evidenceMultiplier: 1,
@@ -765,7 +765,7 @@ export function personalLearningProfileV4(
   if(delayed.length>=3){
     const mean=delayed.reduce((s,a)=>s+Number(a.delay_days??0),0)/delayed.length;
     observations.push({
-      label:`Onnistunut viivekertaus osuu nyt keskimäärin noin ${Math.round(mean)} päivän kohdalle.`,
+      label:`Onnistunut myöhempi kertaus osuu nyt keskimäärin noin ${Math.round(mean)} päivän kohdalle.`,
       evidence:`${delayed.length} onnistunutta viivästettyä yritystä`,
       confidence:delayed.length>=10?"high":delayed.length>=5?"medium":"low",
     });
@@ -1013,10 +1013,10 @@ export function learningAchievementsV4(
   const total=Math.max(1,topics.length);
   return[
     {id:"evidence",title:"Itsenäinen näyttö",body:"Ensimmäinen onnistunut muistista palauttaminen ilman apua.",earned:independent>=1,progress:clamp(independent/1)*100},
-    {id:"growth",title:"Osaaminen kasvaa",body:"Vähintään 10 aihetta on vähintään melko varma -tasolla.",earned:strong>=10,progress:clamp(strong/10)*100},
+    {id:"growth",title:"Osaaminen kasvaa",body:"Vähintään 10 aiheesta osaaminen on melko varmaa tai vahvempaa.",earned:strong>=10,progress:clamp(strong/10)*100},
     {id:"retention",title:"Osaaminen säilyy",body:"Viidestä aiheesta on myös myöhemmin vahvistettua osaamisnäyttöä.",earned:retained>=5,progress:clamp(retained/5)*100},
     {id:"recovery",title:"Virheistä takaisin",body:"Viisi aiempaa virhettä on korjattu hallituksi.",earned:repaired>=5,progress:clamp(repaired/5)*100},
-    {id:"coverage",title:"Vahva osaamiskartta",body:"80 % aiheista on vähintään melko varma -tasolla.",earned:strong/total>=.8,progress:clamp((strong/total)/.8)*100},
+    {id:"coverage",title:"Vahva osaamiskartta",body:"Vähintään 80 prosentista aiheita osaaminen on melko varmaa tai vahvempaa.",earned:strong/total>=.8,progress:clamp((strong/total)/.8)*100},
   ];
 }
 
