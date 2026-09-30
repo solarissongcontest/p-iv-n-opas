@@ -332,6 +332,7 @@ test("runtime if-then engine evaluates late-home, low-energy and missed-days tri
     latestEnergy:2,
     daysSinceLastSession:3,
     weekday:3,
+    recentFrictionReasons:[],
   });
   assert.deepEqual(new Set(effect.triggeredRuleIds),new Set(["late","energy","missed"]));
   assert.equal(effect.replaceWithRetrieval,true);
@@ -381,4 +382,120 @@ test("Learning OS v5 exposes explicit module boundaries",()=>{
   for(const module of ["memory","instruction","discrimination","metacognition","behavior","exam","simulation","personalization","policy"]){
     assert.match(index,new RegExp("\\./"+module+"\\.ts"));
   }
+});
+
+
+test("retention capacity counts only selected study weekdays",()=>{
+  const oneDay={...capacity,studyWeekdays:[3],weekdayMinutes:60,weekendMinutes:90};
+  const t=topic("one-day","Aaltoliike");
+  const budget=retentionBudgetV5({courses:[course],topics:[t],attempts:[],capacity:oneDay,now:NOW});
+  assert.equal(budget.capacityMinutes,60);
+});
+
+test("stop rule uses newest same-day attempts rather than stale successes",()=>{
+  const t=topic("recent-stop","Impulssi");
+  const rows=[
+    attempt("old1",t.id,{attempt_type:"free_recall",created_at:NOW+"T08:00:00Z"}),
+    attempt("old2",t.id,{attempt_type:"application",created_at:NOW+"T08:10:00Z"}),
+    attempt("old3",t.id,{attempt_type:"free_recall",created_at:NOW+"T08:20:00Z"}),
+    attempt("old4",t.id,{attempt_type:"application",created_at:NOW+"T08:30:00Z"}),
+    attempt("new1",t.id,{attempt_type:"application",result:"not_yet",outcome:"incorrect",created_at:NOW+"T12:00:00Z"}),
+    attempt("new2",t.id,{attempt_type:"free_recall",result:"not_yet",outcome:"incorrect",created_at:NOW+"T12:10:00Z"}),
+  ];
+  assert.equal(stopRuleV5(t,rows,NOW).stopToday,false);
+});
+
+test("persisted v5 transfer level 2 means same-context, not varied-context",()=>{
+  const t=topic("transfer-map","Voima");
+  const state=transferStateV5(t,[attempt("same",t.id,{transfer_level:2,question_payload:{transferLevel:2}})]);
+  assert.equal(state.level,2);
+  assert.equal(state.evidenceByLevel[3],0);
+});
+
+test("friction analysis excludes successful starts and matches weekday to the repeated obstacle",()=>{
+  const insight=frictionInsightV5([
+    {date:"2026-09-21",reason:"no_time",self_started:false},
+    {date:"2026-09-28",reason:"no_time",self_started:false},
+    {date:"2026-09-23",reason:"too_tired",self_started:false},
+    {date:"2026-09-30",reason:"started",self_started:true},
+    {date:"2026-09-30",reason:"other",note:"session_start",self_started:true},
+  ]);
+  assert.equal(insight.repeatedReason,"no_time");
+  assert.equal(insight.repeatedWeekday,1);
+});
+
+test("reminder taper reads newest starts from newest-first friction data",()=>{
+  const newestFailures=Array.from({length:5},(_,i)=>({
+    date:"2026-09-"+String(30-i).padStart(2,"0"),reason:"started" as const,self_started:false,reminder_used:true,
+  }));
+  const olderSuccesses=Array.from({length:3},(_,i)=>({
+    date:"2026-09-"+String(20-i).padStart(2,"0"),reason:"started" as const,self_started:true,reminder_used:false,
+  }));
+  const decision=reminderTaperV5([...newestFailures,...olderSuccesses]);
+  assert.equal(decision.mode,"restore");
+});
+
+test("custom friction if-then rules can trigger at runtime",()=>{
+  const effect=evaluateRuntimeIntentionsV5([{
+    id:"forgot",trigger_type:"custom",trigger_value:"forgot_twice",
+    action_type:"replace_with_retrieval",action_value:"10",enabled:true,
+  }],{
+    now:NOW,localTime:"16:00",busyDates:[],latestEnergy:3,daysSinceLastSession:1,weekday:3,
+    recentFrictionReasons:["forgot","forgot"],
+  });
+  assert.deepEqual(effect.triggeredRuleIds,["forgot"]);
+  assert.equal(effect.replaceWithRetrieval,true);
+  assert.equal(effect.maxMinutes,10);
+});
+
+test("Practice Mode consumes feedback preference, pins retries and limits confusion practice to the pair",()=>{
+  const source=readFileSync(new URL("../src/components/PracticeView.tsx",import.meta.url),"utf8");
+  assert.match(source,/feedback_policy_enabled/);
+  assert.match(source,/setPinnedSelection\(selection\)/);
+  assert.match(source,/selectionTopics = confusionSet/);
+  assert.match(source,/confusionSet\?\.topicIds\.includes\(selection\.topic\.id\)/);
+  assert.match(source,/pretestOutcomeScore >= \.75/);
+});
+
+test("due repaired mistakes are surfaced as actionable delayed verifications",()=>{
+  const source=readFileSync(new URL("../src/components/PracticeView.tsx",import.meta.url),"utf8");
+  const engine=readFileSync(new URL("../src/lib/learning-os-v5.ts",import.meta.url),"utf8");
+  assert.match(source,/dueMistakeVerifications/);
+  assert.match(source,/Virheen viivevarmistus/);
+  assert.match(source,/advanceMistake\.mutateAsync\(\{id:dueMistakeVerification\.id,status:"mastered"\}\)/);
+  assert.match(engine,/delayed_verification_due/);
+  assert.match(engine,/kind:"verification"/);
+});
+
+test("exam simulation enforces point cap, autosaves, resumes and writes exam evidence",()=>{
+  const source=readFileSync(new URL("../src/components/ExamSimulationV5.tsx",import.meta.url),"utf8");
+  for(const token of [
+    "currentPoints+task.points>simulation.maxPoints",
+    "useExamSimulations",
+    "opk.exam-simulation:",
+    "answers:next",
+    "completedTaskIds=selected.filter(answerCompleted)",
+    "Oma vastauksesi",
+    "useRecordPracticeAttempt",
+    'source:"exam"',
+    "transferLevel:6",
+    "key={activeTask.id}",
+  ]) assert.ok(source.includes(token),token);
+});
+
+test("push-origin starts are marked as reminder-driven before reminder tapering",()=>{
+  const cron=readFileSync(new URL("../src/routes/api.push.cron.ts",import.meta.url),"utf8");
+  const sw=readFileSync(new URL("../public/sw.js",import.meta.url),"utf8");
+  const views=readFileSync(new URL("../src/components/StudyViews.tsx",import.meta.url),"utf8");
+  assert.match(cron,/\?source=push/);
+  assert.match(sw,/searchParams\.set\("source", "push"\)/);
+  assert.match(views,/params\.get\("source"\)==="push"/);
+  assert.match(views,/self_started:!fromReminder/);
+  assert.match(views,/reminder_used:fromReminder/);
+});
+
+test("accepted implementation intentions reuse an existing persisted rule",()=>{
+  const panel=readFileSync(new URL("../src/components/LearningOSV5Panels.tsx",import.meta.url),"utf8");
+  assert.match(panel,/const existing=\(intentions\.data\?\?\[\]\)\.find/);
+  assert.match(panel,/existing\?\.id/);
 });

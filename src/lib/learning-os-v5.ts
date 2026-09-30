@@ -346,8 +346,17 @@ function attemptLevel(attempt: PracticeAttempt): TransferLevel {
   const storedLevel = typeof attempt.transfer_level === "number" ? attempt.transfer_level : null;
   const payloadLevel = typeof payload["transferLevel"] === "number" ? Number(payload["transferLevel"]) : null;
   const numericLevel = storedLevel ?? payloadLevel;
-  if (numericLevel !== null && numericLevel >= 0 && numericLevel < transferOrder.length) {
-    return transferOrder[numericLevel]!;
+  if (numericLevel !== null) {
+    const numericTransfer: Record<number, TransferLevel> = {
+      0: "recall",
+      1: "recall", // v5 level 1 is self-explanation, not same-context transfer
+      2: "same_context",
+      3: "varied_context",
+      4: "different_representation",
+      5: "unfamiliar_scenario",
+      6: "exam_transfer",
+    };
+    if (numericLevel in numericTransfer) return numericTransfer[numericLevel]!;
   }
   const explicit = String(payload["transferLevel"] ?? "");
   if ([
@@ -482,7 +491,9 @@ export function stopRuleV5(
   const distinctTypes = new Set(rows.filter((a) => resultScore(a) >= 0.9).map((a) => a.attempt_type)).size;
   const transferSuccesses = rows.filter((a) => resultScore(a) >= 0.9 && !isAssisted(a) && ["unfamiliar_scenario","mixed_topic","exam_transfer"].includes(attemptLevel(a))).length;
   const explanationSuccesses = rows.filter((a) => resultScore(a) >= 0.9 && !isAssisted(a) && a.attempt_type === "explanation").length;
-  const recent = rows.slice(-4);
+  const recent = [...rows]
+    .sort((a,b)=>b.created_at.localeCompare(a.created_at))
+    .slice(0,4);
   const latestSuccessRate = recent.length ? recent.reduce((sum,row)=>sum+resultScore(row),0)/recent.length : 0;
   const model = masteryModelV4(topic, attempts, { now });
   const enoughEvidence =
@@ -955,8 +966,27 @@ export function nextBestActionsV5(input:{
       (edge.topic_id===topic.id||edge.depends_on_topic_id===topic.id)
     );
     const ladder=transferLadderV5(topic,input.attempts);
-    const bonus=(confusion && !ladder.strongEligible ? 0.04 : 0)+(ladder.nextTarget === "exam_transfer" ? 0.03 : 0);
-    return{...v5,policyScore:v5.policyScore+bonus,v5Reasons:[...v5.v5Reasons,confusion ? "sekoittuva käsite kannattaa erotella rinnakkain" : null].filter(Boolean) as string[]};
+    const dueRepair=input.mistakes.find(mistake =>
+      mistake.topic_id===topic.id &&
+      mistake.status!=="mastered" &&
+      Boolean(mistake.delayed_verification_due) &&
+      String(mistake.delayed_verification_due)<=now
+    );
+    const bonus=(confusion && !ladder.strongEligible ? 0.04 : 0)+(ladder.nextTarget === "exam_transfer" ? 0.03 : 0)+(dueRepair ? 0.22 : 0);
+    return{
+      ...v5,
+      ...(dueRepair ? {
+        kind:"verification" as const,
+        title:topic.name+" · virheen viivevarmistus",
+        minutes:Math.min(v5.minutes,12),
+      } : {}),
+      policyScore:v5.policyScore+bonus,
+      v5Reasons:[
+        ...v5.v5Reasons,
+        dueRepair ? "korjatun virheen viivevarmistus on nyt ajankohtainen" : null,
+        confusion ? "sekoittuva käsite kannattaa erotella rinnakkain" : null,
+      ].filter(Boolean) as string[],
+    };
   }).sort((a,b)=>b.policyScore-a.policyScore);
 }
 
@@ -999,6 +1029,7 @@ export function adaptiveDayPlanV5(input:{
   now?:string;
   intentions?:ImplementationIntentionV5[];
   sessions?:Session[];
+  frictionEvents?:FrictionEventV5[];
   localTime?:string;
 }){
   const now=input.now??today();
@@ -1008,6 +1039,7 @@ export function adaptiveDayPlanV5(input:{
     capacity:input.capacity,
     now,
     ...(input.localTime ? { localTime: input.localTime } : {}),
+    frictionEvents: input.frictionEvents??[],
   });
   const runtimeIntentions=evaluateRuntimeIntentionsV5(input.intentions??[],runtimeContext);
   const weekday=new Date(now+"T12:00:00").getDay();
@@ -1309,8 +1341,10 @@ export function retentionTargetV5(
 
 function capacityForDateCompat(capacity: CapacityProfile, date: string) {
   if (capacity.busyDates.includes(date)) return 0;
-  const day = new Date(date + "T12:00:00Z").getUTCDay();
-  if (day === 0 || day === 6) return capacity.weekendMinutes;
+  const jsDay = new Date(date + "T12:00:00Z").getUTCDay();
+  const studyDay = jsDay === 0 ? 7 : jsDay; // 1=Mon ... 7=Sun
+  if (capacity.studyWeekdays.length && !capacity.studyWeekdays.includes(studyDay)) return 0;
+  if (jsDay === 0 || jsDay === 6) return capacity.weekendMinutes;
   return capacity.weekdayMinutes;
 }
 
@@ -1498,19 +1532,22 @@ function frictionWeekday(date: string) {
 }
 
 export function frictionInsightV5(events: FrictionEventV5[]): FrictionInsightV5 {
-  const rows = events.filter((event)=>event.reason!=="started");
+  const rows = events.filter((event)=>event.reason!=="started" && event.self_started!==true);
   if (!rows.length) return { repeatedReason:null,repeatedWeekday:null,count:0,suggestion:null,summary:"Ohitetuista sessioista ei ole vielä friction-dataa." };
-  const byReason=new Map<FrictionReasonV5,number>(), byDay=new Map<number,number>();
-  for(const event of rows){byReason.set(event.reason,(byReason.get(event.reason)??0)+1);const d=frictionWeekday(event.date);byDay.set(d,(byDay.get(d)??0)+1);}
+  const byReason=new Map<FrictionReasonV5,number>();
+  for(const event of rows) byReason.set(event.reason,(byReason.get(event.reason)??0)+1);
   const reason=[...byReason.entries()].sort((a,b)=>b[1]-a[1])[0];
-  const day=[...byDay.entries()].sort((a,b)=>b[1]-a[1])[0];
   const repeatedReason=reason&&reason[1]>=2?reason[0]:null;
+  const reasonRows=repeatedReason?rows.filter(event=>event.reason===repeatedReason):[];
+  const byDay=new Map<number,number>();
+  for(const event of reasonRows){const d=frictionWeekday(event.date);byDay.set(d,(byDay.get(d)??0)+1);}
+  const day=[...byDay.entries()].sort((a,b)=>b[1]-a[1])[0];
   const repeatedWeekday=day&&day[1]>=2?day[0]:null;
   let suggestion:ImplementationIntentionV5|null=null;
   if(repeatedReason==="too_tired") suggestion={trigger_type:"low_energy",trigger_value:"true",action_type:"replace_with_retrieval",action_value:"15",enabled:false,suggested:true,reason:"Väsymys toistuu: vaihda raskas työ 15 min retrievaliin."};
   else if(repeatedReason==="no_time"||repeatedReason==="plans_changed") suggestion={trigger_type:"busy_day",trigger_value:repeatedWeekday===null?"any":String(repeatedWeekday),action_type:"lighten",action_value:"0.4",enabled:false,suggested:true,reason:"Aikapula toistuu: tee automaattisesti kevyt päivä."};
   else if(repeatedReason==="too_hard"||repeatedReason==="unclear_start") suggestion={trigger_type:"custom",trigger_value:repeatedReason,action_type:"replace_with_retrieval",action_value:"worked_example_then_10m",enabled:false,suggested:true,reason:"Aloita yhdellä esimerkillä ja rajatulla 10 min tehtävällä."};
-  else if(repeatedReason==="forgot") suggestion={trigger_type:"custom",trigger_value:"forgot_twice",action_type:"move",action_value:"anchor_to_routine",enabled:false,suggested:true,reason:"Sido sessio olemassa olevaan rutiiniin jatkuvien ilmoitusten sijaan."};
+  else if(repeatedReason==="forgot") suggestion={trigger_type:"custom",trigger_value:"forgot_twice",action_type:"replace_with_retrieval",action_value:"10",enabled:false,suggested:true,reason:"Unohtaminen toistuu: tee seuraavasta aloituksesta 10 min retrieval ja sido se tuttuun arjen rutiiniin."};
   return {
     repeatedReason,repeatedWeekday,count:reason?.[1]??0,suggestion,
     summary:repeatedReason?`Yleisin toistuva este on ${repeatedReason}${repeatedWeekday===null?"":`, erityisesti viikonpäivänä ${repeatedWeekday}`}.`:"Yksittäisiä esteitä on, mutta toistuvaa mallia ei vielä näy.",
@@ -1520,6 +1557,7 @@ export function frictionInsightV5(events: FrictionEventV5[]): FrictionInsightV5 
 export function applyImplementationIntentionsV5(
   drafts: PlanDraft[],
   rules: ImplementationIntentionV5[],
+  frictionEvents: FrictionEventV5[] = [],
 ): { drafts: PlanDraft[]; applied: Array<{ id: string; count: number; reason: string }> } {
   const enabled = rules.filter((rule) => rule.enabled);
   const counts = new Map<string, { count: number; reason: string }>();
@@ -1529,6 +1567,19 @@ export function applyImplementationIntentionsV5(
     const weekday = new Date(draft.date + "T12:00:00Z").getUTCDay();
     if (rule.trigger_type === "busy_day") {
       return rule.trigger_value === "any" || rule.trigger_value === String(weekday);
+    }
+    const relevantReason =
+      rule.trigger_type === "low_energy" ? "too_tired" :
+      rule.trigger_type === "custom" && (rule.trigger_value === "too_hard" || rule.trigger_value === "unclear_start") ? rule.trigger_value :
+      rule.trigger_type === "custom" && rule.trigger_value === "forgot_twice" ? "forgot" :
+      null;
+    if (relevantReason) {
+      const matching = frictionEvents.filter(event =>
+        event.reason === relevantReason &&
+        event.self_started !== true &&
+        frictionWeekday(event.date) === weekday
+      );
+      return matching.length >= 2;
     }
     return false;
   };
@@ -1600,6 +1651,7 @@ export type RuntimeIntentionContextV5 = {
   latestEnergy: number | null;
   daysSinceLastSession: number | null;
   weekday: number;
+  recentFrictionReasons: FrictionReasonV5[];
 };
 
 export type RuntimeIntentionEffectV5 = {
@@ -1616,6 +1668,7 @@ export function runtimeIntentionContextV5(input:{
   capacity: CapacityProfile;
   now?: string;
   localTime?: string;
+  frictionEvents?: FrictionEventV5[];
 }):RuntimeIntentionContextV5 {
   const now=input.now??today();
   const recent=[...input.sessions].filter(session=>session.date<=now).sort((a,b)=>
@@ -1629,6 +1682,9 @@ export function runtimeIntentionContextV5(input:{
     latestEnergy:typeof latest?.energy==="number"?latest.energy:null,
     daysSinceLastSession:latest?Math.max(0,diffDays(now,latest.date)):null,
     weekday:new Date(now+"T12:00:00Z").getUTCDay(),
+    recentFrictionReasons:(input.frictionEvents??[])
+      .filter(event=>event.date>=addDays(now,-14) && event.self_started!==true)
+      .map(event=>event.reason),
   };
 }
 
@@ -1664,6 +1720,12 @@ export function evaluateRuntimeIntentionsV5(
     }else if(rule.trigger_type==="missed_days"){
       const threshold=Math.max(1,Number(rule.trigger_value)||2);
       triggered=context.daysSinceLastSession!==null&&context.daysSinceLastSession>=threshold;
+    }else if(rule.trigger_type==="custom"){
+      if(rule.trigger_value==="forgot_twice"){
+        triggered=context.recentFrictionReasons.filter(reason=>reason==="forgot").length>=2;
+      }else if(rule.trigger_value==="too_hard"||rule.trigger_value==="unclear_start"){
+        triggered=context.recentFrictionReasons.filter(reason=>reason===rule.trigger_value).length>=2;
+      }
     }
     if(!triggered)continue;
 
@@ -1700,7 +1762,7 @@ export function reminderTaperV5(events: FrictionEventV5[]): ReminderTaperDecisio
   const started=events.filter((event)=>typeof event.self_started==="boolean");
   if(started.length<5)return{mode:"normal",selfStartRate:started.length?started.filter(e=>e.self_started).length/started.length:null,sampleSize:started.length,recommendation:"Muistutuksia ei vielä säädetä, koska itsenäisistä aloituksista on liian vähän dataa."};
   const rate=started.filter(e=>e.self_started).length/started.length;
-  const recent=started.slice(-5);
+  const recent=started.slice(0,5);
   const recentRate=recent.filter(e=>e.self_started).length/recent.length;
   const mode:ReminderTaperDecisionV5["mode"]=rate>=.85&&recentRate>=.8?"minimal":rate>=.7?"taper":rate<.5&&recentRate<.5?"restore":"normal";
   return{mode,selfStartRate:rate,sampleSize:started.length,recommendation:mode==="minimal"?"Aloitat jo lähes aina itse. Pidä vain kriittiset koe- ja aikataulumuistutukset.":mode==="taper"?"Vähennä tavallisia muistutuksia asteittain.":mode==="restore"?"Palauta yksi kevyt muistutus väliaikaisesti.":"Nykyinen muistutustaso on sopiva."};
@@ -1744,7 +1806,8 @@ export function whatIfPlannerV5(input:{
   const budget=retentionBudgetV5(input);
   const minutes=[...new Set([...(input.customMinutes??[]),20,40,60])].filter(v=>v>0).sort((a,b)=>a-b);
   return minutes.map(minutesPerDay=>{
-    const weeklyCapacity=minutesPerDay*7;
+    const studyDayCount=Math.max(1,input.capacity.studyWeekdays.length);
+    const weeklyCapacity=minutesPerDay*studyDayCount;
     const backlog=Math.max(0,budget.recommendedMinutes-weeklyCapacity);
     const protectedRetentionShare=budget.recommendedMinutes<=0?1:Math.min(1,weeklyCapacity/budget.recommendedMinutes);
     const overloadRisk:WhatIfScenarioV5["overloadRisk"]=weeklyCapacity>=budget.recommendedMinutes*1.3?"low":weeklyCapacity>=budget.minimumMinutes?"medium":"high";

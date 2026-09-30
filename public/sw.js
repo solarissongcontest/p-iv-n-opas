@@ -26,7 +26,11 @@ self.addEventListener("push", (event) => {
 
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
-  const target = new URL(event.notification.data?.url || "/", self.location.origin).href;
+  const targetUrl = new URL(event.notification.data?.url || "/", self.location.origin);
+  if (targetUrl.pathname === "/" && !targetUrl.searchParams.has("source")) {
+    targetUrl.searchParams.set("source", "push");
+  }
+  const target = targetUrl.href;
 
   event.waitUntil(
     clients.matchAll({ type: "window", includeUncontrolled: true }).then((windows) => {

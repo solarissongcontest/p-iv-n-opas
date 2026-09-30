@@ -244,7 +244,7 @@ export const Route = createFileRoute("/api/push/cron")({
             let deliveredToAny = false;
             for (const row of subscriptions) {
               const response = await sendWebPush(row.subscription as StoredPushSubscription, {
-                title, body, url: "/", tag: deliveryKey,
+                title, body, url: "/?source=push", tag: deliveryKey,
               });
               if (response.ok) {
                 deliveredToAny = true; sent += 1;
