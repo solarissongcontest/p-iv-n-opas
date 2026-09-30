@@ -825,7 +825,7 @@ export function frictionInsightsV5(events:StudyFrictionEvent[]):FrictionInsight[
 export function implementationIntentionV5(insight:FrictionInsight):ImplementationIntentionRule{
   if(insight.reason==="too_tired")return{trigger:"low_energy",action:"switch_to_retrieval",parameter:15,label:"Jos energia on matala, vaihda raskas opiskelukerta 15 minuutin muistista palauttamiseen."};
   if(insight.reason==="no_time")return{trigger:"busy_day",action:"protect_minimum",parameter:15,label:"Jos päivä täyttyy, suojaa vähintään 15 min tärkeintä opiskelua."};
-  if(insight.reason==="too_large"||insight.reason==="unclear_start")return{trigger:"busy_day",action:"shorten_session",parameter:15,label:"Jos aloittaminen tökkii, tee vain ensimmäinen 15 min pala."};
+  if(insight.reason==="too_large"||insight.reason==="unclear_start")return{trigger:"busy_day",action:"shorten_session",parameter:15,label:"Jos aloittaminen on vaikeaa, tee vain ensimmäinen 15 minuutin osuus."};
   if(insight.reason==="plans_changed")return{trigger:"busy_day",action:"move_heavy_work",parameter:1,label:"Jos suunnitelmat muuttuvat, siirrä raskas työ seuraavaan kapasiteettipäivään."};
   return{trigger:"two_missed_days",action:"drop_extra",parameter:2,label:"Jos kaksi päivää jää väliin, jätä lisäharjoittelu pois äläkä kasaa velkaa."};
 }
