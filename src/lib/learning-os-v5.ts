@@ -1007,7 +1007,7 @@ export function adaptiveDayPlanV5(input:{
     sessions:input.sessions??[],
     capacity:input.capacity,
     now,
-    localTime:input.localTime,
+    ...(input.localTime ? { localTime: input.localTime } : {}),
   });
   const runtimeIntentions=evaluateRuntimeIntentionsV5(input.intentions??[],runtimeContext);
   const weekday=new Date(now+"T12:00:00").getDay();
