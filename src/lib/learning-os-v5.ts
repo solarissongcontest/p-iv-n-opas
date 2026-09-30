@@ -395,8 +395,8 @@ export function recommendationConfidenceV5(
   const level = confidenceLevel(score);
   const text =
     level === "high" ? `Vahva suositus: ${evidence.evidenceCount} näyttöä ${evidence.distinctDays} päivältä.` :
-    level === "medium" ? `Kohtalainen varmuus: dataa on ${evidence.distinctDays} eri päivältä.` :
-    level === "low" ? "Alustava suositus: henkilökohtaista dataa on vielä vähän." :
+    level === "medium" ? `Kohtalainen varmuus: havaintoja on ${evidence.distinctDays} eri päivältä.` :
+    level === "low" ? "Alustava suositus: henkilökohtaisia havaintoja on vielä vähän." :
     "Tutkimuspohjainen oletus: henkilökohtaista näyttöä ei vielä juuri ole.";
   return { level, score, evidence, text };
 }
