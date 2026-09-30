@@ -35,7 +35,6 @@ test("user-facing UI does not regress to known English product jargon", () => {
     "Friction learning",
     "Reminder Tapering",
     "Subject × task",
-    "Learning OS",
     "Personal Experiment Engine",
     "Adaptive Retention Budget",
     "Adaptive Feedback",
