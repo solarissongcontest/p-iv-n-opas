@@ -233,23 +233,23 @@ export function ExamSimulationV5({courses,topics}:{courses:Course[];topics:Topic
     setSelected([]);setPhase("select");setRowId(null);setActiveIndex(0);setAnswers({});answersRef.current={};setScores({});setStartedAt(null);setElapsed(0);setFinishing(false);
   }
 
-  if(!course)return <section className="panel p-4"><p className="text-sm text-muted-foreground">Lisää kurssi ennen koesimulaatiota.</p></section>;
+  if(!course)return <section className="panel p-4"><p className="text-sm text-muted-foreground">Lisää kurssi ennen koeharjoitusta.</p></section>;
 
   return <section className="panel p-4 sm:p-6">
     <div className="flex flex-wrap items-start justify-between gap-3">
-      <div><h2 className="text-base font-semibold sm:text-lg">YO / Abitti 2 -simulaatio</h2><p className="mt-1 text-sm text-muted-foreground">Tehtävävalinta, suljettu palaute, kaavat sekä piirros- ja kuvaajavastaukset samassa harjoituksessa.</p></div>
+      <div><h2 className="text-base font-semibold sm:text-lg">YO / Abitti 2 -koeharjoitus</h2><p className="mt-1 text-sm text-muted-foreground">Tehtävävalinta, suljettu palaute, kaavat sekä piirros- ja kuvaajavastaukset samassa harjoituksessa.</p></div>
       {phase==="running"&&simulation&&<div className="rounded-xl bg-muted px-3 py-2 text-sm"><b>{Math.floor(elapsed/60)}:{String(elapsed%60).padStart(2,"0")}</b> / {simulation.durationMinutes} min</div>}
     </div>
 
     {phase==="select"&&<>
       {resumable&&<div className="mt-5 rounded-2xl border border-primary/30 bg-accent/50 p-4">
-        <b>Kesken oleva simulaatio löytyi</b>
+        <b>Kesken oleva koeharjoitus löytyi</b>
         <p className="mt-1 text-sm text-muted-foreground">Vastaukset tallennetaan automaattisesti. Voit jatkaa samasta kohdasta ilman, että luonnos katoaa.</p>
-        <button className={primary+" mt-3"} onClick={resumeSimulation}>Jatka kesken jäänyttä simulaatiota</button>
+        <button className={primary+" mt-3"} onClick={resumeSimulation}>Jatka kesken jäänyttä koeharjoitusta</button>
       </div>}
       <div className="mt-5 grid gap-3 sm:grid-cols-2">
         <label className="text-sm font-medium">Kurssi<select className="mt-1 w-full rounded-xl border bg-surface p-3" value={courseId} onChange={e=>{setCourseId(e.target.value);setSelected([]);}}>{courses.filter(c=>!c.archived).map(c=><option key={c.id} value={c.id}>{c.code} · {c.name}</option>)}</select></label>
-        <label className="text-sm font-medium">Tila<select className="mt-1 w-full rounded-xl border bg-surface p-3" value={mode} onChange={e=>{setMode(e.target.value as "practice"|"full");setSelected([]);}}><option value="full">Täysi koesimulaatio</option><option value="practice">Lyhyempi harjoitus</option></select></label>
+        <label className="text-sm font-medium">Tila<select className="mt-1 w-full rounded-xl border bg-surface p-3" value={mode} onChange={e=>{setMode(e.target.value as "practice"|"full");setSelected([]);}}><option value="full">Täysi koeharjoitus</option><option value="practice">Lyhyempi harjoitus</option></select></label>
       </div>
       {simulation?<div className="mt-5">
         <div className="rounded-xl bg-accent/50 p-3 text-sm">Tarjolla {simulation.maxTasks} tehtävää · valitse enintään {simulation.maxSelected} · enintään {simulation.maxPoints} p · {simulation.durationMinutes} min. Vihjeitä tai osaamisnäkymää ei näytetä kesken suorituksen.</div>
@@ -289,6 +289,6 @@ export function ExamSimulationV5({courses,topics}:{courses:Course[];topics:Topic
       <button disabled={update.isPending||recordAttempt.isPending||finishing} className={primary+" mt-4"} onClick={()=>void finishReview()}>{finishing?"Tallennetaan…":"Tallenna koeharjoitus"}</button>
     </>}
 
-    {phase==="done"&&simulation&&<div className="mt-5"><div className="rounded-2xl bg-accent p-4"><h3 className="font-semibold">Koesimulaatio valmis</h3><p className="mt-2 text-sm text-muted-foreground">Pisteet {Object.values(scores).reduce((a,b)=>a+b,0)} / {selectedTasks.reduce((a,b)=>a+b.points,0)}. Vastatut tehtävät on tallennettu koetason osaamisnäytöksi. Tätä ei käytetä automaattisena arvosanaennusteena.</p></div><button className={secondary+" mt-4"} onClick={reset}>Uusi simulaatio</button></div>}
+    {phase==="done"&&simulation&&<div className="mt-5"><div className="rounded-2xl bg-accent p-4"><h3 className="font-semibold">Koeharjoitus valmis</h3><p className="mt-2 text-sm text-muted-foreground">Pisteet {Object.values(scores).reduce((a,b)=>a+b,0)} / {selectedTasks.reduce((a,b)=>a+b.points,0)}. Vastatut tehtävät on tallennettu koetason osaamisnäytöksi. Tätä ei käytetä automaattisena arvosanaennusteena.</p></div><button className={secondary+" mt-4"} onClick={reset}>Uusi koeharjoitus</button></div>}
   </section>;
 }
