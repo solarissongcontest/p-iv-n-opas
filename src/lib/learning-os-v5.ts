@@ -1038,7 +1038,7 @@ export function adaptiveDayPlanV5(input:{
   };
   const minimum=select(minimumBudget,2);
   const recommended=select(recommendedBudget,3);
-  const extra=select(capacity,5);
+  const extra=runtimeIntentions.dropExtra ? recommended : select(capacity,5);
   const sum=(rows:LearningActionV5[])=>rows.reduce((total,row)=>total+row.minutes,0);
   const nextUnused=policy.actions.find(action=>!recommended.some(row=>row.id===action.id));
   return{
