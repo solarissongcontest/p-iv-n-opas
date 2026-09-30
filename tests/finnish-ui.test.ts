@@ -30,6 +30,7 @@ const files = [
   "../src/lib/learning-os-v4.ts",
   "../src/lib/learning-os-v5.ts",
   "../src/lib/domain.ts",
+  "../src/lib/practice-rubric.ts",
 ];
 
 const source = files
@@ -108,6 +109,18 @@ test("user-facing UI does not regress to known English product jargon", () => {
     "Synkattiin ",
     "Try again",
     '<html lang="en">',
+    "evidenssin varmuuden",
+    "Rubriikki tukee",
+    "Rubriikki näkee",
+    "Rubriikki ei vielä",
+    "käsite-rubriikkia",
+    "kalibrointia, ei osaamispisteitä",
+    "(vain kalibrointiin)",
+    "YO / Abitti 2 -simulaatio",
+    "Kesken oleva simulaatio löytyi",
+    "Täysi koesimulaatio",
+    "Koesimulaatio valmis",
+    "Uusi simulaatio",
   ];
   for (const phrase of forbidden) {
     assert.equal(source.includes(phrase), false, phrase);
