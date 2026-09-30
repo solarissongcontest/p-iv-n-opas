@@ -775,7 +775,7 @@ export function personalLearningProfileV4(
     const n=sessions.filter(s=>typeof s.competence==="number").length;
     observations.push({
       label:`Nykyisissä havainnoissa noin ${fatigue.preferredSessionMinutes} min opiskelukerrat näyttävät toimivan parhaiten.`,
-      evidence:`${n} sessiota, joissa on osaamisarvio`,
+      evidence:`${n} opiskelukertaa, joissa on osaamisarvio`,
       confidence:n>=12?"high":n>=6?"medium":"low",
     });
   }
@@ -922,7 +922,7 @@ export function experimentInsightsV4(
   }
 
   return[
-    classify("session_length","Sessioiden pituus",sessionA,sessionB,"25 min","40 min"),
+    classify("session_length","Opiskelukertojen pituus",sessionA,sessionB,"25 min","40 min"),
     classify("spacing_window","Kertausväli",spacingA,spacingB,"2–3 päivää","4–5 päivää"),
     classify("interleaving","Harjoittelun järjestys",interleaveA,interleaveB,"ryhmitelty harjoittelu","limitetty harjoittelu"),
   ];
