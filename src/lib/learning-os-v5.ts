@@ -816,7 +816,7 @@ export function frictionInsightsV5(events:StudyFrictionEvent[]):FrictionInsight[
       reason==="forgot"?"Käytä yhtä kevyttä aloitusmuistutusta, mutta vältä muistutusriippuvuutta.":
       reason==="too_large"?"Pilko tehtävä 10–20 minuutin ensimmäiseen askeleeseen.":
       reason==="unclear_start"?"Näytä vain yksi konkreettinen ensimmäinen tehtävä.":
-      "Mukauta kalenteria muuttuneeseen päivään ilman opiskelusakkoa.";
+      "Mukauta kalenteria muuttuneeseen päivään ilman myöhemmin korvattavaa velkaa.";
     const score=clamp(rows.length/5+(weekday !== null ? 0.18 : 0));
     return{reason,count:rows.length,weekday,recommendation,confidence:confidenceLevel(score)};
   }).sort((a,b)=>b.count-a.count);
@@ -1427,7 +1427,7 @@ export function feedbackPolicyV5(input: {
 }): FeedbackPolicyV5 {
   if (input.mode === "exam_simulation") return {
     timing: "after_block", reveal: "score_only", retriesBeforeReveal: 0,
-    explanation: "Koetilassa palaute pidätetään koko tehtäväblokin loppuun.",
+    explanation: "Koetilassa palaute pidätetään, kunnes kaikki valitut tehtävät on tehty.",
   };
   if (input.mode === "pretest") return {
     timing: "after_item", reveal: "principle", retriesBeforeReveal: 0,
@@ -1449,7 +1449,7 @@ export function feedbackPolicyV5(input: {
   };
 }
 
-const transferCompatLabels = ["Muistista palautus","Selitys","Sama konteksti","Muunneltu konteksti","Eri esitystapa","Uusi tilanne","Koetason soveltaminen"];
+const transferCompatLabels = ["Muistista palautus","Selitys","Sama tilanne","Muunneltu tilanne","Eri esitystapa","Uusi tilanne","Koetason soveltaminen"];
 
 export function transferStateV5(topic: Topic, attempts: PracticeAttempt[]): TransferStateV5 {
   const ladder = transferLadderV5(topic, attempts);
@@ -1843,10 +1843,10 @@ export function contrastiveRepairPlanV5(mistake:Mistake){
       "Selitä omin sanoin miksi ero muuttaa lopputulosta.",
       "Korjaa vain virheellinen vaihe ja jatka ratkaisu loppuun.",
       "Ratkaise uusi saman periaatteen tehtävä ilman mallia.",
-      "Aikatauluta viivevarmistus muutaman päivän päähän.",
+      "Aikatauluta myöhempi varmistus muutaman päivän päähän.",
     ],
     completed:mistake.status==="mastered",
-    next:mistake.status==="open"?"Paikanna ensimmäinen poikkeama.":mistake.status==="corrected"?"Ratkaise uusi rinnakkaistehtävä.":mistake.status==="retested"?"Tee viivevarmistus.":"Virhe on varmennettu korjatuksi.",
+    next:mistake.status==="open"?"Paikanna ensimmäinen poikkeama.":mistake.status==="corrected"?"Ratkaise uusi rinnakkaistehtävä.":mistake.status==="retested"?"Tee myöhempi varmistus.":"Virhe on varmennettu korjatuksi.",
   };
 }
 
