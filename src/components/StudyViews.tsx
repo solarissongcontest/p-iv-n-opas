@@ -27,7 +27,6 @@ import {
   weeklyLearningReview,
 } from "@/lib/learning-engine";
 import {
-  adaptiveDayPlanV4,
   errorProfileV4,
   experimentInsightsV4,
   learningAchievementsV4,
@@ -39,6 +38,7 @@ import {
   simulateLearningOsV4,
   yoOverviewV4,
 } from "@/lib/learning-os-v4";
+import { adaptiveDayPlanV5 } from "@/lib/learning-os-v5";
 import {
   corridor,
   corridorAdvice,
@@ -71,6 +71,7 @@ import {
 import {
   useArchiveCourse,
   useCourses,
+  useCreateFrictionEvent,
   useAdvanceMistake,
   useGeneratePlan,
   useMovePlanItem,
@@ -79,6 +80,7 @@ import {
   useProgressEvents,
   useSettings,
   useResolveMistake,
+  useTopicDependencies,
   useUpdatePreferences,
   useUpdateSettings,
   useUpdateTopic,
@@ -92,6 +94,9 @@ import { applyTheme, storedThemeIsDark } from "@/lib/theme";
 import { clearDeviceSession, type DeviceUser } from "@/lib/deviceSession";
 import { KnowledgeGraphEditor, MaterialImporter } from "@/components/CourseLearningTools";
 import { answerPlainText } from "@/components/AbittiAnswerEditor";
+import { V5LearningHealthPanel, V5PlannerPanel } from "@/components/LearningOSV5Panels";
+import { ExamSimulationV5 } from "@/components/ExamSimulationV5";
+import { ContrastiveErrorLab } from "@/components/ContrastiveErrorLab";
 import {
   CourseEditForm,
   ExamForm,
@@ -122,9 +127,10 @@ export function TodayView({courses,topics,sessions,exams,plan,tests,attempts,mis
 }) {
   const now=today();
   const move=useMovePlanItem(),upsert=useUpsertPlanItem();
+  const graph=useTopicDependencies(),friction=useCreateFrictionEvent();
   const [taskIndex,setTaskIndex]=useState(0);
   const [loadMode,setLoadMode]=useState<"minimum"|"recommended"|"extra">("recommended");
-  const adaptiveDay=adaptiveDayPlanV4({courses,topics,plan,attempts,mistakes,capacity,now});
+  const adaptiveDay=adaptiveDayPlanV5({courses,topics,plan,attempts,mistakes,capacity,dependencies:graph.data??[],now});
   const actions=adaptiveDay[loadMode];
   useEffect(()=>{if(taskIndex>=actions.length)setTaskIndex(0);},[actions.length,taskIndex]);
   const nextAction=actions[taskIndex]??actions[0];
@@ -142,6 +148,16 @@ export function TodayView({courses,topics,sessions,exams,plan,tests,attempts,mis
   const openMistakes=examCourse?mistakes.filter(m=>m.course_id===examCourse.id&&m.status!=="mastered").length:0;
   const reason=nextAction?.reason??"";
 
+  function askFrictionReason(){
+    const raw=window.prompt("Miksi tämä ei onnistu tänään? 1 = ei aikaa, 2 = unohdin, 3 = liian väsynyt, 4 = liian vaikea, 5 = en tiedä mistä aloittaa, 6 = suunnitelmat muuttuivat","1");
+    const map:Record<string,"no_time"|"forgot"|"too_tired"|"too_hard"|"unclear_start"|"plans_changed"|"other">={"1":"no_time","2":"forgot","3":"too_tired","4":"too_hard","5":"unclear_start","6":"plans_changed"};
+    return map[raw??""]??"other";
+  }
+  function startChosen(action:(typeof actions)[number]){
+    void friction.mutateAsync({date:now,plan_item_id:action.planItem?.id??null,course_id:action.course.id,reason:"started",self_started:true,reminder_used:false}).catch(()=>undefined);
+    if(action.planItem)onStart(action.planItem.id);else onGo("practice");
+  }
+
   async function makeLight(){
     if(!next)return;
     const light=Math.max(5,next.min_minutes||Math.round(next.target_minutes*0.5));
@@ -153,6 +169,7 @@ export function TodayView({courses,topics,sessions,exams,plan,tests,attempts,mis
 
   async function cannotToday(){
     if(!next)return;
+    const frictionReason=askFrictionReason();
     const course=courses.find(candidate=>candidate.id===next.course_id);
     const date=findNextStudyDate({
       plan,fromISO:now,studyWeekdays:capacity.studyWeekdays,minutes:next.target_minutes,ignoreItemId:next.id,latestDate:course?.exam_date??null,capacity,
@@ -165,6 +182,7 @@ export function TodayView({courses,topics,sessions,exams,plan,tests,attempts,mis
     try{
       await move.mutateAsync({id:next.id,date,from:next.date});
       setTaskIndex(0);
+      void friction.mutateAsync({date:now,plan_item_id:next.id,course_id:next.course_id,reason:frictionReason,self_started:false,reminder_used:false}).catch(()=>undefined);
       toast.success(`Tehtävä siirrettiin päivälle ${fullDate(date)}. Tänään ei synny opiskelusakkoa.`);
     }catch{toast.error("Tehtävää ei voitu siirtää.");}
   }
@@ -195,12 +213,12 @@ export function TodayView({courses,topics,sessions,exams,plan,tests,attempts,mis
       <details className="mt-3 text-sm text-muted-foreground"><summary className="cursor-pointer font-medium text-foreground">Miksi nämä?</summary><p className="mt-2">Koska {reason}.</p>{adaptiveDay.stoppedForLowMarginalGain&&<p className="mt-2">Suositus loppuu tähän, koska seuraavan tehtävän arvioitu oppimishyöty per minuutti laskee selvästi.</p>}</details>
       <p className="mt-3 text-xs text-muted-foreground">Tämän version kokonaiskuorma on noin {minutes(todayMinutes)}. Extra ei muutu opiskelusakoksi.</p>
       <div className="mt-5 flex flex-wrap gap-2">
-        <button className={button} onClick={()=>nextAction.planItem?onStart(nextAction.planItem.id):onGo("practice")}>Aloita</button>
+        <button className={button} onClick={()=>startChosen(nextAction)}>Aloita</button>
         {actions.length>1&&<button className={secondary} onClick={()=>setTaskIndex(i=>(i+1)%actions.length)}>Seuraava ehdotus</button>}
         {loadMode!=="minimum"&&<button className={secondary} onClick={()=>{setLoadMode("minimum");setTaskIndex(0);}}>Kevyt päivä</button>}
         {next&&<button disabled={move.isPending} className={secondary} onClick={()=>void cannotToday()}>En ehdi tänään</button>}
       </div>
-      {later.length>0&&<div className="mt-5 border-t border-border pt-3"><p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Sen jälkeen</p>{later.map(action=><button key={action.id} className="mt-2 flex min-h-11 w-full items-center justify-between rounded-xl bg-muted/50 px-3 text-left" onClick={()=>action.planItem?onStart(action.planItem.id):onGo("practice")}><span><b className="mr-2 text-primary">{action.course.code}</b>{action.title}</span><span className="text-sm text-muted-foreground">{minutes(action.minutes)}</span></button>)}</div>}
+      {later.length>0&&<div className="mt-5 border-t border-border pt-3"><p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Sen jälkeen</p>{later.map(action=><button key={action.id} className="mt-2 flex min-h-11 w-full items-center justify-between rounded-xl bg-muted/50 px-3 text-left" onClick={()=>startChosen(action)}><span><b className="mr-2 text-primary">{action.course.code}</b>{action.title}</span><span className="text-sm text-muted-foreground">{minutes(action.minutes)}</span></button>)}</div>}
     </>:<>
       <p className="font-medium">Ei pakollista itsenäistä opiskelua tänään.</p>
       <p className="mt-2 text-sm text-muted-foreground">Tämän päivän tärkeimmät oppimistarpeet ovat hallinnassa. Tyhjä päivä ei ole järjestelmävirhe.</p>
