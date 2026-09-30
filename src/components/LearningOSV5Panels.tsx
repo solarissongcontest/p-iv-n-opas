@@ -237,8 +237,8 @@ export function V5LearningHealthPanel({courses,attempts}:{courses:Course[];topic
 
   return <div className="space-y-4">
     <div className="grid gap-4 lg:grid-cols-3">
-      <Panel title="Viivästetty varmuusarvio">
-        <p className="text-xl font-semibold">{calibrationState.status==="well_calibrated"?"Hyvin kalibroitu":calibrationState.status==="overconfident"?"Liikaa varmuutta":calibrationState.status==="underconfident"?"Liikaa epävarmuutta":"Kerätään näyttöä"}</p>
+      <Panel title="Varmuusarvion osuvuus">
+        <p className="text-xl font-semibold">{calibrationState.status==="well_calibrated"?"Varmuusarviot osuvat hyvin":calibrationState.status==="overconfident"?"Arvioit osaamisesi usein liian varmaksi":calibrationState.status==="underconfident"?"Arvioit osaamisesi usein liian epävarmaksi":"Kerätään lisää näyttöä"}</p>
         <p className="mt-2 text-sm text-muted-foreground">{calibrationState.recommendation}</p>
         <p className="mt-3 text-xs text-muted-foreground">{calibrationState.observations} havaintoa{calibrationState.delayedAccuracy==null?"":" · myöhempien arvioiden osumatarkkuus "+pct(calibrationState.delayedAccuracy)}</p>
       </Panel>
