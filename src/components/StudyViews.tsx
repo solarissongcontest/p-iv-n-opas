@@ -128,10 +128,20 @@ export function TodayView({courses,topics,sessions,exams,plan,tests,attempts,mis
 }) {
   const now=today();
   const move=useMovePlanItem(),upsert=useUpsertPlanItem();
-  const graph=useTopicDependencies(),friction=useCreateFrictionEvent();
+  const graph=useTopicDependencies(),friction=useCreateFrictionEvent(),intentions=useImplementationIntentions();
   const [taskIndex,setTaskIndex]=useState(0);
   const [loadMode,setLoadMode]=useState<"minimum"|"recommended"|"extra">("recommended");
-  const adaptiveDay=adaptiveDayPlanV5({courses,topics,plan,attempts,mistakes,capacity,dependencies:graph.data??[],now});
+  const [localTime,setLocalTime]=useState("00:00");
+  useEffect(()=>{
+    const update=()=>setLocalTime(new Date().toLocaleTimeString("fi-FI",{hour:"2-digit",minute:"2-digit",hour12:false}));
+    update();
+    const timer=window.setInterval(update,60_000);
+    return()=>window.clearInterval(timer);
+  },[]);
+  const adaptiveDay=adaptiveDayPlanV5({
+    courses,topics,plan,attempts,mistakes,capacity,dependencies:graph.data??[],now,
+    intentions:intentions.data??[],sessions,localTime,
+  });
   const actions=adaptiveDay[loadMode];
   useEffect(()=>{if(taskIndex>=actions.length)setTaskIndex(0);},[actions.length,taskIndex]);
   const nextAction=actions[taskIndex]??actions[0];
@@ -201,6 +211,17 @@ export function TodayView({courses,topics,sessions,exams,plan,tests,attempts,mis
         <div><p className="text-sm text-muted-foreground">Valmistautumisvaihe</p><p className="text-xl font-semibold">{examPrep?.stages[examPrep.index]?.label??"—"}</p><p className="mt-1 text-xs text-muted-foreground">{examPrep?`Vaihe ${examPrep.index+1}/6`:"Ei vaihetta"} · ei arvosanaennuste</p></div>
         <div><p className="text-sm text-muted-foreground">Avoimet virheet</p><p className="text-2xl font-semibold">{openMistakes}</p><p className="text-sm text-muted-foreground">{mode.finalStretch?"Pidä kuorma kevyenä.":"Painota koetason tehtäviä ja kertausta."}</p></div>
       </div>
+    </Panel>}
+
+    {adaptiveDay.runtimeIntentions.triggeredRuleIds.length>0&&<Panel title="If-then-sääntö aktiivinen">
+      <p className="text-sm text-muted-foreground">{adaptiveDay.runtimeIntentions.notes.join(" ")||"Tämän päivän kuormaa mukautettiin automaattisesti aktiivisen säännön perusteella."}</p>
+      <p className="mt-2 text-sm">{
+        adaptiveDay.runtimeIntentions.replaceWithRetrieval
+          ? "Raskas työ vaihdettiin kevyeen retrievaliin."
+          : adaptiveDay.runtimeIntentions.dropExtra
+            ? "Extra jätetään pois tältä päivältä."
+            : "Päivän kuormaa kevennettiin."
+      }{adaptiveDay.runtimeIntentions.maxMinutes ? " Yhden tehtävän yläraja on nyt "+minutes(adaptiveDay.runtimeIntentions.maxMinutes)+"." : ""}</p>
     </Panel>}
 
     <Panel title="Tärkein tänään" action={
