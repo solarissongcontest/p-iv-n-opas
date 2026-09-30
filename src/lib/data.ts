@@ -355,7 +355,10 @@ async function listFrictionEvents(): Promise<FrictionEventV5[]> {
     .order("created_at", { ascending: false })
     .limit(500);
   if (error) throw error;
-  return (data ?? []) as FrictionEventV5[];
+  return (data ?? []).map((row: Record<string, unknown>) => ({
+    ...row,
+    date: String(row["event_date"] ?? ""),
+  })) as FrictionEventV5[];
 }
 
 async function listImplementationIntentions(): Promise<ImplementationIntentionV5[]> {
