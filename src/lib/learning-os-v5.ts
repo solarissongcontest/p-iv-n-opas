@@ -3,6 +3,7 @@ import type {
   Course,
   Mistake,
   PlanItem,
+  PlanDraft,
   PracticeAttempt,
   QuestionBankItem,
   Session,
@@ -1498,6 +1499,81 @@ export function frictionInsightV5(events: FrictionEventV5[]): FrictionInsightV5 
   return {
     repeatedReason,repeatedWeekday,count:reason?.[1]??0,suggestion,
     summary:repeatedReason?`Yleisin toistuva este on ${repeatedReason}${repeatedWeekday===null?"":`, erityisesti viikonpäivänä ${repeatedWeekday}`}.`:"Yksittäisiä esteitä on, mutta toistuvaa mallia ei vielä näy.",
+  };
+}
+
+export function applyImplementationIntentionsV5(
+  drafts: PlanDraft[],
+  rules: ImplementationIntentionV5[],
+): { drafts: PlanDraft[]; applied: Array<{ id: string; count: number; reason: string }> } {
+  const enabled = rules.filter((rule) => rule.enabled);
+  const counts = new Map<string, { count: number; reason: string }>();
+
+  const matches = (draft: PlanDraft, rule: ImplementationIntentionV5) => {
+    if (draft.kind === "exam") return false;
+    const weekday = new Date(draft.date + "T12:00:00Z").getUTCDay();
+    if (rule.trigger_type === "busy_day") {
+      return rule.trigger_value === "any" || rule.trigger_value === String(weekday);
+    }
+    return false;
+  };
+
+  const transformed = drafts.map((source) => {
+    let draft = { ...source };
+    for (const rule of enabled) {
+      if (!matches(draft, rule)) continue;
+      let changed = false;
+
+      if (rule.action_type === "lighten") {
+        const factor = Math.max(0.2, Math.min(1, Number(rule.action_value) || 0.4));
+        const target = Math.max(10, Math.round((draft.target_minutes * factor) / 5) * 5);
+        draft = {
+          ...draft,
+          target_minutes: target,
+          min_minutes: Math.min(target, Math.max(5, Math.round((target * 0.6) / 5) * 5)),
+          extra_minutes: 0,
+          phase: draft.phase === "content" ? "review" : draft.phase,
+          kind: draft.phase === "content" ? "review" : draft.kind,
+          title: draft.title.includes("kevyt") ? draft.title : draft.title + " – kevyt versio",
+        };
+        changed = true;
+      } else if (rule.action_type === "replace_with_retrieval") {
+        const parsed = Number(rule.action_value);
+        const target = Number.isFinite(parsed) ? Math.max(5, Math.min(30, parsed)) : 15;
+        draft = {
+          ...draft,
+          phase: "review",
+          kind: "review",
+          target_minutes: target,
+          min_minutes: Math.min(10, target),
+          extra_minutes: 0,
+          title: draft.title.replace(/\s[–-].*$/, "") + " – kevyt retrieval",
+        };
+        changed = true;
+      } else if (rule.action_type === "move" && /^\+\d+$/.test(rule.action_value)) {
+        const days = Math.max(1, Math.min(7, Number(rule.action_value.slice(1))));
+        draft = { ...draft, date: addDays(draft.date, days) };
+        changed = true;
+      } else if (rule.action_type === "protect_rest") {
+        draft = { ...draft, extra_minutes: 0 };
+        changed = true;
+      }
+
+      if (changed) {
+        const id = rule.id ?? [rule.trigger_type, rule.trigger_value, rule.action_type].join(":");
+        const previous = counts.get(id);
+        counts.set(id, {
+          count: (previous?.count ?? 0) + 1,
+          reason: rule.reason ?? "Aktiivinen if-then-sääntö mukautti ehdotusta.",
+        });
+      }
+    }
+    return draft;
+  });
+
+  return {
+    drafts: transformed,
+    applied: [...counts.entries()].map(([id, value]) => ({ id, ...value })),
   };
 }
 
