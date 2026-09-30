@@ -402,7 +402,7 @@ export function practicePathV4(
   if (model.evidenceCount === 0 || model.level <= 1) {
     return {
       stage: "worked_example",
-      label: "Opittu esimerkki",
+      label: "Malliesimerkki",
       reason: "Aiheesta ei ole vielä riittävää näyttöä. Ensin rakennetaan ratkaisun rakenne.",
       hintLimit: 5,
       evidenceMultiplier: 0.28,
@@ -1014,7 +1014,7 @@ export function learningAchievementsV4(
   return[
     {id:"evidence",title:"Itsenäinen näyttö",body:"Ensimmäinen onnistunut muistista palauttaminen ilman apua.",earned:independent>=1,progress:clamp(independent/1)*100},
     {id:"growth",title:"Osaaminen kasvaa",body:"Vähintään 10 aihetta on vähintään melko varma -tasolla.",earned:strong>=10,progress:clamp(strong/10)*100},
-    {id:"retention",title:"Osaaminen säilyy",body:"Viidestä aiheesta on myös viiveellä vahvistettua näyttöä.",earned:retained>=5,progress:clamp(retained/5)*100},
+    {id:"retention",title:"Osaaminen säilyy",body:"Viidestä aiheesta on myös myöhemmin vahvistettua osaamisnäyttöä.",earned:retained>=5,progress:clamp(retained/5)*100},
     {id:"recovery",title:"Virheistä takaisin",body:"Viisi aiempaa virhettä on korjattu hallituksi.",earned:repaired>=5,progress:clamp(repaired/5)*100},
     {id:"coverage",title:"Vahva osaamiskartta",body:"80 % aiheista on vähintään melko varma -tasolla.",earned:strong/total>=.8,progress:clamp((strong/total)/.8)*100},
   ];
