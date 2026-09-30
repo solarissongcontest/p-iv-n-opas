@@ -736,7 +736,7 @@ export function ProgressView({courses,topics,attempts,sessions,plan,exams,mistak
   </div>;
 }
 
-export function SettingsView({user}:{user:DeviceUser}) {
+export function SettingsView({user:_user}:{user:DeviceUser}) {
   const [dark,setDark]=useState(typeof window!=="undefined"?storedThemeIsDark():false);
   const [pushEnabled,setPushEnabled]=useState(false);
   const [pushBusy,setPushBusy]=useState(false);
