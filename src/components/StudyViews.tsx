@@ -663,7 +663,7 @@ export function ProgressView({courses,topics,attempts,sessions,plan,exams,mistak
           ["Viivepalautus",productMetrics.delayedRecallRate===null?"—":Math.round(productMetrics.delayedRecallRate*100)+" %"],
           ["Itsenäinen onnistuminen",productMetrics.independentSuccessRate===null?"—":Math.round(productMetrics.independentSuccessRate*100)+" %"],
           ["Osaamisen vakaus",productMetrics.masteryStability===null?"—":Math.round(productMetrics.masteryStability*100)+" %"],
-          ["Recovery success",productMetrics.recoverySuccessRate===null?"—":Math.round(productMetrics.recoverySuccessRate*100)+" %"],
+          ["Virheistä palautuminen",productMetrics.recoverySuccessRate===null?"—":Math.round(productMetrics.recoverySuccessRate*100)+" %"],
           ["Vakaata / tunti",productMetrics.studyEfficiency===null?"—":(Math.round(productMetrics.studyEfficiency*10)/10).toString()],
         ].map(([label,value])=><div key={label} className="rounded-xl bg-muted/50 p-3"><small className="text-muted-foreground">{label}</small><p className="mt-1 text-xl font-semibold">{value}</p></div>)}
       </div>
