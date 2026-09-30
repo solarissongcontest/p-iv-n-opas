@@ -214,6 +214,46 @@ test("v5 policy stays capacity-bounded",()=>{
   assert.ok(day.extraMinutes<=day.capacity);
 });
 
+test("enabled if-then rules change planner drafts but never the exam item",()=>{
+  const drafts=[
+    {
+      course_id:course.id,topic_id:"t",date:"2026-10-05",phase:"content" as const,kind:"study",
+      title:"Ympyräliike",min_minutes:20,target_minutes:50,extra_minutes:15,start_time:null,
+    },
+    {
+      course_id:course.id,topic_id:null,date:"2026-10-20",phase:"exam" as const,kind:"exam",
+      title:"Koe",min_minutes:0,target_minutes:0,extra_minutes:0,start_time:null,
+    },
+  ];
+  const applied=applyImplementationIntentionsV5(drafts,[{
+    id:"rule-1",trigger_type:"busy_day",trigger_value:"1",action_type:"lighten",
+    action_value:"0.4",enabled:true,reason:"Maanantai on toistuvasti liian täysi.",
+  }]);
+  assert.equal(applied.drafts[0]!.target_minutes,20);
+  assert.equal(applied.drafts[0]!.extra_minutes,0);
+  assert.equal(applied.drafts[0]!.phase,"review");
+  assert.equal(applied.drafts[1]!.kind,"exam");
+  assert.equal(applied.applied[0]?.count,1);
+});
+
+test("v5 reminder taper never suppresses critical exam reminders in cron priority",()=>{
+  const cron=readFileSync(new URL("../src/routes/api.push.cron.ts",import.meta.url),"utf8");
+  const examPriority=cron.indexOf("nearestExamDays");
+  const ordinaryStudy=cron.indexOf("studyReminderAllowed && weekdays.includes");
+  assert.ok(examPriority>=0);
+  assert.ok(ordinaryStudy>examPriority);
+  assert.match(cron,/reminder_adaptation/);
+  assert.match(cron,/recommended_level/);
+});
+
+test("v5 health persists reminder adaptation and subject-task parameters",()=>{
+  const panel=readFileSync(new URL("../src/components/LearningOSV5Panels.tsx",import.meta.url),"utf8");
+  assert.match(panel,/useUpsertReminderAdaptation/);
+  assert.match(panel,/useUpsertSubjectTaskParameters/);
+  assert.match(panel,/profile\.observations>=8/);
+  assert.match(panel,/reminder\.sampleSize<5/);
+});
+
 test("YO/Abitti simulation enforces closed-feedback constraints",()=>{
   const t=topic("exam-topic","Mekaniikka");
   const question=(id:string,index:number)=>({
