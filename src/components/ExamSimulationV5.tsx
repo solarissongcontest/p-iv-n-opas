@@ -224,7 +224,7 @@ export function ExamSimulationV5({courses,topics}:{courses:Course[];topics:Topic
       setPhase("done");
       toast.success("Koeharjoitus tallennettiin ja koetason osaamisnäyttö päivitettiin.");
     }catch{
-      toast.error("Koetulosta ei voitu tallentaa kokonaan. Luonnos säilytettiin jatkamista varten.");
+      toast.error("Koetulosta ei voitu tallentaa kokonaan. Keskeneräinen vastaus säilytettiin jatkamista varten.");
     }finally{setFinishing(false);}
   }
 
