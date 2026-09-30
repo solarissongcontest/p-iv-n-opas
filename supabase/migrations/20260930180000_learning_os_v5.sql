@@ -299,6 +299,17 @@ begin
 end
 $$;
 
+grant select,insert,update,delete on public.pretest_attempts to service_role;
+grant select,insert,update,delete on public.retention_targets to service_role;
+grant select,insert,update,delete on public.stop_rule_events to service_role;
+grant select,insert,update,delete on public.reminder_adaptation to service_role;
+grant select,insert,update,delete on public.learning_policy_snapshots to service_role;
+grant select,insert,update,delete on public.subject_task_parameters to service_role;
+
+revoke execute on function public.learning_os_v5_capture_calibration() from public;
+revoke execute on function public.learning_os_v5_transfer_metadata() from public;
+revoke execute on function public.learning_os_v5_capture_pretest_event() from public;
+
 grant execute on function public.learning_os_v5_capture_calibration() to authenticated,service_role;
 grant execute on function public.learning_os_v5_transfer_metadata() to authenticated,service_role;
 grant execute on function public.learning_os_v5_capture_pretest_event() to authenticated,service_role;
