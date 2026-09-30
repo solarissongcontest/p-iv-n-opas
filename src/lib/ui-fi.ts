@@ -7,7 +7,7 @@ export const RELATION_LABELS = {
 } as const;
 
 export function relationLabel(value: string) {
-  return RELATION_LABELS[value as keyof typeof RELATION_LABELS] ?? value.replaceAll("_", " ");
+  return RELATION_LABELS[value as keyof typeof RELATION_LABELS] ?? "muu yhteys";
 }
 
 export function confidenceLabel(value: string) {
@@ -16,7 +16,7 @@ export function confidenceLabel(value: string) {
     case "low": return "vähäinen";
     case "medium": return "kohtalainen";
     case "high": return "vahva";
-    default: return value.replaceAll("_", " ");
+    default: return "tuntematon";
   }
 }
 
@@ -25,7 +25,7 @@ export function riskLabel(value: string) {
     case "low": return "pieni";
     case "medium": return "kohtalainen";
     case "high": return "suuri";
-    default: return value.replaceAll("_", " ");
+    default: return "tuntematon";
   }
 }
 
@@ -34,7 +34,7 @@ export function marginalValueLabel(value: string) {
     case "low": return "pieni";
     case "medium": return "kohtalainen";
     case "high": return "suuri";
-    default: return value.replaceAll("_", " ");
+    default: return "tuntematon";
   }
 }
 
@@ -46,7 +46,7 @@ export function masteryLabelFi(value: string) {
     case "Secure": return "Melko varma";
     case "Strong": return "Vahva";
     case "At risk": return "Riskissä";
-    default: return value;
+    default: return "Ei vielä arvioitu";
   }
 }
 
@@ -58,7 +58,7 @@ export function dimensionLabel(value: string) {
     case "fluency": return "sujuvuus";
     case "retention": return "säilyminen";
     case "calibration": return "kalibrointi";
-    default: return value.replaceAll("_", " ");
+    default: return "muu osa-alue";
   }
 }
 
@@ -67,7 +67,7 @@ export function experimentStatusLabel(value: string) {
     case "clear": return "selvä havainto";
     case "signal": return "alustava havainto";
     case "collecting": return "kerätään havaintoja";
-    default: return value.replaceAll("_", " ");
+    default: return "tila tuntematon";
   }
 }
 
@@ -76,7 +76,7 @@ export function simulationProfileLabel(value: string) {
     case "good_recall_weak_application": return "Muistaminen vahvaa, soveltaminen heikompaa";
     case "frequent_forgetting": return "Asiat unohtuvat tavallista nopeammin";
     case "high_confidence_errors": return "Varmuus on ajoittain suoritusta korkeampi";
-    default: return value.replaceAll("_", " ");
+    default: return "muu oppimisprofiili";
   }
 }
 
@@ -86,7 +86,7 @@ export function yoPhaseLabel(value: string) {
     case "consolidation": return "Osaamisen vahvistaminen";
     case "exam_practice": return "Koetyylinen harjoittelu";
     case "final_review": return "Loppukertaus";
-    default: return value.replaceAll("_", " ");
+    default: return "muu vaihe";
   }
 }
 
@@ -96,7 +96,7 @@ export function eventKindLabel(value: string) {
     case "review": return "kertaus";
     case "practice": return "harjoittelu";
     case "exam": return "koe";
-    default: return value.replaceAll("_", " ");
+    default: return "muu tapahtuma";
   }
 }
 
@@ -112,7 +112,7 @@ export function attemptTypeLabel(value: string) {
     case "error_detection": return "virheen tunnistaminen";
     case "simulation": return "koetyylinen tehtävä";
     case "recognition": return "menetelmän tunnistaminen";
-    default: return value.replaceAll("_", " ");
+    default: return "muu tehtävätyyppi";
   }
 }
 
@@ -124,7 +124,7 @@ export function planPhaseLabel(value: string) {
     case "review": return "kertaus";
     case "light": return "kevyt päivä";
     case "exam": return "koe";
-    default: return value.replaceAll("_", " ");
+    default: return "muu vaihe";
   }
 }
 
@@ -133,7 +133,7 @@ export function plannerModeLabel(value: string) {
     case "manual": return "Manuaalinen";
     case "assisted": return "Avustettu";
     case "autopilot": return "Automaattinen";
-    default: return value.replaceAll("_", " ");
+    default: return "muu tila";
   }
 }
 
