@@ -20,8 +20,10 @@ import {
   confusionSetsV5,
   feedbackPolicyV5,
   instructionDecisionV5,
+  pretestPlanV5,
   retentionTargetV5,
   stopRuleV5,
+  subjectTaskProfilesV5,
   transferStateV5,
   type FeedbackPolicyV5,
 } from "@/lib/learning-os-v5/index";
@@ -29,7 +31,9 @@ import {
   useCalibrationObservations,
   useCreateCalibrationObservation,
   usePreferences,
+  usePretestAttempts,
   useQuestionBank,
+  useCreatePretestAttempt,
   useRecordPracticeAttempt,
   useTopicDependencies,
   useUpdateTopic,
@@ -116,6 +120,8 @@ export function PracticeView({
   const [diagnosticMode, setDiagnosticMode] = useState(false);
   const startedAt = useRef<number>(Date.now());
   const record = useRecordPracticeAttempt();
+  const recordPretest = useCreatePretestAttempt();
+  const pretestAttempts = usePretestAttempts();
   const updateTopic = useUpdateTopic();
   const preferences = usePreferences();
   const questionBank = useQuestionBank();
@@ -158,6 +164,15 @@ export function PracticeView({
   const selectedInstruction = selectedTopic
     ? instructionDecisionV5(selectedTopic, attempts, { examDate: course?.exam_date ?? null })
     : null;
+  const previewPlan = selectedTopic ? pretestPlanV5(selectedTopic, attempts) : null;
+  const completedPretests = selectedTopic
+    ? (pretestAttempts.data ?? []).filter((row) => row.topic_id === selectedTopic.id).length
+    : 0;
+  const previewActive =
+    !diagnosticMode &&
+    (preferences.data?.pretest_enabled ?? true) &&
+    Boolean(previewPlan?.enabled) &&
+    completedPretests < (previewPlan?.questionCount ?? 0);
   const activePath = diagnosticMode && selectedInstruction
     ? {
         ...selectedInstruction,
@@ -168,7 +183,27 @@ export function PracticeView({
         maxHints: 0,
         requiresIndependentFollowup: false,
       }
-    : selectedInstruction;
+    : previewActive && selectedInstruction
+      ? {
+          ...selectedInstruction,
+          stage: "pretest" as const,
+          label: "Preview Challenge",
+          reason: previewPlan?.reason ?? "Ennakkotesti kartoittaa esitiedot ilman mastery-rangaistusta.",
+          revealWorkedSolution: false,
+          maxHints: 0,
+          requiresIndependentFollowup: false,
+        }
+      : selectedInstruction?.stage === "pretest"
+        ? {
+            ...selectedInstruction,
+            stage: "worked_example" as const,
+            label: "Worked example",
+            reason: "Preview Challenge on jo tehty. Nyt rakennetaan ratkaisumalli ennen itsenäistä harjoittelua.",
+            revealWorkedSolution: true,
+            maxHints: Math.max(2, selectedInstruction.maxHints),
+            requiresIndependentFollowup: true,
+          }
+        : selectedInstruction;
   const stopDecision = selectedTopic ? stopRuleV5(selectedTopic, attempts) : null;
   const transferState = selectedTopic ? transferStateV5(selectedTopic, attempts) : null;
   const confusionSet = useMemo(
@@ -189,6 +224,10 @@ export function PracticeView({
     experimentsEnabled && selectedTopic
       ? experimentVariantV4("spacing_window", today(), courseId + ":" + selectedTopic.id)
       : null;
+  const subjectProfiles = useMemo(
+    () => subjectTaskProfilesV5(attempts, (id) => courses.find((candidate) => candidate.id === id)?.subject ?? "Muu"),
+    [attempts, courses],
+  );
   const interleaveMode =
     confusionSet
       ? "interleaved" as const
@@ -340,6 +379,29 @@ export function PracticeView({
       activePath?.stage === "self_explanation" ? 1 : 0;
 
     try {
+      if (activePath?.stage === "pretest") {
+        await recordPretest.mutateAsync({
+          course_id: selection.topic.course_id,
+          topic_id: selection.topic.id,
+          question_bank_id: selection.question.bankId ?? null,
+          prompt: selection.question.prompt,
+          response: storedResponse || null,
+          predicted_confidence: confidence,
+          outcome: resultOutcome === "correct" ? "correct" : resultOutcome === "partial" ? "partial" : "incorrect",
+        });
+        setFeedbackPolicy(effectiveFeedbackPolicy);
+        const answerReveal =
+          isMultipleChoice && selection.question.correctAnswer
+            ? " Oikea vastaus: " + selection.question.correctAnswer + "."
+            : "";
+        setFeedback(
+          "Preview Challenge tallennettiin mastery-neutraalina havaintona." +
+          answerReveal +
+          " " + selection.question.explanation,
+        );
+        return;
+      }
+
       const recordedAttemptId = await record.mutateAsync({
         course_id: selection.topic.course_id,
         topic_id: selection.topic.id,
@@ -421,13 +483,24 @@ export function PracticeView({
         }).catch(() => undefined);
       }
 
-      if (experimentsEnabled && spacingVariant && autoResult === "independent") {
-        const days = spacingVariant === "A" ? 3 : 5;
-        await updateTopic.mutateAsync({
-          id: selection.topic.id,
-          // Experiment controls only the next review suggestion, never mastery itself.
-          next_review: addDays(today(), days),
-        } as Parameters<typeof updateTopic.mutateAsync>[0]);
+      if (autoResult === "independent") {
+        const profile = subjectProfiles.find((row) =>
+          row.subject === (course?.subject ?? "Muu") &&
+          row.attemptType === selection.question.type &&
+          row.reliability.label !== "low"
+        );
+        const experimentalDays = spacingVariant === "A" ? 3 : spacingVariant === "B" ? 5 : null;
+        const baseDays = experimentalDays ?? 4;
+        const personalizedDays = profile
+          ? Math.max(1, Math.min(14, Math.round(baseDays * profile.spacingMultiplier)))
+          : baseDays;
+        if ((experimentsEnabled && spacingVariant) || profile) {
+          await updateTopic.mutateAsync({
+            id: selection.topic.id,
+            // Personalization changes only the next review suggestion, never mastery itself.
+            next_review: addDays(today(), personalizedDays),
+          } as Parameters<typeof updateTopic.mutateAsync>[0]);
+        }
       }
 
       setFeedbackPolicy(effectiveFeedbackPolicy);
