@@ -203,7 +203,7 @@ export function PracticeView({
         ...selectedInstruction,
         stage: "independent" as const,
         label: "Diagnostiikka",
-        reason: "Lähtötaso mitataan ilman vihjeitä, jotta Planner ei aloita arvailusta.",
+        reason: "Lähtötaso mitataan ilman vihjeitä, jotta harjoittelu ei ala arvailusta.",
         revealWorkedSolution: false,
         maxHints: 0,
         requiresIndependentFollowup: false,
