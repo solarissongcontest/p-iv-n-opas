@@ -103,7 +103,9 @@ export type ConfusionSetV5 = {
 
 export type CalibrationObservationV5 = {
   id?: string;
+  course_id?: string | null;
   topic_id: string;
+  attempt_id?: string | null;
   predicted_confidence: number;
   actual_outcome: "correct" | "partial" | "incorrect";
   delay_hours: number;
