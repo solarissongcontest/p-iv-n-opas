@@ -12,6 +12,7 @@ import {
   answerPlainText,
 } from "@/components/AbittiAnswerEditor";
 import { contrastiveRepairPlanV5 } from "@/lib/learning-os-v5";
+import { stimulusFieldLabel } from "@/lib/ui-fi";
 
 const primary =
   "inline-flex min-h-11 items-center justify-center rounded-xl bg-primary px-4 text-sm font-medium text-primary-foreground disabled:opacity-50";
@@ -132,9 +133,9 @@ export function ContrastiveErrorLab({
       setParallelSubmitted(true);
       toast.success(
         result === "independent"
-          ? "Rinnakkaistehtävä varmennettiin itsenäisesti. Viivevarmistus jäi jonoon."
+          ? "Rinnakkaistehtävä onnistui itsenäisesti. Myöhempi varmistus lisättiin kertausjonoon."
           : result === "hinted"
-            ? "Rinnakkaistehtävä tallennettiin, mutta itsenäinen viivevarmistus tarvitaan vielä."
+            ? "Rinnakkaistehtävä tallennettiin, mutta osaaminen pitää vielä varmistaa myöhemmin ilman apua."
             : "Virhe tarvitsee vielä uuden korjauskierroksen.",
       );
     } catch {
@@ -231,9 +232,11 @@ export function ContrastiveErrorLab({
             `Ratkaise uusi soveltava esimerkki aiheesta ${topic?.name ?? "tämä aihe"}. Näytä ratkaisuperiaate ja perustele, miksi sama aiempi virhe ei toistu.`}
         </p>
         {parallelTask?.stimulus_package && Object.keys(parallelTask.stimulus_package).length > 0 && (
-          <pre className="mt-3 overflow-x-auto rounded-xl bg-muted/60 p-3 text-xs">
-            {JSON.stringify(parallelTask.stimulus_package, null, 2)}
-          </pre>
+          <div className="mt-3 space-y-2 rounded-xl bg-muted/60 p-3 text-xs">
+            {Object.entries(parallelTask.stimulus_package).map(([key,value],index)=>(
+              <div key={key}><b>{stimulusFieldLabel(key,index)}:</b>{" "}{typeof value==="string"||typeof value==="number"?String(value):Array.isArray(value)?value.map(String).join(", "):"Lisäaineisto"}</div>
+            ))}
+          </div>
         )}
         <div className="mt-4">
           <AbittiAnswerEditor
