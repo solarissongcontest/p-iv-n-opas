@@ -97,3 +97,18 @@ test("styles are layered and responsive page families remain explicit", () => {
     assert.ok(layouts.includes(token), token);
   }
 });
+
+
+test("planned study sessions and running exams suppress competing chrome", () => {
+  const app = read("src/app/StudyApp.tsx");
+  const session = read("src/features/session/SessionForm.tsx");
+  const exam = read("src/components/ExamSimulationV5.tsx");
+  const layouts = read("src/styles/layouts.css");
+
+  assert.match(app, /presentation="focus"/);
+  assert.match(session, /study-session-focus/);
+  assert.match(exam, /exam-simulation-\+phase/);
+  assert.match(exam, /Lopeta koe/);
+  assert.match(layouts, /:has\(\.exam-simulation-running\)/);
+  assert.match(layouts, /\.study-session-focus/);
+});
