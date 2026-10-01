@@ -1,7 +1,8 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- reconciliation spans tables that are newer than generated Supabase types
 type AdminClient = SupabaseClient<any>;
-type Row = Record<string, any>;
+type Row = Record<string, unknown>;
 
 const OWNER_TABLES = [
   "study_sessions",
