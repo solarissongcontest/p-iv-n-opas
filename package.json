@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite dev",
-    "build": "node scripts/assert-canonical-repo.mjs && node scripts/migrate-db.mjs && vite build && tsc --noEmit",
+    "build": "node scripts/assert-canonical-repo.mjs && vite build && tsc --noEmit",
     "build:dev": "vite build --mode development",
     "preview": "vite preview",
     "lint": "eslint .",
@@ -16,7 +16,8 @@
     "e2e:smoke": "playwright test e2e/iphone-smoke.spec.ts e2e/release-gate.spec.ts",
     "e2e:cross-device": "playwright test e2e/v5-cross-device.spec.ts --project=desktop-chromium",
     "e2e:visual": "playwright test e2e/responsive-visual.spec.ts --project=desktop-chromium",
-    "e2e:install": "npm install --no-save @playwright/test@1.55.0 @axe-core/playwright@4.10.2"
+    "e2e:install": "npm install --no-save @playwright/test@1.55.0 @axe-core/playwright@4.10.2",
+    "db:migrate": "node scripts/migrate-db.mjs"
   },
   "overrides": {
     "rolldown": "1.2.1"

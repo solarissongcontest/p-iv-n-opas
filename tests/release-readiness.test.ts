@@ -83,3 +83,14 @@ test("README documents current Structure V4 navigation instead of the legacy fiv
   assert.match(readme, /\/studies\/:courseCode/);
   assert.equal(readme.includes("Tänään | Suunnitelma | + | Kurssit | Kehitys"), false);
 });
+
+
+test("production build is side-effect free and database migration is explicit", () => {
+  const pkg = JSON.parse(read("package.json")) as { scripts: Record<string,string> };
+  assert.equal(pkg.scripts.build.includes("migrate-db"), false);
+  assert.equal(pkg.scripts["db:migrate"], "node scripts/migrate-db.mjs");
+
+  const migrate = read("scripts/migrate-db.mjs");
+  assert.match(migrate, /POSTGRES_URL is required/);
+  assert.match(migrate, /supabase@2\.117\.0/);
+});
