@@ -228,6 +228,19 @@ export function ExamSimulationV5({courses,topics}:{courses:Course[];topics:Topic
     }finally{setFinishing(false);}
   }
 
+  function pauseExam(){
+    if(rowId){
+      localStorage.setItem("opk.exam-simulation:"+rowId,JSON.stringify({
+        answers:answersRef.current,
+        selected,
+        activeIndex,
+        startedAt,
+      }));
+      update.mutate({id:rowId,answers:answersRef.current});
+    }
+    setPhase("select");
+  }
+
   function reset(){
     if(rowId)localStorage.removeItem("opk.exam-simulation:"+rowId);
     setSelected([]);setPhase("select");setRowId(null);setActiveIndex(0);setAnswers({});answersRef.current={};setScores({});setStartedAt(null);setElapsed(0);setFinishing(false);
@@ -235,10 +248,13 @@ export function ExamSimulationV5({courses,topics}:{courses:Course[];topics:Topic
 
   if(!course)return <section className="panel p-4"><p className="text-sm text-muted-foreground">Lisää kurssi ennen koesimulaatiota.</p></section>;
 
-  return <section className="panel p-4 sm:p-6">
+  return <section className={"exam-simulation exam-simulation-"+phase+" panel p-4 sm:p-6"}>
     <div className="flex flex-wrap items-start justify-between gap-3">
       <div><h2 className="text-base font-semibold sm:text-lg">YO / Abitti 2 -simulaatio</h2><p className="mt-1 text-sm text-muted-foreground">Tehtävävalinta, suljettu palaute, kaavat sekä piirros- ja kuvaajavastaukset samassa harjoituksessa.</p></div>
-      {phase==="running"&&simulation&&<div className="rounded-xl bg-muted px-3 py-2 text-sm"><b>{Math.floor(elapsed/60)}:{String(elapsed%60).padStart(2,"0")}</b> / {simulation.durationMinutes} min</div>}
+      {phase==="running"&&simulation&&<div className="flex items-center gap-2">
+        <div className="rounded-xl bg-muted px-3 py-2 text-sm"><b>{Math.floor(elapsed/60)}:{String(elapsed%60).padStart(2,"0")}</b> / {simulation.durationMinutes} min</div>
+        <button type="button" className={secondary} onClick={pauseExam}>Lopeta koe</button>
+      </div>}
     </div>
 
     {phase==="select"&&<>
