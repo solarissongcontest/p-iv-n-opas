@@ -371,16 +371,16 @@ function StudyApp({ user }: { user: DeviceUser }) {
     </LiquidGlass>
     <main id="main-content" tabIndex={-1} className="app-main app-desktop-main px-4">
       <header className="page-desktop-header mb-8 hidden items-end justify-between pt-7 md:flex"><div><p className="text-sm text-muted-foreground">{pageEyebrow}</p><h1 className="mt-1 text-3xl font-semibold">{pageTitle}</h1></div></header>
-      <header className="app-mobile-header md:hidden">
+      <LiquidGlass lensing as="header" className="app-mobile-header md:hidden">
         <div className="min-w-0">
           <p className="truncate text-[12px] font-medium text-muted-foreground">{pageEyebrow}</p>
           <h1 className="mt-0.5 truncate text-[28px] font-semibold leading-tight">{pageTitle}</h1>
         </div>
         <div className="flex gap-1">
-          <button aria-label="Haku" onClick={()=>setSearch(true)} className="app-icon-button"><Search size={20}/></button>
-          <button aria-label="Lisää toimintoja" aria-expanded={moreOpen} onClick={()=>setMoreOpen(v=>!v)} className="app-icon-button"><Ellipsis size={21}/></button>
+          <button aria-label="Haku" onClick={()=>setSearch(true)} className="app-icon-button glass-interactive"><Search size={20}/></button>
+          <button aria-label="Lisää toimintoja" aria-expanded={moreOpen} onClick={()=>setMoreOpen(v=>!v)} className="app-icon-button glass-interactive"><Ellipsis size={21}/></button>
         </div>
-      </header>
+      </LiquidGlass>
       {pending>0 && <p role="status" className="mb-5 rounded-xl bg-accent p-3 text-sm">Tallennettu paikallisesti · {pending} muutosta synkronoidaan yhteyden palattua.</p>}
       {error && <div role="alert" className="panel mb-5 p-4"><p className="font-medium">{pending>0?"Kaikkea ei voitu vielä synkronoida.":"Tietojen lataus tai alustus epäonnistui."}</p>{pending>0&&<p className="mt-1 text-sm text-muted-foreground">Syöttämäsi tiedot ovat tallessa tässä laitteessa ja synkronoidaan yhteyden palattua.</p>}<p className="mt-1 text-sm text-muted-foreground">{String(error)}</p><button className="mt-2 underline" onClick={()=>{setDefaultsReady(false);setDefaultsError(null);void ensureKe04ForCurrentUser().then(()=>Promise.all([coursesQ.refetch(),topicsQ.refetch(),sessionsQ.refetch(),examsQ.refetch(),planQ.refetch(),testsQ.refetch(),attemptsQ.refetch(),mistakesQ.refetch(),preferencesQ.refetch()])).then(()=>setDefaultsReady(true)).catch(err=>{setDefaultsError(err instanceof Error?err.message:"Uudelleenyritys epäonnistui.");setDefaultsReady(true);});}}>Yritä uudelleen</button></div>}
       <section className={`page-content page-content-${page}`} data-page={page}>
