@@ -808,7 +808,9 @@ export function ProgressView({courses,topics,attempts,sessions,plan,exams,mistak
   </InsightLayout>;
 }
 
-export function SettingsView({user:_user}:{user:DeviceUser}) {
+export type SettingsSection = "study"|"notifications"|"app";
+
+export function SettingsView({user:_user,section="study",onSectionChange}:{user:DeviceUser;section?:SettingsSection;onSectionChange?:(section:SettingsSection)=>void}) {
   const [dark,setDark]=useState(typeof window!=="undefined"?storedThemeIsDark():false);
   const [pushEnabled,setPushEnabled]=useState(false);
   const [pushBusy,setPushBusy]=useState(false);
@@ -869,10 +871,17 @@ export function SettingsView({user:_user}:{user:DeviceUser}) {
     catch{toast.error("Opiskelupäiviä ei voitu tallentaa.");}
   }
 
-  return <SettingsLayout className="settings-view space-y-6">
-    <Panel title="Profiili"><p className="text-2xl font-semibold">{prefs?.display_name||"Arthur"}</p><p className="mt-2 text-sm text-muted-foreground">Tämä laite on yhdistetty Opintopäiväkirja-tiliisi.</p></Panel>
+  return <SettingsLayout className={"settings-view settings-section-"+section+" space-y-6"}>
+    <div role="tablist" aria-label="Asetusten osiot" className="settings-section-tabs">
+      {([
+        ["study","Opiskelu"],
+        ["notifications","Muistutukset"],
+        ["app","Sovellus"],
+      ] as Array<[SettingsSection,string]>).map(([id,label])=><button key={id} role="tab" aria-selected={section===id} className={section===id?"settings-section-tab settings-section-tab-active":"settings-section-tab"} onClick={()=>onSectionChange?.(id)}>{label}</button>)}
+    </div>
+    <Panel className="settings-app-only" title="Profiili"><p className="text-2xl font-semibold">{prefs?.display_name||"Arthur"}</p><p className="mt-2 text-sm text-muted-foreground">Tämä laite on yhdistetty Opintopäiväkirja-tiliisi.</p></Panel>
 
-    <Panel title="Opiskelurytmi ja kapasiteetti">
+    <Panel className="settings-study-only" title="Opiskelurytmi ja kapasiteetti">
       <p className="mb-3 text-sm text-muted-foreground">Suunnittelutoiminto käyttää näitä rajoina. Väliin jäänyttä työmäärää ei työnnetä seuraavan päivän kapasiteetin yli.</p>
       <div className="flex flex-wrap gap-2">{weekdayOptions.map(([day,label])=>{const active=(prefs?.study_weekdays??[1,2,3,4,5]).includes(day);return <button key={day} type="button" aria-pressed={active} onClick={()=>void toggleWeekday(day)} className={`grid size-11 place-items-center rounded-xl border text-sm font-semibold ${active?"border-primary bg-accent text-primary":"border-border bg-surface"}`}>{label}</button>;})}</div>
       <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4"><label className="text-sm font-medium">Arki min<input type="number" min="0" max="360" step="10" className="mt-1 w-full rounded-xl border bg-surface px-3 py-2.5" value={weekdayMinCapacity} onChange={e=>setWeekdayMinCapacity(Number(e.target.value))}/></label><label className="text-sm font-medium">Arki max<input type="number" min="15" max="360" step="10" className="mt-1 w-full rounded-xl border bg-surface px-3 py-2.5" value={weekdayCapacity} onChange={e=>setWeekdayCapacity(Number(e.target.value))}/></label><label className="text-sm font-medium">Viikonloppu min<input type="number" min="0" max="480" step="10" className="mt-1 w-full rounded-xl border bg-surface px-3 py-2.5" value={weekendMinCapacity} onChange={e=>setWeekendMinCapacity(Number(e.target.value))}/></label><label className="text-sm font-medium">Viikonloppu max<input type="number" min="15" max="480" step="10" className="mt-1 w-full rounded-xl border bg-surface px-3 py-2.5" value={weekendCapacity} onChange={e=>setWeekendCapacity(Number(e.target.value))}/></label></div>
@@ -881,7 +890,7 @@ export function SettingsView({user:_user}:{user:DeviceUser}) {
       <div className="mt-5 border-t border-border pt-4"><p className="text-sm font-medium">Kiireiset päivät</p><p className="mt-1 text-xs text-muted-foreground">Kiireisenä päivänä suunnittelutoiminto varaa vain kevyen ylläpitokuorman.</p><div className="mt-3 flex flex-wrap gap-2"><input type="date" className="min-h-11 rounded-xl border bg-surface px-3" value={busyDate} onChange={e=>setBusyDate(e.target.value)}/><button className={secondary} disabled={!prefs||!busyDate} onClick={()=>{if(!prefs||!busyDate)return;const next=[...new Set([...(prefs.busy_dates??[]),busyDate])].sort();void updatePreferences.mutateAsync({busy_dates:next}).then(()=>{setBusyDate("");toast.success("Kiireinen päivä lisätty.");}).catch(()=>toast.error("Päivää ei voitu tallentaa."));}}>Merkitse kiireiseksi</button></div><div className="mt-3 flex flex-wrap gap-2">{(prefs?.busy_dates??[]).filter(d=>d>=today()).slice(0,12).map(date=><button key={date} className="rounded-full bg-muted px-3 py-1 text-xs" title="Poista kiireinen päivä" onClick={()=>prefs&&void updatePreferences.mutateAsync({busy_dates:prefs.busy_dates.filter(d=>d!==date)})}>{fullDate(date)} ×</button>)}</div></div>
     </Panel>
 
-    <Panel title="Mukautuva opiskelu">
+    <Panel className="settings-study-only" title="Mukautuva opiskelu">
       <p className="text-sm text-muted-foreground">Valitse, kuinka paljon suunnittelutoiminto saa tehdä puolestasi. Oppimismoottori saa ehdottaa kaikissa tiloissa, mutta kalenterin muuttaminen noudattaa tätä asetusta.</p>
       <div className="mt-3 grid gap-2 sm:grid-cols-3">
         {(["manual","assisted","autopilot"] as const).map(mode=><button key={mode} className={(prefs?.planner_mode??"assisted")===mode?button:secondary} onClick={()=>void updatePreferences.mutateAsync({planner_mode:mode}).catch(()=>toast.error("Suunnittelutilaa ei voitu tallentaa."))}>{plannerModeLabel(mode)}</button>)}
@@ -910,10 +919,10 @@ export function SettingsView({user:_user}:{user:DeviceUser}) {
       {pushEnabled&&<button className={secondary+" mt-4 !min-h-9"} onClick={()=>void sendTestPush().then(()=>toast.success("Testimuistutus lähetettiin palvelimelta.")).catch(error=>toast.error(error instanceof Error?error.message:"Testimuistutus epäonnistui."))}>Lähetä testimuistutus</button>}
     </Panel>
 
-    <Panel title="Ulkoasu"><label className="flex min-h-11 items-center justify-between">Tumma tila<input type="checkbox" className="size-5 accent-primary" checked={dark} onChange={e=>{const next=e.target.checked;setDark(next);localStorage.setItem("opk.theme",next?"dark":"light");applyTheme(next);}}/></label></Panel>
+    <Panel className="settings-app-only" title="Ulkoasu"><label className="flex min-h-11 items-center justify-between">Tumma tila<input type="checkbox" className="size-5 accent-primary" checked={dark} onChange={e=>{const next=e.target.checked;setDark(next);localStorage.setItem("opk.theme",next?"dark":"light");applyTheme(next);}}/></label></Panel>
 
-    {archived.length>0&&<Panel title="Arkistoidut kurssit">{archived.map(c=><div key={c.id} className="flex min-h-12 items-center justify-between gap-3 border-b border-border"><span><b>{c.code}</b> · {c.name}</span><button className={secondary+" !min-h-9"} onClick={()=>void archiveCourse.mutateAsync({id:c.id,archived:false}).then(()=>toast.success("Kurssi palautettu.")).catch(()=>toast.error("Palautus epäonnistui."))}>Palauta</button></div>)}</Panel>}
+    {archived.length>0&&<Panel className="settings-app-only" title="Arkistoidut kurssit">{archived.map(c=><div key={c.id} className="flex min-h-12 items-center justify-between gap-3 border-b border-border"><span><b>{c.code}</b> · {c.name}</span><button className={secondary+" !min-h-9"} onClick={()=>void archiveCourse.mutateAsync({id:c.id,archived:false}).then(()=>toast.success("Kurssi palautettu.")).catch(()=>toast.error("Palautus epäonnistui."))}>Palauta</button></div>)}</Panel>}
 
-    <Panel title="Laite"><p className="mb-3 text-sm text-muted-foreground">Normaalisti kirjautumista ei enää kysytä tällä selaimella. Tämän painikkeen käyttö poistaa muistamisen ja paikallisen istunnon, mutta Arthur-tili ja opiskelutiedot säilyvät palvelimella.</p><button className={secondary} onClick={async()=>{if(!window.confirm("Unohdetaanko tämä laite?"))return;clearDeviceSession();location.reload();}}><RotateCcw size={16}/>Unohda tämä laite</button></Panel>
+    <Panel className="settings-app-only" title="Laite"><p className="mb-3 text-sm text-muted-foreground">Normaalisti kirjautumista ei enää kysytä tällä selaimella. Tämän painikkeen käyttö poistaa muistamisen ja paikallisen istunnon, mutta Arthur-tili ja opiskelutiedot säilyvät palvelimella.</p><button className={secondary} onClick={async()=>{if(!window.confirm("Unohdetaanko tämä laite?"))return;clearDeviceSession();location.reload();}}><RotateCcw size={16}/>Unohda tämä laite</button></Panel>
   </SettingsLayout>;
 }
