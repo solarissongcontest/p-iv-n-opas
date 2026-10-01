@@ -107,7 +107,7 @@ test("planned study sessions and running exams suppress competing chrome", () =>
 
   assert.match(app, /presentation="focus"/);
   assert.match(session, /study-session-focus/);
-  assert.ok(exam.includes('"exam-simulation-"+phase'));
+  assert.ok(exam.includes('"exam-simulation exam-simulation-"+phase'));
   assert.match(exam, /Lopeta koe/);
   assert.match(layouts, /:has\(\.exam-simulation-running\)/);
   assert.match(layouts, /\.study-session-focus/);
