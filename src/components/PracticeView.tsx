@@ -750,7 +750,7 @@ export function PracticeView({
                 <span>· {typeLabel[selection.question.type]}</span>
                 <span>· vaikeus {selection.question.difficulty}/5</span>
                 <span>· {selection.question.source === "bank" ? "LOPS21-tehtäväpankki" : "varatehtävä"}</span>
-                {selection.interleaved && <span>· limitetty harjoittelu</span>}
+                {selection.interleaved && <span>· vaihteleva harjoittelu</span>}
                 {confusionSet && <span>· sekoittuvien käsitteiden erottelu</span>}
                 {activePath?.stage === "pretest" && <span>· ei vaikuta osaamistasoon</span>}
               </div>
