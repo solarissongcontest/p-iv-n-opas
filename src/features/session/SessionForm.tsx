@@ -173,7 +173,7 @@ export function SessionForm({item,courses,topics,sessions=[],attempts=[],present
  </>;
  const title=guided?"Ohjattu opiskelukerta":"Kirjaa opiskelu";
  if(presentation==="focus"){
-   return <div className="study-session-focus" role="dialog" aria-modal="true" aria-label={title}>
+   return <div className="study-session-focus" data-focus-workspace="study-session">
      <header className="study-session-focus-header">
        <div className="min-w-0">
          <p className="text-xs font-semibold uppercase tracking-wide text-primary">{course?.code??"Opiskelukerta"}</p>
