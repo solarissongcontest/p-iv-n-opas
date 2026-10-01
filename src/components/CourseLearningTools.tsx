@@ -240,8 +240,8 @@ export function MaterialImporter({
       setQuestions(payload.suggestedQuestions ?? []);
       setSelected(nextLinks.filter((row) => row.confidence >= 0.3).map((row) => row.topicId));
       setProvider(payload.provider ?? "local");
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Materiaalia ei voitu analysoida.");
+    } catch {
+      toast.error("Materiaalia ei voitu analysoida. Tarkista yhteys ja yritä uudelleen.");
     } finally {
       setBusy(false);
     }
