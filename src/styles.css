@@ -1427,3 +1427,386 @@ html.dark .app-mobile-header {
     padding-inline: 0.25rem !important;
   }
 }
+
+
+/* =========================================================
+   Structure V4 — canonical layout, surface and focus system
+   ========================================================= */
+
+.layout-action-dashboard,
+.layout-planner,
+.layout-library-detail,
+.layout-focus,
+.layout-insights,
+.layout-settings {
+  container-type: inline-size;
+  min-width: 0;
+}
+
+.surface-open {
+  min-width: 0;
+}
+
+.surface-grouped {
+  min-width: 0;
+}
+
+.surface-emphasis {
+  min-width: 0;
+  border: 1px solid color-mix(in oklab, var(--primary) 20%, var(--border));
+  border-radius: 1.25rem;
+  background: color-mix(in oklab, var(--accent) 32%, var(--surface));
+}
+
+.surface-interactive-row {
+  min-width: 0;
+  border-bottom: 1px solid var(--hairline);
+}
+
+/* One real interaction zone owns bottom navigation and contextual help. */
+.bottom-interaction-zone {
+  position: fixed;
+  inset: auto 0 0;
+  z-index: 24;
+  pointer-events: none;
+}
+
+.bottom-interaction-zone > *,
+.bottom-interaction-zone button {
+  pointer-events: auto;
+}
+
+.bottom-context-action {
+  position: fixed;
+  right: max(1rem, env(safe-area-inset-right, 0px));
+  bottom:
+    calc(
+      var(--app-tabbar-height)
+      + 1.35rem
+      + env(safe-area-inset-bottom, 0px)
+    );
+  z-index: 26;
+}
+
+.bottom-context-action:empty {
+  display: none;
+}
+
+.bottom-context-action .coach-trigger {
+  position: static;
+  right: auto;
+  bottom: auto;
+}
+
+@media (min-width: 768px) {
+  .bottom-context-action {
+    right: 1.5rem;
+    bottom: 1.5rem;
+  }
+}
+
+/* Planner has genuinely different day / week / month structures. */
+.planner-period-header {
+  margin-bottom: 1rem;
+}
+
+.planner-agenda-list {
+  position: relative;
+}
+
+.planner-agenda-item {
+  display: grid;
+  grid-template-columns: minmax(4.75rem, auto) minmax(0, 1fr);
+  gap: 1rem;
+  padding: 1rem 0;
+  border-top: 1px solid var(--hairline);
+}
+
+.planner-agenda-time {
+  color: var(--muted-foreground);
+  font-size: 0.8rem;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+}
+
+.planner-agenda-body {
+  min-width: 0;
+}
+
+.planner-empty-day {
+  border-top: 1px solid var(--hairline);
+  padding: 1.25rem 0;
+  color: var(--muted-foreground);
+  font-size: 0.9rem;
+}
+
+.planner-week-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 0.55rem;
+}
+
+.planner-week-day {
+  min-width: 0;
+  min-height: 14rem;
+  border: 1px solid var(--hairline);
+  border-radius: 1rem;
+  background: color-mix(in oklab, var(--surface) 86%, transparent);
+  padding: 0.7rem;
+}
+
+.planner-week-day-today {
+  border-color: color-mix(in oklab, var(--primary) 35%, var(--border));
+  background: color-mix(in oklab, var(--accent) 28%, var(--surface));
+}
+
+.planner-week-day-header {
+  padding: 0.15rem 0.15rem 0.65rem;
+}
+
+.planner-week-day-items {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.planner-week-empty {
+  display: block;
+  padding: 0.7rem 0.2rem;
+  color: var(--muted-foreground);
+  font-size: 0.75rem;
+}
+
+.planner-compact-item {
+  min-width: 0;
+  border: 1px solid var(--hairline);
+  border-radius: 0.8rem;
+  background: var(--surface);
+  padding: 0.65rem;
+}
+
+.planner-month-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  overflow: hidden;
+  border: 1px solid var(--hairline);
+  border-radius: 1.1rem;
+  background: var(--surface);
+}
+
+.planner-month-day {
+  min-width: 0;
+  min-height: 7rem;
+  border-right: 1px solid var(--hairline);
+  border-bottom: 1px solid var(--hairline);
+  padding: 0.55rem;
+}
+
+.planner-month-day:nth-child(7n) {
+  border-right: 0;
+}
+
+.planner-month-day-today {
+  background: color-mix(in oklab, var(--accent) 42%, transparent);
+}
+
+.planner-month-primary {
+  display: grid;
+  width: 100%;
+  min-width: 0;
+  gap: 0.15rem;
+  margin-top: 0.55rem;
+  padding: 0.45rem;
+  border-radius: 0.65rem;
+  background: color-mix(in oklab, var(--muted) 68%, transparent);
+  text-align: left;
+  font-size: 0.68rem;
+}
+
+.planner-month-primary span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.planner-month-empty {
+  display: block;
+  margin-top: 0.75rem;
+  color: var(--muted-foreground);
+  font-size: 0.75rem;
+}
+
+@media (max-width: 899px) {
+  .planner-week-grid {
+    display: block;
+  }
+
+  .planner-week-day {
+    position: relative;
+    min-height: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    padding: 0.35rem 0 1rem 1.8rem;
+  }
+
+  .planner-week-day::before {
+    content: "";
+    position: absolute;
+    top: 1rem;
+    bottom: -0.2rem;
+    left: 0.38rem;
+    width: 1px;
+    background: var(--border);
+  }
+
+  .planner-week-day::after {
+    content: "";
+    position: absolute;
+    top: 0.95rem;
+    left: 0.12rem;
+    width: 9px;
+    height: 9px;
+    border-radius: 999px;
+    background: var(--muted-foreground);
+  }
+
+  .planner-week-day-today::after {
+    background: var(--primary);
+  }
+
+  .planner-week-day-items {
+    gap: 0.4rem;
+  }
+
+  .planner-month-grid {
+    grid-template-columns: repeat(7, minmax(2.8rem, 1fr));
+    overflow-x: auto;
+  }
+
+  .planner-month-day {
+    min-height: 5.4rem;
+  }
+
+  .planner-month-primary {
+    padding: 0.3rem;
+  }
+
+  .planner-month-primary span {
+    display: none;
+  }
+}
+
+/* Active practice is a bounded focus flow, not the setup page with more stuff below. */
+.practice-start-panel {
+  padding: 0.75rem 0 0.25rem;
+}
+
+.practice-focus-toolbar {
+  display: flex;
+  min-height: 3rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+  border-bottom: 1px solid var(--hairline);
+  padding-bottom: 0.75rem;
+}
+
+.practice-summary {
+  max-width: 42rem;
+  margin: 1.5rem auto 0;
+  padding: clamp(1rem, 4vw, 2rem) 0;
+}
+
+.practice-session-active .practice-support-grid {
+  display: none;
+}
+
+.practice-session-active .practice-primary-surface > div:first-child {
+  opacity: 0.72;
+}
+
+.practice-session-active .practice-question-flow {
+  margin-top: 0.5rem;
+}
+
+.practice-session-summary .practice-support-grid {
+  opacity: 0.65;
+}
+
+@container (min-width: 720px) {
+  .practice-session-active .practice-question-flow {
+    max-width: 820px;
+  }
+
+  .today-summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@container (min-width: 920px) {
+  .progress-summary {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+/* Expanded planner uses a real supporting pane. */
+@media (min-width: 1100px) {
+  .planner-view {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) minmax(17rem, 22rem);
+    align-items: start;
+    column-gap: 1.5rem;
+  }
+
+  .planner-view > :nth-child(1),
+  .planner-view > :nth-child(2),
+  .planner-view > .planner-editor,
+  .planner-view > .panel:not(.planner-support) {
+    grid-column: 1 / -1;
+  }
+
+  .planner-view > .planner-calendar,
+  .planner-view > .planner-day-agenda,
+  .planner-view > .planner-week,
+  .planner-view > .planner-month {
+    grid-column: 1;
+  }
+
+  .planner-support {
+    grid-column: 2;
+    grid-row: 3 / span 5;
+    position: sticky;
+    top: 1.5rem;
+    order: initial;
+  }
+}
+
+/* Interaction states remain readable with large text and narrow containers. */
+@container (max-width: 520px) {
+  .course-hero,
+  .course-library-header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .course-hero > button,
+  .course-library-header > button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 360px) {
+  :root {
+    --page-inline-compact: 1rem;
+  }
+
+  .app-tab span {
+    font-size: 0.61rem;
+  }
+
+  .planner-agenda-item {
+    grid-template-columns: 4rem minmax(0, 1fr);
+    gap: 0.65rem;
+  }
+}
