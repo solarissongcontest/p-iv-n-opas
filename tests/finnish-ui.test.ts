@@ -3,16 +3,22 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 
 const files = [
-  "../src/components/PracticeView.tsx",
-  "../src/components/StudyDialogs.tsx",
+  "../src/features/practice/PracticeView.tsx",
+  "../src/features/today/TodayView.tsx",
+  "../src/features/planner/PlanView.tsx",
+  "../src/features/studies/CourseView.tsx",
+  "../src/features/exams/ExamsView.tsx",
+  "../src/features/progress/ProgressView.tsx",
+  "../src/features/settings/SettingsView.tsx",
+  "../src/features/session/SessionForm.tsx",
+  "../src/features/search/SearchPanel.tsx",
   "../src/components/AICoach.tsx",
   "../src/components/CourseLearningTools.tsx",
   "../src/components/LearningOSV5Panels.tsx",
   "../src/components/ExamSimulationV5.tsx",
   "../src/components/ContrastiveErrorLab.tsx",
-  "../src/components/StudyViews.tsx",
   "../src/components/Onboarding.tsx",
-  "../src/routes/index.tsx",
+  "../src/app/StudyApp.tsx",
   "../src/lib/error-page.ts",
   "../src/lib/push.ts",
   "../src/routes/api.device-auth.ts",
@@ -146,7 +152,7 @@ test("critical adaptive-learning controls have Finnish display labels", () => {
     "utf8",
   );
   const settings = readFileSync(
-    new URL("../src/components/StudyViews.tsx", import.meta.url),
+    new URL("../src/features/settings/SettingsView.tsx", import.meta.url),
     "utf8",
   );
   for (const phrase of [
@@ -224,7 +230,7 @@ test("unknown display enums stay Finnish instead of exposing raw identifiers", (
 
 test("mobile screenshot regressions stay fully Finnish and natural", () => {
   const relations = readFileSync(new URL("../src/components/CourseLearningTools.tsx", import.meta.url), "utf8");
-  const practice = readFileSync(new URL("../src/components/PracticeView.tsx", import.meta.url), "utf8");
+  const practice = readFileSync(new URL("../src/features/practice/PracticeView.tsx", import.meta.url), "utf8");
   const mistakes = readFileSync(new URL("../src/components/ContrastiveErrorLab.tsx", import.meta.url), "utf8");
   const exam = readFileSync(new URL("../src/components/ExamSimulationV5.tsx", import.meta.url), "utf8");
 
