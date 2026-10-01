@@ -1926,3 +1926,39 @@ html.dark .app-mobile-header {
     color: var(--foreground);
   }
 }
+
+
+/* Settings are grouped forms, not another dashboard. */
+.settings-section-tabs {
+  display: flex;
+  gap: 0.25rem;
+  overflow-x: auto;
+  border-radius: 0.85rem;
+  background: var(--muted);
+  padding: 0.25rem;
+}
+
+.settings-section-tab {
+  min-height: 2.65rem;
+  min-width: max-content;
+  border-radius: 0.7rem;
+  padding-inline: 0.85rem;
+  color: var(--muted-foreground);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.settings-section-tab-active {
+  background: var(--surface);
+  color: var(--foreground);
+  box-shadow: 0 1px 2px color-mix(in oklab, var(--foreground) 8%, transparent);
+}
+
+.settings-section-study .settings-notifications-only,
+.settings-section-study .settings-app-only,
+.settings-section-notifications .settings-study-only,
+.settings-section-notifications .settings-app-only,
+.settings-section-app .settings-study-only,
+.settings-section-app .settings-notifications-only {
+  display: none !important;
+}
