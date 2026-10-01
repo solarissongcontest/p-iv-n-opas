@@ -71,7 +71,10 @@ test("v5 offline write survives reload, syncs, and appears on a second device", 
   await waitForServiceWorker(pageA);
 
   const marker = "OPK-E2E-" + Date.now();
-  await pageA.getByRole("button", { name: "Kirjaa opiskelu" }).click();
+  await pageA.getByRole("button", { name: "Lisää toimintoja" }).click();
+  const actionSheet = pageA.getByRole("dialog", { name: "Lisää toimintoja" });
+  await expect(actionSheet).toBeVisible();
+  await actionSheet.getByRole("button", { name: /Kirjaa opiskelu/ }).click();
   await expect(pageA.getByRole("dialog")).toBeVisible();
   await pageA.getByLabel("Todellinen kesto minuutteina").fill("1");
   await pageA.getByLabel("Mitä teit?").fill("Cross-device offline E2E");
