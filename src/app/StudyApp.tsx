@@ -9,7 +9,7 @@ import { coachTriggerLabel, studyNav, type StudyPage } from "@/app/navigation";
 import { isoWeekFromDate } from "@/features/planner/routeDate";
 import { ensureKe04ForCurrentUser, useCourses, useExams, useMistakes, usePlan, usePracticeAttempts, usePreferences, useSessions, useTests, useTopics } from "@/lib/data";
 import { longDate, greeting, today } from "@/lib/fi";
-import { CourseView, ExamsView, ProgressView, TodayView, PlanView, SettingsView, type CourseTab, type ProgressSection } from "@/components/StudyViews";
+import { CourseView, ExamsView, ProgressView, TodayView, PlanView, SettingsView, type CourseTab, type ProgressSection, type SettingsSection } from "@/components/StudyViews";
 import { PracticeView } from "@/components/PracticeView";
 import { CourseForm, SessionForm, SearchPanel } from "@/components/StudyDialogs";
 import { Onboarding } from "@/components/Onboarding";
@@ -50,7 +50,7 @@ async function getArthurSession(previousOwnerId?: string | null): Promise<Device
 }
 
 
-export function StudyAppRoot({ initialPage, courseCode, courseTab, examId, progressSection, planMode, planAnchor }: { initialPage: StudyPage; courseCode?: string; courseTab?:CourseTab; examId?:string; progressSection?:ProgressSection; planMode?:"päivä"|"viikko"|"kuukausi"; planAnchor?:string }) {
+export function StudyAppRoot({ initialPage, courseCode, courseTab, examId, progressSection, settingsSection, planMode, planAnchor }: { initialPage: StudyPage; courseCode?: string; courseTab?:CourseTab; examId?:string; progressSection?:ProgressSection; settingsSection?:SettingsSection; planMode?:"päivä"|"viikko"|"kuukausi"; planAnchor?:string }) {
   const queryClient = useQueryClient();
   const [user, setUser] = useState<DeviceUser | null | undefined>();
   const [authError, setAuthError] = useState<string | null>(null);
@@ -128,7 +128,7 @@ export function StudyAppRoot({ initialPage, courseCode, courseTab, examId, progr
 
   if (user === undefined) return <main className="grid min-h-screen place-items-center">Avataan opintopäiväkirjaa…</main>;
   if (!user) return <DeviceSignIn authError={authError} onSignedIn={setUser} />;
-  return <StudyApp key={user.id + ":" + initialPage + ":" + (courseCode ?? "") + ":" + (courseTab ?? "") + ":" + (examId ?? "") + ":" + (progressSection ?? "") + ":" + (planMode ?? "") + ":" + (planAnchor ?? "")} user={user} initialPage={initialPage} courseCode={courseCode} courseTab={courseTab} examId={examId} progressSection={progressSection} planMode={planMode} planAnchor={planAnchor} />;
+  return <StudyApp key={user.id + ":" + initialPage + ":" + (courseCode ?? "") + ":" + (courseTab ?? "") + ":" + (examId ?? "") + ":" + (progressSection ?? "") + ":" + (settingsSection ?? "") + ":" + (planMode ?? "") + ":" + (planAnchor ?? "")} user={user} initialPage={initialPage} courseCode={courseCode} courseTab={courseTab} examId={examId} progressSection={progressSection} settingsSection={settingsSection} planMode={planMode} planAnchor={planAnchor} />;
 }
 
 function DeviceSignIn({
@@ -194,7 +194,7 @@ function DeviceSignIn({
   </section><Toaster richColors /></main>;
 }
 
-function StudyApp({ user, initialPage, courseCode, courseTab, examId, progressSection, planMode, planAnchor }: { user: DeviceUser; initialPage: StudyPage; courseCode?: string; courseTab?:CourseTab; examId?:string; progressSection?:ProgressSection; planMode?:"päivä"|"viikko"|"kuukausi"; planAnchor?:string }) {
+function StudyApp({ user, initialPage, courseCode, courseTab, examId, progressSection, settingsSection, planMode, planAnchor }: { user: DeviceUser; initialPage: StudyPage; courseCode?: string; courseTab?:CourseTab; examId?:string; progressSection?:ProgressSection; settingsSection?:SettingsSection; planMode?:"päivä"|"viikko"|"kuukausi"; planAnchor?:string }) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   setOfflineOwner(user.id);
@@ -485,7 +485,15 @@ function StudyApp({ user, initialPage, courseCode, courseTab, examId, progressSe
           }}
           onPlan={()=>go("plan")}
         /> :
-        <SettingsView user={user}/>}
+        <SettingsView
+          user={user}
+          section={settingsSection}
+          onSectionChange={(section)=>{
+            if(section==="study") void navigate({to:"/settings/study"});
+            else if(section==="notifications") void navigate({to:"/settings/notifications"});
+            else void navigate({to:"/settings/app"});
+          }}
+        />}
       </section>
     </AppShell>
 
