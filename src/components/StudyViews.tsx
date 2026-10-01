@@ -513,7 +513,8 @@ export function CourseView({courses,topics,sessions,exams,plan,tests,mistakes,se
     {form==="course"&&<CourseEditForm course={c} onClose={()=>setForm(null)}/>}
     {form==="newTopic"&&<TopicForm courseId={c.id} onClose={()=>setForm(null)}/>}
     {editingTopic&&<TopicForm courseId={c.id} topic={editingTopic} onClose={()=>setEditingTopic(null)}/>}
-  </div>;
+    </div>
+  </LibraryDetailLayout>;
 }
 
 export function ExamsView({courses,topics,exams,tests,attempts,mistakes,sessions,plan,onCourse}:Base&{exams:Exam[];tests:PracticeTest[];attempts:PracticeAttempt[];mistakes:Mistake[];sessions:Session[];plan:PlanItem[];onCourse:(id:string)=>void}) {
