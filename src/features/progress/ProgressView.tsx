@@ -251,7 +251,7 @@ export function ProgressView({courses,topics,attempts,sessions,plan,exams,mistak
     </Panel>
 
     <div className="progress-analysis-only grid gap-4 lg:grid-cols-2">
-      <Panel title="Virheprofiili · 30 pv">
+      <Panel title="Virheiden jakauma · 30 pv">
         {errors30.length?errors30.slice(0,6).map(row=><div key={row.category} className="flex items-center justify-between border-b border-border py-2 text-sm"><span>{errorCategoryLabel(row.category)}</span><b>{Math.round(row.share*100)} %</b></div>):<p className="text-sm text-muted-foreground">Virhehavaintoja ei ole vielä tarpeeksi.</p>}
       </Panel>
       <Panel className="progress-analysis-only" title="Opiskelukerran kuormitus">
@@ -281,18 +281,18 @@ export function ProgressView({courses,topics,attempts,sessions,plan,exams,mistak
     <Panel className="progress-analysis-only" title="Oppimismittarit">
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
         {[
-          ["Viivepalautus",productMetrics.delayedRecallRate===null?"—":Math.round(productMetrics.delayedRecallRate*100)+" %"],
+          ["Myöhempi muistaminen",productMetrics.delayedRecallRate===null?"—":Math.round(productMetrics.delayedRecallRate*100)+" %"],
           ["Itsenäinen onnistuminen",productMetrics.independentSuccessRate===null?"—":Math.round(productMetrics.independentSuccessRate*100)+" %"],
           ["Osaamisen vakaus",productMetrics.masteryStability===null?"—":Math.round(productMetrics.masteryStability*100)+" %"],
           ["Virheistä palautuminen",productMetrics.recoverySuccessRate===null?"—":Math.round(productMetrics.recoverySuccessRate*100)+" %"],
-          ["Vakaata / tunti",productMetrics.studyEfficiency===null?"—":(Math.round(productMetrics.studyEfficiency*10)/10).toString()],
+          ["Vakaat aiheet / tunti",productMetrics.studyEfficiency===null?"—":(Math.round(productMetrics.studyEfficiency*10)/10).toString()],
         ].map(([label,value])=><div key={label} className="rounded-xl bg-muted/50 p-3"><small className="text-muted-foreground">{label}</small><p className="mt-1 text-xl font-semibold">{value}</p></div>)}
       </div>
       <p className="mt-3 text-xs text-muted-foreground">Ruutuaikaa ei palkita. Nämä mittarit kertovat muistamisesta, osaamisen vakaudesta, virheistä palautumisesta ja oppimisen tehokkuudesta.</p>
     </Panel>
 
     <details className="progress-analysis-only panel p-4 sm:p-5">
-      <summary className="cursor-pointer font-semibold">Järjestelmän toiminnan tarkistus · 60 päivän simulaatio</summary>
+      <summary className="cursor-pointer font-semibold">Järjestelmän tarkistus · 60 päivän arvio</summary>
       <div className="mt-4 space-y-2">{selfChecks.map(check=><p key={check.id} className="text-sm">{check.ok?"✓":"⚠"} {check.message}</p>)}</div>
       <div className="mt-4 grid gap-3 sm:grid-cols-3">{simulations.map(sim=><div key={sim.profile} className="rounded-xl bg-muted/50 p-3 text-sm"><b>{simulationProfileLabel(sim.profile)}</b><p className="mt-2">Osaaminen {sim.meanMastery} · varmuus {sim.meanConfidence}</p><p className="text-xs text-muted-foreground">{sim.completed} toimintoa · {sim.skipped} ohitettua · {sim.overloadDays} ylikuormapäivää</p></div>)}</div>
     </details>
@@ -350,7 +350,7 @@ export function ProgressView({courses,topics,attempts,sessions,plan,exams,mistak
       <label className="mt-4 block text-sm font-medium">Mikä meni hyvin?<textarea rows={2} className="mt-1 w-full rounded-xl border bg-surface px-3 py-2" value={wentWell} onChange={e=>setWentWell(e.target.value)}/></label>
       <label className="mt-4 block text-sm font-medium">Seuraavan viikon painopiste<textarea rows={2} className="mt-1 w-full rounded-xl border bg-surface px-3 py-2" value={nextFocus} onChange={e=>setNextFocus(e.target.value)}/></label>
       <label className="mt-4 block text-sm font-medium">Muut huomiot<textarea rows={3} className="mt-1 w-full rounded-xl border bg-surface px-3 py-2" value={note} onChange={e=>setNote(e.target.value)}/></label>
-      <div className="mt-3 flex flex-wrap gap-2"><button className={button} disabled={saveCheckin.isPending} onClick={()=>void saveCheckin.mutateAsync({week_start:week,note:note.trim()||null,planned_minutes:planned,actual_minutes:actual,adherence,hardest_topic_id:hardest||null,went_well:wentWell.trim()||null,next_focus:nextFocus.trim()||null,load_rating:load}).then(result=>toast.success(result==="queued"?"Reflektio tallennettu paikallisesti.":"Viikkoreflektointi tallennettu.")).catch(()=>toast.error("Tallennus epäonnistui."))}>Tallenna reflektio</button><button className={secondary} onClick={onPlan}>Avaa ensi viikon suunnitelma</button></div>
+      <div className="mt-3 flex flex-wrap gap-2"><button className={button} disabled={saveCheckin.isPending} onClick={()=>void saveCheckin.mutateAsync({week_start:week,note:note.trim()||null,planned_minutes:planned,actual_minutes:actual,adherence,hardest_topic_id:hardest||null,went_well:wentWell.trim()||null,next_focus:nextFocus.trim()||null,load_rating:load}).then(result=>toast.success(result==="queued"?"Reflektio tallennettu paikallisesti.":"Viikkopohdinta tallennettu.")).catch(()=>toast.error("Tallennus epäonnistui."))}>Tallenna viikkopohdinta</button><button className={secondary} onClick={onPlan}>Avaa ensi viikon suunnitelma</button></div>
     </Panel>
 
     <Panel className="progress-analysis-only" title="Osaamisen tapahtumat">{events.data?.length?events.data.slice(0,12).map(e=><div key={e.id} className="border-b border-border py-3"><p className="font-medium">{e.detail??eventKindLabel(e.kind)}</p><p className="text-sm text-muted-foreground">{e.kind==="mastery"&&e.from_value!=null&&e.to_value!=null?"Osaaminen "+e.from_value+" → "+e.to_value:eventKindLabel(e.kind)} · {new Date(e.created_at).toLocaleDateString("fi-FI")}</p></div>):<p className="text-muted-foreground">Osaamisen muutokset ilmestyvät tähän harjoittelun myötä.</p>}</Panel>
