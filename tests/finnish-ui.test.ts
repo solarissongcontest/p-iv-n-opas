@@ -220,3 +220,59 @@ test("unknown display enums stay Finnish instead of exposing raw identifiers", (
     "muu vastaustapa",
   ]) assert.equal(labels.includes(phrase), true, phrase);
 });
+
+
+test("mobile screenshot regressions stay fully Finnish and natural", () => {
+  const relations = readFileSync(new URL("../src/components/CourseLearningTools.tsx", import.meta.url), "utf8");
+  const practice = readFileSync(new URL("../src/components/PracticeView.tsx", import.meta.url), "utf8");
+  const mistakes = readFileSync(new URL("../src/components/ContrastiveErrorLab.tsx", import.meta.url), "utf8");
+  const exam = readFileSync(new URL("../src/components/ExamSimulationV5.tsx", import.meta.url), "utf8");
+
+  for (const phrase of [
+    "Aiheiden yhteydet",
+    "Esitieto",
+    "Riippuu aiheesta",
+    "Rakentuu aiheen varaan",
+    "Liittyy aiheeseen",
+    "Sekoittuu helposti aiheeseen",
+  ]) assert.equal(relations.includes(phrase), true, phrase);
+
+  for (const raw of [
+    ">prerequisite<",
+    ">depends_on<",
+    ">builds_on<",
+    ">related_to<",
+    ">commonly_confused_with<",
+  ]) assert.equal(relations.includes(raw), false, raw);
+
+  for (const phrase of [
+    "Harjoittelutila",
+    "Kartoita lähtötaso",
+    "varatehtävä",
+    "limitettu harjoittelu",
+    "ei vaikuta osaamistasoon",
+  ]) assert.equal(practice.includes(phrase), true, phrase);
+
+  for (const phrase of [
+    "Virheen korjaus",
+    "Oma aiempi ratkaisu",
+    "Myöhempi varmistustehtävä",
+  ]) assert.equal(mistakes.includes(phrase), true, phrase);
+
+  for (const phrase of [
+    "Vastaukset tallennetaan automaattisesti",
+    "tehtäväkokonaisuus",
+    "koetason osaamisnäytöksi",
+  ]) assert.equal(exam.includes(phrase), true, phrase);
+
+  for (const awkward of [
+    "Knowledge Graph",
+    "Preview Challenge",
+    "Contrastive Error Lab",
+    "autosavetettu",
+    "tehtäväblokki",
+    "koetason evidenssiksi",
+  ]) {
+    assert.equal((relations+practice+mistakes+exam).includes(awkward), false, awkward);
+  }
+});
