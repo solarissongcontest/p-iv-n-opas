@@ -14,6 +14,7 @@ on:
 
 permissions:
   contents: read
+  statuses: read
 
 jobs:
   code-quality:
@@ -51,41 +52,73 @@ jobs:
     outputs:
       base_url: ${{ steps.resolve.outputs.base_url }}
     steps:
-      - name: Resolve production URL
+      - name: Wait for Vercel deployment result
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          EXPECTED_SHA: ${{ github.sha }}
+        run: |
+          API="https://api.github.com/repos/$GITHUB_REPOSITORY/commits/$EXPECTED_SHA/status"
+          for attempt in $(seq 1 60); do
+            JSON=$(curl --silent --show-error --fail \
+              -H "Authorization: Bearer $GITHUB_TOKEN" \
+              -H "Accept: application/vnd.github+json" \
+              "$API")
+            VERCEL_STATE=$(printf '%s' "$JSON" | python3 -c "import json,sys; d=json.load(sys.stdin); s=next((x for x in d.get('statuses',[]) if x.get('context')=='Vercel'),{}); print(s.get('state',''))")
+            VERCEL_DESCRIPTION=$(printf '%s' "$JSON" | python3 -c "import json,sys; d=json.load(sys.stdin); s=next((x for x in d.get('statuses',[]) if x.get('context')=='Vercel'),{}); print(s.get('description',''))")
+
+            if [ "$VERCEL_STATE" = "success" ]; then
+              echo "Vercel deployment completed."
+              exit 0
+            fi
+            if [ "$VERCEL_STATE" = "failure" ] || [ "$VERCEL_STATE" = "error" ]; then
+              echo "::error::Vercel deployment failed: $VERCEL_DESCRIPTION"
+              exit 1
+            fi
+
+            echo "Attempt $attempt/60: Vercel state '${VERCEL_STATE:-not-created-yet}'."
+            sleep 10
+          done
+
+          echo "::error::Timed out waiting for Vercel deployment status."
+          exit 1
+
+      - name: Resolve live production URL
         id: resolve
         shell: bash
         env:
           INPUT_BASE_URL: ${{ inputs.base_url }}
           REPOSITORY_BASE_URL: ${{ vars.PRODUCTION_BASE_URL }}
-        run: |
-          if [ -n "$INPUT_BASE_URL" ]; then
-            URL="$INPUT_BASE_URL"
-          elif [ -n "$REPOSITORY_BASE_URL" ]; then
-            URL="$REPOSITORY_BASE_URL"
-          else
-            URL="https://opiskelupaivakirja.vercel.app"
-          fi
-          URL="${URL%/}"
-          echo "base_url=$URL" >> "$GITHUB_OUTPUT"
-          echo "Testing $URL"
-
-      - name: Wait for this exact commit to reach Vercel
-        shell: bash
-        env:
-          BASE_URL: ${{ steps.resolve.outputs.base_url }}
           EXPECTED_SHA: ${{ github.sha }}
         run: |
-          for attempt in $(seq 1 60); do
-            BODY=$(curl --silent --show-error --fail --max-time 10 "$BASE_URL/api/release-info" || true)
-            LIVE_SHA=$(printf '%s' "$BODY" | python3 -c "import json,sys; d=json.load(sys.stdin) if sys.stdin.readable() else {}; print((d.get('commit') or '').strip())" 2>/dev/null || true)
-            if [ "$LIVE_SHA" = "$EXPECTED_SHA" ]; then
-              echo "Production is serving $EXPECTED_SHA"
-              exit 0
-            fi
-            echo "Attempt $attempt/60: live commit is '${LIVE_SHA:-unknown}', waiting for $EXPECTED_SHA"
+          if [ -n "$INPUT_BASE_URL" ]; then
+            CANDIDATES="$INPUT_BASE_URL"
+          elif [ -n "$REPOSITORY_BASE_URL" ]; then
+            CANDIDATES="$REPOSITORY_BASE_URL"
+          else
+            CANDIDATES="https://opiskelupaivakirja.vercel.app https://opiskelupaivakirja-aeldevahlberg-8169.vercel.app"
+          fi
+
+          for attempt in $(seq 1 30); do
+            for URL in $CANDIDATES; do
+              URL="${URL%/}"
+              BODY=$(curl --silent --show-error --fail --max-time 10 "$URL/api/release-info" || true)
+              LIVE_SHA=$(printf '%s' "$BODY" | python3 -c "import json,sys
+try:
+    print((json.load(sys.stdin).get('commit') or '').strip())
+except Exception:
+    print('')" 2>/dev/null || true)
+              if [ "$LIVE_SHA" = "$EXPECTED_SHA" ]; then
+                echo "base_url=$URL" >> "$GITHUB_OUTPUT"
+                echo "Production URL verified: $URL"
+                exit 0
+              fi
+            done
+            echo "Attempt $attempt/30: deployment succeeded, waiting for a production alias to serve $EXPECTED_SHA."
             sleep 10
           done
-          echo "::error::Production never reported the expected commit $EXPECTED_SHA"
+
+          echo "::error::Vercel succeeded but no configured/default production URL served the expected commit. Set the repository variable PRODUCTION_BASE_URL."
           exit 1
 
   production-e2e:
