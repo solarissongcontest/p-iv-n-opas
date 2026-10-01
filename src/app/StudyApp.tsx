@@ -9,7 +9,7 @@ import { coachTriggerLabel, studyNav, type StudyPage } from "@/app/navigation";
 import { isoWeekFromDate } from "@/features/planner/routeDate";
 import { ensureKe04ForCurrentUser, useCourses, useExams, useMistakes, usePlan, usePracticeAttempts, usePreferences, useSessions, useTests, useTopics } from "@/lib/data";
 import { longDate, greeting, today } from "@/lib/fi";
-import { CourseView, ExamsView, ProgressView, TodayView, PlanView, SettingsView } from "@/components/StudyViews";
+import { CourseView, ExamsView, ProgressView, TodayView, PlanView, SettingsView, type CourseTab } from "@/components/StudyViews";
 import { PracticeView } from "@/components/PracticeView";
 import { CourseForm, SessionForm, SearchPanel } from "@/components/StudyDialogs";
 import { Onboarding } from "@/components/Onboarding";
@@ -50,7 +50,7 @@ async function getArthurSession(previousOwnerId?: string | null): Promise<Device
 }
 
 
-export function StudyAppRoot({ initialPage, courseCode, planMode, planAnchor }: { initialPage: StudyPage; courseCode?: string; planMode?:"päivä"|"viikko"|"kuukausi"; planAnchor?:string }) {
+export function StudyAppRoot({ initialPage, courseCode, courseTab, planMode, planAnchor }: { initialPage: StudyPage; courseCode?: string; courseTab?:CourseTab; planMode?:"päivä"|"viikko"|"kuukausi"; planAnchor?:string }) {
   const queryClient = useQueryClient();
   const [user, setUser] = useState<DeviceUser | null | undefined>();
   const [authError, setAuthError] = useState<string | null>(null);
@@ -128,7 +128,7 @@ export function StudyAppRoot({ initialPage, courseCode, planMode, planAnchor }: 
 
   if (user === undefined) return <main className="grid min-h-screen place-items-center">Avataan opintopäiväkirjaa…</main>;
   if (!user) return <DeviceSignIn authError={authError} onSignedIn={setUser} />;
-  return <StudyApp key={user.id + ":" + initialPage + ":" + (courseCode ?? "") + ":" + (planMode ?? "") + ":" + (planAnchor ?? "")} user={user} initialPage={initialPage} courseCode={courseCode} planMode={planMode} planAnchor={planAnchor} />;
+  return <StudyApp key={user.id + ":" + initialPage + ":" + (courseCode ?? "") + ":" + (courseTab ?? "") + ":" + (planMode ?? "") + ":" + (planAnchor ?? "")} user={user} initialPage={initialPage} courseCode={courseCode} courseTab={courseTab} planMode={planMode} planAnchor={planAnchor} />;
 }
 
 function DeviceSignIn({
@@ -194,7 +194,7 @@ function DeviceSignIn({
   </section><Toaster richColors /></main>;
 }
 
-function StudyApp({ user, initialPage, courseCode, planMode, planAnchor }: { user: DeviceUser; initialPage: StudyPage; courseCode?: string; planMode?:"päivä"|"viikko"|"kuukausi"; planAnchor?:string }) {
+function StudyApp({ user, initialPage, courseCode, courseTab, planMode, planAnchor }: { user: DeviceUser; initialPage: StudyPage; courseCode?: string; courseTab?:CourseTab; planMode?:"päivä"|"viikko"|"kuukausi"; planAnchor?:string }) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   setOfflineOwner(user.id);
@@ -431,7 +431,29 @@ function StudyApp({ user, initialPage, courseCode, planMode, planAnchor }: { use
             else void navigate({to:"/plan/month/$month",params:{month:anchor.slice(0,7)}});
           }}
         /> :
-        page==="courses" ? <CourseView courses={courses} topics={topics} sessions={sessions} exams={exams} plan={plan} tests={testsQ.data??[]} mistakes={mistakesQ.data??[]} selected={courseId} onSelect={(id)=>id?goCourse(id):go("courses")} onAdd={()=>setAdding(true)} onStart={()=>setEntry("manual")}/> :
+        page==="courses" ? <CourseView
+          courses={courses}
+          topics={topics}
+          sessions={sessions}
+          exams={exams}
+          plan={plan}
+          tests={testsQ.data??[]}
+          mistakes={mistakesQ.data??[]}
+          selected={courseId}
+          initialTab={courseTab}
+          onTabChange={(tab)=>{
+            const current=courses.find(course=>course.id===courseId);
+            if(!current)return;
+            const code=current.code.toLowerCase();
+            if(tab==="Yleiskuva") void navigate({to:"/studies/$courseCode",params:{courseCode:code}});
+            else if(tab==="Sisältö") void navigate({to:"/studies/$courseCode/content",params:{courseCode:code}});
+            else if(tab==="Historia") void navigate({to:"/studies/$courseCode/history",params:{courseCode:code}});
+            else void navigate({to:"/studies/$courseCode/analysis",params:{courseCode:code}});
+          }}
+          onSelect={(id)=>id?goCourse(id):go("courses")}
+          onAdd={()=>setAdding(true)}
+          onStart={()=>setEntry("manual")}
+        /> :
         page==="practice" ? <PracticeView courses={courses} topics={topics} attempts={attemptsQ.data??[]} tests={testsQ.data??[]} mistakes={mistakesQ.data??[]}/> :
         page==="exams" ? <ExamsView courses={courses} topics={topics} exams={exams} tests={testsQ.data??[]} attempts={attemptsQ.data??[]} mistakes={mistakesQ.data??[]} sessions={sessions} plan={plan} onCourse={goCourse}/> :
         page==="progress" ? <ProgressView courses={courses} topics={topics} attempts={attemptsQ.data??[]} sessions={sessions} plan={plan} exams={exams} mistakes={mistakesQ.data??[]} capacity={capacity} onPlan={()=>go("plan")}/> :
