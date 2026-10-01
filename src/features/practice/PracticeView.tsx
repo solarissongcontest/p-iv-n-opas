@@ -116,9 +116,9 @@ export function PracticeView({
   attempts: PracticeAttempt[];
   tests?: PracticeTest[];
   mistakes?: Mistake[];
-  initialCourseId?: string;
-  initialTopicId?: string;
-  onExit?: () => void;
+  initialCourseId?: string | undefined;
+  initialTopicId?: string | undefined;
+  onExit?: (() => void) | undefined;
 }) {
   const [courseId, setCourseId] = useState(initialCourseId ?? courses[0]?.id ?? "");
   const [topicId, setTopicId] = useState(initialTopicId ?? "");
