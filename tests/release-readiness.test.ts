@@ -30,11 +30,13 @@ test("Quality Gate includes lint before tests typecheck and build", () => {
   assert.ok(lint < tests && tests < typecheck && typecheck < build);
 });
 
-test("Final Release Gate waits for the deployed commit and runs the full browser matrix", () => {
+test("Final Release Gate fails fast on Vercel errors, verifies the live alias and runs the browser matrix", () => {
   const workflow = read(".github/workflows/iphone-e2e.yml");
   for (const token of [
-    "Wait for this exact commit to reach Vercel",
+    "Wait for Vercel deployment result",
+    "Vercel deployment failed",
     "/api/release-info",
+    "PRODUCTION_BASE_URL",
     "iphone-smoke.spec.ts",
     "release-gate.spec.ts",
     "v5-cross-device.spec.ts",
@@ -93,4 +95,13 @@ test("production build is side-effect free and database migration is explicit", 
   const migrate = read("scripts/migrate-db.mjs");
   assert.match(migrate, /POSTGRES_URL is required/);
   assert.match(migrate, /supabase@2\.117\.0/);
+});
+
+
+test("Quality Gate has a Bun frozen-lockfile parity build for Vercel", () => {
+  const workflow = read(".github/workflows/quality.yml");
+  assert.match(workflow, /vercel-build-parity/);
+  assert.match(workflow, /oven-sh\/setup-bun@v2/);
+  assert.match(workflow, /bun install --frozen-lockfile/);
+  assert.match(workflow, /bun run build/);
 });
