@@ -449,7 +449,7 @@ test("custom friction if-then rules can trigger at runtime",()=>{
 });
 
 test("Harjoittelutila consumes feedback preference, pins retries and limits confusion practice to the pair",()=>{
-  const source=readFileSync(new URL("../src/components/PracticeView.tsx",import.meta.url),"utf8");
+  const source=readFileSync(new URL("../src/features/practice/PracticeView.tsx",import.meta.url),"utf8");
   assert.match(source,/feedback_policy_enabled/);
   assert.match(source,/setPinnedSelection\(selection\)/);
   assert.match(source,/selectionTopics = confusionSet/);
@@ -458,7 +458,7 @@ test("Harjoittelutila consumes feedback preference, pins retries and limits conf
 });
 
 test("due repaired mistakes are surfaced as actionable delayed verifications",()=>{
-  const source=readFileSync(new URL("../src/components/PracticeView.tsx",import.meta.url),"utf8");
+  const source=readFileSync(new URL("../src/features/practice/PracticeView.tsx",import.meta.url),"utf8");
   const engine=readFileSync(new URL("../src/lib/learning-os-v5.ts",import.meta.url),"utf8");
   assert.match(source,/dueMistakeVerifications/);
   assert.match(source,/Virheen myöhempi varmistus/);
@@ -486,7 +486,7 @@ test("exam simulation enforces point cap, autosaves, resumes and writes exam evi
 test("push-origin starts are marked as reminder-driven before reminder tapering",()=>{
   const cron=readFileSync(new URL("../src/routes/api.push.cron.ts",import.meta.url),"utf8");
   const sw=readFileSync(new URL("../public/sw.js",import.meta.url),"utf8");
-  const views=readFileSync(new URL("../src/components/StudyViews.tsx",import.meta.url),"utf8");
+  const views=readFileSync(new URL("../src/features/today/TodayView.tsx",import.meta.url),"utf8");
   assert.match(cron,/\?source=push/);
   assert.match(sw,/searchParams\.set\("source", "push"\)/);
   assert.match(views,/params\.get\("source"\)==="push"/);
