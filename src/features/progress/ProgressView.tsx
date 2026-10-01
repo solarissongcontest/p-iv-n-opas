@@ -135,7 +135,7 @@ import { Bar, Panel, button, secondary, type Base } from "@/features/shared/Stud
 
 export type ProgressSection = "summary"|"mastery"|"analysis";
 
-export function ProgressView({courses,topics,attempts,sessions,plan,exams,mistakes,capacity,onPlan,section="summary",onSectionChange}:Base&{attempts:PracticeAttempt[];sessions:Session[];plan:PlanItem[];exams:Exam[];mistakes:Mistake[];capacity:CapacityProfile;onPlan:()=>void;section?:ProgressSection;onSectionChange?:(section:ProgressSection)=>void}) {
+export function ProgressView({courses,topics,attempts,sessions,plan,exams,mistakes,capacity,onPlan,section="summary",onSectionChange}:Base&{attempts:PracticeAttempt[];sessions:Session[];plan:PlanItem[];exams:Exam[];mistakes:Mistake[];capacity:CapacityProfile;onPlan:()=>void;section?:ProgressSection | undefined;onSectionChange?:(section:ProgressSection)=>void}) {
   const now=today(),from=addDays(now,-29);
   const recent=sessions.filter(s=>s.date>=from&&s.date<=now);
   const due=plan.filter(p=>p.date>=from&&p.date<=now&&p.kind!=="exam");
