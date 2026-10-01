@@ -1,0 +1,93 @@
+/* ---------- Liquid Glass (navigation / control layer only) ---------- */
+
+@utility glass-base {
+  position: relative;
+  isolation: isolate;
+  background-color: var(--surface);
+  border: 1px solid var(--glass-hairline);
+  box-shadow: var(--shadow-card);
+}
+
+/* Tier 1: blur + saturation + adaptive tint + specular edge */
+@supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
+  .glass-base {
+    background-color: var(--glass-tint);
+    backdrop-filter: blur(22px) saturate(180%);
+    -webkit-backdrop-filter: blur(22px) saturate(180%);
+    box-shadow: var(--shadow-glass);
+  }
+}
+
+/* SVG displacement is an optional lensing layer; browsers without support
+   retain the blur, saturation, tint and edge highlight above. */
+@supports (backdrop-filter: url("/glass-lens.svg#glass-lens")) {
+  .glass-base[data-glass-tier="2"] {
+    backdrop-filter: url("/glass-lens.svg#glass-lens") blur(22px) saturate(180%);
+  }
+}
+
+@utility glass-clear {
+  background-color: var(--glass-tint-clear);
+  backdrop-filter: blur(12px) saturate(150%);
+}
+
+@utility glass-thick {
+  background-color: var(--glass-tint-thick);
+  backdrop-filter: blur(34px) saturate(190%);
+}
+
+@utility glass-specular {
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    background: linear-gradient(
+      160deg,
+      var(--glass-edge) 0%,
+      transparent 32%,
+      transparent 70%,
+      color-mix(in oklab, var(--glass-edge) 55%, transparent) 100%
+    );
+    opacity: 0.8;
+    z-index: -1;
+  }
+}
+
+@utility glass-interactive {
+  transition:
+    transform 160ms var(--ease-calm),
+    background-color 160ms var(--ease-calm),
+    box-shadow 200ms var(--ease-calm);
+  &:hover {
+    transform: translateY(-1px);
+  }
+  &:active {
+    transform: scale(0.98);
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .glass-base,
+  .glass-clear,
+  .glass-thick {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background-color: var(--surface) !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+  .glass-interactive:hover,
+  .glass-interactive:active {
+    transform: none;
+  }
+}
+

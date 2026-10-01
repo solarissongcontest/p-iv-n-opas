@@ -1,0 +1,663 @@
+/* ---------- content layer helpers ---------- */
+
+@utility panel {
+  background-color: var(--surface);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-2xl);
+  box-shadow: var(--shadow-card);
+}
+
+@utility press {
+  transition:
+    transform 120ms var(--ease-calm),
+    background-color 140ms var(--ease-calm);
+  &:hover {
+    transform: translateY(-1px);
+  }
+  &:active {
+    transform: scale(0.98);
+  }
+}
+
+@utility tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+@keyframes calm-rise {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@utility rise {
+  animation: calm-rise 260ms var(--ease-calm) both;
+}
+
+
+/* ---------- installed mobile app shell ---------- */
+
+.app-main {
+  min-height: 100dvh;
+  padding-top: 0;
+  padding-bottom:
+    calc(
+      var(--app-tabbar-height)
+      + 6.25rem
+      + env(safe-area-inset-bottom, 0px)
+    );
+}
+
+.page-content {
+  width: min(100%, var(--page-max-dashboard));
+  margin-inline: auto;
+}
+
+.page-content-today { --page-max-dashboard: 860px; }
+.page-content-plan { width: min(100%, 1040px); }
+.page-content-courses { width: min(100%, var(--page-max-library)); }
+.page-content-practice { width: min(100%, var(--page-max-focus)); }
+.page-content-progress { width: min(100%, var(--page-max-insights)); }
+.page-content-exams,
+.page-content-settings { width: min(100%, 920px); }
+
+.today-primary {
+  order: -20;
+  border-color: color-mix(in oklab, var(--primary) 18%, var(--border));
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in oklab, var(--accent) 42%, var(--surface)),
+      var(--surface) 62%
+    );
+}
+
+.planner-calendar {
+  order: 10;
+}
+
+.planner-support {
+  order: 30;
+}
+
+.progress-summary > .panel {
+  min-height: 132px;
+}
+
+.course-row {
+  transition:
+    background-color 140ms var(--ease-calm),
+    border-color 140ms var(--ease-calm),
+    transform 120ms var(--ease-calm);
+}
+
+.app-mobile-header {
+  position: sticky;
+  top: 0;
+  z-index: 15;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-inline: -1rem;
+  margin-bottom: 1rem;
+  padding:
+    max(0.65rem, env(safe-area-inset-top, 0px))
+    1rem
+    0.55rem;
+  background: color-mix(in oklab, var(--background) 86%, transparent);
+  border-bottom: 1px solid color-mix(in oklab, var(--border) 45%, transparent);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+}
+
+.app-icon-button {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: color-mix(in oklab, var(--surface) 78%, transparent);
+  color: var(--foreground);
+  box-shadow: 0 1px 1px oklch(0.2 0.01 260 / 0.03);
+  touch-action: manipulation;
+}
+
+.app-icon-button:active {
+  transform: scale(0.96);
+}
+
+.app-tabbar {
+  position: fixed !important;
+  left: 0.75rem !important;
+  right: 0.75rem !important;
+  bottom: max(0.65rem, env(safe-area-inset-bottom, 0px)) !important;
+  z-index: 30;
+  display: grid !important;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  align-items: center;
+  min-height: 64px;
+  padding: 0.28rem 0.3rem;
+  border-radius: 22px !important;
+}
+
+.app-tab {
+  display: grid;
+  min-width: 0;
+  min-height: 48px;
+  place-items: center;
+  align-content: center;
+  gap: 0.18rem;
+  border-radius: 14px;
+  color: var(--muted-foreground);
+  font-size: 9.5px;
+  line-height: 1;
+  font-weight: 560;
+  touch-action: manipulation;
+  transition:
+    color 150ms var(--ease-calm),
+    background-color 150ms var(--ease-calm),
+    transform 120ms var(--ease-calm);
+}
+
+.app-tab:active {
+  transform: scale(0.96);
+}
+
+.app-tab-active {
+  color: var(--primary);
+  background: transparent;
+}
+
+.app-tab-add {
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 0.15rem;
+  width: 48px;
+  height: 48px;
+  justify-self: center;
+  margin-top: -6px;
+  border-radius: 16px;
+  background: var(--primary);
+  color: var(--primary-foreground);
+  box-shadow:
+    0 8px 22px color-mix(in oklab, var(--primary) 22%, transparent),
+    0 1px 1px oklch(1 0 0 / 0.22) inset;
+  font-size: 8.5px;
+  font-weight: 650;
+  touch-action: manipulation;
+  transition: transform 120ms var(--ease-calm);
+}
+
+.app-tab-add:active {
+  transform: scale(0.95);
+}
+
+.app-sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: flex-end;
+  background: oklch(0.1 0.005 260 / 0.24);
+  animation: app-fade-in 160ms var(--ease-calm) both;
+}
+
+.app-sheet {
+  width: 100%;
+  max-height: min(76dvh, 620px);
+  overflow-y: auto;
+  border-radius: 30px 30px 0 0 !important;
+  padding:
+    0.55rem
+    1rem
+    calc(1rem + env(safe-area-inset-bottom, 0px));
+  animation: app-sheet-up 220ms var(--ease-calm) both;
+}
+
+.app-sheet-handle {
+  width: 38px;
+  height: 5px;
+  margin: 0.1rem auto 0.9rem;
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--muted-foreground) 32%, transparent);
+}
+
+.app-sheet-action {
+  display: flex;
+  min-height: 82px;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.9rem;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: color-mix(in oklab, var(--surface) 90%, transparent);
+  text-align: left;
+  touch-action: manipulation;
+}
+
+.app-sheet-action > svg {
+  flex: 0 0 auto;
+  color: var(--primary);
+}
+
+.app-sheet-action > span {
+  display: grid;
+  min-width: 0;
+  gap: 0.18rem;
+}
+
+.app-sheet-action b {
+  font-size: 0.9rem;
+  font-weight: 650;
+}
+
+.app-sheet-action small {
+  color: var(--muted-foreground);
+  font-size: 0.7rem;
+  line-height: 1.25;
+}
+
+.app-sheet-action-active {
+  border-color: color-mix(in oklab, var(--primary) 35%, var(--border));
+  background: var(--accent);
+}
+
+@keyframes app-sheet-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes app-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@media (max-width: 767px) {
+  .page-content {
+    width: 100%;
+  }
+
+  .page-content .panel {
+    box-shadow: none;
+  }
+
+  .coach-trigger span {
+    display: none;
+  }
+
+  .coach-trigger {
+    width: 48px;
+    padding-inline: 0;
+  }
+
+  .practice-primary-surface {
+    border-color: transparent;
+    background: transparent;
+    padding-inline: 0 !important;
+  }
+
+  .practice-primary-surface > div:first-child {
+    align-items: flex-start;
+  }
+
+  .practice-utility-row {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .practice-utility-button {
+    min-height: 40px !important;
+    padding-inline: 0.75rem !important;
+    font-size: 0.78rem !important;
+  }
+
+  .practice-setup-grid label {
+    font-size: 0.78rem;
+    color: var(--muted-foreground);
+  }
+
+  .practice-setup-grid select {
+    margin-top: 0.35rem;
+    min-height: 52px;
+    color: var(--foreground);
+  }
+
+  .practice-question-context {
+    padding-block: 0.25rem;
+  }
+
+  .practice-question-meta {
+    line-height: 1.35;
+  }
+
+  .practice-prompt {
+    font-size: 1.2rem;
+    line-height: 1.45;
+    font-weight: 650;
+    letter-spacing: -0.012em;
+  }
+
+  .practice-rationale {
+    line-height: 1.5;
+  }
+
+  .practice-self-review {
+    border-color: color-mix(in oklab, var(--border) 70%, transparent);
+    background: color-mix(in oklab, var(--muted) 35%, transparent);
+  }
+
+  .today-primary > div:first-child {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .today-primary > div:first-child > div {
+    width: 100%;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .today-primary > div:first-child > div::-webkit-scrollbar {
+    display: none;
+  }
+
+  .course-list {
+    gap: 0 !important;
+  }
+
+  .course-list .course-row {
+    border-right: 0;
+    border-left: 0;
+    border-radius: 0;
+    background: transparent;
+    padding-inline: 0 !important;
+  }
+
+  .course-list .course-row:first-of-type {
+    border-top-color: transparent;
+  }
+
+  .progress-summary {
+    gap: 0.65rem;
+  }
+
+  .progress-summary > .panel {
+    min-height: 0;
+    padding: 0.9rem !important;
+  }
+
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
+
+  button,
+  a,
+  input,
+  select,
+  textarea {
+    touch-action: manipulation;
+  }
+
+  .panel {
+    border-radius: 18px;
+    box-shadow: none;
+  }
+
+  .app-main {
+    padding-inline: var(--page-inline-compact);
+    padding-bottom:
+      calc(
+        var(--app-tabbar-height)
+        + 6.25rem
+        + env(safe-area-inset-bottom, 0px)
+      );
+  }
+
+  .app-mobile-header {
+    margin-inline: calc(var(--page-inline-compact) * -1);
+    padding-inline: var(--page-inline-compact);
+  }
+
+  .app-tabbar {
+    left: 0.6rem !important;
+    right: 0.6rem !important;
+  }
+}
+
+@media (display-mode: standalone) {
+  body {
+    min-height: 100dvh;
+  }
+
+  .app-mobile-header {
+    padding-top: max(0.95rem, env(safe-area-inset-top, 0px));
+  }
+
+  .app-tabbar {
+    bottom: max(0.45rem, env(safe-area-inset-bottom, 0px)) !important;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .app-mobile-header {
+    background: var(--background);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-sheet,
+  .app-sheet-backdrop {
+    animation: none !important;
+  }
+}
+
+
+html.dark,
+html.dark body {
+  background-color: #0f1012 !important;
+}
+
+html.dark .app-mobile-header {
+  background: color-mix(in oklab, #0f1012 86%, transparent);
+}
+
+@supports (padding: max(0px)) {
+  html,
+  body {
+    min-height: calc(100% + env(safe-area-inset-top, 0px));
+  }
+}
+
+
+/* ---------- tablet navigation ---------- */
+@media (min-width: 768px) and (max-width: 1100px) {
+  .desktop-sidebar {
+    width: 5rem !important;
+    padding-inline: 0.65rem !important;
+  }
+
+  .desktop-sidebar .sidebar-label {
+    display: none !important;
+  }
+
+  .desktop-sidebar nav button,
+  .desktop-sidebar > button,
+  .desktop-sidebar .mt-auto button {
+    justify-content: center;
+    padding-inline: 0.65rem;
+  }
+
+  .desktop-sidebar > div:first-child {
+    justify-content: center;
+    padding-inline: 0;
+  }
+}
+
+
+@media (forced-colors: active) {
+  .panel,
+  .glass-base,
+  button,
+  input,
+  select,
+  textarea {
+    border: 1px solid CanvasText !important;
+  }
+
+  :focus-visible {
+    outline: 2px solid Highlight !important;
+    outline-offset: 2px !important;
+  }
+
+  [aria-current="page"],
+  [aria-pressed="true"] {
+    outline: 2px solid Highlight;
+    outline-offset: -2px;
+  }
+}
+
+
+.skip-link {
+  position: fixed;
+  top: max(0.5rem, env(safe-area-inset-top, 0px));
+  left: 0.75rem;
+  z-index: 100;
+  border-radius: 0.75rem;
+  background: var(--foreground);
+  color: var(--background);
+  padding: 0.65rem 0.9rem;
+  font-weight: 600;
+}
+
+.skip-link:not(:focus):not(:focus-visible) {
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+  padding: 0;
+}
+
+
+/* ---------- hard breakpoint isolation ---------- */
+/* Mobile shell components set display explicitly. These rules ensure they can
+   never leak into the desktop shell, regardless of utility ordering. */
+@media (min-width: 768px) {
+  .app-mobile-header,
+  .app-tabbar,
+  .app-sheet-backdrop {
+    display: none !important;
+  }
+
+  .app-main {
+    padding-bottom: 2.5rem;
+  }
+
+  .app-desktop-main {
+    width: auto;
+    max-width: none;
+    margin-left: 6.5rem;
+    margin-right: 1.5rem;
+    padding-inline: var(--page-inline-medium);
+  }
+}
+
+@media (min-width: 1101px) {
+  .app-desktop-main {
+    max-width: 1440px;
+    margin-left: 17rem;
+    margin-right: 2rem;
+    padding-inline: var(--page-inline-expanded);
+  }
+}
+
+
+/* ---------- Opintocoach ---------- */
+/* Coach is a control layer: Liquid Glass belongs on the trigger and header,
+   while the reading/writing body stays opaque and calm. */
+.coach-trigger {
+  position: fixed;
+  right: 1rem;
+  bottom:
+    calc(
+      var(--app-tabbar-height)
+      + 1.55rem
+      + env(safe-area-inset-bottom, 0px)
+    );
+  z-index: 25;
+  display: flex;
+  min-width: 48px;
+  min-height: 48px;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  padding: 0.72rem 0.9rem;
+  border-radius: 999px;
+  color: var(--foreground);
+  box-shadow: 0 5px 24px oklch(0.2 0.01 260 / 0.08);
+}
+
+.coach-dialog {
+  position: fixed;
+  inset:
+    max(0.5rem, env(safe-area-inset-top, 0px))
+    0.5rem
+    max(0.5rem, env(safe-area-inset-bottom, 0px));
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 1.5rem;
+  background: var(--background);
+  color: var(--foreground);
+  box-shadow: 0 20px 80px oklch(0.1 0.01 260 / 0.28);
+}
+
+.coach-composer {
+  padding-bottom: max(1rem, env(safe-area-inset-bottom, 0px));
+}
+
+@media (min-width: 768px) {
+  .coach-trigger {
+    right: 1.5rem;
+    bottom: 1.5rem;
+  }
+
+  .coach-dialog {
+    top: 1rem;
+    right: 1rem;
+    bottom: 1rem;
+    left: auto;
+    width: min(480px, calc(100vw - 2rem));
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .coach-trigger {
+    background: var(--surface) !important;
+  }
+}
+
+
