@@ -270,9 +270,7 @@ export function AICoach({
       if (controller.signal.aborted) {
         setError("Pyyntö keskeytyi. Paikallinen ohjaus toimii edelleen.");
       } else {
-        setError(
-          caught instanceof Error ? caught.message : "Yhteys katkesi.",
-        );
+        setError("Opiskeluohjaajaan ei saatu yhteyttä. Paikallinen ohjaus toimii edelleen.");
       }
     } finally {
       if (abortRef.current === controller) {
