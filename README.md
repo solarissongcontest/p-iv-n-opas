@@ -1,350 +1,240 @@
-# Päivän Opas
+# Opintopäiväkirja
 
-> **Canonical production repository:** `solarissongcontest/p-iv-n-opas`  
-> Do not deploy, migrate the production database, or continue Opintopäiväkirja development from older repository copies. See `docs/legacy-migration-audit.md`.
+Opintopäiväkirja on suomalainen Study OS, jonka ydinsykli on:
 
-Rakenna production-quality full-stack -sovellus nimeltä "Opintopäiväkirja". Tämä on moderni suomalainen Study OS, jonka ydinsykli on:
+**suunnittele → opiskele → kirjaa → arvioi → mukauta suunnitelmaa**
 
-suunnittele → opiskele → kirjaa → arvioi → mukauta suunnitelmaa.
+Canonical production repository: `solarissongcontest/p-iv-n-opas`.
 
-TÄRKEÄÄ: tämä ei ole geneerinen dashboard. Käyttäjän tärkein kysymys on "Mitä minun pitää tehdä seuraavaksi?"
+## Päänavigaatio
 
-VISUAALINEN SUUNTA
-Calm Academic / Scandinavian Study OS:
-- rauhallinen, älykäs, moderni, kevyt, premium
-- ei pelisovellusta, ei Wilma-tyyliä, ei BI-dashboardia, ei Notion-kloonia, ei violettia AI-startup-lookkia
-- flat content layer + Liquid Glass vain navigation/control layerissa
+Sovelluksen viisi pääaluetta ovat:
 
-Design tokens:
-Light: background #F6F7F9, surface #FFFFFF
-Dark: background #111214, surface #191B1F, raised #1D2025, text #F4F5F6, secondary #B7BBC2
-Typography: Inter / native system stack
-Spacing: 4/8/12/16/24/32/48/64
-Cards radius 14-16px, inputs 10px, buttons 10-12px, modal 20-24px
-Shadows hyvin kevyiksi.
+- **Tänään** – seuraava tarkoituksenmukainen opiskelutoiminto
+- **Suunnitelma** – päivä-, viikko- ja kuukausisuunnittelu
+- **Opinnot** – kurssit, aiheet, historia ja analyysi
+- **Harjoittelu** – mukautuva setup → active → summary -harjoittelu
+- **Edistyminen** – yhteenveto, osaaminen ja analyysi
 
-LIQUID GLASS
-Luo reusable LiquidGlass-komponentti:
-- regular
-- clear
-- thick
-- interactive
-Käytä vain: sidebar, mobile bottom nav, floating actions, command palette, sheets, toolbars, modal controls.
-Ei tavallisiin sisältökortteihin.
-Progressive enhancement:
-0 opaque fallback
-1 CSS backdrop blur + saturation + adaptive tint + specular/edge highlights
-2 SVG displacement/lensing jos suorituskyky sallii
-Huomioi prefers-reduced-motion ja prefers-reduced-transparency.
+Lisäksi **Kokeet** ja **Asetukset** ovat omia route-tason näkymiään.
 
-PÄÄNAVIGAATIO
-Desktop persistent left sidebar:
-- Tänään
-- Suunnitelma
-- Kurssit
-- Kokeet
-- Kehitys
-erillinen + Kirjaa opiskelu
-Asetukset alas
-Search, notifications, profile ovat control-toimintoja.
+Mobiilissa käytetään viiden kohdan tab baria ja desktopilla sivupalkkia. Liquid Glass on rajattu navigaatio- ja kontrollikerrokseen.
 
-Mobile floating glass bottom bar:
-Tänään | Suunnitelma | + | Kurssit | Kehitys
-+ avaa opiskelun kirjaamisen/start-session sheetin.
+## Route-arkkitehtuuri
 
-TÄNÄÄN
-Default home. Näytä vain:
-- greeting + suomalainen päivämäärä
-- yksi primary task card: course, topic, planned duration, Aloita opiskelu
-- Seuraavaksi 1-3 compact rowta
-- tämän viikon tavoite actual/planned + progressbar + remaining
-- tärkeä ilmoitus: nearest exam / plan change
-- viimeisin reflektio/note + tarvittaessa Kertaa aihe
-Ei analytiikkadashboardia.
+Keskeiset osoitteet:
 
-STUDY SESSION
-Start view:
-course, topic, planned minutes, goals, Aloita sessio
-Running focus view:
-course + topic, timer, goal, Tauko, Lopeta, + Lisää huomio
-Session completion:
-actual duration
-competence 1-5
-mikä jäi epäselväksi
-mitä teit
-collapsed advanced details: focus, study method, energy, task numbers, extra note
-Saving updates progress, mastery evidence, review scheduling, weekly totals, next action.
+```text
+/today
 
-SUUNNITELMA
-Default week view, plus day/week/month segmented control.
-Desktop timeline with time + tasks.
-Statuses always icon + text + color:
-planned, in_progress, completed, skipped, overdue.
-Desktop drag & drop rescheduling, BUT always also ••• → Siirrä accessible alternative.
-Everything editable.
+/plan
+/plan/day/:date
+/plan/week/:week
+/plan/month/:month
 
-SMART PLANNING
-When exam added: date, target, current progress, days available, study days, weekly goal.
-Generate suggested distribution: content → applications → practice → review → light review → exam.
-Never lock the user in.
+/studies
+/studies/:courseCode
+/studies/:courseCode/content
+/studies/:courseCode/history
+/studies/:courseCode/analysis
 
-KURSSIT
-Compact rows/medium cards:
-code, name, content progress, study time, next topic.
+/practice
+/practice/:courseCode/:topicId
 
-COURSE PAGE
-Tabs:
-Yleiskuva | Sisältö | Historia | Analyysi
+/progress
+/progress/mastery
+/progress/analysis
 
-Overview: next topic, exam date, progress, this week study time, latest self-rating, hardest topics.
-Content: hierarchical topic list ✓ / ◐ / ○
-Topic detail:
-content progress
-mastery 0-5
-study time
-tasks
-last studied
-next review
-Keep content progress and mastery clearly separate.
+/exams
+/exams/:examId
 
-KOKEET
-Dedicated page.
-List nearest exams:
-course, name, date, days remaining, readiness %
-Exam detail:
-date, target, progress, mastery, remaining topics, review plan, practice tests, study hours
-NO grade prediction.
+/settings
+/settings/study
+/settings/notifications
+/settings/app
+```
 
-KEHITYS
-Actual analytics area.
-30 day summary:
-study time
-change vs previous 30 days
-plan completion %
-study regularity days/week
-mastery development
-Then:
-weekly actual vs planned bar chart
-course time distribution
-mastery development
-subtle calendar heatmap
-efficiency/time-vs-mastery
-concrete insights
+Root `/` ohjaa Tänään-näkymään.
 
-INSIGHTS
-Concrete only:
-"KE04:n opiskeluaika on tällä viikolla 1 h 20 min alle suunnitelman."
-"Stoikiometrian osaaminen nousi 2/5 → 4/5."
-No empty praise.
+## Oppimisjärjestelmä
 
-GAMIFICATION
-Only: goals, progress, milestones, completed topics, own-history comparison, "Opiskelurytmi: 4 päivää tällä viikolla"
-No XP, levels, leaderboards, streak threats.
+Learning OS erottaa toisistaan muun muassa:
 
-SEARCH
-Cmd/Ctrl+K command palette desktop, search button mobile.
-Search courses, topics, study sessions, notes, exams.
-Keyboard navigable.
+- sisällön etenemisen
+- itsearvion
+- todennetun osaamisen
+- myöhemmän muistamisen
+- virheistä palautumisen
+- koetason näytön
+- kuormituksen ja palautumisen
+- kertausvelan
+- aikataulu-, osaamis- ja unohtamisriskin
 
-NOTIFICATIONS SETTINGS
-Toggles:
-study sessions
-exams
-plan changes
-weekly summary
+Todennettu osaaminen ei nouse pelkän itsearvion perusteella.
 
-WEEKLY SUMMARY
-Viikko N
-study time
-plan completion
-most studied course
-biggest mastery improvement
-next week nearest exam
-CTA Suunnittele ensi viikko
+## Suunnittelu
 
-ONBOARDING
-Max 4 steps:
-1 welcome
-2 first course
-3 first exam/target
-4 generate first plan
-then Today.
+Planner huomioi:
 
-ACCESSIBILITY
-WCAG 2.2 AA
-44x44 practical targets
-clear focus indicators
-full keyboard support
-Escape modals
-Enter/Space controls
-arrow keys where semantics require
-Cmd/Ctrl+K search
-N new study log
-T Today
-Drag never only method.
-Color never only status signal.
+- valitut opiskelupäivät
+- arjen ja viikonlopun kapasiteetin
+- kiireiset päivät
+- kokeiden ajankohdat
+- kurssien kuormituksen
+- kertaukset ja virheistä palautumisen
+- viimeisten päivien kevyen koetilan
 
-MOTION
-micro 100-150ms
-control 160-220ms
-panel/sheet 250-350ms
-page 200-300ms
-easing cubic-bezier(.2,.8,.2,1)
-Pressed scale .98, hover translateY(-1px)
-No toy bounce animations.
+Opiskelupäivien muuttaminen tallennetaan yhtenä muutoksena ja tulevat suunnitellut tehtävät siirretään valituille opiskelupäiville kapasiteetti- ja koerajat huomioiden.
 
-LOADING / EMPTY / ERROR
-Use restrained skeletons when needed.
-Empty states explain next action.
-Errors explain what happened + next action.
-Keep local pending copy when possible.
+## Harjoittelu ja koeharjoitus
 
-OFFLINE
-Study session, reflection, task completion, note should work if network fails.
-Store pending local changes and sync later.
-Show calm sync status.
+Harjoittelu käyttää neljän vaiheen flow’ta:
 
-DATA MODEL
-Multi-course app.
-Course:
-id, code, name, subject, startDate, examDate, studyMode, target/evaluation system, color, archived, weeklyMinutes, topics[]
-Topic:
-id, name, weight, importance, dependencies[], materials, progress 0-100, schoolCovered, selfLevel 0-5, verifiedLevel 0-5, lastReview, nextReview, basicSuccesses, examSuccesses, delayedSuccesses
-Session:
-id, courseId, topicId, date, minutes, kind study/review/test/correction, note, optional reflection fields
-Mistake:
-id, courseId, topicId, error, type, explanation, status open->corrected->retested->mastered, retryDate
-PracticeTest:
-id, courseId, date, score, durationMinutes, errorCount, topicResults[]
-WeeklyCheckins
-ProgressEvents
-PlanOverrides
-PlanStatusOverrides
-NotificationSettings
+```text
+SETUP → ACTIVE → FEEDBACK → SUMMARY
+```
 
-MASTERY
-0 not studied
-1 recognize
-2 understand model
-3 basic problem independently
-4 normal exam problem
-5 apply/explain
-Verified mastery depends on actual evidence: basic success, exam-level success, delayed review. Self-rating alone cannot raise verified mastery.
+Aktiivisen tehtävän aikana asetukset ja toissijaiset paneelit väistyvät.
 
-TARGET SYSTEMS
-Support:
-school 4-10
-YO L/E/M/C/B/A/I
-percent
-pass/fail
-custom
-For school: 10=100,9=90,8=80,7=70,6=60,5=50,4=40 mastery target.
-Course coverage target always 100%.
+YO / Abitti 2 -koeharjoitus tukee tehtävävalintaa, ajastusta, vastauseditoria, piirrosvastauksia, autosavea, jatkamista ja vasta suorituksen jälkeen näkyvää palautetta.
 
-READINESS
-0-100, NOT grade prediction.
-Combine verified mastery, coverage, practice tests, review recency, mistake correction.
+## Opiskelukerta
 
-PROGRESS CORRIDOR
-x start→exam, y 0-100
-lower, target, upper, actual, forecast, shaded band
-wider early, narrower near exam
-above upper means review/deepen/rest, not push new content.
+Suunniteltu opiskelukerta avautuu focus workspacena, jossa normaali sovellusnavigaatio ei kilpaile tehtävän kanssa. Tallennus päivittää opiskeluhistorian ja oppimisnäytön.
 
-SCHOOL SYNC
-Track school-covered separately from personal progress.
-Show school vs own.
-If far ahead, prefer review/deepening.
+## Laitteiden välinen synkronointi
 
-RISKS
-Separate:
-schedule risk
-mastery risk
-forgetting/review risk
+Puhelin ja tietokone käyttävät samaa Arthur-owneria ja samaa Supabase-dataa.
 
-BUFFERS
-time buffer days
-work buffer sessions
-recovery days if below lower bound
+- palvelindata on yhteinen source of truth
+- aktiivinen sovellus refetchoi tiedot säännöllisesti
+- näkyviin palaaminen ja verkkoyhteyden palautuminen käynnistävät päivityksen
+- offline-kirjaukset säilyvät paikallisessa jonossa reloadin yli
+- jonossa olevat muutokset synkronoituvat verkon palatessa
+- cross-device E2E varmistaa offline → reload → online → toinen laite -ketjun
 
-DAILY WORKLOAD
-Each planned session has minimum / target / extra.
-Extra is optional, never debt.
-Global workload balances all active courses, especially exams close together.
+Teema ja muu puhtaasti laitekohtainen UI-tila voivat säilyä paikallisina.
 
-EXAM MODE
-Within 14 days: prioritize risks, reviews, mistakes, practice tests.
-Last 2 days: light recall/error list.
+## Opiskeluohjaaja ja Gemini
 
-KE04 SEED
-KE04 Kemialliset reaktiot
-start 2026-10-05
-exam 2026-11-23
-weekly goal 195 min
-target grade 10
-Topics weights total 100:
-Reaktioyhtälöt ja tasapainotus 8
-Stoikiometria 10
-Reaktion saanto 8
-Rajoittava tekijä 9
-Ideaalikaasu ja kaasustoikiometria 8
-Saostumis- ja hajoamisreaktiot 5
-Protoninsiirto, neutraloituminen ja titraus 8
-Palamisreaktiot 4
-Substituutioreaktiot 5
-Additioreaktiot 5
-Eliminaatioreaktiot 5
-Kondensaatioreaktiot 5
-Hydrolyysireaktiot 5
-Polymeroituminen ja polymeerit 8
-Biomolekyylit 7
-Materials:
-14-25,14-35,27-35,38-44,46-54,~61-88,92-100,103-111,114-122,132-161,162-210 as appropriate.
-Before 2026-10-05 do not recommend new KE04 study content.
+Opiskeluohjaajalla on aina paikallinen deterministinen fallback. Geminiä käytetään vain, kun käyttäjä antaa siihen istuntokohtaisen luvan.
 
-COURSE CREATION
-Blank course + templates BI05 and KE06.
-Fast topic import:
-Topic | weight | importance | materials
-Normalize weights to 100 when needed.
+Remote provider:
 
-TECH
-Use Lovable default full-stack TypeScript with Tailwind + shadcn/ui.
-Use Supabase/PostgreSQL persistence.
-Single-user friendly now, clean architecture for auth later.
-Persist real data, no fake static cards.
-Seed KE04 on first setup.
+- `gemini-3.8-flash`
+- autentikoitu server route `/api/ai/coach`
+- timeout ja quota fallback
+- rajattu opiskelukonteksti
+- henkilötietojen automaattinen peittäminen
+- answer firewall
+- provider- ja interaction-auditointi
 
-BUILD ORDER
-1 foundation/design system/LiquidGlass/responsive shell
-2 persistence/data
-3 Today
-4 Study Session
-5 Courses/course tabs
-6 Plan/day-week-month/rescheduling
-7 Exams
-8 Development/insights/heatmap
-9 search/dark/accessibility/offline polish
+Final Release Gate varmistaa tuotannossa, että Gemini on määritetty ja pystyy palauttamaan hyväksytyn ohjausstrategian.
 
-Do not stop at a pretty prototype. Build the functional app end-to-end.
+## Taustailmoitukset
 
-This project was built with [Lovable](https://lovable.dev).
+Web Push sisältää:
 
-## Build with Lovable
+- subscribe / unsubscribe
+- testiviestin
+- VAPID-avaimen
+- quiet hours
+- deduplikoinnin
+- vanhentuneen subscriptionin deaktivoinnin
+- reminder tapering -logiikan
+- päivittäisen Vercel cronin
 
-Continue developing this project in the [Lovable editor](https://lovable.dev/projects/2dd6ec77-8c7b-42e5-b885-a0649b589ea4).
+Ilmoitus avaa asian kannalta oikean reitin, esimerkiksi kokeen, suunnitelman, edistymisen tai Tänään-näkymän.
 
-- **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: every change made in Lovable is committed straight to this repository.
-- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
+## Offline ja PWA
 
-## Development
+Opintopäiväkirja toimii asennettavana PWA:na. Opiskelukerran ja muiden tuettujen kirjoitusten pending-versio säilytetään paikallisesti, jos verkko katoaa.
 
-Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
+## Kehitys
 
-```sh
-git clone <this-repository-url>
-cd <repository-name>
-npm i
+Vaatii Node.js 22+.
+
+```bash
+npm install
 npm run dev
 ```
+
+Keskeiset komennot:
+
+```bash
+npm run lint
+npm test
+npm run typecheck
+npm run build
+npm run e2e
+npm run e2e:smoke
+npm run e2e:cross-device
+npm run e2e:visual
+```
+
+Playwright käyttää ympäristömuuttujaa:
+
+```bash
+E2E_BASE_URL=https://... npm run e2e
+```
+
+## CI ja release-valmius
+
+### Quality Gate
+
+Jokaiselle PR:lle ja `main`-muutokselle ajetaan:
+
+```text
+lint → unit/regression → typecheck → production build
+```
+
+### Final Release Gate
+
+Jokaiselle `main`-pushille:
+
+1. ajetaan vielä kerran lint, testit, typecheck ja build
+2. odotetaan, että Vercel kertoo `/api/release-info`-reitillä juuri saman commit SHA:n
+3. ajetaan iPhone/WebKit-smoke
+4. ajetaan desktop production smoke
+5. ajetaan WCAG/axe-tarkistus
+6. varmennetaan Gemini-provider
+7. varmennetaan push-backend
+8. ajetaan offline + reload + second-device -synkka
+9. ajetaan responsive visual layout -matriisi 320–1440 px
+10. tallennetaan selaintestien screenshot-evidence GitHub Actions -artifactiksi
+
+Production URL voidaan asettaa repository variableen `PRODUCTION_BASE_URL`. Muuten workflow käyttää Vercel-projektin oletusosoitetta `https://opiskelupaivakirja.vercel.app`.
+
+Workflow voidaan käynnistää myös käsin, jolloin voidaan lisäksi lähettää yksi oikea Web Push -testi aktiivisiin laitteisiin.
+
+## Saavutettavuus
+
+Tavoite on WCAG 2.2 AA.
+
+Toteutuksessa on muun muassa:
+
+- skip link
+- näkyvät focus-tilat
+- keyboard navigation
+- Escape-sulkeminen
+- focus trap ja focus restoration väliaikaisissa käyttöliittymissä
+- vähintään käytännössä 44 px kontrollikoot tärkeissä mobiilikontrolleissa
+- drag & dropille vaihtoehtoinen painiketoiminto
+- reduced motion / reduced transparency
+- automaattinen axe-tarkistus Final Release Gatessa
+
+Fyysinen iOS VoiceOver ja oikean laitteen notification-renderöinti kuuluvat release-checklistin laitetarkistuksiin, koska niitä ei voi luotettavasti emuloida Linux-pohjaisessa GitHub Actions -runnerissa.
+
+## Deployment
+
+Vercel deployaa automaattisesti vain `main`-haaran. Feature-branchit eivät luo automaattisia Vercel deploymentteja, jotta Hobby-planin deployment quota ei kulu branch-committeihin.
+
+Vercel cron:
+
+```text
+0 6 * * *
+```
+
+→ `/api/push/cron`
+
+Älä deployaa tuotantoa vanhoista Opintopäiväkirja-repokopioista.
