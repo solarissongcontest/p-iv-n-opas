@@ -103,11 +103,7 @@ jobs:
             for URL in $CANDIDATES; do
               URL="${URL%/}"
               BODY=$(curl --silent --show-error --fail --max-time 10 "$URL/api/release-info" || true)
-              LIVE_SHA=$(printf '%s' "$BODY" | python3 -c "import json,sys
-try:
-    print((json.load(sys.stdin).get('commit') or '').strip())
-except Exception:
-    print('')" 2>/dev/null || true)
+              LIVE_SHA=$(printf '%s' "$BODY" | python3 -c "import json,sys; d=json.load(sys.stdin); print((d.get('commit') or '').strip())" 2>/dev/null || true)
               if [ "$LIVE_SHA" = "$EXPECTED_SHA" ]; then
                 echo "base_url=$URL" >> "$GITHUB_OUTPUT"
                 echo "Production URL verified: $URL"
