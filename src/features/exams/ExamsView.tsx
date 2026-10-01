@@ -133,7 +133,7 @@ import {
 
 import { Bar, Panel, button, secondary, type Base } from "@/features/shared/StudyViewPrimitives";
 
-export function ExamsView({courses,topics,exams,tests,attempts,mistakes,sessions,plan,onCourse,initialExamId,onExamChange}:Base&{exams:Exam[];tests:PracticeTest[];attempts:PracticeAttempt[];mistakes:Mistake[];sessions:Session[];plan:PlanItem[];onCourse:(id:string)=>void;initialExamId?:string;onExamChange?:(id:string|null)=>void}) {
+export function ExamsView({courses,topics,exams,tests,attempts,mistakes,sessions,plan,onCourse,initialExamId,onExamChange}:Base&{exams:Exam[];tests:PracticeTest[];attempts:PracticeAttempt[];mistakes:Mistake[];sessions:Session[];plan:PlanItem[];onCourse:(id:string)=>void;initialExamId?:string | undefined;onExamChange?:(id:string|null)=>void}) {
   const [adding,setAdding]=useState(false),[selectedExam,setSelectedExam]=useState<string|null>(initialExamId??null);
   useEffect(()=>setSelectedExam(initialExamId??null),[initialExamId]);
   const chooseExam=(id:string|null)=>{setSelectedExam(id);onExamChange?.(id);};
