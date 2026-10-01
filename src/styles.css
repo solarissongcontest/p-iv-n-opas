@@ -355,6 +355,36 @@
 .page-content-exams,
 .page-content-settings { width: min(100%, 920px); }
 
+.today-primary {
+  order: -20;
+  border-color: color-mix(in oklab, var(--primary) 18%, var(--border));
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in oklab, var(--accent) 42%, var(--surface)),
+      var(--surface) 62%
+    );
+}
+
+.planner-calendar {
+  order: 10;
+}
+
+.planner-support {
+  order: 30;
+}
+
+.progress-summary > .panel {
+  min-height: 132px;
+}
+
+.course-row {
+  transition:
+    background-color 140ms var(--ease-calm),
+    border-color 140ms var(--ease-calm),
+    transform 120ms var(--ease-calm);
+}
+
 .app-mobile-header {
   position: sticky;
   top: 0;
@@ -618,6 +648,46 @@
   .practice-self-review {
     border-color: color-mix(in oklab, var(--border) 70%, transparent);
     background: color-mix(in oklab, var(--muted) 35%, transparent);
+  }
+
+  .today-primary > div:first-child {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .today-primary > div:first-child > div {
+    width: 100%;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .today-primary > div:first-child > div::-webkit-scrollbar {
+    display: none;
+  }
+
+  .course-list {
+    gap: 0 !important;
+  }
+
+  .course-list .course-row {
+    border-right: 0;
+    border-left: 0;
+    border-radius: 0;
+    background: transparent;
+    padding-inline: 0 !important;
+  }
+
+  .course-list .course-row:first-of-type {
+    border-top-color: transparent;
+  }
+
+  .progress-summary {
+    gap: 0.65rem;
+  }
+
+  .progress-summary > .panel {
+    min-height: 0;
+    padding: 0.9rem !important;
   }
 
   input,
