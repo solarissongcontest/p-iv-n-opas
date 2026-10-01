@@ -1372,3 +1372,58 @@ html.dark .app-mobile-header {
     animation: none;
   }
 }
+
+
+/* ---------- V3 secondary views: forms and exams ---------- */
+
+.settings-view {
+  max-width: 860px;
+  margin-inline: auto;
+}
+.settings-view > .panel {
+  border: 0;
+  border-top: 1px solid var(--hairline);
+  border-radius: 0;
+  background: transparent;
+  padding-inline: 0 !important;
+}
+.settings-view > .panel:first-child {
+  border-top: 0;
+  padding-top: 0 !important;
+}
+.settings-view > .panel > div:first-child h2 {
+  font-size: 1.05rem;
+}
+
+.exam-list > button.panel {
+  border: 0;
+  border-bottom: 1px solid var(--hairline);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.exam-list > button.panel:hover {
+  background: color-mix(in oklab, var(--muted) 58%, transparent);
+}
+.exams-view > .panel {
+  box-shadow: none;
+}
+
+.progress-view > .panel:not(.progress-weekly):not(.progress-mastery):not(.progress-forecast),
+.progress-view > div > .panel {
+  box-shadow: none;
+}
+
+@media (max-width: 767px) {
+  .settings-view > .panel {
+    padding-block: 1.25rem !important;
+  }
+
+  .exam-list {
+    margin-inline: -0.25rem;
+  }
+
+  .exam-list > button.panel {
+    padding-inline: 0.25rem !important;
+  }
+}
