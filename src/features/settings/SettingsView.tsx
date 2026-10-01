@@ -84,6 +84,7 @@ import {
   useResolveMistake,
   useTopicDependencies,
   useUpdatePreferences,
+  useApplyStudyWeekdays,
   useUpdateSettings,
   useUpdateTopic,
   useUpsertPlanItem,
@@ -139,7 +140,8 @@ export function SettingsView({user:_user,section="study",onSectionChange}:{user:
   const [dark,setDark]=useState(typeof window!=="undefined"?storedThemeIsDark():false);
   const [pushEnabled,setPushEnabled]=useState(false);
   const [pushBusy,setPushBusy]=useState(false);
-  const preferences=usePreferences(),prefs=preferences.data,updatePreferences=useUpdatePreferences();
+  const preferences=usePreferences(),prefs=preferences.data,updatePreferences=useUpdatePreferences(),applyStudyWeekdays=useApplyStudyWeekdays();
+  const [studyWeekdaysDraft,setStudyWeekdaysDraft]=useState<number[]>([]);
   const [weekdayMinCapacity,setWeekdayMinCapacity]=useState(30),[weekdayCapacity,setWeekdayCapacity]=useState(60),[weekendMinCapacity,setWeekendMinCapacity]=useState(60),[weekendCapacity,setWeekendCapacity]=useState(120),[busyDate,setBusyDate]=useState("");
   const settingsQ=useSettings(),settings=settingsQ.data,updateSettings=useUpdateSettings();
   const allCourses=useCourses(),archiveCourse=useArchiveCourse();
@@ -159,11 +161,12 @@ export function SettingsView({user:_user,section="study",onSectionChange}:{user:
   },[]);
   useEffect(()=>{
     if(!prefs)return;
+    setStudyWeekdaysDraft((prefs.study_weekdays?.length?prefs.study_weekdays:[1,2,3,4,5]).slice().sort((a,b)=>a-b));
     setWeekdayMinCapacity(prefs.weekday_capacity_min_minutes??30);
     setWeekdayCapacity(prefs.weekday_capacity_minutes??60);
     setWeekendMinCapacity(prefs.weekend_capacity_min_minutes??60);
     setWeekendCapacity(prefs.weekend_capacity_minutes??120);
-  },[prefs?.weekday_capacity_min_minutes,prefs?.weekday_capacity_minutes,prefs?.weekend_capacity_min_minutes,prefs?.weekend_capacity_minutes]);
+  },[prefs?.study_weekdays?.join(","),prefs?.weekday_capacity_min_minutes,prefs?.weekday_capacity_minutes,prefs?.weekend_capacity_min_minutes,prefs?.weekend_capacity_minutes]);
 
   async function togglePush(){
     setPushBusy(true);
@@ -186,14 +189,39 @@ export function SettingsView({user:_user,section="study",onSectionChange}:{user:
     }
   }
 
-  async function toggleWeekday(day:number){
-    if(!prefs)return;
-    const current=prefs.study_weekdays?.length?prefs.study_weekdays:[1,2,3,4,5];
-    const selected=current.includes(day);
-    if(selected&&current.length===1){toast.error("Valitse vähintään yksi opiskelupäivä.");return;}
-    const next=(selected?current.filter(x=>x!==day):[...current,day]).sort((a,b)=>a-b);
-    try{await updatePreferences.mutateAsync({study_weekdays:next});}
-    catch{toast.error("Opiskelupäiviä ei voitu tallentaa.");}
+  function toggleWeekday(day:number){
+    setStudyWeekdaysDraft(current=>{
+      const base=current.length?current:[1,2,3,4,5];
+      const selected=base.includes(day);
+      if(selected&&base.length===1){toast.error("Valitse vähintään yksi opiskelupäivä.");return base;}
+      return (selected?base.filter(x=>x!==day):[...base,day]).sort((a,b)=>a-b);
+    });
+  }
+
+  async function saveStudyWeekdays(){
+    if(!prefs||!studyWeekdaysDraft.length)return;
+    try{
+      const result=await applyStudyWeekdays.mutateAsync({
+        studyWeekdays:studyWeekdaysDraft,
+        capacity:{
+          studyWeekdays:studyWeekdaysDraft,
+          weekdayMinMinutes:prefs.weekday_capacity_min_minutes??30,
+          weekdayMinutes:prefs.weekday_capacity_minutes??60,
+          weekendMinMinutes:prefs.weekend_capacity_min_minutes??60,
+          weekendMinutes:prefs.weekend_capacity_minutes??120,
+          busyDates:prefs.busy_dates??[],
+        },
+      });
+      if(result.unmoved>0){
+        toast.warning(`Opiskelupäivät tallennettu. ${result.moved} tulevaa tehtävää siirrettiin, mutta ${result.unmoved} tehtävää ei mahtunut ennen koetta valituille päiville.`);
+      }else if(result.moved>0){
+        toast.success(`Opiskelupäivät tallennettu. ${result.moved} tulevaa tehtävää siirrettiin valituille päiville.`);
+      }else{
+        toast.success("Opiskelupäivät tallennettu.");
+      }
+    }catch(error){
+      toast.error(error instanceof Error?error.message:"Opiskelupäiviä ei voitu tallentaa.");
+    }
   }
 
   return <SettingsLayout className={"settings-view settings-section-"+section+" space-y-6"}>
@@ -208,7 +236,11 @@ export function SettingsView({user:_user,section="study",onSectionChange}:{user:
 
     <Panel className="settings-study-only" title="Opiskelurytmi ja kapasiteetti">
       <p className="mb-3 text-sm text-muted-foreground">Suunnittelutoiminto käyttää näitä rajoina. Väliin jäänyttä työmäärää ei työnnetä seuraavan päivän kapasiteetin yli.</p>
-      <div className="flex flex-wrap gap-2">{weekdayOptions.map(([day,label])=>{const active=(prefs?.study_weekdays??[1,2,3,4,5]).includes(day);return <button key={day} type="button" aria-pressed={active} onClick={()=>void toggleWeekday(day)} className={`grid size-11 place-items-center rounded-xl border text-sm font-semibold ${active?"border-primary bg-accent text-primary":"border-border bg-surface"}`}>{label}</button>;})}</div>
+      <div className="flex flex-wrap gap-2">{weekdayOptions.map(([day,label])=>{const active=(studyWeekdaysDraft.length?studyWeekdaysDraft:(prefs?.study_weekdays??[1,2,3,4,5])).includes(day);return <button key={day} type="button" aria-pressed={active} onClick={()=>toggleWeekday(day)} className={`grid size-11 place-items-center rounded-xl border text-sm font-semibold ${active?"border-primary bg-accent text-primary":"border-border bg-surface"}`}>{label}</button>;})}</div>
+      <div className="mt-3 flex flex-wrap items-center gap-3">
+        <button className={button} disabled={!prefs||applyStudyWeekdays.isPending||studyWeekdaysDraft.length===0} onClick={()=>void saveStudyWeekdays()}>{applyStudyWeekdays.isPending?"Päivitetään…":"Tallenna opiskelupäivät"}</button>
+        <p className="text-xs text-muted-foreground">Tallennus siirtää myös tulevat suunnitellut tehtävät pois päiviltä, joita et ole valinnut.</p>
+      </div>
       <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4"><label className="text-sm font-medium">Arki min<input type="number" min="0" max="360" step="10" className="mt-1 w-full rounded-xl border bg-surface px-3 py-2.5" value={weekdayMinCapacity} onChange={e=>setWeekdayMinCapacity(Number(e.target.value))}/></label><label className="text-sm font-medium">Arki max<input type="number" min="15" max="360" step="10" className="mt-1 w-full rounded-xl border bg-surface px-3 py-2.5" value={weekdayCapacity} onChange={e=>setWeekdayCapacity(Number(e.target.value))}/></label><label className="text-sm font-medium">Viikonloppu min<input type="number" min="0" max="480" step="10" className="mt-1 w-full rounded-xl border bg-surface px-3 py-2.5" value={weekendMinCapacity} onChange={e=>setWeekendMinCapacity(Number(e.target.value))}/></label><label className="text-sm font-medium">Viikonloppu max<input type="number" min="15" max="480" step="10" className="mt-1 w-full rounded-xl border bg-surface px-3 py-2.5" value={weekendCapacity} onChange={e=>setWeekendCapacity(Number(e.target.value))}/></label></div>
       <p className="mt-2 text-xs text-muted-foreground">Esimerkiksi arki 30–60 min tarkoittaa: suunnittelutoiminto voi tehdä kevyen 30 min päivän, mutta ei täytä päivää yli 60 minuutin.</p>
       <button className={secondary+" mt-3"} disabled={!prefs||updatePreferences.isPending} onClick={()=>{if(weekdayMinCapacity>weekdayCapacity||weekendMinCapacity>weekendCapacity){toast.error("Minimikapasiteetti ei voi olla maksimia suurempi.");return;}void updatePreferences.mutateAsync({weekday_capacity_min_minutes:Math.max(0,weekdayMinCapacity),weekday_capacity_minutes:Math.max(15,weekdayCapacity),weekend_capacity_min_minutes:Math.max(0,weekendMinCapacity),weekend_capacity_minutes:Math.max(15,weekendCapacity)}).then(()=>toast.success("Kapasiteettivälit tallennettu.")).catch(()=>toast.error("Kapasiteettia ei voitu tallentaa."));}}>Tallenna kapasiteetti</button>
