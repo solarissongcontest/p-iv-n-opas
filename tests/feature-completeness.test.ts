@@ -10,7 +10,7 @@ test("non-AI master-plan features remain wired end-to-end", () => {
   const editor = read("src/components/AbittiAnswerEditor.tsx");
   const learning = read("src/lib/learning-os-v4.ts");
   const data = read("src/lib/data.ts");
-  const route = read("src/routes/index.tsx");
+  const app = read("src/app/StudyApp.tsx");
   const migration = read("supabase/migrations/20260929170000_learning_os_v4.sql");
 
   const requiredLearning = [
@@ -43,9 +43,9 @@ test("non-AI master-plan features remain wired end-to-end", () => {
     assert.ok(migration.includes(token), "Missing v4 persistence architecture: " + token);
   }
 
-  assert.ok(route.includes('queryClient.refetchQueries({ type: "active" })'));
-  assert.ok(route.includes("30_000"));
-  assert.ok(route.includes('window.addEventListener("online"'));
+  assert.ok(app.includes('queryClient.refetchQueries({ type: "active" })'));
+  assert.ok(app.includes("30_000"));
+  assert.ok(app.includes('window.addEventListener("online"'));
 });
 
 test("Learning OS v5 remains wired through engine, persistence and UI", () => {
