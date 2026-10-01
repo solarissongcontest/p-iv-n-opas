@@ -517,8 +517,10 @@ export function CourseView({courses,topics,sessions,exams,plan,tests,mistakes,se
   </LibraryDetailLayout>;
 }
 
-export function ExamsView({courses,topics,exams,tests,attempts,mistakes,sessions,plan,onCourse}:Base&{exams:Exam[];tests:PracticeTest[];attempts:PracticeAttempt[];mistakes:Mistake[];sessions:Session[];plan:PlanItem[];onCourse:(id:string)=>void}) {
-  const [adding,setAdding]=useState(false),[selectedExam,setSelectedExam]=useState<string|null>(null);
+export function ExamsView({courses,topics,exams,tests,attempts,mistakes,sessions,plan,onCourse,initialExamId,onExamChange}:Base&{exams:Exam[];tests:PracticeTest[];attempts:PracticeAttempt[];mistakes:Mistake[];sessions:Session[];plan:PlanItem[];onCourse:(id:string)=>void;initialExamId?:string;onExamChange?:(id:string|null)=>void}) {
+  const [adding,setAdding]=useState(false),[selectedExam,setSelectedExam]=useState<string|null>(initialExamId??null);
+  useEffect(()=>setSelectedExam(initialExamId??null),[initialExamId]);
+  const chooseExam=(id:string|null)=>{setSelectedExam(id);onExamChange?.(id);};
   const yo=yoOverviewV4(courses,topics,attempts);
   const selected=exams.find(e=>e.id===selectedExam);
   if(selected){
@@ -539,7 +541,7 @@ export function ExamsView({courses,topics,exams,tests,attempts,mistakes,sessions
       .sort((a,b)=>b.topic.importance-a.topic.importance||a.model.level-b.model.level);
     const finalTwoDays=diffDays(selected.date,today())<=2;
     return <LibraryDetailLayout className="exams-view space-y-5">
-      <button className={secondary} onClick={()=>setSelectedExam(null)}><ChevronLeft size={17}/>Kaikki kokeet</button>
+      <button className={secondary} onClick={()=>chooseExam(null)}><ChevronLeft size={17}/>Kaikki kokeet</button>
       <Panel title={selected.name}>
         <p className="text-sm text-muted-foreground">{course?.code} · {fullDate(selected.date)} · {diffDays(selected.date,today())} päivää</p>
         <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -579,7 +581,7 @@ export function ExamsView({courses,topics,exams,tests,attempts,mistakes,sessions
   </Panel>}
   <ExamSimulationV5 courses={courses} topics={topics}/>
   <button className={button} onClick={()=>setAdding(true)}>+ Lisää koe</button>{adding&&<ExamForm courses={courses} onClose={()=>setAdding(false)}/>}
-  {exams.length===0?<Panel title="Ei kokeita vielä"><p className="text-muted-foreground">Lisää ensimmäinen koe painamalla Lisää koe.</p></Panel>:exams.map(e=>{const course=courses.find(c=>c.id===e.course_id);const ts=topics.filter(t=>t.course_id===e.course_id);const prep=examStage({topics:ts,attempts:attempts.filter(a=>a.course_id===e.course_id),tests:tests.filter(t=>t.course_id===e.course_id),mistakes:mistakes.filter(m=>m.course_id===e.course_id),course:course??null});const mode=examMode(e.date);return <button key={e.id} onClick={()=>setSelectedExam(e.id)} className="panel block w-full p-4 text-left sm:p-5"><div className="flex items-start justify-between gap-3"><div><p className="text-sm font-medium text-primary">{course?.code}</p><h2 className="mt-1 text-lg font-semibold">{e.name}</h2><p className="mt-1 text-sm text-muted-foreground">{fullDate(e.date)} · {diffDays(e.date,today())} päivää</p></div><span className="text-right"><b className="block">{prep.stages[prep.index]?.label}</b><small className="text-muted-foreground">vaihe {prep.index+1}/6</small></span></div>{mode.active&&<p className="mt-2 inline-flex rounded-full bg-accent px-3 py-1 text-xs font-semibold">Koemoodi aktiivinen</p>}<p className="mt-2 text-xs text-muted-foreground">Ei arvosanaennuste · avaa kokeen yksityiskohdat</p></button>})}</LibraryDetailLayout>;
+  {exams.length===0?<Panel title="Ei kokeita vielä"><p className="text-muted-foreground">Lisää ensimmäinen koe painamalla Lisää koe.</p></Panel>:exams.map(e=>{const course=courses.find(c=>c.id===e.course_id);const ts=topics.filter(t=>t.course_id===e.course_id);const prep=examStage({topics:ts,attempts:attempts.filter(a=>a.course_id===e.course_id),tests:tests.filter(t=>t.course_id===e.course_id),mistakes:mistakes.filter(m=>m.course_id===e.course_id),course:course??null});const mode=examMode(e.date);return <button key={e.id} onClick={()=>chooseExam(e.id)} className="panel block w-full p-4 text-left sm:p-5"><div className="flex items-start justify-between gap-3"><div><p className="text-sm font-medium text-primary">{course?.code}</p><h2 className="mt-1 text-lg font-semibold">{e.name}</h2><p className="mt-1 text-sm text-muted-foreground">{fullDate(e.date)} · {diffDays(e.date,today())} päivää</p></div><span className="text-right"><b className="block">{prep.stages[prep.index]?.label}</b><small className="text-muted-foreground">vaihe {prep.index+1}/6</small></span></div>{mode.active&&<p className="mt-2 inline-flex rounded-full bg-accent px-3 py-1 text-xs font-semibold">Koemoodi aktiivinen</p>}<p className="mt-2 text-xs text-muted-foreground">Ei arvosanaennuste · avaa kokeen yksityiskohdat</p></button>})}</LibraryDetailLayout>;
 }
 
 export function ProgressView({courses,topics,attempts,sessions,plan,exams,mistakes,capacity,onPlan}:Base&{attempts:PracticeAttempt[];sessions:Session[];plan:PlanItem[];exams:Exam[];mistakes:Mistake[];capacity:CapacityProfile;onPlan:()=>void}) {
