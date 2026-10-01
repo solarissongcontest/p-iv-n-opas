@@ -1198,7 +1198,7 @@ export function useApplyStudyWeekdays() {
       const workingPlan = ((currentPlan ?? []) as PlanItem[]).map((item) => ({ ...item }));
       const examByCourse = new Map((courses ?? []).map((course) => [course.id, course.exam_date]));
       const now = today();
-      const moves: Array<{ id: string; from: string; to: string }> = [];
+      const moves: Array<{ id: string; from: string; to: string; movedFrom: string | null }> = [];
       let unmoved = 0;
 
       for (const item of workingPlan
@@ -1226,12 +1226,12 @@ export function useApplyStudyWeekdays() {
           continue;
         }
 
-        moves.push({ id: item.id, from: item.date, to: target });
+        moves.push({ id: item.id, from: item.date, to: target, movedFrom: item.moved_from });
         item.date = target;
         item.moved_from = item.moved_from ?? moves[moves.length - 1]!.from;
       }
 
-      const applied: Array<{ id: string; from: string }> = [];
+      const applied: Array<{ id: string; from: string; movedFrom: string | null }> = [];
       try {
         for (const move of moves) {
           const { error } = await supabase
@@ -1239,7 +1239,7 @@ export function useApplyStudyWeekdays() {
             .update({ date: move.to, moved_from: move.from, status: "planned" })
             .eq("id", move.id);
           if (error) throw error;
-          applied.push({ id: move.id, from: move.from });
+          applied.push({ id: move.id, from: move.from, movedFrom: move.movedFrom });
         }
 
         const { error: preferenceError } = await untypedSupabase
@@ -1253,7 +1253,7 @@ export function useApplyStudyWeekdays() {
         for (const move of [...applied].reverse()) {
           await supabase
             .from("plan_items")
-            .update({ date: move.from })
+            .update({ date: move.from, moved_from: move.movedFrom })
             .eq("id", move.id);
         }
         throw error;
