@@ -113,6 +113,14 @@ import { answerPlainText } from "@/components/AbittiAnswerEditor";
 import { V5LearningHealthPanel, V5PlannerPanel } from "@/components/LearningOSV5Panels";
 import { ExamSimulationV5 } from "@/components/ExamSimulationV5";
 import { ContrastiveErrorLab } from "@/components/ContrastiveErrorLab";
+import { GroupedSurface } from "@/components/surfaces";
+import {
+  ActionDashboardLayout,
+  PlannerLayout,
+  LibraryDetailLayout,
+  InsightLayout,
+  SettingsLayout,
+} from "@/layouts";
 import {
   CourseEditForm,
   ExamForm,
@@ -129,7 +137,7 @@ const statusIcon: Record<string,string> = { planned:"○",completed:"✓",skippe
 const statusClass: Record<string,string> = { planned:"text-muted-foreground",completed:"text-primary",skipped:"text-muted-foreground",in_progress:"text-primary",overdue:"text-destructive" };
 
 export function Panel({ title, children, action, className = "" }: { title: string; children: React.ReactNode; action?: React.ReactNode; className?: string }) {
-  return <section className={`panel p-4 sm:p-6 ${className}`}><div className="mb-3 flex items-center justify-between gap-3 sm:mb-4"><h2 className="text-base font-semibold sm:text-lg">{title}</h2>{action}</div>{children}</section>;
+  return <GroupedSurface className={`panel p-4 sm:p-6 ${className}`}><div className="mb-3 flex items-center justify-between gap-3 sm:mb-4"><h2 className="text-base font-semibold sm:text-lg">{title}</h2>{action}</div>{children}</GroupedSurface>;
 }
 function Bar({ value }: { value: number }) {
   const v=Math.max(0,Math.min(100,value));
@@ -228,7 +236,7 @@ export function TodayView({courses,topics,sessions,exams,plan,tests,attempts,mis
     }catch{toast.error("Tehtävää ei voitu siirtää.");}
   }
 
-  return <div className="today-view flex flex-col gap-5">
+  return <ActionDashboardLayout className="today-view flex flex-col gap-5">
     {comeback&&<Panel className="today-context" title="Tervetuloa takaisin">
       <p className="text-sm text-muted-foreground">Edellisestä opiskelumerkinnästä on {comeback.awayDays} päivää. Kaikkea väliin jäänyttä ei tuoda kerralla tälle päivälle.</p>
       <p className="mt-2 font-medium">Aloitetaan {comeback.items.length} tärkeimmästä asiasta · noin {minutes(comeback.estimatedMinutes)}.</p>
@@ -359,7 +367,7 @@ export function PlanView({courses,topics,plan,tests,mistakes,attempts,capacity,o
     }catch{toast.error("Suunnitelmaa ei voitu tallentaa.");}
   }
 
-  return <div className="planner-view flex flex-col gap-5">
+  return <PlannerLayout className="planner-view flex flex-col gap-5">
     <div className="flex flex-wrap items-center justify-between gap-3"><div className="flex items-center gap-1"><button className={secondary+" !px-3"} aria-label="Edellinen" onClick={()=>setAnchor(addDays(anchor,mode==="päivä"?-1:mode==="viikko"?-7:-30))}><ChevronLeft size={18}/></button><span className="min-w-28 text-center text-sm">{fullDate(first)}{first!==last&&` – ${fullDate(last)}`}</span><button className={secondary+" !px-3"} aria-label="Seuraava" onClick={()=>setAnchor(addDays(anchor,mode==="päivä"?1:mode==="viikko"?7:30))}><ChevronRight size={18}/></button></div><div className="flex gap-1 rounded-xl bg-muted p-1">{(["päivä","viikko","kuukausi"] as const).map(m=><button key={m} aria-pressed={mode===m} onClick={()=>setMode(m)} className={`min-h-10 rounded-lg px-3 capitalize ${mode===m?"bg-surface shadow-sm":""}`}>{m}</button>)}</div></div>
     <div className="flex flex-wrap gap-2"><button className={secondary} onClick={()=>setCreating(v=>!v)}><Plus size={17}/>Luo suunnitelma</button><button className={secondary} onClick={()=>setAdding(true)}>Lisää tehtävä</button></div>
     <details className="planner-support panel p-4 sm:p-5">
@@ -385,14 +393,14 @@ export function PlanView({courses,topics,plan,tests,mistakes,attempts,capacity,o
     </Panel>}
     {plan.length===0&&<Panel title="Ei tehtäviä vielä"><p className="text-muted-foreground">Luo ensimmäinen suunnitelma tai lisää tehtävä itse.</p></Panel>}
     <div className={"planner-calendar "+(mode==="kuukausi"?"grid grid-cols-2 gap-2 sm:grid-cols-7":"space-y-3")}>{days.map(date=><section className={`planner-day panel p-4 ${date===today()?"planner-day-today":""}`} key={date} onDragOver={e=>e.preventDefault()} onDrop={e=>{e.preventDefault();const id=e.dataTransfer.getData("text/plain");const item=plan.find(p=>p.id===id);if(item&&item.date!==date)void move.mutateAsync({id,date,from:item.date}).then(()=>toast.success("Tehtävä siirretty.")).catch(()=>toast.error("Siirto epäonnistui."));}}><h2 className="mb-3 text-sm font-semibold capitalize">{dateWithWeekday(date)}</h2>{plan.filter(p=>p.date===date).length===0?<p className="text-sm text-muted-foreground">Ei tehtäviä</p>:plan.filter(p=>p.date===date).map(p=><div key={p.id} draggable={mode!=="kuukausi"&&p.kind!=="exam"} onDragStart={e=>e.dataTransfer.setData("text/plain",p.id)} className="planner-item mb-2 rounded-xl bg-muted/60 p-3"><p className="text-xs font-semibold text-primary">{courses.find(c=>c.id===p.course_id)?.code} · {p.start_time?.slice(0,5)||minutes(p.target_minutes)}</p><p className="mt-1 text-sm font-medium">{p.title||topics.find(t=>t.id===p.topic_id)?.name||"Opiskelu"}</p><p className={`mt-1 text-xs ${statusClass[effectivePlanStatus(p)]}`}><span aria-hidden="true">{statusIcon[effectivePlanStatus(p)]} </span>{statusLabel[effectivePlanStatus(p)]} · {planPhaseLabel(p.phase)}</p>{mode!=="kuukausi"&&p.kind!=="exam"&&<div className="mt-3 flex flex-wrap items-center gap-1"><button className={secondary+" !min-h-9 !px-2"} onClick={()=>onStart(p.id)}>Aloita</button><details className="relative"><summary className={secondary+" list-none !min-h-9 !px-3"} aria-label="Tehtävän toiminnot">•••</summary><div className="absolute right-0 z-10 mt-1 min-w-36 rounded-xl border border-border bg-surface p-1 shadow-lg"><button className="block min-h-10 w-full rounded-lg px-3 text-left text-sm hover:bg-muted" onClick={()=>void shift(p)}>Siirrä</button>{p.status==="planned"&&<button className="block min-h-10 w-full rounded-lg px-3 text-left text-sm hover:bg-muted" onClick={()=>void skipWithReason(p)}>Ohita</button>}</div></details></div>}</div>)}</section>)}</div>
-  </div>;
+  </PlannerLayout>;
 }
 
 export function CourseView({courses,topics,sessions,exams,plan,tests,mistakes,selected,onSelect,onAdd,onStart}:Base&{sessions:Session[];exams:Exam[];plan:PlanItem[];tests:PracticeTest[];mistakes:Mistake[];selected:string|null;onSelect:(id:string|null)=>void;onAdd:()=>void;onStart:()=>void}) {
   const [tab,setTab]=useState("Yleiskuva"),[form,setForm]=useState<"mistake"|"test"|"course"|"newTopic"|null>(null),[editingTopic,setEditingTopic]=useState<Topic|null>(null);
   const archiveCourse=useArchiveCourse(),updateTopic=useUpdateTopic(),advanceMistake=useAdvanceMistake();
   const c=courses.find(x=>x.id===selected);
-  if(!c)return <div className="course-list">
+  if(!c)return <LibraryDetailLayout className="course-list">
     <div className="course-library-header">
       <div>
         <p className="text-sm text-muted-foreground">Kurssit ja niiden osaaminen</p>
@@ -400,7 +408,7 @@ export function CourseView({courses,topics,sessions,exams,plan,tests,mistakes,se
       </div>
       <button className={button} onClick={onAdd}>+ Lisää kurssi</button>
     </div>
-    <div className="course-library-rows">{courses.map(course=>{const ts=topics.filter(t=>t.course_id===course.id),ss=sessions.filter(s=>s.course_id===course.id),next=plan.find(p=>p.course_id===course.id&&p.status==="planned"&&p.date>=today());return <button key={course.id} onClick={()=>{onSelect(course.id);setTab("Yleiskuva");}} className="course-row panel block w-full p-4 text-left hover:ring-1 hover:ring-primary sm:p-5"><div className="flex justify-between gap-3"><div className="min-w-0"><b className="text-primary">{course.code}</b><h2 className="mt-1 truncate text-lg font-semibold sm:text-xl">{course.name}</h2><p className="mt-1 text-sm text-muted-foreground">{minutes(ss.reduce((a,s)=>a+s.minutes,0))} · {next?.title||ts.find(t=>t.progress<100)?.name||"Ei seuraavaa aihetta"}</p></div><b>{weightedCoverage(ts)} %</b></div><div className="mt-3"><Bar value={weightedCoverage(ts)}/></div></button>})}</div></div>;
+    <div className="course-library-rows">{courses.map(course=>{const ts=topics.filter(t=>t.course_id===course.id),ss=sessions.filter(s=>s.course_id===course.id),next=plan.find(p=>p.course_id===course.id&&p.status==="planned"&&p.date>=today());return <button key={course.id} onClick={()=>{onSelect(course.id);setTab("Yleiskuva");}} className="course-row panel block w-full p-4 text-left hover:ring-1 hover:ring-primary sm:p-5"><div className="flex justify-between gap-3"><div className="min-w-0"><b className="text-primary">{course.code}</b><h2 className="mt-1 truncate text-lg font-semibold sm:text-xl">{course.name}</h2><p className="mt-1 text-sm text-muted-foreground">{minutes(ss.reduce((a,s)=>a+s.minutes,0))} · {next?.title||ts.find(t=>t.progress<100)?.name||"Ei seuraavaa aihetta"}</p></div><b>{weightedCoverage(ts)} %</b></div><div className="mt-3"><Bar value={weightedCoverage(ts)}/></div></button>})}</div></LibraryDetailLayout>;
 
   const ts=topics.filter(t=>t.course_id===c.id),ss=sessions.filter(s=>s.course_id===c.id),ee=exams.filter(e=>e.course_id===c.id),pp=plan.filter(p=>p.course_id===c.id),mm=mistakes.filter(m=>m.course_id===c.id),tt=tests.filter(t=>t.course_id===c.id);
   const recovery=recoveryQueue(ts,today(),3);
@@ -422,7 +430,7 @@ export function CourseView({courses,topics,sessions,exams,plan,tests,mistakes,se
   const nextStatus=(status:string):"corrected"|"retested"|"mastered"|null=>status==="open"?"corrected":status==="corrected"?"retested":status==="retested"?"mastered":null;
   const nextLabel=(status:string)=>status==="open"?"Merkitse korjatuksi":status==="corrected"?"Merkitse uudelleen testatuksi":status==="retested"?"Merkitse hallituksi":"Hallittu";
 
-  return <div className="course-detail space-y-5">
+  return <LibraryDetailLayout className="course-detail space-y-5">
     <div className="flex flex-wrap items-center justify-between gap-2"><button className={secondary} onClick={()=>onSelect(null)}><ChevronLeft size={17}/>Kaikki kurssit</button><div className="flex gap-2"><button className={secondary} onClick={()=>setForm("course")}><Pencil size={16}/>Muokkaa</button><button className={secondary} onClick={async()=>{if(!window.confirm("Arkistoidaanko tämä kurssi?"))return;try{await archiveCourse.mutateAsync({id:c.id,archived:true});toast.success("Kurssi arkistoitu.");onSelect(null);}catch{toast.error("Arkistointi epäonnistui.");}}}><Archive size={16}/>Arkistoi</button></div></div>
     <section className="course-hero">
       <div>
@@ -501,7 +509,7 @@ export function ExamsView({courses,topics,exams,tests,attempts,mistakes,sessions
     const v4TopicStates=ts.map(topic=>({topic,model:masteryModelV4(topic,aa,{examDate:selected.date})}))
       .sort((a,b)=>b.topic.importance-a.topic.importance||a.model.level-b.model.level);
     const finalTwoDays=diffDays(selected.date,today())<=2;
-    return <div className="exams-view space-y-5">
+    return <LibraryDetailLayout className="exams-view space-y-5">
       <button className={secondary} onClick={()=>setSelectedExam(null)}><ChevronLeft size={17}/>Kaikki kokeet</button>
       <Panel title={selected.name}>
         <p className="text-sm text-muted-foreground">{course?.code} · {fullDate(selected.date)} · {diffDays(selected.date,today())} päivää</p>
@@ -532,9 +540,9 @@ export function ExamsView({courses,topics,exams,tests,attempts,mistakes,sessions
       </div>
       <ExamSimulationV5 courses={course?[course]:[]} topics={ts}/>
       <button className={secondary} onClick={()=>onCourse(selected.course_id)}>Avaa kurssi</button>
-    </div>;
+    </LibraryDetailLayout>;
   }
-  return <div className="exams-view exam-list space-y-4">
+  return <LibraryDetailLayout className="exams-view exam-list space-y-4">
   {yo.enabled&&<Panel title="YO-tila">
     <div className="grid grid-cols-2 gap-3 sm:grid-cols-4"><div><small className="text-muted-foreground">Vaihe</small><p className="font-semibold">{yoPhaseLabel(yo.phase)}</p></div><div><small className="text-muted-foreground">Vakaat</small><p className="text-xl font-semibold">{yo.stable}</p></div><div><small className="text-muted-foreground">Riskissä</small><p className="text-xl font-semibold">{yo.atRisk}</p></div><div><small className="text-muted-foreground">Arvioimatta</small><p className="text-xl font-semibold">{yo.unassessed}</p></div></div>
     {yo.daysToNearestExam!==null&&<p className="mt-3 text-sm text-muted-foreground">{yo.daysToNearestExam} päivää lähimpään YO-kokeeseen. Kurssikoe- ja YO-logiikka pidetään erillään.</p>}
@@ -542,7 +550,7 @@ export function ExamsView({courses,topics,exams,tests,attempts,mistakes,sessions
   </Panel>}
   <ExamSimulationV5 courses={courses} topics={topics}/>
   <button className={button} onClick={()=>setAdding(true)}>+ Lisää koe</button>{adding&&<ExamForm courses={courses} onClose={()=>setAdding(false)}/>}
-  {exams.length===0?<Panel title="Ei kokeita vielä"><p className="text-muted-foreground">Lisää ensimmäinen koe painamalla Lisää koe.</p></Panel>:exams.map(e=>{const course=courses.find(c=>c.id===e.course_id);const ts=topics.filter(t=>t.course_id===e.course_id);const prep=examStage({topics:ts,attempts:attempts.filter(a=>a.course_id===e.course_id),tests:tests.filter(t=>t.course_id===e.course_id),mistakes:mistakes.filter(m=>m.course_id===e.course_id),course:course??null});const mode=examMode(e.date);return <button key={e.id} onClick={()=>setSelectedExam(e.id)} className="panel block w-full p-4 text-left sm:p-5"><div className="flex items-start justify-between gap-3"><div><p className="text-sm font-medium text-primary">{course?.code}</p><h2 className="mt-1 text-lg font-semibold">{e.name}</h2><p className="mt-1 text-sm text-muted-foreground">{fullDate(e.date)} · {diffDays(e.date,today())} päivää</p></div><span className="text-right"><b className="block">{prep.stages[prep.index]?.label}</b><small className="text-muted-foreground">vaihe {prep.index+1}/6</small></span></div>{mode.active&&<p className="mt-2 inline-flex rounded-full bg-accent px-3 py-1 text-xs font-semibold">Koemoodi aktiivinen</p>}<p className="mt-2 text-xs text-muted-foreground">Ei arvosanaennuste · avaa kokeen yksityiskohdat</p></button>})}</div>;
+  {exams.length===0?<Panel title="Ei kokeita vielä"><p className="text-muted-foreground">Lisää ensimmäinen koe painamalla Lisää koe.</p></Panel>:exams.map(e=>{const course=courses.find(c=>c.id===e.course_id);const ts=topics.filter(t=>t.course_id===e.course_id);const prep=examStage({topics:ts,attempts:attempts.filter(a=>a.course_id===e.course_id),tests:tests.filter(t=>t.course_id===e.course_id),mistakes:mistakes.filter(m=>m.course_id===e.course_id),course:course??null});const mode=examMode(e.date);return <button key={e.id} onClick={()=>setSelectedExam(e.id)} className="panel block w-full p-4 text-left sm:p-5"><div className="flex items-start justify-between gap-3"><div><p className="text-sm font-medium text-primary">{course?.code}</p><h2 className="mt-1 text-lg font-semibold">{e.name}</h2><p className="mt-1 text-sm text-muted-foreground">{fullDate(e.date)} · {diffDays(e.date,today())} päivää</p></div><span className="text-right"><b className="block">{prep.stages[prep.index]?.label}</b><small className="text-muted-foreground">vaihe {prep.index+1}/6</small></span></div>{mode.active&&<p className="mt-2 inline-flex rounded-full bg-accent px-3 py-1 text-xs font-semibold">Koemoodi aktiivinen</p>}<p className="mt-2 text-xs text-muted-foreground">Ei arvosanaennuste · avaa kokeen yksityiskohdat</p></button>})}</LibraryDetailLayout>;
 }
 
 export function ProgressView({courses,topics,attempts,sessions,plan,exams,mistakes,capacity,onPlan}:Base&{attempts:PracticeAttempt[];sessions:Session[];plan:PlanItem[];exams:Exam[];mistakes:Mistake[];capacity:CapacityProfile;onPlan:()=>void}) {
@@ -625,7 +633,7 @@ export function ProgressView({courses,topics,attempts,sessions,plan,exams,mistak
     return course.code+": suunnitelma ennallaan";
   });
 
-  return <div className="progress-view flex flex-col gap-7">
+  return <InsightLayout className="progress-view flex flex-col gap-7">
     <p className="text-sm text-muted-foreground">Oppimisnäyttö ensin · aika ja käyttömäärä ovat alempana kuormitustietoa.</p>
     <div className="progress-summary grid grid-cols-2 gap-3 lg:grid-cols-4">
       <div className="panel p-4"><p className="text-sm text-muted-foreground">Vahvat / vakaat aiheet</p><p className="mt-2 text-2xl font-semibold">{v4Groups.strong.length+v4Groups.secure.length}/{topics.length}</p><p className="mt-1 text-xs text-muted-foreground">{v4Rows.filter(row=>row.model.evidenceCount>0).length} aiheesta on näyttöä</p></div>
@@ -757,7 +765,7 @@ export function ProgressView({courses,topics,attempts,sessions,plan,exams,mistak
     </Panel>
 
     <Panel title="Osaamisen tapahtumat">{events.data?.length?events.data.slice(0,12).map(e=><div key={e.id} className="border-b border-border py-3"><p className="font-medium">{e.detail??eventKindLabel(e.kind)}</p><p className="text-sm text-muted-foreground">{e.kind==="mastery"&&e.from_value!=null&&e.to_value!=null?"Osaaminen "+e.from_value+" → "+e.to_value:eventKindLabel(e.kind)} · {new Date(e.created_at).toLocaleDateString("fi-FI")}</p></div>):<p className="text-muted-foreground">Osaamisen muutokset ilmestyvät tähän harjoittelun myötä.</p>}</Panel>
-  </div>;
+  </InsightLayout>;
 }
 
 export function SettingsView({user:_user}:{user:DeviceUser}) {
@@ -821,7 +829,7 @@ export function SettingsView({user:_user}:{user:DeviceUser}) {
     catch{toast.error("Opiskelupäiviä ei voitu tallentaa.");}
   }
 
-  return <div className="settings-view space-y-6">
+  return <SettingsLayout className="settings-view space-y-6">
     <Panel title="Profiili"><p className="text-2xl font-semibold">{prefs?.display_name||"Arthur"}</p><p className="mt-2 text-sm text-muted-foreground">Tämä laite on yhdistetty Opintopäiväkirja-tiliisi.</p></Panel>
 
     <Panel title="Opiskelurytmi ja kapasiteetti">
@@ -867,5 +875,5 @@ export function SettingsView({user:_user}:{user:DeviceUser}) {
     {archived.length>0&&<Panel title="Arkistoidut kurssit">{archived.map(c=><div key={c.id} className="flex min-h-12 items-center justify-between gap-3 border-b border-border"><span><b>{c.code}</b> · {c.name}</span><button className={secondary+" !min-h-9"} onClick={()=>void archiveCourse.mutateAsync({id:c.id,archived:false}).then(()=>toast.success("Kurssi palautettu.")).catch(()=>toast.error("Palautus epäonnistui."))}>Palauta</button></div>)}</Panel>}
 
     <Panel title="Laite"><p className="mb-3 text-sm text-muted-foreground">Normaalisti kirjautumista ei enää kysytä tällä selaimella. Tämän painikkeen käyttö poistaa muistamisen ja paikallisen istunnon, mutta Arthur-tili ja opiskelutiedot säilyvät palvelimella.</p><button className={secondary} onClick={async()=>{if(!window.confirm("Unohdetaanko tämä laite?"))return;clearDeviceSession();location.reload();}}><RotateCcw size={16}/>Unohda tämä laite</button></Panel>
-  </div>;
+  </SettingsLayout>;
 }
