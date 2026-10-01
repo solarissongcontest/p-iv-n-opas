@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Brain, CheckCircle2, Lightbulb, Sparkles } from "lucide-react";
+import { Brain, CheckCircle2, ChevronLeft, Lightbulb, Sparkles } from "lucide-react";
 import { AbittiAnswerEditor, answerHasContent, answerPlainText } from "@/components/AbittiAnswerEditor";
+import { FocusLayout } from "@/layouts";
 import { toast } from "sonner";
 import type { Course, Mistake, PracticeAttempt, PracticeTest, Topic } from "@/lib/domain";
 import {
@@ -106,15 +107,24 @@ export function PracticeView({
   attempts,
   tests = [],
   mistakes = [],
+  initialCourseId,
+  initialTopicId,
+  onExit,
 }: {
   courses: Course[];
   topics: Topic[];
   attempts: PracticeAttempt[];
   tests?: PracticeTest[];
   mistakes?: Mistake[];
+  initialCourseId?: string;
+  initialTopicId?: string;
+  onExit?: () => void;
 }) {
-  const [courseId, setCourseId] = useState(courses[0]?.id ?? "");
-  const [topicId, setTopicId] = useState("");
+  const [courseId, setCourseId] = useState(initialCourseId ?? courses[0]?.id ?? "");
+  const [topicId, setTopicId] = useState(initialTopicId ?? "");
+  const [sessionState, setSessionState] = useState<"setup"|"active"|"summary">("setup");
+  const [completedCount, setCompletedCount] = useState(0);
+  const sessionStartedAt = useRef<number>(Date.now());
   const [attemptIndex, setAttemptIndex] = useState(0);
   const [response, setResponse] = useState("");
   const [selectedOption, setSelectedOption] = useState("");
@@ -140,6 +150,20 @@ export function PracticeView({
   const calibrationObservations = useCalibrationObservations();
   const syncPolicyState = useUpsertLearningPolicyState();
   const experimentsEnabled = preferences.data?.personal_experiments_enabled ?? true;
+
+  useEffect(() => {
+    if (initialCourseId && initialCourseId !== courseId) {
+      setCourseId(initialCourseId);
+      setAttemptIndex(0);
+    }
+  }, [initialCourseId]);
+
+  useEffect(() => {
+    if (initialTopicId && initialTopicId !== topicId) {
+      setTopicId(initialTopicId);
+      setAttemptIndex(0);
+    }
+  }, [initialTopicId]);
 
   const course = courses.find((candidate) => candidate.id === courseId) ?? null;
   const courseTopics = useMemo(
@@ -648,7 +672,7 @@ export function PracticeView({
   }
 
   return (
-    <div className="practice-view space-y-8">
+    <FocusLayout className={"practice-view practice-session-"+sessionState+" space-y-8"}>
       <Card
         className="practice-primary-surface"
         title="Harjoittelutila"
@@ -659,7 +683,7 @@ export function PracticeView({
           </span>
         }
       >
-        <details className="practice-config">
+        {sessionState==="setup" && <details open className="practice-config">
           <summary className="practice-config-summary">
             <span className="min-w-0">
               <b>{course?.code ?? "Valitse kurssi"}{selectedTopic ? ` · ${selectedTopic.name}` : ""}</b>
@@ -730,9 +754,25 @@ export function PracticeView({
               </button>
             </div>
           </div>
-        </details>
+        </details>}
 
-        {diagnosticDone ? (
+        {sessionState==="setup" && <div className="practice-start-panel"><button type="button" className={primary} disabled={!courseId || !selectedTopic} onClick={()=>{sessionStartedAt.current=Date.now();setCompletedCount(0);setSessionState("active");}}>Aloita harjoittelu</button><p className="mt-2 text-xs text-muted-foreground">Harjoituksen aikana asetukset ja tukipaneelit väistyvät tehtävän tieltä.</p></div>}
+
+        {sessionState==="active" && <div className="practice-focus-toolbar"><button type="button" className={secondary+" !min-h-10"} onClick={()=>setSessionState("summary")}><ChevronLeft size={16}/>Lopeta</button><span className="text-sm text-muted-foreground">{completedCount} tehtävää tehty</span></div>}
+
+
+
+        {sessionState==="summary" ? (
+          <div className="practice-summary">
+            <p className="text-sm font-semibold text-primary">Harjoittelu valmis tältä erää</p>
+            <h3 className="mt-2 text-3xl font-semibold">{completedCount} tehtävää</h3>
+            <p className="mt-2 text-sm text-muted-foreground">Kesto noin {Math.max(1,Math.ceil((Date.now()-sessionStartedAt.current)/60000))} min. Oppimismoottori käyttää vain tallennettuja yrityksiä osaamisnäyttönä.</p>
+            <div className="mt-5 flex flex-wrap gap-2">
+              <button type="button" className={primary} onClick={()=>{sessionStartedAt.current=Date.now();setSessionState("active");}}>Jatka harjoittelua</button>
+              <button type="button" className={secondary} onClick={()=>{setSessionState("setup");onExit?.();}}>Valmis</button>
+            </div>
+          </div>
+        ) : sessionState==="active" ? diagnosticDone ? (
           <div className="mt-5 rounded-2xl bg-accent p-4">
             <h3 className="font-semibold">Lähtötason tarkistus valmis.</h3>
             <p className="mt-2 text-sm text-muted-foreground">
@@ -1008,7 +1048,7 @@ export function PracticeView({
                         {showExplanation ? "Piilota selitys" : "Näytä täysi selitys"}
                       </button>}
                       {showExplanation && <p className="mt-2 rounded-lg bg-surface/70 p-3">{selection.question.explanation}</p>}
-                      <button type="button" className={primary+" mt-3 !min-h-9"} onClick={() => {setPinnedSelection(null);setAttemptIndex((value) => value + 1);}}>
+                      <button type="button" className={primary+" mt-3 !min-h-9"} onClick={() => {setPinnedSelection(null);setCompletedCount((value)=>value+1);setAttemptIndex((value) => value + 1);}}>
                         Seuraava tehtävä
                       </button>
                     </>
@@ -1025,10 +1065,10 @@ export function PracticeView({
           <p className="mt-4 text-sm text-muted-foreground">
             Lisää kurssille aiheita ennen harjoittelua.
           </p>
-        )}
+        ) : null}
       </Card>
 
-      <div className="practice-support-grid grid gap-4 lg:grid-cols-2">
+      <div className="practice-support-grid grid gap-4 lg:grid-cols-2" aria-hidden={sessionState==="active"}>
         <Card title="Kertaa seuraavaksi">
           {recovery.items.length ? (
             <div className="space-y-2">
@@ -1107,6 +1147,6 @@ export function PracticeView({
           ) : dueMistakeVerifications.length===0 ? <p className="text-sm text-muted-foreground">Ei juuri nyt erääntyviä itsenäisiä viivevarmistuksia.</p> : null}
         </Card>
       </div>
-    </div>
+    </FocusLayout>
   );
 }
