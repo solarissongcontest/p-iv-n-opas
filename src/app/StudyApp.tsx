@@ -65,7 +65,7 @@ async function getArthurSession(previousOwnerId?: string | null): Promise<Device
 }
 
 
-export function StudyAppRoot({ initialPage, courseCode, courseTab, examId, progressSection, settingsSection, practiceCourseCode, practiceTopicId, planMode, planAnchor }: { initialPage: StudyPage; courseCode?: string; courseTab?:CourseTab; examId?:string; progressSection?:ProgressSection; settingsSection?:SettingsSection; practiceCourseCode?:string; practiceTopicId?:string; planMode?:"päivä"|"viikko"|"kuukausi"; planAnchor?:string }) {
+export function StudyAppRoot({ initialPage, courseCode, courseTab, examId, progressSection, settingsSection, practiceCourseCode, practiceTopicId, planMode, planAnchor }: { initialPage: StudyPage; courseCode?: string | undefined; courseTab?:CourseTab | undefined; examId?:string | undefined; progressSection?:ProgressSection | undefined; settingsSection?:SettingsSection | undefined; practiceCourseCode?:string | undefined; practiceTopicId?:string | undefined; planMode?:("päivä"|"viikko"|"kuukausi") | undefined; planAnchor?:string | undefined }) {
   const queryClient = useQueryClient();
   const [user, setUser] = useState<DeviceUser | null | undefined>();
   const [authError, setAuthError] = useState<string | null>(null);
@@ -209,7 +209,7 @@ function DeviceSignIn({
   </section><Toaster richColors /></main>;
 }
 
-function StudyApp({ user, initialPage, courseCode, courseTab, examId, progressSection, settingsSection, practiceCourseCode, practiceTopicId, planMode, planAnchor }: { user: DeviceUser; initialPage: StudyPage; courseCode?: string; courseTab?:CourseTab; examId?:string; progressSection?:ProgressSection; settingsSection?:SettingsSection; practiceCourseCode?:string; practiceTopicId?:string; planMode?:"päivä"|"viikko"|"kuukausi"; planAnchor?:string }) {
+function StudyApp({ user, initialPage, courseCode, courseTab, examId, progressSection, settingsSection, practiceCourseCode, practiceTopicId, planMode, planAnchor }: { user: DeviceUser; initialPage: StudyPage; courseCode?: string | undefined; courseTab?:CourseTab | undefined; examId?:string | undefined; progressSection?:ProgressSection | undefined; settingsSection?:SettingsSection | undefined; practiceCourseCode?:string | undefined; practiceTopicId?:string | undefined; planMode?:("päivä"|"viikko"|"kuukausi") | undefined; planAnchor?:string | undefined }) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   setOfflineOwner(user.id);
