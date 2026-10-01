@@ -50,7 +50,7 @@ async function getArthurSession(previousOwnerId?: string | null): Promise<Device
 }
 
 
-export function StudyAppRoot({ initialPage, courseCode, courseTab, examId, progressSection, settingsSection, planMode, planAnchor }: { initialPage: StudyPage; courseCode?: string; courseTab?:CourseTab; examId?:string; progressSection?:ProgressSection; settingsSection?:SettingsSection; planMode?:"päivä"|"viikko"|"kuukausi"; planAnchor?:string }) {
+export function StudyAppRoot({ initialPage, courseCode, courseTab, examId, progressSection, settingsSection, practiceCourseCode, practiceTopicId, planMode, planAnchor }: { initialPage: StudyPage; courseCode?: string; courseTab?:CourseTab; examId?:string; progressSection?:ProgressSection; settingsSection?:SettingsSection; practiceCourseCode?:string; practiceTopicId?:string; planMode?:"päivä"|"viikko"|"kuukausi"; planAnchor?:string }) {
   const queryClient = useQueryClient();
   const [user, setUser] = useState<DeviceUser | null | undefined>();
   const [authError, setAuthError] = useState<string | null>(null);
@@ -128,7 +128,7 @@ export function StudyAppRoot({ initialPage, courseCode, courseTab, examId, progr
 
   if (user === undefined) return <main className="grid min-h-screen place-items-center">Avataan opintopäiväkirjaa…</main>;
   if (!user) return <DeviceSignIn authError={authError} onSignedIn={setUser} />;
-  return <StudyApp key={user.id + ":" + initialPage + ":" + (courseCode ?? "") + ":" + (courseTab ?? "") + ":" + (examId ?? "") + ":" + (progressSection ?? "") + ":" + (settingsSection ?? "") + ":" + (planMode ?? "") + ":" + (planAnchor ?? "")} user={user} initialPage={initialPage} courseCode={courseCode} courseTab={courseTab} examId={examId} progressSection={progressSection} settingsSection={settingsSection} planMode={planMode} planAnchor={planAnchor} />;
+  return <StudyApp key={user.id + ":" + initialPage + ":" + (courseCode ?? "") + ":" + (courseTab ?? "") + ":" + (examId ?? "") + ":" + (progressSection ?? "") + ":" + (settingsSection ?? "") + ":" + (practiceCourseCode ?? "") + ":" + (practiceTopicId ?? "") + ":" + (planMode ?? "") + ":" + (planAnchor ?? "")} user={user} initialPage={initialPage} courseCode={courseCode} courseTab={courseTab} examId={examId} progressSection={progressSection} settingsSection={settingsSection} practiceCourseCode={practiceCourseCode} practiceTopicId={practiceTopicId} planMode={planMode} planAnchor={planAnchor} />;
 }
 
 function DeviceSignIn({
@@ -194,7 +194,7 @@ function DeviceSignIn({
   </section><Toaster richColors /></main>;
 }
 
-function StudyApp({ user, initialPage, courseCode, courseTab, examId, progressSection, settingsSection, planMode, planAnchor }: { user: DeviceUser; initialPage: StudyPage; courseCode?: string; courseTab?:CourseTab; examId?:string; progressSection?:ProgressSection; settingsSection?:SettingsSection; planMode?:"päivä"|"viikko"|"kuukausi"; planAnchor?:string }) {
+function StudyApp({ user, initialPage, courseCode, courseTab, examId, progressSection, settingsSection, practiceCourseCode, practiceTopicId, planMode, planAnchor }: { user: DeviceUser; initialPage: StudyPage; courseCode?: string; courseTab?:CourseTab; examId?:string; progressSection?:ProgressSection; settingsSection?:SettingsSection; practiceCourseCode?:string; practiceTopicId?:string; planMode?:"päivä"|"viikko"|"kuukausi"; planAnchor?:string }) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   setOfflineOwner(user.id);
@@ -315,6 +315,18 @@ function StudyApp({ user, initialPage, courseCode, courseTab, examId, progressSe
     });
   };
 
+  const goPractice = (courseId: string, topicId?: string) => {
+    const target = courses.find((course) => course.id === courseId);
+    if (!target || !topicId) {
+      void navigate({ to: "/practice" });
+      return;
+    }
+    void navigate({
+      to: "/practice/$courseCode/$topicId",
+      params: { courseCode: target.code.toLowerCase(), topicId },
+    });
+  };
+
   useEffect(() => {
     if (!courseCode) {
       setCourseId(null);
@@ -323,6 +335,13 @@ function StudyApp({ user, initialPage, courseCode, courseTab, examId, progressSe
     const match = courses.find((course) => course.code.toLowerCase() === courseCode.toLowerCase());
     setCourseId(match?.id ?? null);
   }, [courseCode, courses]);
+
+  const practiceCourse = practiceCourseCode
+    ? courses.find((course) => course.code.toLowerCase() === practiceCourseCode.toLowerCase())
+    : null;
+  const practiceTopic = practiceTopicId
+    ? topics.find((topic) => topic.id === practiceTopicId && (!practiceCourse || topic.course_id === practiceCourse.id))
+    : null;
 
   useEffect(() => {
     applyTheme(storedThemeIsDark());
@@ -413,7 +432,7 @@ function StudyApp({ user, initialPage, courseCode, courseTab, examId, progressSe
       <section className={`page-content page-content-${page}`} data-page={page}>
         {busy ? (showSkeleton ? <div className="space-y-4" aria-label="Ladataan"><div className="h-32 animate-pulse rounded-2xl bg-muted"/><div className="h-60 animate-pulse rounded-2xl bg-muted"/></div> : null) :
         courses.length===0 ? <section className="panel p-6"><h2 className="text-xl font-semibold">Aloita ensimmäisestä kurssista</h2><p className="mt-2 text-muted-foreground">Lisää kurssi ja sen aiheet, jotta voit suunnitella ja kirjata opiskelua.</p><button onClick={()=>setAdding(true)} className="mt-5 min-h-11 rounded-xl bg-primary px-4 text-primary-foreground">Lisää kurssi</button></section> :
-        page==="today" ? <TodayView courses={courses} topics={topics} sessions={sessions} exams={exams} plan={plan} tests={testsQ.data??[]} attempts={attemptsQ.data??[]} mistakes={mistakesQ.data??[]} capacity={capacity} onStart={setEntry} onGo={go}/> :
+        page==="today" ? <TodayView courses={courses} topics={topics} sessions={sessions} exams={exams} plan={plan} tests={testsQ.data??[]} attempts={attemptsQ.data??[]} mistakes={mistakesQ.data??[]} capacity={capacity} onStart={setEntry} onGo={go} onPractice={goPractice}/> :
         page==="plan" ? <PlanView
           courses={courses}
           topics={topics}
@@ -454,7 +473,7 @@ function StudyApp({ user, initialPage, courseCode, courseTab, examId, progressSe
           onAdd={()=>setAdding(true)}
           onStart={()=>setEntry("manual")}
         /> :
-        page==="practice" ? <PracticeView courses={courses} topics={topics} attempts={attemptsQ.data??[]} tests={testsQ.data??[]} mistakes={mistakesQ.data??[]}/> :
+        page==="practice" ? <PracticeView courses={courses} topics={topics} attempts={attemptsQ.data??[]} tests={testsQ.data??[]} mistakes={mistakesQ.data??[]} initialCourseId={practiceCourse?.id} initialTopicId={practiceTopic?.id} onExit={()=>practiceCourseCode?void navigate({to:"/today"}):undefined}/> :
         page==="exams" ? <ExamsView
           courses={courses}
           topics={topics}
