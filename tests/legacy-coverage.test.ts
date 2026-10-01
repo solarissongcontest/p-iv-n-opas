@@ -51,32 +51,34 @@ test("all legacy evaluation target systems remain supported", () => {
 });
 
 test("planner retains day week month modes and return-from-break recovery UX", () => {
-  const views = read("src/components/StudyViews.tsx");
-  assert.match(views, /"päivä"\|"viikko"\|"kuukausi"/);
-  assert.match(views, /Tervetuloa takaisin/);
-  assert.match(views, /weeklyLearningReview/);
-  assert.match(views, /Viikkosi · viikko/);
+  const planner = read("src/features/planner/PlanView.tsx");
+  const today = read("src/features/today/TodayView.tsx");
+  const progress = read("src/features/progress/ProgressView.tsx");
+  assert.match(planner, /"päivä"\|"viikko"\|"kuukausi"/);
+  assert.match(today, /Tervetuloa takaisin/);
+  assert.match(progress, /weeklyLearningReview/);
+  assert.match(progress, /Viikkosi · viikko/);
 });
 
 test("exam preparation remains six-stage and last-two-days aware", () => {
   const engine = read("src/lib/learning-engine.ts");
-  const views = read("src/components/StudyViews.tsx");
+  const examsView = read("src/features/exams/ExamsView.tsx");
   for (const stage of ["coverage", "retrieval", "mixed", "transfer", "simulation", "repair"]) {
     assert.match(engine, new RegExp('key: "' + stage + '"'));
   }
-  assert.match(views, /Viimeiset 2 päivää/);
+  assert.match(examsView, /Viimeiset 2 päivää/);
 });
 
 test("guided Study Session retains timer and retrieval evidence", () => {
-  const dialogs = read("src/components/StudyDialogs.tsx");
-  assert.match(dialogs, /timerMode/);
-  assert.match(dialogs, /retrievalResult/);
-  assert.match(dialogs, /retrievalConfidence/);
-  assert.match(dialogs, /sessionFatigueV4/);
+  const session = read("src/features/session/SessionForm.tsx");
+  assert.match(session, /timerMode/);
+  assert.match(session, /retrievalResult/);
+  assert.match(session, /retrievalConfidence/);
+  assert.match(session, /sessionFatigueV4/);
 });
 
 test("PracticeTest retains duration errors and topic breakdown", () => {
-  const views = read("src/components/StudyViews.tsx");
+  const views = read("src/features/studies/CourseView.tsx");
   const data = read("src/lib/data.ts");
   for (const field of ["duration_minutes", "error_count", "topic_results"]) {
     assert.ok(views.includes(field) || data.includes(field), field + " is missing");
@@ -128,7 +130,7 @@ test("normalized learning architecture remains present", () => {
 
 test("rubric feedback is deliberately marked as assisted evidence", () => {
   const migration = read("supabase/migrations/20260929183000_practice_rubric_evidence.sql");
-  const practice = read("src/components/PracticeView.tsx");
+  const practice = read("src/features/practice/PracticeView.tsx");
 
   assert.match(practice, /rubricEvaluatorUsed/);
   assert.match(practice, /Arvioi oma vastaus/);
