@@ -135,7 +135,7 @@ import { Bar, Panel, button, secondary, type Base } from "@/features/shared/Stud
 
 export type SettingsSection = "study"|"notifications"|"app";
 
-export function SettingsView({user:_user,section="study",onSectionChange}:{user:DeviceUser;section?:SettingsSection;onSectionChange?:(section:SettingsSection)=>void}) {
+export function SettingsView({user:_user,section="study",onSectionChange}:{user:DeviceUser;section?:SettingsSection | undefined;onSectionChange?:(section:SettingsSection)=>void}) {
   const [dark,setDark]=useState(typeof window!=="undefined"?storedThemeIsDark():false);
   const [pushEnabled,setPushEnabled]=useState(false);
   const [pushBusy,setPushBusy]=useState(false);
