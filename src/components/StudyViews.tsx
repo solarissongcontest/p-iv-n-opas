@@ -534,7 +534,7 @@ export function ExamsView({courses,topics,exams,tests,attempts,mistakes,sessions
       <button className={secondary} onClick={()=>onCourse(selected.course_id)}>Avaa kurssi</button>
     </div>;
   }
-  return <div className="space-y-4">
+  return <div className="exams-view exam-list space-y-4">
   {yo.enabled&&<Panel title="YO-tila">
     <div className="grid grid-cols-2 gap-3 sm:grid-cols-4"><div><small className="text-muted-foreground">Vaihe</small><p className="font-semibold">{yoPhaseLabel(yo.phase)}</p></div><div><small className="text-muted-foreground">Vakaat</small><p className="text-xl font-semibold">{yo.stable}</p></div><div><small className="text-muted-foreground">Riskissä</small><p className="text-xl font-semibold">{yo.atRisk}</p></div><div><small className="text-muted-foreground">Arvioimatta</small><p className="text-xl font-semibold">{yo.unassessed}</p></div></div>
     {yo.daysToNearestExam!==null&&<p className="mt-3 text-sm text-muted-foreground">{yo.daysToNearestExam} päivää lähimpään YO-kokeeseen. Kurssikoe- ja YO-logiikka pidetään erillään.</p>}
