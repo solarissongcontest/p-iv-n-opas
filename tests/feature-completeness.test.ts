@@ -88,7 +88,7 @@ test("Learning OS v5 remains wired through engine, persistence and UI", () => {
   assert.ok(plannerPanels.includes("Mukautuva kertausbudjetti"));
   assert.ok(plannerPanels.includes("Vaihtoehtojen vertailu"));
   assert.ok(plannerPanels.includes("Muistutusten vähentäminen"));
-  assert.ok(examUi.includes("YO / Abitti 2 -simulaatio"));
+  assert.ok(examUi.includes("YO / Abitti 2 -koeharjoitus"));
   assert.ok(examUi.includes("SketchAnswerCanvas"));
   assert.ok(errorLab.includes("Virheen korjaus"));
 
