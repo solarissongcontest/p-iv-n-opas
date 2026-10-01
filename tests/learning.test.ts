@@ -15,6 +15,8 @@ import {
   type Course,
   type Mistake,
   type PlanItem,
+  type PracticeTest,
+  type Session,
   type Topic,
 } from "../src/lib/domain.ts";
 
@@ -241,7 +243,7 @@ test("capacity-aware rescheduling avoids an overloaded day", () => {
 
 test("return from break surfaces a capped gentle restart", () => {
   const comeback = returnFromBreak({
-    sessions: [{ date: "2026-09-20" }] as any,
+    sessions: [{ date: "2026-09-20" }] as unknown as Session[],
     topics: [
       topic("a", 2, { next_review: "2026-09-22", importance: 5 }),
       topic("b", 2, { next_review: "2026-09-23", importance: 4 }),
@@ -275,8 +277,8 @@ test("exam mode exposes all six preparation phases", () => {
       topic("a", 4, { progress: 100, basic_successes: 2, exam_successes: 1 }),
       topic("b", 3, { progress: 100, basic_successes: 2 }),
     ],
-    tests: [{ score: 8, max_score: 10 }] as any,
-    mistakes: [] as any,
+    tests: [{ score: 8, max_score: 10 }] as unknown as PracticeTest[],
+    mistakes: [] as Mistake[],
   });
   assert.deepEqual(phases.map(phase=>phase.key), [
     "coverage","retrieval","mixed","transfer","simulation","repair",
