@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 import { BookOpen, Ellipsis, FlaskConical, Plus, Search, Settings2, X } from "lucide-react";
 import { LiquidGlass } from "@/components/LiquidGlass";
 import { studyNav, type StudyPage } from "@/app/navigation";
@@ -238,10 +238,43 @@ function MoreSheet({
   onLog: () => void;
   onSearch: () => void;
 }) {
+  const rootRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!open) return;
+    const previous = document.activeElement as HTMLElement | null;
+    const focusable = () => [...(rootRef.current?.querySelectorAll<HTMLElement>(
+      'button:not([disabled]), a[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+    ) ?? [])];
+    focusable()[0]?.focus();
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        onClose();
+        return;
+      }
+      if (event.key !== "Tab") return;
+      const items = focusable();
+      const first = items[0], last = items[items.length - 1];
+      if (!first || !last) return;
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+      previous?.focus();
+    };
+  }, [open, onClose]);
+
   if (!open) return null;
 
   return (
-    <div className="app-sheet-backdrop md:hidden" role="presentation" onClick={onClose}>
+    <div ref={rootRef} className="app-sheet-backdrop md:hidden" role="presentation" onClick={onClose}>
       <LiquidGlass
         lensing
         as="aside"
