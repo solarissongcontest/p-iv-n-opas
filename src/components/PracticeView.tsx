@@ -56,13 +56,15 @@ function Card({
   title,
   children,
   action,
+  className = "",
 }: {
   title: string;
   children: React.ReactNode;
   action?: React.ReactNode;
+  className?: string;
 }) {
   return (
-    <section className="panel p-4 sm:p-6">
+    <section className={`panel p-4 sm:p-6 ${className}`}>
       <div className="mb-4 flex items-center justify-between gap-3">
         <h2 className="text-base font-semibold sm:text-lg">{title}</h2>
         {action}
@@ -646,14 +648,15 @@ export function PracticeView({
   }
 
   return (
-    <div className="space-y-5">
+    <div className="practice-view space-y-8">
       <Card
+        className="practice-primary-surface"
         title="Harjoittelutila"
         action={
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="practice-utility-row flex flex-wrap items-center gap-2">
             <button
               type="button"
-              className={secondary}
+              className={secondary+" practice-utility-button"}
               disabled={generatingQuestions || !courseId}
               onClick={() => void generateQuestionBatch()}
               title="Luo valittuun aiheeseen kahdeksan LOPS21-rajattua tehtävää"
@@ -666,7 +669,7 @@ export function PracticeView({
             </span>
             <button
               type="button"
-              className={diagnosticMode ? primary : secondary}
+              className={(diagnosticMode ? primary : secondary)+" practice-utility-button"}
               onClick={() => { setDiagnosticMode((value) => !value); setAttemptIndex(0); }}
             >
               {diagnosticMode ? "Lopeta lähtötason kartoitus" : "Kartoita lähtötaso"}
@@ -678,7 +681,7 @@ export function PracticeView({
           </div>
         }
       >
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="practice-setup-grid grid gap-3 sm:grid-cols-2">
           <label className="text-sm font-medium">
             Kurssi
             <select
@@ -743,10 +746,10 @@ export function PracticeView({
             <button className={secondary+" mt-4"} onClick={() => { setDiagnosticMode(false); setAttemptIndex(0); }}>Palaa normaaliin harjoitteluun</button>
           </div>
         ) : selection ? (
-          <div className="mt-5 space-y-4">
-            <div className="rounded-2xl bg-muted/60 p-4">
-              <div className="flex flex-wrap items-center gap-2 text-xs font-semibold uppercase tracking-wide text-primary">
-                <span>{activePath?.label ?? typeLabel[selection.question.type]}</span>
+          <div className="practice-question-flow mt-6 space-y-5">
+            <div className="practice-question-context">
+              <div className="practice-question-meta flex flex-wrap items-center gap-x-2 gap-y-1 text-xs font-medium text-muted-foreground">
+                <span className="font-semibold text-primary">{activePath?.label ?? typeLabel[selection.question.type]}</span>
                 <span>· {typeLabel[selection.question.type]}</span>
                 <span>· vaikeus {selection.question.difficulty}/5</span>
                 <span>· {selection.question.source === "bank" ? "LOPS21-tehtäväpankki" : "varatehtävä"}</span>
@@ -754,11 +757,11 @@ export function PracticeView({
                 {confusionSet && <span>· sekoittuvien käsitteiden erottelu</span>}
                 {activePath?.stage === "pretest" && <span>· ei vaikuta osaamistasoon</span>}
               </div>
-              <p className="mt-2 text-xs text-muted-foreground">
+              <p className="practice-topic mt-2 text-sm text-muted-foreground">
                 {courses.find((item) => item.id === selection.topic.course_id)?.code} · {confusionSet ? "Erottele: " + confusionSet.labels.join(" ja ") : selection.topic.name}
               </p>
-              <p className="mt-2 text-lg font-semibold">{selection.question.prompt}</p>
-              <p className="mt-2 text-xs text-muted-foreground">
+              <p className="practice-prompt mt-3">{selection.question.prompt}</p>
+              <p className="practice-rationale mt-3 text-sm text-muted-foreground">
                 {activePath?.reason ?? "Moottori valitsee kysymystyypin osaamisnäytön, unohtumisriskin ja koevaiheen perusteella."}
                 {" "}Opiskeluaikaa ei käytetä osaamisen mittarina.
               </p>
@@ -876,7 +879,7 @@ export function PracticeView({
               </fieldset>
             )}
 
-            <div className="rounded-2xl border border-border bg-muted/40 p-4">
+            <div className="practice-self-review rounded-2xl border border-border bg-muted/25 p-4">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
                   <p className="font-medium">Vastauksen oma-arviointi</p>
