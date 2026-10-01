@@ -42,6 +42,7 @@ async function auditCoachInteraction(input: {
   answerFirewallBlocked?: boolean | undefined;
 }) {
   try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- server table exists ahead of generated Supabase client types
     await (supabaseAdmin as any).from("ai_interactions").insert({
       owner_id: input.ownerId,
       course_id: input.courseId,
@@ -193,6 +194,7 @@ export async function handleCoach(request: Request): Promise<Response> {
         .eq("owner_id", ownerId)
         .gte("date", now)
         .limit(500),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- server preference fields exist ahead of generated Supabase client types
       (supabaseAdmin as any)
         .from("user_preferences")
         .select("study_weekdays")
@@ -262,6 +264,7 @@ export async function handleCoach(request: Request): Promise<Response> {
       return json(local);
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- RPC is deployed but not present in the generated client type yet
     const budget = await (supabaseAdmin as any).rpc("consume_coach_budget", {
       p_owner: ownerId,
     });
