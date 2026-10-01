@@ -209,17 +209,20 @@ export const Route = createFileRoute("/api/push/cron")({
 
             let title = "";
             let body = "";
+            let destination = "/today?source=push";
 
             const nearestExamDays = exams?.[0] ? daysBetween(exams[0].date, local.iso) : null;
             if (settings.exams && exams?.[0] && nearestExamDays !== null && nearestExamDays <= 3) {
               title = "Koe lähestyy";
               body = `${exams[0].name}: ${nearestExamDays === 0 ? "tänään" : nearestExamDays === 1 ? "huomenna" : `${nearestExamDays} päivän päästä`}.`;
+              destination = `/exams/${exams[0].id}?source=push`;
             } else if (local.weekday === 7 && settings.weekly_summary) {
               const actual = (weekSessions ?? []).reduce((sum, s) => sum + Number(s.minutes ?? 0), 0);
               const completed = (weekPlan ?? []).filter(p => p.status === "completed").length;
               const percent = weekPlan?.length ? Math.round(completed / weekPlan.length * 100) : 0;
               title = "Viikkoyhteenveto";
               body = `Tällä viikolla ${actual} min opiskelua · ${percent} % suunnitelmasta toteutui.`;
+              destination = "/progress?source=push";
             } else if (studyReminderAllowed && weekdays.includes(local.weekday) && settings.study_sessions && tasks?.length) {
               const taskMinutes = tasks.reduce((sum, task) => sum + Number(task.target_minutes ?? 0), 0);
               title = "Tämän päivän opiskelu";
@@ -230,7 +233,8 @@ export const Route = createFileRoute("/api/push/cron")({
               body = `Järjestelmä nosti esiin ${Math.min(3, reviews.length)} tärkeintä ajankohtaista aihetta. Muu jono järjestellään automaattisesti.`;
             } else if (settings.plan_changes && overdue?.length) {
               title = "Suunnitelma tarvitsee pienen päivityksen";
-              body = "Aiemmilta päiviltä jäi suunnitelmaa kesken. Avaa Planner: vanha kuorma järjestellään uudelleen ilman rästilistaa.";
+              body = "Aiemmilta päiviltä jäi suunnitelmaa kesken. Avaa suunnitelma: vanha kuorma järjestellään uudelleen ilman rästilistaa.";
+              destination = "/plan?source=push";
             }
 
             if (!title) { skipped += 1; continue; }
@@ -244,7 +248,7 @@ export const Route = createFileRoute("/api/push/cron")({
             let deliveredToAny = false;
             for (const row of subscriptions) {
               const response = await sendWebPush(row.subscription as StoredPushSubscription, {
-                title, body, url: "/?source=push", tag: deliveryKey,
+                title, body, url: destination, tag: deliveryKey,
               });
               if (response.ok) {
                 deliveredToAny = true; sent += 1;

@@ -38,7 +38,7 @@ export const Route = createFileRoute("/api/push/test")({
             const response = await sendWebPush(row.subscription as StoredPushSubscription, {
               title: "Opintopäiväkirja toimii",
               body: "Tämä on taustalta lähetetty testimuistutus.",
-              url: "/",
+              url: "/today?source=push-test",
               tag: `test:${Date.now()}`,
             });
 

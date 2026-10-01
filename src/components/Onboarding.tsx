@@ -96,8 +96,8 @@ export function Onboarding({
         });
       }
       onComplete();
-    }catch(error){
-      toast.error(error instanceof Error?error.message:"Käyttöönottoa ei voitu viimeistellä.");
+    }catch{
+      toast.error("Käyttöönottoa ei voitu viimeistellä. Tarkista yhteys ja yritä uudelleen.");
     }finally{setFinishing(false);}
   }
 
