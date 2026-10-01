@@ -61,6 +61,16 @@
   --shadow-glass: 0 1px 1px oklch(1 0 0 / 0.3) inset, 0 8px 30px oklch(0.2 0.01 260 / 0.1);
 
   --ease-calm: cubic-bezier(0.2, 0.8, 0.2, 1);
+
+  --page-inline-compact: 1.25rem;
+  --page-inline-medium: 1.75rem;
+  --page-inline-expanded: 2rem;
+  --page-max-focus: 900px;
+  --page-max-dashboard: 980px;
+  --page-max-library: 1080px;
+  --page-max-insights: 1180px;
+  --app-tabbar-height: 64px;
+  --app-control-gap: 1rem;
 }
 
 :root {
@@ -324,8 +334,26 @@
 .app-main {
   min-height: 100dvh;
   padding-top: 0;
-  padding-bottom: calc(7.4rem + env(safe-area-inset-bottom, 0px));
+  padding-bottom:
+    calc(
+      var(--app-tabbar-height)
+      + 6.25rem
+      + env(safe-area-inset-bottom, 0px)
+    );
 }
+
+.page-content {
+  width: min(100%, var(--page-max-dashboard));
+  margin-inline: auto;
+}
+
+.page-content-today { --page-max-dashboard: 860px; }
+.page-content-plan { width: min(100%, 1040px); }
+.page-content-courses { width: min(100%, var(--page-max-library)); }
+.page-content-practice { width: min(100%, var(--page-max-focus)); }
+.page-content-progress { width: min(100%, var(--page-max-insights)); }
+.page-content-exams,
+.page-content-settings { width: min(100%, 920px); }
 
 .app-mobile-header {
   position: sticky;
@@ -519,6 +547,79 @@
 }
 
 @media (max-width: 767px) {
+  .page-content {
+    width: 100%;
+  }
+
+  .page-content .panel {
+    box-shadow: none;
+  }
+
+  .coach-trigger span {
+    display: none;
+  }
+
+  .coach-trigger {
+    width: 48px;
+    padding-inline: 0;
+  }
+
+  .practice-primary-surface {
+    border-color: transparent;
+    background: transparent;
+    padding-inline: 0 !important;
+  }
+
+  .practice-primary-surface > div:first-child {
+    align-items: flex-start;
+  }
+
+  .practice-utility-row {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .practice-utility-button {
+    min-height: 40px !important;
+    padding-inline: 0.75rem !important;
+    font-size: 0.78rem !important;
+  }
+
+  .practice-setup-grid label {
+    font-size: 0.78rem;
+    color: var(--muted-foreground);
+  }
+
+  .practice-setup-grid select {
+    margin-top: 0.35rem;
+    min-height: 52px;
+    color: var(--foreground);
+  }
+
+  .practice-question-context {
+    padding-block: 0.25rem;
+  }
+
+  .practice-question-meta {
+    line-height: 1.35;
+  }
+
+  .practice-prompt {
+    font-size: 1.2rem;
+    line-height: 1.45;
+    font-weight: 650;
+    letter-spacing: -0.012em;
+  }
+
+  .practice-rationale {
+    line-height: 1.5;
+  }
+
+  .practice-self-review {
+    border-color: color-mix(in oklab, var(--border) 70%, transparent);
+    background: color-mix(in oklab, var(--muted) 35%, transparent);
+  }
+
   input,
   select,
   textarea {
@@ -539,12 +640,18 @@
   }
 
   .app-main {
-    padding-inline: 0.85rem;
-    padding-bottom: calc(6.3rem + env(safe-area-inset-bottom, 0px));
+    padding-inline: var(--page-inline-compact);
+    padding-bottom:
+      calc(
+        var(--app-tabbar-height)
+        + 6.25rem
+        + env(safe-area-inset-bottom, 0px)
+      );
   }
 
   .app-mobile-header {
-    margin-inline: -0.85rem;
+    margin-inline: calc(var(--page-inline-compact) * -1);
+    padding-inline: var(--page-inline-compact);
   }
 
   .app-tabbar {
@@ -692,16 +799,16 @@ html.dark .app-mobile-header {
     max-width: none;
     margin-left: 6.5rem;
     margin-right: 1.5rem;
-    padding-inline: 1.5rem;
+    padding-inline: var(--page-inline-medium);
   }
 }
 
 @media (min-width: 1101px) {
   .app-desktop-main {
-    max-width: 1180px;
+    max-width: 1440px;
     margin-left: 17rem;
     margin-right: 2rem;
-    padding-inline: 0;
+    padding-inline: var(--page-inline-expanded);
   }
 }
 
@@ -712,13 +819,20 @@ html.dark .app-mobile-header {
 .coach-trigger {
   position: fixed;
   right: 1rem;
-  bottom: calc(6.5rem + env(safe-area-inset-bottom, 0px));
+  bottom:
+    calc(
+      var(--app-tabbar-height)
+      + 1.55rem
+      + env(safe-area-inset-bottom, 0px)
+    );
   z-index: 25;
   display: flex;
-  min-height: 44px;
+  min-width: 48px;
+  min-height: 48px;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.7rem 1rem;
+  justify-content: center;
+  gap: 0.45rem;
+  padding: 0.72rem 0.9rem;
   border-radius: 999px;
   color: var(--foreground);
   box-shadow: 0 5px 24px oklch(0.2 0.01 260 / 0.08);
