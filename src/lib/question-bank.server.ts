@@ -162,6 +162,7 @@ export async function handleQuestionGeneration(request: Request): Promise<Respon
       .eq("owner_id", ownerId)
       .eq("course_id", input.courseId)
       .order("position"),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- study_materials is newer than the generated server client type
     (supabaseAdmin as any)
       .from("study_materials")
       .select("id,name,topic_ids,page_hint,text_preview,metadata")
@@ -193,7 +194,7 @@ export async function handleQuestionGeneration(request: Request): Promise<Respon
   const model = process.env["GEMINI_MODEL"] ?? "gemini-3.8-flash";
   if (!/^[a-z0-9._-]+$/i.test(model)) return json({ error: "Gemini-mallin asetus on virheellinen." }, 503);
 
-  const materials = (materialsResult.data ?? []).map((material: any) => ({
+  const materials = (materialsResult.data ?? []).map((material: Record<string, unknown>) => ({
     name: String(material.name ?? "").slice(0, 180),
     topicIds: Array.isArray(material.topic_ids) ? material.topic_ids.filter((id: unknown) => typeof id === "string" && validTopicIds.has(id as string)) : [],
     pageHint: typeof material.page_hint === "string" ? material.page_hint.slice(0, 100) : null,
@@ -328,6 +329,7 @@ export async function handleQuestionGeneration(request: Request): Promise<Respon
       },
     }));
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- question_bank is newer than the generated server client type
     const inserted = await (supabaseAdmin as any)
       .from("question_bank")
       .insert(rows)
