@@ -559,7 +559,18 @@ function StudyApp({ user, initialPage, courseCode, courseTab, examId, progressSe
     <Suspense fallback={null}>
       {entry==="manual" && <SessionForm item={null} courses={courses} topics={topics} sessions={sessions} attempts={attemptsQ.data??[]} presentation="dialog" onClose={()=>setEntry(null)}/>}
       {adding && <CourseForm onClose={()=>setAdding(false)}/>}
-      {search && <SearchPanel courses={courses} topics={topics} exams={exams} sessions={sessions} onClose={()=>setSearch(false)} onNavigate={p=>{go(p as StudyPage);setSearch(false);}} onCourse={id=>{goCourse(id);setSearch(false);}} onLog={()=>{setSearch(false);setEntry("manual");}}/>}
+      {search && <SearchPanel
+        courses={courses}
+        topics={topics}
+        exams={exams}
+        sessions={sessions}
+        onClose={()=>setSearch(false)}
+        onNavigate={p=>{go(p as StudyPage);setSearch(false);}}
+        onCourse={id=>{goCourse(id);setSearch(false);}}
+        onTopic={(courseId,topicId)=>{setSearch(false);goPractice(courseId,topicId);}}
+        onExam={examId=>{setSearch(false);void navigate({to:"/exams/$examId",params:{examId}});}}
+        onLog={()=>{setSearch(false);setEntry("manual");}}
+      />}
     </Suspense>
     <Toaster richColors/>
   </>;
