@@ -15,7 +15,8 @@
     "e2e": "playwright test",
     "e2e:smoke": "playwright test e2e/iphone-smoke.spec.ts e2e/release-gate.spec.ts",
     "e2e:cross-device": "playwright test e2e/v5-cross-device.spec.ts --project=desktop-chromium",
-    "e2e:visual": "playwright test e2e/responsive-visual.spec.ts --project=desktop-chromium"
+    "e2e:visual": "playwright test e2e/responsive-visual.spec.ts --project=desktop-chromium",
+    "e2e:install": "npm install --no-save @playwright/test@1.55.0 @axe-core/playwright@4.10.2"
   },
   "overrides": {
     "rolldown": "1.2.1"
@@ -92,8 +93,6 @@
     "prettier": "^3.7.3",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.56.1",
-    "vite": "8.1.5",
-    "@playwright/test": "^1.55.0",
-    "@axe-core/playwright": "^4.10.2"
+    "vite": "8.1.5"
   }
 }

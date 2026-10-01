@@ -166,6 +166,9 @@ npm run lint
 npm test
 npm run typecheck
 npm run build
+
+# Selain-E2E-työkalut pidetään erillään production/Bun-riippuvuuksista.
+npm run e2e:install
 npm run e2e
 npm run e2e:smoke
 npm run e2e:cross-device

@@ -5,16 +5,19 @@ import { readFileSync } from "node:fs";
 const read = (path: string) =>
   readFileSync(new URL("../" + path, import.meta.url), "utf8");
 
-test("browser and accessibility tooling are first-class dependencies", () => {
+test("browser and accessibility tooling are installed only for E2E jobs", () => {
   const pkg = JSON.parse(read("package.json")) as {
     scripts: Record<string,string>;
     devDependencies: Record<string,string>;
   };
-  assert.ok(pkg.devDependencies["@playwright/test"]);
-  assert.ok(pkg.devDependencies["@axe-core/playwright"]);
+  assert.equal(pkg.devDependencies["@playwright/test"], undefined);
+  assert.equal(pkg.devDependencies["@axe-core/playwright"], undefined);
+  assert.match(pkg.scripts["e2e:install"], /@playwright\/test@/);
+  assert.match(pkg.scripts["e2e:install"], /@axe-core\/playwright@/);
   assert.equal(pkg.scripts.e2e, "playwright test");
   assert.ok(pkg.scripts["e2e:cross-device"]);
   assert.ok(pkg.scripts["e2e:visual"]);
+  assert.match(read(".github/workflows/iphone-e2e.yml"), /npm run e2e:install/);
 });
 
 test("Quality Gate includes lint before tests typecheck and build", () => {
