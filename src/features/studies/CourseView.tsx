@@ -135,7 +135,7 @@ import { Bar, Panel, button, secondary, type Base } from "@/features/shared/Stud
 
 export type CourseTab = "Yleiskuva"|"Sisältö"|"Historia"|"Analyysi";
 
-export function CourseView({courses,topics,sessions,exams,plan,tests,mistakes,selected,onSelect,onAdd,onStart,initialTab="Yleiskuva",onTabChange}:Base&{sessions:Session[];exams:Exam[];plan:PlanItem[];tests:PracticeTest[];mistakes:Mistake[];selected:string|null;onSelect:(id:string|null)=>void;onAdd:()=>void;onStart:()=>void;initialTab?:CourseTab;onTabChange?:(tab:CourseTab)=>void}) {
+export function CourseView({courses,topics,sessions,exams,plan,tests,mistakes,selected,onSelect,onAdd,onStart,initialTab="Yleiskuva",onTabChange}:Base&{sessions:Session[];exams:Exam[];plan:PlanItem[];tests:PracticeTest[];mistakes:Mistake[];selected:string|null;onSelect:(id:string|null)=>void;onAdd:()=>void;onStart:()=>void;initialTab?:CourseTab | undefined;onTabChange?:(tab:CourseTab)=>void}) {
   const [tab,setTab]=useState<CourseTab>(initialTab),[form,setForm]=useState<"mistake"|"test"|"course"|"newTopic"|null>(null),[editingTopic,setEditingTopic]=useState<Topic|null>(null);
   useEffect(()=>setTab(initialTab),[initialTab]);
   const changeTab=(next:CourseTab)=>{setTab(next);onTabChange?.(next);};
