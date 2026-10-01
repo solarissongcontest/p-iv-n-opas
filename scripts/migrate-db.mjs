@@ -1,21 +1,10 @@
 import { spawnSync } from "node:child_process";
 
-const isVercel = process.env.VERCEL === "1";
-const isProduction = process.env.VERCEL_ENV === "production";
 const databaseUrl = process.env.POSTGRES_URL;
 
-if (isVercel && !isProduction) {
-  console.log("[db] Preview build: skipping production database migrations.");
-  process.exit(0);
-}
-
 if (!databaseUrl) {
-  if (isVercel && isProduction) {
-    console.error("[db] POSTGRES_URL is required for production deployments.");
-    process.exit(1);
-  }
-  console.log("[db] POSTGRES_URL is not set; skipping database migrations outside production.");
-  process.exit(0);
+  console.error("[db] POSTGRES_URL is required for npm run db:migrate.");
+  process.exit(1);
 }
 
 console.log("[db] Applying pending Supabase migrations...");
