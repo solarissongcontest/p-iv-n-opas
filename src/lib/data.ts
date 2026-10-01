@@ -18,8 +18,9 @@ import {
   type ProgressEvent,
   generatePlan,
   balanceDraftsAgainstPlan,
+  findNextStudyDate,
 } from "./domain";
-import { today } from "./fi";
+import { addDays, parseISO, today } from "./fi";
 import { requireDeviceOwnerId } from "./deviceSession";
 
 export type TopicDependency = {
@@ -1164,6 +1165,101 @@ export function useUpdatePreferences() {
         .from("user_preferences")
         .upsert(payload, { onConflict: "owner_id" });
       if (error) throw error;
+    },
+    onSuccess: invalidate,
+  });
+}
+
+
+function isoWeekday(date: string) {
+  return ((parseISO(date).getDay() + 6) % 7) + 1;
+}
+
+export function useApplyStudyWeekdays() {
+  const invalidate = useInvalidateAll();
+  return useMutation({
+    mutationFn: async (input: {
+      studyWeekdays: number[];
+      capacity: CapacityProfile;
+    }) => {
+      const studyWeekdays = [...new Set(input.studyWeekdays)]
+        .filter((day) => Number.isInteger(day) && day >= 1 && day <= 7)
+        .sort((a, b) => a - b);
+      if (!studyWeekdays.length) throw new Error("Valitse vähintään yksi opiskelupäivä.");
+
+      const [{ data: currentPlan, error: planError }, { data: courses, error: courseError }] =
+        await Promise.all([
+          supabase.from("plan_items").select("*").eq("status", "planned").order("date"),
+          supabase.from("courses").select("id,exam_date"),
+        ]);
+      if (planError) throw planError;
+      if (courseError) throw courseError;
+
+      const workingPlan = ((currentPlan ?? []) as PlanItem[]).map((item) => ({ ...item }));
+      const examByCourse = new Map((courses ?? []).map((course) => [course.id, course.exam_date]));
+      const now = today();
+      const moves: Array<{ id: string; from: string; to: string; movedFrom: string | null }> = [];
+      let unmoved = 0;
+
+      for (const item of workingPlan
+        .filter((candidate) =>
+          candidate.kind !== "exam" &&
+          candidate.status === "planned" &&
+          candidate.date >= now &&
+          !studyWeekdays.includes(isoWeekday(candidate.date)),
+        )
+        .sort((a, b) => a.date.localeCompare(b.date) || a.created_at.localeCompare(b.created_at))) {
+        const examDate = examByCourse.get(item.course_id) ?? null;
+        const latestDate = examDate ? addDays(examDate, -1) : null;
+        const target = findNextStudyDate({
+          plan: workingPlan,
+          fromISO: item.date,
+          studyWeekdays,
+          minutes: item.target_minutes,
+          ignoreItemId: item.id,
+          latestDate,
+          capacity: { ...input.capacity, studyWeekdays },
+        });
+
+        if (!target) {
+          unmoved += 1;
+          continue;
+        }
+
+        moves.push({ id: item.id, from: item.date, to: target, movedFrom: item.moved_from });
+        item.date = target;
+        item.moved_from = item.moved_from ?? moves[moves.length - 1]!.from;
+      }
+
+      const applied: Array<{ id: string; from: string; movedFrom: string | null }> = [];
+      try {
+        for (const move of moves) {
+          const { error } = await supabase
+            .from("plan_items")
+            .update({ date: move.to, moved_from: move.from, status: "planned" })
+            .eq("id", move.id);
+          if (error) throw error;
+          applied.push({ id: move.id, from: move.from, movedFrom: move.movedFrom });
+        }
+
+        const { error: preferenceError } = await untypedSupabase
+          .from("user_preferences")
+          .upsert({
+            owner_id: requireDeviceOwnerId(),
+            study_weekdays: studyWeekdays,
+          }, { onConflict: "owner_id" });
+        if (preferenceError) throw preferenceError;
+      } catch (error) {
+        for (const move of [...applied].reverse()) {
+          await supabase
+            .from("plan_items")
+            .update({ date: move.from, moved_from: move.movedFrom })
+            .eq("id", move.id);
+        }
+        throw error;
+      }
+
+      return { studyWeekdays, moved: moves.length, unmoved };
     },
     onSuccess: invalidate,
   });

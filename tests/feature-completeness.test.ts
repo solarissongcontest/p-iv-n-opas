@@ -122,3 +122,16 @@ test("master plan keeps evidence and safety invariants", () => {
   assert.ok(views.includes("ei arvosanaennuste"));
   assert.ok(views.includes("Lisäharjoittelu") && views.includes("ei muutu"));
 });
+
+
+test("study weekday settings save once and realign the future plan", () => {
+  const settings = read("src/features/settings/SettingsView.tsx");
+  const data = read("src/lib/data.ts");
+
+  assert.match(settings, /studyWeekdaysDraft/);
+  assert.match(settings, /Tallenna opiskelupäivät/);
+  assert.match(settings, /useApplyStudyWeekdays/);
+  assert.match(data, /export function useApplyStudyWeekdays/);
+  assert.match(data, /findNextStudyDate/);
+  assert.match(data, /study_weekdays: studyWeekdays/);
+});
