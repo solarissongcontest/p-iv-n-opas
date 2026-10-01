@@ -37,10 +37,16 @@ test("Final Release Gate waits for the deployed commit and runs the full browser
     "v5-cross-device.spec.ts",
     "responsive-visual.spec.ts",
     "REQUIRE_GEMINI",
-    "SEND_PUSH_TEST",
   ]) {
     assert.ok(workflow.includes(token), token);
   }
+});
+
+test("physical push delivery is an explicit manual workflow", () => {
+  const workflow = read(".github/workflows/push-device-check.yml");
+  assert.match(workflow, /workflow_dispatch/);
+  assert.match(workflow, /SEND_PUSH_TEST/);
+  assert.match(workflow, /push-delivery\.spec\.ts/);
 });
 
 test("release identity endpoint never exposes secrets and disables caching", () => {

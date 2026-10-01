@@ -1,0 +1,54 @@
+name: Physical Push Delivery Check
+
+on:
+  workflow_dispatch:
+    inputs:
+      base_url:
+        description: "Production URL. Leave empty to use the repository variable or Vercel default."
+        required: false
+        default: ""
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  push-delivery:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Resolve production URL
+        id: resolve
+        shell: bash
+        env:
+          INPUT_BASE_URL: ${{ inputs.base_url }}
+          REPOSITORY_BASE_URL: ${{ vars.PRODUCTION_BASE_URL }}
+        run: |
+          if [ -n "$INPUT_BASE_URL" ]; then
+            URL="$INPUT_BASE_URL"
+          elif [ -n "$REPOSITORY_BASE_URL" ]; then
+            URL="$REPOSITORY_BASE_URL"
+          else
+            URL="https://opiskelupaivakirja.vercel.app"
+          fi
+          echo "base_url=${URL%/}" >> "$GITHUB_OUTPUT"
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Send one real Web Push test
+        env:
+          E2E_BASE_URL: ${{ steps.resolve.outputs.base_url }}
+          SEND_PUSH_TEST: "true"
+        run: npx playwright test e2e/push-delivery.spec.ts --project=desktop-chromium
