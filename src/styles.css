@@ -1810,3 +1810,119 @@ html.dark .app-mobile-header {
     gap: 0.65rem;
   }
 }
+
+
+/* Progress is an information hierarchy, not one endless analytics feed. */
+.progress-section-tabs {
+  display: flex;
+  gap: 0.25rem;
+  align-self: flex-start;
+  overflow-x: auto;
+  border-radius: 0.85rem;
+  background: var(--muted);
+  padding: 0.25rem;
+}
+
+.progress-section-tab {
+  min-height: 2.65rem;
+  min-width: max-content;
+  border-radius: 0.7rem;
+  padding-inline: 0.85rem;
+  color: var(--muted-foreground);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.progress-section-tab-active {
+  background: var(--surface);
+  color: var(--foreground);
+  box-shadow: 0 1px 2px color-mix(in oklab, var(--foreground) 8%, transparent);
+}
+
+.progress-section-summary .progress-mastery-only,
+.progress-section-summary .progress-analysis-only,
+.progress-section-mastery .progress-summary-only,
+.progress-section-mastery .progress-analysis-only,
+.progress-section-analysis .progress-summary-only,
+.progress-section-analysis .progress-mastery-only {
+  display: none !important;
+}
+
+.progress-section-analysis .progress-section-tabs,
+.progress-section-mastery .progress-section-tabs,
+.progress-section-summary .progress-section-tabs {
+  order: -50;
+}
+
+/* Expanded course detail becomes a proper list/detail workspace. */
+.course-detail-sidebar {
+  display: none;
+}
+
+.course-detail-main {
+  min-width: 0;
+}
+
+@media (min-width: 1100px) {
+  .course-detail-split {
+    display: grid;
+    grid-template-columns: minmax(13.5rem, 17rem) minmax(0, 1fr);
+    align-items: start;
+    gap: 2rem;
+    width: min(100%, 1180px);
+  }
+
+  .course-detail-sidebar {
+    display: block;
+    position: sticky;
+    top: 1.5rem;
+    overflow: hidden;
+    border: 1px solid var(--hairline);
+    border-radius: 1.15rem;
+    background: color-mix(in oklab, var(--surface) 88%, transparent);
+  }
+
+  .course-detail-sidebar-title {
+    padding: 0.9rem 1rem 0.65rem;
+    color: var(--muted-foreground);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .course-detail-sidebar-row {
+    display: flex;
+    width: 100%;
+    min-height: 3.75rem;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.65rem;
+    border-top: 1px solid var(--hairline);
+    padding: 0.65rem 0.85rem;
+    text-align: left;
+    font-size: 0.8rem;
+  }
+
+  .course-detail-sidebar-row > span:first-child {
+    min-width: 0;
+  }
+
+  .course-detail-sidebar-row b,
+  .course-detail-sidebar-row small {
+    display: block;
+  }
+
+  .course-detail-sidebar-row small {
+    margin-top: 0.12rem;
+    overflow: hidden;
+    color: var(--muted-foreground);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .course-detail-sidebar-row-active {
+    background: var(--accent);
+    color: var(--foreground);
+  }
+}
