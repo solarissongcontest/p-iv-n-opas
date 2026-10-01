@@ -193,6 +193,7 @@ export type UserPreferences = {
   updated_at: string;
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- compatibility client for schema fields newer than generated browser types
 const untypedSupabase = supabase as any;
 
 /** ---------- reads ---------- */
