@@ -1009,3 +1009,89 @@
 .settings-section-app .settings-notifications-only {
   display: none !important;
 }
+
+
+/* Planned study sessions become a bounded workspace with no competing app chrome. */
+.study-session-focus {
+  min-height: 100dvh;
+  background: var(--background);
+  color: var(--foreground);
+}
+
+.study-session-focus-header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  min-height: 4.5rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  border-bottom: 1px solid var(--hairline);
+  background: color-mix(in oklab, var(--background) 88%, transparent);
+  padding:
+    max(0.8rem, env(safe-area-inset-top, 0px))
+    max(var(--page-inline-compact), env(safe-area-inset-right, 0px))
+    0.8rem
+    max(var(--page-inline-compact), env(safe-area-inset-left, 0px));
+  backdrop-filter: blur(20px) saturate(1.15);
+}
+
+.study-session-focus-main {
+  width: min(100%, var(--page-max-focus));
+  margin-inline: auto;
+  padding:
+    clamp(1.1rem, 4vw, 2rem)
+    max(var(--page-inline-compact), env(safe-area-inset-right, 0px))
+    calc(2rem + env(safe-area-inset-bottom, 0px))
+    max(var(--page-inline-compact), env(safe-area-inset-left, 0px));
+}
+
+.study-session-focus-main > .space-y-5 {
+  min-height: calc(100dvh - 9rem);
+}
+
+@media (min-width: 768px) {
+  .study-session-focus-header {
+    padding-inline: max(2rem, calc((100vw - var(--page-max-focus)) / 2));
+  }
+}
+
+/* While a timed exam block is running, navigation and coach disappear. */
+.min-h-screen:has(.exam-simulation-running) .desktop-sidebar,
+.min-h-screen:has(.exam-simulation-running) .app-mobile-header,
+.min-h-screen:has(.exam-simulation-running) .app-tabbar,
+.min-h-screen:has(.exam-simulation-running) .bottom-context-action {
+  display: none !important;
+}
+
+.min-h-screen:has(.exam-simulation-running) .app-desktop-main {
+  width: min(100%, 1040px);
+  max-width: 1040px;
+  margin-inline: auto;
+  padding-top: max(1rem, env(safe-area-inset-top, 0px));
+}
+
+.exam-simulation-running {
+  min-height: calc(100dvh - 2rem);
+  border: 0;
+  box-shadow: none;
+}
+
+.exam-simulation-running > div:first-child {
+  position: sticky;
+  top: 0;
+  z-index: 12;
+  margin: -1rem -1rem 0;
+  border-bottom: 1px solid var(--hairline);
+  background: color-mix(in oklab, var(--background) 90%, transparent);
+  padding: 1rem;
+  backdrop-filter: blur(18px) saturate(1.12);
+}
+
+@media (min-width: 640px) {
+  .exam-simulation-running > div:first-child {
+    margin: -1.5rem -1.5rem 0;
+    padding: 1.25rem 1.5rem;
+  }
+}
