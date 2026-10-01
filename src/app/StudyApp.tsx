@@ -6,6 +6,7 @@ import { toast, Toaster } from "sonner";
 import { AICoach } from "@/components/AICoach";
 import { AppShell } from "@/app/AppShell";
 import { coachTriggerLabel, studyNav, type StudyPage } from "@/app/navigation";
+import { isoWeekFromDate } from "@/features/planner/routeDate";
 import { ensureKe04ForCurrentUser, useCourses, useExams, useMistakes, usePlan, usePracticeAttempts, usePreferences, useSessions, useTests, useTopics } from "@/lib/data";
 import { longDate, greeting, today } from "@/lib/fi";
 import { CourseView, ExamsView, ProgressView, TodayView, PlanView, SettingsView } from "@/components/StudyViews";
@@ -49,7 +50,7 @@ async function getArthurSession(previousOwnerId?: string | null): Promise<Device
 }
 
 
-export function StudyAppRoot({ initialPage, courseCode }: { initialPage: StudyPage; courseCode?: string }) {
+export function StudyAppRoot({ initialPage, courseCode, planMode, planAnchor }: { initialPage: StudyPage; courseCode?: string; planMode?:"päivä"|"viikko"|"kuukausi"; planAnchor?:string }) {
   const queryClient = useQueryClient();
   const [user, setUser] = useState<DeviceUser | null | undefined>();
   const [authError, setAuthError] = useState<string | null>(null);
@@ -127,7 +128,7 @@ export function StudyAppRoot({ initialPage, courseCode }: { initialPage: StudyPa
 
   if (user === undefined) return <main className="grid min-h-screen place-items-center">Avataan opintopäiväkirjaa…</main>;
   if (!user) return <DeviceSignIn authError={authError} onSignedIn={setUser} />;
-  return <StudyApp key={user.id + ":" + initialPage + ":" + (courseCode ?? "")} user={user} initialPage={initialPage} courseCode={courseCode} />;
+  return <StudyApp key={user.id + ":" + initialPage + ":" + (courseCode ?? "") + ":" + (planMode ?? "") + ":" + (planAnchor ?? "")} user={user} initialPage={initialPage} courseCode={courseCode} planMode={planMode} planAnchor={planAnchor} />;
 }
 
 function DeviceSignIn({
@@ -193,7 +194,7 @@ function DeviceSignIn({
   </section><Toaster richColors /></main>;
 }
 
-function StudyApp({ user, initialPage, courseCode }: { user: DeviceUser; initialPage: StudyPage; courseCode?: string }) {
+function StudyApp({ user, initialPage, courseCode, planMode, planAnchor }: { user: DeviceUser; initialPage: StudyPage; courseCode?: string; planMode?:"päivä"|"viikko"|"kuukausi"; planAnchor?:string }) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   setOfflineOwner(user.id);
@@ -413,7 +414,23 @@ function StudyApp({ user, initialPage, courseCode }: { user: DeviceUser; initial
         {busy ? (showSkeleton ? <div className="space-y-4" aria-label="Ladataan"><div className="h-32 animate-pulse rounded-2xl bg-muted"/><div className="h-60 animate-pulse rounded-2xl bg-muted"/></div> : null) :
         courses.length===0 ? <section className="panel p-6"><h2 className="text-xl font-semibold">Aloita ensimmäisestä kurssista</h2><p className="mt-2 text-muted-foreground">Lisää kurssi ja sen aiheet, jotta voit suunnitella ja kirjata opiskelua.</p><button onClick={()=>setAdding(true)} className="mt-5 min-h-11 rounded-xl bg-primary px-4 text-primary-foreground">Lisää kurssi</button></section> :
         page==="today" ? <TodayView courses={courses} topics={topics} sessions={sessions} exams={exams} plan={plan} tests={testsQ.data??[]} attempts={attemptsQ.data??[]} mistakes={mistakesQ.data??[]} capacity={capacity} onStart={setEntry} onGo={go}/> :
-        page==="plan" ? <PlanView courses={courses} topics={topics} plan={plan} tests={testsQ.data??[]} mistakes={mistakesQ.data??[]} attempts={attemptsQ.data??[]} capacity={capacity} onStart={setEntry}/> :
+        page==="plan" ? <PlanView
+          courses={courses}
+          topics={topics}
+          plan={plan}
+          tests={testsQ.data??[]}
+          mistakes={mistakesQ.data??[]}
+          attempts={attemptsQ.data??[]}
+          capacity={capacity}
+          onStart={setEntry}
+          initialMode={planMode}
+          initialAnchor={planAnchor}
+          onPeriodChange={(mode,anchor)=>{
+            if(mode==="päivä") void navigate({to:"/plan/day/$date",params:{date:anchor}});
+            else if(mode==="viikko") void navigate({to:"/plan/week/$week",params:{week:isoWeekFromDate(anchor)}});
+            else void navigate({to:"/plan/month/$month",params:{month:anchor.slice(0,7)}});
+          }}
+        /> :
         page==="courses" ? <CourseView courses={courses} topics={topics} sessions={sessions} exams={exams} plan={plan} tests={testsQ.data??[]} mistakes={mistakesQ.data??[]} selected={courseId} onSelect={(id)=>id?goCourse(id):go("courses")} onAdd={()=>setAdding(true)} onStart={()=>setEntry("manual")}/> :
         page==="practice" ? <PracticeView courses={courses} topics={topics} attempts={attemptsQ.data??[]} tests={testsQ.data??[]} mistakes={mistakesQ.data??[]}/> :
         page==="exams" ? <ExamsView courses={courses} topics={topics} exams={exams} tests={testsQ.data??[]} attempts={attemptsQ.data??[]} mistakes={mistakesQ.data??[]} sessions={sessions} plan={plan} onCourse={goCourse}/> :
