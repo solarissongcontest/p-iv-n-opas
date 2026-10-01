@@ -418,6 +418,27 @@ function StudyApp({ user, initialPage, courseCode, courseTab, examId, progressSe
     </>;
   }
 
+  const focusedSessionItem = entry && entry !== "manual"
+    ? plan.find(item => item.id === entry) ?? null
+    : null;
+
+  if (focusedSessionItem) {
+    return <>
+      <Suspense fallback={<FeatureFallback/>}>
+        <SessionForm
+          item={focusedSessionItem}
+          courses={courses}
+          topics={topics}
+          sessions={sessions}
+          attempts={attemptsQ.data??[]}
+          presentation="focus"
+          onClose={()=>setEntry(null)}
+        />
+      </Suspense>
+      <Toaster richColors/>
+    </>;
+  }
+
   const contextualCoach = !busy && !error && !entry && !adding && !search && !moreOpen && page !== "settings" ? (
     <Suspense fallback={null}>
       <AICoach
@@ -536,7 +557,7 @@ function StudyApp({ user, initialPage, courseCode, courseTab, examId, progressSe
     </AppShell>
 
     <Suspense fallback={null}>
-      {entry && <SessionForm item={plan.find(p=>p.id===entry)??null} courses={courses} topics={topics} sessions={sessions} attempts={attemptsQ.data??[]} onClose={()=>setEntry(null)}/>}
+      {entry==="manual" && <SessionForm item={null} courses={courses} topics={topics} sessions={sessions} attempts={attemptsQ.data??[]} presentation="dialog" onClose={()=>setEntry(null)}/>}
       {adding && <CourseForm onClose={()=>setAdding(false)}/>}
       {search && <SearchPanel courses={courses} topics={topics} exams={exams} sessions={sessions} onClose={()=>setSearch(false)} onNavigate={p=>{go(p as StudyPage);setSearch(false);}} onCourse={id=>{goCourse(id);setSearch(false);}} onLog={()=>{setSearch(false);setEntry("manual");}}/>}
     </Suspense>
