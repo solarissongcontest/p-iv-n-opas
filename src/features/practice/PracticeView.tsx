@@ -664,8 +664,8 @@ export function PracticeView({
       await questionBank.refetch();
       setAttemptIndex(0);
       toast.success((payload.created ?? 0) + " LOPS21-tehtävää lisättiin tehtäväpankkiin.");
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Tehtävien luonti epäonnistui.");
+    } catch {
+      toast.error("Tehtäviä ei voitu luoda. Tarkista yhteys ja yritä uudelleen.");
     } finally {
       setGeneratingQuestions(false);
     }
