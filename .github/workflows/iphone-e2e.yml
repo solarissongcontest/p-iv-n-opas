@@ -2,23 +2,15 @@ name: Final Release Gate
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
   workflow_dispatch:
     inputs:
       base_url:
-        description: "Production or deployment URL to verify. Empty uses the repository variable or the Vercel default."
+        description: "Production URL to verify. Leave empty to use the repository variable or Vercel default."
         required: false
+        default: ""
         type: string
-      require_gemini:
-        description: "Require a live Gemini response instead of local fallback."
-        required: true
-        default: true
-        type: boolean
-      send_push_test:
-        description: "Send one real Web Push test to active subscriptions."
-        required: true
-        default: false
-        type: boolean
 
 permissions:
   contents: read
@@ -52,7 +44,8 @@ jobs:
         run: npm run build
 
   wait-for-production:
-    needs: code-quality
+    needs:
+      - code-quality
     runs-on: ubuntu-latest
     timeout-minutes: 12
     outputs:
@@ -60,29 +53,31 @@ jobs:
     steps:
       - name: Resolve production URL
         id: resolve
+        shell: bash
         env:
           INPUT_BASE_URL: ${{ inputs.base_url }}
           REPOSITORY_BASE_URL: ${{ vars.PRODUCTION_BASE_URL }}
-        shell: bash
         run: |
-          URL="${INPUT_BASE_URL:-${REPOSITORY_BASE_URL:-https://opiskelupaivakirja.vercel.app}}"
+          if [ -n "$INPUT_BASE_URL" ]; then
+            URL="$INPUT_BASE_URL"
+          elif [ -n "$REPOSITORY_BASE_URL" ]; then
+            URL="$REPOSITORY_BASE_URL"
+          else
+            URL="https://opiskelupaivakirja.vercel.app"
+          fi
           URL="${URL%/}"
-          echo "base_url=${URL}" >> "$GITHUB_OUTPUT"
-          echo "Testing ${URL}"
+          echo "base_url=$URL" >> "$GITHUB_OUTPUT"
+          echo "Testing $URL"
 
       - name: Wait for this exact commit to reach Vercel
+        shell: bash
         env:
           BASE_URL: ${{ steps.resolve.outputs.base_url }}
           EXPECTED_SHA: ${{ github.sha }}
-        shell: bash
         run: |
           for attempt in $(seq 1 60); do
-            BODY="$(curl --silent --show-error --fail --max-time 10 "${BASE_URL}/api/release-info" || true)"
-            LIVE_SHA="$(printf '%s' "$BODY" | python3 -c 'import json,sys
-try:
-    print((json.load(sys.stdin).get("commit") or "").strip())
-except Exception:
-    print("")')"
+            BODY=$(curl --silent --show-error --fail --max-time 10 "$BASE_URL/api/release-info" || true)
+            LIVE_SHA=$(printf '%s' "$BODY" | python3 -c "import json,sys; d=json.load(sys.stdin) if sys.stdin.readable() else {}; print((d.get('commit') or '').strip())" 2>/dev/null || true)
             if [ "$LIVE_SHA" = "$EXPECTED_SHA" ]; then
               echo "Production is serving $EXPECTED_SHA"
               exit 0
@@ -94,13 +89,13 @@ except Exception:
           exit 1
 
   production-e2e:
-    needs: wait-for-production
+    needs:
+      - wait-for-production
     runs-on: ubuntu-latest
     timeout-minutes: 35
     env:
       E2E_BASE_URL: ${{ needs.wait-for-production.outputs.base_url }}
-      REQUIRE_GEMINI: ${{ github.event_name == 'workflow_dispatch' && inputs.require_gemini == false && 'false' || 'true' }}
-      SEND_PUSH_TEST: ${{ github.event_name == 'workflow_dispatch' && inputs.send_push_test == true && 'true' || 'false' }}
+      REQUIRE_GEMINI: "true"
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -128,16 +123,11 @@ except Exception:
       - name: Responsive visual layout regression matrix
         run: npx playwright test e2e/responsive-visual.spec.ts --project=desktop-chromium
 
-      - name: Optional real Web Push delivery
-        if: ${{ env.SEND_PUSH_TEST == 'true' }}
-        run: npx playwright test e2e/push-delivery.spec.ts --project=desktop-chromium
-
       - name: Upload browser evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: final-release-browser-evidence-${{ github.run_id }}
-          path: |
-            test-results/
+          path: test-results/
           if-no-files-found: ignore
           retention-days: 30
