@@ -651,7 +651,7 @@ export function PracticeView({
     <div className="practice-view space-y-8">
       <Card
         className="practice-primary-surface"
-        title="Mitä harjoitellaan?"
+        title="Harjoittelutila"
         action={
           <div className="practice-utility-row flex flex-wrap items-center gap-2">
             <button
