@@ -4,9 +4,18 @@ import { readFileSync } from "node:fs";
 
 const read = (path: string) => readFileSync(new URL("../" + path, import.meta.url), "utf8");
 
+const readViews = () => [
+  "src/features/today/TodayView.tsx",
+  "src/features/planner/PlanView.tsx",
+  "src/features/studies/CourseView.tsx",
+  "src/features/exams/ExamsView.tsx",
+  "src/features/progress/ProgressView.tsx",
+  "src/features/settings/SettingsView.tsx",
+].map(read).join("\n");
+
 test("non-AI master-plan features remain wired end-to-end", () => {
-  const views = read("src/components/StudyViews.tsx");
-  const practice = read("src/components/PracticeView.tsx");
+  const views = readViews();
+  const practice = read("src/features/practice/PracticeView.tsx");
   const editor = read("src/components/AbittiAnswerEditor.tsx");
   const learning = read("src/lib/learning-os-v4.ts");
   const data = read("src/lib/data.ts");
@@ -50,8 +59,8 @@ test("non-AI master-plan features remain wired end-to-end", () => {
 
 test("Learning OS v5 remains wired through engine, persistence and UI", () => {
   const v5 = read("src/lib/learning-os-v5.ts");
-  const views = read("src/components/StudyViews.tsx");
-  const practice = read("src/components/PracticeView.tsx");
+  const views = readViews();
+  const practice = read("src/features/practice/PracticeView.tsx");
   const plannerPanels = read("src/components/LearningOSV5Panels.tsx");
   const examUi = read("src/components/ExamSimulationV5.tsx");
   const errorLab = read("src/components/ContrastiveErrorLab.tsx");
@@ -103,7 +112,7 @@ test("Learning OS v5 remains wired through engine, persistence and UI", () => {
 test("master plan keeps evidence and safety invariants", () => {
   const domain = read("src/lib/domain.ts");
   const learning = read("src/lib/learning-os-v4.ts");
-  const views = read("src/components/StudyViews.tsx");
+  const views = readViews();
 
   assert.ok(learning.includes("verificationRequired"));
   assert.ok(learning.includes("blindSpot"));
