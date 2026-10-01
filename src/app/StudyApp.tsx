@@ -1,17 +1,16 @@
 import { useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { BookOpen } from "lucide-react";
 import { toast, Toaster } from "sonner";
-import { AICoach } from "@/components/AICoach";
 import { AppShell } from "@/app/AppShell";
 import { coachTriggerLabel, studyNav, type StudyPage } from "@/app/navigation";
 import { isoWeekFromDate } from "@/features/planner/routeDate";
 import { ensureKe04ForCurrentUser, useCourses, useExams, useMistakes, usePlan, usePracticeAttempts, usePreferences, useSessions, useTests, useTopics } from "@/lib/data";
 import { longDate, greeting, today } from "@/lib/fi";
-import { CourseView, ExamsView, ProgressView, TodayView, PlanView, SettingsView, type CourseTab, type ProgressSection, type SettingsSection } from "@/components/StudyViews";
-import { PracticeView } from "@/components/PracticeView";
-import { CourseForm, SessionForm, SearchPanel } from "@/components/StudyDialogs";
+import type { CourseTab } from "@/features/studies/CourseView";
+import type { ProgressSection } from "@/features/progress/ProgressView";
+import type { SettingsSection } from "@/features/settings/SettingsView";
 import { Onboarding } from "@/components/Onboarding";
 import { pendingCount, setOfflineOwner, startSyncWatcher, subscribePending } from "@/lib/offline";
 import { applyTheme, storedThemeIsDark } from "@/lib/theme";
@@ -22,6 +21,22 @@ import {
   readDeviceSession,
   storeDeviceSession,
 } from "@/lib/deviceSession";
+
+const TodayView = lazy(() => import("@/features/today/TodayView").then(module => ({ default: module.TodayView })));
+const PlanView = lazy(() => import("@/features/planner/PlanView").then(module => ({ default: module.PlanView })));
+const CourseView = lazy(() => import("@/features/studies/CourseView").then(module => ({ default: module.CourseView })));
+const PracticeView = lazy(() => import("@/features/practice/PracticeView").then(module => ({ default: module.PracticeView })));
+const ProgressView = lazy(() => import("@/features/progress/ProgressView").then(module => ({ default: module.ProgressView })));
+const ExamsView = lazy(() => import("@/features/exams/ExamsView").then(module => ({ default: module.ExamsView })));
+const SettingsView = lazy(() => import("@/features/settings/SettingsView").then(module => ({ default: module.SettingsView })));
+const SessionForm = lazy(() => import("@/features/session/SessionForm").then(module => ({ default: module.SessionForm })));
+const CourseForm = lazy(() => import("@/features/studies/CourseForm").then(module => ({ default: module.CourseForm })));
+const SearchPanel = lazy(() => import("@/features/search/SearchPanel").then(module => ({ default: module.SearchPanel })));
+const AICoach = lazy(() => import("@/components/AICoach").then(module => ({ default: module.AICoach })));
+
+function FeatureFallback() {
+  return <div className="space-y-3" aria-label="Ladataan näkymää"><div className="h-24 animate-pulse rounded-2xl bg-muted"/><div className="h-40 animate-pulse rounded-2xl bg-muted"/></div>;
+}
 
 async function getArthurSession(previousOwnerId?: string | null): Promise<DeviceUser> {
   const response = await fetch("/api/device-auth", {
@@ -404,14 +419,16 @@ function StudyApp({ user, initialPage, courseCode, courseTab, examId, progressSe
   }
 
   const contextualCoach = !busy && !error && !entry && !adding && !search && !moreOpen && page !== "settings" ? (
-    <AICoach
-      data={{ courses, topics, sessions, exams, plan, mistakes: mistakesQ.data ?? [] }}
-      selectedCourseId={courseId}
-      weekdays={preferences?.study_weekdays ?? [1, 2, 3, 4, 5]}
-      triggerLabel={coachTriggerLabel(page)}
-      onLog={() => setEntry("manual")}
-      onPractice={() => go("practice")}
-    />
+    <Suspense fallback={null}>
+      <AICoach
+        data={{ courses, topics, sessions, exams, plan, mistakes: mistakesQ.data ?? [] }}
+        selectedCourseId={courseId}
+        weekdays={preferences?.study_weekdays ?? [1, 2, 3, 4, 5]}
+        triggerLabel={coachTriggerLabel(page)}
+        onLog={() => setEntry("manual")}
+        onPractice={() => go("practice")}
+      />
+    </Suspense>
   ) : null;
 
   return <>
@@ -430,6 +447,7 @@ function StudyApp({ user, initialPage, courseCode, courseTab, examId, progressSe
       {error && <div role="alert" className="panel mb-5 p-4"><p className="font-medium">{pending>0?"Kaikkea ei voitu vielä synkronoida.":"Tietojen lataus tai alustus epäonnistui."}</p>{pending>0&&<p className="mt-1 text-sm text-muted-foreground">Syöttämäsi tiedot ovat tallessa tässä laitteessa ja synkronoidaan yhteyden palattua.</p>}<p className="mt-1 text-sm text-muted-foreground">{String(error)}</p><button className="mt-2 underline" onClick={()=>{setDefaultsReady(false);setDefaultsError(null);void ensureKe04ForCurrentUser().then(()=>Promise.all([coursesQ.refetch(),topicsQ.refetch(),sessionsQ.refetch(),examsQ.refetch(),planQ.refetch(),testsQ.refetch(),attemptsQ.refetch(),mistakesQ.refetch(),preferencesQ.refetch()])).then(()=>setDefaultsReady(true)).catch(err=>{setDefaultsError(err instanceof Error?err.message:"Uudelleenyritys epäonnistui.");setDefaultsReady(true);});}}>Yritä uudelleen</button></div>}
 
       <section className={`page-content page-content-${page}`} data-page={page}>
+        <Suspense fallback={<FeatureFallback/>}>
         {busy ? (showSkeleton ? <div className="space-y-4" aria-label="Ladataan"><div className="h-32 animate-pulse rounded-2xl bg-muted"/><div className="h-60 animate-pulse rounded-2xl bg-muted"/></div> : null) :
         courses.length===0 ? <section className="panel p-6"><h2 className="text-xl font-semibold">Aloita ensimmäisestä kurssista</h2><p className="mt-2 text-muted-foreground">Lisää kurssi ja sen aiheet, jotta voit suunnitella ja kirjata opiskelua.</p><button onClick={()=>setAdding(true)} className="mt-5 min-h-11 rounded-xl bg-primary px-4 text-primary-foreground">Lisää kurssi</button></section> :
         page==="today" ? <TodayView courses={courses} topics={topics} sessions={sessions} exams={exams} plan={plan} tests={testsQ.data??[]} attempts={attemptsQ.data??[]} mistakes={mistakesQ.data??[]} capacity={capacity} onStart={setEntry} onGo={go} onPractice={goPractice}/> :
@@ -513,12 +531,15 @@ function StudyApp({ user, initialPage, courseCode, courseTab, examId, progressSe
             else void navigate({to:"/settings/app"});
           }}
         />}
+        </Suspense>
       </section>
     </AppShell>
 
-    {entry && <SessionForm item={plan.find(p=>p.id===entry)??null} courses={courses} topics={topics} sessions={sessions} attempts={attemptsQ.data??[]} onClose={()=>setEntry(null)}/>}
-    {adding && <CourseForm onClose={()=>setAdding(false)}/>}
-    {search && <SearchPanel courses={courses} topics={topics} exams={exams} sessions={sessions} onClose={()=>setSearch(false)} onNavigate={p=>{go(p as StudyPage);setSearch(false);}} onCourse={id=>{goCourse(id);setSearch(false);}} onLog={()=>{setSearch(false);setEntry("manual");}}/>}
+    <Suspense fallback={null}>
+      {entry && <SessionForm item={plan.find(p=>p.id===entry)??null} courses={courses} topics={topics} sessions={sessions} attempts={attemptsQ.data??[]} onClose={()=>setEntry(null)}/>}
+      {adding && <CourseForm onClose={()=>setAdding(false)}/>}
+      {search && <SearchPanel courses={courses} topics={topics} exams={exams} sessions={sessions} onClose={()=>setSearch(false)} onNavigate={p=>{go(p as StudyPage);setSearch(false);}} onCourse={id=>{goCourse(id);setSearch(false);}} onLog={()=>{setSearch(false);setEntry("manual");}}/>}
+    </Suspense>
     <Toaster richColors/>
   </>;
 }
