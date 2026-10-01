@@ -65,12 +65,14 @@ export function AICoach({
   data,
   selectedCourseId,
   weekdays,
+  triggerLabel = "Ohjaaja",
   onLog,
   onPractice,
 }: {
   data: StudySnapshot;
   selectedCourseId: string | null;
   weekdays: number[];
+  triggerLabel?: string;
   onLog: () => void;
   onPractice: () => void;
 }) {
@@ -353,10 +355,10 @@ export function AICoach({
         <button
           type="button"
           className="coach-trigger glass-base glass-specular glass-interactive"
-          aria-label="Avaa opiskeluohjaaja"
+          aria-label={triggerLabel === "Ohjaaja" ? "Avaa opiskeluohjaaja" : triggerLabel}
         >
           <Sparkles size={19} />
-          <span>Ohjaaja</span>
+          <span>{triggerLabel}</span>
         </button>
       </Dialog.Trigger>
 
