@@ -757,11 +757,11 @@ export function PracticeView({
                 {confusionSet && <span>· sekoittuvien käsitteiden erottelu</span>}
                 {activePath?.stage === "pretest" && <span>· ei vaikuta osaamistasoon</span>}
               </div>
-              <p className="practice-rationale mt-3 text-sm text-muted-foreground">
+              <p className="practice-topic mt-2 text-sm text-muted-foreground">
                 {courses.find((item) => item.id === selection.topic.course_id)?.code} · {confusionSet ? "Erottele: " + confusionSet.labels.join(" ja ") : selection.topic.name}
               </p>
               <p className="practice-prompt mt-3">{selection.question.prompt}</p>
-              <p className="mt-2 text-xs text-muted-foreground">
+              <p className="practice-rationale mt-3 text-sm text-muted-foreground">
                 {activePath?.reason ?? "Moottori valitsee kysymystyypin osaamisnäytön, unohtumisriskin ja koevaiheen perusteella."}
                 {" "}Opiskeluaikaa ei käytetä osaamisen mittarina.
               </p>
@@ -831,7 +831,7 @@ export function PracticeView({
             <div className="flex flex-wrap items-center gap-2">
               <button
                 type="button"
-                className={secondary+" practice-utility-button"}
+                className={secondary}
                 onClick={() => setHintLevel((value) => Math.min(activePath?.maxHints ?? 3, value + 1))}
                 disabled={(activePath?.maxHints ?? 3) === 0 || hintLevel >= Math.min(activePath?.maxHints ?? 3, selection.question.hints.length)}
               >
@@ -889,7 +889,7 @@ export function PracticeView({
                 </div>
                 <button
                   type="button"
-                  className={secondary+" practice-utility-button"}
+                  className={secondary}
                   disabled={!answerHasContent(response)}
                   onClick={() => {
                     if (!selection) return;
@@ -960,10 +960,10 @@ export function PracticeView({
                     <CheckCircle2 size={17} />
                     Itsenäisesti
                   </button>
-                  <button disabled={record.isPending || Boolean(feedback)} className={secondary+" practice-utility-button"} onClick={() => void save("hinted")}>
+                  <button disabled={record.isPending || Boolean(feedback)} className={secondary} onClick={() => void save("hinted")}>
                     Vihjeellä / osittain
                   </button>
-                  <button disabled={record.isPending || Boolean(feedback)} className={secondary+" practice-utility-button"} onClick={() => void save("not_yet")}>
+                  <button disabled={record.isPending || Boolean(feedback)} className={secondary} onClick={() => void save("not_yet")}>
                     Ei vielä
                   </button>
                 </div>
