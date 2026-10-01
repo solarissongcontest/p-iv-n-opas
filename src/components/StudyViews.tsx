@@ -143,9 +143,9 @@ function Bar({ value }: { value: number }) {
 }
 type Base = {courses:Course[];topics:Topic[]};
 
-export function TodayView({courses,topics,sessions,exams,plan,tests,attempts,mistakes,capacity,onStart,onGo}:Base&{
+export function TodayView({courses,topics,sessions,exams,plan,tests,attempts,mistakes,capacity,onStart,onGo,onPractice}:Base&{
   sessions:Session[];exams:Exam[];plan:PlanItem[];tests:PracticeTest[];attempts:PracticeAttempt[];mistakes:Mistake[];capacity:CapacityProfile;
-  onStart:(id:string)=>void;onGo:(page:"plan"|"exams"|"practice")=>void
+  onStart:(id:string)=>void;onGo:(page:"plan"|"exams"|"practice")=>void;onPractice?:(courseId:string,topicId?:string)=>void
 }) {
   const now=today();
   const move=useMovePlanItem(),upsert=useUpsertPlanItem();
@@ -202,7 +202,7 @@ export function TodayView({courses,topics,sessions,exams,plan,tests,attempts,mis
       const query=params.toString();
       window.history.replaceState(null,"",window.location.pathname+(query?"?"+query:""));
     }
-    if(action.planItem)onStart(action.planItem.id);else onGo("practice");
+    if(action.planItem)onStart(action.planItem.id);else if(onPractice)onPractice(action.course.id,action.topic?.id);else onGo("practice");
   }
 
   async function makeLight(){
