@@ -230,6 +230,14 @@ Fyysinen iOS VoiceOver ja oikean laitteen notification-renderöinti kuuluvat rel
 
 ## Deployment
 
+Production-build ei aja tietokantamigraatioita. Buildin pitää olla deterministinen ja sivuvaikutukseton, joten schema-muutokset ajetaan erillisenä release-toimintona:
+
+```bash
+POSTGRES_URL=... npm run db:migrate
+```
+
+Migraatioiden pitää onnistua ennen sellaisen koodin julkaisua, joka tarvitsee uuden scheman. Pelkkä Vercel-build ei saa enää epäonnistua tai muuttaa tietokantaa puuttuvan `POSTGRES_URL`-asetuksen vuoksi.
+
 Vercel deployaa automaattisesti vain `main`-haaran. Feature-branchit eivät luo automaattisia Vercel deploymentteja, jotta Hobby-planin deployment quota ei kulu branch-committeihin.
 
 Vercel cron:
