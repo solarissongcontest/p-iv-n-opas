@@ -653,72 +653,84 @@ export function PracticeView({
         className="practice-primary-surface"
         title="Harjoittelutila"
         action={
-          <div className="practice-utility-row flex flex-wrap items-center gap-2">
-            <button
-              type="button"
-              className={secondary+" practice-utility-button"}
-              disabled={generatingQuestions || !courseId}
-              onClick={() => void generateQuestionBatch()}
-              title="Luo valittuun aiheeseen kahdeksan LOPS21-rajattua tehtävää"
-            >
-              <Sparkles size={16} />
-              {generatingQuestions ? "Luodaan…" : "Luo tehtäviä"}
-            </button>
-            <span className="text-xs text-muted-foreground">
-              Pankissa {(questionBank.data ?? []).filter((item) => item.course_id === courseId).length}
-            </span>
-            <button
-              type="button"
-              className={(diagnosticMode ? primary : secondary)+" practice-utility-button"}
-              onClick={() => { setDiagnosticMode((value) => !value); setAttemptIndex(0); }}
-            >
-              {diagnosticMode ? "Lopeta lähtötason kartoitus" : "Kartoita lähtötaso"}
-            </button>
-            <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
-              <Brain size={15} />
-              {diagnosticMode ? `${Math.min(attemptIndex, diagnosticLimit)}/${diagnosticLimit}` : stage.stages[stage.index]?.label ?? "Harjoittelu"}
-            </span>
-          </div>
+          <span className="practice-stage-chip">
+            <Brain size={15} />
+            {diagnosticMode ? `${Math.min(attemptIndex, diagnosticLimit)}/${diagnosticLimit}` : stage.stages[stage.index]?.label ?? "Harjoittelu"}
+          </span>
         }
       >
-        <div className="practice-setup-grid grid gap-3 sm:grid-cols-2">
-          <label className="text-sm font-medium">
-            Kurssi
-            <select
-              className="mt-1 w-full rounded-xl border bg-surface p-3"
-              value={courseId}
-              onChange={(event) => {
-                setCourseId(event.target.value);
-                setTopicId("");
-                setAttemptIndex(0);
-              }}
-            >
-              {courses.map((item) => (
-                <option key={item.id} value={item.id}>
-                  {item.code} · {item.name}
-                </option>
-              ))}
-            </select>
-          </label>
+        <details className="practice-config">
+          <summary className="practice-config-summary">
+            <span className="min-w-0">
+              <b>{course?.code ?? "Valitse kurssi"}{selectedTopic ? ` · ${selectedTopic.name}` : ""}</b>
+              <small>Vaihda kurssia, aihetta tai harjoittelutilaa</small>
+            </span>
+            <span className="practice-config-action">Asetukset</span>
+          </summary>
+          <div className="practice-config-body">
+            <div className="practice-setup-grid grid gap-3 sm:grid-cols-2">
+              <label className="text-sm font-medium">
+                Kurssi
+                <select
+                  className="mt-1 w-full rounded-xl border bg-surface p-3"
+                  value={courseId}
+                  onChange={(event) => {
+                    setCourseId(event.target.value);
+                    setTopicId("");
+                    setAttemptIndex(0);
+                  }}
+                >
+                  {courses.map((item) => (
+                    <option key={item.id} value={item.id}>
+                      {item.code} · {item.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
 
-          <label className="text-sm font-medium">
-            Aloitusaihe
-            <select
-              className="mt-1 w-full rounded-xl border bg-surface p-3"
-              value={topicId}
-              onChange={(event) => {
-                setTopicId(event.target.value);
-                setAttemptIndex(0);
-              }}
-            >
-              {courseTopics.map((candidate) => (
-                <option key={candidate.id} value={candidate.id}>
-                  {candidate.name}
-                </option>
-              ))}
-            </select>
-          </label>
-        </div>
+              <label className="text-sm font-medium">
+                Aloitusaihe
+                <select
+                  className="mt-1 w-full rounded-xl border bg-surface p-3"
+                  value={topicId}
+                  onChange={(event) => {
+                    setTopicId(event.target.value);
+                    setAttemptIndex(0);
+                  }}
+                >
+                  {courseTopics.map((candidate) => (
+                    <option key={candidate.id} value={candidate.id}>
+                      {candidate.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </div>
+
+            <div className="practice-utility-row mt-3 flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                className={secondary+" practice-utility-button"}
+                disabled={generatingQuestions || !courseId}
+                onClick={() => void generateQuestionBatch()}
+                title="Luo valittuun aiheeseen kahdeksan LOPS21-rajattua tehtävää"
+              >
+                <Sparkles size={16} />
+                {generatingQuestions ? "Luodaan…" : "Luo tehtäviä"}
+              </button>
+              <span className="text-xs text-muted-foreground">
+                Pankissa {(questionBank.data ?? []).filter((item) => item.course_id === courseId).length}
+              </span>
+              <button
+                type="button"
+                className={(diagnosticMode ? primary : secondary)+" practice-utility-button"}
+                onClick={() => { setDiagnosticMode((value) => !value); setAttemptIndex(0); }}
+              >
+                {diagnosticMode ? "Lopeta lähtötason kartoitus" : "Kartoita lähtötaso"}
+              </button>
+            </div>
+          </div>
+        </details>
 
         {diagnosticDone ? (
           <div className="mt-5 rounded-2xl bg-accent p-4">
@@ -761,10 +773,13 @@ export function PracticeView({
                 {courses.find((item) => item.id === selection.topic.course_id)?.code} · {confusionSet ? "Erottele: " + confusionSet.labels.join(" ja ") : selection.topic.name}
               </p>
               <p className="practice-prompt mt-3">{selection.question.prompt}</p>
-              <p className="practice-rationale mt-3 text-sm text-muted-foreground">
-                {activePath?.reason ?? "Moottori valitsee kysymystyypin osaamisnäytön, unohtumisriskin ja koevaiheen perusteella."}
-                {" "}Opiskeluaikaa ei käytetä osaamisen mittarina.
-              </p>
+              <details className="practice-rationale mt-3 text-sm text-muted-foreground">
+                <summary className="cursor-pointer font-medium text-foreground">Miksi tämä tehtävä?</summary>
+                <p className="mt-2">
+                  {activePath?.reason ?? "Moottori valitsee kysymystyypin osaamisnäytön, unohtumisriskin ja koevaiheen perusteella."}
+                  {" "}Opiskeluaikaa ei käytetä osaamisen mittarina.
+                </p>
+              </details>
             </div>
 
             {stopDecision?.stopToday && !diagnosticMode && (
@@ -1013,7 +1028,7 @@ export function PracticeView({
         )}
       </Card>
 
-      <div className="grid gap-4 lg:grid-cols-2">
+      <div className="practice-support-grid grid gap-4 lg:grid-cols-2">
         <Card title="Kertaa seuraavaksi">
           {recovery.items.length ? (
             <div className="space-y-2">

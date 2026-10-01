@@ -949,3 +949,481 @@ html.dark .app-mobile-header {
     background: var(--surface) !important;
   }
 }
+
+
+/* ---------- Layout & UX V3: purpose-driven page families ---------- */
+
+.page-desktop-header {
+  width: min(100%, var(--page-max-insights));
+  margin-inline: auto;
+}
+
+.today-view,
+.planner-view,
+.course-detail,
+.practice-view,
+.progress-view,
+.settings-view,
+.exams-view {
+  animation: calm-rise 220ms var(--ease-calm) both;
+}
+
+/* Dashboard: one obvious next action, quiet support */
+.today-primary {
+  padding: clamp(1.25rem, 3vw, 2rem) !important;
+  border-radius: 24px;
+  box-shadow: var(--shadow-raised);
+}
+.today-primary h3 {
+  max-width: 28ch;
+  font-size: clamp(1.65rem, 5vw, 2.35rem);
+  line-height: 1.12;
+}
+.today-context,
+.today-support-section {
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  padding-inline: 0 !important;
+}
+.today-summary-grid {
+  overflow: hidden;
+  border: 1px solid var(--hairline);
+  border-radius: 20px;
+  background: var(--surface);
+}
+.today-summary-grid > .panel {
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+.today-summary-grid > .panel + .panel {
+  border-left: 1px solid var(--hairline);
+}
+
+/* Planner: timeline first, engine details on demand */
+.planner-support {
+  order: 40;
+  border-color: color-mix(in oklab, var(--border) 72%, transparent);
+  background: color-mix(in oklab, var(--surface) 72%, transparent);
+  box-shadow: none;
+}
+.planner-support[open] {
+  background: var(--surface);
+}
+.planner-support summary::-webkit-details-marker,
+.practice-config summary::-webkit-details-marker {
+  display: none;
+}
+.planner-day {
+  position: relative;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  padding: 0.25rem 0 1.25rem 2rem !important;
+}
+.planner-day::before {
+  content: "";
+  position: absolute;
+  top: 1.1rem;
+  bottom: -0.35rem;
+  left: 0.48rem;
+  width: 1px;
+  background: var(--border);
+}
+.planner-day::after {
+  content: "";
+  position: absolute;
+  top: 1.05rem;
+  left: 0.24rem;
+  width: 9px;
+  height: 9px;
+  border: 2px solid var(--background);
+  border-radius: 999px;
+  background: var(--muted-foreground);
+  box-shadow: 0 0 0 1px var(--border);
+}
+.planner-day-today::after {
+  background: var(--primary);
+  box-shadow: 0 0 0 2px color-mix(in oklab, var(--primary) 20%, transparent);
+}
+.planner-day-today > h2 {
+  color: var(--primary);
+}
+.planner-item {
+  border: 1px solid var(--hairline);
+  background: var(--surface) !important;
+  box-shadow: 0 1px 0 color-mix(in oklab, var(--foreground) 4%, transparent);
+}
+
+/* Library/detail: rows, not a wall of cards */
+.course-library-header {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-bottom: 1rem;
+}
+.course-library-rows {
+  overflow: hidden;
+  border-block: 1px solid var(--hairline);
+}
+.course-library-rows .course-row {
+  border: 0;
+  border-bottom: 1px solid var(--hairline);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.course-library-rows .course-row:last-child {
+  border-bottom: 0;
+}
+.course-library-rows .course-row:hover {
+  background: color-mix(in oklab, var(--muted) 60%, transparent);
+  transform: none;
+}
+.course-hero {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.5rem 0 0.75rem;
+}
+.course-overview > .panel {
+  box-shadow: none;
+}
+.course-overview > .panel:first-child {
+  border-color: color-mix(in oklab, var(--primary) 18%, var(--border));
+  background: color-mix(in oklab, var(--accent) 32%, var(--surface));
+}
+
+/* Focus workspace: configuration recedes, question owns the page */
+.practice-primary-surface {
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  padding: 0 !important;
+}
+.practice-primary-surface > div:first-child {
+  margin-bottom: 0.75rem;
+}
+.practice-stage-chip {
+  display: inline-flex;
+  min-height: 34px;
+  align-items: center;
+  gap: 0.4rem;
+  border-radius: 999px;
+  background: var(--muted);
+  padding: 0.35rem 0.7rem;
+  color: var(--muted-foreground);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+.practice-config {
+  margin-bottom: 1.5rem;
+  border: 1px solid var(--hairline);
+  border-radius: 18px;
+  background: color-mix(in oklab, var(--surface) 82%, transparent);
+}
+.practice-config-summary {
+  display: flex;
+  min-height: 64px;
+  cursor: pointer;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.8rem 1rem;
+}
+.practice-config-summary b,
+.practice-config-summary small {
+  display: block;
+}
+.practice-config-summary small {
+  margin-top: 0.15rem;
+  overflow: hidden;
+  color: var(--muted-foreground);
+  font-size: 0.75rem;
+  font-weight: 400;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.practice-config-action {
+  flex: 0 0 auto;
+  color: var(--primary);
+  font-size: 0.8rem;
+  font-weight: 650;
+}
+.practice-config-body {
+  border-top: 1px solid var(--hairline);
+  padding: 1rem;
+}
+.practice-question-flow {
+  max-width: 760px;
+  margin-inline: auto;
+}
+.practice-question-context {
+  padding: 0.25rem 0 0.5rem;
+}
+.practice-prompt {
+  max-width: 36ch;
+  font-size: clamp(1.35rem, 4.5vw, 1.9rem);
+  line-height: 1.35;
+  font-weight: 650;
+}
+.practice-rationale {
+  border-top: 1px solid var(--hairline);
+  padding-top: 0.75rem;
+}
+.practice-self-review {
+  background: transparent !important;
+}
+.practice-support-grid {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--hairline);
+}
+.practice-support-grid > .panel {
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  padding-inline: 0 !important;
+}
+
+/* Insights: narrative first, technical evidence later */
+.progress-summary {
+  order: -30;
+  overflow: hidden;
+  border: 1px solid var(--hairline);
+  border-radius: 20px;
+  background: var(--surface);
+}
+.progress-summary > .panel {
+  min-height: 0;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+.progress-weekly {
+  order: -20;
+  border-color: color-mix(in oklab, var(--primary) 18%, var(--border));
+  background: color-mix(in oklab, var(--accent) 28%, var(--surface));
+}
+.progress-mastery {
+  order: -10;
+}
+.progress-forecast {
+  order: -5;
+}
+
+/* Settings should read as a form, not another dashboard */
+.settings-view > .panel {
+  box-shadow: none;
+}
+
+@media (min-width: 900px) {
+  .course-overview > .panel:first-child {
+    grid-row: span 2;
+  }
+
+  .practice-view {
+    padding-top: 0.25rem;
+  }
+}
+
+@media (max-width: 767px) {
+  .page-content {
+    padding-bottom: 0.5rem;
+  }
+
+  .app-mobile-header {
+    margin-bottom: 1.25rem;
+    border-bottom-color: color-mix(in oklab, var(--border) 30%, transparent);
+  }
+
+  .today-primary {
+    margin-inline: -0.25rem;
+  }
+
+  .today-summary-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .today-summary-grid > .panel + .panel {
+    border-left: 0;
+    border-top: 1px solid var(--hairline);
+  }
+
+  .planner-view > div:first-child {
+    align-items: stretch;
+  }
+
+  .planner-view > div:first-child > div:first-child {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .planner-view > div:first-child > div:last-child {
+    width: 100%;
+  }
+
+  .planner-view > div:first-child > div:last-child > button {
+    flex: 1;
+  }
+
+  .planner-calendar {
+    margin-top: 0.25rem;
+  }
+
+  .course-library-header {
+    align-items: flex-start;
+  }
+
+  .course-library-header > button {
+    min-width: auto;
+    white-space: nowrap;
+  }
+
+  .course-library-rows {
+    margin-inline: calc(var(--page-inline-compact) * -0.25);
+  }
+
+  .course-library-rows .course-row {
+    padding-block: 1rem !important;
+  }
+
+  .course-hero {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .course-hero > button {
+    width: 100%;
+  }
+
+  .course-detail [role="tablist"] {
+    margin-inline: calc(var(--page-inline-compact) * -0.25);
+    border-radius: 14px;
+  }
+
+  .course-overview {
+    gap: 0 !important;
+  }
+
+  .course-overview > .panel {
+    border-right: 0;
+    border-left: 0;
+    border-radius: 0;
+    background: transparent;
+    padding-inline: 0 !important;
+  }
+
+  .course-overview > .panel:first-child {
+    border-top-color: transparent;
+    background: transparent;
+  }
+
+  .practice-primary-surface > div:first-child h2 {
+    font-size: 1rem;
+  }
+
+  .practice-config {
+    margin-inline: -0.25rem;
+  }
+
+  .practice-question-meta {
+    gap: 0.35rem 0.45rem;
+  }
+
+  .practice-question-meta > span:not(:first-child) {
+    color: color-mix(in oklab, var(--muted-foreground) 82%, transparent);
+  }
+
+  .practice-support-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .progress-summary {
+    grid-template-columns: 1fr 1fr !important;
+  }
+
+  .progress-summary > .panel:nth-child(odd) {
+    border-right: 1px solid var(--hairline);
+  }
+
+  .progress-summary > .panel:nth-child(n+3) {
+    border-top: 1px solid var(--hairline);
+  }
+
+  .progress-weekly,
+  .progress-mastery,
+  .progress-forecast {
+    margin-inline: -0.15rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .today-view,
+  .planner-view,
+  .course-detail,
+  .practice-view,
+  .progress-view,
+  .settings-view,
+  .exams-view {
+    animation: none;
+  }
+}
+
+
+/* ---------- V3 secondary views: forms and exams ---------- */
+
+.settings-view {
+  max-width: 860px;
+  margin-inline: auto;
+}
+.settings-view > .panel {
+  border: 0;
+  border-top: 1px solid var(--hairline);
+  border-radius: 0;
+  background: transparent;
+  padding-inline: 0 !important;
+}
+.settings-view > .panel:first-child {
+  border-top: 0;
+  padding-top: 0 !important;
+}
+.settings-view > .panel > div:first-child h2 {
+  font-size: 1.05rem;
+}
+
+.exam-list > button.panel {
+  border: 0;
+  border-bottom: 1px solid var(--hairline);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.exam-list > button.panel:hover {
+  background: color-mix(in oklab, var(--muted) 58%, transparent);
+}
+.exams-view > .panel {
+  box-shadow: none;
+}
+
+.progress-view > .panel:not(.progress-weekly):not(.progress-mastery):not(.progress-forecast),
+.progress-view > div > .panel {
+  box-shadow: none;
+}
+
+@media (max-width: 767px) {
+  .settings-view > .panel {
+    padding-block: 1.25rem !important;
+  }
+
+  .exam-list {
+    margin-inline: -0.25rem;
+  }
+
+  .exam-list > button.panel {
+    padding-inline: 0.25rem !important;
+  }
+}

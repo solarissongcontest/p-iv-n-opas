@@ -316,6 +316,18 @@ function StudyApp({ user }: { user: DeviceUser }) {
   }, []);
   const go = (p: Page) => { setPage(p); localStorage.setItem("opk.last-page", p); setCourseId(null); setMoreOpen(false); };
   const selected = courses.find(c => c.id === courseId);
+  const pageTitle =
+    selected?.code ??
+    (page==="today" ? greeting() : nav.find(n=>n.id===page)?.label ?? "Asetukset");
+  const pageEyebrow =
+    selected?.name ??
+    (page==="today" ? longDate(today()) :
+      page==="plan" ? "Aikataulu ja kuormitus" :
+      page==="courses" ? "Kurssit ja osaaminen" :
+      page==="practice" ? "Yksi tehtävä kerrallaan" :
+      page==="progress" ? "Osaaminen ja seuraavat tarpeet" :
+      page==="exams" ? "Kokeisiin valmistautuminen" :
+      "Sovelluksen asetukset");
   const ke04 = courses.find(c => c.code === "KE04");
   const preferences = preferencesQ.data;
   const capacity = {
@@ -358,17 +370,17 @@ function StudyApp({ user }: { user: DeviceUser }) {
       <div className="mt-auto space-y-1"><button aria-label="Haku" className="flex min-h-11 w-full items-center gap-3 rounded-xl px-3 hover:bg-muted" onClick={() => setSearch(true)}><Search className="shrink-0" size={19}/><span className="sidebar-label">Haku</span><kbd className="sidebar-label ml-auto text-xs">⌘ K</kbd></button><button aria-label="Asetukset" className="flex min-h-11 w-full items-center gap-3 rounded-xl px-3 hover:bg-muted" onClick={() => go("settings")}><Settings2 className="shrink-0" size={19}/><span className="sidebar-label">Asetukset</span></button></div>
     </LiquidGlass>
     <main id="main-content" tabIndex={-1} className="app-main app-desktop-main px-4">
-      <header className="mb-8 hidden items-center justify-between pt-7 md:flex"><div><p className="text-sm text-muted-foreground">{longDate(today())}</p><h1 className="mt-1 text-3xl font-semibold">{selected?.code ?? (page==="today"?greeting():nav.find(n=>n.id===page)?.label ?? "Asetukset")}</h1></div></header>
-      <header className="app-mobile-header md:hidden">
+      <header className="page-desktop-header mb-8 hidden items-end justify-between pt-7 md:flex"><div><p className="text-sm text-muted-foreground">{pageEyebrow}</p><h1 className="mt-1 text-3xl font-semibold">{pageTitle}</h1></div></header>
+      <LiquidGlass lensing as="header" className="app-mobile-header md:hidden">
         <div className="min-w-0">
-          <p className="truncate text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground">{longDate(today())}</p>
-          <h1 className="mt-0.5 truncate text-[28px] font-semibold leading-tight">{selected?.code ?? (page==="today"?greeting():nav.find(n=>n.id===page)?.label ?? "Asetukset")}</h1>
+          <p className="truncate text-[12px] font-medium text-muted-foreground">{pageEyebrow}</p>
+          <h1 className="mt-0.5 truncate text-[28px] font-semibold leading-tight">{pageTitle}</h1>
         </div>
         <div className="flex gap-1">
-          <button aria-label="Haku" onClick={()=>setSearch(true)} className="app-icon-button"><Search size={20}/></button>
-          <button aria-label="Lisää toimintoja" aria-expanded={moreOpen} onClick={()=>setMoreOpen(v=>!v)} className="app-icon-button"><Ellipsis size={21}/></button>
+          <button aria-label="Haku" onClick={()=>setSearch(true)} className="app-icon-button glass-interactive"><Search size={20}/></button>
+          <button aria-label="Lisää toimintoja" aria-expanded={moreOpen} onClick={()=>setMoreOpen(v=>!v)} className="app-icon-button glass-interactive"><Ellipsis size={21}/></button>
         </div>
-      </header>
+      </LiquidGlass>
       {pending>0 && <p role="status" className="mb-5 rounded-xl bg-accent p-3 text-sm">Tallennettu paikallisesti · {pending} muutosta synkronoidaan yhteyden palattua.</p>}
       {error && <div role="alert" className="panel mb-5 p-4"><p className="font-medium">{pending>0?"Kaikkea ei voitu vielä synkronoida.":"Tietojen lataus tai alustus epäonnistui."}</p>{pending>0&&<p className="mt-1 text-sm text-muted-foreground">Syöttämäsi tiedot ovat tallessa tässä laitteessa ja synkronoidaan yhteyden palattua.</p>}<p className="mt-1 text-sm text-muted-foreground">{String(error)}</p><button className="mt-2 underline" onClick={()=>{setDefaultsReady(false);setDefaultsError(null);void ensureKe04ForCurrentUser().then(()=>Promise.all([coursesQ.refetch(),topicsQ.refetch(),sessionsQ.refetch(),examsQ.refetch(),planQ.refetch(),testsQ.refetch(),attemptsQ.refetch(),mistakesQ.refetch(),preferencesQ.refetch()])).then(()=>setDefaultsReady(true)).catch(err=>{setDefaultsError(err instanceof Error?err.message:"Uudelleenyritys epäonnistui.");setDefaultsReady(true);});}}>Yritä uudelleen</button></div>}
       <section className={`page-content page-content-${page}`} data-page={page}>
