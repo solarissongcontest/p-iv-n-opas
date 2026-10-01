@@ -249,7 +249,7 @@ test("mobile screenshot regressions stay fully Finnish and natural", () => {
     "Harjoittelutila",
     "Kartoita lähtötaso",
     "varatehtävä",
-    "limitettu harjoittelu",
+    "vaihteleva harjoittelu",
     "ei vaikuta osaamistasoon",
   ]) assert.equal(practice.includes(phrase), true, phrase);
 
