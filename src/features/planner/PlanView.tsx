@@ -133,7 +133,7 @@ import {
 
 import { Bar, Panel, button, secondary, type Base } from "@/features/shared/StudyViewPrimitives";
 
-export function PlanView({courses,topics,plan,tests,mistakes,attempts,capacity,onStart,initialMode="viikko",initialAnchor,onPeriodChange}:Base&{plan:PlanItem[];tests:PracticeTest[];mistakes:Mistake[];attempts:PracticeAttempt[];capacity:CapacityProfile;onStart:(id:string)=>void;initialMode?:"päivä"|"viikko"|"kuukausi";initialAnchor?:string;onPeriodChange?:(mode:"päivä"|"viikko"|"kuukausi",anchor:string)=>void}) {
+export function PlanView({courses,topics,plan,tests,mistakes,attempts,capacity,onStart,initialMode="viikko",initialAnchor,onPeriodChange}:Base&{plan:PlanItem[];tests:PracticeTest[];mistakes:Mistake[];attempts:PracticeAttempt[];capacity:CapacityProfile;onStart:(id:string)=>void;initialMode?:("päivä"|"viikko"|"kuukausi") | undefined;initialAnchor?:string | undefined;onPeriodChange?:(mode:"päivä"|"viikko"|"kuukausi",anchor:string)=>void}) {
   const preferences=usePreferences();
   const intentions=useImplementationIntentions();
   const frictionHistory=useFrictionEvents();
