@@ -299,12 +299,12 @@ export function TodayView({courses,topics,sessions,exams,plan,tests,attempts,mis
   </div>;
 }
 
-export function PlanView({courses,topics,plan,tests,mistakes,attempts,capacity,onStart}:Base&{plan:PlanItem[];tests:PracticeTest[];mistakes:Mistake[];attempts:PracticeAttempt[];capacity:CapacityProfile;onStart:(id:string)=>void}) {
+export function PlanView({courses,topics,plan,tests,mistakes,attempts,capacity,onStart,initialMode="viikko",initialAnchor,onPeriodChange}:Base&{plan:PlanItem[];tests:PracticeTest[];mistakes:Mistake[];attempts:PracticeAttempt[];capacity:CapacityProfile;onStart:(id:string)=>void;initialMode?:"päivä"|"viikko"|"kuukausi";initialAnchor?:string;onPeriodChange?:(mode:"päivä"|"viikko"|"kuukausi",anchor:string)=>void}) {
   const preferences=usePreferences();
   const intentions=useImplementationIntentions();
   const frictionHistory=useFrictionEvents();
   const plannerMode=preferences.data?.planner_mode??"assisted";
-  const [mode,setMode]=useState<"päivä"|"viikko"|"kuukausi">("viikko"),[anchor,setAnchor]=useState(today()),[creating,setCreating]=useState(false),[adding,setAdding]=useState(false),[choice,setChoice]=useState(courses[0]?.id??"");
+  const [mode,setMode]=useState<"päivä"|"viikko"|"kuukausi">(initialMode),[anchor,setAnchor]=useState(initialAnchor??today()),[creating,setCreating]=useState(false),[adding,setAdding]=useState(false),[choice,setChoice]=useState(courses[0]?.id??"");
   const [proposal,setProposal]=useState<PlanDraft[]|null>(null),[editingProposal,setEditingProposal]=useState(false);
   const move=useMovePlanItem(),status=usePlanStatus(),generate=useGeneratePlan(),friction=useCreateFrictionEvent();
   const first=mode==="viikko"?startOfWeek(anchor):mode==="kuukausi"?anchor.slice(0,7)+"-01":anchor;
@@ -312,6 +312,11 @@ export function PlanView({courses,topics,plan,tests,mistakes,attempts,capacity,o
   const days=Array.from({length:Math.max(1,diffDays(last,first)+1)},(_,i)=>addDays(first,i));
   const selectedCourse=courses.find(x=>x.id===choice);
   const selectedMode=examMode(selectedCourse?.exam_date??null);
+  useEffect(()=>{setMode(initialMode);},[initialMode]);
+  useEffect(()=>{if(initialAnchor)setAnchor(initialAnchor);},[initialAnchor]);
+  const changePeriod=(nextMode:"päivä"|"viikko"|"kuukausi",nextAnchor:string)=>{
+    setMode(nextMode);setAnchor(nextAnchor);onPeriodChange?.(nextMode,nextAnchor);
+  };
 
   async function shift(p:PlanItem){const date=prompt("Uusi päivä (VVVV-KK-PP)",p.date);if(!date||!/^\d{4}-\d{2}-\d{2}$/.test(date))return;try{await move.mutateAsync({id:p.id,date,from:p.date});toast.success("Tehtävä siirretty.");}catch{toast.error("Siirto epäonnistui.");}}
   async function skipWithReason(p:PlanItem){
@@ -366,7 +371,7 @@ export function PlanView({courses,topics,plan,tests,mistakes,attempts,capacity,o
   }
 
   return <PlannerLayout className="planner-view flex flex-col gap-5">
-    <div className="flex flex-wrap items-center justify-between gap-3"><div className="flex items-center gap-1"><button className={secondary+" !px-3"} aria-label="Edellinen" onClick={()=>setAnchor(addDays(anchor,mode==="päivä"?-1:mode==="viikko"?-7:-30))}><ChevronLeft size={18}/></button><span className="min-w-28 text-center text-sm">{fullDate(first)}{first!==last&&` – ${fullDate(last)}`}</span><button className={secondary+" !px-3"} aria-label="Seuraava" onClick={()=>setAnchor(addDays(anchor,mode==="päivä"?1:mode==="viikko"?7:30))}><ChevronRight size={18}/></button></div><div className="flex gap-1 rounded-xl bg-muted p-1">{(["päivä","viikko","kuukausi"] as const).map(m=><button key={m} aria-pressed={mode===m} onClick={()=>setMode(m)} className={`min-h-10 rounded-lg px-3 capitalize ${mode===m?"bg-surface shadow-sm":""}`}>{m}</button>)}</div></div>
+    <div className="flex flex-wrap items-center justify-between gap-3"><div className="flex items-center gap-1"><button className={secondary+" !px-3"} aria-label="Edellinen" onClick={()=>changePeriod(mode,addDays(anchor,mode==="päivä"?-1:mode==="viikko"?-7:-30))}><ChevronLeft size={18}/></button><span className="min-w-28 text-center text-sm">{fullDate(first)}{first!==last&&` – ${fullDate(last)}`}</span><button className={secondary+" !px-3"} aria-label="Seuraava" onClick={()=>changePeriod(mode,addDays(anchor,mode==="päivä"?1:mode==="viikko"?7:30))}><ChevronRight size={18}/></button></div><div className="flex gap-1 rounded-xl bg-muted p-1">{(["päivä","viikko","kuukausi"] as const).map(m=><button key={m} aria-pressed={mode===m} onClick={()=>changePeriod(m,anchor)} className={`min-h-10 rounded-lg px-3 capitalize ${mode===m?"bg-surface shadow-sm":""}`}>{m}</button>)}</div></div>
     <div className="flex flex-wrap gap-2"><button className={secondary} onClick={()=>setCreating(v=>!v)}><Plus size={17}/>Luo suunnitelma</button><button className={secondary} onClick={()=>setAdding(true)}>Lisää tehtävä</button></div>
     <details className="planner-support panel p-4 sm:p-5">
       <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 font-semibold">
