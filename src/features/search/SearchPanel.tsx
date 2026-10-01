@@ -1,29 +1,7 @@
-import { useEffect, useRef, useState } from "react";
-import { Check, FileText, LoaderCircle, Pause, Play, Upload, X } from "lucide-react";
-import { toast } from "sonner";
-import { LiquidGlass } from "@/components/LiquidGlass";
-import { AbittiAnswerEditor, answerHasContent } from "@/components/AbittiAnswerEditor";
-import {
-  useCreateCourse,
-  useLogSession,
-  useCreateExam,
-  useCreateMistake,
-  useCreatePracticeTest,
-  useUpdateCourse,
-  useUpdateTopic,
-  useCreateTopic,
-  usePreferences,
-  useUpsertPlanItem,
-} from "@/lib/data";
-import type { Course, Exam, PlanItem, PracticeAttempt, Session, Topic } from "@/lib/domain";
-import { TARGET_SYSTEMS } from "@/lib/domain";
-import { shortDate, today } from "@/lib/fi";
-import { experimentVariantV4, sessionFatigueV4 } from "@/lib/learning-os-v4";
-import { COURSE_TEMPLATES, parseTopicImport, topicsToImportText } from "@/lib/courseTemplates";
-import { getDeviceAccessToken } from "@/lib/deviceSession";
-import { relationLabel } from "@/lib/ui-fi";
-
-import { Dialog, button, input, secondary } from "@/features/shared/DialogPrimitives";
+import { useRef, useState } from "react";
+import type { Course, Exam, Session, Topic } from "@/lib/domain";
+import { shortDate } from "@/lib/fi";
+import { Dialog, input } from "@/features/shared/DialogPrimitives";
 
 export function SearchPanel({courses,topics,exams,sessions,onClose,onNavigate,onCourse,onTopic,onExam,onLog}:{courses:Course[];topics:Topic[];exams:Exam[];sessions:Session[];onClose:()=>void;onNavigate:(page:string)=>void;onCourse:(id:string)=>void;onTopic:(courseId:string,topicId:string)=>void;onExam:(examId:string)=>void;onLog:()=>void}) {
  const [q,setQ]=useState("");
