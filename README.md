@@ -205,7 +205,7 @@ Jokaiselle `main`-pushille:
 
 Production URL voidaan asettaa repository variableen `PRODUCTION_BASE_URL`. Muuten workflow käyttää Vercel-projektin oletusosoitetta `https://opiskelupaivakirja.vercel.app`.
 
-Workflow voidaan käynnistää myös käsin, jolloin voidaan lisäksi lähettää yksi oikea Web Push -testi aktiivisiin laitteisiin.
+Final Release Gate voidaan käynnistää myös käsin tiettyä production-URL:ia vasten. Oikean Web Push -viestin lähettämiseen on erillinen **Physical Push Delivery Check** -workflow, jotta automaattinen release-testi ei lähetä käyttäjän laitteille yllätysilmotuksia.
 
 ## Saavutettavuus
 
