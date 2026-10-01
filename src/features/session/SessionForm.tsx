@@ -25,7 +25,7 @@ import { relationLabel } from "@/lib/ui-fi";
 
 import { Dialog, button, input, secondary } from "@/features/shared/DialogPrimitives";
 
-export function SessionForm({item,courses,topics,sessions=[],attempts=[],onClose}:{item:PlanItem|null;courses:Course[];topics:Topic[];sessions?:Session[];attempts?:PracticeAttempt[];onClose:()=>void}) {
+export function SessionForm({item,courses,topics,sessions=[],attempts=[],presentation="dialog",onClose}:{item:PlanItem|null;courses:Course[];topics:Topic[];sessions?:Session[];attempts?:PracticeAttempt[];presentation?:"dialog"|"focus";onClose:()=>void}) {
  const initialCourse=item?.course_id??courses[0]?.id??"";
  const initialTopic=item?.topic_id??"";
  const [guided,setGuided]=useState(!!item);
@@ -129,11 +129,11 @@ export function SessionForm({item,courses,topics,sessions=[],attempts=[],onClose
 
  const timerDisplay=`${String(Math.floor(seconds/3600)).padStart(2,"0")}:${String(Math.floor(seconds/60)%60).padStart(2,"0")}:${String(seconds%60).padStart(2,"0")}`;
 
- return <Dialog title={guided?"Ohjattu opiskelukerta":"Kirjaa opiskelu"} onClose={onClose}>
-   <div className="mb-5 flex rounded-xl bg-muted p-1">
+ const body = <>
+   {presentation==="dialog"&&<div className="mb-5 flex rounded-xl bg-muted p-1">
      <button type="button" onClick={()=>changeMode(true)} className={`min-h-10 flex-1 rounded-lg px-3 text-sm ${guided?"bg-surface font-semibold shadow-sm":""}`}>Ohjattu opiskelukerta</button>
      <button type="button" onClick={()=>changeMode(false)} className={`min-h-10 flex-1 rounded-lg px-3 text-sm ${!guided?"bg-surface font-semibold shadow-sm":""}`}>Nopea kirjaus</button>
-   </div>
+   </div>}
 
    {!guided?<form onSubmit={submitManual} className="space-y-4">
      <div className="grid gap-3 sm:grid-cols-2"><label className="text-sm font-medium">Kurssi<select className={input} value={courseId} onChange={e=>{setCourseId(e.target.value);setTopicId("");}}>{courses.map(c=><option key={c.id} value={c.id}>{c.code} · {c.name}</option>)}</select></label><label className="text-sm font-medium">Aihe<select className={input} value={topicId} onChange={e=>setTopicId(e.target.value)}><option value="">Yleinen opiskelu</option>{topics.filter(t=>t.course_id===courseId).map(t=><option key={t.id} value={t.id}>{t.name}</option>)}</select></label></div>
@@ -170,5 +170,19 @@ export function SessionForm({item,courses,topics,sessions=[],attempts=[],onClose
 
      <div className="flex items-center justify-between gap-3 border-t border-border pt-4">{step>0?<button type="button" className={secondary} onClick={()=>{setRunning(false);setStep(v=>Math.max(0,v-1));}}>Takaisin</button>:<span/>}{step<4&&<button type="button" className={button} disabled={step===0&&!objective.trim()||step===3&&!answerHasContent(retrievalCheck)} onClick={()=>{setRunning(false);setStep(v=>Math.min(4,v+1));}}>Jatka</button>}</div>
    </div>}
- </Dialog>;
+ </>;
+ const title=guided?"Ohjattu opiskelukerta":"Kirjaa opiskelu";
+ if(presentation==="focus"){
+   return <div className="study-session-focus" role="dialog" aria-modal="true" aria-label={title}>
+     <header className="study-session-focus-header">
+       <div className="min-w-0">
+         <p className="text-xs font-semibold uppercase tracking-wide text-primary">{course?.code??"Opiskelukerta"}</p>
+         <h1 className="mt-1 truncate text-xl font-semibold">{item?.title||topic?.name||title}</h1>
+       </div>
+       <button type="button" className={secondary+" shrink-0"} onClick={()=>{setRunning(false);onClose();}}><X size={17}/>Lopeta opiskelukerta</button>
+     </header>
+     <main className="study-session-focus-main">{body}</main>
+   </div>;
+ }
+ return <Dialog title={title} onClose={onClose}>{body}</Dialog>;
 }
