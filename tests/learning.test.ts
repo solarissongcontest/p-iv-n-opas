@@ -151,6 +151,27 @@ test("next study date respects capacity and selected study weekdays", () => {
   assert.equal(date, "2026-10-01");
 });
 
+test("selected study weekdays map exactly to Finnish Monday-Sunday numbering", () => {
+  const selected = [2,4,5,6,7]; // ti, to, pe, la, su
+  const cases = [
+    ["2026-10-05", "2026-10-06"], // ma -> ti
+    ["2026-10-06", "2026-10-08"], // ti -> to
+    ["2026-10-08", "2026-10-09"], // to -> pe
+    ["2026-10-09", "2026-10-10"], // pe -> la
+    ["2026-10-10", "2026-10-11"], // la -> su
+    ["2026-10-11", "2026-10-13"], // su -> ti, maanantai ei kuulu joukkoon
+  ] as const;
+
+  for (const [fromISO, expected] of cases) {
+    assert.equal(findNextStudyDate({
+      plan: [],
+      fromISO,
+      studyWeekdays: selected,
+      minutes: 30,
+    }), expected);
+  }
+});
+
 test("today task rationale is transparent without pretending to know a grade", () => {
   const course = {
     id: "11111111-1111-4111-8111-111111111111",
