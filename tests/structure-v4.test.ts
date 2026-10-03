@@ -246,6 +246,14 @@ test("AI coach keeps provider diagnostics out of the normal student UI", () => {
   assert.equal(coach.includes("Gemini hylkäsi yhteyspyynnön"), false);
 });
 
+test("failed course loading never masquerades as a genuinely empty account", () => {
+  const app = read("src/app/StudyApp.tsx");
+  assert.match(app, /const coursesUnavailable =/);
+  assert.match(app, /Kurssitietoja ei saatu näkyviin/);
+  assert.match(app, /Tämä ei tarkoita, että kurssisi olisivat kadonneet/);
+  assert.ok(app.indexOf("coursesUnavailable ?") < app.indexOf("courses.length===0 ?"));
+});
+
 test("raw backend errors never render in the normal app shell", () => {
   const app = read("src/app/StudyApp.tsx");
   assert.equal(app.includes("{String(error)}"), false);
