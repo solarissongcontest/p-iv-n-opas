@@ -254,7 +254,9 @@ Vercel cron:
 
 ## Tietokantamigraatioiden julkaisu
 
-Tuotantotietokannan migraatiot eivät kuulu tavalliseen Vercel-buildiin. Ne ajetaan erillisestä GitHub Actions -workflow’sta **Production Database Migrations**.
+Nykyinen Opintopäiväkirjan release ei vaadi tuotantotietokannan schema-muutosta. Plannerin monilaitekonfliktit estetään sovellustasolla vertaamalla alkuperäistä päivää, statusta ja minuuttimäärää ennen päivitystä, joten aiemmin suunniteltu `plan_items.updated_at`-triggeri poistettiin tarpeettomana.
+
+Jos tulevaisuudessa tarvitaan oikea schema-migraatio, tuotantotietokannan migraatiot eivät kuulu tavalliseen Vercel-buildiin. Ne ajetaan erillisestä GitHub Actions -workflow’sta **Production Database Migrations**.
 
 Turvallinen järjestys:
 
