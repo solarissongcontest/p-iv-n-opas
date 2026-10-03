@@ -14,6 +14,7 @@ on:
 
 permissions:
   contents: read
+  statuses: read
 
 jobs:
   code-quality:
@@ -74,15 +75,24 @@ jobs:
         env:
           BASE_URL: ${{ steps.resolve.outputs.base_url }}
           EXPECTED_SHA: ${{ github.sha }}
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
         run: |
           for attempt in $(seq 1 60); do
+            STATUS_BODY=$(curl --silent --show-error --fail               -H "Authorization: Bearer $GH_TOKEN"               -H "Accept: application/vnd.github+json"               "https://api.github.com/repos/$REPOSITORY/commits/$EXPECTED_SHA/status" || true)
+            VERCEL_STATE=$(printf '%s' "$STATUS_BODY" | python3 -c "import json,sys; d=json.load(sys.stdin); print(next((s.get('state','') for s in d.get('statuses',[]) if s.get('context')=='Vercel'),''))" 2>/dev/null || true)
+            if [ "$VERCEL_STATE" = "failure" ] || [ "$VERCEL_STATE" = "error" ]; then
+              echo "::error::Vercel deployment status is $VERCEL_STATE for $EXPECTED_SHA. Failing immediately instead of polling stale production."
+              exit 1
+            fi
+
             BODY=$(curl --silent --show-error --fail --max-time 10 "$BASE_URL/api/release-info" || true)
             LIVE_SHA=$(printf '%s' "$BODY" | python3 -c "import json,sys; print((json.load(sys.stdin).get('commit') or '').strip())" 2>/dev/null || true)
             if [ "$LIVE_SHA" = "$EXPECTED_SHA" ]; then
               echo "Production is serving $EXPECTED_SHA"
               exit 0
             fi
-            echo "Attempt $attempt/60: live commit is '${LIVE_SHA:-unknown}', waiting for $EXPECTED_SHA"
+            echo "Attempt $attempt/60: Vercel='${VERCEL_STATE:-unknown}', live commit='${LIVE_SHA:-unknown}', waiting for $EXPECTED_SHA"
             sleep 10
           done
           echo "::error::Production never reported the expected commit $EXPECTED_SHA"
