@@ -49,6 +49,30 @@ async function cleanupSession(
   ).catch(() => undefined);
 }
 
+test("installed-style app shell survives a cold offline navigation", async ({ browser }) => {
+  const context = await browser.newContext({ serviceWorkers: "allow" });
+  const page = await context.newPage();
+  try {
+    await enterApp(page);
+    await waitForServiceWorker(page);
+
+    // Prime the exact route after the worker controls the page so its navigation
+    // response and static dependencies are available to the runtime cache.
+    await page.goto("/today", { waitUntil: "domcontentloaded" });
+    await expect(page.getByRole("button", { name: "Tänään", exact: true })).toBeVisible();
+
+    await context.setOffline(true);
+    const offlinePage = await context.newPage();
+    await offlinePage.goto("/today", { waitUntil: "domcontentloaded" });
+    await expect(offlinePage.getByRole("heading", { name: "Tänään" })).toBeVisible({ timeout: 30_000 });
+    await expect(offlinePage.getByText(/Verkkoyhteyttä ei ole|Tallennettu paikallisesti/).first()).toBeVisible({ timeout: 30_000 }).catch(() => undefined);
+    await offlinePage.close();
+  } finally {
+    await context.setOffline(false).catch(() => undefined);
+    await context.close();
+  }
+});
+
 test("v5 offline write survives reload, syncs, and appears on a second device", async ({ browser }) => {
   const contextA = await browser.newContext({ serviceWorkers: "allow" });
   const pageA = await contextA.newPage();
