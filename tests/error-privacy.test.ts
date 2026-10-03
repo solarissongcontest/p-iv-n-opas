@@ -14,6 +14,9 @@ test("error telemetry keeps technical metadata but not arbitrary error messages 
   assert.equal(capture.includes("current.message"), false);
   assert.equal(capture.includes("safeStringify"), false);
   assert.equal(capture.includes("JSON.stringify(value)"), false);
+  assert.match(capture, /return "\[string redacted\]"/);
+  assert.match(capture, /return "\[value redacted\]"/);
+  assert.match(capture, /args\.map\(safeConsoleArg\)/);
 
   assert.match(client, /const safeError = telemetryError\(error\)/);
   assert.match(client, /captureException\?\.\(\s*safeError/);
