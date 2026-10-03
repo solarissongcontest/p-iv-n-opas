@@ -142,6 +142,18 @@ test("destructive actions use in-app confirmation and course archive is undoable
   assert.match(settings, /title="Unohda tämä laite"/);
 });
 
+test("exam detail leads with one concrete next action and keeps phase machinery secondary", () => {
+  const exams = read("src/features/exams/ExamsView.tsx");
+  const app = read("src/app/StudyApp.tsx");
+  assert.match(exams, /Seuraavaksi kannattaa tehdä/);
+  assert.match(exams, /Harjoittele tätä/);
+  assert.match(exams, /Avaa koeharjoitus/);
+  assert.match(exams, /Näytä koemoodin vaiheet/);
+  assert.ok(exams.indexOf('title="Seuraavaksi kannattaa tehdä"') < exams.indexOf('title="Kokeen osaamiskartta"'));
+  assert.match(exams, /onPractice\(selected\.course_id,recommendedTopic\.id\)/);
+  assert.match(app, /onPractice=\{goPractice\}/);
+});
+
 test("Progress and course detail keep advanced analysis secondary", () => {
   const progress = read("src/features/progress/ProgressView.tsx");
   const course = read("src/features/studies/CourseView.tsx");
