@@ -177,7 +177,7 @@ export function PlanView({courses,topics,plan,tests,mistakes,attempts,capacity,o
   async function confirmShift(){
     if(!shiftTarget||!/^\d{4}-\d{2}-\d{2}$/.test(shiftDate))return;
     try{
-      await move.mutateAsync({id:shiftTarget.id,date:shiftDate,from:shiftTarget.date,expected_updated_at:shiftTarget.updated_at});
+      await move.mutateAsync({id:shiftTarget.id,date:shiftDate,from:shiftTarget.date,expected_updated_at:shiftTarget.updated_at,expected_status:shiftTarget.status});
       setShiftTarget(null);
       toast.success("Tehtävä siirretty.");
     }catch(error){toast.error(isPlanSyncConflict(error)?"Tehtävää muutettiin toisella laitteella. Uusin versio ladattiin.":"Siirto epäonnistui.");}
@@ -186,7 +186,7 @@ export function PlanView({courses,topics,plan,tests,mistakes,attempts,capacity,o
   async function confirmSkip(){
     if(!skipTarget)return;
     try{
-      await status.mutateAsync({id:skipTarget.id,status:"skipped",expected_updated_at:skipTarget.updated_at});
+      await status.mutateAsync({id:skipTarget.id,status:"skipped",expected_updated_at:skipTarget.updated_at,expected_status:skipTarget.status});
       void friction.mutateAsync({date:today(),plan_item_id:skipTarget.id,course_id:skipTarget.course_id,reason:skipReason,self_started:false,reminder_used:false}).catch(()=>undefined);
       setSkipTarget(null);
       toast.success("Tehtävä ohitettu. Suunnitelma mukautuu ilman lisävelkaa.");
@@ -266,7 +266,7 @@ export function PlanView({courses,topics,plan,tests,mistakes,attempts,capacity,o
       courses={courses}
       topics={topics}
       onStart={onStart}
-      onMove={(item,date)=>void move.mutateAsync({id:item.id,date,from:item.date,expected_updated_at:item.updated_at}).then(()=>toast.success("Tehtävä siirretty.")).catch(error=>toast.error(isPlanSyncConflict(error)?"Tehtävää muutettiin toisella laitteella. Uusin versio ladattiin.":"Siirto epäonnistui."))}
+      onMove={(item,date)=>void move.mutateAsync({id:item.id,date,from:item.date,expected_updated_at:item.updated_at,expected_status:item.status}).then(()=>toast.success("Tehtävä siirretty.")).catch(error=>toast.error(isPlanSyncConflict(error)?"Tehtävää muutettiin toisella laitteella. Uusin versio ladattiin.":"Siirto epäonnistui."))}
       onShift={requestShift}
       onSkip={requestSkip}
     />
