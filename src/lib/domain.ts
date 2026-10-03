@@ -684,8 +684,10 @@ export function findNextStudyDate(input: {
     if (load + input.minutes <= maxDaily) return date;
   }
 
-  if (!candidates.length) return null;
-  return [...candidates].sort((a, b) => a.load - b.load || a.date.localeCompare(b.date))[0]?.date ?? null;
+  // Capacity is a hard guardrail. If every allowed day is already full,
+  // force the caller to ask the user or re-plan instead of silently overloading
+  // the "least bad" day.
+  return null;
 }
 
 export function todayTaskReason(input: {
@@ -772,7 +774,9 @@ export function generatePlan(opts: {
   for (let i = 0; i < totalDays; i++) {
     const iso = addDays(startISO, i);
     const weekday = ((parseISO(iso).getDay() + 6) % 7) + 1;
-    if (opts.studyWeekdays.includes(weekday)) dates.push(iso);
+    if (!opts.studyWeekdays.includes(weekday)) continue;
+    if (opts.capacity && capacityForDate(opts.capacity, iso) <= 0) continue;
+    dates.push(iso);
   }
   if (dates.length === 0) return [];
 
