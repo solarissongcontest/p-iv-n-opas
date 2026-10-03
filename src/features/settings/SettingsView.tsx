@@ -95,6 +95,7 @@ import { addDays, dateWithWeekday, diffDays, fullDate, minutes, shortDate, start
 import { disableBackgroundPush, enableBackgroundPush, pushIsEnabledOnDevice, pushSupported, sendTestPush } from "@/lib/push";
 import { applyTheme, storedThemeIsDark } from "@/lib/theme";
 import { clearDeviceSession, type DeviceUser } from "@/lib/deviceSession";
+import { clearOfflineSnapshots } from "@/lib/offlineSnapshot";
 import {
   attemptOutcomeLabel,
   attemptTypeLabel,
@@ -299,7 +300,7 @@ export function SettingsView({user:_user,section="study",onSectionChange}:{user:
       <p className="text-sm text-muted-foreground">Tämä poistaa vain tämän selaimen paikallisen kirjautumisen. Kurssit, opiskeluhistoria ja muut palvelimelle synkronoidut tiedot säilyvät.</p>
       <div className="mt-5 flex justify-end gap-2">
         <button className={secondary} onClick={()=>setForgetDeviceOpen(false)}>Peruuta</button>
-        <button className={button} onClick={()=>{clearDeviceSession();location.reload();}}>Unohda laite</button>
+        <button className={button} onClick={()=>void clearOfflineSnapshots().finally(()=>{clearDeviceSession();location.reload();})}>Unohda laite</button>
       </div>
     </Dialog>}
   </SettingsLayout>;
