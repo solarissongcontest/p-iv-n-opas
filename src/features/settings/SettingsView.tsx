@@ -94,6 +94,7 @@ import {
 import { addDays, dateWithWeekday, diffDays, fullDate, minutes, shortDate, startOfWeek, today, weekNumber } from "@/lib/fi";
 import { disableBackgroundPush, enableBackgroundPush, pushIsEnabledOnDevice, pushSupported, sendTestPush } from "@/lib/push";
 import { applyTheme, storedThemeIsDark } from "@/lib/theme";
+import { DEFAULT_STUDY_WEEKDAYS } from "@/lib/studyDefaults";
 import { clearDeviceSession, type DeviceUser } from "@/lib/deviceSession";
 import { clearOfflineSnapshots } from "@/lib/offlineSnapshot";
 import {
@@ -164,7 +165,7 @@ export function SettingsView({user:_user,section="study",onSectionChange}:{user:
   },[]);
   useEffect(()=>{
     if(!prefs)return;
-    setStudyWeekdaysDraft((prefs.study_weekdays?.length?prefs.study_weekdays:[1,2,3,4,5]).slice().sort((a,b)=>a-b));
+    setStudyWeekdaysDraft((prefs.study_weekdays?.length?prefs.study_weekdays:[...DEFAULT_STUDY_WEEKDAYS]).slice().sort((a,b)=>a-b));
     setWeekdayMinCapacity(prefs.weekday_capacity_min_minutes??30);
     setWeekdayCapacity(prefs.weekday_capacity_minutes??60);
     setWeekendMinCapacity(prefs.weekend_capacity_min_minutes??60);
@@ -194,7 +195,7 @@ export function SettingsView({user:_user,section="study",onSectionChange}:{user:
 
   function toggleWeekday(day:number){
     setStudyWeekdaysDraft(current=>{
-      const base=current.length?current:[1,2,3,4,5];
+      const base=current.length?current:[...DEFAULT_STUDY_WEEKDAYS];
       const selected=base.includes(day);
       if(selected&&base.length===1){toast.error("Valitse vähintään yksi opiskelupäivä.");return base;}
       return (selected?base.filter(x=>x!==day):[...base,day]).sort((a,b)=>a-b);
@@ -243,7 +244,7 @@ export function SettingsView({user:_user,section="study",onSectionChange}:{user:
 
     <Panel className="settings-study-only" title="Opiskelurytmi ja kapasiteetti">
       <p className="mb-3 text-sm text-muted-foreground">Suunnittelutoiminto käyttää näitä rajoina. Väliin jäänyttä työmäärää ei työnnetä seuraavan päivän kapasiteetin yli.</p>
-      <div className="flex flex-wrap gap-2">{weekdayOptions.map(([day,label])=>{const active=(studyWeekdaysDraft.length?studyWeekdaysDraft:(prefs?.study_weekdays??[1,2,3,4,5])).includes(day);return <button key={day} type="button" aria-pressed={active} onClick={()=>toggleWeekday(day)} className={`grid size-11 place-items-center rounded-xl border text-sm font-semibold ${active?"border-primary bg-accent text-primary":"border-border bg-surface"}`}>{label}</button>;})}</div>
+      <div className="flex flex-wrap gap-2">{weekdayOptions.map(([day,label])=>{const active=(studyWeekdaysDraft.length?studyWeekdaysDraft:(prefs?.study_weekdays??[...DEFAULT_STUDY_WEEKDAYS])).includes(day);return <button key={day} type="button" aria-pressed={active} onClick={()=>toggleWeekday(day)} className={`grid size-11 place-items-center rounded-xl border text-sm font-semibold ${active?"border-primary bg-accent text-primary":"border-border bg-surface"}`}>{label}</button>;})}</div>
       <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4"><label className="text-sm font-medium">Arjen vähimmäisaika<input type="number" min="0" max="360" step="10" className="mt-1 w-full rounded-xl border bg-surface px-3 py-2.5" value={weekdayMinCapacity} onChange={e=>setWeekdayMinCapacity(Number(e.target.value))}/></label><label className="text-sm font-medium">Arjen enimmäisaika<input type="number" min="15" max="360" step="10" className="mt-1 w-full rounded-xl border bg-surface px-3 py-2.5" value={weekdayCapacity} onChange={e=>setWeekdayCapacity(Number(e.target.value))}/></label><label className="text-sm font-medium">Viikonlopun vähimmäisaika<input type="number" min="0" max="480" step="10" className="mt-1 w-full rounded-xl border bg-surface px-3 py-2.5" value={weekendMinCapacity} onChange={e=>setWeekendMinCapacity(Number(e.target.value))}/></label><label className="text-sm font-medium">Viikonlopun enimmäisaika<input type="number" min="15" max="480" step="10" className="mt-1 w-full rounded-xl border bg-surface px-3 py-2.5" value={weekendCapacity} onChange={e=>setWeekendCapacity(Number(e.target.value))}/></label></div>
       <p className="mt-2 text-xs text-muted-foreground">Esimerkiksi arki 30–60 min tarkoittaa: suunnittelutoiminto voi tehdä kevyen 30 min päivän, mutta ei täytä päivää yli 60 minuutin.</p>
       <div className="mt-4 flex flex-wrap items-center gap-3">
