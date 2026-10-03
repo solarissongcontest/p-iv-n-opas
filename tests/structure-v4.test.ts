@@ -128,6 +128,16 @@ test("course Continue opens the next planned item before falling back to manual 
   assert.match(course, />Aloita seuraava<\/button>/);
 });
 
+test("destructive actions use in-app confirmation and course archive is undoable", () => {
+  const course = read("src/features/studies/CourseView.tsx");
+  const settings = read("src/features/settings/SettingsView.tsx");
+  assert.equal(course.includes("window.confirm"), false);
+  assert.equal(settings.includes("window.confirm"), false);
+  assert.match(course, /title="Arkistoi kurssi"/);
+  assert.match(course, /label:"Kumoa"/);
+  assert.match(settings, /title="Unohda tämä laite"/);
+});
+
 test("Progress and course detail keep advanced analysis secondary", () => {
   const progress = read("src/features/progress/ProgressView.tsx");
   const course = read("src/features/studies/CourseView.tsx");
