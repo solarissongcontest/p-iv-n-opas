@@ -88,34 +88,59 @@ export async function runOrQueue<T>(op: string, payload: unknown): Promise<T | "
 
 let flushing = false;
 
-export async function flushQueue(): Promise<number> {
-  if (flushing) return 0;
+export type SyncResult = {
+  synced: number;
+  conflicts: number;
+  discarded: number;
+};
+
+function isConflict(error: unknown) {
+  return error instanceof Error && error.message.startsWith("SYNC_CONFLICT:");
+}
+
+export async function flushQueue(): Promise<SyncResult> {
+  if (flushing) return { synced: 0, conflicts: 0, discarded: 0 };
   flushing = true;
-  let done = 0;
+  let synced = 0;
+  let conflicts = 0;
+  let discarded = 0;
   try {
     let items = read();
     for (const item of [...items]) {
       const fn = handlers.get(item.op);
-      if (!fn) continue;
+      if (!fn) {
+        items = read().filter((i) => i.id !== item.id);
+        write(items);
+        discarded += 1;
+        continue;
+      }
       try {
         await fn(item.payload, item.id);
         items = read().filter((i) => i.id !== item.id);
         write(items);
-        done += 1;
-      } catch {
+        synced += 1;
+      } catch (error) {
+        if (isConflict(error)) {
+          items = read().filter((i) => i.id !== item.id);
+          write(items);
+          conflicts += 1;
+          continue;
+        }
         break;
       }
     }
   } finally {
     flushing = false;
   }
-  return done;
+  return { synced, conflicts, discarded };
 }
 
-export function startSyncWatcher(onSynced: (count: number) => void) {
+export function startSyncWatcher(onSynced: (result: SyncResult) => void) {
   if (typeof window === "undefined") return () => {};
   const handler = () => {
-    void flushQueue().then((n) => n > 0 && onSynced(n));
+    void flushQueue().then((result) => {
+      if (result.synced > 0 || result.conflicts > 0 || result.discarded > 0) onSynced(result);
+    });
   };
   window.addEventListener("online", handler);
   const timer = window.setInterval(handler, 30000);
