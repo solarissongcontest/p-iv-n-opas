@@ -231,10 +231,11 @@ function StudyApp({ user, initialPage, courseCode, courseTab, examId, progressSe
   const busy = !defaultsReady || allQueries.some(q => q.isPending);
   const queryError = allQueries.find(q => q.error)?.error;
   const error = defaultsError ?? (queryError instanceof Error ? queryError.message : queryError ? String(queryError) : null);
+  const online = typeof navigator === "undefined" ? true : navigator.onLine;
   const userFacingError = error
     ? pending > 0
       ? "Kaikkea ei voitu vielä synkronoida. Syöttämäsi tiedot ovat tallessa tällä laitteella."
-      : navigator.onLine
+      : online
         ? "Tietoja ei saatu ladattua. Yritä uudelleen."
         : "Verkkoyhteyttä ei ole. Näytetään se, mikä on tällä laitteella käytettävissä."
     : null;
