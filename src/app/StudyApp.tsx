@@ -14,6 +14,7 @@ import type { SettingsSection } from "@/features/settings/SettingsView";
 import { Onboarding } from "@/components/Onboarding";
 import { pendingCount, setOfflineOwner, startSyncWatcher, subscribePending } from "@/lib/offline";
 import { applyTheme, storedThemeIsDark } from "@/lib/theme";
+import { DEFAULT_STUDY_WEEKDAYS } from "@/lib/studyDefaults";
 import {
   type DeviceUser,
   getDeviceOwnerId,
@@ -495,7 +496,7 @@ function StudyApp({ user, initialPage, courseCode, courseTab, examId, progressSe
   const ke04 = courses.find(c => c.code === "KE04");
   const preferences = preferencesQ.data;
   const capacity = {
-    studyWeekdays: preferences?.study_weekdays ?? [1,2,3,4,5],
+    studyWeekdays: preferences?.study_weekdays ?? [...DEFAULT_STUDY_WEEKDAYS],
     weekdayMinMinutes: preferences?.weekday_capacity_min_minutes ?? 30,
     weekdayMinutes: preferences?.weekday_capacity_minutes ?? 60,
     weekendMinMinutes: preferences?.weekend_capacity_min_minutes ?? 60,
@@ -552,7 +553,7 @@ function StudyApp({ user, initialPage, courseCode, courseTab, examId, progressSe
       <AICoach
         data={{ courses, topics, sessions, exams, plan, mistakes: mistakesQ.data ?? [] }}
         selectedCourseId={courseId}
-        weekdays={preferences?.study_weekdays ?? [1, 2, 3, 4, 5]}
+        weekdays={preferences?.study_weekdays ?? [...DEFAULT_STUDY_WEEKDAYS]}
         triggerLabel={coachTriggerLabel(page)}
         onLog={() => setEntry("manual")}
         onPractice={() => go("practice")}
@@ -631,6 +632,7 @@ function StudyApp({ user, initialPage, courseCode, courseTab, examId, progressSe
           mistakes={mistakesQ.data??[]}
           sessions={sessions}
           plan={plan}
+          capacity={capacity}
           onCourse={goCourse}
           onPractice={goPractice}
           initialExamId={examId}
