@@ -80,6 +80,31 @@ test("installed-style app shell survives a cold offline navigation", async ({ br
   }
 });
 
+test("expired device token does not lock a trusted device out of offline study data", async ({ browser }) => {
+  const context = await browser.newContext({ serviceWorkers: "allow" });
+  const page = await context.newPage();
+  try {
+    await enterApp(page);
+    await waitForServiceWorker(page);
+    await page.goto("/today", { waitUntil: "domcontentloaded" });
+    await expect(page.getByRole("heading", { name: "Tänään" })).toBeVisible();
+
+    await page.evaluate(() => {
+      localStorage.setItem("opk.device-token-expires", "0");
+    });
+    await context.setOffline(true);
+
+    const offlinePage = await context.newPage();
+    await offlinePage.goto("/today", { waitUntil: "domcontentloaded" });
+    await expect(offlinePage.getByRole("heading", { name: "Tänään" })).toBeVisible({ timeout: 30_000 });
+    await expect(offlinePage.getByLabel("Käyttäjänimi")).toBeHidden();
+    await offlinePage.close();
+  } finally {
+    await context.setOffline(false).catch(() => undefined);
+    await context.close();
+  }
+});
+
 test("a stale second device cannot overwrite a newer planner edit", async ({ browser }) => {
   const contextA = await browser.newContext({ serviceWorkers: "allow" });
   const contextB = await browser.newContext({ serviceWorkers: "allow" });
