@@ -244,7 +244,7 @@ test("PWA worker registers for every user and updates only after explicit approv
   const sw = read("public/sw.js");
   const shell = read("src/styles/shell.css");
   assert.match(root, /<PwaUpdatePrompt \/>/);
-  assert.match(prompt, /serviceWorker[\\s\\S]*\\.register\("\/sw\.js"/);
+  assert.match(prompt, /serviceWorker[\s\S]*\.register\("\/sw\.js"/);
   assert.match(prompt, /Päivitä nyt/);
   assert.match(prompt, /SKIP_WAITING/);
   assert.match(sw, /event\.data\?\.type === "SKIP_WAITING"/);
