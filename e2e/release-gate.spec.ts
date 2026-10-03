@@ -15,6 +15,20 @@ const ROUTES = [
   "/settings/app",
 ];
 
+async function expectNoBlockingAxe(page: import("@playwright/test").Page, label: string) {
+  const results = await new AxeBuilder({ page })
+    .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"])
+    .analyze();
+  const blocking = results.violations.filter(
+    (violation) => violation.impact === "serious" || violation.impact === "critical",
+  );
+  expect(
+    blocking,
+    label + " sisältää vakavia saavutettavuusvirheitä: " +
+      blocking.map((violation) => violation.id + ": " + violation.help).join("; "),
+  ).toEqual([]);
+}
+
 test.describe("Final release gate", () => {
   test("primary routes load, stay keyboard reachable and have no serious WCAG violations", async ({ page }) => {
     await enterApp(page);
@@ -24,18 +38,7 @@ test.describe("Final release gate", () => {
       await expect(page.locator("#main-content")).toBeVisible();
       await expectNoHorizontalOverflow(page);
 
-      const results = await new AxeBuilder({ page })
-        .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"])
-        .analyze();
-
-      const blocking = results.violations.filter(
-        (violation) => violation.impact === "serious" || violation.impact === "critical",
-      );
-      expect(
-        blocking,
-        route + " sisältää vakavia saavutettavuusvirheitä: " +
-          blocking.map((violation) => violation.id + ": " + violation.help).join("; "),
-      ).toEqual([]);
+      await expectNoBlockingAxe(page, route);
 
       await page.keyboard.press("Tab");
       const focusVisible = await page.evaluate(() => {
@@ -44,6 +47,37 @@ test.describe("Final release gate", () => {
       });
       expect(focusVisible).toBe(true);
     }
+  });
+
+  test("active Practice and modal workspaces stay accessible and distraction free", async ({ page }) => {
+    await enterApp(page);
+
+    await page.goto("/practice", { waitUntil: "domcontentloaded" });
+    await page.getByRole("button", { name: "Aloita harjoittelu" }).click();
+    await expect(page.locator(".practice-session-active")).toBeVisible();
+    await expect(page.locator(".desktop-sidebar")).toBeHidden();
+    await expectNoBlockingAxe(page, "aktiivinen harjoittelu");
+
+    await page.goto("/today", { waitUntil: "domcontentloaded" });
+    await page.getByRole("button", { name: "Kirjaa opiskelu" }).click();
+    await expect(page.getByRole("dialog")).toBeVisible();
+    await expectNoBlockingAxe(page, "opiskelukerran dialogi");
+    await page.getByRole("button", { name: "Sulje" }).click();
+  });
+
+  test("Today becomes usable within a bounded production navigation budget", async ({ page }) => {
+    const started = Date.now();
+    await enterApp(page);
+    await page.goto("/today", { waitUntil: "domcontentloaded" });
+    await expect(page.locator("#main-content")).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByText("Seuraavaksi")).toBeVisible({ timeout: 10_000 });
+    expect(Date.now() - started).toBeLessThan(15_000);
+
+    const timing = await page.evaluate(() => {
+      const nav = performance.getEntriesByType("navigation")[0] as PerformanceNavigationTiming | undefined;
+      return nav ? nav.domContentLoadedEventEnd - nav.startTime : null;
+    });
+    if (timing !== null) expect(timing).toBeLessThan(10_000);
   });
 
   test("production release identity is available and uncached", async ({ request, baseURL }) => {
@@ -62,7 +96,7 @@ test.describe("Final release gate", () => {
     const trigger = page.getByRole("button", { name: /Miksi tämä\?|Ohjaaja|Vihje|Selitä/ }).first();
     await trigger.click();
 
-    await expect(page.getByText(/Gemini-yhteys määritetty|Gemini käytössä/)).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByText(/Tekoälyohjaus saatavilla|Tekoälyohjaus käytössä/)).toBeVisible({ timeout: 20_000 });
 
     const courseId = await page.getByLabel("Kurssi").inputValue();
     expect(courseId).not.toBe("");
