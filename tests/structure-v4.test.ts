@@ -105,6 +105,15 @@ test("styles are layered and responsive page families remain explicit", () => {
 });
 
 
+test("settings keep the learning engine behind advanced disclosure", () => {
+  const settings = read("src/features/settings/SettingsView.tsx");
+  assert.match(settings, /title="Suunnittelutapa"/);
+  assert.match(settings, /Sovellus ehdottaa, minä hyväksyn/);
+  assert.match(settings, /Lisäasetukset · oppimismoottori/);
+  assert.match(settings, /settings-notifications-only" title="Hiljaiset tunnit"/);
+  assert.match(settings, /settings-notifications-only" title="Taustamuistutukset"/);
+});
+
 test("Today keeps one obvious next action and hides load controls behind disclosure", () => {
   const today = read("src/features/today/TodayView.tsx");
   assert.match(today, /title="Seuraavaksi"/);
