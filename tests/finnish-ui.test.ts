@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 
 const files = [
   "../src/features/practice/PracticeView.tsx",
@@ -281,4 +281,56 @@ test("mobile screenshot regressions stay fully Finnish and natural", () => {
   ]) {
     assert.equal((relations+practice+mistakes+exam).includes(awkward), false, awkward);
   }
+});
+
+
+test("document and install metadata stay explicitly Finnish", () => {
+  const root = readFileSync(new URL("../src/routes/__root.tsx", import.meta.url), "utf8");
+  const manifest = JSON.parse(
+    readFileSync(new URL("../public/manifest.webmanifest", import.meta.url), "utf8"),
+  ) as { lang?: string; name?: string; description?: string };
+
+  assert.match(root, /<html lang="fi">/);
+  assert.equal(manifest.lang, "fi");
+  assert.equal(manifest.name, "Opintopäiväkirja");
+  assert.match(manifest.description ?? "", /opisk/i);
+});
+
+test("static visible UI copy does not reintroduce English developer vocabulary", () => {
+  const roots = [
+    new URL("../src/components/", import.meta.url),
+    new URL("../src/features/", import.meta.url),
+    new URL("../src/app/", import.meta.url),
+    new URL("../src/routes/", import.meta.url),
+  ];
+  const forbidden =
+    /\b(?:Preview|Practice|Diagnostic|Knowledge|Coach|Mastery|Retrieval|Retention|Forecast|Fallback|Autopilot|Assisted|Manual|Extra|Secure|Strong|Developing|Session|Learning)\b/i;
+  const failures: string[] = [];
+
+  const visit = (directory: URL) => {
+    for (const entry of readdirSync(directory, { withFileTypes: true })) {
+      const url = new URL(entry.name + (entry.isDirectory() ? "/" : ""), directory);
+      if (entry.isDirectory()) {
+        visit(url);
+        continue;
+      }
+      if (!entry.name.endsWith(".tsx")) continue;
+
+      const text = readFileSync(url, "utf8");
+      const visible = [...text.matchAll(/>([^<>{}]+)</g)]
+        .map((match) => match[1]!.replace(/\s+/g, " ").trim())
+        .filter((copy) => Boolean(copy) && !/[=]{2,}|=>/.test(copy));
+      const props = [...text.matchAll(/\b(?:title|placeholder|aria-label|label)=["']([^"']+)["']/g)]
+        .map((match) => match[1]!.trim());
+      const toasts = [...text.matchAll(/toast\.(?:success|error|info)\(\s*["'`]([^"'`]+)["'`]/g)]
+        .map((match) => match[1]!.trim());
+
+      for (const copy of [...visible, ...props, ...toasts]) {
+        if (forbidden.test(copy)) failures.push(entry.name + ": " + copy);
+      }
+    }
+  };
+
+  for (const root of roots) visit(root);
+  assert.deepEqual(failures, []);
 });
