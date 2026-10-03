@@ -76,6 +76,7 @@ import {
   useAdvanceMistake,
   useGeneratePlan,
   useImplementationIntentions,
+  isPlanSyncConflict,
   useMovePlanItem,
   usePlanStatus,
   usePreferences,
@@ -198,9 +199,9 @@ export function TodayView({courses,topics,sessions,exams,plan,tests,attempts,mis
     if(!next)return;
     const light=Math.max(5,next.min_minutes||Math.round(next.target_minutes*0.5));
     try{
-      await upsert.mutateAsync({id:next.id,course_id:next.course_id,date:next.date,target_minutes:light,extra_minutes:0});
+      await upsert.mutateAsync({id:next.id,course_id:next.course_id,date:next.date,target_minutes:light,extra_minutes:0,expected_updated_at:next.updated_at});
       toast.success(`Päivää kevennettiin: tämä tehtävä on nyt ${minutes(light)}.`);
-    }catch{toast.error("Tehtävää ei voitu keventää.");}
+    }catch(error){toast.error(isPlanSyncConflict(error)?"Tehtävää muutettiin toisella laitteella. Uusin versio ladattiin.":"Tehtävää ei voitu keventää.");}
   }
 
   async function cannotToday(){
@@ -216,11 +217,11 @@ export function TodayView({courses,topics,sessions,exams,plan,tests,attempts,mis
       return;
     }
     try{
-      await move.mutateAsync({id:next.id,date,from:next.date});
+      await move.mutateAsync({id:next.id,date,from:next.date,expected_updated_at:next.updated_at});
       setTaskIndex(0);
       void friction.mutateAsync({date:now,plan_item_id:next.id,course_id:next.course_id,reason:frictionReason,self_started:false,reminder_used:false}).catch(()=>undefined);
       toast.success(`Tehtävä siirrettiin päivälle ${fullDate(date)}. Tälle päivälle ei synny lisävelkaa.`);
-    }catch{toast.error("Tehtävää ei voitu siirtää.");}
+    }catch(error){toast.error(isPlanSyncConflict(error)?"Tehtävää muutettiin toisella laitteella. Uusin versio ladattiin.":"Tehtävää ei voitu siirtää.");}
   }
 
   return <ActionDashboardLayout className="today-view flex flex-col gap-5">
