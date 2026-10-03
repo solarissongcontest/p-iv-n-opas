@@ -204,6 +204,29 @@ test("README documents the simplified four-destination mobile navigation", () =>
 });
 
 
+test("production database migrations are manual preview-first and confirmation-gated", () => {
+  const workflow = read(".github/workflows/database-migrate.yml");
+
+  assert.match(workflow, /workflow_dispatch:/);
+  assert.match(workflow, /github\.ref == 'refs\/heads\/main'/);
+  assert.equal(/\n\s*push:/.test(workflow), false);
+  assert.match(workflow, /group: production-database-migrations/);
+  assert.match(workflow, /cancel-in-progress: false/);
+  assert.match(workflow, /POSTGRES_URL: \$\{\{ secrets\.POSTGRES_URL \}\}/);
+  assert.match(workflow, /supabase@2\.117\.0 db push --db-url "\$POSTGRES_URL" --dry-run/);
+  assert.match(workflow, /inputs\.mode == 'apply'/);
+  assert.match(workflow, /CONFIRMATION/);
+  assert.match(workflow, /\[ "\$CONFIRMATION" != "APPLY" \]/);
+  assert.match(workflow, /supabase@2\.117\.0 db push --db-url "\$POSTGRES_URL"/);
+  assert.match(workflow, /supabase@2\.117\.0 migration list --db-url "\$POSTGRES_URL"/);
+  assert.equal(workflow.includes("--include-seed"), false);
+
+  const preview = workflow.indexOf("Preview pending migrations");
+  const confirmation = workflow.indexOf("Validate apply confirmation");
+  const apply = workflow.indexOf("Apply pending migrations");
+  assert.ok(preview >= 0 && preview < confirmation && confirmation < apply);
+});
+
 test("production build is side-effect free and database migration is explicit", () => {
   const pkg = JSON.parse(read("package.json")) as { scripts: Record<string,string> };
   assert.equal(pkg.scripts.build.includes("migrate-db"), false);
