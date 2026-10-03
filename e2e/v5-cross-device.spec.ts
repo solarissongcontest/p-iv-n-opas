@@ -61,11 +61,18 @@ test("installed-style app shell survives a cold offline navigation", async ({ br
     await page.goto("/today", { waitUntil: "domcontentloaded" });
     await expect(page.getByRole("button", { name: "Tänään", exact: true })).toBeVisible();
 
+    const onlineCourseCodes = await page.locator("[data-page='today']").textContent();
+
     await context.setOffline(true);
     const offlinePage = await context.newPage();
     await offlinePage.goto("/today", { waitUntil: "domcontentloaded" });
     await expect(offlinePage.getByRole("heading", { name: "Tänään" })).toBeVisible({ timeout: 30_000 });
     await expect(offlinePage.getByText(/Verkkoyhteyttä ei ole|Tallennettu paikallisesti/).first()).toBeVisible({ timeout: 30_000 }).catch(() => undefined);
+
+    // The cold start must retain actual study context, not merely render an empty shell.
+    if (onlineCourseCodes?.includes("KE04")) {
+      await expect(offlinePage.getByText("KE04").first()).toBeVisible({ timeout: 30_000 });
+    }
     await offlinePage.close();
   } finally {
     await context.setOffline(false).catch(() => undefined);
