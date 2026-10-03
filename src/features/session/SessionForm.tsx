@@ -131,8 +131,8 @@ export function SessionForm({item,courses,topics,sessions=[],attempts=[],present
 
  const body = <>
    {presentation==="dialog"&&<div className="mb-5 flex rounded-xl bg-muted p-1">
-     <button type="button" onClick={()=>changeMode(true)} className={`min-h-10 flex-1 rounded-lg px-3 text-sm ${guided?"bg-surface font-semibold shadow-sm":""}`}>Ohjattu opiskelukerta</button>
-     <button type="button" onClick={()=>changeMode(false)} className={`min-h-10 flex-1 rounded-lg px-3 text-sm ${!guided?"bg-surface font-semibold shadow-sm":""}`}>Nopea kirjaus</button>
+     <button type="button" onClick={()=>changeMode(true)} className={`min-h-11 flex-1 rounded-lg px-3 text-sm ${guided?"bg-surface font-semibold shadow-sm":""}`}>Ohjattu opiskelukerta</button>
+     <button type="button" onClick={()=>changeMode(false)} className={`min-h-11 flex-1 rounded-lg px-3 text-sm ${!guided?"bg-surface font-semibold shadow-sm":""}`}>Nopea kirjaus</button>
    </div>}
 
    {!guided?<form onSubmit={submitManual} className="space-y-4">
