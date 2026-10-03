@@ -1,0 +1,56 @@
+name: Apply Production Database Migrations
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: "Type APPLY to run pending migrations against the production database"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-database-migrations
+  cancel-in-progress: false
+
+jobs:
+  migrate:
+    if: github.event.inputs.confirm == 'APPLY'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      POSTGRES_URL: ${{ secrets.POSTGRES_URL }}
+    steps:
+      - name: Checkout canonical main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Verify production database secret
+        shell: bash
+        run: |
+          if [ -z "$POSTGRES_URL" ]; then
+            echo "::error::POSTGRES_URL GitHub secret is not configured. No migration was attempted."
+            exit 1
+          fi
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install project dependencies
+        run: npm ci
+
+      - name: Verify canonical repository
+        run: node scripts/assert-canonical-repo.mjs
+
+      - name: Apply pending Supabase migrations
+        run: npm run db:migrate
+
+      - name: Record migrated main commit
+        shell: bash
+        run: |
+          echo "Database migrations applied from main commit $(git rev-parse HEAD)"
