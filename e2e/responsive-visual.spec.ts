@@ -17,7 +17,7 @@ for (const viewport of VIEWPORTS) {
     await page.setViewportSize({ width: viewport.width, height: viewport.height });
     await enterApp(page);
 
-    for (const route of ["/today", "/plan", "/studies", "/practice", "/progress"]) {
+    for (const route of ["/today", "/plan", "/studies", "/practice", "/progress", "/exams", "/settings/study"]) {
       await page.goto(route, { waitUntil: "domcontentloaded" });
       await expectNoHorizontalOverflow(page);
       await expect(page.locator("#main-content")).toBeVisible();
