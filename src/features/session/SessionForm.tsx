@@ -29,7 +29,7 @@ export function SessionForm({item,courses,topics,sessions=[],attempts=[],present
  const initialCourse=item?.course_id??courses[0]?.id??"";
  const initialTopic=item?.topic_id??"";
  const [guided,setGuided]=useState(!!item);
- const [step,setStep]=useState(0);
+ const [step,setStep]=useState(item?1:0);
  const [courseId,setCourseId]=useState(initialCourse),[topicId,setTopicId]=useState(initialTopic);
  const [seconds,setSeconds]=useState(0),[running,setRunning]=useState(false);
  const [timerMode,setTimerMode]=useState<"none"|"20"|"30"|"custom">(item?.target_minutes===20?"20":item?.target_minutes===30?"30":"none");
@@ -78,8 +78,22 @@ export function SessionForm({item,courses,topics,sessions=[],attempts=[],present
 
  function changeMode(next:boolean){
    setGuided(next);
-   setStep(0);
+   setStep(next&&item?1:0);
    setRunning(false);
+ }
+
+ function chooseRetrievalResult(value:"independent"|"hinted"|"not_yet"){
+   setRetrievalResult(value);
+   if(value==="independent"){
+     setOutcome("yes");
+     setCompetence(4);
+   }else if(value==="hinted"){
+     setOutcome("partial");
+     setCompetence(3);
+   }else{
+     setOutcome("not_yet");
+     setCompetence(2);
+   }
  }
 
  async function submitManual(e:React.FormEvent){
@@ -99,10 +113,11 @@ export function SessionForm({item,courses,topics,sessions=[],attempts=[],present
  }
 
  async function submitGuided(){
-   if(!courseId||!objective.trim()||!retrievalCheck.trim()||!retrievalResult||!outcome){
-     toast.error("Täytä tavoite, muistista palauttamisen tarkistus ja lopputulos ennen tallennusta.");
+   if(!courseId||!objective.trim()||!retrievalCheck.trim()||!retrievalResult){
+     toast.error("Täytä tavoite, tee muistista palauttamisen tarkistus ja merkitse miten se onnistui.");
      return;
    }
+   const finalOutcome=outcome??(retrievalResult==="independent"?"yes":retrievalResult==="hinted"?"partial":"not_yet");
    const minutesUsed=timerMode==="none"
      ?Math.max(1,actualMinutes)
      :Math.max(1,Math.ceil(seconds/60));
@@ -120,7 +135,7 @@ export function SessionForm({item,courses,topics,sessions=[],attempts=[],present
        retrieval_check:retrievalCheck.trim(),
        retrieval_result:retrievalResult,
        retrieval_confidence:retrievalConfidence,
-       outcome,
+       outcome:finalOutcome,
      });
      toast.success(result==="queued"?"Opiskelukerta tallennettu paikallisesti.":"Opiskelukerta tallennettu.");
      onClose();
@@ -144,7 +159,7 @@ export function SessionForm({item,courses,topics,sessions=[],attempts=[],present
      <details className="rounded-2xl border border-border p-4"><summary className="cursor-pointer text-sm font-medium">Lisätiedot</summary><div className="mt-4 space-y-4"><label className="block text-sm font-medium">Menetelmä<select className={input} value={method} onChange={e=>setMethod(e.target.value)}><option value="tehtävät">Tehtävät</option><option value="aktiivinen palautus">Aktiivinen palautus</option><option value="muistiinpanot">Muistiinpanot</option><option value="lukeminen">Lukeminen</option><option value="harjoituskoe">Harjoituskoe</option><option value="muu">Muu</option></select></label><label className="block text-sm font-medium">Tehtävät<input className={input} value={tasks} onChange={e=>setTasks(e.target.value)}/></label><label className="block text-sm font-medium">Muistiinpano<textarea className={input} rows={3} value={note} onChange={e=>setNote(e.target.value)}/></label></div></details>
      <button type="submit" disabled={log.isPending} className={button+" w-full"}><Check size={18}/>{log.isPending?"Tallennetaan…":"Tallenna"}</button>
    </form>:<div className="space-y-5">
-     <div className="flex items-center gap-2" aria-label="Opiskelukerran vaiheet">{["Tavoite","Muistelu","Harjoittelu","Palautus","Yhteenveto"].map((label,index)=><div key={label} className="flex-1"><div className={`h-1.5 rounded-full ${index<=step?"bg-primary":"bg-muted"}`}/><span className="mt-1 hidden text-[10px] text-muted-foreground sm:block">{label}</span></div>)}</div>
+     {step>0&&<div className="flex items-center gap-2" aria-label="Opiskelukerran vaiheet">{["Muista","Opiskele","Tarkista"].map((label,index)=>{const visibleStep=step<=1?0:step===2?1:2;return <div key={label} className="flex-1"><div className={`h-1.5 rounded-full ${index<=visibleStep?"bg-primary":"bg-muted"}`}/><span className="mt-1 hidden text-[10px] text-muted-foreground sm:block">{label}</span></div>;})}</div>}
 
      {step===0&&<>
        {item&&<div className="rounded-2xl bg-muted/60 p-4"><p className="text-xs font-semibold uppercase tracking-wide text-primary">{course?.code} · {item.target_minutes} min</p><h3 className="mt-1 text-lg font-semibold">{item.title||topic?.name||"Opiskelu"}</h3><p className="mt-1 text-sm text-muted-foreground">{phaseGoal}</p></div>}
@@ -153,19 +168,17 @@ export function SessionForm({item,courses,topics,sessions=[],attempts=[],present
        <div><p className="mb-2 text-sm font-medium">Ajastin</p><div className="grid grid-cols-2 gap-2 sm:grid-cols-4">{([["none","Ei ajastinta"],["20","20 min"],["30","30 min"],["custom","Oma aika"]] as const).map(([value,label])=><button type="button" key={value} aria-pressed={timerMode===value} onClick={()=>setTimerMode(value)} className={timerMode===value?button:secondary}>{label}</button>)}</div>{timerMode==="custom"&&<label className="mt-3 block text-sm font-medium">Oma aika<input type="number" min="5" max="240" className={input} value={customMinutes} onChange={e=>setCustomMinutes(Number(e.target.value))}/></label>}</div>
      </>}
 
-     {step===1&&<div className="space-y-4"><div><p className="text-sm font-medium text-primary">Muistelu alkuun</p><h3 className="mt-1 text-xl font-semibold">Ennen kuin avaat materiaalin</h3><p className="mt-2 text-sm text-muted-foreground">Kirjoita 2–3 asiaa, jotka muistat aiheesta jo nyt. Tyhjäkin kohta on hyödyllinen havainto, ei epäonnistuminen.</p></div><AbittiAnswerEditor autoFocus label="Muistista palautus" value={recall} onChange={setRecall} placeholder="Mitä muistat ilman muistiinpanoja?" minHeight={170}/></div>}
+     {step===1&&<div className="space-y-4"><div><p className="text-sm font-medium text-primary">Muista</p><h3 className="mt-1 text-xl font-semibold">Mitä muistat jo?</h3><p className="mt-2 text-sm text-muted-foreground">Kirjoita muutama asia ilman materiaalia. Täydellistä vastausta ei tarvita.</p></div><AbittiAnswerEditor autoFocus label="Muistista palautus" value={recall} onChange={setRecall} placeholder="Mitä muistat ilman muistiinpanoja?" minHeight={170}/></div>}
 
      {step===2&&<div className="space-y-4"><div><p className="text-sm font-medium text-primary">Opiskele ja harjoittele</p><h3 className="mt-1 text-xl font-semibold">{objective||phaseGoal}</h3><p className="mt-2 text-sm text-muted-foreground">Opiskele, ratkaise tehtäviä ja käytä materiaalia normaalisti. Ajastin on vain apuväline.</p></div>{timerMode!=="none"?<div className="rounded-2xl bg-muted p-5 text-center"><p role="timer" className="text-5xl font-semibold tabular-nums">{timerDisplay}</p><p className="mt-2 text-sm text-muted-foreground">Tavoite {timerMode==="custom"?customMinutes:Number(timerMode)} min{timerReached?" · tavoiteaika täynnä, voit jatkaa":""}</p>{preferences.data?.personal_experiments_enabled&&timerMode==="custom"&&customMinutes===experimentMinutes&&<p className="mt-1 text-xs text-muted-foreground">Oppimiskokeilu · tämän päivän vaihtoehto {experimentMinutes} min</p>}{liveFatigueNudge&&<div className="mt-4 rounded-xl border border-border bg-surface p-3 text-left text-sm"><b>Hyvä kohta tauolle tai muistista palauttamisen tarkistukseen.</b><p className="mt-1 text-muted-foreground">{fatigue.reason}</p>{fatigue.suggestedBreakMinutes>0&&<small className="mt-1 block text-muted-foreground">Ehdotettu tauko noin {fatigue.suggestedBreakMinutes} min.</small>}</div>}<button type="button" className={secondary+" mt-4"} onClick={()=>setRunning(v=>!v)}>{running?<><Pause size={17}/>Tauko</>:<><Play size={17}/>Aloita / jatka</>}</button></div>:<label className="block text-sm font-medium">Todellinen kesto minuutteina<input type="number" min="1" max="240" className={input} value={actualMinutes} onChange={e=>setActualMinutes(Number(e.target.value))}/></label>}<label className="block text-sm font-medium">Mitä teit?<textarea rows={3} className={input} value={did} onChange={e=>setDid(e.target.value)} placeholder="Esim. tehtävät 4.12–4.18"/></label></div>}
 
      {step===3&&<div className="space-y-4"><div><p className="text-sm font-medium text-primary">Muistista palauttamisen tarkistus</p><h3 className="mt-1 text-xl font-semibold">Sulje materiaali</h3><p className="mt-2 text-sm text-muted-foreground">{retrievalPrompt}</p></div><AbittiAnswerEditor autoFocus label="Vastaus muistista" value={retrievalCheck} onChange={setRetrievalCheck} placeholder="Vastaa muistista…" minHeight={170}/><p className="text-xs text-muted-foreground">Älä arvioi vielä omaa varmuuttasi. Tee ensin yritys, sitten merkitse miten se onnistui.</p></div>}
 
-     {step===4&&<div className="space-y-5"><div><p className="text-sm font-medium text-primary">Yhteenveto</p><h3 className="mt-1 text-xl font-semibold">Mitä tästä opiskelukerrasta jäi käteen?</h3></div>
-       <fieldset><legend className="mb-2 text-sm font-medium">Muistista palauttamisen tarkistus onnistui</legend><div className="grid gap-2 sm:grid-cols-3">{([["independent","Itsenäisesti"],["hinted","Vihjeellä"],["not_yet","Ei vielä"]] as const).map(([value,label])=><button type="button" key={value} aria-pressed={retrievalResult===value} onClick={()=>setRetrievalResult(value)} className={retrievalResult===value?button:secondary}>{label}</button>)}</div></fieldset>
-       <fieldset><legend className="mb-2 text-sm font-medium">Kuinka varma olit? <span className="font-normal text-muted-foreground">(oman arvion tarkkuuden seurantaa, ei osaamispisteitä)</span></legend><div className="grid grid-cols-3 gap-2">{[[1,"Epävarma"],[2,"Melko varma"],[3,"Varma"]].map(([value,label])=><button type="button" key={value} aria-pressed={retrievalConfidence===value} onClick={()=>setRetrievalConfidence(Number(value))} className={retrievalConfidence===value?button:secondary}>{label}</button>)}</div></fieldset>
-       <fieldset><legend className="mb-2 text-sm font-medium">Tavoite saavutettu?</legend><div className="grid grid-cols-3 gap-2">{([["yes","Kyllä"],["partial","Osittain"],["not_yet","Ei vielä"]] as const).map(([value,label])=><button type="button" key={value} aria-pressed={outcome===value} onClick={()=>setOutcome(value)} className={outcome===value?button:secondary}>{label}</button>)}</div></fieldset>
-       <fieldset><legend className="mb-2 text-sm font-medium">Oma yleisarvio 1–5 <span className="font-normal text-muted-foreground">(vain oman varmuusarvion osuvuuden seurantaan)</span></legend><div className="flex gap-2">{[1,2,3,4,5].map(n=><button type="button" key={n} aria-pressed={competence===n} onClick={()=>setCompetence(n)} className={`grid size-11 place-items-center rounded-xl border ${competence===n?"border-primary bg-accent font-semibold":"border-border"}`}>{n}</button>)}</div></fieldset>
-       <label className="block text-sm font-medium">Mikä jäi epäselväksi?<textarea rows={2} className={input} value={unclear} onChange={e=>setUnclear(e.target.value)}/></label>
-       <button type="button" disabled={log.isPending||!retrievalResult||!outcome||!answerHasContent(retrievalCheck)} className={button+" w-full"} onClick={()=>void submitGuided()}><Check size={18}/>{log.isPending?"Tallennetaan…":"Lopeta ja tallenna"}</button>
+     {step===4&&<div className="space-y-5"><div><p className="text-sm font-medium text-primary">Tarkista</p><h3 className="mt-1 text-xl font-semibold">Miten meni?</h3><p className="mt-2 text-sm text-muted-foreground">Valitse vain se, miten hyvin sait asian takaisin mieleen ilman materiaalia.</p></div>
+       <fieldset><legend className="mb-2 text-sm font-medium">Muistista palauttaminen</legend><div className="grid gap-2 sm:grid-cols-3">{([["independent","Osasin itse"],["hinted","Vihjeellä"],["not_yet","En vielä"]] as const).map(([value,label])=><button type="button" key={value} aria-pressed={retrievalResult===value} onClick={()=>chooseRetrievalResult(value)} className={retrievalResult===value?button:secondary}>{label}</button>)}</div></fieldset>
+       <label className="block text-sm font-medium">Mikä jäi epäselväksi? <span className="font-normal text-muted-foreground">(valinnainen)</span><textarea rows={2} className={input} value={unclear} onChange={e=>setUnclear(e.target.value)}/></label>
+       <details className="rounded-2xl border border-border p-4"><summary className="min-h-11 cursor-pointer list-none py-2 text-sm font-medium">Lisäarvio</summary><fieldset className="mt-3"><legend className="mb-2 text-sm font-medium">Kuinka varma olit?</legend><div className="grid grid-cols-3 gap-2">{[[1,"Epävarma"],[2,"Melko varma"],[3,"Varma"]].map(([value,label])=><button type="button" key={value} aria-pressed={retrievalConfidence===value} onClick={()=>setRetrievalConfidence(Number(value))} className={retrievalConfidence===value?button:secondary}>{label}</button>)}</div></fieldset></details>
+       <button type="button" disabled={log.isPending||!retrievalResult||!answerHasContent(retrievalCheck)} className={button+" w-full"} onClick={()=>void submitGuided()}><Check size={18}/>{log.isPending?"Tallennetaan…":"Valmis"}</button>
      </div>}
 
      <div className="flex items-center justify-between gap-3 border-t border-border pt-4">{step>0?<button type="button" className={secondary} onClick={()=>{setRunning(false);setStep(v=>Math.max(0,v-1));}}>Takaisin</button>:<span/>}{step<4&&<button type="button" className={button} disabled={step===0&&!objective.trim()||step===3&&!answerHasContent(retrievalCheck)} onClick={()=>{setRunning(false);setStep(v=>Math.min(4,v+1));}}>Jatka</button>}</div>
