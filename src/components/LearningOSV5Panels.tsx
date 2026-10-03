@@ -93,7 +93,7 @@ export function V5PlannerPanel({
     } as const;
   },[plannedItems,moveItemId,moveTargetDate,capacity]);
 
-  return <div className="grid gap-4 lg:grid-cols-2">
+  return <div className="v5-planner-grid">
     <Panel title="Mukautuva kertausbudjetti">
       <div className="grid grid-cols-3 gap-2">
         {[["Minimi",budget.minimumMinutes],["Suositus",budget.recommendedMinutes],["Lisä",budget.extraMinutes]].map(([label,value])=><div key={String(label)} className="rounded-xl bg-muted/50 p-3"><small className="text-muted-foreground">{label}</small><p className="mt-1 text-xl font-semibold">{value} min</p></div>)}
@@ -117,7 +117,7 @@ export function V5PlannerPanel({
 
       <div className="mt-5 rounded-2xl bg-muted/45 p-4">
         <p className="font-semibold">Rakenna oma skenaario</p>
-        <div className="mt-3 grid gap-3 sm:grid-cols-2">
+        <div className="v5-planner-scenario-grid mt-3">
           <label className="text-sm">Minuuttia / päivä
             <input aria-label="Vaihtoehdon minuuttimäärä päivässä" type="number" min="10" max="180" step="5" value={dailyMinutes} onChange={e=>setDailyMinutes(Math.max(10,Math.min(180,Number(e.target.value)||40)))} className="mt-1 min-h-11 w-full rounded-xl border bg-surface px-3"/>
           </label>

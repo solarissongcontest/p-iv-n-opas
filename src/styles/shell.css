@@ -67,7 +67,10 @@
 }
 
 .page-content-today { --page-max-dashboard: 860px; }
-.page-content-plan { width: min(100%, 1040px); }
+.page-content-plan {
+  width: min(100%, 1360px);
+  container-type: inline-size;
+}
 .page-content-courses { width: min(100%, var(--page-max-library)); }
 .page-content-practice { width: min(100%, var(--page-max-focus)); }
 .page-content-progress { width: min(100%, var(--page-max-insights)); }
