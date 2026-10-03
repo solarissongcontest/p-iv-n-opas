@@ -159,10 +159,12 @@ test("planner uses calendar-safe month movement and avoids browser prompts", () 
   assert.match(calendar, /mondayOffset/);
 });
 
-test("final release workflow is valid on push and does not require Gemini", () => {
+test("final release workflow keeps the last known-valid production wait structure", () => {
   const workflow = read(".github/workflows/iphone-e2e.yml");
-  assert.equal(workflow.includes("${{ inputs."), false);
-  assert.match(workflow, /github\.event\.inputs\.base_url/);
+  assert.match(workflow, /INPUT_BASE_URL: \$\{\{ inputs\.base_url \}\}/);
+  assert.match(workflow, /Wait for this exact commit to reach production/);
+  assert.match(workflow, /\/api\/release-info/);
+  assert.equal(workflow.includes("Wait for Vercel deployment result"), false);
   assert.match(workflow, /REQUIRE_GEMINI: "false"/);
 });
 
