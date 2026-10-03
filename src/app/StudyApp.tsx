@@ -133,10 +133,12 @@ export function StudyAppRoot({ initialPage, courseCode, courseTab, examId, progr
       if (document.visibilityState === "visible") verifyCanonicalOwner();
     };
     window.addEventListener("focus", verifyCanonicalOwner);
+    window.addEventListener("online", verifyCanonicalOwner);
     document.addEventListener("visibilitychange", onVisibility);
     return () => {
       active = false;
       window.removeEventListener("focus", verifyCanonicalOwner);
+      window.removeEventListener("online", verifyCanonicalOwner);
       document.removeEventListener("visibilitychange", onVisibility);
     };
   }, [queryClient, user]);
