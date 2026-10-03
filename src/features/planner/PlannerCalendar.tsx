@@ -1,6 +1,6 @@
 import type { Course, PlanItem, Topic } from "@/lib/domain";
 import { effectivePlanStatus } from "@/lib/domain";
-import { dateWithWeekday, fullDate, minutes, today } from "@/lib/fi";
+import { dateWithWeekday, fullDate, minutes, parseISO, today } from "@/lib/fi";
 import { planPhaseLabel } from "@/lib/ui-fi";
 
 const secondary =
@@ -103,9 +103,16 @@ function PlannerWeek(props: Props) {
 }
 
 function PlannerMonth(props: Props) {
+  const firstDay = parseISO(props.days[0] ?? today());
+  const mondayOffset = (firstDay.getDay() + 6) % 7;
+  const weekdays = ["Ma","Ti","Ke","To","Pe","La","Su"];
   return (
     <section className="planner-month" aria-label="Kuukausisuunnitelma">
+      <div className="planner-month-weekdays" aria-hidden="true">
+        {weekdays.map(day=><span key={day}>{day}</span>)}
+      </div>
       <div className="planner-month-grid">
+        {Array.from({length:mondayOffset},(_,index)=><div key={"offset-"+index} className="planner-month-spacer" aria-hidden="true"/>)}
         {props.days.map((date) => {
           const items = itemsFor(props.plan, date);
           const important = items.find((item) => item.kind === "exam") ?? items[0];
@@ -162,7 +169,7 @@ function AgendaItem(props: Props & { item: PlanItem; date: string }) {
         </p>
         {item.kind !== "exam" && (
           <div className="mt-3 flex flex-wrap gap-1">
-            <button className={secondary+" !min-h-9 !px-2"} onClick={() => props.onStart(item.id)}>Aloita</button>
+            <button className={secondary+" !min-h-11 !px-3"} onClick={() => props.onStart(item.id)}>Aloita</button>
             <TaskMenu item={item} onShift={props.onShift} onSkip={props.onSkip} />
           </div>
         )}
@@ -190,7 +197,7 @@ function CompactItem(props: Props & { item: PlanItem; date: string }) {
       </p>
       {item.kind !== "exam" && (
         <div className="mt-2 flex flex-wrap gap-1">
-          <button className={secondary+" !min-h-9 !px-2"} onClick={() => props.onStart(item.id)}>Aloita</button>
+          <button className={secondary+" !min-h-11 !px-3"} onClick={() => props.onStart(item.id)}>Aloita</button>
           <TaskMenu item={item} onShift={props.onShift} onSkip={props.onSkip} />
         </div>
       )}
@@ -209,10 +216,10 @@ function TaskMenu({
 }) {
   return (
     <details className="relative">
-      <summary className={secondary+" list-none !min-h-9 !px-3"} aria-label="Tehtävän toiminnot">•••</summary>
+      <summary className={secondary+" list-none !min-h-11 !px-3"} aria-label="Tehtävän toiminnot">•••</summary>
       <div className="absolute right-0 z-20 mt-1 min-w-36 rounded-xl border border-border bg-surface p-1 shadow-lg">
-        <button className="block min-h-10 w-full rounded-lg px-3 text-left text-sm hover:bg-muted" onClick={() => onShift(item)}>Siirrä</button>
-        {item.status === "planned" && <button className="block min-h-10 w-full rounded-lg px-3 text-left text-sm hover:bg-muted" onClick={() => onSkip(item)}>Ohita</button>}
+        <button className="block min-h-11 w-full rounded-lg px-3 text-left text-sm hover:bg-muted" onClick={() => onShift(item)}>Siirrä</button>
+        {item.status === "planned" && <button className="block min-h-11 w-full rounded-lg px-3 text-left text-sm hover:bg-muted" onClick={() => onSkip(item)}>Ohita</button>}
       </div>
     </details>
   );
