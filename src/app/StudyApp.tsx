@@ -133,10 +133,12 @@ export function StudyAppRoot({ initialPage, courseCode, courseTab, examId, progr
       if (document.visibilityState === "visible") verifyCanonicalOwner();
     };
     window.addEventListener("focus", verifyCanonicalOwner);
+    window.addEventListener("online", verifyCanonicalOwner);
     document.addEventListener("visibilitychange", onVisibility);
     return () => {
       active = false;
       window.removeEventListener("focus", verifyCanonicalOwner);
+      window.removeEventListener("online", verifyCanonicalOwner);
       document.removeEventListener("visibilitychange", onVisibility);
     };
   }, [queryClient, user]);
@@ -229,6 +231,18 @@ function StudyApp({ user, initialPage, courseCode, courseTab, examId, progressSe
   const busy = !defaultsReady || allQueries.some(q => q.isPending);
   const queryError = allQueries.find(q => q.error)?.error;
   const error = defaultsError ?? (queryError instanceof Error ? queryError.message : queryError ? String(queryError) : null);
+  const online = typeof navigator === "undefined" ? true : navigator.onLine;
+  const userFacingError = error
+    ? pending > 0
+      ? "Kaikkea ei voitu vielä synkronoida. Syöttämäsi tiedot ovat tallessa tällä laitteella."
+      : online
+        ? "Tietoja ei saatu ladattua. Yritä uudelleen."
+        : "Verkkoyhteyttä ei ole. Näytetään se, mikä on tällä laitteella käytettävissä."
+    : null;
+
+  useEffect(() => {
+    if (error) console.error("[Opintopäiväkirja] Data or initialization error", error);
+  }, [error]);
 
   useEffect(() => {
     if (!busy) {
@@ -295,8 +309,20 @@ function StudyApp({ user, initialPage, courseCode, courseTab, examId, progressSe
 
   useEffect(() => {
     const stop = subscribePending(setPending);
-    const sync = startSyncWatcher(n => {
-      toast.success(`Synkronoitiin ${n} merkintää.`);
+    const sync = startSyncWatcher(result => {
+      if (result.synced > 0) {
+        toast.success(`Synkronoitiin ${result.synced} merkintää.`);
+      }
+      if (result.conflicts > 0) {
+        toast.info(
+          result.conflicts === 1
+            ? "Yksi vanha offline-muutos ohitettiin, koska samaa tietoa oli jo muutettu toisella laitteella."
+            : `${result.conflicts} vanhaa offline-muutosta ohitettiin, koska samat tiedot oli jo muutettu toisella laitteella.`,
+        );
+      }
+      if (result.discarded > 0) {
+        toast.info("Vanhentuneita paikallisia toimintoja siivottiin synkronoinnin yhteydessä.");
+      }
       // Offline writes may have changed sessions, plan state, mastery and
       // recovery scheduling. Re-read all active views after the queue commits.
       void queryClient.refetchQueries({ type: "active" });
@@ -315,6 +341,26 @@ function StudyApp({ user, initialPage, courseCode, courseTab, examId, progressSe
       case "exams": void navigate({ to: "/exams" }); break;
       case "settings": void navigate({ to: "/settings" }); break;
     }
+  };
+
+  const continueCourse = (id: string | null) => {
+    if (!id) {
+      setEntry("manual");
+      return;
+    }
+    const nextItem = plan
+      .filter(item =>
+        item.course_id === id &&
+        item.kind !== "exam" &&
+        !["completed", "skipped"].includes(item.status),
+      )
+      .sort((a, b) => {
+        const aPast = a.date < today() ? 0 : 1;
+        const bPast = b.date < today() ? 0 : 1;
+        if (aPast !== bPast) return aPast - bPast;
+        return a.date.localeCompare(b.date) || (a.start_time ?? "").localeCompare(b.start_time ?? "");
+      })[0];
+    setEntry(nextItem?.id ?? "manual");
   };
 
   const goCourse = (id: string) => {
@@ -465,7 +511,7 @@ function StudyApp({ user, initialPage, courseCode, courseTab, examId, progressSe
       contextualAction={contextualCoach}
     >
       {pending>0 && <p role="status" className="mb-5 rounded-xl bg-accent p-3 text-sm">Tallennettu paikallisesti · {pending} muutosta synkronoidaan yhteyden palattua.</p>}
-      {error && <div role="alert" className="panel mb-5 p-4"><p className="font-medium">{pending>0?"Kaikkea ei voitu vielä synkronoida.":"Tietojen lataus tai alustus epäonnistui."}</p>{pending>0&&<p className="mt-1 text-sm text-muted-foreground">Syöttämäsi tiedot ovat tallessa tässä laitteessa ja synkronoidaan yhteyden palattua.</p>}<p className="mt-1 text-sm text-muted-foreground">{String(error)}</p><button className="mt-2 underline" onClick={()=>{setDefaultsReady(false);setDefaultsError(null);void ensureKe04ForCurrentUser().then(()=>Promise.all([coursesQ.refetch(),topicsQ.refetch(),sessionsQ.refetch(),examsQ.refetch(),planQ.refetch(),testsQ.refetch(),attemptsQ.refetch(),mistakesQ.refetch(),preferencesQ.refetch()])).then(()=>setDefaultsReady(true)).catch(err=>{setDefaultsError(err instanceof Error?err.message:"Uudelleenyritys epäonnistui.");setDefaultsReady(true);});}}>Yritä uudelleen</button></div>}
+      {error && <div role="alert" className="panel mb-5 p-4"><p className="font-medium">{userFacingError}</p>{pending>0&&<p className="mt-1 text-sm text-muted-foreground">Muutokset synkronoidaan automaattisesti yhteyden palattua.</p>}<button className="mt-3 min-h-11 underline" onClick={()=>{setDefaultsReady(false);setDefaultsError(null);void ensureKe04ForCurrentUser().then(()=>Promise.all([coursesQ.refetch(),topicsQ.refetch(),sessionsQ.refetch(),examsQ.refetch(),planQ.refetch(),testsQ.refetch(),attemptsQ.refetch(),mistakesQ.refetch(),preferencesQ.refetch()])).then(()=>setDefaultsReady(true)).catch(err=>{console.error("[Opintopäiväkirja] Retry failed",err);setDefaultsError("retry_failed");setDefaultsReady(true);});}}>Yritä uudelleen</button></div>}
 
       <section className={`page-content page-content-${page}`} data-page={page}>
         <Suspense fallback={<FeatureFallback/>}>
@@ -510,7 +556,7 @@ function StudyApp({ user, initialPage, courseCode, courseTab, examId, progressSe
           }}
           onSelect={(id)=>id?goCourse(id):go("courses")}
           onAdd={()=>setAdding(true)}
-          onStart={()=>setEntry("manual")}
+          onStart={()=>continueCourse(courseId)}
         /> :
         page==="practice" ? <PracticeView courses={courses} topics={topics} attempts={attemptsQ.data??[]} tests={testsQ.data??[]} mistakes={mistakesQ.data??[]} initialCourseId={practiceCourse?.id} initialTopicId={practiceTopic?.id} onExit={()=>practiceCourseCode?void navigate({to:"/today"}):undefined}/> :
         page==="exams" ? <ExamsView

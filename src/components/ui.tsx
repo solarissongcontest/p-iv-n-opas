@@ -37,7 +37,7 @@ export const Select=React.forwardRef<HTMLSelectElement,React.SelectHTMLAttribute
 Select.displayName="Select";
 
 export function SegmentedControl<T extends string>({value,options,onChange}:{value:T;options:{value:T;label:string}[];onChange:(v:T)=>void}) {
-  return <div className="inline-flex rounded-xl bg-muted p-1" role="group">{options.map(o=><button type="button" key={o.value} aria-pressed={value===o.value} onClick={()=>onChange(o.value)} className={cn("min-h-10 rounded-lg px-3 text-sm",value===o.value&&"bg-surface font-medium shadow-sm")}>{o.label}</button>)}</div>;
+  return <div className="inline-flex rounded-xl bg-muted p-1" role="group">{options.map(o=><button type="button" key={o.value} aria-pressed={value===o.value} onClick={()=>onChange(o.value)} className={cn("min-h-11 rounded-lg px-3 text-sm",value===o.value&&"bg-surface font-medium shadow-sm")}>{o.label}</button>)}</div>;
 }
 
 export function Sheet({title,children,onClose}:{title:string;children:React.ReactNode;onClose:()=>void}) {

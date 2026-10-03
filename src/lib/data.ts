@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { registerOp, runOrQueue } from "./offline";
+import { withOfflineSnapshot } from "./offlineSnapshot";
 import {
   type CapacityProfile,
   type Course,
@@ -418,24 +419,27 @@ async function getPreferences(): Promise<UserPreferences | null> {
   return data ?? null;
 }
 
-export const useCourses = () => useQuery({ queryKey: ["courses"], queryFn: listCourses });
-export const useTopics = () => useQuery({ queryKey: ["topics"], queryFn: listTopics });
-export const useSessions = () => useQuery({ queryKey: ["sessions"], queryFn: listSessions });
-export const useExams = () => useQuery({ queryKey: ["exams"], queryFn: listExams });
-export const usePlan = () => useQuery({ queryKey: ["plan"], queryFn: listPlan });
-export const useMistakes = () => useQuery({ queryKey: ["mistakes"], queryFn: listMistakes });
-export const useTests = () => useQuery({ queryKey: ["tests"], queryFn: listTests });
+const offlineQuery = <T,>(name: string, load: () => Promise<T>) =>
+  () => withOfflineSnapshot(name, load);
+
+export const useCourses = () => useQuery({ queryKey: ["courses"], queryFn: offlineQuery("courses", listCourses) });
+export const useTopics = () => useQuery({ queryKey: ["topics"], queryFn: offlineQuery("topics", listTopics) });
+export const useSessions = () => useQuery({ queryKey: ["sessions"], queryFn: offlineQuery("sessions", listSessions) });
+export const useExams = () => useQuery({ queryKey: ["exams"], queryFn: offlineQuery("exams", listExams) });
+export const usePlan = () => useQuery({ queryKey: ["plan"], queryFn: offlineQuery("plan", listPlan) });
+export const useMistakes = () => useQuery({ queryKey: ["mistakes"], queryFn: offlineQuery("mistakes", listMistakes) });
+export const useTests = () => useQuery({ queryKey: ["tests"], queryFn: offlineQuery("tests", listTests) });
 export const usePracticeAttempts = () =>
-  useQuery({ queryKey: ["practice-attempts"], queryFn: listPracticeAttempts });
+  useQuery({ queryKey: ["practice-attempts"], queryFn: offlineQuery("practice-attempts", listPracticeAttempts) });
 export const useQuestionBank = () =>
-  useQuery({ queryKey: ["question-bank"], queryFn: listQuestionBank });
-export const useSettings = () => useQuery({ queryKey: ["settings"], queryFn: getSettings });
+  useQuery({ queryKey: ["question-bank"], queryFn: offlineQuery("question-bank", listQuestionBank) });
+export const useSettings = () => useQuery({ queryKey: ["settings"], queryFn: offlineQuery("settings", getSettings) });
 export const usePreferences = () =>
-  useQuery({ queryKey: ["preferences"], queryFn: getPreferences });
+  useQuery({ queryKey: ["preferences"], queryFn: offlineQuery("preferences", getPreferences) });
 export const useTopicDependencies = () =>
-  useQuery({ queryKey: ["topic-dependencies"], queryFn: listTopicDependencies });
+  useQuery({ queryKey: ["topic-dependencies"], queryFn: offlineQuery("topic-dependencies", listTopicDependencies) });
 export const useStudyMaterials = () =>
-  useQuery({ queryKey: ["study-materials"], queryFn: listStudyMaterials });
+  useQuery({ queryKey: ["study-materials"], queryFn: offlineQuery("study-materials", listStudyMaterials) });
 export const useLearningExperiments = () =>
   useQuery({ queryKey: ["learning-experiments"], queryFn: listLearningExperiments });
 export const useLearningPolicyStates = () =>
@@ -455,9 +459,9 @@ export const useReminderAdaptation = () =>
 export const useSubjectTaskParameters = () =>
   useQuery({ queryKey: ["subject-task-parameters"], queryFn: listSubjectTaskParameters });
 export const useWeeklyCheckins = () =>
-  useQuery({ queryKey: ["weekly-checkins"], queryFn: listWeeklyCheckins });
+  useQuery({ queryKey: ["weekly-checkins"], queryFn: offlineQuery("weekly-checkins", listWeeklyCheckins) });
 export const useProgressEvents = () =>
-  useQuery({ queryKey: ["progress-events"], queryFn: listProgressEvents });
+  useQuery({ queryKey: ["progress-events"], queryFn: offlineQuery("progress-events", listProgressEvents) });
 
 
 const KE04_TOPICS = [
@@ -745,33 +749,67 @@ async function doRecordPracticeAttempt(payload: unknown, operationId: string) {
   return data as string;
 }
 
+type PlanMutationExpectation = {
+  expected_updated_at?: string | null;
+  expected_status?: string | null;
+  expected_target_minutes?: number | null;
+};
+
+export function isPlanSyncConflict(error: unknown) {
+  return error instanceof Error && error.message.startsWith("SYNC_CONFLICT:");
+}
+
+function planSyncConflict() {
+  return new Error("SYNC_CONFLICT: Suunnitelman tehtävää muutettiin toisella laitteella.");
+}
+
 async function doUpdatePlanStatus(payload: unknown) {
-  const p = payload as { id: string; status: string };
-  const { error } = await supabase.from("plan_items").update({ status: p.status }).eq("id", p.id);
+  const p = payload as { id: string; status: string } & PlanMutationExpectation;
+  let query = supabase.from("plan_items").update({ status: p.status }).eq("id", p.id);
+  if (p.expected_status) query = query.eq("status", p.expected_status);
+  if (p.expected_updated_at) query = query.eq("updated_at", p.expected_updated_at);
+  const { data, error } = await query.select("id").maybeSingle();
   if (error) throw error;
+  if ((p.expected_status || p.expected_updated_at) && !data) throw planSyncConflict();
 }
 
 async function doMovePlanItem(payload: unknown) {
-  const p = payload as { id: string; date: string; from: string };
-  const { error } = await supabase
+  const p = payload as { id: string; date: string; from: string } & PlanMutationExpectation;
+  let query = supabase
     .from("plan_items")
     .update({ date: p.date, moved_from: p.from, status: "planned" })
-    .eq("id", p.id);
+    .eq("id", p.id)
+    .eq("date", p.from);
+  if (p.expected_status) query = query.eq("status", p.expected_status);
+  if (p.expected_updated_at) query = query.eq("updated_at", p.expected_updated_at);
+  const { data, error } = await query.select("id").maybeSingle();
   if (error) throw error;
+  if (!data) throw planSyncConflict();
 }
 
 async function doUpsertPlanItem(payload: unknown, operationId: string) {
-  const p = payload as Partial<PlanItem> & { id?: string; course_id: string; date: string };
+  const p = payload as Partial<PlanItem> & { id?: string; course_id: string; date: string } & PlanMutationExpectation;
   if (p.id) {
-    const { id, ...rest } = p;
-    const { error } = await supabase.from("plan_items").update(rest).eq("id", id);
+    const { id, expected_updated_at, expected_status, expected_target_minutes, ...rest } = p;
+    let query = supabase.from("plan_items").update(rest).eq("id", id);
+    if (expected_status) query = query.eq("status", expected_status);
+    if (typeof expected_target_minutes === "number") query = query.eq("target_minutes", expected_target_minutes);
+    if (expected_updated_at) query = query.eq("updated_at", expected_updated_at);
+    const { data, error } = await query.select("id").maybeSingle();
     if (error) throw error;
+    if ((expected_status || typeof expected_target_minutes === "number" || expected_updated_at) && !data) throw planSyncConflict();
     return id;
   }
 
+  const {
+    expected_updated_at: _expectedUpdatedAt,
+    expected_status: _expectedStatus,
+    expected_target_minutes: _expectedTargetMinutes,
+    ...insert
+  } = p;
   const { error } = await supabase
     .from("plan_items")
-    .upsert({ ...p, id: operationId } as never, { onConflict: "id" });
+    .upsert({ ...insert, id: operationId } as never, { onConflict: "id" });
   if (error) throw error;
   return operationId;
 }
@@ -944,17 +982,17 @@ export function useRecordPracticeAttempt() {
 export function usePlanStatus() {
   const invalidate = useInvalidateAll();
   return useMutation({
-    mutationFn: (input: { id: string; status: string }) => runOrQueue("updatePlanStatus", input),
-    onSuccess: invalidate,
+    mutationFn: (input: { id: string; status: string; expected_updated_at?: string | null; expected_status?: string | null }) => runOrQueue("updatePlanStatus", input),
+    onSettled: invalidate,
   });
 }
 
 export function useMovePlanItem() {
   const invalidate = useInvalidateAll();
   return useMutation({
-    mutationFn: (input: { id: string; date: string; from: string }) =>
+    mutationFn: (input: { id: string; date: string; from: string; expected_updated_at?: string | null; expected_status?: string | null }) =>
       runOrQueue("movePlanItem", input),
-    onSuccess: invalidate,
+    onSettled: invalidate,
   });
 }
 
@@ -986,9 +1024,16 @@ export function useGeneratePlan() {
 export function useUpsertPlanItem() {
   const invalidate = useInvalidateAll();
   return useMutation({
-    mutationFn: (input: Partial<PlanItem> & { id?: string; course_id: string; date: string }) =>
+    mutationFn: (input: Partial<PlanItem> & {
+      id?: string;
+      course_id: string;
+      date: string;
+      expected_updated_at?: string | null;
+      expected_status?: string | null;
+      expected_target_minutes?: number | null;
+    }) =>
       runOrQueue("upsertPlanItem", input),
-    onSuccess: invalidate,
+    onSettled: invalidate,
   });
 }
 
@@ -1247,6 +1292,10 @@ export function useApplyStudyWeekdays() {
           .upsert({
             owner_id: requireDeviceOwnerId(),
             study_weekdays: studyWeekdays,
+            weekday_capacity_min_minutes: Math.max(0, input.capacity.weekdayMinMinutes ?? 0),
+            weekday_capacity_minutes: Math.max(0, input.capacity.weekdayMinutes),
+            weekend_capacity_min_minutes: Math.max(0, input.capacity.weekendMinMinutes ?? 0),
+            weekend_capacity_minutes: Math.max(0, input.capacity.weekendMinutes),
           }, { onConflict: "owner_id" });
         if (preferenceError) throw preferenceError;
       } catch (error) {

@@ -124,14 +124,17 @@ test("master plan keeps evidence and safety invariants", () => {
 });
 
 
-test("study weekday settings save once and realign the future plan", () => {
+test("study rhythm settings save weekdays and capacity once and realign the future plan", () => {
   const settings = read("src/features/settings/SettingsView.tsx");
   const data = read("src/lib/data.ts");
 
   assert.match(settings, /studyWeekdaysDraft/);
-  assert.match(settings, /Tallenna opiskelupäivät/);
+  assert.match(settings, /Tallenna opiskelurytmi/);
+  assert.equal(settings.includes("Tallenna opiskelupäivät"), false);
   assert.match(settings, /useApplyStudyWeekdays/);
   assert.match(data, /export function useApplyStudyWeekdays/);
   assert.match(data, /findNextStudyDate/);
   assert.match(data, /study_weekdays: studyWeekdays/);
+  assert.match(data, /weekday_capacity_minutes: Math\.max/);
+  assert.match(data, /weekend_capacity_minutes: Math\.max/);
 });

@@ -47,6 +47,15 @@
   padding-bottom:
     calc(
       var(--app-tabbar-height)
+      + 1.75rem
+      + env(safe-area-inset-bottom, 0px)
+    );
+}
+
+.app-main-has-context-action {
+  padding-bottom:
+    calc(
+      var(--app-tabbar-height)
       + 6.25rem
       + env(safe-area-inset-bottom, 0px)
     );
@@ -140,7 +149,7 @@
   bottom: max(0.65rem, env(safe-area-inset-bottom, 0px)) !important;
   z-index: 30;
   display: grid !important;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   align-items: center;
   min-height: 64px;
   padding: 0.28rem 0.3rem;
@@ -424,6 +433,15 @@
     padding-bottom:
       calc(
         var(--app-tabbar-height)
+        + 1.75rem
+        + env(safe-area-inset-bottom, 0px)
+      );
+  }
+
+  .app-main.app-main-has-context-action {
+    padding-bottom:
+      calc(
+        var(--app-tabbar-height)
         + 6.25rem
         + env(safe-area-inset-bottom, 0px)
       );
@@ -503,6 +521,37 @@ html.dark .app-mobile-header {
   .desktop-sidebar .mt-auto button {
     justify-content: center;
     padding-inline: 0.65rem;
+  }
+
+  .desktop-sidebar [data-tooltip] {
+    position: relative;
+  }
+
+  .desktop-sidebar [data-tooltip]::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    left: calc(100% + 0.65rem);
+    top: 50%;
+    z-index: 80;
+    width: max-content;
+    max-width: 12rem;
+    transform: translate(0.25rem, -50%);
+    border: 1px solid var(--hairline);
+    border-radius: 0.65rem;
+    background: var(--surface);
+    padding: 0.4rem 0.6rem;
+    box-shadow: var(--shadow-card);
+    color: var(--foreground);
+    font-size: 0.75rem;
+    font-weight: 600;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 120ms var(--ease-calm), transform 120ms var(--ease-calm);
+  }
+
+  .desktop-sidebar [data-tooltip]:is(:hover, :focus-visible)::after {
+    opacity: 1;
+    transform: translate(0, -50%);
   }
 
   .desktop-sidebar > div:first-child {
@@ -586,12 +635,79 @@ html.dark .app-mobile-header {
 @media (min-width: 1101px) {
   .app-desktop-main {
     max-width: 1440px;
-    margin-left: 17rem;
-    margin-right: 2rem;
+    margin-left: max(17rem, calc(50vw + 8.5rem - 720px));
+    margin-right: auto;
     padding-inline: var(--page-inline-expanded);
   }
 }
 
+
+/* ---------- PWA updates ---------- */
+.pwa-update-prompt {
+  position: fixed;
+  left: 50%;
+  bottom: calc(var(--app-tabbar-height) + 1.35rem + env(safe-area-inset-bottom, 0px));
+  z-index: 55;
+  display: flex;
+  width: min(calc(100% - 1.5rem), 560px);
+  transform: translateX(-50%);
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  background: var(--surface);
+  padding: 0.8rem 0.9rem;
+  box-shadow: var(--shadow-card);
+}
+
+.pwa-update-prompt p {
+  margin-top: 0.2rem;
+  color: var(--muted-foreground);
+  font-size: 0.75rem;
+}
+
+.pwa-update-actions {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 0.4rem;
+}
+
+.pwa-update-actions button {
+  min-height: 44px;
+  border-radius: 0.75rem;
+  padding-inline: 0.75rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.pwa-update-primary {
+  background: var(--primary);
+  color: var(--primary-foreground);
+}
+
+body:has(.study-session-focus) .pwa-update-prompt,
+body:has(.practice-session-active) .pwa-update-prompt,
+body:has(.exam-simulation-running) .pwa-update-prompt {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .pwa-update-prompt {
+    bottom: 1.5rem;
+  }
+}
+
+@media (max-width: 430px) {
+  .pwa-update-prompt {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .pwa-update-actions {
+    justify-content: flex-end;
+  }
+}
 
 /* ---------- Opintocoach ---------- */
 /* Coach is a control layer: Liquid Glass belongs on the trigger and header,

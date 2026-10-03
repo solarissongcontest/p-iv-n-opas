@@ -32,33 +32,8 @@ const MODES: { id: CoachRequest["mode"]; label: string }[] = [
 const buttonClass =
   "min-h-11 rounded-xl border border-border px-3 py-2 text-sm disabled:opacity-50";
 
-function coachFallbackReason(message: CoachMessage) {
-  if (message.status === "quota") {
-    return message.diagnostic === "budget"
-      ? "Opiskeluohjaajan oma käyttöraja tuli vastaan."
-      : "Geminin käyttöraja tuli vastaan.";
-  }
-
-  switch (message.diagnostic) {
-    case "auth":
-      return "Gemini-avain hylättiin tai yhteydellä ei ole käyttöoikeutta.";
-    case "request":
-      return "Gemini hylkäsi yhteyspyynnön. Pyynnön asetukset pitää tarkistaa.";
-    case "model":
-      return "Valittu Gemini-malli ei ole käytettävissä tälle projektille.";
-    case "provider":
-      return "Gemini-palvelu palautti virheen.";
-    case "timeout":
-      return "Gemini ei vastannut ajoissa.";
-    case "network":
-      return "Yhteys Gemini-palveluun katkesi.";
-    case "budget":
-      return "Opiskeluohjaajan käyttörajan tarkistus epäonnistui.";
-    case "invalid_output":
-      return "Geminin vastaus ei läpäissyt vastaussuodatinta.";
-    default:
-      return "Gemini-vastausta ei voitu käyttää.";
-  }
+function coachFallbackReason(_message: CoachMessage) {
+  return "Tekoälyohjaus ei ole juuri nyt käytettävissä.";
 }
 
 export function AICoach({
@@ -400,12 +375,12 @@ export function AICoach({
             </Dialog.Description>
             <p className="mt-2 text-xs text-muted-foreground" role="status">
               {!providerChecked
-                ? "Tarkistetaan yhteyttä…"
+                ? "Tarkistetaan ohjausta…"
                 : geminiActive
-                  ? "Gemini käytössä · vastaussuodatin käytössä"
+                  ? "Tekoälyohjaus käytössä"
                   : remoteConfigured
-                    ? "Gemini-yhteys määritetty · käyttö vapaaehtoista"
-                    : "Paikallinen ohjaus · kielimallia ei ole yhdistetty"}
+                    ? "Tekoälyohjaus saatavilla · käyttö vapaaehtoista"
+                    : "Paikallinen ohjaus käytössä"}
             </p>
           </LiquidGlass>
 

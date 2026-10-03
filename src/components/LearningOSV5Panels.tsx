@@ -247,7 +247,7 @@ export function V5LearningHealthPanel({courses,attempts}:{courses:Course[];topic
         {frictionState.suggestion?<><p className="mt-2 text-sm text-muted-foreground">{frictionState.suggestion.reason}</p><button className={button+" mt-4"} disabled={saveIntention.isPending} onClick={()=>void accept()}>Käytä ehdotettua jos–niin-sääntöä</button></>:<p className="mt-2 text-sm text-muted-foreground">Järjestelmä ei muuta suunnitelmaa yhden huonon päivän perusteella.</p>}
         {(intentions.data??[]).filter(x=>x.enabled).length>0&&<p className="mt-3 text-xs text-muted-foreground">{(intentions.data??[]).filter(x=>x.enabled).length} aktiivista jos–niin-sääntöä.</p>}
       </Panel>
-      <Panel title="Muistutusten vähentäminen" action={<button className={secondary+" !min-h-9 !px-3"} onClick={()=>void updatePreferences.mutateAsync({reminder_taper_enabled:!(preferences.data?.reminder_taper_enabled??true)})}>{(preferences.data?.reminder_taper_enabled??true)?"Päällä":"Pois"}</button>}>
+      <Panel title="Muistutusten vähentäminen" action={<button className={secondary+" !min-h-11 !px-3"} onClick={()=>void updatePreferences.mutateAsync({reminder_taper_enabled:!(preferences.data?.reminder_taper_enabled??true)})}>{(preferences.data?.reminder_taper_enabled??true)?"Päällä":"Pois"}</button>}>
         <p className="text-lg font-semibold">{reminder.mode==="minimal"?"Vain kriittiset":reminder.mode==="taper"?"Vähennä asteittain":reminder.mode==="restore"?"Palauta yksi muistutus":"Nykyinen taso"}</p>
         <p className="mt-2 text-sm text-muted-foreground">{reminder.recommendation}</p>
         <p className="mt-3 text-xs text-muted-foreground">{reminder.sampleSize} aloitushavaintoa{reminder.selfStartRate==null?"":" · itsenäisiä "+pct(reminder.selfStartRate)}</p>

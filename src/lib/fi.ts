@@ -51,6 +51,32 @@ export function parseISO(s: string): Date {
   return new Date(y ?? 2000, (m ?? 1) - 1, d ?? 1);
 }
 
+export function isValidISODate(s: string): boolean {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s);
+  if (!match) return false;
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  const day = Number(match[3]);
+  const date = new Date(Date.UTC(year, month - 1, day));
+  return (
+    date.getUTCFullYear() === year &&
+    date.getUTCMonth() === month - 1 &&
+    date.getUTCDate() === day
+  );
+}
+
+export function isValidISOMonth(s: string): boolean {
+  const match = /^(\d{4})-(\d{2})$/.exec(s);
+  if (!match) return false;
+  const month = Number(match[2]);
+  return month >= 1 && month <= 12;
+}
+
+function dateOrdinal(iso: string): number {
+  const [year, month, day] = iso.split("-").map(Number);
+  return Date.UTC(year ?? 2000, (month ?? 1) - 1, day ?? 1);
+}
+
 export function today(): string {
   return toISO(new Date());
 }
@@ -61,8 +87,17 @@ export function addDays(iso: string, n: number): string {
   return toISO(d);
 }
 
+export function addMonths(iso: string, n: number): string {
+  const source = parseISO(iso);
+  const day = source.getDate();
+  const target = new Date(source.getFullYear(), source.getMonth() + n, 1);
+  const lastDay = new Date(target.getFullYear(), target.getMonth() + 1, 0).getDate();
+  target.setDate(Math.min(day, lastDay));
+  return toISO(target);
+}
+
 export function diffDays(a: string, b: string): number {
-  return Math.round((parseISO(a).getTime() - parseISO(b).getTime()) / 86400000);
+  return Math.round((dateOrdinal(a) - dateOrdinal(b)) / 86400000);
 }
 
 export function startOfWeek(iso: string): string {

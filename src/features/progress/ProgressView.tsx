@@ -223,12 +223,22 @@ export function ProgressView({courses,topics,attempts,sessions,plan,exams,mistak
         ["analysis","Analyysi"],
       ] as Array<[ProgressSection,string]>).map(([id,label])=><button key={id} role="tab" aria-selected={section===id} className={section===id?"progress-section-tab progress-section-tab-active":"progress-section-tab"} onClick={()=>onSectionChange?.(id)}>{label}</button>)}
     </div>
-    <p className="progress-summary-only text-sm text-muted-foreground">Oppimisnäyttö ensin · aika ja käyttömäärä ovat alempana kuormitustietoa.</p>
-    <div className="progress-summary progress-summary-only grid grid-cols-2 gap-3 lg:grid-cols-4">
-      <div className="panel p-4"><p className="text-sm text-muted-foreground">Vahvat / vakaat aiheet</p><p className="mt-2 text-2xl font-semibold">{v4Groups.strong.length+v4Groups.secure.length}/{topics.length}</p><p className="mt-1 text-xs text-muted-foreground">{v4Rows.filter(row=>row.model.evidenceCount>0).length} aiheesta on näyttöä</p></div>
-      <div className="panel p-4"><p className="text-sm text-muted-foreground">Tärkeät opiskelukerrat</p><p className="mt-2 text-2xl font-semibold">{review.completed}/{review.planned}</p><p className="mt-1 text-xs text-muted-foreground">tähän päivään mennessä</p></div>
-      <div className="panel p-4"><p className="text-sm text-muted-foreground">Opiskelurytmi</p><p className="mt-2 text-2xl font-semibold">{new Set(recent.map(s=>s.date)).size}</p><p className="mt-1 text-xs text-muted-foreground">opiskelupäivää / 30 pv</p></div>
-      <div className="panel p-4"><p className="text-sm text-muted-foreground">Aikaa kirjattu</p><p className="mt-2 text-2xl font-semibold">{minutes(recentMinutes)}</p><p className="mt-1 text-xs text-muted-foreground">kuormitustieto, ei osaamispiste</p></div>
+    <p className="progress-summary-only text-sm text-muted-foreground">Tässä näkyy vain se, mikä auttaa hahmottamaan tilanteen nopeasti. Tarkemmat mittarit löytyvät Osaaminen- ja Analyysi-osioista.</p>
+    <div className="progress-summary progress-summary-only grid gap-3 sm:grid-cols-3">
+      <button type="button" className="panel min-h-28 p-4 text-left hover:ring-1 hover:ring-primary" onClick={()=>onSectionChange?.("mastery")}>
+        <p className="text-sm text-muted-foreground">Hyvin hallussa</p>
+        <p className="mt-2 text-3xl font-semibold">{v4Groups.strong.length+v4Groups.secure.length}</p>
+        <p className="mt-1 text-xs text-muted-foreground">aihetta, joista on riittävästi myönteistä näyttöä</p>
+      </button>
+      <button type="button" className="panel min-h-28 p-4 text-left hover:ring-1 hover:ring-primary" onClick={()=>onSectionChange?.("mastery")}>
+        <p className="text-sm text-muted-foreground">Kannattaa kerrata</p>
+        <p className="mt-2 text-3xl font-semibold">{groups.practice.length+groups.developing.length}</p>
+        <p className="mt-1 text-xs text-muted-foreground">aihetta tarvitsee vielä vahvistamista</p>
+      </button>
+      <button type="button" className="panel min-h-28 p-4 text-left hover:ring-1 hover:ring-primary" onClick={nextExam?onPlan:undefined}>
+        <p className="text-sm text-muted-foreground">Seuraava koe</p>
+        {nextExam?<><p className="mt-2 text-xl font-semibold">{courses.find(course=>course.id===nextExam.course_id)?.code??"Koe"}</p><p className="mt-1 text-sm text-muted-foreground">{fullDate(nextExam.date)} · {diffDays(nextExam.date,now)} pv</p></>:<><p className="mt-2 text-xl font-semibold">Ei merkittyä koetta</p><p className="mt-1 text-xs text-muted-foreground">Koe ilmestyy tähän, kun se lisätään kurssille.</p></>}
+      </button>
     </div>
 
     <div className="progress-mastery-only"><V5LearningHealthPanel courses={courses} topics={topics} attempts={attempts}/></div>

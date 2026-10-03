@@ -17,6 +17,7 @@ import {
   type PlanItem,
   type Topic,
 } from "../src/lib/domain.ts";
+import { addDays } from "../src/lib/fi.ts";
 
 function topic(
   id: string,
@@ -170,6 +171,51 @@ test("selected study weekdays map exactly to Finnish Monday-Sunday numbering", (
       minutes: 30,
     }), expected);
   }
+});
+
+test("rescheduling never exceeds capacity or moves work beyond the exam boundary", () => {
+  const fullPlan = Array.from({ length: 14 }, (_, index) => ({
+    id: "full-" + index,
+    date: addDays("2026-10-01", index + 1),
+    target_minutes: 60,
+    status: "planned",
+    kind: "study",
+  })) as PlanItem[];
+
+  assert.equal(findNextStudyDate({
+    plan: fullPlan,
+    fromISO: "2026-10-01",
+    studyWeekdays: [1,2,3,4,5,6,7],
+    minutes: 30,
+    capacity: {
+      studyWeekdays: [1,2,3,4,5,6,7],
+      weekdayMinutes: 60,
+      weekendMinutes: 60,
+      busyDates: [],
+    },
+  }), null);
+
+  assert.equal(findNextStudyDate({
+    plan: [],
+    fromISO: "2026-10-01",
+    studyWeekdays: [1,2,3,4,5,6,7],
+    minutes: 30,
+    latestDate: "2026-10-02",
+  }), "2026-10-02");
+
+  assert.equal(findNextStudyDate({
+    plan: [{
+      id: "exam-eve-full",
+      date: "2026-10-02",
+      target_minutes: 105,
+      status: "planned",
+      kind: "study",
+    } as PlanItem],
+    fromISO: "2026-10-01",
+    studyWeekdays: [1,2,3,4,5,6,7],
+    minutes: 30,
+    latestDate: "2026-10-02",
+  }), null);
 });
 
 test("today task rationale is transparent without pretending to know a grade", () => {

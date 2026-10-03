@@ -8,17 +8,16 @@ Canonical production repository: `solarissongcontest/p-iv-n-opas`.
 
 ## Päänavigaatio
 
-Sovelluksen viisi pääaluetta ovat:
+Mobiilin neljä pääkohdetta ovat:
 
-- **Tänään** – seuraava tarkoituksenmukainen opiskelutoiminto
-- **Suunnitelma** – päivä-, viikko- ja kuukausisuunnittelu
-- **Opinnot** – kurssit, aiheet, historia ja analyysi
-- **Harjoittelu** – mukautuva setup → active → summary -harjoittelu
-- **Edistyminen** – yhteenveto, osaaminen ja analyysi
+- **Tänään** – yksi selkeä seuraava opiskelutoiminto
+- **Opinnot** – kurssit, aiheet ja historia
+- **Edistyminen** – nopea yhteenveto, osaaminen ja tarkempi analyysi
+- **Lisää** – Suunnitelma, Harjoittelu, Kokeet, Kirjaa opiskelu, Haku ja Asetukset
 
-Lisäksi **Kokeet** ja **Asetukset** ovat omia route-tason näkymiään.
+**Suunnitelma** ja **Kokeet** ovat desktopilla näkyvässä suunnitteluryhmässä. **Harjoittelu** on ensisijaisesti toiminto, johon tullaan Tänään-näkymästä tai kurssikontekstista, mutta se säilyy myös suoraan saavutettavana Lisää-valikosta.
 
-Mobiilissa käytetään viiden kohdan tab baria ja desktopilla sivupalkkia. Liquid Glass on rajattu navigaatio- ja kontrollikerrokseen.
+Mobiilissa käytetään neljän kohdan tab baria ja desktopilla sivupalkkia. Liquid Glass on rajattu navigaatio- ja kontrollikerrokseen.
 
 ## Route-arkkitehtuuri
 
@@ -88,11 +87,13 @@ Opiskelupäivien muuttaminen tallennetaan yhtenä muutoksena ja tulevat suunnite
 
 ## Harjoittelu ja koeharjoitus
 
-Harjoittelu käyttää neljän vaiheen flow’ta:
+Harjoittelu käyttää rajattua kolmen tilan flow’ta:
 
 ```text
-SETUP → ACTIVE → FEEDBACK → SUMMARY
+SETUP → ACTIVE → SUMMARY
 ```
+
+Palaute, vihjeet ja mahdollinen uusi yritys tapahtuvat ACTIVE-tilan sisällä. Aktiivisen harjoittelun aikana normaali sovellusnavigaatio piilotetaan.
 
 Aktiivisen tehtävän aikana asetukset ja toissijaiset paneelit väistyvät.
 

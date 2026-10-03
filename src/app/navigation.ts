@@ -1,4 +1,4 @@
-import { BookOpen, Brain, CalendarDays, ChartNoAxesCombined, Home } from "lucide-react";
+import { BookOpen, Brain, CalendarDays, ChartNoAxesCombined, FlaskConical, Home } from "lucide-react";
 
 export type StudyPage = "today" | "plan" | "courses" | "practice" | "progress" | "exams" | "settings";
 
@@ -10,7 +10,18 @@ export const studyNav = [
   { id: "progress", label: "Edistyminen", Icon: ChartNoAxesCombined, path: "/progress" },
 ] as const;
 
-export type PrimaryStudyPage = (typeof studyNav)[number]["id"];
+export const primaryStudyNav = [
+  studyNav[0],
+  studyNav[2],
+  studyNav[4],
+] as const;
+
+export const desktopPlanningNav = [
+  studyNav[1],
+  { id: "exams", label: "Kokeet", Icon: FlaskConical, path: "/exams" },
+] as const;
+
+export type PrimaryStudyPage = (typeof primaryStudyNav)[number]["id"];
 export type StudyPath =
   | "/today"
   | "/plan"

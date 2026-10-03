@@ -631,6 +631,29 @@
   padding: 0.65rem;
 }
 
+.planner-month-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  padding-inline: 0.15rem;
+  color: var(--muted-foreground);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.planner-month-weekdays > span {
+  padding: 0.35rem 0.2rem;
+}
+
+.planner-month-spacer {
+  min-height: 7rem;
+  border-right: 1px solid var(--hairline);
+  border-bottom: 1px solid var(--hairline);
+  background: color-mix(in oklab, var(--muted) 25%, transparent);
+}
+
 .planner-month-grid {
   display: grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));
@@ -730,7 +753,8 @@
     overflow-x: auto;
   }
 
-  .planner-month-day {
+  .planner-month-day,
+  .planner-month-spacer {
     min-height: 5.4rem;
   }
 
@@ -1055,6 +1079,22 @@
   .study-session-focus-header {
     padding-inline: max(2rem, calc((100vw - var(--page-max-focus)) / 2));
   }
+}
+
+/* Active practice uses the same focus-shell rule as a planned study session. */
+.min-h-screen:has(.practice-session-active) .desktop-sidebar,
+.min-h-screen:has(.practice-session-active) .app-mobile-header,
+.min-h-screen:has(.practice-session-active) .app-tabbar,
+.min-h-screen:has(.practice-session-active) .bottom-context-action {
+  display: none !important;
+}
+
+.min-h-screen:has(.practice-session-active) .app-desktop-main {
+  width: min(100%, 1040px);
+  max-width: 1040px;
+  margin-inline: auto;
+  padding-top: max(1rem, env(safe-area-inset-top, 0px));
+  padding-bottom: calc(2rem + env(safe-area-inset-bottom, 0px));
 }
 
 /* While a timed exam block is running, navigation and coach disappear. */

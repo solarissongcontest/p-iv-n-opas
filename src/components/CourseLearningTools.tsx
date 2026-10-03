@@ -128,7 +128,7 @@ export function KnowledgeGraphEditor({
               </span>
               <button
                 aria-label="Poista riippuvuus"
-                className="grid size-10 shrink-0 place-items-center rounded-lg hover:bg-muted"
+                className="grid size-11 shrink-0 place-items-center rounded-lg hover:bg-muted"
                 onClick={() => void (async () => {
                   try {
                     await remove.mutateAsync(row.id);

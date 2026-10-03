@@ -20,7 +20,22 @@ export function registerOp(op: string, fn: OperationHandler) {
 function read(): QueuedOp[] {
   if (typeof localStorage === "undefined") return [];
   try {
-    return JSON.parse(localStorage.getItem(key()) ?? "[]") as QueuedOp[];
+    const parsed: unknown = JSON.parse(localStorage.getItem(key()) ?? "[]");
+    if (!Array.isArray(parsed)) return [];
+    const seen = new Set<string>();
+    return parsed.filter((item): item is QueuedOp => {
+      if (!item || typeof item !== "object") return false;
+      const candidate = item as Partial<QueuedOp>;
+      if (
+        typeof candidate.id !== "string" ||
+        typeof candidate.op !== "string" ||
+        typeof candidate.at !== "number" ||
+        !Number.isFinite(candidate.at) ||
+        seen.has(candidate.id)
+      ) return false;
+      seen.add(candidate.id);
+      return true;
+    });
   } catch {
     return [];
   }
@@ -44,8 +59,10 @@ export function subscribePending(fn: (count: number) => void) {
 
 export function enqueue(op: string, payload: unknown, id = crypto.randomUUID()) {
   const items = read();
+  if (items.some((item) => item.id === id)) return id;
   items.push({ id, op, payload, at: Date.now() });
   write(items);
+  return id;
 }
 
 /** Run a write; if the network fails, keep it locally and sync later. */
@@ -71,34 +88,59 @@ export async function runOrQueue<T>(op: string, payload: unknown): Promise<T | "
 
 let flushing = false;
 
-export async function flushQueue(): Promise<number> {
-  if (flushing) return 0;
+export type SyncResult = {
+  synced: number;
+  conflicts: number;
+  discarded: number;
+};
+
+function isConflict(error: unknown) {
+  return error instanceof Error && error.message.startsWith("SYNC_CONFLICT:");
+}
+
+export async function flushQueue(): Promise<SyncResult> {
+  if (flushing) return { synced: 0, conflicts: 0, discarded: 0 };
   flushing = true;
-  let done = 0;
+  let synced = 0;
+  let conflicts = 0;
+  let discarded = 0;
   try {
     let items = read();
     for (const item of [...items]) {
       const fn = handlers.get(item.op);
-      if (!fn) continue;
+      if (!fn) {
+        items = read().filter((i) => i.id !== item.id);
+        write(items);
+        discarded += 1;
+        continue;
+      }
       try {
         await fn(item.payload, item.id);
         items = read().filter((i) => i.id !== item.id);
         write(items);
-        done += 1;
-      } catch {
+        synced += 1;
+      } catch (error) {
+        if (isConflict(error)) {
+          items = read().filter((i) => i.id !== item.id);
+          write(items);
+          conflicts += 1;
+          continue;
+        }
         break;
       }
     }
   } finally {
     flushing = false;
   }
-  return done;
+  return { synced, conflicts, discarded };
 }
 
-export function startSyncWatcher(onSynced: (count: number) => void) {
+export function startSyncWatcher(onSynced: (result: SyncResult) => void) {
   if (typeof window === "undefined") return () => {};
   const handler = () => {
-    void flushQueue().then((n) => n > 0 && onSynced(n));
+    void flushQueue().then((result) => {
+      if (result.synced > 0 || result.conflicts > 0 || result.discarded > 0) onSynced(result);
+    });
   };
   window.addEventListener("online", handler);
   const timer = window.setInterval(handler, 30000);

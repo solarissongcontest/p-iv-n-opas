@@ -20,5 +20,6 @@ export function dateFromIsoWeek(value: string) {
   const day = (fourthJan.getUTCDay() + 6) % 7;
   const monday = new Date(fourthJan);
   monday.setUTCDate(fourthJan.getUTCDate() - day + (week - 1) * 7);
-  return monday.toISOString().slice(0,10);
+  const result = monday.toISOString().slice(0,10);
+  return isoWeekFromDate(result) === value ? result : null;
 }

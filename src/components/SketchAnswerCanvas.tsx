@@ -143,7 +143,7 @@ export function SketchAnswerCanvas({
         <p className="text-xs text-muted-foreground">
           {ready ? (mode === "graph" ? "Piirrä kuvaaja ruudukolle." : "Piirrä ja merkitse vastaus tähän.") : "Valmistellaan luonnosta…"}
         </p>
-        <button type="button" disabled={disabled} onClick={clear} className="min-h-10 rounded-xl border border-border bg-surface px-3 text-sm">
+        <button type="button" disabled={disabled} onClick={clear} className="min-h-11 rounded-xl border border-border bg-surface px-3 text-sm">
           Tyhjennä
         </button>
       </div>

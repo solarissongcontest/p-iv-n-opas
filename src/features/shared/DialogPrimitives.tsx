@@ -26,7 +26,7 @@ export function Dialog({ title, onClose, children }: { title: string; onClose: (
     return () => { document.removeEventListener("keydown", trap); previous?.focus(); };
   }, []);
   return <div ref={ref} className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 sm:items-center sm:p-4" onMouseDown={event=>{if(event.target===event.currentTarget)onClose();}}>
-    <LiquidGlass lensing variant="thick" role="dialog" aria-modal="true" aria-label={title} className="max-h-[92vh] w-full max-w-xl overflow-y-auto rounded-t-3xl p-5 shadow-2xl sm:rounded-3xl sm:p-7">
+    <LiquidGlass lensing variant="thick" role="dialog" aria-modal="true" aria-label={title} className="max-h-[92dvh] w-full max-w-xl overflow-y-auto rounded-t-3xl p-5 shadow-2xl sm:rounded-3xl sm:p-7" style={{ paddingBottom: "max(1.25rem, env(safe-area-inset-bottom, 0px))" }}>
       <div className="mb-5 flex items-center justify-between"><h2 className="text-xl font-semibold">{title}</h2><button type="button" aria-label="Sulje" className={secondary+" !size-11 !p-0"} onClick={onClose}><X size={18}/></button></div>{children}
     </LiquidGlass>
   </div>;
