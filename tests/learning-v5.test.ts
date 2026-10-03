@@ -367,10 +367,19 @@ test("Contrastive Error Lab requires a real parallel attempt before retest",()=>
   assert.match(lab,/delayedVerificationRequired: true/);
 });
 
-test("cross-device E2E covers offline queue, reload, sync and second browser context",()=>{
+test("cross-device E2E covers offline recovery and stale concurrent planner protection",()=>{
   const e2e=readFileSync(new URL("../e2e/v5-cross-device.spec.ts",import.meta.url),"utf8");
   const workflow=readFileSync(new URL("../.github/workflows/iphone-e2e.yml",import.meta.url),"utf8");
-  for(const token of ["setOffline(true)","reload","setOffline(false)","newContext","OPK-E2E-"]){
+  for(const token of [
+    "setOffline(true)",
+    "reload",
+    "setOffline(false)",
+    "newContext",
+    "OPK-E2E-",
+    "OPK-CONFLICT-",
+    "date=eq.2099-01-01",
+    "expect(await staleUpdate.json()).toEqual([])",
+  ]){
     assert.ok(e2e.includes(token),token);
   }
   assert.match(workflow,/v5-cross-device\.spec\.ts/);
