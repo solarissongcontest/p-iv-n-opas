@@ -7,7 +7,7 @@ import {
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useMemo, type ReactNode } from "react";
 
 import foundationsCss from "../styles/foundations.css?url";
 import glassCss from "../styles/glass.css?url";
@@ -28,7 +28,7 @@ function NotFoundComponent() {
         <div className="mt-6">
           <Link
             to="/"
-            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+            className="inline-flex min-h-11 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
           >
             Takaisin etusivulle
           </Link>
@@ -39,13 +39,16 @@ function NotFoundComponent() {
 }
 
 function ErrorComponent({ error, reset }: { error: unknown; reset: () => void }) {
-  console.error(error);
   const router = useRouter();
-  const normalizedError =
-    error instanceof Error
-      ? error
-      : new Error(typeof error === "string" ? error : "Tuntematon sovellusvirhe");
+  const normalizedError = useMemo(
+    () =>
+      error instanceof Error
+        ? error
+        : new Error(typeof error === "string" ? "NonErrorThrown" : "Tuntematon sovellusvirhe"),
+    [error],
+  );
   useEffect(() => {
+    console.error(normalizedError);
     reportLovableError(normalizedError, { boundary: "tanstack_root_error_component" });
   }, [normalizedError]);
 
@@ -64,13 +67,13 @@ function ErrorComponent({ error, reset }: { error: unknown; reset: () => void })
               router.invalidate();
               reset();
             }}
-            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+            className="inline-flex min-h-11 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
           >
             Yritä uudelleen
           </button>
           <a
             href="/"
-            className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
+            className="inline-flex min-h-11 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
           >
             Takaisin etusivulle
           </a>
