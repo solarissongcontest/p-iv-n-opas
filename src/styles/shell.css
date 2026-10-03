@@ -47,6 +47,15 @@
   padding-bottom:
     calc(
       var(--app-tabbar-height)
+      + 1.75rem
+      + env(safe-area-inset-bottom, 0px)
+    );
+}
+
+.app-main-has-context-action {
+  padding-bottom:
+    calc(
+      var(--app-tabbar-height)
       + 6.25rem
       + env(safe-area-inset-bottom, 0px)
     );
@@ -421,6 +430,15 @@
 
   .app-main {
     padding-inline: var(--page-inline-compact);
+    padding-bottom:
+      calc(
+        var(--app-tabbar-height)
+        + 1.75rem
+        + env(safe-area-inset-bottom, 0px)
+      );
+  }
+
+  .app-main.app-main-has-context-action {
     padding-bottom:
       calc(
         var(--app-tabbar-height)
