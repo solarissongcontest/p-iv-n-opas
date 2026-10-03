@@ -181,6 +181,22 @@ test("Study OS browser flows never fall back to blocking native prompt confirm o
   }
 });
 
+test("API catch responses never serialize raw provider error messages", () => {
+  const routeDir = new URL("../src/routes", import.meta.url);
+  const apiRoutes = readdirSync(routeDir)
+    .filter((name) => name.startsWith("api.") && name.endsWith(".ts"));
+
+  for (const name of apiRoutes) {
+    const route = read("src/routes/" + name);
+    assert.doesNotMatch(
+      route,
+      /error\s+instanceof\s+Error\s*\?\s*error\.message/,
+      name + " must return a generic client-safe error instead of error.message",
+    );
+    assert.equal(route.includes("String(error)"), false, name + " must not serialize String(error)");
+  }
+});
+
 test("device auth never returns raw provider errors to the student UI", () => {
   const route = read("src/routes/api.device-auth.ts");
   assert.match(route, /Laitetunnistusta ei voitu juuri nyt luoda\. Yritä uudelleen\./);
