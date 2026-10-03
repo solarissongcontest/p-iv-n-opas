@@ -147,6 +147,7 @@ test("production database migrations are manual preview-first and confirmation-g
   const workflow = read(".github/workflows/database-migrate.yml");
 
   assert.match(workflow, /workflow_dispatch:/);
+  assert.match(workflow, /github\.ref == 'refs\/heads\/main'/);
   assert.equal(/\n\s*push:/.test(workflow), false);
   assert.match(workflow, /group: production-database-migrations/);
   assert.match(workflow, /cancel-in-progress: false/);
