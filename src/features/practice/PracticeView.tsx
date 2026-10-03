@@ -758,7 +758,7 @@ export function PracticeView({
 
         {sessionState==="setup" && <div className="practice-start-panel"><button type="button" className={primary} disabled={!courseId || !selectedTopic} onClick={()=>{sessionStartedAt.current=Date.now();setCompletedCount(0);setSessionState("active");}}>Aloita harjoittelu</button><p className="mt-2 text-xs text-muted-foreground">Harjoituksen aikana asetukset ja tukipaneelit väistyvät tehtävän tieltä.</p></div>}
 
-        {sessionState==="active" && <div className="practice-focus-toolbar"><button type="button" className={secondary+" !min-h-10"} onClick={()=>setSessionState("summary")}><ChevronLeft size={16}/>Lopeta</button><span className="text-sm text-muted-foreground">{completedCount} tehtävää tehty</span></div>}
+        {sessionState==="active" && <div className="practice-focus-toolbar"><button type="button" className={secondary+" !min-h-11"} onClick={()=>setSessionState("summary")}><ChevronLeft size={16}/>Lopeta</button><span className="text-sm text-muted-foreground">{completedCount} tehtävää tehty</span></div>}
 
 
 
@@ -1031,7 +1031,7 @@ export function PracticeView({
                 {feedback}
                 <div className="mt-3">
                   {feedbackPolicy?.timing === "after_retry" ? (
-                    <button type="button" className={primary+" !min-h-9"} onClick={() => {
+                    <button type="button" className={primary+" !min-h-11"} onClick={() => {
                       setRetryCount((value) => value + 1);
                       setFeedback("");
                       setFeedbackPolicy(null);
@@ -1044,11 +1044,11 @@ export function PracticeView({
                     </button>
                   ) : (
                     <>
-                      {feedbackPolicy?.reveal !== "none" && <button type="button" className={secondary+" !min-h-9"} onClick={() => setShowExplanation((value) => !value)}>
+                      {feedbackPolicy?.reveal !== "none" && <button type="button" className={secondary+" !min-h-11"} onClick={() => setShowExplanation((value) => !value)}>
                         {showExplanation ? "Piilota selitys" : "Näytä täysi selitys"}
                       </button>}
                       {showExplanation && <p className="mt-2 rounded-lg bg-surface/70 p-3">{selection.question.explanation}</p>}
-                      <button type="button" className={primary+" mt-3 !min-h-9"} onClick={() => {setPinnedSelection(null);setCompletedCount((value)=>value+1);setAttemptIndex((value) => value + 1);}}>
+                      <button type="button" className={primary+" mt-3 !min-h-11"} onClick={() => {setPinnedSelection(null);setCompletedCount((value)=>value+1);setAttemptIndex((value) => value + 1);}}>
                         Seuraava tehtävä
                       </button>
                     </>
