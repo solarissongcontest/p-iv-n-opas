@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Archive, Bell, ChevronLeft, ChevronRight, Pencil, Plus, RotateCcw } from "lucide-react";
+import { Archive, Bell, Brain, ChevronLeft, ChevronRight, Pencil, Plus, RotateCcw } from "lucide-react";
 import { toast } from "sonner";
 import {
   Area,
@@ -277,6 +277,11 @@ export function TodayView({courses,topics,sessions,exams,plan,tests,attempts,mis
       <p className="mt-2 text-sm text-muted-foreground">Tämän päivän tärkeimmät oppimistarpeet ovat hallinnassa. Tyhjä päivä ei ole järjestelmävirhe.</p>
       <button className={secondary+" mt-4"} onClick={()=>onGo("plan")}>Avaa suunnitelma</button>
     </>}</Panel>
+
+    <button type="button" className="today-practice-shortcut flex min-h-14 w-full items-center justify-between gap-4 rounded-2xl border border-border bg-surface px-4 py-3 text-left hover:bg-muted" onClick={()=>onGo("practice")}>
+      <span className="flex min-w-0 items-center gap-3"><span className="grid size-10 shrink-0 place-items-center rounded-xl bg-accent text-primary"><Brain size={19}/></span><span><b className="block">Harjoittele</b><small className="block text-muted-foreground">Lyhyt tehtäväkierros ilman erillisen suunnitelman rakentamista.</small></span></span>
+      <span aria-hidden="true" className="text-muted-foreground">›</span>
+    </button>
 
     {recovery.items.length>0&&<Panel className="today-support-section" title="Kertaa seuraavaksi" action={<span className="text-sm font-medium text-muted-foreground">noin {minutes(recovery.estimatedMinutes)}</span>}>
       <div className="space-y-2">{recovery.items.map(row=><div key={row.topic.id} className="flex items-center justify-between gap-3 rounded-xl bg-muted/60 p-3"><span><b>{courses.find(c=>c.id===row.topic.course_id)?.code}</b> · {row.topic.name}<small className="mt-1 block text-muted-foreground">{row.reason}</small></span><span className="text-xs text-muted-foreground">{row.state.masteryLabel}</span></div>)}</div>
