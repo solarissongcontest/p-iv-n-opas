@@ -126,6 +126,16 @@ test("planner uses calendar-safe month movement and avoids browser prompts", () 
   assert.match(calendar, /mondayOffset/);
 });
 
+test("service worker supports offline cold starts without caching API responses", () => {
+  const sw = read("public/sw.js");
+  assert.match(sw, /addEventListener\("install"/);
+  assert.match(sw, /addEventListener\("activate"/);
+  assert.match(sw, /addEventListener\("fetch"/);
+  assert.match(sw, /request\.mode === "navigate"/);
+  assert.match(sw, /url\.pathname\.startsWith\("\/api\/"\)/);
+  assert.match(sw, /candidate\.origin === self\.location\.origin/);
+});
+
 test("active practice suppresses competing app chrome", () => {
   const layouts = read("src/styles/layouts.css");
   assert.match(layouts, /:has\(\.practice-session-active\)/);
