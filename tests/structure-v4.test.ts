@@ -272,6 +272,24 @@ test("device session refreshes before expiry and immediately when the network re
   assert.match(app, /getArthurSession\(previousOwnerId\)/);
 });
 
+test("trusted device identity survives token expiry for owner-scoped offline snapshots", () => {
+  const session = read("src/lib/deviceSession.ts");
+  const app = read("src/app/StudyApp.tsx");
+  assert.match(session, /readCachedDeviceUser/);
+  assert.match(session, /isTrustedArthurDevice\(\)/);
+  assert.match(app, /existing\?\.user \?\? readCachedDeviceUser\(\)/);
+  assert.match(app, /Paikallinen käyttö jatkuu/);
+  assert.match(app, /cachedUser && active/);
+});
+
+test("failed course loading never masquerades as a genuinely empty account", () => {
+  const app = read("src/app/StudyApp.tsx");
+  assert.match(app, /const coursesUnavailable =/);
+  assert.match(app, /Kurssitietoja ei saatu näkyviin/);
+  assert.match(app, /Tämä ei tarkoita, että kurssisi olisivat kadonneet/);
+  assert.ok(app.indexOf("coursesUnavailable ?") < app.indexOf("courses.length===0 ?"));
+});
+
 test("AI coach keeps provider diagnostics out of the normal student UI", () => {
   const coach = read("src/components/AICoach.tsx");
   assert.match(coach, /Tekoälyohjaus ei ole juuri nyt käytettävissä\./);
