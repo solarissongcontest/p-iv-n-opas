@@ -105,6 +105,15 @@ test("styles are layered and responsive page families remain explicit", () => {
 });
 
 
+test("course Continue opens the next planned item before falling back to manual logging", () => {
+  const app = read("src/app/StudyApp.tsx");
+  const course = read("src/features/studies/CourseView.tsx");
+  assert.match(app, /const continueCourse = \(id: string \| null\)/);
+  assert.match(app, /setEntry\(nextItem\?\.id \?\? "manual"\)/);
+  assert.match(app, /onStart=\{\(\)=>continueCourse\(courseId\)\}/);
+  assert.match(course, />Aloita seuraava<\/button>/);
+});
+
 test("settings keep the learning engine behind advanced disclosure", () => {
   const settings = read("src/features/settings/SettingsView.tsx");
   assert.match(settings, /title="Suunnittelutapa"/);
