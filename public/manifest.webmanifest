@@ -9,7 +9,6 @@
     "standalone",
     "minimal-ui"
   ],
-  "orientation": "portrait-primary",
   "background_color": "#f7f7f7",
   "theme_color": "#f7f7f7",
   "lang": "fi",
