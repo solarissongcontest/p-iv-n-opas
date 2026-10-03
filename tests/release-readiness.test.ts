@@ -240,17 +240,23 @@ test("README documents the simplified four-destination mobile navigation", () =>
 });
 
 
-test("production database migrations are manual preview-first and confirmation-gated", () => {
+test("production database migration is previewed in PR and one-time apply is guarded on main", () => {
   const workflow = read(".github/workflows/database-migrate.yml");
+  const trigger = read(".github/db-production-apply.trigger").trim();
 
+  assert.match(workflow, /pull_request:/);
+  assert.match(workflow, /push:/);
   assert.match(workflow, /workflow_dispatch:/);
-  assert.match(workflow, /github\.ref == 'refs\/heads\/main'/);
-  assert.equal(/\n\s*push:/.test(workflow), false);
+  assert.match(workflow, /\.github\/db-production-apply\.trigger/);
   assert.match(workflow, /group: production-database-migrations/);
   assert.match(workflow, /cancel-in-progress: false/);
   assert.match(workflow, /POSTGRES_URL: \$\{\{ secrets\.POSTGRES_URL \}\}/);
+  assert.match(workflow, /Validate guarded main-push trigger/);
+  assert.match(workflow, /EXPECTED="APPLY 20261003190500_plan_item_concurrency\.sql"/);
+  assert.equal(trigger, "APPLY 20261003190500_plan_item_concurrency.sql");
   assert.match(workflow, /supabase@2\.117\.0 db push --db-url "\$POSTGRES_URL" --dry-run/);
-  assert.match(workflow, /inputs\.mode == 'apply'/);
+  assert.match(workflow, /github\.event_name == 'push'/);
+  assert.match(workflow, /github\.event_name == 'workflow_dispatch' && inputs\.mode == 'apply'/);
   assert.match(workflow, /CONFIRMATION/);
   assert.match(workflow, /\[ "\$CONFIRMATION" != "APPLY" \]/);
   assert.match(workflow, /supabase@2\.117\.0 db push --db-url "\$POSTGRES_URL"/);
@@ -258,9 +264,8 @@ test("production database migrations are manual preview-first and confirmation-g
   assert.equal(workflow.includes("--include-seed"), false);
 
   const preview = workflow.indexOf("Preview pending migrations");
-  const confirmation = workflow.indexOf("Validate apply confirmation");
   const apply = workflow.indexOf("Apply pending migrations");
-  assert.ok(preview >= 0 && preview < confirmation && confirmation < apply);
+  assert.ok(preview >= 0 && preview < apply);
 });
 
 test("production build is side-effect free and database migration is explicit", () => {
