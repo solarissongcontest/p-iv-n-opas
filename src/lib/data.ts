@@ -749,7 +749,11 @@ async function doRecordPracticeAttempt(payload: unknown, operationId: string) {
   return data as string;
 }
 
-type PlanMutationExpectation = { expected_updated_at?: string | null };
+type PlanMutationExpectation = {
+  expected_updated_at?: string | null;
+  expected_status?: string | null;
+  expected_target_minutes?: number | null;
+};
 
 export function isPlanSyncConflict(error: unknown) {
   return error instanceof Error && error.message.startsWith("SYNC_CONFLICT:");
@@ -762,10 +766,11 @@ function planSyncConflict() {
 async function doUpdatePlanStatus(payload: unknown) {
   const p = payload as { id: string; status: string } & PlanMutationExpectation;
   let query = supabase.from("plan_items").update({ status: p.status }).eq("id", p.id);
+  if (p.expected_status) query = query.eq("status", p.expected_status);
   if (p.expected_updated_at) query = query.eq("updated_at", p.expected_updated_at);
   const { data, error } = await query.select("id").maybeSingle();
   if (error) throw error;
-  if (p.expected_updated_at && !data) throw planSyncConflict();
+  if ((p.expected_status || p.expected_updated_at) && !data) throw planSyncConflict();
 }
 
 async function doMovePlanItem(payload: unknown) {
@@ -773,26 +778,35 @@ async function doMovePlanItem(payload: unknown) {
   let query = supabase
     .from("plan_items")
     .update({ date: p.date, moved_from: p.from, status: "planned" })
-    .eq("id", p.id);
+    .eq("id", p.id)
+    .eq("date", p.from);
+  if (p.expected_status) query = query.eq("status", p.expected_status);
   if (p.expected_updated_at) query = query.eq("updated_at", p.expected_updated_at);
   const { data, error } = await query.select("id").maybeSingle();
   if (error) throw error;
-  if (p.expected_updated_at && !data) throw planSyncConflict();
+  if (!data) throw planSyncConflict();
 }
 
 async function doUpsertPlanItem(payload: unknown, operationId: string) {
   const p = payload as Partial<PlanItem> & { id?: string; course_id: string; date: string } & PlanMutationExpectation;
   if (p.id) {
-    const { id, expected_updated_at, ...rest } = p;
+    const { id, expected_updated_at, expected_status, expected_target_minutes, ...rest } = p;
     let query = supabase.from("plan_items").update(rest).eq("id", id);
+    if (expected_status) query = query.eq("status", expected_status);
+    if (typeof expected_target_minutes === "number") query = query.eq("target_minutes", expected_target_minutes);
     if (expected_updated_at) query = query.eq("updated_at", expected_updated_at);
     const { data, error } = await query.select("id").maybeSingle();
     if (error) throw error;
-    if (expected_updated_at && !data) throw planSyncConflict();
+    if ((expected_status || typeof expected_target_minutes === "number" || expected_updated_at) && !data) throw planSyncConflict();
     return id;
   }
 
-  const { expected_updated_at: _expectedUpdatedAt, ...insert } = p;
+  const {
+    expected_updated_at: _expectedUpdatedAt,
+    expected_status: _expectedStatus,
+    expected_target_minutes: _expectedTargetMinutes,
+    ...insert
+  } = p;
   const { error } = await supabase
     .from("plan_items")
     .upsert({ ...insert, id: operationId } as never, { onConflict: "id" });
@@ -968,7 +982,7 @@ export function useRecordPracticeAttempt() {
 export function usePlanStatus() {
   const invalidate = useInvalidateAll();
   return useMutation({
-    mutationFn: (input: { id: string; status: string; expected_updated_at?: string | null }) => runOrQueue("updatePlanStatus", input),
+    mutationFn: (input: { id: string; status: string; expected_updated_at?: string | null; expected_status?: string | null }) => runOrQueue("updatePlanStatus", input),
     onSettled: invalidate,
   });
 }
@@ -976,7 +990,7 @@ export function usePlanStatus() {
 export function useMovePlanItem() {
   const invalidate = useInvalidateAll();
   return useMutation({
-    mutationFn: (input: { id: string; date: string; from: string; expected_updated_at?: string | null }) =>
+    mutationFn: (input: { id: string; date: string; from: string; expected_updated_at?: string | null; expected_status?: string | null }) =>
       runOrQueue("movePlanItem", input),
     onSettled: invalidate,
   });
@@ -1010,7 +1024,14 @@ export function useGeneratePlan() {
 export function useUpsertPlanItem() {
   const invalidate = useInvalidateAll();
   return useMutation({
-    mutationFn: (input: Partial<PlanItem> & { id?: string; course_id: string; date: string; expected_updated_at?: string | null }) =>
+    mutationFn: (input: Partial<PlanItem> & {
+      id?: string;
+      course_id: string;
+      date: string;
+      expected_updated_at?: string | null;
+      expected_status?: string | null;
+      expected_target_minutes?: number | null;
+    }) =>
       runOrQueue("upsertPlanItem", input),
     onSettled: invalidate,
   });
