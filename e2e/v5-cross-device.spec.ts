@@ -49,6 +49,39 @@ async function cleanupSession(
   ).catch(() => undefined);
 }
 
+async function cleanupPlanItem(
+  context: BrowserContext,
+  page: Page,
+  supabaseOrigin: string | null,
+  apiKey: string | null,
+  marker: string,
+) {
+  if (!supabaseOrigin || !apiKey) return;
+  const token = await page.evaluate(() => localStorage.getItem("opk.device-token"));
+  if (!token) return;
+  await context.request.delete(
+    supabaseOrigin + "/rest/v1/plan_items?title=eq." + encodeURIComponent(marker),
+    {
+      headers: {
+        apikey: apiKey,
+        Authorization: "Bearer " + token,
+        Prefer: "return=minimal",
+      },
+    },
+  ).catch(() => undefined);
+}
+
+async function movePlannerItem(page: Page, marker: string, date: string) {
+  const item = page.locator("article.planner-agenda-item").filter({ hasText: marker });
+  await expect(item).toBeVisible();
+  await item.getByLabel("Tehtävän toiminnot").click();
+  await item.getByRole("button", { name: "Siirrä" }).click();
+  const dialog = page.getByRole("dialog", { name: "Siirrä tehtävä" });
+  await expect(dialog).toBeVisible();
+  await dialog.locator('input[type="date"]').fill(date);
+  await dialog.getByRole("button", { name: "Siirrä", exact: true }).click();
+}
+
 test("installed-style app shell survives a cold offline navigation", async ({ browser }) => {
   const context = await browser.newContext({ serviceWorkers: "allow" });
   const page = await context.newPage();
@@ -102,6 +135,67 @@ test("expired device token does not lock a trusted device out of offline study d
   } finally {
     await context.setOffline(false).catch(() => undefined);
     await context.close();
+  }
+});
+
+test("stale planner edit from a second device cannot overwrite a newer move", async ({ browser }) => {
+  const contextA = await browser.newContext({ serviceWorkers: "allow" });
+  const pageA = await contextA.newPage();
+  let supabaseOrigin: string | null = null;
+  let apiKey: string | null = null;
+
+  pageA.on("request", (request) => {
+    if (!request.url().includes("/rest/v1/") && !request.url().includes("/rpc/")) return;
+    try {
+      const url = new URL(request.url());
+      if (!/supabase/i.test(url.hostname)) return;
+      supabaseOrigin = url.origin;
+      apiKey = request.headers()["apikey"] ?? apiKey;
+    } catch {
+      // Ignore unrelated requests.
+    }
+  });
+
+  const marker = "OPK-CONFLICT-" + Date.now();
+  const originalDate = "2026-10-20";
+  const firstMoveDate = "2026-10-21";
+  const staleMoveDate = "2026-10-22";
+  const contextB = await browser.newContext({ serviceWorkers: "allow" });
+  const pageB = await contextB.newPage();
+
+  try {
+    await enterApp(pageA);
+    await pageA.goto("/plan/day/" + originalDate, { waitUntil: "domcontentloaded" });
+    await pageA.getByRole("button", { name: "Lisää tehtävä" }).click();
+    const createDialog = pageA.getByRole("dialog", { name: "Lisää opiskelutehtävä" });
+    await createDialog.getByLabel("Tehtävän nimi").fill(marker);
+    await createDialog.getByLabel("Tavoiteaika (min)").fill("10");
+    await createDialog.getByRole("button", { name: "Lisää suunnitelmaan" }).click();
+    await expect(pageA.getByText(marker, { exact: true })).toBeVisible({ timeout: 30_000 });
+
+    // Device B deliberately loads the same row before device A changes it.
+    await enterApp(pageB);
+    await pageB.goto("/plan/day/" + originalDate, { waitUntil: "domcontentloaded" });
+    await expect(pageB.getByText(marker, { exact: true })).toBeVisible({ timeout: 30_000 });
+
+    await movePlannerItem(pageA, marker, firstMoveDate);
+    await expect(pageA.getByText("Tehtävä siirretty.", { exact: true })).toBeVisible();
+
+    // B still holds originalDate in its cached PlanItem. Its guarded mutation
+    // must affect zero rows and surface a sync conflict instead of overwriting A.
+    await movePlannerItem(pageB, marker, staleMoveDate);
+    await expect(
+      pageB.getByText("Tehtävää muutettiin toisella laitteella. Uusin versio ladattiin.", { exact: true }),
+    ).toBeVisible({ timeout: 15_000 });
+
+    await pageB.goto("/plan/day/" + firstMoveDate, { waitUntil: "domcontentloaded" });
+    await expect(pageB.getByText(marker, { exact: true })).toBeVisible({ timeout: 30_000 });
+    await pageB.goto("/plan/day/" + staleMoveDate, { waitUntil: "domcontentloaded" });
+    await expect(pageB.getByText(marker, { exact: true })).toBeHidden();
+  } finally {
+    await cleanupPlanItem(contextA, pageA, supabaseOrigin, apiKey, marker);
+    await contextB.close();
+    await contextA.close();
   }
 });
 
