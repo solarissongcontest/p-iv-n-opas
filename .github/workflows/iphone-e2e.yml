@@ -55,7 +55,7 @@ jobs:
         id: resolve
         shell: bash
         env:
-          INPUT_BASE_URL: ${{ inputs.base_url }}
+          INPUT_BASE_URL: ${{ github.event.inputs.base_url || '' }}
           REPOSITORY_BASE_URL: ${{ vars.PRODUCTION_BASE_URL }}
         run: |
           if [ -n "$INPUT_BASE_URL" ]; then
