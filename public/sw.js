@@ -8,10 +8,26 @@ const SHELL_ASSETS = [
   "/app-icon-512.jpg",
 ];
 
+const OPTIONAL_STUDY_ASSETS = [
+  "https://unpkg.com/rich-text-editor@8.13.0/dist/rich-text-editor-bundle.js",
+  "https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-svg.js",
+];
+
+function isApprovedStudyCdnAsset(url) {
+  return (
+    (url.origin === "https://unpkg.com" &&
+      url.pathname.startsWith("/rich-text-editor@8.13.0/")) ||
+    (url.origin === "https://cdn.jsdelivr.net" &&
+      url.pathname.startsWith("/npm/mathjax@3.2.2/"))
+  );
+}
+
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(SHELL_CACHE).then(async (cache) => {
-      await Promise.allSettled(SHELL_ASSETS.map((asset) => cache.add(asset)));
+      await Promise.allSettled(
+        [...SHELL_ASSETS, ...OPTIONAL_STUDY_ASSETS].map((asset) => cache.add(asset)),
+      );
     }),
   );
 });
@@ -42,13 +58,16 @@ self.addEventListener("fetch", (event) => {
   if (request.method !== "GET") return;
 
   const url = new URL(request.url);
-  if (url.origin !== self.location.origin || url.pathname.startsWith("/api/")) return;
+  const sameOrigin = url.origin === self.location.origin;
+  const approvedStudyCdn = isApprovedStudyCdnAsset(url);
+  if (!sameOrigin && !approvedStudyCdn) return;
+  if (sameOrigin && url.pathname.startsWith("/api/")) return;
 
-  if (request.mode === "navigate") {
+  if (sameOrigin && request.mode === "navigate") {
     event.respondWith(
       fetch(request)
         .then((response) => {
-          if (response.ok) {
+          if (response.ok || response.type === "opaque") {
             const copy = response.clone();
             event.waitUntil(caches.open(RUNTIME_CACHE).then((cache) => cache.put(request, copy)));
           }
@@ -69,6 +88,7 @@ self.addEventListener("fetch", (event) => {
   }
 
   const isStaticAsset =
+    approvedStudyCdn ||
     ["script", "style", "font", "image"].includes(request.destination) ||
     /\.(?:js|css|woff2?|png|jpe?g|svg|ico|webp)$/i.test(url.pathname);
 
