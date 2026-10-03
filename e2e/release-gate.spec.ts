@@ -80,6 +80,41 @@ test.describe("Final release gate", () => {
     if (timing !== null) expect(timing).toBeLessThan(10_000);
   });
 
+  test("device session renews before expiry without a reload or focus event", async ({ page }) => {
+    let authCalls = 0;
+    let forcedExpiry = 0;
+
+    await page.route("**/api/device-auth", async (route) => {
+      authCalls += 1;
+      const response = await route.fetch();
+      if (authCalls !== 1) {
+        await route.fulfill({ response });
+        return;
+      }
+
+      const payload = await response.json() as {
+        access_token?: string;
+        user_id?: string;
+        expires_at?: number;
+        error?: string;
+      };
+      forcedExpiry = Date.now() + 65_000;
+      await route.fulfill({
+        response,
+        json: { ...payload, expires_at: forcedExpiry },
+      });
+    });
+
+    await enterApp(page);
+    expect(forcedExpiry).toBeGreaterThan(0);
+
+    await expect.poll(() => authCalls, { timeout: 20_000 }).toBeGreaterThanOrEqual(2);
+    const renewedExpiry = await page.evaluate(() =>
+      Number(localStorage.getItem("opk.device-token-expires") ?? "0"),
+    );
+    expect(renewedExpiry).toBeGreaterThan(forcedExpiry);
+  });
+
   test("production release identity is available and uncached", async ({ request, baseURL }) => {
     expect(baseURL).toBeTruthy();
     const response = await request.get(new URL("/api/release-info", baseURL).toString());

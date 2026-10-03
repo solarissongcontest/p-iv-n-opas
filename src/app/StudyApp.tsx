@@ -115,30 +115,79 @@ export function StudyAppRoot({ initialPage, courseCode, courseTab, examId, progr
     if (!user) return;
 
     let active = true;
-    const verifyCanonicalOwner = () => {
-      if (document.visibilityState !== "visible") return;
-      const previousOwnerId = getDeviceOwnerId() ?? user.id;
-      void getArthurSession(previousOwnerId)
-        .then((canonicalUser) => {
-          if (!active || canonicalUser.id === user.id) return;
-          queryClient.clear();
-          setUser(canonicalUser);
-        })
-        .catch(() => {
-          // Keep the current cached session. A later focus/online startup retries.
-        });
+    let refreshTimer: number | null = null;
+
+    const clearRefreshTimer = () => {
+      if (refreshTimer !== null) {
+        window.clearTimeout(refreshTimer);
+        refreshTimer = null;
+      }
     };
 
-    const onVisibility = () => {
-      if (document.visibilityState === "visible") verifyCanonicalOwner();
+    const scheduleSessionRefresh = () => {
+      clearRefreshTimer();
+      if (!active) return;
+
+      const session = readDeviceSession();
+      const refreshLeadMs = 60_000;
+      const minimumDelayMs = 5_000;
+      const fallbackDelayMs = 60_000;
+      const delay = session
+        ? Math.max(minimumDelayMs, session.expiresAt - Date.now() - refreshLeadMs)
+        : fallbackDelayMs;
+
+      refreshTimer = window.setTimeout(() => {
+        void verifyCanonicalOwner(true);
+      }, delay);
     };
-    window.addEventListener("focus", verifyCanonicalOwner);
-    window.addEventListener("online", verifyCanonicalOwner);
+
+    const verifyCanonicalOwner = async (force = false) => {
+      if (!force && document.visibilityState !== "visible") return;
+      if (typeof navigator !== "undefined" && !navigator.onLine) {
+        scheduleSessionRefresh();
+        return;
+      }
+
+      const previousOwnerId = getDeviceOwnerId() ?? user.id;
+      try {
+        const canonicalUser = await getArthurSession(previousOwnerId);
+        if (!active) return;
+
+        if (canonicalUser.id !== user.id) {
+          queryClient.clear();
+          setUser(canonicalUser);
+          return;
+        }
+
+        // getArthurSession stores a fresh token even when the owner stays the same.
+        // Schedule the next renewal from that newly stored expiry.
+        scheduleSessionRefresh();
+      } catch {
+        if (!active) return;
+        // Keep the current cached session and try again soon while online.
+        clearRefreshTimer();
+        refreshTimer = window.setTimeout(() => {
+          void verifyCanonicalOwner(true);
+        }, 60_000);
+      }
+    };
+
+    const refreshNow = () => {
+      void verifyCanonicalOwner();
+    };
+    const onVisibility = () => {
+      if (document.visibilityState === "visible") refreshNow();
+    };
+
+    scheduleSessionRefresh();
+    window.addEventListener("focus", refreshNow);
+    window.addEventListener("online", refreshNow);
     document.addEventListener("visibilitychange", onVisibility);
     return () => {
       active = false;
-      window.removeEventListener("focus", verifyCanonicalOwner);
-      window.removeEventListener("online", verifyCanonicalOwner);
+      clearRefreshTimer();
+      window.removeEventListener("focus", refreshNow);
+      window.removeEventListener("online", refreshNow);
       document.removeEventListener("visibilitychange", onVisibility);
     };
   }, [queryClient, user]);
