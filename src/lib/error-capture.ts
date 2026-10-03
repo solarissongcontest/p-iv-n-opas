@@ -74,7 +74,7 @@ function safeConsoleArg(value: unknown): unknown {
     const trimmed = value.trim();
     if (
       trimmed.length <= 180 &&
-      /^\[(?:Opintopäiväkirja|Supabase|db|server)\]\s+[A-Za-z0-9 _.,:;()\/-]+$/i.test(trimmed)
+      /^\[(?:Opintopäiväkirja|Supabase|db|server)\]\s+[A-Za-z0-9 _.,:;()\x2F-]+$/i.test(trimmed)
     ) return trimmed;
     return "[string redacted]";
   }
