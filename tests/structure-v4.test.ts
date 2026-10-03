@@ -319,6 +319,20 @@ test("active practice suppresses competing app chrome", () => {
   assert.match(layouts, /:has\(\.practice-session-active\)/);
 });
 
+test("guided study presents three simple phases and one primary self-assessment", () => {
+  const session = read("src/features/session/SessionForm.tsx");
+  assert.match(session, /\["Muista","Opiskele","Tarkista"\]/);
+  assert.match(session, /Mitä muistat jo\?/);
+  assert.match(session, /Miten meni\?/);
+  assert.match(session, /Osasin itse/);
+  assert.match(session, /Vihjeellä/);
+  assert.match(session, /En vielä/);
+  assert.match(session, /Lisäarvio/);
+  assert.equal(session.includes('["Tavoite","Muistelu","Harjoittelu","Palautus","Yhteenveto"]'), false);
+  assert.equal(session.includes("Tavoite saavutettu?"), false);
+  assert.equal(session.includes("Oma yleisarvio 1–5"), false);
+});
+
 test("planned study sessions and running exams suppress competing chrome", () => {
   const app = read("src/app/StudyApp.tsx");
   const session = read("src/features/session/SessionForm.tsx");
