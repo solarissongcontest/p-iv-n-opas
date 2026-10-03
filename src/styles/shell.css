@@ -140,7 +140,7 @@
   bottom: max(0.65rem, env(safe-area-inset-bottom, 0px)) !important;
   z-index: 30;
   display: grid !important;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   align-items: center;
   min-height: 64px;
   padding: 0.28rem 0.3rem;
@@ -503,6 +503,37 @@ html.dark .app-mobile-header {
   .desktop-sidebar .mt-auto button {
     justify-content: center;
     padding-inline: 0.65rem;
+  }
+
+  .desktop-sidebar [data-tooltip] {
+    position: relative;
+  }
+
+  .desktop-sidebar [data-tooltip]::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    left: calc(100% + 0.65rem);
+    top: 50%;
+    z-index: 80;
+    width: max-content;
+    max-width: 12rem;
+    transform: translate(0.25rem, -50%);
+    border: 1px solid var(--hairline);
+    border-radius: 0.65rem;
+    background: var(--surface);
+    padding: 0.4rem 0.6rem;
+    box-shadow: var(--shadow-card);
+    color: var(--foreground);
+    font-size: 0.75rem;
+    font-weight: 600;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 120ms var(--ease-calm), transform 120ms var(--ease-calm);
+  }
+
+  .desktop-sidebar [data-tooltip]:is(:hover, :focus-visible)::after {
+    opacity: 1;
+    transform: translate(0, -50%);
   }
 
   .desktop-sidebar > div:first-child {
