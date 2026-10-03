@@ -642,6 +642,73 @@ html.dark .app-mobile-header {
 }
 
 
+/* ---------- PWA updates ---------- */
+.pwa-update-prompt {
+  position: fixed;
+  left: 50%;
+  bottom: calc(var(--app-tabbar-height) + 1.35rem + env(safe-area-inset-bottom, 0px));
+  z-index: 55;
+  display: flex;
+  width: min(calc(100% - 1.5rem), 560px);
+  transform: translateX(-50%);
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  background: var(--surface);
+  padding: 0.8rem 0.9rem;
+  box-shadow: var(--shadow-card);
+}
+
+.pwa-update-prompt p {
+  margin-top: 0.2rem;
+  color: var(--muted-foreground);
+  font-size: 0.75rem;
+}
+
+.pwa-update-actions {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 0.4rem;
+}
+
+.pwa-update-actions button {
+  min-height: 44px;
+  border-radius: 0.75rem;
+  padding-inline: 0.75rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.pwa-update-primary {
+  background: var(--primary);
+  color: var(--primary-foreground);
+}
+
+body:has(.study-session-focus) .pwa-update-prompt,
+body:has(.practice-session-active) .pwa-update-prompt,
+body:has(.exam-simulation-running) .pwa-update-prompt {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .pwa-update-prompt {
+    bottom: 1.5rem;
+  }
+}
+
+@media (max-width: 430px) {
+  .pwa-update-prompt {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .pwa-update-actions {
+    justify-content: flex-end;
+  }
+}
+
 /* ---------- Opintocoach ---------- */
 /* Coach is a control layer: Liquid Glass belongs on the trigger and header,
    while the reading/writing body stays opaque and calm. */
