@@ -2,7 +2,18 @@ import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 import { enterApp, expectNoHorizontalOverflow } from "./helpers";
 
-const ROUTES = ["/today", "/plan", "/studies", "/practice", "/progress", "/settings/study"];
+const ROUTES = [
+  "/today",
+  "/plan",
+  "/plan/month/2026-10",
+  "/studies",
+  "/practice",
+  "/progress",
+  "/exams",
+  "/settings/study",
+  "/settings/notifications",
+  "/settings/app",
+];
 
 test.describe("Final release gate", () => {
   test("primary routes load, stay keyboard reachable and have no serious WCAG violations", async ({ page }) => {
