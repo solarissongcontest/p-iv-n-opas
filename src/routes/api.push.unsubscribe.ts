@@ -46,9 +46,9 @@ export const Route = createFileRoute("/api/push/unsubscribe")({
 
           return Response.json({ ok: true });
         } catch (error) {
-          console.error("[push/unsubscribe]", error);
+          console.error("[Opintopäiväkirja] push unsubscribe failed", error);
           return Response.json(
-            { error: error instanceof Error ? error.message : "Taustailmoitustilauksen poisto epäonnistui." },
+            { error: "Taustailmoitustilausta ei voitu poistaa." },
             { status: 500 },
           );
         }
