@@ -230,10 +230,12 @@ test("offline queue survives malformed storage and deduplicates operation ids", 
   assert.match(offline, /items\.some\(\(item\) => item\.id === id\)/);
 });
 
-test("device session refreshes immediately when the network returns", () => {
+test("device session refreshes immediately when the network returns and before an online token expires", () => {
   const app = read("src/app/StudyApp.tsx");
   assert.match(app, /addEventListener\("online", verifyCanonicalOwner\)/);
   assert.match(app, /removeEventListener\("online", verifyCanonicalOwner\)/);
+  assert.match(app, /!getDeviceAccessToken\(\)/);
+  assert.match(app, /clearInterval\(authTimer\)/);
 });
 
 test("AI coach keeps provider diagnostics out of the normal student UI", () => {
