@@ -223,7 +223,7 @@ export function SettingsView({user:_user,section="study",onSectionChange}:{user:
         toast.success("Opiskelupäivät tallennettu.");
       }
     }catch(error){
-      toast.error(error instanceof Error?error.message:"Opiskelupäiviä ei voitu tallentaa.");
+      console.error("[Opintopäiväkirja] Study weekday save failed",error);toast.error("Opiskelupäiviä ei voitu tallentaa. Yritä uudelleen.");
     }
   }
 
@@ -288,7 +288,7 @@ export function SettingsView({user:_user,section="study",onSectionChange}:{user:
       <p className="text-sm text-muted-foreground">{pushSupported()?pushEnabled?"Taustailmoitukset ovat käytössä tällä laitteella. Muistutukset voivat saapua myös sovelluksen ollessa suljettu.":"Ota taustailmoitukset käyttöön, jos haluat muistutuksia sovelluksen ollessa suljettu.":"Tämä selain ei tue taustailmoituksia."}</p>
       {settings?<div className="mt-4 divide-y divide-border">{notificationOptions.map(([key,label,description])=><label key={key} className="flex min-h-14 items-center justify-between gap-4 py-2"><span><span className="block text-sm font-medium">{label}</span><span className="block text-xs text-muted-foreground">{description}</span></span><input type="checkbox" className="size-5 accent-primary" checked={settings[key]} onChange={e=>void updateSettings.mutateAsync({id:settings.id,[key]:e.target.checked}).catch(()=>toast.error("Ilmoitusasetusta ei voitu tallentaa."))}/></label>)}</div>:<p className="mt-4 text-sm text-muted-foreground">Ilmoitusasetuksia ladataan…</p>}
       <p className="mt-3 text-xs text-muted-foreground">Muistutukset ovat tarkoituksella rauhallisia. Saman aiheen turhaa pommitusta ei lähetetä.</p>
-      {pushEnabled&&<button className={secondary+" mt-4 !min-h-11"} onClick={()=>void sendTestPush().then(()=>toast.success("Testimuistutus lähetettiin palvelimelta.")).catch(error=>toast.error(error instanceof Error?error.message:"Testimuistutus epäonnistui."))}>Lähetä testimuistutus</button>}
+      {pushEnabled&&<button className={secondary+" mt-4 !min-h-11"} onClick={()=>void sendTestPush().then(()=>toast.success("Testimuistutus lähetettiin palvelimelta.")).catch(error=>{console.error("[Opintopäiväkirja] Test push failed",error);toast.error("Testimuistutus epäonnistui. Tarkista yhteys ja yritä uudelleen.");})}>Lähetä testimuistutus</button>}
     </Panel>
 
     <Panel className="settings-app-only" title="Ulkoasu"><label className="flex min-h-11 items-center justify-between">Tumma tila<input type="checkbox" className="size-5 accent-primary" checked={dark} onChange={e=>{const next=e.target.checked;setDark(next);localStorage.setItem("opk.theme",next?"dark":"light");applyTheme(next);}}/></label></Panel>
