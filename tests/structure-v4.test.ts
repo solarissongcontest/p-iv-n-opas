@@ -114,6 +114,14 @@ test("settings keep the learning engine behind advanced disclosure", () => {
   assert.match(settings, /settings-notifications-only" title="Taustamuistutukset"/);
 });
 
+test("simplified mobile navigation still keeps Practice directly reachable", () => {
+  const shell = read("src/app/AppShell.tsx");
+  const today = read("src/features/today/TodayView.tsx");
+  assert.match(shell, /<b>Harjoittelu<\/b>/);
+  assert.match(today, />Harjoittele<\/b>/);
+  assert.match(today, /onGo\("practice"\)/);
+});
+
 test("Today keeps one obvious next action and hides load controls behind disclosure", () => {
   const today = read("src/features/today/TodayView.tsx");
   assert.match(today, /title="Seuraavaksi"/);
