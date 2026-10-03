@@ -175,6 +175,8 @@ test("Today never uses browser prompts for missed-study handling", () => {
 
 test("Today keeps one obvious next action and hides load controls behind disclosure", () => {
   const today = read("src/features/today/TodayView.tsx");
+  assert.ok(today.indexOf('title="Seuraavaksi"') < today.indexOf('title="Tervetuloa takaisin"'));
+  assert.ok(today.indexOf('title="Seuraavaksi"') < today.indexOf('title={mode.finalStretch'));
   assert.match(today, /title="Seuraavaksi"/);
   assert.match(today, /Miksi tätä ehdotetaan\?/);
   assert.match(today, /Muuta tämän päivän kuormaa/);
