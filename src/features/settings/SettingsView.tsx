@@ -247,25 +247,37 @@ export function SettingsView({user:_user,section="study",onSectionChange}:{user:
       <div className="mt-5 border-t border-border pt-4"><p className="text-sm font-medium">Kiireiset päivät</p><p className="mt-1 text-xs text-muted-foreground">Kiireisenä päivänä suunnittelutoiminto varaa vain kevyen ylläpitokuorman.</p><div className="mt-3 flex flex-wrap gap-2"><input type="date" className="min-h-11 rounded-xl border bg-surface px-3" value={busyDate} onChange={e=>setBusyDate(e.target.value)}/><button className={secondary} disabled={!prefs||!busyDate} onClick={()=>{if(!prefs||!busyDate)return;const next=[...new Set([...(prefs.busy_dates??[]),busyDate])].sort();void updatePreferences.mutateAsync({busy_dates:next}).then(()=>{setBusyDate("");toast.success("Kiireinen päivä lisätty.");}).catch(()=>toast.error("Päivää ei voitu tallentaa."));}}>Merkitse kiireiseksi</button></div><div className="mt-3 flex flex-wrap gap-2">{(prefs?.busy_dates??[]).filter(d=>d>=today()).slice(0,12).map(date=><button key={date} className="rounded-full bg-muted px-3 py-1 text-xs" title="Poista kiireinen päivä" onClick={()=>prefs&&void updatePreferences.mutateAsync({busy_dates:prefs.busy_dates.filter(d=>d!==date)})}>{fullDate(date)} ×</button>)}</div></div>
     </Panel>
 
-    <Panel className="settings-study-only" title="Mukautuva opiskelu">
-      <p className="text-sm text-muted-foreground">Valitse, kuinka paljon suunnittelutoiminto saa tehdä puolestasi. Oppimismoottori saa ehdottaa kaikissa tiloissa, mutta kalenterin muuttaminen noudattaa tätä asetusta.</p>
-      <div className="mt-3 grid gap-2 sm:grid-cols-3">
-        {(["manual","assisted","autopilot"] as const).map(mode=><button key={mode} className={(prefs?.planner_mode??"assisted")===mode?button:secondary} onClick={()=>void updatePreferences.mutateAsync({planner_mode:mode}).catch(()=>toast.error("Suunnittelutilaa ei voitu tallentaa."))}>{plannerModeLabel(mode)}</button>)}
-      </div>
-      <label className="mt-4 flex min-h-12 items-center justify-between gap-4 border-t border-border pt-3"><span><b>Henkilökohtaiset oppimiskokeilut</b><small className="block text-muted-foreground">Vertaa pieniä turvallisia variaatioita vasta myöhemmän muistissa säilymisen perusteella.</small></span><input type="checkbox" className="size-5 accent-primary" checked={prefs?.personal_experiments_enabled??true} onChange={e=>void updatePreferences.mutateAsync({personal_experiments_enabled:e.target.checked}).catch(()=>toast.error("Kokeiluasetusta ei voitu tallentaa."))}/></label>
-      <div className="mt-4 divide-y divide-border border-t border-border">
+    <Panel className="settings-study-only" title="Suunnittelutapa">
+      <p className="text-sm text-muted-foreground">Valitse, kuinka paljon Opintopäiväkirja saa muuttaa tulevaa suunnitelmaa puolestasi.</p>
+      <div className="mt-3 grid gap-2">
         {([
-          ["retention_budget_enabled","Mukautuva kertausbudjetti","Suojaa tärkein muistaminen käytettävissä olevan ajan sisällä."],
-          ["pretest_enabled","Ennakkotesti","Kartoita uusi aihe ennakkotestillä, joka ei muuta osaamistasoa."],
-          ["feedback_policy_enabled","Mukautuva palaute","Ajoita palaute eri tavalla uuden oppimisen, muistista palauttamisen ja koeharjoituksen mukaan."],
-          ["friction_learning_enabled","Opiskelun esteiden tunnistus","Tunnista, miksi opiskelukertoja jää väliin, ja ehdota kevyitä jos–niin-sääntöjä."],
-          ["reminder_taper_enabled","Muistutusten vähentäminen","Vähennä tavallisia muistutuksia, kun opiskelu käynnistyy jo itsenäisesti."],
-          ["abitti_simulation_enabled","YO / Abitti 2 -vastaavuus","Käytä tehtävävalintaa, lähdeaineistoa, piirrosvastauksia ja viivästettyä palautetta koeharjoituksissa."],
-        ] as const).map(([key,label,description])=><label key={key} className="flex min-h-14 items-center justify-between gap-4 py-3"><span><b>{label}</b><small className="block text-muted-foreground">{description}</small></span><input type="checkbox" className="size-5 accent-primary" checked={prefs?.[key]??true} onChange={e=>void updatePreferences.mutateAsync({[key]:e.target.checked}).catch(()=>toast.error("Mukautuva opiskelun asetusta ei voitu tallentaa."))}/></label>)}
+          ["assisted","Sovellus ehdottaa, minä hyväksyn","Suositus. Näet muutokset ennen kuin ne tallennetaan."],
+          ["autopilot","Sovellus saa mukauttaa automaattisesti","Tulevaa suunnitelmaa voidaan keventää ja järjestää kapasiteetin mukaan."],
+          ["manual","Haluan suunnitella itse","Sovellus antaa edelleen oppimisehdotuksia, mutta ei muuta kalenteria puolestasi."],
+        ] as const).map(([mode,label,description])=><button key={mode} className={"min-h-14 rounded-xl border px-4 py-3 text-left "+((prefs?.planner_mode??"assisted")===mode?"border-primary bg-accent":"border-border bg-surface")} onClick={()=>void updatePreferences.mutateAsync({planner_mode:mode}).then(()=>toast.success("Suunnittelutapa tallennettu.")).catch(()=>toast.error("Suunnittelutilaa ei voitu tallentaa."))}><b className="block text-sm">{label}</b><small className="mt-1 block text-muted-foreground">{description}</small></button>)}
       </div>
-      <div className="mt-4 grid gap-3 border-t border-border pt-3 sm:grid-cols-2">
-        <label className="text-sm font-medium">Hiljaiset tunnit alkavat<input type="time" className="mt-1 w-full rounded-xl border bg-surface px-3 py-2.5" value={prefs?.quiet_hours_start?.slice(0,5)??"21:30"} onChange={e=>void updatePreferences.mutateAsync({quiet_hours_start:e.target.value}).catch(()=>toast.error("Hiljaisia tunteja ei voitu tallentaa."))}/></label>
-        <label className="text-sm font-medium">Hiljaiset tunnit päättyvät<input type="time" className="mt-1 w-full rounded-xl border bg-surface px-3 py-2.5" value={prefs?.quiet_hours_end?.slice(0,5)??"07:00"} onChange={e=>void updatePreferences.mutateAsync({quiet_hours_end:e.target.value}).catch(()=>toast.error("Hiljaisia tunteja ei voitu tallentaa."))}/></label>
+      <details className="mt-5 border-t border-border pt-4">
+        <summary className="min-h-11 cursor-pointer list-none py-2 text-sm font-semibold">Lisäasetukset · oppimismoottori</summary>
+        <p className="mb-3 text-xs text-muted-foreground">Näitä ei tarvitse normaalisti muuttaa. Oletusarvot on valittu niin, että järjestelmä toimii ilman tämän osion tuntemista.</p>
+        <label className="flex min-h-14 items-center justify-between gap-4 border-t border-border py-3"><span><b>Henkilökohtaiset oppimiskokeilut</b><small className="block text-muted-foreground">Vertaa pieniä turvallisia variaatioita vasta myöhemmän muistissa säilymisen perusteella.</small></span><input type="checkbox" className="size-5 accent-primary" checked={prefs?.personal_experiments_enabled??true} onChange={e=>void updatePreferences.mutateAsync({personal_experiments_enabled:e.target.checked}).catch(()=>toast.error("Kokeiluasetusta ei voitu tallentaa."))}/></label>
+        <div className="divide-y divide-border">
+          {([
+            ["retention_budget_enabled","Mukautuva kertausbudjetti","Suojaa tärkein muistaminen käytettävissä olevan ajan sisällä."],
+            ["pretest_enabled","Ennakkotesti","Kartoita uusi aihe ennakkotestillä, joka ei muuta osaamistasoa."],
+            ["feedback_policy_enabled","Mukautuva palaute","Ajoita palaute eri tavalla uuden oppimisen, muistista palauttamisen ja koeharjoituksen mukaan."],
+            ["friction_learning_enabled","Opiskelun esteiden tunnistus","Tunnista, miksi opiskelukertoja jää väliin, ja ehdota kevyitä jos–niin-sääntöjä."],
+            ["reminder_taper_enabled","Muistutusten vähentäminen","Vähennä tavallisia muistutuksia, kun opiskelu käynnistyy jo itsenäisesti."],
+            ["abitti_simulation_enabled","YO / Abitti 2 -vastaavuus","Käytä tehtävävalintaa, lähdeaineistoa, piirrosvastauksia ja viivästettyä palautetta koeharjoituksissa."],
+          ] as const).map(([key,label,description])=><label key={key} className="flex min-h-14 items-center justify-between gap-4 py-3"><span><b>{label}</b><small className="block text-muted-foreground">{description}</small></span><input type="checkbox" className="size-5 accent-primary" checked={prefs?.[key]??true} onChange={e=>void updatePreferences.mutateAsync({[key]:e.target.checked}).catch(()=>toast.error("Mukautuva opiskelun asetusta ei voitu tallentaa."))}/></label>)}
+        </div>
+      </details>
+    </Panel>
+
+    <Panel className="settings-notifications-only" title="Hiljaiset tunnit">
+      <p className="text-sm text-muted-foreground">Tavallisia opiskelumuistutuksia ei lähetetä tämän aikavälin aikana.</p>
+      <div className="mt-4 grid gap-3 sm:grid-cols-2">
+        <label className="text-sm font-medium">Alkaa<input type="time" className="mt-1 min-h-11 w-full rounded-xl border bg-surface px-3" value={prefs?.quiet_hours_start?.slice(0,5)??"21:30"} onChange={e=>void updatePreferences.mutateAsync({quiet_hours_start:e.target.value}).catch(()=>toast.error("Hiljaisia tunteja ei voitu tallentaa."))}/></label>
+        <label className="text-sm font-medium">Päättyy<input type="time" className="mt-1 min-h-11 w-full rounded-xl border bg-surface px-3" value={prefs?.quiet_hours_end?.slice(0,5)??"07:00"} onChange={e=>void updatePreferences.mutateAsync({quiet_hours_end:e.target.value}).catch(()=>toast.error("Hiljaisia tunteja ei voitu tallentaa."))}/></label>
       </div>
     </Panel>
 
