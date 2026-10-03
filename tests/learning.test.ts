@@ -17,6 +17,7 @@ import {
   type PlanItem,
   type Topic,
 } from "../src/lib/domain.ts";
+import { addDays } from "../src/lib/fi.ts";
 
 function topic(
   id: string,
