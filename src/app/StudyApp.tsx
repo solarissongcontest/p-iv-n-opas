@@ -231,6 +231,17 @@ function StudyApp({ user, initialPage, courseCode, courseTab, examId, progressSe
   const busy = !defaultsReady || allQueries.some(q => q.isPending);
   const queryError = allQueries.find(q => q.error)?.error;
   const error = defaultsError ?? (queryError instanceof Error ? queryError.message : queryError ? String(queryError) : null);
+  const userFacingError = error
+    ? pending > 0
+      ? "Kaikkea ei voitu vielä synkronoida. Syöttämäsi tiedot ovat tallessa tällä laitteella."
+      : navigator.onLine
+        ? "Tietoja ei saatu ladattua. Yritä uudelleen."
+        : "Verkkoyhteyttä ei ole. Näytetään se, mikä on tällä laitteella käytettävissä."
+    : null;
+
+  useEffect(() => {
+    if (error) console.error("[Opintopäiväkirja] Data or initialization error", error);
+  }, [error]);
 
   useEffect(() => {
     if (!busy) {
@@ -499,7 +510,7 @@ function StudyApp({ user, initialPage, courseCode, courseTab, examId, progressSe
       contextualAction={contextualCoach}
     >
       {pending>0 && <p role="status" className="mb-5 rounded-xl bg-accent p-3 text-sm">Tallennettu paikallisesti · {pending} muutosta synkronoidaan yhteyden palattua.</p>}
-      {error && <div role="alert" className="panel mb-5 p-4"><p className="font-medium">{pending>0?"Kaikkea ei voitu vielä synkronoida.":"Tietojen lataus tai alustus epäonnistui."}</p>{pending>0&&<p className="mt-1 text-sm text-muted-foreground">Syöttämäsi tiedot ovat tallessa tässä laitteessa ja synkronoidaan yhteyden palattua.</p>}<p className="mt-1 text-sm text-muted-foreground">{String(error)}</p><button className="mt-2 underline" onClick={()=>{setDefaultsReady(false);setDefaultsError(null);void ensureKe04ForCurrentUser().then(()=>Promise.all([coursesQ.refetch(),topicsQ.refetch(),sessionsQ.refetch(),examsQ.refetch(),planQ.refetch(),testsQ.refetch(),attemptsQ.refetch(),mistakesQ.refetch(),preferencesQ.refetch()])).then(()=>setDefaultsReady(true)).catch(err=>{setDefaultsError(err instanceof Error?err.message:"Uudelleenyritys epäonnistui.");setDefaultsReady(true);});}}>Yritä uudelleen</button></div>}
+      {error && <div role="alert" className="panel mb-5 p-4"><p className="font-medium">{userFacingError}</p>{pending>0&&<p className="mt-1 text-sm text-muted-foreground">Muutokset synkronoidaan automaattisesti yhteyden palattua.</p>}<button className="mt-3 min-h-11 underline" onClick={()=>{setDefaultsReady(false);setDefaultsError(null);void ensureKe04ForCurrentUser().then(()=>Promise.all([coursesQ.refetch(),topicsQ.refetch(),sessionsQ.refetch(),examsQ.refetch(),planQ.refetch(),testsQ.refetch(),attemptsQ.refetch(),mistakesQ.refetch(),preferencesQ.refetch()])).then(()=>setDefaultsReady(true)).catch(err=>{console.error("[Opintopäiväkirja] Retry failed",err);setDefaultsError("retry_failed");setDefaultsReady(true);});}}>Yritä uudelleen</button></div>}
 
       <section className={`page-content page-content-${page}`} data-page={page}>
         <Suspense fallback={<FeatureFallback/>}>
