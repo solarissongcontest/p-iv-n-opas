@@ -562,18 +562,28 @@ export function nextReviewDate(
   return addDays(fromISO, Math.max(1, Math.min(60, gap)));
 }
 
+function safeCapacityMinutes(value: number | undefined): number {
+  return typeof value === "number" && Number.isFinite(value) ? Math.max(0, value) : 0;
+}
+
 export function capacityForDate(profile: CapacityProfile, iso: string): number {
-  if (profile.busyDates.includes(iso)) return Math.max(10, Math.min(20, profile.weekdayMinutes));
+  const weekdayMinutes = safeCapacityMinutes(profile.weekdayMinutes);
+  const weekendMinutes = safeCapacityMinutes(profile.weekendMinutes);
+  if (profile.busyDates.includes(iso)) {
+    return weekdayMinutes > 0 ? Math.max(10, Math.min(20, weekdayMinutes)) : 0;
+  }
   const weekday = ((parseISO(iso).getDay() + 6) % 7) + 1;
-  return weekday >= 6 ? profile.weekendMinutes : profile.weekdayMinutes;
+  return weekday >= 6 ? weekendMinutes : weekdayMinutes;
 }
 
 function capacityFloorForDate(profile: CapacityProfile, iso: string): number {
-  if (profile.busyDates.includes(iso)) return 10;
+  const weekdayMinutes = safeCapacityMinutes(profile.weekdayMinutes);
+  const weekendMinutes = safeCapacityMinutes(profile.weekendMinutes);
+  if (profile.busyDates.includes(iso)) return Math.min(10, weekdayMinutes);
   const weekday = ((parseISO(iso).getDay() + 6) % 7) + 1;
   return weekday >= 6
-    ? Math.min(profile.weekendMinutes, profile.weekendMinMinutes ?? Math.min(60, profile.weekendMinutes))
-    : Math.min(profile.weekdayMinutes, profile.weekdayMinMinutes ?? Math.min(30, profile.weekdayMinutes));
+    ? Math.min(weekendMinutes, safeCapacityMinutes(profile.weekendMinMinutes ?? Math.min(60, weekendMinutes)))
+    : Math.min(weekdayMinutes, safeCapacityMinutes(profile.weekdayMinMinutes ?? Math.min(30, weekdayMinutes)));
 }
 
 export function returnFromBreak(input: {
@@ -660,7 +670,11 @@ export function findNextStudyDate(input: {
   maxDailyMinutes?: number;
   capacity?: CapacityProfile;
 }): string | null {
-  const defaultMaxDaily = input.maxDailyMinutes ?? 105;
+  const requestedMinutes =
+    Number.isFinite(input.minutes) ? Math.max(0, input.minutes) : 0;
+  if (requestedMinutes <= 0) return null;
+
+  const defaultMaxDaily = safeCapacityMinutes(input.maxDailyMinutes ?? 105);
   const candidates: { date: string; load: number }[] = [];
 
   for (let offset = 1; offset <= 14; offset += 1) {
@@ -677,11 +691,18 @@ export function findNextStudyDate(input: {
           item.kind !== "exam" &&
           !["completed", "skipped"].includes(item.status),
       )
-      .reduce((sum, item) => sum + item.target_minutes, 0);
+      .reduce(
+        (sum, item) =>
+          sum +
+          (Number.isFinite(item.target_minutes)
+            ? Math.max(0, item.target_minutes)
+            : 0),
+        0,
+      );
 
     const maxDaily = input.capacity ? capacityForDate(input.capacity, date) : defaultMaxDaily;
     candidates.push({ date, load });
-    if (load + input.minutes <= maxDaily) return date;
+    if (load + requestedMinutes <= maxDaily) return date;
   }
 
   // Capacity is a hard guardrail. If every allowed day is already full,

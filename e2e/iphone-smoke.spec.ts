@@ -83,11 +83,14 @@ test("iPhone Study OS primary flow uses four calm navigation destinations", asyn
   await page.getByRole("button", { name: "Tänään", exact: true }).click();
   const actionSheet = await openMore(page);
   await actionSheet.getByRole("button", { name: /Kirjaa opiskelu/ }).click();
+  await expect(actionSheet).toBeHidden();
   await expect(page.getByRole("dialog")).toBeVisible();
   await expect(page.getByRole("button", { name: "Sulje" })).toBeVisible();
   await page.getByRole("button", { name: "Sulje" }).click();
 
-  await page.getByRole("button", { name: "Haku", exact: true }).click();
+  const searchSheet = await openMore(page);
+  await searchSheet.getByRole("button", { name: /Haku/ }).click();
+  await expect(searchSheet).toBeHidden();
   const search = page.getByLabel("Hae");
   await expect(search).toBeVisible();
   await search.fill("KE04");

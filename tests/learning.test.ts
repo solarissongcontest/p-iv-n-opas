@@ -251,6 +251,46 @@ test("today task rationale is transparent without pretending to know a grade", (
 });
 
 
+test("capacity and rescheduling fail safe on corrupted minute values", () => {
+  const corrupted = {
+    studyWeekdays: [1,2,3,4,5,6,7],
+    weekdayMinutes: Number.NaN,
+    weekendMinutes: -90,
+    busyDates: ["2026-10-01"],
+  };
+  assert.equal(capacityForDate(corrupted, "2026-10-01"), 0);
+  assert.equal(capacityForDate(corrupted, "2026-10-03"), 0);
+
+  assert.equal(findNextStudyDate({
+    plan: [],
+    fromISO: "2026-10-01",
+    studyWeekdays: [1,2,3,4,5,6,7],
+    minutes: Number.NaN,
+  }), null);
+
+  assert.equal(findNextStudyDate({
+    plan: [],
+    fromISO: "2026-10-01",
+    studyWeekdays: [1,2,3,4,5,6,7],
+    minutes: -30,
+  }), null);
+
+  const date = findNextStudyDate({
+    plan: [{
+      id: "corrupt-load",
+      date: "2026-10-02",
+      target_minutes: Number.NaN,
+      status: "planned",
+      kind: "study",
+    } as PlanItem],
+    fromISO: "2026-10-01",
+    studyWeekdays: [1,2,3,4,5,6,7],
+    minutes: 30,
+    maxDailyMinutes: 60,
+  });
+  assert.equal(date, "2026-10-02");
+});
+
 test("capacity model distinguishes weekdays, weekends and busy dates", () => {
   const profile = {
     studyWeekdays: [1,2,3,4,5],

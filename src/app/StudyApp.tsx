@@ -1,6 +1,6 @@
 import { useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
-import { lazy, Suspense, useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { BookOpen } from "lucide-react";
 import { toast, Toaster } from "sonner";
 import { AppShell } from "@/app/AppShell";
@@ -225,6 +225,8 @@ function StudyApp({ user, initialPage, courseCode, courseTab, examId, progressSe
   const [showSkeleton, setShowSkeleton] = useState(false);
   const [defaultsReady, setDefaultsReady] = useState(false);
   const [defaultsError, setDefaultsError] = useState<string | null>(null);
+  const dayRef = useRef(today());
+  const [, setDayRevision] = useState(0);
   const coursesQ = useCourses(), topicsQ = useTopics(), sessionsQ = useSessions(), examsQ = useExams(), planQ = usePlan(), testsQ = useTests(), attemptsQ = usePracticeAttempts(), mistakesQ = useMistakes(), preferencesQ = usePreferences();
   const courses = (coursesQ.data ?? []).filter(c => !c.archived), topics = topicsQ.data ?? [], sessions = sessionsQ.data ?? [], exams = examsQ.data ?? [], plan = planQ.data ?? [];
   const allQueries = [coursesQ, topicsQ, sessionsQ, examsQ, planQ, testsQ, attemptsQ, mistakesQ, preferencesQ];
@@ -257,6 +259,12 @@ function StudyApp({ user, initialPage, courseCode, courseTab, examId, progressSe
   useEffect(() => {
     let refreshing = false;
     const refresh = async () => {
+      const nextDay = today();
+      if (nextDay !== dayRef.current) {
+        dayRef.current = nextDay;
+        setDayRevision((revision) => revision + 1);
+      }
+
       if (refreshing || document.visibilityState !== "visible" || !navigator.onLine) return;
       refreshing = true;
       try {

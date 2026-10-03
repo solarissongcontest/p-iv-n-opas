@@ -307,6 +307,15 @@ function MoreSheet({
     };
   }, [open, onClose]);
 
+  const navigateFromSheet = (target: StudyPage) => {
+    onClose();
+    onNavigate(target);
+  };
+  const launchAfterClose = (action: () => void) => {
+    onClose();
+    window.setTimeout(action, 0);
+  };
+
   if (!open) return null;
 
   return (
@@ -333,36 +342,36 @@ function MoreSheet({
         <div className="grid gap-2">
           <button
             className={"app-sheet-action " + (page === "plan" ? "app-sheet-action-active" : "")}
-            onClick={() => onNavigate("plan")}
+            onClick={() => navigateFromSheet("plan")}
           >
             <CalendarDays size={22} />
             <span><b>Suunnitelma</b><small>Katso tulevat päivät</small></span>
           </button>
           <button
             className={"app-sheet-action " + (page === "practice" ? "app-sheet-action-active" : "")}
-            onClick={() => onNavigate("practice")}
+            onClick={() => navigateFromSheet("practice")}
           >
             <Brain size={22} />
             <span><b>Harjoittelu</b><small>Tehtävät ja kertaus</small></span>
           </button>
           <button
             className={"app-sheet-action " + (page === "exams" ? "app-sheet-action-active" : "")}
-            onClick={() => onNavigate("exams")}
+            onClick={() => navigateFromSheet("exams")}
           >
             <FlaskConical size={22} />
             <span><b>Kokeet</b><small>Koetila ja valmius</small></span>
           </button>
-          <button className="app-sheet-action" onClick={onLog}>
+          <button className="app-sheet-action" onClick={() => launchAfterClose(onLog)}>
             <Plus size={22} />
             <span><b>Kirjaa opiskelu</b><small>Nopea jälkikirjaus</small></span>
           </button>
-          <button className="app-sheet-action" onClick={onSearch}>
+          <button className="app-sheet-action" onClick={() => launchAfterClose(onSearch)}>
             <Search size={22} />
             <span><b>Haku</b><small>Kurssit, aiheet ja toiminnot</small></span>
           </button>
           <button
             className={"app-sheet-action " + (page === "settings" ? "app-sheet-action-active" : "")}
-            onClick={() => onNavigate("settings")}
+            onClick={() => navigateFromSheet("settings")}
           >
             <Settings2 size={22} />
             <span><b>Asetukset</b><small>Kapasiteetti ja muistutukset</small></span>

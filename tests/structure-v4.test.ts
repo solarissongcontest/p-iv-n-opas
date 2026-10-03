@@ -79,7 +79,11 @@ test("app shell centralizes navigation bottom interaction zone and accessible mo
   assert.match(shell, /aria-label="Mobiilinavigaatio"/);
   assert.match(shell, /role="dialog"/);
   assert.match(shell, /event\.key === "Escape"/);
-  assert.match(shell, /previous\?\.focus\(\)/);
+  assert.match(shell, /previous\?\.focus\(\)/);  assert.match(shell, /const navigateFromSheet =/);
+  assert.match(shell, /const launchAfterClose =/);
+  assert.match(shell, /launchAfterClose\(onLog\)/);
+  assert.match(shell, /launchAfterClose\(onSearch\)/);
+
 });
 
 test("practice is a bounded setup active summary flow", () => {
@@ -196,12 +200,15 @@ test("planner uses calendar-safe month movement and avoids browser prompts", () 
   assert.match(calendar, /mondayOffset/);
 });
 
-test("final release workflow keeps the last known-valid production wait structure", () => {
+test("final release workflow keeps the production identity wait and fails fast on Vercel rejection", () => {
   const workflow = read(".github/workflows/iphone-e2e.yml");
   assert.match(workflow, /INPUT_BASE_URL: \$\{\{ github\.event\.inputs\.base_url/);
   assert.match(workflow, /Wait for this exact commit to reach production/);
   assert.match(workflow, /\/api\/release-info/);
-  assert.equal(workflow.includes("Wait for Vercel deployment result"), false);
+  assert.match(workflow, /statuses: read/);
+  assert.match(workflow, /VERCEL_STATE/);
+  assert.match(workflow, /Vercel deployment status is/);
+  assert.match(workflow, /Failing immediately instead of polling stale production/);
   assert.match(workflow, /REQUIRE_GEMINI: "false"/);
 });
 
@@ -228,6 +235,16 @@ test("offline queue survives malformed storage and deduplicates operation ids", 
   assert.match(offline, /Array\.isArray\(parsed\)/);
   assert.match(offline, /seen\.has\(candidate\.id\)/);
   assert.match(offline, /items\.some\(\(item\) => item\.id === id\)/);
+});
+
+test("long-lived PWA notices a local calendar day rollover even while offline", () => {
+  const app = read("src/app/StudyApp.tsx");
+  assert.match(app, /dayRef = useRef\(today\(\)\)/);
+  assert.match(app, /nextDay !== dayRef\.current/);
+  assert.match(app, /setDayRevision/);
+  const dayCheck = app.indexOf("const nextDay = today()");
+  const networkGuard = app.indexOf("!navigator.onLine", dayCheck);
+  assert.ok(dayCheck >= 0 && networkGuard > dayCheck);
 });
 
 test("device session refreshes immediately when the network returns", () => {
