@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { StudyAppRoot } from "@/app/StudyApp";
+import { isValidISOMonth } from "@/lib/fi";
 
 export const Route = createFileRoute("/plan/month/$month")({ component: PlanMonthRoute });
 
