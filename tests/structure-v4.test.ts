@@ -259,10 +259,16 @@ test("long-lived PWA notices a local calendar day rollover even while offline", 
   assert.ok(dayCheck >= 0 && networkGuard > dayCheck);
 });
 
-test("device session refreshes immediately when the network returns", () => {
+test("device session refreshes before expiry and immediately when the network returns", () => {
   const app = read("src/app/StudyApp.tsx");
-  assert.match(app, /addEventListener\("online", verifyCanonicalOwner\)/);
-  assert.match(app, /removeEventListener\("online", verifyCanonicalOwner\)/);
+  assert.match(app, /const refreshLeadMs = 60_000/);
+  assert.match(app, /session\.expiresAt - Date\.now\(\) - refreshLeadMs/);
+  assert.match(app, /setTimeout\(\(\) => \{\s*void verifyCanonicalOwner\(true\)/);
+  assert.match(app, /addEventListener\("online", refreshNow\)/);
+  assert.match(app, /removeEventListener\("online", refreshNow\)/);
+  assert.match(app, /clearRefreshTimer\(\)/);
+  assert.match(app, /window\.clearTimeout\(refreshTimer\)/);
+  assert.match(app, /getArthurSession\(previousOwnerId\)/);
 });
 
 test("AI coach keeps provider diagnostics out of the normal student UI", () => {
