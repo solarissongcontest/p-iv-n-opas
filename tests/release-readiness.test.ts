@@ -66,6 +66,25 @@ test("Final Release Gate waits for the exact production commit and runs the brow
   assert.equal(workflow.includes("${{ inputs.base_url }}"), false);
 });
 
+test("visual regression has a deterministic baseline generator before it becomes release-blocking", () => {
+  const spec = read("e2e/visual-regression.spec.ts");
+  const workflow = read(".github/workflows/visual-baselines.yml");
+  const pkg = JSON.parse(read("package.json")) as { scripts: Record<string,string> };
+
+  assert.match(spec, /toHaveScreenshot/);
+  assert.match(spec, /mobile-tabbar-390\.png/);
+  assert.match(spec, /tablet-sidebar-768\.png/);
+  assert.match(spec, /desktop-sidebar-1440\.png/);
+  assert.match(spec, /planner-month-1280\.png/);
+  assert.match(spec, /mobile-practice-focus-390\.png/);
+  assert.match(workflow, /workflow_dispatch/);
+  assert.match(workflow, /base_url/);
+  assert.match(workflow, /--update-snapshots|e2e:visual:baseline/);
+  assert.match(workflow, /upload-artifact@v4/);
+  assert.match(pkg.scripts["e2e:visual:baseline"], /visual-regression\.spec\.ts/);
+  assert.match(pkg.scripts["e2e:visual:baseline"], /--update-snapshots/);
+});
+
 test("physical push delivery is an explicit manual workflow", () => {
   const workflow = read(".github/workflows/push-device-check.yml");
   assert.match(workflow, /workflow_dispatch/);
