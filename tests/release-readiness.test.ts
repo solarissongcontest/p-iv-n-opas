@@ -94,6 +94,34 @@ test("browser-facing source cannot reference server-only secrets", () => {
   }
 });
 
+test("browser-facing source cannot import server-only modules", () => {
+  const roots = ["src/app", "src/components", "src/features", "src/lib"];
+  const files = roots.flatMap(browserSourceFiles);
+
+  for (const path of files) {
+    const content = read(path);
+    assert.doesNotMatch(
+      content,
+      /from\s+["'][^"']*\.server(?:\.[^"']*)?["']/,
+      path + " must not import a server-only module",
+    );
+    assert.doesNotMatch(
+      content,
+      /import\(["'][^"']*\.server(?:\.[^"']*)?["']\)/,
+      path + " must not dynamically import a server-only module",
+    );
+  }
+});
+
+test("secure study migration revokes anonymous access and binds planner rows to the authenticated owner", () => {
+  const migration = read("supabase/migrations/20260928190000_secure_study_data.sql");
+  assert.match(migration, /REVOKE ALL ON[\s\S]*FROM anon;/);
+  assert.match(migration, /ALTER TABLE public\.plan_items ALTER COLUMN owner_id SET DEFAULT auth\.uid\(\)/);
+  assert.match(migration, /CREATE POLICY "personal study data" ON public\.plan_items FOR ALL TO authenticated/);
+  assert.match(migration, /USING \(owner_id = \(select auth\.uid\(\)\)\)/);
+  assert.match(migration, /WITH CHECK \(owner_id = \(select auth\.uid\(\)\)[\s\S]*EXISTS \(SELECT 1 FROM public\.courses c/);
+});
+
 test("Study OS browser flows never fall back to blocking native prompt confirm or alert dialogs", () => {
   const roots = ["src/app", "src/features"];
   const files = roots.flatMap(browserSourceFiles);
