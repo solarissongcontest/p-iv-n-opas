@@ -7,7 +7,7 @@ import {
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useMemo, type ReactNode } from "react";
 
 import foundationsCss from "../styles/foundations.css?url";
 import glassCss from "../styles/glass.css?url";
@@ -39,13 +39,16 @@ function NotFoundComponent() {
 }
 
 function ErrorComponent({ error, reset }: { error: unknown; reset: () => void }) {
-  console.error(error);
   const router = useRouter();
-  const normalizedError =
-    error instanceof Error
-      ? error
-      : new Error(typeof error === "string" ? error : "Tuntematon sovellusvirhe");
+  const normalizedError = useMemo(
+    () =>
+      error instanceof Error
+        ? error
+        : new Error(typeof error === "string" ? error : "Tuntematon sovellusvirhe"),
+    [error],
+  );
   useEffect(() => {
+    console.error(normalizedError);
     reportLovableError(normalizedError, { boundary: "tanstack_root_error_component" });
   }, [normalizedError]);
 
