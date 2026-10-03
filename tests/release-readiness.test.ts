@@ -94,6 +94,20 @@ test("browser-facing source cannot reference server-only secrets", () => {
   }
 });
 
+test("Study OS browser flows never fall back to blocking native prompt confirm or alert dialogs", () => {
+  const roots = ["src/app", "src/features"];
+  const files = roots.flatMap(browserSourceFiles);
+  const forbidden = /\b(?:window\.)?(?:prompt|confirm|alert)\s*\(/;
+
+  for (const path of files) {
+    assert.doesNotMatch(
+      read(path),
+      forbidden,
+      path + " must use an in-app dialog, sheet, or toast instead of a blocking browser dialog",
+    );
+  }
+});
+
 test("release identity endpoint never exposes secrets and disables caching", () => {
   const route = read("src/routes/api.release-info.ts");
   assert.match(route, /VERCEL_GIT_COMMIT_SHA/);
