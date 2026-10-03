@@ -238,6 +238,19 @@ test("raw backend errors never render in the normal app shell", () => {
   assert.match(app, /Verkkoyhteyttä ei ole\./);
 });
 
+test("PWA worker registers for every user and updates only after explicit approval", () => {
+  const root = read("src/routes/__root.tsx");
+  const prompt = read("src/components/PwaUpdatePrompt.tsx");
+  const sw = read("public/sw.js");
+  const shell = read("src/styles/shell.css");
+  assert.match(root, /<PwaUpdatePrompt \/>/);
+  assert.match(prompt, /serviceWorker\.register\("\/sw\.js"/);
+  assert.match(prompt, /Päivitä nyt/);
+  assert.match(prompt, /SKIP_WAITING/);
+  assert.match(sw, /event\.data\?\.type === "SKIP_WAITING"/);
+  assert.match(shell, /body:has\(\.exam-simulation-running\) \.pwa-update-prompt/);
+});
+
 test("service worker supports offline cold starts without caching API responses", () => {
   const sw = read("public/sw.js");
   assert.match(sw, /addEventListener\("install"/);
