@@ -69,7 +69,7 @@ export function CourseForm({onClose}:{onClose:()=>void}) {
      setStructureProvider(payload.provider??"local");
      toast.success("Aihe- ja dependency-ehdotus valmis. Tarkista se ennen tallennusta.");
    }catch(error){
-     toast.error(error instanceof Error?error.message:"Materiaalia ei voitu jäsentää.");
+     console.error("[Opintopäiväkirja] Course material parsing failed",error);toast.error("Materiaalia ei voitu jäsentää. Voit silti lisätä kurssin tiedot käsin.");
    }finally{setStructureBusy(false);}
  }
 
