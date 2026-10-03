@@ -130,7 +130,7 @@ test("study rhythm settings save weekdays and capacity once and realign the futu
 
   assert.match(settings, /studyWeekdaysDraft/);
   assert.match(settings, /Tallenna opiskelurytmi/);
-  assert.match(settings, /Tallenna opiskelupäivät/);
+  assert.equal(settings.includes("Tallenna opiskelupäivät"), false);
   assert.match(settings, /useApplyStudyWeekdays/);
   assert.match(data, /export function useApplyStudyWeekdays/);
   assert.match(data, /findNextStudyDate/);
