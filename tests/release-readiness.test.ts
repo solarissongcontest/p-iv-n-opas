@@ -99,6 +99,18 @@ test("Final Release Gate automatically uses committed visual baselines when avai
   assert.match(workflow, /steps\.visual_baselines\.outputs\.available == 'true'/);
 });
 
+test("browser entry helper waits for late WebKit hydration instead of one-shot visibility checks", () => {
+  const helper = read("e2e/helpers.ts");
+  const iphone = read("e2e/iphone-smoke.spec.ts");
+  assert.match(helper, /waitForEntryState/);
+  assert.match(helper, /Promise\.any/);
+  assert.match(helper, /username\.waitFor\(\{ state: "visible", timeout: 30_000 \}\)/);
+  assert.match(helper, /Tervetuloa, Arthur/);
+  assert.match(helper, /toHaveURL\(\/\\\/today/);
+  assert.match(iphone, /from "\.\/helpers"/);
+  assert.equal(iphone.includes("async function enterApp"), false);
+});
+
 test("physical push delivery is an explicit manual workflow", () => {
   const workflow = read(".github/workflows/push-device-check.yml");
   assert.match(workflow, /workflow_dispatch/);
