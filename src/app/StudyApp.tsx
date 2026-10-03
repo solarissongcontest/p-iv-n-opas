@@ -130,7 +130,7 @@ export function StudyAppRoot({ initialPage, courseCode, courseTab, examId, progr
 
       const session = readDeviceSession();
       const refreshLeadMs = 60_000;
-      const minimumDelayMs = 30_000;
+      const minimumDelayMs = 5_000;
       const fallbackDelayMs = 60_000;
       const delay = session
         ? Math.max(minimumDelayMs, session.expiresAt - Date.now() - refreshLeadMs)
