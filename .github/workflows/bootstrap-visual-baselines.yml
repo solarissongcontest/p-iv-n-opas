@@ -45,7 +45,7 @@ jobs:
         run: bunx playwright install --with-deps chromium
 
       - name: Generate shell baselines
-        run: bun run e2e:visual:baseline
+        run: bunx playwright test e2e/visual-regression.spec.ts --project=desktop-chromium --update-snapshots
 
       - name: Upload generated baselines
         uses: actions/upload-artifact@v4
