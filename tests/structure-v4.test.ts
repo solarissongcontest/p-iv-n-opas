@@ -356,6 +356,30 @@ test("active practice suppresses competing app chrome", () => {
   assert.match(layouts, /:has\(\.practice-session-active\)/);
 });
 
+test("personal study rhythm has one fallback and exam preparation uses real capacity", () => {
+  const defaults = read("src/lib/studyDefaults.ts");
+  const data = read("src/lib/data.ts");
+  const onboarding = read("src/components/Onboarding.tsx");
+  const app = read("src/app/StudyApp.tsx");
+  const settings = read("src/features/settings/SettingsView.tsx");
+  const exams = read("src/features/exams/ExamsView.tsx");
+
+  assert.match(defaults, /DEFAULT_STUDY_WEEKDAYS = \[2, 4, 5, 6, 7\]/);
+  assert.match(data, /study_weekdays: \[\.\.\.DEFAULT_STUDY_WEEKDAYS\]/);
+  assert.match(onboarding, /\.\.\.DEFAULT_STUDY_WEEKDAYS/);
+  assert.match(app, /studyWeekdays: preferences\?\.study_weekdays \?\? \[\.\.\.DEFAULT_STUDY_WEEKDAYS\]/);
+  assert.match(app, /weekdays=\{preferences\?\.study_weekdays \?\? \[\.\.\.DEFAULT_STUDY_WEEKDAYS\]\}/);
+  assert.match(settings, /DEFAULT_STUDY_WEEKDAYS/);
+  assert.match(exams, /capacity:CapacityProfile/);
+  assert.match(exams, /examBuffer\(\{examDate:course\.exam_date,topics:ts,attempts:aa,capacity\}\)/);
+  assert.match(exams, /capacityForDateV3\(capacity,today\(\)\)/);
+
+  for (const content of [data, onboarding, app, settings, exams]) {
+    assert.equal(content.includes("[1,2,3,4,5]"), false);
+    assert.equal(content.includes("[1, 2, 3, 4, 5]"), false);
+  }
+});
+
 test("guided study presents three simple phases and one primary self-assessment", () => {
   const session = read("src/features/session/SessionForm.tsx");
   assert.match(session, /\["Muista","Opiskele","Tarkista"\]/);
