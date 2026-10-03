@@ -66,6 +66,29 @@ test("Final Release Gate waits for the exact production commit and runs the brow
   assert.equal(workflow.includes("${{ inputs.base_url }}"), false);
 });
 
+test("visual regression has a deterministic baseline generator before it becomes release-blocking", () => {
+  const spec = read("e2e/visual-regression.spec.ts");
+  const workflow = read(".github/workflows/visual-baselines.yml");
+  const pkg = JSON.parse(read("package.json")) as { scripts: Record<string,string> };
+
+  assert.match(spec, /toHaveScreenshot/);
+  assert.match(spec, /mobile-tabbar-390\.png/);
+  assert.match(spec, /tablet-sidebar-768\.png/);
+  assert.match(spec, /desktop-sidebar-1440\.png/);
+  assert.match(spec, /planner-month-1280\.png/);
+  assert.match(spec, /mobile-practice-focus-390\.png/);
+  assert.match(workflow, /workflow_dispatch/);
+  assert.match(workflow, /base_url/);
+  assert.match(workflow, /Verify exact deployed commit/);
+  assert.match(workflow, /\/api\/release-info/);
+  assert.match(workflow, /EXPECTED_SHA/);
+  assert.match(workflow, /Baseline URL serves/);
+  assert.match(workflow, /--update-snapshots|e2e:visual:baseline/);
+  assert.match(workflow, /upload-artifact@v4/);
+  assert.match(pkg.scripts["e2e:visual:baseline"], /visual-regression\.spec\.ts/);
+  assert.match(pkg.scripts["e2e:visual:baseline"], /--update-snapshots/);
+});
+
 test("physical push delivery is an explicit manual workflow", () => {
   const workflow = read(".github/workflows/push-device-check.yml");
   assert.match(workflow, /workflow_dispatch/);
@@ -92,6 +115,34 @@ test("browser-facing source cannot reference server-only secrets", () => {
       );
     }
   }
+});
+
+test("browser-facing source cannot import server-only modules", () => {
+  const roots = ["src/app", "src/components", "src/features", "src/lib"];
+  const files = roots.flatMap(browserSourceFiles);
+
+  for (const path of files) {
+    const content = read(path);
+    assert.doesNotMatch(
+      content,
+      /from\s+["'][^"']*\.server(?:\.[^"']*)?["']/,
+      path + " must not import a server-only module",
+    );
+    assert.doesNotMatch(
+      content,
+      /import\(["'][^"']*\.server(?:\.[^"']*)?["']\)/,
+      path + " must not dynamically import a server-only module",
+    );
+  }
+});
+
+test("secure study migration revokes anonymous access and binds planner rows to the authenticated owner", () => {
+  const migration = read("supabase/migrations/20260928190000_secure_study_data.sql");
+  assert.match(migration, /REVOKE ALL ON[\s\S]*FROM anon;/);
+  assert.match(migration, /ALTER TABLE public\.plan_items ALTER COLUMN owner_id SET DEFAULT auth\.uid\(\)/);
+  assert.match(migration, /CREATE POLICY "personal study data" ON public\.plan_items FOR ALL TO authenticated/);
+  assert.match(migration, /USING \(owner_id = \(select auth\.uid\(\)\)\)/);
+  assert.match(migration, /WITH CHECK \(owner_id = \(select auth\.uid\(\)\)[\s\S]*EXISTS \(SELECT 1 FROM public\.courses c/);
 });
 
 test("Study OS browser flows never fall back to blocking native prompt confirm or alert dialogs", () => {
