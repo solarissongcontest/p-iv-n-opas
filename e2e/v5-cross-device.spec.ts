@@ -275,3 +275,152 @@ test("v5 offline write survives reload, syncs, and appears on a second device", 
     await contextA.close();
   }
 });
+
+
+test("a stale second-device planner write cannot overwrite a newer change", async ({ browser }) => {
+  const contextA = await browser.newContext({ serviceWorkers: "allow" });
+  const contextB = await browser.newContext({ serviceWorkers: "allow" });
+  const pageA = await contextA.newPage();
+  const pageB = await contextB.newPage();
+  let supabaseOrigin: string | null = null;
+  let apiKey: string | null = null;
+
+  const capture = (request: import("@playwright/test").Request) => {
+    if (!request.url().includes("/rest/v1/") && !request.url().includes("/rpc/")) return;
+    try {
+      const url = new URL(request.url());
+      if (!/supabase/i.test(url.hostname)) return;
+      supabaseOrigin = url.origin;
+      apiKey = request.headers()["apikey"] ?? apiKey;
+    } catch {
+      // Ignore unrelated requests.
+    }
+  };
+  pageA.on("request", capture);
+  pageB.on("request", capture);
+
+  const itemId = crypto.randomUUID();
+  try {
+    await enterApp(pageA);
+    await enterApp(pageB);
+    await expect.poll(() => Boolean(supabaseOrigin && apiKey)).toBe(true);
+
+    const tokenA = await pageA.evaluate(() => localStorage.getItem("opk.device-token"));
+    const tokenB = await pageB.evaluate(() => localStorage.getItem("opk.device-token"));
+    expect(tokenA).toBeTruthy();
+    expect(tokenB).toBeTruthy();
+
+    const ownerId = await pageA.evaluate((token) => {
+      if (!token) return null;
+      const payload = token.split(".")[1];
+      if (!payload) return null;
+      const normalized = payload.replace(/-/g, "+").replace(/_/g, "/");
+      const padded = normalized.padEnd(Math.ceil(normalized.length / 4) * 4, "=");
+      return JSON.parse(atob(padded)).sub as string | undefined;
+    }, tokenA);
+    expect(ownerId).toBeTruthy();
+
+    const headersA = {
+      apikey: apiKey!,
+      Authorization: "Bearer " + tokenA,
+      "Content-Type": "application/json",
+    };
+    const headersB = {
+      apikey: apiKey!,
+      Authorization: "Bearer " + tokenB,
+      "Content-Type": "application/json",
+    };
+
+    const courseResponse = await contextA.request.get(
+      supabaseOrigin + "/rest/v1/courses?select=id&code=eq.KE04&limit=1",
+      { headers: headersA },
+    );
+    expect(courseResponse.ok()).toBe(true);
+    const courses = await courseResponse.json() as Array<{ id: string }>;
+    expect(courses[0]?.id).toBeTruthy();
+
+    const originalDate = "2099-12-20";
+    const newerDate = "2099-12-21";
+    const staleDate = "2099-12-22";
+
+    const createResponse = await contextA.request.post(
+      supabaseOrigin + "/rest/v1/plan_items",
+      {
+        headers: { ...headersA, Prefer: "return=representation" },
+        data: {
+          id: itemId,
+          owner_id: ownerId,
+          course_id: courses[0].id,
+          date: originalDate,
+          kind: "study",
+          phase: "content",
+          title: "OPK concurrent-device E2E",
+          min_minutes: 1,
+          target_minutes: 1,
+          extra_minutes: 0,
+          status: "planned",
+        },
+      },
+    );
+    expect(createResponse.ok()).toBe(true);
+    const created = await createResponse.json() as Array<{
+      id: string;
+      date: string;
+      status: string;
+      updated_at: string;
+    }>;
+    expect(created[0]?.id).toBe(itemId);
+
+    const snapshotA = created[0];
+
+    const freshUpdate = await contextB.request.patch(
+      supabaseOrigin + "/rest/v1/plan_items?id=eq." + itemId,
+      {
+        headers: { ...headersB, Prefer: "return=representation" },
+        data: { date: newerDate, moved_from: originalDate },
+      },
+    );
+    expect(freshUpdate.ok()).toBe(true);
+    const freshRows = await freshUpdate.json() as Array<{ date: string }>;
+    expect(freshRows[0]?.date).toBe(newerDate);
+
+    const staleQuery = new URL(supabaseOrigin + "/rest/v1/plan_items");
+    staleQuery.searchParams.set("id", "eq." + itemId);
+    staleQuery.searchParams.set("date", "eq." + snapshotA.date);
+    staleQuery.searchParams.set("status", "eq." + snapshotA.status);
+    staleQuery.searchParams.set("updated_at", "eq." + snapshotA.updated_at);
+
+    const staleUpdate = await contextA.request.patch(staleQuery.toString(), {
+      headers: { ...headersA, Prefer: "return=representation" },
+      data: { date: staleDate, moved_from: originalDate },
+    });
+    expect(staleUpdate.ok()).toBe(true);
+    expect(await staleUpdate.json()).toEqual([]);
+
+    const verifyResponse = await contextA.request.get(
+      supabaseOrigin + "/rest/v1/plan_items?select=date&id=eq." + itemId,
+      { headers: headersA },
+    );
+    expect(verifyResponse.ok()).toBe(true);
+    const verified = await verifyResponse.json() as Array<{ date: string }>;
+    expect(verified[0]?.date).toBe(newerDate);
+  } finally {
+    if (supabaseOrigin && apiKey) {
+      const token = await pageA.evaluate(() => localStorage.getItem("opk.device-token")).catch(() => null);
+      if (token) {
+        await contextA.request.delete(
+          supabaseOrigin + "/rest/v1/plan_items?id=eq." + itemId,
+          {
+            headers: {
+              apikey: apiKey,
+              Authorization: "Bearer " + token,
+              Prefer: "return=minimal",
+            },
+          },
+        ).catch(() => undefined);
+      }
+    }
+    await contextB.close();
+    await contextA.close();
+  }
+});
