@@ -99,6 +99,18 @@ test("Final Release Gate automatically uses committed visual baselines when avai
   assert.match(workflow, /steps\.visual_baselines\.outputs\.available == 'true'/);
 });
 
+test("browser entry helper waits for late WebKit hydration instead of one-shot visibility checks", () => {
+  const helper = read("e2e/helpers.ts");
+  const iphone = read("e2e/iphone-smoke.spec.ts");
+  assert.match(helper, /waitForEntryState/);
+  assert.match(helper, /Promise\.any/);
+  assert.match(helper, /username\.waitFor\(\{ state: "visible", timeout: 30_000 \}\)/);
+  assert.match(helper, /Tervetuloa, Arthur/);
+  assert.match(helper, /toHaveURL\(\/\\\/today/);
+  assert.match(iphone, /from "\.\/helpers"/);
+  assert.equal(iphone.includes("async function enterApp"), false);
+});
+
 test("physical push delivery is an explicit manual workflow", () => {
   const workflow = read(".github/workflows/push-device-check.yml");
   assert.match(workflow, /workflow_dispatch/);
@@ -169,6 +181,30 @@ test("Study OS browser flows never fall back to blocking native prompt confirm o
   }
 });
 
+test("API catch responses never serialize raw provider error messages", () => {
+  const routeDir = new URL("../src/routes", import.meta.url);
+  const apiRoutes = readdirSync(routeDir)
+    .filter((name) => name.startsWith("api.") && name.endsWith(".ts"));
+
+  for (const name of apiRoutes) {
+    const route = read("src/routes/" + name);
+    assert.doesNotMatch(
+      route,
+      /error\s+instanceof\s+Error\s*\?\s*error\.message/,
+      name + " must return a generic client-safe error instead of error.message",
+    );
+    assert.equal(route.includes("String(error)"), false, name + " must not serialize String(error)");
+  }
+});
+
+test("device auth never returns raw provider errors to the student UI", () => {
+  const route = read("src/routes/api.device-auth.ts");
+  assert.match(route, /Laitetunnistusta ei voitu juuri nyt luoda\. Yritä uudelleen\./);
+  assert.equal(route.includes("? error.message"), false);
+  assert.equal(route.includes('"[device-auth]"'), false);
+  assert.match(route, /\[Opintopäiväkirja\] device auth failed/);
+});
+
 test("release identity endpoint never exposes secrets and disables caching", () => {
   const route = read("src/routes/api.release-info.ts");
   assert.match(route, /VERCEL_GIT_COMMIT_SHA/);
@@ -203,6 +239,29 @@ test("README documents the simplified four-destination mobile navigation", () =>
   assert.equal(readme.includes("viiden kohdan tab baria"), false);
 });
 
+
+test("production database migrations are manual preview-first and confirmation-gated", () => {
+  const workflow = read(".github/workflows/database-migrate.yml");
+
+  assert.match(workflow, /workflow_dispatch:/);
+  assert.match(workflow, /github\.ref == 'refs\/heads\/main'/);
+  assert.equal(/\n\s*push:/.test(workflow), false);
+  assert.match(workflow, /group: production-database-migrations/);
+  assert.match(workflow, /cancel-in-progress: false/);
+  assert.match(workflow, /POSTGRES_URL: \$\{\{ secrets\.POSTGRES_URL \}\}/);
+  assert.match(workflow, /supabase@2\.117\.0 db push --db-url "\$POSTGRES_URL" --dry-run/);
+  assert.match(workflow, /inputs\.mode == 'apply'/);
+  assert.match(workflow, /CONFIRMATION/);
+  assert.match(workflow, /\[ "\$CONFIRMATION" != "APPLY" \]/);
+  assert.match(workflow, /supabase@2\.117\.0 db push --db-url "\$POSTGRES_URL"/);
+  assert.match(workflow, /supabase@2\.117\.0 migration list --db-url "\$POSTGRES_URL"/);
+  assert.equal(workflow.includes("--include-seed"), false);
+
+  const preview = workflow.indexOf("Preview pending migrations");
+  const confirmation = workflow.indexOf("Validate apply confirmation");
+  const apply = workflow.indexOf("Apply pending migrations");
+  assert.ok(preview >= 0 && preview < confirmation && confirmation < apply);
+});
 
 test("production build is side-effect free and database migration is explicit", () => {
   const pkg = JSON.parse(read("package.json")) as { scripts: Record<string,string> };

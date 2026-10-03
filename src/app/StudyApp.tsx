@@ -18,6 +18,7 @@ import {
   type DeviceUser,
   getDeviceOwnerId,
   isTrustedArthurDevice,
+  readCachedDeviceUser,
   readDeviceSession,
   storeDeviceSession,
 } from "@/lib/deviceSession";
@@ -74,12 +75,15 @@ export function StudyAppRoot({ initialPage, courseCode, courseTab, examId, progr
     let active = true;
     void (async () => {
       const existing = readDeviceSession();
-      const rememberedOwnerId = existing?.user.id ?? getDeviceOwnerId();
+      const cachedUser = existing?.user ?? readCachedDeviceUser();
+      const rememberedOwnerId = cachedUser?.id ?? getDeviceOwnerId();
 
-      // Keep a valid cached session usable immediately, including offline.
-      if (existing && active) setUser(existing.user);
+      // A trusted device may keep using owner-scoped offline snapshots even if
+      // its access token expired while offline. getDeviceAccessToken still
+      // refuses expired tokens, so stale credentials are never sent upstream.
+      if (cachedUser && active) setUser(cachedUser);
 
-      if (!existing && !isTrustedArthurDevice()) {
+      if (!cachedUser && !isTrustedArthurDevice()) {
         if (active) setUser(null);
         return;
       }
@@ -91,17 +95,17 @@ export function StudyAppRoot({ initialPage, courseCode, courseTab, examId, progr
         if (!active) return;
 
         setAuthError(null);
-        if (existing?.user.id && existing.user.id !== canonicalUser.id) {
+        if (cachedUser?.id && cachedUser.id !== canonicalUser.id) {
           queryClient.clear();
         }
         setUser(canonicalUser);
       } catch (error) {
         if (!active) return;
 
-        // A valid cached token still lets the app work offline. When the
-        // connection returns, the next app open/focus will canonicalize it.
-        if (existing) {
-          setAuthError(error instanceof Error ? error.message : "Synkronoinnin tarkistus epäonnistui.");
+        // A remembered device remains usable offline even when its token has
+        // expired. The foreground/online renewal path obtains fresh credentials.
+        if (cachedUser) {
+          setAuthError("Yhteyttä ei voitu juuri nyt varmistaa. Paikallinen käyttö jatkuu.");
           return;
         }
         setAuthError(error instanceof Error ? error.message : "Kirjautuminen epäonnistui.");
@@ -280,6 +284,7 @@ function StudyApp({ user, initialPage, courseCode, courseTab, examId, progressSe
   const courses = (coursesQ.data ?? []).filter(c => !c.archived), topics = topicsQ.data ?? [], sessions = sessionsQ.data ?? [], exams = examsQ.data ?? [], plan = planQ.data ?? [];
   const allQueries = [coursesQ, topicsQ, sessionsQ, examsQ, planQ, testsQ, attemptsQ, mistakesQ, preferencesQ];
   const busy = !defaultsReady || allQueries.some(q => q.isPending);
+  const coursesUnavailable = !busy && courses.length === 0 && Boolean(coursesQ.error);
   const queryError = allQueries.find(q => q.error)?.error;
   const error = defaultsError ?? (queryError instanceof Error ? queryError.message : queryError ? String(queryError) : null);
   const online = typeof navigator === "undefined" ? true : navigator.onLine;
@@ -573,6 +578,7 @@ function StudyApp({ user, initialPage, courseCode, courseTab, examId, progressSe
       <section className={`page-content page-content-${page}`} data-page={page}>
         <Suspense fallback={<FeatureFallback/>}>
         {busy ? (showSkeleton ? <div className="space-y-4" aria-label="Ladataan"><div className="h-32 animate-pulse rounded-2xl bg-muted"/><div className="h-60 animate-pulse rounded-2xl bg-muted"/></div> : null) :
+        coursesUnavailable ? <section className="panel p-6"><h2 className="text-xl font-semibold">Kurssitietoja ei saatu näkyviin</h2><p className="mt-2 text-muted-foreground">Tämä ei tarkoita, että kurssisi olisivat kadonneet. Yritä latausta uudelleen yllä olevasta ilmoituksesta.</p></section> :
         courses.length===0 ? <section className="panel p-6"><h2 className="text-xl font-semibold">Aloita ensimmäisestä kurssista</h2><p className="mt-2 text-muted-foreground">Lisää kurssi ja sen aiheet, jotta voit suunnitella ja kirjata opiskelua.</p><button onClick={()=>setAdding(true)} className="mt-5 min-h-11 rounded-xl bg-primary px-4 text-primary-foreground">Lisää kurssi</button></section> :
         page==="today" ? <TodayView courses={courses} topics={topics} sessions={sessions} exams={exams} plan={plan} tests={testsQ.data??[]} attempts={attemptsQ.data??[]} mistakes={mistakesQ.data??[]} capacity={capacity} onStart={setEntry} onGo={go} onPractice={goPractice}/> :
         page==="plan" ? <PlanView

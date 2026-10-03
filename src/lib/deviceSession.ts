@@ -38,6 +38,13 @@ export function getDeviceOwnerId() {
   return localStorage.getItem(DEVICE_OWNER_KEY);
 }
 
+export function readCachedDeviceUser(): DeviceUser | null {
+  if (typeof localStorage === "undefined") return null;
+  if (!isTrustedArthurDevice()) return null;
+  const userId = localStorage.getItem(DEVICE_OWNER_KEY);
+  return userId ? { id: userId } : null;
+}
+
 export function requireDeviceOwnerId() {
   const id = getDeviceOwnerId();
   if (!id) throw new Error("Arthur-laitetunnistus puuttuu.");

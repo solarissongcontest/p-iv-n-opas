@@ -61,9 +61,9 @@ export const Route = createFileRoute("/api/push/test")({
           }
           return Response.json({ ok: true, sent });
         } catch (error) {
-          console.error("[push/test]", error);
+          console.error("[Opintopäiväkirja] push test failed", error);
           return Response.json(
-            { error: error instanceof Error ? error.message : "Testimuistutus epäonnistui." },
+            { error: "Testimuistutusta ei voitu lähettää." },
             { status: 500 },
           );
         }

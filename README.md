@@ -250,3 +250,17 @@ Vercel cron:
 → `/api/push/cron`
 
 Älä deployaa tuotantoa vanhoista Opintopäiväkirja-repokopioista.
+
+
+## Tietokantamigraatioiden julkaisu
+
+Tuotantotietokannan migraatiot eivät kuulu tavalliseen Vercel-buildiin. Ne ajetaan erillisestä GitHub Actions -workflow’sta **Production Database Migrations**.
+
+Turvallinen järjestys:
+
+1. käynnistä workflow tilassa `preview`; tämä ajaa `supabase db push --dry-run`
+2. tarkista pending-migraatiot ja tulostettu tietokantahosti
+3. vasta sen jälkeen käynnistä workflow tilassa `apply` ja kirjoita vahvistukseksi täsmälleen `APPLY`
+4. applyn jälkeen workflow listaa paikallisen ja remote migration historyn
+
+Workflow ei käytä `--include-seed`-valintaa eikä käynnisty pushista. Repository secret `POSTGRES_URL` pitää osoittaa nimenomaan Opintopäiväkirjan tuotantotietokantaan.

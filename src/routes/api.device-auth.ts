@@ -72,14 +72,9 @@ export const Route = createFileRoute("/api/device-auth")({
             expires_at: signed.expiresAt,
           });
         } catch (error) {
-          console.error("[device-auth]", error);
+          console.error("[Opintopäiväkirja] device auth failed", error);
           return Response.json(
-            {
-              error:
-                error instanceof Error
-                  ? error.message
-                  : "Arthur-laitetunnistuksen luominen epäonnistui.",
-            },
+            { error: "Laitetunnistusta ei voitu juuri nyt luoda. Yritä uudelleen." },
             { status: 500 },
           );
         }

@@ -58,9 +58,9 @@ export const Route = createFileRoute("/api/push/subscribe")({
 
           return Response.json({ ok: true });
         } catch (error) {
-          console.error("[push/subscribe]", error);
+          console.error("[Opintopäiväkirja] push subscribe failed", error);
           return Response.json(
-            { error: error instanceof Error ? error.message : "Taustailmoitustilauksen tallennus epäonnistui." },
+            { error: "Taustailmoitustilausta ei voitu tallentaa." },
             { status: 500 },
           );
         }

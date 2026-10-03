@@ -271,9 +271,9 @@ export const Route = createFileRoute("/api/push/cron")({
 
           return Response.json({ ok: true, sent, skipped, deactivated });
         } catch (error) {
-          console.error("[push/cron]", error);
+          console.error("[Opintopäiväkirja] push cron failed", error);
           return Response.json(
-            { error: error instanceof Error ? error.message : "Push-ajastus epäonnistui." },
+            { error: "Push-ajastus epäonnistui." },
             { status: 500 },
           );
         }

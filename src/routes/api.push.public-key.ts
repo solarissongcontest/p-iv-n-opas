@@ -8,9 +8,9 @@ export const Route = createFileRoute("/api/push/public-key")({
         try {
           return Response.json({ publicKey: getVapidKeys().publicKeyBase64 });
         } catch (error) {
-          console.error("[push/public-key]", error);
+          console.error("[Opintopäiväkirja] push public key failed", error);
           return Response.json(
-            { error: error instanceof Error ? error.message : "Taustailmoitusten palvelinavain puuttuu." },
+            { error: "Taustailmoituksia ei voitu valmistella." },
             { status: 500 },
           );
         }
