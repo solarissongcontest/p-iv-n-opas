@@ -18,6 +18,7 @@ import {
   type DeviceUser,
   getDeviceOwnerId,
   isTrustedArthurDevice,
+  readCachedDeviceUser,
   readDeviceSession,
   storeDeviceSession,
 } from "@/lib/deviceSession";
@@ -74,12 +75,16 @@ export function StudyAppRoot({ initialPage, courseCode, courseTab, examId, progr
     let active = true;
     void (async () => {
       const existing = readDeviceSession();
-      const rememberedOwnerId = existing?.user.id ?? getDeviceOwnerId();
+      const cachedUser = existing?.user ?? readCachedDeviceUser();
+      const rememberedOwnerId = cachedUser?.id ?? getDeviceOwnerId();
 
-      // Keep a valid cached session usable immediately, including offline.
-      if (existing && active) setUser(existing.user);
+      // Keep the trusted device identity usable immediately, including when
+      // its access token expired while the device was offline. The Supabase
+      // client still refuses the expired token; offline queries fall back to
+      // owner-scoped snapshots until canonical auth can refresh it.
+      if (cachedUser && active) setUser(cachedUser);
 
-      if (!existing && !isTrustedArthurDevice()) {
+      if (!cachedUser && !isTrustedArthurDevice()) {
         if (active) setUser(null);
         return;
       }
@@ -100,8 +105,8 @@ export function StudyAppRoot({ initialPage, courseCode, courseTab, examId, progr
 
         // A valid cached token still lets the app work offline. When the
         // connection returns, the next app open/focus will canonicalize it.
-        if (existing) {
-          setAuthError(error instanceof Error ? error.message : "Synkronoinnin tarkistus epäonnistui.");
+        if (cachedUser) {
+          setAuthError("Yhteyttä ei voitu juuri nyt varmistaa. Paikallinen käyttö jatkuu.");
           return;
         }
         setAuthError(error instanceof Error ? error.message : "Kirjautuminen epäonnistui.");
