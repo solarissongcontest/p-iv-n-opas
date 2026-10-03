@@ -79,14 +79,16 @@ test("push notifications deep-link to Structure V4 destinations", () => {
   assert.match(cron, /delivery_key/);
 });
 
-test("README documents current Structure V4 navigation instead of the legacy five-tab model", () => {
+test("README documents the simplified four-destination mobile navigation", () => {
   const readme = read("README.md");
-  for (const label of ["Tänään", "Suunnitelma", "Opinnot", "Harjoittelu", "Edistyminen"]) {
+  for (const label of ["Tänään", "Opinnot", "Edistyminen", "Lisää"]) {
     assert.ok(readme.includes("**" + label + "**"));
   }
+  assert.match(readme, /neljän kohdan tab baria/);
+  assert.match(readme, /Suunnitelma, Harjoittelu, Kokeet/);
   assert.match(readme, /Final Release Gate/);
   assert.match(readme, /\/studies\/:courseCode/);
-  assert.equal(readme.includes("Tänään | Suunnitelma | + | Kurssit | Kehitys"), false);
+  assert.equal(readme.includes("viiden kohdan tab baria"), false);
 });
 
 
