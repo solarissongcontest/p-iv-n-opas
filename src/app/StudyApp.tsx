@@ -297,8 +297,20 @@ function StudyApp({ user, initialPage, courseCode, courseTab, examId, progressSe
 
   useEffect(() => {
     const stop = subscribePending(setPending);
-    const sync = startSyncWatcher(n => {
-      toast.success(`Synkronoitiin ${n} merkintää.`);
+    const sync = startSyncWatcher(result => {
+      if (result.synced > 0) {
+        toast.success(`Synkronoitiin ${result.synced} merkintää.`);
+      }
+      if (result.conflicts > 0) {
+        toast.info(
+          result.conflicts === 1
+            ? "Yksi vanha offline-muutos ohitettiin, koska samaa tietoa oli jo muutettu toisella laitteella."
+            : `${result.conflicts} vanhaa offline-muutosta ohitettiin, koska samat tiedot oli jo muutettu toisella laitteella.`,
+        );
+      }
+      if (result.discarded > 0) {
+        toast.info("Vanhentuneita paikallisia toimintoja siivottiin synkronoinnin yhteydessä.");
+      }
       // Offline writes may have changed sessions, plan state, mastery and
       // recovery scheduling. Re-read all active views after the queue commits.
       void queryClient.refetchQueries({ type: "active" });
