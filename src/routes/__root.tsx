@@ -14,6 +14,7 @@ import glassCss from "../styles/glass.css?url";
 import shellCss from "../styles/shell.css?url";
 import layoutsCss from "../styles/layouts.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { PwaUpdatePrompt } from "../components/PwaUpdatePrompt";
 
 function NotFoundComponent() {
   return (
@@ -153,6 +154,7 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
+      <PwaUpdatePrompt />
     </QueryClientProvider>
   );
 }
