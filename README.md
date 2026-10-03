@@ -258,9 +258,10 @@ Tuotantotietokannan migraatiot eivät kuulu tavalliseen Vercel-buildiin. Ne ajet
 
 Turvallinen järjestys:
 
-1. käynnistä workflow tilassa `preview`; tämä ajaa `supabase db push --dry-run`
-2. tarkista pending-migraatiot ja tulostettu tietokantahosti
-3. vasta sen jälkeen käynnistä workflow tilassa `apply` ja kirjoita vahvistukseksi täsmälleen `APPLY`
-4. applyn jälkeen workflow listaa paikallisen ja remote migration historyn
+1. migraatiota muuttava PR ajaa automaattisesti `supabase db push --dry-run` -previewn tuotantotietokannan yhteysosoitetta vasten
+2. preview tarkistetaan ennen mergeä; odottamattomia pending-migraatioita ei saa olla
+3. tämän yhden planner-concurrency-migraation viimeistelyssä mainiin merge hyväksytään vain, kun `.github/db-production-apply.trigger` sisältää täsmälleen `APPLY 20261003190500_plan_item_concurrency.sql`
+4. main-push ajaa uuden dry-runin, applyn ja lopuksi migration historyn
+5. normaaliin myöhempään ylläpitoon jää edelleen myös manuaalinen `workflow_dispatch` preview/apply-vahvistuksella
 
-Workflow ei käytä `--include-seed`-valintaa eikä käynnisty pushista. Repository secret `POSTGRES_URL` pitää osoittaa nimenomaan Opintopäiväkirjan tuotantotietokantaan.
+Workflow ei käytä `--include-seed`-valintaa. Repository secret `POSTGRES_URL` pitää osoittaa nimenomaan Opintopäiväkirjan tuotantotietokantaan. Push-apply on tarkoituksella sidottu vain yllä olevaan kertakäyttöiseen triggeritiedostoon; triggeri poistetaan onnistuneen migraation jälkeen.
