@@ -23,6 +23,7 @@ import {
 } from "./domain";
 import { addDays, parseISO, today } from "./fi";
 import { requireDeviceOwnerId } from "./deviceSession";
+import { DEFAULT_STUDY_WEEKDAYS } from "./studyDefaults";
 
 export type TopicDependency = {
   id: string;
@@ -623,7 +624,7 @@ export async function ensureKe04ForCurrentUser(): Promise<string> {
     const { error } = await untypedSupabase.from("user_preferences").insert({
       owner_id: ownerId,
       display_name: "Arthur",
-      study_weekdays: [1, 2, 3, 4, 5],
+      study_weekdays: [...DEFAULT_STUDY_WEEKDAYS],
       weekday_capacity_minutes: 60,
       weekend_capacity_minutes: 90,
       busy_dates: [],

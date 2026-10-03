@@ -10,6 +10,7 @@ import {
   type UserPreferences,
 } from "@/lib/data";
 import { fullDate, minutes } from "@/lib/fi";
+import { DEFAULT_STUDY_WEEKDAYS } from "@/lib/studyDefaults";
 
 const primary =
   "inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-primary px-5 font-medium text-primary-foreground disabled:opacity-50";
@@ -36,7 +37,7 @@ export function Onboarding({
   const [step,setStep]=useState(0);
   const [target,setTarget]=useState(course.target_value??"10");
   const [studyWeekdays,setStudyWeekdays]=useState<number[]>(
-    preferences.study_weekdays?.length ? preferences.study_weekdays : [1,2,3,4,5],
+    preferences.study_weekdays?.length ? preferences.study_weekdays : [...DEFAULT_STUDY_WEEKDAYS],
   );
   const [weekdayCapacity,setWeekdayCapacity]=useState(preferences.weekday_capacity_minutes??60);
   const [weekendCapacity,setWeekendCapacity]=useState(preferences.weekend_capacity_minutes??90);
