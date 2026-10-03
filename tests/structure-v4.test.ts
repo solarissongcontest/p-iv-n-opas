@@ -133,6 +133,19 @@ test("final release workflow is valid on push and does not require Gemini", () =
   assert.match(workflow, /REQUIRE_GEMINI: "false"/);
 });
 
+test("offline queue survives malformed storage and deduplicates operation ids", () => {
+  const offline = read("src/lib/offline.ts");
+  assert.match(offline, /Array\.isArray\(parsed\)/);
+  assert.match(offline, /seen\.has\(candidate\.id\)/);
+  assert.match(offline, /items\.some\(\(item\) => item\.id === id\)/);
+});
+
+test("device session refreshes immediately when the network returns", () => {
+  const app = read("src/app/StudyApp.tsx");
+  assert.match(app, /addEventListener\("online", verifyCanonicalOwner\)/);
+  assert.match(app, /removeEventListener\("online", verifyCanonicalOwner\)/);
+});
+
 test("service worker supports offline cold starts without caching API responses", () => {
   const sw = read("public/sw.js");
   assert.match(sw, /addEventListener\("install"/);
