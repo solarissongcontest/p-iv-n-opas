@@ -20,15 +20,21 @@ export function describeError(error: unknown): string {
   let current: unknown = error;
   for (let depth = 0; depth < CAUSE_DEPTH_LIMIT && current != null; depth++) {
     if (!(current instanceof Error)) {
-      parts.push(typeof current === "string" ? current : safeStringify(current));
+      parts.push(depth === 0 ? "NonErrorThrown" : "caused by: NonErrorThrown");
       break;
     }
     const label = depth === 0 ? "" : "caused by: ";
     const status = describeStatus(current);
-    parts.push(`${label}${current.stack ?? `${current.name}: ${current.message}`}${status}`);
+    const code = describeCode(current);
+    const frames = safeStackFrames(current);
+    parts.push(`${label}${safeErrorName(current)}${status}${code}${frames ? `\n${frames}` : ""}`);
     current = current.cause;
   }
   return parts.join("\n").slice(0, DESCRIPTION_LENGTH_LIMIT);
+}
+
+function safeErrorName(error: Error): string {
+  return /^[A-Za-z][A-Za-z0-9_.-]{0,79}$/.test(error.name) ? error.name : "Error";
 }
 
 function describeStatus(error: Error): string {
@@ -37,12 +43,21 @@ function describeStatus(error: Error): string {
   return typeof value === "number" ? ` (status ${value})` : "";
 }
 
-function safeStringify(value: unknown): string {
-  try {
-    return JSON.stringify(value) ?? String(value);
-  } catch {
-    return String(value);
-  }
+function describeCode(error: Error): string {
+  const value = (error as { code?: unknown }).code;
+  return typeof value === "string" && /^[A-Z0-9_.:-]{1,64}$/.test(value)
+    ? ` (code ${value})`
+    : "";
+}
+
+function safeStackFrames(error: Error): string {
+  if (!error.stack) return "";
+  return error.stack
+    .split("\n")
+    .slice(1)
+    .filter((line) => /^\s*at\s/.test(line))
+    .slice(0, 30)
+    .join("\n");
 }
 
 function isErrorLike(value: unknown): value is Error {
