@@ -61,6 +61,15 @@ export function addDays(iso: string, n: number): string {
   return toISO(d);
 }
 
+export function addMonths(iso: string, n: number): string {
+  const source = parseISO(iso);
+  const day = source.getDate();
+  const target = new Date(source.getFullYear(), source.getMonth() + n, 1);
+  const lastDay = new Date(target.getFullYear(), target.getMonth() + 1, 0).getDate();
+  target.setDate(Math.min(day, lastDay));
+  return toISO(target);
+}
+
 export function diffDays(a: string, b: string): number {
   return Math.round((parseISO(a).getTime() - parseISO(b).getTime()) / 86400000);
 }
