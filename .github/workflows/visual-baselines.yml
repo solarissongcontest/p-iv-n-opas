@@ -1,6 +1,11 @@
 name: Generate Visual Baselines
 
 on:
+  workflow_run:
+    workflows:
+      - Final Release Gate
+    types:
+      - completed
   workflow_dispatch:
     inputs:
       base_url:
@@ -13,28 +18,34 @@ permissions:
 
 jobs:
   visual-baselines:
+    if: ${{ github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main') }}
     runs-on: ubuntu-latest
     timeout-minutes: 25
     env:
-      E2E_BASE_URL: ${{ github.event.inputs.base_url }}
+      E2E_BASE_URL: ${{ github.event.inputs.base_url || 'https://opiskelupaivakirja.vercel.app' }}
+      EXPECTED_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
     steps:
-      - name: Checkout
+      - name: Checkout exact release commit
         uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
         with:
-          node-version: 22
-          cache: npm
+          ref: ${{ env.EXPECTED_SHA }}
 
-      - name: Install dependencies
-        run: npm ci
+      - name: Detect existing committed baselines
+        id: existing
+        shell: bash
+        run: |
+          if find e2e/visual-regression.spec.ts-snapshots -type f -name '*.png' -print -quit 2>/dev/null | grep -q .; then
+            echo "available=true" >> "$GITHUB_OUTPUT"
+            echo "Committed visual baselines already exist; bootstrap capture is not needed."
+          else
+            echo "available=false" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Verify exact deployed commit
+        if: steps.existing.outputs.available != 'true'
         shell: bash
         env:
-          BASE_URL: ${{ github.event.inputs.base_url }}
-          EXPECTED_SHA: ${{ github.sha }}
+          BASE_URL: ${{ env.E2E_BASE_URL }}
         run: |
           BODY=$(curl --silent --show-error --fail --max-time 10 "$BASE_URL/api/release-info")
           LIVE_SHA=$(printf '%s' "$BODY" | python3 -c "import json,sys; print((json.load(sys.stdin).get('commit') or '').strip())")
@@ -44,19 +55,32 @@ jobs:
           fi
           echo "Capturing baselines from exact commit $EXPECTED_SHA"
 
+      - name: Setup Node
+        if: steps.existing.outputs.available != 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        if: steps.existing.outputs.available != 'true'
+        run: npm ci
 
       - name: Install browser test tooling
+        if: steps.existing.outputs.available != 'true'
         run: |
           npm run e2e:install
           npx playwright install --with-deps chromium
 
       - name: Generate deterministic shell baselines
+        if: steps.existing.outputs.available != 'true'
         run: npm run e2e:visual:baseline
 
       - name: Upload baseline artifact
+        if: steps.existing.outputs.available != 'true'
         uses: actions/upload-artifact@v4
         with:
-          name: visual-baselines-${{ github.sha }}
+          name: visual-baselines-${{ env.EXPECTED_SHA }}
           path: e2e/visual-regression.spec.ts-snapshots
           if-no-files-found: error
           retention-days: 14
