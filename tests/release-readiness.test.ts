@@ -99,6 +99,21 @@ test("Final Release Gate automatically uses committed visual baselines when avai
   assert.match(workflow, /steps\.visual_baselines\.outputs\.available == 'true'/);
 });
 
+test("production database migrations require an explicit manual confirmation and canonical main", () => {
+  const workflow = read(".github/workflows/database-migrations.yml");
+  assert.match(workflow, /workflow_dispatch/);
+  assert.match(workflow, /Type APPLY/);
+  assert.match(workflow, /CONFIRM.*github\.event\.inputs\.confirm/);
+  assert.match(workflow, /\[ "\$CONFIRM" != "APPLY" \]/);
+  assert.match(workflow, /secrets\.POSTGRES_URL/);
+  assert.match(workflow, /POSTGRES_URL GitHub secret is not configured/);
+  assert.match(workflow, /ref: main/);
+  assert.match(workflow, /npm run db:migrate/);
+  assert.match(workflow, /cancel-in-progress: false/);
+  assert.equal(/^\s*push:/m.test(workflow), false);
+  assert.equal(/^\s*schedule:/m.test(workflow), false);
+});
+
 test("physical push delivery is an explicit manual workflow", () => {
   const workflow = read(".github/workflows/push-device-check.yml");
   assert.match(workflow, /workflow_dispatch/);
