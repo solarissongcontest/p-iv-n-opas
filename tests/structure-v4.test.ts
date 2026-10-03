@@ -90,6 +90,12 @@ test("practice is a bounded setup active summary flow", () => {
   assert.match(practice, /practice-focus-toolbar/);
 });
 
+test("desktop workspace recenters on ultrawide displays", () => {
+  const shell = read("src/styles/shell.css");
+  assert.match(shell, /margin-left: max\(17rem, calc\(50vw \+ 8\.5rem - 720px\)\)/);
+  assert.match(shell, /margin-right: auto/);
+});
+
 test("styles are layered and responsive page families remain explicit", () => {
   const root = read("src/routes/__root.tsx");
   for (const layer of ["foundationsCss", "glassCss", "shellCss", "layoutsCss"]) {
