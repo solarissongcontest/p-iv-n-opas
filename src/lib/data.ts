@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { registerOp, runOrQueue } from "./offline";
+import { withOfflineSnapshot } from "./offlineSnapshot";
 import {
   type CapacityProfile,
   type Course,
@@ -418,24 +419,27 @@ async function getPreferences(): Promise<UserPreferences | null> {
   return data ?? null;
 }
 
-export const useCourses = () => useQuery({ queryKey: ["courses"], queryFn: listCourses });
-export const useTopics = () => useQuery({ queryKey: ["topics"], queryFn: listTopics });
-export const useSessions = () => useQuery({ queryKey: ["sessions"], queryFn: listSessions });
-export const useExams = () => useQuery({ queryKey: ["exams"], queryFn: listExams });
-export const usePlan = () => useQuery({ queryKey: ["plan"], queryFn: listPlan });
-export const useMistakes = () => useQuery({ queryKey: ["mistakes"], queryFn: listMistakes });
-export const useTests = () => useQuery({ queryKey: ["tests"], queryFn: listTests });
+const offlineQuery = <T,>(name: string, load: () => Promise<T>) =>
+  () => withOfflineSnapshot(name, load);
+
+export const useCourses = () => useQuery({ queryKey: ["courses"], queryFn: offlineQuery("courses", listCourses) });
+export const useTopics = () => useQuery({ queryKey: ["topics"], queryFn: offlineQuery("topics", listTopics) });
+export const useSessions = () => useQuery({ queryKey: ["sessions"], queryFn: offlineQuery("sessions", listSessions) });
+export const useExams = () => useQuery({ queryKey: ["exams"], queryFn: offlineQuery("exams", listExams) });
+export const usePlan = () => useQuery({ queryKey: ["plan"], queryFn: offlineQuery("plan", listPlan) });
+export const useMistakes = () => useQuery({ queryKey: ["mistakes"], queryFn: offlineQuery("mistakes", listMistakes) });
+export const useTests = () => useQuery({ queryKey: ["tests"], queryFn: offlineQuery("tests", listTests) });
 export const usePracticeAttempts = () =>
-  useQuery({ queryKey: ["practice-attempts"], queryFn: listPracticeAttempts });
+  useQuery({ queryKey: ["practice-attempts"], queryFn: offlineQuery("practice-attempts", listPracticeAttempts) });
 export const useQuestionBank = () =>
-  useQuery({ queryKey: ["question-bank"], queryFn: listQuestionBank });
-export const useSettings = () => useQuery({ queryKey: ["settings"], queryFn: getSettings });
+  useQuery({ queryKey: ["question-bank"], queryFn: offlineQuery("question-bank", listQuestionBank) });
+export const useSettings = () => useQuery({ queryKey: ["settings"], queryFn: offlineQuery("settings", getSettings) });
 export const usePreferences = () =>
-  useQuery({ queryKey: ["preferences"], queryFn: getPreferences });
+  useQuery({ queryKey: ["preferences"], queryFn: offlineQuery("preferences", getPreferences) });
 export const useTopicDependencies = () =>
-  useQuery({ queryKey: ["topic-dependencies"], queryFn: listTopicDependencies });
+  useQuery({ queryKey: ["topic-dependencies"], queryFn: offlineQuery("topic-dependencies", listTopicDependencies) });
 export const useStudyMaterials = () =>
-  useQuery({ queryKey: ["study-materials"], queryFn: listStudyMaterials });
+  useQuery({ queryKey: ["study-materials"], queryFn: offlineQuery("study-materials", listStudyMaterials) });
 export const useLearningExperiments = () =>
   useQuery({ queryKey: ["learning-experiments"], queryFn: listLearningExperiments });
 export const useLearningPolicyStates = () =>
@@ -455,9 +459,9 @@ export const useReminderAdaptation = () =>
 export const useSubjectTaskParameters = () =>
   useQuery({ queryKey: ["subject-task-parameters"], queryFn: listSubjectTaskParameters });
 export const useWeeklyCheckins = () =>
-  useQuery({ queryKey: ["weekly-checkins"], queryFn: listWeeklyCheckins });
+  useQuery({ queryKey: ["weekly-checkins"], queryFn: offlineQuery("weekly-checkins", listWeeklyCheckins) });
 export const useProgressEvents = () =>
-  useQuery({ queryKey: ["progress-events"], queryFn: listProgressEvents });
+  useQuery({ queryKey: ["progress-events"], queryFn: offlineQuery("progress-events", listProgressEvents) });
 
 
 const KE04_TOPICS = [
