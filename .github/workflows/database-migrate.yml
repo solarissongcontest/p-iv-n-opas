@@ -1,6 +1,18 @@
 name: Production Database Migrations
 
 on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "supabase/migrations/**"
+      - ".github/db-production-apply.trigger"
+      - ".github/workflows/database-migrate.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/db-production-apply.trigger"
   workflow_dispatch:
     inputs:
       mode:
@@ -27,7 +39,7 @@ concurrency:
 jobs:
   migrate:
     name: Preview or apply production migrations
-    if: ${{ github.ref == 'refs/heads/main' }}
+    if: ${{ github.event_name == 'pull_request' || github.event_name == 'push' || github.ref == 'refs/heads/main' }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
@@ -58,14 +70,26 @@ jobs:
           print(f"Database target host: {parsed.hostname}")
           PY
 
+      - name: Validate guarded main-push trigger
+        if: ${{ github.event_name == 'push' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          EXPECTED="APPLY 20261003190500_plan_item_concurrency.sql"
+          ACTUAL="$(tr -d '\r\n' < .github/db-production-apply.trigger)"
+          if [ "$ACTUAL" != "$EXPECTED" ]; then
+            echo "::error::Unexpected database apply trigger. Expected: $EXPECTED"
+            exit 1
+          fi
+
       - name: Preview pending migrations
         shell: bash
         run: |
           set -euo pipefail
           npx --yes supabase@2.117.0 db push --db-url "$POSTGRES_URL" --dry-run
 
-      - name: Validate apply confirmation
-        if: ${{ inputs.mode == 'apply' }}
+      - name: Validate manual apply confirmation
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.mode == 'apply' }}
         shell: bash
         env:
           CONFIRMATION: ${{ inputs.confirmation }}
@@ -77,14 +101,14 @@ jobs:
           fi
 
       - name: Apply pending migrations
-        if: ${{ inputs.mode == 'apply' }}
+        if: ${{ github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.mode == 'apply') }}
         shell: bash
         run: |
           set -euo pipefail
           npx --yes supabase@2.117.0 db push --db-url "$POSTGRES_URL"
 
       - name: Confirm migration history after apply
-        if: ${{ inputs.mode == 'apply' }}
+        if: ${{ github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.mode == 'apply') }}
         shell: bash
         run: |
           set -euo pipefail
