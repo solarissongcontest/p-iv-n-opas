@@ -9,7 +9,7 @@ on:
       - ".github/visual-baseline-bootstrap.trigger"
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   bootstrap:
@@ -57,3 +57,23 @@ jobs:
           path: e2e/visual-regression.spec.ts-snapshots
           if-no-files-found: error
           retention-days: 7
+
+      - name: Publish clean baseline branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          TMP_DIR=$(mktemp -d)
+          cp -a e2e/visual-regression.spec.ts-snapshots "$TMP_DIR/"
+
+          git fetch origin main
+          git checkout -B test/visual-regression-baselines origin/main
+          rm -rf e2e/visual-regression.spec.ts-snapshots
+          mkdir -p e2e
+          cp -a "$TMP_DIR/visual-regression.spec.ts-snapshots" e2e/
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add e2e/visual-regression.spec.ts-snapshots
+          git diff --cached --quiet && exit 0
+          git commit -m "Add production visual regression baselines"
+          git push --force origin HEAD:refs/heads/test/visual-regression-baselines
