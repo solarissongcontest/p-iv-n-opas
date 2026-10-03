@@ -136,6 +136,22 @@ jobs:
       - name: Responsive layout evidence matrix
         run: npx playwright test e2e/responsive-visual.spec.ts --project=desktop-chromium
 
+      - name: Detect committed visual baselines
+        id: visual_baselines
+        shell: bash
+        run: |
+          if find e2e/visual-regression.spec.ts-snapshots -type f -name '*.png' -print -quit 2>/dev/null | grep -q .; then
+            echo "available=true" >> "$GITHUB_OUTPUT"
+            echo "Committed visual baselines found."
+          else
+            echo "available=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Visual baselines are not committed yet. Generate them with the exact-commit baseline workflow before enabling this release gate."
+          fi
+
+      - name: Visual regression against committed baselines
+        if: steps.visual_baselines.outputs.available == 'true'
+        run: npx playwright test e2e/visual-regression.spec.ts --project=desktop-chromium
+
       - name: Upload browser evidence
         if: always()
         uses: actions/upload-artifact@v4

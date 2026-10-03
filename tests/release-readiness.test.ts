@@ -89,6 +89,16 @@ test("visual regression has a deterministic baseline generator before it becomes
   assert.match(pkg.scripts["e2e:visual:baseline"], /--update-snapshots/);
 });
 
+test("Final Release Gate automatically uses committed visual baselines when available", () => {
+  const workflow = read(".github/workflows/iphone-e2e.yml");
+  assert.match(workflow, /Detect committed visual baselines/);
+  assert.match(workflow, /visual-regression\.spec\.ts-snapshots/);
+  assert.match(workflow, /available=true/);
+  assert.match(workflow, /Visual regression against committed baselines/);
+  assert.match(workflow, /e2e\/visual-regression\.spec\.ts/);
+  assert.match(workflow, /steps\.visual_baselines\.outputs\.available == 'true'/);
+});
+
 test("physical push delivery is an explicit manual workflow", () => {
   const workflow = read(".github/workflows/push-device-check.yml");
   assert.match(workflow, /workflow_dispatch/);
