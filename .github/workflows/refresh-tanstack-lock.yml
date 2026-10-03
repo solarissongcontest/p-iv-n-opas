@@ -1,0 +1,49 @@
+name: Refresh Bun lockfile for TanStack security update
+
+on:
+  push:
+    branches:
+      - security/tanstack-start-cve-2026-102989
+
+permissions:
+  contents: write
+
+jobs:
+  refresh-lockfile:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout security branch
+        uses: actions/checkout@v4
+        with:
+          ref: security/tanstack-start-cve-2026-102989
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Regenerate Bun lockfile
+        run: bun install
+
+      - name: Verify aligned patched TanStack graph
+        shell: bash
+        run: |
+          grep -F '"@tanstack/react-start": ["@tanstack/react-start@1.168.60"' bun.lock
+          grep -F '"@tanstack/react-router": ["@tanstack/react-router@1.170.41"' bun.lock
+          grep -F '"@tanstack/router-plugin": ["@tanstack/router-plugin@1.168.42"' bun.lock
+          grep -F '"@tanstack/start-server-core": ["@tanstack/start-server-core@1.169.39"' bun.lock
+
+      - name: Commit regenerated lockfile
+        shell: bash
+        run: |
+          if git diff --quiet -- bun.lock; then
+            echo "bun.lock already up to date"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add bun.lock
+          git commit -m "security: realign Bun lockfile for patched TanStack release"
+          git push origin HEAD:security/tanstack-start-cve-2026-102989
