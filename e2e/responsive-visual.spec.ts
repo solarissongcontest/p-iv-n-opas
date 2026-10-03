@@ -120,3 +120,56 @@ test("mobile More sheet and active Practice remain bounded", async ({ page }, te
     contentType: "image/png",
   });
 });
+
+
+test("desktop planner responds to usable workspace instead of viewport width", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await enterApp(page);
+  await page.goto("/plan/week/2026-W41", { waitUntil: "domcontentloaded" });
+
+  const support = page.locator(".planner-support");
+  const week = page.locator(".planner-week");
+  await expect(support).toBeVisible();
+  await expect(week).toBeVisible();
+  await support.locator("summary").click();
+  await expect(page.locator(".v5-planner-grid")).toBeVisible();
+
+  const geometry = async () => page.evaluate(() => {
+    const box = (selector: string) => {
+      const node = document.querySelector<HTMLElement>(selector);
+      if (!node) return null;
+      const rect = node.getBoundingClientRect();
+      return { left: rect.left, right: rect.right, top: rect.top, bottom: rect.bottom, width: rect.width };
+    };
+    const dayWidths = Array.from(document.querySelectorAll<HTMLElement>(".planner-week-day"))
+      .map((node) => node.getBoundingClientRect().width);
+    const plannerGrid = document.querySelector<HTMLElement>(".v5-planner-grid");
+    const columns = plannerGrid
+      ? getComputedStyle(plannerGrid).gridTemplateColumns.trim().split(/\s+/).filter(Boolean).length
+      : 0;
+    return {
+      week: box(".planner-week"),
+      support: box(".planner-support"),
+      minDayWidth: dayWidths.length ? Math.min(...dayWidths) : 0,
+      plannerColumns: columns,
+    };
+  });
+
+  const constrained = await geometry();
+  expect(constrained.week).not.toBeNull();
+  expect(constrained.support).not.toBeNull();
+  expect(constrained.support!.top).toBeGreaterThanOrEqual(constrained.week!.bottom - 2);
+  expect(constrained.minDayWidth).toBeGreaterThanOrEqual(110);
+  expect(constrained.plannerColumns).toBe(2);
+
+  await page.setViewportSize({ width: 1728, height: 1000 });
+  await page.waitForTimeout(100);
+
+  const wide = await geometry();
+  expect(wide.week).not.toBeNull();
+  expect(wide.support).not.toBeNull();
+  expect(wide.support!.left).toBeGreaterThanOrEqual(wide.week!.right - 2);
+  expect(wide.support!.width).toBeGreaterThanOrEqual(320);
+  expect(wide.minDayWidth).toBeGreaterThanOrEqual(115);
+  expect(wide.plannerColumns).toBe(1);
+});
