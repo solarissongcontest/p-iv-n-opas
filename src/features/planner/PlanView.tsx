@@ -90,7 +90,7 @@ import {
   useUpsertWeeklyCheckin,
   useWeeklyCheckins,
 } from "@/lib/data";
-import { addDays, dateWithWeekday, diffDays, fullDate, minutes, shortDate, startOfWeek, today, weekNumber } from "@/lib/fi";
+import { addDays, addMonths, dateWithWeekday, diffDays, fullDate, minutes, shortDate, startOfWeek, today, weekNumber } from "@/lib/fi";
 import { disableBackgroundPush, enableBackgroundPush, pushIsEnabledOnDevice, pushSupported, sendTestPush } from "@/lib/push";
 import { applyTheme, storedThemeIsDark } from "@/lib/theme";
 import { clearDeviceSession, type DeviceUser } from "@/lib/deviceSession";
@@ -132,6 +132,18 @@ import {
 } from "@/components/StudyDialogs";
 
 import { Bar, Panel, button, secondary, type Base } from "@/features/shared/StudyViewPrimitives";
+import { Dialog, input as dialogInput } from "@/features/shared/DialogPrimitives";
+
+const skipReasonOptions = [
+  ["no_time", "Ei aikaa"],
+  ["forgot", "Unohdin"],
+  ["too_tired", "Liian väsynyt"],
+  ["too_hard", "Liian vaikea"],
+  ["unclear_start", "En tiennyt mistä aloittaa"],
+  ["plans_changed", "Suunnitelmat muuttuivat"],
+  ["other", "Muu syy"],
+] as const;
+type SkipReason = (typeof skipReasonOptions)[number][0];
 
 export function PlanView({courses,topics,plan,tests,mistakes,attempts,capacity,onStart,initialMode="viikko",initialAnchor,onPeriodChange}:Base&{plan:PlanItem[];tests:PracticeTest[];mistakes:Mistake[];attempts:PracticeAttempt[];capacity:CapacityProfile;onStart:(id:string)=>void;initialMode?:("päivä"|"viikko"|"kuukausi") | undefined;initialAnchor?:string | undefined;onPeriodChange?:(mode:"päivä"|"viikko"|"kuukausi",anchor:string)=>void}) {
   const preferences=usePreferences();
@@ -140,6 +152,8 @@ export function PlanView({courses,topics,plan,tests,mistakes,attempts,capacity,o
   const plannerMode=preferences.data?.planner_mode??"assisted";
   const [mode,setMode]=useState<"päivä"|"viikko"|"kuukausi">(initialMode),[anchor,setAnchor]=useState(initialAnchor??today()),[creating,setCreating]=useState(false),[adding,setAdding]=useState(false),[choice,setChoice]=useState(courses[0]?.id??"");
   const [proposal,setProposal]=useState<PlanDraft[]|null>(null),[editingProposal,setEditingProposal]=useState(false);
+  const [shiftTarget,setShiftTarget]=useState<PlanItem|null>(null),[shiftDate,setShiftDate]=useState("");
+  const [skipTarget,setSkipTarget]=useState<PlanItem|null>(null),[skipReason,setSkipReason]=useState<SkipReason>("no_time");
   const move=useMovePlanItem(),status=usePlanStatus(),generate=useGeneratePlan(),friction=useCreateFrictionEvent();
   const first=mode==="viikko"?startOfWeek(anchor):mode==="kuukausi"?anchor.slice(0,7)+"-01":anchor;
   const last=mode==="viikko"?addDays(first,6):mode==="kuukausi"?addDays(addDays(first,32).slice(0,7)+"-01",-1):anchor;
@@ -152,14 +166,29 @@ export function PlanView({courses,topics,plan,tests,mistakes,attempts,capacity,o
     setMode(nextMode);setAnchor(nextAnchor);onPeriodChange?.(nextMode,nextAnchor);
   };
 
-  async function shift(p:PlanItem){const date=prompt("Uusi päivä (VVVV-KK-PP)",p.date);if(!date||!/^\d{4}-\d{2}-\d{2}$/.test(date))return;try{await move.mutateAsync({id:p.id,date,from:p.date});toast.success("Tehtävä siirretty.");}catch{toast.error("Siirto epäonnistui.");}}
-  async function skipWithReason(p:PlanItem){
-    const raw=window.prompt("Miksi ohitat tämän? 1 = ei aikaa, 2 = unohdin, 3 = liian väsynyt, 4 = liian vaikea, 5 = epäselvä aloitus, 6 = suunnitelmat muuttuivat","1");
-    const map:Record<string,"no_time"|"forgot"|"too_tired"|"too_hard"|"unclear_start"|"plans_changed"|"other">={"1":"no_time","2":"forgot","3":"too_tired","4":"too_hard","5":"unclear_start","6":"plans_changed"};
+  const movePeriod=(direction:-1|1)=>{
+    const next=mode==="kuukausi"
+      ? addMonths(anchor,direction)
+      : addDays(anchor,direction*(mode==="päivä"?1:7));
+    changePeriod(mode,next);
+  };
+  function requestShift(p:PlanItem){setShiftTarget(p);setShiftDate(p.date);}
+  async function confirmShift(){
+    if(!shiftTarget||!/^\d{4}-\d{2}-\d{2}$/.test(shiftDate))return;
     try{
-      await status.mutateAsync({id:p.id,status:"skipped"});
-      void friction.mutateAsync({date:today(),plan_item_id:p.id,course_id:p.course_id,reason:map[raw??""]??"other",self_started:false,reminder_used:false}).catch(()=>undefined);
-      toast.success("Tehtävä ohitettu. Syytä käytetään suunnitelman parantamiseen, eikä ohituksesta muodosteta lisävelkaa.");
+      await move.mutateAsync({id:shiftTarget.id,date:shiftDate,from:shiftTarget.date});
+      setShiftTarget(null);
+      toast.success("Tehtävä siirretty.");
+    }catch{toast.error("Siirto epäonnistui.");}
+  }
+  function requestSkip(p:PlanItem){setSkipTarget(p);setSkipReason("no_time");}
+  async function confirmSkip(){
+    if(!skipTarget)return;
+    try{
+      await status.mutateAsync({id:skipTarget.id,status:"skipped"});
+      void friction.mutateAsync({date:today(),plan_item_id:skipTarget.id,course_id:skipTarget.course_id,reason:skipReason,self_started:false,reminder_used:false}).catch(()=>undefined);
+      setSkipTarget(null);
+      toast.success("Tehtävä ohitettu. Suunnitelma mukautuu ilman lisävelkaa.");
     }catch{toast.error("Muutos epäonnistui.");}
   }
 
@@ -204,8 +233,8 @@ export function PlanView({courses,topics,plan,tests,mistakes,attempts,capacity,o
     }catch{toast.error("Suunnitelmaa ei voitu tallentaa.");}
   }
 
-  return <PlannerLayout className="planner-view flex flex-col gap-5">
-    <div className="flex flex-wrap items-center justify-between gap-3"><div className="flex items-center gap-1"><button className={secondary+" !px-3"} aria-label="Edellinen" onClick={()=>changePeriod(mode,addDays(anchor,mode==="päivä"?-1:mode==="viikko"?-7:-30))}><ChevronLeft size={18}/></button><span className="min-w-28 text-center text-sm">{fullDate(first)}{first!==last&&` – ${fullDate(last)}`}</span><button className={secondary+" !px-3"} aria-label="Seuraava" onClick={()=>changePeriod(mode,addDays(anchor,mode==="päivä"?1:mode==="viikko"?7:30))}><ChevronRight size={18}/></button></div><div className="flex gap-1 rounded-xl bg-muted p-1">{(["päivä","viikko","kuukausi"] as const).map(m=><button key={m} aria-pressed={mode===m} onClick={()=>changePeriod(m,anchor)} className={`min-h-10 rounded-lg px-3 capitalize ${mode===m?"bg-surface shadow-sm":""}`}>{m}</button>)}</div></div>
+  return <><PlannerLayout className="planner-view flex flex-col gap-5">
+    <div className="flex flex-wrap items-center justify-between gap-3"><div className="flex items-center gap-1"><button className={secondary+" !px-3"} aria-label="Edellinen" onClick={()=>movePeriod(-1)}><ChevronLeft size={18}/></button><span className="min-w-28 text-center text-sm">{fullDate(first)}{first!==last&&` – ${fullDate(last)}`}</span><button className={secondary+" !px-3"} aria-label="Seuraava" onClick={()=>movePeriod(1)}><ChevronRight size={18}/></button></div><div className="flex gap-1 rounded-xl bg-muted p-1">{(["päivä","viikko","kuukausi"] as const).map(m=><button key={m} aria-pressed={mode===m} onClick={()=>changePeriod(m,anchor)} className={`min-h-11 rounded-lg px-3 capitalize ${mode===m?"bg-surface shadow-sm":""}`}>{m}</button>)}</div></div>
     <div className="flex flex-wrap gap-2"><button className={secondary} onClick={()=>setCreating(v=>!v)}><Plus size={17}/>Luo suunnitelma</button><button className={secondary} onClick={()=>setAdding(true)}>Lisää tehtävä</button></div>
     <details className="planner-support panel p-4 sm:p-5">
       <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 font-semibold">
@@ -237,8 +266,28 @@ export function PlanView({courses,topics,plan,tests,mistakes,attempts,capacity,o
       topics={topics}
       onStart={onStart}
       onMove={(item,date)=>void move.mutateAsync({id:item.id,date,from:item.date}).then(()=>toast.success("Tehtävä siirretty.")).catch(()=>toast.error("Siirto epäonnistui."))}
-      onShift={(item)=>void shift(item)}
-      onSkip={(item)=>void skipWithReason(item)}
+      onShift={requestShift}
+      onSkip={requestSkip}
     />
-  </PlannerLayout>;
+  </PlannerLayout>
+  {shiftTarget&&<Dialog title="Siirrä tehtävä" onClose={()=>setShiftTarget(null)}>
+    <label className="block text-sm font-medium">Uusi päivä
+      <input type="date" value={shiftDate} onChange={event=>setShiftDate(event.target.value)} className={dialogInput}/>
+    </label>
+    <div className="mt-5 flex justify-end gap-2">
+      <button className={secondary} onClick={()=>setShiftTarget(null)}>Peruuta</button>
+      <button className={button} disabled={!/^\d{4}-\d{2}-\d{2}$/.test(shiftDate)||move.isPending} onClick={()=>void confirmShift()}>{move.isPending?"Siirretään…":"Siirrä"}</button>
+    </div>
+  </Dialog>}
+  {skipTarget&&<Dialog title="Miksi jätät tämän väliin?" onClose={()=>setSkipTarget(null)}>
+    <div className="grid gap-2">
+      {skipReasonOptions.map(([value,label])=><button key={value} type="button" aria-pressed={skipReason===value} onClick={()=>setSkipReason(value)} className={"min-h-11 rounded-xl border px-4 text-left text-sm "+(skipReason===value?"border-primary bg-accent font-semibold":"border-border bg-surface")}>{label}</button>)}
+    </div>
+    <p className="mt-4 text-sm text-muted-foreground">Ohitus ei muutu lisävelaksi. Syy auttaa sovellusta tekemään seuraavasta suunnitelmasta realistisemman.</p>
+    <div className="mt-5 flex justify-end gap-2">
+      <button className={secondary} onClick={()=>setSkipTarget(null)}>Peruuta</button>
+      <button className={button} disabled={status.isPending} onClick={()=>void confirmSkip()}>{status.isPending?"Tallennetaan…":"Ohita tältä päivältä"}</button>
+    </div>
+  </Dialog>}
+  </>;
 }
