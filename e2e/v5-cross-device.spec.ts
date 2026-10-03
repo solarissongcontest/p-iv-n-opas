@@ -71,7 +71,7 @@ test("v5 offline write survives reload, syncs, and appears on a second device", 
   await waitForServiceWorker(pageA);
 
   const marker = "OPK-E2E-" + Date.now();
-  await pageA.getByRole("button", { name: "Lisää toimintoja" }).click();
+  await pageA.getByRole("button", { name: "Lisää", exact: true }).click();
   const actionSheet = pageA.getByRole("dialog", { name: "Lisää toimintoja" });
   await expect(actionSheet).toBeVisible();
   await actionSheet.getByRole("button", { name: /Kirjaa opiskelu/ }).click();
