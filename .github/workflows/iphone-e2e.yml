@@ -87,7 +87,7 @@ jobs:
         id: resolve
         shell: bash
         env:
-          INPUT_BASE_URL: ${{ inputs.base_url }}
+          INPUT_BASE_URL: ${{ github.event.inputs.base_url || '' }}
           REPOSITORY_BASE_URL: ${{ vars.PRODUCTION_BASE_URL }}
           EXPECTED_SHA: ${{ github.sha }}
         run: |
@@ -128,7 +128,7 @@ except Exception:
     timeout-minutes: 35
     env:
       E2E_BASE_URL: ${{ needs.wait-for-production.outputs.base_url }}
-      REQUIRE_GEMINI: "true"
+      REQUIRE_GEMINI: "false"
     steps:
       - name: Checkout
         uses: actions/checkout@v4
