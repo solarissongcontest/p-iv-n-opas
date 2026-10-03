@@ -264,6 +264,16 @@ test("core study data has an owner-scoped IndexedDB fallback for cold offline st
   assert.match(settings, /clearOfflineSnapshots\(\)/);
 });
 
+test("service worker caches only pinned study-editor CDN dependencies", () => {
+  const sw = read("public/sw.js");
+  assert.match(sw, /rich-text-editor@8\.13\.0/);
+  assert.match(sw, /mathjax@3\.2\.2/);
+  assert.match(sw, /isApprovedStudyCdnAsset/);
+  assert.match(sw, /url\.pathname\.startsWith\("\/rich-text-editor@8\.13\.0\/"\)/);
+  assert.match(sw, /url\.pathname\.startsWith\("\/npm\/mathjax@3\.2\.2\/"\)/);
+  assert.equal(sw.includes('url.origin === "https://unpkg.com" || true'), false);
+});
+
 test("service worker supports offline cold starts without caching API responses", () => {
   const sw = read("public/sw.js");
   assert.match(sw, /addEventListener\("install"/);
