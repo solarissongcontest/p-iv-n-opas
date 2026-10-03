@@ -10,6 +10,7 @@ const VIEWPORTS = [
   { name: "1024", width: 1024, height: 900 },
   { name: "1280", width: 1280, height: 900 },
   { name: "1440", width: 1440, height: 1000 },
+  { name: "1728", width: 1728, height: 1117 },
 ] as const;
 
 const ROUTES = [
@@ -71,6 +72,11 @@ for (const viewport of VIEWPORTS) {
         expect(geometry.sidebar).not.toBeNull();
         await expect(page.locator(".desktop-sidebar").getByRole("button", { name: "Suunnitelma" })).toBeVisible();
         await expect(page.locator(".desktop-sidebar").getByRole("button", { name: "Kokeet" })).toBeVisible();
+        if (viewport.width >= 1600) {
+          const leftGap = geometry.main!.left - geometry.sidebar!.right;
+          const rightGap = viewport.width - geometry.main!.right;
+          expect(Math.abs(leftGap - rightGap)).toBeLessThanOrEqual(40);
+        }
       }
 
       if (route.name === "month") {
