@@ -142,6 +142,21 @@ test("final release workflow is valid on push and does not require Gemini", () =
   assert.match(workflow, /REQUIRE_GEMINI: "false"/);
 });
 
+test("planner writes use optimistic concurrency and offline conflicts cannot block sync forever", () => {
+  const data = read("src/lib/data.ts");
+  const offline = read("src/lib/offline.ts");
+  const planner = read("src/features/planner/PlanView.tsx");
+  const today = read("src/features/today/TodayView.tsx");
+  const migration = read("supabase/migrations/20261003190500_plan_item_concurrency.sql");
+  assert.match(data, /expected_updated_at/);
+  assert.match(data, /SYNC_CONFLICT:/);
+  assert.match(planner, /expected_updated_at:shiftTarget\.updated_at/);
+  assert.match(today, /expected_updated_at:next\.updated_at/);
+  assert.match(offline, /conflicts \+= 1/);
+  assert.match(offline, /continue;/);
+  assert.match(migration, /before update on public\.plan_items/);
+});
+
 test("offline queue survives malformed storage and deduplicates operation ids", () => {
   const offline = read("src/lib/offline.ts");
   assert.match(offline, /Array\.isArray\(parsed\)/);
