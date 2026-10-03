@@ -1,0 +1,63 @@
+name: Refresh Bun lockfile for TanStack security update
+
+on:
+  push:
+    branches:
+      - security/tanstack-start-cve-2026-102989
+
+permissions:
+  contents: write
+
+jobs:
+  refresh-lockfile:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout security branch
+        uses: actions/checkout@v4
+        with:
+          ref: security/tanstack-start-cve-2026-102989
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Regenerate Bun lockfile
+        run: bun install
+
+      - name: Verify patched dependency graph
+        shell: bash
+        run: |
+          grep -F '"@tanstack/react-start": ["@tanstack/react-start@1.168.60"' bun.lock
+          node - <<'NODE'
+          const fs = require("fs");
+          const lock = fs.readFileSync("bun.lock", "utf8");
+          const match = lock.match(/"@tanstack\/start-server-core": \["@tanstack\/start-server-core@(\d+)\.(\d+)\.(\d+)"/);
+          if (!match) {
+            console.error("Could not find resolved @tanstack/start-server-core in bun.lock");
+            process.exit(1);
+          }
+          const version = match.slice(1).map(Number);
+          const patched = version[0] > 1 ||
+            (version[0] === 1 && (version[1] > 169 || (version[1] === 169 && version[2] >= 39)));
+          if (!patched) {
+            console.error("Resolved @tanstack/start-server-core is still vulnerable: " + version.join("."));
+            process.exit(1);
+          }
+          console.log("Patched @tanstack/start-server-core:", version.join("."));
+          NODE
+
+      - name: Commit regenerated lockfile
+        shell: bash
+        run: |
+          if git diff --quiet -- bun.lock; then
+            echo "bun.lock already up to date"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add bun.lock
+          git commit -m "security: refresh Bun lockfile for TanStack patch"
+          git push origin HEAD:security/tanstack-start-cve-2026-102989
