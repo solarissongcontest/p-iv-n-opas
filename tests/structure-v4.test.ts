@@ -79,7 +79,11 @@ test("app shell centralizes navigation bottom interaction zone and accessible mo
   assert.match(shell, /aria-label="Mobiilinavigaatio"/);
   assert.match(shell, /role="dialog"/);
   assert.match(shell, /event\.key === "Escape"/);
-  assert.match(shell, /previous\?\.focus\(\)/);
+  assert.match(shell, /previous\?\.focus\(\)/);  assert.match(shell, /const navigateFromSheet =/);
+  assert.match(shell, /const launchAfterClose =/);
+  assert.match(shell, /launchAfterClose\(onLog\)/);
+  assert.match(shell, /launchAfterClose\(onSearch\)/);
+
 });
 
 test("practice is a bounded setup active summary flow", () => {
