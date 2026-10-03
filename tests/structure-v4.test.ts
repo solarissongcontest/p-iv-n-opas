@@ -58,6 +58,14 @@ test("large UI monoliths are compatibility barrels rather than implementations",
   assert.match(dialogs, /features\/session\/SessionForm/);
 });
 
+test("mobile shell only reserves coach clearance when the coach exists", () => {
+  const shell = read("src/app/AppShell.tsx");
+  const styles = read("src/styles/shell.css");
+  assert.match(shell, /app-main-has-context-action/);
+  assert.match(styles, /\.app-main-has-context-action/);
+  assert.match(styles, /\+ 1\.75rem/);
+});
+
 test("app shell centralizes navigation bottom interaction zone and accessible mobile sheet", () => {
   const shell = read("src/app/AppShell.tsx");
   const navigation = read("src/app/navigation.ts");
