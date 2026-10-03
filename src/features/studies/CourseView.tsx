@@ -192,7 +192,10 @@ export function CourseView({courses,topics,sessions,exams,plan,tests,mistakes,se
       </div>
       <button className={button} onClick={onStart}>Jatka opiskelua</button>
     </section>
-    <div role="tablist" aria-label="Kurssin osiot" className="flex gap-1 overflow-x-auto rounded-xl bg-muted p-1">{(["Yleiskuva","Sisältö","Historia","Analyysi"] as CourseTab[]).map(name=><button key={name} role="tab" aria-selected={tab===name} onClick={()=>changeTab(name)} className={`min-h-11 min-w-max flex-1 rounded-lg px-3 text-sm ${tab===name?"bg-surface font-medium shadow-sm":""}`}>{name}</button>)}</div>
+    <div className="flex flex-wrap items-center gap-2">
+      <div role="tablist" aria-label="Kurssin osiot" className="flex min-w-0 flex-1 gap-1 overflow-x-auto rounded-xl bg-muted p-1">{(["Yleiskuva","Sisältö","Historia"] as CourseTab[]).map(name=><button key={name} role="tab" aria-selected={tab===name} onClick={()=>changeTab(name)} className={`min-h-11 min-w-max flex-1 rounded-lg px-3 text-sm ${tab===name?"bg-surface font-medium shadow-sm":""}`}>{name}</button>)}</div>
+      <button type="button" aria-pressed={tab==="Analyysi"} className={tab==="Analyysi"?button:secondary} onClick={()=>changeTab("Analyysi")}>Tarkempi analyysi</button>
+    </div>
 
     {tab==="Yleiskuva"&&<div className="course-overview grid gap-4 lg:grid-cols-2">
       <Panel title="Seuraava aihe"><p>{pp.find(p=>p.date>=today()&&p.status==="planned")?.title||ts.find(t=>t.progress<100)?.name||"Ei suunniteltua aihetta"}</p><button className={button+" mt-4"} onClick={onStart}>Aloita seuraava</button></Panel>
@@ -206,11 +209,11 @@ export function CourseView({courses,topics,sessions,exams,plan,tests,mistakes,se
     {tab==="Sisältö"&&<div className="space-y-4">
       <MaterialImporter course={c} topics={topics}/>
       <KnowledgeGraphEditor course={c} courses={courses} topics={topics}/>
-      <Panel title="Aiheet" action={<button className={secondary+" !min-h-9"} onClick={()=>setForm("newTopic")}><Plus size={15}/>Lisää aihe</button>}>
+      <Panel title="Aiheet" action={<button className={secondary+" !min-h-11"} onClick={()=>setForm("newTopic")}><Plus size={15}/>Lisää aihe</button>}>
       {ts.length?ts.map(t=>{const topicSessions=ss.filter(s=>s.topic_id===t.id),lastSession=topicSessions[0],mismatch=masteryMismatch(t);return <div key={t.id} className="border-b border-border py-4">
-        <div className="flex justify-between gap-3"><div className="min-w-0"><p className="font-medium"><span aria-hidden="true">{t.progress>=100?"✓":t.progress>0?"◐":"○"} </span>{t.name}</p><p className="mt-1 text-sm text-muted-foreground">Sisältö {t.progress} % · osaaminen <b className="font-medium text-foreground">{MASTERY_LABELS[t.verified_level]}</b> · {minutes(t.study_minutes)}{t.materials?` · ${t.materials}`:""}</p><p className="mt-1 text-xs text-muted-foreground">{masteryEvidence(t)} · Viimeisin opiskelu {lastSession?fullDate(lastSession.date):"—"} · viimeisin kertaus {t.last_review?fullDate(t.last_review):"—"} · seuraava kertaus {t.next_review?fullDate(t.next_review):"—"}{lastSession?.tasks?` · tehtävät ${lastSession.tasks}`:""}</p>{mismatch&&<p className="mt-2 rounded-xl bg-accent p-2 text-xs">{mismatch.message}</p>}</div><div className="flex items-start gap-2"><button aria-label="Muokkaa aihetta" className="rounded-lg p-2 hover:bg-muted" onClick={()=>setEditingTopic(t)}><Pencil size={15}/></button></div></div>
+        <div className="flex justify-between gap-3"><div className="min-w-0"><p className="font-medium"><span aria-hidden="true">{t.progress>=100?"✓":t.progress>0?"◐":"○"} </span>{t.name}</p><p className="mt-1 text-sm text-muted-foreground">Sisältö {t.progress} % · osaaminen <b className="font-medium text-foreground">{MASTERY_LABELS[t.verified_level]}</b> · {minutes(t.study_minutes)}{t.materials?` · ${t.materials}`:""}</p><p className="mt-1 text-xs text-muted-foreground">{masteryEvidence(t)} · Viimeisin opiskelu {lastSession?fullDate(lastSession.date):"—"} · viimeisin kertaus {t.last_review?fullDate(t.last_review):"—"} · seuraava kertaus {t.next_review?fullDate(t.next_review):"—"}{lastSession?.tasks?` · tehtävät ${lastSession.tasks}`:""}</p>{mismatch&&<p className="mt-2 rounded-xl bg-accent p-2 text-xs">{mismatch.message}</p>}</div><div className="flex items-start gap-2"><button aria-label="Muokkaa aihetta" className="grid size-11 place-items-center rounded-lg hover:bg-muted" onClick={()=>setEditingTopic(t)}><Pencil size={15}/></button></div></div>
         <div className="my-2"><Bar value={t.progress}/></div>
-        <label className="flex min-h-10 items-center gap-2 text-sm"><input type="checkbox" className="size-4 accent-primary" checked={t.school_covered} onChange={e=>void updateTopic.mutateAsync({id:t.id,school_covered:e.target.checked}).catch(()=>toast.error("Koulun etenemistä ei voitu päivittää."))}/>Käsitelty koulussa</label>
+        <label className="flex min-h-11 items-center gap-2 text-sm"><input type="checkbox" className="size-4 accent-primary" checked={t.school_covered} onChange={e=>void updateTopic.mutateAsync({id:t.id,school_covered:e.target.checked}).catch(()=>toast.error("Koulun etenemistä ei voitu päivittää."))}/>Käsitelty koulussa</label>
       </div>}):<p className="text-muted-foreground">Lisää aiheita kurssille.</p>}
     </Panel>
     </div>}
