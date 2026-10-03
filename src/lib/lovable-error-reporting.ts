@@ -13,6 +13,29 @@ type LovableEvents = {
   ) => void;
 };
 
+function telemetryError(error: unknown) {
+  if (error instanceof Response) {
+    return new Error(`Response status ${error.status}`);
+  }
+  if (error instanceof Error) {
+    const status = (error as { status?: unknown; statusCode?: unknown }).status ??
+      (error as { statusCode?: unknown }).statusCode;
+    const safe = new Error(
+      `${/^[A-Za-z][A-Za-z0-9_.-]{0,79}$/.test(error.name) ? error.name : "Error"}${typeof status === "number" ? ` status ${status}` : ""}`,
+    );
+    if (error.stack) {
+      const frames = error.stack
+        .split("\n")
+        .slice(1)
+        .filter((line) => /^\s*at\s/.test(line))
+        .slice(0, 30);
+      safe.stack = [safe.message, ...frames].join("\n");
+    }
+    return safe;
+  }
+  return new Error("NonErrorThrown");
+}
+
 declare global {
   interface Window {
     __lovableEvents?: LovableEvents;
@@ -26,8 +49,9 @@ declare global {
 
 export function reportLovableError(error: unknown, context: Record<string, unknown> = {}) {
   if (typeof window === "undefined") return;
+  const safeError = telemetryError(error);
   window.__lovableEvents?.captureException?.(
-    error,
+    safeError,
     {
       source: "react_error_boundary",
       route: window.location.pathname,
@@ -44,16 +68,9 @@ export function reportLovableError(error: unknown, context: Record<string, unkno
   // which is present only inside the editor preview.
   // Loaders and server fns commonly throw a raw Response; String(it) is the
   // opaque "[object Response]", so pull out the status and URL instead.
-  const message =
-    error instanceof Response
-      ? `Response ${error.status}${error.url ? ` at ${error.url}` : ""}`
-      : error instanceof Error
-        ? error.message
-        : String(error);
-  const stack = error instanceof Error ? error.stack : undefined;
   window.__lovableReportRuntimeError?.({
-    message,
-    ...(stack !== undefined && { stack }),
+    message: safeError.message,
+    ...(safeError.stack !== undefined && { stack: safeError.stack }),
     filename: window.location.pathname,
   });
 }
