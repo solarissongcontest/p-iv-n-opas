@@ -132,6 +132,18 @@ import {
 } from "@/components/StudyDialogs";
 
 import { Bar, Panel, button, secondary, type Base } from "@/features/shared/StudyViewPrimitives";
+import { Dialog } from "@/features/shared/DialogPrimitives";
+
+const todayFrictionReasons = [
+  ["no_time", "Ei aikaa"],
+  ["forgot", "Unohdin"],
+  ["too_tired", "Liian väsynyt"],
+  ["too_hard", "Liian vaikea"],
+  ["unclear_start", "En tiedä mistä aloittaa"],
+  ["plans_changed", "Suunnitelmat muuttuivat"],
+  ["other", "Muu syy"],
+] as const;
+type TodayFrictionReason = (typeof todayFrictionReasons)[number][0];
 
 export function TodayView({courses,topics,sessions,exams,plan,tests,attempts,mistakes,capacity,onStart,onGo,onPractice}:Base&{
   sessions:Session[];exams:Exam[];plan:PlanItem[];tests:PracticeTest[];attempts:PracticeAttempt[];mistakes:Mistake[];capacity:CapacityProfile;
@@ -143,6 +155,8 @@ export function TodayView({courses,topics,sessions,exams,plan,tests,attempts,mis
   const [taskIndex,setTaskIndex]=useState(0);
   const [loadMode,setLoadMode]=useState<"minimum"|"recommended"|"extra">("recommended");
   const [localTime,setLocalTime]=useState("00:00");
+  const [cannotTodayOpen,setCannotTodayOpen]=useState(false);
+  const [todayFrictionReason,setTodayFrictionReason]=useState<TodayFrictionReason>("no_time");
   useEffect(()=>{
     const update=()=>setLocalTime(new Date().toLocaleTimeString("fi-FI",{hour:"2-digit",minute:"2-digit",hour12:false}));
     update();
@@ -170,11 +184,6 @@ export function TodayView({courses,topics,sessions,exams,plan,tests,attempts,mis
   const openMistakes=examCourse?mistakes.filter(m=>m.course_id===examCourse.id&&m.status!=="mastered").length:0;
   const reason=nextAction?.reason??"";
 
-  function askFrictionReason(){
-    const raw=window.prompt("Miksi tämä ei onnistu tänään? 1 = ei aikaa, 2 = unohdin, 3 = liian väsynyt, 4 = liian vaikea, 5 = en tiedä mistä aloittaa, 6 = suunnitelmat muuttuivat","1");
-    const map:Record<string,"no_time"|"forgot"|"too_tired"|"too_hard"|"unclear_start"|"plans_changed"|"other">={"1":"no_time","2":"forgot","3":"too_tired","4":"too_hard","5":"unclear_start","6":"plans_changed"};
-    return map[raw??""]??"other";
-  }
   function startChosen(action:(typeof actions)[number]){
     const params=new URLSearchParams(window.location.search);
     const fromReminder=params.get("source")==="push";
@@ -204,27 +213,34 @@ export function TodayView({courses,topics,sessions,exams,plan,tests,attempts,mis
     }catch(error){toast.error(isPlanSyncConflict(error)?"Tehtävää muutettiin toisella laitteella. Uusin versio ladattiin.":"Tehtävää ei voitu keventää.");}
   }
 
-  async function cannotToday(){
+  function cannotToday(){
     if(!next)return;
-    const frictionReason=askFrictionReason();
+    setTodayFrictionReason("no_time");
+    setCannotTodayOpen(true);
+  }
+
+  async function confirmCannotToday(){
+    if(!next)return;
     const course=courses.find(candidate=>candidate.id===next.course_id);
     const date=findNextStudyDate({
       plan,fromISO:now,studyWeekdays:capacity.studyWeekdays,minutes:next.target_minutes,ignoreItemId:next.id,latestDate:course?.exam_date??null,capacity,
     });
     if(!date){
+      setCannotTodayOpen(false);
       toast.error("En löytänyt ennen koetta järkevää vapaata opiskelupäivää. Avaa suunnitelma ja valitse päivä.");
       onGo("plan");
       return;
     }
     try{
       await move.mutateAsync({id:next.id,date,from:next.date,expected_updated_at:next.updated_at});
+      setCannotTodayOpen(false);
       setTaskIndex(0);
-      void friction.mutateAsync({date:now,plan_item_id:next.id,course_id:next.course_id,reason:frictionReason,self_started:false,reminder_used:false}).catch(()=>undefined);
+      void friction.mutateAsync({date:now,plan_item_id:next.id,course_id:next.course_id,reason:todayFrictionReason,self_started:false,reminder_used:false}).catch(()=>undefined);
       toast.success(`Tehtävä siirrettiin päivälle ${fullDate(date)}. Tälle päivälle ei synny lisävelkaa.`);
     }catch(error){toast.error(isPlanSyncConflict(error)?"Tehtävää muutettiin toisella laitteella. Uusin versio ladattiin.":"Tehtävää ei voitu siirtää.");}
   }
 
-  return <ActionDashboardLayout className="today-view flex flex-col gap-5">
+  return <><ActionDashboardLayout className="today-view flex flex-col gap-5">
     {comeback&&<Panel className="today-context" title="Tervetuloa takaisin">
       <p className="text-sm text-muted-foreground">Edellisestä opiskelumerkinnästä on {comeback.awayDays} päivää. Kaikkea väliin jäänyttä ei tuoda kerralla tälle päivälle.</p>
       <p className="mt-2 font-medium">Aloitetaan {comeback.items.length} tärkeimmästä asiasta · noin {minutes(comeback.estimatedMinutes)}.</p>
@@ -295,5 +311,16 @@ export function TodayView({courses,topics,sessions,exams,plan,tests,attempts,mis
       <Panel title="Tärkeää">{upcoming?<><p className="text-sm font-medium sm:text-base">{courses.find(c=>c.id===upcoming.course_id)?.code} · {upcoming.name}</p><p className="mt-1 text-xs leading-5 text-muted-foreground sm:mt-2 sm:text-base">{fullDate(upcoming.date)} · {diffDays(upcoming.date,now)} pv</p><button className="mt-2 text-xs font-medium text-primary underline sm:mt-3 sm:text-sm" onClick={()=>onGo("exams")}>Katso kokeet</button></>:<p className="text-sm text-muted-foreground">Ei lähestyviä kokeita.</p>}</Panel>
     </div>
     {last&&<Panel className="today-support-section" title="Viimeisin huomio"><p className="text-muted-foreground">{last.note||last.unclear}</p><p className="mt-3 text-xs text-muted-foreground">{fullDate(last.date)} · {courses.find(c=>c.id===last.course_id)?.code}</p></Panel>}
-  </ActionDashboardLayout>;
+  </ActionDashboardLayout>
+  {cannotTodayOpen&&<Dialog title="En ehdi tänään" onClose={()=>setCannotTodayOpen(false)}>
+    <p className="text-sm text-muted-foreground">Valitse syy. Opintopäiväkirja siirtää tehtävän seuraavaan järkevään opiskelupäivään eikä tee siitä rästiä.</p>
+    <div className="mt-4 grid gap-2">
+      {todayFrictionReasons.map(([value,label])=><button key={value} type="button" aria-pressed={todayFrictionReason===value} onClick={()=>setTodayFrictionReason(value)} className={"min-h-11 rounded-xl border px-4 text-left text-sm "+(todayFrictionReason===value?"border-primary bg-accent font-semibold":"border-border bg-surface")}>{label}</button>)}
+    </div>
+    <div className="mt-5 flex justify-end gap-2">
+      <button className={secondary} onClick={()=>setCannotTodayOpen(false)}>Peruuta</button>
+      <button className={button} disabled={move.isPending} onClick={()=>void confirmCannotToday()}>{move.isPending?"Siirretään…":"Siirrä seuraavaan sopivaan päivään"}</button>
+    </div>
+  </Dialog>}
+  </>;
 }
