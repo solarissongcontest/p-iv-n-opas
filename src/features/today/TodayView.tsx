@@ -208,7 +208,7 @@ export function TodayView({courses,topics,sessions,exams,plan,tests,attempts,mis
     if(!next)return;
     const light=Math.max(5,next.min_minutes||Math.round(next.target_minutes*0.5));
     try{
-      await upsert.mutateAsync({id:next.id,course_id:next.course_id,date:next.date,target_minutes:light,extra_minutes:0,expected_updated_at:next.updated_at});
+      await upsert.mutateAsync({id:next.id,course_id:next.course_id,date:next.date,target_minutes:light,extra_minutes:0,expected_updated_at:next.updated_at,expected_status:next.status,expected_target_minutes:next.target_minutes});
       toast.success(`Päivää kevennettiin: tämä tehtävä on nyt ${minutes(light)}.`);
     }catch(error){toast.error(isPlanSyncConflict(error)?"Tehtävää muutettiin toisella laitteella. Uusin versio ladattiin.":"Tehtävää ei voitu keventää.");}
   }
@@ -232,7 +232,7 @@ export function TodayView({courses,topics,sessions,exams,plan,tests,attempts,mis
       return;
     }
     try{
-      await move.mutateAsync({id:next.id,date,from:next.date,expected_updated_at:next.updated_at});
+      await move.mutateAsync({id:next.id,date,from:next.date,expected_updated_at:next.updated_at,expected_status:next.status});
       setCannotTodayOpen(false);
       setTaskIndex(0);
       void friction.mutateAsync({date:now,plan_item_id:next.id,course_id:next.course_id,reason:todayFrictionReason,self_started:false,reminder_used:false}).catch(()=>undefined);
