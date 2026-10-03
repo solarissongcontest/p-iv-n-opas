@@ -133,7 +133,7 @@ import {
 
 import { Bar, Panel, button, secondary, type Base } from "@/features/shared/StudyViewPrimitives";
 
-export function ExamsView({courses,topics,exams,tests,attempts,mistakes,sessions,plan,onCourse,initialExamId,onExamChange}:Base&{exams:Exam[];tests:PracticeTest[];attempts:PracticeAttempt[];mistakes:Mistake[];sessions:Session[];plan:PlanItem[];onCourse:(id:string)=>void;initialExamId?:string | undefined;onExamChange?:(id:string|null)=>void}) {
+export function ExamsView({courses,topics,exams,tests,attempts,mistakes,sessions,plan,onCourse,onPractice,initialExamId,onExamChange}:Base&{exams:Exam[];tests:PracticeTest[];attempts:PracticeAttempt[];mistakes:Mistake[];sessions:Session[];plan:PlanItem[];onCourse:(id:string)=>void;onPractice:(courseId:string,topicId?:string)=>void;initialExamId?:string | undefined;onExamChange?:(id:string|null)=>void}) {
   const [adding,setAdding]=useState(false),[selectedExam,setSelectedExam]=useState<string|null>(initialExamId??null);
   useEffect(()=>setSelectedExam(initialExamId??null),[initialExamId]);
   const chooseExam=(id:string|null)=>{setSelectedExam(id);onExamChange?.(id);};
@@ -156,6 +156,16 @@ export function ExamsView({courses,topics,exams,tests,attempts,mistakes,sessions
     const v4TopicStates=ts.map(topic=>({topic,model:masteryModelV4(topic,aa,{examDate:selected.date})}))
       .sort((a,b)=>b.topic.importance-a.topic.importance||a.model.level-b.model.level);
     const finalTwoDays=diffDays(selected.date,today())<=2;
+    const plannedTopicId=pp.find(item=>item.topic_id)?.topic_id??null;
+    const plannedTopic=plannedTopicId?ts.find(topic=>topic.id===plannedTopicId)??null:null;
+    const recommendedTopic=plannedTopic??reviews[0]?.topic??missing[0]?.topic??null;
+    const recommendationReason=plannedTopic
+      ?"Tämä aihe on seuraavana nykyisessä koesuunnitelmassa."
+      :reviews[0]?.topic
+        ?reviews[0].reason
+        :missing[0]?.topic
+          ?"Tässä aiheessa on tärkein nykyinen osaamisaukko ennen koetta."
+          :"Yksittäistä selvää osaamisaukkoa ei juuri nyt ole. Seuraava hyödyllinen askel on koesimulaatio.";
     return <LibraryDetailLayout className="exams-view space-y-5">
       <button className={secondary} onClick={()=>chooseExam(null)}><ChevronLeft size={17}/>Kaikki kokeet</button>
       <Panel title={selected.name}>
@@ -168,10 +178,30 @@ export function ExamsView({courses,topics,exams,tests,attempts,mistakes,sessions
         </div>
         <p className="mt-5 text-3xl font-semibold">Vaihe {prep.index+1}/6 <span className="text-sm font-normal text-muted-foreground">valmistautuminen · ei arvosanaennuste</span></p>
       </Panel>
+      <Panel title="Seuraavaksi kannattaa tehdä">
+        {recommendedTopic?<div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="text-sm font-semibold text-primary">{course?.code} · {recommendedTopic.name}</p>
+            <p className="mt-1 text-sm text-muted-foreground">{recommendationReason}</p>
+          </div>
+          <button className={button} onClick={()=>onPractice(selected.course_id,recommendedTopic.id)}>Harjoittele tätä</button>
+        </div>:<div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="font-semibold">Tee koeharjoitus</p>
+            <p className="mt-1 text-sm text-muted-foreground">{recommendationReason}</p>
+          </div>
+          <button className={button} onClick={()=>document.querySelector(".exam-simulation")?.scrollIntoView({behavior:"smooth",block:"start"})}>Avaa koeharjoitus</button>
+        </div>}
+      </Panel>
+      <details className="rounded-2xl border border-border bg-surface p-4">
+        <summary className="min-h-11 cursor-pointer list-none py-2 text-sm font-semibold">Näytä koemoodin vaiheet</summary>
+        <div className="mt-3">
       <Panel title="Koemoodin vaiheet">
         <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">{prep.stages.map((phase,index)=><div key={phase.key} className={`rounded-xl p-3 ${index===prep.index?"bg-accent ring-1 ring-primary/40":"bg-muted/60"}`}><div className="flex items-center justify-between gap-2"><p className="font-medium">{index+1}. {phase.label}</p><span className={`text-xs font-semibold ${phase.done?"text-primary":"text-muted-foreground"}`}>{phase.done?"Valmis":index===prep.index?"Nyt":"Tulossa"}</span></div><p className="mt-1 text-xs text-muted-foreground">{phase.description}</p></div>)}</div>
         <p className="mt-3 text-xs text-muted-foreground">Järjestys ei ole jäykkä lukko. Harjoittelutila mukauttaa kysymystyypit tähän vaiheeseen.</p>{buffer&&<div className="mt-4 rounded-xl border border-border p-3 text-sm"><b>Koetta edeltävä aikataulu</b><p className="mt-1 text-muted-foreground">Sisältökierros viimeistään {fullDate(buffer.contentDeadline)} · vaihteleva harjoittelu {fullDate(buffer.mixedDate)} · simulaatio {fullDate(buffer.simulationDate)} · virheiden korjaus {fullDate(buffer.repairDate)} · kevyt päivä {fullDate(buffer.lightDate)}</p></div>}
       </Panel>
+        </div>
+      </details>
       <Panel title="Kokeen osaamiskartta">
         {finalTwoDays&&<div className="mb-4 rounded-xl bg-accent p-3 text-sm"><b>Viimeiset 2 päivää:</b> pidä kuorma kevyenä. Priorisoi muistista palauttaminen, virhelista ja lyhyet itsenäiset varmistukset. Uutta raskasta sisältöä ei työnnetä vain kalenterin täytteeksi.</div>}
         <div className="divide-y divide-border">

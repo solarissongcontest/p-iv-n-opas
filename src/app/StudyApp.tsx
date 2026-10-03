@@ -577,6 +577,7 @@ function StudyApp({ user, initialPage, courseCode, courseTab, examId, progressSe
           sessions={sessions}
           plan={plan}
           onCourse={goCourse}
+          onPractice={goPractice}
           initialExamId={examId}
           onExamChange={(id)=>id?void navigate({to:"/exams/$examId",params:{examId:id}}):void navigate({to:"/exams"})}
         /> :
