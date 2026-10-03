@@ -16,6 +16,7 @@ import { pendingCount, setOfflineOwner, startSyncWatcher, subscribePending } fro
 import { applyTheme, storedThemeIsDark } from "@/lib/theme";
 import {
   type DeviceUser,
+  getDeviceAccessToken,
   getDeviceOwnerId,
   isTrustedArthurDevice,
   readCachedDeviceUser,
@@ -140,11 +141,15 @@ export function StudyAppRoot({ initialPage, courseCode, courseTab, examId, progr
     window.addEventListener("focus", verifyCanonicalOwner);
     window.addEventListener("online", verifyCanonicalOwner);
     document.addEventListener("visibilitychange", onVisibility);
+    const authTimer = window.setInterval(() => {
+      if (navigator.onLine && !getDeviceAccessToken()) verifyCanonicalOwner();
+    }, 30_000);
     return () => {
       active = false;
       window.removeEventListener("focus", verifyCanonicalOwner);
       window.removeEventListener("online", verifyCanonicalOwner);
       document.removeEventListener("visibilitychange", onVisibility);
+      window.clearInterval(authTimer);
     };
   }, [queryClient, user]);
 
