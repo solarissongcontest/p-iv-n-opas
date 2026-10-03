@@ -60,6 +60,12 @@ test("large UI monoliths are compatibility barrels rather than implementations",
 
 test("app shell centralizes navigation bottom interaction zone and accessible mobile sheet", () => {
   const shell = read("src/app/AppShell.tsx");
+  const navigation = read("src/app/navigation.ts");
+  assert.match(navigation, /primaryStudyNav/);
+  assert.match(navigation, /desktopPlanningNav/);
+  assert.match(shell, />Lisää<\/span>/);
+  assert.match(shell, /Suunnitelma<\/b>/);
+  assert.match(shell, /Kokeet<\/b>/);
   assert.match(shell, /BottomInteractionZone/);
   assert.match(shell, /bottom-context-action/);
   assert.match(shell, /aria-label="Mobiilinavigaatio"/);
@@ -98,6 +104,23 @@ test("styles are layered and responsive page families remain explicit", () => {
   }
 });
 
+
+test("planner uses calendar-safe month movement and avoids browser prompts", () => {
+  const planner = read("src/features/planner/PlanView.tsx");
+  const fi = read("src/lib/fi.ts");
+  const calendar = read("src/features/planner/PlannerCalendar.tsx");
+  assert.match(fi, /export function addMonths/);
+  assert.match(planner, /addMonths\(anchor,direction\)/);
+  assert.equal(planner.includes("window.prompt"), false);
+  assert.equal(planner.includes('prompt("Uusi päivä'), false);
+  assert.match(calendar, /planner-month-weekdays/);
+  assert.match(calendar, /mondayOffset/);
+});
+
+test("active practice suppresses competing app chrome", () => {
+  const layouts = read("src/styles/layouts.css");
+  assert.match(layouts, /:has\(\.practice-session-active\)/);
+});
 
 test("planned study sessions and running exams suppress competing chrome", () => {
   const app = read("src/app/StudyApp.tsx");
