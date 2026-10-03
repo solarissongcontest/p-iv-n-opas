@@ -181,6 +181,14 @@ test("Study OS browser flows never fall back to blocking native prompt confirm o
   }
 });
 
+test("device auth never returns raw provider errors to the student UI", () => {
+  const route = read("src/routes/api.device-auth.ts");
+  assert.match(route, /Laitetunnistusta ei voitu juuri nyt luoda\. Yritä uudelleen\./);
+  assert.equal(route.includes("? error.message"), false);
+  assert.equal(route.includes('"[device-auth]"'), false);
+  assert.match(route, /\[Opintopäiväkirja\] device auth failed/);
+});
+
 test("release identity endpoint never exposes secrets and disables caching", () => {
   const route = read("src/routes/api.release-info.ts");
   assert.match(route, /VERCEL_GIT_COMMIT_SHA/);
