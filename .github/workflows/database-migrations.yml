@@ -17,12 +17,21 @@ concurrency:
 
 jobs:
   migrate:
-    if: github.event.inputs.confirm == 'APPLY'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
       POSTGRES_URL: ${{ secrets.POSTGRES_URL }}
     steps:
+      - name: Require explicit confirmation
+        shell: bash
+        env:
+          CONFIRM: ${{ github.event.inputs.confirm }}
+        run: |
+          if [ "$CONFIRM" != "APPLY" ]; then
+            echo "::error::Migration cancelled. Type APPLY exactly to continue."
+            exit 1
+          fi
+
       - name: Checkout canonical main
         uses: actions/checkout@v4
         with:
