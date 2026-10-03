@@ -132,11 +132,12 @@ import {
 } from "@/components/StudyDialogs";
 
 import { Bar, Panel, button, secondary, type Base } from "@/features/shared/StudyViewPrimitives";
+import { Dialog } from "@/features/shared/DialogPrimitives";
 
 export type CourseTab = "Yleiskuva"|"Sisältö"|"Historia"|"Analyysi";
 
 export function CourseView({courses,topics,sessions,exams,plan,tests,mistakes,selected,onSelect,onAdd,onStart,initialTab="Yleiskuva",onTabChange}:Base&{sessions:Session[];exams:Exam[];plan:PlanItem[];tests:PracticeTest[];mistakes:Mistake[];selected:string|null;onSelect:(id:string|null)=>void;onAdd:()=>void;onStart:()=>void;initialTab?:CourseTab | undefined;onTabChange?:(tab:CourseTab)=>void}) {
-  const [tab,setTab]=useState<CourseTab>(initialTab),[form,setForm]=useState<"mistake"|"test"|"course"|"newTopic"|null>(null),[editingTopic,setEditingTopic]=useState<Topic|null>(null);
+  const [tab,setTab]=useState<CourseTab>(initialTab),[form,setForm]=useState<"mistake"|"test"|"course"|"newTopic"|null>(null),[editingTopic,setEditingTopic]=useState<Topic|null>(null),[archiveConfirmOpen,setArchiveConfirmOpen]=useState(false);
   useEffect(()=>setTab(initialTab),[initialTab]);
   const changeTab=(next:CourseTab)=>{setTab(next);onTabChange?.(next);};
   const archiveCourse=useArchiveCourse(),updateTopic=useUpdateTopic(),advanceMistake=useAdvanceMistake();
@@ -183,7 +184,7 @@ export function CourseView({courses,topics,sessions,exams,plan,tests,mistakes,se
       })}
     </aside>
     <div className="course-detail-main space-y-5">
-    <div className="flex flex-wrap items-center justify-between gap-2"><button className={secondary} onClick={()=>onSelect(null)}><ChevronLeft size={17}/>Kaikki kurssit</button><div className="flex gap-2"><button className={secondary} onClick={()=>setForm("course")}><Pencil size={16}/>Muokkaa</button><button className={secondary} onClick={async()=>{if(!window.confirm("Arkistoidaanko tämä kurssi?"))return;try{await archiveCourse.mutateAsync({id:c.id,archived:true});toast.success("Kurssi arkistoitu.");onSelect(null);}catch{toast.error("Arkistointi epäonnistui.");}}}><Archive size={16}/>Arkistoi</button></div></div>
+    <div className="flex flex-wrap items-center justify-between gap-2"><button className={secondary} onClick={()=>onSelect(null)}><ChevronLeft size={17}/>Kaikki kurssit</button><div className="flex gap-2"><button className={secondary} onClick={()=>setForm("course")}><Pencil size={16}/>Muokkaa</button><button className={secondary} onClick={()=>setArchiveConfirmOpen(true)}><Archive size={16}/>Arkistoi</button></div></div>
     <section className="course-hero">
       <div>
         <p className="text-sm font-semibold text-primary">{c.code}</p>
@@ -240,6 +241,25 @@ export function CourseView({courses,topics,sessions,exams,plan,tests,mistakes,se
     {form==="course"&&<CourseEditForm course={c} onClose={()=>setForm(null)}/>}
     {form==="newTopic"&&<TopicForm courseId={c.id} onClose={()=>setForm(null)}/>}
     {editingTopic&&<TopicForm courseId={c.id} topic={editingTopic} onClose={()=>setEditingTopic(null)}/>}
+    {archiveConfirmOpen&&<Dialog title="Arkistoi kurssi" onClose={()=>setArchiveConfirmOpen(false)}>
+      <p className="text-sm text-muted-foreground">Kurssi poistuu aktiivisista opinnoista, mutta sen opiskeluhistoria, tehtävät ja analyysit säilyvät. Kurssin voi palauttaa myöhemmin Asetuksista.</p>
+      <div className="mt-5 flex justify-end gap-2">
+        <button className={secondary} onClick={()=>setArchiveConfirmOpen(false)}>Peruuta</button>
+        <button className={button} disabled={archiveCourse.isPending} onClick={async()=>{
+          try{
+            await archiveCourse.mutateAsync({id:c.id,archived:true});
+            setArchiveConfirmOpen(false);
+            onSelect(null);
+            toast.success("Kurssi arkistoitu.",{
+              action:{
+                label:"Kumoa",
+                onClick:()=>void archiveCourse.mutateAsync({id:c.id,archived:false}).then(()=>toast.success("Kurssi palautettu.")).catch(()=>toast.error("Palautus epäonnistui.")),
+              },
+            });
+          }catch{toast.error("Arkistointi epäonnistui.");}
+        }}>{archiveCourse.isPending?"Arkistoidaan…":"Arkistoi kurssi"}</button>
+      </div>
+    </Dialog>}
     </div>
   </LibraryDetailLayout>;
 }
