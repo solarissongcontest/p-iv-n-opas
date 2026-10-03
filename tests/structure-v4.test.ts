@@ -122,6 +122,17 @@ test("course Continue opens the next planned item before falling back to manual 
   assert.match(course, />Aloita seuraava<\/button>/);
 });
 
+test("Progress and course detail keep advanced analysis secondary", () => {
+  const progress = read("src/features/progress/ProgressView.tsx");
+  const course = read("src/features/studies/CourseView.tsx");
+  const onboarding = read("src/components/Onboarding.tsx");
+  assert.match(progress, /Hyvin hallussa/);
+  assert.match(progress, /Kannattaa kerrata/);
+  assert.match(progress, /Seuraava koe/);
+  assert.match(course, /Tarkempi analyysi/);
+  assert.match(onboarding, /Useimpina päivinä sinun tarvitsee vain avata Tänään ja painaa Aloita\./);
+});
+
 test("settings keep the learning engine behind advanced disclosure", () => {
   const settings = read("src/features/settings/SettingsView.tsx");
   assert.match(settings, /title="Suunnittelutapa"/);
