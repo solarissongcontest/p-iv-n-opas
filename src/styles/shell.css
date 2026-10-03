@@ -635,8 +635,8 @@ html.dark .app-mobile-header {
 @media (min-width: 1101px) {
   .app-desktop-main {
     max-width: 1440px;
-    margin-left: 17rem;
-    margin-right: 2rem;
+    margin-left: max(17rem, calc(50vw + 8.5rem - 720px));
+    margin-right: auto;
     padding-inline: var(--page-inline-expanded);
   }
 }
