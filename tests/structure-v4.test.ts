@@ -126,6 +126,13 @@ test("planner uses calendar-safe month movement and avoids browser prompts", () 
   assert.match(calendar, /mondayOffset/);
 });
 
+test("final release workflow is valid on push and does not require Gemini", () => {
+  const workflow = read(".github/workflows/iphone-e2e.yml");
+  assert.equal(workflow.includes("${{ inputs."), false);
+  assert.match(workflow, /github\.event\.inputs\.base_url/);
+  assert.match(workflow, /REQUIRE_GEMINI: "false"/);
+});
+
 test("service worker supports offline cold starts without caching API responses", () => {
   const sw = read("public/sw.js");
   assert.match(sw, /addEventListener\("install"/);
