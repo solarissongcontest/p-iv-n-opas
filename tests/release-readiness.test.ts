@@ -1,9 +1,25 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync, statSync } from "node:fs";
 
 const read = (path: string) =>
   readFileSync(new URL("../" + path, import.meta.url), "utf8");
+
+function browserSourceFiles(root: string): string[] {
+  const absolute = new URL("../" + root, import.meta.url);
+  const output: string[] = [];
+  for (const name of readdirSync(absolute)) {
+    const relative = root + "/" + name;
+    const url = new URL("../" + relative, import.meta.url);
+    if (statSync(url).isDirectory()) {
+      output.push(...browserSourceFiles(relative));
+      continue;
+    }
+    if (!/\.(ts|tsx)$/.test(name) || name.includes(".server.")) continue;
+    output.push(relative);
+  }
+  return output;
+}
 
 test("browser and accessibility tooling are installed only for E2E jobs", () => {
   const pkg = JSON.parse(read("package.json")) as {
@@ -55,6 +71,27 @@ test("physical push delivery is an explicit manual workflow", () => {
   assert.match(workflow, /workflow_dispatch/);
   assert.match(workflow, /SEND_PUSH_TEST/);
   assert.match(workflow, /push-delivery\.spec\.ts/);
+});
+
+test("browser-facing source cannot reference server-only secrets", () => {
+  const roots = ["src/app", "src/components", "src/features", "src/lib"];
+  const files = roots.flatMap(browserSourceFiles);
+  const forbidden = [
+    "SUPABASE_SERVICE_ROLE_KEY",
+    "POSTGRES_URL",
+    "SUPABASE_JWT_SECRET",
+  ];
+
+  for (const path of files) {
+    const content = read(path);
+    for (const token of forbidden) {
+      assert.equal(
+        content.includes(token),
+        false,
+        path + " must not reference server-only secret " + token,
+      );
+    }
+  }
 });
 
 test("release identity endpoint never exposes secrets and disables caching", () => {
