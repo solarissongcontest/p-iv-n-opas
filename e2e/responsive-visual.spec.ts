@@ -12,13 +12,24 @@ const VIEWPORTS = [
   { name: "1440", width: 1440, height: 1000 },
 ] as const;
 
+const ROUTES = [
+  { name: "today", path: "/today" },
+  { name: "plan", path: "/plan" },
+  { name: "month", path: "/plan/month/2026-10" },
+  { name: "studies", path: "/studies" },
+  { name: "practice", path: "/practice" },
+  { name: "progress", path: "/progress" },
+  { name: "exams", path: "/exams" },
+  { name: "settings", path: "/settings/study" },
+] as const;
+
 for (const viewport of VIEWPORTS) {
-  test("responsive visual invariants at " + viewport.name + "px", async ({ page }, testInfo) => {
+  test("responsive layout evidence at " + viewport.name + "px", async ({ page }, testInfo) => {
     await page.setViewportSize({ width: viewport.width, height: viewport.height });
     await enterApp(page);
 
-    for (const route of ["/today", "/plan", "/studies", "/practice", "/progress", "/exams", "/settings/study"]) {
-      await page.goto(route, { waitUntil: "domcontentloaded" });
+    for (const route of ROUTES) {
+      await page.goto(route.path, { waitUntil: "domcontentloaded" });
       await expectNoHorizontalOverflow(page);
       await expect(page.locator("#main-content")).toBeVisible();
 
@@ -46,6 +57,10 @@ for (const viewport of VIEWPORTS) {
         expect(geometry.sidebar).toBeNull();
         expect(geometry.tabbar).not.toBeNull();
         expect(geometry.tabbar!.height).toBeGreaterThanOrEqual(44);
+        await expect(page.locator(".app-tabbar .app-tab")).toHaveCount(4);
+        for (const label of ["Tänään", "Opinnot", "Edistyminen", "Lisää"]) {
+          await expect(page.getByRole("button", { name: label, exact: true })).toBeVisible();
+        }
         if (geometry.coach) {
           const overlapsTabbar =
             geometry.coach.bottom > geometry.tabbar!.top &&
@@ -54,13 +69,48 @@ for (const viewport of VIEWPORTS) {
         }
       } else {
         expect(geometry.sidebar).not.toBeNull();
+        await expect(page.locator(".desktop-sidebar").getByRole("button", { name: "Suunnitelma" })).toBeVisible();
+        await expect(page.locator(".desktop-sidebar").getByRole("button", { name: "Kokeet" })).toBeVisible();
       }
-    }
 
-    const screenshot = await page.screenshot({ fullPage: true, animations: "disabled" });
-    await testInfo.attach("responsive-" + viewport.name + ".png", {
-      body: screenshot,
-      contentType: "image/png",
-    });
+      if (route.name === "month") {
+        await expect(page.locator(".planner-month-weekdays")).toBeVisible();
+        await expect(page.locator(".planner-month-weekdays > span")).toHaveCount(7);
+      }
+
+      const screenshot = await page.screenshot({ fullPage: true, animations: "disabled" });
+      await testInfo.attach(`responsive-${viewport.name}-${route.name}.png`, {
+        body: screenshot,
+        contentType: "image/png",
+      });
+    }
   });
 }
+
+test("mobile More sheet and active Practice remain bounded", async ({ page }, testInfo) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await enterApp(page);
+
+  await page.getByRole("button", { name: "Lisää", exact: true }).click();
+  const sheet = page.getByRole("dialog", { name: "Lisää toimintoja" });
+  await expect(sheet).toBeVisible();
+  await expectNoHorizontalOverflow(page);
+  const sheetBox = await sheet.boundingBox();
+  expect(sheetBox).not.toBeNull();
+  expect(sheetBox!.bottom).toBeLessThanOrEqual(845);
+  await testInfo.attach("mobile-more-sheet.png", {
+    body: await page.screenshot({ fullPage: true, animations: "disabled" }),
+    contentType: "image/png",
+  });
+
+  await sheet.getByRole("button", { name: /Harjoittelu/ }).click();
+  await page.getByRole("button", { name: "Aloita harjoittelu" }).click();
+  await expect(page.locator(".practice-session-active")).toBeVisible();
+  await expect(page.locator(".app-tabbar")).toBeHidden();
+  await expect(page.locator(".app-mobile-header")).toBeHidden();
+  await expectNoHorizontalOverflow(page);
+  await testInfo.attach("mobile-practice-focus.png", {
+    body: await page.screenshot({ fullPage: true, animations: "disabled" }),
+    contentType: "image/png",
+  });
+});
