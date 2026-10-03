@@ -163,7 +163,7 @@ function DesktopSidebar({
           aria-label="Asetukset"
           data-tooltip="Asetukset"
           className="flex min-h-11 w-full items-center gap-3 rounded-xl px-3 hover:bg-muted"
-          onClick={() => navigateFromSheet("settings")}
+          onClick={() => onNavigate("settings")}
         >
           <Settings2 className="shrink-0" size={19} />
           <span className="sidebar-label">Asetukset</span>
