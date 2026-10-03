@@ -262,6 +262,7 @@ test("long-lived PWA notices a local calendar day rollover even while offline", 
 test("device session refreshes before expiry and immediately when the network returns", () => {
   const app = read("src/app/StudyApp.tsx");
   assert.match(app, /const refreshLeadMs = 60_000/);
+  assert.match(app, /const minimumDelayMs = 5_000/);
   assert.match(app, /session\.expiresAt - Date\.now\(\) - refreshLeadMs/);
   assert.match(app, /setTimeout\(\(\) => \{\s*void verifyCanonicalOwner\(true\)/);
   assert.match(app, /addEventListener\("online", refreshNow\)/);
