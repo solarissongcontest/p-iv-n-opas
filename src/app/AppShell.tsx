@@ -37,7 +37,7 @@ export function AppShell({
         onSearch={onSearch}
       />
 
-      <main id="main-content" tabIndex={-1} className="app-main app-desktop-main px-4">
+      <main id="main-content" tabIndex={-1} className={"app-main app-desktop-main px-4 "+(contextualAction?"app-main-has-context-action":"")}>
         <PageHeader
           title={pageTitle}
           eyebrow={pageEyebrow}
