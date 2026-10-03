@@ -30,21 +30,22 @@ test("Quality Gate includes lint before tests typecheck and build", () => {
   assert.ok(lint < tests && tests < typecheck && typecheck < build);
 });
 
-test("Final Release Gate fails fast on Vercel errors, verifies the live alias and runs the browser matrix", () => {
+test("Final Release Gate waits for the exact production commit and runs the browser matrix", () => {
   const workflow = read(".github/workflows/iphone-e2e.yml");
   for (const token of [
-    "Wait for Vercel deployment result",
-    "Vercel deployment failed",
+    "Wait for this exact commit to reach production",
     "/api/release-info",
     "PRODUCTION_BASE_URL",
     "iphone-smoke.spec.ts",
     "release-gate.spec.ts",
     "v5-cross-device.spec.ts",
     "responsive-visual.spec.ts",
-    "REQUIRE_GEMINI",
+    'REQUIRE_GEMINI: "false"',
   ]) {
     assert.ok(workflow.includes(token), token);
   }
+  assert.equal(workflow.includes("Wait for Vercel deployment result"), false);
+  assert.equal(workflow.includes("Vercel deployment failed"), false);
 });
 
 test("physical push delivery is an explicit manual workflow", () => {
