@@ -201,29 +201,33 @@ export function SettingsView({user:_user,section="study",onSectionChange}:{user:
     });
   }
 
-  async function saveStudyWeekdays(){
+  async function saveStudyProfile(){
     if(!prefs||!studyWeekdaysDraft.length)return;
     try{
+      if(weekdayMinCapacity>weekdayCapacity||weekendMinCapacity>weekendCapacity){
+        toast.error("Vähimmäisaika ei voi olla enimmäisaikaa suurempi.");
+        return;
+      }
       const result=await applyStudyWeekdays.mutateAsync({
         studyWeekdays:studyWeekdaysDraft,
         capacity:{
           studyWeekdays:studyWeekdaysDraft,
-          weekdayMinMinutes:prefs.weekday_capacity_min_minutes??30,
-          weekdayMinutes:prefs.weekday_capacity_minutes??60,
-          weekendMinMinutes:prefs.weekend_capacity_min_minutes??60,
-          weekendMinutes:prefs.weekend_capacity_minutes??120,
+          weekdayMinMinutes:Math.max(0,weekdayMinCapacity),
+          weekdayMinutes:Math.max(15,weekdayCapacity),
+          weekendMinMinutes:Math.max(0,weekendMinCapacity),
+          weekendMinutes:Math.max(15,weekendCapacity),
           busyDates:prefs.busy_dates??[],
         },
       });
       if(result.unmoved>0){
-        toast.warning(`Opiskelupäivät tallennettu. ${result.moved} tulevaa tehtävää siirrettiin, mutta ${result.unmoved} tehtävää ei mahtunut ennen koetta valituille päiville.`);
+        toast.warning(`Opiskelurytmi tallennettu. ${result.moved} tulevaa tehtävää siirrettiin, mutta ${result.unmoved} tehtävää ei mahtunut ennen koetta valituille päiville.`);
       }else if(result.moved>0){
-        toast.success(`Opiskelupäivät tallennettu. ${result.moved} tulevaa tehtävää siirrettiin valituille päiville.`);
+        toast.success(`Opiskelurytmi tallennettu. ${result.moved} tulevaa tehtävää siirrettiin valituille päiville.`);
       }else{
-        toast.success("Opiskelupäivät tallennettu.");
+        toast.success("Opiskelurytmi tallennettu.");
       }
     }catch(error){
-      console.error("[Opintopäiväkirja] Study weekday save failed",error);toast.error("Opiskelupäiviä ei voitu tallentaa. Yritä uudelleen.");
+      console.error("[Opintopäiväkirja] Study weekday save failed",error);toast.error("Opiskelurytmiä ei voitu tallentaa. Yritä uudelleen.");
     }
   }
 
@@ -240,13 +244,12 @@ export function SettingsView({user:_user,section="study",onSectionChange}:{user:
     <Panel className="settings-study-only" title="Opiskelurytmi ja kapasiteetti">
       <p className="mb-3 text-sm text-muted-foreground">Suunnittelutoiminto käyttää näitä rajoina. Väliin jäänyttä työmäärää ei työnnetä seuraavan päivän kapasiteetin yli.</p>
       <div className="flex flex-wrap gap-2">{weekdayOptions.map(([day,label])=>{const active=(studyWeekdaysDraft.length?studyWeekdaysDraft:(prefs?.study_weekdays??[1,2,3,4,5])).includes(day);return <button key={day} type="button" aria-pressed={active} onClick={()=>toggleWeekday(day)} className={`grid size-11 place-items-center rounded-xl border text-sm font-semibold ${active?"border-primary bg-accent text-primary":"border-border bg-surface"}`}>{label}</button>;})}</div>
-      <div className="mt-3 flex flex-wrap items-center gap-3">
-        <button className={button} disabled={!prefs||applyStudyWeekdays.isPending||studyWeekdaysDraft.length===0} onClick={()=>void saveStudyWeekdays()}>{applyStudyWeekdays.isPending?"Päivitetään…":"Tallenna opiskelupäivät"}</button>
-        <p className="text-xs text-muted-foreground">Tallennus siirtää myös tulevat suunnitellut tehtävät pois päiviltä, joita et ole valinnut.</p>
-      </div>
       <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4"><label className="text-sm font-medium">Arjen vähimmäisaika<input type="number" min="0" max="360" step="10" className="mt-1 w-full rounded-xl border bg-surface px-3 py-2.5" value={weekdayMinCapacity} onChange={e=>setWeekdayMinCapacity(Number(e.target.value))}/></label><label className="text-sm font-medium">Arjen enimmäisaika<input type="number" min="15" max="360" step="10" className="mt-1 w-full rounded-xl border bg-surface px-3 py-2.5" value={weekdayCapacity} onChange={e=>setWeekdayCapacity(Number(e.target.value))}/></label><label className="text-sm font-medium">Viikonlopun vähimmäisaika<input type="number" min="0" max="480" step="10" className="mt-1 w-full rounded-xl border bg-surface px-3 py-2.5" value={weekendMinCapacity} onChange={e=>setWeekendMinCapacity(Number(e.target.value))}/></label><label className="text-sm font-medium">Viikonlopun enimmäisaika<input type="number" min="15" max="480" step="10" className="mt-1 w-full rounded-xl border bg-surface px-3 py-2.5" value={weekendCapacity} onChange={e=>setWeekendCapacity(Number(e.target.value))}/></label></div>
       <p className="mt-2 text-xs text-muted-foreground">Esimerkiksi arki 30–60 min tarkoittaa: suunnittelutoiminto voi tehdä kevyen 30 min päivän, mutta ei täytä päivää yli 60 minuutin.</p>
-      <button className={secondary+" mt-3"} disabled={!prefs||updatePreferences.isPending} onClick={()=>{if(weekdayMinCapacity>weekdayCapacity||weekendMinCapacity>weekendCapacity){toast.error("Minimikapasiteetti ei voi olla maksimia suurempi.");return;}void updatePreferences.mutateAsync({weekday_capacity_min_minutes:Math.max(0,weekdayMinCapacity),weekday_capacity_minutes:Math.max(15,weekdayCapacity),weekend_capacity_min_minutes:Math.max(0,weekendMinCapacity),weekend_capacity_minutes:Math.max(15,weekendCapacity)}).then(()=>toast.success("Kapasiteettivälit tallennettu.")).catch(()=>toast.error("Kapasiteettia ei voitu tallentaa."));}}>Tallenna kapasiteetti</button>
+      <div className="mt-4 flex flex-wrap items-center gap-3">
+        <button className={button} disabled={!prefs||applyStudyWeekdays.isPending||studyWeekdaysDraft.length===0} onClick={()=>void saveStudyProfile()}>{applyStudyWeekdays.isPending?"Tallennetaan…":"Tallenna opiskelurytmi"}</button>
+        <p className="text-xs text-muted-foreground">Tallennus vahvistaa päivät ja aikarajat yhdessä. Tulevat tehtävät siirretään pois päiviltä, joita et ole valinnut, vain jos ne mahtuvat turvallisesti ennen koetta.</p>
+      </div>
       <div className="mt-5 border-t border-border pt-4"><p className="text-sm font-medium">Kiireiset päivät</p><p className="mt-1 text-xs text-muted-foreground">Kiireisenä päivänä suunnittelutoiminto varaa vain kevyen ylläpitokuorman.</p><div className="mt-3 flex flex-wrap gap-2"><input type="date" className="min-h-11 rounded-xl border bg-surface px-3" value={busyDate} onChange={e=>setBusyDate(e.target.value)}/><button className={secondary} disabled={!prefs||!busyDate} onClick={()=>{if(!prefs||!busyDate)return;const next=[...new Set([...(prefs.busy_dates??[]),busyDate])].sort();void updatePreferences.mutateAsync({busy_dates:next}).then(()=>{setBusyDate("");toast.success("Kiireinen päivä lisätty.");}).catch(()=>toast.error("Päivää ei voitu tallentaa."));}}>Merkitse kiireiseksi</button></div><div className="mt-3 flex flex-wrap gap-2">{(prefs?.busy_dates??[]).filter(d=>d>=today()).slice(0,12).map(date=><button key={date} className="min-h-11 rounded-full bg-muted px-3 text-xs" title="Poista kiireinen päivä" onClick={()=>prefs&&void updatePreferences.mutateAsync({busy_dates:prefs.busy_dates.filter(d=>d!==date)})}>{fullDate(date)} ×</button>)}</div></div>
     </Panel>
 
