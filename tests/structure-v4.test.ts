@@ -233,6 +233,14 @@ test("device session refreshes immediately when the network returns", () => {
   assert.match(app, /removeEventListener\("online", verifyCanonicalOwner\)/);
 });
 
+test("AI coach keeps provider diagnostics out of the normal student UI", () => {
+  const coach = read("src/components/AICoach.tsx");
+  assert.match(coach, /Tekoälyohjaus ei ole juuri nyt käytettävissä\./);
+  assert.match(coach, /Paikallinen ohjaus käytössä/);
+  assert.equal(coach.includes("Gemini-avain hylättiin"), false);
+  assert.equal(coach.includes("Gemini hylkäsi yhteyspyynnön"), false);
+});
+
 test("raw backend errors never render in the normal app shell", () => {
   const app = read("src/app/StudyApp.tsx");
   assert.equal(app.includes("{String(error)}"), false);
