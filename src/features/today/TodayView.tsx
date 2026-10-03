@@ -250,24 +250,28 @@ export function TodayView({courses,topics,sessions,exams,plan,tests,attempts,mis
       }{adaptiveDay.runtimeIntentions.maxMinutes ? " Yhden tehtävän yläraja on nyt "+minutes(adaptiveDay.runtimeIntentions.maxMinutes)+"." : ""}</p>
     </Panel>}
 
-    <Panel className="today-primary" title="Tärkein tänään" action={
-      <div className="flex rounded-xl bg-muted p-1 text-xs">
-        <button className={"min-h-9 rounded-lg px-2 "+(loadMode==="minimum"?"bg-surface shadow-sm":"")} onClick={()=>{setLoadMode("minimum");setTaskIndex(0);}}>Kevyt · {adaptiveDay.minimumMinutes} min</button>
-        <button className={"min-h-9 rounded-lg px-2 "+(loadMode==="recommended"?"bg-surface shadow-sm":"")} onClick={()=>{setLoadMode("recommended");setTaskIndex(0);}}>Suositus · {adaptiveDay.recommendedMinutes} min</button>
-        <button className={"min-h-9 rounded-lg px-2 "+(loadMode==="extra"?"bg-surface shadow-sm":"")} onClick={()=>{setLoadMode("extra");setTaskIndex(0);}}>Lisä · {adaptiveDay.extraMinutes} min</button>
-      </div>
-    }>{nextAction?<>
+    <Panel className="today-primary" title="Seuraavaksi">{nextAction?<>
       <p className="text-sm font-medium text-primary">{nextAction.course.code} · {minutes(nextAction.minutes)}</p>
       <h3 className="mt-2 text-2xl font-semibold">{nextAction.title}</h3>
-      <details className="mt-3 text-sm text-muted-foreground"><summary className="cursor-pointer font-medium text-foreground">Miksi nämä?</summary><p className="mt-2">Koska {reason}.</p><p className="mt-2"><b>Suosituksen varmuus:</b> {confidenceLabel(nextAction.confidence.level)} · {nextAction.confidence.text}</p><p className="mt-1 text-xs">Näyttö: {nextAction.confidence.evidence.evidenceCount} yritystä · {nextAction.confidence.evidence.distinctDays} eri päivää · {nextAction.confidence.evidence.distinctTypes} tehtävätyyppiä.</p>{adaptiveDay.stoppedForLowMarginalGain&&<p className="mt-2">Suositus loppuu tähän, koska seuraavan tehtävän arvioitu oppimishyöty per minuutti laskee selvästi.</p>}</details>
-      <p className="mt-3 text-xs text-muted-foreground">Tämän vaihtoehdon kokonaiskuorma on noin {minutes(todayMinutes)}. Lisäharjoittelusta ei synny myöhemmin korvattavaa velkaa.</p>
+      <details className="mt-3 text-sm text-muted-foreground">
+        <summary className="cursor-pointer font-medium text-foreground">Miksi tätä ehdotetaan?</summary>
+        <p className="mt-2">Koska {reason}.</p>
+        {adaptiveDay.stoppedForLowMarginalGain&&<p className="mt-2">Tähän on hyvä lopettaa tältä erää: seuraavasta tehtävästä arvioidaan saatavan selvästi vähemmän hyötyä käytettyyn aikaan nähden.</p>}
+      </details>
       <div className="mt-5 flex flex-wrap gap-2">
         <button className={button} onClick={()=>startChosen(nextAction)}>Aloita</button>
-        {actions.length>1&&<button className={secondary} onClick={()=>setTaskIndex(i=>(i+1)%actions.length)}>Seuraava ehdotus</button>}
-        {loadMode!=="minimum"&&<button className={secondary} onClick={()=>{setLoadMode("minimum");setTaskIndex(0);}}>Kevyt päivä</button>}
         {next&&<button disabled={move.isPending} className={secondary} onClick={()=>void cannotToday()}>En ehdi tänään</button>}
       </div>
-      {later.length>0&&<div className="mt-5 border-t border-border pt-3"><p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Sen jälkeen</p>{later.map(action=><button key={action.id} className="mt-2 flex min-h-11 w-full items-center justify-between rounded-xl bg-muted/50 px-3 text-left" onClick={()=>startChosen(action)}><span><b className="mr-2 text-primary">{action.course.code}</b>{action.title}</span><span className="text-sm text-muted-foreground">{minutes(action.minutes)}</span></button>)}</div>}
+      <details className="mt-4 rounded-xl border border-border bg-surface/60 p-3">
+        <summary className="min-h-11 cursor-pointer list-none py-2 text-sm font-medium">Muuta tämän päivän kuormaa</summary>
+        <div className="mt-2 grid gap-2 sm:grid-cols-3">
+          <button className={"min-h-11 rounded-xl border px-3 text-sm "+(loadMode==="minimum"?"border-primary bg-accent font-semibold":"border-border bg-surface")} onClick={()=>{setLoadMode("minimum");setTaskIndex(0);}}>Kevyt päivä · {adaptiveDay.minimumMinutes} min</button>
+          <button className={"min-h-11 rounded-xl border px-3 text-sm "+(loadMode==="recommended"?"border-primary bg-accent font-semibold":"border-border bg-surface")} onClick={()=>{setLoadMode("recommended");setTaskIndex(0);}}>Suositeltu · {adaptiveDay.recommendedMinutes} min</button>
+          <button className={"min-h-11 rounded-xl border px-3 text-sm "+(loadMode==="extra"?"border-primary bg-accent font-semibold":"border-border bg-surface")} onClick={()=>{setLoadMode("extra");setTaskIndex(0);}}>Haluan tehdä enemmän · {adaptiveDay.extraMinutes} min</button>
+        </div>
+        <p className="mt-2 text-xs text-muted-foreground">Nykyinen kokonaiskuorma on noin {minutes(todayMinutes)}. Lisäharjoittelusta ei synny myöhemmin korvattavaa velkaa.</p>
+      </details>
+      {later.length>0&&<div className="mt-5 border-t border-border pt-3"><p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Myöhemmin</p>{later.map(action=><button key={action.id} className="mt-2 flex min-h-11 w-full items-center justify-between rounded-xl bg-muted/50 px-3 text-left" onClick={()=>startChosen(action)}><span><b className="mr-2 text-primary">{action.course.code}</b>{action.title}</span><span className="text-sm text-muted-foreground">{minutes(action.minutes)}</span></button>)}</div>}
     </>:<>
       <p className="font-medium">Ei pakollista itsenäistä opiskelua tänään.</p>
       <p className="mt-2 text-sm text-muted-foreground">Tämän päivän tärkeimmät oppimistarpeet ovat hallinnassa. Tyhjä päivä ei ole järjestelmävirhe.</p>
