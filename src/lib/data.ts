@@ -1271,6 +1271,10 @@ export function useApplyStudyWeekdays() {
           .upsert({
             owner_id: requireDeviceOwnerId(),
             study_weekdays: studyWeekdays,
+            weekday_capacity_min_minutes: Math.max(0, input.capacity.weekdayMinMinutes ?? 0),
+            weekday_capacity_minutes: Math.max(0, input.capacity.weekdayMinutes),
+            weekend_capacity_min_minutes: Math.max(0, input.capacity.weekendMinMinutes ?? 0),
+            weekend_capacity_minutes: Math.max(0, input.capacity.weekendMinutes),
           }, { onConflict: "owner_id" });
         if (preferenceError) throw preferenceError;
       } catch (error) {
