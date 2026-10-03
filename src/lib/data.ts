@@ -745,33 +745,53 @@ async function doRecordPracticeAttempt(payload: unknown, operationId: string) {
   return data as string;
 }
 
+type PlanMutationExpectation = { expected_updated_at?: string | null };
+
+export function isPlanSyncConflict(error: unknown) {
+  return error instanceof Error && error.message.startsWith("SYNC_CONFLICT:");
+}
+
+function planSyncConflict() {
+  return new Error("SYNC_CONFLICT: Suunnitelman tehtävää muutettiin toisella laitteella.");
+}
+
 async function doUpdatePlanStatus(payload: unknown) {
-  const p = payload as { id: string; status: string };
-  const { error } = await supabase.from("plan_items").update({ status: p.status }).eq("id", p.id);
+  const p = payload as { id: string; status: string } & PlanMutationExpectation;
+  let query = supabase.from("plan_items").update({ status: p.status }).eq("id", p.id);
+  if (p.expected_updated_at) query = query.eq("updated_at", p.expected_updated_at);
+  const { data, error } = await query.select("id").maybeSingle();
   if (error) throw error;
+  if (p.expected_updated_at && !data) throw planSyncConflict();
 }
 
 async function doMovePlanItem(payload: unknown) {
-  const p = payload as { id: string; date: string; from: string };
-  const { error } = await supabase
+  const p = payload as { id: string; date: string; from: string } & PlanMutationExpectation;
+  let query = supabase
     .from("plan_items")
     .update({ date: p.date, moved_from: p.from, status: "planned" })
     .eq("id", p.id);
+  if (p.expected_updated_at) query = query.eq("updated_at", p.expected_updated_at);
+  const { data, error } = await query.select("id").maybeSingle();
   if (error) throw error;
+  if (p.expected_updated_at && !data) throw planSyncConflict();
 }
 
 async function doUpsertPlanItem(payload: unknown, operationId: string) {
-  const p = payload as Partial<PlanItem> & { id?: string; course_id: string; date: string };
+  const p = payload as Partial<PlanItem> & { id?: string; course_id: string; date: string } & PlanMutationExpectation;
   if (p.id) {
-    const { id, ...rest } = p;
-    const { error } = await supabase.from("plan_items").update(rest).eq("id", id);
+    const { id, expected_updated_at, ...rest } = p;
+    let query = supabase.from("plan_items").update(rest).eq("id", id);
+    if (expected_updated_at) query = query.eq("updated_at", expected_updated_at);
+    const { data, error } = await query.select("id").maybeSingle();
     if (error) throw error;
+    if (expected_updated_at && !data) throw planSyncConflict();
     return id;
   }
 
+  const { expected_updated_at: _expectedUpdatedAt, ...insert } = p;
   const { error } = await supabase
     .from("plan_items")
-    .upsert({ ...p, id: operationId } as never, { onConflict: "id" });
+    .upsert({ ...insert, id: operationId } as never, { onConflict: "id" });
   if (error) throw error;
   return operationId;
 }
@@ -944,17 +964,17 @@ export function useRecordPracticeAttempt() {
 export function usePlanStatus() {
   const invalidate = useInvalidateAll();
   return useMutation({
-    mutationFn: (input: { id: string; status: string }) => runOrQueue("updatePlanStatus", input),
-    onSuccess: invalidate,
+    mutationFn: (input: { id: string; status: string; expected_updated_at?: string | null }) => runOrQueue("updatePlanStatus", input),
+    onSettled: invalidate,
   });
 }
 
 export function useMovePlanItem() {
   const invalidate = useInvalidateAll();
   return useMutation({
-    mutationFn: (input: { id: string; date: string; from: string }) =>
+    mutationFn: (input: { id: string; date: string; from: string; expected_updated_at?: string | null }) =>
       runOrQueue("movePlanItem", input),
-    onSuccess: invalidate,
+    onSettled: invalidate,
   });
 }
 
@@ -986,9 +1006,9 @@ export function useGeneratePlan() {
 export function useUpsertPlanItem() {
   const invalidate = useInvalidateAll();
   return useMutation({
-    mutationFn: (input: Partial<PlanItem> & { id?: string; course_id: string; date: string }) =>
+    mutationFn: (input: Partial<PlanItem> & { id?: string; course_id: string; date: string; expected_updated_at?: string | null }) =>
       runOrQueue("upsertPlanItem", input),
-    onSuccess: invalidate,
+    onSettled: invalidate,
   });
 }
 
