@@ -1,0 +1,47 @@
+name: Generate Visual Baselines
+
+on:
+  workflow_dispatch:
+    inputs:
+      base_url:
+        description: "Exact deployed URL to capture"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  visual-baselines:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      E2E_BASE_URL: ${{ github.event.inputs.base_url }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install browser test tooling
+        run: |
+          npm run e2e:install
+          npx playwright install --with-deps chromium
+
+      - name: Generate deterministic shell baselines
+        run: npm run e2e:visual:baseline
+
+      - name: Upload baseline artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: visual-baselines-${{ github.sha }}
+          path: e2e/visual-regression.spec.ts-snapshots
+          if-no-files-found: error
+          retention-days: 14
