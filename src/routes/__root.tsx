@@ -28,7 +28,7 @@ function NotFoundComponent() {
         <div className="mt-6">
           <Link
             to="/"
-            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+            className="inline-flex min-h-11 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
           >
             Takaisin etusivulle
           </Link>
@@ -44,7 +44,7 @@ function ErrorComponent({ error, reset }: { error: unknown; reset: () => void })
     () =>
       error instanceof Error
         ? error
-        : new Error(typeof error === "string" ? error : "Tuntematon sovellusvirhe"),
+        : new Error(typeof error === "string" ? "NonErrorThrown" : "Tuntematon sovellusvirhe"),
     [error],
   );
   useEffect(() => {
@@ -73,7 +73,7 @@ function ErrorComponent({ error, reset }: { error: unknown; reset: () => void })
           </button>
           <a
             href="/"
-            className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
+            className="inline-flex min-h-11 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
           >
             Takaisin etusivulle
           </a>
