@@ -1,0 +1,90 @@
+name: Production Database Migrations
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "Preview pending migrations or apply them to production"
+        required: true
+        default: "preview"
+        type: choice
+        options:
+          - preview
+          - apply
+      confirmation:
+        description: "For apply mode, type APPLY exactly"
+        required: false
+        default: ""
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-database-migrations
+  cancel-in-progress: false
+
+jobs:
+  migrate:
+    name: Preview or apply production migrations
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      POSTGRES_URL: ${{ secrets.POSTGRES_URL }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Canonical repository guard
+        run: node scripts/assert-canonical-repo.mjs
+
+      - name: Validate production database secret
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -z "${POSTGRES_URL:-}" ]; then
+            echo "::error::POSTGRES_URL repository secret is not configured."
+            exit 1
+          fi
+          python3 - <<'PY'
+          import os
+          from urllib.parse import urlparse
+
+          raw = os.environ["POSTGRES_URL"]
+          parsed = urlparse(raw)
+          if parsed.scheme not in {"postgres", "postgresql"} or not parsed.hostname:
+              raise SystemExit("::error::POSTGRES_URL is not a valid PostgreSQL connection URL.")
+          print(f"Database target host: {parsed.hostname}")
+          PY
+
+      - name: Preview pending migrations
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx --yes supabase@2.117.0 db push --db-url "$POSTGRES_URL" --dry-run
+
+      - name: Validate apply confirmation
+        if: ${{ inputs.mode == 'apply' }}
+        shell: bash
+        env:
+          CONFIRMATION: ${{ inputs.confirmation }}
+        run: |
+          set -euo pipefail
+          if [ "$CONFIRMATION" != "APPLY" ]; then
+            echo "::error::Apply mode requires the confirmation value APPLY."
+            exit 1
+          fi
+
+      - name: Apply pending migrations
+        if: ${{ inputs.mode == 'apply' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx --yes supabase@2.117.0 db push --db-url "$POSTGRES_URL"
+
+      - name: Confirm migration history after apply
+        if: ${{ inputs.mode == 'apply' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx --yes supabase@2.117.0 migration list --db-url "$POSTGRES_URL"
