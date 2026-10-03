@@ -331,6 +331,26 @@ function StudyApp({ user, initialPage, courseCode, courseTab, examId, progressSe
     }
   };
 
+  const continueCourse = (id: string | null) => {
+    if (!id) {
+      setEntry("manual");
+      return;
+    }
+    const nextItem = plan
+      .filter(item =>
+        item.course_id === id &&
+        item.kind !== "exam" &&
+        !["completed", "skipped"].includes(item.status),
+      )
+      .sort((a, b) => {
+        const aPast = a.date < today() ? 0 : 1;
+        const bPast = b.date < today() ? 0 : 1;
+        if (aPast !== bPast) return aPast - bPast;
+        return a.date.localeCompare(b.date) || (a.start_time ?? "").localeCompare(b.start_time ?? "");
+      })[0];
+    setEntry(nextItem?.id ?? "manual");
+  };
+
   const goCourse = (id: string) => {
     const target = courses.find((course) => course.id === id);
     setMoreOpen(false);
@@ -524,7 +544,7 @@ function StudyApp({ user, initialPage, courseCode, courseTab, examId, progressSe
           }}
           onSelect={(id)=>id?goCourse(id):go("courses")}
           onAdd={()=>setAdding(true)}
-          onStart={()=>setEntry("manual")}
+          onStart={()=>continueCourse(courseId)}
         /> :
         page==="practice" ? <PracticeView courses={courses} topics={topics} attempts={attemptsQ.data??[]} tests={testsQ.data??[]} mistakes={mistakesQ.data??[]} initialCourseId={practiceCourse?.id} initialTopicId={practiceTopic?.id} onExit={()=>practiceCourseCode?void navigate({to:"/today"}):undefined}/> :
         page==="exams" ? <ExamsView
