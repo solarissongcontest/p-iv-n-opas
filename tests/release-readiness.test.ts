@@ -78,10 +78,17 @@ test("visual regression has a deterministic baseline generator before it becomes
   assert.match(spec, /planner-month-1280\.png/);
   assert.match(spec, /mobile-practice-focus-390\.png/);
   assert.match(workflow, /workflow_dispatch/);
+  assert.match(workflow, /workflow_run/);
+  assert.match(workflow, /Final Release Gate/);
+  assert.match(workflow, /github\.event\.workflow_run\.conclusion == 'success'/);
+  assert.match(workflow, /github\.event\.workflow_run\.head_branch == 'main'/);
   assert.match(workflow, /base_url/);
+  assert.match(workflow, /opiskelupaivakirja\.vercel\.app/);
+  assert.match(workflow, /EXPECTED_SHA/);
+  assert.match(workflow, /github\.event\.workflow_run\.head_sha/);
+  assert.match(workflow, /Detect existing committed baselines/);
   assert.match(workflow, /Verify exact deployed commit/);
   assert.match(workflow, /\/api\/release-info/);
-  assert.match(workflow, /EXPECTED_SHA/);
   assert.match(workflow, /Baseline URL serves/);
   assert.match(workflow, /--update-snapshots|e2e:visual:baseline/);
   assert.match(workflow, /upload-artifact@v4/);
