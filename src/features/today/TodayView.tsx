@@ -97,7 +97,6 @@ import { clearDeviceSession, type DeviceUser } from "@/lib/deviceSession";
 import {
   attemptOutcomeLabel,
   attemptTypeLabel,
-  confidenceLabel,
   dimensionLabel,
   eventKindLabel,
   errorCategoryLabel,
