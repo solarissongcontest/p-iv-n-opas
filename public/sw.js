@@ -1,5 +1,5 @@
-const SHELL_CACHE = "opk-shell-v2";
-const RUNTIME_CACHE = "opk-runtime-v2";
+const SHELL_CACHE = "opk-shell-v3";
+const RUNTIME_CACHE = "opk-runtime-v3";
 const SHELL_ASSETS = [
   "/",
   "/manifest.webmanifest",
@@ -14,6 +14,12 @@ self.addEventListener("install", (event) => {
       await Promise.allSettled(SHELL_ASSETS.map((asset) => cache.add(asset)));
     }),
   );
+});
+
+self.addEventListener("message", (event) => {
+  if (event.data?.type === "SKIP_WAITING") {
+    void self.skipWaiting();
+  }
 });
 
 self.addEventListener("activate", (event) => {
