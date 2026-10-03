@@ -30,6 +30,21 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Verify exact deployed commit
+        shell: bash
+        env:
+          BASE_URL: ${{ github.event.inputs.base_url }}
+          EXPECTED_SHA: ${{ github.sha }}
+        run: |
+          BODY=$(curl --silent --show-error --fail --max-time 10 "$BASE_URL/api/release-info")
+          LIVE_SHA=$(printf '%s' "$BODY" | python3 -c "import json,sys; print((json.load(sys.stdin).get('commit') or '').strip())")
+          if [ "$LIVE_SHA" != "$EXPECTED_SHA" ]; then
+            echo "::error::Baseline URL serves '${LIVE_SHA:-unknown}', expected $EXPECTED_SHA"
+            exit 1
+          fi
+          echo "Capturing baselines from exact commit $EXPECTED_SHA"
+
+
       - name: Install browser test tooling
         run: |
           npm run e2e:install
