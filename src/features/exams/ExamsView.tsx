@@ -133,7 +133,7 @@ import {
 
 import { Bar, Panel, button, secondary, type Base } from "@/features/shared/StudyViewPrimitives";
 
-export function ExamsView({courses,topics,exams,tests,attempts,mistakes,sessions,plan,onCourse,onPractice,initialExamId,onExamChange}:Base&{exams:Exam[];tests:PracticeTest[];attempts:PracticeAttempt[];mistakes:Mistake[];sessions:Session[];plan:PlanItem[];onCourse:(id:string)=>void;onPractice:(courseId:string,topicId?:string)=>void;initialExamId?:string | undefined;onExamChange?:(id:string|null)=>void}) {
+export function ExamsView({courses,topics,exams,tests,attempts,mistakes,sessions,plan,capacity,onCourse,onPractice,initialExamId,onExamChange}:Base&{exams:Exam[];tests:PracticeTest[];attempts:PracticeAttempt[];mistakes:Mistake[];sessions:Session[];plan:PlanItem[];capacity:CapacityProfile;onCourse:(id:string)=>void;onPractice:(courseId:string,topicId?:string)=>void;initialExamId?:string | undefined;onExamChange?:(id:string|null)=>void}) {
   const [adding,setAdding]=useState(false),[selectedExam,setSelectedExam]=useState<string|null>(initialExamId??null);
   useEffect(()=>setSelectedExam(initialExamId??null),[initialExamId]);
   const chooseExam=(id:string|null)=>{setSelectedExam(id);onExamChange?.(id);};
@@ -148,10 +148,10 @@ export function ExamsView({courses,topics,exams,tests,attempts,mistakes,sessions
     const ss=sessions.filter(s=>s.course_id===selected.course_id);
     const pp=plan.filter(p=>p.course_id===selected.course_id&&p.date>=today()&&p.date<=selected.date&&p.status==="planned");
     const prep=examStage({topics:ts,attempts:aa,tests:tt,mistakes:mm,course:course??null});
-    const buffer=course?.exam_date?examBuffer({examDate:course.exam_date,topics:ts,attempts:aa,capacity:{studyWeekdays:[1,2,3,4,5],weekdayMinutes:60,weekendMinutes:90,busyDates:[]}}):null;
+    const buffer=course?.exam_date?examBuffer({examDate:course.exam_date,topics:ts,attempts:aa,capacity}):null;
     const topicStates=ts.map(topic=>({topic,state:deriveTopicLearningState(topic,aa,{examDate:course?.exam_date??null})}));
     const missing=topicStates.filter(row=>row.topic.progress<100||row.state.masteryLevel<3).sort((a,b)=>a.state.masteryLevel-b.state.masteryLevel||b.topic.importance-a.topic.importance);
-    const reviews=buildRecoveryQueue({topics:ts,attempts:aa,courses:course?[course]:[],now:today(),capacityMinutes:60,maxItems:10}).items;
+    const reviews=buildRecoveryQueue({topics:ts,attempts:aa,courses:course?[course]:[],now:today(),capacityMinutes:capacityForDateV3(capacity,today()),maxItems:10}).items;
     const studyMinutes=ss.reduce((sum,s)=>sum+s.minutes,0);
     const v4TopicStates=ts.map(topic=>({topic,model:masteryModelV4(topic,aa,{examDate:selected.date})}))
       .sort((a,b)=>b.topic.importance-a.topic.importance||a.model.level-b.model.level);
