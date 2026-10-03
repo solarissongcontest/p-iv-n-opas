@@ -24,3 +24,12 @@ test("error telemetry keeps technical metadata but not arbitrary error messages 
   assert.equal(client.includes("? error.message"), false);
   assert.equal(client.includes(": String(error)"), false);
 });
+
+test("root error boundary logs only from an effect and keeps recovery actions touchable", () => {
+  const root = read("src/routes/__root.tsx");
+  const component = root.slice(root.indexOf("function ErrorComponent"), root.indexOf("export const Route"));
+  assert.match(component, /useMemo/);
+  assert.match(component, /useEffect\(\(\) => \{\s*console\.error\(normalizedError\)/);
+  assert.equal(component.indexOf("console.error(normalizedError)") < component.indexOf("useEffect"), false);
+  assert.match(component, /min-h-11/);
+});
