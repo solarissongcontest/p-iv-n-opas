@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { BookOpen, CalendarDays, Ellipsis, FlaskConical, Plus, Search, Settings2, X } from "lucide-react";
+import { BookOpen, Brain, CalendarDays, Ellipsis, FlaskConical, Plus, Search, Settings2, X } from "lucide-react";
 import { LiquidGlass } from "@/components/LiquidGlass";
 import { desktopPlanningNav, primaryStudyNav, type StudyPage } from "@/app/navigation";
 
@@ -337,6 +337,13 @@ function MoreSheet({
           >
             <CalendarDays size={22} />
             <span><b>Suunnitelma</b><small>Katso tulevat päivät</small></span>
+          </button>
+          <button
+            className={"app-sheet-action " + (page === "practice" ? "app-sheet-action-active" : "")}
+            onClick={() => onNavigate("practice")}
+          >
+            <Brain size={22} />
+            <span><b>Harjoittelu</b><small>Tehtävät ja kertaus</small></span>
           </button>
           <button
             className={"app-sheet-action " + (page === "exams" ? "app-sheet-action-active" : "")}
