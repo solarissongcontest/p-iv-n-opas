@@ -46,6 +46,8 @@ test("Final Release Gate waits for the exact production commit and runs the brow
   }
   assert.equal(workflow.includes("Wait for Vercel deployment result"), false);
   assert.equal(workflow.includes("Vercel deployment failed"), false);
+  assert.match(workflow, /github\.event\.inputs\.base_url/);
+  assert.equal(workflow.includes("${{ inputs.base_url }}"), false);
 });
 
 test("physical push delivery is an explicit manual workflow", () => {
