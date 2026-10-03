@@ -330,7 +330,7 @@ export function AbittiAnswerEditor({
             type="button"
             onClick={beginFormula}
             disabled={disabled || fallback || loading}
-            className="inline-flex min-h-8 items-center gap-1 rounded-lg border border-border bg-surface px-2 font-medium text-foreground disabled:opacity-50"
+            className="inline-flex min-h-11 items-center gap-1 rounded-lg border border-border bg-surface px-3 font-medium text-foreground disabled:opacity-50"
             aria-label="Aloita kaava"
             title="Sama toiminto kuin Abitin Ctrl+E"
           >
