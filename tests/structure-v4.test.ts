@@ -204,6 +204,13 @@ test("device session refreshes immediately when the network returns", () => {
   assert.match(app, /removeEventListener\("online", verifyCanonicalOwner\)/);
 });
 
+test("raw backend errors never render in the normal app shell", () => {
+  const app = read("src/app/StudyApp.tsx");
+  assert.equal(app.includes("{String(error)}"), false);
+  assert.match(app, /Tietoja ei saatu ladattua\. Yritä uudelleen\./);
+  assert.match(app, /Verkkoyhteyttä ei ole\./);
+});
+
 test("service worker supports offline cold starts without caching API responses", () => {
   const sw = read("public/sw.js");
   assert.match(sw, /addEventListener\("install"/);
