@@ -105,6 +105,15 @@ test("styles are layered and responsive page families remain explicit", () => {
 });
 
 
+test("Today keeps one obvious next action and hides load controls behind disclosure", () => {
+  const today = read("src/features/today/TodayView.tsx");
+  assert.match(today, /title="Seuraavaksi"/);
+  assert.match(today, /Miksi tätä ehdotetaan\?/);
+  assert.match(today, /Muuta tämän päivän kuormaa/);
+  assert.equal(today.includes("Suosituksen varmuus:"), false);
+  assert.equal(today.includes("Seuraava ehdotus"), false);
+});
+
 test("planner uses calendar-safe month movement and avoids browser prompts", () => {
   const planner = read("src/features/planner/PlanView.tsx");
   const fi = read("src/lib/fi.ts");
