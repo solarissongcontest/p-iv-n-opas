@@ -122,6 +122,13 @@ test("simplified mobile navigation still keeps Practice directly reachable", () 
   assert.match(today, /onGo\("practice"\)/);
 });
 
+test("Today never uses browser prompts for missed-study handling", () => {
+  const today = read("src/features/today/TodayView.tsx");
+  assert.equal(today.includes("window.prompt"), false);
+  assert.match(today, /title="En ehdi tänään"/);
+  assert.match(today, /Siirrä seuraavaan sopivaan päivään/);
+});
+
 test("Today keeps one obvious next action and hides load controls behind disclosure", () => {
   const today = read("src/features/today/TodayView.tsx");
   assert.match(today, /title="Seuraavaksi"/);
