@@ -251,6 +251,19 @@ test("PWA worker registers for every user and updates only after explicit approv
   assert.match(shell, /body:has\(\.exam-simulation-running\) \.pwa-update-prompt/);
 });
 
+test("core study data has an owner-scoped IndexedDB fallback for cold offline starts", () => {
+  const snapshots = read("src/lib/offlineSnapshot.ts");
+  const data = read("src/lib/data.ts");
+  const settings = read("src/features/settings/SettingsView.tsx");
+  assert.match(snapshots, /indexedDB\.open/);
+  assert.match(snapshots, /ownerId/);
+  assert.match(snapshots, /isNetworkFailure/);
+  assert.match(data, /offlineQuery\("courses", listCourses\)/);
+  assert.match(data, /offlineQuery\("plan", listPlan\)/);
+  assert.match(data, /offlineQuery\("preferences", getPreferences\)/);
+  assert.match(settings, /clearOfflineSnapshots\(\)/);
+});
+
 test("service worker supports offline cold starts without caching API responses", () => {
   const sw = read("public/sw.js");
   assert.match(sw, /addEventListener\("install"/);
