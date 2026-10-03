@@ -64,17 +64,29 @@ function isErrorLike(value: unknown): value is Error {
   return value instanceof Error;
 }
 
+function safeConsoleArg(value: unknown): unknown {
+  if (isErrorLike(value)) {
+    record(value);
+    return describeError(value);
+  }
+  if (typeof value === "number" || typeof value === "boolean" || value == null) return value;
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    if (
+      trimmed.length <= 180 &&
+      /^\[(?:Opintopäiväkirja|Supabase|db|server)\]\s+[A-Za-z0-9 _.,:;()\/-]+$/i.test(trimmed)
+    ) return trimmed;
+    return "[string redacted]";
+  }
+  return "[value redacted]";
+}
+
 // Wrap console.error so errors logged by any layer — including h3's internal
 // unhandled-error logging, which this file cannot hook directly — are both
 // recorded for consumeLastCapturedError and expanded before serialization.
 const originalConsoleError = console.error.bind(console);
 console.error = (...args: unknown[]) => {
-  const expanded = args.map((arg) => {
-    if (!isErrorLike(arg)) return arg;
-    record(arg);
-    return describeError(arg);
-  });
-  originalConsoleError(...expanded);
+  originalConsoleError(...args.map(safeConsoleArg));
 };
 
 if (typeof globalThis.addEventListener === "function") {
