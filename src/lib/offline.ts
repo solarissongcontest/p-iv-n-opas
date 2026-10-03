@@ -20,7 +20,22 @@ export function registerOp(op: string, fn: OperationHandler) {
 function read(): QueuedOp[] {
   if (typeof localStorage === "undefined") return [];
   try {
-    return JSON.parse(localStorage.getItem(key()) ?? "[]") as QueuedOp[];
+    const parsed: unknown = JSON.parse(localStorage.getItem(key()) ?? "[]");
+    if (!Array.isArray(parsed)) return [];
+    const seen = new Set<string>();
+    return parsed.filter((item): item is QueuedOp => {
+      if (!item || typeof item !== "object") return false;
+      const candidate = item as Partial<QueuedOp>;
+      if (
+        typeof candidate.id !== "string" ||
+        typeof candidate.op !== "string" ||
+        typeof candidate.at !== "number" ||
+        !Number.isFinite(candidate.at) ||
+        seen.has(candidate.id)
+      ) return false;
+      seen.add(candidate.id);
+      return true;
+    });
   } catch {
     return [];
   }
@@ -44,8 +59,10 @@ export function subscribePending(fn: (count: number) => void) {
 
 export function enqueue(op: string, payload: unknown, id = crypto.randomUUID()) {
   const items = read();
+  if (items.some((item) => item.id === id)) return id;
   items.push({ id, op, payload, at: Date.now() });
   write(items);
+  return id;
 }
 
 /** Run a write; if the network fails, keep it locally and sync later. */
