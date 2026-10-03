@@ -51,9 +51,38 @@
 /* Planner: timeline first, engine details on demand */
 .planner-support {
   order: 40;
+  container-type: inline-size;
+  min-width: 0;
   border-color: color-mix(in oklab, var(--border) 72%, transparent);
   background: color-mix(in oklab, var(--surface) 72%, transparent);
   box-shadow: none;
+}
+
+.v5-planner-grid,
+.v5-planner-scenario-grid {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.v5-planner-grid {
+  gap: 1rem;
+}
+
+.v5-planner-scenario-grid {
+  gap: 0.75rem;
+}
+
+.v5-planner-grid > *,
+.v5-planner-scenario-grid > * {
+  min-width: 0;
+}
+
+@container (min-width: 42rem) {
+  .v5-planner-grid,
+  .v5-planner-scenario-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 .planner-support[open] {
   background: var(--surface);
@@ -821,11 +850,13 @@
   }
 }
 
-/* Expanded planner uses a real supporting pane. */
-@media (min-width: 1100px) {
+/* Expanded planner uses a real supporting pane only when the planner
+   workspace itself is wide enough. Viewport width is deliberately not used:
+   the desktop sidebar can consume hundreds of pixels before this view starts. */
+@container (min-width: 1240px) {
   .planner-view {
     display: grid !important;
-    grid-template-columns: minmax(0, 1fr) minmax(17rem, 22rem);
+    grid-template-columns: minmax(0, 1fr) minmax(20rem, 22rem);
     align-items: start;
     column-gap: 1.5rem;
   }
