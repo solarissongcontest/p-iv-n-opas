@@ -241,31 +241,6 @@ export function TodayView({courses,topics,sessions,exams,plan,tests,attempts,mis
   }
 
   return <><ActionDashboardLayout className="today-view flex flex-col gap-5">
-    {comeback&&<Panel className="today-context" title="Tervetuloa takaisin">
-      <p className="text-sm text-muted-foreground">Edellisestä opiskelumerkinnästä on {comeback.awayDays} päivää. Kaikkea väliin jäänyttä ei tuoda kerralla tälle päivälle.</p>
-      <p className="mt-2 font-medium">Aloitetaan {comeback.items.length} tärkeimmästä asiasta · noin {minutes(comeback.estimatedMinutes)}.</p>
-      <div className="mt-3 space-y-2">{comeback.items.map(t=><div key={t.id} className="rounded-xl bg-muted/60 p-3 text-sm"><b>{courses.find(c=>c.id===t.course_id)?.code}</b> · {t.name}</div>)}</div>
-      <div className="mt-4 flex flex-wrap gap-2"><button className={button} onClick={()=>onGo("practice")}>Tee kevyt paluu</button><button className={secondary} onClick={()=>onGo("plan")}>Tarkista suunnitelma</button></div>
-    </Panel>}
-    {mode.active&&examCourse&&<Panel className="today-context" title={mode.finalStretch?"Koemoodi · loppusuora":"Koemoodi · 14 päivää"}>
-      <div className="grid gap-4 sm:grid-cols-3">
-        <div><p className="text-sm text-muted-foreground">{examCourse.code}</p><p className="text-2xl font-semibold">{mode.days} pv</p><p className="text-sm text-muted-foreground">kokeeseen</p></div>
-        <div><p className="text-sm text-muted-foreground">Valmistautumisvaihe</p><p className="text-xl font-semibold">{examPrep?.stages[examPrep.index]?.label??"—"}</p><p className="mt-1 text-xs text-muted-foreground">{examPrep?`Vaihe ${examPrep.index+1}/6`:"Ei vaihetta"} · ei arvosanaennuste</p></div>
-        <div><p className="text-sm text-muted-foreground">Avoimet virheet</p><p className="text-2xl font-semibold">{openMistakes}</p><p className="text-sm text-muted-foreground">{mode.finalStretch?"Pidä kuorma kevyenä.":"Painota koetason tehtäviä ja kertausta."}</p></div>
-      </div>
-    </Panel>}
-
-    {adaptiveDay.runtimeIntentions.triggeredRuleIds.length>0&&<Panel className="today-context" title="Jos–niin-sääntö aktiivinen">
-      <p className="text-sm text-muted-foreground">{adaptiveDay.runtimeIntentions.notes.join(" ")||"Tämän päivän kuormaa mukautettiin automaattisesti aktiivisen säännön perusteella."}</p>
-      <p className="mt-2 text-sm">{
-        adaptiveDay.runtimeIntentions.replaceWithRetrieval
-          ? "Raskas työ vaihdettiin kevyeen muistista palauttamiseen."
-          : adaptiveDay.runtimeIntentions.dropExtra
-            ? "Lisäharjoittelu jätetään pois tältä päivältä."
-            : "Päivän kuormaa kevennettiin."
-      }{adaptiveDay.runtimeIntentions.maxMinutes ? " Yhden tehtävän yläraja on nyt "+minutes(adaptiveDay.runtimeIntentions.maxMinutes)+"." : ""}</p>
-    </Panel>}
-
     <Panel className="today-primary" title="Seuraavaksi">{nextAction?<>
       <p className="text-sm font-medium text-primary">{nextAction.course.code} · {minutes(nextAction.minutes)}</p>
       <h3 className="mt-2 text-2xl font-semibold">{nextAction.title}</h3>
@@ -293,6 +268,32 @@ export function TodayView({courses,topics,sessions,exams,plan,tests,attempts,mis
       <p className="mt-2 text-sm text-muted-foreground">Tämän päivän tärkeimmät oppimistarpeet ovat hallinnassa. Tyhjä päivä ei ole järjestelmävirhe.</p>
       <button className={secondary+" mt-4"} onClick={()=>onGo("plan")}>Avaa suunnitelma</button>
     </>}</Panel>
+
+    {comeback&&<Panel className="today-context" title="Tervetuloa takaisin">
+      <p className="text-sm text-muted-foreground">Edellisestä opiskelumerkinnästä on {comeback.awayDays} päivää. Kaikkea väliin jäänyttä ei tuoda kerralla tälle päivälle.</p>
+      <p className="mt-2 font-medium">Aloitetaan {comeback.items.length} tärkeimmästä asiasta · noin {minutes(comeback.estimatedMinutes)}.</p>
+      <div className="mt-3 space-y-2">{comeback.items.map(t=><div key={t.id} className="rounded-xl bg-muted/60 p-3 text-sm"><b>{courses.find(c=>c.id===t.course_id)?.code}</b> · {t.name}</div>)}</div>
+      <div className="mt-4 flex flex-wrap gap-2"><button className={button} onClick={()=>onGo("practice")}>Tee kevyt paluu</button><button className={secondary} onClick={()=>onGo("plan")}>Tarkista suunnitelma</button></div>
+    </Panel>}
+    {mode.active&&examCourse&&<Panel className="today-context" title={mode.finalStretch?"Koemoodi · loppusuora":"Koemoodi · 14 päivää"}>
+      <div className="grid gap-4 sm:grid-cols-3">
+        <div><p className="text-sm text-muted-foreground">{examCourse.code}</p><p className="text-2xl font-semibold">{mode.days} pv</p><p className="text-sm text-muted-foreground">kokeeseen</p></div>
+        <div><p className="text-sm text-muted-foreground">Valmistautumisvaihe</p><p className="text-xl font-semibold">{examPrep?.stages[examPrep.index]?.label??"—"}</p><p className="mt-1 text-xs text-muted-foreground">{examPrep?`Vaihe ${examPrep.index+1}/6`:"Ei vaihetta"} · ei arvosanaennuste</p></div>
+        <div><p className="text-sm text-muted-foreground">Avoimet virheet</p><p className="text-2xl font-semibold">{openMistakes}</p><p className="text-sm text-muted-foreground">{mode.finalStretch?"Pidä kuorma kevyenä.":"Painota koetason tehtäviä ja kertausta."}</p></div>
+      </div>
+    </Panel>}
+
+    {adaptiveDay.runtimeIntentions.triggeredRuleIds.length>0&&<Panel className="today-context" title="Jos–niin-sääntö aktiivinen">
+      <p className="text-sm text-muted-foreground">{adaptiveDay.runtimeIntentions.notes.join(" ")||"Tämän päivän kuormaa mukautettiin automaattisesti aktiivisen säännön perusteella."}</p>
+      <p className="mt-2 text-sm">{
+        adaptiveDay.runtimeIntentions.replaceWithRetrieval
+          ? "Raskas työ vaihdettiin kevyeen muistista palauttamiseen."
+          : adaptiveDay.runtimeIntentions.dropExtra
+            ? "Lisäharjoittelu jätetään pois tältä päivältä."
+            : "Päivän kuormaa kevennettiin."
+      }{adaptiveDay.runtimeIntentions.maxMinutes ? " Yhden tehtävän yläraja on nyt "+minutes(adaptiveDay.runtimeIntentions.maxMinutes)+"." : ""}</p>
+    </Panel>}
+
 
     <button type="button" className="today-practice-shortcut flex min-h-14 w-full items-center justify-between gap-4 rounded-2xl border border-border bg-surface px-4 py-3 text-left hover:bg-muted" onClick={()=>onGo("practice")}>
       <span className="flex min-w-0 items-center gap-3"><span className="grid size-10 shrink-0 place-items-center rounded-xl bg-accent text-primary"><Brain size={19}/></span><span><b className="block">Harjoittele</b><small className="block text-muted-foreground">Lyhyt tehtäväkierros ilman erillisen suunnitelman rakentamista.</small></span></span>
