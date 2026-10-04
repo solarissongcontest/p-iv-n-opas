@@ -13,6 +13,7 @@ import {
   type PracticeTest,
   type PracticeAttempt,
   type QuestionBankItem,
+  type QuestionUserState,
   type Session,
   type Topic,
   type WeeklyCheckin,
@@ -277,6 +278,16 @@ async function listQuestionBank(): Promise<QuestionBankItem[]> {
   return (data ?? []) as QuestionBankItem[];
 }
 
+async function listQuestionUserState(): Promise<QuestionUserState[]> {
+  const { data, error } = await untypedSupabase
+    .from("question_user_state")
+    .select("*")
+    .order("updated_at", { ascending: false })
+    .limit(4000);
+  if (error) throw error;
+  return (data ?? []) as QuestionUserState[];
+}
+
 
 async function listWeeklyCheckins(): Promise<WeeklyCheckin[]> {
   const { data, error } = await supabase
@@ -434,6 +445,8 @@ export const usePracticeAttempts = () =>
   useQuery({ queryKey: ["practice-attempts"], queryFn: offlineQuery("practice-attempts", listPracticeAttempts) });
 export const useQuestionBank = () =>
   useQuery({ queryKey: ["question-bank"], queryFn: offlineQuery("question-bank", listQuestionBank) });
+export const useQuestionUserState = () =>
+  useQuery({ queryKey: ["question-user-state"], queryFn: offlineQuery("question-user-state", listQuestionUserState) });
 export const useSettings = () => useQuery({ queryKey: ["settings"], queryFn: offlineQuery("settings", getSettings) });
 export const usePreferences = () =>
   useQuery({ queryKey: ["preferences"], queryFn: offlineQuery("preferences", getPreferences) });
@@ -721,12 +734,13 @@ type RecordPracticeAttemptInput = {
   skills?: string[];
   expected_concepts?: string[];
   question_payload?: Record<string, unknown>;
+  question_bank_id?: string | null;
 };
 
 async function doRecordPracticeAttempt(payload: unknown, operationId: string) {
   const input = payload as RecordPracticeAttemptInput;
   const hintsUsed = Math.max(input.hints_used ?? 0, input.hint_used ? 1 : 0);
-  const { data, error } = await untypedSupabase.rpc("record_practice_attempt", {
+  const { data, error } = await untypedSupabase.rpc("record_adaptive_practice_attempt", {
     p_course_id: input.course_id,
     p_topic_id: input.topic_id,
     p_date: input.date ?? today(),
@@ -744,6 +758,7 @@ async function doRecordPracticeAttempt(payload: unknown, operationId: string) {
     p_expected_concepts: input.expected_concepts ?? [],
     p_question_payload: input.question_payload ?? {},
     p_operation_id: operationId,
+    p_question_bank_id: input.question_bank_id ?? null,
   });
   if (error) throw error;
   if (!data) throw new Error("Harjoitusyrityksen tallennus ei palauttanut tunnistetta.");
@@ -957,7 +972,7 @@ registerOp("upsertLearningPolicyState", doUpsertLearningPolicyState);
 function useInvalidateAll() {
   const qc = useQueryClient();
   return () =>
-    ["courses", "topics", "sessions", "exams", "plan", "mistakes", "tests", "practice-attempts", "question-bank", "settings", "preferences", "weekly-checkins", "progress-events", "topic-dependencies", "study-materials", "learning-experiments", "learning-policy-states", "calibration-observations", "friction-events", "implementation-intentions", "exam-simulations", "pretest-attempts", "reminder-adaptation", "subject-task-parameters"].forEach(
+    ["courses", "topics", "sessions", "exams", "plan", "mistakes", "tests", "practice-attempts", "question-bank", "question-user-state", "settings", "preferences", "weekly-checkins", "progress-events", "topic-dependencies", "study-materials", "learning-experiments", "learning-policy-states", "calibration-observations", "friction-events", "implementation-intentions", "exam-simulations", "pretest-attempts", "reminder-adaptation", "subject-task-parameters"].forEach(
       (k) => qc.invalidateQueries({ queryKey: [k] }),
     );
 }
