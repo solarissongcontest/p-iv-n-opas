@@ -9,6 +9,7 @@ create table if not exists public.active_study_sessions (
   course_id uuid not null references public.courses(id) on delete cascade,
   topic_id uuid references public.topics(id) on delete set null,
   target_minutes integer not null default 30 check (target_minutes between 1 and 240),
+  kind text not null default 'study' check (kind in ('study','review','test')),
   phase smallint not null default 1 check (phase between 0 and 4),
   objective text not null default '',
   recall text not null default '',
@@ -111,6 +112,7 @@ create or replace function public.start_active_study_session(
   p_course_id uuid,
   p_topic_id uuid,
   p_target_minutes integer,
+  p_kind text,
   p_objective text
 )
 returns uuid
@@ -128,6 +130,9 @@ begin
 
   if p_target_minutes is null or p_target_minutes < 1 or p_target_minutes > 240 then
     raise exception 'target_minutes must be between 1 and 240' using errcode = '22023';
+  end if;
+  if p_kind not in ('study','review','test') then
+    raise exception 'invalid study session kind' using errcode = '22023';
   end if;
 
   perform 1
@@ -176,6 +181,7 @@ begin
     course_id,
     topic_id,
     target_minutes,
+    kind,
     phase,
     objective,
     status,
@@ -188,6 +194,7 @@ begin
     p_course_id,
     p_topic_id,
     p_target_minutes,
+    p_kind,
     1,
     coalesce(p_objective, ''),
     'running',
@@ -208,8 +215,8 @@ begin
 end;
 $$;
 
-revoke all on function public.start_active_study_session(uuid, uuid, uuid, integer, text) from public, anon;
-grant execute on function public.start_active_study_session(uuid, uuid, uuid, integer, text) to authenticated, service_role;
+revoke all on function public.start_active_study_session(uuid, uuid, uuid, integer, text, text) from public, anon;
+grant execute on function public.start_active_study_session(uuid, uuid, uuid, integer, text, text) to authenticated, service_role;
 
 create or replace function public.set_active_study_session_running(
   p_session_id uuid,
