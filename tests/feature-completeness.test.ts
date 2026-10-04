@@ -138,3 +138,19 @@ test("study rhythm settings save weekdays and capacity once and realign the futu
   assert.match(data, /weekday_capacity_minutes: Math\.max/);
   assert.match(data, /weekend_capacity_minutes: Math\.max/);
 });
+
+
+test("planned study sessions keep the one-tap automatic timer contract", () => {
+  const todayView = read("src/features/today/TodayView.tsx");
+  const session = read("src/features/session/SessionForm.tsx");
+
+  assert.ok(todayView.includes("Aloita opiskelu nyt"));
+  assert.match(session, /useState\(!!item\)/);
+  assert.match(session, /runStartedAt=useRef<number\|null>\(item\?Date\.now\(\):null\)/);
+  assert.match(session, /item\.target_minutes===30\?"30":"custom"/);
+  assert.ok(session.includes("currentElapsedSeconds()"));
+  assert.ok(session.includes('document.addEventListener("visibilitychange",tick)'));
+  assert.ok(session.includes("Aika käynnissä"));
+  assert.ok(session.includes("Aika kirjataan automaattisesti"));
+  assert.equal(session.includes('onClick={()=>setRunning(v=>!v)}'), false);
+});
