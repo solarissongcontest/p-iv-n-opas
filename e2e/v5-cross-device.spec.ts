@@ -281,3 +281,111 @@ test("v5 offline write survives reload, syncs, and appears on a second device", 
     await contextA.close();
   }
 });
+
+
+test("active study session started on one device resumes and pauses on another", async ({ browser }) => {
+  const contextA = await browser.newContext({ serviceWorkers: "allow" });
+  const contextB = await browser.newContext({ serviceWorkers: "allow" });
+  const pageA = await contextA.newPage();
+  const pageB = await contextB.newPage();
+  let supabaseOrigin: string | null = null;
+  let apiKey: string | null = null;
+
+  pageA.on("request", (request) => {
+    if (!request.url().includes("/rest/v1/") && !request.url().includes("/rpc/")) return;
+    try {
+      const url = new URL(request.url());
+      if (!/supabase/i.test(url.hostname)) return;
+      supabaseOrigin = url.origin;
+      apiKey = request.headers()["apikey"] ?? apiKey;
+    } catch {
+      // Ignore unrelated requests.
+    }
+  });
+
+  try {
+    await enterApp(pageA);
+    await enterApp(pageB);
+    expect(supabaseOrigin).toBeTruthy();
+    expect(apiKey).toBeTruthy();
+
+    const tokenA = await pageA.evaluate(() => localStorage.getItem("opk.device-token"));
+    expect(tokenA).toBeTruthy();
+    const headersA = {
+      apikey: apiKey!,
+      Authorization: "Bearer " + tokenA,
+      "Content-Type": "application/json",
+    };
+
+    const coursesResponse = await contextA.request.get(
+      supabaseOrigin! + "/rest/v1/courses?select=id&archived=eq.false&limit=1",
+      { headers: headersA },
+    );
+    expect(coursesResponse.ok()).toBe(true);
+    const courses = await coursesResponse.json() as Array<{ id: string }>;
+    expect(courses[0]?.id).toBeTruthy();
+
+    await contextA.request.delete(
+      supabaseOrigin! + "/rest/v1/active_study_sessions?id=not.is.null",
+      { headers: { ...headersA, Prefer: "return=minimal" } },
+    ).catch(() => undefined);
+
+    const marker = "Cross-device active session " + Date.now();
+    const startResponse = await contextA.request.post(
+      supabaseOrigin! + "/rest/v1/rpc/start_active_study_session",
+      {
+        headers: headersA,
+        data: {
+          p_plan_item_id: null,
+          p_course_id: courses[0]!.id,
+          p_topic_id: null,
+          p_target_minutes: 20,
+          p_kind: "study",
+          p_objective: marker,
+        },
+      },
+    );
+    expect(startResponse.ok()).toBe(true);
+
+    await pageB.goto("/today", { waitUntil: "domcontentloaded" });
+    await expect(pageB.getByText("Opiskelukerta käynnissä", { exact: true })).toBeVisible({ timeout: 30_000 });
+    await pageB.getByRole("button", { name: /Opiskelukerta käynnissä/ }).click();
+    await expect(pageB.getByText("Aika käynnissä", { exact: true })).toBeVisible({ timeout: 30_000 });
+
+    await pageB.getByRole("button", { name: "Tauko", exact: true }).click();
+    await pageA.goto("/today", { waitUntil: "domcontentloaded" });
+    await expect(pageA.getByText("Opiskelukerta tauolla", { exact: true })).toBeVisible({ timeout: 30_000 });
+
+    const snapshotResponse = await contextA.request.post(
+      supabaseOrigin! + "/rest/v1/rpc/active_study_session_snapshot",
+      { headers: headersA, data: {} },
+    );
+    expect(snapshotResponse.ok()).toBe(true);
+    const snapshot = await snapshotResponse.json() as {
+      status?: string;
+      objective?: string;
+      effective_elapsed_seconds?: number;
+    } | null;
+    expect(snapshot?.status).toBe("paused");
+    expect(snapshot?.objective).toBe(marker);
+    expect(Number(snapshot?.effective_elapsed_seconds ?? 0)).toBeGreaterThanOrEqual(0);
+  } finally {
+    if (supabaseOrigin && apiKey) {
+      const token = await pageA.evaluate(() => localStorage.getItem("opk.device-token")).catch(() => null);
+      if (token) {
+        await contextA.request.delete(
+          supabaseOrigin + "/rest/v1/active_study_sessions?id=not.is.null",
+          {
+            headers: {
+              apikey: apiKey,
+              Authorization: "Bearer " + token,
+              Prefer: "return=minimal",
+            },
+          },
+        ).catch(() => undefined);
+      }
+    }
+    await contextB.close();
+    await contextA.close();
+  }
+});
