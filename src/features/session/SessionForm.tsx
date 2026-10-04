@@ -241,9 +241,9 @@ export function SessionForm({item,activeSession=null,courses,topics,sessions=[],
        course_id:courseId,topic_id:topicId||null,
        minutes:Math.max(1,actualMinutes),
        planned_minutes:item?.target_minutes??actualMinutes,
-       kind:item?.kind==="review"?"review":item?.kind==="test"?"test":"study",
+       kind:activeSession?.kind??(item?.kind==="review"?"review":item?.kind==="test"?"test":"study"),
        competence,did,unclear,note,focus:null,energy:null,method,tasks,
-       plan_item_id:item?.id??null
+       plan_item_id:item?.id??activeSession?.plan_item_id??null
      });
      toast.success(result==="queued"?"Tallennettu paikallisesti · synkataan myöhemmin.":"Opiskelu kirjattu.");
      onClose();
@@ -264,10 +264,10 @@ export function SessionForm({item,activeSession=null,courses,topics,sessions=[],
        course_id:courseId,topic_id:topicId||null,
        minutes:minutesUsed,
        planned_minutes:item?.target_minutes??targetMinutes,
-       kind:item?.kind==="review"?"review":item?.kind==="test"?"test":"study",
+       kind:activeSession?.kind??(item?.kind==="review"?"review":item?.kind==="test"?"test":"study"),
        competence,did,unclear,note,focus:null,energy:null,
        method:method||"ohjattu opiskelukerta",tasks,
-       plan_item_id:item?.id??null,
+       plan_item_id:item?.id??activeSession?.plan_item_id??null,
        objective:objective.trim(),
        recall:recall.trim()||null,
        retrieval_check:retrievalCheck.trim(),
