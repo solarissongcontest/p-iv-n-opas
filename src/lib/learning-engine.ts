@@ -423,6 +423,11 @@ const genericHints: Record<LearningAttemptType, string[]> = {
     "Sulje pois vaihtoehdot yhden käsitteellisen virheen perusteella.",
     "Palaa kysymyksen täsmälliseen sanamuotoon ennen valintaa.",
   ],
+  matching: [
+    "Tee ensin ne parit, joista olet täysin varma.",
+    "Vertaa jäljelle jäävien vaihtoehtojen käsitteellisiä tuntomerkkejä.",
+    "Tarkista lopuksi, ettei sama oikean puolen vaihtoehto ole päätynyt kahdelle vasemman puolen käsitteelle.",
+  ],
   explanation: [
     "Aloita ilmiöstä: mitä tapahtuu?",
     "Lisää mekanismi: miksi se tapahtuu?",
@@ -478,6 +483,11 @@ function questionTemplate(topic: Topic, type: LearningAttemptType, difficulty: n
       prompt: `Muodosta aiheesta “${name}” neljä mahdollista väitettä. Valitse niistä todennäköisesti oikea ja perustele, millä käsitteellä suljet muut pois.`,
       concepts: ["valinta", "poissulku", "perustelu"],
       explanation: "Monivalinta on hyödyllinen vasta, kun perustelu pakottaa erottamaan samankaltaiset vaihtoehdot.",
+    },
+    matching: {
+      prompt: `Yhdistä aiheen “${name}” keskeiset käsitteet niiden määritelmiin tai seurauksiin ja perustele vaikein pari.`,
+      concepts: ["käsitteiden erottelu", "yhteydet"],
+      explanation: "Yhdistely testaa, erotatko lähikäsitteet toisistaan ja osaatko liittää ne oikeisiin merkityksiin.",
     },
     explanation: {
       prompt: `Selitä aihe “${name}” muodossa mitä tapahtuu → miksi → mitä siitä seuraa.`,
