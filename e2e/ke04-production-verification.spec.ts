@@ -1,3 +1,4 @@
+// Production rerun after schema-compatible KE04 deploy
 import { expect, test } from "@playwright/test";
 import { enterApp } from "./helpers";
 
