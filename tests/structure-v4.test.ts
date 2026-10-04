@@ -127,7 +127,8 @@ test("course Continue opens the next planned item before falling back to manual 
   const app = read("src/app/StudyApp.tsx");
   const course = read("src/features/studies/CourseView.tsx");
   assert.match(app, /const continueCourse = \(id: string \| null\)/);
-  assert.match(app, /setEntry\(nextItem\?\.id \?\? "manual"\)/);
+  assert.match(app, /if \(nextItem\) void startSession\(nextItem\.id\);/);
+  assert.match(app, /else setEntry\("manual"\);/);
   assert.match(app, /onStart=\{\(\)=>continueCourse\(courseId\)\}/);
   assert.match(course, />Aloita seuraava<\/button>/);
 });

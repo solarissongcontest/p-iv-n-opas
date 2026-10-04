@@ -6,7 +6,20 @@ import { toast, Toaster } from "sonner";
 import { AppShell } from "@/app/AppShell";
 import { coachTriggerLabel, studyNav, type StudyPage } from "@/app/navigation";
 import { isoWeekFromDate } from "@/features/planner/routeDate";
-import { ensureKe04ForCurrentUser, useCourses, useExams, useMistakes, usePlan, usePracticeAttempts, usePreferences, useSessions, useTests, useTopics } from "@/lib/data";
+import {
+  ensureKe04ForCurrentUser,
+  useActiveStudySession,
+  useCourses,
+  useExams,
+  useMistakes,
+  usePlan,
+  usePracticeAttempts,
+  usePreferences,
+  useSessions,
+  useStartActiveStudySession,
+  useTests,
+  useTopics,
+} from "@/lib/data";
 import { longDate, greeting, today } from "@/lib/fi";
 import type { CourseTab } from "@/features/studies/CourseView";
 import type { ProgressSection } from "@/features/progress/ProgressView";
@@ -282,6 +295,8 @@ function StudyApp({ user, initialPage, courseCode, courseTab, examId, progressSe
   const dayRef = useRef(today());
   const [, setDayRevision] = useState(0);
   const coursesQ = useCourses(), topicsQ = useTopics(), sessionsQ = useSessions(), examsQ = useExams(), planQ = usePlan(), testsQ = useTests(), attemptsQ = usePracticeAttempts(), mistakesQ = useMistakes(), preferencesQ = usePreferences();
+  const activeSessionQ = useActiveStudySession();
+  const startActiveSession = useStartActiveStudySession();
   const courses = (coursesQ.data ?? []).filter(c => !c.archived), topics = topicsQ.data ?? [], sessions = sessionsQ.data ?? [], exams = examsQ.data ?? [], plan = planQ.data ?? [];
   const allQueries = [coursesQ, topicsQ, sessionsQ, examsQ, planQ, testsQ, attemptsQ, mistakesQ, preferencesQ];
   const busy = !defaultsReady || allQueries.some(q => q.isPending);
@@ -406,6 +421,60 @@ function StudyApp({ user, initialPage, courseCode, courseTab, examId, progressSe
     }
   };
 
+  const openActiveSession = () => {
+    const active = activeSessionQ.data;
+    if (!active) return;
+    if (active.plan_item_id && plan.some(item => item.id === active.plan_item_id)) {
+      setEntry(active.plan_item_id);
+      return;
+    }
+    setEntry(`active:${active.id}`);
+  };
+
+  const startSession = async (id: string) => {
+    const item = plan.find(candidate => candidate.id === id);
+    if (!item) {
+      setEntry(id);
+      return;
+    }
+
+    try {
+      const active = await startActiveSession.mutateAsync({
+        plan_item_id: item.id,
+        course_id: item.course_id,
+        topic_id: item.topic_id ?? null,
+        target_minutes: item.target_minutes,
+        kind: item.kind==="review"?"review":item.kind==="test"?"test":"study",
+        objective: item.title || topics.find(topic => topic.id === item.topic_id)?.name || "Opiskelu",
+      });
+
+      // During a rolling deploy without the DB migration, preserve the old
+      // local-only study timer instead of blocking the student.
+      if (!active) {
+        setEntry(item.id);
+        return;
+      }
+
+      if (active.plan_item_id && active.plan_item_id !== item.id) {
+        toast.info("Sinulla on jo opiskelukerta käynnissä. Jatketaan sitä.");
+        setEntry(plan.some(candidate=>candidate.id===active.plan_item_id)?active.plan_item_id:`active:${active.id}`);
+        return;
+      }
+
+      if (!active.plan_item_id) {
+        toast.info("Sinulla on jo opiskelukerta käynnissä. Jatketaan sitä.");
+        setEntry(`active:${active.id}`);
+        return;
+      }
+
+      setEntry(item.id);
+    } catch (error) {
+      console.error("[Opintopäiväkirja] Active session start failed", error);
+      toast.info("Yhteistä sessiota ei saatu juuri nyt avattua. Opiskelu jatkuu tällä laitteella.");
+      setEntry(item.id);
+    }
+  };
+
   const continueCourse = (id: string | null) => {
     if (!id) {
       setEntry("manual");
@@ -423,7 +492,8 @@ function StudyApp({ user, initialPage, courseCode, courseTab, examId, progressSe
         if (aPast !== bPast) return aPast - bPast;
         return a.date.localeCompare(b.date) || (a.start_time ?? "").localeCompare(b.start_time ?? "");
       })[0];
-    setEntry(nextItem?.id ?? "manual");
+    if (nextItem) void startSession(nextItem.id);
+    else setEntry("manual");
   };
 
   const goCourse = (id: string) => {
@@ -527,15 +597,24 @@ function StudyApp({ user, initialPage, courseCode, courseTab, examId, progressSe
     </>;
   }
 
-  const focusedSessionItem = entry && entry !== "manual"
+  const focusedSessionItem = entry && entry !== "manual" && !entry.startsWith("active:")
     ? plan.find(item => item.id === entry) ?? null
     : null;
+  const focusedActiveSession =
+    activeSessionQ.data &&
+    (
+      (focusedSessionItem && activeSessionQ.data.plan_item_id === focusedSessionItem.id) ||
+      entry === `active:${activeSessionQ.data.id}`
+    )
+      ? activeSessionQ.data
+      : null;
 
-  if (focusedSessionItem) {
+  if (focusedSessionItem || focusedActiveSession) {
     return <>
       <Suspense fallback={<FeatureFallback/>}>
         <SessionForm
           item={focusedSessionItem}
+          activeSession={focusedActiveSession}
           courses={courses}
           topics={topics}
           sessions={sessions}
@@ -573,6 +652,19 @@ function StudyApp({ user, initialPage, courseCode, courseTab, examId, progressSe
       onSearch={() => { setMoreOpen(false); setSearch(true); }}
       contextualAction={contextualCoach}
     >
+      {activeSessionQ.data && !entry && <button
+        type="button"
+        className="mb-5 flex min-h-16 w-full items-center justify-between gap-4 rounded-2xl border border-primary/30 bg-accent px-4 py-3 text-left"
+        onClick={openActiveSession}
+      >
+        <span className="min-w-0">
+          <b className="block">{activeSessionQ.data.status === "running" ? "Opiskelukerta käynnissä" : "Opiskelukerta tauolla"}</b>
+          <small className="block truncate text-muted-foreground">
+            {courses.find(course => course.id === activeSessionQ.data?.course_id)?.code ?? "Opiskelu"} · {Math.max(1, Math.ceil(activeSessionQ.data.effective_elapsed_seconds / 60))} min · jatka samalla sessiolla
+          </small>
+        </span>
+        <span className="shrink-0 text-sm font-semibold text-primary">Jatka ›</span>
+      </button>}
       {pending>0 && <p role="status" className="mb-5 rounded-xl bg-accent p-3 text-sm">Tallennettu paikallisesti · {pending} muutosta synkronoidaan yhteyden palattua.</p>}
       {error && <div role="alert" className="panel mb-5 p-4"><p className="font-medium">{userFacingError}</p>{pending>0&&<p className="mt-1 text-sm text-muted-foreground">Muutokset synkronoidaan automaattisesti yhteyden palattua.</p>}<button className="mt-3 min-h-11 underline" onClick={()=>{setDefaultsReady(false);setDefaultsError(null);void ensureKe04ForCurrentUser().then(()=>Promise.all([coursesQ.refetch(),topicsQ.refetch(),sessionsQ.refetch(),examsQ.refetch(),planQ.refetch(),testsQ.refetch(),attemptsQ.refetch(),mistakesQ.refetch(),preferencesQ.refetch()])).then(()=>setDefaultsReady(true)).catch(err=>{console.error("[Opintopäiväkirja] Retry failed",err);setDefaultsError("retry_failed");setDefaultsReady(true);});}}>Yritä uudelleen</button></div>}
 
@@ -581,7 +673,7 @@ function StudyApp({ user, initialPage, courseCode, courseTab, examId, progressSe
         {busy ? (showSkeleton ? <div className="space-y-4" role="status" aria-live="polite" aria-label="Ladataan"><div className="h-32 animate-pulse rounded-2xl bg-muted"/><div className="h-60 animate-pulse rounded-2xl bg-muted"/></div> : null) :
         coursesUnavailable ? <section className="panel p-6"><h2 className="text-xl font-semibold">Kurssitietoja ei saatu näkyviin</h2><p className="mt-2 text-muted-foreground">Tämä ei tarkoita, että kurssisi olisivat kadonneet. Yritä latausta uudelleen yllä olevasta ilmoituksesta.</p></section> :
         courses.length===0 ? <section className="panel p-6"><h2 className="text-xl font-semibold">Aloita ensimmäisestä kurssista</h2><p className="mt-2 text-muted-foreground">Lisää kurssi ja sen aiheet, jotta voit suunnitella ja kirjata opiskelua.</p><button onClick={()=>setAdding(true)} className="mt-5 min-h-11 rounded-xl bg-primary px-4 text-primary-foreground">Lisää kurssi</button></section> :
-        page==="today" ? <TodayView courses={courses} topics={topics} sessions={sessions} exams={exams} plan={plan} tests={testsQ.data??[]} attempts={attemptsQ.data??[]} mistakes={mistakesQ.data??[]} capacity={capacity} onStart={setEntry} onGo={go} onPractice={goPractice}/> :
+        page==="today" ? <TodayView courses={courses} topics={topics} sessions={sessions} exams={exams} plan={plan} tests={testsQ.data??[]} attempts={attemptsQ.data??[]} mistakes={mistakesQ.data??[]} capacity={capacity} onStart={id=>void startSession(id)} onGo={go} onPractice={goPractice}/> :
         page==="plan" ? <PlanView
           courses={courses}
           topics={topics}
@@ -590,7 +682,7 @@ function StudyApp({ user, initialPage, courseCode, courseTab, examId, progressSe
           mistakes={mistakesQ.data??[]}
           attempts={attemptsQ.data??[]}
           capacity={capacity}
-          onStart={setEntry}
+          onStart={id=>void startSession(id)}
           initialMode={planMode}
           initialAnchor={planAnchor}
           onPeriodChange={(mode,anchor)=>{

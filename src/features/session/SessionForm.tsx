@@ -14,6 +14,10 @@ import {
   useCreateTopic,
   usePreferences,
   useUpsertPlanItem,
+  usePatchActiveStudySession,
+  useSetActiveStudySessionRunning,
+  useClearActiveStudySession,
+  type ActiveStudySession,
 } from "@/lib/data";
 import type { Course, Exam, PlanItem, PracticeAttempt, Session, Topic } from "@/lib/domain";
 import { TARGET_SYSTEMS } from "@/lib/domain";
@@ -25,27 +29,37 @@ import { relationLabel } from "@/lib/ui-fi";
 
 import { Dialog, button, input, secondary } from "@/features/shared/DialogPrimitives";
 
-export function SessionForm({item,courses,topics,sessions=[],attempts=[],presentation="dialog",onClose}:{item:PlanItem|null;courses:Course[];topics:Topic[];sessions?:Session[];attempts?:PracticeAttempt[];presentation?:"dialog"|"focus";onClose:()=>void}) {
- const initialCourse=item?.course_id??courses[0]?.id??"";
- const initialTopic=item?.topic_id??"";
- const [guided,setGuided]=useState(!!item);
- const [step,setStep]=useState(item?1:0);
+export function SessionForm({item,activeSession=null,courses,topics,sessions=[],attempts=[],presentation="dialog",onClose}:{item:PlanItem|null;activeSession?:ActiveStudySession|null;courses:Course[];topics:Topic[];sessions?:Session[];attempts?:PracticeAttempt[];presentation?:"dialog"|"focus";onClose:()=>void}) {
+ const initialCourse=activeSession?.course_id??item?.course_id??courses[0]?.id??"";
+ const initialTopic=activeSession?.topic_id??item?.topic_id??"";
+ const hasGuidedSession=Boolean(item||activeSession);
+ const initialTargetMinutes=activeSession?.target_minutes??item?.target_minutes??30;
+ const initialRunning=activeSession?activeSession.status==="running":Boolean(item);
+ const initialElapsed=activeSession?.effective_elapsed_seconds??0;
+ const [guided,setGuided]=useState(hasGuidedSession);
+ const [step,setStep]=useState(activeSession?.phase??(item?1:0));
  const [courseId,setCourseId]=useState(initialCourse),[topicId,setTopicId]=useState(initialTopic);
- const [seconds,setSeconds]=useState(0),[running,setRunning]=useState(!!item);
- const runStartedAt=useRef<number|null>(item?Date.now():null);
- const accumulatedSeconds=useRef(0);
+ const [seconds,setSeconds]=useState(initialElapsed),[running,setRunning]=useState(initialRunning);
+ const runStartedAt=useRef<number|null>(initialRunning?Date.now():null);
+ const accumulatedSeconds=useRef(initialElapsed);
+ const hydratedActiveId=useRef<string|null>(null);
  const [timerMode,setTimerMode]=useState<"none"|"20"|"30"|"custom">(
-   !item?"none":item.target_minutes===20?"20":item.target_minutes===30?"30":"custom"
+   !hasGuidedSession?"none":initialTargetMinutes===20?"20":initialTargetMinutes===30?"30":"custom"
  );
- const [customMinutes,setCustomMinutes]=useState(item?.target_minutes??30),[actualMinutes,setActualMinutes]=useState(item?.target_minutes??30);
- const [objective,setObjective]=useState(item?.title||""),[recall,setRecall]=useState(""),[retrievalCheck,setRetrievalCheck]=useState("");
- const [retrievalResult,setRetrievalResult]=useState<"independent"|"hinted"|"not_yet"|null>(null);
- const [retrievalConfidence,setRetrievalConfidence]=useState<number|null>(null);
- const [outcome,setOutcome]=useState<"yes"|"partial"|"not_yet"|null>(null);
- const [competence,setCompetence]=useState(3),[did,setDid]=useState(""),[unclear,setUnclear]=useState(""),[note,setNote]=useState("");
- const [method,setMethod]=useState("tehtävät"),[tasks,setTasks]=useState("");
+ const [customMinutes,setCustomMinutes]=useState(initialTargetMinutes),[actualMinutes,setActualMinutes]=useState(initialTargetMinutes);
+ const [objective,setObjective]=useState(activeSession?.objective||item?.title||""),[recall,setRecall]=useState(activeSession?.recall??""),[retrievalCheck,setRetrievalCheck]=useState(activeSession?.retrieval_check??"");
+ const [retrievalResult,setRetrievalResult]=useState<"independent"|"hinted"|"not_yet"|null>(activeSession?.retrieval_result??null);
+ const [retrievalConfidence,setRetrievalConfidence]=useState<number|null>(activeSession?.retrieval_confidence??null);
+ const [outcome,setOutcome]=useState<"yes"|"partial"|"not_yet"|null>(
+   activeSession?.retrieval_result==="independent"?"yes":activeSession?.retrieval_result==="hinted"?"partial":activeSession?.retrieval_result==="not_yet"?"not_yet":null
+ );
+ const [competence,setCompetence]=useState(activeSession?.retrieval_result==="independent"?4:activeSession?.retrieval_result==="hinted"?3:activeSession?.retrieval_result==="not_yet"?2:3),[did,setDid]=useState(activeSession?.did??""),[unclear,setUnclear]=useState(activeSession?.unclear??""),[note,setNote]=useState(activeSession?.note??"");
+ const [method,setMethod]=useState(activeSession?.method||"tehtävät"),[tasks,setTasks]=useState(activeSession?.tasks??"");
  const log=useLogSession();
  const preferences=usePreferences();
+ const patchActive=usePatchActiveStudySession();
+ const setActiveRunning=useSetActiveStudySessionRunning();
+ const clearActive=useClearActiveStudySession();
  const experimentApplied=useRef(false);
  const course=courses.find(c=>c.id===courseId),topic=topics.find(t=>t.id===topicId);
  const fatigue=sessionFatigueV4(sessions,attempts);
@@ -62,11 +76,67 @@ export function SessionForm({item,courses,topics,sessions=[],attempts=[],present
    : "Sulje materiaalit. Kirjoita tärkeimmät asiat, jotka pystyt nyt palauttamaan muistista.";
 
  useEffect(()=>{
-   if(experimentApplied.current||preferences.data?.personal_experiments_enabled!==true||item)return;
+   if(experimentApplied.current||preferences.data?.personal_experiments_enabled!==true||item||activeSession)return;
    setTimerMode("custom");
    setCustomMinutes(experimentMinutes);
    experimentApplied.current=true;
- },[experimentMinutes,item,preferences.data?.personal_experiments_enabled]);
+ },[activeSession,experimentMinutes,item,preferences.data?.personal_experiments_enabled]);
+
+ useEffect(()=>{
+   if(!activeSession)return;
+
+   const canonicalElapsed=Math.max(0,activeSession.effective_elapsed_seconds);
+   accumulatedSeconds.current=canonicalElapsed;
+   runStartedAt.current=activeSession.status==="running"?Date.now():null;
+   setSeconds(canonicalElapsed);
+   setRunning(activeSession.status==="running");
+
+   if(hydratedActiveId.current===activeSession.id)return;
+   hydratedActiveId.current=activeSession.id;
+   setGuided(true);
+   setStep(activeSession.phase);
+   setCourseId(activeSession.course_id);
+   setTopicId(activeSession.topic_id??"");
+   setCustomMinutes(activeSession.target_minutes);
+   setActualMinutes(activeSession.target_minutes);
+   setTimerMode(activeSession.target_minutes===20?"20":activeSession.target_minutes===30?"30":"custom");
+   setObjective(activeSession.objective);
+   setRecall(activeSession.recall);
+   setRetrievalCheck(activeSession.retrieval_check);
+   setRetrievalResult(activeSession.retrieval_result);
+   setRetrievalConfidence(activeSession.retrieval_confidence);
+   setDid(activeSession.did);
+   setUnclear(activeSession.unclear);
+   setNote(activeSession.note);
+   setMethod(activeSession.method||"tehtävät");
+   setTasks(activeSession.tasks);
+   if(activeSession.retrieval_result==="independent"){setOutcome("yes");setCompetence(4);}
+   else if(activeSession.retrieval_result==="hinted"){setOutcome("partial");setCompetence(3);}
+   else if(activeSession.retrieval_result==="not_yet"){setOutcome("not_yet");setCompetence(2);}
+ },[activeSession]);
+
+ useEffect(()=>{
+   if(!activeSession?.id||hydratedActiveId.current!==activeSession.id)return;
+   const timeout=window.setTimeout(()=>{
+     patchActive.mutate({
+       id:activeSession.id,
+       patch:{
+         phase:step,
+         objective,
+         recall,
+         did,
+         retrieval_check:retrievalCheck,
+         retrieval_result:retrievalResult,
+         retrieval_confidence:retrievalConfidence,
+         unclear,
+         note,
+         method,
+         tasks,
+       },
+     });
+   },700);
+   return()=>window.clearTimeout(timeout);
+ },[activeSession?.id,did,method,note,objective,recall,retrievalCheck,retrievalConfidence,retrievalResult,step,tasks,unclear]);
 
  function currentElapsedSeconds(){
    const live=runStartedAt.current===null?0:Math.max(0,Math.floor((Date.now()-runStartedAt.current)/1000));
@@ -79,15 +149,43 @@ export function SessionForm({item,courses,topics,sessions=[],attempts=[],present
    runStartedAt.current=null;
    setSeconds(next);
    setRunning(false);
+   if(activeSession?.id){
+     void setActiveRunning.mutateAsync({id:activeSession.id,running:false})
+       .catch(error=>console.error("[Opintopäiväkirja] Active session pause sync failed",error));
+   }
  }
 
  function resumeTimer(){
    if(runStartedAt.current===null)runStartedAt.current=Date.now();
    setRunning(true);
+   if(activeSession?.id){
+     void setActiveRunning.mutateAsync({id:activeSession.id,running:true})
+       .catch(error=>console.error("[Opintopäiväkirja] Active session resume sync failed",error));
+   }
  }
 
  function toggleTimer(){
    if(running)pauseTimer();else resumeTimer();
+ }
+
+ function persistActivePhase(nextStep:number){
+   if(!activeSession?.id)return;
+   patchActive.mutate({
+     id:activeSession.id,
+     patch:{
+       phase:nextStep,
+       objective,
+       recall,
+       did,
+       retrieval_check:retrievalCheck,
+       retrieval_result:retrievalResult,
+       retrieval_confidence:retrievalConfidence,
+       unclear,
+       note,
+       method,
+       tasks,
+     },
+   });
  }
 
  useEffect(()=>{
@@ -143,9 +241,9 @@ export function SessionForm({item,courses,topics,sessions=[],attempts=[],present
        course_id:courseId,topic_id:topicId||null,
        minutes:Math.max(1,actualMinutes),
        planned_minutes:item?.target_minutes??actualMinutes,
-       kind:item?.kind==="review"?"review":item?.kind==="test"?"test":"study",
+       kind:activeSession?.kind??(item?.kind==="review"?"review":item?.kind==="test"?"test":"study"),
        competence,did,unclear,note,focus:null,energy:null,method,tasks,
-       plan_item_id:item?.id??null
+       plan_item_id:item?.id??activeSession?.plan_item_id??null
      });
      toast.success(result==="queued"?"Tallennettu paikallisesti · synkataan myöhemmin.":"Opiskelu kirjattu.");
      onClose();
@@ -166,10 +264,10 @@ export function SessionForm({item,courses,topics,sessions=[],attempts=[],present
        course_id:courseId,topic_id:topicId||null,
        minutes:minutesUsed,
        planned_minutes:item?.target_minutes??targetMinutes,
-       kind:item?.kind==="review"?"review":item?.kind==="test"?"test":"study",
+       kind:activeSession?.kind??(item?.kind==="review"?"review":item?.kind==="test"?"test":"study"),
        competence,did,unclear,note,focus:null,energy:null,
        method:method||"ohjattu opiskelukerta",tasks,
-       plan_item_id:item?.id??null,
+       plan_item_id:item?.id??activeSession?.plan_item_id??null,
        objective:objective.trim(),
        recall:recall.trim()||null,
        retrieval_check:retrievalCheck.trim(),
@@ -177,6 +275,9 @@ export function SessionForm({item,courses,topics,sessions=[],attempts=[],present
        retrieval_confidence:retrievalConfidence,
        outcome:finalOutcome,
      });
+     if(activeSession?.id&&result!=="queued"){
+       await clearActive.mutateAsync(activeSession.id).catch(()=>undefined);
+     }
      toast.success(result==="queued"?"Opiskelukerta tallennettu paikallisesti.":"Opiskelukerta tallennettu.");
      onClose();
    }catch{toast.error("Opiskelukertaa ei voitu tallentaa. Tiedot eivät katoa, jos yhteys katkesi.");}
@@ -222,7 +323,7 @@ export function SessionForm({item,courses,topics,sessions=[],attempts=[],present
        <button type="button" disabled={log.isPending||!retrievalResult||!answerHasContent(retrievalCheck)} className={button+" w-full"} onClick={()=>void submitGuided()}><Check size={18}/>{log.isPending?"Tallennetaan…":"Valmis"}</button>
      </div>}
 
-     <div className="flex items-center justify-between gap-3 border-t border-border pt-4">{step>0?<button type="button" className={secondary} onClick={()=>{if(step===1)pauseTimer();if(step===4&&timerMode!=="none")resumeTimer();setStep(v=>Math.max(0,v-1));}}>Takaisin</button>:<span/>}{step<4&&<button type="button" className={button} disabled={step===0&&!objective.trim()||step===3&&!answerHasContent(retrievalCheck)} onClick={()=>{if((step===0||step===1)&&timerMode!=="none"&&!running)resumeTimer();if(step===3)pauseTimer();setStep(v=>Math.min(4,v+1));}}>Jatka</button>}</div>
+     <div className="flex items-center justify-between gap-3 border-t border-border pt-4">{step>0?<button type="button" className={secondary} onClick={()=>{const next=Math.max(0,step-1);if(step===1)pauseTimer();if(step===4&&timerMode!=="none")resumeTimer();setStep(next);persistActivePhase(next);}}>Takaisin</button>:<span/>}{step<4&&<button type="button" className={button} disabled={step===0&&!objective.trim()||step===3&&!answerHasContent(retrievalCheck)} onClick={()=>{const next=Math.min(4,step+1);if((step===0||step===1)&&timerMode!=="none"&&!running)resumeTimer();if(step===3)pauseTimer();setStep(next);persistActivePhase(next);}}>Jatka</button>}</div>
    </div>}
  </>;
  const title=guided?"Ohjattu opiskelukerta":"Kirjaa opiskelu";
@@ -233,7 +334,7 @@ export function SessionForm({item,courses,topics,sessions=[],attempts=[],present
          <p className="text-xs font-semibold uppercase tracking-wide text-primary">{course?.code??"Opiskelukerta"}</p>
          <h1 className="mt-1 truncate text-xl font-semibold">{item?.title||topic?.name||title}</h1>
        </div>
-       <button type="button" className={secondary+" shrink-0"} onClick={()=>{pauseTimer();onClose();}}><X size={17}/>Lopeta opiskelukerta</button>
+       <button type="button" className={secondary+" shrink-0"} onClick={()=>{persistActivePhase(step);onClose();}}><X size={17}/>Sulje näkymä</button>
      </header>
      <main className="study-session-focus-main">{body}</main>
    </div>;

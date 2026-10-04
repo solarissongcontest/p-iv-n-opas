@@ -169,6 +169,34 @@ export type ExamSimulationRow = {
   created_at: string;
 };
 
+export type ActiveStudySession = {
+  id: string;
+  owner_id: string;
+  plan_item_id: string | null;
+  course_id: string;
+  topic_id: string | null;
+  target_minutes: number;
+  kind: "study" | "review" | "test";
+  phase: number;
+  objective: string;
+  recall: string;
+  did: string;
+  retrieval_check: string;
+  retrieval_result: "independent" | "hinted" | "not_yet" | null;
+  retrieval_confidence: number | null;
+  unclear: string;
+  note: string;
+  method: string;
+  tasks: string;
+  status: "running" | "paused";
+  elapsed_seconds: number;
+  running_since: string | null;
+  created_at: string;
+  updated_at: string;
+  effective_elapsed_seconds: number;
+  server_now: string;
+};
+
 export type UserPreferences = {
   owner_id: string;
   display_name: string;
@@ -475,6 +503,29 @@ async function listSubjectTaskParameters(): Promise<SubjectTaskParameterV5[]> {
   return (data ?? []) as SubjectTaskParameterV5[];
 }
 
+function activeStudySessionSchemaMissing(error: any) {
+  return Boolean(
+    error && (
+      error.code === "PGRST202" ||
+      error.code === "PGRST205" ||
+      error.code === "42P01" ||
+      error.code === "42883" ||
+      /active_study_session|schema cache|could not find the function|relation/i.test(error.message ?? "")
+    )
+  );
+}
+
+async function getActiveStudySession(): Promise<ActiveStudySession | null> {
+  const { data, error } = await untypedSupabase.rpc("active_study_session_snapshot");
+  if (error) {
+    // Safe rolling deploy: old production schemas keep using the local timer
+    // until the migration lands.
+    if (activeStudySessionSchemaMissing(error)) return null;
+    throw error;
+  }
+  return (data ?? null) as ActiveStudySession | null;
+}
+
 async function getPreferences(): Promise<UserPreferences | null> {
   const { data, error } = await untypedSupabase
     .from("user_preferences")
@@ -503,6 +554,15 @@ export const useQuestionUserState = () =>
 export const useSettings = () => useQuery({ queryKey: ["settings"], queryFn: offlineQuery("settings", getSettings) });
 export const usePreferences = () =>
   useQuery({ queryKey: ["preferences"], queryFn: offlineQuery("preferences", getPreferences) });
+export const useActiveStudySession = () =>
+  useQuery({
+    queryKey: ["active-study-session"],
+    queryFn: getActiveStudySession,
+    refetchInterval: 5_000,
+    refetchIntervalInBackground: false,
+    staleTime: 1_000,
+    retry: 1,
+  });
 export const useTopicDependencies = () =>
   useQuery({ queryKey: ["topic-dependencies"], queryFn: offlineQuery("topic-dependencies", listTopicDependencies) });
 export const useStudyMaterials = () =>
@@ -1064,7 +1124,7 @@ registerOp("upsertLearningPolicyState", doUpsertLearningPolicyState);
 function useInvalidateAll() {
   const qc = useQueryClient();
   return () =>
-    ["courses", "topics", "sessions", "exams", "plan", "mistakes", "tests", "practice-attempts", "question-bank", "question-user-state", "settings", "preferences", "weekly-checkins", "progress-events", "topic-dependencies", "study-materials", "learning-experiments", "learning-policy-states", "calibration-observations", "friction-events", "implementation-intentions", "exam-simulations", "pretest-attempts", "reminder-adaptation", "subject-task-parameters"].forEach(
+    ["courses", "topics", "sessions", "exams", "plan", "mistakes", "tests", "practice-attempts", "question-bank", "question-user-state", "settings", "preferences", "weekly-checkins", "progress-events", "topic-dependencies", "study-materials", "learning-experiments", "learning-policy-states", "calibration-observations", "friction-events", "implementation-intentions", "exam-simulations", "pretest-attempts", "reminder-adaptation", "subject-task-parameters", "active-study-session"].forEach(
       (k) => qc.invalidateQueries({ queryKey: [k] }),
     );
 }
@@ -1076,6 +1136,115 @@ export function useLogSession() {
     onSuccess: invalidate,
   });
 }
+
+export type StartActiveStudySessionInput = {
+  plan_item_id: string | null;
+  course_id: string;
+  topic_id: string | null;
+  target_minutes: number;
+  kind: "study" | "review" | "test";
+  objective: string;
+};
+
+export type ActiveStudySessionPatch = Partial<Pick<
+  ActiveStudySession,
+  | "phase"
+  | "objective"
+  | "recall"
+  | "did"
+  | "retrieval_check"
+  | "retrieval_result"
+  | "retrieval_confidence"
+  | "unclear"
+  | "note"
+  | "method"
+  | "tasks"
+>>;
+
+export function useStartActiveStudySession() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (input: StartActiveStudySessionInput) => {
+      const { error } = await untypedSupabase.rpc("start_active_study_session", {
+        p_plan_item_id: input.plan_item_id,
+        p_course_id: input.course_id,
+        p_topic_id: input.topic_id,
+        p_target_minutes: Math.max(1, Math.min(240, input.target_minutes)),
+        p_kind: input.kind,
+        p_objective: input.objective,
+      });
+      if (error) {
+        if (activeStudySessionSchemaMissing(error)) return null;
+        throw error;
+      }
+      return getActiveStudySession();
+    },
+    onSuccess: (session) => {
+      qc.setQueryData(["active-study-session"], session);
+      void qc.invalidateQueries({ queryKey: ["active-study-session"] });
+    },
+  });
+}
+
+export function usePatchActiveStudySession() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, patch }: { id: string; patch: ActiveStudySessionPatch }) => {
+      const { error } = await untypedSupabase
+        .from("active_study_sessions")
+        .update(patch)
+        .eq("id", id);
+      if (error) {
+        if (activeStudySessionSchemaMissing(error)) return null;
+        throw error;
+      }
+      return getActiveStudySession();
+    },
+    onSuccess: (session) => {
+      if (session) qc.setQueryData(["active-study-session"], session);
+    },
+  });
+}
+
+export function useSetActiveStudySessionRunning() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, running }: { id: string; running: boolean }) => {
+      const { error } = await untypedSupabase.rpc("set_active_study_session_running", {
+        p_session_id: id,
+        p_running: running,
+      });
+      if (error) {
+        if (activeStudySessionSchemaMissing(error)) return null;
+        throw error;
+      }
+      return getActiveStudySession();
+    },
+    onSuccess: (session) => {
+      qc.setQueryData(["active-study-session"], session);
+      void qc.invalidateQueries({ queryKey: ["active-study-session"] });
+    },
+  });
+}
+
+export function useClearActiveStudySession() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await untypedSupabase
+        .from("active_study_sessions")
+        .delete()
+        .eq("id", id);
+      if (error && !activeStudySessionSchemaMissing(error)) throw error;
+      return true;
+    },
+    onSuccess: () => {
+      qc.setQueryData(["active-study-session"], null);
+      void qc.invalidateQueries({ queryKey: ["active-study-session"] });
+    },
+  });
+}
+
 
 
 export function useRecordPracticeAttempt() {
