@@ -1,0 +1,26 @@
+name: Verify Live KE04 V3
+
+on:
+  push:
+    branches:
+      - verify-ke04-v3-production-live
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      E2E_BASE_URL: https://opiskelupaivakirja.vercel.app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install --no-audit --no-fund
+      - run: npm run e2e:install
+      - run: npx playwright install --with-deps chromium
+      - name: Verify KE04 V3 in production
+        run: npx playwright test e2e/ke04-live-verification.spec.ts --project=desktop-chromium
