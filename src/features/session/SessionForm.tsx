@@ -92,7 +92,10 @@ export function SessionForm({item,courses,topics,sessions=[],attempts=[],present
 
  useEffect(()=>{
    if(!running)return;
-   const tick=()=>setSeconds(currentElapsedSeconds());
+   const tick=()=>{
+     const live=runStartedAt.current===null?0:Math.max(0,Math.floor((Date.now()-runStartedAt.current)/1000));
+     setSeconds(accumulatedSeconds.current+live);
+   };
    tick();
    const id=window.setInterval(tick,1000);
    document.addEventListener("visibilitychange",tick);
