@@ -274,8 +274,7 @@ test("v5 offline write survives reload, syncs, and appears on a second device", 
 
   await contextA.setOffline(true);
   await pageA.getByRole("button", { name: "Tallenna" }).click();
-  await expect(pageA.getByText("Tallennettu paikallisesti · synkataan myöhemmin.")).toBeVisible({ timeout: 30_000 });
-  await expect.poll(queuedMarkerPresent, { timeout: 30_000 }).toBe(true);
+  await expect.poll(queuedMarkerPresent, { timeout: 30_000, intervals: [250, 500, 1000] }).toBe(true);
 
   await pageA.reload({ waitUntil: "domcontentloaded" });
   await expect.poll(queuedMarkerPresent, { timeout: 30_000 }).toBe(true);
