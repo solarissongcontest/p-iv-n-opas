@@ -549,7 +549,7 @@ function bankQuestion(item: QuestionBankItem): PracticeQuestion {
     reserveForExam: item.reserve_for_exam ?? false,
     examEligible: item.exam_eligible ?? true,
     scoringGuide: item.scoring_guide ?? null,
-    answerMode: item.answer_mode,
+    ...(item.answer_mode ? { answerMode: item.answer_mode } : {}),
     points: item.points ?? null,
     source: "bank",
     bankId: item.id,
