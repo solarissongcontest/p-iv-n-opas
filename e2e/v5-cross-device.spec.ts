@@ -1,24 +1,5 @@
 import { expect, test, type BrowserContext, type Page } from "@playwright/test";
-
-async function enterApp(page: Page) {
-  await page.goto("/", { waitUntil: "domcontentloaded" });
-
-  const username = page.getByLabel("Käyttäjänimi");
-  if (await username.isVisible().catch(() => false)) {
-    await username.fill("Arthur");
-    await page.getByRole("button", { name: "Jatka" }).click();
-  }
-
-  const onboardingHeading = page.getByRole("heading", { name: /Tervetuloa, Arthur/i });
-  if (await onboardingHeading.isVisible().catch(() => false)) {
-    await page.getByRole("button", { name: /Jatka/i }).click();
-    await page.getByRole("button", { name: /Jatka/i }).click();
-    await page.getByRole("button", { name: /Jatka/i }).click();
-    await page.getByRole("button", { name: /Avaa Tänään/i }).click();
-  }
-
-  await expect(page.getByRole("button", { name: "Tänään" })).toBeVisible();
-}
+import { enterApp } from "./helpers";
 
 async function waitForServiceWorker(page: Page) {
   await page.evaluate(async () => {
