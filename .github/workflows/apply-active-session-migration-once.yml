@@ -1,0 +1,74 @@
+name: Apply active study session migration once
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/run-active-session-migration-20261004"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-database-migrations
+  cancel-in-progress: false
+
+jobs:
+  migrate:
+    name: Apply guarded production migration
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      POSTGRES_URL: ${{ secrets.POSTGRES_URL }}
+      EXPECTED_MIGRATION: "20261004143000_active_study_session_cross_device.sql"
+      EXPECTED_VERSION: "20261004143000"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Canonical repository guard
+        run: node scripts/assert-canonical-repo.mjs
+
+      - name: Validate production database secret
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -z "${POSTGRES_URL:-}" ]; then
+            echo "::error::POSTGRES_URL repository secret is not configured."
+            exit 1
+          fi
+          python3 - <<'PY'
+          import os
+          from urllib.parse import urlparse
+          parsed = urlparse(os.environ["POSTGRES_URL"])
+          if parsed.scheme not in {"postgres", "postgresql"} or not parsed.hostname:
+              raise SystemExit("::error::POSTGRES_URL is not a valid PostgreSQL connection URL.")
+          print(f"Database target host: {parsed.hostname}")
+          PY
+
+      - name: Guard pending migrations
+        shell: bash
+        run: |
+          set -euo pipefail
+          DRY_RUN="$(npx --yes supabase@2.117.0 db push --db-url "$POSTGRES_URL" --dry-run 2>&1)"
+          printf '%s\n' "$DRY_RUN"
+          PENDING="$(printf '%s\n' "$DRY_RUN" | grep -oE '[0-9]{14}_[A-Za-z0-9_.-]+\.sql' | sort -u || true)"
+          if [ "$PENDING" != "$EXPECTED_MIGRATION" ]; then
+            echo "::error::Refusing production migration. Expected only $EXPECTED_MIGRATION, found: ${PENDING:-none/unrecognized}."
+            exit 1
+          fi
+
+      - name: Apply expected migration
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx --yes supabase@2.117.0 db push --db-url "$POSTGRES_URL"
+
+      - name: Verify production migration history
+        shell: bash
+        run: |
+          set -euo pipefail
+          HISTORY="$(npx --yes supabase@2.117.0 migration list --db-url "$POSTGRES_URL" 2>&1)"
+          printf '%s\n' "$HISTORY"
+          printf '%s\n' "$HISTORY" | grep -q "$EXPECTED_VERSION"
