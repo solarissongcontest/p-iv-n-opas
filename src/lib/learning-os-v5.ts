@@ -1921,7 +1921,7 @@ export function buildExamSimulationV5(input:{course:Course;topics:Topic[];questi
     courseId:input.course.id,
     mode,
     maxTasks:tasks.length,
-    maxSelected:mode==="full"?Math.min(15,tasks.length):tasks.length,
+    maxSelected:mode==="full"?Math.min(7,tasks.length):tasks.length,
     maxPoints:120,
     durationMinutes:mode==="full"?360:90,
     feedbackTiming:"after_block",
