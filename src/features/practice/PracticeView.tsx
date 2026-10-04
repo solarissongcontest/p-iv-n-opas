@@ -41,7 +41,7 @@ import {
   useUpsertLearningPolicyState,
 } from "@/lib/data";
 import { getDeviceAccessToken } from "@/lib/deviceSession";
-import { ensureKe04QuestionBankSeed } from "@/lib/ke04-question-bank.client";
+import { ensureKe04QuestionBankSeed } from "@/lib/ke04-question-bank-browser";
 import { addDays, fullDate, today } from "@/lib/fi";
 import { attemptTypeLabel, confidenceLabel } from "@/lib/ui-fi";
 import {
