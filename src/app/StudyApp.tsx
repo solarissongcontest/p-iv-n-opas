@@ -444,6 +444,7 @@ function StudyApp({ user, initialPage, courseCode, courseTab, examId, progressSe
         course_id: item.course_id,
         topic_id: item.topic_id ?? null,
         target_minutes: item.target_minutes,
+        kind: item.kind==="review"?"review":item.kind==="test"?"test":"study",
         objective: item.title || topics.find(topic => topic.id === item.topic_id)?.name || "Opiskelu",
       });
 
@@ -456,7 +457,7 @@ function StudyApp({ user, initialPage, courseCode, courseTab, examId, progressSe
 
       if (active.plan_item_id && active.plan_item_id !== item.id) {
         toast.info("Sinulla on jo opiskelukerta käynnissä. Jatketaan sitä.");
-        setEntry(active.plan_item_id);
+        setEntry(plan.some(candidate=>candidate.id===active.plan_item_id)?active.plan_item_id:`active:${active.id}`);
         return;
       }
 
