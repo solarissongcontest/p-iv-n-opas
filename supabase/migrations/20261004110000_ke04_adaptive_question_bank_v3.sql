@@ -27,8 +27,8 @@ alter table public.question_bank
   add constraint question_bank_matching_pairs_check
     check (jsonb_typeof(matching_pairs) = 'array');
 
-create unique index if not exists question_bank_owner_source_ref_uidx
-  on public.question_bank(owner_id, source_ref);
+create unique index if not exists question_bank_owner_module_content_uidx
+  on public.question_bank(owner_id, module_code, content_id);
 create index if not exists question_bank_ke04_seed_idx
   on public.question_bank(owner_id, module_code, seed_version, status);
 create index if not exists question_bank_exam_pool_idx
