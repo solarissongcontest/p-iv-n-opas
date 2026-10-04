@@ -1857,12 +1857,78 @@ function questionAnswerModeV5(item:QuestionBankItem):ExamSimulationTaskV5["answe
 }
 function questionPointsV5(item:QuestionBankItem){const n=Number(item.points??item.metadata?.["points"]??0);return Number.isFinite(n)&&n>0?Math.min(30,Math.max(2,Math.round(n))):item.difficulty>=5?20:item.difficulty>=4?18:item.difficulty>=3?16:12;}
 
-export function buildExamSimulationV5(input:{course:Course;topics:Topic[];questions:QuestionBankItem[];mode?:"practice"|"full"}):ExamSimulationV5{
+function examQuestionId(attempt:PracticeAttempt){
+  return String(attempt.question_payload?.["questionBankId"]??"");
+}
+
+export function buildExamSimulationV5(input:{course:Course;topics:Topic[];questions:QuestionBankItem[];attempts?:PracticeAttempt[];mode?:"practice"|"full"}):ExamSimulationV5{
   const mode=input.mode??"full", topicIds=new Set(input.topics.map(t=>t.id));
-  const candidates=input.questions.filter(q=>q.course_id===input.course.id).filter(q=>q.topic_id===null||topicIds.has(q.topic_id)).sort((a,b)=>b.difficulty-a.difficulty||a.created_at.localeCompare(b.created_at));
-  const desired=mode==="full"?11:Math.min(6,candidates.length);
-  const tasks=candidates.slice(0,desired).map((item,index)=>({id:item.id,title:`Tehtävä ${index+1}`,topicId:item.topic_id,points:questionPointsV5(item),answerMode:questionAnswerModeV5(item),stimulus:(item.stimulus_package??item.metadata?.["stimulusPackage"]??null) as Record<string,unknown>|null}));
-  return{courseId:input.course.id,mode,maxTasks:tasks.length,maxSelected:mode==="full"?Math.min(7,tasks.length):tasks.length,maxPoints:120,durationMinutes:mode==="full"?360:90,feedbackTiming:"after_block",hintsAllowed:false,masteryHidden:true,tasks};
+  const attempts=(input.attempts??[]).filter(attempt=>attempt.course_id===input.course.id);
+  const seen=new Set(attempts.map(examQuestionId).filter(Boolean));
+  const recent=new Set(attempts.slice(0,60).map(examQuestionId).filter(Boolean));
+  const topicImportance=new Map(input.topics.map(topic=>[topic.id,Number(topic.importance??3)]));
+  const candidates=input.questions
+    .filter(q=>
+      q.course_id===input.course.id &&
+      (q.topic_id===null||topicIds.has(q.topic_id)) &&
+      q.exam_eligible!==false &&
+      q.question_type!=="matching" &&
+      (q.status==="active"||q.status==="validated")
+    )
+    .map(item=>{
+      const unseen=!seen.has(item.id);
+      const reserve=item.reserve_for_exam===true;
+      const priority=reserve&&unseen?0:unseen?1:recent.has(item.id)?3:2;
+      const importance=item.topic_id?topicImportance.get(item.topic_id)??3:3;
+      const difficultyFit=mode==="full"?Math.abs(4-Number(item.difficulty)):Math.abs(3-Number(item.difficulty));
+      return{item,priority,importance,difficultyFit};
+    })
+    .sort((a,b)=>
+      a.priority-b.priority ||
+      b.importance-a.importance ||
+      a.difficultyFit-b.difficultyFit ||
+      b.item.difficulty-a.item.difficulty ||
+      a.item.created_at.localeCompare(b.item.created_at)
+    );
+
+  const desired=mode==="full"?18:Math.min(8,candidates.length);
+  const selected:QuestionBankItem[]=[];
+  const used=new Set<string>();
+
+  // First pass maximizes topic coverage instead of letting one large topic eat the exam.
+  for(const row of candidates){
+    if(selected.length>=desired)break;
+    const key=row.item.topic_id??"course";
+    if(used.has(key))continue;
+    selected.push(row.item); used.add(key);
+  }
+  for(const row of candidates){
+    if(selected.length>=desired)break;
+    if(selected.some(item=>item.id===row.item.id))continue;
+    selected.push(row.item);
+  }
+
+  const tasks=selected.map((item,index)=>({
+    id:item.id,
+    title:`Tehtävä ${index+1}`,
+    topicId:item.topic_id,
+    points:questionPointsV5(item),
+    answerMode:questionAnswerModeV5(item),
+    stimulus:(item.stimulus_package??item.metadata?.["stimulusPackage"]??null) as Record<string,unknown>|null,
+    selected:false,
+  }));
+  return{
+    courseId:input.course.id,
+    mode,
+    maxTasks:tasks.length,
+    maxSelected:mode==="full"?Math.min(15,tasks.length):tasks.length,
+    maxPoints:120,
+    durationMinutes:mode==="full"?360:90,
+    feedbackTiming:"after_block",
+    hintsAllowed:false,
+    masteryHidden:true,
+    tasks
+  };
 }
 
 export function reviewTaskSelectionV5(input:{simulation:ExamSimulationV5;selectedTaskIds:string[];completedTaskIds:string[];scores:Record<string,number>}){
