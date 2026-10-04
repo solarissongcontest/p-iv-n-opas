@@ -37,7 +37,7 @@ const SearchPanel = lazy(() => import("@/features/search/SearchPanel").then(modu
 const AICoach = lazy(() => import("@/components/AICoach").then(module => ({ default: module.AICoach })));
 
 function FeatureFallback() {
-  return <div className="space-y-3" aria-label="Ladataan näkymää"><div className="h-24 animate-pulse rounded-2xl bg-muted"/><div className="h-40 animate-pulse rounded-2xl bg-muted"/></div>;
+  return <div className="space-y-3" role="status" aria-live="polite" aria-label="Ladataan näkymää"><div className="h-24 animate-pulse rounded-2xl bg-muted"/><div className="h-40 animate-pulse rounded-2xl bg-muted"/></div>;
 }
 
 async function getArthurSession(previousOwnerId?: string | null): Promise<DeviceUser> {
