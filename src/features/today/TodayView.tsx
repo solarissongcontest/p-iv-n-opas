@@ -250,7 +250,7 @@ export function TodayView({courses,topics,sessions,exams,plan,tests,attempts,mis
         {adaptiveDay.stoppedForLowMarginalGain&&<p className="mt-2">Tähän on hyvä lopettaa tältä erää: seuraavasta tehtävästä arvioidaan saatavan selvästi vähemmän hyötyä käytettyyn aikaan nähden.</p>}
       </details>
       <div className="mt-5 flex flex-wrap gap-2">
-        <button className={button} onClick={()=>startChosen(nextAction)}>Aloita</button>
+        <button className={button} onClick={()=>startChosen(nextAction)}>{nextAction.planItem?"Aloita opiskelu nyt":"Aloita harjoittelu"}</button>
         {next&&<button disabled={move.isPending} className={secondary} onClick={()=>void cannotToday()}>En ehdi tänään</button>}
       </div>
       <details className="mt-4 rounded-xl border border-border bg-surface/60 p-3">
