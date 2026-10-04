@@ -145,7 +145,7 @@ export async function handleKe04QuestionBankSeed(request: Request): Promise<Resp
   for (let index = 0; index < rows.length; index += 100) {
     const result = await (supabaseAdmin as any)
       .from("question_bank")
-      .upsert(rows.slice(index, index + 100), { onConflict: "owner_id,source_ref" });
+      .upsert(rows.slice(index, index + 100), { onConflict: "owner_id,module_code,content_id" });
     if (result.error) {
       console.error("[KE04 seed] upsert failed", result.error);
       return json({ error: "KE04-tehtäväpankkia ei voitu tallentaa." }, 503);
