@@ -261,9 +261,56 @@ async function listPracticeAttempts(): Promise<PracticeAttempt[]> {
     .order("created_at", { ascending: false })
     .limit(500);
   if (error) throw error;
-  return (data ?? []) as PracticeAttempt[];
+  return (data ?? []).map((raw: any) => {
+    const payload =
+      raw.question_payload && typeof raw.question_payload === "object"
+        ? raw.question_payload as Record<string, unknown>
+        : {};
+    return payload["actualAttemptType"] === "matching"
+      ? { ...raw, attempt_type: "matching" as const }
+      : raw;
+  }) as PracticeAttempt[];
 }
 
+function questionMetadata(row: Record<string, unknown>) {
+  const metadata = row["metadata"];
+  return metadata && typeof metadata === "object" && !Array.isArray(metadata)
+    ? metadata as Record<string, unknown>
+    : {};
+}
+
+function metadataArray<T>(value: unknown): T[] {
+  return Array.isArray(value) ? value as T[] : [];
+}
+
+function normalizeQuestionBankItem(raw: unknown): QuestionBankItem {
+  const row = raw as Record<string, any>;
+  const metadata = questionMetadata(row);
+  const metadataType = metadata["questionType"];
+  const questionType = metadataType === "matching" ? "matching" : row.question_type;
+
+  return {
+    ...row,
+    question_type: questionType,
+    content_id: row.content_id ?? metadata["contentId"] ?? null,
+    prerequisites: row.prerequisites ?? metadataArray<string>(metadata["prerequisites"]),
+    common_errors: row.common_errors ?? metadataArray<string>(metadata["commonErrors"]),
+    scoring_guide: row.scoring_guide ?? metadata["scoringGuide"] ?? metadata["scoring"] ?? null,
+    exam_eligible: row.exam_eligible ?? metadata["examEligible"] ?? true,
+    reserve_for_exam: row.reserve_for_exam ?? metadata["reserveForExam"] ?? false,
+    validated: row.validated ?? metadata["validated"] ?? row.status === "active",
+    matching_pairs: row.matching_pairs ?? metadataArray<{ left: string; right: string }>(metadata["matchingPairs"]),
+    seed_version: row.seed_version ?? metadata["seedVersion"] ?? null,
+    answer_mode:
+      row.answer_mode ??
+      metadata["answerMode"] ??
+      (metadataType === "matching" ? "matching" : "text"),
+    points: row.points ?? metadata["points"] ?? null,
+    transfer_level: row.transfer_level ?? metadata["transferLevel"] ?? 0,
+    pretest_eligible: row.pretest_eligible ?? metadata["pretestEligible"] ?? true,
+    metadata,
+  } as QuestionBankItem;
+}
 
 async function listQuestionBank(): Promise<QuestionBankItem[]> {
   const { data, error } = await untypedSupabase
@@ -275,7 +322,7 @@ async function listQuestionBank(): Promise<QuestionBankItem[]> {
     .order("created_at", { ascending: false })
     .limit(2000);
   if (error) throw error;
-  return (data ?? []) as QuestionBankItem[];
+  return (data ?? []).map(normalizeQuestionBankItem);
 }
 
 async function listQuestionUserState(): Promise<QuestionUserState[]> {
@@ -284,10 +331,16 @@ async function listQuestionUserState(): Promise<QuestionUserState[]> {
     .select("*")
     .order("updated_at", { ascending: false })
     .limit(4000);
-  if (error) throw error;
+  if (error) {
+    if (
+      error.code === "PGRST205" ||
+      error.code === "42P01" ||
+      /question_user_state|schema cache|relation/i.test(error.message ?? "")
+    ) return [];
+    throw error;
+  }
   return (data ?? []) as QuestionUserState[];
 }
-
 
 async function listWeeklyCheckins(): Promise<WeeklyCheckin[]> {
   const { data, error } = await supabase
