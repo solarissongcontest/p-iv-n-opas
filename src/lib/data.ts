@@ -261,9 +261,56 @@ async function listPracticeAttempts(): Promise<PracticeAttempt[]> {
     .order("created_at", { ascending: false })
     .limit(500);
   if (error) throw error;
-  return (data ?? []) as PracticeAttempt[];
+  return (data ?? []).map((raw: any) => {
+    const payload =
+      raw.question_payload && typeof raw.question_payload === "object"
+        ? raw.question_payload as Record<string, unknown>
+        : {};
+    return payload["actualAttemptType"] === "matching"
+      ? { ...raw, attempt_type: "matching" as const }
+      : raw;
+  }) as PracticeAttempt[];
 }
 
+function questionMetadata(row: Record<string, unknown>) {
+  const metadata = row["metadata"];
+  return metadata && typeof metadata === "object" && !Array.isArray(metadata)
+    ? metadata as Record<string, unknown>
+    : {};
+}
+
+function metadataArray<T>(value: unknown): T[] {
+  return Array.isArray(value) ? value as T[] : [];
+}
+
+function normalizeQuestionBankItem(raw: unknown): QuestionBankItem {
+  const row = raw as Record<string, any>;
+  const metadata = questionMetadata(row);
+  const metadataType = metadata["questionType"];
+  const questionType = metadataType === "matching" ? "matching" : row["question_type"];
+
+  return {
+    ...row,
+    question_type: questionType,
+    content_id: row["content_id"] ?? metadata["contentId"] ?? null,
+    prerequisites: row["prerequisites"] ?? metadataArray<string>(metadata["prerequisites"]),
+    common_errors: row["common_errors"] ?? metadataArray<string>(metadata["commonErrors"]),
+    scoring_guide: row["scoring_guide"] ?? metadata["scoringGuide"] ?? metadata["scoring"] ?? null,
+    exam_eligible: row["exam_eligible"] ?? metadata["examEligible"] ?? true,
+    reserve_for_exam: row["reserve_for_exam"] ?? metadata["reserveForExam"] ?? false,
+    validated: row["validated"] ?? metadata["validated"] ?? row["status"] === "active",
+    matching_pairs: row["matching_pairs"] ?? metadataArray<{ left: string; right: string }>(metadata["matchingPairs"]),
+    seed_version: row["seed_version"] ?? metadata["seedVersion"] ?? null,
+    answer_mode:
+      row["answer_mode"] ??
+      metadata["answerMode"] ??
+      (metadataType === "matching" ? "matching" : "text"),
+    points: row["points"] ?? metadata["points"] ?? null,
+    transfer_level: row["transfer_level"] ?? metadata["transferLevel"] ?? 0,
+    pretest_eligible: row["pretest_eligible"] ?? metadata["pretestEligible"] ?? true,
+    metadata,
+  } as QuestionBankItem;
+}
 
 async function listQuestionBank(): Promise<QuestionBankItem[]> {
   const { data, error } = await untypedSupabase
@@ -275,7 +322,7 @@ async function listQuestionBank(): Promise<QuestionBankItem[]> {
     .order("created_at", { ascending: false })
     .limit(2000);
   if (error) throw error;
-  return (data ?? []) as QuestionBankItem[];
+  return (data ?? []).map(normalizeQuestionBankItem);
 }
 
 async function listQuestionUserState(): Promise<QuestionUserState[]> {
@@ -284,10 +331,16 @@ async function listQuestionUserState(): Promise<QuestionUserState[]> {
     .select("*")
     .order("updated_at", { ascending: false })
     .limit(4000);
-  if (error) throw error;
+  if (error) {
+    if (
+      error.code === "PGRST205" ||
+      error.code === "42P01" ||
+      /question_user_state|schema cache|relation/i.test(error.message ?? "")
+    ) return [];
+    throw error;
+  }
   return (data ?? []) as QuestionUserState[];
 }
-
 
 async function listWeeklyCheckins(): Promise<WeeklyCheckin[]> {
   const { data, error } = await supabase
@@ -740,7 +793,13 @@ type RecordPracticeAttemptInput = {
 async function doRecordPracticeAttempt(payload: unknown, operationId: string) {
   const input = payload as RecordPracticeAttemptInput;
   const hintsUsed = Math.max(input.hints_used ?? 0, input.hint_used ? 1 : 0);
-  const { data, error } = await untypedSupabase.rpc("record_adaptive_practice_attempt", {
+  const questionPayload = {
+    ...(input.question_payload ?? {}),
+    ...(input.question_bank_id ? { questionBankId: input.question_bank_id } : {}),
+    ...(input.attempt_type === "matching" ? { actualAttemptType: "matching" } : {}),
+  };
+
+  const adaptive = await untypedSupabase.rpc("record_adaptive_practice_attempt", {
     p_course_id: input.course_id,
     p_topic_id: input.topic_id,
     p_date: input.date ?? today(),
@@ -756,13 +815,46 @@ async function doRecordPracticeAttempt(payload: unknown, operationId: string) {
     p_source: input.source ?? "practice",
     p_skills: input.skills ?? [],
     p_expected_concepts: input.expected_concepts ?? [],
-    p_question_payload: input.question_payload ?? {},
+    p_question_payload: questionPayload,
     p_operation_id: operationId,
     p_question_bank_id: input.question_bank_id ?? null,
   });
-  if (error) throw error;
-  if (!data) throw new Error("Harjoitusyrityksen tallennus ei palauttanut tunnistetta.");
-  return data as string;
+
+  if (!adaptive.error) {
+    if (!adaptive.data) throw new Error("Harjoitusyrityksen tallennus ei palauttanut tunnistetta.");
+    return adaptive.data as string;
+  }
+
+  const missingAdaptiveRpc =
+    adaptive.error.code === "PGRST202" ||
+    adaptive.error.code === "42883" ||
+    /record_adaptive_practice_attempt|could not find the function|schema cache/i.test(adaptive.error.message ?? "");
+  if (!missingAdaptiveRpc) throw adaptive.error;
+
+  // Keep Practice fully usable before the optional V3 DB migration is applied.
+  // Matching is preserved in question_payload and normalized back on reads.
+  const legacy = await untypedSupabase.rpc("record_practice_attempt", {
+    p_course_id: input.course_id,
+    p_topic_id: input.topic_id,
+    p_date: input.date ?? today(),
+    p_attempt_type: input.attempt_type === "matching" ? "recognition" : input.attempt_type,
+    p_prompt: input.prompt,
+    p_response: input.response ?? null,
+    p_difficulty: input.difficulty,
+    p_result: input.result,
+    p_confidence: input.confidence ?? null,
+    p_hint_used: hintsUsed > 0,
+    p_hints_used: hintsUsed,
+    p_response_time_ms: input.response_time_ms ?? null,
+    p_source: input.source ?? "practice",
+    p_skills: input.skills ?? [],
+    p_expected_concepts: input.expected_concepts ?? [],
+    p_question_payload: questionPayload,
+    p_operation_id: operationId,
+  });
+  if (legacy.error) throw legacy.error;
+  if (!legacy.data) throw new Error("Harjoitusyrityksen tallennus ei palauttanut tunnistetta.");
+  return legacy.data as string;
 }
 
 type PlanMutationExpectation = {
