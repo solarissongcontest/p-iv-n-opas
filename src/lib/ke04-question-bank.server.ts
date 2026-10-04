@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { KE04_QUESTION_BANK, KE04_QUESTION_BANK_VERSION } from "@/data/ke04-question-bank";
 import { verifyArthurDeviceToken } from "./deviceAuth.server";
@@ -8,20 +9,35 @@ function json(data: unknown, status = 200) {
   return Response.json(data, { status, headers: noStore });
 }
 
+function deterministicUuid(value: string) {
+  const bytes = Buffer.from(createHash("sha256").update(value).digest().subarray(0, 16));
+  bytes[6] = ((bytes[6] ?? 0) & 0x0f) | 0x50;
+  bytes[8] = ((bytes[8] ?? 0) & 0x3f) | 0x80;
+  const hex = bytes.toString("hex");
+  return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
+}
+
+/**
+ * The production database can temporarily lag application migrations.
+ * Keep the curated bank writable using the original LOPS21 question_bank
+ * contract and place richer V3 fields in metadata. Newer schemas read the
+ * exact same metadata, so applying the forward migration later is lossless.
+ */
 function questionRow(
   ownerId: string,
   courseId: string,
   topicId: string,
   question: (typeof KE04_QUESTION_BANK)[number],
 ) {
+  const storedQuestionType = question.questionType === "matching" ? "recognition" : question.questionType;
   return {
+    id: deterministicUuid(`ke04-v3:${ownerId}:${question.seedKey}`),
     owner_id: ownerId,
     course_id: courseId,
     topic_id: topicId,
     curriculum: "LOPS21",
     module_code: "KE04",
-    content_id: question.contentId,
-    question_type: question.questionType,
+    question_type: storedQuestionType,
     prompt: question.prompt,
     options: question.options,
     correct_answer: question.correctAnswer,
@@ -29,24 +45,11 @@ function questionRow(
     hints: question.hints,
     skills: question.skills,
     expected_concepts: question.expectedConcepts,
-    prerequisites: question.prerequisites,
-    common_errors: question.commonErrors,
     difficulty: question.difficulty,
     estimated_seconds: question.estimatedSeconds,
     status: "active",
     source_type: "seed",
     source_ref: question.seedKey,
-    validated: question.validated,
-    exam_eligible: question.examEligible,
-    reserve_for_exam: question.reserveForExam,
-    matching_pairs: question.matchingPairs,
-    scoring_guide: question.scoring,
-    seed_version: KE04_QUESTION_BANK_VERSION,
-    answer_mode: question.answerMode,
-    points: Math.max(1, Math.min(30, Math.round(question.points))),
-    transfer_level: question.difficulty >= 5 ? 5 : question.difficulty >= 4 ? 4 : question.difficulty >= 3 ? 3 : 1,
-    pretest_eligible: !question.reserveForExam,
-    stimulus_package: {},
     metadata: {
       curated: true,
       contentId: question.contentId,
@@ -54,10 +57,19 @@ function questionRow(
       topicName: question.topicName,
       subtopic: question.subtopic,
       originalType: question.originalType,
-      scoring: question.scoring,
+      questionType: question.questionType,
+      prerequisites: question.prerequisites,
+      commonErrors: question.commonErrors,
+      scoringGuide: question.scoring,
       seedVersion: KE04_QUESTION_BANK_VERSION,
       reserveForExam: question.reserveForExam,
       examEligible: question.examEligible,
+      validated: question.validated,
+      matchingPairs: question.matchingPairs,
+      answerMode: question.answerMode,
+      points: Math.max(1, Math.min(30, Math.round(question.points))),
+      transferLevel: question.difficulty >= 5 ? 5 : question.difficulty >= 4 ? 4 : question.difficulty >= 3 ? 3 : 1,
+      pretestEligible: !question.reserveForExam,
     },
   };
 }
@@ -145,26 +157,33 @@ export async function handleKe04QuestionBankSeed(request: Request): Promise<Resp
   for (let index = 0; index < rows.length; index += 100) {
     const result = await (supabaseAdmin as any)
       .from("question_bank")
-      .upsert(rows.slice(index, index + 100), { onConflict: "owner_id,module_code,content_id" });
+      .upsert(rows.slice(index, index + 100), { onConflict: "id" });
     if (result.error) {
       console.error("[KE04 seed] upsert failed", result.error);
-      return json({ error: "KE04-tehtäväpankkia ei voitu tallentaa." }, 503);
+      return json({
+        error: "KE04-tehtäväpankkia ei voitu tallentaa.",
+        detail: process.env.NODE_ENV === "production" ? undefined : String(result.error.message ?? ""),
+      }, 503);
     }
   }
 
   const verify = await (supabaseAdmin as any)
     .from("question_bank")
-    .select("id,reserve_for_exam,validated", { count: "exact", head: false })
+    .select("id,source_ref,metadata")
     .eq("owner_id", ownerId)
     .eq("course_id", body.courseId)
     .eq("source_type", "seed")
-    .eq("seed_version", KE04_QUESTION_BANK_VERSION)
     .limit(1000);
 
   if (verify.error) return json({ error: "KE04-tehtäväpankin varmennus epäonnistui." }, 503);
-  const seededRows = verify.data ?? [];
-  const seededReserve = seededRows.filter((row: any) => row.reserve_for_exam).length;
-  const valid = seededRows.length === 780 && seededReserve === 45 && seededRows.every((row: any) => row.validated === true);
+  const seededRows = (verify.data ?? []).filter(
+    (row: any) => row.metadata?.seedVersion === KE04_QUESTION_BANK_VERSION,
+  );
+  const seededReserve = seededRows.filter((row: any) => row.metadata?.reserveForExam === true).length;
+  const valid =
+    seededRows.length === 780 &&
+    seededReserve === 45 &&
+    seededRows.every((row: any) => row.metadata?.validated === true);
 
   if (!valid) {
     return json({
@@ -179,5 +198,6 @@ export async function handleKe04QuestionBankSeed(request: Request): Promise<Resp
     version: KE04_QUESTION_BANK_VERSION,
     questions: seededRows.length,
     reserve: seededReserve,
+    storage: "compatible",
   });
 }
