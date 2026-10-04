@@ -31,8 +31,12 @@ export function SessionForm({item,courses,topics,sessions=[],attempts=[],present
  const [guided,setGuided]=useState(!!item);
  const [step,setStep]=useState(item?1:0);
  const [courseId,setCourseId]=useState(initialCourse),[topicId,setTopicId]=useState(initialTopic);
- const [seconds,setSeconds]=useState(0),[running,setRunning]=useState(false);
- const [timerMode,setTimerMode]=useState<"none"|"20"|"30"|"custom">(item?.target_minutes===20?"20":item?.target_minutes===30?"30":"none");
+ const [seconds,setSeconds]=useState(0),[running,setRunning]=useState(!!item);
+ const runStartedAt=useRef<number|null>(item?Date.now():null);
+ const accumulatedSeconds=useRef(0);
+ const [timerMode,setTimerMode]=useState<"none"|"20"|"30"|"custom">(
+   !item?"none":item.target_minutes===20?"20":item.target_minutes===30?"30":"custom"
+ );
  const [customMinutes,setCustomMinutes]=useState(item?.target_minutes??30),[actualMinutes,setActualMinutes]=useState(item?.target_minutes??30);
  const [objective,setObjective]=useState(item?.title||""),[recall,setRecall]=useState(""),[retrievalCheck,setRetrievalCheck]=useState("");
  const [retrievalResult,setRetrievalResult]=useState<"independent"|"hinted"|"not_yet"|null>(null);
@@ -58,14 +62,47 @@ export function SessionForm({item,courses,topics,sessions=[],attempts=[],present
    : "Sulje materiaalit. Kirjoita tärkeimmät asiat, jotka pystyt nyt palauttamaan muistista.";
 
  useEffect(()=>{
-   if(experimentApplied.current||preferences.data?.personal_experiments_enabled!==true)return;
-   if(item?.target_minutes&&item.target_minutes<15)return;
+   if(experimentApplied.current||preferences.data?.personal_experiments_enabled!==true||item)return;
    setTimerMode("custom");
    setCustomMinutes(experimentMinutes);
    experimentApplied.current=true;
- },[experimentMinutes,item?.target_minutes,preferences.data?.personal_experiments_enabled]);
+ },[experimentMinutes,item,preferences.data?.personal_experiments_enabled]);
 
- useEffect(()=>{if(!running)return;const id=window.setInterval(()=>setSeconds(v=>v+1),1000);return()=>window.clearInterval(id);},[running]);
+ function currentElapsedSeconds(){
+   const live=runStartedAt.current===null?0:Math.max(0,Math.floor((Date.now()-runStartedAt.current)/1000));
+   return accumulatedSeconds.current+live;
+ }
+
+ function pauseTimer(){
+   const next=currentElapsedSeconds();
+   accumulatedSeconds.current=next;
+   runStartedAt.current=null;
+   setSeconds(next);
+   setRunning(false);
+ }
+
+ function resumeTimer(){
+   if(runStartedAt.current===null)runStartedAt.current=Date.now();
+   setRunning(true);
+ }
+
+ function toggleTimer(){
+   if(running)pauseTimer();else resumeTimer();
+ }
+
+ useEffect(()=>{
+   if(!running)return;
+   const tick=()=>setSeconds(currentElapsedSeconds());
+   tick();
+   const id=window.setInterval(tick,1000);
+   document.addEventListener("visibilitychange",tick);
+   window.addEventListener("focus",tick);
+   return()=>{
+     window.clearInterval(id);
+     document.removeEventListener("visibilitychange",tick);
+     window.removeEventListener("focus",tick);
+   };
+ },[running]);
  const timerTargetSeconds =
    timerMode==="20" ? 20*60 :
    timerMode==="30" ? 30*60 :
@@ -77,9 +114,9 @@ export function SessionForm({item,courses,topics,sessions=[],attempts=[],present
    running&&fatigue.level!=="none"&&seconds>=fatigueThresholdMinutes*60;
 
  function changeMode(next:boolean){
+   pauseTimer();
    setGuided(next);
    setStep(next&&item?1:0);
-   setRunning(false);
  }
 
  function chooseRetrievalResult(value:"independent"|"hinted"|"not_yet"){
@@ -120,7 +157,7 @@ export function SessionForm({item,courses,topics,sessions=[],attempts=[],present
    const finalOutcome=outcome??(retrievalResult==="independent"?"yes":retrievalResult==="hinted"?"partial":"not_yet");
    const minutesUsed=timerMode==="none"
      ?Math.max(1,actualMinutes)
-     :Math.max(1,Math.ceil(seconds/60));
+     :Math.max(1,Math.ceil(currentElapsedSeconds()/60));
    try{
      const result=await log.mutateAsync({
        course_id:courseId,topic_id:topicId||null,
@@ -160,6 +197,7 @@ export function SessionForm({item,courses,topics,sessions=[],attempts=[],present
      <button type="submit" disabled={log.isPending} className={button+" w-full"}><Check size={18}/>{log.isPending?"Tallennetaan…":"Tallenna"}</button>
    </form>:<div className="space-y-5">
      {step>0&&<div className="flex items-center gap-2" aria-label="Opiskelukerran vaiheet">{["Muista","Opiskele","Tarkista"].map((label,index)=>{const visibleStep=step<=1?0:step===2?1:2;return <div key={label} className="flex-1"><div className={`h-1.5 rounded-full ${index<=visibleStep?"bg-primary":"bg-muted"}`}/><span className="mt-1 hidden text-[10px] text-muted-foreground sm:block">{label}</span></div>;})}</div>}
+     {timerMode!=="none"&&step>0&&<div className="flex items-center justify-between rounded-xl bg-muted/60 px-3 py-2 text-xs"><span className="font-medium">{running?"Aika käynnissä":"Ajastin tauolla"}</span><span className="tabular-nums text-muted-foreground">{timerDisplay}</span></div>}
 
      {step===0&&<>
        {item&&<div className="rounded-2xl bg-muted/60 p-4"><p className="text-xs font-semibold uppercase tracking-wide text-primary">{course?.code} · {item.target_minutes} min</p><h3 className="mt-1 text-lg font-semibold">{item.title||topic?.name||"Opiskelu"}</h3><p className="mt-1 text-sm text-muted-foreground">{phaseGoal}</p></div>}
@@ -170,7 +208,7 @@ export function SessionForm({item,courses,topics,sessions=[],attempts=[],present
 
      {step===1&&<div className="space-y-4"><div><p className="text-sm font-medium text-primary">Muista</p><h3 className="mt-1 text-xl font-semibold">Mitä muistat jo?</h3><p className="mt-2 text-sm text-muted-foreground">Kirjoita muutama asia ilman materiaalia. Täydellistä vastausta ei tarvita.</p></div><AbittiAnswerEditor autoFocus label="Muistista palautus" value={recall} onChange={setRecall} placeholder="Mitä muistat ilman muistiinpanoja?" minHeight={170}/></div>}
 
-     {step===2&&<div className="space-y-4"><div><p className="text-sm font-medium text-primary">Opiskele ja harjoittele</p><h3 className="mt-1 text-xl font-semibold">{objective||phaseGoal}</h3><p className="mt-2 text-sm text-muted-foreground">Opiskele, ratkaise tehtäviä ja käytä materiaalia normaalisti. Ajastin on vain apuväline.</p></div>{timerMode!=="none"?<div className="rounded-2xl bg-muted p-5 text-center"><p role="timer" className="text-5xl font-semibold tabular-nums">{timerDisplay}</p><p className="mt-2 text-sm text-muted-foreground">Tavoite {timerMode==="custom"?customMinutes:Number(timerMode)} min{timerReached?" · tavoiteaika täynnä, voit jatkaa":""}</p>{preferences.data?.personal_experiments_enabled&&timerMode==="custom"&&customMinutes===experimentMinutes&&<p className="mt-1 text-xs text-muted-foreground">Oppimiskokeilu · tämän päivän vaihtoehto {experimentMinutes} min</p>}{liveFatigueNudge&&<div className="mt-4 rounded-xl border border-border bg-surface p-3 text-left text-sm"><b>Hyvä kohta tauolle tai muistista palauttamisen tarkistukseen.</b><p className="mt-1 text-muted-foreground">{fatigue.reason}</p>{fatigue.suggestedBreakMinutes>0&&<small className="mt-1 block text-muted-foreground">Ehdotettu tauko noin {fatigue.suggestedBreakMinutes} min.</small>}</div>}<button type="button" className={secondary+" mt-4"} onClick={()=>setRunning(v=>!v)}>{running?<><Pause size={17}/>Tauko</>:<><Play size={17}/>Aloita / jatka</>}</button></div>:<label className="block text-sm font-medium">Todellinen kesto minuutteina<input type="number" min="1" max="240" className={input} value={actualMinutes} onChange={e=>setActualMinutes(Number(e.target.value))}/></label>}<label className="block text-sm font-medium">Mitä teit?<textarea rows={3} className={input} value={did} onChange={e=>setDid(e.target.value)} placeholder="Esim. tehtävät 4.12–4.18"/></label></div>}
+     {step===2&&<div className="space-y-4"><div><p className="text-sm font-medium text-primary">Opiskele ja harjoittele</p><h3 className="mt-1 text-xl font-semibold">{objective||phaseGoal}</h3><p className="mt-2 text-sm text-muted-foreground">Opiskele, ratkaise tehtäviä ja käytä materiaalia normaalisti. Aika kirjataan automaattisesti; laita ajastin tauolle vain oikean tauon ajaksi.</p></div>{timerMode!=="none"?<div className="rounded-2xl bg-muted p-5 text-center"><p role="timer" className="text-5xl font-semibold tabular-nums">{timerDisplay}</p><p className="mt-2 text-sm text-muted-foreground">Tavoite {timerMode==="custom"?customMinutes:Number(timerMode)} min{timerReached?" · tavoiteaika täynnä, voit jatkaa":""}</p>{preferences.data?.personal_experiments_enabled&&timerMode==="custom"&&customMinutes===experimentMinutes&&<p className="mt-1 text-xs text-muted-foreground">Oppimiskokeilu · tämän päivän vaihtoehto {experimentMinutes} min</p>}{liveFatigueNudge&&<div className="mt-4 rounded-xl border border-border bg-surface p-3 text-left text-sm"><b>Hyvä kohta tauolle tai muistista palauttamisen tarkistukseen.</b><p className="mt-1 text-muted-foreground">{fatigue.reason}</p>{fatigue.suggestedBreakMinutes>0&&<small className="mt-1 block text-muted-foreground">Ehdotettu tauko noin {fatigue.suggestedBreakMinutes} min.</small>}</div>}<button type="button" className={secondary+" mt-4"} onClick={toggleTimer}>{running?<><Pause size={17}/>Tauko</>:<><Play size={17}/>Jatka ajastinta</>}</button></div>:<label className="block text-sm font-medium">Todellinen kesto minuutteina<input type="number" min="1" max="240" className={input} value={actualMinutes} onChange={e=>setActualMinutes(Number(e.target.value))}/></label>}<label className="block text-sm font-medium">Mitä teit?<textarea rows={3} className={input} value={did} onChange={e=>setDid(e.target.value)} placeholder="Esim. tehtävät 4.12–4.18"/></label></div>}
 
      {step===3&&<div className="space-y-4"><div><p className="text-sm font-medium text-primary">Muistista palauttamisen tarkistus</p><h3 className="mt-1 text-xl font-semibold">Sulje materiaali</h3><p className="mt-2 text-sm text-muted-foreground">{retrievalPrompt}</p></div><AbittiAnswerEditor autoFocus label="Vastaus muistista" value={retrievalCheck} onChange={setRetrievalCheck} placeholder="Vastaa muistista…" minHeight={170}/><p className="text-xs text-muted-foreground">Älä arvioi vielä omaa varmuuttasi. Tee ensin yritys, sitten merkitse miten se onnistui.</p></div>}
 
@@ -181,7 +219,7 @@ export function SessionForm({item,courses,topics,sessions=[],attempts=[],present
        <button type="button" disabled={log.isPending||!retrievalResult||!answerHasContent(retrievalCheck)} className={button+" w-full"} onClick={()=>void submitGuided()}><Check size={18}/>{log.isPending?"Tallennetaan…":"Valmis"}</button>
      </div>}
 
-     <div className="flex items-center justify-between gap-3 border-t border-border pt-4">{step>0?<button type="button" className={secondary} onClick={()=>{setRunning(false);setStep(v=>Math.max(0,v-1));}}>Takaisin</button>:<span/>}{step<4&&<button type="button" className={button} disabled={step===0&&!objective.trim()||step===3&&!answerHasContent(retrievalCheck)} onClick={()=>{setRunning(false);setStep(v=>Math.min(4,v+1));}}>Jatka</button>}</div>
+     <div className="flex items-center justify-between gap-3 border-t border-border pt-4">{step>0?<button type="button" className={secondary} onClick={()=>{if(step===1)pauseTimer();if(step===4&&timerMode!=="none")resumeTimer();setStep(v=>Math.max(0,v-1));}}>Takaisin</button>:<span/>}{step<4&&<button type="button" className={button} disabled={step===0&&!objective.trim()||step===3&&!answerHasContent(retrievalCheck)} onClick={()=>{if((step===0||step===1)&&timerMode!=="none"&&!running)resumeTimer();if(step===3)pauseTimer();setStep(v=>Math.min(4,v+1));}}>Jatka</button>}</div>
    </div>}
  </>;
  const title=guided?"Ohjattu opiskelukerta":"Kirjaa opiskelu";
@@ -192,7 +230,7 @@ export function SessionForm({item,courses,topics,sessions=[],attempts=[],present
          <p className="text-xs font-semibold uppercase tracking-wide text-primary">{course?.code??"Opiskelukerta"}</p>
          <h1 className="mt-1 truncate text-xl font-semibold">{item?.title||topic?.name||title}</h1>
        </div>
-       <button type="button" className={secondary+" shrink-0"} onClick={()=>{setRunning(false);onClose();}}><X size={17}/>Lopeta opiskelukerta</button>
+       <button type="button" className={secondary+" shrink-0"} onClick={()=>{pauseTimer();onClose();}}><X size={17}/>Lopeta opiskelukerta</button>
      </header>
      <main className="study-session-focus-main">{body}</main>
    </div>;
