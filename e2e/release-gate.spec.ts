@@ -109,10 +109,11 @@ test.describe("Final release gate", () => {
     expect(forcedExpiry).toBeGreaterThan(0);
 
     await expect.poll(() => authCalls, { timeout: 20_000 }).toBeGreaterThanOrEqual(2);
-    const renewedExpiry = await page.evaluate(() =>
-      Number(localStorage.getItem("opk.device-token-expires") ?? "0"),
-    );
-    expect(renewedExpiry).toBeGreaterThan(forcedExpiry);
+    await expect.poll(
+      () => page.evaluate(() => Number(localStorage.getItem("opk.device-token-expires") ?? "0")),
+      { timeout: 20_000, intervals: [250, 500, 1000] },
+    ).toBeGreaterThan(forcedExpiry);
+    await page.unrouteAll({ behavior: "ignoreErrors" });
   });
 
   test("production release identity is available and uncached", async ({ request, baseURL }) => {
