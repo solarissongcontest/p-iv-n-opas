@@ -72,6 +72,32 @@ async function ownerRows(admin: AdminClient, table: string, ownerId: string) {
   return (data ?? []) as Row[];
 }
 
+const MEANINGFUL_STUDY_TABLES = [
+  "study_sessions",
+  "practice_attempts",
+  "practice_tests",
+  "mistakes",
+  "weekly_checkins",
+  "mastery_evidence",
+  "progress_events",
+  "exam_simulations",
+  "pretest_attempts",
+  "active_study_sessions",
+] as const;
+
+async function ownerHasMeaningfulStudyData(admin: AdminClient, ownerId: string) {
+  for (const table of MEANINGFUL_STUDY_TABLES) {
+    const { data, error } = await admin
+      .from(table)
+      .select("id")
+      .eq("owner_id", ownerId)
+      .limit(1);
+    ensureOk(error, "Taulun " + table + " aktiivisuuden tarkistus epäonnistui");
+    if ((data ?? []).length > 0) return true;
+  }
+  return false;
+}
+
 async function mergeUpdatedSingleton(
   admin: AdminClient,
   table: "user_preferences" | "notification_settings",
@@ -439,6 +465,19 @@ export async function reconcileLegacyOwner(
 ) {
   if (fromOwner === toOwner) return;
   if (!isUuid(fromOwner) || !isUuid(toOwner)) throw new Error("Virheellinen omistajatunniste.");
+
+  // Fresh device identities created before canonical-owner sync contain only
+  // seeded defaults. Merging those rows would duplicate Planner items and the
+  // curated KE04 bank. In that case only move device-level settings and push
+  // subscriptions, then let the canonical Arthur profile remain authoritative.
+  if (!(await ownerHasMeaningfulStudyData(admin, fromOwner))) {
+    await mergeUpdatedSingleton(admin, "notification_settings", fromOwner, toOwner);
+    await mergeUpdatedSingleton(admin, "user_preferences", fromOwner, toOwner);
+    await mergeUniqueOwnerRows(admin, "push_subscriptions", "endpoint", fromOwner, toOwner);
+    await mergeUniqueOwnerRows(admin, "push_deliveries", "delivery_key", fromOwner, toOwner);
+    await mergeCoachBudget(admin, fromOwner, toOwner);
+    return;
+  }
 
   const [sourceCourses, targetCourses, sourceTopics, targetTopics] = await Promise.all([
     ownerRows(admin, "courses", fromOwner),
