@@ -268,13 +268,16 @@ test("v5 offline write survives reload, syncs, and appears on a second device", 
 
   await contextA.setOffline(true);
   await pageA.getByRole("button", { name: "Tallenna" }).click();
-  await expect(pageA.getByRole("status")).toContainText("Tallennettu paikallisesti");
+
+  const pendingSync = pageA.getByRole("status").filter({ hasText: "Tallennettu paikallisesti" });
+  await expect(pendingSync).toContainText("synkronoidaan yhteyden palattua", { timeout: 30_000 });
 
   await pageA.reload({ waitUntil: "domcontentloaded" });
-  await expect(pageA.getByRole("status")).toContainText("synkataan yhteyden palattua");
+  const reloadedPendingSync = pageA.getByRole("status").filter({ hasText: "Tallennettu paikallisesti" });
+  await expect(reloadedPendingSync).toContainText("synkronoidaan yhteyden palattua", { timeout: 30_000 });
 
   await contextA.setOffline(false);
-  await expect(pageA.getByRole("status")).toBeHidden({ timeout: 30_000 });
+  await expect(reloadedPendingSync).toBeHidden({ timeout: 30_000 });
 
   const contextB = await browser.newContext({ serviceWorkers: "allow" });
   const pageB = await contextB.newPage();
