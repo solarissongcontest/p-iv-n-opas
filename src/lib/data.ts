@@ -176,6 +176,7 @@ export type ActiveStudySession = {
   course_id: string;
   topic_id: string | null;
   target_minutes: number;
+  kind: "study" | "review" | "test";
   phase: number;
   objective: string;
   recall: string;
@@ -1141,6 +1142,7 @@ export type StartActiveStudySessionInput = {
   course_id: string;
   topic_id: string | null;
   target_minutes: number;
+  kind: "study" | "review" | "test";
   objective: string;
 };
 
@@ -1168,6 +1170,7 @@ export function useStartActiveStudySession() {
         p_course_id: input.course_id,
         p_topic_id: input.topic_id,
         p_target_minutes: Math.max(1, Math.min(240, input.target_minutes)),
+        p_kind: input.kind,
         p_objective: input.objective,
       });
       if (error) {
