@@ -287,27 +287,27 @@ function normalizeQuestionBankItem(raw: unknown): QuestionBankItem {
   const row = raw as Record<string, any>;
   const metadata = questionMetadata(row);
   const metadataType = metadata["questionType"];
-  const questionType = metadataType === "matching" ? "matching" : row.question_type;
+  const questionType = metadataType === "matching" ? "matching" : row["question_type"];
 
   return {
     ...row,
     question_type: questionType,
-    content_id: row.content_id ?? metadata["contentId"] ?? null,
-    prerequisites: row.prerequisites ?? metadataArray<string>(metadata["prerequisites"]),
-    common_errors: row.common_errors ?? metadataArray<string>(metadata["commonErrors"]),
-    scoring_guide: row.scoring_guide ?? metadata["scoringGuide"] ?? metadata["scoring"] ?? null,
-    exam_eligible: row.exam_eligible ?? metadata["examEligible"] ?? true,
-    reserve_for_exam: row.reserve_for_exam ?? metadata["reserveForExam"] ?? false,
-    validated: row.validated ?? metadata["validated"] ?? row.status === "active",
-    matching_pairs: row.matching_pairs ?? metadataArray<{ left: string; right: string }>(metadata["matchingPairs"]),
-    seed_version: row.seed_version ?? metadata["seedVersion"] ?? null,
+    content_id: row["content_id"] ?? metadata["contentId"] ?? null,
+    prerequisites: row["prerequisites"] ?? metadataArray<string>(metadata["prerequisites"]),
+    common_errors: row["common_errors"] ?? metadataArray<string>(metadata["commonErrors"]),
+    scoring_guide: row["scoring_guide"] ?? metadata["scoringGuide"] ?? metadata["scoring"] ?? null,
+    exam_eligible: row["exam_eligible"] ?? metadata["examEligible"] ?? true,
+    reserve_for_exam: row["reserve_for_exam"] ?? metadata["reserveForExam"] ?? false,
+    validated: row["validated"] ?? metadata["validated"] ?? row["status"] === "active",
+    matching_pairs: row["matching_pairs"] ?? metadataArray<{ left: string; right: string }>(metadata["matchingPairs"]),
+    seed_version: row["seed_version"] ?? metadata["seedVersion"] ?? null,
     answer_mode:
-      row.answer_mode ??
+      row["answer_mode"] ??
       metadata["answerMode"] ??
       (metadataType === "matching" ? "matching" : "text"),
-    points: row.points ?? metadata["points"] ?? null,
-    transfer_level: row.transfer_level ?? metadata["transferLevel"] ?? 0,
-    pretest_eligible: row.pretest_eligible ?? metadata["pretestEligible"] ?? true,
+    points: row["points"] ?? metadata["points"] ?? null,
+    transfer_level: row["transfer_level"] ?? metadata["transferLevel"] ?? 0,
+    pretest_eligible: row["pretest_eligible"] ?? metadata["pretestEligible"] ?? true,
     metadata,
   } as QuestionBankItem;
 }
