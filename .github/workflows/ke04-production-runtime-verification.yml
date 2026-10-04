@@ -1,0 +1,26 @@
+name: KE04 Production Runtime Verification
+
+on:
+  push:
+    branches:
+      - ke04-production-migration-preview
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      E2E_BASE_URL: https://opiskelupaivakirja.vercel.app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install --no-audit --no-fund
+      - run: npm run e2e:install
+      - run: npx playwright install --with-deps chromium
+      - name: Verify live KE04 bank
+        run: npx playwright test e2e/ke04-production-verification.spec.ts --project=desktop-chromium
