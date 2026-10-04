@@ -156,7 +156,7 @@ test("planned study sessions keep the one-tap automatic timer contract", () => {
 });
 
 test("active study sessions are server-backed, owner-scoped and resumable across devices", () => {
-  const migration = read("supabase/migrations/20261004143000_active_study_session_cross_device.sql");
+  const migration = read("supabase/migrations/20261004145316_active_study_session_cross_device.sql");
   const data = read("src/lib/data.ts");
   const app = read("src/app/StudyApp.tsx");
   const session = read("src/features/session/SessionForm.tsx");
