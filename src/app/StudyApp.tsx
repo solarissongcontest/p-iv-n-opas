@@ -578,7 +578,7 @@ function StudyApp({ user, initialPage, courseCode, courseTab, examId, progressSe
 
       <section className={`page-content page-content-${page}`} data-page={page}>
         <Suspense fallback={<FeatureFallback/>}>
-        {busy ? (showSkeleton ? <div className="space-y-4" aria-label="Ladataan"><div className="h-32 animate-pulse rounded-2xl bg-muted"/><div className="h-60 animate-pulse rounded-2xl bg-muted"/></div> : null) :
+        {busy ? (showSkeleton ? <div className="space-y-4" role="status" aria-live="polite" aria-label="Ladataan"><div className="h-32 animate-pulse rounded-2xl bg-muted"/><div className="h-60 animate-pulse rounded-2xl bg-muted"/></div> : null) :
         coursesUnavailable ? <section className="panel p-6"><h2 className="text-xl font-semibold">Kurssitietoja ei saatu näkyviin</h2><p className="mt-2 text-muted-foreground">Tämä ei tarkoita, että kurssisi olisivat kadonneet. Yritä latausta uudelleen yllä olevasta ilmoituksesta.</p></section> :
         courses.length===0 ? <section className="panel p-6"><h2 className="text-xl font-semibold">Aloita ensimmäisestä kurssista</h2><p className="mt-2 text-muted-foreground">Lisää kurssi ja sen aiheet, jotta voit suunnitella ja kirjata opiskelua.</p><button onClick={()=>setAdding(true)} className="mt-5 min-h-11 rounded-xl bg-primary px-4 text-primary-foreground">Lisää kurssi</button></section> :
         page==="today" ? <TodayView courses={courses} topics={topics} sessions={sessions} exams={exams} plan={plan} tests={testsQ.data??[]} attempts={attemptsQ.data??[]} mistakes={mistakesQ.data??[]} capacity={capacity} onStart={setEntry} onGo={go} onPractice={goPractice}/> :
