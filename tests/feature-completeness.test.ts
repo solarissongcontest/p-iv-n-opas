@@ -185,3 +185,18 @@ test("active study sessions are server-backed, owner-scoped and resumable across
   assert.ok(session.includes("persistActivePhase"));
   assert.ok(session.includes("Sulje näkymä"));
 });
+
+
+test("fresh legacy device owners cannot duplicate seeded Planner or KE04 question data", () => {
+  const sync = read("src/lib/ownerSync.server.ts");
+
+  assert.ok(sync.includes("MEANINGFUL_STUDY_TABLES"));
+  assert.ok(sync.includes('"active_study_sessions"'));
+  assert.ok(sync.includes("ownerHasMeaningfulStudyData"));
+  assert.ok(sync.includes('mergeUniqueOwnerRows(admin, "push_subscriptions", "endpoint", fromOwner, toOwner)'));
+  assert.ok(sync.includes('mergeUpdatedSingleton(admin, "user_preferences", fromOwner, toOwner)'));
+  assert.match(
+    sync,
+    /if \(!\(await ownerHasMeaningfulStudyData\(admin, fromOwner\)\)\) \{[\s\S]*?return;[\s\S]*?const \[sourceCourses/,
+  );
+});
