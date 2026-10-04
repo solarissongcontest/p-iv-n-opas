@@ -2012,20 +2012,20 @@ export const questions: Ke04SeedQuestion[] = [
     "answerMode": "matching",
     "matchingPairs": [
       {
-        "left": "massa",
-        "right": "mol n=m/M"
+        "left": "massa→mol",
+        "right": "n=m/M"
       },
       {
-        "left": "mol",
-        "right": "massa m=nM"
+        "left": "mol→massa",
+        "right": "m=nM"
       },
       {
-        "left": "mol",
-        "right": "hiukkaset N=nN_A"
+        "left": "mol→hiukkaset",
+        "right": "N=nN_A"
       },
       {
-        "left": "c,V",
-        "right": "mol n=cV."
+        "left": "pitoisuus+tilavuus→mol",
+        "right": "n=cV"
       }
     ],
     "originalType": "Yhdistely"
