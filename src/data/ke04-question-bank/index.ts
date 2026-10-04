@@ -1,19 +1,19 @@
-import type { Ke04SeedQuestion } from "./types";
-import { questions as chapter01 } from "./chapter-01";
-import { questions as chapter02 } from "./chapter-02";
-import { questions as chapter03 } from "./chapter-03";
-import { questions as chapter04 } from "./chapter-04";
-import { questions as chapter05 } from "./chapter-05";
-import { questions as chapter06 } from "./chapter-06";
-import { questions as chapter07 } from "./chapter-07";
-import { questions as chapter08 } from "./chapter-08";
-import { questions as chapter09 } from "./chapter-09";
-import { questions as chapter10 } from "./chapter-10";
-import { questions as chapter11 } from "./chapter-11";
-import { questions as chapter12 } from "./chapter-12";
-import { questions as chapter13 } from "./chapter-13";
-import { questions as chapter14 } from "./chapter-14";
-import { questions as chapter15 } from "./chapter-15";
+import type { Ke04SeedQuestion } from "./types.ts";
+import { questions as chapter01 } from "./chapter-01.ts";
+import { questions as chapter02 } from "./chapter-02.ts";
+import { questions as chapter03 } from "./chapter-03.ts";
+import { questions as chapter04 } from "./chapter-04.ts";
+import { questions as chapter05 } from "./chapter-05.ts";
+import { questions as chapter06 } from "./chapter-06.ts";
+import { questions as chapter07 } from "./chapter-07.ts";
+import { questions as chapter08 } from "./chapter-08.ts";
+import { questions as chapter09 } from "./chapter-09.ts";
+import { questions as chapter10 } from "./chapter-10.ts";
+import { questions as chapter11 } from "./chapter-11.ts";
+import { questions as chapter12 } from "./chapter-12.ts";
+import { questions as chapter13 } from "./chapter-13.ts";
+import { questions as chapter14 } from "./chapter-14.ts";
+import { questions as chapter15 } from "./chapter-15.ts";
 
 export type { Ke04SeedQuestion, Ke04SeedQuestionType } from "./types";
 
