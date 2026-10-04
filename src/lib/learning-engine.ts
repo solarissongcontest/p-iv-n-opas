@@ -577,14 +577,36 @@ function selectBankQuestion(input: {
 }) {
   const allSeen = new Set(input.attempts.map(questionIdFromAttempt).filter(Boolean));
   const recentlyUsed = new Set(input.attempts.slice(0, 24).map(questionIdFromAttempt).filter(Boolean));
+  const examUsed = new Set(
+    input.attempts
+      .filter((attempt) =>
+        (attempt as RichLearningAttempt).source === "exam" ||
+        attempt.question_payload?.["examTransfer"] === true
+      )
+      .map(questionIdFromAttempt)
+      .filter(Boolean),
+  );
   const lastTypes = input.attempts.slice(0, 5).map(attemptType);
   const weakSkills = new Map<string, number>();
+  const weakErrors = new Map<string, number>();
+  const weakPrerequisites = new Map<string, number>();
 
   for (const attempt of input.attempts.slice(0, 80)) {
     const outcome = legacyOutcome(attempt);
     if (outcome === "correct" && hintsUsed(attempt) === 0) continue;
     const weight = outcome === "incorrect" ? 1 : 0.55;
     for (const skill of attempt.skills ?? []) weakSkills.set(skill, (weakSkills.get(skill) ?? 0) + weight);
+
+    const payloadErrors = Array.isArray(attempt.question_payload?.["commonErrors"])
+      ? attempt.question_payload?.["commonErrors"] as string[]
+      : [];
+    const payloadPrerequisites = Array.isArray(attempt.question_payload?.["prerequisites"])
+      ? attempt.question_payload?.["prerequisites"] as string[]
+      : [];
+    for (const error of payloadErrors) weakErrors.set(error, (weakErrors.get(error) ?? 0) + weight);
+    for (const prerequisite of payloadPrerequisites) {
+      weakPrerequisites.set(prerequisite, (weakPrerequisites.get(prerequisite) ?? 0) + weight);
+    }
   }
 
   const candidates = input.bank
@@ -592,7 +614,7 @@ function selectBankQuestion(input: {
       item.curriculum === "LOPS21" &&
       item.topic_id === input.topicId &&
       (item.status === "active" || item.status === "validated") &&
-      !(item.reserve_for_exam ?? false)
+      (!(item.reserve_for_exam ?? false) || examUsed.has(item.id))
     )
     .map((item) => {
       const itemType = item.question_type as LearningAttemptType;
@@ -600,16 +622,28 @@ function selectBankQuestion(input: {
       const recent = recentlyUsed.has(item.id);
       const difficultyDistance = Math.abs(Number(item.difficulty) - input.targetDifficulty);
       const weakSkillScore = (item.skills ?? []).reduce((sum, skill) => sum + Math.min(2, weakSkills.get(skill) ?? 0), 0);
+      const errorRecoveryScore = (item.common_errors ?? []).reduce(
+        (sum, error) => sum + Math.min(2, weakErrors.get(error) ?? 0),
+        0,
+      );
+      const prerequisiteRecoveryScore = (item.prerequisites ?? []).reduce(
+        (sum, prerequisite) => sum + Math.min(2, weakPrerequisites.get(prerequisite) ?? 0),
+        0,
+      );
       const typeMatch = compatibleQuestionType(itemType, input.types);
       const typeDiversity = lastTypes.includes(itemType) ? 0 : 0.4;
       const curated = item.source_type === "seed" && item.validated !== false ? 0.45 : 0;
+      const releasedReserve = (item.reserve_for_exam ?? false) && examUsed.has(item.id);
       const score =
         (unseen ? 4.5 : 0) +
         (typeMatch ? 1.8 : 0) +
         Math.max(0, 2.4 - difficultyDistance * 1.1) +
         Math.min(2.2, weakSkillScore * 0.42) +
+        Math.min(1.8, errorRecoveryScore * 0.45) +
+        Math.min(1.4, prerequisiteRecoveryScore * 0.35) +
         typeDiversity +
-        curated -
+        curated +
+        (releasedReserve ? 0.15 : 0) -
         (recent ? 7 : 0);
       return { item, score };
     })
