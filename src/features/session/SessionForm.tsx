@@ -14,6 +14,10 @@ import {
   useCreateTopic,
   usePreferences,
   useUpsertPlanItem,
+  usePatchActiveStudySession,
+  useSetActiveStudySessionRunning,
+  useClearActiveStudySession,
+  type ActiveStudySession,
 } from "@/lib/data";
 import type { Course, Exam, PlanItem, PracticeAttempt, Session, Topic } from "@/lib/domain";
 import { TARGET_SYSTEMS } from "@/lib/domain";
@@ -25,27 +29,37 @@ import { relationLabel } from "@/lib/ui-fi";
 
 import { Dialog, button, input, secondary } from "@/features/shared/DialogPrimitives";
 
-export function SessionForm({item,courses,topics,sessions=[],attempts=[],presentation="dialog",onClose}:{item:PlanItem|null;courses:Course[];topics:Topic[];sessions?:Session[];attempts?:PracticeAttempt[];presentation?:"dialog"|"focus";onClose:()=>void}) {
- const initialCourse=item?.course_id??courses[0]?.id??"";
- const initialTopic=item?.topic_id??"";
- const [guided,setGuided]=useState(!!item);
- const [step,setStep]=useState(item?1:0);
+export function SessionForm({item,activeSession=null,courses,topics,sessions=[],attempts=[],presentation="dialog",onClose}:{item:PlanItem|null;activeSession?:ActiveStudySession|null;courses:Course[];topics:Topic[];sessions?:Session[];attempts?:PracticeAttempt[];presentation?:"dialog"|"focus";onClose:()=>void}) {
+ const initialCourse=activeSession?.course_id??item?.course_id??courses[0]?.id??"";
+ const initialTopic=activeSession?.topic_id??item?.topic_id??"";
+ const hasGuidedSession=Boolean(item||activeSession);
+ const initialTargetMinutes=activeSession?.target_minutes??item?.target_minutes??30;
+ const initialRunning=activeSession?activeSession.status==="running":Boolean(item);
+ const initialElapsed=activeSession?.effective_elapsed_seconds??0;
+ const [guided,setGuided]=useState(hasGuidedSession);
+ const [step,setStep]=useState(activeSession?.phase??(item?1:0));
  const [courseId,setCourseId]=useState(initialCourse),[topicId,setTopicId]=useState(initialTopic);
- const [seconds,setSeconds]=useState(0),[running,setRunning]=useState(!!item);
- const runStartedAt=useRef<number|null>(item?Date.now():null);
- const accumulatedSeconds=useRef(0);
+ const [seconds,setSeconds]=useState(initialElapsed),[running,setRunning]=useState(initialRunning);
+ const runStartedAt=useRef<number|null>(initialRunning?Date.now():null);
+ const accumulatedSeconds=useRef(initialElapsed);
+ const hydratedActiveId=useRef<string|null>(null);
  const [timerMode,setTimerMode]=useState<"none"|"20"|"30"|"custom">(
-   !item?"none":item.target_minutes===20?"20":item.target_minutes===30?"30":"custom"
+   !hasGuidedSession?"none":initialTargetMinutes===20?"20":initialTargetMinutes===30?"30":"custom"
  );
- const [customMinutes,setCustomMinutes]=useState(item?.target_minutes??30),[actualMinutes,setActualMinutes]=useState(item?.target_minutes??30);
- const [objective,setObjective]=useState(item?.title||""),[recall,setRecall]=useState(""),[retrievalCheck,setRetrievalCheck]=useState("");
- const [retrievalResult,setRetrievalResult]=useState<"independent"|"hinted"|"not_yet"|null>(null);
- const [retrievalConfidence,setRetrievalConfidence]=useState<number|null>(null);
- const [outcome,setOutcome]=useState<"yes"|"partial"|"not_yet"|null>(null);
- const [competence,setCompetence]=useState(3),[did,setDid]=useState(""),[unclear,setUnclear]=useState(""),[note,setNote]=useState("");
- const [method,setMethod]=useState("tehtävät"),[tasks,setTasks]=useState("");
+ const [customMinutes,setCustomMinutes]=useState(initialTargetMinutes),[actualMinutes,setActualMinutes]=useState(initialTargetMinutes);
+ const [objective,setObjective]=useState(activeSession?.objective||item?.title||""),[recall,setRecall]=useState(activeSession?.recall??""),[retrievalCheck,setRetrievalCheck]=useState(activeSession?.retrieval_check??"");
+ const [retrievalResult,setRetrievalResult]=useState<"independent"|"hinted"|"not_yet"|null>(activeSession?.retrieval_result??null);
+ const [retrievalConfidence,setRetrievalConfidence]=useState<number|null>(activeSession?.retrieval_confidence??null);
+ const [outcome,setOutcome]=useState<"yes"|"partial"|"not_yet"|null>(
+   activeSession?.retrieval_result==="independent"?"yes":activeSession?.retrieval_result==="hinted"?"partial":activeSession?.retrieval_result==="not_yet"?"not_yet":null
+ );
+ const [competence,setCompetence]=useState(activeSession?.retrieval_result==="independent"?4:activeSession?.retrieval_result==="hinted"?3:activeSession?.retrieval_result==="not_yet"?2:3),[did,setDid]=useState(activeSession?.did??""),[unclear,setUnclear]=useState(activeSession?.unclear??""),[note,setNote]=useState(activeSession?.note??"");
+ const [method,setMethod]=useState(activeSession?.method||"tehtävät"),[tasks,setTasks]=useState(activeSession?.tasks??"");
  const log=useLogSession();
  const preferences=usePreferences();
+ const patchActive=usePatchActiveStudySession();
+ const setActiveRunning=useSetActiveStudySessionRunning();
+ const clearActive=useClearActiveStudySession();
  const experimentApplied=useRef(false);
  const course=courses.find(c=>c.id===courseId),topic=topics.find(t=>t.id===topicId);
  const fatigue=sessionFatigueV4(sessions,attempts);
