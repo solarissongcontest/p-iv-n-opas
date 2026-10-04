@@ -145,12 +145,43 @@ test("planned study sessions keep the one-tap automatic timer contract", () => {
   const session = read("src/features/session/SessionForm.tsx");
 
   assert.ok(todayView.includes("Aloita opiskelu nyt"));
-  assert.match(session, /useState\(!!item\)/);
-  assert.match(session, /runStartedAt=useRef<number\|null>\(item\?Date\.now\(\):null\)/);
-  assert.match(session, /item\.target_minutes===30\?"30":"custom"/);
+  assert.ok(session.includes("initialRunning=activeSession?activeSession.status"));
+  assert.ok(session.includes("initialElapsed=activeSession?.effective_elapsed_seconds??0"));
+  assert.ok(session.includes('initialTargetMinutes===30?"30":"custom"'));
   assert.ok(session.includes("currentElapsedSeconds()"));
   assert.ok(session.includes('document.addEventListener("visibilitychange",tick)'));
   assert.ok(session.includes("Aika käynnissä"));
   assert.ok(session.includes("Aika kirjataan automaattisesti"));
   assert.equal(session.includes('onClick={()=>setRunning(v=>!v)}'), false);
+});
+
+test("active study sessions are server-backed, owner-scoped and resumable across devices", () => {
+  const migration = read("supabase/migrations/20261004143000_active_study_session_cross_device.sql");
+  const data = read("src/lib/data.ts");
+  const app = read("src/app/StudyApp.tsx");
+  const session = read("src/features/session/SessionForm.tsx");
+
+  for (const token of [
+    "active_study_sessions",
+    "active_study_session_snapshot",
+    "start_active_study_session",
+    "set_active_study_session_running",
+    "active study sessions select own",
+    "active study sessions update own",
+    "grant select, insert, update, delete on table public.active_study_sessions to authenticated",
+    "clock_timestamp()",
+  ]) assert.ok(migration.includes(token), "Missing active-session migration contract: " + token);
+
+  assert.ok(data.includes('queryKey: ["active-study-session"]'));
+  assert.ok(data.includes("refetchInterval: 5_000"));
+  assert.ok(data.includes("useStartActiveStudySession"));
+  assert.ok(data.includes("usePatchActiveStudySession"));
+  assert.ok(data.includes("useSetActiveStudySessionRunning"));
+
+  assert.ok(app.includes("Opiskelukerta käynnissä"));
+  assert.ok(app.includes("jatka samalla sessiolla"));
+  assert.ok(app.includes("startActiveSession.mutateAsync"));
+  assert.ok(session.includes("effective_elapsed_seconds"));
+  assert.ok(session.includes("persistActivePhase"));
+  assert.ok(session.includes("Sulje näkymä"));
 });
