@@ -1,0 +1,52 @@
+name: KE04 Production Migration Preview
+
+on:
+  push:
+    branches:
+      - ke04-production-migration-preview
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ke04-production-migration-preview
+  cancel-in-progress: false
+
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      POSTGRES_URL: ${{ secrets.POSTGRES_URL }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Canonical repository guard
+        run: node scripts/assert-canonical-repo.mjs
+
+      - name: Validate database target
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "${POSTGRES_URL:-}" || { echo "::error::POSTGRES_URL is not configured"; exit 1; }
+          python3 - <<'PY'
+          import os
+          from urllib.parse import urlparse
+          p=urlparse(os.environ["POSTGRES_URL"])
+          if p.scheme not in {"postgres","postgresql"} or not p.hostname:
+              raise SystemExit("::error::Invalid POSTGRES_URL")
+          print("Database host:", p.hostname)
+          PY
+
+      - name: Preview pending production migrations
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx --yes supabase@2.117.0 db push --db-url "$POSTGRES_URL" --dry-run
+
+      - name: Show production migration history
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx --yes supabase@2.117.0 migration list --db-url "$POSTGRES_URL"
