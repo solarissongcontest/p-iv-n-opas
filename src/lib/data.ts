@@ -793,7 +793,13 @@ type RecordPracticeAttemptInput = {
 async function doRecordPracticeAttempt(payload: unknown, operationId: string) {
   const input = payload as RecordPracticeAttemptInput;
   const hintsUsed = Math.max(input.hints_used ?? 0, input.hint_used ? 1 : 0);
-  const { data, error } = await untypedSupabase.rpc("record_adaptive_practice_attempt", {
+  const questionPayload = {
+    ...(input.question_payload ?? {}),
+    ...(input.question_bank_id ? { questionBankId: input.question_bank_id } : {}),
+    ...(input.attempt_type === "matching" ? { actualAttemptType: "matching" } : {}),
+  };
+
+  const adaptive = await untypedSupabase.rpc("record_adaptive_practice_attempt", {
     p_course_id: input.course_id,
     p_topic_id: input.topic_id,
     p_date: input.date ?? today(),
@@ -809,13 +815,46 @@ async function doRecordPracticeAttempt(payload: unknown, operationId: string) {
     p_source: input.source ?? "practice",
     p_skills: input.skills ?? [],
     p_expected_concepts: input.expected_concepts ?? [],
-    p_question_payload: input.question_payload ?? {},
+    p_question_payload: questionPayload,
     p_operation_id: operationId,
     p_question_bank_id: input.question_bank_id ?? null,
   });
-  if (error) throw error;
-  if (!data) throw new Error("Harjoitusyrityksen tallennus ei palauttanut tunnistetta.");
-  return data as string;
+
+  if (!adaptive.error) {
+    if (!adaptive.data) throw new Error("Harjoitusyrityksen tallennus ei palauttanut tunnistetta.");
+    return adaptive.data as string;
+  }
+
+  const missingAdaptiveRpc =
+    adaptive.error.code === "PGRST202" ||
+    adaptive.error.code === "42883" ||
+    /record_adaptive_practice_attempt|could not find the function|schema cache/i.test(adaptive.error.message ?? "");
+  if (!missingAdaptiveRpc) throw adaptive.error;
+
+  // Keep Practice fully usable before the optional V3 DB migration is applied.
+  // Matching is preserved in question_payload and normalized back on reads.
+  const legacy = await untypedSupabase.rpc("record_practice_attempt", {
+    p_course_id: input.course_id,
+    p_topic_id: input.topic_id,
+    p_date: input.date ?? today(),
+    p_attempt_type: input.attempt_type === "matching" ? "recognition" : input.attempt_type,
+    p_prompt: input.prompt,
+    p_response: input.response ?? null,
+    p_difficulty: input.difficulty,
+    p_result: input.result,
+    p_confidence: input.confidence ?? null,
+    p_hint_used: hintsUsed > 0,
+    p_hints_used: hintsUsed,
+    p_response_time_ms: input.response_time_ms ?? null,
+    p_source: input.source ?? "practice",
+    p_skills: input.skills ?? [],
+    p_expected_concepts: input.expected_concepts ?? [],
+    p_question_payload: questionPayload,
+    p_operation_id: operationId,
+  });
+  if (legacy.error) throw legacy.error;
+  if (!legacy.data) throw new Error("Harjoitusyrityksen tallennus ei palauttanut tunnistetta.");
+  return legacy.data as string;
 }
 
 type PlanMutationExpectation = {
