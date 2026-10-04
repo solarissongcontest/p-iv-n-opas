@@ -266,18 +266,22 @@ test("v5 offline write survives reload, syncs, and appears on a second device", 
   await pageA.getByLabel("Mitä teit?").fill("Cross-device offline E2E");
   await pageA.getByLabel("Mikä jäi epäselväksi?").fill(marker);
 
+  const queuedMarkerPresent = () => pageA.evaluate((needle) => {
+    return Object.keys(localStorage)
+      .filter((key) => key.startsWith("opk.pending.v2."))
+      .some((key) => (localStorage.getItem(key) ?? "").includes(needle));
+  }, marker);
+
   await contextA.setOffline(true);
   await pageA.getByRole("button", { name: "Tallenna" }).click();
-
-  const pendingSync = pageA.getByRole("status").filter({ hasText: "Tallennettu paikallisesti" });
-  await expect(pendingSync).toContainText("synkronoidaan yhteyden palattua", { timeout: 30_000 });
+  await expect(pageA.getByText("Tallennettu paikallisesti · synkataan myöhemmin.")).toBeVisible({ timeout: 30_000 });
+  await expect.poll(queuedMarkerPresent, { timeout: 30_000 }).toBe(true);
 
   await pageA.reload({ waitUntil: "domcontentloaded" });
-  const reloadedPendingSync = pageA.getByRole("status").filter({ hasText: "Tallennettu paikallisesti" });
-  await expect(reloadedPendingSync).toContainText("synkronoidaan yhteyden palattua", { timeout: 30_000 });
+  await expect.poll(queuedMarkerPresent, { timeout: 30_000 }).toBe(true);
 
   await contextA.setOffline(false);
-  await expect(reloadedPendingSync).toBeHidden({ timeout: 30_000 });
+  await expect.poll(queuedMarkerPresent, { timeout: 30_000, intervals: [500, 1000, 2000] }).toBe(false);
 
   const contextB = await browser.newContext({ serviceWorkers: "allow" });
   const pageB = await contextB.newPage();
