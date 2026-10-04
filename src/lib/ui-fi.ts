@@ -107,6 +107,7 @@ export function attemptTypeLabel(value: string) {
     case "calculation": return "laskutehtävä";
     case "application": return "soveltaminen";
     case "multiple_choice": return "monivalinta";
+    case "matching": return "yhdistely";
     case "explanation": return "käsitteen selitys";
     case "ordering": return "järjestäminen";
     case "error_detection": return "virheen tunnistaminen";
