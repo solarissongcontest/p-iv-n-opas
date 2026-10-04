@@ -162,7 +162,7 @@ export async function handleKe04QuestionBankSeed(request: Request): Promise<Resp
       console.error("[KE04 seed] upsert failed", result.error);
       return json({
         error: "KE04-tehtäväpankkia ei voitu tallentaa.",
-        detail: process.env.NODE_ENV === "production" ? undefined : String(result.error.message ?? ""),
+        detail: process.env["NODE_ENV"] === "production" ? undefined : String(result.error.message ?? ""),
       }, 503);
     }
   }
