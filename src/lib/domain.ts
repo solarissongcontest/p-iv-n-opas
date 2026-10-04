@@ -71,6 +71,7 @@ export type PracticeAttempt = {
     | "calculation"
     | "application"
     | "multiple_choice"
+    | "matching"
     | "explanation"
     | "ordering"
     | "error_detection"
@@ -145,14 +146,45 @@ export type QuestionBankItem = {
   status: "draft" | "validated" | "active" | "retired";
   source_type: "manual" | "ai" | "material" | "seed";
   source_ref: string | null;
+  content_id?: string | null;
+  prerequisites?: string[];
+  common_errors?: string[];
+  scoring_guide?: string | null;
+  exam_eligible?: boolean;
+  reserve_for_exam?: boolean;
+  validated?: boolean;
+  matching_pairs?: Array<{ left: string; right: string }>;
+  seed_version?: string | null;
   metadata: Record<string, unknown>;
   stimulus_package?: Record<string, unknown>;
-  answer_mode?: "text" | "formula" | "diagram" | "graph" | "mixed";
+  answer_mode?: "text" | "formula" | "diagram" | "graph" | "mixed" | "matching";
   points?: number | null;
   transfer_level?: number;
   confusion_topic_ids?: string[];
   pretest_eligible?: boolean;
   created_at: string;
+  updated_at: string;
+};
+
+export type QuestionUserState = {
+  owner_id: string;
+  question_id: string;
+  course_id: string;
+  topic_id: string | null;
+  times_seen: number;
+  times_attempted: number;
+  times_correct: number;
+  times_partial: number;
+  last_seen: string | null;
+  last_attempted: string | null;
+  last_result: PracticeAttempt["result"] | null;
+  best_result: PracticeAttempt["result"] | null;
+  last_hint_count: number;
+  mastery_evidence: number;
+  next_review: string | null;
+  used_in_exam: boolean;
+  last_exam_at: string | null;
+  last_response_time_ms: number | null;
   updated_at: string;
 };
 

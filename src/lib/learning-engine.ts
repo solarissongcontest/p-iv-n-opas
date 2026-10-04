@@ -20,6 +20,7 @@ export type LearningAttemptType =
   | "calculation"
   | "application"
   | "multiple_choice"
+  | "matching"
   | "explanation"
   | "ordering"
   | "error_detection"
@@ -75,6 +76,14 @@ export type PracticeQuestion = {
   explanation: string;
   options?: string[];
   correctAnswer?: string | null;
+  matchingPairs?: Array<{ left: string; right: string }>;
+  prerequisites?: string[];
+  commonErrors?: string[];
+  reserveForExam?: boolean;
+  examEligible?: boolean;
+  scoringGuide?: string | null;
+  answerMode?: "text" | "formula" | "diagram" | "graph" | "mixed" | "matching";
+  points?: number | null;
   source?: "bank" | "template";
   bankId?: string;
 };
@@ -175,7 +184,7 @@ export function deriveTopicLearningState(
     ? rows.reduce((sum, attempt) => sum + (legacyOutcome(attempt) === "correct" ? 1 : legacyOutcome(attempt) === "partial" ? 0.45 : 0), 0) / rows.length
     : Math.min(1, Number(topic.verified_level || 0) / 5);
 
-  const recallRows = rows.filter((attempt) => ["free_recall", "short_answer", "explanation", "recognition"].includes(attemptType(attempt)));
+  const recallRows = rows.filter((attempt) => ["free_recall", "short_answer", "explanation", "recognition", "matching"].includes(attemptType(attempt)));
   const appRows = rows.filter((attempt) => isApplication(attemptType(attempt)));
   const delayedRows = rows.filter((attempt) => Number(attempt.delay_days || 0) >= 3);
 
@@ -414,6 +423,11 @@ const genericHints: Record<LearningAttemptType, string[]> = {
     "Sulje pois vaihtoehdot yhden käsitteellisen virheen perusteella.",
     "Palaa kysymyksen täsmälliseen sanamuotoon ennen valintaa.",
   ],
+  matching: [
+    "Tee ensin ne parit, joista olet täysin varma.",
+    "Vertaa jäljelle jäävien vaihtoehtojen käsitteellisiä tuntomerkkejä.",
+    "Tarkista lopuksi, ettei sama oikean puolen vaihtoehto ole päätynyt kahdelle vasemman puolen käsitteelle.",
+  ],
   explanation: [
     "Aloita ilmiöstä: mitä tapahtuu?",
     "Lisää mekanismi: miksi se tapahtuu?",
@@ -470,6 +484,11 @@ function questionTemplate(topic: Topic, type: LearningAttemptType, difficulty: n
       concepts: ["valinta", "poissulku", "perustelu"],
       explanation: "Monivalinta on hyödyllinen vasta, kun perustelu pakottaa erottamaan samankaltaiset vaihtoehdot.",
     },
+    matching: {
+      prompt: `Yhdistä aiheen “${name}” keskeiset käsitteet niiden määritelmiin tai seurauksiin ja perustele vaikein pari.`,
+      concepts: ["käsitteiden erottelu", "yhteydet"],
+      explanation: "Yhdistely testaa, erotatko lähikäsitteet toisistaan ja osaatko liittää ne oikeisiin merkityksiin.",
+    },
     explanation: {
       prompt: `Selitä aihe “${name}” muodossa mitä tapahtuu → miksi → mitä siitä seuraa.`,
       concepts: ["ilmiö", "mekanismi", "seuraus"],
@@ -511,21 +530,41 @@ function questionTemplate(topic: Topic, type: LearningAttemptType, difficulty: n
 }
 
 function bankQuestion(item: QuestionBankItem): PracticeQuestion {
+  const type = item.question_type as LearningAttemptType;
   return {
     id: "bank:" + item.id,
     topicId: item.topic_id ?? "",
-    type: item.question_type as LearningAttemptType,
+    type,
     difficulty: Math.max(1, Math.min(5, Number(item.difficulty || 2))) as PracticeQuestion["difficulty"],
     prompt: item.prompt,
-    hints: Array.isArray(item.hints) && item.hints.length ? item.hints : genericHints[item.question_type as LearningAttemptType],
+    hints: Array.isArray(item.hints) && item.hints.length ? item.hints : genericHints[type] ?? genericHints.short_answer,
     skills: Array.isArray(item.skills) ? item.skills : [],
     expectedConcepts: Array.isArray(item.expected_concepts) ? item.expected_concepts : [],
     explanation: item.explanation,
     options: Array.isArray(item.options) ? item.options : [],
     correctAnswer: item.correct_answer,
+    matchingPairs: Array.isArray(item.matching_pairs) ? item.matching_pairs : [],
+    prerequisites: Array.isArray(item.prerequisites) ? item.prerequisites : [],
+    commonErrors: Array.isArray(item.common_errors) ? item.common_errors : [],
+    reserveForExam: item.reserve_for_exam ?? false,
+    examEligible: item.exam_eligible ?? true,
+    scoringGuide: item.scoring_guide ?? null,
+    ...(item.answer_mode ? { answerMode: item.answer_mode } : {}),
+    points: item.points ?? null,
     source: "bank",
     bankId: item.id,
   };
+}
+
+function compatibleQuestionType(itemType: LearningAttemptType, wanted: LearningAttemptType[]) {
+  if (wanted.includes(itemType)) return true;
+  if (itemType === "matching" && wanted.includes("recognition")) return true;
+  if (itemType === "recognition" && wanted.includes("matching")) return true;
+  return false;
+}
+
+function questionIdFromAttempt(attempt: PracticeAttempt) {
+  return String(attempt.question_payload?.["questionBankId"] ?? "");
 }
 
 function selectBankQuestion(input: {
@@ -536,28 +575,102 @@ function selectBankQuestion(input: {
   attempts: PracticeAttempt[];
   index: number;
 }) {
-  const recentlyUsed = new Set(
+  const allSeen = new Set(input.attempts.map(questionIdFromAttempt).filter(Boolean));
+  const recentlyUsed = new Set(input.attempts.slice(0, 24).map(questionIdFromAttempt).filter(Boolean));
+  const examUsed = new Set(
     input.attempts
-      .slice(0, 20)
-      .map((attempt) => String(attempt.question_payload?.["questionBankId"] ?? ""))
+      .filter((attempt) =>
+        (attempt as RichLearningAttempt).source === "exam" ||
+        attempt.question_payload?.["examTransfer"] === true
+      )
+      .map(questionIdFromAttempt)
       .filter(Boolean),
   );
+  const lastTypes = input.attempts.slice(0, 5).map(attemptType);
+  const weakSkills = new Map<string, number>();
+  const weakErrors = new Map<string, number>();
+  const weakPrerequisites = new Map<string, number>();
+
+  for (const attempt of input.attempts.slice(0, 80)) {
+    const outcome = legacyOutcome(attempt);
+    if (outcome === "correct" && hintsUsed(attempt) === 0) continue;
+    const weight = outcome === "incorrect" ? 1 : 0.55;
+    for (const skill of attempt.skills ?? []) weakSkills.set(skill, (weakSkills.get(skill) ?? 0) + weight);
+
+    const payloadErrors = Array.isArray(attempt.question_payload?.["commonErrors"])
+      ? attempt.question_payload?.["commonErrors"] as string[]
+      : [];
+    const payloadPrerequisites = Array.isArray(attempt.question_payload?.["prerequisites"])
+      ? attempt.question_payload?.["prerequisites"] as string[]
+      : [];
+    for (const error of payloadErrors) weakErrors.set(error, (weakErrors.get(error) ?? 0) + weight);
+    for (const prerequisite of payloadPrerequisites) {
+      weakPrerequisites.set(prerequisite, (weakPrerequisites.get(prerequisite) ?? 0) + weight);
+    }
+  }
+
   const candidates = input.bank
     .filter((item) =>
       item.curriculum === "LOPS21" &&
       item.topic_id === input.topicId &&
       (item.status === "active" || item.status === "validated") &&
-      input.types.includes(item.question_type as LearningAttemptType)
+      (!(item.reserve_for_exam ?? false) || examUsed.has(item.id))
     )
-    .sort((a, b) => {
-      const aRecent = recentlyUsed.has(a.id) ? 1 : 0;
-      const bRecent = recentlyUsed.has(b.id) ? 1 : 0;
-      const aDistance = Math.abs(Number(a.difficulty) - input.targetDifficulty);
-      const bDistance = Math.abs(Number(b.difficulty) - input.targetDifficulty);
-      return aRecent - bRecent || aDistance - bDistance || a.created_at.localeCompare(b.created_at);
-    });
+    .map((item) => {
+      const itemType = item.question_type as LearningAttemptType;
+      const unseen = !allSeen.has(item.id);
+      const recent = recentlyUsed.has(item.id);
+      const difficultyDistance = Math.abs(Number(item.difficulty) - input.targetDifficulty);
+      const weakSkillScore = (item.skills ?? []).reduce((sum, skill) => sum + Math.min(2, weakSkills.get(skill) ?? 0), 0);
+      const errorRecoveryScore = (item.common_errors ?? []).reduce(
+        (sum, error) => sum + Math.min(2, weakErrors.get(error) ?? 0),
+        0,
+      );
+      const prerequisiteRecoveryScore = (item.prerequisites ?? []).reduce(
+        (sum, prerequisite) => sum + Math.min(2, weakPrerequisites.get(prerequisite) ?? 0),
+        0,
+      );
+      const typeMatch = compatibleQuestionType(itemType, input.types);
+      const typeDiversity = lastTypes.includes(itemType) ? 0 : 0.4;
+      const curated = item.source_type === "seed" && item.validated !== false ? 0.45 : 0;
+      const releasedReserve = (item.reserve_for_exam ?? false) && examUsed.has(item.id);
+      const score =
+        (unseen ? 4.5 : 0) +
+        (typeMatch ? 1.8 : 0) +
+        Math.max(0, 2.4 - difficultyDistance * 1.1) +
+        Math.min(2.2, weakSkillScore * 0.42) +
+        Math.min(1.8, errorRecoveryScore * 0.45) +
+        Math.min(1.4, prerequisiteRecoveryScore * 0.35) +
+        typeDiversity +
+        curated +
+        (releasedReserve ? 0.15 : 0) -
+        (recent ? 7 : 0);
+      return { item, score };
+    })
+    .sort((a, b) => b.score - a.score || a.item.created_at.localeCompare(b.item.created_at));
+
   if (!candidates.length) return null;
-  return bankQuestion(candidates[input.index % candidates.length]!);
+  const pool = candidates.slice(0, Math.min(5, candidates.length));
+  return bankQuestion(pool[input.index % pool.length]!.item);
+}
+
+function adaptiveTargetDifficulty(
+  baseDifficulty: number,
+  topicId: string,
+  attempts: PracticeAttempt[],
+) {
+  const recent = attempts.filter((attempt) => attempt.topic_id === topicId).slice(0, 4);
+  const independentWins = recent.filter((attempt) =>
+    legacyOutcome(attempt) === "correct" &&
+    hintsUsed(attempt) === 0 &&
+    Number(attempt.difficulty) >= baseDifficulty
+  ).length;
+  const struggles = recent.filter((attempt) =>
+    legacyOutcome(attempt) === "incorrect" || hintsUsed(attempt) >= 2
+  ).length;
+  if (independentWins >= 2 && struggles === 0) return Math.min(5, baseDifficulty + 1);
+  if (struggles >= 2) return Math.max(1, baseDifficulty - 1);
+  return baseDifficulty;
 }
 
 function desiredTypes(state: TopicLearningState, examStage?: ExamStageKey): LearningAttemptType[] {
@@ -567,9 +680,9 @@ function desiredTypes(state: TopicLearningState, examStage?: ExamStageKey): Lear
   if (examStage === "simulation") return ["simulation", "application", "calculation"];
   if (examStage === "repair") return ["error_detection", "short_answer", "free_recall"];
   if (state.masteryLevel <= 1) return ["free_recall", "short_answer", "explanation"];
-  if (state.masteryLevel === 2) return ["short_answer", "calculation", "free_recall", "recognition"];
-  if (state.masteryLevel === 3) return ["calculation", "application", "recognition", "error_detection"];
-  return ["application", "error_detection", "simulation", "recognition"];
+  if (state.masteryLevel === 2) return ["short_answer", "calculation", "free_recall", "recognition", "matching"];
+  if (state.masteryLevel === 3) return ["calculation", "application", "recognition", "matching", "error_detection"];
+  return ["application", "error_detection", "simulation", "recognition", "matching"];
 }
 
 export function selectPracticeQuestion(input: {
@@ -620,11 +733,12 @@ export function selectPracticeQuestion(input: {
   const types = input.preferredTypes?.length ? input.preferredTypes : desiredTypes(row.state, input.examStage);
   const lastTypes = selectedRecent.map((attempt) => attemptType(attempt));
   const type = types.find((candidate) => !lastTypes.includes(candidate)) ?? types[(input.index ?? 0) % types.length]!;
-  const difficulty =
+  const baseDifficulty =
     row.state.masteryLevel <= 1 ? 1 :
     row.state.masteryLevel === 2 ? 2 :
     row.state.masteryLevel === 3 ? 3 :
     row.state.masteryLevel === 4 ? 4 : 5;
+  const difficulty = adaptiveTargetDifficulty(baseDifficulty, row.topic.id, input.attempts);
   const bank = selectBankQuestion({
     bank: input.questionBank ?? [],
     topicId: row.topic.id,

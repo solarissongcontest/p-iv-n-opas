@@ -5,6 +5,7 @@ import {
   useCreateExamSimulation,
   useExamSimulations,
   useQuestionBank,
+  usePracticeAttempts,
   useRecordPracticeAttempt,
   useUpdateExamSimulation,
 } from "@/lib/data";
@@ -16,6 +17,7 @@ import {
 import { AbittiAnswerEditor, answerHasContent, answerPlainText } from "@/components/AbittiAnswerEditor";
 import { SketchAnswerCanvas } from "@/components/SketchAnswerCanvas";
 import { answerModeLabel, stimulusFieldLabel } from "@/lib/ui-fi";
+import { ensureKe04QuestionBankSeed } from "@/lib/ke04-question-bank-browser";
 
 const primary="inline-flex min-h-11 items-center justify-center rounded-xl bg-primary px-4 text-sm font-medium text-primary-foreground disabled:opacity-50";
 const secondary="inline-flex min-h-11 items-center justify-center rounded-xl border border-border bg-surface px-4 text-sm disabled:opacity-50";
@@ -33,6 +35,7 @@ function Stimulus({value}:{value:Record<string,unknown>|null}) {
 
 export function ExamSimulationV5({courses,topics}:{courses:Course[];topics:Topic[]}) {
   const bank=useQuestionBank();
+  const attempts=usePracticeAttempts();
   const create=useCreateExamSimulation();
   const update=useUpdateExamSimulation();
   const simulations=useExamSimulations();
@@ -48,16 +51,34 @@ export function ExamSimulationV5({courses,topics}:{courses:Course[];topics:Topic
   const [startedAt,setStartedAt]=useState<number|null>(null);
   const [elapsed,setElapsed]=useState(0);
   const [finishing,setFinishing]=useState(false);
+  const [seedingKe04,setSeedingKe04]=useState(false);
+  const seededCourseRef=useRef(new Set<string>());
   const answersRef=useRef<Record<string,AnswerState>>({});
   const autosaveTimer=useRef<number|null>(null);
 
   const course=courses.find(c=>c.id===courseId)??null;
+
+  useEffect(()=>{
+    if(!course||course.code.toUpperCase()!=="KE04"||bank.isLoading)return;
+    const seeded=(bank.data??[]).filter(item=>
+      item.course_id===course.id&&item.module_code==="KE04"&&item.source_type==="seed"&&item.seed_version==="v3"
+    ).length;
+    if(seeded>=780||seededCourseRef.current.has(course.id))return;
+    seededCourseRef.current.add(course.id);
+    setSeedingKe04(true);
+    void ensureKe04QuestionBankSeed(course.id)
+      .then(()=>bank.refetch())
+      .catch(()=>seededCourseRef.current.delete(course.id))
+      .finally(()=>setSeedingKe04(false));
+  },[course,bank.data,bank.isLoading]);
+
   const simulation=useMemo(()=>course?buildExamSimulationV5({
     course,
     topics:topics.filter(t=>t.course_id===course.id),
     questions:bank.data??[],
+    attempts:attempts.data??[],
     mode,
-  }):null,[course,topics,bank.data,mode]);
+  }):null,[course,topics,bank.data,attempts.data,mode]);
   const resumable=useMemo(()=>(simulations.data??[]).find(row=>
     row.course_id===courseId&&row.mode===mode&&!row.completed_at
   )??null,[simulations.data,courseId,mode]);
@@ -209,6 +230,7 @@ export function ExamSimulationV5({courses,topics}:{courses:Course[];topics:Topic
           source:"exam",
           skills:item.skills,
           expected_concepts:item.expected_concepts,
+          question_bank_id:item.id,
           question_payload:{
             examSimulationId:rowId,
             questionBankId:item.id,
@@ -267,6 +289,7 @@ export function ExamSimulationV5({courses,topics}:{courses:Course[];topics:Topic
         <label className="text-sm font-medium">Kurssi<select className="mt-1 w-full rounded-xl border bg-surface p-3" value={courseId} onChange={e=>{setCourseId(e.target.value);setSelected([]);}}>{courses.filter(c=>!c.archived).map(c=><option key={c.id} value={c.id}>{c.code} · {c.name}</option>)}</select></label>
         <label className="text-sm font-medium">Tila<select className="mt-1 w-full rounded-xl border bg-surface p-3" value={mode} onChange={e=>{setMode(e.target.value as "practice"|"full");setSelected([]);}}><option value="full">Täysi koeharjoitus</option><option value="practice">Lyhyempi harjoitus</option></select></label>
       </div>
+      {seedingKe04&&course?.code.toUpperCase()==="KE04"&&<div className="mt-5 rounded-xl bg-accent/50 p-3 text-sm">KE04:n kuratoitua V3-tehtäväpankkia alustetaan koeharjoitusta varten…</div>}
       {simulation?<div className="mt-5">
         <div className="rounded-xl bg-accent/50 p-3 text-sm">Tarjolla {simulation.maxTasks} tehtävää · valitse enintään {simulation.maxSelected} · enintään {simulation.maxPoints} p · {simulation.durationMinutes} min. Vihjeitä tai osaamisnäkymää ei näytetä kesken suorituksen.</div>
         <div className="mt-3 space-y-2">{simulation.tasks.map(task=><button type="button" key={task.id} aria-pressed={selected.includes(task.id)} onClick={()=>toggle(task.id)} className={"flex min-h-14 w-full items-center justify-between gap-3 rounded-xl border p-3 text-left "+(selected.includes(task.id)?"border-primary bg-accent":"border-border bg-surface")}><span><b>{task.title}</b><small className="mt-1 block text-muted-foreground">{answerModeLabel(task.answerMode)} · {task.stimulus?"aineistotehtävä":"ei erillistä aineistoa"}</small></span><span className="font-semibold">{task.points} p</span></button>)}</div>

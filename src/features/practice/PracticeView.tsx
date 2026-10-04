@@ -41,6 +41,7 @@ import {
   useUpsertLearningPolicyState,
 } from "@/lib/data";
 import { getDeviceAccessToken } from "@/lib/deviceSession";
+import { ensureKe04QuestionBankSeed } from "@/lib/ke04-question-bank-browser";
 import { addDays, fullDate, today } from "@/lib/fi";
 import { attemptTypeLabel, confidenceLabel } from "@/lib/ui-fi";
 import {
@@ -99,6 +100,7 @@ const typeLabel: Record<string, string> = {
   error_detection: "Virheen tunnistaminen",
   simulation: "Koetyylinen tehtävä",
   recognition: "Menetelmän tunnistaminen",
+  matching: "Yhdistely",
 };
 
 export function PracticeView({
@@ -128,7 +130,10 @@ export function PracticeView({
   const [attemptIndex, setAttemptIndex] = useState(0);
   const [response, setResponse] = useState("");
   const [selectedOption, setSelectedOption] = useState("");
+  const [matchingAnswers, setMatchingAnswers] = useState<Record<string, string>>({});
   const [generatingQuestions, setGeneratingQuestions] = useState(false);
+  const [seedingKe04, setSeedingKe04] = useState(false);
+  const seedAttemptedRef = useRef(new Set<string>());
   const [hintLevel, setHintLevel] = useState(0);
   const [confidence, setConfidence] = useState<number | null>(null);
   const [feedback, setFeedback] = useState("");
@@ -166,6 +171,33 @@ export function PracticeView({
   }, [initialTopicId]);
 
   const course = courses.find((candidate) => candidate.id === courseId) ?? null;
+
+  useEffect(() => {
+    if (!course || course.code.toUpperCase() !== "KE04" || questionBank.isLoading) return;
+    const seeded = (questionBank.data ?? []).filter((item) =>
+      item.course_id === course.id &&
+      item.module_code === "KE04" &&
+      item.source_type === "seed" &&
+      item.seed_version === "v3"
+    ).length;
+    if (seeded >= 780 || seedAttemptedRef.current.has(course.id)) return;
+
+    seedAttemptedRef.current.add(course.id);
+    setSeedingKe04(true);
+    void ensureKe04QuestionBankSeed(course.id)
+      .then(async (status) => {
+        await questionBank.refetch();
+        setAttemptIndex(0);
+        toast.success(`KE04 V3 -tehtäväpankki valmis: ${status.questions} tehtävää.`);
+      })
+      .catch((error: unknown) => {
+        seedAttemptedRef.current.delete(course.id);
+        const message = error instanceof Error ? error.message : "KE04-tehtäväpankkia ei voitu alustaa.";
+        toast.error(message);
+      })
+      .finally(() => setSeedingKe04(false));
+  }, [course, questionBank.data, questionBank.isLoading]);
+
   const courseTopics = useMemo(
     () => topics.filter((topic) => topic.course_id === courseId),
     [courseId, topics],
@@ -320,13 +352,13 @@ export function PracticeView({
 
   const preferredTypes: LearningAttemptType[] | undefined =
     activePath?.stage === "pretest"
-      ? ["recognition", "multiple_choice", "short_answer"]
+      ? ["recognition", "matching", "multiple_choice", "short_answer"]
       : activePath?.stage === "worked_example" || activePath?.stage === "self_explanation"
         ? ["explanation", "short_answer"]
         : activePath?.stage === "completion" || activePath?.stage === "guided"
           ? ["calculation", "short_answer", "ordering"]
           : activePath?.stage === "varied_context"
-            ? ["application", "recognition", "error_detection"]
+            ? ["application", "recognition", "matching", "error_detection"]
             : activePath?.stage === "transfer"
               ? ["application", "simulation", "error_detection"]
               : activePath?.stage === "delayed_verification"
@@ -403,6 +435,7 @@ export function PracticeView({
     startedAt.current = Date.now();
     setResponse("");
     setSelectedOption("");
+    setMatchingAnswers({});
     setHintLevel(activePath?.stage === "completion" ? 1 : 0);
     setConfidence(null);
     setDelayedPrediction(null);
@@ -418,11 +451,20 @@ export function PracticeView({
     const isMultipleChoice =
       selection.question.type === "multiple_choice" &&
       Boolean(selection.question.options?.length);
+    const matchingPairs = selection.question.matchingPairs ?? [];
+    const isMatching = selection.question.type === "matching" && matchingPairs.length > 0;
+    const matchingComplete = isMatching && matchingPairs.every((pair) => Boolean(matchingAnswers[pair.left]));
+    const matchingCorrect = isMatching && matchingPairs.every((pair) => matchingAnswers[pair.left] === pair.right);
+
     if (isMultipleChoice && !selectedOption) {
       toast.error("Valitse ensin vaihtoehto.");
       return;
     }
-    if (!isMultipleChoice && requestedResult !== "not_yet" && !answerHasContent(response)) {
+    if (isMatching && !matchingComplete) {
+      toast.error("Yhdistä ensin kaikki parit.");
+      return;
+    }
+    if (!isMultipleChoice && !isMatching && requestedResult !== "not_yet" && !answerHasContent(response)) {
       toast.error("Kirjoita ensin oma yrityksesi.");
       return;
     }
@@ -432,9 +474,16 @@ export function PracticeView({
         ? selectedOption === selection.question.correctAnswer
           ? hintLevel > 0 ? "hinted" : "independent"
           : "not_yet"
-        : requestedResult;
+        : isMatching
+          ? matchingCorrect
+            ? hintLevel > 0 ? "hinted" : "independent"
+            : "not_yet"
+          : requestedResult;
     const storedResponse = [
       selectedOption ? "Valinta: " + selectedOption : "",
+      isMatching
+        ? matchingPairs.map((pair) => `${pair.left} → ${matchingAnswers[pair.left] ?? "—"}`).join("\n")
+        : "",
       answerHasContent(response) ? response.trim() : "",
     ].filter(Boolean).join("\n");
 
@@ -526,6 +575,7 @@ export function PracticeView({
         source,
         skills: selection.question.skills,
         expected_concepts: selection.question.expectedConcepts,
+        question_bank_id: selection.question.bankId ?? null,
         question_payload: {
           explanation: selection.question.explanation,
           questionBankId: selection.question.bankId ?? null,
@@ -533,6 +583,10 @@ export function PracticeView({
           curriculum: "LOPS21",
           answerContentFormat: "abitti-rich-text",
           selectedOption: selectedOption || null,
+          matchingAnswers: selection.question.type === "matching" ? matchingAnswers : null,
+          prerequisites: selection.question.prerequisites ?? [],
+          commonErrors: selection.question.commonErrors ?? [],
+          reserveForExam: selection.question.reserveForExam ?? false,
           interleaved: selection.interleaved,
           examStage: stage.key,
           scaffoldStage,
@@ -743,7 +797,9 @@ export function PracticeView({
                 {generatingQuestions ? "Luodaan…" : "Luo tehtäviä"}
               </button>
               <span className="text-xs text-muted-foreground">
-                Pankissa {(questionBank.data ?? []).filter((item) => item.course_id === courseId).length}
+                {seedingKe04
+                  ? "KE04-pankkia alustetaan…"
+                  : `Pankissa ${(questionBank.data ?? []).filter((item) => item.course_id === courseId).length} tehtävää`}
               </span>
               <button
                 type="button"
@@ -870,18 +926,46 @@ export function PracticeView({
               </fieldset>
             ) : null}
 
-            <AbittiAnswerEditor
-              key={selection.question.id}
-              label={selection.question.options?.length ? "Perustelu / ratkaisutapa" : "Oma vastaus / ratkaisutapa"}
-              value={response}
-              disabled={Boolean(feedback)}
-              onChange={(next) => {
-                setResponse(next);
-                setRubricEvaluation(null);
-              }}
-              placeholder="Kirjoita muistista ennen materiaalin avaamista…"
-              minHeight={160}
-            />
+            {selection.question.type === "matching" && (selection.question.matchingPairs?.length ?? 0) > 0 ? (
+              <fieldset className="space-y-3">
+                <legend className="text-sm font-medium">Yhdistä parit</legend>
+                {(selection.question.matchingPairs ?? []).map((pair) => {
+                  const choices = [...new Set((selection.question.matchingPairs ?? []).map((candidate) => candidate.right))].sort();
+                  return (
+                    <label key={pair.left} className="grid gap-2 rounded-xl border border-border bg-surface p-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] sm:items-center">
+                      <span className="font-medium">{pair.left}</span>
+                      <select
+                        className="min-h-11 rounded-xl border border-border bg-background px-3"
+                        value={matchingAnswers[pair.left] ?? ""}
+                        disabled={Boolean(feedback)}
+                        onChange={(event) => {
+                          setMatchingAnswers((current) => ({ ...current, [pair.left]: event.target.value }));
+                          setRubricEvaluation(null);
+                        }}
+                      >
+                        <option value="">Valitse pari…</option>
+                        {choices.map((choice) => <option key={choice} value={choice}>{choice}</option>)}
+                      </select>
+                    </label>
+                  );
+                })}
+              </fieldset>
+            ) : null}
+
+            {selection.question.type !== "matching" && (
+              <AbittiAnswerEditor
+                key={selection.question.id}
+                label={selection.question.options?.length ? "Perustelu / ratkaisutapa" : "Oma vastaus / ratkaisutapa"}
+                value={response}
+                disabled={Boolean(feedback)}
+                onChange={(next) => {
+                  setResponse(next);
+                  setRubricEvaluation(null);
+                }}
+                placeholder="Kirjoita muistista ennen materiaalin avaamista…"
+                minHeight={160}
+              />
+            )}
 
             <div className="flex flex-wrap items-center gap-2">
               <button
@@ -934,7 +1018,7 @@ export function PracticeView({
               </fieldset>
             )}
 
-            <div className="practice-self-review rounded-2xl border border-border bg-muted/25 p-4">
+            {selection.question.type !== "matching" && <div className="practice-self-review rounded-2xl border border-border bg-muted/25 p-4">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
                   <p className="font-medium">Vastauksen oma-arviointi</p>
@@ -994,15 +1078,21 @@ export function PracticeView({
                   </p>
                 </div>
               )}
-            </div>
+            </div>}
 
             <div>
               <p className="mb-2 text-sm font-medium">
-                {selection.question.options?.length ? "Tarkista vastaus" : "Miten yritys onnistui?"}
+                {selection.question.options?.length || selection.question.type === "matching" ? "Tarkista vastaus" : "Miten yritys onnistui?"}
               </p>
-              {selection.question.options?.length ? (
+              {selection.question.options?.length || selection.question.type === "matching" ? (
                 <button
-                  disabled={record.isPending || Boolean(feedback) || !selectedOption}
+                  disabled={
+                    record.isPending ||
+                    Boolean(feedback) ||
+                    (selection.question.type === "matching"
+                      ? !(selection.question.matchingPairs ?? []).every((pair) => Boolean(matchingAnswers[pair.left]))
+                      : !selectedOption)
+                  }
                   className={primary}
                   onClick={() => void save("independent")}
                 >
@@ -1037,6 +1127,7 @@ export function PracticeView({
                       setFeedbackPolicy(null);
                       setResponse("");
                       setSelectedOption("");
+                      setMatchingAnswers({});
                       setRubricEvaluation(null);
                       startedAt.current = Date.now();
                     }}>
