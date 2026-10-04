@@ -17,7 +17,7 @@ import {
 import { AbittiAnswerEditor, answerHasContent, answerPlainText } from "@/components/AbittiAnswerEditor";
 import { SketchAnswerCanvas } from "@/components/SketchAnswerCanvas";
 import { answerModeLabel, stimulusFieldLabel } from "@/lib/ui-fi";
-import { ensureKe04QuestionBankSeed } from "@/lib/ke04-question-bank.client";
+import { ensureKe04QuestionBankSeed } from "@/lib/ke04-question-bank-browser";
 
 const primary="inline-flex min-h-11 items-center justify-center rounded-xl bg-primary px-4 text-sm font-medium text-primary-foreground disabled:opacity-50";
 const secondary="inline-flex min-h-11 items-center justify-center rounded-xl border border-border bg-surface px-4 text-sm disabled:opacity-50";
