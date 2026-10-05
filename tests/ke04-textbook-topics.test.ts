@@ -57,3 +57,9 @@ test("question-bank skill buckets can merge without losing textbook lesson granu
   assert.ok(biomoleculeSections.has("5.3"));
   assert.ok(biomoleculeSections.has("5.4"));
 });
+
+test("inflected starch prompt beats stale nucleic-acid subtopic metadata", () => {
+  const question = KE04_QUESTION_BANK.find((item) => item.contentId === "KE04-BIO-040");
+  assert.ok(question, "KE04-BIO-040 must exist");
+  assert.equal(ke04TextbookTopicForQuestion(question).section, "5.1");
+});
