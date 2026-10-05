@@ -1,0 +1,152 @@
+name: One-shot practice feedback hotfix
+
+on:
+  push:
+    branches: [fix/practice-feedback-question-snapshot]
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v4
+        with:
+          ref: fix/practice-feedback-question-snapshot
+          fetch-depth: 0
+
+      - name: Patch feedback question lifecycle
+        shell: bash
+        run: |
+          node <<'NODE'
+          const fs = require('node:fs');
+          const path = 'src/features/practice/PracticeView.tsx';
+          let source = fs.readFileSync(path, 'utf8');
+
+          function replaceOnce(before, after, label) {
+            const first = source.indexOf(before);
+            if (first < 0) throw new Error(`Missing expected source block: ${label}`);
+            if (source.indexOf(before, first + before.length) >= 0) throw new Error(`Expected one source block, found multiple: ${label}`);
+            source = source.slice(0, first) + after + source.slice(first + before.length);
+          }
+
+          replaceOnce(
+`  const [showExplanation, setShowExplanation] = useState(false);
+  const [diagnosticMode, setDiagnosticMode] = useState(false);`,
+`  const [showExplanation, setShowExplanation] = useState(false);
+  const [feedbackExplanation, setFeedbackExplanation] = useState("");
+  const [diagnosticMode, setDiagnosticMode] = useState(false);`,
+            'feedback explanation snapshot state',
+          );
+
+          replaceOnce(
+`  useEffect(()=>{
+    setPinnedSelection(null);
+  },[courseId,effectiveTopicId,diagnosticMode,activePath?.stage]);`,
+`  useEffect(()=>{
+    setPinnedSelection(null);
+  },[courseId,effectiveTopicId,diagnosticMode]);`,
+            'selection pin reset dependencies',
+          );
+
+          replaceOnce(
+`    setRubricEvaluation(null);
+    setShowExplanation(false);
+  }, [activePath?.stage, selection?.question.id, selection?.topic.id]);`,
+`    setRubricEvaluation(null);
+    setShowExplanation(false);
+    setFeedbackExplanation("");
+  }, [selection?.question.id, selection?.topic.id]);`,
+            'question lifecycle reset dependencies',
+          );
+
+          replaceOnce(
+`    if (!isMultipleChoice && !isMatching && requestedResult !== "not_yet" && !answerHasContent(response)) {
+      toast.error("Kirjoita ensin oma yrityksesi.");
+      return;
+    }
+
+    const autoResult: PracticeAttempt["result"] =`,
+`    if (!isMultipleChoice && !isMatching && requestedResult !== "not_yet" && !answerHasContent(response)) {
+      toast.error("Kirjoita ensin oma yrityksesi.");
+      return;
+    }
+
+    // Recording an attempt updates the adaptive attempt list before the user
+    // presses "Seuraava tehtävä". Keep both the visible question and its
+    // explanation attached to the exact item that was just answered.
+    setPinnedSelection(selection);
+    setFeedbackExplanation(selection.question.explanation);
+
+    const autoResult: PracticeAttempt["result"] =`,
+            'answer snapshot before mutation',
+          );
+
+          replaceOnce(
+`    if(baseFeedbackPolicy.timing==="after_retry"&&retryCount<baseFeedbackPolicy.retriesBeforeReveal){
+      setPinnedSelection(selection);
+    }
+    try {`,
+`    try {`,
+            'old retry-only pin',
+          );
+
+          replaceOnce(
+`    } catch {
+      toast.error("Harjoitusyritystä ei voitu tallentaa.");
+    }`,
+`    } catch {
+      setPinnedSelection(null);
+      setFeedbackExplanation("");
+      toast.error("Harjoitusyritystä ei voitu tallentaa.");
+    }`,
+            'failed save cleanup',
+          );
+
+          replaceOnce(
+`                      {showExplanation && <p className="mt-2 rounded-lg bg-surface/70 p-3">{selection.question.explanation}</p>}
+                      <button type="button" className={primary+" mt-3 !min-h-11"} onClick={() => {setPinnedSelection(null);setCompletedCount((value)=>value+1);setAttemptIndex((value) => value + 1);}}>`,
+`                      {showExplanation && <p className="mt-2 rounded-lg bg-surface/70 p-3">{feedbackExplanation || selection.question.explanation}</p>}
+                      <button type="button" className={primary+" mt-3 !min-h-11"} onClick={() => {setPinnedSelection(null);setFeedbackExplanation("");setCompletedCount((value)=>value+1);setAttemptIndex((value) => value + 1);}}>`,
+            'explanation rendering snapshot',
+          );
+
+          fs.writeFileSync(path, source);
+
+          const test = `import test from "node:test";
+import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+
+const source = readFileSync(new URL("../src/features/practice/PracticeView.tsx", import.meta.url), "utf8");
+
+test("practice feedback stays bound to the question that was answered", () => {
+  assert.match(source, /setPinnedSelection\\(selection\\);\\s*setFeedbackExplanation\\(selection\\.question\\.explanation\\);/);
+  assert.match(source, /feedbackExplanation \\|\\| selection\\.question\\.explanation/);
+  assert.match(source, /setPinnedSelection\\(null\\);setFeedbackExplanation\\(""\\);setCompletedCount/);
+});
+
+test("adaptive stage updates cannot clear an answered question snapshot", () => {
+  const pinReset = source.match(/useEffect\\(\\(\\)=>\\{\\s*setPinnedSelection\\(null\\);\\s*\\},\\[([^\\]]+)\\]\\);/s);
+  assert.ok(pinReset, "pin reset effect must exist");
+  assert.doesNotMatch(pinReset[1] ?? "", /activePath/);
+
+  const questionReset = source.match(/setFeedbackExplanation\\(""\\);\\s*\\}, \\[([^\\]]+)\\]\\);/s);
+  assert.ok(questionReset, "question reset effect must exist");
+  assert.doesNotMatch(questionReset[1] ?? "", /activePath/);
+});
+`;
+          fs.writeFileSync('tests/practice-feedback-question-snapshot.test.ts', test);
+          NODE
+
+      - name: Commit hotfix
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/features/practice/PracticeView.tsx tests/practice-feedback-question-snapshot.test.ts
+          git diff --cached --check
+          git commit -m "Fix practice explanation question snapshot"
+          git push origin HEAD:fix/practice-feedback-question-snapshot
