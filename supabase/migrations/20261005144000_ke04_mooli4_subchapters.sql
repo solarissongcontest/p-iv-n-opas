@@ -2,7 +2,7 @@
 --
 -- The existing 15-topic question-bank taxonomy is intentionally NOT discarded:
 -- it remains in question_bank.metadata.topicName/subtopic/skills for adaptive
--- practice.  topics, Planner and study sessions instead use the 14 textbook
+-- practice. topics, Planner and study sessions instead use the 14 textbook
 -- subchapters that are actually covered on different lessons at school.
 
 create temporary table _ke04_textbook_topics (
@@ -55,8 +55,8 @@ insert into _ke04_old_topic_map(old_name,section) values
   ('Biomolekyylit','5.1');
 
 -- Create all canonical textbook subchapters for every KE04 course, preserving
--- owner scoping.  Existing canonical rows are reused, making the migration
--- safe for preview/test databases that may already contain them.
+-- owner scoping. Existing canonical rows are reused, making the migration safe
+-- for preview/test databases that may already contain them.
 insert into public.topics(
   owner_id, course_id, name, position, weight, importance, materials
 )
@@ -92,7 +92,7 @@ where upper(c.code) = 'KE04'
   and t.name = k.name;
 
 -- Carry useful aggregate learning state from the old broad topics into the new
--- school-facing topic.  Merged sections use conservative averages for mastery
+-- school-facing topic. Merged sections use conservative averages for mastery
 -- and sum actual study/evidence counts.
 with old_state as (
   select
@@ -146,7 +146,7 @@ where target.course_id = s.course_id
   and target.name = k.name;
 
 -- Build an ID replacement table so all foreign keys that point at an old KE04
--- topic are moved to the corresponding textbook subchapter before deletion.
+-- topic can be moved to the corresponding textbook subchapter before deletion.
 create temporary table _ke04_topic_replacements (
   old_id uuid primary key,
   new_id uuid not null
@@ -162,10 +162,133 @@ join public.topics canonical
   on canonical.course_id = old.course_id
  and canonical.name = k.name;
 
--- Move every ordinary FK that references topics(id).  This protects study
--- sessions, planner items, mistakes, practice attempts, question state and any
--- future table that adds a simple FK to topics without having to hand-maintain
--- a brittle list here.
+-- topic_dependencies has a multi-column unique constraint, so blindly updating
+-- several old topics into one canonical topic can collide. Rebuild the affected
+-- rows through the replacement map and de-duplicate them first.
+insert into public.topic_dependencies(
+  owner_id, topic_id, depends_on_topic_id, relation_type, created_at
+)
+select distinct on (d.owner_id, mapped_topic, mapped_dependency, d.relation_type)
+  d.owner_id,
+  mapped_topic,
+  mapped_dependency,
+  d.relation_type,
+  d.created_at
+from (
+  select
+    d.*,
+    coalesce(topic_replacement.new_id, d.topic_id) as mapped_topic,
+    coalesce(dependency_replacement.new_id, d.depends_on_topic_id) as mapped_dependency
+  from public.topic_dependencies d
+  left join _ke04_topic_replacements topic_replacement
+    on topic_replacement.old_id = d.topic_id
+  left join _ke04_topic_replacements dependency_replacement
+    on dependency_replacement.old_id = d.depends_on_topic_id
+  where topic_replacement.old_id is not null
+     or dependency_replacement.old_id is not null
+) d
+where mapped_topic <> mapped_dependency
+order by d.owner_id, mapped_topic, mapped_dependency, d.relation_type, d.created_at
+on conflict (owner_id, topic_id, depends_on_topic_id, relation_type) do nothing;
+
+delete from public.topic_dependencies d
+where exists (
+  select 1 from _ke04_topic_replacements r
+  where r.old_id = d.topic_id or r.old_id = d.depends_on_topic_id
+);
+
+-- learning_policy_states is also unique per owner + topic. It is derived
+-- recommendation state, but preserve the strongest/latest useful signal rather
+-- than throwing it away when several old topics collapse into one section.
+with merged as (
+  select
+    s.owner_id,
+    max(s.course_id::text)::uuid as course_id,
+    r.new_id as topic_id,
+    max(s.desired_retention) as desired_retention,
+    max(s.current_retention) as current_retention,
+    max(s.recommended_minutes) as recommended_minutes,
+    bool_or(s.stop_today) as stop_today,
+    min(s.next_useful_date) as next_useful_date,
+    max(s.recommendation_confidence) as recommendation_confidence,
+    max(s.recommendation_reason) as recommendation_reason,
+    max(s.model_version) as model_version,
+    max(s.updated_at) as updated_at
+  from public.learning_policy_states s
+  join _ke04_topic_replacements r on r.old_id = s.topic_id
+  group by s.owner_id, r.new_id
+)
+insert into public.learning_policy_states(
+  owner_id, course_id, topic_id, desired_retention, current_retention,
+  recommended_minutes, stop_today, next_useful_date,
+  recommendation_confidence, recommendation_reason, model_version, updated_at
+)
+select
+  owner_id, course_id, topic_id, desired_retention, current_retention,
+  recommended_minutes, stop_today, next_useful_date,
+  recommendation_confidence, recommendation_reason, model_version, updated_at
+from merged
+on conflict (owner_id, topic_id) do update set
+  desired_retention = greatest(public.learning_policy_states.desired_retention, excluded.desired_retention),
+  current_retention = greatest(public.learning_policy_states.current_retention, excluded.current_retention),
+  recommended_minutes = greatest(public.learning_policy_states.recommended_minutes, excluded.recommended_minutes),
+  stop_today = public.learning_policy_states.stop_today or excluded.stop_today,
+  next_useful_date = case
+    when public.learning_policy_states.next_useful_date is null then excluded.next_useful_date
+    when excluded.next_useful_date is null then public.learning_policy_states.next_useful_date
+    else least(public.learning_policy_states.next_useful_date, excluded.next_useful_date)
+  end,
+  recommendation_confidence = greatest(public.learning_policy_states.recommendation_confidence, excluded.recommendation_confidence),
+  recommendation_reason = coalesce(excluded.recommendation_reason, public.learning_policy_states.recommendation_reason),
+  model_version = greatest(public.learning_policy_states.model_version, excluded.model_version),
+  updated_at = greatest(public.learning_policy_states.updated_at, excluded.updated_at);
+
+delete from public.learning_policy_states s
+where exists (select 1 from _ke04_topic_replacements r where r.old_id = s.topic_id);
+
+-- UUID-array references are not foreign keys, so PostgreSQL cannot repoint them
+-- automatically. Keep material tags, discrimination practice and legacy topic
+-- dependencies valid after the old rows are removed.
+update public.study_materials sm
+set topic_ids = mapped.topic_ids
+from lateral (
+  select coalesce(array_agg(distinct coalesce(r.new_id, value)), '{}'::uuid[]) as topic_ids
+  from unnest(sm.topic_ids) value
+  left join _ke04_topic_replacements r on r.old_id = value
+) mapped
+where exists (
+  select 1 from unnest(sm.topic_ids) value
+  join _ke04_topic_replacements r on r.old_id = value
+);
+
+update public.practice_attempts a
+set discrimination_topic_ids = mapped.topic_ids
+from lateral (
+  select coalesce(array_agg(distinct coalesce(r.new_id, value)), '{}'::uuid[]) as topic_ids
+  from unnest(a.discrimination_topic_ids) value
+  left join _ke04_topic_replacements r on r.old_id = value
+) mapped
+where exists (
+  select 1 from unnest(a.discrimination_topic_ids) value
+  join _ke04_topic_replacements r on r.old_id = value
+);
+
+update public.topics t
+set dependencies = mapped.topic_ids
+from lateral (
+  select coalesce(array_agg(distinct coalesce(r.new_id, value)), '{}'::uuid[]) as topic_ids
+  from unnest(t.dependencies) value
+  left join _ke04_topic_replacements r on r.old_id = value
+) mapped
+where not exists (select 1 from _ke04_topic_replacements own where own.old_id = t.id)
+  and exists (
+    select 1 from unnest(t.dependencies) value
+    join _ke04_topic_replacements r on r.old_id = value
+  );
+
+-- Move every remaining ordinary single-column FK that references topics(id).
+-- The two tables with merge-sensitive uniqueness above are intentionally
+-- excluded because they were handled safely first.
 do $$
 declare
   fk record;
@@ -182,6 +305,8 @@ begin
       and con.confrelid = 'public.topics'::regclass
       and array_length(con.conkey, 1) = 1
       and array_length(con.confkey, 1) = 1
+      and con.conrelid <> 'public.topic_dependencies'::regclass
+      and con.conrelid <> 'public.learning_policy_states'::regclass
   loop
     execute format(
       'update %s row_to_fix set %I = replacement.new_id from _ke04_topic_replacements replacement where row_to_fix.%I = replacement.old_id',
@@ -194,7 +319,7 @@ end
 $$;
 
 -- The question bank keeps its 15 skill buckets in metadata, but the actual
--- topic_id is refined to the textbook subchapter.  Biomolecule questions are
+-- topic_id is refined to the textbook subchapter. Biomolecule questions are
 -- split across 5.1–5.4 using the content itself because the old bank stored all
 -- of them under one broad 'Biomolekyylit' topic.
 with question_sections as (
@@ -256,9 +381,9 @@ set
 from mapped m
 where q.id = m.id;
 
--- Keep question-level user state and attempts consistent with the remapped
--- question bank.  Attempts not originating from a bank question retain the
--- conservative old-topic replacement above.
+-- Keep question-level state and attempts consistent with the refined question
+-- mapping. Attempts not originating from a bank question retain the conservative
+-- old-topic replacement above.
 update public.question_user_state s
 set topic_id = q.topic_id,
     updated_at = now()
@@ -274,14 +399,47 @@ where a.question_bank_id = q.id
   and q.module_code = 'KE04'
   and a.topic_id is distinct from q.topic_id;
 
--- Old broad rows are no longer school-facing topics. All simple foreign keys
--- have been repointed, so they can now be removed without losing study data.
+update public.pretest_attempts p
+set topic_id = q.topic_id
+from public.question_bank q
+where p.question_bank_id = q.id
+  and q.module_code = 'KE04'
+  and p.topic_id is distinct from q.topic_id;
+
+-- Evidence rows tied to an attempt should follow the attempt's final refined
+-- section instead of staying on the conservative merged fallback.
+update public.mastery_evidence e
+set topic_id = a.topic_id
+from public.practice_attempts a
+where e.attempt_id = a.id
+  and e.topic_id is distinct from a.topic_id;
+
+update public.error_observations e
+set topic_id = a.topic_id
+from public.practice_attempts a
+where e.attempt_id = a.id
+  and e.topic_id is distinct from a.topic_id;
+
+update public.calibration_observations c
+set topic_id = a.topic_id
+from public.practice_attempts a
+where c.attempt_id = a.id
+  and c.topic_id is distinct from a.topic_id;
+
+update public.learning_events e
+set topic_id = a.topic_id
+from public.practice_attempts a
+where e.attempt_id = a.id
+  and e.topic_id is distinct from a.topic_id;
+
+-- Old broad rows are no longer school-facing topics. All references have been
+-- repointed, so they can now be removed without losing study history.
 delete from public.topics old
 using _ke04_topic_replacements replacement
 where old.id = replacement.old_id;
 
 -- Final invariant: every KE04 course has exactly the canonical 14 subchapters
--- with weights totalling 100.  Raise during migration rather than shipping a
+-- with weights totalling 100. Raise during migration rather than shipping a
 -- half-updated planner that looks plausible while being wrong.
 do $$
 declare
