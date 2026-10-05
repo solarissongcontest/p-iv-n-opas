@@ -8,6 +8,18 @@ async function waitForServiceWorker(page: Page) {
   });
 }
 
+async function openStudyLog(page: Page) {
+  const direct = page.getByRole("button", { name: "Kirjaa opiskelu", exact: true }).first();
+  if (await direct.isVisible().catch(() => false)) {
+    await direct.click();
+    return;
+  }
+  await page.getByRole("button", { name: "Lisää", exact: true }).click();
+  const actionSheet = page.getByRole("dialog", { name: "Lisää toimintoja" });
+  await expect(actionSheet).toBeVisible();
+  await actionSheet.getByRole("button", { name: /Kirjaa opiskelu/ }).click();
+}
+
 async function cleanupSession(
   context: BrowserContext,
   page: Page,
@@ -47,7 +59,8 @@ test("installed-style app shell survives a cold offline navigation", async ({ br
     await context.setOffline(true);
     const offlinePage = await context.newPage();
     await offlinePage.goto("/today", { waitUntil: "domcontentloaded" });
-    await expect(offlinePage.getByRole("heading", { name: "Tänään" })).toBeVisible({ timeout: 30_000 });
+    await expect(offlinePage.locator("[data-page='today']")).toBeVisible({ timeout: 30_000 });
+    await expect(offlinePage.getByRole("button", { name: "Tänään", exact: true })).toBeVisible({ timeout: 30_000 });
     await expect(offlinePage.getByText(/Verkkoyhteyttä ei ole|Tallennettu paikallisesti/).first()).toBeVisible({ timeout: 30_000 }).catch(() => undefined);
 
     // The cold start must retain actual study context, not merely render an empty shell.
@@ -68,7 +81,7 @@ test("expired device token does not lock a trusted device out of offline study d
     await enterApp(page);
     await waitForServiceWorker(page);
     await page.goto("/today", { waitUntil: "domcontentloaded" });
-    await expect(page.getByRole("heading", { name: "Tänään" })).toBeVisible();
+    await expect(page.locator("[data-page='today']")).toBeVisible();
 
     await page.evaluate(() => {
       localStorage.setItem("opk.device-token-expires", "0");
@@ -77,7 +90,8 @@ test("expired device token does not lock a trusted device out of offline study d
 
     const offlinePage = await context.newPage();
     await offlinePage.goto("/today", { waitUntil: "domcontentloaded" });
-    await expect(offlinePage.getByRole("heading", { name: "Tänään" })).toBeVisible({ timeout: 30_000 });
+    await expect(offlinePage.locator("[data-page='today']")).toBeVisible({ timeout: 30_000 });
+    await expect(offlinePage.getByRole("button", { name: "Tänään", exact: true })).toBeVisible({ timeout: 30_000 });
     await expect(offlinePage.getByLabel("Käyttäjänimi")).toBeHidden();
     await offlinePage.close();
   } finally {
@@ -246,24 +260,27 @@ test("v5 offline write survives reload, syncs, and appears on a second device", 
   await waitForServiceWorker(pageA);
 
   const marker = "OPK-E2E-" + Date.now();
-  await pageA.getByRole("button", { name: "Lisää", exact: true }).click();
-  const actionSheet = pageA.getByRole("dialog", { name: "Lisää toimintoja" });
-  await expect(actionSheet).toBeVisible();
-  await actionSheet.getByRole("button", { name: /Kirjaa opiskelu/ }).click();
+  await openStudyLog(pageA);
   await expect(pageA.getByRole("dialog")).toBeVisible();
   await pageA.getByLabel("Todellinen kesto minuutteina").fill("1");
   await pageA.getByLabel("Mitä teit?").fill("Cross-device offline E2E");
   await pageA.getByLabel("Mikä jäi epäselväksi?").fill(marker);
 
+  const queuedMarkerPresent = () => pageA.evaluate((needle) => {
+    return Object.keys(localStorage)
+      .filter((key) => key.startsWith("opk.pending.v2."))
+      .some((key) => (localStorage.getItem(key) ?? "").includes(needle));
+  }, marker);
+
   await contextA.setOffline(true);
   await pageA.getByRole("button", { name: "Tallenna" }).click();
-  await expect(pageA.getByRole("status")).toContainText("Tallennettu paikallisesti");
+  await expect.poll(queuedMarkerPresent, { timeout: 30_000, intervals: [250, 500, 1000] }).toBe(true);
 
   await pageA.reload({ waitUntil: "domcontentloaded" });
-  await expect(pageA.getByRole("status")).toContainText("synkataan yhteyden palattua");
+  await expect.poll(queuedMarkerPresent, { timeout: 30_000 }).toBe(true);
 
   await contextA.setOffline(false);
-  await expect(pageA.getByRole("status")).toBeHidden({ timeout: 30_000 });
+  await expect.poll(queuedMarkerPresent, { timeout: 30_000, intervals: [500, 1000, 2000] }).toBe(false);
 
   const contextB = await browser.newContext({ serviceWorkers: "allow" });
   const pageB = await contextB.newPage();
