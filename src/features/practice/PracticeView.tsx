@@ -142,6 +142,7 @@ export function PracticeView({
   const [delayedPrediction, setDelayedPrediction] = useState<number | null>(null);
   const [rubricEvaluation, setRubricEvaluation] = useState<PracticeRubricEvaluation | null>(null);
   const [showExplanation, setShowExplanation] = useState(false);
+  const [feedbackExplanation, setFeedbackExplanation] = useState("");
   const [diagnosticMode, setDiagnosticMode] = useState(false);
   const startedAt = useRef<number>(Date.now());
   const record = useRecordPracticeAttempt();
@@ -390,7 +391,7 @@ export function PracticeView({
 
   useEffect(()=>{
     setPinnedSelection(null);
-  },[courseId,effectiveTopicId,diagnosticMode,activePath?.stage]);
+  },[courseId,effectiveTopicId,diagnosticMode]);
 
   const dueMistakeVerifications=mistakes.filter(mistake=>
     mistake.course_id===courseId &&
@@ -444,7 +445,8 @@ export function PracticeView({
     setRetryCount(0);
     setRubricEvaluation(null);
     setShowExplanation(false);
-  }, [activePath?.stage, selection?.question.id, selection?.topic.id]);
+    setFeedbackExplanation("");
+  }, [selection?.question.id, selection?.topic.id]);
 
   async function save(requestedResult: PracticeAttempt["result"]) {
     if (!selection || feedback) return;
@@ -468,6 +470,12 @@ export function PracticeView({
       toast.error("Kirjoita ensin oma yrityksesi.");
       return;
     }
+
+    // Recording an attempt can update the adaptive attempt list before the user
+    // presses "Seuraava tehtävä". Keep the visible question and explanation
+    // attached to the exact item that was just answered until then.
+    setPinnedSelection(selection);
+    setFeedbackExplanation(selection.question.explanation);
 
     const autoResult: PracticeAttempt["result"] =
       isMultipleChoice && selection.question.correctAnswer
@@ -533,9 +541,6 @@ export function PracticeView({
       activePath?.stage === "independent" ? Math.max(2, transferState?.level ?? 2) :
       activePath?.stage === "self_explanation" ? 1 : 0;
 
-    if(baseFeedbackPolicy.timing==="after_retry"&&retryCount<baseFeedbackPolicy.retriesBeforeReveal){
-      setPinnedSelection(selection);
-    }
     try {
       if (activePath?.stage === "pretest") {
         await recordPretest.mutateAsync({
@@ -685,6 +690,8 @@ export function PracticeView({
               : `Tämä tarvitsee uuden kierroksen.${answerReveal}${explanationReveal}`,
       );
     } catch {
+      setPinnedSelection(null);
+      setFeedbackExplanation("");
       toast.error("Harjoitusyritystä ei voitu tallentaa.");
     }
   }
@@ -1138,8 +1145,8 @@ export function PracticeView({
                       {feedbackPolicy?.reveal !== "none" && <button type="button" className={secondary+" !min-h-11"} onClick={() => setShowExplanation((value) => !value)}>
                         {showExplanation ? "Piilota selitys" : "Näytä täysi selitys"}
                       </button>}
-                      {showExplanation && <p className="mt-2 rounded-lg bg-surface/70 p-3">{selection.question.explanation}</p>}
-                      <button type="button" className={primary+" mt-3 !min-h-11"} onClick={() => {setPinnedSelection(null);setCompletedCount((value)=>value+1);setAttemptIndex((value) => value + 1);}}>
+                      {showExplanation && <p className="mt-2 rounded-lg bg-surface/70 p-3">{feedbackExplanation || selection.question.explanation}</p>}
+                      <button type="button" className={primary+" mt-3 !min-h-11"} onClick={() => {setPinnedSelection(null);setFeedbackExplanation("");setCompletedCount((value)=>value+1);setAttemptIndex((value) => value + 1);}}>
                         Seuraava tehtävä
                       </button>
                     </>
