@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { KE04_QUESTION_BANK, KE04_QUESTION_BANK_VERSION } from "@/data/ke04-question-bank";
+import { ke04TextbookTopicForQuestion } from "./ke04-textbook-topics";
 import { verifyArthurDeviceToken } from "./deviceAuth.server";
 
 const noStore = { "Cache-Control": "no-store" };
@@ -20,8 +21,9 @@ function deterministicUuid(value: string) {
 /**
  * The production database can temporarily lag application migrations.
  * Keep the curated bank writable using the original LOPS21 question_bank
- * contract and place richer V3 fields in metadata. Newer schemas read the
- * exact same metadata, so applying the forward migration later is lossless.
+ * contract and place richer V3 fields in metadata. The bank's own skill
+ * taxonomy remains intact while the stored topic_id follows the actual Mooli
+ * 4 subchapter that is taught at school.
  */
 function questionRow(
   ownerId: string,
@@ -30,6 +32,7 @@ function questionRow(
   question: (typeof KE04_QUESTION_BANK)[number],
 ) {
   const storedQuestionType = question.questionType === "matching" ? "recognition" : question.questionType;
+  const textbookTopic = ke04TextbookTopicForQuestion(question);
   return {
     id: deterministicUuid(`ke04-v3:${ownerId}:${question.seedKey}`),
     owner_id: ownerId,
@@ -54,8 +57,12 @@ function questionRow(
       curated: true,
       contentId: question.contentId,
       chapter: question.chapter,
+      // Keep the original question-bank classification for adaptive skill work.
       topicName: question.topicName,
       subtopic: question.subtopic,
+      textbookSection: textbookTopic.section,
+      textbookUnit: textbookTopic.unit,
+      textbookTopicName: textbookTopic.name,
       originalType: question.originalType,
       questionType: question.questionType,
       prerequisites: question.prerequisites,
@@ -138,21 +145,26 @@ export async function handleKe04QuestionBankSeed(request: Request): Promise<Resp
   const topicByName = new Map<string, string>(
     (topicsResult.data ?? []).map((topic: { id: string; name: string }) => [topic.name, topic.id]),
   );
-  const missingTopics = [...new Set(
-    KE04_QUESTION_BANK
-      .map((question) => question.topicName)
-      .filter((name) => !topicByName.has(name)),
+  const requiredTopicNames = [...new Set(
+    KE04_QUESTION_BANK.map((question) => ke04TextbookTopicForQuestion(question).name),
   )];
+  const missingTopics = requiredTopicNames.filter((name) => !topicByName.has(name));
   if (missingTopics.length) {
     return json({
-      error: "KE04:n aihejako ei vastaa kuratoitua tehtäväpankkia.",
+      error: "KE04:n aihejako ei vastaa Mooli 4:n alalukuja.",
       missingTopics,
     }, 409);
   }
 
-  const rows = KE04_QUESTION_BANK.map((question) =>
-    questionRow(ownerId, body.courseId as string, topicByName.get(question.topicName)!, question)
-  );
+  const rows = KE04_QUESTION_BANK.map((question) => {
+    const textbookTopic = ke04TextbookTopicForQuestion(question);
+    return questionRow(
+      ownerId,
+      body.courseId as string,
+      topicByName.get(textbookTopic.name)!,
+      question,
+    );
+  });
 
   for (let index = 0; index < rows.length; index += 100) {
     const result = await (supabaseAdmin as any)
@@ -169,7 +181,7 @@ export async function handleKe04QuestionBankSeed(request: Request): Promise<Resp
 
   const verify = await (supabaseAdmin as any)
     .from("question_bank")
-    .select("id,source_ref,metadata")
+    .select("id,topic_id,source_ref,metadata")
     .eq("owner_id", ownerId)
     .eq("course_id", body.courseId)
     .eq("source_type", "seed")
@@ -183,7 +195,8 @@ export async function handleKe04QuestionBankSeed(request: Request): Promise<Resp
   const valid =
     seededRows.length === 780 &&
     seededReserve === 45 &&
-    seededRows.every((row: any) => row.metadata?.validated === true);
+    seededRows.every((row: any) => row.metadata?.validated === true) &&
+    seededRows.every((row: any) => typeof row.metadata?.textbookSection === "string");
 
   if (!valid) {
     return json({
@@ -199,5 +212,6 @@ export async function handleKe04QuestionBankSeed(request: Request): Promise<Resp
     questions: seededRows.length,
     reserve: seededReserve,
     storage: "compatible",
+    topicStructure: "Mooli 4 subchapters",
   });
 }
