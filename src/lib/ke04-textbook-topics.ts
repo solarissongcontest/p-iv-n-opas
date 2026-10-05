@@ -173,12 +173,13 @@ function biomoleculeSection(question: Ke04SeedQuestion): string {
   const prompt = question.prompt.toLocaleLowerCase("fi");
   const combined = `${subtopic} ${prompt}`;
 
-  if (/nuklei|nukleot|\bdna\b|\brna\b/.test(combined) && !/tärkkelys|glukoosi|polysakkaridi/.test(prompt)) {
-    return "5.3";
-  }
+  // Prompt-level carbohydrate evidence wins over inherited broad subtopic
+  // metadata. Finnish inflections such as "tärkkelyksestä" must still match.
+  if (/hiilihydra|glukoosi|sakkar|tärkkely|selluloosa|glykogeeni/.test(prompt)) return "5.1";
+  if (/nuklei|nukleot|\bdna\b|\brna\b/.test(combined)) return "5.3";
   if (/aminohapp|protei|peptid|denatur/.test(combined)) return "5.2";
   if (/rasvahapp|trigly|lipid|\brasva|glyserol/.test(combined)) return "5.4";
-  if (/hiilihydra|glukoosi|sakkar|tärkkelys|selluloosa|glykogeeni/.test(combined)) return "5.1";
+  if (/hiilihydra|glukoosi|sakkar|tärkkely|selluloosa|glykogeeni/.test(combined)) return "5.1";
 
   // The first biomolecule questions introduce functional groups before the
   // book moves into the named biomolecule classes. Integrated end-of-unit
