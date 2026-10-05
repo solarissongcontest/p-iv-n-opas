@@ -212,7 +212,9 @@ export function ke04TextbookTopicForQuestion(question: Ke04SeedQuestion): Ke04Te
       return topic("3.3");
     case 14: {
       const text = `${question.subtopic} ${question.prompt}`.toLocaleLowerCase("fi");
-      return /muovi|tekokuit|lisäaine|materiaal|ominaisu/.test(text) ? topic("4.2") : topic("4.1");
+      // Generic polymer structure/properties are part of 4.1. Only explicit
+      // plastics, synthetic fibres and additive material questions belong to 4.2.
+      return /muovi|tekokuit|lisäaine/.test(text) ? topic("4.2") : topic("4.1");
     }
     case 15:
       return topic(biomoleculeSection(question));
