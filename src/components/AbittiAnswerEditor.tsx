@@ -4,6 +4,8 @@ const ABITTI_EDITOR_VERSION = "8.13.0";
 const ABITTI_EDITOR_BASE =
   "https://unpkg.com/rich-text-editor@" + ABITTI_EDITOR_VERSION + "/dist/";
 const ABITTI_EDITOR_SCRIPT = ABITTI_EDITOR_BASE + "rich-text-editor-bundle.js";
+const MATHQUILL_STYLESHEET =
+  "https://unpkg.com/@digabi/mathquill@0.10.12/build/mathquill.css";
 
 type AbittiAnswer = {
   answerHtml: string;
@@ -41,12 +43,127 @@ declare global {
     makeRichText?: MakeRichText;
     __opkAbittiEditorPromise?: Promise<void>;
     __opkMathJaxPromise?: Promise<void>;
+    __opkMathQuillStylePromise?: Promise<void>;
     MathJax?: MathJaxGlobal;
   }
 }
 
 const MATHJAX_SCRIPT =
   "https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-svg.js";
+
+function ensureEditorFixStyles() {
+  if (typeof document === "undefined") return;
+  if (document.querySelector('style[data-opk-abitti-fixes="true"]')) return;
+
+  const style = document.createElement("style");
+  style.dataset["opkAbittiFixes"] = "true";
+  style.textContent = `
+    .opk-abitti-editor,
+    .opk-abitti-editor .opk-abitti-rich-text {
+      color: var(--color-foreground) !important;
+      background: var(--color-surface) !important;
+      caret-color: var(--color-foreground) !important;
+    }
+
+    .opk-abitti-editor .math-editor {
+      display: grid !important;
+      grid-template-columns: minmax(0, 1fr) minmax(14rem, 0.55fr) !important;
+      width: 100% !important;
+      margin-top: 10px !important;
+      overflow: hidden !important;
+      border-top: 3px solid #caedff !important;
+      border-radius: 0 0 10px 10px !important;
+      background: #ffffff !important;
+      color: #111827 !important;
+    }
+
+    .opk-abitti-editor .math-editor-equation-field,
+    .opk-abitti-editor .math-editor-latex-field {
+      box-sizing: border-box !important;
+      width: auto !important;
+      min-width: 0 !important;
+      min-height: 46px !important;
+      color: #111827 !important;
+      -webkit-text-fill-color: #111827 !important;
+      caret-color: #111827 !important;
+    }
+
+    .opk-abitti-editor .math-editor-equation-field {
+      display: flex !important;
+      align-items: center !important;
+      overflow-x: auto !important;
+      background: #ffffff !important;
+    }
+
+    .opk-abitti-editor .math-editor-latex-field {
+      background: #f8fafc !important;
+      border-left: 1px solid #e5e7eb !important;
+      line-height: 1.45 !important;
+    }
+
+    .opk-abitti-editor .mq-editable-field,
+    .opk-abitti-editor .mq-root-block,
+    .opk-abitti-editor .mq-math-mode,
+    .opk-abitti-editor .mq-text-mode {
+      color: #111827 !important;
+      -webkit-text-fill-color: #111827 !important;
+    }
+
+    .opk-abitti-editor .mq-cursor {
+      border-left-color: #111827 !important;
+    }
+
+    .opk-abitti-editor img[data-latex] {
+      max-width: 100%;
+      cursor: text;
+      vertical-align: middle;
+    }
+
+    @media (max-width: 640px) {
+      .opk-abitti-editor .math-editor {
+        grid-template-columns: minmax(0, 1fr) !important;
+      }
+
+      .opk-abitti-editor .math-editor-latex-field {
+        border-left: 0 !important;
+        border-top: 1px solid #e5e7eb !important;
+      }
+    }
+  `;
+  document.head.appendChild(style);
+}
+
+function loadMathQuillStylesheet() {
+  if (typeof window === "undefined") return Promise.reject(new Error("browser-only"));
+  ensureEditorFixStyles();
+  if (window.__opkMathQuillStylePromise) return window.__opkMathQuillStylePromise;
+
+  const existing = document.querySelector<HTMLLinkElement>(
+    'link[data-opk-mathquill-style="true"]',
+  );
+  if (existing?.sheet) return Promise.resolve();
+
+  window.__opkMathQuillStylePromise = new Promise<void>((resolve, reject) => {
+    const link = existing ?? document.createElement("link");
+    const finish = () => resolve();
+    const fail = () => reject(new Error("MathQuillin tyylien lataus epäonnistui."));
+
+    link.addEventListener("load", finish, { once: true });
+    link.addEventListener("error", fail, { once: true });
+
+    if (!existing) {
+      link.rel = "stylesheet";
+      link.href = MATHQUILL_STYLESHEET;
+      link.dataset["opkMathquillStyle"] = "true";
+      document.head.appendChild(link);
+    }
+  }).catch((error) => {
+    delete window.__opkMathQuillStylePromise;
+    throw error;
+  });
+
+  return window.__opkMathQuillStylePromise;
+}
 
 function loadMathJax() {
   if (typeof window === "undefined") return Promise.reject(new Error("browser-only"));
@@ -108,7 +225,7 @@ function latexFallbackDataUrl(latex: string) {
     '<svg xmlns="http://www.w3.org/2000/svg" width="' + width +
     '" height="34" viewBox="0 0 ' + width + ' 34">' +
     '<rect width="100%" height="100%" fill="white"/>' +
-    '<text x="8" y="23" font-size="16" font-family="serif" fill="currentColor">' +
+    '<text x="8" y="23" font-size="16" font-family="serif" fill="#111827">' +
     xmlEscape(latex) + "</text></svg>";
   return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
 }
@@ -136,34 +253,40 @@ async function renderLatexImage(img: HTMLImageElement, latex: string) {
 
 function loadAbittiEditor() {
   if (typeof window === "undefined") return Promise.reject(new Error("browser-only"));
-  if (window.makeRichText) return Promise.resolve();
+  ensureEditorFixStyles();
   if (window.__opkAbittiEditorPromise) return window.__opkAbittiEditorPromise;
 
-  window.__opkAbittiEditorPromise = new Promise<void>((resolve, reject) => {
-    const existing = document.querySelector<HTMLScriptElement>(
-      'script[data-opk-abitti-editor="true"]',
-    );
-    const finish = () => {
-      if (window.makeRichText) resolve();
-      else reject(new Error("Abitti-editori ei rekisteröitynyt."));
-    };
-    if (existing) {
-      existing.addEventListener("load", finish, { once: true });
-      existing.addEventListener("error", () => reject(new Error("Abitti-editorin lataus epäonnistui.")), { once: true });
-      return;
-    }
+  window.__opkAbittiEditorPromise = loadMathQuillStylesheet()
+    .then(() => {
+      if (window.makeRichText) return;
 
-    const script = document.createElement("script");
-    script.type = "module";
-    script.src = ABITTI_EDITOR_SCRIPT;
-    script.dataset["opkAbittiEditor"] = "true";
-    script.addEventListener("load", finish, { once: true });
-    script.addEventListener("error", () => reject(new Error("Abitti-editorin lataus epäonnistui.")), { once: true });
-    document.head.appendChild(script);
-  }).catch((error) => {
-    delete window.__opkAbittiEditorPromise;
-    throw error;
-  });
+      return new Promise<void>((resolve, reject) => {
+        const existing = document.querySelector<HTMLScriptElement>(
+          'script[data-opk-abitti-editor="true"]',
+        );
+        const finish = () => {
+          if (window.makeRichText) resolve();
+          else reject(new Error("Abitti-editori ei rekisteröitynyt."));
+        };
+        if (existing) {
+          existing.addEventListener("load", finish, { once: true });
+          existing.addEventListener("error", () => reject(new Error("Abitti-editorin lataus epäonnistui.")), { once: true });
+          return;
+        }
+
+        const script = document.createElement("script");
+        script.type = "module";
+        script.src = ABITTI_EDITOR_SCRIPT;
+        script.dataset["opkAbittiEditor"] = "true";
+        script.addEventListener("load", finish, { once: true });
+        script.addEventListener("error", () => reject(new Error("Abitti-editorin lataus epäonnistui.")), { once: true });
+        document.head.appendChild(script);
+      });
+    })
+    .catch((error) => {
+      delete window.__opkAbittiEditorPromise;
+      throw error;
+    });
 
   return window.__opkAbittiEditorPromise;
 }
@@ -183,6 +306,7 @@ export function answerHasContent(value: string) {
 export function answerPlainText(value: string) {
   return value
     .replace(/<img\b[^>]*\balt=(["'])(.*?)\1[^>]*>/gi, (_match, _quote, alt: string) => " " + alt + " ")
+    .replace(/<img\b[^>]*\bdata-latex=(["'])(.*?)\1[^>]*>/gi, (_match, _quote, latex: string) => " " + latex + " ")
     .replace(/<br\s*\/?>/gi, "\n")
     .replace(/<\/p>|<\/div>|<\/li>/gi, "\n")
     .replace(/<[^>]+>/g, " ")
@@ -272,6 +396,9 @@ export function AbittiAnswerEditor({
               minHeight: minHeight + "px",
               fontSize: "16px",
               lineHeight: "1.55",
+              color: "var(--color-foreground)",
+              backgroundColor: "var(--color-surface)",
+              caretColor: "var(--color-foreground)",
             },
           },
         });
@@ -357,7 +484,7 @@ export function AbittiAnswerEditor({
         <div className="relative">
           <div
             ref={hostRef}
-            className="opk-abitti-editor overflow-hidden rounded-xl border border-border bg-surface"
+            className="opk-abitti-editor overflow-visible rounded-xl border border-border bg-surface"
             aria-busy={loading}
           />
           {loading && (

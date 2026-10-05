@@ -21,6 +21,14 @@ export type PracticeRubricEvaluation = {
   summary: string;
 };
 
+type RubricQuestion = Pick<PracticeQuestion, "type" | "expectedConcepts"> &
+  Partial<
+    Pick<
+      PracticeQuestion,
+      "prompt" | "explanation" | "correctAnswer" | "answerMode" | "scoringGuide"
+    >
+  >;
+
 function clamp(value: number, min = 0, max = 1) {
   return Math.max(min, Math.min(max, value));
 }
@@ -33,6 +41,142 @@ function normalize(value: string) {
     .replace(/[^a-z0-9åäö+\-*/=.%\s]/gi, " ")
     .replace(/\s+/g, " ")
     .trim();
+}
+
+const subscriptDigits: Record<string, string> = {
+  "₀": "0",
+  "₁": "1",
+  "₂": "2",
+  "₃": "3",
+  "₄": "4",
+  "₅": "5",
+  "₆": "6",
+  "₇": "7",
+  "₈": "8",
+  "₉": "9",
+};
+
+function normalizeChemicalEquation(value: string) {
+  let normalized = value;
+
+  for (const [subscript, digit] of Object.entries(subscriptDigits)) {
+    normalized = normalized.replaceAll(subscript, digit);
+  }
+
+  normalized = normalized
+    .replace(/\\(?:longrightarrow|rightarrow|to)\b/g, "->")
+    .replace(/[→⇒⟶⟹]/g, "->")
+    .replace(/\\(?:mathrm|text|operatorname)\s*\{([^{}]*)\}/g, "$1")
+    .replace(/\\ce\s*\{([^{}]*)\}/g, "$1")
+    .replace(/_\{(\d+)\}/g, "$1")
+    .replace(/_(\d+)/g, "$1")
+    .replace(/\\(?:left|right)/g, "")
+    .replace(/\\[,;! ]/g, "")
+    .replace(/[{}]/g, "")
+    .replace(/\((?:aq|s|l|g)\)/gi, "")
+    .replace(/\s+/g, "")
+    .replace(/[.!?;]+$/g, "");
+
+  const [left, right, ...extra] = normalized.split("->");
+  if (!left || !right || extra.length) return normalized;
+
+  const normalizeSide = (side: string) =>
+    side
+      .split("+")
+      .map((term) => term.replace(/^1(?=[A-ZÅÄÖ(])/u, ""))
+      .join("+");
+
+  return `${normalizeSide(left)}->${normalizeSide(right)}`;
+}
+
+function extractEquation(value: string | null | undefined) {
+  if (!value) return null;
+  const arrow = /(?:→|⇒|⟶|⟹|->|=>|\\(?:longrightarrow|rightarrow|to)\b)/;
+  const match = arrow.exec(value);
+  if (!match) return null;
+
+  const arrowStart = match.index;
+  const separators = [
+    value.lastIndexOf("\n", arrowStart),
+    value.lastIndexOf(";", arrowStart),
+    value.lastIndexOf(":", arrowStart),
+  ];
+  const start = Math.max(...separators) + 1;
+  const afterArrow = arrowStart + match[0].length;
+  const endings = [value.indexOf("\n", afterArrow), value.indexOf(";", afterArrow), value.indexOf(".", afterArrow)]
+    .filter((index) => index >= 0);
+  const end = endings.length ? Math.min(...endings) : value.length;
+  return value.slice(start, end).trim();
+}
+
+function exactChemistryEvaluation(
+  question: RubricQuestion,
+  response: string,
+): PracticeRubricEvaluation | null {
+  if (!question.prompt || !/\btasapainota\b/i.test(question.prompt)) return null;
+
+  const expectedSource = question.correctAnswer || question.explanation;
+  const expectedEquation = extractEquation(expectedSource);
+  const responseEquation = extractEquation(response);
+  if (!expectedEquation || !responseEquation) return null;
+
+  const expected = normalizeChemicalEquation(expectedEquation);
+  const actual = normalizeChemicalEquation(responseEquation);
+  if (!expected || !actual) return null;
+
+  const isExact = actual === expected;
+  const score = isExact ? 100 : 20;
+  const dimensionScore = isExact ? 25 : 5;
+  const dimensions: RubricDimension[] = [
+    {
+      key: "concepts",
+      label: "Ydinkäsitteiden kattavuus",
+      score: dimensionScore,
+      max: 25,
+      note: isExact
+        ? "Kemiallinen rakenne vastaa tehtävän tarkkaa ratkaisua."
+        : "Kemiallinen rakenne ei vielä vastaa tehtävän tarkkaa ratkaisua.",
+    },
+    {
+      key: "reasoning",
+      label: "Perustelu ja päättely",
+      score: dimensionScore,
+      max: 25,
+      note: isExact
+        ? "Tasapainotus on pääteltävissä oikein merkityistä kertoimista."
+        : "Kertoimissa tai atomitasapainossa on vielä korjattavaa.",
+    },
+    {
+      key: "task_fit",
+      label: "Tehtävätyypin vaatimus",
+      score: dimensionScore,
+      max: 25,
+      note: isExact
+        ? "Vastaus täyttää tasapainotustehtävän vaatimuksen."
+        : "Vastaus ei vielä täytä tasapainotustehtävän vaatimusta.",
+    },
+    {
+      key: "completeness",
+      label: "Vastauksen riittävyys",
+      score: dimensionScore,
+      max: 25,
+      note: isExact
+        ? "Lyhyt reaktioyhtälö riittää tässä tehtävässä täydelliseksi vastaukseksi."
+        : "Reaktioyhtälö on arvioitavissa, mutta tasapainotus ei täsmää.",
+    },
+  ];
+
+  return {
+    suggestedResult: isExact ? "independent" : "not_yet",
+    confidence: "high",
+    score,
+    dimensions,
+    matchedConcepts: isExact ? question.expectedConcepts.length : 0,
+    expectedConcepts: question.expectedConcepts.length,
+    summary: isExact
+      ? "Vastaus vastaa tehtävän tarkkaa tasapainotusta."
+      : "Vastaus ei vielä vastaa tehtävän tarkkaa tasapainotusta.",
+  };
 }
 
 function words(value: string) {
@@ -67,7 +211,6 @@ function conceptCoverage(response: string, concepts: string[]) {
 }
 
 function reasoningScore(response: string, type: LearningAttemptType) {
-  const normalized = normalize(response);
   const tokens = words(response);
   const causal = /\b(koska|siksi|joten|johtaa|seurauks|vuoksi|because|therefore|therefore)\b/i.test(response);
   const sequence = /\b(ensin|sitten|seuraav|lopuksi|vaihe|step|then|first)\b/i.test(response);
@@ -113,9 +256,12 @@ function completenessScore(response: string) {
 }
 
 export function evaluatePracticeResponse(
-  question: Pick<PracticeQuestion, "type" | "expectedConcepts">,
+  question: RubricQuestion,
   response: string,
 ): PracticeRubricEvaluation {
+  const exactChemistry = exactChemistryEvaluation(question, response);
+  if (exactChemistry) return exactChemistry;
+
   const concepts = conceptCoverage(response, question.expectedConcepts);
   const reasoning = reasoningScore(response, question.type);
   const taskFit = taskFitScore(response, question.type);
