@@ -1,10 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { createClient } from "@supabase/supabase-js";
 import { randomUUID } from "node:crypto";
+import { resolveCanonicalArthurOwner } from "@/lib/canonicalOwner.server";
 import {
   isUuid,
   reconcileLegacyOwner,
-  resolveArthurOwner,
 } from "@/lib/ownerSync.server";
 
 function required(name: string) {
@@ -39,7 +39,10 @@ export const Route = createFileRoute("/api/device-auth")({
             auth: { persistSession: false, autoRefreshToken: false },
           });
 
-          let ownerId = await resolveArthurOwner(admin, body.legacy_owner_id);
+          // Resolve a stable canonical owner before the client is allowed to
+          // initialize owner-scoped defaults. Newer provisional device rows must
+          // not become canonical simply because they were written most recently.
+          let ownerId = await resolveCanonicalArthurOwner(admin, body.legacy_owner_id);
 
           if (!ownerId) {
             const { data: users, error: usersError } = await admin.auth.admin.listUsers({
