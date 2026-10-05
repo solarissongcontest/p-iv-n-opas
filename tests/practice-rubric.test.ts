@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { evaluatePracticeResponse } from "../src/lib/practice-rubric.ts";
+import { feedbackPolicyV5 } from "../src/lib/learning-os-v5/instruction.ts";
 
 test("rubric evaluator rewards a complete reasoned answer over a fragment", () => {
   const question = {
@@ -65,4 +66,41 @@ test("rubric output is advisory and contains no mastery mutation", () => {
   assert.ok(["independent", "hinted", "not_yet"].includes(result.suggestedResult));
   assert.equal("mastery" in result, false);
   assert.equal("verifiedLevel" in result, false);
+});
+
+test("balanced chemistry equation is recognized as correct in unicode and LaTeX forms", () => {
+  const question = {
+    type: "short_answer" as const,
+    expectedConcepts: ["tasapainotus"],
+    prompt: "Tasapainota H₂ + Cl₂ → HCl.",
+    explanation: "H₂ + Cl₂ → 2HCl.",
+  };
+
+  const unicode = evaluatePracticeResponse(question, "H₂ + Cl₂ → 2HCl");
+  const latex = evaluatePracticeResponse(question, "H_2+Cl_2\\rightarrow 2HCl");
+  const wrong = evaluatePracticeResponse(question, "H₂ + Cl₂ → HCl");
+
+  assert.equal(unicode.suggestedResult, "independent");
+  assert.equal(unicode.score, 100);
+  assert.equal(unicode.confidence, "high");
+  assert.equal(latex.suggestedResult, "independent");
+  assert.equal(latex.score, 100);
+  assert.equal(wrong.suggestedResult, "not_yet");
+});
+
+test("correct retrieval feedback never asks for a pointless retry", () => {
+  const correct = feedbackPolicyV5({
+    mode: "retrieval",
+    result: "correct",
+    stage: "independent",
+  });
+  const incorrect = feedbackPolicyV5({
+    mode: "retrieval",
+    result: "incorrect",
+    stage: "independent",
+  });
+
+  assert.equal(correct.timing, "immediate");
+  assert.equal(correct.retriesBeforeReveal, 0);
+  assert.equal(incorrect.timing, "after_retry");
 });
