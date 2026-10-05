@@ -1,9 +1,6 @@
 -- Align KE04 study topics with the real Mooli 4 (LOPS21) textbook subchapters.
---
--- The existing 15-topic question-bank taxonomy is intentionally NOT discarded:
--- it remains in question_bank.metadata.topicName/subtopic/skills for adaptive
--- practice. topics, Planner and study sessions instead use the 14 textbook
--- subchapters that are actually covered on different lessons at school.
+-- The 15 broad question-bank skill buckets remain in question metadata, while
+-- school progress, Planner and study sessions use the 14 numbered subchapters.
 
 create temporary table _ke04_textbook_topics (
   section text primary key,
@@ -31,7 +28,6 @@ insert into _ke04_textbook_topics(section,unit_no,position,name,weight,importanc
   ('5.3',5,13,'5.3 Nukleiinihapot',1,3,'Mooli 4 s. 189–196'),
   ('5.4',5,14,'5.4 Lipidit',2,3,'Mooli 4 s. 197–207');
 
--- Old broad skill/topic labels -> the school-facing Mooli 4 subchapter.
 create temporary table _ke04_old_topic_map (
   old_name text primary key,
   section text not null references _ke04_textbook_topics(section)
@@ -54,53 +50,38 @@ insert into _ke04_old_topic_map(old_name,section) values
   ('Polymeroituminen ja polymeerit','4.1'),
   ('Biomolekyylit','5.1');
 
--- Create all canonical textbook subchapters for every KE04 course, preserving
--- owner scoping. Existing canonical rows are reused, making the migration safe
--- for preview/test databases that may already contain them.
+-- Ensure the 14 canonical textbook topics exist for every KE04 course.
 insert into public.topics(
   owner_id, course_id, name, position, weight, importance, materials
 )
-select
-  c.owner_id,
-  c.id,
-  k.name,
-  k.position,
-  k.weight,
-  k.importance,
-  k.materials
+select c.owner_id, c.id, k.name, k.position, k.weight, k.importance, k.materials
 from public.courses c
 cross join _ke04_textbook_topics k
 where upper(c.code) = 'KE04'
   and not exists (
-    select 1
-    from public.topics t
-    where t.course_id = c.id
-      and t.name = k.name
+    select 1 from public.topics t
+    where t.course_id = c.id and t.name = k.name
   );
 
--- Canonical metadata is authoritative even if a row already existed.
 update public.topics t
-set
-  owner_id = c.owner_id,
-  position = k.position,
-  weight = k.weight,
-  importance = k.importance,
-  materials = k.materials
+set owner_id = c.owner_id,
+    position = k.position,
+    weight = k.weight,
+    importance = k.importance,
+    materials = k.materials
 from public.courses c, _ke04_textbook_topics k
 where upper(c.code) = 'KE04'
   and t.course_id = c.id
   and t.name = k.name;
 
--- Carry useful aggregate learning state from the old broad topics into the new
--- school-facing topic. Merged sections use conservative averages for mastery
--- and sum actual study/evidence counts.
+-- Carry aggregate state from old broad topics into their school-facing section.
 with old_state as (
   select
     t.course_id,
     m.section,
     round(
-      sum(t.progress * greatest(coalesce(t.weight, 0), 1)) /
-      nullif(sum(greatest(coalesce(t.weight, 0), 1)), 0)
+      sum(t.progress * greatest(coalesce(t.weight,0),1)) /
+      nullif(sum(greatest(coalesce(t.weight,0),1)),0)
     )::integer as progress,
     bool_and(t.school_covered) as school_covered,
     floor(avg(t.self_level))::integer as self_level,
@@ -118,42 +99,39 @@ with old_state as (
   from public.topics t
   join public.courses c on c.id = t.course_id and upper(c.code) = 'KE04'
   join _ke04_old_topic_map m on m.old_name = t.name
-  group by t.course_id, m.section
+  group by t.course_id,m.section
 )
 update public.topics target
-set
-  progress = greatest(target.progress, s.progress),
-  school_covered = target.school_covered or s.school_covered,
-  self_level = greatest(target.self_level, s.self_level),
-  verified_level = greatest(target.verified_level, s.verified_level),
-  last_review = greatest(target.last_review, s.last_review),
-  next_review = case
-    when target.next_review is null then s.next_review
-    when s.next_review is null then target.next_review
-    else least(target.next_review, s.next_review)
-  end,
-  basic_successes = target.basic_successes + s.basic_successes,
-  exam_successes = target.exam_successes + s.exam_successes,
-  delayed_successes = target.delayed_successes + s.delayed_successes,
-  study_minutes = target.study_minutes + s.study_minutes,
-  retrieval_attempts = target.retrieval_attempts + s.retrieval_attempts,
-  retrieval_failures = target.retrieval_failures + s.retrieval_failures,
-  mastery_uncertainty = greatest(target.mastery_uncertainty, s.mastery_uncertainty),
-  last_retrieval_at = greatest(target.last_retrieval_at, s.last_retrieval_at)
+set progress = greatest(target.progress,s.progress),
+    school_covered = target.school_covered or s.school_covered,
+    self_level = greatest(target.self_level,s.self_level),
+    verified_level = greatest(target.verified_level,s.verified_level),
+    last_review = greatest(target.last_review,s.last_review),
+    next_review = case
+      when target.next_review is null then s.next_review
+      when s.next_review is null then target.next_review
+      else least(target.next_review,s.next_review)
+    end,
+    basic_successes = target.basic_successes + s.basic_successes,
+    exam_successes = target.exam_successes + s.exam_successes,
+    delayed_successes = target.delayed_successes + s.delayed_successes,
+    study_minutes = target.study_minutes + s.study_minutes,
+    retrieval_attempts = target.retrieval_attempts + s.retrieval_attempts,
+    retrieval_failures = target.retrieval_failures + s.retrieval_failures,
+    mastery_uncertainty = greatest(target.mastery_uncertainty,s.mastery_uncertainty),
+    last_retrieval_at = greatest(target.last_retrieval_at,s.last_retrieval_at)
 from old_state s
 join _ke04_textbook_topics k on k.section = s.section
 where target.course_id = s.course_id
   and target.name = k.name;
 
--- Build an ID replacement table so all foreign keys that point at an old KE04
--- topic can be moved to the corresponding textbook subchapter before deletion.
 create temporary table _ke04_topic_replacements (
   old_id uuid primary key,
   new_id uuid not null
 ) on commit drop;
 
 insert into _ke04_topic_replacements(old_id,new_id)
-select old.id, canonical.id
+select old.id,canonical.id
 from public.topics old
 join public.courses c on c.id = old.course_id and upper(c.code) = 'KE04'
 join _ke04_old_topic_map m on m.old_name = old.name
@@ -162,34 +140,27 @@ join public.topics canonical
   on canonical.course_id = old.course_id
  and canonical.name = k.name;
 
--- topic_dependencies has a multi-column unique constraint, so blindly updating
--- several old topics into one canonical topic can collide. Rebuild the affected
--- rows through the replacement map and de-duplicate them first.
+-- Merge-safe handling for normalized dependency rows.
 insert into public.topic_dependencies(
-  owner_id, topic_id, depends_on_topic_id, relation_type, created_at
+  owner_id,topic_id,depends_on_topic_id,relation_type,created_at
 )
-select distinct on (d.owner_id, mapped_topic, mapped_dependency, d.relation_type)
-  d.owner_id,
-  mapped_topic,
-  mapped_dependency,
-  d.relation_type,
-  d.created_at
+select distinct on (x.owner_id,x.mapped_topic,x.mapped_dependency,x.relation_type)
+  x.owner_id,x.mapped_topic,x.mapped_dependency,x.relation_type,x.created_at
 from (
   select
-    d.*,
-    coalesce(topic_replacement.new_id, d.topic_id) as mapped_topic,
-    coalesce(dependency_replacement.new_id, d.depends_on_topic_id) as mapped_dependency
+    d.owner_id,
+    coalesce(rt.new_id,d.topic_id) as mapped_topic,
+    coalesce(rd.new_id,d.depends_on_topic_id) as mapped_dependency,
+    d.relation_type,
+    d.created_at
   from public.topic_dependencies d
-  left join _ke04_topic_replacements topic_replacement
-    on topic_replacement.old_id = d.topic_id
-  left join _ke04_topic_replacements dependency_replacement
-    on dependency_replacement.old_id = d.depends_on_topic_id
-  where topic_replacement.old_id is not null
-     or dependency_replacement.old_id is not null
-) d
-where mapped_topic <> mapped_dependency
-order by d.owner_id, mapped_topic, mapped_dependency, d.relation_type, d.created_at
-on conflict (owner_id, topic_id, depends_on_topic_id, relation_type) do nothing;
+  left join _ke04_topic_replacements rt on rt.old_id = d.topic_id
+  left join _ke04_topic_replacements rd on rd.old_id = d.depends_on_topic_id
+  where rt.old_id is not null or rd.old_id is not null
+) x
+where x.mapped_topic <> x.mapped_dependency
+order by x.owner_id,x.mapped_topic,x.mapped_dependency,x.relation_type,x.created_at
+on conflict (owner_id,topic_id,depends_on_topic_id,relation_type) do nothing;
 
 delete from public.topic_dependencies d
 where exists (
@@ -197,9 +168,7 @@ where exists (
   where r.old_id = d.topic_id or r.old_id = d.depends_on_topic_id
 );
 
--- learning_policy_states is also unique per owner + topic. It is derived
--- recommendation state, but preserve the strongest/latest useful signal rather
--- than throwing it away when several old topics collapse into one section.
+-- Merge-safe handling for v5 recommendation state, which is unique per topic.
 with merged as (
   select
     s.owner_id,
@@ -216,117 +185,109 @@ with merged as (
     max(s.updated_at) as updated_at
   from public.learning_policy_states s
   join _ke04_topic_replacements r on r.old_id = s.topic_id
-  group by s.owner_id, r.new_id
+  group by s.owner_id,r.new_id
 )
 insert into public.learning_policy_states(
-  owner_id, course_id, topic_id, desired_retention, current_retention,
-  recommended_minutes, stop_today, next_useful_date,
-  recommendation_confidence, recommendation_reason, model_version, updated_at
+  owner_id,course_id,topic_id,desired_retention,current_retention,
+  recommended_minutes,stop_today,next_useful_date,
+  recommendation_confidence,recommendation_reason,model_version,updated_at
 )
 select
-  owner_id, course_id, topic_id, desired_retention, current_retention,
-  recommended_minutes, stop_today, next_useful_date,
-  recommendation_confidence, recommendation_reason, model_version, updated_at
+  owner_id,course_id,topic_id,desired_retention,current_retention,
+  recommended_minutes,stop_today,next_useful_date,
+  recommendation_confidence,recommendation_reason,model_version,updated_at
 from merged
-on conflict (owner_id, topic_id) do update set
-  desired_retention = greatest(public.learning_policy_states.desired_retention, excluded.desired_retention),
-  current_retention = greatest(public.learning_policy_states.current_retention, excluded.current_retention),
-  recommended_minutes = greatest(public.learning_policy_states.recommended_minutes, excluded.recommended_minutes),
+on conflict (owner_id,topic_id) do update set
+  desired_retention = greatest(public.learning_policy_states.desired_retention,excluded.desired_retention),
+  current_retention = greatest(public.learning_policy_states.current_retention,excluded.current_retention),
+  recommended_minutes = greatest(public.learning_policy_states.recommended_minutes,excluded.recommended_minutes),
   stop_today = public.learning_policy_states.stop_today or excluded.stop_today,
   next_useful_date = case
     when public.learning_policy_states.next_useful_date is null then excluded.next_useful_date
     when excluded.next_useful_date is null then public.learning_policy_states.next_useful_date
-    else least(public.learning_policy_states.next_useful_date, excluded.next_useful_date)
+    else least(public.learning_policy_states.next_useful_date,excluded.next_useful_date)
   end,
-  recommendation_confidence = greatest(public.learning_policy_states.recommendation_confidence, excluded.recommendation_confidence),
-  recommendation_reason = coalesce(excluded.recommendation_reason, public.learning_policy_states.recommendation_reason),
-  model_version = greatest(public.learning_policy_states.model_version, excluded.model_version),
-  updated_at = greatest(public.learning_policy_states.updated_at, excluded.updated_at);
+  recommendation_confidence = greatest(public.learning_policy_states.recommendation_confidence,excluded.recommendation_confidence),
+  recommendation_reason = coalesce(excluded.recommendation_reason,public.learning_policy_states.recommendation_reason),
+  model_version = greatest(public.learning_policy_states.model_version,excluded.model_version),
+  updated_at = greatest(public.learning_policy_states.updated_at,excluded.updated_at);
 
 delete from public.learning_policy_states s
 where exists (select 1 from _ke04_topic_replacements r where r.old_id = s.topic_id);
 
--- UUID-array references are not foreign keys, so PostgreSQL cannot repoint them
--- automatically. Keep material tags, discrimination practice and legacy topic
--- dependencies valid after the old rows are removed.
+-- UUID-array references are not foreign keys and must be rewritten explicitly.
 update public.study_materials sm
-set topic_ids = mapped.topic_ids
-from lateral (
-  select coalesce(array_agg(distinct coalesce(r.new_id, value)), '{}'::uuid[]) as topic_ids
+set topic_ids = (
+  select coalesce(array_agg(distinct coalesce(r.new_id,value)), '{}'::uuid[])
   from unnest(sm.topic_ids) value
   left join _ke04_topic_replacements r on r.old_id = value
-) mapped
+)
 where exists (
-  select 1 from unnest(sm.topic_ids) value
+  select 1
+  from unnest(sm.topic_ids) value
   join _ke04_topic_replacements r on r.old_id = value
 );
 
 update public.practice_attempts a
-set discrimination_topic_ids = mapped.topic_ids
-from lateral (
-  select coalesce(array_agg(distinct coalesce(r.new_id, value)), '{}'::uuid[]) as topic_ids
+set discrimination_topic_ids = (
+  select coalesce(array_agg(distinct coalesce(r.new_id,value)), '{}'::uuid[])
   from unnest(a.discrimination_topic_ids) value
   left join _ke04_topic_replacements r on r.old_id = value
-) mapped
+)
 where exists (
-  select 1 from unnest(a.discrimination_topic_ids) value
+  select 1
+  from unnest(a.discrimination_topic_ids) value
   join _ke04_topic_replacements r on r.old_id = value
 );
 
 update public.topics t
-set dependencies = mapped.topic_ids
-from lateral (
-  select coalesce(array_agg(distinct coalesce(r.new_id, value)), '{}'::uuid[]) as topic_ids
+set dependencies = (
+  select coalesce(array_agg(distinct coalesce(r.new_id,value)), '{}'::uuid[])
   from unnest(t.dependencies) value
   left join _ke04_topic_replacements r on r.old_id = value
-) mapped
+)
 where not exists (select 1 from _ke04_topic_replacements own where own.old_id = t.id)
   and exists (
-    select 1 from unnest(t.dependencies) value
+    select 1
+    from unnest(t.dependencies) value
     join _ke04_topic_replacements r on r.old_id = value
   );
 
--- Move every remaining ordinary single-column FK that references topics(id).
--- The two tables with merge-sensitive uniqueness above are intentionally
--- excluded because they were handled safely first.
+-- Repoint all remaining simple topic foreign keys. Merge-sensitive tables were
+-- handled above to avoid unique-constraint collisions.
 do $$
 declare
   fk record;
 begin
   for fk in
-    select
-      con.conrelid::regclass as table_name,
-      att.attname as column_name
+    select con.conrelid::regclass as table_name,
+           att.attname as column_name
     from pg_constraint con
     join pg_attribute att
       on att.attrelid = con.conrelid
      and att.attnum = con.conkey[1]
     where con.contype = 'f'
       and con.confrelid = 'public.topics'::regclass
-      and array_length(con.conkey, 1) = 1
-      and array_length(con.confkey, 1) = 1
+      and array_length(con.conkey,1) = 1
+      and array_length(con.confkey,1) = 1
       and con.conrelid <> 'public.topic_dependencies'::regclass
       and con.conrelid <> 'public.learning_policy_states'::regclass
   loop
     execute format(
       'update %s row_to_fix set %I = replacement.new_id from _ke04_topic_replacements replacement where row_to_fix.%I = replacement.old_id',
-      fk.table_name,
-      fk.column_name,
-      fk.column_name
+      fk.table_name,fk.column_name,fk.column_name
     );
   end loop;
 end
 $$;
 
--- The question bank keeps its 15 skill buckets in metadata, but the actual
--- topic_id is refined to the textbook subchapter. Biomolecule questions are
--- split across 5.1–5.4 using the content itself because the old bank stored all
--- of them under one broad 'Biomolekyylit' topic.
+-- Refine question-bank links from the broad skill taxonomy to exact textbook
+-- sections. Original topicName/subtopic/skills remain untouched in metadata.
 with question_sections as (
   select
     q.id,
     q.course_id,
-    case coalesce((q.metadata->>'chapter')::integer, 0)
+    case coalesce((q.metadata->>'chapter')::integer,0)
       when 1 then '1.1'
       when 2 then '1.2'
       when 3 then '1.2'
@@ -365,25 +326,22 @@ with question_sections as (
   join public.courses c on c.id = q.course_id and upper(c.code) = 'KE04'
   where q.module_code = 'KE04'
 ), mapped as (
-  select qs.id, qs.course_id, qs.section, k.unit_no, k.name, t.id as topic_id
+  select qs.id,qs.course_id,qs.section,k.unit_no,k.name,t.id as topic_id
   from question_sections qs
   join _ke04_textbook_topics k on k.section = qs.section
   join public.topics t on t.course_id = qs.course_id and t.name = k.name
 )
 update public.question_bank q
-set
-  topic_id = m.topic_id,
-  metadata = coalesce(q.metadata, '{}'::jsonb) || jsonb_build_object(
-    'textbookSection', m.section,
-    'textbookUnit', m.unit_no,
-    'textbookTopicName', m.name
-  )
+set topic_id = m.topic_id,
+    metadata = coalesce(q.metadata,'{}'::jsonb) || jsonb_build_object(
+      'textbookSection',m.section,
+      'textbookUnit',m.unit_no,
+      'textbookTopicName',m.name
+    )
 from mapped m
 where q.id = m.id;
 
--- Keep question-level state and attempts consistent with the refined question
--- mapping. Attempts not originating from a bank question retain the conservative
--- old-topic replacement above.
+-- Keep question-level state and attempts aligned with the refined mapping.
 update public.question_user_state s
 set topic_id = q.topic_id,
     updated_at = now()
@@ -406,8 +364,7 @@ where p.question_bank_id = q.id
   and q.module_code = 'KE04'
   and p.topic_id is distinct from q.topic_id;
 
--- Evidence rows tied to an attempt should follow the attempt's final refined
--- section instead of staying on the conservative merged fallback.
+-- Evidence attached to a practice attempt follows that attempt's final section.
 update public.mastery_evidence e
 set topic_id = a.topic_id
 from public.practice_attempts a
@@ -432,15 +389,12 @@ from public.practice_attempts a
 where e.attempt_id = a.id
   and e.topic_id is distinct from a.topic_id;
 
--- Old broad rows are no longer school-facing topics. All references have been
--- repointed, so they can now be removed without losing study history.
+-- Old broad rows are no longer school-facing topics.
 delete from public.topics old
 using _ke04_topic_replacements replacement
 where old.id = replacement.old_id;
 
--- Final invariant: every KE04 course has exactly the canonical 14 subchapters
--- with weights totalling 100. Raise during migration rather than shipping a
--- half-updated planner that looks plausible while being wrong.
+-- Fail loudly instead of accepting a plausible-looking half migration.
 do $$
 declare
   bad_course uuid;
@@ -449,14 +403,18 @@ begin
   from public.courses c
   where upper(c.code) = 'KE04'
     and (
-      (select count(*) from public.topics t where t.course_id = c.id and t.name in (select name from _ke04_textbook_topics)) <> 14
+      (select count(*) from public.topics t
+       where t.course_id = c.id
+         and t.name in (select name from _ke04_textbook_topics)) <> 14
       or
-      (select coalesce(sum(t.weight),0) from public.topics t where t.course_id = c.id and t.name in (select name from _ke04_textbook_topics)) <> 100
+      (select coalesce(sum(t.weight),0) from public.topics t
+       where t.course_id = c.id
+         and t.name in (select name from _ke04_textbook_topics)) <> 100
     )
   limit 1;
 
   if bad_course is not null then
-    raise exception 'KE04 Mooli 4 topic migration invariant failed for course %', bad_course;
+    raise exception 'KE04 Mooli 4 topic migration invariant failed for course %',bad_course;
   end if;
 end
 $$;
