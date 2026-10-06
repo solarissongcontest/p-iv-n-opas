@@ -13,6 +13,7 @@ import foundationsCss from "../styles/foundations.css?url";
 import glassCss from "../styles/glass.css?url";
 import shellCss from "../styles/shell.css?url";
 import layoutsCss from "../styles/layouts.css?url";
+import surfacesCss from "../styles/surfaces.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { PwaUpdatePrompt } from "../components/PwaUpdatePrompt";
 
@@ -107,6 +108,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "stylesheet", href: glassCss },
       { rel: "stylesheet", href: shellCss },
       { rel: "stylesheet", href: layoutsCss },
+      { rel: "stylesheet", href: surfacesCss },
       { rel: "icon", href: "/app-icon-180.png", type: "image/png", sizes: "180x180" },
       { rel: "shortcut icon", href: "/app-icon-180.png", type: "image/png" },
       { rel: "manifest", href: "/manifest.webmanifest" },
