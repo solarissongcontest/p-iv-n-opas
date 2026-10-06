@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { BookOpen, Brain, CalendarDays, Ellipsis, FlaskConical, Plus, Search, Settings2, X } from "lucide-react";
+import { BookOpen, Brain, Ellipsis, FlaskConical, Plus, Search, Settings2, X } from "lucide-react";
 import { LiquidGlass } from "@/components/LiquidGlass";
-import { desktopPlanningNav, primaryStudyNav, type StudyPage } from "@/app/navigation";
+import { desktopPrimaryNav, mobilePrimaryNav, type StudyPage } from "@/app/navigation";
 
 type AppShellProps = {
   page: StudyPage;
@@ -38,11 +38,7 @@ export function AppShell({
       />
 
       <main id="main-content" tabIndex={-1} className={"app-main app-desktop-main px-4 "+(contextualAction?"app-main-has-context-action":"")}>
-        <PageHeader
-          title={pageTitle}
-          eyebrow={pageEyebrow}
-          onSearch={onSearch}
-        />
+        <PageHeader title={pageTitle} eyebrow={pageEyebrow} onSearch={onSearch} />
         {children}
       </main>
 
@@ -98,7 +94,7 @@ function DesktopSidebar({
       </div>
 
       <nav aria-label="Päänavigaatio" className="space-y-1">
-        {primaryStudyNav.map(({ id, label, Icon }) => (
+        {desktopPrimaryNav.map(({ id, label, Icon }) => (
           <button
             key={id}
             aria-label={label}
@@ -106,30 +102,8 @@ function DesktopSidebar({
             data-tooltip={label}
             onClick={() => onNavigate(id)}
             className={
-              "flex min-h-11 w-full items-center gap-3 rounded-xl px-3 text-left text-sm " +
-              (page === id ? "bg-accent font-semibold" : "hover:bg-muted")
-            }
-          >
-            <Icon className="shrink-0" size={19} />
-            <span className="sidebar-label">{label}</span>
-          </button>
-        ))}
-      </nav>
-
-      <div className="sidebar-label mt-6 px-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
-        Suunnittelu
-      </div>
-      <nav aria-label="Suunnittelu" className="mt-2 space-y-1">
-        {desktopPlanningNav.map(({ id, label, Icon }) => (
-          <button
-            key={id}
-            aria-label={label}
-            aria-current={page === id ? "page" : undefined}
-            data-tooltip={label}
-            onClick={() => onNavigate(id)}
-            className={
-              "flex min-h-11 w-full items-center gap-3 rounded-xl px-3 text-left text-sm " +
-              (page === id ? "bg-accent font-semibold" : "hover:bg-muted")
+              "flex min-h-11 w-full items-center gap-3 rounded-xl px-3 text-left text-sm transition-colors " +
+              (page === id ? "bg-accent font-semibold text-accent-foreground" : "hover:bg-muted")
             }
           >
             <Icon className="shrink-0" size={19} />
@@ -141,7 +115,7 @@ function DesktopSidebar({
       <button
         aria-label="Kirjaa opiskelu"
         data-tooltip="Kirjaa opiskelu"
-        className="mt-6 flex min-h-11 items-center justify-center gap-2 rounded-xl bg-primary px-3 text-primary-foreground"
+        className="mt-6 flex min-h-11 items-center justify-center gap-2 rounded-xl bg-primary px-3 font-medium text-primary-foreground"
         onClick={onLog}
       >
         <Plus size={18} />
@@ -157,12 +131,16 @@ function DesktopSidebar({
         >
           <Search className="shrink-0" size={19} />
           <span className="sidebar-label">Haku</span>
-          <kbd className="sidebar-label ml-auto text-xs">{searchShortcut}</kbd>
+          <kbd className="sidebar-label ml-auto text-xs text-muted-foreground">{searchShortcut}</kbd>
         </button>
         <button
           aria-label="Asetukset"
           data-tooltip="Asetukset"
-          className="flex min-h-11 w-full items-center gap-3 rounded-xl px-3 hover:bg-muted"
+          aria-current={page === "settings" ? "page" : undefined}
+          className={
+            "flex min-h-11 w-full items-center gap-3 rounded-xl px-3 " +
+            (page === "settings" ? "bg-accent font-semibold text-accent-foreground" : "hover:bg-muted")
+          }
           onClick={() => onNavigate("settings")}
         >
           <Settings2 className="shrink-0" size={19} />
@@ -232,9 +210,10 @@ function MobileTabBar({
   onNavigate: (page: StudyPage) => void;
   onMore: () => void;
 }) {
+  const moreActive = moreOpen || page === "practice" || page === "exams" || page === "settings";
   return (
-    <LiquidGlass lensing as="nav" aria-label="Mobiilinavigaatio" className="app-tabbar md:hidden">
-      {primaryStudyNav.map(({ id, label, Icon }) => (
+    <LiquidGlass lensing as="nav" aria-label="Mobiilinavigaatio" className="app-tabbar !grid-cols-5 md:hidden">
+      {mobilePrimaryNav.map(({ id, label, Icon }) => (
         <button
           key={id}
           aria-label={label}
@@ -250,7 +229,7 @@ function MobileTabBar({
         aria-label="Lisää"
         aria-expanded={moreOpen}
         onClick={onMore}
-        className={"app-tab " + (moreOpen || page === "plan" || page === "exams" || page === "settings" ? "app-tab-active" : "")}
+        className={"app-tab " + (moreActive ? "app-tab-active" : "")}
       >
         <Ellipsis size={21} />
         <span>Lisää</span>
@@ -340,13 +319,6 @@ function MoreSheet({
         </div>
 
         <div className="grid gap-2">
-          <button
-            className={"app-sheet-action " + (page === "plan" ? "app-sheet-action-active" : "")}
-            onClick={() => navigateFromSheet("plan")}
-          >
-            <CalendarDays size={22} />
-            <span><b>Suunnitelma</b><small>Katso tulevat päivät</small></span>
-          </button>
           <button
             className={"app-sheet-action " + (page === "practice" ? "app-sheet-action-active" : "")}
             onClick={() => navigateFromSheet("practice")}
