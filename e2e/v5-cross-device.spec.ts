@@ -8,6 +8,23 @@ async function waitForServiceWorker(page: Page) {
   });
 }
 
+async function expectTodayWorkspace(page: Page, timeout = 30_000) {
+  await expect(page.locator("[data-page='today']")).toBeVisible({ timeout });
+}
+
+async function openStudyLog(page: Page) {
+  const directLog = page.getByRole("button", { name: "Kirjaa opiskelu", exact: true });
+  if (await directLog.isVisible().catch(() => false)) {
+    await directLog.click();
+    return;
+  }
+
+  await page.getByRole("button", { name: "Lisää", exact: true }).click();
+  const actionSheet = page.getByRole("dialog", { name: "Lisää toimintoja" });
+  await expect(actionSheet).toBeVisible();
+  await actionSheet.getByRole("button", { name: /Kirjaa opiskelu/ }).click();
+}
+
 async function cleanupSession(
   context: BrowserContext,
   page: Page,
@@ -47,7 +64,7 @@ test("installed-style app shell survives a cold offline navigation", async ({ br
     await context.setOffline(true);
     const offlinePage = await context.newPage();
     await offlinePage.goto("/today", { waitUntil: "domcontentloaded" });
-    await expect(offlinePage.getByRole("heading", { name: "Tänään" })).toBeVisible({ timeout: 30_000 });
+    await expectTodayWorkspace(offlinePage);
     await expect(offlinePage.getByText(/Verkkoyhteyttä ei ole|Tallennettu paikallisesti/).first()).toBeVisible({ timeout: 30_000 }).catch(() => undefined);
 
     // The cold start must retain actual study context, not merely render an empty shell.
@@ -68,7 +85,7 @@ test("expired device token does not lock a trusted device out of offline study d
     await enterApp(page);
     await waitForServiceWorker(page);
     await page.goto("/today", { waitUntil: "domcontentloaded" });
-    await expect(page.getByRole("heading", { name: "Tänään" })).toBeVisible();
+    await expectTodayWorkspace(page);
 
     await page.evaluate(() => {
       localStorage.setItem("opk.device-token-expires", "0");
@@ -77,7 +94,7 @@ test("expired device token does not lock a trusted device out of offline study d
 
     const offlinePage = await context.newPage();
     await offlinePage.goto("/today", { waitUntil: "domcontentloaded" });
-    await expect(offlinePage.getByRole("heading", { name: "Tänään" })).toBeVisible({ timeout: 30_000 });
+    await expectTodayWorkspace(offlinePage);
     await expect(offlinePage.getByLabel("Käyttäjänimi")).toBeHidden();
     await offlinePage.close();
   } finally {
@@ -246,10 +263,7 @@ test("v5 offline write survives reload, syncs, and appears on a second device", 
   await waitForServiceWorker(pageA);
 
   const marker = "OPK-E2E-" + Date.now();
-  await pageA.getByRole("button", { name: "Lisää", exact: true }).click();
-  const actionSheet = pageA.getByRole("dialog", { name: "Lisää toimintoja" });
-  await expect(actionSheet).toBeVisible();
-  await actionSheet.getByRole("button", { name: /Kirjaa opiskelu/ }).click();
+  await openStudyLog(pageA);
   await expect(pageA.getByRole("dialog")).toBeVisible();
   await pageA.getByLabel("Todellinen kesto minuutteina").fill("1");
   await pageA.getByLabel("Mitä teit?").fill("Cross-device offline E2E");
@@ -283,7 +297,7 @@ test("v5 offline write survives reload, syncs, and appears on a second device", 
 });
 
 
-test("active study session started on one device resumes and pauses on another", async ({ browser }) => {
+test("active study session created on one device is explicitly started and paused on another", async ({ browser }) => {
   const contextA = await browser.newContext({ serviceWorkers: "allow" });
   const contextB = await browser.newContext({ serviceWorkers: "allow" });
   const pageA = await contextA.newPage();
@@ -325,10 +339,11 @@ test("active study session started on one device resumes and pauses on another",
     const courses = await coursesResponse.json() as Array<{ id: string }>;
     expect(courses[0]?.id).toBeTruthy();
 
-    await contextA.request.delete(
+    const clearResponse = await contextA.request.delete(
       supabaseOrigin! + "/rest/v1/active_study_sessions?id=not.is.null",
       { headers: { ...headersA, Prefer: "return=minimal" } },
-    ).catch(() => undefined);
+    );
+    expect(clearResponse.ok()).toBe(true);
 
     const marker = "Cross-device active session " + Date.now();
     const startResponse = await contextA.request.post(
@@ -347,9 +362,15 @@ test("active study session started on one device resumes and pauses on another",
     );
     expect(startResponse.ok()).toBe(true);
 
+    // Creating an active study session no longer starts the clock by itself.
+    // Device B must first see the paused shared session, then explicitly enter
+    // the study phase before timing begins.
     await pageB.goto("/today", { waitUntil: "domcontentloaded" });
-    await expect(pageB.getByText("Opiskelukerta käynnissä", { exact: true })).toBeVisible({ timeout: 30_000 });
-    await pageB.getByRole("button", { name: /Opiskelukerta käynnissä/ }).click();
+    await expect(pageB.getByText("Opiskelukerta tauolla", { exact: true })).toBeVisible({ timeout: 30_000 });
+    await pageB.getByRole("button", { name: /Opiskelukerta tauolla/ }).click();
+    await expect(pageB.getByText("Ajastin tauolla", { exact: true })).toBeVisible({ timeout: 30_000 });
+
+    await pageB.getByRole("button", { name: "Jatka", exact: true }).click();
     await expect(pageB.getByText("Aika käynnissä", { exact: true })).toBeVisible({ timeout: 30_000 });
 
     await pageB.getByRole("button", { name: "Tauko", exact: true }).click();
