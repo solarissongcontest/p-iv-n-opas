@@ -103,7 +103,8 @@ test("mobile More sheet and active Practice remain bounded", async ({ page }, te
   await expectNoHorizontalOverflow(page);
   const sheetBox = await sheet.boundingBox();
   expect(sheetBox).not.toBeNull();
-  expect(sheetBox!.bottom).toBeLessThanOrEqual(845);
+  expect(sheetBox!.y).toBeGreaterThanOrEqual(-1);
+  expect(sheetBox!.y + sheetBox!.height).toBeLessThanOrEqual(845);
   await testInfo.attach("mobile-more-sheet.png", {
     body: await page.screenshot({ fullPage: true, animations: "disabled" }),
     contentType: "image/png",
