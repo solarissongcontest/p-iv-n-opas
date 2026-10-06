@@ -76,6 +76,23 @@ function markQueryLayerOffline() {
   onlineManager.setOnline(false);
 }
 
+function errorText(error: unknown) {
+  if (error instanceof Error) return `${error.name}: ${error.message}`;
+  if (typeof error === "string") return error;
+  if (!error || typeof error !== "object") return "";
+
+  const record = error as Record<string, unknown>;
+  return [record["name"], record["message"], record["details"], record["hint"], record["code"]]
+    .filter((value): value is string => typeof value === "string")
+    .join(" ");
+}
+
+function isNetworkFailure(error: unknown) {
+  return /failed to fetch|fetch failed|network|networkerror|load failed|offline|internet|err_network|connection/i.test(
+    errorText(error),
+  );
+}
+
 /** Run a write; if the network fails, keep it locally and sync later. */
 export async function runOrQueue<T>(op: string, payload: unknown): Promise<T | "queued"> {
   const fn = handlers.get(op);
@@ -85,7 +102,10 @@ export async function runOrQueue<T>(op: string, payload: unknown): Promise<T | "
   // When the browser already knows it is offline, do not start a request that
   // can sit in the networking stack until a timeout. Persist first so study
   // logging stays instant and survives a reload even during a hard outage.
-  if (typeof navigator !== "undefined" && navigator.onLine === false) {
+  if (
+    (typeof navigator !== "undefined" && navigator.onLine === false) ||
+    !onlineManager.isOnline()
+  ) {
     markQueryLayerOffline();
     enqueue(op, payload, operationId);
     return "queued";
@@ -94,13 +114,11 @@ export async function runOrQueue<T>(op: string, payload: unknown): Promise<T | "
   try {
     return (await fn(payload, operationId)) as T;
   } catch (err) {
-    if (typeof navigator !== "undefined" && navigator.onLine === false) {
-      markQueryLayerOffline();
-      enqueue(op, payload, operationId);
-      return "queued";
-    }
-    const msg = err instanceof Error ? err.message : "";
-    if (/fetch|network|Failed to fetch|NetworkError/i.test(msg)) {
+    if (
+      (typeof navigator !== "undefined" && navigator.onLine === false) ||
+      !onlineManager.isOnline() ||
+      isNetworkFailure(err)
+    ) {
       markQueryLayerOffline();
       enqueue(op, payload, operationId);
       return "queued";
@@ -149,6 +167,10 @@ export async function flushQueue(): Promise<SyncResult> {
           conflicts += 1;
           continue;
         }
+        // Keep transient failures in the queue. The watcher below retries with
+        // bounded backoff, which matters after an offline reload because the
+        // device access token can be renewing at the same moment connectivity
+        // returns.
         break;
       }
     }
@@ -160,21 +182,68 @@ export async function flushQueue(): Promise<SyncResult> {
 
 export function startSyncWatcher(onSynced: (result: SyncResult) => void) {
   if (typeof window === "undefined") return () => {};
-  const handler = () => {
+
+  let stopped = false;
+  let retryTimer: number | null = null;
+  let retryDelayMs = 1_000;
+
+  const clearRetry = () => {
+    if (retryTimer === null) return;
+    window.clearTimeout(retryTimer);
+    retryTimer = null;
+  };
+
+  const scheduleRetry = () => {
+    if (
+      stopped ||
+      retryTimer !== null ||
+      pendingCount() === 0 ||
+      (typeof navigator !== "undefined" && navigator.onLine === false)
+    ) return;
+
+    const delay = retryDelayMs;
+    retryDelayMs = Math.min(retryDelayMs * 2, 30_000);
+    retryTimer = window.setTimeout(() => {
+      retryTimer = null;
+      syncNow();
+    }, delay);
+  };
+
+  const syncNow = () => {
+    if (stopped) return;
     if (typeof navigator !== "undefined" && navigator.onLine === false) {
       onlineManager.setOnline(false);
+      clearRetry();
       return;
     }
+
     onlineManager.setOnline(true);
     void flushQueue().then((result) => {
+      if (stopped) return;
       if (result.synced > 0 || result.conflicts > 0 || result.discarded > 0) onSynced(result);
+
+      if (pendingCount() === 0) {
+        retryDelayMs = 1_000;
+        clearRetry();
+        return;
+      }
+
+      // An online event can race device-session renewal after an offline reload.
+      // Do not make the user wait for a second online event or a 30 s polling
+      // interval before their saved work reaches the server.
+      scheduleRetry();
     });
   };
+
+  const handler = () => syncNow();
   window.addEventListener("online", handler);
   window.addEventListener("offline", handler);
-  const timer = window.setInterval(handler, 30000);
-  handler();
+  const timer = window.setInterval(syncNow, 30_000);
+  syncNow();
+
   return () => {
+    stopped = true;
+    clearRetry();
     window.removeEventListener("online", handler);
     window.removeEventListener("offline", handler);
     window.clearInterval(timer);
