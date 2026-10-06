@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import { KE04_QUESTION_BANK } from "../src/data/ke04-question-bank/index.ts";
 import {
   KE04_TEXTBOOK_TOPICS,
@@ -62,4 +63,19 @@ test("inflected starch prompt beats stale nucleic-acid subtopic metadata", () =>
   const question = KE04_QUESTION_BANK.find((item) => item.contentId === "KE04-BIO-040");
   assert.ok(question, "KE04-BIO-040 must exist");
   assert.equal(ke04TextbookTopicForQuestion(question).section, "5.1");
+});
+
+test("KE04 hardening migration is valid on production PostgreSQL and scopes the starch invariant to biomolecules", () => {
+  const migration = readFileSync(
+    new URL("../supabase/migrations/20261005144100_ke04_mooli4_hardening.sql", import.meta.url),
+    "utf8",
+  );
+
+  assert.match(migration, /min\(r\.id::text\)::uuid as keep_id/);
+  assert.doesNotMatch(migration, /min\(r\.id\) as keep_id/);
+  assert.match(
+    migration,
+    /coalesce\(\(q\.metadata->>'chapter'\)::integer,0\) = 15[\s\S]*lower\(q\.prompt\) ~ 'tärkkely'/,
+  );
+  assert.match(migration, /chapter-15 starch questions mapped outside 5\.1/);
 });
