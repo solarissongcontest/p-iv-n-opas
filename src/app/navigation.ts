@@ -8,20 +8,37 @@ export const studyNav = [
   { id: "courses", label: "Opinnot", Icon: BookOpen, path: "/studies" },
   { id: "practice", label: "Harjoittelu", Icon: Brain, path: "/practice" },
   { id: "progress", label: "Edistyminen", Icon: ChartNoAxesCombined, path: "/progress" },
+  { id: "exams", label: "Kokeet", Icon: FlaskConical, path: "/exams" },
 ] as const;
 
-export const primaryStudyNav = [
+/**
+ * V5 desktop hierarchy follows the actual study workflow. Planning is no longer
+ * visually demoted into a secondary group: Today → Plan → Studies → Progress → Exams.
+ */
+export const desktopPrimaryNav = [
   studyNav[0],
+  studyNav[1],
+  studyNav[2],
+  studyNav[4],
+  studyNav[5],
+] as const;
+
+/**
+ * Mobile keeps the four recurring destinations permanently reachable. Less
+ * frequent actions live in the More sheet so the tab bar remains readable.
+ */
+export const mobilePrimaryNav = [
+  studyNav[0],
+  studyNav[1],
   studyNav[2],
   studyNav[4],
 ] as const;
 
-export const desktopPlanningNav = [
-  studyNav[1],
-  { id: "exams", label: "Kokeet", Icon: FlaskConical, path: "/exams" },
-] as const;
+// Compatibility aliases while feature code migrates to the V5 naming.
+export const primaryStudyNav = mobilePrimaryNav;
+export const desktopPlanningNav = [studyNav[5]] as const;
 
-export type PrimaryStudyPage = (typeof primaryStudyNav)[number]["id"];
+export type PrimaryStudyPage = (typeof mobilePrimaryNav)[number]["id"];
 export type StudyPath =
   | "/today"
   | "/plan"
