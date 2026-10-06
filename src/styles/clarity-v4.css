@@ -1,0 +1,422 @@
+/* =========================================================
+   Clarity V4 — consistent study surfaces and information hierarchy
+   Loaded after layouts.css so this file is the canonical visual override.
+
+   Rule: one card per meaningful information group. Rows and controls live
+   inside that card instead of turning the whole UI into either card soup or
+   an unstructured wall of text.
+   ========================================================= */
+
+:root {
+  --content-card-radius: 1.25rem;
+  --content-card-padding: clamp(1rem, 2.2vw, 1.35rem);
+  --content-section-gap: clamp(1rem, 2vw, 1.35rem);
+  --content-card-border: color-mix(in oklab, var(--border) 88%, transparent);
+  --content-card-shadow: 0 1px 2px oklch(0.2 0.01 260 / 0.035), 0 7px 24px oklch(0.2 0.01 260 / 0.035);
+}
+
+/* The page itself stays calm. Hierarchy comes from grouped content, not glass. */
+.page-content {
+  color: var(--foreground);
+}
+
+.today-view,
+.planner-view,
+.course-detail,
+.practice-view,
+.progress-view,
+.settings-view,
+.exams-view {
+  gap: var(--content-section-gap) !important;
+}
+
+.panel,
+.surface-grouped {
+  border-color: var(--content-card-border);
+}
+
+.panel {
+  border-radius: var(--content-card-radius);
+  background: var(--surface);
+  box-shadow: var(--content-card-shadow);
+}
+
+.panel > div:first-child > h2 {
+  line-height: 1.25;
+  letter-spacing: -0.018em;
+}
+
+/* ---------- Today: every support thought belongs to a visible group ---------- */
+.today-primary {
+  border-color: color-mix(in oklab, var(--primary) 22%, var(--border));
+  box-shadow: var(--shadow-raised);
+}
+
+.today-context,
+.today-support-section {
+  border: 1px solid var(--content-card-border) !important;
+  border-radius: var(--content-card-radius) !important;
+  background: var(--surface) !important;
+  box-shadow: var(--content-card-shadow) !important;
+  padding: var(--content-card-padding) !important;
+}
+
+.today-context > div:first-child,
+.today-support-section > div:first-child {
+  margin-bottom: 0.8rem;
+}
+
+.today-practice-shortcut {
+  border-color: var(--content-card-border) !important;
+  border-radius: var(--content-card-radius) !important;
+  background: var(--surface) !important;
+  box-shadow: var(--content-card-shadow);
+}
+
+.today-summary-grid {
+  border-color: var(--content-card-border);
+  border-radius: var(--content-card-radius);
+  box-shadow: var(--content-card-shadow);
+}
+
+/* ---------- Planner: separate period controls, calendar, and engine details ---------- */
+.planner-view > div:first-child,
+.planner-view > div:nth-child(2) {
+  padding-inline: 0.1rem;
+}
+
+.planner-support {
+  border: 1px solid var(--content-card-border) !important;
+  border-radius: var(--content-card-radius) !important;
+  background: var(--surface) !important;
+  box-shadow: var(--content-card-shadow) !important;
+}
+
+.planner-week-day {
+  border-color: var(--content-card-border);
+  background: var(--surface);
+  box-shadow: 0 1px 0 color-mix(in oklab, var(--foreground) 3%, transparent);
+}
+
+.planner-month-grid {
+  border-color: var(--content-card-border);
+  box-shadow: var(--content-card-shadow);
+}
+
+.planner-compact-item,
+.planner-item {
+  border-color: var(--content-card-border);
+}
+
+/* The old mobile timeline intentionally removed the day surfaces. At the
+   current information density that makes separate days visually melt together. */
+@media (max-width: 899px) {
+  .planner-week-grid {
+    display: grid !important;
+    gap: 0.75rem !important;
+  }
+
+  .planner-week-day {
+    position: relative;
+    min-height: 0;
+    border: 1px solid var(--content-card-border) !important;
+    border-radius: 1rem !important;
+    background: var(--surface) !important;
+    padding: 0.85rem !important;
+    box-shadow: var(--content-card-shadow);
+  }
+
+  .planner-week-day::before,
+  .planner-week-day::after {
+    display: none !important;
+  }
+
+  .planner-week-day-today {
+    border-color: color-mix(in oklab, var(--primary) 35%, var(--border)) !important;
+    background: color-mix(in oklab, var(--accent) 22%, var(--surface)) !important;
+  }
+}
+
+/* ---------- Studies: lists are grouped containers, details are cards ---------- */
+.course-library-rows,
+.course-list {
+  overflow: hidden;
+  border: 1px solid var(--content-card-border) !important;
+  border-radius: var(--content-card-radius) !important;
+  background: var(--surface);
+  box-shadow: var(--content-card-shadow);
+}
+
+.course-library-rows .course-row,
+.course-list .course-row {
+  border-right: 0 !important;
+  border-left: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  padding-inline: 1rem !important;
+}
+
+.course-library-rows .course-row:first-child,
+.course-list .course-row:first-child {
+  border-top: 0 !important;
+}
+
+.course-library-rows .course-row:last-child,
+.course-list .course-row:last-child {
+  border-bottom: 0 !important;
+}
+
+.course-overview {
+  gap: 0.85rem !important;
+}
+
+.course-overview > .panel {
+  border: 1px solid var(--content-card-border) !important;
+  border-radius: var(--content-card-radius) !important;
+  background: var(--surface) !important;
+  box-shadow: var(--content-card-shadow) !important;
+  padding: var(--content-card-padding) !important;
+}
+
+.course-overview > .panel:first-child {
+  border-color: color-mix(in oklab, var(--primary) 20%, var(--border)) !important;
+  background: color-mix(in oklab, var(--accent) 20%, var(--surface)) !important;
+}
+
+/* ---------- Practice: question can stay focused without support becoming loose text ---------- */
+.practice-primary-surface {
+  border: 1px solid var(--content-card-border) !important;
+  border-radius: var(--content-card-radius) !important;
+  background: var(--surface) !important;
+  box-shadow: var(--content-card-shadow) !important;
+  padding: var(--content-card-padding) !important;
+}
+
+.practice-config {
+  border-color: var(--content-card-border);
+  background: var(--surface);
+  box-shadow: var(--content-card-shadow);
+}
+
+.practice-support-grid {
+  border-top: 0 !important;
+  padding-top: 0 !important;
+  gap: 0.85rem !important;
+}
+
+.practice-support-grid > .panel {
+  border: 1px solid var(--content-card-border) !important;
+  border-radius: var(--content-card-radius) !important;
+  background: var(--surface) !important;
+  box-shadow: var(--content-card-shadow) !important;
+  padding: var(--content-card-padding) !important;
+}
+
+/* ---------- Progress: summary first, detail later ---------- */
+.progress-view > p.progress-summary-only {
+  max-width: 68ch;
+  margin: -0.2rem 0 0;
+  padding-inline: 0.2rem;
+  line-height: 1.55;
+}
+
+.progress-summary {
+  border-color: var(--content-card-border);
+  border-radius: var(--content-card-radius);
+  box-shadow: var(--content-card-shadow);
+}
+
+.progress-adherence {
+  order: -25;
+  overflow: hidden;
+  border-color: color-mix(in oklab, var(--primary) 22%, var(--border)) !important;
+  background: linear-gradient(180deg, color-mix(in oklab, var(--accent) 18%, var(--surface)), var(--surface) 58%) !important;
+}
+
+.progress-adherence-headline {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.progress-adherence-value {
+  font-size: clamp(1.8rem, 5vw, 2.55rem);
+  line-height: 1;
+  font-weight: 700;
+  letter-spacing: -0.035em;
+}
+
+.progress-adherence-chart {
+  height: 13rem;
+  margin-top: 0.75rem;
+}
+
+.progress-adherence-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem 1rem;
+  margin-top: 0.7rem;
+  color: var(--muted-foreground);
+  font-size: 0.75rem;
+}
+
+.progress-adherence-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.progress-adherence-legend i {
+  width: 0.7rem;
+  height: 0.18rem;
+  border-radius: 999px;
+  background: var(--primary);
+}
+
+.progress-adherence-legend span:last-child i {
+  background: var(--muted-foreground);
+  opacity: 0.55;
+}
+
+.progress-weekly,
+.progress-mastery,
+.progress-forecast,
+.progress-view > .panel,
+.progress-view > div > .panel {
+  box-shadow: var(--content-card-shadow) !important;
+}
+
+/* ---------- Settings and exams: restore visible section boundaries ---------- */
+.settings-view > .panel {
+  border: 1px solid var(--content-card-border) !important;
+  border-radius: var(--content-card-radius) !important;
+  background: var(--surface) !important;
+  box-shadow: var(--content-card-shadow) !important;
+  padding: var(--content-card-padding) !important;
+}
+
+.settings-view > .panel:first-child {
+  border-top: 1px solid var(--content-card-border) !important;
+  padding-top: var(--content-card-padding) !important;
+}
+
+.exam-list {
+  overflow: hidden;
+  border: 1px solid var(--content-card-border);
+  border-radius: var(--content-card-radius);
+  background: var(--surface);
+  box-shadow: var(--content-card-shadow);
+}
+
+.exam-list > button.panel {
+  border: 0 !important;
+  border-bottom: 1px solid var(--hairline) !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  padding-inline: 1rem !important;
+}
+
+.exam-list > button.panel:last-child {
+  border-bottom: 0 !important;
+}
+
+.exams-view > .panel {
+  box-shadow: var(--content-card-shadow) !important;
+}
+
+/* ---------- Mobile ---------- */
+@media (max-width: 767px) {
+  :root {
+    --content-card-radius: 1.05rem;
+    --content-card-padding: 1rem;
+    --content-section-gap: 0.8rem;
+  }
+
+  .page-content .panel {
+    box-shadow: var(--content-card-shadow);
+  }
+
+  .today-primary {
+    margin-inline: 0 !important;
+  }
+
+  .today-context,
+  .today-support-section,
+  .today-practice-shortcut,
+  .progress-weekly,
+  .progress-mastery,
+  .progress-forecast {
+    margin-inline: 0 !important;
+  }
+
+  .course-library-rows,
+  .course-list,
+  .practice-config {
+    margin-inline: 0 !important;
+  }
+
+  .course-overview {
+    gap: 0.7rem !important;
+  }
+
+  .progress-summary {
+    grid-template-columns: 1fr !important;
+    gap: 0 !important;
+  }
+
+  .progress-summary > .panel:nth-child(odd) {
+    border-right: 0 !important;
+  }
+
+  .progress-summary > .panel:nth-child(n+2) {
+    border-top: 1px solid var(--hairline) !important;
+  }
+
+  .progress-adherence-headline {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+
+  .progress-adherence-chart {
+    height: 11rem;
+    margin-inline: -0.45rem;
+  }
+
+  .settings-view > .panel {
+    padding-block: 1rem !important;
+  }
+
+  .exam-list {
+    margin-inline: 0 !important;
+  }
+
+  .exam-list > button.panel {
+    padding-inline: 1rem !important;
+  }
+}
+
+/* Dense desktop screens should feel structured, not like isolated floating tiles. */
+@media (min-width: 1101px) {
+  .today-view,
+  .progress-view,
+  .settings-view,
+  .exams-view {
+    gap: 1.2rem !important;
+  }
+
+  .panel {
+    border-radius: 1.3rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .progress-adherence * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
