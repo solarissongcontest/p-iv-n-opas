@@ -1,0 +1,149 @@
+name: One-time study runtime fix
+
+on:
+  push:
+    branches:
+      - fix/today-session-ke04-finish
+
+permissions:
+  contents: write
+
+jobs:
+  apply-fix:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: fix/today-session-ke04-finish
+
+      - name: Apply targeted fixes
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          # 1) The Abitti editor renders a contenteditable DIV. StudyApp's global
+          # keyboard shortcuts only recognize input/textarea/select, so typing a
+          # literal "t" inside the editor bubbles to window and navigates to Today.
+          # Stop the editor's normal key events after the editor itself has handled them.
+          editor = Path("src/components/AbittiAnswerEditor.tsx")
+          text = editor.read_text()
+          old = '    <div className={className}>'
+          new = '    <div className={className} onKeyDown={(event) => event.stopPropagation()}>'
+          if new not in text:
+              if old not in text:
+                  raise SystemExit("Abitti editor wrapper marker not found")
+              text = text.replace(old, new, 1)
+          editor.write_text(text)
+
+          # 2) Keep runtime KE04 provisioning on exactly the same canonical Mooli 4
+          # taxonomy as the migration/question bank. Otherwise every app mount would
+          # recreate the obsolete 15 broad topics after the database cutover.
+          data = Path("src/lib/data.ts")
+          text = data.read_text()
+          import_line = 'import { KE04_TEXTBOOK_TOPICS } from "./ke04-textbook-topics";\n'
+          anchor = 'import { DEFAULT_STUDY_WEEKDAYS } from "./studyDefaults";\n'
+          if import_line not in text:
+              if anchor not in text:
+                  raise SystemExit("data.ts import anchor not found")
+              text = text.replace(anchor, anchor + import_line, 1)
+          replacement = '''const KE04_TOPICS = KE04_TEXTBOOK_TOPICS.map(({ name, weight, importance, materials }) => ({
+  name,
+  weight,
+  importance,
+  materials,
+}));'''
+          if replacement not in text:
+              pattern = re.compile(r'const KE04_TOPICS = \[\n.*?\n\] as const;', re.S)
+              text, count = pattern.subn(replacement, text, count=1)
+              if count != 1:
+                  raise SystemExit(f"Expected one legacy KE04_TOPICS block, got {count}")
+          data.write_text(text)
+
+          # 3) An explicit Planner task scheduled for today is a commitment, not a
+          # suggestion. V5 was throwing away V4's planned-item priority when it
+          # re-sorted by policyScore, so an adaptive recommendation could replace the
+          # actual calendar task on Today. Pin today's planned item(s) ahead of
+          # adaptive extras; adaptive scoring still orders the rest.
+          v5 = Path("src/lib/learning-os-v5.ts")
+          text = v5.read_text()
+          old = '  }).sort((a,b)=>b.policyScore-a.policyScore);'
+          new = '''  }).sort((a,b)=>{
+    const aTodayPlan=a.planItem?.date===now&&a.planItem.status==="planned"?1:0;
+    const bTodayPlan=b.planItem?.date===now&&b.planItem.status==="planned"?1:0;
+    if(aTodayPlan!==bTodayPlan)return bTodayPlan-aTodayPlan;
+    return b.policyScore-a.policyScore;
+  });'''
+          if new not in text:
+              if old not in text:
+                  raise SystemExit("V5 policy sort marker not found")
+              text = text.replace(old, new, 1)
+          v5.write_text(text)
+
+          Path("tests/session-editor-navigation-guard.test.ts").write_text(r'''import test from "node:test";
+import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+
+const editor = readFileSync(new URL("../src/components/AbittiAnswerEditor.tsx", import.meta.url), "utf8");
+const app = readFileSync(new URL("../src/app/StudyApp.tsx", import.meta.url), "utf8");
+
+test("Abitti editor keyboard input cannot bubble into global navigation shortcuts", () => {
+  assert.match(editor, /className=\{className\} onKeyDown=\{\(event\) => event\.stopPropagation\(\)\}/);
+  assert.match(app, /e\.key\.toLowerCase\(\) === "t"\) go\("today"\)/);
+});
+''')
+
+          Path("tests/today-planned-task-priority.test.ts").write_text(r'''import test from "node:test";
+import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+
+const source = readFileSync(new URL("../src/lib/learning-os-v5.ts", import.meta.url), "utf8");
+
+test("today's explicit Planner task is pinned ahead of adaptive suggestions", () => {
+  assert.match(source, /a\.planItem\?\.date===now&&a\.planItem\.status==="planned"/);
+  assert.match(source, /b\.planItem\?\.date===now&&b\.planItem\.status==="planned"/);
+  assert.match(source, /if\(aTodayPlan!==bTodayPlan\)return bTodayPlan-aTodayPlan/);
+});
+''')
+
+          Path("tests/ke04-runtime-taxonomy.test.ts").write_text(r'''import test from "node:test";
+import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+
+const source = readFileSync(new URL("../src/lib/data.ts", import.meta.url), "utf8");
+
+test("runtime KE04 provisioner uses the canonical Mooli 4 subchapter taxonomy", () => {
+  assert.match(source, /import \{ KE04_TEXTBOOK_TOPICS \} from "\.\/ke04-textbook-topics"/);
+  assert.match(source, /const KE04_TOPICS = KE04_TEXTBOOK_TOPICS\.map/);
+  assert.doesNotMatch(source, /const KE04_TOPICS = \[\s*\{ name: "Reaktioyhtälöt ja tasapainotus"/);
+});
+''')
+          PY
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Targeted regression tests
+        run: npx tsx --test tests/session-editor-navigation-guard.test.ts tests/today-planned-task-priority.test.ts tests/ke04-runtime-taxonomy.test.ts
+
+      - name: Typecheck
+        run: npm run typecheck --if-present
+
+      - name: Validate diff
+        run: git diff --check
+
+      - name: Commit fixes to branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/components/AbittiAnswerEditor.tsx src/lib/data.ts src/lib/learning-os-v5.ts tests/session-editor-navigation-guard.test.ts tests/today-planned-task-priority.test.ts tests/ke04-runtime-taxonomy.test.ts
+          git diff --cached --quiet && exit 0
+          git commit -m "Fix Today plan priority and study editor navigation"
+          git push origin HEAD:fix/today-session-ke04-finish
