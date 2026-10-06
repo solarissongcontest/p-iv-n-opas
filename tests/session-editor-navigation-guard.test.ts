@@ -17,4 +17,5 @@ test("Abitti editor keyboard input cannot bubble into global navigation shortcut
     /className=\{className\} onKeyDown=\{\(event\) => event\.stopPropagation\(\)\}/,
   );
   assert.match(app, /e\.key\.toLowerCase\(\) === "t"\) go\("today"\)/);
+  assert.match(app, /e\.key\.toLowerCase\(\) === "n"\) setEntry\("manual"\)/);
 });
