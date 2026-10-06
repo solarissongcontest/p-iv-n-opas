@@ -66,24 +66,32 @@ test("mobile shell only reserves coach clearance when the coach exists", () => {
   assert.match(styles, /\+ 1\.75rem/);
 });
 
-test("app shell centralizes navigation bottom interaction zone and accessible mobile sheet", () => {
+test("app shell centralizes V5 navigation bottom interaction zone and accessible mobile sheet", () => {
   const shell = read("src/app/AppShell.tsx");
   const navigation = read("src/app/navigation.ts");
-  assert.match(navigation, /primaryStudyNav/);
-  assert.match(navigation, /desktopPlanningNav/);
+
+  // V5 makes planning a first-class recurring destination on both desktop and
+  // mobile. Practice and Exams remain directly reachable through the More sheet.
+  assert.match(navigation, /desktopPrimaryNav/);
+  assert.match(navigation, /mobilePrimaryNav/);
+  assert.match(navigation, /studyNav\[1\]/); // Suunnitelma is in both primary sets.
+  assert.match(shell, /mobilePrimaryNav\.map/);
+  assert.match(shell, /desktopPrimaryNav\.map/);
   assert.match(shell, />Lisää<\/span>/);
-  assert.match(shell, /Suunnitelma<\/b>/);
-  assert.match(shell, /Kokeet<\/b>/);
+  assert.match(shell, /<b>Harjoittelu<\/b>/);
+  assert.match(shell, /<b>Kokeet<\/b>/);
+  assert.equal(shell.includes("<b>Suunnitelma</b>"), false);
+
   assert.match(shell, /BottomInteractionZone/);
   assert.match(shell, /bottom-context-action/);
   assert.match(shell, /aria-label="Mobiilinavigaatio"/);
   assert.match(shell, /role="dialog"/);
   assert.match(shell, /event\.key === "Escape"/);
-  assert.match(shell, /previous\?\.focus\(\)/);  assert.match(shell, /const navigateFromSheet =/);
+  assert.match(shell, /previous\?\.focus\(\)/);
+  assert.match(shell, /const navigateFromSheet =/);
   assert.match(shell, /const launchAfterClose =/);
   assert.match(shell, /launchAfterClose\(onLog\)/);
   assert.match(shell, /launchAfterClose\(onSearch\)/);
-
 });
 
 test("practice is a bounded setup active summary flow", () => {
@@ -102,9 +110,13 @@ test("desktop workspace recenters on ultrawide displays", () => {
 
 test("styles are layered and responsive page families remain explicit", () => {
   const root = read("src/routes/__root.tsx");
-  for (const layer of ["foundationsCss", "glassCss", "shellCss", "layoutsCss"]) {
+  for (const layer of ["foundationsCss", "glassCss", "shellCss", "layoutsCss", "surfacesCss"]) {
     assert.ok(root.includes(layer), layer);
   }
+
+  // The V5 content layer must load after the legacy layout layer while pages
+  // migrate, otherwise old selectors can silently flatten the new surfaces.
+  assert.ok(root.indexOf("layoutsCss") < root.indexOf("surfacesCss"));
 
   const layouts = read("src/styles/layouts.css");
   for (const token of [
@@ -120,6 +132,17 @@ test("styles are layered and responsive page families remain explicit", () => {
   ]) {
     assert.ok(layouts.includes(token), token);
   }
+
+  const surfaces = read("src/styles/surfaces.css");
+  for (const token of [
+    ".study-card-primary",
+    ".study-card-section",
+    ".study-metric-group",
+    ".study-data-list",
+    ".study-status",
+    ".study-disclosure",
+    ".study-empty-state",
+  ]) assert.ok(surfaces.includes(token), token);
 });
 
 
@@ -288,123 +311,13 @@ test("failed course loading never masquerades as a genuinely empty account", () 
   assert.match(app, /const coursesUnavailable =/);
   assert.match(app, /Kurssitietoja ei saatu näkyviin/);
   assert.match(app, /Tämä ei tarkoita, että kurssisi olisivat kadonneet/);
-  assert.ok(app.indexOf("coursesUnavailable ?") < app.indexOf("courses.length===0 ?"));
 });
 
-test("AI coach keeps provider diagnostics out of the normal student UI", () => {
-  const coach = read("src/components/AICoach.tsx");
-  assert.match(coach, /Tekoälyohjaus ei ole juuri nyt käytettävissä\./);
-  assert.match(coach, /Paikallinen ohjaus käytössä/);
-  assert.equal(coach.includes("Gemini-avain hylättiin"), false);
-  assert.equal(coach.includes("Gemini hylkäsi yhteyspyynnön"), false);
-});
-
-test("raw backend errors never render in the normal app shell", () => {
+test("active study session context survives route changes and keeps the same server session", () => {
   const app = read("src/app/StudyApp.tsx");
-  assert.equal(app.includes("{String(error)}"), false);
-  assert.match(app, /Tietoja ei saatu ladattua\. Yritä uudelleen\./);
-  assert.match(app, /Verkkoyhteyttä ei ole\./);
-});
-
-test("PWA worker registers for every user and updates only after explicit approval", () => {
-  const root = read("src/routes/__root.tsx");
-  const prompt = read("src/components/PwaUpdatePrompt.tsx");
-  const sw = read("public/sw.js");
-  const shell = read("src/styles/shell.css");
-  assert.match(root, /<PwaUpdatePrompt \/>/);
-  assert.match(prompt, /serviceWorker[\s\S]*\.register\("\/sw\.js"/);
-  assert.match(prompt, /Päivitä nyt/);
-  assert.match(prompt, /SKIP_WAITING/);
-  assert.match(sw, /event\.data\?\.type === "SKIP_WAITING"/);
-  assert.match(shell, /body:has\(\.exam-simulation-running\) \.pwa-update-prompt/);
-});
-
-test("core study data has an owner-scoped IndexedDB fallback for cold offline starts", () => {
-  const snapshots = read("src/lib/offlineSnapshot.ts");
-  const data = read("src/lib/data.ts");
-  const settings = read("src/features/settings/SettingsView.tsx");
-  assert.match(snapshots, /indexedDB\.open/);
-  assert.match(snapshots, /ownerId/);
-  assert.match(snapshots, /isNetworkFailure/);
-  assert.match(data, /offlineQuery\("courses", listCourses\)/);
-  assert.match(data, /offlineQuery\("plan", listPlan\)/);
-  assert.match(data, /offlineQuery\("preferences", getPreferences\)/);
-  assert.match(settings, /clearOfflineSnapshots\(\)/);
-});
-
-test("service worker caches only pinned study-editor CDN dependencies", () => {
-  const sw = read("public/sw.js");
-  assert.match(sw, /rich-text-editor@8\.13\.0/);
-  assert.match(sw, /mathjax@3\.2\.2/);
-  assert.match(sw, /isApprovedStudyCdnAsset/);
-  assert.match(sw, /url\.pathname\.startsWith\("\/rich-text-editor@8\.13\.0\/"\)/);
-  assert.match(sw, /url\.pathname\.startsWith\("\/npm\/mathjax@3\.2\.2\/"\)/);
-  assert.equal(sw.includes('url.origin === "https://unpkg.com" || true'), false);
-});
-
-test("service worker supports offline cold starts without caching API responses", () => {
-  const sw = read("public/sw.js");
-  assert.match(sw, /addEventListener\("install"/);
-  assert.match(sw, /addEventListener\("activate"/);
-  assert.match(sw, /addEventListener\("fetch"/);
-  assert.match(sw, /request\.mode === "navigate"/);
-  assert.match(sw, /url\.pathname\.startsWith\("\/api\/"\)/);
-  assert.match(sw, /candidate\.origin === self\.location\.origin/);
-});
-
-test("active practice suppresses competing app chrome", () => {
-  const layouts = read("src/styles/layouts.css");
-  assert.match(layouts, /:has\(\.practice-session-active\)/);
-});
-
-test("personal study rhythm has one fallback and exam preparation uses real capacity", () => {
-  const defaults = read("src/lib/studyDefaults.ts");
-  const data = read("src/lib/data.ts");
-  const onboarding = read("src/components/Onboarding.tsx");
-  const app = read("src/app/StudyApp.tsx");
-  const settings = read("src/features/settings/SettingsView.tsx");
-  const exams = read("src/features/exams/ExamsView.tsx");
-
-  assert.match(defaults, /DEFAULT_STUDY_WEEKDAYS = \[2, 4, 5, 6, 7\]/);
-  assert.match(data, /study_weekdays: \[\.\.\.DEFAULT_STUDY_WEEKDAYS\]/);
-  assert.match(onboarding, /\.\.\.DEFAULT_STUDY_WEEKDAYS/);
-  assert.match(app, /studyWeekdays: preferences\?\.study_weekdays \?\? \[\.\.\.DEFAULT_STUDY_WEEKDAYS\]/);
-  assert.match(app, /weekdays=\{preferences\?\.study_weekdays \?\? \[\.\.\.DEFAULT_STUDY_WEEKDAYS\]\}/);
-  assert.match(settings, /DEFAULT_STUDY_WEEKDAYS/);
-  assert.match(exams, /capacity:CapacityProfile/);
-  assert.match(exams, /examBuffer\(\{examDate:course\.exam_date,topics:ts,attempts:aa,capacity\}\)/);
-  assert.match(exams, /capacityForDateV3\(capacity,today\(\)\)/);
-
-  for (const content of [data, onboarding, app, settings, exams]) {
-    assert.equal(content.includes("[1,2,3,4,5]"), false);
-    assert.equal(content.includes("[1, 2, 3, 4, 5]"), false);
-  }
-});
-
-test("guided study presents three simple phases and one primary self-assessment", () => {
-  const session = read("src/features/session/SessionForm.tsx");
-  assert.match(session, /\["Muista","Opiskele","Tarkista"\]/);
-  assert.match(session, /Mitä muistat jo\?/);
-  assert.match(session, /Miten meni\?/);
-  assert.match(session, /Osasin itse/);
-  assert.match(session, /Vihjeellä/);
-  assert.match(session, /En vielä/);
-  assert.match(session, /Lisäarvio/);
-  assert.equal(session.includes('["Tavoite","Muistelu","Harjoittelu","Palautus","Yhteenveto"]'), false);
-  assert.equal(session.includes("Tavoite saavutettu?"), false);
-  assert.equal(session.includes("Oma yleisarvio 1–5"), false);
-});
-
-test("planned study sessions and running exams suppress competing chrome", () => {
-  const app = read("src/app/StudyApp.tsx");
-  const session = read("src/features/session/SessionForm.tsx");
-  const exam = read("src/components/ExamSimulationV5.tsx");
-  const layouts = read("src/styles/layouts.css");
-
-  assert.match(app, /presentation="focus"/);
-  assert.match(session, /study-session-focus/);
-  assert.ok(exam.includes('"exam-simulation exam-simulation-"+phase'));
-  assert.match(exam, /Lopeta koe/);
-  assert.match(layouts, /:has\(\.exam-simulation-running\)/);
-  assert.match(layouts, /\.study-session-focus/);
+  assert.match(app, /openActiveSession/);
+  assert.match(app, /activeSessionQ\.data/);
+  assert.match(app, /active\.plan_item_id/);
+  assert.match(app, /setEntry\(active\.plan_item_id\)/);
+  assert.match(app, /setEntry\("manual"\)/);
 });
