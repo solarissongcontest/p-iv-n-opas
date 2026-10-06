@@ -29,6 +29,10 @@
   box-shadow: var(--study-card-shadow);
 }
 
+.study-card-section {
+  background: var(--surface);
+}
+
 .study-card-primary {
   border-color: color-mix(in oklab, var(--primary) 24%, var(--border));
   background:
