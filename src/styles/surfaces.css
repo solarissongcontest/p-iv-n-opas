@@ -1,0 +1,305 @@
+/* =========================================================
+   Design & Layout V5 — canonical content surfaces
+
+   Content stays opaque and calm. Liquid Glass belongs to navigation and
+   transient controls, not to reading surfaces.
+   ========================================================= */
+
+:root {
+  --study-space-1: 0.25rem;
+  --study-space-2: 0.5rem;
+  --study-space-3: 0.75rem;
+  --study-space-4: 1rem;
+  --study-space-5: 1.5rem;
+  --study-space-6: 2rem;
+  --study-space-7: 3rem;
+  --study-card-radius: 1.125rem;
+  --study-card-padding: 1.25rem;
+  --study-card-border: color-mix(in oklab, var(--border) 90%, transparent);
+  --study-card-shadow: 0 1px 2px oklch(0.2 0.01 260 / 0.025), 0 8px 26px oklch(0.2 0.01 260 / 0.03);
+  --study-reading-width: 68ch;
+}
+
+.study-card {
+  min-width: 0;
+  border: 1px solid var(--study-card-border);
+  border-radius: var(--study-card-radius);
+  background: var(--surface);
+  padding: var(--study-card-padding);
+  box-shadow: var(--study-card-shadow);
+}
+
+.study-card-primary {
+  border-color: color-mix(in oklab, var(--primary) 24%, var(--border));
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in oklab, var(--accent) 28%, var(--surface)),
+      var(--surface) 60%
+    );
+  box-shadow: var(--shadow-raised);
+}
+
+.study-card-heading {
+  display: flex;
+  min-width: 0;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--study-space-4);
+  margin-bottom: var(--study-space-4);
+}
+
+.study-card-eyebrow {
+  margin: 0 0 var(--study-space-1);
+  color: var(--muted-foreground);
+  font-size: 0.75rem;
+  font-weight: 650;
+  letter-spacing: 0.055em;
+  text-transform: uppercase;
+}
+
+.study-card-title {
+  margin: 0;
+  color: var(--foreground);
+  font-size: clamp(1rem, 1.7vw, 1.125rem);
+  line-height: 1.3;
+  font-weight: 680;
+  letter-spacing: -0.018em;
+}
+
+.study-card-action {
+  flex: 0 0 auto;
+}
+
+.study-card-body {
+  min-width: 0;
+}
+
+.study-card-body > :first-child {
+  margin-top: 0;
+}
+
+.study-card-body > :last-child {
+  margin-bottom: 0;
+}
+
+.study-metric-group {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(8.5rem, 1fr));
+  gap: 1px;
+  overflow: hidden;
+  border: 1px solid var(--hairline);
+  border-radius: 0.9rem;
+  background: var(--hairline);
+}
+
+.study-metric {
+  display: grid;
+  min-width: 0;
+  align-content: start;
+  gap: 0.3rem;
+  background: var(--surface);
+  padding: 0.9rem 1rem;
+}
+
+.study-metric-label,
+.study-metric-detail {
+  color: var(--muted-foreground);
+  font-size: 0.75rem;
+  line-height: 1.35;
+}
+
+.study-metric-value {
+  overflow-wrap: anywhere;
+  color: var(--foreground);
+  font-size: clamp(1.25rem, 2vw, 1.65rem);
+  line-height: 1.1;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+}
+
+.study-data-list {
+  overflow: hidden;
+  border-block: 1px solid var(--hairline);
+}
+
+.study-data-row {
+  min-width: 0;
+  padding-block: 0.9rem;
+  border-bottom: 1px solid var(--hairline);
+}
+
+.study-data-row:last-child {
+  border-bottom: 0;
+}
+
+.study-status {
+  display: inline-flex;
+  min-height: 1.75rem;
+  align-items: center;
+  width: fit-content;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  padding: 0.22rem 0.6rem;
+  font-size: 0.75rem;
+  line-height: 1;
+  font-weight: 650;
+  white-space: nowrap;
+}
+
+.study-status-neutral {
+  border-color: var(--border);
+  background: var(--muted);
+  color: var(--foreground);
+}
+
+.study-status-positive {
+  border-color: color-mix(in oklab, var(--status-done) 24%, var(--border));
+  background: color-mix(in oklab, var(--status-done) 12%, var(--surface));
+  color: var(--foreground);
+}
+
+.study-status-warning {
+  border-color: color-mix(in oklab, var(--status-skipped) 28%, var(--border));
+  background: color-mix(in oklab, var(--status-skipped) 12%, var(--surface));
+  color: var(--foreground);
+}
+
+.study-status-danger {
+  border-color: color-mix(in oklab, var(--destructive) 30%, var(--border));
+  background: color-mix(in oklab, var(--destructive) 10%, var(--surface));
+  color: var(--foreground);
+}
+
+.study-status-info {
+  border-color: color-mix(in oklab, var(--status-progress) 28%, var(--border));
+  background: color-mix(in oklab, var(--status-progress) 10%, var(--surface));
+  color: var(--foreground);
+}
+
+.study-inline-notice {
+  max-width: var(--study-reading-width);
+  border-left: 3px solid color-mix(in oklab, var(--primary) 65%, var(--border));
+  border-radius: 0 0.75rem 0.75rem 0;
+  background: color-mix(in oklab, var(--accent) 28%, transparent);
+  padding: 0.8rem 1rem;
+  color: var(--foreground);
+  font-size: 0.875rem;
+  line-height: 1.55;
+}
+
+.study-disclosure {
+  min-width: 0;
+  border-top: 1px solid var(--hairline);
+}
+
+.study-disclosure > summary {
+  display: flex;
+  min-height: 44px;
+  cursor: pointer;
+  list-style: none;
+  align-items: center;
+  color: var(--foreground);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.study-disclosure > summary::-webkit-details-marker {
+  display: none;
+}
+
+.study-disclosure > summary::after {
+  content: "›";
+  margin-left: auto;
+  color: var(--muted-foreground);
+  transform: rotate(0deg);
+  transition: transform 140ms var(--ease-calm);
+}
+
+.study-disclosure[open] > summary::after {
+  transform: rotate(90deg);
+}
+
+.study-disclosure-body {
+  max-width: var(--study-reading-width);
+  padding: 0 0 0.9rem;
+  color: var(--muted-foreground);
+  font-size: 0.875rem;
+  line-height: 1.55;
+}
+
+.study-empty-state {
+  display: grid;
+  max-width: 32rem;
+  justify-items: start;
+  gap: 0.55rem;
+  padding-block: 0.75rem;
+}
+
+.study-empty-state h3,
+.study-empty-state p {
+  margin: 0;
+}
+
+.study-empty-state h3 {
+  font-size: 1rem;
+  font-weight: 650;
+}
+
+.study-empty-state p {
+  color: var(--muted-foreground);
+  font-size: 0.875rem;
+  line-height: 1.55;
+}
+
+.study-empty-action {
+  margin-top: 0.35rem;
+}
+
+/* Compatibility surfaces stay intentionally light while old pages migrate. */
+.surface-open,
+.surface-grouped,
+.surface-emphasis,
+.surface-interactive-row {
+  min-width: 0;
+}
+
+@media (max-width: 767px) {
+  :root {
+    --study-card-radius: 1rem;
+    --study-card-padding: 1rem;
+  }
+
+  .study-card-heading {
+    gap: 0.75rem;
+    margin-bottom: 0.9rem;
+  }
+
+  .study-metric-group {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .study-metric {
+    padding: 0.8rem;
+  }
+}
+
+@media (max-width: 379px) {
+  .study-metric-group {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .study-disclosure > summary::after {
+    transition: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .study-card,
+  .study-metric-group,
+  .study-status {
+    border: 1px solid CanvasText;
+  }
+}
