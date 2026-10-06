@@ -1,10 +1,18 @@
 import type { HTMLAttributes, ReactNode } from "react";
 
-type SurfaceProps = HTMLAttributes<HTMLElement> & {
+type SectionSurfaceProps = HTMLAttributes<HTMLElement> & {
   children: ReactNode;
 };
 
-type CardProps = SurfaceProps & {
+type DivSurfaceProps = HTMLAttributes<HTMLDivElement> & {
+  children: ReactNode;
+};
+
+type AsideSurfaceProps = HTMLAttributes<HTMLElement> & {
+  children: ReactNode;
+};
+
+type CardProps = SectionSurfaceProps & {
   title?: string;
   eyebrow?: string;
   action?: ReactNode;
@@ -28,7 +36,7 @@ function CardHeading({ title, eyebrow, action }: Pick<CardProps, "title" | "eyeb
 }
 
 /** Open page-level section. Use only when a visible card would add no grouping value. */
-export function OpenSection({ children, className, ...props }: SurfaceProps) {
+export function OpenSection({ children, className, ...props }: SectionSurfaceProps) {
   return (
     <section className={classes("surface-open", className)} {...props}>
       {children}
@@ -37,7 +45,7 @@ export function OpenSection({ children, className, ...props }: SurfaceProps) {
 }
 
 /** Legacy-compatible grouped surface. Prefer SectionCard for new V5 work. */
-export function GroupedSurface({ children, className, ...props }: SurfaceProps) {
+export function GroupedSurface({ children, className, ...props }: SectionSurfaceProps) {
   return (
     <section className={classes("surface-grouped", className)} {...props}>
       {children}
@@ -46,7 +54,7 @@ export function GroupedSurface({ children, className, ...props }: SurfaceProps) 
 }
 
 /** Legacy-compatible emphasis surface. Prefer PrimaryCard for new V5 work. */
-export function EmphasisSurface({ children, className, ...props }: SurfaceProps) {
+export function EmphasisSurface({ children, className, ...props }: SectionSurfaceProps) {
   return (
     <section className={classes("surface-emphasis", className)} {...props}>
       {children}
@@ -54,7 +62,7 @@ export function EmphasisSurface({ children, className, ...props }: SurfaceProps)
   );
 }
 
-export function InteractiveRow({ children, className, ...props }: SurfaceProps) {
+export function InteractiveRow({ children, className, ...props }: SectionSurfaceProps) {
   return (
     <section className={classes("surface-interactive-row", className)} {...props}>
       {children}
@@ -82,7 +90,7 @@ export function SectionCard({ children, className, title, eyebrow, action, ...pr
   );
 }
 
-export function MetricGroup({ children, className, ...props }: SurfaceProps) {
+export function MetricGroup({ children, className, ...props }: DivSurfaceProps) {
   return <div className={classes("study-metric-group", className)} {...props}>{children}</div>;
 }
 
@@ -96,11 +104,11 @@ export function Metric({ label, value, detail }: { label: ReactNode; value: Reac
   );
 }
 
-export function DataList({ children, className, ...props }: SurfaceProps) {
+export function DataList({ children, className, ...props }: DivSurfaceProps) {
   return <div className={classes("study-data-list", className)} {...props}>{children}</div>;
 }
 
-export function DataRow({ children, className, ...props }: HTMLAttributes<HTMLDivElement> & { children: ReactNode }) {
+export function DataRow({ children, className, ...props }: DivSurfaceProps) {
   return <div className={classes("study-data-row", className)} {...props}>{children}</div>;
 }
 
@@ -108,7 +116,7 @@ export function StatusBadge({ children, tone = "neutral" }: { children: ReactNod
   return <span className={`study-status study-status-${tone}`}>{children}</span>;
 }
 
-export function InlineNotice({ children, className, ...props }: SurfaceProps) {
+export function InlineNotice({ children, className, ...props }: AsideSurfaceProps) {
   return <aside className={classes("study-inline-notice", className)} {...props}>{children}</aside>;
 }
 
