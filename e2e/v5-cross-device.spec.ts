@@ -12,6 +12,23 @@ async function expectTodayWorkspace(page: Page, timeout = 30_000) {
   await expect(page.locator("[data-page='today']")).toBeVisible({ timeout });
 }
 
+async function pendingOfflineWrites(page: Page) {
+  return page.evaluate(() => {
+    let total = 0;
+    for (let index = 0; index < localStorage.length; index += 1) {
+      const storageKey = localStorage.key(index);
+      if (!storageKey?.startsWith("opk.pending.v2.")) continue;
+      try {
+        const value = JSON.parse(localStorage.getItem(storageKey) ?? "[]");
+        if (Array.isArray(value)) total += value.length;
+      } catch {
+        // Malformed queue data is ignored by the production queue as well.
+      }
+    }
+    return total;
+  });
+}
+
 async function openStudyLog(page: Page) {
   const directLog = page.getByRole("button", { name: "Kirjaa opiskelu", exact: true });
   if (await directLog.isVisible().catch(() => false)) {
@@ -261,6 +278,8 @@ test("v5 offline write survives reload, syncs, and appears on a second device", 
 
   await enterApp(pageA);
   await waitForServiceWorker(pageA);
+  expect(supabaseOrigin).toBeTruthy();
+  expect(apiKey).toBeTruthy();
 
   const marker = "OPK-E2E-" + Date.now();
   await openStudyLog(pageA);
@@ -271,23 +290,75 @@ test("v5 offline write survives reload, syncs, and appears on a second device", 
 
   await contextA.setOffline(true);
   await pageA.getByRole("button", { name: "Tallenna" }).click();
-  const offlineQueueStatus = pageA.getByText(/Tallennettu paikallisesti.*yhteyden palattua/);
+  const offlineQueueStatus = pageA.locator("p[role='status']").filter({ hasText: "Tallennettu paikallisesti" }).first();
   await expect(offlineQueueStatus).toBeVisible({ timeout: 15_000 });
+  await expect.poll(() => pendingOfflineWrites(pageA), { timeout: 15_000 }).toBeGreaterThan(0);
 
   await pageA.reload({ waitUntil: "domcontentloaded" });
-  await expect(pageA.getByText(/Tallennettu paikallisesti.*yhteyden palattua/)).toBeVisible({ timeout: 15_000 });
+  const reloadedQueueStatus = pageA.locator("p[role='status']").filter({ hasText: "Tallennettu paikallisesti" }).first();
+  await expect(reloadedQueueStatus).toBeVisible({ timeout: 15_000 });
+  await expect.poll(() => pendingOfflineWrites(pageA), { timeout: 15_000 }).toBeGreaterThan(0);
 
   await contextA.setOffline(false);
-  await expect(pageA.getByText(/Tallennettu paikallisesti.*yhteyden palattua/)).toBeHidden({ timeout: 30_000 });
+
+  let syncedCourseId: string | null = null;
+  await expect.poll(async () => {
+    const token = await pageA.evaluate(() => localStorage.getItem("opk.device-token"));
+    if (!token || !supabaseOrigin || !apiKey) return 0;
+    const response = await contextA.request.get(
+      supabaseOrigin + "/rest/v1/study_sessions?select=id,course_id,unclear&unclear=eq." + encodeURIComponent(marker),
+      {
+        headers: {
+          apikey: apiKey,
+          Authorization: "Bearer " + token,
+        },
+      },
+    );
+    if (!response.ok()) return 0;
+    const rows = await response.json() as Array<{ id: string; course_id: string; unclear: string | null }>;
+    syncedCourseId = rows[0]?.course_id ?? null;
+    return rows.length;
+  }, { timeout: 45_000, intervals: [500, 1_000, 2_000, 4_000] }).toBe(1);
+
+  await expect.poll(() => pendingOfflineWrites(pageA), { timeout: 15_000 }).toBe(0);
+  await expect(reloadedQueueStatus).toBeHidden({ timeout: 15_000 });
+  expect(syncedCourseId).toBeTruthy();
 
   const contextB = await browser.newContext({ serviceWorkers: "allow" });
   const pageB = await contextB.newPage();
   try {
     await enterApp(pageB);
-    await pageB.getByRole("button", { name: "Tänään" }).click();
+    const tokenB = await pageB.evaluate(() => localStorage.getItem("opk.device-token"));
+    expect(tokenB).toBeTruthy();
+
+    const headersB = {
+      apikey: apiKey!,
+      Authorization: "Bearer " + tokenB,
+    };
+    const secondDeviceSession = await contextB.request.get(
+      supabaseOrigin! + "/rest/v1/study_sessions?select=id,course_id,unclear&unclear=eq." + encodeURIComponent(marker),
+      { headers: headersB },
+    );
+    expect(secondDeviceSession.ok()).toBe(true);
+    const secondDeviceRows = await secondDeviceSession.json() as Array<{ id: string; course_id: string; unclear: string | null }>;
+    expect(secondDeviceRows).toHaveLength(1);
+    expect(secondDeviceRows[0]?.unclear).toBe(marker);
+
+    const courseResponse = await contextB.request.get(
+      supabaseOrigin! + "/rest/v1/courses?select=code&id=eq." + encodeURIComponent(syncedCourseId!) + "&limit=1",
+      { headers: headersB },
+    );
+    expect(courseResponse.ok()).toBe(true);
+    const courseRows = await courseResponse.json() as Array<{ code: string }>;
+    const courseCode = courseRows[0]?.code;
+    expect(courseCode).toBeTruthy();
+
+    // Verify the same server-backed record in the second device's actual UI,
+    // using History where every study session is rendered instead of relying
+    // on Today's single "latest note" summary.
+    await pageB.goto(`/studies/${encodeURIComponent(courseCode!)}/history`, { waitUntil: "domcontentloaded" });
     await expect(pageB.getByText(marker, { exact: true })).toBeVisible({ timeout: 30_000 });
 
-    // A fresh reload on device B must still read the server-side value.
     await pageB.reload({ waitUntil: "domcontentloaded" });
     await expect(pageB.getByText(marker, { exact: true })).toBeVisible({ timeout: 30_000 });
   } finally {
