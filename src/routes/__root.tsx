@@ -17,6 +17,7 @@ import surfacesCss from "../styles/surfaces.css?url";
 import todayCss from "../styles/today.css?url";
 import plannerCss from "../styles/planner.css?url";
 import studiesCss from "../styles/studies.css?url";
+import progressCss from "../styles/progress.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { PwaUpdatePrompt } from "../components/PwaUpdatePrompt";
 
@@ -115,6 +116,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "stylesheet", href: todayCss },
       { rel: "stylesheet", href: plannerCss },
       { rel: "stylesheet", href: studiesCss },
+      { rel: "stylesheet", href: progressCss },
       { rel: "icon", href: "/app-icon-180.png", type: "image/png", sizes: "180x180" },
       { rel: "shortcut icon", href: "/app-icon-180.png", type: "image/png" },
       { rel: "manifest", href: "/manifest.webmanifest" },
