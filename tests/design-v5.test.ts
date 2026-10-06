@@ -80,9 +80,37 @@ test("Planner V5 puts the calendar before planning-engine detail", () => {
   assert.match(styles, /min-width: 42rem/);
 });
 
+test("Studies V5 removes the permanent nested course sidebar and restores real content groups", () => {
+  const course = read("src/features/studies/CourseView.tsx");
+  const styles = read("src/styles/studies.css");
+
+  assert.match(course, /course-detail-split/);
+  assert.match(styles, /\.course-detail-sidebar\s*\{\s*display: none !important/);
+  assert.match(styles, /\.course-overview > \.panel/);
+  assert.match(styles, /border: 1px solid var\(--study-card-border\) !important/);
+  assert.match(styles, /\.course-library-rows/);
+});
+
+test("Progress V5 makes plan adherence a native first-class summary insight", () => {
+  const progress = read("src/features/progress/ProgressView.tsx");
+  const adherence = read("src/features/progress/PlanAdherenceCard.tsx");
+  const styles = read("src/styles/progress.css");
+
+  assert.match(progress, /<PlanAdherenceCard sessions=\{sessions\} plan=\{plan\}\/>/);
+  assert.match(progress, /progress-summary-only/);
+  assert.match(progress, /Hyvin hallussa/);
+  assert.match(progress, /Kannattaa kerrata/);
+  assert.match(progress, /Seuraava koe/);
+  assert.match(adherence, /title="Suunnitelmassa pysyminen"/);
+  assert.match(adherence, /ReferenceLine y=\{100\}/);
+  assert.match(adherence, /8 viikon toteutumisaste/);
+  assert.match(styles, /\.progress-v5-adherence-chart/);
+  assert.match(styles, /\.progress-v5-heat-grid/);
+});
+
 test("V5 feature styles load after legacy layout styles", () => {
   const root = read("src/routes/__root.tsx");
-  const order = ["layoutsCss", "surfacesCss", "todayCss", "plannerCss"];
+  const order = ["layoutsCss", "surfacesCss", "todayCss", "plannerCss", "studiesCss", "progressCss"];
   for (const name of order) assert.ok(root.includes(name), name);
   for (let index = 1; index < order.length; index += 1) {
     assert.ok(root.indexOf(order[index - 1]!) < root.indexOf(order[index]!));
