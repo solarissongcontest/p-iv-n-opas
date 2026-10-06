@@ -22,7 +22,15 @@ function classes(base: string, extra?: string) {
   return extra ? base + " " + extra : base;
 }
 
-function CardHeading({ title, eyebrow, action }: Pick<CardProps, "title" | "eyebrow" | "action">) {
+function CardHeading({
+  title,
+  eyebrow,
+  action,
+}: {
+  title: string | undefined;
+  eyebrow: string | undefined;
+  action: ReactNode;
+}) {
   if (!title && !eyebrow && !action) return null;
   return (
     <div className="study-card-heading">
