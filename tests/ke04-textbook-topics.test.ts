@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { KE04_QUESTION_BANK } from "../src/data/ke04-question-bank/index.ts";
 import {
   KE04_TEXTBOOK_TOPICS,
@@ -13,6 +13,13 @@ const EXPECTED_SECTIONS = [
   "3.1", "3.2", "3.3",
   "4.1", "4.2",
   "5.1", "5.2", "5.3", "5.4",
+];
+
+const PRODUCTION_KE04_MIGRATIONS = [
+  "../supabase/migrations/20261006153052_ke04_mooli4_preflight.sql",
+  "../supabase/migrations/20261006153510_ke04_adaptive_question_bank_v3.sql",
+  "../supabase/migrations/20261006153627_ke04_mooli4_subchapters.sql",
+  "../supabase/migrations/20261006154043_ke04_mooli4_hardening.sql",
 ];
 
 test("KE04 school-facing topics match the 14 Mooli 4 subchapters", () => {
@@ -65,9 +72,15 @@ test("inflected starch prompt beats stale nucleic-acid subtopic metadata", () =>
   assert.equal(ke04TextbookTopicForQuestion(question).section, "5.1");
 });
 
+test("KE04 migration filenames match the production migration history", () => {
+  for (const path of PRODUCTION_KE04_MIGRATIONS) {
+    assert.ok(existsSync(new URL(path, import.meta.url)), `missing production-aligned migration: ${path}`);
+  }
+});
+
 test("KE04 hardening migration is valid on production PostgreSQL and scopes the starch invariant to biomolecules", () => {
   const migration = readFileSync(
-    new URL("../supabase/migrations/20261005144100_ke04_mooli4_hardening.sql", import.meta.url),
+    new URL("../supabase/migrations/20261006154043_ke04_mooli4_hardening.sql", import.meta.url),
     "utf8",
   );
 
