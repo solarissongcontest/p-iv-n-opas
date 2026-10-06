@@ -271,13 +271,14 @@ test("v5 offline write survives reload, syncs, and appears on a second device", 
 
   await contextA.setOffline(true);
   await pageA.getByRole("button", { name: "Tallenna" }).click();
-  await expect(pageA.getByRole("status")).toContainText("Tallennettu paikallisesti");
+  const offlineQueueStatus = pageA.getByText(/Tallennettu paikallisesti.*yhteyden palattua/);
+  await expect(offlineQueueStatus).toBeVisible({ timeout: 15_000 });
 
   await pageA.reload({ waitUntil: "domcontentloaded" });
-  await expect(pageA.getByRole("status")).toContainText("synkataan yhteyden palattua");
+  await expect(pageA.getByText(/Tallennettu paikallisesti.*yhteyden palattua/)).toBeVisible({ timeout: 15_000 });
 
   await contextA.setOffline(false);
-  await expect(pageA.getByRole("status")).toBeHidden({ timeout: 30_000 });
+  await expect(pageA.getByText(/Tallennettu paikallisesti.*yhteyden palattua/)).toBeHidden({ timeout: 30_000 });
 
   const contextB = await browser.newContext({ serviceWorkers: "allow" });
   const pageB = await contextB.newPage();
@@ -372,8 +373,28 @@ test("active study session created on one device is explicitly started and pause
 
     await pageB.getByRole("button", { name: "Jatka", exact: true }).click();
     await expect(pageB.getByText("Aika käynnissä", { exact: true })).toBeVisible({ timeout: 30_000 });
+    await expect.poll(async () => {
+      const response = await contextA.request.post(
+        supabaseOrigin! + "/rest/v1/rpc/active_study_session_snapshot",
+        { headers: headersA, data: {} },
+      );
+      if (!response.ok()) return "request-failed";
+      const snapshot = await response.json() as { status?: string; objective?: string } | null;
+      return `${snapshot?.status ?? "none"}:${snapshot?.objective ?? ""}`;
+    }, { timeout: 30_000, intervals: [250, 500, 1_000, 2_000] }).toBe(`running:${marker}`);
 
     await pageB.getByRole("button", { name: "Tauko", exact: true }).click();
+    await expect(pageB.getByText("Ajastin tauolla", { exact: true })).toBeVisible({ timeout: 30_000 });
+    await expect.poll(async () => {
+      const response = await contextA.request.post(
+        supabaseOrigin! + "/rest/v1/rpc/active_study_session_snapshot",
+        { headers: headersA, data: {} },
+      );
+      if (!response.ok()) return "request-failed";
+      const snapshot = await response.json() as { status?: string; objective?: string } | null;
+      return `${snapshot?.status ?? "none"}:${snapshot?.objective ?? ""}`;
+    }, { timeout: 30_000, intervals: [250, 500, 1_000, 2_000] }).toBe(`paused:${marker}`);
+
     await pageA.goto("/today", { waitUntil: "domcontentloaded" });
     await expect(pageA.getByText("Opiskelukerta tauolla", { exact: true })).toBeVisible({ timeout: 30_000 });
 
