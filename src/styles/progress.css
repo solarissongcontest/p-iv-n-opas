@@ -1,0 +1,591 @@
+/* =========================================================
+   Design & Layout V5 — Progress
+
+   Summary answers: am I following a realistic plan, what changed in mastery,
+   and what matters next? Technical evidence is deliberately secondary.
+   ========================================================= */
+
+.page-content-progress {
+  width: min(100%, 1180px);
+}
+
+.progress-v5 {
+  display: grid !important;
+  min-width: 0;
+  gap: var(--study-space-4) !important;
+}
+
+.progress-v5 .progress-section-tabs {
+  order: initial !important;
+  width: fit-content;
+  max-width: 100%;
+  margin-bottom: 0.1rem;
+}
+
+.progress-v5-intro {
+  max-width: var(--study-reading-width);
+  margin: 0;
+  color: var(--muted-foreground);
+  font-size: 0.875rem;
+  line-height: 1.55;
+}
+
+.progress-v5-adherence {
+  border-color: color-mix(in oklab, var(--primary) 24%, var(--border));
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in oklab, var(--accent) 20%, var(--surface)),
+      var(--surface) 64%
+    );
+}
+
+.progress-v5-adherence-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--study-space-5);
+}
+
+.progress-v5-adherence-value {
+  margin: 0;
+  font-size: clamp(2rem, 4.4vw, 3rem);
+  line-height: 0.95;
+  font-weight: 740;
+  letter-spacing: -0.045em;
+  font-variant-numeric: tabular-nums;
+}
+
+.progress-v5-adherence-label {
+  margin: 0.45rem 0 0;
+  color: var(--muted-foreground);
+  font-size: 0.78rem;
+}
+
+.progress-v5-adherence-explanation {
+  max-width: 34rem;
+  margin: 0;
+  color: var(--muted-foreground);
+  font-size: 0.84rem;
+  line-height: 1.55;
+}
+
+.progress-v5-adherence-chart {
+  height: 14rem;
+  margin-top: var(--study-space-4);
+}
+
+.progress-v5-adherence-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem 1rem;
+  margin-top: 0.55rem;
+  color: var(--muted-foreground);
+  font-size: 0.72rem;
+}
+
+.progress-v5-adherence-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.progress-v5-adherence-legend i {
+  display: inline-block;
+  width: 0.8rem;
+  height: 0.16rem;
+  border-radius: 999px;
+}
+
+.progress-v5-adherence-line {
+  background: var(--primary);
+}
+
+.progress-v5-adherence-reference {
+  background: var(--muted-foreground);
+  opacity: 0.55;
+}
+
+.progress-v5-now {
+  box-shadow: none;
+}
+
+.progress-v5-week-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(10rem, 0.55fr);
+  gap: var(--study-space-5);
+}
+
+.progress-v5-week-grid h3 {
+  margin: 0 0 0.55rem;
+  font-size: 0.82rem;
+  font-weight: 680;
+}
+
+.progress-v5-week-grid > div > p {
+  margin: 0;
+  color: var(--muted-foreground);
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+.progress-v5-plan-status {
+  display: grid;
+  align-content: start;
+  gap: 0.25rem;
+}
+
+.progress-v5-plan-status strong {
+  font-size: 2rem;
+  line-height: 1;
+  letter-spacing: -0.035em;
+}
+
+.progress-v5-plan-status span {
+  color: var(--muted-foreground);
+  font-size: 0.75rem;
+  line-height: 1.35;
+}
+
+.progress-v5-next-week {
+  margin-top: var(--study-space-4);
+  border-radius: 0.85rem;
+  background: var(--muted);
+  padding: 0.9rem 1rem;
+}
+
+.progress-v5-next-week b {
+  font-size: 0.82rem;
+}
+
+.progress-v5-next-week p {
+  margin: 0.45rem 0 0;
+  color: var(--muted-foreground);
+  font-size: 0.8rem;
+  line-height: 1.45;
+}
+
+.progress-v5-forecast-date {
+  margin: 0.4rem 0 1rem;
+  font-size: clamp(1.35rem, 3vw, 2rem);
+  line-height: 1.1;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+
+.progress-v5-mastery-list {
+  margin-top: var(--study-space-4);
+  border-block: 1px solid var(--hairline);
+}
+
+.progress-v5-mastery-list > details {
+  border-bottom: 1px solid var(--hairline);
+}
+
+.progress-v5-mastery-list > details:last-child {
+  border-bottom: 0;
+}
+
+.progress-v5-mastery-list summary {
+  display: flex;
+  min-height: 62px;
+  cursor: pointer;
+  list-style: none;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--study-space-3);
+  padding-block: 0.7rem;
+}
+
+.progress-v5-mastery-list summary::-webkit-details-marker {
+  display: none;
+}
+
+.progress-v5-mastery-list summary > span:first-child {
+  min-width: 0;
+}
+
+.progress-v5-mastery-list summary b,
+.progress-v5-mastery-list summary small {
+  display: block;
+}
+
+.progress-v5-mastery-list summary small {
+  margin-top: 0.18rem;
+  color: var(--muted-foreground);
+  font-size: 0.72rem;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.progress-v5-mastery-list summary > span:last-child {
+  flex: 0 0 auto;
+  color: var(--muted-foreground);
+  font-size: 0.75rem;
+}
+
+.progress-v5-evidence {
+  margin-bottom: 0.7rem;
+  border-radius: 0.8rem;
+  background: var(--muted);
+  padding: 0.8rem 0.9rem;
+}
+
+.progress-v5-evidence p {
+  margin: 0;
+  color: var(--muted-foreground);
+  font-size: 0.75rem;
+  line-height: 1.5;
+}
+
+.progress-v5-evidence p + p {
+  margin-top: 0.45rem;
+  border-top: 1px solid var(--hairline);
+  padding-top: 0.45rem;
+}
+
+.progress-v5-dimension-grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 1px;
+  overflow: hidden;
+  border: 1px solid var(--hairline);
+  border-radius: 0.85rem;
+  background: var(--hairline);
+}
+
+.progress-v5-dimension-grid > div {
+  display: grid;
+  min-width: 0;
+  gap: 0.3rem;
+  background: var(--surface);
+  padding: 0.8rem;
+}
+
+.progress-v5-dimension-grid small {
+  color: var(--muted-foreground);
+  font-size: 0.68rem;
+  line-height: 1.3;
+}
+
+.progress-v5-dimension-grid strong {
+  font-size: 1.45rem;
+  line-height: 1;
+}
+
+.progress-v5-dimension-detail {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
+  margin-bottom: 0.7rem;
+  border-radius: 0.8rem;
+  background: var(--muted);
+  padding: 0.8rem;
+  font-size: 0.72rem;
+}
+
+.progress-v5-dimension-detail p {
+  grid-column: 1 / -1;
+  margin: 0.2rem 0 0;
+  color: var(--muted-foreground);
+  line-height: 1.45;
+}
+
+.progress-v5-analysis-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--study-space-4);
+}
+
+.progress-v5-split-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--study-space-3);
+}
+
+.progress-v5-split-row > span:last-child {
+  color: var(--muted-foreground);
+  font-size: 0.75rem;
+}
+
+.progress-v5-achievements {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.progress-v5-achievement {
+  border: 1px solid var(--hairline);
+  border-radius: 0.85rem;
+  background: var(--surface);
+  padding: 0.85rem;
+}
+
+.progress-v5-achievement-earned {
+  border-color: color-mix(in oklab, var(--primary) 28%, var(--border));
+  background: color-mix(in oklab, var(--accent) 28%, var(--surface));
+}
+
+.progress-v5-achievement > div:first-child {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.progress-v5-achievement p {
+  margin: 0.35rem 0 0;
+  color: var(--muted-foreground);
+  font-size: 0.75rem;
+  line-height: 1.45;
+}
+
+.progress-v5-achievement-track {
+  height: 0.35rem;
+  overflow: hidden;
+  margin-top: 0.75rem;
+  border-radius: 999px;
+  background: var(--muted);
+}
+
+.progress-v5-achievement-track > div {
+  height: 100%;
+  border-radius: inherit;
+  background: var(--primary);
+}
+
+.progress-v5-system-check {
+  padding: 0 !important;
+  box-shadow: none;
+}
+
+.progress-v5-system-check > summary {
+  display: flex;
+  min-height: 58px;
+  cursor: pointer;
+  list-style: none;
+  align-items: center;
+  padding: 0.8rem var(--study-card-padding);
+  font-size: 0.88rem;
+  font-weight: 650;
+}
+
+.progress-v5-system-check > summary::-webkit-details-marker {
+  display: none;
+}
+
+.progress-v5-system-check-body {
+  border-top: 1px solid var(--hairline);
+  padding: var(--study-card-padding);
+}
+
+.progress-v5-system-check-body > p {
+  margin: 0.45rem 0;
+  font-size: 0.82rem;
+}
+
+.progress-v5-simulations {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.6rem;
+  margin-top: 0.9rem;
+}
+
+.progress-v5-simulations > div {
+  border-radius: 0.75rem;
+  background: var(--muted);
+  padding: 0.75rem;
+  font-size: 0.75rem;
+}
+
+.progress-v5-simulations p,
+.progress-v5-simulations small {
+  display: block;
+  margin: 0.35rem 0 0;
+  color: var(--muted-foreground);
+}
+
+.progress-v5-heat-grid {
+  display: grid;
+  width: min(100%, 31rem);
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 0.32rem;
+}
+
+.progress-v5-heat-grid > div {
+  aspect-ratio: 1;
+  border: 1px solid var(--hairline);
+  border-radius: 0.35rem;
+  background: var(--primary);
+}
+
+.progress-v5-weekly-chart {
+  height: 13rem;
+}
+
+.progress-v5-reflection {
+  max-width: 920px;
+}
+
+.progress-v5-field {
+  display: grid;
+  gap: 0.35rem;
+  margin-top: 0.9rem;
+  font-size: 0.8rem;
+  font-weight: 650;
+}
+
+.progress-v5-field input,
+.progress-v5-field select,
+.progress-v5-field textarea {
+  min-height: 44px;
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  background: var(--surface);
+  padding: 0.65rem 0.75rem;
+  color: var(--foreground);
+  font-size: 0.9rem;
+  font-weight: 400;
+}
+
+.progress-v5-adherence-rating {
+  margin-top: 1rem;
+}
+
+.progress-v5-adherence-rating legend {
+  margin-bottom: 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 650;
+}
+
+.progress-v5-adherence-rating > div {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.progress-v5-adherence-rating button {
+  display: grid;
+  width: 44px;
+  height: 44px;
+  place-items: center;
+  border: 1px solid var(--border);
+  border-radius: 0.7rem;
+  background: var(--surface);
+  font-size: 0.82rem;
+  font-weight: 650;
+}
+
+.progress-v5-adherence-rating button[aria-pressed="true"] {
+  border-color: var(--primary);
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+
+.progress-v5-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.progress-v5-form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+/* V5 cards must remain visible in Progress even though legacy V3 rules remove
+   shadow/elevation from old panels. */
+.progress-v5 > .study-card,
+.progress-v5 > div > .study-card {
+  box-shadow: var(--study-card-shadow);
+}
+
+@media (max-width: 899px) {
+  .progress-v5-week-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .progress-v5-plan-status {
+    grid-column: 1 / -1;
+  }
+
+  .progress-v5-dimension-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .progress-v5-achievements {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 767px) {
+  .progress-v5 {
+    gap: 0.8rem !important;
+  }
+
+  .progress-v5 .progress-section-tabs {
+    width: 100%;
+  }
+
+  .progress-v5 .progress-section-tab {
+    flex: 1;
+  }
+
+  .progress-v5-adherence-head {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.55rem;
+  }
+
+  .progress-v5-adherence-chart {
+    height: 11rem;
+    margin-inline: -0.45rem;
+  }
+
+  .progress-v5-week-grid,
+  .progress-v5-analysis-grid,
+  .progress-v5-form-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .progress-v5-plan-status {
+    grid-column: auto;
+  }
+
+  .progress-v5-dimension-grid,
+  .progress-v5-achievements,
+  .progress-v5-simulations {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .progress-v5-dimension-detail {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .progress-v5-heat-grid {
+    width: min(100%, 24rem);
+  }
+}
+
+@media (max-width: 430px) {
+  .progress-v5-dimension-grid,
+  .progress-v5-achievements,
+  .progress-v5-simulations,
+  .progress-v5-dimension-detail {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .progress-v5-adherence-value {
+    font-size: 2.1rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .progress-v5-adherence * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
