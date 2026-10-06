@@ -38,9 +38,13 @@ test("course creation keeps BI05, KE06 and fast topic import", () => {
 
 test("KE04 canonical seed remains in the real data layer", () => {
   const data = read("src/lib/data.ts");
+  const textbookTopics = read("src/lib/ke04-textbook-topics.ts");
   assert.match(data, /KE04/);
   assert.match(data, /Kemialliset reaktiot/);
-  assert.match(data, /Stoikiometria/);
+  assert.match(data, /KE04_TEXTBOOK_TOPICS/);
+  assert.match(textbookTopics, /1\.1 Reaktioyhtälön kirjoittaminen ja tasapainottaminen/);
+  assert.match(textbookTopics, /1\.4 Kaasureaktioiden stoikiometria/);
+  assert.match(textbookTopics, /5\.4 Lipidit/);
 });
 
 test("all legacy evaluation target systems remain supported", () => {
