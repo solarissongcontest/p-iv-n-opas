@@ -126,7 +126,7 @@ where target.course_id = d.course_id
 -- were repointed to one subchapter, then restore the original uniqueness rule.
 create temporary table _ke04_retention_merged on commit drop as
 select
-  min(r.id) as keep_id,
+  min(r.id::text)::uuid as keep_id,
   r.owner_id,
   r.course_id,
   r.topic_id,
@@ -372,10 +372,11 @@ begin
   join public.courses c on c.id = q.course_id and upper(c.code) = 'KE04'
   join public.topics t on t.id = q.topic_id
   where q.module_code = 'KE04'
+    and coalesce((q.metadata->>'chapter')::integer,0) = 15
     and lower(q.prompt) ~ 'tärkkely'
     and t.name <> '5.1 Hiilihydraatit';
   if bad_starch <> 0 then
-    raise exception 'KE04 starch questions mapped outside 5.1: %',bad_starch;
+    raise exception 'KE04 chapter-15 starch questions mapped outside 5.1: %',bad_starch;
   end if;
 end
 $$;
