@@ -70,6 +70,15 @@ export async function runOrQueue<T>(op: string, payload: unknown): Promise<T | "
   const fn = handlers.get(op);
   if (!fn) throw new Error(`Tuntematon toiminto: ${op}`);
   const operationId = crypto.randomUUID();
+
+  // When the browser already knows it is offline, do not start a request that
+  // can sit in the networking stack until a timeout. Persist first so study
+  // logging stays instant and survives a reload even during a hard outage.
+  if (typeof navigator !== "undefined" && navigator.onLine === false) {
+    enqueue(op, payload, operationId);
+    return "queued";
+  }
+
   try {
     return (await fn(payload, operationId)) as T;
   } catch (err) {
