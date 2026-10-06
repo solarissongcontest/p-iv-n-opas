@@ -1,3 +1,5 @@
+import { onlineManager } from "@tanstack/react-query";
+
 /**
  * Small offline write queue. Mutations that matter while studying (sessions,
  * notes, task completion) are queued locally when the network fails and
@@ -65,6 +67,15 @@ export function enqueue(op: string, payload: unknown, id = crypto.randomUUID()) 
   return id;
 }
 
+function markQueryLayerOffline() {
+  // Browser automation and some OS network transitions can update
+  // navigator.onLine before the normal `offline` event reaches TanStack Query.
+  // Keep the query layer in the same state before queued mutations resolve so
+  // mutation success handlers cannot immediately refetch every active query
+  // into an offline loading state.
+  onlineManager.setOnline(false);
+}
+
 /** Run a write; if the network fails, keep it locally and sync later. */
 export async function runOrQueue<T>(op: string, payload: unknown): Promise<T | "queued"> {
   const fn = handlers.get(op);
@@ -75,6 +86,7 @@ export async function runOrQueue<T>(op: string, payload: unknown): Promise<T | "
   // can sit in the networking stack until a timeout. Persist first so study
   // logging stays instant and survives a reload even during a hard outage.
   if (typeof navigator !== "undefined" && navigator.onLine === false) {
+    markQueryLayerOffline();
     enqueue(op, payload, operationId);
     return "queued";
   }
@@ -83,11 +95,13 @@ export async function runOrQueue<T>(op: string, payload: unknown): Promise<T | "
     return (await fn(payload, operationId)) as T;
   } catch (err) {
     if (typeof navigator !== "undefined" && navigator.onLine === false) {
+      markQueryLayerOffline();
       enqueue(op, payload, operationId);
       return "queued";
     }
     const msg = err instanceof Error ? err.message : "";
     if (/fetch|network|Failed to fetch|NetworkError/i.test(msg)) {
+      markQueryLayerOffline();
       enqueue(op, payload, operationId);
       return "queued";
     }
@@ -147,15 +161,22 @@ export async function flushQueue(): Promise<SyncResult> {
 export function startSyncWatcher(onSynced: (result: SyncResult) => void) {
   if (typeof window === "undefined") return () => {};
   const handler = () => {
+    if (typeof navigator !== "undefined" && navigator.onLine === false) {
+      onlineManager.setOnline(false);
+      return;
+    }
+    onlineManager.setOnline(true);
     void flushQueue().then((result) => {
       if (result.synced > 0 || result.conflicts > 0 || result.discarded > 0) onSynced(result);
     });
   };
   window.addEventListener("online", handler);
+  window.addEventListener("offline", handler);
   const timer = window.setInterval(handler, 30000);
   handler();
   return () => {
     window.removeEventListener("online", handler);
+    window.removeEventListener("offline", handler);
     window.clearInterval(timer);
   };
 }
