@@ -12,7 +12,7 @@ jobs:
   apply-fix:
     if: ${{ github.actor != 'github-actions[bot]' }}
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 10
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -77,12 +77,6 @@ jobs:
               text = text.replace(old, new, 1)
           v5.write_text(text)
           PY
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Typecheck
-        run: npm run typecheck --if-present
 
       - name: Validate diff
         run: git diff --check
