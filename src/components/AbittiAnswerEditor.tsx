@@ -449,7 +449,7 @@ export function AbittiAnswerEditor({
   }
 
   return (
-    <div className={className}>
+    <div className={className} onKeyDown={(event) => event.stopPropagation()}>
       <div className="mb-1 flex flex-wrap items-center justify-between gap-2">
         <span id={labelId} className="text-sm font-medium">{label}</span>
         <div className="flex items-center gap-2 text-xs text-muted-foreground">

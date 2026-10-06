@@ -987,7 +987,12 @@ export function nextBestActionsV5(input:{
         confusion ? "sekoittuva käsite kannattaa erotella rinnakkain" : null,
       ].filter(Boolean) as string[],
     };
-  }).sort((a,b)=>b.policyScore-a.policyScore);
+  }).sort((a,b)=>{
+    const aTodayPlan=a.planItem?.date===now&&a.planItem.status==="planned"?1:0;
+    const bTodayPlan=b.planItem?.date===now&&b.planItem.status==="planned"?1:0;
+    if(aTodayPlan!==bTodayPlan)return bTodayPlan-aTodayPlan;
+    return b.policyScore-a.policyScore;
+  });
 }
 
 export function learningPolicyV5(input:{

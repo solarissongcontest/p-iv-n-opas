@@ -25,6 +25,7 @@ import {
 import { addDays, parseISO, today } from "./fi";
 import { requireDeviceOwnerId } from "./deviceSession";
 import { DEFAULT_STUDY_WEEKDAYS } from "./studyDefaults";
+import { KE04_TEXTBOOK_TOPICS } from "./ke04-textbook-topics";
 
 export type TopicDependency = {
   id: string;
@@ -591,23 +592,12 @@ export const useProgressEvents = () =>
   useQuery({ queryKey: ["progress-events"], queryFn: offlineQuery("progress-events", listProgressEvents) });
 
 
-const KE04_TOPICS = [
-  { name: "Reaktioyhtälöt ja tasapainotus", weight: 8, importance: 5, materials: "s. 14–25" },
-  { name: "Stoikiometria", weight: 10, importance: 5, materials: "s. 14–35" },
-  { name: "Reaktion saanto", weight: 8, importance: 4, materials: "s. 27–35" },
-  { name: "Rajoittava tekijä", weight: 9, importance: 5, materials: "s. 38–44" },
-  { name: "Ideaalikaasu ja kaasustoikiometria", weight: 8, importance: 4, materials: "s. 46–54" },
-  { name: "Saostumis- ja hajoamisreaktiot", weight: 5, importance: 3, materials: "s. 61–88" },
-  { name: "Protoninsiirto, neutraloituminen ja titraus", weight: 8, importance: 5, materials: "s. 61–88" },
-  { name: "Palamisreaktiot", weight: 4, importance: 3, materials: "s. 61–88" },
-  { name: "Substituutioreaktiot", weight: 5, importance: 3, materials: "s. 92–100" },
-  { name: "Additioreaktiot", weight: 5, importance: 3, materials: "s. 103–111" },
-  { name: "Eliminaatioreaktiot", weight: 5, importance: 3, materials: "s. 103–111" },
-  { name: "Kondensaatioreaktiot", weight: 5, importance: 3, materials: "s. 114–122" },
-  { name: "Hydrolyysireaktiot", weight: 5, importance: 3, materials: "s. 114–122" },
-  { name: "Polymeroituminen ja polymeerit", weight: 8, importance: 4, materials: "s. 132–161" },
-  { name: "Biomolekyylit", weight: 7, importance: 4, materials: "s. 162–210" },
-] as const;
+const KE04_TOPICS = KE04_TEXTBOOK_TOPICS.map(({ name, weight, importance, materials }) => ({
+  name,
+  weight,
+  importance,
+  materials,
+}));
 
 /**
  * Make the canonical KE04 course available to the currently authenticated
