@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { onlineManager } from "@tanstack/react-query";
 import {
   pendingCount,
   registerOp,
@@ -10,6 +11,7 @@ import {
 test("known-offline writes are persisted before any network handler runs", async () => {
   const originalNavigator = Object.getOwnPropertyDescriptor(globalThis, "navigator");
   const originalStorage = Object.getOwnPropertyDescriptor(globalThis, "localStorage");
+  const originalOnlineState = onlineManager.isOnline();
   const values = new Map<string, string>();
 
   Object.defineProperty(globalThis, "navigator", {
@@ -53,7 +55,13 @@ test("known-offline writes are persisted before any network handler runs", async
     assert.equal(result, "queued");
     assert.equal(handlerCalls, 0);
     assert.equal(pendingCount(), 1);
+    assert.equal(
+      onlineManager.isOnline(),
+      false,
+      "queued offline writes must pause TanStack Query before mutation success invalidations run",
+    );
   } finally {
+    onlineManager.setOnline(originalOnlineState);
     if (originalNavigator) Object.defineProperty(globalThis, "navigator", originalNavigator);
     else Reflect.deleteProperty(globalThis, "navigator");
     if (originalStorage) Object.defineProperty(globalThis, "localStorage", originalStorage);
