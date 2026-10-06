@@ -201,7 +201,7 @@ function dimensionEstimate(
 ): DimensionEstimate {
   if (dimension === "calibration") {
     const rows = attempts.filter((a) => typeof a.confidence === "number");
-    if (!rows.length) return { score: 50, confidence: 0, evidence: 0 };
+    if (!rows.length) return { score: 0, confidence: 0, evidence: 0 };
     let weighted = 0;
     let weight = 0;
     for (const attempt of rows) {
@@ -261,6 +261,27 @@ export function masteryModelV4(
     retention: dimensionEstimate(rows, "retention", now),
     calibration: dimensionEstimate(rows, "calibration", now),
   } satisfies Record<MasteryDimension, DimensionEstimate>;
+
+  // A topic with no real attempt evidence is unknown, not "2 % mastered".
+  // Keep study exposure/progress separate from measured mastery so stale topic
+  // aggregates or neutral priors cannot manufacture an achievement signal.
+  if (!rows.length) {
+    return {
+      topicId: topic.id,
+      level: 0,
+      label: "Not assessed",
+      score: 0,
+      confidence: 0,
+      uncertainty: 1,
+      forgettingRisk: 0,
+      dimensions,
+      blindSpot: false,
+      underConfidence: false,
+      verificationRequired: false,
+      weakestDimension: "recall",
+      evidenceCount: 0,
+    };
+  }
 
   // Conservative fallbacks: missing dimensions never inherit full recall mastery.
   if (!dimensions.understanding.evidence && dimensions.recall.evidence) {
