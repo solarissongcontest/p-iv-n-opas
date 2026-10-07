@@ -46,6 +46,7 @@ export function SessionForm({
   const [step, setStep] = useState(activeSession?.phase ?? (item ? 1 : 0));
   const [courseId, setCourseId] = useState(initialCourse);
   const [topicId, setTopicId] = useState(initialTopic);
+  const [selectedTopicIds, setSelectedTopicIds] = useState<string[]>(initialTopic ? [initialTopic] : []);
   const [seconds, setSeconds] = useState(initialElapsed);
   const [running, setRunning] = useState(initialRunning);
   const runStartedAt = useRef<number | null>(initialRunning ? Date.now() : null);
@@ -317,7 +318,8 @@ export function SessionForm({
     try {
       const result = await persistLog({
         course_id: selectedCourseId,
-        topic_id: resolvedTopicId(selectedCourseId),
+        topic_id: selectedTopicIds[0] ?? null,
+        topic_ids: selectedTopicIds,
         minutes: Math.max(1, actualMinutes),
         planned_minutes: item?.target_minutes ?? actualMinutes,
         kind: activeSession?.kind ?? (item?.kind === "review" ? "review" : item?.kind === "test" ? "test" : "study"),
@@ -390,16 +392,27 @@ export function SessionForm({
     {!guided ? <form onSubmit={submitManual} className="space-y-4">
       <div className="grid gap-3 sm:grid-cols-2">
         <label className="text-sm font-medium">Kurssi
-          <select className={input} value={courseId} onChange={(e) => { setCourseId(e.target.value); setTopicId(""); }}>
+          <select className={input} value={courseId} onChange={(e) => { setCourseId(e.target.value); setTopicId(""); setSelectedTopicIds([]); }}>
             {courses.map((candidate) => <option key={candidate.id} value={candidate.id}>{candidate.code} · {candidate.name}</option>)}
           </select>
         </label>
-        <label className="text-sm font-medium">Aihe
-          <select className={input} value={topicId} onChange={(e) => setTopicId(e.target.value)}>
-            <option value="">Yleinen opiskelu</option>
-            {topics.filter((candidate) => candidate.course_id === courseId).map((candidate) => <option key={candidate.id} value={candidate.id}>{candidate.name}</option>)}
-          </select>
-        </label>
+        <fieldset className="text-sm font-medium sm:col-span-2">
+          <div className="flex items-center justify-between gap-3">
+            <legend>Kappaleet <span className="font-normal text-muted-foreground">({selectedTopicIds.length} valittu)</span></legend>
+            {selectedTopicIds.length > 0 && <button type="button" className="text-xs font-normal text-primary" onClick={() => setSelectedTopicIds([])}>Tyhjennä</button>}
+          </div>
+          <div className="mt-1 max-h-64 space-y-1 overflow-y-auto rounded-xl border border-border bg-surface p-2">
+            {topics.filter((candidate) => candidate.course_id === courseId).map((candidate) => {
+              const checked = selectedTopicIds.includes(candidate.id);
+              return <label key={candidate.id} className={`flex min-h-11 cursor-pointer items-center gap-3 rounded-lg px-3 py-2 ${checked ? "bg-accent" : "hover:bg-muted/50"}`}>
+                <input type="checkbox" checked={checked} onChange={() => setSelectedTopicIds((current) => checked ? current.filter((id) => id !== candidate.id) : [...current, candidate.id])} className="size-4"/>
+                <span>{candidate.name}</span>
+              </label>;
+            })}
+            {!topics.some((candidate) => candidate.course_id === courseId) && <p className="px-2 py-3 font-normal text-muted-foreground">Kurssilla ei ole vielä kappaleita.</p>}
+          </div>
+          <p className="mt-1 text-xs font-normal text-muted-foreground">Voit valita useita kappaleita. Opiskeluaika kirjataan vain kerran ja jaetaan valittujen kappaleiden kesken.</p>
+        </fieldset>
       </div>
       <label className="block text-sm font-medium">Todellinen kesto minuutteina<input type="number" min="1" max="1440" required value={actualMinutes} onChange={(e) => setActualMinutes(Number(e.target.value))} className={input}/></label>
       <label className="block text-sm font-medium">Mitä teit?<textarea className={input} rows={2} value={did} onChange={(e) => setDid(e.target.value)}/></label>
