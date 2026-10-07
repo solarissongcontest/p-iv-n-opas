@@ -241,9 +241,7 @@ export function buildProgressTrajectory(input: {
   const { currentItems, ids, state: latestState } = currentStateMap(course, coursePlan, histories);
   const { startDate, endDate } = courseTrajectoryBounds(course, coursePlan, events);
   if (!startDate || !endDate || endDate < startDate) return null;
-
-  const currentWork = [...latestState.values()].filter(item => isWorkKind(item.kind) && item.status !== "skipped");
-  if (!currentWork.length) return null;
+  if (!ids.size) return null;
 
   const revisionsByDate = new Map<string, ProgressRevision[]>();
   for (const event of events.filter(row => row.course_id === course.id && row.event_type !== "created")) {
