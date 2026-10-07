@@ -72,7 +72,7 @@ test("desktop sidebar and workspace alignment stay visually stable", async ({ pa
   });
 });
 
-test("month grid structure stays visually stable without snapshotting personal plan content", async ({ page }) => {
+test("month grid structure stays visually stable without snapshotting personal plan content", async ({ page }, testInfo) => {
   await page.setViewportSize({ width: 1280, height: 900 });
   await enterApp(page);
   await page.goto("/plan/month/2026-10", { waitUntil: "domcontentloaded" });
@@ -123,9 +123,14 @@ test("month grid structure stays visually stable without snapshotting personal p
   expect(geometry!.minDayWidth).toBeGreaterThanOrEqual(110);
   expect(geometry!.maxDayWidth - geometry!.minDayWidth).toBeLessThanOrEqual(2);
   expect(geometry!.tasksStayInsideCells).toBe(true);
+
+  await testInfo.attach("planner-month-1280.png", {
+    body: await month.screenshot({ animations: "disabled" }),
+    contentType: "image/png",
+  });
 });
 
-test("active Practice focus shell stays bounded while adaptive content is allowed to change", async ({ page }) => {
+test("active Practice focus shell stays bounded while adaptive content is allowed to change", async ({ page }, testInfo) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await enterApp(page);
   await page.goto("/practice", { waitUntil: "domcontentloaded" });
@@ -173,4 +178,9 @@ test("active Practice focus shell stays bounded while adaptive content is allowe
   expect(Math.abs(geometry!.surfaceRight - geometry!.focusRight)).toBeLessThanOrEqual(2);
   expect(Math.abs(geometry!.surfaceWidth - geometry!.focusWidth)).toBeLessThanOrEqual(2);
   expect(geometry!.interactiveInsideViewport).toBe(true);
+
+  await testInfo.attach("mobile-practice-focus-390.png", {
+    body: await focus.screenshot({ animations: "disabled" }),
+    contentType: "image/png",
+  });
 });
