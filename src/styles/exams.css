@@ -1,0 +1,85 @@
+/* Exams V5 — status first, next action second, machinery progressively disclosed. */
+.exams-view {
+  width: min(100%, 67.5rem);
+  margin-inline: auto;
+}
+
+.exam-list {
+  display: grid;
+  gap: 1rem !important;
+}
+.exam-list > button.panel {
+  border: 1px solid var(--border) !important;
+  border-radius: 1rem !important;
+  background: var(--surface) !important;
+  padding: 1rem 1.1rem !important;
+  box-shadow: 0 1px 2px color-mix(in oklab, var(--foreground) 4%, transparent);
+  transition: border-color 140ms ease, background-color 140ms ease, transform 140ms ease;
+}
+.exam-list > button.panel:hover {
+  border-color: color-mix(in oklab, var(--primary) 32%, var(--border)) !important;
+  background: color-mix(in oklab, var(--accent) 20%, var(--surface)) !important;
+}
+.exam-list > button.panel:active { transform: translateY(1px); }
+
+.exams-view:not(.exam-list) > .panel,
+.exams-view:not(.exam-list) > details {
+  border: 1px solid var(--border) !important;
+  border-radius: 1.1rem !important;
+  background: var(--surface) !important;
+  box-shadow: 0 1px 2px color-mix(in oklab, var(--foreground) 4%, transparent);
+}
+
+.exams-view:not(.exam-list) > .panel:first-of-type {
+  border-color: color-mix(in oklab, var(--primary) 20%, var(--border)) !important;
+  background: color-mix(in oklab, var(--accent) 22%, var(--surface)) !important;
+}
+
+.exams-view > details > summary {
+  padding-inline: .25rem;
+}
+.exams-view > details > div > .panel {
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  padding: .5rem 0 0 !important;
+}
+
+.exams-view .exam-simulation {
+  scroll-margin-top: 1.5rem;
+  border-radius: 1.1rem;
+}
+
+@media (min-width: 900px) {
+  .exam-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+  }
+  .exam-list > .panel:first-child,
+  .exam-list > .exam-simulation,
+  .exam-list > button:not(.panel) {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 767px) {
+  .exam-list {
+    margin-inline: 0 !important;
+  }
+  .exam-list > button.panel {
+    padding: 1rem !important;
+  }
+  .exams-view:not(.exam-list) > .panel,
+  .exams-view:not(.exam-list) > details {
+    margin-inline: 0;
+  }
+  .exams-view .grid.sm\:grid-cols-4 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 360px) {
+  .exams-view .grid.sm\:grid-cols-4 {
+    grid-template-columns: 1fr;
+  }
+}
