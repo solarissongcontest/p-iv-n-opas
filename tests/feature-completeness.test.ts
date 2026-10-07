@@ -124,7 +124,6 @@ test("master plan keeps evidence and safety invariants", () => {
   assert.ok(views.includes("Lisäharjoittelu") && views.includes("ei muutu"));
 });
 
-
 test("study rhythm settings save weekdays and capacity once and realign the future plan", () => {
   const settings = read("src/features/settings/SettingsView.tsx");
   const data = read("src/lib/data.ts");
@@ -140,20 +139,19 @@ test("study rhythm settings save weekdays and capacity once and realign the futu
   assert.match(data, /weekend_capacity_minutes: Math\.max/);
 });
 
-
 test("planned study sessions keep the one-tap automatic timer contract", () => {
   const todayView = read("src/features/today/TodayView.tsx");
   const session = read("src/features/session/SessionForm.tsx");
 
   assert.ok(todayView.includes("Aloita opiskelu"));
-  assert.ok(session.includes("initialRunning=activeSession?activeSession.status"));
-  assert.ok(session.includes("initialElapsed=activeSession?.effective_elapsed_seconds??0"));
-  assert.ok(session.includes('initialTargetMinutes===30?"30":"custom"'));
+  assert.match(session, /initialRunning\s*=\s*activeSession\s*\?\s*activeSession\.status\s*===\s*"running"\s*:\s*Boolean\(item\)/);
+  assert.match(session, /initialElapsed\s*=\s*activeSession\?\.effective_elapsed_seconds\s*\?\?\s*0/);
+  assert.match(session, /initialTargetMinutes\s*===\s*30\s*\?\s*"30"\s*:\s*"custom"/);
   assert.ok(session.includes("currentElapsedSeconds()"));
-  assert.ok(session.includes('document.addEventListener("visibilitychange",tick)'));
+  assert.match(session, /document\.addEventListener\("visibilitychange",\s*tick\)/);
   assert.ok(session.includes("Aika käynnissä"));
   assert.ok(session.includes("Aika kirjataan automaattisesti"));
-  assert.equal(session.includes('onClick={()=>setRunning(v=>!v)}'), false);
+  assert.equal(/onClick=\{\(\)=>setRunning\(v=>!v\)\}/.test(session), false);
 });
 
 test("active study sessions are server-backed, owner-scoped and resumable across devices", () => {
@@ -186,7 +184,6 @@ test("active study sessions are server-backed, owner-scoped and resumable across
   assert.ok(session.includes("persistActivePhase"));
   assert.ok(session.includes("Sulje näkymä"));
 });
-
 
 test("fresh legacy device owners cannot duplicate seeded Planner or KE04 question data", () => {
   const sync = read("src/lib/ownerSync.server.ts");
