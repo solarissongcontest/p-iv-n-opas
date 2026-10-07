@@ -10,49 +10,17 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as TodayRouteImport } from './routes/today'
 import { Route as ApiDeviceAuthRouteImport } from './routes/api.device-auth'
-import { Route as ApiReleaseInfoRouteImport } from './routes/api.release-info'
-import { Route as ExamsIndexRouteImport } from './routes/exams/index'
-import { Route as ExamsExamIdRouteImport } from './routes/exams/$examId'
-import { Route as PlanIndexRouteImport } from './routes/plan/index'
-import { Route as PracticeIndexRouteImport } from './routes/practice/index'
-import { Route as ProgressIndexRouteImport } from './routes/progress/index'
-import { Route as ProgressAnalysisRouteImport } from './routes/progress/analysis'
-import { Route as ProgressMasteryRouteImport } from './routes/progress/mastery'
-import { Route as SettingsIndexRouteImport } from './routes/settings/index'
-import { Route as SettingsAppRouteImport } from './routes/settings/app'
-import { Route as SettingsNotificationsRouteImport } from './routes/settings/notifications'
-import { Route as SettingsStudyRouteImport } from './routes/settings/study'
-import { Route as StudiesIndexRouteImport } from './routes/studies/index'
-import { Route as StudiesCourseCodeRouteImport } from './routes/studies/$courseCode'
 import { Route as ApiAiCoachRouteImport } from './routes/api.ai.coach'
-import { Route as ApiAiCourseStructureRouteImport } from './routes/api.ai.course-structure'
-import { Route as ApiAiMaterialRouteImport } from './routes/api.ai.material'
-import { Route as ApiAiQuestionsRouteImport } from './routes/api.ai.questions'
 import { Route as ApiPushCronRouteImport } from './routes/api.push.cron'
 import { Route as ApiPushPublicKeyRouteImport } from './routes/api.push.public-key'
 import { Route as ApiPushSubscribeRouteImport } from './routes/api.push.subscribe'
 import { Route as ApiPushTestRouteImport } from './routes/api.push.test'
 import { Route as ApiPushUnsubscribeRouteImport } from './routes/api.push.unsubscribe'
-import { Route as ApiQuestionsSeedKe04RouteImport } from './routes/api.questions.seed-ke04'
-import { Route as PlanDayDateRouteImport } from './routes/plan/day/$date'
-import { Route as PlanMonthMonthRouteImport } from './routes/plan/month/$month'
-import { Route as PlanWeekWeekRouteImport } from './routes/plan/week/$week'
-import { Route as PracticeCourseCodeTopicIdRouteImport } from './routes/practice/$courseCode/$topicId'
-import { Route as StudiesCourseCodeIndexRouteImport } from './routes/studies/$courseCode/index'
-import { Route as StudiesCourseCodeAnalysisRouteImport } from './routes/studies/$courseCode/analysis'
-import { Route as StudiesCourseCodeContentRouteImport } from './routes/studies/$courseCode/content'
-import { Route as StudiesCourseCodeHistoryRouteImport } from './routes/studies/$courseCode/history'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const TodayRoute = TodayRouteImport.update({
-  id: '/today',
-  path: '/today',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiDeviceAuthRoute = ApiDeviceAuthRouteImport.update({
@@ -60,94 +28,9 @@ const ApiDeviceAuthRoute = ApiDeviceAuthRouteImport.update({
   path: '/api/device-auth',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiReleaseInfoRoute = ApiReleaseInfoRouteImport.update({
-  id: '/api/release-info',
-  path: '/api/release-info',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ExamsIndexRoute = ExamsIndexRouteImport.update({
-  id: '/exams/',
-  path: '/exams/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ExamsExamIdRoute = ExamsExamIdRouteImport.update({
-  id: '/exams/$examId',
-  path: '/exams/$examId',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PlanIndexRoute = PlanIndexRouteImport.update({
-  id: '/plan/',
-  path: '/plan/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PracticeIndexRoute = PracticeIndexRouteImport.update({
-  id: '/practice/',
-  path: '/practice/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ProgressIndexRoute = ProgressIndexRouteImport.update({
-  id: '/progress/',
-  path: '/progress/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ProgressAnalysisRoute = ProgressAnalysisRouteImport.update({
-  id: '/progress/analysis',
-  path: '/progress/analysis',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ProgressMasteryRoute = ProgressMasteryRouteImport.update({
-  id: '/progress/mastery',
-  path: '/progress/mastery',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SettingsIndexRoute = SettingsIndexRouteImport.update({
-  id: '/settings/',
-  path: '/settings/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SettingsAppRoute = SettingsAppRouteImport.update({
-  id: '/settings/app',
-  path: '/settings/app',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SettingsNotificationsRoute = SettingsNotificationsRouteImport.update({
-  id: '/settings/notifications',
-  path: '/settings/notifications',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SettingsStudyRoute = SettingsStudyRouteImport.update({
-  id: '/settings/study',
-  path: '/settings/study',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const StudiesIndexRoute = StudiesIndexRouteImport.update({
-  id: '/studies/',
-  path: '/studies/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const StudiesCourseCodeRoute = StudiesCourseCodeRouteImport.update({
-  id: '/studies/$courseCode',
-  path: '/studies/$courseCode',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ApiAiCoachRoute = ApiAiCoachRouteImport.update({
   id: '/api/ai/coach',
   path: '/api/ai/coach',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiAiCourseStructureRoute = ApiAiCourseStructureRouteImport.update({
-  id: '/api/ai/course-structure',
-  path: '/api/ai/course-structure',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiAiMaterialRoute = ApiAiMaterialRouteImport.update({
-  id: '/api/ai/material',
-  path: '/api/ai/material',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiAiQuestionsRoute = ApiAiQuestionsRouteImport.update({
-  id: '/api/ai/questions',
-  path: '/api/ai/questions',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPushCronRoute = ApiPushCronRouteImport.update({
@@ -175,312 +58,80 @@ const ApiPushUnsubscribeRoute = ApiPushUnsubscribeRouteImport.update({
   path: '/api/push/unsubscribe',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiQuestionsSeedKe04Route = ApiQuestionsSeedKe04RouteImport.update({
-  id: '/api/questions/seed-ke04',
-  path: '/api/questions/seed-ke04',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PlanDayDateRoute = PlanDayDateRouteImport.update({
-  id: '/plan/day/$date',
-  path: '/plan/day/$date',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PlanMonthMonthRoute = PlanMonthMonthRouteImport.update({
-  id: '/plan/month/$month',
-  path: '/plan/month/$month',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PlanWeekWeekRoute = PlanWeekWeekRouteImport.update({
-  id: '/plan/week/$week',
-  path: '/plan/week/$week',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PracticeCourseCodeTopicIdRoute =
-  PracticeCourseCodeTopicIdRouteImport.update({
-    id: '/practice/$courseCode/$topicId',
-    path: '/practice/$courseCode/$topicId',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const StudiesCourseCodeIndexRoute = StudiesCourseCodeIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => StudiesCourseCodeRoute,
-} as any)
-const StudiesCourseCodeAnalysisRoute =
-  StudiesCourseCodeAnalysisRouteImport.update({
-    id: '/analysis',
-    path: '/analysis',
-    getParentRoute: () => StudiesCourseCodeRoute,
-  } as any)
-const StudiesCourseCodeContentRoute =
-  StudiesCourseCodeContentRouteImport.update({
-    id: '/content',
-    path: '/content',
-    getParentRoute: () => StudiesCourseCodeRoute,
-  } as any)
-const StudiesCourseCodeHistoryRoute =
-  StudiesCourseCodeHistoryRouteImport.update({
-    id: '/history',
-    path: '/history',
-    getParentRoute: () => StudiesCourseCodeRoute,
-  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/today': typeof TodayRoute
   '/api/device-auth': typeof ApiDeviceAuthRoute
-  '/api/release-info': typeof ApiReleaseInfoRoute
-  '/exams/$examId': typeof ExamsExamIdRoute
-  '/progress/analysis': typeof ProgressAnalysisRoute
-  '/progress/mastery': typeof ProgressMasteryRoute
-  '/settings/app': typeof SettingsAppRoute
-  '/settings/notifications': typeof SettingsNotificationsRoute
-  '/settings/study': typeof SettingsStudyRoute
-  '/studies/$courseCode': typeof StudiesCourseCodeRouteWithChildren
-  '/exams/': typeof ExamsIndexRoute
-  '/plan/': typeof PlanIndexRoute
-  '/practice/': typeof PracticeIndexRoute
-  '/progress/': typeof ProgressIndexRoute
-  '/settings/': typeof SettingsIndexRoute
-  '/studies/': typeof StudiesIndexRoute
   '/api/ai/coach': typeof ApiAiCoachRoute
-  '/api/ai/course-structure': typeof ApiAiCourseStructureRoute
-  '/api/ai/material': typeof ApiAiMaterialRoute
-  '/api/ai/questions': typeof ApiAiQuestionsRoute
   '/api/push/cron': typeof ApiPushCronRoute
   '/api/push/public-key': typeof ApiPushPublicKeyRoute
   '/api/push/subscribe': typeof ApiPushSubscribeRoute
   '/api/push/test': typeof ApiPushTestRoute
   '/api/push/unsubscribe': typeof ApiPushUnsubscribeRoute
-  '/api/questions/seed-ke04': typeof ApiQuestionsSeedKe04Route
-  '/plan/day/$date': typeof PlanDayDateRoute
-  '/plan/month/$month': typeof PlanMonthMonthRoute
-  '/plan/week/$week': typeof PlanWeekWeekRoute
-  '/practice/$courseCode/$topicId': typeof PracticeCourseCodeTopicIdRoute
-  '/studies/$courseCode/analysis': typeof StudiesCourseCodeAnalysisRoute
-  '/studies/$courseCode/content': typeof StudiesCourseCodeContentRoute
-  '/studies/$courseCode/history': typeof StudiesCourseCodeHistoryRoute
-  '/studies/$courseCode/': typeof StudiesCourseCodeIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/today': typeof TodayRoute
   '/api/device-auth': typeof ApiDeviceAuthRoute
-  '/api/release-info': typeof ApiReleaseInfoRoute
-  '/exams/$examId': typeof ExamsExamIdRoute
-  '/progress/analysis': typeof ProgressAnalysisRoute
-  '/progress/mastery': typeof ProgressMasteryRoute
-  '/settings/app': typeof SettingsAppRoute
-  '/settings/notifications': typeof SettingsNotificationsRoute
-  '/settings/study': typeof SettingsStudyRoute
-  '/exams': typeof ExamsIndexRoute
-  '/plan': typeof PlanIndexRoute
-  '/practice': typeof PracticeIndexRoute
-  '/progress': typeof ProgressIndexRoute
-  '/settings': typeof SettingsIndexRoute
-  '/studies': typeof StudiesIndexRoute
   '/api/ai/coach': typeof ApiAiCoachRoute
-  '/api/ai/course-structure': typeof ApiAiCourseStructureRoute
-  '/api/ai/material': typeof ApiAiMaterialRoute
-  '/api/ai/questions': typeof ApiAiQuestionsRoute
   '/api/push/cron': typeof ApiPushCronRoute
   '/api/push/public-key': typeof ApiPushPublicKeyRoute
   '/api/push/subscribe': typeof ApiPushSubscribeRoute
   '/api/push/test': typeof ApiPushTestRoute
   '/api/push/unsubscribe': typeof ApiPushUnsubscribeRoute
-  '/api/questions/seed-ke04': typeof ApiQuestionsSeedKe04Route
-  '/plan/day/$date': typeof PlanDayDateRoute
-  '/plan/month/$month': typeof PlanMonthMonthRoute
-  '/plan/week/$week': typeof PlanWeekWeekRoute
-  '/practice/$courseCode/$topicId': typeof PracticeCourseCodeTopicIdRoute
-  '/studies/$courseCode/analysis': typeof StudiesCourseCodeAnalysisRoute
-  '/studies/$courseCode/content': typeof StudiesCourseCodeContentRoute
-  '/studies/$courseCode/history': typeof StudiesCourseCodeHistoryRoute
-  '/studies/$courseCode': typeof StudiesCourseCodeIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/today': typeof TodayRoute
   '/api/device-auth': typeof ApiDeviceAuthRoute
-  '/api/release-info': typeof ApiReleaseInfoRoute
-  '/exams/$examId': typeof ExamsExamIdRoute
-  '/progress/analysis': typeof ProgressAnalysisRoute
-  '/progress/mastery': typeof ProgressMasteryRoute
-  '/settings/app': typeof SettingsAppRoute
-  '/settings/notifications': typeof SettingsNotificationsRoute
-  '/settings/study': typeof SettingsStudyRoute
-  '/studies/$courseCode': typeof StudiesCourseCodeRouteWithChildren
-  '/exams/': typeof ExamsIndexRoute
-  '/plan/': typeof PlanIndexRoute
-  '/practice/': typeof PracticeIndexRoute
-  '/progress/': typeof ProgressIndexRoute
-  '/settings/': typeof SettingsIndexRoute
-  '/studies/': typeof StudiesIndexRoute
   '/api/ai/coach': typeof ApiAiCoachRoute
-  '/api/ai/course-structure': typeof ApiAiCourseStructureRoute
-  '/api/ai/material': typeof ApiAiMaterialRoute
-  '/api/ai/questions': typeof ApiAiQuestionsRoute
   '/api/push/cron': typeof ApiPushCronRoute
   '/api/push/public-key': typeof ApiPushPublicKeyRoute
   '/api/push/subscribe': typeof ApiPushSubscribeRoute
   '/api/push/test': typeof ApiPushTestRoute
   '/api/push/unsubscribe': typeof ApiPushUnsubscribeRoute
-  '/api/questions/seed-ke04': typeof ApiQuestionsSeedKe04Route
-  '/plan/day/$date': typeof PlanDayDateRoute
-  '/plan/month/$month': typeof PlanMonthMonthRoute
-  '/plan/week/$week': typeof PlanWeekWeekRoute
-  '/practice/$courseCode/$topicId': typeof PracticeCourseCodeTopicIdRoute
-  '/studies/$courseCode/analysis': typeof StudiesCourseCodeAnalysisRoute
-  '/studies/$courseCode/content': typeof StudiesCourseCodeContentRoute
-  '/studies/$courseCode/history': typeof StudiesCourseCodeHistoryRoute
-  '/studies/$courseCode/': typeof StudiesCourseCodeIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/today'
     | '/api/device-auth'
-    | '/api/release-info'
-    | '/exams/$examId'
-    | '/progress/analysis'
-    | '/progress/mastery'
-    | '/settings/app'
-    | '/settings/notifications'
-    | '/settings/study'
-    | '/studies/$courseCode'
-    | '/exams/'
-    | '/plan/'
-    | '/practice/'
-    | '/progress/'
-    | '/settings/'
-    | '/studies/'
     | '/api/ai/coach'
-    | '/api/ai/course-structure'
-    | '/api/ai/material'
-    | '/api/ai/questions'
     | '/api/push/cron'
     | '/api/push/public-key'
     | '/api/push/subscribe'
     | '/api/push/test'
     | '/api/push/unsubscribe'
-    | '/api/questions/seed-ke04'
-    | '/plan/day/$date'
-    | '/plan/month/$month'
-    | '/plan/week/$week'
-    | '/practice/$courseCode/$topicId'
-    | '/studies/$courseCode/analysis'
-    | '/studies/$courseCode/content'
-    | '/studies/$courseCode/history'
-    | '/studies/$courseCode/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/today'
     | '/api/device-auth'
-    | '/api/release-info'
-    | '/exams/$examId'
-    | '/progress/analysis'
-    | '/progress/mastery'
-    | '/settings/app'
-    | '/settings/notifications'
-    | '/settings/study'
-    | '/exams'
-    | '/plan'
-    | '/practice'
-    | '/progress'
-    | '/settings'
-    | '/studies'
     | '/api/ai/coach'
-    | '/api/ai/course-structure'
-    | '/api/ai/material'
-    | '/api/ai/questions'
     | '/api/push/cron'
     | '/api/push/public-key'
     | '/api/push/subscribe'
     | '/api/push/test'
     | '/api/push/unsubscribe'
-    | '/api/questions/seed-ke04'
-    | '/plan/day/$date'
-    | '/plan/month/$month'
-    | '/plan/week/$week'
-    | '/practice/$courseCode/$topicId'
-    | '/studies/$courseCode/analysis'
-    | '/studies/$courseCode/content'
-    | '/studies/$courseCode/history'
-    | '/studies/$courseCode'
   id:
     | '__root__'
     | '/'
-    | '/today'
     | '/api/device-auth'
-    | '/api/release-info'
-    | '/exams/$examId'
-    | '/progress/analysis'
-    | '/progress/mastery'
-    | '/settings/app'
-    | '/settings/notifications'
-    | '/settings/study'
-    | '/studies/$courseCode'
-    | '/exams/'
-    | '/plan/'
-    | '/practice/'
-    | '/progress/'
-    | '/settings/'
-    | '/studies/'
     | '/api/ai/coach'
-    | '/api/ai/course-structure'
-    | '/api/ai/material'
-    | '/api/ai/questions'
     | '/api/push/cron'
     | '/api/push/public-key'
     | '/api/push/subscribe'
     | '/api/push/test'
     | '/api/push/unsubscribe'
-    | '/api/questions/seed-ke04'
-    | '/plan/day/$date'
-    | '/plan/month/$month'
-    | '/plan/week/$week'
-    | '/practice/$courseCode/$topicId'
-    | '/studies/$courseCode/analysis'
-    | '/studies/$courseCode/content'
-    | '/studies/$courseCode/history'
-    | '/studies/$courseCode/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  TodayRoute: typeof TodayRoute
   ApiDeviceAuthRoute: typeof ApiDeviceAuthRoute
-  ApiReleaseInfoRoute: typeof ApiReleaseInfoRoute
-  ExamsExamIdRoute: typeof ExamsExamIdRoute
-  ProgressAnalysisRoute: typeof ProgressAnalysisRoute
-  ProgressMasteryRoute: typeof ProgressMasteryRoute
-  SettingsAppRoute: typeof SettingsAppRoute
-  SettingsNotificationsRoute: typeof SettingsNotificationsRoute
-  SettingsStudyRoute: typeof SettingsStudyRoute
-  StudiesCourseCodeRoute: typeof StudiesCourseCodeRouteWithChildren
-  ExamsIndexRoute: typeof ExamsIndexRoute
-  PlanIndexRoute: typeof PlanIndexRoute
-  PracticeIndexRoute: typeof PracticeIndexRoute
-  ProgressIndexRoute: typeof ProgressIndexRoute
-  SettingsIndexRoute: typeof SettingsIndexRoute
-  StudiesIndexRoute: typeof StudiesIndexRoute
   ApiAiCoachRoute: typeof ApiAiCoachRoute
-  ApiAiCourseStructureRoute: typeof ApiAiCourseStructureRoute
-  ApiAiMaterialRoute: typeof ApiAiMaterialRoute
-  ApiAiQuestionsRoute: typeof ApiAiQuestionsRoute
   ApiPushCronRoute: typeof ApiPushCronRoute
   ApiPushPublicKeyRoute: typeof ApiPushPublicKeyRoute
   ApiPushSubscribeRoute: typeof ApiPushSubscribeRoute
   ApiPushTestRoute: typeof ApiPushTestRoute
   ApiPushUnsubscribeRoute: typeof ApiPushUnsubscribeRoute
-  ApiQuestionsSeedKe04Route: typeof ApiQuestionsSeedKe04Route
-  PlanDayDateRoute: typeof PlanDayDateRoute
-  PlanMonthMonthRoute: typeof PlanMonthMonthRoute
-  PlanWeekWeekRoute: typeof PlanWeekWeekRoute
-  PracticeCourseCodeTopicIdRoute: typeof PracticeCourseCodeTopicIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -492,13 +143,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/today': {
-      id: '/today'
-      path: '/today'
-      fullPath: '/today'
-      preLoaderRoute: typeof TodayRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/api/device-auth': {
       id: '/api/device-auth'
       path: '/api/device-auth'
@@ -506,130 +150,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiDeviceAuthRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/release-info': {
-      id: '/api/release-info'
-      path: '/api/release-info'
-      fullPath: '/api/release-info'
-      preLoaderRoute: typeof ApiReleaseInfoRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/exams/': {
-      id: '/exams/'
-      path: '/exams'
-      fullPath: '/exams/'
-      preLoaderRoute: typeof ExamsIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/exams/$examId': {
-      id: '/exams/$examId'
-      path: '/exams/$examId'
-      fullPath: '/exams/$examId'
-      preLoaderRoute: typeof ExamsExamIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/plan/': {
-      id: '/plan/'
-      path: '/plan'
-      fullPath: '/plan/'
-      preLoaderRoute: typeof PlanIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/practice/': {
-      id: '/practice/'
-      path: '/practice'
-      fullPath: '/practice/'
-      preLoaderRoute: typeof PracticeIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/progress/': {
-      id: '/progress/'
-      path: '/progress'
-      fullPath: '/progress/'
-      preLoaderRoute: typeof ProgressIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/progress/analysis': {
-      id: '/progress/analysis'
-      path: '/progress/analysis'
-      fullPath: '/progress/analysis'
-      preLoaderRoute: typeof ProgressAnalysisRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/progress/mastery': {
-      id: '/progress/mastery'
-      path: '/progress/mastery'
-      fullPath: '/progress/mastery'
-      preLoaderRoute: typeof ProgressMasteryRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/settings/': {
-      id: '/settings/'
-      path: '/settings'
-      fullPath: '/settings/'
-      preLoaderRoute: typeof SettingsIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/settings/app': {
-      id: '/settings/app'
-      path: '/settings/app'
-      fullPath: '/settings/app'
-      preLoaderRoute: typeof SettingsAppRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/settings/notifications': {
-      id: '/settings/notifications'
-      path: '/settings/notifications'
-      fullPath: '/settings/notifications'
-      preLoaderRoute: typeof SettingsNotificationsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/settings/study': {
-      id: '/settings/study'
-      path: '/settings/study'
-      fullPath: '/settings/study'
-      preLoaderRoute: typeof SettingsStudyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/studies/': {
-      id: '/studies/'
-      path: '/studies'
-      fullPath: '/studies/'
-      preLoaderRoute: typeof StudiesIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/studies/$courseCode': {
-      id: '/studies/$courseCode'
-      path: '/studies/$courseCode'
-      fullPath: '/studies/$courseCode'
-      preLoaderRoute: typeof StudiesCourseCodeRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/api/ai/coach': {
       id: '/api/ai/coach'
       path: '/api/ai/coach'
       fullPath: '/api/ai/coach'
       preLoaderRoute: typeof ApiAiCoachRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/ai/course-structure': {
-      id: '/api/ai/course-structure'
-      path: '/api/ai/course-structure'
-      fullPath: '/api/ai/course-structure'
-      preLoaderRoute: typeof ApiAiCourseStructureRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/ai/material': {
-      id: '/api/ai/material'
-      path: '/api/ai/material'
-      fullPath: '/api/ai/material'
-      preLoaderRoute: typeof ApiAiMaterialRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/ai/questions': {
-      id: '/api/ai/questions'
-      path: '/api/ai/questions'
-      fullPath: '/api/ai/questions'
-      preLoaderRoute: typeof ApiAiQuestionsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/push/cron': {
@@ -667,121 +192,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPushUnsubscribeRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/questions/seed-ke04': {
-      id: '/api/questions/seed-ke04'
-      path: '/api/questions/seed-ke04'
-      fullPath: '/api/questions/seed-ke04'
-      preLoaderRoute: typeof ApiQuestionsSeedKe04RouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/plan/day/$date': {
-      id: '/plan/day/$date'
-      path: '/plan/day/$date'
-      fullPath: '/plan/day/$date'
-      preLoaderRoute: typeof PlanDayDateRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/plan/month/$month': {
-      id: '/plan/month/$month'
-      path: '/plan/month/$month'
-      fullPath: '/plan/month/$month'
-      preLoaderRoute: typeof PlanMonthMonthRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/plan/week/$week': {
-      id: '/plan/week/$week'
-      path: '/plan/week/$week'
-      fullPath: '/plan/week/$week'
-      preLoaderRoute: typeof PlanWeekWeekRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/practice/$courseCode/$topicId': {
-      id: '/practice/$courseCode/$topicId'
-      path: '/practice/$courseCode/$topicId'
-      fullPath: '/practice/$courseCode/$topicId'
-      preLoaderRoute: typeof PracticeCourseCodeTopicIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/studies/$courseCode/': {
-      id: '/studies/$courseCode/'
-      path: '/'
-      fullPath: '/studies/$courseCode/'
-      preLoaderRoute: typeof StudiesCourseCodeIndexRouteImport
-      parentRoute: typeof StudiesCourseCodeRoute
-    }
-    '/studies/$courseCode/analysis': {
-      id: '/studies/$courseCode/analysis'
-      path: '/analysis'
-      fullPath: '/studies/$courseCode/analysis'
-      preLoaderRoute: typeof StudiesCourseCodeAnalysisRouteImport
-      parentRoute: typeof StudiesCourseCodeRoute
-    }
-    '/studies/$courseCode/content': {
-      id: '/studies/$courseCode/content'
-      path: '/content'
-      fullPath: '/studies/$courseCode/content'
-      preLoaderRoute: typeof StudiesCourseCodeContentRouteImport
-      parentRoute: typeof StudiesCourseCodeRoute
-    }
-    '/studies/$courseCode/history': {
-      id: '/studies/$courseCode/history'
-      path: '/history'
-      fullPath: '/studies/$courseCode/history'
-      preLoaderRoute: typeof StudiesCourseCodeHistoryRouteImport
-      parentRoute: typeof StudiesCourseCodeRoute
-    }
   }
 }
 
-interface StudiesCourseCodeRouteChildren {
-  StudiesCourseCodeAnalysisRoute: typeof StudiesCourseCodeAnalysisRoute
-  StudiesCourseCodeContentRoute: typeof StudiesCourseCodeContentRoute
-  StudiesCourseCodeHistoryRoute: typeof StudiesCourseCodeHistoryRoute
-  StudiesCourseCodeIndexRoute: typeof StudiesCourseCodeIndexRoute
-}
-
-const StudiesCourseCodeRouteChildren: StudiesCourseCodeRouteChildren = {
-  StudiesCourseCodeAnalysisRoute: StudiesCourseCodeAnalysisRoute,
-  StudiesCourseCodeContentRoute: StudiesCourseCodeContentRoute,
-  StudiesCourseCodeHistoryRoute: StudiesCourseCodeHistoryRoute,
-  StudiesCourseCodeIndexRoute: StudiesCourseCodeIndexRoute,
-}
-
-const StudiesCourseCodeRouteWithChildren =
-  StudiesCourseCodeRoute._addFileChildren(StudiesCourseCodeRouteChildren)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  TodayRoute: TodayRoute,
   ApiDeviceAuthRoute: ApiDeviceAuthRoute,
-  ApiReleaseInfoRoute: ApiReleaseInfoRoute,
-  ExamsExamIdRoute: ExamsExamIdRoute,
-  ProgressAnalysisRoute: ProgressAnalysisRoute,
-  ProgressMasteryRoute: ProgressMasteryRoute,
-  SettingsAppRoute: SettingsAppRoute,
-  SettingsNotificationsRoute: SettingsNotificationsRoute,
-  SettingsStudyRoute: SettingsStudyRoute,
-  StudiesCourseCodeRoute: StudiesCourseCodeRouteWithChildren,
-  ExamsIndexRoute: ExamsIndexRoute,
-  PlanIndexRoute: PlanIndexRoute,
-  PracticeIndexRoute: PracticeIndexRoute,
-  ProgressIndexRoute: ProgressIndexRoute,
-  SettingsIndexRoute: SettingsIndexRoute,
-  StudiesIndexRoute: StudiesIndexRoute,
   ApiAiCoachRoute: ApiAiCoachRoute,
-  ApiAiCourseStructureRoute: ApiAiCourseStructureRoute,
-  ApiAiMaterialRoute: ApiAiMaterialRoute,
-  ApiAiQuestionsRoute: ApiAiQuestionsRoute,
   ApiPushCronRoute: ApiPushCronRoute,
   ApiPushPublicKeyRoute: ApiPushPublicKeyRoute,
   ApiPushSubscribeRoute: ApiPushSubscribeRoute,
   ApiPushTestRoute: ApiPushTestRoute,
   ApiPushUnsubscribeRoute: ApiPushUnsubscribeRoute,
-  ApiQuestionsSeedKe04Route: ApiQuestionsSeedKe04Route,
-  PlanDayDateRoute: PlanDayDateRoute,
-  PlanMonthMonthRoute: PlanMonthMonthRoute,
-  PlanWeekWeekRoute: PlanWeekWeekRoute,
-  PracticeCourseCodeTopicIdRoute: PracticeCourseCodeTopicIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
