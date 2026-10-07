@@ -25,6 +25,7 @@ import { shortDate, today } from "@/lib/fi";
 import { experimentVariantV4, sessionFatigueV4 } from "@/lib/learning-os-v4";
 import { COURSE_TEMPLATES, parseTopicImport, topicsToImportText } from "@/lib/courseTemplates";
 import { getDeviceAccessToken } from "@/lib/deviceSession";
+import { runOrQueue } from "@/lib/offline";
 import { relationLabel } from "@/lib/ui-fi";
 
 import { Dialog, button, input, secondary } from "@/features/shared/DialogPrimitives";
@@ -74,6 +75,16 @@ export function SessionForm({item,activeSession=null,courses,topics,sessions=[],
  const retrievalPrompt=topic
    ? `Sulje materiaalit. Selitä tai ratkaise omin sanoin, mitä osaat nyt aiheesta “${topic.name}”.`
    : "Sulje materiaalit. Kirjoita tärkeimmät asiat, jotka pystyt nyt palauttamaan muistista.";
+
+ async function persistLoggedSession(input: Parameters<typeof log.mutateAsync>[0]) {
+   // TanStack can pause an offline mutation before its mutationFn runs. Bypass
+   // that pause for study logs when the browser already knows it is offline so
+   // the durable write-ahead queue is populated synchronously before closing.
+   if (typeof navigator !== "undefined" && navigator.onLine === false) {
+     return runOrQueue<string>("logSession", input);
+   }
+   return log.mutateAsync(input);
+ }
 
  useEffect(()=>{
    if(experimentApplied.current||preferences.data?.personal_experiments_enabled!==true||item||activeSession)return;
@@ -237,7 +248,7 @@ export function SessionForm({item,activeSession=null,courses,topics,sessions=[],
  async function submitManual(e:React.FormEvent){
    e.preventDefault();if(!courseId)return;
    try{
-     const result=await log.mutateAsync({
+     const result=await persistLoggedSession({
        course_id:courseId,topic_id:topicId||null,
        minutes:Math.max(1,actualMinutes),
        planned_minutes:item?.target_minutes??actualMinutes,
@@ -260,7 +271,7 @@ export function SessionForm({item,activeSession=null,courses,topics,sessions=[],
      ?Math.max(1,actualMinutes)
      :Math.max(1,Math.ceil(currentElapsedSeconds()/60));
    try{
-     const result=await log.mutateAsync({
+     const result=await persistLoggedSession({
        course_id:courseId,topic_id:topicId||null,
        minutes:minutesUsed,
        planned_minutes:item?.target_minutes??targetMinutes,
