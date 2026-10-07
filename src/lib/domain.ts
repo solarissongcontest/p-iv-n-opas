@@ -824,7 +824,7 @@ export function generatePlan(opts: {
   if (totalDays <= 0) return [];
 
   const dates: string[] = [];
-  for (let i = 0; i < totalDays; i++) {
+  for (let i = 0; i < totalDays; i += 1) {
     const iso = addDays(startISO, i);
     const weekday = ((parseISO(iso).getDay() + 6) % 7) + 1;
     if (!opts.studyWeekdays.includes(weekday)) continue;
@@ -838,125 +838,198 @@ export function generatePlan(opts: {
     Math.round(opts.weeklyMinutes / Math.max(1, opts.studyWeekdays.length)),
   );
   const ordered = [...opts.topics].sort((a, b) => a.position - b.position);
-  const progressById = new Map(opts.topics.map((t) => [t.id, t.progress]));
-  const eligibleNew = ordered.filter((t) =>
-    (t.dependencies ?? []).every((id) => (progressById.get(id) ?? 0) >= 60),
-  );
+  if (ordered.length === 0) return [];
+
   const activeMistakeTopics = new Set(
-    (opts.mistakes ?? []).filter((m) => m.status !== "mastered" && m.topic_id).map((m) => m.topic_id!),
+    (opts.mistakes ?? [])
+      .filter((mistake) => mistake.status !== "mastered" && mistake.topic_id)
+      .map((mistake) => mistake.topic_id!),
   );
   const ownAheadOfSchool = weightedCoverage(opts.topics) - schoolCoverage(opts.topics) >= 15;
-  const priorities = [...opts.topics].sort((a, b) => {
-    const score = (t: Topic) => {
-      const dueBoost = t.next_review && t.next_review <= startISO ? 8 : 0;
-      const mistakeBoost = activeMistakeTopics.has(t.id) ? 12 : 0;
-      const schoolBoost = ownAheadOfSchool && t.school_covered ? 5 : 0;
-      const unfinished = (100 - t.progress) / 20;
-      return t.importance * (6 - t.verified_level) + dueBoost + mistakeBoost + schoolBoost + unfinished;
-    };
-    return score(b) - score(a);
-  });
+  const averageWeight =
+    ordered.reduce((sum, topic) => sum + Math.max(1, Number(topic.weight || 1)), 0) /
+    Math.max(1, ordered.length);
 
-  const drafts: PlanDraft[] = [];
-  let contentIdx = 0;
-  let priorityIdx = 0;
-
-  const choosePriority = (date: string) => {
-    const due = priorities.filter((t) => t.next_review && t.next_review <= date);
-    const pool = due.length ? due : priorities;
-    if (!pool.length) return undefined;
-    const topic = pool[priorityIdx % pool.length];
-    priorityIdx += 1;
-    return topic;
+  type SimulatedTopic = {
+    progress: number;
+    nextReview: string | null;
+    plannedContent: number;
+    plannedReviews: number;
+    plannedApplications: number;
+    lastPlanned: string | null;
   };
 
-  dates.forEach((date, i) => {
+  const simulated = new Map<string, SimulatedTopic>(
+    ordered.map((topic) => [
+      topic.id,
+      {
+        progress: Math.max(0, Math.min(100, Number(topic.progress || 0))),
+        nextReview: topic.next_review,
+        plannedContent: 0,
+        plannedReviews: 0,
+        plannedApplications: 0,
+        lastPlanned: null,
+      },
+    ]),
+  );
+
+  // Weight controls how many first-pass content sessions a large topic gets.
+  // Every unfinished topic still gets at least one session, so small chapters
+  // cannot disappear just because a high-weight chapter exists.
+  const contentTargets = new Map<string, number>(
+    ordered.map((topic) => {
+      const remainingShare = Math.max(0, 100 - Number(topic.progress || 0)) / 100;
+      if (remainingShare <= 0) return [topic.id, 0];
+      const weightUnits = Math.max(
+        1,
+        Math.round(Math.max(1, Number(topic.weight || 1)) / Math.max(1, averageWeight)),
+      );
+      return [topic.id, Math.max(1, Math.ceil(weightUnits * remainingShare))];
+    }),
+  );
+
+  const stateFor = (topic: Topic) => simulated.get(topic.id)!;
+  const targetFor = (topic: Topic) => contentTargets.get(topic.id) ?? 0;
+  const dependenciesMet = (topic: Topic) =>
+    (topic.dependencies ?? []).every((id) => (simulated.get(id)?.progress ?? 0) >= 60);
+
+  const remainingContentUnits = () =>
+    ordered.reduce(
+      (sum, topic) => sum + Math.max(0, targetFor(topic) - stateFor(topic).plannedContent),
+      0,
+    );
+
+  const remainingFirstPassTopics = () =>
+    ordered.filter(
+      (topic) =>
+        targetFor(topic) > 0 &&
+        stateFor(topic).plannedContent === 0 &&
+        Number(topic.progress || 0) <= 0,
+    );
+
+  const chooseContent = () => {
+    const candidates = ordered.filter(
+      (topic) =>
+        stateFor(topic).plannedContent < targetFor(topic) &&
+        dependenciesMet(topic),
+    );
+    if (!candidates.length) return undefined;
+
+    // First cover untouched material in textbook order. Only after every
+    // untouched topic has had a first encounter do heavy chapters receive
+    // their additional weighted sessions.
+    const untouched = candidates.filter(
+      (topic) => Number(topic.progress || 0) <= 0 && stateFor(topic).plannedContent === 0,
+    );
+    const pool = untouched.length ? untouched : candidates;
+    return [...pool].sort((a, b) => {
+      if (untouched.length) return a.position - b.position;
+      const aTarget = Math.max(1, targetFor(a));
+      const bTarget = Math.max(1, targetFor(b));
+      const aShare = stateFor(a).plannedContent / aTarget;
+      const bShare = stateFor(b).plannedContent / bTarget;
+      return aShare - bShare || a.position - b.position;
+    })[0];
+  };
+
+  let lastTopicId: string | null = null;
+
+  const dueTopics = (date: string) =>
+    ordered
+      .filter((topic) => {
+        const nextReview = stateFor(topic).nextReview;
+        return Boolean(nextReview && nextReview <= date);
+      })
+      .sort((a, b) => {
+        const score = (topic: Topic) => {
+          const state = stateFor(topic);
+          const overdueDays = state.nextReview ? Math.max(0, diffDays(date, state.nextReview)) : 0;
+          return (
+            overdueDays * 3 +
+            Number(topic.importance || 3) * 3 +
+            (activeMistakeTopics.has(topic.id) ? 12 : 0) +
+            Math.max(0, 4 - Number(topic.verified_level || 0)) * 2 -
+            state.plannedReviews * 3 -
+            (lastTopicId === topic.id ? 16 : 0)
+          );
+        };
+        return score(b) - score(a) || a.position - b.position;
+      });
+
+  const chooseGeneralPriority = (date: string) =>
+    [...ordered].sort((a, b) => {
+      const score = (topic: Topic) => {
+        const state = stateFor(topic);
+        const dueBoost = state.nextReview && state.nextReview <= date ? 7 : 0;
+        return (
+          Number(topic.importance || 3) * 4 +
+          Math.max(1, Number(topic.weight || 1)) / Math.max(1, averageWeight) * 3 +
+          Math.max(0, 5 - Number(topic.verified_level || 0)) * 2 +
+          Math.max(0, 100 - state.progress) / 25 +
+          dueBoost +
+          (activeMistakeTopics.has(topic.id) ? 10 : 0) -
+          state.plannedApplications * 5 -
+          state.plannedReviews * 2 -
+          (lastTopicId === topic.id ? 18 : 0)
+        );
+      };
+      return score(b) - score(a) || a.position - b.position;
+    })[0];
+
+  const markContent = (topic: Topic, date: string) => {
+    const state = stateFor(topic);
+    state.plannedContent += 1;
+    const target = Math.max(1, targetFor(topic));
+    const startProgress = Math.max(0, Math.min(100, Number(topic.progress || 0)));
+    state.progress = Math.min(
+      100,
+      Math.max(
+        state.progress,
+        startProgress + Math.ceil((100 - startProgress) * (state.plannedContent / target)),
+      ),
+    );
+    state.lastPlanned = date;
+    state.nextReview = addDays(date, Number(topic.verified_level || 0) >= 3 ? 3 : 2);
+    lastTopicId = topic.id;
+  };
+
+  const markReview = (topic: Topic, date: string) => {
+    const state = stateFor(topic);
+    state.plannedReviews += 1;
+    const mastery = Math.max(0, Math.min(5, Number(topic.verified_level || 0)));
+    const baseGap = [3, 3, 4, 5, 7, 10][mastery] ?? 3;
+    const growth = [0, 2, 4, 7, 10][Math.min(4, state.plannedReviews - 1)] ?? 10;
+    let gap = baseGap + growth;
+    if (activeMistakeTopics.has(topic.id)) gap = Math.min(gap, 3);
     const daysToExam = diffDays(opts.examDate, date);
-    const inExamMode = daysToExam <= 14;
-    const finalStretch = daysToExam <= 2;
+    if (daysToExam <= 14) gap = Math.min(gap, 4);
+    state.nextReview = addDays(date, Math.max(2, gap));
+    state.lastPlanned = date;
+    lastTopicId = topic.id;
+  };
 
-    let phase: PlanPhase;
-    let kind = "study";
-    let title = "";
-    let topic: Topic | undefined;
-
-    if (finalStretch) {
-      phase = "light";
-      kind = "review";
-      topic = choosePriority(date);
-      title = topic
-        ? `${topic.name} – kevyt palautus`
-        : "Kevyt palautus: virhelista, käsitteet ja kaavat";
-    } else if (inExamMode) {
-      const cycle = i % 6;
-      if (cycle === 0) {
-        phase = "review";
-        kind = "review";
-        topic = choosePriority(date);
-        title = topic ? `${topic.name} – muistista palautus ilman materiaalia` : "Palauta koealue muistista";
-      } else if (cycle === 1) {
-        phase = "application";
-        topic = choosePriority(date);
-        title = topic ? `${topic.name} – vaihtelevat tehtävät` : "Vaihtelevat tehtävät: valitse oikea menetelmä";
-      } else if (cycle === 2) {
-        phase = "application";
-        topic = choosePriority(date);
-        title = topic ? `${topic.name} – soveltava tehtävä` : "Sovella osaamista uuteen tilanteeseen";
-      } else if (cycle === 3) {
-        phase = "practice";
-        kind = "test";
-        topic = choosePriority(date);
-        title = "Koesimulaatio";
-      } else if (cycle === 4) {
-        phase = "review";
-        kind = "review";
-        topic = choosePriority(date);
-        title = topic ? `${topic.name} – korjaa virheet` : "Korjaa harjoituskokeen virheet";
-      } else {
-        phase = "light";
-        kind = "review";
-        topic = choosePriority(date);
-        title = topic ? `${topic.name} – kevyt varmistus` : "Kevyt varmistus ja palautuminen";
-      }
-    } else {
-      const x = i / Math.max(1, dates.length - 1);
-      if (x < 0.42) {
-        const due = priorities.find((t) => t.next_review && t.next_review <= date);
-        if (due) {
-          phase = "review";
-          kind = "review";
-          topic = choosePriority(date);
-          title = topic ? `${topic.name} – ajastettu kertaus` : "Ajastettu kertaus";
-        } else if (ownAheadOfSchool) {
-          phase = "review";
-          kind = "review";
-          topic = choosePriority(date);
-          title = topic ? `${topic.name} – syventävä kertaus` : "Syventävä kertaus";
-        } else {
-          phase = "content";
-          const pool = eligibleNew.length ? eligibleNew : ordered;
-          topic = pool[Math.min(contentIdx, Math.max(0, pool.length - 1))];
-          contentIdx += 1;
-          title = topic ? topic.name : "Uusi sisältö";
-        }
-      } else if (x < 0.67) {
-        phase = "application";
-        topic = choosePriority(date);
-        title = topic ? `${topic.name} – soveltavat tehtävät` : "Soveltavat tehtävät";
-      } else if (x < 0.8) {
-        phase = "practice";
-        kind = "test";
-        topic = choosePriority(date);
-        title = "Harjoituskoe ja virheiden läpikäynti";
-      } else {
-        phase = "review";
-        kind = "review";
-        topic = choosePriority(date);
-        title = topic ? `${topic.name} – kertaus` : "Kertaus";
-      }
+  const markApplication = (topic: Topic, date: string) => {
+    const state = stateFor(topic);
+    state.plannedApplications += 1;
+    state.lastPlanned = date;
+    // A scheduled application/test is also a future exposure. If the current
+    // DB next_review is already due, advance the simulated date so it cannot
+    // monopolise every later planner slot.
+    if (state.nextReview && state.nextReview <= date) {
+      state.nextReview = addDays(date, 3);
     }
+    lastTopicId = topic.id;
+  };
 
-    const light = finalStretch;
+  const drafts: PlanDraft[] = [];
+  const pushDraft = (
+    date: string,
+    phase: PlanPhase,
+    kind: string,
+    title: string,
+    topic: Topic | undefined,
+    light = false,
+  ) => {
     const dailyCapacity = opts.capacity ? capacityForDate(opts.capacity, date) : perDay;
     const targetMinutes = light
       ? Math.min(20, dailyCapacity)
@@ -968,11 +1041,156 @@ export function generatePlan(opts: {
       phase,
       kind,
       title,
-      min_minutes: Math.min(targetMinutes, light ? 10 : Math.max(10, Math.round(targetMinutes * 0.55))),
+      min_minutes: Math.min(
+        targetMinutes,
+        light ? 10 : Math.max(10, Math.round(targetMinutes * 0.55)),
+      ),
       target_minutes: targetMinutes,
-      extra_minutes: light ? 0 : Math.max(0, Math.min(Math.round(targetMinutes * 0.35), dailyCapacity - targetMinutes)),
+      extra_minutes: light
+        ? 0
+        : Math.max(0, Math.min(Math.round(targetMinutes * 0.35), dailyCapacity - targetMinutes)),
       start_time: null,
     });
+  };
+
+  let examModeIndex = 0;
+
+  dates.forEach((date, i) => {
+    const daysToExam = diffDays(opts.examDate, date);
+    const inExamMode = daysToExam <= 14;
+    const finalStretch = daysToExam <= 2;
+    const due = dueTopics(date);
+
+    if (finalStretch) {
+      const topic = due[0] ?? chooseGeneralPriority(date);
+      if (topic) markReview(topic, date);
+      pushDraft(
+        date,
+        "light",
+        "review",
+        topic ? `${topic.name} – kevyt palautus` : "Kevyt palautus: virhelista, käsitteet ja kaavat",
+        topic,
+        true,
+      );
+      return;
+    }
+
+    if (!inExamMode) {
+      const preExamSlotsLeft = dates
+        .slice(i)
+        .filter((candidate) => diffDays(opts.examDate, candidate) > 14).length;
+      const contentLeft = remainingContentUnits();
+      const contentTopic = chooseContent();
+      // Keep a small reserve for reviews/applications, but never let those
+      // consume the slots required to cover unfinished content before exam mode.
+      const mustProtectCoverage =
+        Boolean(contentTopic) && contentLeft >= Math.max(1, preExamSlotsLeft - 4);
+      const reviewSlot =
+        due.length > 0 && (i === 0 || i % 4 === 3 || (ownAheadOfSchool && i % 3 === 2));
+
+      if (contentTopic && (mustProtectCoverage || !reviewSlot)) {
+        markContent(contentTopic, date);
+        pushDraft(date, "content", "study", contentTopic.name, contentTopic);
+        return;
+      }
+
+      if (due.length) {
+        const topic = due[0]!;
+        markReview(topic, date);
+        pushDraft(date, "review", "review", `${topic.name} – ajastettu kertaus`, topic);
+        return;
+      }
+
+      if (contentTopic) {
+        markContent(contentTopic, date);
+        pushDraft(date, "content", "study", contentTopic.name, contentTopic);
+        return;
+      }
+
+      const topic = chooseGeneralPriority(date);
+      if (topic) markApplication(topic, date);
+      pushDraft(
+        date,
+        "application",
+        "study",
+        topic ? `${topic.name} – soveltavat tehtävät` : "Soveltavat tehtävät",
+        topic,
+      );
+      return;
+    }
+
+    // If earlier interruptions left genuinely untouched content, exam mode may
+    // still finish the first pass. It does not blindly switch to simulations
+    // while chapters have never been studied.
+    const firstPassLeft = remainingFirstPassTopics();
+    const studySlotsLeft = dates.slice(i).filter((candidate) => diffDays(opts.examDate, candidate) > 2).length;
+    if (firstPassLeft.length && studySlotsLeft <= firstPassLeft.length + 4) {
+      const topic = chooseContent();
+      if (topic) {
+        markContent(topic, date);
+        pushDraft(date, "content", "study", topic.name, topic);
+        examModeIndex += 1;
+        return;
+      }
+    }
+
+    const cycle = examModeIndex % 6;
+    examModeIndex += 1;
+    if (cycle === 0) {
+      const topic = due[0] ?? chooseGeneralPriority(date);
+      if (topic) markReview(topic, date);
+      pushDraft(
+        date,
+        "review",
+        "review",
+        topic ? `${topic.name} – muistista palautus ilman materiaalia` : "Palauta koealue muistista",
+        topic,
+      );
+    } else if (cycle === 1) {
+      const topic = chooseGeneralPriority(date);
+      if (topic) markApplication(topic, date);
+      pushDraft(
+        date,
+        "application",
+        "study",
+        topic ? `${topic.name} – vaihtelevat tehtävät` : "Vaihtelevat tehtävät: valitse oikea menetelmä",
+        topic,
+      );
+    } else if (cycle === 2) {
+      const topic = chooseGeneralPriority(date);
+      if (topic) markApplication(topic, date);
+      pushDraft(
+        date,
+        "application",
+        "study",
+        topic ? `${topic.name} – soveltava tehtävä` : "Sovella osaamista uuteen tilanteeseen",
+        topic,
+      );
+    } else if (cycle === 3) {
+      const topic = chooseGeneralPriority(date);
+      if (topic) markApplication(topic, date);
+      pushDraft(date, "practice", "test", "Koesimulaatio", topic);
+    } else if (cycle === 4) {
+      const topic = due[0] ?? chooseGeneralPriority(date);
+      if (topic) markReview(topic, date);
+      pushDraft(
+        date,
+        "review",
+        "review",
+        topic ? `${topic.name} – korjaa virheet` : "Korjaa harjoituskokeen virheet",
+        topic,
+      );
+    } else {
+      const topic = due[0] ?? chooseGeneralPriority(date);
+      if (topic) markReview(topic, date);
+      pushDraft(
+        date,
+        "light",
+        "review",
+        topic ? `${topic.name} – kevyt varmistus` : "Kevyt varmistus ja palautuminen",
+        topic,
+      );
+    }
   });
 
   drafts.push({

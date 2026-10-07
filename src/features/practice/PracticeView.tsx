@@ -144,6 +144,7 @@ export function PracticeView({
   const [showExplanation, setShowExplanation] = useState(false);
   const [feedbackExplanation, setFeedbackExplanation] = useState("");
   const [diagnosticMode, setDiagnosticMode] = useState(false);
+  const [diagnosticTopicId, setDiagnosticTopicId] = useState<string | null>(null);
   const startedAt = useRef<number>(Date.now());
   const record = useRecordPracticeAttempt();
   const advanceMistake = useAdvanceMistake();
@@ -222,11 +223,20 @@ export function PracticeView({
     course,
   });
 
-  const diagnosticLimit = Math.min(10, courseTopics.length);
+  // A topic diagnostic measures the topic the user explicitly selected.
+  // Never rotate through the course by attempt index: that made question 2 of
+  // a 1.1 diagnostic silently become a 1.2 question.
+  const diagnosticLimit = 5;
   const diagnosticDone = diagnosticMode && attemptIndex >= diagnosticLimit;
-  const effectiveTopicId = diagnosticMode
-    ? courseTopics[attemptIndex % Math.max(1, courseTopics.length)]?.id ?? topicId
-    : topicId;
+  const effectiveTopicId = diagnosticMode ? (diagnosticTopicId ?? topicId) : topicId;
+
+  useEffect(() => {
+    if (!diagnosticMode || !diagnosticTopicId) return;
+    if (courseTopics.some((candidate) => candidate.id === diagnosticTopicId)) return;
+    setDiagnosticMode(false);
+    setDiagnosticTopicId(null);
+    setAttemptIndex(0);
+  }, [courseTopics, diagnosticMode, diagnosticTopicId]);
   const selectedTopic = courseTopics.find((candidate) => candidate.id === effectiveTopicId) ?? courseTopics[0] ?? null;
   const dueMistakeVerification = selectedTopic
     ? mistakes.find(mistake =>
@@ -321,14 +331,16 @@ export function PracticeView({
   const stopDecision = selectedTopic ? stopRuleV5(selectedTopic, attempts) : null;
   const transferState = selectedTopic ? transferStateV5(selectedTopic, attempts) : null;
   const confusionSet = useMemo(
-    () => selectedTopic
-      ? confusionSetsV5({
-          topics: courseTopics,
-          dependencies: dependencies.data ?? [],
-          attempts,
-        }).find((set) => set.topicIds.includes(selectedTopic.id) && set.priority >= .55) ?? null
-      : null,
-    [attempts, courseTopics, dependencies.data, selectedTopic],
+    () => diagnosticMode
+      ? null
+      : selectedTopic
+        ? confusionSetsV5({
+            topics: courseTopics,
+            dependencies: dependencies.data ?? [],
+            attempts,
+          }).find((set) => set.topicIds.includes(selectedTopic.id) && set.priority >= .55) ?? null
+        : null,
+    [attempts, courseTopics, dependencies.data, diagnosticMode, selectedTopic],
   );
   const interleavingVariant =
     experimentsEnabled && selectedTopic
@@ -343,13 +355,15 @@ export function PracticeView({
     [attempts, courses],
   );
   const interleaveMode =
-    confusionSet
-      ? "interleaved" as const
-      : diagnosticMode || interleavingVariant === null
-        ? "auto" as const
-        : interleavingVariant === "A"
-          ? "blocked" as const
-          : "interleaved" as const;
+    diagnosticMode
+      ? "blocked" as const
+      : confusionSet
+        ? "interleaved" as const
+        : interleavingVariant === null
+          ? "auto" as const
+          : interleavingVariant === "A"
+            ? "blocked" as const
+            : "interleaved" as const;
 
   const preferredTypes: LearningAttemptType[] | undefined =
     activePath?.stage === "pretest"
@@ -366,9 +380,11 @@ export function PracticeView({
                 ? ["free_recall", "application"]
                 : ["free_recall", "short_answer", "calculation"];
 
-  const selectionTopics = confusionSet
-    ? courseTopics.filter((candidate)=>confusionSet.topicIds.includes(candidate.id))
-    : courseTopics;
+  const selectionTopics = diagnosticMode && effectiveTopicId
+    ? courseTopics.filter((candidate) => candidate.id === effectiveTopicId)
+    : confusionSet
+      ? courseTopics.filter((candidate)=>confusionSet.topicIds.includes(candidate.id))
+      : courseTopics;
   const selectionCandidate = useMemo(
     () =>
       diagnosticDone
@@ -762,6 +778,8 @@ export function PracticeView({
                   onChange={(event) => {
                     setCourseId(event.target.value);
                     setTopicId("");
+                    setDiagnosticMode(false);
+                    setDiagnosticTopicId(null);
                     setAttemptIndex(0);
                   }}
                 >
@@ -779,7 +797,9 @@ export function PracticeView({
                   className="mt-1 w-full rounded-xl border bg-surface p-3"
                   value={topicId}
                   onChange={(event) => {
-                    setTopicId(event.target.value);
+                    const nextTopicId = event.target.value;
+                    setTopicId(nextTopicId);
+                    if (diagnosticMode) setDiagnosticTopicId(nextTopicId);
                     setAttemptIndex(0);
                   }}
                 >
@@ -811,9 +831,18 @@ export function PracticeView({
               <button
                 type="button"
                 className={(diagnosticMode ? primary : secondary)+" practice-utility-button"}
-                onClick={() => { setDiagnosticMode((value) => !value); setAttemptIndex(0); }}
+                onClick={() => {
+                  if (diagnosticMode) {
+                    setDiagnosticMode(false);
+                    setDiagnosticTopicId(null);
+                  } else {
+                    setDiagnosticTopicId(topicId || courseTopics[0]?.id || null);
+                    setDiagnosticMode(true);
+                  }
+                  setAttemptIndex(0);
+                }}
               >
-                {diagnosticMode ? "Lopeta lähtötason kartoitus" : "Kartoita lähtötaso"}
+                {diagnosticMode ? "Lopeta lähtötason kartoitus" : "Kartoita tämän kappaleen lähtötaso"}
               </button>
             </div>
           </div>
@@ -839,26 +868,24 @@ export function PracticeView({
           <div className="mt-5 rounded-2xl bg-accent p-4">
             <h3 className="font-semibold">Lähtötason tarkistus valmis.</h3>
             <p className="mt-2 text-sm text-muted-foreground">
-              {diagnosticLimit} eri aiheen muistista palauttamisen näyttö on tallennettu. Tulokset eivät yksin ratkaise osaamistasoa, vaan parantavat suositusten luotettavuutta.
+              {diagnosticLimit} kysymyksen näyttö aiheesta {selectedTopic?.name ?? "valittu aihe"} on tallennettu. Kartoitus vaikuttaa vain tämän aiheen suosituksiin ja osaamisnäyttöön.
             </p>
-            <div className="mt-3 space-y-2">
-              {courseTopics.slice(0, diagnosticLimit).map((candidate) => {
-                const model = masteryModelV4(candidate, attempts, { examDate: course?.exam_date ?? null });
-                const missingPrerequisite = (candidate.dependencies ?? []).some((id) => {
-                  const dependency = courseTopics.find((topic) => topic.id === id);
-                  return dependency ? masteryModelV4(dependency, attempts, { examDate: course?.exam_date ?? null }).level <= 1 : false;
-                });
-                const classification = missingPrerequisite
-                  ? "missing_prerequisite"
-                  : model.evidenceCount === 0
-                    ? "new_material"
-                    : model.level >= 4
-                      ? "already_mastered"
-                      : "needs_review";
-                return <div key={candidate.id} className="flex items-center justify-between rounded-xl bg-surface/70 p-3 text-sm"><span>{candidate.name}</span><span className="text-xs font-medium text-muted-foreground">{diagnosticLabel[classification] ?? "Tarvitsee harjoittelua"}</span></div>;
-              })}
-            </div>
-            <button className={secondary+" mt-4"} onClick={() => { setDiagnosticMode(false); setAttemptIndex(0); }}>Palaa normaaliin harjoitteluun</button>
+            {selectedTopic && (() => {
+              const model = masteryModelV4(selectedTopic, attempts, { examDate: course?.exam_date ?? null });
+              const missingPrerequisite = (selectedTopic.dependencies ?? []).some((id) => {
+                const dependency = courseTopics.find((topic) => topic.id === id);
+                return dependency ? masteryModelV4(dependency, attempts, { examDate: course?.exam_date ?? null }).level <= 1 : false;
+              });
+              const classification = missingPrerequisite
+                ? "missing_prerequisite"
+                : model.evidenceCount === 0
+                  ? "new_material"
+                  : model.level >= 4
+                    ? "already_mastered"
+                    : "needs_review";
+              return <div className="mt-3 flex items-center justify-between rounded-xl bg-surface/70 p-3 text-sm"><span>{selectedTopic.name}</span><span className="text-xs font-medium text-muted-foreground">{diagnosticLabel[classification] ?? "Tarvitsee harjoittelua"}</span></div>;
+            })()}
+            <button className={secondary+" mt-4"} onClick={() => { setDiagnosticMode(false); setDiagnosticTopicId(null); setAttemptIndex(0); }}>Palaa normaaliin harjoitteluun</button>
           </div>
         ) : selection ? (
           <div className="practice-question-flow mt-6 space-y-5">

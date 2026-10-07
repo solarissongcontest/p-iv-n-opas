@@ -253,7 +253,7 @@ test("mobile screenshot regressions stay fully Finnish and natural", () => {
 
   for (const phrase of [
     "Harjoittelutila",
-    "Kartoita lähtötaso",
+    "Kartoita tämän kappaleen lähtötaso",
     "varatehtävä",
     "vaihteleva harjoittelu",
     "ei vaikuta osaamistasoon",
