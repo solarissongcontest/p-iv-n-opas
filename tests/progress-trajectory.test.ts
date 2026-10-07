@@ -115,7 +115,7 @@ test("forecast stays hidden with too little evidence and appears after three com
   const plan = [
     planItem({ id: "1.1", date: "2026-10-05", status: "completed" }),
     planItem({ id: "1.2", date: "2026-10-06", status: "completed" }),
-    planItem({ id: "1.3", date: "2026-10-07", status: "completed" }),
+    planItem({ id: "1.3", date: "2026-10-07" }),
     planItem({ id: "1.4", date: "2026-10-12" }),
     planItem({ id: "1.5", date: "2026-10-16" }),
     planItem({ id: "exam", date: "2026-11-23", kind: "exam", target_minutes: 0 }),
