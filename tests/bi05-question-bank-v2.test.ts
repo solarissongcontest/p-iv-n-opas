@@ -19,6 +19,11 @@ test("BI05 V1 writes PostgreSQL arrays to array columns instead of JSON", () => 
   assert.doesNotMatch(v1, /jsonb_build_array\(topic_name,canonical_name\),to_jsonb\(array_prepend/);
 });
 
+test("BI05 V1 supplies an explanation expression for every target column", () => {
+  assert.match(v1, /'Iiris 5: ' \|\| canonical_name \|\| ' = ' \|\| definition/);
+  assert.match(v1, /'\[\]'::jsonb,definition,\s*'Iiris 5: '/);
+});
+
 test("BI05 V2 retires the recall-heavy bank and activates exactly 630 balanced tasks", () => {
   assert.match(v2, /seed_version='bi05-v1'/);
   assert.match(v2, /set status='retired'/);

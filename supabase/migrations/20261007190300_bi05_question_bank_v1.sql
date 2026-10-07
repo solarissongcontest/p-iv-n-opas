@@ -105,6 +105,7 @@ select owner_id,course_id,topic_id,'LOPS21','BI05',question_type,
     else 'Selitä omin sanoin, mitä käsite ' || canonical_name || ' tarkoittaa. Kuvaa myös sen keskeinen biologinen tehtävä tai merkitys silloin, kun se käy määritelmästä ilmi.'
   end,
   '[]'::jsonb,definition,
+  'Iiris 5: ' || canonical_name || ' = ' || definition,
   case variant
     when 'define' then jsonb_build_array('Mieti ensin, mihin elimistön rakenteeseen tai toimintoon käsite liittyy.','Muotoile määritelmä rakenteen ja tehtävän kautta.')
     when 'recognize' then jsonb_build_array('Etsi kuvauksesta rakenteen tai toiminnan tunnuspiirre.','Nimeä täsmällinen Iiris 5 -käsite.')
