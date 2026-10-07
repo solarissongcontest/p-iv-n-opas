@@ -6,6 +6,9 @@ function read(path: string) {
   return readFileSync(new URL("../" + path, import.meta.url), "utf8");
 }
 
+const readCombined = (...paths: string[]) => paths.map(read).join("\n");
+const readDataLayer = () => readCombined("src/lib/data.ts", "src/lib/data-base.ts", "src/lib/maa06a-data.ts");
+
 test("repository declares the canonical production repository", () => {
   const readme = read("README.md");
   const workflow = read(".github/workflows/quality.yml");
@@ -37,7 +40,7 @@ test("course creation keeps BI05, KE06 and fast topic import", () => {
 });
 
 test("KE04 canonical seed remains in the real data layer", () => {
-  const data = read("src/lib/data.ts");
+  const data = readDataLayer();
   const textbookTopics = read("src/lib/ke04-textbook-topics.ts");
   assert.match(data, /KE04/);
   assert.match(data, /Kemialliset reaktiot/);
@@ -55,8 +58,8 @@ test("all legacy evaluation target systems remain supported", () => {
 });
 
 test("planner retains day week month modes and return-from-break recovery UX", () => {
-  const planner = read("src/features/planner/PlanView.tsx");
-  const today = read("src/features/today/TodayView.tsx");
+  const planner = readCombined("src/features/planner/PlanView.tsx", "src/features/planner/PlanViewBase.tsx");
+  const today = readCombined("src/features/today/TodayView.tsx", "src/features/today/TodayViewBase.tsx");
   const progress = read("src/features/progress/ProgressView.tsx");
   assert.match(planner, /"päivä"\|"viikko"\|"kuukausi"/);
   assert.match(today, /Tervetuloa takaisin/);
@@ -82,8 +85,8 @@ test("guided Study Session retains timer and retrieval evidence", () => {
 });
 
 test("PracticeTest retains duration errors and topic breakdown", () => {
-  const views = read("src/features/studies/CourseView.tsx");
-  const data = read("src/lib/data.ts");
+  const views = readCombined("src/features/studies/CourseView.tsx", "src/features/studies/CourseViewBase.tsx");
+  const data = readDataLayer();
   for (const field of ["duration_minutes", "error_count", "topic_results"]) {
     assert.ok(views.includes(field) || data.includes(field), field + " is missing");
   }
@@ -97,7 +100,7 @@ test("push notification safeguards retain quiet hours and dedupe", () => {
 });
 
 test("offline mutations retain operation ids and queued write paths", () => {
-  const data = read("src/lib/data.ts");
+  const data = readDataLayer();
   assert.match(data, /operation_id/);
   assert.match(data, /runOrQueue/);
   assert.match(data, /registerOp/);

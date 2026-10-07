@@ -496,7 +496,10 @@ test("exam simulation enforces point cap, autosaves, resumes and writes exam evi
 test("push-origin starts are marked as reminder-driven before reminder tapering",()=>{
   const cron=readFileSync(new URL("../src/routes/api.push.cron.ts",import.meta.url),"utf8");
   const sw=readFileSync(new URL("../public/sw.js",import.meta.url),"utf8");
-  const views=readFileSync(new URL("../src/features/today/TodayView.tsx",import.meta.url),"utf8");
+  const views=[
+    readFileSync(new URL("../src/features/today/TodayView.tsx",import.meta.url),"utf8"),
+    readFileSync(new URL("../src/features/today/TodayViewBase.tsx",import.meta.url),"utf8"),
+  ].join("\n");
   assert.match(cron,/\?source=push/);
   assert.match(sw,/searchParams\.set\("source", "push"\)/);
   assert.match(views,/params\.get\("source"\)==="push"/);

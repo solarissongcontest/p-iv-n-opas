@@ -3,6 +3,12 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 
 const read = (path: string) => readFileSync(new URL("../" + path, import.meta.url), "utf8");
+const readCombined = (...paths: string[]) => paths.map(read).join("\n");
+const readDataLayer = () => readCombined(
+  "src/lib/data.ts",
+  "src/lib/data-base.ts",
+  "src/lib/maa06a-data.ts",
+);
 
 test("Structure V4 uses real routes for the primary product surfaces", () => {
   for (const path of [
@@ -148,7 +154,10 @@ test("styles are layered and responsive page families remain explicit", () => {
 
 test("course Continue opens the next planned item before falling back to manual logging", () => {
   const app = read("src/app/StudyApp.tsx");
-  const course = read("src/features/studies/CourseView.tsx");
+  const course = readCombined(
+    "src/features/studies/CourseView.tsx",
+    "src/features/studies/CourseViewBase.tsx",
+  );
   assert.match(app, /const continueCourse = \(id: string \| null\)/);
   assert.match(app, /if \(nextItem\) void startSession\(nextItem\.id\);/);
   assert.match(app, /else setEntry\("manual"\);/);
@@ -157,7 +166,10 @@ test("course Continue opens the next planned item before falling back to manual 
 });
 
 test("destructive actions use in-app confirmation and course archive is undoable", () => {
-  const course = read("src/features/studies/CourseView.tsx");
+  const course = readCombined(
+    "src/features/studies/CourseView.tsx",
+    "src/features/studies/CourseViewBase.tsx",
+  );
   const settings = read("src/features/settings/SettingsView.tsx");
   assert.equal(course.includes("window.confirm"), false);
   assert.equal(settings.includes("window.confirm"), false);
@@ -180,7 +192,10 @@ test("exam detail leads with one concrete next action and keeps phase machinery 
 
 test("Progress and course detail keep advanced analysis secondary", () => {
   const progress = read("src/features/progress/ProgressView.tsx");
-  const course = read("src/features/studies/CourseView.tsx");
+  const course = readCombined(
+    "src/features/studies/CourseView.tsx",
+    "src/features/studies/CourseViewBase.tsx",
+  );
   const onboarding = read("src/components/Onboarding.tsx");
   assert.match(progress, /Hyvin hallussa/);
   assert.match(progress, /Kannattaa kerrata/);
@@ -200,21 +215,30 @@ test("settings keep the learning engine behind advanced disclosure", () => {
 
 test("simplified mobile navigation still keeps Practice directly reachable", () => {
   const shell = read("src/app/AppShell.tsx");
-  const today = read("src/features/today/TodayView.tsx");
+  const today = readCombined(
+    "src/features/today/TodayView.tsx",
+    "src/features/today/TodayViewBase.tsx",
+  );
   assert.match(shell, /<b>Harjoittelu<\/b>/);
   assert.match(today, />Harjoittele<\/b>/);
   assert.match(today, /onGo\("practice"\)/);
 });
 
 test("Today never uses browser prompts for missed-study handling", () => {
-  const today = read("src/features/today/TodayView.tsx");
+  const today = readCombined(
+    "src/features/today/TodayView.tsx",
+    "src/features/today/TodayViewBase.tsx",
+  );
   assert.equal(today.includes("window.prompt"), false);
   assert.match(today, /title="En ehdi tänään"/);
   assert.match(today, /Siirrä seuraavaan sopivaan päivään/);
 });
 
 test("Today keeps one obvious next action and hides load controls behind disclosure", () => {
-  const today = read("src/features/today/TodayView.tsx");
+  const today = readCombined(
+    "src/features/today/TodayView.tsx",
+    "src/features/today/TodayViewBase.tsx",
+  );
   assert.ok(today.indexOf('title="Seuraavaksi"') < today.indexOf('title="Tervetuloa takaisin"'));
   assert.ok(today.indexOf('title="Seuraavaksi"') < today.indexOf('title={mode.finalStretch'));
   assert.match(today, /title="Seuraavaksi"/);
@@ -225,7 +249,10 @@ test("Today keeps one obvious next action and hides load controls behind disclos
 });
 
 test("planner uses calendar-safe month movement and avoids browser prompts", () => {
-  const planner = read("src/features/planner/PlanView.tsx");
+  const planner = readCombined(
+    "src/features/planner/PlanView.tsx",
+    "src/features/planner/PlanViewBase.tsx",
+  );
   const fi = read("src/lib/fi.ts");
   const calendar = read("src/features/planner/PlannerCalendar.tsx");
   assert.match(fi, /export function addMonths/);
@@ -249,10 +276,16 @@ test("final release workflow keeps the production identity wait and fails fast o
 });
 
 test("planner writes use schema-independent optimistic concurrency and offline conflicts cannot block sync forever", () => {
-  const data = read("src/lib/data.ts");
+  const data = readDataLayer();
   const offline = read("src/lib/offline.ts");
-  const planner = read("src/features/planner/PlanView.tsx");
-  const today = read("src/features/today/TodayView.tsx");
+  const planner = readCombined(
+    "src/features/planner/PlanView.tsx",
+    "src/features/planner/PlanViewBase.tsx",
+  );
+  const today = readCombined(
+    "src/features/today/TodayView.tsx",
+    "src/features/today/TodayViewBase.tsx",
+  );
   assert.match(data, /expected_updated_at/);
   assert.match(data, /expected_status/);
   assert.match(data, /expected_target_minutes/);

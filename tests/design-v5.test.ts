@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 
 const read = (path: string) => readFileSync(new URL("../" + path, import.meta.url), "utf8");
+const readCombined = (...paths: string[]) => paths.map(read).join("\n");
 
 test("V5 navigation keeps the four recurring mobile destinations permanently reachable", () => {
   const navigation = read("src/app/navigation.ts");
@@ -49,7 +50,10 @@ test("V5 content uses a small canonical surface vocabulary", () => {
 });
 
 test("Today V5 preserves one dominant next action and separates context from support", () => {
-  const today = read("src/features/today/TodayView.tsx");
+  const today = readCombined(
+    "src/features/today/TodayView.tsx",
+    "src/features/today/TodayViewBase.tsx",
+  );
   const styles = read("src/styles/today.css");
 
   assert.match(today, /today-v5-dashboard/);
@@ -65,7 +69,10 @@ test("Today V5 preserves one dominant next action and separates context from sup
 });
 
 test("Planner V5 puts the calendar before planning-engine detail", () => {
-  const planner = read("src/features/planner/PlanView.tsx");
+  const planner = readCombined(
+    "src/features/planner/PlanView.tsx",
+    "src/features/planner/PlanViewBase.tsx",
+  );
   const styles = read("src/styles/planner.css");
 
   assert.match(planner, /planner-v5-toolbar/);
@@ -81,7 +88,10 @@ test("Planner V5 puts the calendar before planning-engine detail", () => {
 });
 
 test("Studies V5 removes the permanent nested course sidebar and restores real content groups", () => {
-  const course = read("src/features/studies/CourseView.tsx");
+  const course = readCombined(
+    "src/features/studies/CourseView.tsx",
+    "src/features/studies/CourseViewBase.tsx",
+  );
   const styles = read("src/styles/studies.css");
 
   assert.match(course, /course-detail-split/);
