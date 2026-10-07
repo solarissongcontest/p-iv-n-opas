@@ -91,6 +91,18 @@ test("Studies V5 removes the permanent nested course sidebar and restores real c
   assert.match(styles, /\.course-library-rows/);
 });
 
+test("Practice V5 becomes a bounded focus workspace once a session starts", () => {
+  const practice = read("src/features/practice/PracticeView.tsx");
+  const styles = read("src/styles/practice.css");
+
+  assert.match(practice, /"setup"\|"active"\|"summary"/);
+  assert.match(practice, /practice-focus-toolbar/);
+  assert.match(practice, /practice-question-flow/);
+  assert.match(styles, /\.practice-session-active \.practice-primary-surface/);
+  assert.match(styles, /\.practice-session-active \.practice-support-grid/);
+  assert.match(styles, /\.practice-question-flow/);
+});
+
 test("Progress V5 makes plan adherence a native first-class summary insight", () => {
   const progress = read("src/features/progress/ProgressView.tsx");
   const adherence = read("src/features/progress/PlanAdherenceCard.tsx");
@@ -108,9 +120,46 @@ test("Progress V5 makes plan adherence a native first-class summary insight", ()
   assert.match(styles, /\.progress-v5-heat-grid/);
 });
 
+test("Exams and Settings V5 restore intentional grouped surfaces", () => {
+  const exams = read("src/styles/exams.css");
+  const settings = read("src/styles/settings.css");
+
+  assert.match(exams, /\.exam-list > button\.panel/);
+  assert.match(exams, /border: 1px solid var\(--border\) !important/);
+  assert.match(exams, /\.exams-view:not\(\.exam-list\) > \.panel/);
+  assert.match(settings, /\.settings-view > \.panel/);
+  assert.match(settings, /\.settings-section-tabs/);
+  assert.match(settings, /@media \(max-width: 767px\)/);
+});
+
+test("Search and coach use the shared V5 overlay language", () => {
+  const dialog = read("src/features/shared/DialogPrimitives.tsx");
+  const search = read("src/features/search/SearchPanel.tsx");
+  const overlays = read("src/styles/overlays.css");
+
+  assert.match(dialog, /dialog-backdrop/);
+  assert.match(dialog, /dialog-surface/);
+  assert.match(search, /search-group-title/);
+  assert.match(search, /search-result/);
+  assert.match(overlays, /\.search-group/);
+  assert.match(overlays, /\.coach-dialog/);
+  assert.match(overlays, /@media \(max-width: 767px\)/);
+});
+
 test("V5 feature styles load after legacy layout styles", () => {
   const root = read("src/routes/__root.tsx");
-  const order = ["layoutsCss", "surfacesCss", "todayCss", "plannerCss", "studiesCss", "progressCss"];
+  const order = [
+    "layoutsCss",
+    "surfacesCss",
+    "todayCss",
+    "plannerCss",
+    "studiesCss",
+    "progressCss",
+    "practiceCss",
+    "examsCss",
+    "settingsCss",
+    "overlaysCss",
+  ];
   for (const name of order) assert.ok(root.includes(name), name);
   for (let index = 1; index < order.length; index += 1) {
     assert.ok(root.indexOf(order[index - 1]!) < root.indexOf(order[index]!));
