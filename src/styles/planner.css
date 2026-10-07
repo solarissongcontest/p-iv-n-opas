@@ -11,6 +11,7 @@
 
 .planner-v5 {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   min-width: 0;
   gap: var(--study-space-4) !important;
 }
