@@ -1,3 +1,5 @@
+import { BI05_COURSE, BI05_IIRIS5_TOPICS } from "./bi05-iiris5";
+
 export type ImportedTopic = {
   name: string;
   weight: number;
@@ -36,28 +38,20 @@ export const COURSE_TEMPLATES: CourseTemplate[] = [
   {
     id: "BI05",
     label: "BI05 · Ihmisen biologia",
-    code: "BI05",
-    name: "Ihmisen biologia",
-    subject: "Biologia",
+    code: BI05_COURSE.code,
+    name: BI05_COURSE.name,
+    subject: BI05_COURSE.subject,
     study_mode: "course",
     color: "forest",
-    weekly_minutes: 180,
-    target_system: "school",
-    target_value: "10",
-    topics: [
-      "Solut, kudokset ja elimistön säätely",
-      "Hermosto",
-      "Aistit",
-      "Hormonit",
-      "Tuki- ja liikuntaelimistö",
-      "Verenkierto",
-      "Hengitys",
-      "Ruoansulatus",
-      "Eritys ja nestetasapaino",
-      "Puolustusjärjestelmä",
-      "Lisääntyminen ja kehitys",
-      "Ihmisen perinnöllisyys ja terveys",
-    ].map((name) => ({ name, weight: 1, importance: 3 })),
+    weekly_minutes: BI05_COURSE.weeklyMinutes,
+    target_system: BI05_COURSE.targetSystem,
+    target_value: BI05_COURSE.targetValue,
+    topics: BI05_IIRIS5_TOPICS.map(({ name, weight, importance, materials }) => ({
+      name,
+      weight,
+      importance,
+      materials,
+    })),
   },
   {
     id: "KE06",
