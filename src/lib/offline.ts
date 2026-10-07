@@ -1,5 +1,5 @@
 import { onlineManager } from "@tanstack/react-query";
-import { getDeviceOwnerId } from "@/lib/deviceSession";
+import { getDeviceOwnerId } from "./deviceSession.ts";
 
 /**
  * Small offline write queue. Mutations that matter while studying (sessions,
