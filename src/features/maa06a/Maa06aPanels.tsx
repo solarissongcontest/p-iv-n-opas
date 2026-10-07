@@ -62,7 +62,7 @@ function latestAttempt(attempts: CourseExerciseAttempt[], exerciseId: string) {
   return attempts.filter((a) => a.exercise_id === exerciseId).sort((a, b) => b.attempted_at.localeCompare(a.attempted_at))[0];
 }
 
-function ResultBadge({ result }: { result?: CourseExerciseResult }) {
+function ResultBadge({ result }: { result?: CourseExerciseResult | undefined }) {
   if (!result) return null;
   if (result === "independent" || result === "class") return <StatusBadge tone="positive">{result === "class" ? "Tunnilla" : "Oikein"}</StatusBadge>;
   if (result === "helped" || result === "incorrect") return <StatusBadge tone="warning">{result === "helped" ? "Avulla" : "Väärin"}</StatusBadge>;

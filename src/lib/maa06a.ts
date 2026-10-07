@@ -248,7 +248,7 @@ export function recommendMaa06aExercises(input: {
     goal: input.goal,
     completed: progress.uniqueCompleted,
     studyWeekdays: input.studyWeekdays,
-    busyDates: input.busyDates,
+    busyDates: input.busyDates ?? [],
   });
   if (!pace.remaining) return { exercises: [] as CourseExercise[], pace, scheduledDate: pace.nextStudyDate };
 
