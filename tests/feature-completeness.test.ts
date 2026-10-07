@@ -3,22 +3,28 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 
 const read = (path: string) => readFileSync(new URL("../" + path, import.meta.url), "utf8");
+const readCombined = (...paths: string[]) => paths.map(read).join("\n");
 
 const readViews = () => [
   "src/features/today/TodayView.tsx",
+  "src/features/today/TodayViewBase.tsx",
   "src/features/planner/PlanView.tsx",
+  "src/features/planner/PlanViewBase.tsx",
   "src/features/studies/CourseView.tsx",
+  "src/features/studies/CourseViewBase.tsx",
   "src/features/exams/ExamsView.tsx",
   "src/features/progress/ProgressView.tsx",
   "src/features/settings/SettingsView.tsx",
 ].map(read).join("\n");
+
+const readDataLayer = () => readCombined("src/lib/data.ts", "src/lib/data-base.ts", "src/lib/maa06a-data.ts");
 
 test("non-AI master-plan features remain wired end-to-end", () => {
   const views = readViews();
   const practice = read("src/features/practice/PracticeView.tsx");
   const editor = read("src/components/AbittiAnswerEditor.tsx");
   const learning = read("src/lib/learning-os-v4.ts");
-  const data = read("src/lib/data.ts");
+  const data = readDataLayer();
   const app = read("src/app/StudyApp.tsx");
   const migration = read("supabase/migrations/20260929170000_learning_os_v4.sql");
 
@@ -126,7 +132,7 @@ test("master plan keeps evidence and safety invariants", () => {
 
 test("study rhythm settings save weekdays and capacity once and realign the future plan", () => {
   const settings = read("src/features/settings/SettingsView.tsx");
-  const data = read("src/lib/data.ts");
+  const data = readDataLayer();
 
   assert.match(settings, /studyWeekdaysDraft/);
   assert.match(settings, /Tallenna opiskelurytmi/);
@@ -140,7 +146,10 @@ test("study rhythm settings save weekdays and capacity once and realign the futu
 });
 
 test("planned study sessions keep the one-tap automatic timer contract", () => {
-  const todayView = read("src/features/today/TodayView.tsx");
+  const todayView = readCombined(
+    "src/features/today/TodayView.tsx",
+    "src/features/today/TodayViewBase.tsx",
+  );
   const session = read("src/features/session/SessionForm.tsx");
 
   assert.ok(todayView.includes("Aloita opiskelu"));
@@ -156,7 +165,7 @@ test("planned study sessions keep the one-tap automatic timer contract", () => {
 
 test("active study sessions are server-backed, owner-scoped and resumable across devices", () => {
   const migration = read("supabase/migrations/20261004145316_active_study_session_cross_device.sql");
-  const data = read("src/lib/data.ts");
+  const data = readDataLayer();
   const app = read("src/app/StudyApp.tsx");
   const session = read("src/features/session/SessionForm.tsx");
 
