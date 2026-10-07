@@ -1,11 +1,13 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { StudyAppRoot } from "@/app/StudyApp";
+import { Outlet, createFileRoute } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/studies/$courseCode")({
-  component: StudiesCourseRoute,
+  component: StudiesCourseLayout,
 });
 
-function StudiesCourseRoute() {
-  const { courseCode } = Route.useParams();
-  return <StudyAppRoot initialPage="courses" courseCode={courseCode} />;
+function StudiesCourseLayout() {
+  return <Outlet />;
 }
+
+// The index/content/history/analysis child routes render StudyAppRoot. Keeping
+// this path as a pure Outlet layout ensures their deep links render the child
+// instead of being masked by the course overview.

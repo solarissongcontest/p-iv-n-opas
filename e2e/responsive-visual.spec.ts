@@ -101,9 +101,19 @@ test("mobile More sheet and active Practice remain bounded", async ({ page }, te
   const sheet = page.getByRole("dialog", { name: "Lisää toimintoja" });
   await expect(sheet).toBeVisible();
   await expectNoHorizontalOverflow(page);
+
+  // The sheet has a short entrance animation. Measure its settled geometry,
+  // not an intermediate translateY frame that can temporarily extend a few
+  // pixels below the viewport while the animation is still running.
+  await expect.poll(async () => {
+    const box = await sheet.boundingBox();
+    return box ? box.y + box.height : Number.POSITIVE_INFINITY;
+  }, { timeout: 2_000, intervals: [50, 100, 150] }).toBeLessThanOrEqual(845);
+
   const sheetBox = await sheet.boundingBox();
   expect(sheetBox).not.toBeNull();
-  expect(sheetBox!.bottom).toBeLessThanOrEqual(845);
+  expect(sheetBox!.y).toBeGreaterThanOrEqual(-1);
+  expect(sheetBox!.y + sheetBox!.height).toBeLessThanOrEqual(845);
   await testInfo.attach("mobile-more-sheet.png", {
     body: await page.screenshot({ fullPage: true, animations: "disabled" }),
     contentType: "image/png",
