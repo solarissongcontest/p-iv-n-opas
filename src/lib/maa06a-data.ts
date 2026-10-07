@@ -16,16 +16,16 @@ import type {
 } from "./maa06a";
 
 const untypedSupabase = supabase as any;
+const MAA06A_EXERCISE_SEED_VERSION = 1;
 
 function exerciseSchemaMissing(error: any) {
-  return Boolean(
-    error && (
-      error.code === "PGRST205" ||
-      error.code === "42P01" ||
-      /course_exercises|course_exercise_attempts|course_exercise_goals|schema cache|relation/i.test(
-        error.message ?? "",
-      )
-    )
+  if (!error) return false;
+  if (error.code === "PGRST205" || error.code === "42P01") return true;
+
+  const message = String(error.message ?? "");
+  return (
+    /could not find the table[\s\S]*(course_exercises|course_exercise_attempts|course_exercise_goals)[\s\S]*schema cache/i.test(message) ||
+    /relation[\s\S]*(course_exercises|course_exercise_attempts|course_exercise_goals)[\s\S]*does not exist/i.test(message)
   );
 }
 
@@ -129,8 +129,13 @@ registerOp("recordCourseExerciseAttempt", doRecordCourseExerciseAttempt);
 export function useRecordCourseExerciseAttempt() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (input: RecordCourseExerciseAttemptInput) =>
-      runOrQueue<string>("recordCourseExerciseAttempt", input),
+    mutationFn: (input: RecordCourseExerciseAttemptInput) => {
+      // Stamp before the write-ahead queue sees the payload. TanStack keeps the
+      // same variables object for onSuccess, so the offline echo and replayed
+      // server row share the exact click-time timestamp.
+      input.attempted_at ??= new Date().toISOString();
+      return runOrQueue<string>("recordCourseExerciseAttempt", input);
+    },
     onSuccess: (result, input) => {
       if (result === "queued") {
         // Reflect an offline mark immediately. The durable write-ahead queue
@@ -154,6 +159,7 @@ export function useRecordCourseExerciseAttempt() {
       }
       void queryClient.invalidateQueries({ queryKey: ["course-exercise-attempts", input.course_id] });
       void queryClient.invalidateQueries({ queryKey: ["course-exercise-goal", input.course_id] });
+      void queryClient.invalidateQueries({ queryKey: ["topics"] });
     },
   });
 }
@@ -170,6 +176,16 @@ async function upsertMaa06aGoal(courseId: string, ownerId: string) {
     resource_url: MAA06A_RESOURCE_URL,
   }, { onConflict: "owner_id,course_id" });
   if (error) throw error;
+}
+
+async function maa06aExerciseSeedIsCurrent(courseId: string) {
+  const { count, error } = await untypedSupabase
+    .from("course_exercises")
+    .select("id", { count: "exact", head: true })
+    .eq("course_id", courseId)
+    .eq("metadata->>seedVersion", String(MAA06A_EXERCISE_SEED_VERSION));
+  if (error) throw error;
+  return count === MAA06A_EXERCISE_SEED.length;
 }
 
 async function seedMaa06aExercises(
@@ -192,7 +208,9 @@ async function seedMaa06aExercises(
     counts_toward_goal: exercise.countsTowardGoal,
     estimated_load: exercise.estimatedLoad,
     sort_order: exercise.sortOrder,
-    metadata: exercise.topicName ? { topicName: exercise.topicName } : {},
+    metadata: exercise.topicName
+      ? { topicName: exercise.topicName, seedVersion: MAA06A_EXERCISE_SEED_VERSION }
+      : { seedVersion: MAA06A_EXERCISE_SEED_VERSION },
   }));
 
   for (let index = 0; index < rows.length; index += 100) {
@@ -308,7 +326,9 @@ export async function ensureMaa06aForCurrentUser(): Promise<string> {
 
   try {
     await upsertMaa06aGoal(course.id, ownerId);
-    await seedMaa06aExercises(course.id, ownerId, topics ?? []);
+    if (!(await maa06aExerciseSeedIsCurrent(course.id))) {
+      await seedMaa06aExercises(course.id, ownerId, topics ?? []);
+    }
   } catch (error) {
     // Rolling deployment safety: the course itself remains usable while the
     // new exercise tables are still being migrated. The next app load repairs

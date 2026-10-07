@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { BookOpen, ChevronLeft, ExternalLink, Star } from "lucide-react";
 import { toast } from "sonner";
 import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
@@ -74,7 +74,12 @@ function ExerciseRow({ courseId, exercise, attempts }: { courseId: string; exerc
   const latest = latestAttempt(attempts, exercise.id);
   async function mark(result: CourseExerciseResult) {
     try {
-      const response = await record.mutateAsync({ course_id: courseId, exercise_id: exercise.id, result });
+      const response = await record.mutateAsync({
+        course_id: courseId,
+        exercise_id: exercise.id,
+        result,
+        attempted_at: new Date().toISOString(),
+      });
       if (response === "queued") toast.success("Tallennettu laitteelle. Synkronoidaan verkon palatessa.");
       else if (result === "solution_only" || result === "skipped") toast.info("Kirjattu, mutta tämä ei kasvata 130-laskuria.");
       else toast.success(`${exerciseDisplayLabel(exercise)} kirjattu.`);
@@ -153,7 +158,7 @@ export function Maa06aCourseView({ course, topics, onBack, onStart }: { course: 
   if (!model.goal || !model.progress) return <LibraryDetailLayout className="course-detail"><button className={secondary} onClick={onBack}><ChevronLeft size={17}/>Kaikki kurssit</button><GoalCard course={course}/></LibraryDetailLayout>;
   const { goal, progress, pace } = model;
   const completed = progress.completedExerciseIds;
-  const allFiltered = useMemo(() => model.exercises.filter((exercise) => filter === "recommended" ? exercise.teacher_recommended : filter === "unfinished" ? !completed.has(exercise.id) : filter === "review" ? exercise.source !== "textbook" : true), [model.exercises, filter, completed]);
+  const allFiltered = model.exercises.filter((exercise) => filter === "recommended" ? exercise.teacher_recommended : filter === "unfinished" ? !completed.has(exercise.id) : filter === "review" ? exercise.source !== "textbook" : true);
   const shown = allFiltered.slice(0, limit);
   const trajectory = maa06aTrajectory({ exercises: model.exercises, attempts: model.attempts, goal, startDate: course.start_date ?? "2026-10-06", studyWeekdays: model.studyWeekdays, busyDates: model.busyDates, throughDate: goal.deadline });
   const ticks = trajectory.filter((_point, index) => index % 7 === 0 || index === trajectory.length - 1).map((point) => point.date);
