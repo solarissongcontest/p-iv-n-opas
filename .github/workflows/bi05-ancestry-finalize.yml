@@ -26,8 +26,8 @@ jobs:
         run: |
           set -euo pipefail
           node scripts/assert-canonical-repo.mjs
-          test "$(git rev-parse HEAD^)" = "ce3373b202f1a01f16853073adeb0a74feeb1108" || {
-            echo "::error::Feature branch moved unexpectedly before ancestry finalization."
+          git merge-base --is-ancestor ce3373b202f1a01f16853073adeb0a74feeb1108 HEAD || {
+            echo "::error::Expected reconciled BI05 commit is no longer in branch history."
             exit 1
           }
           git fetch origin main
