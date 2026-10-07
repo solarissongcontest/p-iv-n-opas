@@ -8,6 +8,13 @@ import { onlineManager } from "@tanstack/react-query";
 
 export type QueuedOp = { id: string; op: string; payload: unknown; at: number };
 
+type QueueChangeDetail = {
+  storageKey: string;
+  count: number;
+};
+
+const OFFLINE_QUEUE_EVENT = "opk:offline-queue-change";
+
 let owner = "signed-out";
 const key = () => `opk.pending.v2.${owner}`;
 export function setOfflineOwner(id: string) { owner = id; }
@@ -46,8 +53,20 @@ function read(): QueuedOp[] {
 
 function write(items: QueuedOp[]) {
   if (typeof localStorage === "undefined") return;
-  localStorage.setItem(key(), JSON.stringify(items));
+  const storageKey = key();
+  localStorage.setItem(storageKey, JSON.stringify(items));
   listeners.forEach((l) => l(items.length));
+
+  // StudyApp and mutation hooks can live in different lazy chunks. Browser
+  // events provide a bundle-independent same-tab signal, while the storage
+  // event below handles other tabs/windows. The queue badge must update as
+  // soon as durable local persistence succeeds, even if the network request
+  // itself is still hanging during an online -> offline transition.
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new CustomEvent<QueueChangeDetail>(OFFLINE_QUEUE_EVENT, {
+      detail: { storageKey, count: items.length },
+    }));
+  }
 }
 
 function removeQueued(id: string) {
@@ -61,9 +80,30 @@ export function pendingCount(): number {
 }
 
 export function subscribePending(fn: (count: number) => void) {
+  const storageKey = key();
   listeners.add(fn);
+
+  const onQueueChange = (event: Event) => {
+    const detail = (event as CustomEvent<QueueChangeDetail>).detail;
+    if (detail?.storageKey === storageKey) fn(detail.count);
+  };
+  const onStorage = (event: StorageEvent) => {
+    if (event.key === storageKey) fn(pendingCount());
+  };
+
+  if (typeof window !== "undefined") {
+    window.addEventListener(OFFLINE_QUEUE_EVENT, onQueueChange);
+    window.addEventListener("storage", onStorage);
+  }
+
   fn(pendingCount());
-  return () => listeners.delete(fn);
+  return () => {
+    listeners.delete(fn);
+    if (typeof window !== "undefined") {
+      window.removeEventListener(OFFLINE_QUEUE_EVENT, onQueueChange);
+      window.removeEventListener("storage", onStorage);
+    }
+  };
 }
 
 export function enqueue(op: string, payload: unknown, id = crypto.randomUUID()) {
