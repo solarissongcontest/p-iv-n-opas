@@ -53,7 +53,7 @@ jobs:
 
       - name: Verify
         run: |
-          npm ci
+          npm install --no-package-lock
           npm test
           npm run build
 
