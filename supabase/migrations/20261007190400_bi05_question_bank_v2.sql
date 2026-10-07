@@ -85,7 +85,7 @@ with variants as (
       when 'source_analysis' then 'Tunnista aineiston kolme käsitettä ja perustele jokainen tunnistus kuvauksen perusteella. Selitä lopuksi, miksi ne kuuluvat samaan alalukuun '||g.code||' ('||g.topic_name||').'
       when 'concept_map' then 'Laadi kaavio tai käsitekartta alaluvusta '||g.code||' ('||g.topic_name||') käyttäen käsitteitä '||g.c1||', '||g.c2||' ja '||g.c3||'. Kirjoita jokaisen käsitteen yhteyteen sen Iiris 5:n mukainen merkitys. Yhdistä käsitteet toisiinsa vain siltä osin kuin määritelmät tukevat yhteyttä.'
       when 'synthesis' then 'Selitä alaluvun '||g.code||' ('||g.topic_name||') ydinsisältö käyttäen kaikkia kolmea käsitettä '||g.c1||', '||g.c2||' ja '||g.c3||'. Erota toisistaan käsitteiden määritelmät ja niiden välinen tulkintasi.'
-      else case when g.chapter=any(array[5,6,7,8,9,11]) then
+      else case when g.chapter=any(array[4,5,6,7,9,10,11]) then
         'Suunnittele turvallinen ja ei-invasiivinen koulututkimus, joka liittyy alalukuun '||g.code||' ('||g.topic_name||'). Muotoile testattava tutkimuskysymys, nimeä riippumaton ja riippuva muuttuja sekä kaksi vakioitavaa tekijää. Tutkimus ei saa edellyttää lääkityksen muuttamista, biologisten näytteiden ottamista tai muuta terveydellistä riskiä. Kerro lopuksi, miten ainakin yhtä käsitteistä '||g.c1||', '||g.c2||' tai '||g.c3||' käytettäisiin tulosten tulkinnassa.'
       else
         'Opiskelija väittää, että käsitteet '||g.c1||' ja '||g.c2||' tarkoittavat käytännössä samaa asiaa. Arvioi väite Iiris 5:n määritelmien perusteella, korjaa mahdollinen sekaannus ja sijoita myös käsite '||g.c3||' alaluvun kokonaisuuteen.' end
@@ -127,7 +127,7 @@ with variants as (
       when v.variant='source_analysis' then array['aineiston tulkinta','soveltaminen']::text[]
       when v.variant='concept_map' then array['rakenteiden visualisointi','käsitekartta']::text[]
       when v.variant='synthesis' then array['mekanismien selittäminen','kokonaisuuksien yhdistäminen']::text[]
-      when g.chapter=any(array[5,6,7,8,9,11]) then array['tutkimustaito','soveltaminen']::text[]
+      when g.chapter=any(array[4,5,6,7,9,10,11]) then array['tutkimustaito','soveltaminen']::text[]
       else array['soveltaminen','käsitteellinen erottelu']::text[]
     end as skills,
     case when v.variant='recall' then array[g.c1]::text[]
@@ -182,7 +182,7 @@ select
     'chapter',chapter,
     'subchapter',code,
     'questionFamily',variant,
-    'researchSkill',(variant='transfer_or_research' and chapter=any(array[5,6,7,8,9,11])),
+    'researchSkill',(variant='transfer_or_research' and chapter=any(array[4,5,6,7,9,10,11])),
     'reservedForExam',(reserve_for_exam and chapter<>5)
   ),
   stimulus_package,transfer_level,pretest_eligible
@@ -212,7 +212,7 @@ begin
     select count(*) into application_count from public.question_bank where course_id=r.id and seed_version='bi05-v2' and question_type='application';
     select count(*) into research_count from public.question_bank where course_id=r.id and seed_version='bi05-v2' and metadata->>'researchSkill'='true';
 
-    if diagram_count<>63 or matching_count<>63 or application_count<>126 or research_count<>27 then
+    if diagram_count<>63 or matching_count<>63 or application_count<>126 or research_count<>30 then
       raise exception 'BI05 V2 mix invariant failed: diagram %, matching %, application %, research %',diagram_count,matching_count,application_count,research_count;
     end if;
   end loop;

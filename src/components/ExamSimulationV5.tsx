@@ -89,8 +89,8 @@ export function ExamSimulationV5({courses,topics}:{courses:Course[];topics:Topic
     mode,
   }):null,[course,scopedTopics,bank.data,attempts.data,mode,scopeQ.isLoading]);
   const resumable=useMemo(()=>(simulations.data??[]).find(row=>
-    row.course_id===courseId&&row.mode===mode&&!row.completed_at
-  )??null,[simulations.data,courseId,mode]);
+    row.course_id===courseId&&row.exam_id===(nextExam?.id??null)&&row.mode===mode&&!row.completed_at
+  )??null,[simulations.data,courseId,nextExam?.id,mode]);
 
   useEffect(()=>{
     if(!simulation||phase!=="select")return;
@@ -133,6 +133,7 @@ export function ExamSimulationV5({courses,topics}:{courses:Course[];topics:Topic
     try{
       const id=await create.mutateAsync({
         course_id:course.id,
+        exam_id:nextExam?.id??null,
         mode,
         task_ids:simulation.tasks.map(task=>task.id),
         selected_task_ids:selected,

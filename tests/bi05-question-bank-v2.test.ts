@@ -43,8 +43,8 @@ test("BI05 V2 includes visual, source-analysis, transfer and research practice w
   assert.match(v2, /'concept_map','explanation'.*?'diagram'/s);
   assert.match(v2, /'source_analysis','application'/);
   assert.match(v2, /'transfer_or_research','application'/);
-  assert.match(v2, /array\[5,6,7,8,9,11\]/);
-  assert.match(v2, /research_count<>27/);
+  assert.match(v2, /array\[4,5,6,7,9,10,11\]/);
+  assert.match(v2, /research_count<>30/);
   assert.match(v2, /diagram_count<>63/);
   assert.match(v2, /matching_count<>63/);
   assert.match(v2, /application_count<>126/);

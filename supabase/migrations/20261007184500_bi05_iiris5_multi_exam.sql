@@ -169,7 +169,7 @@ insert into public.topics(
 select
   c.owner_id, c.id, b.name, b.position, b.weight, b.importance, b.materials,
   b.school_covered,
-  case when b.exam_eligible then greatest(1, b.importance) else 0 end
+  case when b.exam_eligible then 1 else 0 end
 from public.courses c
 cross join _bi05_topics b
 where upper(c.code) = 'BI05'
@@ -188,7 +188,7 @@ set owner_id = c.owner_id,
     importance = b.importance,
     materials = b.materials,
     school_covered = case when b.code = '1.1' then true else t.school_covered end,
-    exam_relevance = case when b.exam_eligible then greatest(1, b.importance) else 0 end
+    exam_relevance = case when b.exam_eligible then 1 else 0 end
 from public.courses c, _bi05_topics b
 where t.course_id = c.id
   and upper(c.code) = 'BI05'
