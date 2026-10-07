@@ -1,5 +1,5 @@
 import type { Course, PlanItem, Session } from "./domain";
-import { addDays, diffDays, shortDate } from "./fi";
+import { addDays, diffDays, shortDate } from "./fi.ts";
 
 export type ProgressTrajectoryPoint = {
   date: string;
