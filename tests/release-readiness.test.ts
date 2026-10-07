@@ -66,17 +66,26 @@ test("Final Release Gate waits for the exact production commit and runs the brow
   assert.equal(workflow.includes("${{ inputs.base_url }}"), false);
 });
 
-test("visual regression has a deterministic baseline generator before it becomes release-blocking", () => {
+test("visual regression snapshots stable shell chrome while dynamic study views use geometry checks", () => {
   const spec = read("e2e/visual-regression.spec.ts");
   const workflow = read(".github/workflows/visual-baselines.yml");
   const pkg = JSON.parse(read("package.json")) as { scripts: Record<string,string> };
 
   assert.match(spec, /toHaveScreenshot/);
+  assert.match(spec, /mobile-header-390\.png/);
   assert.match(spec, /mobile-tabbar-390\.png/);
+  assert.match(spec, /mobile-more-sheet-390\.png/);
   assert.match(spec, /tablet-sidebar-768\.png/);
   assert.match(spec, /desktop-sidebar-1440\.png/);
-  assert.match(spec, /planner-month-1280\.png/);
-  assert.match(spec, /mobile-practice-focus-390\.png/);
+  assert.match(spec, /desktop-today-workspace-1440\.png/);
+  assert.match(spec, /freezeShellClock/);
+  assert.match(spec, /month grid structure stays visually stable without snapshotting personal plan content/);
+  assert.match(spec, /active Practice focus shell stays bounded while adaptive content is allowed to change/);
+  assert.match(spec, /tasksStayInsideCells/);
+  assert.match(spec, /interactiveInsideViewport/);
+  assert.equal(spec.includes("planner-month-1280.png"), false);
+  assert.equal(spec.includes("mobile-practice-focus-390.png"), false);
+
   assert.match(workflow, /workflow_dispatch/);
   assert.match(workflow, /workflow_run/);
   assert.match(workflow, /Final Release Gate/);
