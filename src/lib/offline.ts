@@ -1,4 +1,5 @@
 import { onlineManager } from "@tanstack/react-query";
+import { getDeviceOwnerId } from "./deviceSession.ts";
 
 /**
  * Small offline write queue. Mutations that matter while studying (sessions,
@@ -16,7 +17,8 @@ type QueueChangeDetail = {
 const OFFLINE_QUEUE_EVENT = "opk:offline-queue-change";
 
 let owner = "signed-out";
-const key = () => `opk.pending.v2.${owner}`;
+const currentOwner = () => getDeviceOwnerId() ?? owner;
+const key = () => `opk.pending.v2.${currentOwner()}`;
 export function setOfflineOwner(id: string) { owner = id; }
 export type OperationHandler = (payload: unknown, operationId: string) => Promise<unknown>;
 const handlers = new Map<string, OperationHandler>();
@@ -80,15 +82,14 @@ export function pendingCount(): number {
 }
 
 export function subscribePending(fn: (count: number) => void) {
-  const storageKey = key();
   listeners.add(fn);
 
   const onQueueChange = (event: Event) => {
     const detail = (event as CustomEvent<QueueChangeDetail>).detail;
-    if (detail?.storageKey === storageKey) fn(detail.count);
+    if (detail?.storageKey === key()) fn(pendingCount());
   };
   const onStorage = (event: StorageEvent) => {
-    if (event.key === storageKey) fn(pendingCount());
+    if (event.key === key()) fn(pendingCount());
   };
 
   if (typeof window !== "undefined") {
