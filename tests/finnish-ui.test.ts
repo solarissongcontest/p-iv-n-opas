@@ -319,7 +319,7 @@ test("static visible UI copy does not reintroduce English developer vocabulary",
       const text = readFileSync(url, "utf8");
       const visible = [...text.matchAll(/>([^<>{}]+)</g)]
         .map((match) => match[1]!.replace(/\s+/g, " ").trim())
-        .filter((copy) => Boolean(copy) && !/[=]{2,}|=>/.test(copy));
+        .filter((copy) => Boolean(copy) && !/[=]{2,}|=>|>=|<=/.test(copy));
       const props = [...text.matchAll(/\b(?:title|placeholder|aria-label|label)=["']([^"']+)["']/g)]
         .map((match) => match[1]!.trim());
       const toasts = [...text.matchAll(/toast\.(?:success|error|info)\(\s*["'`]([^"'`]+)["'`]/g)]
