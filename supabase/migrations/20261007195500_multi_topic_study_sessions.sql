@@ -1,6 +1,7 @@
 -- Allow one study session to cover multiple textbook topics without double-counting time.
 -- study_sessions remains the canonical single duration row; this table records the
 -- topic allocation for analytics and preserves the legacy primary topic_id column.
+-- The allocated_minutes rows always partition one canonical session duration; they are never extra study time.
 
 create table if not exists public.study_session_topics (
   session_id uuid not null references public.study_sessions(id) on delete cascade,
