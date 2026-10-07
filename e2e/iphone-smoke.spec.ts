@@ -8,19 +8,14 @@ async function openMore(page: import("@playwright/test").Page) {
   return sheet;
 }
 
-test("iPhone Study OS primary flow uses four calm navigation destinations", async ({ page }) => {
+test("iPhone Study OS primary flow uses five calm navigation destinations", async ({ page }) => {
   await enterApp(page);
 
-  for (const label of ["Tänään", "Opinnot", "Edistyminen", "Lisää"]) {
+  for (const label of ["Tänään", "Suunnitelma", "Opinnot", "Edistyminen", "Lisää"]) {
     await expect(page.getByRole("button", { name: label, exact: true })).toBeVisible();
   }
 
-  const sheet = await openMore(page);
-  for (const label of ["Suunnitelma", "Harjoittelu", "Kokeet", "Kirjaa opiskelu", "Haku", "Asetukset"]) {
-    await expect(sheet.getByRole("button", { name: new RegExp(label) })).toBeVisible();
-  }
-
-  await sheet.getByRole("button", { name: /Suunnitelma/ }).click();
+  await page.getByRole("button", { name: "Suunnitelma", exact: true }).click();
   await expect(page).toHaveURL(/\/plan/);
   await expect(page.getByRole("heading", { name: "Suunnitelma" })).toBeVisible();
   await expectNoHorizontalOverflow(page);
@@ -35,8 +30,13 @@ test("iPhone Study OS primary flow uses four calm navigation destinations", asyn
   await expect(page.getByRole("heading", { name: "Edistyminen" })).toBeVisible();
   await expectNoHorizontalOverflow(page);
 
-  const practiceSheet = await openMore(page);
-  await practiceSheet.getByRole("button", { name: /Harjoittelu/ }).click();
+  const sheet = await openMore(page);
+  for (const label of ["Harjoittelu", "Kokeet", "Kirjaa opiskelu", "Haku", "Asetukset"]) {
+    await expect(sheet.getByRole("button", { name: new RegExp(label) })).toBeVisible();
+  }
+  await expect(sheet.getByRole("button", { name: /Suunnitelma/ })).toHaveCount(0);
+
+  await sheet.getByRole("button", { name: /Harjoittelu/ }).click();
   await expect(page).toHaveURL(/\/practice/);
   await expect(page.getByRole("heading", { name: "Harjoittelu" })).toBeVisible();
   await expectNoHorizontalOverflow(page);
