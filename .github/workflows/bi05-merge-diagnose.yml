@@ -1,0 +1,35 @@
+name: BI05 Merge Diagnose
+
+on:
+  push:
+    branches:
+      - feature/bi05-iiris5-course-system
+    paths:
+      - .github/workflows/bi05-merge-diagnose.yml
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/bi05-iiris5-course-system
+          fetch-depth: 0
+      - name: Diagnose merge with main
+        shell: bash
+        run: |
+          set +e
+          git fetch origin main
+          git merge --no-commit --no-ff origin/main
+          status=$?
+          echo "merge_status=$status"
+          echo "--- conflicted files ---"
+          git diff --name-only --diff-filter=U
+          echo "--- concise status ---"
+          git status --short
+          echo "--- conflict hunks ---"
+          git diff --cc -- . ':!.github/workflows/bi05-merge-diagnose.yml'
+          exit 0
