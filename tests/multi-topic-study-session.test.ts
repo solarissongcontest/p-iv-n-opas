@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 
 const migration = readFileSync(new URL("../supabase/migrations/20261007195500_multi_topic_study_sessions.sql", import.meta.url), "utf8");
-const data = readFileSync(new URL("../src/lib/data.ts", import.meta.url), "utf8");
+const data = readFileSync(new URL("../src/lib/data-base.ts", import.meta.url), "utf8");
 const form = readFileSync(new URL("../src/features/session/SessionForm.tsx", import.meta.url), "utf8");
 const exam = readFileSync(new URL("../src/components/ExamSimulationV5.tsx", import.meta.url), "utf8");
 const bi05 = readFileSync(new URL("../supabase/migrations/20261007184500_bi05_iiris5_multi_exam.sql", import.meta.url), "utf8");
