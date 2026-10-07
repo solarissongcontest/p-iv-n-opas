@@ -70,7 +70,7 @@ test.describe("Final release gate", () => {
     await enterApp(page);
     await page.goto("/today", { waitUntil: "domcontentloaded" });
     await expect(page.locator("#main-content")).toBeVisible({ timeout: 10_000 });
-    await expect(page.getByText("Seuraavaksi")).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByRole("heading", { name: "Seuraavaksi", exact: true })).toBeVisible({ timeout: 10_000 });
     expect(Date.now() - started).toBeLessThan(15_000);
 
     const timing = await page.evaluate(() => {
