@@ -3,6 +3,7 @@ import { toast } from "sonner";
 import type { Course, Topic } from "@/lib/domain";
 import {
   useCreateExamSimulation,
+  useExams,
   useExamSimulations,
   useQuestionBank,
   usePracticeAttempts,
@@ -14,6 +15,8 @@ import {
   reviewTaskSelectionV5,
   type ExamSimulationTaskV5,
 } from "@/lib/learning-os-v5";
+import { examScopeLabel, nextExamForCourse, topicsForExam, useExamTopicScopes } from "@/lib/examScopeData";
+import { today } from "@/lib/fi";
 import { AbittiAnswerEditor, answerHasContent, answerPlainText } from "@/components/AbittiAnswerEditor";
 import { SketchAnswerCanvas } from "@/components/SketchAnswerCanvas";
 import { answerModeLabel, stimulusFieldLabel } from "@/lib/ui-fi";
@@ -40,6 +43,7 @@ export function ExamSimulationV5({courses,topics}:{courses:Course[];topics:Topic
   const update=useUpdateExamSimulation();
   const simulations=useExamSimulations();
   const recordAttempt=useRecordPracticeAttempt();
+  const exams=useExams();
   const [courseId,setCourseId]=useState(courses.find(c=>!c.archived)?.id??courses[0]?.id??"");
   const [mode,setMode]=useState<"practice"|"full">("full");
   const [selected,setSelected]=useState<string[]>([]);
@@ -57,6 +61,11 @@ export function ExamSimulationV5({courses,topics}:{courses:Course[];topics:Topic
   const autosaveTimer=useRef<number|null>(null);
 
   const course=courses.find(c=>c.id===courseId)??null;
+  const nextExam=course?nextExamForCourse(exams.data??[],course.id,today()):null;
+  const scopeQ=useExamTopicScopes(nextExam?.id);
+  const scopedTopics=useMemo(()=>course
+    ?topicsForExam(topics.filter(t=>t.course_id===course.id),scopeQ.data??[])
+    :[],[course,topics,scopeQ.data]);
 
   useEffect(()=>{
     if(!course||course.code.toUpperCase()!=="KE04"||bank.isLoading)return;
@@ -72,13 +81,13 @@ export function ExamSimulationV5({courses,topics}:{courses:Course[];topics:Topic
       .finally(()=>setSeedingKe04(false));
   },[course,bank.data,bank.isLoading]);
 
-  const simulation=useMemo(()=>course?buildExamSimulationV5({
+  const simulation=useMemo(()=>course&&!scopeQ.isLoading?buildExamSimulationV5({
     course,
-    topics:topics.filter(t=>t.course_id===course.id),
+    topics:scopedTopics,
     questions:bank.data??[],
     attempts:attempts.data??[],
     mode,
-  }):null,[course,topics,bank.data,attempts.data,mode]);
+  }):null,[course,scopedTopics,bank.data,attempts.data,mode,scopeQ.isLoading]);
   const resumable=useMemo(()=>(simulations.data??[]).find(row=>
     row.course_id===courseId&&row.mode===mode&&!row.completed_at
   )??null,[simulations.data,courseId,mode]);
@@ -289,6 +298,7 @@ export function ExamSimulationV5({courses,topics}:{courses:Course[];topics:Topic
         <label className="text-sm font-medium">Kurssi<select className="mt-1 w-full rounded-xl border bg-surface p-3" value={courseId} onChange={e=>{setCourseId(e.target.value);setSelected([]);}}>{courses.filter(c=>!c.archived).map(c=><option key={c.id} value={c.id}>{c.code} · {c.name}</option>)}</select></label>
         <label className="text-sm font-medium">Tila<select className="mt-1 w-full rounded-xl border bg-surface p-3" value={mode} onChange={e=>{setMode(e.target.value as "practice"|"full");setSelected([]);}}><option value="full">Täysi koeharjoitus</option><option value="practice">Lyhyempi harjoitus</option></select></label>
       </div>
+      {nextExam&&<div className="mt-4 rounded-xl border border-border bg-muted/40 p-3 text-sm"><b>{nextExam.name}</b> · {nextExam.date} · {examScopeLabel(scopeQ.data??[])}{scopeQ.data?.some(scope=>scope.confidence==="provisional")?" (ei vielä opettajan vahvistama)":""}. Koeharjoitus käyttää vain tämän alueen aiheita.</div>}
       {seedingKe04&&course?.code.toUpperCase()==="KE04"&&<div className="mt-5 rounded-xl bg-accent/50 p-3 text-sm">KE04:n kuratoitua V3-tehtäväpankkia alustetaan koeharjoitusta varten…</div>}
       {simulation?<div className="mt-5">
         <div className="rounded-xl bg-accent/50 p-3 text-sm">Tarjolla {simulation.maxTasks} tehtävää · valitse enintään {simulation.maxSelected} · enintään {simulation.maxPoints} p · {simulation.durationMinutes} min. Vihjeitä tai osaamisnäkymää ei näytetä kesken suorituksen.</div>
