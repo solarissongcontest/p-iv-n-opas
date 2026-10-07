@@ -1,0 +1,135 @@
+/* V5 overlays — one sheet/dialog language for search, forms and coach. */
+.dialog-backdrop {
+  background: color-mix(in oklab, black 42%, transparent);
+  backdrop-filter: blur(2px);
+}
+
+.dialog-surface {
+  border: 1px solid color-mix(in oklab, var(--border) 88%, transparent);
+  background: color-mix(in oklab, var(--surface) 96%, transparent) !important;
+  box-shadow: 0 24px 70px color-mix(in oklab, black 20%, transparent);
+}
+.dialog-header {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  margin: -1.25rem -1.25rem 1.25rem;
+  border-bottom: 1px solid var(--hairline);
+  background: color-mix(in oklab, var(--surface) 94%, transparent);
+  padding: 1rem 1.25rem .8rem;
+  backdrop-filter: blur(16px) saturate(1.08);
+}
+.dialog-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.search-panel {
+  min-width: 0;
+}
+.search-results {
+  display: grid;
+  gap: 1rem;
+}
+.search-group {
+  min-width: 0;
+}
+.search-group-title {
+  margin: 0 0 .4rem;
+  color: var(--muted-foreground);
+  font-size: .7rem;
+  font-weight: 750;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+.search-result {
+  display: flex;
+  width: 100%;
+  min-height: 2.9rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: .75rem;
+  border-radius: .8rem;
+  padding: .55rem .7rem;
+  text-align: left;
+}
+.search-result:hover,
+.search-result:focus-visible {
+  background: var(--muted);
+}
+.search-result small {
+  color: var(--muted-foreground);
+}
+
+.coach-dialog {
+  position: fixed;
+  top: 0;
+  right: 0;
+  z-index: 60;
+  display: flex;
+  width: min(30rem, 100vw);
+  height: 100dvh;
+  flex-direction: column;
+  overflow: hidden;
+  border-left: 1px solid var(--border);
+  background: var(--surface);
+  box-shadow: -18px 0 60px color-mix(in oklab, black 16%, transparent);
+}
+.coach-dialog > div:first-child {
+  border-radius: 0;
+}
+.coach-dialog [role="log"] article {
+  border: 1px solid var(--hairline);
+  background: color-mix(in oklab, var(--muted) 48%, transparent);
+}
+.coach-composer {
+  padding-bottom: max(1rem, env(safe-area-inset-bottom, 0px)) !important;
+}
+
+@media (max-width: 767px) {
+  .dialog-backdrop {
+    align-items: flex-end !important;
+    padding: 0 !important;
+  }
+  .dialog-surface {
+    width: 100% !important;
+    max-width: none !important;
+    max-height: min(92dvh, 52rem) !important;
+    border-right: 0;
+    border-bottom: 0;
+    border-left: 0;
+    border-radius: 1.5rem 1.5rem 0 0 !important;
+    padding: 1rem !important;
+    padding-bottom: max(1rem, env(safe-area-inset-bottom, 0px)) !important;
+  }
+  .dialog-header {
+    margin: -1rem -1rem 1rem;
+    padding: .9rem 1rem .75rem;
+  }
+  .dialog-surface[aria-label="Haku ja pikatoiminnot"] {
+    height: min(92dvh, 52rem);
+  }
+  .coach-dialog {
+    top: auto;
+    bottom: 0;
+    width: 100vw;
+    height: min(94dvh, 56rem);
+    border-top: 1px solid var(--border);
+    border-left: 0;
+    border-radius: 1.5rem 1.5rem 0 0;
+  }
+  .coach-dialog > div:first-child {
+    border-radius: 1.5rem 1.5rem 0 0;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .dialog-backdrop,
+  .dialog-header {
+    backdrop-filter: none;
+  }
+  .dialog-surface,
+  .coach-dialog {
+    background: var(--surface) !important;
+  }
+}

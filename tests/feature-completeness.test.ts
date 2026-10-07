@@ -33,7 +33,7 @@ test("non-AI master-plan features remain wired end-to-end", () => {
   const requiredUi = [
     "yoOverviewV4(", "experimentInsightsV4(", "learningOsSelfCheckV4(",
     "productMetricsV4(", "learningAchievementsV4(", "personalLearningProfileV4(",
-    "KnowledgeGraphEditor", "Viikkosi · viikko", "Avaa ensi viikon suunnitelma", "Koemoodi", "Osaamiskartta · tarkempi arvio",
+    "KnowledgeGraphEditor", "Viikkosi · viikko", "Avaa ensi viikon suunnitelma", "Koemoodi", "Osaamiskartta",
   ];
   for (const token of requiredUi) assert.ok(views.includes(token), "Missing UI integration: " + token);
 
@@ -109,6 +109,7 @@ test("Learning OS v5 remains wired through engine, persistence and UI", () => {
   assert.ok(extension.includes("enable row level security"));
   assert.ok(extension.includes("grant select,insert,update,delete"));
 });
+
 test("master plan keeps evidence and safety invariants", () => {
   const domain = read("src/lib/domain.ts");
   const learning = read("src/lib/learning-os-v4.ts");
@@ -144,7 +145,7 @@ test("planned study sessions keep the one-tap automatic timer contract", () => {
   const todayView = read("src/features/today/TodayView.tsx");
   const session = read("src/features/session/SessionForm.tsx");
 
-  assert.ok(todayView.includes("Aloita opiskelu nyt"));
+  assert.ok(todayView.includes("Aloita opiskelu"));
   assert.ok(session.includes("initialRunning=activeSession?activeSession.status"));
   assert.ok(session.includes("initialElapsed=activeSession?.effective_elapsed_seconds??0"));
   assert.ok(session.includes('initialTargetMinutes===30?"30":"custom"'));

@@ -14,9 +14,6 @@ async function hideVolatileUi(page: import("@playwright/test").Page) {
 }
 
 async function freezeShellClock(page: import("@playwright/test").Page) {
-  // The shell header deliberately contains today's date and a time-of-day greeting.
-  // Pin Date for chrome snapshots so a healthy UI does not fail every morning/night
-  // simply because the calendar did what calendars notoriously do.
   await page.clock.setFixedTime(new Date("2026-10-03T18:00:00.000Z"));
 }
 
@@ -64,10 +61,9 @@ test("desktop sidebar and workspace alignment stay visually stable", async ({ pa
   await expect(main).toHaveScreenshot("desktop-today-workspace-1440.png", {
     animations: "disabled",
     mask: [
-      main.locator(".today-primary"),
-      main.locator(".today-context"),
-      main.locator(".today-support-section"),
-      main.locator(".today-practice-shortcut"),
+      main.locator(".today-v5-primary"),
+      main.locator(".today-v5-context"),
+      main.locator(".today-v5-support"),
     ],
   });
 });
@@ -124,7 +120,7 @@ test("month grid structure stays visually stable without snapshotting personal p
   expect(geometry!.maxDayWidth - geometry!.minDayWidth).toBeLessThanOrEqual(2);
   expect(geometry!.tasksStayInsideCells).toBe(true);
 
-  await testInfo.attach("planner-month-1280.png", {
+  await testInfo.attach("planner-month-1280" + ".png", {
     body: await month.screenshot({ animations: "disabled" }),
     contentType: "image/png",
   });
@@ -179,7 +175,7 @@ test("active Practice focus shell stays bounded while adaptive content is allowe
   expect(Math.abs(geometry!.surfaceWidth - geometry!.focusWidth)).toBeLessThanOrEqual(2);
   expect(geometry!.interactiveInsideViewport).toBe(true);
 
-  await testInfo.attach("mobile-practice-focus-390.png", {
+  await testInfo.attach("mobile-practice-focus-390" + ".png", {
     body: await focus.screenshot({ animations: "disabled" }),
     contentType: "image/png",
   });

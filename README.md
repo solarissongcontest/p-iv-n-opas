@@ -8,16 +8,17 @@ Canonical production repository: `solarissongcontest/p-iv-n-opas`.
 
 ## Päänavigaatio
 
-Mobiilin neljä pääkohdetta ovat:
+Mobiilin viisi pääkohdetta ovat:
 
 - **Tänään** – yksi selkeä seuraava opiskelutoiminto
+- **Suunnitelma** – päivä-, viikko- ja kuukausisuunnitelma
 - **Opinnot** – kurssit, aiheet ja historia
 - **Edistyminen** – nopea yhteenveto, osaaminen ja tarkempi analyysi
-- **Lisää** – Suunnitelma, Harjoittelu, Kokeet, Kirjaa opiskelu, Haku ja Asetukset
+- **Lisää** – Harjoittelu, Kokeet, Kirjaa opiskelu, Haku ja Asetukset
 
-**Suunnitelma** ja **Kokeet** ovat desktopilla näkyvässä suunnitteluryhmässä. **Harjoittelu** on ensisijaisesti toiminto, johon tullaan Tänään-näkymästä tai kurssikontekstista, mutta se säilyy myös suoraan saavutettavana Lisää-valikosta.
+Desktopilla **Tänään**, **Suunnitelma**, **Opinnot**, **Edistyminen** ja **Kokeet** ovat jatkuvasti näkyvässä pääworkflow’ssa. **Harjoittelu** on ensisijaisesti toiminto, johon tullaan Tänään-näkymästä, kurssilta tai kokeesta, mutta se säilyy myös mobiilin Lisää-valikossa suoraan saavutettavana.
 
-Mobiilissa käytetään neljän kohdan tab baria ja desktopilla sivupalkkia. Liquid Glass on rajattu navigaatio- ja kontrollikerrokseen.
+Mobiilissa käytetään viiden kohdan tab baria ja desktopilla sivupalkkia. Liquid Glass on rajattu navigaatio- ja kontrollikerrokseen; varsinainen opiskelusisältö käyttää rauhallisia, läpinäkymättömiä sisältöpintoja.
 
 ## Route-arkkitehtuuri
 
@@ -54,6 +55,20 @@ Keskeiset osoitteet:
 ```
 
 Root `/` ohjaa Tänään-näkymään.
+
+## Design & Layout V5
+
+V5:n käyttöliittymäperiaate on **yksinkertainen päätös, älykäs järjestelmä**. Oppimismoottori saa olla monimutkainen, mutta käyttöliittymän pitää vastata nopeasti neljään kysymykseen: missä olen, mikä on tärkeintä, mitä teen seuraavaksi ja tarvittaessa miksi.
+
+Sisällön canonical rakenne on:
+
+```text
+page → section → card → rows/content
+```
+
+Yhdellä näkymällä on yksi ensisijainen toiminto tai insight. Toissijainen selitys, algoritmin perusteet ja teknisempi analyysi siirretään disclosureihin tai Analyysi-näkymään. Desktop ja mobiili käyttävät samaa dataa ja komponenttijärjestelmää, mutta niiden kompositio suunnitellaan erikseen.
+
+Edistyminen → Yhteenveto nostaa **Suunnitelmassa pysymisen** ensimmäisen luokan insightiksi. Se vertaa käyttäjää omaan suunnitelmaansa ja historiaansa, ei muihin käyttäjiin. Sovellus ei käytä streak-, XP- tai leaderboard-rangaistuksia.
 
 ## Oppimisjärjestelmä
 
@@ -204,7 +219,7 @@ Jokaiselle `main`-pushille:
 6. varmennetaan Gemini-provider
 7. varmennetaan push-backend
 8. ajetaan offline + reload + second-device -synkka
-9. ajetaan responsive visual layout -matriisi 320–1440 px
+9. ajetaan responsive visual layout -matriisi 320–1728 px
 10. tallennetaan selaintestien screenshot-evidence GitHub Actions -artifactiksi
 
 Production URL voidaan asettaa repository variableen `PRODUCTION_BASE_URL`. Muuten workflow käyttää Vercel-projektin oletusosoitetta `https://opiskelupaivakirja.vercel.app`.

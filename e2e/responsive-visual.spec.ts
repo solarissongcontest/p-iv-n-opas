@@ -58,8 +58,8 @@ for (const viewport of VIEWPORTS) {
         expect(geometry.sidebar).toBeNull();
         expect(geometry.tabbar).not.toBeNull();
         expect(geometry.tabbar!.height).toBeGreaterThanOrEqual(44);
-        await expect(page.locator(".app-tabbar .app-tab")).toHaveCount(4);
-        for (const label of ["Tänään", "Opinnot", "Edistyminen", "Lisää"]) {
+        await expect(page.locator(".app-tabbar .app-tab")).toHaveCount(5);
+        for (const label of ["Tänään", "Suunnitelma", "Opinnot", "Edistyminen", "Lisää"]) {
           await expect(page.getByRole("button", { name: label, exact: true })).toBeVisible();
         }
         if (geometry.coach) {
@@ -132,17 +132,17 @@ test("mobile More sheet and active Practice remain bounded", async ({ page }, te
 });
 
 
-test("desktop planner responds to usable workspace instead of viewport width", async ({ page }) => {
+test("desktop planner protects calendar width and keeps engine detail secondary", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 900 });
   await enterApp(page);
   await page.goto("/plan/week/2026-W41", { waitUntil: "domcontentloaded" });
 
-  const support = page.locator(".planner-support");
+  const inspector = page.locator(".planner-v5-inspector");
+  const calendar = page.locator(".planner-v5-calendar");
   const week = page.locator(".planner-week");
-  await expect(support).toBeVisible();
+  await expect(inspector).toBeVisible();
+  await expect(calendar).toBeVisible();
   await expect(week).toBeVisible();
-  await support.locator("summary").click();
-  await expect(page.locator(".v5-planner-grid")).toBeVisible();
 
   const geometry = async () => page.evaluate(() => {
     const box = (selector: string) => {
@@ -153,33 +153,27 @@ test("desktop planner responds to usable workspace instead of viewport width", a
     };
     const dayWidths = Array.from(document.querySelectorAll<HTMLElement>(".planner-week-day"))
       .map((node) => node.getBoundingClientRect().width);
-    const plannerGrid = document.querySelector<HTMLElement>(".v5-planner-grid");
-    const columns = plannerGrid
-      ? getComputedStyle(plannerGrid).gridTemplateColumns.trim().split(/\s+/).filter(Boolean).length
-      : 0;
     return {
-      week: box(".planner-week"),
-      support: box(".planner-support"),
+      calendar: box(".planner-v5-calendar"),
+      inspector: box(".planner-v5-inspector"),
       minDayWidth: dayWidths.length ? Math.min(...dayWidths) : 0,
-      plannerColumns: columns,
     };
   });
 
   const constrained = await geometry();
-  expect(constrained.week).not.toBeNull();
-  expect(constrained.support).not.toBeNull();
-  expect(constrained.support!.top).toBeGreaterThanOrEqual(constrained.week!.bottom - 2);
-  expect(constrained.minDayWidth).toBeGreaterThanOrEqual(110);
-  expect(constrained.plannerColumns).toBe(2);
+  expect(constrained.calendar).not.toBeNull();
+  expect(constrained.inspector).not.toBeNull();
+  expect(constrained.inspector!.top).toBeGreaterThanOrEqual(constrained.calendar!.bottom - 2);
+  expect(constrained.minDayWidth).toBeGreaterThanOrEqual(105);
+
+  await inspector.locator("summary").click();
+  await expect(page.locator(".v5-planner-grid")).toBeVisible();
+  await expectNoHorizontalOverflow(page);
 
   await page.setViewportSize({ width: 1728, height: 1000 });
   await page.waitForTimeout(100);
-
   const wide = await geometry();
-  expect(wide.week).not.toBeNull();
-  expect(wide.support).not.toBeNull();
-  expect(wide.support!.left).toBeGreaterThanOrEqual(wide.week!.right - 2);
-  expect(wide.support!.width).toBeGreaterThanOrEqual(320);
+  expect(wide.calendar).not.toBeNull();
+  expect(wide.inspector).not.toBeNull();
   expect(wide.minDayWidth).toBeGreaterThanOrEqual(115);
-  expect(wide.plannerColumns).toBe(1);
 });

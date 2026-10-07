@@ -1,0 +1,201 @@
+/* Practice V5 — quiet setup, bounded focus workspace, concise completion state. */
+.practice-view {
+  width: min(100%, 52rem);
+  margin-inline: auto;
+  gap: 1.5rem !important;
+}
+
+.practice-primary-surface {
+  overflow: hidden;
+  border: 1px solid var(--border) !important;
+  border-radius: 1.25rem !important;
+  background: var(--surface) !important;
+  box-shadow: 0 1px 2px color-mix(in oklab, var(--foreground) 5%, transparent);
+}
+
+.practice-primary-surface > div:first-child {
+  margin-bottom: 0 !important;
+  border-bottom: 1px solid var(--hairline);
+  padding-bottom: 1rem;
+}
+
+.practice-stage-chip {
+  display: inline-flex;
+  min-height: 2rem;
+  align-items: center;
+  gap: .4rem;
+  border-radius: 999px;
+  background: var(--muted);
+  padding-inline: .7rem;
+  color: var(--muted-foreground);
+  font-size: .75rem;
+  font-weight: 650;
+}
+
+.practice-config {
+  margin-top: 1rem;
+  border: 1px solid var(--hairline);
+  border-radius: 1rem;
+  background: color-mix(in oklab, var(--muted) 34%, transparent);
+}
+
+.practice-config-summary {
+  display: flex;
+  min-height: 3.5rem;
+  cursor: pointer;
+  list-style: none;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: .75rem 1rem;
+}
+
+.practice-config-summary::-webkit-details-marker { display: none; }
+.practice-config-summary b,
+.practice-config-summary small { display: block; }
+.practice-config-summary small {
+  margin-top: .15rem;
+  color: var(--muted-foreground);
+  font-size: .75rem;
+  font-weight: 450;
+}
+.practice-config-action {
+  color: var(--primary);
+  font-size: .8rem;
+  font-weight: 650;
+}
+.practice-config-body {
+  border-top: 1px solid var(--hairline);
+  padding: 1rem;
+}
+
+.practice-start-panel {
+  display: grid;
+  justify-items: start;
+  gap: .2rem;
+  padding-top: 1rem !important;
+}
+
+.practice-session-active {
+  width: min(100%, 52rem);
+}
+.practice-session-active .practice-primary-surface {
+  overflow: visible;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none;
+}
+.practice-session-active .practice-primary-surface > div:first-child {
+  display: none;
+}
+.practice-session-active .practice-focus-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 12;
+  margin: 0 0 1.25rem;
+  border-bottom: 1px solid var(--hairline);
+  background: color-mix(in oklab, var(--background) 92%, transparent);
+  padding: .75rem 0;
+  backdrop-filter: blur(18px) saturate(1.12);
+}
+.practice-question-flow {
+  width: min(100%, 48rem);
+  margin-inline: auto;
+}
+.practice-question-context {
+  border-bottom: 1px solid var(--hairline);
+  padding-bottom: 1.25rem;
+}
+.practice-prompt {
+  max-width: 68ch;
+  color: var(--foreground);
+  font-size: clamp(1.1rem, 2vw, 1.3rem);
+  font-weight: 600;
+  line-height: 1.55;
+}
+.practice-rationale {
+  max-width: 68ch;
+}
+.practice-question-flow fieldset,
+.practice-self-review {
+  min-width: 0;
+}
+.practice-question-flow textarea,
+.practice-question-flow [contenteditable="true"] {
+  background: var(--surface);
+}
+.practice-question-flow > .flex:last-child {
+  position: sticky;
+  bottom: max(.5rem, env(safe-area-inset-bottom, 0px));
+  z-index: 8;
+  border: 1px solid var(--hairline);
+  border-radius: 1rem;
+  background: color-mix(in oklab, var(--surface) 94%, transparent);
+  padding: .65rem;
+  box-shadow: 0 10px 28px color-mix(in oklab, var(--foreground) 9%, transparent);
+  backdrop-filter: blur(16px) saturate(1.08);
+}
+
+.practice-summary {
+  width: min(100%, 42rem);
+  margin-inline: auto;
+  border: 1px solid var(--border);
+  border-radius: 1.25rem;
+  background: var(--surface);
+  padding: clamp(1.25rem, 4vw, 2rem) !important;
+}
+
+.practice-support-grid {
+  gap: 1rem !important;
+}
+.practice-support-grid > .panel {
+  border: 1px solid var(--border) !important;
+  border-radius: 1rem !important;
+  background: var(--surface) !important;
+  padding: 1rem !important;
+}
+.practice-session-active .practice-support-grid,
+.practice-session-summary .practice-support-grid {
+  display: none !important;
+}
+
+@media (max-width: 767px) {
+  .practice-view {
+    gap: 1rem !important;
+  }
+  .practice-primary-surface {
+    border-radius: 1.1rem !important;
+  }
+  .practice-config {
+    margin-inline: 0 !important;
+  }
+  .practice-config-body {
+    padding: .85rem;
+  }
+  .practice-utility-row {
+    display: grid !important;
+    grid-template-columns: 1fr;
+  }
+  .practice-utility-button {
+    width: 100%;
+  }
+  .practice-start-panel > button {
+    width: 100%;
+  }
+  .practice-session-active {
+    padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+  }
+  .practice-session-active .practice-focus-toolbar {
+    top: max(0px, env(safe-area-inset-top, 0px));
+  }
+  .practice-question-meta {
+    line-height: 1.55;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .practice-session-active .practice-focus-toolbar,
+  .practice-question-flow > .flex:last-child {
+    backdrop-filter: none;
+  }
+}

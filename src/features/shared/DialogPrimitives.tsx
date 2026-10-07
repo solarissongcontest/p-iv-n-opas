@@ -10,24 +10,72 @@ export function Dialog({ title, onClose, children }: { title: string; onClose: (
   const ref = useRef<HTMLDivElement>(null);
   const close = useRef(onClose);
   close.current = onClose;
+
   useEffect(() => {
     const previous = document.activeElement as HTMLElement | null;
-    const focusable = () => [...(ref.current?.querySelectorAll<HTMLElement>('button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"]), [contenteditable="true"]') ?? [])];
+    const focusable = () => [
+      ...(ref.current?.querySelectorAll<HTMLElement>(
+        'button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"]), [contenteditable="true"]',
+      ) ?? []),
+    ];
     focusable()[0]?.focus();
+
     function trap(event: KeyboardEvent) {
-      if (event.key === "Escape") { event.stopPropagation(); close.current(); }
+      if (event.key === "Escape") {
+        event.stopPropagation();
+        close.current();
+      }
       if (event.key !== "Tab") return;
-      const elements = focusable(), first = elements[0], last = elements[elements.length - 1];
+      const elements = focusable();
+      const first = elements[0];
+      const last = elements[elements.length - 1];
       if (!first || !last) return;
-      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
-      else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
     }
+
     document.addEventListener("keydown", trap);
-    return () => { document.removeEventListener("keydown", trap); previous?.focus(); };
+    return () => {
+      document.removeEventListener("keydown", trap);
+      previous?.focus();
+    };
   }, []);
-  return <div ref={ref} className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 sm:items-center sm:p-4" onMouseDown={event=>{if(event.target===event.currentTarget)onClose();}}>
-    <LiquidGlass lensing variant="thick" role="dialog" aria-modal="true" aria-label={title} className="max-h-[92dvh] w-full max-w-xl overflow-y-auto rounded-t-3xl p-5 shadow-2xl sm:rounded-3xl sm:p-7" style={{ paddingBottom: "max(1.25rem, env(safe-area-inset-bottom, 0px))" }}>
-      <div className="mb-5 flex items-center justify-between"><h2 className="text-xl font-semibold">{title}</h2><button type="button" aria-label="Sulje" className={secondary+" !size-11 !p-0"} onClick={onClose}><X size={18}/></button></div>{children}
-    </LiquidGlass>
-  </div>;
+
+  return (
+    <div
+      ref={ref}
+      className="dialog-backdrop fixed inset-0 z-50 flex items-end justify-center bg-black/40 sm:items-center sm:p-4"
+      onMouseDown={(event) => {
+        if (event.target === event.currentTarget) onClose();
+      }}
+    >
+      <LiquidGlass
+        lensing
+        variant="thick"
+        role="dialog"
+        aria-modal="true"
+        aria-label={title}
+        className="dialog-surface max-h-[92dvh] w-full max-w-xl overflow-y-auto rounded-t-3xl p-5 shadow-2xl sm:rounded-3xl sm:p-7"
+        style={{ paddingBottom: "max(1.25rem, env(safe-area-inset-bottom, 0px))" }}
+      >
+        <div className="dialog-header mb-5 flex items-center justify-between">
+          <h2 className="dialog-title text-xl font-semibold">{title}</h2>
+          <button
+            type="button"
+            aria-label="Sulje"
+            className={secondary + " !size-11 !p-0"}
+            onClick={onClose}
+          >
+            <X size={18} />
+          </button>
+        </div>
+        {children}
+      </LiquidGlass>
+    </div>
+  );
 }

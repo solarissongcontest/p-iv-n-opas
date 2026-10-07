@@ -13,6 +13,15 @@ import foundationsCss from "../styles/foundations.css?url";
 import glassCss from "../styles/glass.css?url";
 import shellCss from "../styles/shell.css?url";
 import layoutsCss from "../styles/layouts.css?url";
+import surfacesCss from "../styles/surfaces.css?url";
+import todayCss from "../styles/today.css?url";
+import plannerCss from "../styles/planner.css?url";
+import studiesCss from "../styles/studies.css?url";
+import progressCss from "../styles/progress.css?url";
+import practiceCss from "../styles/practice.css?url";
+import examsCss from "../styles/exams.css?url";
+import settingsCss from "../styles/settings.css?url";
+import overlaysCss from "../styles/overlays.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { PwaUpdatePrompt } from "../components/PwaUpdatePrompt";
 
@@ -107,6 +116,15 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "stylesheet", href: glassCss },
       { rel: "stylesheet", href: shellCss },
       { rel: "stylesheet", href: layoutsCss },
+      { rel: "stylesheet", href: surfacesCss },
+      { rel: "stylesheet", href: todayCss },
+      { rel: "stylesheet", href: plannerCss },
+      { rel: "stylesheet", href: studiesCss },
+      { rel: "stylesheet", href: progressCss },
+      { rel: "stylesheet", href: practiceCss },
+      { rel: "stylesheet", href: examsCss },
+      { rel: "stylesheet", href: settingsCss },
+      { rel: "stylesheet", href: overlaysCss },
       { rel: "icon", href: "/app-icon-180.png", type: "image/png", sizes: "180x180" },
       { rel: "shortcut icon", href: "/app-icon-180.png", type: "image/png" },
       { rel: "manifest", href: "/manifest.webmanifest" },

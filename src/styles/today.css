@@ -1,0 +1,408 @@
+/* =========================================================
+   Design & Layout V5 — Today
+
+   Today is the app's decision surface: one obvious next action, compact
+   context, and deeper learning-engine detail only on demand.
+   ========================================================= */
+
+.page-content-today {
+  width: min(100%, 1040px);
+}
+
+.today-v5 {
+  display: grid;
+  gap: var(--study-space-4);
+}
+
+.today-v5-dashboard {
+  display: grid;
+  min-width: 0;
+  gap: var(--study-space-4);
+}
+
+.today-v5-main,
+.today-v5-context {
+  display: grid;
+  min-width: 0;
+  align-content: start;
+  gap: var(--study-space-4);
+}
+
+.today-v5-primary {
+  min-width: 0;
+  padding: clamp(1.2rem, 2.6vw, 1.75rem);
+}
+
+.today-v5-next-title {
+  max-width: 30ch;
+  margin: 0;
+  font-size: clamp(1.65rem, 3.6vw, 2.35rem);
+  line-height: 1.14;
+  font-weight: 720;
+  letter-spacing: -0.032em;
+  text-wrap: balance;
+}
+
+.today-v5-next-summary {
+  max-width: 48ch;
+  margin: 0.7rem 0 0;
+  color: var(--muted-foreground);
+  font-size: 0.9rem;
+  line-height: 1.55;
+}
+
+.today-v5-primary-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--study-space-2);
+  margin-top: var(--study-space-5);
+}
+
+.today-v5-disclosure {
+  margin-top: var(--study-space-4);
+}
+
+.today-v5-load-options {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--study-space-2);
+}
+
+.today-v5-load-options > button {
+  display: grid;
+  min-width: 0;
+  min-height: 50px;
+  align-content: center;
+  gap: 0.15rem;
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  background: var(--surface);
+  padding: 0.55rem 0.7rem;
+  color: var(--foreground);
+  font-size: 0.78rem;
+  font-weight: 650;
+  text-align: left;
+  transition:
+    border-color 140ms var(--ease-calm),
+    background-color 140ms var(--ease-calm),
+    transform 120ms var(--ease-calm);
+}
+
+.today-v5-load-options > button span {
+  color: var(--muted-foreground);
+  font-size: 0.72rem;
+  font-weight: 500;
+}
+
+.today-v5-load-options > button[aria-pressed="true"] {
+  border-color: color-mix(in oklab, var(--primary) 42%, var(--border));
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+
+.today-v5-load-options > button:active {
+  transform: scale(0.98);
+}
+
+.today-v5-action-row {
+  display: flex;
+  width: 100%;
+  min-height: 52px;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--study-space-3);
+  border-radius: 0.75rem;
+  padding: 0.15rem 0.25rem;
+  text-align: left;
+}
+
+.today-v5-action-row:hover {
+  color: var(--foreground);
+}
+
+.today-v5-action-row > span:first-child {
+  display: grid;
+  gap: 0.15rem;
+}
+
+.today-v5-action-row b {
+  color: var(--primary);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.today-v5-action-row > span:first-child > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--foreground);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.today-v5-action-row > span:last-child {
+  flex: 0 0 auto;
+  color: var(--muted-foreground);
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
+
+.today-v5-context .study-card {
+  box-shadow: none;
+}
+
+.today-v5-context-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--study-space-3);
+}
+
+.today-v5-context-head > strong {
+  font-size: clamp(1.65rem, 3vw, 2.1rem);
+  line-height: 1;
+  font-weight: 720;
+  letter-spacing: -0.035em;
+}
+
+.today-v5-text-action {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  margin-top: 0.55rem;
+  color: var(--primary);
+  font-size: 0.82rem;
+  font-weight: 650;
+}
+
+.today-v5-text-action:hover {
+  text-decoration: underline;
+  text-underline-offset: 0.16rem;
+}
+
+.today-v5-week-value {
+  margin: 0 0 0.7rem;
+  font-size: 1.55rem;
+  line-height: 1.15;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+}
+
+.today-v5-week-value span {
+  color: var(--muted-foreground);
+  font-size: 0.82rem;
+  font-weight: 500;
+  letter-spacing: 0;
+}
+
+.today-v5-support {
+  min-width: 0;
+}
+
+.today-v5-notice {
+  max-width: none;
+}
+
+.today-v5-practice-shortcut {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  width: 100%;
+  min-height: 68px;
+  align-items: center;
+  gap: var(--study-space-3);
+  border: 1px solid var(--study-card-border);
+  border-radius: var(--study-card-radius);
+  background: var(--surface);
+  padding: 0.8rem 1rem;
+  box-shadow: var(--study-card-shadow);
+  color: var(--foreground);
+  text-align: left;
+  transition:
+    border-color 140ms var(--ease-calm),
+    background-color 140ms var(--ease-calm),
+    transform 120ms var(--ease-calm);
+}
+
+.today-v5-practice-shortcut:hover {
+  border-color: color-mix(in oklab, var(--primary) 24%, var(--border));
+  background: color-mix(in oklab, var(--accent) 18%, var(--surface));
+}
+
+.today-v5-practice-shortcut:active {
+  transform: scale(0.992);
+}
+
+.today-v5-practice-icon {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  border-radius: 0.8rem;
+  background: var(--accent);
+  color: var(--primary);
+}
+
+.today-v5-practice-shortcut b,
+.today-v5-practice-shortcut small {
+  display: block;
+}
+
+.today-v5-practice-shortcut b {
+  font-size: 0.92rem;
+  font-weight: 680;
+}
+
+.today-v5-practice-shortcut small {
+  margin-top: 0.15rem;
+  overflow: hidden;
+  color: var(--muted-foreground);
+  font-size: 0.75rem;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+}
+
+.today-v5-practice-shortcut > span:last-child {
+  color: var(--muted-foreground);
+  font-size: 1.25rem;
+}
+
+.today-v5-recovery-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--study-space-3);
+  font-size: 0.88rem;
+}
+
+.today-v5-recovery-row > span:first-child {
+  min-width: 0;
+}
+
+.today-v5-recovery-row small {
+  display: block;
+  margin-top: 0.2rem;
+  color: var(--muted-foreground);
+  font-size: 0.75rem;
+  line-height: 1.4;
+}
+
+.today-v5-recovery-row > span:last-child {
+  flex: 0 0 auto;
+  color: var(--muted-foreground);
+  font-size: 0.75rem;
+  white-space: nowrap;
+}
+
+@media (min-width: 900px) {
+  .today-v5-dashboard {
+    grid-template-columns: minmax(0, 1.75fr) minmax(16.5rem, 0.8fr);
+    align-items: start;
+  }
+
+  .today-v5-main {
+    gap: 1rem;
+  }
+
+  .today-v5-context {
+    position: sticky;
+    top: 1.25rem;
+  }
+}
+
+@media (max-width: 899px) {
+  .today-v5-dashboard {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .today-v5-context {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 767px) {
+  .today-v5 {
+    gap: 0.8rem;
+  }
+
+  .today-v5-dashboard,
+  .today-v5-main,
+  .today-v5-context {
+    gap: 0.8rem;
+  }
+
+  .today-v5-primary {
+    padding: 1.1rem;
+  }
+
+  .today-v5-next-title {
+    font-size: clamp(1.55rem, 7vw, 2rem);
+  }
+
+  .today-v5-next-summary {
+    font-size: 0.85rem;
+  }
+
+  .today-v5-primary-actions {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    margin-top: 1.15rem;
+  }
+
+  .today-v5-primary-actions > button {
+    width: 100%;
+  }
+
+  .today-v5-context {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .today-v5-context .study-card {
+    box-shadow: var(--study-card-shadow);
+  }
+
+  .today-v5-load-options {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .today-v5-load-options > button {
+    padding-inline: 0.55rem;
+  }
+
+  .today-v5-action-row {
+    min-height: 56px;
+  }
+
+  .today-v5-practice-shortcut {
+    min-height: 72px;
+  }
+}
+
+@media (max-width: 430px) {
+  .today-v5-load-options {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .today-v5-load-options > button {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    min-height: 48px;
+  }
+
+  .today-v5-load-options > button span {
+    justify-self: end;
+  }
+
+  .today-v5-recovery-row {
+    display: grid;
+  }
+
+  .today-v5-recovery-row > span:last-child {
+    white-space: normal;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .today-v5-load-options > button,
+  .today-v5-practice-shortcut {
+    transition: none;
+  }
+}
