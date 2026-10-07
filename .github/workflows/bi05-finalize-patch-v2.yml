@@ -1,0 +1,50 @@
+name: BI05 Finalize Patch V2
+
+on:
+  push:
+    branches:
+      - feature/bi05-iiris5-course-system
+    paths:
+      - .github/workflows/bi05-finalize-patch-v2.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v4
+        with:
+          ref: feature/bi05-iiris5-course-system
+          fetch-depth: 0
+
+      - name: Guard canonical repo
+        run: node scripts/assert-canonical-repo.mjs
+
+      - name: Apply patch
+        run: python3 scripts/bi05-finalize-patch.py
+
+      - name: Remove one-shot helpers
+        run: |
+          rm -f scripts/bi05-finalize-patch.py
+          rm -f .github/workflows/bi05-finalize-patch.yml
+          rm -f .github/workflows/bi05-finalize-patch-v2.yml
+          rm -f .github/workflows/bi05-production-migrate.yml
+
+      - name: Verify
+        run: |
+          npm ci
+          npm test
+          npm run build
+
+      - name: Commit finalization
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git diff --cached --quiet && { echo "No changes to commit"; exit 1; } || true
+          git commit -m "Finalize BI05 and multi-topic study logging"
+          git push origin HEAD:feature/bi05-iiris5-course-system
