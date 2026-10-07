@@ -55,10 +55,9 @@ test("desktop sidebar and workspace alignment stay visually stable", async ({ pa
   await expect(main).toHaveScreenshot("desktop-today-workspace-1440.png", {
     animations: "disabled",
     mask: [
-      main.locator(".today-primary"),
-      main.locator(".today-context"),
-      main.locator(".today-support-section"),
-      main.locator(".today-practice-shortcut"),
+      main.locator(".today-v5-primary"),
+      main.locator(".today-v5-context"),
+      main.locator(".today-v5-support"),
     ],
   });
 });
@@ -73,7 +72,7 @@ test("month grid structure stays visually stable", async ({ page }) => {
   await expect(month).toBeVisible();
   await expect(month).toHaveScreenshot("planner-month-1280.png", {
     animations: "disabled",
-    mask: [month.locator(".planner-task")],
+    mask: [month.locator(".planner-compact-item"), month.locator(".planner-month-primary")],
   });
 });
 
@@ -91,7 +90,7 @@ test("active Practice focus shell stays visually stable", async ({ page }) => {
     mask: [
       focus.locator("textarea"),
       focus.locator("[contenteditable='true']"),
-      focus.locator(".practice-question"),
+      focus.locator(".practice-prompt"),
     ],
   });
 });
