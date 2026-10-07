@@ -1,6 +1,8 @@
 -- BI05 V1: 630 deterministic, source-grounded questions.
 -- Each of the 63 Iiris 5 subchapters is assigned three curated core concepts.
 -- Definitions come from public.course_concepts, seeded from the user-provided Iiris 5 glossary.
+-- V1 is retained as a migration prerequisite for V2. V2 retires these rows after
+-- deriving its curated concept mapping.
 
 create temporary table _bi05_core_map(
   code text not null,
@@ -108,10 +110,10 @@ select owner_id,course_id,topic_id,'LOPS21','BI05',question_type,
     when 'recognize' then jsonb_build_array('Etsi kuvauksesta rakenteen tai toiminnan tunnuspiirre.','Nimeä täsmällinen Iiris 5 -käsite.')
     else jsonb_build_array('Aloita käsitteen määritelmästä.','Lisää sen jälkeen määritelmässä kuvattu tehtävä, sijainti tai vaikutus.')
   end,
-  jsonb_build_array(topic_name,canonical_name),to_jsonb(array_prepend(canonical_name,aliases)),
+  array[topic_name,canonical_name]::text[],array_prepend(canonical_name,aliases)::text[],
   difficulty,estimated_seconds,'active','seed',
   'BI05-IIRIS5-' || replace(code,'.','') || '-' || lower(regexp_replace(canonical_name,'[^a-zA-Z0-9åäöÅÄÖ]+','-','g')) || '-' || variant,
-  '[]'::jsonb,'[]'::jsonb,
+  '{}'::text[],'{}'::text[],
   'Hyvä vastaus vastaa Iiris 5 -käsiteluettelon määritelmää. Hyväksy kanoninen nimi ja tallennetut rinnakkaisnimet.',
   chapter<>5,false,true,points,'text','[]'::jsonb,'bi05-v1',
   jsonb_build_object('generator','deterministic-iiris5-vocabulary','sourceScope','Iiris 5 käsiteluettelo','mapping','curated-subchapter-core','scopeValidated',true,'chapter',chapter,'subchapter',code)
@@ -154,9 +156,9 @@ select g.owner_id,g.course_id,g.topic_id,'LOPS21','BI05','multiple_choice',
      order by md5(cc.canonical_name || g.topic_id::text) limit 1)),
   g.correct,'Oikea käsite on ' || g.correct || '. ' || g.definition,
   jsonb_build_array('Etsi kuvauksesta rakenteen tai toiminnan erottava tuntomerkki.','Rajaa vaihtoehdot sen perusteella, mihin elimistön kokonaisuuteen kuvaus kuuluu.'),
-  jsonb_build_array(g.topic_name,g.correct),jsonb_build_array(g.correct),
+  array[g.topic_name,g.correct]::text[],array[g.correct]::text[],
   2,60,'active','seed','BI05-IIRIS5-' || replace(g.code,'.','') || '-mc-core',
-  '[]'::jsonb,'[]'::jsonb,'1 p oikeasta Iiris 5 -käsitteestä.',
+  '{}'::text[],'{}'::text[],'1 p oikeasta Iiris 5 -käsitteestä.',
   g.chapter<>5,g.chapter<>5,true,1,'text','[]'::jsonb,'bi05-v1',
   jsonb_build_object('generator','deterministic-iiris5-vocabulary','sourceScope','Iiris 5 käsiteluettelo','mapping','curated-subchapter-core','scopeValidated',true,'chapter',g.chapter,'subchapter',g.code,'reservedForExam',g.chapter<>5)
 from grouped g
