@@ -22,7 +22,7 @@ type AdherencePoint = {
   adherence: number | null;
 };
 
-export function buildPlanAdherenceSeries(
+function buildPlanAdherenceSeries(
   rows: Array<{ week: string; planned: number; actual: number }>,
 ): AdherencePoint[] {
   return rows.map(row => ({
