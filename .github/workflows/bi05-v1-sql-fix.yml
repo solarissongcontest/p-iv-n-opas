@@ -1,0 +1,67 @@
+name: BI05 V1 SQL Fix
+
+on:
+  push:
+    branches:
+      - feature/bi05-iiris5-course-system
+    paths:
+      - .github/workflows/bi05-v1-sql-fix.yml
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v4
+        with:
+          ref: feature/bi05-iiris5-course-system
+          fetch-depth: 0
+
+      - name: Canonical repository guard
+        run: node scripts/assert-canonical-repo.mjs
+
+      - name: Patch V1 SQL and regression test
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+
+          migration = Path('supabase/migrations/20261007190300_bi05_question_bank_v1.sql')
+          text = migration.read_text()
+          old = "  '[]'::jsonb,definition,\n  case variant"
+          new = "  '[]'::jsonb,definition,\n  'Iiris 5: ' || canonical_name || ' = ' || definition,\n  case variant"
+          if text.count(old) != 1:
+              raise SystemExit(f'Expected exactly one V1 insert expression gap, found {text.count(old)}')
+          migration.write_text(text.replace(old, new, 1))
+
+          test_file = Path('tests/bi05-question-bank-v2.test.ts')
+          test_text = test_file.read_text()
+          marker = 'test("BI05 V2 retires the recall-heavy bank and activates exactly 630 balanced tasks", () => {'
+          regression = '''test("BI05 V1 supplies an explanation expression for every target column", () => {\n  assert.match(v1, /'Iiris 5: ' \\|\\| canonical_name \\|\\| ' = ' \\|\\| definition/);\n  assert.match(v1, /'\\[\\]'::jsonb,definition,\\s*'Iiris 5: '/);\n});\n\n'''
+          if regression not in test_text:
+              if marker not in test_text:
+                  raise SystemExit('Could not find BI05 V2 test insertion marker')
+              test_text = test_text.replace(marker, regression + marker, 1)
+              test_file.write_text(test_text)
+          PY
+
+          rm -f .github/workflows/bi05-v1-sql-fix.yml
+
+      - name: Verify
+        run: |
+          npm ci
+          npm test
+          npm run build
+
+      - name: Commit fix
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Fix BI05 V1 SQL insert cardinality"
+          git push origin HEAD:feature/bi05-iiris5-course-system
