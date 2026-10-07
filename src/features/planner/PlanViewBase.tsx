@@ -8,6 +8,7 @@ import { examMode, generatePlan } from "@/lib/domain";
 import {
   isPlanSyncConflict,
   useCreateFrictionEvent,
+  useExams,
   useFrictionEvents,
   useGeneratePlan,
   useImplementationIntentions,
@@ -15,6 +16,7 @@ import {
   usePlanStatus,
   usePreferences,
 } from "@/lib/data";
+import { examScopeLabel, nextExamForCourse, topicsForExam, useExamTopicScopes } from "@/lib/examScopeData";
 import { addDays, addMonths, diffDays, fullDate, minutes, startOfWeek, today } from "@/lib/fi";
 import { plannerModeLabel } from "@/lib/ui-fi";
 import { V5PlannerPanel } from "@/components/LearningOSV5Panels";
@@ -52,6 +54,7 @@ export function PlanView({courses,topics,plan,tests,mistakes,attempts,capacity,o
   const preferences=usePreferences();
   const intentions=useImplementationIntentions();
   const frictionHistory=useFrictionEvents();
+  const examsQ=useExams();
   const plannerMode=preferences.data?.planner_mode??"assisted";
   const [mode,setMode]=useState<PlannerMode>(initialMode);
   const [anchor,setAnchor]=useState(initialAnchor??today());
@@ -70,7 +73,10 @@ export function PlanView({courses,topics,plan,tests,mistakes,attempts,capacity,o
   const last=mode==="viikko"?addDays(first,6):mode==="kuukausi"?addDays(addDays(first,32).slice(0,7)+"-01",-1):anchor;
   const days=Array.from({length:Math.max(1,diffDays(last,first)+1)},(_,index)=>addDays(first,index));
   const selectedCourse=courses.find(course=>course.id===choice);
-  const selectedMode=examMode(selectedCourse?.exam_date??null);
+  const nextExam=selectedCourse?nextExamForCourse(examsQ.data??[],selectedCourse.id,today()):null;
+  const selectedExamDate=nextExam?.date??selectedCourse?.exam_date??null;
+  const scopeQ=useExamTopicScopes(nextExam?.id);
+  const selectedMode=examMode(selectedExamDate);
 
   const periodItems=plan.filter(item=>item.date>=first&&item.date<=last&&item.kind!=="exam");
   const plannedItems=periodItems.filter(item=>item.status!=="skipped");
@@ -132,14 +138,20 @@ export function PlanView({courses,topics,plan,tests,mistakes,attempts,capacity,o
 
   async function makeProposal(){
     const course=courses.find(candidate=>candidate.id===choice);
-    if(!course?.exam_date){toast.error("Kurssilla ei ole koepäivää.");return;}
+    if(!course){return;}
+    const exam=nextExamForCourse(examsQ.data??[],course.id,today());
+    const examDate=exam?.date??course.exam_date;
+    if(!examDate){toast.error("Kurssilla ei ole tulevaa koepäivää.");return;}
+    const courseTopics=topics.filter(topic=>topic.course_id===course.id);
+    const planningTopics=exam?.id===nextExam?.id?topicsForExam(courseTopics,scopeQ.data??[]):courseTopics;
+    if(!planningTopics.length){toast.error("Koealueella ei ole vielä suunniteltavia aiheita.");return;}
     const baseDrafts=generatePlan({
       course,
-      topics:topics.filter(topic=>topic.course_id===course.id),
-      examDate:course.exam_date,
+      topics:planningTopics,
+      examDate,
       studyWeekdays:capacity.studyWeekdays,
       weeklyMinutes:course.weekly_minutes,
-      mistakes:mistakes.filter(mistake=>mistake.course_id===course.id),
+      mistakes:mistakes.filter(mistake=>mistake.course_id===course.id&&(!mistake.topic_id||planningTopics.some(topic=>topic.id===mistake.topic_id))),
       tests:tests.filter(test=>test.course_id===course.id),
       capacity,
     });
@@ -207,6 +219,7 @@ export function PlanView({courses,topics,plan,tests,mistakes,attempts,capacity,o
         <label className="planner-v5-course-field">Kurssi
           <select value={choice} onChange={event=>setChoice(event.target.value)}>{courses.map(course=><option key={course.id} value={course.id}>{course.code} · {course.name}</option>)}</select>
         </label>
+        {nextExam&&<p className="planner-v5-readable">Seuraava koe: <b>{nextExam.name}</b> · {fullDate(nextExam.date)} · {examScopeLabel(scopeQ.data??[])}{scopeQ.data?.some(scope=>scope.confidence==="provisional")?" (ei vielä opettajan vahvistama)":""}.</p>}
         {selectedMode.active&&<p className="planner-v5-exam-notice">Koemoodi on aktiivinen: {selectedMode.days} päivää kokeeseen. Uusi sisältö väistyy tarvittaessa koetason harjoittelun, virheiden ja kertauksen tieltä.</p>}
         <button disabled={generate.isPending} className={button} onClick={()=>void makeProposal()}>{plannerMode==="autopilot"?"Mukauta suunnitelma nyt":"Luo ehdotus"}</button>
 

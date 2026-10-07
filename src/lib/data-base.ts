@@ -157,6 +157,7 @@ export type ExamSimulationRow = {
   id: string;
   owner_id: string;
   course_id: string;
+  exam_id: string | null;
   mode: "practice" | "full";
   task_ids: string[];
   selected_task_ids: string[];
@@ -349,7 +350,7 @@ async function listQuestionBank(): Promise<QuestionBankItem[]> {
     .eq("curriculum", "LOPS21")
     .order("difficulty")
     .order("created_at", { ascending: false })
-    .limit(2000);
+    .limit(5000);
   if (error) throw error;
   return (data ?? []).map(normalizeQuestionBankItem);
 }
@@ -759,6 +760,7 @@ export async function ensureKe04ForCurrentUser(): Promise<string> {
 export type LogSessionInput = {
   course_id: string;
   topic_id: string | null;
+  topic_ids?: string[];
   minutes: number;
   planned_minutes?: number | null;
   kind: string;
@@ -783,10 +785,9 @@ export type LogSessionInput = {
 async function doLogSession(payload: unknown, operationId: string) {
   const input = payload as LogSessionInput;
   const date = input.date ?? today();
-  const common = {
+  const baseCommon = {
     p_request_id: operationId,
     p_course_id: input.course_id,
-    p_topic_id: input.topic_id,
     p_date: date,
     p_minutes: input.minutes,
     p_planned_minutes: input.planned_minutes ?? null,
@@ -801,10 +802,12 @@ async function doLogSession(payload: unknown, operationId: string) {
     p_note: input.note ?? null,
     p_plan_item_id: input.plan_item_id ?? null,
   };
+  const singleTopicCommon = { ...baseCommon, p_topic_id: input.topic_id };
+  const multiTopicIds = [...new Set(input.topic_ids ?? [])].filter(Boolean);
 
   const result = input.retrieval_result
     ? await untypedSupabase.rpc("log_guided_study_session", {
-        ...common,
+        ...singleTopicCommon,
         p_objective: input.objective ?? null,
         p_recall: input.recall ?? null,
         p_retrieval_check: input.retrieval_check ?? null,
@@ -812,7 +815,12 @@ async function doLogSession(payload: unknown, operationId: string) {
         p_retrieval_confidence: input.retrieval_confidence ?? null,
         p_outcome: input.outcome ?? null,
       })
-    : await untypedSupabase.rpc("log_study_session", common);
+    : multiTopicIds.length > 1
+      ? await untypedSupabase.rpc("log_multi_topic_study_session", {
+          ...baseCommon,
+          p_topic_ids: multiTopicIds,
+        })
+      : await untypedSupabase.rpc("log_study_session", singleTopicCommon);
 
   const { data: sessionId, error } = result;
   if (error) throw error;
@@ -1755,6 +1763,7 @@ export function useCreateExamSimulation() {
   return useMutation({
     mutationFn: async (input: {
       course_id: string;
+      exam_id?: string | null;
       mode: "practice" | "full";
       task_ids: string[];
       selected_task_ids?: string[];
@@ -1763,6 +1772,7 @@ export function useCreateExamSimulation() {
       const { data, error } = await untypedSupabase.from("exam_simulations").insert({
         owner_id: requireDeviceOwnerId(),
         course_id: input.course_id,
+        exam_id: input.exam_id ?? null,
         mode: input.mode,
         task_ids: input.task_ids,
         selected_task_ids: input.selected_task_ids ?? [],

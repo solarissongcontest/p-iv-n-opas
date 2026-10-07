@@ -284,7 +284,7 @@ export function Maa06aCourseView({ course, topics, onBack, onStart }: { course: 
         <input value={search} onChange={(event) => { setSearch(event.target.value); setLimit(60); }} placeholder="Hae esim. 2.15, K27 tai B7" className="min-h-11 w-full rounded-xl border border-border bg-surface pl-10 pr-3 text-base sm:text-sm"/>
       </label>
       <div className="mb-4 flex flex-wrap gap-2">{([['recommended','⭐ Suositellut'],['unfinished','Tekemättä'],['review','Kertaus'],['all','Kaikki']] as const).map(([value,label]) => <button key={value} aria-pressed={filter === value} onClick={() => { setFilter(value); setLimit(60); }} className={filter === value ? button : secondary}>{label}</button>)}</div>
-      {shown.length ? <DataList>{shown.map((exercise) => <ExerciseRow key={exercise.id} courseId={course.id} exercise={exercise} attempts={model.attempts}/>)}</DataList> : <EmptyState title="Ei osumia" body={search ? "Jos tehtävä on kirjassa mutta ei vielä pankissa, lisää se yllä pikakirjauksella." : "Vaihda suodatinta nähdäksesi muita tehtäviä."}/>} 
+      {shown.length ? <DataList>{shown.map((exercise) => <ExerciseRow key={exercise.id} courseId={course.id} exercise={exercise} attempts={model.attempts}/>)}</DataList> : <EmptyState title="Ei osumia" body={search ? "Jos tehtävä on kirjassa mutta ei vielä pankissa, lisää se yllä pikakirjauksella." : "Vaihda suodatinta nähdäksesi muita tehtäviä."}/>}
       {shown.length < allFiltered.length ? <button className={secondary + " mt-4"} onClick={() => setLimit((value) => value + 60)}>Näytä lisää</button> : null}
     </SectionCard>
 
