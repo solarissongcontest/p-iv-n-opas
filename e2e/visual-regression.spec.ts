@@ -120,7 +120,7 @@ test("month grid structure stays visually stable without snapshotting personal p
   expect(geometry!.maxDayWidth - geometry!.minDayWidth).toBeLessThanOrEqual(2);
   expect(geometry!.tasksStayInsideCells).toBe(true);
 
-  await testInfo.attach("planner-month-1280.png", {
+  await testInfo.attach("planner-month-1280" + ".png", {
     body: await month.screenshot({ animations: "disabled" }),
     contentType: "image/png",
   });
@@ -175,7 +175,7 @@ test("active Practice focus shell stays bounded while adaptive content is allowe
   expect(Math.abs(geometry!.surfaceWidth - geometry!.focusWidth)).toBeLessThanOrEqual(2);
   expect(geometry!.interactiveInsideViewport).toBe(true);
 
-  await testInfo.attach("mobile-practice-focus-390.png", {
+  await testInfo.attach("mobile-practice-focus-390" + ".png", {
     body: await focus.screenshot({ animations: "disabled" }),
     contentType: "image/png",
   });
