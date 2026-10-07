@@ -1267,19 +1267,47 @@ export function useGeneratePlan() {
   const invalidate = useInvalidateAll();
   return useMutation({
     mutationFn: async (input: { courseId: string; drafts: PlanDraft[]; capacity?: CapacityProfile }) => {
-      const [{ data: previous, error: readError }, { data: otherPlan, error: otherError }] = await Promise.all([
-        supabase.from("plan_items").select("id").eq("course_id", input.courseId).eq("status", "planned"),
+      const [{ data: existing, error: readError }, { data: otherPlan, error: otherError }] = await Promise.all([
+        supabase.from("plan_items").select("id,status,date,kind").eq("course_id", input.courseId),
         supabase.from("plan_items").select("*").neq("course_id", input.courseId).eq("status", "planned"),
       ]);
       if (readError) throw readError;
       if (otherError) throw otherError;
-      const balancedDrafts = balanceDraftsAgainstPlan(input.drafts, otherPlan ?? [], 120, input.capacity);
-      const { data: created, error } = await supabase.from("plan_items").insert(balancedDrafts).select("id");
-      if (error) throw error;
-      if (previous?.length) {
-        const { error: deleteError } = await supabase.from("plan_items").delete().in("id", previous.map(p => p.id));
+
+      const current = existing ?? [];
+      const replaceableIds = current.filter((item) => item.status === "planned").map((item) => item.id);
+      const protectedStudyDates = new Set(
+        current
+          .filter((item) => ["completed", "in_progress"].includes(item.status) && item.kind !== "exam")
+          .map((item) => item.date),
+      );
+      const protectedExamDates = new Set(
+        current
+          .filter((item) => item.kind === "exam" && item.status !== "planned")
+          .map((item) => item.date),
+      );
+
+      // Re-planning is allowed to replace future planned rows, never completed
+      // history. If today already has a completed/in-progress session, don't
+      // generate a second phantom task for the same course/date.
+      const safeDrafts = input.drafts.filter((draft) =>
+        draft.kind === "exam"
+          ? !protectedExamDates.has(draft.date)
+          : !protectedStudyDates.has(draft.date),
+      );
+      const balancedDrafts = balanceDraftsAgainstPlan(safeDrafts, otherPlan ?? [], 120, input.capacity);
+
+      let created: Array<{ id: string }> = [];
+      if (balancedDrafts.length) {
+        const { data: inserted, error } = await supabase.from("plan_items").insert(balancedDrafts).select("id");
+        if (error) throw error;
+        created = inserted ?? [];
+      }
+
+      if (replaceableIds.length) {
+        const { error: deleteError } = await supabase.from("plan_items").delete().in("id", replaceableIds);
         if (deleteError) {
-          if (created?.length) await supabase.from("plan_items").delete().in("id", created.map(p => p.id));
+          if (created.length) await supabase.from("plan_items").delete().in("id", created.map((item) => item.id));
           throw deleteError;
         }
       }

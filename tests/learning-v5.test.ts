@@ -461,7 +461,8 @@ test("Harjoittelutila consumes feedback preference, pins retries and limits conf
   const source=readFileSync(new URL("../src/features/practice/PracticeView.tsx",import.meta.url),"utf8");
   assert.match(source,/feedback_policy_enabled/);
   assert.match(source,/setPinnedSelection\(selection\)/);
-  assert.match(source,/selectionTopics = confusionSet/);
+  assert.match(source,/selectionTopics = diagnosticMode && effectiveTopicId/);
+  assert.match(source,/: confusionSet[\s\S]*confusionSet\.topicIds\.includes/);
   assert.match(source,/confusionSet\?\.topicIds\.includes\(selection\.topic\.id\)/);
   assert.match(source,/pretestOutcomeScore >= \.75/);
 });
