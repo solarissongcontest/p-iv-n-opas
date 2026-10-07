@@ -14,6 +14,7 @@ export function setOfflineOwner(id: string) { owner = id; }
 export type OperationHandler = (payload: unknown, operationId: string) => Promise<unknown>;
 const handlers = new Map<string, OperationHandler>();
 const listeners = new Set<(count: number) => void>();
+const inFlightOperationIds = new Set<string>();
 
 export function registerOp(op: string, fn: OperationHandler) {
   handlers.set(op, fn);
@@ -47,6 +48,12 @@ function write(items: QueuedOp[]) {
   if (typeof localStorage === "undefined") return;
   localStorage.setItem(key(), JSON.stringify(items));
   listeners.forEach((l) => l(items.length));
+}
+
+function removeQueued(id: string) {
+  const items = read();
+  if (!items.some((item) => item.id === id)) return;
+  write(items.filter((item) => item.id !== id));
 }
 
 export function pendingCount(): number {
@@ -93,37 +100,58 @@ function isNetworkFailure(error: unknown) {
   );
 }
 
-/** Run a write; if the network fails, keep it locally and sync later. */
+/**
+ * Run an offline-capable write using a local write-ahead queue.
+ *
+ * Persisting before network dispatch closes a small but real transition race:
+ * a browser can lose connectivity between a click and the moment
+ * navigator.onLine / TanStack's online manager reflects it. If the process,
+ * tab or device disappears after the server request starts, the same operation
+ * id can be replayed safely by the existing idempotent handlers.
+ */
 export async function runOrQueue<T>(op: string, payload: unknown): Promise<T | "queued"> {
   const fn = handlers.get(op);
   if (!fn) throw new Error(`Tuntematon toiminto: ${op}`);
   const operationId = crypto.randomUUID();
 
-  // When the browser already knows it is offline, do not start a request that
-  // can sit in the networking stack until a timeout. Persist first so study
-  // logging stays instant and survives a reload even during a hard outage.
+  // Durable first, network second. This is intentionally a write-ahead log:
+  // successful online writes remove themselves immediately, while interrupted
+  // writes remain available after a reload.
+  inFlightOperationIds.add(operationId);
+  enqueue(op, payload, operationId);
+
   if (
     (typeof navigator !== "undefined" && navigator.onLine === false) ||
     !onlineManager.isOnline()
   ) {
     markQueryLayerOffline();
-    enqueue(op, payload, operationId);
+    inFlightOperationIds.delete(operationId);
     return "queued";
   }
 
   try {
-    return (await fn(payload, operationId)) as T;
+    const result = (await fn(payload, operationId)) as T;
+    removeQueued(operationId);
+    return result;
   } catch (err) {
+    // Let browser/network state notifications settle before classifying a
+    // failure that happened at the exact online -> offline boundary.
+    await Promise.resolve();
     if (
       (typeof navigator !== "undefined" && navigator.onLine === false) ||
       !onlineManager.isOnline() ||
       isNetworkFailure(err)
     ) {
       markQueryLayerOffline();
-      enqueue(op, payload, operationId);
       return "queued";
     }
+
+    // Validation/authorization/domain failures are not useful to retry forever.
+    // Remove the speculative write-ahead entry and surface the real error.
+    removeQueued(operationId);
     throw err;
+  } finally {
+    inFlightOperationIds.delete(operationId);
   }
 }
 
@@ -148,6 +176,11 @@ export async function flushQueue(): Promise<SyncResult> {
   try {
     let items = read();
     for (const item of [...items]) {
+      // A foreground write is already dispatching this exact operation id.
+      // Its write-ahead entry only exists for crash/reload durability, so the
+      // background flusher must not race it with a duplicate request.
+      if (inFlightOperationIds.has(item.id)) continue;
+
       const fn = handlers.get(item.op);
       if (!fn) {
         items = read().filter((i) => i.id !== item.id);
