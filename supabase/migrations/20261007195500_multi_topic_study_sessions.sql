@@ -16,6 +16,9 @@ create table if not exists public.study_session_topics (
 create index if not exists study_session_topics_owner_topic_idx
   on public.study_session_topics(owner_id, topic_id);
 
+create index if not exists study_session_topics_topic_idx
+  on public.study_session_topics(topic_id);
+
 alter table public.study_session_topics enable row level security;
 
 drop policy if exists "personal study session topics" on public.study_session_topics;
