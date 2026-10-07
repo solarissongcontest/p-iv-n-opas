@@ -171,6 +171,19 @@ function RootShell({ children }: { children: ReactNode }) {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
 
+  // TanStack Start can create/hydrate the client at a different layer than the
+  // route module. Re-assert the offline write contract at the provider boundary
+  // so mutations using runOrQueue are never paused before their mutationFn gets
+  // a chance to persist the write locally.
+  const defaults = queryClient.getDefaultOptions();
+  queryClient.setDefaultOptions({
+    ...defaults,
+    mutations: {
+      ...defaults.mutations,
+      networkMode: "always",
+    },
+  });
+
   return (
     <QueryClientProvider client={queryClient}>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
