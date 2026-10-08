@@ -707,7 +707,12 @@ export function selectPracticeQuestion(input: {
 
   let row = selected;
   let interleaved = false;
+  // Passing selectedTopicId is an explicit scope contract: Practice Mode must
+  // stay inside that topic. Mixed/interleaved practice has to opt out of the
+  // explicit topic scope instead of silently overriding the user's choice.
+  const hasExplicitTopicScope = Boolean(input.selectedTopicId);
   const canInterleave =
+    !hasExplicitTopicScope &&
     input.interleaveMode !== "blocked" &&
     selected.state.masteryLevel >= 2 &&
     states.length > 1;
