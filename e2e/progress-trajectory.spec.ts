@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 import { enterApp, expectNoHorizontalOverflow } from "./helpers";
 
 test.describe("Progress trajectory", () => {
-  test("Progress exposes visible trajectory marks, Today marker and all three views without escaping the iPhone viewport", async ({ page }, testInfo) => {
+  test("Progress renders a real plan curve, Today marker and all three views without escaping the iPhone viewport", async ({ page }, testInfo) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await enterApp(page);
     await page.goto("/progress", { waitUntil: "domcontentloaded" });
@@ -19,22 +19,39 @@ test.describe("Progress trajectory", () => {
 
     const plot = page.getByTestId("trajectory-main-plot").first();
     await expect(plot).toBeVisible();
-    const visualMarks = await plot.evaluate(node => {
-      const visiblePaths = [...node.querySelectorAll<SVGPathElement>(".recharts-line-curve")]
-        .filter(path => (path.getAttribute("d") ?? "").length > 4).length;
-      const endpointDots = node.querySelectorAll("[data-trajectory-dot], .recharts-reference-dot circle").length;
-      return { visiblePaths, endpointDots };
+    const marks = await plot.evaluate(node => {
+      const plan = node.querySelector<SVGPathElement>('[data-trajectory-series="plan"]');
+      const actual = node.querySelector<SVGPathElement>('[data-trajectory-series="actual"]');
+      const planBox = plan?.getBBox();
+      const actualBox = actual?.getBBox();
+      const planStyle = plan ? getComputedStyle(plan) : null;
+      return {
+        planD: plan?.getAttribute("d") ?? "",
+        planWidth: planBox?.width ?? 0,
+        planHeight: planBox?.height ?? 0,
+        planStroke: planStyle?.stroke ?? "none",
+        planOpacity: planStyle?.opacity ?? "0",
+        actualD: actual?.getAttribute("d") ?? "",
+        actualWidth: actualBox?.width ?? 0,
+        actualHeight: actualBox?.height ?? 0,
+        dots: node.querySelectorAll("[data-trajectory-dot]").length,
+      };
     });
-    expect(visualMarks.visiblePaths + visualMarks.endpointDots).toBeGreaterThan(0);
+    expect(marks.planD.length).toBeGreaterThan(8);
+    expect(marks.planWidth).toBeGreaterThan(20);
+    expect(marks.planHeight).toBeGreaterThan(2);
+    expect(marks.planStroke).not.toBe("none");
+    expect(Number(marks.planOpacity)).toBeGreaterThan(0);
+    expect(marks.actualD.length + marks.dots).toBeGreaterThan(0);
 
     await expect(page.getByLabel("Etenemisen luvut")).toBeVisible();
     await expect(page.getByText("Opiskelupäivien ero", { exact: true })).toBeVisible();
     await expect(page.getByTestId("trajectory-deviation-plot")).toBeVisible();
 
     await page.getByRole("button", { name: "Työmäärä", exact: true }).click();
-    await expect(page.getByText(/Suunniteltu työmäärä ja oikeasti kirjattu opiskeluaika/)).toBeVisible();
+    await expect(page.getByRole("img", { name: /työmäärä/ })).toBeVisible();
     await page.getByRole("button", { name: "Osaaminen", exact: true }).click();
-    await expect(page.getByText(/Harjoitusnäyttö perustuu viimeisimpiin harjoitusyrityksiin/)).toBeVisible();
+    await expect(page.getByRole("img", { name: /osaaminen/ })).toBeVisible();
 
     const geometry = await page.evaluate(() => {
       const card = document.querySelector<HTMLElement>(".progress-trajectory-card");
@@ -69,14 +86,10 @@ test.describe("Progress trajectory", () => {
     expect(geometry.rangeTabs).not.toBeNull();
     expect(geometry.legend).not.toBeNull();
     expect(geometry.scroller).not.toBeNull();
-
     for (const box of [geometry.card, geometry.body, geometry.contentTabs, geometry.rangeTabs, geometry.legend, geometry.scroller]) {
       expect(box!.left).toBeGreaterThanOrEqual(-1);
       expect(box!.right).toBeLessThanOrEqual(geometry.viewportWidth + 1);
     }
-
-    // The daily chart may be intentionally wider than the phone, but only its
-    // own scroll container is allowed to be wider internally.
     expect(geometry.scrollerClientWidth).toBeLessThanOrEqual(geometry.card!.width + 1);
     expect(geometry.scrollerScrollWidth).toBeGreaterThanOrEqual(geometry.scrollerClientWidth);
 
