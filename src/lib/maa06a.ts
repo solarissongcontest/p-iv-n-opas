@@ -128,8 +128,7 @@ export function recommendMaa06aExercises(input: {
   if (!pace.remaining) return { exercises: [] as CourseExercise[], pace, scheduledDate: pace.nextStudyDate };
 
   const scheduledDate = pace.nextStudyDate ?? input.today;
-  const holidayBoost = MAA06A_AUTUMN_BREAK_STUDY_DATES.includes(scheduledDate as (typeof MAA06A_AUTUMN_BREAK_STUDY_DATES)[number]) ? 1 : 0;
-  const wanted = Math.max(1, Math.min(10, (input.count ?? pace.perStudyDay + holidayBoost) || 1));
+  const wanted = Math.max(1, Math.min(10, (input.count ?? pace.perStudyDay) || 1));
   const incomplete = input.exercises.filter(
     (exercise) => exercise.counts_toward_goal && !progress.completedExerciseIds.has(exercise.id),
   );
