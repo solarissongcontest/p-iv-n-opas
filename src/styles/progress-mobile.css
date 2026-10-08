@@ -1,6 +1,12 @@
-/* Mobile containment for the trajectory card.
-   The daily chart is intentionally wider than the viewport so it can be panned,
+/* Trajectory containment across desktop and mobile.
+   The daily chart is intentionally wider than its viewport so it can be panned,
    but that width must never become the width of the whole page. */
+
+.progress-v5 > *,
+.progress-summary-only {
+  min-width: 0;
+  max-width: 100%;
+}
 
 .progress-trajectory-card {
   min-width: 0;
@@ -17,6 +23,9 @@
   width: 100%;
   max-width: 100%;
   min-width: 0;
+  contain: inline-size;
+  overflow-x: auto;
+  overflow-y: hidden;
   overscroll-behavior-x: contain;
   -webkit-overflow-scrolling: touch;
 }
@@ -73,12 +82,7 @@
     min-width: 0;
   }
 
-  /* Establish a hard viewport for the intentionally wide daily chart. Without
-     inline-size containment Safari can use the 760+ px child as page width. */
   .progress-trajectory-card .overflow-x-auto {
-    contain: inline-size;
-    overflow-x: auto;
-    overflow-y: hidden;
     touch-action: pan-x pan-y;
   }
 
