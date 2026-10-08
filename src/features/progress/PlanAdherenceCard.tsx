@@ -5,7 +5,8 @@ import { usePlanItemEvents } from "@/lib/progress-data";
 import { buildProgressTrajectory, pickTrajectoryCourse } from "@/lib/progress-trajectory";
 import { today } from "@/lib/fi";
 import { EmptyState } from "@/components/surfaces";
-import { ProgressTrajectoryChart, dayDifferenceLabel, trajectoryStatus } from "@/features/progress/ProgressTrajectoryChart";
+import { dayDifferenceLabel, trajectoryStatus } from "@/features/progress/ProgressTrajectoryChart";
+import { ReliableProgressTrajectoryChart } from "@/features/progress/ReliableProgressTrajectoryChart";
 
 export function PlanAdherenceCard({ sessions, plan }: { sessions: Session[]; plan: PlanItem[] }) {
   const now = today();
@@ -49,11 +50,11 @@ export function PlanAdherenceCard({ sessions, plan }: { sessions: Session[]; pla
           {options.map(course => <option key={course.id} value={course.id}>{course.code} · {course.name}</option>)}
         </select>
       </label>
-      <p className="min-w-0 max-w-full text-xs text-muted-foreground">Sama laskentamalli on käytössä myös kurssin Tarkemmassa analyysissä.</p>
+      <p className="min-w-0 max-w-full text-xs text-muted-foreground">Sama laskentamalli ja sama käyrä ovat käytössä myös kurssin Tarkemmassa analyysissä.</p>
     </div>
 
     <div className="min-w-0 max-w-full overflow-hidden">
-      <ProgressTrajectoryChart
+      <ReliableProgressTrajectoryChart
         course={selectedCourse}
         plan={plan}
         sessions={sessions}
