@@ -5,7 +5,6 @@
 .progress-v5 > *,
 .progress-summary-only {
   min-width: 0;
-  max-width: 100%;
 }
 
 .progress-trajectory-card {
