@@ -116,6 +116,7 @@ test("Practice V5 becomes a bounded focus workspace once a session starts", () =
 test("Progress V5 makes the daily plan trajectory a native first-class summary insight", () => {
   const progress = read("src/features/progress/ProgressView.tsx");
   const adherence = read("src/features/progress/PlanAdherenceCard.tsx");
+  const trajectoryChart = read("src/features/progress/ProgressTrajectoryChart.tsx");
   const styles = read("src/styles/progress.css");
 
   assert.match(progress, /<PlanAdherenceCard sessions=\{sessions\} plan=\{plan\}\/>/);
@@ -123,11 +124,12 @@ test("Progress V5 makes the daily plan trajectory a native first-class summary i
   assert.match(progress, /Hyvin hallussa/);
   assert.match(progress, /Kannattaa kerrata/);
   assert.match(progress, /Seuraava koe/);
-  assert.match(adherence, /title="Suunnitelmassa pysyminen"/);
   assert.match(adherence, /buildProgressTrajectory/);
-  assert.match(adherence, /TÄNÄÄN/);
-  assert.match(adherence, /Päivittäin/);
-  assert.match(adherence, /Koko kurssi/);
+  assert.match(adherence, /ProgressTrajectoryChart/);
+  assert.match(trajectoryChart, /Suunnitelmassa pysyminen/);
+  assert.match(trajectoryChart, /TÄNÄÄN/);
+  assert.match(trajectoryChart, /Päivittäin/);
+  assert.match(trajectoryChart, /Koko kurssi/);
   assert.doesNotMatch(adherence, /8 viikon toteutumisaste/);
   assert.match(styles, /\.progress-v5-adherence/);
   assert.match(styles, /\.progress-v5-heat-grid/);

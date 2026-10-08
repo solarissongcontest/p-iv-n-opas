@@ -1,0 +1,7 @@
+/* CourseViewBase still owns the dense legacy analysis layout. The wrapper
+   mounts the canonical shared trajectory into that layout and suppresses only
+   the immediately-following legacy corridor panel. This keeps one visible
+   source of truth while the rest of CourseViewBase remains untouched. */
+.course-analysis-v2 .course-detail-main > .space-y-4 > .grid + .panel {
+  display: none;
+}
