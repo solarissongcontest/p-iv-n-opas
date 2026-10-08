@@ -54,6 +54,7 @@ export type ProgressTrajectorySummary = {
 
 type RuntimePlanItem = PlanItem & { completed_at?: string | null };
 type SnapshotState = PlanItemSnapshot & { id: string; course_id: string; date: string };
+type TrajectoryRow = { id: string; item: SnapshotState };
 
 const clamp = (value: number, min = 0, max = 100) => Math.min(max, Math.max(min, value));
 const isoDay = (value: string | null | undefined) => value?.slice(0, 10) ?? null;
@@ -132,8 +133,16 @@ function stateAtDate(
     return state;
   }
 
-  if (!current || isoDay(current.created_at) && isoDay(current.created_at)! > date) return null;
-  return currentSnapshot(current);
+  if (!current) return null;
+
+  // Legacy rows created before immutable plan history cannot use created_at as an
+  // effective-plan timestamp: imports and hydration often wrote that timestamp later.
+  // New rows have a real `created` event, so this fallback is intentionally legacy-only.
+  const snapshot = currentSnapshot(current);
+  if (current.moved_from && current.moved_from !== current.date && date < current.date) {
+    return { ...snapshot, date: current.moved_from, moved_from: null };
+  }
+  return snapshot;
 }
 
 function sessionCompletionDate(item: PlanItemSnapshot, itemId: string, sessions: Session[], now: string) {
@@ -147,6 +156,24 @@ function sessionCompletionDate(item: PlanItemSnapshot, itemId: string, sessions:
   if (linked) return linked.date;
   if (item.status !== "completed") return null;
   return item.date && item.date <= now ? item.date : now;
+}
+
+function effectiveCompletionDate(
+  row: TrajectoryRow,
+  sessions: Session[],
+  now: string,
+  history: PlanItemEvent[] | undefined,
+) {
+  const completedOn = sessionCompletionDate(row.item, row.id, sessions, now);
+  if (!completedOn) return null;
+
+  // Immutable history is authoritative after migration. If a task was reopened,
+  // the historical snapshot stops counting it from that day forward even though an
+  // older linked session still exists. Legacy rows have no such event trail, so a
+  // linked persisted session is accepted as completion evidence when status sync lagged.
+  if (row.item.status === "completed") return completedOn;
+  if (!history?.length) return completedOn;
+  return null;
 }
 
 function signedStudyDayDistance(points: Array<{ plannedMinutesToday: number }>, equivalentIndex: number, actualIndex: number) {
@@ -256,6 +283,24 @@ export function buildProgressTrajectory(input: {
     revisionsByDate.set(event.event_date, [...(revisionsByDate.get(event.event_date) ?? []), revision]);
   }
 
+  // Backwards compatibility for pre-history rows. Modern moves are represented by
+  // immutable events above; this marker only keeps legacy moved_from rows visible.
+  for (const item of coursePlan as RuntimePlanItem[]) {
+    if (!item.moved_from || item.moved_from === item.date) continue;
+    if (histories.get(item.id)?.some(event => event.event_type === "moved")) continue;
+    const newSnapshot = currentSnapshot(item);
+    const oldSnapshot: PlanItemSnapshot = { ...newSnapshot, date: item.moved_from, moved_from: null };
+    const revision: ProgressRevision = {
+      id: `legacy-moved-${item.id}-${item.date}`,
+      eventType: "moved",
+      changes: ["date"],
+      occurredAt: item.updated_at ?? `${item.date}T00:00:00Z`,
+      oldSnapshot,
+      newSnapshot,
+    };
+    revisionsByDate.set(item.date, [...(revisionsByDate.get(item.date) ?? []), revision]);
+  }
+
   const studyMinutesByDate = new Map<string, number>();
   for (const session of sessions.filter(session => session.course_id === course.id)) {
     studyMinutesByDate.set(session.date, (studyMinutesByDate.get(session.date) ?? 0) + session.minutes);
@@ -263,7 +308,7 @@ export function buildProgressTrajectory(input: {
 
   let cumulativeStudied = 0;
   const raw = dateRange(startDate, endDate).map(date => {
-    const states: Array<{ id: string; item: SnapshotState }> = [];
+    const states: TrajectoryRow[] = [];
     for (const id of ids) {
       const item = stateAtDate(id, date, currentItems.get(id), histories.get(id), course.id);
       if (item && isWorkKind(item.kind) && item.status !== "skipped") states.push({ id, item });
@@ -273,12 +318,14 @@ export function buildProgressTrajectory(input: {
     const due = states.filter(row => row.item.date <= date);
     const plannedMinutesCumulative = due.reduce((sum, row) => sum + stateMinutes(row.item), 0);
     const completedRows = states.filter(row => {
-      const completedOn = sessionCompletionDate(row.item, row.id, sessions, now);
-      return row.item.status === "completed" && completedOn != null && completedOn <= date;
+      const completedOn = effectiveCompletionDate(row, sessions, now, histories.get(row.id));
+      return completedOn != null && completedOn <= date;
     });
     const completedMinutesCumulative = completedRows.reduce((sum, row) => sum + stateMinutes(row.item), 0);
     const plannedToday = states.filter(row => row.item.date === date);
-    const completedToday = completedRows.filter(row => sessionCompletionDate(row.item, row.id, sessions, now) === date);
+    const completedToday = completedRows.filter(row =>
+      effectiveCompletionDate(row, sessions, now, histories.get(row.id)) === date,
+    );
     const studiedMinutesToday = studyMinutesByDate.get(date) ?? 0;
     cumulativeStudied += studiedMinutesToday;
 
@@ -328,26 +375,31 @@ export function buildProgressTrajectory(input: {
   }
 
   const current = raw[todayIndex] ?? raw.at(-1)!;
-  const currentRows = [...latestState.entries()]
+  const currentRows: TrajectoryRow[] = [...latestState.entries()]
     .map(([id, item]) => ({ id, item }))
     .filter(row => isWorkKind(row.item.kind) && row.item.status !== "skipped");
   const plannedMinutesNow = currentRows
     .filter(row => row.item.date <= now)
     .reduce((sum, row) => sum + stateMinutes(row.item), 0);
   const completedNowRows = currentRows.filter(row => {
-    const completedOn = sessionCompletionDate(row.item, row.id, sessions, now);
-    return row.item.status === "completed" && completedOn != null && completedOn <= now;
+    const completedOn = effectiveCompletionDate(row, sessions, now, histories.get(row.id));
+    return completedOn != null && completedOn <= now;
   });
   const completedMinutesNow = completedNowRows.reduce((sum, row) => sum + stateMinutes(row.item), 0);
   const adherencePercent = plannedMinutesNow > 0 ? Math.round((completedMinutesNow / plannedMinutesNow) * 100) : null;
-  const behindTasks = currentRows.filter(row => row.item.date <= now && row.item.status !== "completed").length;
+  const behindTasks = currentRows.filter(row => {
+    if (row.item.date > now) return false;
+    const completedOn = effectiveCompletionDate(row, sessions, now, histories.get(row.id));
+    return completedOn == null || completedOn > now;
+  }).length;
   const aheadTasks = currentRows.filter(row => {
-    const completedOn = sessionCompletionDate(row.item, row.id, sessions, now);
-    return row.item.date > now && row.item.status === "completed" && completedOn != null && completedOn <= now;
+    if (row.item.date <= now) return false;
+    const completedOn = effectiveCompletionDate(row, sessions, now, histories.get(row.id));
+    return completedOn != null && completedOn <= now;
   }).length;
 
   const completionDates = completedNowRows
-    .map(row => sessionCompletionDate(row.item, row.id, sessions, now))
+    .map(row => effectiveCompletionDate(row, sessions, now, histories.get(row.id)))
     .filter((date): date is string => Boolean(date));
   const uniqueCompletionDays = [...new Set(completionDates)].sort();
   const hasForecast = uniqueCompletionDays.length >= 3 && now >= startDate && now < endDate;
@@ -359,7 +411,7 @@ export function buildProgressTrajectory(input: {
     const elapsedDays = Math.max(1, diffDays(now, windowStart) + 1);
     const completedInWindow = currentRows
       .filter(row => {
-        const completedOn = sessionCompletionDate(row.item, row.id, sessions, now);
+        const completedOn = effectiveCompletionDate(row, sessions, now, histories.get(row.id));
         return completedOn != null && completedOn >= windowStart && completedOn <= now;
       })
       .reduce((sum, row) => sum + stateMinutes(row.item), 0);
