@@ -1,87 +1,24 @@
-export type CourseExerciseResult =
-  | "independent"
-  | "helped"
-  | "incorrect"
-  | "class"
-  | "skipped"
-  | "solution_only";
+export * from "./maa06a-core.ts";
 
-export type CourseExercise = {
-  id: string;
-  owner_id?: string;
-  course_id: string;
-  topic_id: string | null;
-  code: string;
-  source: "textbook" | "textbook_review" | "review_worksheet";
-  source_group: "chapter" | "K" | "A" | "B" | "worksheet";
-  section_code: string | null;
-  chapter: number | null;
-  level: 1 | 2 | 3 | null;
-  teacher_recommended: boolean;
-  counts_toward_goal: boolean;
-  estimated_load: number;
-  sort_order: number;
-  metadata?: Record<string, unknown>;
-};
+import {
+  countsAsCompleted,
+  effectiveGoalDate,
+  maa06aProgress,
+  studyDatesBetween as baseStudyDatesBetween,
+  type CourseExercise,
+  type CourseExerciseAttempt,
+  type CourseExerciseGoal,
+} from "./maa06a-core.ts";
 
-export type CourseExerciseAttempt = {
-  id: string;
-  owner_id?: string;
-  course_id: string;
-  exercise_id: string;
-  result: CourseExerciseResult;
-  note: string | null;
-  attempted_at: string;
-};
+export const MAA06A_AUTUMN_BREAK_STUDY_DATES = [
+  "2026-10-19",
+  "2026-10-21",
+  "2026-10-23",
+  "2026-10-25",
+] as const;
 
-export type CourseExerciseGoal = {
-  id: string;
-  owner_id?: string;
-  course_id: string;
-  target_count: number;
-  deadline: string;
-  buffer_days: number;
-  bonus_points: number | null;
-  bonus_label: string | null;
-  resource_url: string | null;
-};
-
-export type Maa06aProgress = {
-  uniqueCompleted: number;
-  goalCompleted: number;
-  extraCompleted: number;
-  remaining: number;
-  recommendedCompleted: number;
-  recommendedTotal: number;
-  bySource: {
-    textbook: number;
-    textbook_review: number;
-    review_worksheet: number;
-  };
-  byResult: {
-    independent: number;
-    helped: number;
-    incorrect: number;
-    class: number;
-  };
-  completedExerciseIds: Set<string>;
-  firstCompletionByExercise: Map<string, CourseExerciseAttempt>;
-};
-
-export const COUNTING_RESULTS = new Set<CourseExerciseResult>([
-  "independent",
-  "helped",
-  "incorrect",
-  "class",
-]);
-
-export function countsAsCompleted(result: CourseExerciseResult) {
-  return COUNTING_RESULTS.has(result);
-}
-
-function isoDate(value: string) {
-  return value.slice(0, 10);
-}
+const AUTUMN_BREAK_START = "2026-10-19";
+const AUTUMN_BREAK_END = "2026-10-25";
 
 function utcDate(iso: string) {
   return new Date(`${iso.slice(0, 10)}T12:00:00Z`);
@@ -97,85 +34,25 @@ function addDays(iso: string, amount: number) {
   return toISO(date);
 }
 
-function isoWeekday(iso: string) {
-  const day = utcDate(iso).getUTCDay();
-  return day === 0 ? 7 : day;
-}
-
-export function maa06aProgress(
-  exercises: CourseExercise[],
-  attempts: CourseExerciseAttempt[],
-  targetCount = 130,
-): Maa06aProgress {
-  const eligible = new Map(
-    exercises.filter((exercise) => exercise.counts_toward_goal).map((exercise) => [exercise.id, exercise]),
-  );
-  const sorted = [...attempts].sort((a, b) => a.attempted_at.localeCompare(b.attempted_at));
-  const firstCompletionByExercise = new Map<string, CourseExerciseAttempt>();
-
-  for (const attempt of sorted) {
-    if (!eligible.has(attempt.exercise_id) || !countsAsCompleted(attempt.result)) continue;
-    if (!firstCompletionByExercise.has(attempt.exercise_id)) {
-      firstCompletionByExercise.set(attempt.exercise_id, attempt);
-    }
-  }
-
-  const completedExerciseIds = new Set(firstCompletionByExercise.keys());
-  const uniqueCompleted = completedExerciseIds.size;
-  const bySource = {
-    textbook: 0,
-    textbook_review: 0,
-    review_worksheet: 0,
-  };
-  let recommendedCompleted = 0;
-  const recommendedTotal = exercises.filter(
-    (exercise) => exercise.counts_toward_goal && exercise.teacher_recommended,
-  ).length;
-  const byResult = { independent: 0, helped: 0, incorrect: 0, class: 0 };
-
-  for (const exerciseId of completedExerciseIds) {
-    const exercise = eligible.get(exerciseId);
-    const attempt = firstCompletionByExercise.get(exerciseId);
-    if (!exercise || !attempt) continue;
-    bySource[exercise.source] += 1;
-    if (exercise.teacher_recommended) recommendedCompleted += 1;
-    if (attempt.result in byResult) {
-      byResult[attempt.result as keyof typeof byResult] += 1;
-    }
-  }
-
-  return {
-    uniqueCompleted,
-    goalCompleted: Math.min(targetCount, uniqueCompleted),
-    extraCompleted: Math.max(0, uniqueCompleted - targetCount),
-    remaining: Math.max(0, targetCount - uniqueCompleted),
-    recommendedCompleted,
-    recommendedTotal,
-    bySource,
-    byResult,
-    completedExerciseIds,
-    firstCompletionByExercise,
-  };
-}
-
-export function studyDatesBetween(
+/**
+ * MAA06A deliberately alternates with BI05 during the 2026 autumn break.
+ * Normal study weekdays still apply everywhere else. This uses the school-free
+ * Monday/Wednesday without piling MAA06A, BI05 and KE04 onto every single day.
+ */
+export function maa06aStudyDatesBetween(
   start: string,
   end: string,
   studyWeekdays: number[],
   busyDates: string[] = [],
 ) {
-  if (end < start) return [];
-  const weekdays = new Set(studyWeekdays.length ? studyWeekdays : [1, 2, 3, 4, 5, 6, 7]);
   const busy = new Set(busyDates);
-  const dates: string[] = [];
-  for (let cursor = start; cursor <= end; cursor = addDays(cursor, 1)) {
-    if (weekdays.has(isoWeekday(cursor)) && !busy.has(cursor)) dates.push(cursor);
-  }
-  return dates;
-}
-
-export function effectiveGoalDate(goal: Pick<CourseExerciseGoal, "deadline" | "buffer_days">) {
-  return addDays(goal.deadline, -Math.max(0, goal.buffer_days || 0));
+  const normal = baseStudyDatesBetween(start, end, studyWeekdays, busyDates).filter(
+    (date) => date < AUTUMN_BREAK_START || date > AUTUMN_BREAK_END,
+  );
+  const holiday = MAA06A_AUTUMN_BREAK_STUDY_DATES.filter(
+    (date) => date >= start && date <= end && !busy.has(date),
+  );
+  return [...new Set([...normal, ...holiday])].sort();
 }
 
 export function maa06aPace(input: {
@@ -192,12 +69,10 @@ export function maa06aPace(input: {
   const hardFinish = goal.deadline;
   const targetFinish = today <= plannedFinish ? plannedFinish : hardFinish;
   const firstRelevant = today < startDate ? startDate : today;
-  let remainingDates = studyDatesBetween(firstRelevant, targetFinish, studyWeekdays, busyDates);
+  let remainingDates = maa06aStudyDatesBetween(firstRelevant, targetFinish, studyWeekdays, busyDates);
 
-  // If today is not a study day, calculate the next real session rather than
-  // pretending the student can complete 0.37 of an exercise on a rest day.
   if (!remainingDates.length && today <= hardFinish) {
-    remainingDates = studyDatesBetween(firstRelevant, hardFinish, studyWeekdays, busyDates);
+    remainingDates = maa06aStudyDatesBetween(firstRelevant, hardFinish, studyWeekdays, busyDates);
   }
 
   const remaining = Math.max(0, goal.target_count - completed);
@@ -205,7 +80,7 @@ export function maa06aPace(input: {
   const perStudyDay = remaining === 0 ? 0 : Math.ceil(remaining / sessions);
   const nextStudyDate = remainingDates[0] ?? null;
 
-  const planDates = studyDatesBetween(startDate, plannedFinish, studyWeekdays, busyDates);
+  const planDates = maa06aStudyDatesBetween(startDate, plannedFinish, studyWeekdays, busyDates);
   const elapsedPlanDates = planDates.filter((date) => date <= today).length;
   const expectedByToday = planDates.length
     ? Math.min(goal.target_count, Math.round((elapsedPlanDates / planDates.length) * goal.target_count))
@@ -253,7 +128,8 @@ export function recommendMaa06aExercises(input: {
   if (!pace.remaining) return { exercises: [] as CourseExercise[], pace, scheduledDate: pace.nextStudyDate };
 
   const scheduledDate = pace.nextStudyDate ?? input.today;
-  const wanted = Math.max(1, Math.min(10, (input.count ?? pace.perStudyDay) || 1));
+  const holidayBoost = MAA06A_AUTUMN_BREAK_STUDY_DATES.includes(scheduledDate as (typeof MAA06A_AUTUMN_BREAK_STUDY_DATES)[number]) ? 1 : 0;
+  const wanted = Math.max(1, Math.min(10, (input.count ?? pace.perStudyDay + holidayBoost) || 1));
   const incomplete = input.exercises.filter(
     (exercise) => exercise.counts_toward_goal && !progress.completedExerciseIds.has(exercise.id),
   );
@@ -310,10 +186,6 @@ export function recommendMaa06aExercises(input: {
   let level3 = 0;
   const maxLevel3 = Math.max(1, Math.ceil(wanted * 0.35));
 
-  // During the last two weeks, review must actually become mixed practice, not
-  // merely a lower-priority label beneath a long tail of chapter exercises.
-  // Reserve part of the block for K/A/B or the review worksheet while leaving
-  // room for unfinished teacher-recommended chapter work.
   if (reviewWindow) {
     const reviewPool = ranked.filter((exercise) => exercise.source !== "textbook");
     const reviewWanted = Math.min(reviewPool.length, Math.max(1, Math.ceil(wanted * 0.4)));
@@ -352,7 +224,7 @@ export function maa06aTrajectory(input: {
     ? input.goal.deadline
     : input.throughDate ?? input.goal.deadline;
   const plannedFinish = effectiveGoalDate(input.goal);
-  const planStudyDates = studyDatesBetween(input.startDate, plannedFinish, input.studyWeekdays, busyDates);
+  const planStudyDates = maa06aStudyDatesBetween(input.startDate, plannedFinish, input.studyWeekdays, busyDates);
   const eligibleExerciseIds = new Set(
     input.exercises.filter((exercise) => exercise.counts_toward_goal).map((exercise) => exercise.id),
   );
@@ -364,7 +236,7 @@ export function maa06aTrajectory(input: {
       countsAsCompleted(attempt.result) &&
       !firstCompletion.has(attempt.exercise_id)
     ) {
-      firstCompletion.set(attempt.exercise_id, isoDate(attempt.attempted_at));
+      firstCompletion.set(attempt.exercise_id, attempt.attempted_at.slice(0, 10));
     }
   }
 
@@ -372,7 +244,7 @@ export function maa06aTrajectory(input: {
   for (let cursor = input.startDate; cursor <= through; cursor = addDays(cursor, 1)) {
     const plannedElapsed = planStudyDates.filter((date) => date <= cursor).length;
     const planned = planStudyDates.length
-      ? Math.min(input.goal.target_count, Math.round((plannedElapsed / planStudyDates.length) * input.goal.target_count))
+      ? Math.min(input.goal.target_count, Math.round(plannedElapsed / planStudyDates.length * input.goal.target_count))
       : 0;
     const actual = Math.min(
       input.goal.target_count,
@@ -381,15 +253,4 @@ export function maa06aTrajectory(input: {
     points.push({ date: cursor, planned, actual });
   }
   return points;
-}
-
-export function exerciseDisplayLabel(exercise: Pick<CourseExercise, "code" | "source">) {
-  if (exercise.source === "review_worksheet") return `Moniste ${exercise.code}`;
-  return exercise.code;
-}
-
-export function exerciseSourceLabel(exercise: Pick<CourseExercise, "source" | "source_group">) {
-  if (exercise.source === "textbook") return "Kirja";
-  if (exercise.source === "review_worksheet") return "Kertausmoniste";
-  return `Kirjan kertaus ${exercise.source_group}`;
 }
