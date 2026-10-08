@@ -1,0 +1,112 @@
+/* Mobile containment for the trajectory card.
+   The daily chart is intentionally wider than the viewport so it can be panned,
+   but that width must never become the width of the whole page. */
+
+.progress-trajectory-card {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.progress-trajectory-card .study-card-heading,
+.progress-trajectory-card .study-card-body {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.progress-trajectory-card .overflow-x-auto {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+@media (max-width: 767px) {
+  .page-content-progress,
+  .progress-v5 {
+    min-width: 0;
+    max-width: 100%;
+    overflow-x: clip;
+  }
+
+  .progress-trajectory-card {
+    width: 100%;
+    overflow: hidden;
+  }
+
+  .progress-trajectory-card .study-card-heading {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .progress-trajectory-card .study-card-action {
+    max-width: 100%;
+  }
+
+  /* Both segmented controls become their own full-width rows. This avoids the
+     desktop control strip creating a 500+ px min-content width on iPhone. */
+  .progress-trajectory-card [aria-label="Kuvaajan sisältö"],
+  .progress-trajectory-card [aria-label="Kuvaajan tarkkuus"] {
+    display: flex;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .progress-trajectory-card [aria-label="Kuvaajan sisältö"] > button,
+  .progress-trajectory-card [aria-label="Kuvaajan tarkkuus"] > button {
+    flex: 1 1 0;
+    min-width: 0;
+    padding-inline: 0.55rem;
+    white-space: nowrap;
+  }
+
+  /* The legend is information, not a second horizontal navigation bar. */
+  .progress-trajectory-card [aria-label="Kuvaajan selite"] {
+    display: grid;
+    width: 100%;
+    min-width: 0;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.55rem 0.75rem;
+  }
+
+  .progress-trajectory-card [aria-label="Kuvaajan selite"] > span {
+    min-width: 0;
+  }
+
+  /* Establish a hard viewport for the intentionally wide daily chart. Without
+     inline-size containment Safari can use the 760+ px child as page width. */
+  .progress-trajectory-card .overflow-x-auto {
+    contain: inline-size;
+    overflow-x: auto;
+    overflow-y: hidden;
+    touch-action: pan-x pan-y;
+  }
+
+  .progress-trajectory-card .overflow-x-auto > div:first-child {
+    height: 270px !important;
+  }
+
+  .progress-trajectory-card .overflow-x-auto > div:nth-child(2) {
+    height: 64px !important;
+  }
+
+  .progress-trajectory-card .rounded-2xl {
+    max-width: 100%;
+  }
+
+  .progress-trajectory-card .rounded-2xl.p-4 {
+    padding: 0.9rem;
+  }
+}
+
+@media (max-width: 359px) {
+  .progress-trajectory-card [aria-label="Kuvaajan selite"] {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .progress-trajectory-card [aria-label="Kuvaajan sisältö"] > button,
+  .progress-trajectory-card [aria-label="Kuvaajan tarkkuus"] > button {
+    padding-inline: 0.35rem;
+    font-size: 0.7rem;
+  }
+}

@@ -136,6 +136,9 @@ jobs:
       - name: Responsive layout evidence matrix
         run: npx playwright test e2e/responsive-visual.spec.ts --project=desktop-chromium
 
+      - name: Mobile progress trajectory containment
+        run: npx playwright test e2e/progress-trajectory.spec.ts --project=desktop-chromium
+
       - name: Detect committed visual baselines
         id: visual_baselines
         shell: bash
