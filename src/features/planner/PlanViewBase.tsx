@@ -4,7 +4,8 @@ import { toast } from "sonner";
 import type { CapacityProfile, Mistake, PlanDraft, PlanItem, PracticeAttempt, PracticeTest } from "@/lib/domain";
 import { capacityForDateV3 } from "@/lib/learning-engine";
 import { applyImplementationIntentionsV5 } from "@/lib/learning-os-v5";
-import { examMode, generatePlan } from "@/lib/domain";
+import { examMode } from "@/lib/domain";
+import { generateCoursePlan, isKe04Psa2026Plan } from "@/lib/ke04-school-plan";
 import {
   isPlanSyncConflict,
   useCreateFrictionEvent,
@@ -77,6 +78,7 @@ export function PlanView({courses,topics,plan,tests,mistakes,attempts,capacity,o
   const selectedExamDate=nextExam?.date??selectedCourse?.exam_date??null;
   const scopeQ=useExamTopicScopes(nextExam?.id);
   const selectedMode=examMode(selectedExamDate);
+  const schoolPacedKe04=Boolean(selectedCourse&&selectedExamDate&&isKe04Psa2026Plan({course:selectedCourse,examDate:selectedExamDate}));
 
   const periodItems=plan.filter(item=>item.date>=first&&item.date<=last&&item.kind!=="exam");
   const plannedItems=periodItems.filter(item=>item.status!=="skipped");
@@ -145,7 +147,7 @@ export function PlanView({courses,topics,plan,tests,mistakes,attempts,capacity,o
     const courseTopics=topics.filter(topic=>topic.course_id===course.id);
     const planningTopics=exam?.id===nextExam?.id?topicsForExam(courseTopics,scopeQ.data??[]):courseTopics;
     if(!planningTopics.length){toast.error("Koealueella ei ole vielä suunniteltavia aiheita.");return;}
-    const baseDrafts=generatePlan({
+    const baseDrafts=generateCoursePlan({
       course,
       topics:planningTopics,
       examDate,
@@ -216,11 +218,12 @@ export function PlanView({courses,topics,plan,tests,mistakes,attempts,capacity,o
 
       {creating&&<SectionCard className="planner-v5-create" title="Adaptiivinen suunnitelma koetta varten">
         <p className="planner-v5-readable">Suunnitelma huomioi aiheen tärkeyden, esitiedot, osaamisnäytön, kertaukset, virheet, koepäivän ja muiden kurssien kuorman. Tila: <b>{plannerModeLabel(plannerMode)}</b>.</p>
+        {schoolPacedKe04&&<p className="planner-v5-readable"><b>KE04:n koulutahti on käytössä.</b> Planner ennakoi yleensä vain 1–2 opetuskertaa, käyttää syysloman päivittäiseen opiskeluun ja vaihtaa ylimääräisen etumatkan kertaukseksi.</p>}
         <label className="planner-v5-course-field">Kurssi
           <select value={choice} onChange={event=>setChoice(event.target.value)}>{courses.map(course=><option key={course.id} value={course.id}>{course.code} · {course.name}</option>)}</select>
         </label>
         {nextExam&&<p className="planner-v5-readable">Seuraava koe: <b>{nextExam.name}</b> · {fullDate(nextExam.date)} · {examScopeLabel(scopeQ.data??[])}{scopeQ.data?.some(scope=>scope.confidence==="provisional")?" (ei vielä opettajan vahvistama)":""}.</p>}
-        {selectedMode.active&&<p className="planner-v5-exam-notice">Koemoodi on aktiivinen: {selectedMode.days} päivää kokeeseen. Uusi sisältö väistyy tarvittaessa koetason harjoittelun, virheiden ja kertauksen tieltä.</p>}
+        {selectedMode.active&&<p className="planner-v5-exam-notice">{schoolPacedKe04?`Koe on ${selectedMode.days} päivän päästä. KE04 viimeistelee silti koulun viimeiset aiheet 20.11. asti ja siirtyy sen jälkeen täyteen koeharjoitteluun.`:`Koemoodi on aktiivinen: ${selectedMode.days} päivää kokeeseen. Uusi sisältö väistyy tarvittaessa koetason harjoittelun, virheiden ja kertauksen tieltä.`}</p>}
         <button disabled={generate.isPending} className={button} onClick={()=>void makeProposal()}>{plannerMode==="autopilot"?"Mukauta suunnitelma nyt":"Luo ehdotus"}</button>
 
         {proposal&&<div className="planner-v5-proposal">
