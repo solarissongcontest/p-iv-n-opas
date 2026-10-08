@@ -93,7 +93,11 @@ function currentSnapshot(item: RuntimePlanItem): SnapshotState {
   };
 }
 
-function validSnapshot(snapshot: PlanItemSnapshot | null | undefined, id: string, courseId: string): SnapshotState | null {
+function validSnapshot(
+  snapshot: PlanItemSnapshot | null | undefined,
+  id: string,
+  courseId: string,
+): SnapshotState | null {
   if (!snapshot?.date) return null;
   return {
     ...snapshot,
@@ -101,6 +105,19 @@ function validSnapshot(snapshot: PlanItemSnapshot | null | undefined, id: string
     course_id: String(snapshot.course_id ?? courseId),
     date: String(snapshot.date),
   };
+}
+
+function validWorkSnapshot(
+  snapshot: PlanItemSnapshot | null | undefined,
+  id: string,
+  courseId: string,
+  startDate: string,
+  endDate: string,
+) {
+  const state = validSnapshot(snapshot, id, courseId);
+  if (!state || !isWorkKind(state.kind) || state.status === "skipped") return null;
+  if (state.date < startDate || state.date > endDate || stateMinutes(state) <= 0) return null;
+  return state;
 }
 
 function eventsByItem(events: PlanItemEvent[], courseId: string) {
@@ -141,7 +158,6 @@ function stateAtDate(
 function sessionCompletionDate(item: PlanItemSnapshot, itemId: string, sessions: Session[], now: string) {
   const explicit = isoDay(item.completed_at);
   if (explicit) return explicit;
-
   const linked = sessions
     .filter(session => session.course_id === item.course_id)
     .filter(session => session.plan_item_id === itemId || (item.session_id != null && session.id === item.session_id))
@@ -164,7 +180,11 @@ function effectiveCompletionDate(
   return null;
 }
 
-function signedStudyDayDistance(points: Array<{ plannedMinutesToday: number }>, equivalentIndex: number, actualIndex: number) {
+function signedStudyDayDistance(
+  points: Array<{ plannedMinutesToday: number }>,
+  equivalentIndex: number,
+  actualIndex: number,
+) {
   if (equivalentIndex === actualIndex) return 0;
   if (equivalentIndex < actualIndex) {
     let count = 0;
@@ -173,7 +193,6 @@ function signedStudyDayDistance(points: Array<{ plannedMinutesToday: number }>, 
     }
     return -count;
   }
-
   let count = 0;
   for (let index = actualIndex + 1; index <= equivalentIndex; index += 1) {
     if ((points[index]?.plannedMinutesToday ?? 0) > 0) count += 1;
@@ -181,7 +200,10 @@ function signedStudyDayDistance(points: Array<{ plannedMinutesToday: number }>, 
   return count;
 }
 
-function chooseEquivalentPlanMinuteIndex(points: Array<{ plannedMinutesCumulative: number }>, completedMinutes: number) {
+function chooseEquivalentPlanMinuteIndex(
+  points: Array<{ plannedMinutesCumulative: number }>,
+  completedMinutes: number,
+) {
   let equivalent = -1;
   for (let index = 0; index < points.length; index += 1) {
     if (points[index]!.plannedMinutesCumulative <= completedMinutes + 0.0001) equivalent = index;
@@ -190,7 +212,9 @@ function chooseEquivalentPlanMinuteIndex(points: Array<{ plannedMinutesCumulativ
 }
 
 function currentStateMap(course: Course, plan: PlanItem[], histories: Map<string, PlanItemEvent[]>) {
-  const currentItems = new Map(plan.filter(item => item.course_id === course.id).map(item => [item.id, item as RuntimePlanItem]));
+  const currentItems = new Map(
+    plan.filter(item => item.course_id === course.id).map(item => [item.id, item as RuntimePlanItem]),
+  );
   const ids = new Set([...currentItems.keys(), ...histories.keys()]);
   const state = new Map<string, SnapshotState>();
   for (const id of ids) {
@@ -214,23 +238,39 @@ function canonicalReferenceRows(
 ) {
   const rows = new Map<string, SnapshotState>();
   for (const [id, item] of latestState) {
-    if (!isWorkKind(item.kind) || item.status === "skipped" || item.date < startDate || item.date > endDate) continue;
-    if (stateMinutes(item) <= 0) continue;
-    rows.set(id, item);
+    const valid = validWorkSnapshot(item, id, item.course_id, startDate, endDate);
+    if (valid) rows.set(id, valid);
   }
 
-  // A task that was completed and later deleted is still part of work that really
-  // happened. Keep it in the denominator so deleting history cannot inflate the
-  // student's completion percentage.
+  // Completed work remains part of course scope even if its plan row is later deleted.
+  // Otherwise deleting a completed row would falsely inflate the student's percentage.
   for (const [id, history] of histories) {
     if (rows.has(id)) continue;
     const completed = [...history].reverse().find(event => event.new_snapshot?.status === "completed");
-    const snapshot = completed ? validSnapshot(completed.new_snapshot, id, completed.course_id) : null;
-    if (!snapshot || !isWorkKind(snapshot.kind) || snapshot.date < startDate || snapshot.date > endDate) continue;
-    if (stateMinutes(snapshot) <= 0) continue;
-    rows.set(id, snapshot);
+    const snapshot = completed
+      ? validWorkSnapshot(completed.new_snapshot, id, completed.course_id, startDate, endDate)
+      : null;
+    if (snapshot) rows.set(id, snapshot);
   }
 
+  if (rows.size) return [...rows.entries()].map(([id, item]) => ({ id, item }));
+
+  // If the current plan has become empty because every task was skipped/deleted,
+  // retain the last real historical scope solely as a denominator for the historical
+  // chart. This keeps old plan points visible without pretending deleted work is due now.
+  for (const [id, history] of histories) {
+    for (let index = history.length - 1; index >= 0; index -= 1) {
+      const event = history[index]!;
+      const candidates = [event.new_snapshot, event.old_snapshot];
+      const snapshot = candidates
+        .map(candidate => validWorkSnapshot(candidate, id, event.course_id, startDate, endDate))
+        .find((candidate): candidate is SnapshotState => Boolean(candidate));
+      if (snapshot) {
+        rows.set(id, snapshot);
+        break;
+      }
+    }
+  }
   return [...rows.entries()].map(([id, item]) => ({ id, item }));
 }
 
@@ -253,7 +293,6 @@ export function pickTrajectoryCourse(courses: Course[], plan: PlanItem[], now: s
     .filter(course => !course.archived)
     .map(course => ({ course, ...courseTrajectoryBounds(course, plan, events) }))
     .filter((row): row is { course: Course; startDate: string; endDate: string } => Boolean(row.startDate && row.endDate));
-
   if (!candidates.length) return null;
   return [...candidates].sort((a, b) => {
     const aActive = a.startDate <= now && now <= a.endDate;
@@ -288,9 +327,9 @@ export function buildProgressTrajectory(input: {
   if (referenceTotalMinutes <= 0) return null;
 
   const referenceDays = [...new Set(referenceRows.map(row => row.item.date))];
-  const referenceDayLoads = referenceDays.map(day =>
-    referenceRows.filter(row => row.item.date === day).reduce((sum, row) => sum + stateMinutes(row.item), 0),
-  ).filter(value => value > 0);
+  const referenceDayLoads = referenceDays
+    .map(day => referenceRows.filter(row => row.item.date === day).reduce((sum, row) => sum + stateMinutes(row.item), 0))
+    .filter(value => value > 0);
   const normalStudyDay = median(referenceDayLoads);
   const corridorWidth = clamp((normalStudyDay / referenceTotalMinutes) * 100, 2, 15);
 
@@ -326,7 +365,9 @@ export function buildProgressTrajectory(input: {
   }
 
   const studyMinutesByDate = new Map<string, number>();
-  for (const session of sessions.filter(session => session.course_id === course.id && session.date >= startDate && session.date <= endDate)) {
+  for (const session of sessions.filter(
+    session => session.course_id === course.id && session.date >= startDate && session.date <= endDate,
+  )) {
     studyMinutesByDate.set(session.date, (studyMinutesByDate.get(session.date) ?? 0) + Math.max(0, session.minutes));
   }
 
@@ -349,12 +390,11 @@ export function buildProgressTrajectory(input: {
     });
     const completedMinutesCumulative = completedRows.reduce((sum, row) => sum + stateMinutes(row.item), 0);
     const plannedToday = states.filter(row => row.item.date === date);
-    const completedToday = completedRows.filter(row =>
-      effectiveCompletionDate(row, sessions, now, histories.get(row.id)) === date,
+    const completedToday = completedRows.filter(
+      row => effectiveCompletionDate(row, sessions, now, histories.get(row.id)) === date,
     );
     const studiedMinutesToday = studyMinutesByDate.get(date) ?? 0;
     cumulativeStudied += studiedMinutesToday;
-
     const planned = clamp((plannedMinutesCumulative / referenceTotalMinutes) * 100);
     const actual = date <= now
       ? clamp((completedMinutesCumulative / referenceTotalMinutes) * 100)
@@ -405,15 +445,14 @@ export function buildProgressTrajectory(input: {
       raw[index]!.deviationStudyDays = 0;
       continue;
     }
-    const knownPlan = raw.map(point => {
-      const plannedMinutesToday = knownRows
+    const knownPlan = raw.map(point => ({
+      plannedMinutesToday: knownRows
         .filter(row => row.item.date === point.date)
-        .reduce((sum, row) => sum + stateMinutes(row.item), 0);
-      const plannedMinutesCumulative = knownRows
+        .reduce((sum, row) => sum + stateMinutes(row.item), 0),
+      plannedMinutesCumulative: knownRows
         .filter(row => row.item.date <= point.date)
-        .reduce((sum, row) => sum + stateMinutes(row.item), 0);
-      return { plannedMinutesCumulative, plannedMinutesToday };
-    });
+        .reduce((sum, row) => sum + stateMinutes(row.item), 0),
+    }));
     const equivalent = chooseEquivalentPlanMinuteIndex(knownPlan, raw[index]!.completedMinutesCumulative);
     raw[index]!.deviationStudyDays = signedStudyDayDistance(knownPlan, equivalent, index);
   }
