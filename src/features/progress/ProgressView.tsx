@@ -87,6 +87,13 @@ export function ProgressView({
   onSectionChange?:(section:ProgressSection)=>void;
 }) {
   const now=today();
+  const activeCourses=courses.filter(course=>!course.archived&&(!course.start_date||course.start_date<=now)&&(!course.exam_date||course.exam_date>=now));
+  const startedCourseDates=activeCourses.map(course=>course.start_date).filter((date):date is string=>Boolean(date));
+  const observedDates=[
+    ...sessions.filter(session=>session.date<=now).map(session=>session.date),
+    ...plan.filter(item=>item.kind!=="exam"&&item.date<=now).map(item=>item.date),
+  ];
+  const timelineStart=[...startedCourseDates,...observedDates].sort()[0]??now;
   const from=addDays(now,-29);
   const recent=sessions.filter(session=>session.date>=from&&session.date<=now);
   const due=plan.filter(item=>item.date>=from&&item.date<=now&&item.kind!=="exam");
@@ -138,8 +145,9 @@ export function ProgressView({
   const saveCheckin=useUpsertWeeklyCheckin();
   const week=startOfWeek(now);
   const existing=checkins.data?.find(row=>row.week_start===week);
+  const defaultWeeklyTarget=activeCourses.reduce((sum,course)=>sum+course.weekly_minutes,0);
   const [note,setNote]=useState("");
-  const [planned,setPlanned]=useState<number>(courses.reduce((sum,course)=>sum+course.weekly_minutes,0));
+  const [planned,setPlanned]=useState<number>(defaultWeeklyTarget);
   const [adherence,setAdherence]=useState(3);
   const [hardest,setHardest]=useState("");
   const [wentWell,setWentWell]=useState("");
@@ -147,20 +155,26 @@ export function ProgressView({
   const [load,setLoad]=useState<"light"|"good"|"heavy">("good");
 
   useEffect(()=>{
-    if(!existing)return;
+    if(!existing){setPlanned(defaultWeeklyTarget);return;}
     setNote(existing.note??"");
-    setPlanned(existing.planned_minutes??courses.reduce((sum,course)=>sum+course.weekly_minutes,0));
+    setPlanned(existing.planned_minutes??defaultWeeklyTarget);
     setAdherence(existing.adherence??3);
     setHardest(existing.hardest_topic_id??"");
     setWentWell(existing.went_well??"");
     setNextFocus(existing.next_focus??"");
     setLoad(existing.load_rating??"good");
-  },[existing,courses]);
+  },[existing,defaultWeeklyTarget]);
 
   const actual=weekMinutes(sessions);
-  const weekly=weeklyStudySeries(sessions,plan,8,now);
-  const heat=Array.from({length:35},(_,index)=>{
-    const date=addDays(now,-34+index);
+  const timelineWeek=startOfWeek(timelineStart);
+  const currentWeek=startOfWeek(now);
+  const weeksSinceTimeline=Math.max(1,Math.floor(diffDays(currentWeek,timelineWeek)/7)+1);
+  const weekly=weeklyStudySeries(sessions,plan,Math.min(8,weeksSinceTimeline),now);
+  const rollingHeatStart=addDays(now,-34);
+  const heatStart=timelineStart>rollingHeatStart?timelineStart:rollingHeatStart;
+  const heatLength=Math.max(1,diffDays(now,heatStart)+1);
+  const heat=Array.from({length:heatLength},(_,index)=>{
+    const date=addDays(heatStart,index);
     const mins=sessions.filter(session=>session.date===date).reduce((sum,session)=>sum+session.minutes,0);
     return {date,mins};
   });
@@ -177,7 +191,7 @@ export function ProgressView({
     now,
   }):null;
 
-  const nextWeekSuggestions=courses.slice(0,6).map(course=>{
+  const nextWeekSuggestions=activeCourses.slice(0,6).map(course=>{
     const courseTopics=topics.filter(topic=>topic.course_id===course.id);
     const queue=buildRecoveryQueue({
       topics:courseTopics,
@@ -355,14 +369,14 @@ export function ProgressView({
       <p className="mt-2 text-sm text-muted-foreground">Perustuu {calibrationData.count} harjoitusyritykseen, joissa annoit varmuusarvion ennen palautetta. Tämä ei ole pisteytys eikä sijoituslista.</p>
     </SectionCard>}
 
-    <SectionCard className="progress-analysis-only progress-v5-heat" title="Opiskelurytmi · 5 viikkoa">
+    <SectionCard className="progress-analysis-only progress-v5-heat" title="Opiskelurytmi">
       <div className="progress-v5-heat-grid">{heat.map(cell=>{const intensity=cell.mins===0?0:cell.mins<30?0.25:cell.mins<60?0.5:cell.mins<90?0.75:1;return <div key={cell.date} title={fullDate(cell.date)+" · "+minutes(cell.mins)} style={{opacity:intensity===0?0.07:intensity}}/>})}</div>
-      <p className="mt-3 text-xs text-muted-foreground">Tummempi ruutu tarkoittaa enemmän opiskelua. Päiväputkia ei käytetä painostamiseen.</p>
+      <p className="mt-3 text-xs text-muted-foreground">Näytetään vain ajalta, jolloin opinnot ovat alkaneet. Tummempi ruutu tarkoittaa enemmän opiskelua; päiväputkia ei käytetä painostamiseen.</p>
     </SectionCard>
 
     <SectionCard className="progress-analysis-only" title="Viikoittainen suunniteltu vs. toteutunut">
       <div className="progress-v5-weekly-chart"><ResponsiveContainer width="100%" height="100%"><BarChart data={weekly}><CartesianGrid vertical={false} stroke="var(--hairline)"/><XAxis dataKey="week" tickLine={false} axisLine={false}/><YAxis width={34} tickLine={false} axisLine={false}/><Tooltip formatter={(value)=>minutes(Number(value))}/><RechartsBar dataKey="planned" fill="var(--muted-foreground)" fillOpacity={0.24}/><RechartsBar dataKey="actual" fill="var(--primary)" fillOpacity={0.78}/></BarChart></ResponsiveContainer></div>
-      <p className="mt-2 text-xs text-muted-foreground">Tämä kertoo kuormasta ja suunnitelman toteutumisesta, ei siitä kuinka hyvä opiskelija olit.</p>
+      <p className="mt-2 text-xs text-muted-foreground">Aikajana alkaa ensimmäisen aktiivisen kurssin oikeasta aloitusviikosta. Tämä kertoo kuormasta ja suunnitelman toteutumisesta, ei siitä kuinka hyvä opiskelija olit.</p>
     </SectionCard>
 
     <SectionCard className="progress-analysis-only progress-v5-reflection" title={"Viikko "+weekNumber(now)+" · reflektio"}>

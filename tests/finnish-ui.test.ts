@@ -319,9 +319,11 @@ test("static visible UI copy does not reintroduce English developer vocabulary",
       const text = readFileSync(url, "utf8");
       const visible = [...text.matchAll(/>([^<>{}]+)</g)]
         .map((match) => match[1]!.replace(/\s+/g, " ").trim())
-        // Comparisons inside TSX such as `date>=from&&session.date<=now` can
-        // contain > and < even though they are source code, not rendered copy.
-        .filter((copy) => Boolean(copy) && !/[=]|&&|\|\||=>|>=|<=/.test(copy));
+        // Comparisons and bare dotted identifiers can be fragments of TSX source
+        // around > / < operators rather than rendered UI copy.
+        .filter((copy) => Boolean(copy)
+          && !/[=]|&&|\|\||=>|>=|<=/.test(copy)
+          && !/^[A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*)+$/.test(copy));
       const props = [...text.matchAll(/\b(?:title|placeholder|aria-label|label)=["']([^"']+)["']/g)]
         .map((match) => match[1]!.trim());
       const toasts = [...text.matchAll(/toast\.(?:success|error|info)\(\s*["'`]([^"'`]+)["'`]/g)]
