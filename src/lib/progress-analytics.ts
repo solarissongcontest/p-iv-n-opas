@@ -34,11 +34,15 @@ export function progressTimelineStart(input: {
   now: string;
 }) {
   const relevant = input.courses.filter(course => courseIsRelevant(course, input.now));
-  const ids = new Set(relevant.map(course => course.id));
+  const courseById = new Map(relevant.map(course => [course.id, course]));
   const dates = [
     ...relevant.map(course => course.start_date).filter((date): date is string => Boolean(date)),
-    ...input.plan.filter(item => ids.has(item.course_id) && workItem(item) && item.date <= input.now).map(item => item.date),
-    ...input.sessions.filter(session => ids.has(session.course_id) && session.date <= input.now).map(session => session.date),
+    ...input.plan
+      .filter(item => workItem(item) && item.date <= input.now && courseContainsDate(courseById.get(item.course_id), item.date))
+      .map(item => item.date),
+    ...input.sessions
+      .filter(session => session.date <= input.now && courseContainsDate(courseById.get(session.course_id), session.date))
+      .map(session => session.date),
   ].sort();
   return dates[0] ?? input.now;
 }
