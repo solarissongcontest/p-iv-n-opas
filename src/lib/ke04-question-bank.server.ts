@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { KE04_QUESTION_BANK, KE04_QUESTION_BANK_VERSION } from "@/data/ke04-question-bank";
 import { ke04TextbookTopicForQuestion } from "./ke04-textbook-topics";
+import { questionPromptLeaksAnswer } from "./question-quality";
 import { verifyArthurDeviceToken } from "./deviceAuth.server";
 
 const noStore = { "Cache-Control": "no-store" };
@@ -118,6 +119,15 @@ export async function handleKe04QuestionBankSeed(request: Request): Promise<Resp
   const reserveCount = KE04_QUESTION_BANK.filter((question) => question.reserveForExam).length;
   if (reserveCount !== 45) {
     return json({ error: "KE04 V3 -koereservi ei läpäissyt sisäistä tarkistusta." }, 500);
+  }
+  const answerLeaks = KE04_QUESTION_BANK.filter((question) =>
+    questionPromptLeaksAnswer(question.prompt, question.correctAnswer)
+  );
+  if (answerLeaks.length) {
+    return json({
+      error: "KE04 V3 -seedissä on tehtäviä, joiden tehtävänanto paljastaa vastauksen.",
+      contentIds: answerLeaks.map((question) => question.contentId),
+    }, 500);
   }
 
   const [courseResult, topicsResult] = await Promise.all([
