@@ -12,14 +12,17 @@ const AUTUMN_BREAK_START = "2026-10-19";
 const AUTUMN_BREAK_END = "2026-10-25";
 const BI05_AUTUMN_BREAK_DATES = new Set(["2026-10-20", "2026-10-22", "2026-10-24"]);
 
+type Bi05PlanTopic = {
+  code: string;
+  name: string;
+  position: number;
+  estimatedMinutes: number;
+  topic: Topic | null;
+};
+
 export function isBi05TwoExamPlan(opts: Pick<CoursePlanOptions, "course">) {
   return opts.course.code.trim().toUpperCase() === "BI05" &&
     (!opts.course.start_date || opts.course.start_date === "2026-10-06");
-}
-
-function topicChapter(topic: Pick<Topic, "name">) {
-  const match = /^(\d{1,2})\./.exec(topic.name.trim());
-  return match ? Number(match[1]) : null;
 }
 
 function isAutumnBreak(date: string) {
@@ -37,26 +40,43 @@ function bi05StudyDates(
   );
 }
 
-function distribute(topics: Topic[], dates: string[]) {
-  if (!topics.length || !dates.length) return [] as Array<{ topic: Topic; date: string }>;
+function canonicalTopics(opts: CoursePlanOptions, chapters: readonly number[]): Bi05PlanTopic[] {
+  const byCode = new Map<string, Topic>();
+  for (const topic of opts.topics) {
+    const code = topic.name.trim().match(/^(\d{1,2}\.\d+)/)?.[1];
+    if (code) byCode.set(code, topic);
+  }
+  const chapterSet = new Set<number>(chapters);
+  return BI05_IIRIS5_TOPICS
+    .filter((row) => chapterSet.has(row.chapter) && row.examEligible)
+    .map((row) => ({
+      code: row.code,
+      name: row.name,
+      position: row.position,
+      estimatedMinutes: row.estimatedMinutes,
+      topic: byCode.get(row.code) ?? null,
+    }));
+}
+
+function distribute(topics: Bi05PlanTopic[], dates: string[]) {
+  if (!topics.length || !dates.length) return [] as Array<{ topic: Bi05PlanTopic; date: string }>;
   return topics.map((topic, index) => ({
     topic,
     date: dates[Math.min(dates.length - 1, Math.floor(index * dates.length / topics.length))]!,
   }));
 }
 
-function topicDraft(opts: CoursePlanOptions, topic: Topic, date: string): PlanDraft {
-  const canonical = BI05_IIRIS5_TOPICS.find((row) => topic.name.startsWith(`${row.code} `));
-  const known = Boolean(topic.school_covered || Number(topic.progress || 0) > 0 || topic.last_review);
-  const estimate = canonical?.estimatedMinutes ?? 30;
-  const target = Math.max(18, Math.min(24, Math.round(estimate * 0.55)));
+function topicDraft(opts: CoursePlanOptions, row: Bi05PlanTopic, date: string): PlanDraft {
+  const topic = row.topic;
+  const known = Boolean(topic && (topic.school_covered || Number(topic.progress || 0) > 0 || topic.last_review));
+  const target = Math.max(18, Math.min(24, Math.round(row.estimatedMinutes * 0.55)));
   return {
     course_id: opts.course.id,
-    topic_id: topic.id,
+    topic_id: topic?.id ?? null,
     date,
     phase: known ? "review" : "content",
     kind: known ? "review" : "study",
-    title: `${isAutumnBreak(date) ? "Syysloma · " : ""}${topic.name}${known ? " – vahvistus" : ""}`,
+    title: `${isAutumnBreak(date) ? "Syysloma · " : ""}${row.name}${known ? " – vahvistus" : ""}`,
     min_minutes: Math.min(15, target),
     target_minutes: target,
     extra_minutes: 0,
@@ -100,16 +120,13 @@ function examDraft(courseId: string, date: string, title: string): PlanDraft {
  * Chapter 5 is excluded from both exams and therefore absent from exam preparation.
  * During autumn break BI05 uses Tue/Thu/Sat while MAA06A gets the alternating days,
  * preventing three live courses from piling onto every school-free day.
+ *
+ * Planner currently supplies the selected exam's scoped topic rows. Canonical Iiris
+ * topic metadata fills the other exam phase with course-level tasks (topic_id=null)
+ * until that phase becomes the selected exam and real topic IDs are available.
  */
 export function generateBi05TwoExamPlan(opts: CoursePlanOptions): PlanDraft[] {
   const startISO = opts.fromISO ?? today();
-  const byChapter = new Map<number, Topic[]>();
-  for (const topic of [...opts.topics].sort((a, b) => a.position - b.position)) {
-    const chapter = topicChapter(topic);
-    if (!chapter) continue;
-    byChapter.set(chapter, [...(byChapter.get(chapter) ?? []), topic]);
-  }
-
   const phases = [
     {
       exam: BI05_EXAMS[0],
@@ -130,7 +147,7 @@ export function generateBi05TwoExamPlan(opts: CoursePlanOptions): PlanDraft[] {
   const drafts: PlanDraft[] = [];
   for (const phase of phases) {
     if (startISO > phase.exam.date) continue;
-    const phaseTopics = phase.chapters.flatMap((chapter) => byChapter.get(chapter) ?? []);
+    const phaseTopics = canonicalTopics(opts, phase.chapters);
     const dates = bi05StudyDates(
       phase.contentStart,
       phase.contentEnd,
