@@ -196,8 +196,12 @@ function signedStudyDayDistance(points: Array<{ plannedMinutesToday: number }>, 
 function chooseEquivalentPlanIndex(points: Array<{ planned: number }>, actual: number) {
   let equivalent = -1;
   for (let index = 0; index < points.length; index += 1) {
+    // The historical planned percentage is not guaranteed to be monotonic: adding
+    // future work can increase the denominator and make the percentage drop even
+    // though no existing work moved backwards. Scan the whole trajectory instead
+    // of stopping at the first point above actual, otherwise a caught-up student
+    // can be reported as one or more study days behind.
     if (points[index]!.planned <= actual + 0.0001) equivalent = index;
-    else break;
   }
   return equivalent;
 }
