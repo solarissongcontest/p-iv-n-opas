@@ -284,8 +284,7 @@ export function ProgressTrajectoryChart({
 
       <div className="flex flex-wrap items-center gap-2">
         <div className="flex rounded-xl bg-muted p-1" aria-label="Kuvaajan sisältö">
-          {([[
-            "progress", "Eteneminen"], ["workload", "Työmäärä"], ["mastery", "Osaaminen"]] as Array<[TrajectoryMode, string]>).map(([id, label]) => <button
+          {([["progress", "Eteneminen"], ["workload", "Työmäärä"], ["mastery", "Osaaminen"]] as Array<[TrajectoryMode, string]>).map(([id, label]) => <button
             key={id}
             type="button"
             aria-pressed={mode === id}
@@ -364,7 +363,7 @@ export function ProgressTrajectoryChart({
             />
             <YAxis
               domain={yMax == null ? [0, "auto"] : [0, yMax]}
-              ticks={mode === "workload" ? undefined : [0, 25, 50, 75, 100]}
+              {...(mode === "workload" ? {} : { ticks: [0, 25, 50, 75, 100] })}
               width={52}
               tickLine={false}
               axisLine={false}
