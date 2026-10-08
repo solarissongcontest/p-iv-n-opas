@@ -53,18 +53,21 @@ function successfulAttempt(id: string, createdAt: string): PracticeAttempt {
   } as unknown as PracticeAttempt;
 }
 
-test("explicitly selected Practice topic is a hard scope even when interleaving is requested", () => {
-  const selectedTopic = topic(SELECTED_TOPIC_ID, "1.1 Reaktioyhtälön kirjoittaminen");
-  const otherTopic = topic(OTHER_TOPIC_ID, "1.2 Ainemääräsuhteet");
-  const attempts = [
+function strongSelectedTopicAttempts(): PracticeAttempt[] {
+  return [
     successfulAttempt("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa", "2026-10-08T10:00:00Z"),
     successfulAttempt("bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb", "2026-10-08T10:10:00Z"),
     successfulAttempt("cccccccc-cccc-4ccc-8ccc-cccccccccccc", "2026-10-08T10:20:00Z"),
   ];
+}
+
+test("explicitly selected Practice topic is a hard scope even when interleaving is requested", () => {
+  const selectedTopic = topic(SELECTED_TOPIC_ID, "1.1 Reaktioyhtälön kirjoittaminen");
+  const otherTopic = topic(OTHER_TOPIC_ID, "1.2 Ainemääräsuhteet");
 
   const selection = selectPracticeQuestion({
     topics: [selectedTopic, otherTopic],
-    attempts,
+    attempts: strongSelectedTopicAttempts(),
     selectedTopicId: SELECTED_TOPIC_ID,
     index: 1,
     interleaveMode: "interleaved",
@@ -75,4 +78,22 @@ test("explicitly selected Practice topic is a hard scope even when interleaving 
   assert.equal(selection!.topic.id, SELECTED_TOPIC_ID);
   assert.equal(selection!.question.topicId, SELECTED_TOPIC_ID);
   assert.equal(selection!.interleaved, false);
+});
+
+test("mixed practice can still interleave when no explicit topic scope is supplied", () => {
+  const selectedTopic = topic(SELECTED_TOPIC_ID, "1.1 Reaktioyhtälön kirjoittaminen");
+  const otherTopic = topic(OTHER_TOPIC_ID, "1.2 Ainemääräsuhteet");
+
+  const selection = selectPracticeQuestion({
+    topics: [selectedTopic, otherTopic],
+    attempts: strongSelectedTopicAttempts(),
+    index: 1,
+    interleaveMode: "interleaved",
+    questionBank: [],
+  });
+
+  assert.ok(selection);
+  assert.equal(selection!.topic.id, OTHER_TOPIC_ID);
+  assert.equal(selection!.question.topicId, OTHER_TOPIC_ID);
+  assert.equal(selection!.interleaved, true);
 });
