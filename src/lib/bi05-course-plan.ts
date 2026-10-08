@@ -189,7 +189,7 @@ export function generateBi05TwoExamPlan(opts: CoursePlanOptions): PlanDraft[] {
       drafts.push(topicDraft(opts, assignment.topic, assignment.date));
     }
 
-    if (phase.exam.id === "exam-1") {
+    if (phase.exam.key === "exam-1") {
       for (const block of BI05_AUTUMN_BREAK_REVIEWS) {
         if (block.date >= startISO && block.date < phase.exam.date && !(opts.capacity?.busyDates ?? []).includes(block.date)) {
           drafts.push(reviewDraft(opts.course.id, block.date, block.title, block.minutes));
