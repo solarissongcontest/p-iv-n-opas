@@ -198,9 +198,8 @@ function chooseEquivalentPlanIndex(points: Array<{ planned: number }>, actual: n
   for (let index = 0; index < points.length; index += 1) {
     // The historical planned percentage is not guaranteed to be monotonic: adding
     // future work can increase the denominator and make the percentage drop even
-    // though no existing work moved backwards. Scan the whole trajectory instead
-    // of stopping at the first point above actual, otherwise a caught-up student
-    // can be reported as one or more study days behind.
+    // though no existing work moved backwards. The caller passes only history up
+    // to the evaluated day, so later plan revisions cannot rewrite past deviation.
     if (points[index]!.planned <= actual + 0.0001) equivalent = index;
   }
   return equivalent;
@@ -376,7 +375,7 @@ export function buildProgressTrajectory(input: {
   for (let index = 0; index < raw.length; index += 1) {
     const actual = raw[index]!.actual;
     if (actual == null) continue;
-    const equivalent = chooseEquivalentPlanIndex(raw, actual);
+    const equivalent = chooseEquivalentPlanIndex(raw.slice(0, index + 1), actual);
     raw[index]!.deviationStudyDays = signedStudyDayDistance(raw, equivalent, index);
   }
 
