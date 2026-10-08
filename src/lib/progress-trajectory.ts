@@ -196,10 +196,6 @@ function signedStudyDayDistance(points: Array<{ plannedMinutesToday: number }>, 
 function chooseEquivalentPlanIndex(points: Array<{ planned: number }>, actual: number) {
   let equivalent = -1;
   for (let index = 0; index < points.length; index += 1) {
-    // The historical planned percentage is not guaranteed to be monotonic: adding
-    // future work can increase the denominator and make the percentage drop even
-    // though no existing work moved backwards. The caller passes only history up
-    // to the evaluated day, so later plan revisions cannot rewrite past deviation.
     if (points[index]!.planned <= actual + 0.0001) equivalent = index;
   }
   return equivalent;
@@ -375,8 +371,32 @@ export function buildProgressTrajectory(input: {
   for (let index = 0; index < raw.length; index += 1) {
     const actual = raw[index]!.actual;
     if (actual == null) continue;
-    const equivalent = chooseEquivalentPlanIndex(raw.slice(0, index + 1), actual);
-    raw[index]!.deviationStudyDays = signedStudyDayDistance(raw, equivalent, index);
+
+    // Deviation must use one coherent plan snapshot: the schedule that was known
+    // on the evaluated day, including its already-known future work. This prevents
+    // later revisions from rewriting history while still allowing early completion
+    // of a future task to register as being ahead of plan.
+    const evaluatedDate = raw[index]!.date;
+    const knownRows: TrajectoryRow[] = [];
+    for (const id of ids) {
+      const item = stateAtDate(id, evaluatedDate, currentItems.get(id), histories.get(id), course.id);
+      if (item && isWorkKind(item.kind) && item.status !== "skipped") knownRows.push({ id, item });
+    }
+    const knownTotal = knownRows.reduce((sum, row) => sum + stateMinutes(row.item), 0);
+    const knownPlan = raw.map(point => {
+      const plannedMinutesToday = knownRows
+        .filter(row => row.item.date === point.date)
+        .reduce((sum, row) => sum + stateMinutes(row.item), 0);
+      const cumulative = knownRows
+        .filter(row => row.item.date <= point.date)
+        .reduce((sum, row) => sum + stateMinutes(row.item), 0);
+      return {
+        planned: knownTotal > 0 ? clamp((cumulative / knownTotal) * 100) : 0,
+        plannedMinutesToday,
+      };
+    });
+    const equivalent = chooseEquivalentPlanIndex(knownPlan, actual);
+    raw[index]!.deviationStudyDays = signedStudyDayDistance(knownPlan, equivalent, index);
   }
 
   const current = raw[todayIndex] ?? raw.at(-1)!;
