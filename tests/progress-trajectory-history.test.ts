@@ -118,5 +118,7 @@ test("skipping and deleting tasks change the plan only from the event day onward
   const result = buildProgressTrajectory({ course, plan: current, sessions: emptySessions, events, now: "2026-10-07" });
   assert.ok(result);
   assert.equal(result.points.find(point => point.date === "2026-10-06")?.plannedMinutesToday, 30);
-  assert.equal(result.points.find(point => point.date === "2026-10-07")?.totalPlannedMinutes, 0);
+  assert.equal(result.points.find(point => point.date === "2026-10-07")?.plannedMinutesToday, 0);
+  assert.equal(result.points.find(point => point.date === "2026-10-07")?.plannedMinutesCumulative, 0);
+  assert.equal(result.points.find(point => point.date === "2026-10-07")?.totalPlannedMinutes, 30, "historical denominator stays stable even after the row is deleted");
 });

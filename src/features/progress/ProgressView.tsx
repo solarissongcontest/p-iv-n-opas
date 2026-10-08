@@ -29,7 +29,8 @@ import {
   sessionFatigueV4,
   simulateLearningOsV4,
 } from "@/lib/learning-os-v4";
-import { studyDaysInWeek, weekMinutes, weeklyStudySeries } from "@/lib/domain";
+import { studyDaysInWeek } from "@/lib/domain";
+import { buildWeeklyStudyTruth, progressTimelineStart } from "@/lib/progress-analytics";
 import {
   useProgressEvents,
   useUpsertWeeklyCheckin,
@@ -88,17 +89,19 @@ export function ProgressView({
 }) {
   const now=today();
   const activeCourses=courses.filter(course=>!course.archived&&(!course.start_date||course.start_date<=now)&&(!course.exam_date||course.exam_date>=now));
-  const startedCourseDates=activeCourses.map(course=>course.start_date).filter((date):date is string=>Boolean(date));
-  const observedDates=[
-    ...sessions.filter(session=>session.date<=now).map(session=>session.date),
-    ...plan.filter(item=>item.kind!=="exam"&&item.date<=now).map(item=>item.date),
-  ];
-  const timelineStart=[...startedCourseDates,...observedDates].sort()[0]??now;
+  const startedCourses=courses.filter(course=>!course.archived&&(!course.start_date||course.start_date<=now));
+  const startedCourseIds=new Set(startedCourses.map(course=>course.id));
+  const timelineStart=progressTimelineStart({courses,plan,sessions,now});
   const from=addDays(now,-29);
-  const recent=sessions.filter(session=>session.date>=from&&session.date<=now);
-  const due=plan.filter(item=>item.date>=from&&item.date<=now&&item.kind!=="exam");
+  const recent=sessions.filter(session=>startedCourseIds.has(session.course_id)&&session.date>=from&&session.date<=now);
+  const due=plan.filter(item=>startedCourseIds.has(item.course_id)&&item.date>=from&&item.date<=now&&item.kind!=="exam"&&item.status!=="skipped");
   const completed=due.filter(item=>item.status==="completed");
   const recentMinutes=recent.reduce((sum,session)=>sum+session.minutes,0);
+
+  const weekly=buildWeeklyStudyTruth({courses,plan,sessions,now,maxWeeks:8});
+  const currentWeekTruth=weekly.find(row=>row.isCurrent)??weekly.at(-1)??null;
+  const defaultWeeklyTarget=currentWeekTruth?.planned??0;
+  const actual=currentWeekTruth?.actual??0;
 
   const v4Analysis=useMemo(()=>{
     const rows=topics.map(topic=>{
@@ -145,7 +148,6 @@ export function ProgressView({
   const saveCheckin=useUpsertWeeklyCheckin();
   const week=startOfWeek(now);
   const existing=checkins.data?.find(row=>row.week_start===week);
-  const defaultWeeklyTarget=activeCourses.reduce((sum,course)=>sum+course.weekly_minutes,0);
   const [note,setNote]=useState("");
   const [planned,setPlanned]=useState<number>(defaultWeeklyTarget);
   const [adherence,setAdherence]=useState(3);
@@ -165,17 +167,12 @@ export function ProgressView({
     setLoad(existing.load_rating??"good");
   },[existing,defaultWeeklyTarget]);
 
-  const actual=weekMinutes(sessions);
-  const timelineWeek=startOfWeek(timelineStart);
-  const currentWeek=startOfWeek(now);
-  const weeksSinceTimeline=Math.max(1,Math.floor(diffDays(currentWeek,timelineWeek)/7)+1);
-  const weekly=weeklyStudySeries(sessions,plan,Math.min(8,weeksSinceTimeline),now);
   const rollingHeatStart=addDays(now,-34);
   const heatStart=timelineStart>rollingHeatStart?timelineStart:rollingHeatStart;
   const heatLength=Math.max(1,diffDays(now,heatStart)+1);
   const heat=Array.from({length:heatLength},(_,index)=>{
     const date=addDays(heatStart,index);
-    const mins=sessions.filter(session=>session.date===date).reduce((sum,session)=>sum+session.minutes,0);
+    const mins=sessions.filter(session=>startedCourseIds.has(session.course_id)&&session.date===date).reduce((sum,session)=>sum+session.minutes,0);
     return {date,mins};
   });
   const review=weeklyLearningReview({courses,topics,attempts,sessions,plan,now});
@@ -312,9 +309,10 @@ export function ProgressView({
     <SectionCard className="progress-analysis-only progress-v5-analysis-overview" title="30 päivän yhteenveto">
       <MetricGroup>
         <Metric label="Opiskeltu" value={minutes(recentMinutes)}/>
-        <Metric label="Suunnitelmasta valmis" value={completionRate===null?"—":`${completionRate} %`} detail={`${completed.length}/${due.length} tehtävää`}/>
+        <Metric label="Nykyisestä suunnitelmasta valmis" value={completionRate===null?"—":`${completionRate} %`} detail={`${completed.length}/${due.length} erääntynyttä tehtävää`}/>
         <Metric label="Oppimisen tehokkuus" value={productMetrics.studyEfficiency===null?"—":(Math.round(productMetrics.studyEfficiency*10)/10).toString()} detail="vakaat aiheet / tunti"/>
       </MetricGroup>
+      <p className="mt-2 text-xs text-muted-foreground">Tehtäväprosentti perustuu nykyisen Plannerin viimeisen 30 päivän erääntyneisiin tehtäviin. Historiallinen suunnitelmassa pysyminen näkyy ylempänä päiväkohtaisessa käyrässä.</p>
     </SectionCard>
 
     <div className="progress-analysis-only"><ContrastiveErrorLab courses={courses} topics={topics} mistakes={mistakes}/></div>
@@ -371,21 +369,22 @@ export function ProgressView({
 
     <SectionCard className="progress-analysis-only progress-v5-heat" title="Opiskelurytmi">
       <div className="progress-v5-heat-grid">{heat.map(cell=>{const intensity=cell.mins===0?0:cell.mins<30?0.25:cell.mins<60?0.5:cell.mins<90?0.75:1;return <div key={cell.date} title={fullDate(cell.date)+" · "+minutes(cell.mins)} style={{opacity:intensity===0?0.07:intensity}}/>})}</div>
-      <p className="mt-3 text-xs text-muted-foreground">Näytetään vain ajalta, jolloin opinnot ovat alkaneet. Tummempi ruutu tarkoittaa enemmän opiskelua; päiväputkia ei käytetä painostamiseen.</p>
+      <p className="mt-3 text-xs text-muted-foreground">Näytetään vain ajalta, jolloin vähintään yksi nykyinen kurssi on alkanut. Tummempi ruutu tarkoittaa kirjattuja opiskeluminuutteja; päiväputkia ei käytetä painostamiseen.</p>
     </SectionCard>
 
-    <SectionCard className="progress-analysis-only" title="Viikoittainen suunniteltu vs. toteutunut">
-      <div className="progress-v5-weekly-chart"><ResponsiveContainer width="100%" height="100%"><BarChart data={weekly}><CartesianGrid vertical={false} stroke="var(--hairline)"/><XAxis dataKey="week" tickLine={false} axisLine={false}/><YAxis width={34} tickLine={false} axisLine={false}/><Tooltip formatter={(value)=>minutes(Number(value))}/><RechartsBar dataKey="planned" fill="var(--muted-foreground)" fillOpacity={0.24}/><RechartsBar dataKey="actual" fill="var(--primary)" fillOpacity={0.78}/></BarChart></ResponsiveContainer></div>
-      <p className="mt-2 text-xs text-muted-foreground">Aikajana alkaa ensimmäisen aktiivisen kurssin oikeasta aloitusviikosta. Tämä kertoo kuormasta ja suunnitelman toteutumisesta, ei siitä kuinka hyvä opiskelija olit.</p>
+    <SectionCard className="progress-analysis-only" title="Viikoittainen työmäärä · nykyinen suunnitelma vs. toteutunut">
+      <div className="progress-v5-weekly-chart"><ResponsiveContainer width="100%" height="100%"><BarChart data={weekly}><CartesianGrid vertical={false} stroke="var(--hairline)"/><XAxis dataKey="week" tickLine={false} axisLine={false}/><YAxis width={34} tickLine={false} axisLine={false}/><Tooltip formatter={(value)=>minutes(Number(value))}/><RechartsBar dataKey="planned" name="Nykyinen suunnitelma" fill="var(--muted-foreground)" fillOpacity={0.24}/><RechartsBar dataKey="actual" name="Toteutunut" fill="var(--primary)" fillOpacity={0.78}/></BarChart></ResponsiveContainer></div>
+      <p className="mt-2 text-xs text-muted-foreground">Pylvään suunniteltu määrä tulee nykyisestä Plannerista ja toteutunut määrä kirjatuista opiskelukerroista. Historialliset suunnitelmamuutokset eivät kuulu tähän kuormakuvaajaan; ne näkyvät päiväkohtaisessa suunnitelma–toteuma-käyrässä.</p>
     </SectionCard>
 
     <SectionCard className="progress-analysis-only progress-v5-reflection" title={"Viikko "+weekNumber(now)+" · reflektio"}>
       <MetricGroup>
-        <Metric label="Tavoite" value={minutes(planned)}/>
-        <Metric label="Toteutunut" value={minutes(actual)}/>
+        <Metric label="Suunniteltu tälle viikolle" value={minutes(planned)}/>
+        <Metric label="Toteutunut tähän mennessä" value={minutes(actual)}/>
         <Metric label="Opiskelupäivät" value={studyDaysInWeek(sessions)}/>
       </MetricGroup>
-      <label className="progress-v5-field">Tavoite minuutteina<input type="number" min="0" step="15" value={planned} onChange={event=>setPlanned(Number(event.target.value))}/></label>
+      <label className="progress-v5-field">Suunniteltu määrä minuutteina<input type="number" min="0" step="15" value={planned} onChange={event=>setPlanned(Number(event.target.value))}/></label>
+      <p className="mt-1 text-xs text-muted-foreground">Oletusarvo tulee tämän viikon oikeista Planner-tehtävistä, ei kurssien yleisistä viikkobudjeteista.</p>
       <fieldset className="progress-v5-adherence-rating"><legend>Suunnitelmassa pysyminen 1–5</legend><div>{[1,2,3,4,5].map(value=><button key={value} type="button" aria-pressed={adherence===value} onClick={()=>setAdherence(value)}>{value}</button>)}</div></fieldset>
       <div className="progress-v5-form-grid">
         <label className="progress-v5-field">Vaikein aihe<select value={hardest} onChange={event=>setHardest(event.target.value)}><option value="">Ei valintaa</option>{topics.map(topic=><option key={topic.id} value={topic.id}>{courses.find(course=>course.id===topic.course_id)?.code} · {topic.name}</option>)}</select></label>
