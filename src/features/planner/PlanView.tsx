@@ -27,9 +27,9 @@ export function PlanView(props: Props) {
   return <>
     {showAutumnBreakRhythm && hasBi05 ? <SectionCard title="Syysloman opiskelurytmi">
       <p className="text-sm leading-6 text-muted-foreground">
-        19.–25.10. KE04 pysyy päivittäisenä. BI05 käyttää pääosin tiistaita, torstaita ja lauantaita,
-        ja MAA06A maanantaita, keskiviikkoa, perjantaita ja sunnuntaita. Näin loma antaa lisäaikaa
-        ilman että kaikki kolme kurssia kasautuvat jokaiselle päivälle.
+        BI05 on 19.–25.10. selvä pääaine, koska koe 1 on jo 29.10. Sitä tehdään joka päivä:
+        ensin jäljellä oleva koealue, sitten aktiivinen palautus ja loppulomasta koetyylinen harjoittelu.
+        KE04 pysyy lyhyempänä ylläpitona ja MAA06A jatkaa vain 130-tehtävätavoitteen vaatimaa tahtia.
       </p>
     </SectionCard> : null}
     <Maa06aPlannerCard course={course}/>

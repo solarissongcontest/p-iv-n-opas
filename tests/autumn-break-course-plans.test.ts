@@ -50,7 +50,6 @@ test("BI05 plans both confirmed exams without inventing chapter 5 exam content",
   );
   const chapterFiveIds = new Set(topics.filter((topic) => topic.name.startsWith("5.")).map((topic) => topic.id));
   assert.equal(drafts.some((draft) => draft.topic_id && chapterFiveIds.has(draft.topic_id)), false);
-  assert.equal(drafts.some((draft) => draft.date === "2026-10-27" && draft.kind === "review"), true);
   assert.equal(drafts.some((draft) => draft.date === "2026-11-19" && draft.kind === "review"), true);
 });
 
@@ -68,22 +67,43 @@ test("BI05 keeps phase two even when Planner has loaded only phase one's scoped 
   assert.equal(secondPhase.some((draft) => draft.topic_id === null), true);
 });
 
-test("BI05 uses alternating autumn-break days so it does not pile onto MAA06A every day", () => {
+test("BI05 is the primary course on every autumn-break day before the 29 Oct exam", () => {
   const drafts = generateBi05TwoExamPlan(bi05Options());
   const holidayDates = [...new Set(
     drafts.filter((draft) => draft.date >= "2026-10-19" && draft.date <= "2026-10-25").map((draft) => draft.date),
   )];
   assert.deepEqual(holidayDates, BI05_AUTUMN_BREAK_STUDY_DATES);
-  assert.equal(drafts.filter((draft) => BI05_AUTUMN_BREAK_STUDY_DATES.includes(draft.date)).every((draft) => draft.title.startsWith("Syysloma · ")), true);
+
+  for (const date of BI05_AUTUMN_BREAK_STUDY_DATES) {
+    const day = drafts.filter((draft) => draft.date === date);
+    assert.equal(day.some((draft) => draft.kind === "review"), true, `${date} needs a BI05 retrieval/practice block`);
+    assert.equal(day.every((draft) => draft.title.startsWith("Syysloma · ")), true);
+  }
+
+  const holidayReviewMinutes = drafts
+    .filter((draft) => draft.date >= "2026-10-19" && draft.date <= "2026-10-25" && draft.kind === "review")
+    .reduce((sum, draft) => sum + draft.target_minutes, 0);
+  assert.equal(holidayReviewMinutes, 285);
 });
 
-test("MAA06A deliberately uses the opposite autumn-break days and keeps the 130-task buffer", () => {
+test("BI05 continues exam preparation on all three school days immediately after autumn break", () => {
+  const drafts = generateBi05TwoExamPlan(bi05Options());
+  assert.deepEqual(
+    drafts
+      .filter((draft) => draft.kind === "review" && draft.date >= "2026-10-26" && draft.date <= "2026-10-28")
+      .map((draft) => draft.date),
+    ["2026-10-26", "2026-10-27", "2026-10-28"],
+  );
+});
+
+test("MAA06A remains a secondary pace-based course during autumn break and keeps the 130-task buffer", () => {
   const holidayDates = maa06aStudyDatesBetween(
     "2026-10-19",
     "2026-10-25",
     [2, 4, 5, 6, 7],
   );
   assert.deepEqual(holidayDates, MAA06A_AUTUMN_BREAK_STUDY_DATES);
+  assert.equal(holidayDates.length < BI05_AUTUMN_BREAK_STUDY_DATES.length, true);
 
   const pace = maa06aPace({
     startDate: "2026-10-06",

@@ -10,7 +10,25 @@ import { today } from "./fi.ts";
 
 const AUTUMN_BREAK_START = "2026-10-19";
 const AUTUMN_BREAK_END = "2026-10-25";
-const BI05_AUTUMN_BREAK_DATES = new Set(["2026-10-20", "2026-10-22", "2026-10-24"]);
+const BI05_AUTUMN_BREAK_DATES = new Set([
+  "2026-10-19",
+  "2026-10-20",
+  "2026-10-21",
+  "2026-10-22",
+  "2026-10-23",
+  "2026-10-24",
+  "2026-10-25",
+]);
+
+const BI05_AUTUMN_BREAK_REVIEWS = [
+  { date: "2026-10-19", title: "Syysloma · BI05 koe 1 – aktiivinen palautus: luvut 1–2", minutes: 35 },
+  { date: "2026-10-20", title: "Syysloma · BI05 koe 1 – aktiivinen palautus: luvut 3–4", minutes: 35 },
+  { date: "2026-10-21", title: "Syysloma · BI05 koe 1 – aktiivinen palautus: luku 6", minutes: 35 },
+  { date: "2026-10-22", title: "Syysloma · BI05 koe 1 – aktiivinen palautus: verenkierto", minutes: 35 },
+  { date: "2026-10-23", title: "Syysloma · BI05 koe 1 – sekakertaus: luvut 1–8", minutes: 40 },
+  { date: "2026-10-24", title: "Syysloma · BI05 koe 1 – koetyylinen harjoitus", minutes: 55 },
+  { date: "2026-10-25", title: "Syysloma · BI05 koe 1 – virheet, heikot kohdat ja aktiivinen palautus", minutes: 50 },
+] as const;
 
 type Bi05PlanTopic = {
   code: string;
@@ -35,9 +53,10 @@ function bi05StudyDates(
   studyWeekdays: number[],
   busyDates: string[],
 ) {
-  return studyDatesBetween(start, end, studyWeekdays, busyDates).filter((date) =>
-    !isAutumnBreak(date) || BI05_AUTUMN_BREAK_DATES.has(date),
-  );
+  const busy = new Set(busyDates);
+  const normal = studyDatesBetween(start, end, studyWeekdays, busyDates).filter((date) => !isAutumnBreak(date));
+  const holiday = [...BI05_AUTUMN_BREAK_DATES].filter((date) => date >= start && date <= end && !busy.has(date));
+  return [...new Set([...normal, ...holiday])].sort();
 }
 
 function canonicalTopics(opts: CoursePlanOptions, chapters: readonly number[]): Bi05PlanTopic[] {
@@ -87,7 +106,7 @@ function topicDraft(opts: CoursePlanOptions, row: Bi05PlanTopic, date: string): 
   };
 }
 
-function reviewDraft(courseId: string, date: string, title: string): PlanDraft {
+function reviewDraft(courseId: string, date: string, title: string, minutes = 40): PlanDraft {
   return {
     course_id: courseId,
     topic_id: null,
@@ -95,8 +114,8 @@ function reviewDraft(courseId: string, date: string, title: string): PlanDraft {
     phase: "review",
     kind: "review",
     title,
-    min_minutes: 20,
-    target_minutes: 40,
+    min_minutes: Math.min(20, minutes),
+    target_minutes: minutes,
     extra_minutes: 0,
     start_time: null,
   };
@@ -121,8 +140,11 @@ function examDraft(courseId: string, date: string, title: string): PlanDraft {
  * BI05 has two confirmed exam dates. The chapter split is explicitly provisional,
  * so this is exam-paced rather than school-paced: it never invents lesson dates.
  * Chapter 5 is excluded from both exams and therefore absent from exam preparation.
- * During autumn break BI05 uses Tue/Thu/Sat while MAA06A gets the alternating days,
- * preventing three live courses from piling onto every school-free day.
+ *
+ * The first exam is only four days after the autumn break. BI05 therefore becomes
+ * the primary holiday course: it is studied every day 19–25 Oct, with new/remaining
+ * content plus a separate retrieval or exam-practice block. KE04 and MAA06A remain
+ * secondary maintenance courses during that week.
  *
  * Planner currently supplies the selected exam's scoped topic rows. Canonical Iiris
  * topic metadata fills the other exam phase with course-level tasks (topic_id=null)
@@ -136,14 +158,20 @@ export function generateBi05TwoExamPlan(opts: CoursePlanOptions): PlanDraft[] {
       chapters: BI05_PROVISIONAL_EXAM_CHAPTERS["exam-1"],
       contentStart: startISO,
       contentEnd: "2026-10-25",
-      reviewDate: "2026-10-27",
+      preExamReviews: [
+        { date: "2026-10-26", title: "BI05 koe 1 – koko koealueen aktiivinen palautus", minutes: 45 },
+        { date: "2026-10-27", title: "BI05 koe 1 – koetyylinen sekaharjoitus ja heikot kohdat", minutes: 55 },
+        { date: "2026-10-28", title: "BI05 koe 1 – kevyt viimeistely ennen koetta", minutes: 25 },
+      ],
     },
     {
       exam: BI05_EXAMS[1],
       chapters: BI05_PROVISIONAL_EXAM_CHAPTERS["exam-2"],
       contentStart: startISO > "2026-10-30" ? startISO : "2026-10-30",
       contentEnd: "2026-11-17",
-      reviewDate: "2026-11-19",
+      preExamReviews: [
+        { date: "2026-11-19", title: "BI05 koe 2 – sekakertaus ja heikoimmat koealueen kohdat", minutes: 40 },
+      ],
     },
   ] as const;
 
@@ -160,12 +188,19 @@ export function generateBi05TwoExamPlan(opts: CoursePlanOptions): PlanDraft[] {
     for (const assignment of distribute(phaseTopics, dates)) {
       drafts.push(topicDraft(opts, assignment.topic, assignment.date));
     }
-    if (phase.reviewDate >= startISO && phase.reviewDate < phase.exam.date) {
-      drafts.push(reviewDraft(
-        opts.course.id,
-        phase.reviewDate,
-        `${phase.exam.name} – sekakertaus ja heikoimmat koealueen kohdat`,
-      ));
+
+    if (phase.exam.key === "exam-1") {
+      for (const block of BI05_AUTUMN_BREAK_REVIEWS) {
+        if (block.date >= startISO && block.date < phase.exam.date && !(opts.capacity?.busyDates ?? []).includes(block.date)) {
+          drafts.push(reviewDraft(opts.course.id, block.date, block.title, block.minutes));
+        }
+      }
+    }
+
+    for (const review of phase.preExamReviews) {
+      if (review.date >= startISO && review.date < phase.exam.date && !(opts.capacity?.busyDates ?? []).includes(review.date)) {
+        drafts.push(reviewDraft(opts.course.id, review.date, review.title, review.minutes));
+      }
     }
     drafts.push(examDraft(opts.course.id, phase.exam.date, phase.exam.name));
   }
