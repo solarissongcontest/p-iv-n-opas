@@ -132,3 +132,21 @@ test("future plan additions cannot rewrite an earlier day's deviation", () => {
   assert.equal(oct5?.actual, 50);
   assert.equal(oct5?.deviationStudyDays, 0);
 });
+
+test("finishing known future work early still reports the student ahead", () => {
+  const plan = [
+    item({ id: "today", date: "2026-10-05", status: "completed" }),
+    item({ id: "future", date: "2026-10-07", status: "completed" }),
+  ];
+  const events = [
+    event({ id: "today-created", plan_item_id: "today", event_type: "created", event_date: "2026-10-05", occurred_at: "2026-10-05T06:00:00Z", new_snapshot: snapshot({ id: "today", date: "2026-10-05" }) }),
+    event({ id: "future-created", plan_item_id: "future", event_type: "created", event_date: "2026-10-05", occurred_at: "2026-10-05T06:01:00Z", new_snapshot: snapshot({ id: "future", date: "2026-10-07" }) }),
+    event({ id: "today-completed", plan_item_id: "today", event_type: "completed", event_date: "2026-10-05", occurred_at: "2026-10-05T16:00:00Z", old_snapshot: snapshot({ id: "today", date: "2026-10-05" }), new_snapshot: snapshot({ id: "today", date: "2026-10-05", status: "completed", completed_at: "2026-10-05T16:00:00Z" }) }),
+    event({ id: "future-completed", plan_item_id: "future", event_type: "completed", event_date: "2026-10-05", occurred_at: "2026-10-05T16:01:00Z", old_snapshot: snapshot({ id: "future", date: "2026-10-07" }), new_snapshot: snapshot({ id: "future", date: "2026-10-07", status: "completed", completed_at: "2026-10-05T16:01:00Z" }) }),
+  ];
+
+  const result = buildProgressTrajectory({ course, plan, sessions: [], events, now: "2026-10-05" });
+  assert.ok(result);
+  assert.equal(result.aheadTasks, 1);
+  assert.equal(result.deviationStudyDays, 1);
+});
