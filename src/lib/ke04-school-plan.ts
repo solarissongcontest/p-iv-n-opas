@@ -3,8 +3,8 @@ import {
   generatePlan,
   type PlanDraft,
   type Topic,
-} from "./domain";
-import { diffDays, today } from "./fi";
+} from "./domain.ts";
+import { diffDays, today } from "./fi.ts";
 
 export type CoursePlanOptions = Parameters<typeof generatePlan>[0];
 
@@ -70,7 +70,6 @@ type SessionSpec = {
 
 const CHAPTER_ONE = ["1.1", "1.2", "1.3", "1.4"];
 const REACTION_CHAPTERS = ["2.1", "3.1", "3.2", "3.3"];
-const POLYMERS = ["4.1", "4.2"];
 const ALL_TOPICS = [
   "1.1", "1.2", "1.3", "1.4", "2.1", "3.1", "3.2", "3.3",
   "4.1", "4.2", "5.1", "5.2", "5.3", "5.4",
@@ -96,7 +95,7 @@ const KE04_PSA_2026_SESSION_SPECS: SessionSpec[] = [
   { date: "2026-10-20", mode: "preview", topicKey: "1.4", title: "Syysloma 2/7 – ideaalikaasun tilanyhtälö ennen 26.10. työtä", minutes: 40 },
   { date: "2026-10-21", mode: "review", reviewPool: CHAPTER_ONE, title: "Syysloma 3/7 – luvun 1 vaikeimmat tehtävät", minutes: 35 },
   { date: "2026-10-22", mode: "preview", topicKey: "2.1", title: "Syysloma 4/7 – 2.1 Reaktiotyypit ennakkoon", minutes: 40 },
-  { date: "2026-10-23", mode: "apply", topicKey: "2.1", title: "Syysloma 5/7 – reaktiotyypit + lyhyt spaced review", minutes: 35 },
+  { date: "2026-10-23", mode: "apply", topicKey: "2.1", title: "Syysloma 5/7 – reaktiotyypit + lyhyt kertaus", minutes: 35 },
   { date: "2026-10-24", mode: "preview", topicKey: "3.1", title: "Syysloma 6/7 – 3.1 Substituution kevyt ennakointi", minutes: 35 },
   { date: "2026-10-25", mode: "checkpoint", reviewPool: [...CHAPTER_ONE, "2.1", "3.1"], title: "Syysloma 7/7 – sekakertaus ja osaamiskartoitus", minutes: 40 },
 
@@ -287,8 +286,6 @@ export function generateKe04Psa2026Plan(opts: CoursePlanOptions): PlanDraft[] {
       });
     }
 
-    // If a preview has already been mastered, keep the school-paced slot but
-    // turn it into reinforcement. Never skip ahead to a much later chapter.
     const mode = spec.mode === "preview" && topic && Number(topic.verified_level || 0) >= 4
       ? "apply"
       : spec.mode;
@@ -302,9 +299,6 @@ export function generateKe04Psa2026Plan(opts: CoursePlanOptions): PlanDraft[] {
       advanceAfterExposure(topic, spec.date, simulatedNextReview, plannedReviews, activeMistakeTopics, mode === "review");
     }
 
-    // Add at most one compact spaced-retrieval task. The simulated review date
-    // is advanced immediately so the same overdue topic cannot monopolise every
-    // later day, which was one of the old KE04 planner defects.
     if (!["review", "checkpoint", "mock"].includes(mode)) {
       const due = chooseReviewTopic({
         keys: ALL_TOPICS,
@@ -318,8 +312,8 @@ export function generateKe04Psa2026Plan(opts: CoursePlanOptions): PlanDraft[] {
       });
       if (due) {
         const mainMinutes = drafts[drafts.length - 1]!.target_minutes;
-        const capacity = opts.capacity ? capacityForDate(opts.capacity, spec.date) : mainMinutes + 10;
-        if (capacity <= 0 || mainMinutes + 10 <= Math.max(capacity, mainMinutes + 10)) {
+        const capacity = opts.capacity ? capacityForDate(opts.capacity, spec.date) : null;
+        if (capacity === null || (capacity > 0 && mainMinutes + 10 <= capacity)) {
           drafts.push({
             ...draftFor(opts, spec.date, "review", `${due.name} – 10 min ajastettu muistista palautus`, due, 10),
             min_minutes: 10,
