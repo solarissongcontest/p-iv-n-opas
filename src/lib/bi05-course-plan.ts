@@ -68,7 +68,10 @@ function distribute(topics: Bi05PlanTopic[], dates: string[]) {
 
 function topicDraft(opts: CoursePlanOptions, row: Bi05PlanTopic, date: string): PlanDraft {
   const topic = row.topic;
-  const known = Boolean(topic && (topic.school_covered || Number(topic.progress || 0) > 0 || topic.last_review));
+  // Some older BI05 seed rows have school_covered=true without real study evidence.
+  // Treat only meaningful progress or a real review timestamp as a reason to switch
+  // a first-pass block into reinforcement.
+  const known = Boolean(topic && (Number(topic.progress || 0) >= 10 || topic.last_review));
   const target = Math.max(18, Math.min(24, Math.round(row.estimatedMinutes * 0.55)));
   return {
     course_id: opts.course.id,
