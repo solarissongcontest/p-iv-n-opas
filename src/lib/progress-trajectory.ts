@@ -298,7 +298,9 @@ export function buildProgressTrajectory(input: {
       oldSnapshot,
       newSnapshot,
     };
-    revisionsByDate.set(item.date, [...(revisionsByDate.get(item.date) ?? []), revision]);
+    for (const revisionDate of new Set([item.moved_from, item.date])) {
+      revisionsByDate.set(revisionDate, [...(revisionsByDate.get(revisionDate) ?? []), revision]);
+    }
   }
 
   const studyMinutesByDate = new Map<string, number>();
