@@ -2,7 +2,7 @@ import { useEffect, useState, type ComponentProps } from "react";
 import { createPortal } from "react-dom";
 import { CourseView as BaseCourseView, type CourseTab } from "./CourseViewBase";
 import { Maa06aCourseView } from "@/features/maa06a/Maa06aPanels";
-import { ProgressTrajectoryChart } from "@/features/progress/ProgressTrajectoryChart";
+import { ReliableProgressTrajectoryChart } from "@/features/progress/ReliableProgressTrajectoryChart";
 import { usePracticeAttempts } from "@/lib/data";
 import { usePlanItemEvents } from "@/lib/progress-data";
 import "./CourseViewTrajectory.css";
@@ -48,7 +48,7 @@ export function CourseView(props: Props) {
   return <div className={activeTab === "Analyysi" ? "course-analysis-v2" : undefined}>
     <BaseCourseView {...props} onTabChange={handleTabChange}/>
     {activeTab === "Analyysi" && course && analysisTarget && createPortal(
-      <ProgressTrajectoryChart
+      <ReliableProgressTrajectoryChart
         course={course}
         plan={props.plan}
         sessions={props.sessions}
