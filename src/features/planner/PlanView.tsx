@@ -1,6 +1,8 @@
 import type { ComponentProps } from "react";
 import { PlanView as BasePlanView } from "./PlanViewBase";
 import { Maa06aPlannerCard } from "@/features/maa06a/Maa06aPanels";
+import { SectionCard } from "@/components/surfaces";
+import { today } from "@/lib/fi";
 
 type Props = ComponentProps<typeof BasePlanView>;
 
@@ -18,8 +20,18 @@ export function PlanView(props: Props) {
     mistakes: props.mistakes.filter((item) => item.course_id !== courseId),
     attempts: props.attempts.filter((item) => item.course_id !== courseId),
   };
+  const now = today();
+  const showAutumnBreakRhythm = now >= "2026-10-08" && now <= "2026-10-25";
+  const hasBi05 = props.courses.some((candidate) => candidate.code === "BI05");
 
   return <>
+    {showAutumnBreakRhythm && hasBi05 ? <SectionCard title="Syysloman opiskelurytmi">
+      <p className="text-sm leading-6 text-muted-foreground">
+        19.–25.10. KE04 pysyy päivittäisenä. BI05 käyttää pääosin tiistaita, torstaita ja lauantaita,
+        ja MAA06A maanantaita, keskiviikkoa, perjantaita ja sunnuntaita. Näin loma antaa lisäaikaa
+        ilman että kaikki kolme kurssia kasautuvat jokaiselle päivälle.
+      </p>
+    </SectionCard> : null}
     <Maa06aPlannerCard course={course}/>
     <BasePlanView {...baseProps}/>
   </>;
