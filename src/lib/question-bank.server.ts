@@ -2,6 +2,7 @@ import { z } from "zod";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { verifyArthurDeviceToken } from "./deviceAuth.server";
 import { CURRICULUM_ID, LOPS21_AI_POLICY, curriculumContext } from "./lops21";
+import { questionPromptLeaksAnswer } from "./question-quality";
 
 const QUESTION_TYPES = [
   "free_recall",
@@ -76,6 +77,8 @@ function normalizeQuestion(raw: unknown, topicIds: Set<string>): GeneratedQuesti
   const correctAnswer = typeof row.correctAnswer === "string" && row.correctAnswer.trim()
     ? row.correctAnswer.trim()
     : null;
+
+  if (questionPromptLeaksAnswer(row.prompt, correctAnswer)) return null;
 
   if (row.type === "multiple_choice") {
     if (options.length < 2 || !correctAnswer || !options.includes(correctAnswer)) return null;
@@ -217,6 +220,7 @@ export async function handleQuestionGeneration(request: Request): Promise<Respon
     requirements: {
       language: "Finnish unless the course itself is a language course requiring another language.",
       multipleChoice: "Use 4 plausible options when practical, with exactly one correct option. correctAnswer must exactly equal one option.",
+      answerLeakage: "Never include the correct answer verbatim in the prompt when the learner is supposed to identify, calculate or choose it. A definition used for identification must not name the term being asked for.",
       hints: "Use 2-3 progressive hints. Hints must not immediately reveal the final answer.",
       explanation: "After submission, give a detailed, precise explanation of why the answer/reasoning works, including assumptions and common mistakes where relevant.",
       difficulty: "1-5 within Finnish upper-secondary LOPS21, never university-level assessment.",
