@@ -12,7 +12,7 @@ test.describe("Progress trajectory", () => {
     await expect(page.getByText("Suunnitelmassa pysyminen", { exact: true })).toBeVisible();
     await expect(page.getByRole("button", { name: "Eteneminen", exact: true })).toBeVisible();
     await expect(page.getByRole("button", { name: "Työmäärä", exact: true })).toBeVisible();
-    await expect(page.getByRole("button", { name: "Osaaminen", exact: true })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Harjoitusnäyttö", exact: true })).toBeVisible();
     await expect(page.getByRole("button", { name: "Päivittäin", exact: true })).toBeVisible();
     await expect(page.getByRole("button", { name: "Koko kurssi", exact: true })).toBeVisible();
     await expect(page.getByText(/Tänään \d{1,2}\.\d{1,2}\./).first()).toBeVisible();
@@ -50,8 +50,10 @@ test.describe("Progress trajectory", () => {
 
     await page.getByRole("button", { name: "Työmäärä", exact: true }).click();
     await expect(page.getByRole("img", { name: /työmäärä/ })).toBeVisible();
-    await page.getByRole("button", { name: "Osaaminen", exact: true }).click();
-    await expect(page.getByRole("img", { name: /osaaminen/ })).toBeVisible();
+    await page.getByRole("button", { name: "Harjoitusnäyttö", exact: true }).click();
+    await expect(page.getByRole("img", { name: /harjoitusnäyttö/ })).toBeVisible();
+    await expect(page.getByText(/Harjoitusnäyttö on enintään 20 viimeisimmän harjoitusyrityksen painotettu onnistumispiste/)).toBeVisible();
+    await expect(page.getByText(/Se ei ole kurssin osaamisprosentti, arvosanaennuste eikä arvio koko sisällön hallinnasta/)).toBeVisible();
 
     const geometry = await page.evaluate(() => {
       const card = document.querySelector<HTMLElement>(".progress-trajectory-card");
@@ -115,7 +117,7 @@ test.describe("Progress trajectory", () => {
     await expect(page.getByText("Suunnitelma, toteuma ja ennuste", { exact: true })).toBeVisible();
     await expect(page.getByRole("button", { name: "Eteneminen", exact: true })).toBeVisible();
     await expect(page.getByRole("button", { name: "Työmäärä", exact: true })).toBeVisible();
-    await expect(page.getByRole("button", { name: "Osaaminen", exact: true })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Harjoitusnäyttö", exact: true })).toBeVisible();
     await expect(page.getByText("Etenemiskäytävä ja ennuste", { exact: true })).toBeHidden();
   });
 });
