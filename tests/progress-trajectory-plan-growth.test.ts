@@ -108,3 +108,27 @@ test("adding future work later does not make a caught-up student look behind", (
   assert.equal(result.adherencePercent, 100);
   assert.equal(result.deviationStudyDays, 0);
 });
+
+test("future plan additions cannot rewrite an earlier day's deviation", () => {
+  const plan = [
+    item({ id: "a", date: "2026-10-05", status: "completed" }),
+    item({ id: "b", date: "2026-10-06", status: "completed" }),
+    item({ id: "c", date: "2026-10-10", created_at: "2026-10-07T08:00:00Z", updated_at: "2026-10-07T08:00:00Z" }),
+    item({ id: "d", date: "2026-10-11", created_at: "2026-10-07T08:01:00Z", updated_at: "2026-10-07T08:01:00Z" }),
+  ];
+  const events = [
+    event({ id: "a-created", plan_item_id: "a", event_type: "created", event_date: "2026-10-05", occurred_at: "2026-10-05T06:00:00Z", new_snapshot: snapshot({ id: "a", date: "2026-10-05" }) }),
+    event({ id: "a-completed", plan_item_id: "a", event_type: "completed", event_date: "2026-10-05", occurred_at: "2026-10-05T16:00:00Z", old_snapshot: snapshot({ id: "a", date: "2026-10-05" }), new_snapshot: snapshot({ id: "a", date: "2026-10-05", status: "completed", completed_at: "2026-10-05T16:00:00Z" }) }),
+    event({ id: "b-created", plan_item_id: "b", event_type: "created", event_date: "2026-10-05", occurred_at: "2026-10-05T06:01:00Z", new_snapshot: snapshot({ id: "b", date: "2026-10-06" }) }),
+    event({ id: "b-completed", plan_item_id: "b", event_type: "completed", event_date: "2026-10-06", occurred_at: "2026-10-06T16:00:00Z", old_snapshot: snapshot({ id: "b", date: "2026-10-06" }), new_snapshot: snapshot({ id: "b", date: "2026-10-06", status: "completed", completed_at: "2026-10-06T16:00:00Z" }) }),
+    event({ id: "c-created", plan_item_id: "c", event_type: "created", event_date: "2026-10-07", occurred_at: "2026-10-07T08:00:00Z", new_snapshot: snapshot({ id: "c", date: "2026-10-10" }) }),
+    event({ id: "d-created", plan_item_id: "d", event_type: "created", event_date: "2026-10-07", occurred_at: "2026-10-07T08:01:00Z", new_snapshot: snapshot({ id: "d", date: "2026-10-11" }) }),
+  ];
+
+  const result = buildProgressTrajectory({ course, plan, sessions: [], events, now: "2026-10-08" });
+  assert.ok(result);
+  const oct5 = result.points.find(point => point.date === "2026-10-05");
+  assert.equal(oct5?.planned, 50);
+  assert.equal(oct5?.actual, 50);
+  assert.equal(oct5?.deviationStudyDays, 0);
+});
