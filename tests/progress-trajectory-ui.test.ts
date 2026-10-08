@@ -30,10 +30,12 @@ test("progress summary uses the course-bound daily trajectory instead of an 8-we
   assert.doesNotMatch(planCard, /8 viikon toteutumisaste/);
 });
 
-test("daily trajectory preserves every course day and never projects actual progress into the future", () => {
+test("daily trajectory preserves every course day, uses one stable course denominator and never projects actual progress into the future", () => {
   assert.match(engine, /dateRange\(startDate, endDate\)/);
-  assert.match(engine, /const actual = date <= now && totalPlannedMinutes > 0/);
-  assert.match(engine, /completedMinutesCumulative \/ totalPlannedMinutes/);
+  assert.match(engine, /referenceTotalMinutes/);
+  assert.match(engine, /const actual = date <= now/);
+  assert.match(engine, /completedMinutesCumulative \/ referenceTotalMinutes/);
+  assert.doesNotMatch(engine, /completedMinutesCumulative \/ totalPlannedMinutes/);
   assert.match(engine, /isToday: date === now/);
   assert.match(engine, /isCourseStart: date === startDate/);
   assert.match(engine, /isExam: date === endDate/);
