@@ -11,9 +11,9 @@ test("production progress trajectory keeps real plan, actual and forecast geomet
 
   for (const token of [
     "trajectory-main-plot",
-    'data-trajectory-series=\"actual\"',
-    'data-trajectory-series=\"plan\"',
-    'data-trajectory-series=\"forecast\"',
+    'data-trajectory-series="actual"',
+    'data-trajectory-series="plan"',
+    'data-trajectory-series="forecast"',
     "stepPath",
     "Etenemisen luvut",
     "Opiskelupäivien ero",
