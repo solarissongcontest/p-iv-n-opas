@@ -2,11 +2,13 @@ import { expect, test } from "@playwright/test";
 import { enterApp, expectNoHorizontalOverflow } from "./helpers";
 
 test.describe("Progress trajectory", () => {
-  test("Progress exposes the daily trajectory, Today marker and all three views", async ({ page }) => {
+  test("Progress exposes the daily trajectory, Today marker and all three views without escaping the iPhone viewport", async ({ page }, testInfo) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await enterApp(page);
     await page.goto("/progress", { waitUntil: "domcontentloaded" });
 
+    const card = page.locator(".progress-trajectory-card").first();
+    await expect(card).toBeVisible();
     await expect(page.getByText("Suunnitelmassa pysyminen", { exact: true })).toBeVisible();
     await expect(page.getByRole("button", { name: "Eteneminen", exact: true })).toBeVisible();
     await expect(page.getByRole("button", { name: "Työmäärä", exact: true })).toBeVisible();
@@ -20,9 +22,58 @@ test.describe("Progress trajectory", () => {
     await page.getByRole("button", { name: "Osaaminen", exact: true }).click();
     await expect(page.getByText(/Harjoitusnäyttö perustuu viimeisimpiin harjoitusyrityksiin/)).toBeVisible();
 
+    const geometry = await page.evaluate(() => {
+      const card = document.querySelector<HTMLElement>(".progress-trajectory-card");
+      const body = card?.querySelector<HTMLElement>(".study-card-body") ?? null;
+      const contentTabs = card?.querySelector<HTMLElement>('[aria-label="Kuvaajan sisältö"]') ?? null;
+      const rangeTabs = card?.querySelector<HTMLElement>('[aria-label="Kuvaajan tarkkuus"]') ?? null;
+      const legend = card?.querySelector<HTMLElement>('[aria-label="Kuvaajan selite"]') ?? null;
+      const scroller = card?.querySelector<HTMLElement>(".overflow-x-auto") ?? null;
+      const rect = (node: HTMLElement | null) => {
+        if (!node) return null;
+        const box = node.getBoundingClientRect();
+        return { left: box.left, right: box.right, width: box.width };
+      };
+      return {
+        viewportWidth: innerWidth,
+        documentWidth: document.documentElement.scrollWidth,
+        card: rect(card),
+        body: rect(body),
+        contentTabs: rect(contentTabs),
+        rangeTabs: rect(rangeTabs),
+        legend: rect(legend),
+        scroller: rect(scroller),
+        scrollerClientWidth: scroller?.clientWidth ?? 0,
+        scrollerScrollWidth: scroller?.scrollWidth ?? 0,
+      };
+    });
+
+    expect(geometry.documentWidth).toBeLessThanOrEqual(geometry.viewportWidth + 1);
+    expect(geometry.card).not.toBeNull();
+    expect(geometry.body).not.toBeNull();
+    expect(geometry.contentTabs).not.toBeNull();
+    expect(geometry.rangeTabs).not.toBeNull();
+    expect(geometry.legend).not.toBeNull();
+    expect(geometry.scroller).not.toBeNull();
+
+    for (const box of [geometry.card, geometry.body, geometry.contentTabs, geometry.rangeTabs, geometry.legend, geometry.scroller]) {
+      expect(box!.left).toBeGreaterThanOrEqual(-1);
+      expect(box!.right).toBeLessThanOrEqual(geometry.viewportWidth + 1);
+    }
+
+    // The daily chart may be intentionally wider than the phone, but only its
+    // own scroll container is allowed to be wider internally.
+    expect(geometry.scrollerClientWidth).toBeLessThanOrEqual(geometry.card!.width + 1);
+    expect(geometry.scrollerScrollWidth).toBeGreaterThanOrEqual(geometry.scrollerClientWidth);
+
     await expect(page.getByRole("button", { name: "Edellinen päivä" })).toBeVisible();
     await expect(page.getByRole("button", { name: "Seuraava päivä" })).toBeVisible();
     await expectNoHorizontalOverflow(page);
+
+    await testInfo.attach("progress-trajectory-mobile-contained.png", {
+      body: await page.screenshot({ fullPage: true, animations: "disabled" }),
+      contentType: "image/png",
+    });
   });
 
   test("Course Analysis reuses the same canonical trajectory instead of the legacy corridor", async ({ page }) => {
