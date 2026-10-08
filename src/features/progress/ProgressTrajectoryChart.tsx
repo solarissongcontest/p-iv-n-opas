@@ -1,10 +1,12 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 import {
   Area,
   Bar,
   CartesianGrid,
+  Cell,
   ComposedChart,
   Line,
+  ReferenceDot,
   ReferenceLine,
   ResponsiveContainer,
   Tooltip,
@@ -104,6 +106,43 @@ type ChartRow = ProgressTrajectoryPoint & {
 
 type TooltipPayload = { payload?: ChartRow };
 
+type DotProps = {
+  cx?: number;
+  cy?: number;
+  value?: number | null;
+  payload?: ChartRow;
+};
+
+function ActualDot({ cx, cy, value, payload }: DotProps) {
+  if (cx == null || cy == null || value == null || !payload) return null;
+  const important = payload.isToday || payload.completedMinutesToday > 0 || payload.revised || payload.isCourseStart;
+  if (!important) return null;
+  return <circle
+    cx={cx}
+    cy={cy}
+    r={payload.isToday ? 4.5 : 2.8}
+    fill="var(--surface)"
+    stroke="var(--chart-1)"
+    strokeWidth={payload.isToday ? 2.5 : 1.8}
+    data-trajectory-dot="actual"
+  />;
+}
+
+function PlanDot({ cx, cy, value, payload }: DotProps) {
+  if (cx == null || cy == null || value == null || !payload) return null;
+  const important = payload.isToday || payload.plannedMinutesToday > 0 || payload.isCourseStart || payload.isExam || payload.revised;
+  if (!important) return null;
+  return <circle
+    cx={cx}
+    cy={cy}
+    r={payload.isToday ? 3.8 : 2.3}
+    fill="var(--surface)"
+    stroke="var(--chart-2)"
+    strokeWidth={1.7}
+    data-trajectory-dot="planned"
+  />;
+}
+
 function TrajectoryTooltip({ active, payload, mode }: { active?: boolean; payload?: TooltipPayload[]; mode: TrajectoryMode }) {
   if (!active || !payload?.length) return null;
   const point = payload.find(row => row.payload)?.payload;
@@ -128,7 +167,7 @@ function TrajectoryTooltip({ active, payload, mode }: { active?: boolean; payloa
     </div>}
     {point.plannedTitles.length > 0 && <div className="mt-2 border-t border-border pt-2">
       <p className="font-medium">Suunniteltu tänään</p>
-      {point.plannedTitles.slice(0, 4).map((title, index) => <p key={`${title}-${index}`} className="mt-1 text-muted-foreground">{title}</p>)}
+      {point.plannedTitles.slice(0, 4).map((itemTitle, index) => <p key={`${itemTitle}-${index}`} className="mt-1 text-muted-foreground">{itemTitle}</p>)}
     </div>}
     {point.revisions.length > 0 && <div className="mt-2 border-t border-border pt-2">
       <p className="font-medium">Suunnitelman muutokset</p>
@@ -157,6 +196,7 @@ export function ProgressTrajectoryChart({
   defaultView?: "daily" | "course";
 }) {
   const now = today();
+  const visualId = useId().replace(/:/g, "");
   const [viewMode, setViewMode] = useState<"daily" | "course">(defaultView);
   const [mode, setMode] = useState<TrajectoryMode>("progress");
   const scrollRef = useRef<HTMLDivElement | null>(null);
@@ -177,16 +217,24 @@ export function ProgressTrajectoryChart({
     actualWork: viewMode === "daily" ? point.studiedMinutesToday : point.studiedMinutesCumulative,
     evidence: evidenceByDate.get(point.date) ?? null,
   })) ?? [];
+
   const dailyWidth = Math.max(760, chartData.length * 52);
   const chartWidth: number | string = viewMode === "daily" ? dailyWidth : "100%";
   const todayIndex = chartData.findIndex(point => point.isToday);
+  const fallbackIndex = chartData.reduce((best, point, index) => point.date <= now ? index : best, 0);
+  const currentIndex = todayIndex >= 0 ? todayIndex : Math.max(0, fallbackIndex);
+  const currentPoint = chartData[currentIndex] ?? null;
+  const latestActualPoint = [...chartData].reverse().find(point => point.actual != null) ?? null;
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const selectedIndex = Math.max(0, chartData.findIndex(point => point.date === selectedDate));
-  const selectedPoint = chartData.find(point => point.date === selectedDate) ?? chartData[todayIndex >= 0 ? todayIndex : Math.max(0, chartData.length - 1)] ?? null;
+  const selectedPoint = chartData.find(point => point.date === selectedDate) ?? currentPoint;
+  const actualPointCount = chartData.filter(point => point.actual != null).length;
+  const progressGap = currentPoint?.actual == null ? null : Math.round(currentPoint.actual - currentPoint.planned);
+  const deviationMax = Math.max(1, ...chartData.map(point => Math.abs(point.deviationStudyDays ?? 0)));
 
   useEffect(() => {
-    setSelectedDate(chartData[todayIndex >= 0 ? todayIndex : Math.max(0, chartData.length - 1)]?.date ?? null);
-  }, [course.id, todayIndex, chartData.length]);
+    setSelectedDate(chartData[currentIndex]?.date ?? null);
+  }, [course.id, currentIndex, chartData.length]);
 
   useEffect(() => {
     if (viewMode !== "daily" || todayIndex < 0 || !scrollRef.current || chartData.length < 2) return;
@@ -236,8 +284,7 @@ export function ProgressTrajectoryChart({
 
       <div className="flex flex-wrap items-center gap-2">
         <div className="flex rounded-xl bg-muted p-1" aria-label="Kuvaajan sisältö">
-          {([[
-            "progress", "Eteneminen"], ["workload", "Työmäärä"], ["mastery", "Osaaminen"]] as Array<[TrajectoryMode, string]>).map(([id, label]) => <button
+          {([["progress", "Eteneminen"], ["workload", "Työmäärä"], ["mastery", "Osaaminen"]] as Array<[TrajectoryMode, string]>).map(([id, label]) => <button
             key={id}
             type="button"
             aria-pressed={mode === id}
@@ -252,27 +299,56 @@ export function ProgressTrajectoryChart({
       </div>
     </div>
 
+    {mode === "progress" && <div className="mt-4 grid gap-2 sm:grid-cols-3" aria-label="Etenemisen luvut">
+      <div className="rounded-xl border border-border bg-background/60 px-3 py-2">
+        <p className="text-xs text-muted-foreground">Suunnitelma nyt</p>
+        <p className="mt-0.5 text-lg font-semibold">{currentPoint ? `${Math.round(currentPoint.planned)} %` : "—"}</p>
+      </div>
+      <div className="rounded-xl border border-border bg-background/60 px-3 py-2">
+        <p className="text-xs text-muted-foreground">Toteuma nyt</p>
+        <p className="mt-0.5 text-lg font-semibold text-primary">{currentPoint?.actual == null ? "—" : `${Math.round(currentPoint.actual)} %`}</p>
+      </div>
+      <div className="rounded-xl border border-border bg-background/60 px-3 py-2">
+        <p className="text-xs text-muted-foreground">Ero suunnitelmaan</p>
+        <p className="mt-0.5 text-lg font-semibold">{progressGap == null ? "—" : progressGap === 0 ? "0 %-yks." : `${progressGap > 0 ? "+" : ""}${progressGap} %-yks.`}</p>
+      </div>
+    </div>}
+
     <div className="mt-4 flex flex-wrap gap-x-4 gap-y-2 text-xs text-muted-foreground" aria-label="Kuvaajan selite">
       {mode === "progress" && <>
-        <span className="flex items-center gap-2"><i className="h-0.5 w-6 bg-primary"/>Toteuma</span>
-        <span className="flex items-center gap-2"><i className="h-0.5 w-6 border-t-2 border-dashed border-foreground/60"/>Suunnitelma</span>
-        <span className="flex items-center gap-2"><i className="h-0.5 w-6 border-t-2 border-dashed border-primary/60"/>Ennuste</span>
-        <span className="flex items-center gap-2"><i className="h-3 w-6 rounded bg-primary/10"/>Tavoitealue</span>
+        <span className="flex items-center gap-2"><i className="h-0.5 w-6 bg-chart-1"/>Toteuma</span>
+        <span className="flex items-center gap-2"><i className="h-0.5 w-6 border-t-2 border-dashed border-chart-2"/>Suunnitelma</span>
+        <span className="flex items-center gap-2"><i className="h-0.5 w-6 border-t-2 border-dashed border-chart-3"/>Ennuste</span>
+        <span className="flex items-center gap-2"><i className="h-3 w-6 rounded bg-chart-2/10"/>Tavoitealue</span>
       </>}
-      {mode === "workload" && <><span>Suunniteltu työ</span><span>Kirjattu opiskeluaika</span></>}
-      {mode === "mastery" && <span>Harjoitusnäytön kehitys</span>}
+      {mode === "workload" && <><span className="flex items-center gap-2"><i className="h-3 w-4 rounded-sm bg-chart-2/35"/>Suunniteltu työ</span><span className="flex items-center gap-2"><i className="h-3 w-4 rounded-sm bg-chart-1/70"/>Kirjattu opiskeluaika</span></>}
+      {mode === "mastery" && <span className="flex items-center gap-2"><i className="h-0.5 w-6 bg-chart-4"/>Harjoitusnäytön kehitys</span>}
       <span className="font-medium text-foreground">Tänään {shortDate(now)}</span>
     </div>
 
     <div ref={scrollRef} className="mt-3 overflow-x-auto overscroll-x-contain pb-2">
-      <div style={{ width: chartWidth, minWidth: viewMode === "daily" ? dailyWidth : 0, height: 340 }}>
+      <div
+        data-testid="trajectory-main-plot"
+        className="rounded-2xl border border-border bg-background/45 px-1 pt-2"
+        style={{ width: chartWidth, minWidth: viewMode === "daily" ? dailyWidth : 0, height: 360 }}
+      >
         <ResponsiveContainer width="100%" height="100%">
           <ComposedChart
             data={chartData}
-            margin={{ top: 22, right: 22, bottom: viewMode === "daily" ? 36 : 8, left: -8 }}
+            margin={{ top: 26, right: 22, bottom: viewMode === "daily" ? 36 : 8, left: -4 }}
             onClick={(state: any) => state?.activePayload?.[0]?.payload?.date && setSelectedDate(state.activePayload[0].payload.date)}
           >
-            <CartesianGrid vertical={false} stroke="var(--hairline)" />
+            <defs>
+              <linearGradient id={`${visualId}-actual-fill`} x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="var(--chart-1)" stopOpacity={0.2}/>
+                <stop offset="100%" stopColor="var(--chart-1)" stopOpacity={0.015}/>
+              </linearGradient>
+              <linearGradient id={`${visualId}-mastery-fill`} x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="var(--chart-4)" stopOpacity={0.18}/>
+                <stop offset="100%" stopColor="var(--chart-4)" stopOpacity={0.01}/>
+              </linearGradient>
+            </defs>
+            <CartesianGrid vertical={false} stroke="var(--hairline)" strokeDasharray="3 5" />
             <XAxis
               dataKey="date"
               interval={viewMode === "daily" ? 0 : "preserveStartEnd"}
@@ -285,38 +361,143 @@ export function ProgressTrajectoryChart({
               minTickGap={viewMode === "daily" ? 0 : 24}
               tick={{ fill: "var(--muted-foreground)", fontSize: 10 }}
             />
-            <YAxis domain={yMax == null ? [0, "auto"] : [0, yMax]} width={48} tickLine={false} axisLine={false} tickFormatter={value => mode === "progress" ? `${value}%` : String(value)} tick={{ fill: "var(--muted-foreground)", fontSize: 10 }} />
+            <YAxis
+              domain={yMax == null ? [0, "auto"] : [0, yMax]}
+              {...(mode === "workload" ? {} : { ticks: [0, 25, 50, 75, 100] })}
+              width={52}
+              tickLine={false}
+              axisLine={false}
+              tickFormatter={value => mode === "progress" ? `${value}%` : String(value)}
+              tick={{ fill: "var(--muted-foreground)", fontSize: 10 }}
+            />
             <Tooltip content={<TrajectoryTooltip mode={mode}/>} cursor={{ stroke: "var(--muted-foreground)", strokeOpacity: 0.3 }} />
+
             {mode === "progress" && <>
-              <Area type="monotone" dataKey="corridor" stroke="none" fill="var(--primary)" fillOpacity={0.08} isAnimationActive={false} />
-              <Line type="monotone" dataKey="planned" name="Suunnitelma" stroke="var(--foreground)" strokeOpacity={0.48} strokeWidth={2} strokeDasharray="6 5" dot={false} isAnimationActive={false} />
-              <Line type="monotone" dataKey="actual" name="Toteuma" stroke="var(--primary)" strokeWidth={3} dot={viewMode === "daily" ? { r: 2, fill: "var(--surface)", stroke: "var(--primary)", strokeWidth: 1.5 } : false} activeDot={{ r: 5 }} connectNulls={false} isAnimationActive={false} />
-              <Line type="monotone" dataKey="forecast" name="Ennuste" stroke="var(--primary)" strokeOpacity={0.62} strokeWidth={2} strokeDasharray="3 5" dot={false} connectNulls={false} isAnimationActive={false} />
+              <Area type="monotone" dataKey="corridor" stroke="none" fill="var(--chart-2)" fillOpacity={0.1} isAnimationActive={false} />
+              <Area type="monotone" dataKey="actual" stroke="none" fill={`url(#${visualId}-actual-fill)`} isAnimationActive={false} />
+              <Line
+                className="trajectory-actual-line"
+                type="monotone"
+                dataKey="actual"
+                name="Toteuma"
+                stroke="var(--chart-1)"
+                strokeWidth={3.5}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                dot={(props: DotProps) => <ActualDot {...props}/>}
+                activeDot={{ r: 5.5, fill: "var(--surface)", stroke: "var(--chart-1)", strokeWidth: 2.5 }}
+                connectNulls={false}
+                isAnimationActive={false}
+              />
+              <Line
+                className="trajectory-plan-line"
+                type="monotone"
+                dataKey="planned"
+                name="Suunnitelma"
+                stroke="var(--chart-2)"
+                strokeOpacity={0.95}
+                strokeWidth={2.4}
+                strokeDasharray="7 5"
+                strokeLinecap="round"
+                dot={(props: DotProps) => <PlanDot {...props}/>}
+                activeDot={{ r: 4.5, fill: "var(--surface)", stroke: "var(--chart-2)", strokeWidth: 2 }}
+                isAnimationActive={false}
+              />
+              <Line
+                className="trajectory-forecast-line"
+                type="monotone"
+                dataKey="forecast"
+                name="Ennuste"
+                stroke="var(--chart-3)"
+                strokeOpacity={0.9}
+                strokeWidth={2.2}
+                strokeDasharray="3 5"
+                strokeLinecap="round"
+                dot={false}
+                connectNulls={false}
+                isAnimationActive={false}
+              />
+              {latestActualPoint?.actual != null && <ReferenceDot
+                x={latestActualPoint.date}
+                y={latestActualPoint.actual}
+                r={5}
+                fill="var(--surface)"
+                stroke="var(--chart-1)"
+                strokeWidth={2.5}
+                isFront
+              />}
+              {currentPoint && <ReferenceDot
+                x={currentPoint.date}
+                y={currentPoint.planned}
+                r={3.8}
+                fill="var(--surface)"
+                stroke="var(--chart-2)"
+                strokeWidth={2}
+                isFront
+              />}
             </>}
-            {mode === "workload" && <>
-              <Line type="monotone" dataKey="plannedWork" name="Suunniteltu" stroke="var(--foreground)" strokeOpacity={0.52} strokeWidth={2} strokeDasharray="6 5" dot={false} isAnimationActive={false}/>
-              <Line type="monotone" dataKey="actualWork" name="Opiskeltu" stroke="var(--primary)" strokeWidth={3} dot={viewMode === "daily" ? { r: 2 } : false} isAnimationActive={false}/>
+
+            {mode === "workload" && viewMode === "daily" && <>
+              <Bar dataKey="plannedWork" name="Suunniteltu" fill="var(--chart-2)" fillOpacity={0.3} radius={[4, 4, 0, 0]} maxBarSize={20} isAnimationActive={false}/>
+              <Bar dataKey="actualWork" name="Opiskeltu" fill="var(--chart-1)" fillOpacity={0.78} radius={[4, 4, 0, 0]} maxBarSize={20} isAnimationActive={false}/>
             </>}
-            {mode === "mastery" && <Line type="monotone" dataKey="evidence" name="Harjoitusnäyttö" stroke="var(--primary)" strokeWidth={3} dot={viewMode === "daily" ? { r: 2 } : false} connectNulls={false} isAnimationActive={false}/>} 
+            {mode === "workload" && viewMode === "course" && <>
+              <Area type="monotone" dataKey="actualWork" stroke="none" fill={`url(#${visualId}-actual-fill)`} isAnimationActive={false}/>
+              <Line type="monotone" dataKey="actualWork" name="Opiskeltu" stroke="var(--chart-1)" strokeWidth={3.2} dot={false} isAnimationActive={false}/>
+              <Line type="monotone" dataKey="plannedWork" name="Suunniteltu" stroke="var(--chart-2)" strokeWidth={2.3} strokeDasharray="7 5" dot={false} isAnimationActive={false}/>
+            </>}
+
+            {mode === "mastery" && <>
+              <Area type="monotone" dataKey="evidence" stroke="none" fill={`url(#${visualId}-mastery-fill)`} isAnimationActive={false}/>
+              <Line
+                type="monotone"
+                dataKey="evidence"
+                name="Harjoitusnäyttö"
+                stroke="var(--chart-4)"
+                strokeWidth={3.2}
+                strokeLinecap="round"
+                dot={{ r: 2.8, fill: "var(--surface)", stroke: "var(--chart-4)", strokeWidth: 1.8 }}
+                activeDot={{ r: 5 }}
+                connectNulls={false}
+                isAnimationActive={false}
+              />
+            </>}
+
             {chartData.some(point => point.isToday) && <ReferenceLine x={now} stroke="var(--foreground)" strokeWidth={2} strokeOpacity={0.72} label={{ value: `TÄNÄÄN ${shortDate(now)}`, position: "insideTopRight", fill: "var(--foreground)", fontSize: 10, fontWeight: 700 }} />}
-            <ReferenceLine x={trajectory.startDate} stroke="var(--muted-foreground)" strokeOpacity={0.25} label={{ value: "ALKU", position: "insideTopRight", fill: "var(--muted-foreground)", fontSize: 9 }} />
-            <ReferenceLine x={trajectory.endDate} stroke="var(--muted-foreground)" strokeOpacity={0.45} label={{ value: "KOE", position: "insideTopLeft", fill: "var(--muted-foreground)", fontSize: 10 }} />
-            {chartData.filter(point => point.revised).slice(0, 24).map(point => <ReferenceLine key={`revision-${point.date}`} x={point.date} stroke="var(--muted-foreground)" strokeDasharray="2 5" strokeOpacity={0.32} />)}
+            <ReferenceLine x={trajectory.startDate} stroke="var(--muted-foreground)" strokeOpacity={0.3} label={{ value: "ALKU", position: "insideTopRight", fill: "var(--muted-foreground)", fontSize: 9 }} />
+            <ReferenceLine x={trajectory.endDate} stroke="var(--muted-foreground)" strokeOpacity={0.5} label={{ value: "KOE", position: "insideTopLeft", fill: "var(--muted-foreground)", fontSize: 10 }} />
+            {chartData.filter(point => point.revised).slice(0, 24).map(point => <ReferenceLine key={`revision-${point.date}`} x={point.date} stroke="var(--muted-foreground)" strokeDasharray="2 5" strokeOpacity={0.36} />)}
           </ComposedChart>
         </ResponsiveContainer>
       </div>
 
-      {mode === "progress" && <div className="mt-1" style={{ width: chartWidth, minWidth: viewMode === "daily" ? dailyWidth : 0, height: 78 }}>
-        <ResponsiveContainer width="100%" height="100%">
-          <ComposedChart data={chartData} margin={{ top: 4, right: 22, bottom: 4, left: -8 }}>
-            <CartesianGrid vertical={false} stroke="var(--hairline)" />
-            <XAxis dataKey="date" hide />
-            <YAxis width={42} tickLine={false} axisLine={false} allowDecimals={false} tick={{ fill: "var(--muted-foreground)", fontSize: 9 }} />
-            <ReferenceLine y={0} stroke="var(--muted-foreground)" strokeOpacity={0.55} />
-            <Bar dataKey="deviationStudyDays" fill="var(--primary)" fillOpacity={0.42} maxBarSize={18} isAnimationActive={false} />
-            {chartData.some(point => point.isToday) && <ReferenceLine x={now} stroke="var(--foreground)" strokeOpacity={0.5} />}
-          </ComposedChart>
-        </ResponsiveContainer>
+      {mode === "progress" && actualPointCount <= 1 && <div className="mt-2 rounded-xl border border-border bg-muted/45 px-3 py-2 text-xs text-muted-foreground">
+        Toteumakäyrä on vasta alussa. Ensimmäinen piste näkyy silti, ja käyrä yhdistyy automaattisesti sitä mukaa kun opiskelupäiviä kertyy.
+      </div>}
+
+      {mode === "progress" && <div className="mt-3" style={{ width: chartWidth, minWidth: viewMode === "daily" ? dailyWidth : 0 }}>
+        <div className="mb-1 flex items-center justify-between gap-3 text-xs text-muted-foreground">
+          <span className="font-medium text-foreground">Opiskelupäivien ero</span>
+          <span>ylös = edellä · alas = jäljessä</span>
+        </div>
+        <div className="h-[92px] rounded-xl border border-border bg-background/35 px-1 pt-1" data-testid="trajectory-deviation-plot">
+          <ResponsiveContainer width="100%" height="100%">
+            <ComposedChart data={chartData} margin={{ top: 4, right: 22, bottom: 4, left: -4 }}>
+              <CartesianGrid vertical={false} stroke="var(--hairline)" strokeDasharray="3 5" />
+              <XAxis dataKey="date" hide />
+              <YAxis domain={[-deviationMax, deviationMax]} width={44} tickLine={false} axisLine={false} allowDecimals={false} tick={{ fill: "var(--muted-foreground)", fontSize: 9 }} />
+              <ReferenceLine y={0} stroke="var(--muted-foreground)" strokeOpacity={0.65} />
+              <Bar dataKey="deviationStudyDays" maxBarSize={18} isAnimationActive={false}>
+                {chartData.map(point => <Cell
+                  key={`deviation-${point.date}`}
+                  fill={(point.deviationStudyDays ?? 0) > 0 ? "var(--status-done)" : (point.deviationStudyDays ?? 0) < 0 ? "var(--status-overdue)" : "var(--muted-foreground)"}
+                  fillOpacity={(point.deviationStudyDays ?? 0) === 0 ? 0.22 : 0.55}
+                />)}
+              </Bar>
+              {chartData.some(point => point.isToday) && <ReferenceLine x={now} stroke="var(--foreground)" strokeOpacity={0.55} />}
+            </ComposedChart>
+          </ResponsiveContainer>
+        </div>
       </div>}
     </div>
 

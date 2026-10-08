@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 import { enterApp, expectNoHorizontalOverflow } from "./helpers";
 
 test.describe("Progress trajectory", () => {
-  test("Progress exposes the daily trajectory, Today marker and all three views without escaping the iPhone viewport", async ({ page }, testInfo) => {
+  test("Progress exposes visible trajectory marks, Today marker and all three views without escaping the iPhone viewport", async ({ page }, testInfo) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await enterApp(page);
     await page.goto("/progress", { waitUntil: "domcontentloaded" });
@@ -16,6 +16,20 @@ test.describe("Progress trajectory", () => {
     await expect(page.getByRole("button", { name: "Päivittäin", exact: true })).toBeVisible();
     await expect(page.getByRole("button", { name: "Koko kurssi", exact: true })).toBeVisible();
     await expect(page.getByText(/Tänään \d{1,2}\.\d{1,2}\./).first()).toBeVisible();
+
+    const plot = page.getByTestId("trajectory-main-plot").first();
+    await expect(plot).toBeVisible();
+    const visualMarks = await plot.evaluate(node => {
+      const visiblePaths = [...node.querySelectorAll<SVGPathElement>(".recharts-line-curve")]
+        .filter(path => (path.getAttribute("d") ?? "").length > 4).length;
+      const endpointDots = node.querySelectorAll("[data-trajectory-dot], .recharts-reference-dot circle").length;
+      return { visiblePaths, endpointDots };
+    });
+    expect(visualMarks.visiblePaths + visualMarks.endpointDots).toBeGreaterThan(0);
+
+    await expect(page.getByLabel("Etenemisen luvut")).toBeVisible();
+    await expect(page.getByText("Opiskelupäivien ero", { exact: true })).toBeVisible();
+    await expect(page.getByTestId("trajectory-deviation-plot")).toBeVisible();
 
     await page.getByRole("button", { name: "Työmäärä", exact: true }).click();
     await expect(page.getByText(/Suunniteltu työmäärä ja oikeasti kirjattu opiskeluaika/)).toBeVisible();
