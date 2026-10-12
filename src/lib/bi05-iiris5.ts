@@ -35,15 +35,38 @@ export const BI05_EXAMS = [
 ] as const;
 
 /**
- * Teacher-confirmed fact: chapter 5 is outside both course exams.
- * The remaining split is only a planning estimate until the teacher confirms
- * the exact scopes. Never present the provisional rows as confirmed scope.
+ * Teacher-confirmed on 12 Oct 2026:
+ * - exam 1 covers chapters 1–4 and 7
+ * - chapters 6 and 8 are not part of exam 1
+ * - chapter 5 remains outside both course exams
+ *
+ * Exam 2's chapter split is still only a planning estimate until the teacher
+ * confirms it. Do not present exam 2's provisional rows as confirmed scope.
  */
 export const BI05_EXCLUDED_EXAM_CHAPTERS = [5] as const;
-export const BI05_PROVISIONAL_EXAM_CHAPTERS: Record<Bi05ExamKey, readonly number[]> = {
-  "exam-1": [1, 2, 3, 4, 6, 7, 8],
+export const BI05_EXAM_CHAPTERS: Record<Bi05ExamKey, readonly number[]> = {
+  "exam-1": [1, 2, 3, 4, 7],
   "exam-2": [9, 10, 11, 12, 13, 14],
 };
+
+/** @deprecated Prefer BI05_EXAM_CHAPTERS. Kept for compatibility with older consumers. */
+export const BI05_PROVISIONAL_EXAM_CHAPTERS = BI05_EXAM_CHAPTERS;
+
+export const BI05_EXAM_SCOPE_CONFIDENCE: Record<Bi05ExamKey, "confirmed" | "provisional"> = {
+  "exam-1": "confirmed",
+  "exam-2": "provisional",
+};
+
+export const BI05_EXAM1_MUST_KNOW_TOPIC_CODES = ["3.1", "7.2"] as const;
+
+export const BI05_EXAM1_FORMAT = {
+  availableTasks: 4,
+  answerTasks: 3,
+  multipleChoice: { count: 10, pointsEach: 1 },
+  concepts: { count: 5, pointsEach: 2 },
+  extendedTasks: { count: 2, pointsEach: 10 },
+  maxAnsweredPoints: 30,
+} as const;
 
 type RawChapter = readonly [
   number,
@@ -97,7 +120,8 @@ export const BI05_IIRIS5_TOPICS: Bi05Subchapter[] = (() => {
         importance,
         estimatedMinutes,
         materials: `${BI05_COURSE.textbook} · luku ${chapter}: ${chapterTitle} · työmääräarvio ${estimatedMinutes} min`,
-        schoolCovered: code === "1.1",
+        // School has reached the end of chapter 3. This is coverage, not mastery.
+        schoolCovered: chapter <= 3,
         examEligible: chapter !== 5,
       };
     });
@@ -111,9 +135,12 @@ export function bi05ChapterForTopicName(name: string) {
   return BI05_CHAPTERS.find((row) => row.number === chapter) ?? null;
 }
 
-export function bi05ProvisionalExamKeyForChapter(chapter: number): Bi05ExamKey | null {
+export function bi05ExamKeyForChapter(chapter: number): Bi05ExamKey | null {
   if (chapter === 5) return null;
-  if (BI05_PROVISIONAL_EXAM_CHAPTERS["exam-1"].includes(chapter)) return "exam-1";
-  if (BI05_PROVISIONAL_EXAM_CHAPTERS["exam-2"].includes(chapter)) return "exam-2";
+  if (BI05_EXAM_CHAPTERS["exam-1"].includes(chapter)) return "exam-1";
+  if (BI05_EXAM_CHAPTERS["exam-2"].includes(chapter)) return "exam-2";
   return null;
 }
+
+/** @deprecated Prefer bi05ExamKeyForChapter. */
+export const bi05ProvisionalExamKeyForChapter = bi05ExamKeyForChapter;

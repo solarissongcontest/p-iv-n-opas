@@ -3,7 +3,7 @@ import type { CoursePlanOptions } from "./ke04-school-plan-core.ts";
 import {
   BI05_CHAPTERS,
   BI05_EXAMS,
-  BI05_PROVISIONAL_EXAM_CHAPTERS,
+  BI05_EXAM_CHAPTERS,
 } from "./bi05-iiris5.ts";
 import { studyDatesBetween } from "./maa06a.ts";
 import { today } from "./fi.ts";
@@ -20,11 +20,17 @@ const BI05_AUTUMN_BREAK_DATES = new Set([
   "2026-10-25",
 ]);
 
-const BI05_AUTUMN_BREAK_REVIEWS = [
-  { date: "2026-10-20", title: "Syysloma · BI05 koe 1 – aktiivinen palautus: luvut 1–4", minutes: 45 },
-  { date: "2026-10-22", title: "Syysloma · BI05 koe 1 – aktiivinen palautus: luvut 6–8", minutes: 45 },
-  { date: "2026-10-24", title: "Syysloma · BI05 koe 1 – koetyylinen harjoitus", minutes: 60 },
-  { date: "2026-10-25", title: "Syysloma · BI05 koe 1 – virheet, heikot kohdat ja aktiivinen palautus", minutes: 50 },
+const BI05_EXAM1_REVIEW_BLOCKS = [
+  { date: "2026-10-15", title: "BI05 koe 1 – luvut 1–3: aktiivinen palautus + käsitteet", minutes: 30 },
+  { date: "2026-10-16", title: "BI05 koe 1 – luku 4 + luvut 1–4 sekakertaus", minutes: 35 },
+  { date: "2026-10-17", title: "BI05 koe 1 – heikot kohdat: luvut 1–4", minutes: 30 },
+  { date: "2026-10-18", title: "BI05 koe 1 – hermosolun rakenne + käsitteet", minutes: 30, topicCode: "3.1" },
+  { date: "2026-10-20", title: "Syysloma · BI05 koe 1 – luku 7: aktiivinen palautus", minutes: 35 },
+  { date: "2026-10-21", title: "Syysloma · BI05 koe 1 – sydämen rakenne + veren kulkureitti", minutes: 40, topicCode: "7.2" },
+  { date: "2026-10-22", title: "Syysloma · BI05 koe 1 – hermosolun rakenne: nimeä osat ja yhdistä toimintaan", minutes: 35, topicCode: "3.1" },
+  { date: "2026-10-23", title: "Syysloma · BI05 koe 1 – koko koealueen aktiivinen palautus: luvut 1–4 ja 7", minutes: 45 },
+  { date: "2026-10-24", title: "Syysloma · BI05 koe 1 – heikot kohdat + käsitteet", minutes: 40 },
+  { date: "2026-10-25", title: "Syysloma · BI05 koe 1 – harjoituskoe: 10 monivalintaa + 5 käsitettä + 2 × 10 p tehtävää", minutes: 75 },
 ] as const;
 
 type Bi05PlanChapter = {
@@ -33,6 +39,7 @@ type Bi05PlanChapter = {
   subchapterCodes: string[];
   subchapterCount: number;
   knownRatio: number;
+  schoolCoveredRatio: number;
 };
 
 export function isBi05TwoExamPlan(opts: Pick<CoursePlanOptions, "course">) {
@@ -73,21 +80,24 @@ function canonicalChapters(opts: CoursePlanOptions, chapters: readonly number[])
       const codes = chapter.subchapters.map((subchapter) => subchapter.code);
       const matching = codes.map((code) => topicsByCode.get(code)).filter((topic): topic is Topic => Boolean(topic));
       const known = matching.filter((topic) => Number(topic.progress || 0) >= 10 || topic.last_review).length;
+      const schoolCovered = matching.filter((topic) => topic.school_covered).length;
       return {
         number: chapter.number,
         title: chapter.title,
         subchapterCodes: codes,
         subchapterCount: codes.length,
         knownRatio: matching.length ? known / matching.length : 0,
+        schoolCoveredRatio: matching.length ? schoolCovered / matching.length : 0,
       };
     });
 }
 
 function distribute<T>(items: T[], dates: string[]) {
   if (!items.length || !dates.length) return [] as Array<{ item: T; date: string }>;
+  if (items.length === 1) return [{ item: items[0]!, date: dates[0]! }];
   return items.map((item, index) => ({
     item,
-    date: dates[Math.min(dates.length - 1, Math.floor(index * dates.length / items.length))]!,
+    date: dates[Math.round(index * (dates.length - 1) / (items.length - 1))]!,
   }));
 }
 
@@ -99,7 +109,7 @@ function chapterMinutes(chapter: Bi05PlanChapter, date: string) {
 }
 
 function chapterDraft(opts: CoursePlanOptions, chapter: Bi05PlanChapter, date: string): PlanDraft {
-  const known = chapter.knownRatio >= 0.6;
+  const reviewOnly = chapter.knownRatio >= 0.6 || chapter.schoolCoveredRatio >= 0.6;
   const first = chapter.subchapterCodes[0];
   const last = chapter.subchapterCodes[chapter.subchapterCodes.length - 1];
   const range = first && last ? ` (${first}–${last})` : "";
@@ -111,9 +121,9 @@ function chapterDraft(opts: CoursePlanOptions, chapter: Bi05PlanChapter, date: s
     // Practice incorrectly scope the whole block to only one child topic.
     topic_id: null,
     date,
-    phase: known ? "review" : "content",
-    kind: known ? "review" : "study",
-    title: `${isAutumnBreak(date) ? "Syysloma · " : ""}Luku ${chapter.number}: ${chapter.title}${range}${holidayRecall}${known ? " – vahvistus" : ""}`,
+    phase: reviewOnly ? "review" : "content",
+    kind: reviewOnly ? "review" : "study",
+    title: `${isAutumnBreak(date) ? "Syysloma · " : ""}Luku ${chapter.number}: ${chapter.title}${range}${holidayRecall}${reviewOnly ? " – vahvistus" : ""}`,
     min_minutes: Math.min(20, target),
     target_minutes: target,
     extra_minutes: 0,
@@ -121,10 +131,15 @@ function chapterDraft(opts: CoursePlanOptions, chapter: Bi05PlanChapter, date: s
   };
 }
 
-function reviewDraft(courseId: string, date: string, title: string, minutes = 40): PlanDraft {
+function topicIdForCode(opts: CoursePlanOptions, code: string | undefined) {
+  if (!code) return null;
+  return opts.topics.find((topic) => topicCode(topic) === code)?.id ?? null;
+}
+
+function reviewDraft(opts: CoursePlanOptions, date: string, title: string, minutes = 40, topicCodeValue?: string): PlanDraft {
   return {
-    course_id: courseId,
-    topic_id: null,
+    course_id: opts.course.id,
+    topic_id: topicIdForCode(opts, topicCodeValue),
     date,
     phase: "review",
     kind: "review",
@@ -136,7 +151,7 @@ function reviewDraft(courseId: string, date: string, title: string, minutes = 40
   };
 }
 
-function examDraft(courseId: string, date: string, title: string): PlanDraft {
+function examDraft(courseId: string, date: string, title: string, startTime: string | null = null): PlanDraft {
   return {
     course_id: courseId,
     topic_id: null,
@@ -147,7 +162,7 @@ function examDraft(courseId: string, date: string, title: string): PlanDraft {
     min_minutes: 0,
     target_minutes: 0,
     extra_minutes: 0,
-    start_time: null,
+    start_time: startTime,
   };
 }
 
@@ -155,29 +170,32 @@ function examDraft(courseId: string, date: string, title: string): PlanDraft {
  * BI05 follows the teacher's real classroom granularity: roughly one major
  * textbook chapter per lesson, not one lesson per numbered subchapter. Child
  * topics remain the mastery/practice unit, while Planner uses the major chapter
- * as the default learning block. Extra child-topic work is created by adaptive
- * review only when evidence says it is needed.
+ * as the default learning block.
  *
- * The two exam dates are confirmed. The chapter split is explicitly provisional,
- * and chapter 5 is confirmed outside both exams.
+ * Exam 1 is now teacher-confirmed as chapters 1–4 and 7. Chapters 1–3 have
+ * already been covered at school, so Planner does not re-teach them as new
+ * content. It verifies them with retrieval, concepts and mixed practice instead.
+ * Exam 2's chapter split remains provisional.
  */
 export function generateBi05TwoExamPlan(opts: CoursePlanOptions): PlanDraft[] {
   const startISO = opts.fromISO ?? today();
   const phases = [
     {
       exam: BI05_EXAMS[0],
-      chapters: BI05_PROVISIONAL_EXAM_CHAPTERS["exam-1"],
+      chapters: BI05_EXAM_CHAPTERS["exam-1"],
       contentStart: startISO,
-      contentEnd: "2026-10-25",
+      // Put the two genuinely new exam-1 chapters at opposite ends of the
+      // pre-holiday runway: chapter 4 next, chapter 7 at the start of break.
+      contentEnd: "2026-10-19",
       preExamReviews: [
-        { date: "2026-10-26", title: "BI05 koe 1 – koko koealueen aktiivinen palautus", minutes: 35 },
-        { date: "2026-10-27", title: "BI05 koe 1 – heikot kohdat ja koetyyliset kysymykset", minutes: 20 },
-        { date: "2026-10-28", title: "BI05 koe 1 – kevyt viimeistely ennen koetta", minutes: 20 },
+        { date: "2026-10-26", title: "BI05 koe 1 – harjoituskokeen virheet ja epävarmat asiat", minutes: 35 },
+        { date: "2026-10-27", title: "BI05 koe 1 – sekaharjoittelu + 5 käsitteen minikoe", minutes: 30 },
+        { date: "2026-10-28", title: "BI05 koe 1 – kevyt viimeistely: sydän, hermosolu, käsitteet ja monivalinnat", minutes: 25 },
       ],
     },
     {
       exam: BI05_EXAMS[1],
-      chapters: BI05_PROVISIONAL_EXAM_CHAPTERS["exam-2"],
+      chapters: BI05_EXAM_CHAPTERS["exam-2"],
       contentStart: startISO > "2026-10-30" ? startISO : "2026-10-30",
       contentEnd: "2026-11-17",
       preExamReviews: [
@@ -191,7 +209,12 @@ export function generateBi05TwoExamPlan(opts: CoursePlanOptions): PlanDraft[] {
   const drafts: PlanDraft[] = [];
   for (const phase of phases) {
     if (startISO > phase.exam.date) continue;
-    const phaseChapters = canonicalChapters(opts, phase.chapters);
+    const allPhaseChapters = canonicalChapters(opts, phase.chapters);
+    // School coverage is not mastery, but it does mean "do not teach this from
+    // scratch again". Those chapters re-enter through the fixed retrieval blocks.
+    const phaseChapters = phase.exam.key === "exam-1"
+      ? allPhaseChapters.filter((chapter) => chapter.schoolCoveredRatio < 0.6)
+      : allPhaseChapters;
     const dates = bi05StudyDates(
       phase.contentStart,
       phase.contentEnd,
@@ -206,24 +229,24 @@ export function generateBi05TwoExamPlan(opts: CoursePlanOptions): PlanDraft[] {
     }
 
     if (phase.exam.key === "exam-1") {
-      for (const block of BI05_AUTUMN_BREAK_REVIEWS) {
+      for (const block of BI05_EXAM1_REVIEW_BLOCKS) {
         if (
           block.date >= startISO &&
           block.date < phase.exam.date &&
           !chapterDates.has(block.date) &&
           !(opts.capacity?.busyDates ?? []).includes(block.date)
         ) {
-          drafts.push(reviewDraft(opts.course.id, block.date, block.title, block.minutes));
+          drafts.push(reviewDraft(opts, block.date, block.title, block.minutes, "topicCode" in block ? block.topicCode : undefined));
         }
       }
     }
 
     for (const review of phase.preExamReviews) {
       if (review.date >= startISO && review.date < phase.exam.date && !(opts.capacity?.busyDates ?? []).includes(review.date)) {
-        drafts.push(reviewDraft(opts.course.id, review.date, review.title, review.minutes));
+        drafts.push(reviewDraft(opts, review.date, review.title, review.minutes));
       }
     }
-    drafts.push(examDraft(opts.course.id, phase.exam.date, phase.exam.name));
+    drafts.push(examDraft(opts.course.id, phase.exam.date, phase.exam.name, phase.exam.key === "exam-1" ? "08:00" : null));
   }
   return drafts.sort((a, b) => a.date.localeCompare(b.date) || a.title.localeCompare(b.title));
 }
