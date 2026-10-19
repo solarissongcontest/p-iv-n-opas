@@ -115,6 +115,13 @@ export function enqueue(op: string, payload: unknown, id = crypto.randomUUID()) 
   return id;
 }
 
+function connectionLooksOffline() {
+  return (
+    (typeof navigator !== "undefined" && navigator.onLine === false) ||
+    !onlineManager.isOnline()
+  );
+}
+
 function markQueryLayerOffline() {
   // Browser automation and some OS network transitions can update
   // navigator.onLine before the normal `offline` event reaches TanStack Query.
@@ -122,6 +129,56 @@ function markQueryLayerOffline() {
   // mutation success handlers cannot immediately refetch every active query
   // into an offline loading state.
   onlineManager.setOnline(false);
+}
+
+function watchForOfflineTransition() {
+  let stopped = false;
+  let interval: ReturnType<typeof setInterval> | null = null;
+  let onOffline: (() => void) | null = null;
+  let resolveOffline: ((value: { kind: "offline" }) => void) | null = null;
+
+  const cleanup = () => {
+    if (interval !== null) {
+      clearInterval(interval);
+      interval = null;
+    }
+    if (onOffline && typeof window !== "undefined") {
+      window.removeEventListener("offline", onOffline);
+    }
+    onOffline = null;
+  };
+
+  const finish = () => {
+    if (stopped || !resolveOffline) return;
+    stopped = true;
+    cleanup();
+    resolveOffline({ kind: "offline" });
+  };
+
+  const promise = new Promise<{ kind: "offline" }>((resolve) => {
+    resolveOffline = resolve;
+    onOffline = finish;
+    if (typeof window !== "undefined") window.addEventListener("offline", onOffline, { once: true });
+
+    // Some browsers update navigator.onLine slightly after transport has already
+    // been cut. Poll briefly while the foreground request is in flight so the
+    // durable queue can take over without making the save dialog wait for the
+    // network stack's much longer request timeout.
+    interval = setInterval(() => {
+      if (connectionLooksOffline()) finish();
+    }, 50);
+
+    if (connectionLooksOffline()) finish();
+  });
+
+  return {
+    promise,
+    stop() {
+      if (stopped) return;
+      stopped = true;
+      cleanup();
+    },
+  };
 }
 
 function errorText(error: unknown) {
@@ -140,6 +197,10 @@ function isNetworkFailure(error: unknown) {
     errorText(error),
   );
 }
+
+type DispatchOutcome<T> =
+  | { kind: "success"; value: T }
+  | { kind: "error"; error: unknown };
 
 /**
  * Run an offline-capable write using a local write-ahead queue.
@@ -161,28 +222,56 @@ export async function runOrQueue<T>(op: string, payload: unknown): Promise<T | "
   inFlightOperationIds.add(operationId);
   enqueue(op, payload, operationId);
 
-  if (
-    (typeof navigator !== "undefined" && navigator.onLine === false) ||
-    !onlineManager.isOnline()
-  ) {
+  if (connectionLooksOffline()) {
     markQueryLayerOffline();
     inFlightOperationIds.delete(operationId);
     return "queued";
   }
 
+  let detachedDispatch = false;
+  const dispatchPromise = fn(payload, operationId).then<DispatchOutcome<T>>(
+    (value) => ({ kind: "success", value: value as T }),
+    (error) => ({ kind: "error", error }),
+  );
+  const offlineTransition = watchForOfflineTransition();
+
   try {
-    const result = (await fn(payload, operationId)) as T;
-    removeQueued(operationId);
-    return result;
-  } catch (err) {
+    const outcome = await Promise.race([dispatchPromise, offlineTransition.promise]);
+    offlineTransition.stop();
+
+    if (outcome.kind === "offline") {
+      markQueryLayerOffline();
+      detachedDispatch = true;
+
+      // The request may have reached the server immediately before transport
+      // disappeared. Keep observing it so a late idempotent success can remove
+      // the write-ahead entry instead of replaying work that already landed.
+      void dispatchPromise.then((lateOutcome) => {
+        if (lateOutcome.kind === "success") {
+          removeQueued(operationId);
+        } else if (!isNetworkFailure(lateOutcome.error)) {
+          // A genuine domain/authorization failure is not helped by endless
+          // replay. This is rare after an offline transition, but discard it
+          // rather than poisoning the queue forever.
+          removeQueued(operationId);
+          console.error("[Opintopäiväkirja] Queued write was rejected after connectivity changed.", lateOutcome.error);
+        }
+        inFlightOperationIds.delete(operationId);
+      });
+
+      return "queued";
+    }
+
+    if (outcome.kind === "success") {
+      removeQueued(operationId);
+      return outcome.value;
+    }
+
+    const err = outcome.error;
     // Let browser/network state notifications settle before classifying a
     // failure that happened at the exact online -> offline boundary.
     await Promise.resolve();
-    if (
-      (typeof navigator !== "undefined" && navigator.onLine === false) ||
-      !onlineManager.isOnline() ||
-      isNetworkFailure(err)
-    ) {
+    if (connectionLooksOffline() || isNetworkFailure(err)) {
       markQueryLayerOffline();
       return "queued";
     }
@@ -192,7 +281,8 @@ export async function runOrQueue<T>(op: string, payload: unknown): Promise<T | "
     removeQueued(operationId);
     throw err;
   } finally {
-    inFlightOperationIds.delete(operationId);
+    offlineTransition.stop();
+    if (!detachedDispatch) inFlightOperationIds.delete(operationId);
   }
 }
 
