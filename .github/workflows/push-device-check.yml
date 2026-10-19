@@ -25,6 +25,11 @@ jobs:
         with:
           node-version: 22
 
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
       - name: Resolve production URL
         id: resolve
         shell: bash
@@ -41,17 +46,17 @@ jobs:
           fi
           echo "base_url=${URL%/}" >> "$GITHUB_OUTPUT"
 
-      - name: Install dependencies
-        run: npm install --no-audit --no-fund
+      - name: Install from committed Bun lockfile
+        run: bun install --frozen-lockfile
 
       - name: Install browser test tooling
-        run: npm run e2e:install
+        run: bun run e2e:install
 
       - name: Install Chromium
-        run: npx playwright install --with-deps chromium
+        run: bunx playwright install --with-deps chromium
 
       - name: Send one real Web Push test
         env:
           E2E_BASE_URL: ${{ steps.resolve.outputs.base_url }}
           SEND_PUSH_TEST: "true"
-        run: npx playwright test e2e/push-delivery.spec.ts --project=desktop-chromium
+        run: bunx playwright test e2e/push-delivery.spec.ts --project=desktop-chromium
