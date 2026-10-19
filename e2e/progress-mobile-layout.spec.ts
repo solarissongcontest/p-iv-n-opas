@@ -40,16 +40,23 @@ test("mobile progress charts stay separated and clear of the floating tab bar", 
   expect(geometry!.deviationWidth).toBeLessThanOrEqual(geometry!.viewportWidth + 1);
   expect(geometry!.sectionWidth).toBeLessThanOrEqual(geometry!.viewportWidth + 1);
 
-  const selectedDay = page.locator('.progress-trajectory-card [aria-live="polite"]').first();
+  // The selected-day summary is the panel containing the previous/next day controls.
+  // It is a real visible layout surface, but it is not an aria-live region. The old
+  // selector accidentally asserted an accessibility implementation detail that the
+  // canonical trajectory component has never required, so the release gate could
+  // fail even while the entire progress UI rendered correctly.
+  const selectedDay = page
+    .getByRole("button", { name: "Seuraava päivä" })
+    .locator("xpath=../../..");
   const tabbar = page.locator(".app-tabbar");
+  await expect(selectedDay.getByText("Valittu päivä", { exact: true })).toBeVisible();
   await expect(selectedDay).toBeVisible();
   await expect(tabbar).toBeVisible();
 
   await selectedDay.evaluate((node) => node.scrollIntoView({ block: "end" }));
-  const overlap = await page.evaluate(() => {
-    const selected = document.querySelector<HTMLElement>('.progress-trajectory-card [aria-live="polite"]');
+  const overlap = await selectedDay.evaluate((selected) => {
     const nav = document.querySelector<HTMLElement>(".app-tabbar");
-    if (!selected || !nav) return null;
+    if (!nav) return null;
     const selectedBox = selected.getBoundingClientRect();
     const navBox = nav.getBoundingClientRect();
     return selectedBox.bottom - navBox.top;
