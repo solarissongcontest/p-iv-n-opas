@@ -229,10 +229,9 @@ export async function runOrQueue<T>(op: string, payload: unknown): Promise<T | "
   }
 
   let detachedDispatch = false;
-  const dispatchPromise = fn(payload, operationId).then<DispatchOutcome<T>>(
-    (value) => ({ kind: "success", value: value as T }),
-    (error) => ({ kind: "error", error }),
-  );
+  const dispatchPromise: Promise<DispatchOutcome<T>> = fn(payload, operationId)
+    .then((value) => ({ kind: "success", value: value as T } as const))
+    .catch((error: unknown) => ({ kind: "error", error } as const));
   const offlineTransition = watchForOfflineTransition();
 
   try {
