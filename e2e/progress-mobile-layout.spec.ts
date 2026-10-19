@@ -45,7 +45,7 @@ test("mobile progress charts stay separated and clear of the floating tab bar", 
   await expect(selectedDay).toBeVisible();
   await expect(tabbar).toBeVisible();
 
-  await selectedDay.evaluate((node) => node.scrollIntoView({ block: "end", behavior: "instant" }));
+  await selectedDay.evaluate((node) => node.scrollIntoView({ block: "end" }));
   const overlap = await page.evaluate(() => {
     const selected = document.querySelector<HTMLElement>('.progress-trajectory-card [aria-live="polite"]');
     const nav = document.querySelector<HTMLElement>(".app-tabbar");
