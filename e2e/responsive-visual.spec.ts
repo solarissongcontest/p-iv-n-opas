@@ -3,6 +3,7 @@ import { enterApp, expectNoHorizontalOverflow } from "./helpers";
 
 const VIEWPORTS = [
   { name: "320", width: 320, height: 800 },
+  { name: "360", width: 360, height: 800 },
   { name: "375", width: 375, height: 812 },
   { name: "390", width: 390, height: 844 },
   { name: "430", width: 430, height: 932 },
