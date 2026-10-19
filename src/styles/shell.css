@@ -1,43 +1,6 @@
-/* ---------- content layer helpers ---------- */
-
-@utility panel {
-  background-color: var(--surface);
-  border: 1px solid var(--hairline);
-  border-radius: var(--radius-2xl);
-  box-shadow: var(--shadow-card);
-}
-
-@utility press {
-  transition:
-    transform 120ms var(--ease-calm),
-    background-color 140ms var(--ease-calm);
-  &:hover {
-    transform: translateY(-1px);
-  }
-  &:active {
-    transform: scale(0.98);
-  }
-}
-
-@utility tabular {
-  font-variant-numeric: tabular-nums;
-}
-
-@keyframes calm-rise {
-  from {
-    opacity: 0;
-    transform: translateY(6px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@utility rise {
-  animation: calm-rise 260ms var(--ease-calm) both;
-}
-
+/* Runtime helper classes live in shell-utilities.css because this stylesheet is
+   shipped as a standalone browser stylesheet and does not pass through the
+   Tailwind utility-directive transform. */
 
 /* ---------- installed mobile app shell ---------- */
 
@@ -778,5 +741,4 @@ body:has(.exam-simulation-running) .pwa-update-prompt {
     background: var(--surface) !important;
   }
 }
-
 
