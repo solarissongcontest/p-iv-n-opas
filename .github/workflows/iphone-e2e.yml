@@ -158,7 +158,7 @@ jobs:
       - name: Install from committed Bun lockfile
         run: bun install --frozen-lockfile
 
-      - name: Install browser test tooling
+      - name: Install browser test tooling (npm run e2e:install replacement)
         run: bun run e2e:install
 
       - name: Install browser engines
