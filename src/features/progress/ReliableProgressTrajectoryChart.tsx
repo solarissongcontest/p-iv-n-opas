@@ -325,7 +325,7 @@ export function ReliableProgressTrajectoryChart({
       </div>}
     </div>
 
-    <div className="mt-3 rounded-2xl border border-border bg-muted/35 p-3">
+    <div className="mt-3 rounded-2xl border border-border bg-muted/35 p-3" aria-live="polite">
       <div className="flex items-center justify-between gap-3">
         <div><p className="text-xs text-muted-foreground">Valittu päivä</p><p className="font-semibold">{selectedPoint?.isToday ? `Tänään · ${selectedPoint.label}` : selectedPoint?.label ?? "—"}</p></div>
         <div className="flex gap-2"><button type="button" className="min-h-10 min-w-10 rounded-xl border border-border" aria-label="Edellinen päivä" onClick={() => pickDay(selectedIndex - 1)}>←</button><button type="button" className="min-h-10 min-w-10 rounded-xl border border-border" aria-label="Seuraava päivä" onClick={() => pickDay(selectedIndex + 1)}>→</button></div>
