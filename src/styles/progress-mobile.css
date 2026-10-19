@@ -37,6 +37,15 @@
     overflow-x: clip;
   }
 
+  .page-content-progress {
+    padding-bottom:
+      calc(
+        var(--app-tabbar-height)
+        + 4rem
+        + env(safe-area-inset-bottom, 0px)
+      );
+  }
+
   .progress-trajectory-card {
     width: 100%;
     overflow: hidden;
@@ -83,14 +92,56 @@
 
   .progress-trajectory-card .overflow-x-auto {
     touch-action: pan-x pan-y;
+    scroll-padding-inline: 0.5rem;
   }
 
-  .progress-trajectory-card .overflow-x-auto > div:first-child {
-    height: 270px !important;
+  /* Target the actual plots instead of relying on child position. The old
+     nth-child rules could accidentally collapse the deviation section to 64px,
+     which made its heading and chart overlap exactly like on iPhone. */
+  .progress-trajectory-card [data-testid="trajectory-main-plot"] {
+    height: clamp(238px, 66vw, 278px) !important;
   }
 
-  .progress-trajectory-card .overflow-x-auto > div:nth-child(2) {
-    height: 64px !important;
+  .progress-trajectory-card [data-testid="trajectory-deviation-plot"] {
+    height: 82px !important;
+  }
+
+  /* The deviation chart is a summary and should not inherit the very wide
+     daily timeline. Keep it anchored to the visible phone viewport even while
+     the main daily chart itself remains horizontally pannable. */
+  .progress-trajectory-card .overflow-x-auto > div:has(> [data-testid="trajectory-deviation-plot"]) {
+    position: sticky;
+    left: 0;
+    width: 100% !important;
+    min-width: 100% !important;
+    height: auto !important;
+    margin-top: 1rem;
+    padding-bottom: 0.25rem;
+    background: var(--surface);
+    z-index: 2;
+  }
+
+  .progress-trajectory-card .overflow-x-auto > div:has(> [data-testid="trajectory-deviation-plot"]) > div:first-child {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.15rem;
+    margin-bottom: 0.45rem;
+    line-height: 1.25;
+  }
+
+  .progress-trajectory-card .overflow-x-auto > div:has(> [data-testid="trajectory-deviation-plot"]) > div:first-child > span:last-child {
+    font-size: 0.7rem;
+  }
+
+  /* The selected-day card can always be scrolled fully above the floating
+     bottom navigation instead of ending up hidden behind it. */
+  .progress-trajectory-card [aria-live="polite"] {
+    scroll-margin-bottom:
+      calc(
+        var(--app-tabbar-height)
+        + 2.25rem
+        + env(safe-area-inset-bottom, 0px)
+      );
   }
 
   .progress-trajectory-card .rounded-2xl {
