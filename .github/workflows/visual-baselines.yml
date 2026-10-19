@@ -60,21 +60,26 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
 
-      - name: Install dependencies
+      - name: Setup Bun
         if: steps.existing.outputs.available != 'true'
-        run: npm ci
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install from committed Bun lockfile
+        if: steps.existing.outputs.available != 'true'
+        run: bun install --frozen-lockfile
 
       - name: Install browser test tooling
         if: steps.existing.outputs.available != 'true'
         run: |
-          npm run e2e:install
-          npx playwright install --with-deps chromium
+          bun run e2e:install
+          bunx playwright install --with-deps chromium
 
       - name: Generate deterministic shell baselines
         if: steps.existing.outputs.available != 'true'
-        run: npm run e2e:visual:baseline
+        run: bun run e2e:visual:baseline
 
       - name: Upload baseline artifact
         if: steps.existing.outputs.available != 'true'
