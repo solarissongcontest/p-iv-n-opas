@@ -35,5 +35,19 @@ export default tseslint.config(
       "@typescript-eslint/no-unused-vars": "off",
       "@typescript-eslint/no-explicit-any": "off",
     },
-  }
+  },
+  {
+    // These modules intentionally colocate reusable render helpers/variants with
+    // their components. Fast Refresh is still safe for the app, but the generic
+    // single-export heuristic cannot distinguish those public helper exports.
+    files: [
+      "src/components/ui/**/*.{ts,tsx}",
+      "src/components/AbittiAnswerEditor.tsx",
+      "src/components/AbittiAnswerEditorBase.tsx",
+      "src/features/progress/ProgressTrajectoryChart.tsx",
+    ],
+    rules: {
+      "react-refresh/only-export-components": "off",
+    },
+  },
 );
