@@ -13,9 +13,9 @@ export function PlanAdherenceCard({ sessions, plan }: { sessions: Session[]; pla
   const coursesQuery = useCourses();
   const attemptsQuery = usePracticeAttempts();
   const historyQuery = usePlanItemEvents(plan);
-  const courses = coursesQuery.data ?? [];
-  const attempts = attemptsQuery.data ?? [];
-  const events = historyQuery.data ?? [];
+  const courses = useMemo(() => coursesQuery.data ?? [], [coursesQuery.data]);
+  const attempts = useMemo(() => attemptsQuery.data ?? [], [attemptsQuery.data]);
+  const events = useMemo(() => historyQuery.data ?? [], [historyQuery.data]);
   const suggestedCourse = useMemo(
     () => pickTrajectoryCourse(courses, plan, now, events),
     [courses, events, now, plan],
