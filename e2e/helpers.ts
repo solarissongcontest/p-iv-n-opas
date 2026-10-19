@@ -2,6 +2,10 @@ import { expect, type Page } from "@playwright/test";
 
 type AppEntryState = "app" | "login" | "onboarding";
 
+export async function waitForAppShell(page: Page, timeout = 30_000) {
+  await expect(page.getByRole("button", { name: "Tänään", exact: true })).toBeVisible({ timeout });
+}
+
 async function waitForEntryState(page: Page): Promise<AppEntryState> {
   const today = page.getByRole("button", { name: "Tänään", exact: true });
   const username = page.getByLabel("Käyttäjänimi");
@@ -52,7 +56,7 @@ export async function enterApp(page: Page) {
     await finishOnboarding(page);
   }
 
-  await expect(page.getByRole("button", { name: "Tänään", exact: true })).toBeVisible({ timeout: 30_000 });
+  await waitForAppShell(page);
   await expect(page).toHaveURL(/\/today(?:\?|$)/);
 }
 
