@@ -204,7 +204,7 @@ begin
     select count(*) into chapter5_exam_count
     from public.question_bank q join public.topics t on t.id=q.topic_id
     where q.course_id=r.id and q.seed_version='bi05-v2'
-      and split_part(t.name,'.',1)::integer=5 and (q.exam_eligible or q.reserve_for_exam);
+      and (q.metadata->>'chapter')::integer=5 and (q.exam_eligible or q.reserve_for_exam);
     if chapter5_exam_count<>0 then raise exception 'BI05 V2 chapter 5 leaked into exam bank: %',chapter5_exam_count; end if;
 
     select count(*) into diagram_count from public.question_bank where course_id=r.id and seed_version='bi05-v2' and answer_mode='diagram';
