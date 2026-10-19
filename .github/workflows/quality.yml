@@ -31,20 +31,25 @@ jobs:
         with:
           node-version: 22
 
-      - name: Install dependencies
-        run: npm install --no-audit --no-fund
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install from committed Bun lockfile
+        run: bun install --frozen-lockfile
 
       - name: Lint
-        run: npm run lint
+        run: bun run lint # deterministic equivalent of npm run lint
 
       - name: Coach policy and API tests
-        run: npm test
+        run: bun run test # deterministic equivalent of npm test
 
       - name: Typecheck
-        run: npm run typecheck
+        run: bun run typecheck # deterministic equivalent of npm run typecheck
 
       - name: Build
-        run: npm run build
+        run: bun run build # deterministic equivalent of npm run build
 
   vercel-build-parity:
     runs-on: ubuntu-latest
