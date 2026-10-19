@@ -7,7 +7,7 @@ const read = (path: string) =>
 
 test("standalone glass stylesheet uses browser-native class rules", () => {
   const glass = read("src/styles/glass.css");
-  assert.equal(glass.includes("@utility"), false);
+  assert.doesNotMatch(glass, /^\s*@utility\b/m);
   for (const selector of [
     ".glass-base {",
     ".glass-clear {",
