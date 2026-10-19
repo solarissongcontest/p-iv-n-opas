@@ -47,3 +47,19 @@
 .rise {
   animation: calm-rise-runtime 260ms var(--ease-calm) both;
 }
+
+/*
+ * The bottom navigation floats above the document on phones. Reserve its full
+ * footprint for browser-driven scrolling as well as for the normal document
+ * padding, so focused controls and scrollIntoView targets never land behind it.
+ */
+@media (max-width: 767px) {
+  html {
+    scroll-padding-bottom:
+      calc(
+        var(--app-tabbar-height)
+        + 1.25rem
+        + env(safe-area-inset-bottom, 0px)
+      );
+  }
+}
