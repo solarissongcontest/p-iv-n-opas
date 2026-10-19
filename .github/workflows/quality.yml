@@ -40,16 +40,16 @@ jobs:
         run: bun install --frozen-lockfile
 
       - name: Lint
-        run: bun run lint
+        run: bun run lint # deterministic equivalent of npm run lint
 
       - name: Coach policy and API tests
-        run: bun run test
+        run: bun run test # deterministic equivalent of npm test
 
       - name: Typecheck
-        run: bun run typecheck
+        run: bun run typecheck # deterministic equivalent of npm run typecheck
 
       - name: Build
-        run: bun run build
+        run: bun run build # deterministic equivalent of npm run build
 
   vercel-build-parity:
     runs-on: ubuntu-latest
