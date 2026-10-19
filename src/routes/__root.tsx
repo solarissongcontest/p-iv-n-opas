@@ -12,6 +12,7 @@ import { useEffect, useMemo, type ReactNode } from "react";
 import foundationsCss from "../styles/foundations.css?url";
 import glassCss from "../styles/glass.css?url";
 import shellCss from "../styles/shell.css?url";
+import shellUtilitiesCss from "../styles/shell-utilities.css?url";
 import layoutsCss from "../styles/layouts.css?url";
 import surfacesCss from "../styles/surfaces.css?url";
 import todayCss from "../styles/today.css?url";
@@ -116,6 +117,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "stylesheet", href: foundationsCss },
       { rel: "stylesheet", href: glassCss },
       { rel: "stylesheet", href: shellCss },
+      { rel: "stylesheet", href: shellUtilitiesCss },
       { rel: "stylesheet", href: layoutsCss },
       { rel: "stylesheet", href: surfacesCss },
       { rel: "stylesheet", href: todayCss },

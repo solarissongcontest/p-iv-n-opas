@@ -1,0 +1,49 @@
+/*
+ * Runtime definitions for the small set of shell helpers that were originally
+ * written as Tailwind `@utility` directives in shell.css.
+ *
+ * shell.css is emitted as an independent `?url` stylesheet, so those directives
+ * reach the browser uncompiled and are ignored. Keep the explicit class rules
+ * here until the shell stylesheet is folded into the Tailwind compilation
+ * pipeline.
+ */
+
+.panel {
+  background-color: var(--surface);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-2xl);
+  box-shadow: var(--shadow-card);
+}
+
+.press {
+  transition:
+    transform 120ms var(--ease-calm),
+    background-color 140ms var(--ease-calm);
+}
+
+.press:hover {
+  transform: translateY(-1px);
+}
+
+.press:active {
+  transform: scale(0.98);
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+@keyframes calm-rise-runtime {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.rise {
+  animation: calm-rise-runtime 260ms var(--ease-calm) both;
+}
