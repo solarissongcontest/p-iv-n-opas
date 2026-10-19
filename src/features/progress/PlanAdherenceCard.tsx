@@ -33,6 +33,17 @@ export function PlanAdherenceCard({ sessions, plan }: { sessions: Session[]; pla
     const trajectory = buildProgressTrajectory({ course, plan, sessions, events, now });
     return { course, trajectory, status: trajectoryStatus(trajectory) };
   });
+  const selectedTrajectory = selectedCourse
+    ? buildProgressTrajectory({ course: selectedCourse, plan, sessions, events, now })
+    : null;
+  const selectedCurrentPoint = selectedTrajectory?.points.find(point => point.isToday)
+    ?? [...(selectedTrajectory?.points ?? [])].reverse().find(point => point.date <= now)
+    ?? null;
+  const loggedStudyMinutes = selectedCurrentPoint?.studiedMinutesCumulative ?? 0;
+  const hasOpenDueWork = Boolean(
+    selectedTrajectory
+    && selectedTrajectory.plannedMinutesNow > selectedTrajectory.completedMinutesNow,
+  );
 
   if (!selectedCourse) return <div className="progress-summary-only min-w-0 max-w-full"><EmptyState
     title="Käyrä muodostuu suunnitelmasta"
@@ -52,6 +63,15 @@ export function PlanAdherenceCard({ sessions, plan }: { sessions: Session[]; pla
       </label>
       <p className="min-w-0 max-w-full text-xs text-muted-foreground">Sama laskentamalli ja sama käyrä ovat käytössä myös kurssin Tarkemmassa analyysissä.</p>
     </div>
+
+    {loggedStudyMinutes > 0 && hasOpenDueWork && <div
+      className="min-w-0 max-w-full rounded-2xl border border-border bg-muted/35 px-4 py-3 text-sm"
+      data-testid="progress-study-time-explainer"
+      role="note"
+    >
+      <p><b>{selectedCourse.code}:lle on kirjattu {loggedStudyMinutes} min opiskelua.</b></p>
+      <p className="mt-1 text-muted-foreground">Etenemisprosentti kuvaa valmiiksi merkittyä suunnitelmatyötä, ei pelkkää käytettyä aikaa. Siksi opiskelu näkyy Työmäärä-välilehdellä, vaikka Eteneminen ei vielä nousisi.</p>
+    </div>}
 
     <div className="min-w-0 max-w-full overflow-hidden">
       <ReliableProgressTrajectoryChart
