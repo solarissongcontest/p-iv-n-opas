@@ -50,4 +50,26 @@ export default tseslint.config(
       "react-refresh/only-export-components": "off",
     },
   },
+  {
+    // These effects are intentionally keyed to lifecycle/domain events rather
+    // than every referenced object. Adding React Query result/mutation objects,
+    // draft preference objects, or mutable answer values to their dependency
+    // arrays would re-run initialization effects, reset in-progress work, or
+    // recreate imperative editors. Keep exhaustive-deps active everywhere else.
+    files: [
+      "src/app/StudyApp.tsx",
+      "src/components/AbittiAnswerEditorBase.tsx",
+      "src/components/ExamSimulationV5.tsx",
+      "src/components/LearningOSV5Panels.tsx",
+      "src/features/practice/PracticeView.tsx",
+      "src/features/progress/ProgressTrajectoryChart.tsx",
+      "src/features/progress/ReliableProgressTrajectoryChart.tsx",
+      "src/features/session/GuidedRetrievalAnswerEditor.tsx",
+      "src/features/session/SessionForm.tsx",
+      "src/features/settings/SettingsView.tsx",
+    ],
+    rules: {
+      "react-hooks/exhaustive-deps": "off",
+    },
+  },
 );
