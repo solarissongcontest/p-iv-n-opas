@@ -6,6 +6,10 @@ const trajectory = readFileSync(
   new URL("../src/features/progress/ReliableProgressTrajectoryChart.tsx", import.meta.url),
   "utf8",
 );
+const planCard = readFileSync(
+  new URL("../src/features/progress/PlanAdherenceCard.tsx", import.meta.url),
+  "utf8",
+);
 const progress = readFileSync(
   new URL("../src/features/progress/ProgressView.tsx", import.meta.url),
   "utf8",
@@ -34,4 +38,8 @@ test("progress UI distinguishes due-plan adherence from logged study time", () =
   assert.match(trajectory, /erääntyneestä suunnitellusta työstä tehty/);
   assert.match(trajectory, /Kirjattu opiskeluaika/);
   assert.match(trajectory, /Erääntynyt suunniteltu työ/);
+  assert.match(planCard, /progress-study-time-explainer/);
+  assert.match(planCard, /on kirjattu \{loggedStudyMinutes\} min opiskelua/);
+  assert.match(planCard, /Etenemisprosentti kuvaa valmiiksi merkittyä suunnitelmatyötä/);
+  assert.match(planCard, /Työmäärä-välilehdellä/);
 });
