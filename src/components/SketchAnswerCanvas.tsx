@@ -66,7 +66,7 @@ export function SketchAnswerCanvas({
       image.src = value;
     }
     setReady(true);
-  }, [mode]);
+  }, [mode, value]);
 
   function point(event: React.PointerEvent<HTMLCanvasElement>) {
     const canvas = canvasRef.current;
