@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [main]
 
+concurrency:
+  group: quality-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   typecheck-and-build:
     runs-on: ubuntu-latest
@@ -41,7 +45,6 @@ jobs:
 
       - name: Build
         run: npm run build
-
 
   vercel-build-parity:
     runs-on: ubuntu-latest
