@@ -1,6 +1,12 @@
 /* ---------- Liquid Glass (navigation / control layer only) ---------- */
 
-@utility glass-base {
+/*
+ * These styles are loaded as their own stylesheet via `?url`, so Tailwind's
+ * `@utility` directive is not compiled in this file. Keep them as ordinary CSS
+ * classes so browsers actually receive the navigation/control styles instead
+ * of ignoring an unknown at-rule.
+ */
+.glass-base {
   position: relative;
   isolation: isolate;
   background-color: var(--surface);
@@ -26,46 +32,48 @@
   }
 }
 
-@utility glass-clear {
+.glass-clear {
   background-color: var(--glass-tint-clear);
   backdrop-filter: blur(12px) saturate(150%);
+  -webkit-backdrop-filter: blur(12px) saturate(150%);
 }
 
-@utility glass-thick {
+.glass-thick {
   background-color: var(--glass-tint-thick);
   backdrop-filter: blur(34px) saturate(190%);
+  -webkit-backdrop-filter: blur(34px) saturate(190%);
 }
 
-@utility glass-specular {
-  &::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    pointer-events: none;
-    background: linear-gradient(
-      160deg,
-      var(--glass-edge) 0%,
-      transparent 32%,
-      transparent 70%,
-      color-mix(in oklab, var(--glass-edge) 55%, transparent) 100%
-    );
-    opacity: 0.8;
-    z-index: -1;
-  }
+.glass-specular::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(
+    160deg,
+    var(--glass-edge) 0%,
+    transparent 32%,
+    transparent 70%,
+    color-mix(in oklab, var(--glass-edge) 55%, transparent) 100%
+  );
+  opacity: 0.8;
+  z-index: -1;
 }
 
-@utility glass-interactive {
+.glass-interactive {
   transition:
     transform 160ms var(--ease-calm),
     background-color 160ms var(--ease-calm),
     box-shadow 200ms var(--ease-calm);
-  &:hover {
-    transform: translateY(-1px);
-  }
-  &:active {
-    transform: scale(0.98);
-  }
+}
+
+.glass-interactive:hover {
+  transform: translateY(-1px);
+}
+
+.glass-interactive:active {
+  transform: scale(0.98);
 }
 
 @media (prefers-reduced-transparency: reduce) {
