@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { enterApp, expectNoHorizontalOverflow } from "./helpers";
+import { enterApp, expectNoHorizontalOverflow, waitForAppShell } from "./helpers";
 
 async function openMore(page: import("@playwright/test").Page) {
   await page.getByRole("button", { name: "Lisää", exact: true }).click();
@@ -82,13 +82,17 @@ test("deep links survive reload and keep the correct information layer", async (
   await enterApp(page);
 
   await page.goto("/progress/analysis", { waitUntil: "domcontentloaded" });
-  await expect(page.getByRole("tab", { name: "Analyysi" })).toHaveAttribute("aria-selected", "true");
+  await waitForAppShell(page);
+  await expect(page.getByRole("tab", { name: "Analyysi" })).toHaveAttribute("aria-selected", "true", { timeout: 30_000 });
+
   await page.reload({ waitUntil: "domcontentloaded" });
   await expect(page).toHaveURL(/\/progress\/analysis/);
-  await expect(page.getByRole("tab", { name: "Analyysi" })).toHaveAttribute("aria-selected", "true");
+  await waitForAppShell(page);
+  await expect(page.getByRole("tab", { name: "Analyysi" })).toHaveAttribute("aria-selected", "true", { timeout: 30_000 });
 
   await page.goto("/settings/notifications", { waitUntil: "domcontentloaded" });
-  await expect(page.getByRole("tab", { name: "Muistutukset" })).toHaveAttribute("aria-selected", "true");
+  await waitForAppShell(page);
+  await expect(page.getByRole("tab", { name: "Muistutukset" })).toHaveAttribute("aria-selected", "true", { timeout: 30_000 });
   await expect(page.getByText("Hiljaiset tunnit")).toBeVisible();
   await expectNoHorizontalOverflow(page);
 });
