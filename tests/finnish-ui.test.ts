@@ -38,8 +38,12 @@ const files = [
   "../src/lib/domain.ts",
 ];
 
+function withoutFullLineComments(text: string) {
+  return text.replace(/^\s*\/\/.*$/gm, "");
+}
+
 const source = files
-  .map((file) => readFileSync(new URL(file, import.meta.url), "utf8"))
+  .map((file) => withoutFullLineComments(readFileSync(new URL(file, import.meta.url), "utf8")))
   .join("\n");
 
 test("user-facing UI does not regress to known English product jargon", () => {

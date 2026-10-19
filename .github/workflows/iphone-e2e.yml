@@ -1,7 +1,11 @@
 name: Final Release Gate
 
 on:
-  push:
+  workflow_run:
+    workflows:
+      - Quality Gate
+    types:
+      - completed
     branches:
       - main
   workflow_dispatch:
@@ -18,6 +22,7 @@ permissions:
 
 jobs:
   code-quality:
+    if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -47,17 +52,24 @@ jobs:
   wait-for-production:
     needs:
       - code-quality
+    if: >-
+      ${{ always() && (
+        (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main') ||
+        (github.event_name == 'workflow_dispatch' && needs.code-quality.result == 'success')
+      ) }}
     runs-on: ubuntu-latest
     timeout-minutes: 12
     outputs:
       base_url: ${{ steps.resolve.outputs.base_url }}
+      expected_sha: ${{ steps.resolve.outputs.expected_sha }}
     steps:
-      - name: Resolve production URL
+      - name: Resolve production URL and release commit
         id: resolve
         shell: bash
         env:
           INPUT_BASE_URL: ${{ github.event.inputs.base_url || '' }}
           REPOSITORY_BASE_URL: ${{ vars.PRODUCTION_BASE_URL }}
+          RELEASE_SHA: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
         run: |
           if [ -n "$INPUT_BASE_URL" ]; then
             URL="$INPUT_BASE_URL"
@@ -68,18 +80,22 @@ jobs:
           fi
           URL="${URL%/}"
           echo "base_url=$URL" >> "$GITHUB_OUTPUT"
-          echo "Testing $URL"
+          echo "expected_sha=$RELEASE_SHA" >> "$GITHUB_OUTPUT"
+          echo "Testing $URL at commit $RELEASE_SHA"
 
       - name: Wait for this exact commit to reach production
         shell: bash
         env:
           BASE_URL: ${{ steps.resolve.outputs.base_url }}
-          EXPECTED_SHA: ${{ github.sha }}
+          EXPECTED_SHA: ${{ steps.resolve.outputs.expected_sha }}
           GH_TOKEN: ${{ github.token }}
           REPOSITORY: ${{ github.repository }}
         run: |
           for attempt in $(seq 1 60); do
-            STATUS_BODY=$(curl --silent --show-error --fail               -H "Authorization: Bearer $GH_TOKEN"               -H "Accept: application/vnd.github+json"               "https://api.github.com/repos/$REPOSITORY/commits/$EXPECTED_SHA/status" || true)
+            STATUS_BODY=$(curl --silent --show-error --fail \
+              -H "Authorization: Bearer $GH_TOKEN" \
+              -H "Accept: application/vnd.github+json" \
+              "https://api.github.com/repos/$REPOSITORY/commits/$EXPECTED_SHA/status" || true)
             VERCEL_STATE=$(printf '%s' "$STATUS_BODY" | python3 -c "import json,sys; d=json.load(sys.stdin); print(next((s.get('state','') for s in d.get('statuses',[]) if s.get('context')=='Vercel'),''))" 2>/dev/null || true)
             if [ "$VERCEL_STATE" = "failure" ] || [ "$VERCEL_STATE" = "error" ]; then
               echo "::error::Vercel deployment status is $VERCEL_STATE for $EXPECTED_SHA. Failing immediately instead of polling stale production."
@@ -102,13 +118,15 @@ jobs:
     needs:
       - wait-for-production
     runs-on: ubuntu-latest
-    timeout-minutes: 35
+    timeout-minutes: 40
     env:
       E2E_BASE_URL: ${{ needs.wait-for-production.outputs.base_url }}
       REQUIRE_GEMINI: "false"
     steps:
-      - name: Checkout
+      - name: Checkout certified commit
         uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.wait-for-production.outputs.expected_sha }}
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -136,8 +154,8 @@ jobs:
       - name: Responsive layout evidence matrix
         run: npx playwright test e2e/responsive-visual.spec.ts --project=desktop-chromium
 
-      - name: Mobile progress trajectory containment
-        run: npx playwright test e2e/progress-trajectory.spec.ts --project=desktop-chromium
+      - name: Mobile progress layout and trajectory containment
+        run: npx playwright test e2e/progress-mobile-layout.spec.ts e2e/progress-trajectory.spec.ts --project=desktop-chromium
 
       - name: Detect committed visual baselines
         id: visual_baselines

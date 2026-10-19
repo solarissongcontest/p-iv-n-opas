@@ -17,11 +17,13 @@ export function CourseView(props: Props) {
   const historyQuery = usePlanItemEvents(props.plan);
   const attemptsQuery = usePracticeAttempts();
   const course = props.courses.find((candidate) => candidate.id === props.selected);
+  const courseId = course?.id ?? null;
+  const courseCode = course?.code ?? null;
 
   useEffect(() => setActiveTab(props.initialTab ?? "Yleiskuva"), [props.initialTab, props.selected]);
 
   useEffect(() => {
-    if (activeTab !== "Analyysi" || !course || course.code === "MAA06A") {
+    if (activeTab !== "Analyysi" || !courseId || courseCode === "MAA06A") {
       setAnalysisTarget(null);
       return;
     }
@@ -29,7 +31,7 @@ export function CourseView(props: Props) {
       setAnalysisTarget(document.querySelector<HTMLElement>(".course-analysis-v2 .course-detail-main > .space-y-4"));
     });
     return () => window.cancelAnimationFrame(frame);
-  }, [activeTab, course?.id, course?.code]);
+  }, [activeTab, courseCode, courseId]);
 
   if (course?.code === "MAA06A") {
     return <Maa06aCourseView

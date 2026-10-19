@@ -153,7 +153,7 @@ test("recovery queue respects capacity and hides backlog", () => {
   assert.ok(queue.hiddenCount > 0);
 });
 
-test("adaptive practice blocks first and interleaves after basic mastery", () => {
+test("adaptive practice keeps explicit topic scope and interleaves unscoped practice after basic mastery", () => {
   const a = topic("p1", "Newton II");
   const b = topic("p2", "Kitka");
   const weak = selectPracticeQuestion({ topics: [a, b], attempts: [], selectedTopicId: a.id, course, index: 1 });
@@ -165,7 +165,7 @@ test("adaptive practice blocks first and interleaves after basic mastery", () =>
     attempt("p-a2", a.id, { evidence_quality: 0.84, attempt_type: "short_answer" }),
     attempt("p-b1", b.id, { evidence_quality: 0.5 }),
   ];
-  const mixed = selectPracticeQuestion({ topics: [a, b], attempts: evidence, selectedTopicId: a.id, course, index: 1 });
+  const mixed = selectPracticeQuestion({ topics: [a, b], attempts: evidence, course, index: 1 });
   assert.equal(mixed?.topic.id, b.id);
   assert.equal(mixed?.interleaved, true);
 });
