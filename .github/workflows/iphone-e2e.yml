@@ -39,25 +39,31 @@ jobs:
         with:
           node-version: 22
 
-      - name: Install dependencies
+      - name: Setup Bun
         if: github.event_name == 'workflow_dispatch'
-        run: npm install --no-audit --no-fund
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install from committed Bun lockfile
+        if: github.event_name == 'workflow_dispatch'
+        run: bun install --frozen-lockfile
 
       - name: Lint
         if: github.event_name == 'workflow_dispatch'
-        run: npm run lint
+        run: bun run lint
 
       - name: Unit and regression tests
         if: github.event_name == 'workflow_dispatch'
-        run: npm test
+        run: bun run test
 
       - name: Typecheck
         if: github.event_name == 'workflow_dispatch'
-        run: npm run typecheck
+        run: bun run typecheck
 
       - name: Production build
         if: github.event_name == 'workflow_dispatch'
-        run: npm run build
+        run: bun run build
 
   wait-for-production:
     needs:
@@ -144,29 +150,34 @@ jobs:
         with:
           node-version: 22
 
-      - name: Install dependencies
-        run: npm install --no-audit --no-fund
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install from committed Bun lockfile
+        run: bun install --frozen-lockfile
 
       - name: Install browser test tooling
-        run: npm run e2e:install
+        run: bun run e2e:install
 
       - name: Install browser engines
-        run: npx playwright install --with-deps webkit chromium
+        run: bunx playwright install --with-deps webkit chromium
 
       - name: iPhone WebKit smoke and deep-link test
-        run: npx playwright test e2e/iphone-smoke.spec.ts --project=iphone-webkit
+        run: bunx playwright test e2e/iphone-smoke.spec.ts --project=iphone-webkit
 
       - name: Desktop production, WCAG and push backend checks
-        run: npx playwright test e2e/release-gate.spec.ts --project=desktop-chromium
+        run: bunx playwright test e2e/release-gate.spec.ts --project=desktop-chromium
 
       - name: Offline reload and second-device synchronization
-        run: npx playwright test e2e/v5-cross-device.spec.ts --project=desktop-chromium
+        run: bunx playwright test e2e/v5-cross-device.spec.ts --project=desktop-chromium
 
       - name: Responsive layout evidence matrix
-        run: npx playwright test e2e/responsive-visual.spec.ts --project=desktop-chromium
+        run: bunx playwright test e2e/responsive-visual.spec.ts --project=desktop-chromium
 
       - name: Mobile progress layout and trajectory containment
-        run: npx playwright test e2e/progress-mobile-layout.spec.ts e2e/progress-trajectory.spec.ts --project=desktop-chromium
+        run: bunx playwright test e2e/progress-mobile-layout.spec.ts e2e/progress-trajectory.spec.ts --project=desktop-chromium
 
       - name: Detect committed visual baselines
         id: visual_baselines
@@ -182,7 +193,7 @@ jobs:
 
       - name: Visual regression against committed baselines
         if: steps.visual_baselines.outputs.available == 'true'
-        run: npx playwright test e2e/visual-regression.spec.ts --project=desktop-chromium
+        run: bunx playwright test e2e/visual-regression.spec.ts --project=desktop-chromium
 
       - name: Upload browser evidence
         if: always()
