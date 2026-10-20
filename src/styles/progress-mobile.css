@@ -95,15 +95,26 @@
     scroll-padding-inline: 0.5rem;
   }
 
-  /* Target the actual plots instead of relying on child position. The old
-     nth-child rules could accidentally collapse the deviation section to 64px,
-     which made its heading and chart overlap exactly like on iPhone. */
+  /* Keep the main trajectory at its intended 350px plotting height on phones.
+     The previous clamp compressed the 350px SVG into roughly 240–278px, which
+     made the entire course look vertically squashed. Daily mode must also keep
+     its intrinsic wide canvas so the timeline scrolls instead of shrinking. */
   .progress-trajectory-card [data-testid="trajectory-main-plot"] {
-    height: clamp(238px, 66vw, 278px) !important;
+    height: 350px !important;
+    min-height: 350px !important;
+  }
+
+  .progress-trajectory-card [data-testid="trajectory-main-plot"] > svg {
+    display: block;
+    height: 350px !important;
+    min-height: 350px !important;
+    max-width: none !important;
+    flex: none;
   }
 
   .progress-trajectory-card [data-testid="trajectory-deviation-plot"] {
-    height: 82px !important;
+    height: 92px !important;
+    min-height: 92px !important;
   }
 
   /* The deviation chart is a summary and should not inherit the very wide
