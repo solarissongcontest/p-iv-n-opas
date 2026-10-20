@@ -6,7 +6,7 @@ test("progress summary opens the uncompressed daily timeline on mobile", async (
   await enterApp(page);
   await page.goto("/progress", { waitUntil: "domcontentloaded" });
 
-  const precision = page.getByRole("group", { name: "Kuvaajan tarkkuus" }).first();
+  const precision = page.locator('[aria-label="Kuvaajan tarkkuus"]').first();
   const daily = precision.getByRole("button", { name: "Päivittäin" });
   const course = precision.getByRole("button", { name: "Koko kurssi" });
 
