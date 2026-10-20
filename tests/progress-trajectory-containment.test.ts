@@ -19,6 +19,7 @@ test("Progress summary cannot inherit the daily chart min-content width", () => 
   assert.match(containment, /overflow-x: auto/);
 });
 
-test("Progress summary opens on the whole-course curve instead of a horizontally dense daily track", () => {
-  assert.match(card, /defaultView="course"/);
+test("Progress summary opens on the scrollable daily curve instead of compressing the whole course into the phone viewport", () => {
+  assert.match(card, /defaultView="daily"/);
+  assert.doesNotMatch(card, /defaultView="course"/);
 });
