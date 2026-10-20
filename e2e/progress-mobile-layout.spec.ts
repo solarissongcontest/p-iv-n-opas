@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 import { enterApp, expectNoHorizontalOverflow } from "./helpers";
 
-test("mobile progress charts stay separated and clear of the floating tab bar", async ({ page }) => {
+test("mobile progress charts stay separated, full-height and clear of the floating tab bar", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await enterApp(page);
   await page.goto("/progress", { waitUntil: "domcontentloaded" });
@@ -17,24 +17,36 @@ test("mobile progress charts stay separated and clear of the floating tab bar", 
     const deviation = document.querySelector<HTMLElement>('[data-testid="trajectory-deviation-plot"]');
     if (!main || !deviation) return null;
 
+    const mainSvg = main.querySelector<SVGElement>("svg");
+    const scrollViewport = main.parentElement;
     const deviationSection = deviation.parentElement;
     const heading = deviationSection?.firstElementChild as HTMLElement | null;
     const mainBox = main.getBoundingClientRect();
+    const mainSvgBox = mainSvg?.getBoundingClientRect() ?? null;
     const deviationBox = deviation.getBoundingClientRect();
     const sectionBox = deviationSection?.getBoundingClientRect() ?? null;
     const headingBox = heading?.getBoundingClientRect() ?? null;
 
     return {
       viewportWidth: innerWidth,
+      mainHeight: mainBox.height,
+      mainSvgHeight: mainSvgBox?.height ?? 0,
       mainBottom: mainBox.bottom,
       deviationTop: deviationBox.top,
+      deviationHeight: deviationBox.height,
       deviationWidth: deviationBox.width,
       sectionWidth: sectionBox?.width ?? 0,
       headingBottom: headingBox?.bottom ?? 0,
+      timelineScrollWidth: scrollViewport?.scrollWidth ?? 0,
+      timelineClientWidth: scrollViewport?.clientWidth ?? 0,
     };
   });
 
   expect(geometry).not.toBeNull();
+  expect(geometry!.mainHeight).toBeGreaterThanOrEqual(340);
+  expect(Math.abs(geometry!.mainSvgHeight - geometry!.mainHeight)).toBeLessThanOrEqual(1);
+  expect(geometry!.timelineScrollWidth).toBeGreaterThan(geometry!.timelineClientWidth);
+  expect(geometry!.deviationHeight).toBeGreaterThanOrEqual(88);
   expect(geometry!.deviationTop).toBeGreaterThanOrEqual(geometry!.mainBottom + 8);
   expect(geometry!.headingBottom).toBeLessThanOrEqual(geometry!.deviationTop + 1);
   expect(geometry!.deviationWidth).toBeLessThanOrEqual(geometry!.viewportWidth + 1);
