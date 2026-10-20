@@ -20,9 +20,11 @@ test("standalone glass stylesheet uses browser-native class rules", () => {
 });
 
 test("shell helpers have runtime CSS and load immediately after the shell stylesheet", () => {
+  const shell = read("src/styles/shell.css");
   const compat = read("src/styles/shell-utilities.css");
   const root = read("src/routes/__root.tsx");
 
+  assert.doesNotMatch(shell, /^\s*@utility\b/m);
   for (const selector of [".panel {", ".press {", ".tabular {", ".rise {"]) {
     assert.ok(compat.includes(selector), selector);
   }
