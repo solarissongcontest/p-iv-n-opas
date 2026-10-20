@@ -80,7 +80,7 @@ export function PlanAdherenceCard({ sessions, plan }: { sessions: Session[]; pla
         sessions={sessions}
         events={events}
         attempts={attempts}
-        defaultView="course"
+        defaultView="daily"
       />
     </div>
 
