@@ -1,7 +1,19 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { BookOpen, Brain, Ellipsis, FlaskConical, Plus, Search, Settings2, X } from "lucide-react";
-import { LiquidGlass } from "@/components/LiquidGlass";
-import { desktopPrimaryNav, mobilePrimaryNav, type StudyPage } from "@/app/navigation";
+import {
+  BookOpen,
+  Brain,
+  CalendarDays,
+  ChartNoAxesCombined,
+  ChevronDown,
+  FlaskConical,
+  Map,
+  Plus,
+  Search,
+  Settings2,
+  Sparkles,
+  X,
+} from "lucide-react";
+import type { StudyPage } from "@/app/navigation";
 
 type AppShellProps = {
   page: StudyPage;
@@ -16,6 +28,23 @@ type AppShellProps = {
   children: ReactNode;
 };
 
+const secondaryDestinations: Array<{
+  id: StudyPage;
+  label: string;
+  description: string;
+  Icon: typeof BookOpen;
+}> = [
+  { id: "courses", label: "Opinnot", description: "Kurssit, aiheet ja oppimispolut", Icon: BookOpen },
+  { id: "practice", label: "Harjoittelu", description: "Vapaa retrieval- ja kertausharjoittelu", Icon: Brain },
+  { id: "exams", label: "Kokeet", description: "Koealueet ja harjoituskokeet", Icon: FlaskConical },
+  { id: "progress", label: "Kehitys", description: "Osaamisnäyttö ja oppimisrytmi", Icon: ChartNoAxesCombined },
+  { id: "settings", label: "Asetukset", description: "Kuormitus, ilmoitukset ja sovellus", Icon: Settings2 },
+];
+
+function isCorePage(page: StudyPage) {
+  return page === "today" || page === "plan";
+}
+
 export function AppShell({
   page,
   pageTitle,
@@ -29,29 +58,32 @@ export function AppShell({
   children,
 }: AppShellProps) {
   return (
-    <div className="min-h-screen">
-      <DesktopSidebar
+    <div className="studyos-shell">
+      <SystemBar
         page={page}
+        pageTitle={pageTitle}
+        moreOpen={moreOpen}
+        onMoreOpenChange={onMoreOpenChange}
         onNavigate={onNavigate}
         onLog={onLog}
         onSearch={onSearch}
       />
 
-      <main id="main-content" tabIndex={-1} className={"app-main app-desktop-main px-4 "+(contextualAction?"app-main-has-context-action":"")}>
-        <PageHeader title={pageTitle} eyebrow={pageEyebrow} onSearch={onSearch} />
+      <main id="main-content" tabIndex={-1} className="studyos-main">
+        {!isCorePage(page) && (
+          <header className="studyos-context-header">
+            <p>{pageEyebrow}</p>
+            <h1>{pageTitle}</h1>
+          </header>
+        )}
         {children}
       </main>
 
-      <BottomInteractionZone contextualAction={contextualAction}>
-        <MobileTabBar
-          page={page}
-          moreOpen={moreOpen}
-          onNavigate={onNavigate}
-          onMore={() => onMoreOpenChange(!moreOpen)}
-        />
-      </BottomInteractionZone>
+      {contextualAction ? <div className="studyos-assistive-action">{contextualAction}</div> : null}
 
-      <MoreSheet
+      <MobileDock page={page} onNavigate={onNavigate} onSearch={onSearch} />
+
+      <MoreMenu
         page={page}
         open={moreOpen}
         onClose={() => onMoreOpenChange(false)}
@@ -63,182 +95,113 @@ export function AppShell({
   );
 }
 
-function DesktopSidebar({
+function SystemBar({
   page,
+  pageTitle,
+  moreOpen,
+  onMoreOpenChange,
   onNavigate,
   onLog,
   onSearch,
 }: {
   page: StudyPage;
+  pageTitle: string;
+  moreOpen: boolean;
+  onMoreOpenChange: (open: boolean) => void;
   onNavigate: (page: StudyPage) => void;
   onLog: () => void;
   onSearch: () => void;
 }) {
-  const [searchShortcut, setSearchShortcut] = useState("Ctrl K");
+  const [shortcut, setShortcut] = useState("Ctrl K");
+
   useEffect(() => {
     const platform = navigator.platform || "";
-    setSearchShortcut(/Mac|iPhone|iPad/i.test(platform) ? "⌘ K" : "Ctrl K");
+    setShortcut(/Mac|iPhone|iPad/i.test(platform) ? "⌘ K" : "Ctrl K");
   }, []);
 
   return (
-    <LiquidGlass
-      lensing
-      as="aside"
-      className="desktop-sidebar fixed inset-y-4 left-4 z-20 hidden w-60 flex-col rounded-3xl p-4 md:flex"
-    >
-      <div className="mb-8 flex items-center gap-3 px-2 pt-2 font-semibold">
-        <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-primary text-primary-foreground">
-          <BookOpen size={20} />
-        </span>
-        <span className="sidebar-label">Opintopäiväkirja</span>
-      </div>
+    <header className="studyos-systembar">
+      <div className="studyos-systembar-inner">
+        <button className="studyos-brand" onClick={() => onNavigate("today")} aria-label="StudyOS Flow">
+          <span className="studyos-brand-mark" aria-hidden="true"><Sparkles size={17} /></span>
+          <span className="studyos-brand-name">StudyOS</span>
+        </button>
 
-      <nav aria-label="Päänavigaatio" className="space-y-1">
-        {desktopPrimaryNav.map(({ id, label, Icon }) => (
+        <nav className="studyos-primary-nav" aria-label="Päänavigaatio">
           <button
-            key={id}
-            aria-label={label}
-            aria-current={page === id ? "page" : undefined}
-            data-tooltip={label}
-            onClick={() => onNavigate(id)}
-            className={
-              "flex min-h-11 w-full items-center gap-3 rounded-xl px-3 text-left text-sm transition-colors " +
-              (page === id ? "bg-accent font-semibold text-accent-foreground" : "hover:bg-muted")
-            }
+            aria-current={page === "today" ? "page" : undefined}
+            className={page === "today" ? "is-active" : ""}
+            onClick={() => onNavigate("today")}
           >
-            <Icon className="shrink-0" size={19} />
-            <span className="sidebar-label">{label}</span>
+            <Sparkles size={16} />
+            Flow
           </button>
-        ))}
-      </nav>
+          <button
+            aria-current={page === "plan" ? "page" : undefined}
+            className={page === "plan" ? "is-active" : ""}
+            onClick={() => onNavigate("plan")}
+          >
+            <Map size={16} />
+            Map
+          </button>
+        </nav>
 
-      <button
-        aria-label="Kirjaa opiskelu"
-        data-tooltip="Kirjaa opiskelu"
-        className="mt-6 flex min-h-11 items-center justify-center gap-2 rounded-xl bg-primary px-3 font-medium text-primary-foreground"
-        onClick={onLog}
-      >
-        <Plus size={18} />
-        <span className="sidebar-label">Kirjaa opiskelu</span>
-      </button>
+        <div className="studyos-systembar-spacer" />
 
-      <div className="mt-auto space-y-1">
-        <button
-          aria-label="Haku"
-          data-tooltip="Haku"
-          className="flex min-h-11 w-full items-center gap-3 rounded-xl px-3 hover:bg-muted"
-          onClick={onSearch}
-        >
-          <Search className="shrink-0" size={19} />
-          <span className="sidebar-label">Haku</span>
-          <kbd className="sidebar-label ml-auto text-xs text-muted-foreground">{searchShortcut}</kbd>
+        {!isCorePage(page) && <span className="studyos-current-context">{pageTitle}</span>}
+
+        <button className="studyos-command" onClick={onSearch} aria-label={`Haku, ${shortcut}`}>
+          <Search size={17} />
+          <span>Hae</span>
+          <kbd>{shortcut}</kbd>
         </button>
+
+        <button className="studyos-icon-action studyos-log-action" onClick={onLog} aria-label="Kirjaa opiskelu">
+          <Plus size={18} />
+        </button>
+
         <button
-          aria-label="Asetukset"
-          data-tooltip="Asetukset"
-          aria-current={page === "settings" ? "page" : undefined}
-          className={
-            "flex min-h-11 w-full items-center gap-3 rounded-xl px-3 " +
-            (page === "settings" ? "bg-accent font-semibold text-accent-foreground" : "hover:bg-muted")
-          }
-          onClick={() => onNavigate("settings")}
+          className={"studyos-more-trigger " + (moreOpen ? "is-active" : "")}
+          onClick={() => onMoreOpenChange(!moreOpen)}
+          aria-expanded={moreOpen}
+          aria-label="Lisää näkymiä"
         >
-          <Settings2 className="shrink-0" size={19} />
-          <span className="sidebar-label">Asetukset</span>
+          <span className="studyos-avatar">A</span>
+          <ChevronDown size={15} />
         </button>
       </div>
-    </LiquidGlass>
+    </header>
   );
 }
 
-function PageHeader({
-  title,
-  eyebrow,
+function MobileDock({
+  page,
+  onNavigate,
   onSearch,
 }: {
-  title: string;
-  eyebrow: string;
+  page: StudyPage;
+  onNavigate: (page: StudyPage) => void;
   onSearch: () => void;
 }) {
   return (
-    <>
-      <header className="page-desktop-header mb-8 hidden items-end justify-between pt-7 md:flex">
-        <div>
-          <p className="text-sm text-muted-foreground">{eyebrow}</p>
-          <h1 className="mt-1 text-3xl font-semibold">{title}</h1>
-        </div>
-      </header>
-
-      <LiquidGlass lensing as="header" className="app-mobile-header md:hidden">
-        <div className="min-w-0">
-          <p className="truncate text-[12px] font-medium text-muted-foreground">{eyebrow}</p>
-          <h1 className="mt-0.5 truncate text-[28px] font-semibold leading-tight">{title}</h1>
-        </div>
-        <div className="flex gap-1">
-          <button aria-label="Haku" onClick={onSearch} className="app-icon-button glass-interactive">
-            <Search size={20} />
-          </button>
-        </div>
-      </LiquidGlass>
-    </>
-  );
-}
-
-function BottomInteractionZone({
-  children,
-  contextualAction,
-}: {
-  children: ReactNode;
-  contextualAction?: ReactNode;
-}) {
-  return (
-    <div className="bottom-interaction-zone">
-      <div className="bottom-context-action">{contextualAction}</div>
-      {children}
-    </div>
-  );
-}
-
-function MobileTabBar({
-  page,
-  moreOpen,
-  onNavigate,
-  onMore,
-}: {
-  page: StudyPage;
-  moreOpen: boolean;
-  onNavigate: (page: StudyPage) => void;
-  onMore: () => void;
-}) {
-  const moreActive = moreOpen || page === "practice" || page === "exams" || page === "settings";
-  return (
-    <LiquidGlass lensing as="nav" aria-label="Mobiilinavigaatio" className="app-tabbar !grid-cols-5 md:hidden">
-      {mobilePrimaryNav.map(({ id, label, Icon }) => (
-        <button
-          key={id}
-          aria-label={label}
-          aria-current={page === id ? "page" : undefined}
-          onClick={() => onNavigate(id)}
-          className={"app-tab " + (page === id ? "app-tab-active" : "")}
-        >
-          <Icon size={21} />
-          <span>{label}</span>
-        </button>
-      ))}
-      <button
-        aria-label="Lisää"
-        aria-expanded={moreOpen}
-        onClick={onMore}
-        className={"app-tab " + (moreActive ? "app-tab-active" : "")}
-      >
-        <Ellipsis size={21} />
-        <span>Lisää</span>
+    <nav className="studyos-mobile-dock" aria-label="Mobiilinavigaatio">
+      <button className={page === "today" ? "is-active" : ""} onClick={() => onNavigate("today")}>
+        <Sparkles size={20} />
+        <span>Flow</span>
       </button>
-    </LiquidGlass>
+      <button className={page === "plan" ? "is-active" : ""} onClick={() => onNavigate("plan")}>
+        <CalendarDays size={20} />
+        <span>Map</span>
+      </button>
+      <button onClick={onSearch}>
+        <Search size={20} />
+        <span>Haku</span>
+      </button>
+    </nav>
   );
 }
 
-function MoreSheet({
+function MoreMenu({
   page,
   open,
   onClose,
@@ -254,13 +217,15 @@ function MoreSheet({
   onSearch: () => void;
 }) {
   const rootRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     if (!open) return;
     const previous = document.activeElement as HTMLElement | null;
     const focusable = () => [...(rootRef.current?.querySelectorAll<HTMLElement>(
-      'button:not([disabled]), a[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      'button:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])',
     ) ?? [])];
     focusable()[0]?.focus();
+
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         event.preventDefault();
@@ -269,7 +234,8 @@ function MoreSheet({
       }
       if (event.key !== "Tab") return;
       const items = focusable();
-      const first = items[0], last = items[items.length - 1];
+      const first = items[0];
+      const last = items[items.length - 1];
       if (!first || !last) return;
       if (event.shiftKey && document.activeElement === first) {
         event.preventDefault();
@@ -279,6 +245,7 @@ function MoreSheet({
         first.focus();
       }
     };
+
     document.addEventListener("keydown", onKeyDown);
     return () => {
       document.removeEventListener("keydown", onKeyDown);
@@ -286,70 +253,44 @@ function MoreSheet({
     };
   }, [open, onClose]);
 
-  const navigateFromSheet = (target: StudyPage) => {
+  if (!open) return null;
+
+  const navigate = (target: StudyPage) => {
     onClose();
     onNavigate(target);
   };
-  const launchAfterClose = (action: () => void) => {
-    onClose();
-    window.setTimeout(action, 0);
-  };
-
-  if (!open) return null;
 
   return (
-    <div ref={rootRef} className="app-sheet-backdrop md:hidden" role="presentation" onClick={onClose}>
-      <LiquidGlass
-        lensing
-        as="aside"
+    <div ref={rootRef} className="studyos-menu-backdrop" role="presentation" onClick={onClose}>
+      <aside
+        className="studyos-more-menu"
         role="dialog"
         aria-modal="true"
-        aria-label="Lisää toimintoja"
-        className="app-sheet"
+        aria-label="StudyOS-valikko"
         onClick={(event) => event.stopPropagation()}
       >
-        <div className="mb-4 flex items-center justify-between">
+        <div className="studyos-more-head">
           <div>
-            <p className="text-sm text-muted-foreground">Opintopäiväkirja</p>
-            <h2 className="text-xl font-semibold">Lisää</h2>
+            <p>StudyOS</p>
+            <h2>Työtila</h2>
           </div>
-          <button className="app-icon-button" aria-label="Sulje" onClick={onClose}>
-            <X size={20} />
-          </button>
+          <button onClick={onClose} aria-label="Sulje"><X size={19} /></button>
         </div>
 
-        <div className="grid gap-2">
-          <button
-            className={"app-sheet-action " + (page === "practice" ? "app-sheet-action-active" : "")}
-            onClick={() => navigateFromSheet("practice")}
-          >
-            <Brain size={22} />
-            <span><b>Harjoittelu</b><small>Tehtävät ja kertaus</small></span>
-          </button>
-          <button
-            className={"app-sheet-action " + (page === "exams" ? "app-sheet-action-active" : "")}
-            onClick={() => navigateFromSheet("exams")}
-          >
-            <FlaskConical size={22} />
-            <span><b>Kokeet</b><small>Koetila ja valmius</small></span>
-          </button>
-          <button className="app-sheet-action" onClick={() => launchAfterClose(onLog)}>
-            <Plus size={22} />
-            <span><b>Kirjaa opiskelu</b><small>Nopea jälkikirjaus</small></span>
-          </button>
-          <button className="app-sheet-action" onClick={() => launchAfterClose(onSearch)}>
-            <Search size={22} />
-            <span><b>Haku</b><small>Kurssit, aiheet ja toiminnot</small></span>
-          </button>
-          <button
-            className={"app-sheet-action " + (page === "settings" ? "app-sheet-action-active" : "")}
-            onClick={() => navigateFromSheet("settings")}
-          >
-            <Settings2 size={22} />
-            <span><b>Asetukset</b><small>Kapasiteetti ja muistutukset</small></span>
-          </button>
+        <div className="studyos-more-grid">
+          {secondaryDestinations.map(({ id, label, description, Icon }) => (
+            <button key={id} className={page === id ? "is-active" : ""} onClick={() => navigate(id)}>
+              <Icon size={20} />
+              <span><b>{label}</b><small>{description}</small></span>
+            </button>
+          ))}
         </div>
-      </LiquidGlass>
+
+        <div className="studyos-more-quick">
+          <button onClick={() => { onClose(); window.setTimeout(onLog, 0); }}><Plus size={18} /> Kirjaa opiskelu</button>
+          <button onClick={() => { onClose(); window.setTimeout(onSearch, 0); }}><Search size={18} /> Hae StudyOS:stä</button>
+        </div>
+      </aside>
     </div>
   );
 }
