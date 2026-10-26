@@ -24,6 +24,7 @@ import practiceCss from "../styles/practice.css?url";
 import examsCss from "../styles/exams.css?url";
 import settingsCss from "../styles/settings.css?url";
 import overlaysCss from "../styles/overlays.css?url";
+import studyosCss from "../styles/studyos.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { PwaUpdatePrompt } from "../components/PwaUpdatePrompt";
 
@@ -66,9 +67,7 @@ function ErrorComponent({ error, reset }: { error: unknown; reset: () => void })
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
-        <h1 className="text-xl font-semibold tracking-tight text-foreground">
-          Sivua ei voitu ladata
-        </h1>
+        <h1 className="text-xl font-semibold tracking-tight text-foreground">Sivua ei voitu ladata</h1>
         <p className="mt-2 text-sm text-muted-foreground">
           Jokin meni pieleen. Yritä uudelleen tai palaa etusivulle.
         </p>
@@ -99,17 +98,17 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
-      { name: "theme-color", content: "#f7f7f7" },
+      { name: "theme-color", content: "#f5f4f0" },
       { name: "color-scheme", content: "light dark" },
       { name: "mobile-web-app-capable", content: "yes" },
       { name: "apple-mobile-web-app-capable", content: "yes" },
       { name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" },
-      { name: "apple-mobile-web-app-title", content: "Opintopäiväkirja" },
+      { name: "apple-mobile-web-app-title", content: "StudyOS" },
       { name: "format-detection", content: "telephone=no" },
-      { title: "Opintopäiväkirja" },
-      { name: "description", content: "Suunnittele opiskelu, kirjaa harjoittelu ja seuraa osaamistasi." },
-      { property: "og:title", content: "Opintopäiväkirja" },
-      { property: "og:description", content: "Rauhallinen työkalu opiskelun suunnitteluun." },
+      { title: "StudyOS" },
+      { name: "description", content: "Adaptiivinen opiskelutyötila suunnitteluun, fokukseen ja oppimisen seurantaan." },
+      { property: "og:title", content: "StudyOS" },
+      { property: "og:description", content: "Rauhallinen, oppimistieteeseen perustuva opiskelutyötila." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -129,6 +128,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "stylesheet", href: examsCss },
       { rel: "stylesheet", href: settingsCss },
       { rel: "stylesheet", href: overlaysCss },
+      { rel: "stylesheet", href: studyosCss },
       { rel: "icon", href: "/app-icon-180.png", type: "image/png", sizes: "180x180" },
       { rel: "shortcut icon", href: "/app-icon-180.png", type: "image/png" },
       { rel: "manifest", href: "/manifest.webmanifest" },
@@ -155,9 +155,9 @@ function RootShell({ children }: { children: ReactNode }) {
                 const root = document.documentElement;
                 root.classList.toggle("dark", dark);
                 root.style.colorScheme = dark ? "dark" : "light";
-                root.style.backgroundColor = dark ? "#0f1012" : "#f7f7f7";
+                root.style.backgroundColor = dark ? "#111310" : "#f5f4f0";
                 const theme = document.querySelector('meta[name="theme-color"]');
-                if (theme) theme.setAttribute("content", dark ? "#0f1012" : "#f7f7f7");
+                if (theme) theme.setAttribute("content", dark ? "#111310" : "#f5f4f0");
               } catch {}
             })();`,
           }}
@@ -175,10 +175,6 @@ function RootShell({ children }: { children: ReactNode }) {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
 
-  // TanStack Start can create/hydrate the client at a different layer than the
-  // route module. Re-assert the offline write contract at the provider boundary
-  // so mutations using runOrQueue are never paused before their mutationFn gets
-  // a chance to persist the write locally.
   const defaults = queryClient.getDefaultOptions();
   queryClient.setDefaultOptions({
     ...defaults,
@@ -190,7 +186,6 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
       <PwaUpdatePrompt />
     </QueryClientProvider>
