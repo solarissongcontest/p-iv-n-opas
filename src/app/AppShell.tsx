@@ -45,12 +45,10 @@ const secondaryDestinations: Array<{
   { id: "settings", label: "Asetukset", description: "Kuormitus, ilmoitukset ja sovellus", Icon: Settings2 },
 ];
 
-const desktopCoreDestinations = desktopPrimaryNav
-  .map(({ id }) => id)
+const desktopCoreDestinations = desktopPrimaryNav.map(({ id }) => id)
   .filter((id) => id === "today" || id === "plan");
 
-const mobileCoreDestinations = mobilePrimaryNav
-  .map(({ id }) => id)
+const mobileCoreDestinations = mobilePrimaryNav.map(({ id }) => id)
   .filter((id) => id === "today" || id === "plan");
 
 function isCorePage(page: StudyPage) {
