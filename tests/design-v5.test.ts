@@ -5,19 +5,21 @@ import { readFileSync } from "node:fs";
 const read = (path: string) => readFileSync(new URL("../" + path, import.meta.url), "utf8");
 const readCombined = (...paths: string[]) => paths.map(read).join("\n");
 
-test("V5 navigation keeps the four recurring mobile destinations permanently reachable", () => {
+test("StudyOS keeps Flow and Map primary while mobile search and secondary study surfaces stay reachable", () => {
   const navigation = read("src/app/navigation.ts");
   const shell = read("src/app/AppShell.tsx");
 
-  assert.match(navigation, /mobilePrimaryNav/);
-  assert.match(navigation, /studyNav\[0\]/);
-  assert.match(navigation, /studyNav\[1\]/);
-  assert.match(navigation, /studyNav\[2\]/);
-  assert.match(navigation, /studyNav\[4\]/);
+  assert.match(navigation, /studyNav/);
+  assert.match(shell, /desktopCoreDestinations/);
+  assert.match(shell, /mobileCoreDestinations/);
+  assert.match(shell, /desktopPrimaryNav\.map/);
   assert.match(shell, /mobilePrimaryNav\.map/);
-  assert.match(shell, /!grid-cols-5/);
+  assert.match(shell, /aria-label="Mobiilinavigaatio"/);
+  assert.match(shell, /<span>Haku<\/span>/);
   assert.match(shell, /<b>Harjoittelu<\/b>/);
   assert.match(shell, /<b>Kokeet<\/b>/);
+  assert.match(shell, /aria-label="StudyOS-valikko"/);
+  assert.doesNotMatch(shell, /app-sidebar/);
 });
 
 test("V5 content uses a small canonical surface vocabulary", () => {
