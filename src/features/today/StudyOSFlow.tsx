@@ -283,7 +283,7 @@ export function StudyOSFlow({
       </section> : <section className="studyos-flow-empty">
         <p className="studyos-kicker">Tänään</p>
         <h2>Päivä on vapaa.</h2>
-        <p>StudyOS ei täytä tyhjää aikaa tehtävillä vain näyttääkseen ahkeralta. Voit levätä tai tehdä vapaaehtoisen retrieval-kierroksen.</p>
+        <p>StudyOS ei täytä tyhjää aikaa tehtävillä vain näyttääkseen ahkeralta. Voit levätä tai tehdä vapaaehtoisen mieleenpalautuskierroksen.</p>
         <div className="studyos-next-actions">
           <button className="studyos-start" onClick={() => onGo("practice")}>Harjoittele vapaaehtoisesti <ArrowRight size={18} /></button>
           <button className="studyos-quiet-button" onClick={() => onGo("plan")}>Avaa Map</button>
