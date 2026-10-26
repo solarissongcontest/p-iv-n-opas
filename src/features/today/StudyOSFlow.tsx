@@ -12,8 +12,9 @@ import type {
   Session,
   Topic,
 } from "@/lib/domain";
+import { findNextStudyDate } from "@/lib/domain";
+import { capacityForDateV3 } from "@/lib/learning-engine";
 import { adaptiveDayPlanV5 } from "@/lib/learning-os-v5";
-import { capacityForDateV3, findNextStudyDate } from "@/lib/domain";
 import {
   isPlanSyncConflict,
   useCreateFrictionEvent,
