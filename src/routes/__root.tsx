@@ -25,6 +25,7 @@ import examsCss from "../styles/exams.css?url";
 import settingsCss from "../styles/settings.css?url";
 import overlaysCss from "../styles/overlays.css?url";
 import studyosCss from "../styles/studyos.css?url";
+import studyosMapCss from "../styles/studyos-map.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { PwaUpdatePrompt } from "../components/PwaUpdatePrompt";
 
@@ -34,16 +35,9 @@ function NotFoundComponent() {
       <div className="max-w-md text-center">
         <h1 className="text-7xl font-bold text-foreground">404</h1>
         <h2 className="mt-4 text-xl font-semibold text-foreground">Sivua ei löytynyt</h2>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Hakemaasi sivua ei ole olemassa tai se on siirretty.
-        </p>
+        <p className="mt-2 text-sm text-muted-foreground">Hakemaasi sivua ei ole olemassa tai se on siirretty.</p>
         <div className="mt-6">
-          <Link
-            to="/"
-            className="inline-flex min-h-11 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-          >
-            Takaisin etusivulle
-          </Link>
+          <Link to="/" className="inline-flex min-h-11 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90">Takaisin etusivulle</Link>
         </div>
       </div>
     </div>
@@ -53,10 +47,7 @@ function NotFoundComponent() {
 function ErrorComponent({ error, reset }: { error: unknown; reset: () => void }) {
   const router = useRouter();
   const normalizedError = useMemo(
-    () =>
-      error instanceof Error
-        ? error
-        : new Error(typeof error === "string" ? "NonErrorThrown" : "Tuntematon sovellusvirhe"),
+    () => error instanceof Error ? error : new Error(typeof error === "string" ? "NonErrorThrown" : "Tuntematon sovellusvirhe"),
     [error],
   );
   useEffect(() => {
@@ -68,25 +59,10 @@ function ErrorComponent({ error, reset }: { error: unknown; reset: () => void })
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
         <h1 className="text-xl font-semibold tracking-tight text-foreground">Sivua ei voitu ladata</h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Jokin meni pieleen. Yritä uudelleen tai palaa etusivulle.
-        </p>
+        <p className="mt-2 text-sm text-muted-foreground">Jokin meni pieleen. Yritä uudelleen tai palaa etusivulle.</p>
         <div className="mt-6 flex flex-wrap justify-center gap-2">
-          <button
-            onClick={() => {
-              router.invalidate();
-              reset();
-            }}
-            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-          >
-            Yritä uudelleen
-          </button>
-          <a
-            href="/"
-            className="inline-flex min-h-11 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
-          >
-            Takaisin etusivulle
-          </a>
+          <button onClick={() => { router.invalidate(); reset(); }} className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90">Yritä uudelleen</button>
+          <a href="/" className="inline-flex min-h-11 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent">Takaisin etusivulle</a>
         </div>
       </div>
     </div>
@@ -129,6 +105,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "stylesheet", href: settingsCss },
       { rel: "stylesheet", href: overlaysCss },
       { rel: "stylesheet", href: studyosCss },
+      { rel: "stylesheet", href: studyosMapCss },
       { rel: "icon", href: "/app-icon-180.png", type: "image/png", sizes: "180x180" },
       { rel: "shortcut icon", href: "/app-icon-180.png", type: "image/png" },
       { rel: "manifest", href: "/manifest.webmanifest" },
@@ -174,7 +151,6 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
-
   const defaults = queryClient.getDefaultOptions();
   queryClient.setDefaultOptions({
     ...defaults,
