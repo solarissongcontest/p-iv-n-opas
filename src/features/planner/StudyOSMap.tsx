@@ -1,22 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
 import { ArrowLeft, ArrowRight, CalendarPlus, Play, X } from "lucide-react";
 import { toast } from "sonner";
-import type {
-  CapacityProfile,
-  Course,
-  Mistake,
-  PlanItem,
-  PracticeAttempt,
-  PracticeTest,
-  Topic,
-} from "@/lib/domain";
+import type { CapacityProfile, Course, Mistake, PlanItem, PracticeAttempt, PracticeTest, Topic } from "@/lib/domain";
 import { capacityForDateV3 } from "@/lib/learning-engine";
 import { useExams, useMovePlanItem } from "@/lib/data";
 import { addDays, diffDays, fullDate, minutes, startOfWeek, today } from "@/lib/fi";
 import { TaskForm } from "@/components/StudyDialogs";
 
 export type StudyOSMapMode = "week" | "course" | "term";
-
 type LegacyPlannerMode = "päivä" | "viikko" | "kuukausi";
 
 type Props = {
@@ -28,84 +19,77 @@ type Props = {
   attempts: PracticeAttempt[];
   capacity: CapacityProfile;
   onStart: (id: string) => void;
-  initialMode?: LegacyPlannerMode;
-  initialAnchor?: string;
-  onPeriodChange?: (mode: LegacyPlannerMode, anchor: string) => void;
+  initialMode?: LegacyPlannerMode | undefined;
+  initialAnchor?: string | undefined;
+  onPeriodChange?: ((mode: LegacyPlannerMode, anchor: string) => void) | undefined;
 };
 
-function fiWeekday(iso: string) {
-  return new Date(`${iso}T12:00:00`).toLocaleDateString("fi-FI", { weekday: "short" }).replace(".", "");
-}
+type ExamLike = { id: string; course_id: string; date: string; name: string };
 
-function dayNumber(iso: string) {
-  return new Date(`${iso}T12:00:00`).toLocaleDateString("fi-FI", { day: "numeric", month: "numeric" });
-}
+const modeFromLegacy = (mode: LegacyPlannerMode | undefined): StudyOSMapMode =>
+  mode === "kuukausi" ? "term" : mode === "päivä" ? "course" : "week";
 
-function mapModeFromLegacy(mode: LegacyPlannerMode | undefined): StudyOSMapMode {
-  if (mode === "kuukausi") return "term";
-  if (mode === "päivä") return "course";
-  return "week";
-}
+const weekday = (iso: string) =>
+  new Date(`${iso}T12:00:00`).toLocaleDateString("fi-FI", { weekday: "short" }).replace(".", "");
+const dayNumber = (iso: string) =>
+  new Date(`${iso}T12:00:00`).toLocaleDateString("fi-FI", { day: "numeric", month: "numeric" });
 
-export function StudyOSMap(props: Props) {
-  const {
-    courses,
-    topics,
-    plan,
-    capacity,
-    onStart,
-    initialAnchor,
-    onPeriodChange,
-  } = props;
+export function StudyOSMap({
+  courses,
+  topics,
+  plan,
+  capacity,
+  onStart,
+  initialMode,
+  initialAnchor,
+  onPeriodChange,
+}: Props) {
   const examsQ = useExams();
   const move = useMovePlanItem();
-  const [mode, setMode] = useState<StudyOSMapMode>(() => mapModeFromLegacy(props.initialMode));
+  const [mode, setMode] = useState<StudyOSMapMode>(() => modeFromLegacy(initialMode));
   const [anchor, setAnchor] = useState(initialAnchor ?? today());
   const [selectedCourseId, setSelectedCourseId] = useState(courses[0]?.id ?? "");
   const [selectedItem, setSelectedItem] = useState<PlanItem | null>(null);
   const [shiftDate, setShiftDate] = useState("");
   const [adding, setAdding] = useState(false);
 
-  useEffect(() => {
-    setMode(mapModeFromLegacy(props.initialMode));
-  }, [props.initialMode]);
-  useEffect(() => {
-    if (initialAnchor) setAnchor(initialAnchor);
-  }, [initialAnchor]);
+  useEffect(() => setMode(modeFromLegacy(initialMode)), [initialMode]);
+  useEffect(() => { if (initialAnchor) setAnchor(initialAnchor); }, [initialAnchor]);
   useEffect(() => {
     if (!selectedCourseId || !courses.some((course) => course.id === selectedCourseId)) {
       setSelectedCourseId(courses[0]?.id ?? "");
     }
   }, [courses, selectedCourseId]);
 
+  const exams = (examsQ.data ?? []) as ExamLike[];
+  const activePlan = useMemo(() => plan.filter((item) => item.status !== "skipped"), [plan]);
   const weekStart = startOfWeek(anchor);
-  const weekDays = Array.from({ length: 7 }, (_, index) => addDays(weekStart, index));
-  const exams = examsQ.data ?? [];
-  const activePlan = plan.filter((item) => item.status !== "skipped");
+  const weekDays = useMemo(() => Array.from({ length: 7 }, (_, index) => addDays(weekStart, index)), [weekStart]);
+  const firstWeekDay = weekDays.at(0) ?? weekStart;
+  const lastWeekDay = weekDays.at(-1) ?? addDays(weekStart, 6);
+
+  const plannedByDate = useMemo(() => {
+    const result = new Map<string, number>();
+    for (const item of activePlan) {
+      if (item.kind === "exam") continue;
+      result.set(item.date, (result.get(item.date) ?? 0) + Math.max(0, item.target_minutes));
+    }
+    return result;
+  }, [activePlan]);
 
   const selectedCourse = courses.find((course) => course.id === selectedCourseId) ?? courses[0];
-  const selectedCourseItems = selectedCourse
-    ? activePlan.filter((item) => item.course_id === selectedCourse.id && item.date >= addDays(today(), -7))
-      .sort((a, b) => a.date.localeCompare(b.date) || (a.start_time ?? "").localeCompare(b.start_time ?? ""))
+  const courseItems = selectedCourse
+    ? activePlan
+        .filter((item) => item.course_id === selectedCourse.id && item.date >= addDays(today(), -7))
+        .sort((a, b) => a.date.localeCompare(b.date) || (a.start_time ?? "").localeCompare(b.start_time ?? ""))
     : [];
 
   const termStart = startOfWeek(today());
   const termEnd = addDays(termStart, 41);
-  const termDays = 42;
-
-  const plannedByDate = useMemo(() => {
-    const map = new Map<string, number>();
-    for (const item of activePlan) {
-      if (item.kind === "exam") continue;
-      map.set(item.date, (map.get(item.date) ?? 0) + Math.max(0, item.target_minutes));
-    }
-    return map;
-  }, [activePlan]);
 
   function changeMode(next: StudyOSMapMode) {
     setMode(next);
-    const legacy: LegacyPlannerMode = next === "term" ? "kuukausi" : next === "course" ? "päivä" : "viikko";
-    onPeriodChange?.(legacy, anchor);
+    onPeriodChange?.(next === "term" ? "kuukausi" : next === "course" ? "päivä" : "viikko", anchor);
   }
 
   function shiftWeek(direction: -1 | 1) {
@@ -136,13 +120,11 @@ export function StudyOSMap(props: Props) {
     }
   }
 
-  const title = mode === "week" ? "Tämä viikko" : mode === "course" ? "Kurssipolku" : "Seuraavat kuusi viikkoa";
-
   return <div className="studyos-map">
     <header className="studyos-map-hero">
       <div>
-        <p>Map · näe kokonaisuus ilman dashboardia</p>
-        <h1>{title}</h1>
+        <p>Map · koko suunnitelma samassa ajassa</p>
+        <h1>{mode === "week" ? "Tämä viikko" : mode === "course" ? "Kurssipolku" : "Seuraavat kuusi viikkoa"}</h1>
       </div>
       <div className="studyos-map-switch" role="group" aria-label="Mapin näkymä">
         <button aria-pressed={mode === "week"} onClick={() => changeMode("week")}>Viikko</button>
@@ -151,39 +133,59 @@ export function StudyOSMap(props: Props) {
       </div>
     </header>
 
-    {mode === "week" ? <WeekMap
-      courses={courses}
-      topics={topics}
-      plan={activePlan}
-      exams={exams}
-      days={weekDays}
-      capacity={capacity}
-      plannedByDate={plannedByDate}
-      onItem={openItem}
-      onPrevious={() => shiftWeek(-1)}
-      onNext={() => shiftWeek(1)}
-      onAdd={() => setAdding(true)}
-    /> : null}
+    {mode === "week" ? <>
+      <div className="studyos-map-toolbar">
+        <div className="studyos-map-period">
+          <button onClick={() => shiftWeek(-1)} aria-label="Edellinen viikko"><ArrowLeft size={17} /></button>
+          <span>{fullDate(firstWeekDay)} – {fullDate(lastWeekDay)}</span>
+          <button onClick={() => shiftWeek(1)} aria-label="Seuraava viikko"><ArrowRight size={17} /></button>
+        </div>
+        <button className="studyos-map-add" onClick={() => setAdding(true)}><CalendarPlus size={16} /> Lisää</button>
+      </div>
 
-    {mode === "course" ? <CourseMap
-      courses={courses}
-      topics={topics}
-      items={selectedCourseItems}
-      selectedCourseId={selectedCourse?.id ?? ""}
-      exams={exams}
-      onSelectCourse={setSelectedCourseId}
-      onItem={openItem}
-    /> : null}
+      <div className="studyos-map-grid" role="table" aria-label="Viikon opiskelukartta">
+        <div className="studyos-map-row" role="row">
+          <div className="studyos-map-cell studyos-map-day" role="columnheader">Kurssi</div>
+          {weekDays.map((day) => <div key={day} className="studyos-map-cell studyos-map-day" role="columnheader"><span>{weekday(day)}</span><b>{dayNumber(day)}</b></div>)}
+        </div>
 
-    {mode === "term" ? <TermMap
-      courses={courses}
-      plan={activePlan}
-      exams={exams}
-      start={termStart}
-      end={termEnd}
-      totalDays={termDays}
-      onItem={openItem}
-    /> : null}
+        {courses.map((course) => <div key={course.id} className="studyos-map-row" role="row">
+          <div className="studyos-map-cell studyos-map-course" role="rowheader"><b>{course.code}</b><small>{course.name}</small></div>
+          {weekDays.map((day) => {
+            const items = activePlan.filter((item) => item.course_id === course.id && item.date === day && item.kind !== "exam");
+            const exam = exams.find((candidate) => candidate.course_id === course.id && candidate.date === day);
+            return <div key={day} className="studyos-map-cell" role="cell">
+              {items.map((item) => <button key={item.id} className={`studyos-map-event ${item.status === "completed" ? "is-done" : ""}`} onClick={() => openItem(item)}>
+                <b>{item.start_time ? item.start_time.slice(0, 5) : minutes(item.target_minutes)}</b>
+                <span>{item.title || topics.find((topic) => topic.id === item.topic_id)?.name || "Opiskelu"}</span>
+              </button>)}
+              {exam ? <div className="studyos-map-event studyos-map-exam"><b>◆ KOE</b><span>{exam.name}</span></div> : null}
+            </div>;
+          })}
+        </div>)}
+
+        <div className="studyos-map-load" aria-label="Päivien kuormitus">
+          <div><strong>Kuorma</strong><span>suunniteltu / kapasiteetti</span></div>
+          {weekDays.map((day) => {
+            const planned = plannedByDate.get(day) ?? 0;
+            const available = Math.max(1, capacityForDateV3(capacity, day));
+            const width = Math.min(100, (planned / available) * 100);
+            return <div key={day}><strong>{planned} / {available} min</strong><div className="studyos-load-bar"><span style={{ width: `${width}%` }} /></div></div>;
+          })}
+        </div>
+      </div>
+    </> : null}
+
+    {mode === "course" ? <div className="studyos-course-map">
+      <label className="studyos-map-course-select">Kurssi
+        <select value={selectedCourse?.id ?? ""} onChange={(event) => setSelectedCourseId(event.target.value)}>
+          {courses.map((course) => <option key={course.id} value={course.id}>{course.code} · {course.name}</option>)}
+        </select>
+      </label>
+      <CoursePath course={selectedCourse} items={courseItems} topics={topics} exams={exams} onItem={openItem} />
+    </div> : null}
+
+    {mode === "term" ? <TermMap courses={courses} plan={activePlan} exams={exams} start={termStart} end={termEnd} onItem={openItem} /> : null}
 
     {adding ? <TaskForm courses={courses} topics={topics} date={anchor} onClose={() => setAdding(false)} /> : null}
 
@@ -203,115 +205,31 @@ export function StudyOSMap(props: Props) {
   </div>;
 }
 
-function WeekMap({
-  courses,
-  topics,
-  plan,
-  exams,
-  days,
-  capacity,
-  plannedByDate,
-  onItem,
-  onPrevious,
-  onNext,
-  onAdd,
-}: {
-  courses: Course[];
-  topics: Topic[];
-  plan: PlanItem[];
-  exams: Array<{ id: string; course_id: string; date: string; name: string }>;
-  days: string[];
-  capacity: CapacityProfile;
-  plannedByDate: Map<string, number>;
-  onItem: (item: PlanItem) => void;
-  onPrevious: () => void;
-  onNext: () => void;
-  onAdd: () => void;
-}) {
-  return <>
-    <div className="studyos-map-toolbar">
-      <div className="studyos-map-period">
-        <button onClick={onPrevious} aria-label="Edellinen viikko"><ArrowLeft size={17} /></button>
-        <span>{fullDate(days[0])} – {fullDate(days[6])}</span>
-        <button onClick={onNext} aria-label="Seuraava viikko"><ArrowRight size={17} /></button>
-      </div>
-      <button className="studyos-map-add" onClick={onAdd}><CalendarPlus size={16} /> Lisää</button>
-    </div>
-
-    <div className="studyos-map-grid" role="table" aria-label="Viikon opiskelukartta">
-      <div className="studyos-map-row" role="row">
-        <div className="studyos-map-cell studyos-map-day" role="columnheader">Kurssi</div>
-        {days.map((day) => <div key={day} className="studyos-map-cell studyos-map-day" role="columnheader"><span>{fiWeekday(day)}</span><b>{dayNumber(day)}</b></div>)}
-      </div>
-
-      {courses.map((course) => <div key={course.id} className="studyos-map-row" role="row">
-        <div className="studyos-map-cell studyos-map-course" role="rowheader"><b>{course.code}</b><small>{course.name}</small></div>
-        {days.map((day) => {
-          const items = plan.filter((item) => item.course_id === course.id && item.date === day && item.kind !== "exam");
-          const exam = exams.find((candidate) => candidate.course_id === course.id && candidate.date === day);
-          return <div key={day} className="studyos-map-cell" role="cell">
-            {items.map((item) => <button key={item.id} className={"studyos-map-event " + (item.status === "completed" ? "is-done" : "")} onClick={() => onItem(item)}>
-              <b>{item.start_time ? item.start_time.slice(0, 5) : minutes(item.target_minutes)}</b>
-              <span>{item.title || topics.find((topic) => topic.id === item.topic_id)?.name || "Opiskelu"}</span>
-            </button>)}
-            {exam ? <div className="studyos-map-event studyos-map-exam"><b>◆ KOE</b><span>{exam.name}</span></div> : null}
-          </div>;
-        })}
-      </div>)}
-
-      <div className="studyos-map-load" aria-label="Päivien kuormitus">
-        <div><strong>Kuorma</strong><span>suunniteltu / kapasiteetti</span></div>
-        {days.map((day) => {
-          const planned = plannedByDate.get(day) ?? 0;
-          const cap = Math.max(1, capacityForDateV3(capacity, day));
-          const ratio = Math.min(1.2, planned / cap);
-          return <div key={day}><strong>{planned} / {cap} min</strong><div className="studyos-load-bar"><span style={{ width: `${Math.min(100, ratio * 100)}%` }} /></div></div>;
-        })}
-      </div>
-    </div>
-  </>;
-}
-
-function CourseMap({
-  courses,
-  topics,
-  items,
-  selectedCourseId,
-  exams,
-  onSelectCourse,
-  onItem,
-}: {
-  courses: Course[];
-  topics: Topic[];
+function CoursePath({ course, items, topics, exams, onItem }: {
+  course: Course | undefined;
   items: PlanItem[];
-  selectedCourseId: string;
-  exams: Array<{ id: string; course_id: string; date: string; name: string }>;
-  onSelectCourse: (id: string) => void;
+  topics: Topic[];
+  exams: ExamLike[];
   onItem: (item: PlanItem) => void;
 }) {
-  const course = courses.find((candidate) => candidate.id === selectedCourseId);
-  const exam = exams.filter((candidate) => candidate.course_id === selectedCourseId && candidate.date >= today()).sort((a, b) => a.date.localeCompare(b.date))[0];
-  const grouped = items.reduce<Record<string, PlanItem[]>>((acc, item) => {
-    (acc[item.date] ??= []).push(item);
-    return acc;
+  if (!course) return <p className="text-sm text-muted-foreground">Lisää ensin kurssi.</p>;
+  const exam = exams.filter((item) => item.course_id === course.id && item.date >= today()).sort((a, b) => a.date.localeCompare(b.date))[0];
+  const grouped = items.reduce<Record<string, PlanItem[]>>((result, item) => {
+    (result[item.date] ??= []).push(item);
+    return result;
   }, {});
 
-  return <div className="studyos-course-map">
-    <label className="studyos-map-course-select">Kurssi
-      <select value={selectedCourseId} onChange={(event) => onSelectCourse(event.target.value)}>{courses.map((candidate) => <option key={candidate.id} value={candidate.id}>{candidate.code} · {candidate.name}</option>)}</select>
-    </label>
-
+  return <>
     <div className="studyos-course-path-head">
-      <div><span>{course?.code}</span><h2>{course?.name}</h2></div>
+      <div><span>{course.code}</span><h2>{course.name}</h2></div>
       {exam ? <p><b>◆ {exam.name}</b><span>{fullDate(exam.date)} · {diffDays(exam.date, today())} pv</span></p> : null}
     </div>
-
     <div className="studyos-course-path">
       {Object.entries(grouped).map(([date, dateItems]) => <div key={date} className="studyos-course-path-stop">
         <div className="studyos-course-path-date">{fullDate(date)}</div>
         <div className="studyos-course-path-node" aria-hidden="true" />
         <div className="studyos-course-path-items">
-          {dateItems.map((item) => <button key={item.id} onClick={() => onItem(item)} className={item.status === "completed" ? "is-done" : ""}>
+          {dateItems.map((item) => <button key={item.id} className={item.status === "completed" ? "is-done" : ""} onClick={() => onItem(item)}>
             <b>{item.title || topics.find((topic) => topic.id === item.topic_id)?.name || "Opiskelujakso"}</b>
             <span>{minutes(item.target_minutes)} · {item.kind === "review" ? "kertaus" : "opiskelu"}</span>
           </button>)}
@@ -319,26 +237,18 @@ function CourseMap({
       </div>)}
       {!items.length ? <p className="text-sm text-muted-foreground">Kurssille ei ole vielä tulevia opiskelujaksoja.</p> : null}
     </div>
-  </div>;
+  </>;
 }
 
-function TermMap({
-  courses,
-  plan,
-  exams,
-  start,
-  end,
-  totalDays,
-  onItem,
-}: {
+function TermMap({ courses, plan, exams, start, end, onItem }: {
   courses: Course[];
   plan: PlanItem[];
-  exams: Array<{ id: string; course_id: string; date: string; name: string }>;
+  exams: ExamLike[];
   start: string;
   end: string;
-  totalDays: number;
   onItem: (item: PlanItem) => void;
 }) {
+  const totalDays = 42;
   return <div className="studyos-term-map">
     <div className="studyos-term-axis"><span>{fullDate(start)}</span><span>{fullDate(addDays(start, 14))}</span><span>{fullDate(addDays(start, 28))}</span><span>{fullDate(end)}</span></div>
     {courses.map((course) => {
@@ -350,7 +260,7 @@ function TermMap({
           <div className="studyos-term-line" />
           {items.map((item) => {
             const offset = Math.max(0, Math.min(totalDays - 1, diffDays(item.date, start)));
-            return <button key={item.id} className={"studyos-term-node " + (item.status === "completed" ? "is-done" : "")} style={{ left: `${(offset / (totalDays - 1)) * 100}%` }} onClick={() => onItem(item)} aria-label={`${course.code}, ${item.title || "opiskelu"}, ${fullDate(item.date)}`} />;
+            return <button key={item.id} className={`studyos-term-node ${item.status === "completed" ? "is-done" : ""}`} style={{ left: `${(offset / (totalDays - 1)) * 100}%` }} onClick={() => onItem(item)} aria-label={`${course.code}, ${item.title || "opiskelu"}, ${fullDate(item.date)}`} />;
           })}
           {courseExams.map((exam) => {
             const offset = Math.max(0, Math.min(totalDays - 1, diffDays(exam.date, start)));
