@@ -13,7 +13,11 @@ import {
   Sparkles,
   X,
 } from "lucide-react";
-import type { StudyPage } from "@/app/navigation";
+import {
+  desktopPrimaryNav,
+  mobilePrimaryNav,
+  type StudyPage,
+} from "@/app/navigation";
 
 type AppShellProps = {
   page: StudyPage;
@@ -35,14 +39,30 @@ const secondaryDestinations: Array<{
   Icon: typeof BookOpen;
 }> = [
   { id: "courses", label: "Opinnot", description: "Kurssit, aiheet ja oppimispolut", Icon: BookOpen },
-  { id: "practice", label: "Harjoittelu", description: "Vapaa retrieval- ja kertausharjoittelu", Icon: Brain },
+  { id: "practice", label: "Harjoittelu", description: "Vapaa mieleenpalautus- ja kertausharjoittelu", Icon: Brain },
   { id: "exams", label: "Kokeet", description: "Koealueet ja harjoituskokeet", Icon: FlaskConical },
   { id: "progress", label: "Kehitys", description: "Osaamisnäyttö ja oppimisrytmi", Icon: ChartNoAxesCombined },
   { id: "settings", label: "Asetukset", description: "Kuormitus, ilmoitukset ja sovellus", Icon: Settings2 },
 ];
 
+const desktopCoreDestinations = desktopPrimaryNav
+  .map(({ id }) => id)
+  .filter((id) => id === "today" || id === "plan");
+
+const mobileCoreDestinations = mobilePrimaryNav
+  .map(({ id }) => id)
+  .filter((id) => id === "today" || id === "plan");
+
 function isCorePage(page: StudyPage) {
   return page === "today" || page === "plan";
+}
+
+function coreLabel(page: StudyPage) {
+  return page === "today" ? "Flow" : "Map";
+}
+
+function CoreIcon({ page, size }: { page: StudyPage; size: number }) {
+  return page === "today" ? <Sparkles size={size} /> : <Map size={size} />;
 }
 
 export function AppShell({
@@ -69,7 +89,11 @@ export function AppShell({
         onSearch={onSearch}
       />
 
-      <main id="main-content" tabIndex={-1} className="studyos-main">
+      <main
+        id="main-content"
+        tabIndex={-1}
+        className={"studyos-main " + (contextualAction ? "app-main-has-context-action" : "")}
+      >
         {!isCorePage(page) && (
           <header className="studyos-context-header">
             <p>{pageEyebrow}</p>
@@ -79,9 +103,12 @@ export function AppShell({
         {children}
       </main>
 
-      {contextualAction ? <div className="studyos-assistive-action">{contextualAction}</div> : null}
-
-      <MobileDock page={page} onNavigate={onNavigate} onSearch={onSearch} />
+      <BottomInteractionZone
+        page={page}
+        contextualAction={contextualAction}
+        onNavigate={onNavigate}
+        onSearch={onSearch}
+      />
 
       <MoreMenu
         page={page}
@@ -128,22 +155,17 @@ function SystemBar({
         </button>
 
         <nav className="studyos-primary-nav" aria-label="Päänavigaatio">
-          <button
-            aria-current={page === "today" ? "page" : undefined}
-            className={page === "today" ? "is-active" : ""}
-            onClick={() => onNavigate("today")}
-          >
-            <Sparkles size={16} />
-            Flow
-          </button>
-          <button
-            aria-current={page === "plan" ? "page" : undefined}
-            className={page === "plan" ? "is-active" : ""}
-            onClick={() => onNavigate("plan")}
-          >
-            <Map size={16} />
-            Map
-          </button>
+          {desktopCoreDestinations.map((target) => (
+            <button
+              key={target}
+              aria-current={page === target ? "page" : undefined}
+              className={page === target ? "is-active" : ""}
+              onClick={() => onNavigate(target)}
+            >
+              <CoreIcon page={target} size={16} />
+              {coreLabel(target)}
+            </button>
+          ))}
         </nav>
 
         <div className="studyos-systembar-spacer" />
@@ -168,9 +190,29 @@ function SystemBar({
         >
           <span className="studyos-avatar">A</span>
           <ChevronDown size={15} />
+          <span className="sr-only">Lisää</span>
         </button>
       </div>
     </header>
+  );
+}
+
+function BottomInteractionZone({
+  page,
+  contextualAction,
+  onNavigate,
+  onSearch,
+}: {
+  page: StudyPage;
+  contextualAction?: ReactNode;
+  onNavigate: (page: StudyPage) => void;
+  onSearch: () => void;
+}) {
+  return (
+    <div className="bottom-interaction-zone">
+      {contextualAction ? <div className="studyos-assistive-action bottom-context-action">{contextualAction}</div> : null}
+      <MobileDock page={page} onNavigate={onNavigate} onSearch={onSearch} />
+    </div>
   );
 }
 
@@ -185,20 +227,28 @@ function MobileDock({
 }) {
   return (
     <nav className="studyos-mobile-dock" aria-label="Mobiilinavigaatio">
-      <button className={page === "today" ? "is-active" : ""} onClick={() => onNavigate("today")}>
-        <Sparkles size={20} />
-        <span>Flow</span>
-      </button>
-      <button className={page === "plan" ? "is-active" : ""} onClick={() => onNavigate("plan")}>
-        <CalendarDays size={20} />
-        <span>Map</span>
-      </button>
+      {mobileCoreDestinations.map((target) => (
+        <button
+          key={target}
+          className={page === target ? "is-active" : ""}
+          onClick={() => onNavigate(target)}
+        >
+          <CoreIcon page={target} size={20} />
+          <span>{coreLabel(target)}</span>
+        </button>
+      ))}
       <button onClick={onSearch}>
         <Search size={20} />
         <span>Haku</span>
       </button>
     </nav>
   );
+}
+
+function DestinationLabel({ label }: { label: string }) {
+  if (label === "Harjoittelu") return <b>Harjoittelu</b>;
+  if (label === "Kokeet") return <b>Kokeet</b>;
+  return <b>{label}</b>;
 }
 
 function MoreMenu({
@@ -255,9 +305,14 @@ function MoreMenu({
 
   if (!open) return null;
 
-  const navigate = (target: StudyPage) => {
+  const navigateFromSheet = (target: StudyPage) => {
     onClose();
     onNavigate(target);
+  };
+
+  const launchAfterClose = (action: () => void) => {
+    onClose();
+    window.setTimeout(action, 0);
   };
 
   return (
@@ -279,16 +334,16 @@ function MoreMenu({
 
         <div className="studyos-more-grid">
           {secondaryDestinations.map(({ id, label, description, Icon }) => (
-            <button key={id} className={page === id ? "is-active" : ""} onClick={() => navigate(id)}>
+            <button key={id} className={page === id ? "is-active" : ""} onClick={() => navigateFromSheet(id)}>
               <Icon size={20} />
-              <span><b>{label}</b><small>{description}</small></span>
+              <span><DestinationLabel label={label} /><small>{description}</small></span>
             </button>
           ))}
         </div>
 
         <div className="studyos-more-quick">
-          <button onClick={() => { onClose(); window.setTimeout(onLog, 0); }}><Plus size={18} /> Kirjaa opiskelu</button>
-          <button onClick={() => { onClose(); window.setTimeout(onSearch, 0); }}><Search size={18} /> Hae StudyOS:stä</button>
+          <button onClick={() => launchAfterClose(onLog)}><Plus size={18} /> Kirjaa opiskelu</button>
+          <button onClick={() => launchAfterClose(onSearch)}><Search size={18} /> Hae StudyOS:stä</button>
         </div>
       </aside>
     </div>
