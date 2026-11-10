@@ -10,7 +10,7 @@ export function gradeExercise(exercise:Exercise, response:string|TextAnchor|null
  if(exercise.type==='speech'||exercise.type==='writing'){
   return {status:'self-review',feedback:exercise.explanation};
  }
- if(exercise.type==='highlight'){
+ if(exercise.type==='highlight'||exercise.type==='find-text'){
   if(!response||typeof response==='string')return {status:'incorrect',feedback:'Valitse ensin tekstistä vastauskohta.'};
   // Exact anchor endpoints correspond to the entire source phrase. No fuzzy text acceptance.
   const source = exercise.target ?? '';
@@ -21,7 +21,22 @@ export function gradeExercise(exercise:Exercise, response:string|TextAnchor|null
   return {status:good?'correct':'incorrect',feedback:good?exercise.explanation:'Korostus ei vielä osu pyydettyyn tekstikohtaan. Lue ohje ja etsi koko ilmaus.'};
  }
  if(typeof response!=='string'||!response.trim())return {status:'incorrect',feedback:'Anna vastaus ennen tarkistamista.'};
- const correct=exercise.type==='choice'||exercise.type==='true-false'
+ if(exercise.type==='video'&&!exercise.reviewedMedia){
+  return {status:'self-review',feedback:'Videoaineiston sisältöä ja upotuksen toimintaa ei ole vielä vahvistettu. Tätä tehtävää ei pisteytetä.'};
+ }
+ if(exercise.type==='matching'||exercise.type==='article-sort'||exercise.type==='conjugation'){
+  let provided:Record<string,unknown>;
+  try{const value:unknown=JSON.parse(response);if(!value||typeof value!=='object'||Array.isArray(value))throw Error('invalid');provided=value as Record<string,unknown>;}
+  catch{return {status:'incorrect',feedback:'Täytä jokainen vastausrivi ennen tarkistamista.'};}
+  const pairs=exercise.pairs??[];
+  const mistakes=pairs.filter(([left,right])=>typeof provided[left]!=='string'||normalizedPhrase(provided[left] as string)!==normalizedPhrase(right));
+  const extra=Object.keys(provided).filter(key=>!pairs.some(([left])=>left===key));
+  const correct=mistakes.length===0&&extra.length===0&&pairs.length>0;
+  return {status:correct?'correct':'incorrect',feedback:correct?exercise.explanation:
+   'Tarkista erityisesti: '+mistakes.map(([left])=>left).join(', ')+'. '+exercise.explanation};
+ }
+
+ const correct=exercise.type==='choice'||exercise.type==='true-false'||exercise.type==='listen-choice'||exercise.type==='video'
   ?response===exercise.correct
   :exercise.type==='ordering'
     ?response.split(' | ').join(' ')===exercise.order?.join(' ')
