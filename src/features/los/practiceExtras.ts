@@ -16,6 +16,11 @@ const say=(id:string,prompt:string,model:string):Exercise=>
  ({id,type:'speech',prompt,explanation:'Mallisuoritus: '+model+'. Kuuntele oma äänitys ja arvioi rauhallinen, ymmärrettävä ääntäminen. Automaattista arvosanaa ei anneta.',hint:'Voit toistaa fraasin useita kertoja.'});
 
 export const supplementaryExercises:Partial<Record<ChapterId,Exercise[]>>={
+ C01:[
+ {id:'C01-X01',type:'matching',prompt:'Yhdistä kolme saksankielistä fraasia oikeaan suomennokseen.',pairs:[['Hallo!','Hei!'],['danke','kiitos'],['Tschüss!','Hei hei!']],hint:'Tarkista ensin kappaleen ensimmäinen ja viimeinen repliikki.',explanation:'Hallo = hei, danke = kiitos ja Tschüss = hei hei.'},
+ {id:'C01-X02',type:'listen-choice',prompt:'Kuuntele alkuperäistä Franzin ja Jörgin keskustelua. Mitä Jörg kysyy Franzilta iästä?',mediaUrl:'https://commons.wikimedia.org/wiki/Special:Redirect/file/Gespr%C3%A4chVorstellung.ogg',options:['Wie alt bist du?','Guten Morgen!','Was bedeutet das?'],correct:'Wie alt bist du?',hint:'Etsi kysymys, jonka vastaus sisältää Jahre alt.',explanation:'Jörg kysyy Wie alt bist du? Näin hän kysyy ikää, mutta fraasi opetellaan vasta C06:ssa.'},
+ {id:'C01-X03',type:'listen-write',prompt:'Kuuntele alkuperäinen lyhyt keskustelu. Kirjoita viimeinen hyvästely saksaksi.',mediaUrl:'https://commons.wikimedia.org/wiki/Special:Redirect/file/Gespr%C3%A4chVorstellung.ogg',accepted:['Tschüss!','Tschüss'],hint:'Kuuntele Jörgin viimeistä vuoroa.',explanation:'Jörg sanoo lopuksi Tschüss!'}
+ ],
  C02:[
   pick('C02-X01','Mikä on oikea kysymys kaverin nimestä?',['Wie heißt du?','Wie bist du?','Woher du?'],'Wie heißt du?','Nimi kysytään fraasilla Wie heißt du?'),
   fill('C02-X02','Täydennä: Du ____ Otto.', ['heißt'],'Du heißt Otto. Du-persoona saa heißen-verbissä muodon heißt.'),
@@ -26,6 +31,7 @@ export const supplementaryExercises:Partial<Record<ChapterId,Exercise[]>>={
   translate('C02-X07','Kirjoita saksaksi ”Olen nimeltäni Max.”',['Ich heiße Max.','Ich heiße Max'],'Ich heiße Max. Huomaa ß-kirjain.'),
   fill('C02-X08','Täydennä: Du ____ mein Freund. (Sinä olet ystäväni.)',['bist'],'Du bist käyttää sein-verbin du-muotoa. Tässä harjoitellaan vain sitä muotoa.'),
   say('C02-X09','Sano tervehdyksen jälkeen ”Olen nimeltäni Alex. Mikä sinun nimesi on?”','Hallo! Ich heiße Alex. Wie heißt du?'),
+  {id:'C02-X10',type:'conjugation',prompt:'Täytä heiße- ja sein-verbien opitut minä–sinä-muodot.',pairs:[['ich (heißen)','heiße'],['du (heißen)','heißt'],['ich (sein)','bin'],['du (sein)','bist']],hint:'Kertaa ich heiße / du heißt / ich bin / du bist.',explanation:'Heißen: ich heiße, du heißt. Sein: ich bin, du bist.'},
  ],
  C03:[
   pick('C03-X01','Mitä woher tarkoittaa?',['mistä','missä','milloin'],'mistä','Woher kysyy alkuperää. Wo kysyy sijaintia.'),
@@ -38,6 +44,7 @@ export const supplementaryExercises:Partial<Record<ChapterId,Exercise[]>>={
   translate('C03-X08','Kirjoita saksaksi ”Olen Itävallasta.”',['Ich komme aus Österreich.','Ich komme aus Österreich'],'Itävalta on Österreich, ja tarvitaan aus.'),
   write('C03-X09','Esittele kuvitteellinen henkilö, joka on kotoisin Berliinistä. Kerro nimi ja lähtöpaikka.','Ich heiße Lea. Ich komme aus Berlin.','Onko ich heiße -rakenne ja ich komme aus -rakenne mukana?'),
   say('C03-X10','Kysy ääneen uudelta tuttavalta, mistä hän tulee.','Woher kommst du?'),
+  {id:'C03-X11',type:'matching',prompt:'Yhdistä maat niiden suomenkielisiin nimiin.',pairs:[['Finnland','Suomi'],['Deutschland','Saksa'],['Österreich','Itävalta'],['Schweden','Ruotsi']],hint:'Käytä kappaleen sanastoa.',explanation:'Finnland = Suomi, Deutschland = Saksa, Österreich = Itävalta, Schweden = Ruotsi.'},
  ],
  C04:[
   pick('C04-X01','Kumpi pronomini on kohtelias puhuttelu?',['Sie','du','sie (pienellä)'],'Sie','Kohtelias te = Sie aina isolla.'),
@@ -58,6 +65,8 @@ export const supplementaryExercises:Partial<Record<ChapterId,Exercise[]>>={
   pick('C05-X08','Mikä vastaus kertoo, että olet väsynyt?',['Ich bin müde.','Ich heiße Max.','Guten Tag!'],'Ich bin müde.','Müde tarkoittaa väsynyt.'),
   write('C05-X09','Kirjoita lyhyt kolmen repliikin vointikeskustelu kahdelle kuvitteelliselle henkilölle.','A: Hallo! Wie geht es dir? B: Gut, danke. Und dir? A: Mir geht es gut.','Molemmat tervehtivät tai reagoivat, ja vointikysymykseen vastataan.'),
   say('C05-X10','Kysy ääneen kohteliaasti mitä toiselle kuuluu ja vastaa esimerkillä.','Wie geht es Ihnen? Mir geht es gut.'),
+  {id:'C05-X11',type:'error-correction',prompt:'Korjaa virhe tässä lauseessa: ”Mir geht es guten.”',accepted:['Mir geht es gut.','Mir geht es gut'],hint:'Vointifraasissa käytetään sanaa gut.',explanation:'Oikea fraasi on Mir geht es gut. Guten kuuluu esimerkiksi tervehdykseen Guten Tag.'},
+  {id:'C05-X12',type:'find-text',prompt:'Etsi ja korosta Karl-nimisen puhujan kohtelias vastakysymys ”Entä sinulle?”',blockId:'c05-a-2',target:'Und dir?',hint:'Karlin repliikin lopussa.',explanation:'Und dir? = Entä sinulle?'},
  ],
  C06:[
   pick('C06-X01','Mikä on numero seitsemän saksaksi?',['sieben','sechs','siebzehn'],'sieben','Sieben = 7, siebzehn = 17.'),
@@ -89,6 +98,7 @@ export const supplementaryExercises:Partial<Record<ChapterId,Exercise[]>>={
   order('C07-X09','Järjestä: Tavatkaa, olkaa hyvä.',['Bitte','buchstabieren','Sie.'],'Bitte buchstabieren Sie. on muodollinen pyyntö.'),
   write('C07-X10','Kirjoita kuvitteellinen nimi ja pyydä sen tavaamista kohteliaasti.','Mein Name ist Alex. Bitte buchstabieren Sie.','Pyyntö on kohtelias ja Sie isolla.'),
   say('C07-X11','Tavaa oma tai kuvitteellinen nimi ääneen selkeästi.','A – L – E – X'),
+  {id:'C07-X12',type:'article-sort',prompt:'Valitse näiden jo opetettujen substantiivien sanakirja-artikkelit.',pairs:[['Name','der'],['Frau','die'],['Jahr','das']],hint:'Nämä artikkelit on esitelty kappalesanastoissa.',explanation:'Der Name, die Frau ja das Jahr ovat sanojen sanakirjamuodot. Tämä ei vielä edellytä sijamuotojen osaamista.'},
  ],
  C08:[
   pick('C08-X01','Miten kerrot, ettet ymmärrä?',['Ich verstehe nicht.','Ich komme aus Finnland.','Guten Abend.'],'Ich verstehe nicht.','Verstehe nicht = en ymmärrä.'),
