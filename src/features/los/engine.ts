@@ -1,4 +1,4 @@
-import { LOS_VERSION, type Exercise } from './content';
+import { LOS_VERSION, type Exercise } from './content.ts';
 
 export type TextAnchor = {blockId:string;start:number;end:number;contentVersion:string};
 export type Grade = {status:'correct'|'incorrect'|'self-review';feedback:string};
