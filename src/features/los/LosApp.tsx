@@ -231,21 +231,23 @@ export function LosApp({ownerId}:{ownerId:string}){
  const navigate=useNavigate();
  const [view,setView]=useState<View>(initial);
  const [wordSearch,setWordSearch]=useState('');
+ const [moreOpen,setMoreOpen]=useState(false);
  const store=useLosStore(ownerId);
  const fontSize=typeof item(store,'setting:fontSize')==='number'?Number(item(store,'setting:fontSize')):18;
  useEffect(()=>{const update=()=>setView(parseHash());update();window.addEventListener('hashchange',update);return()=>window.removeEventListener('hashchange',update);},[]);
- const go=(v:View)=>{window.location.hash='/'+[v.kind,v.kind==='lesson'?v.lesson:v.cid,v.section].filter(Boolean).map(encodeURIComponent).join('/');setView(v);window.scrollTo({top:0,behavior:'instant'});};
+ const go=(v:View)=>{window.location.hash='/'+[v.kind,v.kind==='lesson'?v.lesson:v.cid,v.section].filter(Boolean).map(encodeURIComponent).join('/');setView(v);window.scrollTo({top:0,behavior:'auto'});};
  const goApp=(p:StudyPage)=>{const urls:Record<StudyPage,string>={today:'/today',plan:'/plan',courses:'/studies',practice:'/practice',progress:'/progress',exams:'/exams',settings:'/settings'};void navigate({to:urls[p]});};
  const chapter=chapters.find(c=>c.id===view.cid);
  const lesson=lessons.find(l=>l.id===view.lesson);
  const finishedLessons=lessons.filter(l=>item(store,'lesson:'+l.id)===true).length;
  const reviews=Object.entries(store.items).filter(([key,v])=>key.startsWith('review:')&&v&&typeof v==='object'&&'due' in v&&String((v as {due:string}).due)<=new Date().toISOString().slice(0,10));
  const dictionaryResults=allWords.filter(w=>(w.de+' '+w.fi).toLocaleLowerCase('de').includes(wordSearch.toLocaleLowerCase('de'))).slice(0,80);
- const lessonSteps=lesson?.id==='L001'?['Opas','Oma tavoite','Teksti B']:lesson?.chapterId?(Number(lesson.id.slice(1))-2)%5===0?['Aloita','Teksti A','Ymmärrä']:(Number(lesson.id.slice(1))-2)%5===1?['Teksti A','Ymmärrä','Sanasto']:(Number(lesson.id.slice(1))-2)%5===2?['Kielioppi','Harjoittele']:(Number(lesson.id.slice(1))-2)%5===3?['Teksti B','Käytä saksaa']:['Kulttuuri','Kappaletesti']:['Kertaus'];
+ const lessonPosition=lesson?.chapterId?(Number(lesson.id.slice(1))<=26?(Number(lesson.id.slice(1))-2)%5:(Number(lesson.id.slice(1))-31)%5):0;
+ const lessonSteps=lesson?.id==='L001'?['Opas','Oma tavoite','Teksti B']:lesson?.chapterId?lessonPosition===0?['Aloita','Teksti A','Ymmärrä']:lessonPosition===1?['Teksti A','Ymmärrä','Sanasto']:lessonPosition===2?['Kielioppi','Harjoittele']:lessonPosition===3?['Teksti B','Käytä saksaa']:['Kulttuuri','Kappaletesti']:['Kertaus'];
  const [step,setStep]=useState(0);
  useEffect(()=>setStep(0),[lesson?.id]);
- return <AppShell page="courses" pageTitle="LOS! 1" pageEyebrow="Saksa B3 · SAB31 · 2 op" moreOpen={false}
-  onMoreOpenChange={()=>{}} onNavigate={goApp} onLog={()=>void navigate({to:'/studies'})} onSearch={()=>go({kind:'dictionary'})}>
+ return <AppShell page="courses" pageTitle="LOS! 1" pageEyebrow="Saksa B3 · SAB31 · 2 op" moreOpen={moreOpen}
+  onMoreOpenChange={setMoreOpen} onNavigate={goApp} onLog={()=>void navigate({to:'/studies'})} onSearch={()=>go({kind:'dictionary'})}>
   <div className="los" id="los-root">
    <div className="los-top"><button className="los-quiet" onClick={()=>go({kind:'home'})}><ChevronLeft size={17}/> LOS! 1</button><span>Perustason alkeet 1 · Tutustu ja ihastu saksan kieleen</span><StateLabel status={store.status} error={store.error}/></div>
    <div className="los-layout">
@@ -292,7 +294,7 @@ export function LosApp({ownerId}:{ownerId:string}){
       <ChapterSection chapter={chapter} section={view.section??'Aloita'} store={store} fontSize={fontSize}/>
       <div className="los-note"><h3>Oma muistiinpano</h3><textarea aria-label={'Muistiinpanot '+chapter.name} rows={3} value={valueString(store,'note:'+chapter.id)} onChange={e=>store.put('note:'+chapter.id,e.target.value)} placeholder="Kirjoita, mitä opit tai mikä jäi epäselväksi…"/></div>
       <div className="los-actions"><button onClick={()=>store.put('bookmark:'+chapter.id,{section:view.section??'Aloita',version:LOS_VERSION})}><Bookmark size={16}/> Lisää kirjanmerkki</button>
-      <button onClick={()=>go({kind:'chapter',cid:chapter.id,section:sections[(sections.indexOf((view.section??'Aloita') as typeof sections[number])+1)%sections.length]})}>Seuraava osio <ChevronRight size={17}/></button></div>
+      <button onClick={()=>go({kind:'chapter',cid:chapter.id,section:sections[(sections.indexOf((view.section??'Aloita') as typeof sections[number])+1)%sections.length]??'Aloita'})}>Seuraava osio <ChevronRight size={17}/></button></div>
      </>:null}
      {view.kind==='lessons'?<><h1>Opetuspolku</h1><p>60 joustavaa noin 30 minuutin oppituntia, ei aikarajalaskuria. Tämä versio sisältää käyttökelpoiset alkutunnit. Muut tunnit erotetaan keskeneräisinä.</p><div className="los-lesson-list">{lessons.map(l=><button key={l.id} onClick={()=>go({kind:'lesson',lesson:l.id})}><b>{l.id}</b><span>{l.name}<small>{l.section} · noin 30 min</small></span><span>{item(store,'lesson:'+l.id)===true?'Suoritettu':l.status==='initial-material'?'Aloita':'Sisältö kesken'}</span></button>)}</div></>:null}
      {view.kind==='lesson'&&lesson?<><Label>TUNTI {Number(lesson.id.slice(1))} / 60</Label><h1>{lesson.name}</h1><p>{lesson.section} · noin 30 minuuttia, omaan tahtiin</p>
@@ -302,7 +304,7 @@ export function LosApp({ownerId}:{ownerId:string}){
        {lesson.id==='L001'&&step===0?<div className="los-prose"><h2>Näin opiskelet</h2><p>Valitse oppikirjasta kappale tai seuraa vapaaehtoista opetuspolkua. Kaikki tekstit on tarkoitus lukea LOS!:ssa. Napauta sanaa saadaksesi selityksen. Oikea korostustussi on erillään omista merkinnöistäsi.</p><p>Vihjeitä saa käyttää harjoittelussa. Kokeessa vastaus palautetaan ilman niitä. Edistyminen ei tarkoita samaa asiaa kuin osaaminen.</p></div>:null}
        {lesson.id==='L001'&&step===1?<><h2>Kirjoita oma tavoitteesi</h2><textarea aria-label="Oma tavoite" rows={4} value={valueString(store,'goal:los1')} onChange={e=>store.put('goal:los1',e.target.value)} placeholder="Haluan esimerkiksi osata tervehtiä ja esitellä itseni saksaksi." /></>:null}
        {lesson.id==='L001'&&step===2?<Media chapter={chapters[0]}/>:null}
-       {lesson.chapterId?<ChapterSection chapter={chapters.find(c=>c.id===lesson.chapterId)??chapters[0]} section={lessonSteps[step]} store={store} fontSize={fontSize}/>:null}
+       {lesson.chapterId?<ChapterSection chapter={chapters.find(c=>c.id===lesson.chapterId)??chapters[0]} section={lessonSteps[step]??'Aloita'} store={store} fontSize={fontSize}/>:null}
        {!lesson.chapterId&&lesson.id!=='L001'?<div className="los-prose"><h2>Opetussisältöä tarkistetaan</h2><p>Laajaa kertausta ja oikeaa arviointikoetta ei ole vielä hyväksytty. Tämä näkymä ei väitä suoritusta.</p><button onClick={()=>go({kind:'exams'})}>Kokeiden tilanne</button></div>:null}
       </div>
       <div className="los-actions">
