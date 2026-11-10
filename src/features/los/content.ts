@@ -5,9 +5,10 @@ export type ChapterId = 'C01'|'C02'|'C03'|'C04'|'C05'|'C06'|'C07'|'C08'|'C09'|'C
 export type Block = {id:string; speaker?:string; text:string};
 export type Word = {de:string; fi:string; tier:'ydin'|'tunnista'|'tuki'; note?:string};
 export type Exercise = {
-  id:string; type:'choice'|'true-false'|'fill'|'ordering'|'translate'|'highlight'|'writing'|'speech';
+  id:string; type:'choice'|'true-false'|'fill'|'matching'|'ordering'|'translate'|'highlight'|'find-text'|'listen-choice'|'listen-write'|'video'|'article-sort'|'conjugation'|'error-correction'|'writing'|'speech';
   prompt:string; options?:string[]; accepted?:string[]; correct?:string;
   hint:string; explanation:string; blockId?:string; target?:string; order?:string[];
+  pairs?:[string,string][]; mediaUrl?:string; videoId?:string; reviewedMedia?:boolean;
 };
 export type Chapter = {
   id:ChapterId; name:string; goal:string; sourceId:string; sourceUrl:string;
@@ -225,7 +226,7 @@ export function validateLosContent() {
  for(const chapter of chapters){
   for(const block of chapter.blocks){if(ids.has(block.id))issues.push('Päällekkäinen lohko '+block.id);ids.add(block.id)}
   for(const e of chapter.exercises){if(ids.has(e.id))issues.push('Päällekkäinen tehtävä '+e.id);ids.add(e.id);
-    if(e.type==='highlight'&&!chapter.blocks.some(b=>b.id===e.blockId&&b.text.includes(e.target??'')))issues.push('Virheellinen korostus '+e.id);}
+    if((e.type==='highlight'||e.type==='find-text')&&!chapter.blocks.some(b=>b.id===e.blockId&&b.text.includes(e.target??'')))issues.push('Virheellinen korostus '+e.id);}
   if(chapter.status==='text-reviewed'&&!chapter.blocks.length)issues.push('Puuttuva teksti '+chapter.id);
  }
  if(lessons.length!==60)issues.push('Oppitunteja ei ole 60');
