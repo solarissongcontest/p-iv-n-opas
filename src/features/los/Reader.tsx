@@ -1,22 +1,10 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { BookOpen, Highlighter, NotebookPen, Settings2 } from "lucide-react";
 import type { Book, ContentBlock } from "./model";
-import { getDeviceOwnerId } from "@/lib/deviceSession";
+import { useLosRecord, losSyncMessage } from "./data/useLosRecord";
 
 export type ReaderMark = { blockId: string; version: string; start: number; end: number; color: "yellow" };
 export type ReaderNote = { blockId: string; version: string; text: string; updatedAt: string };
-const storeKey = (book: Book, suffix: string) => {
-  const owner = getDeviceOwnerId();
-  return owner ? ["opk", "los", owner, book.id, suffix].join(":") : null;
-};
-function loadLocal<T>(key: string | null, fallback: T): T {
-  try { return key ? (JSON.parse(localStorage.getItem(key) ?? "null") as T | null) ?? fallback : fallback; }
-  catch { return fallback; }
-}
-function saveLocal<T>(key: string | null, value: T) {
-  try { if (!key) return false; localStorage.setItem(key, JSON.stringify(value)); return true; }
-  catch { return false; }
-}
 function SafeMedia({ block }: { block: Extract<ContentBlock, { kind: "media" }> }) {
   let valid = false;
   try {
@@ -93,22 +81,9 @@ export function Reader({ book, blocks, title }: { book: Book; blocks: ContentBlo
   const [readingMode, setReadingMode] = useState(false);
   const [toolsOpen, setToolsOpen] = useState(false);
   const [highlighter, setHighlighter] = useState(false);
-  const [marks, setMarks] = useState<ReaderMark[]>([]);
-  const [notes, setNotes] = useState<ReaderNote[]>([]);
+  const { value: marks, update: setMarks, status: marksStatus } = useLosRecord<ReaderMark[]>(book.id, "marks", "reader", book.contentVersion, []);
+  const { value: notes, update: setNotes, status: notesStatus } = useLosRecord<ReaderNote[]>(book.id, "notes", "reader", book.contentVersion, []);
   const [activeNote, setActiveNote] = useState<ContentBlock | null>(null);
-  const [loaded, setLoaded] = useState(false);
-  const [saved, setSaved] = useState(false);
-  useEffect(() => {
-    setMarks(loadLocal(storeKey(book, "marks"), []));
-    setNotes(loadLocal(storeKey(book, "notes"), []));
-    setLoaded(true);
-  }, [book]);
-  useEffect(() => {
-    if (!loaded) return;
-    const marksSaved = saveLocal(storeKey(book, "marks"), marks);
-    const notesSaved = saveLocal(storeKey(book, "notes"), notes);
-    setSaved(marksSaved && notesSaved);
-  }, [book, marks, notes, loaded]);
   const noteValue = notes.find(note => note.blockId === activeNote?.id && note.version === activeNote.version)?.text ?? "";
   const updateNote = (text: string) => {
     if (!activeNote) return;
@@ -130,7 +105,8 @@ export function Reader({ book, blocks, title }: { book: Book; blocks: ContentBlo
       <label>Tekstin koko {fontSize} px <input aria-label="Tekstin koko" type="range" min="16" max="24" step="1" value={fontSize} onChange={event => setFontSize(Number(event.target.value))} /></label>
       <label>Riviväli {lineHeight.toFixed(2)} <input aria-label="Riviväli" type="range" min="1.4" max="1.9" step=".05" value={lineHeight} onChange={event => setLineHeight(Number(event.target.value))}/></label>
     </div>}
-    {highlighter && <p className="los-notice">Valitse hiirellä tai kosketuksella teksti maalattavaksi. Merkinnät tallentuvat toistaiseksi vain tälle laitteelle.</p>}
+    {highlighter && <p className="los-notice">Valitse hiirellä tai kosketuksella teksti maalattavaksi. Merkinnät tallentuvat ensin laitteelle ja synkronoituvat palvelimelle, kun yhteys ja tietokanta ovat saatavilla.</p>}
+    <p className="los-storage-state" role="status">{losSyncMessage(marksStatus)}</p>
     <div className="los-reading-body">{blocks.map(block => <RenderBlock
       key={block.id + ":" + block.version} block={block}
       highlighterEnabled={highlighter}
@@ -145,7 +121,7 @@ export function Reader({ book, blocks, title }: { book: Book; blocks: ContentBlo
       <div className="los-inline-head"><h2 id="los-note-heading">Muistiinpano</h2><button className="los-button los-button-secondary" onClick={() => setActiveNote(null)}>Sulje</button></div>
       <label htmlFor="los-note-input">Oma merkintä tähän tekstikohtaan</label>
       <textarea id="los-note-input" value={noteValue} onChange={event => updateNote(event.target.value)} rows={5}/>
-      <p className="los-storage-state">{saved ? "Luonnos tallennettu tälle laitteelle" : "Tallennusta ei voitu vahvistaa"}</p>
+      <p className="los-storage-state">{losSyncMessage(notesStatus)}</p>
     </section>}
   </article>;
 }
