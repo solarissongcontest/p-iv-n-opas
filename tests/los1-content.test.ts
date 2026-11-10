@@ -3,6 +3,7 @@ import test from 'node:test';
 import {chapters,lessons,sections,validateLosContent,LOS_VERSION} from '../src/features/los/content.ts';
 import {gradeExercise,tokenOffsets,normalizeAnswer,dueDate} from '../src/features/los/engine.ts';
 import {allChapterExercises} from '../src/features/los/practiceExtras.ts';
+import {midExam,finalExam,validateLosExams} from '../src/features/los/examBank.ts';
 
 test('LOS! 1 preserves canonical ten chapters and sixty lessons',()=>{
  assert.deepEqual(chapters.map(c=>c.id),Array.from({length:10},(_,i)=>'C'+String(i+1).padStart(2,'0')));
@@ -64,6 +65,17 @@ test('additional practice is differentiated across all ten chapters',()=>{
   for(const ex of exercises){assert.ok(ex.prompt.trim());assert.ok(ex.explanation.trim());assert.ok(ex.hint.trim());}
  }
  assert.equal(ids.length,new Set(ids).size);
+});
+test('L030 and L059 have distinct complete deterministic 25/50 question banks',()=>{
+ assert.equal(midExam.length,25);
+ assert.equal(finalExam.length,50);
+ assert.deepEqual(validateLosExams(),[]);
+ const all=[...midExam,...finalExam];
+ assert.equal(new Set(all.map(x=>x.id)).size,75);
+ for(const ex of all){
+  const answer=ex.correct??ex.accepted?.[0]??ex.order?.join(' | ')??'';
+  assert.equal(gradeExercise(ex,answer).status,'correct',ex.id);
+ }
 });
 test('review schedule is delayed and not an XP/streak score',()=>{
  const date=new Date('2026-11-10T12:00:00Z');
