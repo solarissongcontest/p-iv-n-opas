@@ -16,11 +16,13 @@ export interface SourceAttribution {
 export interface Chapter {
   id: string; version: string; sequence: number; title: string;
   introductionFi: string; objectives: string[]; blockIds: string[]; exerciseIds: string[];
+  publicationStatus?: "planned" | "published"; plannedSourceIds?: string[];
 }
 export interface Lesson {
   id: string; version: string; bookId: BookId; chapterId?: string;
   sequence: number; title: string; estimatedMinutes: number; objectives: string[];
   model: "text" | "vocabulary" | "grammar" | "application" | "review";
+  publicationStatus?: "planned" | "published";
   steps: { id: string; title: string; required: boolean; blockId?: string; exerciseId?: string }[];
 }
 export type ContentBlock =
