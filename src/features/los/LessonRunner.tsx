@@ -22,6 +22,7 @@ export function LessonRunner({ book, lesson }: { book: Book; lesson: Lesson }) {
     lessonId: lesson.id, lessonVersion: lesson.version, completedStepIds: [], status: "not-started", updatedAt: "",
   });
   const [index, setIndex] = useState(0);
+  const [checkedSteps, setCheckedSteps] = useState<string[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [saved, setSaved] = useState(false);
   useEffect(() => {
@@ -38,7 +39,7 @@ export function LessonRunner({ book, lesson }: { book: Book; lesson: Lesson }) {
   const required = lesson.steps.filter(item => item.required);
   const completedCount = required.filter(item => progress.completedStepIds.includes(item.id)).length;
   const advance = () => {
-    if (!step) return;
+    if (!step || (step.exerciseId && !checkedSteps.includes(step.id))) return;
     const completedStepIds = Array.from(new Set([...progress.completedStepIds, step.id]));
     const isDone = required.every(item => completedStepIds.includes(item.id));
     setProgress({
@@ -65,14 +66,15 @@ export function LessonRunner({ book, lesson }: { book: Book; lesson: Lesson }) {
       </li>)}</ol>
     <section className="los-lesson-step" aria-labelledby="los-step-title"><h2 id="los-step-title">{step.title}</h2>
       {block && <Reader book={book} title={step.title} blocks={[block]} />}
-      {exercise && <ExerciseEngine key={exercise.id} exercise={exercise}/>}
+      {exercise && <ExerciseEngine key={exercise.id} exercise={exercise} onChecked={() => setCheckedSteps(previous => Array.from(new Set([...previous, step.id])))}/>}
       {!block && !exercise && <p className="los-notice">Tämän vaiheen materiaalia ei ole vielä julkaistu.</p>}
     </section>
     <div className="los-actions los-step-controls">
       <button type="button" className="los-button los-button-secondary" disabled={index === 0} onClick={() => setIndex(index - 1)}><ArrowLeft size={17}/> Edellinen</button>
-      <button type="button" className="los-button los-button-primary" disabled={!block && !exercise}
+      <button type="button" className="los-button los-button-primary" disabled={(!block && !exercise) || (!!exercise && !checkedSteps.includes(step.id))}
         onClick={advance}>{index < lesson.steps.length - 1 ? "Merkitse käsitellyksi ja jatka" : "Päätä oppitunti"} <ArrowRight size={17}/></button>
     </div>
+    {exercise && !checkedSteps.includes(step.id) && <p className="los-support">Tarkista tehtävä ennen kuin merkitset tämän vaiheen käsitellyksi. Oikeaa vastausta ei vaadita.</p>}
     <p className="los-storage-state">{saved ? "Vaihetiedot tallennettu tälle laitteelle · ei synkronoitu" : "Vaihetiedoille ei ole vielä vahvistettua pilvitallennusta"}</p>
     {progress.status === "completed" && <p className="los-feedback is-correct" role="status">Kaikki pakolliset vaiheet käsitelty tällä laitteella. Tämä ei ole virallinen kurssisuoritus.</p>}
   </section>;
