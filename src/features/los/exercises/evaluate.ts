@@ -33,8 +33,8 @@ export function evaluateExercise(exercise: Exercise, answer: ExerciseAnswer): Ev
         && new Set(Object.values(answer)).size === exercise.right.length;
       break;
     case "highlight": {
-      if (typeof answer !== "object" || Array.isArray(answer) || !("start" in answer)) return null;
-      const selected = normalizeRange(exercise.text, answer);
+      if (typeof answer !== "object" || Array.isArray(answer) || !("start" in answer) || !("end" in answer) || typeof answer.start !== "number" || typeof answer.end !== "number") return null;
+      const selected = normalizeRange(exercise.text, { start: answer.start, end: answer.end });
       if (selected.start === selected.end) return null;
       correct = exercise.acceptedRanges.some(range => {
         const expected = normalizeRange(exercise.text, range);
