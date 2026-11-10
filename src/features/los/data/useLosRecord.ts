@@ -124,7 +124,7 @@ export function useLosRecord<T>(
         setStatus("queued");
         void send(bookId, kind, key, version, cached).then((result) => {
           if (alive && !edited.current) setStatus(result === "queued" ? "queued" : "synced");
-        }).catch(() => { if (alive && !edited.current) setStatus("error"); });
+        }).catch(error => { if (alive && !edited.current) setStatus(String(error).includes("SYNC_CONFLICT") ? "conflict" : "error"); });
       } else setStatus("empty");
     }).catch(() => {
       if (alive && !edited.current) setStatus(cached ? "local" : "error");
@@ -135,7 +135,11 @@ export function useLosRecord<T>(
   const update = useCallback((next: SetStateAction<T>) => {
     const newValue = typeof next === "function"
       ? (next as (previous: T) => T)(current.current) : next;
-    const item: Stored<T> = { value: newValue, clientUpdatedAt: new Date().toISOString() };
+    // Date.now() can repeat during rapid typing. Strictly increasing client
+    // timestamps prevent an older queued autosave from racing the latest one.
+    const previousTime = Date.parse(latestWrite.current);
+    const stamp = new Date(Math.max(Date.now(), Number.isFinite(previousTime) ? previousTime + 1 : 0)).toISOString();
+    const item: Stored<T> = { value: newValue, clientUpdatedAt: stamp };
     latestWrite.current = item.clientUpdatedAt;
     edited.current = true;
     current.current = newValue;
