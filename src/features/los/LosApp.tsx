@@ -36,13 +36,13 @@ function Empty({ title, children }: { title: string; children: React.ReactNode }
 }
 function Navigation({ book, current }: { book: Book; current: string }) {
   return <nav aria-label={"LOS! " + book.number + " kirjan osiot"} className="los-nav">
-    {sections.map(section => <a key={section.segment} href={bookPath(book, section.segment)}
+    {sections.map(section => <a key={section.segment} href={section.segment === "sanakirja" ? LOS_BASE_PATH + "/sanakirja" : bookPath(book, section.segment)}
       aria-current={current === section.segment ? "page" : undefined}>
       {section.title}</a>)}
   </nav>;
 }
 function BookShell({ book, current, children }: { book: Book; current: string; children: React.ReactNode }) {
-  const css = { "--los-book-accent": book.accent, "--los-book-tint": book.tint, "--los-book-accent-readable": book.accentDark } as React.CSSProperties;
+  const css = { "--los-book-accent": book.accent, "--los-book-tint": book.tint, "--los-book-accent-light": book.accent, "--los-book-accent-dark": book.accentDark } as React.CSSProperties;
   return <div className="los-app" style={css}>
     <div className="los-context"><a href={LOS_BASE_PATH}><ArrowLeft size={17}/> Kaikki kirjat</a><span>LOS! {book.number} · {book.moduleCode}</span></div>
     <div className="los-book-mobile-nav"><details><summary><List size={18}/> Kirjan valikko</summary><Navigation book={book} current={current}/></details></div>
@@ -64,7 +64,7 @@ function LibraryPage() {
     <h2 className="los-section-title">Kirjat</h2>
     <div className="los-library-grid">{LOS_BOOKS.map(book =>
       <a href={bookPath(book)} className="los-book-card" key={book.id}
-        style={{ "--los-book-accent": book.accent, "--los-book-tint": book.tint } as React.CSSProperties}>
+        style={{ "--los-book-accent": book.accent, "--los-book-tint": book.tint, "--los-book-accent-light": book.accent, "--los-book-accent-dark": book.accentDark } as React.CSSProperties}>
         <BookCover book={book} />
         <strong>LOS! {book.number}</strong><span className="los-card-title">{book.title}</span>
         <small>{book.moduleCode} · {book.credits} op</small>
@@ -143,6 +143,7 @@ function ChapterPage({ book, chapter }: { book: Book; chapter: Chapter }) {
   return <section><p className="los-eyebrow">KAPPALE {String(chapter.sequence).padStart(2, "0")}</p>
     <h1>{chapter.title}</h1><p className="los-intro">{chapter.introductionFi}</p>
     {!!chapter.objectives.length && <div className="los-objectives"><b>Tämän jälkeen osaat</b><ul>{chapter.objectives.map(goal => <li key={goal}>{goal}</li>)}</ul></div>}
+    {chapter.publicationStatus !== "published" && <p className="los-notice">Kappaleen opetusrunko on vasta osittainen. Kokonainen ihmisen laatima Text A, lähdeääni sekä kappaletesti puuttuvat vielä. Alla olevat omat opetusesimerkit eivät korvaa alkuperäistekstiä.</p>}
     <Reader book={book} blocks={blocks} title={chapter.title}/>
     {exercises.length > 0 && <section className="los-chapter-exercises"><h2>Harjoitukset</h2>{exercises.map(exercise =>
       <ExerciseEngine key={exercise.id} bookId={book.id} exercise={exercise}/>)}</section>}
@@ -153,6 +154,14 @@ function WordIndex({ book }: { book: Book }) {
   return <section><h1>Sanastot</h1><p className="los-intro">Kirjakohtainen sanasto ja yhteinen sanakirja ovat eri kokonaisuuksia.</p>
     {blocks.length ? <Reader book={book} blocks={blocks} title="Sanastot"/> :
       <Empty title="Sanastoa ei vielä saatavilla">Kappaleiden tarkistetut sana- ja ilmauslistat lisätään oppimateriaalin mukana.</Empty>}</section>;
+}
+function GlobalDictionary() {
+  return <div className="los-app">
+    <div className="los-context"><a href={LOS_BASE_PATH}><ArrowLeft size={17}/> Oppikirjasto</a><span>Kaikki kahdeksan kirjaa</span></div>
+    <p className="los-eyebrow">DEUTSCH ↔ SUOMI</p><h1>Saksan sanakirja</h1>
+    <p className="los-intro">LOS!-sarjan yhteinen kaksisuuntainen sanakirja tulee tähän. Se on eri asia kuin kunkin kirjan itseopiskelusanasto.</p>
+    <Empty title="Sanakirjakantaa ei ole vielä tuotu">Sanahaku ja ääntäminen avataan vasta, kun FreeDict-aineiston lisenssi, lähdeversio, suomennokset ja hakemiston toiminta on tarkistettu. Tällä hetkellä sanakirja ei anna näennäisiä osumia.</Empty>
+  </div>;
 }
 function NotesIndex({ book }: { book: Book }) {
   const { value: notes, status } = useLosRecord<ReaderNote[]>(book.id, "notes", "reader", book.contentVersion, []);
@@ -200,6 +209,7 @@ export function LosApp() {
     ? pathname.slice(LOS_BASE_PATH.length).split("/").filter(Boolean).map(decodeURIComponent) : [];
   const book = segments[0] ? findLosBook(segments[0]) : undefined;
   if (!segments.length) return <LibraryPage/>;
+  if (segments[0] === "sanakirja") return <GlobalDictionary/>;
   if (!book) return <div className="los-app"><Empty title="Kirjaa ei löytynyt">Palaa LOS!-kirjastoon.</Empty><a href={LOS_BASE_PATH}>Kaikki kahdeksan kirjaa</a></div>;
   const section = segments[1] ?? "";
   const chapter = section === "kappale" ? book.chapters.find(item => item.id === segments[2] || item.id.slice(1) === segments[2]) : undefined;
