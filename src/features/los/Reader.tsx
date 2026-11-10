@@ -33,9 +33,10 @@ function SafeMedia({ block }: { block: Extract<ContentBlock, { kind: "media" }> 
       : <p className="los-notice">Mediaa ei ole vielä hyväksytty tai sitä ei voi upottaa turvallisesti.</p>}
   </figure>;
 }
-function RenderBlock({ block, marked, onSelection, onNote }: {
+function RenderBlock({ block, marked, highlighterEnabled, onSelection, onNote }: {
   block: ContentBlock;
   marked: ReaderMark | undefined;
+  highlighterEnabled: boolean;
   onSelection: (block: ContentBlock, start: number, end: number) => void;
   onNote: (block: ContentBlock) => void;
 }) {
@@ -60,7 +61,8 @@ function RenderBlock({ block, marked, onSelection, onNote }: {
     case "heading": return block.level === 2 ? <h2>{block.text}</h2> : <h3>{block.text}</h3>;
     case "paragraph":
     case "authenticText": return <div className="los-reader-paragraph" id={block.id}>
-      <p lang={block.language} onMouseUp={event => select(event, block.text)} onTouchEnd={event => select(event, block.text)}>{markedText(block.text)}</p>
+      <p lang={block.language} onMouseUp={highlighterEnabled ? event => select(event, block.text) : undefined} onTouchEnd={highlighterEnabled ? event => select(event, block.text) : undefined}>{markedText(block.text)}</p>
+      {highlighterEnabled && <div className="los-token-picker" role="group" aria-label="Korosta sana tai ilmaus"><p className="los-support">Valitse sana näppäimistöllä tai napauttamalla. Peräkkäiset valinnat muodostavat kokonaisen ilmauksen.</p><div className="los-tokens">{Array.from(block.text.matchAll(/\S+/gu), match => ({ word: match[0], start: match.index, end: match.index + match[0].length })).map(token => <button type="button" key={token.start} lang={block.language} className="los-token" aria-pressed={!!marked && token.start >= marked.start && token.end <= marked.end} onClick={() => { const start = marked ? Math.min(marked.start, token.start) : token.start; const end = marked ? Math.max(marked.end, token.end) : token.end; onSelection(block, start, end); }}>{token.word}</button>)}</div></div>}
       <button type="button" className="los-text-action los-note-action" onClick={() => onNote(block)}><NotebookPen size={16} /> Muistiinpano</button>
     </div>;
     case "dialogue": return <div lang="de" className="los-dialogue">{block.turns.map((turn, index) =>
@@ -131,6 +133,7 @@ export function Reader({ book, blocks, title }: { book: Book; blocks: ContentBlo
     {highlighter && <p className="los-notice">Valitse hiirellä tai kosketuksella teksti maalattavaksi. Merkinnät tallentuvat toistaiseksi vain tälle laitteelle.</p>}
     <div className="los-reading-body">{blocks.map(block => <RenderBlock
       key={block.id + ":" + block.version} block={block}
+      highlighterEnabled={highlighter}
       marked={marks.find(mark => mark.blockId === block.id && mark.version === block.version)}
       onSelection={(source, start, end) => {
         if (!highlighter) return;
