@@ -6,6 +6,7 @@ import {type StudyPage} from '@/app/navigation';
 import {chapters,sections,lessons,allWords,LOS_VERSION,type Chapter,type Exercise,type Block} from './content';
 import {gradeExercise,tokenOffsets,dueDate,type TextAnchor,type Grade} from './engine';
 import {allChapterExercises} from './practiceExtras';
+import {ExamSession} from './ExamSession';
 import {useLosStore,type SyncStatus} from './useLosStore';
 import './los.css';
 
@@ -299,7 +300,8 @@ export function LosApp({ownerId}:{ownerId:string}){
       <button onClick={()=>go({kind:'chapter',cid:chapter.id,section:sections[(sections.indexOf((view.section??'Aloita') as typeof sections[number])+1)%sections.length]??'Aloita'})}>Seuraava osio <ChevronRight size={17}/></button></div>
      </>:null}
      {view.kind==='lessons'?<><h1>Opetuspolku</h1><p>60 joustavaa noin 30 minuutin oppituntia, ei aikarajalaskuria. Tämä versio sisältää käyttökelpoiset alkutunnit. Muut tunnit erotetaan keskeneräisinä.</p><div className="los-lesson-list">{lessons.map(l=><button key={l.id} onClick={()=>go({kind:'lesson',lesson:l.id})}><b>{l.id}</b><span>{l.name}<small>{l.section} · noin 30 min</small></span><span>{item(store,'lesson:'+l.id)===true?'Suoritettu':l.status==='initial-material'?'Aloita':'Sisältö kesken'}</span></button>)}</div></>:null}
-     {view.kind==='lesson'&&lesson?<><Label>TUNTI {Number(lesson.id.slice(1))} / 60</Label><h1>{lesson.name}</h1><p>{lesson.section} · noin 30 minuuttia, omaan tahtiin</p>
+     {view.kind==='lesson'&&lesson&&(lesson.id==='L030'||lesson.id==='L059')?<ExamSession id={lesson.id==='L030'?'EX-MID':'EX-FINAL'} store={store} onExit={()=>go({kind:'lessons'})} onSubmit={()=>store.put('lesson:'+lesson.id,true)}/>:null}
+     {view.kind==='lesson'&&lesson&&lesson.id!=='L030'&&lesson.id!=='L059'?<><Label>TUNTI {Number(lesson.id.slice(1))} / 60</Label><h1>{lesson.name}</h1><p>{lesson.section} · noin 30 minuuttia, omaan tahtiin</p>
       {lesson.status==='pending'?<p className="los-warning">Tämän tunnin julkaisuportti on edelleen avoin. Linkitettyä sisältöä voi tarkastella, mutta tuntia ei merkitä valmiiksi keskeneräisen aineiston perusteella.</p>:null}
       <div className="los-stats"><span>Vaihe <b>{step+1}/{lessonSteps.length}</b></span><span>Tila <b>{item(store,'lesson:'+lesson.id)===true?'Suoritettu':'Kesken'}</b></span></div>
       <div className="los-step"><Label>{lessonSteps[step]}</Label>
@@ -326,7 +328,7 @@ export function LosApp({ownerId}:{ownerId:string}){
      {view.kind==='progress'?<><h1>Osaaminen</h1><p>Oppitunteja kirjattu {finishedLessons}/60. Tämä ei ole kielitaitoarvosana.</p><h2>Erilliset osaamisnäytöt</h2><p>Tehtäviin tallennetut vastausyritykset: {Object.keys(store.items).filter(x=>x.startsWith('attempt:')).length}. Viivästetyt kertaukset: {Object.keys(store.items).filter(x=>x.startsWith('review:')).length}. Nämä mittarit eivät itsessään todista A1-tasoa.</p><button onClick={()=>go({kind:'review'})}>Avaa tämän päivän kertaus</button></>:null}
      {view.kind==='review'?<><h1>Kertaa</h1><p>Harjoittele myös myöhempinä päivinä. Kertauksen viiveet 1, 3, 7, 14 ja 30 päivää. Ei pakollista streakiä.</p>{reviews.length===0?<p>Ei erääntyneitä kortteja. Voit lisätä niitä sanastosta.</p>:reviews.slice(0,16).map(([key,v])=><ReviewCard key={key} id={key} value={v} store={store}/>)}</>:null}
      {view.kind==='settings'?<><h1>Lukemisen asetukset</h1><label htmlFor="los-text-size">Saksankielisen tekstin koko: {fontSize} px</label><input id="los-text-size" type="range" min={16} max={24} value={fontSize} onChange={e=>store.put('setting:fontSize',Number(e.target.value))}/><p>Vaalea ja tumma tila periytyvät Opintopäiväkirjan asetuksista. Älä käytä puhelimen toista päällekkäistä alapalkkia.</p></>:null}
-     {view.kind==='exams'?<><h1>Kokeet ja kertaukset</h1><p>Ensimmäisen kappaleen harjoitustesti on käytettävissä. Varsinainen 25 tehtävän välikoe L030 ja 50 tehtävän loppukoe L059 eivät vielä ole julkaisuvalmiita.</p><button onClick={()=>go({kind:'chapter',cid:'C01',section:'Kappaletesti'})}>C01 harjoitustesti</button>{chapters.slice(1).map(c=><button className="los-index-row" key={c.id} onClick={()=>go({kind:'chapter',cid:c.id,section:'Kappaletesti'})}>{c.id} testi · {c.status==='text-reviewed'?'Osittainen':'Pääteksti kesken'}</button>)}</>:null}
+     {view.kind==='exams'?<><h1>Kokeet ja kertaukset</h1><p>Väli- ja loppukokeiden alustavat, erikseen palautettavat 25 ja 50 tehtävän kysymyspankit toimivat. Lähde- ja mediavalidointi on kuitenkin kesken; nämä eivät vielä täytä lopullista julkaisukriteeriä.</p><div className="los-actions"><button onClick={()=>go({kind:'lesson',lesson:'L030'})}>Avaa L030 · Välikoe</button><button onClick={()=>go({kind:'lesson',lesson:'L059'})}>Avaa L059 · Loppukoe</button></div><button onClick={()=>go({kind:'chapter',cid:'C01',section:'Kappaletesti'})}>C01 harjoitustesti</button>{chapters.slice(1).map(c=><button className="los-index-row" key={c.id} onClick={()=>go({kind:'chapter',cid:c.id,section:'Kappaletesti'})}>{c.id} testi · {c.status==='text-reviewed'?'Osittainen':'Pääteksti kesken'}</button>)}</>:null}
     </div>
    </div>
   </div>
