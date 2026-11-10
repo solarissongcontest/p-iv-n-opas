@@ -3,7 +3,7 @@
  * until human-authored source materials pass the chapter publication gate.
  */
 import type { Chapter, Lesson } from "./model";
-export const LOS1_PLANNED_CHAPTERS = [
+export const LOS1_PLANNED_CHAPTERS: Chapter[] = [
   {
     "id": "C01",
     "version": "1.0.0",
@@ -188,14 +188,14 @@ export const LOS1_PLANNED_CHAPTERS = [
       "V-GOE-01"
     ]
   }
-] satisfies Chapter[];
+];
 
-export const LOS1_PLANNED_LESSONS = [
+
+export const LOS1_PLANNED_LESSONS: Lesson[] = [
   {
     "id": "L001",
     "version": "1.0.0",
     "bookId": "los-1",
-    "chapterId": null,
     "sequence": 1,
     "title": "Miten LOS! 1:llä opiskellaan?",
     "estimatedMinutes": 30,
@@ -598,7 +598,6 @@ export const LOS1_PLANNED_LESSONS = [
     "id": "L027",
     "version": "1.0.0",
     "bookId": "los-1",
-    "chapterId": null,
     "sequence": 27,
     "title": "Muistanko tervehtimisen ja esittäytymisen?",
     "estimatedMinutes": 30,
@@ -611,7 +610,6 @@ export const LOS1_PLANNED_LESSONS = [
     "id": "L028",
     "version": "1.0.0",
     "bookId": "los-1",
-    "chapterId": null,
     "sequence": 28,
     "title": "Voinnin ja kohteliaisuuden taitosekoitus",
     "estimatedMinutes": 30,
@@ -624,7 +622,6 @@ export const LOS1_PLANNED_LESSONS = [
     "id": "L029",
     "version": "1.0.0",
     "bookId": "los-1",
-    "chapterId": null,
     "sequence": 29,
     "title": "Autenttisen keskustelun kertauskuuntelu",
     "estimatedMinutes": 30,
@@ -637,7 +634,6 @@ export const LOS1_PLANNED_LESSONS = [
     "id": "L030",
     "version": "1.0.0",
     "bookId": "los-1",
-    "chapterId": null,
     "sequence": 30,
     "title": "Välikoe: kappaleet 1–5",
     "estimatedMinutes": 30,
@@ -1035,7 +1031,6 @@ export const LOS1_PLANNED_LESSONS = [
     "id": "L056",
     "version": "1.0.0",
     "bookId": "los-1",
-    "chapterId": null,
     "sequence": 56,
     "title": "Luvut, tavaaminen ja viikonpäivät",
     "estimatedMinutes": 30,
@@ -1048,7 +1043,6 @@ export const LOS1_PLANNED_LESSONS = [
     "id": "L057",
     "version": "1.0.0",
     "bookId": "los-1",
-    "chapterId": null,
     "sequence": 57,
     "title": "Kaikkien 10 kappaleen taitosekoitus",
     "estimatedMinutes": 30,
@@ -1061,7 +1055,6 @@ export const LOS1_PLANNED_LESSONS = [
     "id": "L058",
     "version": "1.0.0",
     "bookId": "los-1",
-    "chapterId": null,
     "sequence": 58,
     "title": "Täydellinen esittelyharjoitus ilman vihjeitä",
     "estimatedMinutes": 30,
@@ -1074,7 +1067,6 @@ export const LOS1_PLANNED_LESSONS = [
     "id": "L059",
     "version": "1.0.0",
     "bookId": "los-1",
-    "chapterId": null,
     "sequence": 59,
     "title": "Koko kirjan loppukoe",
     "estimatedMinutes": 30,
@@ -1087,7 +1079,6 @@ export const LOS1_PLANNED_LESSONS = [
     "id": "L060",
     "version": "1.0.0",
     "bookId": "los-1",
-    "chapterId": null,
     "sequence": 60,
     "title": "Mitä osaan nyt saksaksi?",
     "estimatedMinutes": 30,
@@ -1096,4 +1087,5 @@ export const LOS1_PLANNED_LESSONS = [
     "steps": [],
     "publicationStatus": "planned"
   }
-] satisfies Lesson[];
+];
+
