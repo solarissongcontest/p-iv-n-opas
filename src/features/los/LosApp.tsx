@@ -35,12 +35,12 @@ function SourceNotice({chapter}:{chapter:Chapter}){
   {chapter.license==='CC BY-SA 3.0'?<a href="https://creativecommons.org/licenses/by-sa/3.0/" target="_blank" rel="noreferrer"> Lisenssiehdot</a>:null}
  </p>;
 }
-function Audio({src,title}:{src:string;title:string}){
+function Audio({src,title,onFailure}:{src:string;title:string;onFailure?:()=>void}){
  const [failed,setFailed]=useState(false);
  return <div className="los-media">
  <Label>ALKUPERÄINEN IHMISÄÄNI</Label>
  <p><Volume2 size={17} aria-hidden="true"/> {title}</p>
- {!failed?<audio controls preload="none" src={src} onError={()=>setFailed(true)} aria-label={title}/>:<p role="alert">Äänitteen lataus epäonnistui. Voit jatkaa tekstin ja sanaston avulla. Äänitettä ei merkitä kuunnelluksi.</p>}
+ {!failed?<audio controls preload="none" src={src} onError={()=>{setFailed(true);onFailure?.();}} aria-label={title}/>:<p role="alert">Äänitteen lataus epäonnistui. Voit jatkaa tekstin ja sanaston avulla. Äänitettä ei merkitä kuunnelluksi.</p>}
  </div>;
 }
 function Media({chapter}:{chapter:Chapter}){
@@ -154,15 +154,19 @@ function ExerciseCard({exercise,chapter,store,exam=false,fontSize}:{exercise:Exe
  const [hint,setHint]=useState(false);
  const [result,setResult]=useState<Grade|null>(null);
  const [submitted,setSubmitted]=useState(false);
+ const [mediaFailed,setMediaFailed]=useState(false);
  useEffect(()=>{if(typeof prev==='string')setAnswer(prev);},[prev]);
  const update=(value:string)=>{setAnswer(value);store.put(draftKey,value);setResult(null);};
  const source=chapter.blocks.find(b=>b.id===exercise.blockId);
  const ordered=answer?answer.split(' | '):[];
  const remaining=(exercise.order??[]).filter((w,i)=>ordered.filter(x=>x===w).length<(exercise.order??[]).filter((x,j)=>x===w&&j<=i).length);
+ let mapping:Record<string,string>={};
+ if(answer){try{const parsed:unknown=JSON.parse(answer);if(parsed&&typeof parsed==='object'&&!Array.isArray(parsed))mapping=parsed as Record<string,string>;}catch{/* Not a mapping answer */}}
+ const setMapped=(left:string,value:string)=>update(JSON.stringify({...mapping,[left]:value}));
  const submit=()=>{
-  const grade=gradeExercise({...exercise,sourceText:source?.text} as Exercise & {sourceText?:string},exercise.type==='highlight'?highlight:answer);
+  const grade=gradeExercise({...exercise,sourceText:source?.text} as Exercise & {sourceText?:string},(exercise.type==='highlight'||exercise.type==='find-text')?highlight:answer);
   setResult(grade);setSubmitted(true);
-  const entry={answer:exercise.type==='highlight'?highlight:answer,grade:grade.status,at:new Date().toISOString(),version:LOS_VERSION,exam};
+  const entry={answer:(exercise.type==='highlight'||exercise.type==='find-text')?highlight:answer,grade:grade.status,at:new Date().toISOString(),version:LOS_VERSION,exam};
   store.put('latest:'+exercise.id,entry);
   store.put('attempt:'+exercise.id+':'+Date.now(),entry);
   if(grade.status==='correct'||grade.status==='incorrect'){
@@ -174,13 +178,26 @@ function ExerciseCard({exercise,chapter,store,exam=false,fontSize}:{exercise:Exe
  return <article className="los-exercise" id={exercise.id}>
   <Label>{exercise.id} · {exam?'Koetila':'Harjoitustila'}</Label>
   <h3>{exercise.prompt}</h3>
-  {exercise.type==='highlight'&&source?<Reader chapter={{...chapter,blocks:[source]}} store={store} exerciseMode onSelect={setHighlight} selection={highlight} fontSize={fontSize}/>:null}
+  {(exercise.type==='highlight'||exercise.type==='find-text')&&source?<Reader chapter={{...chapter,blocks:[source]}} store={store} exerciseMode onSelect={setHighlight} selection={highlight} fontSize={fontSize}/>:null}
+  {(exercise.type==='listen-choice'||exercise.type==='listen-write')&&exercise.mediaUrl?<><Audio src={exercise.mediaUrl} title={'Kuuntele alkuperäisäänite '+exercise.id} onFailure={()=>setMediaFailed(true)}/>{mediaFailed?<><p className="los-warning">Äänite ei toimi. Siirrymme saman alkuperäisaineiston lukemiseen, joten tätä yritystä ei lasketa kuuntelunäytöksi.</p><Reader chapter={chapter} store={store} fontSize={fontSize}/></>:null}</>:null}
+  {exercise.type==='video'?<>{exercise.videoId?<div className="los-video"><iframe src={'https://www.youtube-nocookie.com/embed/'+exercise.videoId} title={'Videotehtävä '+exercise.id} loading="lazy" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowFullScreen/></div>:null}{!exercise.reviewedMedia?<p className="los-warning">Videon sisältöä ja upotusta ei ole vielä tarkistettu. Tehtävää ei pisteytetä.</p>:null}</>:null}
   {exercise.options?<div className="los-options" role="radiogroup" aria-label={exercise.prompt}>
    {exercise.options.map(option=><label key={option}><input type="radio" name={exercise.id+(exam?'-exam':'')} value={option} checked={answer===option} onChange={()=>update(option)} disabled={exam&&submitted}/><span>{option}</span></label>)}
   </div>:null}
-  {['fill','translate','writing'].includes(exercise.type)?(exercise.type==='writing'?
+  {['fill','translate','listen-write','error-correction','writing'].includes(exercise.type)?(exercise.type==='writing'?
    <textarea aria-label={exercise.prompt} value={answer} onChange={e=>update(e.target.value)} rows={4} disabled={exam&&submitted} placeholder="Kirjoita vastauksesi tähän…"/>:
    <input aria-label={exercise.prompt} value={answer} onChange={e=>update(e.target.value)} disabled={exam&&submitted} lang="de" autoComplete="off" />):null}
+  {['matching','article-sort','conjugation'].includes(exercise.type)&&exercise.pairs?<fieldset className="los-pairs">
+   <legend className="sr-only">Täydennä jokainen rivi tehtävässä {exercise.id}</legend>
+   {exercise.pairs.map(([left,right],i)=><div className="los-pair-row" key={left}>
+    <label htmlFor={exercise.id+'-'+i} lang="de">{left}</label>
+    {exercise.type==='conjugation'?<input id={exercise.id+'-'+i} lang="de" value={mapping[left]??''} onChange={e=>setMapped(left,e.target.value)} placeholder="Kirjoita verbimuoto" autoComplete="off"/>:
+    <select id={exercise.id+'-'+i} lang="de" value={mapping[left]??''} onChange={e=>setMapped(left,e.target.value)}>
+     <option value="">Valitse…</option>
+     {(exercise.type==='article-sort'?['der','die','das']:exercise.pairs.map(pair=>pair[1])).slice((i+1)%exercise.pairs.length).concat((exercise.type==='article-sort'?['der','die','das']:exercise.pairs.map(pair=>pair[1])).slice(0,(i+1)%exercise.pairs.length)).filter((option,idx,items)=>items.indexOf(option)===idx).map(option=><option key={option} value={option}>{option}</option>)}
+    </select>}
+   </div>)}
+  </fieldset>:null}
   {exercise.type==='ordering'?<div className="los-order">
    <p>Valittu järjestys: <span lang="de">{ordered.join(' ')||'Ei vielä sanoja'}</span></p>
    <div>{remaining.map((token,i)=><button key={token+i} type="button" onClick={()=>update([...ordered,token].join(' | '))}>{token}</button>)}</div>
@@ -190,7 +207,7 @@ function ExerciseCard({exercise,chapter,store,exam=false,fontSize}:{exercise:Exe
   {!exam&&exercise.hint?<button className="los-quiet" onClick={()=>setHint(!hint)}>{hint?'Piilota vihje':'Näytä vihje'}</button>:null}
   {hint&&!exam?<p className="los-hint">{exercise.hint}</p>:null}
   <div className="los-actions">
-   <button onClick={submit} disabled={exam&&submitted}>{exercise.type==='speech'||exercise.type==='writing'?'Avaa itsearviointimalli':'Tarkista vastaus'}</button>
+   <button onClick={submit} disabled={(exam&&submitted)||(exercise.type==='video'&&!exercise.reviewedMedia)}>{exercise.type==='speech'||exercise.type==='writing'?'Avaa itsearviointimalli':'Tarkista vastaus'}</button>
    {!exam&&result?<button className="los-quiet" onClick={()=>{setResult(null);setSubmitted(false);setHint(false);}}>Yritä uudelleen</button>:null}
   </div>
   {result?<p role="status" className={'los-feedback los-'+result.status}><b>{result.status==='correct'?'Oikein':result.status==='self-review'?'Itsearviointi':'Tarkista vielä'}</b> · {result.feedback}</p>:null}
@@ -217,7 +234,7 @@ function ChapterSection({chapter,section,store,fontSize}:{chapter:Chapter;sectio
   <h2>{section==='Teksti A'?'Teksti A · kokonainen lähdeteksti':'Ymmärrä lukemasi'}</h2>
   {chapter.blocks.length?<><Reader chapter={chapter} store={store} fontSize={fontSize}/><SourceNotice chapter={chapter}/></>:<p className="los-warning">Tämän kappaleen alkuperäisen päätekstin lupa tai täsmällinen lähde on vielä kesken. Ulkoista sivua ei käytetä tekstin korvikkeena.</p>}
   {section==='Teksti A'&&active&&chapter.id==='C01'?<Audio src="https://commons.wikimedia.org/wiki/Special:Redirect/file/Gespr%C3%A4chVorstellung.ogg" title="GesprächVorstellung (14 s)"/>:null}
-  {section==='Ymmärrä'&&exercises.filter(e=>e.type==='highlight').map(ex=><ExerciseCard key={ex.id} exercise={ex} chapter={chapter} store={store} fontSize={fontSize}/>)}
+  {section==='Ymmärrä'&&exercises.filter(e=>e.type==='highlight'||e.type==='find-text').map(ex=><ExerciseCard key={ex.id} exercise={ex} chapter={chapter} store={store} fontSize={fontSize}/>)}
  </>;
  if(section==='Sanasto')return <Words chapter={chapter} store={store}/>;
  if(section==='Kielioppi')return <Grammar chapter={chapter}/>;
