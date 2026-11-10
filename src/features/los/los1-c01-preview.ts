@@ -45,7 +45,7 @@ export const LOS1_C01_PREVIEW_BLOCKS: ContentBlock[] = [
   },
   {
     id: "los1-c01-core-words", version: "0.1.0", kind: "vocabulary",
-    entries: [
+    entries: ([
       ["hallo", "hei", "tavallinen tervehdys"],
       ["guten Morgen", "hyvää huomenta", "aamulla"],
       ["guten Tag", "hyvää päivää", "päivällä"],
@@ -62,7 +62,7 @@ export const LOS1_C01_PREVIEW_BLOCKS: ContentBlock[] = [
       ["ich", "minä", "opetellaan tarkemmin C02:ssa"],
       ["du", "sinä", "opetellaan tarkemmin C02:ssa"],
       ["wie", "miten", "opetellaan tarkemmin C02:ssa"],
-    ].map(([de, fi, note], index) => ({
+    ] as [string, string, string][]).map(([de, fi, note], index) => ({
       id: "los1-c01-word-" + String(index + 1).padStart(2, "0"),
       de, fi, note,
     })),
