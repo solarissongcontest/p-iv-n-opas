@@ -1,5 +1,5 @@
 import type { Book, BookId, ModuleCode } from "./model";
-import { LOS1_PLANNED_CHAPTERS, LOS1_PLANNED_LESSONS } from "./los1-planned";
+import { LOS1_PLANNED_CHAPTERS, LOS1_PLANNED_LESSONS } from "./los1-planned.ts";
 
 const specs: readonly [string, string, string, string, string, string][] = [
   ["Perustason alkeet 1", "Tutustu ja ihastu saksan kieleen", "Nollataso, tervehdykset, esittäytyminen ja ensimmäinen vuorovaikutus.", "#B43D33", "#FCE8E5", "#FF9B91"],
