@@ -70,7 +70,7 @@ function Reader({chapter,store,exerciseMode,onSelect,selection,fontSize}:{chapte
  const selectToken=(block:Block,start:number,end:number)=>{
   const previous=exerciseMode?selection:draft;
   const same=previous?.blockId===block.id;
-  const next:TextAnchor={blockId:block.id,start:same?Math.min(previous.start,start):start,end:same?Math.max(previous.end,end):end,contentVersion:LOS_VERSION};
+  const next:TextAnchor={blockId:block.id,start:same&&previous?Math.min(previous.start,start):start,end:same&&previous?Math.max(previous.end,end):end,contentVersion:LOS_VERSION};
   if(exerciseMode)onSelect?.(next);
   else {setDraft(next);store.put('ink:'+block.id,next);}
  };
@@ -109,7 +109,7 @@ function Reader({chapter,store,exerciseMode,onSelect,selection,fontSize}:{chapte
        className={'los-word'+(highlighted?' los-marked':'')}
        aria-label={'Sana '+token.text}
        onClick={()=>isPicking?selectToken(block,token.start,token.end):setSelectedWord(token.text.replace(/[.!?,:]/g,''))}
-       onKeyDown={e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();isPicking?selectToken(block,token.start,token.end):setSelectedWord(token.text.replace(/[.!?,:]/g,''));}}}
+       onKeyDown={e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();if(isPicking)selectToken(block,token.start,token.end);else setSelectedWord(token.text.replace(/[.!?,:]/g,''));}}}
       >{token.text}</span>
      </span>;
     })}
@@ -152,7 +152,7 @@ function ExerciseCard({exercise,chapter,store,exam=false,fontSize}:{exercise:Exe
  const [hint,setHint]=useState(false);
  const [result,setResult]=useState<Grade|null>(null);
  const [submitted,setSubmitted]=useState(false);
- useEffect(()=>{if(typeof prev==='string'&&!answer)setAnswer(prev);},[prev]);
+ useEffect(()=>{if(typeof prev==='string')setAnswer(prev);},[prev]);
  const update=(value:string)=>{setAnswer(value);store.put(draftKey,value);setResult(null);};
  const source=chapter.blocks.find(b=>b.id===exercise.blockId);
  const ordered=answer?answer.split(' | '):[];
@@ -303,8 +303,8 @@ export function LosApp({ownerId}:{ownerId:string}){
       <div className="los-step"><Label>{lessonSteps[step]}</Label>
        {lesson.id==='L001'&&step===0?<div className="los-prose"><h2>Näin opiskelet</h2><p>Valitse oppikirjasta kappale tai seuraa vapaaehtoista opetuspolkua. Kaikki tekstit on tarkoitus lukea LOS!:ssa. Napauta sanaa saadaksesi selityksen. Oikea korostustussi on erillään omista merkinnöistäsi.</p><p>Vihjeitä saa käyttää harjoittelussa. Kokeessa vastaus palautetaan ilman niitä. Edistyminen ei tarkoita samaa asiaa kuin osaaminen.</p></div>:null}
        {lesson.id==='L001'&&step===1?<><h2>Kirjoita oma tavoitteesi</h2><textarea aria-label="Oma tavoite" rows={4} value={valueString(store,'goal:los1')} onChange={e=>store.put('goal:los1',e.target.value)} placeholder="Haluan esimerkiksi osata tervehtiä ja esitellä itseni saksaksi." /></>:null}
-       {lesson.id==='L001'&&step===2?<Media chapter={chapters[0]}/>:null}
-       {lesson.chapterId?<ChapterSection chapter={chapters.find(c=>c.id===lesson.chapterId)??chapters[0]} section={lessonSteps[step]??'Aloita'} store={store} fontSize={fontSize}/>:null}
+       {lesson.id==='L001'&&step===2?<Media chapter={chapters[0]!}/>:null}
+       {lesson.chapterId?<ChapterSection chapter={chapters.find(c=>c.id===lesson.chapterId)??chapters[0]!} section={lessonSteps[step]??'Aloita'} store={store} fontSize={fontSize}/>:null}
        {!lesson.chapterId&&lesson.id!=='L001'?<div className="los-prose"><h2>Opetussisältöä tarkistetaan</h2><p>Laajaa kertausta ja oikeaa arviointikoetta ei ole vielä hyväksytty. Tämä näkymä ei väitä suoritusta.</p><button onClick={()=>go({kind:'exams'})}>Kokeiden tilanne</button></div>:null}
       </div>
       <div className="los-actions">
