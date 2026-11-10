@@ -8,7 +8,7 @@ import {gradeExercise,tokenOffsets,dueDate,type TextAnchor,type Grade} from './e
 import {useLosStore,type SyncStatus} from './useLosStore';
 import './los.css';
 
-type View = {kind:'library'|'home'|'contents'|'chapter'|'lessons'|'lesson'|'dictionary'|'grammar'|'notes'|'bookmarks'|'media'|'sources'|'progress'|'review'|'settings'|'exams'; cid?:string; section?:string;lesson?:string};
+type View = {kind:'library'|'home'|'contents'|'chapter'|'lessons'|'lesson'|'dictionary'|'grammar'|'notes'|'bookmarks'|'media'|'sources'|'progress'|'review'|'settings'|'exams'; cid?:string|undefined; section?:string|undefined;lesson?:string|undefined};
 const initial:View={kind:'home'};
 const parseHash=():View=>{
  if(typeof window==='undefined')return initial;
@@ -102,7 +102,7 @@ function Reader({chapter,store,exerciseMode,onSelect,selection,fontSize}:{chapte
     {block.speaker?<strong>{block.speaker}: </strong>:null}
     {tokens.map((token,i)=>{
      const highlighted=active&&token.start>=active.start&&token.end<=active.end;
-     const prevEnd=i?tokens[i-1].end:0;
+     const prevEnd=i?(tokens[i-1]?.end??0):0;
      return <span key={token.start}>
       {block.text.slice(prevEnd,token.start)}
       <span role="button" tabIndex={0} data-los-start={token.start} data-los-end={token.end}
@@ -235,7 +235,7 @@ export function LosApp({ownerId}:{ownerId:string}){
  const store=useLosStore(ownerId);
  const fontSize=typeof item(store,'setting:fontSize')==='number'?Number(item(store,'setting:fontSize')):18;
  useEffect(()=>{const update=()=>setView(parseHash());update();window.addEventListener('hashchange',update);return()=>window.removeEventListener('hashchange',update);},[]);
- const go=(v:View)=>{window.location.hash='/'+[v.kind,v.kind==='lesson'?v.lesson:v.cid,v.section].filter(Boolean).map(encodeURIComponent).join('/');setView(v);window.scrollTo({top:0,behavior:'auto'});};
+ const go=(v:View)=>{window.location.hash='/'+[v.kind,v.kind==='lesson'?v.lesson:v.cid,v.section].filter((value):value is string=>Boolean(value)).map(encodeURIComponent).join('/');setView(v);window.scrollTo({top:0,behavior:'auto'});};
  const goApp=(p:StudyPage)=>{const urls:Record<StudyPage,string>={today:'/today',plan:'/plan',courses:'/studies',practice:'/practice',progress:'/progress',exams:'/exams',settings:'/settings'};void navigate({to:urls[p]});};
  const chapter=chapters.find(c=>c.id===view.cid);
  const lesson=lessons.find(l=>l.id===view.lesson);
