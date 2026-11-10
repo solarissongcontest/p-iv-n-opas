@@ -12,7 +12,7 @@ const orderedOptions=(e:Exercise)=> {
  const rotate=number%options.length||0;
  return options.slice(rotate).concat(options.slice(0,rotate));
 };
-export function ExamSession({id,store,onExit}:{id:ExamId;store:Store;onExit:()=>void}){
+export function ExamSession({id,store,onExit,onSubmit}:{id:ExamId;store:Store;onExit:()=>void;onSubmit:()=>void}){
  const paper=exams[id];
  const attempt=safeNumber(store.items['exam:no:'+id]);
  const resultKey='exam:result:'+id+':'+attempt;
@@ -35,6 +35,7 @@ export function ExamSession({id,store,onExit}:{id:ExamId;store:Store;onExit:()=>
   const scores=Object.fromEntries(paper.questions.map(q=>[q.id,gradeExercise(q,answers[q.id]??'').status==='correct']));
   const total=Object.values(scores).filter(Boolean).length;
   store.put(resultKey,{answers,scores,total,max:paper.questions.length,version:LOS_VERSION,date:new Date().toISOString()});
+  onSubmit();
  };
  const reset=()=>{
   if(!result)return;
