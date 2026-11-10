@@ -10,7 +10,7 @@ const safeRead=(owner:string):Record<string,unknown>=>{
  if(typeof window==='undefined')return {};
  try {
   const raw=window.localStorage.getItem(cacheKey(owner));
-  const value=raw?JSON.parse(raw) as unknown:{};
+  const value:unknown=raw?JSON.parse(raw):{};
   return value&&typeof value==='object'&&!Array.isArray(value)?value as Record<string,unknown>:{};
  } catch {return {}}
 };
