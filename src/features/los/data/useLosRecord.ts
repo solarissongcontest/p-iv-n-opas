@@ -101,6 +101,9 @@ export function useLosRecord<T>(
   const current = useRef(value);
   const latestWrite = useRef("");
   const edited = useRef(false);
+  const mounted = useRef(false);
+  const delayed = useRef<Stored<T> | null>(null);
+  const delayedTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     let alive = true;
@@ -132,6 +135,38 @@ export function useLosRecord<T>(
     return () => { alive = false; };
   }, [bookId, kind, key, version]);
 
+  const flush = useCallback(() => {
+    if (delayedTimer.current !== null) {
+      clearTimeout(delayedTimer.current);
+      delayedTimer.current = null;
+    }
+    const item = delayed.current;
+    if (!item) return;
+    delayed.current = null;
+    // Existing StudyOS write-ahead queue is made durable synchronously before
+    // network dispatch. The local snapshot is always written first.
+    void send(bookId, kind, key, version, item).then(result => {
+      if (!mounted.current || latestWrite.current !== item.clientUpdatedAt) return;
+      setStatus(result === "queued" ? "queued" : "synced");
+    }).catch(error => {
+      if (!mounted.current || latestWrite.current !== item.clientUpdatedAt) return;
+      setStatus(String(error).includes("SYNC_CONFLICT") ? "conflict" : "error");
+    });
+  }, [bookId, kind, key, version]);
+
+  useEffect(() => {
+    mounted.current = true;
+    const hidden = () => { if (document.visibilityState === "hidden") flush(); };
+    window.addEventListener("pagehide", flush);
+    document.addEventListener("visibilitychange", hidden);
+    return () => {
+      mounted.current = false;
+      window.removeEventListener("pagehide", flush);
+      document.removeEventListener("visibilitychange", hidden);
+      flush();
+    };
+  }, [flush]);
+
   const update = useCallback((next: SetStateAction<T>) => {
     const newValue = typeof next === "function"
       ? (next as (previous: T) => T)(current.current) : next;
@@ -146,16 +181,12 @@ export function useLosRecord<T>(
     setValue(newValue);
     const persisted = writeCached(key, item);
     setStatus(persisted ? "queued" : "error");
-    // runOrQueue writes the durable existing StudyOS queue before dispatching
-    // any network request. A page close cannot erase the pending operation.
-    void send(bookId, kind, key, version, item).then(result => {
-      if (latestWrite.current !== item.clientUpdatedAt) return;
-      setStatus(result === "queued" ? "queued" : "synced");
-    }).catch(error => {
-      if (latestWrite.current !== item.clientUpdatedAt) return;
-      setStatus(String(error).includes("SYNC_CONFLICT") ? "conflict" : "error");
-    });
-  }, [bookId, kind, key, version]);
+    // Keystrokes/sliders remain durable locally immediately; only the cloud
+    // request is coalesced to avoid flooding the user's Supabase project.
+    delayed.current = item;
+    if (delayedTimer.current !== null) clearTimeout(delayedTimer.current);
+    delayedTimer.current = setTimeout(flush, 450);
+  }, [bookId, kind, key, version, flush]);
 
   return { value, update, status };
 }
