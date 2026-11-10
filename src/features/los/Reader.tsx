@@ -18,7 +18,9 @@ function SafeMedia({ block }: { block: Extract<ContentBlock, { kind: "media" }> 
     <figcaption>{block.title}</figcaption>
     {valid && block.mediaType === "video"
       ? <iframe title={block.title} src={block.embedUrl} loading="lazy" allowFullScreen allow="fullscreen; encrypted-media; picture-in-picture" />
-      : <p className="los-notice">Mediaa ei ole vielä hyväksytty tai sitä ei voi upottaa turvallisesti.</p>}
+      : block.mediaType === "audio" && /^\/los\/media\/[a-z0-9_-]+\.(ogg|mp3|m4a)$/i.test(block.embedUrl)
+        ? <audio controls preload="none" src={block.embedUrl} aria-label={block.title}>Äänitoistoa ei tueta selaimessasi.</audio>
+        : <p className="los-notice">Mediaa ei ole vielä hyväksytty tai sitä ei voi upottaa turvallisesti.</p>}
   </figure>;
 }
 function RenderBlock({ block, marked, highlighterEnabled, onSelection, onNote }: {
@@ -75,9 +77,11 @@ function RenderBlock({ block, marked, highlighterEnabled, onSelection, onNote }:
   }
 }
 
-export function Reader({ book, blocks, title }: { book: Book; blocks: ContentBlock[]; title: string }) {
-  const [fontSize, setFontSize] = useState(18);
-  const [lineHeight, setLineHeight] = useState(1.75);
+export function Reader({ book, blocks, title, headingLevel = 2 }: { book: Book; blocks: ContentBlock[]; title: string; headingLevel?: 1 | 2 }) {
+  const { value: readerPreferences, update: updateReaderPreferences } = useLosRecord(
+    book.id, "preferences", "reader-settings", "1.0.0", { fontSize: 18, lineHeight: 1.75 },
+  );
+  const { fontSize, lineHeight } = readerPreferences;
   const [readingMode, setReadingMode] = useState(false);
   const [toolsOpen, setToolsOpen] = useState(false);
   const [highlighter, setHighlighter] = useState(false);
@@ -94,7 +98,7 @@ export function Reader({ book, blocks, title }: { book: Book; blocks: ContentBlo
   if (!blocks.length) return <section className="los-empty"><BookOpen size={24} /><h2>Tekstejä ei ole vielä lisätty</h2><p>Tämän kirjan lukija on valmis näyttämään myöhemmin lisättävät luvalliset kokonaiset tekstit suoraan LOS!:ssa.</p></section>;
   return <article className={"los-reader " + (readingMode ? "is-reading" : "")}
     style={{ "--los-reader-font": fontSize + "px", "--los-reader-leading": lineHeight } as React.CSSProperties}>
-    <div className="los-reader-top"><div><p className="los-eyebrow">LUE JA OPI</p><h1>{title}</h1></div>
+    <div className="los-reader-top"><div><p className="los-eyebrow">LUE JA OPI</p>{headingLevel === 1 ? <h1>{title}</h1> : <h2>{title}</h2>}</div>
       <div className="los-reader-tools" role="toolbar" aria-label="Lukijan työkalut">
         <button className="los-button los-button-secondary" type="button" aria-pressed={highlighter} onClick={() => setHighlighter(v => !v)}><Highlighter size={17} /> Korosta</button>
         <button className="los-button los-button-secondary" type="button" aria-pressed={readingMode} onClick={() => setReadingMode(v => !v)}><BookOpen size={17} /> {readingMode ? "Opiskele" : "Lukutila"}</button>
@@ -102,8 +106,8 @@ export function Reader({ book, blocks, title }: { book: Book; blocks: ContentBlo
       </div>
     </div>
     {toolsOpen && <div className="los-reader-settings">
-      <label>Tekstin koko {fontSize} px <input aria-label="Tekstin koko" type="range" min="16" max="24" step="1" value={fontSize} onChange={event => setFontSize(Number(event.target.value))} /></label>
-      <label>Riviväli {lineHeight.toFixed(2)} <input aria-label="Riviväli" type="range" min="1.4" max="1.9" step=".05" value={lineHeight} onChange={event => setLineHeight(Number(event.target.value))}/></label>
+      <label>Tekstin koko {fontSize} px <input aria-label="Tekstin koko" type="range" min="16" max="24" step="1" value={fontSize} onChange={event => updateReaderPreferences(previous => ({ ...previous, fontSize: Number(event.target.value) }))} /></label>
+      <label>Riviväli {lineHeight.toFixed(2)} <input aria-label="Riviväli" type="range" min="1.4" max="1.9" step=".05" value={lineHeight} onChange={event => updateReaderPreferences(previous => ({ ...previous, lineHeight: Number(event.target.value) }))}/></label>
     </div>}
     {highlighter && <p className="los-notice">Valitse hiirellä tai kosketuksella teksti maalattavaksi. Merkinnät tallentuvat ensin laitteelle ja synkronoituvat palvelimelle, kun yhteys ja tietokanta ovat saatavilla.</p>}
     <p className="los-storage-state" role="status">{losSyncMessage(marksStatus)}</p>
