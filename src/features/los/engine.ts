@@ -30,7 +30,7 @@ export function gradeExercise(exercise:Exercise, response:string|TextAnchor|null
 }
 export function dueDate(previous:Date,success:boolean,stage:number):{date:string;stage:number}{
  const next=success?Math.min(spacedDays.length-1,stage+1):0;
- const delay=success?(spacedDays[next]??30):1;
+ const delay=success?(spacedDays[Math.min(spacedDays.length-1,Math.max(0,stage))]??30):1;
  const day=new Date(previous);
  day.setUTCDate(day.getUTCDate()+delay);
  return {date:day.toISOString().slice(0,10),stage:next};
