@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import {chapters,lessons,sections,validateLosContent,LOS_VERSION} from '../src/features/los/content.ts';
 import {gradeExercise,tokenOffsets,normalizeAnswer,dueDate} from '../src/features/los/engine.ts';
+import {allChapterExercises} from '../src/features/los/practiceExtras.ts';
 
 test('LOS! 1 preserves canonical ten chapters and sixty lessons',()=>{
  assert.deepEqual(chapters.map(c=>c.id),Array.from({length:10},(_,i)=>'C'+String(i+1).padStart(2,'0')));
@@ -54,8 +55,19 @@ test('ordering requires exact token order and hints are not treated as answers',
  assert.equal(gradeExercise(e,'Tag! | Guten').status,'incorrect');
  assert.equal(gradeExercise(e,'').status,'incorrect');
 });
+test('additional practice is differentiated across all ten chapters',()=>{
+ const ids:string[]=[];
+ for(const c of chapters){
+  const exercises=allChapterExercises(c.id,c.exercises);
+  assert.ok(exercises.length>=9,'Too few exercises in '+c.id);
+  ids.push(...exercises.map(e=>e.id));
+  for(const ex of exercises){assert.ok(ex.prompt.trim());assert.ok(ex.explanation.trim());assert.ok(ex.hint.trim());}
+ }
+ assert.equal(ids.length,new Set(ids).size);
+});
 test('review schedule is delayed and not an XP/streak score',()=>{
  const date=new Date('2026-11-10T12:00:00Z');
  assert.deepEqual(dueDate(date,false,2),{date:'2026-11-11',stage:0});
- assert.deepEqual(dueDate(date,true,0),{date:'2026-11-13',stage:1});
+ assert.deepEqual(dueDate(date,true,0),{date:'2026-11-11',stage:1});
+ assert.deepEqual(dueDate(date,true,1),{date:'2026-11-13',stage:2});
 });
