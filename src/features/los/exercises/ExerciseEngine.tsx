@@ -1,32 +1,12 @@
-import { useEffect, useRef, useState } from "react";
-import type { Exercise, ExerciseAnswer, HighlightRange } from "../model";
+import { useRef, useState } from "react";
+import type { BookId, Exercise, ExerciseAnswer, ExerciseAttempt, HighlightRange } from "../model";
 import { evaluateExercise, type Evaluation } from "./evaluate";
-import { getDeviceOwnerId } from "@/lib/deviceSession";
+import { useLosRecord, losSyncMessage } from "../data/useLosRecord";
 
-type Props = { exercise: Exercise; mode?: "practice" | "exam"; onChecked?: (correct: boolean) => void };
+type Props = { bookId: BookId; exercise: Exercise; mode?: "practice" | "exam"; onChecked?: (correct: boolean) => void };
 const isRange = (value: ExerciseAnswer): value is HighlightRange =>
   !!value && typeof value === "object" && "start" in value && "end" in value;
 
-function draftKey(exercise: Exercise) {
-  const owner = getDeviceOwnerId();
-  return owner ? ["opk", "los", owner, exercise.id, exercise.version, "draft"].join(":") : null;
-}
-function readDraft(exercise: Exercise): ExerciseAnswer {
-  try {
-    const key = draftKey(exercise);
-    if (!key) return null;
-    const saved = localStorage.getItem(key);
-    return saved ? (JSON.parse(saved) as ExerciseAnswer) : null;
-  } catch { return null; }
-}
-function persistDraft(exercise: Exercise, answer: ExerciseAnswer): boolean {
-  try {
-    const key = draftKey(exercise);
-    if (!key) return false;
-    localStorage.setItem(key, JSON.stringify(answer));
-    return true;
-  } catch { return false; }
-}
 function HighlightPicker({ exercise, value, onChange }: {
   exercise: Extract<Exercise, { type: "highlight" }>;
   value: ExerciseAnswer;
@@ -93,23 +73,23 @@ function HighlightPicker({ exercise, value, onChange }: {
   </div>;
 }
 
-export function ExerciseEngine({ exercise, mode = "practice", onChecked }: Props) {
-  const [answer, setAnswer] = useState<ExerciseAnswer>(null);
-  const [ready, setReady] = useState(false);
-  const [savedLocally, setSavedLocally] = useState(false);
+export function ExerciseEngine({ bookId, exercise, mode = "practice", onChecked }: Props) {
+  const { value: attempt, update: updateAttempt, status: saveStatus } = useLosRecord<ExerciseAttempt>(
+    bookId, "exercise", exercise.id, exercise.version,
+    { id: exercise.id, exerciseId: exercise.id, exerciseVersion: exercise.version,
+      answer: null, checkedAt: null, status: "draft", updatedAt: "" },
+  );
+  const answer = attempt.answer;
   const [checked, setChecked] = useState<Evaluation | null>(null);
   const [selectedLeft, setSelectedLeft] = useState<string | null>(null);
   const [hintShown, setHintShown] = useState(false);
-
-  useEffect(() => {
-    setAnswer(readDraft(exercise));
-    setReady(true);
-  }, [exercise]);
-  useEffect(() => {
-    if (!ready) return;
-    setSavedLocally(persistDraft(exercise, answer));
-  }, [exercise, answer, ready]);
-  const change = (next: ExerciseAnswer) => { setAnswer(next); setChecked(null); };
+  const [examSubmitted, setExamSubmitted] = useState(false);
+  const change = (next: ExerciseAnswer) => {
+    updateAttempt(previous => ({ ...previous, answer: next, status: "draft",
+      checkedAt: null, updatedAt: new Date().toISOString() }));
+    setChecked(null);
+    setExamSubmitted(false);
+  };
   const matches = exercise.type === "matching" && answer && typeof answer === "object" && !isRange(answer)
     ? answer as Record<string, string> : {};
   return <section className="los-exercise" aria-labelledby={"los-prompt-" + exercise.id}>
@@ -159,19 +139,32 @@ export function ExerciseEngine({ exercise, mode = "practice", onChecked }: Props
     {exercise.type === "highlight" && <HighlightPicker exercise={exercise} value={answer} onChange={change} />}
     <div className="los-actions los-exercise-bottom">
       {mode === "practice" && exercise.hintFi && <button type="button" className="los-button los-button-secondary" onClick={() => setHintShown(v => !v)} aria-expanded={hintShown}>Vihje</button>}
-      <button type="button" className="los-button los-button-primary" disabled={!ready || answer === null || (typeof answer === "string" && !answer.trim())}
+      <button type="button" className="los-button los-button-primary" disabled={saveStatus === "loading" || answer === null || (typeof answer === "string" && !answer.trim())}
         onClick={() => {
+          if (mode === "exam") {
+            // In exam mode an individual task may only submit its answer.
+            // Never leak correctness or a solution before the entire exam is returned.
+            updateAttempt(previous => ({ ...previous, checkedAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString() }));
+            setExamSubmitted(true);
+            return;
+          }
           const result = evaluateExercise(exercise, answer);
           setChecked(result);
-          if (result) onChecked?.(result.correct);
+          if (result) {
+            updateAttempt(previous => ({ ...previous, status: result.correct ? "correct" : "incorrect",
+              checkedAt: new Date().toISOString(), updatedAt: new Date().toISOString() }));
+            onChecked?.(result.correct);
+          }
         }}>Tarkista vastaus</button>
     </div>
     {hintShown && mode === "practice" && <p className="los-notice">{exercise.hintFi}</p>}
+    {examSubmitted && <p className="los-notice" role="status">Vastaus tallennettu koetilaan. Oikeellisuutta ei näytetä ennen koko kokeen palauttamista.</p>}
     {checked && <div role="status" aria-live="polite" className={"los-feedback " + (checked.correct ? "is-correct" : "is-incorrect")}>
       <b>{checked.correct ? "Oikein" : "Ei vielä oikein"}</b>
       {mode === "practice" && <p>{checked.explanationFi}</p>}
       {!checked.correct && mode === "practice" && <button type="button" className="los-text-action" onClick={() => setChecked(null)}>Yritä uudelleen</button>}
     </div>}
-    <p className="los-storage-state" role="status">{savedLocally ? "Luonnos tällä laitteella · ei pilvisynkronointia" : "Luonnosta ei ole voitu tallentaa laitteelle"}</p>
+    <p className="los-storage-state" role="status">{losSyncMessage(saveStatus)}</p>
   </section>;
 }
