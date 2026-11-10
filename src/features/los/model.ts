@@ -11,7 +11,9 @@ export interface SourceAttribution {
   licenseOrBasis: string;
   verifiedAt: string;
   modification?: string;
-  permittedMode: "hosted" | "embed";
+  permittedMode: "hosted" | "embed" | "pending";
+  readiness?: "research" | "text-cleared" | "media-pending" | "blocked";
+  publicationNoteFi?: string;
 }
 export interface Chapter {
   id: string; version: string; sequence: number; title: string;
