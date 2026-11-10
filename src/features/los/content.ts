@@ -197,7 +197,7 @@ export const lessons = [
 'Luvut, tavaaminen ja viikonpäivät','Kaikkien 10 kappaleen taitosekoitus','Täydellinen esittelyharjoitus ilman vihjeitä','Koko kirjan loppukoe','Mitä osaan nyt saksaksi?'
 ].map((name,index)=>{
  const n=index+1,chapterIndex=n>=2&&n<=26?Math.floor((n-2)/5):n>=31&&n<=55?Math.floor((n-31)/5)+5:-1;
- return {id:'L'+String(n).padStart(3,'0'),name,chapterId:chapterIndex>=0?chapters[chapterIndex].id:null,estimate:30,
+ return {id:'L'+String(n).padStart(3,'0'),name,chapterId:chapterIndex>=0?chapters[chapterIndex]!.id:null,estimate:30,
   section:n===1?'Aloitus':n===30?'Välikoe':n===59?'Loppukoe':n===60?'Yhteenveto':n>=27&&n<=29?'Kertaus I':n>=56&&n<=58?'Kertaus II':chapters[chapterIndex]?.name??'',
   status:n<=6?'initial-material': 'pending' as const};
 });
