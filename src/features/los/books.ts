@@ -1,4 +1,5 @@
 import type { Book, BookId, ModuleCode } from "./model";
+import { LOS1_PLANNED_CHAPTERS, LOS1_PLANNED_LESSONS } from "./los1-planned";
 
 const specs: readonly [string, string, string, string, string, string][] = [
   ["Perustason alkeet 1", "Tutustu ja ihastu saksan kieleen", "Nollataso, tervehdykset, esittäytyminen ja ensimmäinen vuorovaikutus.", "#B43D33", "#FCE8E5", "#FF9B91"],
@@ -26,8 +27,8 @@ export const LOS_BOOKS: readonly Book[] = specs.map((spec, index) => ({
   contentVersion: "1.0.0",
   coverAsset: null,
   bannerAsset: null,
-  chapters: [],
-  lessons: [],
+  chapters: index === 0 ? LOS1_PLANNED_CHAPTERS : [],
+  lessons: index === 0 ? LOS1_PLANNED_LESSONS : [],
   blocks: [],
   exercises: [],
   sources: [],
