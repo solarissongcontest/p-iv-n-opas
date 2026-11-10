@@ -1,0 +1,293 @@
+/* LOS! scoped design system. Never overrides StudyOS's global color tokens. */
+.los-app {
+  --los-bg: #f7f7f5;
+  --los-surface: #fff;
+  --los-surface-muted: #f3f4f3;
+  --los-surface-raised: #fff;
+  --los-ink: #1f2933;
+  --los-ink-secondary: #556371;
+  --los-ink-tertiary: #697684;
+  --los-border: #e2e5e5;
+  --los-border-strong: #c3cbcd;
+  --los-focus: #1d5bc4;
+  --los-success: #216d53;
+  --los-success-bg: #e6f5ee;
+  --los-warning: #8b5c1a;
+  --los-warning-bg: #fff3d8;
+  --los-danger: #ab3743;
+  --los-danger-bg: #fceaed;
+  --los-book-accent: #b43d33;
+  --los-book-accent-readable: #b43d33;
+  --los-book-tint: #fce8e5;
+  width: 100%;
+  max-width: 1440px;
+  margin-inline: auto;
+  padding: clamp(16px, 2.6vw, 40px);
+  background: var(--los-bg);
+  border: 1px solid var(--los-border);
+  border-radius: 18px;
+  color: var(--los-ink);
+  font: 400 16px/1.65 Inter, system-ui, sans-serif;
+  min-width: 0;
+}
+.dark .los-app {
+  --los-bg: #11161d;
+  --los-surface: #1a222b;
+  --los-surface-muted: #222d37;
+  --los-surface-raised: #283440;
+  --los-ink: #f2f5f5;
+  --los-ink-secondary: #bcc7cf;
+  --los-ink-tertiary: #9aaab6;
+  --los-border: #37434f;
+  --los-border-strong: #5b6b78;
+  --los-focus: #8ab5ff;
+  --los-success: #7ddbb4;
+  --los-success-bg: #173b31;
+  --los-warning: #f0c779;
+  --los-warning-bg: #42331d;
+  --los-danger: #ff9da5;
+  --los-danger-bg: #4b252c;
+}
+.page-content-courses:has(.los-app) { width: 100%; max-width: 1440px; }
+.los-app *, .los-app *::before, .los-app *::after { box-sizing: border-box; }
+.los-app a { color: inherit; text-decoration: none; }
+.los-app button, .los-app input, .los-app textarea { font: inherit; }
+.los-app button { cursor: pointer; }
+.los-app button:disabled { cursor: not-allowed; color: var(--los-ink-tertiary); }
+.los-app :is(a, button, input, textarea, summary):focus-visible, .los-studies-entry:focus-visible {
+  outline: 3px solid var(--los-focus);
+  outline-offset: 3px;
+}
+.los-app h1 { font-size: 34px; line-height: 1.18; font-weight: 720; letter-spacing: -.02em; margin: 0 0 12px; }
+.los-app h2 { font-size: 26px; line-height: 1.25; font-weight: 700; margin: 0 0 16px; }
+.los-app h3 { font-size: 20px; line-height: 1.35; font-weight: 650; margin: 0 0 12px; }
+.los-app p { margin: 0 0 16px; }
+.los-app small { color: var(--los-ink-secondary); font-size: 13px; line-height: 1.4; }
+.los-eyebrow { font-size: 12px; font-weight: 700; letter-spacing: .085em; color: var(--los-ink-secondary); text-transform: uppercase; }
+.los-intro { max-width: 68ch; color: var(--los-ink-secondary); }
+.los-section-title { margin-top: 40px !important; margin-bottom: 20px !important; }
+.los-context {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  min-height: 48px; border-bottom: 1px solid var(--los-border); margin-bottom: 24px;
+  color: var(--los-ink-secondary); font-size: 13px;
+}
+.los-context a { display: inline-flex; align-items: center; min-height: 44px; gap: 8px; font-weight: 600; }
+.los-context a:hover { color: var(--los-book-accent-readable); }
+.los-library-heading { max-width: 630px; margin-bottom: 36px; }
+.los-library-heading > p:last-child { color: var(--los-ink-secondary); }
+.los-brand-label { display: inline-block; font-size: 32px; font-weight: 800; letter-spacing: -.05em; margin: 2px 0 10px !important; }
+.los-library-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 24px; }
+.los-book-card {
+  display: flex; flex-direction: column; align-items: stretch; min-width: 0;
+  gap: 4px; padding: 12px; border: 1px solid transparent; border-radius: 14px;
+  background: var(--los-surface); transition: transform .14s ease, border-color .14s ease;
+}
+@media (hover: hover) {
+  .los-book-card:hover { transform: translateY(-2px); border-color: var(--los-book-accent); }
+}
+.los-book-card > strong { margin-top: 10px; font-size: 16px; }
+.los-card-title { font-size: 15px; line-height: 1.4; min-height: 2.8em; font-weight: 500; }
+.los-card-status { font-size: 12px; color: var(--los-ink-secondary); margin-top: 4px; }
+.los-library-footnote { margin-top: 28px !important; color: var(--los-ink-secondary); font-size: 13px; max-width: 70ch; }
+.los-cover { aspect-ratio: 5 / 7; width: 100%; min-width: 0; overflow: hidden; border-radius: 10px; background: var(--los-surface-muted); }
+.los-cover > img { display: block; width: 100%; height: 100%; object-fit: contain; }
+.los-cover-unavailable {
+  display: flex; flex-direction: column; align-items: center; justify-content: space-between; gap: 12px;
+  width: 100%; height: 100%; padding: 20px 10px; border: 1px dashed var(--los-border-strong);
+  color: var(--los-ink-secondary); text-align: center;
+}
+.los-cover-unavailable span:first-child { color: var(--los-book-accent-readable); font-size: 14px; font-weight: 700; }
+.los-cover-unavailable span:last-child { font-size: 12px; max-width: 14ch; line-height: 1.5; }
+.los-cover.is-compact { width: 36px; height: 50px; flex: 0 0 36px; border-radius: 4px; }
+.los-cover.is-compact .los-cover-unavailable { padding: 4px; }
+.los-cover.is-compact .los-cover-unavailable span:last-child { display: none; }
+.los-cover.is-compact .los-cover-unavailable span:first-child { font-size: 8px; }
+.los-book-grid { display: grid; grid-template-columns: 248px minmax(0, 1fr); gap: 32px; align-items: start; }
+.los-book-sidebar { position: sticky; top: 72px; min-width: 0; }
+.los-sidebar-brand { display: flex; align-items: center; gap: 12px; padding: 10px 0 20px; border-bottom: 1px solid var(--los-border); }
+.los-sidebar-brand span { display: grid; gap: 2px; min-width: 0; font-size: 14px; line-height: 1.4; }
+.los-sidebar-brand small { max-width: 19ch; }
+.los-nav { padding-top: 12px; display: grid; gap: 2px; }
+.los-nav a { display: flex; align-items: center; min-height: 44px; padding: 8px 12px;
+  border-left: 3px solid transparent; border-radius: 0 8px 8px 0; font-size: 14px; color: var(--los-ink-secondary); }
+.los-nav a:hover { background: var(--los-surface-muted); color: var(--los-ink); }
+.los-nav a[aria-current="page"] { border-left-color: var(--los-book-accent); background: var(--los-book-tint); color: #25303a; font-weight: 700; }
+.dark .los-nav a[aria-current="page"] { background: var(--los-surface-muted); color: var(--los-book-accent-readable); }
+.los-book-mobile-nav { display: none; }
+.los-main-content { min-width: 0; max-width: 100%; }
+.los-book-hero { display: grid; grid-template-columns: 160px minmax(0, 1fr); gap: 30px;
+  align-items: center; border: 1px solid var(--los-border); border-radius: 18px;
+  padding: 28px; background: var(--los-surface); border-top: 4px solid var(--los-book-accent); }
+.los-book-hero > div:last-child { min-width: 0; }
+.los-book-hero h1 { max-width: 25ch; }
+.los-book-hero .los-cover { width: 160px; max-width: 100%; }
+.los-banner { display: block; max-width: 960px; width: 100%; height: auto; margin: 0 auto 24px; border-radius: 14px; }
+.los-button { display: inline-flex; gap: 9px; align-items: center; justify-content: center;
+  min-height: 44px; border-radius: 10px; padding: 10px 18px; border: 1px solid var(--los-border-strong);
+  font-size: 15px; font-weight: 650; line-height: 1.3; transition: background .12s ease; }
+.los-button-primary { background: var(--los-book-accent); border-color: var(--los-book-accent); color: #fff !important; }
+.los-button-primary:hover:not(:disabled) { filter: brightness(.94); }
+.los-button-secondary { background: var(--los-surface); color: var(--los-ink); }
+.los-button-secondary:hover:not(:disabled) { background: var(--los-surface-muted); }
+.los-button:disabled { opacity: .65; }
+.los-path-cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.los-path-cards > a { display: flex; align-items: flex-start; flex-direction: column; gap: 8px;
+  min-height: 138px; padding: 20px; border: 1px solid var(--los-border); border-radius: 14px; background: var(--los-surface); }
+.los-path-cards > a:hover, .los-tool-links a:hover { border-color: var(--los-book-accent); }
+.los-path-cards svg { color: var(--los-book-accent-readable); }
+.los-path-cards span { color: var(--los-ink-secondary); font-size: 14px; }
+.los-tool-links { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 8px; }
+.los-tool-links a { display: flex; align-items: center; justify-content: space-between; min-height: 52px;
+  padding: 12px 16px; border: 1px solid var(--los-border); border-radius: 10px; font-weight: 600; font-size: 14px; }
+.los-empty { padding: 44px 28px; border: 1px dashed var(--los-border-strong);
+  border-radius: 14px; background: var(--los-surface); color: var(--los-ink-secondary); }
+.los-empty h2 { margin: 12px 0 8px; font-size: 20px; color: var(--los-ink); }
+.los-empty p { margin: 0; max-width: 70ch; }
+.los-notice { background: var(--los-surface-muted); border-left: 3px solid var(--los-book-accent);
+  border-radius: 8px; padding: 14px 16px; color: var(--los-ink-secondary); font-size: 14px; }
+.los-chapter-list, .los-lesson-list { list-style: none; padding: 0; margin: 24px 0; border-top: 1px solid var(--los-border); }
+.los-chapter-list > li, .los-lesson-list > li { border-bottom: 1px solid var(--los-border); }
+.los-chapter-list summary { display: flex; align-items: center; gap: 16px; padding: 18px 10px; min-height: 88px; cursor: pointer; list-style: none; }
+.los-chapter-list summary::-webkit-details-marker { display: none; }
+.los-chapter-list summary > span:nth-child(2), .los-lesson-list a > span:nth-child(2) { flex: 1; display: grid; gap: 4px; }
+.los-chapter-list summary small, .los-lesson-list small { display: block; }
+.los-chapter-list summary > span:last-child { font-size: 13px; color: var(--los-ink-secondary); }
+.los-chapter-number { font-size: 26px; font-weight: 600; min-width: 42px; color: var(--los-book-accent-readable); font-variant-numeric: tabular-nums; }
+.los-chapter-inner { padding: 0 16px 14px 65px; background: var(--los-surface-muted); }
+.los-chapter-inner a { display: flex; align-items: center; gap: 8px; min-height: 44px; font-size: 14px; }
+.los-lesson-list a { display: flex; align-items: center; gap: 16px; min-height: 88px; padding: 16px 10px; }
+.los-lesson-list a:hover { background: var(--los-surface-muted); }
+.los-lesson-list a > span:last-child { display: flex; align-items: center; gap: 8px; white-space: nowrap; font-size: 13px; color: var(--los-ink-secondary); }
+.los-objectives { max-width: 760px; background: var(--los-surface-muted); border-left: 3px solid var(--los-book-accent); padding: 20px; border-radius: 8px; margin-bottom: 24px; }
+.los-objectives ul { margin: 8px 0 0; padding-left: 24px; }
+.los-reader { max-width: 840px; margin-top: 24px; padding: 30px; border-radius: 14px; background: var(--los-surface); }
+.los-reader-top { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 28px; }
+.los-reader-top h1 { font-size: 30px; }
+.los-reader-tools { display: flex; flex-wrap: wrap; gap: 8px; }
+.los-reader-settings { display: flex; flex-wrap: wrap; gap: 32px; padding: 16px; background: var(--los-surface-muted); margin-bottom: 20px; }
+.los-reader-settings label { display: grid; gap: 8px; font-size: 14px; }
+.los-reader-settings input { min-width: 160px; accent-color: var(--los-book-accent); }
+.los-reading-body { font-size: var(--los-reader-font, 18px); line-height: var(--los-reader-leading, 1.75); }
+.los-reading-body > * { max-width: 68ch; margin-bottom: 1em; }
+.los-reading-body h2 { font-size: 26px; }
+.los-reading-body h3 { font-size: 20px; }
+.los-reading-body p[lang="de"] { font-size: inherit; line-height: inherit; user-select: text; white-space: pre-wrap; hyphens: auto; }
+.los-reader-paragraph { margin-bottom: 1.2em; }
+.los-reader-paragraph p { margin: 0; }
+.los-note-action { font-size: 13px !important; opacity: .85; }
+.los-text-action { background: transparent; border: none; padding: 8px 2px; display: inline-flex;
+  align-items: center; gap: 8px; min-height: 44px; color: var(--los-book-accent-readable); font-weight: 600; }
+.los-marker { background: rgba(255,225,106,.45); border-radius: 3px; box-decoration-break: clone; -webkit-box-decoration-break: clone; padding-block: 1px; color: inherit; }
+.dark .los-marker { background: rgba(255,225,106,.38); }
+.los-dialogue p { margin-bottom: 12px; }
+.los-dialogue b { font-size: 15px; margin-right: 8px; }
+.los-grammar { padding: 18px 20px; border-left: 3px solid var(--los-book-accent); background: var(--los-surface-muted); border-radius: 8px; }
+.los-examples { display: grid; gap: 14px; }
+.los-examples div { border-top: 1px solid var(--los-border); padding-top: 10px; }
+.los-examples p { margin-bottom: 4px; font-size: 18px; font-weight: 550; }
+.los-table-scroll { max-width: 100% !important; overflow-x: auto; }
+.los-table-scroll table { border-collapse: collapse; min-width: 360px; width: 100%; font-size: 15px; }
+.los-table-scroll td, .los-table-scroll th { padding: 10px; border-bottom: 1px solid var(--los-border); text-align: left; }
+.los-reader-image img { max-width: 100%; height: auto; }
+.los-reader-image figcaption, .los-media figcaption { color: var(--los-ink-secondary); font-size: 13px; }
+.los-vocabulary dl > div { display: grid; grid-template-columns: 1fr 1fr; padding: 12px; border-bottom: 1px solid var(--los-border); gap: 20px; }
+.los-vocabulary dt { font-weight: 650; }
+.los-vocabulary dd { margin: 0; }
+.los-vocabulary dd small { display: block; }
+.los-media iframe { width: 100%; aspect-ratio: 16/9; border: 0; }
+.los-note-editor { padding: 20px; margin-top: 20px; border: 1px solid var(--los-border); border-radius: 14px; }
+.los-inline-head { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.los-note-editor label { display: block; font-size: 14px; margin-bottom: 8px; }
+.los-note-editor textarea { width: 100%; min-height: 120px; resize: vertical; padding: 12px; background: var(--los-surface); color: var(--los-ink); border: 1px solid var(--los-border-strong); border-radius: 10px; }
+.los-lesson-heading { max-width: 800px; }
+.los-progress-heading { display: flex; justify-content: space-between; font-size: 13px; font-weight: 600; margin-top: 24px; }
+.los-lesson progress { width: 100%; height: 8px; accent-color: var(--los-book-accent); }
+.los-step-list { display: flex; list-style: none; padding: 0; gap: 8px; margin: 18px 0 24px; flex-wrap: wrap; }
+.los-step-list button { display: flex; align-items: center; gap: 8px; min-height: 44px; padding: 8px 12px; background: var(--los-surface); border: 1px solid var(--los-border); border-radius: 10px; color: var(--los-ink); font-size: 14px; }
+.los-step-list button.is-active { background: var(--los-surface-muted); border-color: var(--los-book-accent); }
+.los-lesson-step { max-width: 840px; }
+.los-step-controls { justify-content: space-between; }
+.los-actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 18px; }
+.los-exercise { max-width: 760px; padding: 24px; margin: 26px 0; border: 1px solid var(--los-border); border-radius: 14px; background: var(--los-surface); }
+.los-exercise-meta { display: flex; justify-content: space-between; gap: 16px; color: var(--los-ink-tertiary); font-size: 12px; font-weight: 650; letter-spacing: .04em; }
+.los-exercise-prompt { font-size: 16px !important; line-height: 1.55; font-weight: 600; margin: 16px 0 !important; }
+.los-options { display: grid; gap: 8px; border: 0; padding: 0; margin: 0; }
+.los-option { display: flex; align-items: center; gap: 12px; padding: 12px 14px; min-height: 52px;
+  border: 1px solid var(--los-border-strong); border-radius: 10px; cursor: pointer; }
+.los-option:has(input:checked) { border-color: var(--los-book-accent); background: var(--los-surface-muted); }
+.los-option input { accent-color: var(--los-book-accent); width: 20px; height: 20px; flex: none; }
+.los-gap { display: grid; gap: 10px; }
+.los-gap label { font-size: 14px; }
+.los-gap input { height: 48px; min-width: 0; width: min(100%, 340px); border: 1px solid var(--los-border-strong);
+  border-radius: 10px; padding: 10px 12px; background: var(--los-surface); color: var(--los-ink); }
+.los-umlauts { display: flex; flex-wrap: wrap; gap: 6px; }
+.los-umlauts button { min-width: 44px; min-height: 44px; border-radius: 8px; border: 1px solid var(--los-border); }
+.los-matching { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.los-matching h4 { font-size: 14px; font-weight: 700; margin: 0 0 8px; }
+.los-match-item { width: 100%; min-height: 52px; text-align: left; display: flex; justify-content: space-between;
+  align-items: center; padding: 10px 12px; gap: 10px; background: var(--los-surface-muted);
+  border: 1px solid var(--los-border); border-radius: 8px; margin-bottom: 8px; }
+.los-match-item[aria-pressed="true"] { border-color: var(--los-book-accent); }
+.los-support { color: var(--los-ink-secondary); font-size: 13px; }
+.los-highlight-text { white-space: pre-wrap; font-size: 18px; line-height: 1.75; user-select: text; touch-action: pan-y; }
+.los-token-picker { margin-top: 16px; padding: 12px; border: 1px solid var(--los-border); border-radius: 10px; }
+.los-tokens { display: flex; flex-wrap: wrap; gap: 6px; }
+.los-token { min-height: 44px; padding: 6px 10px; border: 1px solid var(--los-border-strong); border-radius: 8px; background: var(--los-surface); color: var(--los-ink); }
+.los-token[aria-pressed="true"] { background: rgba(255,225,106,.45); border-color: var(--los-book-accent); color: #1f2933; }
+.los-exercise-bottom { justify-content: flex-end; margin-top: 24px; }
+.los-feedback { padding: 14px 16px; border-left: 3px solid var(--los-success); margin-top: 18px; background: var(--los-surface-muted); font-size: 14px; }
+.los-feedback.is-incorrect { border-color: var(--los-danger); }
+.los-feedback p { margin: 6px 0 0; }
+.los-storage-state { color: var(--los-ink-tertiary); font-size: 12px; margin: 16px 0 0 !important; }
+.los-source-list { list-style: none; padding: 0; }
+.los-source-list li { border-bottom: 1px solid var(--los-border); padding: 15px 0; }
+.los-source-list span { display: block; font-size: 13px; }
+.los-source-list a { text-decoration: underline; }
+.los-studies-entry { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 18px 20px;
+  margin-bottom: 18px; border-radius: 14px; border: 1px solid var(--border); background: var(--surface); }
+.los-studies-entry strong, .los-studies-entry small { display: block; }
+.los-studies-entry small { margin-top: 4px; color: var(--muted-foreground); }
+.los-studies-entry:hover { border-color: var(--primary); }
+@media (max-width: 1100px) {
+  .los-book-grid { grid-template-columns: minmax(0, 1fr); }
+  .los-book-sidebar { display: none; }
+  .los-book-mobile-nav { display: block; margin-bottom: 24px; }
+  .los-book-mobile-nav details { border: 1px solid var(--los-border); border-radius: 12px; background: var(--los-surface); }
+  .los-book-mobile-nav summary { display: flex; align-items: center; gap: 10px; cursor: pointer; min-height: 48px; padding: 8px 14px; font-weight: 600; }
+  .los-book-mobile-nav .los-nav { padding: 8px 12px 14px; border-top: 1px solid var(--los-border); }
+}
+@media (max-width: 1023px) {
+  .los-library-grid { grid-template-columns: repeat(3, minmax(0,1fr)); gap: 16px; }
+}
+@media (max-width: 639px) {
+  .los-app { padding: 16px; border-radius: 12px; font-size: 16px; }
+  .los-app h1 { font-size: 27px; }
+  .los-app h2 { font-size: 22px; }
+  .los-app h3 { font-size: 19px; }
+  .los-library-grid { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px; }
+  .los-book-card { padding: 8px; }
+  .los-card-title { font-size: 14px; }
+  .los-book-hero { grid-template-columns: 104px minmax(0,1fr); align-items: start; padding: 16px; gap: 16px; }
+  .los-book-hero .los-cover { width: 104px; }
+  .los-book-hero .los-button { grid-column: 1/-1; }
+  .los-path-cards, .los-tool-links { grid-template-columns: 1fr; }
+  .los-path-cards > a { min-height: 100px; }
+  .los-reader { padding: 16px; }
+  .los-reading-body { font-size: var(--los-reader-font, 17.5px); }
+  .los-reader-tools { width: 100%; }
+  .los-reader-tools .los-button { flex: 1; padding: 10px; }
+  .los-exercise { padding: 16px; }
+  .los-matching { gap: 8px; }
+  .los-match-item { font-size: 14px; }
+  .los-step-controls .los-button { min-height: 48px; }
+  .los-context > span { display: none; }
+}
+@media (max-width: 339px) {
+  .los-library-grid { grid-template-columns: 1fr; }
+  .los-book-hero { grid-template-columns: 90px minmax(0,1fr); }
+  .los-book-hero .los-cover { width: 90px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .los-book-card, .los-button { transition: none; }
+  .los-book-card:hover { transform: none; }
+}
