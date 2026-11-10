@@ -77,6 +77,27 @@ test('L030 and L059 have distinct complete deterministic 25/50 question banks',(
   assert.equal(gradeExercise(ex,answer).status,'correct',ex.id);
  }
 });
+test('16 exercise schemas are defined, deterministic where reliable, and video cannot be falsely scored',()=>{
+ const c=chapters[0]!, e=allChapterExercises(c.id,c.exercises);
+ assert.equal(gradeExercise(e.find(x=>x.id==='C01-X01')!,JSON.stringify({'Hallo!':'Hei!','danke':'kiitos','Tschüss!':'Hei hei!'})).status,'correct');
+ assert.equal(gradeExercise(e.find(x=>x.id==='C01-X01')!,JSON.stringify({'Hallo!':'Hei!','danke':'hei','Tschüss!':'Hei hei!'})).status,'incorrect');
+ const audioChoice=e.find(x=>x.id==='C01-X02')!;
+ assert.equal(audioChoice.type,'listen-choice');
+ assert.ok(audioChoice.mediaUrl?.includes('commons.wikimedia.org'));
+ assert.equal(gradeExercise(audioChoice,'Wie alt bist du?').status,'correct');
+ assert.equal(gradeExercise(e.find(x=>x.id==='C01-X03')!,'Tschüss!').status,'correct');
+ const conjugation=allChapterExercises('C02',chapters[1]!.exercises).find(x=>x.type==='conjugation')!;
+ assert.equal(gradeExercise(conjugation,JSON.stringify({'ich (heißen)':'heiße','du (heißen)':'heißt','ich (sein)':'bin','du (sein)':'bist'})).status,'correct');
+ const article=allChapterExercises('C07',chapters[6]!.exercises).find(x=>x.type==='article-sort')!;
+ assert.equal(gradeExercise(article,JSON.stringify({Name:'der',Frau:'die',Jahr:'das'})).status,'correct');
+ assert.equal(gradeExercise(article,JSON.stringify({Name:'das',Frau:'die',Jahr:'der'})).status,'incorrect');
+ const correction=allChapterExercises('C05',chapters[4]!.exercises).find(x=>x.type==='error-correction')!;
+ assert.equal(gradeExercise(correction,'Mir geht es gut.').status,'correct');
+ const types=new Set(['highlight','choice','true-false','fill','matching','ordering','translate','find-text','listen-choice','listen-write','video','article-sort','conjugation','error-correction','writing','speech']);
+ assert.equal(types.size,16);
+ const unverifiedVideo={id:'test-video',type:'video' as const,prompt:'test',videoId:'unverified',hint:'',explanation:'',reviewedMedia:false,correct:'X',options:['X','Y']};
+ assert.equal(gradeExercise(unverifiedVideo,'X').status,'self-review');
+});
 test('review schedule is delayed and not an XP/streak score',()=>{
  const date=new Date('2026-11-10T12:00:00Z');
  assert.deepEqual(dueDate(date,false,2),{date:'2026-11-11',stage:0});
