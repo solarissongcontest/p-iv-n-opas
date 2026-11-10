@@ -3,38 +3,21 @@ import { ArrowLeft, ArrowRight, CheckCircle2 } from "lucide-react";
 import type { Book, Lesson, LessonProgress } from "./model";
 import { Reader } from "./Reader";
 import { ExerciseEngine } from "./exercises/ExerciseEngine";
-import { getDeviceOwnerId } from "@/lib/deviceSession";
+import { useLosRecord, losSyncMessage } from "./data/useLosRecord";
 
-function lessonKey(lesson: Lesson) {
-  const owner = getDeviceOwnerId();
-  return owner ? ["opk", "los", owner, lesson.bookId, lesson.id, lesson.version, "progress"].join(":") : null;
-}
-function readLesson(lesson: Lesson): LessonProgress | null {
-  try { const key = lessonKey(lesson); return key ? JSON.parse(localStorage.getItem(key) ?? "null") as LessonProgress | null : null; }
-  catch { return null; }
-}
-function saveLesson(lesson: Lesson, value: LessonProgress) {
-  try { const key = lessonKey(lesson); if (!key) return false; localStorage.setItem(key, JSON.stringify(value)); return true; }
-  catch { return false; }
-}
 export function LessonRunner({ book, lesson }: { book: Book; lesson: Lesson }) {
-  const [progress, setProgress] = useState<LessonProgress>({
-    lessonId: lesson.id, lessonVersion: lesson.version, completedStepIds: [], status: "not-started", updatedAt: "",
-  });
+  const { value: progress, update: setProgress, status: saveStatus } = useLosRecord<LessonProgress>(
+    book.id, "lesson", lesson.id, lesson.version, {
+      lessonId: lesson.id, lessonVersion: lesson.version, completedStepIds: [], status: "not-started", updatedAt: "",
+    },
+  );
   const [index, setIndex] = useState(0);
   const [checkedSteps, setCheckedSteps] = useState<string[]>([]);
-  const [loaded, setLoaded] = useState(false);
-  const [saved, setSaved] = useState(false);
   useEffect(() => {
-    const restored = readLesson(lesson);
-    if (restored) {
-      setProgress(restored);
-      const firstUnfinished = lesson.steps.findIndex(step => !restored.completedStepIds.includes(step.id));
-      setIndex(firstUnfinished < 0 ? Math.max(0, lesson.steps.length - 1) : firstUnfinished);
-    }
-    setLoaded(true);
-  }, [lesson]);
-  useEffect(() => { if (loaded && progress.updatedAt) setSaved(saveLesson(lesson, progress)); }, [lesson, progress, loaded]);
+    if (saveStatus === "loading") return;
+    const firstUnfinished = lesson.steps.findIndex(step => !progress.completedStepIds.includes(step.id));
+    setIndex(firstUnfinished < 0 ? Math.max(0, lesson.steps.length - 1) : firstUnfinished);
+  }, [lesson.id, lesson.steps, saveStatus]);
   const step = lesson.steps[index];
   const required = lesson.steps.filter(item => item.required);
   const completedCount = required.filter(item => progress.completedStepIds.includes(item.id)).length;
@@ -66,7 +49,7 @@ export function LessonRunner({ book, lesson }: { book: Book; lesson: Lesson }) {
       </li>)}</ol>
     <section className="los-lesson-step" aria-labelledby="los-step-title"><h2 id="los-step-title">{step.title}</h2>
       {block && <Reader book={book} title={step.title} blocks={[block]} />}
-      {exercise && <ExerciseEngine key={exercise.id} exercise={exercise} onChecked={() => setCheckedSteps(previous => Array.from(new Set([...previous, step.id])))}/>}
+      {exercise && <ExerciseEngine key={exercise.id} bookId={book.id} exercise={exercise} onChecked={() => setCheckedSteps(previous => Array.from(new Set([...previous, step.id])))}/>}
       {!block && !exercise && <p className="los-notice">Tämän vaiheen materiaalia ei ole vielä julkaistu.</p>}
     </section>
     <div className="los-actions los-step-controls">
@@ -75,7 +58,7 @@ export function LessonRunner({ book, lesson }: { book: Book; lesson: Lesson }) {
         onClick={advance}>{index < lesson.steps.length - 1 ? "Merkitse käsitellyksi ja jatka" : "Päätä oppitunti"} <ArrowRight size={17}/></button>
     </div>
     {exercise && !checkedSteps.includes(step.id) && <p className="los-support">Tarkista tehtävä ennen kuin merkitset tämän vaiheen käsitellyksi. Oikeaa vastausta ei vaadita.</p>}
-    <p className="los-storage-state">{saved ? "Vaihetiedot tallennettu tälle laitteelle · ei synkronoitu" : "Vaihetiedoille ei ole vielä vahvistettua pilvitallennusta"}</p>
-    {progress.status === "completed" && <p className="los-feedback is-correct" role="status">Kaikki pakolliset vaiheet käsitelty tällä laitteella. Tämä ei ole virallinen kurssisuoritus.</p>}
+    <p className="los-storage-state">{losSyncMessage(saveStatus)}</p>
+    {progress.status === "completed" && <p className="los-feedback is-correct" role="status">Kaikki pakolliset vaiheet käsitelty. Tämä ei ole virallinen kurssisuoritus.</p>}
   </section>;
 }
