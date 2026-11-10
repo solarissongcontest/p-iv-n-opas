@@ -17,7 +17,9 @@
   --los-danger: #ab3743;
   --los-danger-bg: #fceaed;
   --los-book-accent: #b43d33;
-  --los-book-accent-readable: #b43d33;
+  --los-book-accent-light: #b43d33;
+  --los-book-accent-dark: #ff9b91;
+  --los-book-accent-readable: var(--los-book-accent-light);
   --los-book-tint: #fce8e5;
   width: 100%;
   max-width: 1440px;
@@ -47,6 +49,7 @@
   --los-warning-bg: #42331d;
   --los-danger: #ff9da5;
   --los-danger-bg: #4b252c;
+  --los-book-accent-readable: var(--los-book-accent-dark);
 }
 .page-content-courses:has(.los-app) { width: 100%; max-width: 1440px; }
 .los-app *, .los-app *::before, .los-app *::after { box-sizing: border-box; }
@@ -85,6 +88,7 @@
 @media (hover: hover) {
   .los-book-card:hover { transform: translateY(-2px); border-color: var(--los-book-accent); }
 }
+.dark .los-book-card { --los-book-accent-readable: var(--los-book-accent-dark); }
 .los-book-card > strong { margin-top: 10px; font-size: 16px; }
 .los-card-title { font-size: 15px; line-height: 1.4; min-height: 2.8em; font-weight: 500; }
 .los-card-status { font-size: 12px; color: var(--los-ink-secondary); margin-top: 4px; }
@@ -290,4 +294,18 @@
 @media (prefers-reduced-motion: reduce) {
   .los-book-card, .los-button { transition: none; }
   .los-book-card:hover { transform: none; }
+}
+
+/* Editorially planned 60-lesson path, grouped by chapter rather than one long wall. */
+.los-lesson-group { margin-block: 32px; }
+.los-lesson-group h2 { font-size: 20px; margin-bottom: 12px; }
+.los-lesson-group .los-lesson-list { margin-top: 0; }
+.los-notes-list { list-style: none; padding: 0; margin: 20px 0; display: grid; gap: 12px; }
+.los-notes-list li { background: var(--los-surface); border: 1px solid var(--los-border); border-radius: 12px; padding: 16px; }
+.los-notes-list li > small { display: block; margin-top: 4px; }
+.los-notes-list li p { white-space: pre-wrap; margin: 12px 0; overflow-wrap: anywhere; }
+@media (max-width: 639px) {
+  .los-lesson-list a { gap: 8px; }
+  .los-lesson-list .los-chapter-number { min-width: 38px; font-size: 22px; }
+  .los-lesson-list a > span:last-child { font-size: 11px; max-width: 90px; white-space: normal; }
 }
