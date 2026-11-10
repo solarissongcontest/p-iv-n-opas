@@ -108,15 +108,32 @@ function Contents({ book }: { book: Book }) {
   </section>;
 }
 function Lessons({ book }: { book: Book }) {
-  return <section><h1>Opetuspolku</h1><p className="los-intro">Vapaaehtoiset, noin 30 minuutin oppitunnit käyttävät samoja materiaaleja kuin muu oppikirja.</p>
-    {book.lessons.length > 0 && book.lessons.every(lesson => !lesson.steps.length) && <p className="los-notice">Tämän kirjan kaikki {book.lessons.length} oppituntia on nimetty suunnitelman mukaan. Oppimateriaali, tehtävät ja suoritukset eivät ole vielä julkaistuja.</p>}
-    {!book.lessons.length ? <Empty title="Oppitunteja ei ole vielä julkaistu">Opetuspolun rakenne on valmis. Ensimmäiset tunnit lisätään myöhemmin tarkistettuina sisältöpaketteina.</Empty> :
-      <ol className="los-lesson-list">{book.lessons.map(lesson =>
-        <li key={lesson.id}><a href={bookPath(book, "oppitunti/" + encodeURIComponent(lesson.id.slice(1)))}>
-          <span className="los-chapter-number">{String(lesson.sequence).padStart(2, "0")}</span>
-          <span><b>{lesson.title}</b><small>{lesson.objectives.join(" · ")}</small></span>
-          <span>{lesson.steps.length ? "n. " + lesson.estimatedMinutes + " min" : "Sisältö tulossa"} <ArrowRight size={17}/></span>
-        </a></li>)}</ol>}
+  const groups: { id: string; title: string; items: Book["lessons"][number][] }[] = [];
+  for (const lesson of book.lessons) {
+    const key = lesson.chapterId ?? (lesson.sequence === 1 ? "start" : lesson.sequence <= 30 ? "review-one" : "review-two");
+    const title = lesson.chapterId
+      ? book.chapters.find(chapter => chapter.id === lesson.chapterId)?.title ?? "Kappale"
+      : key === "start" ? "Aloitus"
+      : key === "review-one" ? "Kertaus I ja välikoe" : "Kertaus II ja loppukoe";
+    const group = groups.find(item => item.id === key);
+    if (group) group.items.push(lesson);
+    else groups.push({ id: key, title, items: [lesson] });
+  }
+  return <section className="los-lessons">
+    <h1>Opetuspolku</h1>
+    <p className="los-intro">Vapaaehtoiset, noin 30 minuutin oppitunnit käyttävät samoja materiaaleja kuin muu oppikirja. Oppitunteja ei ole lukittu järjestyksessä.</p>
+    {book.lessons.length > 0 && book.lessons.every(lesson => !lesson.steps.length) &&
+      <p className="los-notice">Kaikki {book.lessons.length} suunniteltua oppituntia löytyvät alla. Varsinainen opetusmateriaali ja suoritustoiminnot eivät vielä ole julkaistuja.</p>}
+    {!book.lessons.length ? <Empty title="Oppitunteja ei ole vielä julkaistu">Opetuspolun sisältö lisätään tarkistettuina sisältöpaketteina.</Empty> :
+      groups.map(group => <section key={group.id} className="los-lesson-group">
+        <h2>{group.title}</h2>
+        <ol className="los-lesson-list">{group.items.map(lesson =>
+          <li key={lesson.id}><a href={bookPath(book, "oppitunti/" + encodeURIComponent(lesson.id.slice(1)))}>
+            <span className="los-chapter-number">{String(lesson.sequence).padStart(3, "0")}</span>
+            <span><b>{lesson.title}</b><small>{lesson.objectives.join(" · ") || "Opetussisällön suunnitelma"}</small></span>
+            <span>{lesson.steps.length ? "n. " + lesson.estimatedMinutes + " min" : "Sisältö tulossa"} <ArrowRight size={17}/></span>
+          </a></li>)}</ol>
+      </section>)}
   </section>;
 }
 function ChapterPage({ book, chapter }: { book: Book; chapter: Chapter }) {
