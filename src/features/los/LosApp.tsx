@@ -186,7 +186,7 @@ function GenericSection({ book, segment }: { book: Book; segment: string }) {
   if (segment === "muistiinpanot") return <NotesIndex book={book}/>;
   if (segment === "kielioppi") {
     const blocks = book.blocks.filter(block => block.kind === "grammar");
-    return blocks.length ? <Reader book={book} blocks={blocks} title="Kielioppi"/> :
+    return blocks.length ? <Reader book={book} blocks={blocks} title="Kielioppi" headingLevel={1}/> :
       <section><h1>Kielioppi</h1><Empty title="Kielioppilukuja ei ole vielä julkaistu">Tähän avautuvat varsinaiset, perusteelliset opetussivut.</Empty></section>;
   }
   if (segment === "lahteet") return <section><h1>Lähteet</h1>{book.sources.length ?
@@ -222,7 +222,7 @@ export function LosApp() {
       section === "opetuspolku" ? <Lessons book={book}/> :
       section === "kappale" ? chapter ? <ChapterPage book={book} chapter={chapter}/> : <Empty title="Kappaletta ei löytynyt">Sisältöä ei ole vielä julkaistu.</Empty> :
       section === "oppitunti" ? lesson ? <LessonRunner book={book} lesson={lesson}/> : <Empty title="Oppituntia ei löytynyt">Tätä tuntia ei ole julkaistu.</Empty> :
-      section === "teksti" ? selectedBlock ? <Reader book={book} blocks={[selectedBlock]} title="Oppimateriaali"/> : <Empty title="Tekstiä ei löytynyt">Tätä aineistoa ei ole julkaistu.</Empty> :
+      section === "teksti" ? selectedBlock ? <Reader book={book} blocks={[selectedBlock]} title="Oppimateriaali" headingLevel={1}/> : <Empty title="Tekstiä ei löytynyt">Tätä aineistoa ei ole julkaistu.</Empty> :
       <GenericSection book={book} segment={section}/>}
   </BookShell>;
 }
