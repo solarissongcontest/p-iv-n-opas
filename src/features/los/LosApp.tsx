@@ -1,5 +1,5 @@
 import { useLocation } from "@tanstack/react-router";
-import { ArrowLeft, ArrowRight, BookOpen, LibraryBig, List, NotebookPen, RotateCcw, Search, Sparkles } from "lucide-react";
+import { ArrowLeft, ArrowRight, BookOpen, List, RotateCcw, Sparkles } from "lucide-react";
 import { LOS_BASE_PATH, LOS_BOOKS, bookPath, findLosBook } from "./books";
 import type { Book, Chapter, ContentBlock } from "./model";
 import { Reader } from "./Reader";
@@ -79,12 +79,12 @@ function BookHome({ book }: { book: Book }) {
     <div className="los-book-hero"><BookCover book={book}/>
       <div><p className="los-eyebrow">{book.moduleTitle}</p><h1>{book.title}</h1>
         <p>{book.description}</p>
-        <a className="los-button los-button-primary" href={bookPath(book, book.lessons.length ? "opetuspolku" : "sisalto")}>
-          {book.lessons.length ? "Siirry opetuspolkuun" : "Avaa sisällysluettelo"} <ArrowRight size={17}/>
+        <a className="los-button los-button-primary" href={bookPath(book, book.lessons.some(lesson => lesson.steps.length > 0) ? "opetuspolku" : "sisalto")}>
+          {book.lessons.some(lesson => lesson.steps.length > 0) ? "Siirry opetuspolkuun" : "Avaa sisällysluettelo"} <ArrowRight size={17}/>
         </a>
       </div>
     </div>
-    {!book.lessons.length && <p className="los-notice" role="status">Oppitunteja ei ole vielä julkaistu. Etenemistä ei lasketa ennen kuin oikeita opintosuorituksia on saatavilla.</p>}
+    {!book.lessons.some(lesson => lesson.steps.length > 0) && <p className="los-notice" role="status">Oppituntien sisältöä ei ole vielä julkaistu. Etenemistä ei lasketa ennen kuin oikeita opintosuorituksia on saatavilla.</p>}
     <h2 className="los-section-title">Tutustu kirjaan</h2>
     <div className="los-path-cards">
       <a href={bookPath(book, "sisalto")}><List size={20}/><b>Sisällysluettelo</b><span>Selaa tekstejä ja kappaleita.</span></a>
@@ -96,12 +96,12 @@ function BookHome({ book }: { book: Book }) {
   </div>;
 }
 function Contents({ book }: { book: Book }) {
-  return <section><h1>Sisällysluettelo</h1><p className="los-intro">{book.moduleCode} · {book.chapters.length} julkaistua kappaletta</p>
+  return <section><h1>Sisällysluettelo</h1><p className="los-intro">{book.moduleCode} · {book.chapters.length} suunniteltua kappaletta · {book.chapters.filter(chapter => chapter.publicationStatus === "published").length} julkaistua</p>
     {!book.chapters.length ? <Empty title="Kappaleita ei ole vielä lisätty">Tähän ilmestyvät kirjan varsinaiset tekstit, kieliopit, sanastot ja tehtävät. Mitään tekaistua oppimateriaalia ei näytetä.</Empty> :
       <ol className="los-chapter-list">{book.chapters.map(chapter =>
         <li key={chapter.id}><details><summary><span className="los-chapter-number">{String(chapter.sequence).padStart(2, "0")}</span>
-          <span><b>{chapter.title}</b><small>{chapter.introductionFi}</small></span><span>Katso sisältö</span></summary>
-          <div className="los-chapter-inner"><a href={bookPath(book, "kappale/" + encodeURIComponent(chapter.id))}>Avaa kappale <ArrowRight size={16}/></a>
+          <span><b>{chapter.title}</b><small>{chapter.introductionFi}</small></span><span>{chapter.publicationStatus === "published" ? "Katso sisältö" : "Sisältö tulossa"}</span></summary>
+          <div className="los-chapter-inner"><a href={bookPath(book, "kappale/" + encodeURIComponent(chapter.id.slice(1)))}>Avaa kappale <ArrowRight size={16}/></a>
             {chapter.blockIds.map(id => <a key={id} href={bookPath(book, "teksti/" + encodeURIComponent(id))}>
               {book.blocks.find(block => block.id === id)?.kind === "grammar" ? "Kielioppi" : "Oppimateriaali"} · {id}</a>)}
           </div></details></li>)}</ol>}
@@ -109,12 +109,13 @@ function Contents({ book }: { book: Book }) {
 }
 function Lessons({ book }: { book: Book }) {
   return <section><h1>Opetuspolku</h1><p className="los-intro">Vapaaehtoiset, noin 30 minuutin oppitunnit käyttävät samoja materiaaleja kuin muu oppikirja.</p>
+    {book.lessons.length > 0 && book.lessons.every(lesson => !lesson.steps.length) && <p className="los-notice">Tämän kirjan kaikki {book.lessons.length} oppituntia on nimetty suunnitelman mukaan. Oppimateriaali, tehtävät ja suoritukset eivät ole vielä julkaistuja.</p>}
     {!book.lessons.length ? <Empty title="Oppitunteja ei ole vielä julkaistu">Opetuspolun rakenne on valmis. Ensimmäiset tunnit lisätään myöhemmin tarkistettuina sisältöpaketteina.</Empty> :
       <ol className="los-lesson-list">{book.lessons.map(lesson =>
-        <li key={lesson.id}><a href={bookPath(book, "oppitunti/" + encodeURIComponent(lesson.id))}>
+        <li key={lesson.id}><a href={bookPath(book, "oppitunti/" + encodeURIComponent(lesson.id.slice(1)))}>
           <span className="los-chapter-number">{String(lesson.sequence).padStart(2, "0")}</span>
           <span><b>{lesson.title}</b><small>{lesson.objectives.join(" · ")}</small></span>
-          <span>noin {lesson.estimatedMinutes} min <ArrowRight size={17}/></span>
+          <span>{lesson.steps.length ? "n. " + lesson.estimatedMinutes + " min" : "Sisältö tulossa"} <ArrowRight size={17}/></span>
         </a></li>)}</ol>}
   </section>;
 }
@@ -126,7 +127,7 @@ function ChapterPage({ book, chapter }: { book: Book; chapter: Chapter }) {
     {!!chapter.objectives.length && <div className="los-objectives"><b>Tämän jälkeen osaat</b><ul>{chapter.objectives.map(goal => <li key={goal}>{goal}</li>)}</ul></div>}
     <Reader book={book} blocks={blocks} title={chapter.title}/>
     {exercises.length > 0 && <section className="los-chapter-exercises"><h2>Harjoitukset</h2>{exercises.map(exercise =>
-      <ExerciseEngine key={exercise.id} exercise={exercise}/>)}</section>}
+      <ExerciseEngine key={exercise.id} bookId={book.id} exercise={exercise}/>)}</section>}
   </section>;
 }
 function WordIndex({ book }: { book: Book }) {
@@ -165,8 +166,8 @@ export function LosApp() {
   if (!segments.length) return <LibraryPage/>;
   if (!book) return <div className="los-app"><Empty title="Kirjaa ei löytynyt">Palaa LOS!-kirjastoon.</Empty><a href={LOS_BASE_PATH}>Kaikki kahdeksan kirjaa</a></div>;
   const section = segments[1] ?? "";
-  const chapter = section === "kappale" ? book.chapters.find(item => item.id === segments[2]) : undefined;
-  const lesson = section === "oppitunti" ? book.lessons.find(item => item.id === segments[2]) : undefined;
+  const chapter = section === "kappale" ? book.chapters.find(item => item.id === segments[2] || item.id.slice(1) === segments[2]) : undefined;
+  const lesson = section === "oppitunti" ? book.lessons.find(item => item.id === segments[2] || item.id.slice(1) === segments[2]) : undefined;
   const selectedBlock = section === "teksti" ? book.blocks.find(item => item.id === segments[2]) : undefined;
   const current = ["kappale", "teksti"].includes(section) ? "sisalto" : section === "oppitunti" ? "opetuspolku" : section;
   return <BookShell book={book} current={current}>
