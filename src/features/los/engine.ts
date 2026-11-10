@@ -24,7 +24,7 @@ export function gradeExercise(exercise:Exercise, response:string|TextAnchor|null
  const correct=exercise.type==='choice'||exercise.type==='true-false'
   ?response===exercise.correct
   :exercise.type==='ordering'
-    ?response===exercise.order?.join(' ')
+    ?response.split(' | ').join(' ')===exercise.order?.join(' ')
     :(exercise.accepted??[]).some(a=>normalizedPhrase(a)===normalizedPhrase(response));
  return {status:correct?'correct':'incorrect',feedback:correct?exercise.explanation:'Ei vielä oikein. '+exercise.explanation};
 }
