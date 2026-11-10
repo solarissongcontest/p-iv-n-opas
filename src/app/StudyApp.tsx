@@ -22,6 +22,7 @@ import {
 } from "@/lib/data";
 import { longDate, greeting, today } from "@/lib/fi";
 import type { CourseTab } from "@/features/studies/CourseView";
+import { registerLosOperations } from "@/features/los/data/useLosRecord";
 import type { ProgressSection } from "@/features/progress/ProgressView";
 import type { SettingsSection } from "@/features/settings/SettingsView";
 import { Onboarding } from "@/components/Onboarding";
@@ -82,6 +83,8 @@ async function getArthurSession(previousOwnerId?: string | null): Promise<Device
 
 export function StudyAppRoot({ initialPage, courseCode, courseTab, examId, progressSection, settingsSection, practiceCourseCode, practiceTopicId, planMode, planAnchor, losContent }: { initialPage: StudyPage; courseCode?: string | undefined; courseTab?:CourseTab | undefined; examId?:string | undefined; progressSection?:ProgressSection | undefined; settingsSection?:SettingsSection | undefined; practiceCourseCode?:string | undefined; practiceTopicId?:string | undefined; planMode?:("päivä"|"viikko"|"kuukausi") | undefined; planAnchor?:string | undefined; losContent?: ReactNode | undefined }) {
   const queryClient = useQueryClient();
+  // Register before the global offline watcher can replay any saved LOS! writes.
+  registerLosOperations();
   const [user, setUser] = useState<DeviceUser | null | undefined>();
   const [authError, setAuthError] = useState<string | null>(null);
 
