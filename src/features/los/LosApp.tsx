@@ -5,6 +5,7 @@ import {AppShell} from '@/app/AppShell';
 import {type StudyPage} from '@/app/navigation';
 import {chapters,sections,lessons,allWords,LOS_VERSION,type Chapter,type Exercise,type Block} from './content';
 import {gradeExercise,tokenOffsets,dueDate,type TextAnchor,type Grade} from './engine';
+import {allChapterExercises} from './practiceExtras';
 import {useLosStore,type SyncStatus} from './useLosStore';
 import './los.css';
 
@@ -30,7 +31,7 @@ function StateLabel({status,error}:{status:SyncStatus;error:string}){
 function SourceNotice({chapter}:{chapter:Chapter}){
  return <p className="los-source"><b>{chapter.sourceId}</b> · {chapter.attribution} · {chapter.license}
   {chapter.sourceUrl?<a href={chapter.sourceUrl} target="_blank" rel="noreferrer"> Lähdetiedot</a>:null}
-  {chapter.license.includes('BY-SA')?<a href="https://creativecommons.org/licenses/by-sa/3.0/" target="_blank" rel="noreferrer"> Lisenssiehdot</a>:null}
+  {chapter.license==='CC BY-SA 3.0'?<a href="https://creativecommons.org/licenses/by-sa/3.0/" target="_blank" rel="noreferrer"> Lisenssiehdot</a>:null}
  </p>;
 }
 function Audio({src,title}:{src:string;title:string}){
@@ -209,7 +210,7 @@ function Grammar({chapter}:{chapter:Chapter}){return <div className="los-prose">
  </div>;}
 function ChapterSection({chapter,section,store,fontSize}:{chapter:Chapter;section:string;store:Store;fontSize:number}){
  const active=chapter.status==='text-reviewed';
- const exercises=chapter.exercises;
+ const exercises=allChapterExercises(chapter.id,chapter.exercises);
  if(section==='Aloita')return <div className="los-prose"><h2>Mitä opit?</h2><p>{chapter.goal}</p>{chapter.teaching.map((p,i)=><p key={i}>{p}</p>)}</div>;
  if(section==='Teksti A'||section==='Ymmärrä')return <>
   <h2>{section==='Teksti A'?'Teksti A · kokonainen lähdeteksti':'Ymmärrä lukemasi'}</h2>
@@ -223,6 +224,7 @@ function ChapterSection({chapter,section,store,fontSize}:{chapter:Chapter;sectio
  if(section==='Kulttuuri')return <div className="los-prose"><Label>LAND UND LEUTE</Label><h2>Kulttuuri</h2><p>{chapter.culture}</p></div>;
  if(section==='Harjoittele')return <><h2>Harjoittele</h2>{exercises.filter(e=>!['highlight','writing','speech'].includes(e.type)).map(ex=><ExerciseCard key={ex.id} exercise={ex} chapter={chapter} store={store} fontSize={fontSize}/>)}</>;
  if(section==='Käytä saksaa')return <><h2>Käytä saksaa itse</h2>{exercises.filter(e=>['writing','speech'].includes(e.type)).map(ex=><ExerciseCard key={ex.id} exercise={ex} chapter={chapter} store={store} fontSize={fontSize}/>)}</>;
+ if(section==='Kappaletesti'&&chapter.status==='source-pending')return <p className="los-warning">Kappaletestiä ei ole vielä julkaistu, koska tämän kappaleen pääteksti on hyväksymättä. Harjoitteita voi tehdä erikseen.</p>;
  if(section==='Kappaletesti')return <><Label>OMA HARJOITUSTESTI</Label><h2>{chapter.name}: kappaletesti</h2><p>Vihjeet ja ratkaisut eivät näy ennen palautusta. Ensimmäinen tehtäväpankin versio: joitakin tehtäviä käytetään myös harjoittelussa, joten tämä ei vielä ole lopullinen riippumaton koe.</p>{exercises.filter(e=>e.type!=='highlight').map(ex=><ExerciseCard key={ex.id+'-exam'} exam exercise={ex} chapter={chapter} store={store} fontSize={fontSize}/>)}</>;
  return null;
 }
@@ -263,7 +265,7 @@ export function LosApp({ownerId}:{ownerId:string}){
      {toolsMenu.map(([key,label])=><button key={key} onClick={()=>go({kind:key})}>{label}</button>)}
      <button onClick={()=>go({kind:'library'})}>LOS!-sarja</button>
     </nav>
-    <main className="los-main">
+    <div className="los-main">
      <details className="los-mobile-nav"><summary><Menu size={17}/> Kirjan valikko</summary><div>
       {([['home','Etusivu'],['contents','Sisällysluettelo'],['lessons','Opetuspolku'],['review','Kertaus'],...toolsMenu] as [View['kind'],string][]).map(([kind,label])=><button key={kind} onClick={e=>{go({kind});e.currentTarget.closest('details')?.removeAttribute('open')}}>{label}</button>)}
       {chapters.map(c=><button key={c.id} onClick={e=>{go({kind:'chapter',cid:c.id,section:'Aloita'});e.currentTarget.closest('details')?.removeAttribute('open')}}>{c.id} {c.name}</button>)}
@@ -324,8 +326,8 @@ export function LosApp({ownerId}:{ownerId:string}){
      {view.kind==='progress'?<><h1>Osaaminen</h1><p>Oppitunteja kirjattu {finishedLessons}/60. Tämä ei ole kielitaitoarvosana.</p><h2>Erilliset osaamisnäytöt</h2><p>Tehtäviin tallennetut vastausyritykset: {Object.keys(store.items).filter(x=>x.startsWith('attempt:')).length}. Viivästetyt kertaukset: {Object.keys(store.items).filter(x=>x.startsWith('review:')).length}. Nämä mittarit eivät itsessään todista A1-tasoa.</p><button onClick={()=>go({kind:'review'})}>Avaa tämän päivän kertaus</button></>:null}
      {view.kind==='review'?<><h1>Kertaa</h1><p>Harjoittele myös myöhempinä päivinä. Kertauksen viiveet 1, 3, 7, 14 ja 30 päivää. Ei pakollista streakiä.</p>{reviews.length===0?<p>Ei erääntyneitä kortteja. Voit lisätä niitä sanastosta.</p>:reviews.slice(0,16).map(([key,v])=><ReviewCard key={key} id={key} value={v} store={store}/>)}</>:null}
      {view.kind==='settings'?<><h1>Lukemisen asetukset</h1><label htmlFor="los-text-size">Saksankielisen tekstin koko: {fontSize} px</label><input id="los-text-size" type="range" min={16} max={24} value={fontSize} onChange={e=>store.put('setting:fontSize',Number(e.target.value))}/><p>Vaalea ja tumma tila periytyvät Opintopäiväkirjan asetuksista. Älä käytä puhelimen toista päällekkäistä alapalkkia.</p></>:null}
-     {view.kind==='exams'?<><h1>Kokeet ja kertaukset</h1><p>Ensimmäisen kappaleen harjoitustesti on käytettävissä. Varsinainen 25 tehtävän välikoe L030 ja 50 tehtävän loppukoe L059 eivät vielä ole julkaisuvalmiita.</p><button onClick={()=>go({kind:'chapter',cid:'C01',section:'Kappaletesti'})}>C01 harjoitustesti</button>{chapters.slice(1).map(c=><button className="los-index-row" key={c.id} onClick={()=>go({kind:'chapter',cid:c.id,section:'Kappaletesti'})}>{c.id} testi · {c.exercises.length?'Osittainen':'Sisältö kesken'}</button>)}</>:null}
-    </main>
+     {view.kind==='exams'?<><h1>Kokeet ja kertaukset</h1><p>Ensimmäisen kappaleen harjoitustesti on käytettävissä. Varsinainen 25 tehtävän välikoe L030 ja 50 tehtävän loppukoe L059 eivät vielä ole julkaisuvalmiita.</p><button onClick={()=>go({kind:'chapter',cid:'C01',section:'Kappaletesti'})}>C01 harjoitustesti</button>{chapters.slice(1).map(c=><button className="los-index-row" key={c.id} onClick={()=>go({kind:'chapter',cid:c.id,section:'Kappaletesti'})}>{c.id} testi · {c.status==='text-reviewed'?'Osittainen':'Pääteksti kesken'}</button>)}</>:null}
+    </div>
    </div>
   </div>
  </AppShell>;
