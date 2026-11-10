@@ -160,6 +160,7 @@ function ExerciseCard({exercise,chapter,store,exam=false,fontSize}:{exercise:Exe
  const source=chapter.blocks.find(b=>b.id===exercise.blockId);
  const ordered=answer?answer.split(' | '):[];
  const remaining=(exercise.order??[]).filter((w,i)=>ordered.filter(x=>x===w).length<(exercise.order??[]).filter((x,j)=>x===w&&j<=i).length);
+ const pairs=exercise.pairs??[];
  let mapping:Record<string,string>={};
  if(answer){try{const parsed:unknown=JSON.parse(answer);if(parsed&&typeof parsed==='object'&&!Array.isArray(parsed))mapping=parsed as Record<string,string>;}catch{/* Not a mapping answer */}}
  const setMapped=(left:string,value:string)=>update(JSON.stringify({...mapping,[left]:value}));
@@ -187,14 +188,14 @@ function ExerciseCard({exercise,chapter,store,exam=false,fontSize}:{exercise:Exe
   {['fill','translate','listen-write','error-correction','writing'].includes(exercise.type)?(exercise.type==='writing'?
    <textarea aria-label={exercise.prompt} value={answer} onChange={e=>update(e.target.value)} rows={4} disabled={exam&&submitted} placeholder="Kirjoita vastauksesi tähän…"/>:
    <input aria-label={exercise.prompt} value={answer} onChange={e=>update(e.target.value)} disabled={exam&&submitted} lang="de" autoComplete="off" />):null}
-  {['matching','article-sort','conjugation'].includes(exercise.type)&&exercise.pairs?<fieldset className="los-pairs">
+  {['matching','article-sort','conjugation'].includes(exercise.type)&&pairs.length>0?<fieldset className="los-pairs">
    <legend className="sr-only">Täydennä jokainen rivi tehtävässä {exercise.id}</legend>
-   {exercise.pairs.map(([left,right],i)=><div className="los-pair-row" key={left}>
+   {pairs.map(([left,right],i)=><div className="los-pair-row" key={left}>
     <label htmlFor={exercise.id+'-'+i} lang="de">{left}</label>
     {exercise.type==='conjugation'?<input id={exercise.id+'-'+i} lang="de" value={mapping[left]??''} onChange={e=>setMapped(left,e.target.value)} placeholder="Kirjoita verbimuoto" autoComplete="off"/>:
     <select id={exercise.id+'-'+i} lang="de" value={mapping[left]??''} onChange={e=>setMapped(left,e.target.value)}>
      <option value="">Valitse…</option>
-     {(exercise.type==='article-sort'?['der','die','das']:exercise.pairs.map(pair=>pair[1])).slice((i+1)%exercise.pairs.length).concat((exercise.type==='article-sort'?['der','die','das']:exercise.pairs.map(pair=>pair[1])).slice(0,(i+1)%exercise.pairs.length)).filter((option,idx,items)=>items.indexOf(option)===idx).map(option=><option key={option} value={option}>{option}</option>)}
+     {(exercise.type==='article-sort'?['der','die','das']:pairs.map(pair=>pair[1])).slice((i+1)%pairs.length).concat((exercise.type==='article-sort'?['der','die','das']:pairs.map(pair=>pair[1])).slice(0,(i+1)%pairs.length)).filter((option,idx,items)=>items.indexOf(option)===idx).map(option=><option key={option} value={option}>{option}</option>)}
     </select>}
    </div>)}
   </fieldset>:null}
