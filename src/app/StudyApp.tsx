@@ -47,6 +47,7 @@ const SettingsView = lazy(() => import("@/features/settings/SettingsView").then(
 const SessionForm = lazy(() => import("@/features/session/SessionForm").then(module => ({ default: module.SessionForm })));
 const CourseForm = lazy(() => import("@/features/studies/CourseForm").then(module => ({ default: module.CourseForm })));
 const SearchPanel = lazy(() => import("@/features/search/SearchPanel").then(module => ({ default: module.SearchPanel })));
+const LosApp = lazy(() => import("@/features/los/LosApp").then(module => ({ default: module.LosApp })));
 const AICoach = lazy(() => import("@/components/AICoach").then(module => ({ default: module.AICoach })));
 
 function FeatureFallback() {
@@ -80,7 +81,7 @@ async function getArthurSession(previousOwnerId?: string | null): Promise<Device
 }
 
 
-export function StudyAppRoot({ initialPage, courseCode, courseTab, examId, progressSection, settingsSection, practiceCourseCode, practiceTopicId, planMode, planAnchor }: { initialPage: StudyPage; courseCode?: string | undefined; courseTab?:CourseTab | undefined; examId?:string | undefined; progressSection?:ProgressSection | undefined; settingsSection?:SettingsSection | undefined; practiceCourseCode?:string | undefined; practiceTopicId?:string | undefined; planMode?:("päivä"|"viikko"|"kuukausi") | undefined; planAnchor?:string | undefined }) {
+export function StudyAppRoot({ initialPage, courseCode, courseTab, examId, progressSection, settingsSection, practiceCourseCode, practiceTopicId, planMode, planAnchor, losView = false }: { initialPage: StudyPage; losView?: boolean; courseCode?: string | undefined; courseTab?:CourseTab | undefined; examId?:string | undefined; progressSection?:ProgressSection | undefined; settingsSection?:SettingsSection | undefined; practiceCourseCode?:string | undefined; practiceTopicId?:string | undefined; planMode?:("päivä"|"viikko"|"kuukausi") | undefined; planAnchor?:string | undefined }) {
   const queryClient = useQueryClient();
   const [user, setUser] = useState<DeviceUser | null | undefined>();
   const [authError, setAuthError] = useState<string | null>(null);
@@ -212,6 +213,7 @@ export function StudyAppRoot({ initialPage, courseCode, courseTab, examId, progr
 
   if (user === undefined) return <main className="grid min-h-screen place-items-center">Avataan opintopäiväkirjaa…</main>;
   if (!user) return <DeviceSignIn authError={authError} onSignedIn={setUser} />;
+  if (losView) return <Suspense fallback={<FeatureFallback />}><LosApp key={user.id} ownerId={user.id} /></Suspense>;
   return <StudyApp key={user.id + ":" + initialPage + ":" + (courseCode ?? "") + ":" + (courseTab ?? "") + ":" + (examId ?? "") + ":" + (progressSection ?? "") + ":" + (settingsSection ?? "") + ":" + (practiceCourseCode ?? "") + ":" + (practiceTopicId ?? "") + ":" + (planMode ?? "") + ":" + (planAnchor ?? "")} user={user} initialPage={initialPage} courseCode={courseCode} courseTab={courseTab} examId={examId} progressSection={progressSection} settingsSection={settingsSection} practiceCourseCode={practiceCourseCode} practiceTopicId={practiceTopicId} planMode={planMode} planAnchor={planAnchor} />;
 }
 
