@@ -163,7 +163,7 @@ export const chapters:Chapter[] = [
  {id:'c07-a-5',speaker:'Auskunft',text:'Danke. Die Nummer lautet ...'}
  ],
  vocab:w([['schreiben','kirjoittaa'],['Wie schreibt man das?','Miten se kirjoitetaan?'],['buchstabieren','tavata'],['Bitte buchstabieren Sie.','Tavatkaa, olkaa hyvä.'],['noch einmal','vielä kerran'],['langsam','hitaasti'],['der Buchstabe','kirjain'],['die Nummer','numero'],['die Telefonnummer','puhelinnumero'],['die Adresse','osoite'],['das Handy','matkapuhelin'],['die E-Mail-Adresse','sähköpostiosoite'],['richtig','oikein']]),
- teaching:['Saksan kirjainten nimet eivät aina vastaa suomen kirjainten nimiä. Erota nimi ja äänne.', 'Wie schreibt man das? on hyödyllinen kiinteä fraasi. Bitte buchstabieren Sie on kohtelias tavaamispyyntö.'],
+ teaching:['Saksan kirjainten nimet eivät aina vastaa suomen kirjainten nimiä. Erota nimi ja äänne.', 'Wie schreibt man das? on hyödyllinen kiinteä fraasi. Bitte buchstabieren Sie on kohtelias tavaamispyyntö.', 'Saksan substantiiveilla on sanakirjassa artikkeli der, die tai das. Artikkeli opitaan yleensä sanan mukana: der Name (nimi), die Frau (rouva tai nainen), das Jahr (vuosi). Artikkeli ei tarkoita suomenkielistä sukupuolta. Tässä riittää näiden kolmen opitun sanan tunnistaminen, ei sijamuotojen opiskelu.'],
  grammar:{title:'Tavaaminen',explanation:'Käytä fraaseja vielä kokonaisina. Ääkkösten korvausmuotoja voi käyttää teknisesti (ä → ae), mutta oikea kirjoitusasu ei katoa.',examples:[['Wie schreibt man das?','Miten tämä kirjoitetaan?'],['Noch einmal, bitte!','Vielä kerran, kiitos!']]},
  culture:'Puhelimessa käytetään joskus kirjainten selventämiseen esimerkkisanoja.',exercises:[]
 },
