@@ -159,7 +159,7 @@ export function ExerciseEngine({ bookId, exercise, mode = "practice", onChecked 
         }}>Tarkista vastaus</button>
     </div>
     {hintShown && mode === "practice" && <p className="los-notice">{exercise.hintFi}</p>}
-    {examSubmitted && <p className="los-notice" role="status">Vastaus tallennettu koetilaan. Oikeellisuutta ei näytetä ennen koko kokeen palauttamista.</p>}
+    {examSubmitted && <p className="los-notice" role="status">Vastaus merkitty koetilaan. Tallennuksen tila näkyy alla; oikeellisuutta ei näytetä ennen koko kokeen palauttamista.</p>}
     {checked && <div role="status" aria-live="polite" className={"los-feedback " + (checked.correct ? "is-correct" : "is-incorrect")}>
       <b>{checked.correct ? "Oikein" : "Ei vielä oikein"}</b>
       {mode === "practice" && <p>{checked.explanationFi}</p>}
