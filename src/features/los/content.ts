@@ -99,11 +99,29 @@ export const chapters:Chapter[] = [
 },
 {
  id:'C04',name:'Du oder Sie?',goal:'Tunnistan sinuttelun ja teitittelyn.',
- sourceId:'M-WB-06',sourceUrl:'https://en.wikibooks.org/wiki/German/Lesson_2',attribution:'Wikibooks German/Lesson 2, Die Geschäftsmänner (koko tekstilohkon tarkistus kesken).',license:'CC BY-SA (tekstiversio tarkistettava)',status:'source-pending',sections,blocks:[],
+ sourceId:'M-WB-06',sourceUrl:'https://en.wikibooks.org/wiki/German/Lesson_2',attribution:'Wikibooks-yhteisö, German/Lesson 2, Gespräch 2-2 Die Geschäftsmänner, 8 alkuperäistä repliikkiä. Lähdesivun versio 3823654 (2.4.2021). Ei muokkauksia saksankielisiin vuoroihin.',license:'CC BY-SA (sivun tekstilisenssi; media erikseen)',status:'text-reviewed',sections,
+ blocks:[
+ {id:'c04-a-1',speaker:'Herr Schmidt',text:'Guten Morgen, Herr Standish! Wie geht es Ihnen?'},
+ {id:'c04-a-2',speaker:'Herr Standish',text:'Danke sehr, es geht mir gut. Und Ihnen?'},
+ {id:'c04-a-3',speaker:'Herr Schmidt',text:'Nicht so gut. Ich bin müde.'},
+ {id:'c04-a-4',speaker:'Herr Standish',text:'Wie bitte? Müde? Warum?'},
+ {id:'c04-a-5',speaker:'Herr Schmidt',text:'Ich habe so viel Arbeit.'},
+ {id:'c04-a-6',speaker:'Herr Standish',text:'Das kann ich verstehen. Zu viel ist zu viel.'},
+ {id:'c04-a-7',speaker:'Herr Schmidt',text:'Das ist richtig. Auf Wiedersehen, Herr Standish!'},
+ {id:'c04-a-8',speaker:'Herr Standish',text:'Auf Wiedersehen, bis morgen.'}
+ ],
  vocab:w([['Sie','te (kohtelias)'],['Wie heißen Sie?','Mikä teidän nimenne on?'],['Kommen Sie ...?','Tuletteko ...?'],['Entschuldigung','anteeksi'],['bitte schön','olkaa hyvä'],['danke schön','paljon kiitoksia'],['vielen Dank','paljon kiitoksia'],['gern','mielelläni'],['mein','minun'],['Ihr Name','teidän nimenne'],['die Lehrerin','naisopettaja'],['der Lehrer','miesopettaja']]),
  teaching:['Du on tuttavallinen sinä. Sie kirjoitetaan isolla ja tarkoittaa kohteliasta te-puhuttelua.', 'Kysy muodollisesti Wie heißen Sie? tai Woher kommen Sie?'],
  grammar:{title:'Kohtelias Sie',explanation:'Sie-teitittelyssä verbi on monikon kaltaisessa muodossa: Sie heißen, Sie kommen. Pieni sie voi tarkoittaa hän (naisesta) tai he.',examples:[['Wie heißen Sie?','Mikä teidän nimenne on?'],['Woher kommen Sie?','Mistä olette kotoisin?']]},
- culture:'Puhuttelu riippuu tilanteesta, suhteesta ja paikallisesta tavasta. Pelkkä ikä ei määritä sinuttelua.',exercises:[]
+ culture:'Puhuttelu riippuu tilanteesta, suhteesta ja paikallisesta tavasta. Pelkkä ikä ei määritä sinuttelua.',
+ exercises:[
+ {id:'C04-E01',type:'highlight',prompt:'Korosta keskustelusta kohtelias ilmaus ”Mitä teille kuuluu?”',blockId:'c04-a-1',target:'Wie geht es Ihnen?',hint:'Ensimmäisen puhujan lopussa.',explanation:'Wie geht es Ihnen? käyttää kohteliasta Ihnen-pronominia.'},
+ {id:'C04-E02',type:'choice',prompt:'Mikä on kohtelias kysymys tuntemattomalle aikuiselle?',options:['Wie heißen Sie?','Wie heißt du?','Du heißen?'],correct:'Wie heißen Sie?',hint:'Kohtelias te kirjoitetaan isolla.',explanation:'Wie heißen Sie? on kohtelias. Du-puhuttelussa kysytään Wie heißt du?'},
+ {id:'C04-E03',type:'fill',prompt:'Täydennä kohteliaasti: Woher ____ Sie?',accepted:['kommen'],hint:'Sie-muodossa verbi on kommen.',explanation:'Woher kommen Sie? = Mistä olette kotoisin?'},
+ {id:'C04-E04',type:'true-false',prompt:'Väite: Kohtelias Sie kirjoitetaan isolla alkukirjaimella myös lauseen keskellä.',options:['Totta','Tarua'],correct:'Totta',hint:'Vertaa du ja Sie.',explanation:'Kohtelias Sie ja sen taivutusmuodot kirjoitetaan isolla.'},
+ {id:'C04-E05',type:'translate',prompt:'Kirjoita kohtelias tervehdys ”Hyvää päivää!”',accepted:['Guten Tag!','Guten Tag'],hint:'Olet jo opiskellut tämän C01:ssä.',explanation:'Guten Tag! sopii sekä yleiseen että asialliseen tervehtimiseen.'},
+ {id:'C04-E06',type:'writing',prompt:'Kirjoita kuvitteellinen kaksi lausetta sisältävä kohtelias esittäytyminen.',hint:'Guten Tag! Ich heiße ...',explanation:'Mallivastaus: Guten Tag! Ich heiße Alex. Wie heißen Sie? Tarkista Sie-kirjain ja kysymysmerkki.'}
+ ]
 },
 {
  id:'C05',name:'Wie geht’s?',goal:'Kysyn vointia ja vastaan lyhyesti.',
