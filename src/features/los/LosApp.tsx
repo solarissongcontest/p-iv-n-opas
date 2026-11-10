@@ -2,7 +2,8 @@ import { useLocation } from "@tanstack/react-router";
 import { ArrowLeft, ArrowRight, BookOpen, List, RotateCcw, Sparkles } from "lucide-react";
 import { LOS_BASE_PATH, LOS_BOOKS, bookPath, findLosBook } from "./books";
 import type { Book, Chapter, ContentBlock } from "./model";
-import { Reader } from "./Reader";
+import { Reader, type ReaderNote } from "./Reader";
+import { useLosRecord, losSyncMessage } from "./data/useLosRecord";
 import { LessonRunner } from "./LessonRunner";
 import { ExerciseEngine } from "./exercises/ExerciseEngine";
 
@@ -153,8 +154,27 @@ function WordIndex({ book }: { book: Book }) {
     {blocks.length ? <Reader book={book} blocks={blocks} title="Sanastot"/> :
       <Empty title="Sanastoa ei vielä saatavilla">Kappaleiden tarkistetut sana- ja ilmauslistat lisätään oppimateriaalin mukana.</Empty>}</section>;
 }
+function NotesIndex({ book }: { book: Book }) {
+  const { value: notes, status } = useLosRecord<ReaderNote[]>(book.id, "notes", "reader", book.contentVersion, []);
+  const visible = notes.filter(note => note.text.trim());
+  return <section className="los-notes-index">
+    <h1>Omat muistiinpanot</h1>
+    <p className="los-intro">Lukijan tekstikohtaiset merkinnät säilyvät yhteydessä sisältölohkon tunnisteeseen ja versioon.</p>
+    <p role="status" className="los-storage-state">{losSyncMessage(status)}</p>
+    {visible.length ? <ul className="los-notes-list">{visible.map(note =>
+      <li key={note.blockId + ":" + note.version}>
+        <b>{book.blocks.find(block => block.id === note.blockId)?.kind === "paragraph" ? "Teksti" : "Oppimateriaalin kohta"}</b>
+        <small>{note.blockId} · versio {note.version}</small>
+        <p>{note.text}</p>
+        {book.blocks.some(block => block.id === note.blockId && block.version === note.version)
+          ? <a className="los-text-action" href={bookPath(book, "teksti/" + encodeURIComponent(note.blockId))}>Avaa tekstikohta <ArrowRight size={16}/></a>
+          : <p className="los-support">Tekstikohta on poistunut nykyisestä julkaisuversiosta, mutta muistiinpano on säilytetty.</p>}
+      </li>)}</ul> : <Empty title="Ei vielä muistiinpanoja">Voit lisätä muistiinpanoja lukijan tekstikohtaisilla toiminnoilla. Merkinnät kootaan tähän hakemistoon.</Empty>}
+  </section>;
+}
 function GenericSection({ book, segment }: { book: Book; segment: string }) {
   if (segment === "sanastot") return <WordIndex book={book}/>;
+  if (segment === "muistiinpanot") return <NotesIndex book={book}/>;
   if (segment === "kielioppi") {
     const blocks = book.blocks.filter(block => block.kind === "grammar");
     return blocks.length ? <Reader book={book} blocks={blocks} title="Kielioppi"/> :
@@ -162,12 +182,11 @@ function GenericSection({ book, segment }: { book: Book; segment: string }) {
   }
   if (segment === "lahteet") return <section><h1>Lähteet</h1>{book.sources.length ?
     <ul className="los-source-list">{book.sources.map(source => <li key={source.id}><b>{source.title}</b> · {source.publisher}
-      <span>{source.licenseOrBasis}</span>{source.originalUrl && <a href={source.originalUrl} target="_blank" rel="noopener noreferrer">Alkuperäinen lähde</a>}</li>)}</ul> :
+      <span>{source.licenseOrBasis}</span><span><b>Tila:</b> {source.readiness === "blocked" ? "Julkaisu estetty" : source.readiness === "text-cleared" ? "Tekstiehdokas tunnistettu · julkaisu-QA kesken" : source.readiness === "media-pending" ? "Mediatarkistus kesken" : "Lisenssi- tai lähdetarkistus kesken"}</span>{source.publicationNoteFi && <span>{source.publicationNoteFi}</span>}{source.originalUrl && <a href={source.originalUrl} target="_blank" rel="noopener noreferrer">Alkuperäinen lähde</a>}</li>)}</ul> :
     <Empty title="Ei vielä lähteitä">Lähde- ja käyttöoikeustiedot julkaistaan varsinaisten materiaalien yhteydessä.</Empty>}</section>;
   const titles: Record<string, [string, string, string]> = {
     kertaus: ["Kertaa", "Ei vielä kerrattavaa", "Kertaus alkaa, kun oppimateriaalia ja luotettavia suoritustietoja on saatavilla."],
     sanakirja: ["Sanakirja", "Sanakirja-aineistoa ei ole vielä tuotu", "Hakua ei näytetä toimivana ennen kuin tarkistettu saksan ja suomen sanakirjakanta on asennettu."],
-    muistiinpanot: ["Muistiinpanot", "Muistiinpanohakemistoa ei vielä ole", "Lukijaan kirjoitetut luonnokset pysyvät tällä laitteella. Pilvisynkronointi ja hakemisto toteutetaan erikseen."],
     osaaminen: ["Osaaminen", "Ei vielä osaamistietoja", "Osaamista ei päätellä avatuista sivuista eikä keksityistä pisteistä."],
     kokeet: ["Kokeet", "Ei julkaistuja kokeita", "Kokeet perustuvat myöhemmin tarkistettuihin tehtäviin."],
     mediat: ["Mediat", "Ei julkaistua mediaa", "Äänitteet ja videot lisätään lähdetietoineen ja soveltuvin upotusoikeuksin."],
