@@ -171,7 +171,7 @@ export const LOS1_C07_CONTENT_BLOCKS:ContentBlock[]=[
   {id:"los1-c07-numbers-table",version:"0.1.0",kind:"table",
     headers:["Keksitty numerosarja","Kirjaimittaisen lukemisen malli"],
     rows:LOS1_C07_FICTIONAL_NUMBERS.map(sequence=>[
-      sequence, [...sequence].map(c=>({0:"null",1:"eins",2:"zwei",3:"drei",4:"vier",5:"fünf",6:"sechs",7:"sieben",8:"acht",9:"neun"} as Record<string,string>)[c]??" · ").join(" · ").replace(/ ·  ·  · /g," | ")
+      sequence, [...sequence].map(c=>({0:"null",1:"eins",2:"zwei",3:"drei",4:"vier",5:"fünf",6:"sechs",7:"sieben",8:"acht",9:"neun"} as Record<string,string>)[c]??" · ").join(" · ").replace(" ·  ·  · "," | ")
     ])},
   {id:"los1-c07-form-guide",version:"0.1.0",kind:"paragraph",language:"fi",
     text:"Täytä kuvitteellinen yhteystietolomake. Käytä vain keksittyä nimeä "
