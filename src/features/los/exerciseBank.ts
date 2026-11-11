@@ -1,3 +1,5 @@
+import { LOS_C03_C06_EXERCISES } from "./exerciseBankExpanded";
+
 /**
  * LOS! 1:n rajatusti, yksiselitteisesti tarkistettavat alkeistehtävät.
  * Itse kirjoitettu opetusaineisto, ei alkuperäistekstin ymmärtämistehtävien
@@ -6,7 +8,7 @@
 export type LosExercise = {
   id: string;
   chapterId: string;
-  skill: "tervehtiminen" | "ääntäminen" | "sanasto" | "esittäytyminen" | "kielioppi";
+  skill: "tervehtiminen" | "ääntäminen" | "sanasto" | "esittäytyminen" | "kielioppi" | "alkuperä" | "puhuttelu" | "kuulumiset" | "numerot";
   kind: "choice" | "fill";
   prompt: string;
   instruction: string;
@@ -44,6 +46,7 @@ export const LOS_EXERCISES: ReadonlyArray<LosExercise> = [
   {id:"C02-EX-13",chapterId:"02",skill:"kielioppi",kind:"choice",instruction:"Valitse oikea kahden verbimuodon pari.",prompt:"Mitkä heißen-verbin muodot vastaavat ich ja du?",options:["heiße / heißt","heißen / heißt","heiße / bist"],correct:"heiße / heißt",accepted:["heiße / heißt"],explanation:"ich heiße, du heißt."},
   {id:"C02-EX-14",chapterId:"02",skill:"kielioppi",kind:"choice",instruction:"Valitse oikea kahden verbimuodon pari.",prompt:"Mitkä sein-verbin muodot vastaavat ich ja du?",options:["ist / sind","bin / bist","bist / bin"],correct:"bin / bist",accepted:["bin / bist"],explanation:"ich bin, du bist."},
   {id:"C02-EX-15",chapterId:"02",skill:"esittäytyminen",kind:"fill",instruction:"Kirjoita kysymyssana.",prompt:"____ heißt du? (Mikä sinun nimesi on?)",correct:"Wie",accepted:["Wie"],explanation:"Wie heißt du?"},
+  ...LOS_C03_C06_EXERCISES,
 ];
 
 /** Sallitut vertailumuunnokset: välilyönnit ja loppupiste/-huuto-/kysymysmerkki.
