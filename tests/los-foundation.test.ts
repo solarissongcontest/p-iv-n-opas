@@ -38,6 +38,11 @@ test("each planned chapter exposes exactly ten routable sections", () => {
   assert.equal(first.sections?.find(section => section.id === "teksti-a")?.blockIds.includes("los1-c01-m-com-01-dialogue"), true);
   assert.equal(first.sections?.find(section => section.id === "teksti-b")?.publicationStatus, "preview");
   assert.equal(first.sections?.find(section => section.id === "tarkista")?.publicationStatus, "preview");
+  assert.equal(first.sections?.find(section => section.id === "kulttuuri")?.exerciseIds.length, 2);
+  assert.equal(first.sections?.find(section => section.id === "kielioppi")?.exerciseIds.length, 5);
+  assert.equal(first.sections?.find(section => section.id === "harjoittele")?.exerciseIds.length, 7);
+  assert.ok(first.sections?.find(section => section.id === "kayta")?.blockIds.includes("los1-c01-application-writing"));
+  assert.equal(first.sections?.filter(section => section.publicationStatus === "planned").length, 0);
 });
 test("L001 begins without prerequisite German and stores an ungraded personal goal", () => {
   const lesson = los1.lessons.find(item => item.id === "L001");
@@ -52,9 +57,9 @@ test("L001 begins without prerequisite German and stores an ungraded personal go
   assert.ok(lesson.steps.some(step => step.blockId === "los1-c01-m-com-01-dialogue"));
   assert.ok(lesson.steps.some(step => step.blockId === "los1-c01-m-com-01-audio"));
 });
-test("two verified Wikimedia originals are enabled while 21 candidates remain pending", () => {
-  assert.equal(los1.sources.length, 23);
-  assert.equal(los1.sources.filter(source => source.permittedMode === "pending").length, 21);
+test("two Commons media sources verified, with separate Goethe culture reference", () => {
+  assert.equal(los1.sources.length, 24);
+  assert.equal(los1.sources.filter(source => source.permittedMode === "pending").length, 22);
   const source = los1.sources.find(item => item.id === "M-COM-01");
   assert.equal(source?.permittedMode, "embed");
   assert.equal(source?.licenseUrl, "https://creativecommons.org/licenses/by-sa/3.0/");
@@ -74,10 +79,10 @@ test("two verified Wikimedia originals are enabled while 21 candidates remain pe
     "Public domain - tekijän oma vapaa luovutus");
   assert.ok(los1.blocks.some(block => block.kind === "media" && block.sourceId === "M-COM-03"));
 });
-test("C01's seven practice and two audio exercises plus twelve exam questions are all indexed", () => {
+test("C01's 35 combined practice, audio, culture and exam exercises are indexed", () => {
   const c01 = los1.chapters.find(chapter => chapter.id === "C01");
   assert.ok(c01);
-  assert.equal(c01.exerciseIds.length, 21);
+  assert.equal(c01.exerciseIds.length, 35);
   assert.ok(c01.blockIds.length >= 8);
   const choice = los1.exercises.find(ex => ex.type === "single-choice");
   const gap = los1.exercises.find(ex => ex.type === "gap-fill");
@@ -114,6 +119,17 @@ test("curated dictionary lookup matches whole words and prioritizes phrases", ()
     { value: "Bis später", id: "soon" },
   ]);
   assert.deepEqual(findGlossarySpans("nicht", [{ id: "i", de: "ich", fi: "minä" }]), []);
+});
+test("C01 application is an editable original task and not a scored source text", () => {
+  const block = los1.blocks.find(block => block.id === "los1-c01-application-writing");
+  assert.ok(block && block.kind === "production");
+  assert.equal(block.criteriaFi.length, 3);
+  assert.ok(block.modelDe.includes("Guten Morgen"));
+  const culture = los1.blocks.find(block => block.id === "los1-c01-culture-greetings");
+  assert.ok(culture && culture.kind === "paragraph");
+  assert.equal(culture.sourceId, "GOETHE-REGIONAL-GREETINGS-01");
+  assert.ok(los1.sources.some(source => source.id === culture.sourceId &&
+    source.originalUrl?.startsWith("https://www.goethe.de/")));
 });
 test("LOS! cloud schema requires ownership, RLS and idempotent write constraints", () => {
   const sql = readFileSync("supabase/migrations/20261110214000_los_personal_records.sql", "utf8");
