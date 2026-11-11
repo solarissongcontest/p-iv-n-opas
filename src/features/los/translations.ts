@@ -114,7 +114,7 @@ export const basicGloss:Readonly<Record<string,Gloss>>={
  'wörter':{fi:'sanoja, sanat',lemma:'das Wort'},
  'hören':{fi:'kuulla; kuunnella'},
  'wiederholen':{fi:'toistaa; kerrata'},
- 'nach':{fi:'jälkeen; tässä nachsprechen = toistaa perässä'},
+
  'einzeln':{fi:'yksittäin'},
  'schwierig':{fi:'vaikea'},
  'leicht':{fi:'helppo'},
