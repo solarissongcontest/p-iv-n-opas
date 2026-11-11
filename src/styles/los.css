@@ -766,3 +766,102 @@
   font-size:14px; font-weight:600; text-decoration:none;
 }
 .los-standalone-exam .los-back-link:hover { text-decoration:underline; }
+
+
+/* LOS! 1 · Final exam section navigator (50 questions, 5 sections)
+ * Uses the book's muted surfaces and accessible interactive focus states.
+ * Keeps 44px touch targets and wraps without horizontal scrolling on phones.
+ */
+.los-exam-section-nav {
+  display: grid;
+  gap: 12px;
+  padding: clamp(14px, 2.6vw, 22px);
+  margin: 22px 0;
+  border: 1px solid var(--los-border);
+  background: var(--los-surface-muted);
+  border-radius: 14px;
+  scroll-margin-top: 96px;
+}
+.los-exam-section-top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px 18px;
+}
+.los-exam-section-top h3 {
+  font-size: 17px;
+  font-weight: 750;
+  color: var(--los-ink);
+  margin: 0;
+}
+.los-exam-section-top > span {
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  color: var(--los-ink-muted);
+}
+.los-exam-section-tabs {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 155px), 1fr));
+  gap: 9px;
+}
+.los-exam-section-tab {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  min-height: 58px;
+  width: 100%;
+  padding: 10px 12px;
+  text-align: left;
+  font: inherit;
+  color: var(--los-ink);
+  background: var(--los-surface);
+  border: 1px solid var(--los-border-strong);
+  border-radius: 9px;
+  cursor: pointer;
+}
+.los-exam-section-tab > span { font-size: 13px; font-weight: 650; line-height: 1.3; }
+.los-exam-section-tab > small {
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  color: var(--los-ink-muted);
+}
+.los-exam-section-tab.is-active {
+  color: var(--los-book-accent-readable);
+  border-color: var(--los-book-accent-readable);
+  background: var(--los-surface);
+  box-shadow: inset 0 0 0 1px var(--los-book-accent-readable);
+}
+.los-exam-section-tab.is-complete:not(.is-active) {
+  border-style: solid;
+  border-color: var(--los-border-strong);
+}
+.los-exam-section-tab:focus-visible,
+.los-exam-section-actions button:focus-visible {
+  outline: 3px solid var(--los-book-accent-readable);
+  outline-offset: 2px;
+}
+.los-exam-section-nav > .los-text-action {
+  width: fit-content;
+  max-width: 100%;
+  text-align: left;
+}
+.los-exam-section-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 20px 0;
+}
+.los-exam-section-actions .los-support { font-variant-numeric: tabular-nums; }
+@media (max-width: 639px) {
+  .los-exam-section-nav { padding: 12px; scroll-margin-top: 74px; }
+  .los-exam-section-tabs { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  .los-exam-section-tab { padding: 11px 9px; min-height: 64px; }
+  .los-exam-section-tab > span { font-size: 12px; }
+  .los-exam-section-actions > button { flex: 1 1 auto; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .los-exam-section-nav { scroll-behavior: auto; }
+}
