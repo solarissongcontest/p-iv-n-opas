@@ -21,7 +21,7 @@ export function ReviewWorkspace({ book }: { book: Book }) {
   const today = localDay(new Date());
   const cards = bookReviewCards(book);
   const counts = reviewCounts(cards, ledger, today);
-  const remaining = reviewQueue(cards, ledger, today, 8).filter(card => !reviewedHere.includes(card.id));
+  const remaining = reviewedHere.length >= 8 ? [] : reviewQueue(cards, ledger, today, 8).filter(card => !reviewedHere.includes(card.id));
   const current = activeId && feedback ? cards.find(card => card.id === activeId) : remaining[0];
 
   const finish = (event: FormEvent<HTMLFormElement>) => {
@@ -82,5 +82,44 @@ export function ReviewWorkspace({ book }: { book: Book }) {
           </div>}
         </div>}
     <p className="los-support">Kertaus mittaa vain tässä tehtyjen yksittäisten sanavastausten onnistumista. Se ei yksin osoita laajaa kielitaitoa eikä vastaa virallista koetta. Päiväkohtaisia väliin jääneitä harjoituksia ei kerrytetä velaksi.</p>
+  </section>;
+}
+
+
+/** Evidence-only overview. An attempt is not proof of language proficiency. */
+export function ReviewEvidence({ book }: { book: Book }) {
+  const { value: ledger, status } = useLosRecord<ReviewLedger>(
+    book.id, "review", "vocabulary", book.contentVersion, {},
+  );
+  const cards = bookReviewCards(book);
+  const today = localDay(new Date());
+  const stats = reviewCounts(cards, ledger, today);
+  const attempted = cards.filter(card => ledger[card.id]?.cardVersion === card.contentVersion);
+  const retained = attempted.filter(card => {
+    const entry = ledger[card.id];
+    return entry && entry.lastCorrect && entry.stage >= 1 && entry.successes >= 2;
+  });
+  return <section className="los-review-evidence">
+    <p className="los-eyebrow">TOTEUTUNEET NÄYTÖT</p>
+    <h1>Osaaminen</h1>
+    <p className="los-intro">Tässä näkyvät vain tallennettuihin sanastokertauksiin perustuvat tiedot. Sivujen avaamisesta tai harjoitustuntien suorittamisesta ei päätellä kielitaitoa.</p>
+    <div className="los-review-summary">
+      <div><strong>{attempted.length}</strong><span>Sanaa yritetty muistista</span></div>
+      <div><strong>{retained.length}</strong><span>Oikein myöhemmässä kertauksessa</span></div>
+      <div><strong>{stats.due}</strong><span>Ajankohtaista kerrattavaa</span></div>
+    </div>
+    <p role="status" className="los-storage-state">{losSyncMessage(status)}</p>
+    <h2>Mitä osaan?</h2>
+    {retained.length > 0 ?
+      <ul className="los-review-retained">{retained.map(card => <li key={card.id}>
+        <strong lang="de">{card.de}</strong><span>{card.fi}</span>
+      </li>)}</ul> :
+      <p className="los-notice">Viivästettyjen kertausten näyttöjä ei vielä ole. Harjoittele ensin, ja palaa sanoihin myöhemmin. Ensimmäinen onnistuminen ei vielä riitä osoittamaan muistamista pitkällä aikavälillä.</p>}
+    <h2>Seuraavat harjoitukset</h2>
+    <p>{cards.length ? "Käytettävissä " + cards.length + " toimitettua sanakorttia; " +
+      stats.fresh + " uutta, " + stats.upcoming + " odottaa seuraavaa kertauspäivää." :
+      "Tähän kirjaan ei ole vielä julkaistu sanakortteja."}</p>
+    <h2>Muut taidot</h2>
+    <p className="los-support">Kuullun ymmärtäminen, luetun ymmärtäminen, puhuminen ja itsenäinen kirjoittaminen: ei vielä riittävää taitokohtaista seurantaa. LOS! ei keksi tasopisteitä tai CEFR-arvioita.</p>
   </section>;
 }
