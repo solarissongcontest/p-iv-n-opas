@@ -208,8 +208,27 @@ export function validateBook(book: Book): string[] {
         errors.push("Invalid category answer key: " + exercise.id);
     }
   }
+  const sourceById = new Map(book.sources.map(source => [source.id, source]));
   for (const block of book.blocks) {
-    if ("sourceId" in block && block.sourceId && !sources.has(block.sourceId)) errors.push("Unknown source: " + block.sourceId);
+    if ("sourceId" in block && block.sourceId && !sources.has(block.sourceId))
+      errors.push("Unknown source: " + block.sourceId);
+
+    // Source material in a visible reader must be cleared, not merely planned.
+    // A prose note about a still-pending source does not claim to host it.
+    // Original teaching texts must be attributable even in PREVIEW.
+    if (block.kind === "authenticText" || block.kind === "dialogue" ||
+        block.kind === "transcript") {
+      const source = sourceById.get(block.sourceId ?? "");
+      if (!block.sourceId || !source)
+        errors.push("Unattributed original text: " + block.id);
+      else if (source.permittedMode === "pending")
+        errors.push("Uncleared original text: " + block.id + " (source " + source.id + ")");
+    }
+    if (block.kind === "media") {
+      const source = sourceById.get(block.sourceId);
+      if (source?.permittedMode === "pending")
+        errors.push("Uncleared visible media: " + block.id + " (source " + source.id + ")");
+    }
   }
   return errors;
 }
