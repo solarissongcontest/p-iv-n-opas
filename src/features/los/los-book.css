@@ -24,6 +24,12 @@
 .los-app p { margin-block:0 1em; }
 .los-logo { display:inline-block;font-family:Georgia,"Times New Roman",serif;font-style:italic;font-weight:900;letter-spacing:-.095em;line-height:1;font-size:85px;transform:skew(-7deg);white-space:nowrap; }
 .los-logo span { color:#c34b42;padding-left:.06em; }
+.los-logo img {width:190px;max-width:100%;height:auto;max-height:92px;display:block;object-fit:contain;}
+.los-logo-compact img {width:80px;max-height:34px;}
+.dark .los-app .los-eyebrow,.dark .los-app .los-content-number,.dark .los-app .los-opening-number,.dark .los-app .los-exercise-header span:first-child {
+  color:color-mix(in srgb,var(--los-book-accent) 55%,white 45%);
+}
+
 .los-logo-compact { font-size:28px;letter-spacing:-.085em; }
 .los-eyebrow,.los-overline { display:block;font-weight:750;letter-spacing:.15em;font-size:11px;line-height:1.5;color:var(--los-book-accent);text-transform:uppercase; }
 .los-overline {color:var(--los-soft)}
