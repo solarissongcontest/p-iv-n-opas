@@ -6,6 +6,7 @@ import {
   restartChapterTest, selectedTestExercises,
 } from "../src/features/los/chapterTest.ts";
 import { LOS1_C02_EDITORIAL_TURNS, LOS1_C02_EDITORIAL_TEXT } from "../src/features/los/los1-c02-content.ts";
+import { LOS1_C02_WB_ORIGINAL_TURNS, LOS1_C02_WB_ORIGINAL_TEXT } from "../src/features/los/los1-c02-wikibooks.ts";
 import { evaluateExercise } from "../src/features/los/exercises/evaluate.ts";
 import type { Exercise, ExerciseAnswer } from "../src/features/los/model.ts";
 
@@ -91,4 +92,54 @@ test("C02 keeps personal names out of vocabulary flashcards", () => {
   assert.ok(block && block.kind === "vocabulary");
   assert.equal(block.entries.length, 16);
   assert.ok(block.entries.every(entry => !["Lena", "Ben", "Franz", "Greta", "Takashi", "Peter"].includes(entry.de)));
+});
+
+
+test("C02 publishes the exact six-turn human Wikibooks Text A inside the app", () => {
+  assert.equal(LOS1_C02_WB_ORIGINAL_TURNS.length, 6);
+  assert.equal(LOS1_C02_WB_ORIGINAL_TEXT.split("\n").length, 6);
+  assert.equal(LOS1_C02_WB_ORIGINAL_TURNS[0]?.text, "Hallo, ich bin Franz. Wie heißt du?");
+  assert.equal(LOS1_C02_WB_ORIGINAL_TURNS[1]?.text, "Hallo, Franz. Ich heiße Greta. Wie geht's?");
+  assert.equal(LOS1_C02_WB_ORIGINAL_TURNS[2]?.text, "Es geht mir gut. Kennst du den Lehrer?");
+  assert.equal(LOS1_C02_WB_ORIGINAL_TURNS[3]?.text, "Ja, er heißt Herr Weiß.");
+  assert.equal(LOS1_C02_WB_ORIGINAL_TURNS[4]?.text, "Oh, danke, Greta. Bis dann!");
+  assert.equal(LOS1_C02_WB_ORIGINAL_TURNS[5]?.text, "Wiedersehen!");
+  const main = book.blocks.find(row => row.id === "los1-c02-wb-original-dialogue");
+  assert.ok(main && main.kind === "dialogue");
+  assert.equal(main.sourceId, "M-WB-01");
+  assert.deepEqual(main.turns.map(row => row.text), LOS1_C02_WB_ORIGINAL_TURNS.map(row => row.text));
+  assert.ok(main.turns.every(row => row.translationFi));
+  const source = book.sources.find(row => row.id === "M-WB-01");
+  assert.equal(source?.permittedMode, "hosted");
+  assert.equal(source?.licenseUrl, "https://creativecommons.org/licenses/by-sa/4.0/");
+  assert.ok(source?.originalUrl?.includes("oldid=4430449"));
+  assert.equal(chapter.blockIds.includes("los1-c02-wb-original-dialogue"), true);
+  assert.ok(chapter.sections?.find(row => row.id === "teksti-a")?.blockIds.includes("los1-c02-wb-original-dialogue"));
+});
+
+test("human-original C02 audio is separately attributed public domain, with verified Commons metadata", () => {
+  const audio = book.blocks.find(row => row.id === "los1-c02-wb-original-audio");
+  assert.ok(audio && audio.kind === "media");
+  assert.equal(audio.sourceId, "M-COM-04");
+  assert.equal(audio.embedUrl, "https://upload.wikimedia.org/wikipedia/commons/2/20/Dialogue_franz_greta_1.ogg");
+  assert.equal(audio.mp3Url, "https://upload.wikimedia.org/wikipedia/commons/transcoded/2/20/Dialogue_franz_greta_1.ogg/Dialogue_franz_greta_1.ogg.mp3");
+  const source = book.sources.find(row => row.id === "M-COM-04");
+  assert.equal(source?.permittedMode, "embed");
+  assert.ok(source?.licenseOrBasis.includes("Public domain"));
+  assert.equal(chapter.blockIds.includes(audio.id), true);
+  const l008 = book.lessons.find(row => row.id === "L008");
+  assert.ok(l008);
+  assert.ok(l008.steps.some(step => step.blockId === audio.id));
+  assert.ok(l008.steps.some(step => step.blockId === "los1-c02-wb-original-dialogue"));
+  assert.ok(l008.steps.some(step => step.exerciseId === "los1-c02-wb-highlight"));
+});
+
+test("C02 source-based questions have correct values and do not require untaught teacher verbs", () => {
+  for (const id of ["los1-c02-wb-greta-name", "los1-c02-wb-teacher",
+    "los1-c02-wb-farewell", "los1-c02-wb-highlight"]) {
+    const item = book.exercises.find(row => row.id === id);
+    assert.ok(item);
+    assert.equal(evaluateExercise(item, correctAnswer(item))?.correct, true);
+  }
+  assert.equal(chapter.exerciseIds.filter(id => id.startsWith("los1-c02-wb-")).length, 4);
 });
