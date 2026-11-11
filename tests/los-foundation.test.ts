@@ -40,7 +40,7 @@ test("each planned chapter exposes exactly ten routable sections", () => {
   assert.equal(first.sections?.find(section => section.id === "tarkista")?.publicationStatus, "preview");
   assert.equal(first.sections?.find(section => section.id === "kulttuuri")?.exerciseIds.length, 2);
   assert.equal(first.sections?.find(section => section.id === "kielioppi")?.exerciseIds.length, 5);
-  assert.equal(first.sections?.find(section => section.id === "harjoittele")?.exerciseIds.length, 7);
+  assert.equal(first.sections?.find(section => section.id === "harjoittele")?.exerciseIds.length, 12);
   assert.ok(first.sections?.find(section => section.id === "kayta")?.blockIds.includes("los1-c01-application-writing"));
   assert.equal(first.sections?.filter(section => section.publicationStatus === "planned").length, 0);
 });
@@ -79,10 +79,10 @@ test("two Commons media sources verified, with separate Goethe culture reference
     "Public domain - tekijän oma vapaa luovutus");
   assert.ok(los1.blocks.some(block => block.kind === "media" && block.sourceId === "M-COM-03"));
 });
-test("C01's 47 combined practice, audio, culture and 2 exam form exercises are indexed", () => {
+test("C01's 52 combined exercises across eight interaction families are indexed", () => {
   const c01 = los1.chapters.find(chapter => chapter.id === "C01");
   assert.ok(c01);
-  assert.equal(c01.exerciseIds.length, 47);
+  assert.equal(c01.exerciseIds.length, 52);
   assert.ok(c01.blockIds.length >= 8);
   const choice = los1.exercises.find(ex => ex.type === "single-choice");
   const gap = los1.exercises.find(ex => ex.type === "gap-fill");
