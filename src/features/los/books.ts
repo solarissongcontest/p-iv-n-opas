@@ -7,6 +7,7 @@ import { LOS1_INTRO_BLOCKS } from "./los1-onboarding.ts";
 import { LOS1_C01_SECTIONS, emptyChapterSections } from "./chapterSections.ts";
 import { LOS1_C01_GREETING_AUDIO_BLOCKS, LOS1_C01_AUDIO_COMPREHENSION_EXERCISES } from "./los1-c01-audio-list.ts";
 import { LOS1_C01_EXAM_EXERCISES, LOS1_C01_TEST } from "./los1-c01-chapter-test.ts";
+import { LOS1_C01_APPLICATION_BLOCKS, LOS1_C01_CULTURE_BLOCKS, LOS1_C01_EXTRA_EXERCISES } from "./los1-c01-activities.ts";
 
 const specs: readonly [string, string, string, string, string, string][] = [
   ["Perustason alkeet 1", "Tutustu ja ihastu saksan kieleen", "Nollataso, tervehdykset, esittäytyminen ja ensimmäinen vuorovaikutus.", "#B7473C", "#FCE8E5", "#FF9B91"],
@@ -41,6 +42,8 @@ export const LOS_BOOKS: readonly Book[] = specs.map((spec, index) => ({
       LOS1_C01_PREVIEW_BLOCKS[0]!.id,
       ...LOS1_C01_SOURCE_BLOCKS.map(block => block.id),
       ...LOS1_C01_GREETING_AUDIO_BLOCKS.map(block => block.id),
+      ...LOS1_C01_APPLICATION_BLOCKS.map(block => block.id),
+      ...LOS1_C01_CULTURE_BLOCKS.map(block => block.id),
       ...LOS1_C01_PREVIEW_BLOCKS.slice(1).map(block => block.id),
     ],
     exerciseIds: [
@@ -48,6 +51,7 @@ export const LOS_BOOKS: readonly Book[] = specs.map((spec, index) => ({
       ...LOS1_C01_AUDIO_COMPREHENSION_EXERCISES.map(exercise => exercise.id),
       ...LOS1_C01_PREVIEW_EXERCISES.map(exercise => exercise.id),
       ...LOS1_C01_EXAM_EXERCISES.map(exercise => exercise.id),
+      ...LOS1_C01_EXTRA_EXERCISES.map(exercise => exercise.id),
     ],
   } : { ...chapter, sections: emptyChapterSections() }) : [],
   lessons: index === 0 ? LOS1_PLANNED_LESSONS.map(lesson => {
@@ -117,8 +121,8 @@ export const LOS_BOOKS: readonly Book[] = specs.map((spec, index) => ({
     };
     return lesson;
   }) : [],
-  blocks: index === 0 ? [...LOS1_INTRO_BLOCKS, ...LOS1_C01_PREVIEW_BLOCKS, ...LOS1_C01_SOURCE_BLOCKS, ...LOS1_C01_GREETING_AUDIO_BLOCKS] : [],
-  exercises: index === 0 ? [...LOS1_C01_PREVIEW_EXERCISES, ...LOS1_C01_SOURCE_EXERCISES, ...LOS1_C01_AUDIO_COMPREHENSION_EXERCISES, ...LOS1_C01_EXAM_EXERCISES] : [],
+  blocks: index === 0 ? [...LOS1_INTRO_BLOCKS, ...LOS1_C01_PREVIEW_BLOCKS, ...LOS1_C01_SOURCE_BLOCKS, ...LOS1_C01_GREETING_AUDIO_BLOCKS, ...LOS1_C01_APPLICATION_BLOCKS, ...LOS1_C01_CULTURE_BLOCKS] : [],
+  exercises: index === 0 ? [...LOS1_C01_PREVIEW_EXERCISES, ...LOS1_C01_SOURCE_EXERCISES, ...LOS1_C01_AUDIO_COMPREHENSION_EXERCISES, ...LOS1_C01_EXAM_EXERCISES, ...LOS1_C01_EXTRA_EXERCISES] : [],
   chapterTests: index === 0 ? [LOS1_C01_TEST] : [],
   sources: index === 0 ? LOS1_RESEARCH_SOURCES.map(source => source.id === "M-COM-01" ? {
     ...source,
@@ -135,7 +139,18 @@ export const LOS_BOOKS: readonly Book[] = specs.map((spec, index) => ({
     permittedMode: "embed" as const,
     modification: "Koko alkukielinen ilmausluettelo lähdejärjestyksessä. Suomenkieliset käännökset ja alueelliset huomautukset lisätty; lähdeäänitettä ei ole muokattu LOS!:ssa.",
     publicationNoteFi: "28 sekunnin alkuperäinen ilmauksiin perustuva äänite; ei dialogi. Äänite toistetaan Wikimedian omalta palvelimelta. Mobiilitoisto vielä vahvistamatta.",
-  } : source) : [],
+  } : source).concat([{
+    id: "GOETHE-REGIONAL-GREETINGS-01",
+    title: "Servus und Salam · Goethe-Institut, #DeutschlandNoFilter",
+    author: "Hasnain Kazim",
+    publisher: "Goethe-Institut",
+    originalUrl: "https://www.goethe.de/prj/ger/en/kre/spk/22878868.html",
+    licenseOrBasis: "Faktalähde omalle suomenkieliselle kulttuurisivulle; suojattua alkuperäistekstiä ei kopioitu",
+    permittedMode: "pending" as const,
+    readiness: "research" as const,
+    verifiedAt: "2026-11-11",
+    publicationNoteFi: "Alueelliset tervehdyskäytännöt tarkistettu; LOS!:n sisältö on oma suomenkielinen selitys.",
+  }]) : [],
 }));
 
 export const LOS_BASE_PATH = "/oppikirjasto/saksa-b3";
