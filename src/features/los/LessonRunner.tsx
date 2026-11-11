@@ -11,6 +11,8 @@ export function LessonRunner({ book, lesson }: { book: Book; lesson: Lesson }) {
       lessonId: lesson.id, lessonVersion: lesson.version, completedStepIds: [], status: "not-started", updatedAt: "",
     },
   );
+  const { value: reflections, update: updateReflections, status: reflectionSaveStatus } =
+    useLosRecord<Record<string, string>>(book.id, "notes", "lesson-reflections-" + lesson.id, lesson.version, {});
   const [index, setIndex] = useState(0);
   const [checkedSteps, setCheckedSteps] = useState<string[]>([]);
   const restoredLesson = useRef<string | null>(null);
@@ -25,7 +27,8 @@ export function LessonRunner({ book, lesson }: { book: Book; lesson: Lesson }) {
   const required = lesson.steps.filter(item => item.required);
   const completedCount = required.filter(item => progress.completedStepIds.includes(item.id)).length;
   const advance = () => {
-    if (!step || (step.exerciseId && !checkedSteps.includes(step.id))) return;
+    if (!step || (step.exerciseId && !checkedSteps.includes(step.id)) ||
+      (step.reflectionPromptFi && !(reflections[step.id] ?? "").trim())) return;
     setProgress(previous => {
       const completedStepIds = Array.from(new Set([...previous.completedStepIds, step.id]));
       const isDone = required.every(item => completedStepIds.includes(item.id));
@@ -56,11 +59,21 @@ export function LessonRunner({ book, lesson }: { book: Book; lesson: Lesson }) {
     <section className="los-lesson-step" aria-labelledby="los-step-title"><h2 id="los-step-title">{step.title}</h2>
       {block && <Reader book={book} title={step.title} blocks={[block]} />}
       {exercise && <ExerciseEngine key={exercise.id} bookId={book.id} exercise={exercise} onChecked={() => setCheckedSteps(previous => Array.from(new Set([...previous, step.id])))}/>}
-      {!block && !exercise && <p className="los-notice">Tämän vaiheen materiaalia ei ole vielä julkaistu.</p>}
+      {step.reflectionPromptFi && <div className="los-lesson-reflection">
+        <label htmlFor={"los-reflection-" + step.id}>{step.reflectionPromptFi}</label>
+        <textarea id={"los-reflection-" + step.id} rows={4}
+          value={reflections[step.id] ?? ""}
+          onChange={event => updateReflections(previous => ({ ...previous, [step.id]: event.target.value }))}/>
+        <p className="los-storage-state" role="status">{losSyncMessage(reflectionSaveStatus)}</p>
+      </div>}
+      {!block && !exercise && !step.reflectionPromptFi &&
+        <p className="los-notice">Tämän vaiheen materiaalia ei ole vielä julkaistu.</p>}
     </section>
     <div className="los-actions los-step-controls">
       <button type="button" className="los-button los-button-secondary" disabled={index === 0} onClick={() => setIndex(index - 1)}><ArrowLeft size={17}/> Edellinen</button>
-      <button type="button" className="los-button los-button-primary" disabled={(!block && !exercise) || (!!exercise && !checkedSteps.includes(step.id))}
+      <button type="button" className="los-button los-button-primary" disabled={(!block && !exercise && !step.reflectionPromptFi) ||
+          (!!exercise && !checkedSteps.includes(step.id)) ||
+          (!!step.reflectionPromptFi && !(reflections[step.id] ?? "").trim())}
         onClick={advance}>{index < lesson.steps.length - 1 ? "Merkitse käsitellyksi ja jatka" : "Päätä oppitunti"} <ArrowRight size={17}/></button>
     </div>
     {exercise && !checkedSteps.includes(step.id) && <p className="los-support">Tarkista tehtävä ennen kuin merkitset tämän vaiheen käsitellyksi. Oikeaa vastausta ei vaadita.</p>}
