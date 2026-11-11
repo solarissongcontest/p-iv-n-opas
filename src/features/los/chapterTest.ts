@@ -8,37 +8,68 @@ export type SpeechAssessment = "onnistui" | "harjoiteltavaa";
 export type ChapterTestDefinition = {
   id: string; version: string; chapterId: string; title: string; introductoryFi: string;
   exerciseIds: readonly string[];
+  alternativeExerciseIds?: readonly string[];
   speechCriteria: readonly { id: string; title: string }[];
 };
 export type ChapterTestResult = {
   submittedAt: string; score: number; maximum: number;
+  attemptNumber?: number;
   outcomes: { exerciseId: string; correct: boolean; explanationFi: string }[];
   selfAssessment: Record<string, SpeechAssessment>;
 };
 export type ChapterTestRecord = {
   testId: string; testVersion: string;
+  attemptNumber?: number;
   answers: Record<string, ExerciseAnswer>;
   selfAssessment: Record<string, SpeechAssessment>;
   submission: ChapterTestResult | null;
-  previousResults: { submittedAt: string; score: number; maximum: number }[];
+  previousResults: {
+    submittedAt: string; score: number; maximum: number;
+    attemptNumber?: number;
+    outcomes?: ChapterTestResult["outcomes"];
+    answers?: Record<string, ExerciseAnswer>;
+    selfAssessment?: Record<string, SpeechAssessment>;
+  }[];
 };
 export function emptyChapterTestRecord(definition: ChapterTestDefinition): ChapterTestRecord {
   return {
     testId: definition.id, testVersion: definition.version,
+    attemptNumber: 0,
     answers: {}, selfAssessment: {}, submission: null, previousResults: [],
   };
 }
-export function selectedTestExercises(definition: ChapterTestDefinition, allExercises: readonly Exercise[]): Exercise[] {
+/** The first attempt uses C01's original twelve questions. Each succeeding
+ * attempt chooses a different deterministic blend of two *authored* forms,
+ * preserving one question per curriculum objective slot. There are 4096
+ * combinations, not merely shuffled answer options. Never reveal the seed
+ * or answer key to the exam UI before grading.
+ */
+export function selectedTestExerciseIds(
+  definition: ChapterTestDefinition, attemptNumber = 0,
+): string[] {
+  const original = [...definition.exerciseIds];
+  const alternates = definition.alternativeExerciseIds;
+  if (!alternates || !alternates.length || !Number.isSafeInteger(attemptNumber) || attemptNumber <= 0) return original;
+  if (alternates.length !== original.length) return [];
+  const shift = (attemptNumber * 0x9e3) & 0xfff;
+  return original.map((id, index) =>
+    ((shift >>> (index % 12)) & 1) === 1 ? alternates[index]! : id);
+}
+export function selectedTestExercises(
+  definition: ChapterTestDefinition, allExercises: readonly Exercise[], attemptNumber = 0,
+): Exercise[] {
   const byId = new Map(allExercises.map(exercise => [exercise.id, exercise]));
-  return definition.exerciseIds.flatMap(id => {
+  return selectedTestExerciseIds(definition, attemptNumber).flatMap(id => {
     const match = byId.get(id);
     return match ? [match] : [];
   });
 }
 export function missingChapterTestAnswers(definition: ChapterTestDefinition,
   exercises: readonly Exercise[], state: ChapterTestRecord): string[] {
-  if (exercises.length !== definition.exerciseIds.length ||
-      exercises.some((exercise, index) => exercise.id !== definition.exerciseIds[index])) {
+  const chosen = selectedTestExerciseIds(definition, state.attemptNumber ?? 0);
+  if (chosen.length !== definition.exerciseIds.length ||
+      exercises.length !== chosen.length ||
+      exercises.some((exercise, index) => exercise.id !== chosen[index])) {
     return [...definition.exerciseIds];
   }
   return exercises.filter(exercise => evaluateExercise(exercise, state.answers[exercise.id] ?? null) === null)
@@ -62,7 +93,7 @@ export function gradeChapterTest(definition: ChapterTestDefinition, exercises: r
       explanationFi: evaluated.explanationFi };
   });
   return {
-    submittedAt, score: outcomes.filter(item => item.correct).length,
+    submittedAt, attemptNumber: state.attemptNumber ?? 0, score: outcomes.filter(item => item.correct).length,
     maximum: outcomes.length, outcomes,
     selfAssessment: Object.fromEntries(definition.speechCriteria.map(item => [
       item.id, state.selfAssessment[item.id],
@@ -70,12 +101,18 @@ export function gradeChapterTest(definition: ChapterTestDefinition, exercises: r
   };
 }
 export function restartChapterTest(state: ChapterTestRecord): ChapterTestRecord {
+  if (!state.submission) return state;
   return {
     ...state, answers: {}, selfAssessment: {}, submission: null,
-    previousResults: state.submission ? [
+    attemptNumber: (state.attemptNumber ?? 0) + 1,
+    previousResults: [
       ...state.previousResults,
       { submittedAt: state.submission.submittedAt, score: state.submission.score,
-        maximum: state.submission.maximum },
-    ] : state.previousResults,
+        maximum: state.submission.maximum, attemptNumber: state.submission.attemptNumber ?? 0,
+        outcomes: state.submission.outcomes,
+        answers: { ...state.answers },
+        selfAssessment: { ...state.submission.selfAssessment },
+      },
+    ],
   };
 }
