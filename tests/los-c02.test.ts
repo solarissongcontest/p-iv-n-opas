@@ -47,11 +47,11 @@ test("C02 retains ten complete navigable preview sections with no orphan referen
   assert.ok(chapter.sections?.find(item => item.id === "teksti-b")?.blockIds.includes("los1-c02-commons-02-audio"));
   assert.ok(chapter.sections?.find(item => item.id === "tarkista")?.exerciseIds.includes("los1-c02-exam-15"));
 });
-test("complete C02 Text A is original editorial writing with separately identified source", () => {
+test("C02 supplementary editorial writing remains separately identified from the Wikibooks primary source", () => {
   assert.equal(LOS1_C02_EDITORIAL_TURNS.length, 8);
   assert.equal(LOS1_C02_EDITORIAL_TEXT, LOS1_C02_EDITORIAL_TURNS.map(line => line.text).join("\n"));
   assert.ok(book.sources.some(source => source.id === "LOS-EDITORIAL-C02"));
-  assert.ok(book.sources.some(source => source.id === "M-WB-01" && source.permittedMode === "pending"));
+  assert.ok(book.sources.some(source => source.id === "M-WB-01" && source.permittedMode === "hosted"));
   const dialogue = book.blocks.find(block => block.id === "los1-c02-text-a-editorial");
   assert.ok(dialogue && dialogue.kind === "dialogue");
   assert.equal(dialogue.sourceId, "LOS-EDITORIAL-C02");
