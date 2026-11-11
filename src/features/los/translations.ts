@@ -110,7 +110,7 @@ export const basicGloss:Readonly<Record<string,Gloss>>={
  'schon':{fi:'jo'},
  'seid':{fi:'olette (ihr seid)',lemma:'sein'},
  'ihr':{fi:'te (tuttavallisen monikon pronomini)'},
- 'wir':{fi:'me'},
+
  'sind':{fi:'olemme / ovat (wir/sie sind)',lemma:'sein'},
  'fünf':{fi:'viisi'},
  'zehn':{fi:'kymmenen'},
