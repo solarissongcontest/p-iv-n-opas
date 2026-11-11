@@ -7,16 +7,17 @@ import {chapters,sections,lessons,allWords,LOS_VERSION,type Chapter,type Exercis
 import {gradeExercise,tokenOffsets,anchorFromSelectedTokens,dueDate,type TextAnchor,type Grade} from './engine';
 import {allChapterExercises} from './practiceExtras';
 import {ExamSession} from './ExamSession';
-import {firstLessons,type FirstLessonStep} from './firstLessons';
-import {chapter02Lessons} from './chapter02Lessons';
-import {chapter03Lessons} from './chapter03Lessons';
-import {chapter04Lessons} from './chapter04Lessons';
-import {chapter05Lessons} from './chapter05Lessons';
-import {chapter07Lessons} from './chapter07Lessons';
-import {chapter09Lessons} from './chapter09Lessons';
-import {chapter10Lessons} from './chapter10Lessons';
+import {type FirstLessonStep} from './firstLessons';
+import {guidedLessons} from './guidedLessons';
+
+
+
+
+
+
+
 import {WeekCalendarPractice} from './WeekCalendarPractice';
-import {reviewOneLessons} from './reviewOneLessons';
+
 import {reviewOneItems} from './reviewOneItems';
 import {exams,type ExamId} from './examBank';
 import {lookupGloss,translationFi} from './translations';
@@ -363,7 +364,7 @@ function ChapterSection({chapter,section,store,fontSize}:{chapter:Chapter;sectio
  return null;
 }
 
-const guidedLessons=[...firstLessons,...chapter02Lessons,...chapter03Lessons,...chapter04Lessons,...chapter05Lessons,...reviewOneLessons,...chapter07Lessons,...chapter09Lessons,...chapter10Lessons];
+
 function FirstLessonRunner({lessonId,store,fontSize,onNext,onContents}:{lessonId:string;store:Store;fontSize:number;onNext:()=>void;onContents:()=>void}){
  const plan=guidedLessons.find(p=>p.id===lessonId);
  const [stepIndex,setStepIndex]=useState(0);
