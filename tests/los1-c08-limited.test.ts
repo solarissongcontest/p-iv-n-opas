@@ -9,13 +9,14 @@ import {gradeExercise} from '../src/features/los/engine.ts';
 const chapter=chapters.find(c=>c.id==='C08')!;
 const tasks=allChapterExercises('C08',chapter.exercises);
 const taskIds=new Set(tasks.map(x=>x.id));
-test('C08 explicitly remains blocked: no fabricated full Im Unterricht interview or video',()=>{
- assert.equal(chapter.status,'source-pending');
- assert.equal(chapter.sourceId,'M-DIB-04');
- assert.deepEqual(chapter.blocks,[]);
- assert.equal(chapter.media,undefined);
- assert.ok(chapter.attribution.includes('ei ole valittu'));
- assert.ok(chapter.sourceUrl.includes('toc.php?k=2'));
+test('C08 replacement original chat is documented as such, without inventing an audio version',()=>{
+ assert.equal(chapter.status,'text-reviewed');
+ assert.equal(chapter.sourceId,'M-ZPE-02');
+ assert.equal(chapter.blocks.length,12);
+ assert.equal(chapter.media?.sourceId,'M-COM-08-ICH');
+ assert.ok(chapter.attribution.includes('Magdalena Sieradz'));
+ assert.ok(chapter.attribution.includes('COERLL'));
+ assert.ok(chapter.sourceUrl.includes('/a/przeczytaj/DOdbZ7KLX'));
 });
 test('C08 L041 and L043 are fully written source-limited 30-minute phrase lessons',()=>{
  assert.deepEqual(chapter08PartialLessons.map(p=>p.id),['L041','L043']);
@@ -43,9 +44,9 @@ test('C08 phrase practice is graded only on taught A1 expressions with self-asse
   assert.equal(status,ex.type==='writing'?'self-review':'correct',id);
  }
 });
-test('C08 authentic-source-dependent lessons and chapter exam remain missing',()=>{
+test('C08 real-source and distinct-audio lessons are now authored without fake dialogue recording',()=>{
  for(const id of ['L042','L044','L045']){
-  assert.equal(lessons.find(l=>l.id===id)?.status,'pending');
-  assert.equal(guidedLessons.some(l=>l.id===id),false);
+  assert.equal(lessons.find(l=>l.id===id)?.status,'initial-material');
+  assert.equal(guidedLessons.some(l=>l.id===id),true);
  }
 });
