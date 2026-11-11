@@ -115,7 +115,22 @@ export function validateBook(book: Book): string[] {
     }
   }
   for (const chapterTest of book.chapterTests) {
-    if (!chapters.has(chapterTest.chapterId)) errors.push("Unknown test chapter: " + chapterTest.id);
+    const standalone = chapterTest.examType === "midterm" && chapterTest.chapterId === "EX-MID" ||
+      chapterTest.examType === "final" && chapterTest.chapterId === "EX-FINAL";
+    if (!chapters.has(chapterTest.chapterId) && !standalone) errors.push("Unknown test chapter: " + chapterTest.id);
+    if (chapterTest.scoreGroups) {
+      const grouped = chapterTest.scoreGroups.flatMap(group => group.exerciseIds);
+      const originals = chapterTest.exerciseIds;
+      if (grouped.length !== originals.length ||
+        new Set(grouped).size !== grouped.length ||
+        originals.some(id => !grouped.includes(id))) errors.push("Invalid exam section coverage: " + chapterTest.id);
+      if (new Set(chapterTest.scoreGroups.map(group => group.id)).size !== chapterTest.scoreGroups.length)
+        errors.push("Duplicate exam section: " + chapterTest.id);
+    }
+    if (chapterTest.maximumWritingLines !== undefined &&
+      (chapterTest.requiredWritingLines === undefined ||
+        chapterTest.maximumWritingLines < chapterTest.requiredWritingLines))
+      errors.push("Invalid exam writing line limits: " + chapterTest.id);
     if (chapterTest.exerciseIds.length < 1) errors.push("Empty test: " + chapterTest.id);
     if (new Set(chapterTest.exerciseIds).size !== chapterTest.exerciseIds.length)
       errors.push("Duplicate test question: " + chapterTest.id);
