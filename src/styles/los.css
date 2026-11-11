@@ -740,3 +740,29 @@
   .los-country-schematic { padding:14px; }
   .los-country-map-scroll svg { min-width:570px; }
 }
+
+
+/* Midterm section report is computed only from a submitted, graded attempt.
+ * The writing lines and model stay visually separate from automatic points. */
+.los-exam-breakdown {
+  border: 1px solid var(--los-border);
+  border-radius: 12px;
+  padding: clamp(12px, 2vw, 20px);
+  margin: 12px 0 20px;
+  background: var(--los-surface);
+}
+.los-exam-breakdown h4 { margin: 0 0 10px; font-size: 15px; }
+.los-exam-breakdown ul { list-style: none; margin: 0; padding: 0; }
+.los-exam-breakdown li {
+  display: flex; justify-content: space-between; align-items: baseline; gap: 18px;
+  border-top: 1px solid var(--los-border); padding: 9px 2px;
+}
+.los-exam-breakdown li strong { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.los-exam-writing-return [lang="de"], .los-exam-past-writing { white-space: pre-line; }
+.los-standalone-exam { display: grid; gap: 18px; max-width: 920px; }
+.los-standalone-exam .los-back-link {
+  display:inline-flex; align-items:center; gap:7px;
+  color:var(--los-book-accent); width:fit-content;
+  font-size:14px; font-weight:600; text-decoration:none;
+}
+.los-standalone-exam .los-back-link:hover { text-decoration:underline; }
