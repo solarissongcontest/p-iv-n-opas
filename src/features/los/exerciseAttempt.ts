@@ -56,3 +56,15 @@ export function canSubmitExerciseAttempt(
  if(!valid)return false;
  return (exercise.type!=='listen-choice'&&exercise.type!=='listen-write')||audioCompleted;
 }
+
+
+/** Playback evidence is valid only for the current source and book version.
+ * A stale receipt from a different file must not silently satisfy the task.
+ */
+export function hasValidAudioProof(receipt:unknown,sourceUrl:string,version:string):boolean{
+ if(!receipt||typeof receipt!=='object'||Array.isArray(receipt))return false;
+ const value=receipt as Record<string,unknown>;
+ return typeof value['at']==='string'&&
+  /^\d{4}-\d{2}-\d{2}T/u.test(value['at'])&&
+  value['source']===sourceUrl&&value['version']===version;
+}
