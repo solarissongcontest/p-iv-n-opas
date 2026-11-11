@@ -76,32 +76,60 @@ export function LosChapterGrammar({chapterId}:{chapterId:string}) {
     <p>Kun nimeä ei kuule oikein, voit pyytää toista tavaamaan sen. Saksassa kirjaimet ääntyvät osin eri tavoin kuin suomessa.</p>
     <Example de="Wie schreibt man das?" fi="Miten se kirjoitetaan?" />
     <Example de="Bitte buchstabieren Sie." fi="Tavatkaa, olkaa hyvä." />
-    <p>Opettele erottamaan myös saksan kirjainmerkit <b lang="de">ä, ö, ü</b> ja <b lang="de">ß</b>. Joissakin yhteyksissä ä voidaan kirjoittaa ae ja ü ue, mutta oppikirjan oikeinkirjoituksessa käytetään varsinaisia merkkejä.</p>
-    <Note title="Pyydä toistoa">Lause <span lang="de">Noch einmal, bitte.</span> on hyödyllinen jo ennen kuin osaat sen kaikkia sanoja erikseen.</Note>
+    <h3>Kirjoitusasu ja kirjaimen nimi ovat eri asioita</h3>
+    <p>Saksan aakkosissa on tutut latinalaiset kirjaimet A–Z. Saksan kirjaimet eivät kuitenkaan välttämättä äänny samoin kuin suomen kirjaimet: esimerkiksi <span lang="de">J</span> on tavallisesti j-äänne sanassa, mutta kirjaimen oma saksankielinen nimi on erillinen opeteltava asia. Oikea tavaaminen kuunnellaan mieluiten ihmisen puheesta.</p>
+    <p>Opettele erottamaan myös saksan kirjainmerkit <b lang="de">ä, ö, ü</b> ja <b lang="de">ß</b>. Joissakin teknisissä yhteyksissä käytetään korvaavia merkintöjä <span lang="de">ae, oe, ue</span> ja <span lang="de">ss</span>. Korvausmerkintä ei ole yleispätevästi sama kuin sanan oikea kirjoitusasu.</p>
+    <Example de="M – I – A" fi="Kirjaimittain kirjoitettu nimi Mia. Tämä esimerkki näyttää kirjaimet, ei niiden saksalaista ääntämistä." />
+    <Example de="Wie schreibt man das? Bitte buchstabieren Sie." fi="Miten se kirjoitetaan? Tavatkaa, olkaa hyvä." />
+    <Note title="Tavatun nimen kuuntelu ei ole vielä automaattinen testi">Harjoittele kahdeksan kuvitteellista nimeä ja neljä numerosarjaa ääneen. Kun oikea aakkosäänite lisätään luvallisesti oppikirjaan, voit verrata myös ääntämistä. Pelkkä tekstimuoto ei todista ääntämistä.</Note>
   </>;
   if(chapterId==="08")return <>
     <p>Itsenäisessä opiskelussa tarvitaan myös ilmauksia, joilla voi pyytää apua. Nämä ovat käyttövalmiita fraaseja, jotka kannattaa opetella kokonaisina.</p>
     <Example de="Ich verstehe nicht." fi="En ymmärrä." />
     <Example de="Können Sie das bitte wiederholen?" fi="Voitteko toistaa sen, olkaa hyvä?" />
     <Example de="Bitte langsamer." fi="Hitaammin, olkaa hyvä." />
-    <p>Myöhemmin opit, miksi <span lang="de">können</span>-verbillä on juuri tämä muoto. Nyt tärkeintä on ymmärtää ja käyttää näitä lauseita arjessa.</p>
-    <Note title="Oppimisstrategia">Pysäytä äänite, kuuntele uudelleen ja tunnista ensin tutut sanat. Kaikkia sanoja ei tarvitse ymmärtää heti.</Note>
+    <Example de="Was bedeutet das?" fi="Mitä se tarkoittaa?" />
+    <Example de="Wie sagt man das auf Deutsch?" fi="Miten se sanotaan saksaksi?" />
+    <p>Opettele <span lang="de">Können Sie das bitte wiederholen?</span> yhtenä valmiina kohteliaana pyyntönä. Koko <span lang="de">können</span>-verbin taivutusta, imperatiivia tai uusia sijamuotoja ei tarvitse vielä osata. Sana <span lang="de">Wort</span> tarkoittaa sanaa ja <span lang="de">Satz</span> lausetta.</p>
+    <h3>Kolme tapaa ratkaista ymmärtämisongelma</h3>
+    <ol>
+      <li>Jos et ymmärrä, ilmaise se: <span lang="de">Ich verstehe nicht.</span></li>
+      <li>Pyydä toistamaan tai hidastamaan: <span lang="de">Noch einmal, bitte.</span> tai <span lang="de">Bitte langsamer.</span></li>
+      <li>Jos sana on uusi, kysy: <span lang="de">Was bedeutet das?</span></li>
+    </ol>
+    <Note title="Oppimisstrategia">Pysäytä äänite, kuuntele uudelleen ja tunnista ensin tutut sanat. Kaikkia sanoja ei tarvitse ymmärtää heti. Tämän kappaleen julkaisematon Text B ei ole vielä oikea kuuntelutehtävä.</Note>
   </>;
   if(chapterId==="09")return <>
     <p>Viikonpäivien kanssa käytetään tavallisesti ilmausta <b lang="de">am Montag</b> (maanantaina). Kellonajan edellä käytetään sanaa <b lang="de">um</b>.</p>
     <Example de="Am Montag um drei Uhr." fi="Maanantaina kello kolme." />
     <Example de="Am Freitag um vier Uhr." fi="Perjantaina kello neljä." />
-    <p>Viikonpäivien nimet aloitetaan isolla kirjaimella: <span lang="de">Montag, Dienstag, Mittwoch, Donnerstag, Freitag, Samstag, Sonntag</span>.</p>
-    <Note title="Erota sanat">Sana <span lang="de">am</span> kertoo tässä päivän ja <span lang="de">um</span> kellonajan.</Note>
+    <h3>Viikonpäivät</h3>
+    <table className="los-grammar-table"><thead><tr><th>Suomeksi</th><th lang="de">Deutsch</th></tr></thead><tbody>
+      {[["maanantai","Montag"],["tiistai","Dienstag"],["keskiviikko","Mittwoch"],["torstai","Donnerstag"],["perjantai","Freitag"],["lauantai","Samstag"],["sunnuntai","Sonntag"]].map(([fi,de])=><tr key={de}><td>{fi}</td><td lang="de">{de}</td></tr>)}
+    </tbody></table>
+    <p>Viikonpäivät kirjoitetaan isolla, sillä ne ovat saksassa substantiiveja. Kirjoita <span lang="de">am Montag</span> mutta <span lang="de">um drei Uhr</span>. Sana <b lang="de">wann</b> kysyy <i>milloin</i>.</p>
+    <p>Erota <span lang="de">heute</span> (tänään), <span lang="de">morgen</span> (huomenna) ja <span lang="de">gestern</span> (eilen). Isolla kirjoitettu <span lang="de">der Morgen</span> tarkoittaa aamua.</p>
+    <Note title="Rajattu ajanilmaisu riittää">Tasatunnit ja am/um ovat aktiivisia tavoitteita. Lähdetekstin muotoja <span lang="de">halb</span>, <span lang="de">Viertel vor</span> ja <span lang="de">Viertel nach</span> saa oppia tunnistamaan, mutta niitä ei vaadita vielä itsenäisessä testissä.</Note>
   </>;
   if(chapterId==="10")return <>
     <p>Viimeisessä kappaleessa kokoat opitut perusilmaukset yhdeksi kohtaamiseksi: tervehtiminen, nimen kysyminen, kotipaikka, ikä ja hyvästely.</p>
     <Example de="Hallo! Ich heiße Mia." fi="Hei! Nimeni on Mia." />
     <Example de="Ich komme aus Finnland." fi="Olen kotoisin Suomesta." />
     <Example de="Schön, dich kennenzulernen!" fi="Hauska tutustua!" />
-    <h3>Harjoittele oma esittely</h3>
-    <p>Kirjoita ensin muutama lause kuvitteellisesta henkilöstä. Kokeile sen jälkeen sanoa ne ilman näkyvää mallia. Tarkista <span lang="de">ich</span>-verbimuodot ja lauseiden sanajärjestys.</p>
-    <Note title="Seuraavaksi">Kun pystyt käyttämään näitä ilmauksia ilman mallia, voit alkaa laajentaa sanastoa LOS! 2:ssa. Osaamista ei arvioida automaattisesti vain lukemisen perusteella.</Note>
+    <h3>Kolmen tärkeän verbin kertaus</h3>
+    <table className="los-grammar-table">
+      <thead><tr><th>Persoona</th><th lang="de">heißen</th><th lang="de">sein</th><th lang="de">kommen</th></tr></thead>
+      <tbody>{[
+        ["ich","heiße","bin","komme"],
+        ["du","heißt","bist","kommst"],
+        ["er/sie","heißt","ist","kommt"],
+        ["Sie (kohtelias)","heißen","sind","kommen"],
+      ].map(([person,named,be,from])=><tr key={person}><td lang="de">{person}</td><td lang="de">{named}</td><td lang="de">{be}</td><td lang="de">{from}</td></tr>)}</tbody>
+    </table>
+    <p>Kolmannen henkilön esitteleminen onnistuu lyhyillä lauseilla: <span lang="de">Das ist Mia. Sie heißt Mia. Sie kommt aus Finnland.</span> Muista, että kohtelias <span lang="de">Sie</span> ja naisesta käytetty <span lang="de">sie</span> ovat eri käyttötapoja.</p>
+    <h3>Harjoittele kaksi erilaista kohtaamista</h3>
+    <p>Kirjoita ensin 6–8 repliikin tuttavallinen keskustelu ja sen jälkeen erillinen kohtelias keskustelu opettajan kanssa. Kerro tervehdyksen jälkeen nimet, alkuperä ja jokin tuttu perustieto. Lopeta sopivaan hyvästelyyn. Kirjoita myös erikseen neljä lausetta kolmannesta henkilöstä.</p>
+    <Note title="Kappaletesti ei ole kirjan loppukoe">C10 tarkistaa opittuja muotoja ja fraaseja. Täydellinen omien kohtaamisten tuottaminen arvioidaan erillisellä tarkistuslistalla, ja koko kirjan loppukoe on oma osionsa. Ei automaattista kielitaidon prosenttilukua.</Note>
   </>;
   return null;
 }
