@@ -47,7 +47,7 @@ test('L012–L016 each contain five distinct 30-minute teaching steps, required 
   }
   assert.equal(lessons.find(x=>x.id===l.id)?.status,'initial-material');
  }
- assert.deepEqual(chapter03Lessons[3]?.requiredMediaIds,['M-COM-02']);
+ assert.deepEqual(chapter03Lessons[3]?.requiredMediaIds,['C03:M-COM-02']);
  assert.deepEqual(chapter03Lessons[4]?.requiredIds,['EX-C03']);
 });
 test('Berna source-highlight grading is exact, versioned, and blocks are not fabricated',()=>{
