@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { BookOpen, Highlighter, NotebookPen, Settings2 } from "lucide-react";
-import type { Book, ContentBlock, SourceAttribution } from "./model";
+import type { Book, BookId, ContentBlock, SourceAttribution } from "./model";
 import { useLosRecord, losSyncMessage } from "./data/useLosRecord";
 import { findGlossarySpans, type GlossaryEntry } from "./glossary";
 
@@ -55,8 +55,46 @@ function SafeMedia({ block, source }: {
     <Attribution source={source}/>
   </figure>;
 }
-function RenderBlock({ block, source, marked, highlighterEnabled, glossary, onLookup, onSelection, onNote }: {
+function ProductionBlock({ bookId, block }: {
+  bookId: BookId; block: Extract<ContentBlock, { kind: "production" }>;
+}) {
+  const { value, update, status } = useLosRecord<{ text: string; reviewed: Record<string, boolean> }>(
+    bookId, "notes", "production-" + block.id, block.version, { text: "", reviewed: {} },
+  );
+  return <section className="los-production" id={block.id}>
+    <p className="los-eyebrow">KÄYTÄ SAKSAA ITSE · EI PISTEYTYSTÄ</p>
+    <h2>{block.titleFi}</h2>
+    <p>{block.promptFi}</p>
+    <label htmlFor={"los-production-" + block.id}>Oma saksankielinen vastauksesi</label>
+    <textarea id={"los-production-" + block.id} lang="de"
+      spellCheck={false} autoCapitalize="none" rows={4}
+      value={value.text} disabled={status === "loading"}
+      onChange={event => update(previous => ({ ...previous, text: event.target.value }))}/>
+    <p className="los-storage-state" role="status">{losSyncMessage(status)}</p>
+    <details className="los-production-model">
+      <summary>Avaa vasta oman yrityksen jälkeen: malliratkaisu</summary>
+      <p lang="de"><b>{block.modelDe}</b></p>
+      <p>{block.modelFi}</p>
+      <p className="los-support">Malli on LOS!:n oma opetusesimerkki, ei lainattu alkuperäisteksti.</p>
+    </details>
+    <fieldset className="los-production-check">
+      <legend>Tarkista itse, kun olet verrannut vastaustasi malliin</legend>
+      {block.criteriaFi.map((criterion, index) => <label key={index}>
+        <input type="checkbox" checked={Boolean(value.reviewed[String(index)])}
+          disabled={status === "loading"}
+          onChange={event => update(previous => ({
+            ...previous, reviewed: { ...previous.reviewed, [String(index)]: event.target.checked },
+          }))}/>
+        {criterion}
+      </label>)}
+    </fieldset>
+    <p className="los-support">Itsearviointi ei tuota automaattista pistettä eikä varmistettua kielitaitotasoa.</p>
+  </section>;
+}
+
+function RenderBlock({ block, bookId, source, marked, highlighterEnabled, glossary, onLookup, onSelection, onNote }: {
   block: ContentBlock;
+  bookId: BookId;
   source: SourceAttribution | undefined;
   marked: ReaderMark | undefined;
   highlighterEnabled: boolean;
@@ -172,6 +210,7 @@ function RenderBlock({ block, source, marked, highlighterEnabled, glossary, onLo
       <h2>Sanasto</h2><dl>{block.entries.map(entry => <div key={entry.id}>
         <dt lang="de">{entry.de}</dt><dd>{entry.fi}{entry.note && <small>{entry.note}</small>}</dd>
       </div>)}</dl></section>;
+    case "production": return <ProductionBlock bookId={bookId} block={block} />;
     case "media": return <SafeMedia block={block} source={source} />;
   }
 }
@@ -220,7 +259,7 @@ export function Reader({ book, blocks, title, headingLevel = 2 }: { book: Book; 
       <button type="button" className="los-button los-button-secondary" onClick={() => setActiveGloss(null)}>Sulje</button>
     </aside>}
     <div className="los-reading-body">{blocks.map(block => <RenderBlock
-      key={block.id + ":" + block.version} block={block}
+      key={block.id + ":" + block.version} block={block} bookId={book.id}
       source={"sourceId" in block ? book.sources.find(item => item.id === block.sourceId) : undefined}
       highlighterEnabled={highlighter}
       glossary={readingMode ? [] : glossary}
