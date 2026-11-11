@@ -56,12 +56,16 @@ export interface ExerciseBase {
 }
 export type Exercise =
   | (ExerciseBase & { type: "single-choice"; options: { id: string; label: string }[]; correctOptionId: string })
+  | (ExerciseBase & { type: "multiple-choice"; options: { id: string; label: string }[]; correctOptionIds: string[] })
+  | (ExerciseBase & { type: "true-false"; statement: string; correctValue: boolean })
+  | (ExerciseBase & { type: "word-order"; tokens: { id: string; label: string }[]; correctOrder: string[] })
+  | (ExerciseBase & { type: "categorize"; items: { id: string; label: string }[]; categories: { id: string; label: string }[]; assignments: { itemId: string; categoryId: string }[] })
   | (ExerciseBase & { type: "gap-fill"; sentenceBefore: string; sentenceAfter: string; acceptedAnswers: string[]; caseSensitive?: boolean })
   | (ExerciseBase & { type: "matching"; left: { id: string; label: string }[]; right: { id: string; label: string }[]; pairs: { leftId: string; rightId: string }[] })
   | (ExerciseBase & { type: "highlight"; blockId: string; text: string; acceptedRanges: { start: number; end: number }[] });
 
 export type HighlightRange = { start: number; end: number };
-export type ExerciseAnswer = string | Record<string, string> | HighlightRange | null;
+export type ExerciseAnswer = string | string[] | Record<string, string> | HighlightRange | null;
 export type ExerciseAttempt = {
   id: string; exerciseId: string; exerciseVersion: string; answer: ExerciseAnswer;
   checkedAt: string | null; status: "draft" | "correct" | "incorrect"; updatedAt: string;
