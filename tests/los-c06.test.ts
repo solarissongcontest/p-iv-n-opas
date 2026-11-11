@@ -59,15 +59,15 @@ test("German cardinal conversion exactly 0–100 and irregular spellings",()=>{
   assert.ok(words.every(word=>!word.includes("einsund")));
   assert.ok(words.every(word=>!word.includes("siebenzehn")&&!word.includes("sechszehn")));
 });
-test("sixth chapter sections and L031–L035 connect without erasing L027–L030 review slots",()=>{
+test("sixth chapter sections and L031–L035 coexist with working L027–L030 review and midterm",()=>{
   assert.deepEqual(validateBook(book),[]);
   assert.equal(chapter.publicationStatus,"preview");
   assert.equal(chapter.sections?.length,10);
   assert.ok(chapter.sections?.every(s=>s.publicationStatus==="preview"));
   assert.deepEqual(book.lessons.filter(l=>l.chapterId==="C06"&&l.publicationStatus==="preview").map(l=>l.id),
     ["L031","L032","L033","L034","L035"]);
-  assert.ok(["L027","L028","L029","L030"].every(id=>book.lessons.find(l=>l.id===id)?.publicationStatus==="planned"));
-  assert.ok(["L027","L028","L029","L030"].every(id=>book.lessons.find(l=>l.id===id)?.steps.length===0));
+  assert.ok(["L027","L028","L029","L030"].every(id=>book.lessons.find(l=>l.id===id)?.publicationStatus==="preview"));
+  assert.ok(["L027","L028","L029","L030"].every(id=>(book.lessons.find(l=>l.id===id)?.steps.length??0)>0));
   assert.equal(chapter.exerciseIds.length,96);
   assert.equal(new Set(chapter.exerciseIds).size,96);
   const allRefs=new Set(chapter.sections?.flatMap(s=>s.exerciseIds));
