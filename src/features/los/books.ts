@@ -5,6 +5,7 @@ import { LOS1_RESEARCH_SOURCES } from "./los1-sources.ts";
 import { LOS1_C01_SOURCE_BLOCKS, LOS1_C01_SOURCE_EXERCISES } from "./los1-c01-source.ts";
 import { LOS1_INTRO_BLOCKS } from "./los1-onboarding.ts";
 import { LOS1_C01_SECTIONS, emptyChapterSections } from "./chapterSections.ts";
+import { LOS1_C01_GREETING_AUDIO_BLOCKS, LOS1_C01_AUDIO_COMPREHENSION_EXERCISES } from "./los1-c01-audio-list.ts";
 
 const specs: readonly [string, string, string, string, string, string][] = [
   ["Perustason alkeet 1", "Tutustu ja ihastu saksan kieleen", "Nollataso, tervehdykset, esittäytyminen ja ensimmäinen vuorovaikutus.", "#B7473C", "#FCE8E5", "#FF9B91"],
@@ -38,10 +39,12 @@ export const LOS_BOOKS: readonly Book[] = specs.map((spec, index) => ({
     blockIds: [
       LOS1_C01_PREVIEW_BLOCKS[0]!.id,
       ...LOS1_C01_SOURCE_BLOCKS.map(block => block.id),
+      ...LOS1_C01_GREETING_AUDIO_BLOCKS.map(block => block.id),
       ...LOS1_C01_PREVIEW_BLOCKS.slice(1).map(block => block.id),
     ],
     exerciseIds: [
       ...LOS1_C01_SOURCE_EXERCISES.map(exercise => exercise.id),
+      ...LOS1_C01_AUDIO_COMPREHENSION_EXERCISES.map(exercise => exercise.id),
       ...LOS1_C01_PREVIEW_EXERCISES.map(exercise => exercise.id),
     ],
   } : { ...chapter, sections: emptyChapterSections() }) : [],
@@ -94,17 +97,18 @@ export const LOS_BOOKS: readonly Book[] = specs.map((spec, index) => ({
     if (lesson.id === "L005") return {
       ...lesson, publicationStatus: "preview" as const,
       steps: [
-        { id: "L005-S01", title: "Viritä kuuntelu", required: true, blockId: "los1-c01-source-intro" },
-        { id: "L005-S02", title: "Kuuntele alkuperäinen keskustelu", required: true, blockId: "los1-c01-m-com-01-audio" },
-        { id: "L005-S03", title: "Tunnista kuulemasi hyvästely", required: true, exerciseId: "los1-c01-text-a-choice-goodbye" },
-        { id: "L005-S04", title: "Varmista kuulemasi alkuperäisestä tekstistä", required: true, blockId: "los1-c01-m-com-01-dialogue" },
-        { id: "L005-S05", title: "Täydennä kuulemasi ilmaus", required: true, exerciseId: "los1-c01-text-a-gap-goodbye" },
+        { id: "L005-S01", title: "Kuuntele luettelon tavoite", required: true, blockId: "los1-c01-text-b-guide" },
+        { id: "L005-S02", title: "Kuuntele 28 sekunnin alkuperäisäänite", required: true, blockId: "los1-c01-m-com-03-audio" },
+        { id: "L005-S03", title: "Lue koko alkuperäinen ilmausluettelo", required: true, blockId: "los1-c01-m-com-03-transcript" },
+        { id: "L005-S04", title: "Tunnista aamun tervehdys", required: true, exerciseId: "los1-c01-audio-list-morning" },
+        { id: "L005-S05", title: "Tunnista hyvästely", required: true, exerciseId: "los1-c01-audio-list-parting" },
+        { id: "L005-S06", title: "Kertaa kuulemasi", required: true, blockId: "los1-c01-text-b-reflection" },
       ],
     };
     return lesson;
   }) : [],
-  blocks: index === 0 ? [...LOS1_INTRO_BLOCKS, ...LOS1_C01_PREVIEW_BLOCKS, ...LOS1_C01_SOURCE_BLOCKS] : [],
-  exercises: index === 0 ? [...LOS1_C01_PREVIEW_EXERCISES, ...LOS1_C01_SOURCE_EXERCISES] : [],
+  blocks: index === 0 ? [...LOS1_INTRO_BLOCKS, ...LOS1_C01_PREVIEW_BLOCKS, ...LOS1_C01_SOURCE_BLOCKS, ...LOS1_C01_GREETING_AUDIO_BLOCKS] : [],
+  exercises: index === 0 ? [...LOS1_C01_PREVIEW_EXERCISES, ...LOS1_C01_SOURCE_EXERCISES, ...LOS1_C01_AUDIO_COMPREHENSION_EXERCISES] : [],
   sources: index === 0 ? LOS1_RESEARCH_SOURCES.map(source => source.id === "M-COM-01" ? {
     ...source,
     author: "Xzapro4 ja Erkan Yilmaz",
@@ -113,6 +117,13 @@ export const LOS_BOOKS: readonly Book[] = specs.map((spec, index) => ({
     permittedMode: "embed" as const,
     modification: "Saksankielinen transkriptio alkuperäisenä. Suomenkieliset opetusselitykset ja repliikkikohtaiset käännökset ovat lisäyksiä.",
     publicationNoteFi: "Koko alkuperäisteksti on lukijassa. Alkuperäisäänite toistetaan Wikimedian palvelimelta; mobiilitoistoa ei ole vielä varmennettu.",
+  } : source.id === "M-COM-03" ? {
+    ...source,
+    author: "German Men92 (English Wikibooks); Commons-version äänenvoimakkuutta nostanut Recent Runes",
+    licenseOrBasis: "Public domain - tekijän oma vapaa luovutus",
+    permittedMode: "embed" as const,
+    modification: "Koko alkukielinen ilmausluettelo lähdejärjestyksessä. Suomenkieliset käännökset ja alueelliset huomautukset lisätty; lähdeäänitettä ei ole muokattu LOS!:ssa.",
+    publicationNoteFi: "28 sekunnin alkuperäinen ilmauksiin perustuva äänite; ei dialogi. Äänite toistetaan Wikimedian omalta palvelimelta. Mobiilitoisto vielä vahvistamatta.",
   } : source) : [],
 }));
 
