@@ -139,6 +139,9 @@ export function useLosRecord<T>(
       if (alive && !edited.current) setStatus(cached ? "local" : "error");
     });
     return () => { alive = false; };
+    // The caller's fallback is an initial value and may be a new object on each
+    // render. Re-hydrating for that identity would erase typed answers.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [bookId, kind, key, version]);
 
   const flush = useCallback(() => {
