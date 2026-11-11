@@ -11,6 +11,8 @@ export type ChapterTestDefinition = {
   alternativeExerciseIds?: readonly string[];
   speechCriteria: readonly { id: string; title: string }[];
   selfAssessmentMode?: "speech" | "writing";
+  speechExampleDe?: string;
+  speechPromptFi?: string;
   writingPromptFi?: string;
   writingModelDe?: string;
   writingModelFi?: string;
