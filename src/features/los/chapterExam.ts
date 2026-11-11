@@ -165,3 +165,31 @@ export const c10Exam:Exercise[]=[
  truth('EX-C10-19','Väite: Bernan ja Haraldin alkuperäiset haastattelut ovat eri puhujien tekstejä.','Totta','C03:n Berna ja C10:n Harald ovat kaksi eri henkilöä.'),
  choice('EX-C10-20','Mikä sopii kohteliaaksi hyvästelyksi uuden opettajan kanssa?',['Auf Wiedersehen!','Wie alt bist du?','Ich komme aus Wien.'],'Auf Wiedersehen!','Auf Wiedersehen on kohtelias hyvästely.')
 ];
+
+
+/** Independently authored age/numeral assessment, grounded in Janicka's
+ * four published dialogs and the A1 numeral model. The ZPE recording itself
+ * has not been verified for in-app playback, so this exam has no audio claims.
+ */
+export const c06Exam:Exercise[]=[
+ choice('EX-C06-01','Miten kysyt tuttavan ikää saksaksi?',['Wie alt bist du?','Wie heißt du?','Woher kommst du?'],'Wie alt bist du?','Wie alt bist du? kysyy ikää.'),
+ fill('EX-C06-02','Täydennä ikälause: Ich ____ sechzehn Jahre alt.',['bin'],'Ikä ilmaistaan sein-verbillä: Ich bin ... Jahre alt.'),
+ choice('EX-C06-03','Mikä saksan luku tarkoittaa 12?',['zwölf','zwei','zwanzig'],'zwölf','Zwölf on kaksitoista.'),
+ fill('EX-C06-04','Kirjoita 16 saksaksi yhtenä sanana.',['sechzehn'],'Sechzehn kirjoitetaan ilman kuuden pitkää loppua.'),
+ fill('EX-C06-05','Kirjoita 17 saksaksi yhtenä sanana.',['siebzehn'],'Siebzehn ei ole siebenzehn.'),
+ choice('EX-C06-06','Mikä vastaa lukua 19?',['neunzehn','neunzig','neun'],'neunzehn','Neunzehn on yhdeksäntoista.'),
+ choice('EX-C06-07','Mikä vastaa lukua 20?',['zwanzig','zwölf','zwei'],'zwanzig','Zwanzig on kaksikymmentä.'),
+ fill('EX-C06-08','Kirjoita 21 saksaksi.',['einundzwanzig'],'Ykköset ja und ennen kymmeniä; eins lyhenee ein.'),
+ choice('EX-C06-09','Mikä on 30 saksaksi?',['dreißig','dreizehn','dreiundzwanzig'],'dreißig','Dreißig kirjoitetaan ß-kirjaimella.'),
+ fill('EX-C06-10','Kirjoita 32 saksaksi.',['zweiunddreißig'],'Zweiunddreißig: zwei + und + dreißig.'),
+ choice('EX-C06-11','Mikä on 60 saksaksi?',['sechzig','sechszehn','sechzehn'],'sechzig','Sechzig on kuusikymmentä.'),
+ choice('EX-C06-12','Mikä on 70 saksaksi?',['siebzig','siebenzig','siebzehn'],'siebzig','Siebzig on seitsemänkymmentä.'),
+ truth('EX-C06-13','Väite: saksaksi voi sanoa iän muodolla Ich habe zwölf Jahre alt.','Tarua','Oikea ikälause on Ich bin zwölf Jahre alt.'),
+ choice('EX-C06-14','Kuka on Janickan tekstin toisen alkuperäisen minidialogin 12-vuotias henkilö?',['Larissa','Oskar','Fabian'],'Larissa','Larissa vastaa Ich bin schon zwölf Jahre alt.'),
+ choice('EX-C06-15','Mikä on ensimmäisessä alkuperäisessä minidialogissa näkyvän Oskarin ikä?',['fünf','neun','zwölf'],'fünf','Lähdesivun Transkription-versiossa ensimmäinen vastaaja sanoo Ich bin fünf.'),
+ choice('EX-C06-16','Miten kolmannen alkuperäisen minidialogin kaksi puhujaa ilmaisevat ikänsä?',['Wir sind 10.','Ich bin zwölf.','Er ist fünf.'],'Wir sind 10.','Julkaistun dialogin vastaaja B+C sanoo Wir sind 10.'),
+ choice('EX-C06-17','Miten neljännen alkuperäisen minidialogin Paulin ikä ilmoitetaan?',['Er ist elf Jahre alt.','Er ist neun Jahre alt.','Er bin elf Jahre alt.'],'Er ist elf Jahre alt.','Viimeisessä dialogissa vastataan Paul? Er ist elf Jahre alt.'),
+ fill('EX-C06-18','Täydennä tutun monikon kysymys: Wie alt ____ ihr?',['seid'],'Saksan ihr-pronominin sein-muoto on seid.'),
+ choice('EX-C06-19','Mikä on 100 saksaksi?',['einhundert','einhundertund','einhunderteins'],'einhundert','Einhundert on sata. Sana hundert sopii myös itsenäisesti.'),
+ truth('EX-C06-20','Väite: Janickan C06-lähdeteksti koostuu neljästä erillisestä julkaistusta ikäminidialogista.','Totta','ZPE:n Sag mal, wie alt bist du? -tekstin Transkription-osassa on neljä minidialogia.')
+];
