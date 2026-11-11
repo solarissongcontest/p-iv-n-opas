@@ -100,3 +100,22 @@ export const c03Exam:Exercise[]=[
  truth('EX-C03-14','Väite: saksa ja suomi ovat saman maan nimiä.','Tarua','Deutschland tarkoittaa Saksaa ja Finnland Suomea.'),
  fill('EX-C03-15','Täydennä: Woher kommst ____?',['du'],'Woher kommst du? on tuttavallinen lähtöpaikkakysymys.')
 ];
+
+
+export const c07Exam:Exercise[]=[
+ choice('EX-C07-01','Mikä ilmaus kysyy kirjoitusasua?',['Wie schreibt man das?','Wie geht es dir?','Woher kommst du?'],'Wie schreibt man das?','Wie schreibt man das? tarkoittaa Miten se kirjoitetaan?'),
+ choice('EX-C07-02','Mikä on kohtelias tavaamispyyntö?',['Bitte buchstabieren Sie.','Wie alt bist du?','Ich bin müde.'],'Bitte buchstabieren Sie.','Bitte buchstabieren Sie. on kohtelias pyyntö.'),
+ fill('EX-C07-03','Täydennä: Bitte ____ Sie.',['buchstabieren'],'Kohtelias tavaamispyyntö kuuluu Bitte buchstabieren Sie.'),
+ choice('EX-C07-04','Miten voit kirjoittaa ä-kirjaimen teknisenä korvausmerkintänä?',['ae','aa','ea'],'ae','Tekninen korvike ä → ae.'),
+ choice('EX-C07-05','Miten voit kirjoittaa ö-kirjaimen teknisenä korvausmerkintänä?',['oe','eo','oo'],'oe','Tekninen korvike ö → oe.'),
+ choice('EX-C07-06','Miten voit kirjoittaa ü-kirjaimen teknisenä korvausmerkintänä?',['ue','eu','uu'],'ue','Tekninen korvike ü → ue.'),
+ truth('EX-C07-07','Väite: ß ja B ovat sama kirjain saksassa.','Tarua','ß (Eszett) vastaa s-äännettä, ei B-kirjainta.'),
+ choice('EX-C07-08','Kuka pyytää alkuperäisessä numeropalvelun tekstissä Franzia tavaamaan?',['Auskunft','Franz','Claudia'],'Auskunft','Auskunft sanoo Bitte buchstabieren Sie.'),
+ choice('EX-C07-09','Mikä on alkuperäisessä puheludialogissa mainittu nimi?',['Claudia Bolliger','Greta Schmidt','Berna Standish'],'Claudia Bolliger','Franz kysyy Frau Claudia Bolligerin numeroa; oikeaa numeroa ei tässä käsitellä.'),
+ fill('EX-C07-10','Täydennä kohtelias kysymys: Wie ____ man das?',['schreibt'],'Wie schreibt man das? kysyy kirjoitusasua.'),
+ choice('EX-C07-11','Mikä tarkoittaa twice eli kahdesti?',['zweimal','wiedersehen','gestern'],'zweimal','Zweimal tarkoittaa kahdesti.'),
+ choice('EX-C07-12','Mikä on jo opetetun sanan Frau artikkeli perusmuodossa?',['die','der','das'],'die','Opitun substantiivin muoto on die Frau.'),
+ choice('EX-C07-13','Mikä on opitun sanan Name sanakirja-artikkeli?',['der','die','das'],'der','Der Name on nimi.'),
+ truth('EX-C07-14','Väite: alkuperäisen nimen tavaamisharjoituksen yhteydessä opiskelijan pitää antaa oma oikea puhelinnumeronsa.','Tarua','Oppikirjassa käytetään kuvitteellisia nimiä, eikä henkilökohtaisia puhelinnumeroita kerätä.'),
+ fill('EX-C07-15','Täydennä: Noch einmal, ____! (Vielä kerran, kiitos!)',['bitte'],'Noch einmal, bitte! on valmis kohtelias toistopyyntö.')
+];
