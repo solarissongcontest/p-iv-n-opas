@@ -13,7 +13,7 @@ function isMatchingAnswer(value: ExerciseAnswer): value is Record<string, string
   return value !== null && typeof value === "object" && !Array.isArray(value) && !("start" in value);
 }
 function isRangeAnswer(value: ExerciseAnswer): value is HighlightRange {
-  return Boolean(value) && typeof value === "object" && !Array.isArray(value) && "start" in value && "end" in value;
+  return value !== null && typeof value === "object" && !Array.isArray(value) && "start" in value && "end" in value;
 }
 function ChapterTestQuestion({ exercise, number, answer, disabled, onAnswer }: {
   exercise: Exercise; number: number; answer: ExerciseAnswer; disabled: boolean;
