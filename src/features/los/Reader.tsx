@@ -19,8 +19,9 @@ function Attribution({ source }: { source: SourceAttribution | undefined }) {
     </span>
   </aside>;
 }
-function SafeMedia({ block, source }: {
+function SafeMedia({ block, source, onMediaStarted }: {
   block: Extract<ContentBlock, { kind: "media" }>; source: SourceAttribution | undefined;
+  onMediaStarted?: (blockId: string) => void;
 }) {
   const [failed, setFailed] = useState(false);
   let validVideo = false;
@@ -74,7 +75,8 @@ function SafeMedia({ block, source }: {
       allowFullScreen allow="fullscreen; encrypted-media; picture-in-picture" /> :
       validCommonsAudio || validLocalAudio
         ? <audio controls preload="metadata" aria-label={block.title}
-            onError={() => setFailed(true)} onCanPlay={() => setFailed(false)}>
+            onError={() => setFailed(true)} onCanPlay={() => setFailed(false)}
+            onPlaying={() => { setFailed(false); onMediaStarted?.(block.id); }}>
             {validMp3 && <source src={block.mp3Url} type="audio/mpeg"/>}
             <source src={block.embedUrl} type={validLocalAudio && block.embedUrl.endsWith(".mp3") ? "audio/mpeg" :
               validLocalAudio && block.embedUrl.endsWith(".m4a") ? "audio/mp4" : "audio/ogg"}/>
@@ -125,7 +127,7 @@ function ProductionBlock({ bookId, block }: {
   </section>;
 }
 
-function RenderBlock({ block, bookId, source, marked, highlighterEnabled, glossary, onLookup, onSelection, onNote }: {
+function RenderBlock({ block, bookId, source, marked, highlighterEnabled, glossary, onLookup, onSelection, onNote, onMediaStarted }: {
   block: ContentBlock;
   bookId: BookId;
   source: SourceAttribution | undefined;
@@ -135,6 +137,7 @@ function RenderBlock({ block, bookId, source, marked, highlighterEnabled, glossa
   onLookup: (entry: GlossaryEntry) => void;
   onSelection: (block: ContentBlock, start: number, end: number) => void;
   onNote: (block: ContentBlock) => void;
+  onMediaStarted?: (blockId: string) => void;
 }) {
   const markedText = (text: string, offset = 0) => {
     if (!marked || marked.end <= offset || marked.start >= offset + text.length) return text;
@@ -252,11 +255,14 @@ function RenderBlock({ block, bookId, source, marked, highlighterEnabled, glossa
       </div>)}</dl></section>;
     case "production": return <ProductionBlock bookId={bookId} block={block} />;
     case "geo-schematic": return <CountrySchematic titleFi={block.titleFi} instructionsFi={block.instructionsFi}/>;
-    case "media": return <SafeMedia block={block} source={source} />;
+    case "media": return <SafeMedia block={block} source={source} onMediaStarted={onMediaStarted} />;
   }
 }
 
-export function Reader({ book, blocks, title, headingLevel = 2 }: { book: Book; blocks: ContentBlock[]; title: string; headingLevel?: 1 | 2 }) {
+export function Reader({ book, blocks, title, headingLevel = 2, onMediaStarted }: {
+  book: Book; blocks: ContentBlock[]; title: string; headingLevel?: 1 | 2;
+  onMediaStarted?: (blockId: string) => void;
+}) {
   const { value: readerPreferences, update: updateReaderPreferences } = useLosRecord(
     book.id, "preferences", "reader-settings", "1.0.0", { fontSize: 18, lineHeight: 1.75 },
   );
@@ -311,6 +317,7 @@ export function Reader({ book, blocks, title, headingLevel = 2 }: { book: Book; 
         setMarks(previous => [...previous.filter(mark => mark.blockId !== source.id), { blockId: source.id, version: source.version, start, end, color: "yellow" }]);
       }}
       onNote={setActiveNote}
+      onMediaStarted={onMediaStarted}
     />)}</div>
     {activeNote && <section className="los-note-editor" aria-labelledby="los-note-heading">
       <div className="los-inline-head"><h2 id="los-note-heading">Muistiinpano</h2><button className="los-button los-button-secondary" onClick={() => setActiveNote(null)}>Sulje</button></div>
