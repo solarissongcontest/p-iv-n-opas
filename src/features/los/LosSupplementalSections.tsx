@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { ArrowRight, BookOpen, Headphones } from "lucide-react";
 import { LosAuthenticAudio } from "./LosReferenceTools";
+import { LosC01Understanding } from "./LosC01Understanding";
 import { LosVoicePractice } from "./LosVoicePractice";
 import { useLosChapterDraft } from "./studyState";
 import type { LosChapter } from "./catalog";
 
 export function LosUnderstanding({chapter,goToText}:{chapter:LosChapter;goToText:()=>void}) {
+  if(chapter.id==="01")return <LosC01Understanding goToText={goToText}/>;
   const probes=chapter.id==="01"?
     ["Ketkä ihmiset keskustelevat?", "Mikä tervehdys esiintyy keskustelussa?", "Millä ilmauksella he hyvästelevät toisensa?"]:
     chapter.id==="02"?
