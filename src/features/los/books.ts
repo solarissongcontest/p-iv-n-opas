@@ -19,6 +19,11 @@ import { LOS1_C03_CONTENT_BLOCKS } from "./los1-c03-content.ts";
 import { LOS1_C03_PRACTICE_EXERCISES } from "./los1-c03-practice.ts";
 import { LOS1_C03_EXAM_EXERCISES, LOS1_C03_TEST } from "./los1-c03-test.ts";
 import { LOS1_C03_SECTIONS } from "./los1-c03-sections.ts";
+import { LOS1_C04_SOURCE_BLOCKS, LOS1_C04_SOURCE_EXERCISES } from "./los1-c04-source.ts";
+import { LOS1_C04_BLOCKS } from "./los1-c04-content.ts";
+import { LOS1_C04_PRACTICE_EXERCISES } from "./los1-c04-practice.ts";
+import { LOS1_C04_EXAM_EXERCISES, LOS1_C04_TEST } from "./los1-c04-test.ts";
+import { LOS1_C04_SECTIONS } from "./los1-c04-sections.ts";
 
 const specs: readonly [string, string, string, string, string, string][] = [
   ["Perustason alkeet 1", "Tutustu ja ihastu saksan kieleen", "Nollataso, tervehdykset, esittäytyminen ja ensimmäinen vuorovaikutus.", "#B7473C", "#FCE8E5", "#FF9B91"],
@@ -80,6 +85,14 @@ export const LOS_BOOKS: readonly Book[] = specs.map((spec, index) => ({
     blockIds: [...LOS1_C03_SOURCE_BLOCKS, ...LOS1_C03_CONTENT_BLOCKS].map(block => block.id),
     exerciseIds: [
       ...LOS1_C03_SOURCE_EXERCISES, ...LOS1_C03_PRACTICE_EXERCISES, ...LOS1_C03_EXAM_EXERCISES,
+    ].map(exercise => exercise.id),
+  } : chapter.id === "C04" ? {
+    ...chapter, publicationStatus: "preview" as const,
+    sections: LOS1_C04_SECTIONS,
+    blockIds: [...LOS1_C04_SOURCE_BLOCKS, ...LOS1_C04_BLOCKS].map(block => block.id),
+    exerciseIds: [
+      ...LOS1_C04_SOURCE_EXERCISES, ...LOS1_C04_PRACTICE_EXERCISES,
+      ...LOS1_C04_EXAM_EXERCISES,
     ].map(exercise => exercise.id),
   } : { ...chapter, sections: emptyChapterSections() }) : [],
   lessons: index === 0 ? LOS1_PLANNED_LESSONS.map(lesson => {
@@ -261,11 +274,71 @@ export const LOS_BOOKS: readonly Book[] = specs.map((spec, index) => ({
           chapterTestId: LOS1_C03_TEST.id },
       ],
     };
+    if (lesson.id === "L017") return {
+      ...lesson, publicationStatus:"preview" as const,
+      steps:[
+        {id:"L017-S01",title:"Tutustu du/Sie-erotteluun",required:true,blockId:"los1-c04-orientation"},
+        {id:"L017-S02",title:"Lue puhuttelumuotojen selitys",required:true,blockId:"los1-c04-grammar-pronouns"},
+        {id:"L017-S03",title:"Valitse oikea kysymys tutulle",required:true,exerciseId:"los1-c04-intro-du"},
+        {id:"L017-S04",title:"Valitse kohtelias kysymys",required:true,exerciseId:"los1-c04-intro-sie"},
+        {id:"L017-S05",title:"Harjoittele tilannetta ystävän kanssa",required:true,exerciseId:"los1-c04-situation-01"},
+        {id:"L017-S06",title:"Harjoittele kohtaamista palvelutilanteessa",required:true,exerciseId:"los1-c04-situation-02"},
+      ],
+    };
+    if (lesson.id === "L018") return {
+      ...lesson, title:"Schmidt ja Standish: kokonainen alkuperäisdialogi",
+      publicationStatus:"preview" as const,
+      steps:[
+        {id:"L018-S01",title:"Avaa autenttisen Wikibooks-dialogin lukuohje",required:true,blockId:"los1-c04-text-a-guide"},
+        {id:"L018-S02",title:"Lue alkuperäiset kahdeksan repliikkiä",required:true,blockId:"los1-c04-wb-06-dialogue"},
+        {id:"L018-S03",title:"Tunnista keskustelijat",required:true,exerciseId:"los1-c04-source-pair"},
+        {id:"L018-S04",title:"Etsi kohtelias vointikysymys",required:true,exerciseId:"los1-c04-source-formal"},
+        {id:"L018-S05",title:"Tunnista Schmidtin vointi",required:true,exerciseId:"los1-c04-source-tired"},
+        {id:"L018-S06",title:"Korosta lähteestä kysymys",required:true,exerciseId:"los1-c04-source-highlight"},
+        {id:"L018-S07",title:"Kertaa tekstin merkitystä",required:true,blockId:"los1-c04-text-a-followup"},
+      ],
+    };
+    if (lesson.id === "L019") return {
+      ...lesson, publicationStatus:"preview" as const,
+      steps:[
+        {id:"L019-S01",title:"Opettele muodot heißen Sie ja kommen Sie",required:true,blockId:"los1-c04-grammar-verbs"},
+        {id:"L019-S02",title:"Vertaile du/Sie-taulukkoa",required:true,blockId:"los1-c04-grammar-table"},
+        {id:"L019-S03",title:"Tunnista Ihnen koko fraasina",required:true,blockId:"los1-c04-grammar-ihnen"},
+        {id:"L019-S04",title:"Kirjoita kohtelias Sie",required:true,exerciseId:"los1-c04-capital-01"},
+        {id:"L019-S05",title:"Kirjoita tuttavallinen du",required:true,exerciseId:"los1-c04-capital-03"},
+        {id:"L019-S06",title:"Täydennä kohtelias heißen",required:true,exerciseId:"los1-c04-verb-heissen"},
+        {id:"L019-S07",title:"Täydennä kohtelias kommen",required:true,exerciseId:"los1-c04-verb-kommen"},
+      ],
+    };
+    if (lesson.id === "L020") return {
+      ...lesson, title:"Kohtelias puhuttelu autenttisissa kysymyksissä",
+      publicationStatus:"preview" as const,
+      steps:[
+        {id:"L020-S01",title:"Tutustu alkuperäisen Deutsch im Blick -listan tarkoitukseen",required:true,blockId:"los1-c04-text-b-guide"},
+        {id:"L020-S02",title:"Lue kaikki kuusi alkuperäistä muodollista kysymystä",required:true,blockId:"los1-c04-dib-07-list"},
+        {id:"L020-S03",title:"Tunnista kohtelias nimikysymys",required:true,exerciseId:"los1-c04-dib-formal"},
+        {id:"L020-S04",title:"Tunnista kohtelias alkuperäkysymys",required:true,exerciseId:"los1-c04-dib-origin"},
+        {id:"L020-S05",title:"Kuuntele ihmisäänen tervehdyksiä",required:true,blockId:"los1-c04-greetings-audio"},
+        {id:"L020-S06",title:"Lue koko 20 ilmauksen alkuperäinen luettelo",required:true,blockId:"los1-c04-greetings-raw"},
+        {id:"L020-S07",title:"Tunnista kohtelias hyvästely",required:true,exerciseId:"los1-c04-greeting-audio"},
+        {id:"L020-S08",title:"Kirjoita oma kohtelias kysymys",required:true,blockId:"los1-c04-production-sie"},
+      ],
+    };
+    if (lesson.id === "L021") return {
+      ...lesson, publicationStatus:"preview" as const,
+      steps:[
+        {id:"L021-S01",title:"Kertaa du/Sie-kappaleen ydinsanasto",required:true,blockId:"los1-c04-vocabulary"},
+        {id:"L021-S02",title:"Tuttavallinen oma dialogi",required:true,blockId:"los1-c04-production-du"},
+        {id:"L021-S03",title:"Kohtelias oma dialogi",required:true,blockId:"los1-c04-production-sie"},
+        {id:"L021-S04",title:"Palauta 12 tehtävän koe ja kaksi kirjallista tilannetta",required:true,
+          chapterTestId:LOS1_C04_TEST.id},
+      ],
+    };
     return lesson;
   }) : [],
-  blocks: index === 0 ? [...LOS1_INTRO_BLOCKS, ...LOS1_C01_PREVIEW_BLOCKS, ...LOS1_C01_SOURCE_BLOCKS, ...LOS1_C01_GREETING_AUDIO_BLOCKS, ...LOS1_C01_APPLICATION_BLOCKS, ...LOS1_C01_CULTURE_BLOCKS, ...LOS1_C02_WB_BLOCKS, ...LOS1_C02_BLOCKS, ...LOS1_C03_SOURCE_BLOCKS, ...LOS1_C03_CONTENT_BLOCKS] : [],
-  exercises: index === 0 ? [...LOS1_C01_PREVIEW_EXERCISES, ...LOS1_C01_SOURCE_EXERCISES, ...LOS1_C01_AUDIO_COMPREHENSION_EXERCISES, ...LOS1_C01_EXAM_EXERCISES, ...LOS1_C01_ALTERNATE_EXAM_EXERCISES, ...LOS1_C01_EXTRA_EXERCISES, ...LOS1_C01_INTERACTIVE_EXERCISES, ...LOS1_C02_WB_EXERCISES, ...LOS1_C02_EXERCISES, ...LOS1_C02_EXAM_EXERCISES, ...LOS1_C03_SOURCE_EXERCISES, ...LOS1_C03_PRACTICE_EXERCISES, ...LOS1_C03_EXAM_EXERCISES] : [],
-  chapterTests: index === 0 ? [LOS1_C01_TEST, LOS1_C02_TEST, LOS1_C03_TEST] : [],
+  blocks: index === 0 ? [...LOS1_INTRO_BLOCKS, ...LOS1_C01_PREVIEW_BLOCKS, ...LOS1_C01_SOURCE_BLOCKS, ...LOS1_C01_GREETING_AUDIO_BLOCKS, ...LOS1_C01_APPLICATION_BLOCKS, ...LOS1_C01_CULTURE_BLOCKS, ...LOS1_C02_WB_BLOCKS, ...LOS1_C02_BLOCKS, ...LOS1_C03_SOURCE_BLOCKS, ...LOS1_C03_CONTENT_BLOCKS, ...LOS1_C04_SOURCE_BLOCKS, ...LOS1_C04_BLOCKS] : [],
+  exercises: index === 0 ? [...LOS1_C01_PREVIEW_EXERCISES, ...LOS1_C01_SOURCE_EXERCISES, ...LOS1_C01_AUDIO_COMPREHENSION_EXERCISES, ...LOS1_C01_EXAM_EXERCISES, ...LOS1_C01_ALTERNATE_EXAM_EXERCISES, ...LOS1_C01_EXTRA_EXERCISES, ...LOS1_C01_INTERACTIVE_EXERCISES, ...LOS1_C02_WB_EXERCISES, ...LOS1_C02_EXERCISES, ...LOS1_C02_EXAM_EXERCISES, ...LOS1_C03_SOURCE_EXERCISES, ...LOS1_C03_PRACTICE_EXERCISES, ...LOS1_C03_EXAM_EXERCISES, ...LOS1_C04_SOURCE_EXERCISES, ...LOS1_C04_PRACTICE_EXERCISES, ...LOS1_C04_EXAM_EXERCISES] : [],
+  chapterTests: index === 0 ? [LOS1_C01_TEST, LOS1_C02_TEST, LOS1_C03_TEST, LOS1_C04_TEST] : [],
   sources: index === 0 ? LOS1_RESEARCH_SOURCES.map(source => source.id === "M-COM-01" ? {
     ...source,
     author: "Xzapro4 ja Erkan Yilmaz",
@@ -302,6 +375,30 @@ export const LOS_BOOKS: readonly Book[] = specs.map((spec, index) => ({
     verifiedAt: "2026-11-11",
     modification: "Saksankieliset kuusi repliikkiä täsmälleen lähdeversiosta; LOS!:n omat suomennokset, opastus ja tehtävät lisätty. Lisätyt käännökset lisensoidaan CC BY-SA 4.0 -ehdoilla.",
     publicationNoteFi: "Alkuperäisen tekstin täsmäversio on 4430449 (2024-09-02). Wikibooksin erillinen alkuperäisäänite on lisensoitu public domainiin ja merkitty omalla lähteellään M-COM-04.",
+  } : source.id === "M-WB-06" ? {
+    ...source,
+    originalUrl: "https://en.wikibooks.org/wiki/German/Lesson_2",
+    author: "Wikibooks German/Lesson 2 -yhteiskirjoittajat",
+    publisher: "Wikibooks / Wikimedia",
+    licenseOrBasis: "CC BY-SA 4.0 · saksankielinen kahdeksan repliikin Gespräch 2-2",
+    licenseUrl: "https://creativecommons.org/licenses/by-sa/4.0/",
+    permittedMode: "hosted" as const,
+    readiness: "text-cleared" as const,
+    verifiedAt: "2026-11-11",
+    modification: "Alkuperäiset kahdeksan saksankielistä repliikkiä säilytetty kokonaisina lähdejärjestyksessä. Lisätty LOS!:n suomennokset ja tehtävät. Käännösmuunnelmat jakautuvat samoin CC BY-SA 4.0 -ehdoin.",
+    publicationNoteFi: "Koko alkuperäisdialogi on LOS!-lukijassa, mutta Wikibooksin erillistä äänitettä ei ole oletettu olemassa olevaksi.",
+  } : source.id === "M-DIB-07" ? {
+    ...source,
+    originalUrl: "https://coerll.utexas.edu/dib/pdfs/k_01.pdf",
+    author: "COERLL / Deutsch im Blick -oppikirjan tekijätyöryhmä",
+    publisher: "University of Texas at Austin / COERLL",
+    licenseOrBasis: "CC BY 4.0 · Kapitel 1, Aktivität 2, sivu 20/484",
+    licenseUrl: "https://creativecommons.org/licenses/by/4.0/",
+    permittedMode: "hosted" as const,
+    readiness: "text-cleared" as const,
+    verifiedAt: "2026-11-11",
+    modification: "Kuusi alkuperäistä saksankielistä kysymystä kopioitu listan järjestyksessä. LOS!:n suomennokset ja tehtävät lisätty. Ääntä ei ole kopioitu eikä oletettu tähän kysymyslistaan liittyväksi.",
+    publicationNoteFi: "C04:n Text B on täsmällinen kuuden kysymyksen opetusaineistolohko, ei koko COERLL-kirja eikä äänitallenne. Kysymysten ulkopuolisia henkilötietoja ei ole siirretty.",
   } : source.id === "M-DIB-01" ? {
     ...source,
     author: "Berna Güneli (haastateltava), COERLL / Deutsch im Blick -toimitus",
