@@ -391,7 +391,7 @@ function FirstLessonRunner({lessonId,store,fontSize,onNext,onContents}:{lessonId
  const allSubmitted=requiredIds.every(id=>
   id in exams?Boolean(item(store,'exam:submitted:'+id)):Boolean(item(store,'latest:'+id)));
  const hasGoal=lessonId!=='L001'||valueString(store,'goal:los1').trim().length>=8;
- const hasReflection=!['L006','L011','L016','L021','L026','L027','L028','L029','L030','L040','L050','L055','L056','L058','L060'].includes(lessonId)||valueString(store,'lesson:reflection:'+lessonId).trim().length>=12;
+ const hasReflection=!['L006','L011','L016','L021','L026','L027','L028','L029','L030','L040','L041','L050','L055','L056','L058','L060'].includes(lessonId)||valueString(store,'lesson:reflection:'+lessonId).trim().length>=12;
  const mediaDone=(plan?.requiredMediaIds??[]).every(id=>Boolean(item(store,'media:completed:'+id)));
  const midtermAttempt=typeof item(store,'exam:no:EX-MID')==='number'?item(store,'exam:no:EX-MID') as number:0;
  const hasMidtermWriting=lessonId!=='L030'||valueString(store,'exam:self:EX-MID:'+midtermAttempt).trim().length>=30;
