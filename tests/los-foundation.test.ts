@@ -69,7 +69,8 @@ test("two Commons media sources verified, with separate Goethe culture reference
   assert.deepEqual(dialogue.turns.map(turn => turn.text), LOS1_C01_DIALOGUE_TURNS.map(turn => turn.text));
   assert.equal(LOS1_C01_AUTHENTIC_TEXT, LOS1_C01_DIALOGUE_TURNS.map(turn => turn.text).join("\n"));
   assert.ok(los1.blocks.some(block => block.kind === "media" && block.sourceId === "M-COM-01"));
-  assert.equal(los1.blocks.filter(block => block.kind === "dialogue").length, 1);
+  assert.equal(los1.blocks.filter(block => block.kind === "dialogue").length, 2);
+  assert.equal(los1.blocks.filter(block => block.kind === "dialogue" && block.sourceId === "M-COM-01").length, 1);
   const list = los1.blocks.find(block => block.kind === "transcript");
   assert.ok(list && list.kind === "transcript");
   assert.equal(list.lines.length, 20);
