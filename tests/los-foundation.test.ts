@@ -12,14 +12,14 @@ import { LOS_CHAPTER_SECTION_TITLES } from "../src/features/los/chapterSections.
 const los1 = LOS_BOOKS[0];
 if (!los1) throw new Error("LOS! 1 must exist");
 
-test("LOS! 1 retains 10 chapters and 60 canonical lessons, with six preview lessons", () => {
+test("LOS! 1 retains 10 chapters and 60 canonical lessons, with eleven preview lessons", () => {
   assert.equal(los1.chapters.length, 10);
   assert.equal(los1.lessons.length, 60);
   assert.deepEqual(los1.chapters.map(item => item.id), Array.from({ length: 10 }, (_, i) => "C" + String(i + 1).padStart(2, "0")));
   assert.deepEqual(los1.lessons.map(item => item.id), Array.from({ length: 60 }, (_, i) => "L" + String(i + 1).padStart(3, "0")));
-  assert.equal(los1.chapters.filter(item => item.publicationStatus === "preview").length, 1);
+  assert.equal(los1.chapters.filter(item => item.publicationStatus === "preview").length, 2);
   assert.equal(los1.chapters.filter(item => item.publicationStatus === "published").length, 0);
-  assert.deepEqual(los1.lessons.filter(item => item.publicationStatus === "preview").map(item => item.id), ["L001", "L002", "L003", "L004", "L005", "L006"]);
+  assert.deepEqual(los1.lessons.filter(item => item.publicationStatus === "preview").map(item => item.id), ["L001", "L002", "L003", "L004", "L005", "L006", "L007", "L008", "L009", "L010", "L011"]);
   assert.ok(los1.lessons.filter(item => item.publicationStatus !== "preview").every(item => !item.steps.length));
   assert.deepEqual(validateBook(los1), []);
 });
@@ -58,8 +58,8 @@ test("L001 begins without prerequisite German and stores an ungraded personal go
   assert.ok(lesson.steps.some(step => step.blockId === "los1-c01-m-com-01-audio"));
 });
 test("two Commons media sources verified, with separate Goethe culture reference", () => {
-  assert.equal(los1.sources.length, 24);
-  assert.equal(los1.sources.filter(source => source.permittedMode === "pending").length, 22);
+  assert.equal(los1.sources.length, 25);
+  assert.equal(los1.sources.filter(source => source.permittedMode === "pending").length, 21);
   const source = los1.sources.find(item => item.id === "M-COM-01");
   assert.equal(source?.permittedMode, "embed");
   assert.equal(source?.licenseUrl, "https://creativecommons.org/licenses/by-sa/3.0/");
@@ -104,6 +104,27 @@ test("C01's 52 combined exercises across eight interaction families are indexed"
   assert.equal(evaluateExercise(match, { morgen:"morning", abend:"evening", tag:"day", tschuess:"bye" })?.correct, true);
   assert.equal(evaluateExercise(match, { morgen:"evening", abend:"morning", tag:"day", tschuess:"bye" })?.correct, false);
   assert.equal(evaluateExercise(highlight, highlight.acceptedRanges[0] ?? null)?.correct, true);
+});
+test("C02 chapter has ten connected preview sections, not counterfeit source text", () => {
+  const chapter = los1.chapters.find(item => item.id === "C02");
+  assert.ok(chapter);
+  assert.equal(chapter.sections?.length, 10);
+  assert.equal(chapter.sections?.filter(item => item.publicationStatus === "preview").length, 10);
+  assert.equal(chapter.blockIds.length, 14);
+  assert.equal(chapter.exerciseIds.length, 34);
+  const audio = los1.blocks.find(block => block.id === "los1-c02-commons-02-audio");
+  assert.ok(audio && audio.kind === "media");
+  assert.equal(audio.sourceId, "M-COM-02");
+  const sourced = los1.sources.find(item => item.id === "M-COM-02");
+  assert.equal(sourced?.permittedMode, "embed");
+  assert.equal(sourced?.licenseUrl, "https://creativecommons.org/licenses/by-sa/3.0/");
+  const editorial = los1.blocks.find(block => block.id === "los1-c02-text-a-editorial");
+  assert.ok(editorial && editorial.kind === "dialogue");
+  assert.equal(editorial.turns.length, 8);
+  assert.equal(editorial.sourceId, "LOS-EDITORIAL-C02");
+  assert.notEqual(editorial.sourceId, "M-WB-01");
+  assert.equal(los1.chapterTests.find(item => item.chapterId === "C02")?.exerciseIds.length, 15);
+  assert.equal(los1.lessons.filter(lesson => lesson.chapterId === "C02" && lesson.publicationStatus === "preview").length, 5);
 });
 test("original-source highlighting is tied to the full licensed dialogue", () => {
   const exercise = los1.exercises.find(item => item.id === "los1-c01-text-a-highlight-greeting");
