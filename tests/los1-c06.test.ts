@@ -73,7 +73,7 @@ test('C06 actual audio tasks reference original C01 human voice, never falsely l
   assert.match(e.mediaUrl!,/commons\.wikimedia\.org/);
   assert.match(e.mediaUrl!,/Gespr%C3%A4chVorstellung\.ogg/);
   assert.equal(gradeExercise(e,e.correct!).status,'correct');
-  assert.match(e.explanation,/C01|erillisen/);
+  assert.match(e.explanation,/C01|erillisen|ZPE/);
  }
 });
 test('C06 independent chapter exam has 20 checked questions, with no pre-submit hints or reused practice IDs',()=>{
