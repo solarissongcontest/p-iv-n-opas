@@ -9,9 +9,10 @@ const words = bookVocabularyRows(book);
 
 test("book vocabulary shows only actual content and links each word back to a chapter", () => {
   assert.ok(words.length >= 10);
-  assert.ok(words.every(item => item.chapterId === "C01" || item.chapterId === "C02"));
+  assert.ok(words.every(item => ["C01", "C02", "C03"].includes(item.chapterId)));
   assert.equal(words.filter(item => item.chapterId === "C01").length, 16);
   assert.equal(words.filter(item => item.chapterId === "C02").length, 16);
+  assert.equal(words.filter(item => item.chapterId === "C03").length, 17);
   assert.equal(new Set(words.map(item => item.id)).size, words.length);
   assert.deepEqual(bookVocabularyRows(LOS_BOOKS[1]!), []);
   const sorted = [...words].sort((a, b) => a.de.localeCompare(b.de, "de-DE") || a.id.localeCompare(b.id));
