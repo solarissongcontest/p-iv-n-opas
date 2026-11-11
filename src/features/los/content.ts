@@ -218,7 +218,12 @@ export const chapters:Chapter[] = [
  vocab:w([['schreiben','kirjoittaa'],['Wie schreibt man das?','Miten se kirjoitetaan?'],['buchstabieren','tavata'],['Bitte buchstabieren Sie.','Tavatkaa, olkaa hyvä.'],['noch einmal','vielä kerran'],['langsam','hitaasti'],['der Buchstabe','kirjain'],['die Nummer','numero'],['die Telefonnummer','puhelinnumero'],['die Adresse','osoite'],['das Handy','matkapuhelin'],['die E-Mail-Adresse','sähköpostiosoite'],['richtig','oikein']]),
  teaching:['Saksan kirjainten nimet eivät aina vastaa suomen kirjainten nimiä. Erota nimi ja äänne.', 'Wie schreibt man das? on hyödyllinen kiinteä fraasi. Bitte buchstabieren Sie on kohtelias tavaamispyyntö.', 'Saksan substantiiveilla on sanakirjassa artikkeli der, die tai das. Artikkeli opitaan yleensä sanan mukana: der Name (nimi), die Frau (rouva tai nainen), das Jahr (vuosi). Artikkeli ei tarkoita suomenkielistä sukupuolta. Tässä riittää näiden kolmen opitun sanan tunnistaminen, ei sijamuotojen opiskelu.'],
  grammar:{title:'Tavaaminen',explanation:'Käytä fraaseja vielä kokonaisina. Ääkkösten korvausmuotoja voi käyttää teknisesti (ä → ae), mutta oikea kirjoitusasu ei katoa.',examples:[['Wie schreibt man das?','Miten tämä kirjoitetaan?'],['Noch einmal, bitte!','Vielä kerran, kiitos!']]},
- culture:'Puhelimessa käytetään joskus kirjainten selventämiseen esimerkkisanoja.',exercises:[]
+ culture:'Puhelimessa käytetään joskus kirjainten selventämiseen esimerkkisanoja. Kirjainten sanoilla selittäminen auttaa, kun yhteys on huono tai nimien kirjoitusasut ovat vieraita.',
+ media:{sourceId:'M-COM-07-BUCH',title:'buchstabieren – tavata kirjaimet (2,2 s)',url:'https://commons.wikimedia.org/wiki/Special:Redirect/file/De-buchstabieren.ogg',
+ sourceUrl:'https://commons.wikimedia.org/wiki/File:De-buchstabieren.ogg',license:'CC BY-SA 4.0',
+ attribution:'Jeuwre (2014), syntyperäisen saksankielisen puhujan alkuperäinen ääntämisnäyte. Muokkaamaton.',
+ durationSeconds:2.2,transcript:[{id:'c07-b-1',speaker:'Ääntämisnäyte',text:'buchstabieren'}]},
+ exercises:[]
 },
 {
  id:'C08',name:'Noch einmal, bitte!',goal:'Pyydän toistoa ja selvennystä.',sourceId:'M-DIB-04',sourceUrl:'https://coerll.utexas.edu/dib/toc.php?k=2',
@@ -271,7 +276,7 @@ export const lessons = [
  const n=index+1,chapterIndex=n>=2&&n<=26?Math.floor((n-2)/5):n>=31&&n<=55?Math.floor((n-31)/5)+5:-1;
  return {id:'L'+String(n).padStart(3,'0'),name,chapterId:chapterIndex>=0?chapters[chapterIndex]!.id:null,estimate:30,
   section:n===1?'Aloitus':n===30?'Välikoe':n===59?'Loppukoe':n===60?'Yhteenveto':n>=27&&n<=29?'Kertaus I':n>=56&&n<=58?'Kertaus II':chapters[chapterIndex]?.name??'',
-  status:n<=29?'initial-material': 'pending' as const};
+  status:n<=29||(n>=36&&n<=40)?'initial-material': 'pending' as const};
 });
 export const allWords=chapters.flatMap(c=>c.vocab.map(word=>({...word,chapterId:c.id})));
 export function validateLosContent() {
