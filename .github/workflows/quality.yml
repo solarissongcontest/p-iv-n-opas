@@ -82,19 +82,11 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Install unzip in Playwright image
-        run: apt-get update -qq && apt-get install -y -qq unzip
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: latest
-      - name: Install project dependencies
-        run: bun install --frozen-lockfile
-      - name: Install Playwright test runner
-        run: bun run e2e:install
+      - name: Install project and browser test dependencies
+        run: npm install --no-save --legacy-peer-deps @playwright/test@1.55.0
       - name: Start local app
         run: |
-          bun run dev --host 127.0.0.1 --port 4173 > /tmp/los-vite.log 2>&1 &
+          npm run dev -- --host 127.0.0.1 --port 4173 > /tmp/los-vite.log 2>&1 &
           for attempt in $(seq 1 60); do
             if curl -fsS http://127.0.0.1:4173/los > /dev/null; then exit 0; fi
             sleep 2
@@ -104,7 +96,7 @@ jobs:
       - name: Browser test LOS! desktop and mobile
         env:
           E2E_BASE_URL: http://127.0.0.1:4173
-        run: bunx playwright test e2e/los-v33.spec.ts --project=desktop-chromium
+        run: npx playwright test e2e/los-v33.spec.ts --project=desktop-chromium
       - name: Preserve browser failures
         if: failure()
         uses: actions/upload-artifact@v4
