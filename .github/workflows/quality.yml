@@ -72,6 +72,8 @@ jobs:
   los-browser-smoke:
     if: github.event_name == 'pull_request' && startsWith(github.head_ref, 'feat/los-')
     runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.55.0-noble
     timeout-minutes: 15
     steps:
       - name: Checkout
@@ -88,8 +90,6 @@ jobs:
         run: bun install --frozen-lockfile
       - name: Install Playwright test runner
         run: bun run e2e:install
-      - name: Install Chromium
-        run: bunx playwright install --with-deps chromium
       - name: Start local app
         run: |
           bun run dev --host 127.0.0.1 --port 4173 > /tmp/los-vite.log 2>&1 &
