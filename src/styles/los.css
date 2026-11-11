@@ -965,3 +965,29 @@
  .los-dictionary-pagination > button { flex:1 1 42%; }
  .los-dictionary-pagination > span { order:-1; flex-basis:100%; text-align:center; }
 }
+
+/* Verified language examples inside the dictionary, without pretending a
+ * course-authored model sentence is an authentic source transcript. */
+.los-dictionary-example {
+ margin-top:13px; padding:12px 0 0;
+ border-top:1px solid var(--los-border);
+}
+.los-dictionary-example > b {
+ display:block; margin-bottom:6px; color:var(--los-ink-muted);
+ font-size:11px; font-weight:700; letter-spacing:.045em;
+ text-transform:uppercase;
+}
+.los-dictionary-example > p { margin:5px 0; font-size:14px; line-height:1.55; }
+.los-dictionary-example > p[lang="de"] { font-weight:600; color:var(--los-ink); }
+.los-dictionary-example > p[lang="fi"] { color:var(--los-ink-secondary); }
+.los-dictionary-example > small {
+ display:block; font-size:11px; line-height:1.5;
+ color:var(--los-ink-muted); overflow-wrap:anywhere;
+}
+.los-dictionary-example > a {
+ display:inline-flex; gap:5px; align-items:center;
+ margin-top:9px; padding:5px 0; min-height:32px;
+ font-size:12px; font-weight:600; text-decoration:underline;
+ text-underline-offset:3px; color:var(--los-book-accent-readable,#B7473C);
+}
+.los-dictionary-example > a:focus-visible { outline:2px solid #B7473C; outline-offset:2px; }
