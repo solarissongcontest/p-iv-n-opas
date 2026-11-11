@@ -51,6 +51,57 @@ test("highlight compares stable character offsets and trims punctuation", () => 
   assert.equal(evaluateExercise(ex, { start: 0, end: 5 })?.correct, false);
   assert.equal(evaluateExercise(ex, { start: -1, end: 11 }), null);
 });
+test("multiple-choice requires a unique valid selection and checks the full correct set", () => {
+  const ex: Exercise = {
+    ...base, type: "multiple-choice",
+    options: [{ id:"hello",label:"Hallo" },{ id:"bye",label:"Tschüss" },{ id:"later",label:"Bis später" }],
+    correctOptionIds: ["bye","later"],
+  };
+  assert.equal(evaluateExercise(ex, ["later","bye"])?.correct, true);
+  assert.equal(evaluateExercise(ex, ["bye"])?.correct, false);
+  assert.equal(evaluateExercise(ex, ["bye","hello"])?.correct, false);
+  assert.equal(evaluateExercise(ex, []), null);
+  assert.equal(evaluateExercise(ex, ["bye","bye"]), null);
+  assert.equal(evaluateExercise(ex, ["bye","unknown"]), null);
+});
+test("true/false has explicit typed answers and no guesses for empty values", () => {
+  const ex: Exercise = { ...base, type:"true-false", statement:"Gute Nacht is a morning greeting", correctValue:false };
+  assert.equal(evaluateExercise(ex, "false")?.correct, true);
+  assert.equal(evaluateExercise(ex, "true")?.correct, false);
+  assert.equal(evaluateExercise(ex, ""), null);
+  assert.equal(evaluateExercise(ex, "no"), null);
+});
+test("word ordering rejects missing, duplicate or unsupported tokens", () => {
+  const ex: Exercise = { ...base, type:"word-order",
+    tokens:[{id:"morgen",label:"Morgen"},{id:"guten",label:"Guten"}],
+    correctOrder:["guten","morgen"] };
+  assert.equal(evaluateExercise(ex, ["guten","morgen"])?.correct, true);
+  assert.equal(evaluateExercise(ex, ["morgen","guten"])?.correct, false);
+  assert.equal(evaluateExercise(ex, ["guten"]), null);
+  assert.equal(evaluateExercise(ex, ["guten","guten"]), null);
+  assert.equal(evaluateExercise(ex, ["guten","wrong"]), null);
+});
+test("categorize checks every assignment and does not assume a one-to-one match", () => {
+  const ex: Exercise = { ...base, type:"categorize",
+    items:[{id:"bye",label:"Tschüss"},{id:"later",label:"Bis später"},{id:"morning",label:"Guten Morgen"}],
+    categories:[{id:"greet",label:"Tervehdys"},{id:"farewell",label:"Hyvästely"}],
+    assignments:[{itemId:"bye",categoryId:"farewell"},
+      {itemId:"later",categoryId:"farewell"},{itemId:"morning",categoryId:"greet"}] };
+  assert.equal(evaluateExercise(ex, {bye:"farewell",later:"farewell",morning:"greet"})?.correct, true);
+  assert.equal(evaluateExercise(ex, {bye:"greet",later:"farewell",morning:"greet"})?.correct, false);
+  assert.equal(evaluateExercise(ex, {bye:"farewell",later:"farewell"}), null);
+  assert.equal(evaluateExercise(ex, {bye:"farewell",later:"fake",morning:"greet"}), null);
+});
+test("the whole original LOS book remains structurally valid with new exercises", () => {
+  const book = structuredClone(LOS_BOOKS[0]);
+  if (!book) throw Error("Missing book fixture");
+  assert.equal(book.exercises.filter(ex => ["multiple-choice", "true-false", "word-order", "categorize"].includes(ex.type)).length, 5);
+  assert.deepEqual(validateBook(book), []);
+  const broken = book.exercises.find(ex => ex.type === "word-order");
+  assert.ok(broken && broken.type === "word-order");
+  broken.correctOrder = ["wrong","same"];
+  assert.match(validateBook(book).join(", "), /Invalid word order answer key/);
+});
 test("reject dangling references and duplicate content identifiers", () => {
   const book = structuredClone(LOS_BOOKS[0]);
   if (!book) throw new Error("Missing book fixture");
