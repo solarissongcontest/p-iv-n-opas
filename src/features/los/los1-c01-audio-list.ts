@@ -49,6 +49,7 @@ export const LOS1_C01_GREETING_AUDIO_BLOCKS: ContentBlock[] = [
     title: "German Vocabulary – Greetings · alkuperäinen ääni (28 s)",
     sourceId: "M-COM-03",
     embedUrl: "https://upload.wikimedia.org/wikipedia/commons/b/bb/German_Vocabulary_-_Greetings.ogg",
+    mp3Url: "https://upload.wikimedia.org/wikipedia/commons/transcoded/b/bb/German_Vocabulary_-_Greetings.ogg/German_Vocabulary_-_Greetings.ogg.mp3",
   },
   {
     id: "los1-c01-m-com-03-transcript", version: "1.0.0", kind: "transcript",
