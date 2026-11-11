@@ -10,18 +10,21 @@ export type ChapterTestDefinition = {
   exerciseIds: readonly string[];
   alternativeExerciseIds?: readonly string[];
   speechCriteria: readonly { id: string; title: string }[];
+  selfAssessmentMode?: "speech" | "writing";
 };
 export type ChapterTestResult = {
   submittedAt: string; score: number; maximum: number;
   attemptNumber?: number;
   outcomes: { exerciseId: string; correct: boolean; explanationFi: string }[];
   selfAssessment: Record<string, SpeechAssessment>;
+  writtenResponse?: string;
 };
 export type ChapterTestRecord = {
   testId: string; testVersion: string;
   attemptNumber?: number;
   answers: Record<string, ExerciseAnswer>;
   selfAssessment: Record<string, SpeechAssessment>;
+  writtenResponse?: string;
   submission: ChapterTestResult | null;
   previousResults: {
     submittedAt: string; score: number; maximum: number;
@@ -29,13 +32,14 @@ export type ChapterTestRecord = {
     outcomes?: ChapterTestResult["outcomes"];
     answers?: Record<string, ExerciseAnswer>;
     selfAssessment?: Record<string, SpeechAssessment>;
+    writtenResponse?: string;
   }[];
 };
 export function emptyChapterTestRecord(definition: ChapterTestDefinition): ChapterTestRecord {
   return {
     testId: definition.id, testVersion: definition.version,
     attemptNumber: 0,
-    answers: {}, selfAssessment: {}, submission: null, previousResults: [],
+    answers: {}, selfAssessment: {}, writtenResponse: "", submission: null, previousResults: [],
   };
 }
 /** The first attempt uses C01's original twelve questions. Each succeeding
@@ -84,7 +88,8 @@ export function gradeChapterTest(definition: ChapterTestDefinition, exercises: r
   state: ChapterTestRecord, submittedAt: string): ChapterTestResult | null {
   if (state.testId !== definition.id || state.testVersion !== definition.version ||
     state.submission || missingChapterTestAnswers(definition, exercises, state).length ||
-    missingSpeechAssessments(definition, state).length) return null;
+    missingSpeechAssessments(definition, state).length ||
+    (definition.selfAssessmentMode === "writing" && !(state.writtenResponse ?? "").trim())) return null;
   const outcomes = exercises.map(exercise => {
     const evaluated = evaluateExercise(exercise, state.answers[exercise.id] ?? null);
     // All null/invalid submissions are rejected above, not silently counted wrong.
@@ -94,6 +99,7 @@ export function gradeChapterTest(definition: ChapterTestDefinition, exercises: r
   });
   return {
     submittedAt, attemptNumber: state.attemptNumber ?? 0, score: outcomes.filter(item => item.correct).length,
+    ...(definition.selfAssessmentMode === "writing" ? { writtenResponse: state.writtenResponse?.trim() ?? "" } : {}),
     maximum: outcomes.length, outcomes,
     selfAssessment: Object.fromEntries(definition.speechCriteria.map(item => [
       item.id, state.selfAssessment[item.id],
@@ -103,7 +109,7 @@ export function gradeChapterTest(definition: ChapterTestDefinition, exercises: r
 export function restartChapterTest(state: ChapterTestRecord): ChapterTestRecord {
   if (!state.submission) return state;
   return {
-    ...state, answers: {}, selfAssessment: {}, submission: null,
+    ...state, answers: {}, selfAssessment: {}, writtenResponse: "", submission: null,
     attemptNumber: (state.attemptNumber ?? 0) + 1,
     previousResults: [
       ...state.previousResults,
@@ -112,6 +118,7 @@ export function restartChapterTest(state: ChapterTestRecord): ChapterTestRecord 
         outcomes: state.submission.outcomes,
         answers: { ...state.answers },
         selfAssessment: { ...state.submission.selfAssessment },
+        ...(state.submission.writtenResponse ? { writtenResponse: state.submission.writtenResponse } : {}),
       },
     ],
   };
