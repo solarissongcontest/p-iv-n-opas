@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { ArrowLeft, ArrowRight, CheckCircle2 } from "lucide-react";
-import type { Book, Lesson, LessonProgress } from "./model";
+import type { Book, Lesson, LessonProgress, ResumeBookmark } from "./model";
 import { Reader } from "./Reader";
 import { ExerciseEngine } from "./exercises/ExerciseEngine";
 import { useLosRecord, losSyncMessage } from "./data/useLosRecord";
@@ -13,6 +13,9 @@ export function LessonRunner({ book, lesson }: { book: Book; lesson: Lesson }) {
   );
   const { value: reflections, update: updateReflections, status: reflectionSaveStatus } =
     useLosRecord<Record<string, string>>(book.id, "notes", "lesson-reflections-" + lesson.id, lesson.version, {});
+  const { update: saveResume } = useLosRecord<ResumeBookmark | null>(
+    book.id, "bookmark", "resume-lesson", book.contentVersion, null,
+  );
   const [index, setIndex] = useState(0);
   const [checkedSteps, setCheckedSteps] = useState<string[]>([]);
   const restoredLesson = useRef<string | null>(null);
@@ -36,6 +39,9 @@ export function LessonRunner({ book, lesson }: { book: Book; lesson: Lesson }) {
         lessonId: lesson.id, lessonVersion: lesson.version, completedStepIds,
         status: isDone ? "completed" : "in-progress", updatedAt: new Date().toISOString(),
       };
+    });
+    saveResume({
+      lessonId: lesson.id, lessonVersion: lesson.version, updatedAt: new Date().toISOString(),
     });
     setIndex(current => Math.min(current + 1, lesson.steps.length - 1));
   };
