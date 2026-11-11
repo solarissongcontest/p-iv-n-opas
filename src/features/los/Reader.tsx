@@ -1,39 +1,71 @@
 import { useState } from "react";
 import { BookOpen, Highlighter, NotebookPen, Settings2 } from "lucide-react";
-import type { Book, ContentBlock } from "./model";
+import type { Book, ContentBlock, SourceAttribution } from "./model";
 import { useLosRecord, losSyncMessage } from "./data/useLosRecord";
 
 export type ReaderMark = { blockId: string; version: string; start: number; end: number; color: "yellow" };
 export type ReaderNote = { blockId: string; version: string; text: string; updatedAt: string };
-function SafeMedia({ block }: { block: Extract<ContentBlock, { kind: "media" }> }) {
-  let valid = false;
+function Attribution({ source }: { source?: SourceAttribution }) {
+  if (!source) return null;
+  return <aside className="los-attribution" aria-label="Lähdetiedot">
+    <b>Lähde: {source.title}</b>
+    <span>{source.author ? source.author + " · " : ""}{source.publisher}</span>
+    <span>{source.licenseOrBasis}{source.modification ? " · " + source.modification : ""}</span>
+    <span className="los-attribution-links">
+      {source.originalUrl && <a href={source.originalUrl} target="_blank" rel="noopener noreferrer">Alkuperäinen aineisto</a>}
+      {source.licenseUrl && <a href={source.licenseUrl} target="_blank" rel="noopener noreferrer">Lisenssin ehdot</a>}
+    </span>
+  </aside>;
+}
+function SafeMedia({ block, source }: {
+  block: Extract<ContentBlock, { kind: "media" }>; source?: SourceAttribution;
+}) {
+  const [failed, setFailed] = useState(false);
+  let validVideo = false;
+  let validCommonsAudio = false;
   try {
     const url = new URL(block.embedUrl);
-    valid = url.protocol === "https:" &&
-      (block.mediaType === "video"
-        ? ["www.youtube-nocookie.com", "www.youtube.com", "www.youtube.com"].includes(url.hostname) && url.pathname.startsWith("/embed/")
-        : false);
-  } catch { /* Invalid source URL is never embedded. */ }
-  return <figure className="los-media">
+    validVideo = block.mediaType === "video" && source?.permittedMode === "embed"
+      && url.protocol === "https:"
+      && ["www.youtube-nocookie.com", "www.youtube.com"].includes(url.hostname)
+      && url.pathname.startsWith("/embed/");
+    validCommonsAudio = block.mediaType === "audio"
+      && source?.id === "M-COM-01" && source.permittedMode === "embed"
+      && url.origin === "https://upload.wikimedia.org"
+      && url.pathname === "/wikipedia/commons/1/11/Gespr%C3%A4chVorstellung.ogg";
+  } catch { /* Untrusted URLs never render a player. */ }
+  const validLocalAudio = block.mediaType === "audio" && source?.permittedMode === "hosted"
+    && /^\/los\/media\/[a-z0-9_-]+\.(ogg|mp3|m4a)$/i.test(block.embedUrl);
+  return <figure className="los-media" id={block.id}>
     <figcaption>{block.title}</figcaption>
-    {valid && block.mediaType === "video"
-      ? <iframe title={block.title} src={block.embedUrl} loading="lazy" allowFullScreen allow="fullscreen; encrypted-media; picture-in-picture" />
-      : block.mediaType === "audio" && /^\/los\/media\/[a-z0-9_-]+\.(ogg|mp3|m4a)$/i.test(block.embedUrl)
-        ? <audio controls preload="none" src={block.embedUrl} aria-label={block.title}>Äänitoistoa ei tueta selaimessasi.</audio>
-        : <p className="los-notice">Mediaa ei ole vielä hyväksytty tai sitä ei voi upottaa turvallisesti.</p>}
+    {validVideo ? <iframe title={block.title} src={block.embedUrl} loading="lazy"
+      allowFullScreen allow="fullscreen; encrypted-media; picture-in-picture" /> :
+      validCommonsAudio || validLocalAudio
+        ? <audio controls preload="metadata" src={block.embedUrl} aria-label={block.title}
+            onError={() => setFailed(true)} onCanPlay={() => setFailed(false)}>
+            Äänitoistoa ei tueta selaimessasi.
+          </audio>
+        : <p className="los-notice">Mediaa ei ole hyväksytty sisäiseen toistoon.</p>}
+    {failed && <p className="los-notice" role="status">Äänitettä ei voitu toistaa. Lue sama kokonainen keskustelu alapuolelta. Harjoittelu ei edellytä toimimatonta soitinta.</p>}
+    {validCommonsAudio && <p className="los-support">Ääni ladataan Wikimedia Commonsista. Sen saatavuus ja toiminta voivat riippua verkkoyhteydestä.</p>}
+    <Attribution source={source}/>
   </figure>;
 }
-function RenderBlock({ block, marked, highlighterEnabled, onSelection, onNote }: {
+function RenderBlock({ block, source, marked, highlighterEnabled, onSelection, onNote }: {
   block: ContentBlock;
+  source?: SourceAttribution;
   marked: ReaderMark | undefined;
   highlighterEnabled: boolean;
   onSelection: (block: ContentBlock, start: number, end: number) => void;
   onNote: (block: ContentBlock) => void;
 }) {
-  const markedText = (text: string) => marked && marked.start >= 0 && marked.end <= text.length
-    ? <>{text.slice(0, marked.start)}<mark className="los-marker">{text.slice(marked.start, marked.end)}</mark>{text.slice(marked.end)}</>
-    : text;
-  const select = (event: React.MouseEvent<HTMLElement> | React.TouchEvent<HTMLElement>, text: string) => {
+  const markedText = (text: string, offset = 0) => {
+    if (!marked || marked.start < offset || marked.start >= offset + text.length || marked.end <= offset) return text;
+    const start = Math.max(0, marked.start - offset);
+    const end = Math.min(text.length, marked.end - offset);
+    return <>{text.slice(0, start)}<mark className="los-marker">{text.slice(start, end)}</mark>{text.slice(end)}</>;
+  };
+  const select = (event: React.MouseEvent<HTMLElement> | React.TouchEvent<HTMLElement>, text: string, offset = 0) => {
     const container = event.currentTarget;
     const selected = window.getSelection();
     if (!selected || selected.isCollapsed || !selected.rangeCount) return;
@@ -44,7 +76,7 @@ function RenderBlock({ block, marked, highlighterEnabled, onSelection, onNote }:
     prefix.setEnd(range.startContainer, range.startOffset);
     const start = prefix.toString().length;
     const end = start + range.toString().length;
-    if (start >= 0 && end <= text.length && end > start) onSelection(block, start, end);
+    if (start >= 0 && end <= text.length && end > start) onSelection(block, offset + start, offset + end);
     selected.removeAllRanges();
   };
   switch (block.kind) {
@@ -55,8 +87,38 @@ function RenderBlock({ block, marked, highlighterEnabled, onSelection, onNote }:
       {highlighterEnabled && <div className="los-token-picker" role="group" aria-label="Korosta sana tai ilmaus"><p className="los-support">Valitse sana näppäimistöllä tai napauttamalla. Peräkkäiset valinnat muodostavat kokonaisen ilmauksen.</p><div className="los-tokens">{Array.from(block.text.matchAll(/\S+/gu), match => ({ word: match[0], start: match.index, end: match.index + match[0].length })).map(token => <button type="button" key={token.start} lang={block.language} className="los-token" aria-pressed={!!marked && token.start >= marked.start && token.end <= marked.end} onClick={() => { const start = marked ? Math.min(marked.start, token.start) : token.start; const end = marked ? Math.max(marked.end, token.end) : token.end; onSelection(block, start, end); }}>{token.word}</button>)}</div></div>}
       <button type="button" className="los-text-action los-note-action" onClick={() => onNote(block)}><NotebookPen size={16} /> Muistiinpano</button>
     </div>;
-    case "dialogue": return <div lang="de" className="los-dialogue">{block.turns.map((turn, index) =>
-      <p key={index}><b>{turn.speaker}</b> {turn.text}</p>)}</div>;
+    case "dialogue": return <section className="los-dialogue" id={block.id} aria-label="Kokonainen alkuperäinen saksankielinen keskustelu" lang="de">
+      <p className="los-eyebrow" lang="fi">ALKUPERÄINEN DIALOGI · {block.turns.length} REPLIIKKIÄ</p>
+      {block.turns.map((turn, index) => {
+        const offset = block.turns.slice(0, index).reduce((sum, previous) => sum + previous.text.length + 1, 0);
+        return <div className="los-dialogue-turn" key={index}>
+          <p><b>{turn.speaker}:</b>{" "}
+            <span className="los-dialogue-spoken" onMouseUp={highlighterEnabled ? event => select(event, turn.text, offset) : undefined}
+              onTouchEnd={highlighterEnabled ? event => select(event, turn.text, offset) : undefined}>
+              {markedText(turn.text, offset)}
+            </span>
+          </p>
+          {turn.translationFi && <details lang="fi" className="los-translation">
+            <summary>Suomennos</summary><p>{turn.translationFi}</p>
+          </details>}
+          {highlighterEnabled && <div className="los-token-picker" role="group" aria-label={"Valitse " + turn.speaker + "-repliikin sana korostettavaksi"}>
+            <div className="los-tokens">{Array.from(turn.text.matchAll(/\S+/gu), item => ({
+              text: item[0], start: offset + item.index, end: offset + item.index + item[0].length,
+            })).map(token => <button key={token.start} type="button" lang="de" className="los-token"
+              aria-pressed={!!marked && token.start >= marked.start && token.end <= marked.end}
+              onClick={() => {
+                const start = marked ? Math.min(marked.start, token.start) : token.start;
+                const end = marked ? Math.max(marked.end, token.end) : token.end;
+                onSelection(block, start, end);
+              }}>{token.text}</button>)}</div>
+          </div>}
+        </div>;
+      })}
+      <button type="button" className="los-text-action los-note-action" onClick={() => onNote(block)}>
+        <NotebookPen size={16}/> Muistiinpano keskustelusta
+      </button>
+      <Attribution source={source}/>
+    </section>;
     case "grammar": return <section className="los-grammar" id={block.id}>
       <p className="los-eyebrow">KIELIOPPI</p><h2>{block.title}</h2>
       <p>{block.explanationFi}</p>
@@ -73,7 +135,7 @@ function RenderBlock({ block, marked, highlighterEnabled, onSelection, onNote }:
       <h2>Sanasto</h2><dl>{block.entries.map(entry => <div key={entry.id}>
         <dt lang="de">{entry.de}</dt><dd>{entry.fi}{entry.note && <small>{entry.note}</small>}</dd>
       </div>)}</dl></section>;
-    case "media": return <SafeMedia block={block} />;
+    case "media": return <SafeMedia block={block} source={source} />;
   }
 }
 
@@ -113,6 +175,7 @@ export function Reader({ book, blocks, title, headingLevel = 2 }: { book: Book; 
     <p className="los-storage-state" role="status">{losSyncMessage(marksStatus)}</p>
     <div className="los-reading-body">{blocks.map(block => <RenderBlock
       key={block.id + ":" + block.version} block={block}
+      source={"sourceId" in block ? book.sources.find(item => item.id === block.sourceId) : undefined}
       highlighterEnabled={highlighter}
       marked={marks.find(mark => mark.blockId === block.id && mark.version === block.version)}
       onSelection={(source, start, end) => {
