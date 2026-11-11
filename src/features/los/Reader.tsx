@@ -193,6 +193,13 @@ export function Reader({ book, blocks, title, headingLevel = 2 }: { book: Book; 
     </div>}
     {highlighter && <p className="los-notice">Valitse hiirellä tai kosketuksella teksti maalattavaksi. Merkinnät tallentuvat ensin laitteelle ja synkronoituvat palvelimelle, kun yhteys ja tietokanta ovat saatavilla.</p>}
     <p className="los-storage-state" role="status">{losSyncMessage(marksStatus)}</p>
+    {activeGloss && <aside className="los-gloss-panel" aria-live="polite" aria-label="Sanan merkitys" lang="fi">
+      <div><p className="los-eyebrow">SANASTON MERKITYS</p>
+        <b lang="de">{activeGloss.de}</b><p>{activeGloss.fi}</p>
+        {activeGloss.note && <small>{activeGloss.note}</small>}
+      </div>
+      <button type="button" className="los-button los-button-secondary" onClick={() => setActiveGloss(null)}>Sulje</button>
+    </aside>}
     <div className="los-reading-body">{blocks.map(block => <RenderBlock
       key={block.id + ":" + block.version} block={block}
       source={"sourceId" in block ? book.sources.find(item => item.id === block.sourceId) : undefined}
@@ -206,13 +213,6 @@ export function Reader({ book, blocks, title, headingLevel = 2 }: { book: Book; 
       }}
       onNote={setActiveNote}
     />)}</div>
-    {activeGloss && <aside className="los-gloss-panel" aria-label="Sanan merkitys" lang="fi">
-      <div><p className="los-eyebrow">SANASTON MERKITYS</p>
-        <b lang="de">{activeGloss.de}</b><p>{activeGloss.fi}</p>
-        {activeGloss.note && <small>{activeGloss.note}</small>}
-      </div>
-      <button type="button" className="los-button los-button-secondary" onClick={() => setActiveGloss(null)}>Sulje</button>
-    </aside>}
     {activeNote && <section className="los-note-editor" aria-labelledby="los-note-heading">
       <div className="los-inline-head"><h2 id="los-note-heading">Muistiinpano</h2><button className="los-button los-button-secondary" onClick={() => setActiveNote(null)}>Sulje</button></div>
       <label htmlFor="los-note-input">Oma merkintä tähän tekstikohtaan</label>
