@@ -22,15 +22,14 @@
 .los-app a { color:inherit;text-decoration:none; }
 .los-app h1,.los-app h2,.los-app h3,.los-access h1 { letter-spacing:-.035em;line-height:1.22;color:var(--los-ink); }
 .los-app p { margin-block:0 1em; }
-.los-logo { display:inline-block;font-family:Georgia,"Times New Roman",serif;font-style:italic;font-weight:900;letter-spacing:-.095em;line-height:1;font-size:85px;transform:skew(-7deg);white-space:nowrap; }
-.los-logo span { color:#c34b42;padding-left:.06em; }
-.los-logo img {width:190px;max-width:100%;height:auto;max-height:92px;display:block;object-fit:contain;}
-.los-logo-compact img {width:80px;max-height:34px;}
+/* LOS! wordmark is rendered with Takota, not an external logo image. */
+@font-face {font-family:"LOS Takota";src:url("/los/takota.ttf") format("truetype");font-weight:400;font-style:normal;font-display:swap;}
+.los-logo {display:inline-block;font-family:"LOS Takota",Georgia,serif;font-style:normal;font-weight:400;letter-spacing:-.05em;line-height:1;font-size:85px;white-space:nowrap;color:var(--los-book-accent,#b7473c);}
+.los-logo-compact {font-size:28px;letter-spacing:-.05em;}
 .dark .los-app .los-eyebrow,.dark .los-app .los-content-number,.dark .los-app .los-opening-number,.dark .los-app .los-exercise-header span:first-child {
   color:color-mix(in srgb,var(--los-book-accent) 55%,white 45%);
 }
 
-.los-logo-compact { font-size:28px;letter-spacing:-.085em; }
 .los-eyebrow,.los-overline { display:block;font-weight:750;letter-spacing:.15em;font-size:11px;line-height:1.5;color:var(--los-book-accent);text-transform:uppercase; }
 .los-overline {color:var(--los-soft)}
 .los-primary { display:inline-flex;align-items:center;justify-content:center;gap:12px;min-height:48px;border:0;border-radius:6px;background:var(--los-book-accent);color:#fff!important;padding:12px 20px;font-size:15px!important;font-weight:700!important;text-decoration:none; }
