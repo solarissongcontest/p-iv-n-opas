@@ -1,0 +1,133 @@
+import { useState } from "react";
+import { Bookmark, BookOpen, Check, CircleAlert, Download, FileText, RotateCcw } from "lucide-react";
+import { losExercisesFor, losIsCorrect, losScore, type LosExercise } from "./exerciseBank";
+import { useLosChapterDraft } from "./studyState";
+import type { LosChapter } from "./catalog";
+
+function LosSaveNotice({saved}:{saved:boolean}) {
+  return <p className={`los-save-state ${saved?"":"is-error"}`} role="status">
+    {saved ? <><Check size={14}/> Tallennettu tähän selaimeen. Ei vielä puhelimen ja tietokoneen välistä synkronointia.</> :
+      <><CircleAlert size={15}/> Tallennus epäonnistui. Älä sulje sivua ennen kuin olet kopioinut vastauksesi talteen.</>}
+  </p>;
+}
+function Question({item,index,value,locked,reveal,onValue}:{
+  item:LosExercise;index:number;value:string;locked:boolean;reveal:boolean;
+  onValue:(value:string)=>void;
+}) {
+  const correct=losIsCorrect(item,value);
+  return <li className="los-workbook-question" id={item.id}>
+    <div className="los-workbook-question-header"><span className="los-question-number">{item.chapterId.replace(/^0/,"")}.{index+1}</span><span>{item.instruction}</span></div>
+    <fieldset disabled={locked}>
+      <legend>{item.prompt}</legend>
+      {item.kind==="choice" ? <div className="los-workbook-choices">
+        {(item.options??[]).map(option=><label className={value===option?"is-selected":""} key={option}>
+          <input type="radio" name={item.id} value={option} checked={value===option} onChange={()=>onValue(option)}/>
+          <span>{option}</span>
+        </label>)}
+      </div> : <label className="los-workbook-fill">
+        <span className="sr-only">Kirjoita puuttuva sana</span>
+        <input type="text" spellCheck={false} autoComplete="off" inputMode="text" value={value}
+          onChange={event=>onValue(event.target.value)} placeholder="Kirjoita vastaus tähän" maxLength={100}/>
+      </label>}
+    </fieldset>
+    {reveal && <div className={`los-workbook-feedback ${correct?"is-right":"is-wrong"}`} role="status">
+      <strong>{correct?"Oikein.":"Korjattavaa."}</strong> {item.explanation}
+      {!correct && <span className="los-workbook-answer">Oikea vastaus: <b lang={item.chapterId==="01"||item.chapterId==="02"?"de":undefined}>{item.correct}</b></span>}
+    </div>}
+  </li>;
+}
+export function LosWorkbook({chapter,mode}:{chapter:LosChapter;mode:"practice"|"test"}) {
+  const {draft,update,saved}=useLosChapterDraft(1,chapter.id);
+  const exercises=losExercisesFor(chapter.id);
+  const [revealPractice,setRevealPractice]=useState<string[]>([]);
+  if(!exercises.length) return <section className="los-inner-page los-workbook">
+    <p className="los-eyebrow">{mode==="test"?"WIEDERHOLEN":"ÜBEN"} / KAPITEL {Number(chapter.id)}</p>
+    <h1>{mode==="test"?"Kappaletesti":"Harjoittele"}</h1>
+    <div className="los-editorial-note"><h2>Tehtäväsarja valmistellaan</h2>
+    <p>Tälle kappaleelle ei vielä ole julkaistu tarkistettua, kokonaisuudessaan arvioitavaa tehtäväsarjaa. Kappaleen sisältösivut ovat vapaasti luettavissa.</p></div>
+  </section>;
+  const answers=mode==="test"?draft.testAnswers:draft.practiceAnswers;
+  const locked=mode==="test"&&Boolean(draft.testSubmittedAt);
+  const filled=exercises.filter(ex=>Boolean(answers[ex.id]?.trim())).length;
+  const score=losScore(chapter.id,answers);
+  const updateAnswer=(id:string,value:string)=>{
+    if(locked)return;
+    update(current=>mode==="test"?
+      {...current,testAnswers:{...current.testAnswers,[id]:value}}:
+      {...current,practiceAnswers:{...current.practiceAnswers,[id]:value}});
+    if(mode==="practice")setRevealPractice(prev=>prev.filter(key=>key!==id));
+  };
+  return <section className="los-inner-page los-workbook">
+    <p className="los-eyebrow">{mode==="test"?"WIEDERHOLEN / KAPPALETESTI":"ÜBEN / HARJOITTELE"} · KAPITEL {Number(chapter.id)}</p>
+    <h1>{mode==="test"?"Kappaletesti":"Harjoittele"}</h1>
+    <p className="los-page-intro">{mode==="test"?
+      "Vastaa kaikkiin tehtäviin ilman näkyvää mallia. Saat ratkaisut ja perustelut vasta palautettuasi koko testin.":
+      "Harjoittele jokainen tehtävä rauhassa. Harjoitustilassa voit nähdä perustelun heti vastauksen jälkeen. Voit tehdä tehtävät uudelleen."}</p>
+    <div className="los-workbook-intro">
+      <p><strong>{exercises.length} osatehtävää</strong> · {filled} vastattu</p>
+      <LosSaveNotice saved={saved}/>
+      <p className="los-workbook-scope">Nämä ovat LOS!:n omia alkeiden muoto- ja fraasiharjoituksia. Alkuperäisen päätekstin ymmärtämistä, kuuntelua ja puheen tuottamista arvioidaan erikseen.</p>
+    </div>
+    <ol className="los-workbook-list">
+      {exercises.map((item,index)=><Question key={item.id} item={item} index={index}
+        value={answers[item.id]??""} locked={locked}
+        reveal={mode==="test"?locked:revealPractice.includes(item.id)}
+        onValue={value=>updateAnswer(item.id,value)} />)}
+    </ol>
+    {mode==="practice"?<div className="los-workbook-tools">
+      <button className="los-outline-button" onClick={()=>setRevealPractice(exercises.filter(ex=>Boolean(answers[ex.id]?.trim())).map(ex=>ex.id))} disabled={!filled}>
+        <Check size={17}/> Tarkista vastatut ({filled})
+      </button>
+      <button className="los-text-link" onClick={()=>{update(current=>({...current,practiceAnswers:{}}));setRevealPractice([]);}}>
+        <RotateCcw size={16}/> Tyhjennä harjoitusvastaukset
+      </button>
+    </div>:locked?<div className="los-test-result" role="status">
+      <p className="los-overline">TESTI PALAUTETTU · PAIKALLINEN TULOS</p>
+      <h2>{score.correct} / {score.total} oikein</h2>
+      <p>Katso kunkin tehtävän perustelu yllä. Tulos tallennetaan tähän selaimeen, mutta sitä ei vielä synkronoida eikä tulkita koko kappaleen osaamisen todistukseksi.</p>
+      <button className="los-outline-button" onClick={()=>{
+        update(current=>({...current,testAnswers:{},testSubmittedAt:null,selfAssessment:""}));
+      }}><RotateCcw size={17}/> Aloita uusi testiyritys</button>
+    </div>:<div className="los-test-submit">
+      <p>Testi voidaan palauttaa, kun olet vastannut kaikkiin {exercises.length} osatehtävään. Ennen palautusta ratkaisuja ei näytetä.</p>
+      <button className="los-primary" disabled={filled!==exercises.length} onClick={()=>
+        update(current=>({...current,testSubmittedAt:new Date().toISOString()}))
+      }>Palauta testi · {filled}/{exercises.length}</button>
+    </div>}
+    {mode==="test"&&locked&&<div className="los-self-assessment">
+      <h2>Itsearviointi: puhu tai kirjoita itse</h2>
+      <p>{chapter.id==="01"?"Kuvittele, että tapaat ensin opettajan aamulla ja myöhemmin hyvästelet ystävän. Sano molemmat ilmaukset ääneen ja arvioi, osasitko ne ilman näkyvää mallia.":"Kuvittele esittäytyväsi uudelle henkilölle. Kerro nimesi ja kysy hänen nimeään saksaksi ääneen ilman valmista tekstiä."}</p>
+      <label htmlFor={`los-self-${chapter.id}`}>Mitä osasin? Mitä täytyy vielä harjoitella?</label>
+      <textarea id={`los-self-${chapter.id}`} value={draft.selfAssessment} maxLength={5000}
+        onChange={e=>update(current=>({...current,selfAssessment:e.target.value}))} rows={4} placeholder="Kirjaa oma havaintosi, ei automaattisesti pisteytettävä vastaus."/>
+      <LosSaveNotice saved={saved}/>
+    </div>}
+  </section>;
+}
+export function LosNotebook({chapter}:{chapter:LosChapter}) {
+  const {draft,update,saved}=useLosChapterDraft(1,chapter.id);
+  const download=()=>{
+    const lines=[`LOS! 1 · Kappale ${Number(chapter.id)} · ${chapter.title}`,"","Omat muistiinpanot",draft.note,"","Itsearviointi",draft.selfAssessment,"",`Paikallisen tallennuksen päiväys: ${draft.updatedAt||"ei vielä tallennettu"}`];
+    const blob=new Blob([lines.join("\n")],{type:"text/plain;charset=utf-8"});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement("a");a.href=url;a.download=`LOS1-kappale-${chapter.id}-muistiinpanot.txt`;document.body.appendChild(a);a.click();a.remove();
+    URL.revokeObjectURL(url);
+  };
+  return <aside className="los-chapter-notes" aria-label="Omat muistiinpanot">
+    <div className="los-chapter-notes-title">
+      <div><FileText size={19}/><h2>Omat muistiinpanot</h2></div>
+      <button type="button" aria-pressed={draft.bookmarked} onClick={()=>update(current=>({...current,bookmarked:!current.bookmarked}))}>
+        <Bookmark size={17} fill={draft.bookmarked?"currentColor":"none"}/>{draft.bookmarked?"Merkitty":"Merkitse kappale"}
+      </button>
+    </div>
+    <p>Kirjoita omat havainnot tähän. Muistiinpano säilyy tässä selaimessa myös sivun sulkemisen jälkeen, jos selaimen tallennustietoja ei poisteta.</p>
+    <label htmlFor={`los-notes-${chapter.id}`} className="sr-only">Omat muistiinpanot kappaleesta {Number(chapter.id)}</label>
+    <textarea id={`los-notes-${chapter.id}`} rows={4} maxLength={8000} value={draft.note}
+      placeholder="Kirjoita tähän omia esimerkkejä, muistettavia sanoja ja kysymyksiä…"
+      onChange={e=>update(current=>({...current,note:e.target.value}))}/>
+    <div className="los-chapter-notes-bottom">
+      <LosSaveNotice saved={saved}/>
+      <button type="button" onClick={download} title="Lataa muistiinpanot omalle laitteelle"><Download size={16}/> Vie muistiinpanot .txt</button>
+    </div>
+  </aside>;
+}

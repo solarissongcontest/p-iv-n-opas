@@ -1,0 +1,88 @@
+/* LOS! workbook: editorial exercises, marginalia and culture.
+ * Book stylesheet only; no StudyOS dashboard tokens.
+ */
+.los-workbook-intro{margin:35px 0 8px;padding:14px 0;border-top:1px solid var(--los-ink);border-bottom:1px solid var(--los-line);}
+.los-workbook-intro>p:first-child{margin:0 0 9px!important;font-size:14px;}
+.los-workbook-scope{font-size:13px!important;color:var(--los-soft);max-width:66ch;line-height:1.6;margin:9px 0 0!important;}
+.los-save-state{display:flex;align-items:flex-start;gap:7px;font-size:12px!important;color:var(--los-soft);line-height:1.55;margin:0!important;}
+.los-save-state svg{flex:0 0 14px;margin-top:2px;}
+.los-save-state.is-error{color:#a72c33;}
+.los-workbook-list{margin:0;padding:0;list-style:none;}
+.los-workbook-question{padding:28px 0 31px;border-bottom:1px solid var(--los-line);}
+.los-workbook-question-header{display:flex;align-items:baseline;gap:15px;color:var(--los-soft);font-size:12px;line-height:1.45;}
+.los-question-number{font-family:Georgia,"Times New Roman",serif;font-size:27px;color:var(--los-book-accent);font-variant-numeric:tabular-nums;flex-shrink:0;}
+.los-workbook-question fieldset{border:0;margin:0;padding:0;min-width:0;}
+.los-workbook-question legend{font-size:18px;font-weight:660;line-height:1.5;margin:12px 0 16px;padding:0;color:var(--los-ink);}
+.los-workbook-choices{display:flex;flex-direction:column;gap:9px;max-width:600px;}
+.los-workbook-choices label{display:flex;align-items:center;gap:12px;border:1px solid var(--los-line);min-height:51px;padding:10px 15px;cursor:pointer;line-height:1.35;background:var(--los-paper);}
+.los-workbook-choices label.is-selected{border-color:var(--los-book-accent);background:var(--los-book-tint);color:#202632;}
+.los-workbook-choices input{width:18px;height:18px;accent-color:var(--los-book-accent);flex:0 0 18px;}
+.los-workbook-question fieldset:disabled label{cursor:default;opacity:.85;}
+.los-workbook-fill{display:block;max-width:470px;}
+.los-workbook-fill input,.los-self-assessment textarea,.los-chapter-notes textarea,.los-application-page textarea{
+ background:var(--los-paper);color:var(--los-ink);border:1px solid var(--los-line);border-radius:0;
+ padding:14px 15px;width:100%;font-family:inherit;font-size:16px;line-height:1.6;
+}
+.los-workbook-fill input:focus-visible,.los-self-assessment textarea:focus-visible,.los-chapter-notes textarea:focus-visible,.los-application-page textarea:focus-visible{
+ outline:2px solid var(--los-book-accent);outline-offset:1px;
+}
+.los-workbook-feedback{margin:16px 0 0;padding:15px 18px;background:var(--los-subtle);border-left:3px solid #33816d;font-size:14px;line-height:1.6;color:var(--los-ink);}
+.los-workbook-feedback.is-wrong{border-left-color:#b34744;}
+.los-workbook-feedback strong{font-weight:800;}
+.los-workbook-answer{display:block;margin-top:6px;}
+.los-outline-button{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:48px;max-width:100%;border:1px solid var(--los-book-accent);background:transparent;color:var(--los-ink);padding:11px 17px;font-size:14px!important;font-weight:700!important;text-align:center;}
+.los-outline-button:hover{background:var(--los-subtle);}
+.los-outline-button:disabled,.los-workbook .los-primary:disabled{opacity:.47;cursor:not-allowed;}
+.los-workbook-tools{display:flex;flex-wrap:wrap;align-items:center;gap:22px;margin-top:31px;}
+.los-workbook-tools .los-text-link{margin:0;}
+.los-test-submit,.los-test-result{border-top:2px solid var(--los-book-accent);margin:35px 0 0;padding-top:24px;}
+.los-test-submit p,.los-test-result>p:not(.los-overline){font-size:15px;line-height:1.65;max-width:68ch;color:var(--los-soft);}
+.los-test-result h2{font-family:Georgia,serif;font-size:48px;font-weight:500;line-height:1.1;margin:7px 0 19px;}
+.los-self-assessment{margin-top:55px;padding-top:30px;border-top:1px solid var(--los-ink);}
+.los-self-assessment h2{font-family:Georgia,serif;font-weight:500;font-size:26px;margin:0 0 15px;}
+.los-self-assessment>p{color:var(--los-soft);font-size:15px;line-height:1.7;}
+.los-self-assessment label{display:block;font-weight:670;margin:14px 0 8px;font-size:14px;}
+.los-self-assessment textarea{resize:vertical;margin:0 0 9px;}
+.los-chapter-notes{max-width:1000px;padding:30px 40px 34px;margin:21px auto 0;border-top:1px solid var(--los-line);border-bottom:1px solid var(--los-line);background:var(--los-paper);}
+.los-chapter-notes-title{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:10px;}
+.los-chapter-notes-title>div{display:flex;align-items:center;gap:9px;}
+.los-chapter-notes-title svg{color:var(--los-book-accent);}
+.los-chapter-notes-title h2{font-family:Georgia,"Times New Roman",serif;letter-spacing:-.02em;font-size:22px;font-weight:500;margin:0;}
+.los-chapter-notes-title button{display:flex;align-items:center;gap:8px;min-height:44px;border:0;background:none;padding:6px 0;color:var(--los-ink);font-size:12px!important;font-weight:700!important;}
+.los-chapter-notes>p{font-size:13px!important;color:var(--los-soft);line-height:1.65;max-width:65ch;margin-bottom:13px;}
+.los-chapter-notes textarea{resize:vertical;min-height:95px;}
+.los-chapter-notes-bottom{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:11px;}
+.los-chapter-notes-bottom>button{display:inline-flex;align-items:center;gap:7px;min-height:44px;background:none;border:0;color:var(--los-ink);font-size:12px!important;font-weight:700!important;}
+.los-understanding h2,.los-text-b h2,.los-application-page h2,.los-culture-page h2{font-family:Georgia,serif;font-size:27px;font-weight:500;margin:30px 0 14px;}
+.los-understanding-probes{list-style:none;padding:0;margin:22px 0 25px;border-top:1px solid var(--los-ink);}
+.los-understanding-probes li{display:flex;gap:18px;align-items:baseline;padding:16px 0;border-bottom:1px solid var(--los-line);font-size:16px;}
+.los-understanding-probes li span{font-family:Georgia,serif;color:var(--los-book-accent);font-size:24px;flex:0 0 26px;}
+.los-application-page>p:not(.los-eyebrow){font-size:16px;line-height:1.8;max-width:68ch;}
+.los-application-label{display:block;font-size:15px;font-weight:750;margin:25px 0 10px;}
+.los-application-page textarea{white-space:pre-wrap;resize:vertical;}
+.los-application-page .los-save-state{margin-top:9px!important;}
+.los-application-page h3{font-size:19px;margin:32px 0 14px;}
+.los-application-checks{margin:0 0 25px;padding-left:23px;}
+.los-application-checks li{margin:8px 0;font-size:15px;}
+.los-model-answer{margin:26px 0;padding:22px 24px;border-left:3px solid var(--los-book-accent);background:var(--los-subtle);}
+.los-model-answer p[lang="de"]{white-space:pre-line;font-family:Georgia,serif;font-size:25px;line-height:1.7;margin:10px 0;}
+.los-model-answer small{font-size:12px;color:var(--los-soft);}
+.los-culture-page>p:not(.los-eyebrow){font-size:16px;line-height:1.8;max-width:68ch;}
+.los-culture-term{padding:14px 0 20px;border-bottom:1px solid var(--los-line);}
+.los-culture-term strong{font-family:Georgia,serif;font-size:27px;font-weight:500;}
+.los-culture-term p{font-size:15px;color:var(--los-soft);margin:6px 0 0;line-height:1.7;}
+.los-culture-source{margin-top:41px;padding:18px 0;border-top:1px solid var(--los-line);}
+.los-culture-source strong{font-size:13px;}
+.los-culture-source p{font-size:13px;color:var(--los-soft);max-width:65ch;margin:6px 0;}
+@media(max-width:760px){
+ .los-workbook-question{padding:24px 0;}
+ .los-workbook-question legend{font-size:17px;}
+ .los-chapter-notes{margin-top:14px;padding:25px 20px;}
+ .los-chapter-notes-title{align-items:flex-start;flex-direction:column;}
+ .los-chapter-notes-title button{padding:4px 0;}
+ .los-book-main .los-section-nav{padding-left:7px;gap:0;}
+ .los-section-nav button{font-size:12px;min-height:45px;padding:8px 11px;}
+ .los-workbook-intro{margin-top:26px;}
+ .los-workbook-tools{gap:13px;}
+}
+.dark .los-workbook-choices label.is-selected{background:color-mix(in srgb,var(--los-book-accent) 25%,var(--los-paper));color:var(--los-ink);}
