@@ -193,3 +193,26 @@ export const c06Exam:Exercise[]=[
  choice('EX-C06-19','Mikä on 100 saksaksi?',['einhundert','einhundertund','einhunderteins'],'einhundert','Einhundert on sata. Sana hundert sopii myös itsenäisesti.'),
  truth('EX-C06-20','Väite: Janickan C06-lähdeteksti koostuu neljästä erillisestä julkaistusta ikäminidialogista.','Totta','ZPE:n Sag mal, wie alt bist du? -tekstin Transkription-osassa on neljä minidialogia.')
 ];
+
+
+/** C08 source-specific final review: Magdalena Sieradz's human-written 12-turn
+ * German-class chat. Two independent human-recorded pronunciation samples
+ * are NOT misrepresented as an audio version of this written chat.
+ */
+export const c08Exam:Exercise[]=[
+ choice('EX-C08-01','Miten sanot ”En ymmärrä” saksaksi?',['Ich verstehe nicht.','Ich heiße nicht.','Ich komme nicht.'],'Ich verstehe nicht.','Ich verstehe nicht on opittu erillinen selviytymisfraasi.'),
+ choice('EX-C08-02','Miten pyydät kuulemaan asian vielä kerran?',['Noch einmal, bitte!','Wie alt bist du?','Gute Nacht!'],'Noch einmal, bitte!','Noch einmal, bitte! on valmis toistopyyntö.'),
+ choice('EX-C08-03','Miten pyydät hitaampaa puhetta?',['Bitte langsamer.','Bitte schneller.','Wie heißt du?'],'Bitte langsamer.','Bitte langsamer tarkoittaa hitaammin, kiitos.'),
+ choice('EX-C08-04','Millä kysymyksellä pyydät sanan merkitystä?',['Was bedeutet das?','Wann kommen Sie?','Wie alt seid ihr?'],'Was bedeutet das?','Was bedeutet das? on Mitä se tarkoittaa?'),
+ choice('EX-C08-05','Mikä on kohtelias toistopyyntö?',['Können Sie das bitte wiederholen?','Du kann das wiederholen?','Wie heißt du?'],'Können Sie das bitte wiederholen?','Können Sie ...? käyttää kohteliasta puhuttelua.'),
+ fill('EX-C08-06','Täydennä fraasi: Ich verstehe ____.',['nicht'],'Ich verstehe nicht = En ymmärrä.'),
+ fill('EX-C08-07','Täydennä: Noch ____, bitte!',['einmal'],'Noch einmal, bitte! = Vielä kerran, kiitos.'),
+ choice('EX-C08-08','Kumpi kertoo alkuperäisessä Sieradzin chatissa saksantunnin olleen hieno?',['Leo','Fabian','Larissa'],'Leo','Leo kertoo Ich hatte heute wieder Deutschunterricht und es war toll!'),
+ choice('EX-C08-09','Mitä Fabian kertoo koulukeskustelussa opiskelevansa samoin menetelmin?',['Englisch','Spanisch','Schwedisch'],'Englisch','Fabian mainitsee Englischunterricht.'),
+ choice('EX-C08-10','Mikä alkuperäisen chatin lause kertoo, että dialogit ovat helppoja?',['Die Dialoge sind leicht.','Die Dialoge sind schwierig.','Die Dialoge sind blau.'],'Die Dialoge sind leicht.','Leo sanoo suoraan Die Dialoge sind leicht.'),
+ truth('EX-C08-11','Väite: alkuperäisessä kouluchatissa oppilaat vain kuuntelevat, eivät kirjoita tekstejä.','Tarua','Leo kertoo myös lyhyiden tekstien kirjoittamisesta ja ääneen lukemisesta.'),
+ choice('EX-C08-12','Minkä tarkistamisesta Leo kertoo opettajan huolehtivan?',['sanojen oikeasta ääntämisestä','oppilaiden puhelinnumeroista','lippujen hinnoista'],'sanojen oikeasta ääntämisestä','Die Lehrerin prüft, ob wir die Wörter richtig aussprechen.'),
+ choice('EX-C08-13','Mitkä laitteet mainitaan alkuperäisen chatin interaktiivisissa tehtävissä?',['Tablets und Smartphones','Fernseher und Radios','Autos und Fahrräder'],'Tablets und Smartphones','Tekstissä mainitaan tabletit ja älypuhelimet.'),
+ fill('EX-C08-14','Täydennä kertausverbi: Können Sie das bitte ____?',['wiederholen'],'Wiederholen tarkoittaa toistaa. Tässä sitä käytetään kokonaisena kohteliaana fraasina.'),
+ truth('EX-C08-15','Väite: Sieradzin alkuperäinen chat-teksti ja erillinen Timwin Ich verstehe nicht -äänite ovat saman keskustelun teksti ja äänitys.','Tarua','Ne ovat eri julkaisijoiden aineistoja. Äänite on erillinen yhden fraasin ääntämisnäyte.')
+];
