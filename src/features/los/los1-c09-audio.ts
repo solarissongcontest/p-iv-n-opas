@@ -37,13 +37,13 @@ export const LOS1_C09_AUDIO_BLOCKS:ContentBlock[]=[
  {id:"los1-c09-audio-followup",version:"0.1.0",kind:"paragraph",language:"fi",
   text:"Tarkista alkuperäisen äänen kahdeksan sanaa vasta kuuntelun jälkeen: Tage, Montag, Dienstag, Mittwoch, Donnerstag, Freitag, Samstag, Sonntag. Jos ääni toimii laitteellasi, voit yhdistää joka sanan kuuloasun kirjoitusasuun. Jos ei toimi, harjoittele luettelon ymmärtämistä tekstinä ja merkitse itsellesi, että ääni odottaa toimivuustarkistusta. Kaikki alla olevat vastaukset löytyvät myös litteraatista, joten niitä ei pidä tulkita kuuntelukyvyn yksiselitteiseksi mittaukseksi."},
 ];
-const base={version:"0.1.0",difficulty:"guided" as const,objectives:["L1-TIME-01","L1-LISTEN-01"]};
+const base={version:"0.1.0",difficulty:"guided" as const,objectives:["L1-TIME-01","L1-READ-01"]};
 const choice=(id:string,promptFi:string,options:[string,string,string],correct:0|1|2,explanationFi:string):Exercise=>({
  ...base,id:"los1-c09-audio-"+id,type:"single-choice",promptFi,
  options:options.map((label,i)=>({id:"a"+i,label})),correctOptionId:"a"+correct,explanationFi,
 });
 export const LOS1_C09_AUDIO_EXERCISES:Exercise[]=[
- choice("intro","Mikä sana aloittaa Commonsin alkuperäisen viikonpäiväluettelon ennen Montagia?",
+ choice("question-intro","Mikä sana aloittaa Commonsin alkuperäisen viikonpäiväluettelon ennen Montagia?",
   ["Tage","Monate","Zahlen"],0,"Äänite alkaa Tage-sanalla, jota seuraavat viikonpäivät."),
  choice("first","Mikä viikonpäivä on alkuperäisen äänitteen ensimmäinen päivä?",
   ["Sonntag","Montag","Samstag"],1,"Montag on ensimmäinen viikonpäivä luettelossa."),
