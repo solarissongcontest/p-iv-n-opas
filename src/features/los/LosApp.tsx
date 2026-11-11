@@ -9,6 +9,7 @@ import {allChapterExercises} from './practiceExtras';
 import {ExamSession} from './ExamSession';
 import {type FirstLessonStep} from './firstLessons';
 import {guidedLessons} from './guidedLessons';
+import {lessonAudioProof,lessonRequiresReflection} from './lessonProofs';
 import {auditLosRelease} from './releaseAudit';
 import {NumberPractice} from './NumberPractice';
 
@@ -150,8 +151,16 @@ function Media({chapter,store,fontSize=18,onAudioCompleted,lessonId}:{chapter:Ch
    <a href="https://creativecommons.org/licenses/by-sa/3.0/" target="_blank" rel="noreferrer"> Lisenssi</a></p>
  </>;
  if(chapter.id==='C01')return <>
-  <Audio src="https://commons.wikimedia.org/wiki/Special:Redirect/file/Gespr%C3%A4chVorstellung.ogg" title="Franz ja Jörg, GesprächVorstellung (14 s)" onCompleted={()=>store.put("media:completed:M-COM-01",{at:new Date().toISOString(),version:LOS_VERSION})}/>
-  {chapter.media?<Audio src={chapter.media.url} title={chapter.media.title} onCompleted={()=>store.put("media:completed:"+chapter.media!.sourceId,{at:new Date().toISOString(),version:LOS_VERSION})}/>:null}
+  <Audio src="https://commons.wikimedia.org/wiki/Special:Redirect/file/Gespr%C3%A4chVorstellung.ogg" title="Franz ja Jörg, GesprächVorstellung (14 s)" onCompleted={()=>{
+   const receipt={at:new Date().toISOString(),version:LOS_VERSION};
+   store.put('media:completed:M-COM-01',receipt);
+   if(lessonId&&['L001','L002','L003'].includes(lessonId))store.put('media:completed:'+lessonAudioProof(lessonId,'M-COM-01'),receipt);
+  }}/>
+  {chapter.media?<Audio src={chapter.media.url} title={chapter.media.title} onCompleted={()=>{
+   const receipt={at:new Date().toISOString(),version:LOS_VERSION};
+   store.put('media:completed:'+chapter.media!.sourceId,receipt);
+   if(lessonId==='L005')store.put('media:completed:'+lessonAudioProof(lessonId,chapter.media!.sourceId),receipt);
+  }}/>:null}
   <SourceNotice chapter={chapter}/>
   <p>Ääni ja teksti ovat eri aineistotyyppejä. Äänitteitä ei luoda koneellisesti eikä luvata toimiviksi ennen toistotestausta.</p>
  </>;
@@ -425,7 +434,7 @@ function FirstLessonRunner({lessonId,store,fontSize,onNext,onContents}:{lessonId
  const allSubmitted=requiredIds.every(id=>
   id in exams?Boolean(item(store,'exam:submitted:'+id)):Boolean(item(store,'latest:'+id)));
  const hasGoal=lessonId!=='L001'||valueString(store,'goal:los1').trim().length>=8;
- const hasReflection=!['L006','L011','L016','L021','L026','L027','L028','L029','L030','L035','L040','L041','L045','L050','L055','L056','L057','L058','L059','L060'].includes(lessonId)||valueString(store,'lesson:reflection:'+lessonId).trim().length>=12;
+ const hasReflection=!lessonRequiresReflection(plan)||valueString(store,'lesson:reflection:'+lessonId).trim().length>=12;
  const mediaDone=(plan?.requiredMediaIds??[]).every(id=>Boolean(item(store,'media:completed:'+id)));
  const midtermAttempt=typeof item(store,'exam:no:EX-MID')==='number'?item(store,'exam:no:EX-MID') as number:0;
  const hasMidtermWriting=lessonId!=='L030'||valueString(store,'exam:self:EX-MID:'+midtermAttempt).trim().length>=30;
