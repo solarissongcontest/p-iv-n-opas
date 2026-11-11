@@ -59,6 +59,8 @@ export const LOS1_C05_TEST:ChapterTestDefinition={
     +"Puhe arvioidaan vain omalla tarkistuslistalla eikä lisää automaattisia pisteitä.",
   exerciseIds:LOS1_C05_EXAM_EXERCISES.map(row=>row.id),
   selfAssessmentMode:"speech",
+  speechExampleDe:"Hallo! Wie geht es dir? Mir geht es gut. Und dir?",
+  speechPromptFi:"Lausu ääneen vointikysymys, oma lyhyt vastaus ja kysymys takaisin. Voit keksiä tilanteen eikä sinun tarvitse kertoa oikeasta voinnistasi.",
   speechCriteria:[
     {id:"question",title:"Lausuin vointikysymyksen Wie geht's? tai Wie geht es dir?."},
     {id:"reply",title:"Lausuin ymmärrettävän myönteisen tai kielteisen vointivastauksen."},
