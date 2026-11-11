@@ -62,7 +62,23 @@ function Audio({src,title,onFailure,onCompleted}:{src:string;title:string;onFail
  {!failed?<audio controls preload="none" src={src} onEnded={onCompleted} onError={()=>{setFailed(true);onFailure?.();}} aria-label={title}/>:<p role="alert">Äänitteen lataus epäonnistui. Voit jatkaa tekstin ja sanaston avulla. Äänitettä ei merkitä kuunnelluksi.</p>}
  </div>;
 }
-function Media({chapter,store,fontSize=18,onAudioCompleted}:{chapter:Chapter;store:Store;fontSize?:number;onAudioCompleted?:()=>void}){
+function Media({chapter,store,fontSize=18,onAudioCompleted,lessonId}:{chapter:Chapter;store:Store;fontSize?:number;onAudioCompleted?:()=>void;lessonId?:string}){
+ if(chapter.id==='C06')return <>
+  <Label>TEKSTI B · ERILLINEN ALKUPERÄINEN KERTAUSÄÄNITE</Label>
+  <h3>Franz ja Jörg: Wie alt bist du?</h3>
+  <p>C06:n Teksti A koostuu Monika Janickan neljästä alkuperäisestä ikäminidialogista. Seuraava ääni on **eri lähteen** jo C01:ssa julkaistu 14 sekunnin Franz–Jörg-keskustelu. Ääni ei ole Janickan ZPE-keskustelujen nauhoitus.</p>
+  <Audio src="https://commons.wikimedia.org/wiki/Special:Redirect/file/Gespr%C3%A4chVorstellung.ogg"
+   title="Xzapro4 ja Erkan Yilmaz: Franz ja Jörg (14 sekuntia)"
+   onCompleted={()=>{
+    if(lessonId==='L034')store.put('media:completed:review:L034:M-COM-01',{at:new Date().toISOString(),version:LOS_VERSION});
+    else store.put('media:completed:C06:M-COM-01',{at:new Date().toISOString(),version:LOS_VERSION});
+   }}/>
+  <Reader chapter={chapters[0]!} store={store} fontSize={fontSize}/>
+  <p className="los-source"><b>M-COM-01</b> · Xzapro4 ja Erkan Yilmaz (2008), alkuperäinen ihmisäänite, CC BY-SA 3.0, ei muutoksia ·
+   <a href="https://commons.wikimedia.org/wiki/File:Gespr%C3%A4chVorstellung.ogg" target="_blank" rel="noreferrer">Lähde ja alkuperäiset repliikit</a> ·
+   <a href="https://creativecommons.org/licenses/by-sa/3.0/" target="_blank" rel="noreferrer">Lisenssi</a></p>
+  <p className="los-meta">Monika Janickan oman äänitteen sovelluksen sisäistä toistoa ei ole varmennettu. C06:n pääteksti on silti kokonaisuudessaan luettavissa suomeksi käännettynä.</p>
+ </>;
  if(chapter.id==='C02'&&chapter.media?.transcript)return <>
    <Label>TEKSTI B · ALKUPERÄINEN ÄÄNITETTY DIALOGI</Label>
    <h3>{chapter.media.title}</h3>
@@ -360,7 +376,7 @@ function ChapterSection({chapter,section,store,fontSize}:{chapter:Chapter;sectio
  if(section==='Harjoittele')return <><h2>Harjoittele</h2>{chapter.id==='C06'?<NumberPractice items={store.items} put={store.put}/>:null}{exercises.filter(e=>!['highlight','writing','speech'].includes(e.type)).map(ex=><ExerciseCard key={ex.id} exercise={ex} chapter={chapter} store={store} fontSize={fontSize}/>)}</>;
  if(section==='Käytä saksaa')return <><h2>Käytä saksaa itse</h2>{exercises.filter(e=>['writing','speech'].includes(e.type)).map(ex=><ExerciseCard key={ex.id} exercise={ex} chapter={chapter} store={store} fontSize={fontSize}/>)}</>;
  if(section==='Kappaletesti'&&chapter.status==='source-pending')return <p className="los-warning">Kappaletestiä ei ole vielä julkaistu, koska tämän kappaleen pääteksti on hyväksymättä. Harjoitteita voi tehdä erikseen.</p>;
- if(section==='Kappaletesti'&&['C01','C02','C03','C04','C05','C07','C09','C10'].includes(chapter.id)){
+ if(section==='Kappaletesti'&&['C01','C02','C03','C04','C05','C06','C07','C09','C10'].includes(chapter.id)){
   const id=('EX-'+chapter.id) as ExamId;
   return <ExamSession id={id} store={store} onExit={()=>window.location.hash='/chapter/'+chapter.id+'/Harjoittele'} onSubmit={()=>store.put('exam:submitted:'+id,{submittedAt:new Date().toISOString(),version:LOS_VERSION})}/>;
  }
@@ -422,8 +438,8 @@ function FirstLessonRunner({lessonId,store,fontSize,onNext,onContents}:{lessonId
    <Reader chapter={currentChapter} store={store} fontSize={fontSize}/>
    <SourceNotice chapter={currentChapter}/>
   </>;
-  if(st.kind==='listen')return <Media chapter={currentChapter} store={store} fontSize={fontSize}
-    onAudioCompleted={()=>store.put('media:completed:review:'+lessonId+':'+currentChapter.media?.sourceId,{at:new Date().toISOString(),version:LOS_VERSION})}/>;
+  if(st.kind==='listen')return <Media chapter={currentChapter} store={store} fontSize={fontSize} lessonId={lessonId}
+    onAudioCompleted={()=>{if(currentChapter.media?.sourceId)store.put('media:completed:review:'+lessonId+':'+currentChapter.media.sourceId,{at:new Date().toISOString(),version:LOS_VERSION});}}/>;
   if(st.kind==='vocabulary')return <Words chapter={currentChapter} store={store}/>;
   if(st.kind==='grammar'||st.kind==='instruction')return <Grammar chapter={currentChapter}/>;
   if(st.kind==='practice'){
