@@ -45,6 +45,11 @@ import { LOS1_C08_CONTENT_BLOCKS } from "./los1-c08-content.ts";
 import { LOS1_C08_PRACTICE_EXERCISES } from "./los1-c08-practice.ts";
 import { LOS1_C08_EXAM_A, LOS1_C08_EXAM_B, LOS1_C08_TEST } from "./los1-c08-test.ts";
 import { LOS1_C08_SECTIONS } from "./los1-c08-sections.ts";
+import { LOS1_C09_CONTENT_BLOCKS } from "./los1-c09-content.ts";
+import { LOS1_C09_PRACTICE_EXERCISES } from "./los1-c09-practice.ts";
+import { LOS1_C09_SOURCE_EXERCISES } from "./los1-c09-source.ts";
+import { LOS1_C09_EXAM_A, LOS1_C09_EXAM_B, LOS1_C09_TEST } from "./los1-c09-test.ts";
+import { LOS1_C09_SECTIONS } from "./los1-c09-sections.ts";
 
 const specs: readonly [string, string, string, string, string, string][] = [
   ["Perustason alkeet 1", "Tutustu ja ihastu saksan kieleen", "Nollataso, tervehdykset, esittäytyminen ja ensimmäinen vuorovaikutus.", "#B7473C", "#FCE8E5", "#FF9B91"],
@@ -138,6 +143,12 @@ export const LOS_BOOKS: readonly Book[] = specs.map((spec, index) => ({
     sections:LOS1_C08_SECTIONS,
     blockIds:LOS1_C08_CONTENT_BLOCKS.map(b=>b.id),
     exerciseIds:[...LOS1_C08_PRACTICE_EXERCISES,...LOS1_C08_EXAM_A].map(ex=>ex.id),
+  } : chapter.id === "C09" ? {
+    ...chapter,publicationStatus:"preview" as const,
+    sections:LOS1_C09_SECTIONS,
+    blockIds:LOS1_C09_CONTENT_BLOCKS.map(b=>b.id),
+    exerciseIds:[...LOS1_C09_SOURCE_EXERCISES,...LOS1_C09_PRACTICE_EXERCISES,
+      ...LOS1_C09_EXAM_A].map(ex=>ex.id),
   } : { ...chapter, sections: emptyChapterSections() }) : [],
   lessons: index === 0 ? LOS1_PLANNED_LESSONS.map(lesson => {
     if (lesson.id === "L001") return {
@@ -640,11 +651,50 @@ export const LOS_BOOKS: readonly Book[] = specs.map((spec, index) => ({
           chapterTestId:LOS1_C08_TEST.id},
       ],
     };
+    if (lesson.id === "L046") return {
+      ...lesson,publicationStatus:"preview" as const,
+      steps:[
+        {id:"L046-S01",title:"Aloita viikonpäivistä",required:true,blockId:"los1-c09-intro"},
+        {id:"L046-S02",title:"Opettele viikonpäivien suomenkieliset merkitykset",required:true,blockId:"los1-c09-weekday-guide"},
+        {id:"L046-S03",title:"Lue koko Wikibooksin alkuperäinen viikonpäivälista",required:true,blockId:"los1-c09-wb-04-days"},
+        {id:"L046-S04",title:"Tarkista alkuperäisen listan kolmas päivä",required:true,exerciseId:"los1-c09-source-order"},
+        {id:"L046-S05",title:"Tarkista alkuperäisen listan viikonlopun päivät",required:true,exerciseId:"los1-c09-source-weekend"},
+        {id:"L046-S06",title:"Harjoittele maanantain kirjoitusasua",required:true,exerciseId:"los1-c09-weekday-01"},
+        {id:"L046-S07",title:"Harjoittele viikon lopun kirjoitusasua",required:true,exerciseId:"los1-c09-weekday-07"},
+      ],
+    };
+    // L047 remains planned until the whole Franz–Greta Sport und Zeit source is inside LOS!.
+    if (lesson.id === "L048") return {
+      ...lesson,publicationStatus:"preview" as const,
+      steps:[
+        {id:"L048-S01",title:"Lue am- ja um-aikailmausten ohjeet",required:true,blockId:"los1-c09-am-um"},
+        {id:"L048-S02",title:"Tunnista päiväilmaus",required:true,exerciseId:"los1-c09-preposition-day"},
+        {id:"L048-S03",title:"Tunnista tasatunti",required:true,exerciseId:"los1-c09-preposition-hour"},
+        {id:"L048-S04",title:"Järjestä viikonpäivä ja aika",required:true,exerciseId:"los1-c09-order-monday"},
+        {id:"L048-S05",title:"Harjoittele neljän tasatuntia",required:true,exerciseId:"los1-c09-calendar-02"},
+        {id:"L048-S06",title:"Tutustu oikean lähteen vaativaan ajanilmaukseen tunnistamisen tasolla",required:true,blockId:"los1-c09-source-time-support"},
+        {id:"L048-S07",title:"Tarkista viikonpäivän ja ajan merkitys",required:true,exerciseId:"los1-c09-calendar-meaning"},
+      ],
+    };
+    // L049 is deliberately planned: no independent verified Die Woche recording.
+    if (lesson.id === "L050") return {
+      ...lesson,publicationStatus:"preview" as const,
+      steps:[
+        {id:"L050-S01",title:"Kertaa C09:n 17 ydinsanaa",required:true,blockId:"los1-c09-words"},
+        {id:"L050-S02",title:"Tutustu kuvitteelliseen seitsemän päivän harjoituskalenteriin",required:true,blockId:"los1-c09-calendar-table"},
+        {id:"L050-S03",title:"Laadi oma seitsemän päivän kalenteri",required:true,blockId:"los1-c09-production-calendar"},
+        {id:"L050-S04",title:"Harjoittele kolmen repliikin tapaamista",required:true,blockId:"los1-c09-production-meeting"},
+        {id:"L050-S05",title:"Palauta 14 kysymyksen testi ja kirjoita lyhyt viesti",required:true,
+          chapterTestId:LOS1_C09_TEST.id},
+      ],
+    };
     return lesson;
   }) : [],
-  blocks: index === 0 ? [...LOS1_INTRO_BLOCKS, ...LOS1_C01_PREVIEW_BLOCKS, ...LOS1_C01_SOURCE_BLOCKS, ...LOS1_C01_GREETING_AUDIO_BLOCKS, ...LOS1_C01_APPLICATION_BLOCKS, ...LOS1_C01_CULTURE_BLOCKS, ...LOS1_C02_WB_BLOCKS, ...LOS1_C02_BLOCKS, ...LOS1_C03_SOURCE_BLOCKS, ...LOS1_C03_CONTENT_BLOCKS, ...LOS1_C04_SOURCE_BLOCKS, ...LOS1_C04_BLOCKS, ...LOS1_C05_SOURCE_BLOCKS, ...LOS1_C05_BLOCKS, ...LOS1_C06_SOURCE_BLOCKS, ...LOS1_C06_CONTENT_BLOCKS, ...LOS1_REVIEW_ONE_BLOCKS, ...LOS1_C07_SOURCE_BLOCKS, ...LOS1_C07_CONTENT_BLOCKS, ...LOS1_C08_CONTENT_BLOCKS] : [],
-  exercises: index === 0 ? [...LOS1_C01_PREVIEW_EXERCISES, ...LOS1_C01_SOURCE_EXERCISES, ...LOS1_C01_AUDIO_COMPREHENSION_EXERCISES, ...LOS1_C01_EXAM_EXERCISES, ...LOS1_C01_ALTERNATE_EXAM_EXERCISES, ...LOS1_C01_EXTRA_EXERCISES, ...LOS1_C01_INTERACTIVE_EXERCISES, ...LOS1_C02_WB_EXERCISES, ...LOS1_C02_EXERCISES, ...LOS1_C02_EXAM_EXERCISES, ...LOS1_C03_SOURCE_EXERCISES, ...LOS1_C03_PRACTICE_EXERCISES, ...LOS1_C03_EXAM_EXERCISES, ...LOS1_C04_SOURCE_EXERCISES, ...LOS1_C04_PRACTICE_EXERCISES, ...LOS1_C04_EXAM_EXERCISES, ...LOS1_C05_SOURCE_EXERCISES, ...LOS1_C05_PRACTICE_EXERCISES, ...LOS1_C05_EXAM_EXERCISES, ...LOS1_C06_SOURCE_EXERCISES, ...LOS1_C06_PRACTICE_EXERCISES, ...LOS1_C06_EXAM_EXERCISES, ...LOS1_REVIEW_ONE_EXERCISES, ...LOS1_MIDTERM_FORM_A, ...LOS1_MIDTERM_FORM_B, ...LOS1_C07_SOURCE_EXERCISES, ...LOS1_C07_PRACTICE_EXERCISES, ...LOS1_C07_EXAM_A, ...LOS1_C07_EXAM_B, ...LOS1_C08_PRACTICE_EXERCISES, ...LOS1_C08_EXAM_A, ...LOS1_C08_EXAM_B] : [],
-  chapterTests: index === 0 ? [LOS1_C01_TEST, LOS1_C02_TEST, LOS1_C03_TEST, LOS1_C04_TEST, LOS1_C05_TEST, LOS1_C06_TEST, LOS1_C07_TEST, LOS1_C08_TEST, LOS1_MIDTERM_TEST] : [],
+  blocks: index === 0 ? [...LOS1_INTRO_BLOCKS, ...LOS1_C01_PREVIEW_BLOCKS, ...LOS1_C01_SOURCE_BLOCKS, ...LOS1_C01_GREETING_AUDIO_BLOCKS, ...LOS1_C01_APPLICATION_BLOCKS, ...LOS1_C01_CULTURE_BLOCKS, ...LOS1_C02_WB_BLOCKS, ...LOS1_C02_BLOCKS, ...LOS1_C03_SOURCE_BLOCKS, ...LOS1_C03_CONTENT_BLOCKS, ...LOS1_C04_SOURCE_BLOCKS, ...LOS1_C04_BLOCKS, ...LOS1_C05_SOURCE_BLOCKS, ...LOS1_C05_BLOCKS, ...LOS1_C06_SOURCE_BLOCKS, ...LOS1_C06_CONTENT_BLOCKS, ...LOS1_REVIEW_ONE_BLOCKS, ...LOS1_C07_SOURCE_BLOCKS, ...LOS1_C07_CONTENT_BLOCKS, ...LOS1_C08_CONTENT_BLOCKS, ...LOS1_C09_CONTENT_BLOCKS] : [],
+  exercises: index === 0 ? [...LOS1_C01_PREVIEW_EXERCISES, ...LOS1_C01_SOURCE_EXERCISES, ...LOS1_C01_AUDIO_COMPREHENSION_EXERCISES, ...LOS1_C01_EXAM_EXERCISES, ...LOS1_C01_ALTERNATE_EXAM_EXERCISES, ...LOS1_C01_EXTRA_EXERCISES, ...LOS1_C01_INTERACTIVE_EXERCISES, ...LOS1_C02_WB_EXERCISES, ...LOS1_C02_EXERCISES, ...LOS1_C02_EXAM_EXERCISES, ...LOS1_C03_SOURCE_EXERCISES, ...LOS1_C03_PRACTICE_EXERCISES, ...LOS1_C03_EXAM_EXERCISES, ...LOS1_C04_SOURCE_EXERCISES, ...LOS1_C04_PRACTICE_EXERCISES, ...LOS1_C04_EXAM_EXERCISES, ...LOS1_C05_SOURCE_EXERCISES, ...LOS1_C05_PRACTICE_EXERCISES, ...LOS1_C05_EXAM_EXERCISES, ...LOS1_C06_SOURCE_EXERCISES, ...LOS1_C06_PRACTICE_EXERCISES, ...LOS1_C06_EXAM_EXERCISES, ...LOS1_REVIEW_ONE_EXERCISES, ...LOS1_MIDTERM_FORM_A, ...LOS1_MIDTERM_FORM_B, ...LOS1_C07_SOURCE_EXERCISES, ...LOS1_C07_PRACTICE_EXERCISES, ...LOS1_C07_EXAM_A, ...LOS1_C07_EXAM_B, ...LOS1_C08_PRACTICE_EXERCISES, ...LOS1_C08_EXAM_A, ...LOS1_C08_EXAM_B,
+    ...LOS1_C09_SOURCE_EXERCISES, ...LOS1_C09_PRACTICE_EXERCISES,
+    ...LOS1_C09_EXAM_A, ...LOS1_C09_EXAM_B] : [],
+  chapterTests: index === 0 ? [LOS1_C01_TEST, LOS1_C02_TEST, LOS1_C03_TEST, LOS1_C04_TEST, LOS1_C05_TEST, LOS1_C06_TEST, LOS1_C07_TEST, LOS1_C08_TEST, LOS1_C09_TEST, LOS1_MIDTERM_TEST] : [],
   sources: index === 0 ? LOS1_RESEARCH_SOURCES.map(source => source.id === "M-COM-01" ? {
     ...source,
     author: "Xzapro4 ja Erkan Yilmaz",
@@ -717,6 +767,29 @@ export const LOS_BOOKS: readonly Book[] = specs.map((spec, index) => ({
     verifiedAt:"2026-11-11",
     modification:"Alkuperäisen COERLL-listan kaikki 30 aakkosmerkkiä säilytetty alkuperäisessä järjestyksessä. Suomenkieliset opastukset LOS!:n omia; äänitiedostoja ei kopioitu.",
     publicationNoteFi:"Tekstilista on kokonaisuudessaan LOS!:n sisällä. COERLL:n omien äänitiedostojen tiedostokohtainen lisenssi ja suora upotus vaativat yhä tarkistuksen. Erillinen Timwin public domain -äänite on merkitty omalla lähteellään.",
+  } : source.id === "M-WB-03" ? {
+    ...source,
+    originalUrl:"https://en.wikibooks.org/w/index.php?title=German/Level_I/Freizeit&oldid=4003622",
+    author:"Wikibooks German Level I -yhteiskirjoittajat (versio 4003622)",
+    publisher:"Wikibooks / Wikimedia",
+    licenseOrBasis:"CC BY-SA 4.0 · Sport und Zeit, 7 repliikkiä: tutkimusvaiheen lähde",
+    licenseUrl:"https://creativecommons.org/licenses/by-sa/4.0/",
+    permittedMode:"pending" as const,
+    readiness:"text-cleared" as const,
+    verifiedAt:"2026-11-11",
+    publicationNoteFi:"Alkuperäinen Franzin ja Gretan 7-repliikkinen dialogi on todennettu, mutta KOKO tekstiä ei vielä ole toimitettu LOS!-lukijaan. Lähteen audio sisältää sivun mainitseman kielioppivirheen; sitä ei ole hyväksytty soitettavaksi.",
+  } : source.id === "M-WB-04" ? {
+    ...source,
+    originalUrl:"https://en.wikibooks.org/w/index.php?title=German/Level_I/Geburtstag&oldid=4408402",
+    author:"Wikibooks German Level I -yhteiskirjoittajat (versio 4408402)",
+    publisher:"Wikibooks / Wikimedia",
+    licenseOrBasis:"CC BY-SA 4.0 · Days and Months -osion valittu seitsemän viikonpäivän luettelo",
+    licenseUrl:"https://creativecommons.org/licenses/by-sa/4.0/",
+    permittedMode:"hosted" as const,
+    readiness:"text-cleared" as const,
+    verifiedAt:"2026-11-11",
+    modification:"Kaikki seitsemän viikonpäivän saksankielistä nimeä ovat alkuperäisessä järjestyksessä. LOS!:n omat suomenkieliset selitykset ja tehtävät on lisätty.",
+    publicationNoteFi:"Kokonainen valittu seitsemän sanan listaus on LOS!:n Text B -sivulla. Kyseessä on sanaluettelo, ei video tai äänite. Erillinen Die Woche -audio odottaa tiedostokohtaista tarkistusta.",
   } : source.id === "M-WB-05" ? {
     ...source,
     originalUrl:"https://en.wikibooks.org/w/index.php?title=German/Lesson_1&oldid=3823655",
