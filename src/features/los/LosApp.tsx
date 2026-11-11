@@ -101,7 +101,7 @@ function BookHome({ book }: { book: Book }) {
       </div>
     </div>
     {book.lessons.some(lesson => lesson.publicationStatus === "preview") ?
-      <p className="los-notice" role="status">LOS! 1:n kolmessa ensimmäisessä kappaleessa on esikatselusisältöä ja yhteensä 16 ohjattua oppituntia. C01:n kaksi alkuperäisäänitettä ja niiden tekstit, C02:n Wikibooksin koko alkuperäinen Franz–Greta-pääteksti, sen 20 sekunnin äänite, LOS!:n oma lisäkeskustelu sekä Ariserin koko nelirepliikkinen dialogi ovat luettavissa. C03:n oikean saksankielisen puhujan alkuperäinen Bernan haastattelu on kokonaisena lukuun ottamatta näkyvästi poistettua puhelinnumeroa. Kappaletestit ovat käytettävissä, mutta lähteiden lopullinen toimitus, äänitteiden laitetestaus ja muiden kappaleiden sisällöt ovat vielä kesken.</p> :
+      <p className="los-notice" role="status">LOS! 1:n neljässä ensimmäisessä kappaleessa on esikatselusisältöä ja yhteensä 21 ohjattua oppituntia. C01:n kaksi alkuperäisäänitettä ja niiden tekstit, C02:n Wikibooksin koko alkuperäinen Franz–Greta-pääteksti, sen 20 sekunnin äänite, LOS!:n oma lisäkeskustelu sekä Ariserin koko nelirepliikkinen dialogi ovat luettavissa. C03:n oikean saksankielisen puhujan alkuperäinen Bernan haastattelu on kokonaisena lukuun ottamatta näkyvästi poistettua puhelinnumeroa. Kappaletestit ovat käytettävissä, mutta lähteiden lopullinen toimitus, äänitteiden laitetestaus ja muiden kappaleiden sisällöt ovat vielä kesken.</p> :
       <p className="los-notice" role="status">Oppituntien sisältöä ei ole vielä julkaistu. Etenemistä ei lasketa ennen kuin oikeita opintosuorituksia on saatavilla.</p>}
     <h2 className="los-section-title">Tutustu kirjaan</h2>
     <div className="los-path-cards">
@@ -180,6 +180,8 @@ function ChapterPage({ book, chapter, subsection }: { book: Book; chapter: Chapt
         "C02 on harjoitusversio: Wikibooksin aito Franz–Greta-pääteksti on kokonaan sisällä kuutena repliikkinä ja sen 20 sekunnin public domain -äänite on soitettavissa. LOS!:n oma lisädialogi, Ariserin nelirepliikkinen alkuperäislähde, 16 ydinsanaa ja 15 kysymyksen kappaletesti täydentävät kokonaisuutta. Alkuperäisäänten laitetoisto ja loppulaaduntarkistus ovat vielä kesken." :
         chapter.id === "C03" ?
         "C03 on harjoitusversio: Bernan koko alkuperäishaastattelun 12 repliikkiä ovat luettavissa yhtä näkyvästi poistettua puhelinnumeroa lukuun ottamatta. Lisäksi käytössä ovat 17 ydinsanaa, tulla-verbin opetusta, maantieteellinen sijaintikaavio, Ariserin nelirepliikkinen alkuperäisäänite ja 15 tehtävän testi. COERLL-videon upotus, todellinen laitetestaus ja koko kappaleen toimituksellinen laaduntarkistus ovat kesken." :
+        chapter.id === "C04" ?
+        "C04 on harjoitusversio: Wikibooksin Herr Schmidt–Herr Standish -dialogin kaikki kahdeksan alkuperäisrepliikkiä, COERLL:n kuuden kysymyksen alkuperäinen kohteliaisuuslista, tervehdyksien aito lisäkuuntelu, 14 uutta sanastokorttia, du/Sie-kielioppi sekä 12 tehtävän kappaletesti ovat käytettävissä. Kaksi kirjoitustilannetta itsearvioidaan. Äänitoiston laitetestaus ja lopullinen toimituksellinen tarkistus ovat vielä kesken." :
         "Kappale on harjoitusversio, mutta kaikki lähteet ja oppisisällöt eivät ole vielä toimitettuja." :
         "Tämän kappaleen 10 osion rakenne on valmis, mutta aineistoja ei ole vielä julkaistu."}
     </p>}
