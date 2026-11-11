@@ -8,6 +8,7 @@ import {gradeExercise,tokenOffsets,dueDate,type TextAnchor,type Grade} from './e
 import {allChapterExercises} from './practiceExtras';
 import {ExamSession} from './ExamSession';
 import {firstLessons,type FirstLessonStep} from './firstLessons';
+import {lookupGloss,translationFi} from './translations';
 import {useLosStore,type SyncStatus} from './useLosStore';
 import './los.css';
 
@@ -55,23 +56,29 @@ function Media({chapter}:{chapter:Chapter}){
  return <p>Erillisen autenttisen kuuntelun käyttöönotto on vielä kesken. Tästä ei synny suoritusmerkintää.</p>;
 }
 function WordSheet({word,onClose,onReview}:{word:string;onClose:()=>void;onReview:(term:string)=>void}){
- const candidate=allWords.find(w=>w.de.toLocaleLowerCase('de')===word.toLocaleLowerCase('de')||w.de.toLocaleLowerCase('de').includes(word.toLocaleLowerCase('de')));
+ const candidate=allWords.find(w=>w.de.toLocaleLowerCase('de')===word.toLocaleLowerCase('de'));
+ const gloss=lookupGloss(word);
  return <div className="los-sheet-backdrop" onClick={onClose}>
   <aside className="los-word-sheet" role="dialog" aria-modal="true" aria-label="Sanan selitys" onClick={e=>e.stopPropagation()}>
    <button className="los-quiet" onClick={onClose} aria-label="Sulje sanakortti">Sulje</button>
-   <h2 lang="de">{candidate?.de??word}</h2>
-   <p>{candidate?.fi??'Tälle sanalle ei ole vielä tarkistettua käännöstä. Hae myös sanakirjasta.'}</p>
-   {candidate?<><p className="los-meta">Löytyy kappaleesta {candidate.chapterId}</p><button onClick={()=>{onReview(candidate.de);onClose()}}>Lisää kertaukseen</button></>:null}
+   <h2 lang="de">{word}</h2>
+   <p>{gloss?.fi??candidate?.fi??'Tälle sanalle ei ole vielä tarkistettua käännöstä. Hae myös sanakirjasta.'}</p>
+   {gloss?.lemma?<p className="los-meta">Perusmuoto: <span lang="de">{gloss.lemma}</span></p>:null}
+   {gloss?.note?<p className="los-meta">{gloss.note}</p>:null}
+   {candidate?<p className="los-meta">Löytyy kappaleesta {candidate.chapterId}</p>:null}
+   {candidate||gloss?<button onClick={()=>{onReview(candidate?.de??gloss?.lemma??word);onClose()}}>Lisää kertaukseen</button>:null}
   </aside>
  </div>;
 }
-function Reader({chapter,store,exerciseMode,onSelect,selection,fontSize}:{chapter:Chapter;store:Store;exerciseMode?:boolean;onSelect?:(a:TextAnchor)=>void;selection?:TextAnchor|null;fontSize:number}){
+function Reader({chapter,store,exerciseMode,onSelect,onClear,selection,fontSize}:{chapter:Chapter;store:Store;exerciseMode?:boolean;onSelect?:(a:TextAnchor)=>void;onClear?:()=>void;selection?:TextAnchor|null;fontSize:number}){
  const [selectedWord,setSelectedWord]=useState('');
  const [freeInk,setFreeInk]=useState(false);
+ const [showTranslations,setShowTranslations]=useState(false);
  const [draft,setDraft]=useState<TextAnchor|null>(null);
  const isPicking=Boolean(exerciseMode||freeInk);
  const selectToken=(block:Block,start:number,end:number)=>{
-  const previous=exerciseMode?selection:draft;
+  const existing=item(store,'ink:'+block.id) as TextAnchor|null;
+  const previous=exerciseMode?selection:(draft??(existing?.contentVersion===LOS_VERSION?existing:null));
   const same=previous?.blockId===block.id;
   const next:TextAnchor={blockId:block.id,start:same&&previous?Math.min(previous.start,start):start,end:same&&previous?Math.max(previous.end,end):end,contentVersion:LOS_VERSION};
   if(exerciseMode)onSelect?.(next);
@@ -94,14 +101,16 @@ function Reader({chapter,store,exerciseMode,onSelect,selection,fontSize}:{chapte
  return <div className="los-reader">
   {!exerciseMode?<div className="los-reader-tools">
    <button aria-pressed={freeInk} onClick={()=>setFreeInk(!freeInk)}>{freeInk?'Poistu omasta korostuksesta':'Oma korostustussi'}</button>
+   <button type="button" aria-pressed={showTranslations} onClick={()=>setShowTranslations(value=>!value)}>{showTranslations?'Piilota suomennokset':'Näytä suomennokset'}</button>
    <span>{freeInk?'Napauta tai maalaa sanat. Tämä korostus ei ole tehtävävastaus.':'Napauta sanaa nähdäksesi merkityksen.'}</span>
   </div>:<p className="los-meta">Tehtäväkorostus: napauta sanoja peräkkäin tai maalaa hiirellä/sormella. Vastauksen ankkurit tallennetaan tekstin merkkiväleinä.</p>}
+  {exerciseMode&&selection?<button className="los-quiet" type="button" onClick={onClear}>Pyyhi tehtäväkorostus</button>:null}
   <div className="los-text" lang="de" style={{fontSize:fontSize+'px'}}>
   {chapter.blocks.map(block=>{
    const tokens=tokenOffsets(block.text);
    const stored=exerciseMode?selection:item(store,'ink:'+block.id) as TextAnchor|null;
-   const active=stored?.blockId===block.id?stored:null;
-   return <p key={block.id} data-los-block={block.id} onPointerUp={()=>selectDrag(block)}>
+   const active=stored?.blockId===block.id&&stored.contentVersion===LOS_VERSION&&stored.start>=0&&stored.end<=block.text.length?stored:null;
+   return <div key={block.id} className="los-reader-block"><p data-los-block={block.id} onPointerUp={()=>selectDrag(block)}>
     {block.speaker?<strong>{block.speaker}: </strong>:null}
     {tokens.map((token,i)=>{
      const highlighted=active&&token.start>=active.start&&token.end<=active.end;
@@ -117,7 +126,7 @@ function Reader({chapter,store,exerciseMode,onSelect,selection,fontSize}:{chapte
      </span>;
     })}
     {block.text.slice(tokens[tokens.length-1]?.end??0)}
-   </p>;
+   </p>{showTranslations&&!exerciseMode&&translationFi[block.id]?<p className="los-translation" lang="fi">{translationFi[block.id]}</p>:null}</div>;
   })}
   </div>
   {selectedWord?<WordSheet word={selectedWord} onClose={()=>setSelectedWord('')} onReview={term=>store.put('review:'+term,{due:new Date().toISOString().slice(0,10),stage:0,source:chapter.id})}/>:null}
@@ -151,12 +160,12 @@ function ExerciseCard({exercise,chapter,store,exam=false,fontSize}:{exercise:Exe
  const draftKey='draft:'+exercise.id+(exam?':exam':'');
  const prev=item(store,draftKey);
  const [answer,setAnswer]=useState<string>(typeof prev==='string'?prev:'');
- const [highlight,setHighlight]=useState<TextAnchor|null>(null);
+ const [highlight,setHighlight]=useState<TextAnchor|null>(()=>prev&&typeof prev==='object'&&'blockId' in prev?prev as TextAnchor:null);
  const [hint,setHint]=useState(false);
  const [result,setResult]=useState<Grade|null>(null);
  const [submitted,setSubmitted]=useState(false);
  const [mediaFailed,setMediaFailed]=useState(false);
- useEffect(()=>{if(typeof prev==='string')setAnswer(prev);},[prev]);
+ useEffect(()=>{if(typeof prev==='string')setAnswer(prev);else if(prev&&typeof prev==='object'&&'blockId' in prev)setHighlight(prev as TextAnchor);},[prev]);
  const update=(value:string)=>{setAnswer(value);store.put(draftKey,value);setResult(null);};
  const source=chapter.blocks.find(b=>b.id===exercise.blockId);
  const ordered=answer?answer.split(' | '):[];
@@ -180,7 +189,7 @@ function ExerciseCard({exercise,chapter,store,exam=false,fontSize}:{exercise:Exe
  return <article className="los-exercise" id={exercise.id}>
   <Label>{exercise.id} · {exam?'Koetila':'Harjoitustila'}</Label>
   <h3>{exercise.prompt}</h3>
-  {(exercise.type==='highlight'||exercise.type==='find-text')&&source?<Reader chapter={{...chapter,blocks:[source]}} store={store} exerciseMode onSelect={setHighlight} selection={highlight} fontSize={fontSize}/>:null}
+  {(exercise.type==='highlight'||exercise.type==='find-text')&&source?<Reader chapter={{...chapter,blocks:[source]}} store={store} exerciseMode onSelect={next=>{setHighlight(next);store.put(draftKey,next);setResult(null);}} onClear={()=>{setHighlight(null);store.put(draftKey,null);setResult(null);}} selection={highlight} fontSize={fontSize}/>:null}
   {(exercise.type==='listen-choice'||exercise.type==='listen-write')&&exercise.mediaUrl?<><Audio src={exercise.mediaUrl} title={'Kuuntele alkuperäisäänite '+exercise.id} onFailure={()=>setMediaFailed(true)}/>{mediaFailed?<><p className="los-warning">Äänite ei toimi. Siirrymme saman alkuperäisaineiston lukemiseen, joten tätä yritystä ei lasketa kuuntelunäytöksi.</p><Reader chapter={chapter} store={store} fontSize={fontSize}/></>:null}</>:null}
   {exercise.type==='video'?<>{exercise.videoId?<div className="los-video"><iframe src={'https://www.youtube-nocookie.com/embed/'+exercise.videoId} title={'Videotehtävä '+exercise.id} loading="lazy" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowFullScreen/></div>:null}{!exercise.reviewedMedia?<p className="los-warning">Videon sisältöä ja upotusta ei ole vielä tarkistettu. Tehtävää ei pisteytetä.</p>:null}</>:null}
   {exercise.options?<div className="los-options" role="radiogroup" aria-label={exercise.prompt}>
