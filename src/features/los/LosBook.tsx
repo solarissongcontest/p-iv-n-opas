@@ -5,6 +5,7 @@ import { LOS_BOOKS, type LosBookDefinition, type LosChapter } from "./catalog";
 import { LosAuthenticAudio, LosDictionary, LosIndexSearch, LosLearningPath, type LosDestination } from "./LosReferenceTools";
 import { LosChapterGrammar } from "./LosGrammarChapters";
 import "./los-book.css";
+import "./los-appendix.css";
 
 type LosSection = LosDestination;
 type LosLocation = { book: number | null; chapter: string | null; section: LosSection };
