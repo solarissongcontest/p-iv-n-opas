@@ -482,3 +482,30 @@
   .los-review-card { padding: 18px; }
   .los-review-question { font-size: 26px; }
 }
+
+
+/* Full chapter vocabulary remains visible and searchable inside LOS!, without
+   borrowing unlicensed dictionary entries or redirecting to external readers. */
+.los-word-controls { display:flex; align-items:flex-end; justify-content:space-between; gap:16px; flex-wrap:wrap; max-width:960px; margin:24px 0 14px; }
+.los-word-search { flex:1 1 280px; max-width:440px; }
+.los-word-search label { display:flex; align-items:center; gap:8px; font-size:14px; font-weight:600; margin-bottom:7px; color:var(--los-ink-secondary); }
+.los-word-search input { width:100%; height:48px; padding:10px 14px; border:1px solid var(--los-border-strong); border-radius:10px; background:var(--los-surface); color:var(--los-ink); font-size:16px; }
+.los-word-filters { display:flex; flex-wrap:wrap; gap:6px; }
+.los-word-filters button { display:inline-flex; align-items:center; gap:7px; min-height:44px; border:1px solid var(--los-border); background:var(--los-surface); border-radius:10px; padding:8px 14px; color:var(--los-ink-secondary); font-size:14px; font-weight:600; }
+.los-word-filters button[aria-pressed="true"] { border-color:var(--los-book-accent-readable); color:var(--los-book-accent-readable); background:var(--los-surface-muted); }
+.los-word-list { list-style:none; padding:0; max-width:960px; margin:18px 0; }
+.los-word-list li { display:flex; align-items:center; justify-content:space-between; gap:20px; min-height:96px; padding:16px; border-bottom:1px solid var(--los-border); }
+.los-word-main { min-width:0; }
+.los-word-main b { display:block; color:var(--los-ink); font-size:19px; font-weight:650; }
+.los-word-main p { margin:3px 0 4px; font-size:15px; }
+.los-word-main small { display:block; font-size:12px; }
+.los-word-main a { display:inline-block; margin-top:6px; color:var(--los-book-accent-readable); text-decoration:underline; text-underline-offset:3px; font-size:12px; }
+.los-word-list li > button { flex-shrink:0; font-size:13px; }
+.los-word-footer { max-width:960px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:14px; margin:24px 0; }
+.los-word-footer p { margin:0; font-size:13px; color:var(--los-ink-secondary); }
+@media (max-width:639px) {
+  .los-word-list li { align-items:flex-start; flex-wrap:wrap; gap:10px; }
+  .los-word-list li > button { margin-left:auto; }
+  .los-word-controls { align-items:stretch; }
+  .los-word-search { max-width:none; }
+}
