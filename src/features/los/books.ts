@@ -7,6 +7,7 @@ import { LOS1_INTRO_BLOCKS } from "./los1-onboarding.ts";
 import { LOS1_C01_SECTIONS, emptyChapterSections } from "./chapterSections.ts";
 import { LOS1_C01_GREETING_AUDIO_BLOCKS, LOS1_C01_AUDIO_COMPREHENSION_EXERCISES } from "./los1-c01-audio-list.ts";
 import { LOS1_C01_EXAM_EXERCISES, LOS1_C01_TEST } from "./los1-c01-chapter-test.ts";
+import { LOS1_C01_ALTERNATE_EXAM_EXERCISES } from "./los1-c01-exam-alternates.ts";
 import { LOS1_C01_APPLICATION_BLOCKS, LOS1_C01_CULTURE_BLOCKS, LOS1_C01_EXTRA_EXERCISES } from "./los1-c01-activities.ts";
 
 const specs: readonly [string, string, string, string, string, string][] = [
@@ -51,6 +52,7 @@ export const LOS_BOOKS: readonly Book[] = specs.map((spec, index) => ({
       ...LOS1_C01_AUDIO_COMPREHENSION_EXERCISES.map(exercise => exercise.id),
       ...LOS1_C01_PREVIEW_EXERCISES.map(exercise => exercise.id),
       ...LOS1_C01_EXAM_EXERCISES.map(exercise => exercise.id),
+      ...LOS1_C01_ALTERNATE_EXAM_EXERCISES.map(exercise => exercise.id),
       ...LOS1_C01_EXTRA_EXERCISES.map(exercise => exercise.id),
     ],
   } : { ...chapter, sections: emptyChapterSections() }) : [],
@@ -122,7 +124,7 @@ export const LOS_BOOKS: readonly Book[] = specs.map((spec, index) => ({
     return lesson;
   }) : [],
   blocks: index === 0 ? [...LOS1_INTRO_BLOCKS, ...LOS1_C01_PREVIEW_BLOCKS, ...LOS1_C01_SOURCE_BLOCKS, ...LOS1_C01_GREETING_AUDIO_BLOCKS, ...LOS1_C01_APPLICATION_BLOCKS, ...LOS1_C01_CULTURE_BLOCKS] : [],
-  exercises: index === 0 ? [...LOS1_C01_PREVIEW_EXERCISES, ...LOS1_C01_SOURCE_EXERCISES, ...LOS1_C01_AUDIO_COMPREHENSION_EXERCISES, ...LOS1_C01_EXAM_EXERCISES, ...LOS1_C01_EXTRA_EXERCISES] : [],
+  exercises: index === 0 ? [...LOS1_C01_PREVIEW_EXERCISES, ...LOS1_C01_SOURCE_EXERCISES, ...LOS1_C01_AUDIO_COMPREHENSION_EXERCISES, ...LOS1_C01_EXAM_EXERCISES, ...LOS1_C01_ALTERNATE_EXAM_EXERCISES, ...LOS1_C01_EXTRA_EXERCISES] : [],
   chapterTests: index === 0 ? [LOS1_C01_TEST] : [],
   sources: index === 0 ? LOS1_RESEARCH_SOURCES.map(source => source.id === "M-COM-01" ? {
     ...source,
