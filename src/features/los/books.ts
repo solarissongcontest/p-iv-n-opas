@@ -721,7 +721,7 @@ export const LOS_BOOKS: readonly Book[] = specs.map((spec, index) => ({
       steps:[
         {id:"L049-S01",title:"Tutustu alkuperäisen Commons-äänitteen taustaan",required:true,blockId:"los1-c09-audio-intro"},
         {id:"L049-S02",title:"Toista oikean ihmisen 15 sekunnin viikonpäiväluettelo",required:true,blockId:"los1-c09-m-com-08-audio"},
-        {id:"L049-S03",title:"Tunnista äänitteen alkusana",required:true,exerciseId:"los1-c09-audio-intro"},
+        {id:"L049-S03",title:"Tunnista äänitteen alkusana",required:true,exerciseId:"los1-c09-audio-question-intro"},
         {id:"L049-S04",title:"Tunnista ensimmäinen viikonpäivä",required:true,exerciseId:"los1-c09-audio-first"},
         {id:"L049-S05",title:"Tunnista viikon kolmas päivä",required:true,exerciseId:"los1-c09-audio-third"},
         {id:"L049-S06",title:"Tunnista lopun viikonloppupäivät",required:true,exerciseId:"los1-c09-audio-weekend"},
