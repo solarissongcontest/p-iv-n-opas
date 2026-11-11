@@ -49,7 +49,7 @@ function complete(attempt=0){
   answers:Object.fromEntries(selectedTestExercises(definition,book.exercises,attempt)
    .map(ex=>[ex.id,answer(ex)])),
   selfAssessment:Object.fromEntries(definition.speechCriteria.map(x=>[x.id,"onnistui" as const])),
-  writtenResponse:message,secondWrittenResponse:dialogue,
+  writtenResponse:message,secondWrittenResponse:dialogue,listeningSelfReported:true,
  };
 }
 test("Book has 50-point standalone EX-FINAL, all sixty canonical lessons, ten preview chapters",()=>{
@@ -123,10 +123,13 @@ test("Both separate writing outputs are mandatory, privately stored, and never m
  assert.equal(a?.maximum,50);
  assert.equal(a?.writtenResponse,message);
  assert.equal(a?.secondWrittenResponse,dialogue);
+ assert.equal(a?.listeningSelfReported,true);
  assert.deepEqual(examScoreGroups(definition,a).map(g=>[g.id,g.score,g.maximum]),[
   ["listening",12,12],["reading",10,10],["vocabulary",10,10],
   ["grammar",10,10],["situations",8,8],
  ]);
+ const missingAttestation={...complete(),listeningSelfReported:false};
+ assert.equal(gradeChapterTest(definition,chosen,missingAttestation,"2026-11-11T18:45:00Z"),null);
  const missingSecond={...complete(),secondWrittenResponse:""};
  assert.equal(gradeChapterTest(definition,chosen,missingSecond,"2026-11-11T18:45:00Z"),null);
  const tooShortMessage={...complete(),writtenResponse:"Ich heiße Mia.\nHallo."};
@@ -143,6 +146,8 @@ test("Both separate writing outputs are mandatory, privately stored, and never m
  assert.equal(previous.previousResults.length,1);
  assert.equal(previous.previousResults[0]?.writtenResponse,message);
  assert.equal(previous.previousResults[0]?.secondWrittenResponse,dialogue);
+ assert.equal(previous.previousResults[0]?.listeningSelfReported,true);
+ assert.equal(previous.listeningSelfReported,false);
  assert.equal(previous.secondWrittenResponse,"");
  const b=gradeChapterTest(definition,selectedTestExercises(definition,book.exercises,1),
   complete(1),"2026-11-12T18:45:00Z");
@@ -157,8 +162,15 @@ test("In-app final UI displays and retains both answers and uses existing safe R
  assert.match(workspace,/listeningBlockIds/);
  assert.match(workspace,/<Reader book=\{book\} blocks=\{listeningBlocks\}/);
  assert.match(workspace,/SpeechRecorder/);
+ assert.match(workspace,/onMediaStarted/);
+ assert.match(workspace,/listeningSelfReported/);
+ assert.match(workspace,/unplayed\.length > 0/);
+ const reader=readFileSync("src/features/los/Reader.tsx","utf8");
+ assert.match(reader,/onPlaying/);
+ assert.match(reader,/onMediaStarted/);
  const model=readFileSync("src/features/los/model.ts","utf8");
  assert.match(model,/Invalid second exam writing contract/);
  const grader=readFileSync("src/features/los/chapterTest.ts","utf8");
  assert.match(grader,/secondWrittenResponse/);
+ assert.match(grader,/listeningSelfReported/);
 });
