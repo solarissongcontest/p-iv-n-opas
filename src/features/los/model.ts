@@ -41,6 +41,7 @@ export type ContentBlock =
   | { id: string; version: string; kind: "heading"; level: 2 | 3; text: string }
   | { id: string; version: string; kind: "paragraph" | "authenticText"; text: string; language: "de" | "fi"; sourceId?: string }
   | { id: string; version: string; kind: "dialogue"; turns: { speaker: string; text: string; translationFi?: string }[]; sourceId: string }
+  | { id: string; version: string; kind: "transcript"; lines: { de: string; fi: string; noteFi?: string }[]; sourceId: string }
   | { id: string; version: string; kind: "grammar"; title: string; explanationFi: string; examples: { de: string; fi: string }[] }
   | { id: string; version: string; kind: "table"; headers: string[]; rows: string[][] }
   | { id: string; version: string; kind: "image"; src: string; alt: string; caption: string; sourceId: string }
