@@ -12,14 +12,14 @@ import { LOS_CHAPTER_SECTION_TITLES } from "../src/features/los/chapterSections.
 const los1 = LOS_BOOKS[0];
 if (!los1) throw new Error("LOS! 1 must exist");
 
-test("LOS! 1 retains 10 chapters and 60 canonical lessons, with fifty-four preview lessons", () => {
+test("LOS! 1 retains 10 chapters and 60 canonical lessons, with fifty-five preview lessons", () => {
   assert.equal(los1.chapters.length, 10);
   assert.equal(los1.lessons.length, 60);
   assert.deepEqual(los1.chapters.map(item => item.id), Array.from({ length: 10 }, (_, i) => "C" + String(i + 1).padStart(2, "0")));
   assert.deepEqual(los1.lessons.map(item => item.id), Array.from({ length: 60 }, (_, i) => "L" + String(i + 1).padStart(3, "0")));
   assert.equal(los1.chapters.filter(item => item.publicationStatus === "preview").length, 10);
   assert.equal(los1.chapters.filter(item => item.publicationStatus === "published").length, 0);
-  assert.deepEqual(los1.lessons.filter(item => item.publicationStatus === "preview").map(item => item.id), ["L001", "L002", "L003", "L004", "L005", "L006", "L007", "L008", "L009", "L010", "L011", "L012", "L013", "L014", "L015", "L016", "L017", "L018", "L019", "L020", "L021", "L022", "L023", "L024", "L025", "L026", "L027", "L028", "L029", "L030", "L031", "L032", "L033", "L034", "L035", "L036", "L037", "L038", "L039", "L040", "L041", "L043", "L045", "L046", "L048", "L050", "L051", "L053", "L055", "L056", "L057", "L058", "L059", "L060"]);
+  assert.deepEqual(los1.lessons.filter(item => item.publicationStatus === "preview").map(item => item.id), ["L001", "L002", "L003", "L004", "L005", "L006", "L007", "L008", "L009", "L010", "L011", "L012", "L013", "L014", "L015", "L016", "L017", "L018", "L019", "L020", "L021", "L022", "L023", "L024", "L025", "L026", "L027", "L028", "L029", "L030", "L031", "L032", "L033", "L034", "L035", "L036", "L037", "L038", "L039", "L040", "L041", "L043", "L045", "L046", "L047", "L048", "L050", "L051", "L053", "L055", "L056", "L057", "L058", "L059", "L060"]);
   assert.ok(los1.lessons.filter(item => item.publicationStatus !== "preview").every(item => !item.steps.length));
   assert.deepEqual(validateBook(los1), []);
 });
@@ -59,7 +59,7 @@ test("L001 begins without prerequisite German and stores an ungraded personal go
 });
 test("two Commons media sources verified, with separate Goethe culture reference", () => {
   assert.equal(los1.sources.length, 29);
-  assert.equal(los1.sources.filter(source => source.permittedMode === "pending").length, 11);
+  assert.equal(los1.sources.filter(source => source.permittedMode === "pending").length, 10);
   const source = los1.sources.find(item => item.id === "M-COM-01");
   assert.equal(source?.permittedMode, "embed");
   assert.equal(source?.licenseUrl, "https://creativecommons.org/licenses/by-sa/3.0/");
@@ -69,7 +69,7 @@ test("two Commons media sources verified, with separate Goethe culture reference
   assert.deepEqual(dialogue.turns.map(turn => turn.text), LOS1_C01_DIALOGUE_TURNS.map(turn => turn.text));
   assert.equal(LOS1_C01_AUTHENTIC_TEXT, LOS1_C01_DIALOGUE_TURNS.map(turn => turn.text).join("\n"));
   assert.ok(los1.blocks.some(block => block.kind === "media" && block.sourceId === "M-COM-01"));
-  assert.equal(los1.blocks.filter(block => block.kind === "dialogue").length, 13);
+  assert.equal(los1.blocks.filter(block => block.kind === "dialogue").length, 14);
   assert.equal(los1.blocks.filter(block => block.kind === "dialogue" && block.sourceId === "M-COM-01").length, 2);
   const list = los1.blocks.find(block => block.kind === "transcript");
   assert.ok(list && list.kind === "transcript");
