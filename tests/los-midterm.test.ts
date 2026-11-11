@@ -92,7 +92,7 @@ test("midterm has exact 25/25 genuinely distinct authored exam tasks",()=>{
   assert.equal(LOS1_MIDTERM_FORM_B.length,25);
   assert.equal(definition.exerciseIds.length,25);
   assert.equal(definition.alternativeExerciseIds?.length,25);
-  assert.equal(new Set([...definition.exerciseIds,...definition.alternativeExerciseIds??[]]).size,50);
+  assert.equal(new Set([...definition.exerciseIds,...(definition.alternativeExerciseIds ?? [])]).size,50);
   assert.deepEqual(definition.scoreGroups?.map(g=>g.exerciseIds.length),[5,7,5,4,4]);
   assert.deepEqual(definition.scoreGroups?.map(g=>g.titleFi),
     ["Tervehdykset","Nimet ja verbit","Alkuperä","Du ja Sie","Vointi"]);
