@@ -3,6 +3,7 @@
  * Only the beginner greeting / phonetics material taught in C01 is examined.
  */
 import type { Exercise } from "./model";
+import { LOS1_C01_ALTERNATE_EXAM_EXERCISES } from "./los1-c01-exam-alternates.ts";
 
 const stem = {
   version: "0.1.0",
@@ -69,5 +70,6 @@ export const LOS1_C01_TEST = {
     + "Tarkat ratkaisut ja pisteet näkyvät vasta palautuksen jälkeen. "
     + "Tee myös puheen itsearviointi, joka ei vaikuta automaattisiin pisteisiin.",
   exerciseIds: LOS1_C01_EXAM_EXERCISES.map(exercise => exercise.id),
+  alternativeExerciseIds: LOS1_C01_ALTERNATE_EXAM_EXERCISES.map(exercise => exercise.id),
   speechCriteria: LOS1_C01_SPEECH_CRITERIA,
 } as const;
