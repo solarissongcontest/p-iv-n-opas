@@ -9,6 +9,7 @@ export type FirstLessonStep={
 export type FirstLesson={
  id:string;title:string;steps:readonly FirstLessonStep[];
  requiredIds:readonly string[];
+ requiredMediaIds?:readonly string[];
 };
 export const firstLessons:readonly FirstLesson[]=[
  {id:'L001',title:'Miten LOS! 1:llä opiskellaan?',requiredIds:[],steps:[
