@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ArrowLeft, ArrowRight, CheckCircle2 } from "lucide-react";
 import type { Book, Lesson, LessonProgress } from "./model";
 import { Reader } from "./Reader";
@@ -13,23 +13,28 @@ export function LessonRunner({ book, lesson }: { book: Book; lesson: Lesson }) {
   );
   const [index, setIndex] = useState(0);
   const [checkedSteps, setCheckedSteps] = useState<string[]>([]);
+  const restoredLesson = useRef<string | null>(null);
   useEffect(() => {
-    if (saveStatus === "loading") return;
+    // Do not bounce the learner backwards on every asynchronous autosave.
+    if (saveStatus === "loading" || restoredLesson.current === lesson.id) return;
+    restoredLesson.current = lesson.id;
     const firstUnfinished = lesson.steps.findIndex(step => !progress.completedStepIds.includes(step.id));
     setIndex(firstUnfinished < 0 ? Math.max(0, lesson.steps.length - 1) : firstUnfinished);
-  }, [lesson.id, lesson.steps, saveStatus]);
+  }, [lesson.id, lesson.steps, saveStatus, progress.completedStepIds]);
   const step = lesson.steps[index];
   const required = lesson.steps.filter(item => item.required);
   const completedCount = required.filter(item => progress.completedStepIds.includes(item.id)).length;
   const advance = () => {
     if (!step || (step.exerciseId && !checkedSteps.includes(step.id))) return;
-    const completedStepIds = Array.from(new Set([...progress.completedStepIds, step.id]));
-    const isDone = required.every(item => completedStepIds.includes(item.id));
-    setProgress({
-      lessonId: lesson.id, lessonVersion: lesson.version, completedStepIds,
-      status: isDone ? "completed" : "in-progress", updatedAt: new Date().toISOString(),
+    setProgress(previous => {
+      const completedStepIds = Array.from(new Set([...previous.completedStepIds, step.id]));
+      const isDone = required.every(item => completedStepIds.includes(item.id));
+      return {
+        lessonId: lesson.id, lessonVersion: lesson.version, completedStepIds,
+        status: isDone ? "completed" : "in-progress", updatedAt: new Date().toISOString(),
+      };
     });
-    if (index < lesson.steps.length - 1) setIndex(index + 1);
+    setIndex(current => Math.min(current + 1, lesson.steps.length - 1));
   };
   if (!step) return <div className="los-empty"><h2>Oppitunnissa ei ole vielä vaiheita</h2><p>Opetusmateriaali julkaistaan tähän myöhemmin.</p></div>;
   const block = step.blockId ? book.blocks.find(item => item.id === step.blockId) : undefined;
@@ -37,6 +42,7 @@ export function LessonRunner({ book, lesson }: { book: Book; lesson: Lesson }) {
   return <section className="los-lesson">
     <div className="los-lesson-heading"><p className="los-eyebrow">OPPITUNTI {lesson.sequence} · NOIN {lesson.estimatedMinutes} MIN</p><h1>{lesson.title}</h1>
       <p>{lesson.objectives.join(" · ")}</p>
+      {lesson.publicationStatus === "preview" && <p className="los-notice">Harjoitusversio: tämän tunnin alkuperäisteksti ja rajatut harjoitukset ovat käytettävissä. Täysimittainen 30 minuutin opetus ja arviointi ovat vielä toimitettavana.</p>}
       <div className="los-progress-heading"><span>Pakolliset vaiheet</span><span>{completedCount} / {required.length}</span></div>
       <progress value={completedCount} max={Math.max(1, required.length)} />
     </div>
@@ -59,6 +65,6 @@ export function LessonRunner({ book, lesson }: { book: Book; lesson: Lesson }) {
     </div>
     {exercise && !checkedSteps.includes(step.id) && <p className="los-support">Tarkista tehtävä ennen kuin merkitset tämän vaiheen käsitellyksi. Oikeaa vastausta ei vaadita.</p>}
     <p className="los-storage-state">{losSyncMessage(saveStatus)}</p>
-    {progress.status === "completed" && <p className="los-feedback is-correct" role="status">Kaikki pakolliset vaiheet käsitelty. Tämä ei ole virallinen kurssisuoritus.</p>}
+    {progress.status === "completed" && <p className="los-feedback is-correct" role="status">Tämän harjoitusversion kaikki pakolliset vaiheet käsitelty. Tämä ei ole virallinen kurssisuoritus.</p>}
   </section>;
 }
