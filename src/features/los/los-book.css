@@ -213,7 +213,8 @@
  .los-library-heading .los-logo {font-size:72px;}
  .los-library-heading h1 {font-size:34px;}
  .los-library-heading>p:last-child {font-size:16px;}
-  .los-book-topbar {height:56px;padding:0 12px;}\n .los-top-toc {display:inline-flex!important;}
+  .los-book-topbar {height:56px;padding:0 12px;}
+ .los-top-toc {display:inline-flex!important;}
  .los-book-layout {display:block;}
  .los-book-sidebar {display:none;}
  .los-book-sidebar.is-open {display:block;position:fixed;z-index:70;top:56px;bottom:0;right:0;left:auto;width:min(86vw,330px);height:auto;overflow:auto;background:var(--los-paper);padding:17px;box-shadow:-8px 8px 28px rgba(0,0,0,.12);border-left:1px solid var(--los-line);}
