@@ -47,9 +47,9 @@ test("C09 has ten independently routable preview sections and valid model",()=>{
  assert.equal(chapter.sections?.length,10);
  assert.equal(LOS1_C09_CONTENT_BLOCKS.length,18);
  assert.equal(LOS1_C09_SOURCE_EXERCISES.length,4);
- assert.equal(LOS1_C09_PRACTICE_EXERCISES.length,41);
+ assert.equal(LOS1_C09_PRACTICE_EXERCISES.length,39);
  assert.equal(LOS1_C09_EXAM_A.length,14);
- assert.equal(chapter.exerciseIds.length,59);
+ assert.equal(chapter.exerciseIds.length,57);
  assert.equal(new Set(chapter.exerciseIds).size,59);
  const sections=chapter.sections??[];
  assert.ok(sections.every(s=>s.publicationStatus==="preview"));
@@ -87,8 +87,8 @@ test("Main source and audio remain visibly pending, not fabricated",()=>{
  assert.equal(metadata.permittedMode,"pending");
  assert.ok(metadata.originalUrl?.includes("oldid=4003622"));
  const source=book.blocks.find(b=>b.id==="los1-c09-text-a-pending");
- assert.ok(source&&source.kind==="paragraph"&&source.text.includes("KOKO")===false);
- assert.ok(source&&source.kind==="paragraph"&&source.text.includes("Koko")===false);
+ assert.ok(source&&source.kind==="paragraph"&&source.text.includes("ei ole vielä tuotu tähän lukijaan"));
+ assert.ok(source&&source.kind==="paragraph"&&source.text.includes("seitsemän repliikin Franz–Greta-dialogi"));
  const media=book.blocks.find(b=>b.id==="los1-c09-text-b-media-pending");
  assert.ok(media&&media.kind==="paragraph"&&media.text.includes("vielä"));
  assert.ok(book.blocks.filter(b=>b.id.startsWith("los1-c09-")).every(b=>b.kind!=="media"));
