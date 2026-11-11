@@ -61,6 +61,9 @@ export function LosCloudPanel({bookId,chapterId,draft,replaceDraft}:{
         storeLosCloudMeta(bookId,chapterId,remote);
         setMessage("Tämän laitteen ja pilven tiedot ovat samat.");return;
       }
+      if(draftIsEmpty(snapshot)){
+        importRecord(remote);return;
+      }
       if(localMeta?.revision===remote.revision){
         const uploaded=await uploadLosCloud(bookId,chapterId,snapshot,remote.revision);
         if(!uploaded)throw new Error("Palvelin ei vahvistanut tallennusta.");
@@ -90,6 +93,8 @@ export function LosCloudPanel({bookId,chapterId,draft,replaceDraft}:{
         setMessage("Pilviversio on muuttunut jälleen. Tarkista tilanne ennen korvaamista.");return;
       }
       const snapshot=latest.current;
+      // Download the previous cloud draft before an intentional overwrite.
+      backupLosLocalDraft(bookId,chapterId,current.payload);
       const updated=await uploadLosCloud(bookId,chapterId,snapshot,current.revision);
       if(!updated)throw new Error("Palvelin ei vahvistanut tallennusta.");
       storeLosCloudMeta(bookId,chapterId,updated);
