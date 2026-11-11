@@ -9,6 +9,7 @@ import {allChapterExercises} from './practiceExtras';
 import {ExamSession} from './ExamSession';
 import {type FirstLessonStep} from './firstLessons';
 import {guidedLessons} from './guidedLessons';
+import {auditLosRelease} from './releaseAudit';
 
 
 
@@ -576,7 +577,29 @@ export function LosApp({ownerId}:{ownerId:string}){
      {view.kind==='notes'?<><h1>Omat muistiinpanot</h1>{chapters.map(c=><div className="los-note" key={c.id}><h2>{c.id} · {c.name}</h2><textarea aria-label={'Muistiinpanot '+c.name} rows={4} value={valueString(store,'note:'+c.id)} onChange={e=>store.put('note:'+c.id,e.target.value)}/></div>)}</>:null}
      {view.kind==='bookmarks'?<><h1>Kirjanmerkit</h1>{chapters.filter(c=>item(store,'bookmark:'+c.id)).map(c=><button className="los-index-row" key={c.id} onClick={()=>go({kind:'chapter',cid:c.id,section:(item(store,'bookmark:'+c.id) as {section:string}).section})}>{c.id} · {c.name} · Avaa tallennettu osio</button>)}{!chapters.some(c=>item(store,'bookmark:'+c.id))?<p>Et ole vielä tallentanut kirjanmerkkejä.</p>:null}</>:null}
      {view.kind==='media'?<><h1>Mediakirjasto</h1><Audio title="Franz ja Jörg, alkuperäinen dialogi (14 s)" src="https://commons.wikimedia.org/wiki/Special:Redirect/file/Gespr%C3%A4chVorstellung.ogg"/><Audio title="German Vocabulary – Greetings (28 s)" src="https://commons.wikimedia.org/wiki/Special:Redirect/file/German_Vocabulary_-_Greetings.ogg"/><h2>Videot, joita ei ole vielä toistotestattu</h2><p>Nicos Weg -video voidaan avata virallisessa upotuksessa. Käytettävyyttä ei ole vahvistettu eikä tästä tehdä automaattisesti arvosteltavaa tehtävää.</p><p className="los-warning">Virallista videoupotusta ei ole vielä tarkistettu alkuperäisen palveluntarjoajan kautta. Video pidetään julkaisuportin takana eikä sen perusteella pisteytetä vastauksia.</p></>:null}
-     {view.kind==='sources'?<><h1>Lähteet ja tarkistustilat</h1><p>Aineistojen oikeudet tarkistetaan erikseen teksteille, äänelle ja videoille. Tekstien katselu ei edellytä näiden osoitteiden avaamista.</p>{chapters.map(c=><section className="los-note" key={c.id}><h2>{c.id} {c.name}</h2><p>{c.status==='text-reviewed'?'Tekstilohko tuotu; lisenssin ja kieliasun lopullinen QA avoin.':'Päätekstin julkaisu estynyt.'}</p><SourceNotice chapter={c}/></section>)}</>:null}
+     {view.kind==='sources'?<><h1>Lähteet ja julkaisun tarkistustilat</h1>
+      <p>Alkuperäiset tekstit luetaan kokonaisuudessaan LOS!:ssa. Julkaisuportin tila ei muutu hyväksytyksi vain siksi, että lähdesivu tai kooditesti toimii.</p>
+      {(()=>{const audit=auditLosRelease();return <>
+       <h2>Oppikirjan toimituksellinen tilanne</h2>
+       <div className="los-stats">
+        <span>Päätekstit <b>{audit.textsImported}/10 tuotu</b></span>
+        <span>Ohjatut tunnit <b>{audit.lessonsAuthored}/{audit.lessonsTotal}</b></span>
+        <span>Kappalekokeet <b>{audit.chapterExams}/10 alustavaa</b></span>
+        <span>Alustava ydinsanasto <b>{audit.uniqueCoreWords} eri merkintää</b></span>
+       </div>
+       <p className="los-warning" role="status">{audit.ready?'Kaikki G1–G8-portit hyväksytty.':'Koko LOS! 1 ei ole vielä julkaisuvalmis. Lähteiden, laitteiden ja tietokannan erilliset hyväksynnät ovat edelleen avoimia.'}</p>
+       <h2>Julkaisuportit G1–G8</h2>
+       <div className="los-gate-list">{audit.gates.map(g=><section className="los-note" key={g.id}>
+        <h3>{g.id} · {g.title} · {g.passed?'Hyväksytty':'Avoin'}</h3>
+        <p>{g.detail}</p>
+       </section>)}</div>
+       <h2>Vielä toteuttamatta olevat oppitunnit</h2>
+       <p>{audit.unauthoredLessonIds.join(', ')||'Kaikilla tunnuksilla on käsikirjoitettu opetuspolku.'}</p>
+       {audit.additionalBlocks.map(block=><p key={block.id}><b>{block.id} · {block.resolved?'Varmistettu':'Avoin'}</b>: {block.detail}</p>)}
+      </>})()}
+      <h2>Alkuperäisten päätekstien lähdemerkinnät</h2>
+      {chapters.map(c=><section className="los-note" key={c.id}><h3>{c.id} {c.name}</h3><p>{c.status==='text-reviewed'?'Koko lähdeteksti alustavasti tuotu kirjan sisään. Lopullinen tekijänoikeus- ja kieliasutarkistus edelleen avoin.':'Päätekstin käyttö ja oppituntien hyväksyntä estetty, kunnes kokonainen alkuperäinen lähde on saatu.'}</p><SourceNotice chapter={c}/></section>)}
+     </>:null}
      {view.kind==='progress'?<><h1>Osaaminen</h1><p>Oppitunteja kirjattu {finishedLessons}/60. Tämä ei ole kielitaitoarvosana.</p><h2>Erilliset osaamisnäytöt</h2><p>Tehtäviin tallennetut vastausyritykset: {Object.keys(store.items).filter(x=>x.startsWith('attempt:')).length}. Viivästetyt kertaukset: {Object.keys(store.items).filter(x=>x.startsWith('review:')).length}. Nämä mittarit eivät itsessään todista A1-tasoa.</p><button onClick={()=>go({kind:'review'})}>Avaa tämän päivän kertaus</button></>:null}
      {view.kind==='review'?<><h1>Kertaa</h1><p>Harjoittele myös myöhempinä päivinä. Kertauksen viiveet 1, 3, 7, 14 ja 30 päivää. Ei pakollista streakiä.</p>{reviews.length===0?<p>Ei erääntyneitä kortteja. Voit lisätä niitä sanastosta.</p>:reviews.slice(0,16).map(([key,v])=><ReviewCard key={key} id={key} value={v} store={store}/>)}</>:null}
      {view.kind==='settings'?<><h1>Lukemisen asetukset</h1><label htmlFor="los-text-size">Saksankielisen tekstin koko: {fontSize} px</label><input id="los-text-size" type="range" min={16} max={24} value={fontSize} onChange={e=>store.put('setting:fontSize',Number(e.target.value))}/><p>Vaalea ja tumma tila periytyvät Opintopäiväkirjan asetuksista. Älä käytä puhelimen toista päällekkäistä alapalkkia.</p></>:null}
