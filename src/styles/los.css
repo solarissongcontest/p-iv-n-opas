@@ -720,3 +720,23 @@
   .los-exam-writing-return { padding:14px; }
   .los-exam-speech > textarea { padding:12px; }
 }
+
+
+/* LOS! C03 in-book geography: explicitly a schematic with a full text alternative. */
+.los-country-schematic {
+  display:grid; gap: 12px;
+  max-width: 920px; margin: 24px 0; padding: clamp(16px,3vw,28px);
+  border: 1px solid var(--los-border); border-radius: 14px;
+  background: var(--los-surface);
+}
+.los-country-schematic h2 { margin:0; font-size: clamp(19px,2.6vw,26px); color: var(--los-ink); }
+.los-country-schematic p { margin: 0; font-size: 14px; line-height: 1.6; }
+.los-country-map-scroll { width:100%; max-width:100%; overflow-x:auto; border-radius:12px; }
+.los-country-map-scroll svg { display:block; width:100%; min-width:520px; height:auto; }
+.los-country-map-text { border-top:1px solid var(--los-border); padding-top:12px; }
+.los-country-map-text summary { cursor:pointer; font-weight:650; font-size:14px; }
+.los-country-map-text ul { margin:12px 0 0; padding-left:24px; font-size:14px; line-height:1.8; }
+@media (max-width:639px) {
+  .los-country-schematic { padding:14px; }
+  .los-country-map-scroll svg { min-width:570px; }
+}
