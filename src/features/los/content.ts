@@ -122,7 +122,7 @@ export const chapters:Chapter[] = [
  {id:'c03-a-11',speaker:'Haastattelija',text:'Was ist deine Lieblingsfarbe und warum?'},
  {id:'c03-a-12',speaker:'Berna',text:'Meine Lieblingsfarbe ist, glaube ich, rot. Und rot, weil... [das] ist halt eine sehr temperamentvolle Farbe und hat viel Feuer und Leidenschaft.'}
  ],
- vocab:w([['woher','mistä'],['kommen','tulla'],['kommst','tulet'],['aus','-sta/-stä'],['Finnland','Suomi'],['Deutschland','Saksa'],['Österreich','Itävalta'],['die Schweiz','Sveitsi'],['Schweden','Ruotsi'],['Estland','Viro'],['wo','missä'],['die Stadt','kaupunki'],['das Land','maa'],['hier','täällä'],['auch','myös']]),
+ vocab:w([['Kiel','Kiel (Saksan kaupunki)'],['der Norden','pohjoinen'],['woher','mistä'],['kommen','tulla'],['kommst','tulet'],['aus','-sta/-stä'],['Finnland','Suomi'],['Deutschland','Saksa'],['Österreich','Itävalta'],['die Schweiz','Sveitsi'],['Schweden','Ruotsi'],['Estland','Viro'],['wo','missä'],['die Stadt','kaupunki'],['das Land','maa'],['hier','täällä'],['auch','myös']]),
  teaching:['Woher kysyy lähtöpaikkaa: Woher kommst du? eli Mistä tulet?','Ich komme aus Finnland tarkoittaa Olen Suomesta. Huomaa poikkeava muoto aus der Schweiz.'],
  grammar:{title:'Kommen ja woher',explanation:'Ich komme, du kommst, er/sie kommt. Woher tarkoittaa mistä, wo tarkoittaa missä. Maan nimissä on yksittäisiä artikkelipoikkeuksia.',examples:[['Woher kommst du?','Mistä olet kotoisin?'],['Ich komme aus Finnland.','Olen Suomesta.']]},
  culture:'Saksa, Itävalta ja Sveitsi ovat tärkeimpiä saksankielisiä maita. Saksaa puhutaan myös muun muassa Liechtensteinissa.',
@@ -271,7 +271,7 @@ export const lessons = [
  const n=index+1,chapterIndex=n>=2&&n<=26?Math.floor((n-2)/5):n>=31&&n<=55?Math.floor((n-31)/5)+5:-1;
  return {id:'L'+String(n).padStart(3,'0'),name,chapterId:chapterIndex>=0?chapters[chapterIndex]!.id:null,estimate:30,
   section:n===1?'Aloitus':n===30?'Välikoe':n===59?'Loppukoe':n===60?'Yhteenveto':n>=27&&n<=29?'Kertaus I':n>=56&&n<=58?'Kertaus II':chapters[chapterIndex]?.name??'',
-  status:n<=11||(n>=17&&n<=26)?'initial-material': 'pending' as const};
+  status:n<=26?'initial-material': 'pending' as const};
 });
 export const allWords=chapters.flatMap(c=>c.vocab.map(word=>({...word,chapterId:c.id})));
 export function validateLosContent() {
