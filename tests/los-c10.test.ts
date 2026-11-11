@@ -85,7 +85,7 @@ test("C10 L052 compares genuine Franz/Jörg audio with Harald's full text but NE
   .map(l=>l.id),["L051","L052","L053","L054","L055"]);
  const lesson=book.lessons.find(l=>l.id==="L052");
  assert.ok(lesson&&lesson.publicationStatus==="preview");
- assert.ok(lesson.title.includes("vertailukuuntelua"));
+ assert.ok(lesson.title.includes("esittelykuuntelua"));
  assert.equal(lesson.steps.length,15);
  assert.ok(lesson.steps.some(x=>x.blockId==="los1-c01-m-com-01-audio"));
  assert.ok(lesson.steps.some(x=>x.blockId==="los1-c10-m-dib-02-harald"));
