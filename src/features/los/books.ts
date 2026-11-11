@@ -43,6 +43,7 @@ import { LOS1_C07_EXAM_A, LOS1_C07_EXAM_B, LOS1_C07_TEST } from "./los1-c07-test
 import { LOS1_C07_SECTIONS } from "./los1-c07-sections.ts";
 import { LOS1_C08_CONTENT_BLOCKS } from "./los1-c08-content.ts";
 import { LOS1_C08_PRACTICE_EXERCISES } from "./los1-c08-practice.ts";
+import { LOS1_C08_SOURCE_BLOCKS, LOS1_C08_SOURCE_EXERCISES } from "./los1-c08-source.ts";
 import { LOS1_C08_EXAM_A, LOS1_C08_EXAM_B, LOS1_C08_TEST } from "./los1-c08-test.ts";
 import { LOS1_C08_SECTIONS } from "./los1-c08-sections.ts";
 import { LOS1_C09_CONTENT_BLOCKS } from "./los1-c09-content.ts";
@@ -149,8 +150,8 @@ export const LOS_BOOKS: readonly Book[] = specs.map((spec, index) => ({
   } : chapter.id === "C08" ? {
     ...chapter,publicationStatus:"preview" as const,
     sections:LOS1_C08_SECTIONS,
-    blockIds:LOS1_C08_CONTENT_BLOCKS.map(b=>b.id),
-    exerciseIds:[...LOS1_C08_PRACTICE_EXERCISES,...LOS1_C08_EXAM_A].map(ex=>ex.id),
+    blockIds:[...LOS1_C08_CONTENT_BLOCKS,...LOS1_C08_SOURCE_BLOCKS].map(b=>b.id),
+    exerciseIds:[...LOS1_C08_SOURCE_EXERCISES,...LOS1_C08_PRACTICE_EXERCISES,...LOS1_C08_EXAM_A].map(ex=>ex.id),
   } : chapter.id === "C09" ? {
     ...chapter,publicationStatus:"preview" as const,
     sections:LOS1_C09_SECTIONS,
@@ -641,7 +642,19 @@ export const LOS_BOOKS: readonly Book[] = specs.map((spec, index) => ({
         {id:"L041-S07",title:"Tunnista merkityskysymys",required:true,exerciseId:"los1-c08-intro-meaning"},
       ],
     };
-    // L042 remains planned: the actual original Im Unterricht source is not yet cleared.
+    if (lesson.id === "L042") return {
+      ...lesson,title:"Lue alkuperäiset toistopyynnöt",publicationStatus:"preview" as const,
+      steps:[
+        {id:"L042-S01",title:"Tutustu Wikibooksin alkuperäisen tekstin taustaan",required:true,blockId:"los1-c08-text-a-bridge"},
+        {id:"L042-S02",title:"Lue koko harjoituksen 562 alkuperäisteksti",required:true,blockId:"los1-c08-wb-07-repeat-phrases"},
+        {id:"L042-S03",title:"Avaa suomennokset ja verrattavat fraasit",required:true,blockId:"los1-c08-source-gloss"},
+        {id:"L042-S04",title:"Tunnista kirjoitetun lähteen lyhyt toistopyyntö",required:true,exerciseId:"los1-c08-source-first"},
+        {id:"L042-S05",title:"Vertaa sinuttelua ja teitittelyä",required:true,exerciseId:"los1-c08-source-formal"},
+        {id:"L042-S06",title:"Korosta autenttinen kohtelias toistopyyntö",required:true,exerciseId:"los1-c08-source-highlight-formal"},
+        {id:"L042-S07",title:"Lue alkuperäisen tekstin ymmärtämisohje",required:true,blockId:"los1-c08-source-explanation"},
+        {id:"L042-S08",title:"Tarkista autenttisen tekstin tyyppi ja lähteen luotettavuus",required:true,exerciseId:"los1-c08-source-type"},
+      ],
+    };
     if (lesson.id === "L043") return {
       ...lesson,publicationStatus:"preview" as const,
       steps:[
@@ -809,17 +822,29 @@ export const LOS_BOOKS: readonly Book[] = specs.map((spec, index) => ({
     };
     return lesson;
   }) : [],
-  blocks: index === 0 ? [...LOS1_INTRO_BLOCKS, ...LOS1_C01_PREVIEW_BLOCKS, ...LOS1_C01_SOURCE_BLOCKS, ...LOS1_C01_GREETING_AUDIO_BLOCKS, ...LOS1_C01_APPLICATION_BLOCKS, ...LOS1_C01_CULTURE_BLOCKS, ...LOS1_C02_WB_BLOCKS, ...LOS1_C02_BLOCKS, ...LOS1_C03_SOURCE_BLOCKS, ...LOS1_C03_CONTENT_BLOCKS, ...LOS1_C04_SOURCE_BLOCKS, ...LOS1_C04_BLOCKS, ...LOS1_C05_SOURCE_BLOCKS, ...LOS1_C05_BLOCKS, ...LOS1_C06_SOURCE_BLOCKS, ...LOS1_C06_CONTENT_BLOCKS, ...LOS1_REVIEW_ONE_BLOCKS, ...LOS1_C07_SOURCE_BLOCKS, ...LOS1_C07_CONTENT_BLOCKS, ...LOS1_C08_CONTENT_BLOCKS, ...LOS1_C09_CONTENT_BLOCKS, ...LOS1_C09_TEXT_A_BLOCKS,
+  blocks: index === 0 ? [...LOS1_INTRO_BLOCKS, ...LOS1_C01_PREVIEW_BLOCKS, ...LOS1_C01_SOURCE_BLOCKS, ...LOS1_C01_GREETING_AUDIO_BLOCKS, ...LOS1_C01_APPLICATION_BLOCKS, ...LOS1_C01_CULTURE_BLOCKS, ...LOS1_C02_WB_BLOCKS, ...LOS1_C02_BLOCKS, ...LOS1_C03_SOURCE_BLOCKS, ...LOS1_C03_CONTENT_BLOCKS, ...LOS1_C04_SOURCE_BLOCKS, ...LOS1_C04_BLOCKS, ...LOS1_C05_SOURCE_BLOCKS, ...LOS1_C05_BLOCKS, ...LOS1_C06_SOURCE_BLOCKS, ...LOS1_C06_CONTENT_BLOCKS, ...LOS1_REVIEW_ONE_BLOCKS, ...LOS1_C07_SOURCE_BLOCKS, ...LOS1_C07_CONTENT_BLOCKS, ...LOS1_C08_CONTENT_BLOCKS, ...LOS1_C08_SOURCE_BLOCKS, ...LOS1_C09_CONTENT_BLOCKS, ...LOS1_C09_TEXT_A_BLOCKS,
     ...LOS1_C10_SOURCE_BLOCKS, ...LOS1_C10_CONTENT_BLOCKS,
     ...LOS1_REVIEW_TWO_BLOCKS, ...LOS1_FINAL_BLOCKS] : [],
-  exercises: index === 0 ? [...LOS1_C01_PREVIEW_EXERCISES, ...LOS1_C01_SOURCE_EXERCISES, ...LOS1_C01_AUDIO_COMPREHENSION_EXERCISES, ...LOS1_C01_EXAM_EXERCISES, ...LOS1_C01_ALTERNATE_EXAM_EXERCISES, ...LOS1_C01_EXTRA_EXERCISES, ...LOS1_C01_INTERACTIVE_EXERCISES, ...LOS1_C02_WB_EXERCISES, ...LOS1_C02_EXERCISES, ...LOS1_C02_EXAM_EXERCISES, ...LOS1_C03_SOURCE_EXERCISES, ...LOS1_C03_PRACTICE_EXERCISES, ...LOS1_C03_EXAM_EXERCISES, ...LOS1_C04_SOURCE_EXERCISES, ...LOS1_C04_PRACTICE_EXERCISES, ...LOS1_C04_EXAM_EXERCISES, ...LOS1_C05_SOURCE_EXERCISES, ...LOS1_C05_PRACTICE_EXERCISES, ...LOS1_C05_EXAM_EXERCISES, ...LOS1_C06_SOURCE_EXERCISES, ...LOS1_C06_PRACTICE_EXERCISES, ...LOS1_C06_EXAM_EXERCISES, ...LOS1_REVIEW_ONE_EXERCISES, ...LOS1_MIDTERM_FORM_A, ...LOS1_MIDTERM_FORM_B, ...LOS1_C07_SOURCE_EXERCISES, ...LOS1_C07_PRACTICE_EXERCISES, ...LOS1_C07_EXAM_A, ...LOS1_C07_EXAM_B, ...LOS1_C08_PRACTICE_EXERCISES, ...LOS1_C08_EXAM_A, ...LOS1_C08_EXAM_B,
+  exercises: index === 0 ? [...LOS1_C01_PREVIEW_EXERCISES, ...LOS1_C01_SOURCE_EXERCISES, ...LOS1_C01_AUDIO_COMPREHENSION_EXERCISES, ...LOS1_C01_EXAM_EXERCISES, ...LOS1_C01_ALTERNATE_EXAM_EXERCISES, ...LOS1_C01_EXTRA_EXERCISES, ...LOS1_C01_INTERACTIVE_EXERCISES, ...LOS1_C02_WB_EXERCISES, ...LOS1_C02_EXERCISES, ...LOS1_C02_EXAM_EXERCISES, ...LOS1_C03_SOURCE_EXERCISES, ...LOS1_C03_PRACTICE_EXERCISES, ...LOS1_C03_EXAM_EXERCISES, ...LOS1_C04_SOURCE_EXERCISES, ...LOS1_C04_PRACTICE_EXERCISES, ...LOS1_C04_EXAM_EXERCISES, ...LOS1_C05_SOURCE_EXERCISES, ...LOS1_C05_PRACTICE_EXERCISES, ...LOS1_C05_EXAM_EXERCISES, ...LOS1_C06_SOURCE_EXERCISES, ...LOS1_C06_PRACTICE_EXERCISES, ...LOS1_C06_EXAM_EXERCISES, ...LOS1_REVIEW_ONE_EXERCISES, ...LOS1_MIDTERM_FORM_A, ...LOS1_MIDTERM_FORM_B, ...LOS1_C07_SOURCE_EXERCISES, ...LOS1_C07_PRACTICE_EXERCISES, ...LOS1_C07_EXAM_A, ...LOS1_C07_EXAM_B, ...LOS1_C08_SOURCE_EXERCISES, ...LOS1_C08_PRACTICE_EXERCISES, ...LOS1_C08_EXAM_A, ...LOS1_C08_EXAM_B,
     ...LOS1_C09_SOURCE_EXERCISES, ...LOS1_C09_TEXT_A_EXERCISES, ...LOS1_C09_PRACTICE_EXERCISES,
     ...LOS1_C09_EXAM_A, ...LOS1_C09_EXAM_B,
     ...LOS1_C10_SOURCE_EXERCISES, ...LOS1_C10_PRACTICE_EXERCISES,
     ...LOS1_C10_EXAM_A, ...LOS1_C10_EXAM_B,
     ...LOS1_REVIEW_TWO_EXERCISES, ...LOS1_FINAL_FORM_A, ...LOS1_FINAL_FORM_B] : [],
   chapterTests: index === 0 ? [LOS1_C01_TEST, LOS1_C02_TEST, LOS1_C03_TEST, LOS1_C04_TEST, LOS1_C05_TEST, LOS1_C06_TEST, LOS1_C07_TEST, LOS1_C08_TEST, LOS1_C09_TEST, LOS1_C10_TEST, LOS1_MIDTERM_TEST, LOS1_FINAL_TEST] : [],
-  sources: index === 0 ? LOS1_RESEARCH_SOURCES.map(source => source.id === "M-COM-01" ? {
+  sources: index === 0 ? LOS1_RESEARCH_SOURCES.map(source => source.id === "M-WB-07" ? {
+    ...source,
+    originalUrl:"https://en.wikibooks.org/w/index.php?title=Deutschkurs_für_Anfänger/Lektion_012&oldid=3823563",
+    author:"Deutschkurs für Anfänger -oppikirjan Wikibooks-yhteiskirjoittajat (versio 3823563)",
+    publisher:"Wikibooks / Wikimedia",
+    licenseOrBasis:"CC BY-SA 4.0 · valittu harjoitus 562 kokonaisuudessaan, 15 saksankielistä ilmausta",
+    licenseUrl:"https://creativecommons.org/licenses/by-sa/4.0/",
+    permittedMode:"hosted" as const,
+    readiness:"text-cleared" as const,
+    verifiedAt:"2026-11-11",
+    modification:"Saksankieliset 15 fraasia ovat alkuperäisessä järjestyksessä. LOS!:n suomennokset, selitykset ja tehtävät on kirjoitettu erikseen.",
+    publicationNoteFi:"C08 Text A on nyt kokonainen julkaistu 15 rivin fraasiluettelo, ei dialogi eikä kuuntelu. Lähde on erillinen COERLL:n vielä keskeneräisestä M-DIB-04-haastattelusta.",
+  } : source.id === "M-COM-01" ? {
     ...source,
     author: "Xzapro4 ja Erkan Yilmaz",
     licenseOrBasis: "CC BY-SA 3.0 Unported · teksti ja ääni",
