@@ -41,6 +41,10 @@ import { LOS1_C07_CONTENT_BLOCKS } from "./los1-c07-content.ts";
 import { LOS1_C07_PRACTICE_EXERCISES } from "./los1-c07-practice.ts";
 import { LOS1_C07_EXAM_A, LOS1_C07_EXAM_B, LOS1_C07_TEST } from "./los1-c07-test.ts";
 import { LOS1_C07_SECTIONS } from "./los1-c07-sections.ts";
+import { LOS1_C08_CONTENT_BLOCKS } from "./los1-c08-content.ts";
+import { LOS1_C08_PRACTICE_EXERCISES } from "./los1-c08-practice.ts";
+import { LOS1_C08_EXAM_A, LOS1_C08_EXAM_B, LOS1_C08_TEST } from "./los1-c08-test.ts";
+import { LOS1_C08_SECTIONS } from "./los1-c08-sections.ts";
 
 const specs: readonly [string, string, string, string, string, string][] = [
   ["Perustason alkeet 1", "Tutustu ja ihastu saksan kieleen", "Nollataso, tervehdykset, esittäytyminen ja ensimmäinen vuorovaikutus.", "#B7473C", "#FCE8E5", "#FF9B91"],
@@ -129,6 +133,11 @@ export const LOS_BOOKS: readonly Book[] = specs.map((spec, index) => ({
     blockIds:[...LOS1_C07_SOURCE_BLOCKS,...LOS1_C07_CONTENT_BLOCKS].map(b=>b.id),
     exerciseIds:[...LOS1_C07_SOURCE_EXERCISES,...LOS1_C07_PRACTICE_EXERCISES,
       ...LOS1_C07_EXAM_A].map(ex=>ex.id),
+  } : chapter.id === "C08" ? {
+    ...chapter,publicationStatus:"preview" as const,
+    sections:LOS1_C08_SECTIONS,
+    blockIds:LOS1_C08_CONTENT_BLOCKS.map(b=>b.id),
+    exerciseIds:[...LOS1_C08_PRACTICE_EXERCISES,...LOS1_C08_EXAM_A].map(ex=>ex.id),
   } : { ...chapter, sections: emptyChapterSections() }) : [],
   lessons: index === 0 ? LOS1_PLANNED_LESSONS.map(lesson => {
     if (lesson.id === "L001") return {
@@ -595,11 +604,47 @@ export const LOS_BOOKS: readonly Book[] = specs.map((spec, index) => ({
           chapterTestId:LOS1_C07_TEST.id},
       ],
     };
+    if (lesson.id === "L041") return {
+      ...lesson,publicationStatus:"preview" as const,
+      steps:[
+        {id:"L041-S01",title:"Tutustu luokassa selviytymiseen",required:true,blockId:"los1-c08-intro"},
+        {id:"L041-S02",title:"Tunnista kuusi tuttua tilannetta",required:true,blockId:"los1-c08-goals"},
+        {id:"L041-S03",title:"Lue viiden selviytymisfraasin opetus",required:true,blockId:"los1-c08-phrases"},
+        {id:"L041-S04",title:"Valitse ymmärtämisen vaikeuteen sopiva fraasi",required:true,exerciseId:"los1-c08-intro-not-understand"},
+        {id:"L041-S05",title:"Valitse tilanteeseen sopiva toistopyyntö",required:true,exerciseId:"los1-c08-intro-repeat"},
+        {id:"L041-S06",title:"Valitse hidastamista pyytävä ilmaus",required:true,exerciseId:"los1-c08-intro-slow"},
+        {id:"L041-S07",title:"Tunnista merkityskysymys",required:true,exerciseId:"los1-c08-intro-meaning"},
+      ],
+    };
+    // L042 remains planned: the actual original Im Unterricht source is not yet cleared.
+    if (lesson.id === "L043") return {
+      ...lesson,publicationStatus:"preview" as const,
+      steps:[
+        {id:"L043-S01",title:"Opettele C08:n 17 sanastoyksikköä",required:true,blockId:"los1-c08-words"},
+        {id:"L043-S02",title:"Erota toistaminen, hidastaminen ja merkityksen kysyminen",required:true,blockId:"los1-c08-distinction"},
+        {id:"L043-S03",title:"Harjoittele luokkatilanteiden valintaa",required:true,blockId:"los1-c08-tutorial-scenarios"},
+        {id:"L043-S04",title:"Tunnista kohtelias toistopyyntö",required:true,exerciseId:"los1-c08-meaning-sie"},
+        {id:"L043-S05",title:"Muodosta toistopyyntö oikeaan sanajärjestykseen",required:true,exerciseId:"los1-c08-order-repeat"},
+        {id:"L043-S06",title:"Yhdistä tilanne ja sopiva avunpyyntö",required:true,exerciseId:"los1-c08-match-help"},
+        {id:"L043-S07",title:"Tarkista toistopyynnön täydennys",required:true,exerciseId:"los1-c08-grammar-repeat"},
+      ],
+    };
+    // L044 remains planned until Text B listening is technically and legally checked.
+    if (lesson.id === "L045") return {
+      ...lesson,publicationStatus:"preview" as const,
+      steps:[
+        {id:"L045-S01",title:"Kertaa opitut selviytymisfraasit",required:true,blockId:"los1-c08-phrases"},
+        {id:"L045-S02",title:"Kirjoita kolme omaa avunpyyntöä",required:true,blockId:"los1-c08-production-ask"},
+        {id:"L045-S03",title:"Harjoittele sanomista ja itsearviointia",required:true,blockId:"los1-c08-production-speak"},
+        {id:"L045-S04",title:"Palauta 12 tehtävän kappaletesti ja tee puheen itsearviointi",required:true,
+          chapterTestId:LOS1_C08_TEST.id},
+      ],
+    };
     return lesson;
   }) : [],
-  blocks: index === 0 ? [...LOS1_INTRO_BLOCKS, ...LOS1_C01_PREVIEW_BLOCKS, ...LOS1_C01_SOURCE_BLOCKS, ...LOS1_C01_GREETING_AUDIO_BLOCKS, ...LOS1_C01_APPLICATION_BLOCKS, ...LOS1_C01_CULTURE_BLOCKS, ...LOS1_C02_WB_BLOCKS, ...LOS1_C02_BLOCKS, ...LOS1_C03_SOURCE_BLOCKS, ...LOS1_C03_CONTENT_BLOCKS, ...LOS1_C04_SOURCE_BLOCKS, ...LOS1_C04_BLOCKS, ...LOS1_C05_SOURCE_BLOCKS, ...LOS1_C05_BLOCKS, ...LOS1_C06_SOURCE_BLOCKS, ...LOS1_C06_CONTENT_BLOCKS, ...LOS1_REVIEW_ONE_BLOCKS, ...LOS1_C07_SOURCE_BLOCKS, ...LOS1_C07_CONTENT_BLOCKS] : [],
-  exercises: index === 0 ? [...LOS1_C01_PREVIEW_EXERCISES, ...LOS1_C01_SOURCE_EXERCISES, ...LOS1_C01_AUDIO_COMPREHENSION_EXERCISES, ...LOS1_C01_EXAM_EXERCISES, ...LOS1_C01_ALTERNATE_EXAM_EXERCISES, ...LOS1_C01_EXTRA_EXERCISES, ...LOS1_C01_INTERACTIVE_EXERCISES, ...LOS1_C02_WB_EXERCISES, ...LOS1_C02_EXERCISES, ...LOS1_C02_EXAM_EXERCISES, ...LOS1_C03_SOURCE_EXERCISES, ...LOS1_C03_PRACTICE_EXERCISES, ...LOS1_C03_EXAM_EXERCISES, ...LOS1_C04_SOURCE_EXERCISES, ...LOS1_C04_PRACTICE_EXERCISES, ...LOS1_C04_EXAM_EXERCISES, ...LOS1_C05_SOURCE_EXERCISES, ...LOS1_C05_PRACTICE_EXERCISES, ...LOS1_C05_EXAM_EXERCISES, ...LOS1_C06_SOURCE_EXERCISES, ...LOS1_C06_PRACTICE_EXERCISES, ...LOS1_C06_EXAM_EXERCISES, ...LOS1_REVIEW_ONE_EXERCISES, ...LOS1_MIDTERM_FORM_A, ...LOS1_MIDTERM_FORM_B, ...LOS1_C07_SOURCE_EXERCISES, ...LOS1_C07_PRACTICE_EXERCISES, ...LOS1_C07_EXAM_A, ...LOS1_C07_EXAM_B] : [],
-  chapterTests: index === 0 ? [LOS1_C01_TEST, LOS1_C02_TEST, LOS1_C03_TEST, LOS1_C04_TEST, LOS1_C05_TEST, LOS1_C06_TEST, LOS1_C07_TEST, LOS1_MIDTERM_TEST] : [],
+  blocks: index === 0 ? [...LOS1_INTRO_BLOCKS, ...LOS1_C01_PREVIEW_BLOCKS, ...LOS1_C01_SOURCE_BLOCKS, ...LOS1_C01_GREETING_AUDIO_BLOCKS, ...LOS1_C01_APPLICATION_BLOCKS, ...LOS1_C01_CULTURE_BLOCKS, ...LOS1_C02_WB_BLOCKS, ...LOS1_C02_BLOCKS, ...LOS1_C03_SOURCE_BLOCKS, ...LOS1_C03_CONTENT_BLOCKS, ...LOS1_C04_SOURCE_BLOCKS, ...LOS1_C04_BLOCKS, ...LOS1_C05_SOURCE_BLOCKS, ...LOS1_C05_BLOCKS, ...LOS1_C06_SOURCE_BLOCKS, ...LOS1_C06_CONTENT_BLOCKS, ...LOS1_REVIEW_ONE_BLOCKS, ...LOS1_C07_SOURCE_BLOCKS, ...LOS1_C07_CONTENT_BLOCKS, ...LOS1_C08_CONTENT_BLOCKS] : [],
+  exercises: index === 0 ? [...LOS1_C01_PREVIEW_EXERCISES, ...LOS1_C01_SOURCE_EXERCISES, ...LOS1_C01_AUDIO_COMPREHENSION_EXERCISES, ...LOS1_C01_EXAM_EXERCISES, ...LOS1_C01_ALTERNATE_EXAM_EXERCISES, ...LOS1_C01_EXTRA_EXERCISES, ...LOS1_C01_INTERACTIVE_EXERCISES, ...LOS1_C02_WB_EXERCISES, ...LOS1_C02_EXERCISES, ...LOS1_C02_EXAM_EXERCISES, ...LOS1_C03_SOURCE_EXERCISES, ...LOS1_C03_PRACTICE_EXERCISES, ...LOS1_C03_EXAM_EXERCISES, ...LOS1_C04_SOURCE_EXERCISES, ...LOS1_C04_PRACTICE_EXERCISES, ...LOS1_C04_EXAM_EXERCISES, ...LOS1_C05_SOURCE_EXERCISES, ...LOS1_C05_PRACTICE_EXERCISES, ...LOS1_C05_EXAM_EXERCISES, ...LOS1_C06_SOURCE_EXERCISES, ...LOS1_C06_PRACTICE_EXERCISES, ...LOS1_C06_EXAM_EXERCISES, ...LOS1_REVIEW_ONE_EXERCISES, ...LOS1_MIDTERM_FORM_A, ...LOS1_MIDTERM_FORM_B, ...LOS1_C07_SOURCE_EXERCISES, ...LOS1_C07_PRACTICE_EXERCISES, ...LOS1_C07_EXAM_A, ...LOS1_C07_EXAM_B, ...LOS1_C08_PRACTICE_EXERCISES, ...LOS1_C08_EXAM_A, ...LOS1_C08_EXAM_B] : [],
+  chapterTests: index === 0 ? [LOS1_C01_TEST, LOS1_C02_TEST, LOS1_C03_TEST, LOS1_C04_TEST, LOS1_C05_TEST, LOS1_C06_TEST, LOS1_C07_TEST, LOS1_C08_TEST, LOS1_MIDTERM_TEST] : [],
   sources: index === 0 ? LOS1_RESEARCH_SOURCES.map(source => source.id === "M-COM-01" ? {
     ...source,
     author: "Xzapro4 ja Erkan Yilmaz",
