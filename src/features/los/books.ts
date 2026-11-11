@@ -81,6 +81,26 @@ export const LOS_BOOKS: readonly Book[] = specs.map((spec, index) => ({
         { id: "L003-S07", title: "Kertaa uusi teksti", required: true, blockId: "los1-c01-reading-followup" },
       ],
     };
+    if (lesson.id === "L004") return {
+      ...lesson, publicationStatus: "preview" as const,
+      steps: [
+        { id: "L004-S01", title: "Palauta mieleen tervehdykset", required: true, blockId: "los1-c01-greetings" },
+        { id: "L004-S02", title: "Tutustu tämän kappaleen ydinsanastoon", required: true, blockId: "los1-c01-core-words" },
+        { id: "L004-S03", title: "Täydennä tervehdys muistista", required: true, exerciseId: "los1-c01-ex-greeting-gap" },
+        { id: "L004-S04", title: "Yhdistä fraasit ilman mallia", required: true, exerciseId: "los1-c01-ex-greeting-pairs" },
+        { id: "L004-S05", title: "Korosta tilanteeseen sopiva ilmaus", required: true, exerciseId: "los1-c01-ex-marker-demo" },
+      ],
+    };
+    if (lesson.id === "L005") return {
+      ...lesson, publicationStatus: "preview" as const,
+      steps: [
+        { id: "L005-S01", title: "Viritä kuuntelu", required: true, blockId: "los1-c01-source-intro" },
+        { id: "L005-S02", title: "Kuuntele alkuperäinen keskustelu", required: true, blockId: "los1-c01-m-com-01-audio" },
+        { id: "L005-S03", title: "Tunnista kuulemasi hyvästely", required: true, exerciseId: "los1-c01-text-a-choice-goodbye" },
+        { id: "L005-S04", title: "Varmista kuulemasi alkuperäisestä tekstistä", required: true, blockId: "los1-c01-m-com-01-dialogue" },
+        { id: "L005-S05", title: "Täydennä kuulemasi ilmaus", required: true, exerciseId: "los1-c01-text-a-gap-goodbye" },
+      ],
+    };
     return lesson;
   }) : [],
   blocks: index === 0 ? [...LOS1_INTRO_BLOCKS, ...LOS1_C01_PREVIEW_BLOCKS, ...LOS1_C01_SOURCE_BLOCKS] : [],
