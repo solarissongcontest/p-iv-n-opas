@@ -105,11 +105,39 @@ export const chapters:Chapter[] = [
 },
 {
  id:'C03',name:'Woher kommst du?',goal:'Kysyn ja kerron kotimaan tai kotikaupungin.',
- sourceId:'M-DIB-01',sourceUrl:'https://coerll.utexas.edu/dib/vidt.php?f=01_15_int_bg_who',attribution:'COERLL / Deutsch im Blick; litteraatin oikeustarkistus avoin.',license:'Tiedostokohtainen oikeus tarkistettava',status:'source-pending',sections,blocks:[],
+ sourceId:'M-DIB-01',sourceUrl:'https://coerll.utexas.edu/dib/vidt.php?f=01_15_int_bg_who',
+ attribution:'COERLL, University of Texas at Austin / Deutsch im Blick, Kapitel 1, Berna: Wer bin ich?. Alkuperäinen kahdentoista vuoron saksankielinen litteraatti. CC BY 4.0 -lisenssilähde: https://coerll.utexas.edu/dib/pdfs/DeutschImBlick-textbook.pdf. Saksankieliseen tekstiin ei ole tehty muutoksia.',
+ license:'CC BY 4.0 (litteraatin OER-teksti; video erikseen tarkistamatta)',status:'text-reviewed',sections,
+ blocks:[
+ {id:'c03-a-1',speaker:'Haastattelija',text:'Wie heißt du?'},
+ {id:'c03-a-2',speaker:'Berna',text:'Ich heiße Berna.'},
+ {id:'c03-a-3',speaker:'Haastattelija',text:'Woher kommst du?'},
+ {id:'c03-a-4',speaker:'Berna',text:'Ich komme aus Deutschland.'},
+ {id:'c03-a-5',speaker:'Haastattelija',text:'Und wo in Deutschland?'},
+ {id:'c03-a-6',speaker:'Berna',text:'Ich komme aus Kiel. Das ist in Schleswig-Holstein, ganz im Norden.'},
+ {id:'c03-a-7',speaker:'Haastattelija',text:'Wie alt bist du?'},
+ {id:'c03-a-8',speaker:'Berna',text:'Ich bin 30 Jahre alt.'},
+ {id:'c03-a-9',speaker:'Haastattelija',text:'Was ist deine Telefonnummer?'},
+ {id:'c03-a-10',speaker:'Berna',text:'Meine Telefonnummer 512-749-8940'},
+ {id:'c03-a-11',speaker:'Haastattelija',text:'Was ist deine Lieblingsfarbe und warum?'},
+ {id:'c03-a-12',speaker:'Berna',text:'Meine Lieblingsfarbe ist, glaube ich, rot. Und rot, weil... [das] ist halt eine sehr temperamentvolle Farbe und hat viel Feuer und Leidenschaft.'}
+ ],
  vocab:w([['woher','mistä'],['kommen','tulla'],['kommst','tulet'],['aus','-sta/-stä'],['Finnland','Suomi'],['Deutschland','Saksa'],['Österreich','Itävalta'],['die Schweiz','Sveitsi'],['Schweden','Ruotsi'],['Estland','Viro'],['wo','missä'],['die Stadt','kaupunki'],['das Land','maa'],['hier','täällä'],['auch','myös']]),
  teaching:['Woher kysyy lähtöpaikkaa: Woher kommst du? eli Mistä tulet?','Ich komme aus Finnland tarkoittaa Olen Suomesta. Huomaa poikkeava muoto aus der Schweiz.'],
  grammar:{title:'Kommen ja woher',explanation:'Ich komme, du kommst, er/sie kommt. Woher tarkoittaa mistä, wo tarkoittaa missä. Maan nimissä on yksittäisiä artikkelipoikkeuksia.',examples:[['Woher kommst du?','Mistä olet kotoisin?'],['Ich komme aus Finnland.','Olen Suomesta.']]},
- culture:'Saksa, Itävalta ja Sveitsi ovat tärkeimpiä saksankielisiä maita. Saksaa puhutaan myös muun muassa Liechtensteinissa.',exercises:[]
+ culture:'Saksa, Itävalta ja Sveitsi ovat tärkeimpiä saksankielisiä maita. Saksaa puhutaan myös muun muassa Liechtensteinissa.',
+ media:{sourceId:'M-COM-02',title:'Ich bin Peter – esittäytyminen ja kotipaikka (12 s)',
+  url:'https://commons.wikimedia.org/wiki/Special:Redirect/file/Deutsch_Dialog_._Ich_bin_Peter.ogg',
+  sourceUrl:'https://commons.wikimedia.org/wiki/File:Deutsch_Dialog_._Ich_bin_Peter.ogg',
+  license:'CC BY-SA 3.0',durationSeconds:12,
+  attribution:'Ariser (2011), alkuperäinen nelirepliikkinen saksankielinen ihmisen äänittämä keskustelu. C02:ssa käytetty sama äänite, tässä harjoitellaan maita ja paikkoja. Ei muutoksia.',
+  transcript:[
+   {id:'c03-b-1',speaker:'Thomas',text:'Wie heißt du?'},
+   {id:'c03-b-2',speaker:'Takashi',text:'Ich heiße Takashi. Und du?'},
+   {id:'c03-b-3',speaker:'Thomas',text:'Ich bin Thomas. Das ist Peter. Wir kommen aus Berlin.'},
+   {id:'c03-b-4',speaker:'Takashi',text:'Ich komme aus Kyoto. Ich bin Japaner.'}
+  ]},
+ exercises:[]
 },
 {
  id:'C04',name:'Du oder Sie?',goal:'Tunnistan sinuttelun ja teitittelyn.',
