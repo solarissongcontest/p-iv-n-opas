@@ -6,6 +6,7 @@ import {emptyChapterSections} from "./chapterSections.ts";
 import {LOS1_C09_PRACTICE_EXERCISES} from "./los1-c09-practice.ts";
 import {LOS1_C09_SOURCE_EXERCISES} from "./los1-c09-source.ts";
 import {LOS1_C09_TEXT_A_EXERCISES} from "./los1-c09-text-a.ts";
+import {LOS1_C09_AUDIO_EXERCISES} from "./los1-c09-audio.ts";
 import {LOS1_C09_EXAM_A} from "./los1-c09-test.ts";
 
 const grammarItems=[
@@ -23,7 +24,7 @@ export const LOS1_C09_SECTIONS:ChapterSection[]=emptyChapterSections().map(secti
   section.id==="ymmarra"?["los1-c09-source-reading-guide"]:
   section.id==="sanasto"?["los1-c09-words"]:
   section.id==="kielioppi"?["los1-c09-am-um","los1-c09-heute-morgen","los1-c09-source-time-support"]:
-  section.id==="teksti-b"?["los1-c09-text-b-intro","los1-c09-wb-04-days","los1-c09-text-b-media-pending"]:
+  section.id==="teksti-b"?["los1-c09-text-b-intro","los1-c09-wb-04-days","los1-c09-text-b-media-pending","los1-c09-audio-intro","los1-c09-m-com-08-audio","los1-c09-m-com-08-transcript","los1-c09-audio-followup"]:
   section.id==="harjoittele"?["los1-c09-calendar-guide","los1-c09-calendar-table"]:
   section.id==="kayta"?["los1-c09-production-calendar","los1-c09-production-meeting"]:
   section.id==="kulttuuri"?["los1-c09-culture"]:
@@ -32,7 +33,7 @@ export const LOS1_C09_SECTIONS:ChapterSection[]=emptyChapterSections().map(secti
   section.id==="aloita"?["los1-c09-intro-when","los1-c09-intro-day","los1-c09-intro-order","los1-c09-intro-weekend"]:
   section.id==="ymmarra"?LOS1_C09_TEXT_A_EXERCISES.map(ex=>ex.id):
   section.id==="kielioppi"?grammarItems:
-  section.id==="teksti-b"?LOS1_C09_SOURCE_EXERCISES.map(ex=>ex.id):
+  section.id==="teksti-b"?[...LOS1_C09_SOURCE_EXERCISES,...LOS1_C09_AUDIO_EXERCISES].map(ex=>ex.id):
   section.id==="harjoittele"?LOS1_C09_PRACTICE_EXERCISES.map(ex=>ex.id):
   section.id==="kulttuuri"?["los1-c09-culture-format"]:
   section.id==="tarkista"?LOS1_C09_EXAM_A.map(ex=>ex.id):[];
