@@ -172,3 +172,30 @@
 }
 @media(max-width:355px){.los-book-grid{grid-template-columns:1fr}.los-mobile-nav>div{grid-template-columns:1fr}}
 @media(prefers-reduced-motion:reduce){.los *{scroll-behavior:auto!important;transition:none!important}}
+
+
+/* Real L001–L006 step navigation, compact enough for the 320px reading column. */
+.los-stepper{list-style:none;display:flex;gap:6px;flex-wrap:wrap;padding:0;margin:22px 0}
+.los-stepper li{display:flex;flex:1 1 160px;min-width:0}
+.los-stepper button{width:100%;text-align:left;justify-content:flex-start!important;font-size:13px!important;
+ padding:8px 10px!important;min-height:48px!important;line-height:1.35!important}
+.los-stepper button span{min-width:22px;height:22px;display:inline-flex;align-items:center;
+ justify-content:center;border-radius:100px;background:var(--los-surface-muted);font-variant-numeric:tabular-nums}
+.los-stepper .los-active-step{border-color:var(--los-accent)!important;background:var(--los-tint)!important;font-weight:700}
+.los-first-lesson>.los-stats{gap:12px 24px}
+.los-first-lesson .los-step{padding:clamp(14px,3vw,28px)}
+.los-first-lesson .los-step>p:first-of-type{font-size:16px;max-width:76ch;line-height:1.7}
+.los-first-lesson .los-step .los-text{margin-top:14px}
+.los-first-lesson .los-exercise{margin:16px 0}
+.los-pairs{border:0;padding:8px 0;display:grid;gap:12px}
+.los-pair-row{display:grid;grid-template-columns:minmax(130px,1fr) minmax(150px,1.4fr);gap:12px;align-items:center}
+.los-pair-row label{font-weight:550;overflow-wrap:anywhere}
+.los-pair-row select{border:1px solid var(--los-border-strong);background:var(--los-surface);
+ color:var(--los-ink);border-radius:10px;padding:10px 12px;min-height:44px;width:100%}
+.los-exam-pagination{display:flex;gap:6px;align-items:center;justify-content:center;flex-wrap:wrap;margin:20px 0}
+.los-exam-pagination button{min-width:42px}
+.los-exam-pagination .los-selected-page{border-color:var(--los-accent)!important;background:var(--los-tint)!important}
+.los-exam-result{border:1px solid var(--los-border);padding:16px 20px;background:var(--los-surface);border-radius:12px}
+.los-exam-result strong{font-size:24px}
+.los-exam-self{padding:16px 0;border-top:1px solid var(--los-border);max-width:76ch}
+@media(max-width:480px){.los-stepper{flex-direction:column}.los-stepper li{flex:1 1 auto}.los-pair-row{grid-template-columns:1fr;gap:4px}}
