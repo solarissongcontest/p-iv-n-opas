@@ -109,17 +109,23 @@ export function useLosRecord<T>(
     let alive = true;
     edited.current = false;
     const cached = readCached<T>(key);
+    // Book/lesson/answer routes may reuse the same React component. Never show
+    // another record's answer while the new key's own storage is being loaded.
+    latestWrite.current = cached?.clientUpdatedAt ?? "";
     if (cached) {
       current.current = cached.value;
       setValue(cached.value);
       setStatus("local");
     } else {
+      current.current = fallback;
+      setValue(fallback);
       setStatus("loading");
     }
     void readRemote<T>(key).then((remote) => {
       if (!alive || edited.current) return;
       if (remote && (!cached || remote.client_updated_at >= cached.clientUpdatedAt)) {
         current.current = remote.payload.value;
+        latestWrite.current = remote.client_updated_at;
         setValue(remote.payload.value);
         writeCached(key, { value: remote.payload.value, clientUpdatedAt: remote.client_updated_at });
         setStatus("synced");
