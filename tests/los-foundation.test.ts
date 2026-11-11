@@ -5,6 +5,7 @@ import { LOS_BOOKS } from "../src/features/los/books.ts";
 import { evaluateExercise } from "../src/features/los/exercises/evaluate.ts";
 import { validateBook } from "../src/features/los/model.ts";
 import { LOS1_C01_AUTHENTIC_TEXT, LOS1_C01_DIALOGUE_TURNS } from "../src/features/los/los1-c01-source.ts";
+import { findGlossarySpans } from "../src/features/los/glossary.ts";
 
 const los1 = LOS_BOOKS[0];
 if (!los1) throw new Error("LOS! 1 must exist");
@@ -59,6 +60,21 @@ test("original-source highlighting is tied to the full licensed dialogue", () =>
   assert.equal(exercise.blockId, "los1-c01-m-com-01-dialogue");
   assert.equal(evaluateExercise(exercise, { start: 0, end: 5 })?.correct, true);
   assert.equal(evaluateExercise(exercise, { start: 0, end: 8 })?.correct, false);
+});
+test("curated dictionary lookup matches whole words and prioritizes phrases", () => {
+  const entries = [
+    { id: "hello", de: "hallo", fi: "hei" },
+    { id: "i", de: "ich", fi: "minä" },
+    { id: "until", de: "bis", fi: "saakka" },
+    { id: "soon", de: "bis später", fi: "nähdään myöhemmin" },
+  ];
+  const spans = findGlossarySpans("Hallo, ich heiße Franz. Bis später!", entries);
+  assert.deepEqual(spans.map(span => ({ value: "Hallo, ich heiße Franz. Bis später!".slice(span.start, span.end), id: span.entry.id })), [
+    { value: "Hallo", id: "hello" },
+    { value: "ich", id: "i" },
+    { value: "Bis später", id: "soon" },
+  ]);
+  assert.deepEqual(findGlossarySpans("nicht", [{ id: "i", de: "ich", fi: "minä" }]), []);
 });
 test("LOS! cloud schema requires ownership, RLS and idempotent write constraints", () => {
   const sql = readFileSync("supabase/migrations/20261110214000_los_personal_records.sql", "utf8");
