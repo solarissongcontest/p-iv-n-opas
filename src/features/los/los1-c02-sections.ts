@@ -14,10 +14,18 @@ export const LOS1_C02_SECTIONS: ChapterSection[] = emptyChapterSections().map(se
       exerciseIds: ["los1-c02-start-name", "los1-c02-start-answer"],
     } :
     section.id === "teksti-a" ? {
-      blockIds: ["los1-c02-text-a-guide", "los1-c02-text-a-editorial", "los1-c02-source-status"],
+      blockIds: [
+        "los1-c02-wb-original-intro", "los1-c02-wb-original-audio",
+        "los1-c02-wb-original-dialogue", "los1-c02-wb-original-followup",
+        "los1-c02-text-a-guide", "los1-c02-text-a-editorial", "los1-c02-source-status",
+      ],
     } :
     section.id === "ymmarra" ? {
-      exerciseIds: ["los1-c02-read-name", "los1-c02-read-teacher", "los1-c02-read-highlight"],
+      exerciseIds: [
+        "los1-c02-wb-greta-name", "los1-c02-wb-teacher",
+        "los1-c02-wb-farewell", "los1-c02-wb-highlight",
+        "los1-c02-read-name", "los1-c02-read-teacher", "los1-c02-read-highlight",
+      ],
     } :
     section.id === "sanasto" ? { blockIds: ["los1-c02-words"] } :
     section.id === "kielioppi" ? {
