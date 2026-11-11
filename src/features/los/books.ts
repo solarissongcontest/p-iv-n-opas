@@ -59,6 +59,7 @@ import { LOS1_C10_CONTENT_BLOCKS } from "./los1-c10-content.ts";
 import { LOS1_C10_PRACTICE_EXERCISES } from "./los1-c10-practice.ts";
 import { LOS1_C10_EXAM_A, LOS1_C10_EXAM_B, LOS1_C10_TEST } from "./los1-c10-test.ts";
 import { LOS1_C10_SECTIONS } from "./los1-c10-sections.ts";
+import { LOS1_C10_CONTRAST_BLOCKS, LOS1_C10_CONTRAST_EXERCISES } from "./los1-c10-listen.ts";
 import { LOS1_REVIEW_TWO_BLOCKS, LOS1_REVIEW_TWO_EXERCISES } from "./los1-review-two.ts";
 import { LOS1_FINAL_BLOCKS, LOS1_FINAL_FORM_A, LOS1_FINAL_FORM_B, LOS1_FINAL_TEST } from "./los1-final-exam.ts";
 
@@ -163,8 +164,9 @@ export const LOS_BOOKS: readonly Book[] = specs.map((spec, index) => ({
   } : chapter.id === "C10" ? {
     ...chapter,publicationStatus:"preview" as const,
     sections:LOS1_C10_SECTIONS,
-    blockIds:[...LOS1_C10_SOURCE_BLOCKS,...LOS1_C10_CONTENT_BLOCKS].map(b=>b.id),
-    exerciseIds:[...LOS1_C10_SOURCE_EXERCISES,...LOS1_C10_PRACTICE_EXERCISES,
+    blockIds:[...LOS1_C10_SOURCE_BLOCKS,...LOS1_C10_CONTENT_BLOCKS,
+      ...LOS1_C10_CONTRAST_BLOCKS].map(b=>b.id).concat("los1-c01-m-com-01-audio"),
+    exerciseIds:[...LOS1_C10_SOURCE_EXERCISES,...LOS1_C10_CONTRAST_EXERCISES,...LOS1_C10_PRACTICE_EXERCISES,
       ...LOS1_C10_EXAM_A].map(ex=>ex.id),
   } : { ...chapter, sections: emptyChapterSections() }) : [],
   lessons: index === 0 ? LOS1_PLANNED_LESSONS.map(lesson => {
@@ -767,7 +769,42 @@ export const LOS_BOOKS: readonly Book[] = specs.map((spec, index) => ({
         {id:"L051-S06",title:"Tunnista Haraldin koko nimi",required:true,exerciseId:"los1-c10-source-harald-name"},
       ],
     };
-    // L052 requires an original, verified working Harald audio/video, not just text.
+    if (lesson.id === "L052") return {
+      ...lesson,title:"Vertaa Haraldin tekstiä ja oikeaa esittelykuuntelua",
+      model:"application" as const,publicationStatus:"preview" as const,
+      steps:[
+        {id:"L052-S01",title:"Erota Haraldin haastatteluteksti ja erillinen oikea kuuntelulähde",required:true,
+          blockId:"los1-c10-contrast-start"},
+        {id:"L052-S02",title:"Seuraa 30 minuutin oppituntisuunnitelmaa",required:true,
+          blockId:"los1-c10-contrast-plan"},
+        {id:"L052-S03",title:"Valmistaudu Franzin ja Jörgin aitoon nauhoitteeseen",required:true,
+          blockId:"los1-c10-contrast-human-audio-guide"},
+        {id:"L052-S04",title:"Kuuntele oikea alkuperäinen 14 sekunnin Franz–Jörg-nauhoite",required:true,
+          blockId:"los1-c01-m-com-01-audio"},
+        {id:"L052-S05",title:"Yritä tunnistaa aidosta nauhoitteesta henkilöt",required:true,
+          exerciseId:"los1-c10-contrast-audio-speakers"},
+        {id:"L052-S06",title:"Yritä tunnistaa Franzin ikä aidosta nauhoitteesta",required:true,
+          exerciseId:"los1-c10-contrast-audio-age-franz"},
+        {id:"L052-S07",title:"Lue erillinen Franz–Jörg-litteraatti vasta kuuntelun jälkeen",required:true,
+          blockId:"los1-c10-contrast-franz-dialogue"},
+        {id:"L052-S08",title:"Lue Haraldin koko oikea haastatteluteksti",required:true,
+          blockId:"los1-c10-m-dib-02-harald"},
+        {id:"L052-S09",title:"Tarkista haastattelun alkuperä ja vaikeat sanat",required:true,
+          blockId:"los1-c10-contrast-harald-guide"},
+        {id:"L052-S10",title:"Etsi Haraldin oikea kotikaupunki kirjoitetusta lähteestä",required:true,
+          exerciseId:"los1-c10-contrast-text-city"},
+        {id:"L052-S11",title:"Korosta Haraldin oikea kotipaikkalause",required:true,
+          exerciseId:"los1-c10-contrast-harald-origin"},
+        {id:"L052-S12",title:"Vertaa todennettuja kahden eri lähteen tietoja",required:true,
+          blockId:"los1-c10-contrast-forms"},
+        {id:"L052-S13",title:"Kirjoita neljä omaa esittelylausetta ja harjoittele puhumista",required:true,
+          blockId:"los1-c10-contrast-production"},
+        {id:"L052-S14",title:"Merkitse Haraldin alkuperäisvideon erillinen julkaisuraja",required:true,
+          blockId:"los1-c10-contrast-source-gate"},
+        {id:"L052-S15",title:"Arvioi kuullun ja luetun ymmärtämisesi erikseen",required:true,
+          reflectionPromptFi:"Mitä ymmärsit oikeasta Franz–Jörg-äänitteestä ennen lukemista? Mitä tiesit Haraldista vasta kirjoitetun haastattelun perusteella? Jos ääni ei toiminut, kerro se ja erottele lukeminen kuuntelusta."},
+      ],
+    };
     if (lesson.id === "L053") return {
       ...lesson,publicationStatus:"preview" as const,
       steps:[
@@ -865,12 +902,12 @@ export const LOS_BOOKS: readonly Book[] = specs.map((spec, index) => ({
     return lesson;
   }) : [],
   blocks: index === 0 ? [...LOS1_INTRO_BLOCKS, ...LOS1_C01_PREVIEW_BLOCKS, ...LOS1_C01_SOURCE_BLOCKS, ...LOS1_C01_GREETING_AUDIO_BLOCKS, ...LOS1_C01_APPLICATION_BLOCKS, ...LOS1_C01_CULTURE_BLOCKS, ...LOS1_C02_WB_BLOCKS, ...LOS1_C02_BLOCKS, ...LOS1_C03_SOURCE_BLOCKS, ...LOS1_C03_CONTENT_BLOCKS, ...LOS1_C04_SOURCE_BLOCKS, ...LOS1_C04_BLOCKS, ...LOS1_C05_SOURCE_BLOCKS, ...LOS1_C05_BLOCKS, ...LOS1_C06_SOURCE_BLOCKS, ...LOS1_C06_CONTENT_BLOCKS, ...LOS1_REVIEW_ONE_BLOCKS, ...LOS1_C07_SOURCE_BLOCKS, ...LOS1_C07_CONTENT_BLOCKS, ...LOS1_C08_CONTENT_BLOCKS, ...LOS1_C08_SOURCE_BLOCKS, ...LOS1_C08_OTTO_BLOCKS, ...LOS1_C09_CONTENT_BLOCKS, ...LOS1_C09_TEXT_A_BLOCKS, ...LOS1_C09_AUDIO_BLOCKS,
-    ...LOS1_C10_SOURCE_BLOCKS, ...LOS1_C10_CONTENT_BLOCKS,
+    ...LOS1_C10_SOURCE_BLOCKS, ...LOS1_C10_CONTENT_BLOCKS, ...LOS1_C10_CONTRAST_BLOCKS,
     ...LOS1_REVIEW_TWO_BLOCKS, ...LOS1_FINAL_BLOCKS] : [],
   exercises: index === 0 ? [...LOS1_C01_PREVIEW_EXERCISES, ...LOS1_C01_SOURCE_EXERCISES, ...LOS1_C01_AUDIO_COMPREHENSION_EXERCISES, ...LOS1_C01_EXAM_EXERCISES, ...LOS1_C01_ALTERNATE_EXAM_EXERCISES, ...LOS1_C01_EXTRA_EXERCISES, ...LOS1_C01_INTERACTIVE_EXERCISES, ...LOS1_C02_WB_EXERCISES, ...LOS1_C02_EXERCISES, ...LOS1_C02_EXAM_EXERCISES, ...LOS1_C03_SOURCE_EXERCISES, ...LOS1_C03_PRACTICE_EXERCISES, ...LOS1_C03_EXAM_EXERCISES, ...LOS1_C04_SOURCE_EXERCISES, ...LOS1_C04_PRACTICE_EXERCISES, ...LOS1_C04_EXAM_EXERCISES, ...LOS1_C05_SOURCE_EXERCISES, ...LOS1_C05_PRACTICE_EXERCISES, ...LOS1_C05_EXAM_EXERCISES, ...LOS1_C06_SOURCE_EXERCISES, ...LOS1_C06_PRACTICE_EXERCISES, ...LOS1_C06_EXAM_EXERCISES, ...LOS1_REVIEW_ONE_EXERCISES, ...LOS1_MIDTERM_FORM_A, ...LOS1_MIDTERM_FORM_B, ...LOS1_C07_SOURCE_EXERCISES, ...LOS1_C07_PRACTICE_EXERCISES, ...LOS1_C07_EXAM_A, ...LOS1_C07_EXAM_B, ...LOS1_C08_SOURCE_EXERCISES, ...LOS1_C08_OTTO_EXERCISES, ...LOS1_C08_PRACTICE_EXERCISES, ...LOS1_C08_EXAM_A, ...LOS1_C08_EXAM_B,
     ...LOS1_C09_SOURCE_EXERCISES, ...LOS1_C09_TEXT_A_EXERCISES, ...LOS1_C09_AUDIO_EXERCISES, ...LOS1_C09_PRACTICE_EXERCISES,
     ...LOS1_C09_EXAM_A, ...LOS1_C09_EXAM_B,
-    ...LOS1_C10_SOURCE_EXERCISES, ...LOS1_C10_PRACTICE_EXERCISES,
+    ...LOS1_C10_SOURCE_EXERCISES, ...LOS1_C10_CONTRAST_EXERCISES, ...LOS1_C10_PRACTICE_EXERCISES,
     ...LOS1_C10_EXAM_A, ...LOS1_C10_EXAM_B,
     ...LOS1_REVIEW_TWO_EXERCISES, ...LOS1_FINAL_FORM_A, ...LOS1_FINAL_FORM_B] : [],
   chapterTests: index === 0 ? [LOS1_C01_TEST, LOS1_C02_TEST, LOS1_C03_TEST, LOS1_C04_TEST, LOS1_C05_TEST, LOS1_C06_TEST, LOS1_C07_TEST, LOS1_C08_TEST, LOS1_C09_TEST, LOS1_C10_TEST, LOS1_MIDTERM_TEST, LOS1_FINAL_TEST] : [],
