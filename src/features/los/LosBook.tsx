@@ -52,7 +52,8 @@ function BookCover({ book, large = false }: { book: LosBookDefinition; large?: b
   );
 }
 function Brand({ compact = false }: { compact?: boolean }) {
-  return <span className={`los-logo ${compact ? "los-logo-compact" : ""}`} aria-label="LOS!">LOS<span>!</span></span>;
+  const [missing, setMissing] = useState(false);
+  return <span className={`los-logo ${compact ? "los-logo-compact" : ""}`} aria-label="LOS!">{missing ? <>LOS<span>!</span></> : <img src="/los/los-logo.svg" alt="LOS!" onError={() => setMissing(true)} />}</span>;
 }
 function AccessGate() {
   return <main className="los-access">
