@@ -1,6 +1,7 @@
 import {chapters,lessons,allWords} from './content.ts';
 import {guidedLessons} from './guidedLessons.ts';
 import {exams} from './examBank.ts';
+import {validateGuidedLessons} from './lessonProofs.ts';
 
 export type LosReleaseEvidence={
  rightsReviewed:boolean; mediaPlaybackVerified:boolean; fallbackVerified:boolean;
@@ -32,10 +33,10 @@ export function auditLosRelease(evidence:LosReleaseEvidence=losReleaseEvidence):
  const sourceIds=new Set(imported.map(c=>c.sourceId));
  const core=new Set(allWords.filter(w=>w.tier==='ydin').map(w=>w.de.toLocaleLowerCase('de').normalize('NFC')));
  const examCount=chapters.filter(c=>('EX-'+c.id) in exams).length;
- const knownLessonIds=new Set(lessons.map(l=>l.id));
- const validLessons=guidedLessons.every(l=>knownLessonIds.has(l.id)&&l.steps.length===5&&
-  l.steps.every(s=>Boolean(s.id&&s.title&&s.instructionFi.trim()))&&
-  l.steps.reduce((sum,s)=>sum+s.minutes,0)===30);
+ // Shared validator includes lesson IDs, step structure and mandatory
+ // playback proof for authored listening sessions. G3 never passes on a
+ // superficially 60-entry lesson list whose media gates are absent.
+ const validLessons=validateGuidedLessons(guidedLessons).length===0;
  const full=guidedIds.size===60&&validLessons;
  const gates:ReleaseGate[]=[
   {id:'G1',title:'Aineisto',passed:imported.length===10&&sourceIds.size===10&&evidence.rightsReviewed,
