@@ -17,6 +17,14 @@ export function LosUnderstanding({chapter,goToText}:{chapter:LosChapter;goToText
     ["Ketkä kaksi henkilöä puhuvat?", "Millä kysymyksellä toisen vointia kysytään?", "Miten vastauksen sävyä voi kuvata suomeksi?"]:
     chapter.id==="06"?
     ["Löydätkö keskustelusta ikään liittyvän kysymyksen?", "Mikä lukusana esiintyy?", "Miten kysymys eroaa nimikysymyksestä?"]:
+    chapter.id==="07"?
+    ["Ketkä keskustelevat puhelimessa?", "Missä kohdassa joku pyytää tavaamaan?", "Minkä nimen kirjaimista saat selvää?"]:
+    chapter.id==="08"?
+    ["Kuka haastattelussa kertoo opiskelustaan?", "Etsi yksi jo tuttu sana, jos aineisto on julkaistu.", "Missä tilanteessa pyytäisit puhujaa toistamaan?"]:
+    chapter.id==="09"?
+    ["Ketkä sopivat ajankohdasta?", "Mikä päivä tai kellonaika mainitaan?", "Mitkä ajanilmaukset ovat vielä vain tunnistettavia?"]:
+    chapter.id==="10"?
+    ["Mitä henkilö kertoo omasta nimestään?", "Mitä tietoa hän antaa kotipaikastaan?", "Poimi yksi jo oppimasi esittelyilmaus."]:
     ["Etsi tekstistä kappaleen aiheeseen liittyvä nimi tai ilmaus.", "Etsi yksi jo tuntemasi saksankielinen rakenne.", "Kuvaile omin sanoin, mistä keskustelu kertoo."];
   return <section className="los-inner-page los-understanding">
     <p className="los-eyebrow">VERSTEHEN / KAPITEL {Number(chapter.id)}</p>
@@ -70,7 +78,7 @@ export function LosApplication({chapter}:{chapter:LosChapter}) {
     <textarea id={`los-application-${chapter.id}`} value={draft.applicationDraft} rows={6} maxLength={5000}
       spellCheck={false} placeholder="Kirjoita oma saksankielinen vastauksesi…"
       onChange={event=>update(current=>({...current,applicationDraft:event.target.value}))}/>
-    <p className="los-save-state" role="status">{saved?"Vastaus tallennettu tähän selaimeen. Ei vielä synkronointia.":"Tallennus epäonnistui. Kopioi vastauksesi talteen."}</p>
+    <p className="los-save-state" role="status">{saved?"Vastaus tallennettu tähän selaimeen. Pilveen siirto on erillinen vapaaehtoinen toiminto.":"Tallennus epäonnistui. Kopioi vastauksesi talteen."}</p>
     <h3>Itsearvioinnin tarkistuslista</h3>
     <ul className="los-application-checks">{item.checklist.map(point=><li key={point}>{point}</li>)}</ul>
     <button className="los-outline-button" disabled={!draft.applicationDraft.trim()} onClick={()=>setShowExample(v=>!v)}>
@@ -109,6 +117,26 @@ export function LosCulture({chapter}:{chapter:LosChapter}) {
       <p>Saksaksi ikää kysytään <span lang="de">Wie alt bist du?</span> ja kerrotaan <span lang="de">Ich bin … Jahre alt.</span>. Harjoittele kuvitteellisilla henkilöillä, jotta sinun ei tarvitse ilmoittaa oppikirjaan oikeaa syntymäaikaasi.</p>
       <p>Ikä voi kuulua esittäytymiseen, mutta toiselta kysyminen ei ole tarpeen jokaisessa tapaamisessa. Harjoituksen tavoitteena on osata lause, ei kerätä henkilötietoja.</p>
       <div className="los-culture-term"><strong lang="de">siebzehn · zwanzig · einundzwanzig</strong><p>Harjoittele muotoja lukusanoina. Ikälauseessa käytetään <span lang="de">bin</span>-muotoa.</p></div>
+    </>:chapter.id==="07"?<>
+      <h2>Kirjain, kirjainmerkki ja tavaaminen</h2>
+      <p>Saksankielisessä puhelussa tai lomakkeen täyttämisessä nimeä voi joutua tavaamaan kirjain kirjaimelta. Kirjaimen <b>nimi</b> ei ole aina sama kuin sen tavallinen äänne sanassa. Tämän vuoksi kirjoitettu kirjainsarja ei yksin korvaa ihmisen lausumaa tavaamisharjoitusta.</p>
+      <div className="los-culture-term"><strong lang="de">ä · ö · ü · ß</strong><p>Nämä merkit ovat osa saksan oikeinkirjoitusta. Aina niitä ei voi kirjoittaa kaikilla näppäimistöillä, jolloin teknisessä yhteydessä saatetaan käyttää muotoja ae, oe, ue ja ss. Ne eivät kuitenkaan ole kaikissa sanoissa tai arviointitilanteissa merkitykseltään tai kirjoitusasultaan samanarvoisia.</p></div>
+      <p>Opettele ensin erottamaan, mitä näet kirjoitettuna. Tavaamisen ääntämistä harjoitellaan oikean ihmisen puheäänitteellä sen jälkeen, kun C07:n äänilähde on hyväksytty ja lisätty oppikirjaan.</p>
+    </>:chapter.id==="08"?<>
+      <h2>Kun et ymmärrä vieraskielisessä tilanteessa</h2>
+      <p>Kieltä opiskellessa ei tarvitse ymmärtää jokaista lausetta ensimmäisellä kuulemalla. Voit käyttää selkeitä fraaseja: <span lang="de">Ich verstehe nicht.</span>, <span lang="de">Noch einmal, bitte.</span> ja <span lang="de">Bitte langsamer.</span>.</p>
+      <div className="los-culture-term"><strong lang="de">Können Sie das bitte wiederholen?</strong><p>Opettele tämä pitkä kohtelias ilmaus yhtenä kokonaisuutena. Se ei tarkoita, että tässä kappaleessa pitäisi vielä osata kaikki können-verbin muodot tai saksan pyyntöjen kielioppi.</p></div>
+      <p>Oppilaitosten käytännöt vaihtelevat. Oppikirja opettaa tässä kielellisiä selviytymiskeinoja, ei yhtä kaikissa saksankielisissä kouluissa noudatettavaa toimintatapaa.</p>
+    </>:chapter.id==="09"?<>
+      <h2>Viikonpäivät ja kalenterin lukeminen</h2>
+      <p>Saksankieliset viikonpäivät <span lang="de">Montag, Dienstag, Mittwoch, Donnerstag, Freitag, Samstag</span> ja <span lang="de">Sonntag</span> kirjoitetaan isolla alkukirjaimella. Saksassa ja Suomessa viikkokalenteri esitetään yleisesti maanantaista alkavana.</p>
+      <div className="los-culture-term"><strong lang="de">am Montag · um drei Uhr</strong><p>Ensimmäinen ilmaus kertoo päivän ja toinen kellonajan. Oppikirjan harjoituksissa riittävät tasatunnit. Lähdetekstissä mahdollisesti esiintyvät <span lang="de">halb</span> ja <span lang="de">Viertel vor/nach</span> selitetään myöhemmin lukemisen tueksi.</p></div>
+      <p>Kalenteriharjoituksissa käytetään kuvitteellisia tapaamisia. Oikeaa henkilökohtaista kalenteriasi ei tarvitse siirtää oppikirjaan.</p>
+    </>:chapter.id==="10"?<>
+      <h2>Kohtaaminen alusta loppuun</h2>
+      <p>Saksankielisessä kohtaamisessa tervehdyksen ja puhuttelun sopivuus riippuu tilanteesta. Tuttava voi kysyä <span lang="de">Wie heißt du?</span>, kun taas virallisessa kohtaamisessa <span lang="de">Wie heißen Sie?</span> voi olla luontevampi.</p>
+      <div className="los-culture-term"><strong lang="de">Das ist Leo. Er kommt aus Deutschland.</strong><p>Kolmannen henkilön esitteleminen laajentaa jo opittuja minä- ja sinä-muotoja. Tämä on kertaus, ei lupa alkaa harjoitella koko saksan pronominijärjestelmää.</p></div>
+      <p>Kokeile kirjoittaa ja esittää kaksi toisistaan eroavaa tilannetta. Kappaletesti tarkistaa vain rajattuja muotoja; ääneen tapahtuva keskustelu arvioidaan omalla tarkistuslistalla.</p>
     </>:<div className="los-editorial-note"><h2>Kulttuurisivu tarkistetaan</h2><p>Tämän kappaleen erillinen kulttuuriteksti, lähdeviitteet ja oikeuksiltaan hyväksytty kuvitus on vielä toimitettava. Oppikirjaa ei merkitä valmiiksi puuttuvan aineiston perusteella.</p></div>}
     <div className="los-culture-source"><strong>Kuvat ja lähteet</strong><p>Tämän sivun kuvallinen oppimateriaali ja lähdekohtaisten kulttuuriväitteiden toimitukselliset merkinnät ovat vielä valmistelussa. Valmiin kulttuuriosion hyväksyntä edellyttää niitä.</p></div>
   </section>;
