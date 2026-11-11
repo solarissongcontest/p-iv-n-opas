@@ -57,6 +57,9 @@ export const LOS1_C01_SECTIONS: ChapterSection[] = emptyChapterSections().map(se
       "los1-c01-ex-greeting-pairs", "los1-c01-ex-marker-demo",
       "los1-c01-practice-short", "los1-c01-practice-formal",
       "los1-c01-practice-thanks",
+      "los1-c01-multichoice-goodbyes", "los1-c01-truth-good-night",
+      "los1-c01-order-bis-spaeter", "los1-c01-order-guten-morgen",
+      "los1-c01-categorize-situations",
     ] } :
     section.id === "kayta" ? { blockIds: [
       "los1-c01-application-intro", "los1-c01-application-writing",
