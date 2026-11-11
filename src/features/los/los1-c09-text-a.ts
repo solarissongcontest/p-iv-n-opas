@@ -62,7 +62,7 @@ export const LOS1_C09_TEXT_A_EXERCISES:Exercise[]=[
   ["Bis dann.","Guten Morgen!","Gute Nacht!"],0,
   "Greta sanoo Bis dann."),
  choice("audio-honesty","Miksi tämän lähteen alkuperäistä ääntä ei pidä käsitellä valmiina mallinauhoitteena?",
-  ["Koska sitä ei ole olemassa.","Lähteen sivu kertoo virheestä ääneen sisältyvässä artikkelissa.",
+  ["Koska sitä ei ole olemassa.","Lähdesivu kertoo äänitteen käyttävän väärää artikkelia Fußball-sanan edellä.",
    "Koska ääni kuuluu eri henkilöille kuin tekstissä."],1,
   "Wikibooksin lähdesivu kertoo, että äänitteessä sanotaan das eikä oikea der (Fußball)."),
  highlight("highlight-quarter","Es ist Viertel vor drei.",
