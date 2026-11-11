@@ -11,6 +11,8 @@ import {LOS1_C09_SOURCE_EXERCISES,LOS1_C09_WB04_TEXT}
  from "../src/features/los/los1-c09-source.ts";
 import {LOS1_C09_SPORT_TURNS,LOS1_C09_SPORT_TEXT,LOS1_C09_TEXT_A_BLOCKS,LOS1_C09_TEXT_A_EXERCISES}
  from "../src/features/los/los1-c09-text-a.ts";
+import {LOS1_C09_AUDIO_BLOCKS,LOS1_C09_AUDIO_EXERCISES,LOS1_C09_AUDIO_SOURCE_ID}
+ from "../src/features/los/los1-c09-audio.ts";
 import {LOS1_C09_EXAM_A,LOS1_C09_EXAM_B,LOS1_C09_TEST}
  from "../src/features/los/los1-c09-test.ts";
 import {emptyChapterTestRecord,gradeChapterTest,selectedTestExercises,
@@ -51,8 +53,8 @@ test("C09 has ten independently routable preview sections and valid model",()=>{
  assert.equal(LOS1_C09_SOURCE_EXERCISES.length,4);
  assert.equal(LOS1_C09_PRACTICE_EXERCISES.length,39);
  assert.equal(LOS1_C09_EXAM_A.length,14);
- assert.equal(chapter.exerciseIds.length,67);
- assert.equal(new Set(chapter.exerciseIds).size,67);
+ assert.equal(chapter.exerciseIds.length,74);
+ assert.equal(new Set(chapter.exerciseIds).size,74);
  const sections=chapter.sections??[];
  assert.ok(sections.every(s=>s.publicationStatus==="preview"));
  assert.deepEqual(sections.map(s=>s.id),[
@@ -117,7 +119,9 @@ test("Main Sport und Zeit text is complete, sourced, and authentic audio remains
  assert.ok(highlights.every(ex=>ex.type==="highlight"&&ex.blockId==="los1-c09-wb-03-dialogue"&&ex.text===LOS1_C09_SPORT_TEXT));
  const media=book.blocks.find(b=>b.id==="los1-c09-text-b-media-pending");
  assert.ok(media&&media.kind==="paragraph"&&media.text.includes("vielä"));
- assert.ok(book.blocks.filter(b=>b.id.startsWith("los1-c09-")).every(b=>b.kind!=="media"));
+ const mediaBlocks=book.blocks.filter(b=>b.id.startsWith("los1-c09-")&&b.kind==="media");
+ assert.equal(mediaBlocks.length,1);
+ assert.equal(mediaBlocks[0]?.sourceId,LOS1_C09_AUDIO_SOURCE_ID);
  assert.ok(book.blocks.filter(b=>b.id.startsWith("los1-c09-")&&b.kind==="authenticText").every(b=>b.sourceId==="M-WB-04"));
 });
 test("Seven fictional days, seven safe calendar prompts, and 17 glossary units",()=>{
@@ -143,19 +147,38 @@ test("Seven fictional days, seven safe calendar prompts, and 17 glossary units",
  assert.ok(grammar.explanationFi.includes("am + viikonpäivä"));
  assert.ok(grammar.explanationFi.includes("um + lukusana"));
 });
-test("Four C09 lessons are preview; only unverified media listening stays planned",()=>{
+test("All five C09 lessons are preview with independent authentic sound and text sources",()=>{
  assert.deepEqual(book.lessons.filter(l=>l.chapterId==="C09"&&l.publicationStatus==="preview")
-  .map(l=>l.id),["L046","L047","L048","L050"]);
+  .map(l=>l.id),["L046","L047","L048","L049","L050"]);
  const sourceLesson=book.lessons.find(x=>x.id==="L047");
  assert.ok(sourceLesson?.steps.some(x=>x.blockId==="los1-c09-wb-03-dialogue"));
  assert.ok(sourceLesson?.steps.some(x=>x.exerciseId==="los1-c09-sport-quarter"));
- for(const id of ["L049"]){
-  const l=book.lessons.find(x=>x.id===id);
-  assert.ok(l&&l.publicationStatus==="planned"&&l.steps.length===0);
- }
+ const listen=book.lessons.find(x=>x.id==="L049");
+ assert.ok(listen&&listen.publicationStatus==="preview");
+ assert.ok(listen.steps.some(x=>x.blockId==="los1-c09-m-com-08-audio"));
  assert.ok(book.lessons.find(l=>l.id==="L050")?.steps.some(x=>x.chapterTestId===LOS1_C09_TEST.id));
 });
-test("Fourteen-point A/B test requires 2–4 written lines, preserves retake answers",()=>{
+test("Authentic 15-second Commons weekday list is in-book, licensed, and safely allowlisted",()=>{
+ assert.equal(LOS1_C09_AUDIO_BLOCKS.length,4);
+ assert.equal(LOS1_C09_AUDIO_EXERCISES.length,7);
+ const metadata=book.sources.find(x=>x.id==="M-COM-08");
+ assert.ok(metadata);
+ assert.equal(metadata.permittedMode,"embed");
+ assert.equal(metadata.licenseUrl,"https://creativecommons.org/licenses/by-sa/3.0/");
+ assert.ok(metadata.originalUrl?.includes("German_Vocabulary_-_Days.ogg"));
+ const media=book.blocks.find(x=>x.id==="los1-c09-m-com-08-audio");
+ assert.ok(media&&media.kind==="media"&&media.mediaType==="audio");
+ assert.equal(media.sourceId,"M-COM-08");
+ assert.equal(media.embedUrl,"https://upload.wikimedia.org/wikipedia/commons/1/15/German_Vocabulary_-_Days.ogg");
+ assert.equal(media.mp3Url,"https://upload.wikimedia.org/wikipedia/commons/transcoded/1/15/German_Vocabulary_-_Days.ogg/German_Vocabulary_-_Days.ogg.mp3");
+ const transcript=book.blocks.find(x=>x.id==="los1-c09-m-com-08-transcript");
+ assert.ok(transcript&&transcript.kind==="transcript");
+ assert.deepEqual(transcript.lines.map(x=>x.de),["Tage","Montag","Dienstag","Mittwoch","Donnerstag","Freitag","Samstag","Sonntag"]);
+ const support=book.blocks.find(x=>x.id==="los1-c09-audio-followup");
+ assert.ok(support&&support.kind==="paragraph"&&support.text.includes("ei pidä tulkita kuuntelukyvyn"));
+ for(const ex of LOS1_C09_AUDIO_EXERCISES)
+  assert.equal(evaluateExercise(ex,answer(ex))?.correct,true,ex.id);
+});\ntest("Fourteen-point A/B test requires 2–4 written lines, preserves retake answers",()=>{
  assert.equal(testDef.exerciseIds.length,14);
  assert.equal(testDef.alternativeExerciseIds?.length,14);
  assert.equal(new Set([...testDef.exerciseIds,...(testDef.alternativeExerciseIds??[])]).size,28);
