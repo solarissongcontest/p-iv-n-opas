@@ -26,7 +26,7 @@ export interface Lesson {
   sequence: number; title: string; estimatedMinutes: number; objectives: string[];
   model: "text" | "vocabulary" | "grammar" | "application" | "review";
   publicationStatus?: "planned" | "preview" | "published";
-  steps: { id: string; title: string; required: boolean; blockId?: string; exerciseId?: string }[];
+  steps: { id: string; title: string; required: boolean; blockId?: string; exerciseId?: string; reflectionPromptFi?: string }[];
 }
 export type ContentBlock =
   | { id: string; version: string; kind: "heading"; level: 2 | 3; text: string }
@@ -94,6 +94,8 @@ export function validateBook(book: Book): string[] {
       stepIds.add(step.id);
       if (step.blockId && !blocks.has(step.blockId)) errors.push("Unknown block: " + step.blockId);
       if (step.exerciseId && !exercises.has(step.exerciseId)) errors.push("Unknown exercise: " + step.exerciseId);
+      const references = Number(Boolean(step.blockId)) + Number(Boolean(step.exerciseId)) + Number(Boolean(step.reflectionPromptFi));
+      if (references !== 1) errors.push("Lesson step must reference exactly one content, exercise or reflection: " + step.id);
     }
   }
   for (const block of book.blocks) {
