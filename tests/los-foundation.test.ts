@@ -21,6 +21,19 @@ test("LOS! 1 retains 10 chapters and 60 canonical lessons, with three preview le
   assert.ok(los1.lessons.filter(item => item.publicationStatus !== "preview").every(item => !item.steps.length));
   assert.deepEqual(validateBook(los1), []);
 });
+test("L001 begins without prerequisite German and stores an ungraded personal goal", () => {
+  const lesson = los1.lessons.find(item => item.id === "L001");
+  assert.ok(lesson);
+  assert.equal(lesson.publicationStatus, "preview");
+  assert.ok(lesson.steps.length >= 5);
+  const reflection = lesson.steps.find(step => step.reflectionPromptFi);
+  assert.ok(reflection);
+  assert.equal(reflection.required, true);
+  assert.equal(reflection.blockId, undefined);
+  assert.equal(reflection.exerciseId, undefined);
+  assert.ok(lesson.steps.some(step => step.blockId === "los1-c01-m-com-01-dialogue"));
+  assert.ok(lesson.steps.some(step => step.blockId === "los1-c01-m-com-01-audio"));
+});
 test("only the verified Wikimedia original is enabled; 22 other sources remain pending", () => {
   assert.equal(los1.sources.length, 23);
   assert.equal(los1.sources.filter(source => source.permittedMode === "pending").length, 22);
