@@ -6,6 +6,7 @@ import { LOS1_C01_SOURCE_BLOCKS, LOS1_C01_SOURCE_EXERCISES } from "./los1-c01-so
 import { LOS1_INTRO_BLOCKS } from "./los1-onboarding.ts";
 import { LOS1_C01_SECTIONS, emptyChapterSections } from "./chapterSections.ts";
 import { LOS1_C01_GREETING_AUDIO_BLOCKS, LOS1_C01_AUDIO_COMPREHENSION_EXERCISES } from "./los1-c01-audio-list.ts";
+import { LOS1_C01_EXAM_EXERCISES, LOS1_C01_TEST } from "./los1-c01-chapter-test.ts";
 
 const specs: readonly [string, string, string, string, string, string][] = [
   ["Perustason alkeet 1", "Tutustu ja ihastu saksan kieleen", "Nollataso, tervehdykset, esittäytyminen ja ensimmäinen vuorovaikutus.", "#B7473C", "#FCE8E5", "#FF9B91"],
@@ -46,6 +47,7 @@ export const LOS_BOOKS: readonly Book[] = specs.map((spec, index) => ({
       ...LOS1_C01_SOURCE_EXERCISES.map(exercise => exercise.id),
       ...LOS1_C01_AUDIO_COMPREHENSION_EXERCISES.map(exercise => exercise.id),
       ...LOS1_C01_PREVIEW_EXERCISES.map(exercise => exercise.id),
+      ...LOS1_C01_EXAM_EXERCISES.map(exercise => exercise.id),
     ],
   } : { ...chapter, sections: emptyChapterSections() }) : [],
   lessons: index === 0 ? LOS1_PLANNED_LESSONS.map(lesson => {
@@ -105,10 +107,19 @@ export const LOS_BOOKS: readonly Book[] = specs.map((spec, index) => ({
         { id: "L005-S06", title: "Kertaa kuulemasi", required: true, blockId: "los1-c01-text-b-reflection" },
       ],
     };
+    if (lesson.id === "L006") return {
+      ...lesson, publicationStatus: "preview" as const,
+      steps: [
+        { id: "L006-S01", title: "Kertaa C01:n tervehdykset", required: true, blockId: "los1-c01-greetings" },
+        { id: "L006-S02", title: "Lue alkuperäisen dialogin hyvästely", required: true, blockId: "los1-c01-m-com-01-dialogue" },
+        { id: "L006-S03", title: "Tee 12 kohdan kappaletesti ja puheen itsearviointi", required: true, chapterTestId: LOS1_C01_TEST.id },
+      ],
+    };
     return lesson;
   }) : [],
   blocks: index === 0 ? [...LOS1_INTRO_BLOCKS, ...LOS1_C01_PREVIEW_BLOCKS, ...LOS1_C01_SOURCE_BLOCKS, ...LOS1_C01_GREETING_AUDIO_BLOCKS] : [],
-  exercises: index === 0 ? [...LOS1_C01_PREVIEW_EXERCISES, ...LOS1_C01_SOURCE_EXERCISES, ...LOS1_C01_AUDIO_COMPREHENSION_EXERCISES] : [],
+  exercises: index === 0 ? [...LOS1_C01_PREVIEW_EXERCISES, ...LOS1_C01_SOURCE_EXERCISES, ...LOS1_C01_AUDIO_COMPREHENSION_EXERCISES, ...LOS1_C01_EXAM_EXERCISES] : [],
+  chapterTests: index === 0 ? [LOS1_C01_TEST] : [],
   sources: index === 0 ? LOS1_RESEARCH_SOURCES.map(source => source.id === "M-COM-01" ? {
     ...source,
     author: "Xzapro4 ja Erkan Yilmaz",
