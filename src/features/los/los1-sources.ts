@@ -35,6 +35,15 @@ const planned: ReadonlyArray<readonly [
     "Sanastoäänite, ei kokonainen dialogi; soitto-QA kesken."
   ],
   [
+    "M-COM-08",
+    "German Vocabulary - Days.ogg · 15 sekunnin viikonpäiväluettelo",
+    "Wikimedia Commons",
+    "https://commons.wikimedia.org/wiki/File:German_Vocabulary_-_Days.ogg",
+    "CC BY-SA 3.0 Unported · tekijä: Christoph (englanninkielinen Wikibooks)",
+    "text-cleared",
+    "Alkuperäisen äänitteen kokoteksti (Tage sekä seitsemän viikonpäivää) on tiedoston kuvauksessa. Sivun oikeus varmistettu, mobiilin toisto-QA edelleen tekemättä."
+  ],
+  [
     "M-WB-01",
     "German Level I: Wie heißt du?",
     "Wikibooks",
