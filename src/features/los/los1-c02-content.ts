@@ -1,8 +1,8 @@
 /** LOS! 1 chapter C02: editorially original introductory dialogue and learning.
  *
- * The six-replica Wikibooks M-WB-01 primary source is in the source manifest,
- * but its full quoted transcription has NOT been imported here. This Text A
- * is original LOS! content with other characters, NOT attributed to Wikibooks.
+ * The full six-replica human Wikibooks M-WB-01 main source is separately
+ * included in los1-c02-wikibooks.ts. This supplementary Lena–Ben dialogue
+ * is original LOS! editorial content and is NOT attributed to Wikibooks.
  * M-COM-02 is a separate complete 4-turn CC BY-SA 3.0 original by Ariser.
  * The lesson intentionally leaves "Wir kommen ...", nationality, and the
  * country grammar for C03; learners need only detect personal names in audio.
