@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { ArrowLeft, ArrowRight, BookOpen, ChevronLeft, ChevronRight, Headphones, List, Menu, Search, X } from "lucide-react";
 import { readCachedDeviceUser } from "@/lib/deviceSession";
 import { LOS_BOOKS, type LosBookDefinition, type LosChapter } from "./catalog";
+import { getLosChapterSourceGate } from "./content/sourceRegistry";
 import { LosAuthenticAudio, LosDictionary, LosIndexSearch, LosLearningPath, type LosDestination } from "./LosReferenceTools";
 import { LosChapterGrammar } from "./LosGrammarChapters";
 import { LosNotebook, LosWorkbook } from "./LosWorkbook";
@@ -172,12 +173,6 @@ function ChapterOpening({ chapter, book, move }: { chapter: LosChapter; book: Lo
     </nav>
   </section>;
 }
-const pendingTextSources:Record<string,{name:string;status:string}>={
-  "07":{name:"M-WB-02 · Wikibooks, Bitte buchstabieren Sie",status:"Avoimen sivutekstin CC BY-SA -käyttöperuste on tiedossa, mutta koko tekstiä ei vielä ole toimitettu tähän lukijaan. Erillisen äänen oikeuksia ei ole hyväksytty."},
-  "08":{name:"M-DIB-04 · Deutsch im Blick, Im Unterricht",status:"Yksittäistä julkaistavaa haastattelua ja sen tarkkaa suoraa osoitetta ei vielä ole vahvistettu. Tälle kappaleelle ei ole hyväksyttyä Text A:ta."},
-  "09":{name:"M-WB-03 · Wikibooks, Sport und Zeit",status:"Avoin Franz–Greta-lähdeteksti on tunnistettu, mutta kokonainen teksti ja sen tukiselitykset eivät vielä ole tässä lukijassa. Alkuperäisen äänen käyttö edellyttää erillistä tarkistusta."},
-  "10":{name:"M-DIB-02 · Deutsch im Blick, Harald: Wer bin ich?",status:"Haastattelun tarkkaa toimivuutta, kokonaista litteraattia ja mediakohtaisia oikeuksia ei ole vielä vahvistettu."},
-};
 const sampleByChapter:Record<string,string>={
   "07":"Wie schreibt man das?",
   "08":"Ich verstehe nicht.",
@@ -185,7 +180,7 @@ const sampleByChapter:Record<string,string>={
   "10":"Das ist Mia.",
 };
 function TextPage({ chapter }: { chapter: LosChapter }) {
-  const pending=pendingTextSources[chapter.id];
+  const sourceGate=getLosChapterSourceGate(chapter.id);
   const sample=sampleByChapter[chapter.id]??"Guten Tag!";
   return <section className="los-inner-page los-reading-page">
     <p className="los-eyebrow">KAPPALE {chapter.id} / TEKSTI A</p>
@@ -195,7 +190,10 @@ function TextPage({ chapter }: { chapter: LosChapter }) {
       <Headphones size={24} />
       <div><h2>Alkuperäistekstin julkaisu on kesken</h2>
         <p>Tekstin koko litteraatti ja kuuntelun tukiselitykset lisätään samaan lukijaan toimitus- ja käyttöoikeustarkistuksen jälkeen. Tässä ei käytetä keksittyä dialogia täytteenä.</p>
-        {pending&&<p><strong>Suunniteltu lähde: {pending.name}.</strong> {pending.status}</p>}
+        {sourceGate.sourceId && <p><strong>Suunniteltu lähde: {sourceGate.sourceId}.</strong>{" "}
+          {sourceGate.sourceUrl && <a href={sourceGate.sourceUrl} target="_blank" rel="noopener noreferrer">Lähdetiedot ja lisenssi</a>}.
+          {" "}Linkki on lähdeviite, ei kirjan lukutekstin korvike.</p>}
+        <p><strong>Julkaisuportit:</strong> {sourceGate.issues.join(" ")}</p>
       </div>
     </div>
     <LosAuthenticAudio chapterId={chapter.id} source="A" />
