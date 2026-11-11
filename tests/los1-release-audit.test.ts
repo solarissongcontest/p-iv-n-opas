@@ -6,13 +6,13 @@ import {guidedLessons} from '../src/features/los/guidedLessons.ts';
 test('LOS! release audit counts material actually implemented, not just placeholder lesson names',()=>{
  const audit=auditLosRelease();
  assert.equal(audit.lessonsTotal,60);
- assert.equal(audit.lessonsAuthored,45);
- assert.equal(guidedLessons.length,45);
- assert.equal(new Set(guidedLessons.map(l=>l.id)).size,45);
+ assert.equal(audit.lessonsAuthored,48);
+ assert.equal(guidedLessons.length,48);
+ assert.equal(new Set(guidedLessons.map(l=>l.id)).size,48);
  assert.equal(audit.textsImported,8);
  assert.deepEqual(audit.blockingChapterIds,['C06','C08']);
  assert.equal(audit.chapterExams,8);
- assert.equal(audit.unauthoredLessonIds.length,15);
+ assert.equal(audit.unauthoredLessonIds.length,12);
  assert.ok(!audit.unauthoredLessonIds.includes('L030'));
  assert.ok(audit.unauthoredLessonIds.includes('L031'));
  assert.ok(audit.unauthoredLessonIds.includes('L041'));
