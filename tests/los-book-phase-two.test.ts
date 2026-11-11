@@ -36,3 +36,9 @@ test("publisher style is maintained in navigational adjuncts", () => {
   assert.ok(reader.includes("LosAuthenticAudio"));
   assert.doesNotMatch(tools,/studyos-shell|<AppShell|className="panel"/);
 });
+
+test("SAB32–SAB38 cannot inherit SAB31's guided lesson plan", () => {
+  const tools = readFileSync("src/features/los/LosReferenceTools.tsx","utf8");
+  assert.match(tools,/book\.id !== 1/);
+  assert.match(tools,/LOS! 1:n oppitunteja ei käytetä tässä kirjassa/);
+});
