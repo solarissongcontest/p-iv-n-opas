@@ -4,7 +4,7 @@ import { LOS1_C01_PREVIEW_BLOCKS, LOS1_C01_PREVIEW_EXERCISES } from "./los1-c01-
 import { LOS1_RESEARCH_SOURCES } from "./los1-sources.ts";
 import { LOS1_C01_SOURCE_BLOCKS, LOS1_C01_SOURCE_EXERCISES } from "./los1-c01-source.ts";
 import { LOS1_INTRO_BLOCKS } from "./los1-onboarding.ts";
-import { LOS1_C01_SECTIONS, emptyChapterSections } from "./chapterSections";
+import { LOS1_C01_SECTIONS, emptyChapterSections } from "./chapterSections.ts";
 
 const specs: readonly [string, string, string, string, string, string][] = [
   ["Perustason alkeet 1", "Tutustu ja ihastu saksan kieleen", "Nollataso, tervehdykset, esittäytyminen ja ensimmäinen vuorovaikutus.", "#B7473C", "#FCE8E5", "#FF9B91"],
