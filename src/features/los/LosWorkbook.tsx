@@ -43,7 +43,7 @@ const selfAssessments:Record<string,string> = {
   "03":"Kuvittele tapaavasi henkilön Saksasta. Kysy, mistä hän on kotoisin, ja kerro olevasi kotoisin Suomesta. Tarkista erityisesti woher, kommen ja aus.",
   "04":"Kuvittele kaksi kohtaamista: puhut tutulle ystävälle ja asioit kohteliaasti tuntemattoman aikuisen kanssa. Esitä kummassakin sopiva nimikysymys.",
   "05":"Kuvittele ystävän kysyvän kuulumisiasi. Vastaa realistisesti, esitä vastakysymys ja kokeile sitten kohteliasta Ihnen-muotoa.",
-  "06":"Kerro ääneen kuvitteellisen henkilön ikä (17 vuotta). Kirjoita sen jälkeen ilman mallia luvut 7, 16, 21 ja 32 saksaksi.",
+  "06":"Esitä ääneen kaksi kuvitteellista ikäkeskustelua (17 ja 20 vuotta). Kirjoita sen jälkeen ilman mallia luvut 7, 16, 21 ja 32 saksaksi.",
 };
 
 export function LosWorkbook({chapter,mode}:{chapter:LosChapter;mode:"practice"|"test"}) {
