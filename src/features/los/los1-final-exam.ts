@@ -14,10 +14,14 @@
  * excluded from the 50 automatic points. This is a PRIVATE PREVIEW exam,
  * not a school grade, CEFR proof, or audio-verified final release.
  */
-import type {Exercise} from "./model";
+import type {Exercise,ContentBlock} from "./model";
 import type {ChapterTestDefinition} from "./chapterTest";
 type AuthoredQuestion={q:string;options:[string,string,string];right:0|1|2;explanation:string};
 type Group={key:string;titleFi:string;count:number;a:AuthoredQuestion[];b:AuthoredQuestion[]};
+export const LOS1_FINAL_BLOCKS:ContentBlock[]=[
+ {id:"los1-final-intro",version:"0.1.0",kind:"paragraph",language:"fi",
+  text:"LOS! 1:n 50 pisteen harjoituskoe. Viisi osa-aluetta ovat puheenymmärtäminen 12 p, luetunymmärtäminen 10 p, sanasto 10 p, muoto-oppi 10 p ja arkiset tilanteet 8 p. Lisäksi kirjoitat erikseen 5–7 lauseen viestin ja 6–8 repliikin keskustelun. Nämä kaksi tekstiä arvioit itse ilman lisäpisteitä. Kuuntelun äänet ovat alkuperäisiä lisensoituja ihmisten äänitteitä, mutta niiden toimivuutta omalla laitteellasi ei ole vielä testattu. Jos ääni ei toimi, kuuntelupisteitä ei tule tulkita kuuntelutaitosi osoitukseksi. Tämä koe on esikatselu, ei virallinen todistus."},
+];
 const GROUPS:Group[]=[
   {
     "key": "listening",
@@ -1115,8 +1119,8 @@ export const LOS1_FINAL_TEST:ChapterTestDefinition={
   +"Keksi henkilöt ja kerro, kuka olet, mistä olet kotoisin, mitä kuuluu, "
   +"kenet esittelet (er/sie) ja mihin viikonpäivään ja tasatuntiin "
   +"sovitte tapaamisen. Käytä oman mielikuvituksen tietoja, älä oikeita puhelinnumeroita.",
- writingModelDe:"Hallo! Ich heiße Lena.\nIch komme aus Finnland.\nMir geht es gut.\nDas ist Ben. Er kommt aus Deutschland.\nAm Freitag um vier Uhr?\nBis Freitag!",
- writingModelFi:"Hei! Olen Lena.\nOlen kotoisin Suomesta.\nMinulle kuuluu hyvää.\nTämä on Ben. Hän tulee Saksasta.\nPerjantaina kello neljältä?\nNähdään perjantaina!",
+ writingModelDe:"Ich heiße Lena.\nIch komme aus Finnland.\nMir geht es gut.\nDas ist Ben.\nEr kommt aus Deutschland.\nAm Freitag um vier Uhr?\nBis Freitag!",
+ writingModelFi:"Nimeni on Lena.\nOlen kotoisin Suomesta.\nMinulle kuuluu hyvää.\nTämä on Ben.\nHän tulee Saksasta.\nPerjantaina kello neljältä?\nNähdään perjantaina!",
  secondWritingPromptFi:"Kirjoita 6–8 ERILLISTÄ REPLIIKKIÄ omille riveilleen. "
   +"Tee fiktiivinen kohtaaminen: tervehdi, kerro nimet ja alkuperä, kysy vointia, "
   +"pyydä kerran toistamaan tai tavaamaan, sovi tapaamisen päivä ja tasatunti, "
