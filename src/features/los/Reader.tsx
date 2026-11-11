@@ -35,7 +35,8 @@ function SafeMedia({ block, source }: {
       && url.origin === "https://upload.wikimedia.org"
       && (
         (source.id === "M-COM-01" && url.pathname === "/wikipedia/commons/1/11/Gespr%C3%A4chVorstellung.ogg") ||
-        (source.id === "M-COM-03" && url.pathname === "/wikipedia/commons/b/bb/German_Vocabulary_-_Greetings.ogg")
+        (source.id === "M-COM-03" && url.pathname === "/wikipedia/commons/b/bb/German_Vocabulary_-_Greetings.ogg") ||
+        (source.id === "M-COM-02" && url.pathname === "/wikipedia/commons/f/f9/Deutsch_Dialog_._Ich_bin_Peter.ogg")
       );
   } catch { /* Untrusted URLs never render a player. */ }
   let validMp3 = false;
