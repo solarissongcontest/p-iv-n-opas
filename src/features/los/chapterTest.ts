@@ -17,6 +17,9 @@ export type ChapterTestDefinition = {
   writingModelDe?: string;
   writingModelFi?: string;
   requiredWritingLines?: number;
+  maximumWritingLines?: number;
+  examType?: "chapter" | "midterm" | "final";
+  scoreGroups?: readonly { id: string; titleFi: string; exerciseIds: readonly string[] }[];
 };
 export type ChapterTestResult = {
   submittedAt: string; score: number; maximum: number;
@@ -96,7 +99,8 @@ export function gradeChapterTest(definition: ChapterTestDefinition, exercises: r
     state.submission || missingChapterTestAnswers(definition, exercises, state).length ||
     missingSpeechAssessments(definition, state).length ||
     (definition.selfAssessmentMode === "writing" && (!(state.writtenResponse ?? "").trim() ||
-      (definition.requiredWritingLines ?? 1) > (state.writtenResponse ?? "").split(/\r?\n/u).filter(line => line.trim().length > 0).length))) return null;
+      ((definition.requiredWritingLines ?? 1) > (state.writtenResponse ?? "").split(/\r?\n/u).filter(line => line.trim().length > 0).length ||
+      (definition.maximumWritingLines != null && (state.writtenResponse ?? "").split(/\r?\n/u).filter(line => line.trim().length > 0).length > definition.maximumWritingLines)))) return null;
   const outcomes = exercises.map(exercise => {
     const evaluated = evaluateExercise(exercise, state.answers[exercise.id] ?? null);
     // All null/invalid submissions are rejected above, not silently counted wrong.
@@ -129,4 +133,24 @@ export function restartChapterTest(state: ChapterTestRecord): ChapterTestRecord 
       },
     ],
   };
+}
+
+/** Score separately without exposing keys before the exam is submitted.
+ * Retake alternatives are mapped by authored original exercise slot.
+ */
+export function examScoreGroups(definition: ChapterTestDefinition,
+  result: ChapterTestResult | null): { id: string; titleFi: string; score: number; maximum: number }[] {
+  if (!result || !definition.scoreGroups) return [];
+  const byOriginal = new Map(definition.exerciseIds.map((id, index) => [id, index]));
+  const outcomes = result.outcomes;
+  return definition.scoreGroups.map(group => {
+    const slots = group.exerciseIds.flatMap(id => {
+      const index = byOriginal.get(id);
+      return index === undefined ? [] : [index];
+    });
+    return { id: group.id, titleFi: group.titleFi,
+      maximum: slots.length,
+      score: slots.filter(index => outcomes[index]?.correct).length,
+    };
+  });
 }
