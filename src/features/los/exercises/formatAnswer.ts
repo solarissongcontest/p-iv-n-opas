@@ -15,14 +15,12 @@ export function formatExerciseAnswer(exercise: Exercise | undefined, answer: Exe
     case "word-order":
       return Array.isArray(answer) ? answer.map(id => exercise.tokens.find(token => token.id === id)?.label ?? "?").join(" ") : "Vastausta ei tunnisteta";
     case "matching": {
-      if (typeof answer !== "object" || Array.isArray(answer) || !("start" in answer)) {
-        if (typeof answer !== "object" || Array.isArray(answer)) return "Vastausta ei tunnisteta";
-        return exercise.left.map(item => {
-          const right = answer[item.id];
-          return item.label + " – " + (exercise.right.find(option => option.id === right)?.label ?? "?");
-        }).join("; ");
-      }
-      return "Vastausta ei tunnisteta";
+      if (typeof answer !== "object" || Array.isArray(answer) || "start" in answer)
+        return "Vastausta ei tunnisteta";
+      return exercise.left.map(item => {
+        const right = answer[item.id];
+        return item.label + " – " + (exercise.right.find(option => option.id === right)?.label ?? "?");
+      }).join("; ");
     }
     case "categorize": {
       if (typeof answer !== "object" || Array.isArray(answer) || "start" in answer) return "Vastausta ei tunnisteta";
