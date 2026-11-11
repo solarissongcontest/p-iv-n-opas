@@ -50,6 +50,13 @@ import { LOS1_C09_PRACTICE_EXERCISES } from "./los1-c09-practice.ts";
 import { LOS1_C09_SOURCE_EXERCISES } from "./los1-c09-source.ts";
 import { LOS1_C09_EXAM_A, LOS1_C09_EXAM_B, LOS1_C09_TEST } from "./los1-c09-test.ts";
 import { LOS1_C09_SECTIONS } from "./los1-c09-sections.ts";
+import { LOS1_C10_SOURCE_BLOCKS, LOS1_C10_SOURCE_EXERCISES } from "./los1-c10-source.ts";
+import { LOS1_C10_CONTENT_BLOCKS } from "./los1-c10-content.ts";
+import { LOS1_C10_PRACTICE_EXERCISES } from "./los1-c10-practice.ts";
+import { LOS1_C10_EXAM_A, LOS1_C10_EXAM_B, LOS1_C10_TEST } from "./los1-c10-test.ts";
+import { LOS1_C10_SECTIONS } from "./los1-c10-sections.ts";
+import { LOS1_REVIEW_TWO_BLOCKS, LOS1_REVIEW_TWO_EXERCISES } from "./los1-review-two.ts";
+import { LOS1_FINAL_BLOCKS, LOS1_FINAL_FORM_A, LOS1_FINAL_FORM_B, LOS1_FINAL_TEST } from "./los1-final-exam.ts";
 
 const specs: readonly [string, string, string, string, string, string][] = [
   ["Perustason alkeet 1", "Tutustu ja ihastu saksan kieleen", "Nollataso, tervehdykset, esittäytyminen ja ensimmäinen vuorovaikutus.", "#B7473C", "#FCE8E5", "#FF9B91"],
@@ -149,6 +156,12 @@ export const LOS_BOOKS: readonly Book[] = specs.map((spec, index) => ({
     blockIds:LOS1_C09_CONTENT_BLOCKS.map(b=>b.id),
     exerciseIds:[...LOS1_C09_SOURCE_EXERCISES,...LOS1_C09_PRACTICE_EXERCISES,
       ...LOS1_C09_EXAM_A].map(ex=>ex.id),
+  } : chapter.id === "C10" ? {
+    ...chapter,publicationStatus:"preview" as const,
+    sections:LOS1_C10_SECTIONS,
+    blockIds:[...LOS1_C10_SOURCE_BLOCKS,...LOS1_C10_CONTENT_BLOCKS].map(b=>b.id),
+    exerciseIds:[...LOS1_C10_SOURCE_EXERCISES,...LOS1_C10_PRACTICE_EXERCISES,
+      ...LOS1_C10_EXAM_A].map(ex=>ex.id),
   } : { ...chapter, sections: emptyChapterSections() }) : [],
   lessons: index === 0 ? LOS1_PLANNED_LESSONS.map(lesson => {
     if (lesson.id === "L001") return {
@@ -688,13 +701,112 @@ export const LOS_BOOKS: readonly Book[] = specs.map((spec, index) => ({
           chapterTestId:LOS1_C09_TEST.id},
       ],
     };
+    if (lesson.id === "L051") return {
+      ...lesson,publicationStatus:"preview" as const,
+      steps:[
+        {id:"L051-S01",title:"Kertaa kaikkien kymmenen kappaleen esittelyfraasit",required:true,blockId:"los1-c10-goals"},
+        {id:"L051-S02",title:"Lue C10:n kokonaisen kohtaamisen tavoitteet",required:true,blockId:"los1-c10-intro"},
+        {id:"L051-S03",title:"Tunnista tutustumisen tervehdys",required:true,exerciseId:"los1-c10-intro-pleasure"},
+        {id:"L051-S04",title:"Tunnista oikea kolmannen henkilön esittely",required:true,exerciseId:"los1-c10-intro-who"},
+        {id:"L051-S05",title:"Lue Haraldin koko autenttinen haastattelu",required:true,blockId:"los1-c10-m-dib-02-harald"},
+        {id:"L051-S06",title:"Tunnista Haraldin koko nimi",required:true,exerciseId:"los1-c10-source-harald-name"},
+      ],
+    };
+    // L052 requires an original, verified working Harald audio/video, not just text.
+    if (lesson.id === "L053") return {
+      ...lesson,publicationStatus:"preview" as const,
+      steps:[
+        {id:"L053-S01",title:"Lue minä- ja kolmannen persoonan kielioppi",required:true,blockId:"los1-c10-first-person-third"},
+        {id:"L053-S02",title:"Vertaa heißen, kommen ja sein -verbien muotoja",required:true,blockId:"los1-c10-verb-table"},
+        {id:"L053-S03",title:"Erota teitittelevä Sie ja hän-sanan sie",required:true,blockId:"los1-c10-sie-clarification"},
+        {id:"L053-S04",title:"Täydennä Haraldin nimi",required:true,exerciseId:"los1-c10-gap-er-name"},
+        {id:"L053-S05",title:"Täydennä Bernan kotikaupunki",required:true,exerciseId:"los1-c10-gap-sie-origin"},
+        {id:"L053-S06",title:"Tunnista kolmannen persoonan muoto",required:true,exerciseId:"los1-c10-grammar-person"},
+        {id:"L053-S07",title:"Esittele Harald ja Berna omin sanoin",required:true,blockId:"los1-c10-production-third"},
+      ],
+    };
+    // L054 requires authentic Text B media; BERNA TEXT remains accessible within C10.
+    if (lesson.id === "L055") return {
+      ...lesson,publicationStatus:"preview" as const,
+      steps:[
+        {id:"L055-S01",title:"Lue uudestaan Bernan koko alkuperäinen haastattelu",required:true,blockId:"los1-c10-m-dib-01-berna"},
+        {id:"L055-S02",title:"Vertaa Haraldin ja Bernan alkuperäisiä tietoja",required:true,blockId:"los1-c10-source-comparison"},
+        {id:"L055-S03",title:"Tarkista Bernan lähtöpaikka",required:true,exerciseId:"los1-c10-source-berna-city"},
+        {id:"L055-S04",title:"Kirjoita oma kuviteltu kohtaaminen",required:true,blockId:"los1-c10-production-meeting"},
+        {id:"L055-S05",title:"Palauta C10:n 20 tehtävän kappalekoe ja itsearvioi tuotokset",required:true,
+          chapterTestId:LOS1_C10_TEST.id},
+      ],
+    };
+    if (lesson.id === "L056") return {
+      ...lesson,publicationStatus:"preview" as const,
+      steps:[
+        {id:"L056-S01",title:"Aloita kertaus II: lukuja, tavauksia ja päiviä",required:true,blockId:"los1-review2-intro-a"},
+        {id:"L056-S02",title:"Kertaa numeron 17 muoto",required:true,exerciseId:"los1-review2-a01"},
+        {id:"L056-S03",title:"Kirjoita numero 20",required:true,exerciseId:"los1-review2-a02"},
+        {id:"L056-S04",title:"Tunnista W-kirjaimen nimi",required:true,exerciseId:"los1-review2-a03"},
+        {id:"L056-S05",title:"Tunnista nimen alkukirjain",required:true,exerciseId:"los1-review2-a04"},
+        {id:"L056-S06",title:"Täydennä viikonpäiväilmaus",required:true,exerciseId:"los1-review2-a05"},
+        {id:"L056-S07",title:"Tunnista tasatunti",required:true,exerciseId:"los1-review2-a06"},
+        {id:"L056-S08",title:"Laadi itsenäinen kalenterimerkintä",required:true,blockId:"los1-review2-production-a"},
+      ],
+    };
+    if (lesson.id === "L057") return {
+      ...lesson,publicationStatus:"preview" as const,
+      steps:[
+        {id:"L057-S01",title:"Aloita kaikkien kymmenen kappaleen taitosekoitus",required:true,blockId:"los1-review2-intro-b"},
+        {id:"L057-S02",title:"Tunnista teitittelevä nimikysymys",required:true,exerciseId:"los1-review2-b01"},
+        {id:"L057-S03",title:"Täydennä alkuperäkysymys",required:true,exerciseId:"los1-review2-b02"},
+        {id:"L057-S04",title:"Tunnista heikompi vointi",required:true,exerciseId:"los1-review2-b03"},
+        {id:"L057-S05",title:"Täydennä toistopyyntö",required:true,exerciseId:"los1-review2-b04"},
+        {id:"L057-S06",title:"Esittele Harald oikein",required:true,exerciseId:"los1-review2-b05"},
+        {id:"L057-S07",title:"Vertaa lähdehaastateltavia",required:true,exerciseId:"los1-review2-b06"},
+        {id:"L057-S08",title:"Kirjoita kaksi kuvitteellista esittelyä",required:true,blockId:"los1-review2-production-b"},
+      ],
+    };
+    if (lesson.id === "L058") return {
+      ...lesson,publicationStatus:"preview" as const,
+      steps:[
+        {id:"L058-S01",title:"Kokoa itsenäinen kohtaaminen",required:true,blockId:"los1-review2-intro-c"},
+        {id:"L058-S02",title:"Valitse aloitustervehdys",required:true,exerciseId:"los1-review2-c01"},
+        {id:"L058-S03",title:"Esittele kolmas henkilö",required:true,exerciseId:"los1-review2-c02"},
+        {id:"L058-S04",title:"Täydennä toisen henkilön nimi",required:true,exerciseId:"los1-review2-c03"},
+        {id:"L058-S05",title:"Reagoi toistopyyntöön",required:true,exerciseId:"los1-review2-c04"},
+        {id:"L058-S06",title:"Täydennä ajanilmaus",required:true,exerciseId:"los1-review2-c05"},
+        {id:"L058-S07",title:"Päätä tapaaminen",required:true,exerciseId:"los1-review2-c06"},
+        {id:"L058-S08",title:"Kirjoita täydellinen kahdeksan repliikin harjoitus",required:true,blockId:"los1-review2-production-c"},
+      ],
+    };
+    if (lesson.id === "L059") return {
+      ...lesson,publicationStatus:"preview" as const,
+      steps:[
+        {id:"L059-S01",title:"Lue loppukokeen viisi osa-aluetta ja toisto-ohje",required:true,
+          blockId:"los1-final-intro"},
+        {id:"L059-S02",title:"Tee 50 pisteen loppukoe sekä kaksi erillistä kirjoitustehtävää",required:true,
+          chapterTestId:LOS1_FINAL_TEST.id},
+      ],
+    };
+    if (lesson.id === "L060") return {
+      ...lesson,publicationStatus:"preview" as const,
+      steps:[
+        {id:"L060-S01",title:"Katso mitä olet oppinut saksaksi",required:true,blockId:"los1-summary-intro"},
+        {id:"L060-S02",title:"Käy läpi kymmenen osaamistavoitetta",required:true,blockId:"los1-summary-checklist"},
+        {id:"L060-S03",title:"Suunnittele oma kertauksesi ja jatkosi",required:true,blockId:"los1-summary-next"},
+        {id:"L060-S04",title:"Kirjoita oma seuraava tavoite",required:true,
+          reflectionPromptFi:"Minkä kolmen asian osaan nyt saksaksi ilman apua, ja mitä yhtä asiaa harjoittelen seuraavaksi?"},
+      ],
+    };
     return lesson;
   }) : [],
-  blocks: index === 0 ? [...LOS1_INTRO_BLOCKS, ...LOS1_C01_PREVIEW_BLOCKS, ...LOS1_C01_SOURCE_BLOCKS, ...LOS1_C01_GREETING_AUDIO_BLOCKS, ...LOS1_C01_APPLICATION_BLOCKS, ...LOS1_C01_CULTURE_BLOCKS, ...LOS1_C02_WB_BLOCKS, ...LOS1_C02_BLOCKS, ...LOS1_C03_SOURCE_BLOCKS, ...LOS1_C03_CONTENT_BLOCKS, ...LOS1_C04_SOURCE_BLOCKS, ...LOS1_C04_BLOCKS, ...LOS1_C05_SOURCE_BLOCKS, ...LOS1_C05_BLOCKS, ...LOS1_C06_SOURCE_BLOCKS, ...LOS1_C06_CONTENT_BLOCKS, ...LOS1_REVIEW_ONE_BLOCKS, ...LOS1_C07_SOURCE_BLOCKS, ...LOS1_C07_CONTENT_BLOCKS, ...LOS1_C08_CONTENT_BLOCKS, ...LOS1_C09_CONTENT_BLOCKS] : [],
+  blocks: index === 0 ? [...LOS1_INTRO_BLOCKS, ...LOS1_C01_PREVIEW_BLOCKS, ...LOS1_C01_SOURCE_BLOCKS, ...LOS1_C01_GREETING_AUDIO_BLOCKS, ...LOS1_C01_APPLICATION_BLOCKS, ...LOS1_C01_CULTURE_BLOCKS, ...LOS1_C02_WB_BLOCKS, ...LOS1_C02_BLOCKS, ...LOS1_C03_SOURCE_BLOCKS, ...LOS1_C03_CONTENT_BLOCKS, ...LOS1_C04_SOURCE_BLOCKS, ...LOS1_C04_BLOCKS, ...LOS1_C05_SOURCE_BLOCKS, ...LOS1_C05_BLOCKS, ...LOS1_C06_SOURCE_BLOCKS, ...LOS1_C06_CONTENT_BLOCKS, ...LOS1_REVIEW_ONE_BLOCKS, ...LOS1_C07_SOURCE_BLOCKS, ...LOS1_C07_CONTENT_BLOCKS, ...LOS1_C08_CONTENT_BLOCKS, ...LOS1_C09_CONTENT_BLOCKS,
+    ...LOS1_C10_SOURCE_BLOCKS, ...LOS1_C10_CONTENT_BLOCKS,
+    ...LOS1_REVIEW_TWO_BLOCKS, ...LOS1_FINAL_BLOCKS] : [],
   exercises: index === 0 ? [...LOS1_C01_PREVIEW_EXERCISES, ...LOS1_C01_SOURCE_EXERCISES, ...LOS1_C01_AUDIO_COMPREHENSION_EXERCISES, ...LOS1_C01_EXAM_EXERCISES, ...LOS1_C01_ALTERNATE_EXAM_EXERCISES, ...LOS1_C01_EXTRA_EXERCISES, ...LOS1_C01_INTERACTIVE_EXERCISES, ...LOS1_C02_WB_EXERCISES, ...LOS1_C02_EXERCISES, ...LOS1_C02_EXAM_EXERCISES, ...LOS1_C03_SOURCE_EXERCISES, ...LOS1_C03_PRACTICE_EXERCISES, ...LOS1_C03_EXAM_EXERCISES, ...LOS1_C04_SOURCE_EXERCISES, ...LOS1_C04_PRACTICE_EXERCISES, ...LOS1_C04_EXAM_EXERCISES, ...LOS1_C05_SOURCE_EXERCISES, ...LOS1_C05_PRACTICE_EXERCISES, ...LOS1_C05_EXAM_EXERCISES, ...LOS1_C06_SOURCE_EXERCISES, ...LOS1_C06_PRACTICE_EXERCISES, ...LOS1_C06_EXAM_EXERCISES, ...LOS1_REVIEW_ONE_EXERCISES, ...LOS1_MIDTERM_FORM_A, ...LOS1_MIDTERM_FORM_B, ...LOS1_C07_SOURCE_EXERCISES, ...LOS1_C07_PRACTICE_EXERCISES, ...LOS1_C07_EXAM_A, ...LOS1_C07_EXAM_B, ...LOS1_C08_PRACTICE_EXERCISES, ...LOS1_C08_EXAM_A, ...LOS1_C08_EXAM_B,
     ...LOS1_C09_SOURCE_EXERCISES, ...LOS1_C09_PRACTICE_EXERCISES,
-    ...LOS1_C09_EXAM_A, ...LOS1_C09_EXAM_B] : [],
-  chapterTests: index === 0 ? [LOS1_C01_TEST, LOS1_C02_TEST, LOS1_C03_TEST, LOS1_C04_TEST, LOS1_C05_TEST, LOS1_C06_TEST, LOS1_C07_TEST, LOS1_C08_TEST, LOS1_C09_TEST, LOS1_MIDTERM_TEST] : [],
+    ...LOS1_C09_EXAM_A, ...LOS1_C09_EXAM_B,
+    ...LOS1_C10_SOURCE_EXERCISES, ...LOS1_C10_PRACTICE_EXERCISES,
+    ...LOS1_C10_EXAM_A, ...LOS1_C10_EXAM_B,
+    ...LOS1_REVIEW_TWO_EXERCISES, ...LOS1_FINAL_FORM_A, ...LOS1_FINAL_FORM_B] : [],
+  chapterTests: index === 0 ? [LOS1_C01_TEST, LOS1_C02_TEST, LOS1_C03_TEST, LOS1_C04_TEST, LOS1_C05_TEST, LOS1_C06_TEST, LOS1_C07_TEST, LOS1_C08_TEST, LOS1_C09_TEST, LOS1_C10_TEST, LOS1_MIDTERM_TEST, LOS1_FINAL_TEST] : [],
   sources: index === 0 ? LOS1_RESEARCH_SOURCES.map(source => source.id === "M-COM-01" ? {
     ...source,
     author: "Xzapro4 ja Erkan Yilmaz",
