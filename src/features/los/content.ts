@@ -198,11 +198,30 @@ export const chapters:Chapter[] = [
  ]
 },
 {
- id:'C06',name:'Wie alt bist du?',goal:'Ymmärrän numerot ja kerron iän.',sourceId:'BLOCK-03',
- sourceUrl:'',attribution:'Uusi ihmisen kirjoittama ikädialogi puuttuu; C01:n kertaus ei kelpaa uudeksi päätekstiksi.',license:'Ei vielä valittua lähdettä',status:'source-pending',sections,blocks:[],
+ id:'C06',name:'Wie alt bist du?',goal:'Ymmärrän numerot ja kerron iän.',sourceId:'M-ZPE-01',
+ sourceUrl:'https://zpe.gov.pl/a/plik-audio/DIcQL1VxT',
+ attribution:'Monika Janicka, Sag mal, wie alt bist du? (Bist du schon 11?, Puolan julkinen ZPE-oppimateriaali), neljä kokonaisena julkaistua alkuperäistä minidialogia. Alkuperäiset saksankieliset repliikit sivun varsinaisesta Transkription-osiosta, tekstimuutoksia ei tehty. Lähdesivun muu harjoitusversio kertoo eri ensimmäisen dialogin henkilön/iän, joten tämä transkriptio on sidottu juuri näytettyyn Oskar / fünf -versioon. Käyttö mainittavalla nimellä ja CC BY-SA 3.0 -lisenssillä; alkuperäisen äänen suoraa tiedostolinkkiä ei ole varmennettu.',
+ license:'CC BY-SA 3.0 (Monika Janicka, julkaistu transkriptio; yksittäisen äänen toisto tarkistamatta)',status:'text-reviewed',sections,
+ blocks:[
+ {id:'c06-a-1',speaker:'Dialog 1 · A',text:'Hi, wie alt bist du?'},
+ {id:'c06-a-2',speaker:'Dialog 1 · B',text:'Ich bin fünf.'},
+ {id:'c06-a-3',speaker:'Dialog 1 · A',text:'Und wie heißt du?'},
+ {id:'c06-a-4',speaker:'Dialog 1 · B',text:'Oskar.'},
+ {id:'c06-a-5',speaker:'Dialog 2 · A',text:'Hallo, ich bin Fabian. Und wie heißt du?'},
+ {id:'c06-a-6',speaker:'Dialog 2 · B',text:'Ich bin Larissa.'},
+ {id:'c06-a-7',speaker:'Dialog 2 · A',text:'Bist du schon elf?'},
+ {id:'c06-a-8',speaker:'Dialog 2 · B',text:'Ich bin schon zwölf Jahre alt.'},
+ {id:'c06-a-9',speaker:'Dialog 3 · A',text:'Wie alt seid ihr?'},
+ {id:'c06-a-10',speaker:'Dialog 3 · B+C',text:'Wir sind 10.'},
+ {id:'c06-a-11',speaker:'Dialog 4 · A',text:'Wie alt ist er?'},
+ {id:'c06-a-12',speaker:'Dialog 4 · B',text:'Paul? Er ist elf Jahre alt.'}
+ ],
  vocab:w([['null','nolla'],['eins','yksi'],['zwei','kaksi'],['drei','kolme'],['vier','neljä'],['fünf','viisi'],['sechs','kuusi'],['sieben','seitsemän'],['acht','kahdeksan'],['neun','yhdeksän'],['zehn','kymmenen'],['elf','yksitoista'],['zwölf','kaksitoista'],['dreizehn','kolmetoista'],['vierzehn','neljätoista'],['fünfzehn','viisitoista'],['sechzehn','kuusitoista'],['siebzehn','seitsemäntoista'],['achtzehn','kahdeksantoista'],['neunzehn','yhdeksäntoista'],['zwanzig','kaksikymmentä'],['alt','vanha'],['das Jahr','vuosi'],['die Jahre','vuodet']]),
- teaching:['Ikä ilmaistaan sein-verbin avulla: Ich bin siebzehn Jahre alt.', 'Lukujen 21–99 järjestys on ykköset ja kymmenet: einundzwanzig = 21. Sechzehn ja siebzehn ovat poikkeavia.'],
- grammar:{title:'Ikä ja numerot',explanation:'Wie alt bist du? = Kuinka vanha olet? Ich bin ... Jahre alt. Kohteliaasti Wie alt sind Sie?',examples:[['Ich bin siebzehn Jahre alt.','Olen 17-vuotias.']]},culture:'Ikää ei ole tarpeen kysyä kaikissa ensikohtaamisissa.',exercises:[]
+ teaching:['Ikä ilmaistaan sein-verbin avulla: Ich bin siebzehn Jahre alt.', 'Lukujen 21–99 järjestys on ykköset ja kymmenet: einundzwanzig = 21. Sechzehn ja siebzehn ovat poikkeavia.',
+ 'Teksti A on Monika Janickan alkuperäisistä neljästä dialogista koostuva kokonainen julkaistu yksikkö. Sen ensimmäisessä dialogissa Oskar sanoo olevansa viisi. Muiden saman verkkosivun harjoitusnäkymien nimiä ja lukuja ei sekoiteta tähän alkuperäislitteraattiin.',
+ 'Tekstin 10 on alkuperäinen numeroasu, ei LOS!:n jälkikäteen muuttama sana. Tarkoitus on tunnistaa zehn jo opitun lukusäännön avulla.',
+ 'Teksti B: C01:n aiemman Franz–Jörg-dialogin oikea ihmisäänite sisältää myös ikäkysymyksen, mutta ei ole C06:n uuden Teksti A:n oma äänite. Äänitetiedoston hakemista ZPE:stä ja oikeaa mobiilitoistoa ei ole vielä hyväksytty.'],
+ grammar:{title:'Ikä ja numerot',explanation:'Wie alt bist du? = Kuinka vanha olet? Ich bin ... Jahre alt. Kohteliaasti Wie alt sind Sie?',examples:[['Ich bin siebzehn Jahre alt.','Olen 17-vuotias.']]},culture:'Ikää ei ole tarpeen kysyä kaikissa ensikohtaamisissa. Teksti A:n neljän minidialogin lasten iät ovat oppimateriaalin kuvitteellisia esimerkkejä; oppija ei kirjoita tähän omia tai muiden yksityisiä syntymäaikoja.',exercises:[]
 },
 {
  id:'C07',name:'Wie schreibt man das?',goal:'Osaan tavata nimen ja pyytää kirjoittamaan sen.',
