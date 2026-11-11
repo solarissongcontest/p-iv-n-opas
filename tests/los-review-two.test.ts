@@ -49,7 +49,7 @@ test("All 18 revision tasks are scored independently, not copied from final exam
   assert.ok(!finalIds.has(ex.id));
  }
  const intro=LOS1_REVIEW_TWO_BLOCKS.find(b=>b.id==="los1-review2-intro-c");
- assert.ok(intro&&intro.kind==="paragraph"&&intro.text.includes("ilman vihjeitä"));
+ assert.ok(intro&&intro.kind==="paragraph"&&intro.text.includes("ilman mallia"));
  const production=LOS1_REVIEW_TWO_BLOCKS.find(b=>b.id==="los1-review2-production-c");
  assert.ok(production&&production.kind==="production");
  assert.equal(production.modelDe.split("\n").length,8);
