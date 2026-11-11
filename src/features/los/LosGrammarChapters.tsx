@@ -41,13 +41,16 @@ export function LosChapterGrammar({chapterId}:{chapterId:string}) {
     <Conjugation rows={[["ich","komme","minä tulen"],["du","kommst","sinä tulet"]]} />
     <h3>Wo ja woher</h3>
     <p><b lang="de">Wo?</b> kysyy, missä jokin on. <b lang="de">Woher?</b> kysyy, mistä jokin tai joku tulee. Tässä kappaleessa harjoittelet erityisesti jälkimmäistä.</p>
-    <Note title="Maanimen yhteydessä pieni poikkeus">Useimmista maista sanotaan <span lang="de">aus Finnland</span> tai <span lang="de">aus Deutschland</span>. Sveitsi on poikkeus: <span lang="de">aus der Schweiz</span>. Sijamuodon sääntö opetetaan vasta myöhemmin.</Note>
+    <Note title="Maanimen yhteydessä pieni poikkeus">Useimmista maista sanotaan <span lang="de">aus Finnland</span> tai <span lang="de">aus Deutschland</span>. Tunnista poikkeukset <span lang="de">aus der Schweiz</span> ja <span lang="de">aus den USA</span>. Niiden sijamuotoja ei tarvitse vielä muodostaa itse.</Note>
+    <p>Kun luet toisen henkilön esittelyä, voit nähdä myös muodon <span lang="de">er/sie kommt</span> (hän tulee). Se riittää tässä vaiheessa tunnistaa, eikä koko taivutusta opetella ulkoa.</p>
   </>;
   if(chapterId==="04")return <>
     <p>Saksassa puhuttelu riippuu tilanteesta, suhteesta ja yhteisön tavoista. <b lang="de">du</b> on tuttavallinen sinä. Isolla alkukirjaimella kirjoitettu <b lang="de">Sie</b> on kohtelias teitittelymuoto.</p>
     <Example de="Wie heißt du?" fi="Mikä sinun nimesi on?" />
     <Example de="Wie heißen Sie?" fi="Mikä Teidän nimenne on?" />
     <p>Teititeltäessä verbi on tavallisesti samassa muodossa kuin perusmuodon näköinen monikon persoonamuoto: <span lang="de">Sie heißen</span>, <span lang="de">Sie kommen</span>.</p>
+    <Example de="Woher kommen Sie?" fi="Mistä Te olette kotoisin?" />
+    <p>Isolla alkukirjaimella kirjoitettu <b lang="de">Sie</b> tarkoittaa teitittelyä. Pienellä alkukirjaimella kirjoitetulla <span lang="de">sie</span>-pronominilla voi olla toinen merkitys (hän, naisesta, tai he). Tunnista ero, mutta älä opettele tässä vielä kaikkia muotoja.</p>
     <Note title="Miten valitsen puhuttelumuodon?">Nuorten kesken käytetään yleensä du-muotoa. Virallisissa tilanteissa Sie voi olla luonteva. Pelkkä henkilön ikä ei ratkaise asiaa aina.</Note>
   </>;
   if(chapterId==="05")return <>
@@ -59,7 +62,7 @@ export function LosChapterGrammar({chapterId}:{chapterId:string}) {
     <Note title="Opettele fraasit tässä vaiheessa kokonaisina">Sanojen <span lang="de">mir</span> ja <span lang="de">dir</span> sijamuotoja ei vielä tarvitse osata muodostaa itse.</Note>
   </>;
   if(chapterId==="06")return <>
-    <p>Saksassa ikä kerrotaan <b lang="de">sein</b>-verbillä: kirjaimellisesti ”olen … vuotta vanha”.</p>
+    <p>Saksassa ikä kerrotaan <b lang="de">sein</b>-verbillä: kirjaimellisesti ”olen … vuotta vanha”. Älä käännä suomen ikälausetta sanasta sanaan tai käytä siihen <span lang="de">haben</span>-verbiä.</p>
     <Example de="Wie alt bist du?" fi="Kuinka vanha olet?" />
     <Example de="Ich bin siebzehn Jahre alt." fi="Olen seitsemäntoista vuotta vanha." />
     <h3>Numerot 0–20</h3>

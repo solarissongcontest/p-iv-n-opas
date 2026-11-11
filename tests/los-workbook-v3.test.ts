@@ -3,11 +3,15 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { LOS_EXERCISES,losExercisesFor,losIsCorrect,losScore,normalizeLosAnswer } from "../src/features/los/exerciseBank.ts";
 
-test("C01 has 12 and C02 has 15 uniquely identified assessment items",()=>{
+test("LOS! C01–C06 have 86 uniquely identified assessment items",()=>{
   assert.equal(losExercisesFor("01").length,12);
   assert.equal(losExercisesFor("02").length,15);
-  assert.equal(LOS_EXERCISES.length,27);
-  assert.equal(new Set(LOS_EXERCISES.map(item=>item.id)).size,27);
+  assert.equal(losExercisesFor("03").length,15);
+  assert.equal(losExercisesFor("04").length,12);
+  assert.equal(losExercisesFor("05").length,12);
+  assert.equal(losExercisesFor("06").length,20);
+  assert.equal(LOS_EXERCISES.length,86);
+  assert.equal(new Set(LOS_EXERCISES.map(item=>item.id)).size,86);
   for(const item of LOS_EXERCISES){
     assert.equal(item.accepted.includes(item.correct),true,`missing canonical answer ${item.id}`);
     assert.ok(item.explanation.trim().length>10);

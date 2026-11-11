@@ -37,6 +37,15 @@ function Question({item,index,value,locked,reveal,onValue}:{
     </div>}
   </li>;
 }
+const selfAssessments:Record<string,string> = {
+  "01":"Kuvittele, että tapaat ensin opettajan aamulla ja myöhemmin hyvästelet ystävän. Sano molemmat ilmaukset ääneen ja arvioi, osasitko ne ilman näkyvää mallia.",
+  "02":"Kuvittele esittäytyväsi uudelle henkilölle. Kerro nimesi ja kysy hänen nimeään saksaksi ääneen ilman valmista tekstiä.",
+  "03":"Kuvittele tapaavasi henkilön Saksasta. Kysy, mistä hän on kotoisin, ja kerro olevasi kotoisin Suomesta. Tarkista erityisesti woher, kommen ja aus.",
+  "04":"Kuvittele kaksi kohtaamista: puhut tutulle ystävälle ja asioit kohteliaasti tuntemattoman aikuisen kanssa. Esitä kummassakin sopiva nimikysymys.",
+  "05":"Kuvittele ystävän kysyvän kuulumisiasi. Vastaa realistisesti, esitä vastakysymys ja kokeile sitten kohteliasta Ihnen-muotoa.",
+  "06":"Esitä ääneen kaksi kuvitteellista ikäkeskustelua (17 ja 20 vuotta). Kirjoita sen jälkeen ilman mallia luvut 7, 16, 21 ja 32 saksaksi.",
+};
+
 export function LosWorkbook({chapter,mode}:{chapter:LosChapter;mode:"practice"|"test"}) {
   const {draft,update,saved}=useLosChapterDraft(1,chapter.id);
   const exercises=losExercisesFor(chapter.id);
@@ -97,7 +106,7 @@ export function LosWorkbook({chapter,mode}:{chapter:LosChapter;mode:"practice"|"
     </div>}
     {mode==="test"&&locked&&<div className="los-self-assessment">
       <h2>Itsearviointi: puhu tai kirjoita itse</h2>
-      <p>{chapter.id==="01"?"Kuvittele, että tapaat ensin opettajan aamulla ja myöhemmin hyvästelet ystävän. Sano molemmat ilmaukset ääneen ja arvioi, osasitko ne ilman näkyvää mallia.":"Kuvittele esittäytyväsi uudelle henkilölle. Kerro nimesi ja kysy hänen nimeään saksaksi ääneen ilman valmista tekstiä."}</p>
+      <p>{selfAssessments[chapter.id] ?? "Tee kappaleen viestintätavoitteista oma lyhyt puhe- tai kirjoitusharjoitus. Arvioi, mitä osaat ilman mallia."}</p>
       <label htmlFor={`los-self-${chapter.id}`}>Mitä osasin? Mitä täytyy vielä harjoitella?</label>
       <textarea id={`los-self-${chapter.id}`} value={draft.selfAssessment} maxLength={5000}
         onChange={e=>update(current=>({...current,selfAssessment:e.target.value}))} rows={4} placeholder="Kirjaa oma havaintosi, ei automaattisesti pisteytettävä vastaus."/>
