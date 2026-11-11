@@ -110,6 +110,13 @@ export function ChapterTestWorkspace({ book, definition, onReturned }: {
   });
   const listeningUnavailable = Boolean(definition.listeningBlockIds?.length) &&
     listeningBlocks.length !== definition.listeningBlockIds?.length;
+  // Real HTMLAudioElement playing events only, not a checkbox pretending media worked.
+  // Evidence stays in this browser view and is reset for each exam attempt.
+  const [playedMedia, setPlayedMedia] = useState<{ attempt: number; ids: string[] }>({ attempt: 0, ids: [] });
+  const playedIds = playedMedia.attempt === attemptNumber ? playedMedia.ids : [];
+  const unplayed = listeningBlocks.filter(block => !playedIds.includes(block.id)).map(block => block.id);
+  const listeningUnconfirmed = Boolean(definition.listeningBlockIds?.length) &&
+    (unplayed.length > 0 || state.listeningSelfReported !== true);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [restartVisible, setRestartVisible] = useState(false);
   const isReturned = Boolean(state.submission);
@@ -136,7 +143,13 @@ export function ChapterTestWorkspace({ book, definition, onReturned }: {
   const submit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (status === "loading" || isReturned) return;
-    if (missingAnswers.length > 0 || missingSpeech.length > 0 || (writingMode && (writtenLines < (definition.requiredWritingLines ?? 1) || (definition.maximumWritingLines !== undefined && writtenLines > definition.maximumWritingLines) || missingSecondWriting)) || listeningUnavailable) {
+    if (listeningUnconfirmed || listeningUnavailable) {
+      setSubmitError("Kuunteluosion pisteitä ei voi palauttaa vielä. Käynnistä kaikki " +
+        listeningBlocks.length + " alkuperäistä äänitettä ja vahvista, että myös kuulit ne. " +
+        "Jos ääni ei toimi, älä arvaa äänikysymyksiä vaan tee kuuntelu myöhemmin.");
+      return;
+    }
+    if (missingAnswers.length > 0 || missingSpeech.length > 0 || (writingMode && (writtenLines < (definition.requiredWritingLines ?? 1) || (definition.maximumWritingLines !== undefined && writtenLines > definition.maximumWritingLines) || missingSecondWriting))) {
       setSubmitError("Vastaa kaikkiin " + definition.exerciseIds.length +
         " tarkistettavaan kohtaan ja tee " + (writingMode ?
           "kirjallinen osuus (" + (definition.requiredWritingLines ?? 1) + (definition.maximumWritingLines ? "–" + definition.maximumWritingLines : "+") + " erillistä riviä)" +
@@ -178,7 +191,27 @@ export function ChapterTestWorkspace({ book, definition, onReturned }: {
     {!!listeningBlocks.length && <section className="los-exam-listening" aria-label="Kokeen alkuperäiset kuuntelulähteet">
       <h3>Kuuntelu · oikeiden ihmisten alkuperäiset äänitteet</h3>
       <p>Toista alla olevat alkuperäiset äänitteet ennen kuunteluryhmän tehtäviä. Ne ovat samoja hyväksyttyjä lähdetiedostoja kuin aiemmissa oppitunneissa, eivät tietokoneella luotuja lisäkatkelmia. Kuuntelun todellinen toimivuus omalla laitteellasi pitää silti varmistaa. Jos jokin soitin ei toimi, älä arvaa vastausta äläkä pidä kuuntelutulosta luotettavana.</p>
-      <Reader book={book} blocks={listeningBlocks} title="Kuuntelutekstit" />
+      <Reader book={book} blocks={listeningBlocks} title="Kuuntelutekstit"
+        onMediaStarted={id => {
+          setPlayedMedia(previous => {
+            const current = previous.attempt === attemptNumber ? previous.ids : [];
+            return { attempt: attemptNumber, ids: current.includes(id) ? current : [...current, id] };
+          });
+          setSubmitError(null);
+        }}/>
+      {!isReturned && <div className="los-exam-audio-confirm">
+        <p role="status">Toisto on käynnistynyt {listeningBlocks.length - unplayed.length} / {listeningBlocks.length} alkuperäisessä äänitteessä tällä koeyrityksellä. Käynnistyminen ei yksin todista, että ääni kuului.</p>
+        <label>
+          <input type="checkbox" disabled={status === "loading" || unplayed.length > 0}
+            checked={state.listeningSelfReported === true && unplayed.length === 0}
+            onChange={event => {
+              update(previous => ({...previous,listeningSelfReported:event.target.checked}));
+              setSubmitError(null);
+            }}/>
+          Kuulin kaikki neljä alkuperäistä äänitettä tällä laitteella. Arvioin kuunteluosuutta omien havaintojeni perusteella.
+        </label>
+        {unplayed.length > 0 && <p className="los-support">Vahvistus avautuu vasta, kun jokainen soitin on oikeasti käynnistetty. Mikäli toisto ei käynnisty, jätä kuunteluosio kesken.</p>}
+      </div>}
     </section>}
     <form onSubmit={submit}>
       <div className="los-exam-questions">{exercises.map((exercise, index) =>
@@ -249,6 +282,7 @@ export function ChapterTestWorkspace({ book, definition, onReturned }: {
         <ul>{examScoreGroups(definition, state.submission).map(group =>
           <li key={group.id}><span>{group.titleFi}</span><strong>{group.score} / {group.maximum} p</strong></li>)}</ul>
       </section>}
+      {definition.listeningBlockIds?.length && <p className="los-support">Kuuntelusoittimet käynnistettiin ja äänen kuuluminen vahvistettiin opiskelijan toimesta. Tämä ei ole automaattinen kuulonvarmistus eikä korvaa äänitiedostojen todellista mobiili- tai saavutettavuustestausta.</p>}
       <p>Automaattisesti tarkistettiin {state.submission.maximum} osatehtävää. {writingMode ? "Kirjalliset tuotokset" : "Puhe"} itsearvioitiin erikseen, eikä niistä lisätty pisteitä. Voit lukea jokaisen kohdan perustelun ylempänä.</p>
       {writingMode && <div className="los-exam-writing-return"><h4>Oma kirjallinen vastauksesi · itsearviointi</h4><p lang="de" style={{whiteSpace:"pre-wrap"}}>{state.submission.writtenResponse ?? ""}</p><details><summary>Avaa LOS!:n oma mallivastaus</summary><p lang="de" style={{whiteSpace:"pre-wrap"}}>{definition.writingModelDe ?? "Hallo! Ich heiße Lena. Wie heißt du?"}</p>{definition.writingModelFi && <p style={{whiteSpace:"pre-wrap"}}>{definition.writingModelFi}</p>}</details>
         {definition.secondWritingPromptFi && <div className="los-exam-second-result">
