@@ -1,4 +1,5 @@
 import type {Exercise} from './content';
+import {c01Exam} from './chapterExam';
 // The assessment banks are independent of chapter practice IDs. No answer key
 // is rendered in ExamSession until the learner submits the whole paper.
 type Item=Exercise;
@@ -94,11 +95,17 @@ export const finalExam:Item[]=[
  q('EX-F50','Mitä tarkoittaa Schön, dich kennenzulernen?','Hauska tutustua!','Hyvää yötä!','Kiitos!','Schön, dich kennenzulernen = hauska tutustua.'),
 ];
 export const exams={
+ 'EX-C01':{title:'Kappaletesti · C01 Hallo!',questions:c01Exam,scope:'C01'},
  'EX-MID':{title:'Välikoe · kappaleet 1–5',questions:midExam,scope:'C01–C05'},
  'EX-FINAL':{title:'Loppukoe · LOS! 1',questions:finalExam,scope:'C01–C10'},
 } as const;
 export type ExamId=keyof typeof exams;
 export const selfAssessment={
+ 'EX-C01':{
+ prompt:'Tervehdi kuviteltua tuttavaa, kerro kohtelias hyvästely ja sano mitä ääntämisen sääntöä käytit.',
+ model:'Hallo! Guten Tag! Tschüss! Auf Wiedersehen!',
+ criteria:'Valitsit kaksi erilaista tervehdys- tai hyvästelytilannetta, ja erotit ne toisistaan. Ääntäminen arvioidaan itse.'
+ },
  'EX-MID':{
  prompt:'Esittäydy 3–4 lauseella kuvitteellisena henkilönä.',
  model:'Guten Tag! Ich heiße Mira. Ich komme aus Finnland. Mir geht es gut.',
@@ -112,8 +119,8 @@ export const selfAssessment={
 } as const;
 export function validateLosExams():string[]{
  const issues:string[]=[];const ids=new Set<string>();
- for(const [name,questions] of [['EX-MID',midExam],['EX-FINAL',finalExam]] as const){
-  if(questions.length!==(name==='EX-MID'?25:50))issues.push(name+' väärä tehtävämäärä');
+ for(const [name,questions] of [['EX-C01',c01Exam],['EX-MID',midExam],['EX-FINAL',finalExam]] as const){
+  if(questions.length!==(name==='EX-MID'?25:name==='EX-C01'?15:50))issues.push(name+' väärä tehtävämäärä');
   for(const e of questions){
    if(ids.has(e.id))issues.push('Duplikaatti '+e.id);
    ids.add(e.id);
