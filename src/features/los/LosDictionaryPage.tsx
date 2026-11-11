@@ -80,7 +80,7 @@ export function LosDictionaryPage(){
        </div>
        {!!entry.notes.length && <div className="los-dictionary-notes">{entry.notes.map((note,i)=>
          <p key={i}>{note}</p>)}</div>}
-       {example&&<div className="los-dictionary-example" aria-label="Sana asiayhteydessä">
+       {query.trim()&&example&&<div className="los-dictionary-example" aria-label="Sana asiayhteydessä">
          <b>{example.kind==="authentic"?"Alkuperäislähteestä":"LOS!:n oma opetusesimerkki"}</b>
          <p lang="de">{example.de}</p>
          {example.fi&&<p lang="fi">{example.fi}</p>}
