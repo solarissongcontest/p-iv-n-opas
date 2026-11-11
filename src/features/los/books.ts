@@ -24,6 +24,11 @@ import { LOS1_C04_BLOCKS } from "./los1-c04-content.ts";
 import { LOS1_C04_PRACTICE_EXERCISES } from "./los1-c04-practice.ts";
 import { LOS1_C04_EXAM_EXERCISES, LOS1_C04_TEST } from "./los1-c04-test.ts";
 import { LOS1_C04_SECTIONS } from "./los1-c04-sections.ts";
+import { LOS1_C05_SOURCE_BLOCKS, LOS1_C05_SOURCE_EXERCISES } from "./los1-c05-source.ts";
+import { LOS1_C05_BLOCKS } from "./los1-c05-content.ts";
+import { LOS1_C05_PRACTICE_EXERCISES } from "./los1-c05-practice.ts";
+import { LOS1_C05_EXAM_EXERCISES, LOS1_C05_TEST } from "./los1-c05-test.ts";
+import { LOS1_C05_SECTIONS } from "./los1-c05-sections.ts";
 
 const specs: readonly [string, string, string, string, string, string][] = [
   ["Perustason alkeet 1", "Tutustu ja ihastu saksan kieleen", "Nollataso, tervehdykset, esittäytyminen ja ensimmäinen vuorovaikutus.", "#B7473C", "#FCE8E5", "#FF9B91"],
@@ -94,6 +99,12 @@ export const LOS_BOOKS: readonly Book[] = specs.map((spec, index) => ({
       ...LOS1_C04_SOURCE_EXERCISES, ...LOS1_C04_PRACTICE_EXERCISES,
       ...LOS1_C04_EXAM_EXERCISES,
     ].map(exercise => exercise.id),
+  } : chapter.id === "C05" ? {
+    ...chapter, publicationStatus:"preview" as const,
+    sections:LOS1_C05_SECTIONS,
+    blockIds:[...LOS1_C05_SOURCE_BLOCKS,...LOS1_C05_BLOCKS].map(block=>block.id),
+    exerciseIds:[...LOS1_C05_SOURCE_EXERCISES,...LOS1_C05_PRACTICE_EXERCISES,
+      ...LOS1_C05_EXAM_EXERCISES].map(exercise=>exercise.id),
   } : { ...chapter, sections: emptyChapterSections() }) : [],
   lessons: index === 0 ? LOS1_PLANNED_LESSONS.map(lesson => {
     if (lesson.id === "L001") return {
@@ -334,11 +345,65 @@ export const LOS_BOOKS: readonly Book[] = specs.map((spec, index) => ({
           chapterTestId:LOS1_C04_TEST.id},
       ],
     };
+    if (lesson.id === "L022") return {
+      ...lesson, publicationStatus:"preview" as const,
+      steps:[
+        {id:"L022-S01",title:"Vointikysymyksen tavoite ja edeltävän kertaus",required:true,blockId:"los1-c05-intro"},
+        {id:"L022-S02",title:"Lue kuinka Wie geht's toimii",required:true,blockId:"los1-c05-grammar-how"},
+        {id:"L022-S03",title:"Tunnista vointikysymyksen merkitys",required:true,exerciseId:"los1-c05-intro-meaning"},
+        {id:"L022-S04",title:"Valitse sopiva perusvastaus",required:true,exerciseId:"los1-c05-intro-reply"},
+      ],
+    };
+    if (lesson.id === "L023") return {
+      ...lesson, publicationStatus:"preview" as const,
+      steps:[
+        {id:"L023-S01",title:"Lue alkuperäisen Heinrich–Karl-dialogin ohjeet",required:true,blockId:"los1-c05-text-a-guide"},
+        {id:"L023-S02",title:"Lue kaikki neljä alkuperäistä repliikkiä",required:true,blockId:"los1-c05-wb-05-dialogue"},
+        {id:"L023-S03",title:"Tunnista keskustelijat",required:true,exerciseId:"los1-c05-source-people"},
+        {id:"L023-S04",title:"Tunnista vointikysymys",required:true,exerciseId:"los1-c05-source-question"},
+        {id:"L023-S05",title:"Tunnista Karlin vointi",required:true,exerciseId:"los1-c05-source-feeling"},
+        {id:"L023-S06",title:"Korosta kysymys alkuperäistekstistä",required:true,exerciseId:"los1-c05-source-highlight"},
+      ],
+    };
+    if (lesson.id === "L024") return {
+      ...lesson, publicationStatus:"preview" as const,
+      steps:[
+        {id:"L024-S01",title:"Opettele vointivastaukset kokonaisina fraaseina",required:true,blockId:"los1-c05-grammar-reply"},
+        {id:"L024-S02",title:"Erota nicht ja sehr",required:true,blockId:"los1-c05-grammar-negation"},
+        {id:"L024-S03",title:"Täydennä nicht",required:true,exerciseId:"los1-c05-grammar-nicht-gap"},
+        {id:"L024-S04",title:"Täydennä mir",required:true,exerciseId:"los1-c05-grammar-mir"},
+        {id:"L024-S05",title:"Täydennä tuttavallinen dir",required:true,exerciseId:"los1-c05-grammar-dir"},
+        {id:"L024-S06",title:"Täydennä kohtelias Ihnen",required:true,exerciseId:"los1-c05-grammar-ihnen"},
+        {id:"L024-S07",title:"Valitse ero hyvän ja huonon voinnin välillä",required:true,exerciseId:"los1-c05-grammar-contrast"},
+      ],
+    };
+    if (lesson.id === "L025") return {
+      ...lesson, title:"Tunnista vointi ja kuuntele kysymys",
+      publicationStatus:"preview" as const,
+      steps:[
+        {id:"L025-S01",title:"Tutustu COERLL:n alkuperäiseen vointilistaan",required:true,blockId:"los1-c05-text-b-intro"},
+        {id:"L025-S02",title:"Lue kaikki 13 alkuperäistä ilmauksen suomennoksineen",required:true,blockId:"los1-c05-dib-05-lines"},
+        {id:"L025-S03",title:"Tunnista myönteinen vointi",required:true,exerciseId:"los1-c05-mood-positive"},
+        {id:"L025-S04",title:"Tunnista huono vointi",required:true,exerciseId:"los1-c05-mood-negative"},
+        {id:"L025-S05",title:"Kuuntele Jeuwren aito ääntämisnäyte",required:true,blockId:"los1-c05-m-com-05-pronunciation"},
+        {id:"L025-S06",title:"Tunnista kuultu kysymys",required:true,exerciseId:"los1-c05-audio-native-question"},
+        {id:"L025-S07",title:"Muodosta fraasi oikeaan sanajärjestykseen",required:true,exerciseId:"los1-c05-order-question"},
+      ],
+    };
+    if (lesson.id === "L026") return {
+      ...lesson,publicationStatus:"preview" as const,
+      steps:[
+        {id:"L026-S01",title:"Kertaa kappaleen 17 ydinkorttia",required:true,blockId:"los1-c05-words"},
+        {id:"L026-S02",title:"Kirjoita oma lyhyt vointikeskustelu",required:true,blockId:"los1-c05-production"},
+        {id:"L026-S03",title:"Palauta 12 kohdan kappaletesti ja arvioi puhe itse",required:true,
+          chapterTestId:LOS1_C05_TEST.id},
+      ],
+    };
     return lesson;
   }) : [],
-  blocks: index === 0 ? [...LOS1_INTRO_BLOCKS, ...LOS1_C01_PREVIEW_BLOCKS, ...LOS1_C01_SOURCE_BLOCKS, ...LOS1_C01_GREETING_AUDIO_BLOCKS, ...LOS1_C01_APPLICATION_BLOCKS, ...LOS1_C01_CULTURE_BLOCKS, ...LOS1_C02_WB_BLOCKS, ...LOS1_C02_BLOCKS, ...LOS1_C03_SOURCE_BLOCKS, ...LOS1_C03_CONTENT_BLOCKS, ...LOS1_C04_SOURCE_BLOCKS, ...LOS1_C04_BLOCKS] : [],
-  exercises: index === 0 ? [...LOS1_C01_PREVIEW_EXERCISES, ...LOS1_C01_SOURCE_EXERCISES, ...LOS1_C01_AUDIO_COMPREHENSION_EXERCISES, ...LOS1_C01_EXAM_EXERCISES, ...LOS1_C01_ALTERNATE_EXAM_EXERCISES, ...LOS1_C01_EXTRA_EXERCISES, ...LOS1_C01_INTERACTIVE_EXERCISES, ...LOS1_C02_WB_EXERCISES, ...LOS1_C02_EXERCISES, ...LOS1_C02_EXAM_EXERCISES, ...LOS1_C03_SOURCE_EXERCISES, ...LOS1_C03_PRACTICE_EXERCISES, ...LOS1_C03_EXAM_EXERCISES, ...LOS1_C04_SOURCE_EXERCISES, ...LOS1_C04_PRACTICE_EXERCISES, ...LOS1_C04_EXAM_EXERCISES] : [],
-  chapterTests: index === 0 ? [LOS1_C01_TEST, LOS1_C02_TEST, LOS1_C03_TEST, LOS1_C04_TEST] : [],
+  blocks: index === 0 ? [...LOS1_INTRO_BLOCKS, ...LOS1_C01_PREVIEW_BLOCKS, ...LOS1_C01_SOURCE_BLOCKS, ...LOS1_C01_GREETING_AUDIO_BLOCKS, ...LOS1_C01_APPLICATION_BLOCKS, ...LOS1_C01_CULTURE_BLOCKS, ...LOS1_C02_WB_BLOCKS, ...LOS1_C02_BLOCKS, ...LOS1_C03_SOURCE_BLOCKS, ...LOS1_C03_CONTENT_BLOCKS, ...LOS1_C04_SOURCE_BLOCKS, ...LOS1_C04_BLOCKS, ...LOS1_C05_SOURCE_BLOCKS, ...LOS1_C05_BLOCKS] : [],
+  exercises: index === 0 ? [...LOS1_C01_PREVIEW_EXERCISES, ...LOS1_C01_SOURCE_EXERCISES, ...LOS1_C01_AUDIO_COMPREHENSION_EXERCISES, ...LOS1_C01_EXAM_EXERCISES, ...LOS1_C01_ALTERNATE_EXAM_EXERCISES, ...LOS1_C01_EXTRA_EXERCISES, ...LOS1_C01_INTERACTIVE_EXERCISES, ...LOS1_C02_WB_EXERCISES, ...LOS1_C02_EXERCISES, ...LOS1_C02_EXAM_EXERCISES, ...LOS1_C03_SOURCE_EXERCISES, ...LOS1_C03_PRACTICE_EXERCISES, ...LOS1_C03_EXAM_EXERCISES, ...LOS1_C04_SOURCE_EXERCISES, ...LOS1_C04_PRACTICE_EXERCISES, ...LOS1_C04_EXAM_EXERCISES, ...LOS1_C05_SOURCE_EXERCISES, ...LOS1_C05_PRACTICE_EXERCISES, ...LOS1_C05_EXAM_EXERCISES] : [],
+  chapterTests: index === 0 ? [LOS1_C01_TEST, LOS1_C02_TEST, LOS1_C03_TEST, LOS1_C04_TEST, LOS1_C05_TEST] : [],
   sources: index === 0 ? LOS1_RESEARCH_SOURCES.map(source => source.id === "M-COM-01" ? {
     ...source,
     author: "Xzapro4 ja Erkan Yilmaz",
@@ -375,6 +440,30 @@ export const LOS_BOOKS: readonly Book[] = specs.map((spec, index) => ({
     verifiedAt: "2026-11-11",
     modification: "Saksankieliset kuusi repliikkiä täsmälleen lähdeversiosta; LOS!:n omat suomennokset, opastus ja tehtävät lisätty. Lisätyt käännökset lisensoidaan CC BY-SA 4.0 -ehdoilla.",
     publicationNoteFi: "Alkuperäisen tekstin täsmäversio on 4430449 (2024-09-02). Wikibooksin erillinen alkuperäisäänite on lisensoitu public domainiin ja merkitty omalla lähteellään M-COM-04.",
+  } : source.id === "M-WB-05" ? {
+    ...source,
+    originalUrl:"https://en.wikibooks.org/w/index.php?title=German/Lesson_1&oldid=3823655",
+    author:"Wikibooks German/Lesson 1 -yhteiskirjoittajat",
+    publisher:"Wikibooks / Wikimedia",
+    licenseOrBasis:"CC BY-SA 4.0 · koko neljän repliikin Gespräch 1-1 Die Freunde",
+    licenseUrl:"https://creativecommons.org/licenses/by-sa/4.0/",
+    permittedMode:"hosted" as const,
+    readiness:"text-cleared" as const,
+    verifiedAt:"2026-11-11",
+    modification:"Kaikki neljä saksankielistä repliikkiä lähdejärjestyksessä. Suomenkieliset käännökset, opastukset ja tehtävät LOS!:n lisäämiä.",
+    publicationNoteFi:"Heinrichin ja Karlin autenttinen teksti on kokonaan kirjan lukijassa. Wikibooksin mahdollisen oman äänen mediatiedostoa ei ole merkitty valmiiksi.",
+  } : source.id === "M-DIB-05" ? {
+    ...source,
+    originalUrl:"https://coerll.utexas.edu/dib/voc.php?k=1&s=1",
+    author:"COERLL / Deutsch im Blick -oppikirjan tekijät",
+    publisher:"University of Texas at Austin / COERLL",
+    licenseOrBasis:"CC BY 4.0 · Kapitel 1, Wie geht's? -vointisanastolista",
+    licenseUrl:"https://creativecommons.org/licenses/by/4.0/",
+    permittedMode:"hosted" as const,
+    readiness:"text-cleared" as const,
+    verifiedAt:"2026-11-11",
+    modification:"Koko 13 ilmauksen positiivinen/negatiivinen vointilista lähdejärjestyksessä. Suomenkieliset selitykset ovat LOS!:n omia.",
+    publicationNoteFi:"Teksti on kokonaan LOS!:ssa. COERLL:n ääniosan täsmällinen mediaosoite ja käyttötapa ovat edelleen tutkittavana. Sitä ei ole väitetty toistetuksi.",
   } : source.id === "M-WB-06" ? {
     ...source,
     originalUrl: "https://en.wikibooks.org/wiki/German/Lesson_2",
@@ -410,6 +499,18 @@ export const LOS_BOOKS: readonly Book[] = specs.map((spec, index) => ({
     modification: "Litteraatin kaikki kysymys-vastausparit sisältyvät saksaksi. Yksi lähteessä julkaistu puhelinnumero on poistettu ja merkitty näkyvästi. Suomennokset ovat LOS!:n lisäämiä.",
     publicationNoteFi: "COERLL ilmoittaa Deutsch im Blick -kokonaisuuden CC BY -lisensoiduksi. Vain teksti julkaistaan LOS!:ssa, haastatteluvideota ei upoteta eikä julkaista ilman erillistä media-QA:ta.",
   } : source).concat([{
+    id:"M-COM-05",
+    title:"De-wie geht es dir.ogg · Wie geht es dir? -ääntämisnäyte",
+    author:"Jeuwre (saksaa äidinkielenään puhuva mies Berliinistä)",
+    publisher:"Wikimedia Commons",
+    originalUrl:"https://commons.wikimedia.org/wiki/File:De-wie_geht_es_dir.ogg",
+    licenseOrBasis:"CC BY-SA 4.0 · alkuperäinen ääni 7.5.2017",
+    licenseUrl:"https://creativecommons.org/licenses/by-sa/4.0/",
+    permittedMode:"embed" as const,
+    verifiedAt:"2026-11-11",
+    modification:"Ääntä ei ole muokattu LOS!:ssa. OGG ja Wikimedia Commonsin MP3-muunnos valittavissa.",
+    publicationNoteFi:"Alkuperäisen natiivipuhujan 1,8 sekunnin lausunto, ei COERLL:n tai Wikibooksin keskustelun audioversio. iPhone/Android-selaintoisto odottaa todellista testausta.",
+  },{
     id: "M-COM-04",
     title: "Dialogue franz greta 1.ogg · Wikibooksin Franz–Greta-äänite",
     author: "Human Robot (alkuperäinen tekijä), Recent Runes (äänenvoimakkuuden muokkaus)",
