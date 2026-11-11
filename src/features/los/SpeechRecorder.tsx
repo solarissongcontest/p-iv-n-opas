@@ -21,7 +21,7 @@ function stopTracks(stream: MediaStream | null) {
  * useLosRecord, the offline sync queue or Supabase. The learner explicitly
  * downloads a local copy if they want to keep it after leaving this page.
  */
-export function SpeechRecorder({ title = "Oma puheharjoitus" }: { title?: string }) {
+export function SpeechRecorder({ title = "Oma puheharjoitus", exampleDe = "Hallo! Guten Morgen! Bis später!" }: { title?: string; exampleDe?: string }) {
   const [recording, setRecording] = useState(false);
   const [requesting, setRequesting] = useState(false);
   const [clipUrl, setClipUrl] = useState<string | null>(null);
@@ -126,7 +126,7 @@ export function SpeechRecorder({ title = "Oma puheharjoitus" }: { title?: string
   return <section className="los-speech-recorder" aria-label={title}>
     <h4><Mic size={18}/> {title}</h4>
     <p className="los-support">
-      Lausu esimerkiksi <span lang="de">Hallo! Guten Morgen! Bis später!</span> ja kuuntele omaa puhettasi.
+      Lausu esimerkiksi <span lang="de">{exampleDe}</span> ja kuuntele omaa puhettasi.
       Ääni tallentuu vain väliaikaiseen selaimen muistiin, ei palvelimelle, oppimismerkintöihin tai pilvisynkronointiin.
       Voit halutessasi ladata tiedoston itse. Äänite katoaa, kun poistut sivulta.
     </p>
