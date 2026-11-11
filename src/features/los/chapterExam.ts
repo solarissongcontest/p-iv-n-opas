@@ -138,3 +138,30 @@ export const c09Exam:Exercise[]=[
  choice('EX-C09-14','Kuka kertoo alkuperäisessä Franz–Greta-dialogissa pelaavansa kolmelta jalkapalloa?',['Franz','Greta','Jörg'],'Franz','Franz sanoo Ich spiele um drei Fußball.'),
  fill('EX-C09-15','Täydennä: Am Dienstag ____ vier Uhr.',['um'],'Am Dienstag um vier Uhr. on tiistaina kello neljä.')
 ];
+
+
+/** Twenty new auto-graded questions. These are not lifted from the earlier
+ * midterm/final banks; no answer keys are shown before whole-paper submit.
+ */
+export const c10Exam:Exercise[]=[
+ choice('EX-C10-01','Miten tervehdit tuttavaa?',['Hallo!','Auf Wiedersehen!','Gute Nacht!'],'Hallo!','Hallo! on tavallinen tuttavallinen tervehdys.'),
+ choice('EX-C10-02','Miten kysyt ystäväsi nimeä?',['Wie heißt du?','Woher kommen Sie?','Wie spät ist es?'],'Wie heißt du?','Wie heißt du kysyy nimeä.'),
+ choice('EX-C10-03','Mikä on alkuperäisen C10-haastattelun päähenkilön nimi?',['Harald Becker','Jörg Müller','Karl Standish'],'Harald Becker','Harald vastaa Ich heiße Harald Becker.'),
+ choice('EX-C10-04','Mistä kaupungista Harald sanoo olevansa alun perin?',['München','Kiel','Wien'],'München','Harald sanoo Ich komme ursprünglich aus München.'),
+ choice('EX-C10-05','Mikä on Haraldin alkuperäisessä haastattelussa mainittu lempiväri?',['blau','rot','grün'],'blau','Harald vastaa Blau.'),
+ choice('EX-C10-06','Miten Harald ilmaisee ikänsä haastattelussa?',['noin viisikymmentä','täsmälleen kolmekymmentä','täsmälleen kaksikymmentä'],'noin viisikymmentä','So um die fünfzig on suunnilleen viisikymmentä.'),
+ choice('EX-C10-07','Mistä kaupungista Berna kertoo olevansa?',['Kiel','München','Hamburg'],'Kiel','Bernan alkuperäinen haastattelu kertoo Ich komme aus Kiel.'),
+ choice('EX-C10-08','Mikä on Bernan alkuperäisessä haastattelussa mainittu lempiväri?',['rot','blau','gelb'],'rot','Berna kertoo värin rot, kun taas Haraldin lempiväri on blau.'),
+ choice('EX-C10-09','Mikä on kohtelias nimikysymys?',['Wie heißen Sie?','Wie heißt du?','Du heißen Sie?'],'Wie heißen Sie?','Kohtelias Sie vaatii muodon heißen.'),
+ choice('EX-C10-10','Miten kysyt tutulta vointia?',['Wie geht es dir?','Wie heißen Sie?','Woher kommst du?'],'Wie geht es dir?','Wie geht es dir on tuttavallinen vointikysymys.'),
+ choice('EX-C10-11','Miten esittelet henkilön, jonka nimi on Ben?',['Das ist Ben.','Ich ist Ben.','Sie komme Ben.'],'Das ist Ben.','Das ist Ben. esittelee kolmannen henkilön.'),
+ fill('EX-C10-12','Täydennä: Er ____ Olli. (Hän on nimeltään Olli.)',['heißt'],'Er heißt kertoo kolmannen henkilön nimen.'),
+ fill('EX-C10-13','Täydennä: Sie ____ aus Finnland. (Hän tulee Suomesta.)',['kommt'],'Sie kommt aus Finnland.'),
+ truth('EX-C10-14','Väite: kohtelias Sie kirjoitetaan isolla alkukirjaimella myös keskellä virkettä.','Totta','Kohtelias Sie erotetaan pienellä kirjoitetusta sie-sanasta.'),
+ choice('EX-C10-15','Mikä tarkoittaa ”Hauska tutustua!”?',['Schön, dich kennenzulernen!','Gute Nacht!','Es ist spät.'],'Schön, dich kennenzulernen!','Schön, dich kennenzulernen on opittu käyttöfraasi, ei suora sitaatti Haraldin haastattelusta.'),
+ choice('EX-C10-16','Miten sanot maanantaina kello kolme?',['Am Montag um drei Uhr.','Um Montag am drei Uhr.','Am drei Uhr Montag.'],'Am Montag um drei Uhr.','Am kertoo viikonpäivän, um kertoo kellonajan.'),
+ fill('EX-C10-17','Täydennä: Wie ____ man das? (Miten se kirjoitetaan?)',['schreibt'],'Wie schreibt man das on kirjoitusasun kysymys.'),
+ choice('EX-C10-18','Mitä Haraldin oma kommentti Münchenin ”sivistyneestä osasta” ilmaisee?',['puhujan leikillisen mielipiteen','kaikkien saksalaisten yhteisen faktan','ettei München sijaitse Saksassa'],'puhujan leikillisen mielipiteen','Haastattelijan alueellinen heitto ei ole yleispätevä väite muista alueista.'),
+ truth('EX-C10-19','Väite: Bernan ja Haraldin alkuperäiset haastattelut ovat eri puhujien tekstejä.','Totta','C03:n Berna ja C10:n Harald ovat kaksi eri henkilöä.'),
+ choice('EX-C10-20','Mikä sopii kohteliaaksi hyvästelyksi uuden opettajan kanssa?',['Auf Wiedersehen!','Wie alt bist du?','Ich komme aus Wien.'],'Auf Wiedersehen!','Auf Wiedersehen on kohtelias hyvästely.')
+];
