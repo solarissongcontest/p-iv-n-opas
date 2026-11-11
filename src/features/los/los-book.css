@@ -80,7 +80,7 @@
 .los-top-title {justify-self:center;}
 .los-top-title>span:last-child {color:var(--los-soft);font-weight:600;}
 .los-top-separator {padding:0 4px;color:var(--los-line);}
-.los-top-toc {justify-self:end;}
+.los-top-toc {justify-self:end;display:none!important;}
 .los-book-layout {display:grid;grid-template-columns:240px minmax(0,1fr);max-width:1440px;margin:0 auto;}
 .los-book-sidebar {position:sticky;top:62px;align-self:start;height:calc(100dvh - 62px);overflow:auto;padding:26px 14px 26px 21px;border-right:1px solid var(--los-line);background:var(--los-bg);}
 .los-sidebar-book {display:flex;align-items:center;gap:13px;width:100%;text-align:left;padding:0 0 25px;border:0;border-bottom:1px solid var(--los-line);background:transparent;color:var(--los-ink);}
@@ -213,7 +213,7 @@
  .los-library-heading .los-logo {font-size:72px;}
  .los-library-heading h1 {font-size:34px;}
  .los-library-heading>p:last-child {font-size:16px;}
- .los-book-topbar {height:56px;padding:0 12px;}
+  .los-book-topbar {height:56px;padding:0 12px;}\n .los-top-toc {display:inline-flex!important;}
  .los-book-layout {display:block;}
  .los-book-sidebar {display:none;}
  .los-book-sidebar.is-open {display:block;position:fixed;z-index:70;top:56px;bottom:0;right:0;left:auto;width:min(86vw,330px);height:auto;overflow:auto;background:var(--los-paper);padding:17px;box-shadow:-8px 8px 28px rgba(0,0,0,.12);border-left:1px solid var(--los-line);}
@@ -262,4 +262,9 @@
 }
 @media (prefers-reduced-motion: reduce) {
  .los-app * {scroll-behavior:auto!important;transition-duration:.01ms!important;animation-duration:.01ms!important;}
+}
+
+.dark .los-book-sidebar nav button.is-active,.dark .los-answer-list label.is-selected {
+  background:color-mix(in srgb,var(--los-book-accent) 25%,var(--los-paper));
+  color:var(--los-ink);
 }
