@@ -52,7 +52,7 @@ test('five C10 guided lessons have five stages and true 30min goals',()=>{
  }
  assert.deepEqual(chapter10Lessons[3]?.requiredMediaIds,['review:L054:M-COM-01']);
  assert.deepEqual(chapter10Lessons[4]?.requiredIds,['EX-C10']);
- assert.equal(lessons.find(l=>l.id==='L056')?.status,'pending');
+ assert.equal(lessons.find(l=>l.id==='L056')?.status,'initial-material');
 });
 test('all C10 primary-source highlight ranges refer to exact source characters and are versioned',()=>{
  for(const id of ['C10-X11','C10-X12','C10-X13']){
