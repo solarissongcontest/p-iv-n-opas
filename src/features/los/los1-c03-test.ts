@@ -71,6 +71,9 @@ export const LOS1_C03_TEST: ChapterTestDefinition = {
     +"ja arvioi se itse. Kirjoittamista ei pisteytetä automaattisesti.",
   exerciseIds: LOS1_C03_EXAM_EXERCISES.map(item=>item.id),
   selfAssessmentMode:"writing",
+  writingPromptFi:"Kirjoita saksaksi tervehdyksesi, nimesi ja kotimaasi tai kotikaupunkisi sekä kysy toiselta Woher kommst du?.",
+  writingModelDe:"Hallo! Ich heiße Lena. Ich komme aus Finnland. Woher kommst du?",
+  writingModelFi:"Hei! Minun nimeni on Lena. Olen kotoisin Suomesta. Mistä sinä olet kotoisin?",
   speechCriteria: [
     {id:"greet",title:"Kirjoitin saksaksi tervehdyksen ja nimeni."},
     {id:"origin",title:"Kerroin lähtömaan tai -kaupungin ilmauksella Ich komme aus …"},
