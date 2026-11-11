@@ -52,7 +52,7 @@ test('L017–L026 are independently authored ~30min with required exercises and 
   assert.deepEqual(ls[3]?.requiredMediaIds,[media]);
   assert.deepEqual(ls[4]?.requiredIds,['EX-'+id]);
  }
- for(const l of lessons.filter(l=>l.id>='L012'&&l.id<='L016'))assert.equal(l.status,'pending');
+ for(const l of lessons.filter(l=>l.id>='L012'&&l.id<='L016'))assert.equal(l.status,'initial-material');
 });
 test('C04/C05 authentic audio practice has unambiguous source recordings and right answer keys',()=>{
  const sources=new Map([['C04','De-wie_geht_es_Ihnen.ogg'],['C05','De-wie_geht_es_dir.ogg']]);
