@@ -18,6 +18,14 @@ export type ChapterTestDefinition = {
   writingModelFi?: string;
   requiredWritingLines?: number;
   maximumWritingLines?: number;
+  /** Optional second independent writing product (e.g. EX-FINAL dialogue). */
+  secondWritingPromptFi?: string;
+  secondWritingModelDe?: string;
+  secondWritingModelFi?: string;
+  requiredSecondWritingLines?: number;
+  maximumSecondWritingLines?: number;
+  /** Existing in-app, human-recorded source media for listening groups. */
+  listeningBlockIds?: readonly string[];
   examType?: "chapter" | "midterm" | "final";
   scoreGroups?: readonly { id: string; titleFi: string; exerciseIds: readonly string[] }[];
 };
@@ -27,6 +35,7 @@ export type ChapterTestResult = {
   outcomes: { exerciseId: string; correct: boolean; explanationFi: string }[];
   selfAssessment: Record<string, SpeechAssessment>;
   writtenResponse?: string;
+  secondWrittenResponse?: string;
 };
 export type ChapterTestRecord = {
   testId: string; testVersion: string;
@@ -34,6 +43,7 @@ export type ChapterTestRecord = {
   answers: Record<string, ExerciseAnswer>;
   selfAssessment: Record<string, SpeechAssessment>;
   writtenResponse?: string;
+  secondWrittenResponse?: string;
   submission: ChapterTestResult | null;
   previousResults: {
     submittedAt: string; score: number; maximum: number;
@@ -42,13 +52,14 @@ export type ChapterTestRecord = {
     answers?: Record<string, ExerciseAnswer>;
     selfAssessment?: Record<string, SpeechAssessment>;
     writtenResponse?: string;
+    secondWrittenResponse?: string;
   }[];
 };
 export function emptyChapterTestRecord(definition: ChapterTestDefinition): ChapterTestRecord {
   return {
     testId: definition.id, testVersion: definition.version,
     attemptNumber: 0,
-    answers: {}, selfAssessment: {}, writtenResponse: "", submission: null, previousResults: [],
+    answers: {}, selfAssessment: {}, writtenResponse: "", secondWrittenResponse: "", submission: null, previousResults: [],
   };
 }
 /** The first attempt uses C01's original twelve questions. Each succeeding
@@ -97,9 +108,15 @@ export function gradeChapterTest(definition: ChapterTestDefinition, exercises: r
   state: ChapterTestRecord, submittedAt: string): ChapterTestResult | null {
   const writtenLines = (state.writtenResponse ?? "").split(/\r?\n/u)
     .filter(line => line.trim().length > 0).length;
+  const secondLines = (state.secondWrittenResponse ?? "").split(/\r?\n/u)
+    .filter(line => line.trim().length > 0).length;
   const invalidWriting = definition.selfAssessmentMode === "writing" &&
     (writtenLines < (definition.requiredWritingLines ?? 1) ||
-      (definition.maximumWritingLines !== undefined && writtenLines > definition.maximumWritingLines));
+      (definition.maximumWritingLines !== undefined && writtenLines > definition.maximumWritingLines) ||
+      (definition.secondWritingPromptFi !== undefined &&
+        (secondLines < (definition.requiredSecondWritingLines ?? 1) ||
+          (definition.maximumSecondWritingLines !== undefined &&
+            secondLines > definition.maximumSecondWritingLines))));
   if (state.testId !== definition.id || state.testVersion !== definition.version ||
     state.submission || missingChapterTestAnswers(definition, exercises, state).length ||
     missingSpeechAssessments(definition, state).length || invalidWriting) return null;
@@ -112,7 +129,12 @@ export function gradeChapterTest(definition: ChapterTestDefinition, exercises: r
   });
   return {
     submittedAt, attemptNumber: state.attemptNumber ?? 0, score: outcomes.filter(item => item.correct).length,
-    ...(definition.selfAssessmentMode === "writing" ? { writtenResponse: state.writtenResponse?.trim() ?? "" } : {}),
+    ...(definition.selfAssessmentMode === "writing" ? {
+      writtenResponse: state.writtenResponse?.trim() ?? "",
+      ...(definition.secondWritingPromptFi ? {
+        secondWrittenResponse: state.secondWrittenResponse?.trim() ?? "",
+      } : {}),
+    } : {}),
     maximum: outcomes.length, outcomes,
     selfAssessment: Object.fromEntries(definition.speechCriteria.map(item => [
       item.id, state.selfAssessment[item.id],
@@ -122,7 +144,7 @@ export function gradeChapterTest(definition: ChapterTestDefinition, exercises: r
 export function restartChapterTest(state: ChapterTestRecord): ChapterTestRecord {
   if (!state.submission) return state;
   return {
-    ...state, answers: {}, selfAssessment: {}, writtenResponse: "", submission: null,
+    ...state, answers: {}, selfAssessment: {}, writtenResponse: "", secondWrittenResponse: "", submission: null,
     attemptNumber: (state.attemptNumber ?? 0) + 1,
     previousResults: [
       ...state.previousResults,
@@ -132,6 +154,8 @@ export function restartChapterTest(state: ChapterTestRecord): ChapterTestRecord 
         answers: { ...state.answers },
         selfAssessment: { ...state.submission.selfAssessment },
         ...(state.submission.writtenResponse ? { writtenResponse: state.submission.writtenResponse } : {}),
+        ...(state.submission.secondWrittenResponse ?
+          { secondWrittenResponse: state.submission.secondWrittenResponse } : {}),
       },
     ],
   };
