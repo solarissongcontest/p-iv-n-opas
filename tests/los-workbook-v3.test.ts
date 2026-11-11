@@ -11,7 +11,7 @@ test("LOS! C01–C06 have 86 uniquely identified assessment items",()=>{
   assert.equal(losExercisesFor("05").length,12);
   assert.equal(losExercisesFor("06").length,20);
   assert.equal(LOS_EXERCISES.length,86);
-  assert.equal(new Set(LOS_EXERCISES.map(item=>item.id)).size,27);
+  assert.equal(new Set(LOS_EXERCISES.map(item=>item.id)).size,86);
   for(const item of LOS_EXERCISES){
     assert.equal(item.accepted.includes(item.correct),true,`missing canonical answer ${item.id}`);
     assert.ok(item.explanation.trim().length>10);
