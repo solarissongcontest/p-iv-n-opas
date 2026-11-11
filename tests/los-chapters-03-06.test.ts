@@ -8,8 +8,8 @@ const expectedCounts:Record<string,number>={"01":12,"02":15,"03":15,"04":12,"05"
 const vocabularyCounts:Record<string,number>={"03":17,"04":16,"05":16,"06":26};
 
 test("C01–C06 provide the correct book-specified number of deterministic questions",()=>{
-  assert.equal(LOS_EXERCISES.length,86);
-  assert.equal(new Set(LOS_EXERCISES.map(ex=>ex.id)).size,86);
+  assert.equal(LOS_EXERCISES.filter(ex=>Number(ex.chapterId)<=6).length,86);
+  assert.equal(new Set(LOS_EXERCISES.filter(ex=>Number(ex.chapterId)<=6).map(ex=>ex.id)).size,86);
   for(const [chapter,count] of Object.entries(expectedCounts)) {
     const exercises=losExercisesFor(chapter);
     assert.equal(exercises.length,count,`chapter ${chapter} task count`);
