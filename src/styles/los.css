@@ -632,3 +632,31 @@
 .los-exam-evidence strong { display:block; color:var(--los-ink); font-weight:650; }
 .los-exam-evidence small { display:block; color:var(--los-ink-secondary); font-size:13px; margin-top:5px; }
 .los-exam-evidence .los-support { margin:5px 0 0; font-size:12px; }
+
+
+/* Private, opt-in speech practice. No automatic speech grading or upload. */
+.los-speech-recorder {
+  display: grid; gap: 10px; padding: clamp(14px, 2vw, 20px);
+  margin: 20px 0; border: 1px solid var(--los-border);
+  border-radius: 12px; background: var(--los-surface-muted);
+}
+.los-speech-recorder h4 {
+  display: flex; align-items: center; gap: 9px;
+  color: var(--los-ink); font-size: 17px; margin: 0;
+}
+.los-speech-recorder > p { margin: 0; }
+.los-speech-actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.los-speech-actions .los-button { min-height: 44px; white-space: normal; }
+.los-speech-preview { display: grid; gap: 14px; min-width: 0; padding-top: 10px; border-top: 1px solid var(--los-border); }
+.los-speech-preview audio { display: block; max-width: 100%; width: min(100%, 550px); }
+.los-exam-past-report { margin: 12px 0; padding: 12px; border: 1px solid var(--los-border); border-radius: 9px; background: var(--los-surface-muted); }
+.los-exam-past-report summary { cursor: pointer; font-size: 14px; font-weight: 600; }
+.los-exam-past-report ol { margin: 12px 0 4px; padding-left: 23px; }
+.los-exam-past-report li { padding: 9px 0; border-bottom: 1px solid var(--los-border); }
+.los-exam-past-report li:last-child { border-bottom: 0; }
+.los-exam-past-report p { margin: 4px 0 0; }
+@media (max-width: 639px) {
+  .los-speech-recorder { padding: 14px; }
+  .los-speech-actions { flex-direction: column; align-items: stretch; }
+  .los-speech-actions .los-button { justify-content: center; }
+}
