@@ -58,8 +58,8 @@ test("L001 begins without prerequisite German and stores an ungraded personal go
   assert.ok(lesson.steps.some(step => step.blockId === "los1-c01-m-com-01-audio"));
 });
 test("two Commons media sources verified, with separate Goethe culture reference", () => {
-  assert.equal(los1.sources.length, 25);
-  assert.equal(los1.sources.filter(source => source.permittedMode === "pending").length, 20);
+  assert.equal(los1.sources.length, 26);
+  assert.equal(los1.sources.filter(source => source.permittedMode === "pending").length, 19);
   const source = los1.sources.find(item => item.id === "M-COM-01");
   assert.equal(source?.permittedMode, "embed");
   assert.equal(source?.licenseUrl, "https://creativecommons.org/licenses/by-sa/3.0/");
@@ -69,7 +69,7 @@ test("two Commons media sources verified, with separate Goethe culture reference
   assert.deepEqual(dialogue.turns.map(turn => turn.text), LOS1_C01_DIALOGUE_TURNS.map(turn => turn.text));
   assert.equal(LOS1_C01_AUTHENTIC_TEXT, LOS1_C01_DIALOGUE_TURNS.map(turn => turn.text).join("\n"));
   assert.ok(los1.blocks.some(block => block.kind === "media" && block.sourceId === "M-COM-01"));
-  assert.equal(los1.blocks.filter(block => block.kind === "dialogue").length, 5);
+  assert.equal(los1.blocks.filter(block => block.kind === "dialogue").length, 6);
   assert.equal(los1.blocks.filter(block => block.kind === "dialogue" && block.sourceId === "M-COM-01").length, 1);
   const list = los1.blocks.find(block => block.kind === "transcript");
   assert.ok(list && list.kind === "transcript");
@@ -111,8 +111,8 @@ test("C02 chapter has ten connected preview sections, not counterfeit source tex
   assert.ok(chapter);
   assert.equal(chapter.sections?.length, 10);
   assert.equal(chapter.sections?.filter(item => item.publicationStatus === "preview").length, 10);
-  assert.equal(chapter.blockIds.length, 15);
-  assert.equal(chapter.exerciseIds.length, 34);
+  assert.equal(chapter.blockIds.length, 19);
+  assert.equal(chapter.exerciseIds.length, 38);
   const audio = los1.blocks.find(block => block.id === "los1-c02-commons-02-audio");
   assert.ok(audio && audio.kind === "media");
   assert.equal(audio.sourceId, "M-COM-02");
