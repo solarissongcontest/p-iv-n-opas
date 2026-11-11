@@ -116,6 +116,16 @@ export function validateBook(book: Book): string[] {
       errors.push("Duplicate test question: " + chapterTest.id);
     for (const exerciseId of chapterTest.exerciseIds)
       if (!exercises.has(exerciseId)) errors.push("Unknown test exercise: " + exerciseId);
+    if (chapterTest.alternativeExerciseIds) {
+      if (chapterTest.alternativeExerciseIds.length !== chapterTest.exerciseIds.length)
+        errors.push("Mismatched retake question count: " + chapterTest.id);
+      if (new Set(chapterTest.alternativeExerciseIds).size !== chapterTest.alternativeExerciseIds.length)
+        errors.push("Repeated retake question: " + chapterTest.id);
+      for (const exerciseId of chapterTest.alternativeExerciseIds) {
+        if (!exercises.has(exerciseId)) errors.push("Unknown retake exercise: " + exerciseId);
+        if (chapterTest.exerciseIds.includes(exerciseId)) errors.push("Retake must use a distinct authored question: " + exerciseId);
+      }
+    }
   }
   const tests = new Set(book.chapterTests.map(item => item.id));
   for (const lesson of book.lessons) {
