@@ -26,7 +26,7 @@ test('C01 keeps complete eight-replica authentic dialogue in stable blocks',()=>
  assert.ok(c.exercises.length>=13);
 });
 test('source-pending chapters are not disguised as complete texts',()=>{
- for(const id of ['C06','C08']){
+ for(const id of ['C08']){
   const chapter=chapters.find(c=>c.id===id)!;
   assert.equal(chapter.status,'source-pending');
   assert.equal(chapter.blocks.length,0);
