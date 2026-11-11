@@ -38,6 +38,7 @@ export const LOS1_C01_SOURCE_BLOCKS: ContentBlock[] = [
     title: "Franz ja Jörg · alkuperäinen äänite (14 s)",
     sourceId: "M-COM-01",
     embedUrl: "https://upload.wikimedia.org/wikipedia/commons/1/11/Gespr%C3%A4chVorstellung.ogg",
+    mp3Url: "https://upload.wikimedia.org/wikipedia/commons/transcoded/1/11/Gespr%C3%A4chVorstellung.ogg/Gespr%C3%A4chVorstellung.ogg.mp3",
   },
   {
     id: "los1-c01-m-com-01-dialogue", version: "1.0.0", kind: "dialogue",
