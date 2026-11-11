@@ -36,6 +36,11 @@ import { LOS1_C06_EXAM_EXERCISES, LOS1_C06_TEST } from "./los1-c06-test.ts";
 import { LOS1_C06_SECTIONS } from "./los1-c06-sections.ts";
 import { LOS1_REVIEW_ONE_BLOCKS, LOS1_REVIEW_ONE_EXERCISES } from "./los1-review-one.ts";
 import { LOS1_MIDTERM_FORM_A, LOS1_MIDTERM_FORM_B, LOS1_MIDTERM_TEST } from "./los1-midterm.ts";
+import { LOS1_C07_SOURCE_BLOCKS, LOS1_C07_SOURCE_EXERCISES } from "./los1-c07-source.ts";
+import { LOS1_C07_CONTENT_BLOCKS } from "./los1-c07-content.ts";
+import { LOS1_C07_PRACTICE_EXERCISES } from "./los1-c07-practice.ts";
+import { LOS1_C07_EXAM_A, LOS1_C07_EXAM_B, LOS1_C07_TEST } from "./los1-c07-test.ts";
+import { LOS1_C07_SECTIONS } from "./los1-c07-sections.ts";
 
 const specs: readonly [string, string, string, string, string, string][] = [
   ["Perustason alkeet 1", "Tutustu ja ihastu saksan kieleen", "Nollataso, tervehdykset, esittäytyminen ja ensimmäinen vuorovaikutus.", "#B7473C", "#FCE8E5", "#FF9B91"],
@@ -118,6 +123,12 @@ export const LOS_BOOKS: readonly Book[] = specs.map((spec, index) => ({
     blockIds:[...LOS1_C06_SOURCE_BLOCKS,...LOS1_C06_CONTENT_BLOCKS].map(block=>block.id),
     exerciseIds:[...LOS1_C06_SOURCE_EXERCISES,...LOS1_C06_PRACTICE_EXERCISES,
       ...LOS1_C06_EXAM_EXERCISES].map(exercise=>exercise.id),
+  } : chapter.id === "C07" ? {
+    ...chapter, publicationStatus:"preview" as const,
+    sections:LOS1_C07_SECTIONS,
+    blockIds:[...LOS1_C07_SOURCE_BLOCKS,...LOS1_C07_CONTENT_BLOCKS].map(b=>b.id),
+    exerciseIds:[...LOS1_C07_SOURCE_EXERCISES,...LOS1_C07_PRACTICE_EXERCISES,
+      ...LOS1_C07_EXAM_A].map(ex=>ex.id),
   } : { ...chapter, sections: emptyChapterSections() }) : [],
   lessons: index === 0 ? LOS1_PLANNED_LESSONS.map(lesson => {
     if (lesson.id === "L001") return {
@@ -529,11 +540,66 @@ export const LOS_BOOKS: readonly Book[] = specs.map((spec, index) => ({
           chapterTestId:LOS1_C06_TEST.id},
       ],
     };
+    if (lesson.id === "L036") return {
+      ...lesson,publicationStatus:"preview" as const,
+      steps:[
+        {id:"L036-S01",title:"Tutustu aakkosiin ja nimien tavaamiseen",required:true,blockId:"los1-c07-intro"},
+        {id:"L036-S02",title:"Lue saksan aakkosten opetus",required:true,blockId:"los1-c07-basic-alphabet"},
+        {id:"L036-S03",title:"Avaa perusaakkosten nimitaulukko",required:true,blockId:"los1-c07-alphabet-table"},
+        {id:"L036-S04",title:"Kuuntele ihmisen nauhoittama aakkosto",required:true,blockId:"los1-c07-m-com-07-alphabet-audio"},
+        {id:"L036-S05",title:"Tunnista kirjaimen ja ääntämyksen ero",required:true,exerciseId:"los1-c07-intro-pronunciation"},
+        {id:"L036-S06",title:"Tunnista aakkosten koko",required:true,exerciseId:"los1-c07-intro-alphabet"},
+      ],
+    };
+    if (lesson.id === "L037") return {
+      ...lesson,publicationStatus:"preview" as const,
+      steps:[
+        {id:"L037-S01",title:"Tutustu autenttisen puhelindialogin tilanteeseen",required:true,blockId:"los1-c07-text-a-intro"},
+        {id:"L037-S02",title:"Lue koko alkuperäinen viiden repliikin puhelu",required:true,blockId:"los1-c07-wb-02-dialogue"},
+        {id:"L037-S03",title:"Tunnista puhelun aihe",required:true,exerciseId:"los1-c07-source-call"},
+        {id:"L037-S04",title:"Tunnista henkilön nimi",required:true,exerciseId:"los1-c07-source-name"},
+        {id:"L037-S05",title:"Tunnista kaupungin nimi",required:true,exerciseId:"los1-c07-source-city"},
+        {id:"L037-S06",title:"Lue lähteen tavausmalli",required:true,blockId:"los1-c07-text-a-spelling-table"},
+      ],
+    };
+    if (lesson.id === "L038") return {
+      ...lesson,publicationStatus:"preview" as const,
+      steps:[
+        {id:"L038-S01",title:"Opettele tavaamis- ja toistopyynnöt",required:true,blockId:"los1-c07-spelling-grammar"},
+        {id:"L038-S02",title:"Erota sanan ääntämys ja kirjaimen nimi",required:true,blockId:"los1-c07-letter-vs-sound"},
+        {id:"L038-S03",title:"Tunnista J-kirjaimen nimi",required:true,exerciseId:"los1-c07-name-j"},
+        {id:"L038-S04",title:"Tunnista W-kirjaimen nimi",required:true,exerciseId:"los1-c07-name-w"},
+        {id:"L038-S05",title:"Muodosta kohtelias tavaamispyyntö",required:true,exerciseId:"los1-c07-order-polite"},
+        {id:"L038-S06",title:"Harjoittele keksityn nimen kirjoittamista",required:true,exerciseId:"los1-c07-spell-name-01"},
+        {id:"L038-S07",title:"Harjoittele keksittyä numerosarjaa",required:true,exerciseId:"los1-c07-fictitious-number-01"},
+      ],
+    };
+    if (lesson.id === "L039") return {
+      ...lesson,publicationStatus:"preview" as const,
+      steps:[
+        {id:"L039-S01",title:"Lue COERLL:n koko alkuperäinen aakkoslista",required:true,blockId:"los1-c07-dib-06-alphabet"},
+        {id:"L039-S02",title:"Kuuntele erillinen oikea aakkosäänite",required:true,blockId:"los1-c07-m-com-07-alphabet-audio"},
+        {id:"L039-S03",title:"Tunnista ä, ö, ü",required:true,exerciseId:"los1-c07-coerll-list-umlaut"},
+        {id:"L039-S04",title:"Tunnista äänitteen oikea sisältölaji",required:true,exerciseId:"los1-c07-audioguide-reality"},
+        {id:"L039-S05",title:"Täytä keksitty lomake",required:true,blockId:"los1-c07-production-form"},
+        {id:"L039-S06",title:"Pyydä kohteliasta toistoa",required:true,blockId:"los1-c07-production-phone"},
+      ],
+    };
+    if (lesson.id === "L040") return {
+      ...lesson,publicationStatus:"preview" as const,
+      steps:[
+        {id:"L040-S01",title:"Kertaa 16 tärkeintä sanaa ja fraasia",required:true,blockId:"los1-c07-words"},
+        {id:"L040-S02",title:"Tarkista autenttisen puhelindialogin tavaamissäännöt",required:true,blockId:"los1-c07-text-a-support"},
+        {id:"L040-S03",title:"Lue henkilö- ja numerotietojen turvalliset ohjeet",required:true,blockId:"los1-c07-culture"},
+        {id:"L040-S04",title:"Palauta 15 tehtävän testi ja itsearvioi nimen tavaaminen",required:true,
+          chapterTestId:LOS1_C07_TEST.id},
+      ],
+    };
     return lesson;
   }) : [],
-  blocks: index === 0 ? [...LOS1_INTRO_BLOCKS, ...LOS1_C01_PREVIEW_BLOCKS, ...LOS1_C01_SOURCE_BLOCKS, ...LOS1_C01_GREETING_AUDIO_BLOCKS, ...LOS1_C01_APPLICATION_BLOCKS, ...LOS1_C01_CULTURE_BLOCKS, ...LOS1_C02_WB_BLOCKS, ...LOS1_C02_BLOCKS, ...LOS1_C03_SOURCE_BLOCKS, ...LOS1_C03_CONTENT_BLOCKS, ...LOS1_C04_SOURCE_BLOCKS, ...LOS1_C04_BLOCKS, ...LOS1_C05_SOURCE_BLOCKS, ...LOS1_C05_BLOCKS, ...LOS1_C06_SOURCE_BLOCKS, ...LOS1_C06_CONTENT_BLOCKS, ...LOS1_REVIEW_ONE_BLOCKS] : [],
-  exercises: index === 0 ? [...LOS1_C01_PREVIEW_EXERCISES, ...LOS1_C01_SOURCE_EXERCISES, ...LOS1_C01_AUDIO_COMPREHENSION_EXERCISES, ...LOS1_C01_EXAM_EXERCISES, ...LOS1_C01_ALTERNATE_EXAM_EXERCISES, ...LOS1_C01_EXTRA_EXERCISES, ...LOS1_C01_INTERACTIVE_EXERCISES, ...LOS1_C02_WB_EXERCISES, ...LOS1_C02_EXERCISES, ...LOS1_C02_EXAM_EXERCISES, ...LOS1_C03_SOURCE_EXERCISES, ...LOS1_C03_PRACTICE_EXERCISES, ...LOS1_C03_EXAM_EXERCISES, ...LOS1_C04_SOURCE_EXERCISES, ...LOS1_C04_PRACTICE_EXERCISES, ...LOS1_C04_EXAM_EXERCISES, ...LOS1_C05_SOURCE_EXERCISES, ...LOS1_C05_PRACTICE_EXERCISES, ...LOS1_C05_EXAM_EXERCISES, ...LOS1_C06_SOURCE_EXERCISES, ...LOS1_C06_PRACTICE_EXERCISES, ...LOS1_C06_EXAM_EXERCISES, ...LOS1_REVIEW_ONE_EXERCISES, ...LOS1_MIDTERM_FORM_A, ...LOS1_MIDTERM_FORM_B] : [],
-  chapterTests: index === 0 ? [LOS1_C01_TEST, LOS1_C02_TEST, LOS1_C03_TEST, LOS1_C04_TEST, LOS1_C05_TEST, LOS1_C06_TEST, LOS1_MIDTERM_TEST] : [],
+  blocks: index === 0 ? [...LOS1_INTRO_BLOCKS, ...LOS1_C01_PREVIEW_BLOCKS, ...LOS1_C01_SOURCE_BLOCKS, ...LOS1_C01_GREETING_AUDIO_BLOCKS, ...LOS1_C01_APPLICATION_BLOCKS, ...LOS1_C01_CULTURE_BLOCKS, ...LOS1_C02_WB_BLOCKS, ...LOS1_C02_BLOCKS, ...LOS1_C03_SOURCE_BLOCKS, ...LOS1_C03_CONTENT_BLOCKS, ...LOS1_C04_SOURCE_BLOCKS, ...LOS1_C04_BLOCKS, ...LOS1_C05_SOURCE_BLOCKS, ...LOS1_C05_BLOCKS, ...LOS1_C06_SOURCE_BLOCKS, ...LOS1_C06_CONTENT_BLOCKS, ...LOS1_REVIEW_ONE_BLOCKS, ...LOS1_C07_SOURCE_BLOCKS, ...LOS1_C07_CONTENT_BLOCKS] : [],
+  exercises: index === 0 ? [...LOS1_C01_PREVIEW_EXERCISES, ...LOS1_C01_SOURCE_EXERCISES, ...LOS1_C01_AUDIO_COMPREHENSION_EXERCISES, ...LOS1_C01_EXAM_EXERCISES, ...LOS1_C01_ALTERNATE_EXAM_EXERCISES, ...LOS1_C01_EXTRA_EXERCISES, ...LOS1_C01_INTERACTIVE_EXERCISES, ...LOS1_C02_WB_EXERCISES, ...LOS1_C02_EXERCISES, ...LOS1_C02_EXAM_EXERCISES, ...LOS1_C03_SOURCE_EXERCISES, ...LOS1_C03_PRACTICE_EXERCISES, ...LOS1_C03_EXAM_EXERCISES, ...LOS1_C04_SOURCE_EXERCISES, ...LOS1_C04_PRACTICE_EXERCISES, ...LOS1_C04_EXAM_EXERCISES, ...LOS1_C05_SOURCE_EXERCISES, ...LOS1_C05_PRACTICE_EXERCISES, ...LOS1_C05_EXAM_EXERCISES, ...LOS1_C06_SOURCE_EXERCISES, ...LOS1_C06_PRACTICE_EXERCISES, ...LOS1_C06_EXAM_EXERCISES, ...LOS1_REVIEW_ONE_EXERCISES, ...LOS1_MIDTERM_FORM_A, ...LOS1_MIDTERM_FORM_B, ...LOS1_C07_SOURCE_EXERCISES, ...LOS1_C07_PRACTICE_EXERCISES, ...LOS1_C07_EXAM_A, ...LOS1_C07_EXAM_B] : [],
+  chapterTests: index === 0 ? [LOS1_C01_TEST, LOS1_C02_TEST, LOS1_C03_TEST, LOS1_C04_TEST, LOS1_C05_TEST, LOS1_C06_TEST, LOS1_C07_TEST, LOS1_MIDTERM_TEST] : [],
   sources: index === 0 ? LOS1_RESEARCH_SOURCES.map(source => source.id === "M-COM-01" ? {
     ...source,
     author: "Xzapro4 ja Erkan Yilmaz",
@@ -582,6 +648,30 @@ export const LOS_BOOKS: readonly Book[] = specs.map((spec, index) => ({
     verifiedAt:"2026-11-11",
     modification:"Kaikki Harald-haastattelun kysymys–vastausparit sisältyvät, mutta yksi puhelinnumero on poistettu ja merkitty näkyvästi. Suomennokset ja selitykset ovat LOS!:n omia.",
     publicationNoteFi:"Harald kertoo olevansa noin viisikymppinen, ei täsmälleen 50. Video ei ole mukana: sen tiedostokohtainen oikeus ja media-upotuksen toiminta vaativat lisätarkistuksen.",
+  } : source.id === "M-WB-02" ? {
+    ...source,
+    originalUrl:"https://en.wikibooks.org/w/index.php?title=German/Level_I/Bitte_buchstabieren_Sie&oldid=3504939",
+    author:"Wikibooksin saksankurssin yhteiskirjoittajat",
+    publisher:"Wikibooks / Wikimedia",
+    licenseOrBasis:"CC BY-SA 4.0 · koko viiden repliikin Fernsprechauskunft -dialogi",
+    licenseUrl:"https://creativecommons.org/licenses/by-sa/4.0/",
+    permittedMode:"hosted" as const,
+    readiness:"text-cleared" as const,
+    verifiedAt:"2026-11-11",
+    modification:"Lähteen viisi repliikkiä alkuperäisessä järjestyksessä ja täsmällisillä saksankielisillä sanoilla. Suomentamiset, selitykset ja tehtävät ovat LOS!:n omia.",
+    publicationNoteFi:"Wikibooksin koko autenttinen puhelukeskustelu on LOS!:n sisällä. Alkuperäinen päättyy 'Die Nummer lautet ...'; siinä ei ole kerrottua puhelinnumeroa. Alkuperäisen dialogin oman äänitteen oikeus ja upotus vielä varmistamatta.",
+  } : source.id === "M-DIB-06" ? {
+    ...source,
+    originalUrl:"https://coerll.utexas.edu/dib/pho.php?k=1",
+    author:"Dr. Zsuzsanna Abrams ja Deutsch im Blick -toimitus",
+    publisher:"University of Texas at Austin / COERLL",
+    licenseOrBasis:"CC BY 4.0 · Das Alphabet -sivun järjestetty koko aakkosmerkkilista",
+    licenseUrl:"https://creativecommons.org/licenses/by/4.0/",
+    permittedMode:"hosted" as const,
+    readiness:"text-cleared" as const,
+    verifiedAt:"2026-11-11",
+    modification:"Alkuperäisen COERLL-listan kaikki 30 aakkosmerkkiä säilytetty alkuperäisessä järjestyksessä. Suomenkieliset opastukset LOS!:n omia; äänitiedostoja ei kopioitu.",
+    publicationNoteFi:"Tekstilista on kokonaisuudessaan LOS!:n sisällä. COERLL:n omien äänitiedostojen tiedostokohtainen lisenssi ja suora upotus vaativat yhä tarkistuksen. Erillinen Timwin public domain -äänite on merkitty omalla lähteellään.",
   } : source.id === "M-WB-05" ? {
     ...source,
     originalUrl:"https://en.wikibooks.org/w/index.php?title=German/Lesson_1&oldid=3823655",
@@ -641,6 +731,17 @@ export const LOS_BOOKS: readonly Book[] = specs.map((spec, index) => ({
     modification: "Litteraatin kaikki kysymys-vastausparit sisältyvät saksaksi. Yksi lähteessä julkaistu puhelinnumero on poistettu ja merkitty näkyvästi. Suomennokset ovat LOS!:n lisäämiä.",
     publicationNoteFi: "COERLL ilmoittaa Deutsch im Blick -kokonaisuuden CC BY -lisensoiduksi. Vain teksti julkaistaan LOS!:ssa, haastatteluvideota ei upoteta eikä julkaista ilman erillistä media-QA:ta.",
   } : source).concat([{
+    id:"M-COM-07",
+    title:"German alphabet-2.ogg · saksankielinen aakkosten lausunta",
+    publisher:"Wikimedia Commons / alkuperäinen English Wikipedia",
+    author:"Timwi",
+    originalUrl:"https://commons.wikimedia.org/wiki/File:German_alphabet-2.ogg",
+    licenseOrBasis:"Public domain · tekijän oma 28 sekunnin tallenne, 22.4.2004",
+    permittedMode:"embed" as const,
+    verifiedAt:"2026-11-11",
+    modification:"Ääni upotettu muuttamattomana Wikimediasta, erikseen COERLL:n alkuperäisestä aakkosluettelosta.",
+    publicationNoteFi:"Ihmisen nauhoittama 28 sekunnin aakkostoääni, tekijä Timwi. Ei sisällä käyttäjien nimiä tai puhelinnumeroita. Tiedostokohtainen public domain -luovutus vahvistettu; todellinen mobiilitoisto vielä testaamatta.",
+  },{
     id:"M-COM-06",
     title:"German Vocabulary - Numbers.ogg · Saksankielinen numerosarja 1–20 ja kymmenluvut",
     publisher:"Wikimedia Commons / Wikibooks",
