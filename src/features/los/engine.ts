@@ -54,3 +54,18 @@ export function tokenOffsets(text:string):{text:string;start:number;end:number}[
  const parts=[...text.matchAll(/\S+/gu)];
  return parts.map(match=>({text:match[0],start:match.index,end:match.index+match[0].length}));
 }
+
+/** The highlighter stores text-character offsets, never pixel positions.
+ * DOM Range may start in a whitespace text node rather than inside a word.
+ * Passing all intersecting tokens gives a stable, direction-independent span.
+ */
+export function anchorFromSelectedTokens(
+ blockId:string, tokens:readonly {start:number;end:number}[],
+ textLength:number, contentVersion=LOS_VERSION,
+):TextAnchor|null{
+ const valid=tokens.filter(t=>Number.isInteger(t.start)&&Number.isInteger(t.end)
+  &&t.start>=0&&t.end>t.start&&t.end<=textLength);
+ if(!valid.length)return null;
+ return {blockId,start:Math.min(...valid.map(t=>t.start)),
+  end:Math.max(...valid.map(t=>t.end)),contentVersion};
+}
