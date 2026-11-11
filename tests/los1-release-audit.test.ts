@@ -17,7 +17,7 @@ test('LOS! release audit counts material actually implemented, not just placehol
  assert.ok(audit.unauthoredLessonIds.includes('L031'));
  assert.ok(audit.unauthoredLessonIds.includes('L041'));
  assert.ok(audit.unauthoredLessonIds.includes('L059'));
- assert.ok(audit.unauthoredLessonIds.includes('L060'));
+ assert.ok(!audit.unauthoredLessonIds.includes('L060'));
  assert.ok(audit.uniqueCoreWords>0);
 });
 test('G1–G8 do not pass without explicit reviewed rights and actual field evidence',()=>{
