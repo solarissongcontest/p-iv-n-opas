@@ -27,7 +27,7 @@ test("LOS! reader is visually isolated from StudyOS dashboard shell", () => {
   const css = readFileSync("src/features/los/los-book.css", "utf8");
   assert.ok(component.includes("los-book-workspace"));
   assert.ok(component.includes("los-book-paper"));
-  assert.ok(component.includes("Alkuperäistekstiä valmistellaan"));
+  assert.ok(component.includes("Alkuperäistekstin julkaisu on kesken"));
   assert.doesNotMatch(component, /<AppShell|studyos-shell|studyos-main|className="panel"/);
   assert.ok(css.includes(".los-opening-number"));
   assert.ok(css.includes("@media (max-width:760px)"));
