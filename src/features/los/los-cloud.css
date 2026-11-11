@@ -1,0 +1,32 @@
+/* LOS! only: quiet textbook-style cloud notes and conflict states. */
+.los-cloud-panel{margin-top:29px;padding-top:23px;border-top:1px solid var(--los-line);color:var(--los-ink);}
+.los-cloud-title{display:flex;gap:9px;align-items:center;margin-bottom:10px;}
+.los-cloud-title svg{color:var(--los-book-accent);}
+.los-cloud-title h3{font-family:Georgia,"Times New Roman",serif;font-size:20px;font-weight:500;line-height:1.3;margin:0;}
+.los-cloud-panel p{font-size:13px!important;line-height:1.7;color:var(--los-soft);margin:9px 0 13px;}
+.los-cloud-panel strong{color:var(--los-ink);}
+.los-cloud-unlock>label{display:block;font-size:13px;font-weight:700;margin:13px 0 8px;}
+.los-cloud-entry{display:flex;gap:8px;align-items:stretch;}
+.los-cloud-entry input{flex:1;min-width:0;max-width:530px;padding:12px;border:1px solid var(--los-line);border-radius:0;background:var(--los-paper);color:var(--los-ink);font-size:14px;min-height:46px;}
+.los-cloud-entry input:focus-visible{outline:2px solid var(--los-book-accent);outline-offset:1px;}
+.los-cloud-entry button,.los-cloud-controls button,.los-cloud-conflict button{
+ display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:11px 14px;
+ min-height:46px;border:1px solid var(--los-line);background:none;
+ color:var(--los-ink);font-size:12px;font-weight:720;line-height:1.35;
+}
+.los-cloud-entry button:first-of-type,.los-cloud-controls button:first-of-type{border-color:var(--los-book-accent);}
+.los-cloud-panel button:disabled{cursor:not-allowed;opacity:.47;}
+.los-cloud-controls{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0 12px;}
+.los-cloud-conflict{padding:17px 18px;margin-top:19px;border-left:3px solid #a65c2d;background:var(--los-subtle);}
+.los-cloud-conflict>strong{font-size:15px;}
+.los-cloud-conflict p{margin:9px 0!important;}
+.los-cloud-conflict>div{display:flex;flex-wrap:wrap;gap:9px;margin:15px 0;}
+.los-cloud-conflict>div button{border-color:var(--los-book-accent);}
+.los-cloud-conflict small{font-size:12px;line-height:1.65;color:var(--los-soft);}
+.los-cloud-message{display:flex;gap:8px;align-items:flex-start;max-width:65ch;}
+.los-cloud-message svg{flex:0 0 15px;margin-top:2px;}
+@media(max-width:600px){
+ .los-cloud-entry{flex-direction:column;align-items:stretch;}
+ .los-cloud-entry button{align-self:flex-start;}
+ .los-cloud-conflict{padding:15px 13px;}
+}
