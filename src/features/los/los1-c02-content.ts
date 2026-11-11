@@ -31,8 +31,8 @@ export const LOS1_C02_BLOCKS: ContentBlock[] = [
   },
   {
     id: "los1-c02-text-a-guide", kind: "paragraph", version: "0.1.0", language: "fi",
-    text: "Lue ensin LOS!:n oma kahdeksan repliikin opetuskeskustelu. "
-      + "Se on toimituksen kirjoittama esimerkki, ei Wikibooksista lainattu autenttinen teksti. "
+    text: "Lue nyt lisäksi LOS!:n oma kahdeksan repliikin opetuskeskustelu. "
+      + "Se on toimituksen kirjoittama lisäesimerkki, ei Wikibooksin alkuperäinen kuuden repliikin pääteksti. "
       + "Avaa suomennokset vain silloin, kun niitä tarvitset. Etsi erityisesti ich heiße, wie heißt du ja das ist.",
   },
   {
@@ -42,10 +42,10 @@ export const LOS1_C02_BLOCKS: ContentBlock[] = [
   },
   {
     id: "los1-c02-source-status", kind: "paragraph", version: "0.1.0", language: "fi",
-    text: "Kappaleeseen suunniteltu Wikibooksin Franzin ja Gretan alkuperäinen kuusirepliikkinen dialogi "
-      + "on tunnistettu erillisenä lähteenä, mutta sen kokonaistuonti odottaa toimituksellista tarkistusta. "
-      + "Tämä esikatselu käyttää sen sijaan yllä olevaa kokonaan LOS!:ssa kirjoitettua keskustelua. "
-      + "Alkuperäistekstin lähdetiedot näkyvät kirjan Lähteet-osiossa.",
+    text: "Wikibooksin Franzin ja Gretan aito kuusirepliikkinen päädialogi on nyt kokonaan "
+      + "saksaksi sekä erillisellä public domain -äänitteellä kappaleen alussa. "
+      + "Tämä Lenan ja Benin lisäteksti on LOS!:n itse kirjoittama opetuskeskustelu. "
+      + "Kummankin lähteen alkuperä ja käyttöoikeudet näytetään erikseen kirjan Lähteet-osiossa.",
   },
   {
     id: "los1-c02-grammar-heissen", kind: "grammar", version: "0.1.0",
