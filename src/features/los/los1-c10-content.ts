@@ -96,7 +96,7 @@ export const LOS1_C10_CONTENT_BLOCKS:ContentBlock[]=[
  {id:"los1-c10-production-meeting",version:"0.1.0",kind:"production",
   titleFi:"Kirjoita oma kahden kuvitteellisen henkilön kohtaaminen",
   promptFi:"Kirjoita 6–8 repliikkiä, yksi omalle rivilleen. Kohtaaminen sisältää tervehdyksen, nimien vaihdon, alkuperäkysymyksen, vointikysymyksen, yhden toisto- tai tavauksen pyynnön ja sopimisen viikonpäivästä sekä tasatunnista. Päätä keskustelu hyvästelyyn. Keksi henkilöt, älä kerro omia yhteystietojasi. Tämä on luova harjoitus, ei aito haastattelu.",
-  modelDe:"Mia: Hallo! Ich heiße Mia. Wie heißt du?\nBen: Hallo, ich heiße Ben.\nMia: Woher kommst du?\nBen: Ich komme aus Finnland. Und du?\nMia: Ich komme aus Deutschland. Wie geht's?\nBen: Gut, danke. Am Montag um drei Uhr?\nMia: Ja! Bis Montag!\nBen: Tschüss!",
+  modelDe:"Mia: Hallo! Ich heiße Mia. Wie heißt du?\nBen: Hallo, ich heiße Ben.\nMia: Woher kommst du?\nBen: Ich komme aus Finnland. Und du?\nMia: Ich komme aus Deutschland. Wie geht's?\nBen: Gut, danke. Am Montag um drei Uhr?\nMia: Noch einmal, bitte. Montag um drei?\nBen: Tschüss!",
   modelFi:"Mia: Hei! Olen Mia. Mikä sinun nimesi on?\nBen: Hei, olen Ben.\nMia: Mistä olet kotoisin?\nBen: Suomesta. Entä sinä?\nMia: Saksasta. Mitä kuuluu?\nBen: Hyvää, kiitos. Maanantaina kolmelta?\nMia: Kyllä! Nähdään maanantaina!\nBen: Hei hei!",
   criteriaFi:["Kirjoitin 6–8 repliikkiä.","Tervehdin ja hyvästelin.","Kerroin tai kysyin nimen ja lähtöpaikan.","Kysyin vointia ja käytin aikailmausta.","Sisällytin ainakin yhden toisto- tai tavauspyynnön."],
  },
