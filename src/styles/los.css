@@ -693,3 +693,30 @@
 @media (max-width:639px) {
   .los-categorize-row { grid-template-columns: 1fr; gap: 7px; }
 }
+
+
+/* C02: free-writing part of chapter test, never auto-graded */
+.los-exam-speech > label[for^="los-exam-writing-"] {
+  display:block; margin-top:16px; margin-bottom:8px;
+  font-weight:650; color:var(--los-ink); font-size:14px;
+}
+.los-exam-speech > textarea {
+  display:block; box-sizing:border-box; width:100%; min-height:116px; max-width:100%;
+  border:1px solid var(--los-border-strong); border-radius:10px;
+  background:var(--los-surface); color:var(--los-ink);
+  padding:14px 16px; font-size:18px; line-height:1.6;
+  font-family:inherit; resize:vertical;
+}
+.los-exam-writing-return {
+  border:1px solid var(--los-border); border-radius:10px;
+  margin-top:16px; padding:16px 20px; background:var(--los-surface-muted);
+}
+.los-exam-writing-return h4 { margin:0 0 8px; font-size:15px; }
+.los-exam-writing-return > p { white-space:pre-wrap; overflow-wrap:anywhere; font-size:17px; }
+.los-exam-writing-return details { margin-top:14px; }
+.los-exam-writing-return details summary { cursor:pointer; font-weight:650; }
+.los-exam-past-writing { white-space:pre-wrap; overflow-wrap:anywhere; font-size:15px; }
+@media (max-width:639px) {
+  .los-exam-writing-return { padding:14px; }
+  .los-exam-speech > textarea { padding:12px; }
+}
