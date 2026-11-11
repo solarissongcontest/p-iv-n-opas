@@ -13,6 +13,7 @@ import { LOS1_C01_INTERACTIVE_EXERCISES } from "./los1-c01-interactive.ts";
 import { LOS1_C02_BLOCKS, LOS1_C02_EXERCISES } from "./los1-c02-content.ts";
 import { LOS1_C02_EXAM_EXERCISES, LOS1_C02_TEST } from "./los1-c02-test.ts";
 import { LOS1_C02_SECTIONS } from "./los1-c02-sections.ts";
+import { LOS1_C02_WB_BLOCKS, LOS1_C02_WB_EXERCISES } from "./los1-c02-wikibooks.ts";
 import { LOS1_C03_SOURCE_BLOCKS, LOS1_C03_SOURCE_EXERCISES } from "./los1-c03-source.ts";
 import { LOS1_C03_CONTENT_BLOCKS } from "./los1-c03-content.ts";
 import { LOS1_C03_PRACTICE_EXERCISES } from "./los1-c03-practice.ts";
@@ -69,8 +70,8 @@ export const LOS_BOOKS: readonly Book[] = specs.map((spec, index) => ({
     ...chapter,
     publicationStatus: "preview" as const,
     sections: LOS1_C02_SECTIONS,
-    blockIds: LOS1_C02_BLOCKS.map(block => block.id),
-    exerciseIds: [...LOS1_C02_EXERCISES, ...LOS1_C02_EXAM_EXERCISES].map(item => item.id),
+    blockIds: [...LOS1_C02_WB_BLOCKS, ...LOS1_C02_BLOCKS].map(block => block.id),
+    exerciseIds: [...LOS1_C02_WB_EXERCISES, ...LOS1_C02_EXERCISES, ...LOS1_C02_EXAM_EXERCISES].map(item => item.id),
   } : chapter.id === "C03" ? {
     ...chapter,
     publicationStatus: "preview" as const,
@@ -157,14 +158,16 @@ export const LOS_BOOKS: readonly Book[] = specs.map((spec, index) => ({
       ],
     };
     if (lesson.id === "L008") return {
-      ...lesson, title: "Lue Lenan ja Benin opetuskeskustelu", publicationStatus: "preview" as const,
+      ...lesson, publicationStatus: "preview" as const,
       steps: [
-        { id: "L008-S01", title: "Valmistaudu lukemaan LOS!:n oma dialogi", required: true, blockId: "los1-c02-text-a-guide" },
-        { id: "L008-S02", title: "Lue Lenan ja Benin kokonainen keskustelu", required: true, blockId: "los1-c02-text-a-editorial" },
-        { id: "L008-S03", title: "Tunnista keskustelun toinen henkilö", required: true, exerciseId: "los1-c02-read-name" },
-        { id: "L008-S04", title: "Tunnista Frau Weiß", required: true, exerciseId: "los1-c02-read-teacher" },
-        { id: "L008-S05", title: "Etsi nimikysymys keskustelusta", required: true, exerciseId: "los1-c02-read-highlight" },
-        { id: "L008-S06", title: "Ymmärrä tekstin lähdestatus", required: true, blockId: "los1-c02-source-status" },
+        { id: "L008-S01", title: "Tutustu Wikibooksin alkuperäiseen päätekstiin", required: true, blockId: "los1-c02-wb-original-intro" },
+        { id: "L008-S02", title: "Kuuntele Franzin ja Gretan alkuperäinen äänite", required: true, blockId: "los1-c02-wb-original-audio" },
+        { id: "L008-S03", title: "Lue alkuperäisen päätekstin kaikki kuusi repliikkiä", required: true, blockId: "los1-c02-wb-original-dialogue" },
+        { id: "L008-S04", title: "Tunnista Gretan nimi", required: true, exerciseId: "los1-c02-wb-greta-name" },
+        { id: "L008-S05", title: "Tunnista opettaja", required: true, exerciseId: "los1-c02-wb-teacher" },
+        { id: "L008-S06", title: "Etsi tekstistä Ich heiße Greta", required: true, exerciseId: "los1-c02-wb-highlight" },
+        { id: "L008-S07", title: "Lue alkuperäistekstin loppuohje", required: true, blockId: "los1-c02-wb-original-followup" },
+        { id: "L008-S08", title: "Vertaile LOS!:n omaan lisädialogiin", required: false, blockId: "los1-c02-text-a-editorial" },
       ],
     };
     if (lesson.id === "L009") return {
@@ -260,8 +263,8 @@ export const LOS_BOOKS: readonly Book[] = specs.map((spec, index) => ({
     };
     return lesson;
   }) : [],
-  blocks: index === 0 ? [...LOS1_INTRO_BLOCKS, ...LOS1_C01_PREVIEW_BLOCKS, ...LOS1_C01_SOURCE_BLOCKS, ...LOS1_C01_GREETING_AUDIO_BLOCKS, ...LOS1_C01_APPLICATION_BLOCKS, ...LOS1_C01_CULTURE_BLOCKS, ...LOS1_C02_BLOCKS, ...LOS1_C03_SOURCE_BLOCKS, ...LOS1_C03_CONTENT_BLOCKS] : [],
-  exercises: index === 0 ? [...LOS1_C01_PREVIEW_EXERCISES, ...LOS1_C01_SOURCE_EXERCISES, ...LOS1_C01_AUDIO_COMPREHENSION_EXERCISES, ...LOS1_C01_EXAM_EXERCISES, ...LOS1_C01_ALTERNATE_EXAM_EXERCISES, ...LOS1_C01_EXTRA_EXERCISES, ...LOS1_C01_INTERACTIVE_EXERCISES, ...LOS1_C02_EXERCISES, ...LOS1_C02_EXAM_EXERCISES, ...LOS1_C03_SOURCE_EXERCISES, ...LOS1_C03_PRACTICE_EXERCISES, ...LOS1_C03_EXAM_EXERCISES] : [],
+  blocks: index === 0 ? [...LOS1_INTRO_BLOCKS, ...LOS1_C01_PREVIEW_BLOCKS, ...LOS1_C01_SOURCE_BLOCKS, ...LOS1_C01_GREETING_AUDIO_BLOCKS, ...LOS1_C01_APPLICATION_BLOCKS, ...LOS1_C01_CULTURE_BLOCKS, ...LOS1_C02_WB_BLOCKS, ...LOS1_C02_BLOCKS, ...LOS1_C03_SOURCE_BLOCKS, ...LOS1_C03_CONTENT_BLOCKS] : [],
+  exercises: index === 0 ? [...LOS1_C01_PREVIEW_EXERCISES, ...LOS1_C01_SOURCE_EXERCISES, ...LOS1_C01_AUDIO_COMPREHENSION_EXERCISES, ...LOS1_C01_EXAM_EXERCISES, ...LOS1_C01_ALTERNATE_EXAM_EXERCISES, ...LOS1_C01_EXTRA_EXERCISES, ...LOS1_C01_INTERACTIVE_EXERCISES, ...LOS1_C02_WB_EXERCISES, ...LOS1_C02_EXERCISES, ...LOS1_C02_EXAM_EXERCISES, ...LOS1_C03_SOURCE_EXERCISES, ...LOS1_C03_PRACTICE_EXERCISES, ...LOS1_C03_EXAM_EXERCISES] : [],
   chapterTests: index === 0 ? [LOS1_C01_TEST, LOS1_C02_TEST, LOS1_C03_TEST] : [],
   sources: index === 0 ? LOS1_RESEARCH_SOURCES.map(source => source.id === "M-COM-01" ? {
     ...source,
@@ -287,6 +290,18 @@ export const LOS_BOOKS: readonly Book[] = specs.map((spec, index) => ({
     verifiedAt: "2026-11-11",
     modification: "Äänitettä ei ole muokattu LOS!:ssa; suomenkielinen opastus ja harjoitustehtävät ovat uusia.",
     publicationNoteFi: "Tiedostokohtainen lisenssi varmistettu Commonsin tiedostosivulta. 12 sekunnin puhe toistetaan ulkoisesta lähteestä; soitto selaimessa vielä testaamatta.",
+  } : source.id === "M-WB-01" ? {
+    ...source,
+    originalUrl: "https://en.wikibooks.org/w/index.php?title=German/Level_I/Wie_heißt_du&oldid=4430449",
+    author: "Wikibooks German Level I -yhteiskirjoittajat (versio 4430449)",
+    publisher: "Wikibooks / Wikimedia",
+    licenseOrBasis: "CC BY-SA 4.0 · koko alkuperäinen kuusirepliikkinen saksankielinen dialogi",
+    licenseUrl: "https://creativecommons.org/licenses/by-sa/4.0/",
+    permittedMode: "hosted" as const,
+    readiness: "text-cleared" as const,
+    verifiedAt: "2026-11-11",
+    modification: "Saksankieliset kuusi repliikkiä täsmälleen lähdeversiosta; LOS!:n omat suomennokset, opastus ja tehtävät lisätty. Lisätyt käännökset lisensoidaan CC BY-SA 4.0 -ehdoilla.",
+    publicationNoteFi: "Alkuperäisen tekstin täsmäversio on 4430449 (2024-09-02). Wikibooksin erillinen alkuperäisäänite on lisensoitu public domainiin ja merkitty omalla lähteellään M-COM-04.",
   } : source.id === "M-DIB-01" ? {
     ...source,
     author: "Berna Güneli (haastateltava), COERLL / Deutsch im Blick -toimitus",
@@ -298,6 +313,17 @@ export const LOS_BOOKS: readonly Book[] = specs.map((spec, index) => ({
     modification: "Litteraatin kaikki kysymys-vastausparit sisältyvät saksaksi. Yksi lähteessä julkaistu puhelinnumero on poistettu ja merkitty näkyvästi. Suomennokset ovat LOS!:n lisäämiä.",
     publicationNoteFi: "COERLL ilmoittaa Deutsch im Blick -kokonaisuuden CC BY -lisensoiduksi. Vain teksti julkaistaan LOS!:ssa, haastatteluvideota ei upoteta eikä julkaista ilman erillistä media-QA:ta.",
   } : source).concat([{
+    id: "M-COM-04",
+    title: "Dialogue franz greta 1.ogg · Wikibooksin Franz–Greta-äänite",
+    author: "Human Robot (alkuperäinen tekijä), Recent Runes (äänenvoimakkuuden muokkaus)",
+    publisher: "Wikimedia Commons / Wikibooks",
+    originalUrl: "https://commons.wikimedia.org/wiki/File:Dialogue_franz_greta_1.ogg",
+    licenseOrBasis: "Public domain · alkuperäisen äänitteen tekijän luovutus",
+    permittedMode: "embed" as const,
+    verifiedAt: "2026-11-11",
+    modification: "Äänitettä ei muokata LOS!:ssa. Vuoden 2011 Commons-versiossa äänenvoimakkuutta nostettu; soitin voi käyttää Commonsin valmista MP3-muunnosta.",
+    publicationNoteFi: "Alkuperäistiedoston lisenssi ja 20 sekunnin kesto tarkistettu tiedostosivulta. Suoratoiston toimivuutta oikeilla laitteilla ei ole vielä testattu.",
+  },{
     id: "LOS-EDITORIAL-C02",
     title: "LOS! 1 C02 · Lenan ja Benin opetuskeskustelu",
     author: "LOS!:n oma toimitettu opetussisältö",
