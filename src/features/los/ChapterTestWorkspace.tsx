@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { CheckCircle2, RotateCcw } from "lucide-react";
 import type { Book, Exercise, ExerciseAnswer, HighlightRange } from "./model";
 import type { ChapterTestDefinition, SpeechAssessment } from "./chapterTest";
@@ -11,6 +11,7 @@ import { evaluateExercise } from "./exercises/evaluate";
 import { formatExerciseAnswer } from "./exercises/formatAnswer";
 import { SpeechRecorder } from "./SpeechRecorder";
 import { Reader } from "./Reader";
+import { buildExamNavigationGroups } from "./examNavigation";
 
 function isMatchingAnswer(value: ExerciseAnswer): value is Record<string, string> {
   return value !== null && typeof value === "object" && !Array.isArray(value) && !("start" in value);
@@ -119,6 +120,23 @@ export function ChapterTestWorkspace({ book, definition, onReturned }: {
     (unplayed.length > 0 || state.listeningSelfReported !== true);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [restartVisible, setRestartVisible] = useState(false);
+  // Final exam: 5 visible learning sections instead of one overwhelming 50-question page.
+  // The stable group ID survives form-A/form-B retakes; the helper remaps by slot.
+  const [activeGroupId, setActiveGroupId] = useState<string | null>(null);
+  const groupNavRef = useRef<HTMLElement>(null);
+  const navigationGroups = buildExamNavigationGroups(definition, exercises, state.answers);
+  const activeGroupIndex = navigationGroups.length ?
+    Math.max(0, navigationGroups.findIndex(group => group.id === activeGroupId)) : 0;
+  const activeGroup = navigationGroups[activeGroupIndex];
+  const isFinalGroup = !navigationGroups.length || activeGroupIndex === navigationGroups.length - 1;
+  const selectedSlots = activeGroup ? new Set(activeGroup.slots) : null;
+  const displayedQuestions = exercises.map((exercise, index) => ({ exercise, index }))
+    .filter(({ index }) => !selectedSlots || selectedSlots.has(index));
+  const unfinishedGroup = navigationGroups.find(group => group.answered < group.total);
+  const gotoGroup = (id: string) => {
+    setActiveGroupId(id);
+    groupNavRef.current?.scrollIntoView?.({ behavior: "smooth", block: "start" });
+  };
   const isReturned = Boolean(state.submission);
   const returnTimestamp = state.submission?.submittedAt;
   useEffect(() => {
@@ -214,7 +232,31 @@ export function ChapterTestWorkspace({ book, definition, onReturned }: {
       </div>}
     </section>}
     <form onSubmit={submit}>
-      <div className="los-exam-questions">{exercises.map((exercise, index) =>
+      {!!navigationGroups.length && <nav className="los-exam-section-nav" ref={groupNavRef}
+        aria-label="Loppukokeen osa-alueet">
+        <div className="los-exam-section-top">
+          <h3>Osa-alueet</h3>
+          <span aria-live="polite">{completeCount} / {exercises.length} tehtävään vastattu</span>
+        </div>
+        <div className="los-exam-section-tabs" role="group" aria-label="Siirry kokeen osa-alueeseen">
+          {navigationGroups.map((group, index) =>
+            <button type="button" key={group.id}
+              className={"los-exam-section-tab" +
+                (activeGroupIndex === index ? " is-active" : "") +
+                (group.answered === group.total ? " is-complete" : "")}
+              aria-current={activeGroupIndex === index ? "step" : undefined}
+              onClick={() => gotoGroup(group.id)}>
+              <span>{index + 1}. {group.titleFi}</span>
+              <small>{group.answered} / {group.total} vastattu</small>
+            </button>)}
+        </div>
+        {unfinishedGroup && !isReturned &&
+          <button type="button" className="los-text-action"
+            onClick={() => gotoGroup(unfinishedGroup.id)}>
+            Siirry seuraavaan keskeneräiseen: {unfinishedGroup.titleFi}
+          </button>}
+      </nav>}
+      <div className="los-exam-questions">{displayedQuestions.map(({ exercise, index }) =>
         <div key={exercise.id}>
           <ChapterTestQuestion exercise={exercise} number={index + 1}
             answer={state.answers[exercise.id] ?? null} disabled={isReturned || status === "loading"}
@@ -225,7 +267,7 @@ export function ChapterTestWorkspace({ book, definition, onReturned }: {
             <p>{state.submission.outcomes[index]?.explanationFi}</p>
           </div>}
         </div>)}</div>
-      <section className="los-exam-speech" aria-label={writingMode ? "Kirjallisen tuotoksen itsearviointi" : "Puheen itsearviointi"}>
+      {isFinalGroup && <section className="los-exam-speech" aria-label={writingMode ? "Kirjallisen tuotoksen itsearviointi" : "Puheen itsearviointi"}>
         <h3>{writingMode ? "Kirjoita oma dialogi · ei automaattisia pisteitä" : "Puhe · oma arvio, ei automaattisia pisteitä"}</h3>
         {writingMode ? <>
           <p>{definition.writingPromptFi ?? "Kirjoita lyhyt saksankielinen esittely oppimiesi rakenteiden avulla."} Vastauksesi tallennetaan koesuorituksen yhteyteen, mutta sitä ei arvioida automaattisesti.</p>
@@ -269,9 +311,21 @@ export function ChapterTestWorkspace({ book, definition, onReturned }: {
             checked={state.selfAssessment[item.id] === "harjoiteltavaa"}
             onChange={() => setAssessment(item.id, "harjoiteltavaa")}/> Tarvitsen harjoitusta</label>
         </fieldset>)}
-      </section>
+      </section>}
+      {!!navigationGroups.length && <div className="los-exam-section-actions" role="group"
+        aria-label="Siirry osa-alueiden välillä">
+        {activeGroupIndex > 0 && <button type="button" className="los-button los-button-secondary"
+          onClick={() => gotoGroup(navigationGroups[activeGroupIndex - 1]!.id)}>
+          Edellinen osa-alue
+        </button>}
+        {!isFinalGroup && <button type="button" className="los-button los-button-primary"
+          onClick={() => gotoGroup(navigationGroups[activeGroupIndex + 1]!.id)}>
+          Seuraava osa-alue
+        </button>}
+        <span className="los-support" aria-live="polite">Osio {activeGroupIndex + 1} / {navigationGroups.length}</span>
+      </div>}
       {submitError && <p className="los-feedback is-incorrect" role="alert">{submitError}</p>}
-      {!isReturned && <button type="submit" className="los-button los-button-primary"
+      {!isReturned && isFinalGroup && <button type="submit" className="los-button los-button-primary"
         disabled={status === "loading"}>Palauta koe ja näytä ratkaisut</button>}
     </form>
     {state.submission && <section className="los-exam-result" role="status" aria-live="polite">
