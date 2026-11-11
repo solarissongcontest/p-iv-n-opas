@@ -2,7 +2,7 @@ import { useLocation } from "@tanstack/react-router";
 import { ArrowLeft, ArrowRight, BookOpen, List, RotateCcw, Sparkles } from "lucide-react";
 import { LOS_BASE_PATH, LOS_BOOKS, bookPath, findLosBook } from "./books";
 import { emptyChapterSections } from "./chapterSections";
-import type { Book, Chapter, ContentBlock } from "./model";
+import type { Book, Chapter, ContentBlock, ResumeBookmark } from "./model";
 import { Reader, type ReaderNote } from "./Reader";
 import { useLosRecord, losSyncMessage } from "./data/useLosRecord";
 import { LessonRunner } from "./LessonRunner";
@@ -75,15 +75,26 @@ function LibraryPage() {
   </div>;
 }
 function BookHome({ book }: { book: Book }) {
+  const { value: bookmark, status: bookmarkStatus } = useLosRecord<ResumeBookmark | null>(
+    book.id, "bookmark", "resume-lesson", book.contentVersion, null,
+  );
+  const resumedLesson = bookmark ? book.lessons.find(lesson =>
+    lesson.id === bookmark.lessonId && lesson.version === bookmark.lessonVersion && lesson.steps.length > 0) : undefined;
+  const firstLesson = book.lessons.find(lesson => lesson.steps.length > 0);
+  const startPath = resumedLesson ? "oppitunti/" + resumedLesson.id.slice(1) :
+    firstLesson ? "oppitunti/" + firstLesson.id.slice(1) : "sisalto";
   return <div className="los-landing">
     <p className="los-eyebrow">LOS! {book.number} · {book.moduleCode} · {book.credits} OP</p>
     {book.bannerAsset && <img className="los-banner" alt={"LOS! " + book.number + " -kirjan banneri"} src={book.bannerAsset}/>}
     <div className="los-book-hero"><BookCover book={book}/>
       <div><p className="los-eyebrow">{book.moduleTitle}</p><h1>{book.title}</h1>
         <p>{book.description}</p>
-        <a className="los-button los-button-primary" href={bookPath(book, book.lessons.some(lesson => lesson.steps.length > 0) ? "oppitunti/001" : "sisalto")}>
-          {book.lessons.some(lesson => lesson.steps.length > 0) ? "Aloita nollasta · L001" : "Avaa sisällysluettelo"} <ArrowRight size={17}/>
+        <a className="los-button los-button-primary" href={bookPath(book, startPath)}>
+          {resumedLesson ? "Jatka oppituntia " + resumedLesson.id : firstLesson ? "Aloita nollasta · " + firstLesson.id : "Avaa sisällysluettelo"} <ArrowRight size={17}/>
         </a>
+        {resumedLesson && <p className="los-storage-state" role="status">
+          Viimeksi käsitelty: {resumedLesson.title}. {losSyncMessage(bookmarkStatus)}
+        </p>}
       </div>
     </div>
     {book.lessons.some(lesson => lesson.publicationStatus === "preview") ?
