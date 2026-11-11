@@ -52,7 +52,7 @@ export const LOS1_C05_PRACTICE_EXERCISES:Exercise[]=[
   choice("mood-recognize","Mitä Es geht mir nicht so gut. tarkoittaa?",
     ["Minulle kuuluu oikein hyvää.","Minulle ei kuulu kovin hyvää.","Minun nimeni on ..."],1,
     "Nicht so gut. muuttaa vointif ja kertoo ettei mene kovin hyvin."),
-  gap("grammar-negation","Täydennä kieltosana.","Es geht mir","so gut.",["nicht"],
+  gap("grammar-nicht-gap","Täydennä kieltosana.","Es geht mir","so gut.",["nicht"],
     "Es geht mir nicht so gut. tarkoittaa 'Minulle ei kuulu kovin hyvää'."),
   gap("grammar-sehr","Täydennä vahvistussana.","", "gut, danke!",["Sehr"],
     "Sehr gut, danke! = Oikein hyvää, kiitos."),
