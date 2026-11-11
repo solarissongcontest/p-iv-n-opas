@@ -2,9 +2,12 @@ import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { ArrowLeft, ArrowRight, BookOpen, ChevronLeft, ChevronRight, Headphones, List, Menu, Search, X } from "lucide-react";
 import { readCachedDeviceUser } from "@/lib/deviceSession";
 import { LOS_BOOKS, type LosBookDefinition, type LosChapter } from "./catalog";
+import { LosAuthenticAudio, LosDictionary, LosIndexSearch, LosLearningPath, type LosDestination } from "./LosReferenceTools";
+import { LosChapterGrammar } from "./LosGrammarChapters";
 import "./los-book.css";
+import "./los-appendix.css";
 
-type LosSection = "overview" | "contents" | "chapter" | "text" | "vocabulary" | "grammar" | "practice" | "appendix";
+type LosSection = LosDestination;
 type LosLocation = { book: number | null; chapter: string | null; section: LosSection };
 const sections: { id: LosSection; label: string }[] = [
   { id: "chapter", label: "Aloitus" }, { id: "text", label: "Lue" }, { id: "vocabulary", label: "Sanasto" },
@@ -22,7 +25,7 @@ function readLocation(): LosLocation {
   const book = Number.isInteger(parsedBook) && parsedBook >= 1 && parsedBook <= 8 ? parsedBook : null;
   const chapter = book === 1 && /^\d{2}$/.test(parts[1] ?? "") ? (parts[1] ?? null) : null;
   const token = parts[chapter ? 2 : 1];
-  const section = (["overview", "contents", "chapter", "text", "vocabulary", "grammar", "practice", "appendix"].includes(token ?? "") ? token : chapter ? "chapter" : "overview") as LosSection;
+  const section = (["overview", "contents", "chapter", "text", "vocabulary", "grammar", "practice", "appendix", "dictionary", "path", "search"].includes(token ?? "") ? token : chapter ? "chapter" : "overview") as LosSection;
   return { book, chapter, section };
 }
 function linkTo(book?: number, chapter?: string, section: LosSection = "overview") {
@@ -103,6 +106,8 @@ function BookFront({ book, move }: { book: LosBookDefinition; move: (chapter: st
       <p>{book.id === 1 ? "Opiskelet aluksi saksan ääntämistä ja tervehdyksiä. Sen jälkeen etenet oman nimen ja kotipaikan kertomiseen, numeroihin ja ensimmäisiin oikeisiin keskusteluihin." : book.summary}</p>
       <div className="los-front-links">
         <button onClick={() => move(null, "contents")}><List size={18} /> Sisällysluettelo</button>
+        <button onClick={() => move(null, "path")}><BookOpen size={18} /> Opetuspolku</button>
+        <button onClick={() => move(null, "dictionary")}><BookOpen size={18} /> Sanakirja</button>
         <button onClick={() => move(null, "appendix")}><BookOpen size={18} /> Kirjan liitteet</button>
       </div>
     </div>
@@ -123,7 +128,9 @@ function Contents({ book, move }: { book: LosBookDefinition; move: (chapter: str
       </li>)}
     </ol> : <div className="los-editorial-note"><h2>Kappalesuunnitelma viimeistellään</h2><p>Tälle kirjalle on vahvistettu moduuli, teema ja kansi-identiteetti. Tarkkaa kappalejakoa ei vielä ole hyväksytty, joten sitä ei näytetä keksittynä sisällysluettelona.</p></div>}
     <div className="los-contents-appendix">
-      <button onClick={() => move(null, "appendix")}>Liitteet, sanasto ja kirjan tietoja <ArrowRight size={16} /></button>
+      <button onClick={() => move(null, "path")}>Opetuspolku: 60 oppitunnin lukujärjestys <ArrowRight size={16} /></button>
+      <button onClick={() => move(null, "dictionary")}>Kirjan sanakirja <ArrowRight size={16} /></button>
+      <button onClick={() => move(null, "appendix")}>Liitteet ja kirjan tietoja <ArrowRight size={16} /></button>
     </div>
   </section>;
 }
@@ -151,10 +158,11 @@ function TextPage({ chapter }: { chapter: LosChapter }) {
     <p className="los-page-intro">Kappaleen alkuperäinen saksankielinen teksti luetaan tässä oppikirjassa, ei ulkopuolisella sivulla.</p>
     <div className="los-source-pending" role="status">
       <Headphones size={24} />
-      <div><h2>Alkuperäistekstiä valmistellaan</h2>
-        <p>Teksti ja äänite tuodaan kokonaisina tähän lukijaan vasta, kun lähteen käyttöoikeudet, sisältö ja toisto on tarkistettu. Tässä ei käytetä keksittyä dialogia täytteenä.</p>
+      <div><h2>Alkuperäistekstin julkaisu on kesken</h2>
+        <p>Tekstin koko litteraatti ja kuuntelun tukiselitykset lisätään samaan lukijaan toimitus- ja käyttöoikeustarkistuksen jälkeen. Tässä ei käytetä keksittyä dialogia täytteenä.</p>
       </div>
     </div>
+    <LosAuthenticAudio chapterId={chapter.id} />
     <div className="los-reader-sample">
       <p className="los-overline">KIELEN HAVAINTO · OPETUSESIMERKKI</p>
       <blockquote lang="de">Guten Tag!</blockquote>
@@ -182,10 +190,7 @@ function Grammar({ chapter }: { chapter: LosChapter }) {
         <tr><td>sch</td><td>š-äänne</td><td lang="de">Schule</td></tr>
       </tbody></table>
       <aside className="los-grammar-aside"><strong>Huomaa</strong><p>Saksan substantiivit kirjoitetaan isolla alkukirjaimella. Kirjaimet ä, ö, ü ja ß tulevat tutuiksi vähitellen.</p></aside>
-    </> : <>
-      <p>Tämän kappaleen kielioppiaihe on <strong>{chapter.grammar}</strong>. Tarkan opetustekstin, malliesimerkkien ja harjoitusten toimituksellinen hyväksyntä on vielä kesken. Aihetta ei merkitä opetetuksi.</p>
-      <div className="los-grammar-aside"><strong>Sisältö tulossa</strong><p>Oppikirjan taitto on valmiina varsinaiselle suomenkieliselle kielioppiselitykselle, taulukoille ja tehtäville.</p></div>
-    </>}
+    </> : <LosChapterGrammar chapterId={chapter.id} />}
   </section>;
 }
 function Vocabulary({ chapter }: { chapter: LosChapter }) {
@@ -237,10 +242,10 @@ function Appendix({ book }: { book: LosBookDefinition }) {
     <h1>Kirjan liitteet</h1>
     <div className="los-appendix-section"><h2>Kirjan tiedot</h2><dl><div><dt>Moduuli</dt><dd>{book.code} · {book.module}</dd></div><div><dt>Laajuus</dt><dd>2 op</dd></div><div><dt>Oppimäärä</dt><dd>Saksa B3 · LOPS21</dd></div></dl></div>
     <div className="los-appendix-section"><h2>Lähteet ja materiaalit</h2><p>Alkuperäistekstit, puheäänitteet ja videot kirjataan tähän lähde- ja lisenssitietoineen vasta tarkistuksen jälkeen. LOS! 1:n aineistokatalogi on lähdesuunnitelma, ei valmis julkaistu materiaalipaketti.</p></div>
-    <div className="los-appendix-section"><h2>Kertaus, sanakirja ja kokeet</h2><p>Nämä kuuluvat koko LOS!-sarjan suunniteltuun kirjamaisiin liitteisiin. Niiden arviointi-, hakemis- ja tallennusmoottoria ei vielä ole kytketty tähän ensimmäiseen ulkoasutoteutukseen.</p></div>
+    <div className="los-appendix-section"><h2>Opetuspolku, sanakirja ja kokeet</h2><p>Opetuspolun lukujärjestys ja sanakirjahakemisto löytyvät nyt kirjan omasta valikosta. Kertausten, kokeiden arvioinnin ja pilvisynkronoidun edistymisen toteutus on vielä kesken.</p></div>
   </section>;
 }
-function LosBookWorkspace({ book, location, move, goLibrary }: { book: LosBookDefinition; location: LosLocation; move: (chapter: string | null, section: LosSection) => void; goLibrary: () => void }) {
+function LosBookWorkspace({ book, location, move, goLibrary, openBook }: { book: LosBookDefinition; location: LosLocation; move: (chapter: string | null, section: LosSection) => void; goLibrary: () => void; openBook: (id: number) => void }) {
   const chapter = book.chapters.find(c => c.id === location.chapter) ?? null;
   const [tocOpen, setTocOpen] = useState(false);
   useEffect(() => setTocOpen(false), [location]);
@@ -248,12 +253,12 @@ function LosBookWorkspace({ book, location, move, goLibrary }: { book: LosBookDe
   const previousIndex = chapter ? book.chapters.findIndex(c => c.id === chapter.id) : -1;
   const next = previousIndex >= 0 ? book.chapters[previousIndex + 1] : null;
   const previous = previousIndex > 0 ? book.chapters[previousIndex - 1] : null;
-  const section = chapter ? location.section : location.section === "contents" || location.section === "appendix" ? location.section : "overview";
+  const section = chapter ? location.section : ["contents", "appendix", "dictionary", "path", "search"].includes(location.section) ? location.section : "overview";
   return <div className="los-book-workspace" style={bookStyle(book)}>
     <header className="los-book-topbar">
       <button className="los-back-library" onClick={goLibrary} aria-label="Takaisin kirjasarjaan"><ChevronLeft size={19} /> <span>Kirjasarja</span></button>
       <button className="los-top-title" onClick={() => move(null, "overview")}><Brand compact /><span> / {book.id} <span className="los-top-separator">·</span> {book.code}</span></button>
-      <button className="los-top-toc" onClick={() => setTocOpen(v => !v)} aria-expanded={tocOpen} aria-controls="los-mobile-toc">{tocOpen ? <X size={19} /> : <Menu size={19} />}<span>Sisältö</span></button>
+      <div className="los-top-actions"><button className="los-top-search" onClick={() => move(null, "search")} aria-label="Hae oppikirjasta"><Search size={19}/></button><button className="los-top-toc" onClick={() => setTocOpen(v => !v)} aria-expanded={tocOpen} aria-controls="los-mobile-toc">{tocOpen ? <X size={19} /> : <Menu size={19} />}<span>Sisältö</span></button></div>
     </header>
     <div className="los-book-layout">
       <aside className={`los-book-sidebar ${tocOpen ? "is-open" : ""}`} id="los-mobile-toc" aria-label="Kirjan sisällysluettelo">
@@ -262,6 +267,10 @@ function LosBookWorkspace({ book, location, move, goLibrary }: { book: LosBookDe
         <nav>
           <button className={section === "contents" ? "is-active" : ""} onClick={() => move(null, "contents")}>Sisällysluettelo</button>
           {book.chapters.map(ch => <button key={ch.id} className={chapter?.id === ch.id ? "is-active" : ""} onClick={() => openChapter(ch)}><span className="los-sidebar-num">{ch.id}</span><span lang="de">{ch.title}</span></button>)}
+          <div className="los-sidebar-heading">HAKEMISTOT</div>
+          <button className={section === "path" ? "is-active" : ""} onClick={() => move(null, "path")}>Ohjattu opetuspolku</button>
+          <button className={section === "dictionary" ? "is-active" : ""} onClick={() => move(null, "dictionary")}>Sanakirja</button>
+          <button className={section === "search" ? "is-active" : ""} onClick={() => move(null, "search")}>Hae kirjasta</button>
           <button className={section === "appendix" ? "is-active" : ""} onClick={() => move(null, "appendix")}>Kirjan liitteet</button>
         </nav>
         <a className="los-sidebar-exit" href="/studies">Palaa Opintopäiväkirjaan <ArrowRight size={15} /></a>
@@ -275,6 +284,9 @@ function LosBookWorkspace({ book, location, move, goLibrary }: { book: LosBookDe
           {!chapter && section === "overview" ? <BookFront book={book} move={move} /> :
             section === "contents" ? <Contents book={book} move={move} /> :
             section === "appendix" ? <Appendix book={book} /> :
+            section === "path" ? <LosLearningPath book={book} move={move} /> :
+            section === "dictionary" ? <LosDictionary book={book} move={move} openBook={openBook} /> :
+            section === "search" ? <LosIndexSearch book={book} move={move} /> :
             chapter ? (
               section === "text" ? <TextPage chapter={chapter} /> :
               section === "vocabulary" ? <Vocabulary key={chapter.id} chapter={chapter} /> :
@@ -308,11 +320,16 @@ export function LosBook() {
     if (window.location.hash === hash) { setLocation(readLocation()); window.scrollTo(0, 0); }
     else window.location.hash = hash;
   };
+  useEffect(() => {
+    const title = location.book ? `LOS! ${location.book} · Saksan oppikirja` : "LOS! · Saksan oppikirjasarja";
+    document.title = title;
+    return () => { document.title = "StudyOS"; };
+  }, [location.book]);
   if (canOpen === null) return <div className="los-loading" role="status">Avataan LOS!-oppikirjastoa…</div>;
   if (!canOpen) return <AccessGate />;
   const book = LOS_BOOKS.find(b => b.id === location.book);
   return <div className="los-app">
-    {book ? <LosBookWorkspace book={book} location={location} move={(chapter, section) => move(book.id, chapter, section)} goLibrary={() => move(null)} /> :
+    {book ? <LosBookWorkspace book={book} location={location} move={(chapter, section) => move(book.id, chapter, section)} goLibrary={() => move(null)} openBook={id => move(id)} /> :
       <><div className="los-series-top"><a href="/studies"><ArrowLeft size={17} /> Opintopäiväkirjaan</a><span>LOS! · Saksa B3</span></div><SeriesView openBook={id => move(id)} /></>}
   </div>;
 }

@@ -1,0 +1,77 @@
+/* LOS! oppikirjan hakemistot, opetuspolku ja luvallinen audio.
+ * Kaikki osat jatkavat samaa toimituksellista kirjatyyliä, eivät StudyOS:n
+ * ajanhallinnan, dashboardin tai tehtäväkorttien rakenteita.
+ */
+.los-top-actions{justify-self:end;display:flex;align-items:center;gap:5px;}
+.los-book-topbar .los-top-search{display:inline-flex;justify-content:center;min-width:44px;min-height:44px;color:var(--los-ink);border:0;background:none;}
+.los-index-options{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:35px 0 16px;flex-wrap:wrap;}
+.los-index-tabs{display:flex;gap:0;border-bottom:1px solid var(--los-line);}
+.los-index-tabs button{padding:10px 18px;min-height:46px;font-size:14px;font-weight:650;color:var(--los-soft);border:0;border-bottom:3px solid transparent;background:none;}
+.los-index-tabs button.is-active{border-bottom-color:var(--los-book-accent);color:var(--los-ink);}
+.los-index-toggle{min-height:44px;padding:8px 14px;font-size:13px!important;font-weight:650!important;border:1px solid var(--los-line);background:none;color:var(--los-ink);}
+.los-index-search{display:flex;align-items:center;gap:14px;width:100%;min-height:52px;margin:24px 0 14px;padding:8px 15px;border:1px solid var(--los-line);background:var(--los-paper);color:var(--los-soft);}
+.los-index-search:focus-within{border-color:var(--los-book-accent);}
+.los-index-search input{flex:1;min-width:0;border:0;background:none;outline:0;color:var(--los-ink);font:inherit;font-size:16px;}
+.los-index-search input:focus-visible{outline:0!important;}
+.los-index-count{font-size:13px;color:var(--los-soft);margin:10px 0!important;}
+.los-index-table{margin-top:12px;border-top:2px solid var(--los-ink);}
+.los-index-table-head,.los-index-entry{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1.4fr) 100px;align-items:start;gap:17px;padding:12px 4px;border-bottom:1px solid var(--los-line);font-size:14px;}
+.los-index-table-head{font-size:11px;font-weight:750;text-transform:uppercase;letter-spacing:.07em;color:var(--los-soft);}
+.los-index-entry strong{font-weight:700;overflow-wrap:anywhere;}
+.los-index-entry>span:nth-child(2){color:var(--los-ink);}
+.los-index-entry button{display:flex;align-items:center;justify-content:space-between;gap:3px;min-height:36px;padding:4px 0;font-size:12px;color:var(--los-soft);background:none;border:0;text-align:left;}
+.los-index-entry button:hover{color:var(--los-book-accent);}
+.los-muted-hidden{font-style:italic;font-size:12px;color:var(--los-soft);}
+.los-index-footnote{font-size:13px;color:var(--los-soft);line-height:1.6;margin-top:22px!important;}
+.los-path-notice{display:flex;gap:12px;align-items:flex-start;margin-top:29px;padding:13px 0;border-top:1px solid var(--los-line);border-bottom:1px solid var(--los-line);color:var(--los-soft);}
+.los-path-notice svg{flex:0 0 20px;color:var(--los-book-accent);margin-top:3px;}
+.los-path-notice p{margin:0!important;font-size:14px;line-height:1.65;}
+.los-path-notice strong{color:var(--los-ink);}
+.los-path-group{margin-top:47px;}
+.los-path-group h2{font-family:Georgia,"Times New Roman",serif;font-weight:500;font-size:26px;margin:0 0 15px;line-height:1.3;}
+.los-path-group ol{padding:0;margin:0;border-top:1px solid var(--los-ink);list-style:none;}
+.los-path-group li{border-bottom:1px solid var(--los-line);}
+.los-path-group li button{display:flex;align-items:center;gap:15px;width:100%;min-height:68px;padding:12px 3px;text-align:left;border:0;background:none;color:var(--los-ink);}
+.los-path-group li button:hover .los-path-copy strong{color:var(--los-book-accent);}
+.los-path-number{font-family:Georgia,"Times New Roman",serif;font-size:25px;color:var(--los-book-accent);font-variant-numeric:tabular-nums;min-width:44px;}
+.los-path-copy{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;}
+.los-path-copy strong{font-size:15px;font-weight:675;line-height:1.35;}
+.los-path-copy small{font-size:12px;color:var(--los-soft);}
+.los-search-results{padding:0;margin:15px 0;list-style:none;border-top:1px solid var(--los-ink);}
+.los-search-results li{border-bottom:1px solid var(--los-line);}
+.los-search-results li button{display:flex;align-items:center;gap:15px;width:100%;min-height:75px;text-align:left;padding:10px 0;background:none;border:0;color:var(--los-ink);}
+.los-search-kind{font-size:11px;font-weight:750;letter-spacing:.05em;text-transform:uppercase;color:var(--los-book-accent);width:70px;flex:0 0 70px;}
+.los-search-copy{display:flex;flex-direction:column;gap:4px;flex:1;min-width:0;}
+.los-search-copy strong{font-size:16px;font-weight:660;line-height:1.35;}
+.los-search-copy small{font-size:13px;line-height:1.35;color:var(--los-soft);max-width:65ch;}
+.los-authentic-audio{margin:35px 0 43px;border-top:2px solid var(--los-book-accent);padding-top:20px;}
+.los-authentic-audio h2{display:flex;gap:11px;align-items:center;font-size:24px;font-family:Georgia,serif;font-weight:500;margin:12px 0 13px;}
+.los-authentic-audio>p:not(.los-overline){font-size:14px;color:var(--los-soft);max-width:65ch;}
+.los-audio-line{border-top:1px solid var(--los-line);padding:22px 0;}
+.los-audio-label{display:flex;align-items:center;gap:11px;margin-bottom:13px;color:var(--los-ink);}
+.los-audio-label svg{color:var(--los-book-accent);}
+.los-audio-label strong{font-size:14px;font-weight:650;}
+.los-audio-label small{margin-left:auto;color:var(--los-soft);font-size:12px;}
+.los-audio-line audio{display:block;width:min(100%,560px);height:48px;accent-color:var(--los-book-accent);}
+.los-audio-line .los-audio-license{margin-top:12px!important;font-size:12px;line-height:1.55;color:var(--los-soft);}
+.los-audio-license a{text-decoration:underline;text-underline-offset:3px;}
+.los-audio-error{color:#a82636!important;font-size:13px!important;}
+.dark .los-index-entry button:hover,.dark .los-path-group li button:hover .los-path-copy strong{color:#ffa99e;}
+@media (max-width:760px){
+ .los-index-table-head,.los-index-entry{grid-template-columns:minmax(0,1fr) minmax(0,1.05fr) 75px;gap:9px;font-size:13px;padding:12px 0;}
+ .los-index-entry button{font-size:11px;}
+ .los-index-options{align-items:flex-start;}
+ .los-index-tabs button{padding:10px 11px;}
+ .los-path-group{margin-top:33px;}
+ .los-path-group h2{font-size:23px;}
+ .los-path-number{min-width:35px;font-size:23px;}
+ .los-search-kind{width:57px;flex:0 0 57px;font-size:10px;}
+ .los-search-results li button{gap:8px;}
+ .los-authentic-audio h2{font-size:22px;}
+}
+@media (max-width:360px){
+ .los-index-table-head,.los-index-entry{grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:11px;}
+ .los-index-table-head span:last-child{display:none;}
+ .los-index-entry button{grid-column:1 / -1;justify-content:flex-start;min-height:24px;}
+ .los-path-copy strong{font-size:14px;}
+}
