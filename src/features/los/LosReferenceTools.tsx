@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { ArrowRight, BookOpen, ChevronRight, Headphones, Search, Volume2 } from "lucide-react";
 import { LOS_BOOKS, type LosBookDefinition } from "./catalog";
 import { LOS_1_LESSONS } from "./learningPath";
+import { LosFirstLessons } from "./LosFirstLessons";
 
 export type LosDestination = "overview" | "contents" | "chapter" | "text" | "understand" | "vocabulary" | "grammar" | "text-b" | "practice" | "apply" | "culture" | "test" | "appendix" | "dictionary" | "path" | "search";
 export type LosNavigate = (chapter: string | null, section: LosDestination) => void;
@@ -52,6 +53,7 @@ export function LosDictionary({ book, move, openBook }: { book: LosBookDefinitio
   </section>;
 }
 export function LosLearningPath({ book, move }: { book: LosBookDefinition; move: LosNavigate }) {
+  const [selectedLesson, setSelectedLesson] = useState("L001");
   const groups = useMemo(() => {
     const result: { section: string; items: typeof LOS_1_LESSONS[number][] }[] = [];
     for (const lesson of LOS_1_LESSONS) {
@@ -72,14 +74,15 @@ export function LosLearningPath({ book, move }: { book: LosBookDefinition; move:
     <p className="los-eyebrow">OHJATTU LUKUJÄRJESTYS / {book.code}</p>
     <h1>Opetuspolku</h1>
     <p className="los-page-intro">Kirjan 60 suunniteltua, noin 30 minuutin oppituntia. Opetuspolku viittaa samoihin oppikirjasivuihin, eikä tee niistä erillisiä kursseja.</p>
-    <div className="los-path-notice"><BookOpen size={20}/><p><strong>Rakenne on valmis, oppimateriaalit eivät vielä kaikki.</strong> Oppitunnit eivät tällä hetkellä kirjaa suorituksia tai avaa keskeneräistä materiaalia valmiina.</p></div>
+    <div className="los-path-notice"><BookOpen size={20}/><p><strong>L001–L006 ovat käytettäviä opiskelutunteja.</strong> Ne tallentavat vaiheet ja lopputarkistuksen erilleen osaamisesta. L007–L060 ovat vielä toimituksellinen tuntikartta, eivät valmiita suorituksia.</p></div>
+    <LosFirstLessons selectedId={selectedLesson} onSelect={setSelectedLesson} move={move} />
     {groups.map(group=><section key={group.section} className="los-path-group">
       <h2>{group.section}</h2>
       <ol>
         {group.items.map(lesson=><li key={lesson.number}>
-          <button onClick={()=>move(lesson.chapter,lesson.destination)}>
+          <button onClick={()=>{ if(lesson.number <= 6){ setSelectedLesson("L"+String(lesson.number).padStart(3,"0")); document.getElementById("los-lesson-runner")?.scrollIntoView({block:"start",behavior:"smooth"}); } else move(lesson.chapter,lesson.destination); }}>
             <span className="los-path-number">{String(lesson.number).padStart(2,"0")}</span>
-            <span className="los-path-copy"><strong>{lesson.title}</strong><small>{lesson.chapter ? `Kappale ${Number(lesson.chapter)} · ` : ""}Oppikirjan sisältöön</small></span>
+            <span className="los-path-copy"><strong>{lesson.title}</strong><small>{lesson.number <= 6 ? "Avaa ohjattu oppitunti" : lesson.chapter ? `Kappale ${Number(lesson.chapter)} · Oppikirjan sisältöön (suoritus ei vielä käytössä)` : "Suoritusjärjestelmä ei vielä käytössä"}</small></span>
             <ArrowRight size={18}/>
           </button>
         </li>)}

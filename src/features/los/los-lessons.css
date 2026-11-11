@@ -1,0 +1,69 @@
+/* LOS! 1 lesson runner. Reuses the book's existing editorial visual tokens. */
+.los-lesson-program { margin: 28px 0 42px; border-top: 3px solid var(--los-book-accent); }
+.los-lesson-program-head { padding: 24px 0 13px; }
+.los-lesson-program-head h2 { font-family: Georgia, "Times New Roman", serif; font-weight: 500; font-size: clamp(24px, 3vw, 30px); margin: 8px 0 12px; color: var(--los-ink); }
+.los-lesson-program-head > p:not(.los-overline) { font-size: 14px; line-height: 1.7; max-width: 68ch; color: var(--los-soft); }
+.los-lesson-program-head .los-lesson-save { font-size: 12px!important; }
+.los-lesson-progress { display: flex; align-items: center; gap: 18px; margin: 21px 0 5px; font-size: 13px; }
+.los-lesson-progress strong { white-space: nowrap; }
+.los-lesson-progress [role="progressbar"] { height: 7px; border-radius: 9px; background: var(--los-line); flex: 1; overflow: hidden; }
+.los-lesson-progress [role="progressbar"] span { display: block; height: 100%; background: var(--los-book-accent); transition: width .15s ease; }
+.los-lesson-picker { display: grid; grid-template-columns: repeat(6,minmax(0,1fr)); gap: 7px; padding: 17px 0 22px; }
+.los-lesson-picker button { border: 1px solid var(--los-line); border-radius: 9px; min-width: 0; min-height: 48px; display: flex; align-items: center; justify-content: center; gap: 7px; background: var(--los-paper); color: var(--los-ink); font-size: 12px; font-weight: 700; }
+.los-lesson-picker button.is-active { border-color: var(--los-book-accent); background: var(--los-book-tint); color: var(--los-book-accent); }
+.los-lesson-picker button:hover { border-color: var(--los-book-accent); }
+.los-lesson-detail { border: 1px solid var(--los-line); border-radius: 12px; background: var(--los-paper); padding: clamp(18px, 3vw, 30px); }
+.los-lesson-detail > h3 { font-size: clamp(23px, 3.2vw, 29px); font-weight: 720; letter-spacing: -.04em; line-height: 1.25; margin: 9px 0 14px; color: var(--los-ink); }
+.los-lesson-objective { font-size: 15px; line-height: 1.65; color: var(--los-ink); }
+.los-lesson-status { font-size: 12px; font-weight: 650; color: var(--los-soft); padding: 13px 0 18px; border-bottom: 1px solid var(--los-line); }
+.los-lesson-steps { list-style: none; padding: 0; margin: 0; }
+.los-lesson-steps > li { padding: 23px 0; border-bottom: 1px solid var(--los-line); }
+.los-lesson-step-title { display: flex; align-items: flex-start; gap: 11px; color: var(--los-ink); }
+.los-lesson-step-title svg { margin-top: 2px; color: #216D53; flex: none; }
+.los-lesson-step-count { width: 24px; height: 24px; border: 1px solid var(--los-line); border-radius: 50%; text-align: center; line-height: 22px; flex: none; font-size: 12px; font-weight: 800; }
+.los-lesson-step-title div { display: flex; flex-direction: column; gap: 4px; }
+.los-lesson-step-title strong { font-size: 16px; }
+.los-lesson-step-title small { font-size: 12px; color: var(--los-soft); }
+.los-lesson-steps li > p { margin: 12px 0 15px 35px; max-width: 63ch; line-height: 1.65; font-size: 13px; color: var(--los-soft); }
+.los-lesson-step-actions { margin-left: 35px; display: flex; gap: 9px; flex-wrap: wrap; }
+.los-lesson-step-actions button, .los-lesson-submit, .los-lesson-next, .los-lesson-retry { min-height: 44px; padding: 9px 13px; border: 1px solid var(--los-line); border-radius: 8px; background: transparent; color: var(--los-ink); font-size: 13px; font-weight: 650; display: inline-flex; align-items: center; justify-content: center; gap: 7px; text-align: left; }
+.los-lesson-step-actions button:first-child { color: var(--los-book-accent); }
+.los-lesson-step-actions button:hover:not(:disabled), .los-lesson-retry:hover { border-color: var(--los-book-accent); }
+.los-lesson-step-actions button:disabled, .los-lesson-submit:disabled, .los-lesson-finish button:disabled { opacity: .5; cursor: not-allowed; }
+.los-lesson-evidence { padding: 21px 0 17px; border-bottom: 1px solid var(--los-line); }
+.los-lesson-evidence h4 { font-size: 15px; margin: 0 0 14px; }
+.los-lesson-evidence p { display: flex; align-items: flex-start; gap: 9px; font-size: 13px; line-height: 1.55; margin: 10px 0; }
+.los-lesson-evidence p svg { margin-top: 1px; flex: none; color: var(--los-book-accent); }
+.los-lesson-evidence small { display: block; line-height: 1.6; color: var(--los-soft); font-size: 12px; }
+.los-lesson-exit { border: 0; padding: 26px 0 15px; margin: 0; min-width: 0; }
+.los-lesson-exit legend { padding: 0; font-size: 19px; font-weight: 720; color: var(--los-ink); }
+.los-lesson-exit > p { font-size: 14px; line-height: 1.6; }
+.los-lesson-exit label { display: flex; align-items: center; gap: 12px; min-height: 47px; padding: 11px 13px; border: 1px solid var(--los-line); border-radius: 9px; margin-bottom: 8px; font-size: 14px; cursor: pointer; }
+.los-lesson-exit label:has(input:checked) { border-color: var(--los-book-accent); background: var(--los-book-tint); }
+.los-lesson-exit input { accent-color: var(--los-book-accent); width: 16px; height: 16px; }
+.los-lesson-submit { margin-top: 10px; }
+.los-lesson-feedback { background: var(--los-book-tint); border-left: 3px solid var(--los-book-accent); padding: 15px 17px; margin-top: 19px; border-radius: 0 8px 8px 0; font-size: 13px; line-height: 1.65; }
+.los-lesson-feedback p { margin: 6px 0 0; }
+.los-lesson-finish { border-top: 1px solid var(--los-line); padding-top: 18px; }
+.los-lesson-finish .los-primary { display: inline-flex; align-items: center; gap: 8px; min-height: 46px; text-align: left; }
+.los-lesson-finish > p { font-size: 12px; color: var(--los-soft); line-height: 1.6; }
+.los-lesson-done { display: flex; flex-wrap: wrap; align-items: center; gap: 9px; }
+.los-lesson-done svg { color: #216D53; }
+.los-lesson-done small { flex-basis: 100%; color: var(--los-soft); line-height: 1.55; }
+.los-lesson-next { margin-top: 17px; color: var(--los-book-accent); }
+.los-lesson-retry { margin-top: 13px; }
+.los-lesson-program button:focus-visible, .los-lesson-program input:focus-visible { outline: 3px solid #1D5BC4; outline-offset: 2px; }
+@media (max-width: 650px) {
+  .los-lesson-picker { grid-template-columns: repeat(3,minmax(0,1fr)); }
+  .los-lesson-detail { padding: 17px; }
+  .los-lesson-step-actions { margin-left: 0; }
+  .los-lesson-steps li > p { margin-left: 0; }
+  .los-lesson-step-actions button { flex: 1 1 155px; }
+  .los-lesson-progress { align-items: flex-start; flex-direction: column; gap: 9px; }
+  .los-lesson-progress [role="progressbar"] { width: 100%; flex: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .los-lesson-progress [role="progressbar"] span { transition: none; }
+}
+.dark .los-lesson-picker button.is-active, .dark .los-lesson-exit label:has(input:checked), .dark .los-lesson-feedback { background: #38282a; color: var(--los-ink); }
+.dark .los-lesson-step-title svg, .dark .los-lesson-done svg { color: #7DDBB4; }
