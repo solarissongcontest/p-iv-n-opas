@@ -131,6 +131,22 @@ export function validateBook(book: Book): string[] {
       (chapterTest.requiredWritingLines === undefined ||
         chapterTest.maximumWritingLines < chapterTest.requiredWritingLines))
       errors.push("Invalid exam writing line limits: " + chapterTest.id);
+    if (chapterTest.secondWritingPromptFi !== undefined &&
+      (chapterTest.selfAssessmentMode !== "writing" ||
+        chapterTest.requiredSecondWritingLines === undefined ||
+        chapterTest.maximumSecondWritingLines === undefined ||
+        chapterTest.requiredSecondWritingLines < 1 ||
+        chapterTest.maximumSecondWritingLines < chapterTest.requiredSecondWritingLines))
+      errors.push("Invalid second exam writing contract: " + chapterTest.id);
+    if (chapterTest.listeningBlockIds) {
+      for (const id of chapterTest.listeningBlockIds) {
+        const block = book.blocks.find(item => item.id === id);
+        if (!block || block.kind !== "media" || block.mediaType !== "audio" ||
+          !book.sources.some(source => source.id === block.sourceId &&
+            source.permittedMode === "embed"))
+          errors.push("Unapproved listening media: " + id);
+      }
+    }
     if (chapterTest.exerciseIds.length < 1) errors.push("Empty test: " + chapterTest.id);
     if (new Set(chapterTest.exerciseIds).size !== chapterTest.exerciseIds.length)
       errors.push("Duplicate test question: " + chapterTest.id);
