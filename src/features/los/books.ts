@@ -449,7 +449,7 @@ export const LOS_BOOKS: readonly Book[] = specs.map((spec, index) => ({
         {id:"L029-S03",title:"Tunnista aloitus",required:true,exerciseId:"los1-review1-c01"},
         {id:"L029-S04",title:"Kuuntele Franzin ja Gretan oikea dialogi",required:true,blockId:"los1-c02-wb-original-audio"},
         {id:"L029-S05",title:"Tunnista Gretan nimen kertominen",required:true,exerciseId:"los1-review1-c02"},
-        {id:"L029-S06",title:"Kuuntele Ariserin nelirepliikkinen kaupunkidialogi",required:true,blockId:"los1-c02-m-com-02-audio"},
+        {id:"L029-S06",title:"Kuuntele Ariserin nelirepliikkinen kaupunkidialogi",required:true,blockId:"los1-c02-commons-02-audio"},
         {id:"L029-S07",title:"Tunnista Kioto",required:true,exerciseId:"los1-review1-c03"},
         {id:"L029-S08",title:"Tunnista Berliini",required:true,exerciseId:"los1-review1-c04"},
         {id:"L029-S09",title:"Kuuntele alkuperäinen tervehdyssarja",required:true,blockId:"los1-c01-m-com-03-audio"},
