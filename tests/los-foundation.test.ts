@@ -6,6 +6,7 @@ import { evaluateExercise } from "../src/features/los/exercises/evaluate.ts";
 import { validateBook } from "../src/features/los/model.ts";
 import { LOS1_C01_AUTHENTIC_TEXT, LOS1_C01_DIALOGUE_TURNS } from "../src/features/los/los1-c01-source.ts";
 import { findGlossarySpans } from "../src/features/los/glossary.ts";
+import { LOS_CHAPTER_SECTION_TITLES } from "../src/features/los/chapterSections.ts";
 
 const los1 = LOS_BOOKS[0];
 if (!los1) throw new Error("LOS! 1 must exist");
@@ -20,6 +21,21 @@ test("LOS! 1 retains 10 chapters and 60 canonical lessons, with three preview le
   assert.deepEqual(los1.lessons.filter(item => item.publicationStatus === "preview").map(item => item.id), ["L001", "L002", "L003"]);
   assert.ok(los1.lessons.filter(item => item.publicationStatus !== "preview").every(item => !item.steps.length));
   assert.deepEqual(validateBook(los1), []);
+});
+test("each planned chapter exposes exactly ten routable sections", () => {
+  const ids = LOS_CHAPTER_SECTION_TITLES.map(section => section.id);
+  assert.equal(ids.length, 10);
+  assert.equal(new Set(ids).size, 10);
+  for (const chapter of los1.chapters) {
+    assert.deepEqual(chapter.sections?.map(section => section.id), ids);
+    assert.ok(chapter.sections?.every(section =>
+      section.blockIds.every(id => chapter.blockIds.includes(id)) &&
+      section.exerciseIds.every(id => chapter.exerciseIds.includes(id))));
+  }
+  const first = los1.chapters[0];
+  assert.ok(first);
+  assert.equal(first.sections?.find(section => section.id === "teksti-a")?.blockIds.includes("los1-c01-m-com-01-dialogue"), true);
+  assert.equal(first.sections?.find(section => section.id === "teksti-b")?.publicationStatus, "planned");
 });
 test("L001 begins without prerequisite German and stores an ungraded personal goal", () => {
   const lesson = los1.lessons.find(item => item.id === "L001");
