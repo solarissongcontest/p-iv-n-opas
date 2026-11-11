@@ -58,18 +58,32 @@ export function useLosChapterDraft(bookId:number,chapterId:string) {
     const onStorage=(event:StorageEvent)=>{
       if(event.key===key){setDraft(parseLosDraft(event.newValue));setSaved(true);}
     };
+    const onLocal=(event:Event)=>{
+      const detail=(event as CustomEvent<{key:string;draft:LosChapterDraft}>).detail;
+      if(detail?.key===key){setDraft(detail.draft);setSaved(true);}
+    };
     window.addEventListener("storage",onStorage);
-    return ()=>window.removeEventListener("storage",onStorage);
+    window.addEventListener("los:draft-change",onLocal);
+    return ()=>{
+      window.removeEventListener("storage",onStorage);
+      window.removeEventListener("los:draft-change",onLocal);
+    };
   },[key]);
   const update=useCallback((modify:(current:LosChapterDraft)=>LosChapterDraft)=>{
-    setDraft(current=>{
-      const next:LosChapterDraft={...modify(current),version:1,updatedAt:new Date().toISOString()};
-      if(key){
-        try{localStorage.setItem(key,JSON.stringify(next));setSaved(true);}
-        catch{setSaved(false);}
-      }else{setSaved(false);}
-      return next;
-    });
-  },[key]);
+    let current=emptyLosDraft();
+    if(key){
+      try {current=parseLosDraft(localStorage.getItem(key));}
+      catch {current=draft;}
+    }else{current=draft;}
+    const next:LosChapterDraft={...modify(current),version:1,updatedAt:new Date().toISOString()};
+    if(key) {
+      try{
+        localStorage.setItem(key,JSON.stringify(next));
+        setSaved(true);
+        window.dispatchEvent(new CustomEvent("los:draft-change",{detail:{key,draft:next}}));
+      }catch{setSaved(false);}
+    }else{setSaved(false);}
+    setDraft(next);
+  },[key,draft]);
   return {draft,update,saved};
 }
