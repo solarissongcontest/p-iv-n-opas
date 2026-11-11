@@ -27,7 +27,7 @@ export const LOS1_C07_NUMBER_EXERCISES:Exercise[]=LOS1_C07_FICTIONAL_NUMBERS.map
   ...base,id:"los1-c07-fictitious-number-"+String(index+1).padStart(2,"0"),
   type:"gap-fill" as const,
   promptFi:"Kirjoita nämä yksittäin sanotut numerot numeroina: "+
-    [...value].map(character=>character===" " ? " | " : digitWords[Number(character)]).join(" · ").replace(/ ·  \|  · /gu," | ")+
+    [...value].map(character=>character===" " ? " | " : digitWords[Number(character)]).join(" · ").replace(" ·  |  · "," | ")+
     ". Numerosarja on keksitty, ei oikea puhelinnumero.",
   sentenceBefore:"Nummer:",sentenceAfter:"",
   acceptedAnswers:[value.replace(/ /gu,""),value],
