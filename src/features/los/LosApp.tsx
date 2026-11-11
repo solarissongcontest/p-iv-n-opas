@@ -101,7 +101,7 @@ function BookHome({ book }: { book: Book }) {
       </div>
     </div>
     {book.lessons.some(lesson => lesson.publicationStatus === "preview") ?
-      <p className="los-notice" role="status">LOS! 1:n kaksi alkuperäisäänitettä, koko niiden tekstisisältö ja ensimmäiset kuusi harjoitustuntia sekä 12 kohdan kappaletesti ovat esikatseluversioina. Valmiin oppikirjan julkaisuvaatimukset eivät vielä täyty.</p> :
+      <p className="los-notice" role="status">LOS! 1:n kahdessa ensimmäisessä kappaleessa on esikatselusisältöä: 11 ohjattua harjoitustuntia, C01:n koko alkuperäinen teksti ja kaksi äänitettä sekä C02:n oma kokonainen opetusdialogi ja erillinen aito äänite. Kummankin kappaleen testit ovat käytettävissä, mutta alkuperäisen C02-lähdetekstin täysi tuonti ja äänitteiden laitetestaus ovat kesken.</p> :
       <p className="los-notice" role="status">Oppituntien sisältöä ei ole vielä julkaistu. Etenemistä ei lasketa ennen kuin oikeita opintosuorituksia on saatavilla.</p>}
     <h2 className="los-section-title">Tutustu kirjaan</h2>
     <div className="los-path-cards">
@@ -174,7 +174,11 @@ function ChapterPage({ book, chapter, subsection }: { book: Book; chapter: Chapt
     </div>}
     {chapter.publicationStatus !== "published" && <p className="los-notice">
       {chapter.publicationStatus === "preview" ?
-        "Kappale on harjoitusversio. Text A:n dialogi ja Text B:n tervehdyksiä sisältävä ääniluettelo ovat kokonaisina sisällä, samoin 12 tehtävän kokeiluversio kappaletestistä. Äänitoistoa oikeilla laitteilla, puheäänitystä, kappaleen pedagogista laajuutta ja lopullista julkaisulaatua ei vielä ole hyväksytty." :
+        chapter.id === "C01" ?
+        "C01 on harjoitusversio: Text A:n 8-repliikkinen alkuperäisdialogi, Text B:n 20 ilmauksen ääniteluettelo sekä 12 tehtävän kappaletesti ovat käytettävissä. Äänitoiston laitetestaus ja lopullinen toimitus ovat kesken." :
+        chapter.id === "C02" ?
+        "C02 on harjoitusversio: luettavana on kokonainen LOS!:n itse laatima esittelydialogi, 16 ydinsanaa, kielioppi, 15 kysymyksen kappaletesti ja Ariserin alkuperäisäänite. Suunnitellun Wikibooksin Franz–Greta-päätekstin ja Ariserin täydellisen litteraatin tuonti sekä laitetoisto ovat vielä kesken." :
+        "Kappale on harjoitusversio, mutta kaikki lähteet ja oppisisällöt eivät ole vielä toimitettuja." :
         "Tämän kappaleen 10 osion rakenne on valmis, mutta aineistoja ei ole vielä julkaistu."}
     </p>}
     <nav className="los-chapter-sections" aria-label={"Kappaleen " + chapter.sequence + " osiot"}>
