@@ -178,7 +178,8 @@ test("Authentic 15-second Commons weekday list is in-book, licensed, and safely 
  assert.ok(support&&support.kind==="paragraph"&&support.text.includes("ei pidä tulkita kuuntelukyvyn"));
  for(const ex of LOS1_C09_AUDIO_EXERCISES)
   assert.equal(evaluateExercise(ex,answer(ex))?.correct,true,ex.id);
-});\ntest("Fourteen-point A/B test requires 2–4 written lines, preserves retake answers",()=>{
+});
+test("Fourteen-point A/B test requires 2–4 written lines, preserves retake answers",()=>{
  assert.equal(testDef.exerciseIds.length,14);
  assert.equal(testDef.alternativeExerciseIds?.length,14);
  assert.equal(new Set([...testDef.exerciseIds,...(testDef.alternativeExerciseIds??[])]).size,28);
