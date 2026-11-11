@@ -179,7 +179,7 @@ export const basicGloss:Readonly<Record<string,Gloss>>={
  'rot':{fi:'punainen'},
  'deine':{fi:'sinun (tämän sanan yksi muoto)'},
  'meine':{fi:'minun (tämän sanan yksi muoto)'},
- 'warum':{fi:'miksi'},
+
  'harald':{fi:'Harald (etunimi)'},
  'münchen':{fi:'München (kaupunki Etelä-Saksassa)'},
  'bayern':{fi:'Baijeri, Saksan osavaltio'},
