@@ -199,3 +199,10 @@
 .los-exam-result strong{font-size:24px}
 .los-exam-self{padding:16px 0;border-top:1px solid var(--los-border);max-width:76ch}
 @media(max-width:480px){.los-stepper{flex-direction:column}.los-stepper li{flex:1 1 auto}.los-pair-row{grid-template-columns:1fr;gap:4px}}
+
+
+.los-text .los-translation{font-size:clamp(13px,0.9em,16px);line-height:1.55;color:var(--los-ink-secondary);
+ margin:-.6em 0 1.45em;padding-left:13px;border-left:2px solid var(--los-border);letter-spacing:0}
+.los-reader-block{margin:0}
+.los-reader-block>p:first-child{margin-bottom:1em}
+.los-reader-block:has(.los-translation)>p:first-child{margin-bottom:.8em}
