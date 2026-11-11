@@ -36,6 +36,8 @@ export type ChapterTestResult = {
   selfAssessment: Record<string, SpeechAssessment>;
   writtenResponse?: string;
   secondWrittenResponse?: string;
+  /** Learner attestation: audio played and was heard. NOT a device QA certificate. */
+  listeningSelfReported?: boolean;
 };
 export type ChapterTestRecord = {
   testId: string; testVersion: string;
@@ -44,6 +46,7 @@ export type ChapterTestRecord = {
   selfAssessment: Record<string, SpeechAssessment>;
   writtenResponse?: string;
   secondWrittenResponse?: string;
+  listeningSelfReported?: boolean;
   submission: ChapterTestResult | null;
   previousResults: {
     submittedAt: string; score: number; maximum: number;
@@ -53,13 +56,15 @@ export type ChapterTestRecord = {
     selfAssessment?: Record<string, SpeechAssessment>;
     writtenResponse?: string;
     secondWrittenResponse?: string;
+    listeningSelfReported?: boolean;
   }[];
 };
 export function emptyChapterTestRecord(definition: ChapterTestDefinition): ChapterTestRecord {
   return {
     testId: definition.id, testVersion: definition.version,
     attemptNumber: 0,
-    answers: {}, selfAssessment: {}, writtenResponse: "", secondWrittenResponse: "", submission: null, previousResults: [],
+    answers: {}, selfAssessment: {}, writtenResponse: "", secondWrittenResponse: "",
+    listeningSelfReported: false, submission: null, previousResults: [],
   };
 }
 /** The first attempt uses C01's original twelve questions. Each succeeding
@@ -119,7 +124,8 @@ export function gradeChapterTest(definition: ChapterTestDefinition, exercises: r
             secondLines > definition.maximumSecondWritingLines))));
   if (state.testId !== definition.id || state.testVersion !== definition.version ||
     state.submission || missingChapterTestAnswers(definition, exercises, state).length ||
-    missingSpeechAssessments(definition, state).length || invalidWriting) return null;
+    missingSpeechAssessments(definition, state).length || invalidWriting ||
+    (Boolean(definition.listeningBlockIds?.length) && state.listeningSelfReported !== true)) return null;
   const outcomes = exercises.map(exercise => {
     const evaluated = evaluateExercise(exercise, state.answers[exercise.id] ?? null);
     // All null/invalid submissions are rejected above, not silently counted wrong.
@@ -129,6 +135,7 @@ export function gradeChapterTest(definition: ChapterTestDefinition, exercises: r
   });
   return {
     submittedAt, attemptNumber: state.attemptNumber ?? 0, score: outcomes.filter(item => item.correct).length,
+    ...(definition.listeningBlockIds?.length ? { listeningSelfReported: true } : {}),
     ...(definition.selfAssessmentMode === "writing" ? {
       writtenResponse: state.writtenResponse?.trim() ?? "",
       ...(definition.secondWritingPromptFi ? {
@@ -144,7 +151,8 @@ export function gradeChapterTest(definition: ChapterTestDefinition, exercises: r
 export function restartChapterTest(state: ChapterTestRecord): ChapterTestRecord {
   if (!state.submission) return state;
   return {
-    ...state, answers: {}, selfAssessment: {}, writtenResponse: "", secondWrittenResponse: "", submission: null,
+    ...state, answers: {}, selfAssessment: {}, writtenResponse: "", secondWrittenResponse: "",
+    listeningSelfReported: false, submission: null,
     attemptNumber: (state.attemptNumber ?? 0) + 1,
     previousResults: [
       ...state.previousResults,
@@ -156,6 +164,8 @@ export function restartChapterTest(state: ChapterTestRecord): ChapterTestRecord 
         ...(state.submission.writtenResponse ? { writtenResponse: state.submission.writtenResponse } : {}),
         ...(state.submission.secondWrittenResponse ?
           { secondWrittenResponse: state.submission.secondWrittenResponse } : {}),
+        ...(state.submission.listeningSelfReported ?
+          { listeningSelfReported: true } : {}),
       },
     ],
   };
