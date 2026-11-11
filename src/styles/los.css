@@ -625,3 +625,10 @@
   .los-production { padding: 16px; gap: 8px; }
   .los-production-model { padding: 12px; }
 }
+
+.los-exam-evidence > ul { list-style: none; max-width: 850px; margin: 18px 0 24px; padding: 0; }
+.los-exam-evidence > ul > li { display: flex; justify-content: space-between; flex-wrap: wrap;
+  align-items: center; gap: 12px 20px; padding: 16px 0; border-bottom: 1px solid var(--los-border); }
+.los-exam-evidence strong { display:block; color:var(--los-ink); font-weight:650; }
+.los-exam-evidence small { display:block; color:var(--los-ink-secondary); font-size:13px; margin-top:5px; }
+.los-exam-evidence .los-support { margin:5px 0 0; font-size:12px; }
