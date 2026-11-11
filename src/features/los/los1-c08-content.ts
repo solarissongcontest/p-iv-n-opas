@@ -70,8 +70,8 @@ export const LOS1_C08_CONTENT_BLOCKS:ContentBlock[]=[
       ["Haluat saksankielisen ilmauksen.","Wie sagt man das auf Deutsch?","Kysy käännöstapaa."],
       ["Tarvitset vielä yhden toiston.","Noch einmal, bitte.","Pyydä uudelleen."]
     ]},
-  {id:"los1-c08-text-b-pending",version:"0.1.0",kind:"paragraph",language:"fi",
-    text:"Text B -aineistoa ei vielä julkaista. Suunnitelmassa on M-DIB-03:n Evan opiskelu- ja asumishaastattelu ja V-DIB-01:n Studentenausweis-video. Niiden tarkka käyttöoikeus, puheen vaikeusaste ja toistuminen LOS!:n sisällä ovat tarkistamatta. Nämä eivät ole tämän sivun omaa ääntä, eikä kuuntelutaitoa saa pisteyttää pelkkien kirjoitettujen lauseiden avulla."},
+  {id:"los1-c08-text-b-bridge",version:"1.0.0",kind:"paragraph",language:"fi",
+    text:"Text B sisältää nyt Wikibooksin Deutschkurs für Anfänger -kirjan oikean kokonaisen Am Telefon -puheludialogin (M-WB-08, harjoitus 112). Lue kaikki neljä alkuperäistä repliikkiä tässä LOS!:n lukijassa ja kokeile tulkita kohteliasta toistopyyntöä sekä nimen tavaamista. Vuoden 2024 lähdeversio ja CC BY-SA 4.0 -ehdot näkyvät myös tekstin alla. C08:n alun perin suunniteltu M-DIB-03:n Evan haastattelu ja V-DIB-01:n Studentenausweis-video ovat edelleen erikseen keskeneräisiä. Tämä teksti ei ole puhelun alkuperäinen äänite: erillinen Timwin C07-aakkosäänite auttaa harjoittelemaan kirjainten nimiä, mutta ei sisällä tätä keskustelua."},
   {id:"los1-c08-practice-intro",version:"0.1.0",kind:"paragraph",language:"fi",
     text:"Harjoittele kuutta tuttua luokkahuonetilannetta. Valitse fraasi, kokoa sanajärjestys ja muista kysyä merkitystä oikealla kysymyksellä. Nämä ovat LOS!:n omia opetustilanteita. Eri osion Text A -luetunymmärtämistehtävät ja tekstikohtainen korostusharjoitus perustuvat puolestaan Wikibooksin oikeaan julkaistuun lähteeseen. Kuunteluharjoitus lisätään vasta, kun alkuperäinen äänite on hyväksytty ja laitetestattu."},
   {id:"los1-c08-production-ask",version:"0.1.0",kind:"production",
