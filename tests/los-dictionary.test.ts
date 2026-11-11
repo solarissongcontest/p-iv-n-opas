@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {readFileSync} from "node:fs";
 import {LOS_BOOKS} from "../src/features/los/books.ts";
-import {buildLosDictionary,normalizedSearchText,searchLosDictionary} from "../src/features/los/dictionary.ts";
+import {buildLosDictionary,findLosDictionaryContext,normalizedSearchText,searchLosDictionary} from "../src/features/los/dictionary.ts";
 import {bookVocabularyRows} from "../src/features/los/vocabularyIndex.ts";
 
 const entries=buildLosDictionary(LOS_BOOKS);
@@ -92,6 +92,10 @@ test("The formerly empty global dictionary page now renders interactive search a
  assert.match(ui,/Suomi → saksa/);
  assert.match(ui,/href=\{location\.chapterId\?/);
  assert.match(ui,/Avaa sanakortti ja tallenna/);
+ assert.match(ui,/findLosDictionaryContext\(LOS_BOOKS,entry\)/);
+ assert.match(ui,/Alkuperäislähteestä/);
+ assert.match(ui,/LOS!:n oma opetusesimerkki/);
+ assert.match(ui,/query\.trim\(\)&&example/);
  assert.match(ui,/setPage\(0\)/);
  assert.match(ui,/Seuraavat/);
  assert.match(ui,/ei täydellinen saksan yleissanakirja/);
@@ -137,4 +141,49 @@ test("Same upstream vocabulary row IDs cannot merge distinct Finnish meanings",(
  assert.equal(list.find(e=>e.fi==="ensimmäinen testimerkitys")?.locations.length,2);
  assert.ok(list.every(e=>e.locations.every(loc=>
   loc.vocabularyRowId.includes("fixture-"))));
+});
+
+test("Dictionary examples are real in-book source sentences, never newly generated translations",()=>{
+ const word=entries.find(x=>x.de.toLocaleLowerCase("de-DE")==="hallo");
+ assert.ok(word,"C01 publishes Hallo in its core vocabulary");
+ const found=findLosDictionaryContext(LOS_BOOKS,word);
+ assert.ok(found,"The original human-recorded C01 dialogue contains the word Hallo");
+ assert.equal(found.kind,"authentic");
+ assert.equal(found.bookId,"los-1");
+ assert.equal(found.sourceTitle!==undefined,true);
+ const book=LOS_BOOKS.find(x=>x.id===found.bookId)!;
+ const sourceBlock=book.blocks.find(x=>x.id===found.blockId);
+ assert.ok(sourceBlock&&sourceBlock.kind==="dialogue");
+ assert.ok(sourceBlock.turns.some(turn=>turn.text===found.de&&turn.translationFi===found.fi));
+ const linked=book.sources.find(x=>x.id===sourceBlock.sourceId);
+ assert.ok(linked&&linked.permittedMode==="embed");
+ assert.equal(found.sourceTitle,linked.title);
+});
+
+test("Unapproved original transcript is never promoted to authentic dictionary example",()=>{
+ const book=structuredClone(LOS_BOOKS[0]!);
+ const vocabId="dict-test-pending-vocab";
+ const sourceId=book.sources.find(x=>x.permittedMode==="pending")?.id;
+ assert.ok(sourceId);
+ const dialogueId="dict-test-pending-dialogue";
+ const grammarId="dict-test-local-grammar";
+ book.blocks.push({
+  id:vocabId,version:"1.0.0",kind:"vocabulary",
+  entries:[{id:"testword",de:"Prüfwort",fi:"esimerkkisana"}],
+ },{
+  id:dialogueId,version:"1.0.0",kind:"dialogue",sourceId,
+  turns:[{speaker:"Puhuja",text:"Prüfwort",translationFi:"esimerkkisana"}],
+ },{
+  id:grammarId,version:"1.0.0",kind:"grammar",
+  title:"Vain testin oma esimerkki",explanationFi:"Testi",
+  examples:[{de:"Prüfwort",fi:"esimerkkisana"}],
+ });
+ book.chapters[0]!.blockIds.push(vocabId,dialogueId,grammarId);
+ const word=buildLosDictionary([book]).find(x=>x.de==="Prüfwort");
+ assert.ok(word);
+ const example=findLosDictionaryContext([book],word);
+ assert.ok(example);
+ assert.equal(example.kind,"teaching");
+ assert.equal(example.sourceTitle,undefined);
+ assert.equal(example.de,"Prüfwort");
 });
