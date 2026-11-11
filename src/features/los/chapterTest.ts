@@ -14,6 +14,7 @@ export type ChapterTestDefinition = {
   writingPromptFi?: string;
   writingModelDe?: string;
   writingModelFi?: string;
+  requiredWritingLines?: number;
 };
 export type ChapterTestResult = {
   submittedAt: string; score: number; maximum: number;
@@ -92,7 +93,8 @@ export function gradeChapterTest(definition: ChapterTestDefinition, exercises: r
   if (state.testId !== definition.id || state.testVersion !== definition.version ||
     state.submission || missingChapterTestAnswers(definition, exercises, state).length ||
     missingSpeechAssessments(definition, state).length ||
-    (definition.selfAssessmentMode === "writing" && !(state.writtenResponse ?? "").trim())) return null;
+    (definition.selfAssessmentMode === "writing" && (!(state.writtenResponse ?? "").trim() ||
+      (definition.requiredWritingLines ?? 1) > (state.writtenResponse ?? "").split(/\r?\n/u).filter(line => line.trim().length > 0).length))) return null;
   const outcomes = exercises.map(exercise => {
     const evaluated = evaluateExercise(exercise, state.answers[exercise.id] ?? null);
     // All null/invalid submissions are rejected above, not silently counted wrong.
