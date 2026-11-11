@@ -3,6 +3,7 @@ import test from "node:test";
 import {readFileSync} from "node:fs";
 import {LOS_BOOKS} from "../src/features/los/books.ts";
 import {buildLosDictionary,normalizedSearchText,searchLosDictionary} from "../src/features/los/dictionary.ts";
+import {bookVocabularyRows} from "../src/features/los/vocabularyIndex.ts";
 
 const entries=buildLosDictionary(LOS_BOOKS);
 test("Bilingual dictionary is generated from REAL existing in-book vocabulary, not invented word pairs",()=>{
@@ -13,6 +14,8 @@ test("Bilingual dictionary is generated from REAL existing in-book vocabulary, n
  assert.ok(entries.length<=input.length);
  assert.ok(entries.every(x=>x.de.trim().length>0&&x.fi.trim().length>0));
  assert.ok(entries.every(x=>x.locations.length>0));
+ assert.equal(new Set(entries.map(x=>x.id)).size,entries.length,
+  "Every dictionary result needs a collision-free stable React key");
  assert.equal(new Set(entries.map(x=>x.de.toLocaleLowerCase("de-DE")+"\u0000"+
   x.fi.toLocaleLowerCase("fi-FI"))).size,entries.length);
  const sources=new Set(input.map(e=>e.de+"\u0000"+e.fi));
@@ -70,6 +73,10 @@ test("Every visible vocabulary result links to a valid in-book chapter source, w
     assert.ok(chapter,location.chapterId);
     assert.equal(chapter.title,location.chapterTitle);
    }
+   const target=bookVocabularyRows(book).find(x=>x.id===location.vocabularyRowId);
+   assert.ok(target,"Source link must refer to an actual bookmarkable word: "+location.vocabularyRowId);
+   assert.equal(target.de.trim(),entry.de);
+   assert.equal(target.fi.trim(),entry.fi);
   }
  }
 });
@@ -84,7 +91,50 @@ test("The formerly empty global dictionary page now renders interactive search a
  assert.match(ui,/Saksa → suomi/);
  assert.match(ui,/Suomi → saksa/);
  assert.match(ui,/href=\{location\.chapterId\?/);
+ assert.match(ui,/Avaa sanakortti ja tallenna/);
+ assert.match(ui,/setPage\(0\)/);
+ assert.match(ui,/Seuraavat/);
  assert.match(ui,/ei täydellinen saksan yleissanakirja/);
  assert.match(route,/function GlobalDictionary\(\) \{ return <LosDictionaryPage\/>; \}/);
  assert.match(style,/\.los-dictionary-search-input:focus-within/);
+ assert.match(style,/\.los-dictionary-pagination/);
+ assert.match(style,/\.los-word-list li:target/);
+ const words=readFileSync("src/features/los/VocabularyIndex.tsx","utf8");
+ assert.match(words,/id=\{"los-word-" \+ row\.id\}/);
+ assert.match(words,/scrollIntoView/);
+});
+
+test("Pagination exposes every original word exactly once, never trapping results on page one",()=>{
+ const collected:string[]=[];
+ for(let offset=0;offset<entries.length;offset+=60){
+  const page=searchLosDictionary(entries,"","de-fi",60,offset);
+  assert.equal(page.total,entries.length);
+  assert.ok(page.results.length>0&&page.results.length<=60);
+  collected.push(...page.results.map(x=>x.entry.id));
+ }
+ assert.equal(collected.length,entries.length);
+ assert.equal(new Set(collected).size,entries.length);
+ assert.deepEqual(searchLosDictionary(entries,"","de-fi",60,entries.length).results,[]);
+ assert.deepEqual(searchLosDictionary(entries,"","de-fi",60,-7).results,
+  searchLosDictionary(entries,"","de-fi",60,0).results);
+ assert.ok(searchLosDictionary(entries,"","de-fi",NaN).results.length<=48);
+});
+test("Same upstream vocabulary row IDs cannot merge distinct Finnish meanings",()=>{
+ const fake=structuredClone(LOS_BOOKS[0]!);
+ const make=(id:string,fi:string)=>({
+  id,version:"1.0.0",kind:"vocabulary" as const,
+  entries:[{id:"reused-id",de:"Testwort",fi}],
+ });
+ const a=make("fixture-one","ensimmäinen testimerkitys");
+ const b=make("fixture-two","toinen testimerkitys");
+ const c=make("fixture-three","ensimmäinen testimerkitys");
+ fake.blocks.push(a,b,c);
+ fake.chapters[0]!.blockIds.push(a.id,b.id);
+ fake.chapters[1]!.blockIds.push(c.id);
+ const list=buildLosDictionary([fake]).filter(e=>e.de==="Testwort");
+ assert.equal(list.length,2);
+ assert.equal(new Set(list.map(e=>e.id)).size,2);
+ assert.equal(list.find(e=>e.fi==="ensimmäinen testimerkitys")?.locations.length,2);
+ assert.ok(list.every(e=>e.locations.every(loc=>
+  loc.vocabularyRowId.includes("fixture-"))));
 });
