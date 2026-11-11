@@ -13,7 +13,7 @@
  */
 import type { Exercise, ExerciseAnswer } from "./model";
 import type { ChapterTestDefinition } from "./chapterTest";
-import { evaluateExercise } from "./exercises/evaluate";
+import { evaluateExercise } from "./exercises/evaluate.ts";
 
 export type ExamNavigationGroup = {
   id: string;
