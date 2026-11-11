@@ -1,6 +1,7 @@
 import { useLocation } from "@tanstack/react-router";
 import { ArrowLeft, ArrowRight, BookOpen, List, RotateCcw, Sparkles } from "lucide-react";
 import { LOS_BASE_PATH, LOS_BOOKS, bookPath, findLosBook } from "./books";
+import { emptyChapterSections } from "./chapterSections";
 import type { Book, Chapter, ContentBlock } from "./model";
 import { Reader, type ReaderNote } from "./Reader";
 import { useLosRecord, losSyncMessage } from "./data/useLosRecord";
@@ -105,8 +106,10 @@ function Contents({ book }: { book: Book }) {
         <li key={chapter.id}><details><summary><span className="los-chapter-number">{String(chapter.sequence).padStart(2, "0")}</span>
           <span><b>{chapter.title}</b><small>{chapter.introductionFi}</small></span><span>{chapter.publicationStatus === "published" ? "Katso sisältö" : chapter.publicationStatus === "preview" ? "Lue ja harjoittele · luonnos" : "Sisältö tulossa"}</span></summary>
           <div className="los-chapter-inner"><a href={bookPath(book, "kappale/" + encodeURIComponent(chapter.id.slice(1)))}>Avaa kappale <ArrowRight size={16}/></a>
-            {chapter.blockIds.map(id => <a key={id} href={bookPath(book, "teksti/" + encodeURIComponent(id))}>
-              {book.blocks.find(block => block.id === id)?.kind === "grammar" ? "Kielioppi" : "Oppimateriaali"} · {id}</a>)}
+            {(chapter.sections ?? emptyChapterSections()).map(item =>
+              <a key={item.id} href={bookPath(book, "kappale/" + chapter.id.slice(1) + "/" + item.id)}>
+                {item.title} {item.publicationStatus === "planned" ? "· tulossa" : "· harjoitusversio"}
+              </a>)}
           </div></details></li>)}</ol>}
   </section>;
 }
@@ -139,19 +142,55 @@ function Lessons({ book }: { book: Book }) {
       </section>)}
   </section>;
 }
-function ChapterPage({ book, chapter }: { book: Book; chapter: Chapter }) {
-  const blocks = chapter.blockIds.map(id => book.blocks.find(block => block.id === id)).filter((block): block is ContentBlock => !!block);
-  const exercises = chapter.exerciseIds.map(id => book.exercises.find(exercise => exercise.id === id)).filter(item => item !== undefined);
-  return <section><p className="los-eyebrow">KAPPALE {String(chapter.sequence).padStart(2, "0")}</p>
-    <h1>{chapter.title}</h1><p className="los-intro">{chapter.introductionFi}</p>
-    {!!chapter.objectives.length && <div className="los-objectives"><b>Tämän jälkeen osaat</b><ul>{chapter.objectives.map(goal => <li key={goal}>{goal}</li>)}</ul></div>}
-    {chapter.publicationStatus === "preview" ?
-      <p className="los-notice">Tämän kappaleen koko alkuperäinen Text A ja lähdeäänitteen sisäinen soitin ovat käytettävissä. Äänen toimivuutta eri laitteissa ja kappaleen täyttä harjoitus-/koesisältöä ei ole vielä varmennettu. Erilliset opetusesimerkit on merkitty omiksi harjoituksiksi.</p> :
-      chapter.publicationStatus !== "published" &&
-      <p className="los-notice">Kappaleen opetusmateriaalia ei ole vielä julkaistu kokonaisuudessaan.</p>}
-    <Reader book={book} blocks={blocks} title={chapter.title}/>
-    {exercises.length > 0 && <section className="los-chapter-exercises"><h2>Harjoitukset</h2>{exercises.map(exercise =>
-      <ExerciseEngine key={exercise.id} bookId={book.id} exercise={exercise}/>)}</section>}
+function ChapterPage({ book, chapter, subsection }: { book: Book; chapter: Chapter; subsection?: string }) {
+  const sections = chapter.sections ?? emptyChapterSections();
+  const selected = subsection ? sections.find(section => section.id === subsection) : undefined;
+  const chapterHref = bookPath(book, "kappale/" + chapter.id.slice(1));
+  const blockIds = selected?.blockIds ?? [];
+  const exerciseIds = selected?.exerciseIds ?? [];
+  const blocks = blockIds.map(id => book.blocks.find(block => block.id === id)).filter((block): block is ContentBlock => !!block);
+  const exercises = exerciseIds.map(id => book.exercises.find(exercise => exercise.id === id)).filter(item => item !== undefined);
+  return <section className="los-chapter">
+    <p className="los-eyebrow">KAPPALE {String(chapter.sequence).padStart(2, "0")}</p>
+    <h1>{chapter.title}</h1>
+    <p className="los-intro">{chapter.introductionFi}</p>
+    {!!chapter.objectives.length && <div className="los-objectives">
+      <b>Tämän kappaleen osaamistavoitteet</b>
+      <ul>{chapter.objectives.map(goal => <li key={goal}>{goal}</li>)}</ul>
+    </div>}
+    {chapter.publicationStatus !== "published" && <p className="los-notice">
+      {chapter.publicationStatus === "preview" ?
+        "Kappale on harjoitusversio. Alkuperäinen Text A ja ensimmäiset tehtävät ovat valmiina katseltaviksi, mutta koko kappaletesti, Text B ja täydellinen 30 minuutin opetus ovat kesken." :
+        "Tämän kappaleen 10 osion rakenne on valmis, mutta aineistoja ei ole vielä julkaistu."}
+    </p>}
+    <nav className="los-chapter-sections" aria-label={"Kappaleen " + chapter.sequence + " osiot"}>
+      <a href={chapterHref} aria-current={!subsection ? "page" : undefined}>Yleiskuva</a>
+      {sections.map(section => <a key={section.id} href={chapterHref + "/" + section.id}
+        aria-current={selected?.id === section.id ? "page" : undefined}>
+        <span>{section.title}</span>
+        {section.publicationStatus !== "planned" && <small>Harjoitusversio</small>}
+      </a>)}
+    </nav>
+    {!subsection ? <div className="los-chapter-overview">
+      <h2>Sisältö</h2>
+      <p>Valitse yllä kappaleen osio. Teksti A, suomenkielinen opetus ja harjoitukset ovat käytettävissä myös erillään opetuspolusta. Tyhjät osiot eivät sisällä näennäisiä tekstejä tai oppimistuloksia.</p>
+      {sections.some(section => section.publicationStatus !== "planned") &&
+        <a className="los-button los-button-primary" href={chapterHref + "/teksti-a"}>
+          Avaa Text A <ArrowRight size={16}/>
+        </a>}
+    </div> : !selected ? <Empty title="Osiota ei löytynyt">Avaa jokin kappaleen kymmenestä osasta.</Empty> :
+      <div className="los-chapter-section">
+        <h2>{selected.title}</h2>
+        {!blocks.length && !exercises.length ?
+          <Empty title="Tämän osion aineisto on vielä kesken">Varsinaista ihmisen kirjoittamaa oppimateriaalia tai toimitettuja tehtäviä ei vielä ole lisätty tähän osioon.</Empty> :
+          <>
+            {!!blocks.length && <Reader book={book} blocks={blocks} title={selected.title}/>}
+            {!!exercises.length && <section className="los-chapter-exercises">
+              <h3>Harjoitukset</h3>
+              {exercises.map(exercise => <ExerciseEngine key={exercise.id} bookId={book.id} exercise={exercise}/>)}
+            </section>}
+          </>}
+      </div>}
   </section>;
 }
 function WordIndex({ book }: { book: Book }) {
@@ -231,7 +270,7 @@ export function LosApp() {
     {section === "" ? <BookHome book={book}/> :
       section === "sisalto" ? <Contents book={book}/> :
       section === "opetuspolku" ? <Lessons book={book}/> :
-      section === "kappale" ? chapter ? <ChapterPage book={book} chapter={chapter}/> : <Empty title="Kappaletta ei löytynyt">Sisältöä ei ole vielä julkaistu.</Empty> :
+      section === "kappale" ? chapter ? <ChapterPage book={book} chapter={chapter} subsection={segments[3]}/> : <Empty title="Kappaletta ei löytynyt">Sisältöä ei ole vielä julkaistu.</Empty> :
       section === "oppitunti" ? lesson ? <LessonRunner book={book} lesson={lesson}/> : <Empty title="Oppituntia ei löytynyt">Tätä tuntia ei ole julkaistu.</Empty> :
       section === "teksti" ? selectedBlock ? <Reader book={book} blocks={[selectedBlock]} title="Oppimateriaali" headingLevel={1}/> : <Empty title="Tekstiä ei löytynyt">Tätä aineistoa ei ole julkaistu.</Empty> :
       <GenericSection book={book} segment={section}/>}
