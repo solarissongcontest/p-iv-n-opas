@@ -30,7 +30,9 @@ function authenticate(request:Request) {
   }
   const authorization=request.headers.get("authorization")??"";
   if(!authorization.startsWith("Bearer "))throw new AuthFailure(401,"Laitteen tunnistus puuttuu.");
-  const claims=verifyArthurDeviceToken(authorization.slice(7),required("SUPABASE_JWT_SECRET"));
+  let claims:ReturnType<typeof verifyArthurDeviceToken>;
+  try{claims=verifyArthurDeviceToken(authorization.slice(7),required("SUPABASE_JWT_SECRET"));}
+  catch{throw new AuthFailure(401,"Laitteen tunnistus ei kelpaa.");}
   if(!isUuid(claims.sub))throw new AuthFailure(401,"Laitteen käyttäjätunnus on virheellinen.");
   const supabaseUrl=required("SUPABASE_URL");
   const expectedIss=`${supabaseUrl.replace(/\/$/,"")}/auth/v1`;
