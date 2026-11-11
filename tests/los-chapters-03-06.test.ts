@@ -45,6 +45,16 @@ test("new chapter vocabulary follows the book source plan's exact headword count
   }
 });
 
+test("C06 contains twenty numeral items; two age dialogues are separate self-assessed work",()=>{
+  const nums=losExercisesFor("06");
+  assert.equal(nums.length,20);
+  assert.ok(nums.every(item=>item.skill==="numerot"));
+  const supplements=readFileSync("src/features/los/LosSupplementalSections.tsx","utf8");
+  assert.match(supplements,/Kaksi ikäkeskustelua/);
+  assert.match(supplements,/Mia: Wie alt bist du/);
+  assert.match(supplements,/Kaksi erilaista kohtaamista/);
+});
+
 test("aus der Schweiz, du/Sie, nicht and numbers stay exact and unambiguous",()=>{
   const pick=(id:string)=>{const item=LOS_EXERCISES.find(x=>x.id===id);assert.ok(item,id);return item;};
   assert.equal(losIsCorrect(pick("C03-EX-11"),"Ich komme aus der Schweiz."),true);
