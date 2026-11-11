@@ -12,7 +12,7 @@ import {ExamSession} from './ExamSession';
 import {type FirstLessonStep} from './firstLessons';
 import {guidedLessons} from './guidedLessons';
 import {lessonAudioProof,lessonRequiresReflection} from './lessonProofs';
-import {canSubmitExerciseAttempt,exerciseAudioProof} from './exerciseAttempt';
+import {canSubmitExerciseAttempt,exerciseAudioProof,hasValidAudioProof} from './exerciseAttempt';
 import {vocabularySearch,vocabularyReviewSummary} from './vocabularyCandidates';
 import {auditLosRelease} from './releaseAudit';
 import {NumberPractice} from './NumberPractice';
@@ -328,7 +328,7 @@ function ExerciseCard({exercise,chapter,store,exam=false,fontSize}:{exercise:Exe
  let mapping:Record<string,string>={};
  if(answer){try{const parsed:unknown=JSON.parse(answer);if(parsed&&typeof parsed==='object'&&!Array.isArray(parsed))mapping=parsed as Record<string,string>;}catch{/* Not a mapping answer */}}
  const setMapped=(left:string,value:string)=>update(JSON.stringify({...mapping,[left]:value}));
- const audioCompleted=Boolean(item(store,exerciseAudioProof(exercise.id)));
+ const audioCompleted=hasValidAudioProof(item(store,exerciseAudioProof(exercise.id)),exercise.mediaUrl??'',LOS_VERSION);
  const requiresAudio=exercise.type==='listen-choice'||exercise.type==='listen-write';
  const canSubmit=canSubmitExerciseAttempt(exercise,answer,highlight,speechConfirmed,audioCompleted);
  const submit=()=>{
