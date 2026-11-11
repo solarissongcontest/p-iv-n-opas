@@ -13,6 +13,8 @@ import {chapter03Lessons} from './chapter03Lessons';
 import {chapter04Lessons} from './chapter04Lessons';
 import {chapter05Lessons} from './chapter05Lessons';
 import {chapter07Lessons} from './chapter07Lessons';
+import {chapter09Lessons} from './chapter09Lessons';
+import {WeekCalendarPractice} from './WeekCalendarPractice';
 import {reviewOneLessons} from './reviewOneLessons';
 import {reviewOneItems} from './reviewOneItems';
 import {exams,type ExamId} from './examBank';
@@ -101,7 +103,7 @@ function Media({chapter,store,fontSize=18,onAudioCompleted}:{chapter:Chapter;sto
  if(chapter.media?.transcript?.length)return <>
   <Label>TEKSTI B · ALKUPERÄINEN IHMISÄÄNITE</Label>
   <h3>{chapter.media.title}</h3>
-  <p>{chapter.media.transcript.length>1?'Kuuntele ensin ilman litteraattia ja toista sitten koko alkuperäinen dialogi tekstin kanssa.':'Kuuntele ensin ilman litteraattia. Tämä äänite sisältää yksittäisen puhutun fraasin, ei kokonaista dialogia.'}</p>
+  <p>{chapter.id==='C09'?'Kuuntele ensin ilman litteraattia seitsemän viikonpäivän autenttinen ääniluettelo. Toista se sitten alkuperäistä tekstilistaa seuraten. Äänite ei sisällä tapaamisajoista käytävää keskustelua.':chapter.media.transcript.length>1?'Kuuntele ensin ilman litteraattia ja toista sitten koko alkuperäinen dialogi tekstin kanssa.':'Kuuntele ensin ilman litteraattia. Tämä äänite sisältää yksittäisen puhutun fraasin, ei kokonaista dialogia.'}</p>
   <Audio src={chapter.media.url} title={chapter.media.title} onCompleted={()=>{store.put('media:completed:'+(chapter.id==='C03'?'C03:':'')+chapter.media!.sourceId,{at:new Date().toISOString(),version:LOS_VERSION});onAudioCompleted?.();}}/>
   <Reader chapter={{...chapter,blocks:chapter.media.transcript}} store={store} fontSize={fontSize}/>
   <p className="los-source"><b>{chapter.media.sourceId}</b> · {chapter.media.attribution} · {chapter.media.license} ·
@@ -333,7 +335,7 @@ function ChapterSection({chapter,section,store,fontSize}:{chapter:Chapter;sectio
  if(section==='Harjoittele')return <><h2>Harjoittele</h2>{exercises.filter(e=>!['highlight','writing','speech'].includes(e.type)).map(ex=><ExerciseCard key={ex.id} exercise={ex} chapter={chapter} store={store} fontSize={fontSize}/>)}</>;
  if(section==='Käytä saksaa')return <><h2>Käytä saksaa itse</h2>{exercises.filter(e=>['writing','speech'].includes(e.type)).map(ex=><ExerciseCard key={ex.id} exercise={ex} chapter={chapter} store={store} fontSize={fontSize}/>)}</>;
  if(section==='Kappaletesti'&&chapter.status==='source-pending')return <p className="los-warning">Kappaletestiä ei ole vielä julkaistu, koska tämän kappaleen pääteksti on hyväksymättä. Harjoitteita voi tehdä erikseen.</p>;
- if(section==='Kappaletesti'&&['C01','C02','C03','C04','C05','C07'].includes(chapter.id)){
+ if(section==='Kappaletesti'&&['C01','C02','C03','C04','C05','C07','C09'].includes(chapter.id)){
   const id=('EX-'+chapter.id) as ExamId;
   return <ExamSession id={id} store={store} onExit={()=>window.location.hash='/chapter/'+chapter.id+'/Harjoittele'} onSubmit={()=>store.put('exam:submitted:'+id,{submittedAt:new Date().toISOString(),version:LOS_VERSION})}/>;
  }
@@ -341,14 +343,14 @@ function ChapterSection({chapter,section,store,fontSize}:{chapter:Chapter;sectio
  return null;
 }
 
-const guidedLessons=[...firstLessons,...chapter02Lessons,...chapter03Lessons,...chapter04Lessons,...chapter05Lessons,...reviewOneLessons,...chapter07Lessons];
+const guidedLessons=[...firstLessons,...chapter02Lessons,...chapter03Lessons,...chapter04Lessons,...chapter05Lessons,...reviewOneLessons,...chapter07Lessons,...chapter09Lessons];
 function FirstLessonRunner({lessonId,store,fontSize,onNext,onContents}:{lessonId:string;store:Store;fontSize:number;onNext:()=>void;onContents:()=>void}){
  const plan=guidedLessons.find(p=>p.id===lessonId);
  const [stepIndex,setStepIndex]=useState(0);
  const storedStep=item(store,'lesson:step:'+lessonId);
  useEffect(()=>{
   if(typeof storedStep==='number'&&Number.isFinite(storedStep)){
-   setStepIndex(index=>Math.max(index,Math.max(0,Math.min(4,storedStep))));
+   setStepIndex(Math.max(0,Math.min(4,storedStep)));
   }
  },[storedStep]);
  if(!plan)return <p role="alert">Oppitunnin sisältösuunnitelmaa ei löydy.</p>;
@@ -363,18 +365,19 @@ function FirstLessonRunner({lessonId,store,fontSize,onNext,onContents}:{lessonId
  const allSubmitted=requiredIds.every(id=>
   id.startsWith('EX-C')?Boolean(item(store,'exam:submitted:'+id)):Boolean(item(store,'latest:'+id)));
  const hasGoal=lessonId!=='L001'||valueString(store,'goal:los1').trim().length>=8;
- const hasReflection=!['L006','L011','L016','L021','L026','L027','L028','L029','L040'].includes(lessonId)||valueString(store,'lesson:reflection:'+lessonId).trim().length>=12;
+ const hasReflection=!['L006','L011','L016','L021','L026','L027','L028','L029','L040','L050'].includes(lessonId)||valueString(store,'lesson:reflection:'+lessonId).trim().length>=12;
  const mediaDone=(plan?.requiredMediaIds??[]).every(id=>Boolean(item(store,'media:completed:'+id)));
  const canAdvance=(current.kind!=='practice'||allSubmitted)&&(current.kind!=='goal'||hasGoal)&&(current.kind!=='reflection'||hasReflection);
  const fulfilled=mediaDone&&plan.requiredIds.every(id=>id.startsWith('EX-C')?Boolean(item(store,'exam:submitted:'+id)):Boolean(item(store,'latest:'+id)));
  const completed=item(store,'lesson:'+lessonId)===true&&store.status==='saved';
+ const priorStepsDone=plan.steps.slice(0,-1).every((_,i)=>Boolean(item(store,'step:'+lessonId+':'+i)));
  const last=stepIndex===plan.steps.length-1;
  const next=()=>{
   if(!canAdvance)return;
   store.put('lesson:step:'+lessonId,Math.min(stepIndex+1,plan.steps.length-1));
   store.put('step:'+lessonId+':'+stepIndex,{completedAt:new Date().toISOString(),version:LOS_VERSION});
   if(last){
-   if(!fulfilled||!hasGoal||!hasReflection)return;
+   if(!fulfilled||!hasGoal||!hasReflection||!priorStepsDone)return;
    store.put('lesson:'+lessonId,true);
    return;
   }
@@ -399,6 +402,7 @@ function FirstLessonRunner({lessonId,store,fontSize,onNext,onContents}:{lessonId
    const examId=st.exerciseIds?.find(id=>id in exams) as ExamId|undefined;
    if(examId)return <ExamSession id={examId} store={store} onExit={onContents}
      onSubmit={()=>store.put('exam:submitted:'+examId,{submittedAt:new Date().toISOString(),version:LOS_VERSION})}/>;
+   if(st.exerciseIds?.includes('C09-SCHEDULE'))return <WeekCalendarPractice items={store.items} put={store.put}/>;
    return <>{(st.exerciseIds??[]).map(id=>{
     const entry=exerciseEntries.find(e=>e.exercise.id===id);
     return entry?<ExerciseCard key={entry.exercise.id} exercise={entry.exercise} chapter={entry.chapter} store={store} fontSize={fontSize}/>:
@@ -445,11 +449,12 @@ function FirstLessonRunner({lessonId,store,fontSize,onNext,onContents}:{lessonId
    <button className="los-quiet" disabled={stepIndex===0} onClick={()=>setStepIndex(i=>Math.max(0,i-1))}>Edellinen vaihe</button>
    {!last?<button disabled={!canAdvance} onClick={next}>Jatka seuraavaan vaiheeseen <ChevronRight size={17}/></button>:
     completed?<button onClick={onNext}>Seuraava oppitunti <ChevronRight size={17}/></button>:
-    <button disabled={!canAdvance||!fulfilled||store.status!=='saved'} onClick={next}>
+    <button disabled={!canAdvance||!fulfilled||!priorStepsDone||store.status!=='saved'} onClick={next}>
      <CheckCircle2 size={17}/> Merkitse oppitunti suoritetuksi
     </button>}
   </div>
   {last&&store.status!=='saved'?<p className="los-meta" role="status">Suorituksen viimeistely vaatii vahvistetun palvelintallennuksen. Tila: {store.status}.</p>:null}
+  {last&&!priorStepsDone?<p role="status" className="los-warning">Oppitunnin aiempia vaiheita ei ole vielä merkitty käydyiksi. Palaa keskeneräisiin vaiheisiin, tee tehtävät ja jatka sitten loppuun.</p>:null}
   {last&&!fulfilled?<p className="los-warning">Kaikkia oppitunnin tehtäviä ei ole vielä palautettu. Voit avata aiemman vaiheen yllä olevasta vaihevalikosta.</p>:null}
  </section>;
 }
