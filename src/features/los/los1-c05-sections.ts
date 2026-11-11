@@ -24,7 +24,7 @@ export const LOS1_C05_SECTIONS:ChapterSection[]=emptyChapterSections().map(secti
     section.id==="kielioppi"?{
       blockIds:["los1-c05-grammar-how","los1-c05-grammar-reply",
         "los1-c05-grammar-negation","los1-c05-grammar-compare"],
-      exerciseIds:["los1-c05-grammar-negation","los1-c05-grammar-sehr",
+      exerciseIds:["los1-c05-grammar-nicht-gap","los1-c05-grammar-sehr",
         "los1-c05-grammar-mir","los1-c05-grammar-dir","los1-c05-grammar-ihnen",
         "los1-c05-grammar-gehts","los1-c05-grammar-contrast","los1-c05-grammar-formal"],
     }:
