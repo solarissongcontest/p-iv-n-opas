@@ -6,6 +6,7 @@ import type { Book, Chapter, ContentBlock, ResumeBookmark } from "./model";
 import { Reader, type ReaderNote } from "./Reader";
 import { useLosRecord, losSyncMessage } from "./data/useLosRecord";
 import { LessonRunner } from "./LessonRunner";
+import { ReviewWorkspace, ReviewEvidence } from "./ReviewWorkspace";
 import { ExerciseEngine } from "./exercises/ExerciseEngine";
 
 type NavItem = { segment: string; title: string };
@@ -237,6 +238,8 @@ function NotesIndex({ book }: { book: Book }) {
   </section>;
 }
 function GenericSection({ book, segment }: { book: Book; segment: string }) {
+  if (segment === "kertaus") return <ReviewWorkspace book={book}/>;
+  if (segment === "osaaminen") return <ReviewEvidence book={book}/>;
   if (segment === "sanastot") return <WordIndex book={book}/>;
   if (segment === "muistiinpanot") return <NotesIndex book={book}/>;
   if (segment === "kielioppi") {
