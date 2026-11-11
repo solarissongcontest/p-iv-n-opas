@@ -79,9 +79,9 @@ export const LOS1_C10_PRACTICE_EXERCISES:Exercise[]=[
   "Wie heißen Sie?"),
  order("order-harald","Järjestä Haraldin nimi ja kotipaikka yhdeksi lauseeksi.",
   ["München.","aus","Er","kommt"],["p2","p3","p1","p0"],"Er kommt aus München."),
- order("order-berna","Järjestä Bernan esittely oikein.",
-  ["Berna.","heißt","Sie","—"],["p2","p1","p0","p3"],
-  "Sie heißt Berna. — (päätemerkki kuuluu esimerkin tehtävärakenteeseen)."),
+ order("order-berna","Järjestä Bernan lähtökaupunki oikein.",
+  ["Kiel.","aus","kommt","Sie"],["p3","p2","p1","p0"],
+  "Sie kommt aus Kiel."),
  {
   ...base,id:"los1-c10-match-person",type:"matching",
   promptFi:"Yhdistä puhujan näkökulma oikeaan fraasiin.",
