@@ -9,6 +9,7 @@ import { LOS1_C01_GREETING_AUDIO_BLOCKS, LOS1_C01_AUDIO_COMPREHENSION_EXERCISES 
 import { LOS1_C01_EXAM_EXERCISES, LOS1_C01_TEST } from "./los1-c01-chapter-test.ts";
 import { LOS1_C01_ALTERNATE_EXAM_EXERCISES } from "./los1-c01-exam-alternates.ts";
 import { LOS1_C01_APPLICATION_BLOCKS, LOS1_C01_CULTURE_BLOCKS, LOS1_C01_EXTRA_EXERCISES } from "./los1-c01-activities.ts";
+import { LOS1_C01_INTERACTIVE_EXERCISES } from "./los1-c01-interactive.ts";
 
 const specs: readonly [string, string, string, string, string, string][] = [
   ["Perustason alkeet 1", "Tutustu ja ihastu saksan kieleen", "Nollataso, tervehdykset, esittäytyminen ja ensimmäinen vuorovaikutus.", "#B7473C", "#FCE8E5", "#FF9B91"],
@@ -54,6 +55,7 @@ export const LOS_BOOKS: readonly Book[] = specs.map((spec, index) => ({
       ...LOS1_C01_EXAM_EXERCISES.map(exercise => exercise.id),
       ...LOS1_C01_ALTERNATE_EXAM_EXERCISES.map(exercise => exercise.id),
       ...LOS1_C01_EXTRA_EXERCISES.map(exercise => exercise.id),
+      ...LOS1_C01_INTERACTIVE_EXERCISES.map(exercise => exercise.id),
     ],
   } : { ...chapter, sections: emptyChapterSections() }) : [],
   lessons: index === 0 ? LOS1_PLANNED_LESSONS.map(lesson => {
@@ -100,6 +102,7 @@ export const LOS_BOOKS: readonly Book[] = specs.map((spec, index) => ({
         { id: "L004-S03", title: "Täydennä tervehdys muistista", required: true, exerciseId: "los1-c01-ex-greeting-gap" },
         { id: "L004-S04", title: "Yhdistä fraasit ilman mallia", required: true, exerciseId: "los1-c01-ex-greeting-pairs" },
         { id: "L004-S05", title: "Korosta tilanteeseen sopiva ilmaus", required: true, exerciseId: "los1-c01-ex-marker-demo" },
+        { id: "L004-S06", title: "Järjestä hyvästely oikein", required: true, exerciseId: "los1-c01-order-bis-spaeter" },
       ],
     };
     if (lesson.id === "L005") return {
@@ -124,7 +127,7 @@ export const LOS_BOOKS: readonly Book[] = specs.map((spec, index) => ({
     return lesson;
   }) : [],
   blocks: index === 0 ? [...LOS1_INTRO_BLOCKS, ...LOS1_C01_PREVIEW_BLOCKS, ...LOS1_C01_SOURCE_BLOCKS, ...LOS1_C01_GREETING_AUDIO_BLOCKS, ...LOS1_C01_APPLICATION_BLOCKS, ...LOS1_C01_CULTURE_BLOCKS] : [],
-  exercises: index === 0 ? [...LOS1_C01_PREVIEW_EXERCISES, ...LOS1_C01_SOURCE_EXERCISES, ...LOS1_C01_AUDIO_COMPREHENSION_EXERCISES, ...LOS1_C01_EXAM_EXERCISES, ...LOS1_C01_ALTERNATE_EXAM_EXERCISES, ...LOS1_C01_EXTRA_EXERCISES] : [],
+  exercises: index === 0 ? [...LOS1_C01_PREVIEW_EXERCISES, ...LOS1_C01_SOURCE_EXERCISES, ...LOS1_C01_AUDIO_COMPREHENSION_EXERCISES, ...LOS1_C01_EXAM_EXERCISES, ...LOS1_C01_ALTERNATE_EXAM_EXERCISES, ...LOS1_C01_EXTRA_EXERCISES, ...LOS1_C01_INTERACTIVE_EXERCISES] : [],
   chapterTests: index === 0 ? [LOS1_C01_TEST] : [],
   sources: index === 0 ? LOS1_RESEARCH_SOURCES.map(source => source.id === "M-COM-01" ? {
     ...source,
