@@ -72,9 +72,9 @@ function LibraryPage() {
         <BookCover book={book} />
         <strong>LOS! {book.number}</strong><span className="los-card-title">{book.title}</span>
         <small>{book.moduleCode} · {book.credits} op</small>
-        <span className="los-card-status">{book.chapters.some(chapter => chapter.publicationStatus === "preview") ? "Ensimmäinen kappale · harjoitusversio" : "Sisältöä valmistellaan"}</span>
+        <span className="los-card-status">{book.chapters.some(chapter => chapter.publicationStatus === "preview") ? book.chapters.filter(chapter => chapter.publicationStatus === "preview").length + " / " + book.chapters.length + " kappaletta · harjoitusversio" : "Sisältöä valmistellaan"}</span>
       </a>)}</div>
-    <p className="los-library-footnote">Kansikuvia ja varsinaista logoa ei ole vielä toimitettu. LOS! 1:n ensimmäisiä, lähdeviittein merkittyjä oppisisältöjä voi jo avata harjoitusversioina.</p>
+    <p className="los-library-footnote">Harjoitusversion kappaleet ovat avattavissa, mutta kaikki lähdeäänitteet, julkaisuoikeudet ja laitetestit eivät vielä ole valmiita. Kansikuva näytetään vain, jos kirjaan on liitetty toimiva kuvatiedosto.</p>
   </div>;
 }
 function BookHome({ book }: { book: Book }) {
@@ -101,7 +101,18 @@ function BookHome({ book }: { book: Book }) {
       </div>
     </div>
     {book.lessons.some(lesson => lesson.publicationStatus === "preview") ?
-      <p className="los-notice" role="status">LOS! 1:n seitsemässä ensimmäisessä kappaleessa on esikatselusisältöä. Yhteensä 40 ohjattua oppituntia on avattu harjoitusversioiksi, mukaan lukien kertaus I, välikoe sekä C07:n aakkoset ja tavaaminen (L036–L040). C01:n kaksi alkuperäisäänitettä ja niiden tekstit, C02:n Wikibooksin koko alkuperäinen Franz–Greta-pääteksti, sen 20 sekunnin äänite, LOS!:n oma lisäkeskustelu sekä Ariserin koko nelirepliikkinen dialogi ovat luettavissa. C03:n oikean saksankielisen puhujan alkuperäinen Bernan haastattelu on kokonaisena lukuun ottamatta näkyvästi poistettua puhelinnumeroa. Kappaletestit ovat käytettävissä, mutta lähteiden lopullinen toimitus, äänitteiden laitetestaus ja muiden kappaleiden sisällöt ovat vielä kesken.</p> :
+      <p className="los-notice" role="status">
+        LOS! {book.number} on edelleen esikatselussa. Sisältöä on
+        {" "}{book.chapters.filter(chapter => chapter.publicationStatus === "preview").length} / {book.chapters.length} kappaleessa,
+        ja {" "}{book.lessons.filter(lesson => lesson.publicationStatus === "preview").length} / {book.lessons.length}
+        {" "}ohjatussa oppitunnissa on käytettävä harjoitusversio.
+        {book.chapterTests.some(test => test.examType === "final") ?
+          " Myös kirjan loppukokeen harjoitusversio on avattavissa." : ""}
+        {book.lessons.some(lesson => lesson.publicationStatus !== "preview" && lesson.steps.length === 0) ?
+          " Osa oppitunneista odottaa vielä varsinaisen lähteen tai median hyväksymistä." : ""}
+        {" "}Esikatselu ei tarkoita julkaisuvalmista kirjaa: alkuperäisten medioiden laitetestaus,
+        aineiston viimeistely ja synkronoinnin tuotantovarmistus ovat edelleen erillisiä vaiheita.
+      </p> :
       <p className="los-notice" role="status">Oppituntien sisältöä ei ole vielä julkaistu. Etenemistä ei lasketa ennen kuin oikeita opintosuorituksia on saatavilla.</p>}
     <h2 className="los-section-title">Tutustu kirjaan</h2>
     <div className="los-path-cards">
