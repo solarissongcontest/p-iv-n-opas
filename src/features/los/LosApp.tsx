@@ -39,6 +39,7 @@ function SourceNotice({chapter}:{chapter:Chapter}){
  return <p className="los-source"><b>{chapter.sourceId}</b> · {chapter.attribution} · {chapter.license}
   {chapter.sourceUrl?<a href={chapter.sourceUrl} target="_blank" rel="noreferrer"> Lähdetiedot</a>:null}
   {chapter.license==='CC BY-SA 3.0'?<a href="https://creativecommons.org/licenses/by-sa/3.0/" target="_blank" rel="noreferrer"> Lisenssiehdot</a>:null}
+  {chapter.license.startsWith('CC BY 4.0')?<a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noreferrer"> Tekstin CC BY 4.0 -lisenssi</a>:null}
  </p>;
 }
 function Audio({src,title,onFailure,onCompleted}:{src:string;title:string;onFailure?:()=>void;onCompleted?:()=>void}){
@@ -73,12 +74,12 @@ function Media({chapter,store,fontSize=18}:{chapter:Chapter;store:Store;fontSize
  if(chapter.media?.transcript?.length)return <>
   <Label>TEKSTI B · ALKUPERÄINEN IHMISÄÄNITE</Label>
   <h3>{chapter.media.title}</h3>
-  <p>Kuuntele ensin ilman litteraattia. Kuuntele toisen kerran tekstiä seuraten. Kyseessä on lähteessä julkaistu yksittäinen fraasi, ei kokonainen keskustelu.</p>
+  <p>{chapter.media.transcript.length>1?'Kuuntele ensin ilman litteraattia ja toista sitten koko alkuperäinen dialogi tekstin kanssa.':'Kuuntele ensin ilman litteraattia. Tämä äänite sisältää yksittäisen puhutun fraasin, ei kokonaista dialogia.'}</p>
   <Audio src={chapter.media.url} title={chapter.media.title} onCompleted={()=>store.put('media:completed:'+chapter.media!.sourceId,{at:new Date().toISOString(),version:LOS_VERSION})}/>
   <Reader chapter={{...chapter,blocks:chapter.media.transcript}} store={store} fontSize={fontSize}/>
   <p className="los-source"><b>{chapter.media.sourceId}</b> · {chapter.media.attribution} · {chapter.media.license} ·
    <a href={chapter.media.sourceUrl} target="_blank" rel="noreferrer"> Alkuperäinen äänitiedosto</a> ·
-   <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noreferrer"> Lisenssiehdot</a>
+   <a href={chapter.media.license.includes("4.0")?"https://creativecommons.org/licenses/by-sa/4.0/":"https://creativecommons.org/licenses/by-sa/3.0/"} target="_blank" rel="noreferrer"> Lisenssiehdot</a>
   </p>
   <p className="los-meta">Teksti ja äänite ovat kirjan sisällä; toisto ladataan suoraan alkuperäisestä Wikimedia Commonsin tiedostosta. Laitetestit ovat vielä tekemättä.</p>
  </>;
