@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Bookmark, BookOpen, Check, CircleAlert, Download, FileText, RotateCcw } from "lucide-react";
 import { losExercisesFor, losIsCorrect, losScore, type LosExercise } from "./exerciseBank";
 import { useLosChapterDraft } from "./studyState";
@@ -50,13 +49,13 @@ const selfAssessments:Record<string,string> = {
   "10":"Esitä ääneen kaksi erilaista 6–8 repliikin kohtaamista, toinen du- ja toinen Sie-puhuttelulla. Esittele myös kolmas henkilö neljällä omalla virkkeellä ja arvioi, mitä osasit ilman mallia.",
 };
 
-export function LosWorkbook({chapter,mode}:{chapter:LosChapter;mode:"practice"|"test"}) {
+export function LosWorkbook({chapter,mode,embedded=false}:{chapter:LosChapter;mode:"practice"|"test";embedded?:boolean}) {
   const {draft,update,saved}=useLosChapterDraft(1,chapter.id);
   const exercises=losExercisesFor(chapter.id);
-  const [revealPractice,setRevealPractice]=useState<string[]>([]);
+  const revealPractice=draft.practiceChecked;
   if(!exercises.length) return <section className="los-inner-page los-workbook">
     <p className="los-eyebrow">{mode==="test"?"WIEDERHOLEN":"ÜBEN"} / KAPITEL {Number(chapter.id)}</p>
-    <h1>{mode==="test"?"Kappaletesti":"Harjoittele"}</h1>
+    {embedded ? <h2 className="los-v33-embedded-heading">{mode==="test"?"Kappaletesti":"Harjoittele"}</h2> : <h1>{mode==="test"?"Kappaletesti":"Harjoittele"}</h1>}
     <div className="los-editorial-note"><h2>Tehtäväsarja valmistellaan</h2>
     <p>Tälle kappaleelle ei vielä ole julkaistu tarkistettua, kokonaisuudessaan arvioitavaa tehtäväsarjaa. Kappaleen sisältösivut ovat vapaasti luettavissa.</p></div>
   </section>;
@@ -68,12 +67,11 @@ export function LosWorkbook({chapter,mode}:{chapter:LosChapter;mode:"practice"|"
     if(locked)return;
     update(current=>mode==="test"?
       {...current,testAnswers:{...current.testAnswers,[id]:value}}:
-      {...current,practiceAnswers:{...current.practiceAnswers,[id]:value}});
-    if(mode==="practice")setRevealPractice(prev=>prev.filter(key=>key!==id));
+      {...current,practiceAnswers:{...current.practiceAnswers,[id]:value},practiceChecked:current.practiceChecked.filter(key=>key!==id)});
   };
   return <section className="los-inner-page los-workbook">
     <p className="los-eyebrow">{mode==="test"?"WIEDERHOLEN / KAPPALETESTI":"ÜBEN / HARJOITTELE"} · KAPITEL {Number(chapter.id)}</p>
-    <h1>{mode==="test"?"Kappaletesti":"Harjoittele"}</h1>
+    {embedded ? <h2 className="los-v33-embedded-heading">{mode==="test"?"Kappaletesti":"Harjoittele"}</h2> : <h1>{mode==="test"?"Kappaletesti":"Harjoittele"}</h1>}
     <p className="los-page-intro">{mode==="test"?
       "Vastaa kaikkiin tehtäviin ilman näkyvää mallia. Saat ratkaisut ja perustelut vasta palautettuasi koko testin.":
       "Harjoittele jokainen tehtävä rauhassa. Harjoitustilassa voit nähdä perustelun heti vastauksen jälkeen. Voit tehdä tehtävät uudelleen."}</p>
@@ -89,10 +87,10 @@ export function LosWorkbook({chapter,mode}:{chapter:LosChapter;mode:"practice"|"
         onValue={value=>updateAnswer(item.id,value)} />)}
     </ol>
     {mode==="practice"?<div className="los-workbook-tools">
-      <button className="los-outline-button" onClick={()=>setRevealPractice(exercises.filter(ex=>Boolean(answers[ex.id]?.trim())).map(ex=>ex.id))} disabled={!filled}>
+      <button className="los-outline-button" onClick={()=>update(current=>({...current,practiceChecked:exercises.filter(ex=>Boolean(current.practiceAnswers[ex.id]?.trim())).map(ex=>ex.id)}))} disabled={!filled}>
         <Check size={17}/> Tarkista vastatut ({filled})
       </button>
-      <button className="los-text-link" onClick={()=>{update(current=>({...current,practiceAnswers:{}}));setRevealPractice([]);}}>
+      <button className="los-text-link" onClick={()=>update(current=>({...current,practiceAnswers:{},practiceChecked:[]}))}>
         <RotateCcw size={16}/> Tyhjennä harjoitusvastaukset
       </button>
     </div>:locked?<div className="los-test-result" role="status">

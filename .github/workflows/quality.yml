@@ -68,3 +68,39 @@ jobs:
 
       - name: Build with Bun
         run: bun run build
+
+  los-browser-smoke:
+    if: github.event_name == 'pull_request' && startsWith(github.head_ref, 'feat/los-')
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.55.0-noble
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install project and browser test dependencies
+        run: npm install --no-save --legacy-peer-deps @playwright/test@1.55.0
+      - name: Start local app
+        run: |
+          npm run dev -- --host 127.0.0.1 --port 4173 > /tmp/los-vite.log 2>&1 &
+          for attempt in $(seq 1 60); do
+            if curl -fsS http://127.0.0.1:4173/los > /dev/null; then exit 0; fi
+            sleep 2
+          done
+          cat /tmp/los-vite.log
+          exit 1
+      - name: Browser test LOS! desktop and mobile
+        env:
+          E2E_BASE_URL: http://127.0.0.1:4173
+        run: npx playwright test e2e/los-v33.spec.ts --project=desktop-chromium
+      - name: Preserve browser failures
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: los-v33-browser-traces
+          path: test-results/
+          if-no-files-found: ignore

@@ -1,17 +1,19 @@
-import { useEffect, useMemo, useState, type CSSProperties } from "react";
-import { ArrowLeft, ArrowRight, BookOpen, ChevronLeft, ChevronRight, Headphones, List, Menu, Search, X } from "lucide-react";
+import { useCallback, useEffect, useMemo, useState, type CSSProperties } from "react";
+import { ArrowLeft, ArrowRight, BookOpen, ChevronLeft, ChevronRight, Headphones, List, Menu, Search, Settings2, X } from "lucide-react";
 import { readCachedDeviceUser } from "@/lib/deviceSession";
 import { LOS_BOOKS, type LosBookDefinition, type LosChapter } from "./catalog";
 import { LosAuthenticAudio, LosDictionary, LosIndexSearch, LosLearningPath, type LosDestination } from "./LosReferenceTools";
 import { LosChapterGrammar } from "./LosGrammarChapters";
 import { LosNotebook, LosWorkbook } from "./LosWorkbook";
 import { LosBackups } from "./LosBackups";
+import { LosBookBanner, LosContentsTree } from "./LosV33";
 import { LosApplication, LosCulture, LosTextB, LosUnderstanding } from "./LosSupplementalSections";
 import "./los-book.css";
 import "./los-appendix.css";
 import "./los-workbook.css";
 import "./los-cloud.css";
 import "./los-backups.css";
+import "./los-v33.css";
 
 type LosSection = LosDestination;
 type LosLocation = { book: number | null; chapter: string | null; section: LosSection };
@@ -97,28 +99,22 @@ function SeriesView({ openBook }: { openBook: (id: number) => void }) {
         <small>{book.code} · {book.module}</small>
       </button>)}
     </div>
-    <p className="los-library-footnote">Kirjasarjan taitto on käytössä. LOS! 1:n sisällysluettelon runko on tuotu suunnitelmasta; varsinaiset alkuperäistekstit ja äänitteet julkaistaan vain oikeus- ja laatutarkistuksen jälkeen. Kannet näyttävät hyväksytyt kuvat, kun ne lisätään sovelluksen kuvatiedostoihin.</p>
+    <p className="los-library-footnote">Kirjasarjan taitto on käytössä. LOS! 1:n sisällysluettelon runko on tuotu suunnitelmasta; varsinaiset alkuperäistekstit ja äänitteet julkaistaan vain oikeus- ja laatutarkistuksen jälkeen. LOS! 1:n hyväksytty kansi ja banneri on liitetty kirjaan. Muiden kirjojen kuvitus täydentyy niiden hyväksyttyjen materiaalien mukana.</p>
   </div>;
 }
 function BookFront({ book, move }: { book: LosBookDefinition; move: (chapter: string | null, section: LosSection) => void }) {
   return <>
-    <div className={`los-front ${book.id === 1 ? "los-front-has-banner" : ""}`}>
-      {book.id === 1 ? (
-        <div className="los-front-banner">
-          <img src="/los/los-1-banner.jpeg" alt="LOS! 1 -kirjan kuvallinen banneri" loading="eager" />
-        </div>
-      ) : (
-        <div className="los-front-cover"><BookCover book={book} large /></div>
-      )}
+    <div className="los-front los-front-v33">
+      {book.id === 1 && <LosBookBanner book={book} />}
       <div className="los-front-copy">
-        {book.id === 1 && <div className="los-front-mini-cover"><BookCover book={book} /></div>}
+        <div className="los-front-cover los-v33-info-cover"><BookCover book={book} /></div>
         <p className="los-eyebrow">LOS! {book.id} / {book.code} / 2 op</p>
         <h1>{book.title}</h1>
         <div className="los-front-rule" />
         <p className="los-front-lead">{book.summary}</p>
         <p className="los-front-meta">{book.module} · LOPS21 · Saksa B3</p>
-        <button className="los-primary" onClick={() => move(null, "contents")}>Avaa sisällysluettelo <ArrowRight size={18} /></button>
-        {book.chapters.length > 0 && <button className="los-text-link" onClick={() => move("01", "chapter")}>Aloita kappaleesta 1 <ChevronRight size={17} /></button>}
+        {book.chapters.length > 0 ? <button className="los-primary" onClick={() => move("01", "chapter")}>Aloita kappaleesta 1 <ArrowRight size={18} /></button> : <button className="los-primary" onClick={() => move(null, "contents")}>Tutustu kirjaan <ArrowRight size={18} /></button>}
+        <button className="los-text-link" onClick={() => move(null, "contents")}>Avaa sisällysluettelo <ChevronRight size={17} /></button>
       </div>
     </div>
     <div className="los-front-after">
@@ -257,43 +253,112 @@ function Appendix({ book }: { book: LosBookDefinition }) {
     <LosBackups bookId={book.id} />
   </section>;
 }
+type LosReaderPreferences = { size: number; leading: number; width: "narrow" | "normal" | "wide" };
+const DEFAULT_READER_PREFERENCES: LosReaderPreferences = { size: 18, leading: 1.75, width: "normal" };
+function readReaderPreferences(): LosReaderPreferences {
+  if (typeof window === "undefined") return DEFAULT_READER_PREFERENCES;
+  try {
+    const source = JSON.parse(localStorage.getItem("los.reader.prefs.v1") ?? "{}") as Partial<LosReaderPreferences>;
+    return {
+      size: typeof source.size === "number" && source.size >= 16 && source.size <= 24 ? source.size : 18,
+      leading: typeof source.leading === "number" && source.leading >= 1.4 && source.leading <= 1.9 ? source.leading : 1.75,
+      width: source.width === "narrow" || source.width === "normal" || source.width === "wide" ? source.width : "normal",
+    };
+  } catch { return DEFAULT_READER_PREFERENCES; }
+}
+
 function LosBookWorkspace({ book, location, move, goLibrary, openBook }: { book: LosBookDefinition; location: LosLocation; move: (chapter: string | null, section: LosSection) => void; goLibrary: () => void; openBook: (id: number) => void }) {
   const chapter = book.chapters.find(c => c.id === location.chapter) ?? null;
   const [tocOpen, setTocOpen] = useState(false);
+  const [desktopToc, setDesktopToc] = useState(true);
+  const [splitView, setSplitView] = useState(false);
+  const [pendingExercise, setPendingExercise] = useState<string | null>(null);
+  const [focusMode, setFocusMode] = useState(false);
+  const [readerPreferences, setReaderPreferences] = useState<LosReaderPreferences>(readReaderPreferences);
+  useEffect(() => { try { localStorage.setItem("los.reader.prefs.v1", JSON.stringify(readerPreferences)); } catch { /* Storage is optional for appearance settings. */ } }, [readerPreferences]);
+  const closeToc = useCallback(() => setTocOpen(false), []);
   useEffect(() => setTocOpen(false), [location]);
+  useEffect(() => { if (!tocOpen) return; const onEscape = (event: KeyboardEvent) => { if (event.key === "Escape") setTocOpen(false); }; window.addEventListener("keydown", onEscape); return () => window.removeEventListener("keydown", onEscape); }, [tocOpen]);
   const openChapter = (ch: LosChapter) => move(ch.id, "chapter");
+  const openExercise = (chapterId: string, exerciseId: string) => {
+    setPendingExercise(exerciseId);
+    move(chapterId, "practice");
+  };
+  useEffect(() => {
+    if (!pendingExercise || location.section !== "practice" || !chapter) return;
+    const target = document.getElementById(pendingExercise);
+    if (!target) return;
+    target.scrollIntoView({
+      behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+      block: "start",
+    });
+    setPendingExercise(null);
+  }, [pendingExercise, chapter, location.section]);
   const previousIndex = chapter ? book.chapters.findIndex(c => c.id === chapter.id) : -1;
   const next = previousIndex >= 0 ? book.chapters[previousIndex + 1] : null;
   const previous = previousIndex > 0 ? book.chapters[previousIndex - 1] : null;
   const section = chapter ? location.section : ["contents", "appendix", "dictionary", "path", "search"].includes(location.section) ? location.section : "overview";
-  return <div className="los-book-workspace" style={bookStyle(book)}>
+  const sectionIndex = chapter ? sections.findIndex(item => item.id === section) : -1;
+  const previousSection = sectionIndex > 0 ? sections[sectionIndex - 1] : null;
+  const nextSection = sectionIndex >= 0 && sectionIndex < sections.length - 1 ? sections[sectionIndex + 1] : null;
+  return <div className={"los-book-workspace" + (!desktopToc ? " los-v33-no-sidebar" : "") + (focusMode ? " los-v33-focus-mode" : "")}
+    style={{
+      ...bookStyle(book),
+      "--los-reader-text-size": readerPreferences.size + "px",
+      "--los-reader-line-height": readerPreferences.leading,
+      "--los-reader-page-width": readerPreferences.width === "narrow" ? "700px" : readerPreferences.width === "wide" ? "1000px" : "846px",
+    } as CSSProperties}>
     <header className="los-book-topbar">
       <button className="los-back-library" onClick={goLibrary} aria-label="Takaisin kirjasarjaan"><ChevronLeft size={19} /> <span>Kirjasarja</span></button>
       <button className="los-top-title" onClick={() => move(null, "overview")}><Brand compact /><span> / {book.id} <span className="los-top-separator">·</span> {book.code}</span></button>
-      <div className="los-top-actions"><button className="los-top-search" onClick={() => move(null, "search")} aria-label="Hae oppikirjasta"><Search size={19}/></button><button className="los-top-toc" onClick={() => setTocOpen(v => !v)} aria-expanded={tocOpen} aria-controls="los-mobile-toc">{tocOpen ? <X size={19} /> : <Menu size={19} />}<span>Sisältö</span></button></div>
+      <div className="los-top-actions"><button className="los-v33-desktop-toc" onClick={() => setDesktopToc(value => !value)} aria-expanded={desktopToc} aria-controls="los-mobile-toc" aria-label={desktopToc ? "Sulje sisällysluettelo" : "Avaa sisällysluettelo"}><List size={19}/><span>Sisältö</span></button><button className="los-top-search" onClick={() => move(null, "search")} aria-label="Hae oppikirjasta"><Search size={19}/></button>
+        <button className="los-v33-dictionary-button" onClick={() => move(null, "dictionary")} aria-label="Avaa sanakirja"><BookOpen size={19}/><span>Sanakirja</span></button>
+        {chapter && <button className="los-v33-focus-toggle" onClick={() => setFocusMode(value => !value)} aria-pressed={focusMode}><BookOpen size={18}/><span>{focusMode ? "Poistu lukutilasta" : "Lukutila"}</span></button>}
+        <details className="los-v33-settings-menu">
+          <summary aria-label="Lukuasetukset" title="Lukuasetukset"><Settings2 size={19}/><span>Asetukset</span></summary>
+          <div className="los-v33-settings-panel">
+            <h2>Lukuasetukset</h2>
+            <label>Tekstin koko <output>{readerPreferences.size} px</output>
+              <input aria-label="Tekstin koko" type="range" min="16" max="24" step="1" value={readerPreferences.size}
+                onChange={event => setReaderPreferences(current => ({...current, size: Number(event.target.value)}))}/>
+            </label>
+            <label>Riviväli <output>{readerPreferences.leading.toFixed(2)}</output>
+              <input aria-label="Riviväli" type="range" min="1.4" max="1.9" step="0.05" value={readerPreferences.leading}
+                onChange={event => setReaderPreferences(current => ({...current, leading: Number(event.target.value)}))}/>
+            </label>
+            <label>Lukuleveys
+              <select aria-label="Lukuleveys" value={readerPreferences.width}
+                onChange={event => setReaderPreferences(current => ({...current, width: event.target.value as LosReaderPreferences["width"]}))}>
+                <option value="narrow">Kapea</option><option value="normal">Normaali</option><option value="wide">Leveä</option>
+              </select>
+            </label>
+            <button type="button" className="los-v33-reset-settings" onClick={() => setReaderPreferences(DEFAULT_READER_PREFERENCES)}>Palauta oletukset</button>
+          </div>
+        </details>
+        <button className="los-top-toc" onClick={() => setTocOpen(v => !v)} aria-expanded={tocOpen} aria-controls="los-mobile-toc">{tocOpen ? <X size={19} /> : <Menu size={19} />}<span>Sisältö</span></button></div>
     </header>
     <div className="los-book-layout">
-      <aside className={`los-book-sidebar ${tocOpen ? "is-open" : ""}`} id="los-mobile-toc" aria-label="Kirjan sisällysluettelo">
-        <button className="los-sidebar-book" onClick={() => move(null, "overview")}><BookCover book={book} /><span><b>LOS! {book.id}</b><small>{book.title}</small></span></button>
-        <div className="los-sidebar-heading">KIRJAN SIVUT</div>
-        <nav>
-          <button className={section === "contents" ? "is-active" : ""} onClick={() => move(null, "contents")}>Sisällysluettelo</button>
-          {book.chapters.map(ch => <button key={ch.id} className={chapter?.id === ch.id ? "is-active" : ""} onClick={() => openChapter(ch)}><span className="los-sidebar-num">{ch.id}</span><span lang="de">{ch.title}</span></button>)}
-          <div className="los-sidebar-heading">HAKEMISTOT</div>
-          <button className={section === "path" ? "is-active" : ""} onClick={() => move(null, "path")}>Ohjattu opetuspolku</button>
-          <button className={section === "dictionary" ? "is-active" : ""} onClick={() => move(null, "dictionary")}>Sanakirja</button>
-          <button className={section === "search" ? "is-active" : ""} onClick={() => move(null, "search")}>Hae kirjasta</button>
-          <button className={section === "appendix" ? "is-active" : ""} onClick={() => move(null, "appendix")}>Kirjan liitteet</button>
-        </nav>
-        <a className="los-sidebar-exit" href="/studies">Palaa Opintopäiväkirjaan <ArrowRight size={15} /></a>
-      </aside>
+      <LosContentsTree book={book} chapterId={chapter?.id ?? null} section={section} sections={sections}
+        cover={<BookCover book={book} />} isOpen={tocOpen} close={closeToc}
+        navigate={move} navigateExercise={openExercise} />
       <main className="los-book-main" id="main-content" tabIndex={-1}>
         <div className="los-main-breadcrumb"><button onClick={() => move(null, "overview")}>LOS! {book.id}</button>{chapter ? <><ChevronRight size={12} /><button onClick={() => openChapter(chapter)}>Kappale {Number(chapter.id)}</button></> : null}{chapter && section !== "chapter" ? <><ChevronRight size={12} /><span>{sections.find(s => s.id === section)?.label}</span></> : null}</div>
         {chapter && section !== "overview" && section !== "contents" && section !== "appendix" && <nav className="los-section-nav" aria-label="Kappaleen osiot">
           {sections.map(item => <button key={item.id} className={section === item.id ? "is-active" : ""} onClick={() => move(chapter.id, item.id)}>{item.label}</button>)}
         </nav>}
-        <div className="los-book-paper">
-          {!chapter && section === "overview" ? <BookFront book={book} move={move} /> :
+        {chapter && (section === "text" || section === "grammar" || section === "practice") && <div className="los-v33-view-toggle">
+          <span>{splitView ? "Teksti ja tehtävät" : "Oppikirjan lukunäkymä"}</span>
+          <button type="button" onClick={() => setSplitView(value => !value)} aria-pressed={splitView}>
+            <BookOpen size={17} /> {splitView ? "Tavallinen näkymä" : "Kirja + tehtävät"}
+          </button>
+        </div>}
+        <div className={"los-book-paper" + (!chapter && section === "overview" ? " los-v33-front-paper" : "") + (chapter && splitView && (section === "text" || section === "grammar" || section === "practice") ? " los-v33-split-paper" : "")}>
+          {chapter && splitView && (section === "text" || section === "grammar" || section === "practice") ?
+            <div className="los-v33-split">
+              <div className="los-v33-text-column">{section === "text" ? <TextPage chapter={chapter} /> : <Grammar chapter={chapter} />}</div>
+              <div className="los-v33-exercise-column"><LosWorkbook key={"split-practice-" + chapter.id} chapter={chapter} mode="practice" embedded /></div>
+            </div> :
+            !chapter && section === "overview" ? <BookFront book={book} move={move} /> :
             section === "contents" ? <Contents book={book} move={move} /> :
             section === "appendix" ? <Appendix book={book} /> :
             section === "path" ? <LosLearningPath book={book} move={move} /> :
@@ -312,11 +377,19 @@ function LosBookWorkspace({ book, location, move, goLibrary, openBook }: { book:
               <ChapterOpening book={book} chapter={chapter} move={move} />
             ) : <Contents book={book} move={move} />}
         </div>
+        {chapter && <nav className="los-v33-section-pager" aria-label="Siirry kappaleen osioissa">
+          {previousSection
+            ? <button type="button" onClick={() => move(chapter.id, previousSection.id)}>
+                <ChevronLeft size={19} /><span><small>Edellinen osio</small><strong>{previousSection.label}</strong></span>
+              </button>
+            : previous ? <button type="button" onClick={() => openChapter(previous)}><ChevronLeft size={19} /><span><small>Edellinen kappale</small><strong lang="de">{previous.title}</strong></span></button> : <span />}
+          {nextSection
+            ? <button type="button" onClick={() => move(chapter.id, nextSection.id)}>
+                <span><small>Seuraava osio</small><strong>{nextSection.label}</strong></span><ChevronRight size={19} />
+              </button>
+            : next ? <button type="button" onClick={() => openChapter(next)}><span><small>Seuraava kappale</small><strong lang="de">{next.title}</strong></span><ChevronRight size={19} /></button> : <span />}
+        </nav>}
         {chapter && <LosNotebook key={`notes-${chapter.id}`} chapter={chapter} />}
-        {chapter && <div className="los-pagination">
-          {previous ? <button onClick={() => openChapter(previous)}><ChevronLeft size={18} /><span>Edellinen kappale<small lang="de">{previous.title}</small></span></button> : <span />}
-          {next ? <button onClick={() => openChapter(next)}><span>Seuraava kappale<small lang="de">{next.title}</small></span><ChevronRight size={18} /></button> : <button onClick={() => move(null, "appendix")}>Kirjan liitteet <ChevronRight size={18} /></button>}
-        </div>}
         <footer className="los-page-footer">LOS! · {book.code} · {book.module} <span>Kappaleiden varmistettuja aineistoja täydennetään</span></footer>
       </main>
     </div>
