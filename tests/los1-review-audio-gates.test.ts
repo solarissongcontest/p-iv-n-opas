@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import {readReviewEntry,createReviewEntry,scheduleReviewEntry,reviewIsDue} from '../src/features/los/reviewSchedule.ts';
-import {canSubmitExerciseAttempt,exerciseAudioProof} from '../src/features/los/exerciseAttempt.ts';
+import {canSubmitExerciseAttempt,exerciseAudioProof,hasValidAudioProof} from '../src/features/los/exerciseAttempt.ts';
 import {chapters} from '../src/features/los/content.ts';
 import {allChapterExercises} from '../src/features/los/practiceExtras.ts';
 
@@ -58,4 +58,15 @@ test('listening writing also requires an authentic completed recording, while no
  assert.equal(canSubmitExerciseAttempt(listenWrite,'Ich verstehe nicht.',null,false,false),false);
  assert.equal(canSubmitExerciseAttempt(listenWrite,'Ich verstehe nicht.',null,false,true),true);
  assert.equal(canSubmitExerciseAttempt(writing,'Ich verstehe nicht. Noch einmal, bitte!',null,false,false),true);
+});
+
+
+test('listening receipts from old versions or other sources never unlock this source audio',()=>{
+ const url='https://commons.wikimedia.org/wiki/Special:Redirect/file/De-Ich_verstehe_nicht.oga';
+ const fresh={at:'2026-11-11T12:00:00.000Z',version:'los1-2026-11',source:url};
+ assert.equal(hasValidAudioProof(fresh,url,'los1-2026-11'),true);
+ assert.equal(hasValidAudioProof(fresh,url,'los1-2027-02'),false);
+ assert.equal(hasValidAudioProof(fresh,url+'?changed','los1-2026-11'),false);
+ assert.equal(hasValidAudioProof({version:'los1-2026-11',source:url},url,'los1-2026-11'),false);
+ assert.equal(hasValidAudioProof(true,url,'los1-2026-11'),false);
 });
