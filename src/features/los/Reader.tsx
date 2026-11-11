@@ -21,7 +21,7 @@ function Attribution({ source }: { source: SourceAttribution | undefined }) {
 }
 function SafeMedia({ block, source, onMediaStarted }: {
   block: Extract<ContentBlock, { kind: "media" }>; source: SourceAttribution | undefined;
-  onMediaStarted?: (blockId: string) => void;
+  onMediaStarted?: ((blockId: string) => void) | undefined;
 }) {
   const [failed, setFailed] = useState(false);
   let validVideo = false;
@@ -137,7 +137,7 @@ function RenderBlock({ block, bookId, source, marked, highlighterEnabled, glossa
   onLookup: (entry: GlossaryEntry) => void;
   onSelection: (block: ContentBlock, start: number, end: number) => void;
   onNote: (block: ContentBlock) => void;
-  onMediaStarted?: (blockId: string) => void;
+  onMediaStarted?: ((blockId: string) => void) | undefined;
 }) {
   const markedText = (text: string, offset = 0) => {
     if (!marked || marked.end <= offset || marked.start >= offset + text.length) return text;
@@ -261,7 +261,7 @@ function RenderBlock({ block, bookId, source, marked, highlighterEnabled, glossa
 
 export function Reader({ book, blocks, title, headingLevel = 2, onMediaStarted }: {
   book: Book; blocks: ContentBlock[]; title: string; headingLevel?: 1 | 2;
-  onMediaStarted?: (blockId: string) => void;
+  onMediaStarted?: ((blockId: string) => void) | undefined;
 }) {
   const { value: readerPreferences, update: updateReaderPreferences } = useLosRecord(
     book.id, "preferences", "reader-settings", "1.0.0", { fontSize: 18, lineHeight: 1.75 },
