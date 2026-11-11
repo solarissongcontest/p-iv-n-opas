@@ -26,6 +26,7 @@ import settingsCss from "../styles/settings.css?url";
 import overlaysCss from "../styles/overlays.css?url";
 import studyosCss from "../styles/studyos.css?url";
 import studyosMapCss from "../styles/studyos-map.css?url";
+import losCss from "../styles/los.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { PwaUpdatePrompt } from "../components/PwaUpdatePrompt";
 
@@ -106,6 +107,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "stylesheet", href: overlaysCss },
       { rel: "stylesheet", href: studyosCss },
       { rel: "stylesheet", href: studyosMapCss },
+      { rel: "stylesheet", href: losCss },
       { rel: "icon", href: "/app-icon-180.png", type: "image/png", sizes: "180x180" },
       { rel: "shortcut icon", href: "/app-icon-180.png", type: "image/png" },
       { rel: "manifest", href: "/manifest.webmanifest" },

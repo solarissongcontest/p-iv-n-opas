@@ -29,6 +29,7 @@ type AppShellProps = {
   onLog: () => void;
   onSearch: () => void;
   contextualAction?: ReactNode;
+  contextHeader?: boolean;
   children: ReactNode;
 };
 
@@ -73,6 +74,7 @@ export function AppShell({
   onLog,
   onSearch,
   contextualAction,
+  contextHeader = true,
   children,
 }: AppShellProps) {
   return (
@@ -92,7 +94,7 @@ export function AppShell({
         tabIndex={-1}
         className={"studyos-main " + (contextualAction ? "app-main-has-context-action" : "")}
       >
-        {!isCorePage(page) && (
+        {contextHeader && !isCorePage(page) && (
           <header className="studyos-context-header">
             <p>{pageEyebrow}</p>
             <h1>{pageTitle}</h1>

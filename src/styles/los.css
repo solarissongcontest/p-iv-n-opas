@@ -1,0 +1,993 @@
+/* LOS! scoped design system. Never overrides StudyOS's global color tokens. */
+.los-app {
+  --los-bg: #f7f7f5;
+  --los-surface: #fff;
+  --los-surface-muted: #f3f4f3;
+  --los-surface-raised: #fff;
+  --los-ink: #1f2933;
+  --los-ink-secondary: #556371;
+  --los-ink-tertiary: #697684;
+  --los-border: #e2e5e5;
+  --los-border-strong: #c3cbcd;
+  --los-focus: #1d5bc4;
+  --los-success: #216d53;
+  --los-success-bg: #e6f5ee;
+  --los-warning: #8b5c1a;
+  --los-warning-bg: #fff3d8;
+  --los-danger: #ab3743;
+  --los-danger-bg: #fceaed;
+  --los-book-accent: #b43d33;
+  --los-book-accent-light: #b43d33;
+  --los-book-accent-dark: #ff9b91;
+  --los-book-accent-readable: var(--los-book-accent-light);
+  --los-book-tint: #fce8e5;
+  width: 100%;
+  max-width: 1440px;
+  margin-inline: auto;
+  padding: clamp(16px, 2.6vw, 40px);
+  background: var(--los-bg);
+  border: 1px solid var(--los-border);
+  border-radius: 18px;
+  color: var(--los-ink);
+  font: 400 16px/1.65 Inter, system-ui, sans-serif;
+  min-width: 0;
+}
+.dark .los-app {
+  --los-bg: #11161d;
+  --los-surface: #1a222b;
+  --los-surface-muted: #222d37;
+  --los-surface-raised: #283440;
+  --los-ink: #f2f5f5;
+  --los-ink-secondary: #bcc7cf;
+  --los-ink-tertiary: #9aaab6;
+  --los-border: #37434f;
+  --los-border-strong: #5b6b78;
+  --los-focus: #8ab5ff;
+  --los-success: #7ddbb4;
+  --los-success-bg: #173b31;
+  --los-warning: #f0c779;
+  --los-warning-bg: #42331d;
+  --los-danger: #ff9da5;
+  --los-danger-bg: #4b252c;
+  --los-book-accent-readable: var(--los-book-accent-dark);
+}
+.page-content-courses:has(.los-app) { width: 100%; max-width: 1440px; }
+.los-app *, .los-app *::before, .los-app *::after { box-sizing: border-box; }
+.los-app a { color: inherit; text-decoration: none; }
+.los-app button, .los-app input, .los-app textarea { font: inherit; }
+.los-app button { cursor: pointer; }
+.los-app button:disabled { cursor: not-allowed; color: var(--los-ink-tertiary); }
+.los-app :is(a, button, input, textarea, summary):focus-visible, .los-studies-entry:focus-visible {
+  outline: 3px solid var(--los-focus);
+  outline-offset: 3px;
+}
+.los-app h1 { font-size: 34px; line-height: 1.18; font-weight: 720; letter-spacing: -.02em; margin: 0 0 12px; }
+.los-app h2 { font-size: 26px; line-height: 1.25; font-weight: 700; margin: 0 0 16px; }
+.los-app h3 { font-size: 20px; line-height: 1.35; font-weight: 650; margin: 0 0 12px; }
+.los-app p { margin: 0 0 16px; }
+.los-app small { color: var(--los-ink-secondary); font-size: 13px; line-height: 1.4; }
+.los-eyebrow { font-size: 12px; font-weight: 700; letter-spacing: .085em; color: var(--los-ink-secondary); text-transform: uppercase; }
+.los-intro { max-width: 68ch; color: var(--los-ink-secondary); }
+.los-section-title { margin-top: 40px !important; margin-bottom: 20px !important; }
+.los-context {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  min-height: 48px; border-bottom: 1px solid var(--los-border); margin-bottom: 24px;
+  color: var(--los-ink-secondary); font-size: 13px;
+}
+.los-context a { display: inline-flex; align-items: center; min-height: 44px; gap: 8px; font-weight: 600; }
+.los-context a:hover { color: var(--los-book-accent-readable); }
+.los-library-heading { max-width: 630px; margin-bottom: 36px; }
+.los-library-heading > p:last-child { color: var(--los-ink-secondary); }
+.los-brand-label { display: inline-block; font-size: 32px; font-weight: 800; letter-spacing: -.05em; margin: 2px 0 10px !important; }
+.los-library-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 24px; }
+.los-book-card {
+  display: flex; flex-direction: column; align-items: stretch; min-width: 0;
+  gap: 4px; padding: 12px; border: 1px solid transparent; border-radius: 14px;
+  background: var(--los-surface); transition: transform .14s ease, border-color .14s ease;
+}
+@media (hover: hover) {
+  .los-book-card:hover { transform: translateY(-2px); border-color: var(--los-book-accent); }
+}
+.dark .los-book-card { --los-book-accent-readable: var(--los-book-accent-dark); }
+.los-book-card > strong { margin-top: 10px; font-size: 16px; }
+.los-card-title { font-size: 15px; line-height: 1.4; min-height: 2.8em; font-weight: 500; }
+.los-card-status { font-size: 12px; color: var(--los-ink-secondary); margin-top: 4px; }
+.los-library-footnote { margin-top: 28px !important; color: var(--los-ink-secondary); font-size: 13px; max-width: 70ch; }
+.los-cover { aspect-ratio: 5 / 7; width: 100%; min-width: 0; overflow: hidden; border-radius: 10px; background: var(--los-surface-muted); }
+.los-cover > img { display: block; width: 100%; height: 100%; object-fit: contain; }
+.los-cover-unavailable {
+  display: flex; flex-direction: column; align-items: center; justify-content: space-between; gap: 12px;
+  width: 100%; height: 100%; padding: 20px 10px; border: 1px dashed var(--los-border-strong);
+  color: var(--los-ink-secondary); text-align: center;
+}
+.los-cover-unavailable span:first-child { color: var(--los-book-accent-readable); font-size: 14px; font-weight: 700; }
+.los-cover-unavailable span:last-child { font-size: 12px; max-width: 14ch; line-height: 1.5; }
+.los-cover.is-compact { width: 36px; height: 50px; flex: 0 0 36px; border-radius: 4px; }
+.los-cover.is-compact .los-cover-unavailable { padding: 4px; }
+.los-cover.is-compact .los-cover-unavailable span:last-child { display: none; }
+.los-cover.is-compact .los-cover-unavailable span:first-child { font-size: 8px; }
+.los-book-grid { display: grid; grid-template-columns: 248px minmax(0, 1fr); gap: 32px; align-items: start; }
+.los-book-sidebar { position: sticky; top: 72px; min-width: 0; }
+.los-sidebar-brand { display: flex; align-items: center; gap: 12px; padding: 10px 0 20px; border-bottom: 1px solid var(--los-border); }
+.los-sidebar-brand span { display: grid; gap: 2px; min-width: 0; font-size: 14px; line-height: 1.4; }
+.los-sidebar-brand small { max-width: 19ch; }
+.los-nav { padding-top: 12px; display: grid; gap: 2px; }
+.los-nav a { display: flex; align-items: center; min-height: 44px; padding: 8px 12px;
+  border-left: 3px solid transparent; border-radius: 0 8px 8px 0; font-size: 14px; color: var(--los-ink-secondary); }
+.los-nav a:hover { background: var(--los-surface-muted); color: var(--los-ink); }
+.los-nav a[aria-current="page"] { border-left-color: var(--los-book-accent); background: var(--los-book-tint); color: #25303a; font-weight: 700; }
+.dark .los-nav a[aria-current="page"] { background: var(--los-surface-muted); color: var(--los-book-accent-readable); }
+.los-book-mobile-nav { display: none; }
+.los-main-content { min-width: 0; max-width: 100%; }
+.los-book-hero { display: grid; grid-template-columns: 160px minmax(0, 1fr); gap: 30px;
+  align-items: center; border: 1px solid var(--los-border); border-radius: 18px;
+  padding: 28px; background: var(--los-surface); border-top: 4px solid var(--los-book-accent); }
+.los-book-hero > div:last-child { min-width: 0; }
+.los-book-hero h1 { max-width: 25ch; }
+.los-book-hero .los-cover { width: 160px; max-width: 100%; }
+.los-banner { display: block; max-width: 960px; width: 100%; height: auto; margin: 0 auto 24px; border-radius: 14px; }
+.los-button { display: inline-flex; gap: 9px; align-items: center; justify-content: center;
+  min-height: 44px; border-radius: 10px; padding: 10px 18px; border: 1px solid var(--los-border-strong);
+  font-size: 15px; font-weight: 650; line-height: 1.3; transition: background .12s ease; }
+.los-button-primary { background: var(--los-book-accent); border-color: var(--los-book-accent); color: #fff !important; }
+.los-button-primary:hover:not(:disabled) { filter: brightness(.94); }
+.los-button-secondary { background: var(--los-surface); color: var(--los-ink); }
+.los-button-secondary:hover:not(:disabled) { background: var(--los-surface-muted); }
+.los-button:disabled { opacity: .65; }
+.los-path-cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.los-path-cards > a { display: flex; align-items: flex-start; flex-direction: column; gap: 8px;
+  min-height: 138px; padding: 20px; border: 1px solid var(--los-border); border-radius: 14px; background: var(--los-surface); }
+.los-path-cards > a:hover, .los-tool-links a:hover { border-color: var(--los-book-accent); }
+.los-path-cards svg { color: var(--los-book-accent-readable); }
+.los-path-cards span { color: var(--los-ink-secondary); font-size: 14px; }
+.los-tool-links { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 8px; }
+.los-tool-links a { display: flex; align-items: center; justify-content: space-between; min-height: 52px;
+  padding: 12px 16px; border: 1px solid var(--los-border); border-radius: 10px; font-weight: 600; font-size: 14px; }
+.los-empty { padding: 44px 28px; border: 1px dashed var(--los-border-strong);
+  border-radius: 14px; background: var(--los-surface); color: var(--los-ink-secondary); }
+.los-empty h2 { margin: 12px 0 8px; font-size: 20px; color: var(--los-ink); }
+.los-empty p { margin: 0; max-width: 70ch; }
+.los-notice { background: var(--los-surface-muted); border-left: 3px solid var(--los-book-accent);
+  border-radius: 8px; padding: 14px 16px; color: var(--los-ink-secondary); font-size: 14px; }
+.los-chapter-list, .los-lesson-list { list-style: none; padding: 0; margin: 24px 0; border-top: 1px solid var(--los-border); }
+.los-chapter-list > li, .los-lesson-list > li { border-bottom: 1px solid var(--los-border); }
+.los-chapter-list summary { display: flex; align-items: center; gap: 16px; padding: 18px 10px; min-height: 88px; cursor: pointer; list-style: none; }
+.los-chapter-list summary::-webkit-details-marker { display: none; }
+.los-chapter-list summary > span:nth-child(2), .los-lesson-list a > span:nth-child(2) { flex: 1; display: grid; gap: 4px; }
+.los-chapter-list summary small, .los-lesson-list small { display: block; }
+.los-chapter-list summary > span:last-child { font-size: 13px; color: var(--los-ink-secondary); }
+.los-chapter-number { font-size: 26px; font-weight: 600; min-width: 42px; color: var(--los-book-accent-readable); font-variant-numeric: tabular-nums; }
+.los-chapter-inner { padding: 0 16px 14px 65px; background: var(--los-surface-muted); }
+.los-chapter-inner a { display: flex; align-items: center; gap: 8px; min-height: 44px; font-size: 14px; }
+.los-lesson-list a { display: flex; align-items: center; gap: 16px; min-height: 88px; padding: 16px 10px; }
+.los-lesson-list a:hover { background: var(--los-surface-muted); }
+.los-lesson-list a > span:last-child { display: flex; align-items: center; gap: 8px; white-space: nowrap; font-size: 13px; color: var(--los-ink-secondary); }
+.los-objectives { max-width: 760px; background: var(--los-surface-muted); border-left: 3px solid var(--los-book-accent); padding: 20px; border-radius: 8px; margin-bottom: 24px; }
+.los-objectives ul { margin: 8px 0 0; padding-left: 24px; }
+.los-reader { max-width: 840px; margin-top: 24px; padding: 30px; border-radius: 14px; background: var(--los-surface); }
+.los-reader-top { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 28px; }
+.los-reader-top h1 { font-size: 30px; }
+.los-reader-tools { display: flex; flex-wrap: wrap; gap: 8px; }
+.los-reader-settings { display: flex; flex-wrap: wrap; gap: 32px; padding: 16px; background: var(--los-surface-muted); margin-bottom: 20px; }
+.los-reader-settings label { display: grid; gap: 8px; font-size: 14px; }
+.los-reader-settings input { min-width: 160px; accent-color: var(--los-book-accent); }
+.los-reading-body { font-size: var(--los-reader-font, 18px); line-height: var(--los-reader-leading, 1.75); }
+.los-reading-body > * { max-width: 68ch; margin-bottom: 1em; }
+.los-reading-body h2 { font-size: 26px; }
+.los-reading-body h3 { font-size: 20px; }
+.los-reading-body p[lang="de"] { font-size: inherit; line-height: inherit; user-select: text; white-space: pre-wrap; hyphens: auto; }
+.los-reader-paragraph { margin-bottom: 1.2em; }
+.los-reader-paragraph p { margin: 0; }
+.los-note-action { font-size: 13px !important; opacity: .85; }
+.los-text-action { background: transparent; border: none; padding: 8px 2px; display: inline-flex;
+  align-items: center; gap: 8px; min-height: 44px; color: var(--los-book-accent-readable); font-weight: 600; }
+.los-marker { background: rgba(255,225,106,.45); border-radius: 3px; box-decoration-break: clone; -webkit-box-decoration-break: clone; padding-block: 1px; color: inherit; }
+.dark .los-marker { background: rgba(255,225,106,.38); }
+.los-dialogue p { margin-bottom: 12px; }
+.los-dialogue b { font-size: 15px; margin-right: 8px; }
+.los-grammar { padding: 18px 20px; border-left: 3px solid var(--los-book-accent); background: var(--los-surface-muted); border-radius: 8px; }
+.los-examples { display: grid; gap: 14px; }
+.los-examples div { border-top: 1px solid var(--los-border); padding-top: 10px; }
+.los-examples p { margin-bottom: 4px; font-size: 18px; font-weight: 550; }
+.los-table-scroll { max-width: 100% !important; overflow-x: auto; }
+.los-table-scroll table { border-collapse: collapse; min-width: 360px; width: 100%; font-size: 15px; }
+.los-table-scroll td, .los-table-scroll th { padding: 10px; border-bottom: 1px solid var(--los-border); text-align: left; }
+.los-reader-image img { max-width: 100%; height: auto; }
+.los-reader-image figcaption, .los-media figcaption { color: var(--los-ink-secondary); font-size: 13px; }
+.los-vocabulary dl > div { display: grid; grid-template-columns: 1fr 1fr; padding: 12px; border-bottom: 1px solid var(--los-border); gap: 20px; }
+.los-vocabulary dt { font-weight: 650; }
+.los-vocabulary dd { margin: 0; }
+.los-vocabulary dd small { display: block; }
+.los-media iframe { width: 100%; aspect-ratio: 16/9; border: 0; }
+.los-note-editor { padding: 20px; margin-top: 20px; border: 1px solid var(--los-border); border-radius: 14px; }
+.los-inline-head { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.los-note-editor label { display: block; font-size: 14px; margin-bottom: 8px; }
+.los-note-editor textarea { width: 100%; min-height: 120px; resize: vertical; padding: 12px; background: var(--los-surface); color: var(--los-ink); border: 1px solid var(--los-border-strong); border-radius: 10px; }
+.los-lesson-heading { max-width: 800px; }
+.los-progress-heading { display: flex; justify-content: space-between; font-size: 13px; font-weight: 600; margin-top: 24px; }
+.los-lesson progress { width: 100%; height: 8px; accent-color: var(--los-book-accent); }
+.los-step-list { display: flex; list-style: none; padding: 0; gap: 8px; margin: 18px 0 24px; flex-wrap: wrap; }
+.los-step-list button { display: flex; align-items: center; gap: 8px; min-height: 44px; padding: 8px 12px; background: var(--los-surface); border: 1px solid var(--los-border); border-radius: 10px; color: var(--los-ink); font-size: 14px; }
+.los-step-list button.is-active { background: var(--los-surface-muted); border-color: var(--los-book-accent); }
+.los-lesson-step { max-width: 840px; }
+.los-step-controls { justify-content: space-between; }
+.los-actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 18px; }
+.los-exercise { max-width: 760px; padding: 24px; margin: 26px 0; border: 1px solid var(--los-border); border-radius: 14px; background: var(--los-surface); }
+.los-exercise-meta { display: flex; justify-content: space-between; gap: 16px; color: var(--los-ink-tertiary); font-size: 12px; font-weight: 650; letter-spacing: .04em; }
+.los-exercise-prompt { font-size: 16px !important; line-height: 1.55; font-weight: 600; margin: 16px 0 !important; }
+.los-options { display: grid; gap: 8px; border: 0; padding: 0; margin: 0; }
+.los-option { display: flex; align-items: center; gap: 12px; padding: 12px 14px; min-height: 52px;
+  border: 1px solid var(--los-border-strong); border-radius: 10px; cursor: pointer; }
+.los-option:has(input:checked) { border-color: var(--los-book-accent); background: var(--los-surface-muted); }
+.los-option input { accent-color: var(--los-book-accent); width: 20px; height: 20px; flex: none; }
+.los-gap { display: grid; gap: 10px; }
+.los-gap label { font-size: 14px; }
+.los-gap input { height: 48px; min-width: 0; width: min(100%, 340px); border: 1px solid var(--los-border-strong);
+  border-radius: 10px; padding: 10px 12px; background: var(--los-surface); color: var(--los-ink); }
+.los-umlauts { display: flex; flex-wrap: wrap; gap: 6px; }
+.los-umlauts button { min-width: 44px; min-height: 44px; border-radius: 8px; border: 1px solid var(--los-border); }
+.los-matching { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.los-matching h4 { font-size: 14px; font-weight: 700; margin: 0 0 8px; }
+.los-match-item { width: 100%; min-height: 52px; text-align: left; display: flex; justify-content: space-between;
+  align-items: center; padding: 10px 12px; gap: 10px; background: var(--los-surface-muted);
+  border: 1px solid var(--los-border); border-radius: 8px; margin-bottom: 8px; }
+.los-match-item[aria-pressed="true"] { border-color: var(--los-book-accent); }
+.los-support { color: var(--los-ink-secondary); font-size: 13px; }
+.los-highlight-text { white-space: pre-wrap; font-size: 18px; line-height: 1.75; user-select: text; touch-action: pan-y; }
+.los-token-picker { margin-top: 16px; padding: 12px; border: 1px solid var(--los-border); border-radius: 10px; }
+.los-tokens { display: flex; flex-wrap: wrap; gap: 6px; }
+.los-token { min-height: 44px; padding: 6px 10px; border: 1px solid var(--los-border-strong); border-radius: 8px; background: var(--los-surface); color: var(--los-ink); }
+.los-token[aria-pressed="true"] { background: rgba(255,225,106,.45); border-color: var(--los-book-accent); color: #1f2933; }
+.los-exercise-bottom { justify-content: flex-end; margin-top: 24px; }
+.los-feedback { padding: 14px 16px; border-left: 3px solid var(--los-success); margin-top: 18px; background: var(--los-surface-muted); font-size: 14px; }
+.los-feedback.is-incorrect { border-color: var(--los-danger); }
+.los-feedback p { margin: 6px 0 0; }
+.los-storage-state { color: var(--los-ink-tertiary); font-size: 12px; margin: 16px 0 0 !important; }
+.los-source-list { list-style: none; padding: 0; }
+.los-source-list li { border-bottom: 1px solid var(--los-border); padding: 15px 0; }
+.los-source-list span { display: block; font-size: 13px; }
+.los-source-list a { text-decoration: underline; }
+.los-studies-entry { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 18px 20px;
+  margin-bottom: 18px; border-radius: 14px; border: 1px solid var(--border); background: var(--surface); }
+.los-studies-entry strong, .los-studies-entry small { display: block; }
+.los-studies-entry small { margin-top: 4px; color: var(--muted-foreground); }
+.los-studies-entry:hover { border-color: var(--primary); }
+@media (max-width: 1100px) {
+  .los-book-grid { grid-template-columns: minmax(0, 1fr); }
+  .los-book-sidebar { display: none; }
+  .los-book-mobile-nav { display: block; margin-bottom: 24px; }
+  .los-book-mobile-nav details { border: 1px solid var(--los-border); border-radius: 12px; background: var(--los-surface); }
+  .los-book-mobile-nav summary { display: flex; align-items: center; gap: 10px; cursor: pointer; min-height: 48px; padding: 8px 14px; font-weight: 600; }
+  .los-book-mobile-nav .los-nav { padding: 8px 12px 14px; border-top: 1px solid var(--los-border); }
+}
+@media (max-width: 1023px) {
+  .los-library-grid { grid-template-columns: repeat(3, minmax(0,1fr)); gap: 16px; }
+}
+@media (max-width: 639px) {
+  .los-app { padding: 16px; border-radius: 12px; font-size: 16px; }
+  .los-app h1 { font-size: 27px; }
+  .los-app h2 { font-size: 22px; }
+  .los-app h3 { font-size: 19px; }
+  .los-library-grid { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px; }
+  .los-book-card { padding: 8px; }
+  .los-card-title { font-size: 14px; }
+  .los-book-hero { grid-template-columns: 104px minmax(0,1fr); align-items: start; padding: 16px; gap: 16px; }
+  .los-book-hero .los-cover { width: 104px; }
+  .los-book-hero .los-button { grid-column: 1/-1; }
+  .los-path-cards, .los-tool-links { grid-template-columns: 1fr; }
+  .los-path-cards > a { min-height: 100px; }
+  .los-reader { padding: 16px; }
+  .los-reading-body { font-size: var(--los-reader-font, 17.5px); }
+  .los-reader-tools { width: 100%; }
+  .los-reader-tools .los-button { flex: 1; padding: 10px; }
+  .los-exercise { padding: 16px; }
+  .los-matching { gap: 8px; }
+  .los-match-item { font-size: 14px; }
+  .los-step-controls .los-button { min-height: 48px; }
+  .los-context > span { display: none; }
+}
+@media (max-width: 339px) {
+  .los-library-grid { grid-template-columns: 1fr; }
+  .los-book-hero { grid-template-columns: 90px minmax(0,1fr); }
+  .los-book-hero .los-cover { width: 90px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .los-book-card, .los-button { transition: none; }
+  .los-book-card:hover { transform: none; }
+}
+
+/* Editorially planned 60-lesson path, grouped by chapter rather than one long wall. */
+.los-lesson-group { margin-block: 32px; }
+.los-lesson-group h2 { font-size: 20px; margin-bottom: 12px; }
+.los-lesson-group .los-lesson-list { margin-top: 0; }
+.los-notes-list { list-style: none; padding: 0; margin: 20px 0; display: grid; gap: 12px; }
+.los-notes-list li { background: var(--los-surface); border: 1px solid var(--los-border); border-radius: 12px; padding: 16px; }
+.los-notes-list li > small { display: block; margin-top: 4px; }
+.los-notes-list li p { white-space: pre-wrap; margin: 12px 0; overflow-wrap: anywhere; }
+@media (max-width: 639px) {
+  .los-lesson-list a { gap: 8px; }
+  .los-lesson-list .los-chapter-number { min-width: 38px; font-size: 22px; }
+  .los-lesson-list a > span:last-child { font-size: 11px; max-width: 90px; white-space: normal; }
+}
+
+/* LOS! licensed dialogue: restrained textbook layout, not a social chat interface. */
+.los-dialogue {
+  padding: clamp(14px, 3vw, 24px);
+  border: 1px solid var(--los-border);
+  border-radius: 12px;
+  background: var(--los-surface);
+  color: var(--los-ink);
+}
+.los-dialogue > .los-eyebrow { font-size: 12px; margin-bottom: 16px; }
+.los-dialogue-turn { padding: 12px 0; border-bottom: 1px solid var(--los-border); }
+.los-dialogue-turn:last-of-type { border-bottom: none; }
+.los-dialogue-turn > p { display: block; margin: 0; font-size: inherit; line-height: 1.65; }
+.los-dialogue-turn > p > b { font-size: 14px; color: var(--los-book-accent-readable); margin-right: 4px; }
+.los-dialogue-spoken { white-space: pre-wrap; user-select: text; overflow-wrap: anywhere; }
+.los-translation { margin-top: 6px; color: var(--los-ink-secondary); font-size: 14px; }
+.los-translation summary { width: fit-content; min-height: 32px; cursor: pointer; font-size: 13px; text-decoration: underline; text-underline-offset: 3px; }
+.los-translation > p { padding: 4px 0 2px 12px; margin: 0; border-left: 2px solid var(--los-border-strong); font-size: 14px; line-height: 1.55; }
+.los-attribution {
+  display: grid; gap: 3px; padding: 12px 0 0; margin-top: 18px;
+  border-top: 1px solid var(--los-border); color: var(--los-ink-secondary);
+  font-size: 12px; line-height: 1.55; overflow-wrap: anywhere;
+}
+.los-attribution > b { color: var(--los-ink); font-weight: 600; }
+.los-attribution-links { display: flex; flex-wrap: wrap; gap: 10px 20px; }
+.los-attribution-links a { min-height: 36px; display: inline-flex; align-items: center; color: var(--los-book-accent-readable); text-decoration: underline; text-underline-offset: 3px; }
+.los-media { padding: 14px 16px; background: var(--los-surface-muted); border-radius: 10px; }
+.los-media audio { display: block; max-width: 100%; width: 100%; margin: 12px 0; }
+.los-media .los-support { margin: 8px 0 2px; font-size: 12px; color: var(--los-ink-secondary); }
+.los-dialogue .los-token-picker { margin-top: 12px; }
+@media (max-width: 639px) {
+  .los-dialogue { padding: 14px; }
+  .los-dialogue-turn { padding: 14px 0; }
+  .los-attribution-links a { min-height: 44px; }
+}
+
+/* Contextual glossary uses real word ranges. No synthetic dictionary results. */
+.los-gloss-word {
+  display: inline; min-height: 0; padding: 0;
+  border: 0; border-bottom: 1px dotted var(--los-book-accent-readable);
+  border-radius: 0; background: transparent; color: inherit;
+  font: inherit; line-height: inherit; text-decoration: none;
+  cursor: pointer; overflow-wrap: inherit;
+}
+.los-gloss-word:hover { color: var(--los-book-accent-readable); background: var(--los-surface-muted); }
+.los-gloss-panel {
+  display: flex; align-items: flex-start; justify-content: space-between; gap: 18px;
+  padding: 16px 18px; border: 1px solid var(--los-border-strong);
+  border-left: 3px solid var(--los-book-accent);
+  border-radius: 10px; margin-top: 24px; background: var(--los-surface-muted);
+}
+.los-gloss-panel b { display: block; font-size: 20px; color: var(--los-ink); margin-bottom: 5px; }
+.los-gloss-panel p { margin: 0 0 5px; }
+.los-gloss-panel small { display: block; }
+@media (max-width: 639px) {
+  .los-gloss-panel { flex-wrap: wrap; }
+  .los-gloss-panel .los-button { margin-left: auto; }
+}
+
+/* First-run reflection is written in Finnish and stored separately from scores. */
+.los-lesson-reflection { display: grid; gap: 10px; max-width: 720px; margin-top: 16px; }
+.los-lesson-reflection label { display: block; font-weight: 600; color: var(--los-ink); }
+.los-lesson-reflection textarea {
+  width: 100%; max-width: 100%; min-height: 118px; padding: 12px 14px;
+  border: 1px solid var(--los-border-strong); border-radius: 10px;
+  background: var(--los-surface); color: var(--los-ink);
+  line-height: 1.55; resize: vertical;
+}
+.los-lesson-reflection textarea:focus-visible {
+  outline: 3px solid var(--los-focus); outline-offset: 2px;
+}
+
+/* Ten required textbook chapter sections, shown as a compact index. */
+.los-chapter-sections {
+  display: grid; grid-template-columns: repeat(2,minmax(0,1fr));
+  border-top: 1px solid var(--los-border);
+  border-left: 1px solid var(--los-border);
+  border-radius: 10px; overflow: hidden; margin: 26px 0;
+}
+.los-chapter-sections a {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  min-width: 0; min-height: 52px; padding: 10px 14px;
+  border-right: 1px solid var(--los-border); border-bottom: 1px solid var(--los-border);
+  font-size: 14px; color: var(--los-ink-secondary);
+}
+.los-chapter-sections a span { min-width: 0; overflow-wrap: anywhere; }
+.los-chapter-sections a small { font-size: 11px; color: var(--los-ink-secondary); white-space: nowrap; }
+.los-chapter-sections a:hover { color: var(--los-ink); background: var(--los-surface-muted); }
+.los-chapter-sections a[aria-current="page"] {
+  color: var(--los-book-accent-readable); font-weight: 700;
+  background: var(--los-surface-muted); box-shadow: inset 3px 0 var(--los-book-accent);
+}
+.los-chapter-overview { margin: 28px 0; max-width: 760px; }
+.los-chapter-overview .los-button { margin-top: 12px; }
+.los-chapter-section > h2 { font-size: 23px; margin: 28px 0 12px; }
+@media (max-width: 639px) {
+  .los-chapter-sections { grid-template-columns: 1fr; }
+  .los-chapter-sections a { min-height: 48px; }
+}
+
+
+/* LOS! review and evidence: calm textbook revision rather than gamified streaks. */
+.los-review-summary {
+  display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 12px;
+  max-width: 820px; margin: 24px 0 10px;
+}
+.los-review-summary > div {
+  display: flex; flex-direction: column; justify-content: center;
+  padding: 18px 20px; background: var(--los-surface);
+  border: 1px solid var(--los-border); border-radius: 12px;
+  min-height: 102px;
+}
+.los-review-summary strong {
+  color: var(--los-ink); font-size: 27px; font-weight: 700;
+  line-height: 1.2; font-variant-numeric: tabular-nums;
+}
+.los-review-summary span {
+  margin-top: 5px; color: var(--los-ink-secondary);
+  font-size: 13px; line-height: 1.45;
+}
+.los-review-card {
+  max-width: 820px; margin: 25px 0;
+  padding: clamp(20px,3vw,32px);
+  border-radius: 14px; border: 1px solid var(--los-border);
+  background: var(--los-surface);
+}
+.los-review-card-head {
+  display: flex; justify-content: space-between; align-items: center;
+  gap: 12px; color: var(--los-ink-secondary); font-size: 13px;
+  margin-bottom: 32px;
+}
+.los-review-card-head span { display: inline-flex; align-items: center; gap: 7px; }
+.los-review-question {
+  color: var(--los-ink); font-size: clamp(24px,3vw,32px);
+  font-weight: 650; letter-spacing: -.02em;
+  line-height: 1.3; margin: 12px 0 28px !important;
+}
+.los-review-card form { display: grid; justify-items: start; gap: 12px; }
+.los-review-card form label { display: block; font-size: 14px; font-weight: 600; }
+.los-review-card form input[type="text"] {
+  display: block; max-width: 100%; width: min(100%,530px);
+  min-height: 50px; padding: 10px 14px;
+  border: 1px solid var(--los-border-strong);
+  border-radius: 10px; background: var(--los-surface);
+  color: var(--los-ink); font-size: 18px; line-height: 1.4;
+}
+.los-review-feedback {
+  padding: 20px; margin-top: 24px; border-left: 3px solid var(--los-success);
+  border-radius: 8px; background: var(--los-success-bg);
+}
+.los-review-feedback.is-incorrect {
+  background: var(--los-surface-muted); border-left-color: var(--los-warning);
+}
+.los-review-feedback > strong { color: var(--los-ink); }
+.los-review-feedback p { margin: 10px 0 !important; }
+.los-review-feedback .los-button { margin-top: 12px; }
+.los-review-evidence > h2 { font-size: 20px; margin-top: 32px; }
+.los-review-retained { padding: 0; list-style: none; max-width: 820px; }
+.los-review-retained li {
+  display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr);
+  gap: 16px; padding: 13px 16px;
+  border-bottom: 1px solid var(--los-border);
+}
+.los-review-retained li strong { font-weight: 650; }
+.los-reviews > .los-support { max-width: 75ch; line-height: 1.65; }
+@media (max-width: 639px) {
+  .los-review-summary { gap: 8px; }
+  .los-review-summary > div { padding: 12px 10px; min-height: 93px; }
+  .los-review-summary strong { font-size: 23px; }
+  .los-review-summary span { font-size: 11px; }
+  .los-review-card { padding: 18px; }
+  .los-review-question { font-size: 26px; }
+}
+
+
+/* Full chapter vocabulary remains visible and searchable inside LOS!, without
+   borrowing unlicensed dictionary entries or redirecting to external readers. */
+.los-word-controls { display:flex; align-items:flex-end; justify-content:space-between; gap:16px; flex-wrap:wrap; max-width:960px; margin:24px 0 14px; }
+.los-word-search { flex:1 1 280px; max-width:440px; }
+.los-word-search label { display:flex; align-items:center; gap:8px; font-size:14px; font-weight:600; margin-bottom:7px; color:var(--los-ink-secondary); }
+.los-word-search input { width:100%; height:48px; padding:10px 14px; border:1px solid var(--los-border-strong); border-radius:10px; background:var(--los-surface); color:var(--los-ink); font-size:16px; }
+.los-word-filters { display:flex; flex-wrap:wrap; gap:6px; }
+.los-word-filters button { display:inline-flex; align-items:center; gap:7px; min-height:44px; border:1px solid var(--los-border); background:var(--los-surface); border-radius:10px; padding:8px 14px; color:var(--los-ink-secondary); font-size:14px; font-weight:600; }
+.los-word-filters button[aria-pressed="true"] { border-color:var(--los-book-accent-readable); color:var(--los-book-accent-readable); background:var(--los-surface-muted); }
+.los-word-list { list-style:none; padding:0; max-width:960px; margin:18px 0; }
+.los-word-list li { display:flex; align-items:center; justify-content:space-between; gap:20px; min-height:96px; padding:16px; border-bottom:1px solid var(--los-border); }
+.los-word-main { min-width:0; }
+.los-word-main b { display:block; color:var(--los-ink); font-size:19px; font-weight:650; }
+.los-word-main p { margin:3px 0 4px; font-size:15px; }
+.los-word-main small { display:block; font-size:12px; }
+.los-word-main a { display:inline-block; margin-top:6px; color:var(--los-book-accent-readable); text-decoration:underline; text-underline-offset:3px; font-size:12px; }
+.los-word-list li > button { flex-shrink:0; font-size:13px; }
+.los-word-footer { max-width:960px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:14px; margin:24px 0; }
+.los-word-footer p { margin:0; font-size:13px; color:var(--los-ink-secondary); }
+@media (max-width:639px) {
+  .los-word-list li { align-items:flex-start; flex-wrap:wrap; gap:10px; }
+  .los-word-list li > button { margin-left:auto; }
+  .los-word-controls { align-items:stretch; }
+  .los-word-search { max-width:none; }
+}
+
+
+/* Licensed audio transcript: clearly a numbered phrase list, not a fabricated dialogue. */
+.los-transcript {
+  max-width: 760px; margin: 22px 0; padding: clamp(16px, 2.5vw, 24px);
+  border: 1px solid var(--los-border); background: var(--los-surface);
+  border-radius: 12px;
+}
+.los-transcript > ol { list-style: decimal; padding-left: 28px; margin: 16px 0; }
+.los-transcript > ol > li { padding: 12px 4px; border-bottom: 1px solid var(--los-border); }
+.los-transcript-utterance { font-size: var(--los-reader-font,18px); font-weight: 620; line-height: 1.5; overflow-wrap:anywhere; }
+.los-transcript .los-translation { margin-top: 4px; }
+.los-transcript .los-translation .los-support { font-size: 13px; padding-left: 10px; }
+.los-transcript .los-attribution { margin-top: 22px; }
+
+/* Full-answer chapter tests: solutions appear only after a complete return. */
+.los-chapter-test { max-width: 900px; margin: 20px 0 36px; }
+.los-chapter-test > h2 { font-size: 24px; }
+.los-exam-meta {
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 8px 20px; padding: 12px 14px; margin: 24px 0 10px;
+  border: 1px solid var(--los-border); border-radius: 10px;
+  background: var(--los-surface); color: var(--los-ink-secondary);
+  font-size: 13px; font-weight: 600;
+}
+.los-exam-questions { display: grid; gap: 18px; margin: 26px 0; }
+.los-exam-question {
+  padding: clamp(16px,2.5vw,26px); margin: 0; min-width:0;
+  border: 1px solid var(--los-border); border-radius: 12px;
+  background: var(--los-surface);
+}
+.los-exam-question-title { float: none; width: 100%; padding: 0 0 14px;
+  font-weight: 650; font-size: 17px; line-height: 1.5; color: var(--los-ink); }
+.los-exam-question .los-options { margin: 0; }
+.los-exam-question .los-options .los-option { max-width: 100%; }
+.los-exam-question .los-gap input { width: min(100%,450px); max-width:100%; }
+.los-exam-question .los-matching h3 { font-size: 16px; margin: 0 0 12px; }
+.los-exam-feedback { margin: 8px 0 0; padding: 14px 18px;
+  background: var(--los-surface-muted); border-left: 3px solid var(--los-success);
+  border-radius: 8px; font-size: 14px; color: var(--los-ink); }
+.los-exam-feedback.is-incorrect { border-left-color: var(--los-danger); }
+.los-exam-feedback p { margin: 6px 0 0; }
+.los-exam-speech { border: 1px solid var(--los-border); border-radius: 12px;
+  padding: clamp(16px,2.5vw,26px); background: var(--los-surface);
+  margin: 28px 0; }
+.los-exam-speech h3 { font-size: 19px; margin-bottom: 12px; }
+.los-exam-speech > p { font-size: 14px; color: var(--los-ink-secondary); }
+.los-exam-speech-criterion { border-top: 1px solid var(--los-border); border-right: 0;
+  border-bottom: 0; border-left: 0; padding: 16px 0; margin-top: 10px; min-width: 0; }
+.los-exam-speech-criterion legend { font-weight: 600; font-size: 15px;
+  padding-top: 10px; line-height: 1.45; max-width:100%; }
+.los-exam-speech-criterion label { display: flex; align-items: center; gap: 10px;
+  min-height: 44px; font-size: 14px; cursor: pointer; }
+.los-exam-speech-criterion input { width: 18px; height: 18px;
+  accent-color: var(--los-book-accent); }
+.los-exam-result { background: var(--los-surface); border: 1px solid var(--los-border);
+  border-left: 4px solid var(--los-book-accent);
+  padding: clamp(16px,3vw,28px); border-radius: 12px; margin-top: 24px; }
+.los-exam-result > div:first-child { display: flex; align-items:center; gap: 10px; }
+.los-exam-result h3 { margin:0; font-size:18px; }
+.los-exam-score { font-weight: 750; color: var(--los-ink);
+  font-size: clamp(34px,5vw,48px); line-height: 1.3; margin: 12px 0 !important; }
+.los-exam-confirm { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.los-exam-confirm p { flex: 1 0 100%; font-size: 14px; }
+.los-exam-history { margin-top: 25px; padding: 14px;
+  border: 1px solid var(--los-border); border-radius: 10px; }
+.los-exam-history summary { cursor: pointer; font-weight: 600; }
+.los-exams-list { list-style: none; margin: 22px 0; padding: 0; max-width:900px; }
+.los-exams-list > li { display:flex; justify-content:space-between; align-items:center;
+  flex-wrap:wrap; gap:10px 20px; padding: 16px 0; border-bottom:1px solid var(--los-border); }
+.los-exams-list strong { display:block; }
+.los-exams-list small { display:block; margin-top:4px; }
+.los-exams-wait { font-size: 13px; color: var(--los-ink-secondary); }
+@media (max-width: 639px) {
+  .los-transcript { padding: 14px; }
+  .los-transcript > ol { padding-left: 23px; }
+  .los-exam-question { padding: 16px; }
+  .los-exam-result { padding: 18px; }
+  .los-exam-speech { padding: 16px; }
+}
+
+
+/* Self-authored productive language: editable draft and explicit ungraded checklist. */
+.los-production {
+  display: grid; gap: 10px; padding: clamp(18px,3vw,28px);
+  margin: 24px 0; max-width: 780px; border: 1px solid var(--los-border);
+  border-radius: 12px; background: var(--los-surface);
+}
+.los-production > h2 { font-size: 22px; margin: 0 0 4px; }
+.los-production > p:not(.los-eyebrow) { max-width: 72ch; font-size: 15px; margin: 0 0 6px; }
+.los-production > label { font-weight: 650; font-size: 14px; margin-top: 5px; }
+.los-production > textarea {
+  display: block; min-height: 122px; width: 100%; max-width:100%;
+  border: 1px solid var(--los-border-strong); border-radius: 10px;
+  background: var(--los-surface); color: var(--los-ink);
+  font: 400 18px/1.6 Inter, system-ui, sans-serif;
+  padding: 14px 16px; resize: vertical; overflow-wrap: anywhere;
+}
+.los-production-model { padding: 14px 18px; margin-top: 8px;
+  border: 1px solid var(--los-border); border-radius: 10px;
+  background: var(--los-surface-muted); }
+.los-production-model summary { min-height: 34px; cursor:pointer;
+  font-weight: 650; color:var(--los-book-accent-readable); }
+.los-production-model p { margin: 10px 0 0; }
+.los-production-model b { font-size: 18px; }
+.los-production-check { border: 0; padding: 6px 0; margin: 8px 0 0; }
+.los-production-check legend { font-size: 15px; font-weight: 650; line-height: 1.55; padding-bottom: 10px; }
+.los-production-check label { display:flex; align-items:center; gap: 12px;
+  font-size:14px; min-height:44px; cursor:pointer; }
+.los-production-check input[type="checkbox"] { width:18px; height:18px;
+  flex:0 0 18px; accent-color: var(--los-book-accent); }
+.los-production .los-storage-state { margin: 4px 0 !important; }
+@media (max-width: 639px) {
+  .los-production { padding: 16px; gap: 8px; }
+  .los-production-model { padding: 12px; }
+}
+
+.los-exam-evidence > ul { list-style: none; max-width: 850px; margin: 18px 0 24px; padding: 0; }
+.los-exam-evidence > ul > li { display: flex; justify-content: space-between; flex-wrap: wrap;
+  align-items: center; gap: 12px 20px; padding: 16px 0; border-bottom: 1px solid var(--los-border); }
+.los-exam-evidence strong { display:block; color:var(--los-ink); font-weight:650; }
+.los-exam-evidence small { display:block; color:var(--los-ink-secondary); font-size:13px; margin-top:5px; }
+.los-exam-evidence .los-support { margin:5px 0 0; font-size:12px; }
+
+
+/* Private, opt-in speech practice. No automatic speech grading or upload. */
+.los-speech-recorder {
+  display: grid; gap: 10px; padding: clamp(14px, 2vw, 20px);
+  margin: 20px 0; border: 1px solid var(--los-border);
+  border-radius: 12px; background: var(--los-surface-muted);
+}
+.los-speech-recorder h4 {
+  display: flex; align-items: center; gap: 9px;
+  color: var(--los-ink); font-size: 17px; margin: 0;
+}
+.los-speech-recorder > p { margin: 0; }
+.los-speech-actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.los-speech-actions .los-button { min-height: 44px; white-space: normal; }
+.los-speech-preview { display: grid; gap: 14px; min-width: 0; padding-top: 10px; border-top: 1px solid var(--los-border); }
+.los-speech-preview audio { display: block; max-width: 100%; width: min(100%, 550px); }
+.los-exam-past-report { margin: 12px 0; padding: 12px; border: 1px solid var(--los-border); border-radius: 9px; background: var(--los-surface-muted); }
+.los-exam-past-report summary { cursor: pointer; font-size: 14px; font-weight: 600; }
+.los-exam-past-report ol { margin: 12px 0 4px; padding-left: 23px; }
+.los-exam-past-report li { padding: 9px 0; border-bottom: 1px solid var(--los-border); }
+.los-exam-past-report li:last-child { border-bottom: 0; }
+.los-exam-past-report p { margin: 4px 0 0; }
+@media (max-width: 639px) {
+  .los-speech-recorder { padding: 14px; }
+  .los-speech-actions { flex-direction: column; align-items: stretch; }
+  .los-speech-actions .los-button { justify-content: center; }
+}
+
+
+/* Eight exercise modalities: accessible token ordering, grouped classification. */
+.los-word-order, .los-categorize { display: grid; gap: 14px; margin-top: 16px; }
+.los-order-selected {
+  display: flex; flex-wrap: wrap; gap: 8px;
+  min-height: 60px; align-items: center; padding: 12px 14px;
+  border: 1px dashed var(--los-border-strong); border-radius: 10px;
+  background: var(--los-surface-muted);
+}
+.los-order-selected > .los-support { margin: 0; }
+.los-order-selected .los-token.is-selected {
+  border-color: var(--los-book-accent-readable);
+  color: var(--los-book-accent-readable);
+  background: var(--los-surface);
+}
+.los-word-order .los-tokens { display: flex; flex-wrap: wrap; gap: 8px; }
+.los-word-order .los-tokens button:disabled { opacity: .45; cursor: default; }
+.los-categorize-row {
+  display: grid; grid-template-columns: minmax(130px, 1fr) minmax(180px, 1fr);
+  align-items: center; gap: 14px; padding: 10px 0;
+  border-bottom: 1px solid var(--los-border);
+}
+.los-categorize-row label { font-weight: 600; font-size: 16px; color: var(--los-ink); }
+.los-categorize-row select {
+  width: 100%; max-width: 100%; min-height: 44px;
+  border: 1px solid var(--los-border-strong); border-radius: 9px;
+  color: var(--los-ink); background: var(--los-surface);
+  padding: 8px 10px; font-size: 15px;
+}
+@media (max-width:639px) {
+  .los-categorize-row { grid-template-columns: 1fr; gap: 7px; }
+}
+
+
+/* C02: free-writing part of chapter test, never auto-graded */
+.los-exam-speech > label[for^="los-exam-writing-"] {
+  display:block; margin-top:16px; margin-bottom:8px;
+  font-weight:650; color:var(--los-ink); font-size:14px;
+}
+.los-exam-speech > textarea {
+  display:block; box-sizing:border-box; width:100%; min-height:116px; max-width:100%;
+  border:1px solid var(--los-border-strong); border-radius:10px;
+  background:var(--los-surface); color:var(--los-ink);
+  padding:14px 16px; font-size:18px; line-height:1.6;
+  font-family:inherit; resize:vertical;
+}
+.los-exam-writing-return {
+  border:1px solid var(--los-border); border-radius:10px;
+  margin-top:16px; padding:16px 20px; background:var(--los-surface-muted);
+}
+.los-exam-writing-return h4 { margin:0 0 8px; font-size:15px; }
+.los-exam-writing-return > p { white-space:pre-wrap; overflow-wrap:anywhere; font-size:17px; }
+.los-exam-writing-return details { margin-top:14px; }
+.los-exam-writing-return details summary { cursor:pointer; font-weight:650; }
+.los-exam-past-writing { white-space:pre-wrap; overflow-wrap:anywhere; font-size:15px; }
+@media (max-width:639px) {
+  .los-exam-writing-return { padding:14px; }
+  .los-exam-speech > textarea { padding:12px; }
+}
+
+
+/* LOS! C03 in-book geography: explicitly a schematic with a full text alternative. */
+.los-country-schematic {
+  display:grid; gap: 12px;
+  max-width: 920px; margin: 24px 0; padding: clamp(16px,3vw,28px);
+  border: 1px solid var(--los-border); border-radius: 14px;
+  background: var(--los-surface);
+}
+.los-country-schematic h2 { margin:0; font-size: clamp(19px,2.6vw,26px); color: var(--los-ink); }
+.los-country-schematic p { margin: 0; font-size: 14px; line-height: 1.6; }
+.los-country-map-scroll { width:100%; max-width:100%; overflow-x:auto; border-radius:12px; }
+.los-country-map-scroll svg { display:block; width:100%; min-width:520px; height:auto; }
+.los-country-map-text { border-top:1px solid var(--los-border); padding-top:12px; }
+.los-country-map-text summary { cursor:pointer; font-weight:650; font-size:14px; }
+.los-country-map-text ul { margin:12px 0 0; padding-left:24px; font-size:14px; line-height:1.8; }
+@media (max-width:639px) {
+  .los-country-schematic { padding:14px; }
+  .los-country-map-scroll svg { min-width:570px; }
+}
+
+
+/* Midterm section report is computed only from a submitted, graded attempt.
+ * The writing lines and model stay visually separate from automatic points. */
+.los-exam-breakdown {
+  border: 1px solid var(--los-border);
+  border-radius: 12px;
+  padding: clamp(12px, 2vw, 20px);
+  margin: 12px 0 20px;
+  background: var(--los-surface);
+}
+.los-exam-breakdown h4 { margin: 0 0 10px; font-size: 15px; }
+.los-exam-breakdown ul { list-style: none; margin: 0; padding: 0; }
+.los-exam-breakdown li {
+  display: flex; justify-content: space-between; align-items: baseline; gap: 18px;
+  border-top: 1px solid var(--los-border); padding: 9px 2px;
+}
+.los-exam-breakdown li strong { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.los-exam-writing-return [lang="de"], .los-exam-past-writing { white-space: pre-line; }
+.los-standalone-exam { display: grid; gap: 18px; max-width: 920px; }
+.los-standalone-exam .los-back-link {
+  display:inline-flex; align-items:center; gap:7px;
+  color:var(--los-book-accent); width:fit-content;
+  font-size:14px; font-weight:600; text-decoration:none;
+}
+.los-standalone-exam .los-back-link:hover { text-decoration:underline; }
+
+
+/* LOS! 1 · Final exam section navigator (50 questions, 5 sections)
+ * Uses the book's muted surfaces and accessible interactive focus states.
+ * Keeps 44px touch targets and wraps without horizontal scrolling on phones.
+ */
+.los-exam-section-nav {
+  display: grid;
+  gap: 12px;
+  padding: clamp(14px, 2.6vw, 22px);
+  margin: 22px 0;
+  border: 1px solid var(--los-border);
+  background: var(--los-surface-muted);
+  border-radius: 14px;
+  scroll-margin-top: 96px;
+}
+.los-exam-section-top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px 18px;
+}
+.los-exam-section-top h3 {
+  font-size: 17px;
+  font-weight: 750;
+  color: var(--los-ink);
+  margin: 0;
+}
+.los-exam-section-top > span {
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  color: var(--los-ink-secondary);
+}
+.los-exam-section-tabs {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 155px), 1fr));
+  gap: 9px;
+}
+.los-exam-section-tab {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  min-height: 58px;
+  width: 100%;
+  padding: 10px 12px;
+  text-align: left;
+  font: inherit;
+  color: var(--los-ink);
+  background: var(--los-surface);
+  border: 1px solid var(--los-border-strong);
+  border-radius: 9px;
+  cursor: pointer;
+}
+.los-exam-section-tab > span { font-size: 13px; font-weight: 650; line-height: 1.3; }
+.los-exam-section-tab > small {
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  color: var(--los-ink-secondary);
+}
+.los-exam-section-tab.is-active {
+  color: var(--los-book-accent-readable);
+  border-color: var(--los-book-accent-readable);
+  background: var(--los-surface);
+  box-shadow: inset 0 0 0 1px var(--los-book-accent-readable);
+}
+.los-exam-section-tab.is-complete:not(.is-active) {
+  border-style: solid;
+  border-color: var(--los-border-strong);
+}
+.los-exam-section-tab:focus-visible,
+.los-exam-section-actions button:focus-visible {
+  outline: 3px solid var(--los-book-accent-readable);
+  outline-offset: 2px;
+}
+.los-exam-section-nav > .los-text-action {
+  width: fit-content;
+  max-width: 100%;
+  text-align: left;
+}
+.los-exam-section-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 20px 0;
+}
+.los-exam-section-actions .los-support { font-variant-numeric: tabular-nums; }
+@media (max-width: 639px) {
+  .los-exam-section-nav { padding: 12px; scroll-margin-top: 74px; }
+  .los-exam-section-tabs { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  .los-exam-section-tab { padding: 11px 9px; min-height: 64px; }
+  .los-exam-section-tab > span { font-size: 12px; }
+  .los-exam-section-actions > button { flex: 1 1 auto; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .los-exam-section-nav { scroll-behavior: auto; }
+}
+
+/* LOS! shared German-Finnish vocabulary dictionary.
+ * The outer surface matches V3.3; inputs stay legible on narrow mobile screens.
+ */
+.los-dictionary { max-width: 1160px; margin-inline:auto; }
+.los-dictionary-header { max-width: 820px; margin: 8px 0 24px; }
+.los-dictionary-header h1 { margin: 6px 0 12px; color:var(--los-ink); }
+.los-dictionary-controls {
+  display:grid; grid-template-columns: minmax(0,1fr) minmax(0,1.5fr);
+  gap:16px 20px; padding:clamp(14px,2.5vw,24px);
+  border:1px solid var(--los-border); border-radius:14px;
+  background:var(--los-surface-muted);
+}
+.los-dictionary-direction { margin:0; min-width:0; padding:0; border:0; }
+.los-dictionary-direction legend,
+.los-dictionary-search > label,.los-dictionary-filter > label {
+  display:block; margin-bottom:9px; color:var(--los-ink);
+  font-size:14px; font-weight:700;
+}
+.los-dictionary-direction label {
+  display:inline-flex; align-items:center; min-height:44px;
+  gap:9px; margin-right:18px; font-size:14px; cursor:pointer;
+}
+.los-dictionary-direction input { accent-color:#B7473C; width:17px; height:17px; }
+.los-dictionary-search,.los-dictionary-filter { min-width:0; }
+.los-dictionary-search-input {
+  display:flex; align-items:center; gap:10px; min-height:46px;
+  padding:0 12px; border:1px solid var(--los-border-strong);
+  border-radius:9px; background:var(--los-surface);
+}
+.los-dictionary-search-input svg { flex:none; color:var(--los-ink-muted); }
+.los-dictionary-search-input input {
+  min-width:0; width:100%; min-height:44px; border:0; outline:0;
+  font:inherit; color:var(--los-ink); background:transparent;
+}
+.los-dictionary-search-input:focus-within { outline:3px solid #B7473C; outline-offset:1px; }
+.los-dictionary-filter select {
+  width:100%; min-height:46px; border-radius:9px;
+  border:1px solid var(--los-border-strong);
+  padding:9px 12px; font:inherit;
+  color:var(--los-ink); background:var(--los-surface);
+}
+.los-dictionary-filter select:focus-visible,.los-dictionary-direction input:focus-visible {
+  outline:3px solid #B7473C; outline-offset:2px;
+}
+.los-dictionary-count { margin:20px 2px 14px; font-size:14px; font-variant-numeric:tabular-nums; color:var(--los-ink-muted); }
+.los-dictionary-results {
+  display:grid; grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:12px; list-style:none; margin:0; padding:0;
+}
+.los-dictionary-entry {
+  min-width:0; border:1px solid var(--los-border); border-radius:12px;
+  background:var(--los-surface); padding:16px;
+}
+.los-dictionary-translation {
+  display:flex; align-items:baseline; flex-wrap:wrap; gap:8px 12px;
+  overflow-wrap:anywhere; line-height:1.4; color:var(--los-ink);
+}
+.los-dictionary-translation strong { font-size:19px; font-weight:740; }
+.los-dictionary-translation > span:last-child { font-size:16px; }
+.los-dictionary-equals { color:var(--los-ink-muted); font-size:14px; }
+.los-dictionary-notes p { font-size:13px; line-height:1.55; margin:9px 0 0; color:var(--los-ink-muted); }
+.los-dictionary-references { display:flex; gap:8px; flex-wrap:wrap; margin-top:13px; }
+.los-dictionary-references a {
+  display:inline-flex; align-items:center; gap:4px; min-height:30px;
+  padding:5px 8px; border-radius:6px; background:var(--los-surface-muted);
+  color:var(--los-book-accent-readable,#B7473C);
+  text-decoration:none; font-size:12px; font-weight:600;
+}
+.los-dictionary-references a:hover { text-decoration:underline; }
+.los-dictionary-references a:focus-visible { outline:2px solid #B7473C; outline-offset:2px; }
+.los-dictionary-disclaimer { max-width:870px; margin:24px 0; font-size:13px; line-height:1.6; color:var(--los-ink-muted); }
+@media(max-width:719px){
+ .los-dictionary-controls,.los-dictionary-results { grid-template-columns:minmax(0,1fr); }
+ .los-dictionary-direction label { margin-right:12px; }
+ .los-dictionary-entry { padding:14px; }
+}
+
+
+/* Keyboard-accessible, bounded dictionary pagination and focused book-word links. */
+.los-dictionary-pagination {
+ display:flex; align-items:center; justify-content:center;
+ gap:14px; flex-wrap:wrap; margin:22px 0;
+ font-size:14px; color:var(--los-ink-muted);
+}
+.los-dictionary-pagination > button { min-height:44px; }
+.los-dictionary-pagination > span { font-variant-numeric:tabular-nums; }
+.los-dictionary-pagination button:disabled { opacity:.45; cursor:not-allowed; }
+.los-word-list li:target,
+.los-word-list li:focus {
+ border-radius:8px;
+ outline:2px solid #B7473C;
+ outline-offset:2px;
+ scroll-margin-block:120px;
+}
+@media (max-width:479px) {
+ .los-dictionary-pagination { justify-content:stretch; }
+ .los-dictionary-pagination > button { flex:1 1 42%; }
+ .los-dictionary-pagination > span { order:-1; flex-basis:100%; text-align:center; }
+}
+
+/* Verified language examples inside the dictionary, without pretending a
+ * course-authored model sentence is an authentic source transcript. */
+.los-dictionary-example {
+ margin-top:13px; padding:12px 0 0;
+ border-top:1px solid var(--los-border);
+}
+.los-dictionary-example > b {
+ display:block; margin-bottom:6px; color:var(--los-ink-muted);
+ font-size:11px; font-weight:700; letter-spacing:.045em;
+ text-transform:uppercase;
+}
+.los-dictionary-example > p { margin:5px 0; font-size:14px; line-height:1.55; }
+.los-dictionary-example > p[lang="de"] { font-weight:600; color:var(--los-ink); }
+.los-dictionary-example > p[lang="fi"] { color:var(--los-ink-secondary); }
+.los-dictionary-example > small {
+ display:block; font-size:11px; line-height:1.5;
+ color:var(--los-ink-muted); overflow-wrap:anywhere;
+}
+.los-dictionary-example > a {
+ display:inline-flex; gap:5px; align-items:center;
+ margin-top:9px; padding:5px 0; min-height:32px;
+ font-size:12px; font-weight:600; text-decoration:underline;
+ text-underline-offset:3px; color:var(--los-book-accent-readable,#B7473C);
+}
+.los-dictionary-example > a:focus-visible { outline:2px solid #B7473C; outline-offset:2px; }

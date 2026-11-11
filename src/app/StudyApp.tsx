@@ -1,6 +1,6 @@
 import { useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
-import { lazy, Suspense, useEffect, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useRef, useState, type ReactNode } from "react";
 import { BookOpen } from "lucide-react";
 import { toast, Toaster } from "sonner";
 import { AppShell } from "@/app/AppShell";
@@ -22,6 +22,7 @@ import {
 } from "@/lib/data";
 import { longDate, greeting, today } from "@/lib/fi";
 import type { CourseTab } from "@/features/studies/CourseView";
+import { registerLosOperations } from "@/features/los/data/useLosRecord";
 import type { ProgressSection } from "@/features/progress/ProgressView";
 import type { SettingsSection } from "@/features/settings/SettingsView";
 import { Onboarding } from "@/components/Onboarding";
@@ -80,8 +81,10 @@ async function getArthurSession(previousOwnerId?: string | null): Promise<Device
 }
 
 
-export function StudyAppRoot({ initialPage, courseCode, courseTab, examId, progressSection, settingsSection, practiceCourseCode, practiceTopicId, planMode, planAnchor }: { initialPage: StudyPage; courseCode?: string | undefined; courseTab?:CourseTab | undefined; examId?:string | undefined; progressSection?:ProgressSection | undefined; settingsSection?:SettingsSection | undefined; practiceCourseCode?:string | undefined; practiceTopicId?:string | undefined; planMode?:("päivä"|"viikko"|"kuukausi") | undefined; planAnchor?:string | undefined }) {
+export function StudyAppRoot({ initialPage, courseCode, courseTab, examId, progressSection, settingsSection, practiceCourseCode, practiceTopicId, planMode, planAnchor, losContent }: { initialPage: StudyPage; courseCode?: string | undefined; courseTab?:CourseTab | undefined; examId?:string | undefined; progressSection?:ProgressSection | undefined; settingsSection?:SettingsSection | undefined; practiceCourseCode?:string | undefined; practiceTopicId?:string | undefined; planMode?:("päivä"|"viikko"|"kuukausi") | undefined; planAnchor?:string | undefined; losContent?: ReactNode | undefined }) {
   const queryClient = useQueryClient();
+  // Register before the global offline watcher can replay any saved LOS! writes.
+  registerLosOperations();
   const [user, setUser] = useState<DeviceUser | null | undefined>();
   const [authError, setAuthError] = useState<string | null>(null);
 
@@ -212,7 +215,7 @@ export function StudyAppRoot({ initialPage, courseCode, courseTab, examId, progr
 
   if (user === undefined) return <main className="grid min-h-screen place-items-center">Avataan opintopäiväkirjaa…</main>;
   if (!user) return <DeviceSignIn authError={authError} onSignedIn={setUser} />;
-  return <StudyApp key={user.id + ":" + initialPage + ":" + (courseCode ?? "") + ":" + (courseTab ?? "") + ":" + (examId ?? "") + ":" + (progressSection ?? "") + ":" + (settingsSection ?? "") + ":" + (practiceCourseCode ?? "") + ":" + (practiceTopicId ?? "") + ":" + (planMode ?? "") + ":" + (planAnchor ?? "")} user={user} initialPage={initialPage} courseCode={courseCode} courseTab={courseTab} examId={examId} progressSection={progressSection} settingsSection={settingsSection} practiceCourseCode={practiceCourseCode} practiceTopicId={practiceTopicId} planMode={planMode} planAnchor={planAnchor} />;
+  return <StudyApp key={user.id + ":" + initialPage + ":" + (courseCode ?? "") + ":" + (courseTab ?? "") + ":" + (examId ?? "") + ":" + (progressSection ?? "") + ":" + (settingsSection ?? "") + ":" + (practiceCourseCode ?? "") + ":" + (practiceTopicId ?? "") + ":" + (planMode ?? "") + ":" + (planAnchor ?? "")} user={user} initialPage={initialPage} courseCode={courseCode} courseTab={courseTab} examId={examId} progressSection={progressSection} settingsSection={settingsSection} practiceCourseCode={practiceCourseCode} practiceTopicId={practiceTopicId} planMode={planMode} planAnchor={planAnchor} losContent={losContent} />;
 }
 
 function DeviceSignIn({
@@ -278,7 +281,7 @@ function DeviceSignIn({
   </section><Toaster richColors /></main>;
 }
 
-function StudyApp({ user, initialPage, courseCode, courseTab, examId, progressSection, settingsSection, practiceCourseCode, practiceTopicId, planMode, planAnchor }: { user: DeviceUser; initialPage: StudyPage; courseCode?: string | undefined; courseTab?:CourseTab | undefined; examId?:string | undefined; progressSection?:ProgressSection | undefined; settingsSection?:SettingsSection | undefined; practiceCourseCode?:string | undefined; practiceTopicId?:string | undefined; planMode?:("päivä"|"viikko"|"kuukausi") | undefined; planAnchor?:string | undefined }) {
+function StudyApp({ user, initialPage, courseCode, courseTab, examId, progressSection, settingsSection, practiceCourseCode, practiceTopicId, planMode, planAnchor, losContent }: { user: DeviceUser; initialPage: StudyPage; courseCode?: string | undefined; courseTab?:CourseTab | undefined; examId?:string | undefined; progressSection?:ProgressSection | undefined; settingsSection?:SettingsSection | undefined; practiceCourseCode?:string | undefined; practiceTopicId?:string | undefined; planMode?:("päivä"|"viikko"|"kuukausi") | undefined; planAnchor?:string | undefined; losContent?: ReactNode | undefined }) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   setOfflineOwner(user.id);
@@ -627,7 +630,7 @@ function StudyApp({ user, initialPage, courseCode, courseTab, examId, progressSe
     </>;
   }
 
-  const contextualCoach = !busy && !error && !entry && !adding && !search && !moreOpen && page !== "settings" ? (
+  const contextualCoach = !losContent && !busy && !error && !entry && !adding && !search && !moreOpen && page !== "settings" ? (
     <Suspense fallback={null}>
       <AICoach
         data={{ courses, topics, sessions, exams, plan, mistakes: mistakesQ.data ?? [] }}
@@ -643,8 +646,9 @@ function StudyApp({ user, initialPage, courseCode, courseTab, examId, progressSe
   return <>
     <AppShell
       page={page}
-      pageTitle={pageTitle}
+      pageTitle={losContent ? "Saksa B3" : pageTitle}
       pageEyebrow={pageEyebrow}
+      contextHeader={!losContent}
       moreOpen={moreOpen}
       onMoreOpenChange={setMoreOpen}
       onNavigate={go}
@@ -652,7 +656,7 @@ function StudyApp({ user, initialPage, courseCode, courseTab, examId, progressSe
       onSearch={() => { setMoreOpen(false); setSearch(true); }}
       contextualAction={contextualCoach}
     >
-      {activeSessionQ.data && !entry && <button
+      {!losContent && activeSessionQ.data && !entry && <button
         type="button"
         className="mb-5 flex min-h-16 w-full items-center justify-between gap-4 rounded-2xl border border-primary/30 bg-accent px-4 py-3 text-left"
         onClick={openActiveSession}
@@ -666,11 +670,12 @@ function StudyApp({ user, initialPage, courseCode, courseTab, examId, progressSe
         <span className="shrink-0 text-sm font-semibold text-primary">Jatka ›</span>
       </button>}
       {pending>0 && <p role="status" className="mb-5 rounded-xl bg-accent p-3 text-sm">Tallennettu paikallisesti · {pending} muutosta synkronoidaan yhteyden palattua.</p>}
-      {error && <div role="alert" className="panel mb-5 p-4"><p className="font-medium">{userFacingError}</p>{pending>0&&<p className="mt-1 text-sm text-muted-foreground">Muutokset synkronoidaan automaattisesti yhteyden palattua.</p>}<button className="mt-3 min-h-11 underline" onClick={()=>{setDefaultsReady(false);setDefaultsError(null);void ensureKe04ForCurrentUser().then(()=>Promise.all([coursesQ.refetch(),topicsQ.refetch(),sessionsQ.refetch(),examsQ.refetch(),planQ.refetch(),testsQ.refetch(),attemptsQ.refetch(),mistakesQ.refetch(),preferencesQ.refetch()])).then(()=>setDefaultsReady(true)).catch(err=>{console.error("[Opintopäiväkirja] Retry failed",err);setDefaultsError("retry_failed");setDefaultsReady(true);});}}>Yritä uudelleen</button></div>}
+      {!losContent && error && <div role="alert" className="panel mb-5 p-4"><p className="font-medium">{userFacingError}</p>{pending>0&&<p className="mt-1 text-sm text-muted-foreground">Muutokset synkronoidaan automaattisesti yhteyden palattua.</p>}<button className="mt-3 min-h-11 underline" onClick={()=>{setDefaultsReady(false);setDefaultsError(null);void ensureKe04ForCurrentUser().then(()=>Promise.all([coursesQ.refetch(),topicsQ.refetch(),sessionsQ.refetch(),examsQ.refetch(),planQ.refetch(),testsQ.refetch(),attemptsQ.refetch(),mistakesQ.refetch(),preferencesQ.refetch()])).then(()=>setDefaultsReady(true)).catch(err=>{console.error("[Opintopäiväkirja] Retry failed",err);setDefaultsError("retry_failed");setDefaultsReady(true);});}}>Yritä uudelleen</button></div>}
 
       <section className={`page-content page-content-${page}`} data-page={page}>
+        {page === "courses" && !courseCode && !losContent && <a className="los-studies-entry" href="/oppikirjasto/saksa-b3"><span><strong>LOS! · Saksan B3-oppikirjat</strong><small>Kahdeksan digitaalista oppikirjaa · SAB31–SAB38</small></span><span aria-hidden="true">→</span></a>}
         <Suspense fallback={<FeatureFallback/>}>
-        {busy ? (showSkeleton ? <div className="space-y-4" role="status" aria-live="polite" aria-label="Ladataan"><div className="h-32 animate-pulse rounded-2xl bg-muted"/><div className="h-60 animate-pulse rounded-2xl bg-muted"/></div> : null) :
+        {losContent ? losContent : busy ? (showSkeleton ? <div className="space-y-4" role="status" aria-live="polite" aria-label="Ladataan"><div className="h-32 animate-pulse rounded-2xl bg-muted"/><div className="h-60 animate-pulse rounded-2xl bg-muted"/></div> : null) :
         coursesUnavailable ? <section className="panel p-6"><h2 className="text-xl font-semibold">Kurssitietoja ei saatu näkyviin</h2><p className="mt-2 text-muted-foreground">Tämä ei tarkoita, että kurssisi olisivat kadonneet. Yritä latausta uudelleen yllä olevasta ilmoituksesta.</p></section> :
         courses.length===0 ? <section className="panel p-6"><h2 className="text-xl font-semibold">Aloita ensimmäisestä kurssista</h2><p className="mt-2 text-muted-foreground">Lisää kurssi ja sen aiheet, jotta voit suunnitella ja kirjata opiskelua.</p><button onClick={()=>setAdding(true)} className="mt-5 min-h-11 rounded-xl bg-primary px-4 text-primary-foreground">Lisää kurssi</button></section> :
         page==="today" ? <TodayView courses={courses} topics={topics} sessions={sessions} exams={exams} plan={plan} tests={testsQ.data??[]} attempts={attemptsQ.data??[]} mistakes={mistakesQ.data??[]} capacity={capacity} onStart={id=>void startSession(id)} onGo={go} onPractice={goPractice}/> :
