@@ -4,6 +4,7 @@ import { LOS1_C01_PREVIEW_BLOCKS, LOS1_C01_PREVIEW_EXERCISES } from "./los1-c01-
 import { LOS1_RESEARCH_SOURCES } from "./los1-sources.ts";
 import { LOS1_C01_SOURCE_BLOCKS, LOS1_C01_SOURCE_EXERCISES } from "./los1-c01-source.ts";
 import { LOS1_INTRO_BLOCKS } from "./los1-onboarding.ts";
+import { LOS1_C01_SECTIONS, emptyChapterSections } from "./chapterSections";
 
 const specs: readonly [string, string, string, string, string, string][] = [
   ["Perustason alkeet 1", "Tutustu ja ihastu saksan kieleen", "Nollataso, tervehdykset, esittäytyminen ja ensimmäinen vuorovaikutus.", "#B7473C", "#FCE8E5", "#FF9B91"],
@@ -33,6 +34,7 @@ export const LOS_BOOKS: readonly Book[] = specs.map((spec, index) => ({
   bannerAsset: null,
   chapters: index === 0 ? LOS1_PLANNED_CHAPTERS.map(chapter => chapter.id === "C01" ? {
     ...chapter, publicationStatus: "preview" as const,
+    sections: LOS1_C01_SECTIONS,
     blockIds: [
       LOS1_C01_PREVIEW_BLOCKS[0]!.id,
       ...LOS1_C01_SOURCE_BLOCKS.map(block => block.id),
@@ -42,7 +44,7 @@ export const LOS_BOOKS: readonly Book[] = specs.map((spec, index) => ({
       ...LOS1_C01_SOURCE_EXERCISES.map(exercise => exercise.id),
       ...LOS1_C01_PREVIEW_EXERCISES.map(exercise => exercise.id),
     ],
-  } : chapter) : [],
+  } : { ...chapter, sections: emptyChapterSections() }) : [],
   lessons: index === 0 ? LOS1_PLANNED_LESSONS.map(lesson => {
     if (lesson.id === "L001") return {
       ...lesson, publicationStatus: "preview" as const,
