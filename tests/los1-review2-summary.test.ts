@@ -69,5 +69,6 @@ test('honesty: full ten-chapter review L057 and final exam lesson L059 remain bl
  assert.equal(lessons.find(l=>l.id==='L059')?.status,'pending');
  assert.equal(guidedLessons.some(l=>l.id==='L057'),false);
  assert.equal(guidedLessons.some(l=>l.id==='L059'),false);
- for(const cid of ['C06','C08'])assert.equal(chapters.find(c=>c.id===cid)?.status,'source-pending');
+ assert.equal(chapters.find(c=>c.id==='C06')?.status,'text-reviewed');
+ assert.equal(chapters.find(c=>c.id==='C08')?.status,'source-pending');
 });
