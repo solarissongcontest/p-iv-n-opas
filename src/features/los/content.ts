@@ -247,7 +247,14 @@ export const chapters:Chapter[] = [
  ],
  vocab:w([['der Montag','maanantai'],['der Dienstag','tiistai'],['der Mittwoch','keskiviikko'],['der Donnerstag','torstai'],['der Freitag','perjantai'],['der Samstag','lauantai'],['der Sonntag','sunnuntai'],['am Montag','maanantaina'],['um drei Uhr','kello kolme'],['wann','milloin'],['die Woche','viikko'],['heute','tänään'],['morgen','huomenna']]),
  teaching:['Päivän nimen edessä käytetään am: am Montag. Kellonajan edessä käytetään um: um drei Uhr.', 'Viertel vor drei tarkoittaa varttia vaille kolme. Muu dialogin verbisanasto on tukea, ei vielä opeteltavaa taivutusta.'],
- grammar:{title:'Am + viikonpäivä, um + kellonaika',explanation:'Am Montag um drei tarkoittaa maanantaina kello kolme. Viikonpäivät ovat saksan substantiiveja ja alkavat isolla.',examples:[['Am Montag um drei Uhr.','Maanantaina kello kolme.']]},culture:'Saksassa kalenterin arkiviikko alkaa maanantaista, kuten Suomessa.',exercises:[]
+ grammar:{title:'Am + viikonpäivä, um + kellonaika',explanation:'Am Montag um drei tarkoittaa maanantaina kello kolme. Viikonpäivät ovat saksan substantiiveja ja alkavat isolla.',examples:[['Am Montag um drei Uhr.','Maanantaina kello kolme.']]},culture:'Saksassa kalenterin arkiviikko alkaa maanantaista, kuten Suomessa.',
+ media:{sourceId:'M-COM-09-DAYS',title:'Tage: Montag bis Sonntag (15 s)',
+  url:'https://commons.wikimedia.org/wiki/Special:Redirect/file/German_Vocabulary_-_Days.ogg',
+  sourceUrl:'https://commons.wikimedia.org/wiki/File:German_Vocabulary_-_Days.ogg',
+  license:'CC BY-SA 3.0',durationSeconds:15,
+  attribution:'Christoph (2007), englanninkielisestä Wikibooksista Wikimedia Commonsiin siirretty alkuperäinen ihmisen äänittämä viikonpäiväluettelo. Ei muutoksia.',
+  transcript:[{id:'c09-b-1',speaker:'Viikonpäivien ääni',text:'Tage: Montag, Dienstag, Mittwoch, Donnerstag, Freitag, Samstag, Sonntag.'}]},
+ exercises:[]
 },
 {
  id:'C10',name:'Schön, dich kennenzulernen!',goal:'Yhdistän opitut asiat lyhyeen esittelyyn.',sourceId:'M-DIB-02',
@@ -276,7 +283,7 @@ export const lessons = [
  const n=index+1,chapterIndex=n>=2&&n<=26?Math.floor((n-2)/5):n>=31&&n<=55?Math.floor((n-31)/5)+5:-1;
  return {id:'L'+String(n).padStart(3,'0'),name,chapterId:chapterIndex>=0?chapters[chapterIndex]!.id:null,estimate:30,
   section:n===1?'Aloitus':n===30?'Välikoe':n===59?'Loppukoe':n===60?'Yhteenveto':n>=27&&n<=29?'Kertaus I':n>=56&&n<=58?'Kertaus II':chapters[chapterIndex]?.name??'',
-  status:n<=29||(n>=36&&n<=40)?'initial-material': 'pending' as const};
+  status:n<=29||(n>=36&&n<=40)||(n>=46&&n<=50)?'initial-material': 'pending' as const};
 });
 export const allWords=chapters.flatMap(c=>c.vocab.map(word=>({...word,chapterId:c.id})));
 export function validateLosContent() {
