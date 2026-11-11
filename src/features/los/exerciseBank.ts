@@ -1,4 +1,5 @@
 import { LOS_C03_C06_EXERCISES } from "./exerciseBankExpanded.ts";
+import { LOS_C07_C10_EXERCISES } from "./exerciseBankFinal.ts";
 
 /**
  * LOS! 1:n rajatusti, yksiselitteisesti tarkistettavat alkeistehtävät.
@@ -8,7 +9,7 @@ import { LOS_C03_C06_EXERCISES } from "./exerciseBankExpanded.ts";
 export type LosExercise = {
   id: string;
   chapterId: string;
-  skill: "tervehtiminen" | "ääntäminen" | "sanasto" | "esittäytyminen" | "kielioppi" | "alkuperä" | "puhuttelu" | "kuulumiset" | "numerot";
+  skill: "tervehtiminen" | "ääntäminen" | "sanasto" | "esittäytyminen" | "kielioppi" | "alkuperä" | "puhuttelu" | "kuulumiset" | "numerot" | "tavaaminen" | "selviytyminen" | "ajanilmaukset" | "kertaus";
   kind: "choice" | "fill";
   prompt: string;
   instruction: string;
@@ -47,6 +48,7 @@ export const LOS_EXERCISES: ReadonlyArray<LosExercise> = [
   {id:"C02-EX-14",chapterId:"02",skill:"kielioppi",kind:"choice",instruction:"Valitse oikea kahden verbimuodon pari.",prompt:"Mitkä sein-verbin muodot vastaavat ich ja du?",options:["ist / sind","bin / bist","bist / bin"],correct:"bin / bist",accepted:["bin / bist"],explanation:"ich bin, du bist."},
   {id:"C02-EX-15",chapterId:"02",skill:"esittäytyminen",kind:"fill",instruction:"Kirjoita kysymyssana.",prompt:"____ heißt du? (Mikä sinun nimesi on?)",correct:"Wie",accepted:["Wie"],explanation:"Wie heißt du?"},
   ...LOS_C03_C06_EXERCISES,
+  ...LOS_C07_C10_EXERCISES,
 ];
 
 /** Sallitut vertailumuunnokset: välilyönnit ja loppupiste/-huuto-/kysymysmerkki.
