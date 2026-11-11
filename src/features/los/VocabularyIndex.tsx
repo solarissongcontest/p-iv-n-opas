@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Bookmark, BookmarkCheck, Search } from "lucide-react";
 import type { Book } from "./model";
 import { bookPath } from "./books";
@@ -11,7 +11,18 @@ export function VocabularyIndex({ book }: { book: Book }) {
   const { value: saved, update: updateSaved, status } = useLosRecord<string[]>(
     book.id, "bookmark", "saved-vocabulary", book.contentVersion, [],
   );
-  const rows = bookVocabularyRows(book);
+  const rows = useMemo(() => bookVocabularyRows(book), [book]);
+  // Exact book-specific row references come from the learner dictionary.
+  // The hash only selects a known in-book ID, never arbitrary user HTML.
+  useEffect(() => {
+    const hash = decodeURIComponent(window.location.hash.slice(1));
+    if (!hash.startsWith("los-word-")) return;
+    const rowId = hash.slice("los-word-".length);
+    if (!rows.some(row => row.id === rowId)) return;
+    const target = document.getElementById(hash);
+    target?.scrollIntoView({ block: "center", behavior: "instant" });
+    target?.focus({ preventScroll: true });
+  }, [rows]);
   const visible = filterBookVocabulary(rows, query, savedOnly, saved);
   const savedSet = new Set(saved);
   const toggle = (id: string) => updateSaved(previous =>
@@ -41,7 +52,7 @@ export function VocabularyIndex({ book }: { book: Book }) {
       !visible.length ?
         <div className="los-empty"><h2>Ei vastaavia sanoja</h2><p>{savedOnly ? "Lisää sanoja omaan listaan tai poista nykyinen hakurajaus." : "Kokeile eri hakusanaa. Tässä näytetään vain kirjaan kuuluvat sanat."}</p></div> :
         <ul className="los-word-list">{visible.map(row =>
-          <li key={row.id}>
+          <li key={row.id} id={"los-word-" + row.id} tabIndex={-1}>
             <div className="los-word-main">
               <b lang="de">{row.de}</b><p lang="fi">{row.fi}</p>
               {row.note && <small>{row.note}</small>}
