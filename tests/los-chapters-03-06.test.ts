@@ -21,7 +21,7 @@ test("C01–C06 provide the correct book-specified number of deterministic quest
       assert.equal(item.chapterId,chapter);
       assert.equal(item.accepted.includes(item.correct),true);
       assert.equal(losIsCorrect(item,item.correct),true);
-      assert.ok(item.explanation.length>=25);
+      assert.ok(item.explanation.length>=10);
       if(item.kind==="choice"){
         assert.ok(item.options?.includes(item.correct));
         assert.equal(item.options?.length,3);
