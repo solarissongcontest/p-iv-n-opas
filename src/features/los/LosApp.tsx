@@ -68,6 +68,29 @@ function Media({chapter,store,fontSize=18,onAudioCompleted}:{chapter:Chapter;sto
    </p>
    <p className="los-meta">Äänite on alkuperäisen julkaisijan palvelimella, ei LOS!:iin kopioitu. Upotuksen toistettavuus testataan vielä varsinaisella mobiili- ja desktop-laitteella.</p>
   </>;
+ if(chapter.id==='C07'&&chapter.media?.transcript)return <>
+  <Label>TEKSTI B · ÄÄNTÄMINEN JA AAKKOSET</Label>
+  <h3>Tavaa saksaksi</h3>
+  <p>Kuuntele ensin saksankielisen puhujan lausuma sana <i lang="de">buchstabieren</i> ja sen jälkeen kokonainen saksan aakkosten ihmisäänite. Ne ovat kaksi eri autenttista äänitiedostoa, eivät C07:n hakemistopuhelun ääniversio.</p>
+  <Audio src={chapter.media.url} title={chapter.media.title}
+   onCompleted={()=>{store.put('media:completed:M-COM-07-BUCH',{at:new Date().toISOString(),version:LOS_VERSION});onAudioCompleted?.();}}/>
+  <Reader chapter={{...chapter,blocks:chapter.media.transcript}} store={store} fontSize={fontSize}/>
+  <p className="los-source"><b>{chapter.media.sourceId}</b> · {chapter.media.attribution} · {chapter.media.license} ·
+   <a href={chapter.media.sourceUrl} target="_blank" rel="noreferrer"> Alkuperäinen sanaäänite</a> ·
+   <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noreferrer"> CC BY-SA 4.0</a></p>
+  <Audio src="https://commons.wikimedia.org/wiki/Special:Redirect/file/German_Grammar_-_The_Alphabet.ogg"
+   title="Saksan aakkoset · endymi0n (61 sekuntia)"
+   onCompleted={()=>store.put('media:completed:M-COM-07-ABC',{at:new Date().toISOString(),version:LOS_VERSION})}/>
+  <div className="los-grammar-examples">
+   <p lang="de" aria-label="Saksan kirjaimet A:sta Z:aan">A · B · C · D · E · F · G · H · I · J · K · L · M · N · O · P · Q · R · S · T · U · V · W · X · Y · Z</p>
+   <p lang="de">Ä · Ö · Ü · ß</p>
+  </div>
+  <p className="los-meta">Kirjainrivi on LOS!:n toimitettu opiskelulista, ei väite äänitteen sanatarkasta litteraatista. Ääntämisnäytteessä kuullaan kirjainten ääntämistä, mutta listaa ei arvioida sanasta sanaan äänitteen perusteella.</p>
+  <p className="los-source"><b>M-COM-07-ABC</b> · endymi0n (2006), saksan aakkosten alkuperäinen äänite, englanninkielisen Wikibooksin käyttäjän German Men92 lataamana · CC BY-SA 3.0 / GFDL · muokkaamaton ·
+   <a href="https://commons.wikimedia.org/wiki/File:German_Grammar_-_The_Alphabet.ogg" target="_blank" rel="noreferrer"> Alkuperäinen äänite</a> ·
+   <a href="https://creativecommons.org/licenses/by-sa/3.0/" target="_blank" rel="noreferrer"> Lisenssiehdot</a></p>
+  <p className="los-meta">Äänitteet toistetaan Commonsin omista tiedostoista. Puhelun alkuperäisen äänitteen lisenssi ja toiminta ovat erikseen avoimia.</p>
+ </>;
  if(chapter.id==='C01')return <>
   <Audio src="https://commons.wikimedia.org/wiki/Special:Redirect/file/Gespr%C3%A4chVorstellung.ogg" title="Franz ja Jörg, GesprächVorstellung (14 s)" onCompleted={()=>store.put("media:completed:M-COM-01",{at:new Date().toISOString(),version:LOS_VERSION})}/>
   {chapter.media?<Audio src={chapter.media.url} title={chapter.media.title} onCompleted={()=>store.put("media:completed:"+chapter.media!.sourceId,{at:new Date().toISOString(),version:LOS_VERSION})}/>:null}
