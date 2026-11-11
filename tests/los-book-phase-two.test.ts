@@ -11,7 +11,7 @@ test("LOS! 1 has exactly 60 lessons in locked manifest sequence", () => {
   assert.equal(LOS_1_LESSONS[29]?.title,"Välikoe: kappaleet 1–5");
   assert.equal(LOS_1_LESSONS[58]?.title,"Koko kirjan loppukoe");
   assert.equal(LOS_1_LESSONS[59]?.title,"Mitä osaan nyt saksaksi?");
-  assert.equal(LOS_1_LESSONS.filter(x=>x.chapter !== null).length,53);
+  assert.equal(LOS_1_LESSONS.filter(x=>x.chapter !== null).length,56);
 });
 
 test("guided lessons point to known chapter pages or the book's appendix", () => {
