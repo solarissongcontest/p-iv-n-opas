@@ -1,0 +1,133 @@
+/** C07 fifteen item, authentic-source-aware practice chapter test.
+ * Optional private speaking recorder, mandatory honest self-rating only.
+ * Retake form B is newly authored, not a shuffled answer list.
+ */
+import type {Exercise} from "./model";
+import type {ChapterTestDefinition} from "./chapterTest";
+const base={version:"0.1.0",difficulty:"basic" as const,
+  objectives:["L1-PHON-01","L1-STRAT-01"]};
+type Form="a"|"b";
+const choice=(f:Form,n:number,promptFi:string,options:[string,string,string],
+  right:0|1|2,explanationFi:string):Exercise=>({
+  ...base,id:"los1-c07-exam-"+f+"-"+String(n).padStart(2,"0"),
+  type:"single-choice",promptFi,
+  options:options.map((label,i)=>({id:"c"+i,label})),
+  correctOptionId:"c"+right,explanationFi,
+});
+const gap=(f:Form,n:number,promptFi:string,before:string,after:string,answer:string,
+  explanationFi:string):Exercise=>({
+  ...base,id:"los1-c07-exam-"+f+"-"+String(n).padStart(2,"0"),
+  type:"gap-fill",promptFi,sentenceBefore:before,sentenceAfter:after,
+  acceptedAnswers:[answer],explanationFi,
+});
+
+export const LOS1_C07_EXAM_A:Exercise[]=[
+  choice("a",1,"Mitä Wie schreibt man das? tarkoittaa?",
+    ["Miten se kirjoitetaan?","Kuka se on?","Mistä olet kotoisin?"],0,
+    "Wie schreibt man das? tarkoittaa miten se kirjoitetaan."),
+  choice("a",2,"Mikä pyyntö on teitittelevä?",
+    ["Buchstabiere bitte.","Bitte buchstabieren Sie.","Du buchstabierst."],1,
+    "Bitte buchstabieren Sie. on kohtelias pyyntö."),
+  choice("a",3,"Miten pyydät toistamaan kuulemasi?",
+    ["Noch einmal, bitte.","Wie alt bist du?","Ich bin zwanzig."],0,
+    "Noch einmal, bitte. tarkoittaa vielä kerran, kiitos."),
+  choice("a",4,"Mitä langsam tarkoittaa?",
+    ["nopeasti","hitaasti","oikein"],1,
+    "Langsam tarkoittaa hitaasti."),
+  choice("a",5,"Mikä on V-kirjaimen saksankielinen nimi?",
+    ["Vau","We","Jott"],0,
+    "V-kirjaimen nimi on Vau."),
+  choice("a",6,"Mikä on W-kirjaimen saksankielinen nimi?",
+    ["Zett","Vau","We"],2,
+    "W:n nimi on We."),
+  choice("a",7,"Mikä kirjain tunnetaan nimellä Zett?",
+    ["J","Z","C"],1,
+    "Zett on Z."),
+  choice("a",8,"Mikä merkki tunnetaan nimellä Eszett?",
+    ["ß","B","Ü"],0,
+    "Eszett on ß."),
+  choice("a",9,"Mikä on Wikibooksin puhelindialogissa pyydetyn naisen etunimi?",
+    ["Greta","Claudia","Berna"],1,
+    "Tekstissä mainitaan Claudia Bolliger."),
+  choice("a",10,"Miten nimi Bolliger alkaa tavattuna?",
+    ["B – O – L – L","B – A – L – L","B – O – R – L"],0,
+    "Bolliger alkaa B–O–L–L."),
+  choice("a",11,"Mitä zweimal L tarkoittaa Wikibooksin tekstissä?",
+    ["Kaksi peräkkäistä L:ää.","Kaksi peräkkäistä R:ää.","Yksi L."],0,
+    "Zweimal on kahdesti."),
+  gap("a",12,"Täydennä tavaamisverbi kohteliaaseen pyyntöön.","Bitte","Sie.","buchstabieren",
+    "Bitte buchstabieren Sie. on oikein."),
+  gap("a",13,"Täydennä nimen kirjoitusasua kysyvä lause.","Wie","man das?","schreibt",
+    "Wie schreibt man das? on oikein."),
+  gap("a",14,"Kirjoita kirjaimista muodostuva kuvitteellinen nimi.","L – E – N – A =", "", "Lena",
+    "L–E–N–A muodostaa nimen Lena."),
+  choice("a",15,"Miten kuulet oman äänen C07:ssa ja mikä pisteytetään?",
+    ["Puhe pisteytetään automaattisesti ääntämisestä.",
+      "Puheen voi äänittää vapaaehtoisesti ja arvioida itse ilman puhepisteitä.",
+      "Sovellus lähettää tallenteen opettajalle."],1,
+    "Äänitys on vapaaehtoinen ja itsearviointi erillinen; ei automaattista puheentunnistusta."),
+];
+export const LOS1_C07_EXAM_B:Exercise[]=[
+  choice("b",1,"Mitä kysyisit, jos nimeä ei osata kirjoittaa?",
+    ["Wie heißt du?","Wie schreibt man das?","Wie geht's?"],1,
+    "Wie schreibt man das? on kirjoitusasukysymys."),
+  choice("b",2,"Tuntemattomalle aikuiselle: mikä on kohtelias tapa pyytää tavaamaan?",
+    ["Bitte buchstabieren Sie.","Buchstabiere du!","Buchstabe bist du?"],0,
+    "Teitittelyssä käytetään Sie-pronominia."),
+  choice("b",3,"Mikä fraasi tarkoittaa 'vielä kerran, kiitos'?",
+    ["Langsam, bitte.","Bitte buchstabieren Sie.","Noch einmal, bitte."],2,
+    "Noch einmal, bitte. pyytää toistoa."),
+  choice("b",4,"Miten pyydät puhumaan hitaammin lyhyesti?",
+    ["Schnell, bitte.","Langsam, bitte.","Tschüss!"],1,
+    "Langsam, bitte. on hidas puhe -pyyntö."),
+  choice("b",5,"Mikä kirjain on nimeltään Vau?",
+    ["V","W","F"],0,"V = Vau."),
+  choice("b",6,"Mikä kirjain on nimeltään We?",
+    ["V","Z","W"],2,"W = We."),
+  choice("b",7,"Mikä on saksan Z-kirjaimen nimi?",
+    ["Jott","Zett","Eszett"],1,"Z = Zett."),
+  choice("b",8,"Mikä EI ole saksan 26 tavallisen A–Z-kirjaimen jäsen?",
+    ["Z","V","ß"],2,"ß on lisämerkki."),
+  choice("b",9,"Kenelle Franz pyytää tiedustelupalvelusta puhelinnumeroa?",
+    ["Frau Claudia Bolliger","Frau Lena Meier","Frau Greta Schneider"],0,
+    "Franz mainitsee Frau Claudia Bolligerin."),
+  choice("b",10,"Mikä tavattu kirjainsarja kuuluu sukunimeen Bolliger?",
+    ["B – O – L – L – I – G – E – R","B – O – L – I – G – E – R",
+      "B – O – L – L – I – D – E – R"],0,
+    "Bolliger sisältää kaksi L:ää."),
+  choice("b",11,"Miksi Franz sanoo zweimal L?",
+    ["Koska siinä on yksi L.","Koska siinä on kaksi L:ää.","Koska nimi alkaa L:llä."],1,
+    "Zweimal L selventää kaksi L-kirjainta."),
+  gap("b",12,"Täydennä kohteliaan pyynnön verbi.","Bitte","Sie.","buchstabieren",
+    "Bitte buchstabieren Sie. käyttää infinitiivin muotoista verbiä."),
+  gap("b",13,"Täydennä alkuperäinen kirjoitusasukysymys.","Wie","man das?","schreibt",
+    "Wie schreibt man das? kysyy kirjoitusasua."),
+  gap("b",14,"Tavaa kirjoitusasu nimeksi: M – I – L – A.","", "", "Mila",
+    "M–I–L–A muodostaa nimen Mila."),
+  choice("b",15,"Mikä kuvaa C07:n puhetehtävän arviointia?",
+    ["Tietokone kertoo oikean ääntämisprosentin.",
+      "Äänite on pakollista ladata pilveen.",
+      "Opiskelija arvioi itse puhumisen; ääntä ei pisteytetä automaattisesti."],2,
+    "C07:n puheosuus ei lisää automaattisia pisteitä."),
+];
+export const LOS1_C07_TEST:ChapterTestDefinition={
+  id:"los1-c07-chapter-test",chapterId:"C07",version:"0.1.0",
+  title:"C07 · Wie schreibt man das? · Kappaletesti",
+  introductoryFi:"Vastaa kaikkiin 15 automaattisesti pisteytettävään kohtaan "
+    +"ja harjoittele tämän jälkeen yhden keksityn nimen tavaamista ääneen. "
+    +"Voit äänittää itseäsi vain omalla laitteella vapaaehtoisesti. "
+    +"Itsearviointi on pakollinen, mutta äänitys ei ole eikä puhetta pisteytetä "
+    +"automaattisesti. Oikeat ratkaisut näkyvät vasta koko kokeen palautuksen jälkeen.",
+  exerciseIds:LOS1_C07_EXAM_A.map(item=>item.id),
+  alternativeExerciseIds:LOS1_C07_EXAM_B.map(item=>item.id),
+  selfAssessmentMode:"speech",
+  speechExampleDe:"Guten Tag! Ich heiße Lena. L – E – N – A. Noch einmal, bitte.",
+  speechPromptFi:"Sano kuviteltu nimi ääneen, tavaa se yksittäisinä saksankielisinä "
+    +"kirjainten niminä ja käytä toistopyyntöä Noch einmal, bitte.",
+  speechCriteria:[
+    {id:"letters",title:"Sanoin keksityn nimen kaikki kirjaimet oikeassa järjestyksessä."},
+    {id:"german",title:"Yritin käyttää saksalaisia kirjainnimiä enkä englanninkielisiä."},
+    {id:"repeat",title:"Osasin käyttää fraasia Noch einmal, bitte."},
+    {id:"context",title:"Osasin erottaa Wie schreibt man das? ja Bitte buchstabieren Sie."},
+  ],
+};
