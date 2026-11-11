@@ -21,6 +21,8 @@ import {NumberPractice} from './NumberPractice';
 import {WeekCalendarPractice} from './WeekCalendarPractice';
 
 import {reviewOneItems} from './reviewOneItems';
+import {reviewTwoItems} from './reviewTwoItems';
+import {SummaryPractice} from './SummaryPractice';
 import {exams,type ExamId} from './examBank';
 import {lookupGloss,translationFi} from './translations';
 import {useLosStore,type SyncStatus} from './useLosStore';
@@ -382,13 +384,14 @@ function FirstLessonRunner({lessonId,store,fontSize,onNext,onContents}:{lessonId
  const currentChapter=chapters.find(c=>c.id===current.chapterId)??chapters[0]!;
  const exerciseEntries=[
   ...chapters.flatMap(c=>allChapterExercises(c.id,c.exercises).map(exercise=>({exercise,chapter:c}))),
-  ...reviewOneItems.map(entry=>({exercise:entry.exercise,chapter:chapters.find(c=>c.id===entry.chapterId)??chapters[0]!}))
+  ...reviewOneItems.map(entry=>({exercise:entry.exercise,chapter:chapters.find(c=>c.id===entry.chapterId)??chapters[0]!})),
+  ...reviewTwoItems.map(entry=>({exercise:entry.exercise,chapter:chapters.find(c=>c.id===entry.chapterId)??chapters[0]!}))
  ];
  const requiredIds=current.exerciseIds??[];
  const allSubmitted=requiredIds.every(id=>
   id in exams?Boolean(item(store,'exam:submitted:'+id)):Boolean(item(store,'latest:'+id)));
  const hasGoal=lessonId!=='L001'||valueString(store,'goal:los1').trim().length>=8;
- const hasReflection=!['L006','L011','L016','L021','L026','L027','L028','L029','L030','L040','L050','L055'].includes(lessonId)||valueString(store,'lesson:reflection:'+lessonId).trim().length>=12;
+ const hasReflection=!['L006','L011','L016','L021','L026','L027','L028','L029','L030','L040','L050','L055','L056','L058','L060'].includes(lessonId)||valueString(store,'lesson:reflection:'+lessonId).trim().length>=12;
  const mediaDone=(plan?.requiredMediaIds??[]).every(id=>Boolean(item(store,'media:completed:'+id)));
  const midtermAttempt=typeof item(store,'exam:no:EX-MID')==='number'?item(store,'exam:no:EX-MID') as number:0;
  const hasMidtermWriting=lessonId!=='L030'||valueString(store,'exam:self:EX-MID:'+midtermAttempt).trim().length>=30;
@@ -428,6 +431,7 @@ function FirstLessonRunner({lessonId,store,fontSize,onNext,onContents}:{lessonId
    if(examId)return <ExamSession id={examId} store={store} onExit={onContents}
      onSubmit={()=>store.put('exam:submitted:'+examId,{submittedAt:new Date().toISOString(),version:LOS_VERSION})}/>;
    if(st.exerciseIds?.includes('C09-SCHEDULE'))return <WeekCalendarPractice items={store.items} put={store.put}/>;
+   if(st.exerciseIds?.includes('SUMMARY-CHECK'))return <SummaryPractice items={store.items} put={store.put}/>;
    return <>{(st.exerciseIds??[]).map(id=>{
     const entry=exerciseEntries.find(e=>e.exercise.id===id);
     return entry?<ExerciseCard key={entry.exercise.id} exercise={entry.exercise} chapter={entry.chapter} store={store} fontSize={fontSize}/>:
