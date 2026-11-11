@@ -66,7 +66,7 @@ export const LOS_C07_C10_EXERCISES:ReadonlyArray<LosExercise>=[
   choice("09",6,"ajanilmaukset","Mikä viikonpäivä on Samstag?",["lauantai","sunnuntai","tiistai"],"lauantai","Samstag tarkoittaa lauantaita."),
   choice("09",7,"ajanilmaukset","Mikä viikonpäivä on Sonntag?",["maanantai","perjantai","sunnuntai"],"sunnuntai","Sonntag tarkoittaa sunnuntaita."),
   choice("09",8,"ajanilmaukset","Mitä am Montag tarkoittaa?",["maanantaina","maanantaisin aamulla","ennen maanantaita"],"maanantaina","Am Montag tarkoittaa tässä maanantaina."),
-  choice("09",9,"ajanilmaukset","Mitä um drei Uhr tarkoittaa?",["kolmen tunnin ajan","kello kolme","kolmantena päivänä"],"kello kolme","Um kolme Uhr ilmaisee kellonajan; kolme on drei."),
+  choice("09",9,"ajanilmaukset","Mitä um drei Uhr tarkoittaa?",["kolmen tunnin ajan","kello kolme","kolmantena päivänä"],"kello kolme","Um drei Uhr ilmaisee kellonajan; drei tarkoittaa kolmea."),
   choice("09",10,"ajanilmaukset","Mitä Wann? kysyy?",["Miksi?","Milloin?","Kenen kanssa?"],"Milloin?","Wann? tarkoittaa milloin?"),
   choice("09",11,"ajanilmaukset","Mikä on morgen pienellä alkukirjaimella?",["aamu (substantiivi)","huomenna","eilen"],"huomenna","Morgen isolla on aamu, morgen pienellä tarkoittaa huomenna."),
   choice("09",12,"ajanilmaukset","Mitä heute tarkoittaa?",["eilen","tänään","huomenna"],"tänään","Heute tarkoittaa tänään."),
