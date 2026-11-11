@@ -16,10 +16,19 @@ export interface SourceAttribution {
   readiness?: "research" | "text-cleared" | "media-pending" | "blocked";
   publicationNoteFi?: string;
 }
+export type ChapterSectionId =
+  | "aloita" | "teksti-a" | "ymmarra" | "sanasto" | "kielioppi"
+  | "teksti-b" | "harjoittele" | "kayta" | "kulttuuri" | "tarkista";
+export interface ChapterSection {
+  id: ChapterSectionId; title: string;
+  blockIds: string[]; exerciseIds: string[];
+  publicationStatus: "planned" | "preview" | "published";
+}
 export interface Chapter {
   id: string; version: string; sequence: number; title: string;
   introductionFi: string; objectives: string[]; blockIds: string[]; exerciseIds: string[];
   publicationStatus?: "planned" | "preview" | "published"; plannedSourceIds?: string[];
+  sections?: ChapterSection[];
 }
 export interface Lesson {
   id: string; version: string; bookId: BookId; chapterId?: string;
@@ -84,6 +93,17 @@ export function validateBook(book: Book): string[] {
   for (const chapter of book.chapters) {
     for (const id of chapter.blockIds) if (!blocks.has(id)) errors.push("Unknown block: " + id);
     for (const id of chapter.exerciseIds) if (!exercises.has(id)) errors.push("Unknown exercise: " + id);
+    if (chapter.sections) {
+      const sectionIds = new Set<string>();
+      for (const section of chapter.sections) {
+        if (sectionIds.has(section.id)) errors.push("Duplicate chapter section: " + section.id);
+        sectionIds.add(section.id);
+        for (const id of section.blockIds) if (!blocks.has(id)) errors.push("Unknown section block: " + id);
+        for (const id of section.exerciseIds) if (!exercises.has(id)) errors.push("Unknown section exercise: " + id);
+        for (const id of section.blockIds) if (!chapter.blockIds.includes(id)) errors.push("Section block not in chapter: " + id);
+        for (const id of section.exerciseIds) if (!chapter.exerciseIds.includes(id)) errors.push("Section exercise not in chapter: " + id);
+      }
+    }
   }
   for (const lesson of book.lessons) {
     if (lesson.bookId !== book.id) errors.push("Wrong book: " + lesson.id);
