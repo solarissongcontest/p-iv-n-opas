@@ -2,6 +2,8 @@ import { useState, type FormEvent } from "react";
 import { ArrowRight, RotateCcw } from "lucide-react";
 import type { Book } from "./model";
 import { useLosRecord, losSyncMessage } from "./data/useLosRecord";
+import { bookPath } from "./books";
+import { emptyChapterTestRecord, type ChapterTestDefinition, type ChapterTestRecord } from "./chapterTest";
 import {
   bookReviewCards, localDay, nextReview, reviewCounts, reviewQueue,
   reviewedAnswerCorrect, type ReviewLedger,
@@ -86,6 +88,28 @@ export function ReviewWorkspace({ book }: { book: Book }) {
 }
 
 
+function ChapterTestEvidence({ book, test }: { book: Book; test: ChapterTestDefinition }) {
+  const { value: record, status } = useLosRecord<ChapterTestRecord>(
+    book.id, "exercise", test.id, test.version, emptyChapterTestRecord(test),
+  );
+  const chapter = book.chapters.find(item => item.id === test.chapterId);
+  const attempts = [...record.previousResults,
+    ...(record.submission ? [{ submittedAt: record.submission.submittedAt,
+      score: record.submission.score, maximum: record.submission.maximum }] : [])];
+  const latest = attempts.at(-1);
+  return <li>
+    <div><strong>{chapter ? chapter.title : test.title}</strong>
+      {status === "loading" ? <small>Haetaan tulosta…</small> :
+        latest ? <small>Viimeisin oma tulos: {latest.score} / {latest.maximum} pistettä · {attempts.length} palautettua yritystä</small> :
+        <small>Ei vielä palautettua testiä</small>}
+      <p className="los-support">Tehtäväsarjan pistemäärä, ei arvosana tai todistus.</p>
+    </div>
+    <a className="los-button los-button-secondary" href={bookPath(book, "kappale/" + test.chapterId.slice(1) + "/tarkista")}>
+      {latest ? "Katso testi" : "Avaa testi"}
+    </a>
+  </li>;
+}
+
 /** Evidence-only overview. An attempt is not proof of language proficiency. */
 export function ReviewEvidence({ book }: { book: Book }) {
   const { value: ledger, status } = useLosRecord<ReviewLedger>(
@@ -119,6 +143,11 @@ export function ReviewEvidence({ book }: { book: Book }) {
     <p>{cards.length ? "Käytettävissä " + cards.length + " toimitettua sanakorttia; " +
       stats.fresh + " uutta, " + stats.upcoming + " odottaa seuraavaa kertauspäivää." :
       "Tähän kirjaan ei ole vielä julkaistu sanakortteja."}</p>
+    {book.chapterTests.length > 0 && <section className="los-exam-evidence">
+      <h2>Kappaletestien tulokset</h2>
+      <p className="los-intro">Alla näkyvät vain todella palautetut automaattisesti tarkistetut tehtäväsarjat. Puheen itsearviota ei sisällytetä pistelukuun.</p>
+      <ul>{book.chapterTests.map(test => <ChapterTestEvidence key={test.id} book={book} test={test}/>)}</ul>
+    </section>}
     <h2>Muut taidot</h2>
     <p className="los-support">Kuullun ymmärtäminen, luetun ymmärtäminen, puhuminen ja itsenäinen kirjoittaminen: ei vielä riittävää taitokohtaista seurantaa. LOS! ei keksi tasopisteitä tai CEFR-arvioita.</p>
   </section>;
