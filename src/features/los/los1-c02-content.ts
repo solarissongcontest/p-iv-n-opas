@@ -3,11 +3,12 @@
  * The six-replica Wikibooks M-WB-01 primary source is in the source manifest,
  * but its full quoted transcription has NOT been imported here. This Text A
  * is original LOS! content with other characters, NOT attributed to Wikibooks.
- * M-COM-02 is a separately sourced CC BY-SA 3.0 12-second audio by Ariser.
+ * M-COM-02 is a separate complete 4-turn CC BY-SA 3.0 original by Ariser.
  * The lesson intentionally leaves "Wir kommen ...", nationality, and the
  * country grammar for C03; learners need only detect personal names in audio.
  */
 import type { ContentBlock, Exercise } from "./model";
+import { ariserTranscript } from "./los1-authentic-ariser.ts";
 
 export const LOS1_C02_EDITORIAL_TURNS = [
   { speaker: "Lena", text: "Hallo! Ich heiße Lena. Wie heißt du?", translationFi: "Hei! Minun nimeni on Lena. Mikä sinun nimesi on?" },
@@ -129,13 +130,13 @@ export const LOS1_C02_BLOCKS: ContentBlock[] = [
     title: "Thomas, Takashi ja Peter · alkuperäisäänite (12 s)",
     embedUrl: "https://upload.wikimedia.org/wikipedia/commons/f/f9/Deutsch_Dialog_._Ich_bin_Peter.ogg",
   },
+  ariserTranscript("los1-c02-m-com-02-dialogue"),
   {
-    id: "los1-c02-text-b-support", kind: "paragraph", version: "0.1.0", language: "fi",
-    text: "Äänitteessä Thomas kysyy toiselta henkilöltä tämän nimeä. Takashi esittelee itsensä ja kysyy takaisin. "
-      + "Thomas mainitsee myös Peterin. Loppupuolella kerrotaan kotipaikoista ja Japanista. "
-      + "Kuuntelun sanaselitykset: Ich komme aus … = tulen …sta, Wir kommen aus … = tulemme …sta. "
-      + "Nämä ovat vielä tunnistettavia, eivät tässä osiossa arvioitavia taivutusmuotoja. "
-      + "Koko äänite sisältyy äänisoittimeen, mutta täydellinen saksankielinen litteraatti ei ole vielä tämän esikatselun tekstissä.",
+    id: "los1-c02-text-b-support", kind: "paragraph", version: "0.2.0", language: "fi",
+    text: "Koko Ariserin nelirepliikkinen alkuperäinen saksankielinen keskustelu on nyt luettavissa yllä, "
+      + "myös sen repliikkikohtaiset suomennokset. C02:n tavoitteena on vielä tunnistaa nimet ja kysymys "
+      + "Wie heißt du?. Ich komme aus Kyoto ja Wir kommen aus Berlin liittyvät seuraavan C03-kappaleen "
+      + "kotipaikka- ja alkuperäilmaisuun, eivät C02:n pakolliseen kielioppiosaamiseen.",
   },
   {
     id: "los1-c02-application-guide", kind: "paragraph", version: "0.1.0", language: "fi",
