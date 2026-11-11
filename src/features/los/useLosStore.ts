@@ -1,6 +1,7 @@
 import {useCallback,useEffect,useRef,useState} from 'react';
 import type {SupabaseClient} from '@supabase/supabase-js';
 import {supabase} from '@/integrations/supabase/client';
+import {drainLosPending} from './syncQueue';
 
 type Row={item_key:string;value:unknown};
 export type SyncStatus='loading'|'saved'|'pending'|'error';
@@ -27,29 +28,34 @@ export function useLosStore(ownerId:string){
  const pending=useRef<Record<string,unknown>>(safeRead(ownerId));
  const flushing=useRef(false);
  const mounted=useRef(true);
+ const flushDelay=useRef<ReturnType<typeof setTimeout>|null>(null);
  const flush=useCallback(async()=>{
   if(flushing.current)return;
   if(typeof navigator!=='undefined'&&!navigator.onLine){setStatus('pending');return;}
-  const queue={...pending.current};
-  if(!Object.keys(queue).length){setStatus('saved');return;}
+  if(!Object.keys(pending.current).length){setStatus('saved');return;}
   flushing.current=true;setStatus('pending');
   try{
-   // Send only current owner-scoped data. RLS remains the authoritative guard.
-   for(const [item_key,value] of Object.entries(queue)){
+   // A write occurring while a previous upsert is in flight must never be
+   // marked "saved" until its *new* value has also reached the database.
+   const drained=await drainLosPending(pending,async(item_key,value)=>{
     const {error:saveError}=await db.from('los_user_items').upsert(
      {owner_id:ownerId,item_key,value},
      {onConflict:'owner_id,item_key'}
     );
     if(saveError)throw saveError;
-    if(pending.current[item_key]===value)delete pending.current[item_key];
-    safeWrite(ownerId,pending.current);
+   },()=>{safeWrite(ownerId,pending.current);});
+   if(mounted.current){
+    setError('');
+    setStatus(drained?'saved':'pending');
    }
-   setError('');
-   setStatus(Object.keys(pending.current).length?'pending':'saved');
   }catch(e){
-   setError(e instanceof Error?e.message:String(e));
-   setStatus('error');
-  }finally{flushing.current=false;}
+   if(mounted.current){
+    setError(e instanceof Error?e.message:String(e));
+    setStatus('error');
+   }
+  }finally{
+   flushing.current=false;
+  }
  },[ownerId]);
  const reload=useCallback(async()=>{
   try{
@@ -74,7 +80,7 @@ export function useLosStore(ownerId:string){
   window.addEventListener('online',onReconnect);
   const onFocus=()=>{if(document.visibilityState==='visible')void reload();};
   document.addEventListener('visibilitychange',onFocus);
-  return()=>{mounted.current=false;window.removeEventListener('online',onReconnect);document.removeEventListener('visibilitychange',onFocus);};
+  return()=>{mounted.current=false;if(flushDelay.current)clearTimeout(flushDelay.current);window.removeEventListener('online',onReconnect);document.removeEventListener('visibilitychange',onFocus);};
  },[reload]);
  const put=useCallback((key:string,value:unknown)=>{
   // Never signal saved before the server confirms it. Retain pending writes
@@ -84,7 +90,8 @@ export function useLosStore(ownerId:string){
   const queued=safeWrite(ownerId,pending.current);
   setStatus(queued?'pending':'error');
   if(!queued)setError('Paikallisen luonnoksen tallennus epäonnistui. Älä sulje sivua.');
-  void flush();
+  if(flushDelay.current)clearTimeout(flushDelay.current);
+  flushDelay.current=setTimeout(()=>{void flush();},350);
  },[flush,ownerId]);
  return {items,put,reload,status,error};
 }
