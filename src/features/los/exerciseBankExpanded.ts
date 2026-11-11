@@ -81,6 +81,6 @@ export const LOS_C03_C06_EXERCISES:ReadonlyArray<LosExercise>=[
   choice("06",16,"numerot","Mikä on 30?",["dreizig","dreißig","dreiß"],"dreißig","Poikkeava kirjoitusasu on dreißig."),
   choice("06",17,"numerot","Mikä on 40?",["vierzig","vierßig","vierzehn"],"vierzig","Vierzig on neljäkymmentä."),
   choice("06",18,"numerot","Mikä on 70?",["siebenzig","siebzig","siebzehn"],"siebzig","Sieben lyhenee muotoon sieb- luvussa siebzig."),
-  choice("06",19,"kuulumiset","Mitä Wie alt bist du? tarkoittaa?",["Mitä kuuluu?","Kuinka vanha olet?","Mistä olet kotoisin?"],"Kuinka vanha olet?","Wie alt bist du? kysyy ikää."),
-  fill("06",20,"kielioppi","Ich ____ siebzehn Jahre alt.","bin","Saksassa iän ilmoittamiseen käytetään sein-verbiä: ich bin."),
+  choice("06",19,"numerot","Mikä on 90 saksaksi?",["neunzig","neunzehn","neunundzwanzig"],"neunzig","Neunzig tarkoittaa yhdeksääkymmentä."),
+  choice("06",20,"numerot","Mikä on 100 saksaksi?",["zehnhundert","hundert","zehnzig"],"hundert","Hundert tarkoittaa sataa. Myös einhundert on oikea vaihtoehtoinen kirjoitusasu."),
 ];
