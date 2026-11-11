@@ -81,3 +81,22 @@ export const c05Exam:Exercise[]=[
  choice('EX-C05-14','Miten alkuperäinen Heinrichin ja Karlin keskustelu päättyy?',['Auf Wiedersehen!','Wie alt bist du?','Woher kommen Sie?'],'Auf Wiedersehen!','Molemmat hyvästelevät sanoilla Auf Wiedersehen.'),
  fill('EX-C05-15','Täydennä: Sehr ____! (Erittäin hyvin!)',['gut'],'Sehr gut on erittäin hyvin.')
 ];
+
+
+export const c03Exam:Exercise[]=[
+ choice('EX-C03-01','Mikä tarkoittaa mistä?',['woher','wo','wer'],'woher','Woher tarkoittaa mistä, wo missä.'),
+ choice('EX-C03-02','Mikä kysymys tarkoittaa Mistä olet kotoisin?',['Woher kommst du?','Wie heißt du?','Wie geht es dir?'],'Woher kommst du?','Woher kommst du kysyy lähtöpaikkaa.'),
+ fill('EX-C03-03','Täydennä: Ich ____ aus Finnland.',['komme'],'Ich komme on tulla-verbin minä-muoto.'),
+ fill('EX-C03-04','Täydennä: Woher ____ du?',['kommst'],'Du kommst on kommen-verbin sinä-muoto.'),
+ choice('EX-C03-05','Mikä on Saksa saksaksi?',['Deutschland','Schweden','Österreich'],'Deutschland','Deutschland tarkoittaa Saksaa.'),
+ choice('EX-C03-06','Mikä on Itävalta saksaksi?',['Österreich','Finnland','Estland'],'Österreich','Österreich on Itävalta.'),
+ choice('EX-C03-07','Mikä ilmaus on oikein Sveitsistä?',['aus der Schweiz','aus die Schweiz','aus Schweiz'],'aus der Schweiz','Sveitsi tarvitsee tässä fraasin aus der Schweiz.'),
+ truth('EX-C03-08','Väite: wo ja woher tarkoittavat samaa asiaa.','Tarua','Wo on missä, woher mistä.'),
+ choice('EX-C03-09','Minkä maan Berna mainitsee alkuperäisessä haastattelussa?',['Deutschland','Österreich','Schweden'],'Deutschland','Berna sanoo Ich komme aus Deutschland.'),
+ choice('EX-C03-10','Mistä kaupungista Berna kertoo olevansa?',['Kiel','Berlin','Hamburg'],'Kiel','Berna sanoo Ich komme aus Kiel.'),
+ choice('EX-C03-11','Mikä on Ruotsi saksaksi?',['Schweden','Finnland','Deutschland'],'Schweden','Schweden tarkoittaa Ruotsia.'),
+ fill('EX-C03-12','Täydennä: Ich komme ____ Deutschland.',['aus'],'Aus ilmaisee lähtöpaikan: Ich komme aus Deutschland.'),
+ choice('EX-C03-13','Mikä lause on oikein?',['Ich komme aus Finnland.','Ich kommst aus Finnland.','Ich kommt aus Finnland.'],'Ich komme aus Finnland.','Ich komme käyttää kommen-verbin minä-muotoa.'),
+ truth('EX-C03-14','Väite: saksa ja suomi ovat saman maan nimiä.','Tarua','Deutschland tarkoittaa Saksaa ja Finnland Suomea.'),
+ fill('EX-C03-15','Täydennä: Woher kommst ____?',['du'],'Woher kommst du? on tuttavallinen lähtöpaikkakysymys.')
+];
