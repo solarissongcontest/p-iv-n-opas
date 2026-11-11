@@ -46,7 +46,7 @@ test('L046–L050 are five fully authored flexible 30-minute lesson sequences',(
  assert.deepEqual(chapter09Lessons[3]!.requiredIds,['C09-X19','C09-X20','C09-SCHEDULE']);
  assert.deepEqual(chapter09Lessons[4]!.requiredIds,['EX-C09']);
  assert.equal(lessons.find(x=>x.id==='L045')?.status,'pending');
- assert.equal(lessons.find(x=>x.id==='L051')?.status,'pending');
+ assert.equal(lessons.find(x=>x.id==='L051')?.status,'initial-material');
 });
 test('C09 time and audio questions are sourced exactly; transcription is never a made-up appointment recording',()=>{
  for(const id of ['C09-X19','C09-X20','C09-X21']){
