@@ -67,6 +67,18 @@ function Media({chapter,store,fontSize=18}:{chapter:Chapter;store:Store;fontSize
   <SourceNotice chapter={chapter}/>
   <p>Ääni ja teksti ovat eri aineistotyyppejä. Äänitteitä ei luoda koneellisesti eikä luvata toimiviksi ennen toistotestausta.</p>
  </>;
+ if(chapter.media?.transcript?.length)return <>
+  <Label>TEKSTI B · ALKUPERÄINEN IHMISÄÄNITE</Label>
+  <h3>{chapter.media.title}</h3>
+  <p>Kuuntele ensin ilman litteraattia. Kuuntele toisen kerran tekstiä seuraten. Kyseessä on lähteessä julkaistu yksittäinen fraasi, ei kokonainen keskustelu.</p>
+  <Audio src={chapter.media.url} title={chapter.media.title} onCompleted={()=>store.put('media:completed:'+chapter.media!.sourceId,{at:new Date().toISOString(),version:LOS_VERSION})}/>
+  <Reader chapter={{...chapter,blocks:chapter.media.transcript}} store={store} fontSize={fontSize}/>
+  <p className="los-source"><b>{chapter.media.sourceId}</b> · {chapter.media.attribution} · {chapter.media.license} ·
+   <a href={chapter.media.sourceUrl} target="_blank" rel="noreferrer"> Alkuperäinen äänitiedosto</a> ·
+   <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noreferrer"> Lisenssiehdot</a>
+  </p>
+  <p className="los-meta">Teksti ja äänite ovat kirjan sisällä; toisto ladataan suoraan alkuperäisestä Wikimedia Commonsin tiedostosta. Laitetestit ovat vielä tekemättä.</p>
+ </>;
  if(chapter.media)return <Audio src={chapter.media.url} title={chapter.media.title} onCompleted={()=>store.put('media:completed:'+chapter.media!.sourceId,{at:new Date().toISOString(),version:LOS_VERSION})}/>;
  return <p>Erillisen autenttisen kuuntelun käyttöönotto on vielä kesken. Tästä ei synny suoritusmerkintää.</p>;
 }
