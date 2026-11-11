@@ -96,7 +96,7 @@ test("categorize checks every assignment and does not assume a one-to-one match"
 test("the whole original LOS book remains structurally valid with new exercises", () => {
   const book = structuredClone(LOS_BOOKS[0]);
   if (!book) throw Error("Missing book fixture");
-  assert.equal(book.exercises.filter(ex => ["multiple-choice", "true-false", "word-order", "categorize"].includes(ex.type)).length, 5);
+  assert.equal(book.exercises.filter(ex => ["multiple-choice", "true-false", "word-order", "categorize"].includes(ex.type)).length, 10);
   assert.deepEqual(validateBook(book), []);
   const broken = book.exercises.find(ex => ex.type === "word-order");
   assert.ok(broken && broken.type === "word-order");
