@@ -23,7 +23,7 @@ export const LOS1_C03_SECTIONS: ChapterSection[] = emptyChapterSections().map(se
     section.id === "kielioppi" ? {
       blockIds: ["los1-c03-grammar-kommen", "los1-c03-grammar-aus", "los1-c03-grammar-wo"],
       exerciseIds: ["los1-c03-grammar-ich", "los1-c03-grammar-du", "los1-c03-grammar-question",
-        "los1-c03-grammar-aus", "los1-c03-grammar-wo", "los1-c03-grammar-er",
+        "los1-c03-grammar-aus-gap", "los1-c03-grammar-wo-choice", "los1-c03-grammar-er",
         "los1-c03-first-switzerland"],
     } :
     section.id === "teksti-b" ? {
