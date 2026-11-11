@@ -78,6 +78,14 @@ test("two Commons media sources verified, with separate Goethe culture reference
   assert.equal(los1.sources.find(source => source.id === "M-COM-03")?.licenseOrBasis,
     "Public domain - tekijän oma vapaa luovutus");
   assert.ok(los1.blocks.some(block => block.kind === "media" && block.sourceId === "M-COM-03"));
+  const licensedAudio = los1.blocks.filter(block => block.kind === "media" &&
+    ["M-COM-01", "M-COM-03"].includes(block.sourceId));
+  assert.equal(licensedAudio.length, 2);
+  assert.ok(licensedAudio.every(block => block.kind === "media" &&
+    block.embedUrl.startsWith("https://upload.wikimedia.org/wikipedia/commons/") &&
+    block.mp3Url?.startsWith("https://upload.wikimedia.org/wikipedia/commons/transcoded/") &&
+    block.mp3Url.endsWith(".ogg.mp3")));
+
 });
 test("C01's 52 combined exercises across eight interaction families are indexed", () => {
   const c01 = los1.chapters.find(chapter => chapter.id === "C01");
