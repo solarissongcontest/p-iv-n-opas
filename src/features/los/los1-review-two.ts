@@ -19,7 +19,7 @@ export const LOS1_REVIEW_TWO_BLOCKS:ContentBlock[]=[
  {id:"los1-review2-intro-b",version:"0.1.0",kind:"paragraph",language:"fi",
   text:"Kertaus II · 2/3. Nyt käytät kaikkia C01–C10:n keskeisiä taitoja yhdessä: tervehdykset, nimet, alkuperä, du/Sie, vointi, ikä, tavaus, toisto, kellonaika sekä kolmannen henkilön esittely. Etene ensin ilman vihjeitä. Kuusi omaa harjoitusta eivät ole loppukokeen kysymysten kopioita. Jos epäonnistut, palaa oikeaan alkuperäistekstiin ja kertaa vain vaikea asia."},
  {id:"los1-review2-intro-c",version:"0.1.0",kind:"paragraph",language:"fi",
-  text:"Kertaus II · 3/3. Kirjoita koko pieni kuvitteellinen ensikohtaaminen muistista, yksi repliikki omalle rivilleen. Valitse lisäksi kolmannen henkilön esittely ja oma aikailmaus. Lue vasta lopuksi malliharjoitus. Äänen äänittäminen on halutessasi mahdollista C10:n puheharjoituksessa, mutta puhetta ei arvioida automaattisesti. Kun nämä 18 tehtävää ja avoimet tuotokset on tehty, voit siirtyä loppukokeen harjoitusversioon."},
+  text:"Kertaus II · 3/3. Kirjoita koko pieni kuvitteellinen ensikohtaaminen muistista ilman mallia, yksi repliikki omalle rivilleen. Valitse lisäksi kolmannen henkilön esittely ja oma aikailmaus. Lue vasta lopuksi malliharjoitus. Äänen äänittäminen on halutessasi mahdollista C10:n puheharjoituksessa, mutta puhetta ei arvioida automaattisesti. Kun nämä 18 tehtävää ja avoimet tuotokset on tehty, voit siirtyä loppukokeen harjoitusversioon."},
  {id:"los1-review2-tools",version:"0.1.0",kind:"table",
   headers:["Unohdin...","Palaa","Tarkista"],
   rows:[
