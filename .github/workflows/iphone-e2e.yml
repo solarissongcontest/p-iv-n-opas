@@ -167,6 +167,9 @@ jobs:
       - name: iPhone WebKit smoke and deep-link test
         run: bunx playwright test e2e/iphone-smoke.spec.ts --project=iphone-webkit
 
+      - name: LOS! 1 C01 reader and L001-L006 on iPhone WebKit and desktop Chromium
+        run: bunx playwright test e2e/los-c01-lessons.spec.ts --project=iphone-webkit --project=desktop-chromium
+
       - name: Desktop production, WCAG and push backend checks
         run: bunx playwright test e2e/release-gate.spec.ts --project=desktop-chromium
 
