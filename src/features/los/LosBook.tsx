@@ -106,7 +106,7 @@ function BookFront({ book, move }: { book: LosBookDefinition; move: (chapter: st
       <p>{book.id === 1 ? "Opiskelet aluksi saksan ääntämistä ja tervehdyksiä. Sen jälkeen etenet oman nimen ja kotipaikan kertomiseen, numeroihin ja ensimmäisiin oikeisiin keskusteluihin." : book.summary}</p>
       <div className="los-front-links">
         <button onClick={() => move(null, "contents")}><List size={18} /> Sisällysluettelo</button>
-        <button onClick={() => move(null, "path")}><BookOpen size={18} /> Opetuspolku</button>
+        {book.id === 1 && <button onClick={() => move(null, "path")}><BookOpen size={18} /> Opetuspolku</button>}
         <button onClick={() => move(null, "dictionary")}><BookOpen size={18} /> Sanakirja</button>
         <button onClick={() => move(null, "appendix")}><BookOpen size={18} /> Kirjan liitteet</button>
       </div>
