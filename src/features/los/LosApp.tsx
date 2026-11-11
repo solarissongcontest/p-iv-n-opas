@@ -12,6 +12,7 @@ import {chapter02Lessons} from './chapter02Lessons';
 import {chapter03Lessons} from './chapter03Lessons';
 import {chapter04Lessons} from './chapter04Lessons';
 import {chapter05Lessons} from './chapter05Lessons';
+import {chapter07Lessons} from './chapter07Lessons';
 import {reviewOneLessons} from './reviewOneLessons';
 import {reviewOneItems} from './reviewOneItems';
 import {exams,type ExamId} from './examBank';
@@ -332,7 +333,7 @@ function ChapterSection({chapter,section,store,fontSize}:{chapter:Chapter;sectio
  if(section==='Harjoittele')return <><h2>Harjoittele</h2>{exercises.filter(e=>!['highlight','writing','speech'].includes(e.type)).map(ex=><ExerciseCard key={ex.id} exercise={ex} chapter={chapter} store={store} fontSize={fontSize}/>)}</>;
  if(section==='Käytä saksaa')return <><h2>Käytä saksaa itse</h2>{exercises.filter(e=>['writing','speech'].includes(e.type)).map(ex=><ExerciseCard key={ex.id} exercise={ex} chapter={chapter} store={store} fontSize={fontSize}/>)}</>;
  if(section==='Kappaletesti'&&chapter.status==='source-pending')return <p className="los-warning">Kappaletestiä ei ole vielä julkaistu, koska tämän kappaleen pääteksti on hyväksymättä. Harjoitteita voi tehdä erikseen.</p>;
- if(section==='Kappaletesti'&&['C01','C02','C03','C04','C05'].includes(chapter.id)){
+ if(section==='Kappaletesti'&&['C01','C02','C03','C04','C05','C07'].includes(chapter.id)){
   const id=('EX-'+chapter.id) as ExamId;
   return <ExamSession id={id} store={store} onExit={()=>window.location.hash='/chapter/'+chapter.id+'/Harjoittele'} onSubmit={()=>store.put('exam:submitted:'+id,{submittedAt:new Date().toISOString(),version:LOS_VERSION})}/>;
  }
@@ -340,7 +341,7 @@ function ChapterSection({chapter,section,store,fontSize}:{chapter:Chapter;sectio
  return null;
 }
 
-const guidedLessons=[...firstLessons,...chapter02Lessons,...chapter03Lessons,...chapter04Lessons,...chapter05Lessons,...reviewOneLessons];
+const guidedLessons=[...firstLessons,...chapter02Lessons,...chapter03Lessons,...chapter04Lessons,...chapter05Lessons,...reviewOneLessons,...chapter07Lessons];
 function FirstLessonRunner({lessonId,store,fontSize,onNext,onContents}:{lessonId:string;store:Store;fontSize:number;onNext:()=>void;onContents:()=>void}){
  const plan=guidedLessons.find(p=>p.id===lessonId);
  const [stepIndex,setStepIndex]=useState(0);
@@ -362,7 +363,7 @@ function FirstLessonRunner({lessonId,store,fontSize,onNext,onContents}:{lessonId
  const allSubmitted=requiredIds.every(id=>
   id.startsWith('EX-C')?Boolean(item(store,'exam:submitted:'+id)):Boolean(item(store,'latest:'+id)));
  const hasGoal=lessonId!=='L001'||valueString(store,'goal:los1').trim().length>=8;
- const hasReflection=!['L006','L011','L016','L021','L026','L027','L028','L029'].includes(lessonId)||valueString(store,'lesson:reflection:'+lessonId).trim().length>=12;
+ const hasReflection=!['L006','L011','L016','L021','L026','L027','L028','L029','L040'].includes(lessonId)||valueString(store,'lesson:reflection:'+lessonId).trim().length>=12;
  const mediaDone=(plan?.requiredMediaIds??[]).every(id=>Boolean(item(store,'media:completed:'+id)));
  const canAdvance=(current.kind!=='practice'||allSubmitted)&&(current.kind!=='goal'||hasGoal)&&(current.kind!=='reflection'||hasReflection);
  const fulfilled=mediaDone&&plan.requiredIds.every(id=>id.startsWith('EX-C')?Boolean(item(store,'exam:submitted:'+id)):Boolean(item(store,'latest:'+id)));
