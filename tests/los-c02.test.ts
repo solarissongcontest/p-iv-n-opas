@@ -41,6 +41,7 @@ test("C02 retains ten complete navigable preview sections with no orphan referen
   assert.equal(chapter.sections?.filter(item => item.publicationStatus === "preview").length, 10);
   assert.equal(book.lessons.filter(item => item.chapterId === "C02" && item.publicationStatus === "preview").length, 5);
   assert.equal(chapter.exerciseIds.length, 34);
+  assert.ok(chapter.sections?.find(item => item.id === "teksti-b")?.blockIds.includes("los1-c02-m-com-02-dialogue"));
   assert.ok(chapter.sections?.find(item => item.id === "teksti-a")?.blockIds.includes("los1-c02-text-a-editorial"));
   assert.ok(chapter.sections?.find(item => item.id === "teksti-b")?.blockIds.includes("los1-c02-commons-02-audio"));
   assert.ok(chapter.sections?.find(item => item.id === "tarkista")?.exerciseIds.includes("los1-c02-exam-15"));
