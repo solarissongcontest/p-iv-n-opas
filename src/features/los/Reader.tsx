@@ -41,7 +41,8 @@ function SafeMedia({ block, source }: {
         (source.id === "M-COM-04" && url.pathname === "/wikipedia/commons/2/20/Dialogue_franz_greta_1.ogg") ||
         (source.id === "M-COM-05" && url.pathname === "/wikipedia/commons/3/32/De-wie_geht_es_dir.ogg") ||
         (source.id === "M-COM-06" && url.pathname === "/wikipedia/commons/5/56/German_Vocabulary_-_Numbers.ogg") ||
-        (source.id === "M-COM-07" && url.pathname === "/wikipedia/commons/9/92/German_alphabet-2.ogg")
+        (source.id === "M-COM-07" && url.pathname === "/wikipedia/commons/9/92/German_alphabet-2.ogg") ||
+        (source.id === "M-COM-08" && url.pathname === "/wikipedia/commons/1/15/German_Vocabulary_-_Days.ogg")
       );
   } catch { /* Untrusted URLs never render a player. */ }
   let validMp3 = false;
@@ -60,7 +61,9 @@ function SafeMedia({ block, source }: {
          (source?.id === "M-COM-06" &&
           alt.pathname === "/wikipedia/commons/transcoded/5/56/German_Vocabulary_-_Numbers.ogg/German_Vocabulary_-_Numbers.ogg.mp3") ||
          (source?.id === "M-COM-07" &&
-          alt.pathname === "/wikipedia/commons/transcoded/9/92/German_alphabet-2.ogg/German_alphabet-2.ogg.mp3"));
+          alt.pathname === "/wikipedia/commons/transcoded/9/92/German_alphabet-2.ogg/German_alphabet-2.ogg.mp3") ||
+         (source?.id === "M-COM-08" &&
+          alt.pathname === "/wikipedia/commons/transcoded/1/15/German_Vocabulary_-_Days.ogg/German_Vocabulary_-_Days.ogg.mp3"));
     } catch { /* Only pinned Wikimedia MP3 transcodes are ever played. */ }
   }
   const validLocalAudio = block.mediaType === "audio" && source?.permittedMode === "hosted"
