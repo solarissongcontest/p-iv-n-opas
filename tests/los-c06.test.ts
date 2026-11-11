@@ -132,6 +132,11 @@ test("C06 active word bank tracks 0–20 once, plus grammar phrases, and all pra
   assert.equal(LOS1_C06_NUMBER_0_TO_20.length,21);
   assert.equal(LOS1_C06_NUMBER_21_TO_99.length,9);
   assert.equal(LOS1_C06_TENS.length,8);
+  for (const task of LOS1_C06_TENS) {
+    assert.equal(task.type, "single-choice", task.id);
+    if(task.type==="single-choice")
+      assert.equal(new Set(task.options.map(option=>option.label)).size, task.options.length, "Distinct distractors required: "+task.id);
+  }
   assert.equal(LOS1_C06_PRACTICE_EXERCISES.length,67);
   for(const item of LOS1_C06_PRACTICE_EXERCISES)
     assert.equal(evaluateExercise(item,answerFor(item))?.correct,true,item.id);
