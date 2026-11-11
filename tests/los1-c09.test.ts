@@ -71,7 +71,7 @@ test('fictional seven-day calendar accepts only taught times, ignores malformed 
  assert.equal(completedWeek(plan),true);
  assert.equal(completedWeek({...plan,Freitag:''}),false);
  assert.equal(completedWeek({...plan,Mittwoch:'um neun Uhr'}),false);
- assert.equal(getWeeklyPlan({...plan,Mittwoch:'um neun Uhr'}).Mittwoch,'');
+ assert.equal(getWeeklyPlan({...plan,Mittwoch:'um neun Uhr'})['Mittwoch'],'');
  assert.deepEqual(getWeeklyPlan('invalid'),{});
 });
 test('C09 independent 15-item chapter exam has no hints or reused chapter practice IDs',()=>{
