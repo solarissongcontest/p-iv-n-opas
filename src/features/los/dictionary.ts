@@ -32,7 +32,7 @@ export function buildLosDictionary(books:readonly Book[]):DictionaryEntry[]{
   for(const block of book.blocks){
    if(block.kind!=="vocabulary")continue;
    const matches=book.chapters.filter(chapter=>chapter.blockIds.includes(block.id));
-   const locations:DictionaryLocation[]=matches.length
+   const locations:Omit<DictionaryLocation,"vocabularyRowId">[]=matches.length
     ?matches.map(chapter=>({
       bookId:book.id,bookNumber:book.number,
       chapterId:chapter.id,chapterTitle:chapter.title,
