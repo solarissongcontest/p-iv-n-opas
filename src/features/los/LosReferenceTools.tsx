@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { ArrowRight, BookMarked, BookOpen, ChevronRight, Headphones, Search, Volume2 } from "lucide-react";
+import { ArrowRight, BookOpen, ChevronRight, Headphones, Search, Volume2 } from "lucide-react";
 import { LOS_BOOKS, type LosBookDefinition } from "./catalog";
 import { LOS_1_LESSONS } from "./learningPath";
 
@@ -14,7 +14,7 @@ const DICTIONARY = LOS_BOOKS.flatMap(book => book.chapters.flatMap(chapter =>
 ));
 function compare(a: string, b: string) { return a.localeCompare(b, "de"); }
 
-export function LosDictionary({ book, move }: { book: LosBookDefinition; move: LosNavigate }) {
+export function LosDictionary({ book, move, openBook }: { book: LosBookDefinition; move: LosNavigate; openBook: (id: number) => void }) {
   const [search, setSearch] = useState("");
   const [hidden, setHidden] = useState(false);
   const [scope, setScope] = useState<"book" | "series">("book");
@@ -42,7 +42,7 @@ export function LosDictionary({ book, move }: { book: LosBookDefinition; move: L
         {entries.map((item,i)=><div role="row" className="los-index-entry" key={`${item.book}-${item.chapter}-${i}-${item.word}`}>
           <strong role="cell" lang="de">{item.word}</strong>
           <span role="cell">{hidden ? <span className="los-muted-hidden">Piilotettu</span> : item.meaning}</span>
-          <button type="button" role="cell" title={`Avaa ${item.title}`} onClick={()=>move(item.book === book.id ? item.chapter : null, item.book === book.id ? "vocabulary" : "overview")}>
+          <button type="button" role="cell" title={`Avaa ${item.title}`} onClick={()=>item.book === book.id ? move(item.chapter, "vocabulary") : openBook(item.book)}>
             <span>{item.code} · {Number(item.chapter)}</span><ChevronRight size={15}/>
           </button>
         </div>)}
