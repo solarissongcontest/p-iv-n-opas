@@ -542,10 +542,6 @@ function LosAppForOwner({ownerId}:{ownerId:string}){
  const finishedLessons=lessons.filter(l=>item(store,'lesson:'+l.id)===true).length;
  const reviews=Object.entries(store.items).filter(([key,v])=>key.startsWith('review:')&&v&&typeof v==='object'&&'due' in v&&String((v as {due:string}).due)<=new Date().toISOString().slice(0,10));
  const dictionaryResults=allWords.filter(w=>(w.de+' '+w.fi).toLocaleLowerCase('de').includes(wordSearch.toLocaleLowerCase('de'))).slice(0,80);
- const lessonPosition=lesson?.chapterId?(Number(lesson.id.slice(1))<=26?(Number(lesson.id.slice(1))-2)%5:(Number(lesson.id.slice(1))-31)%5):0;
- const lessonSteps=lesson?.id==='L001'?['Opas','Oma tavoite','Teksti B']:lesson?.chapterId?lessonPosition===0?['Aloita','Teksti A','Ymmärrä']:lessonPosition===1?['Teksti A','Ymmärrä','Sanasto']:lessonPosition===2?['Kielioppi','Harjoittele']:lessonPosition===3?['Teksti B','Käytä saksaa']:['Kulttuuri','Kappaletesti']:['Kertaus'];
- const [step,setStep]=useState(0);
- useEffect(()=>setStep(0),[lesson?.id]);
  return <AppShell page="courses" pageTitle="LOS! 1" pageEyebrow="Saksa B3 · SAB31 · 2 op" moreOpen={moreOpen}
   onMoreOpenChange={setMoreOpen} onNavigate={goApp} onLog={()=>void navigate({to:'/studies'})} onSearch={()=>go({kind:'dictionary'})}>
   <div className="los" id="los-root">
