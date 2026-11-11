@@ -509,3 +509,83 @@
   .los-word-controls { align-items:stretch; }
   .los-word-search { max-width:none; }
 }
+
+
+/* Licensed audio transcript: clearly a numbered phrase list, not a fabricated dialogue. */
+.los-transcript {
+  max-width: 760px; margin: 22px 0; padding: clamp(16px, 2.5vw, 24px);
+  border: 1px solid var(--los-border); background: var(--los-surface);
+  border-radius: 12px;
+}
+.los-transcript > ol { list-style: decimal; padding-left: 28px; margin: 16px 0; }
+.los-transcript > ol > li { padding: 12px 4px; border-bottom: 1px solid var(--los-border); }
+.los-transcript-utterance { font-size: var(--los-reader-font,18px); font-weight: 620; line-height: 1.5; overflow-wrap:anywhere; }
+.los-transcript .los-translation { margin-top: 4px; }
+.los-transcript .los-translation .los-support { font-size: 13px; padding-left: 10px; }
+.los-transcript .los-attribution { margin-top: 22px; }
+
+/* Full-answer chapter tests: solutions appear only after a complete return. */
+.los-chapter-test { max-width: 900px; margin: 20px 0 36px; }
+.los-chapter-test > h2 { font-size: 24px; }
+.los-exam-meta {
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 8px 20px; padding: 12px 14px; margin: 24px 0 10px;
+  border: 1px solid var(--los-border); border-radius: 10px;
+  background: var(--los-surface); color: var(--los-ink-secondary);
+  font-size: 13px; font-weight: 600;
+}
+.los-exam-questions { display: grid; gap: 18px; margin: 26px 0; }
+.los-exam-question {
+  padding: clamp(16px,2.5vw,26px); margin: 0; min-width:0;
+  border: 1px solid var(--los-border); border-radius: 12px;
+  background: var(--los-surface);
+}
+.los-exam-question-title { float: none; width: 100%; padding: 0 0 14px;
+  font-weight: 650; font-size: 17px; line-height: 1.5; color: var(--los-ink); }
+.los-exam-question .los-options { margin: 0; }
+.los-exam-question .los-options .los-option { max-width: 100%; }
+.los-exam-question .los-gap input { width: min(100%,450px); max-width:100%; }
+.los-exam-question .los-matching h3 { font-size: 16px; margin: 0 0 12px; }
+.los-exam-feedback { margin: 8px 0 0; padding: 14px 18px;
+  background: var(--los-surface-muted); border-left: 3px solid var(--los-success);
+  border-radius: 8px; font-size: 14px; color: var(--los-ink); }
+.los-exam-feedback.is-incorrect { border-left-color: var(--los-danger); }
+.los-exam-feedback p { margin: 6px 0 0; }
+.los-exam-speech { border: 1px solid var(--los-border); border-radius: 12px;
+  padding: clamp(16px,2.5vw,26px); background: var(--los-surface);
+  margin: 28px 0; }
+.los-exam-speech h3 { font-size: 19px; margin-bottom: 12px; }
+.los-exam-speech > p { font-size: 14px; color: var(--los-ink-secondary); }
+.los-exam-speech-criterion { border-top: 1px solid var(--los-border); border-right: 0;
+  border-bottom: 0; border-left: 0; padding: 16px 0; margin-top: 10px; min-width: 0; }
+.los-exam-speech-criterion legend { font-weight: 600; font-size: 15px;
+  padding-top: 10px; line-height: 1.45; max-width:100%; }
+.los-exam-speech-criterion label { display: flex; align-items: center; gap: 10px;
+  min-height: 44px; font-size: 14px; cursor: pointer; }
+.los-exam-speech-criterion input { width: 18px; height: 18px;
+  accent-color: var(--los-book-accent); }
+.los-exam-result { background: var(--los-surface); border: 1px solid var(--los-border);
+  border-left: 4px solid var(--los-book-accent);
+  padding: clamp(16px,3vw,28px); border-radius: 12px; margin-top: 24px; }
+.los-exam-result > div:first-child { display: flex; align-items:center; gap: 10px; }
+.los-exam-result h3 { margin:0; font-size:18px; }
+.los-exam-score { font-weight: 750; color: var(--los-ink);
+  font-size: clamp(34px,5vw,48px); line-height: 1.3; margin: 12px 0 !important; }
+.los-exam-confirm { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.los-exam-confirm p { flex: 1 0 100%; font-size: 14px; }
+.los-exam-history { margin-top: 25px; padding: 14px;
+  border: 1px solid var(--los-border); border-radius: 10px; }
+.los-exam-history summary { cursor: pointer; font-weight: 600; }
+.los-exams-list { list-style: none; margin: 22px 0; padding: 0; max-width:900px; }
+.los-exams-list > li { display:flex; justify-content:space-between; align-items:center;
+  flex-wrap:wrap; gap:10px 20px; padding: 16px 0; border-bottom:1px solid var(--los-border); }
+.los-exams-list strong { display:block; }
+.los-exams-list small { display:block; margin-top:4px; }
+.los-exams-wait { font-size: 13px; color: var(--los-ink-secondary); }
+@media (max-width: 639px) {
+  .los-transcript { padding: 14px; }
+  .los-transcript > ol { padding-left: 23px; }
+  .los-exam-question { padding: 16px; }
+  .los-exam-result { padding: 18px; }
+  .los-exam-speech { padding: 16px; }
+}
