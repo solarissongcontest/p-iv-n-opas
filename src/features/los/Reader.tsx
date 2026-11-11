@@ -38,7 +38,8 @@ function SafeMedia({ block, source }: {
         (source.id === "M-COM-01" && url.pathname === "/wikipedia/commons/1/11/Gespr%C3%A4chVorstellung.ogg") ||
         (source.id === "M-COM-03" && url.pathname === "/wikipedia/commons/b/bb/German_Vocabulary_-_Greetings.ogg") ||
         (source.id === "M-COM-02" && url.pathname === "/wikipedia/commons/f/f9/Deutsch_Dialog_._Ich_bin_Peter.ogg") ||
-        (source.id === "M-COM-04" && url.pathname === "/wikipedia/commons/2/20/Dialogue_franz_greta_1.ogg")
+        (source.id === "M-COM-04" && url.pathname === "/wikipedia/commons/2/20/Dialogue_franz_greta_1.ogg") ||
+        (source.id === "M-COM-05" && url.pathname === "/wikipedia/commons/3/32/De-wie_geht_es_dir.ogg")
       );
   } catch { /* Untrusted URLs never render a player. */ }
   let validMp3 = false;
@@ -51,7 +52,9 @@ function SafeMedia({ block, source }: {
          (source?.id === "M-COM-03" &&
           alt.pathname === "/wikipedia/commons/transcoded/b/bb/German_Vocabulary_-_Greetings.ogg/German_Vocabulary_-_Greetings.ogg.mp3") ||
          (source?.id === "M-COM-04" &&
-          alt.pathname === "/wikipedia/commons/transcoded/2/20/Dialogue_franz_greta_1.ogg/Dialogue_franz_greta_1.ogg.mp3"));
+          alt.pathname === "/wikipedia/commons/transcoded/2/20/Dialogue_franz_greta_1.ogg/Dialogue_franz_greta_1.ogg.mp3") ||
+         (source?.id === "M-COM-05" &&
+          alt.pathname === "/wikipedia/commons/transcoded/3/32/De-wie_geht_es_dir.ogg/De-wie_geht_es_dir.ogg.mp3"));
     } catch { /* Only pinned Wikimedia MP3 transcodes are ever played. */ }
   }
   const validLocalAudio = block.mediaType === "audio" && source?.permittedMode === "hosted"
