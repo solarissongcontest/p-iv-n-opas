@@ -31,6 +31,7 @@ export function formatExerciseAnswer(exercise: Exercise | undefined, answer: Exe
     }
     case "highlight":
       return typeof answer === "object" && !Array.isArray(answer) && "start" in answer &&
+        typeof answer.start === "number" && typeof answer.end === "number" &&
         Number.isInteger(answer.start) && Number.isInteger(answer.end)
         ? exercise.text.slice(Math.max(0, answer.start), Math.max(0, answer.end))
         : "Vastausta ei tunnisteta";
