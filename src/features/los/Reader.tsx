@@ -104,25 +104,31 @@ function RenderBlock({ block, bookId, source, marked, highlighterEnabled, glossa
   onNote: (block: ContentBlock) => void;
 }) {
   const markedText = (text: string, offset = 0) => {
-    if (!marked || marked.start < offset || marked.start >= offset + text.length || marked.end <= offset) return text;
+    if (!marked || marked.end <= offset || marked.start >= offset + text.length) return text;
+    // The same mark may span a glossary token boundary. Clip the visible
+    // fragment instead of hiding saved highlights when word lookups are on.
     const start = Math.max(0, marked.start - offset);
     const end = Math.min(text.length, marked.end - offset);
+    if (end <= start) return text;
     return <>{text.slice(0, start)}<mark className="los-marker">{text.slice(start, end)}</mark>{text.slice(end)}</>;
   };
   const textWithGlosses = (text: string, offset = 0, german = true) => {
     if (highlighterEnabled || !german) return markedText(text, offset);
     const spans = findGlossarySpans(text, glossary);
-    if (!spans.length) return text;
+    if (!spans.length) return markedText(text, offset);
     let cursor = 0;
     return <>{spans.map(span => {
-      const before = text.slice(cursor, span.start);
+      const beginning = cursor;
+      const before = text.slice(beginning, span.start);
       cursor = span.end;
+      const word = text.slice(span.start, span.end);
       return <span key={span.start}>
-        {before}<button type="button" className="los-gloss-word" lang="de"
-          aria-label={"Avaa sanan " + text.slice(span.start, span.end) + " merkitys"}
-          onClick={() => onLookup(span.entry)}>{text.slice(span.start, span.end)}</button>
+        {markedText(before, offset + beginning)}
+        <button type="button" className="los-gloss-word" lang="de"
+          aria-label={"Avaa sanan " + word + " merkitys"}
+          onClick={() => onLookup(span.entry)}>{markedText(word, offset + span.start)}</button>
       </span>;
-    })}{text.slice(cursor)}</>;
+    })}{markedText(text.slice(cursor), offset + cursor)}</>;
   };
   const select = (event: React.MouseEvent<HTMLElement> | React.TouchEvent<HTMLElement>, text: string, offset = 0) => {
     const container = event.currentTarget;
