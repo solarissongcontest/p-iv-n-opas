@@ -1,7 +1,7 @@
 import {useMemo,useState} from "react";
 import {ArrowLeft,ArrowRight,BookOpen,Search} from "lucide-react";
 import {LOS_BASE_PATH,LOS_BOOKS,bookPath} from "./books";
-import {buildLosDictionary,searchLosDictionary,type DictionaryDirection} from "./dictionary";
+import {buildLosDictionary,findLosDictionaryContext,searchLosDictionary,type DictionaryDirection} from "./dictionary";
 
 /** A working course dictionary indexed exclusively from the actual
  * German–Finnish learner vocabulary inside LOS! books. This is not
@@ -14,6 +14,9 @@ export function LosDictionaryPage(){
  const [page,setPage]=useState(0);
  const pageSize=60;
  const entries=useMemo(()=>buildLosDictionary(LOS_BOOKS),[]);
+ const contexts=useMemo(()=>new Map(entries.map(entry=>[
+  entry.id,findLosDictionaryContext(LOS_BOOKS,entry),
+ ])),[entries]);
  const scoped=useMemo(()=>selectedBook==="all" ? entries :
   entries.filter(item=>item.locations.some(location=>location.bookId===selectedBook)),
   [entries,selectedBook]);
@@ -66,8 +69,10 @@ export function LosDictionaryPage(){
      <h2>Ei osumia oppikirjan sanastosta</h2>
      <p>Kokeile lyhyempää hakua tai vaihda suuntaa. Tämä on vielä rajattu LOS!-sanakirja, ei täydellinen saksan yleissanakirja.</p>
    </section>:
-   <ol className="los-dictionary-results">{results.map(({entry})=>
-     <li className="los-dictionary-entry" key={entry.id}>
+   <ol className="los-dictionary-results">{results.map(({entry})=>{
+     const example=contexts.get(entry.id);
+     const exampleBook=LOS_BOOKS.find(book=>book.id===example?.bookId);
+     return <li className="los-dictionary-entry" key={entry.id}>
        <div className="los-dictionary-translation">
          <strong lang={direction==="de-fi"?"de":"fi"}>{direction==="de-fi"?entry.de:entry.fi}</strong>
          <span className="los-dictionary-equals" aria-hidden="true">↔</span>
@@ -75,6 +80,15 @@ export function LosDictionaryPage(){
        </div>
        {!!entry.notes.length && <div className="los-dictionary-notes">{entry.notes.map((note,i)=>
          <p key={i}>{note}</p>)}</div>}
+       {example&&<div className="los-dictionary-example" aria-label="Sana asiayhteydessä">
+         <b>{example.kind==="authentic"?"Alkuperäislähteestä":"LOS!:n oma opetusesimerkki"}</b>
+         <p lang="de">{example.de}</p>
+         {example.fi&&<p lang="fi">{example.fi}</p>}
+         {example.sourceTitle&&<small>{example.sourceTitle}</small>}
+         {exampleBook&&<a href={bookPath(exampleBook,"teksti/"+encodeURIComponent(example.blockId))}>
+           Avaa koko tekstikohta kirjassa <ArrowRight size={14} aria-hidden="true"/>
+         </a>}
+       </div>}
        <div className="los-dictionary-references">
          {entry.locations.map(location=>{
            const book=LOS_BOOKS.find(item=>item.id===location.bookId);
@@ -97,7 +111,7 @@ export function LosDictionaryPage(){
            </a>;
          })}
        </div>
-     </li>)}</ol>}
+     </li>})}</ol>}
    {total>pageSize&&<nav className="los-dictionary-pagination" aria-label="Sanahaun sivutus">
      <button type="button" className="los-button los-button-secondary"
        disabled={page===0} onClick={()=>setPage(current=>Math.max(0,current-1))}>
@@ -111,7 +125,7 @@ export function LosDictionaryPage(){
    </nav>}
    <p className="los-dictionary-disclaimer">
      Sanakortin linkki avaa juuri saman sanan kirjan sanastoluettelossa, jossa sen voi tallentaa omaan sanalistaan. Sanakirja ei tee merkintöjä tai piilota merkityseroja automaattisesti.
-     Sisältö muodostuu LOS!:n olemassa olevista sanastokorteista, ei erikseen hankitusta FreeDict-sanastosta. Sanaparien määrä ei mittaa koko aktiivisen sanavaraston kokoa: sama ilmaus voi esiintyä useassa kappaleessa ja eri merkityksiä voi olla useita. Ääntäminen, taivutusmuodot, esimerkkien täydellinen tarkistus ja yleissanakirjan laajennus ovat myöhempiä töitä.
+     Asiayhteysesimerkki näytetään vain silloin, kun se löytyy tästä oppikirjasta: alkuperäislähde ja LOS!:n oma opetusesimerkki on merkitty erikseen. Sisältö muodostuu LOS!:n olemassa olevista sanastokorteista, ei erikseen hankitusta FreeDict-sanastosta. Sanaparien määrä ei mittaa koko aktiivisen sanavaraston kokoa: sama ilmaus voi esiintyä useassa kappaleessa ja eri merkityksiä voi olla useita. Ääntäminen, taivutusmuodot, esimerkkien täydellinen tarkistus ja yleissanakirjan laajennus ovat myöhempiä töitä.
    </p>
  </main>;
 }
