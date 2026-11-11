@@ -61,6 +61,9 @@ export const LOS1_C02_TEST: ChapterTestDefinition={
     +"Kirjoitelma itsearvioidaan, eikä sitä lueta automaattisiin pisteisiin.",
   exerciseIds:LOS1_C02_EXAM_EXERCISES.map(item=>item.id),
   selfAssessmentMode:"writing",
+  writingPromptFi:"Kirjoita saksaksi kaksi tai kolme lyhyttä lausetta, joissa kerrot nimesi ja kysyt toisen nimeä.",
+  writingModelDe:"Hallo! Ich heiße Lena. Wie heißt du?",
+  writingModelFi:"Hei! Minun nimeni on Lena. Mikä sinun nimesi on?",
   speechCriteria:[
     {id:"own-name",title:"Kirjoitin oman nimeni vähintään kerran lauseeseen Ich heiße … tai Ich bin …"},
     {id:"ask-name",title:"Kirjoitin toiselle kysymyksen Wie heißt du?"},
