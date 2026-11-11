@@ -45,3 +45,39 @@ export const c02Exam:Exercise[]=[
  fill('EX-C02-14','Kirjoita lauseen puuttuva verbi: Ich ____ Mira. (Olen nimeltäni Mira.)',['heiße'],'Heißen-verbin minä-muoto on heiße.'),
  choice('EX-C02-15','Mikä kysymys on oikein kirjoitettu?',['Wie heißt du?','Wie heiße du?','Wie heißen du?'],'Wie heißt du?','Du-persoona käyttää muotoa heißt.')
 ];
+
+
+export const c04Exam:Exercise[]=[
+ choice('EX-C04-01','Mikä puhuttelusana on kohtelias te?',['Sie','du','er'],'Sie','Kohtelias te on Sie isolla.'),
+ choice('EX-C04-02','Mikä kysymys sopii kohteliaaseen nimen kysymiseen?',['Wie heißen Sie?','Wie heißt Sie?','Wie heißen du?'],'Wie heißen Sie?','Kohteliaan Sie-muodon verbi on heißen.'),
+ fill('EX-C04-03','Täydennä kohteliaasti: Woher ____ Sie?',['kommen'],'Woher kommen Sie? kysyy lähtöpaikkaa.'),
+ truth('EX-C04-04','Väite: kohtelias Sie kirjoitetaan isolla myös lauseen keskellä.','Totta','Kohtelias Sie kirjoitetaan isolla.'),
+ choice('EX-C04-05','Mikä on luonteva puhuttelu läheiselle kaverille?',['du','Sie','Ihnen'],'du','Tuttavaan käytetään yleensä du-muotoa.'),
+ choice('EX-C04-06','Mikä on asiallinen tervehdys virallisessa tapaamisessa?',['Guten Tag!','Tschüss!','Gute Nacht!'],'Guten Tag!','Guten Tag sopii asialliseen tervehtimiseen.'),
+ fill('EX-C04-07','Täydennä kohtelias nimikysymys: Wie ____ Sie?',['heißen'],'Wie heißen Sie? on oikea kysymys.'),
+ choice('EX-C04-08','Kumpi kysymys on tuttavallinen?',['Wie heißt du?','Wie heißen Sie?','Wie geht es Ihnen?'],'Wie heißt du?','Du kertoo tuttavallisesta puhuttelusta.'),
+ truth('EX-C04-09','Väite: kaikissa maissa jokaiselle vanhemmalle henkilölle täytyy sanoa Sie.','Tarua','Puhuttelu riippuu myös tilanteesta ja puhujien suhteesta.'),
+ choice('EX-C04-10','Miten kysyt kohteliaasti Mitä teille kuuluu?',['Wie geht es Ihnen?','Wie geht es dir?','Wer ist das?'],'Wie geht es Ihnen?','Ihnen on vointikysymyksen kohtelias muoto.'),
+ choice('EX-C04-11','Kuka alkuperäisessä Die Geschäftsmänner -dialogissa sanoo Nicht so gut?',['Herr Schmidt','Herr Standish','Karl'],'Herr Schmidt','Herr Schmidt kertoo olevansa väsynyt.'),
+ choice('EX-C04-12','Miten Herr Schmidt ja Herr Standish hyvästelevät toisensa?',['Auf Wiedersehen!','Guten Morgen!','Wie heißt du?'],'Auf Wiedersehen!','Molemmat käyttävät kohteliasta hyvästelyä Auf Wiedersehen.'),
+ fill('EX-C04-13','Täydennä: Guten ____! (Hyvää päivää!)',['Tag'],'Guten Tag on asiallinen päivätervehdys.'),
+ choice('EX-C04-14','Mikä lause on oikein?',['Sie heißen Petra.','Sie heißt Petra.','Sie heiße Petra.'],'Sie heißen Petra.','Kohteliaassa puhuttelussa Sie heißen.'),
+ truth('EX-C04-15','Väite: pieni sie voi tarkoittaa hän (naisesta) tai he.','Totta','Pienellä kirjoitettu sie ja kohtelias Sie pitää erottaa kontekstissa.')
+];
+export const c05Exam:Exercise[]=[
+ choice('EX-C05-01','Mikä kysymys tarkoittaa Mitä sinulle kuuluu?',['Wie geht es dir?','Wie heißen Sie?','Wie alt bist du?'],'Wie geht es dir?','Wie geht es dir on tuttavallinen vointikysymys.'),
+ choice('EX-C05-02','Mikä sopii vastaukseksi kun voit hyvin?',['Mir geht es gut.','Woher kommst du?','Guten Abend.'],'Mir geht es gut.','Mir geht es gut tarkoittaa että kuuluu hyvää.'),
+ fill('EX-C05-03','Täydennä: Mir geht es ____.',['gut'],'Vointifraasissa käytetään gut.'),
+ choice('EX-C05-04','Mitä nicht so gut tarkoittaa?',['ei kovin hyvin','erittäin hyvin','hyvää yötä'],'ei kovin hyvin','Nicht kieltää fraasissa nicht so gut.'),
+ choice('EX-C05-05','Mikä on kohtelias vointikysymys?',['Wie geht es Ihnen?','Wie geht es dir?','Wer ist das?'],'Wie geht es Ihnen?','Ihnen kuuluu kohteliaaseen vointikysymykseen.'),
+ fill('EX-C05-06','Täydennä: Wie geht es ____? (kohtelias)',['Ihnen'],'Kohteliaasti Wie geht es Ihnen?'),
+ fill('EX-C05-07','Täydennä: Wie geht es ____? (tuttavallinen)',['dir'],'Tuttavallisesti Wie geht es dir?'),
+ choice('EX-C05-08','Miten vastaat ei kovin hyvin?',['Nicht so gut.','Guten Morgen!','Danke schön.'],'Nicht so gut.','Nicht so gut on lyhyt vointivastaus.'),
+ truth('EX-C05-09','Väite: sehr vahvistaa ilmaisua, esimerkiksi sehr gut.','Totta','Sehr gut tarkoittaa erittäin hyvin.'),
+ choice('EX-C05-10','Mitä Ich bin müde tarkoittaa?',['Olen väsynyt.','Olen iloinen.','Olen suomalainen.'],'Olen väsynyt.','Müde tarkoittaa väsynyt.'),
+ choice('EX-C05-11','Mitä tarkoittaa Und dir?',['Entä sinulle?','Nähdään pian!','Miten nimesi kirjoitetaan?'],'Entä sinulle?','Und dir on tuttavallinen vastakysymys.'),
+ choice('EX-C05-12','Mitä tarkoittaa Und Ihnen?',['Entä teille?','Entä minulle?','Mistä olette kotoisin?'],'Entä teille?','Und Ihnen on kohtelias vastakysymys.'),
+ truth('EX-C05-13','Väite: mir-, dir- ja Ihnen-muotojen koko sijataivutus vaaditaan jo tässä kappaleessa.','Tarua','Tässä opiskellaan käyttövalmiit vointifraasit.'),
+ choice('EX-C05-14','Miten alkuperäinen Heinrichin ja Karlin keskustelu päättyy?',['Auf Wiedersehen!','Wie alt bist du?','Woher kommen Sie?'],'Auf Wiedersehen!','Molemmat hyvästelevät sanoilla Auf Wiedersehen.'),
+ fill('EX-C05-15','Täydennä: Sehr ____! (Erittäin hyvin!)',['gut'],'Sehr gut on erittäin hyvin.')
+];
