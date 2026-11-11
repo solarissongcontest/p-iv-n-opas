@@ -105,6 +105,16 @@
 .los-section-nav button.is-active {border-bottom-color:var(--los-book-accent);color:var(--los-ink);}
 .los-book-paper {max-width:1000px;margin:0 auto;min-height:560px;background:var(--los-paper);border:1px solid var(--los-line);box-shadow:0 4px 17px rgba(13,27,38,.025);}
 .los-front {display:grid;grid-template-columns:285px minmax(0,1fr);gap:66px;align-items:center;min-height:490px;padding:57px 65px 55px;}
+/* LOS! 1: full uncut banner alongside the book information and small cover. */
+.los-front.los-front-has-banner {grid-template-columns:minmax(0,1.6fr) minmax(235px,1fr);gap:28px;min-height:0;padding:36px;}
+.los-front-banner {min-width:0;width:100%;}
+.los-front-banner img {display:block;width:100%;height:auto;object-fit:contain;border-radius:7px;}
+.los-front-mini-cover {width:75px;margin-bottom:10px;}
+.los-front-mini-cover .los-cover {width:100%;}
+.los-front-has-banner .los-front-copy {min-width:0;}
+.los-front-has-banner .los-front-copy h1 {font-size:clamp(27px,3vw,36px);margin:8px 0 15px;}
+.los-front-has-banner .los-front-lead {font-size:16px!important;}
+.los-front-has-banner .los-front-rule {margin-bottom:18px;}
 .los-front-copy h1 {font-family:Georgia,"Times New Roman",serif;font-size:clamp(34px,4vw,53px);font-weight:500;margin:16px 0 24px;letter-spacing:-.047em;}
 .los-front-copy .los-eyebrow {margin:0;}
 .los-front-rule {width:64px;border-bottom:3px solid var(--los-book-accent);margin-bottom:27px;}
@@ -203,6 +213,7 @@
  .los-book-layout {grid-template-columns:210px minmax(0,1fr);}
  .los-book-main {padding:0 20px 35px;}
  .los-front {grid-template-columns:220px 1fr;gap:36px;padding:43px 39px;}
+ .los-front.los-front-has-banner {grid-template-columns:minmax(0,1.4fr) minmax(220px,1fr);gap:22px;padding:29px;}
  .los-front-cover .los-cover {width:220px;}
  .los-front-after {padding:33px 39px;}
 }
@@ -224,6 +235,11 @@
  .los-main-breadcrumb {margin:0;padding:7px 15px;min-height:40px;}
  .los-section-nav {margin:0;padding-left:8px;}
  .los-front {display:flex;flex-direction:column;align-items:flex-start;gap:24px;padding:31px 23px;}
+ .los-front.los-front-has-banner {display:flex;flex-direction:column;gap:20px;padding:25px 23px;}
+ .los-front-has-banner .los-front-copy {order:0;width:100%;}
+ .los-front-has-banner .los-front-banner {order:1;width:100%;}
+ .los-front-has-banner .los-front-mini-cover {width:85px;}
+ .los-front-has-banner .los-front-copy h1 {font-size:30px;}
  .los-front-cover .los-cover {width:143px;}
  .los-front-cover .los-cover-mark {font-size:51px;}
  .los-front-cover .los-cover-number {font-size:63px;}

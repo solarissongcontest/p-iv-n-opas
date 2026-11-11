@@ -52,7 +52,7 @@ function BookCover({ book, large = false }: { book: LosBookDefinition; large?: b
     <span className={`los-cover ${large ? "los-cover-large" : ""}`} style={bookStyle(book)}>
       {!assetFailed ? (
         <img
-          src={`/los/los-${book.id}-cover.webp`}
+          src={book.id === 1 ? "/los/los-1-cover.jpeg" : `/los/los-${book.id}-cover.webp`}
           alt={`LOS! ${book.id}: ${book.title}, kansikuva`}
           loading={large ? "eager" : "lazy"}
           onError={() => setAssetFailed(true)}
@@ -103,9 +103,16 @@ function SeriesView({ openBook }: { openBook: (id: number) => void }) {
 }
 function BookFront({ book, move }: { book: LosBookDefinition; move: (chapter: string | null, section: LosSection) => void }) {
   return <>
-    <div className="los-front">
-      <div className="los-front-cover"><BookCover book={book} large /></div>
+    <div className={`los-front ${book.id === 1 ? "los-front-has-banner" : ""}`}>
+      {book.id === 1 ? (
+        <div className="los-front-banner">
+          <img src="/los/los-1-banner.jpeg" alt="LOS! 1 -kirjan kuvallinen banneri" loading="eager" />
+        </div>
+      ) : (
+        <div className="los-front-cover"><BookCover book={book} large /></div>
+      )}
       <div className="los-front-copy">
+        {book.id === 1 && <div className="los-front-mini-cover"><BookCover book={book} /></div>}
         <p className="los-eyebrow">LOS! {book.id} / {book.code} / 2 op</p>
         <h1>{book.title}</h1>
         <div className="los-front-rule" />
