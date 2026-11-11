@@ -1,5 +1,5 @@
 import type {Exercise} from './content';
-import {c01Exam,c02Exam,c03Exam,c04Exam,c05Exam,c07Exam,c09Exam} from './chapterExam.ts';
+import {c01Exam,c02Exam,c03Exam,c04Exam,c05Exam,c07Exam,c09Exam,c10Exam} from './chapterExam.ts';
 // The assessment banks are independent of chapter practice IDs. No answer key
 // is rendered in ExamSession until the learner submits the whole paper.
 type Item=Exercise;
@@ -102,6 +102,7 @@ export const exams={
  'EX-C05':{title:'Kappaletesti · C05 Wie geht’s?',questions:c05Exam,scope:'C05'},
  'EX-C07':{title:'Kappaletesti · C07 Wie schreibt man das?',questions:c07Exam,scope:'C07'},
  'EX-C09':{title:'Kappaletesti · C09 Am Montag um drei',questions:c09Exam,scope:'C09'},
+ 'EX-C10':{title:'Kappaletesti · C10 Schön, dich kennenzulernen!',questions:c10Exam,scope:'C10'},
  'EX-MID':{title:'Välikoe · kappaleet 1–5',questions:midExam,scope:'C01–C05'},
  'EX-FINAL':{title:'Loppukoe · LOS! 1',questions:finalExam,scope:'C01–C10'},
 } as const;
@@ -142,6 +143,11 @@ export const selfAssessment={
  model:'Am Montag um drei Uhr. Am Donnerstag um vier Uhr.',
  criteria:'Kummassakin käytät muotoja am + isolla alkava viikonpäivä ja um + kellonaika.'
  },
+ 'EX-C10':{
+ prompt:'Kirjoita kaksi lyhyttä kuvitteellista kohtaamista, joista toisessa käytetään du-muotoa ja toisessa kohteliasta Sie-muotoa. Esittele myös kolmas henkilö.',
+ model:'A: Hallo! Wie heißt du? B: Ich heiße Mia. Und du? A: Ich bin Leo. B: Schön, dich kennenzulernen! C: Guten Tag! Wie heißen Sie? D: Ich heiße Herr Weber. C: Das ist Lea. Sie kommt aus Finnland. D: Auf Wiedersehen!',
+ criteria:'Erotat du- ja Sie-muodot, esittelet nimet ja kolmannen henkilön, ja käytät sopivia tervehdyksiä ja hyvästelyjä. Tämä on itsearvioitava tuotos.'
+ },
  'EX-MID':{
  prompt:'Esittäydy 3–4 lauseella kuvitteellisena henkilönä.',
  model:'Guten Tag! Ich heiße Mira. Ich komme aus Finnland. Mir geht es gut.',
@@ -155,8 +161,8 @@ export const selfAssessment={
 } as const;
 export function validateLosExams():string[]{
  const issues:string[]=[];const ids=new Set<string>();
- for(const [name,questions] of [['EX-C01',c01Exam],['EX-C02',c02Exam],['EX-C03',c03Exam],['EX-C04',c04Exam],['EX-C05',c05Exam],['EX-C07',c07Exam],['EX-C09',c09Exam],['EX-MID',midExam],['EX-FINAL',finalExam]] as const){
-  if(questions.length!==(name==='EX-MID'?25:name.startsWith('EX-C')?15:50))issues.push(name+' väärä tehtävämäärä');
+ for(const [name,questions] of [['EX-C01',c01Exam],['EX-C02',c02Exam],['EX-C03',c03Exam],['EX-C04',c04Exam],['EX-C05',c05Exam],['EX-C07',c07Exam],['EX-C09',c09Exam],['EX-C10',c10Exam],['EX-MID',midExam],['EX-FINAL',finalExam]] as const){
+  if(questions.length!==(name==='EX-MID'?25:name==='EX-C10'?20:name.startsWith('EX-C')?15:50))issues.push(name+' väärä tehtävämäärä');
   for(const e of questions){
    if(ids.has(e.id))issues.push('Duplikaatti '+e.id);
    ids.add(e.id);
