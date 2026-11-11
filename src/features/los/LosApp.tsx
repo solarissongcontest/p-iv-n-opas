@@ -101,7 +101,7 @@ function BookHome({ book }: { book: Book }) {
       </div>
     </div>
     {book.lessons.some(lesson => lesson.publicationStatus === "preview") ?
-      <p className="los-notice" role="status">LOS! 1:n kolmessa ensimmäisessä kappaleessa on esikatselusisältöä ja yhteensä 16 ohjattua oppituntia. C01:n kaksi alkuperäisäänitettä ja niiden tekstit, C02:n oma opetuskeskustelu sekä Ariserin koko alkuperäinen dialogi ovat luettavissa. C03:n oikean saksankielisen puhujan alkuperäinen Bernan haastattelu on kokonaisena lukuun ottamatta näkyvästi poistettua puhelinnumeroa. Kappaletestit ovat käytettävissä, mutta lähteiden lopullinen toimitus, äänitteiden laitetestaus ja muiden kappaleiden sisällöt ovat vielä kesken.</p> :
+      <p className="los-notice" role="status">LOS! 1:n kolmessa ensimmäisessä kappaleessa on esikatselusisältöä ja yhteensä 16 ohjattua oppituntia. C01:n kaksi alkuperäisäänitettä ja niiden tekstit, C02:n Wikibooksin koko alkuperäinen Franz–Greta-pääteksti, sen 20 sekunnin äänite, LOS!:n oma lisäkeskustelu sekä Ariserin koko nelirepliikkinen dialogi ovat luettavissa. C03:n oikean saksankielisen puhujan alkuperäinen Bernan haastattelu on kokonaisena lukuun ottamatta näkyvästi poistettua puhelinnumeroa. Kappaletestit ovat käytettävissä, mutta lähteiden lopullinen toimitus, äänitteiden laitetestaus ja muiden kappaleiden sisällöt ovat vielä kesken.</p> :
       <p className="los-notice" role="status">Oppituntien sisältöä ei ole vielä julkaistu. Etenemistä ei lasketa ennen kuin oikeita opintosuorituksia on saatavilla.</p>}
     <h2 className="los-section-title">Tutustu kirjaan</h2>
     <div className="los-path-cards">
@@ -177,7 +177,7 @@ function ChapterPage({ book, chapter, subsection }: { book: Book; chapter: Chapt
         chapter.id === "C01" ?
         "C01 on harjoitusversio: Text A:n 8-repliikkinen alkuperäisdialogi, Text B:n 20 ilmauksen ääniteluettelo sekä 12 tehtävän kappaletesti ovat käytettävissä. Äänitoiston laitetestaus ja lopullinen toimitus ovat kesken." :
         chapter.id === "C02" ?
-        "C02 on harjoitusversio: luettavana on LOS!:n itse laatima esittelydialogi, 16 ydinsanaa, 15 kysymyksen kappaletesti ja Ariserin koko alkuperäinen nelirepliikkinen litteraatti sekä ääni. Suunnitellun Wikibooksin Franz–Greta-päätekstin tuonti ja äänitteen laitetoisto ovat vielä kesken." :
+        "C02 on harjoitusversio: Wikibooksin aito Franz–Greta-pääteksti on kokonaan sisällä kuutena repliikkinä ja sen 20 sekunnin public domain -äänite on soitettavissa. LOS!:n oma lisädialogi, Ariserin nelirepliikkinen alkuperäislähde, 16 ydinsanaa ja 15 kysymyksen kappaletesti täydentävät kokonaisuutta. Alkuperäisäänten laitetoisto ja loppulaaduntarkistus ovat vielä kesken." :
         chapter.id === "C03" ?
         "C03 on harjoitusversio: Bernan koko alkuperäishaastattelun 12 repliikkiä ovat luettavissa yhtä näkyvästi poistettua puhelinnumeroa lukuun ottamatta. Lisäksi käytössä ovat 17 ydinsanaa, tulla-verbin opetusta, maantieteellinen sijaintikaavio, Ariserin nelirepliikkinen alkuperäisäänite ja 15 tehtävän testi. COERLL-videon upotus, todellinen laitetestaus ja koko kappaleen toimituksellinen laaduntarkistus ovat kesken." :
         "Kappale on harjoitusversio, mutta kaikki lähteet ja oppisisällöt eivät ole vielä toimitettuja." :
