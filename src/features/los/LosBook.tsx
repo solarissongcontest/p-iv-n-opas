@@ -4,14 +4,25 @@ import { readCachedDeviceUser } from "@/lib/deviceSession";
 import { LOS_BOOKS, type LosBookDefinition, type LosChapter } from "./catalog";
 import { LosAuthenticAudio, LosDictionary, LosIndexSearch, LosLearningPath, type LosDestination } from "./LosReferenceTools";
 import { LosChapterGrammar } from "./LosGrammarChapters";
+import { LosNotebook, LosWorkbook } from "./LosWorkbook";
+import { LosApplication, LosCulture, LosTextB, LosUnderstanding } from "./LosSupplementalSections";
 import "./los-book.css";
 import "./los-appendix.css";
 
 type LosSection = LosDestination;
 type LosLocation = { book: number | null; chapter: string | null; section: LosSection };
+/** Kymmenen näkyvää kappaleosiota LOS! 1:n kirjakohtaisen masterplanin mukaan. */
 const sections: { id: LosSection; label: string }[] = [
-  { id: "chapter", label: "Aloitus" }, { id: "text", label: "Lue" }, { id: "vocabulary", label: "Sanasto" },
-  { id: "grammar", label: "Kielioppi" }, { id: "practice", label: "Harjoitukset" },
+  { id:"chapter", label:"Aloita" },
+  { id:"text", label:"Text A" },
+  { id:"understand", label:"Ymmärrä" },
+  { id:"vocabulary", label:"Sanasto" },
+  { id:"grammar", label:"Kielioppi" },
+  { id:"text-b", label:"Text B" },
+  { id:"practice", label:"Harjoittele" },
+  { id:"apply", label:"Käytä saksaa" },
+  { id:"culture", label:"Kulttuuri" },
+  { id:"test", label:"Kappaletesti" },
 ];
 const bookStyle = (book: LosBookDefinition): CSSProperties => ({
   "--los-book-accent": book.accent,
@@ -25,7 +36,7 @@ function readLocation(): LosLocation {
   const book = Number.isInteger(parsedBook) && parsedBook >= 1 && parsedBook <= 8 ? parsedBook : null;
   const chapter = book === 1 && /^\d{2}$/.test(parts[1] ?? "") ? (parts[1] ?? null) : null;
   const token = parts[chapter ? 2 : 1];
-  const section = (["overview", "contents", "chapter", "text", "vocabulary", "grammar", "practice", "appendix", "dictionary", "path", "search"].includes(token ?? "") ? token : chapter ? "chapter" : "overview") as LosSection;
+  const section = (["overview", "contents", "chapter", "text", "vocabulary", "grammar", "practice", "appendix", "dictionary", "path", "search", "understand", "text-b", "apply", "culture", "test"].includes(token ?? "") ? token : chapter ? "chapter" : "overview") as LosSection;
   return { book, chapter, section };
 }
 function linkTo(book?: number, chapter?: string, section: LosSection = "overview") {
@@ -162,7 +173,7 @@ function TextPage({ chapter }: { chapter: LosChapter }) {
         <p>Tekstin koko litteraatti ja kuuntelun tukiselitykset lisätään samaan lukijaan toimitus- ja käyttöoikeustarkistuksen jälkeen. Tässä ei käytetä keksittyä dialogia täytteenä.</p>
       </div>
     </div>
-    <LosAuthenticAudio chapterId={chapter.id} />
+    <LosAuthenticAudio chapterId={chapter.id} source="A" />
     <div className="los-reader-sample">
       <p className="los-overline">KIELEN HAVAINTO · OPETUSESIMERKKI</p>
       <blockquote lang="de">Guten Tag!</blockquote>
@@ -211,38 +222,13 @@ function Vocabulary({ chapter }: { chapter: LosChapter }) {
     {!words.length && <p>Sanastosta ei löytynyt hakua vastaavaa sanaa.</p>}
   </section>;
 }
-const practiceQuestions = [
-  { question: "Mikä tervehdys sopii aamuun?", options: ["Guten Morgen!", "Guten Abend!", "Tschüss!"], correct: 0, why: "Morgen tarkoittaa aamua." },
-  { question: "Mitä tarkoittaa Auf Wiedersehen?", options: ["Kiitos", "Näkemiin", "Hyvää huomenta"], correct: 1, why: "Auf Wiedersehen on tavallinen hyvästely." },
-  { question: "Miten sanot saksaksi 'Hyvää päivää'?", options: ["Guten Tag!", "Gute Nacht!", "Bitte!"], correct: 0, why: "Guten Tag on päiväsaikaan käytettävä tervehdys." },
-];
-function Exercises({ chapter }: { chapter: LosChapter }) {
-  const [answers, setAnswers] = useState<Record<number, number>>({});
-  const [checked, setChecked] = useState<Record<number, boolean>>({});
-  return <section className="los-inner-page los-exercise-page">
-    <p className="los-eyebrow">ÜBEN / KAPITEL {Number(chapter.id)}</p>
-    <h1>Harjoitukset</h1>
-    {chapter.id === "01" ? <>
-      <p className="los-page-intro">Harjoittele ensin tervehdyksiä. Nämä ovat erillisiä alkeiden malliharjoituksia, eivät vielä kappaleen varsinainen arvioiva testi.</p>
-      {practiceQuestions.map((task, i) => <article className="los-exercise" key={task.question}>
-        <div className="los-exercise-header"><span>{Number(chapter.id)}.{i + 1}</span><span>Valitse oikea vastaus</span></div>
-        <h2>{task.question}</h2>
-        <div className="los-answer-list" role="radiogroup" aria-label={task.question}>
-          {task.options.map((option, j) => <label key={option} className={answers[i] === j ? "is-selected" : ""}><input type="radio" name={`los-ex-${i}`} checked={answers[i] === j} onChange={() => {setAnswers(prev => ({...prev, [i]: j}));setChecked(prev => ({...prev, [i]: false}));}} /><span lang="de">{option}</span></label>)}
-        </div>
-        <button className="los-exercise-check" disabled={answers[i] === undefined} onClick={() => setChecked(prev => ({...prev, [i]: true}))}>Tarkista vastaus</button>
-        {checked[i] && <p role="status" className={answers[i] === task.correct ? "los-answer-right" : "los-answer-wrong"}>{answers[i] === task.correct ? "Oikein. " : "Ei aivan. "}{task.why}{answers[i] !== task.correct ? ` Oikea vastaus: ${task.options[task.correct]}` : ""}</p>}
-      </article>)}
-    </> : <div className="los-editorial-note"><h2>Tehtävät ovat toimituksessa</h2><p>Kappaleen tehtävätyypit ja arviointitavoitteet on määritelty sisältösuunnitelmassa. Valmiiksi merkitään vain todelliset, tarkistetut tehtävät.</p></div>}
-  </section>;
-}
 function Appendix({ book }: { book: LosBookDefinition }) {
   return <section className="los-inner-page los-appendix">
     <p className="los-eyebrow">LOS! {book.id} / LIITTEET</p>
     <h1>Kirjan liitteet</h1>
     <div className="los-appendix-section"><h2>Kirjan tiedot</h2><dl><div><dt>Moduuli</dt><dd>{book.code} · {book.module}</dd></div><div><dt>Laajuus</dt><dd>2 op</dd></div><div><dt>Oppimäärä</dt><dd>Saksa B3 · LOPS21</dd></div></dl></div>
     <div className="los-appendix-section"><h2>Lähteet ja materiaalit</h2><p>Alkuperäistekstit, puheäänitteet ja videot kirjataan tähän lähde- ja lisenssitietoineen vasta tarkistuksen jälkeen. LOS! 1:n aineistokatalogi on lähdesuunnitelma, ei valmis julkaistu materiaalipaketti.</p></div>
-    <div className="los-appendix-section"><h2>Opetuspolku, sanakirja ja kokeet</h2><p>Opetuspolun lukujärjestys ja sanakirjahakemisto löytyvät nyt kirjan omasta valikosta. Kertausten, kokeiden arvioinnin ja pilvisynkronoidun edistymisen toteutus on vielä kesken.</p></div>
+    <div className="los-appendix-section"><h2>Opetuspolku, sanakirja ja kappaletestit</h2><p>Opetuspolku ja sanakirja löytyvät kirjan valikosta. Kappaleissa 1 ja 2 on omat automaattisesti tarkistettavat alkeistestit. Muiden kappaleiden tehtäväsarjat ja kaikkien vastausten pilvisynkronointi ovat yhä kesken.</p></div>
   </section>;
 }
 function LosBookWorkspace({ book, location, move, goLibrary, openBook }: { book: LosBookDefinition; location: LosLocation; move: (chapter: string | null, section: LosSection) => void; goLibrary: () => void; openBook: (id: number) => void }) {
@@ -289,17 +275,23 @@ function LosBookWorkspace({ book, location, move, goLibrary, openBook }: { book:
             section === "search" ? <LosIndexSearch book={book} move={move} /> :
             chapter ? (
               section === "text" ? <TextPage chapter={chapter} /> :
+              section === "understand" ? <LosUnderstanding chapter={chapter} goToText={() => move(chapter.id, "text")} /> :
               section === "vocabulary" ? <Vocabulary key={chapter.id} chapter={chapter} /> :
               section === "grammar" ? <Grammar chapter={chapter} /> :
-              section === "practice" ? <Exercises key={chapter.id} chapter={chapter} /> :
+              section === "text-b" ? <LosTextB chapter={chapter} /> :
+              section === "practice" ? <LosWorkbook key={`practice-${chapter.id}`} chapter={chapter} mode="practice" /> :
+              section === "apply" ? <LosApplication key={chapter.id} chapter={chapter} /> :
+              section === "culture" ? <LosCulture chapter={chapter} /> :
+              section === "test" ? <LosWorkbook key={`test-${chapter.id}`} chapter={chapter} mode="test" /> :
               <ChapterOpening book={book} chapter={chapter} move={move} />
             ) : <Contents book={book} move={move} />}
         </div>
+        {chapter && <LosNotebook key={`notes-${chapter.id}`} chapter={chapter} />}
         {chapter && <div className="los-pagination">
           {previous ? <button onClick={() => openChapter(previous)}><ChevronLeft size={18} /><span>Edellinen kappale<small lang="de">{previous.title}</small></span></button> : <span />}
           {next ? <button onClick={() => openChapter(next)}><span>Seuraava kappale<small lang="de">{next.title}</small></span><ChevronRight size={18} /></button> : <button onClick={() => move(null, "appendix")}>Kirjan liitteet <ChevronRight size={18} /></button>}
         </div>}
-        <footer className="los-page-footer">LOS! · {book.code} · {book.module} <span>Oppikirjan visuaalinen ensimmäinen toteutus</span></footer>
+        <footer className="los-page-footer">LOS! · {book.code} · {book.module} <span>Kappaleiden varmistettuja aineistoja täydennetään</span></footer>
       </main>
     </div>
     {tocOpen && <button className="los-toc-backdrop" aria-label="Sulje sisällysluettelo" onClick={() => setTocOpen(false)} />}
