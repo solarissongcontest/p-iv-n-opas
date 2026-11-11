@@ -2,6 +2,7 @@ import type { Book, BookId, ModuleCode } from "./model";
 import { LOS1_PLANNED_CHAPTERS, LOS1_PLANNED_LESSONS } from "./los1-planned.ts";
 import { LOS1_C01_PREVIEW_BLOCKS, LOS1_C01_PREVIEW_EXERCISES } from "./los1-c01-preview.ts";
 import { LOS1_RESEARCH_SOURCES } from "./los1-sources.ts";
+import { LOS1_C01_SOURCE_BLOCKS, LOS1_C01_SOURCE_EXERCISES } from "./los1-c01-source.ts";
 
 const specs: readonly [string, string, string, string, string, string][] = [
   ["Perustason alkeet 1", "Tutustu ja ihastu saksan kieleen", "Nollataso, tervehdykset, esittäytyminen ja ensimmäinen vuorovaikutus.", "#B43D33", "#FCE8E5", "#FF9B91"],
@@ -30,13 +31,54 @@ export const LOS_BOOKS: readonly Book[] = specs.map((spec, index) => ({
   coverAsset: null,
   bannerAsset: null,
   chapters: index === 0 ? LOS1_PLANNED_CHAPTERS.map(chapter => chapter.id === "C01" ? {
-    ...chapter, blockIds: LOS1_C01_PREVIEW_BLOCKS.map(block => block.id),
-    exerciseIds: LOS1_C01_PREVIEW_EXERCISES.map(exercise => exercise.id),
+    ...chapter, publicationStatus: "preview" as const,
+    blockIds: [
+      LOS1_C01_PREVIEW_BLOCKS[0]!.id,
+      ...LOS1_C01_SOURCE_BLOCKS.map(block => block.id),
+      ...LOS1_C01_PREVIEW_BLOCKS.slice(1).map(block => block.id),
+    ],
+    exerciseIds: [
+      ...LOS1_C01_SOURCE_EXERCISES.map(exercise => exercise.id),
+      ...LOS1_C01_PREVIEW_EXERCISES.map(exercise => exercise.id),
+    ],
   } : chapter) : [],
-  lessons: index === 0 ? LOS1_PLANNED_LESSONS : [],
-  blocks: index === 0 ? LOS1_C01_PREVIEW_BLOCKS : [],
-  exercises: index === 0 ? LOS1_C01_PREVIEW_EXERCISES : [],
-  sources: index === 0 ? LOS1_RESEARCH_SOURCES : [],
+  lessons: index === 0 ? LOS1_PLANNED_LESSONS.map(lesson => {
+    if (lesson.id === "L002") return {
+      ...lesson, publicationStatus: "preview" as const,
+      steps: [
+        { id: "L002-S01", title: "Mistä aloitat?", required: true, blockId: "los1-c01-orientation" },
+        { id: "L002-S02", title: "Ensimmäiset saksan äänteet", required: true, blockId: "los1-c01-phonetics" },
+        { id: "L002-S03", title: "Kuuntele aitoa puhetta", required: true, blockId: "los1-c01-m-com-01-audio" },
+        { id: "L002-S04", title: "Tervehdykset käyttötilanteissa", required: true, blockId: "los1-c01-greetings" },
+        { id: "L002-S05", title: "Tunnista aamun tervehdys", required: true, exerciseId: "los1-c01-ex-greeting-choice" },
+        { id: "L002-S06", title: "Yhdistä tutut tervehdykset", required: true, exerciseId: "los1-c01-ex-greeting-pairs" },
+      ],
+    };
+    if (lesson.id === "L003") return {
+      ...lesson, publicationStatus: "preview" as const,
+      steps: [
+        { id: "L003-S01", title: "Tutustu alkuperäiseen dialogiin", required: true, blockId: "los1-c01-source-intro" },
+        { id: "L003-S02", title: "Kuuntele keskustelu", required: true, blockId: "los1-c01-m-com-01-audio" },
+        { id: "L003-S03", title: "Lue koko kahdeksan repliikin dialogi", required: true, blockId: "los1-c01-m-com-01-dialogue" },
+        { id: "L003-S04", title: "Korosta Franzin tervehdys", required: true, exerciseId: "los1-c01-text-a-highlight-greeting" },
+        { id: "L003-S05", title: "Tunnista hyvästely", required: true, exerciseId: "los1-c01-text-a-choice-goodbye" },
+        { id: "L003-S06", title: "Täydennä hyvästely", required: true, exerciseId: "los1-c01-text-a-gap-goodbye" },
+        { id: "L003-S07", title: "Kertaa uusi teksti", required: true, blockId: "los1-c01-reading-followup" },
+      ],
+    };
+    return lesson;
+  }) : [],
+  blocks: index === 0 ? [...LOS1_C01_PREVIEW_BLOCKS, ...LOS1_C01_SOURCE_BLOCKS] : [],
+  exercises: index === 0 ? [...LOS1_C01_PREVIEW_EXERCISES, ...LOS1_C01_SOURCE_EXERCISES] : [],
+  sources: index === 0 ? LOS1_RESEARCH_SOURCES.map(source => source.id === "M-COM-01" ? {
+    ...source,
+    author: "Xzapro4 ja Erkan Yilmaz",
+    licenseOrBasis: "CC BY-SA 3.0 Unported · teksti ja ääni",
+    licenseUrl: "https://creativecommons.org/licenses/by-sa/3.0/",
+    permittedMode: "embed" as const,
+    modification: "Saksankielinen transkriptio alkuperäisenä. Suomenkieliset opetusselitykset ja repliikkikohtaiset käännökset ovat lisäyksiä.",
+    publicationNoteFi: "Koko alkuperäisteksti on lukijassa. Alkuperäisäänite toistetaan Wikimedian palvelimelta; mobiilitoistoa ei ole vielä varmennettu.",
+  } : source) : [],
 }));
 
 export const LOS_BASE_PATH = "/oppikirjasto/saksa-b3";
