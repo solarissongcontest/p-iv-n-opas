@@ -93,3 +93,24 @@ test("C02 unabridged dialogue, glossary, marks and source tasks survive navigati
   await expect(page.locator(".los-c01-turn").first().locator(".los-c01-mark-green")).toHaveCount(2);
   await expectNoHorizontalOverflow(page);
 });
+
+
+test("C04, C05, C07 and C09 original published dialogues are readable, annotatable and linked to source exercises", async ({ page }) => {
+  await enterApp(page);
+  for (const [chapter,turns,phrase] of [
+    ["04",8,"Wie geht es Ihnen?"],
+    ["05",4,"Wie geht es dir?"],
+    ["07",5,"Bitte buchstabieren Sie."],
+    ["09",7,"Wie spät ist es?"],
+  ] as const) {
+    await page.goto("/los#/1/"+chapter+"/text", { waitUntil:"domcontentloaded" });
+    await expect(page.locator(".los-c01-turn")).toHaveCount(turns);
+    await expect(page.locator(".los-c01-turns")).toContainText(phrase);
+    await expect(page.locator(".los-c01-attribution")).toContainText("CC BY-SA 4.0");
+    await expectNoHorizontalOverflow(page);
+    await page.goto("/los#/1/"+chapter+"/understand", { waitUntil:"domcontentloaded" });
+    await expect(page.locator("fieldset.los-c01-question")).toHaveCount(5);
+    await expect(page.getByRole("button",{name:"Näytä koko tekstin suomennos"})).toBeVisible();
+    await expectNoHorizontalOverflow(page);
+  }
+});
