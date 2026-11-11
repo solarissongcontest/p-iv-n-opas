@@ -50,10 +50,10 @@ test("C07 is ten real preview sections and exactly L036–L040 sessions",()=>{
   assert.deepEqual(book.lessons.filter(row=>row.chapterId==="C07"&&row.publicationStatus==="preview")
     .map(row=>row.id),["L036","L037","L038","L039","L040"]);
   assert.equal(LOS1_C07_SOURCE_EXERCISES.length,8);
-  assert.equal(LOS1_C07_PRACTICE_EXERCISES.length,41);
+  assert.equal(LOS1_C07_PRACTICE_EXERCISES.length,40);
   assert.equal(LOS1_C07_EXAM_A.length,15);
-  assert.equal(chapter.exerciseIds.length,64);
-  assert.equal(new Set(chapter.exerciseIds).size,64);
+  assert.equal(chapter.exerciseIds.length,63);
+  assert.equal(new Set(chapter.exerciseIds).size,63);
   const seen=new Set(chapter.sections?.flatMap(row=>row.exerciseIds));
   assert.ok(chapter.exerciseIds.every(id=>seen.has(id)),"Every C07 chapter task should be routable");
   assert.ok(chapter.sections?.find(s=>s.id==="teksti-a")?.blockIds.includes("los1-c07-wb-02-dialogue"));
