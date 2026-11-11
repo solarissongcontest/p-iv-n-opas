@@ -90,7 +90,7 @@ export function ExerciseEngine({ bookId, exercise, mode = "practice", onChecked 
     setChecked(null);
     setExamSubmitted(false);
   };
-  const matches = exercise.type === "matching" && answer && typeof answer === "object" && !isRange(answer)
+  const matches = exercise.type === "matching" && answer && typeof answer === "object" && !Array.isArray(answer) && !isRange(answer)
     ? answer as Record<string, string> : {};
   return <section className="los-exercise" aria-labelledby={"los-prompt-" + exercise.id}>
     <div className="los-exercise-meta">HARJOITUS · {exercise.id} <span>{mode === "exam" ? "Koetila" : "Harjoitustila"}</span></div>
@@ -103,6 +103,63 @@ export function ExerciseEngine({ bookId, exercise, mode = "practice", onChecked 
         <span>{option.label}</span>
       </label>)}
     </fieldset>}
+    {exercise.type === "multiple-choice" && <fieldset className="los-options">
+      <legend className="sr-only">Voit valita useita vaihtoehtoja</legend>
+      <p className="los-support">Valitse kaikki sopivat vaihtoehdot. Niitä voi olla useampi kuin yksi.</p>
+      {exercise.options.map(option => <label className="los-option" key={option.id}>
+        <input type="checkbox" checked={Array.isArray(answer) && answer.includes(option.id)}
+          onChange={event => {
+            const selected = Array.isArray(answer) ? answer : [];
+            change(event.target.checked ? [...selected, option.id] : selected.filter(id => id !== option.id));
+          }}/>
+        <span>{option.label}</span>
+      </label>)}
+    </fieldset>}
+    {exercise.type === "true-false" && <fieldset className="los-options">
+      <legend>{exercise.statement}</legend>
+      {[{ id: "true", text: "Totta" }, { id: "false", text: "Epätotta" }].map(option =>
+        <label className="los-option" key={option.id}>
+          <input type="radio" name={"los-truth-" + exercise.id} value={option.id}
+            checked={answer === option.id} onChange={() => change(option.id)}/>
+          <span>{option.text}</span>
+        </label>)}
+    </fieldset>}
+    {exercise.type === "word-order" && <div className="los-word-order">
+      <p className="los-support">Napauta sanoja siinä järjestyksessä kuin ne kuuluvat lauseeseen. Voit poistaa valitun sanan napauttamalla sitä uudelleen.</p>
+      <div className="los-order-selected" role="group" aria-label="Oma sanajärjestys">
+        {Array.isArray(answer) && answer.length ? answer.map((id, index) =>
+          <button type="button" className="los-token is-selected" key={id}
+            aria-label={"Poista sana sijalta " + (index + 1)}
+            onClick={() => change(answer.filter(value => value !== id))}>
+            {exercise.tokens.find(token => token.id === id)?.label ?? id} <span aria-hidden="true">×</span>
+          </button>) : <p className="los-support">Valitut sanat näkyvät tässä.</p>}
+      </div>
+      <div className="los-tokens" role="group" aria-label="Käytettävissä olevat sanat">
+        {exercise.tokens.map(token => <button type="button" key={token.id}
+          className="los-token" disabled={Array.isArray(answer) && answer.includes(token.id)}
+          onClick={() => change([...(Array.isArray(answer) ? answer : []), token.id])}>{token.label}</button>)}
+      </div>
+    </div>}
+    {exercise.type === "categorize" && <div className="los-categorize">
+      <p className="los-support">Valitse jokaiselle ilmaukselle sopiva ryhmä.</p>
+      {exercise.items.map(item => <div className="los-categorize-row" key={item.id}>
+        <label htmlFor={"los-cat-" + exercise.id + "-" + item.id} lang="de">{item.label}</label>
+        <select id={"los-cat-" + exercise.id + "-" + item.id}
+          value={answer && typeof answer === "object" && !Array.isArray(answer) && !isRange(answer)
+            ? (answer as Record<string, string>)[item.id] ?? "" : ""}
+          onChange={event => {
+            const previous = answer && typeof answer === "object" && !Array.isArray(answer) && !isRange(answer)
+              ? answer as Record<string, string> : {};
+            const next = { ...previous };
+            if (event.target.value) next[item.id] = event.target.value;
+            else delete next[item.id];
+            change(next);
+          }}>
+          <option value="">Valitse ryhmä…</option>
+          {exercise.categories.map(category => <option key={category.id} value={category.id}>{category.label}</option>)}
+        </select>
+      </div>)}
+    </div>}
     {exercise.type === "gap-fill" && <div className="los-gap">
       <div lang="de">{exercise.sentenceBefore} <span aria-hidden="true">_____</span> {exercise.sentenceAfter}</div>
       <label htmlFor={"los-answer-" + exercise.id}>Täydennä puuttuva sana tai ilmaus</label>
@@ -139,7 +196,7 @@ export function ExerciseEngine({ bookId, exercise, mode = "practice", onChecked 
     {exercise.type === "highlight" && <HighlightPicker exercise={exercise} value={answer} onChange={change} />}
     <div className="los-actions los-exercise-bottom">
       {mode === "practice" && exercise.hintFi && <button type="button" className="los-button los-button-secondary" onClick={() => setHintShown(v => !v)} aria-expanded={hintShown}>Vihje</button>}
-      <button type="button" className="los-button los-button-primary" disabled={saveStatus === "loading" || answer === null || (typeof answer === "string" && !answer.trim())}
+      <button type="button" className="los-button los-button-primary" disabled={saveStatus === "loading" || evaluateExercise(exercise, answer) === null}
         onClick={() => {
           if (mode === "exam") {
             // In exam mode an individual task may only submit its answer.
