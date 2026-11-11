@@ -50,7 +50,7 @@ test('L036–L040 have five substantive steps summing to 30min, exact prerequisi
  assert.deepEqual(chapter07Lessons[4]!.requiredIds,['EX-C07']);
  assert.equal(lessons.find(l=>l.id==='L035')?.status,'initial-material');
  assert.equal(lessons.find(l=>l.id==='L041')?.status,'initial-material');
- assert.equal(lessons.find(l=>l.id==='L042')?.status,'pending');
+ assert.equal(lessons.find(l=>l.id==='L042')?.status,'initial-material');
 });
 test('C07 source anchors and one-word human audio prompts are not misleading or fabricated',()=>{
  const word=extras.find(e=>e.id==='C07-X19')!;
