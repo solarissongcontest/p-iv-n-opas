@@ -50,6 +50,7 @@ import { LOS1_C09_CONTENT_BLOCKS } from "./los1-c09-content.ts";
 import { LOS1_C09_PRACTICE_EXERCISES } from "./los1-c09-practice.ts";
 import { LOS1_C09_SOURCE_EXERCISES } from "./los1-c09-source.ts";
 import { LOS1_C09_TEXT_A_BLOCKS, LOS1_C09_TEXT_A_EXERCISES } from "./los1-c09-text-a.ts";
+import { LOS1_C09_AUDIO_BLOCKS, LOS1_C09_AUDIO_EXERCISES } from "./los1-c09-audio.ts";
 import { LOS1_C09_EXAM_A, LOS1_C09_EXAM_B, LOS1_C09_TEST } from "./los1-c09-test.ts";
 import { LOS1_C09_SECTIONS } from "./los1-c09-sections.ts";
 import { LOS1_C10_SOURCE_BLOCKS, LOS1_C10_SOURCE_EXERCISES } from "./los1-c10-source.ts";
@@ -155,8 +156,8 @@ export const LOS_BOOKS: readonly Book[] = specs.map((spec, index) => ({
   } : chapter.id === "C09" ? {
     ...chapter,publicationStatus:"preview" as const,
     sections:LOS1_C09_SECTIONS,
-    blockIds:[...LOS1_C09_CONTENT_BLOCKS,...LOS1_C09_TEXT_A_BLOCKS].map(b=>b.id),
-    exerciseIds:[...LOS1_C09_SOURCE_EXERCISES,...LOS1_C09_TEXT_A_EXERCISES,...LOS1_C09_PRACTICE_EXERCISES,
+    blockIds:[...LOS1_C09_CONTENT_BLOCKS,...LOS1_C09_TEXT_A_BLOCKS,...LOS1_C09_AUDIO_BLOCKS].map(b=>b.id),
+    exerciseIds:[...LOS1_C09_SOURCE_EXERCISES,...LOS1_C09_TEXT_A_EXERCISES,...LOS1_C09_AUDIO_EXERCISES,...LOS1_C09_PRACTICE_EXERCISES,
       ...LOS1_C09_EXAM_A].map(ex=>ex.id),
   } : chapter.id === "C10" ? {
     ...chapter,publicationStatus:"preview" as const,
@@ -714,7 +715,20 @@ export const LOS_BOOKS: readonly Book[] = specs.map((spec, index) => ({
         {id:"L048-S07",title:"Tarkista viikonpäivän ja ajan merkitys",required:true,exerciseId:"los1-c09-calendar-meaning"},
       ],
     };
-    // L049 is deliberately planned: no independent verified Die Woche recording.
+    if (lesson.id === "L049") return {
+      ...lesson,title:"Kuuntele viikonpäiviä autenttisesta äänitteestä",
+      publicationStatus:"preview" as const,
+      steps:[
+        {id:"L049-S01",title:"Tutustu alkuperäisen Commons-äänitteen taustaan",required:true,blockId:"los1-c09-audio-intro"},
+        {id:"L049-S02",title:"Toista oikean ihmisen 15 sekunnin viikonpäiväluettelo",required:true,blockId:"los1-c09-m-com-08-audio"},
+        {id:"L049-S03",title:"Tunnista äänitteen alkusana",required:true,exerciseId:"los1-c09-audio-intro"},
+        {id:"L049-S04",title:"Tunnista ensimmäinen viikonpäivä",required:true,exerciseId:"los1-c09-audio-first"},
+        {id:"L049-S05",title:"Tunnista viikon kolmas päivä",required:true,exerciseId:"los1-c09-audio-third"},
+        {id:"L049-S06",title:"Tunnista lopun viikonloppupäivät",required:true,exerciseId:"los1-c09-audio-weekend"},
+        {id:"L049-S07",title:"Lue koko lähteen kahdeksan sanan tukilitteraatti",required:true,blockId:"los1-c09-m-com-08-transcript"},
+        {id:"L049-S08",title:"Vertaile kirjoitettua ja kuultua, jos ääni toimi laitteellasi",required:true,blockId:"los1-c09-audio-followup"},
+      ],
+    };
     if (lesson.id === "L050") return {
       ...lesson,publicationStatus:"preview" as const,
       steps:[
@@ -834,17 +848,29 @@ export const LOS_BOOKS: readonly Book[] = specs.map((spec, index) => ({
     };
     return lesson;
   }) : [],
-  blocks: index === 0 ? [...LOS1_INTRO_BLOCKS, ...LOS1_C01_PREVIEW_BLOCKS, ...LOS1_C01_SOURCE_BLOCKS, ...LOS1_C01_GREETING_AUDIO_BLOCKS, ...LOS1_C01_APPLICATION_BLOCKS, ...LOS1_C01_CULTURE_BLOCKS, ...LOS1_C02_WB_BLOCKS, ...LOS1_C02_BLOCKS, ...LOS1_C03_SOURCE_BLOCKS, ...LOS1_C03_CONTENT_BLOCKS, ...LOS1_C04_SOURCE_BLOCKS, ...LOS1_C04_BLOCKS, ...LOS1_C05_SOURCE_BLOCKS, ...LOS1_C05_BLOCKS, ...LOS1_C06_SOURCE_BLOCKS, ...LOS1_C06_CONTENT_BLOCKS, ...LOS1_REVIEW_ONE_BLOCKS, ...LOS1_C07_SOURCE_BLOCKS, ...LOS1_C07_CONTENT_BLOCKS, ...LOS1_C08_CONTENT_BLOCKS, ...LOS1_C08_SOURCE_BLOCKS, ...LOS1_C09_CONTENT_BLOCKS, ...LOS1_C09_TEXT_A_BLOCKS,
+  blocks: index === 0 ? [...LOS1_INTRO_BLOCKS, ...LOS1_C01_PREVIEW_BLOCKS, ...LOS1_C01_SOURCE_BLOCKS, ...LOS1_C01_GREETING_AUDIO_BLOCKS, ...LOS1_C01_APPLICATION_BLOCKS, ...LOS1_C01_CULTURE_BLOCKS, ...LOS1_C02_WB_BLOCKS, ...LOS1_C02_BLOCKS, ...LOS1_C03_SOURCE_BLOCKS, ...LOS1_C03_CONTENT_BLOCKS, ...LOS1_C04_SOURCE_BLOCKS, ...LOS1_C04_BLOCKS, ...LOS1_C05_SOURCE_BLOCKS, ...LOS1_C05_BLOCKS, ...LOS1_C06_SOURCE_BLOCKS, ...LOS1_C06_CONTENT_BLOCKS, ...LOS1_REVIEW_ONE_BLOCKS, ...LOS1_C07_SOURCE_BLOCKS, ...LOS1_C07_CONTENT_BLOCKS, ...LOS1_C08_CONTENT_BLOCKS, ...LOS1_C08_SOURCE_BLOCKS, ...LOS1_C09_CONTENT_BLOCKS, ...LOS1_C09_TEXT_A_BLOCKS, ...LOS1_C09_AUDIO_BLOCKS,
     ...LOS1_C10_SOURCE_BLOCKS, ...LOS1_C10_CONTENT_BLOCKS,
     ...LOS1_REVIEW_TWO_BLOCKS, ...LOS1_FINAL_BLOCKS] : [],
   exercises: index === 0 ? [...LOS1_C01_PREVIEW_EXERCISES, ...LOS1_C01_SOURCE_EXERCISES, ...LOS1_C01_AUDIO_COMPREHENSION_EXERCISES, ...LOS1_C01_EXAM_EXERCISES, ...LOS1_C01_ALTERNATE_EXAM_EXERCISES, ...LOS1_C01_EXTRA_EXERCISES, ...LOS1_C01_INTERACTIVE_EXERCISES, ...LOS1_C02_WB_EXERCISES, ...LOS1_C02_EXERCISES, ...LOS1_C02_EXAM_EXERCISES, ...LOS1_C03_SOURCE_EXERCISES, ...LOS1_C03_PRACTICE_EXERCISES, ...LOS1_C03_EXAM_EXERCISES, ...LOS1_C04_SOURCE_EXERCISES, ...LOS1_C04_PRACTICE_EXERCISES, ...LOS1_C04_EXAM_EXERCISES, ...LOS1_C05_SOURCE_EXERCISES, ...LOS1_C05_PRACTICE_EXERCISES, ...LOS1_C05_EXAM_EXERCISES, ...LOS1_C06_SOURCE_EXERCISES, ...LOS1_C06_PRACTICE_EXERCISES, ...LOS1_C06_EXAM_EXERCISES, ...LOS1_REVIEW_ONE_EXERCISES, ...LOS1_MIDTERM_FORM_A, ...LOS1_MIDTERM_FORM_B, ...LOS1_C07_SOURCE_EXERCISES, ...LOS1_C07_PRACTICE_EXERCISES, ...LOS1_C07_EXAM_A, ...LOS1_C07_EXAM_B, ...LOS1_C08_SOURCE_EXERCISES, ...LOS1_C08_PRACTICE_EXERCISES, ...LOS1_C08_EXAM_A, ...LOS1_C08_EXAM_B,
-    ...LOS1_C09_SOURCE_EXERCISES, ...LOS1_C09_TEXT_A_EXERCISES, ...LOS1_C09_PRACTICE_EXERCISES,
+    ...LOS1_C09_SOURCE_EXERCISES, ...LOS1_C09_TEXT_A_EXERCISES, ...LOS1_C09_AUDIO_EXERCISES, ...LOS1_C09_PRACTICE_EXERCISES,
     ...LOS1_C09_EXAM_A, ...LOS1_C09_EXAM_B,
     ...LOS1_C10_SOURCE_EXERCISES, ...LOS1_C10_PRACTICE_EXERCISES,
     ...LOS1_C10_EXAM_A, ...LOS1_C10_EXAM_B,
     ...LOS1_REVIEW_TWO_EXERCISES, ...LOS1_FINAL_FORM_A, ...LOS1_FINAL_FORM_B] : [],
   chapterTests: index === 0 ? [LOS1_C01_TEST, LOS1_C02_TEST, LOS1_C03_TEST, LOS1_C04_TEST, LOS1_C05_TEST, LOS1_C06_TEST, LOS1_C07_TEST, LOS1_C08_TEST, LOS1_C09_TEST, LOS1_C10_TEST, LOS1_MIDTERM_TEST, LOS1_FINAL_TEST] : [],
-  sources: index === 0 ? LOS1_RESEARCH_SOURCES.map(source => source.id === "M-WB-07" ? {
+  sources: index === 0 ? LOS1_RESEARCH_SOURCES.map(source => source.id === "M-COM-08" ? {
+    ...source,
+    originalUrl:"https://commons.wikimedia.org/wiki/File:German_Vocabulary_-_Days.ogg",
+    author:"Christoph (englanninkielinen Wikibooks)",
+    publisher:"Wikimedia Commons",
+    licenseOrBasis:"CC BY-SA 3.0 Unported · ihmisen lausuma kokonainen 15 s viikonpäiväluettelo",
+    licenseUrl:"https://creativecommons.org/licenses/by-sa/3.0/",
+    permittedMode:"embed" as const,
+    readiness:"text-cleared" as const,
+    verifiedAt:"2026-11-11",
+    modification:"Alkuperäistä ääntä ei ole muokattu LOS!:ssa. Koko teksti ja suomenkieliset selitykset on lisätty erikseen.",
+    publicationNoteFi:"Alkuperäinen Commons-äänite sisältää Tage ja seitsemän viikonpäivää, 15 s. Linkin formaatti perustuu Wikimedia Commonsin tiedostopolkuun; oikeus on vahvistettu tiedostosivulta. MP3:n ja OGG:n mobiilitoistoa ei ole vielä varmennettu laitteella. Tämä ei ole C09:n virheellinen Franz–Greta-dialogiääni.",
+  } : source.id === "M-WB-07" ? {
     ...source,
     originalUrl:"https://en.wikibooks.org/w/index.php?title=Deutschkurs_für_Anfänger/Lektion_012&oldid=3823563",
     author:"Deutschkurs für Anfänger -oppikirjan Wikibooks-yhteiskirjoittajat (versio 3823563)",
