@@ -8,6 +8,7 @@ import { LosNotebook, LosWorkbook } from "./LosWorkbook";
 import { LosApplication, LosCulture, LosTextB, LosUnderstanding } from "./LosSupplementalSections";
 import "./los-book.css";
 import "./los-appendix.css";
+import "./los-workbook.css";
 
 type LosSection = LosDestination;
 type LosLocation = { book: number | null; chapter: string | null; section: LosSection };
