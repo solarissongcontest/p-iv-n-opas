@@ -1,4 +1,5 @@
 /** LOS! contents are versioned publication data. Learner data is separate. */
+import type { ChapterTestDefinition } from "./chapterTest";
 export type ModuleCode = "SAB31" | "SAB32" | "SAB33" | "SAB34" | "SAB35" | "SAB36" | "SAB37" | "SAB38";
 export type BookId = "los-1" | "los-2" | "los-3" | "los-4" | "los-5" | "los-6" | "los-7" | "los-8";
 
@@ -35,7 +36,7 @@ export interface Lesson {
   sequence: number; title: string; estimatedMinutes: number; objectives: string[];
   model: "text" | "vocabulary" | "grammar" | "application" | "review";
   publicationStatus?: "planned" | "preview" | "published";
-  steps: { id: string; title: string; required: boolean; blockId?: string; exerciseId?: string; reflectionPromptFi?: string }[];
+  steps: { id: string; title: string; required: boolean; blockId?: string; exerciseId?: string; chapterTestId?: string; reflectionPromptFi?: string }[];
 }
 export type ContentBlock =
   | { id: string; version: string; kind: "heading"; level: 2 | 3; text: string }
@@ -75,14 +76,14 @@ export interface Book {
   accent: string; tint: string; accentDark: string;
   coverAsset: string | null; bannerAsset: string | null;
   chapters: Chapter[]; lessons: Lesson[]; blocks: ContentBlock[];
-  exercises: Exercise[]; sources: SourceAttribution[];
+  exercises: Exercise[]; sources: SourceAttribution[]; chapterTests: ChapterTestDefinition[];
 }
 
 /** Allow empty forthcoming books; reject dangling or duplicated published content. */
 export function validateBook(book: Book): string[] {
   const errors: string[] = [];
   const seen = new Set<string>();
-  const all = [...book.chapters, ...book.lessons, ...book.blocks, ...book.exercises, ...book.sources];
+  const all = [...book.chapters, ...book.lessons, ...book.blocks, ...book.exercises, ...book.sources, ...book.chapterTests];
   for (const item of all) {
     if (!item.id || seen.has(item.id)) errors.push("Missing/duplicate ID: " + item.id);
     if ("version" in item && !item.version) errors.push("Missing version: " + item.id);
@@ -107,6 +108,15 @@ export function validateBook(book: Book): string[] {
       }
     }
   }
+  for (const chapterTest of book.chapterTests) {
+    if (!chapters.has(chapterTest.chapterId)) errors.push("Unknown test chapter: " + chapterTest.id);
+    if (chapterTest.exerciseIds.length < 1) errors.push("Empty test: " + chapterTest.id);
+    if (new Set(chapterTest.exerciseIds).size !== chapterTest.exerciseIds.length)
+      errors.push("Duplicate test question: " + chapterTest.id);
+    for (const exerciseId of chapterTest.exerciseIds)
+      if (!exercises.has(exerciseId)) errors.push("Unknown test exercise: " + exerciseId);
+  }
+  const tests = new Set(book.chapterTests.map(item => item.id));
   for (const lesson of book.lessons) {
     if (lesson.bookId !== book.id) errors.push("Wrong book: " + lesson.id);
     if (lesson.chapterId && !chapters.has(lesson.chapterId)) errors.push("Unknown chapter: " + lesson.chapterId);
@@ -116,8 +126,10 @@ export function validateBook(book: Book): string[] {
       stepIds.add(step.id);
       if (step.blockId && !blocks.has(step.blockId)) errors.push("Unknown block: " + step.blockId);
       if (step.exerciseId && !exercises.has(step.exerciseId)) errors.push("Unknown exercise: " + step.exerciseId);
-      const references = Number(Boolean(step.blockId)) + Number(Boolean(step.exerciseId)) + Number(Boolean(step.reflectionPromptFi));
-      if (references !== 1) errors.push("Lesson step must reference exactly one content, exercise or reflection: " + step.id);
+      if (step.chapterTestId && !tests.has(step.chapterTestId))
+        errors.push("Unknown chapter test: " + step.chapterTestId);
+      const references = Number(Boolean(step.blockId)) + Number(Boolean(step.exerciseId)) + Number(Boolean(step.reflectionPromptFi)) + Number(Boolean(step.chapterTestId));
+      if (references !== 1) errors.push("Lesson step must reference exactly one content, exercise, chapter test or reflection: " + step.id);
     }
   }
   for (const block of book.blocks) {
