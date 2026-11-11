@@ -1,5 +1,5 @@
 import type {Exercise} from './content';
-import {c01Exam,c02Exam,c03Exam,c04Exam,c05Exam,c07Exam,c09Exam,c10Exam} from './chapterExam.ts';
+import {c01Exam,c02Exam,c03Exam,c04Exam,c05Exam,c06Exam,c07Exam,c09Exam,c10Exam} from './chapterExam.ts';
 // The assessment banks are independent of chapter practice IDs. No answer key
 // is rendered in ExamSession until the learner submits the whole paper.
 type Item=Exercise;
@@ -100,6 +100,7 @@ export const exams={
  'EX-C03':{title:'Kappaletesti · C03 Woher kommst du?',questions:c03Exam,scope:'C03'},
  'EX-C04':{title:'Kappaletesti · C04 Du oder Sie?',questions:c04Exam,scope:'C04'},
  'EX-C05':{title:'Kappaletesti · C05 Wie geht’s?',questions:c05Exam,scope:'C05'},
+ 'EX-C06':{title:'Kappaletesti · C06 Wie alt bist du?',questions:c06Exam,scope:'C06'},
  'EX-C07':{title:'Kappaletesti · C07 Wie schreibt man das?',questions:c07Exam,scope:'C07'},
  'EX-C09':{title:'Kappaletesti · C09 Am Montag um drei',questions:c09Exam,scope:'C09'},
  'EX-C10':{title:'Kappaletesti · C10 Schön, dich kennenzulernen!',questions:c10Exam,scope:'C10'},
@@ -133,6 +134,11 @@ export const selfAssessment={
  model:'A: Wie geht es dir? B: Mir geht es gut. Und dir? A: Sehr gut! C: Wie geht es Ihnen? D: Nicht so gut.',
  criteria:'Kysyt vointia ainakin kahdella puhuttelutavalla ja vastaat sopivalla fraasilla.'
  },
+ 'EX-C06':{
+ prompt:'Kirjoita kaksi kuvitteellista lyhyttä ikäkeskustelua: toinen 12-vuotiaan ja toinen 21-vuotiaan esimerkki. Käytä kysymystä Wie alt bist du? ja tarkista luvut. Omia syntymäaikoja ei kysytä.',
+ model:'A: Wie alt bist du? B: Ich bin zwölf Jahre alt. C: Wie alt bist du? D: Ich bin einundzwanzig Jahre alt.',
+ criteria:'Molemmissa keskusteluissa on ikäkysymys ja oikein muodostettu sein + luku + Jahre alt -vastaus. Itsearviointi ei ole automaattisesti pisteytetty.'
+ },
  'EX-C07':{
  prompt:'Kirjoita kuvitteellisen henkilön nimi ja kohtelias tapa kysyä, miten se kirjoitetaan.',
  model:'A: Wie schreibt man das? B: Bitte buchstabieren Sie. A: L – E – A.',
@@ -161,8 +167,8 @@ export const selfAssessment={
 } as const;
 export function validateLosExams():string[]{
  const issues:string[]=[];const ids=new Set<string>();
- for(const [name,questions] of [['EX-C01',c01Exam],['EX-C02',c02Exam],['EX-C03',c03Exam],['EX-C04',c04Exam],['EX-C05',c05Exam],['EX-C07',c07Exam],['EX-C09',c09Exam],['EX-C10',c10Exam],['EX-MID',midExam],['EX-FINAL',finalExam]] as const){
-  if(questions.length!==(name==='EX-MID'?25:name==='EX-C10'?20:name.startsWith('EX-C')?15:50))issues.push(name+' väärä tehtävämäärä');
+ for(const [name,questions] of [['EX-C01',c01Exam],['EX-C02',c02Exam],['EX-C03',c03Exam],['EX-C04',c04Exam],['EX-C05',c05Exam],['EX-C06',c06Exam],['EX-C07',c07Exam],['EX-C09',c09Exam],['EX-C10',c10Exam],['EX-MID',midExam],['EX-FINAL',finalExam]] as const){
+  if(questions.length!==(name==='EX-MID'?25:name==='EX-C06'||name==='EX-C10'?20:name.startsWith('EX-C')?15:50))issues.push(name+' väärä tehtävämäärä');
   for(const e of questions){
    if(ids.has(e.id))issues.push('Duplikaatti '+e.id);
    ids.add(e.id);
