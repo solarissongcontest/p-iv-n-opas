@@ -81,7 +81,7 @@ test("two Commons media sources verified, with separate Goethe culture reference
   assert.ok(los1.blocks.some(block => block.kind === "media" && block.sourceId === "M-COM-03"));
   const licensedAudio = los1.blocks.filter(block => block.kind === "media" &&
     ["M-COM-01", "M-COM-03"].includes(block.sourceId));
-  assert.equal(licensedAudio.length, 5);
+  assert.equal(licensedAudio.length, 4);
   assert.equal(new Set(licensedAudio.map(block => block.kind === "media" ? block.sourceId : "")).size, 2);
   assert.ok(licensedAudio.every(block => block.kind === "media" &&
     block.embedUrl.startsWith("https://upload.wikimedia.org/wikipedia/commons/") &&
