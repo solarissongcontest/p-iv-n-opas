@@ -22,7 +22,7 @@ export function germanNumber(value:number):string{
 }
 export function numberAnswerAccepted(number:number,answer:string):boolean{
  if(!Number.isInteger(number)||number<0||number>100)return false;
- const normalized=answer.normalize('NFC').trim().toLocaleLowerCase('de').replace(/\s+/gu,'');
+ const normalized=answer.normalize('NFC').trim().toLocaleLowerCase('de').replace(/\s+/gu,' ');
  return normalized===germanNumber(number)||(number===100&&normalized==='hundert');
 }
 export const NUMBER_DRILL=[
