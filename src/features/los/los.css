@@ -206,3 +206,10 @@
 .los-reader-block{margin:0}
 .los-reader-block>p:first-child{margin-bottom:1em}
 .los-reader-block:has(.los-translation)>p:first-child{margin-bottom:.8em}
+
+
+.los-reader-actions{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:9px 0 14px}
+.los-reader-actions button{min-height:40px}
+@media(prefers-reduced-motion:reduce){
+ .los .los-marked{transition:none}
+}
