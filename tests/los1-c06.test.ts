@@ -87,8 +87,8 @@ test('C06 independent chapter exam has 20 checked questions, with no pre-submit 
  }
  assert.equal(lessons.find(x=>x.id==='L035')?.status,'initial-material');
 });
-test('C08 remains independent missing original classroom source even after C06 import',()=>{
- assert.equal(chapters.find(x=>x.id==='C08')?.status,'source-pending');
- assert.equal(chapters.find(x=>x.id==='C08')?.blocks.length,0);
- assert.equal(lessons.find(x=>x.id==='L042')?.status,'pending');
+test('C08 uses a separately attributed human-written school chat after the C06 import',()=>{
+ assert.equal(chapters.find(x=>x.id==='C08')?.status,'text-reviewed');
+ assert.equal(chapters.find(x=>x.id==='C08')?.blocks.length,12);
+ assert.equal(lessons.find(x=>x.id==='L042')?.status,'initial-material');
 });
