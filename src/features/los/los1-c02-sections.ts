@@ -26,7 +26,7 @@ export const LOS1_C02_SECTIONS: ChapterSection[] = emptyChapterSections().map(se
         "los1-c02-bin-gap", "los1-c02-bist-gap", "los1-c02-verb-choice"],
     } :
     section.id === "teksti-b" ? {
-      blockIds: ["los1-c02-text-b-guide", "los1-c02-commons-02-audio", "los1-c02-text-b-support"],
+      blockIds: ["los1-c02-text-b-guide", "los1-c02-commons-02-audio", "los1-c02-m-com-02-dialogue", "los1-c02-text-b-support"],
       exerciseIds: ["los1-c02-audio-question", "los1-c02-audio-person", "los1-c02-audio-select"],
     } :
     section.id === "harjoittele" ? { exerciseIds: [
