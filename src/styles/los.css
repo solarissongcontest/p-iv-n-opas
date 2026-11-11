@@ -589,3 +589,39 @@
   .los-exam-result { padding: 18px; }
   .los-exam-speech { padding: 16px; }
 }
+
+
+/* Self-authored productive language: editable draft and explicit ungraded checklist. */
+.los-production {
+  display: grid; gap: 10px; padding: clamp(18px,3vw,28px);
+  margin: 24px 0; max-width: 780px; border: 1px solid var(--los-border);
+  border-radius: 12px; background: var(--los-surface);
+}
+.los-production > h2 { font-size: 22px; margin: 0 0 4px; }
+.los-production > p:not(.los-eyebrow) { max-width: 72ch; font-size: 15px; margin: 0 0 6px; }
+.los-production > label { font-weight: 650; font-size: 14px; margin-top: 5px; }
+.los-production > textarea {
+  display: block; min-height: 122px; width: 100%; max-width:100%;
+  border: 1px solid var(--los-border-strong); border-radius: 10px;
+  background: var(--los-surface); color: var(--los-ink);
+  font: 400 18px/1.6 Inter, system-ui, sans-serif;
+  padding: 14px 16px; resize: vertical; overflow-wrap: anywhere;
+}
+.los-production-model { padding: 14px 18px; margin-top: 8px;
+  border: 1px solid var(--los-border); border-radius: 10px;
+  background: var(--los-surface-muted); }
+.los-production-model summary { min-height: 34px; cursor:pointer;
+  font-weight: 650; color:var(--los-book-accent-readable); }
+.los-production-model p { margin: 10px 0 0; }
+.los-production-model b { font-size: 18px; }
+.los-production-check { border: 0; padding: 6px 0; margin: 8px 0 0; }
+.los-production-check legend { font-size: 15px; font-weight: 650; line-height: 1.55; padding-bottom: 10px; }
+.los-production-check label { display:flex; align-items:center; gap: 12px;
+  font-size:14px; min-height:44px; cursor:pointer; }
+.los-production-check input[type="checkbox"] { width:18px; height:18px;
+  flex:0 0 18px; accent-color: var(--los-book-accent); }
+.los-production .los-storage-state { margin: 4px 0 !important; }
+@media (max-width: 639px) {
+  .los-production { padding: 16px; gap: 8px; }
+  .los-production-model { padding: 12px; }
+}
