@@ -178,8 +178,8 @@ export function ChapterTestWorkspace({ book, definition, onReturned }: {
               setSubmitError(null);
             }}/>
         </> : <>
-          <p>Lausu ääneen esimerkiksi Hallo!, Guten Morgen! ja Tschüss!. Voit äänittää harjoituksesi vapaaehtoisesti ja kuunnella sen ennen itsearviointia. Sovellus ei automaattisesti arvioi ääntämistäsi.</p>
-          <SpeechRecorder key={definition.id + ":" + attemptNumber} title="Kuuntele omaa ääntämistäsi"/>
+          <p>{definition.speechPromptFi ?? "Lausu ääneen kappaleen keskeinen kysymys ja vastaus."} Voit äänittää harjoituksesi vapaaehtoisesti ja kuunnella sen ennen itsearviointia. Sovellus ei automaattisesti arvioi ääntämistäsi.</p>
+          <SpeechRecorder key={definition.id + ":" + attemptNumber} title="Kuuntele omaa ääntämistäsi" exampleDe={definition.speechExampleDe}/>
         </>}
         {definition.speechCriteria.map(item => <fieldset key={item.id}
           disabled={isReturned || status === "loading"} className="los-exam-speech-criterion">
