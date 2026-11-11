@@ -1,5 +1,5 @@
 import type {Exercise} from './content';
-import {c01Exam} from './chapterExam';
+import {c01Exam} from './chapterExam.ts';
 // The assessment banks are independent of chapter practice IDs. No answer key
 // is rendered in ExamSession until the learner submits the whole paper.
 type Item=Exercise;
