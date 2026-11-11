@@ -88,10 +88,11 @@ function ChapterTestQuestion({ exercise, number, answer, disabled, onAnswer }: {
 export function ChapterTestWorkspace({ book, definition, onReturned }: {
   book: Book; definition: ChapterTestDefinition; onReturned?: () => void;
 }) {
-  const exercises = selectedTestExercises(definition, book.exercises);
   const { value: state, update, status } = useLosRecord(
     book.id, "exercise", definition.id, definition.version, emptyChapterTestRecord(definition),
   );
+  const attemptNumber = state.attemptNumber ?? 0;
+  const exercises = selectedTestExercises(definition, book.exercises, attemptNumber);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [restartVisible, setRestartVisible] = useState(false);
   const isReturned = Boolean(state.submission);
@@ -141,9 +142,9 @@ export function ChapterTestWorkspace({ book, definition, onReturned }: {
     <p className="los-eyebrow">LOS! · KAPPALEEN ITSEARVIOINTI</p>
     <h2>{definition.title}</h2>
     <p className="los-intro">{definition.introductoryFi}</p>
-    <p className="los-notice">Tämä on C01:n automaattisesti tarkistettava harjoituskoe, ei virallinen kurssikoe tai julkaistun oppikirjan lopullisesti hyväksytty arviointi. Puheosuuden onnistumista et voi vahvistaa mikrofonilla tässä versiossa.</p>
+    <p className="los-notice">Tämä on C01:n automaattisesti tarkistettava harjoituskoe, ei virallinen kurssikoe tai julkaistun oppikirjan lopullisesti hyväksytty arviointi. Uusintayritys käyttää samojen tavoitteiden uusia, itse laadittuja kysymyksiä.</p>
     <div className="los-exam-meta">
-      <span>{isReturned ? "Palautettu" : "Vastattu " + completeCount + " / " + exercises.length}</span>
+      <span>Yritys {attemptNumber + 1} · {isReturned ? "Palautettu" : "Vastattu " + completeCount + " / " + exercises.length}</span>
       <span>{definition.speechCriteria.length} puheen itsearviointia · ei pisteitä</span>
     </div>
     <p className="los-storage-state" role="status">{losSyncMessage(status)}</p>
@@ -197,7 +198,16 @@ export function ChapterTestWorkspace({ book, definition, onReturned }: {
     {!!state.previousResults.length && <details className="los-exam-history">
       <summary>Edelliset yritykset ({state.previousResults.length})</summary>
       <ol>{state.previousResults.map((result, index) => <li key={result.submittedAt + ":" + index}>
-        {new Date(result.submittedAt).toLocaleDateString("fi-FI")} · {result.score} / {result.maximum} p
+        <strong>Yritys {(result.attemptNumber ?? index) + 1}</strong> · {new Date(result.submittedAt).toLocaleDateString("fi-FI")} · {result.score} / {result.maximum} p
+        {!!result.outcomes?.length && <details className="los-exam-past-report">
+          <summary>Tarkista aiemmat vastaukset ja perustelut</summary>
+          <ol>{result.outcomes.map((item, index2) => <li key={item.exerciseId}>
+            <strong>{index2 + 1}. {item.correct ? "Oikein" : "Ei oikein"}</strong>
+            <p>{item.explanationFi}</p>
+            <p className="los-support">Oma vastaus: {typeof result.answers?.[item.exerciseId] === "string"
+              ? String(result.answers[item.exerciseId]) : "Tehtävän valintatiedot tallessa"}</p>
+          </li>)}</ol>
+        </details>}
       </li>)}</ol>
     </details>}
   </article>;
