@@ -149,7 +149,6 @@ export const basicGloss:Readonly<Record<string,Gloss>>={
  'schleswig-holstein':{fi:'Schleswig-Holstein, osavaltio Saksassa'},
  'lieblingsfarbe':{fi:'lempiväri',lemma:'die Lieblingsfarbe'},
  'rot':{fi:'punainen'},
- 'telefonnummer':{fi:'puhelinnumero',lemma:'die Telefonnummer'},
  'deine':{fi:'sinun (tämän sanan yksi muoto)'},
  'meine':{fi:'minun (tämän sanan yksi muoto)'},
  'warum':{fi:'miksi'},
