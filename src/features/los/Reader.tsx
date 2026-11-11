@@ -2,6 +2,7 @@ import { useState } from "react";
 import { BookOpen, Highlighter, NotebookPen, Settings2 } from "lucide-react";
 import type { Book, ContentBlock, SourceAttribution } from "./model";
 import { useLosRecord, losSyncMessage } from "./data/useLosRecord";
+import { findGlossarySpans, type GlossaryEntry } from "./glossary";
 
 export type ReaderMark = { blockId: string; version: string; start: number; end: number; color: "yellow" };
 export type ReaderNote = { blockId: string; version: string; text: string; updatedAt: string };
@@ -51,11 +52,13 @@ function SafeMedia({ block, source }: {
     <Attribution source={source}/>
   </figure>;
 }
-function RenderBlock({ block, source, marked, highlighterEnabled, onSelection, onNote }: {
+function RenderBlock({ block, source, marked, highlighterEnabled, glossary, onLookup, onSelection, onNote }: {
   block: ContentBlock;
   source?: SourceAttribution;
   marked: ReaderMark | undefined;
   highlighterEnabled: boolean;
+  glossary: readonly GlossaryEntry[];
+  onLookup: (entry: GlossaryEntry) => void;
   onSelection: (block: ContentBlock, start: number, end: number) => void;
   onNote: (block: ContentBlock) => void;
 }) {
@@ -64,6 +67,21 @@ function RenderBlock({ block, source, marked, highlighterEnabled, onSelection, o
     const start = Math.max(0, marked.start - offset);
     const end = Math.min(text.length, marked.end - offset);
     return <>{text.slice(0, start)}<mark className="los-marker">{text.slice(start, end)}</mark>{text.slice(end)}</>;
+  };
+  const textWithGlosses = (text: string, offset = 0, german = true) => {
+    if (highlighterEnabled || !german) return markedText(text, offset);
+    const spans = findGlossarySpans(text, glossary);
+    if (!spans.length) return text;
+    let cursor = 0;
+    return <>{spans.map(span => {
+      const before = text.slice(cursor, span.start);
+      cursor = span.end;
+      return <span key={span.start}>
+        {before}<button type="button" className="los-gloss-word" lang="de"
+          aria-label={"Avaa sanan " + text.slice(span.start, span.end) + " merkitys"}
+          onClick={() => onLookup(span.entry)}>{text.slice(span.start, span.end)}</button>
+      </span>;
+    })}{text.slice(cursor)}</>;
   };
   const select = (event: React.MouseEvent<HTMLElement> | React.TouchEvent<HTMLElement>, text: string, offset = 0) => {
     const container = event.currentTarget;
@@ -83,7 +101,7 @@ function RenderBlock({ block, source, marked, highlighterEnabled, onSelection, o
     case "heading": return block.level === 2 ? <h2>{block.text}</h2> : <h3>{block.text}</h3>;
     case "paragraph":
     case "authenticText": return <div className="los-reader-paragraph" id={block.id}>
-      <p lang={block.language} onMouseUp={highlighterEnabled ? event => select(event, block.text) : undefined} onTouchEnd={highlighterEnabled ? event => select(event, block.text) : undefined}>{markedText(block.text)}</p>
+      <p lang={block.language} onMouseUp={highlighterEnabled ? event => select(event, block.text) : undefined} onTouchEnd={highlighterEnabled ? event => select(event, block.text) : undefined}>{textWithGlosses(block.text, 0, block.language === "de")}</p>
       {highlighterEnabled && <div className="los-token-picker" role="group" aria-label="Korosta sana tai ilmaus"><p className="los-support">Valitse sana näppäimistöllä tai napauttamalla. Peräkkäiset valinnat muodostavat kokonaisen ilmauksen.</p><div className="los-tokens">{Array.from(block.text.matchAll(/\S+/gu), match => ({ word: match[0], start: match.index, end: match.index + match[0].length })).map(token => <button type="button" key={token.start} lang={block.language} className="los-token" aria-pressed={!!marked && token.start >= marked.start && token.end <= marked.end} onClick={() => { const start = marked ? Math.min(marked.start, token.start) : token.start; const end = marked ? Math.max(marked.end, token.end) : token.end; onSelection(block, start, end); }}>{token.word}</button>)}</div></div>}
       <button type="button" className="los-text-action los-note-action" onClick={() => onNote(block)}><NotebookPen size={16} /> Muistiinpano</button>
     </div>;
@@ -95,7 +113,7 @@ function RenderBlock({ block, source, marked, highlighterEnabled, onSelection, o
           <p><b>{turn.speaker}:</b>{" "}
             <span className="los-dialogue-spoken" onMouseUp={highlighterEnabled ? event => select(event, turn.text, offset) : undefined}
               onTouchEnd={highlighterEnabled ? event => select(event, turn.text, offset) : undefined}>
-              {markedText(turn.text, offset)}
+              {textWithGlosses(turn.text, offset)}
             </span>
           </p>
           {turn.translationFi && <details lang="fi" className="los-translation">
@@ -150,6 +168,8 @@ export function Reader({ book, blocks, title, headingLevel = 2 }: { book: Book; 
   const { value: marks, update: setMarks, status: marksStatus } = useLosRecord<ReaderMark[]>(book.id, "marks", "reader", book.contentVersion, []);
   const { value: notes, update: setNotes, status: notesStatus } = useLosRecord<ReaderNote[]>(book.id, "notes", "reader", book.contentVersion, []);
   const [activeNote, setActiveNote] = useState<ContentBlock | null>(null);
+  const [activeGloss, setActiveGloss] = useState<GlossaryEntry | null>(null);
+  const glossary = book.blocks.filter(block => block.kind === "vocabulary").flatMap(block => block.entries);
   const noteValue = notes.find(note => note.blockId === activeNote?.id && note.version === activeNote.version)?.text ?? "";
   const updateNote = (text: string) => {
     if (!activeNote) return;
@@ -177,6 +197,8 @@ export function Reader({ book, blocks, title, headingLevel = 2 }: { book: Book; 
       key={block.id + ":" + block.version} block={block}
       source={"sourceId" in block ? book.sources.find(item => item.id === block.sourceId) : undefined}
       highlighterEnabled={highlighter}
+      glossary={readingMode ? [] : glossary}
+      onLookup={setActiveGloss}
       marked={marks.find(mark => mark.blockId === block.id && mark.version === block.version)}
       onSelection={(source, start, end) => {
         if (!highlighter) return;
@@ -184,6 +206,13 @@ export function Reader({ book, blocks, title, headingLevel = 2 }: { book: Book; 
       }}
       onNote={setActiveNote}
     />)}</div>
+    {activeGloss && <aside className="los-gloss-panel" aria-label="Sanan merkitys" lang="fi">
+      <div><p className="los-eyebrow">SANASTON MERKITYS</p>
+        <b lang="de">{activeGloss.de}</b><p>{activeGloss.fi}</p>
+        {activeGloss.note && <small>{activeGloss.note}</small>}
+      </div>
+      <button type="button" className="los-button los-button-secondary" onClick={() => setActiveGloss(null)}>Sulje</button>
+    </aside>}
     {activeNote && <section className="los-note-editor" aria-labelledby="los-note-heading">
       <div className="los-inline-head"><h2 id="los-note-heading">Muistiinpano</h2><button className="los-button los-button-secondary" onClick={() => setActiveNote(null)}>Sulje</button></div>
       <label htmlFor="los-note-input">Oma merkintä tähän tekstikohtaan</label>
