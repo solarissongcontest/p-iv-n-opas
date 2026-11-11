@@ -1,4 +1,4 @@
-# LOS! · oppikirjamaisen käyttöliittymän ensimmäinen toteutus
+# LOS! · oppikirjamaisen käyttöliittymän toteutustilanne
 
 **Lähteet:** `LOS_visuaalinen_masterplan_v2.1_OPPIKIRJA.txt`, `LOS_masterplan_v1.1_OPPIKIRJA.txt`, `Los 1.txt`. Näitä tiedostoja ei ollut vielä repositorion lähdekoodina.
 
@@ -15,7 +15,7 @@
 
 ## Tärkeä rajaus
 
-Tämä on **toiminnallinen oppikirjamaisen UI:n ensimmäinen toteutus**, ei valmis LOS! 1 -kurssi, eikä kahdeksan valmista kirjaa. Kuvia, lähdetekstejä, äänitteitä, sanakirjatietokantaa, tehtävämoottorin kaikkia tyyppejä, synkronoitua edistymistä tai kokeita **ei ole toteutettu**.
+Tämä on **toiminnallinen oppikirjamainen käyttöliittymä**, ei valmis LOS! 1 -kurssi eikä kahdeksan valmista kirjaa. Valmiin oppikirjan hyväksyttyjä kansikuvia, kokonaisia lähdetekstejä, kaikkia tehtävätyyppejä, synkronoitua edistymistä, kertaustoimintoa tai kokeita **ei ole toteutettu**. Sanakirjassa on vasta suppea alustava hakusanalista eikä tuotantovalmiiksi tarkistettua sanakirjatietokantaa.
 
 Hyväksyttyä LOS! 1 -kantta/banneria tai sanamerkkiä ei löytynyt GitHub-reposta. Älä korvaa niitä tekoälyn keksimillä lopullisilla kuvilla. Lisää käyttäjän hyväksymistä lähteistä käsitellyt varat:
 - `public/los/los-logo.svg` (hyväksytty graafinen LOS!-logo, ei fontin uusi ladonta)
@@ -38,6 +38,16 @@ Kirjan URL ei tuo uusia käyttäjätietoja eikä vaadi tietokantamigraatiota. Ny
 
 1. Toimita ja lisää hyväksytty logo, kansi ja banneri.
 2. Lisää tarkistetut autenttiset tekstit ja mediat `Los 1.txt`:n lähdekatalogista, käyttölupa ja attribuutio jokaiseen.
-3. Toteuta sarjan sanakirja, oppituntipolku, toimiva tehtävä-/kertausmoottori ja synkronoitu tallennus.
+3. Täydennä sanakirjan kattavuus, kytke 60-tuntinen opetuspolku oikeisiin aineistoihin, toteuta loput tehtävä-/kertausmoottorista ja synkronoitu tallennus.
 4. Todista visuaalinen ero ruutukaappauksilla (desktop 1440 px, iPhone 390 px), kontrastit ja saavutettavuus.
 5. Käy läpi PR-laatuportit. Älä väitä koko sarjaa valmiiksi tämän käyttöönoton perusteella.
+
+## Vaihe 2: 11.11.2026
+
+- LOS! 1:n oma 60 oppitunnin lukujärjestys noudattaa `LOS1_SOURCE_MANIFEST_v1.0`:n hyväksyttyjä otsikoita. Rakenne on olemassa, oppituntien suoritusseuranta ei.
+- Sanakirjahakemisto näyttää `catalog.ts`:n alustavat saksa–suomi-ilmaukset, saksan/suomen haun ja suomennosten piilottamisen. Se ei ole kattava eikä sen tietosisältöä ole vielä kielentarkastettu kokonaisuudessaan.
+- Sisäinen kirjahaku kattaa otsikot, kieliopin, tavoitteet ja nykyisen sanastodatan, ei vielä alkuperäistekstejä.
+- C01–C10 sisältävät kirjoitettuja kieliopin perusselityksiä. Ne ovat oppikirjan omaa opetustekstiä, eivät autenttisiksi nimettyjä päätekstejä. Toimituksellinen kielentarkistus ennen valmiiksi merkitsemistä.
+- Wikimedia Commonsin `M-COM-01` (CC BY-SA 3.0) ja `M-COM-03` (public domain) avataan ulkoisen julkaisijan palvelimella olevasta lähdeäänestä LOS!:n sisällä. Tekijä- ja lisenssitiedot säilyvät. **Tuotantoympäristön toistotesti on avoin**, eivätkä lähdelitteraatit vielä ole kokonaisina sivuilla.
+- Opetuspolku on tässä vaiheessa vain LOS! 1:lle. Muiden seitsemän kirjan opetuspolut odottavat omia kirjakohtaisia sisältömäärityksiä.
+- LOS!:n lisättyjen näkymien visuaalinen tyyli jatkaa erillistä kirjamaista taittoa eikä käytä StudyOS:n sivukortti- tai analytiikkanäkymiä.
