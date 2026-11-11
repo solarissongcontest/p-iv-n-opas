@@ -5,7 +5,7 @@ import { useLosRecord, losSyncMessage } from "./data/useLosRecord";
 
 export type ReaderMark = { blockId: string; version: string; start: number; end: number; color: "yellow" };
 export type ReaderNote = { blockId: string; version: string; text: string; updatedAt: string };
-function Attribution({ source }: { source?: SourceAttribution }) {
+function Attribution({ source }: { source: SourceAttribution | undefined }) {
   if (!source) return null;
   return <aside className="los-attribution" aria-label="Lähdetiedot">
     <b>Lähde: {source.title}</b>
