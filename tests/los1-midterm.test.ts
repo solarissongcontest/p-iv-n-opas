@@ -36,5 +36,5 @@ test('midterm never approves or unlocks unavailable C06 and C08 source texts',()
  assert.equal(chapters.find(c=>c.id==='C06')?.status,'source-pending');
  assert.equal(chapters.find(c=>c.id==='C08')?.status,'source-pending');
  assert.equal(lessons.find(l=>l.id==='L031')?.status,'pending');
- assert.equal(lessons.find(l=>l.id==='L041')?.status,'pending');
+ assert.equal(lessons.find(l=>l.id==='L041')?.status,'initial-material');
 });
