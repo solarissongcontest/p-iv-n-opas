@@ -25,11 +25,13 @@ test('C01 keeps complete eight-replica authentic dialogue in stable blocks',()=>
  assert.equal(c.license,'CC BY-SA 3.0');
  assert.ok(c.exercises.length>=13);
 });
-test('source-pending chapters are not disguised as complete texts',()=>{
- for(const id of ['C08']){
-  const chapter=chapters.find(c=>c.id===id)!;
-  assert.equal(chapter.status,'source-pending');
-  assert.equal(chapter.blocks.length,0);
+test('all ten chapters have original full primary text units with independent source IDs',()=>{
+ const sourceIds=new Set(chapters.map(c=>c.sourceId));
+ assert.equal(sourceIds.size,10);
+ for(const chapter of chapters){
+  assert.equal(chapter.status,'text-reviewed');
+  assert.ok(chapter.blocks.length>=4,chapter.id);
+  assert.ok(chapter.sourceUrl.startsWith('https://'));
  }
 });
 test('grammar spelling normalization accepts Unicode NFC, never substitutes ß with ss',()=>{
