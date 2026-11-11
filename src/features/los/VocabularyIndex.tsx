@@ -15,12 +15,14 @@ export function VocabularyIndex({ book }: { book: Book }) {
   // Exact book-specific row references come from the learner dictionary.
   // The hash only selects a known in-book ID, never arbitrary user HTML.
   useEffect(() => {
-    const hash = decodeURIComponent(window.location.hash.slice(1));
+    let hash: string;
+    try { hash = decodeURIComponent(window.location.hash.slice(1)); }
+    catch { return; } // A malformed fragment cannot crash the vocabulary page.
     if (!hash.startsWith("los-word-")) return;
     const rowId = hash.slice("los-word-".length);
     if (!rows.some(row => row.id === rowId)) return;
     const target = document.getElementById(hash);
-    target?.scrollIntoView({ block: "center", behavior: "instant" });
+    target?.scrollIntoView({ block: "center", behavior: "auto" });
     target?.focus({ preventScroll: true });
   }, [rows]);
   const visible = filterBookVocabulary(rows, query, savedOnly, saved);
