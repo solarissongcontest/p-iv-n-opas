@@ -44,6 +44,7 @@ import { LOS1_C07_SECTIONS } from "./los1-c07-sections.ts";
 import { LOS1_C08_CONTENT_BLOCKS } from "./los1-c08-content.ts";
 import { LOS1_C08_PRACTICE_EXERCISES } from "./los1-c08-practice.ts";
 import { LOS1_C08_SOURCE_BLOCKS, LOS1_C08_SOURCE_EXERCISES } from "./los1-c08-source.ts";
+import { LOS1_C08_OTTO_BLOCKS, LOS1_C08_OTTO_EXERCISES } from "./los1-c08-otto.ts";
 import { LOS1_C08_EXAM_A, LOS1_C08_EXAM_B, LOS1_C08_TEST } from "./los1-c08-test.ts";
 import { LOS1_C08_SECTIONS } from "./los1-c08-sections.ts";
 import { LOS1_C09_CONTENT_BLOCKS } from "./los1-c09-content.ts";
@@ -151,8 +152,8 @@ export const LOS_BOOKS: readonly Book[] = specs.map((spec, index) => ({
   } : chapter.id === "C08" ? {
     ...chapter,publicationStatus:"preview" as const,
     sections:LOS1_C08_SECTIONS,
-    blockIds:[...LOS1_C08_CONTENT_BLOCKS,...LOS1_C08_SOURCE_BLOCKS].map(b=>b.id),
-    exerciseIds:[...LOS1_C08_SOURCE_EXERCISES,...LOS1_C08_PRACTICE_EXERCISES,...LOS1_C08_EXAM_A].map(ex=>ex.id),
+    blockIds:[...LOS1_C08_CONTENT_BLOCKS,...LOS1_C08_SOURCE_BLOCKS,...LOS1_C08_OTTO_BLOCKS].map(b=>b.id),
+    exerciseIds:[...LOS1_C08_SOURCE_EXERCISES,...LOS1_C08_OTTO_EXERCISES,...LOS1_C08_PRACTICE_EXERCISES,...LOS1_C08_EXAM_A].map(ex=>ex.id),
   } : chapter.id === "C09" ? {
     ...chapter,publicationStatus:"preview" as const,
     sections:LOS1_C09_SECTIONS,
@@ -668,7 +669,22 @@ export const LOS_BOOKS: readonly Book[] = specs.map((spec, index) => ({
         {id:"L043-S07",title:"Tarkista toistopyynnön täydennys",required:true,exerciseId:"los1-c08-grammar-repeat"},
       ],
     };
-    // L044 remains planned until Text B listening is technically and legally checked.
+    if (lesson.id === "L044") return {
+      ...lesson,title:"Lue alkuperäinen puhelinkeskustelu ja tavaa nimi",
+      publicationStatus:"preview" as const,model:"text" as const,
+      steps:[
+        {id:"L044-S01",title:"Tutustu neljän repliikin aitoon puhelutilanteeseen",required:true,blockId:"los1-c08-otto-intro"},
+        {id:"L044-S02",title:"Lue alkuperäinen kirjoitettu Am Telefon -keskustelu kokonaan",required:true,blockId:"los1-c08-otto-dialogue"},
+        {id:"L044-S03",title:"Ymmärrä Wie bitte? ja nimen tavaus",required:true,blockId:"los1-c08-otto-grammar"},
+        {id:"L044-S04",title:"Tunnista henkilö b:n sanoma nimi",required:true,exerciseId:"los1-c08-otto-name"},
+        {id:"L044-S05",title:"Tunnista alkuperäisen puheen tilanne tekstistä",required:true,exerciseId:"los1-c08-otto-setting"},
+        {id:"L044-S06",title:"Korosta alkuperäisen tekstin toistopyyntö",required:true,exerciseId:"los1-c08-otto-highlight-request"},
+        {id:"L044-S07",title:"Tarkista, miten Otto-nimi tavataan",required:true,exerciseId:"los1-c08-otto-spell"},
+        {id:"L044-S08",title:"Kuuntele erillinen aakkosten alkuperäisäänite, ei puhelinkeskustelun ääntä",required:true,blockId:"los1-c07-m-com-07-alphabet-audio"},
+        {id:"L044-S09",title:"Lue lähteen käyttö- ja ääniterajoitukset",required:true,blockId:"los1-c08-otto-source-note"},
+        {id:"L044-S10",title:"Kirjoita lyhyt oma yhteenveto",required:true,reflectionPromptFi:"Miten pyydät puhelimessa nimeä uudestaan ja mitä neljää kirjainta Otto-nimessä on? Erotatko alkuperäisen kirjoitetun puheludialogin erillisestä aakkosäänitteestä?"},
+      ],
+    };
     if (lesson.id === "L045") return {
       ...lesson,publicationStatus:"preview" as const,
       steps:[
@@ -848,10 +864,10 @@ export const LOS_BOOKS: readonly Book[] = specs.map((spec, index) => ({
     };
     return lesson;
   }) : [],
-  blocks: index === 0 ? [...LOS1_INTRO_BLOCKS, ...LOS1_C01_PREVIEW_BLOCKS, ...LOS1_C01_SOURCE_BLOCKS, ...LOS1_C01_GREETING_AUDIO_BLOCKS, ...LOS1_C01_APPLICATION_BLOCKS, ...LOS1_C01_CULTURE_BLOCKS, ...LOS1_C02_WB_BLOCKS, ...LOS1_C02_BLOCKS, ...LOS1_C03_SOURCE_BLOCKS, ...LOS1_C03_CONTENT_BLOCKS, ...LOS1_C04_SOURCE_BLOCKS, ...LOS1_C04_BLOCKS, ...LOS1_C05_SOURCE_BLOCKS, ...LOS1_C05_BLOCKS, ...LOS1_C06_SOURCE_BLOCKS, ...LOS1_C06_CONTENT_BLOCKS, ...LOS1_REVIEW_ONE_BLOCKS, ...LOS1_C07_SOURCE_BLOCKS, ...LOS1_C07_CONTENT_BLOCKS, ...LOS1_C08_CONTENT_BLOCKS, ...LOS1_C08_SOURCE_BLOCKS, ...LOS1_C09_CONTENT_BLOCKS, ...LOS1_C09_TEXT_A_BLOCKS, ...LOS1_C09_AUDIO_BLOCKS,
+  blocks: index === 0 ? [...LOS1_INTRO_BLOCKS, ...LOS1_C01_PREVIEW_BLOCKS, ...LOS1_C01_SOURCE_BLOCKS, ...LOS1_C01_GREETING_AUDIO_BLOCKS, ...LOS1_C01_APPLICATION_BLOCKS, ...LOS1_C01_CULTURE_BLOCKS, ...LOS1_C02_WB_BLOCKS, ...LOS1_C02_BLOCKS, ...LOS1_C03_SOURCE_BLOCKS, ...LOS1_C03_CONTENT_BLOCKS, ...LOS1_C04_SOURCE_BLOCKS, ...LOS1_C04_BLOCKS, ...LOS1_C05_SOURCE_BLOCKS, ...LOS1_C05_BLOCKS, ...LOS1_C06_SOURCE_BLOCKS, ...LOS1_C06_CONTENT_BLOCKS, ...LOS1_REVIEW_ONE_BLOCKS, ...LOS1_C07_SOURCE_BLOCKS, ...LOS1_C07_CONTENT_BLOCKS, ...LOS1_C08_CONTENT_BLOCKS, ...LOS1_C08_SOURCE_BLOCKS, ...LOS1_C08_OTTO_BLOCKS, ...LOS1_C09_CONTENT_BLOCKS, ...LOS1_C09_TEXT_A_BLOCKS, ...LOS1_C09_AUDIO_BLOCKS,
     ...LOS1_C10_SOURCE_BLOCKS, ...LOS1_C10_CONTENT_BLOCKS,
     ...LOS1_REVIEW_TWO_BLOCKS, ...LOS1_FINAL_BLOCKS] : [],
-  exercises: index === 0 ? [...LOS1_C01_PREVIEW_EXERCISES, ...LOS1_C01_SOURCE_EXERCISES, ...LOS1_C01_AUDIO_COMPREHENSION_EXERCISES, ...LOS1_C01_EXAM_EXERCISES, ...LOS1_C01_ALTERNATE_EXAM_EXERCISES, ...LOS1_C01_EXTRA_EXERCISES, ...LOS1_C01_INTERACTIVE_EXERCISES, ...LOS1_C02_WB_EXERCISES, ...LOS1_C02_EXERCISES, ...LOS1_C02_EXAM_EXERCISES, ...LOS1_C03_SOURCE_EXERCISES, ...LOS1_C03_PRACTICE_EXERCISES, ...LOS1_C03_EXAM_EXERCISES, ...LOS1_C04_SOURCE_EXERCISES, ...LOS1_C04_PRACTICE_EXERCISES, ...LOS1_C04_EXAM_EXERCISES, ...LOS1_C05_SOURCE_EXERCISES, ...LOS1_C05_PRACTICE_EXERCISES, ...LOS1_C05_EXAM_EXERCISES, ...LOS1_C06_SOURCE_EXERCISES, ...LOS1_C06_PRACTICE_EXERCISES, ...LOS1_C06_EXAM_EXERCISES, ...LOS1_REVIEW_ONE_EXERCISES, ...LOS1_MIDTERM_FORM_A, ...LOS1_MIDTERM_FORM_B, ...LOS1_C07_SOURCE_EXERCISES, ...LOS1_C07_PRACTICE_EXERCISES, ...LOS1_C07_EXAM_A, ...LOS1_C07_EXAM_B, ...LOS1_C08_SOURCE_EXERCISES, ...LOS1_C08_PRACTICE_EXERCISES, ...LOS1_C08_EXAM_A, ...LOS1_C08_EXAM_B,
+  exercises: index === 0 ? [...LOS1_C01_PREVIEW_EXERCISES, ...LOS1_C01_SOURCE_EXERCISES, ...LOS1_C01_AUDIO_COMPREHENSION_EXERCISES, ...LOS1_C01_EXAM_EXERCISES, ...LOS1_C01_ALTERNATE_EXAM_EXERCISES, ...LOS1_C01_EXTRA_EXERCISES, ...LOS1_C01_INTERACTIVE_EXERCISES, ...LOS1_C02_WB_EXERCISES, ...LOS1_C02_EXERCISES, ...LOS1_C02_EXAM_EXERCISES, ...LOS1_C03_SOURCE_EXERCISES, ...LOS1_C03_PRACTICE_EXERCISES, ...LOS1_C03_EXAM_EXERCISES, ...LOS1_C04_SOURCE_EXERCISES, ...LOS1_C04_PRACTICE_EXERCISES, ...LOS1_C04_EXAM_EXERCISES, ...LOS1_C05_SOURCE_EXERCISES, ...LOS1_C05_PRACTICE_EXERCISES, ...LOS1_C05_EXAM_EXERCISES, ...LOS1_C06_SOURCE_EXERCISES, ...LOS1_C06_PRACTICE_EXERCISES, ...LOS1_C06_EXAM_EXERCISES, ...LOS1_REVIEW_ONE_EXERCISES, ...LOS1_MIDTERM_FORM_A, ...LOS1_MIDTERM_FORM_B, ...LOS1_C07_SOURCE_EXERCISES, ...LOS1_C07_PRACTICE_EXERCISES, ...LOS1_C07_EXAM_A, ...LOS1_C07_EXAM_B, ...LOS1_C08_SOURCE_EXERCISES, ...LOS1_C08_OTTO_EXERCISES, ...LOS1_C08_PRACTICE_EXERCISES, ...LOS1_C08_EXAM_A, ...LOS1_C08_EXAM_B,
     ...LOS1_C09_SOURCE_EXERCISES, ...LOS1_C09_TEXT_A_EXERCISES, ...LOS1_C09_AUDIO_EXERCISES, ...LOS1_C09_PRACTICE_EXERCISES,
     ...LOS1_C09_EXAM_A, ...LOS1_C09_EXAM_B,
     ...LOS1_C10_SOURCE_EXERCISES, ...LOS1_C10_PRACTICE_EXERCISES,
@@ -1037,6 +1053,19 @@ export const LOS_BOOKS: readonly Book[] = specs.map((spec, index) => ({
     modification: "Litteraatin kaikki kysymys-vastausparit sisältyvät saksaksi. Yksi lähteessä julkaistu puhelinnumero on poistettu ja merkitty näkyvästi. Suomennokset ovat LOS!:n lisäämiä.",
     publicationNoteFi: "COERLL ilmoittaa Deutsch im Blick -kokonaisuuden CC BY -lisensoiduksi. Vain teksti julkaistaan LOS!:ssa, haastatteluvideota ei upoteta eikä julkaista ilman erillistä media-QA:ta.",
   } : source).concat([{
+    id:"M-WB-08",
+    title:"Am Telefon · Deutschkurs für Anfänger / Lektion 003, harjoitus 112",
+    author:"Wikibooks Deutschkurs für Anfänger -yhteiskirjoittajat (versio 4382117)",
+    publisher:"Wikibooks / Wikimedia",
+    originalUrl:"https://en.wikibooks.org/w/index.php?title=Deutschkurs_f%C3%BCr_Anf%C3%A4nger%2FLektion_003&oldid=4382117",
+    licenseOrBasis:"CC BY-SA 4.0 · koko nelirepliikkinen Am Telefon -puhelinkeskustelu",
+    licenseUrl:"https://creativecommons.org/licenses/by-sa/4.0/",
+    permittedMode:"hosted" as const,
+    readiness:"text-cleared" as const,
+    verifiedAt:"2026-11-11",
+    modification:"Neljä alkuperäistä repliikkiä, myös kirjoitettu lausuntavihje, säilytetty muuttamattomina. Suomenkieliset käännökset, kielioppituki ja lukemistehtävät ovat LOS!:n lisäyksiä. Muunnelmat ja käännökset CC BY-SA 4.0 -ehdoin.",
+    publicationNoteFi:"Koko kirjoitettu Am Telefon -harjoitus 112 on LOS!:ssa. Erillinen C07:n aakkosäänite ei ole alkuperäisen puhelukeskustelun ääni, eikä tätä lähdettä käytetä kuullunymmärtämiskokeena.",
+  },{
     id:"M-COM-07",
     title:"German alphabet-2.ogg · saksankielinen aakkosten lausunta",
     publisher:"Wikimedia Commons / alkuperäinen English Wikipedia",
