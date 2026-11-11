@@ -79,10 +79,10 @@ test("two Commons media sources verified, with separate Goethe culture reference
     "Public domain - tekijän oma vapaa luovutus");
   assert.ok(los1.blocks.some(block => block.kind === "media" && block.sourceId === "M-COM-03"));
 });
-test("C01's 35 combined practice, audio, culture and exam exercises are indexed", () => {
+test("C01's 47 combined practice, audio, culture and 2 exam form exercises are indexed", () => {
   const c01 = los1.chapters.find(chapter => chapter.id === "C01");
   assert.ok(c01);
-  assert.equal(c01.exerciseIds.length, 35);
+  assert.equal(c01.exerciseIds.length, 47);
   assert.ok(c01.blockIds.length >= 8);
   const choice = los1.exercises.find(ex => ex.type === "single-choice");
   const gap = los1.exercises.find(ex => ex.type === "gap-fill");
