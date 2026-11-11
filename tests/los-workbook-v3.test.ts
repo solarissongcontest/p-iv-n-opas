@@ -3,15 +3,19 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { LOS_EXERCISES,losExercisesFor,losIsCorrect,losScore,normalizeLosAnswer } from "../src/features/los/exerciseBank.ts";
 
-test("LOS! C01–C06 have 86 uniquely identified assessment items",()=>{
+test("LOS! C01–C10 have 147 uniquely identified assessment items",()=>{
   assert.equal(losExercisesFor("01").length,12);
   assert.equal(losExercisesFor("02").length,15);
   assert.equal(losExercisesFor("03").length,15);
   assert.equal(losExercisesFor("04").length,12);
   assert.equal(losExercisesFor("05").length,12);
   assert.equal(losExercisesFor("06").length,20);
-  assert.equal(LOS_EXERCISES.length,86);
-  assert.equal(new Set(LOS_EXERCISES.map(item=>item.id)).size,86);
+  assert.equal(losExercisesFor("07").length,15);
+  assert.equal(losExercisesFor("08").length,12);
+  assert.equal(losExercisesFor("09").length,14);
+  assert.equal(losExercisesFor("10").length,20);
+  assert.equal(LOS_EXERCISES.length,147);
+  assert.equal(new Set(LOS_EXERCISES.map(item=>item.id)).size,147);
   for(const item of LOS_EXERCISES){
     assert.equal(item.accepted.includes(item.correct),true,`missing canonical answer ${item.id}`);
     assert.ok(item.explanation.trim().length>10);
@@ -57,5 +61,5 @@ test("test solutions unlock only after explicit submit and drafts are owner-scop
   assert.match(wb,/mode==="test"\?locked:revealPractice\.includes/);
   assert.match(storage,/los\.local\.v1/);
   assert.match(storage,/getDeviceOwnerId/);
-  assert.match(wb,/Ei vielä puhelimen ja tietokoneen välistä synkronointia/);
+  assert.match(wb,/Pilvisynkronoinnin|suojatun pilvisynkronoinnin/);
 });
