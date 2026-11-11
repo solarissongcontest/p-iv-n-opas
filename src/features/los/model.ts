@@ -9,6 +9,7 @@ export interface SourceAttribution {
   author?: string;
   originalUrl?: string;
   licenseOrBasis: string;
+  licenseUrl?: string;
   verifiedAt: string;
   modification?: string;
   permittedMode: "hosted" | "embed" | "pending";
@@ -18,19 +19,19 @@ export interface SourceAttribution {
 export interface Chapter {
   id: string; version: string; sequence: number; title: string;
   introductionFi: string; objectives: string[]; blockIds: string[]; exerciseIds: string[];
-  publicationStatus?: "planned" | "published"; plannedSourceIds?: string[];
+  publicationStatus?: "planned" | "preview" | "published"; plannedSourceIds?: string[];
 }
 export interface Lesson {
   id: string; version: string; bookId: BookId; chapterId?: string;
   sequence: number; title: string; estimatedMinutes: number; objectives: string[];
   model: "text" | "vocabulary" | "grammar" | "application" | "review";
-  publicationStatus?: "planned" | "published";
+  publicationStatus?: "planned" | "preview" | "published";
   steps: { id: string; title: string; required: boolean; blockId?: string; exerciseId?: string }[];
 }
 export type ContentBlock =
   | { id: string; version: string; kind: "heading"; level: 2 | 3; text: string }
   | { id: string; version: string; kind: "paragraph" | "authenticText"; text: string; language: "de" | "fi"; sourceId?: string }
-  | { id: string; version: string; kind: "dialogue"; turns: { speaker: string; text: string }[]; sourceId: string }
+  | { id: string; version: string; kind: "dialogue"; turns: { speaker: string; text: string; translationFi?: string }[]; sourceId: string }
   | { id: string; version: string; kind: "grammar"; title: string; explanationFi: string; examples: { de: string; fi: string }[] }
   | { id: string; version: string; kind: "table"; headers: string[]; rows: string[][] }
   | { id: string; version: string; kind: "image"; src: string; alt: string; caption: string; sourceId: string }
