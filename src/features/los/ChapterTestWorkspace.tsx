@@ -10,7 +10,7 @@ import { useLosRecord, losSyncMessage } from "./data/useLosRecord";
 import { evaluateExercise } from "./exercises/evaluate";
 
 function isMatchingAnswer(value: ExerciseAnswer): value is Record<string, string> {
-  return Boolean(value) && typeof value === "object" && !Array.isArray(value) && !("start" in value);
+  return value !== null && typeof value === "object" && !Array.isArray(value) && !("start" in value);
 }
 function isRangeAnswer(value: ExerciseAnswer): value is HighlightRange {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value) && "start" in value && "end" in value;
