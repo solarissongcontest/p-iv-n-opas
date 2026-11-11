@@ -141,11 +141,19 @@ const audioSources = [
     attributionUrl:"https://commons.wikimedia.org/wiki/File:German_Vocabulary_-_Greetings.ogg",
     src:"https://commons.wikimedia.org/wiki/Special:Redirect/file/German_Vocabulary_-_Greetings.ogg",
     note:"Äänite on luettu ilmausluettelo, ei yhtenäinen dialogi.",
+  },
+  {
+    id:"M-COM-02",title:"Thomas ja Takashi: esittäytyminen ja kotipaikka",
+    duration:"12 s",author:"Ariser",license:"CC BY-SA 3.0",
+    licenseUrl:"https://creativecommons.org/licenses/by-sa/3.0/",
+    attributionUrl:"https://commons.wikimedia.org/wiki/File:Deutsch_Dialog_._Ich_bin_Peter.ogg",
+    src:"https://commons.wikimedia.org/wiki/Special:Redirect/file/Deutsch_Dialog_._Ich_bin_Peter.ogg",
+    note:"Tämän neljän repliikin äänitteen jokainen puheenvuoro on näkyvissä LOS!:n Text B -osassa. Toisto vielä laitetestattava.",
   }
 ] as const;
 export function LosAuthenticAudio({ chapterId, source = "all" }: { chapterId: string; source?: "A" | "B" | "all" }) {
   const [errors,setErrors] = useState<string[]>([]);
-  const selected=chapterId==="01" ? (source==="A"?audioSources.slice(0,1):source==="B"?audioSources.slice(1):audioSources) : chapterId==="06" && source!=="B"?audioSources.slice(0,1):[];
+  const selected=chapterId==="01" ? (source==="A"?audioSources.slice(0,1):source==="B"?audioSources.slice(1,2):audioSources.slice(0,2)) : (chapterId==="02"||chapterId==="03") && source!=="A" ? audioSources.filter(item=>item.id==="M-COM-02") : chapterId==="06" && source!=="B"?audioSources.slice(0,1):[];
   if(!selected.length)return null;
   return <section className="los-authentic-audio" aria-label="Alkuperäiset kuunteluäänitteet">
     <p className="los-overline">ALKUPERÄISET ÄÄNITTEET · KOKEILUTOISTO</p>

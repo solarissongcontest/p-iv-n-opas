@@ -3,6 +3,7 @@ import { ArrowRight, BookOpen, Headphones } from "lucide-react";
 import { LosAuthenticAudio } from "./LosReferenceTools";
 import { LosC01Understanding } from "./LosC01Understanding";
 import { LosVoicePractice } from "./LosVoicePractice";
+import { LosC02SecondaryText } from "./LosC02SecondaryText";
 import { useLosChapterDraft } from "./studyState";
 import type { LosChapter } from "./catalog";
 
@@ -52,7 +53,7 @@ export function LosTextB({chapter}:{chapter:LosChapter}) {
       <LosAuthenticAudio chapterId={chapter.id} source="B" />
       <h2>Mitä huomasit?</h2>
       <p>Toistuvatko kaikki tutut tervehdykset? Voit käyttää sanastosivua tarkistamiseen, mutta älä luokittele sanoja opituiksi pelkän kuulemisen perusteella.</p>
-    </>:<div className="los-source-pending"><Headphones size={23}/><div><h2>Toinen lähdeaineisto valmistellaan</h2><p>Kirjakohtaisessa aineistoluettelossa on tälle kappaleelle ehdokkaita, mutta kokonaisen median käyttö ja upotus varmistetaan erikseen.</p></div></div>}
+    </>:(chapter.id==="02"||chapter.id==="03")?<LosC02SecondaryText chapterId={chapter.id}/>:<div className="los-source-pending"><Headphones size={23}/><div><h2>Toinen lähdeaineisto valmistellaan</h2><p>Kirjakohtaisessa aineistoluettelossa on tälle kappaleelle ehdokkaita, mutta kokonaisen median käyttö ja upotus varmistetaan erikseen.</p></div></div>}
   </section>;
 }
 const applications:Record<string,{title:string;prompt:string;checklist:string[];example:string}> = {

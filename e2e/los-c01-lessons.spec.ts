@@ -114,3 +114,18 @@ test("C04, C05, C07 and C09 original published dialogues are readable, annotatab
     await expectNoHorizontalOverflow(page);
   }
 });
+
+
+test("C02 and C03 include the complete Ariser four-turn second dialogue and its original audio player", async ({ page }) => {
+  await enterApp(page);
+  for(const chapter of ["02","03"]) {
+    await page.goto("/los#/1/"+chapter+"/text-b", {waitUntil:"domcontentloaded"});
+    await expect(page.locator(".los-c01-turn")).toHaveCount(4);
+    await expect(page.locator(".los-c01-turns")).toContainText("Wir kommen aus Berlin.");
+    await expect(page.locator(".los-c01-attribution")).toContainText("Ariser");
+    await expect(page.locator(".los-c01-attribution")).toContainText("CC BY-SA 3.0");
+    await expect(page.locator("audio")).toHaveCount(1);
+    await expect(page.locator("fieldset.los-c01-question")).toHaveCount(4);
+    await expectNoHorizontalOverflow(page);
+  }
+});
