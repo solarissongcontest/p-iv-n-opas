@@ -10,6 +10,9 @@ import { LOS1_C01_EXAM_EXERCISES, LOS1_C01_TEST } from "./los1-c01-chapter-test.
 import { LOS1_C01_ALTERNATE_EXAM_EXERCISES } from "./los1-c01-exam-alternates.ts";
 import { LOS1_C01_APPLICATION_BLOCKS, LOS1_C01_CULTURE_BLOCKS, LOS1_C01_EXTRA_EXERCISES } from "./los1-c01-activities.ts";
 import { LOS1_C01_INTERACTIVE_EXERCISES } from "./los1-c01-interactive.ts";
+import { LOS1_C02_BLOCKS, LOS1_C02_EXERCISES } from "./los1-c02-content.ts";
+import { LOS1_C02_EXAM_EXERCISES, LOS1_C02_TEST } from "./los1-c02-test.ts";
+import { LOS1_C02_SECTIONS } from "./los1-c02-sections.ts";
 
 const specs: readonly [string, string, string, string, string, string][] = [
   ["Perustason alkeet 1", "Tutustu ja ihastu saksan kieleen", "Nollataso, tervehdykset, esittäytyminen ja ensimmäinen vuorovaikutus.", "#B7473C", "#FCE8E5", "#FF9B91"],
@@ -57,6 +60,12 @@ export const LOS_BOOKS: readonly Book[] = specs.map((spec, index) => ({
       ...LOS1_C01_EXTRA_EXERCISES.map(exercise => exercise.id),
       ...LOS1_C01_INTERACTIVE_EXERCISES.map(exercise => exercise.id),
     ],
+  } : chapter.id === "C02" ? {
+    ...chapter,
+    publicationStatus: "preview" as const,
+    sections: LOS1_C02_SECTIONS,
+    blockIds: LOS1_C02_BLOCKS.map(block => block.id),
+    exerciseIds: [...LOS1_C02_EXERCISES, ...LOS1_C02_EXAM_EXERCISES].map(item => item.id),
   } : { ...chapter, sections: emptyChapterSections() }) : [],
   lessons: index === 0 ? LOS1_PLANNED_LESSONS.map(lesson => {
     if (lesson.id === "L001") return {
@@ -124,11 +133,63 @@ export const LOS_BOOKS: readonly Book[] = specs.map((spec, index) => ({
         { id: "L006-S03", title: "Tee 12 kohdan kappaletesti ja puheen itsearviointi", required: true, chapterTestId: LOS1_C01_TEST.id },
       ],
     };
+    if (lesson.id === "L007") return {
+      ...lesson, publicationStatus: "preview" as const,
+      steps: [
+        { id: "L007-S01", title: "Miten nimi kysytään?", required: true, blockId: "los1-c02-intro" },
+        { id: "L007-S02", title: "Nimikysymys", required: true, blockId: "los1-c02-grammar-heissen" },
+        { id: "L007-S03", title: "Tunnista nimikysymys", required: true, exerciseId: "los1-c02-start-name" },
+        { id: "L007-S04", title: "Valitse sopiva vastaus", required: true, exerciseId: "los1-c02-start-answer" },
+      ],
+    };
+    if (lesson.id === "L008") return {
+      ...lesson, publicationStatus: "preview" as const,
+      steps: [
+        { id: "L008-S01", title: "Valmistaudu lukemaan LOS!:n oma dialogi", required: true, blockId: "los1-c02-text-a-guide" },
+        { id: "L008-S02", title: "Lue Lenan ja Benin kokonainen keskustelu", required: true, blockId: "los1-c02-text-a-editorial" },
+        { id: "L008-S03", title: "Tunnista keskustelun toinen henkilö", required: true, exerciseId: "los1-c02-read-name" },
+        { id: "L008-S04", title: "Tunnista Frau Weiß", required: true, exerciseId: "los1-c02-read-teacher" },
+        { id: "L008-S05", title: "Etsi nimikysymys keskustelusta", required: true, exerciseId: "los1-c02-read-highlight" },
+        { id: "L008-S06", title: "Ymmärrä tekstin lähdestatus", required: true, blockId: "los1-c02-source-status" },
+      ],
+    };
+    if (lesson.id === "L009") return {
+      ...lesson, publicationStatus: "preview" as const,
+      steps: [
+        { id: "L009-S01", title: "Ich heiße ja du heißt", required: true, blockId: "los1-c02-grammar-heissen" },
+        { id: "L009-S02", title: "Ich bin ja du bist", required: true, blockId: "los1-c02-grammar-sein" },
+        { id: "L009-S03", title: "Tarkastele muotojen taulukkoa", required: true, blockId: "los1-c02-grammar-mini-table" },
+        { id: "L009-S04", title: "Täydennä heiße", required: true, exerciseId: "los1-c02-name-gap" },
+        { id: "L009-S05", title: "Täydennä heißt", required: true, exerciseId: "los1-c02-you-gap" },
+        { id: "L009-S06", title: "Täydennä bin", required: true, exerciseId: "los1-c02-bin-gap" },
+        { id: "L009-S07", title: "Täydennä bist", required: true, exerciseId: "los1-c02-bist-gap" },
+      ],
+    };
+    if (lesson.id === "L010") return {
+      ...lesson, publicationStatus: "preview" as const,
+      steps: [
+        { id: "L010-S01", title: "Tunnista äänitteen tavoite", required: true, blockId: "los1-c02-text-b-guide" },
+        { id: "L010-S02", title: "Kuuntele Thomasin ja Takashin alkuperäinen keskustelu", required: true, blockId: "los1-c02-commons-02-audio" },
+        { id: "L010-S03", title: "Poimi nimikysymys", required: true, exerciseId: "los1-c02-audio-question" },
+        { id: "L010-S04", title: "Poimi nimet", required: true, exerciseId: "los1-c02-audio-person" },
+        { id: "L010-S05", title: "Valitse kaikki äänitteen henkilöt", required: true, exerciseId: "los1-c02-audio-select" },
+        { id: "L010-S06", title: "Kertaa äänitteen keskeiset ilmaukset", required: true, blockId: "los1-c02-text-b-support" },
+      ],
+    };
+    if (lesson.id === "L011") return {
+      ...lesson, publicationStatus: "preview" as const,
+      steps: [
+        { id: "L011-S01", title: "Lue C02:n nimisanasto", required: true, blockId: "los1-c02-words" },
+        { id: "L011-S02", title: "Kirjoita ensin oma esittely", required: true, blockId: "los1-c02-production" },
+        { id: "L011-S03", title: "Palauta 15 kysymyksen testi ja kirjallinen itsearviointi", required: true,
+          chapterTestId: LOS1_C02_TEST.id },
+      ],
+    };
     return lesson;
   }) : [],
-  blocks: index === 0 ? [...LOS1_INTRO_BLOCKS, ...LOS1_C01_PREVIEW_BLOCKS, ...LOS1_C01_SOURCE_BLOCKS, ...LOS1_C01_GREETING_AUDIO_BLOCKS, ...LOS1_C01_APPLICATION_BLOCKS, ...LOS1_C01_CULTURE_BLOCKS] : [],
-  exercises: index === 0 ? [...LOS1_C01_PREVIEW_EXERCISES, ...LOS1_C01_SOURCE_EXERCISES, ...LOS1_C01_AUDIO_COMPREHENSION_EXERCISES, ...LOS1_C01_EXAM_EXERCISES, ...LOS1_C01_ALTERNATE_EXAM_EXERCISES, ...LOS1_C01_EXTRA_EXERCISES, ...LOS1_C01_INTERACTIVE_EXERCISES] : [],
-  chapterTests: index === 0 ? [LOS1_C01_TEST] : [],
+  blocks: index === 0 ? [...LOS1_INTRO_BLOCKS, ...LOS1_C01_PREVIEW_BLOCKS, ...LOS1_C01_SOURCE_BLOCKS, ...LOS1_C01_GREETING_AUDIO_BLOCKS, ...LOS1_C01_APPLICATION_BLOCKS, ...LOS1_C01_CULTURE_BLOCKS, ...LOS1_C02_BLOCKS] : [],
+  exercises: index === 0 ? [...LOS1_C01_PREVIEW_EXERCISES, ...LOS1_C01_SOURCE_EXERCISES, ...LOS1_C01_AUDIO_COMPREHENSION_EXERCISES, ...LOS1_C01_EXAM_EXERCISES, ...LOS1_C01_ALTERNATE_EXAM_EXERCISES, ...LOS1_C01_EXTRA_EXERCISES, ...LOS1_C01_INTERACTIVE_EXERCISES, ...LOS1_C02_EXERCISES, ...LOS1_C02_EXAM_EXERCISES] : [],
+  chapterTests: index === 0 ? [LOS1_C01_TEST, LOS1_C02_TEST] : [],
   sources: index === 0 ? LOS1_RESEARCH_SOURCES.map(source => source.id === "M-COM-01" ? {
     ...source,
     author: "Xzapro4 ja Erkan Yilmaz",
@@ -144,7 +205,26 @@ export const LOS_BOOKS: readonly Book[] = specs.map((spec, index) => ({
     permittedMode: "embed" as const,
     modification: "Koko alkukielinen ilmausluettelo lähdejärjestyksessä. Suomenkieliset käännökset ja alueelliset huomautukset lisätty; lähdeäänitettä ei ole muokattu LOS!:ssa.",
     publicationNoteFi: "28 sekunnin alkuperäinen ilmauksiin perustuva äänite; ei dialogi. Äänite toistetaan Wikimedian omalta palvelimelta. Mobiilitoisto vielä vahvistamatta.",
+  } : source.id === "M-COM-02" ? {
+    ...source,
+    author: "Ariser",
+    permittedMode: "embed" as const,
+    licenseOrBasis: "CC BY-SA 3.0 Unported · alkuperäinen äänite",
+    licenseUrl: "https://creativecommons.org/licenses/by-sa/3.0/",
+    verifiedAt: "2026-11-11",
+    modification: "Äänitettä ei ole muokattu LOS!:ssa; suomenkielinen opastus ja harjoitustehtävät ovat uusia.",
+    publicationNoteFi: "Tiedostokohtainen lisenssi varmistettu Commonsin tiedostosivulta. 12 sekunnin puhe toistetaan ulkoisesta lähteestä; soitto selaimessa vielä testaamatta.",
   } : source).concat([{
+    id: "LOS-EDITORIAL-C02",
+    title: "LOS! 1 C02 · Lenan ja Benin opetuskeskustelu",
+    author: "LOS!:n oma toimitettu opetussisältö",
+    publisher: "LOS! - oppikirjaprojekti",
+    licenseOrBasis: "Itsenäisesti laadittu LOS!-opetusesimerkki; ei lainattu Wikibooks-dialogi",
+    permittedMode: "hosted" as const,
+    verifiedAt: "2026-11-11",
+    modification: "Kokonaan toimituksessa luotu alkeisdialogi, suomenkieliset käännökset ja harjoitukset.",
+    publicationNoteFi: "Julkaistu esikatseluun omana opetustekstinä. Suunnitellun Wikibooks-lähteen M-WB-01 täysi tuonti on vielä kesken.",
+  },{
     id: "GOETHE-REGIONAL-GREETINGS-01",
     title: "Servus und Salam · Goethe-Institut, #DeutschlandNoFilter",
     author: "Hasnain Kazim",
