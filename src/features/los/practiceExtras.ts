@@ -33,6 +33,16 @@ export const supplementaryExercises:Partial<Record<ChapterId,Exercise[]>>={
   fill('C02-X08','Täydennä: Du ____ mein Freund. (Sinä olet ystäväni.)',['bist'],'Du bist käyttää sein-verbin du-muotoa. Tässä harjoitellaan vain sitä muotoa.'),
   say('C02-X09','Sano tervehdyksen jälkeen ”Olen nimeltäni Alex. Mikä sinun nimesi on?”','Hallo! Ich heiße Alex. Wie heißt du?'),
   {id:'C02-X10',type:'conjugation',prompt:'Täytä heiße- ja sein-verbien opitut minä–sinä-muodot.',pairs:[['ich (heißen)','heiße'],['du (heißen)','heißt'],['ich (sein)','bin'],['du (sein)','bist']],hint:'Kertaa ich heiße / du heißt / ich bin / du bist.',explanation:'Heißen: ich heiße, du heißt. Sein: ich bin, du bist.'},
+
+  {id:'C02-X11',type:'choice',prompt:'Kuka esittää Franzille vointikysymyksen alkuperäisessä Text A:ssa?',options:['Greta','Franz','Herr Weiß'],correct:'Greta',hint:'Toinen puhuja sanoo Wie geht’s?',explanation:'Greta kysyy Franzilta Wie geht’s? Tässä kysymyksen merkitys annetaan lukemisen tukena.'},
+  {id:'C02-X12',type:'highlight',prompt:'Korosta ensimmäisestä repliikistä nimen kysymys kokonaisena.',blockId:'c02-a-1',target:'Wie heißt du?',hint:'Franz kysyy sinun nimeäsi.',explanation:'Wie heißt du? tarkoittaa Mikä sinun nimesi on?'},
+  {id:'C02-X13',type:'choice',prompt:'Kuka kertoo, että opettajan nimi on Herr Weiß?',options:['Greta','Franz','Herr Schmidt'],correct:'Greta',hint:'Katso keskustelun neljäs repliikki.',explanation:'Greta sanoo Ja, er heißt Herr Weiß. Vaikeampi pronomini er on tässä vain tunnistusta.'},
+  {id:'C02-X14',type:'listen-choice',prompt:'Kuuntele alkuperäinen Ich bin Peter -äänite. Kuka esittelee Peterin?',options:['Thomas','Takashi','Franz'],correct:'Thomas',mediaUrl:'https://commons.wikimedia.org/wiki/Special:Redirect/file/Deutsch_Dialog_._Ich_bin_Peter.ogg',hint:'Katso, kuka sanoo Das ist Peter.',explanation:'Thomas sanoo Das ist Peter. Sama puhe ja koko litteraatti ovat C02:n Teksti B:ssä.'},
+  {id:'C02-X15',type:'listen-write',prompt:'Kuuntele Ich bin Peter -äänitteen ensimmäinen kysymys ja kirjoita se saksaksi.',accepted:['Wie heißt du?','Wie heißt du'],mediaUrl:'https://commons.wikimedia.org/wiki/Special:Redirect/file/Deutsch_Dialog_._Ich_bin_Peter.ogg',hint:'Kysymys alkaa Wie ja tarkoittaa Mikä nimesi on?',explanation:'Thomas kysyy aluksi Wie heißt du?'},
+  {id:'C02-X16',type:'choice',prompt:'Miten voisit kysyä, kuka toinen esitelty henkilö on?',options:['Wer ist das?','Wie bist das?','Wie du heißt?'],correct:'Wer ist das?',hint:'Wer = kuka. Ist on sein-verbin hän-muoto.',explanation:'Wer ist das? tarkoittaa Kuka tuo on?'},
+  {id:'C02-X17',type:'highlight',prompt:'Korosta ensimmäisestä Text A:sta Franzin oma nimen ilmoitus.',blockId:'c02-a-1',target:'ich bin Franz.',hint:'Tämä on ensimmäisen puhujan alussa.',explanation:'Franz sanoo ich bin Franz osana lausetta Hallo, ich bin Franz. Tässä ei vaadita tekstin muuttamista.'},
+  {id:'C02-X18',type:'writing',prompt:'Kirjoita kuvitteellinen minidialogi: tervehdi, kysy nimi ja vastaa nimellä. Vähintään 3 repliikkiä.',hint:'A: Hallo! Wie heißt du? B: Ich heiße ...',explanation:'Itsearviointimalli: A: Hallo! Wie heißt du? B: Ich heiße Lena. Und du? A: Ich bin Ben.'},
+
  ],
  C03:[
   pick('C03-X01','Mitä woher tarkoittaa?',['mistä','missä','milloin'],'mistä','Woher kysyy alkuperää. Wo kysyy sijaintia.'),
