@@ -7,6 +7,7 @@ import {chapters,sections,lessons,allWords,LOS_VERSION,type Chapter,type Exercis
 import {gradeExercise,tokenOffsets,dueDate,type TextAnchor,type Grade} from './engine';
 import {allChapterExercises} from './practiceExtras';
 import {ExamSession} from './ExamSession';
+import {firstLessons,type FirstLessonStep} from './firstLessons';
 import {useLosStore,type SyncStatus} from './useLosStore';
 import './los.css';
 
@@ -247,6 +248,112 @@ function ChapterSection({chapter,section,store,fontSize}:{chapter:Chapter;sectio
  if(section==='Kappaletesti')return <><Label>OMA HARJOITUSTESTI</Label><h2>{chapter.name}: kappaletesti</h2><p>Vihjeet ja ratkaisut eivät näy ennen palautusta. Ensimmäinen tehtäväpankin versio: joitakin tehtäviä käytetään myös harjoittelussa, joten tämä ei vielä ole lopullinen riippumaton koe.</p>{exercises.filter(e=>e.type!=='highlight').map(ex=><ExerciseCard key={ex.id+'-exam'} exam exercise={ex} chapter={chapter} store={store} fontSize={fontSize}/>)}</>;
  return null;
 }
+
+function FirstLessonRunner({lessonId,store,fontSize,onNext,onContents}:{lessonId:string;store:Store;fontSize:number;onNext:()=>void;onContents:()=>void}){
+ const plan=firstLessons.find(p=>p.id===lessonId);
+ const [stepIndex,setStepIndex]=useState(0);
+ const storedStep=item(store,'lesson:step:'+lessonId);
+ useEffect(()=>{
+  if(typeof storedStep==='number'&&Number.isFinite(storedStep)){
+   setStepIndex(index=>Math.max(index,Math.max(0,Math.min(4,storedStep))));
+  }
+ },[storedStep]);
+ if(!plan)return <p role="alert">Oppitunnin sisältösuunnitelmaa ei löydy.</p>;
+ const current=plan.steps[stepIndex];
+ if(!current)return <p role="alert">Oppitunnin vaihe puuttuu.</p>;
+ const currentChapter=chapters.find(c=>c.id===current.chapterId)??chapters[0]!;
+ const exerciseList=allChapterExercises(currentChapter.id,currentChapter.exercises);
+ const requiredIds=current.exerciseIds??[];
+ const allSubmitted=requiredIds.every(id=>
+  id==='EX-C01'?Boolean(item(store,'exam:submitted:EX-C01')):Boolean(item(store,'latest:'+id)));
+ const hasGoal=lessonId!=='L001'||valueString(store,'goal:los1').trim().length>=8;
+ const hasReflection=lessonId!=='L006'||valueString(store,'lesson:reflection:L006').trim().length>=12;
+ const canAdvance=(current.kind!=='practice'||allSubmitted)&&(current.kind!=='goal'||hasGoal)&&(current.kind!=='reflection'||hasReflection);
+ const fulfilled=plan.requiredIds.every(id=>id==='EX-C01'?Boolean(item(store,'exam:submitted:EX-C01')):Boolean(item(store,'latest:'+id)));
+ const completed=item(store,'lesson:'+lessonId)===true&&store.status==='saved';
+ const last=stepIndex===plan.steps.length-1;
+ const next=()=>{
+  if(!canAdvance)return;
+  store.put('lesson:step:'+lessonId,Math.min(stepIndex+1,plan.steps.length-1));
+  store.put('step:'+lessonId+':'+stepIndex,{completedAt:new Date().toISOString(),version:LOS_VERSION});
+  if(last){
+   if(!fulfilled||!hasGoal||!hasReflection)return;
+   store.put('lesson:'+lessonId,true);
+   return;
+  }
+  setStepIndex(index=>Math.min(plan.steps.length-1,index+1));
+ };
+ const stepContent=(st:FirstLessonStep)=>{
+  if(st.kind==='goal')return <>
+   <label htmlFor="los-first-goal">Oma tavoite</label>
+   <textarea id="los-first-goal" rows={4} value={valueString(store,'goal:los1')} onChange={e=>store.put('goal:los1',e.target.value)}
+     placeholder="Haluan osata tervehtiä ja esitellä itseni."/>
+   <p className="los-meta">Vähintään kahdeksan merkkiä, jotta tavoite on konkreettinen.</p>
+  </>;
+  if(st.kind==='read')return <>
+   <Reader chapter={currentChapter} store={store} fontSize={fontSize}/>
+   <SourceNotice chapter={currentChapter}/>
+  </>;
+  if(st.kind==='listen')return <Media chapter={currentChapter}/>;
+  if(st.kind==='vocabulary')return <Words chapter={currentChapter} store={store}/>;
+  if(st.kind==='grammar'||st.kind==='instruction')return <Grammar chapter={currentChapter}/>;
+  if(st.kind==='practice'){
+   if(st.exerciseIds?.includes('EX-C01'))return <ExamSession id="EX-C01" store={store} onExit={onContents}
+     onSubmit={()=>store.put('exam:submitted:EX-C01',{submittedAt:new Date().toISOString(),version:LOS_VERSION})}/>;
+   return <>{(st.exerciseIds??[]).map(id=>{
+    const ex=exerciseList.find(e=>e.id===id);
+    return ex?<ExerciseCard key={ex.id} exercise={ex} chapter={currentChapter} store={store} fontSize={fontSize}/>:
+      <p key={id} role="alert">Pakollinen tehtävä {id} puuttuu; oppituntia ei voi kuitata suoritetuksi.</p>;
+   })}</>;
+  }
+  if(st.kind==='reflection')return <>
+   <label htmlFor="los-reflection">Itsearviointi</label>
+   <textarea id="los-reflection" rows={4} value={valueString(store,'lesson:reflection:L006')}
+     onChange={e=>store.put('lesson:reflection:L006',e.target.value)}
+     placeholder="Osaan jo tervehtiä, mutta saksan ääntäminen ..."/>
+  </>;
+  if(st.kind==='guide')return <div className="los-prose">
+   <p>Kirjan tekstit, suomennokset, äänet ja harjoitukset löytyvät oppikirjan sisältä. Tehtävissä voi yrittää uudelleen; harjoituksen oikeat vastaukset näkyvät vasta tarkistuksen jälkeen. Kokeen vastaukset tulevat näkyviin vasta koko kokeen palautuksessa.</p>
+   <p>Tekstilukijassa sanaa napauttamalla saat sanakortin. Tehtäväkorostus ja oma korostustussi tallennetaan erikseen.</p>
+   <button onClick={onContents}>Tutki sisällysluetteloa</button>
+  </div>;
+  if(st.kind==='check')return <div className="los-prose">
+   <p>Tämän tunnin suoritus edellyttää opetusta ja harjoituksia, mutta täydellisiä pisteitä ei vaadita. Kertaus on osa myöhempiä tunteja.</p>
+   <p>Jos palvelin ei ole vahvistanut viimeisiä merkintöjä, tila näkyy tallennusjonossa. Sulje vasta, kun tallennus on vahvistettu.</p>
+  </div>;
+  return <div className="los-prose"><p>Yritä ensin palauttaa opittu muistista. Avaa sanasto tarvittaessa vasta sen jälkeen.</p></div>;
+ };
+ return <section className="los-first-lesson">
+  <Label>OHJATTU OPPITUNTI · {lessonId} · NOIN 30 MIN</Label>
+  <h1>{plan.title}</h1>
+  <p>Viisi joustavaa vaihetta. Voit edetä omaan tahtiisi, eikä aikaa lasketa alas.</p>
+  <div className="los-stats"><span>Vaihe <b>{stepIndex+1} / {plan.steps.length}</b></span><span>Suoritukset <b>{plan.requiredIds.filter(id=>id==='EX-C01'?Boolean(item(store,'exam:submitted:EX-C01')):Boolean(item(store,'latest:'+id))).length} / {plan.requiredIds.length}</b></span><span>Oppitunti <b>{completed?'Suoritettu':item(store,'lesson:'+lessonId)===true?'Odottaa synkronointia':'Kesken'}</b></span></div>
+  <ol className="los-stepper" aria-label="Oppitunnin vaiheet">{plan.steps.map((st,i)=><li key={st.id}>
+   <button aria-current={i===stepIndex?'step':undefined} className={i===stepIndex?'los-active-step':''}
+    onClick={()=>{setStepIndex(i);store.put('lesson:step:'+lessonId,i);}}>
+    <span>{i+1}</span> {st.title}
+   </button>
+  </li>)}</ol>
+  <section className="los-step">
+   <Label>{current.id} · {current.minutes} MIN SUOSITUS</Label>
+   <h2>{current.title}</h2>
+   <p>{current.instructionFi}</p>
+   {stepContent(current)}
+  </section>
+  {current.kind==='practice'&&!allSubmitted?<p role="status" className="los-hint">Palauta ensin kaikki tämän vaiheen {requiredIds.length} tehtävää. Oikein menemistä ei vaadita, mutta jokaisesta tarvitaan yritys.</p>:null}
+  <div className="los-actions">
+   <button className="los-quiet" disabled={stepIndex===0} onClick={()=>setStepIndex(i=>Math.max(0,i-1))}>Edellinen vaihe</button>
+   {!last?<button disabled={!canAdvance} onClick={next}>Jatka seuraavaan vaiheeseen <ChevronRight size={17}/></button>:
+    completed?<button onClick={onNext}>Seuraava oppitunti <ChevronRight size={17}/></button>:
+    <button disabled={!canAdvance||!fulfilled||store.status!=='saved'} onClick={next}>
+     <CheckCircle2 size={17}/> Merkitse oppitunti suoritetuksi
+    </button>}
+  </div>
+  {last&&store.status!=='saved'?<p className="los-meta" role="status">Suorituksen viimeistely vaatii vahvistetun palvelintallennuksen. Tila: {store.status}.</p>:null}
+  {last&&!fulfilled?<p className="los-warning">Kaikkia oppitunnin tehtäviä ei ole vielä palautettu. Voit avata aiemman vaiheen yllä olevasta vaihevalikosta.</p>:null}
+ </section>;
+}
+
 const toolsMenu:[View['kind'],string][]=[['dictionary','Sanakirja'],['grammar','Kielioppi'],['notes','Muistiinpanot'],['bookmarks','Kirjanmerkit'],['media','Mediat'],['sources','Lähteet'],['progress','Osaaminen'],['exams','Kokeet'],['settings','Lukuasetukset']];
 export function LosApp({ownerId}:{ownerId:string}){
  const navigate=useNavigate();
@@ -318,8 +425,9 @@ export function LosApp({ownerId}:{ownerId:string}){
       <button onClick={()=>go({kind:'chapter',cid:chapter.id,section:sections[(sections.indexOf((view.section??'Aloita') as typeof sections[number])+1)%sections.length]??'Aloita'})}>Seuraava osio <ChevronRight size={17}/></button></div>
      </>:null}
      {view.kind==='lessons'?<><h1>Opetuspolku</h1><p>60 joustavaa noin 30 minuutin oppituntia, ei aikarajalaskuria. Tämä versio sisältää käyttökelpoiset alkutunnit. Muut tunnit erotetaan keskeneräisinä.</p><div className="los-lesson-list">{lessons.map(l=><button key={l.id} onClick={()=>go({kind:'lesson',lesson:l.id})}><b>{l.id}</b><span>{l.name}<small>{l.section} · noin 30 min</small></span><span>{item(store,'lesson:'+l.id)===true?'Suoritettu':l.status==='initial-material'?'Aloita':'Sisältö kesken'}</span></button>)}</div></>:null}
+     {view.kind==='lesson'&&lesson&&firstLessons.some(p=>p.id===lesson.id)?<FirstLessonRunner key={lesson.id} lessonId={lesson.id} store={store} fontSize={fontSize} onNext={()=>go({kind:'lesson',lesson:lessons[Number(lesson.id.slice(1))]?.id??'L007'})} onContents={()=>go({kind:'contents'})}/>:null}
      {view.kind==='lesson'&&lesson&&(lesson.id==='L030'||lesson.id==='L059')?<ExamSession id={lesson.id==='L030'?'EX-MID':'EX-FINAL'} store={store} onExit={()=>go({kind:'lessons'})} onSubmit={()=>store.put('lesson:'+lesson.id,true)}/>:null}
-     {view.kind==='lesson'&&lesson&&lesson.id!=='L030'&&lesson.id!=='L059'?<><Label>TUNTI {Number(lesson.id.slice(1))} / 60</Label><h1>{lesson.name}</h1><p>{lesson.section} · noin 30 minuuttia, omaan tahtiin</p>
+     {view.kind==='lesson'&&lesson&&!firstLessons.some(p=>p.id===lesson.id)&&lesson.id!=='L030'&&lesson.id!=='L059'?<><Label>TUNTI {Number(lesson.id.slice(1))} / 60</Label><h1>{lesson.name}</h1><p>{lesson.section} · noin 30 minuuttia, omaan tahtiin</p>
       {lesson.status==='pending'?<p className="los-warning">Tämän tunnin julkaisuportti on edelleen avoin. Linkitettyä sisältöä voi tarkastella, mutta tuntia ei merkitä valmiiksi keskeneräisen aineiston perusteella.</p>:null}
       <div className="los-stats"><span>Vaihe <b>{step+1}/{lessonSteps.length}</b></span><span>Tila <b>{item(store,'lesson:'+lesson.id)===true?'Suoritettu':'Kesken'}</b></span></div>
       <div className="los-step"><Label>{lessonSteps[step]}</Label>
