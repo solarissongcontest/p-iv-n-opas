@@ -153,7 +153,7 @@ function Lessons({ book }: { book: Book }) {
       </section>)}
   </section>;
 }
-function ChapterPage({ book, chapter, subsection }: { book: Book; chapter: Chapter; subsection?: string }) {
+function ChapterPage({ book, chapter, subsection }: { book: Book; chapter: Chapter; subsection: string | undefined }) {
   const sections = chapter.sections ?? emptyChapterSections();
   const selected = subsection ? sections.find(section => section.id === subsection) : undefined;
   const chapterHref = bookPath(book, "kappale/" + chapter.id.slice(1));
