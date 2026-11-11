@@ -79,7 +79,8 @@ test("The formerly empty global dictionary page now renders interactive search a
  const style=readFileSync("src/styles/los.css","utf8");
  assert.match(ui,/type="search"/);
  assert.match(ui,/buildLosDictionary\(LOS_BOOKS\)/);
- assert.match(ui,/searchLosDictionary\(scoped,query,direction,60\)/);
+ assert.match(ui,/const pageSize=60;/);
+ assert.match(ui,/searchLosDictionary\(scoped,query,direction,pageSize,page\*pageSize\)/);
  assert.match(ui,/Saksa → suomi/);
  assert.match(ui,/Suomi → saksa/);
  assert.match(ui,/href=\{location\.chapterId\?/);
