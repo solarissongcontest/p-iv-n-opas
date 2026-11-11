@@ -1,5 +1,5 @@
 import type { LosChapterDraft } from "./studyState";
-import { validateLosLessonProgressMap } from "./lessonEngine";
+import { validateLosLessonProgressMap } from "./lessonEngine.ts";
 
 export type LosCloudRecord = {
   revision: number;

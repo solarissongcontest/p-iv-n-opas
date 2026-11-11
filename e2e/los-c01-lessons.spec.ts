@@ -69,3 +69,27 @@ test("L003 does not unlock until the real source questions are checked", async (
   await runner.getByRole("group", { name: "Valitse oppitunti" }).getByRole("button", { name: /L003/ }).click();
   await expect(runner.getByRole("button", { name: "Merkitse oppitunti suoritetuksi" })).toBeEnabled();
 });
+
+
+test("C02 unabridged dialogue, glossary, marks and source tasks survive navigation", async ({ page }) => {
+  await enterApp(page);
+  await page.goto("/los#/1/02/text", { waitUntil: "domcontentloaded" });
+  await expect(page.locator(".los-c01-turn")).toHaveCount(6);
+  await expect(page.locator(".los-c01-attribution")).toContainText("CC BY-SA 4.0");
+  await expect(page.locator(".los-c01-turn").last()).toContainText("Wiedersehen!");
+  await page.getByRole("button", { name: /heiße, selitys/i }).first().click();
+  await expect(page.locator(".los-c01-gloss")).toContainText("nimeltäni");
+  await page.getByRole("button", { name: "Korostustussi" }).click();
+  await page.getByRole("button", { name: "Vihreä" }).click();
+  await page.getByRole("button", { name: /hallo, korostuksen sana/i }).first().click();
+  await page.getByRole("button", { name: /ich, korostuksen sana/i }).first().click();
+  await expect(page.locator(".los-c01-turn").first().locator(".los-c01-mark-green")).toHaveCount(2);
+  await page.goto("/los#/1/02/understand", { waitUntil: "domcontentloaded" });
+  const q = page.locator("fieldset.los-c01-question").first();
+  await q.getByLabel("Ich heiße Greta.").check();
+  await q.getByRole("button", { name: "Tarkista vastaus" }).click();
+  await expect(q).toContainText("Oikein.");
+  await page.goto("/los#/1/02/text", { waitUntil: "domcontentloaded" });
+  await expect(page.locator(".los-c01-turn").first().locator(".los-c01-mark-green")).toHaveCount(2);
+  await expectNoHorizontalOverflow(page);
+});

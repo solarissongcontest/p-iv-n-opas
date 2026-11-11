@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { getDeviceOwnerId } from "@/lib/deviceSession";
-import { parseLosLessonProgressMap } from "./lessonEngine";
-import type { LosLessonProgress } from "./lessonEngine";
+import { parseLosLessonProgressMap } from "./lessonEngine.ts";
+import type { LosLessonProgress } from "./lessonEngine.ts";
 
 /**
  * Opiskelijakohtainen paikallinen luonnos. EI pilvisynkronointia.

@@ -6,6 +6,8 @@ import { getLosChapterSourceGate } from "./content/sourceRegistry";
 import { LosAuthenticAudio, LosDictionary, LosIndexSearch, LosLearningPath, type LosDestination } from "./LosReferenceTools";
 import { LosChapterGrammar } from "./LosGrammarChapters";
 import { LosC01AuthenticText } from "./LosC01AuthenticText";
+import { LosC02AuthenticText } from "./LosC02AuthenticText";
+import { LosC02Understanding } from "./LosC02Understanding";
 import { LosNotebook, LosWorkbook } from "./LosWorkbook";
 import { LosBackups } from "./LosBackups";
 import { LosApplication, LosCulture, LosTextB, LosUnderstanding } from "./LosSupplementalSections";
@@ -193,6 +195,16 @@ function TextPage({ chapter }: { chapter: LosChapter }) {
       <p>{sourceGate.issues.join(" ")} Tämä on oikeuksiltaan tarkistettu sisältöesikatselu, ei vielä hyväksytty valmis kappale.</p>
     </div>}
   </section>;
+  if(chapter.id==="02")return <section className="los-inner-page los-reading-page">
+    <p className="los-eyebrow">KAPPALE 02 / TEXT A</p>
+    <h1>Lue ja ymmärrä</h1>
+    <p className="los-page-intro">Franzin ja Gretan alkuperäinen kuuden repliikin keskustelu on luettavissa tässä kirjassa. Voit napauttaa sanoja, avata suomennokset ymmärtämissivulla ja tallentaa omia korostuksia. Lähteen äänitiedostojen erillisiä käyttöoikeuksia ei ole vielä varmistettu.</p>
+    <LosC02AuthenticText />
+    {!sourceGate.ready && <div className="los-editorial-note" role="status">
+      <h2>Sisällön tarkistus kesken</h2>
+      <p>{sourceGate.issues.join(" ")} Tämä on avoimeen julkaistuun aineistoon perustuva tekstiesikatselu, ei vielä valmis kappale.</p>
+    </div>}
+  </section>;
   const sample=sampleByChapter[chapter.id]??"Guten Tag!";
   return <section className="los-inner-page los-reading-page">
     <p className="los-eyebrow">KAPPALE {chapter.id} / TEKSTI A</p>
@@ -311,7 +323,7 @@ function LosBookWorkspace({ book, location, move, goLibrary, openBook }: { book:
             section === "search" ? <LosIndexSearch book={book} move={move} /> :
             chapter ? (
               section === "text" ? <TextPage chapter={chapter} /> :
-              section === "understand" ? <LosUnderstanding chapter={chapter} goToText={() => move(chapter.id, "text")} /> :
+              section === "understand" ? (chapter.id==="02" ? <LosC02Understanding goToText={() => move(chapter.id,"text")}/> : <LosUnderstanding chapter={chapter} goToText={() => move(chapter.id, "text")} />) :
               section === "vocabulary" ? <Vocabulary key={chapter.id} chapter={chapter} /> :
               section === "grammar" ? <Grammar chapter={chapter} /> :
               section === "text-b" ? <LosTextB chapter={chapter} /> :
