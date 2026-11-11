@@ -11,14 +11,14 @@ import { LOS_CHAPTER_SECTION_TITLES } from "../src/features/los/chapterSections.
 const los1 = LOS_BOOKS[0];
 if (!los1) throw new Error("LOS! 1 must exist");
 
-test("LOS! 1 retains 10 chapters and 60 canonical lessons, with three preview lessons", () => {
+test("LOS! 1 retains 10 chapters and 60 canonical lessons, with five preview lessons", () => {
   assert.equal(los1.chapters.length, 10);
   assert.equal(los1.lessons.length, 60);
   assert.deepEqual(los1.chapters.map(item => item.id), Array.from({ length: 10 }, (_, i) => "C" + String(i + 1).padStart(2, "0")));
   assert.deepEqual(los1.lessons.map(item => item.id), Array.from({ length: 60 }, (_, i) => "L" + String(i + 1).padStart(3, "0")));
   assert.equal(los1.chapters.filter(item => item.publicationStatus === "preview").length, 1);
   assert.equal(los1.chapters.filter(item => item.publicationStatus === "published").length, 0);
-  assert.deepEqual(los1.lessons.filter(item => item.publicationStatus === "preview").map(item => item.id), ["L001", "L002", "L003"]);
+  assert.deepEqual(los1.lessons.filter(item => item.publicationStatus === "preview").map(item => item.id), ["L001", "L002", "L003", "L004", "L005"]);
   assert.ok(los1.lessons.filter(item => item.publicationStatus !== "preview").every(item => !item.steps.length));
   assert.deepEqual(validateBook(los1), []);
 });
