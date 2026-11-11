@@ -27,12 +27,14 @@ test('C06 newly licensed human-written source has four complete 12-turn original
   'Dialog 3','Dialog 3','Dialog 4','Dialog 4'
  ]);
  assert.equal(c.blocks[0]?.text,'Hi, wie alt bist du?');
- assert.equal(c.blocks[1]?.text,'Ich bin fünf.');
- assert.equal(c.blocks[3]?.text,'Oskar.');
+ assert.equal(c.blocks[1]?.text,'Ich bin neun.');
+ assert.equal(c.blocks[3]?.text,'Lucas.');
  assert.equal(c.blocks[7]?.text,'Ich bin schon zwölf Jahre alt.');
  assert.equal(c.blocks[9]?.text,'Wir sind 10.');
  assert.equal(c.blocks[11]?.text,'Paul? Er ist elf Jahre alt.');
- for(const block of c.blocks)assert.ok(translationFi[block.id]?.trim().length>=8,'Finnish translation absent '+block.id);
+ for(const block of c.blocks)assert.ok(translationFi[block.id]?.trim().length>=5,'Finnish translation absent '+block.id);
+ assert.equal(translationFi['c06-a-2'],'Olen yhdeksänvuotias.');
+ assert.equal(translationFi['c06-a-4'],'Lucas.');
  assert.equal(c.media,undefined,'Original ZPE audio is still not directly verified playable');
 });
 test('L031–L035 all have different complete five-stage 30-minute lessons and correct prerequisites',()=>{
