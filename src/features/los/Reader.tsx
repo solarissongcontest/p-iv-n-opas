@@ -31,9 +31,12 @@ function SafeMedia({ block, source }: {
       && ["www.youtube-nocookie.com", "www.youtube.com"].includes(url.hostname)
       && url.pathname.startsWith("/embed/");
     validCommonsAudio = block.mediaType === "audio"
-      && source?.id === "M-COM-01" && source.permittedMode === "embed"
+      && source?.permittedMode === "embed"
       && url.origin === "https://upload.wikimedia.org"
-      && url.pathname === "/wikipedia/commons/1/11/Gespr%C3%A4chVorstellung.ogg";
+      && (
+        (source.id === "M-COM-01" && url.pathname === "/wikipedia/commons/1/11/Gespr%C3%A4chVorstellung.ogg") ||
+        (source.id === "M-COM-03" && url.pathname === "/wikipedia/commons/b/bb/German_Vocabulary_-_Greetings.ogg")
+      );
   } catch { /* Untrusted URLs never render a player. */ }
   const validLocalAudio = block.mediaType === "audio" && source?.permittedMode === "hosted"
     && /^\/los\/media\/[a-z0-9_-]+\.(ogg|mp3|m4a)$/i.test(block.embedUrl);
@@ -47,7 +50,7 @@ function SafeMedia({ block, source }: {
             Äänitoistoa ei tueta selaimessasi.
           </audio>
         : <p className="los-notice">Mediaa ei ole hyväksytty sisäiseen toistoon.</p>}
-    {failed && <p className="los-notice" role="status">Äänitettä ei voitu toistaa. Lue sama kokonainen keskustelu alapuolelta. Harjoittelu ei edellytä toimimatonta soitinta.</p>}
+    {failed && <p className="los-notice" role="status">Äänitettä ei voitu toistaa. Voit lukea saman dialogin tai ilmauslistan kokonaan tekstinä. Äänen toimivuus on varmistettava ennen kuuntelutehtävän arviointia.</p>}
     {validCommonsAudio && <p className="los-support">Ääni ladataan Wikimedia Commonsista. Sen saatavuus ja toiminta voivat riippua verkkoyhteydestä.</p>}
     <Attribution source={source}/>
   </figure>;
@@ -134,6 +137,22 @@ function RenderBlock({ block, source, marked, highlighterEnabled, glossary, onLo
       })}
       <button type="button" className="los-text-action los-note-action" onClick={() => onNote(block)}>
         <NotebookPen size={16}/> Muistiinpano keskustelusta
+      </button>
+      <Attribution source={source}/>
+    </section>;
+    case "transcript": return <section className="los-transcript" id={block.id} lang="de"
+      aria-label="Alkuperäisäänitteen kokonainen ilmausluettelo">
+      <p lang="fi" className="los-eyebrow">KOKO ÄÄNITTEEN ILMAUSLISTA · {block.lines.length} KOHTAA</p>
+      <ol>{block.lines.map((line, index) => <li key={index}>
+        <div className="los-transcript-utterance">{textWithGlosses(line.de)}</div>
+        <details className="los-translation" lang="fi">
+          <summary>Suomennos</summary>
+          <p>{line.fi}</p>
+          {line.noteFi && <p className="los-support">{line.noteFi}</p>}
+        </details>
+      </li>)}</ol>
+      <button type="button" className="los-text-action los-note-action" onClick={() => onNote(block)}>
+        <NotebookPen size={16}/> Muistiinpano ilmauslistasta
       </button>
       <Attribution source={source}/>
     </section>;
