@@ -49,6 +49,7 @@ export const translationFi:Readonly<Record<string,string>>={
  'c05-a-3':'Kiitos, minulle kuuluu hyvää. Näkemiin.',
  'c05-a-4':'Näkemiin!',
  'c05-b-1':'Mitä sinulle kuuluu? (tuttavallinen)',
+ 'c07-b-1':'tavata kirjaimet ääneen',
  'c07-a-1':'Numeropalvelu, hyvää päivää.',
  'c07-a-2':'Hyvää päivää. Haluaisin rouva Claudia Bolligerin puhelinnumeron Bernistä.',
  'c07-a-3':'Miten se kirjoitetaan? Tavatkaa se, olkaa hyvä.',
