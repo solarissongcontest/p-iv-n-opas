@@ -29,6 +29,11 @@ import { LOS1_C05_BLOCKS } from "./los1-c05-content.ts";
 import { LOS1_C05_PRACTICE_EXERCISES } from "./los1-c05-practice.ts";
 import { LOS1_C05_EXAM_EXERCISES, LOS1_C05_TEST } from "./los1-c05-test.ts";
 import { LOS1_C05_SECTIONS } from "./los1-c05-sections.ts";
+import { LOS1_C06_SOURCE_BLOCKS, LOS1_C06_SOURCE_EXERCISES } from "./los1-c06-source.ts";
+import { LOS1_C06_CONTENT_BLOCKS } from "./los1-c06-content.ts";
+import { LOS1_C06_PRACTICE_EXERCISES } from "./los1-c06-practice.ts";
+import { LOS1_C06_EXAM_EXERCISES, LOS1_C06_TEST } from "./los1-c06-test.ts";
+import { LOS1_C06_SECTIONS } from "./los1-c06-sections.ts";
 
 const specs: readonly [string, string, string, string, string, string][] = [
   ["Perustason alkeet 1", "Tutustu ja ihastu saksan kieleen", "Nollataso, tervehdykset, esittäytyminen ja ensimmäinen vuorovaikutus.", "#B7473C", "#FCE8E5", "#FF9B91"],
@@ -105,6 +110,12 @@ export const LOS_BOOKS: readonly Book[] = specs.map((spec, index) => ({
     blockIds:[...LOS1_C05_SOURCE_BLOCKS,...LOS1_C05_BLOCKS].map(block=>block.id),
     exerciseIds:[...LOS1_C05_SOURCE_EXERCISES,...LOS1_C05_PRACTICE_EXERCISES,
       ...LOS1_C05_EXAM_EXERCISES].map(exercise=>exercise.id),
+  } : chapter.id === "C06" ? {
+    ...chapter, publicationStatus:"preview" as const,
+    sections:LOS1_C06_SECTIONS,
+    blockIds:[...LOS1_C06_SOURCE_BLOCKS,...LOS1_C06_CONTENT_BLOCKS].map(block=>block.id),
+    exerciseIds:[...LOS1_C06_SOURCE_EXERCISES,...LOS1_C06_PRACTICE_EXERCISES,
+      ...LOS1_C06_EXAM_EXERCISES].map(exercise=>exercise.id),
   } : { ...chapter, sections: emptyChapterSections() }) : [],
   lessons: index === 0 ? LOS1_PLANNED_LESSONS.map(lesson => {
     if (lesson.id === "L001") return {
@@ -399,11 +410,72 @@ export const LOS_BOOKS: readonly Book[] = specs.map((spec, index) => ({
           chapterTestId:LOS1_C05_TEST.id},
       ],
     };
+    if (lesson.id === "L031") return {
+      ...lesson,publicationStatus:"preview" as const,
+      steps:[
+        {id:"L031-S01",title:"Tutustu numeroihin ja ikään",required:true,blockId:"los1-c06-intro"},
+        {id:"L031-S02",title:"Lue numerot 0–12",required:true,blockId:"los1-c06-zero-twelve-table"},
+        {id:"L031-S03",title:"Harjoittele yhtä, viittä ja kahtatoista",required:true,exerciseId:"los1-c06-digit-01"},
+        {id:"L031-S04",title:"Täydennä viisi",required:true,exerciseId:"los1-c06-digit-05"},
+        {id:"L031-S05",title:"Täydennä kaksitoista",required:true,exerciseId:"los1-c06-digit-12"},
+        {id:"L031-S06",title:"Kuuntele aito 37 sekunnin numeroluettelo",required:true,blockId:"los1-c06-m-com-06-numbers-audio"},
+        {id:"L031-S07",title:"Lue äänen koko alkuperäinen numerosarja",required:true,blockId:"los1-c06-m-com-06-transcript"},
+      ],
+    };
+    if (lesson.id === "L032") return {
+      ...lesson,publicationStatus:"preview" as const,
+      steps:[
+        {id:"L032-S01",title:"Opettele luvut 13–20 ja poikkeukset",required:true,blockId:"los1-c06-teen-grammar"},
+        {id:"L032-S02",title:"Lue ikäkysymyksen kielioppi",required:true,blockId:"los1-c06-age-grammar"},
+        {id:"L032-S03",title:"Kertaa koko alkuperäinen Franz–Jörg-dialogi",required:true,blockId:"los1-c06-m-com-01-dialogue"},
+        {id:"L032-S04",title:"Tunnista Franzin ikä",required:true,exerciseId:"los1-c06-text-a-franz"},
+        {id:"L032-S05",title:"Tunnista Jörgin ikä",required:true,exerciseId:"los1-c06-text-a-joerg"},
+        {id:"L032-S06",title:"Korosta Franzin ikälause",required:true,exerciseId:"los1-c06-text-a-highlight-age"},
+        {id:"L032-S07",title:"Harjoittele kuusitoista",required:true,exerciseId:"los1-c06-digit-16"},
+        {id:"L032-S08",title:"Harjoittele seitsemäntoista",required:true,exerciseId:"los1-c06-digit-17"},
+      ],
+    };
+    if (lesson.id === "L033") return {
+      ...lesson,publicationStatus:"preview" as const,
+      steps:[
+        {id:"L033-S01",title:"Opi yhdyssanaperiaate 21–100",required:true,blockId:"los1-c06-compound-grammar"},
+        {id:"L033-S02",title:"Vertaile saksan kymmenlukuja",required:true,blockId:"los1-c06-tens-table"},
+        {id:"L033-S03",title:"Tarkastele yhdeksää esimerkkiä",required:true,blockId:"los1-c06-compound-table"},
+        {id:"L033-S04",title:"Kirjoita 21",required:true,exerciseId:"los1-c06-compound-21"},
+        {id:"L033-S05",title:"Kirjoita 27",required:true,exerciseId:"los1-c06-compound-27"},
+        {id:"L033-S06",title:"Kirjoita 32",required:true,exerciseId:"los1-c06-compound-32"},
+        {id:"L033-S07",title:"Tunnista 60",required:true,exerciseId:"los1-c06-ten-60"},
+        {id:"L033-S08",title:"Yhdistä kuusi, seitsemän ja teiniluvut",required:true,exerciseId:"los1-c06-match-numbers"},
+      ],
+    };
+    if (lesson.id === "L034") return {
+      ...lesson,title:"Lue Haraldin haastattelu ja kuuntele luvut",
+      publicationStatus:"preview" as const,
+      steps:[
+        {id:"L034-S01",title:"Lue autenttisen Harald-haastattelun opastus",required:true,blockId:"los1-c06-text-b-intro"},
+        {id:"L034-S02",title:"Lue koko saksankielinen Haraldin haastattelu",required:true,blockId:"los1-c06-m-dib-02-dialogue"},
+        {id:"L034-S03",title:"Tunnista Haraldin lähtöpaikka",required:true,exerciseId:"los1-c06-text-b-place"},
+        {id:"L034-S04",title:"Tunnista arvioitu ikä",required:true,exerciseId:"los1-c06-text-b-age"},
+        {id:"L034-S05",title:"Korosta Haraldin ikälause",required:true,exerciseId:"los1-c06-text-b-highlight"},
+        {id:"L034-S06",title:"Kuuntele ihmisen lausumat kymmenluvut",required:true,blockId:"los1-c06-m-com-06-numbers-audio"},
+        {id:"L034-S07",title:"Tunnista äänitteen viimeinen luku",required:true,exerciseId:"los1-c06-audio-last"},
+      ],
+    };
+    if (lesson.id === "L035") return {
+      ...lesson,publicationStatus:"preview" as const,
+      steps:[
+        {id:"L035-S01",title:"Kertaa numerot, ikä ja vuosien ilmaukset",required:true,blockId:"los1-c06-vocabulary"},
+        {id:"L035-S02",title:"Harjoittele tuttavallinen ikäkysymys",required:true,blockId:"los1-c06-production-du"},
+        {id:"L035-S03",title:"Harjoittele kohtelias ikäkysymys",required:true,blockId:"los1-c06-production-sie"},
+        {id:"L035-S04",title:"Palauta 20 tehtävän C06-koe ja kaksi kuvitteellista ikädialogia",required:true,
+          chapterTestId:LOS1_C06_TEST.id},
+      ],
+    };
     return lesson;
   }) : [],
-  blocks: index === 0 ? [...LOS1_INTRO_BLOCKS, ...LOS1_C01_PREVIEW_BLOCKS, ...LOS1_C01_SOURCE_BLOCKS, ...LOS1_C01_GREETING_AUDIO_BLOCKS, ...LOS1_C01_APPLICATION_BLOCKS, ...LOS1_C01_CULTURE_BLOCKS, ...LOS1_C02_WB_BLOCKS, ...LOS1_C02_BLOCKS, ...LOS1_C03_SOURCE_BLOCKS, ...LOS1_C03_CONTENT_BLOCKS, ...LOS1_C04_SOURCE_BLOCKS, ...LOS1_C04_BLOCKS, ...LOS1_C05_SOURCE_BLOCKS, ...LOS1_C05_BLOCKS] : [],
-  exercises: index === 0 ? [...LOS1_C01_PREVIEW_EXERCISES, ...LOS1_C01_SOURCE_EXERCISES, ...LOS1_C01_AUDIO_COMPREHENSION_EXERCISES, ...LOS1_C01_EXAM_EXERCISES, ...LOS1_C01_ALTERNATE_EXAM_EXERCISES, ...LOS1_C01_EXTRA_EXERCISES, ...LOS1_C01_INTERACTIVE_EXERCISES, ...LOS1_C02_WB_EXERCISES, ...LOS1_C02_EXERCISES, ...LOS1_C02_EXAM_EXERCISES, ...LOS1_C03_SOURCE_EXERCISES, ...LOS1_C03_PRACTICE_EXERCISES, ...LOS1_C03_EXAM_EXERCISES, ...LOS1_C04_SOURCE_EXERCISES, ...LOS1_C04_PRACTICE_EXERCISES, ...LOS1_C04_EXAM_EXERCISES, ...LOS1_C05_SOURCE_EXERCISES, ...LOS1_C05_PRACTICE_EXERCISES, ...LOS1_C05_EXAM_EXERCISES] : [],
-  chapterTests: index === 0 ? [LOS1_C01_TEST, LOS1_C02_TEST, LOS1_C03_TEST, LOS1_C04_TEST, LOS1_C05_TEST] : [],
+  blocks: index === 0 ? [...LOS1_INTRO_BLOCKS, ...LOS1_C01_PREVIEW_BLOCKS, ...LOS1_C01_SOURCE_BLOCKS, ...LOS1_C01_GREETING_AUDIO_BLOCKS, ...LOS1_C01_APPLICATION_BLOCKS, ...LOS1_C01_CULTURE_BLOCKS, ...LOS1_C02_WB_BLOCKS, ...LOS1_C02_BLOCKS, ...LOS1_C03_SOURCE_BLOCKS, ...LOS1_C03_CONTENT_BLOCKS, ...LOS1_C04_SOURCE_BLOCKS, ...LOS1_C04_BLOCKS, ...LOS1_C05_SOURCE_BLOCKS, ...LOS1_C05_BLOCKS, ...LOS1_C06_SOURCE_BLOCKS, ...LOS1_C06_CONTENT_BLOCKS] : [],
+  exercises: index === 0 ? [...LOS1_C01_PREVIEW_EXERCISES, ...LOS1_C01_SOURCE_EXERCISES, ...LOS1_C01_AUDIO_COMPREHENSION_EXERCISES, ...LOS1_C01_EXAM_EXERCISES, ...LOS1_C01_ALTERNATE_EXAM_EXERCISES, ...LOS1_C01_EXTRA_EXERCISES, ...LOS1_C01_INTERACTIVE_EXERCISES, ...LOS1_C02_WB_EXERCISES, ...LOS1_C02_EXERCISES, ...LOS1_C02_EXAM_EXERCISES, ...LOS1_C03_SOURCE_EXERCISES, ...LOS1_C03_PRACTICE_EXERCISES, ...LOS1_C03_EXAM_EXERCISES, ...LOS1_C04_SOURCE_EXERCISES, ...LOS1_C04_PRACTICE_EXERCISES, ...LOS1_C04_EXAM_EXERCISES, ...LOS1_C05_SOURCE_EXERCISES, ...LOS1_C05_PRACTICE_EXERCISES, ...LOS1_C05_EXAM_EXERCISES, ...LOS1_C06_SOURCE_EXERCISES, ...LOS1_C06_PRACTICE_EXERCISES, ...LOS1_C06_EXAM_EXERCISES] : [],
+  chapterTests: index === 0 ? [LOS1_C01_TEST, LOS1_C02_TEST, LOS1_C03_TEST, LOS1_C04_TEST, LOS1_C05_TEST, LOS1_C06_TEST] : [],
   sources: index === 0 ? LOS1_RESEARCH_SOURCES.map(source => source.id === "M-COM-01" ? {
     ...source,
     author: "Xzapro4 ja Erkan Yilmaz",
@@ -440,6 +512,18 @@ export const LOS_BOOKS: readonly Book[] = specs.map((spec, index) => ({
     verifiedAt: "2026-11-11",
     modification: "Saksankieliset kuusi repliikkiä täsmälleen lähdeversiosta; LOS!:n omat suomennokset, opastus ja tehtävät lisätty. Lisätyt käännökset lisensoidaan CC BY-SA 4.0 -ehdoilla.",
     publicationNoteFi: "Alkuperäisen tekstin täsmäversio on 4430449 (2024-09-02). Wikibooksin erillinen alkuperäisäänite on lisensoitu public domainiin ja merkitty omalla lähteellään M-COM-04.",
+  } : source.id === "M-DIB-02" ? {
+    ...source,
+    originalUrl:"https://coerll.utexas.edu/dib/vidt.php?f=01_22_int_hb_who",
+    author:"Harald Becker (haastateltava); Deutsch im Blick -toimitus, Dr. Zsuzsanna Abrams",
+    publisher:"University of Texas at Austin / COERLL",
+    licenseOrBasis:"CC BY 4.0 · alkuperäisen haastattelun saksankielinen litteraatti",
+    licenseUrl:"https://creativecommons.org/licenses/by/4.0/",
+    permittedMode:"hosted" as const,
+    readiness:"text-cleared" as const,
+    verifiedAt:"2026-11-11",
+    modification:"Kaikki Harald-haastattelun kysymys–vastausparit sisältyvät, mutta yksi puhelinnumero on poistettu ja merkitty näkyvästi. Suomennokset ja selitykset ovat LOS!:n omia.",
+    publicationNoteFi:"Harald kertoo olevansa noin viisikymppinen, ei täsmälleen 50. Video ei ole mukana: sen tiedostokohtainen oikeus ja media-upotuksen toiminta vaativat lisätarkistuksen.",
   } : source.id === "M-WB-05" ? {
     ...source,
     originalUrl:"https://en.wikibooks.org/w/index.php?title=German/Lesson_1&oldid=3823655",
@@ -499,6 +583,17 @@ export const LOS_BOOKS: readonly Book[] = specs.map((spec, index) => ({
     modification: "Litteraatin kaikki kysymys-vastausparit sisältyvät saksaksi. Yksi lähteessä julkaistu puhelinnumero on poistettu ja merkitty näkyvästi. Suomennokset ovat LOS!:n lisäämiä.",
     publicationNoteFi: "COERLL ilmoittaa Deutsch im Blick -kokonaisuuden CC BY -lisensoiduksi. Vain teksti julkaistaan LOS!:ssa, haastatteluvideota ei upoteta eikä julkaista ilman erillistä media-QA:ta.",
   } : source).concat([{
+    id:"M-COM-06",
+    title:"German Vocabulary - Numbers.ogg · Saksankielinen numerosarja 1–20 ja kymmenluvut",
+    publisher:"Wikimedia Commons / Wikibooks",
+    author:"Human Robot (English Wikibooks)",
+    originalUrl:"https://commons.wikimedia.org/wiki/File:German_Vocabulary_-_Numbers.ogg",
+    licenseOrBasis:"Public domain · alkuperäisen tekijän vapaa luovutus, 23.7.2006",
+    permittedMode:"embed" as const,
+    verifiedAt:"2026-11-11",
+    modification:"Saksankielinen numeroiden 1–20, 30–70, 100 ja 1000 litteraatti on kokonaisena LOS!:ssa. Suomenkieliset numeromerkinnät uusia. Ääntä ei ole muokattu LOS!:ssa.",
+    publicationNoteFi:"37 sekunnin ihmisen tekemä numeroäänite, jonka ääntä on lähteen mukaan hieman muokattu. Se ei sisällä numeroita null, achtzig eikä neunzig. MP3-muunnos ilmoitettu Commonsissa valmiiksi; todellinen iPhone- ja Android-toisto vielä testaamatta.",
+  },{
     id:"M-COM-05",
     title:"De-wie geht es dir.ogg · Wie geht es dir? -ääntämisnäyte",
     author:"Jeuwre (saksaa äidinkielenään puhuva mies Berliinistä)",
