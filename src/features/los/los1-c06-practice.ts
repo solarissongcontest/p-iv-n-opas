@@ -34,7 +34,7 @@ export const LOS1_C06_NUMBER_21_TO_99:Exercise[]=C06_EXAMPLE_COMPOUNDS.map(({n,d
 );
 export const LOS1_C06_TENS:Exercise[]=C06_TENS.filter(({n})=>n>20).map(({n,de})=>
   choice("ten-"+n,"Mitä saksankielinen kymmenluku "+de+" tarkoittaa?",
-    [String(n),String(n/10),String(n===100?10:100-n)],
+    [String(n),String(n/10),String(n===100?20:n===50?15:100-n)],
     0,de+" tarkoittaa lukua "+n+".")
 );
 export const LOS1_C06_PRACTICE_EXERCISES:Exercise[]=[
