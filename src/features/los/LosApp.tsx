@@ -177,7 +177,7 @@ function ChapterPage({ book, chapter, subsection }: { book: Book; chapter: Chapt
         chapter.id === "C01" ?
         "C01 on harjoitusversio: Text A:n 8-repliikkinen alkuperäisdialogi, Text B:n 20 ilmauksen ääniteluettelo sekä 12 tehtävän kappaletesti ovat käytettävissä. Äänitoiston laitetestaus ja lopullinen toimitus ovat kesken." :
         chapter.id === "C02" ?
-        "C02 on harjoitusversio: luettavana on kokonainen LOS!:n itse laatima esittelydialogi, 16 ydinsanaa, kielioppi, 15 kysymyksen kappaletesti ja Ariserin alkuperäisäänite. Suunnitellun Wikibooksin Franz–Greta-päätekstin ja Ariserin täydellisen litteraatin tuonti sekä laitetoisto ovat vielä kesken." :
+        "C02 on harjoitusversio: luettavana on kokonainen LOS!:n itse laatima esittelydialogi, 16 ydinsanaa, kielioppi, 15 kysymyksen kappaletesti ja Ariserin alkuperäisäänite. Suunnitellun Wikibooksin Franz–Greta-päätekstin tuonti ja äänitteen laitetoisto ovat vielä kesken. Ariserin kaikki neljä repliikkiä ovat jo LOS!:ssa." :
         "Kappale on harjoitusversio, mutta kaikki lähteet ja oppisisällöt eivät ole vielä toimitettuja." :
         "Tämän kappaleen 10 osion rakenne on valmis, mutta aineistoja ei ole vielä julkaistu."}
     </p>}
