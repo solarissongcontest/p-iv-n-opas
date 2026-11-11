@@ -21,7 +21,7 @@ function stopTracks(stream: MediaStream | null) {
  * useLosRecord, the offline sync queue or Supabase. The learner explicitly
  * downloads a local copy if they want to keep it after leaving this page.
  */
-export function SpeechRecorder({ title = "Oma puheharjoitus", exampleDe = "Hallo! Guten Morgen! Bis später!" }: { title?: string; exampleDe?: string }) {
+export function SpeechRecorder({ title = "Oma puheharjoitus", exampleDe = "Hallo! Guten Morgen! Bis später!" }: { title?: string; exampleDe?: string | undefined }) {
   const [recording, setRecording] = useState(false);
   const [requesting, setRequesting] = useState(false);
   const [clipUrl, setClipUrl] = useState<string | null>(null);
