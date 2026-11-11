@@ -13,6 +13,11 @@ import { LOS1_C01_INTERACTIVE_EXERCISES } from "./los1-c01-interactive.ts";
 import { LOS1_C02_BLOCKS, LOS1_C02_EXERCISES } from "./los1-c02-content.ts";
 import { LOS1_C02_EXAM_EXERCISES, LOS1_C02_TEST } from "./los1-c02-test.ts";
 import { LOS1_C02_SECTIONS } from "./los1-c02-sections.ts";
+import { LOS1_C03_SOURCE_BLOCKS, LOS1_C03_SOURCE_EXERCISES } from "./los1-c03-source.ts";
+import { LOS1_C03_CONTENT_BLOCKS } from "./los1-c03-content.ts";
+import { LOS1_C03_PRACTICE_EXERCISES } from "./los1-c03-practice.ts";
+import { LOS1_C03_EXAM_EXERCISES, LOS1_C03_TEST } from "./los1-c03-test.ts";
+import { LOS1_C03_SECTIONS } from "./los1-c03-sections.ts";
 
 const specs: readonly [string, string, string, string, string, string][] = [
   ["Perustason alkeet 1", "Tutustu ja ihastu saksan kieleen", "Nollataso, tervehdykset, esittäytyminen ja ensimmäinen vuorovaikutus.", "#B7473C", "#FCE8E5", "#FF9B91"],
@@ -66,6 +71,15 @@ export const LOS_BOOKS: readonly Book[] = specs.map((spec, index) => ({
     sections: LOS1_C02_SECTIONS,
     blockIds: LOS1_C02_BLOCKS.map(block => block.id),
     exerciseIds: [...LOS1_C02_EXERCISES, ...LOS1_C02_EXAM_EXERCISES].map(item => item.id),
+  } : chapter.id === "C03" ? {
+    ...chapter,
+    publicationStatus: "preview" as const,
+    objectives: ["L1-INT-03", "L1-READ-01", "L1-MED-01"],
+    sections: LOS1_C03_SECTIONS,
+    blockIds: [...LOS1_C03_SOURCE_BLOCKS, ...LOS1_C03_CONTENT_BLOCKS].map(block => block.id),
+    exerciseIds: [
+      ...LOS1_C03_SOURCE_EXERCISES, ...LOS1_C03_PRACTICE_EXERCISES, ...LOS1_C03_EXAM_EXERCISES,
+    ].map(exercise => exercise.id),
   } : { ...chapter, sections: emptyChapterSections() }) : [],
   lessons: index === 0 ? LOS1_PLANNED_LESSONS.map(lesson => {
     if (lesson.id === "L001") return {
@@ -186,11 +200,69 @@ export const LOS_BOOKS: readonly Book[] = specs.map((spec, index) => ({
           chapterTestId: LOS1_C02_TEST.id },
       ],
     };
+    if (lesson.id === "L012") return {
+      ...lesson, publicationStatus: "preview" as const,
+      steps: [
+        { id:"L012-S01",title:"Kertaa jo opittu nimi ja tutustu kotipaikkaan",required:true,blockId:"los1-c03-orientation" },
+        { id:"L012-S02",title:"Lue ja harjoittele Woher kommst du?",required:true,blockId:"los1-c03-first-phrase" },
+        { id:"L012-S03",title:"Tunnista kysymys",required:true,exerciseId:"los1-c03-first-question" },
+        { id:"L012-S04",title:"Valitse oikea vastaus",required:true,exerciseId:"los1-c03-first-answer" },
+        { id:"L012-S05",title:"Lue maat ja alkuperäfraasit",required:true,blockId:"los1-c03-country-table" },
+        { id:"L012-S06",title:"Tunnista Saksan nimi",required:true,exerciseId:"los1-c03-first-country" },
+      ],
+    };
+    if (lesson.id === "L013") return {
+      ...lesson, publicationStatus: "preview" as const,
+      steps: [
+        { id:"L013-S01",title:"Tutustu Bernan alkuperäiseen haastatteluun",required:true,blockId:"los1-c03-berna-intro" },
+        { id:"L013-S02",title:"Lue koko Bernan litteraatti, puhelinnumero poistettuna",required:true,blockId:"los1-c03-berna-dialogue" },
+        { id:"L013-S03",title:"Tunnista Bernan lähtömaa",required:true,exerciseId:"los1-c03-berna-country" },
+        { id:"L013-S04",title:"Tunnista Bernan lähtökaupunki",required:true,exerciseId:"los1-c03-berna-city" },
+        { id:"L013-S05",title:"Etsi tekstin alkuperäkysymys",required:true,exerciseId:"los1-c03-berna-highlight-question" },
+        { id:"L013-S06",title:"Lue kohdennettu opastus",required:true,blockId:"los1-c03-berna-followup" },
+      ],
+    };
+    if (lesson.id === "L014") return {
+      ...lesson, publicationStatus: "preview" as const,
+      steps: [
+        { id:"L014-S01",title:"Opiskele kommen-verbin muodot",required:true,blockId:"los1-c03-grammar-kommen" },
+        { id:"L014-S02",title:"Opettele aus ja die Schweiz -poikkeus",required:true,blockId:"los1-c03-grammar-aus" },
+        { id:"L014-S03",title:"Erota woher ja wo",required:true,blockId:"los1-c03-grammar-wo" },
+        { id:"L014-S04",title:"Täydennä ich komme",required:true,exerciseId:"los1-c03-grammar-ich" },
+        { id:"L014-S05",title:"Täydennä du kommst",required:true,exerciseId:"los1-c03-grammar-du" },
+        { id:"L014-S06",title:"Muodosta oikea kysymys",required:true,exerciseId:"los1-c03-grammar-question" },
+        { id:"L014-S07",title:"Kirjoita aus",required:true,exerciseId:"los1-c03-grammar-aus-gap" },
+        { id:"L014-S08",title:"Valitse Sveitsin oikea muoto",required:true,exerciseId:"los1-c03-first-switzerland" },
+      ],
+    };
+    if (lesson.id === "L015") return {
+      ...lesson, title: "Kuuntele alkuperää ja tutki maiden sijaintia",
+      publicationStatus: "preview" as const,
+      steps: [
+        { id:"L015-S01",title:"Lue kuuntelutehtävän opastus",required:true,blockId:"los1-c03-text-b-guide" },
+        { id:"L015-S02",title:"Kuuntele Ariserin alkuperäinen dialogi",required:true,blockId:"los1-c03-m-com-02-audio" },
+        { id:"L015-S03",title:"Lue kaikki neljä alkuperäisrepliikkiä",required:true,blockId:"los1-c03-m-com-02-dialogue" },
+        { id:"L015-S04",title:"Tunnista Thomasin ja Peterin alkuperä",required:true,exerciseId:"los1-c03-audio-berlin" },
+        { id:"L015-S05",title:"Tunnista Takashin alkuperä",required:true,exerciseId:"los1-c03-audio-kyoto" },
+        { id:"L015-S06",title:"Tutki maiden sijaintikaaviota",required:true,blockId:"los1-c03-country-schematic" },
+        { id:"L015-S07",title:"Paikanna Suomen länsipuolen maa",required:true,exerciseId:"los1-c03-geography-west" },
+        { id:"L015-S08",title:"Paikanna Saksan eteläpuolen maa",required:true,exerciseId:"los1-c03-geography-south" },
+      ],
+    };
+    if (lesson.id === "L016") return {
+      ...lesson, publicationStatus: "preview" as const,
+      steps: [
+        { id:"L016-S01",title:"Kertaa C03:n ydinsanasto",required:true,blockId:"los1-c03-core-vocabulary" },
+        { id:"L016-S02",title:"Harjoittele omaa lähtöpaikkaasi",required:true,blockId:"los1-c03-production" },
+        { id:"L016-S03",title:"Palauta 15 kohdan kappaletesti ja kirjallinen itsearviointi",required:true,
+          chapterTestId: LOS1_C03_TEST.id },
+      ],
+    };
     return lesson;
   }) : [],
-  blocks: index === 0 ? [...LOS1_INTRO_BLOCKS, ...LOS1_C01_PREVIEW_BLOCKS, ...LOS1_C01_SOURCE_BLOCKS, ...LOS1_C01_GREETING_AUDIO_BLOCKS, ...LOS1_C01_APPLICATION_BLOCKS, ...LOS1_C01_CULTURE_BLOCKS, ...LOS1_C02_BLOCKS] : [],
-  exercises: index === 0 ? [...LOS1_C01_PREVIEW_EXERCISES, ...LOS1_C01_SOURCE_EXERCISES, ...LOS1_C01_AUDIO_COMPREHENSION_EXERCISES, ...LOS1_C01_EXAM_EXERCISES, ...LOS1_C01_ALTERNATE_EXAM_EXERCISES, ...LOS1_C01_EXTRA_EXERCISES, ...LOS1_C01_INTERACTIVE_EXERCISES, ...LOS1_C02_EXERCISES, ...LOS1_C02_EXAM_EXERCISES] : [],
-  chapterTests: index === 0 ? [LOS1_C01_TEST, LOS1_C02_TEST] : [],
+  blocks: index === 0 ? [...LOS1_INTRO_BLOCKS, ...LOS1_C01_PREVIEW_BLOCKS, ...LOS1_C01_SOURCE_BLOCKS, ...LOS1_C01_GREETING_AUDIO_BLOCKS, ...LOS1_C01_APPLICATION_BLOCKS, ...LOS1_C01_CULTURE_BLOCKS, ...LOS1_C02_BLOCKS, ...LOS1_C03_SOURCE_BLOCKS, ...LOS1_C03_CONTENT_BLOCKS] : [],
+  exercises: index === 0 ? [...LOS1_C01_PREVIEW_EXERCISES, ...LOS1_C01_SOURCE_EXERCISES, ...LOS1_C01_AUDIO_COMPREHENSION_EXERCISES, ...LOS1_C01_EXAM_EXERCISES, ...LOS1_C01_ALTERNATE_EXAM_EXERCISES, ...LOS1_C01_EXTRA_EXERCISES, ...LOS1_C01_INTERACTIVE_EXERCISES, ...LOS1_C02_EXERCISES, ...LOS1_C02_EXAM_EXERCISES, ...LOS1_C03_SOURCE_EXERCISES, ...LOS1_C03_PRACTICE_EXERCISES, ...LOS1_C03_EXAM_EXERCISES] : [],
+  chapterTests: index === 0 ? [LOS1_C01_TEST, LOS1_C02_TEST, LOS1_C03_TEST] : [],
   sources: index === 0 ? LOS1_RESEARCH_SOURCES.map(source => source.id === "M-COM-01" ? {
     ...source,
     author: "Xzapro4 ja Erkan Yilmaz",
@@ -215,6 +287,16 @@ export const LOS_BOOKS: readonly Book[] = specs.map((spec, index) => ({
     verifiedAt: "2026-11-11",
     modification: "Äänitettä ei ole muokattu LOS!:ssa; suomenkielinen opastus ja harjoitustehtävät ovat uusia.",
     publicationNoteFi: "Tiedostokohtainen lisenssi varmistettu Commonsin tiedostosivulta. 12 sekunnin puhe toistetaan ulkoisesta lähteestä; soitto selaimessa vielä testaamatta.",
+  } : source.id === "M-DIB-01" ? {
+    ...source,
+    author: "Berna Güneli (haastateltava), COERLL / Deutsch im Blick -toimitus",
+    licenseOrBasis: "CC BY 4.0 · Deutsch im Blick -oppimateriaalin verkkolitteraatti",
+    licenseUrl: "https://creativecommons.org/licenses/by/4.0/",
+    permittedMode: "hosted" as const,
+    readiness: "text-cleared" as const,
+    verifiedAt: "2026-11-11",
+    modification: "Litteraatin kaikki kysymys-vastausparit sisältyvät saksaksi. Yksi lähteessä julkaistu puhelinnumero on poistettu ja merkitty näkyvästi. Suomennokset ovat LOS!:n lisäämiä.",
+    publicationNoteFi: "COERLL ilmoittaa Deutsch im Blick -kokonaisuuden CC BY -lisensoiduksi. Vain teksti julkaistaan LOS!:ssa, haastatteluvideota ei upoteta eikä julkaista ilman erillistä media-QA:ta.",
   } : source).concat([{
     id: "LOS-EDITORIAL-C02",
     title: "LOS! 1 C02 · Lenan ja Benin opetuskeskustelu",
