@@ -7,6 +7,7 @@ import {LOS1_C08_CONTENT_BLOCKS} from "../src/features/los/los1-c08-content.ts";
 import {LOS1_C08_PRACTICE_EXERCISES} from "../src/features/los/los1-c08-practice.ts";
 import {LOS1_C08_SOURCE_BLOCKS,LOS1_C08_SOURCE_EXERCISES,
  LOS1_C08_WB07_LINES,LOS1_C08_WB07_FULL_TEXT} from "../src/features/los/los1-c08-source.ts";
+import {LOS1_C08_OTTO_TURNS,LOS1_C08_OTTO_TEXT,LOS1_C08_OTTO_BLOCKS,LOS1_C08_OTTO_EXERCISES} from "../src/features/los/los1-c08-otto.ts";
 import {LOS1_C08_EXAM_A,LOS1_C08_EXAM_B,LOS1_C08_TEST} from "../src/features/los/los1-c08-test.ts";
 import {
  emptyChapterTestRecord,gradeChapterTest,selectedTestExercises,
@@ -48,8 +49,8 @@ test("C08 is ten routable sections with genuine published-source gates",()=>{
  assert.ok(chapter.sections?.every(x=>x.publicationStatus==="preview"));
  assert.equal(LOS1_C08_CONTENT_BLOCKS.length,14);
  assert.equal(LOS1_C08_PRACTICE_EXERCISES.length,26);
- assert.equal(chapter.exerciseIds.length,50);
- assert.equal(new Set(chapter.exerciseIds).size,50);
+ assert.equal(chapter.exerciseIds.length,60);
+ assert.equal(new Set(chapter.exerciseIds).size,60);
  const sections=chapter.sections??[];
  assert.deepEqual(sections.map(x=>x.id),[
   "aloita","teksti-a","ymmarra","sanasto","kielioppi",
@@ -61,13 +62,15 @@ test("C08 is ten routable sections with genuine published-source gates",()=>{
  assert.ok(chapter.exerciseIds.every(id=>allExercises.has(id)));
  assert.ok(sections.find(x=>x.id==="teksti-a")?.blockIds.includes("los1-c08-wb-07-repeat-phrases"));
  assert.equal(LOS1_C08_SOURCE_EXERCISES.length,12);
- assert.deepEqual(sections.find(x=>x.id==="teksti-b")?.blockIds,
-   ["los1-c08-text-b-pending"]);
+ assert.ok(sections.find(x=>x.id==="teksti-b")?.blockIds.includes("los1-c08-otto-dialogue"));
+ assert.ok(sections.find(x=>x.id==="teksti-b")?.exerciseIds.includes("los1-c08-otto-highlight-request"));
  const owned=book.blocks.filter(x=>x.id.startsWith("los1-c08-"));
  const publishedText=owned.filter(x=>x.kind==="authenticText");
  assert.equal(publishedText.length,1);
  assert.equal(publishedText[0]?.sourceId,"M-WB-07");
- assert.ok(owned.every(x=>x.kind!=="media"&&x.kind!=="dialogue"));
+ assert.ok(owned.every(x=>x.kind!=="media"));
+ assert.equal(owned.filter(x=>x.kind==="dialogue").length,1);
+ assert.ok(owned.some(x=>x.kind==="dialogue"&&x.sourceId==="M-WB-08"));
  const unverified=book.sources.find(x=>x.id==="M-DIB-04");
  assert.ok(unverified?.permittedMode==="pending");
 });
@@ -96,6 +99,35 @@ test("A complete, 15-row human-authored original repetition lesson is now visibl
  const explanations=book.blocks.find(x=>x.id==="los1-c08-source-gloss");
  assert.ok(explanations&&explanations.kind==="table"&&explanations.rows.length===15);
 });
+test("C08 includes exact four-turn CC-licensed Otto phone dialogue and source-bound checks",()=>{
+ assert.deepEqual(validateBook(book),[]);
+ assert.equal(LOS1_C08_OTTO_TURNS.length,4);
+ assert.deepEqual(LOS1_C08_OTTO_TURNS.map(t=>t.text),[
+   "Wie ist Ihr Name?","Mein Name ist Otto.",
+   "Wie bitte? Noch einmal, bitte langsam.","O-T-T-O ([Oo-Te-Te-Oo])"
+ ]);
+ assert.equal(LOS1_C08_OTTO_TEXT,LOS1_C08_OTTO_TURNS.map(t=>t.text).join("\n"));
+ assert.equal(LOS1_C08_OTTO_BLOCKS.length,5);
+ const dialogue=book.blocks.find(b=>b.id==="los1-c08-otto-dialogue");
+ assert.ok(dialogue&&dialogue.kind==="dialogue"&&dialogue.sourceId==="M-WB-08");
+ assert.deepEqual(dialogue.turns.map(t=>t.text),LOS1_C08_OTTO_TURNS.map(t=>t.text));
+ assert.ok(dialogue.turns.every(t=>t.translationFi));
+ const attribution=book.sources.find(s=>s.id==="M-WB-08");
+ assert.equal(attribution?.permittedMode,"hosted");
+ assert.equal(attribution?.readiness,"text-cleared");
+ assert.ok(attribution?.originalUrl?.includes("oldid=4382117"));
+ assert.equal(attribution?.licenseUrl,"https://creativecommons.org/licenses/by-sa/4.0/");
+ assert.ok(attribution?.publicationNoteFi?.includes("ei ole alkuperäisen puhelukeskustelun ääni"));
+ assert.equal(LOS1_C08_OTTO_EXERCISES.length,10);
+ assert.equal(new Set(LOS1_C08_OTTO_EXERCISES.map(ex=>ex.id)).size,10);
+ for(const ex of LOS1_C08_OTTO_EXERCISES){
+   assert.equal(evaluateExercise(ex,correctAnswer(ex))?.correct,true,ex.id);
+   if(ex.type==="highlight"){
+     assert.equal(ex.blockId,"los1-c08-otto-dialogue");
+     assert.equal(ex.text,LOS1_C08_OTTO_TEXT);
+   }
+ }
+});
 test("C08 vocabulary and teaching are explicit and source-honest",()=>{
  const words=book.blocks.find(x=>x.id==="los1-c08-words");
  assert.ok(words&&words.kind==="vocabulary");
@@ -107,11 +139,11 @@ test("C08 vocabulary and teaching are explicit and source-honest",()=>{
  assert.ok(phrases.explanationFi.includes("kaikkia sen kielioppisääntöjä"));
  const a=book.blocks.find(x=>x.id==="los1-c08-text-a-bridge");
  assert.ok(a&&a.kind==="paragraph"&&a.text.includes("Wikibooks"));
- const b=book.blocks.find(x=>x.id==="los1-c08-text-b-pending");
- assert.ok(b&&b.kind==="paragraph"&&b.text.includes("tarkistamatta"));
+ const b=book.blocks.find(x=>x.id==="los1-c08-text-b-bridge");
+ assert.ok(b&&b.kind==="paragraph"&&b.text.includes("Am Telefon"));
 });
 test("All C08 exercises have deterministic solutions and non-fake feedback",()=>{
- for(const ex of [...LOS1_C08_SOURCE_EXERCISES,...LOS1_C08_PRACTICE_EXERCISES,...LOS1_C08_EXAM_A,...LOS1_C08_EXAM_B]){
+ for(const ex of [...LOS1_C08_SOURCE_EXERCISES,...LOS1_C08_OTTO_EXERCISES,...LOS1_C08_PRACTICE_EXERCISES,...LOS1_C08_EXAM_A,...LOS1_C08_EXAM_B]){
   assert.equal(evaluateExercise(ex,correctAnswer(ex))?.correct,true,ex.id);
   if(ex.type==="single-choice")
    assert.equal(new Set(ex.options.map(o=>o.label)).size,ex.options.length,ex.id);
@@ -119,15 +151,15 @@ test("All C08 exercises have deterministic solutions and non-fake feedback",()=>
    "Exercises may not misrepresent source reading as listening");
  }
 });
-test("Four C08 lessons are preview; only original-listening lesson remains pending",()=>{
+test("All five C08 lessons are preview; original phone dialogue remains reading-only",()=>{
  assert.deepEqual(book.lessons.filter(l=>l.chapterId==="C08"&&l.publicationStatus==="preview")
-  .map(l=>l.id),["L041","L042","L043","L045"]);
+  .map(l=>l.id),["L041","L042","L043","L044","L045"]);
  assert.ok(book.lessons.find(l=>l.id==="L042")?.steps.some(x=>x.blockId==="los1-c08-wb-07-repeat-phrases"));
- for(const id of ["L044"]){
-  const lesson=book.lessons.find(l=>l.id===id);
-  assert.ok(lesson&&lesson.publicationStatus==="planned");
-  assert.deepEqual(lesson.steps,[]);
- }
+ const lesson=book.lessons.find(l=>l.id==="L044");
+ assert.ok(lesson&&lesson.publicationStatus==="preview");
+ assert.ok(lesson.steps.some(s=>s.blockId==="los1-c08-otto-dialogue"));
+ assert.ok(lesson.steps.some(s=>s.blockId==="los1-c07-m-com-07-alphabet-audio"));
+ assert.ok(lesson.steps.some(s=>s.exerciseId==="los1-c08-otto-highlight-request"));
  assert.ok(book.lessons.find(l=>l.id==="L045")?.steps.some(x=>x.chapterTestId===definition.id));
 });
 test("C08 distinct 12-question retakes keep score history and speech ungraded",()=>{
