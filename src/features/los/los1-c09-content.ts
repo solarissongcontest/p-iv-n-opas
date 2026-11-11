@@ -105,7 +105,7 @@ export const LOS1_C09_CONTENT_BLOCKS:ContentBlock[]=[
  {id:"los1-c09-wb-04-days",version:"1.0.0",kind:"authenticText",language:"de",sourceId:"M-WB-04",
   text:LOS1_C09_WEEKDAYS.join(", ")},
  {id:"los1-c09-text-b-media-pending",version:"0.1.0",kind:"paragraph",language:"fi",
-  text:"M-DIB-05:n Deutsch im Blick / Die Woche -sanastoääni on vielä erillinen mediahankinta. Pelkkä Wikibooksin seitsemän päivän kirjoitettu lista EI ole kuullun ymmärtämistä, eikä tällä sivulla esitetä tekstiä itse soittavana autenttisena äänitteenä. Äänitteelle pitää vahvistaa tarkka mediatiedosto, oikeus ja toimiva toisto puhelimella ja tietokoneella."},
+  text:"Alkuperäinen M-DIB-05:n Deutsch im Blick / Die Woche -äänite on yhä erillinen keskeneräinen mediahankinta. Sen sijaan oppikirjassa on nyt täysin toinen, lähdekohtaisesti lisensoitu ihmisen tallentama 15 sekunnin Wikimedia Commons -äänite German Vocabulary – Days (M-COM-08). Sen koko lähdeluettelo löytyy tekstinä samalta sivulta. Commons-tiedoston lisenssi on CC BY-SA 3.0, ja selain voi toistaa alkuperäisen OGG-äänen tai MP3-muunnoksen. Puhelintoisto ja äänen laatu vaativat vielä oikean laitteen QA-tarkistuksen. Pelkkä luettelon lukeminen ei todista kuuntelutaitoa."},
  {id:"los1-c09-production-calendar",version:"0.1.0",kind:"production",
   titleFi:"Laadi kuvitteellinen seitsemän päivän viikkokalenteri",
   promptFi:"Kirjoita seitsemän riviä: yksi maanantaista sunnuntaihin. Käytä kunkin päivän saksankielistä nimeä sekä ilmausta am + viikonpäivä ja um + tasatunti + Uhr. Saat keksiä ajan itse. Älä käytä oikeita tapaamistietojasi. Vertaa vasta kirjoittamisen jälkeen malliin. Tämä on oma teksti eikä sitä pisteytetä koneellisesti.",
