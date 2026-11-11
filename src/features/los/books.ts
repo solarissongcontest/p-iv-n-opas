@@ -750,7 +750,19 @@ export const LOS_BOOKS: readonly Book[] = specs.map((spec, index) => ({
         {id:"L053-S07",title:"Esittele Harald ja Berna omin sanoin",required:true,blockId:"los1-c10-production-third"},
       ],
     };
-    // L054 requires authentic Text B media; BERNA TEXT remains accessible within C10.
+    if (lesson.id === "L054") return {
+      ...lesson,title:"Rakenna kaksi keskustelua",publicationStatus:"preview" as const,
+      steps:[
+        {id:"L054-S01",title:"Lue Bernan alkuperäinen koko haastattelu",required:true,blockId:"los1-c10-m-dib-01-berna"},
+        {id:"L054-S02",title:"Kertaa, mitä tekstistä voi päätellä ja mitä ei",required:true,blockId:"los1-c10-berna-support"},
+        {id:"L054-S03",title:"Tunnista lähteiden erot",required:true,exerciseId:"los1-c10-source-compare-origin"},
+        {id:"L054-S04",title:"Tee oma kolmen henkilön esittelyharjoitus",required:true,blockId:"los1-c10-production-third"},
+        {id:"L054-S05",title:"Rakenna kuvitteellinen keskustelu avunpyyntöineen",required:true,blockId:"los1-c10-production-meeting"},
+        {id:"L054-S06",title:"Tunnista oppitilanteen toistopyyntö",required:true,exerciseId:"los1-c10-review-repeat"},
+        {id:"L054-S07",title:"Järjestä Bernan lähtökaupunki",required:true,exerciseId:"los1-c10-order-berna"},
+        {id:"L054-S08",title:"Päätä tapaaminen sopivaan aikaan",required:true,exerciseId:"los1-c10-review-time"},
+      ],
+    };
     if (lesson.id === "L055") return {
       ...lesson,publicationStatus:"preview" as const,
       steps:[
