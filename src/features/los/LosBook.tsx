@@ -5,11 +5,13 @@ import { LOS_BOOKS, type LosBookDefinition, type LosChapter } from "./catalog";
 import { LosAuthenticAudio, LosDictionary, LosIndexSearch, LosLearningPath, type LosDestination } from "./LosReferenceTools";
 import { LosChapterGrammar } from "./LosGrammarChapters";
 import { LosNotebook, LosWorkbook } from "./LosWorkbook";
+import { LosBackups } from "./LosBackups";
 import { LosApplication, LosCulture, LosTextB, LosUnderstanding } from "./LosSupplementalSections";
 import "./los-book.css";
 import "./los-appendix.css";
 import "./los-workbook.css";
 import "./los-cloud.css";
+import "./los-backups.css";
 
 type LosSection = LosDestination;
 type LosLocation = { book: number | null; chapter: string | null; section: LosSection };
@@ -230,7 +232,8 @@ function Appendix({ book }: { book: LosBookDefinition }) {
     <h1>Kirjan liitteet</h1>
     <div className="los-appendix-section"><h2>Kirjan tiedot</h2><dl><div><dt>Moduuli</dt><dd>{book.code} · {book.module}</dd></div><div><dt>Laajuus</dt><dd>2 op</dd></div><div><dt>Oppimäärä</dt><dd>Saksa B3 · LOPS21</dd></div></dl></div>
     <div className="los-appendix-section"><h2>Lähteet ja materiaalit</h2><p>Alkuperäistekstit, puheäänitteet ja videot kirjataan tähän lähde- ja lisenssitietoineen vasta tarkistuksen jälkeen. LOS! 1:n aineistokatalogi on lähdesuunnitelma, ei valmis julkaistu materiaalipaketti.</p></div>
-    <div className="los-appendix-section"><h2>Opetuspolku, sanakirja ja kappaletestit</h2><p>Opetuspolku ja sanakirja löytyvät kirjan valikosta. Kappaleissa 1 ja 2 on omat automaattisesti tarkistettavat alkeistestit. Muiden kappaleiden tehtäväsarjat ja kaikkien vastausten pilvisynkronointi ovat yhä kesken.</p></div>
+    <div className="los-appendix-section"><h2>Opetuspolku, sanakirja ja kappaletestit</h2><p>Opetuspolku ja sanakirja löytyvät kirjan valikosta. Kappaleissa 1 ja 2 on omat automaattisesti tarkistettavat alkeistestit. Muiden kappaleiden tehtäväsarjat ovat vielä kesken. Kappalekohtaisissa muistiinpanoissa on erillinen, salasanalla suojattu manuaalinen pilvisynkronointi, joka vaatii palvelimen käyttöönoton.</p></div>
+    <LosBackups bookId={book.id} />
   </section>;
 }
 function LosBookWorkspace({ book, location, move, goLibrary, openBook }: { book: LosBookDefinition; location: LosLocation; move: (chapter: string | null, section: LosSection) => void; goLibrary: () => void; openBook: (id: number) => void }) {
