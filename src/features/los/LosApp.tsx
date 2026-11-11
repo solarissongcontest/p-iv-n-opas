@@ -4,13 +4,14 @@ import {BookOpen,ChevronLeft,ChevronRight,Menu,Search,Volume2,Bookmark,CheckCirc
 import {AppShell} from '@/app/AppShell';
 import {type StudyPage} from '@/app/navigation';
 import {chapters,sections,lessons,allWords,LOS_VERSION,type Chapter,type Exercise,type Block} from './content';
-import {gradeExercise,tokenOffsets,anchorFromSelectedTokens,dueDate,type TextAnchor,type Grade} from './engine';
+import {gradeExercise,tokenOffsets,anchorFromSelectedTokens,type TextAnchor,type Grade} from './engine';
+import {createReviewEntry,scheduleReviewEntry,reviewIsDue} from './reviewSchedule';
 import {allChapterExercises} from './practiceExtras';
 import {ExamSession} from './ExamSession';
 import {type FirstLessonStep} from './firstLessons';
 import {guidedLessons} from './guidedLessons';
 import {lessonAudioProof,lessonRequiresReflection} from './lessonProofs';
-import {hasExerciseAttempt} from './exerciseAttempt';
+import {canSubmitExerciseAttempt,exerciseAudioProof} from './exerciseAttempt';
 import {vocabularySearch,vocabularyReviewSummary} from './vocabularyCandidates';
 import {auditLosRelease} from './releaseAudit';
 import {NumberPractice} from './NumberPractice';
@@ -280,7 +281,7 @@ function Reader({chapter,store,exerciseMode,onSelect,onClear,selection,fontSize}
    </p>{showTranslations&&!exerciseMode&&translationFi[block.id]?<p className="los-translation" lang="fi">{translationFi[block.id]}</p>:null}</div>;
   })}
   </div>
-  {selectedWord?<WordSheet word={selectedWord} onClose={()=>setSelectedWord('')} onReview={term=>store.put('review:'+term,{due:new Date().toISOString().slice(0,10),stage:0,source:chapter.id})}/>:null}
+  {selectedWord?<WordSheet word={selectedWord} onClose={()=>setSelectedWord('')} onReview={term=>store.put('review:'+term,createReviewEntry(new Date(),chapter.id))}/>:null}
   {!exerciseMode&&freeInk?<div className="los-reader-actions">{undoMark?<button className="los-quiet" type="button" onClick={undoSelection}>Kumoa valinta</button>:null}{chapter.blocks.some(block=>Boolean(item(store,'ink:'+block.id)))?<button className="los-quiet" type="button" onClick={()=>{for(const block of chapter.blocks)store.put('ink:'+block.id,null);setDraft(null);setUndoMark(null);}}>Pyyhi tämän tekstin omat korostukset</button>:null}</div>:null}
  </div>;
 }
@@ -326,7 +327,9 @@ function ExerciseCard({exercise,chapter,store,exam=false,fontSize}:{exercise:Exe
  let mapping:Record<string,string>={};
  if(answer){try{const parsed:unknown=JSON.parse(answer);if(parsed&&typeof parsed==='object'&&!Array.isArray(parsed))mapping=parsed as Record<string,string>;}catch{/* Not a mapping answer */}}
  const setMapped=(left:string,value:string)=>update(JSON.stringify({...mapping,[left]:value}));
- const canSubmit=hasExerciseAttempt(exercise,answer,highlight,speechConfirmed);
+ const audioCompleted=Boolean(item(store,exerciseAudioProof(exercise.id)));
+ const requiresAudio=exercise.type==='listen-choice'||exercise.type==='listen-write';
+ const canSubmit=canSubmitExerciseAttempt(exercise,answer,highlight,speechConfirmed,audioCompleted);
  const submit=()=>{
   if(!canSubmit)return;
   const grade=gradeExercise({...exercise,sourceText:source?.text} as Exercise & {sourceText?:string},(exercise.type==='highlight'||exercise.type==='find-text')?highlight:answer);
@@ -335,16 +338,17 @@ function ExerciseCard({exercise,chapter,store,exam=false,fontSize}:{exercise:Exe
   store.put('latest:'+exercise.id,entry);
   store.put('attempt:'+exercise.id+':'+Date.now(),entry);
   if(grade.status==='correct'||grade.status==='incorrect'){
-   const old=item(store,'review:'+exercise.id) as {stage?:number}|undefined;
-   const next=dueDate(new Date(),grade.status==='correct',old?.stage??0);
-   store.put('review:'+exercise.id,next);
+   const old=item(store,'review:'+exercise.id);
+   store.put('review:'+exercise.id,scheduleReviewEntry(old,grade.status==='correct'));
   }
  };
  return <article className="los-exercise" id={exercise.id}>
   <Label>{exercise.id} · {exam?'Koetila':'Harjoitustila'}</Label>
   <h3>{exercise.prompt}</h3>
   {(exercise.type==='highlight'||exercise.type==='find-text')&&source?<Reader chapter={{...chapter,blocks:[source]}} store={store} exerciseMode onSelect={next=>{setHighlight(next);store.put(draftKey,next);setResult(null);}} onClear={()=>{setHighlight(null);store.put(draftKey,null);setResult(null);}} selection={highlight} fontSize={fontSize}/>:null}
-  {(exercise.type==='listen-choice'||exercise.type==='listen-write')&&exercise.mediaUrl?<><Audio src={exercise.mediaUrl} title={'Kuuntele alkuperäisäänite '+exercise.id} onFailure={()=>setMediaFailed(true)}/>{mediaFailed?<><p className="los-warning">Äänite ei toimi. Siirrymme saman alkuperäisaineiston lukemiseen, joten tätä yritystä ei lasketa kuuntelunäytöksi.</p><Reader chapter={chapter} store={store} fontSize={fontSize}/></>:null}</>:null}
+  {(exercise.type==='listen-choice'||exercise.type==='listen-write')&&exercise.mediaUrl?<><Audio src={exercise.mediaUrl} title={'Kuuntele alkuperäisäänite '+exercise.id} onFailure={()=>setMediaFailed(true)}
+   onCompleted={()=>store.put(exerciseAudioProof(exercise.id),{at:new Date().toISOString(),version:LOS_VERSION,source:exercise.mediaUrl})}/>{mediaFailed?<><p className="los-warning">Äänite ei toimi. Siirrymme saman alkuperäisaineiston lukemiseen, joten tätä yritystä ei lasketa kuuntelunäytöksi.</p><Reader chapter={chapter} store={store} fontSize={fontSize}/></>:null}
+   {requiresAudio&&!audioCompleted?<p role="status" className="los-meta">Kuunteluvastaus voidaan palauttaa vasta, kun tämä alkuperäinen äänite on toistettu loppuun. Pelkkä vaihtoehdon valitseminen ei vielä ole kuuntelusuoritus.</p>:null}</>:null}
   {exercise.type==='video'?<>{exercise.videoId&&exercise.reviewedMedia?<div className="los-video"><iframe src={'https://www.youtube-nocookie.com/embed/'+exercise.videoId} title={'Videotehtävä '+exercise.id} loading="lazy" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowFullScreen/></div>:null}{!exercise.reviewedMedia?<p className="los-warning">Videon sisältöä ja upotusta ei ole vielä tarkistettu. Tehtävää ei pisteytetä.</p>:null}</>:null}
   {exercise.options?<div className="los-options" role="radiogroup" aria-label={exercise.prompt}>
    {exercise.options.map(option=><label key={option}><input type="radio" name={exercise.id+(exam?'-exam':'')} value={option} checked={answer===option} onChange={()=>update(option)} disabled={exam&&submitted}/><span>{option}</span></label>)}
@@ -388,7 +392,7 @@ function Words({chapter,store}:{chapter:Chapter;store:Store}){
  const [filter,setFilter]=useState('');const [hide,setHide]=useState(false);
  const filtered=chapter.vocab.filter(w=>(w.de+' '+w.fi).toLowerCase().includes(filter.toLowerCase()));
  return <><h2>Kappaleen sanasto</h2><div className="los-inline"><input aria-label="Hae kappalesanastosta" placeholder="Hae saksaksi tai suomeksi" value={filter} onChange={e=>setFilter(e.target.value)}/><button onClick={()=>setHide(!hide)}>{hide?'Näytä merkitykset':'Piilota merkitykset'}</button></div>
-  <div className="los-vocab">{filtered.map(w=><div className="los-vocab-row" key={w.de}><span lang="de"><b>{w.de}</b><small>{w.tier}</small></span><span>{hide?'••••':w.fi}</span><button className="los-quiet" onClick={()=>store.put('review:'+w.de,{due:new Date().toISOString().slice(0,10),stage:0})}>Kertaa</button></div>)}</div>
+  <div className="los-vocab">{filtered.map(w=><div className="los-vocab-row" key={w.de}><span lang="de"><b>{w.de}</b><small>{w.tier}</small></span><span>{hide?'••••':w.fi}</span><button className="los-quiet" onClick={()=>store.put('review:'+w.de,createReviewEntry())}>Kertaa</button></div>)}</div>
   {!filtered.length?<p>Ei hakutuloksia.</p>:null}
  </>;
 }
@@ -560,7 +564,7 @@ function LosAppForOwner({ownerId}:{ownerId:string}){
  const chapter=chapters.find(c=>c.id===view.cid);
  const lesson=lessons.find(l=>l.id===view.lesson);
  const finishedLessons=lessons.filter(l=>item(store,'lesson:'+l.id)===true).length;
- const reviews=Object.entries(store.items).filter(([key,v])=>key.startsWith('review:')&&v&&typeof v==='object'&&'due' in v&&String((v as {due:string}).due)<=new Date().toISOString().slice(0,10));
+ const reviews=Object.entries(store.items).filter(([key,v])=>key.startsWith('review:')&&reviewIsDue(v));
  const dictionaryResults=vocabularySearch(wordSearch);
  const dictionaryAudit=vocabularyReviewSummary();
  return <AppShell page="courses" pageTitle="LOS! 1" pageEyebrow="Saksa B3 · SAB31 · 2 op" moreOpen={moreOpen}
@@ -629,7 +633,7 @@ function LosAppForOwner({ownerId}:{ownerId:string}){
        <span><b lang="de">{w.displayForm}</b><small>{w.partOfSpeech==='noun'?'substantiivi · '+(w.gender==='m'?'der':w.gender==='f'?'die':'das'):w.partOfSpeech==='chunk'?'fraasi':'sanaluokka vielä tarkistamatta'} · {w.importance==='active'?'ydin':w.importance==='recognition'?'tunnista':'tuki'}</small></span>
        <span>{w.meaningFi.join('; ')}<small>Ensimmäisen kerran {w.introducedChapterId}{w.chapters.length>1?' · myös '+w.chapters.slice(1).join(', '):''}{w.exampleBlockId?' · alkuperäistekstiesimerkki löytyy':' · ei vielä lähdetekstiankkuria'} · kieliasun loppukatselmointi avoin</small></span>
        <div className="los-actions"><button className="los-quiet" onClick={()=>go({kind:'chapter',cid:w.introducedChapterId,section:'Sanasto'})}>Avaa kappale</button>
-       <button onClick={()=>store.put('review:'+w.displayForm,{due:new Date().toISOString().slice(0,10),stage:0})}>Lisää kertaukseen</button></div>
+       <button onClick={()=>store.put('review:'+w.displayForm,createReviewEntry())}>Lisää kertaukseen</button></div>
       </div>)}</div>
       {!dictionaryResults.length?<p role="status">Ei hakutuloksia tästä oppikirjasta.</p>:null}
      </>:null}
@@ -675,7 +679,7 @@ function ReviewCard({id,store}:{id:string;value:unknown;store:Store}){
  const word=allWords.find(w=>w.de===de);
  const mark=(success:boolean)=>{
   const old=item(store,id) as {stage?:number}|undefined;
-  store.put(id,dueDate(new Date(),success,old?.stage??0));setShown(false);
+  store.put(id,scheduleReviewEntry(old,success));setShown(false);
  };
  return <article className="los-review-card"><p lang="de"><b>{de}</b></p><button onClick={()=>setShown(!shown)}>{shown?'Piilota vastaus':'Näytä suomennos / ratkaisu'}</button>{shown?<><p>{word?.fi??'Katso alkuperäinen harjoitus uudelleen ja arvioi vastauksesi.'}</p><button onClick={()=>mark(true)}>Muistin</button><button className="los-quiet" onClick={()=>mark(false)}>Harjoittele uudelleen huomenna</button></>:null}</article>;
 }
