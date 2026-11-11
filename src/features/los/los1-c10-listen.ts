@@ -26,7 +26,7 @@ const h=(id:string,text:string,frag:string,promptFi:string,explanationFi:string)
 };
 export const LOS1_C10_CONTRAST_BLOCKS:ContentBlock[]=[
  {id:"los1-c10-contrast-start",version:"0.1.0",kind:"paragraph",language:"fi",
-  text:"L052 · Haraldin esittely ja alkuperäinen vertailukuuntelu (30 min). Tässä on kaksi EROTETTUA aineistoa. Ensin kuuntelet Franzin ja Jörgin oikean 14 sekunnin keskustelun, jonka he itse ovat nauhoittaneet. Sen jälkeen luet Harald Beckerin oikean 14 repliikin haastattelun kokonaisena ja vertailet kolmea tuttua kysymystä. Franzin ja Jörgin äänite ei ole Haraldin ääni eikä hänen haastattelunsa. Haraldin oman COERLL-videon pysyvää, toimivaa ja yksityisyyden kannalta hyväksyttävää tiedostoa ei ole vielä pystytty varmistamaan. Siksi Haraldin lukemistehtävistä ei anneta kuuntelutaitopisteitä."},
+  text:"L052 · Haraldin esittely ja alkuperäinen vertailukuuntelu (30 min). Tässä on kaksi EROTETTUA aineistoa. Ensin kuuntelet Franzin ja Jörgin henkilöhahmojen oikean, ihmisten äänittämän 14 sekunnin keskustelun (M-COM-01). Sen jälkeen luet Harald Beckerin oikean 14 repliikin haastattelun kokonaisena ja vertailet kolmea tuttua kysymystä. Franzin ja Jörgin äänite ei ole Haraldin ääni eikä hänen haastattelunsa. Haraldin oman COERLL-videon pysyvää, toimivaa ja yksityisyyden kannalta hyväksyttävää tiedostoa ei ole vielä pystytty varmistamaan. Siksi Haraldin lukemistehtävistä ei anneta kuuntelutaitopisteitä."},
  {id:"los1-c10-contrast-plan",version:"0.1.0",kind:"table",
   headers:["Osuus","Tee näin","Arvioitu aika"],
   rows:[
