@@ -33,7 +33,16 @@ export const reviewTwoItems:readonly MixedReviewItem[]=[
  write('REV2-12','C10','Kirjoita 6–8 repliikin kohtelias ensikohtaaminen kuvitteellisen opettajan kanssa. Käytä Sie-muotoa ja nimen kysymistä.','A: Guten Tag! Wie heißen Sie? B: Guten Tag! Ich heiße Herr Weber. Und Sie? A: Ich heiße Mia. Woher kommen Sie? B: Ich komme aus Deutschland. A: Auf Wiedersehen!','Kohtelias Sie isolla, kysymyksissä heißen ja kommen sekä kohtelias hyvästely.'),
  say('REV2-13','C10','Esitä ääneen 4–6 lyhyttä virkettä kuvitteellisesta esittäytymisestä. Vertaa malliin itse, älä odota automaattista ääntämisarvosanaa.','Hallo! Ich heiße Lea. Ich komme aus Finnland. Wie heißt du? Mir geht es gut. Tschüss!'),
  choice('REV2-14','C10','Kumpi alkuperäisten COERLL-haastattelujen väite on oikea?','Berna tulee Kielistä ja Harald Münchenistä.','Molemmat tulevat Kielistä.','Molemmat tulevat Berliinistä.','Berna kertoo Ich komme aus Kiel, Harald puolestaan Ich komme ursprünglich aus München.'),
+
+ choice('REV2-15','C01','Tervehdit uutta tuttavaa aamulla. Mikä on sopiva opittu tervehdys?','Guten Morgen!','Auf Wiedersehen!','Gute Nacht!','Guten Morgen on aamun tervehdys.'),
+ choice('REV2-16','C08','Mitä voit sanoa opettajalle, kun et ymmärrä?','Ich verstehe nicht.','Ich heiße Max.','Am Montag um drei Uhr.','Ich verstehe nicht on oma opittu avunpyyntöfraasi.'),
+ choice('REV2-17','C06','Minkä ikäinen Larissa on Monika Janickan toisessa alkuperäisessä minidialogissa?','zwölf','neunzehn','fünf','Larissa vastaa Ich bin schon zwölf Jahre alt.'),
+ fill('REV2-18','C07','Täydennä: Bitte ____ Sie. (Pyydä tavaamaan.)',['buchstabieren'],'Bitte buchstabieren Sie on kohtelias tavaamispyyntö.'),
+ choice('REV2-19','C09','Mikä ilmaus tarkoittaa torstaina kello neljä?','Am Donnerstag um vier Uhr.','Um Donnerstag am vier Uhr.','Am Donnerstag vier um.','Am + viikonpäivä, um + kellonaika.'),
+ write('REV2-20','C10','Kirjoita kuvitteellinen 8–10 repliikin tutustuminen, jossa yhdistät vähintään viisi kirjan eri taitoa: tervehdys, nimi, alkuperä, ikä, kohtelias tai tuttavallinen puhuttelu, vointi, kirjoitusasun kysyminen, hitaamman puheen pyyntö tai viikonpäivä. Käytä kummallekin sopivaa hyvästelyä.','A: Hallo! Wie heißt du? B: Ich heiße Lisa. Und du? A: Ich bin Ben. Woher kommst du? B: Ich komme aus Finnland. Wie alt bist du? A: Ich bin siebzehn Jahre alt. Wie geht es dir? B: Mir geht es gut. Tschüss!','Vähintään kahdeksan repliikkiä ja viisi erilaista opittua taitoa, molempien vuorot ja tilanteeseen sopiva hyvästely. Ei oikeita henkilökohtaisia tietoja.'),
+
 ];
 /** A completed task is a submitted answer, not a correct score or language grade. */
 export const reviewTwoInitialIds=['REV2-01','REV2-02','REV2-03','REV2-04','REV2-05','REV2-06'] as const;
 export const reviewTwoApplicationIds=['REV2-07','REV2-08','REV2-09','REV2-10','REV2-11','REV2-12'] as const;
+export const reviewTwoFinalIds=['REV2-15','REV2-16','REV2-17','REV2-18','REV2-19','REV2-20'] as const;
