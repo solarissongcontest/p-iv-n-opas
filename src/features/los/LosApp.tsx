@@ -7,6 +7,7 @@ import { Reader, type ReaderNote } from "./Reader";
 import { useLosRecord, losSyncMessage } from "./data/useLosRecord";
 import { LessonRunner } from "./LessonRunner";
 import { ReviewWorkspace, ReviewEvidence } from "./ReviewWorkspace";
+import { VocabularyIndex } from "./VocabularyIndex";
 import { ExerciseEngine } from "./exercises/ExerciseEngine";
 
 type NavItem = { segment: string; title: string };
@@ -205,12 +206,6 @@ function ChapterPage({ book, chapter, subsection }: { book: Book; chapter: Chapt
       </div>}
   </section>;
 }
-function WordIndex({ book }: { book: Book }) {
-  const blocks = book.blocks.filter(block => block.kind === "vocabulary");
-  return <section><h1>Sanastot</h1><p className="los-intro">Kirjakohtainen sanasto ja yhteinen sanakirja ovat eri kokonaisuuksia.</p>
-    {blocks.length ? <Reader book={book} blocks={blocks} title="Sanastot"/> :
-      <Empty title="Sanastoa ei vielä saatavilla">Kappaleiden tarkistetut sana- ja ilmauslistat lisätään oppimateriaalin mukana.</Empty>}</section>;
-}
 function GlobalDictionary() {
   return <div className="los-app">
     <div className="los-context"><a href={LOS_BASE_PATH}><ArrowLeft size={17}/> Oppikirjasto</a><span>Kaikki kahdeksan kirjaa</span></div>
@@ -240,7 +235,7 @@ function NotesIndex({ book }: { book: Book }) {
 function GenericSection({ book, segment }: { book: Book; segment: string }) {
   if (segment === "kertaus") return <ReviewWorkspace book={book}/>;
   if (segment === "osaaminen") return <ReviewEvidence book={book}/>;
-  if (segment === "sanastot") return <WordIndex book={book}/>;
+  if (segment === "sanastot") return <VocabularyIndex book={book}/>;
   if (segment === "muistiinpanot") return <NotesIndex book={book}/>;
   if (segment === "kielioppi") {
     const blocks = book.blocks.filter(block => block.kind === "grammar");
