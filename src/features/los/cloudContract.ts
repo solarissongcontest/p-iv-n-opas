@@ -23,6 +23,7 @@ export function validateLosCloudDraft(raw:unknown):raw is LosChapterDraft {
     typeof d.selfAssessment!=="string" || d.selfAssessment.length>5000 ||
     typeof d.bookmarked!=="boolean")return false;
   if(!isStringRecord(d.practiceAnswers)||!isStringRecord(d.testAnswers))return false;
+  if(d.readerMarks!==undefined && !isStringRecord(d.readerMarks))return false;
   if(!Array.isArray(d.practiceChecked)||d.practiceChecked.length>200 ||
     !d.practiceChecked.every(item=>typeof item==="string" && item.length<=100))return false;
   if(d.testSubmittedAt!==null && (typeof d.testSubmittedAt!=="string"||!isValidIso(d.testSubmittedAt)))return false;
@@ -39,6 +40,7 @@ export function validLosChapter(bookId:unknown,chapterId:unknown):bookId is numb
 export function draftIsEmpty(draft:LosChapterDraft) {
   return !draft.note.trim() && !draft.applicationDraft.trim() && !draft.bookmarked &&
     !Object.values(draft.practiceAnswers).some(Boolean) &&
+    !(draft.readerMarks && Object.values(draft.readerMarks).some(Boolean)) &&
     !Object.values(draft.testAnswers).some(Boolean) &&
     !draft.testSubmittedAt && !draft.selfAssessment.trim();
 }
