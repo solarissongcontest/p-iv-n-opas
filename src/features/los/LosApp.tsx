@@ -80,8 +80,8 @@ function BookHome({ book }: { book: Book }) {
     <div className="los-book-hero"><BookCover book={book}/>
       <div><p className="los-eyebrow">{book.moduleTitle}</p><h1>{book.title}</h1>
         <p>{book.description}</p>
-        <a className="los-button los-button-primary" href={bookPath(book, book.lessons.some(lesson => lesson.steps.length > 0) ? "oppitunti/002" : "sisalto")}>
-          {book.lessons.some(lesson => lesson.steps.length > 0) ? "Aloita ensimmäinen harjoitustunti" : "Avaa sisällysluettelo"} <ArrowRight size={17}/>
+        <a className="los-button los-button-primary" href={bookPath(book, book.lessons.some(lesson => lesson.steps.length > 0) ? "oppitunti/001" : "sisalto")}>
+          {book.lessons.some(lesson => lesson.steps.length > 0) ? "Aloita nollasta · L001" : "Avaa sisällysluettelo"} <ArrowRight size={17}/>
         </a>
       </div>
     </div>
