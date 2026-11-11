@@ -10,6 +10,7 @@ import {ExamSession} from './ExamSession';
 import {type FirstLessonStep} from './firstLessons';
 import {guidedLessons} from './guidedLessons';
 import {lessonAudioProof,lessonRequiresReflection} from './lessonProofs';
+import {hasExerciseAttempt} from './exerciseAttempt';
 import {auditLosRelease} from './releaseAudit';
 import {NumberPractice} from './NumberPractice';
 
@@ -314,6 +315,7 @@ function ExerciseCard({exercise,chapter,store,exam=false,fontSize}:{exercise:Exe
  const [result,setResult]=useState<Grade|null>(null);
  const [submitted,setSubmitted]=useState(false);
  const [mediaFailed,setMediaFailed]=useState(false);
+ const [speechConfirmed,setSpeechConfirmed]=useState(false);
  useEffect(()=>{if(typeof prev==='string')setAnswer(prev);else if(prev&&typeof prev==='object'&&'blockId' in prev)setHighlight(prev as TextAnchor);},[prev]);
  const update=(value:string)=>{setAnswer(value);store.put(draftKey,value);setResult(null);};
  const source=chapter.blocks.find(b=>b.id===exercise.blockId);
@@ -323,7 +325,9 @@ function ExerciseCard({exercise,chapter,store,exam=false,fontSize}:{exercise:Exe
  let mapping:Record<string,string>={};
  if(answer){try{const parsed:unknown=JSON.parse(answer);if(parsed&&typeof parsed==='object'&&!Array.isArray(parsed))mapping=parsed as Record<string,string>;}catch{/* Not a mapping answer */}}
  const setMapped=(left:string,value:string)=>update(JSON.stringify({...mapping,[left]:value}));
+ const canSubmit=hasExerciseAttempt(exercise,answer,highlight,speechConfirmed);
  const submit=()=>{
+  if(!canSubmit)return;
   const grade=gradeExercise({...exercise,sourceText:source?.text} as Exercise & {sourceText?:string},(exercise.type==='highlight'||exercise.type==='find-text')?highlight:answer);
   setResult(grade);setSubmitted(true);
   const entry={answer:(exercise.type==='highlight'||exercise.type==='find-text')?highlight:answer,grade:grade.status,at:new Date().toISOString(),version:LOS_VERSION,exam};
@@ -363,13 +367,19 @@ function ExerciseCard({exercise,chapter,store,exam=false,fontSize}:{exercise:Exe
    <div>{remaining.map((token,i)=><button key={token+i} type="button" onClick={()=>update([...ordered,token].join(' | '))}>{token}</button>)}</div>
    <button className="los-quiet" onClick={()=>update('')}>Aloita järjestys alusta</button>
   </div>:null}
-  {exercise.type==='speech'?<SpeechRecorder/>:null}
+  {exercise.type==='speech'?<>
+   <SpeechRecorder/>
+   <label className="los-speech-confirm"><input type="checkbox" checked={speechConfirmed} onChange={e=>setSpeechConfirmed(e.target.checked)}/>
+    Harjoittelin lauseet ääneen. Ääntämistä ei arvioida automaattisesti.
+   </label>
+  </>:null}
   {!exam&&exercise.hint?<button className="los-quiet" onClick={()=>setHint(!hint)}>{hint?'Piilota vihje':'Näytä vihje'}</button>:null}
   {hint&&!exam?<p className="los-hint">{exercise.hint}</p>:null}
   <div className="los-actions">
-   <button onClick={submit} disabled={(exam&&submitted)||(exercise.type==='video'&&!exercise.reviewedMedia)}>{exercise.type==='speech'||exercise.type==='writing'?'Avaa itsearviointimalli':'Tarkista vastaus'}</button>
+   <button onClick={submit} disabled={!canSubmit||(exam&&submitted)}>{exercise.type==='speech'||exercise.type==='writing'?'Avaa itsearviointimalli':'Tarkista vastaus'}</button>
    {!exam&&result?<button className="los-quiet" onClick={()=>{setResult(null);setSubmitted(false);setHint(false);}}>Yritä uudelleen</button>:null}
   </div>
+  {!canSubmit&&!result?<p className="los-meta">Täydennä ensin vastaus. Kirjoitustehtävään tarvitaan vähintään 20 merkkiä; puheharjoituksessa vahvista, että harjoittelit ääneen. Tyhjää vastausta ei voi merkitä yritykseksi.</p>:null}
   {result?<p role="status" className={'los-feedback los-'+result.status}><b>{result.status==='correct'?'Oikein':result.status==='self-review'?'Itsearviointi':'Tarkista vielä'}</b> · {result.feedback}</p>:null}
  </article>;
 }
