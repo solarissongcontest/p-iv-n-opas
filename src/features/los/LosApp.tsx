@@ -66,7 +66,7 @@ function Media({chapter,store,fontSize=18,onAudioCompleted,lessonId}:{chapter:Ch
  if(chapter.id==='C06')return <>
   <Label>TEKSTI B · ERILLINEN ALKUPERÄINEN KERTAUSÄÄNITE</Label>
   <h3>Franz ja Jörg: Wie alt bist du?</h3>
-  <p>C06:n Teksti A koostuu Monika Janickan neljästä alkuperäisestä ikäminidialogista. Seuraava ääni on **eri lähteen** jo C01:ssa julkaistu 14 sekunnin Franz–Jörg-keskustelu. Ääni ei ole Janickan ZPE-keskustelujen nauhoitus.</p>
+  <p>C06:n Teksti A koostuu Monika Janickan neljästä alkuperäisestä ikäminidialogista. Seuraava ääni on eri lähteen jo C01:ssa julkaistu 14 sekunnin Franz–Jörg-keskustelu. Ääni ei ole Janickan ZPE-keskustelujen nauhoitus.</p>
   <Audio src="https://commons.wikimedia.org/wiki/Special:Redirect/file/Gespr%C3%A4chVorstellung.ogg"
    title="Xzapro4 ja Erkan Yilmaz: Franz ja Jörg (14 sekuntia)"
    onCompleted={()=>{
@@ -425,10 +425,12 @@ function FirstLessonRunner({lessonId,store,fontSize,onNext,onContents}:{lessonId
  const allSubmitted=requiredIds.every(id=>
   id in exams?Boolean(item(store,'exam:submitted:'+id)):Boolean(item(store,'latest:'+id)));
  const hasGoal=lessonId!=='L001'||valueString(store,'goal:los1').trim().length>=8;
- const hasReflection=!['L006','L011','L016','L021','L026','L027','L028','L029','L030','L040','L041','L050','L055','L056','L058','L060'].includes(lessonId)||valueString(store,'lesson:reflection:'+lessonId).trim().length>=12;
+ const hasReflection=!['L006','L011','L016','L021','L026','L027','L028','L029','L030','L035','L040','L041','L045','L050','L055','L056','L057','L058','L059','L060'].includes(lessonId)||valueString(store,'lesson:reflection:'+lessonId).trim().length>=12;
  const mediaDone=(plan?.requiredMediaIds??[]).every(id=>Boolean(item(store,'media:completed:'+id)));
  const midtermAttempt=typeof item(store,'exam:no:EX-MID')==='number'?item(store,'exam:no:EX-MID') as number:0;
  const hasMidtermWriting=lessonId!=='L030'||valueString(store,'exam:self:EX-MID:'+midtermAttempt).trim().length>=30;
+ const finalAttempt=typeof item(store,'exam:no:EX-FINAL')==='number'?item(store,'exam:no:EX-FINAL') as number:0;
+ const hasFinalWriting=lessonId!=='L059'||valueString(store,'exam:self:EX-FINAL:'+finalAttempt).trim().length>=60;
  const canAdvance=(current.kind!=='practice'||allSubmitted)&&(current.kind!=='goal'||hasGoal)&&(current.kind!=='reflection'||hasReflection);
  const fulfilled=mediaDone&&plan.requiredIds.every(id=>id in exams?Boolean(item(store,'exam:submitted:'+id)):Boolean(item(store,'latest:'+id)));
  const completed=item(store,'lesson:'+lessonId)===true&&store.status==='saved';
@@ -439,7 +441,7 @@ function FirstLessonRunner({lessonId,store,fontSize,onNext,onContents}:{lessonId
   store.put('lesson:step:'+lessonId,Math.min(stepIndex+1,plan.steps.length-1));
   store.put('step:'+lessonId+':'+stepIndex,{completedAt:new Date().toISOString(),version:LOS_VERSION});
   if(last){
-   if(!fulfilled||!hasGoal||!hasReflection||!hasMidtermWriting||!priorStepsDone)return;
+   if(!fulfilled||!hasGoal||!hasReflection||!hasMidtermWriting||!hasFinalWriting||!priorStepsDone)return;
    store.put('lesson:'+lessonId,true);
    return;
   }
@@ -512,11 +514,12 @@ function FirstLessonRunner({lessonId,store,fontSize,onNext,onContents}:{lessonId
    <button className="los-quiet" disabled={stepIndex===0} onClick={()=>setStepIndex(i=>Math.max(0,i-1))}>Edellinen vaihe</button>
    {!last?<button disabled={!canAdvance} onClick={next}>Jatka seuraavaan vaiheeseen <ChevronRight size={17}/></button>:
     completed?<button onClick={onNext}>Seuraava oppitunti <ChevronRight size={17}/></button>:
-    <button disabled={!canAdvance||!fulfilled||!hasMidtermWriting||!priorStepsDone||store.status!=='saved'} onClick={next}>
+    <button disabled={!canAdvance||!fulfilled||!hasMidtermWriting||!hasFinalWriting||!priorStepsDone||store.status!=='saved'} onClick={next}>
      <CheckCircle2 size={17}/> Merkitse oppitunti suoritetuksi
     </button>}
   </div>
   {last&&store.status!=='saved'?<p className="los-meta" role="status">Suorituksen viimeistely vaatii vahvistetun palvelintallennuksen. Tila: {store.status}.</p>:null}
+  {last&&!hasFinalWriting?<p role="status" className="los-warning">Loppukokeen oma saksankielinen kirjoitusnäyte puuttuu tai on liian lyhyt. Palauta kokeen yhteydessä vähintään noin kolme omaa virkettä.</p>:null}
   {last&&!hasMidtermWriting?<p role="status" className="los-warning">Välikokeen itsearvioitu kirjoitusnäyte puuttuu tai on liian lyhyt. Avaa koe uudelleen ja kirjoita vähintään noin kolme lyhyttä virkettä sen omaan kirjoituskenttään.</p>:null}
   {last&&!priorStepsDone?<p role="status" className="los-warning">Oppitunnin aiempia vaiheita ei ole vielä merkitty käydyiksi. Palaa keskeneräisiin vaiheisiin, tee tehtävät ja jatka sitten loppuun.</p>:null}
   {last&&!fulfilled?<p className="los-warning">Kaikkia oppitunnin tehtäviä ei ole vielä palautettu. Voit avata aiemman vaiheen yllä olevasta vaihevalikosta.</p>:null}
@@ -595,7 +598,7 @@ function LosAppForOwner({ownerId}:{ownerId:string}){
      </>:null}
      {view.kind==='lessons'?<><h1>Opetuspolku</h1><p>60 joustavaa noin 30 minuutin oppituntia, ei aikarajalaskuria. Tämä versio sisältää käyttökelpoiset alkutunnit. Muut tunnit erotetaan keskeneräisinä.</p><div className="los-lesson-list">{lessons.map(l=><button key={l.id} onClick={()=>go({kind:'lesson',lesson:l.id})}><b>{l.id}</b><span>{l.name}<small>{l.section} · noin 30 min</small></span><span>{item(store,'lesson:'+l.id)===true?'Suoritettu':l.status==='initial-material'?'Aloita':'Sisältö kesken'}</span></button>)}</div></>:null}
      {view.kind==='lesson'&&lesson&&guidedLessons.some(p=>p.id===lesson.id)?<FirstLessonRunner key={lesson.id} lessonId={lesson.id} store={store} fontSize={fontSize} onNext={()=>{const next=lessons.slice(Number(lesson.id.slice(1))).find(l=>l.status==='initial-material');go(next?{kind:'lesson',lesson:next.id}:{kind:'progress'});}} onContents={()=>go({kind:'contents'})}/>:null}
-     {view.kind==='lesson'&&lesson&&lesson.id==='L059'?<ExamSession id='EX-FINAL' store={store} onExit={()=>go({kind:'lessons'})} onSubmit={()=>store.put('exam:preview:'+lesson.id,{submittedAt:new Date().toISOString(),version:LOS_VERSION,status:'provisional-assessment'})}/>:null}
+     
      {view.kind==='lesson'&&lesson&&!guidedLessons.some(p=>p.id===lesson.id)&&lesson.id!=='L059'?<><Label>TUNTI {Number(lesson.id.slice(1))} / 60</Label><h1>{lesson.name}</h1><p>{lesson.section} · noin 30 minuuttia, omaan tahtiin</p>
       {lesson.status==='pending'?<p className="los-warning">Tämän tunnin julkaisuportti on edelleen avoin. Linkitettyä sisältöä voi tarkastella, mutta tuntia ei merkitä valmiiksi keskeneräisen aineiston perusteella.</p>:null}
       <div className="los-stats"><span>Vaihe <b>{step+1}/{lessonSteps.length}</b></span><span>Tila <b>{item(store,'lesson:'+lesson.id)===true?'Suoritettu':'Kesken'}</b></span></div>
