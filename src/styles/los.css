@@ -344,3 +344,26 @@
   .los-dialogue-turn { padding: 14px 0; }
   .los-attribution-links a { min-height: 44px; }
 }
+
+/* Contextual glossary uses real word ranges. No synthetic dictionary results. */
+.los-gloss-word {
+  display: inline; min-height: 0; padding: 0;
+  border: 0; border-bottom: 1px dotted var(--los-book-accent-readable);
+  border-radius: 0; background: transparent; color: inherit;
+  font: inherit; line-height: inherit; text-decoration: none;
+  cursor: pointer; overflow-wrap: inherit;
+}
+.los-gloss-word:hover { color: var(--los-book-accent-readable); background: var(--los-surface-muted); }
+.los-gloss-panel {
+  display: flex; align-items: flex-start; justify-content: space-between; gap: 18px;
+  padding: 16px 18px; border: 1px solid var(--los-border-strong);
+  border-left: 3px solid var(--los-book-accent);
+  border-radius: 10px; margin-top: 24px; background: var(--los-surface-muted);
+}
+.los-gloss-panel b { display: block; font-size: 20px; color: var(--los-ink); margin-bottom: 5px; }
+.los-gloss-panel p { margin: 0 0 5px; }
+.los-gloss-panel small { display: block; }
+@media (max-width: 639px) {
+  .los-gloss-panel { flex-wrap: wrap; }
+  .los-gloss-panel .los-button { margin-left: auto; }
+}
