@@ -12,6 +12,7 @@ import {chapter10Lessons} from './chapter10Lessons.ts';
 import {reviewOneLessons} from './reviewOneLessons.ts';
 import {midtermLesson} from './midtermLesson.ts';
 import {reviewTwoLessons} from './reviewTwoLessons.ts';
+import {finalLessons} from './finalLessons.ts';
 
 /** One ordered canonical list: does not imply all 60 lessons are finished. */
 export const guidedLessons=[
@@ -28,5 +29,6 @@ export const guidedLessons=[
  ...chapter08SourceLessons,
  ...chapter09Lessons,
  ...chapter10Lessons,
- ...reviewTwoLessons
+ ...reviewTwoLessons,
+ ...finalLessons
 ];
