@@ -84,7 +84,7 @@ test('16 exercise schemas are defined, deterministic where reliable, and video c
  const audioChoice=e.find(x=>x.id==='C01-X02')!;
  assert.equal(audioChoice.type,'listen-choice');
  assert.ok(audioChoice.mediaUrl?.includes('commons.wikimedia.org'));
- assert.equal(gradeExercise(audioChoice,'Wie alt bist du?').status,'correct');
+ assert.equal(gradeExercise(audioChoice,'Hallo').status,'correct');
  assert.equal(gradeExercise(e.find(x=>x.id==='C01-X03')!,'Tschüss!').status,'correct');
  const conjugation=allChapterExercises('C02',chapters[1]!.exercises).find(x=>x.type==='conjugation')!;
  assert.equal(gradeExercise(conjugation,JSON.stringify({'ich (heißen)':'heiße','du (heißen)':'heißt','ich (sein)':'bin','du (sein)':'bist'})).status,'correct');
