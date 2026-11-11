@@ -1,4 +1,4 @@
-import { LOS1_C01_TEXT_VERSION } from "./los1C01";
+import { LOS1_C01_TEXT_VERSION } from "./los1C01.ts";
 
 export type LosReaderColor = "yellow" | "pink" | "green" | "blue";
 export const LOS_READER_COLORS: readonly LosReaderColor[] = ["yellow","pink","green","blue"];
