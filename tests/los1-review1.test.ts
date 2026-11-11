@@ -18,7 +18,7 @@ test('L027–L029 have their own 30-minute five-step review plans and reflection
   assert.ok(l.steps.every(s=>s.instructionFi.length>=40));
   assert.equal(lessons.find(x=>x.id===l.id)?.status,'initial-material');
  }
- assert.equal(lessons.find(l=>l.id==='L030')?.status,'pending');
+ assert.equal(lessons.find(l=>l.id==='L030')?.status,'initial-material');
  assert.deepEqual(reviewOneLessons[2]?.requiredMediaIds,['review:L029:M-COM-02']);
 });
 test('new mixed-review IDs cannot be auto-satisfied by earlier chapter answers',()=>{
