@@ -1,5 +1,5 @@
 import type {Exercise} from './content';
-import {c01Exam,c02Exam,c04Exam,c05Exam} from './chapterExam.ts';
+import {c01Exam,c02Exam,c03Exam,c04Exam,c05Exam} from './chapterExam.ts';
 // The assessment banks are independent of chapter practice IDs. No answer key
 // is rendered in ExamSession until the learner submits the whole paper.
 type Item=Exercise;
@@ -97,6 +97,7 @@ export const finalExam:Item[]=[
 export const exams={
  'EX-C01':{title:'Kappaletesti · C01 Hallo!',questions:c01Exam,scope:'C01'},
  'EX-C02':{title:'Kappaletesti · C02 Ich heiße …',questions:c02Exam,scope:'C02'},
+ 'EX-C03':{title:'Kappaletesti · C03 Woher kommst du?',questions:c03Exam,scope:'C03'},
  'EX-C04':{title:'Kappaletesti · C04 Du oder Sie?',questions:c04Exam,scope:'C04'},
  'EX-C05':{title:'Kappaletesti · C05 Wie geht’s?',questions:c05Exam,scope:'C05'},
  'EX-MID':{title:'Välikoe · kappaleet 1–5',questions:midExam,scope:'C01–C05'},
@@ -113,6 +114,11 @@ export const selfAssessment={
  prompt:'Kirjoita itse lyhyt esittelyvuoropuhelu. Tervehdi, kysy toisen nimeä, vastaa omaan nimeesi ja hyvästele.',
  model:'A: Hallo! Wie heißt du? B: Ich heiße Mia. Und du? A: Ich bin Leo. B: Tschüss!',
  criteria:'Tervehdit, kysyit Wie heißt du?, käytit minä-muotoa heiße/bin ja hyvästelit. Arvioi kirjoitus itse.'
+ },
+ 'EX-C03':{
+ prompt:'Kirjoita kaksi kuvitteellista esittäytymistä, joissa kerrot nimen ja kotimaan.',
+ model:'Ich heiße Lina. Ich komme aus Finnland. Ich heiße Leo. Ich komme aus Österreich.',
+ criteria:'Kummassakin on nimi ja oikein muodostettu Ich komme aus ... -lause. Voit käyttää keksittyjä nimiä.'
  },
  'EX-C04':{
  prompt:'Kirjoita tai sano lyhyt kohtelias kohtaaminen kuvitteellisessa palvelutilanteessa.',
@@ -137,7 +143,7 @@ export const selfAssessment={
 } as const;
 export function validateLosExams():string[]{
  const issues:string[]=[];const ids=new Set<string>();
- for(const [name,questions] of [['EX-C01',c01Exam],['EX-C02',c02Exam],['EX-C04',c04Exam],['EX-C05',c05Exam],['EX-MID',midExam],['EX-FINAL',finalExam]] as const){
+ for(const [name,questions] of [['EX-C01',c01Exam],['EX-C02',c02Exam],['EX-C03',c03Exam],['EX-C04',c04Exam],['EX-C05',c05Exam],['EX-MID',midExam],['EX-FINAL',finalExam]] as const){
   if(questions.length!==(name==='EX-MID'?25:name.startsWith('EX-C')?15:50))issues.push(name+' väärä tehtävämäärä');
   for(const e of questions){
    if(ids.has(e.id))issues.push('Duplikaatti '+e.id);
