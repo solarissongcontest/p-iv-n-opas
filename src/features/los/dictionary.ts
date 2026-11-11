@@ -95,3 +95,63 @@ export function searchLosDictionary(entries:readonly DictionaryEntry[],query:str
  return {total:scored.length,
   results:scored.slice(safeOffset,safeOffset+safeLimit)};
 }
+
+
+/** An optional in-book German example, quoted exactly from an existing
+ * licensed source or from a separately identifiable LOS! teaching example.
+ * No sentence generation, fake narrator, inferred translation or web fetch.
+ */
+export type DictionaryContext={
+ de:string;fi:string;blockId:string;bookId:Book["id"];
+ kind:"authentic"|"teaching";sourceTitle?:string;
+};
+function containsExactGermanPhrase(line:string,phrase:string):boolean{
+ const value=line.normalize("NFC").toLocaleLowerCase("de-DE");
+ const needle=phrase.normalize("NFC").toLocaleLowerCase("de-DE");
+ if(!needle)return false;
+ let from=0;
+ while(from<value.length){
+  const at=value.indexOf(needle,from);
+  if(at<0)return false;
+  const before=at>0?value.slice(at-1,at):"";
+  const after=value.slice(at+needle.length,at+needle.length+1);
+  if((!before||!/[\\p{L}\\p{N}]/u.test(before))&&
+     (!after||!/[\\p{L}\\p{N}]/u.test(after)))return true;
+  from=at+1;
+ }
+ return false;
+}
+export function findLosDictionaryContext(books:readonly Book[],
+ entry:DictionaryEntry):DictionaryContext|null{
+ let authored:DictionaryContext|null=null;
+ for(const location of entry.locations){
+  const book=books.find(item=>item.id===location.bookId);
+  const chapter=book?.chapters.find(item=>item.id===location.chapterId);
+  if(!book||!chapter)continue;
+  for(const blockId of chapter.blockIds){
+   const block=book.blocks.find(item=>item.id===blockId);
+   if(!block)continue;
+   if(block.kind==="dialogue"||block.kind==="transcript"){
+    const source=book.sources.find(item=>item.id===block.sourceId);
+    if(!source||source.permittedMode==="pending"||
+      source.readiness==="blocked")continue;
+    const lines=block.kind==="dialogue"?
+      block.turns.map(turn=>({de:turn.text,fi:turn.translationFi??""})):
+      block.lines.map(line=>({de:line.de,fi:line.fi}));
+    const found=lines.find(line=>line.de.length<=200&&
+      containsExactGermanPhrase(line.de,entry.de));
+    if(found)return {de:found.de,fi:found.fi,
+      blockId:block.id,bookId:book.id,kind:"authentic",sourceTitle:source.title};
+   }
+   // Own teaching examples are a fallback. They must NEVER be presented
+   // as human-authored original source dialogue.
+   if(block.kind==="grammar"&&!authored){
+    const found=block.examples.find(line=>line.de.length<=200&&
+      containsExactGermanPhrase(line.de,entry.de));
+    if(found)authored={de:found.de,fi:found.fi,
+      blockId:block.id,bookId:book.id,kind:"teaching"};
+   }
+  }
+ }
+ return authored;
+}
