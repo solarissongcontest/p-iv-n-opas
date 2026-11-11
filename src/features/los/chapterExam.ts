@@ -119,3 +119,22 @@ export const c07Exam:Exercise[]=[
  truth('EX-C07-14','Väite: alkuperäisen nimen tavaamisharjoituksen yhteydessä opiskelijan pitää antaa oma oikea puhelinnumeronsa.','Tarua','Oppikirjassa käytetään kuvitteellisia nimiä, eikä henkilökohtaisia puhelinnumeroita kerätä.'),
  fill('EX-C07-15','Täydennä: Noch einmal, ____! (Vielä kerran, kiitos!)',['bitte'],'Noch einmal, bitte! on valmis kohtelias toistopyyntö.')
 ];
+
+
+export const c09Exam:Exercise[]=[
+ choice('EX-C09-01','Miten sanot maanantai saksaksi?',['Montag','Mittwoch','Sonntag'],'Montag','Montag tarkoittaa maanantaita.'),
+ choice('EX-C09-02','Mikä viikonpäivä on Donnerstag?',['torstai','tiistai','sunnuntai'],'torstai','Donnerstag on torstai.'),
+ choice('EX-C09-03','Mikä viikonpäivä on Sonntag?',['sunnuntai','lauantai','maanantai'],'sunnuntai','Sonntag tarkoittaa sunnuntaita.'),
+ choice('EX-C09-04','Miten sanot keskiviikko saksaksi?',['Mittwoch','Donnerstag','Freitag'],'Mittwoch','Mittwoch on keskiviikko.'),
+ fill('EX-C09-05','Täydennä: ____ Montag. (Maanantaina.)',['am'],'Am Montag on viikonpäivän ilmaus.'),
+ fill('EX-C09-06','Täydennä: ____ drei Uhr. (Kello kolme.)',['um'],'Um kolme Uhr ei ole saksaa; sanotaan um drei Uhr.'),
+ choice('EX-C09-07','Mikä tarkoittaa perjantaina?',['am Freitag','um Freitag','auf Freitag'],'am Freitag','Am Freitag on perjantaina.'),
+ choice('EX-C09-08','Miten sanot kello neljä?',['um vier Uhr','am vier Uhr','am Donnerstag'],'um vier Uhr','Um vier Uhr on kello neljä.'),
+ choice('EX-C09-09','Miten yhdistät maanantain ja kello kolme?',['Am Montag um drei Uhr.','Um Montag am drei Uhr.','Am drei um Montag.'],'Am Montag um drei Uhr.','Am + viikonpäivä, um + kellonaika.'),
+ choice('EX-C09-10','Mikä on saksan sana huomenna?',['morgen','heute','wann'],'morgen','Morgen on tässä huomenna; heute on tänään.'),
+ choice('EX-C09-11','Mikä on saksan sana milloin?',['wann','wo','wie'],'wann','Wann? kysyy aikaa.'),
+ truth('EX-C09-12','Väite: viikonpäivät kirjoitetaan saksassa substantiiveina isolla alkukirjaimella.','Totta','Montag, Dienstag ja muut viikonpäivät kirjoitetaan isolla.'),
+ choice('EX-C09-13','Mitä tarkoittaa Viertel vor drei, jonka Greta sanoo?',['varttia vaille kolme','varttia yli kolme','tasaltaan kolme'],'varttia vaille kolme','Lähdetekstin Viertel vor drei tarkoittaa 14.45. Tämä on tunnistuskysymys, ei koko varttiaikalukujen tuottaminen.'),
+ choice('EX-C09-14','Kuka kertoo alkuperäisessä Franz–Greta-dialogissa pelaavansa kolmelta jalkapalloa?',['Franz','Greta','Jörg'],'Franz','Franz sanoo Ich spiele um drei Fußball.'),
+ fill('EX-C09-15','Täydennä: Am Dienstag ____ vier Uhr.',['um'],'Am Dienstag um vier Uhr. on tiistaina kello neljä.')
+];
