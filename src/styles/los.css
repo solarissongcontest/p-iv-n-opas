@@ -942,3 +942,26 @@
  .los-dictionary-direction label { margin-right:12px; }
  .los-dictionary-entry { padding:14px; }
 }
+
+
+/* Keyboard-accessible, bounded dictionary pagination and focused book-word links. */
+.los-dictionary-pagination {
+ display:flex; align-items:center; justify-content:center;
+ gap:14px; flex-wrap:wrap; margin:22px 0;
+ font-size:14px; color:var(--los-ink-muted);
+}
+.los-dictionary-pagination > button { min-height:44px; }
+.los-dictionary-pagination > span { font-variant-numeric:tabular-nums; }
+.los-dictionary-pagination button:disabled { opacity:.45; cursor:not-allowed; }
+.los-word-list li:target,
+.los-word-list li:focus {
+ border-radius:8px;
+ outline:2px solid #B7473C;
+ outline-offset:2px;
+ scroll-margin-block:120px;
+}
+@media (max-width:479px) {
+ .los-dictionary-pagination { justify-content:stretch; }
+ .los-dictionary-pagination > button { flex:1 1 42%; }
+ .los-dictionary-pagination > span { order:-1; flex-basis:100%; text-align:center; }
+}
