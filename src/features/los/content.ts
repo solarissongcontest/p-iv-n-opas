@@ -15,7 +15,7 @@ export type Chapter = {
   attribution:string; license:string; status:'text-reviewed'|'source-pending';
   sections:readonly string[]; blocks:Block[]; vocab:Word[]; teaching:string[];
   grammar:{title:string; explanation:string; examples:[string,string][]};
-  culture:string; media?:{sourceId:string;title:string;url:string; license:string};
+  culture:string; media?:{sourceId:string;title:string;url:string;license:string;sourceUrl?:string;attribution?:string;transcript?:Block[];durationSeconds?:number};
   exercises:Exercise[];
 };
 export const sections = ['Aloita','Teksti A','Ymmärrä','Sanasto','Kielioppi','Teksti B','Harjoittele','Käytä saksaa','Kulttuuri','Kappaletesti'] as const;
@@ -82,6 +82,19 @@ export const chapters:Chapter[] = [
  teaching:['Kysy toisen nimeä kysymyksellä Wie heißt du? Vastaa Ich heiße ... tai Ich bin ... .', 'Verbin muoto muuttuu puhujan mukaan: ich heiße, du heißt. Ich bin ja du bist ovat sein-verbin muotoja. Tässä riittää opetella nämä muodot.', 'Lauseessa Ich heiße Greta tekijä ich tulee ennen verbiä heiße. Kysymyssana Wie aloittaa kysymyksen Wie heißt du?'],
  grammar:{title:'Heißen ja sein: ich ja du',explanation:'Saksan verbin muoto muuttuu persoonan mukaan. Heißen = olla nimeltään: ich heiße, du heißt. Sein = olla: ich bin, du bist. Älä käytä muotoa ich heißt.',examples:[['Ich heiße Greta.','Olen nimeltäni Greta.'],['Wie heißt du?','Mikä sinun nimesi on?'],['Ich bin Franz.','Minä olen Franz.']]},
  culture:'Etunimellä puhuttelu on tavallista tuttavallisissa tilanteissa. Herr ja Frau esiintyvät sukunimen yhteydessä kohteliaassa puhuttelussa.',
+ media:{
+  sourceId:'M-COM-02',title:'Deutsch Dialog. Ich bin Peter (12 s)',
+  url:'https://commons.wikimedia.org/wiki/Special:Redirect/file/Deutsch_Dialog_._Ich_bin_Peter.ogg',
+  sourceUrl:'https://commons.wikimedia.org/wiki/File:Deutsch_Dialog_._Ich_bin_Peter.ogg',
+  license:'CC BY-SA 3.0',durationSeconds:12,
+  attribution:'Ariser (2011), alkuperäinen nelirepliikkinen äänitetty esittelydialogi. Ei muutoksia saksankielisiin repliikkeihin.',
+  transcript:[
+   {id:'c02-b-1',speaker:'Thomas',text:'Wie heißt du?'},
+   {id:'c02-b-2',speaker:'Takashi',text:'Ich heiße Takashi. Und du?'},
+   {id:'c02-b-3',speaker:'Thomas',text:'Ich bin Thomas. Das ist Peter. Wir kommen aus Berlin.'},
+   {id:'c02-b-4',speaker:'Takashi',text:'Ich komme aus Kyoto. Ich bin Japaner.'}
+  ]
+ },
  exercises:[
  {id:'C02-E01',type:'fill',prompt:'Täydennä: Ich ____ Greta.',accepted:['heiße'],hint:'Verbi on heißen.',explanation:'Ich heiße on oikea minä-muoto.'},
  {id:'C02-E02',type:'fill',prompt:'Täydennä: Wie ____ du?',accepted:['heißt'],hint:'Du-persoona päättyy tässä -t.',explanation:'Du heißt, joten kysymys on Wie heißt du?'},
