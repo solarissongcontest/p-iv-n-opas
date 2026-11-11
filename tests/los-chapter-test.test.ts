@@ -4,6 +4,7 @@ import { LOS_BOOKS } from "../src/features/los/books.ts";
 import { evaluateExercise } from "../src/features/los/exercises/evaluate.ts";
 import {
   emptyChapterTestRecord, gradeChapterTest, missingChapterTestAnswers,
+  selectedTestExerciseIds,
   missingSpeechAssessments, restartChapterTest, selectedTestExercises,
   type ChapterTestRecord,
 } from "../src/features/los/chapterTest.ts";
@@ -98,8 +99,53 @@ test("a returned assessment is locked until explicit retry and previous score is
   assert.deepEqual(retry.answers, {});
   assert.deepEqual(retry.selfAssessment, {});
   assert.equal(retry.submission, null);
-  assert.deepEqual(retry.previousResults, [{ submittedAt: grade.submittedAt, score: 12, maximum: 12 }]);
+  assert.equal(retry.attemptNumber, 1);
+  assert.equal(retry.previousResults[0]?.submittedAt, grade.submittedAt);
+  assert.equal(retry.previousResults[0]?.score, 12);
+  assert.equal(retry.previousResults[0]?.maximum, 12);
+  assert.equal(retry.previousResults[0]?.outcomes?.length, 12);
+  assert.deepEqual(retry.previousResults[0]?.answers, ready.answers);
   const second = gradeChapterTest(definition, questions, draftReady(), "2026-11-11T10:02:00Z");
   assert.equal(second?.maximum, 12);
   assert.equal(restartChapterTest(retry).previousResults.length, 1);
+});
+
+
+test("retakes select other authored questions, not just reorder the first answer choices", () => {
+  assert.equal(definition.alternativeExerciseIds?.length, 12);
+  const variant0 = selectedTestExerciseIds(definition, 0);
+  assert.deepEqual(variant0, definition.exerciseIds);
+  const seen = new Set<string>();
+  for (let attempt = 0; attempt < 32; attempt++) {
+    const form = selectedTestExerciseIds(definition, attempt);
+    const previous = attempt > 0 ? selectedTestExerciseIds(definition, attempt - 1) : null;
+    assert.equal(form.length, 12);
+    assert.equal(new Set(form).size, 12);
+    assert.ok(form.every(id => book.exercises.some(e => e.id === id)));
+    if (previous) assert.notDeepEqual(form, previous);
+    seen.add(form.join(","));
+  }
+  assert.equal(seen.size, 32);
+  assert.ok(selectedTestExerciseIds(definition, 1).some((id, i) => id !== variant0[i]));
+});
+
+test("a retake grades against the current authored form, never stale first-attempt answers", () => {
+  const firstDraft = draftReady();
+  const first = gradeChapterTest(definition, questions, firstDraft, "2026-11-11T10:00:00Z");
+  assert.ok(first);
+  const retry = restartChapterTest({ ...firstDraft, submission: first });
+  const nextQuestions = selectedTestExercises(definition, book.exercises, retry.attemptNumber);
+  assert.equal(nextQuestions.length, 12);
+  assert.ok(nextQuestions.some((question, i) => question.id !== questions[i]?.id));
+  assert.equal(gradeChapterTest(definition, questions, retry, "2026-11-12T10:00:00Z"), null);
+  const prepared = {
+    ...retry,
+    answers: Object.fromEntries(nextQuestions.map(question => [question.id, correctAnswer(question)])),
+    selfAssessment: Object.fromEntries(definition.speechCriteria.map(item => [item.id, "harjoiteltavaa"])),
+  };
+  const result = gradeChapterTest(definition, nextQuestions, prepared, "2026-11-12T10:00:00Z");
+  assert.equal(result?.score, 12);
+  assert.equal(result?.attemptNumber, 1);
+  assert.ok(result?.outcomes.every((row, i) => row.exerciseId === nextQuestions[i]?.id));
+  assert.equal(result?.maximum, 12);
 });
