@@ -19,7 +19,7 @@ function Attribution({ source }: { source: SourceAttribution | undefined }) {
   </aside>;
 }
 function SafeMedia({ block, source }: {
-  block: Extract<ContentBlock, { kind: "media" }>; source?: SourceAttribution;
+  block: Extract<ContentBlock, { kind: "media" }>; source: SourceAttribution | undefined;
 }) {
   const [failed, setFailed] = useState(false);
   let validVideo = false;
@@ -54,7 +54,7 @@ function SafeMedia({ block, source }: {
 }
 function RenderBlock({ block, source, marked, highlighterEnabled, glossary, onLookup, onSelection, onNote }: {
   block: ContentBlock;
-  source?: SourceAttribution;
+  source: SourceAttribution | undefined;
   marked: ReaderMark | undefined;
   highlighterEnabled: boolean;
   glossary: readonly GlossaryEntry[];
