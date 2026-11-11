@@ -136,6 +136,7 @@ function Reader({chapter,store,exerciseMode,onSelect,onClear,selection,fontSize}
  const [showTranslations,setShowTranslations]=useState(false);
  const [draft,setDraft]=useState<TextAnchor|null>(null);
  const [undoMark,setUndoMark]=useState<{before:TextAnchor|null;after:TextAnchor}|null>(null);
+ const suppressNextWordClick=useRef(false);
  const isPicking=Boolean(exerciseMode||freeInk);
  const selectToken=(block:Block,start:number,end:number)=>{
   const existing=item(store,'ink:'+block.id) as TextAnchor|null;
@@ -160,6 +161,9 @@ function Reader({chapter,store,exerciseMode,onSelect,onClear,selection,fontSize}
   }).map(node=>({start:Number(node.dataset['losStart']),end:Number(node.dataset['losEnd'])}));
   const next=anchorFromSelectedTokens(block.id,touched,block.text.length);
   if(!next)return;
+  // A completed pointer-drag may also emit a click on its final word.
+  // Ignore that click so the precisely dragged span is not overwritten.
+  suppressNextWordClick.current=true;
   const existing=item(store,'ink:'+block.id) as TextAnchor|null;
   const previous=(exerciseMode?selection:(draft??existing))??null;
   setUndoMark({before:previous,after:next});
@@ -191,7 +195,7 @@ function Reader({chapter,store,exerciseMode,onSelect,onClear,selection,fontSize}
    const tokens=tokenOffsets(block.text);
    const stored=exerciseMode?selection:item(store,'ink:'+block.id) as TextAnchor|null;
    const active=stored?.blockId===block.id&&stored.contentVersion===LOS_VERSION&&stored.start>=0&&stored.end<=block.text.length?stored:null;
-   return <div key={block.id} className="los-reader-block"><p data-los-block={block.id} onPointerUp={event=>selectDrag(block,event.currentTarget)}>
+   return <div key={block.id} className="los-reader-block"><p data-los-block={block.id} onPointerDown={()=>{suppressNextWordClick.current=false;}} onPointerUp={event=>selectDrag(block,event.currentTarget)}>
     {block.speaker?<strong>{block.speaker}: </strong>:null}
     {tokens.map((token,i)=>{
      const highlighted=active&&token.start>=active.start&&token.end<=active.end;
@@ -201,7 +205,7 @@ function Reader({chapter,store,exerciseMode,onSelect,onClear,selection,fontSize}
       <span role="button" tabIndex={0} data-los-start={token.start} data-los-end={token.end}
        className={'los-word'+(highlighted?' los-marked':'')}
        aria-label={'Sana '+token.text}
-       onClick={()=>isPicking?selectToken(block,token.start,token.end):setSelectedWord(token.text.replace(/[.!?,:]/g,''))}
+       onClick={()=>{if(suppressNextWordClick.current){suppressNextWordClick.current=false;return;}if(isPicking)selectToken(block,token.start,token.end);else setSelectedWord(token.text.replace(/[.!?,:]/g,''));}}
        onKeyDown={e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();if(isPicking)selectToken(block,token.start,token.end);else setSelectedWord(token.text.replace(/[.!?,:]/g,''));}}}
       >{token.text}</span>
      </span>;
