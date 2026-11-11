@@ -80,10 +80,10 @@ test("C10's real-source and all original practice items have checkable answers",
    assert.equal(new Set(ex.options.map(o=>o.label)).size,ex.options.length,ex.id);
  }
 });
-test("C10 preview lessons exclude unverified Harald/Berna moving-picture recordings",()=>{
+test("C10 preview lessons permit reading and two-conversation production, while excluding unverified Harald listening",()=>{
  assert.deepEqual(book.lessons.filter(l=>l.chapterId==="C10"&&l.publicationStatus==="preview")
-  .map(l=>l.id),["L051","L053","L055"]);
- for(const id of ["L052","L054"]){
+  .map(l=>l.id),["L051","L053","L054","L055"]);
+ for(const id of ["L052"]){
   const lesson=book.lessons.find(l=>l.id===id);
   assert.ok(lesson&&lesson.publicationStatus==="planned"&&lesson.steps.length===0);
  }
