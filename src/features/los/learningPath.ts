@@ -1,4 +1,4 @@
-import { LOS_BOOKS } from "./catalog";
+import { LOS_BOOKS } from "./catalog.ts";
 
 /**
  * LOS! 1:n 60 oppitunnin toimituksellinen kartta.
