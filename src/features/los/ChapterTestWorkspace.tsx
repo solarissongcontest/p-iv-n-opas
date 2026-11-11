@@ -95,6 +95,7 @@ export function ChapterTestWorkspace({ book, definition, onReturned }: {
   );
   const attemptNumber = state.attemptNumber ?? 0;
   const exercises = selectedTestExercises(definition, book.exercises, attemptNumber);
+  const writingMode = definition.selfAssessmentMode === "writing";
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [restartVisible, setRestartVisible] = useState(false);
   const isReturned = Boolean(state.submission);
@@ -121,9 +122,9 @@ export function ChapterTestWorkspace({ book, definition, onReturned }: {
   const submit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (status === "loading" || isReturned) return;
-    if (missingAnswers.length > 0 || missingSpeech.length > 0) {
-      setSubmitError("Täytä kaikki " + definition.exerciseIds.length +
-        " automaattisesti tarkistettavaa kohtaa ja jokaisen puheväittämän itsearviointi ennen palautusta.");
+    if (missingAnswers.length > 0 || missingSpeech.length > 0 || (writingMode && !(state.writtenResponse ?? "").trim())) {
+      setSubmitError("Vastaa kaikkiin " + definition.exerciseIds.length +
+        " tarkistettavaan kohtaan ja tee " + (writingMode ? "kirjallinen esittely sekä sen" : "puheen") + " itsearviointi.");
       return;
     }
     const submittedAt = new Date().toISOString();
@@ -147,7 +148,7 @@ export function ChapterTestWorkspace({ book, definition, onReturned }: {
     <p className="los-notice">Tämä on C01:n automaattisesti tarkistettava harjoituskoe, ei virallinen kurssikoe tai julkaistun oppikirjan lopullisesti hyväksytty arviointi. Uusintayritys käyttää samojen tavoitteiden uusia, itse laadittuja kysymyksiä. Puheäänitys on vapaaehtoinen ja pysyy vain tällä laitteella.</p>
     <div className="los-exam-meta">
       <span>Yritys {attemptNumber + 1} · {isReturned ? "Palautettu" : "Vastattu " + completeCount + " / " + exercises.length}</span>
-      <span>{definition.speechCriteria.length} puheen itsearviointia · ei pisteitä</span>
+      <span>{definition.speechCriteria.length} {writingMode ? "kirjallisen tuotoksen" : "puheen"} itsearviointia · ei pisteitä</span>
     </div>
     <p className="los-storage-state" role="status">{losSyncMessage(status)}</p>
     <form onSubmit={submit}>
@@ -162,10 +163,22 @@ export function ChapterTestWorkspace({ book, definition, onReturned }: {
             <p>{state.submission.outcomes[index]?.explanationFi}</p>
           </div>}
         </div>)}</div>
-      <section className="los-exam-speech" aria-label="Puheen itsearviointi">
-        <h3>Puhe · oma arvio, ei automaattisia pisteitä</h3>
-        <p>Lausu ääneen esimerkiksi Hallo!, Guten Morgen! ja Tschüss!. Voit äänittää harjoituksesi vapaaehtoisesti ja kuunnella sen ennen itsearviointia. Sovellus ei automaattisesti arvioi ääntämistäsi.</p>
-        <SpeechRecorder key={definition.id + ":" + attemptNumber} title="Kuuntele omaa ääntämistäsi"/>
+      <section className="los-exam-speech" aria-label={writingMode ? "Kirjallisen tuotoksen itsearviointi" : "Puheen itsearviointi"}>
+        <h3>{writingMode ? "Kirjoita oma esittely · ei automaattisia pisteitä" : "Puhe · oma arvio, ei automaattisia pisteitä"}</h3>
+        {writingMode ? <>
+          <p>Kirjoita saksaksi kaksi tai kolme lyhyttä lausetta, joissa kerrot nimesi ja kysyt toisen nimeä. Vastauksesi tallennetaan koesuorituksen yhteyteen, mutta sitä ei arvioida automaattisesti.</p>
+          <label htmlFor={"los-exam-writing-" + definition.id}>Oma esittely saksaksi</label>
+          <textarea id={"los-exam-writing-" + definition.id} rows={4} lang="de"
+            autoCapitalize="none" spellCheck={false} disabled={isReturned || status === "loading"}
+            value={state.writtenResponse ?? ""}
+            onChange={event => {
+              update(previous => ({ ...previous, writtenResponse: event.target.value }));
+              setSubmitError(null);
+            }}/>
+        </> : <>
+          <p>Lausu ääneen esimerkiksi Hallo!, Guten Morgen! ja Tschüss!. Voit äänittää harjoituksesi vapaaehtoisesti ja kuunnella sen ennen itsearviointia. Sovellus ei automaattisesti arvioi ääntämistäsi.</p>
+          <SpeechRecorder key={definition.id + ":" + attemptNumber} title="Kuuntele omaa ääntämistäsi"/>
+        </>}
         {definition.speechCriteria.map(item => <fieldset key={item.id}
           disabled={isReturned || status === "loading"} className="los-exam-speech-criterion">
           <legend>{item.title}</legend>
@@ -184,7 +197,8 @@ export function ChapterTestWorkspace({ book, definition, onReturned }: {
     {state.submission && <section className="los-exam-result" role="status" aria-live="polite">
       <div><CheckCircle2 size={22}/><h3>Koe palautettu</h3></div>
       <p className="los-exam-score">{state.submission.score} / {state.submission.maximum} pistettä</p>
-      <p>Automaattisesti tarkistettiin {state.submission.maximum} osatehtävää. Puhe arvioitiin erikseen omalla arviollasi. Voit lukea jokaisen kohdan perustelun ylempänä.</p>
+      <p>Automaattisesti tarkistettiin {state.submission.maximum} osatehtävää. {writingMode ? "Kirjallinen esittely" : "Puhe"} itsearvioitiin erikseen. Voit lukea jokaisen kohdan perustelun ylempänä.</p>
+      {writingMode && <div className="los-exam-writing-return"><h4>Oma kirjallinen vastauksesi</h4><p lang="de">{state.submission.writtenResponse ?? ""}</p><details><summary>Avaa LOS!:n oma mallivastaus</summary><p lang="de">Hallo! Ich heiße Lena. Wie heißt du?</p></details></div>}
       <p className="los-support">Tulos kuvaa vain tätä C01:n tehtäväsarjaa. Se ei ole kurssin arvosana eikä CEFR-tason arvio.</p>
       {!restartVisible ? <button type="button" className="los-button los-button-secondary"
         onClick={() => setRestartVisible(true)}><RotateCcw size={17}/> Tee uusi yritys</button>
@@ -202,6 +216,7 @@ export function ChapterTestWorkspace({ book, definition, onReturned }: {
       <summary>Edelliset yritykset ({state.previousResults.length})</summary>
       <ol>{state.previousResults.map((result, index) => <li key={result.submittedAt + ":" + index}>
         <strong>Yritys {(result.attemptNumber ?? index) + 1}</strong> · {new Date(result.submittedAt).toLocaleDateString("fi-FI")} · {result.score} / {result.maximum} p
+        {result.writtenResponse && <p lang="de" className="los-exam-past-writing">{result.writtenResponse}</p>}
         {!!result.outcomes?.length && <details className="los-exam-past-report">
           <summary>Tarkista aiemmat vastaukset ja perustelut</summary>
           <ol>{result.outcomes.map((item, index2) => <li key={item.exerciseId}>
