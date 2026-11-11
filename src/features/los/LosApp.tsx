@@ -93,6 +93,24 @@ function Media({chapter,store,fontSize=18,onAudioCompleted,lessonId}:{chapter:Ch
    </p>
    <p className="los-meta">Äänite on alkuperäisen julkaisijan palvelimella, ei LOS!:iin kopioitu. Upotuksen toistettavuus testataan vielä varsinaisella mobiili- ja desktop-laitteella.</p>
   </>;
+ if(chapter.id==='C08'&&chapter.media?.transcript)return <>
+  <Label>TEKSTI B · KAKSI ERILLISTÄ AITOA ÄÄNTÄMISNÄYTETTÄ</Label>
+  <h3>Ich verstehe nicht · wiederholen</h3>
+  <p>Kuuntele kaksi erillistä alkuperäistä ihmisäänitettä: Timwin koko fraasi <i lang="de">Ich verstehe nicht</i> ja Jeuwren yhden sanan ääntämisnäyte <i lang="de">wiederholen</i>. Kumpikaan ei ole Magdalena Sieradzin kahdentoista vuoron kirjoitetun chat-keskustelun ääniversio.</p>
+  <Audio src={chapter.media.url} title={chapter.media.title}
+   onCompleted={()=>store.put('media:completed:M-COM-08-ICH',{at:new Date().toISOString(),version:LOS_VERSION})}/>
+  <Reader chapter={{...chapter,blocks:chapter.media.transcript}} store={store} fontSize={fontSize}/>
+  <p className="los-source"><b>M-COM-08-ICH</b> · Timwi (2004), alkuperäinen itse nauhoitettu fraasi, tekijän public domain -luovutus ·
+   <a href={chapter.media.sourceUrl} target="_blank" rel="noreferrer"> Alkuperäinen ääni ja käyttöoikeus</a></p>
+  <Audio src="https://commons.wikimedia.org/wiki/Special:Redirect/file/De-wiederholen2.ogg"
+   title="wiederholen · Jeuwre, 2,1 sekuntia"
+   onCompleted={()=>store.put('media:completed:M-COM-08-WIED',{at:new Date().toISOString(),version:LOS_VERSION})}/>
+  <p><span lang="de">wiederholen</span> = toistaa. Tämä on erillinen yksi sana, eikä sitä voi pisteyttää koulukeskustelun autenttiseksi kuuntelemiseksi.</p>
+  <p className="los-source"><b>M-COM-08-WIED</b> · Jeuwre (2020), syntyperäisen saksalaisen puhujan ihmisääni, alkuperäinen sana, CC BY-SA 4.0, ei muutoksia ·
+   <a href="https://commons.wikimedia.org/wiki/File:De-wiederholen2.ogg" target="_blank" rel="noreferrer"> Äänitiedoston lähde</a> ·
+   <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noreferrer"> Lisenssiehdot</a></p>
+  <p className="los-meta">Molemmat kuuntelut on toistettava loppuun L044:n suoritusmerkintää varten. Jos tiedostot eivät toimi laitteella, teksti jää luettavaksi, mutta kuuntelua ei kuitata valmiiksi.</p>
+ </>;
  if(chapter.id==='C07'&&chapter.media?.transcript)return <>
   <Label>TEKSTI B · ÄÄNTÄMINEN JA AAKKOSET</Label>
   <h3>Tavaa saksaksi</h3>
@@ -376,7 +394,7 @@ function ChapterSection({chapter,section,store,fontSize}:{chapter:Chapter;sectio
  if(section==='Harjoittele')return <><h2>Harjoittele</h2>{chapter.id==='C06'?<NumberPractice items={store.items} put={store.put}/>:null}{exercises.filter(e=>!['highlight','writing','speech'].includes(e.type)).map(ex=><ExerciseCard key={ex.id} exercise={ex} chapter={chapter} store={store} fontSize={fontSize}/>)}</>;
  if(section==='Käytä saksaa')return <><h2>Käytä saksaa itse</h2>{exercises.filter(e=>['writing','speech'].includes(e.type)).map(ex=><ExerciseCard key={ex.id} exercise={ex} chapter={chapter} store={store} fontSize={fontSize}/>)}</>;
  if(section==='Kappaletesti'&&chapter.status==='source-pending')return <p className="los-warning">Kappaletestiä ei ole vielä julkaistu, koska tämän kappaleen pääteksti on hyväksymättä. Harjoitteita voi tehdä erikseen.</p>;
- if(section==='Kappaletesti'&&['C01','C02','C03','C04','C05','C06','C07','C09','C10'].includes(chapter.id)){
+ if(section==='Kappaletesti'&&['C01','C02','C03','C04','C05','C06','C07','C08','C09','C10'].includes(chapter.id)){
   const id=('EX-'+chapter.id) as ExamId;
   return <ExamSession id={id} store={store} onExit={()=>window.location.hash='/chapter/'+chapter.id+'/Harjoittele'} onSubmit={()=>store.put('exam:submitted:'+id,{submittedAt:new Date().toISOString(),version:LOS_VERSION})}/>;
  }
