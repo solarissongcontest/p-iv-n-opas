@@ -147,6 +147,35 @@ export function validateBook(book: Book): string[] {
       if (references !== 1) errors.push("Lesson step must reference exactly one content, exercise, chapter test or reflection: " + step.id);
     }
   }
+  for (const exercise of book.exercises) {
+    if (exercise.type === "multiple-choice") {
+      const options = exercise.options.map(item => item.id);
+      if (exercise.correctOptionIds.length < 1 ||
+        new Set(exercise.correctOptionIds).size !== exercise.correctOptionIds.length ||
+        exercise.correctOptionIds.some(id => !options.includes(id)) ||
+        new Set(options).size !== options.length)
+        errors.push("Invalid multiple-choice answer key: " + exercise.id);
+    }
+    if (exercise.type === "word-order") {
+      const ids = exercise.tokens.map(item => item.id);
+      if (ids.length < 2 || exercise.correctOrder.length !== ids.length ||
+        new Set(ids).size !== ids.length ||
+        new Set(exercise.correctOrder).size !== ids.length ||
+        exercise.correctOrder.some(id => !ids.includes(id)))
+        errors.push("Invalid word order answer key: " + exercise.id);
+    }
+    if (exercise.type === "categorize") {
+      const ids = exercise.items.map(item => item.id);
+      const categories = exercise.categories.map(item => item.id);
+      const assigned = exercise.assignments.map(item => item.itemId);
+      if (!ids.length || !categories.length || exercise.assignments.length !== ids.length ||
+        new Set(ids).size !== ids.length || new Set(categories).size !== categories.length ||
+        new Set(assigned).size !== ids.length ||
+        exercise.assignments.some(item => !ids.includes(item.itemId) ||
+          !categories.includes(item.categoryId)))
+        errors.push("Invalid category answer key: " + exercise.id);
+    }
+  }
   for (const block of book.blocks) {
     if ("sourceId" in block && block.sourceId && !sources.has(block.sourceId)) errors.push("Unknown source: " + block.sourceId);
   }
