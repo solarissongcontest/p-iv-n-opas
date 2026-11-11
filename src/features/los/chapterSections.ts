@@ -42,7 +42,9 @@ export const LOS1_C01_SECTIONS: ChapterSection[] = emptyChapterSections().map(se
     section.id === "harjoittele" ? { exerciseIds: [
       "los1-c01-ex-greeting-choice", "los1-c01-ex-greeting-gap",
       "los1-c01-ex-greeting-pairs", "los1-c01-ex-marker-demo",
-    ] } : {};
+    ] } :
+    section.id === "tarkista" ? { exerciseIds: Array.from({ length: 12 }, (_, index) =>
+      "los1-c01-exam-" + String(index + 1).padStart(2, "0")) } : {};
   return {
     ...section, ...content,
     publicationStatus: content.blockIds?.length || content.exerciseIds?.length ? "preview" : "planned",
