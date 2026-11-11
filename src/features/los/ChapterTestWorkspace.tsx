@@ -122,9 +122,11 @@ export function ChapterTestWorkspace({ book, definition, onReturned }: {
   const submit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (status === "loading" || isReturned) return;
-    if (missingAnswers.length > 0 || missingSpeech.length > 0 || (writingMode && !(state.writtenResponse ?? "").trim())) {
+    if (missingAnswers.length > 0 || missingSpeech.length > 0 || (writingMode && ((state.writtenResponse ?? "").split(/\r?\n/u).filter(line => line.trim().length > 0).length < (definition.requiredWritingLines ?? 1)))) {
       setSubmitError("Vastaa kaikkiin " + definition.exerciseIds.length +
-        " tarkistettavaan kohtaan ja tee " + (writingMode ? "kirjallinen esittely sekä sen" : "puheen") + " itsearviointi.");
+        " tarkistettavaan kohtaan ja tee " + (writingMode ?
+          "kirjallinen osuus (vähintään " + (definition.requiredWritingLines ?? 1) + " erillistä riviä) sekä sen" :
+          "puheen") + " itsearviointi.");
       return;
     }
     const submittedAt = new Date().toISOString();
