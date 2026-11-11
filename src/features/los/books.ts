@@ -48,6 +48,7 @@ import { LOS1_C08_SECTIONS } from "./los1-c08-sections.ts";
 import { LOS1_C09_CONTENT_BLOCKS } from "./los1-c09-content.ts";
 import { LOS1_C09_PRACTICE_EXERCISES } from "./los1-c09-practice.ts";
 import { LOS1_C09_SOURCE_EXERCISES } from "./los1-c09-source.ts";
+import { LOS1_C09_TEXT_A_BLOCKS, LOS1_C09_TEXT_A_EXERCISES } from "./los1-c09-text-a.ts";
 import { LOS1_C09_EXAM_A, LOS1_C09_EXAM_B, LOS1_C09_TEST } from "./los1-c09-test.ts";
 import { LOS1_C09_SECTIONS } from "./los1-c09-sections.ts";
 import { LOS1_C10_SOURCE_BLOCKS, LOS1_C10_SOURCE_EXERCISES } from "./los1-c10-source.ts";
@@ -153,8 +154,8 @@ export const LOS_BOOKS: readonly Book[] = specs.map((spec, index) => ({
   } : chapter.id === "C09" ? {
     ...chapter,publicationStatus:"preview" as const,
     sections:LOS1_C09_SECTIONS,
-    blockIds:LOS1_C09_CONTENT_BLOCKS.map(b=>b.id),
-    exerciseIds:[...LOS1_C09_SOURCE_EXERCISES,...LOS1_C09_PRACTICE_EXERCISES,
+    blockIds:[...LOS1_C09_CONTENT_BLOCKS,...LOS1_C09_TEXT_A_BLOCKS].map(b=>b.id),
+    exerciseIds:[...LOS1_C09_SOURCE_EXERCISES,...LOS1_C09_TEXT_A_EXERCISES,...LOS1_C09_PRACTICE_EXERCISES,
       ...LOS1_C09_EXAM_A].map(ex=>ex.id),
   } : chapter.id === "C10" ? {
     ...chapter,publicationStatus:"preview" as const,
@@ -676,7 +677,18 @@ export const LOS_BOOKS: readonly Book[] = specs.map((spec, index) => ({
         {id:"L046-S07",title:"Harjoittele viikon lopun kirjoitusasua",required:true,exerciseId:"los1-c09-weekday-07"},
       ],
     };
-    // L047 remains planned until the whole Franz–Greta Sport und Zeit source is inside LOS!.
+    if (lesson.id === "L047") return {
+      ...lesson,publicationStatus:"preview" as const,
+      steps:[
+        {id:"L047-S01",title:"Johdanto autenttiseen Sport und Zeit -keskusteluun",required:true,blockId:"los1-c09-text-a-intro"},
+        {id:"L047-S02",title:"Lue koko alkuperäinen Franzin ja Gretan keskustelu",required:true,blockId:"los1-c09-wb-03-dialogue"},
+        {id:"L047-S03",title:"Tunnista Gretan kellonaika",required:true,exerciseId:"los1-c09-sport-quarter"},
+        {id:"L047-S04",title:"Vertaa Franzin tasatuntia",required:true,exerciseId:"los1-c09-sport-franz-time"},
+        {id:"L047-S05",title:"Korosta Gretan alkuperäinen ajanilmaus",required:true,exerciseId:"los1-c09-sport-highlight-quarter"},
+        {id:"L047-S06",title:"Tunnista erot ajanilmauksissa",required:true,blockId:"los1-c09-sport-followup"},
+        {id:"L047-S07",title:"Tutustu lähteeseen ja äänitteen laatuhuomautukseen",required:true,blockId:"los1-c09-sport-source-note"},
+      ],
+    };
     if (lesson.id === "L048") return {
       ...lesson,publicationStatus:"preview" as const,
       steps:[
@@ -797,11 +809,11 @@ export const LOS_BOOKS: readonly Book[] = specs.map((spec, index) => ({
     };
     return lesson;
   }) : [],
-  blocks: index === 0 ? [...LOS1_INTRO_BLOCKS, ...LOS1_C01_PREVIEW_BLOCKS, ...LOS1_C01_SOURCE_BLOCKS, ...LOS1_C01_GREETING_AUDIO_BLOCKS, ...LOS1_C01_APPLICATION_BLOCKS, ...LOS1_C01_CULTURE_BLOCKS, ...LOS1_C02_WB_BLOCKS, ...LOS1_C02_BLOCKS, ...LOS1_C03_SOURCE_BLOCKS, ...LOS1_C03_CONTENT_BLOCKS, ...LOS1_C04_SOURCE_BLOCKS, ...LOS1_C04_BLOCKS, ...LOS1_C05_SOURCE_BLOCKS, ...LOS1_C05_BLOCKS, ...LOS1_C06_SOURCE_BLOCKS, ...LOS1_C06_CONTENT_BLOCKS, ...LOS1_REVIEW_ONE_BLOCKS, ...LOS1_C07_SOURCE_BLOCKS, ...LOS1_C07_CONTENT_BLOCKS, ...LOS1_C08_CONTENT_BLOCKS, ...LOS1_C09_CONTENT_BLOCKS,
+  blocks: index === 0 ? [...LOS1_INTRO_BLOCKS, ...LOS1_C01_PREVIEW_BLOCKS, ...LOS1_C01_SOURCE_BLOCKS, ...LOS1_C01_GREETING_AUDIO_BLOCKS, ...LOS1_C01_APPLICATION_BLOCKS, ...LOS1_C01_CULTURE_BLOCKS, ...LOS1_C02_WB_BLOCKS, ...LOS1_C02_BLOCKS, ...LOS1_C03_SOURCE_BLOCKS, ...LOS1_C03_CONTENT_BLOCKS, ...LOS1_C04_SOURCE_BLOCKS, ...LOS1_C04_BLOCKS, ...LOS1_C05_SOURCE_BLOCKS, ...LOS1_C05_BLOCKS, ...LOS1_C06_SOURCE_BLOCKS, ...LOS1_C06_CONTENT_BLOCKS, ...LOS1_REVIEW_ONE_BLOCKS, ...LOS1_C07_SOURCE_BLOCKS, ...LOS1_C07_CONTENT_BLOCKS, ...LOS1_C08_CONTENT_BLOCKS, ...LOS1_C09_CONTENT_BLOCKS, ...LOS1_C09_TEXT_A_BLOCKS,
     ...LOS1_C10_SOURCE_BLOCKS, ...LOS1_C10_CONTENT_BLOCKS,
     ...LOS1_REVIEW_TWO_BLOCKS, ...LOS1_FINAL_BLOCKS] : [],
   exercises: index === 0 ? [...LOS1_C01_PREVIEW_EXERCISES, ...LOS1_C01_SOURCE_EXERCISES, ...LOS1_C01_AUDIO_COMPREHENSION_EXERCISES, ...LOS1_C01_EXAM_EXERCISES, ...LOS1_C01_ALTERNATE_EXAM_EXERCISES, ...LOS1_C01_EXTRA_EXERCISES, ...LOS1_C01_INTERACTIVE_EXERCISES, ...LOS1_C02_WB_EXERCISES, ...LOS1_C02_EXERCISES, ...LOS1_C02_EXAM_EXERCISES, ...LOS1_C03_SOURCE_EXERCISES, ...LOS1_C03_PRACTICE_EXERCISES, ...LOS1_C03_EXAM_EXERCISES, ...LOS1_C04_SOURCE_EXERCISES, ...LOS1_C04_PRACTICE_EXERCISES, ...LOS1_C04_EXAM_EXERCISES, ...LOS1_C05_SOURCE_EXERCISES, ...LOS1_C05_PRACTICE_EXERCISES, ...LOS1_C05_EXAM_EXERCISES, ...LOS1_C06_SOURCE_EXERCISES, ...LOS1_C06_PRACTICE_EXERCISES, ...LOS1_C06_EXAM_EXERCISES, ...LOS1_REVIEW_ONE_EXERCISES, ...LOS1_MIDTERM_FORM_A, ...LOS1_MIDTERM_FORM_B, ...LOS1_C07_SOURCE_EXERCISES, ...LOS1_C07_PRACTICE_EXERCISES, ...LOS1_C07_EXAM_A, ...LOS1_C07_EXAM_B, ...LOS1_C08_PRACTICE_EXERCISES, ...LOS1_C08_EXAM_A, ...LOS1_C08_EXAM_B,
-    ...LOS1_C09_SOURCE_EXERCISES, ...LOS1_C09_PRACTICE_EXERCISES,
+    ...LOS1_C09_SOURCE_EXERCISES, ...LOS1_C09_TEXT_A_EXERCISES, ...LOS1_C09_PRACTICE_EXERCISES,
     ...LOS1_C09_EXAM_A, ...LOS1_C09_EXAM_B,
     ...LOS1_C10_SOURCE_EXERCISES, ...LOS1_C10_PRACTICE_EXERCISES,
     ...LOS1_C10_EXAM_A, ...LOS1_C10_EXAM_B,
@@ -884,12 +896,13 @@ export const LOS_BOOKS: readonly Book[] = specs.map((spec, index) => ({
     originalUrl:"https://en.wikibooks.org/w/index.php?title=German/Level_I/Freizeit&oldid=4003622",
     author:"Wikibooks German Level I -yhteiskirjoittajat (versio 4003622)",
     publisher:"Wikibooks / Wikimedia",
-    licenseOrBasis:"CC BY-SA 4.0 · Sport und Zeit, 7 repliikkiä: tutkimusvaiheen lähde",
+    licenseOrBasis:"CC BY-SA 4.0 · koko alkuperäinen Sport und Zeit, 7 repliikkiä",
     licenseUrl:"https://creativecommons.org/licenses/by-sa/4.0/",
-    permittedMode:"pending" as const,
+    permittedMode:"hosted" as const,
     readiness:"text-cleared" as const,
     verifiedAt:"2026-11-11",
-    publicationNoteFi:"Alkuperäinen Franzin ja Gretan 7-repliikkinen dialogi on todennettu, mutta KOKO tekstiä ei vielä ole toimitettu LOS!-lukijaan. Lähteen audio sisältää sivun mainitseman kielioppivirheen; sitä ei ole hyväksytty soitettavaksi.",
+    modification:"Kaikki seitsemän alkuperäistä saksankielistä repliikkiä ovat suoraan lukijassa. Suomennokset ja ymmärtämistehtävät on laadittu erikseen LOS!:iin; äänitettä ei ole kopioitu tai upotettu.",
+    publicationNoteFi:"Koko alkuperäinen Franzin ja Gretan 7-repliikkinen Sport und Zeit -dialogi on nyt luettavissa LOS!:ssa. Wikibooksin lähde ilmoittaa artikkelivirheestä vanhassa äänitteessä (das Fußball); ääni on estetty eikä sitä väitetä hyväksytyksi.",
   } : source.id === "M-WB-04" ? {
     ...source,
     originalUrl:"https://en.wikibooks.org/w/index.php?title=German/Level_I/Geburtstag&oldid=4408402",
