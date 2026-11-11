@@ -8,6 +8,7 @@ import { getDeviceOwnerId } from "@/lib/deviceSession";
 export type LosChapterDraft = {
   version: 1;
   note: string;
+  applicationDraft: string;
   bookmarked: boolean;
   practiceAnswers: Record<string,string>;
   practiceChecked: string[];
@@ -17,7 +18,7 @@ export type LosChapterDraft = {
   updatedAt: string;
 };
 export function emptyLosDraft(): LosChapterDraft {
-  return {version:1,note:"",bookmarked:false,practiceAnswers:{},practiceChecked:[],testAnswers:{},testSubmittedAt:null,selfAssessment:"",updatedAt:""};
+  return {version:1,note:"",applicationDraft:"",bookmarked:false,practiceAnswers:{},practiceChecked:[],testAnswers:{},testSubmittedAt:null,selfAssessment:"",updatedAt:""};
 }
 export function losDraftKey(bookId:number,chapterId:string,ownerId:string):string {
   return `los.local.v1.${ownerId}.${bookId}.${chapterId}`;
@@ -33,6 +34,7 @@ export function parseLosDraft(value:string | null):LosChapterDraft {
     return {
       version:1,
       note:typeof input.note==="string"?input.note.slice(0,8000):"",
+      applicationDraft:typeof input.applicationDraft==="string"?input.applicationDraft.slice(0,5000):"",
       bookmarked:input.bookmarked===true,
       practiceAnswers:input.practiceAnswers,
       practiceChecked:Array.isArray(input.practiceChecked)?input.practiceChecked.filter((id):id is string=>typeof id==="string"):[],
