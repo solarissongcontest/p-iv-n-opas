@@ -48,7 +48,7 @@ test('L036–L040 have five substantive steps summing to 30min, exact prerequisi
  }
  assert.deepEqual(chapter07Lessons[3]!.requiredMediaIds,['M-COM-07-BUCH','M-COM-07-ABC']);
  assert.deepEqual(chapter07Lessons[4]!.requiredIds,['EX-C07']);
- assert.equal(lessons.find(l=>l.id==='L035')?.status,'pending');
+ assert.equal(lessons.find(l=>l.id==='L035')?.status,'initial-material');
  assert.equal(lessons.find(l=>l.id==='L041')?.status,'initial-material');
  assert.equal(lessons.find(l=>l.id==='L042')?.status,'pending');
 });
