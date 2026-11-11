@@ -101,7 +101,7 @@ function BookHome({ book }: { book: Book }) {
       </div>
     </div>
     {book.lessons.some(lesson => lesson.publicationStatus === "preview") ?
-      <p className="los-notice" role="status">LOS! 1:n kuudessa ensimmäisessä kappaleessa on esikatselusisältöä ja yhteensä 31 ohjattua oppituntia. Oppitunnit L027–L030 on varattu erilliselle kertaukselle ja välikokeelle, eikä niitä ole vielä toteutettu. C01:n kaksi alkuperäisäänitettä ja niiden tekstit, C02:n Wikibooksin koko alkuperäinen Franz–Greta-pääteksti, sen 20 sekunnin äänite, LOS!:n oma lisäkeskustelu sekä Ariserin koko nelirepliikkinen dialogi ovat luettavissa. C03:n oikean saksankielisen puhujan alkuperäinen Bernan haastattelu on kokonaisena lukuun ottamatta näkyvästi poistettua puhelinnumeroa. Kappaletestit ovat käytettävissä, mutta lähteiden lopullinen toimitus, äänitteiden laitetestaus ja muiden kappaleiden sisällöt ovat vielä kesken.</p> :
+      <p className="los-notice" role="status">LOS! 1:n kuudessa ensimmäisessä kappaleessa on esikatselusisältöä. Yhteensä 35 ohjattua oppituntia on avattu harjoitusversioiksi, mukaan lukien kertaus I (L027–L029) ja oma 25 pisteen välikoe (L030). C01:n kaksi alkuperäisäänitettä ja niiden tekstit, C02:n Wikibooksin koko alkuperäinen Franz–Greta-pääteksti, sen 20 sekunnin äänite, LOS!:n oma lisäkeskustelu sekä Ariserin koko nelirepliikkinen dialogi ovat luettavissa. C03:n oikean saksankielisen puhujan alkuperäinen Bernan haastattelu on kokonaisena lukuun ottamatta näkyvästi poistettua puhelinnumeroa. Kappaletestit ovat käytettävissä, mutta lähteiden lopullinen toimitus, äänitteiden laitetestaus ja muiden kappaleiden sisällöt ovat vielä kesken.</p> :
       <p className="los-notice" role="status">Oppituntien sisältöä ei ole vielä julkaistu. Etenemistä ei lasketa ennen kuin oikeita opintosuorituksia on saatavilla.</p>}
     <h2 className="los-section-title">Tutustu kirjaan</h2>
     <div className="los-path-cards">
@@ -264,7 +264,17 @@ function GenericSection({ book, segment }: { book: Book; segment: string }) {
       <h1>Kokeet ja kappaletestit</h1>
       <p className="los-intro">Kokeet palautetaan kokonaisuutena ennen ratkaisujen ja pisteiden näyttämistä. Puheen itsearviointi on erillinen, eikä pisteitä keksitä.</p>
       {book.chapterTests.length === 0 ? <Empty title="Kokeita ei vielä saatavilla">Tämän kirjan koetehtävät valmistellaan oppikirjan sisältöjen mukana.</Empty> :
-        <ul className="los-exams-list">{book.chapters.map(chapter => {
+        <ul className="los-exams-list">
+          {book.chapterTests.filter(test => test.examType === "midterm" || test.examType === "final").map(test =>
+            <li key={test.id}>
+              <div><strong>{test.title}</strong>
+                <small>{test.exerciseIds.length} pisteytettävää tehtävää · {test.scoreGroups?.length ?? 0} osa-aluetta · kirjallinen itsearviointi · harjoitusversio</small>
+              </div>
+              <a className="los-button los-button-secondary" href={bookPath(book, "koe/" + test.chapterId)}>
+                Avaa koe <ArrowRight size={16}/>
+              </a>
+            </li>)}
+          {book.chapters.map(chapter => {
           const test = book.chapterTests.find(item => item.chapterId === chapter.id);
           return <li key={chapter.id}>
             <div><strong>{chapter.id} · {chapter.title}</strong><small>{test ? test.exerciseIds.length + " tarkistettavaa tehtävää + itsearviointi · harjoitusversio" : "Ei julkaistua kappaletestiä"}</small></div>
@@ -313,6 +323,14 @@ export function LosApp() {
       section === "opetuspolku" ? <Lessons book={book}/> :
       section === "kappale" ? chapter ? <ChapterPage book={book} chapter={chapter} subsection={segments[3]}/> : <Empty title="Kappaletta ei löytynyt">Sisältöä ei ole vielä julkaistu.</Empty> :
       section === "oppitunti" ? lesson ? <LessonRunner book={book} lesson={lesson}/> : <Empty title="Oppituntia ei löytynyt">Tätä tuntia ei ole julkaistu.</Empty> :
+      section === "koe" ? (() => {
+        const exam = book.chapterTests.find(test => (test.examType === "midterm" || test.examType === "final") &&
+          (test.chapterId === segments[2] || test.id === segments[2]));
+        return exam ? <section className="los-standalone-exam">
+          <a className="los-back-link" href={bookPath(book,"kokeet")}><ArrowLeft size={16}/> Kaikki kokeet</a>
+          <ChapterTestWorkspace book={book} definition={exam}/>
+        </section> : <Empty title="Koetta ei löytynyt">Tätä koetta ei ole julkaistu.</Empty>;
+      })() :
       section === "teksti" ? selectedBlock ? <Reader book={book} blocks={[selectedBlock]} title="Oppimateriaali" headingLevel={1}/> : <Empty title="Tekstiä ei löytynyt">Tätä aineistoa ei ole julkaistu.</Empty> :
       <GenericSection book={book} segment={section}/>}
   </BookShell>;
