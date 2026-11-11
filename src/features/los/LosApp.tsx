@@ -37,22 +37,36 @@ function SourceNotice({chapter}:{chapter:Chapter}){
   {chapter.license==='CC BY-SA 3.0'?<a href="https://creativecommons.org/licenses/by-sa/3.0/" target="_blank" rel="noreferrer"> Lisenssiehdot</a>:null}
  </p>;
 }
-function Audio({src,title,onFailure}:{src:string;title:string;onFailure?:()=>void}){
+function Audio({src,title,onFailure,onCompleted}:{src:string;title:string;onFailure?:()=>void;onCompleted?:()=>void}){
  const [failed,setFailed]=useState(false);
  return <div className="los-media">
  <Label>ALKUPERÄINEN IHMISÄÄNI</Label>
  <p><Volume2 size={17} aria-hidden="true"/> {title}</p>
- {!failed?<audio controls preload="none" src={src} onError={()=>{setFailed(true);onFailure?.();}} aria-label={title}/>:<p role="alert">Äänitteen lataus epäonnistui. Voit jatkaa tekstin ja sanaston avulla. Äänitettä ei merkitä kuunnelluksi.</p>}
+ {!failed?<audio controls preload="none" src={src} onEnded={onCompleted} onError={()=>{setFailed(true);onFailure?.();}} aria-label={title}/>:<p role="alert">Äänitteen lataus epäonnistui. Voit jatkaa tekstin ja sanaston avulla. Äänitettä ei merkitä kuunnelluksi.</p>}
  </div>;
 }
-function Media({chapter}:{chapter:Chapter}){
+function Media({chapter,store,fontSize=18}:{chapter:Chapter;store:Store;fontSize?:number}){
+ if(chapter.id==='C02'&&chapter.media?.transcript)return <>
+   <Label>TEKSTI B · ALKUPERÄINEN ÄÄNITETTY DIALOGI</Label>
+   <h3>{chapter.media.title}</h3>
+   <p>Thomas, Takashi ja Peter esittäytyvät. Tässä kuullaan myös kotipaikka, mutta ilmausta <i lang="de">Ich komme aus ...</i> harjoitellaan vasta kappaleessa 3.</p>
+   <Audio src={chapter.media.url} title={chapter.media.title}
+    onCompleted={()=>store.put('media:completed:'+chapter.media!.sourceId,{at:new Date().toISOString(),version:LOS_VERSION})}/>
+   <Reader chapter={{...chapter,blocks:chapter.media.transcript}} store={store} fontSize={fontSize}/>
+   <p className="los-source">
+    <b>{chapter.media.sourceId}</b> · {chapter.media.attribution} · {chapter.media.license} ·
+    <a href={chapter.media.sourceUrl} target="_blank" rel="noreferrer"> Alkuperäinen äänite ja tekstilähde</a> ·
+    <a href="https://creativecommons.org/licenses/by-sa/3.0/" target="_blank" rel="noreferrer"> Lisenssiehdot</a>
+   </p>
+   <p className="los-meta">Äänite on alkuperäisen julkaisijan palvelimella, ei LOS!:iin kopioitu. Upotuksen toistettavuus testataan vielä varsinaisella mobiili- ja desktop-laitteella.</p>
+  </>;
  if(chapter.id==='C01')return <>
-  <Audio src="https://commons.wikimedia.org/wiki/Special:Redirect/file/Gespr%C3%A4chVorstellung.ogg" title="Franz ja Jörg, GesprächVorstellung (14 s)"/>
-  {chapter.media?<Audio src={chapter.media.url} title={chapter.media.title}/>:null}
+  <Audio src="https://commons.wikimedia.org/wiki/Special:Redirect/file/Gespr%C3%A4chVorstellung.ogg" title="Franz ja Jörg, GesprächVorstellung (14 s)" onCompleted={()=>store.put("media:completed:M-COM-01",{at:new Date().toISOString(),version:LOS_VERSION})}/>
+  {chapter.media?<Audio src={chapter.media.url} title={chapter.media.title} onCompleted={()=>store.put("media:completed:"+chapter.media!.sourceId,{at:new Date().toISOString(),version:LOS_VERSION})}/>:null}
   <SourceNotice chapter={chapter}/>
   <p>Ääni ja teksti ovat eri aineistotyyppejä. Äänitteitä ei luoda koneellisesti eikä luvata toimiviksi ennen toistotestausta.</p>
  </>;
- if(chapter.media)return <Audio src={chapter.media.url} title={chapter.media.title}/>;
+ if(chapter.media)return <Audio src={chapter.media.url} title={chapter.media.title} onCompleted={()=>store.put('media:completed:'+chapter.media!.sourceId,{at:new Date().toISOString(),version:LOS_VERSION})}/>;
  return <p>Erillisen autenttisen kuuntelun käyttöönotto on vielä kesken. Tästä ei synny suoritusmerkintää.</p>;
 }
 function WordSheet({word,onClose,onReview}:{word:string;onClose:()=>void;onReview:(term:string)=>void}){
@@ -249,7 +263,7 @@ function ChapterSection({chapter,section,store,fontSize}:{chapter:Chapter;sectio
  </>;
  if(section==='Sanasto')return <Words chapter={chapter} store={store}/>;
  if(section==='Kielioppi')return <Grammar chapter={chapter}/>;
- if(section==='Teksti B')return <><h2>Teksti B / Kuuntelu</h2><Media chapter={chapter}/></>;
+ if(section==='Teksti B')return <><h2>Teksti B / Kuuntelu</h2><Media chapter={chapter} store={store} fontSize={fontSize}/></>;
  if(section==='Kulttuuri')return <div className="los-prose"><Label>LAND UND LEUTE</Label><h2>Kulttuuri</h2><p>{chapter.culture}</p></div>;
  if(section==='Harjoittele')return <><h2>Harjoittele</h2>{exercises.filter(e=>!['highlight','writing','speech'].includes(e.type)).map(ex=><ExerciseCard key={ex.id} exercise={ex} chapter={chapter} store={store} fontSize={fontSize}/>)}</>;
  if(section==='Käytä saksaa')return <><h2>Käytä saksaa itse</h2>{exercises.filter(e=>['writing','speech'].includes(e.type)).map(ex=><ExerciseCard key={ex.id} exercise={ex} chapter={chapter} store={store} fontSize={fontSize}/>)}</>;
@@ -304,7 +318,7 @@ function FirstLessonRunner({lessonId,store,fontSize,onNext,onContents}:{lessonId
    <Reader chapter={currentChapter} store={store} fontSize={fontSize}/>
    <SourceNotice chapter={currentChapter}/>
   </>;
-  if(st.kind==='listen')return <Media chapter={currentChapter}/>;
+  if(st.kind==='listen')return <Media chapter={currentChapter} store={store} fontSize={fontSize}/>;
   if(st.kind==='vocabulary')return <Words chapter={currentChapter} store={store}/>;
   if(st.kind==='grammar'||st.kind==='instruction')return <Grammar chapter={currentChapter}/>;
   if(st.kind==='practice'){
@@ -443,7 +457,7 @@ export function LosApp({ownerId}:{ownerId:string}){
       <div className="los-step"><Label>{lessonSteps[step]}</Label>
        {lesson.id==='L001'&&step===0?<div className="los-prose"><h2>Näin opiskelet</h2><p>Valitse oppikirjasta kappale tai seuraa vapaaehtoista opetuspolkua. Kaikki tekstit on tarkoitus lukea LOS!:ssa. Napauta sanaa saadaksesi selityksen. Oikea korostustussi on erillään omista merkinnöistäsi.</p><p>Vihjeitä saa käyttää harjoittelussa. Kokeessa vastaus palautetaan ilman niitä. Edistyminen ei tarkoita samaa asiaa kuin osaaminen.</p></div>:null}
        {lesson.id==='L001'&&step===1?<><h2>Kirjoita oma tavoitteesi</h2><textarea aria-label="Oma tavoite" rows={4} value={valueString(store,'goal:los1')} onChange={e=>store.put('goal:los1',e.target.value)} placeholder="Haluan esimerkiksi osata tervehtiä ja esitellä itseni saksaksi." /></>:null}
-       {lesson.id==='L001'&&step===2?<Media chapter={chapters[0]!}/>:null}
+       {lesson.id==='L001'&&step===2?<Media chapter={chapters[0]!} store={store} fontSize={fontSize}/>:null}
        {lesson.chapterId?<ChapterSection chapter={chapters.find(c=>c.id===lesson.chapterId)??chapters[0]!} section={lessonSteps[step]??'Aloita'} store={store} fontSize={fontSize}/>:null}
        {!lesson.chapterId&&lesson.id!=='L001'?<div className="los-prose"><h2>Opetussisältöä tarkistetaan</h2><p>Laajaa kertausta ja oikeaa arviointikoetta ei ole vielä hyväksytty. Tämä näkymä ei väitä suoritusta.</p><button onClick={()=>go({kind:'exams'})}>Kokeiden tilanne</button></div>:null}
       </div>
