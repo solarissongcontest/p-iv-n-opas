@@ -170,6 +170,7 @@ export const LOS_BOOKS: readonly Book[] = specs.map((spec, index) => ({
       steps: [
         { id: "L010-S01", title: "Tunnista äänitteen tavoite", required: true, blockId: "los1-c02-text-b-guide" },
         { id: "L010-S02", title: "Kuuntele Thomasin ja Takashin alkuperäinen keskustelu", required: true, blockId: "los1-c02-commons-02-audio" },
+        { id: "L010-S02B", title: "Lue koko alkuperäinen nelirepliikkinen teksti", required: true, blockId: "los1-c02-m-com-02-dialogue" },
         { id: "L010-S03", title: "Poimi nimikysymys", required: true, exerciseId: "los1-c02-audio-question" },
         { id: "L010-S04", title: "Poimi nimet", required: true, exerciseId: "los1-c02-audio-person" },
         { id: "L010-S05", title: "Valitse kaikki äänitteen henkilöt", required: true, exerciseId: "los1-c02-audio-select" },
