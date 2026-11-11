@@ -143,7 +143,7 @@ export const LOS_BOOKS: readonly Book[] = specs.map((spec, index) => ({
       ],
     };
     if (lesson.id === "L008") return {
-      ...lesson, publicationStatus: "preview" as const,
+      ...lesson, title: "Lue Lenan ja Benin opetuskeskustelu", publicationStatus: "preview" as const,
       steps: [
         { id: "L008-S01", title: "Valmistaudu lukemaan LOS!:n oma dialogi", required: true, blockId: "los1-c02-text-a-guide" },
         { id: "L008-S02", title: "Lue Lenan ja Benin kokonainen keskustelu", required: true, blockId: "los1-c02-text-a-editorial" },
