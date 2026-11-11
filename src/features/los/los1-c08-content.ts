@@ -1,6 +1,6 @@
-/** LOS! 1 C08 · classroom survival. LOS!-authored teaching, NOT original-source Text A.
- * M-DIB-04 "Im Unterricht" and M-DIB-03 are still source/media pending.
- * Never pass an authored example off as an authenticated transcript.
+/** LOS! 1 C08 · classroom survival. Authored pedagogy and a complete
+ * human-written Wikibooks phrase list are separated from still-pending
+ * original COERLL audio/video. Never pretend print text is audio.
  */
 import type {ContentBlock} from "./model";
 
@@ -17,10 +17,10 @@ export const LOS1_C08_CONTENT_BLOCKS:ContentBlock[]=[
       ["En tiedä sanan merkitystä","Was bedeutet das?","Kysy selitystä."],
       ["Haluan saksankielisen ilmauksen","Wie sagt man das auf Deutsch?","Kysy, miten jokin sanotaan."]
     ]},
-  {id:"los1-c08-text-a-pending",version:"0.1.0",kind:"paragraph",language:"fi",
-    text:"LÄHDEAINEISTO ODOTTAA TARKISTUSTA. Tähän tulee oikean saksankielisen puhujan tai kirjoittajan kokonainen Text A. Suunnitelmassa on COERLL / Deutsch im Blick -aineistoluettelon Im Unterricht -haastattelu (M-DIB-04), mutta yksittäisen haastattelun pysyvää osoitetta, tarkkaa litteraattia ja mediakohtaista käyttöoikeutta ei ole vielä vahvistettu. Tässä ei ole tekoälyn kirjoittamaa autenttiseksi väitettyä dialogia. Voit opiskella erilliset LOS!:n omat fraasiesimerkit ja harjoitukset jo nyt."},
+  {id:"los1-c08-text-a-bridge",version:"0.2.0",kind:"paragraph",language:"fi",
+    text:"TEXT A on nyt Wikibooksin oikeiden ihmisten kirjoittaman Deutschkurs für Anfänger -kirjan kokonainen harjoituksen 562 toistopyyntöjen luettelo. Se on aito alkuperäinen 15 fraasin sarja, ei kuviteltu keskustelu eikä äänen litteraatti. Voit lukea koko valitun lähdetekstin ja kaikki 15 suomenkielistä selitystä tässä oppikirjassa. Aiemmin suunniteltu COERLL:n Im Unterricht -haastattelu (M-DIB-04) on edelleen yksilöimättä eikä ole tätä lähdettä. Video- ja äänilähteet varmistetaan erikseen."},
   {id:"los1-c08-reading-strategy",version:"0.1.0",kind:"paragraph",language:"fi",
-    text:"Kun alkuperäisaineisto julkaistaan: lue tai kuuntele ensin kokonaisuus. Etsi sitten yksi tuttu pyyntö tai sana, kuten bitte. Pyri ymmärtämään, pyytääkö puhuja toistoa, hidastamista vai sanan selitystä. Tuntemattomia taivutusmuotoja ei tarvitse osata käyttää. Varsinaisia alkuperäistekstin ymmärtämistehtäviä ei pisteytetä, ennen kuin kokonainen lähde on tarkistettu."},
+    text:"Lue ensin julkaistun Wikibooks-alkuperäisluettelon kaikki 15 riviä. Etsi tuttu Noch einmal, bitte! ja vertaa sinuttelevaa Kannst du -alkua kohteliaaseen Können Sie -alkuun. Merkitse halutessasi suomenkielisten tukisanojen avulla sana Wort (sana), Satz (lause), Frage (kysymys) ja Antwort (vastaus). Tekstiin liittyvät ymmärtämistehtävät ovat nyt käytössä, koska koko valittu lähde on luettavissa tässä. Tämä on lukemista, ei kuullunymmärtämistä."},
   {id:"los1-c08-words",version:"0.1.0",kind:"vocabulary",entries:[
     {id:"los1-c08-word-01",de:"verstehen",fi:"ymmärtää",note:"Ich verstehe nicht."},
     {id:"los1-c08-word-02",de:"Ich verstehe nicht.",fi:"En ymmärrä.",note:"Käyttövalmis ilmaus."},
@@ -73,7 +73,7 @@ export const LOS1_C08_CONTENT_BLOCKS:ContentBlock[]=[
   {id:"los1-c08-text-b-pending",version:"0.1.0",kind:"paragraph",language:"fi",
     text:"Text B -aineistoa ei vielä julkaista. Suunnitelmassa on M-DIB-03:n Evan opiskelu- ja asumishaastattelu ja V-DIB-01:n Studentenausweis-video. Niiden tarkka käyttöoikeus, puheen vaikeusaste ja toistuminen LOS!:n sisällä ovat tarkistamatta. Nämä eivät ole tämän sivun omaa ääntä, eikä kuuntelutaitoa saa pisteyttää pelkkien kirjoitettujen lauseiden avulla."},
   {id:"los1-c08-practice-intro",version:"0.1.0",kind:"paragraph",language:"fi",
-    text:"Harjoittele kuutta tuttua luokkahuonetilannetta. Valitse fraasi, kokoa sanajärjestys ja muista kysyä merkitystä oikealla kysymyksellä. Harjoitukset koskevat LOS!:n omia opetusesimerkkejä ja niitä voi tarkistaa ilman alkuperäistä Text A:ta. Tekstikohtaan sidottu korostus- ja kuunteluharjoitus lisätään erikseen vasta alkuperäislähteen tarkistuksen jälkeen."},
+    text:"Harjoittele kuutta tuttua luokkahuonetilannetta. Valitse fraasi, kokoa sanajärjestys ja muista kysyä merkitystä oikealla kysymyksellä. Nämä ovat LOS!:n omia opetustilanteita. Eri osion Text A -luetunymmärtämistehtävät ja tekstikohtainen korostusharjoitus perustuvat puolestaan Wikibooksin oikeaan julkaistuun lähteeseen. Kuunteluharjoitus lisätään vasta, kun alkuperäinen äänite on hyväksytty ja laitetestattu."},
   {id:"los1-c08-production-ask",version:"0.1.0",kind:"production",
     titleFi:"Kirjoita kolme omaa selviytymistilannetta",
     promptFi:"Kirjoita kolme erillistä yhden tai kahden repliikin kuvitteellista tilannetta: (1) et ymmärrä opettajan ohjetta, (2) tarvitset uuden, hitaamman toiston, (3) et tiedä sanan merkitystä. Älä kopioi ensin mallia. Käytä opittuja käyttöfraaseja. Tämä on LOS!:n oma kirjoitusharjoitus, ei alkuperäislähteen litteraatti.",
