@@ -26,7 +26,7 @@ test('second-cycle original attempts are separate from chapter and first review 
    assert.equal(gradeExercise(ex,ex.correct??ex.accepted?.[0]??'').status,'correct',ex.id);
   }
  }
- assert.equal(reviewTwoItems.length,14);
+ assert.equal(reviewTwoItems.length,20);
 });
 test('L056 and L058 each have 30 minutes, distinct five-stage scripts and six new attempted tasks',()=>{
  const plans=reviewTwoLessons.filter(l=>l.id!=='L060');
@@ -64,11 +64,11 @@ test('L060 personal summary requires ten self-ratings and a concrete next goal',
  assert.equal(lessons.find(l=>l.id==='L060')?.status,'initial-material');
  assert.equal(guidedLessons.filter(l=>l.id==='L060').length,1);
 });
-test('honesty: full ten-chapter review L057 and final exam lesson L059 remain blocked',()=>{
- assert.equal(lessons.find(l=>l.id==='L057')?.status,'pending');
- assert.equal(lessons.find(l=>l.id==='L059')?.status,'pending');
- assert.equal(guidedLessons.some(l=>l.id==='L057'),false);
- assert.equal(guidedLessons.some(l=>l.id==='L059'),false);
+test('all ten-chapter L057 and final exam L059 lessons are now authored but not release-certified',()=>{
+ assert.equal(lessons.find(l=>l.id==='L057')?.status,'initial-material');
+ assert.equal(lessons.find(l=>l.id==='L059')?.status,'initial-material');
+ assert.equal(guidedLessons.some(l=>l.id==='L057'),true);
+ assert.equal(guidedLessons.some(l=>l.id==='L059'),true);
  assert.equal(chapters.find(c=>c.id==='C06')?.status,'text-reviewed');
- assert.equal(chapters.find(c=>c.id==='C08')?.status,'source-pending');
+ assert.equal(chapters.find(c=>c.id==='C08')?.status,'text-reviewed');
 });
