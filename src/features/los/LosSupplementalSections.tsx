@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { ArrowRight, BookOpen, Headphones } from "lucide-react";
 import { LosAuthenticAudio } from "./LosReferenceTools";
+import { LosVoicePractice } from "./LosVoicePractice";
 import { useLosChapterDraft } from "./studyState";
 import type { LosChapter } from "./catalog";
 
@@ -81,6 +82,7 @@ export function LosApplication({chapter}:{chapter:LosChapter}) {
     <p className="los-save-state" role="status">{saved?"Vastaus tallennettu tähän selaimeen. Pilveen siirto on erillinen vapaaehtoinen toiminto.":"Tallennus epäonnistui. Kopioi vastauksesi talteen."}</p>
     <h3>Itsearvioinnin tarkistuslista</h3>
     <ul className="los-application-checks">{item.checklist.map(point=><li key={point}>{point}</li>)}</ul>
+    {(chapter.id==="07"||chapter.id==="08"||chapter.id==="10")&&<LosVoicePractice key={chapter.id} chapterId={chapter.id}/>}
     <button className="los-outline-button" disabled={!draft.applicationDraft.trim()} onClick={()=>setShowExample(v=>!v)}>
       {showExample?"Piilota mallivastaus":"Näytä mallivastaus oman yrityksen jälkeen"}
     </button>
