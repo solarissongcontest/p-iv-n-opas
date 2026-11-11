@@ -71,5 +71,7 @@ export const LOS1_C01_TEST = {
     + "Tee myös puheen itsearviointi, joka ei vaikuta automaattisiin pisteisiin.",
   exerciseIds: LOS1_C01_EXAM_EXERCISES.map(exercise => exercise.id),
   alternativeExerciseIds: LOS1_C01_ALTERNATE_EXAM_EXERCISES.map(exercise => exercise.id),
+  speechExampleDe: "Hallo! Guten Morgen! Tschüss!",
+  speechPromptFi: "Lausu ääneen yksi tervehdys ja yksi hyvästely. Voit myös kertoa, mihin vuorokaudenaikaan niitä käytetään.",
   speechCriteria: LOS1_C01_SPEECH_CRITERIA,
 } as const;
