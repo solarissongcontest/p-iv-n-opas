@@ -389,7 +389,7 @@ function LosBookWorkspace({ book, location, move, goLibrary, openBook }: { book:
               </button>
             : next ? <button type="button" onClick={() => openChapter(next)}><span><small>Seuraava kappale</small><strong lang="de">{next.title}</strong></span><ChevronRight size={19} /></button> : <span />}
         </nav>}
-        {chapter && <LosNotebook key={`notes-${chapter.id}`} chapter={chapter} />
+        {chapter && <LosNotebook key={`notes-${chapter.id}`} chapter={chapter} />}
         <footer className="los-page-footer">LOS! · {book.code} · {book.module} <span>Kappaleiden varmistettuja aineistoja täydennetään</span></footer>
       </main>
     </div>
