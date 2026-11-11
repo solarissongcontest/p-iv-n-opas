@@ -157,6 +157,12 @@ export const LOS1_C03_CONTENT_BLOCKS: ContentBlock[] = [
     ],
   },
   {
+    id: "los1-c03-country-schematic", version: "0.1.0", kind: "geo-schematic",
+    titleFi: "Suomen, Keski-Euroopan ja naapurimaiden sijainti",
+    instructionsFi: "Tutki maiden nimien sijaintia kaaviossa. Vastaa sitten seuraaviin neljään tehtävään. "
+      + "Kaavio on yksinkertaistettu muistamisen apuväline, eikä se esitä valtioiden todellisia rajoja tai mittakaavaa.",
+  },
+  {
     id: "los1-c03-culture-intro", version: "0.1.0", kind: "paragraph", language: "fi",
     text: "DACH on lyhenne kolmesta saksankielisestä maasta: Deutschland (Saksa), "
       + "Austria eli Österreich (Itävalta) ja Confoederatio Helvetica eli die Schweiz (Sveitsi). "
