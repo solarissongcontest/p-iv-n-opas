@@ -227,3 +227,14 @@
 .los-week-preview{font-size:13px;color:var(--los-ink-secondary);overflow-wrap:anywhere}
 @media(max-width:760px){.los-week-day{grid-template-columns:minmax(100px,.9fr) minmax(130px,1.1fr)}.los-week-preview{grid-column:1/-1;padding-left:2px}}
 @media(max-width:340px){.los-week-day{grid-template-columns:minmax(0,1fr)}.los-week-preview{grid-column:auto}}
+
+
+/* C06 two source-independent German cardinal numeral workshops */
+.los-number-practice{max-width:900px}
+.los-number-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 16px;margin:20px 0}
+.los-number-row{display:grid;grid-template-columns:minmax(94px,.6fr) minmax(130px,1.4fr);gap:8px;align-items:center;border-bottom:1px solid var(--los-border);padding:7px 0}
+.los-number-row label{font-size:14px;white-space:normal}
+.los-number-row input{min-height:44px;width:100%;min-width:0;padding:9px;border:1px solid var(--los-border-strong);border-radius:8px;color:var(--los-ink);background:var(--los-surface)}
+.los-number-row .los-feedback{grid-column:1/-1;margin:0;line-height:1.4}
+@media(max-width:710px){.los-number-list{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:380px){.los-number-row{grid-template-columns:minmax(0,1fr)}}
