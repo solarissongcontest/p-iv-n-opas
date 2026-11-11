@@ -68,7 +68,7 @@ function LibraryPage() {
         <BookCover book={book} />
         <strong>LOS! {book.number}</strong><span className="los-card-title">{book.title}</span>
         <small>{book.moduleCode} · {book.credits} op</small>
-        <span className="los-card-status">Sisältöä valmistellaan</span>
+        <span className="los-card-status">{book.chapters.some(chapter => chapter.publicationStatus === "preview") ? "Ensimmäinen kappale · harjoitusversio" : "Sisältöä valmistellaan"}</span>
       </a>)}</div>
     <p className="los-library-footnote">Kansikuvat ja varsinainen oppimateriaali lisätään vasta alkuperäisten assettien ja tarkistettujen sisältöpakettien mukana.</p>
   </div>;
@@ -80,12 +80,14 @@ function BookHome({ book }: { book: Book }) {
     <div className="los-book-hero"><BookCover book={book}/>
       <div><p className="los-eyebrow">{book.moduleTitle}</p><h1>{book.title}</h1>
         <p>{book.description}</p>
-        <a className="los-button los-button-primary" href={bookPath(book, book.lessons.some(lesson => lesson.steps.length > 0) ? "opetuspolku" : "sisalto")}>
-          {book.lessons.some(lesson => lesson.steps.length > 0) ? "Siirry opetuspolkuun" : "Avaa sisällysluettelo"} <ArrowRight size={17}/>
+        <a className="los-button los-button-primary" href={bookPath(book, book.lessons.some(lesson => lesson.steps.length > 0) ? "oppitunti/002" : "sisalto")}>
+          {book.lessons.some(lesson => lesson.steps.length > 0) ? "Aloita ensimmäinen harjoitustunti" : "Avaa sisällysluettelo"} <ArrowRight size={17}/>
         </a>
       </div>
     </div>
-    {!book.lessons.some(lesson => lesson.steps.length > 0) && <p className="los-notice" role="status">Oppituntien sisältöä ei ole vielä julkaistu. Etenemistä ei lasketa ennen kuin oikeita opintosuorituksia on saatavilla.</p>}
+    {book.lessons.some(lesson => lesson.publicationStatus === "preview") ?
+      <p className="los-notice" role="status">LOS! 1:n ensimmäinen alkuperäisteksti ja harjoituspolku ovat nyt käytettävissä. Muut oppitunnit sekä kappaleen virallinen testi ovat kesken.</p> :
+      <p className="los-notice" role="status">Oppituntien sisältöä ei ole vielä julkaistu. Etenemistä ei lasketa ennen kuin oikeita opintosuorituksia on saatavilla.</p>}
     <h2 className="los-section-title">Tutustu kirjaan</h2>
     <div className="los-path-cards">
       <a href={bookPath(book, "sisalto")}><List size={20}/><b>Sisällysluettelo</b><span>Selaa tekstejä ja kappaleita.</span></a>
@@ -93,7 +95,7 @@ function BookHome({ book }: { book: Book }) {
       <a href={bookPath(book, "kertaus")}><RotateCcw size={20}/><b>Kertaa</b><span>Palauta aiemmin opittua mieleen.</span></a>
     </div>
     <h2 className="los-section-title">Kirjan työkalut</h2>
-    <div className="los-tool-links">{sections.slice(4).map(section => <a key={section.segment} href={bookPath(book, section.segment)}>{section.title} <ArrowRight size={16}/></a>)}</div>
+    <div className="los-tool-links">{sections.slice(4).map(section => <a key={section.segment} href={section.segment === "sanakirja" ? LOS_BASE_PATH + "/sanakirja" : bookPath(book, section.segment)}>{section.title} <ArrowRight size={16}/></a>)}</div>
   </div>;
 }
 function Contents({ book }: { book: Book }) {
@@ -101,7 +103,7 @@ function Contents({ book }: { book: Book }) {
     {!book.chapters.length ? <Empty title="Kappaleita ei ole vielä lisätty">Tähän ilmestyvät kirjan varsinaiset tekstit, kieliopit, sanastot ja tehtävät. Mitään tekaistua oppimateriaalia ei näytetä.</Empty> :
       <ol className="los-chapter-list">{book.chapters.map(chapter =>
         <li key={chapter.id}><details><summary><span className="los-chapter-number">{String(chapter.sequence).padStart(2, "0")}</span>
-          <span><b>{chapter.title}</b><small>{chapter.introductionFi}</small></span><span>{chapter.publicationStatus === "published" ? "Katso sisältö" : "Sisältö tulossa"}</span></summary>
+          <span><b>{chapter.title}</b><small>{chapter.introductionFi}</small></span><span>{chapter.publicationStatus === "published" ? "Katso sisältö" : chapter.publicationStatus === "preview" ? "Lue ja harjoittele · luonnos" : "Sisältö tulossa"}</span></summary>
           <div className="los-chapter-inner"><a href={bookPath(book, "kappale/" + encodeURIComponent(chapter.id.slice(1)))}>Avaa kappale <ArrowRight size={16}/></a>
             {chapter.blockIds.map(id => <a key={id} href={bookPath(book, "teksti/" + encodeURIComponent(id))}>
               {book.blocks.find(block => block.id === id)?.kind === "grammar" ? "Kielioppi" : "Oppimateriaali"} · {id}</a>)}
@@ -123,8 +125,8 @@ function Lessons({ book }: { book: Book }) {
   return <section className="los-lessons">
     <h1>Opetuspolku</h1>
     <p className="los-intro">Vapaaehtoiset, noin 30 minuutin oppitunnit käyttävät samoja materiaaleja kuin muu oppikirja. Oppitunteja ei ole lukittu järjestyksessä.</p>
-    {book.lessons.length > 0 && book.lessons.every(lesson => !lesson.steps.length) &&
-      <p className="los-notice">Kaikki {book.lessons.length} suunniteltua oppituntia löytyvät alla. Varsinainen opetusmateriaali ja suoritustoiminnot eivät vielä ole julkaistuja.</p>}
+    {book.lessons.length > 0 &&
+      <p className="los-notice">Polussa on {book.lessons.length} nimettyä oppituntia. Näistä {book.lessons.filter(lesson => lesson.publicationStatus === "preview").length} on avattu harjoitusversioiksi. Keskeneräisen tunnin otsikko ei tarkoita, että sen sisältö olisi jo julkaistu.</p>}
     {!book.lessons.length ? <Empty title="Oppitunteja ei ole vielä julkaistu">Opetuspolun sisältö lisätään tarkistettuina sisältöpaketteina.</Empty> :
       groups.map(group => <section key={group.id} className="los-lesson-group">
         <h2>{group.title}</h2>
@@ -132,7 +134,7 @@ function Lessons({ book }: { book: Book }) {
           <li key={lesson.id}><a href={bookPath(book, "oppitunti/" + encodeURIComponent(lesson.id.slice(1)))}>
             <span className="los-chapter-number">{String(lesson.sequence).padStart(3, "0")}</span>
             <span><b>{lesson.title}</b><small>{lesson.objectives.join(" · ") || "Opetussisällön suunnitelma"}</small></span>
-            <span>{lesson.steps.length ? "n. " + lesson.estimatedMinutes + " min" : "Sisältö tulossa"} <ArrowRight size={17}/></span>
+            <span>{lesson.publicationStatus === "preview" ? "Harjoitusversio" : lesson.steps.length ? "n. " + lesson.estimatedMinutes + " min" : "Sisältö tulossa"} <ArrowRight size={17}/></span>
           </a></li>)}</ol>
       </section>)}
   </section>;
@@ -143,7 +145,10 @@ function ChapterPage({ book, chapter }: { book: Book; chapter: Chapter }) {
   return <section><p className="los-eyebrow">KAPPALE {String(chapter.sequence).padStart(2, "0")}</p>
     <h1>{chapter.title}</h1><p className="los-intro">{chapter.introductionFi}</p>
     {!!chapter.objectives.length && <div className="los-objectives"><b>Tämän jälkeen osaat</b><ul>{chapter.objectives.map(goal => <li key={goal}>{goal}</li>)}</ul></div>}
-    {chapter.publicationStatus !== "published" && <p className="los-notice">Kappaleen opetusrunko on vasta osittainen. Kokonainen ihmisen laatima Text A, lähdeääni sekä kappaletesti puuttuvat vielä. Alla olevat omat opetusesimerkit eivät korvaa alkuperäistekstiä.</p>}
+    {chapter.publicationStatus === "preview" ?
+      <p className="los-notice">Tämän kappaleen koko alkuperäinen Text A ja lähdeäänitteen sisäinen soitin ovat käytettävissä. Äänen toimivuutta eri laitteissa ja kappaleen täyttä harjoitus-/koesisältöä ei ole vielä varmennettu. Erilliset opetusesimerkit on merkitty omiksi harjoituksiksi.</p> :
+      chapter.publicationStatus !== "published" &&
+      <p className="los-notice">Kappaleen opetusmateriaalia ei ole vielä julkaistu kokonaisuudessaan.</p>}
     <Reader book={book} blocks={blocks} title={chapter.title}/>
     {exercises.length > 0 && <section className="los-chapter-exercises"><h2>Harjoitukset</h2>{exercises.map(exercise =>
       <ExerciseEngine key={exercise.id} bookId={book.id} exercise={exercise}/>)}</section>}
@@ -188,6 +193,12 @@ function GenericSection({ book, segment }: { book: Book; segment: string }) {
     const blocks = book.blocks.filter(block => block.kind === "grammar");
     return blocks.length ? <Reader book={book} blocks={blocks} title="Kielioppi" headingLevel={1}/> :
       <section><h1>Kielioppi</h1><Empty title="Kielioppilukuja ei ole vielä julkaistu">Tähän avautuvat varsinaiset, perusteelliset opetussivut.</Empty></section>;
+  }
+  if (segment === "mediat") {
+    const blocks = book.blocks.filter(block => block.kind === "media");
+    return blocks.length
+      ? <Reader book={book} blocks={blocks} title="Mediat" headingLevel={1}/>
+      : <section><h1>Mediat</h1><Empty title="Ei julkaistua mediaa">Äänitteet ja videot lisätään lähdetietoineen vasta, kun käyttöoikeudet on varmennettu.</Empty></section>;
   }
   if (segment === "lahteet") return <section><h1>Lähteet</h1>{book.sources.length ?
     <ul className="los-source-list">{book.sources.map(source => <li key={source.id}><b>{source.title}</b> · {source.publisher}
