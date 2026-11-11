@@ -10,6 +10,7 @@ import { useLosRecord, losSyncMessage } from "./data/useLosRecord";
 import { evaluateExercise } from "./exercises/evaluate";
 import { formatExerciseAnswer } from "./exercises/formatAnswer";
 import { SpeechRecorder } from "./SpeechRecorder";
+import { Reader } from "./Reader";
 
 function isMatchingAnswer(value: ExerciseAnswer): value is Record<string, string> {
   return value !== null && typeof value === "object" && !Array.isArray(value) && !("start" in value);
@@ -97,6 +98,18 @@ export function ChapterTestWorkspace({ book, definition, onReturned }: {
   const exercises = selectedTestExercises(definition, book.exercises, attemptNumber);
   const writingMode = definition.selfAssessmentMode === "writing";
   const writtenLines = (state.writtenResponse ?? "").split(/\r?\n/u).filter(line => line.trim().length > 0).length;
+  const secondWrittenLines = (state.secondWrittenResponse ?? "").split(/\r?\n/u).filter(line => line.trim().length > 0).length;
+  const missingSecondWriting = writingMode && definition.secondWritingPromptFi !== undefined &&
+    (secondWrittenLines < (definition.requiredSecondWritingLines ?? 1) ||
+      (definition.maximumSecondWritingLines !== undefined &&
+       secondWrittenLines > definition.maximumSecondWritingLines));
+  const listeningBlocks = (definition.listeningBlockIds ?? []).flatMap(id => {
+    const block = book.blocks.find(item => item.id === id);
+    return block?.kind === "media" && book.sources.some(source =>
+      source.id === block.sourceId && source.permittedMode === "embed") ? [block] : [];
+  });
+  const listeningUnavailable = Boolean(definition.listeningBlockIds?.length) &&
+    listeningBlocks.length !== definition.listeningBlockIds?.length;
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [restartVisible, setRestartVisible] = useState(false);
   const isReturned = Boolean(state.submission);
@@ -123,10 +136,13 @@ export function ChapterTestWorkspace({ book, definition, onReturned }: {
   const submit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (status === "loading" || isReturned) return;
-    if (missingAnswers.length > 0 || missingSpeech.length > 0 || (writingMode && (writtenLines < (definition.requiredWritingLines ?? 1) || (definition.maximumWritingLines !== undefined && writtenLines > definition.maximumWritingLines)))) {
+    if (missingAnswers.length > 0 || missingSpeech.length > 0 || (writingMode && (writtenLines < (definition.requiredWritingLines ?? 1) || (definition.maximumWritingLines !== undefined && writtenLines > definition.maximumWritingLines) || missingSecondWriting)) || listeningUnavailable) {
       setSubmitError("Vastaa kaikkiin " + definition.exerciseIds.length +
         " tarkistettavaan kohtaan ja tee " + (writingMode ?
-          "kirjallinen osuus (" + (definition.requiredWritingLines ?? 1) + (definition.maximumWritingLines ? "–" + definition.maximumWritingLines : "+") + " erillistä riviä) sekä sen" :
+          "kirjallinen osuus (" + (definition.requiredWritingLines ?? 1) + (definition.maximumWritingLines ? "–" + definition.maximumWritingLines : "+") + " erillistä riviä)" +
+          (definition.secondWritingPromptFi ? " ja toinen kirjoitustehtävä (" +
+           (definition.requiredSecondWritingLines ?? 1) + "–" +
+           (definition.maximumSecondWritingLines ?? "∞") + " repliikkiä)" : "") + " sekä niiden" :
           "puheen") + " itsearviointi.");
       return;
     }
@@ -138,6 +154,11 @@ export function ChapterTestWorkspace({ book, definition, onReturned }: {
     });
     setSubmitError(null);
   };
+
+  if (listeningUnavailable)
+    return <section className="los-empty"><h2>Kokeen kuuntelulähteet puuttuvat</h2>
+      <p>Harjoituskoetta ei aloiteta, jos jokin valittu alkuperäinen äänitiedosto ei ole hyväksytty käytettäväksi oppikirjassa.</p>
+    </section>;
 
   if (exercises.length !== definition.exerciseIds.length)
     return <section className="los-empty"><h2>Kokeen tehtävät ovat keskeneräisiä</h2>
@@ -154,6 +175,11 @@ export function ChapterTestWorkspace({ book, definition, onReturned }: {
       <span>{definition.speechCriteria.length} {writingMode ? "kirjallisen tuotoksen" : "puheen"} itsearviointia · ei pisteitä</span>
     </div>
     <p className="los-storage-state" role="status">{losSyncMessage(status)}</p>
+    {!!listeningBlocks.length && <section className="los-exam-listening" aria-label="Kokeen alkuperäiset kuuntelulähteet">
+      <h3>Kuuntelu · oikeiden ihmisten alkuperäiset äänitteet</h3>
+      <p>Toista alla olevat alkuperäiset äänitteet ennen kuunteluryhmän tehtäviä. Ne ovat samoja hyväksyttyjä lähdetiedostoja kuin aiemmissa oppitunneissa, eivät tietokoneella luotuja lisäkatkelmia. Kuuntelun todellinen toimivuus omalla laitteellasi pitää silti varmistaa. Jos jokin soitin ei toimi, älä arvaa vastausta äläkä pidä kuuntelutulosta luotettavana.</p>
+      <Reader book={book} blocks={listeningBlocks} title="Kuuntelutekstit" />
+    </section>}
     <form onSubmit={submit}>
       <div className="los-exam-questions">{exercises.map((exercise, index) =>
         <div key={exercise.id}>
@@ -170,7 +196,7 @@ export function ChapterTestWorkspace({ book, definition, onReturned }: {
         <h3>{writingMode ? "Kirjoita oma dialogi · ei automaattisia pisteitä" : "Puhe · oma arvio, ei automaattisia pisteitä"}</h3>
         {writingMode ? <>
           <p>{definition.writingPromptFi ?? "Kirjoita lyhyt saksankielinen esittely oppimiesi rakenteiden avulla."} Vastauksesi tallennetaan koesuorituksen yhteyteen, mutta sitä ei arvioida automaattisesti.</p>
-          <label htmlFor={"los-exam-writing-" + definition.id}>Oma teksti saksaksi</label>
+          <label htmlFor={"los-exam-writing-" + definition.id}>{definition.secondWritingPromptFi ? "Oma viesti saksaksi" : "Oma teksti saksaksi"}</label>
           <textarea id={"los-exam-writing-" + definition.id} rows={4} lang="de"
             autoCapitalize="none" spellCheck={false} disabled={isReturned || status === "loading"}
             value={state.writtenResponse ?? ""}
@@ -178,6 +204,24 @@ export function ChapterTestWorkspace({ book, definition, onReturned }: {
               update(previous => ({ ...previous, writtenResponse: event.target.value }));
               setSubmitError(null);
             }}/>
+          {definition.secondWritingPromptFi && <>
+            <h4>Toinen erillinen kirjoitustehtävä · ei pisteitä</h4>
+            <p>{definition.secondWritingPromptFi}</p>
+            <label htmlFor={"los-exam-writing-second-" + definition.id}>Oma keskustelu (yksi repliikki per rivi)</label>
+            <textarea id={"los-exam-writing-second-" + definition.id} rows={8} lang="de"
+              autoCapitalize="none" spellCheck={false} disabled={isReturned || status === "loading"}
+              value={state.secondWrittenResponse ?? ""}
+              onChange={event => {
+                update(previous => ({...previous,secondWrittenResponse:event.target.value}));
+                setSubmitError(null);
+              }}/>
+          </>}
+          {definition.speechPromptFi && <div className="los-exam-optional-speaking">
+            <h4>Harjoittele lisäksi ääneen · ei pisteitä</h4>
+            <p>{definition.speechPromptFi}</p>
+            <SpeechRecorder key={definition.id + ":" + attemptNumber}
+              title="Vapaaehtoinen oma ääni" exampleDe={definition.speechExampleDe}/>
+          </div>}
         </> : <>
           <p>{definition.speechPromptFi ?? "Lausu ääneen kappaleen keskeinen kysymys ja vastaus."} Voit äänittää harjoituksesi vapaaehtoisesti ja kuunnella sen ennen itsearviointia. Sovellus ei automaattisesti arvioi ääntämistäsi.</p>
           <SpeechRecorder key={definition.id + ":" + attemptNumber} title="Kuuntele omaa ääntämistäsi" exampleDe={definition.speechExampleDe}/>
@@ -205,8 +249,17 @@ export function ChapterTestWorkspace({ book, definition, onReturned }: {
         <ul>{examScoreGroups(definition, state.submission).map(group =>
           <li key={group.id}><span>{group.titleFi}</span><strong>{group.score} / {group.maximum} p</strong></li>)}</ul>
       </section>}
-      <p>Automaattisesti tarkistettiin {state.submission.maximum} osatehtävää. {writingMode ? "Kirjallinen dialogi" : "Puhe"} itsearvioitiin erikseen. Voit lukea jokaisen kohdan perustelun ylempänä.</p>
-      {writingMode && <div className="los-exam-writing-return"><h4>Oma kirjallinen vastauksesi · itsearviointi</h4><p lang="de">{state.submission.writtenResponse ?? ""}</p><details><summary>Avaa LOS!:n oma mallivastaus</summary><p lang="de">{definition.writingModelDe ?? "Hallo! Ich heiße Lena. Wie heißt du?"}</p>{definition.writingModelFi && <p>{definition.writingModelFi}</p>}</details></div>}
+      <p>Automaattisesti tarkistettiin {state.submission.maximum} osatehtävää. {writingMode ? "Kirjalliset tuotokset" : "Puhe"} itsearvioitiin erikseen, eikä niistä lisätty pisteitä. Voit lukea jokaisen kohdan perustelun ylempänä.</p>
+      {writingMode && <div className="los-exam-writing-return"><h4>Oma kirjallinen vastauksesi · itsearviointi</h4><p lang="de" style={{whiteSpace:"pre-wrap"}}>{state.submission.writtenResponse ?? ""}</p><details><summary>Avaa LOS!:n oma mallivastaus</summary><p lang="de" style={{whiteSpace:"pre-wrap"}}>{definition.writingModelDe ?? "Hallo! Ich heiße Lena. Wie heißt du?"}</p>{definition.writingModelFi && <p style={{whiteSpace:"pre-wrap"}}>{definition.writingModelFi}</p>}</details>
+        {definition.secondWritingPromptFi && <div className="los-exam-second-result">
+          <h4>Oma keskustelu · itsearviointi</h4>
+          <p lang="de" style={{whiteSpace:"pre-wrap"}}>{state.submission.secondWrittenResponse ?? ""}</p>
+          <details><summary>Avaa keskustelun mallivastaus</summary>
+            <p lang="de" style={{whiteSpace:"pre-wrap"}}>{definition.secondWritingModelDe}</p>
+            {definition.secondWritingModelFi && <p style={{whiteSpace:"pre-wrap"}}>{definition.secondWritingModelFi}</p>}
+          </details>
+        </div>}
+      </div>}
       <p className="los-support">Tulos kuvaa vain tätä {definition.examType === "midterm" ? "LOS! 1:n välikoetta" : definition.chapterId + ":n tehtäväsarjaa"}. Se ei ole kurssin arvosana eikä CEFR-tason arvio.</p>
       {!restartVisible ? <button type="button" className="los-button los-button-secondary"
         onClick={() => setRestartVisible(true)}><RotateCcw size={17}/> Tee uusi yritys</button>
@@ -224,7 +277,8 @@ export function ChapterTestWorkspace({ book, definition, onReturned }: {
       <summary>Edelliset yritykset ({state.previousResults.length})</summary>
       <ol>{state.previousResults.map((result, index) => <li key={result.submittedAt + ":" + index}>
         <strong>Yritys {(result.attemptNumber ?? index) + 1}</strong> · {new Date(result.submittedAt).toLocaleDateString("fi-FI")} · {result.score} / {result.maximum} p
-        {result.writtenResponse && <p lang="de" className="los-exam-past-writing">{result.writtenResponse}</p>}
+        {result.writtenResponse && <p lang="de" className="los-exam-past-writing" style={{whiteSpace:"pre-wrap"}}>{result.writtenResponse}</p>}
+        {result.secondWrittenResponse && <p lang="de" className="los-exam-past-writing" style={{whiteSpace:"pre-wrap"}}>{result.secondWrittenResponse}</p>}
         {!!result.outcomes?.length && <details className="los-exam-past-report">
           <summary>Tarkista aiemmat vastaukset ja perustelut</summary>
           <ol>{result.outcomes.map((item, index2) => <li key={item.exerciseId}>
