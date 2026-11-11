@@ -10,6 +10,7 @@ import {ExamSession} from './ExamSession';
 import {type FirstLessonStep} from './firstLessons';
 import {guidedLessons} from './guidedLessons';
 import {auditLosRelease} from './releaseAudit';
+import {NumberPractice} from './NumberPractice';
 
 
 
@@ -354,7 +355,7 @@ function ChapterSection({chapter,section,store,fontSize}:{chapter:Chapter;sectio
  if(section==='Kielioppi')return <Grammar chapter={chapter}/>;
  if(section==='Teksti B')return <><h2>Teksti B / Kuuntelu</h2><Media chapter={chapter} store={store} fontSize={fontSize}/></>;
  if(section==='Kulttuuri')return <div className="los-prose"><Label>LAND UND LEUTE</Label><h2>Kulttuuri</h2><p>{chapter.culture}</p></div>;
- if(section==='Harjoittele')return <><h2>Harjoittele</h2>{exercises.filter(e=>!['highlight','writing','speech'].includes(e.type)).map(ex=><ExerciseCard key={ex.id} exercise={ex} chapter={chapter} store={store} fontSize={fontSize}/>)}</>;
+ if(section==='Harjoittele')return <><h2>Harjoittele</h2>{chapter.id==='C06'?<NumberPractice items={store.items} put={store.put}/>:null}{exercises.filter(e=>!['highlight','writing','speech'].includes(e.type)).map(ex=><ExerciseCard key={ex.id} exercise={ex} chapter={chapter} store={store} fontSize={fontSize}/>)}</>;
  if(section==='Käytä saksaa')return <><h2>Käytä saksaa itse</h2>{exercises.filter(e=>['writing','speech'].includes(e.type)).map(ex=><ExerciseCard key={ex.id} exercise={ex} chapter={chapter} store={store} fontSize={fontSize}/>)}</>;
  if(section==='Kappaletesti'&&chapter.status==='source-pending')return <p className="los-warning">Kappaletestiä ei ole vielä julkaistu, koska tämän kappaleen pääteksti on hyväksymättä. Harjoitteita voi tehdä erikseen.</p>;
  if(section==='Kappaletesti'&&['C01','C02','C03','C04','C05','C07','C09','C10'].includes(chapter.id)){
