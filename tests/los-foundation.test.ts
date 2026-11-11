@@ -111,7 +111,7 @@ test("C02 chapter has ten connected preview sections, not counterfeit source tex
   assert.ok(chapter);
   assert.equal(chapter.sections?.length, 10);
   assert.equal(chapter.sections?.filter(item => item.publicationStatus === "preview").length, 10);
-  assert.equal(chapter.blockIds.length, 14);
+  assert.equal(chapter.blockIds.length, 15);
   assert.equal(chapter.exerciseIds.length, 34);
   const audio = los1.blocks.find(block => block.id === "los1-c02-commons-02-audio");
   assert.ok(audio && audio.kind === "media");
