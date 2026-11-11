@@ -3,6 +3,7 @@ import { BookOpen, Highlighter, NotebookPen, Settings2 } from "lucide-react";
 import type { Book, BookId, ContentBlock, SourceAttribution } from "./model";
 import { useLosRecord, losSyncMessage } from "./data/useLosRecord";
 import { findGlossarySpans, type GlossaryEntry } from "./glossary";
+import { CountrySchematic } from "./CountrySchematic";
 
 export type ReaderMark = { blockId: string; version: string; start: number; end: number; color: "yellow" };
 export type ReaderNote = { blockId: string; version: string; text: string; updatedAt: string };
@@ -235,6 +236,7 @@ function RenderBlock({ block, bookId, source, marked, highlighterEnabled, glossa
         <dt lang="de">{entry.de}</dt><dd>{entry.fi}{entry.note && <small>{entry.note}</small>}</dd>
       </div>)}</dl></section>;
     case "production": return <ProductionBlock bookId={bookId} block={block} />;
+    case "geo-schematic": return <CountrySchematic titleFi={block.titleFi} instructionsFi={block.instructionsFi}/>;
     case "media": return <SafeMedia block={block} source={source} />;
   }
 }
