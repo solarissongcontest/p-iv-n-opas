@@ -94,7 +94,7 @@ function Reader({chapter,store,exerciseMode,onSelect,onClear,selection,fontSize}
  const isPicking=Boolean(exerciseMode||freeInk);
  const selectToken=(block:Block,start:number,end:number)=>{
   const existing=item(store,'ink:'+block.id) as TextAnchor|null;
-  const previous=exerciseMode?selection:(draft??(existing?.contentVersion===LOS_VERSION?existing:null));
+  const previous=(exerciseMode?selection:(draft??(existing?.contentVersion===LOS_VERSION?existing:null)))??null;
   const same=previous?.blockId===block.id;
   const next:TextAnchor={blockId:block.id,start:same&&previous?Math.min(previous.start,start):start,end:same&&previous?Math.max(previous.end,end):end,contentVersion:LOS_VERSION};
   setUndoMark({before:previous,after:next});
@@ -112,11 +112,11 @@ function Reader({chapter,store,exerciseMode,onSelect,onClear,selection,fontSize}
   // boundary nodes themselves have data-los-start/end.
   const touched=tokens.filter(node=>{
    try{return range.intersectsNode(node)}catch{return false}
-  }).map(node=>({start:Number(node.dataset.losStart),end:Number(node.dataset.losEnd)}));
+  }).map(node=>({start:Number(node.dataset['losStart']),end:Number(node.dataset['losEnd'])}));
   const next=anchorFromSelectedTokens(block.id,touched,block.text.length);
   if(!next)return;
   const existing=item(store,'ink:'+block.id) as TextAnchor|null;
-  const previous=exerciseMode?selection:(draft??existing);
+  const previous=(exerciseMode?selection:(draft??existing))??null;
   setUndoMark({before:previous,after:next});
   if(exerciseMode)onSelect?.(next);
   else {setDraft(next);store.put('ink:'+block.id,next);}
