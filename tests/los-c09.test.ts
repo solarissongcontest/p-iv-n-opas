@@ -9,6 +9,8 @@ import {LOS1_C09_PRACTICE_EXERCISES,LOS1_C09_DAY_EXERCISES,LOS1_C09_CALENDAR_EXE
  from "../src/features/los/los1-c09-practice.ts";
 import {LOS1_C09_SOURCE_EXERCISES,LOS1_C09_WB04_TEXT}
  from "../src/features/los/los1-c09-source.ts";
+import {LOS1_C09_SPORT_TURNS,LOS1_C09_SPORT_TEXT,LOS1_C09_TEXT_A_BLOCKS,LOS1_C09_TEXT_A_EXERCISES}
+ from "../src/features/los/los1-c09-text-a.ts";
 import {LOS1_C09_EXAM_A,LOS1_C09_EXAM_B,LOS1_C09_TEST}
  from "../src/features/los/los1-c09-test.ts";
 import {emptyChapterTestRecord,gradeChapterTest,selectedTestExercises,
@@ -49,8 +51,8 @@ test("C09 has ten independently routable preview sections and valid model",()=>{
  assert.equal(LOS1_C09_SOURCE_EXERCISES.length,4);
  assert.equal(LOS1_C09_PRACTICE_EXERCISES.length,39);
  assert.equal(LOS1_C09_EXAM_A.length,14);
- assert.equal(chapter.exerciseIds.length,57);
- assert.equal(new Set(chapter.exerciseIds).size,57);
+ assert.equal(chapter.exerciseIds.length,67);
+ assert.equal(new Set(chapter.exerciseIds).size,67);
  const sections=chapter.sections??[];
  assert.ok(sections.every(s=>s.publicationStatus==="preview"));
  assert.deepEqual(sections.map(s=>s.id),[
@@ -81,14 +83,38 @@ test("Real Wikibooks weekday list is complete and precisely attributed",()=>{
  assert.equal(sourceHighlight.text,LOS1_C09_WB04_TEXT);
  assert.equal(evaluateExercise(sourceHighlight,sourceHighlight.acceptedRanges[0]??null)?.correct,true);
 });
-test("Main source and audio remain visibly pending, not fabricated",()=>{
+test("Main Sport und Zeit text is complete, sourced, and authentic audio remains blocked",()=>{
  const metadata=book.sources.find(x=>x.id==="M-WB-03");
  assert.ok(metadata);
- assert.equal(metadata.permittedMode,"pending");
+ assert.equal(metadata.permittedMode,"hosted");
+ assert.equal(metadata.licenseUrl,"https://creativecommons.org/licenses/by-sa/4.0/");
  assert.ok(metadata.originalUrl?.includes("oldid=4003622"));
- const source=book.blocks.find(b=>b.id==="los1-c09-text-a-pending");
- assert.ok(source&&source.kind==="paragraph"&&source.text.includes("ei ole vielä tuotu tähän lukijaan"));
- assert.ok(source&&source.kind==="paragraph"&&source.text.includes("seitsemän repliikin Franz–Greta-dialogi"));
+ assert.ok(metadata.publicationNoteFi?.includes("artikkelivirheestä"));
+ const original=[
+  "Hallo, Greta! Wie spät ist es?",
+  "Es ist Viertel vor drei.",
+  "Wirklich? Ich spiele um drei Fußball. Machst du Sport, Greta?",
+  "Nein, ich bin faul. Ich gehe jetzt nach Hause.",
+  "Fußball macht aber Spaß!",
+  "Bis dann.",
+  "Wiedersehen!",
+ ];
+ assert.deepEqual(LOS1_C09_SPORT_TURNS.map(x=>x.text),original);
+ assert.equal(LOS1_C09_SPORT_TURNS.length,7);
+ assert.equal(LOS1_C09_SPORT_TEXT,original.join("\n"));
+ const source=book.blocks.find(b=>b.id==="los1-c09-wb-03-dialogue");
+ assert.ok(source&&source.kind==="dialogue");
+ assert.equal(source.sourceId,"M-WB-03");
+ assert.deepEqual(source.turns.map(x=>x.text),original);
+ assert.ok(source.turns.every(x=>x.translationFi));
+ assert.equal(LOS1_C09_TEXT_A_BLOCKS.length,3);
+ assert.equal(LOS1_C09_TEXT_A_EXERCISES.length,10);
+ for(const ex of LOS1_C09_TEXT_A_EXERCISES){
+  assert.equal(evaluateExercise(ex,answer(ex))?.correct,true,ex.id);
+ }
+ const highlights=LOS1_C09_TEXT_A_EXERCISES.filter(ex=>ex.type==="highlight");
+ assert.equal(highlights.length,2);
+ assert.ok(highlights.every(ex=>ex.type==="highlight"&&ex.blockId==="los1-c09-wb-03-dialogue"&&ex.text===LOS1_C09_SPORT_TEXT));
  const media=book.blocks.find(b=>b.id==="los1-c09-text-b-media-pending");
  assert.ok(media&&media.kind==="paragraph"&&media.text.includes("vielä"));
  assert.ok(book.blocks.filter(b=>b.id.startsWith("los1-c09-")).every(b=>b.kind!=="media"));
@@ -117,10 +143,13 @@ test("Seven fictional days, seven safe calendar prompts, and 17 glossary units",
  assert.ok(grammar.explanationFi.includes("am + viikonpäivä"));
  assert.ok(grammar.explanationFi.includes("um + lukusana"));
 });
-test("Only three C09 lessons are preview: originals still require clearance",()=>{
+test("Four C09 lessons are preview; only unverified media listening stays planned",()=>{
  assert.deepEqual(book.lessons.filter(l=>l.chapterId==="C09"&&l.publicationStatus==="preview")
-  .map(l=>l.id),["L046","L048","L050"]);
- for(const id of ["L047","L049"]){
+  .map(l=>l.id),["L046","L047","L048","L050"]);
+ const sourceLesson=book.lessons.find(x=>x.id==="L047");
+ assert.ok(sourceLesson?.steps.some(x=>x.blockId==="los1-c09-wb-03-dialogue"));
+ assert.ok(sourceLesson?.steps.some(x=>x.exerciseId==="los1-c09-sport-quarter"));
+ for(const id of ["L049"]){
   const l=book.lessons.find(x=>x.id===id);
   assert.ok(l&&l.publicationStatus==="planned"&&l.steps.length===0);
  }
