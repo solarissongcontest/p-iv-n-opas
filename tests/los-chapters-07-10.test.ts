@@ -91,3 +91,16 @@ test("final grammar only combines learned persons and fixed frames",()=>{
   assert.match(grammar,/Tasatunnit ja am\/um/);
   assert.match(grammar,/ei ole kirjan loppukoe/);
 });
+
+test("recording is opt-in, not uploaded, and only exported after explicit user action",()=>{
+  const voice=readFileSync("src/features/los/LosVoicePractice.tsx","utf8");
+  const supplementary=readFileSync("src/features/los/LosSupplementalSections.tsx","utf8");
+  assert.match(voice,/navigator\.mediaDevices\.getUserMedia\(\{audio:true,video:false\}\)/);
+  assert.match(voice,/onClick=\{\(\)=>void start\(\)\}/);
+  assert.match(voice,/onClick=\{stop\}/);
+  assert.match(voice,/URL\.revokeObjectURL/);
+  assert.match(voice,/getTracks\(\)\.forEach\(track=>track\.stop\(\)\)/);
+  assert.match(voice,/link\.download=/);
+  assert.doesNotMatch(voice,/\bfetch\(/);
+  assert.match(supplementary,/LosVoicePractice/);
+});
