@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Bookmark, BookOpen, Check, CircleAlert, Download, FileText, RotateCcw } from "lucide-react";
 import { losExercisesFor, losIsCorrect, losScore, type LosExercise } from "./exerciseBank";
 import { useLosChapterDraft } from "./studyState";
+import { LosCloudPanel } from "./LosCloudPanel";
 import type { LosChapter } from "./catalog";
 
 function LosSaveNotice({saved}:{saved:boolean}) {
@@ -129,5 +130,6 @@ export function LosNotebook({chapter}:{chapter:LosChapter}) {
       <LosSaveNotice saved={saved}/>
       <button type="button" onClick={download} title="Lataa muistiinpanot omalle laitteelle"><Download size={16}/> Vie muistiinpanot .txt</button>
     </div>
+    <LosCloudPanel bookId={1} chapterId={chapter.id} draft={draft} replaceDraft={remote=>update(()=>remote)} />
   </aside>;
 }
