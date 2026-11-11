@@ -12,6 +12,8 @@ import {chapter02Lessons} from './chapter02Lessons';
 import {chapter03Lessons} from './chapter03Lessons';
 import {chapter04Lessons} from './chapter04Lessons';
 import {chapter05Lessons} from './chapter05Lessons';
+import {reviewOneLessons} from './reviewOneLessons';
+import {reviewOneItems} from './reviewOneItems';
 import {exams,type ExamId} from './examBank';
 import {lookupGloss,translationFi} from './translations';
 import {useLosStore,type SyncStatus} from './useLosStore';
@@ -51,13 +53,13 @@ function Audio({src,title,onFailure,onCompleted}:{src:string;title:string;onFail
  {!failed?<audio controls preload="none" src={src} onEnded={onCompleted} onError={()=>{setFailed(true);onFailure?.();}} aria-label={title}/>:<p role="alert">Äänitteen lataus epäonnistui. Voit jatkaa tekstin ja sanaston avulla. Äänitettä ei merkitä kuunnelluksi.</p>}
  </div>;
 }
-function Media({chapter,store,fontSize=18}:{chapter:Chapter;store:Store;fontSize?:number}){
+function Media({chapter,store,fontSize=18,onAudioCompleted}:{chapter:Chapter;store:Store;fontSize?:number;onAudioCompleted?:()=>void}){
  if(chapter.id==='C02'&&chapter.media?.transcript)return <>
    <Label>TEKSTI B · ALKUPERÄINEN ÄÄNITETTY DIALOGI</Label>
    <h3>{chapter.media.title}</h3>
    <p>Thomas, Takashi ja Peter esittäytyvät. Tässä kuullaan myös kotipaikka, mutta ilmausta <i lang="de">Ich komme aus ...</i> harjoitellaan vasta kappaleessa 3.</p>
    <Audio src={chapter.media.url} title={chapter.media.title}
-    onCompleted={()=>store.put('media:completed:'+chapter.media!.sourceId,{at:new Date().toISOString(),version:LOS_VERSION})}/>
+    onCompleted={()=>{store.put('media:completed:'+chapter.media!.sourceId,{at:new Date().toISOString(),version:LOS_VERSION});onAudioCompleted?.();}}/>
    <Reader chapter={{...chapter,blocks:chapter.media.transcript}} store={store} fontSize={fontSize}/>
    <p className="los-source">
     <b>{chapter.media.sourceId}</b> · {chapter.media.attribution} · {chapter.media.license} ·
@@ -76,7 +78,7 @@ function Media({chapter,store,fontSize=18}:{chapter:Chapter;store:Store;fontSize
   <Label>TEKSTI B · ALKUPERÄINEN IHMISÄÄNITE</Label>
   <h3>{chapter.media.title}</h3>
   <p>{chapter.media.transcript.length>1?'Kuuntele ensin ilman litteraattia ja toista sitten koko alkuperäinen dialogi tekstin kanssa.':'Kuuntele ensin ilman litteraattia. Tämä äänite sisältää yksittäisen puhutun fraasin, ei kokonaista dialogia.'}</p>
-  <Audio src={chapter.media.url} title={chapter.media.title} onCompleted={()=>store.put('media:completed:'+(chapter.id==='C03'?'C03:':'')+chapter.media!.sourceId,{at:new Date().toISOString(),version:LOS_VERSION})}/>
+  <Audio src={chapter.media.url} title={chapter.media.title} onCompleted={()=>{store.put('media:completed:'+(chapter.id==='C03'?'C03:':'')+chapter.media!.sourceId,{at:new Date().toISOString(),version:LOS_VERSION});onAudioCompleted?.();}}/>
   <Reader chapter={{...chapter,blocks:chapter.media.transcript}} store={store} fontSize={fontSize}/>
   <p className="los-source"><b>{chapter.media.sourceId}</b> · {chapter.media.attribution} · {chapter.media.license} ·
    <a href={chapter.media.sourceUrl} target="_blank" rel="noreferrer"> Alkuperäinen äänitiedosto</a> ·
@@ -315,7 +317,7 @@ function ChapterSection({chapter,section,store,fontSize}:{chapter:Chapter;sectio
  return null;
 }
 
-const guidedLessons=[...firstLessons,...chapter02Lessons,...chapter03Lessons,...chapter04Lessons,...chapter05Lessons];
+const guidedLessons=[...firstLessons,...chapter02Lessons,...chapter03Lessons,...chapter04Lessons,...chapter05Lessons,...reviewOneLessons];
 function FirstLessonRunner({lessonId,store,fontSize,onNext,onContents}:{lessonId:string;store:Store;fontSize:number;onNext:()=>void;onContents:()=>void}){
  const plan=guidedLessons.find(p=>p.id===lessonId);
  const [stepIndex,setStepIndex]=useState(0);
@@ -329,12 +331,15 @@ function FirstLessonRunner({lessonId,store,fontSize,onNext,onContents}:{lessonId
  const current=plan.steps[stepIndex];
  if(!current)return <p role="alert">Oppitunnin vaihe puuttuu.</p>;
  const currentChapter=chapters.find(c=>c.id===current.chapterId)??chapters[0]!;
- const exerciseList=allChapterExercises(currentChapter.id,currentChapter.exercises);
+ const exerciseEntries=[
+  ...chapters.flatMap(c=>allChapterExercises(c.id,c.exercises).map(exercise=>({exercise,chapter:c}))),
+  ...reviewOneItems.map(entry=>({exercise:entry.exercise,chapter:chapters.find(c=>c.id===entry.chapterId)??chapters[0]!}))
+ ];
  const requiredIds=current.exerciseIds??[];
  const allSubmitted=requiredIds.every(id=>
   id.startsWith('EX-C')?Boolean(item(store,'exam:submitted:'+id)):Boolean(item(store,'latest:'+id)));
  const hasGoal=lessonId!=='L001'||valueString(store,'goal:los1').trim().length>=8;
- const hasReflection=!['L006','L011','L016','L021','L026'].includes(lessonId)||valueString(store,'lesson:reflection:'+lessonId).trim().length>=12;
+ const hasReflection=!['L006','L011','L016','L021','L026','L027','L028','L029'].includes(lessonId)||valueString(store,'lesson:reflection:'+lessonId).trim().length>=12;
  const mediaDone=(plan?.requiredMediaIds??[]).every(id=>Boolean(item(store,'media:completed:'+id)));
  const canAdvance=(current.kind!=='practice'||allSubmitted)&&(current.kind!=='goal'||hasGoal)&&(current.kind!=='reflection'||hasReflection);
  const fulfilled=mediaDone&&plan.requiredIds.every(id=>id.startsWith('EX-C')?Boolean(item(store,'exam:submitted:'+id)):Boolean(item(store,'latest:'+id)));
@@ -362,7 +367,8 @@ function FirstLessonRunner({lessonId,store,fontSize,onNext,onContents}:{lessonId
    <Reader chapter={currentChapter} store={store} fontSize={fontSize}/>
    <SourceNotice chapter={currentChapter}/>
   </>;
-  if(st.kind==='listen')return <Media chapter={currentChapter} store={store} fontSize={fontSize}/>;
+  if(st.kind==='listen')return <Media chapter={currentChapter} store={store} fontSize={fontSize}
+    onAudioCompleted={()=>store.put('media:completed:review:'+lessonId+':'+currentChapter.media?.sourceId,{at:new Date().toISOString(),version:LOS_VERSION})}/>;
   if(st.kind==='vocabulary')return <Words chapter={currentChapter} store={store}/>;
   if(st.kind==='grammar'||st.kind==='instruction')return <Grammar chapter={currentChapter}/>;
   if(st.kind==='practice'){
@@ -370,8 +376,8 @@ function FirstLessonRunner({lessonId,store,fontSize,onNext,onContents}:{lessonId
    if(examId)return <ExamSession id={examId} store={store} onExit={onContents}
      onSubmit={()=>store.put('exam:submitted:'+examId,{submittedAt:new Date().toISOString(),version:LOS_VERSION})}/>;
    return <>{(st.exerciseIds??[]).map(id=>{
-    const ex=exerciseList.find(e=>e.id===id);
-    return ex?<ExerciseCard key={ex.id} exercise={ex} chapter={currentChapter} store={store} fontSize={fontSize}/>:
+    const entry=exerciseEntries.find(e=>e.exercise.id===id);
+    return entry?<ExerciseCard key={entry.exercise.id} exercise={entry.exercise} chapter={entry.chapter} store={store} fontSize={fontSize}/>:
       <p key={id} role="alert">Pakollinen tehtävä {id} puuttuu; oppituntia ei voi kuitata suoritetuksi.</p>;
    })}</>;
   }
@@ -379,7 +385,7 @@ function FirstLessonRunner({lessonId,store,fontSize,onNext,onContents}:{lessonId
    <label htmlFor="los-reflection">Itsearviointi</label>
    <textarea id="los-reflection" rows={4} value={valueString(store,'lesson:reflection:'+lessonId)}
      onChange={e=>store.put('lesson:reflection:'+lessonId,e.target.value)}
-     placeholder="Osaan jo tervehtiä, mutta saksan ääntäminen ..."/>
+     placeholder="Muistan jo ... Vaikeinta oli ... Aion kerrata ..."/>
   </>;
   if(st.kind==='guide')return <div className="los-prose">
    <p>Kirjan tekstit, suomennokset, äänet ja harjoitukset löytyvät oppikirjan sisältä. Tehtävissä voi yrittää uudelleen; harjoituksen oikeat vastaukset näkyvät vasta tarkistuksen jälkeen. Kokeen vastaukset tulevat näkyviin vasta koko kokeen palautuksessa.</p>
