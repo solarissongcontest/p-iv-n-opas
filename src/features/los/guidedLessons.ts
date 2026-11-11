@@ -6,6 +6,7 @@ import {chapter05Lessons} from './chapter05Lessons.ts';
 import {chapter06Lessons} from './chapter06Lessons.ts';
 import {chapter07Lessons} from './chapter07Lessons.ts';
 import {chapter08PartialLessons} from './chapter08PartialLessons.ts';
+import {chapter08SourceLessons} from './chapter08SourceLessons.ts';
 import {chapter09Lessons} from './chapter09Lessons.ts';
 import {chapter10Lessons} from './chapter10Lessons.ts';
 import {reviewOneLessons} from './reviewOneLessons.ts';
@@ -24,6 +25,7 @@ export const guidedLessons=[
  ...chapter06Lessons,
  ...chapter07Lessons,
  ...chapter08PartialLessons,
+ ...chapter08SourceLessons,
  ...chapter09Lessons,
  ...chapter10Lessons,
  ...reviewTwoLessons
