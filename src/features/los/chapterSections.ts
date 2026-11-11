@@ -35,6 +35,10 @@ export const LOS1_C01_SECTIONS: ChapterSection[] = emptyChapterSections().map(se
     ] } :
     section.id === "sanasto" ? { blockIds: ["los1-c01-core-words"] } :
     section.id === "kielioppi" ? { blockIds: ["los1-c01-phonetics", "los1-c01-greetings"] } :
+    section.id === "teksti-b" ? { blockIds: [
+      "los1-c01-text-b-guide", "los1-c01-m-com-03-audio",
+      "los1-c01-m-com-03-transcript", "los1-c01-text-b-reflection",
+    ], exerciseIds: ["los1-c01-audio-list-morning", "los1-c01-audio-list-parting"] } :
     section.id === "harjoittele" ? { exerciseIds: [
       "los1-c01-ex-greeting-choice", "los1-c01-ex-greeting-gap",
       "los1-c01-ex-greeting-pairs", "los1-c01-ex-marker-demo",
