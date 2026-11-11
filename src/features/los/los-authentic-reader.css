@@ -46,3 +46,25 @@
  .los-c01-toolbox{margin:23px 0 12px;}
 }
 @media(prefers-reduced-motion:reduce){.los-c01-token{transition:none!important;}}
+
+
+/* Source-based comprehension page, not an invented grammar test. */
+.los-c01-questions{margin-top:30px;}
+.los-c01-question{border:0;border-top:1px solid var(--los-line);margin:0;padding:26px 0 32px;min-width:0;}
+.los-c01-question legend{font-size:19px;font-weight:680;line-height:1.5;padding:0 0 13px;}
+.los-c01-question legend span{font-family:Georgia,serif;color:var(--los-book-accent);margin-right:7px;}
+.los-c01-question>p{font-size:14px;line-height:1.65;color:var(--los-soft);}
+.los-c01-options,.los-c01-evidence{display:grid;gap:9px;max-width:680px;}
+.los-c01-options label,.los-c01-evidence label{display:flex;align-items:flex-start;gap:12px;border:1px solid var(--los-line);padding:12px 14px;cursor:pointer;min-height:46px;background:var(--los-paper);}
+.los-c01-options label.is-selected,.los-c01-evidence label.is-selected{border-color:var(--los-book-accent);background:var(--los-book-tint);color:#222b34;}
+.los-c01-options input,.los-c01-evidence input{accent-color:var(--los-book-accent);margin:4px 0 0;flex-shrink:0;width:17px;height:17px;}
+.los-c01-feedback{padding:13px 16px;border-left:3px solid var(--los-book-accent);background:var(--los-subtle);font-size:14px!important;margin-top:17px!important;}
+.los-c01-understanding-summary{padding-top:22px;border-top:2px solid var(--los-book-accent);}
+.los-c01-understanding-summary>p:first-child{display:flex;align-items:center;gap:9px;flex-wrap:wrap;font-size:16px;}
+.los-c01-translations{padding-left:25px;margin:16px 0 25px;line-height:1.8;}
+.los-c01-translations li{padding:5px 0;border-bottom:1px solid var(--los-line);}
+.los-c01-source-version{font-size:12px!important;color:var(--los-soft);}
+@media(max-width:760px){
+ .los-c01-question legend{font-size:17px;}
+ .los-c01-options label,.los-c01-evidence label{padding:12px;min-height:48px;}
+}
