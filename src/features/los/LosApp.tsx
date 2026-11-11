@@ -6,6 +6,7 @@ import {type StudyPage} from '@/app/navigation';
 import {chapters,sections,lessons,allWords,LOS_VERSION,type Chapter,type Exercise,type Block} from './content';
 import {gradeExercise,tokenOffsets,anchorFromSelectedTokens,type TextAnchor,type Grade} from './engine';
 import {createReviewEntry,scheduleReviewEntry,reviewIsDue} from './reviewSchedule';
+import {reviewCardInfo} from './reviewCards';
 import {allChapterExercises} from './practiceExtras';
 import {ExamSession} from './ExamSession';
 import {type FirstLessonStep} from './firstLessons';
@@ -674,14 +675,19 @@ function LosAppForOwner({ownerId}:{ownerId:string}){
  </AppShell>;
 }
 function ReviewCard({id,store}:{id:string;value:unknown;store:Store}){
- const de=id.replace(/^review:/,'');
  const [shown,setShown]=useState(false);
- const word=allWords.find(w=>w.de===de);
+ const info=reviewCardInfo(id);
  const mark=(success:boolean)=>{
-  const old=item(store,id) as {stage?:number}|undefined;
-  store.put(id,scheduleReviewEntry(old,success));setShown(false);
+  store.put(id,scheduleReviewEntry(item(store,id),success));setShown(false);
  };
- return <article className="los-review-card"><p lang="de"><b>{de}</b></p><button onClick={()=>setShown(!shown)}>{shown?'Piilota vastaus':'Näytä suomennos / ratkaisu'}</button>{shown?<><p>{word?.fi??'Katso alkuperäinen harjoitus uudelleen ja arvioi vastauksesi.'}</p><button onClick={()=>mark(true)}>Muistin</button><button className="los-quiet" onClick={()=>mark(false)}>Harjoittele uudelleen huomenna</button></>:null}</article>;
+ return <article className="los-review-card">
+  <p className={info.kind==='word'?'los-review-word':'los-review-question'} lang={info.kind==='word'?'de':undefined}><b>{info.title}</b></p>
+  <button type="button" aria-expanded={shown} onClick={()=>setShown(!shown)}>{shown?'Piilota vastaus':'Näytä suomennos / ratkaisu'}</button>
+  {shown?<><p>{info.solution}</p>
+   <button type="button" onClick={()=>mark(true)}>Muistin</button>
+   <button type="button" className="los-quiet" onClick={()=>mark(false)}>Harjoittele uudelleen huomenna</button>
+  </>:null}
+ </article>;
 }
 
 /** Force the entire owner-scoped store/UI to unmount on login-account changes.
