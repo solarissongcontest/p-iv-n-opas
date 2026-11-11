@@ -5,20 +5,21 @@ import { LOS_BOOKS } from "../src/features/los/books.ts";
 import { evaluateExercise } from "../src/features/los/exercises/evaluate.ts";
 import { validateBook } from "../src/features/los/model.ts";
 import { LOS1_C01_AUTHENTIC_TEXT, LOS1_C01_DIALOGUE_TURNS } from "../src/features/los/los1-c01-source.ts";
+import { LOS1_C01_GREETING_AUDIO_LINES } from "../src/features/los/los1-c01-audio-list.ts";
 import { findGlossarySpans } from "../src/features/los/glossary.ts";
 import { LOS_CHAPTER_SECTION_TITLES } from "../src/features/los/chapterSections.ts";
 
 const los1 = LOS_BOOKS[0];
 if (!los1) throw new Error("LOS! 1 must exist");
 
-test("LOS! 1 retains 10 chapters and 60 canonical lessons, with five preview lessons", () => {
+test("LOS! 1 retains 10 chapters and 60 canonical lessons, with six preview lessons", () => {
   assert.equal(los1.chapters.length, 10);
   assert.equal(los1.lessons.length, 60);
   assert.deepEqual(los1.chapters.map(item => item.id), Array.from({ length: 10 }, (_, i) => "C" + String(i + 1).padStart(2, "0")));
   assert.deepEqual(los1.lessons.map(item => item.id), Array.from({ length: 60 }, (_, i) => "L" + String(i + 1).padStart(3, "0")));
   assert.equal(los1.chapters.filter(item => item.publicationStatus === "preview").length, 1);
   assert.equal(los1.chapters.filter(item => item.publicationStatus === "published").length, 0);
-  assert.deepEqual(los1.lessons.filter(item => item.publicationStatus === "preview").map(item => item.id), ["L001", "L002", "L003", "L004", "L005"]);
+  assert.deepEqual(los1.lessons.filter(item => item.publicationStatus === "preview").map(item => item.id), ["L001", "L002", "L003", "L004", "L005", "L006"]);
   assert.ok(los1.lessons.filter(item => item.publicationStatus !== "preview").every(item => !item.steps.length));
   assert.deepEqual(validateBook(los1), []);
 });
@@ -35,7 +36,8 @@ test("each planned chapter exposes exactly ten routable sections", () => {
   const first = los1.chapters[0];
   assert.ok(first);
   assert.equal(first.sections?.find(section => section.id === "teksti-a")?.blockIds.includes("los1-c01-m-com-01-dialogue"), true);
-  assert.equal(first.sections?.find(section => section.id === "teksti-b")?.publicationStatus, "planned");
+  assert.equal(first.sections?.find(section => section.id === "teksti-b")?.publicationStatus, "preview");
+  assert.equal(first.sections?.find(section => section.id === "tarkista")?.publicationStatus, "preview");
 });
 test("L001 begins without prerequisite German and stores an ungraded personal goal", () => {
   const lesson = los1.lessons.find(item => item.id === "L001");
@@ -50,9 +52,9 @@ test("L001 begins without prerequisite German and stores an ungraded personal go
   assert.ok(lesson.steps.some(step => step.blockId === "los1-c01-m-com-01-dialogue"));
   assert.ok(lesson.steps.some(step => step.blockId === "los1-c01-m-com-01-audio"));
 });
-test("only the verified Wikimedia original is enabled; 22 other sources remain pending", () => {
+test("two verified Wikimedia originals are enabled while 21 candidates remain pending", () => {
   assert.equal(los1.sources.length, 23);
-  assert.equal(los1.sources.filter(source => source.permittedMode === "pending").length, 22);
+  assert.equal(los1.sources.filter(source => source.permittedMode === "pending").length, 21);
   const source = los1.sources.find(item => item.id === "M-COM-01");
   assert.equal(source?.permittedMode, "embed");
   assert.equal(source?.licenseUrl, "https://creativecommons.org/licenses/by-sa/3.0/");
@@ -63,11 +65,19 @@ test("only the verified Wikimedia original is enabled; 22 other sources remain p
   assert.equal(LOS1_C01_AUTHENTIC_TEXT, LOS1_C01_DIALOGUE_TURNS.map(turn => turn.text).join("\n"));
   assert.ok(los1.blocks.some(block => block.kind === "media" && block.sourceId === "M-COM-01"));
   assert.equal(los1.blocks.filter(block => block.kind === "dialogue").length, 1);
+  const list = los1.blocks.find(block => block.kind === "transcript");
+  assert.ok(list && list.kind === "transcript");
+  assert.equal(list.lines.length, 20);
+  assert.deepEqual(list.lines.map(line => line.de), LOS1_C01_GREETING_AUDIO_LINES.map(line => line.de));
+  assert.equal(los1.sources.find(source => source.id === "M-COM-03")?.permittedMode, "embed");
+  assert.equal(los1.sources.find(source => source.id === "M-COM-03")?.licenseOrBasis,
+    "Public domain - tekijän oma vapaa luovutus");
+  assert.ok(los1.blocks.some(block => block.kind === "media" && block.sourceId === "M-COM-03"));
 });
-test("C01's original editorial vocabulary and four exercises evaluate correctly", () => {
+test("C01's seven practice and two audio exercises plus twelve exam questions are all indexed", () => {
   const c01 = los1.chapters.find(chapter => chapter.id === "C01");
   assert.ok(c01);
-  assert.equal(c01.exerciseIds.length, 7);
+  assert.equal(c01.exerciseIds.length, 21);
   assert.ok(c01.blockIds.length >= 8);
   const choice = los1.exercises.find(ex => ex.type === "single-choice");
   const gap = los1.exercises.find(ex => ex.type === "gap-fill");
