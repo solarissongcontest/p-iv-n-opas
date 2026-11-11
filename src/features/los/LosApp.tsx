@@ -4,7 +4,7 @@ import {BookOpen,ChevronLeft,ChevronRight,Menu,Search,Volume2,Bookmark,CheckCirc
 import {AppShell} from '@/app/AppShell';
 import {type StudyPage} from '@/app/navigation';
 import {chapters,sections,lessons,allWords,LOS_VERSION,type Chapter,type Exercise,type Block} from './content';
-import {gradeExercise,tokenOffsets,dueDate,type TextAnchor,type Grade} from './engine';
+import {gradeExercise,tokenOffsets,anchorFromSelectedTokens,dueDate,type TextAnchor,type Grade} from './engine';
 import {allChapterExercises} from './practiceExtras';
 import {ExamSession} from './ExamSession';
 import {firstLessons,type FirstLessonStep} from './firstLessons';
@@ -90,28 +90,49 @@ function Reader({chapter,store,exerciseMode,onSelect,onClear,selection,fontSize}
  const [freeInk,setFreeInk]=useState(false);
  const [showTranslations,setShowTranslations]=useState(false);
  const [draft,setDraft]=useState<TextAnchor|null>(null);
+ const [undoMark,setUndoMark]=useState<{before:TextAnchor|null;after:TextAnchor}|null>(null);
  const isPicking=Boolean(exerciseMode||freeInk);
  const selectToken=(block:Block,start:number,end:number)=>{
   const existing=item(store,'ink:'+block.id) as TextAnchor|null;
   const previous=exerciseMode?selection:(draft??(existing?.contentVersion===LOS_VERSION?existing:null));
   const same=previous?.blockId===block.id;
   const next:TextAnchor={blockId:block.id,start:same&&previous?Math.min(previous.start,start):start,end:same&&previous?Math.max(previous.end,end):end,contentVersion:LOS_VERSION};
+  setUndoMark({before:previous,after:next});
   if(exerciseMode)onSelect?.(next);
   else {setDraft(next);store.put('ink:'+block.id,next);}
  };
- const selectDrag=(block:Block)=>{
+ const selectDrag=(block:Block,paragraph:HTMLParagraphElement)=>{
   if(!isPicking)return;
   const selectionText=window.getSelection();
   if(!selectionText||selectionText.isCollapsed||!selectionText.rangeCount)return;
   const range=selectionText.getRangeAt(0);
-  const element=(node:Node)=>node.nodeType===Node.ELEMENT_NODE?node as Element:node.parentElement;
-  const startEl=element(range.startContainer)?.closest('[data-los-start]');
-  const endEl=element(range.endContainer)?.closest('[data-los-end]');
-  if(!startEl||!endEl||!startEl.closest('[data-los-block="'+block.id+'"]')||!endEl.closest('[data-los-block="'+block.id+'"]'))return;
-  const start=Number(startEl.getAttribute('data-los-start'));
-  const end=Number(endEl.getAttribute('data-los-end'));
-  if(Number.isFinite(start)&&Number.isFinite(end))selectToken(block,Math.min(start,end),Math.max(start,end));
+  const tokens=Array.from(paragraph.querySelectorAll<HTMLElement>('[data-los-start][data-los-end]'));
+  // A user can begin dragging on a blank text node between two words.
+  // Inspect every intersecting word instead of assuming that both Range
+  // boundary nodes themselves have data-los-start/end.
+  const touched=tokens.filter(node=>{
+   try{return range.intersectsNode(node)}catch{return false}
+  }).map(node=>({start:Number(node.dataset.losStart),end:Number(node.dataset.losEnd)}));
+  const next=anchorFromSelectedTokens(block.id,touched,block.text.length);
+  if(!next)return;
+  const existing=item(store,'ink:'+block.id) as TextAnchor|null;
+  const previous=exerciseMode?selection:(draft??existing);
+  setUndoMark({before:previous,after:next});
+  if(exerciseMode)onSelect?.(next);
+  else {setDraft(next);store.put('ink:'+block.id,next);}
   selectionText.removeAllRanges();
+ };
+ const undoSelection=()=>{
+  if(!undoMark)return;
+  if(exerciseMode){
+   if(undoMark.before)onSelect?.(undoMark.before);
+   else onClear?.();
+  }else{
+   store.put('ink:'+undoMark.after.blockId,null);
+   if(undoMark.before)store.put('ink:'+undoMark.before.blockId,undoMark.before);
+   setDraft(undoMark.before);
+  }
+  setUndoMark(null);
  };
  return <div className="los-reader">
   {!exerciseMode?<div className="los-reader-tools">
@@ -119,13 +140,13 @@ function Reader({chapter,store,exerciseMode,onSelect,onClear,selection,fontSize}
    <button type="button" aria-pressed={showTranslations} onClick={()=>setShowTranslations(value=>!value)}>{showTranslations?'Piilota suomennokset':'Näytä suomennokset'}</button>
    <span>{freeInk?'Napauta tai maalaa sanat. Tämä korostus ei ole tehtävävastaus.':'Napauta sanaa nähdäksesi merkityksen.'}</span>
   </div>:<p className="los-meta">Tehtäväkorostus: napauta sanoja peräkkäin tai maalaa hiirellä/sormella. Vastauksen ankkurit tallennetaan tekstin merkkiväleinä.</p>}
-  {exerciseMode&&selection?<button className="los-quiet" type="button" onClick={onClear}>Pyyhi tehtäväkorostus</button>:null}
+  {exerciseMode&&(selection||undoMark)?<div className="los-reader-actions">{undoMark?<button className="los-quiet" type="button" onClick={undoSelection}>Kumoa valinta</button>:null}{selection?<button className="los-quiet" type="button" onClick={()=>{onClear?.();setUndoMark(null);}}>Pyyhi tehtäväkorostus</button>:null}</div>:null}
   <div className="los-text" lang="de" style={{fontSize:fontSize+'px'}}>
   {chapter.blocks.map(block=>{
    const tokens=tokenOffsets(block.text);
    const stored=exerciseMode?selection:item(store,'ink:'+block.id) as TextAnchor|null;
    const active=stored?.blockId===block.id&&stored.contentVersion===LOS_VERSION&&stored.start>=0&&stored.end<=block.text.length?stored:null;
-   return <div key={block.id} className="los-reader-block"><p data-los-block={block.id} onPointerUp={()=>selectDrag(block)}>
+   return <div key={block.id} className="los-reader-block"><p data-los-block={block.id} onPointerUp={event=>selectDrag(block,event.currentTarget)}>
     {block.speaker?<strong>{block.speaker}: </strong>:null}
     {tokens.map((token,i)=>{
      const highlighted=active&&token.start>=active.start&&token.end<=active.end;
@@ -145,7 +166,7 @@ function Reader({chapter,store,exerciseMode,onSelect,onClear,selection,fontSize}
   })}
   </div>
   {selectedWord?<WordSheet word={selectedWord} onClose={()=>setSelectedWord('')} onReview={term=>store.put('review:'+term,{due:new Date().toISOString().slice(0,10),stage:0,source:chapter.id})}/>:null}
-  {!exerciseMode&&freeInk&&draft?<button className="los-quiet" onClick={()=>{store.put('ink:'+draft.blockId,null);setDraft(null)}}>Pyyhi oma korostus</button>:null}
+  {!exerciseMode&&freeInk?<div className="los-reader-actions">{undoMark?<button className="los-quiet" type="button" onClick={undoSelection}>Kumoa valinta</button>:null}{chapter.blocks.some(block=>Boolean(item(store,'ink:'+block.id)))?<button className="los-quiet" type="button" onClick={()=>{for(const block of chapter.blocks)store.put('ink:'+block.id,null);setDraft(null);setUndoMark(null);}}>Pyyhi tämän tekstin omat korostukset</button>:null}</div>:null}
  </div>;
 }
 function SpeechRecorder(){
