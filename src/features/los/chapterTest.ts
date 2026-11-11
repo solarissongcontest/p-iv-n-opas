@@ -95,12 +95,14 @@ export function missingSpeechAssessments(definition: ChapterTestDefinition, stat
 }
 export function gradeChapterTest(definition: ChapterTestDefinition, exercises: readonly Exercise[],
   state: ChapterTestRecord, submittedAt: string): ChapterTestResult | null {
+  const writtenLines = (state.writtenResponse ?? "").split(/\r?\n/u)
+    .filter(line => line.trim().length > 0).length;
+  const invalidWriting = definition.selfAssessmentMode === "writing" &&
+    (writtenLines < (definition.requiredWritingLines ?? 1) ||
+      (definition.maximumWritingLines !== undefined && writtenLines > definition.maximumWritingLines));
   if (state.testId !== definition.id || state.testVersion !== definition.version ||
     state.submission || missingChapterTestAnswers(definition, exercises, state).length ||
-    missingSpeechAssessments(definition, state).length ||
-    (definition.selfAssessmentMode === "writing" && (!(state.writtenResponse ?? "").trim() ||
-      ((definition.requiredWritingLines ?? 1) > (state.writtenResponse ?? "").split(/\r?\n/u).filter(line => line.trim().length > 0).length ||
-      (definition.maximumWritingLines != null && (state.writtenResponse ?? "").split(/\r?\n/u).filter(line => line.trim().length > 0).length > definition.maximumWritingLines)))) return null;
+    missingSpeechAssessments(definition, state).length || invalidWriting) return null;
   const outcomes = exercises.map(exercise => {
     const evaluated = evaluateExercise(exercise, state.answers[exercise.id] ?? null);
     // All null/invalid submissions are rejected above, not silently counted wrong.
