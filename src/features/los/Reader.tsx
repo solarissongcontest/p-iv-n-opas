@@ -38,6 +38,17 @@ function SafeMedia({ block, source }: {
         (source.id === "M-COM-03" && url.pathname === "/wikipedia/commons/b/bb/German_Vocabulary_-_Greetings.ogg")
       );
   } catch { /* Untrusted URLs never render a player. */ }
+  let validMp3 = false;
+  if (block.mp3Url && validCommonsAudio) {
+    try {
+      const alt = new URL(block.mp3Url);
+      validMp3 = alt.origin === "https://upload.wikimedia.org" &&
+        ((source?.id === "M-COM-01" &&
+          alt.pathname === "/wikipedia/commons/transcoded/1/11/Gespr%C3%A4chVorstellung.ogg/Gespr%C3%A4chVorstellung.ogg.mp3") ||
+         (source?.id === "M-COM-03" &&
+          alt.pathname === "/wikipedia/commons/transcoded/b/bb/German_Vocabulary_-_Greetings.ogg/German_Vocabulary_-_Greetings.ogg.mp3"));
+    } catch { /* Only pinned Wikimedia MP3 transcodes are ever played. */ }
+  }
   const validLocalAudio = block.mediaType === "audio" && source?.permittedMode === "hosted"
     && /^\/los\/media\/[a-z0-9_-]+\.(ogg|mp3|m4a)$/i.test(block.embedUrl);
   return <figure className="los-media" id={block.id}>
@@ -45,13 +56,16 @@ function SafeMedia({ block, source }: {
     {validVideo ? <iframe title={block.title} src={block.embedUrl} loading="lazy"
       allowFullScreen allow="fullscreen; encrypted-media; picture-in-picture" /> :
       validCommonsAudio || validLocalAudio
-        ? <audio controls preload="metadata" src={block.embedUrl} aria-label={block.title}
+        ? <audio controls preload="metadata" aria-label={block.title}
             onError={() => setFailed(true)} onCanPlay={() => setFailed(false)}>
+            {validMp3 && <source src={block.mp3Url} type="audio/mpeg"/>}
+            <source src={block.embedUrl} type={validLocalAudio && block.embedUrl.endsWith(".mp3") ? "audio/mpeg" :
+              validLocalAudio && block.embedUrl.endsWith(".m4a") ? "audio/mp4" : "audio/ogg"}/>
             Äänitoistoa ei tueta selaimessasi.
           </audio>
         : <p className="los-notice">Mediaa ei ole hyväksytty sisäiseen toistoon.</p>}
     {failed && <p className="los-notice" role="status">Äänitettä ei voitu toistaa. Voit lukea saman dialogin tai ilmauslistan kokonaan tekstinä. Äänen toimivuus on varmistettava ennen kuuntelutehtävän arviointia.</p>}
-    {validCommonsAudio && <p className="los-support">Ääni ladataan Wikimedia Commonsista. Sen saatavuus ja toiminta voivat riippua verkkoyhteydestä.</p>}
+    {validCommonsAudio && <p className="los-support">Ääni ladataan Wikimedia Commonsista. Soitin kokeilee ensin MP3-muunnosta ja käyttää tarvittaessa alkuperäistä OGG-äänitettä. Toisto edellyttää verkkoyhteyttä.</p>}
     <Attribution source={source}/>
   </figure>;
 }
