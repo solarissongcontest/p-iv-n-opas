@@ -1,4 +1,4 @@
-import { LOS_C03_C06_EXERCISES } from "./exerciseBankExpanded";
+import { LOS_C03_C06_EXERCISES } from "./exerciseBankExpanded.ts";
 
 /**
  * LOS! 1:n rajatusti, yksiselitteisesti tarkistettavat alkeistehtävät.
