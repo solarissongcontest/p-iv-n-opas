@@ -39,21 +39,21 @@ function complete(attempt=0){
   writtenResponse:"Er heißt Harald Becker.\nEr kommt aus München.\nSie heißt Berna.\nSie kommt aus Kiel.",
  };
 }
-test("C10 has ten complete preview sections and 63 independent routable questions",()=>{
+test("C10 has ten complete preview sections and 64 independent routable questions",()=>{
  assert.deepEqual(validateBook(book),[]);
  assert.equal(book.chapters.length,10);
  assert.equal(chapter.publicationStatus,"preview");
  assert.equal(chapter.sections?.length,10);
  assert.ok(chapter.sections?.every(s=>s.publicationStatus==="preview"));
  assert.equal(LOS1_C10_SOURCE_EXERCISES.length,12);
- assert.equal(LOS1_C10_PRACTICE_EXERCISES.length,31);
+ assert.equal(LOS1_C10_PRACTICE_EXERCISES.length,32);
  assert.equal(LOS1_C10_EXAM_A.length,20);
- assert.equal(chapter.exerciseIds.length,63);
+ assert.equal(chapter.exerciseIds.length,64);
  const ids=new Set(chapter.sections?.flatMap(section=>section.exerciseIds));
  const blockIds=new Set(chapter.sections?.flatMap(section=>section.blockIds));
  assert.ok(chapter.exerciseIds.every(id=>ids.has(id)));
  assert.ok(chapter.blockIds.every(id=>blockIds.has(id)));
- assert.equal(new Set(chapter.exerciseIds).size,63);
+ assert.equal(new Set(chapter.exerciseIds).size,64);
 });
 test("C10 repeats complete actual Harald and Berna human-authored interviews, without new synthetic dialogues",()=>{
  const harald=LOS1_C10_SOURCE_BLOCKS.find(x=>x.id==="los1-c10-m-dib-02-harald");
