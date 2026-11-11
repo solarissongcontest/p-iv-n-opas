@@ -117,5 +117,5 @@ export const LOS1_C08_SOURCE_EXERCISES:Exercise[]=[
   "Toisella rivillä on Noch einmal, bitte!"),
  highlight("highlight-formal","Können Sie das Wort bitte noch einmal lesen?",
   "Korosta lähdetekstistä kokonainen teitittelevä pyyntö lukea sana vielä kerran.",
-  "Teitittelevä Könnnen Sie -fraasi pyytää lukemaan sanan uudelleen."),
+  "Teitittelevä Können Sie -fraasi pyytää lukemaan sanan uudelleen."),
 ];
