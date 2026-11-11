@@ -259,10 +259,27 @@ export const chapters:Chapter[] = [
 {
  id:'C10',name:'Schön, dich kennenzulernen!',goal:'Yhdistän opitut asiat lyhyeen esittelyyn.',sourceId:'M-DIB-02',
  sourceUrl:'https://coerll.utexas.edu/dib/vidt.php?f=01_22_int_hb_who',
- attribution:'Haraldin haastattelun osoite, koko teksti ja mediakohtainen lisenssi ovat vielä tarkistamatta.',license:'Avoin',status:'source-pending',sections,blocks:[],
- vocab:w([['Schön, dich kennenzulernen!','Hauska tutustua!'],['Das ist ...','Tämä on ...'],['Er heißt ...','Hänen nimensä on (mies)'],['Sie heißt ...','Hänen nimensä on (nainen)'],['Vielen Dank!','Paljon kiitoksia!']]),
+ attribution:'COERLL / University of Texas at Austin, Deutsch im Blick: Harald Becker, Kapitel 1 / Wer bin ich? Kokonainen 14-vuoroinen julkinen saksankielinen haastattelulitteraatti, muokkaamattomat saksankieliset repliikit. Avoimen 2017 oppikirjan CC BY 4.0 -lähde: https://coerll.utexas.edu/dib/pdfs/DeutschImBlick-textbook.pdf. Videon tiedostokohtaisia oikeuksia ei vielä ole vahvistettu.',
+ license:'CC BY 4.0 (OER-opetusmateriaali, alkuperäisvideon käyttöoikeudet erikseen)',status:'text-reviewed',sections,
+ blocks:[
+ {id:'c10-a-1',speaker:'Haastattelija',text:'Wie heißt du?'},
+ {id:'c10-a-2',speaker:'Harald',text:'Ich heiße Harald Becker.'},
+ {id:'c10-a-3',speaker:'Haastattelija',text:'Woher kommst du?'},
+ {id:'c10-a-4',speaker:'Harald',text:'Ich komme ursprünglich aus München.'},
+ {id:'c10-a-5',speaker:'Haastattelija',text:'Aha, wo ist München?'},
+ {id:'c10-a-6',speaker:'Harald',text:'München ist im zivilisierten Teil Deutschlands, also in Süddeutschland.'},
+ {id:'c10-a-7',speaker:'Haastattelija',text:'Aha. Wie alt bist du?'},
+ {id:'c10-a-8',speaker:'Harald',text:'Ich bin jetzt so um die fünfzig.'},
+ {id:'c10-a-9',speaker:'Haastattelija',text:'Um die fünfzig... Was ist deine Telefonnumer?'},
+ {id:'c10-a-10',speaker:'Harald',text:'Ah, das ist nicht so einfach. Neun, eins, zwei, eins, fünf, sechs, sechs.'},
+ {id:'c10-a-11',speaker:'Haastattelija',text:'Hmh. Und was ist deine Lieblingsfarbe?'},
+ {id:'c10-a-12',speaker:'Harald',text:'Blau.'},
+ {id:'c10-a-13',speaker:'Haastattelija',text:'Warum Blau?'},
+ {id:'c10-a-14',speaker:'Harald',text:'Ahmh, das ist eine gute Frage. Vielleicht wegen Bayern, das ist auch eine der Farben Bayerns. Wegen dem bayerischen Himmel. Der Himmel ist blau.'}
+ ],
+ vocab:w([['Schön, dich kennenzulernen!','Hauska tutustua!'],['Das ist ...','Tämä on ...'],['Er heißt ...','Hänen nimensä on (mies)'],['Sie heißt ...','Hänen nimensä on (nainen)'],['Er kommt aus ...','Hän on kotoisin (mies)'],['Sie kommt aus ...','Hän on kotoisin (nainen)'],['Vielen Dank!','Paljon kiitoksia!'],['der Freund','ystävä (mies)'],['die Freundin','ystävä (nainen)'],['blau','sininen'],['ungefähr / um die','noin; suunnilleen'],['kennenlernen','tutustua']]),
  teaching:['Kokoa tervehdys, nimi, kotipaikka, vointi ja hyvästely lyhyeksi keskusteluksi. Kolmannen henkilön esitteleminen onnistuu fraasilla Das ist ... .'],
- grammar:{title:'Esittele toinen henkilö',explanation:'Das ist ... = Tämä on ... . Er heißt ... ja Sie heißt ... tarkoittavat Hän on nimeltään ... . Muista ero kohteliaaseen isolla kirjoitettavaan Sie-sanaan.',examples:[['Das ist Alex.','Tämä on Alex.'],['Er heißt Ben.','Hänen nimensä on Ben.']]},culture:'Tutustumiskäytännöt vaihtelevat tilanteen mukaan.',exercises:[]
+ grammar:{title:'Esittele toinen henkilö',explanation:'Das ist ... = Tämä on ... . Er heißt ... ja Sie heißt ... tarkoittavat Hän on nimeltään ... . Muista ero kohteliaaseen isolla kirjoitettavaan Sie-sanaan.',examples:[['Das ist Alex.','Tämä on Alex.'],['Er heißt Ben.','Hänen nimensä on Ben.']]},culture:'Tutustumiskäytännöt vaihtelevat tilanteen ja puhuttelusuhteen mukaan. Haraldin lähdetekstissä on leikkisä ja alueellisesti arvottava puheenvuoro Münchenistä: sitä tarkastellaan puhujan mielipiteenä, ei yleispätevänä tosiasiana.',exercises:[]
 }
 ];
 export const lessons = [
