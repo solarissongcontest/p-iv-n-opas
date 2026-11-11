@@ -9,6 +9,7 @@ import { LessonRunner } from "./LessonRunner";
 import { ReviewWorkspace, ReviewEvidence } from "./ReviewWorkspace";
 import { VocabularyIndex } from "./VocabularyIndex";
 import { ExerciseEngine } from "./exercises/ExerciseEngine";
+import { ChapterTestWorkspace } from "./ChapterTestWorkspace";
 
 type NavItem = { segment: string; title: string };
 const sections: readonly NavItem[] = [
@@ -73,7 +74,7 @@ function LibraryPage() {
         <small>{book.moduleCode} · {book.credits} op</small>
         <span className="los-card-status">{book.chapters.some(chapter => chapter.publicationStatus === "preview") ? "Ensimmäinen kappale · harjoitusversio" : "Sisältöä valmistellaan"}</span>
       </a>)}</div>
-    <p className="los-library-footnote">Kansikuvat ja varsinainen oppimateriaali lisätään vasta alkuperäisten assettien ja tarkistettujen sisältöpakettien mukana.</p>
+    <p className="los-library-footnote">Kansikuvia ja varsinaista logoa ei ole vielä toimitettu. LOS! 1:n ensimmäisiä, lähdeviittein merkittyjä oppisisältöjä voi jo avata harjoitusversioina.</p>
   </div>;
 }
 function BookHome({ book }: { book: Book }) {
@@ -100,7 +101,7 @@ function BookHome({ book }: { book: Book }) {
       </div>
     </div>
     {book.lessons.some(lesson => lesson.publicationStatus === "preview") ?
-      <p className="los-notice" role="status">LOS! 1:n ensimmäinen alkuperäisteksti ja harjoituspolku ovat nyt käytettävissä. Muut oppitunnit sekä kappaleen virallinen testi ovat kesken.</p> :
+      <p className="los-notice" role="status">LOS! 1:n kaksi alkuperäisäänitettä, koko niiden tekstisisältö ja ensimmäiset kuusi harjoitustuntia sekä 12 kohdan kappaletesti ovat esikatseluversioina. Valmiin oppikirjan julkaisuvaatimukset eivät vielä täyty.</p> :
       <p className="los-notice" role="status">Oppituntien sisältöä ei ole vielä julkaistu. Etenemistä ei lasketa ennen kuin oikeita opintosuorituksia on saatavilla.</p>}
     <h2 className="los-section-title">Tutustu kirjaan</h2>
     <div className="los-path-cards">
@@ -173,7 +174,7 @@ function ChapterPage({ book, chapter, subsection }: { book: Book; chapter: Chapt
     </div>}
     {chapter.publicationStatus !== "published" && <p className="los-notice">
       {chapter.publicationStatus === "preview" ?
-        "Kappale on harjoitusversio. Alkuperäinen Text A ja ensimmäiset tehtävät ovat valmiina katseltaviksi, mutta koko kappaletesti, Text B ja täydellinen 30 minuutin opetus ovat kesken." :
+        "Kappale on harjoitusversio. Text A:n dialogi ja Text B:n tervehdyksiä sisältävä ääniluettelo ovat kokonaisina sisällä, samoin 12 tehtävän kokeiluversio kappaletestistä. Äänitoistoa oikeilla laitteilla, puheäänitystä, kappaleen pedagogista laajuutta ja lopullista julkaisulaatua ei vielä ole hyväksytty." :
         "Tämän kappaleen 10 osion rakenne on valmis, mutta aineistoja ei ole vielä julkaistu."}
     </p>}
     <nav className="los-chapter-sections" aria-label={"Kappaleen " + chapter.sequence + " osiot"}>
@@ -194,15 +195,19 @@ function ChapterPage({ book, chapter, subsection }: { book: Book; chapter: Chapt
     </div> : !selected ? <Empty title="Osiota ei löytynyt">Avaa jokin kappaleen kymmenestä osasta.</Empty> :
       <div className="los-chapter-section">
         <h2>{selected.title}</h2>
-        {!blocks.length && !exercises.length ?
-          <Empty title="Tämän osion aineisto on vielä kesken">Varsinaista ihmisen kirjoittamaa oppimateriaalia tai toimitettuja tehtäviä ei vielä ole lisätty tähän osioon.</Empty> :
-          <>
-            {!!blocks.length && <Reader book={book} blocks={blocks} title={selected.title}/>}
-            {!!exercises.length && <section className="los-chapter-exercises">
-              <h3>Harjoitukset</h3>
-              {exercises.map(exercise => <ExerciseEngine key={exercise.id} bookId={book.id} exercise={exercise}/>)}
-            </section>}
-          </>}
+        {selected.id === "tarkista" ?
+          book.chapterTests.find(test => test.chapterId === chapter.id) ?
+            <ChapterTestWorkspace book={book} definition={book.chapterTests.find(test => test.chapterId === chapter.id)!}/> :
+            <Empty title="Kappaletesti on vielä kesken">Tähän kappaleeseen ei ole vielä julkaistu arvioitavaa tehtäväpakettia.</Empty> :
+          !blocks.length && !exercises.length ?
+            <Empty title="Tämän osion aineisto on vielä kesken">Varsinaista ihmisen kirjoittamaa oppimateriaalia tai toimitettuja tehtäviä ei vielä ole lisätty tähän osioon.</Empty> :
+            <>
+              {!!blocks.length && <Reader book={book} blocks={blocks} title={selected.title}/>}
+              {!!exercises.length && <section className="los-chapter-exercises">
+                <h3>Harjoitukset</h3>
+                {exercises.map(exercise => <ExerciseEngine key={exercise.id} bookId={book.id} exercise={exercise}/>)}
+              </section>}
+            </>}
       </div>}
   </section>;
 }
@@ -242,6 +247,21 @@ function GenericSection({ book, segment }: { book: Book; segment: string }) {
     return blocks.length ? <Reader book={book} blocks={blocks} title="Kielioppi" headingLevel={1}/> :
       <section><h1>Kielioppi</h1><Empty title="Kielioppilukuja ei ole vielä julkaistu">Tähän avautuvat varsinaiset, perusteelliset opetussivut.</Empty></section>;
   }
+  if (segment === "kokeet") {
+    return <section className="los-exams-index">
+      <h1>Kokeet ja kappaletestit</h1>
+      <p className="los-intro">Kokeet palautetaan kokonaisuutena ennen ratkaisujen ja pisteiden näyttämistä. Puheen itsearviointi on erillinen, eikä pisteitä keksitä.</p>
+      {book.chapterTests.length === 0 ? <Empty title="Kokeita ei vielä saatavilla">Tämän kirjan koetehtävät valmistellaan oppikirjan sisältöjen mukana.</Empty> :
+        <ul className="los-exams-list">{book.chapters.map(chapter => {
+          const test = book.chapterTests.find(item => item.chapterId === chapter.id);
+          return <li key={chapter.id}>
+            <div><strong>{chapter.id} · {chapter.title}</strong><small>{test ? test.exerciseIds.length + " tarkistettavaa tehtävää + itsearviointi · harjoitusversio" : "Ei julkaistua kappaletestiä"}</small></div>
+            {test ? <a className="los-button los-button-secondary" href={bookPath(book, "kappale/" + chapter.id.slice(1) + "/tarkista")}>
+              Avaa testi <ArrowRight size={16}/></a> : <span className="los-exams-wait">Tulossa</span>}
+          </li>;
+        })}</ul>}
+    </section>;
+  }
   if (segment === "mediat") {
     const blocks = book.blocks.filter(block => block.kind === "media");
     return blocks.length
@@ -250,7 +270,7 @@ function GenericSection({ book, segment }: { book: Book; segment: string }) {
   }
   if (segment === "lahteet") return <section><h1>Lähteet</h1>{book.sources.length ?
     <ul className="los-source-list">{book.sources.map(source => <li key={source.id}><b>{source.title}</b> · {source.publisher}
-      <span>{source.licenseOrBasis}</span><span><b>Tila:</b> {source.readiness === "blocked" ? "Julkaisu estetty" : source.readiness === "text-cleared" ? "Tekstiehdokas tunnistettu · julkaisu-QA kesken" : source.readiness === "media-pending" ? "Mediatarkistus kesken" : "Lisenssi- tai lähdetarkistus kesken"}</span>{source.publicationNoteFi && <span>{source.publicationNoteFi}</span>}{source.originalUrl && <a href={source.originalUrl} target="_blank" rel="noopener noreferrer">Alkuperäinen lähde</a>}</li>)}</ul> :
+      <span>{source.licenseOrBasis}</span><span><b>Tila:</b> {source.permittedMode === "embed" ? "Lähde ja käyttöoikeus tarkistettu · toisto ja sisältöjen viimeinen julkaisukatselmus kesken" : source.readiness === "blocked" ? "Julkaisu estetty" : source.readiness === "text-cleared" ? "Tekstiehdokas tunnistettu · julkaisu-QA kesken" : source.readiness === "media-pending" ? "Mediatarkistus kesken" : "Lisenssi- tai lähdetarkistus kesken"}</span>{source.publicationNoteFi && <span>{source.publicationNoteFi}</span>}{source.originalUrl && <a href={source.originalUrl} target="_blank" rel="noopener noreferrer">Alkuperäinen lähde</a>}</li>)}</ul> :
     <Empty title="Ei vielä lähteitä">Lähde- ja käyttöoikeustiedot julkaistaan varsinaisten materiaalien yhteydessä.</Empty>}</section>;
   const titles: Record<string, [string, string, string]> = {
     kertaus: ["Kertaa", "Ei vielä kerrattavaa", "Kertaus alkaa, kun oppimateriaalia ja luotettavia suoritustietoja on saatavilla."],
