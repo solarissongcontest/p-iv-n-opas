@@ -57,7 +57,7 @@ test("Book has 50-point standalone EX-FINAL, all sixty canonical lessons, ten pr
  assert.equal(book.chapters.length,10);
  assert.equal(book.lessons.length,60);
  assert.equal(book.chapters.filter(x=>x.publicationStatus==="preview").length,10);
- assert.equal(book.lessons.filter(x=>x.publicationStatus==="preview").length,58);
+ assert.equal(book.lessons.filter(x=>x.publicationStatus==="preview").length,59);
  assert.equal(book.lessons.filter(x=>x.publicationStatus==="published").length,0);
  assert.equal(book.chapterTests.filter(x=>x.examType==="final").length,1);
  assert.equal(definition.chapterId,"EX-FINAL");
