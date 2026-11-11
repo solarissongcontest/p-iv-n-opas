@@ -316,7 +316,7 @@ export function LosApp() {
   const chapter = section === "kappale" ? book.chapters.find(item => item.id === segments[2] || item.id.slice(1) === segments[2]) : undefined;
   const lesson = section === "oppitunti" ? book.lessons.find(item => item.id === segments[2] || item.id.slice(1) === segments[2]) : undefined;
   const selectedBlock = section === "teksti" ? book.blocks.find(item => item.id === segments[2]) : undefined;
-  const current = ["kappale", "teksti"].includes(section) ? "sisalto" : section === "oppitunti" ? "opetuspolku" : section;
+  const current = ["kappale", "teksti"].includes(section) ? "sisalto" : section === "oppitunti" ? "opetuspolku" : section === "koe" ? "kokeet" : section;
   return <BookShell book={book} current={current}>
     {section === "" ? <BookHome book={book}/> :
       section === "sisalto" ? <Contents book={book}/> :
