@@ -8,7 +8,7 @@ const choices:{value:SelfRating;title:string}[]=[
 ];
 /**
  * A private and honest personal review. Not an official A1 evaluation,
- * and not a shortcut to certify C06/C08's missing original texts.
+ * and not a shortcut to certify any unreviewed source rights or media.
  */
 export function SummaryPractice({items,put}:{items:Record<string,unknown>;put:(key:string,value:unknown)=>void}){
  const ratings=normalizedRatings(items['summary:skills']);
@@ -53,12 +53,13 @@ export function SummaryPractice({items,put}:{items:Record<string,unknown>;put:(k
  };
  return <section className="los-summary-practice" aria-labelledby="los-skill-summary-heading">
   <h3 id="los-skill-summary-heading">Kymmenen taitoa, oma tilanne</h3>
-  <p>Arvioi omaa osaamistasi, älä pelkkiä tehtäväpisteitä. Tähänkään arvioon ei liity virallista kielitaitoluokitusta. C06:n ja C08:n lähdetekstit ovat keskeneräisiä, joten ne näkyvät erikseen toimituksellisina rajoituksina.</p>
+  <p>Arvioi omaa osaamistasi, älä pelkkiä tehtäväpisteitä. Tähänkään arvioon ei liity virallista kielitaitoluokitusta. Kaikki kymmenen alkuperäistekstikokonaisuutta on nyt tuotu oppikirjaan, mutta tekstien toimituksellinen laadunvarmistus, media, esteettömyys ja synkronoinnin laitetestit ovat yhä kesken.</p>
   <div className="los-skill-list">{FINAL_SKILLS.map(skill=>{
-   const unavailable=chapters.find(c=>c.id===skill.id)?.status==='source-pending';
+   const source=chapters.find(c=>c.id===skill.id);
+   const unavailable=source?.status==='source-pending';
    return <div key={skill.id} className="los-skill-row">
     <label htmlFor={'los-skill-'+skill.id}><strong>{skill.id}</strong> {skill.title}
-     {unavailable?<span className="los-meta"> · alkuperäisteksti odottaa hyväksyntää</span>:null}
+     {unavailable?<span className="los-meta"> · alkuperäisteksti odottaa lähdettä</span>:null}
      <span className="los-meta" lang="de">{skill.sample}</span>
     </label>
     <select id={'los-skill-'+skill.id} value={ratings[skill.id]??''}
