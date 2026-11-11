@@ -12,21 +12,21 @@ export type FirstLesson={
  requiredMediaIds?:readonly string[];
 };
 export const firstLessons:readonly FirstLesson[]=[
- {id:'L001',title:'Miten LOS! 1:llä opiskellaan?',requiredIds:[],steps:[
+ {id:'L001',title:'Miten LOS! 1:llä opiskellaan?',requiredIds:[],requiredMediaIds:['lesson:L001:M-COM-01'],steps:[
   {id:'L001-S1',kind:'guide',title:'Tutustu oppikirjaan',minutes:5,instructionFi:'Opiskelet ensimmäisessä moduulissa tervehtimistä, nimiä ja lyhyitä saksankielisiä kohtaamisia. Et tarvitse ennakkotietoja. Voit avata kirjan muut sivut ilman opetuspolkua. Kappaleen pääteksti luetaan tässä kirjassa, ei erillisellä verkkosivulla.'},
   {id:'L001-S2',kind:'goal',title:'Kirjaa oma tavoitteesi',minutes:5,instructionFi:'Kirjoita vähintään yksi taito, jonka haluat oppia, esimerkiksi tervehdys tai oma esittäytyminen.'},
   {id:'L001-S3',kind:'read',title:'Kokeile saksankielistä lukijaa',minutes:7,instructionFi:'Lue alkuperäinen Franzin ja Jörgin keskustelu. Napauta sanaa: sen merkitys näkyy sanakortissa. Tunnista Hallo ja Tschüss. Älä huolehdi vielä ikää tarkoittavista ilmauksista.',chapterId:'C01'},
   {id:'L001-S4',kind:'listen',title:'Testaa alkuperäisäänite',minutes:7,instructionFi:'Paina äänisoittimen toistopainiketta ja kuuntele. Jos ääni ei avaudu, lukija on edelleen käytettävissä. Älä merkitse toistoa toimivaksi, jos se ei toiminut.',chapterId:'C01'},
   {id:'L001-S5',kind:'check',title:'Muista kolme perusasiaa',minutes:6,instructionFi:'1. Tässä kirjassa luetaan koko alkuperäinen teksti. 2. Tehtävän oikea vastaus näkyy harjoituksessa vasta tarkistamisen jälkeen. 3. Kertaus ja muistiinpanot tallennetaan samaan Opintopäiväkirjaan; ennen viimeistelyä odota vahvistusta palvelimelta.'}
  ]},
- {id:'L002',title:'Aloita saksan ääntämisestä',requiredIds:['C01-E08','C01-E10'],steps:[
+ {id:'L002',title:'Aloita saksan ääntämisestä',requiredIds:['C01-E08','C01-E10'],requiredMediaIds:['lesson:L002:M-COM-01'],steps:[
   {id:'L002-S1',kind:'recall',title:'Palauta mieleen',minutes:4,instructionFi:'Mitä muistat sanoista Hallo ja Tschüss? Yritä vastata ennen kuin avaat sanaston.'},
   {id:'L002-S2',kind:'instruction',title:'Saksan ensimmäiset äänteet',minutes:8,instructionFi:'Harjoittele w = v, z = ts, ei = ai, ie = pitkä i, sch = š ja ß = s. Ch voi ääntyä kevyesti ich-sanassa ja kurkumpana Bach-sanassa. Näiden ch-äänteiden tuottamista ei vielä arvioida.',chapterId:'C01'},
   {id:'L002-S3',kind:'listen',title:'Kuuntele oikeaa puhetta',minutes:5,instructionFi:'Kuuntele aito lyhyt keskustelu. Seuraa lukijasta samalla tuttuja sanoja. Älä vielä opettele ikäkysymyksen rakennetta.',chapterId:'C01'},
   {id:'L002-S4',kind:'practice',title:'Tarkista ääntäminen',minutes:9,instructionFi:'Tee kaksi ääntämissääntöjä koskevaa tehtävää. Yritä ensin itse, vasta sen jälkeen käytä vihjettä.',chapterId:'C01',exerciseIds:['C01-E08','C01-E10']},
   {id:'L002-S5',kind:'check',title:'Lopputarkistus',minutes:4,instructionFi:'Osaatko selittää suomeksi, mitä saksan w, z, ei, ie ja sch yleensä tarkoittavat ääntämisessä?'},
  ]},
- {id:'L003',title:'Lue Franzin ja Jörgin keskustelu',requiredIds:['C01-E02','C01-E03','C01-X04'],steps:[
+ {id:'L003',title:'Lue Franzin ja Jörgin keskustelu',requiredIds:['C01-E02','C01-E03','C01-X04'],requiredMediaIds:['lesson:L003:M-COM-01'],steps:[
   {id:'L003-S1',kind:'recall',title:'Muista tervehdykset',minutes:4,instructionFi:'Sano mielessäsi hei ja hei hei saksaksi, ennen kuin palaat tekstiin.'},
   {id:'L003-S2',kind:'read',title:'Lue Text A alusta loppuun',minutes:9,instructionFi:'Lue kaikki kahdeksan repliikkiä. Tuntemattomat ikämuodot ovat tässä tukisanoja, eivät vielä kokeen aihe.',chapterId:'C01'},
   {id:'L003-S3',kind:'listen',title:'Kuuntele puheen rytmi',minutes:5,instructionFi:'Kuuntele alkuperäinen sama dialogi ja seuraa puhujia. Huomaa, missä vuorot vaihtuvat.',chapterId:'C01'},
@@ -40,7 +40,7 @@ export const firstLessons:readonly FirstLesson[]=[
   {id:'L004-S4',kind:'practice',title:'Neljä muistitehtävää',minutes:10,instructionFi:'Harjoittele merkityksiä, aukkotehtävää ja kiitoksen käännöstä.',chapterId:'C01',exerciseIds:['C01-E01','C01-E04','C01-E05','C01-E07']},
   {id:'L004-S5',kind:'check',title:'Lopputarkistus',minutes:3,instructionFi:'Mikä on sopivin tervehdys aamulla? Miten tervehdit ystävää?'}
  ]},
- {id:'L005',title:'Kuuntele ja valitse tervehdys',requiredIds:['C01-X02','C01-X03'],steps:[
+ {id:'L005',title:'Kuuntele ja valitse tervehdys',requiredIds:['C01-X02','C01-X03'],requiredMediaIds:['lesson:L005:M-COM-03'],steps:[
   {id:'L005-S1',kind:'recall',title:'Muistista palautus',minutes:4,instructionFi:'Tervehdi mielessäsi tuttavaa ja hyvästele hänet kahdella tavalla.'},
   {id:'L005-S2',kind:'listen',title:'Text B: kuuntele tervehdyksiä',minutes:10,instructionFi:'Kuuntele ihmisen lukema tervehdyslista. Jos se ei toimi, jatka varamateriaalina Text A:n dialogia.',chapterId:'C01'},
   {id:'L005-S3',kind:'practice',title:'Kuuntelun tunnistaminen',minutes:9,instructionFi:'Kuuntele ja tunnista dialogin aloitus ja lopetus. Vastaukset perustuvat alkuperäiseen äänitteeseen.',chapterId:'C01',exerciseIds:['C01-X02','C01-X03']},
