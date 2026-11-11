@@ -524,7 +524,7 @@ function FirstLessonRunner({lessonId,store,fontSize,onNext,onContents}:{lessonId
 }
 
 const toolsMenu:[View['kind'],string][]=[['dictionary','Sanakirja'],['grammar','Kielioppi'],['notes','Muistiinpanot'],['bookmarks','Kirjanmerkit'],['media','Mediat'],['sources','Lähteet'],['progress','Osaaminen'],['exams','Kokeet'],['settings','Lukuasetukset']];
-export function LosApp({ownerId}:{ownerId:string}){
+function LosAppForOwner({ownerId}:{ownerId:string}){
  const navigate=useNavigate();
  const [view,setView]=useState<View>(initial);
  const [wordSearch,setWordSearch]=useState('');
@@ -660,4 +660,12 @@ function ReviewCard({id,store}:{id:string;value:unknown;store:Store}){
   store.put(id,dueDate(new Date(),success,old?.stage??0));setShown(false);
  };
  return <article className="los-review-card"><p lang="de"><b>{de}</b></p><button onClick={()=>setShown(!shown)}>{shown?'Piilota vastaus':'Näytä suomennos / ratkaisu'}</button>{shown?<><p>{word?.fi??'Katso alkuperäinen harjoitus uudelleen ja arvioi vastauksesi.'}</p><button onClick={()=>mark(true)}>Muistin</button><button className="los-quiet" onClick={()=>mark(false)}>Harjoittele uudelleen huomenna</button></>:null}</article>;
+}
+
+/** Force the entire owner-scoped store/UI to unmount on login-account changes.
+ * Without this React key, pending local writes and cached chapter progress from
+ * account A could remain in memory when the parent renders account B.
+ */
+export function LosApp({ownerId}:{ownerId:string}){
+ return <LosAppForOwner key={ownerId} ownerId={ownerId}/>;
 }
