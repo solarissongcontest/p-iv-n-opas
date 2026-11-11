@@ -1,5 +1,5 @@
 import type { Book, BookId } from "./model";
-import { normalizeGap } from "./exercises/evaluate";
+import { normalizeGap } from "./exercises/evaluate.ts";
 
 export type ReviewCard = {
   id: string; bookId: BookId; contentVersion: string; de: string; fi: string; note?: string;
