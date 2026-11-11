@@ -11,6 +11,9 @@ export type ChapterTestDefinition = {
   alternativeExerciseIds?: readonly string[];
   speechCriteria: readonly { id: string; title: string }[];
   selfAssessmentMode?: "speech" | "writing";
+  writingPromptFi?: string;
+  writingModelDe?: string;
+  writingModelFi?: string;
 };
 export type ChapterTestResult = {
   submittedAt: string; score: number; maximum: number;
