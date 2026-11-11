@@ -11,6 +11,7 @@ import {type FirstLessonStep} from './firstLessons';
 import {guidedLessons} from './guidedLessons';
 import {lessonAudioProof,lessonRequiresReflection} from './lessonProofs';
 import {hasExerciseAttempt} from './exerciseAttempt';
+import {vocabularySearch,vocabularyReviewSummary} from './vocabularyCandidates';
 import {auditLosRelease} from './releaseAudit';
 import {NumberPractice} from './NumberPractice';
 
@@ -560,7 +561,8 @@ function LosAppForOwner({ownerId}:{ownerId:string}){
  const lesson=lessons.find(l=>l.id===view.lesson);
  const finishedLessons=lessons.filter(l=>item(store,'lesson:'+l.id)===true).length;
  const reviews=Object.entries(store.items).filter(([key,v])=>key.startsWith('review:')&&v&&typeof v==='object'&&'due' in v&&String((v as {due:string}).due)<=new Date().toISOString().slice(0,10));
- const dictionaryResults=allWords.filter(w=>(w.de+' '+w.fi).toLocaleLowerCase('de').includes(wordSearch.toLocaleLowerCase('de'))).slice(0,80);
+ const dictionaryResults=vocabularySearch(wordSearch);
+ const dictionaryAudit=vocabularyReviewSummary();
  return <AppShell page="courses" pageTitle="LOS! 1" pageEyebrow="Saksa B3 · SAB31 · 2 op" moreOpen={moreOpen}
   onMoreOpenChange={setMoreOpen} onNavigate={goApp} onLog={()=>void navigate({to:'/studies'})} onSearch={()=>go({kind:'dictionary'})}>
   <div className="los" id="los-root">
@@ -619,7 +621,18 @@ function LosAppForOwner({ownerId}:{ownerId:string}){
         <p>Tuntia {lesson.id} ei voi merkitä suoritetuksi ilman viiden vaiheen opetuspolkua ja oikeita tehtäviä. Tämä on sisältövirhe eikä hyväksytty lyhennetty oppitunti.</p>
         <button onClick={()=>go({kind:'lessons'})}>Takaisin opetuspolkuun</button>
        </section>:null}
-       {view.kind==='dictionary'?<><Label>DEUTSCH ↔ SUOMI</Label><h1>LOS!-sanakirja</h1><p>Tässä versiossa haku kattaa vain toimitetun LOS! 1:n sanaston. FreeDictin laajaa aineistoa ei ole vielä tuotu.</p><div className="los-search"><Search size={18}/><input aria-label="Hae sanakirjasta" value={wordSearch} onChange={e=>setWordSearch(e.target.value)} placeholder="Hae saksaksi tai suomeksi…"/></div><div className="los-vocab">{dictionaryResults.map((w,i)=><div key={w.chapterId+'-'+w.de+'-'+i} className="los-vocab-row"><b lang="de">{w.de}</b><span>{w.fi}</span><button onClick={()=>store.put('review:'+w.de,{due:new Date().toISOString().slice(0,10),stage:0})}>Lisää kertaukseen</button></div>)}</div></>:null}
+       {view.kind==='dictionary'?<><Label>DEUTSCH ↔ SUOMI</Label><h1>LOS!-sanakirja</h1>
+      <p>Sanakirja kokoaa LOS! 1:n kappalesanaston yhteen. Sama saksankielinen kirjoitusasu näytetään vain kerran, ja merkitykset yhdistetään silloin kun niitä on eri kappaleissa. FreeDictin laajaa aineistoa ei ole vielä tuotu.</p>
+      <p className="los-meta" role="status">{dictionaryAudit.total} uniikkia sanastoehdokasta · {dictionaryAudit.activeCandidates} alustavaa aktiivikohdetta · {dictionaryAudit.reviewed} aktiivikohdetta merkitty kieliasultaan lopullisesti tarkistetuksi. Tavoite on 160–190 tarkistettua oppimiskohdetta. Numerot eivät tarkoita hyväksyttyä sanakirjaa.</p>
+      <div className="los-search"><Search size={18}/><input aria-label="Hae sanakirjasta" value={wordSearch} onChange={e=>setWordSearch(e.target.value)} placeholder="Hae saksaksi tai suomeksi…"/></div>
+      <div className="los-vocab">{dictionaryResults.map(w=><div key={w.entryId} className="los-vocab-row">
+       <span><b lang="de">{w.displayForm}</b><small>{w.partOfSpeech==='noun'?'substantiivi · '+(w.gender==='m'?'der':w.gender==='f'?'die':'das'):w.partOfSpeech==='chunk'?'fraasi':'sanaluokka vielä tarkistamatta'} · {w.importance==='active'?'ydin':w.importance==='recognition'?'tunnista':'tuki'}</small></span>
+       <span>{w.meaningFi.join('; ')}<small>Ensimmäisen kerran {w.introducedChapterId}{w.chapters.length>1?' · myös '+w.chapters.slice(1).join(', '):''}{w.exampleBlockId?' · alkuperäistekstiesimerkki löytyy':' · ei vielä lähdetekstiankkuria'} · kieliasun loppukatselmointi avoin</small></span>
+       <div className="los-actions"><button className="los-quiet" onClick={()=>go({kind:'chapter',cid:w.introducedChapterId,section:'Sanasto'})}>Avaa kappale</button>
+       <button onClick={()=>store.put('review:'+w.displayForm,{due:new Date().toISOString().slice(0,10),stage:0})}>Lisää kertaukseen</button></div>
+      </div>)}</div>
+      {!dictionaryResults.length?<p role="status">Ei hakutuloksia tästä oppikirjasta.</p>:null}
+     </>:null}
      {view.kind==='grammar'?<><h1>Kielioppihakemisto</h1>{chapters.map(c=><button className="los-index-row" key={c.id} onClick={()=>go({kind:'chapter',cid:c.id,section:'Kielioppi'})}><b>{c.id}</b><span>{c.grammar.title}</span><ChevronRight size={16}/></button>)}</>:null}
      {view.kind==='notes'?<><h1>Omat muistiinpanot</h1>{chapters.map(c=><div className="los-note" key={c.id}><h2>{c.id} · {c.name}</h2><textarea aria-label={'Muistiinpanot '+c.name} rows={4} value={valueString(store,'note:'+c.id)} onChange={e=>store.put('note:'+c.id,e.target.value)}/></div>)}</>:null}
      {view.kind==='bookmarks'?<><h1>Kirjanmerkit</h1>{chapters.filter(c=>item(store,'bookmark:'+c.id)).map(c=><button className="los-index-row" key={c.id} onClick={()=>go({kind:'chapter',cid:c.id,section:(item(store,'bookmark:'+c.id) as {section:string}).section})}>{c.id} · {c.name} · Avaa tallennettu osio</button>)}{!chapters.some(c=>item(store,'bookmark:'+c.id))?<p>Et ole vielä tallentanut kirjanmerkkejä.</p>:null}</>:null}
