@@ -245,11 +245,38 @@ export const chapters:Chapter[] = [
  exercises:[]
 },
 {
- id:'C08',name:'Noch einmal, bitte!',goal:'Pyydän toistoa ja selvennystä.',sourceId:'M-DIB-04',sourceUrl:'https://coerll.utexas.edu/dib/toc.php?k=2',
- attribution:'COERLL:n luettelosta ei ole valittu yksittäistä tarkistettua haastattelua.',license:'Avoin',status:'source-pending',sections,blocks:[],
+ id:'C08',name:'Noch einmal, bitte!',goal:'Pyydän toistoa ja selvennystä.',sourceId:'M-ZPE-02',
+ sourceUrl:'https://zpe.gov.pl/a/przeczytaj/DOdbZ7KLX',
+ attribution:'Magdalena Sieradz, Fremdsprachenunterricht? Du brauchst keine Angst zu haben, Puolan ZPE-oppimateriaali. Alkuperäisen kahden henkilön koko 12-vuoroinen kirjoitettu verkkokeskustelu (CC BY-SA 3.0). Saksankieliset sanastolinkit ja niiden kaksinkertaiset verkkopoiminnat poistettu esityksestä; itse julkaistun keskustelun lauseet säilytetty. Tämä korvaa suunnitelman COERLL:n Im Unterricht -aineiston, jonka koko haastattelun suoraa transkriptiota ei saatu varmennettua. Alkuperäinen chat ei ole äänitiedosto.',
+ license:'CC BY-SA 3.0 (Magdalena Sieradz, verkkokeskustelu; sanastolinkkien toistot siistitty)',status:'text-reviewed',sections,
+ blocks:[
+ {id:'c08-a-1',speaker:'Leo',text:'Hallo Fabian, wie geht es dir?'},
+ {id:'c08-a-2',speaker:'Fabian',text:'Hallo Leo. Mir geht es prima. Danke. Und dir?'},
+ {id:'c08-a-3',speaker:'Leo',text:'Mir geht es auch super. Ich hatte heute wieder Deutschunterricht und es war toll!'},
+ {id:'c08-a-4',speaker:'Fabian',text:'Cool. Und was macht ihr so in eurem Deutschunterricht?'},
+ {id:'c08-a-5',speaker:'Leo',text:'Das ist unterschiedlich. Wir hören zum Beispiel kurze Texte und Dialoge in der Fremdsprache und lösen Aufgaben dazu.'},
+ {id:'c08-a-6',speaker:'Fabian',text:'Das machen wir in unserem Englischunterricht ja auch. Findest du das schwierig?'},
+ {id:'c08-a-7',speaker:'Leo',text:'Nein. Die Dialoge sind leicht.'},
+ {id:'c08-a-8',speaker:'Fabian',text:'Und was macht ihr noch?'},
+ {id:'c08-a-9',speaker:'Leo',text:'Wir lernen neue Vokabeln. Wir sprechen die Wörter nach, wiederholen sie im Chor oder einzeln. Die Lehrerin prüft, ob wir die Wörter richtig aussprechen. Wir übersetzen die Wörter in unsere Muttersprache. Manchmal übersetzen wir kurze Sätze in die Fremdsprache.'},
+ {id:'c08-a-10',speaker:'Fabian',text:'Schreibt ihr auch Texte?'},
+ {id:'c08-a-11',speaker:'Leo',text:'Ja, manchmal müssen wir als Hausaufgabe kurze Texte in der Fremdsprache schreiben. Später lesen wir sie im Unterricht vor und unsere Lehrerin korrigiert die Fehler. Wir machen auch viele interaktive Aufgaben auf Tablets und Smartphones.'},
+ {id:'c08-a-12',speaker:'Fabian',text:'Das klingt alles sehr spannend.'}
+ ],
  vocab:w([['Ich verstehe nicht.','En ymmärrä.'],['Noch einmal, bitte!','Vielä kerran, kiitos!'],['Bitte langsamer.','Hitaammin, kiitos.'],['Was bedeutet das?','Mitä se tarkoittaa?'],['Wie sagt man ... auf Deutsch?','Miten sanotaan ... saksaksi?'],['Können Sie das bitte wiederholen?','Voisitteko toistaa sen?']]),
- teaching:['Selviytymisfraasit kannattaa opetella ulkoa. Niitä voi käyttää, vaikka niiden kaikkia kielioppiosia ei vielä ymmärrä.'],
- grammar:{title:'Pyydä selvennystä',explanation:'Können Sie das bitte wiederholen? on kohtelias valmis fraasi. Modaaliverbin taivutusta ei vielä opetella.',examples:[['Ich verstehe nicht.','En ymmärrä.'],['Bitte langsamer.','Hitaammin, kiitos.']]},culture:'Selvennyksen pyytäminen on tavallinen ja hyödyllinen osa vuorovaikutusta.',exercises:[]
+ teaching:['Selviytymisfraasit kannattaa opetella ulkoa. Niitä voi käyttää, vaikka niiden kaikkia kielioppiosia ei vielä ymmärrä.',
+ 'C08:n alkuperäinen Text A on Magdalena Sieradzin kahden henkilön 12-vuoroinen luokkahuoneessa tapahtuvaa kieltenopiskelua kuvaava viestikeskustelu. Se on valittu COERLL:n yksittäisen Im Unterricht -haastattelun sijasta ja sen alkuperä kerrotaan selvästi.',
+ 'Pitkät alkuperäisvirkkeet sisältävät alkeistason ylittävää kielioppia. Tunnista vain alkuun tutut tervehdykset, vointifraasit, hören, schreiben, Wörter, wiederholen ja Unterricht. Älä yritä opetella koko keskustelua ulkoa.',
+ 'C08:n varsinaiset uuden käytön mallifraasit Ich verstehe nicht, Noch einmal, bitte! ja Können Sie das bitte wiederholen? ovat erillistä LOS!:n toimituksellista opetusta, eivät Sieradzin alkuperäisestä keskustelusta lainattuja puheenvuoroja.',
+ 'Teksti B:n aidot itsenäiset ihmisäänet ovat Timwin Ich verstehe nicht ja Jeuwren wiederholen. Niitä ei markkinoida Sieradzin kahden henkilön keskustelun ääniversioksi.'],
+ grammar:{title:'Pyydä selvennystä',explanation:'Können Sie das bitte wiederholen? on kohtelias valmis fraasi. Modaaliverbin taivutusta ei vielä opetella.',examples:[['Ich verstehe nicht.','En ymmärrä.'],['Bitte langsamer.','Hitaammin, kiitos.']]},culture:'Selvennyksen pyytäminen on tavallinen ja hyödyllinen osa vuorovaikutusta. Luokassa voidaan lukea, kirjoittaa, kerrata uusia sanoja ja kuunnella dialogeja. Sieradzin lähdeteksti on tavallinen viestikeskustelu, ei varsinainen opetuksen aikana tehty nauhoite.',
+ media:{sourceId:'M-COM-08-ICH',title:'Ich verstehe nicht · puheen alkuperäinen ääntämisnäyte (1,2 s)',
+  url:'https://commons.wikimedia.org/wiki/Special:Redirect/file/De-Ich_verstehe_nicht.oga',
+  sourceUrl:'https://commons.wikimedia.org/wiki/File:De-Ich_verstehe_nicht.oga',
+  license:'Public domain',durationSeconds:1.2,
+  attribution:'Timwi (2004), itse nauhoitettu alkuperäinen saksankielisen fraasin ihmisäänite, tekijä luovuttanut yleiseen käyttöön. Ei Sieradzin keskustelun ääniversio.',
+  transcript:[{id:'c08-b-1',speaker:'Ääntämisnäyte',text:'Ich verstehe nicht.'}]},
+ exercises:[]
 },
 {
  id:'C09',name:'Am Montag um drei.',goal:'Ymmärrän viikonpäivät ja yksinkertaisen tapaamisajan.',
