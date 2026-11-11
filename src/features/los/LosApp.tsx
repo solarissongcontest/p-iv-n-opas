@@ -10,6 +10,7 @@ import { ReviewWorkspace, ReviewEvidence } from "./ReviewWorkspace";
 import { VocabularyIndex } from "./VocabularyIndex";
 import { ExerciseEngine } from "./exercises/ExerciseEngine";
 import { ChapterTestWorkspace } from "./ChapterTestWorkspace";
+import { LosDictionaryPage } from "./LosDictionaryPage";
 
 type NavItem = { segment: string; title: string };
 const sections: readonly NavItem[] = [
@@ -242,14 +243,7 @@ function ChapterPage({ book, chapter, subsection }: { book: Book; chapter: Chapt
       </div>}
   </section>;
 }
-function GlobalDictionary() {
-  return <div className="los-app">
-    <div className="los-context"><a href={LOS_BASE_PATH}><ArrowLeft size={17}/> Oppikirjasto</a><span>Kaikki kahdeksan kirjaa</span></div>
-    <p className="los-eyebrow">DEUTSCH ↔ SUOMI</p><h1>Saksan sanakirja</h1>
-    <p className="los-intro">LOS!-sarjan yhteinen kaksisuuntainen sanakirja tulee tähän. Se on eri asia kuin kunkin kirjan itseopiskelusanasto.</p>
-    <Empty title="Sanakirjakantaa ei ole vielä tuotu">Sanahaku ja ääntäminen avataan vasta, kun FreeDict-aineiston lisenssi, lähdeversio, suomennokset ja hakemiston toiminta on tarkistettu. Tällä hetkellä sanakirja ei anna näennäisiä osumia.</Empty>
-  </div>;
-}
+function GlobalDictionary() { return <LosDictionaryPage/>; }
 function NotesIndex({ book }: { book: Book }) {
   const { value: notes, status } = useLosRecord<ReaderNote[]>(book.id, "notes", "reader", book.contentVersion, []);
   const visible = notes.filter(note => note.text.trim());
