@@ -145,7 +145,7 @@ export function ChapterTestWorkspace({ book, definition, onReturned }: {
     <p className="los-eyebrow">LOS! · KAPPALEEN ITSEARVIOINTI</p>
     <h2>{definition.title}</h2>
     <p className="los-intro">{definition.introductoryFi}</p>
-    <p className="los-notice">Tämä on C01:n automaattisesti tarkistettava harjoituskoe, ei virallinen kurssikoe tai julkaistun oppikirjan lopullisesti hyväksytty arviointi. Uusintayritys käyttää samojen tavoitteiden uusia, itse laadittuja kysymyksiä. Puheäänitys on vapaaehtoinen ja pysyy vain tällä laitteella.</p>
+    <p className="los-notice">Tämä on {definition.chapterId}:n automaattisesti tarkistettava harjoituskoe, ei virallinen kurssikoe tai julkaistun oppikirjan lopullisesti hyväksytty arviointi. {definition.alternativeExerciseIds?.length ? "Uusintayritys käyttää myös uusia tehtävävaihtoehtoja." : "Uusintayrityksessä kysymykset pysyvät tässä versiossa samoina."} {writingMode ? "Kirjoitusosuus itsearvioidaan eikä lisää pisteitä." : "Puheäänitys on vapaaehtoinen ja pysyy vain tällä laitteella."}</p>
     <div className="los-exam-meta">
       <span>Yritys {attemptNumber + 1} · {isReturned ? "Palautettu" : "Vastattu " + completeCount + " / " + exercises.length}</span>
       <span>{definition.speechCriteria.length} {writingMode ? "kirjallisen tuotoksen" : "puheen"} itsearviointia · ei pisteitä</span>
@@ -166,7 +166,7 @@ export function ChapterTestWorkspace({ book, definition, onReturned }: {
       <section className="los-exam-speech" aria-label={writingMode ? "Kirjallisen tuotoksen itsearviointi" : "Puheen itsearviointi"}>
         <h3>{writingMode ? "Kirjoita oma esittely · ei automaattisia pisteitä" : "Puhe · oma arvio, ei automaattisia pisteitä"}</h3>
         {writingMode ? <>
-          <p>Kirjoita saksaksi kaksi tai kolme lyhyttä lausetta, joissa kerrot nimesi ja kysyt toisen nimeä. Vastauksesi tallennetaan koesuorituksen yhteyteen, mutta sitä ei arvioida automaattisesti.</p>
+          <p>{definition.writingPromptFi ?? "Kirjoita lyhyt saksankielinen esittely oppimiesi rakenteiden avulla."} Vastauksesi tallennetaan koesuorituksen yhteyteen, mutta sitä ei arvioida automaattisesti.</p>
           <label htmlFor={"los-exam-writing-" + definition.id}>Oma esittely saksaksi</label>
           <textarea id={"los-exam-writing-" + definition.id} rows={4} lang="de"
             autoCapitalize="none" spellCheck={false} disabled={isReturned || status === "loading"}
@@ -198,8 +198,8 @@ export function ChapterTestWorkspace({ book, definition, onReturned }: {
       <div><CheckCircle2 size={22}/><h3>Koe palautettu</h3></div>
       <p className="los-exam-score">{state.submission.score} / {state.submission.maximum} pistettä</p>
       <p>Automaattisesti tarkistettiin {state.submission.maximum} osatehtävää. {writingMode ? "Kirjallinen esittely" : "Puhe"} itsearvioitiin erikseen. Voit lukea jokaisen kohdan perustelun ylempänä.</p>
-      {writingMode && <div className="los-exam-writing-return"><h4>Oma kirjallinen vastauksesi</h4><p lang="de">{state.submission.writtenResponse ?? ""}</p><details><summary>Avaa LOS!:n oma mallivastaus</summary><p lang="de">Hallo! Ich heiße Lena. Wie heißt du?</p></details></div>}
-      <p className="los-support">Tulos kuvaa vain tätä C01:n tehtäväsarjaa. Se ei ole kurssin arvosana eikä CEFR-tason arvio.</p>
+      {writingMode && <div className="los-exam-writing-return"><h4>Oma kirjallinen vastauksesi</h4><p lang="de">{state.submission.writtenResponse ?? ""}</p><details><summary>Avaa LOS!:n oma mallivastaus</summary><p lang="de">{definition.writingModelDe ?? "Hallo! Ich heiße Lena. Wie heißt du?"}</p>{definition.writingModelFi && <p>{definition.writingModelFi}</p>}</details></div>}
+      <p className="los-support">Tulos kuvaa vain tätä {definition.chapterId}:n tehtäväsarjaa. Se ei ole kurssin arvosana eikä CEFR-tason arvio.</p>
       {!restartVisible ? <button type="button" className="los-button los-button-secondary"
         onClick={() => setRestartVisible(true)}><RotateCcw size={17}/> Tee uusi yritys</button>
         : <div className="los-exam-confirm">
