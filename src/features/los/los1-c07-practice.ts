@@ -22,11 +22,17 @@ export const LOS1_C07_NAME_EXERCISES:Exercise[]=LOS1_C07_FICTIONAL_NAMES.map((na
   gap("spell-name-"+String(index+1).padStart(2,"0"),
     "Kirjoita kirjaimista muodostuva keksitty nimi: "+[...name.toUpperCase()].join(" – ")+".",
     "Name:", "",name,"Kirjaimista muodostuu nimi "+name+"."));
-export const LOS1_C07_NUMBER_EXERCISES:Exercise[]=LOS1_C07_FICTIONAL_NUMBERS.map((value,index)=>
-  gap("fictitious-number-"+String(index+1).padStart(2,"0"),
-    "Kirjoita esimerkkitaulukon keksitty numerosarja (välilyönti voidaan jättää pois): "+value+".",
-    "Nummer:", "",value.replace(/ /gu,""),
-    "Luvut muodostavat keksityn numerojonon "+value+". Todellista yhteystietoa ei käytetä."));
+const digitWords=["null","eins","zwei","drei","vier","fünf","sechs","sieben","acht","neun"];
+export const LOS1_C07_NUMBER_EXERCISES:Exercise[]=LOS1_C07_FICTIONAL_NUMBERS.map((value,index)=>({
+  ...base,id:"los1-c07-fictitious-number-"+String(index+1).padStart(2,"0"),
+  type:"gap-fill" as const,
+  promptFi:"Kirjoita nämä yksittäin sanotut numerot numeroina: "+
+    [...value].map(character=>character===" " ? " | " : digitWords[Number(character)]).join(" · ").replace(/ ·  \|  · /gu," | ")+
+    ". Numerosarja on keksitty, ei oikea puhelinnumero.",
+  sentenceBefore:"Nummer:",sentenceAfter:"",
+  acceptedAnswers:[value.replace(/ /gu,""),value],
+  explanationFi:"Keksitty numerosarja on "+value+". Myös välilyönnitön muoto hyväksytään.",
+}));
 export const LOS1_C07_PRACTICE_EXERCISES:Exercise[]=[
   choice("intro-pronunciation","Mikä väite pitää paikkansa?",
     ["Kirjaimen nimi ja ääntäminen sanassa ovat aina sama asia.",
