@@ -18,6 +18,9 @@ function required(name:string){
   return value;
 }
 function hash(value:string){return createHash("sha256").update(value,"utf8").digest();}
+function createLosDb(url:string,secret:string){
+  return createClient(url,secret,{auth:{persistSession:false,autoRefreshToken:false}});
+}
 function authenticate(request:Request) {
   const url=new URL(request.url);
   const origin=request.headers.get("origin");
@@ -39,9 +42,7 @@ function authenticate(request:Request) {
   if(claims.iss!==expectedIss)throw new AuthFailure(401,"Laitetunnistuksen myöntäjä ei vastaa palvelinta.");
   return {
     ownerId:claims.sub,
-    db:createClient(supabaseUrl,required("SUPABASE_SECRET_KEY"),{
-      auth:{persistSession:false,autoRefreshToken:false}
-    }),
+    db:createLosDb(supabaseUrl,required("SUPABASE_SECRET_KEY")),
   };
 }
 function parseKey(rawBook:string|null,rawChapter:string|null){
@@ -56,7 +57,7 @@ function handleError(error:unknown){
   console.error("[LOS sync] server error",error);
   return reply({error:"Pilvitallennus ei ole juuri nyt käytettävissä."},500);
 }
-async function currentRecord(db:ReturnType<typeof createClient>,ownerId:string,bookId:number,chapterId:string){
+async function currentRecord(db:ReturnType<typeof createLosDb>,ownerId:string,bookId:number,chapterId:string){
   const {data,error}=await db.from("los_chapter_drafts")
     .select("revision,payload,updated_at")
     .eq("owner_id",ownerId).eq("book_id",bookId).eq("chapter_id",chapterId).maybeSingle();
