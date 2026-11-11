@@ -86,7 +86,7 @@ export type LosChapterSourceGate = {
   issues: readonly string[];
 };
 export function getLosChapterSourceGate(chapterId: string): LosChapterSourceGate {
-  const normalized = /^\\d{2}$/.test(chapterId) ? `C${chapterId}` : chapterId;
+  const normalized = /^\d{2}$/.test(chapterId) ? `C${chapterId}` : chapterId;
   const chapter = LOS1_CHAPTER_SOURCE_PLANS.find(plan => plan.id === normalized);
   const source = chapter?.primarySourceId ? findLosSource(chapter.primarySourceId) : undefined;
   const issues = !chapter
