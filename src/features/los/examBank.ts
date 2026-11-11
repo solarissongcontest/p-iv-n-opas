@@ -1,5 +1,5 @@
 import type {Exercise} from './content';
-import {c01Exam} from './chapterExam.ts';
+import {c01Exam,c02Exam} from './chapterExam.ts';
 // The assessment banks are independent of chapter practice IDs. No answer key
 // is rendered in ExamSession until the learner submits the whole paper.
 type Item=Exercise;
@@ -96,6 +96,7 @@ export const finalExam:Item[]=[
 ];
 export const exams={
  'EX-C01':{title:'Kappaletesti · C01 Hallo!',questions:c01Exam,scope:'C01'},
+ 'EX-C02':{title:'Kappaletesti · C02 Ich heiße …',questions:c02Exam,scope:'C02'},
  'EX-MID':{title:'Välikoe · kappaleet 1–5',questions:midExam,scope:'C01–C05'},
  'EX-FINAL':{title:'Loppukoe · LOS! 1',questions:finalExam,scope:'C01–C10'},
 } as const;
@@ -105,6 +106,11 @@ export const selfAssessment={
  prompt:'Tervehdi kuviteltua tuttavaa, kerro kohtelias hyvästely ja sano mitä ääntämisen sääntöä käytit.',
  model:'Hallo! Guten Tag! Tschüss! Auf Wiedersehen!',
  criteria:'Valitsit kaksi erilaista tervehdys- tai hyvästelytilannetta, ja erotit ne toisistaan. Ääntäminen arvioidaan itse.'
+ },
+ 'EX-C02':{
+ prompt:'Kirjoita itse lyhyt esittelyvuoropuhelu. Tervehdi, kysy toisen nimeä, vastaa omaan nimeesi ja hyvästele.',
+ model:'A: Hallo! Wie heißt du? B: Ich heiße Mia. Und du? A: Ich bin Leo. B: Tschüss!',
+ criteria:'Tervehdit, kysyit Wie heißt du?, käytit minä-muotoa heiße/bin ja hyvästelit. Arvioi kirjoitus itse.'
  },
  'EX-MID':{
  prompt:'Esittäydy 3–4 lauseella kuvitteellisena henkilönä.',
@@ -119,8 +125,8 @@ export const selfAssessment={
 } as const;
 export function validateLosExams():string[]{
  const issues:string[]=[];const ids=new Set<string>();
- for(const [name,questions] of [['EX-C01',c01Exam],['EX-MID',midExam],['EX-FINAL',finalExam]] as const){
-  if(questions.length!==(name==='EX-MID'?25:name==='EX-C01'?15:50))issues.push(name+' väärä tehtävämäärä');
+ for(const [name,questions] of [['EX-C01',c01Exam],['EX-C02',c02Exam],['EX-MID',midExam],['EX-FINAL',finalExam]] as const){
+  if(questions.length!==(name==='EX-MID'?25:name==='EX-C01'||name==='EX-C02'?15:50))issues.push(name+' väärä tehtävämäärä');
   for(const e of questions){
    if(ids.has(e.id))issues.push('Duplikaatti '+e.id);
    ids.add(e.id);
