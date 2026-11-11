@@ -8,6 +8,7 @@ import {
 } from "./chapterTest";
 import { useLosRecord, losSyncMessage } from "./data/useLosRecord";
 import { evaluateExercise } from "./exercises/evaluate";
+import { SpeechRecorder } from "./SpeechRecorder";
 
 function isMatchingAnswer(value: ExerciseAnswer): value is Record<string, string> {
   return value !== null && typeof value === "object" && !Array.isArray(value) && !("start" in value);
@@ -142,7 +143,7 @@ export function ChapterTestWorkspace({ book, definition, onReturned }: {
     <p className="los-eyebrow">LOS! · KAPPALEEN ITSEARVIOINTI</p>
     <h2>{definition.title}</h2>
     <p className="los-intro">{definition.introductoryFi}</p>
-    <p className="los-notice">Tämä on C01:n automaattisesti tarkistettava harjoituskoe, ei virallinen kurssikoe tai julkaistun oppikirjan lopullisesti hyväksytty arviointi. Uusintayritys käyttää samojen tavoitteiden uusia, itse laadittuja kysymyksiä.</p>
+    <p className="los-notice">Tämä on C01:n automaattisesti tarkistettava harjoituskoe, ei virallinen kurssikoe tai julkaistun oppikirjan lopullisesti hyväksytty arviointi. Uusintayritys käyttää samojen tavoitteiden uusia, itse laadittuja kysymyksiä. Puheäänitys on vapaaehtoinen ja pysyy vain tällä laitteella.</p>
     <div className="los-exam-meta">
       <span>Yritys {attemptNumber + 1} · {isReturned ? "Palautettu" : "Vastattu " + completeCount + " / " + exercises.length}</span>
       <span>{definition.speechCriteria.length} puheen itsearviointia · ei pisteitä</span>
@@ -162,7 +163,8 @@ export function ChapterTestWorkspace({ book, definition, onReturned }: {
         </div>)}</div>
       <section className="los-exam-speech" aria-label="Puheen itsearviointi">
         <h3>Puhe · oma arvio, ei automaattisia pisteitä</h3>
-        <p>Lausu ääneen esimerkiksi Hallo!, Guten Morgen! ja Tschüss!. Arvioi vasta sen jälkeen jokainen väittämä. Äänitettä ei tallenneta eikä sovellus voi todistaa ääntämisesi oikeellisuutta.</p>
+        <p>Lausu ääneen esimerkiksi Hallo!, Guten Morgen! ja Tschüss!. Voit äänittää harjoituksesi vapaaehtoisesti ja kuunnella sen ennen itsearviointia. Sovellus ei automaattisesti arvioi ääntämistäsi.</p>
+        <SpeechRecorder key={definition.id + ":" + attemptNumber} title="Kuuntele omaa ääntämistäsi"/>
         {definition.speechCriteria.map(item => <fieldset key={item.id}
           disabled={isReturned || status === "loading"} className="los-exam-speech-criterion">
           <legend>{item.title}</legend>
