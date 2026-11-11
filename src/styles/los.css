@@ -367,3 +367,16 @@
   .los-gloss-panel { flex-wrap: wrap; }
   .los-gloss-panel .los-button { margin-left: auto; }
 }
+
+/* First-run reflection is written in Finnish and stored separately from scores. */
+.los-lesson-reflection { display: grid; gap: 10px; max-width: 720px; margin-top: 16px; }
+.los-lesson-reflection label { display: block; font-weight: 600; color: var(--los-ink); }
+.los-lesson-reflection textarea {
+  width: 100%; max-width: 100%; min-height: 118px; padding: 12px 14px;
+  border: 1px solid var(--los-border-strong); border-radius: 10px;
+  background: var(--los-surface); color: var(--los-ink);
+  line-height: 1.55; resize: vertical;
+}
+.los-lesson-reflection textarea:focus-visible {
+  outline: 3px solid var(--los-focus); outline-offset: 2px;
+}
