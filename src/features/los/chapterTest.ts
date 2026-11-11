@@ -6,7 +6,7 @@ import { evaluateExercise } from "./exercises/evaluate.ts";
  */
 export type SpeechAssessment = "onnistui" | "harjoiteltavaa";
 export type ChapterTestDefinition = {
-  id: string; version: string; title: string; introductoryFi: string;
+  id: string; version: string; chapterId: string; title: string; introductoryFi: string;
   exerciseIds: readonly string[];
   speechCriteria: readonly { id: string; title: string }[];
 };
