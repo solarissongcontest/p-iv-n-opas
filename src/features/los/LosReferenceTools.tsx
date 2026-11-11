@@ -1,0 +1,153 @@
+import { useMemo, useState } from "react";
+import { ArrowRight, BookMarked, BookOpen, ChevronRight, Headphones, Search, Volume2 } from "lucide-react";
+import { LOS_BOOKS, type LosBookDefinition } from "./catalog";
+import { LOS_1_LESSONS } from "./learningPath";
+
+export type LosDestination = "overview" | "contents" | "chapter" | "text" | "vocabulary" | "grammar" | "practice" | "appendix" | "dictionary" | "path" | "search";
+export type LosNavigate = (chapter: string | null, section: LosDestination) => void;
+type WordEntry = { book: number; code: string; chapter: string; title: string; word: string; meaning: string };
+const DICTIONARY = LOS_BOOKS.flatMap(book => book.chapters.flatMap(chapter =>
+  chapter.vocabulary.map(item => {
+    const [word, ...rest] = item.split(" – ");
+    return { book: book.id, code: book.code, chapter: chapter.id, title: chapter.title, word: word ?? "", meaning: rest.join(" – ") } satisfies WordEntry;
+  })
+));
+function compare(a: string, b: string) { return a.localeCompare(b, "de"); }
+
+export function LosDictionary({ book, move }: { book: LosBookDefinition; move: LosNavigate }) {
+  const [search, setSearch] = useState("");
+  const [hidden, setHidden] = useState(false);
+  const [scope, setScope] = useState<"book" | "series">("book");
+  const entries = useMemo(() => DICTIONARY.filter(entry =>
+    (scope === "series" || entry.book === book.id) &&
+    (entry.word.toLocaleLowerCase("de").includes(search.trim().toLocaleLowerCase("de")) ||
+      entry.meaning.toLocaleLowerCase("fi").includes(search.trim().toLocaleLowerCase("fi")))
+  ).sort((a,b) => compare(a.word,b.word)), [search,book.id,scope]);
+  return <section className="los-inner-page los-dictionary-page">
+    <p className="los-eyebrow">WÖRTERBUCH · LOS! {book.id}</p>
+    <h1>Sanakirja</h1>
+    <p className="los-page-intro">Selaa kirjassa esiintyvien sanojen ja ilmausten hakemistoa. Alustava sanasto täydentyy sitä mukaa, kun oppikirja toimitetaan.</p>
+    <div className="los-index-options">
+      <div className="los-index-tabs" role="group" aria-label="Sanakirjan laajuus">
+        <button className={scope === "book" ? "is-active" : ""} aria-pressed={scope === "book"} onClick={() => setScope("book")}>Tämä kirja</button>
+        <button className={scope === "series" ? "is-active" : ""} aria-pressed={scope === "series"} onClick={() => setScope("series")}>Koko sarja</button>
+      </div>
+      <button className="los-index-toggle" onClick={() => setHidden(v => !v)} aria-pressed={hidden}>{hidden ? "Näytä suomennokset" : "Peitä suomennokset"}</button>
+    </div>
+    <label className="los-index-search"><Search size={19}/><span className="sr-only">Hae saksaksi tai suomeksi</span><input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Hae saksaksi tai suomeksi" autoComplete="off" /></label>
+    <p className="los-index-count">{entries.length} hakusanaa</p>
+    {entries.length === 0 ? <p>Ei hakusanoja tällä rajauksella. Muut kirjat saavat hakusanastonsa, kun niiden sisällöt valmistuvat.</p> :
+      <div className="los-index-table" role="table" aria-label="Sanakirjahakemisto">
+        <div className="los-index-table-head" role="row"><span role="columnheader">Deutsch</span><span role="columnheader">Suomi</span><span role="columnheader">Lähde</span></div>
+        {entries.map((item,i)=><div role="row" className="los-index-entry" key={`${item.book}-${item.chapter}-${i}-${item.word}`}>
+          <strong role="cell" lang="de">{item.word}</strong>
+          <span role="cell">{hidden ? <span className="los-muted-hidden">Piilotettu</span> : item.meaning}</span>
+          <button type="button" role="cell" title={`Avaa ${item.title}`} onClick={()=>move(item.book === book.id ? item.chapter : null, item.book === book.id ? "vocabulary" : "overview")}>
+            <span>{item.code} · {Number(item.chapter)}</span><ChevronRight size={15}/>
+          </button>
+        </div>)}
+      </div>
+    }
+    {scope === "series" && <p className="los-index-footnote">Muiden kirjojen keskeneräiset hakemistot eivät vielä sisällä sanastoja. Tämä ei ole kattava saksan yleissanakirja.</p>}
+  </section>;
+}
+export function LosLearningPath({ book, move }: { book: LosBookDefinition; move: LosNavigate }) {
+  const groups = useMemo(() => {
+    const result: { section: string; items: typeof LOS_1_LESSONS[number][] }[] = [];
+    for (const lesson of LOS_1_LESSONS) {
+      let group = result[result.length - 1];
+      if (!group || group.section !== lesson.section) {
+        group = { section: lesson.section, items: [] }; result.push(group);
+      }
+      group.items.push(lesson);
+    }
+    return result;
+  }, []);
+  return <section className="los-inner-page los-learning-path">
+    <p className="los-eyebrow">OHJATTU LUKUJÄRJESTYS / {book.code}</p>
+    <h1>Opetuspolku</h1>
+    <p className="los-page-intro">Kirjan 60 suunniteltua, noin 30 minuutin oppituntia. Opetuspolku viittaa samoihin oppikirjasivuihin, eikä tee niistä erillisiä kursseja.</p>
+    <div className="los-path-notice"><BookOpen size={20}/><p><strong>Rakenne on valmis, oppimateriaalit eivät vielä kaikki.</strong> Oppitunnit eivät tällä hetkellä kirjaa suorituksia tai avaa keskeneräistä materiaalia valmiina.</p></div>
+    {groups.map(group=><section key={group.section} className="los-path-group">
+      <h2>{group.section}</h2>
+      <ol>
+        {group.items.map(lesson=><li key={lesson.number}>
+          <button onClick={()=>move(lesson.chapter,lesson.destination)}>
+            <span className="los-path-number">{String(lesson.number).padStart(2,"0")}</span>
+            <span className="los-path-copy"><strong>{lesson.title}</strong><small>{lesson.chapter ? `Kappale ${Number(lesson.chapter)} · ` : ""}Oppikirjan sisältöön</small></span>
+            <ArrowRight size={18}/>
+          </button>
+        </li>)}
+      </ol>
+    </section>)}
+  </section>;
+}
+type LosSearchHit={id:string;kind:"Kirja"|"Kappale"|"Kielioppi"|"Sanasto"|"Tavoite";title:string;description:string;chapter:string|null;section:LosDestination};
+export function LosIndexSearch({book,move}:{book:LosBookDefinition;move:LosNavigate}) {
+  const [query,setQuery]=useState("");
+  const hits=useMemo<LosSearchHit[]>(()=>{
+    const q=query.trim().toLocaleLowerCase("fi");
+    if (!q) return [];
+    const out:LosSearchHit[]=[];
+    const add=(item:LosSearchHit)=>{if ((item.title+" "+item.description).toLocaleLowerCase("fi").includes(q))out.push(item);};
+    add({id:"book",kind:"Kirja",title:book.title,description:book.summary,chapter:null,section:"overview"});
+    for (const ch of book.chapters){
+      add({id:`ch-${ch.id}`,kind:"Kappale",title:ch.title,description:ch.subtitle,chapter:ch.id,section:"chapter"});
+      add({id:`gr-${ch.id}`,kind:"Kielioppi",title:ch.grammar,description:ch.title,chapter:ch.id,section:"grammar"});
+      for(const [i,item] of ch.vocabulary.entries()) add({id:`vo-${ch.id}-${i}`,kind:"Sanasto",title:item.split(" – ")[0]??item,description:item.split(" – ")[1]??"",chapter:ch.id,section:"vocabulary"});
+      for(const [i,objective] of ch.objectives.entries())add({id:`ob-${ch.id}-${i}`,kind:"Tavoite",title:objective,description:ch.title,chapter:ch.id,section:"chapter"});
+    }
+    return out.slice(0,100);
+  },[book,query]);
+  return <section className="los-inner-page los-index-search-page">
+    <p className="los-eyebrow">HAKU · {book.code}</p>
+    <h1>Hae kirjasta</h1>
+    <p className="los-page-intro">Etsi kappaleiden otsikoista, sanastosta, kielioppiaiheista ja osaamistavoitteista. Varsinaiset lähdetekstit lisätään hakuun, kun ne on julkaistu.</p>
+    <label className="los-index-search"><Search size={19}/><span className="sr-only">Hae tästä oppikirjasta</span><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Hae sanaa, kappaletta tai kielioppia" /></label>
+    {!query.trim()?<p className="los-index-footnote">Voit kokeilla esimerkiksi hakusanoja <b lang="de">heißen</b>, <b lang="de">Hallo</b> tai <b lang="de">kommen</b>.</p>:
+      <><p className="los-index-count">{hits.length} tulosta</p>
+      {hits.length ? <ul className="los-search-results">{hits.map(hit=><li key={hit.id}><button onClick={()=>move(hit.chapter,hit.section)}>
+        <span className="los-search-kind">{hit.kind}</span><span className="los-search-copy"><strong>{hit.title}</strong><small>{hit.description}</small></span><ChevronRight size={20} />
+      </button></li>)}</ul>:<p>Hakusanalle ei löytynyt tuloksia kirjan valmiista hakemistotiedoista.</p>}</>}
+  </section>;
+}
+
+/**
+ * Suoraan Wikimedia Commonsin alkuperäistiedostoon osoittava äänilähde.
+ * CC BY-SA 3.0: Xzapro4 ja Erkan Yilmaz; PD: German Men92.
+ * Teknisesti testattava todellisessa tuotantoympäristössä ennen READY-tilaa.
+ */
+const audioSources = [
+  {
+    id:"M-COM-01", title:"Franz ja Jörg: esittäytymiskeskustelu",
+    duration:"14 s", author:"Xzapro4 ja Erkan Yilmaz", license:"CC BY-SA 3.0",
+    licenseUrl:"https://creativecommons.org/licenses/by-sa/3.0/",
+    attributionUrl:"https://commons.wikimedia.org/wiki/File:Gespr%C3%A4chVorstellung.ogg",
+    src:"https://commons.wikimedia.org/wiki/Special:Redirect/file/Gespr%C3%A4chVorstellung.ogg",
+    note:"Toisen puhujan äidinkieli ei ole saksa. Äänitettä ei esitetä kahden natiivipuhujan keskusteluna.",
+  },
+  {
+    id:"M-COM-03",title:"Tervehdyksiä ja hyvästelyjä",
+    duration:"28 s",author:"German Men92",license:"Public domain",
+    licenseUrl:"https://creativecommons.org/publicdomain/mark/1.0/",
+    attributionUrl:"https://commons.wikimedia.org/wiki/File:German_Vocabulary_-_Greetings.ogg",
+    src:"https://commons.wikimedia.org/wiki/Special:Redirect/file/German_Vocabulary_-_Greetings.ogg",
+    note:"Äänite on luettu ilmausluettelo, ei yhtenäinen dialogi.",
+  }
+] as const;
+export function LosAuthenticAudio({ chapterId }: { chapterId: string }) {
+  const [errors,setErrors] = useState<string[]>([]);
+  const selected=chapterId==="01"?audioSources:chapterId==="06"?audioSources.slice(0,1):[];
+  if(!selected.length)return null;
+  return <section className="los-authentic-audio" aria-label="Alkuperäiset kuunteluäänitteet">
+    <p className="los-overline">ALKUPERÄISET ÄÄNITTEET · KOKEILUTOISTO</p>
+    <h2><Headphones size={22}/> Kuuntele aitoa saksaa</h2>
+    <p>Äänitteet toistetaan julkaisijan palvelimelta kirjan omassa soittimessa. Toiston tekninen toimivuus on vielä testattava tässä sovelluksessa.</p>
+    {selected.map(src=><div className="los-audio-line" key={src.id}>
+      <div className="los-audio-label"><Volume2 size={19}/><strong>{src.title}</strong><small>{src.duration}</small></div>
+      <audio controls preload="none" src={src.src} onError={()=>setErrors(previous=>previous.includes(src.id)?previous:[...previous,src.id])} aria-label={src.title}>Selaimesi ei tue äänentoistoa.</audio>
+      {errors.includes(src.id)&&<p role="alert" className="los-audio-error">Äänitteen lataus epäonnistui. Tämä media ei ole tällä hetkellä käytettävissä.</p>}
+      <p className="los-audio-license">Lähde: <a href={src.attributionUrl} target="_blank" rel="noopener noreferrer">Wikimedia Commons</a> · {src.author} · <a href={src.licenseUrl} target="_blank" rel="noopener noreferrer">{src.license}</a>. {src.note}</p>
+    </div>)}
+  </section>;
+}
