@@ -93,7 +93,7 @@ export function LessonRunner({ book, lesson }: { book: Book; lesson: Lesson }) {
         onClick={advance}>{index < lesson.steps.length - 1 ? "Merkitse käsitellyksi ja jatka" : "Päätä oppitunti"} <ArrowRight size={17}/></button>
     </div>
     {chapterTest && !checkedSteps.includes(step.id) && !progress.completedStepIds.includes(step.id) &&
-      <p className="los-support">Palauta kaikki 12 tehtävää ja puheen itsearviointi ennen kuin päätät oppitunnin.</p>}
+      <p className="los-support">Palauta kaikki {chapterTest.exerciseIds.length} tehtävää ja {chapterTest.selfAssessmentMode === "writing" ? "kirjoituksen" : "puheen"} itsearviointi ennen kuin päätät oppitunnin.</p>}
     {exercise && !checkedSteps.includes(step.id) && <p className="los-support">Tarkista tehtävä ennen kuin merkitset tämän vaiheen käsitellyksi. Oikeaa vastausta ei vaadita.</p>}
     <p className="los-storage-state">{losSyncMessage(saveStatus)}</p>
     {progress.status === "completed" && <p className="los-feedback is-correct" role="status">Tämän harjoitusversion kaikki pakolliset vaiheet käsitelty. Tämä ei ole virallinen kurssisuoritus.</p>}
