@@ -48,6 +48,7 @@ export type ContentBlock =
   | { id: string; version: string; kind: "image"; src: string; alt: string; caption: string; sourceId: string }
   | { id: string; version: string; kind: "vocabulary"; entries: { id: string; de: string; fi: string; note?: string }[] }
   | { id: string; version: string; kind: "production"; titleFi: string; promptFi: string; modelDe: string; modelFi: string; criteriaFi: string[] }
+  | { id: string; version: string; kind: "geo-schematic"; titleFi: string; instructionsFi: string }
   | { id: string; version: string; kind: "media"; mediaType: "audio" | "video"; title: string; embedUrl: string; mp3Url?: string; sourceId: string };
 
 export interface ExerciseBase {
