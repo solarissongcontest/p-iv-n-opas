@@ -1,5 +1,6 @@
 import {LOS_VERSION,allWords,chapters} from './content';
 import {FINAL_SKILLS,eligibleSummary,normalizedRatings,type SelfRating} from './summaryModel';
+import {createReviewEntry,readReviewEntry} from './reviewSchedule';
 
 const choices:{value:SelfRating;title:string}[]=[
  {value:'harjoittelen',title:'Harjoittelen vielä'},
@@ -44,10 +45,10 @@ export function SummaryPractice({items,put}:{items:Record<string,unknown>;put:(k
    if(seen.has(key))return false;
    seen.add(key);return true;
   }).slice(0,8);
-  const today=new Date().toISOString().slice(0,10);
   for(const w of unique){
    const key='review:'+w.de;
-   if(!items[key])put(key,{date:today,stage:0});
+   // Existing cards keep their original interval, including old date-field data.
+   if(!readReviewEntry(items[key]))put(key,createReviewEntry());
   }
   put('summary:reviewsActivated',{at:new Date().toISOString(),count:unique.length,version:LOS_VERSION});
  };
