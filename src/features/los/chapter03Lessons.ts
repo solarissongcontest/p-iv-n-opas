@@ -24,7 +24,7 @@ export const chapter03Lessons:readonly FirstLesson[]=[
   {id:'L014-S4',kind:'practice',title:'Neljä soveltavaa tehtävää',minutes:10,instructionFi:'Täydennä ich komme ja du kommst, tunnista Sveitsin fraasi ja järjestä Suomesta tulevan henkilön vastaus. Palauta jokainen.',chapterId:'C03',exerciseIds:['C03-X02','C03-X03','C03-X05','C03-X07']},
   {id:'L014-S5',kind:'check',title:'Kaksi lauseparia',minutes:3,instructionFi:'Sano Ich komme aus Österreich ja Woher kommst du? Varmista, että verbit ovat oikeassa persoonassa.'}
  ]},
- {id:'L015',title:'Nicon alkuperä ja karttatehtävät',requiredIds:['C03-X17','C03-X18','C03-X22'],requiredMediaIds:['M-COM-02'],steps:[
+ {id:'L015',title:'Nicon alkuperä ja karttatehtävät',requiredIds:['C03-X17','C03-X18','C03-X22'],requiredMediaIds:['C03:M-COM-02'],steps:[
   {id:'L015-S1',kind:'recall',title:'Kertaa maiden nimet',minutes:4,instructionFi:'Muista englanniksi? Älä käytä englantia, vaan suomeksi: mitä Deutschland ja Finnland tarkoittavat? Miten vastaat saksaksi Ich komme ...?'},
   {id:'L015-S2',kind:'listen',title:'Thomas ja Takashi: mistä he tulevat?',minutes:8,instructionFi:'Kuuntele Ariserin alkuperäinen nelirepliikkinen Ich bin Peter -ihmisäänite. Thomas kertoo tulevansa Berliinistä ja Takashi Kiotosta. Nico-video on lähdemanifestissa, mutta se odottaa erillistä mediatarkistusta eikä sitä väitetä tässä toteutetuksi.',chapterId:'C03'},
   {id:'L015-S3',kind:'practice',title:'Kaksi oikeaa kuuntelutehtävää',minutes:9,instructionFi:'Tunnista kuulemalla, mistä Thomas ja Takashi kertovat olevansa kotoisin. Vastaukset perustuvat täsmälleen äänitettyyn neljän repliikin dialogiin.',chapterId:'C03',exerciseIds:['C03-X17','C03-X18']},
