@@ -50,7 +50,7 @@ test("C09 has ten independently routable preview sections and valid model",()=>{
  assert.equal(LOS1_C09_PRACTICE_EXERCISES.length,39);
  assert.equal(LOS1_C09_EXAM_A.length,14);
  assert.equal(chapter.exerciseIds.length,57);
- assert.equal(new Set(chapter.exerciseIds).size,59);
+ assert.equal(new Set(chapter.exerciseIds).size,57);
  const sections=chapter.sections??[];
  assert.ok(sections.every(s=>s.publicationStatus==="preview"));
  assert.deepEqual(sections.map(s=>s.id),[
