@@ -8,6 +8,7 @@ import {
 } from "./chapterTest";
 import { useLosRecord, losSyncMessage } from "./data/useLosRecord";
 import { evaluateExercise } from "./exercises/evaluate";
+import { formatExerciseAnswer } from "./exercises/formatAnswer";
 import { SpeechRecorder } from "./SpeechRecorder";
 
 function isMatchingAnswer(value: ExerciseAnswer): value is Record<string, string> {
@@ -206,8 +207,10 @@ export function ChapterTestWorkspace({ book, definition, onReturned }: {
           <ol>{result.outcomes.map((item, index2) => <li key={item.exerciseId}>
             <strong>{index2 + 1}. {item.correct ? "Oikein" : "Ei oikein"}</strong>
             <p>{item.explanationFi}</p>
-            <p className="los-support">Oma vastaus: {typeof result.answers?.[item.exerciseId] === "string"
-              ? String(result.answers[item.exerciseId]) : "Tehtävän valintatiedot tallessa"}</p>
+            <p className="los-support">Oma vastaus: {formatExerciseAnswer(
+              book.exercises.find(exercise => exercise.id === item.exerciseId),
+              result.answers?.[item.exerciseId] ?? null,
+            )}</p>
           </li>)}</ol>
         </details>}
       </li>)}</ol>
