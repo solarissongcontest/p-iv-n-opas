@@ -13,7 +13,10 @@ export type WeeklyPlan=Record<string,string>;
 export function getWeeklyPlan(value:unknown):WeeklyPlan {
  if(value===null||typeof value!=='object'||Array.isArray(value))return {};
  const input=value as Record<string,unknown>;
- return Object.fromEntries(WEEK_DAYS.map(day=>[day.de,typeof input[day.de]==='string'&&TIME_OPTIONS.some(v=>v===input[day.de])?input[day.de]:'']));
+ return Object.fromEntries(WEEK_DAYS.map(day=>{
+  const candidate=input[day.de];
+  return [day.de,typeof candidate==='string'&&TIME_OPTIONS.some(v=>v===candidate)?candidate:''] as const;
+ }));
 }
 export function completedWeek(value:unknown):boolean {
  const plan=getWeeklyPlan(value);
