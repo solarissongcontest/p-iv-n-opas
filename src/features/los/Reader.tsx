@@ -65,7 +65,9 @@ function SafeMedia({ block, source }: {
             Äänitoistoa ei tueta selaimessasi.
           </audio>
         : <p className="los-notice">Mediaa ei ole hyväksytty sisäiseen toistoon.</p>}
-    {failed && <p className="los-notice" role="status">Äänitettä ei voitu toistaa. Voit lukea saman dialogin tai ilmauslistan kokonaan tekstinä. Äänen toimivuus on varmistettava ennen kuuntelutehtävän arviointia.</p>}
+    {failed && <p className="los-notice" role="status">{source?.id === "M-COM-02" ?
+      "Äänitettä ei voitu toistaa. Tämän lähteen koko litteraattia ei ole vielä toimitettu LOS!:iin: jätä ääneen perustuvat tehtävät myöhemmäksi, älä yritä arvata vastauksia. Voit silti opiskella kappaleen oman luettavan Text A -dialogin." :
+      "Äänitettä ei voitu toistaa. Voit lukea saman lähteen transkription tai ilmauslistan kokonaan tekstinä. Äänen toimivuus on varmistettava ennen kuuntelutehtävän arviointia."}</p>}
     {validCommonsAudio && <p className="los-support">Ääni ladataan Wikimedia Commonsista. Soitin kokeilee ensin MP3-muunnosta ja käyttää tarvittaessa alkuperäistä OGG-äänitettä. Toisto edellyttää verkkoyhteyttä.</p>}
     <Attribution source={source}/>
   </figure>;
