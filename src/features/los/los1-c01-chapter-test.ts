@@ -62,6 +62,7 @@ export const LOS1_C01_SPEECH_CRITERIA = [
 
 export const LOS1_C01_TEST = {
   id: "los1-c01-chapter-test",
+  chapterId: "C01",
   version: "0.1.0",
   title: "C01 · Hallo! · Kappaletesti",
   introductoryFi: "Vastaa ilman tehtäväkohtaisia vihjeitä ja palauta kaikki 12 osatehtävää kerralla. "
