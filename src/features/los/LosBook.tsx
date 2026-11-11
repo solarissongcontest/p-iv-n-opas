@@ -5,6 +5,7 @@ import { LOS_BOOKS, type LosBookDefinition, type LosChapter } from "./catalog";
 import { getLosChapterSourceGate } from "./content/sourceRegistry";
 import { LosAuthenticAudio, LosDictionary, LosIndexSearch, LosLearningPath, type LosDestination } from "./LosReferenceTools";
 import { LosChapterGrammar } from "./LosGrammarChapters";
+import { LosC01AuthenticText } from "./LosC01AuthenticText";
 import { LosNotebook, LosWorkbook } from "./LosWorkbook";
 import { LosBackups } from "./LosBackups";
 import { LosApplication, LosCulture, LosTextB, LosUnderstanding } from "./LosSupplementalSections";
@@ -181,6 +182,17 @@ const sampleByChapter:Record<string,string>={
 };
 function TextPage({ chapter }: { chapter: LosChapter }) {
   const sourceGate=getLosChapterSourceGate(chapter.id);
+  if(chapter.id==="01")return <section className="los-inner-page los-reading-page">
+    <p className="los-eyebrow">KAPPALE 01 / TEXT A</p>
+    <h1>Lue ja kuuntele</h1>
+    <p className="los-page-intro">Franzin ja Jörgin autenttinen keskustelu on tässä kokonaisena. Kuuntele alkuperäinen äänite ja napauta sanoja saadaksesi suomenkielisiä selityksiä. Tussilla voit tehdä omia korostuksia.</p>
+    <LosAuthenticAudio chapterId="01" source="A" />
+    <LosC01AuthenticText />
+    {!sourceGate.ready && <div className="los-editorial-note" role="status">
+      <h2>Sisällön tarkistus kesken</h2>
+      <p>{sourceGate.issues.join(" ")} Tämä on oikeuksiltaan tarkistettu sisältöesikatselu, ei vielä hyväksytty valmis kappale.</p>
+    </div>}
+  </section>;
   const sample=sampleByChapter[chapter.id]??"Guten Tag!";
   return <section className="los-inner-page los-reading-page">
     <p className="los-eyebrow">KAPPALE {chapter.id} / TEKSTI A</p>
