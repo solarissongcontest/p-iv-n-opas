@@ -20,9 +20,9 @@ function readLocation(): LosLocation {
   const parts = window.location.hash.replace(/^#\/?/, "").split("/").filter(Boolean);
   const parsedBook = Number(parts[0]);
   const book = Number.isInteger(parsedBook) && parsedBook >= 1 && parsedBook <= 8 ? parsedBook : null;
-  const chapter = book === 1 && /^\d{2}$/.test(parts[1] ?? "") ? parts[1] : null;
+  const chapter = book === 1 && /^\d{2}$/.test(parts[1] ?? "") ? (parts[1] ?? null) : null;
   const token = parts[chapter ? 2 : 1];
-  const section = (["overview", "contents", "chapter", "text", "vocabulary", "grammar", "practice", "appendix"].includes(token) ? token : chapter ? "chapter" : "overview") as LosSection;
+  const section = (["overview", "contents", "chapter", "text", "vocabulary", "grammar", "practice", "appendix"].includes(token ?? "") ? token : chapter ? "chapter" : "overview") as LosSection;
   return { book, chapter, section };
 }
 function linkTo(book?: number, chapter?: string, section: LosSection = "overview") {
