@@ -115,8 +115,8 @@ function containsExactGermanPhrase(line:string,phrase:string):boolean{
   if(at<0)return false;
   const before=at>0?value.slice(at-1,at):"";
   const after=value.slice(at+needle.length,at+needle.length+1);
-  if((!before||!/[\\p{L}\\p{N}]/u.test(before))&&
-     (!after||!/[\\p{L}\\p{N}]/u.test(after)))return true;
+  if((!before||!/[\p{L}\p{N}]/u.test(before))&&
+     (!after||!/[\p{L}\p{N}]/u.test(after)))return true;
   from=at+1;
  }
  return false;
