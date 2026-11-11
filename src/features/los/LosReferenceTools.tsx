@@ -63,6 +63,11 @@ export function LosLearningPath({ book, move }: { book: LosBookDefinition; move:
     }
     return result;
   }, []);
+  if (book.id !== 1) return <section className="los-inner-page los-learning-path">
+    <p className="los-eyebrow">OHJATTU LUKUJÄRJESTYS / {book.code}</p>
+    <h1>Opetuspolku</h1>
+    <p className="los-page-intro">Tämän kirjan oppituntien sisältö ja järjestys laaditaan erillisessä kirjakohtaisessa masterplanissa. LOS! 1:n oppitunteja ei käytetä tässä kirjassa.</p>
+  </section>;
   return <section className="los-inner-page los-learning-path">
     <p className="los-eyebrow">OHJATTU LUKUJÄRJESTYS / {book.code}</p>
     <h1>Opetuspolku</h1>
