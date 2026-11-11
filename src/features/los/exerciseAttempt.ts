@@ -41,3 +41,18 @@ export function hasExerciseAttempt(
   default:return answer.trim().length>0;
  }
 }
+
+
+/** A choice can be supplied without sound, but a listening-comprehension
+ * receipt exists only after the actual source recording fires onEnded.
+ */
+export const exerciseAudioProof=(exerciseId:string):string=>
+ 'media:completed:exercise:'+exerciseId;
+export function canSubmitExerciseAttempt(
+ exercise:Exercise,answer:string,highlight:TextAnchor|null,
+ speechConfirmed=false,audioCompleted=false,
+):boolean{
+ const valid=hasExerciseAttempt(exercise,answer,highlight,speechConfirmed);
+ if(!valid)return false;
+ return (exercise.type!=='listen-choice'&&exercise.type!=='listen-write')||audioCompleted;
+}
