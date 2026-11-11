@@ -76,7 +76,7 @@ function Media({chapter,store,fontSize=18}:{chapter:Chapter;store:Store;fontSize
   <Label>TEKSTI B · ALKUPERÄINEN IHMISÄÄNITE</Label>
   <h3>{chapter.media.title}</h3>
   <p>{chapter.media.transcript.length>1?'Kuuntele ensin ilman litteraattia ja toista sitten koko alkuperäinen dialogi tekstin kanssa.':'Kuuntele ensin ilman litteraattia. Tämä äänite sisältää yksittäisen puhutun fraasin, ei kokonaista dialogia.'}</p>
-  <Audio src={chapter.media.url} title={chapter.media.title} onCompleted={()=>store.put('media:completed:'+chapter.media!.sourceId,{at:new Date().toISOString(),version:LOS_VERSION})}/>
+  <Audio src={chapter.media.url} title={chapter.media.title} onCompleted={()=>store.put('media:completed:'+(chapter.id==='C03'?'C03:':'')+chapter.media!.sourceId,{at:new Date().toISOString(),version:LOS_VERSION})}/>
   <Reader chapter={{...chapter,blocks:chapter.media.transcript}} store={store} fontSize={fontSize}/>
   <p className="los-source"><b>{chapter.media.sourceId}</b> · {chapter.media.attribution} · {chapter.media.license} ·
    <a href={chapter.media.sourceUrl} target="_blank" rel="noreferrer"> Alkuperäinen äänitiedosto</a> ·
