@@ -309,3 +309,38 @@
   .los-lesson-list .los-chapter-number { min-width: 38px; font-size: 22px; }
   .los-lesson-list a > span:last-child { font-size: 11px; max-width: 90px; white-space: normal; }
 }
+
+/* LOS! licensed dialogue: restrained textbook layout, not a social chat interface. */
+.los-dialogue {
+  padding: clamp(14px, 3vw, 24px);
+  border: 1px solid var(--los-border);
+  border-radius: 12px;
+  background: var(--los-surface);
+  color: var(--los-ink);
+}
+.los-dialogue > .los-eyebrow { font-size: 12px; margin-bottom: 16px; }
+.los-dialogue-turn { padding: 12px 0; border-bottom: 1px solid var(--los-border); }
+.los-dialogue-turn:last-of-type { border-bottom: none; }
+.los-dialogue-turn > p { display: block; margin: 0; font-size: inherit; line-height: 1.65; }
+.los-dialogue-turn > p > b { font-size: 14px; color: var(--los-book-accent-readable); margin-right: 4px; }
+.los-dialogue-spoken { white-space: pre-wrap; user-select: text; overflow-wrap: anywhere; }
+.los-translation { margin-top: 6px; color: var(--los-ink-secondary); font-size: 14px; }
+.los-translation summary { width: fit-content; min-height: 32px; cursor: pointer; font-size: 13px; text-decoration: underline; text-underline-offset: 3px; }
+.los-translation > p { padding: 4px 0 2px 12px; margin: 0; border-left: 2px solid var(--los-border-strong); font-size: 14px; line-height: 1.55; }
+.los-attribution {
+  display: grid; gap: 3px; padding: 12px 0 0; margin-top: 18px;
+  border-top: 1px solid var(--los-border); color: var(--los-ink-secondary);
+  font-size: 12px; line-height: 1.55; overflow-wrap: anywhere;
+}
+.los-attribution > b { color: var(--los-ink); font-weight: 600; }
+.los-attribution-links { display: flex; flex-wrap: wrap; gap: 10px 20px; }
+.los-attribution-links a { min-height: 36px; display: inline-flex; align-items: center; color: var(--los-book-accent-readable); text-decoration: underline; text-underline-offset: 3px; }
+.los-media { padding: 14px 16px; background: var(--los-surface-muted); border-radius: 10px; }
+.los-media audio { display: block; max-width: 100%; width: 100%; margin: 12px 0; }
+.los-media .los-support { margin: 8px 0 2px; font-size: 12px; color: var(--los-ink-secondary); }
+.los-dialogue .los-token-picker { margin-top: 12px; }
+@media (max-width: 639px) {
+  .los-dialogue { padding: 14px; }
+  .los-dialogue-turn { padding: 14px 0; }
+  .los-attribution-links a { min-height: 44px; }
+}
