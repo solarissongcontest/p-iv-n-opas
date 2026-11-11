@@ -15,6 +15,10 @@ export const translationFi:Readonly<Record<string,string>>={
  'c02-a-4':'Kyllä, hänen nimensä on herra Weiß.',
  'c02-a-5':'Kiitos, Greta. Nähdään!',
  'c02-a-6':'Näkemiin!',
+ 'c02-b-1':'Mikä sinun nimesi on?',
+ 'c02-b-2':'Minun nimeni on Takashi. Entä sinä?',
+ 'c02-b-3':'Minä olen Thomas. Tämä on Peter. Me tulemme Berliinistä.',
+ 'c02-b-4':'Minä olen Kiotosta. Olen japanilainen.',
  'c04-a-1':'Hyvää huomenta, herra Standish! Mitä teille kuuluu?',
  'c04-a-2':'Kiitos paljon, minulle kuuluu hyvää. Entä teille?',
  'c04-a-3':'Ei kovin hyvää. Olen väsynyt.',
@@ -116,6 +120,15 @@ export const basicGloss:Readonly<Record<string,Gloss>>={
  'drei':{fi:'kolme'},
  'um':{fi:'kello (ajankohdan yhteydessä)'},
  'heute':{fi:'tänään'},
+ 'takashi':{fi:'Takashi (erisnimi)'},
+ 'thomas':{fi:'Thomas (erisnimi)'},
+ 'peter':{fi:'Peter (erisnimi)'},
+ 'berlin':{fi:'Berliini (kaupunki)'},
+ 'kyoto':{fi:'Kioto (kaupunki)'},
+ 'wir':{fi:'me'},
+ 'kommen':{fi:'tulemme (wir kommen); tulla',lemma:'kommen'},
+ 'komme':{fi:'tulen (ich komme)',lemma:'kommen'},
+ 'japaner':{fi:'japanilainen (mies)',lemma:'der Japaner'},
  'morgen.':{fi:'huomenna / aamulla tilanteesta riippuen'}
 };
 export function lookupGloss(token:string):Gloss|null{
