@@ -166,22 +166,37 @@ function ChapterOpening({ chapter, book, move }: { chapter: LosChapter; book: Lo
     </nav>
   </section>;
 }
+const pendingTextSources:Record<string,{name:string;status:string}>={
+  "07":{name:"M-WB-02 · Wikibooks, Bitte buchstabieren Sie",status:"Avoimen sivutekstin CC BY-SA -käyttöperuste on tiedossa, mutta koko tekstiä ei vielä ole toimitettu tähän lukijaan. Erillisen äänen oikeuksia ei ole hyväksytty."},
+  "08":{name:"M-DIB-04 · Deutsch im Blick, Im Unterricht",status:"Yksittäistä julkaistavaa haastattelua ja sen tarkkaa suoraa osoitetta ei vielä ole vahvistettu. Tälle kappaleelle ei ole hyväksyttyä Text A:ta."},
+  "09":{name:"M-WB-03 · Wikibooks, Sport und Zeit",status:"Avoin Franz–Greta-lähdeteksti on tunnistettu, mutta kokonainen teksti ja sen tukiselitykset eivät vielä ole tässä lukijassa. Alkuperäisen äänen käyttö edellyttää erillistä tarkistusta."},
+  "10":{name:"M-DIB-02 · Deutsch im Blick, Harald: Wer bin ich?",status:"Haastattelun tarkkaa toimivuutta, kokonaista litteraattia ja mediakohtaisia oikeuksia ei ole vielä vahvistettu."},
+};
+const sampleByChapter:Record<string,string>={
+  "07":"Wie schreibt man das?",
+  "08":"Ich verstehe nicht.",
+  "09":"Am Montag um drei Uhr.",
+  "10":"Das ist Mia.",
+};
 function TextPage({ chapter }: { chapter: LosChapter }) {
+  const pending=pendingTextSources[chapter.id];
+  const sample=sampleByChapter[chapter.id]??"Guten Tag!";
   return <section className="los-inner-page los-reading-page">
     <p className="los-eyebrow">KAPPALE {chapter.id} / TEKSTI A</p>
     <h1>Lue ja kuuntele</h1>
-    <p className="los-page-intro">Kappaleen alkuperäinen saksankielinen teksti luetaan tässä oppikirjassa, ei ulkopuolisella sivulla.</p>
+    <p className="los-page-intro">Tämän kappaleen koko saksankielinen alkuperäisteksti julkaistaan samaan oppikirjalukijaan, ei pelkkänä ulkopuolisena linkkinä. Teksti ei ole vielä julkaisuvalmis.</p>
     <div className="los-source-pending" role="status">
       <Headphones size={24} />
       <div><h2>Alkuperäistekstin julkaisu on kesken</h2>
         <p>Tekstin koko litteraatti ja kuuntelun tukiselitykset lisätään samaan lukijaan toimitus- ja käyttöoikeustarkistuksen jälkeen. Tässä ei käytetä keksittyä dialogia täytteenä.</p>
+        {pending&&<p><strong>Suunniteltu lähde: {pending.name}.</strong> {pending.status}</p>}
       </div>
     </div>
     <LosAuthenticAudio chapterId={chapter.id} source="A" />
     <div className="los-reader-sample">
       <p className="los-overline">KIELEN HAVAINTO · OPETUSESIMERKKI</p>
-      <blockquote lang="de">Guten Tag!</blockquote>
-      <p>Yksinkertainen tervehdys, jota käytetään päivällä. Tämä on opetusesimerkki, ei puuttuvan alkuperäistekstin korvike.</p>
+      <blockquote lang="de">{sample}</blockquote>
+      <p>Tämä on LOS!:n itse kirjoittama lyhyt kielioppiesimerkki. Se ei ole lähdetekstin sitaatti eikä korvaa puuttuvaa kokonaista alkuperäistekstiä.</p>
     </div>
   </section>;
 }
@@ -232,7 +247,7 @@ function Appendix({ book }: { book: LosBookDefinition }) {
     <h1>Kirjan liitteet</h1>
     <div className="los-appendix-section"><h2>Kirjan tiedot</h2><dl><div><dt>Moduuli</dt><dd>{book.code} · {book.module}</dd></div><div><dt>Laajuus</dt><dd>2 op</dd></div><div><dt>Oppimäärä</dt><dd>Saksa B3 · LOPS21</dd></div></dl></div>
     <div className="los-appendix-section"><h2>Lähteet ja materiaalit</h2><p>Alkuperäistekstit, puheäänitteet ja videot kirjataan tähän lähde- ja lisenssitietoineen vasta tarkistuksen jälkeen. LOS! 1:n aineistokatalogi on lähdesuunnitelma, ei valmis julkaistu materiaalipaketti.</p></div>
-    <div className="los-appendix-section"><h2>Opetuspolku, sanakirja ja kappaletestit</h2><p>Opetuspolku ja sanakirja löytyvät kirjan valikosta. Kappaleissa 1 ja 2 on omat automaattisesti tarkistettavat alkeistestit. Muiden kappaleiden tehtäväsarjat ovat vielä kesken. Kappalekohtaisissa muistiinpanoissa on erillinen, salasanalla suojattu manuaalinen pilvisynkronointi, joka vaatii palvelimen käyttöönoton.</p></div>
+    <div className="los-appendix-section"><h2>Opetuspolku, sanakirja ja kappaletestit</h2><p>Opetuspolku ja sanakirja löytyvät kirjan valikosta. LOS! 1:n kaikissa kymmenessä kappaleessa on rajattu automaattisesti tarkistettava alkeistesti, yhteensä 147 osatehtävää. Tekstien ymmärtämisen, kuuntelun ja vapaan puheen arviointi sekä erillinen loppukoe vaativat vielä toimitettavaa aineistoa. Kappalekohtaisissa muistiinpanoissa on erillinen, salasanalla suojattu manuaalinen pilvisynkronointi, joka vaatii palvelimen käyttöönoton.</p></div>
     <LosBackups bookId={book.id} />
   </section>;
 }

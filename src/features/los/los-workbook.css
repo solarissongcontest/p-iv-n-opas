@@ -86,3 +86,20 @@
  .los-workbook-tools{gap:13px;}
 }
 .dark .los-workbook-choices label.is-selected{background:color-mix(in srgb,var(--los-book-accent) 25%,var(--los-paper));color:var(--los-ink);}
+
+/* Oma ääneenharjoittelu on kirjan harjoitussivun osa, ei StudyOS-kortti. */
+.los-voice-practice{border-top:2px solid var(--los-book-accent);border-bottom:1px solid var(--los-line);padding:24px 0 27px;margin:31px 0 28px;}
+.los-voice-practice h3{font:500 25px/1.3 Georgia,"Times New Roman",serif!important;display:flex;align-items:center;gap:11px;margin:0 0 14px!important;color:var(--los-ink);}
+.los-voice-practice h3 svg{color:var(--los-book-accent);}
+.los-voice-practice>p{font-size:15px!important;line-height:1.7;max-width:67ch;}
+.los-voice-practice .los-voice-privacy{display:flex;gap:9px;align-items:flex-start;color:var(--los-soft);font-size:13px!important;}
+.los-voice-privacy svg{color:var(--los-book-accent);flex:0 0 16px;margin-top:4px;}
+.los-voice-actions{display:flex;align-items:center;gap:11px;flex-wrap:wrap;margin:21px 0;}
+.los-voice-actions button{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--los-book-accent);background:none;color:var(--los-ink);font-size:14px;font-weight:700;min-height:46px;padding:10px 15px;}
+.los-voice-actions button:disabled{opacity:.48;cursor:not-allowed;}
+.los-voice-playback{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin:21px 0;}
+.los-voice-playback>span{font-size:13px;font-weight:700;}
+.los-voice-playback audio{width:100%;max-width:420px;min-height:48px;}
+.los-voice-practice .los-voice-message{font-size:13px!important;font-weight:650;}
+.los-voice-practice>small{display:block;max-width:66ch;color:var(--los-soft);font-size:12px;line-height:1.65;}
+@media(max-width:600px){.los-voice-practice h3{font-size:22px!important;}.los-voice-playback{align-items:flex-start;flex-direction:column;}.los-voice-playback audio{max-width:100%;}}

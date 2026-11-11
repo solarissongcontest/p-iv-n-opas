@@ -7,7 +7,7 @@ import type { LosChapter } from "./catalog";
 
 function LosSaveNotice({saved}:{saved:boolean}) {
   return <p className={`los-save-state ${saved?"":"is-error"}`} role="status">
-    {saved ? <><Check size={14}/> Tallennettu tähän selaimeen. Ei vielä puhelimen ja tietokoneen välistä synkronointia.</> :
+    {saved ? <><Check size={14}/> Tallennettu tähän selaimeen. Tallennus on paikallinen, kunnes teet erillisen suojatun pilvisynkronoinnin.</> :
       <><CircleAlert size={15}/> Tallennus epäonnistui. Älä sulje sivua ennen kuin olet kopioinut vastauksesi talteen.</>}
   </p>;
 }
@@ -44,6 +44,10 @@ const selfAssessments:Record<string,string> = {
   "04":"Kuvittele kaksi kohtaamista: puhut tutulle ystävälle ja asioit kohteliaasti tuntemattoman aikuisen kanssa. Esitä kummassakin sopiva nimikysymys.",
   "05":"Kuvittele ystävän kysyvän kuulumisiasi. Vastaa realistisesti, esitä vastakysymys ja kokeile sitten kohteliasta Ihnen-muotoa.",
   "06":"Esitä ääneen kaksi kuvitteellista ikäkeskustelua (17 ja 20 vuotta). Kirjoita sen jälkeen ilman mallia luvut 7, 16, 21 ja 32 saksaksi.",
+  "07":"Tavaa ääneen kahdeksan kuvitteellista etunimeä ja lue neljä itse kirjoittamaasi numerojonoa. Pysähdy jokaisen kirjaimen kohdalle. Vertaa vasta lopuksi omaan kirjoitusasuusi. Äänen oikeellisuutta ei pisteytetä automaattisesti.",
+  "08":"Kokeile kolmea erilaista avunpyyntöä: en ymmärrä, toistatteko ja mitä tämä sana tarkoittaa. Sano ne ääneen mielikuvitukselliselle opettajalle ja arvioi, osaisitko käyttää niitä ilman mallia.",
+  "09":"Lue ääneen itse kirjoittamasi viikon seitsemän kalenterimerkintää. Kirjoita kolmella repliikillä tapaaminen, jossa käytät am + viikonpäivä ja um + tasatunti.",
+  "10":"Esitä ääneen kaksi erilaista 6–8 repliikin kohtaamista, toinen du- ja toinen Sie-puhuttelulla. Esittele myös kolmas henkilö neljällä omalla virkkeellä ja arvioi, mitä osasit ilman mallia.",
 };
 
 export function LosWorkbook({chapter,mode}:{chapter:LosChapter;mode:"practice"|"test"}) {
@@ -94,7 +98,7 @@ export function LosWorkbook({chapter,mode}:{chapter:LosChapter;mode:"practice"|"
     </div>:locked?<div className="los-test-result" role="status">
       <p className="los-overline">TESTI PALAUTETTU · PAIKALLINEN TULOS</p>
       <h2>{score.correct} / {score.total} oikein</h2>
-      <p>Katso kunkin tehtävän perustelu yllä. Tulos tallennetaan tähän selaimeen, mutta sitä ei vielä synkronoida eikä tulkita koko kappaleen osaamisen todistukseksi.</p>
+      <p>Katso kunkin tehtävän perustelu yllä. Tulos tallennetaan ensin tähän selaimeen. Mahdollinen pilvisynkronointi tehdään erikseen. Muoto- ja fraasitehtävien tulos ei yksin todista koko kappaleen kielitaitoa.</p>
       <button className="los-outline-button" onClick={()=>{
         update(current=>({...current,testAnswers:{},testSubmittedAt:null,selfAssessment:""}));
       }}><RotateCcw size={17}/> Aloita uusi testiyritys</button>
