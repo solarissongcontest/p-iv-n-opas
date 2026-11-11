@@ -4,7 +4,7 @@ import type { Book, Exercise, ExerciseAnswer, HighlightRange } from "./model";
 import type { ChapterTestDefinition, SpeechAssessment } from "./chapterTest";
 import {
   emptyChapterTestRecord, gradeChapterTest, missingChapterTestAnswers,
-  missingSpeechAssessments, restartChapterTest, selectedTestExercises,
+  missingSpeechAssessments, restartChapterTest, selectedTestExercises, examScoreGroups,
 } from "./chapterTest";
 import { useLosRecord, losSyncMessage } from "./data/useLosRecord";
 import { evaluateExercise } from "./exercises/evaluate";
@@ -96,6 +96,7 @@ export function ChapterTestWorkspace({ book, definition, onReturned }: {
   const attemptNumber = state.attemptNumber ?? 0;
   const exercises = selectedTestExercises(definition, book.exercises, attemptNumber);
   const writingMode = definition.selfAssessmentMode === "writing";
+  const writtenLines = (state.writtenResponse ?? "").split(/\r?\n/u).filter(line => line.trim().length > 0).length;
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [restartVisible, setRestartVisible] = useState(false);
   const isReturned = Boolean(state.submission);
@@ -122,10 +123,10 @@ export function ChapterTestWorkspace({ book, definition, onReturned }: {
   const submit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (status === "loading" || isReturned) return;
-    if (missingAnswers.length > 0 || missingSpeech.length > 0 || (writingMode && ((state.writtenResponse ?? "").split(/\r?\n/u).filter(line => line.trim().length > 0).length < (definition.requiredWritingLines ?? 1)))) {
+    if (missingAnswers.length > 0 || missingSpeech.length > 0 || (writingMode && (writtenLines < (definition.requiredWritingLines ?? 1) || (definition.maximumWritingLines !== undefined && writtenLines > definition.maximumWritingLines)))) {
       setSubmitError("Vastaa kaikkiin " + definition.exerciseIds.length +
         " tarkistettavaan kohtaan ja tee " + (writingMode ?
-          "kirjallinen osuus (vähintään " + (definition.requiredWritingLines ?? 1) + " erillistä riviä) sekä sen" :
+          "kirjallinen osuus (" + (definition.requiredWritingLines ?? 1) + (definition.maximumWritingLines ? "–" + definition.maximumWritingLines : "+") + " erillistä riviä) sekä sen" :
           "puheen") + " itsearviointi.");
       return;
     }
@@ -144,10 +145,10 @@ export function ChapterTestWorkspace({ book, definition, onReturned }: {
     </section>;
 
   return <article className="los-chapter-test">
-    <p className="los-eyebrow">LOS! · KAPPALEEN ITSEARVIOINTI</p>
+    <p className="los-eyebrow">LOS! · {definition.examType === "midterm" ? "VÄLIKOE" : definition.examType === "final" ? "LOPPUKOE" : "KAPPALEEN ITSEARVIOINTI"}</p>
     <h2>{definition.title}</h2>
     <p className="los-intro">{definition.introductoryFi}</p>
-    <p className="los-notice">Tämä on {definition.chapterId}:n automaattisesti tarkistettava harjoituskoe, ei virallinen kurssikoe tai julkaistun oppikirjan lopullisesti hyväksytty arviointi. {definition.alternativeExerciseIds?.length ? "Uusintayritys käyttää myös uusia tehtävävaihtoehtoja." : "Uusintayrityksessä kysymykset pysyvät tässä versiossa samoina."} {writingMode ? "Kirjoitusosuus itsearvioidaan eikä lisää pisteitä." : "Puheäänitys on vapaaehtoinen ja pysyy vain tällä laitteella."}</p>
+    <p className="los-notice">Tämä on {definition.examType === "midterm" ? "kappaleiden 1–5 välikoe" : definition.examType === "final" ? "kirjan loppukoe" : definition.chapterId + ":n harjoituskoe"}, ei virallinen kurssikoe tai julkaistun oppikirjan lopullisesti hyväksytty arviointi. {definition.alternativeExerciseIds?.length ? "Uusintayritys käyttää myös uusia tehtävävaihtoehtoja." : "Uusintayrityksessä kysymykset pysyvät tässä versiossa samoina."} {writingMode ? "Kirjoitusosuus itsearvioidaan eikä lisää pisteitä." : "Puheäänitys on vapaaehtoinen ja pysyy vain tällä laitteella."}</p>
     <div className="los-exam-meta">
       <span>Yritys {attemptNumber + 1} · {isReturned ? "Palautettu" : "Vastattu " + completeCount + " / " + exercises.length}</span>
       <span>{definition.speechCriteria.length} {writingMode ? "kirjallisen tuotoksen" : "puheen"} itsearviointia · ei pisteitä</span>
@@ -166,10 +167,10 @@ export function ChapterTestWorkspace({ book, definition, onReturned }: {
           </div>}
         </div>)}</div>
       <section className="los-exam-speech" aria-label={writingMode ? "Kirjallisen tuotoksen itsearviointi" : "Puheen itsearviointi"}>
-        <h3>{writingMode ? "Kirjoita oma esittely · ei automaattisia pisteitä" : "Puhe · oma arvio, ei automaattisia pisteitä"}</h3>
+        <h3>{writingMode ? "Kirjoita oma dialogi · ei automaattisia pisteitä" : "Puhe · oma arvio, ei automaattisia pisteitä"}</h3>
         {writingMode ? <>
           <p>{definition.writingPromptFi ?? "Kirjoita lyhyt saksankielinen esittely oppimiesi rakenteiden avulla."} Vastauksesi tallennetaan koesuorituksen yhteyteen, mutta sitä ei arvioida automaattisesti.</p>
-          <label htmlFor={"los-exam-writing-" + definition.id}>Oma esittely saksaksi</label>
+          <label htmlFor={"los-exam-writing-" + definition.id}>Oma teksti saksaksi</label>
           <textarea id={"los-exam-writing-" + definition.id} rows={4} lang="de"
             autoCapitalize="none" spellCheck={false} disabled={isReturned || status === "loading"}
             value={state.writtenResponse ?? ""}
@@ -199,9 +200,14 @@ export function ChapterTestWorkspace({ book, definition, onReturned }: {
     {state.submission && <section className="los-exam-result" role="status" aria-live="polite">
       <div><CheckCircle2 size={22}/><h3>Koe palautettu</h3></div>
       <p className="los-exam-score">{state.submission.score} / {state.submission.maximum} pistettä</p>
-      <p>Automaattisesti tarkistettiin {state.submission.maximum} osatehtävää. {writingMode ? "Kirjallinen esittely" : "Puhe"} itsearvioitiin erikseen. Voit lukea jokaisen kohdan perustelun ylempänä.</p>
-      {writingMode && <div className="los-exam-writing-return"><h4>Oma kirjallinen vastauksesi</h4><p lang="de">{state.submission.writtenResponse ?? ""}</p><details><summary>Avaa LOS!:n oma mallivastaus</summary><p lang="de">{definition.writingModelDe ?? "Hallo! Ich heiße Lena. Wie heißt du?"}</p>{definition.writingModelFi && <p>{definition.writingModelFi}</p>}</details></div>}
-      <p className="los-support">Tulos kuvaa vain tätä {definition.chapterId}:n tehtäväsarjaa. Se ei ole kurssin arvosana eikä CEFR-tason arvio.</p>
+      {definition.scoreGroups && <section className="los-exam-breakdown" aria-label="Osa-aluekohtaiset pisteet">
+        <h4>Osa-alueet · pisteet</h4>
+        <ul>{examScoreGroups(definition, state.submission).map(group =>
+          <li key={group.id}><span>{group.titleFi}</span><strong>{group.score} / {group.maximum} p</strong></li>)}</ul>
+      </section>}
+      <p>Automaattisesti tarkistettiin {state.submission.maximum} osatehtävää. {writingMode ? "Kirjallinen dialogi" : "Puhe"} itsearvioitiin erikseen. Voit lukea jokaisen kohdan perustelun ylempänä.</p>
+      {writingMode && <div className="los-exam-writing-return"><h4>Oma kirjallinen vastauksesi · itsearviointi</h4><p lang="de">{state.submission.writtenResponse ?? ""}</p><details><summary>Avaa LOS!:n oma mallivastaus</summary><p lang="de">{definition.writingModelDe ?? "Hallo! Ich heiße Lena. Wie heißt du?"}</p>{definition.writingModelFi && <p>{definition.writingModelFi}</p>}</details></div>}
+      <p className="los-support">Tulos kuvaa vain tätä {definition.examType === "midterm" ? "LOS! 1:n välikoetta" : definition.chapterId + ":n tehtäväsarjaa"}. Se ei ole kurssin arvosana eikä CEFR-tason arvio.</p>
       {!restartVisible ? <button type="button" className="los-button los-button-secondary"
         onClick={() => setRestartVisible(true)}><RotateCcw size={17}/> Tee uusi yritys</button>
         : <div className="los-exam-confirm">
