@@ -660,3 +660,36 @@
   .los-speech-actions { flex-direction: column; align-items: stretch; }
   .los-speech-actions .los-button { justify-content: center; }
 }
+
+
+/* Eight exercise modalities: accessible token ordering, grouped classification. */
+.los-word-order, .los-categorize { display: grid; gap: 14px; margin-top: 16px; }
+.los-order-selected {
+  display: flex; flex-wrap: wrap; gap: 8px;
+  min-height: 60px; align-items: center; padding: 12px 14px;
+  border: 1px dashed var(--los-border-strong); border-radius: 10px;
+  background: var(--los-surface-muted);
+}
+.los-order-selected > .los-support { margin: 0; }
+.los-order-selected .los-token.is-selected {
+  border-color: var(--los-book-accent-readable);
+  color: var(--los-book-accent-readable);
+  background: var(--los-surface);
+}
+.los-word-order .los-tokens { display: flex; flex-wrap: wrap; gap: 8px; }
+.los-word-order .los-tokens button:disabled { opacity: .45; cursor: default; }
+.los-categorize-row {
+  display: grid; grid-template-columns: minmax(130px, 1fr) minmax(180px, 1fr);
+  align-items: center; gap: 14px; padding: 10px 0;
+  border-bottom: 1px solid var(--los-border);
+}
+.los-categorize-row label { font-weight: 600; font-size: 16px; color: var(--los-ink); }
+.los-categorize-row select {
+  width: 100%; max-width: 100%; min-height: 44px;
+  border: 1px solid var(--los-border-strong); border-radius: 9px;
+  color: var(--los-ink); background: var(--los-surface);
+  padding: 8px 10px; font-size: 15px;
+}
+@media (max-width:639px) {
+  .los-categorize-row { grid-template-columns: 1fr; gap: 7px; }
+}
