@@ -340,6 +340,7 @@ function MoreMenu({
         </div>
 
         <div className="studyos-more-quick">
+          <button onClick={() => { onClose(); window.location.assign("/los"); }}><BookOpen size={18} /> LOS! · Saksan oppikirjat</button>
           <button onClick={() => launchAfterClose(onLog)}><Plus size={18} /> Kirjaa opiskelu</button>
           <button onClick={() => launchAfterClose(onSearch)}><Search size={18} /> Hae StudyOS:stä</button>
         </div>
