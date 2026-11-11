@@ -9,6 +9,14 @@ export function LosUnderstanding({chapter,goToText}:{chapter:LosChapter;goToText
     ["Ketkä ihmiset keskustelevat?", "Mikä tervehdys esiintyy keskustelussa?", "Millä ilmauksella he hyvästelevät toisensa?"]:
     chapter.id==="02"?
     ["Kuka kertoo nimensä?", "Miten nimeä kysytään?", "Mikä kysymyksen vastaus on?"]:
+    chapter.id==="03"?
+    ["Mistä maasta Berna sanoo olevansa kotoisin?", "Mikä kaupunki tekstissä nimetään?", "Missä kohdassa esiintyy aus-ilmaus?"]:
+    chapter.id==="04"?
+    ["Ketkä henkilöt käyvät keskustelun?", "Missä repliikissä käytetään kohteliasta puhuttelua?", "Mitä vointiin liittyvää ilmausta tunnistat?"]:
+    chapter.id==="05"?
+    ["Ketkä kaksi henkilöä puhuvat?", "Millä kysymyksellä toisen vointia kysytään?", "Miten vastauksen sävyä voi kuvata suomeksi?"]:
+    chapter.id==="06"?
+    ["Löydätkö keskustelusta ikään liittyvän kysymyksen?", "Mikä lukusana esiintyy?", "Miten kysymys eroaa nimikysymyksestä?"]:
     ["Etsi tekstistä kappaleen aiheeseen liittyvä nimi tai ilmaus.", "Etsi yksi jo tuntemasi saksankielinen rakenne.", "Kuvaile omin sanoin, mistä keskustelu kertoo."];
   return <section className="los-inner-page los-understanding">
     <p className="los-eyebrow">VERSTEHEN / KAPITEL {Number(chapter.id)}</p>
@@ -81,10 +89,26 @@ export function LosCulture({chapter}:{chapter:LosChapter}) {
       <div className="los-culture-term"><strong lang="de">Moin!</strong><p>Tervehdys, jota kuulee varsinkin Pohjois-Saksassa. Sitä käytetään usein muulloinkin kuin aamulla.</p></div>
       <div className="los-culture-term"><strong lang="de">Servus!</strong><p>Varsinkin eteläisillä saksankielisillä alueilla käytetty tuttavallinen tervehdys. Se voi toimia myös hyvästelynä.</p></div>
       <p>Nämä alueelliset fraasit ovat nyt <b>tunnistamissanastoa</b>: niiden käyttäminen ei ole kappaleen kokeen vaatimus.</p>
+    </>:chapter.id==="03"?<>
+      <h2>DACH ja saksankieliset alueet</h2>
+      <p>Lyhenne <strong>DACH</strong> viittaa Saksaan (<span lang="de">Deutschland</span>), Itävaltaan (<span lang="de">Österreich</span>) ja Sveitsiin (<span lang="de">die Schweiz</span>). Näillä alueilla saksaa käytetään monissa arjen ja julkisen elämän tilanteissa.</p>
+      <p>Sveitsissä on myös muita kansalliskieliä, eikä siellä tai muissakaan maissa jokainen puhu vain saksaa. Saksaa puhutaan myös pienessä Liechtensteinissa. Puhuttu saksa vaihtelee alueittain, joten myöhemmin kuulet erilaisia ääntämistapoja.</p>
+      <div className="los-culture-term"><strong lang="de">Deutschland · Österreich · die Schweiz</strong><p>Muista maiden saksankieliset nimet. Alkeissa harjoitellaan erityisesti ilmaukset <span lang="de">aus Deutschland</span>, <span lang="de">aus Österreich</span> ja <span lang="de">aus der Schweiz</span>.</p></div>
+      <p>Harjoittele kirjoittamalla näiden maiden nimet oikein ja nimeämällä ne kuvitteellisen matkareitin pysähdyksiksi. Oikeuksiltaan hyväksytty karttakuva lisätään myöhemmin.</p>
     </>:chapter.id==="04"?<>
       <h2>Sinuttelu ja teitittely</h2>
       <p>Saksassa <span lang="de">du</span> ja <span lang="de">Sie</span> valitaan suhteessa tilanteeseen ja ihmisten keskinäiseen sopimukseen. Nuorten keskinäisissä keskusteluissa <span lang="de">du</span> on tavallinen. Virallisessa asioinnissa <span lang="de">Sie</span> voi olla luonteva.</p>
       <p>Myös työpaikkojen ja koulujen tavat vaihtelevat. Pelkästään iästä ei voi päätellä sopivaa muotoa joka tilanteeseen.</p>
+    </>:chapter.id==="05"?<>
+      <h2>Kuulumisten kysyminen arjessa</h2>
+      <p><span lang="de">Wie geht's?</span> on tavallinen kuulumiskysymys. Sitä voi käyttää lyhyenä tervehdyksen jatkona, mutta läheisen ystävän kanssa vastauksesta voi syntyä myös pidempi keskustelu. Yhtä ainoaa kaikissa tilanteissa toimivaa vastauspituutta ei ole.</p>
+      <p>Alkeissa riittää vastata tilanteeseen sopivalla tutulla fraasilla, esimerkiksi <span lang="de">Gut, danke.</span> tai <span lang="de">Nicht so gut.</span>. Vastakysymys <span lang="de">Und dir?</span> sopii tuttavalliseen tilanteeseen, <span lang="de">Und Ihnen?</span> kohteliaaseen puhutteluun.</p>
+      <div className="los-culture-term"><strong lang="de">Und dir? / Und Ihnen?</strong><p>Valinta kertoo puhetilanteesta. Kummankaan fraasin taustalla olevaa sijamuoto-opillista järjestelmää ei tarvitse tässä kappaleessa osata.</p></div>
+    </>:chapter.id==="06"?<>
+      <h2>Ikä ja henkilötiedot</h2>
+      <p>Saksaksi ikää kysytään <span lang="de">Wie alt bist du?</span> ja kerrotaan <span lang="de">Ich bin … Jahre alt.</span>. Harjoittele kuvitteellisilla henkilöillä, jotta sinun ei tarvitse ilmoittaa oppikirjaan oikeaa syntymäaikaasi.</p>
+      <p>Ikä voi kuulua esittäytymiseen, mutta toiselta kysyminen ei ole tarpeen jokaisessa tapaamisessa. Harjoituksen tavoitteena on osata lause, ei kerätä henkilötietoja.</p>
+      <div className="los-culture-term"><strong lang="de">siebzehn · zwanzig · einundzwanzig</strong><p>Harjoittele muotoja lukusanoina. Ikälauseessa käytetään <span lang="de">bin</span>-muotoa.</p></div>
     </>:<div className="los-editorial-note"><h2>Kulttuurisivu tarkistetaan</h2><p>Tämän kappaleen erillinen kulttuuriteksti, lähdeviitteet ja oikeuksiltaan hyväksytty kuvitus on vielä toimitettava. Oppikirjaa ei merkitä valmiiksi puuttuvan aineiston perusteella.</p></div>}
     <div className="los-culture-source"><strong>Kuvat ja lähteet</strong><p>Tämän sivun kuvallinen oppimateriaali ja lähdekohtaisten kulttuuriväitteiden toimitukselliset merkinnät ovat vielä valmistelussa. Valmiin kulttuuriosion hyväksyntä edellyttää niitä.</p></div>
   </section>;
