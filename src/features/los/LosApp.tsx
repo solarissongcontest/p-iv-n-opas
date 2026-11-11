@@ -14,6 +14,7 @@ import {chapter04Lessons} from './chapter04Lessons';
 import {chapter05Lessons} from './chapter05Lessons';
 import {chapter07Lessons} from './chapter07Lessons';
 import {chapter09Lessons} from './chapter09Lessons';
+import {chapter10Lessons} from './chapter10Lessons';
 import {WeekCalendarPractice} from './WeekCalendarPractice';
 import {reviewOneLessons} from './reviewOneLessons';
 import {reviewOneItems} from './reviewOneItems';
@@ -93,6 +94,21 @@ function Media({chapter,store,fontSize=18,onAudioCompleted}:{chapter:Chapter;sto
    <a href="https://commons.wikimedia.org/wiki/File:German_Grammar_-_The_Alphabet.ogg" target="_blank" rel="noreferrer"> Alkuperäinen äänite</a> ·
    <a href="https://creativecommons.org/licenses/by-sa/3.0/" target="_blank" rel="noreferrer"> Lisenssiehdot</a></p>
   <p className="los-meta">Äänitteet toistetaan Commonsin omista tiedostoista. Puhelun alkuperäisen äänitteen lisenssi ja toiminta ovat erikseen avoimia.</p>
+ </>;
+ if(chapter.id==='C10')return <>
+  <Label>TEKSTI B · HAASTATTELUJEN VERTAILU</Label>
+  <h3>Berna ja Harald: kaksi oikeaa henkilöhaastattelua</h3>
+  <p>Alla luetaan kokonaisena Bernan aiemmin julkaistu alkuperäishaastattelu ja verrataan sitä Haraldin C10 Teksti A:han. Molemmat saksankieliset tekstit ovat LOS!:n lukijassa. Kummankaan haastattelun alkuperäistä videota ei ole merkitty toimivaksi tai katsotuksi.</p>
+  <Reader chapter={chapters[2]!} store={store} fontSize={fontSize}/>
+  <SourceNotice chapter={chapters[2]!}/>
+  <h3>Lisäkuuntelu · tuttavallinen esittäytyminen</h3>
+  <p>Erillinen alkuperäinen Franzin ja Jörgin neljäntoista sekunnin dialogi on jo C01:stä tuttu. Se ei ole Haraldin eikä Bernan haastattelun äänite. Tässä kertauskuuntelussa yrität erottaa nimen, iän ja hyvästelyn.</p>
+  <Audio src="https://commons.wikimedia.org/wiki/Special:Redirect/file/Gespr%C3%A4chVorstellung.ogg"
+   title="Xzapro4 ja Erkan Yilmaz: Franz ja Jörg, 14 sekunnin alkuperäisdialogi"
+   onCompleted={()=>{store.put('media:completed:review:L054:M-COM-01',{at:new Date().toISOString(),version:LOS_VERSION});onAudioCompleted?.();}}/>
+  <p className="los-source"><b>M-COM-01</b> · Xzapro4 ja Erkan Yilmaz (2008), alkuperäinen kaksihenkilöinen saksankielinen äänite, CC BY-SA 3.0 ·
+   <a href="https://commons.wikimedia.org/wiki/File:Gespr%C3%A4chVorstellung.ogg" target="_blank" rel="noreferrer"> Alkuperäinen äänite ja litteraatti</a> ·
+   <a href="https://creativecommons.org/licenses/by-sa/3.0/" target="_blank" rel="noreferrer"> Lisenssi</a></p>
  </>;
  if(chapter.id==='C01')return <>
   <Audio src="https://commons.wikimedia.org/wiki/Special:Redirect/file/Gespr%C3%A4chVorstellung.ogg" title="Franz ja Jörg, GesprächVorstellung (14 s)" onCompleted={()=>store.put("media:completed:M-COM-01",{at:new Date().toISOString(),version:LOS_VERSION})}/>
@@ -339,7 +355,7 @@ function ChapterSection({chapter,section,store,fontSize}:{chapter:Chapter;sectio
  if(section==='Harjoittele')return <><h2>Harjoittele</h2>{exercises.filter(e=>!['highlight','writing','speech'].includes(e.type)).map(ex=><ExerciseCard key={ex.id} exercise={ex} chapter={chapter} store={store} fontSize={fontSize}/>)}</>;
  if(section==='Käytä saksaa')return <><h2>Käytä saksaa itse</h2>{exercises.filter(e=>['writing','speech'].includes(e.type)).map(ex=><ExerciseCard key={ex.id} exercise={ex} chapter={chapter} store={store} fontSize={fontSize}/>)}</>;
  if(section==='Kappaletesti'&&chapter.status==='source-pending')return <p className="los-warning">Kappaletestiä ei ole vielä julkaistu, koska tämän kappaleen pääteksti on hyväksymättä. Harjoitteita voi tehdä erikseen.</p>;
- if(section==='Kappaletesti'&&['C01','C02','C03','C04','C05','C07','C09'].includes(chapter.id)){
+ if(section==='Kappaletesti'&&['C01','C02','C03','C04','C05','C07','C09','C10'].includes(chapter.id)){
   const id=('EX-'+chapter.id) as ExamId;
   return <ExamSession id={id} store={store} onExit={()=>window.location.hash='/chapter/'+chapter.id+'/Harjoittele'} onSubmit={()=>store.put('exam:submitted:'+id,{submittedAt:new Date().toISOString(),version:LOS_VERSION})}/>;
  }
@@ -347,7 +363,7 @@ function ChapterSection({chapter,section,store,fontSize}:{chapter:Chapter;sectio
  return null;
 }
 
-const guidedLessons=[...firstLessons,...chapter02Lessons,...chapter03Lessons,...chapter04Lessons,...chapter05Lessons,...reviewOneLessons,...chapter07Lessons,...chapter09Lessons];
+const guidedLessons=[...firstLessons,...chapter02Lessons,...chapter03Lessons,...chapter04Lessons,...chapter05Lessons,...reviewOneLessons,...chapter07Lessons,...chapter09Lessons,...chapter10Lessons];
 function FirstLessonRunner({lessonId,store,fontSize,onNext,onContents}:{lessonId:string;store:Store;fontSize:number;onNext:()=>void;onContents:()=>void}){
  const plan=guidedLessons.find(p=>p.id===lessonId);
  const [stepIndex,setStepIndex]=useState(0);
@@ -369,7 +385,7 @@ function FirstLessonRunner({lessonId,store,fontSize,onNext,onContents}:{lessonId
  const allSubmitted=requiredIds.every(id=>
   id.startsWith('EX-C')?Boolean(item(store,'exam:submitted:'+id)):Boolean(item(store,'latest:'+id)));
  const hasGoal=lessonId!=='L001'||valueString(store,'goal:los1').trim().length>=8;
- const hasReflection=!['L006','L011','L016','L021','L026','L027','L028','L029','L040','L050'].includes(lessonId)||valueString(store,'lesson:reflection:'+lessonId).trim().length>=12;
+ const hasReflection=!['L006','L011','L016','L021','L026','L027','L028','L029','L040','L050','L055'].includes(lessonId)||valueString(store,'lesson:reflection:'+lessonId).trim().length>=12;
  const mediaDone=(plan?.requiredMediaIds??[]).every(id=>Boolean(item(store,'media:completed:'+id)));
  const canAdvance=(current.kind!=='practice'||allSubmitted)&&(current.kind!=='goal'||hasGoal)&&(current.kind!=='reflection'||hasReflection);
  const fulfilled=mediaDone&&plan.requiredIds.every(id=>id.startsWith('EX-C')?Boolean(item(store,'exam:submitted:'+id)):Boolean(item(store,'latest:'+id)));
