@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { evaluateExercise, normalizeGap, normalizeRange } from "../src/features/los/exercises/evaluate.ts";
+import { formatExerciseAnswer } from "../src/features/los/exercises/formatAnswer.ts";
 import { LOS_BOOKS } from "../src/features/los/books.ts";
 import { validateBook, type Exercise } from "../src/features/los/model.ts";
 
@@ -107,4 +108,24 @@ test("reject dangling references and duplicate content identifiers", () => {
   if (!book) throw new Error("Missing book fixture");
   book.chapters.push({ id: "chapter-a", version: "1", sequence: 1, title: "Fixture", introductionFi: "", objectives: [], blockIds: ["no-block"], exerciseIds: [] });
   assert.match(validateBook(book).join(","), /Unknown block/);
+});
+
+
+test("historical exam feedback displays answer labels, not internal database IDs", () => {
+  const choice: Exercise = { ...base, type: "single-choice",
+    options: [{ id: "c1", label: "Guten Morgen!" }, { id: "c2", label: "Gute Nacht!" }],
+    correctOptionId: "c1",
+  };
+  const order: Exercise = { ...base, type: "word-order",
+    tokens: [{ id: "a", label: "später!" }, { id: "b", label: "Bis" }],
+    correctOrder: ["b", "a"],
+  };
+  const matching: Exercise = { ...base, type: "matching",
+    left: [{ id:"a",label:"Hallo" }], right:[{ id:"x",label:"Hei" }],
+    pairs:[{leftId:"a",rightId:"x"}],
+  };
+  assert.equal(formatExerciseAnswer(choice, "c2"), "Gute Nacht!");
+  assert.equal(formatExerciseAnswer(order, ["b","a"]), "Bis später!");
+  assert.equal(formatExerciseAnswer(matching, { a:"x" }), "Hallo – Hei");
+  assert.equal(formatExerciseAnswer(choice, null), "Ei tallennettua vastausta");
 });
