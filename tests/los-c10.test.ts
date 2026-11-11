@@ -39,7 +39,7 @@ function complete(attempt=0){
   writtenResponse:"Er heißt Harald Becker.\nEr kommt aus München.\nSie heißt Berna.\nSie kommt aus Kiel.",
  };
 }
-test("C10 has ten complete preview sections and 64 independent routable questions",()=>{
+test("C10 has ten complete preview sections and 74 independent routable questions",()=>{
  assert.deepEqual(validateBook(book),[]);
  assert.equal(book.chapters.length,10);
  assert.equal(chapter.publicationStatus,"preview");
@@ -48,12 +48,12 @@ test("C10 has ten complete preview sections and 64 independent routable question
  assert.equal(LOS1_C10_SOURCE_EXERCISES.length,12);
  assert.equal(LOS1_C10_PRACTICE_EXERCISES.length,32);
  assert.equal(LOS1_C10_EXAM_A.length,20);
- assert.equal(chapter.exerciseIds.length,64);
+ assert.equal(chapter.exerciseIds.length,74);
  const ids=new Set(chapter.sections?.flatMap(section=>section.exerciseIds));
  const blockIds=new Set(chapter.sections?.flatMap(section=>section.blockIds));
  assert.ok(chapter.exerciseIds.every(id=>ids.has(id)));
  assert.ok(chapter.blockIds.every(id=>blockIds.has(id)));
- assert.equal(new Set(chapter.exerciseIds).size,64);
+ assert.equal(new Set(chapter.exerciseIds).size,74);
 });
 test("C10 repeats complete actual Harald and Berna human-authored interviews, without new synthetic dialogues",()=>{
  const harald=LOS1_C10_SOURCE_BLOCKS.find(x=>x.id==="los1-c10-m-dib-02-harald");
@@ -80,13 +80,18 @@ test("C10's real-source and all original practice items have checkable answers",
    assert.equal(new Set(ex.options.map(o=>o.label)).size,ex.options.length,ex.id);
  }
 });
-test("C10 preview lessons permit reading and two-conversation production, while excluding unverified Harald listening",()=>{
+test("C10 L052 compares genuine Franz/Jörg audio with Harald's full text but NEVER claims a Harald recording",()=>{
  assert.deepEqual(book.lessons.filter(l=>l.chapterId==="C10"&&l.publicationStatus==="preview")
-  .map(l=>l.id),["L051","L053","L054","L055"]);
- for(const id of ["L052"]){
-  const lesson=book.lessons.find(l=>l.id===id);
-  assert.ok(lesson&&lesson.publicationStatus==="planned"&&lesson.steps.length===0);
- }
+  .map(l=>l.id),["L051","L052","L053","L054","L055"]);
+ const lesson=book.lessons.find(l=>l.id==="L052");
+ assert.ok(lesson&&lesson.publicationStatus==="preview");
+ assert.ok(lesson.title.includes("vertailukuuntelua"));
+ assert.equal(lesson.steps.length,15);
+ assert.ok(lesson.steps.some(x=>x.blockId==="los1-c01-m-com-01-audio"));
+ assert.ok(lesson.steps.some(x=>x.blockId==="los1-c10-m-dib-02-harald"));
+ assert.ok(lesson.steps.some(x=>x.blockId==="los1-c10-contrast-source-gate"));
+ assert.ok(lesson.steps.some(x=>x.exerciseId==="los1-c10-contrast-audio-speakers"));
+ assert.ok(!book.blocks.some(b=>b.kind==="media"&&b.sourceId==="M-DIB-02"));
  assert.ok(book.lessons.find(l=>l.id==="L055")?.steps.some(s=>s.chapterTestId===definition.id));
 });
 test("Twenty genuinely alternative C10 exam questions and four-line writing are not auto-mixed",()=>{
