@@ -89,6 +89,15 @@ const planned: ReadonlyArray<readonly [
     "Äänen olemassaoloa ei oleteta."
   ],
   [
+    "M-WB-07",
+    "Deutschkurs für Anfänger/Lektion 012: vollständige Übung 562 · noch einmal",
+    "Wikibooks / Wikimedia",
+    "https://en.wikibooks.org/w/index.php?title=Deutschkurs_für_Anfänger/Lektion_012&oldid=3823563",
+    "CC BY-SA 4.0 · kaikki alkuperäisen harjoituksen 562 15 saksankielistä riviä",
+    "text-cleared",
+    "Kokonainen valittu toistopyyntöharjoitus. Tämä ei ole haastattelu eikä äänite; suomennokset ja tehtävät LOS!:n omia."
+  ],
+  [
     "M-DIB-01",
     "Deutsch im Blick: Berna Wer bin ich?",
     "COERLL / University of Texas",
