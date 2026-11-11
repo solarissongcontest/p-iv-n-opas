@@ -63,6 +63,7 @@ export type ExerciseAttempt = {
   id: string; exerciseId: string; exerciseVersion: string; answer: ExerciseAnswer;
   checkedAt: string | null; status: "draft" | "correct" | "incorrect"; updatedAt: string;
 };
+export type ResumeBookmark = { lessonId: string; lessonVersion: string; updatedAt: string };
 export type LessonProgress = {
   lessonId: string; lessonVersion: string; completedStepIds: string[];
   status: "not-started" | "in-progress" | "completed"; updatedAt: string;
