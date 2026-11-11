@@ -3,7 +3,7 @@ import { ArrowRight, BookOpen, ChevronRight, Headphones, Search, Volume2 } from 
 import { LOS_BOOKS, type LosBookDefinition } from "./catalog";
 import { LOS_1_LESSONS } from "./learningPath";
 
-export type LosDestination = "overview" | "contents" | "chapter" | "text" | "vocabulary" | "grammar" | "practice" | "appendix" | "dictionary" | "path" | "search";
+export type LosDestination = "overview" | "contents" | "chapter" | "text" | "understand" | "vocabulary" | "grammar" | "text-b" | "practice" | "apply" | "culture" | "test" | "appendix" | "dictionary" | "path" | "search";
 export type LosNavigate = (chapter: string | null, section: LosDestination) => void;
 type WordEntry = { book: number; code: string; chapter: string; title: string; word: string; meaning: string };
 const DICTIONARY = LOS_BOOKS.flatMap(book => book.chapters.flatMap(chapter =>
@@ -140,9 +140,9 @@ const audioSources = [
     note:"Äänite on luettu ilmausluettelo, ei yhtenäinen dialogi.",
   }
 ] as const;
-export function LosAuthenticAudio({ chapterId }: { chapterId: string }) {
+export function LosAuthenticAudio({ chapterId, source = "all" }: { chapterId: string; source?: "A" | "B" | "all" }) {
   const [errors,setErrors] = useState<string[]>([]);
-  const selected=chapterId==="01"?audioSources:chapterId==="06"?audioSources.slice(0,1):[];
+  const selected=chapterId==="01" ? (source==="A"?audioSources.slice(0,1):source==="B"?audioSources.slice(1):audioSources) : chapterId==="06" && source!=="B"?audioSources.slice(0,1):[];
   if(!selected.length)return null;
   return <section className="los-authentic-audio" aria-label="Alkuperäiset kuunteluäänitteet">
     <p className="los-overline">ALKUPERÄISET ÄÄNITTEET · KOKEILUTOISTO</p>
