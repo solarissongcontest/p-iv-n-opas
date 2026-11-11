@@ -129,3 +129,22 @@ test("C02 and C03 include the complete Ariser four-turn second dialogue and its 
     await expectNoHorizontalOverflow(page);
   }
 });
+
+
+test("C03 Lisa Müller has its own complete licensed Text A without private phone-number exercises", async ({ page }) => {
+  await enterApp(page);
+  await page.goto("/los#/1/03/text", {waitUntil:"domcontentloaded"});
+  await expect(page.locator(".los-c01-turn")).toHaveCount(8);
+  await expect(page.locator(".los-c01-turns")).toContainText("ich komme aus Deutschland");
+  await expect(page.locator(".los-c01-turns")).toContainText("wohne hier in Bern");
+  await expect(page.locator(".los-c01-attribution")).toContainText("CC BY-SA 4.0");
+  await expect(page.locator(".los-c01-attribution")).toContainText("Wikibooks");
+  await expect(page.locator(".los-c01-turns")).not.toContainText(/Telefonnummer|telephone number/i);
+  await page.goto("/los#/1/03/understand", {waitUntil:"domcontentloaded"});
+  await expect(page.locator("fieldset.los-c01-question")).toHaveCount(5);
+  const first=page.locator("fieldset.los-c01-question").first();
+  await first.getByLabel("Saksasta").check();
+  await first.getByRole("button",{name:"Tarkista vastaus"}).click();
+  await expect(first).toContainText("Oikein.");
+  await expectNoHorizontalOverflow(page);
+});

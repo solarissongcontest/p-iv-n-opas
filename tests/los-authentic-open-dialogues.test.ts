@@ -6,6 +6,16 @@ import { findLosSource, getLosChapterSourceGate } from "../src/features/los/cont
 import { losReaderMarkKey } from "../src/features/los/content/readerAnnotations.ts";
 
 const original:Record<string,readonly string[]> = {
+  "03":[
+    "Guten Tag! Ich suche Lisa Müller. Sind Sie Lisa Müller?",
+    "Ja, und Sie? Wie heißen Sie?",
+    "Ich heiße Lutz Schmidt.",
+    "Ich heiße Christine Schmidt.",
+    "Angenehm.",
+    "Wo wohnen Sie?",
+    "Woher kommen Sie? Kommen Sie aus Österreich?",
+    "Nein, ich komme aus Deutschland und ich wohne hier in Bern.",
+  ],
   "04":[
     "Guten Morgen, Herr Standish! Wie geht es Ihnen?",
     "Danke sehr, es geht mir gut. Und Ihnen?",
@@ -39,10 +49,10 @@ const original:Record<string,readonly string[]> = {
     "Wiedersehen!",
   ],
 };
-test("C04, C05, C07 and C09 contain four distinct published, whole original dialogues",()=>{
-  assert.equal(LOS1_OPEN_DIALOGUES.length,4);
-  assert.deepEqual(LOS1_OPEN_DIALOGUES.map(x=>x.chapterId),["04","05","07","09"]);
-  assert.deepEqual(LOS1_OPEN_DIALOGUES.map(x=>x.originalLines.length),[8,4,5,7]);
+test("C03, C04, C05, C07 and C09 contain five distinct published, whole original dialogues",()=>{
+  assert.equal(LOS1_OPEN_DIALOGUES.length,5);
+  assert.deepEqual(LOS1_OPEN_DIALOGUES.map(x=>x.chapterId),["03","04","05","07","09"]);
+  assert.deepEqual(LOS1_OPEN_DIALOGUES.map(x=>x.originalLines.length),[8,8,4,5,7]);
   assert.equal(new Set(LOS1_OPEN_DIALOGUES.map(x=>x.sourceId)).size,4);
   for(const text of LOS1_OPEN_DIALOGUES){
     assert.deepEqual(text.originalLines.map(line=>line.text),original[text.chapterId]);
@@ -71,7 +81,7 @@ test("source-based comprehension is finite, keyed to actual text and isolated fr
     assert.ok(!markKeys.has(mark));markKeys.add(mark);
   }
 });
-test("all four text rights are verified while language, media and device QA remain pending",()=>{
+test("all five text rights are verified while language, media and device QA remain pending",()=>{
   for(const text of LOS1_OPEN_DIALOGUES){
     const source=findLosSource(text.sourceId);
     assert.ok(source);

@@ -2,7 +2,7 @@
   "schemaVersion": "1.0.0",
   "bookId": "los-1",
   "importedFrom": "LOS1_SOURCE_MANIFEST_v1.0(1).json",
-  "sourceCount": 23,
+  "sourceCount": 24,
   "sources": [
     {
       "id": "M-COM-01",
@@ -417,6 +417,24 @@
       "integrated": false,
       "deviceTested": false,
       "published": false
+    },
+    {
+      "id": "M-WB-07",
+      "kind": "source",
+      "description": "Wikibooks BLL German/A1/Lesson 2, kahdeksan repliikin Lisa Müllerin ja kahden vieraan alkuperäkeskustelu. C03:n uusi Text A, koska aiemmassa Berna-lähteessä oli todellinen henkilön puhelinnumero.",
+      "sourceUrl": "https://en.wikibooks.org/wiki/BLL_German/A1/Lesson_2",
+      "rightsNotes": "Wikibooksin CC BY-SA 4.0 -sivuteksti; pysyvä sivuversio 4581896 (18.10.2025). Kokonainen 8-repliikkinen julkaistu dialogi säilyttää puhujat, alkuperäisen sanajärjestyksen ja sanojen merkit. Suomenkieliset selitteet ovat omaa erillistä materiaalia. Audioa ei luvata. Omatunniste M-WB-07 lisätty, koska Berna M-DIB-01 sisälsi oikean puhelinnumeron ja C03:n päätekstiksi halutaan henkilötiedoton dialogi. Kielellinen arvio ja laitetestit avoinna.",
+      "manifestReadiness": "A teksti / ei ääntä",
+      "manifestCheckedAt": "2026-11-11",
+      "mediaTested": false,
+      "stage": "rights-verified",
+      "licenseCode": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+      "licenseEvidenceUrl": "https://en.wikibooks.org/wiki/BLL_German/A1/Lesson_2",
+      "languageReviewed": false,
+      "integrated": true,
+      "deviceTested": false,
+      "published": false
     }
   ],
   "chapters": [
@@ -436,10 +454,10 @@
     },
     {
       "id": "C03",
-      "primarySourceId": "M-DIB-01",
-      "textAPlan": "`M-DIB-01`, **Bernan koko Wer bin ich? -litteraatti**",
+      "primarySourceId": "M-WB-07",
+      "textAPlan": "`M-WB-07`, BLL German / A1 / Lesson 2, kokonainen 8-repliikkinen Lisa Müllerin alkuperäkeskustelu (alkuperäinen M-DIB-01 siirretty mahdolliseksi täydentäväksi tunnistusharjoitukseksi; ei julkaista suoran puhelinnumeron sisältävää transkriptiota C03:n päätekstinä).",
       "textBPlan": "`M-COM-02` + `V-DW-03`",
-      "publicationGate": "**EHDOLLINEN:** DiB-haastattelun tekstin/median per-asset-lupa ja pienestä määrästä nimeen liittyvää yksityistietoa koskeva käsittely."
+      "publicationGate": "Tekstin CC BY-SA 4.0 -lisenssi vahvistettu; alkuperäisteksti integroitu, mutta kielentarkistus, opetustason arvio, laitetesti ja julkaisuportti edelleen avoinna. M-COM-02:n audiotesti erikseen."
     },
     {
       "id": "C04",

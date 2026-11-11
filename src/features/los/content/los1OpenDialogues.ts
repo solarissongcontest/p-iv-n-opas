@@ -16,7 +16,7 @@ export type LosOpenQuestion = {
   explanation: string;
 };
 export type LosOpenText = {
-  chapterId: "04"|"05"|"07"|"09";
+  chapterId: "03"|"04"|"05"|"07"|"09";
   sourceId: string;
   revision: string;
   sourceUrl: string;
@@ -59,6 +59,65 @@ const common: Record<string,string> = {
   die:"määräinen artikkeli, tässä vain tunnistettava",
   der:"määräinen artikkeli, tässä vain tunnistettava",
   von:"joltakulta/jostakin, tässä osana puhelinilmausta",
+};
+
+const c03: LosOpenText = {
+  chapterId:"03",sourceId:"M-WB-07",revision:"4581896",
+  sourceUrl:"https://en.wikibooks.org/w/index.php?title=BLL_German/A1/Lesson_2&oldid=4581896",
+  title:"BLL German / A1 / Lesson 2 · Text",
+  heading:"Lisa Müller kertoo, mistä hän on",
+  guidance:"Wikibooksin kahdeksan repliikin alkuperäiskohtaus. Siinä kaksi vierasta kysyy Lisa Mülleriltä, mistä hän on ja missä hän asuu. Muodollinen Sie näkyy alkuperäisessä tekstissä, mutta sen aktiivinen opetus tulee C04:ssä. Opettele nyt ensisijaisesti Woher? ja komme aus.",
+  originalLines:[
+    {id:"u01",speaker:"Stranger 1",text:"Guten Tag! Ich suche Lisa Müller. Sind Sie Lisa Müller?",meaning:"Hyvää päivää! Etsin Lisa Mülleriä. Oletteko te Lisa Müller?"},
+    {id:"u02",speaker:"Lisa",text:"Ja, und Sie? Wie heißen Sie?",meaning:"Kyllä, entä te? Mikä teidän nimenne on?"},
+    {id:"u03",speaker:"Stranger 1",text:"Ich heiße Lutz Schmidt.",meaning:"Minun nimeni on Lutz Schmidt."},
+    {id:"u04",speaker:"Stranger 2",text:"Ich heiße Christine Schmidt.",meaning:"Minun nimeni on Christine Schmidt."},
+    {id:"u05",speaker:"Lisa",text:"Angenehm.",meaning:"Hauska tutustua."},
+    {id:"u06",speaker:"Stranger 1",text:"Wo wohnen Sie?",meaning:"Missä te asutte?"},
+    {id:"u07",speaker:"Stranger 2",text:"Woher kommen Sie? Kommen Sie aus Österreich?",meaning:"Mistä te olette kotoisin? Oletteko te Itävallasta?"},
+    {id:"u08",speaker:"Lisa",text:"Nein, ich komme aus Deutschland und ich wohne hier in Bern.",meaning:"En, olen kotoisin Saksasta ja asun täällä Bernissä."},
+  ],
+  glossary:{...common,
+    suche:"etsin; suchen-verbin minä-muoto, tunnistettava tukisana",
+    lisa:"Lisa, etunimi",
+    müller:"Müller, sukunimi",
+    sind:"olette; sein-verbin kohteliaan Sie-puhuttelun muoto, tunnistettava",
+    sie:"te, kohtelias puhuttelusana; Sie kirjoitetaan isolla",
+    heißen:"olette nimeltänne; Wie heißen Sie? = mikä teidän nimenne on?",
+    heiße:"olen nimeltäni; Ich heiße = nimeni on",
+    lutz:"Lutz, etunimi",
+    schmidt:"Schmidt, sukunimi",
+    christine:"Christine, etunimi",
+    angenehm:"hauska tutustua; kokonainen kohtelias ilmaus",
+    wo:"missä",
+    wohnen:"asua; Wo wohnen Sie? = missä asutte?",
+    woher:"mistä; Woher kommen Sie? = mistä olette kotoisin?",
+    kommen:"tulla, tulla kotoisin; kommen Sie = tulette",
+    österreich:"Itävalta",
+    komme:"tulen; ich komme = minä tulen / olen kotoisin",
+    aus:"-sta/-stä; ich komme aus Deutschland",
+    deutschland:"Saksa",
+    wohne:"asun; ich wohne = minä asun",
+    hier:"täällä",
+    in:"-ssa/-ssä, jossakin paikassa",
+    bern:"Bern, Sveitsin kaupunki",
+  },
+  questions:[
+    {id:"C03-SOURCE-Q01",prompt:"Mistä maasta Lisa Müller on kotoisin?",
+      answers:[{id:"a",text:"Saksasta"},{id:"b",text:"Itävallasta"},{id:"c",text:"Sveitsistä"}],correctId:"a",
+      explanation:"Lisa vastaa Ich komme aus Deutschland. Bern on hänen asuinpaikkansa, ei tekstissä ilmoitettu lähtömaa."},
+    {id:"C03-SOURCE-Q02",prompt:"Missä kaupungissa Lisa kertoo asuvansa?",
+      answers:[{id:"a",text:"Berliinissä"},{id:"b",text:"Bernissä"},{id:"c",text:"Wienissä"}],correctId:"b",
+      explanation:"Ich wohne hier in Bern tarkoittaa asun täällä Bernissä."},
+    {id:"C03-SOURCE-Q03",prompt:"Mikä tekstin kysymys tarkoittaa Mistä olette kotoisin?",
+      answers:[{id:"a",text:"Wie heißen Sie?"},{id:"b",text:"Wo wohnen Sie?"},{id:"c",text:"Woher kommen Sie?"}],correctId:"c",
+      explanation:"Woher kysyy mistä, kommen Sie on muodollisen Sie-puhuttelun muoto."},
+    {id:"C03-SOURCE-Q04",prompt:"Mikä kohta kertoo, että keskustelijat teitittelevät?",
+      answers:[{id:"a",text:"Sie kirjoitetaan isolla alkukirjaimella puhuttelussa."},{id:"b",text:"Kaikki puhujat sanovat du."},{id:"c",text:"Kukaan ei käytä nimeä."}],correctId:"a",
+      explanation:"Tekstissä esiintyy esimerkiksi Wie heißen Sie? Kohtelias Sie käsitellään aktiivisesti C04:ssä."},
+  ],
+  evidenceLineId:"u08",evidenceQuestion:"Missä puheenvuorossa Lisa sanoo Ich komme aus Deutschland?",
+  evidenceExplanation:"Lisan viimeisessä eli kahdeksannessa puheenvuorossa kerrotaan alkuperä.",
 };
 
 const c04: LosOpenText = {
@@ -255,7 +314,7 @@ const c09: LosOpenText = {
   evidenceExplanation:"Kolmannessa repliikissä Franz kertoo pelaavansa jalkapalloa kolmelta.",
 };
 
-export const LOS1_OPEN_DIALOGUES: readonly LosOpenText[] = [c04,c05,c07,c09];
+export const LOS1_OPEN_DIALOGUES: readonly LosOpenText[] = [c03,c04,c05,c07,c09];
 export function getLosOpenDialogue(chapterId: string): LosOpenText | undefined {
   return LOS1_OPEN_DIALOGUES.find(text=>text.chapterId===chapterId);
 }
