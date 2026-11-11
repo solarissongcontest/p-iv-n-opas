@@ -60,10 +60,11 @@ test('two written drills contain at least twenty two authentic numerals and grad
  assert.ok(NUMBER_DRILL.includes(17));
  assert.ok(NUMBER_DRILL.includes(99));
 });
-test('C06 original human-written primary age text is still explicitly blocked',()=>{
+test('C06 now contains a separate real human-written age-dialogue unit, with no verified embedded ZPE audio',()=>{
  const chapter=chapters.find(c=>c.id==='C06')!;
- assert.equal(chapter.status,'source-pending');
- assert.deepEqual(chapter.blocks,[]);
- assert.equal(lessons.find(l=>l.id==='L031')?.status,'pending');
- assert.equal(lessons.find(l=>l.id==='L035')?.status,'pending');
+ assert.equal(chapter.status,'text-reviewed');
+ assert.equal(chapter.blocks.length,12);
+ assert.equal(chapter.media,undefined,'The original Polish audio has not been verified as in-app playable');
+ assert.equal(lessons.find(l=>l.id==='L031')?.status,'initial-material');
+ assert.equal(lessons.find(l=>l.id==='L035')?.status,'initial-material');
 });
