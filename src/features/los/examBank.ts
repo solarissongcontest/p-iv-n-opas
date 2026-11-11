@@ -1,5 +1,5 @@
 import type {Exercise} from './content';
-import {c01Exam,c02Exam,c03Exam,c04Exam,c05Exam,c06Exam,c07Exam,c09Exam,c10Exam} from './chapterExam.ts';
+import {c01Exam,c02Exam,c03Exam,c04Exam,c05Exam,c06Exam,c07Exam,c08Exam,c09Exam,c10Exam} from './chapterExam.ts';
 // The assessment banks are independent of chapter practice IDs. No answer key
 // is rendered in ExamSession until the learner submits the whole paper.
 type Item=Exercise;
@@ -102,6 +102,7 @@ export const exams={
  'EX-C05':{title:'Kappaletesti · C05 Wie geht’s?',questions:c05Exam,scope:'C05'},
  'EX-C06':{title:'Kappaletesti · C06 Wie alt bist du?',questions:c06Exam,scope:'C06'},
  'EX-C07':{title:'Kappaletesti · C07 Wie schreibt man das?',questions:c07Exam,scope:'C07'},
+ 'EX-C08':{title:'Kappaletesti · C08 Noch einmal, bitte!',questions:c08Exam,scope:'C08'},
  'EX-C09':{title:'Kappaletesti · C09 Am Montag um drei',questions:c09Exam,scope:'C09'},
  'EX-C10':{title:'Kappaletesti · C10 Schön, dich kennenzulernen!',questions:c10Exam,scope:'C10'},
  'EX-MID':{title:'Välikoe · kappaleet 1–5',questions:midExam,scope:'C01–C05'},
@@ -144,6 +145,11 @@ export const selfAssessment={
  model:'A: Wie schreibt man das? B: Bitte buchstabieren Sie. A: L – E – A.',
  criteria:'Osaat käyttää kysymystä Wie schreibt man das?, kohteliasta pyyntöä sekä tavata kuvitteellisen nimen. Oikeaa puhelinnumeroa ei vaadita.'
  },
+ 'EX-C08':{
+ prompt:'Kirjoita kuvitteellinen pieni kolmen vuoron opettajan kanssa käytävä kohtaaminen, jossa kerrot ettet ymmärrä, pyydät toistoa ja pyydät hitaampaa puhetta.',
+ model:'A: Ich verstehe nicht. B: Kein Problem. A: Können Sie das bitte wiederholen? Bitte langsamer.',
+ criteria:'Opitut Ich verstehe nicht, Können Sie ...? ja Bitte langsamer esiintyvät asiallisesti. Tämä on itsearvioitavaa tuottamista; automaattipisteet lasketaan erikseen.'
+ },
  'EX-C09':{
  prompt:'Kirjoita kahdelle kuvitteelliselle päivälle tapaamisaika saksaksi.',
  model:'Am Montag um drei Uhr. Am Donnerstag um vier Uhr.',
@@ -167,7 +173,7 @@ export const selfAssessment={
 } as const;
 export function validateLosExams():string[]{
  const issues:string[]=[];const ids=new Set<string>();
- for(const [name,questions] of [['EX-C01',c01Exam],['EX-C02',c02Exam],['EX-C03',c03Exam],['EX-C04',c04Exam],['EX-C05',c05Exam],['EX-C06',c06Exam],['EX-C07',c07Exam],['EX-C09',c09Exam],['EX-C10',c10Exam],['EX-MID',midExam],['EX-FINAL',finalExam]] as const){
+ for(const [name,questions] of [['EX-C01',c01Exam],['EX-C02',c02Exam],['EX-C03',c03Exam],['EX-C04',c04Exam],['EX-C05',c05Exam],['EX-C06',c06Exam],['EX-C07',c07Exam],['EX-C08',c08Exam],['EX-C09',c09Exam],['EX-C10',c10Exam],['EX-MID',midExam],['EX-FINAL',finalExam]] as const){
   if(questions.length!==(name==='EX-MID'?25:name==='EX-C06'||name==='EX-C10'?20:name.startsWith('EX-C')?15:50))issues.push(name+' väärä tehtävämäärä');
   for(const e of questions){
    if(ids.has(e.id))issues.push('Duplikaatti '+e.id);
