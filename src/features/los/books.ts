@@ -34,6 +34,8 @@ import { LOS1_C06_CONTENT_BLOCKS } from "./los1-c06-content.ts";
 import { LOS1_C06_PRACTICE_EXERCISES } from "./los1-c06-practice.ts";
 import { LOS1_C06_EXAM_EXERCISES, LOS1_C06_TEST } from "./los1-c06-test.ts";
 import { LOS1_C06_SECTIONS } from "./los1-c06-sections.ts";
+import { LOS1_REVIEW_ONE_BLOCKS, LOS1_REVIEW_ONE_EXERCISES } from "./los1-review-one.ts";
+import { LOS1_MIDTERM_FORM_A, LOS1_MIDTERM_FORM_B, LOS1_MIDTERM_TEST } from "./los1-midterm.ts";
 
 const specs: readonly [string, string, string, string, string, string][] = [
   ["Perustason alkeet 1", "Tutustu ja ihastu saksan kieleen", "Nollataso, tervehdykset, esittäytyminen ja ensimmäinen vuorovaikutus.", "#B7473C", "#FCE8E5", "#FF9B91"],
@@ -410,6 +412,62 @@ export const LOS_BOOKS: readonly Book[] = specs.map((spec, index) => ({
           chapterTestId:LOS1_C05_TEST.id},
       ],
     };
+    if (lesson.id === "L027") return {
+      ...lesson, publicationStatus:"preview" as const,
+      objectives:["L1-INT-01","L1-INT-02","L1-INT-03"],
+      steps:[
+        {id:"L027-S01",title:"Kertaus I:n tavoitteet",required:true,blockId:"los1-review1-intro-a"},
+        {id:"L027-S02",title:"Tervehdy tilanteen mukaan",required:true,exerciseId:"los1-review1-a01"},
+        {id:"L027-S03",title:"Muodosta tuttu nimikysymys",required:true,exerciseId:"los1-review1-a02"},
+        {id:"L027-S04",title:"Esittele kuvitteellinen henkilö",required:true,exerciseId:"los1-review1-a03"},
+        {id:"L027-S05",title:"Kerro lähtömaa",required:true,exerciseId:"los1-review1-a04"},
+        {id:"L027-S06",title:"Valitse kohtelias hyvästely",required:true,exerciseId:"los1-review1-a05"},
+        {id:"L027-S07",title:"Arvioi itse, mikä palautui mieleen",required:true,
+          reflectionPromptFi:"Mikä sujui ilman sanastoa ja mitä (tervehdykset, nimet, alkuperä) haluat vielä kerrata? Kirjoita lyhyt oma huomio."},
+      ],
+    };
+    if (lesson.id === "L028") return {
+      ...lesson, publicationStatus:"preview" as const,
+      objectives:["L1-INT-04","L1-INT-05"],
+      steps:[
+        {id:"L028-S01",title:"Valmistaudu taitojen sekoitukseen",required:true,blockId:"los1-review1-intro-b"},
+        {id:"L028-S02",title:"Kysy vointia tuttavalta",required:true,exerciseId:"los1-review1-b01"},
+        {id:"L028-S03",title:"Täydennä kohtelias nimikysymys",required:true,exerciseId:"los1-review1-b02"},
+        {id:"L028-S04",title:"Vastaa kohteliaaseen lähtöpaikkakysymykseen",required:true,exerciseId:"los1-review1-b03"},
+        {id:"L028-S05",title:"Tunnista heikompi vointi",required:true,exerciseId:"los1-review1-b04"},
+        {id:"L028-S06",title:"Kysy kohteliaasti takaisin",required:true,exerciseId:"los1-review1-b05"},
+        {id:"L028-S07",title:"Arvioi taitosekoituksen sujuvuus",required:true,
+          reflectionPromptFi:"Mitkä muodot (du/dir ja Sie/Ihnen; heißen/kommen; hyvä/huono vointi) tunnistit ilman vihjettä? Mikä jäi epävarmaksi?"},
+      ],
+    };
+    if (lesson.id === "L029") return {
+      ...lesson, publicationStatus:"preview" as const,
+      objectives:["L1-INT-01","L1-READ-01","L1-INT-03"],
+      steps:[
+        {id:"L029-S01",title:"Tutustu autenttiseen kertauskuunteluun",required:true,blockId:"los1-review1-intro-c"},
+        {id:"L029-S02",title:"Kuuntele Franzin ja Jörgin alkuperäinen keskustelu",required:true,blockId:"los1-c01-m-com-01-audio"},
+        {id:"L029-S03",title:"Tunnista aloitus",required:true,exerciseId:"los1-review1-c01"},
+        {id:"L029-S04",title:"Kuuntele Franzin ja Gretan oikea dialogi",required:true,blockId:"los1-c02-wb-original-audio"},
+        {id:"L029-S05",title:"Tunnista Gretan nimen kertominen",required:true,exerciseId:"los1-review1-c02"},
+        {id:"L029-S06",title:"Kuuntele Ariserin nelirepliikkinen kaupunkidialogi",required:true,blockId:"los1-c02-m-com-02-audio"},
+        {id:"L029-S07",title:"Tunnista Kioto",required:true,exerciseId:"los1-review1-c03"},
+        {id:"L029-S08",title:"Tunnista Berliini",required:true,exerciseId:"los1-review1-c04"},
+        {id:"L029-S09",title:"Kuuntele alkuperäinen tervehdyssarja",required:true,blockId:"los1-c01-m-com-03-audio"},
+        {id:"L029-S10",title:"Tunnista kohtelias hyvästely",required:true,exerciseId:"los1-review1-c05"},
+        {id:"L029-S11",title:"Arvioi oma kuullun ymmärtäminen",required:true,
+          reflectionPromptFi:"Minkä alkuperäisen äänitteen ymmärsit parhaiten ilman litteraattia? Mitä ilmausta tarvitsee vielä kuunnella? Jos laite ei toista ääntä, kerro tämä rehellisesti."},
+      ],
+    };
+    if (lesson.id === "L030") return {
+      ...lesson, publicationStatus:"preview" as const,
+      objectives:["L1-INT-01","L1-INT-02","L1-INT-03","L1-INT-04","L1-INT-05"],
+      steps:[
+        {id:"L030-S01",title:"Valmistaudu kappaleiden 1–5 välikokeeseen",required:true,
+          reflectionPromptFi:"Mitä tavoittelet tältä harjoitusvälikokeelta? Voit kirjoittaa lyhyesti, millainen osa-alue tuntuu vaikeimmalta."},
+        {id:"L030-S02",title:"Palauta 25 pisteytettävää kohtaa ja itsearvioitu 4–6 repliikin dialogi",required:true,
+          chapterTestId:LOS1_MIDTERM_TEST.id},
+      ],
+    };
     if (lesson.id === "L031") return {
       ...lesson,publicationStatus:"preview" as const,
       steps:[
@@ -473,9 +531,9 @@ export const LOS_BOOKS: readonly Book[] = specs.map((spec, index) => ({
     };
     return lesson;
   }) : [],
-  blocks: index === 0 ? [...LOS1_INTRO_BLOCKS, ...LOS1_C01_PREVIEW_BLOCKS, ...LOS1_C01_SOURCE_BLOCKS, ...LOS1_C01_GREETING_AUDIO_BLOCKS, ...LOS1_C01_APPLICATION_BLOCKS, ...LOS1_C01_CULTURE_BLOCKS, ...LOS1_C02_WB_BLOCKS, ...LOS1_C02_BLOCKS, ...LOS1_C03_SOURCE_BLOCKS, ...LOS1_C03_CONTENT_BLOCKS, ...LOS1_C04_SOURCE_BLOCKS, ...LOS1_C04_BLOCKS, ...LOS1_C05_SOURCE_BLOCKS, ...LOS1_C05_BLOCKS, ...LOS1_C06_SOURCE_BLOCKS, ...LOS1_C06_CONTENT_BLOCKS] : [],
-  exercises: index === 0 ? [...LOS1_C01_PREVIEW_EXERCISES, ...LOS1_C01_SOURCE_EXERCISES, ...LOS1_C01_AUDIO_COMPREHENSION_EXERCISES, ...LOS1_C01_EXAM_EXERCISES, ...LOS1_C01_ALTERNATE_EXAM_EXERCISES, ...LOS1_C01_EXTRA_EXERCISES, ...LOS1_C01_INTERACTIVE_EXERCISES, ...LOS1_C02_WB_EXERCISES, ...LOS1_C02_EXERCISES, ...LOS1_C02_EXAM_EXERCISES, ...LOS1_C03_SOURCE_EXERCISES, ...LOS1_C03_PRACTICE_EXERCISES, ...LOS1_C03_EXAM_EXERCISES, ...LOS1_C04_SOURCE_EXERCISES, ...LOS1_C04_PRACTICE_EXERCISES, ...LOS1_C04_EXAM_EXERCISES, ...LOS1_C05_SOURCE_EXERCISES, ...LOS1_C05_PRACTICE_EXERCISES, ...LOS1_C05_EXAM_EXERCISES, ...LOS1_C06_SOURCE_EXERCISES, ...LOS1_C06_PRACTICE_EXERCISES, ...LOS1_C06_EXAM_EXERCISES] : [],
-  chapterTests: index === 0 ? [LOS1_C01_TEST, LOS1_C02_TEST, LOS1_C03_TEST, LOS1_C04_TEST, LOS1_C05_TEST, LOS1_C06_TEST] : [],
+  blocks: index === 0 ? [...LOS1_INTRO_BLOCKS, ...LOS1_C01_PREVIEW_BLOCKS, ...LOS1_C01_SOURCE_BLOCKS, ...LOS1_C01_GREETING_AUDIO_BLOCKS, ...LOS1_C01_APPLICATION_BLOCKS, ...LOS1_C01_CULTURE_BLOCKS, ...LOS1_C02_WB_BLOCKS, ...LOS1_C02_BLOCKS, ...LOS1_C03_SOURCE_BLOCKS, ...LOS1_C03_CONTENT_BLOCKS, ...LOS1_C04_SOURCE_BLOCKS, ...LOS1_C04_BLOCKS, ...LOS1_C05_SOURCE_BLOCKS, ...LOS1_C05_BLOCKS, ...LOS1_C06_SOURCE_BLOCKS, ...LOS1_C06_CONTENT_BLOCKS, ...LOS1_REVIEW_ONE_BLOCKS] : [],
+  exercises: index === 0 ? [...LOS1_C01_PREVIEW_EXERCISES, ...LOS1_C01_SOURCE_EXERCISES, ...LOS1_C01_AUDIO_COMPREHENSION_EXERCISES, ...LOS1_C01_EXAM_EXERCISES, ...LOS1_C01_ALTERNATE_EXAM_EXERCISES, ...LOS1_C01_EXTRA_EXERCISES, ...LOS1_C01_INTERACTIVE_EXERCISES, ...LOS1_C02_WB_EXERCISES, ...LOS1_C02_EXERCISES, ...LOS1_C02_EXAM_EXERCISES, ...LOS1_C03_SOURCE_EXERCISES, ...LOS1_C03_PRACTICE_EXERCISES, ...LOS1_C03_EXAM_EXERCISES, ...LOS1_C04_SOURCE_EXERCISES, ...LOS1_C04_PRACTICE_EXERCISES, ...LOS1_C04_EXAM_EXERCISES, ...LOS1_C05_SOURCE_EXERCISES, ...LOS1_C05_PRACTICE_EXERCISES, ...LOS1_C05_EXAM_EXERCISES, ...LOS1_C06_SOURCE_EXERCISES, ...LOS1_C06_PRACTICE_EXERCISES, ...LOS1_C06_EXAM_EXERCISES, ...LOS1_REVIEW_ONE_EXERCISES, ...LOS1_MIDTERM_FORM_A, ...LOS1_MIDTERM_FORM_B] : [],
+  chapterTests: index === 0 ? [LOS1_C01_TEST, LOS1_C02_TEST, LOS1_C03_TEST, LOS1_C04_TEST, LOS1_C05_TEST, LOS1_C06_TEST, LOS1_MIDTERM_TEST] : [],
   sources: index === 0 ? LOS1_RESEARCH_SOURCES.map(source => source.id === "M-COM-01" ? {
     ...source,
     author: "Xzapro4 ja Erkan Yilmaz",
