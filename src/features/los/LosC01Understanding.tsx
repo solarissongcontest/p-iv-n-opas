@@ -65,7 +65,7 @@ export function LosC01Understanding({goToText}:{goToText:()=>void}) {
       </fieldset>
     </div>
     <div className="los-c01-understanding-summary">
-      <p><CheckCircle2 size={19}/> <strong>{checkedResponses.length}/5 tarkistettu</strong> · {score}/5 oikein tarkistetuista kysymyksistä · {answered.length}/5 vastattu</p>
+      <p><CheckCircle2 size={19}/> <strong>{checkedResponses.length}/5 tarkistettu</strong> · {score}/{checkedResponses.length} oikein tarkistetuista · {answered.length}/5 vastattu</p>
       <p>Tämä on alkuperäistekstin harjoitus, ei kappaletesti eikä lopullinen kielitaidon arvosana.</p>
       <button type="button" className="los-outline-button" aria-pressed={showTranslation} onClick={()=>setShowTranslation(v=>!v)}>{showTranslation?"Piilota tekstin suomennos":"Näytä koko tekstin suomennos"}</button>
       {showTranslation&&<ol className="los-c01-translations">
