@@ -9,7 +9,11 @@
 import type {Book} from "./model";
 
 export type DictionaryDirection="de-fi"|"fi-de";
-export type DictionaryLocation={bookId:Book["id"];bookNumber:number;chapterId:string|null;chapterTitle:string};
+export type DictionaryLocation={
+ bookId:Book["id"];bookNumber:number;chapterId:string|null;chapterTitle:string;
+ /** Exact stable row ID used by VocabularyIndex and its user's bookmark list. */
+ vocabularyRowId:string;
+};
 export type DictionaryEntry={
  id:string;de:string;fi:string;notes:string[];
  locations:DictionaryLocation[];
@@ -39,20 +43,24 @@ export function buildLosDictionary(books:readonly Book[]):DictionaryEntry[]{
     }];
    for(const vocab of block.entries){
     const de=vocab.de.trim(),fi=vocab.fi.trim();
+    const vocabularyRowId=block.id+":"+vocab.id;
     if(!de||!fi)continue;
     // Dedupe only a truly matching bilingual pair; do NOT silently merge
     // ambiguous German lemmas with different valid Finnish glosses.
     const key=de.toLocaleLowerCase("de-DE")+"\u0000"+fi.toLocaleLowerCase("fi-FI");
     let entry=unique.get(key);
     if(!entry){
-      entry={id:vocab.id,de,fi,notes:[],locations:[]};
+      entry={id:book.id+":"+vocabularyRowId,de,fi,notes:[],locations:[]};
       unique.set(key,entry);
     }
     const note=vocab.note?.trim();
     if(note&&!entry.notes.includes(note))entry.notes.push(note);
     for(const location of locations){
-      if(!entry.locations.some(x=>x.bookId===location.bookId&&x.chapterId===location.chapterId))
-        entry.locations.push(location);
+      // Exact identity maps back to the same row the book's bookmark list uses.
+      // Distinct source occurrences of the same translation are not lost.
+      if(!entry.locations.some(x=>x.bookId===location.bookId&&
+        x.vocabularyRowId===vocabularyRowId&&x.chapterId===location.chapterId))
+        entry.locations.push({...location,vocabularyRowId});
     }
    }
   }
@@ -63,7 +71,7 @@ export function buildLosDictionary(books:readonly Book[]):DictionaryEntry[]{
 
 /** Score exact/prefix/word-start/substring; keep stable alphabetical ties. */
 export function searchLosDictionary(entries:readonly DictionaryEntry[],query:string,
- direction:DictionaryDirection,limit=48):{
+ direction:DictionaryDirection,limit=48,offset=0):{
  total:number; results:DictionarySearchResult[];
 }{
  const q=normalizedSearchText(query);
@@ -82,6 +90,8 @@ export function searchLosDictionary(entries:readonly DictionaryEntry[],query:str
  scored.sort((a,b)=>a.rank-b.rank||
   a.entry[key].localeCompare(b.entry[key],direction==="de-fi"?"de":"fi")||
   a.entry.id.localeCompare(b.entry.id));
+ const safeOffset=Number.isFinite(offset)?Math.max(0,Math.floor(offset)):0;
+ const safeLimit=Number.isFinite(limit)?Math.max(1,Math.min(100,Math.floor(limit))):48;
  return {total:scored.length,
-  results:scored.slice(0,Math.max(1,Math.min(100,Math.floor(limit)||48)))};
+  results:scored.slice(safeOffset,safeOffset+safeLimit)};
 }
