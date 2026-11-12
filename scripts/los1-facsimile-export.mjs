@@ -56,6 +56,21 @@ async function run(){
        new Set(leafInfo.map(x=>x.id)).size!==expectedLeaves){
       throw new Error("The print-only page map is incomplete or duplicated.");
     }
+    // The app shell can occupy extra invisible printed pages even with
+    // visibility:hidden. Clone ONLY the already-rendered print leaves into
+    // a clean document, keeping the same loaded CSS and original source data.
+    await page.evaluate(()=>{
+      const original=document.querySelector(".los-facs-print-only");
+      if(!original)throw new Error("Missing C01 print sheet container.");
+      const standalone=document.createElement("main");
+      standalone.className="los-facs-reader";
+      standalone.appendChild(original.cloneNode(true));
+      document.body.replaceChildren(standalone);
+      document.body.removeAttribute("style");
+      document.body.className="los-facs-pdf-export";
+      document.documentElement.classList.remove("dark");
+      document.title="LOS! 1 | C01 B5 - Taittoluonnos";
+    });
     await page.emulateMedia({media:"print"});
     const printChecks=await page.evaluate(()=>{
       const only=document.querySelector(".los-facs-print-only");
