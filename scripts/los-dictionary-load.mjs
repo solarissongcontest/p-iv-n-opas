@@ -34,7 +34,8 @@ function makeBatch(items,sourceId){
   for(const [index,sense]of item.senses.entries()){
    const num=sense.index??index+1;
    senses.push({...id,sense_index:num,source_glosses:sense.glosses??[],
-    gloss_language:sense.glossLanguage??null});
+    gloss_language:sense.glossLanguage??null,
+    form_of_candidates:sense.formOfCandidates??[]});
    for(const [idx,value]of (sense.translations??[]).entries()){
     if(!["fi","de"].includes(sense.translationLanguage))throw new Error("Unlabelled translation");
     translations.push({...id,sense_index:num,translation_index:idx+1,
