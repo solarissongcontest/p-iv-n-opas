@@ -6,10 +6,10 @@ import {
   validateLosSourceRegistry,
 } from "../src/features/los/content/sourceRegistry.ts";
 
-test("LOS! 1 source manifest imports 27 unique resources and ten chapters", () => {
-  assert.equal(LOS1_SOURCE_REGISTRY.length, 27);
+test("LOS! 1 source manifest imports 28 unique resources and ten chapters", () => {
+  assert.equal(LOS1_SOURCE_REGISTRY.length, 28);
   assert.equal(LOS1_CHAPTER_SOURCE_PLANS.length, 10);
-  assert.equal(new Set(LOS1_SOURCE_REGISTRY.map(source => source.id)).size, 27);
+  assert.equal(new Set(LOS1_SOURCE_REGISTRY.map(source => source.id)).size, 28);
   assert.ok(findLosSource("M-WB-07"),"C03 replacement source must be present");
   assert.deepEqual(validateLosSourceRegistry(), []);
 });
@@ -30,7 +30,7 @@ test("manifest readiness A never implies reviewed or published textbook content"
   assert.ok(LOS1_SOURCE_REGISTRY.every(source => !isLosSourcePublishable(source)));
 });
 
-test("C06 has verified new source while C08 still lacks a single identified interview", () => {
+test("C06 and C08 both have identified but unpublished primary sources", () => {
   const c06=getLosChapterSourceGate("06");
   assert.equal(c06.sourceId,"M-ZPE-01");
   assert.equal(c06.sourceStage,"rights-verified");
@@ -38,9 +38,9 @@ test("C06 has verified new source while C08 still lacks a single identified inte
   assert.ok(c06.issues.some(issue=>issue.includes("kieli-")));
   assert.ok(c06.issues.some(issue=>issue.includes("mobiilissa")));
   const c08=getLosChapterSourceGate("08");
-  assert.equal(c08.sourceId,null);
+  assert.equal(c08.sourceId,"M-WB-08");
   assert.equal(c08.ready,false);
-  assert.equal(c08.sourceStage,"missing");
+  assert.equal(c08.sourceStage,"rights-verified");
 });
 
 test("chapter source gates preserve all ten chapter IDs and never invent readiness", () => {
