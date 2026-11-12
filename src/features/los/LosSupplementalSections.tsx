@@ -4,6 +4,7 @@ import { LosC01Understanding } from "./LosC01Understanding";
 import { LosVoicePractice } from "./LosVoicePractice";
 import { LosC02SecondaryText } from "./LosC02SecondaryText";
 import { LosAdditionalTextB } from "./LosAdditionalTextB";
+import { LosCultureChecks } from "./LosCultureChecks";
 import { useLosChapterDraft } from "./studyState";
 import type { LosChapter } from "./catalog";
 
@@ -103,12 +104,17 @@ export function LosCulture({chapter}:{chapter:LosChapter}) {
       <div className="los-culture-term"><strong lang="de">Moin!</strong><p>Tervehdys, jota kuulee varsinkin Pohjois-Saksassa. Sitä käytetään usein muulloinkin kuin aamulla.</p></div>
       <div className="los-culture-term"><strong lang="de">Servus!</strong><p>Varsinkin eteläisillä saksankielisillä alueilla käytetty tuttavallinen tervehdys. Se voi toimia myös hyvästelynä.</p></div>
       <p>Nämä alueelliset fraasit ovat nyt <b>tunnistamissanastoa</b>: niiden käyttäminen ei ole kappaleen kokeen vaatimus.</p>
+    </>:chapter.id==="02"?<>
+      <h2>Etunimet, sukunimet ja puhuttelu</h2>
+      <p>Saksankielisessä kohtaamisessa etunimen ja sukunimen erottaa samalla tavalla kuin suomessa. Alkeiden nimidialogissa uudet tuttavat voivat sanoa <span lang="de">Ich heiße Greta.</span> ja kysyä <span lang="de">Wie heißt du?</span>. Muoto ei kuitenkaan sovi jokaiseen tilanteeseen.</p>
+      <div className="los-culture-term"><strong lang="de">Herr Weiß · Frau Müller</strong><p><span lang="de">Herr</span> ja <span lang="de">Frau</span> toimivat kohteliaina puhutteluina sukunimen edellä. Ne eivät ole henkilön etunimiä. Kysy tarvittaessa, millä nimellä ja tavalla ihminen haluaa itseään puhuteltavan.</p></div>
+      <p>Harjoittelussa vierasta aikuista voi kysyä kohteliaalla <span lang="de">Wie heißen Sie?</span> -kysymyksellä. Tuttavallinen muoto on <span lang="de">Wie heißt du?</span>. Nämä ovat kielellisiä vaihtoehtoja, eivät sääntö siitä, että ihmisen ikä määräisi aina puhuttelun.</p>
     </>:chapter.id==="03"?<>
       <h2>DACH ja saksankieliset alueet</h2>
       <p>Lyhenne <strong>DACH</strong> viittaa Saksaan (<span lang="de">Deutschland</span>), Itävaltaan (<span lang="de">Österreich</span>) ja Sveitsiin (<span lang="de">die Schweiz</span>). Näillä alueilla saksaa käytetään monissa arjen ja julkisen elämän tilanteissa.</p>
       <p>Sveitsissä on myös muita kansalliskieliä, eikä siellä tai muissakaan maissa jokainen puhu vain saksaa. Saksaa puhutaan myös pienessä Liechtensteinissa. Puhuttu saksa vaihtelee alueittain, joten myöhemmin kuulet erilaisia ääntämistapoja.</p>
       <div className="los-culture-term"><strong lang="de">Deutschland · Österreich · die Schweiz</strong><p>Muista maiden saksankieliset nimet. Alkeissa harjoitellaan erityisesti ilmaukset <span lang="de">aus Deutschland</span>, <span lang="de">aus Österreich</span> ja <span lang="de">aus der Schweiz</span>.</p></div>
-      <p>Harjoittele kirjoittamalla näiden maiden nimet oikein ja nimeämällä ne kuvitteellisen matkareitin pysähdyksiksi. Oikeuksiltaan hyväksytty karttakuva lisätään myöhemmin.</p>
+      <p>Harjoittele kirjoittamalla näiden maiden nimet oikein ja nimeämällä ne kuvitteellisen matkareitin pysähdyksiksi. Katso myös alempana oleva LOS!:n oma kolmen maan havainnekuva; se ei ole maantieteellinen kartta.</p>
     </>:chapter.id==="04"?<>
       <h2>Sinuttelu ja teitittely</h2>
       <p>Saksassa <span lang="de">du</span> ja <span lang="de">Sie</span> valitaan suhteessa tilanteeseen ja ihmisten keskinäiseen sopimukseen. Nuorten keskinäisissä keskusteluissa <span lang="de">du</span> on tavallinen. Virallisessa asioinnissa <span lang="de">Sie</span> voi olla luonteva.</p>
@@ -127,7 +133,7 @@ export function LosCulture({chapter}:{chapter:LosChapter}) {
       <h2>Kirjain, kirjainmerkki ja tavaaminen</h2>
       <p>Saksankielisessä puhelussa tai lomakkeen täyttämisessä nimeä voi joutua tavaamaan kirjain kirjaimelta. Kirjaimen <b>nimi</b> ei ole aina sama kuin sen tavallinen äänne sanassa. Tämän vuoksi kirjoitettu kirjainsarja ei yksin korvaa ihmisen lausumaa tavaamisharjoitusta.</p>
       <div className="los-culture-term"><strong lang="de">ä · ö · ü · ß</strong><p>Nämä merkit ovat osa saksan oikeinkirjoitusta. Aina niitä ei voi kirjoittaa kaikilla näppäimistöillä, jolloin teknisessä yhteydessä saatetaan käyttää muotoja ae, oe, ue ja ss. Ne eivät kuitenkaan ole kaikissa sanoissa tai arviointitilanteissa merkitykseltään tai kirjoitusasultaan samanarvoisia.</p></div>
-      <p>Opettele ensin erottamaan, mitä näet kirjoitettuna. Tavaamisen ääntämistä harjoitellaan oikean ihmisen puheäänitteellä sen jälkeen, kun C07:n äänilähde on hyväksytty ja lisätty oppikirjaan.</p>
+      <p>Opettele ensin erottamaan, mitä näet kirjoitettuna. Avaa C07:n Text B:n ihmisen tekemä alkuperäinen aakkosäänite ja kuuntele se siellä. Äänite on liitetty kirjaan, mutta todellisen iPhone- ja tietokonekäytön laitetesti on yhä kesken.</p>
     </>:chapter.id==="08"?<>
       <h2>Kun et ymmärrä vieraskielisessä tilanteessa</h2>
       <p>Kieltä opiskellessa ei tarvitse ymmärtää jokaista lausetta ensimmäisellä kuulemalla. Voit käyttää selkeitä fraaseja: <span lang="de">Ich verstehe nicht.</span>, <span lang="de">Noch einmal, bitte.</span> ja <span lang="de">Bitte langsamer.</span>.</p>
@@ -144,6 +150,6 @@ export function LosCulture({chapter}:{chapter:LosChapter}) {
       <div className="los-culture-term"><strong lang="de">Das ist Leo. Er kommt aus Deutschland.</strong><p>Kolmannen henkilön esitteleminen laajentaa jo opittuja minä- ja sinä-muotoja. Tämä on kertaus, ei lupa alkaa harjoitella koko saksan pronominijärjestelmää.</p></div>
       <p>Kokeile kirjoittaa ja esittää kaksi toisistaan eroavaa tilannetta. Kappaletesti tarkistaa vain rajattuja muotoja; ääneen tapahtuva keskustelu arvioidaan omalla tarkistuslistalla.</p>
     </>:<div className="los-editorial-note"><h2>Kulttuurisivu tarkistetaan</h2><p>Tämän kappaleen erillinen kulttuuriteksti, lähdeviitteet ja oikeuksiltaan hyväksytty kuvitus on vielä toimitettava. Oppikirjaa ei merkitä valmiiksi puuttuvan aineiston perusteella.</p></div>}
-    <div className="los-culture-source"><strong>Kuvat ja lähteet</strong><p>Tämän sivun kuvallinen oppimateriaali ja lähdekohtaisten kulttuuriväitteiden toimitukselliset merkinnät ovat vielä valmistelussa. Valmiin kulttuuriosion hyväksyntä edellyttää niitä.</p></div>
+    <LosCultureChecks chapterId={chapter.id}/>
   </section>;
 }
