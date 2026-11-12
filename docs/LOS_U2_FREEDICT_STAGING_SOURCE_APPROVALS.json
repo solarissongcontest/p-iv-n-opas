@@ -1,0 +1,46 @@
+{
+  "version": "LOS-DICTIONARY-STAGING-APPROVALS/0.1",
+  "purpose": "Temporary CI-only parsing and measured QA. NEVER permission to publish or import into production.",
+  "officialSourceRoot": "https://download.freedict.org/generated/",
+  "reviewScope": "TEI teiHeader license notice + URL and source-byte SHA512 inspected 2026-11-12; no author/publisher claim of qualified legal or language review.",
+  "entries": [
+    {
+      "sourceId": "freedict-de-fi-2025.11.23",
+      "kind": "freedict",
+      "direction": "de-fi",
+      "sourceUrl": "https://download.freedict.org/generated/deu-fin/deu-fin.tei",
+      "sourceSha512": "b689041275b3f4eec531204b3da12bf623cbb3f563aaaf914d943a055bf0d98852da20937e63921fbbf2a45adfc1b3507242b0d2492755837ef1912e5d6a708d",
+      "teiHeaderSha256": "ffc40ec35475f86f4246daca8f70d3f98f3d09a79206e2ad6e63eb9c74ccb8b0",
+      "rightsApproval": {
+        "reviewed": true,
+        "stagingApproved": true,
+        "publicationApproved": false,
+        "licenseCode": "CC BY-SA 3.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+        "evidenceUrl": "https://download.freedict.org/generated/deu-fin/deu-fin.tei",
+        "reviewedBy": "LOS U2 source-header inspection (automated CI + manual source reading)",
+        "reviewedAt": "2026-11-12",
+        "teiHeaderSha256": "ffc40ec35475f86f4246daca8f70d3f98f3d09a79206e2ad6e63eb9c74ccb8b0"
+      }
+    },
+    {
+      "sourceId": "freedict-fi-de-2025.11.23",
+      "kind": "freedict",
+      "direction": "fi-de",
+      "sourceUrl": "https://download.freedict.org/generated/fin-deu/fin-deu.tei",
+      "sourceSha512": "a39c405777fb56f345d4cb2020652e3a9c55fba8bbbded261fc7f273038f1447458573061442b88cbe2fccf12389b8ccaedb97eb819408b3103",
+      "teiHeaderSha256": "3067601622771df44de03e107541b876c0ac060c21c638de924059facd476a98",
+      "rightsApproval": {
+        "reviewed": true,
+        "stagingApproved": true,
+        "publicationApproved": false,
+        "licenseCode": "CC BY-SA 3.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+        "evidenceUrl": "https://download.freedict.org/generated/fin-deu/fin-deu.tei",
+        "reviewedBy": "LOS U2 source-header inspection (automated CI + manual source reading)",
+        "reviewedAt": "2026-11-12",
+        "teiHeaderSha256": "3067601622771df44de03e107541b876c0ac060c21c638de924059facd476a98"
+      }
+    }
+  ]
+}
