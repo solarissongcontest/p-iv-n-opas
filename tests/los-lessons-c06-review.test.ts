@@ -21,7 +21,7 @@ const draft=()=>({
   practiceChecked:[] as string[],testAnswers:{} as Record<string,string>,
   testSubmittedAt:null as string|null,selfAssessment:"",updatedAt:now,
 });
-test("C06 reuses all eight real Franz/Jörg lines with correct 19/20 ages, no invented new Text A",()=>{
+test("C06 preserves its eight-line C01 age review while new independent Text A is separate",()=>{
   assert.equal(LOS1_C06_REVIEW_SOURCE_ID,LOS1_C01_SOURCE_ID);
   assert.equal(LOS1_C01_LINES.length,8);
   assert.equal(LOS1_C01_LINES[3]?.text,"Wie alt bist du?");
@@ -32,9 +32,9 @@ test("C06 reuses all eight real Franz/Jörg lines with correct 19/20 ages, no in
   assert.equal(LOS1_C06_REVIEW_QUESTIONS[1]?.correctId,"c");
   assert.equal(LOS1_C06_REVIEW_EVIDENCE_ID,"C06-SOURCE-EVIDENCE-01");
   assert.equal(LOS1_C06_REVIEW_EVIDENCE_CORRECT,"u05");
-  assert.equal(LOS1_CHAPTER_SOURCE_PLANS.find(p=>p.id==="C06")?.primarySourceId,null);
+  assert.equal(LOS1_CHAPTER_SOURCE_PLANS.find(p=>p.id==="C06")?.primarySourceId,"M-ZPE-01");
   assert.equal(getLosChapterSourceGate("06").ready,false);
-  assert.ok(getLosChapterSourceGate("06").issues.some(x=>x.includes("Ensisijaisen")||x.includes("puuttuu")));
+  assert.ok(getLosChapterSourceGate("06").issues.some(x=>x.includes("kieli-")||x.includes("mobiilissa")));
 });
 test("C06 five real numeric lessons match canonical plan and use only existing question IDs",()=>{
   assert.equal(LOS1_C06_LESSON_BLUEPRINTS.length,5);
@@ -100,7 +100,8 @@ test("C06 routing shows a reuse label, same source, inline full text and correct
   assert.match(book,/chapter\.id==="06"/);
   assert.match(book,/LosC06AgeReview/);
   assert.match(book,/LosC06AgeUnderstanding/);
-  assert.match(book,/Uusi itsenäinen Text A puuttuu yhä/);
+  assert.match(book,/LosOpenTextPage chapterId="06"/);
+  assert.match(book,/M-ZPE-01/);
   assert.match(reader,/lines=\{LOS1_C01_LINES\}/);
   assert.match(reader,/chapterId="06"/);
   assert.match(reader,/CC BY-SA 3\.0/);
