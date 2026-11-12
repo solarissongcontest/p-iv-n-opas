@@ -199,7 +199,7 @@ test("C01 B5 facsimile pilot uses original cover and lets readers jump to the re
  await expect(reader.locator('[data-facsimile-page="c01-text-a"] .los-facs-dialogue li')).toHaveCount(8);
  await reader.getByRole("button",{name:/Avaa sama osio digikirjassa/}).click();
  await expect(page).toHaveURL(/\/los#\/1\/01\/text$/);
- await expect(page.locator(".los-original-dialogue")).toBeVisible();
+ await expect(page.locator(".los-c01-reader")).toBeVisible();
  await expectNoHorizontalOverflow(page);
 });
 test("C01 facsimile page position survives reload but does not mark a lesson finished",async({page})=>{
