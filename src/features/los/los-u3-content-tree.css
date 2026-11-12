@@ -25,3 +25,13 @@
   .los-tree-tasks {margin-left:10px}
   .los-book-sidebar nav button {min-height:44px}
 }
+
+.los-tree-books {margin:10px 0 15px;border-bottom:1px solid var(--los-line);padding:0 0 11px}
+.los-tree-books summary {cursor:pointer;padding:9px 7px;min-height:42px;font-size:13px;font-weight:750;color:var(--los-ink)}
+.los-tree-books ul {list-style:none;padding:0;margin:0 0 10px}
+.los-book-sidebar nav .los-tree-books button {display:flex;flex-direction:column;align-items:flex-start;gap:1px;width:100%;padding:8px 9px;min-height:44px;white-space:normal}
+.los-tree-books button strong {font-size:12px}
+.los-tree-books button span {font-size:12px;line-height:1.4}
+.los-tree-books button small {font-size:11px;color:var(--los-soft)}
+.los-book-sidebar nav .los-tree-books button[aria-current="page"] {border-left-color:var(--los-book-accent);background:var(--los-book-tint);color:#1f2933}
+.dark .los-book-sidebar nav .los-tree-books button[aria-current="page"] {background:var(--los-subtle);color:var(--los-ink)}
