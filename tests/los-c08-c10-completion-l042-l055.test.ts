@@ -47,8 +47,8 @@ test("C08 full source carries separate lawful provenance and remains gated after
 test("the five added C08/C10 lesson IDs are canonical, unique, 30 minutes and supported by actual chapter views",()=>{
  assert.deepEqual(LOS1_C08_C10_COMPLETION_LESSONS.map(x=>x.id),expectedIds);
  assert.equal(LOS_1_LESSONS.length,60);
- assert.equal(LOS1_EXECUTABLE_LESSONS.length,58);
- assert.equal(new Set(LOS1_EXECUTABLE_LESSONS.map(x=>x.id)).size,58);
+ assert.equal(LOS1_EXECUTABLE_LESSONS.length,60);
+ assert.equal(new Set(LOS1_EXECUTABLE_LESSONS.map(x=>x.id)).size,60);
  for(const lesson of LOS1_C08_C10_COMPLETION_LESSONS){
   const number=Number(lesson.id.slice(1));
   assert.equal(lesson.title,LOS_1_LESSONS[number-1]?.title);
@@ -70,7 +70,7 @@ test("the five added C08/C10 lesson IDs are canonical, unique, 30 minutes and su
    }
   }
  }
- for(const id of ["L059","L060"])assert.equal(isLos1ExecutableLesson(id),false);
+ for(const id of ["L059","L060"])assert.equal(isLos1ExecutableLesson(id),true);
 });
 test("reading, written application, and reflection cannot be completed by clicks or single characters",()=>{
  for(const lesson of LOS1_C08_C10_COMPLETION_LESSONS){
