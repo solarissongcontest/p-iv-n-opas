@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
-import { ChevronDown, ChevronRight, Search } from "lucide-react";
+import { Bookmark, ChevronDown, ChevronRight, Search } from "lucide-react";
 import { LOS_BOOKS, type LosBookDefinition } from "./catalog";
 import { getDeviceOwnerId } from "@/lib/deviceSession";
+import { losDraftKey, parseLosDraft } from "./studyState";
+import { summarizeLosTreeEvidence, type LosTreeEvidence } from "./contentTreeEvidence";
 import {
   emptyLosContentTreePreferences, losContentTreePrefsKey,
   parseLosContentTreePreferences, type LosContentTreePreferences,
@@ -29,6 +31,30 @@ export function LosContentTree({
   openBook:(id:number)=>void;
 }) {
   const [search,setSearch]=useState("");
+  const [evidence,setEvidence]=useState<Record<string,LosTreeEvidence>>({});
+  useEffect(()=>{
+    const refresh=()=>{
+      try {
+        const ownerId=getDeviceOwnerId();
+        if(!ownerId){setEvidence({});return;}
+        const result:Record<string,LosTreeEvidence>={};
+        for(const ch of book.chapters) {
+          const draft=parseLosDraft(localStorage.getItem(
+            losDraftKey(book.id,ch.id,ownerId)));
+          result[ch.id]=summarizeLosTreeEvidence(draft);
+        }
+        setEvidence(result);
+      }catch{setEvidence({});}
+    };
+    refresh();
+    // Same local event as the existing workbook, not an alternative store.
+    window.addEventListener("los:draft-change",refresh);
+    window.addEventListener("storage",refresh);
+    return ()=>{
+      window.removeEventListener("los:draft-change",refresh);
+      window.removeEventListener("storage",refresh);
+    };
+  },[book.id,book.chapters]);
   const readPreference = (bookId:number, chapters:readonly string[]):LosContentTreePreferences => {
     if(typeof window==="undefined")return emptyLosContentTreePreferences();
     try {
@@ -129,8 +155,13 @@ export function LosContentTree({
             <button type="button" className={ch.id===chapterId&&section==="chapter"?"is-active los-tree-chapter-link":"los-tree-chapter-link"}
               onClick={()=>go(ch.id,"chapter")} aria-current={ch.id===chapterId&&section==="chapter"?"page":undefined}>
               <span className="los-sidebar-num">{ch.id}</span><span lang="de">{ch.title}</span>
+              {evidence[ch.id]?.bookmarked&&
+                <Bookmark size={14} fill="currentColor" aria-label="Kirjanmerkki asetettu"/>}
             </button>
           </div>
+          {evidence[ch.id]?.testSubmitted && <p className="los-tree-saved-status">
+            Kappaletesti palautettu
+          </p>}
           {isOpen&&<ul className="los-tree-sections" id={`los-tree-children-${ch.id}`}>
             {sectionLinks.filter(item=>!needle||chapterMatches||matchedSections.some(s=>s.id===item.id)||
               matchingTasks.some(t=>t.section===item.id)).map(item=>{
@@ -169,7 +200,13 @@ export function LosContentTree({
                     <button type="button" title={task.label}
                       className={activeTaskId===task.id&&chapterId===ch.id?"is-active los-tree-task-link":"los-tree-task-link"}
                       aria-current={activeTaskId===task.id&&chapterId===ch.id?"location":undefined}
-                      onClick={()=>openTask(task)}>{task.label}</button>
+                      onClick={()=>openTask(task)}>
+                        <span>{task.label}</span>
+                        {(item.id==="practice"?
+                          evidence[ch.id]?.practiceAnsweredIds:
+                          evidence[ch.id]?.testAnsweredIds)?.includes(task.id) &&
+                          <small className="los-tree-saved-status">Vastaus tallennettu</small>}
+                      </button>
                   </li>)}
                 </ul>}
               </li>;
