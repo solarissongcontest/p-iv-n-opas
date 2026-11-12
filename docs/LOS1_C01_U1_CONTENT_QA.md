@@ -13,7 +13,7 @@ Tämä raportti on koodin rakenteellisen tarkistuksen tilannekuva. Sitä ei tule
 | Oikeudet | Commons lähde, Xzapro4 ja Erkan Yilmaz, CC BY-SA 3.0 näkyy `LosC01AuthenticText.tsx`:ssa | Johdannaisattribuution lopullinen tarkastus |
 | Ääni | M-COM-01:lle Commons HTML5-äänisoitin, erillinen tervehdyslista M-COM-03:lle | Aidon toiston ja tekstin vastaavuuden varmistus iOS Safarilla ja Linux Chromiumilla puuttuu; TTS vain epävarma varatie |
 | Sana-avaukset | `LOS1_C01_GLOSS`: 19 kontekstimerkitystä, samassa alkuperäistekstin tokenilukijassa | Kaikkien merkitysten ja IPA-muotojen tarkistus puuttuu |
-| IPA | U1 yhteinen sanakortti ja 8 lähteistettyä perusmuotoa, joista C01:ssa esiintyy osa | C01:n aktiivinen sanasto (16 ilmaisua) **ei** vielä läpäise 100 % IPA+ääni-QA-porttia |
+| IPA | U1 yhteinen sanakortti ja 15 lähteistettyä C01:n sana- tai kokofraasi-IPAa 16:sta; asiantuntijan tarkistamia 0 ja hyväksyttyjä ääniä 0 | C01:n aktiivinen sanasto (16 ilmaisua) **ei** vielä läpäise 100 % IPA+ääni-QA-porttia; Bis später! tarvitsee täydellisen fraasin lähde-IPAn |
 | Ääntämisen opetus | `LosBook.tsx`: w, z, ei, ie ja sch -esimerkit | Kieliohjeiden ja yksittäisten ääni-esimerkkien laatutestaus vaaditaan |
 | Kielioppi | Opetetaan tervehdyksiä fraaseina ennen taivutusta; vieraat muodot vain tunnistettavaksi | Didaktisen tason tarkistus vaaditaan |
 | Tekstin ymmärtäminen | `content/los1C01.ts` sisältää 4 lähteeseen sidottua monivalintaa ja selittäviä palautteita | Laadullinen ja saavutettavuuden kokonais-QA avoin |
