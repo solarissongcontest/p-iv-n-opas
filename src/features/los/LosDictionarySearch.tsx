@@ -115,7 +115,8 @@ export function LosDictionarySearch({onOpenCard}:{
     </div>
     {state.kind==="done"&&
       (state.results.length?<ol className="los-dict-results">
-        {state.results.map(item=><LosDictionarySourceResult key={item.source_id+":"+item.source_entry_id} entry={item} onSearch={setQuery} onOpenCard={onOpenCard}/>) }
+        {state.results.map(item=><LosDictionarySourceResult key={item.source_id+":"+item.source_entry_id} entry={item} onSearch={setQuery}
+          {...(onOpenCard ? {onOpenCard} : {})}/>) }
       </ol>:<p>Ei osumia julkaistusta aineistosta tällä hakusanalla.</p>)}
   </section>;
 }
