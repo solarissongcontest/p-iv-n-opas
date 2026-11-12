@@ -550,3 +550,35 @@ test("R10: failed two-chapter local backup import rolls back, then safely retrie
  const restored=await page.evaluate(keys=>keys.map(key=>JSON.parse(localStorage.getItem(key)??"null")?.note),keys);
  expect(restored).toEqual(["R10 first chapter","R10 second chapter"]);
 });
+
+/** R10: even a chapter with only practiceChecked IDs must survive JSON export. */
+test("R10: checked-only chapter work survives backup export and blocks missing-only overwrite",async({page})=>{
+ await enterLocalBook(page);
+ const key="los.local.v1.00000000-0000-4000-8000-000000000195.1.03";
+ const draft={
+  version:1,note:"",applicationDraft:"",bookmarked:false,
+  practiceAnswers:{},practiceChecked:["C03-PRACTICE-01"],
+  testAnswers:{},testSubmittedAt:null,selfAssessment:"",updatedAt:new Date().toISOString(),
+ };
+ await page.evaluate(({key,draft})=>localStorage.setItem(key,JSON.stringify(draft)),{key,draft});
+ await page.goto("/los#/1/appendix",{waitUntil:"domcontentloaded"});
+ const downloadPromise=page.waitForEvent("download");
+ await page.getByRole("button",{name:"Vie koko LOS! 1:n varmuuskopio"}).click();
+ const downloaded=await downloadPromise;
+ const {readFile}=await import("node:fs/promises");
+ const backup=JSON.parse(await readFile(await downloaded.path(),"utf8"));
+ expect(backup.chapters["03"].practiceChecked).toEqual(["C03-PRACTICE-01"]);
+ const incoming={
+  ...backup,exportedAt:new Date().toISOString(),
+  chapters:{"03":{...draft,note:"incoming would overwrite checked-only work",practiceChecked:[]}},
+ };
+ await page.locator(".los-backup-upload input[type=file]").setInputFiles({
+  name:"r10-checked-only.json",mimeType:"application/json",
+  buffer:Buffer.from(JSON.stringify(incoming)),
+ });
+ await expect(page.locator(".los-backup-preview")).toContainText("1 tallennuskohteessa on jo omia tallennuksia");
+ await expect(page.getByRole("button",{name:/Tuo vain puuttuvat/})).toBeDisabled();
+ const stored=await page.evaluate(key=>JSON.parse(localStorage.getItem(key)??"null"),key);
+ expect(stored.practiceChecked).toEqual(["C03-PRACTICE-01"]);
+ expect(stored.note).toBe("");
+});
