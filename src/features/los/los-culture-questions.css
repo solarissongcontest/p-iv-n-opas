@@ -1,0 +1,16 @@
+.los-culture-exercises{display:grid;gap:1.25rem;margin-top:1.8rem;padding-top:1.1rem;border-top:1px solid var(--los-divider,#e2d8d3)}
+.los-culture-diagram{margin:0;padding:.35rem 0 .6rem;max-width:660px}
+.los-culture-diagram svg{display:block;width:100%;height:auto;border-radius:12px}
+.los-culture-diagram figcaption{font-size:.82rem;line-height:1.45;color:var(--los-muted,#756963);margin:.55rem .25rem 0}
+.los-culture-editorial{border-left:3px solid #b7473c;background:color-mix(in srgb,#b7473c 6%,transparent);padding:1rem 1.15rem;border-radius:0 10px 10px 0}
+.los-culture-editorial h2{font-size:1.15rem;margin:0 0 .5rem}
+.los-culture-editorial p{margin:.45rem 0;line-height:1.6}
+.los-culture-editorial p:last-child{display:flex;align-items:start;gap:.4rem;flex-wrap:wrap;font-size:.87rem}
+.los-culture-editorial a{color:var(--los-accent,#b7473c);text-decoration:underline;text-underline-offset:3px}
+.los-culture-checklist{display:grid;gap:1rem}
+.los-culture-exercises fieldset{min-inline-size:0}
+@media(max-width:560px){
+ .los-culture-exercises{gap:1rem}
+ .los-culture-diagram figcaption{font-size:.76rem}
+ .los-culture-editorial{padding:.8rem .95rem}
+}
