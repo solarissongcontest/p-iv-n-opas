@@ -109,8 +109,8 @@ test("guided C02 lessons use chapter-2 draft, and the book index routes to them"
   assert.match(component,/useLosChapterDraft\(1, "02"\)/);
   assert.match(component,/isC02Lesson/);
   assert.match(component,/LOS1_C02_LESSON_BLUEPRINTS/);
-  assert.match(index,/lesson\.number <= 11/);
-  assert.match(index,/L012–L060/);
+  assert.match(index,/lesson\.number <= 16/);
+  assert.match(index,/L017–L060/);
   assert.match(index,/sessionStorage\.getItem\("los1\.selectedLesson"\)/);
   assert.match(index,/sessionStorage\.setItem\("los1\.selectedLesson", id\)/);
 });
