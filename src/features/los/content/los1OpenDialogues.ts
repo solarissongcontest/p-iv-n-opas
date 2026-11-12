@@ -385,7 +385,9 @@ const c06:LosOpenText={
   evidenceExplanation:"Toisen dialogin viimeinen repliikki kuuluu Ich bin schon zwölf Jahre alt.",
 };
 
-export const LOS1_OPEN_DIALOGUES: readonly LosOpenText[] = [c03,c04,c05,c06,c07,c09];
+export const LOS1_C06_TEXT: LosOpenText = c06;
+/** Legacy collection of the five independently sourced Wikibooks texts. C06 is a separate Polish OER source. */
+export const LOS1_OPEN_DIALOGUES: readonly LosOpenText[] = [c03,c04,c05,c07,c09];
 export function getLosOpenDialogue(chapterId: string): LosOpenText | undefined {
-  return LOS1_OPEN_DIALOGUES.find(text=>text.chapterId===chapterId);
+  return chapterId==="06" ? LOS1_C06_TEXT : LOS1_OPEN_DIALOGUES.find(text=>text.chapterId===chapterId);
 }
