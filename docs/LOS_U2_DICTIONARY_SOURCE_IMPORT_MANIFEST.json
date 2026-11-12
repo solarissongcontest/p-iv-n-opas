@@ -48,10 +48,32 @@
   "wiktionaryKaikki": {
     "state": "NOT_IMPORTED",
     "actualParsedRows": 0,
-    "sourceDumpHash": null
+    "sourceDumpHash": null,
+    "sourcesIdentified": [
+      {
+        "edition": "enwiktionary",
+        "sourceListing": "https://kaikki.org/dictionary/rawdata.html",
+        "targetLanguage": "de",
+        "glossLanguage": "en",
+        "dumpVersion": null,
+        "checksumSha512": null,
+        "publicationStatus": "pending-source-license-and-byte-hash"
+      },
+      {
+        "edition": "dewiktionary",
+        "sourceListing": "https://kaikki.org/dewiktionary/rawdata.html",
+        "targetLanguage": "de",
+        "glossLanguage": "de",
+        "dumpVersion": null,
+        "checksumSha512": null,
+        "publicationStatus": "pending-source-license-and-byte-hash"
+      }
+    ],
+    "sourcePolicy": "Dumps are streamed and kept in separated source records; source gloss language is mandatory. No English/German gloss is labeled a Finnish translation; per-item Commons audio requires separate review."
   },
   "commonsPronunciation": {
     "state": "NOT_IMPORTED",
     "acceptedAudioRecords": 0
-  }
+  },
+  "publicationSafety": "Dictionary sources default to published=false. SQL requires exact loaded-source-row count plus independent legal_review_approved/at/by before any source can become searchable. No data has been deployed."
 }
