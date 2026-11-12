@@ -45,6 +45,7 @@ CREATE TABLE IF NOT EXISTS public.los_dictionary_senses (
   sense_index integer NOT NULL CHECK (sense_index > 0),
   source_glosses jsonb NOT NULL DEFAULT '[]'::jsonb,
   gloss_language text,
+  form_of_candidates jsonb NOT NULL DEFAULT '[]'::jsonb,
   PRIMARY KEY (source_id, source_entry_id, sense_index),
   FOREIGN KEY (source_id, source_entry_id)
     REFERENCES public.los_dictionary_lexemes(source_id, source_entry_id) ON DELETE CASCADE
@@ -188,7 +189,8 @@ AS $search$
     r.license_url,r.evidence_url,r.match_type,
     COALESCE((SELECT jsonb_agg(jsonb_build_object(
       'senseIndex',n.sense_index,'glosses',n.source_glosses,
-      'glossLanguage',n.gloss_language,'translations',
+      'glossLanguage',n.gloss_language,
+      'formOfCandidates',n.form_of_candidates,'translations',
       COALESCE((SELECT jsonb_agg(jsonb_build_object('language',t.language,'value',t.value)
         ORDER BY t.translation_index)
         FROM public.los_dictionary_translations t
