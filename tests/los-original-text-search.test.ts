@@ -32,7 +32,7 @@ test("repeated sources retain chapter-specific Text B links without invented or 
  assert.ok(mcom.some(x=>x.chapterId==="03"&&x.section==="text-b"));
  assert.equal(source.some(x=>x.chapterId==="07"&&x.section==="text-b"),false,
   "C07 is an honest separate learner-authored alphabet aid, not exact original audio text");
- assert.equal(searchLos1OriginalTexts(""),[].length?1:0); 
+ assert.deepEqual(searchLos1OriginalTexts(""),[]); 
  assert.equal(searchLos1OriginalTexts("Hallo",3).length<=3,true);
  assert.deepEqual(searchLos1OriginalTexts("Hallo",0),[]);
 });
