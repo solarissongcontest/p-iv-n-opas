@@ -26,6 +26,15 @@ export const LOS1_C03_DRAFT_PDF_SPECS={
   requiredTexts:["Lisa","Müller","Woher","Deutschland","Bern","Thomas","Takashi","Wortschatz","Grammatik"],
 };
 
+export const LOS1_C04_DRAFT_PDF_SPECS={
+  leaves:16,
+  widthMm:176,
+  heightMm:250,
+  requiredTexts:["Schmidt","Standish","Ihnen","Guten Morgen","Wie geht es",
+    "Sie","heißt du","heißen Sie","Wortschatz","Grammatik","Moin","Servus",
+    "Bis bald","Gute Nacht","Duzen","siezen"],
+};
+
 export function parsePdfInfo(value){
   const pages=Number(value.match(/^Pages:\s*(\d+)/m)?.[1]??NaN);
   const match=value.match(/^Page size:\s*([\d.]+)\s*x\s*([\d.]+)\s*pts/m);
@@ -58,12 +67,13 @@ export function inspectDraftPdf({info,text,spec=LOS1_C01_DRAFT_PDF_SPECS}){
 function runCli(){
   const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),"..");
   const chapter=process.env["LOS1_FACSIMILE_CHAPTER"]??"01";
-  if(!["01","02","03"].includes(chapter))throw Error("Only C01–C03 drafts can be checked.");
+  if(!["01","02","03","04"].includes(chapter))throw Error("Only C01–C04 drafts can be checked.");
   const filename=path.resolve(process.argv[2]||
     path.join(root,`.artifacts/los1/LOS1_C${chapter}_B5_TAITTOLUONNOS.pdf`));
   const info=execFileSync("pdfinfo",[filename],{encoding:"utf8"});
   const text=execFileSync("pdftotext",["-enc","UTF-8",filename,"-"],{encoding:"utf8"});
-  const spec=chapter==="03"?LOS1_C03_DRAFT_PDF_SPECS:
+  const spec=chapter==="04"?LOS1_C04_DRAFT_PDF_SPECS:
+    chapter==="03"?LOS1_C03_DRAFT_PDF_SPECS:
     chapter==="02"?LOS1_C02_DRAFT_PDF_SPECS:LOS1_C01_DRAFT_PDF_SPECS;
   const result=inspectDraftPdf({info,text,spec});
   process.stdout.write(JSON.stringify({file:filename,...result},null,2)+"\n");
