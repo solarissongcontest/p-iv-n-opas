@@ -1,4 +1,5 @@
 .los-recall { max-width: 850px; }
+.los-recall-back { border: 1px solid var(--los-line); border-radius: 7px; background: var(--los-paper); color: var(--los-ink); padding: 10px 14px; min-height: 42px; margin-bottom: 14px; }
 .los-recall-stats { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 11px; margin: 20px 0; }
 .los-recall-stats > div { display: flex; flex-direction: column; gap: 5px; padding: 16px 13px; border: 1px solid var(--los-line); border-radius: 9px; background: var(--los-book-tint); }
 .los-recall-stats strong { font-size: 25px; line-height: 1.1; font-variant-numeric: tabular-nums; }
