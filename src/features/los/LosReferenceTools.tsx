@@ -90,7 +90,7 @@ export function LosLearningPath({ book, move }: { book: LosBookDefinition; move:
     <p className="los-eyebrow">OHJATTU LUKUJÄRJESTYS / {book.code}</p>
     <h1>Opetuspolku</h1>
     <p className="los-page-intro">Kirjan 60 suunniteltua, noin 30 minuutin oppituntia. Opetuspolku viittaa samoihin oppikirjasivuihin, eikä tee niistä erillisiä kursseja. Kertaus II:n kolme lähteistä riippumatonta tuntia ovat käytettävissä ennen varsinaisen loppukokeen valmistumista.</p>
-    <div className="los-path-notice"><BookOpen size={20}/><p><strong>{LOS1_EXECUTABLE_LESSONS.length}/60 oppituntia on käytettävissä.</strong> Opetukseen toteutetut tunnit löytyvät kappaleista C01–C07 ja C09 sekä Kertaus I -jaksosta. C08:ssa ja C10:ssä vain erikseen nimetyt lähteistä riippumattomat harjoitustunnit ovat käytössä; niiden päätekstit puuttuvat edelleen. Muut tunnit ovat vasta sisältökartta, eivät valmiita suorituksia.</p></div>
+    <div className="los-path-notice"><BookOpen size={20}/><p><strong>{LOS1_EXECUTABLE_LESSONS.length}/60 oppituntia on käytettävissä.</strong> Opetukseen toteutetut tunnit löytyvät kappaleista C01–C07 ja C09 sekä Kertaus I -jaksosta. C08:ssa vain erikseen nimetyt lähteistä riippumattomat harjoitustunnit ovat käytössä, sillä sen pääteksti puuttuu edelleen. C10:n koko Harald-haastattelun litteraatti on nyt luettavissa kirjan sisällä, mutta sen äänitteen sekä kielellisen ja laitteellisen tarkistuksen vuoksi kaikki C10-oppitunnit eivät vielä ole käytettävissä. Muut tunnit ovat vasta sisältökartta, eivät valmiita suorituksia.</p></div>
     <LosFirstLessons selectedId={selectedLesson} onSelect={selectLesson} move={move} />
     {groups.map(group=><section key={group.section} className="los-path-group">
       <h2>{group.section}</h2>
