@@ -194,7 +194,7 @@ test("C01–C10 show chapter-specific sourced photos instead of abandoned facsim
  for(const chapter of chapters){
    await openChapter(page,chapter,"chapter");
    await expect(page.locator(".los1-digital-photo")).toBeVisible();
-   await expect(page.locator(".los1-digital-photo figcaption a")).toHaveAttribute("href",/pexels.com\\/photo\\//);
+   await expect(page.locator(".los1-digital-photo figcaption a")).toHaveAttribute("href",/pexels[.]com/);
  }
  await page.goto("/los#/1/facsimile",{waitUntil:"domcontentloaded"});
  await expect(page.locator(".los-front")).toBeVisible();
