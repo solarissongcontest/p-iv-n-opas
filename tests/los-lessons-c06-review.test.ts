@@ -56,7 +56,7 @@ test("C06 five real numeric lessons match canonical plan and use only existing q
       if(e.kind==="checked-source")assert.ok(e.ids?.every(id=>source.has(id)),lesson.id+" missing source question");
     }
   }
-  for(let n=27;n<=30;n++)assert.equal(isLos1ExecutableLesson("L"+String(n).padStart(3,"0")),false);
+  for(let n=27;n<=30;n++)assert.equal(isLos1ExecutableLesson("L"+String(n).padStart(3,"0")),true);
   assert.equal(LOS1_C06_LESSON_BLUEPRINTS[3]?.evidence[0]?.kind,"checked-source");
   assert.equal(LOS1_C06_LESSON_BLUEPRINTS[4]?.evidence[0]?.kind,"chapter-test");
 });
