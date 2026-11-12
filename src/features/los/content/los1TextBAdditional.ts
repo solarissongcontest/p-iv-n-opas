@@ -1,7 +1,7 @@
 import {LOS1_C01_LINES,LOS1_C01_GLOSS} from "./los1C01.ts";
 import {LOS1_M_COM_02_LINES,LOS1_M_COM_02_GLOSS} from "./los1MCom02.ts";
 
-export type LosTextBChapter="04"|"06"|"07"|"10";
+export type LosTextBChapter="04"|"06"|"07"|"09"|"10";
 type Question={id:string;prompt:string;options:readonly {id:"a"|"b"|"c";text:string}[];correctId:"a"|"b"|"c";explanation:string};
 const question=(ch:LosTextBChapter,n:number,prompt:string,choices:[string,string,string],correctId:"a"|"b"|"c",explanation:string):Question=>({
  id:"C"+ch+"-TEXTB-Q"+String(n).padStart(2,"0"),prompt,
@@ -78,6 +78,28 @@ export const LOS1_TEXT_B_SOURCES={
    question("07",4,"Mitä tarkoittaa Bitte buchstabieren Sie?",["Vielä kerran, kiitos","Olkaa hyvä ja tavatkaa","Mikä ikänne on?"],"b","Bitte buchstabieren Sie pyytää kohteliaasti tavaamaan."),
   ],
  },
+ "09":{
+  sourceId:"M-COM-07",title:"Die Wochentage · seitsemän viikonpäivää",
+  summary:"Christophin itse äänittämä, noin 15 sekunnin kokonainen luettelo saksan viikonpäivistä. Tämä on aito luettu sanalista, ei tekaistu tapahtumakertomus tai dialogi. Teksti kuuluu samaan äänilähteeseen. Kirjan C09:n oma ensisijainen Text A on edelleen erillinen Sport und Zeit.",
+  transcriptIsExact:true,
+  lines:[{id:"u01",speaker:"Puhuja",text:"Tage: Montag, Dienstag, Mittwoch, Donnerstag, Freitag, Samstag, Sonntag.",
+   meaning:"Päivät: maanantai, tiistai, keskiviikko, torstai, perjantai, lauantai, sunnuntai."}],
+  glossary:{tage:"päivät",montag:"maanantai",dienstag:"tiistai",mittwoch:"keskiviikko",
+   donnerstag:"torstai",freitag:"perjantai",samstag:"lauantai",sonntag:"sunnuntai"},
+  attribution:{author:"Christoph (English Wikibooks, 2007)",title:"German Vocabulary - Days.ogg",
+   url:"https://commons.wikimedia.org/wiki/File:German_Vocabulary_-_Days.ogg",
+   license:"CC BY-SA 3.0",licenseUrl:"https://creativecommons.org/licenses/by-sa/3.0/"},
+  questions:[
+   question("09",1,"Mikä viikonpäivä mainitaan luettelossa tiistain jälkeen?",
+    ["Mittwoch","Montag","Freitag"],"a","Tage-luettelossa Dienstag seuraa Montagia ja Mittwoch tulee Dienstag-päivän jälkeen."),
+   question("09",2,"Mikä vastaa torstaita?",
+    ["Sonntag","Donnerstag","Dienstag"],"b","Donnerstag tarkoittaa torstaita."),
+   question("09",3,"Mikä päivän nimi kuuluu ennen sunnuntaita?",
+    ["Montag","Mittwoch","Samstag"],"c","Luettelon lopussa on Samstag, Sonntag."),
+   question("09",4,"Mikä on saksaksi perjantai?",
+    ["Freitag","Dienstag","Sonntag"],"a","Freitag on perjantai; tämä on neljäs arkipäivä maanantain jälkeen."),
+  ],
+ },
  "10":{
   sourceId:"M-COM-02",title:"Thomas ja Takashi: kolmannen henkilön esittely",
   summary:"Koko neljän repliikin autenttinen esittelydialogi; sitä käytettiin myös C02:ssa ja C03:ssa. Nyt etsi erityisesti Das ist Peter ja wir kommen aus -ilmaisu. Äänitteen toisto on vielä testaamatta iPhonella ja tietokoneella.",
@@ -94,7 +116,7 @@ export const LOS1_TEXT_B_SOURCES={
 export function isLosTextBChapter(id:string):id is LosTextBChapter{return id in LOS1_TEXT_B_SOURCES;}
 export function validateLosTextB():string[]{
  const errors:string[]=[];
- for(const chapterId of ["04","06","07","10"] as const){
+ for(const chapterId of ["04","06","07","09","10"] as const){
   const resource=LOS1_TEXT_B_SOURCES[chapterId];
   if(resource.questions.length!==4)errors.push("C"+chapterId+" requires four checks");
   if(new Set(resource.questions.map(q=>q.id)).size!==4)errors.push("C"+chapterId+" duplicate question IDs");
