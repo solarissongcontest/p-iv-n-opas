@@ -128,6 +128,8 @@ export function validateLos1EditionRelease(
     }
     if(page.kind==="content"&&!page.chapterId)
       problems.push("Sisältösivulta puuttuu kappaletunnus: "+page.pageId);
+    if(page.kind==="content"&&!/^\d+$/.test(page.printedPageLabel??""))
+      problems.push("Varsinaiselta sisältösivulta puuttuu painettu sivunumero: "+page.pageId);
   }
   for(const [spreadId,pages] of spreadGroups){
     if(pages.length!==2||pages[0]?.physicalSide!=="left"||
