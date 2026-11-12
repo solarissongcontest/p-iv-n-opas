@@ -16,7 +16,11 @@ export type LosOpenQuestion = {
   explanation: string;
 };
 export type LosOpenText = {
-  chapterId: "03"|"04"|"05"|"07"|"09";
+  chapterId: "03"|"04"|"05"|"06"|"07"|"09";
+  author?:string;
+  licenseCode?:string;
+  licenseUrl?:string;
+  sourceDetail?:string;
   sourceId: string;
   revision: string;
   sourceUrl: string;
@@ -314,7 +318,74 @@ const c09: LosOpenText = {
   evidenceExplanation:"Kolmannessa repliikissä Franz kertoo pelaavansa jalkapalloa kolmelta.",
 };
 
-export const LOS1_OPEN_DIALOGUES: readonly LosOpenText[] = [c03,c04,c05,c07,c09];
+
+/**
+ * C06 Text A: four distinct complete human-authored mini-dialogues.
+ * Literal German lines follow the ORIGINAL transcription, not the page's
+ * inconsistent translated practice worksheet (which mentions Lucas).
+ *
+ * Source: Monika Janicka, Sag mal, wie alt bist du?,
+ * https://zpe.gov.pl/a/plik-audio/DIcQL1VxT
+ * The transcription explicitly credits the author and CC BY-SA 3.0.
+ * The audio stream has not been integrated or device-tested.
+ * Finnish translations and questions are independent LOS! aids.
+ */
+const c06:LosOpenText={
+  chapterId:"06",sourceId:"M-ZPE-01",revision:"source-checked-2026-11-12",
+  sourceUrl:"https://zpe.gov.pl/a/plik-audio/DIcQL1VxT",
+  author:"Monika Janicka",
+  licenseCode:"CC BY-SA 3.0",
+  licenseUrl:"https://creativecommons.org/licenses/by-sa/3.0/",
+  sourceDetail:"Alkuperäisen lähdesivun Sag mal, wie alt bist du? -litteraatti sisältää neljä lyhyttä erillistä dialogia. Puheäänitteen itsenäinen tallennus ja toisto ovat yhä testaamatta. Suomenkieliset tukiselitykset ovat LOS!:n toimitusta.",
+  title:"Sag mal, wie alt bist du?",
+  heading:"Neljä keskustelua iästä",
+  guidance:"Lue kaikki neljä alkuperäistä lyhyttä dialogia. Etsi ensin vain nimet ja ikälukusanat. Lapsille suunnatussa tekstissä esiintyy myös vielä opettamattomia muotoja kuten seid ihr, wir sind ja ist er; ne ovat tässä vain tunnistettavia tukirakenteita. Aineisto on vielä kieli- ja laitetarkistusta odottava esikatselu.",
+  originalLines:[
+    {id:"u01",sectionTitle:"Dialog 1",speaker:"A",text:"Hi, wie alt bist du?",meaning:"Hei, kuinka vanha olet?"},
+    {id:"u02",speaker:"B",text:"Ich bin fünf.",meaning:"Olen viisi."},
+    {id:"u03",speaker:"A",text:"Und wie heißt du?",meaning:"Ja mikä sinun nimesi on?"},
+    {id:"u04",speaker:"B",text:"Oskar.",meaning:"Oskar."},
+    {id:"u05",sectionTitle:"Dialog 2",speaker:"A",text:"Hallo, ich bin Fabian. Und wie heißt du?",meaning:"Hei, olen Fabian. Ja mikä sinun nimesi on?"},
+    {id:"u06",speaker:"B",text:"Ich bin Larissa.",meaning:"Olen Larissa."},
+    {id:"u07",speaker:"A",text:"Bist du schon elf?",meaning:"Oletko jo yksitoista?"},
+    {id:"u08",speaker:"B",text:"Ich bin schon zwölf Jahre alt.",meaning:"Olen jo kaksitoista vuotta vanha."},
+    {id:"u09",sectionTitle:"Dialog 3",speaker:"A",text:"Wie alt seid ihr?",meaning:"Kuinka vanhoja te olette?"},
+    {id:"u10",speaker:"B+C",text:"Wir sind 10.",meaning:"Olemme kymmenen."},
+    {id:"u11",sectionTitle:"Dialog 4",speaker:"A",text:"Wie alt ist er?",meaning:"Kuinka vanha hän on?"},
+    {id:"u12",speaker:"B",text:"Paul? Er ist elf Jahre alt.",meaning:"Paul? Hän on yksitoistavuotias."},
+  ],
+  glossary:{...common,
+    hi:"hei, tuttavallinen tervehdys",alt:"vanha; Wie alt bist du? = kuinka vanha olet?",
+    heißt:"on nimeltään; Wie heißt du? = mikä sinun nimesi on?",
+    fünf:"viisi",schon:"jo",elf:"yksitoista",zwölf:"kaksitoista",
+    zehn:"kymmenen",jahre:"vuotta; Jahre alt = vuotta vanha",
+    bist:"olet; sein-verbin du-muoto",seid:"olette; sein-verbin ihr-muoto, vain tunnistettava",
+    ihr:"te (tuttavallinen monikon puhuttelu), vain tunnistettava",wir:"me",
+    sind:"olemme/olette/ovat; sein-verbin monikkomuoto, vain tunnistettava",
+    er:"hän (miespuolinen), vain tunnistettava",oskar:"Oskar, etunimi",
+    fabian:"Fabian, etunimi",larissa:"Larissa, etunimi",
+    paul:"Paul, etunimi",
+  },
+  questions:[
+    {id:"C06-ZPE-Q01",prompt:"Kuinka vanha Oskar sanoo olevansa ensimmäisessä keskustelussa?",
+      answers:[{id:"a",text:"5-vuotias"},{id:"b",text:"11-vuotias"},{id:"c",text:"12-vuotias"}],correctId:"a",
+      explanation:"Ich bin fünf. on ensimmäisen keskustelun vastaus. Fünf on viisi."},
+    {id:"C06-ZPE-Q02",prompt:"Kuinka vanha Larissa sanoo olevansa?",
+      answers:[{id:"a",text:"11-vuotias"},{id:"b",text:"12-vuotias"},{id:"c",text:"10-vuotias"}],correctId:"b",
+      explanation:"Larissa vastaa Ich bin schon zwölf Jahre alt. Zwölf on kaksitoista."},
+    {id:"C06-ZPE-Q03",prompt:"Minkä ikäisiä kolmannen dialogin kaksi puhujaa sanovat olevansa?",
+      answers:[{id:"a",text:"12-vuotiaita"},{id:"b",text:"11-vuotiaita"},{id:"c",text:"10-vuotiaita"}],correctId:"c",
+      explanation:"Wir sind 10 tarkoittaa Olemme kymmenen. Tässä luku on alkuperäisessä tekstissä numerona."},
+    {id:"C06-ZPE-Q04",prompt:"Kenen ikä kerrotaan neljännessä dialogissa?",
+      answers:[{id:"a",text:"Paulin (11 vuotta)"},{id:"b",text:"Fabianin (12 vuotta)"},{id:"c",text:"Oskarin (5 vuotta)"}],correctId:"a",
+      explanation:"Paul? Er ist elf Jahre alt. kertoo Paulin olevan yksitoistavuotias."},
+  ],
+  evidenceLineId:"u08",
+  evidenceQuestion:"Missä repliikissä Larissa kertoo olevansa 12-vuotias?",
+  evidenceExplanation:"Toisen dialogin viimeinen repliikki kuuluu Ich bin schon zwölf Jahre alt.",
+};
+
+export const LOS1_OPEN_DIALOGUES: readonly LosOpenText[] = [c03,c04,c05,c06,c07,c09];
 export function getLosOpenDialogue(chapterId: string): LosOpenText | undefined {
   return LOS1_OPEN_DIALOGUES.find(text=>text.chapterId===chapterId);
 }
