@@ -7,6 +7,9 @@ on:
       - "scripts/los-dictionary-import.py"
       - "scripts/tests/test_los_dictionary_import.py"
       - "scripts/tests/test_los_dictionary_loader.py"
+      - "scripts/tests/test_los_dictionary_real_stage.py"
+      - "scripts/los-dictionary-real-stage-qa.py"
+      - "scripts/tests/los-dictionary-real-source-qa.sql"
       - "scripts/tests/los-dictionary-postgres-smoke.sql"
       - "supabase/migrations/20261112170000_los_dictionary_search_staging.sql"
       - ".github/workflows/los-dictionary-import-ci.yml"
@@ -38,7 +41,21 @@ jobs:
 
   freedict-source-inspection:
     runs-on: ubuntu-24.04
-    timeout-minutes: 15
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_DB: los_u2_real_stage_qa
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: los-test-only
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
     steps:
       - uses: actions/checkout@v4
       - name: Setup Python
@@ -128,6 +145,28 @@ jobs:
               --manifest "/tmp/los-u2-sources/$direction-staged.jsonl.manifest.json" \
               --approvals docs/LOS_U2_FREEDICT_STAGING_SOURCE_APPROVALS.json
           done
+      - name: Physically stage real FreeDict data in disposable PostgreSQL 17
+        shell: bash
+        env:
+          PGPASSWORD: los-test-only
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq && sudo apt-get install -y postgresql-client
+          python scripts/los-dictionary-real-stage-qa.py \
+            /tmp/los-u2-sources docs/LOS_U2_FREEDICT_STAGING_SOURCE_APPROVALS.json \
+            /tmp/los-u2-sources/qa-csv
+          psql -v ON_ERROR_STOP=1 -h localhost -U postgres -d los_u2_real_stage_qa \
+            -c "CREATE ROLE anon NOLOGIN; CREATE ROLE authenticated NOLOGIN; CREATE ROLE service_role NOLOGIN BYPASSRLS;"
+          psql -v ON_ERROR_STOP=1 -h localhost -U postgres -d los_u2_real_stage_qa \
+            -f supabase/migrations/20261112170000_los_dictionary_search_staging.sql
+          psql -v ON_ERROR_STOP=1 -h localhost -U postgres -d los_u2_real_stage_qa \
+            -c 'CREATE TABLE public.los_dict_qa_sources (payload jsonb NOT NULL); CREATE TABLE public.los_dict_qa_entries (source_id text NOT NULL, payload jsonb NOT NULL);'
+          psql -v ON_ERROR_STOP=1 -h localhost -U postgres -d los_u2_real_stage_qa \
+            -c "\copy public.los_dict_qa_sources (payload) FROM '/tmp/los-u2-sources/qa-csv/sources.csv' WITH (FORMAT csv)"
+          psql -v ON_ERROR_STOP=1 -h localhost -U postgres -d los_u2_real_stage_qa \
+            -c "\copy public.los_dict_qa_entries (source_id,payload) FROM '/tmp/los-u2-sources/qa-csv/entries.csv' WITH (FORMAT csv)"
+          psql -v ON_ERROR_STOP=1 -h localhost -U postgres -d los_u2_real_stage_qa \
+            -f scripts/tests/los-dictionary-real-source-qa.sql
       - name: Archive actual counts and source hashes only; NO corpus publication
         uses: actions/upload-artifact@v4
         with:
