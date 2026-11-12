@@ -18,10 +18,18 @@ CREATE TABLE IF NOT EXISTS public.los_dictionary_sources (
   imported_source_rows bigint NOT NULL DEFAULT 0 CHECK (imported_source_rows >= 0),
   actual_loaded_rows bigint NOT NULL DEFAULT 0 CHECK (actual_loaded_rows >= 0),
   published boolean NOT NULL DEFAULT false,
+  legal_review_approved boolean NOT NULL DEFAULT false,
+  legal_review_at timestamptz,
+  legal_review_by text,
   imported_at timestamptz NOT NULL DEFAULT now(),
   published_at timestamptz,
   CONSTRAINT los_dict_published_count CHECK (
-    NOT published OR (actual_loaded_rows > 0 AND published_at IS NOT NULL)
+    NOT published OR (
+      actual_loaded_rows > 0 AND imported_source_rows = actual_loaded_rows
+      AND published_at IS NOT NULL
+      AND legal_review_approved = true AND legal_review_at IS NOT NULL
+      AND length(btrim(legal_review_by)) >= 3
+    )
   )
 );
 
