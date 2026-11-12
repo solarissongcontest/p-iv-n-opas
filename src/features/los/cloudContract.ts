@@ -44,6 +44,7 @@ export function validLosChapter(bookId:unknown,chapterId:unknown):bookId is numb
 export function draftIsEmpty(draft:LosChapterDraft) {
   return !draft.note.trim() && !draft.applicationDraft.trim() && !draft.bookmarked &&
     !Object.values(draft.practiceAnswers).some(Boolean) &&
+    draft.practiceChecked.length===0 &&
     !(draft.readerMarks && Object.values(draft.readerMarks).some(Boolean)) &&
     !(draft.lessonProgress && Object.values(draft.lessonProgress).some(progress=>Boolean(progress.startedAt || progress.completedAt || progress.exitCheckedAt || progress.completedStepIds.length))) &&
     !(draft.recallCards && Object.keys(draft.recallCards).length>0) &&

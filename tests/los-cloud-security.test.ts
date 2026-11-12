@@ -18,6 +18,9 @@ test("LOS private cloud contract rejects oversized and corrupted payloads",()=>{
   assert.equal(validateLosCloudDraft({...blank,version:2}),false);
   assert.equal(draftIsEmpty(blank),true);
   assert.equal(draftIsEmpty({...blank,note:"Guten Tag!"}),false);
+  // A chapter with only checked practice IDs is still user work: do not
+  // drop it from JSON backup or overwrite it in a missing-only import.
+  assert.equal(draftIsEmpty({...blank,practiceChecked:["C01-EX-01"]}),false);
 });
 test("LOS cloud keys are restricted to real book and chapter identifiers",()=>{
   assert.equal(validLosChapter(1,"01"),true);

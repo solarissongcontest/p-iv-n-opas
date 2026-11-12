@@ -1,14 +1,20 @@
 import { useEffect, useMemo, useState } from "react";
 import { ArrowRight, BookOpen, ChevronRight, Headphones, Search, Volume2 } from "lucide-react";
 import { LOS_BOOKS, type LosBookDefinition } from "./catalog";
+import { LosDictionarySearch } from "./LosDictionarySearch";
+import { LosDictionaryCard } from "./LosDictionaryCard";
+import type { LosDictionaryResult } from "./dictionaryClient";
 import { LOS_1_LESSONS } from "./learningPath";
 import { LosFirstLessons } from "./LosFirstLessons";
 import { LOS1_EXECUTABLE_LESSONS, isLos1ExecutableLesson } from "./guidedLessons";
 
-export type LosDestination = "overview" | "contents" | "chapter" | "text" | "understand" | "vocabulary" | "grammar" | "text-b" | "practice" | "apply" | "culture" | "test" | "appendix" | "dictionary" | "path" | "search" | "midterm" | "review" | "review-ii" | "cards" | "progress" | "final" | "summary" | "facsimile";
+export type LosDestination = "overview" | "contents" | "chapter" | "text" | "understand" | "vocabulary" | "grammar" | "text-b" | "practice" | "apply" | "culture" | "test" | "appendix" | "dictionary" | "path" | "search" | "midterm" | "review" | "review-ii" | "cards" | "progress" | "final" | "summary";
 import {searchLos1OriginalTexts} from "./content/los1TextSearch";
 export type LosNavigate = (chapter: string | null, section: LosDestination) => void;
 type WordEntry = { book: number; code: string; chapter: string; title: string; word: string; meaning: string };
+type DictionarySelection =
+  | {kind:"local";entry:WordEntry}
+  | {kind:"published";entry:LosDictionaryResult};
 const DICTIONARY = LOS_BOOKS.flatMap(book => book.chapters.flatMap(chapter =>
   chapter.vocabulary.map(item => {
     const [word, ...rest] = item.split(" – ");
@@ -21,6 +27,7 @@ export function LosDictionary({ book, move, openBook }: { book: LosBookDefinitio
   const [search, setSearch] = useState("");
   const [hidden, setHidden] = useState(false);
   const [scope, setScope] = useState<"book" | "series">("book");
+  const [selection,setSelection] = useState<DictionarySelection|null>(null);
   const entries = useMemo(() => DICTIONARY.filter(entry =>
     (scope === "series" || entry.book === book.id) &&
     (entry.word.toLocaleLowerCase("de").includes(search.trim().toLocaleLowerCase("de")) ||
@@ -29,21 +36,32 @@ export function LosDictionary({ book, move, openBook }: { book: LosBookDefinitio
   return <section className="los-inner-page los-dictionary-page">
     <p className="los-eyebrow">WÖRTERBUCH · LOS! {book.id}</p>
     <h1>Sanakirja</h1>
-    <p className="los-page-intro">Selaa kirjan kappaleiden sanastoa saksaksi tai suomeksi. Alkuperäistekstien kokonaisia repliikkejä ja niiden suomennoksia voit hakea myös kirjan Haku-sivulla.</p>
+    <p className="los-page-intro">Laaja saksa–suomi- ja suomi–saksa-sanakirja käyttää vain erikseen hyväksyttyjä, ladattuja sanakirjalähteitä. Hakutulokset näytetään lähteineen, kun aineiston julkaisu on vahvistettu.</p>
+    <LosDictionarySearch onOpenCard={entry=>setSelection({kind:"published",entry})} />
+    {selection?.kind==="published" && <LosDictionaryCard floating
+      word={selection.entry.lemma} publishedEntry={selection.entry}
+      onClose={() => setSelection(null)} />}
+    {selection?.kind==="local" && <LosDictionaryCard floating
+      word={selection.entry.word} contextMeaning={selection.entry.meaning}
+      onClose={() => setSelection(null)} />}
+    <h2>Kappalesanasto</h2>
+    <p>Tämä erillinen paikallinen sanastoluettelo perustuu LOS!-kirjojen opetettaviin sanoihin. Se ei ole yleissanakirja. Alkuperäistekstien kokonaisia repliikkejä ja niiden suomennoksia voit hakea myös kirjan Haku-sivulla.</p>
     <div className="los-index-options">
-      <div className="los-index-tabs" role="group" aria-label="Sanakirjan laajuus">
+      <div className="los-index-tabs" role="group" aria-label="Kappalesanaston laajuus">
         <button className={scope === "book" ? "is-active" : ""} aria-pressed={scope === "book"} onClick={() => setScope("book")}>Tämä kirja</button>
         <button className={scope === "series" ? "is-active" : ""} aria-pressed={scope === "series"} onClick={() => setScope("series")}>Koko sarja</button>
       </div>
       <button className="los-index-toggle" onClick={() => setHidden(v => !v)} aria-pressed={hidden}>{hidden ? "Näytä suomennokset" : "Peitä suomennokset"}</button>
     </div>
     <label className="los-index-search"><Search size={19}/><span className="sr-only">Hae saksaksi tai suomeksi</span><input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Hae saksaksi tai suomeksi" autoComplete="off" /></label>
-    <p className="los-index-count">{entries.length} hakusanaa</p>
+    <p className="los-index-count">{entries.length} kappalesanaston hakusanaa</p>
     {entries.length === 0 ? <p>Ei hakusanoja tällä rajauksella. Muut kirjat saavat hakusanastonsa, kun niiden sisällöt valmistuvat.</p> :
       <div className="los-index-table" role="table" aria-label="Sanakirjahakemisto">
         <div className="los-index-table-head" role="row"><span role="columnheader">Deutsch</span><span role="columnheader">Suomi</span><span role="columnheader">Lähde</span></div>
         {entries.map((item,i)=><div role="row" className="los-index-entry" key={`${item.book}-${item.chapter}-${i}-${item.word}`}>
-          <strong role="cell" lang="de">{item.word}</strong>
+          <strong role="cell"><button type="button" lang="de" className="los-index-word-card"
+            aria-label={`Avaa sanakortti: ${item.word}`}
+            onClick={()=>setSelection({kind:"local",entry:item})}>{item.word}</button></strong>
           <span role="cell">{hidden ? <span className="los-muted-hidden">Piilotettu</span> : item.meaning}</span>
           <button type="button" role="cell" title={`Avaa ${item.title}`} onClick={()=>item.book === book.id ? move(item.chapter, "vocabulary") : openBook(item.book)}>
             <span>{item.code} · {Number(item.chapter)}</span><ChevronRight size={15}/>

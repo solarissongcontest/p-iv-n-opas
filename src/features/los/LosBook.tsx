@@ -1,10 +1,11 @@
-import { useEffect, useMemo, useState, type CSSProperties } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { ArrowLeft, ArrowRight, BookOpen, ChevronLeft, ChevronRight, Headphones, List, Menu, Search, X } from "lucide-react";
 import { readCachedDeviceUser } from "@/lib/deviceSession";
 import { LOS_BOOKS, type LosBookDefinition, type LosChapter } from "./catalog";
 import { getLosChapterSourceGate } from "./content/sourceRegistry";
 import { LosAuthenticAudio, LosDictionary, LosIndexSearch, LosLearningPath, type LosDestination } from "./LosReferenceTools";
 import { LosChapterGrammar } from "./LosGrammarChapters";
+import { LosC01GrammarGuide } from "./LosC01GrammarGuide";
 import { LosC01AuthenticText } from "./LosC01AuthenticText";
 import { LosC02AuthenticText } from "./LosC02AuthenticText";
 import { LosC02Understanding } from "./LosC02Understanding";
@@ -14,6 +15,11 @@ import { getLosOpenDialogue } from "./content/los1OpenDialogues";
 import { LosNotebook, LosWorkbook } from "./LosWorkbook";
 import { LosBackups } from "./LosBackups";
 import { LosBookStartAction } from "./LosBookStartAction";
+import { LosDictionaryCard } from "./LosDictionaryCard";
+import { LosContentTree } from "./LosContentTree";
+import { isLosContentTask, type LosContentTask } from "./contentTreeModel";
+import { getLosPronunciation } from "./pronunciation";
+import { inspectLosVocabularyQA } from "./pronunciationPublication";
 import { Los1ChapterImage } from "./Los1ChapterImage";
 import { Los1VisualLearning } from "./Los1VisualLearning";
 import { LosMidtermExam } from "./LosMidtermExam";
@@ -28,17 +34,19 @@ import "./los-appendix.css";
 import "./los-workbook.css";
 import "./los-cloud.css";
 import "./los-backups.css";
+import "./los-u3-content-tree.css";
+import "./los-u3-split.css";
 
 type LosSection = LosDestination;
-type LosLocation = { book: number | null; chapter: string | null; section: LosSection };
+type LosLocation = { book: number | null; chapter: string | null; section: LosSection; taskId: string | null };
 /** Kymmenen näkyvää kappaleosiota LOS! 1:n kirjakohtaisen masterplanin mukaan. */
 const sections: { id: LosSection; label: string }[] = [
   { id:"chapter", label:"Aloita" },
-  { id:"text", label:"Text A" },
+  { id:"text", label:"Teksti A" },
   { id:"understand", label:"Ymmärrä" },
   { id:"vocabulary", label:"Sanasto" },
   { id:"grammar", label:"Kielioppi" },
-  { id:"text-b", label:"Text B" },
+  { id:"text-b", label:"Teksti B" },
   { id:"practice", label:"Harjoittele" },
   { id:"apply", label:"Käytä saksaa" },
   { id:"culture", label:"Kulttuuri" },
@@ -50,14 +58,18 @@ const bookStyle = (book: LosBookDefinition): CSSProperties => ({
 } as CSSProperties);
 const strip = (text: string) => text.split(" – ");
 function readLocation(): LosLocation {
-  if (typeof window === "undefined") return { book: null, chapter: null, section: "overview" };
+  if (typeof window === "undefined") return { book: null, chapter: null, section: "overview", taskId: null };
   const parts = window.location.hash.replace(/^#\/?/, "").split("/").filter(Boolean);
   const parsedBook = Number(parts[0]);
   const book = Number.isInteger(parsedBook) && parsedBook >= 1 && parsedBook <= 8 ? parsedBook : null;
   const chapter = book === 1 && /^\d{2}$/.test(parts[1] ?? "") ? (parts[1] ?? null) : null;
   const token = parts[chapter ? 2 : 1];
   const section = (["overview", "contents", "chapter", "text", "vocabulary", "grammar", "practice", "appendix", "dictionary", "path", "search", "midterm", "review", "review-ii", "cards", "progress", "final", "summary", "understand", "text-b", "apply", "culture", "test"].includes(token ?? "") ? token : chapter ? "chapter" : "overview") as LosSection;
-  return { book, chapter, section };
+  const requestedTaskId = parts[3] ?? "";
+  const taskId = chapter && (section === "practice" || section === "test") &&
+    /^[A-Za-z0-9][A-Za-z0-9-]{1,90}$/.test(requestedTaskId) &&
+    isLosContentTask(chapter, section, requestedTaskId) ? requestedTaskId : null;
+  return { book, chapter, section, taskId };
 }
 function linkTo(book?: number, chapter?: string, section: LosSection = "overview") {
   return !book ? "#/" : chapter ? `#/${book}/${chapter}/${section}` : `#/${book}/${section}`;
@@ -184,7 +196,7 @@ function ChapterOpening({ chapter, book, move }: { chapter: LosChapter; book: Lo
       <div>
         <p className="los-overline">TÄSSÄ KAPPALEESSA</p>
         <h2>Opit käyttämään saksaa</h2>
-        <p className="los-opening-lead">Aloita uusi aihe sen keskeisistä sanoista ja rakenteista. Lähdeaineistot avataan samaan kirjaan, kun niiden tarkistus on valmis.</p>
+        <p className="los-opening-lead">{chapter.id==="01" ? "Aloitat saksan aivan nollasta. Harjoittele ensin tervehdykset, lue Franzin ja Jörgin kokonainen alkuperäiskeskustelu, tutki sanoja ja vasta sitten tee tehtävät. Tekstin kielellinen ja audion laitetarkistus ovat vielä kesken." : "Tutustu kappaleen tavoitteisiin ja lue tekstin lähdetiedot. Opetussisällön sekä äänen julkaisu- ja laitetarkistus voivat vielä olla kesken."}</p>
       </div>
       <aside className="los-goals"><h3>Kappaleen tavoitteet</h3><ul>{chapter.objectives.map(goal => <li key={goal}>{goal}</li>)}</ul></aside>
     </div>
@@ -285,40 +297,42 @@ function Grammar({ chapter }: { chapter: LosChapter }) {
     <p className="los-eyebrow">GRAMMATIK / KAPITEL {Number(chapter.id)}</p>
     <h1>Kielioppi</h1>
     <h2>{chapter.grammar}</h2>
-    {first ? <>
-      <p>Saksan opiskelun alussa kannattaa opetella muutama tervehdys kokonaisena ilmauksena. Ne ovat käytännöllisiä, vaikka et vielä tunne sanojen kielioppia.</p>
-      <div className="los-example"><p lang="de">Guten Morgen!</p><span>Hyvää huomenta!</span></div>
-      <div className="los-example"><p lang="de">Guten Tag!</p><span>Hyvää päivää!</span></div>
-      <p><strong>Guten Morgen</strong> on aamun tervehdys. <strong>Guten Tag</strong> sopii päivään. Illalla sanotaan <strong>Guten Abend</strong>. Nämä ilmaukset kannattaa tässä vaiheessa opetella sellaisinaan.</p>
-      <h3>Ensimmäiset ääntämissäännöt</h3>
-      <table className="los-grammar-table"><thead><tr><th>Kirjain / yhdistelmä</th><th>Ääntäminen</th><th>Esimerkki</th></tr></thead><tbody>
-        <tr><td>w</td><td>yleensä kuten suomen v</td><td lang="de">wie</td></tr>
-        <tr><td>z</td><td>ts</td><td lang="de">zehn</td></tr>
-        <tr><td>ei</td><td>ai</td><td lang="de">mein</td></tr>
-        <tr><td>ie</td><td>pitkä i</td><td lang="de">wie</td></tr>
-        <tr><td>sch</td><td>š-äänne</td><td lang="de">Schule</td></tr>
-      </tbody></table>
-      <aside className="los-grammar-aside"><strong>Huomaa</strong><p>Saksan substantiivit kirjoitetaan isolla alkukirjaimella. Kirjaimet ä, ö, ü ja ß tulevat tutuiksi vähitellen.</p></aside>
-    </> : <LosChapterGrammar chapterId={chapter.id} />}
+    {first ? <LosC01GrammarGuide /> : <LosChapterGrammar chapterId={chapter.id} />}
   </section>;
 }
-function Vocabulary({ chapter, move, bookId }: { chapter: LosChapter; bookId:number; move: (chapter:string|null,section:LosSection)=>void }) {
+function Vocabulary({ chapter, bookId, move }: { chapter: LosChapter; bookId:number; move: (chapter:string|null,section:LosSection)=>void }) {
   const [query, setQuery] = useState("");
   const [showTranslations, setShowTranslations] = useState(true);
+  const coverage = useMemo(() => inspectLosVocabularyQA(bookId,chapter.id), [bookId,chapter.id]);
+  const [activeWord, setActiveWord] = useState<{word:string;meaning:string}|null>(null);
   const words = useMemo(() => chapter.vocabulary.map(strip).filter(parts => parts.join(" ").toLowerCase().includes(query.trim().toLowerCase())), [chapter, query]);
   return <section className="los-inner-page los-vocabulary-page">
     <p className="los-eyebrow">WORTSCHATZ / KAPITEL {Number(chapter.id)}</p>
     <h1>Sanasto</h1>
     <p className="los-page-intro">Kappaleen opetettavia sanoja ja ilmauksia. Tämä on tarkistettava ennakkoluettelo, ei vielä lopullinen sanakirjatietokanta.</p>
+    <p className="los-vocabulary-qa" role="status">IPA:n lähde löytynyt {coverage.ipaSourced}/{coverage.total} riville; asiantuntijan hyväksymä IPA {coverage.ipaHumanReviewed}/{coverage.total}, hyväksytty sanaääni {coverage.audioApproved}/{coverage.total}. Julkaisuportti on vielä avoin.</p>
     {bookId===1&&<Los1VisualLearning key={chapter.id} chapterId={chapter.id} placement="vocabulary"/>}
     <button type="button" className="los-outline-button" onClick={() => move(chapter.id,"cards")}>Kertaa sanastoa korteilla</button>
     <div className="los-vocabulary-tools">
       <label><Search size={17} /><span className="sr-only">Etsi sanastosta</span><input value={query} onChange={event => setQuery(event.target.value)} placeholder="Etsi sanaa…" /></label>
       <button aria-pressed={!showTranslations} onClick={() => setShowTranslations(v => !v)}>{showTranslations ? "Piilota suomennokset" : "Näytä suomennokset"}</button>
     </div>
-    <table className="los-word-table"><thead><tr><th>Deutsch</th><th>Suomi</th></tr></thead><tbody>
-      {words.map((parts, i) => <tr key={i}><td lang="de">{parts[0]}</td><td>{showTranslations ? parts[1] ?? "" : <span className="los-hidden-translation">Piilotettu</span>}</td></tr>)}
+    <table className="los-word-table"><thead><tr><th>Deutsch</th><th>IPA</th><th>Suomi</th></tr></thead><tbody>
+      {words.map((parts, i) => {
+        const word = parts[0] ?? "";
+        const pronunciation = getLosPronunciation(word);
+        return <tr key={i}>
+          <td><button className="los-word-open" type="button" lang="de"
+            onClick={() => setActiveWord({word,meaning:parts[1]??"Kontekstimerkitys tarkistamatta"})}
+            aria-label={`Avaa sanan ${word} ääntäminen ja selitys`}>{word}</button></td>
+          <td lang="de">{pronunciation?.ipa ? <span title="Lähteen sanamuoto tarkistettu; asiantuntija-arvio puuttuu">[{pronunciation.ipa}]</span> :
+            <span className="los-ipa-pending">Tarkistamatta</span>}</td>
+          <td>{showTranslations ? parts[1] ?? "" : <span className="los-hidden-translation">Piilotettu</span>}</td>
+        </tr>;
+      })}
     </tbody></table>
+    {activeWord && <LosDictionaryCard word={activeWord.word} contextMeaning={activeWord.meaning}
+      onClose={() => setActiveWord(null)} />}
     {!words.length && <p>Sanastosta ei löytynyt hakua vastaavaa sanaa.</p>}
   </section>;
 }
@@ -335,12 +349,62 @@ function Appendix({ book }: { book: LosBookDefinition }) {
 function LosBookWorkspace({ book, location, move, goLibrary, openBook }: { book: LosBookDefinition; location: LosLocation; move: (chapter: string | null, section: LosSection) => void; goLibrary: () => void; openBook: (id: number) => void }) {
   const chapter = book.chapters.find(c => c.id === location.chapter) ?? null;
   const [tocOpen, setTocOpen] = useState(false);
+  const [splitOpen, setSplitOpen] = useState(false);
+  const [splitInline, setSplitInline] = useState(false);
+  const mainRef = useRef<HTMLElement>(null);
+  const splitTriggerRef = useRef<HTMLButtonElement>(null);
+  const splitCloseRef = useRef<HTMLButtonElement>(null);
   useEffect(() => setTocOpen(false), [location]);
+  useEffect(() => setSplitOpen(false), [book.id, location.chapter]);
+  useEffect(() => {
+    const element = mainRef.current;
+    if (!element || typeof ResizeObserver === "undefined") return;
+    const resize = () => {
+      const style = window.getComputedStyle(element);
+      const inside = element.clientWidth - parseFloat(style.paddingLeft || "0")
+        - parseFloat(style.paddingRight || "0");
+      setSplitInline(inside >= 1050);
+    };
+    const observer = new ResizeObserver(resize);
+    observer.observe(element);
+    resize();
+    return () => observer.disconnect();
+  }, []);
+  useEffect(() => {
+    if (!splitOpen) return;
+    if (!splitInline) splitCloseRef.current?.focus();
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        setSplitOpen(false);
+        splitTriggerRef.current?.focus();
+      }
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [splitOpen, splitInline]);
+  useEffect(() => {
+    if (!location.taskId) return;
+    document.getElementById(location.taskId)?.scrollIntoView({block:"start"});
+  }, [location.taskId,location.section,location.chapter]);
+  const openTask = (task:LosContentTask) => {
+    window.location.hash = `#/${book.id}/${task.chapterId}/${task.section}/${task.id}`;
+  };
   const openChapter = (ch: LosChapter) => move(ch.id, "chapter");
   const previousIndex = chapter ? book.chapters.findIndex(c => c.id === chapter.id) : -1;
   const next = previousIndex >= 0 ? book.chapters[previousIndex + 1] : null;
   const previous = previousIndex > 0 ? book.chapters[previousIndex - 1] : null;
   const section = chapter ? location.section : ["contents", "appendix", "dictionary", "path", "search", "midterm", "review", "review-ii", "progress", "final", "summary"].includes(location.section) ? location.section : "overview";
+  const sectionIndex = chapter ? sections.findIndex(item => item.id===section) : -1;
+  const previousSection = chapter && sectionIndex>0 ? sections[sectionIndex-1] : null;
+  const followingSection = chapter && sectionIndex>=0 && sectionIndex<sections.length-1
+    ? sections[sectionIndex+1] : null;
+  const splitEligible = Boolean(chapter && ["text", "understand", "grammar", "text-b"].includes(section));
+  const splitVisible = splitOpen && splitEligible;
+  const closeSplit = () => {
+    setSplitOpen(false);
+    splitTriggerRef.current?.focus();
+  };
   return <div className="los-book-workspace" style={bookStyle(book)}>
     <header className="los-book-topbar">
       <button className="los-back-library" onClick={goLibrary} aria-label="Takaisin kirjasarjaan"><ChevronLeft size={19} /> <span>Kirjasarja</span></button>
@@ -353,7 +417,8 @@ function LosBookWorkspace({ book, location, move, goLibrary, openBook }: { book:
         <div className="los-sidebar-heading">KIRJAN SIVUT</div>
         <nav>
           <button className={section === "contents" ? "is-active" : ""} onClick={() => move(null, "contents")}>Sisällysluettelo</button>
-          {book.chapters.map(ch => <button key={ch.id} className={chapter?.id === ch.id ? "is-active" : ""} onClick={() => openChapter(ch)}><span className="los-sidebar-num">{ch.id}</span><span lang="de">{ch.title}</span></button>)}
+          <LosContentTree book={book} chapterId={chapter?.id??null} section={section}
+            activeTaskId={location.taskId} move={move} openTask={openTask} openBook={openBook} />
           <div className="los-sidebar-heading">HAKEMISTOT</div>
           <button className={section === "path" ? "is-active" : ""} onClick={() => move(null, "path")}>Ohjattu opetuspolku</button>
           {book.id===1&&<button className={section === "progress" ? "is-active" : ""} onClick={() => move(null, "progress")}>Osaaminen ja eteneminen</button>}
@@ -364,11 +429,16 @@ function LosBookWorkspace({ book, location, move, goLibrary, openBook }: { book:
         </nav>
         <a className="los-sidebar-exit" href="/studies">Palaa Opintopäiväkirjaan <ArrowRight size={15} /></a>
       </aside>
-      <main className="los-book-main" id="main-content" tabIndex={-1}>
+      <main className="los-book-main" ref={mainRef} id="main-content" tabIndex={-1}>
         <div className="los-main-breadcrumb"><button onClick={() => move(null, "overview")}>LOS! {book.id}</button>{chapter ? <><ChevronRight size={12} /><button onClick={() => openChapter(chapter)}>Kappale {Number(chapter.id)}</button></> : null}{chapter && section !== "chapter" ? <><ChevronRight size={12} /><span>{section==="cards" ? "Kertauskortit" : sections.find(s => s.id === section)?.label}</span></> : null}</div>
-        {chapter && section !== "overview" && section !== "contents" && section !== "appendix" && <nav className="los-section-nav" aria-label="Kappaleen osiot">
-          {sections.map(item => <button key={item.id} className={section === item.id || (section==="cards" && item.id==="vocabulary") ? "is-active" : ""} onClick={() => move(chapter.id, item.id)}>{item.label}</button>)}
-        </nav>}
+        {splitEligible && <div className="los-split-controls">
+          <button type="button" ref={splitTriggerRef} aria-pressed={splitVisible}
+            aria-controls="los-split-workbook" onClick={() => setSplitOpen(value => !value)}>
+            {splitVisible ? "Sulje rinnakkaistehtävät" : "Kirja + tehtävät"}
+          </button>
+          <span>Vapaaehtoinen näkymä käyttää samoja tallennettuja vastauksia.</span>
+        </div>}
+        <div className={"los-reader-workarea"+(splitVisible ? splitInline ? " is-split" : " is-overlay" : "")}>
         <div className="los-book-paper">
           {!chapter && section === "overview" ? <BookFront book={book} move={move} /> :
             section === "contents" ? <Contents book={book} move={move} /> :
@@ -396,7 +466,49 @@ function LosBookWorkspace({ book, location, move, goLibrary, openBook }: { book:
               <ChapterOpening book={book} chapter={chapter} move={move} />
             ) : <Contents book={book} move={move} />}
         </div>
+        {splitVisible && chapter && <>
+          {!splitInline && <button type="button" className="los-split-backdrop"
+            aria-label="Sulje rinnakkaistehtävät" onClick={closeSplit} />}
+          <aside id="los-split-workbook" className="los-split-workbook"
+            role={splitInline ? "complementary" : "dialog"}
+            aria-modal={splitInline ? undefined : true}
+            aria-label="Rinnakkaiset harjoitukset"
+            onKeyDown={event => {
+              if (splitInline || event.key !== "Tab") return;
+              const focusable = Array.from(event.currentTarget.querySelectorAll<HTMLElement>(
+                "a[href],button:not(:disabled),input:not(:disabled),textarea:not(:disabled),select:not(:disabled)"
+              )).filter(element => element.getClientRects().length > 0);
+              const first = focusable[0], last = focusable[focusable.length - 1];
+              if (event.shiftKey && document.activeElement === first) {
+                event.preventDefault(); last?.focus();
+              } else if (!event.shiftKey && document.activeElement === last) {
+                event.preventDefault(); first?.focus();
+              }
+            }}>
+            <div className="los-split-panel-top">
+              <strong>Harjoitukset · {chapter.title}</strong>
+              <button type="button" ref={splitCloseRef} onClick={closeSplit}>
+                <X size={18} aria-hidden="true"/> Sulje
+              </button>
+            </div>
+            <LosWorkbook key={"split-practice-"+chapter.id} chapter={chapter} mode="practice"/>
+          </aside>
+        </>}
+        </div>
         {chapter && <LosNotebook key={`notes-${chapter.id}`} chapter={chapter} />}
+        {chapter && sectionIndex>=0 && <nav className="los-section-pager"
+          aria-label="Siirry kappaleen edelliseen tai seuraavaan osioon">
+          {previousSection ? <button type="button"
+            onClick={() => move(chapter.id,previousSection.id)}>
+            <ChevronLeft size={17} aria-hidden="true"/>
+            <span>Edellinen osio <strong>{previousSection.label}</strong></span>
+          </button> : <span aria-hidden="true"/>}
+          {followingSection ? <button type="button"
+            onClick={() => move(chapter.id,followingSection.id)}>
+            <span>Seuraava osio <strong>{followingSection.label}</strong></span>
+            <ChevronRight size={17} aria-hidden="true"/>
+          </button> : <span aria-hidden="true"/>}
+        </nav>}
         {chapter && <div className="los-pagination">
           {previous ? <button onClick={() => openChapter(previous)}><ChevronLeft size={18} /><span>Edellinen kappale<small lang="de">{previous.title}</small></span></button> : <span />}
           {next ? <button onClick={() => openChapter(next)}><span>Seuraava kappale<small lang="de">{next.title}</small></span><ChevronRight size={18} /></button> : <button onClick={() => move(null, "appendix")}>Kirjan liitteet <ChevronRight size={18} /></button>}
@@ -409,10 +521,16 @@ function LosBookWorkspace({ book, location, move, goLibrary, openBook }: { book:
 }
 export function LosBook() {
   const [canOpen, setCanOpen] = useState<boolean | null>(null);
-  const [location, setLocation] = useState<LosLocation>({ book: null, chapter: null, section: "overview" });
+  const [location, setLocation] = useState<LosLocation>({ book: null, chapter: null, section: "overview", taskId: null });
   useEffect(() => {
     setCanOpen(Boolean(readCachedDeviceUser()));
-    const sync = () => { setLocation(readLocation()); window.scrollTo(0, 0); };
+    const sync = () => {
+      // Redirect retired B5/PDF.js hashes into the living digital book.
+      if (new RegExp("^#/1/(?:[0-9]{2}/)?facsimile(?:-pdf|-c0[2-4])?(?:/|$)").test(window.location.hash))
+        window.history.replaceState(window.history.state, "", window.location.pathname + window.location.search + "#/1/overview");
+      setLocation(readLocation());
+      window.scrollTo(0, 0);
+    };
     sync();
     window.addEventListener("hashchange", sync);
     return () => window.removeEventListener("hashchange", sync);
