@@ -85,7 +85,7 @@ export function LosMidtermExam() {
       </button>
       {!complete&&<p role="status">Välikokeen palautus avautuu vasta, kun kaikkiin tehtäviin on vastattu.</p>}
     </div>:<section className="los-exam-results" aria-label="Välikokeen tulokset">
-      <p className="los-overline">PALUTETTU · AUTOMAATTINEN OSIOKOE</p>
+      <p className="los-overline">PALAUTETTU · AUTOMAATTINEN OSIOKOE</p>
       <h2>{score?.correct} / {score?.total} pistettä</h2>
       <p>Automaattisesti tarkistettujen monivalintatehtävien tulos. Puhetta ja vapaata kirjoittamista ei ole pisteytetty tähän tulokseen.</p>
       <table><caption>Pisteet osa-alueittain</caption><thead><tr><th scope="col">Taitoalue</th><th scope="col">Oikein</th></tr></thead>
