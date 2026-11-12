@@ -8,6 +8,7 @@ import "pdfjs-dist/web/pdf_viewer.css";
 import {getDeviceOwnerId} from "@/lib/deviceSession";
 import {LOS1_C01_FACSIMILE_PAGES,type LosFacsimileSection} from "./c01Pilot";
 import {getFacsimileSwipeDirection} from "./navigation";
+import {Los1PrintOutlinePanel} from "./Los1PrintOutlinePanel";
 import {LOS1_C01_PDF_CONTRACT,turnPdfLeaf,validateC01TextALayer,
   validatePdfGeometry,visiblePdfLeaves,type PdfFacsimileMode} from "./pdfReaderModel";
 import {getPublishedLos1Edition,loadVerifiedLos1Pdf,
@@ -331,6 +332,7 @@ export function Los1PdfReader({
         julkaistu PDF-linkki otetaan käyttöön vasta lähteiden, kuvien ja sivutuksen hyväksymisen jälkeen.</p>
       <p>Nykyinen HTML-pohjainen 15-sivuinen näköiskirjapilotti toimii edelleen erikseen.</p>
     </div>}
+    {!document&&!busy&&!getPublishedLos1Edition()&&<Los1PrintOutlinePanel/>}
     {document&&<>
       <div className="los1-pdf-controls">
         <button type="button" onClick={()=>{setTocOpen(v=>!v);setSearchOpen(false);}}>Sisällys</button>
