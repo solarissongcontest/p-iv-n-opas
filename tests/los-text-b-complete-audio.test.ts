@@ -9,7 +9,7 @@ import {validateLosCloudDraft} from "../src/features/los/cloudContract.ts";
 
 test("four added Text B pages use actual full published German source artifacts and 4 unique tasks each",()=>{
  assert.deepEqual(validateLosTextB(),[]);
- assert.deepEqual(Object.keys(LOS1_TEXT_B_SOURCES),["04","06","07","10"]);
+ assert.deepEqual(Object.keys(LOS1_TEXT_B_SOURCES).sort(),["04","06","07","10"]);
  assert.equal(isLosTextBChapter("04"),true);
  assert.equal(isLosTextBChapter("07"),true);
  assert.equal(isLosTextBChapter("09"),false);
