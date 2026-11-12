@@ -78,6 +78,7 @@ CREATE TABLE IF NOT EXISTS public.los_dictionary_forms (
   form_index integer NOT NULL CHECK (form_index > 0),
   written_form text NOT NULL CHECK (length(written_form) BETWEEN 1 AND 180),
   form_key text NOT NULL,
+  form_search_keys text[] NOT NULL,
   grammar jsonb NOT NULL DEFAULT '{}'::jsonb,
   PRIMARY KEY (source_id, source_entry_id, form_index),
   FOREIGN KEY (source_id, source_entry_id)
@@ -129,6 +130,8 @@ CREATE INDEX IF NOT EXISTS los_dict_lexeme_prefix_idx
   ON public.los_dictionary_lexemes (language, lemma_key text_pattern_ops);
 CREATE INDEX IF NOT EXISTS los_dict_form_lookup_idx
   ON public.los_dictionary_forms (form_key);
+CREATE INDEX IF NOT EXISTS los_dict_form_alias_idx
+  ON public.los_dictionary_forms USING gin (form_search_keys);
 CREATE INDEX IF NOT EXISTS los_dict_translation_lookup_idx
   ON public.los_dictionary_translations (language, value_key text_pattern_ops);
 
@@ -172,13 +175,13 @@ AS $search$
         THEN 0 WHEN EXISTS (
           SELECT 1 FROM public.los_dictionary_forms f
           WHERE f.source_id=l.source_id AND f.source_entry_id=l.source_entry_id
-            AND f.form_key=p.q
+            AND (f.form_key=p.q OR p.q=ANY(f.form_search_keys))
         ) THEN 1 ELSE 2 END AS rank,
       CASE WHEN l.lemma_key=p.q OR p.q=ANY(l.search_keys) THEN 'lemma'
         WHEN EXISTS (
           SELECT 1 FROM public.los_dictionary_forms f
           WHERE f.source_id=l.source_id AND f.source_entry_id=l.source_entry_id
-            AND f.form_key=p.q
+            AND (f.form_key=p.q OR p.q=ANY(f.form_search_keys))
         ) THEN 'form' ELSE 'prefix' END AS match_type
     FROM param p
     JOIN public.los_dictionary_lexemes l ON l.language=p.source_lang
