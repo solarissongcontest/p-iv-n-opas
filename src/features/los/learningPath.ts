@@ -35,7 +35,7 @@ for (const chapter of LOS_BOOKS[0]?.chapters ?? []) {
     // Neljä erillistä kertaus-/koetuntia ennen kirjan jälkipuoliskoa.
     push("Muistanko tervehtimisen ja esittäytymisen?", "Kertaus I", "01", "practice");
     push("Voinnin ja kohteliaisuuden taitosekoitus", "Kertaus I", "05", "practice");
-    push("Autenttisen keskustelun kertauskuuntelu", "Kertaus I", "02", "text");
+    push("Autenttisen keskustelun kertaus (kuuntelu valinnainen)", "Kertaus I", "02", "text");
     push("Välikoe: kappaleet 1–5", "Välikoe", null, "appendix");
   }
   const titles = chapterTitles[chapter.id];
