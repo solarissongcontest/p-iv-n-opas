@@ -75,11 +75,13 @@ def header_text(path: Path) -> str:
 
 
 def license_approval(path: Path, kind: str, source_id: str, approval: dict,
-                     source_sha: str, header: str | None) -> dict:
+                     source_sha: str, header: str | None, gloss_language: str | None) -> dict:
     if approval.get("sourceId") != source_id or approval.get("kind") != kind:
         raise ValueError("Lähteen tunnus tai tyyppi ei vastaa hyväksymistietoa")
     if approval.get("sourceSha512", "").lower() != source_sha:
         raise ValueError("Lähteen SHA512-tarkistussumma ei täsmää")
+    if kind == "kaikki" and approval.get("glossLanguage") != gloss_language:
+        raise ValueError("Kaikki-selitteen hyväksytty kieli ei vastaa aineistoa")
     legal = approval.get("rightsApproval") or {}
     if legal.get("reviewed") is not True:
         raise ValueError("Lisenssille ei ole nimenomaista tarkistushyväksyntää")
@@ -240,7 +242,8 @@ def run(args: argparse.Namespace) -> dict:
         raise ValueError("Varsinainen tuonti edellyttää --approval ja --output")
     with Path(args.approval).open("r", encoding="utf-8") as stream:
         approval = json.load(stream)
-    legal = license_approval(file, args.kind, args.source_id, approval, source_sha, header)
+    legal = license_approval(file, args.kind, args.source_id, approval, source_sha,
+                             header, args.gloss_language)
     output = Path(args.output)
     output.parent.mkdir(parents=True, exist_ok=True)
     pending = output.with_name(output.name + ".pending")
