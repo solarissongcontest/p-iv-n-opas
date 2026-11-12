@@ -321,7 +321,7 @@ test("LOS Teacher 2.0 L004 teaches greetings, saves scenes, and never invents ma
  await player.getByRole("button",{name:"Guten Morgen!"}).click();
  await expect(player).toContainText("Tämä sopii aamuun.");
  await player.getByRole("button",{name:"Guten Abend!"}).click();
- await expect(player).toContainText("ei ole ensiyrityksen itsenäinen näyttö");
+ await expect(player).toContainText("ettei tämä ole ensiyrityksen itsenäinen näyttö");
  await expect(player).toContainText("0/3");
  await page.reload({waitUntil:"domcontentloaded"});
  const restored=page.locator(".los-teacher");

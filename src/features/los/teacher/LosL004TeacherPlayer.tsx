@@ -30,7 +30,7 @@ export function LosL004TeacherPlayer({
  const feedback=scene.question?.choices.find(c=>c.id===result?.answer)?.feedback;
  return <section className="los-teacher" aria-label="L004: opettajajohtoinen opetus">
   <div className="los-teacher-top">
-   <div><p className="los-overline">LOS TEACHER EXPERIENCE 2.0 · L004</p>
+   <div><p className="los-teacher-eyebrow">LOS TEACHER EXPERIENCE 2.0 · L004</p>
     <h4>Tervehdykset muistista</h4>
     <p>{TEACHER_L004.objective}</p>
    </div>
