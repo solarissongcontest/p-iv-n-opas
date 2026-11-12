@@ -16,7 +16,7 @@ export type LosOpenQuestion = {
   explanation: string;
 };
 export type LosOpenText = {
-  chapterId: "03"|"04"|"05"|"06"|"07"|"09";
+  chapterId: "03"|"04"|"05"|"06"|"07"|"09"|"10";
   author?:string;
   licenseCode?:string;
   licenseUrl?:string;
@@ -385,9 +385,87 @@ const c06:LosOpenText={
   evidenceExplanation:"Toisen dialogin viimeinen repliikki kuuluu Ich bin schon zwölf Jahre alt.",
 };
 
+
+/**
+ * COMPLETE original human-speaker transcript from COERLL's Deutsch im Blick,
+ * Kapitel 1, Harald Becker: "Wer bin ich?", QR 1.22.
+ * https://coerll.utexas.edu/dib/vidt.php?f=01_22_int_hb_who
+ * Language is deliberately NOT simplified or edited; support definitions
+ * and Finnish translations are independent LOS! instructional aids.
+ *
+ * Textbook © 2017 COERLL, University of Texas at Austin, CC BY 4.0;
+ * separate audio/video file rights and device functionality remain unchecked.
+ * A public seven-digit numeric string appears in the original recording:
+ * it is a source quotation only, never an instruction to collect real numbers.
+ */
+const c10:LosOpenText={
+  chapterId:"10",sourceId:"M-DIB-02",revision:"COERLL-QR-1.22-checked-2026-11-12",
+  sourceUrl:"https://coerll.utexas.edu/dib/vidt.php?f=01_22_int_hb_who",
+  title:"Deutsch im Blick · Harald · Wer bin ich?",
+  heading:"Harald esittäytyy: Wer bin ich?",
+  author:"COERLL, The University of Texas at Austin (2017); Harald Becker (haastateltava)",
+  licenseCode:"CC BY 4.0",
+  licenseUrl:"https://creativecommons.org/licenses/by/4.0/",
+  sourceDetail:"Deutsch im Blick, Kapitel 1, videolitteraatti 1.22. Saksankielinen puhe on toistettu kirjoitettuna ilman kielellisiä muutoksia. Suomessa käytettävät glossit ja kysymykset ovat LOS!:n laatimia. Alkuperäisen ääni-/videotiedoston erillinen lupa ja tekninen toisto odottavat tarkistusta. Puhelinnumeron lukusarja on ainoastaan julkaistun lähteen osa eikä sitä pidä opetella tai käyttää yhteystietona.",
+  guidance:"Lue koko Haraldin alkuperäinen haastattelu rauhassa. Tunnista nimen, lähtöpaikan, iän ja lempivärin kysymykset. Puheessa esiintyy alkeistason ylittäviä rakenteita (ursprünglich, zivilisierten, wegen, vielleicht), jotka ovat lukemisen tukisanoja, eivät uuden kieliopin oppimistavoitteita. Äänitteen kuulumista ja videon toistoa ei ole vahvistettu. Lähde sisältää numeroina lausutun esimerkin, jota ei saa käyttää oikeana yhteystietona.",
+  originalLines:[
+    {id:"u01",speaker:"Haastattelija",text:"Wie heißt du?",meaning:"Mikä sinun nimesi on?"},
+    {id:"u02",speaker:"Harald",text:"Ich heiße Harald Becker.",meaning:"Minun nimeni on Harald Becker."},
+    {id:"u03",speaker:"Haastattelija",text:"Woher kommst du?",meaning:"Mistä olet kotoisin?"},
+    {id:"u04",speaker:"Harald",text:"Ich komme ursprünglich aus München.",meaning:"Olen alun perin Münchenistä."},
+    {id:"u05",speaker:"Haastattelija",text:"Aha, wo ist München?",meaning:"Ahaa, missä München on?"},
+    {id:"u06",speaker:"Harald",text:"München ist im zivilisierten Teil Deutschlands, also in Süddeutschland.",meaning:"München on Saksan sivistyneessä osassa, siis Etelä-Saksassa. Tämä on puhujan humoristinen mielipide, ei oppikirjan väite."},
+    {id:"u07",speaker:"Haastattelija",text:"Aha. Wie alt bist du?",meaning:"Ahaa. Kuinka vanha olet?"},
+    {id:"u08",speaker:"Harald",text:"Ich bin jetzt so um die fünfzig.",meaning:"Olen nyt suunnilleen viisikymmentä."},
+    {id:"u09",speaker:"Haastattelija",text:"Um die fünfzig... Was ist deine Telefonnumer?",meaning:"Viidenkymmenen paikkeilla... Mikä on puhelinnumerosi? Alkuperäisen litteraatin kirjoitusasu on säilytetty."},
+    {id:"u10",speaker:"Harald",text:"Ah, das ist nicht so einfach. Neun, eins, zwei, eins, fünf, sechs, sechs.",meaning:"Se ei ole ihan yksinkertaista. Yhdeksän, yksi, kaksi, yksi, viisi, kuusi, kuusi. Lukusarja vain tekstinymmärtämistä varten."},
+    {id:"u11",speaker:"Haastattelija",text:"Hmh. Und was ist deine Lieblingsfarbe?",meaning:"Hmm. Ja mikä on lempivärisi?"},
+    {id:"u12",speaker:"Harald",text:"Blau.",meaning:"Sininen."},
+    {id:"u13",speaker:"Haastattelija",text:"Warum Blau?",meaning:"Miksi sininen?"},
+    {id:"u14",speaker:"Harald",text:"Ahmh, das ist eine gute Frage. Vielleicht wegen Bayern, das ist auch eine der Farben Bayerns. Wegen dem bayerischen Himmel. Der Himmel ist blau.",meaning:"Se on hyvä kysymys. Ehkä Baijerin takia, koska se on myös yksi Baijerin väreistä. Baijerin taivaan vuoksi. Taivas on sininen."},
+  ],
+  glossary:{...common,
+    heißt:"on nimeltään; Ich heiße = nimeni on",
+    ursprünglich:"alun perin (tunnistettava)",
+    münchen:"München, kaupunki Etelä-Saksassa",
+    also:"siis; tässä puhuttu siirtymä",
+    zivilisierten:"sivistyneessä; puhujan humoristinen mielipide, ei opeteltava rakenne",
+    teil:"osa (der Teil)",deutschlands:"Saksan; genetiivi vain ymmärtämiseen",
+    süddeutschland:"Etelä-Saksa",alt:"vanha; Wie alt bist du? = kuinka vanha olet?",
+    jetzt:"nyt",um:"noin; um die fünfzig = noin viisikymmentä",
+    fünfzig:"viisikymmentä",telefonnummer:"puhelinnumero; alkuperäisessä litteraatissa on kirjoitusvirhe Telefonnumer",
+    telefonnumer:"alkuperäislitteraatin kirjoitusasu; yleiskielen kirjoitusasu Telefonnummer",
+    neun:"yhdeksän",eins:"yksi",zwei:"kaksi",fünf:"viisi",sechs:"kuusi",
+    einfach:"helppo/yksinkertainen",so:"niin; tässä so um die fünfzig = noin 50",
+    lieblingsfarbe:"lempiväri (die Lieblingsfarbe)",
+    blau:"sininen",warum:"miksi",gute:"hyvä; eine gute Frage = hyvä kysymys",
+    frage:"kysymys (die Frage)",vielleicht:"ehkä",wegen:"jonkin vuoksi; vain tunnistettava",
+    bayern:"Baijeri",farben:"värit (die Farben)",bayerischen:"baijerilaisen; vain tunnistettava",
+    himmel:"taivas (der Himmel)",auch:"myös",
+  },
+  questions:[
+    {id:"C10-HARALD-Q01",prompt:"Mistä Harald sanoo olevansa alun perin?",
+      answers:[{id:"a",text:"Münchenistä"},{id:"b",text:"Berliinistä"},{id:"c",text:"Wienistä"}],
+      correctId:"a",explanation:"Ich komme ursprünglich aus München. on alkuperää kuvaava lause."},
+    {id:"C10-HARALD-Q02",prompt:"Kuinka vanha Harald sanoo suunnilleen olevansa?",
+      answers:[{id:"a",text:"20-vuotias"},{id:"b",text:"50-vuotias"},{id:"c",text:"70-vuotias"}],
+      correctId:"b",explanation:"Um die fünfzig tarkoittaa suunnilleen viisikymmentä."},
+    {id:"C10-HARALD-Q03",prompt:"Mikä Haraldin lempiväri on?",
+      answers:[{id:"a",text:"Punainen"},{id:"b",text:"Vihreä"},{id:"c",text:"Sininen"}],
+      correctId:"c",explanation:"Harald vastaa kysymykseen Und was ist deine Lieblingsfarbe? sanalla Blau."},
+    {id:"C10-HARALD-Q04",prompt:"Mihin Harald yhdistää lempivärinsä?",
+      answers:[{id:"a",text:"Baijeriin ja sen taivaaseen"},{id:"b",text:"Saksan lippuun"},{id:"c",text:"Hänen kouluunsa"}],
+      correctId:"a",explanation:"Harald mainitsee Bayern ja den bayerischen Himmel, eli Baijerin taivaan."},
+  ],
+  evidenceLineId:"u08",
+  evidenceQuestion:"Missä Haraldin puheenvuorossa kerrotaan hänen ikänsä?",
+  evidenceExplanation:"Kahdeksannessa puheenvuorossa Harald sanoo Ich bin jetzt so um die fünfzig.",
+};
+
 export const LOS1_C06_TEXT: LosOpenText = c06;
+export const LOS1_C10_TEXT: LosOpenText = c10;
 /** Legacy collection of the five independently sourced Wikibooks texts. C06 is a separate Polish OER source. */
 export const LOS1_OPEN_DIALOGUES: readonly LosOpenText[] = [c03,c04,c05,c07,c09];
 export function getLosOpenDialogue(chapterId: string): LosOpenText | undefined {
-  return chapterId==="06" ? LOS1_C06_TEXT : LOS1_OPEN_DIALOGUES.find(text=>text.chapterId===chapterId);
+  return chapterId==="06" ? LOS1_C06_TEXT : chapterId==="10" ? LOS1_C10_TEXT : LOS1_OPEN_DIALOGUES.find(text=>text.chapterId===chapterId);
 }
