@@ -97,6 +97,13 @@ export function validTeacherSession(value: unknown): value is TeacherSession {
     attempt["answer"].length <= 500 && typeof attempt["correct"] === "boolean" &&
     typeof attempt["independent"] === "boolean" && iso(attempt["at"]));
 }
+/** Strict cloud/backup validation; unlike local parsing, reject any invalid entry. */
+export function validTeacherSessionMap(value: unknown): value is Record<string, TeacherSession> {
+  if (!record(value)) return false;
+  const entries = Object.entries(value);
+  return entries.length <= 60 && entries.every(([key, entry]) =>
+    /^L\\d{3}$/.test(key) && validTeacherSession(entry) && entry.lessonId === key);
+}
 export function parseTeacherSessions(value: unknown): Record<string, TeacherSession> {
   if (!record(value)) return {};
   return Object.fromEntries(Object.entries(value).filter(([key, entry]) =>
