@@ -6,6 +6,7 @@ import { LosC02SecondaryText } from "./LosC02SecondaryText";
 import { LosAdditionalTextB } from "./LosAdditionalTextB";
 import { LosCultureChecks } from "./LosCultureChecks";
 import { Los1VisualLearning } from "./Los1VisualLearning";
+import { Los1CultureGallery } from "./Los1CultureGallery";
 import { useLosChapterDraft } from "./studyState";
 import type { LosChapter } from "./catalog";
 
@@ -99,6 +100,7 @@ export function LosCulture({chapter,bookId=1}:{chapter:LosChapter;bookId?:number
   return <section className="los-inner-page los-culture-page">
     <p className="los-eyebrow">LAND UND LEUTE / KAPITEL {Number(chapter.id)}</p>
     <h1>Kulttuuri</h1>
+    {bookId===1&&<Los1CultureGallery chapterId={chapter.id}/>}
     {bookId===1&&<Los1VisualLearning key={chapter.id} chapterId={chapter.id} placement="culture"/>}
     {chapter.id==="01"?<>
       <h2>Miten saksankielisessä maailmassa tervehditään?</h2>
