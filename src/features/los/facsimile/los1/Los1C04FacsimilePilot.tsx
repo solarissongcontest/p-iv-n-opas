@@ -301,10 +301,9 @@ function Leaf({page}:{page:LosC04PrintPage}){
     </footer>
   </article>;
 }
-export function Los1C04FacsimilePilot({onBack,onOpenDigital,onOpenC05}:{
+export function Los1C04FacsimilePilot({onBack,onOpenDigital}:{
   onBack:()=>void;
   onOpenDigital:(section:LosC04Section)=>void;
-  onOpenC05?:()=>void;
 }){
   const [state,setState]=useState<State>({pageId:"c04-open-left",mode:"auto",zoom:100});
   const [ready,setReady]=useState(false);
@@ -404,7 +403,7 @@ export function Los1C04FacsimilePilot({onBack,onOpenDigital,onOpenC05}:{
     const number=Number(jumpValue);
     if(!/^\d+$/.test(jumpValue.trim())||!Number.isInteger(number)||
       number<1||number>pages.length){
-      setJumpError("C04-luonnoksessa on 14 lehteä.");return;
+      setJumpError("C04-luonnoksessa on 16 lehteä.");return;
     }
     goTo(number-1);setJumpValue("");setJumpError("");
   };
@@ -412,11 +411,11 @@ export function Los1C04FacsimilePilot({onBack,onOpenDigital,onOpenC05}:{
   const toggleBookmark=()=>setBookmarks(old=>isBookmarked?
     old.filter(id=>id!==pages[index]!.pageId):[...old,pages[index]!.pageId]);
   return <section className="los-facs-reader los-facs-c04-reader"
-    aria-label="LOS! 1:n C04-kappaleen 14 B5-sivun taittoluonnos">
+    aria-label="LOS! 1:n C04-kappaleen 16 B5-sivun taittoluonnos">
     <div className="los-facs-toolbar">
       <div className="los-facs-toolbar-title"><BookOpen size={19}/>
         <div><strong>LOS! 1 · C04 Woher kommst du?</strong>
-          <small>14 B5-luonnossivua · ei valmis painos</small></div></div>
+          <small>16 B5-luonnossivua · ei valmis painos</small></div></div>
       <div className="los-facs-toolbar-actions">
         <button type="button" onClick={onBack}><ArrowLeft size={16}/> C03</button>
         <button type="button" aria-expanded={tocOpen} onClick={()=>{
@@ -445,7 +444,7 @@ export function Los1C04FacsimilePilot({onBack,onOpenDigital,onOpenC05}:{
     <p className="los-facs-honesty" role="status"><BookOpen size={16}/>
       C04 on keskeneräinen taittoluonnos: alkuperäistekstit ovat kokonaisia,
       mutta kielentarkistus, mediat, kuvat ja lopullinen sivutus odottavat.
-      C02:n Text B on sama lähde, jota käytetään nyt uudelleen.
+      Text B on sama alkuperäinen 20 ilmauksen listalähde, joka esiteltiin C01:ssä.
     </p>
     {searchOpen&&<section className="los-facs-search" aria-label="Haku C04-luonnoksesta">
       <label htmlFor="los-facs-c04-search">Hae C04:n luonnossivuilta</label>
@@ -492,7 +491,7 @@ export function Los1C04FacsimilePilot({onBack,onOpenDigital,onOpenC05}:{
           <label htmlFor="los-facs-c04-jump">Siirry luonnoslehdelle</label>
           <input id="los-facs-c04-jump" value={jumpValue} inputMode="numeric"
             onChange={e=>{setJumpValue(e.target.value);setJumpError("");}}
-            placeholder="1–14"/>
+            placeholder="1–16"/>
           <button type="submit">Siirry</button>
         </form>{jumpError&&<small role="alert">{jumpError}</small>}
       </div>
@@ -500,7 +499,6 @@ export function Los1C04FacsimilePilot({onBack,onOpenDigital,onOpenC05}:{
         onClick={next}>Seuraava <ChevronRight size={18}/></button>
     </div>
     <div className="los-facs-return">
-      {onOpenC05&&<button type="button" onClick={onOpenC05}>Seuraava kappale</button>}
       <button type="button" onClick={()=>onOpenDigital(
         pages[index]!.section==="text-b-understand"?"text-b":
         pages[index]!.section==="grammar-comparison"?"grammar":pages[index]!.section)}>
