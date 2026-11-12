@@ -11,6 +11,12 @@ function option(key) {
  return process.argv[i+1];
 }
 const norm=(text)=>String(text).normalize("NFC").trim().toLocaleLowerCase();
+function formSearchKeys(form,language) {
+ const base=norm(form);
+ if(language!=="de")return [base];
+ return [...new Set([base,base.replaceAll("ß","ss"),
+  base.replaceAll("ä","ae").replaceAll("ö","oe").replaceAll("ü","ue")])];
+}
 async function checksum(path) {
  const hash=createHash("sha512");
  for await(const chunk of createReadStream(path))hash.update(chunk);
@@ -48,6 +54,7 @@ function makeBatch(items,sourceId){
    const written=detail.form;
    if(typeof written==="string"&&written.trim())forms.push({...id,form_index:i+1,
     written_form:written,form_key:norm(written),
+    form_search_keys:formSearchKeys(written,item.language),
     grammar:{tags:detail.tags??[],rawTags:detail.rawTags??[]}});
   });
   (item.ipaCandidates??[]).forEach((ipa,i)=>{
