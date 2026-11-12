@@ -262,6 +262,7 @@ test("four new culture photos are locally served, decoded and credited on deskto
    for(let i=0;i<photos.length;i++){
      const image=images.nth(i);
      await expect(image).toHaveAttribute("src",new RegExp(photos[i]+"-desktop[.]webp$"));
+     await image.scrollIntoViewIfNeeded();
      await expect.poll(async()=>image.evaluate(el=>(el as HTMLImageElement).naturalWidth),
        {timeout:15_000}).toBeGreaterThan(0);
      await expect(gallery.locator("picture source").nth(i)).toHaveAttribute(
