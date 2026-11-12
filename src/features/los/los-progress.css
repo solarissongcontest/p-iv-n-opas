@@ -1,0 +1,35 @@
+.los-study-progress { max-width: 1000px; }
+.los-progress-metrics { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 11px; margin: 25px 0 14px; }
+.los-progress-metrics > div { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; border: 1px solid var(--los-line); border-radius: 10px; padding: 19px; background: var(--los-paper); }
+.los-progress-metrics svg { color: var(--los-book-accent); }
+.los-progress-metrics strong { font-size: clamp(20px,3vw,30px); font-variant-numeric: tabular-nums; }
+.los-progress-metrics span { font-size: 12px; color: var(--los-soft); line-height: 1.6; }
+.los-progress-line { height: 10px; border-radius: 100px; background: var(--los-line); margin-top: 13px; overflow: hidden; }
+.los-progress-line span { display: block; height: 100%; background: var(--los-book-accent); border-radius: 100px; }
+.los-progress-caption { font-size: 12px; color: var(--los-soft); line-height: 1.6; }
+.los-progress-recall-note, .los-progress-midterm { display: flex; gap: 13px; align-items: flex-start; border-left: 3px solid var(--los-book-accent); background: var(--los-book-tint); padding: 16px 18px; margin: 23px 0; border-radius: 0 9px 9px 0; }
+.los-progress-recall-note h2, .los-progress-midterm h2 { font-size: 19px; margin: 0 0 8px; }
+.los-progress-recall-note p, .los-progress-midterm p { font-size: 13px; line-height: 1.75; margin: 0; }
+.los-progress-midterm { display: block; }
+.los-progress-midterm button { margin-top: 15px; display: inline-flex; align-items: center; gap: 8px; min-height: 43px; }
+.los-progress-chapters { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px; margin: 16px 0 30px; }
+.los-progress-chapter { border: 1px solid var(--los-line); border-radius: 9px; padding: 16px; background: var(--los-paper); }
+.los-progress-chapter-head { display: flex; gap: 12px; align-items: flex-start; }
+.los-progress-num { flex: none; width: 35px; height: 35px; border-radius: 8px; display: grid; place-items: center; background: var(--los-book-tint); color: var(--los-book-accent); font-weight: 700; font-size: 13px; }
+.los-progress-chapter h3 { margin: 0 0 5px; font-size: 16px; line-height: 1.5; }
+.los-progress-chapter-head p { margin: 0; line-height: 1.65; font-size: 12px; color: var(--los-soft); }
+.los-progress-source { font-size: 12px; color: var(--los-soft); line-height: 1.6; padding: 9px 0; }
+.los-progress-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.los-progress-actions button { border: 1px solid var(--los-line); background: var(--los-paper); color: var(--los-ink); min-height: 43px; border-radius: 7px; display: inline-flex; gap: 6px; align-items: center; padding: 9px 11px; font-size: 12px; }
+.los-progress-actions button:hover,.los-progress-actions button:focus-visible { border-color: var(--los-book-accent); outline: 2px solid var(--los-book-accent); outline-offset: 2px; }
+.los-progress-pending { border-top: 1px solid var(--los-line); padding-top: 18px; margin-top: 27px; }
+.los-progress-pending p,.los-progress-pending li { font-size: 13px; line-height: 1.75; }
+.los-progress-pending ul { padding-left: 21px; }
+.los-progress-pending li { margin-bottom: 5px; }
+.los-progress-foot { font-size: 12px; line-height: 1.8; color: var(--los-soft); margin: 23px 0; }
+@media (max-width: 700px) {
+ .los-progress-metrics { grid-template-columns: 1fr; }
+ .los-progress-metrics > div { padding: 14px; gap: 7px; }
+ .los-progress-chapters { grid-template-columns: 1fr; }
+ .los-progress-recall-note { padding: 12px 14px; }
+}
