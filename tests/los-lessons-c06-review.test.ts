@@ -38,7 +38,7 @@ test("C06 reuses all eight real Franz/Jörg lines with correct 19/20 ages, no in
 });
 test("C06 five real numeric lessons match canonical plan and use only existing question IDs",()=>{
   assert.equal(LOS1_C06_LESSON_BLUEPRINTS.length,5);
-  assert.equal(LOS1_EXECUTABLE_LESSONS.length,49);
+  assert.equal(LOS1_EXECUTABLE_LESSONS.length,52);
   const practice=new Set(losExercisesFor("06").map(x=>x.id));
   const source=new Set(LOS1_C06_REVIEW_QUESTIONS.map(x=>x.id));
   for(const [i,lesson] of LOS1_C06_LESSON_BLUEPRINTS.entries()){
