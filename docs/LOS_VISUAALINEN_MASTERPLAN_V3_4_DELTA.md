@@ -14,7 +14,7 @@ Tämä on V3.3:n rinnalle kirjattu U1.0:n nimenomaisten muutosten versioitu tote
 
 | Osa | Uusi sääntö | Kooditilanne |
 | --- | --- | --- |
-| Sisältöpuu | Kirja → kappale → osio → yksittäinen tehtävä. 284px desktop, mobiilissa drawer, hakukenttä ja ryhmien avaus. | `LosContentTree.tsx` + `los-u3-content-tree.css`; tehtävät suoraan `exerciseBank.ts`- ja `los1RichExercises.ts`-pankeista; selaintesti kesken |
+| Sisältöpuu | Kirja → kappale → osio → yksittäinen tehtävä. 284px desktop, mobiilissa drawer, hakukenttä ja ryhmien avaus. | `LosContentTree.tsx` + `los-u3-content-tree.css`: aidot LOS! 1–8 -kirjalinkit, keskeneräisten kirjojen tilamerkinnät, kappale- ja tehtäväpuu suoraan `exerciseBank.ts`- ja `los1RichExercises.ts`-pankeista; uusimman muutoksen selaintestaus kesken |
 | Syvälinkit | Uusi `#/1/01/practice/C01-EX-01`, vanha `#/1/01/practice` toimii edelleen | `LosBook.tsx`, erillinen puhdas `contentTreeModel.ts` ID-tarkastuksille |
 | Vaakavälilehdet | Vanhat 10 kappalevälilehteä eivät enää ole ensisijainen valikko | Poistettu navigaatiosta, korvattu sivupuulla |
 | Sanakortti | Pienessä näytössä alalehti; kontekstimerkitys ensin, lemma/IPA ja äänitiedot vasta sen jälkeen | `LosDictionaryCard.tsx`, `los-u1-pronunciation.css`; pyyhkäisy ja lopullinen ruudunlukijatesti puuttuvat |
