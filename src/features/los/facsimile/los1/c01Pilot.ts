@@ -77,7 +77,7 @@ export function losC01FacsimilePageIndex(pageId:string):number{
 export function validateLosC01Facsimile():string[]{
  const errors:string[]=[];
  const ids=new Set<string>();
- const lineIds=new Set(LOS1_C01_LINES.map(l=>l.id));
+ const lineIds=new Set<string>(LOS1_C01_LINES.map(l=>l.id));
  const textBIds=new Set(LOS1_TEXT_B_SOURCES["01"].lines.map(l=>l.id));
  const exerciseIds=new Set(LOS_EXERCISES.filter(e=>e.chapterId==="01").map(e=>e.id));
  const cultureIds=new Set(LOS1_CULTURE["01"].questions.map(q=>q.id));
