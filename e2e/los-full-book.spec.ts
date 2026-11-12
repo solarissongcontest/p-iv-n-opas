@@ -282,6 +282,6 @@ test("U4 C01 teaches greetings and pronunciation without requiring prior German"
  await expect(guide.locator(".los-c01-greetings-table tbody tr")).toHaveCount(8);
  await expect(guide.locator(".los-c01-phonetics article")).toHaveCount(4);
  await expect(guide).toContainText("ei arvostella automaattisesti");
- await expect(guide).toContainText("syntet");
+ await expect(guide).toContainText("synteettinen");
  await expectNoHorizontalOverflow(page);
 });
