@@ -184,7 +184,7 @@ export function Los1PdfReader({
       const buffer=await file.arrayBuffer();
       const pdfjs=await import("pdfjs-dist");
       pdfjs.GlobalWorkerOptions.workerSrc=pdfWorkerUrl;
-      const loadingTask=pdfjs.getDocument({data:new Uint8Array(buffer),isEvalSupported:false});
+      const loadingTask=pdfjs.getDocument({data:new Uint8Array(buffer)});
       currentLoadingTask.current=loadingTask;
       const pdf=await loadingTask.promise;
       const first=await pdf.getPage(1);
