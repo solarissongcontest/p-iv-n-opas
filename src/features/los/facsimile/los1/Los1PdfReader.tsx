@@ -10,6 +10,8 @@ import {LOS1_C01_FACSIMILE_PAGES,type LosFacsimileSection} from "./c01Pilot";
 import {getFacsimileSwipeDirection} from "./navigation";
 import {LOS1_C01_PDF_CONTRACT,turnPdfLeaf,validateC01TextALayer,
   validatePdfGeometry,visiblePdfLeaves,type PdfFacsimileMode} from "./pdfReaderModel";
+import {getPublishedLos1Edition,loadVerifiedLos1Pdf,
+  visibleReleasedPages,turnReleasedPage,type Los1PublishedEdition} from "./editionRelease";
 import "./pdfReader.css";
 
 type SearchHit={page:number;snippet:string};
@@ -96,10 +98,11 @@ export function Los1PdfReader({
   onBack,onOpenDigital,
 }:{
   onBack:()=>void;
-  onOpenDigital:(section:LosFacsimileSection)=>void;
+  onOpenDigital:(section:LosFacsimileSection,chapterId?:string|null)=>void;
 }){
   const [fileName,setFileName]=useState("");
   const [document,setDocument]=useState<PDFDocumentProxy|null>(null);
+  const [activeEdition,setActiveEdition]=useState<Los1PublishedEdition|null>(null);
   const [busy,setBusy]=useState(false);
   const [error,setError]=useState("");
   const [pageIndex,setPageIndex]=useState(0);
@@ -142,48 +145,47 @@ export function Los1PdfReader({
   const spread=mode==="spread"||(mode==="auto"&&stageSize.width>=970);
   const shouldSpread=spread&&stageSize.width>=670;
   const visible=useMemo(()=>
-    document?visiblePdfLeaves(pageIndex,document.numPages,shouldSpread):[],
-  [document,pageIndex,shouldSpread]);
+    document?(activeEdition?
+      visibleReleasedPages(activeEdition.pages,pageIndex,shouldSpread):
+      visiblePdfLeaves(pageIndex,document.numPages,shouldSpread)):[],
+  [document,pageIndex,shouldSpread,activeEdition]);
   const pageWidth=Math.max(190,(stageSize.width-(shouldSpread?50:34))/(shouldSpread?2:1));
   const pageHeight=Math.max(250,stageSize.height-54);
   const go=useCallback((direction:-1|1)=>{
     if(!document)return;
-    setPageIndex(index=>turnPdfLeaf(index,document.numPages,shouldSpread,direction));
-  },[document,shouldSpread]);
+    setPageIndex(index=>activeEdition?
+      turnReleasedPage(activeEdition.pages,index,shouldSpread,direction):
+      turnPdfLeaf(index,document.numPages,shouldSpread,direction));
+  },[document,shouldSpread,activeEdition]);
   const goTo=(index:number)=>{
     if(!document||index<0||index>=document.numPages)return;
     setPageIndex(index);setJumpValue("");setJumpError("");
     setTocOpen(false);setSearchOpen(false);
   };
-  const onFile=async(event:ChangeEvent<HTMLInputElement>)=>{
-    const file=event.currentTarget.files?.[0];
-    event.currentTarget.value="";
-    if(!file)return;
-    setError("");
-    if(!file.name.toLocaleLowerCase("fi").endsWith(".pdf")||
-       file.size===0||file.size>LOS1_C01_PDF_CONTRACT.maxBytes){
-      setError("Valitse enintään 35 Mt:n PDF-tiedosto.");return;
-    }
-    setBusy(true);setDocument(null);setFileName("");
-    setBookmarkStorageKey(null);setBookmarks([]);setHits([]);
+  const openPdfBytes=useCallback(async(
+    buffer:ArrayBuffer,name:string,release:Los1PublishedEdition|null,
+  )=>{
+    setBusy(true);setError("");setDocument(null);setFileName("");
+    setActiveEdition(null);setBookmarkStorageKey(null);setBookmarks([]);setHits([]);
     try{
       await currentLoadingTask.current?.destroy();
       currentLoadingTask.current=null;
       currentDoc.current=null;
-      const buffer=await file.arrayBuffer();
-      // The PDF worker may transfer/detach the ArrayBuffer. Hash it first.
       const owner=getDeviceOwnerId();
       let bookmarkKey:string|null=null;
       let restoredBookmarks:number[]=[];
+      // Compute digest before PDF.js worker may transfer/detach the bytes.
       if(owner&&typeof crypto!=="undefined"&&crypto.subtle){
         const hash=await crypto.subtle.digest("SHA-256",buffer);
-        const digest=Array.from(new Uint8Array(hash)).map(x=>x.toString(16).padStart(2,"0")).join("");
-        bookmarkKey="los1.c01.pdf-bookmarks."+owner+"."+digest;
+        const digest=Array.from(new Uint8Array(hash))
+          .map(x=>x.toString(16).padStart(2,"0")).join("");
+        bookmarkKey="los1.pdf-bookmarks."+owner+"."+(release?.editionId??"c01-draft")+"."+digest;
         try{
           const data:unknown=JSON.parse(localStorage.getItem(bookmarkKey)??"[]");
+          const maxPages=release?.pages.length??LOS1_C01_PDF_CONTRACT.pageCount;
           restoredBookmarks=Array.isArray(data)?data.filter((n):n is number=>
-            Number.isInteger(n)&&n>=0&&n<LOS1_C01_PDF_CONTRACT.pageCount):[];
-        }catch{/* Use an empty set of local bookmarks. */}
+            Number.isInteger(n)&&n>=0&&n<maxPages):[];
+        }catch{/* No stored bookmark set is fine. */}
       }
       const pdfjs=await import("pdfjs-dist/legacy/build/pdf.mjs");
       pdfjs.GlobalWorkerOptions.workerSrc=pdfWorkerUrl;
@@ -192,24 +194,58 @@ export function Los1PdfReader({
       const pdf=await loadingTask.promise;
       const first=await pdf.getPage(1);
       const firstView=first.getViewport({scale:1});
-      const geometryError=validatePdfGeometry(firstView.width,firstView.height,pdf.numPages);
-      if(geometryError)throw new Error(geometryError);
-      const textA=await pdf.getPage(LOS1_C01_PDF_CONTRACT.textAPdfPage);
-      const textContent=await textA.getTextContent();
-      const sourceError=validateC01TextALayer(extractStrings(textContent.items));
-      if(sourceError)throw new Error(sourceError);
+      if(release){
+        const expected=release.screenPdf.pageCount;
+        if(pdf.numPages!==expected||pdf.numPages!==release.pages.length)
+          throw Error("Julkaistun painoksen PDF:n sivumäärä ei vastaa sivukarttaa.");
+        const expectedWidth=release.trimMm.width*72/25.4;
+        const expectedHeight=release.trimMm.height*72/25.4;
+        if(Math.abs(firstView.width-expectedWidth)>1.5||
+           Math.abs(firstView.height-expectedHeight)>1.5)
+          throw Error("Julkaistun PDF:n B5-sivukoko ei vastaa hyväksyttyä taittoa.");
+      }else{
+        const geometryError=validatePdfGeometry(firstView.width,firstView.height,pdf.numPages);
+        if(geometryError)throw Error(geometryError);
+        const textA=await pdf.getPage(LOS1_C01_PDF_CONTRACT.textAPdfPage);
+        const textContent=await textA.getTextContent();
+        const sourceError=validateC01TextALayer(extractStrings(textContent.items));
+        if(sourceError)throw Error(sourceError);
+      }
       currentDoc.current=pdf;
-      setDocument(pdf);setPageIndex(0);setZoom(100);setFileName(file.name);
-      setBookmarks(restoredBookmarks);
-      setBookmarkStorageKey(bookmarkKey);
+      setDocument(pdf);setActiveEdition(release);setPageIndex(0);
+      setZoom(100);setFileName(name);
+      setBookmarks(restoredBookmarks);setBookmarkStorageKey(bookmarkKey);
     }catch(e){
       setError(e instanceof Error?e.message:"PDF:n avaaminen epäonnistui.");
-      setDocument(null);
+      setDocument(null);setActiveEdition(null);
       await currentLoadingTask.current?.destroy().catch(()=>{});
-      currentLoadingTask.current=null;
-      currentDoc.current=null;
+      currentLoadingTask.current=null;currentDoc.current=null;
     }finally{setBusy(false);}
+  },[]);
+  const onFile=async(event:ChangeEvent<HTMLInputElement>)=>{
+    const file=event.currentTarget.files?.[0];
+    event.currentTarget.value="";
+    if(!file)return;
+    if(!file.name.toLocaleLowerCase("fi").endsWith(".pdf")||
+       file.size===0||file.size>LOS1_C01_PDF_CONTRACT.maxBytes){
+      setError("Valitse enintään 35 Mt:n PDF-tiedosto.");return;
+    }
+    await openPdfBytes(await file.arrayBuffer(),file.name,null);
   };
+  useEffect(()=>{
+    const release=getPublishedLos1Edition();
+    if(!release)return;
+    let cancelled=false;
+    void (async()=>{
+      try{
+        const bytes=await loadVerifiedLos1Pdf(release);
+        if(!cancelled)await openPdfBytes(bytes,"LOS! 1 · "+release.editionId,release);
+      }catch(e){
+        if(!cancelled)setError(e instanceof Error?e.message:"Painoksen lataus epäonnistui.");
+      }
+    })();
+    return()=>{cancelled=true;};
+  },[openPdfBytes]);
 
   const runSearch=async()=>{
     if(!document||!query.trim())return;
@@ -268,24 +304,27 @@ export function Los1PdfReader({
     <header className="los1-pdf-header">
       <button type="button" onClick={onBack}><ArrowLeft size={18}/> Näköiskirjan pilottiin</button>
       <div className="los1-pdf-heading"><strong>LOS! 1 · PDF.js</strong>
-        <small>Paikallinen C01-taittoluonnos · ei julkaistu painos</small></div>
-      {document&&<button type="button" onClick={()=>{setDocument(null);setFileName("");setBookmarkStorageKey(null);setBookmarks([]);setHits([]);
+        <small>{activeEdition?"Hyväksytty painos · "+activeEdition.editionId:
+          "Paikallinen C01-taittoluonnos · ei julkaistu painos"}</small></div>
+      {document&&<button type="button" onClick={()=>{setDocument(null);setActiveEdition(null);setFileName("");setBookmarkStorageKey(null);setBookmarks([]);setHits([]);
           void currentLoadingTask.current?.destroy().catch(()=>{});currentLoadingTask.current=null;currentDoc.current=null;}}>
           <X size={17}/> Sulje PDF
         </button>}
     </header>
     <p className="los1-pdf-disclaimer"><FileText size={16}/>
-      PDF pysyy laitteessasi: se luetaan selaimen muistissa eikä sitä lähetetä palvelimelle.
-      Tämä lukija hyväksyy vain C01:n 15-sivuisen B5-luonnoksen.</p>
-    <div className="los1-pdf-upload">
+      {activeEdition?
+        "Hyväksytty PDF haetaan käyttäjän oikeudet tarkistavalta palvelimelta, ja sen SHA-256 tarkistetaan ennen avaamista.":
+        "Paikallista C01-PDF:ää ei lähetetä palvelimelle. Julkaistua koko kirjan PDF:ää ei ole vielä hyväksytty."}
+    </p>
+    {!getPublishedLos1Edition()&&<div className="los1-pdf-upload">
       <label className="los1-pdf-file-label"><Upload size={18}/>
         {busy?"Avataan PDF-tiedostoa…":"Valitse paikallinen C01-PDF"}
         <input type="file" accept=".pdf,application/pdf" disabled={busy} onChange={onFile}/>
       </label>
       {fileName&&<span title={fileName}>Avoinna: {fileName}</span>}
-    </div>
+    </div>}
     {error&&<p className="los1-pdf-error" role="alert">{error}</p>}
-    {!document&&!busy&&<div className="los1-pdf-empty">
+    {!document&&!busy&&!getPublishedLos1Edition()&&<div className="los1-pdf-empty">
       <BookOpen size={36} strokeWidth={1.4}/>
       <h2>PDF.js-lukija on valmis testausta varten</h2>
       <p>Avaa ensin C01:n B5-taittoluonnos PDF-tiedostona. Automaattinen
@@ -310,10 +349,11 @@ export function Los1PdfReader({
         <button type="button" aria-label="Suurenna" disabled={zoom>=250}
           onClick={()=>setZoom(v=>Math.min(250,v+25))}><ZoomIn size={18}/></button>
       </div>
-      {tocOpen&&<nav className="los1-pdf-toc" aria-label="PDF:n luonnoslehtien sisällys">
-        {LOS1_C01_FACSIMILE_PAGES.map(p=><button type="button" key={p.pageId}
+      {tocOpen&&<nav className="los1-pdf-toc" aria-label="PDF:n sivujen sisällys">
+        {(activeEdition?.pages??LOS1_C01_FACSIMILE_PAGES).map(p=><button type="button" key={p.pageId}
           aria-current={pageIndex===p.pdfPageIndex?"page":undefined} onClick={()=>goTo(p.pdfPageIndex)}>
-          <span>{p.title||"Etukannen sisäpuoli"}</span><small>{p.pdfPageIndex+1}</small>
+          <span>{p.title||"Etukannen sisäpuoli"}</span>
+          <small>{p.printedPageLabel??(activeEdition?"Numeroimaton":String(p.pdfPageIndex+1))}</small>
         </button>)}
         {bookmarks.length>0&&<div className="los1-pdf-bookmarks"><strong>Omat kirjanmerkit</strong>
           {bookmarks.map(n=><button type="button" key={n} onClick={()=>goTo(n)}>
@@ -343,7 +383,7 @@ export function Los1PdfReader({
         <button type="button" onClick={()=>go(-1)}
           disabled={pageIndex===0}><ChevronLeft size={17}/> Edellinen</button>
         <form onSubmit={e=>{e.preventDefault();jump();}}>
-          <label htmlFor="los1-pdf-jump">Luonnoslehti {pageIndex+1}/{document.numPages}</label>
+          <label htmlFor="los1-pdf-jump">{activeEdition?"PDF-sivu":"Luonnoslehti"} {pageIndex+1}/{document.numPages}</label>
           <input id="los1-pdf-jump" value={jumpValue} inputMode="numeric" placeholder="1–15"
             onChange={e=>{setJumpValue(e.target.value);setJumpError("");}}/>
           <button type="submit">Siirry</button>
@@ -353,10 +393,15 @@ export function Los1PdfReader({
         {jumpError&&<small role="alert">{jumpError}</small>}
       </footer>
       <div className="los1-pdf-digital-link">
-        <span>PDF-sivu: {LOS1_C01_FACSIMILE_PAGES[pageIndex]?.title??"Luonnoslehti"}</span>
-        <button type="button" onClick={()=>onOpenDigital(LOS1_C01_FACSIMILE_PAGES[pageIndex]?.section??"chapter")}>
-          Avaa sama osio digikirjassa
-        </button>
+        <span>PDF-sivu: {(activeEdition?.pages??LOS1_C01_FACSIMILE_PAGES)[pageIndex]?.title??"Sivu"}</span>
+        <button type="button" onClick={()=>{
+          const page=activeEdition?.pages[pageIndex];
+          const section=page?.sectionId??LOS1_C01_FACSIMILE_PAGES[pageIndex]?.section??"chapter";
+          const permitted:readonly string[]=["overview","chapter","text","understand","vocabulary",
+            "grammar","text-b","practice","apply","culture","test","appendix"];
+          onOpenDigital(permitted.includes(section)?section as LosFacsimileSection:"chapter",
+            page?.chapterId??"01");
+        }}>Avaa sama osio digikirjassa</button>
       </div>
     </>}
     <span className="sr-only">PDF on paikallinen taittoluonnos, ei julkaistu painos eikä painovalmis kirja.</span>
