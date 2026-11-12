@@ -13,6 +13,7 @@ import { LosOpenTextPage, LosOpenTextUnderstanding } from "./LosOpenSourcePages"
 import { getLosOpenDialogue } from "./content/los1OpenDialogues";
 import { LosNotebook, LosWorkbook } from "./LosWorkbook";
 import { LosBackups } from "./LosBackups";
+import { LosBookStartAction } from "./LosBookStartAction";
 import { LosMidtermExam } from "./LosMidtermExam";
 import { LosStudyProgress } from "./LosStudyProgress";
 import { LosRecallCards } from "./LosRecallCards";
@@ -130,8 +131,12 @@ function BookFront({ book, move }: { book: LosBookDefinition; move: (chapter: st
         <div className="los-front-rule" />
         <p className="los-front-lead">{book.summary}</p>
         <p className="los-front-meta">{book.module} · LOPS21 · Saksa B3</p>
-        <button className="los-primary" onClick={() => move(null, "contents")}>Avaa sisällysluettelo <ArrowRight size={18} /></button>
-        {book.chapters.length > 0 && <button className="los-text-link" onClick={() => move("01", "chapter")}>Aloita kappaleesta 1 <ChevronRight size={17} /></button>}
+        {book.id===1?<LosBookStartAction move={move}/>:
+          <button className="los-primary" onClick={() => move(null, "contents")}>Avaa sisällysluettelo <ArrowRight size={18} /></button>}
+        {book.chapters.length > 0 && <button className="los-text-link"
+          onClick={() => book.id===1?move(null,"contents"):move("01","chapter")}>
+          {book.id===1?"Selaa sisällysluetteloa":"Aloita kappaleesta 1"} <ChevronRight size={17}/>
+        </button>}
       </div>
     </div>
     <div className="los-front-after">
