@@ -17,22 +17,22 @@ const draft=()=>({
   practiceChecked:[] as string[],testAnswers:{} as Record<string,string>,
   testSubmittedAt:null as string|null,selfAssessment:"",updatedAt:time,
 });
-test("canonical readiness is explicit: 49 actual lessons, not a fabricated contiguous 1–50 series",()=>{
+test("canonical readiness is explicit: 52 actual lessons, not a fabricated contiguous 1–50 series",()=>{
  assert.equal(LOS_1_LESSONS.length,60);
- assert.equal(LOS1_EXECUTABLE_LESSONS.length,49);
+ assert.equal(LOS1_EXECUTABLE_LESSONS.length,52);
  assert.equal(LOS1_C07_C09_LESSONS.length,10);
- assert.equal(new Set(LOS1_EXECUTABLE_LESSONS.map(l=>l.id)).size,49);
+ assert.equal(new Set(LOS1_EXECUTABLE_LESSONS.map(l=>l.id)).size,52);
  for(let n=1;n<=26;n++)assert.equal(isLos1ExecutableLesson("L"+String(n).padStart(3,"0")),true);
  for(let n=27;n<=30;n++)assert.equal(isLos1ExecutableLesson("L"+String(n).padStart(3,"0")),true);
  for(let n=31;n<=35;n++)assert.equal(isLos1ExecutableLesson("L"+String(n).padStart(3,"0")),true);
  for(let n=36;n<=40;n++)assert.equal(isLos1ExecutableLesson("L"+String(n).padStart(3,"0")),true);
  for(let n=41;n<=45;n++)assert.equal(isLos1ExecutableLesson("L"+String(n).padStart(3,"0")),n===41||n===43);
  for(let n=46;n<=50;n++)assert.equal(isLos1ExecutableLesson("L"+String(n).padStart(3,"0")),true);
- for(let n=51;n<=60;n++)assert.equal(isLos1ExecutableLesson("L"+String(n).padStart(3,"0")),n===51||n===53);
+ for(let n=51;n<=60;n++)assert.equal(isLos1ExecutableLesson("L"+String(n).padStart(3,"0")),n===51||n===53||(n>=56&&n<=58));
  assert.equal(los1LessonDraftChapter("L031"),"06");
  assert.equal(los1LessonDraftChapter("L030"),"91");
  assert.equal(los1LessonDraftChapter("L036"),"07");
- assert.equal(los1LessonDraftChapter("L049"),"09");
+ assert.equal(los1LessonDraftChapter("L052"),"09");
  assert.equal(los1LessonDraftChapter("L025"),"05");
 });
 test("C07 and C09 lesson plans use original source dialogue and valid real question IDs",()=>{
