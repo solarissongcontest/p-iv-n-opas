@@ -53,7 +53,7 @@ test("C03, C04, C05, C07 and C09 contain five distinct published, whole original
   assert.equal(LOS1_OPEN_DIALOGUES.length,5);
   assert.deepEqual(LOS1_OPEN_DIALOGUES.map(x=>x.chapterId),["03","04","05","07","09"]);
   assert.deepEqual(LOS1_OPEN_DIALOGUES.map(x=>x.originalLines.length),[8,8,4,5,7]);
-  assert.equal(new Set(LOS1_OPEN_DIALOGUES.map(x=>x.sourceId)).size,4);
+  assert.equal(new Set(LOS1_OPEN_DIALOGUES.map(x=>x.sourceId)).size,5);
   for(const text of LOS1_OPEN_DIALOGUES){
     assert.deepEqual(text.originalLines.map(line=>line.text),original[text.chapterId]);
     assert.ok(text.originalLines.every(line=>line.meaning.trim().length>1));
