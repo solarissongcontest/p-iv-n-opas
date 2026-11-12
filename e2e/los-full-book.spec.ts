@@ -184,3 +184,33 @@ test("book cover resumes next unfinished lesson after completing L001",async({pa
  await next.click();
  await expect(page.locator("#los-lesson-runner .los-lesson-detail .los-overline")).toContainText("L002");
 });
+
+test("C01 B5 facsimile pilot uses original cover and lets readers jump to the real digital chapter",async({page})=>{
+ await enterLocalBook(page);
+ await page.goto("/los#/1/facsimile",{waitUntil:"domcontentloaded"});
+ const reader=page.locator(".los-facs-reader");
+ await expect(reader).toBeVisible();
+ await expect(reader).toContainText("C01-pilotti");
+ await expect(reader.locator('[data-facsimile-page="cover"] img')).toHaveAttribute("src","/los/los-1-cover.jpeg");
+ await expect(reader.locator(".los-facs-bottom")).toContainText("Luonnoslehti 1 / 15");
+ await reader.getByRole("button",{name:"Sisältö"}).click();
+ await reader.getByRole("navigation",{name:"Näköiskirjan sisällysluettelo"}).getByRole("button",{name:/Text A/}).click();
+ await expect(reader.locator('[data-facsimile-page="c01-text-a"]')).toBeVisible();
+ await expect(reader.locator('[data-facsimile-page="c01-text-a"] .los-facs-dialogue li')).toHaveCount(8);
+ await reader.getByRole("button",{name:/Avaa sama osio digikirjassa/}).click();
+ await expect(page).toHaveURL(/\/los#\/1\/01\/text$/);
+ await expect(page.locator(".los-original-dialogue")).toBeVisible();
+ await expectNoHorizontalOverflow(page);
+});
+test("C01 facsimile page position survives reload but does not mark a lesson finished",async({page})=>{
+ await enterLocalBook(page);
+ await page.goto("/los#/1/facsimile",{waitUntil:"domcontentloaded"});
+ const reader=page.locator(".los-facs-reader");
+ await reader.getByRole("button",{name:"Sisältö"}).click();
+ await reader.getByRole("navigation",{name:"Näköiskirjan sisällysluettelo"}).getByRole("button",{name:/Land und Leute/}).click();
+ await expect(reader.locator('[data-facsimile-page="c01-culture"]')).toBeVisible();
+ await page.reload({waitUntil:"domcontentloaded"});
+ await expect(reader.locator('[data-facsimile-page="c01-culture"]')).toBeVisible();
+ await page.goto("/los#/1/path",{waitUntil:"domcontentloaded"});
+ await expect(page.locator("#los-lesson-runner .los-lesson-progress")).toContainText("0/60 suoritettu");
+});
