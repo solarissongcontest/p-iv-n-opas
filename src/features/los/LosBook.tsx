@@ -19,6 +19,7 @@ import { LosDictionaryCard } from "./LosDictionaryCard";
 import { LosContentTree } from "./LosContentTree";
 import { isLosContentTask, type LosContentTask } from "./contentTreeModel";
 import { getLosPronunciation } from "./pronunciation";
+import { inspectLosVocabularyQA } from "./pronunciationPublication";
 import { Los1FacsimilePilot } from "./facsimile/los1/Los1FacsimilePilot";
 import { LosMidtermExam } from "./LosMidtermExam";
 import { LosStudyProgress } from "./LosStudyProgress";
@@ -298,15 +299,17 @@ function Grammar({ chapter }: { chapter: LosChapter }) {
     {first ? <LosC01GrammarGuide /> : <LosChapterGrammar chapterId={chapter.id} />}
   </section>;
 }
-function Vocabulary({ chapter, move }: { chapter: LosChapter; move: (chapter:string|null,section:LosSection)=>void }) {
+function Vocabulary({ chapter, bookId, move }: { chapter: LosChapter; bookId:number; move: (chapter:string|null,section:LosSection)=>void }) {
   const [query, setQuery] = useState("");
   const [showTranslations, setShowTranslations] = useState(true);
+  const coverage = useMemo(() => inspectLosVocabularyQA(bookId,chapter.id), [bookId,chapter.id]);
   const [activeWord, setActiveWord] = useState<{word:string;meaning:string}|null>(null);
   const words = useMemo(() => chapter.vocabulary.map(strip).filter(parts => parts.join(" ").toLowerCase().includes(query.trim().toLowerCase())), [chapter, query]);
   return <section className="los-inner-page los-vocabulary-page">
     <p className="los-eyebrow">WORTSCHATZ / KAPITEL {Number(chapter.id)}</p>
     <h1>Sanasto</h1>
     <p className="los-page-intro">Kappaleen opetettavia sanoja ja ilmauksia. Tämä on tarkistettava ennakkoluettelo, ei vielä lopullinen sanakirjatietokanta.</p>
+    <p className="los-vocabulary-qa" role="status">IPA:n lähde löytynyt {coverage.ipaSourced}/{coverage.total} riville; asiantuntijan hyväksymä IPA {coverage.ipaHumanReviewed}/{coverage.total}, hyväksytty sanaääni {coverage.audioApproved}/{coverage.total}. Julkaisuportti on vielä avoin.</p>
     <button type="button" className="los-outline-button" onClick={() => move(chapter.id,"cards")}>Kertaa sanastoa korteilla</button>
     <div className="los-vocabulary-tools">
       <label><Search size={17} /><span className="sr-only">Etsi sanastosta</span><input value={query} onChange={event => setQuery(event.target.value)} placeholder="Etsi sanaa…" /></label>
@@ -448,7 +451,7 @@ function LosBookWorkspace({ book, location, move, goLibrary, openBook }: { book:
             chapter ? (
               section === "text" ? <TextPage chapter={chapter} /> :
               section === "understand" ? (chapter.id==="02" ? <LosC02Understanding goToText={() => move(chapter.id,"text")}/> : chapter.id==="06" ? <><LosOpenTextUnderstanding chapterId="06" goToText={() => move(chapter.id,"text")}/><details className="los-editorial-note"><summary>C01:n ikäkertauksen vanhat ymmärtämistehtävät (L034)</summary><LosC06AgeUnderstanding goToText={() => move(chapter.id,"text")}/></details></> : getLosOpenDialogue(chapter.id) ? <LosOpenTextUnderstanding chapterId={chapter.id} goToText={() => move(chapter.id,"text")}/> : <LosUnderstanding chapter={chapter} goToText={() => move(chapter.id, "text")} />) :
-              section === "vocabulary" ? <Vocabulary key={chapter.id} chapter={chapter} move={move} /> :
+              section === "vocabulary" ? <Vocabulary key={chapter.id} chapter={chapter} bookId={book.id} move={move} /> :
               section === "cards" ? <LosRecallCards key={chapter.id} chapter={chapter} onBack={()=>move(chapter.id,"vocabulary")} /> :
               section === "grammar" ? <Grammar chapter={chapter} /> :
               section === "text-b" ? <LosTextB chapter={chapter} /> :
