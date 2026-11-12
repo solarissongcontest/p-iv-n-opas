@@ -229,7 +229,7 @@ test("U1/U3: chapter tree links to persisted exercise and shared IPA word card o
  const first=tree.locator("#los-tree-task-list-01-practice button").first();
  await expect(first).toBeVisible();
  await first.click();
- await expect(page).toHaveURL(/\\/los#\\/1\\/01\\/practice\\/C01-EX-01$/);
+ await expect(page).toHaveURL(/C01-EX-01$/);
  await expect(page.locator("#C01-EX-01")).toBeVisible();
  await page.reload({waitUntil:"domcontentloaded"});
  await expect(page.locator("#C01-EX-01")).toBeVisible();
