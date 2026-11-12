@@ -8,10 +8,13 @@ import {
   type LosLessonProgress,
 } from "./lessonEngine";
 import { LOS1_C02_LESSON_BLUEPRINTS } from "./lessonEngineC02";
+import { LOS1_C03_LESSON_BLUEPRINTS } from "./lessonEngineC03";
 import "./los-lessons.css";
 
-const ALL_LESSONS = [...LOS1_C01_LESSON_BLUEPRINTS, ...LOS1_C02_LESSON_BLUEPRINTS];
-const isC02Lesson = (id: string) => LOS1_C02_LESSON_BLUEPRINTS.some(lesson => lesson.id === id);
+const ALL_LESSONS = [...LOS1_C01_LESSON_BLUEPRINTS, ...LOS1_C02_LESSON_BLUEPRINTS, ...LOS1_C03_LESSON_BLUEPRINTS];
+const lessonChapter = (id: string): "01" | "02" | "03" =>
+  LOS1_C03_LESSON_BLUEPRINTS.some(lesson => lesson.id === id) ? "03" :
+  LOS1_C02_LESSON_BLUEPRINTS.some(lesson => lesson.id === id) ? "02" : "01";
 
 const stamp = () => new Date().toISOString();
 
@@ -27,9 +30,11 @@ export function LosFirstLessons({ selectedId, onSelect, move }: {
 }) {
   const c01 = useLosChapterDraft(1, "01");
   const c02 = useLosChapterDraft(1, "02");
+  const c03 = useLosChapterDraft(1, "03");
+  const chapterDraft = (id: string) => lessonChapter(id) === "03" ? c03 : lessonChapter(id) === "02" ? c02 : c01;
   const lesson = ALL_LESSONS.find(item => item.id === selectedId) ?? ALL_LESSONS[0]!;
-  const chapterId = isC02Lesson(lesson.id) ? "02" : "01";
-  const { draft, update, saved } = chapterId === "02" ? c02 : c01;
+  const chapterId = lessonChapter(lesson.id);
+  const { draft, update, saved } = chapterDraft(lesson.id);
   const [pendingAnswer, setPendingAnswer] = useState("");
   const progress = draft.lessonProgress?.[lesson.id] ?? emptyLosLessonProgress();
   useEffect(() => { setPendingAnswer(progress.exitAnswer ?? ""); }, [lesson.id, progress.exitAnswer]);
@@ -43,18 +48,18 @@ export function LosFirstLessons({ selectedId, onSelect, move }: {
     });
   };
   const completeCount = ALL_LESSONS.filter(item =>
-    Boolean((isC02Lesson(item.id) ? c02.draft : c01.draft).lessonProgress?.[item.id]?.completedAt)).length;
+    Boolean(chapterDraft(item.id).draft.lessonProgress?.[item.id]?.completedAt)).length;
   const stepCount = lesson.steps.filter(item => progress.completedStepIds.includes(item.id)).length;
   const evidenceReady = losLessonEvidenceMet(lesson, draft);
   const ready = losLessonCanComplete(lesson, progress, draft);
   const nextIndex = ALL_LESSONS.findIndex(item => item.id === lesson.id) + 1;
   const next = ALL_LESSONS[nextIndex];
   const isComplete = Boolean(progress.completedAt);
-  return <section className="los-lesson-program" id="los-lesson-runner" aria-label="Toteutetut oppitunnit L001–L011">
+  return <section className="los-lesson-program" id="los-lesson-runner" aria-label="Toteutetut oppitunnit L001–L016">
     <div className="los-lesson-program-head">
-      <p className="los-overline">OHJATTU OPETUS · L001–L011</p>
+      <p className="los-overline">OHJATTU OPETUS · L001–L016</p>
       <h2>Opiskele vaihe vaiheelta</h2>
-      <p>Ensimmäiset yksitoista oppituntia voi suorittaa. Niissä käytetään kirjan oikeita sivuja ja samoja tallennettuja vastauksia. Oppitunnin suoritus kertoo työvaiheiden tekemisestä, ei vielä todennetusta kielitaidosta.</p>
+      <p>Ensimmäiset kuusitoista oppituntia voi suorittaa. Niissä käytetään kirjan oikeita sivuja ja samoja tallennettuja vastauksia. Oppitunnin suoritus kertoo työvaiheiden tekemisestä, ei vielä todennetusta kielitaidosta.</p>
       <p className="los-lesson-save" role="status">{saved ? `Oppituntitiedot tallennetaan paikalliseen LOS!-varmuuskopioon. Valinnainen pilvisynkronointi tehdään kappaleen ${Number(chapterId)} muistiinpanojen kautta.` : "Tallennus epäonnistui. Älä sulje sivua ennen varmuuskopion tekemistä."}</p>
       <div className="los-lesson-progress" aria-label="Yhdentoista oppitunnin edistyminen">
         <strong>{completeCount}/{ALL_LESSONS.length} suoritettu</strong>
@@ -65,7 +70,7 @@ export function LosFirstLessons({ selectedId, onSelect, move }: {
     </div>
     <div className="los-lesson-picker" role="group" aria-label="Valitse oppitunti">
       {ALL_LESSONS.map(item => {
-        const done = Boolean((isC02Lesson(item.id) ? c02.draft : c01.draft).lessonProgress?.[item.id]?.completedAt);
+        const done = Boolean(chapterDraft(item.id).draft.lessonProgress?.[item.id]?.completedAt);
         return <button key={item.id} type="button" aria-pressed={item.id === lesson.id} onClick={() => onSelect(item.id)}
           className={item.id === lesson.id ? "is-active" : ""}>
           {done ? <CheckCircle2 size={17} /> : <Circle size={17} />}
