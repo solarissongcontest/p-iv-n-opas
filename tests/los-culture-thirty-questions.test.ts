@@ -46,7 +46,7 @@ test("culture pages display the missing C02 narrative, original cultural compari
  const ui=readFileSync("src/features/los/LosCultureChecks.tsx","utf8");
  const sections=readFileSync("src/features/los/LosSupplementalSections.tsx","utf8");
  const style=readFileSync("src/features/los/los-culture-questions.css","utf8");
- assert.match(sections,/chapter.id==="02"\?<\>/);
+ assert.match(sections,/chapter\.id==="02"\?<>/);
  assert.match(sections,/Herr Weiß · Frau Müller/);
  assert.match(sections,/LosCultureChecks chapterId=\{chapter.id\}/);
  assert.match(ui,/source.sourceUrl/);
