@@ -14,8 +14,8 @@
           "file": "/los/chapters/LOS1-C01-5537577-desktop.webp",
           "width": 1440,
           "height": 630,
-          "bytes": 35442,
-          "sha256": "da7a80d1063618785e95d4bc3574f77509a855ac917a3e7be84a29cfb70a842a"
+          "bytes": 39264,
+          "sha256": "40968fbdf950ce5b31dec706e585750f396c06e15423388dae59ee0d105acd0d"
         },
         "mobile": {
           "file": "/los/chapters/LOS1-C01-5537577-mobile.webp",
@@ -37,8 +37,8 @@
           "file": "/los/chapters/LOS1-C02-35605778-desktop.webp",
           "width": 1440,
           "height": 630,
-          "bytes": 29156,
-          "sha256": "08d9a40d81bffe3efa6e64ce6933e157c3d32c8c7b50793d221246b579bd44af"
+          "bytes": 34836,
+          "sha256": "355cd2306e385a280af357396bb2c9e3373eff5dc1a6264fb0a237917618d81c"
         },
         "mobile": {
           "file": "/los/chapters/LOS1-C02-35605778-mobile.webp",
@@ -129,8 +129,8 @@
           "file": "/los/chapters/LOS1-C06-29711471-desktop.webp",
           "width": 1440,
           "height": 630,
-          "bytes": 88168,
-          "sha256": "0a9ca50ac7bd84d35fa9e28602c0c89f8883d84c271d56774ba175a898460248"
+          "bytes": 86782,
+          "sha256": "9fb6405e510452bd6937d4be1fdb4edeeab7535d71ef97ca184b4c6c3dacbf76"
         },
         "mobile": {
           "file": "/los/chapters/LOS1-C06-29711471-mobile.webp",
@@ -175,8 +175,8 @@
           "file": "/los/chapters/LOS1-C08-36729726-desktop.webp",
           "width": 1440,
           "height": 630,
-          "bytes": 49762,
-          "sha256": "09633f252568f72b96b9d24124b08407069021fe02697feb7e75f41518bbf019"
+          "bytes": 49370,
+          "sha256": "8afe7a18f01e98f6831ea972fe719d936b23651b7dcff9b2c034b91b6ee9a208"
         },
         "mobile": {
           "file": "/los/chapters/LOS1-C08-36729726-mobile.webp",
