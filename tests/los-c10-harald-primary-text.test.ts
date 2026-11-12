@@ -59,7 +59,7 @@ test("the source registry records rights evidence while keeping language, audio 
   assert.equal(gate.ready,false);
   assert.ok(gate.issues.some(x=>x.includes("kieli-")));
   assert.ok(gate.issues.some(x=>x.includes("mobiilissa")));
-  assert.equal(getLosChapterSourceGate("08").sourceId,null);
+  assert.equal(getLosChapterSourceGate("08").sourceId,"M-WB-08");
   assert.equal(getLosChapterSourceGate("08").ready,false);
 });
 
@@ -74,7 +74,7 @@ test("LOS text page and comprehension route preserve true source attribution and
   assert.match(book,/LosOpenTextUnderstanding chapterId=\{chapter\.id\}/); // generic chapter routing
   assert.match(pages,/author=\{text\.author \?\?/);
   assert.match(pages,/license=\{text\.licenseCode \?\?/);
-  assert.match(index,/C10:n koko Harald-haastattelun litteraatti on nyt luettavissa/);
+  assert.match(index,/C10:n Harald-haastattelu ovat nyt kirjan sisällä/);
   assert.equal(LOS1_EXECUTABLE_LESSONS.length,58,"Only evidence-backed reading lessons may be enabled");
   for(const id of ["L054","L055"])assert.equal(isLos1ExecutableLesson(id),true);
   assert.equal(LOS1_OPEN_DIALOGUES.length,5,"Existing five Wikibooks texts remain unchanged");
