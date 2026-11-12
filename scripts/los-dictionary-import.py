@@ -173,9 +173,21 @@ def parse_kaikki(path: Path, source_id: str):
                            if isinstance(x, str) and x.strip()]
                 senses.append({"index": idx, "glosses": glosses,
                                "glossLanguage": "source", "translations": []})
-            forms = [nfc(x.get("form")) for x in entry.get("forms") or []
-                     if isinstance(x, dict) and isinstance(x.get("form"), str)]
-            forms = list(dict.fromkeys(x for x in forms if 0 < len(x) <= MAX_WORD_LENGTH))
+            # Keep the morphological tags on each form. The display-form
+            # string list remains for older staged consumers.
+            form_details: list[dict] = []
+            for candidate in entry.get("forms") or []:
+                if not isinstance(candidate, dict):
+                    continue
+                form = nfc(candidate.get("form"))
+                if not 0 < len(form) <= MAX_WORD_LENGTH:
+                    continue
+                tags = [nfc(x)[:80] for x in candidate.get("tags") or []
+                        if isinstance(x, str) and x.strip()][:30]
+                raw_tags = [nfc(x)[:80] for x in candidate.get("raw_tags") or []
+                            if isinstance(x, str) and x.strip()][:30]
+                form_details.append({"form": form, "tags": tags, "rawTags": raw_tags})
+            forms = list(dict.fromkeys(x["form"] for x in form_details))
             ipa = [nfc(x["ipa"]) for x in entry.get("sounds") or []
                    if isinstance(x, dict) and isinstance(x.get("ipa"), str)
                    and x["ipa"].strip()]
@@ -184,7 +196,8 @@ def parse_kaikki(path: Path, source_id: str):
             yield {"sourceId": source_id, "sourceEntryId": f"{lineno}",
                    "row": lineno, "language": "de", "targetLanguage": None,
                    "lemma": word, "searchKeys": search_keys(word, "de"),
-                   "forms": forms, "partOfSpeech": pos, "gender": None,
+                   "forms": forms, "formDetails": form_details,
+                   "partOfSpeech": pos, "gender": None,
                    "senses": senses, "ipaCandidates": list(dict.fromkeys(ipa)),
                    "sourceKind": "kaikki"}
 
