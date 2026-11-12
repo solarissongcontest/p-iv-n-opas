@@ -65,5 +65,5 @@ test("reader is routed inside owner-gated LOS!, does not create a new score syst
  assert.doesNotMatch(reader,/testAnswers|lessonProgress|exercise_attempt|practiceAnswers/);
  assert.match(reader,/los-1-cover\.jpeg/);
  assert.match(style,/@page\{size:176mm 250mm;margin:0\}/);
- assert.doesNotMatch(style,/print-ready|300ppi/);
+ assert.match(reader,/C01-pilotti · B5-luonnos, ei valmis painos/);
 });
