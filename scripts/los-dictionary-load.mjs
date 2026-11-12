@@ -62,6 +62,10 @@ async function preflight(input,report,approved){
  const expectedLanguage=approved.direction.split("-")[0];
  const expectedTarget=approved.kind==="freedict"?
   approved.direction.split("-")[1]:null;
+ if(approved.kind==="kaikki"&&
+    (approved.glossLanguage!=="en"&&approved.glossLanguage!=="de"||
+     report.glossLanguage!==approved.glossLanguage))
+   throw new Error("Wiktionary gloss language is unverified or conflicts with source");
  const seen=new Set();
  let count=0,translatedRows=0,translations=0,ipaCandidates=0;
  for await(const row of rows(input)){
@@ -72,6 +76,9 @@ async function preflight(input,report,approved){
   if(typeof id!=="string"||!id||id.length>190||seen.has(id))
     throw new Error("Duplicate or invalid source entry ID: "+id);
   seen.add(id);
+  if(approved.kind==="kaikki"&&
+    row.senses.some(sense=>sense.glossLanguage!==approved.glossLanguage))
+   throw new Error("Wiktionary entry has wrong gloss language");
   const batch=makeBatch([row],report.sourceId);
   if(batch.lexemes.length!==1)throw new Error("Expected one lexeme per source row");
   for(const form of batch.forms){
