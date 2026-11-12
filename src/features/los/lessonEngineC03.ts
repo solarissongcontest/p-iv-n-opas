@@ -24,7 +24,7 @@ export const LOS1_C03_LESSON_BLUEPRINTS: readonly LosLessonBlueprint[] = [
     },
   },
   {
-    id:"L013", title:"Berna: alkuperän tunnistaminen",
+    id:"L013", title:"Lisa Müllerin alkuperäkeskustelu",
     objective:"Löydän oikeasta Lisa Müller -keskustelusta lähtömaan ja asuinpaikan.",
     estimatedMinutes:30,contentVersion:"1.0.0",
     steps:[
