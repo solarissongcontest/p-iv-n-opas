@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { ChevronDown, ChevronRight, Search } from "lucide-react";
-import type { LosBookDefinition } from "./catalog";
+import { LOS_BOOKS, type LosBookDefinition } from "./catalog";
 import type { LosDestination } from "./LosReferenceTools";
 import { losContentTasks, type LosContentTask } from "./contentTreeModel";
 
@@ -13,7 +13,7 @@ const sectionLinks: readonly {id:LosDestination;label:string}[] = [
 ];
 
 export function LosContentTree({
-  book,chapterId,section,activeTaskId,move,openTask,
+  book,chapterId,section,activeTaskId,move,openTask,openBook,
 }: {
   book:LosBookDefinition;
   chapterId:string|null;
@@ -21,6 +21,7 @@ export function LosContentTree({
   activeTaskId:string|null;
   move:(chapter:string|null,section:LosDestination)=>void;
   openTask:(task:LosContentTask)=>void;
+  openBook:(id:number)=>void;
 }) {
   const [search,setSearch]=useState("");
   const [expanded,setExpanded]=useState<Record<string,boolean>>({});
@@ -48,6 +49,17 @@ export function LosContentTree({
   };
   const go=(ch:string,sec:LosDestination)=>move(ch,sec);
   return <div className="los-content-tree">
+    <details className="los-tree-books">
+      <summary>Kirjasarja · LOS! 1–8</summary>
+      <ul>{LOS_BOOKS.map(item=><li key={item.id}>
+        <button type="button" aria-current={item.id===book.id ? "page" : undefined}
+          onClick={() => openBook(item.id)}>
+          <strong>LOS! {item.id}</strong>
+          <span>{item.title}</span>
+          {item.chapters.length===0&&<small>Ei vielä kappalesisältöä</small>}
+        </button>
+      </li>)}</ul>
+    </details>
     <div className="los-tree-search">
       <Search size={16} aria-hidden="true"/>
       <label className="sr-only" htmlFor="los-tree-search-input">Hae sisältöpuusta</label>
