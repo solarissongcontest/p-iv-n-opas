@@ -4,6 +4,7 @@ import { losScore } from "./exerciseBank.ts";
 import { LOS1_EXECUTABLE_LESSONS,isLos1ExecutableLesson,los1LessonDraftChapter } from "./guidedLessons.ts";
 import { LOS_1_LESSONS } from "./learningPath.ts";
 import { losExamScore, LOS1_MIDTERM_QUESTIONS } from "./content/los1Exams.ts";
+import { losFinalScore } from "./content/los1FinalExam.ts";
 import { getLosChapterSourceGate } from "./content/sourceRegistry.ts";
 import { losRecallFromVocabulary,losRecallIsDue } from "./recallEngine.ts";
 
@@ -18,6 +19,7 @@ export type LosStudyProgressSnapshot={
   correct:number;total:number;scoredChapters:number;
   delayedSelfRemembered:number;pendingScheduled:number;newCards:number;
   midterm:{correct:number;total:number}|null;
+  finalExam:{correct:number;total:number}|null;
   chapters:ChapterProgress[];
   unfinished:{id:string;title:string}[];
 };
@@ -45,6 +47,8 @@ export function getLosStudyProgressSnapshot(book:LosBookDefinition,drafts:Readon
   const mid=drafts["91"];
   const midterm=mid?.testSubmittedAt?
     (()=>{const result=losExamScore(LOS1_MIDTERM_QUESTIONS,mid.testAnswers);return {correct:result.correct,total:result.total};})():null;
+  const finalDraft=drafts["93"];
+  const finalExam=finalDraft?.testSubmittedAt?(()=>{const result=losFinalScore(finalDraft.testAnswers);return {correct:result.correct,total:result.total};})():null;
   const completed=LOS1_EXECUTABLE_LESSONS.filter(l=>{
     const d=drafts[los1LessonDraftChapter(l.id)];
     return Boolean(d?.lessonProgress?.[l.id]?.completedAt);
@@ -60,6 +64,6 @@ export function getLosStudyProgressSnapshot(book:LosBookDefinition,drafts:Readon
     delayedSelfRemembered:chapterStatuses.reduce((sum,c)=>sum+c.reviewSelf,0),
     pendingScheduled:chapterStatuses.reduce((sum,c)=>sum+c.pendingScheduled,0),
     newCards:chapterStatuses.reduce((sum,c)=>sum+c.newCards,0),
-    midterm,chapters:chapterStatuses,unfinished:done,
+    midterm,finalExam,chapters:chapterStatuses,unfinished:done,
   };
 }
