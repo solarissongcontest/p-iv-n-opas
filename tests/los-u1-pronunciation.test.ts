@@ -5,11 +5,11 @@ import {
 } from "../src/features/los/pronunciation.ts";
 
 test("U1: only source-inspected German IPA has a source and explicit review status", () => {
-  assert.equal(LOS_PRONUNCIATIONS.length, 8);
+  assert.equal(LOS_PRONUNCIATIONS.length, 15);
   for (const item of LOS_PRONUNCIATIONS) {
     assert.equal(item.language, "de");
     assert.equal(item.region, "de-DE");
-    assert.equal(item.targetType, "lemma");
+    assert.ok(item.targetType === "lemma" || item.targetType === "phrase");
     assert.equal(item.ipaReviewStatus, "source-verified");
     assert.match(item.ipa ?? "", /[^\s]/u);
     assert.match(item.ipaSourceUrl ?? "", /^https:\/\/de\.wiktionary\.org\/wiki\//);
@@ -26,7 +26,12 @@ test("U1: de word normalization preserves umlaut, ß and token matching", () => 
 });
 
 test("U1: never manufacture IPA for unverified phrases or unknown inflections", () => {
-  assert.equal(getLosPronunciation("Guten Tag!"), null);
+  assert.equal(getLosPronunciation("Guten Tag!")?.ipa, "ˌɡutn̩ ˈtaːk");
+  assert.equal(getLosPronunciation("Guten Morgen!")?.targetType, "phrase");
+  assert.equal(getLosPronunciation("Gute Nacht!")?.ipa, "ˌɡutə ˈnaxt");
+  assert.equal(getLosPronunciation("Auf Wiedersehen!")?.ipa, "aʊ̯f ˈviːdɐˌzeːən");
+  assert.equal(getLosPronunciation("Bitte!")?.ipa, "ˈbɪtə");
+  assert.equal(getLosPronunciation("Bis später!"), null);
   assert.equal(getLosPronunciation("Wie heißt du?"), null);
   assert.equal(getLosPronunciation("heiße"), null);
   assert.equal(getLosPronunciation("foobar"), null);
