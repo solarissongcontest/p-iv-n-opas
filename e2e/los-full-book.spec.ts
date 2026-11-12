@@ -120,10 +120,16 @@ test("every one of the 60 guided lessons opens from its actual chapter picker on
    expect(seen.has(title)).toBe(false);
    seen.add(title);
    await button.click();
-   await expect(runner.locator(".los-lesson-detail .los-overline")).toContainText(title);
-   await expect(runner.locator(".los-lesson-steps li").first()).toBeVisible();
-   await expect(runner.locator(".los-lesson-exit")).toBeVisible();
-   await expect(runner.getByRole("button",{name:"Merkitse oppitunti suoritetuksi"})).toBeDisabled();
+   if(title==="L004"){
+     await expect(page).toHaveURL(/\/los-lessons\/L004$/);
+     await expect(page.locator(".los-teacher-paper h2").first()).toContainText("Tänään opit");
+     await page.goto("/los#/1/path",{waitUntil:"domcontentloaded"});
+   }else{
+     await expect(runner.locator(".los-lesson-detail .los-overline")).toContainText(title);
+     await expect(runner.locator(".los-lesson-steps li").first()).toBeVisible();
+     await expect(runner.locator(".los-lesson-exit")).toBeVisible();
+     await expect(runner.getByRole("button",{name:"Merkitse oppitunti suoritetuksi"})).toBeDisabled();
+   }
   }
  }
  expect(seen.size).toBe(60);
