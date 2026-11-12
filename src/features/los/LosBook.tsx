@@ -5,6 +5,7 @@ import { LOS_BOOKS, type LosBookDefinition, type LosChapter } from "./catalog";
 import { getLosChapterSourceGate } from "./content/sourceRegistry";
 import { LosAuthenticAudio, LosDictionary, LosIndexSearch, LosLearningPath, type LosDestination } from "./LosReferenceTools";
 import { LosChapterGrammar } from "./LosGrammarChapters";
+import { LosC01GrammarGuide } from "./LosC01GrammarGuide";
 import { LosC01AuthenticText } from "./LosC01AuthenticText";
 import { LosC02AuthenticText } from "./LosC02AuthenticText";
 import { LosC02Understanding } from "./LosC02Understanding";
@@ -294,21 +295,7 @@ function Grammar({ chapter }: { chapter: LosChapter }) {
     <p className="los-eyebrow">GRAMMATIK / KAPITEL {Number(chapter.id)}</p>
     <h1>Kielioppi</h1>
     <h2>{chapter.grammar}</h2>
-    {first ? <>
-      <p>Saksan opiskelun alussa kannattaa opetella muutama tervehdys kokonaisena ilmauksena. Ne ovat käytännöllisiä, vaikka et vielä tunne sanojen kielioppia.</p>
-      <div className="los-example"><p lang="de">Guten Morgen!</p><span>Hyvää huomenta!</span></div>
-      <div className="los-example"><p lang="de">Guten Tag!</p><span>Hyvää päivää!</span></div>
-      <p><strong>Guten Morgen</strong> on aamun tervehdys. <strong>Guten Tag</strong> sopii päivään. Illalla sanotaan <strong>Guten Abend</strong>. Nämä ilmaukset kannattaa tässä vaiheessa opetella sellaisinaan.</p>
-      <h3>Ensimmäiset ääntämissäännöt</h3>
-      <table className="los-grammar-table"><thead><tr><th>Kirjain / yhdistelmä</th><th>Ääntäminen</th><th>Esimerkki</th></tr></thead><tbody>
-        <tr><td>w</td><td>yleensä kuten suomen v</td><td lang="de">wie</td></tr>
-        <tr><td>z</td><td>ts</td><td lang="de">zehn</td></tr>
-        <tr><td>ei</td><td>ai</td><td lang="de">mein</td></tr>
-        <tr><td>ie</td><td>pitkä i</td><td lang="de">wie</td></tr>
-        <tr><td>sch</td><td>š-äänne</td><td lang="de">Schule</td></tr>
-      </tbody></table>
-      <aside className="los-grammar-aside"><strong>Huomaa</strong><p>Saksan substantiivit kirjoitetaan isolla alkukirjaimella. Kirjaimet ä, ö, ü ja ß tulevat tutuiksi vähitellen.</p></aside>
-    </> : <LosChapterGrammar chapterId={chapter.id} />}
+    {first ? <LosC01GrammarGuide /> : <LosChapterGrammar chapterId={chapter.id} />}
   </section>;
 }
 function Vocabulary({ chapter, move }: { chapter: LosChapter; move: (chapter:string|null,section:LosSection)=>void }) {
