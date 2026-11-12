@@ -1,5 +1,5 @@
 /**
- * Export a DRAFT C01 B5 PDF from the exact LOS! React page used by the reader.
+ * Export DRAFT C01 or C02 B5 PDF from the exact LOS! React print leaves.
  *
  * Usage (from the repo root with the Vite dev server already running):
  *   bun run e2e:install
@@ -14,11 +14,14 @@ import path from "node:path";
 import {fileURLToPath} from "node:url";
 
 const repoRoot=path.resolve(path.dirname(fileURLToPath(import.meta.url)),"..");
+const chapter=process.env["LOS1_FACSIMILE_CHAPTER"]??"01";
+if(!["01","02"].includes(chapter))throw Error("Only C01 or C02 draft PDF export is allowed.");
+const expectedLeaves=chapter==="01"?15:14;
+const expectedFirst=chapter==="01"?"cover":"c02-open-left";
 const outputPath=path.resolve(process.env["LOS1_FACSIMILE_PDF_OUTPUT"]||
-  path.join(repoRoot,".artifacts/los1/LOS1_C01_B5_TAITTOLUONNOS.pdf"));
+  path.join(repoRoot,`.artifacts/los1/LOS1_C${chapter}_B5_TAITTOLUONNOS.pdf`));
 const baseUrl=process.env["LOS1_FACSIMILE_BASE_URL"]||"http://127.0.0.1:5173";
-const requestedUrl=new URL("/los#/1/facsimile",baseUrl).href;
-const expectedLeaves=15;
+const requestedUrl=new URL(chapter==="01"?"/los#/1/facsimile":"/los#/1/facsimile-c02",baseUrl).href;
 
 async function run(){
   const {chromium}=await import("@playwright/test");
@@ -42,7 +45,7 @@ async function run(){
     await page.waitForFunction(expected=>
       document.querySelectorAll(".los-facs-print-only .los-facs-leaf").length===expected,
       expectedLeaves,{timeout:60_000});
-    await page.locator(".los-facs-print-only .los-facs-cover-image").evaluate(async img=>{
+    if(chapter==="01")await page.locator(".los-facs-print-only .los-facs-cover-image").evaluate(async img=>{
       if(!img.complete)await new Promise((resolve,reject)=>{
         img.addEventListener("load",resolve,{once:true});
         img.addEventListener("error",reject,{once:true});
@@ -52,25 +55,25 @@ async function run(){
     await page.evaluate(()=>document.fonts.ready);
     const leafInfo=await page.locator(".los-facs-print-only .los-facs-leaf").evaluateAll(elements=>
       elements.map(el=>({id:el.getAttribute("data-facsimile-page"),side:el.getAttribute("data-physical-side")})));
-    if(leafInfo.length!==expectedLeaves||leafInfo[0]?.id!=="cover"||
+    if(leafInfo.length!==expectedLeaves||leafInfo[0]?.id!==expectedFirst||
        new Set(leafInfo.map(x=>x.id)).size!==expectedLeaves){
       throw new Error("The print-only page map is incomplete or duplicated.");
     }
     // The app shell can occupy extra invisible printed pages even with
     // visibility:hidden. Clone ONLY the already-rendered print leaves into
     // a clean document, keeping the same loaded CSS and original source data.
-    await page.evaluate(()=>{
+    await page.evaluate(chapter=>{
       const original=document.querySelector(".los-facs-print-only");
       if(!original)throw new Error("Missing C01 print sheet container.");
       const standalone=document.createElement("main");
-      standalone.className="los-facs-reader";
+      standalone.className=chapter==="02"?"los-facs-reader los-facs-c02-reader":"los-facs-reader";
       standalone.appendChild(original.cloneNode(true));
       document.body.replaceChildren(standalone);
       document.body.removeAttribute("style");
       document.body.className="los-facs-pdf-export";
       document.documentElement.classList.remove("dark");
-      document.title="LOS! 1 | C01 B5 - Taittoluonnos";
-    });
+      document.title="LOS! 1 | C"+chapter+" B5 - Taittoluonnos";
+    },chapter);
     await page.emulateMedia({media:"print"});
     const printChecks=await page.evaluate(()=>{
       const only=document.querySelector(".los-facs-print-only");
@@ -99,6 +102,7 @@ async function run(){
     process.stdout.write(JSON.stringify({
       type:"draft-PDF-only",
       output:outputPath,
+      chapter,
       expectedLeaves,
       printChecks,
       pageMap:leafInfo,

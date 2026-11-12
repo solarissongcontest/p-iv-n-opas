@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import {test} from "node:test";
 import {readFileSync} from "node:fs";
 import {
-  LOS1_C01_DRAFT_PDF_SPECS,parsePdfInfo,inspectDraftPdf,
+  LOS1_C01_DRAFT_PDF_SPECS,LOS1_C02_DRAFT_PDF_SPECS,parsePdfInfo,inspectDraftPdf,
 } from "../scripts/los1-facsimile-pdf-preflight.mjs";
 
 const info=[
@@ -43,4 +43,21 @@ test("export uses existing owner-gated reader print leaves instead of duplicated
   assert.match(exporter,/preferCSSPageSize:true/);
   assert.match(printCss,/@page\s*\{\s*size:\s*176mm 250mm/);
   assert.match(printCss,/\.los-facs-reader > :not\(\.los-facs-print-only\)/);
+});
+
+test("C02 draft preflight verifies fourteen B5 leaves and both original dialogues",()=>{
+  const c02Info=info.replace("Pages:          15","Pages:          14");
+  const content="Franz Greta Thomas Takashi Wortschatz Grammatik Ich heiße ".repeat(45);
+  const accepted=inspectDraftPdf({info:c02Info,text:content,spec:LOS1_C02_DRAFT_PDF_SPECS});
+  assert.equal(accepted.ok,true);
+  assert.equal(accepted.pages,14);
+  assert.equal(LOS1_C02_DRAFT_PDF_SPECS.widthMm,176);
+  assert.equal(LOS1_C02_DRAFT_PDF_SPECS.heightMm,250);
+  const incomplete=inspectDraftPdf({
+    info:c02Info,text:"Franz Greta Wortschatz Grammatik ".repeat(45),
+    spec:LOS1_C02_DRAFT_PDF_SPECS,
+  });
+  assert.ok(incomplete.errors.some(e=>e.includes("Thomas")));
+  const extra=inspectDraftPdf({info,text:content,spec:LOS1_C02_DRAFT_PDF_SPECS});
+  assert.ok(extra.errors.some(e=>e.includes("Sivumäärä")));
 });
