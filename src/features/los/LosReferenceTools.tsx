@@ -175,6 +175,14 @@ const audioSources = [
     note:"Alkuperäinen kokonainen aakkosäänite. LOS!:n kirjainrivi on opetustuki, ei vahvistettu sanatarkka litteraatti. Toisto vielä laitetestattava.",
   },
   {
+    id:"M-COM-07",title:"Viikonpäivät: Montag–Sonntag",
+    duration:"15 s",author:"Christoph (English Wikibooks, 2007)",
+    license:"CC BY-SA 3.0",licenseUrl:"https://creativecommons.org/licenses/by-sa/3.0/",
+    attributionUrl:"https://commons.wikimedia.org/wiki/File:German_Vocabulary_-_Days.ogg",
+    src:"https://commons.wikimedia.org/wiki/Special:Redirect/file/German_Vocabulary_-_Days.ogg",
+    note:"Ihmisen äänittämä täysi 7 päivän lista. Sen koko transkriptio näkyy C09:n Text B -lukijassa; äänen tekninen toimivuus testattava oikealla iPhonella ja tietokoneella.",
+  },
+  {
     id:"M-COM-04",title:"Wie geht es dir? · ääntämisnäyte",
     duration:"1,8 s",author:"Jeuwre",license:"CC BY-SA 4.0",
     licenseUrl:"https://creativecommons.org/licenses/by-sa/4.0/",
@@ -193,7 +201,7 @@ const audioSources = [
 ] as const;
 export function LosAuthenticAudio({ chapterId, source = "all" }: { chapterId: string; source?: "A" | "B" | "all" }) {
   const [errors,setErrors] = useState<string[]>([]);
-  const selected=chapterId==="01" ? (source==="A"?audioSources.slice(0,1):source==="B"?audioSources.slice(1,2):audioSources.slice(0,2)) : (chapterId==="02"||chapterId==="03") && source!=="A" ? audioSources.filter(item=>item.id==="M-COM-02") : chapterId==="05" && source!=="A"?audioSources.filter(item=>item.id==="M-COM-04"||item.id==="M-COM-05") : chapterId==="06"?audioSources.filter(item=>item.id==="M-COM-01") : chapterId==="04" && source!=="A"?audioSources.filter(item=>item.id==="M-COM-03") : chapterId==="07" && source!=="A"?audioSources.filter(item=>item.id==="M-COM-06") : chapterId==="10" && source!=="A"?audioSources.filter(item=>item.id==="M-COM-02") : [];
+  const selected=chapterId==="01" ? (source==="A"?audioSources.slice(0,1):source==="B"?audioSources.slice(1,2):audioSources.slice(0,2)) : (chapterId==="02"||chapterId==="03") && source!=="A" ? audioSources.filter(item=>item.id==="M-COM-02") : chapterId==="05" && source!=="A"?audioSources.filter(item=>item.id==="M-COM-04"||item.id==="M-COM-05") : chapterId==="06"?audioSources.filter(item=>item.id==="M-COM-01") : chapterId==="04" && source!=="A"?audioSources.filter(item=>item.id==="M-COM-03") : chapterId==="07" && source!=="A"?audioSources.filter(item=>item.id==="M-COM-06") : chapterId==="09" && source!=="A"?audioSources.filter(item=>item.id==="M-COM-07") : chapterId==="10" && source!=="A"?audioSources.filter(item=>item.id==="M-COM-02") : [];
   if(!selected.length)return null;
   return <section className="los-authentic-audio" aria-label="Alkuperäiset kuunteluäänitteet">
     <p className="los-overline">ALKUPERÄISET ÄÄNITTEET · KOKEILUTOISTO</p>

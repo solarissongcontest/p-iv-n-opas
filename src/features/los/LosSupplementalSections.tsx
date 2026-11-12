@@ -54,7 +54,7 @@ export function LosTextB({chapter}:{chapter:LosChapter}) {
       <LosAuthenticAudio chapterId={chapter.id} source="B" />
       <h2>Mitä huomasit?</h2>
       <p>Toistuvatko kaikki tutut tervehdykset? Voit käyttää sanastosivua tarkistamiseen, mutta älä luokittele sanoja opituiksi pelkän kuulemisen perusteella.</p>
-    </>:(chapter.id==="02"||chapter.id==="03")?<LosC02SecondaryText chapterId={chapter.id}/>:["04","06","07","10"].includes(chapter.id)?<LosAdditionalTextB chapterId={chapter.id}/>:chapter.id==="05"?<>
+    </>:(chapter.id==="02"||chapter.id==="03")?<LosC02SecondaryText chapterId={chapter.id}/>:["04","06","07","09","10"].includes(chapter.id)?<LosAdditionalTextB chapterId={chapter.id}/>:chapter.id==="05"?<>
       <h2>Harjoittele vointifraasien ääntämistä</h2>
       <p>Kuuntele kahden lyhyen ilmauksen ääntämistä oikealta saksankieliseltä puhujalta. Nämä ovat erillisiä, noin kahden sekunnin <strong>ääntämisnäytteitä</strong>, eivät Heinrichin ja Karlin keskustelun äänitys eivätkä kokonainen toinen tekstiaineisto.</p>
       <LosAuthenticAudio chapterId="05" source="B" />
