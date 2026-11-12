@@ -50,8 +50,8 @@ export const LOS1_VISUAL_LESSONS:Readonly<Record<string,Los1VisualLesson>>={
  },
  "07":{
   chapterId:"07",placement:"culture",
-  question:"Tutki yllä olevaa Düsseldorfin katukylttiä. Mitä merkkejä saksankielisen sanan kirjoitusasussa huomaat?",
-  note:"Kuva on Saksasta, mutta kaikki saksan ä-, ö-, ü- ja ß-säännöt eivät näy yhdessä kyltissä. Tavaamista harjoitellaan sanastosta.",
+  question:"Tutki Düsseldorfistä kuvattua katukylttiä: Düsseldorfer Straße. Mikä kirjain on sanassa Straße suomalaisesta aakkostosta poikkeava?",
+  note:"Kyltin Straße sisältää ß-kirjaimen. Ä-, ö- ja ü-kirjaimia tai niiden korvausasuja ei voi opiskella tästä yhdestä kuvasta.",
   phraseKeys:["schreiben","buchstabieren","der Buchstabe"],
  },
  "08":{
