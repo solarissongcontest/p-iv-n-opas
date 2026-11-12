@@ -5,7 +5,7 @@ import {
 } from "./dictionaryClient";
 import "./los-u2-dictionary.css";
 
-function SourceResult({entry}:{entry:LosDictionaryResult}) {
+function SourceResult({entry,onSearch}:{entry:LosDictionaryResult;onSearch:(word:string)=>void}) {
   return <li className="los-dict-result">
     <div className="los-dict-result-head">
       <strong lang={entry.language}>{entry.lemma}</strong>
@@ -25,8 +25,11 @@ function SourceResult({entry}:{entry:LosDictionaryResult}) {
           <span className="los-dict-notice">Suomenkielistä käännöstä ei ole tästä lähteestä.</span>}
         {Boolean(sense.formOfCandidates?.length) && <p className="los-dict-form-of">
           Lähteen ilmoittama mahdollinen perusmuoto:{" "}
-          <strong lang="de">{sense.formOfCandidates?.join(", ")}</strong>.
-          Muotoyhteyttä ei ole erikseen kielentarkistettu.
+          {sense.formOfCandidates?.map(candidate=><button key={candidate} type="button"
+            className="los-dict-lemma-button" lang="de"
+            aria-label={`Hae perusmuoto ${candidate} sanakirjasta`}
+            onClick={()=>onSearch(candidate)}>{candidate}</button>)}
+          <span>Muotoyhteyttä ei ole erikseen kielentarkistettu.</span>
         </p>}
         {sense.glosses.length>0 && <details>
           <summary>Lähteen alkuperäiset selitteet (ei automaattisia suomennoksia)</summary>
@@ -104,7 +107,7 @@ export function LosDictionarySearch() {
     </div>
     {state.kind==="done"&&
       (state.results.length?<ol className="los-dict-results">
-        {state.results.map(item=><SourceResult key={item.source_id+":"+item.source_entry_id} entry={item}/>)}
+        {state.results.map(item=><SourceResult key={item.source_id+":"+item.source_entry_id} entry={item} onSearch={setQuery}/>) }
       </ol>:<p>Ei osumia julkaistusta aineistosta tällä hakusanalla.</p>)}
   </section>;
 }
