@@ -72,7 +72,7 @@ test("exam answers and explanations are hidden until submit in the UI",()=>{
   assert.match(ui,/\{submitted&&<div className="los-exam-rubric"/);
   assert.match(ui,/disabled=\{!complete\|\|!saved\}/);
   assert.match(ui,/if\(!complete\|\|submitted\)return/);
-  assert.match(ui,/if\(!confirmRetake\)return/);
+  assert.match(ui,/if\(!confirmRetake\|\|!saved\)return/);
   assert.match(ui,/useLosChapterDraft\(1,LOS1_MIDTERM_DRAFT_CHAPTER\)/);
   assert.match(app,/section === "midterm"/);
   assert.match(app,/Välikoe · C01–C05/);
