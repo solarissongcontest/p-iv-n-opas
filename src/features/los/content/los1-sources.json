@@ -2,7 +2,7 @@
   "schemaVersion": "1.0.0",
   "bookId": "los-1",
   "importedFrom": "LOS1_SOURCE_MANIFEST_v1.0(1).json",
-  "sourceCount": 30,
+  "sourceCount": 31,
   "sources": [
     {
       "id": "M-COM-01",
@@ -543,6 +543,24 @@
       "integrated": true,
       "deviceTested": false,
       "published": false
+    },
+    {
+      "id": "M-COM-08",
+      "kind": "source",
+      "description": "Human Robotin 20 sekunnin Franz–Greta-esittelydialogin alkuperäinen ihmisen puhuma äänite (public domain). C05 Text B, erillinen C02:ssa julkaistun CC BY-SA 4.0 -Wikibooks-dialogin tekstikertaus.",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Dialogue_franz_greta_1.ogg",
+      "rightsNotes": "Ääni: Human Robot (2006), Commonsin tiedostosivulla public domain -luovutus. Kirjoitettu 6 repliikin dialogi: Wikibooks German/Level I/Wie heißt du? rev 4430449, CC BY-SA 4.0. Molemmat lähteet attribuoidaan erikseen, ääni toistuu Commonsin julkaisijapalvelimelta. Täsmällistä ääni–tekstivastaavuutta ei väitetä vielä auditoiduksi, joten tekstinymmärryksen kysymykset perustuvat täyteen kirjoitettuun tekstiin. Laitetestaus ja pedagoginen tarkistus vielä avoimia.",
+      "manifestReadiness": "A äänen lisenssi ja koko kirjateksti, B laite- ja kieli QA avoin",
+      "manifestCheckedAt": "2026-11-12",
+      "mediaTested": false,
+      "stage": "rights-verified",
+      "licenseCode": "public-domain",
+      "licenseUrl": "https://commons.wikimedia.org/wiki/File:Dialogue_franz_greta_1.ogg",
+      "licenseEvidenceUrl": "https://commons.wikimedia.org/wiki/File:Dialogue_franz_greta_1.ogg",
+      "languageReviewed": false,
+      "integrated": true,
+      "deviceTested": false,
+      "published": false
     }
   ],
   "chapters": [
@@ -580,7 +598,8 @@
       "primarySourceId": "M-WB-05",
       "textAPlan": "`M-WB-05`, **koko Heinrich–Karl ”Die Freunde” -dialogi** (neljä repliikkiä)",
       "textBPlan": "`M-DIB-05` ”Wie geht’s?” -äänitesanasto + `V-EASY-01`, `M-WB-01` kertaus",
-      "publicationGate": "A-pääteksti; alkuperäisen äänitiedoston oikeus tarkistettava, mutta toisen lähdeäänen käyttö mahdollista."
+      "publicationGate": "A-pääteksti; alkuperäisen äänitiedoston oikeus tarkistettava, mutta toisen lähdeäänen käyttö mahdollista.",
+      "textBImplementationNote": "C05 Text B sisältää nyt Human Robotin alkuperäisen 20s Franz–Greta-äänen (public domain), erikseen attribuoidun C02:sta tutun kokonaisen kuuden repliikin Wikibooks-tekstin (CC BY-SA 4.0) ja 4 uutta kuulumisfraasitehtävää. Lähteiden erilliset lisenssit näytetään. Äänen ja tekstin tarkka vastaavuus ja iPhone/desktop-toisto eivät ole vielä hyväksyttyjä."
     },
     {
       "id": "C06",

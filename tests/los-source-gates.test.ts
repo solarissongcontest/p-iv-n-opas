@@ -6,10 +6,10 @@ import {
   validateLosSourceRegistry,
 } from "../src/features/los/content/sourceRegistry.ts";
 
-test("LOS! 1 source manifest imports 30 unique resources and ten chapters", () => {
-  assert.equal(LOS1_SOURCE_REGISTRY.length, 30);
+test("LOS! 1 source manifest imports 31 unique resources and ten chapters", () => {
+  assert.equal(LOS1_SOURCE_REGISTRY.length, 31);
   assert.equal(LOS1_CHAPTER_SOURCE_PLANS.length, 10);
-  assert.equal(new Set(LOS1_SOURCE_REGISTRY.map(source => source.id)).size, 30);
+  assert.equal(new Set(LOS1_SOURCE_REGISTRY.map(source => source.id)).size, 31);
   assert.ok(findLosSource("M-WB-07"),"C03 replacement source must be present");
   assert.deepEqual(validateLosSourceRegistry(), []);
 });

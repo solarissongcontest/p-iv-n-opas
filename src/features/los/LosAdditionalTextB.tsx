@@ -13,7 +13,7 @@ export function LosAdditionalTextB({chapterId}:{chapterId:string}){
  if(!isLosTextBChapter(chapterId))return null;
  return <LosAdditionalTextBContent chapterId={chapterId}/>;
 }
-function LosAdditionalTextBContent({chapterId}:{chapterId:"04"|"06"|"07"|"09"|"10"}){
+function LosAdditionalTextBContent({chapterId}:{chapterId:"04"|"05"|"06"|"07"|"09"|"10"}){
  const source=LOS1_TEXT_B_SOURCES[chapterId];
  const {draft,update,saved}=useLosChapterDraft(1,chapterId);
  const checked=draft.practiceChecked;
@@ -37,10 +37,14 @@ function LosAdditionalTextBContent({chapterId}:{chapterId:"04"|"06"|"07"|"09"|"1
     lines={source.lines} glossary={source.glossary}
     heading={source.title} usageLabel="ORIGINALTEXT · TEXT B"
     guidance="Lue koko autenttinen teksti tässä oppikirjassa. Kokeile ensin ymmärtää ilman sanaselityksiä. Äänitteen toimivuutta ei ole vielä testattu oikealla laitteella."
-    author={source.attribution.author} sourceTitle={source.attribution.title}
-    sourceUrl={source.attribution.url} license={source.attribution.license}
-    licenseUrl={source.attribution.licenseUrl}
-    sourceDetail="Alkuperäinen lähde on luettu kokonaisena, ei tekoälyn kirjoittama mallidialogi. Tämä lähde esiintyy myös toisessa LOS!:n kappaleessa mutta uudella oppimistavoitteella."
+    author={"textAttribution" in source?source.textAttribution.author:source.attribution.author}
+    sourceTitle={"textAttribution" in source?source.textAttribution.title:source.attribution.title}
+    sourceUrl={"textAttribution" in source?source.textAttribution.url:source.attribution.url}
+    license={"textAttribution" in source?source.textAttribution.license:source.attribution.license}
+    licenseUrl={"textAttribution" in source?source.textAttribution.licenseUrl:source.attribution.licenseUrl}
+    sourceDetail={"textAttribution" in source
+     ?"Tämä kuuden repliikin muuttamaton teksti on peräisin Wikibooksista (CC BY-SA 4.0) ja on tuttu C02:sta. Erillinen 20 sekunnin alkuperäinen ääni on Human Robotin public domain -julkaisu; äänen ja litteraatin tarkkaa vastaavuutta ei ole vielä laite- ja kielentarkistettu."
+     :"Alkuperäinen lähde on luettu kokonaisena, ei tekoälyn kirjoittama mallidialogi. Tämä lähde esiintyy myös toisessa LOS!:n kappaleessa mutta uudella oppimistavoitteella."}
    />:
    <section className="los-editorial-note" aria-label="Aakkosten oppijan oma harjoittelulista">
     <h2>Kirjainrivi lausunnan tueksi</h2>
