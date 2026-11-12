@@ -190,7 +190,7 @@ AS $search$
       left(l.lemma_key,length(p.q))=p.q OR EXISTS (
         SELECT 1 FROM public.los_dictionary_forms f
         WHERE f.source_id=l.source_id AND f.source_entry_id=l.source_entry_id
-          AND f.form_key=p.q
+          AND (f.form_key=p.q OR p.q=ANY(f.form_search_keys))
       )
     ORDER BY rank, length(l.lemma), l.lemma, l.source_id, l.source_entry_id
     LIMIT (SELECT p_limit FROM param)
