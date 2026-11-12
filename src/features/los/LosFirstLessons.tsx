@@ -60,6 +60,7 @@ export function LosFirstLessons({ selectedId, onSelect, move }: {
   const ready = losLessonCanComplete(lesson, progress, draft);
   const nextIndex = ALL_LESSONS.findIndex(item => item.id === lesson.id) + 1;
   const next = ALL_LESSONS[nextIndex];
+  const skipsUnfinishedLessons = Boolean(next && Number(next.id.slice(1)) > Number(lesson.id.slice(1)) + 1);
   const isComplete = Boolean(progress.completedAt);
   return <section className="los-lesson-program" id="los-lesson-runner" aria-label="Toteutetut LOS! 1 -oppitunnit">
     <div className="los-lesson-program-head">
@@ -67,7 +68,7 @@ export function LosFirstLessons({ selectedId, onSelect, move }: {
       <h2>Opiskele vaihe vaiheelta</h2>
       <p>L001–L026 sekä C07:n ja C09:n kymmenen oppituntia ovat suoritettavissa. Keskeneräisten kappaleiden tunteja ei merkitä valmiiksi. Niissä käytetään kirjan oikeita sivuja ja samoja tallennettuja vastauksia. Oppitunnin suoritus kertoo työvaiheiden tekemisestä, ei vielä todennetusta kielitaidosta.</p>
       <p className="los-lesson-save" role="status">{saved ? `Oppituntitiedot tallennetaan paikalliseen LOS!-varmuuskopioon. Valinnainen pilvisynkronointi tehdään kappaleen ${Number(chapterId)} muistiinpanojen kautta.` : "Tallennus epäonnistui. Älä sulje sivua ennen varmuuskopion tekemistä."}</p>
-      <div className="los-lesson-progress" aria-label="Yhdentoista oppitunnin edistyminen">
+      <div className="los-lesson-progress" aria-label="Toteutettujen oppituntien edistyminen">
         <strong>{completeCount}/{ALL_LESSONS.length} suoritettu</strong>
         <div role="progressbar" aria-label="Oppituntien eteneminen" aria-valuemin={0} aria-valuemax={ALL_LESSONS.length} aria-valuenow={completeCount}>
           <span style={{ width: String(completeCount / ALL_LESSONS.length * 100) + "%" }} />
@@ -145,7 +146,10 @@ export function LosFirstLessons({ selectedId, onSelect, move }: {
           <CheckCircle2 size={22} /><strong>{lesson.id} suoritettu</strong>
           <small>Merkintä tallennettu {progress.completedAt ? new Date(progress.completedAt).toLocaleString("fi-FI") : ""}. Osaaminen arvioidaan erikseen.</small>
         </div>}
-        {isComplete && next && <button type="button" className="los-lesson-next" onClick={() => onSelect(next.id)}>Seuraava: {next.title} <ArrowRight size={17} /></button>}
+        {isComplete && next && <>
+          {skipsUnfinishedLessons && <p className="los-lesson-skip-notice" role="note">Tuntien {`L${String(Number(lesson.id.slice(1)) + 1).padStart(3,"0")}`}–{`L${String(Number(next.id.slice(1)) - 1).padStart(3,"0")}`} suoritus ei ole vielä käytössä. Siirtyminen seuraavaan käytettävissä olevaan tuntiin ei merkitse niitä suoritetuiksi.</p>}
+          <button type="button" className="los-lesson-next" onClick={() => onSelect(next.id)}>{skipsUnfinishedLessons ? "Seuraava käytettävissä oleva" : "Seuraava"}: {next.id} · {next.title} <ArrowRight size={17} /></button>
+        </>}
       </div>
       {progress.exitCheckedAt && !isComplete && <button type="button" className="los-lesson-retry" onClick={() => record(old => ({
         ...old, exitAnswer: null, exitCheckedAt: null,
