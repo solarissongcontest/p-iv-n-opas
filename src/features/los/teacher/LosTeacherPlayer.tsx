@@ -7,7 +7,7 @@ import {
 } from "../lessonEngine.ts";
 import { LOS1_EXECUTABLE_LESSONS } from "../guidedLessons.ts";
 import {
-  emptyTeacherSession, markTeacherHelp, confirmTeacherActivity, evaluateTeacherAnswer,
+  emptyTeacherSession, markTeacherHelp, confirmTeacherActivity,
   finishTeacherSession, independentTeacherEvidence, moveTeacherScene, revealTeacherSolution,
   setTeacherAnswerDraft, submitTeacherAnswer, teacherCanFinish, teacherLatestAttempt,
   teacherWrongFeedback, type TeacherScene, type TeacherSession,
@@ -216,7 +216,7 @@ export function LosTeacherPlayer({ lessonId }: { lessonId: string }) {
               <nav aria-label="Oppitunnin opetustilanteet">
                 {lesson.scenes.map((item, i) => <button key={item.id} type="button"
                   aria-current={scene.id === item.id ? "step" : undefined}
-                  disabled={completed} className={scene.id === item.id ? "is-active" : ""}
+                  className={scene.id === item.id ? "is-active" : ""}
                   onClick={() => navigate(item.id)}>
                   <span>{session.visitedIds.includes(item.id) ? <Check size={15}/> : String(i + 1)}</span>
                   <span>{item.title}</span>
@@ -280,12 +280,12 @@ export function LosTeacherPlayer({ lessonId }: { lessonId: string }) {
                 <p className="los-teacher-done"><CheckCircle2 size={19}/> Oppitunti merkitty suoritetuksi. Osaamista seurataan erikseen.</p>}
             </section>}
             <div className="los-teacher-navigation">
-              <button type="button" disabled={sceneIndex === 0 || completed}
+              <button type="button" disabled={sceneIndex === 0}
                 onClick={() => navigate(lesson.scenes[sceneIndex - 1]!.id)}>
                 <ChevronLeft size={18}/> Edellinen
               </button>
               {sceneIndex < lesson.scenes.length - 1 &&
-                <button type="button" className="los-teacher-primary" disabled={completed}
+                <button type="button" className="los-teacher-primary"
                   onClick={() => navigate(lesson.scenes[sceneIndex + 1]!.id)}>
                   Seuraava <ChevronRight size={18}/>
                 </button>}
