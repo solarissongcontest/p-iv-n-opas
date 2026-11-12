@@ -5,7 +5,7 @@
 .los-app,.los-access,.los-loading {
   --los-bg:#f7f7f5; --los-paper:#fff; --los-ink:#1f2933;
   --los-soft:#536170; --los-line:#e1e4e3; --los-subtle:#f2f4f3;
-  --los-book-accent:#b43d33; --los-book-tint:#fce8e5;
+  --los-book-accent:#b7473c; --los-book-tint:#fce8e5;
   min-height:100dvh; background:var(--los-bg); color:var(--los-ink);
   font-family:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
   font-size:16px; line-height:1.6;
