@@ -269,3 +269,19 @@ test("U3 Book + exercises reuses saved C01 answer and remains usable on both lay
  await expect(page.locator("#C01-EX-01 input[type='radio'][value='Guten Morgen!']")).toBeChecked();
  await expectNoHorizontalOverflow(page);
 });
+
+test("U4 C01 teaches greetings and pronunciation without requiring prior German",async({page})=>{
+ await enterLocalBook(page);
+ await page.goto("/los#/1/01/chapter",{waitUntil:"domcontentloaded"});
+ await expect(page.locator(".los-opening-lead")).toContainText("aivan nollasta");
+ await page.goto("/los#/1/01/grammar",{waitUntil:"domcontentloaded"});
+ const guide=page.locator(".los-c01-grammar-guide");
+ await expect(guide).toBeVisible();
+ await expect(guide.getByRole("heading",{name:/Aloitat aivan nollasta/})).toBeVisible();
+ await expect(guide.getByRole("heading",{name:/Näin luet Franzin ja Jörgin keskustelua/})).toBeVisible();
+ await expect(guide.locator(".los-c01-greetings-table tbody tr")).toHaveCount(8);
+ await expect(guide.locator(".los-c01-phonetics article")).toHaveCount(4);
+ await expect(guide).toContainText("ei arvostella automaattisesti");
+ await expect(guide).toContainText("syntet");
+ await expectNoHorizontalOverflow(page);
+});
