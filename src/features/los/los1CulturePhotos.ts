@@ -65,8 +65,8 @@ export const LOS1_CULTURE_PHOTOS:Readonly<Record<string,readonly Los1CulturePhot
   "07":[{
     key:"duesseldorf-street-sign",chapterId:"07",photoId:30125064,
     heading:"Straßenschilder in Düsseldorf",
-    caption:"Katukyltti Saksan Düsseldorfissä. Tutki kuvan sanojen kirjoitusasua ja etsi ß-kirjain, jos se näkyy. Tarkat saksan kirjoitussäännöt opiskellaan tekstistä, ei päätellä yhden kyltin perusteella.",
-    alt:"Saksalainen kadunnimikyltti Düsseldorfin katumaisemassa.",
+    caption:"Kyltissä lukee Düsseldorfer Straße. Huomaa sanan Straße ß-kirjain. Yksi esimerkki ei kuitenkaan yksin selitä kaikkia saksan oikeinkirjoitussääntöjä.",
+    alt:"Düsseldorfin kadunnimikyltissä lukee Düsseldorfer Straße, jossa on ß-kirjain.",
     photographer:"Markus Winkler",
     sourceUrl:"https://www.pexels.com/photo/street-sign-in-dusseldorf-cityscape-30125064/",
     desktopSrc:"/los/culture/LOS1-C07-CULTURE-30125064-desktop.webp",
