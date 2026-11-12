@@ -86,6 +86,6 @@ test("C03 audio fallback is truthful and the runner uses C03's own draft",()=>{
   const path=readFileSync("src/features/los/LosReferenceTools.tsx","utf8");
   assert.match(runner,/useLosChapterDraft\(1, "03"\)/);
   assert.match(runner,/LOS1_C03_LESSON_BLUEPRINTS/);
-  assert.match(path,/lesson\.number <= 16/);
-  assert.match(path,/L017–L060/);
+  assert.match(path,/lesson\.number <= 26/);
+  assert.match(path,/L027–L060/);
 });
