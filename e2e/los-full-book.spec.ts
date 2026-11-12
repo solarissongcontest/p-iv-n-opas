@@ -502,3 +502,43 @@ test("LOS! 1 digital chapter photos coexist with the existing facsimile",async({
  await expect(page.locator(".los-facs-reader")).toBeVisible();
  await expect(page.locator(".los1-digital-photo")).toHaveCount(0);
 });
+
+/** R10 synthetic browser storage-failure test, not a real cross-device restore signoff. */
+test("R10: failed two-chapter local backup import rolls back, then safely retries",async({page})=>{
+ await enterLocalBook(page);
+ await page.goto("/los#/1/appendix",{waitUntil:"domcontentloaded"});
+ const owner=await page.evaluate(()=>localStorage.getItem("opk.owner-id"));
+ expect(owner).toBeTruthy();
+ const keys=["01","02"].map(id=>`los.local.v1.${owner}.1.${id}`);
+ const before=await page.evaluate(keys=>keys.map(key=>localStorage.getItem(key)),keys);
+ const draft=(note:string)=>({version:1,note,applicationDraft:"",bookmarked:true,
+  practiceAnswers:{},practiceChecked:[],testAnswers:{},testSubmittedAt:null,
+  selfAssessment:"",updatedAt:new Date().toISOString()});
+ const backup={format:"los-book-backup-v1",bookId:1,exportedAt:new Date().toISOString(),
+  chapters:{"01":draft("R10 first chapter"),"02":draft("R10 second chapter")}};
+ const file={name:"LOS-1-test-only.json",mimeType:"application/json",buffer:Buffer.from(JSON.stringify(backup))};
+ await page.locator(".los-backup-upload input[type=file]").setInputFiles(file);
+ await expect(page.locator(".los-backup-preview")).toBeVisible();
+ await page.evaluate(failKey=>{
+  const real=Storage.prototype.setItem;
+  Reflect.set(window,"__losBackupOriginalSetItem",real);
+  Storage.prototype.setItem=function(key,value){
+   if(key===failKey)throw new DOMException("synthetic failure","QuotaExceededError");
+   return real.call(this,key,value);
+  };
+ },keys[1]);
+ await page.getByRole("button",{name:/Tuo vain puuttuvat/}).click();
+ await expect(page.locator(".los-backup-status")).toContainText("Tuonti keskeytyi");
+ const after=await page.evaluate(keys=>{
+  const state=keys.map(key=>localStorage.getItem(key));
+  const real=Reflect.get(window,"__losBackupOriginalSetItem") as typeof Storage.prototype.setItem;
+  Storage.prototype.setItem=real;
+  return state;
+ },keys);
+ expect(after).toEqual(before);
+ await page.getByRole("button",{name:/Tuo vain puuttuvat/}).click();
+ await expect(page.locator(".los-backup-status")).toContainText("Tuotu 2 tallennuskohdetta");
+ await page.reload({waitUntil:"domcontentloaded"});
+ const restored=await page.evaluate(keys=>keys.map(key=>JSON.parse(localStorage.getItem(key)??"null")?.note),keys);
+ expect(restored).toEqual(["R10 first chapter","R10 second chapter"]);
+});
