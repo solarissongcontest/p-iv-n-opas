@@ -137,7 +137,6 @@ BEGIN
     EXECUTE format('GRANT SELECT, INSERT, UPDATE ON TABLE public.%I TO service_role', table_name);
   END LOOP;
 END $$;
-GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO service_role;
 
 -- Server RPC exposes only reviewed/published sources; never global raw JSONL.
 -- No SECURITY DEFINER: the caller (server-side service role) owns the authorization.
