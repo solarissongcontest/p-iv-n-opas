@@ -93,7 +93,7 @@ BEGIN
 END $$;
 
 -- Inspect FK catalog only; never issue DELETE or alter staged test rows.
-DO $
+DO $$
 BEGIN
  IF EXISTS (
    SELECT 1 FROM pg_constraint fk
@@ -104,7 +104,7 @@ BEGIN
  ) THEN
    RAISE EXCEPTION 'Staged dictionary contains a cascading foreign key';
  END IF;
-END $;
+END $$;
 
 -- A staged source must not become searchable without explicit legal review.
 DO $$
