@@ -87,6 +87,10 @@ jobs:
               source = root / ('deu-fin.tei' if direction == 'de-fi' else 'fin-deu.tei')
               staged = root / (direction + '-staged.jsonl')
               approval = root / (direction + '-approval.json')
+              import hashlib
+              real_sha = hashlib.sha512(source.read_bytes()).hexdigest()
+              assert real_sha == entry['sourceSha512'], (
+                  f"Source bytes changed in {direction}: {real_sha} vs {entry['sourceSha512']}")
               approval.write_text(json.dumps({key: entry[key] for key in
                   ('sourceId','kind','sourceSha512','rightsApproval')}))
               command = [
