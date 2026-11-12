@@ -1,4 +1,4 @@
-name: LOS1 C01–C03 B5 PDF Draft Preflight
+name: LOS1 C01–C04 B5 PDF Draft Preflight
 
 on:
   pull_request:
@@ -11,6 +11,7 @@ on:
       - "e2e/los-pdfjs-reader.spec.ts"
       - "e2e/los-c02-facsimile.spec.ts"
       - "e2e/los-c03-facsimile.spec.ts"
+      - "e2e/los-c04-facsimile.spec.ts"
       - "scripts/los1-facsimile-export.mjs"
       - "scripts/los1-facsimile-pdf-preflight.mjs"
       - ".github/workflows/los-facsimile-pdf.yml"
@@ -129,6 +130,28 @@ jobs:
         env:
           E2E_BASE_URL: http://127.0.0.1:5173
         run: bunx playwright test e2e/los-c03-facsimile.spec.ts --project=desktop-chromium
+
+      - name: Export 16-leaf C04 du/Sie print draft as B5 PDF
+        env:
+          LOS1_FACSIMILE_CHAPTER: "04"
+        run: node scripts/los1-facsimile-export.mjs
+
+      - name: Preflight C04 16 B5 leaves and searchable original source text
+        env:
+          LOS1_FACSIMILE_CHAPTER: "04"
+        run: node scripts/los1-facsimile-pdf-preflight.mjs
+
+      - name: Render C04 original eight-turn Text A for review evidence
+        run: |
+          pdftoppm -f 3 -l 3 -singlefile -png -r 96 \
+            .artifacts/los1/LOS1_C04_B5_TAITTOLUONNOS.pdf \
+            .artifacts/los1/render/c04-text-a
+          test -s .artifacts/los1/render/c04-text-a.png
+
+      - name: Browser-test C04 exact original dialogue, all 20 greetings and chapter navigation
+        env:
+          E2E_BASE_URL: http://127.0.0.1:5173
+        run: bunx playwright test e2e/los-c04-facsimile.spec.ts --project=desktop-chromium
 
       # Intentionally no upload-artifact/public distribution: this is an
       # unapproved C01 layout draft, not a rights-cleared downloadable edition.

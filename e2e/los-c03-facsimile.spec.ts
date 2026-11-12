@@ -21,7 +21,7 @@ test("LOS! 1 C03 reader displays all 14 B5 draft leaves and both source texts",a
   await expect(reader.locator(".los-facs-stage")).toContainText("Woher kommen Sie?");
   await expect(reader.locator(".los-facs-stage")).toContainText("ich komme aus Deutschland");
   await reader.locator("#los-facs-c03-jump").fill("7");
-  await reader.getByRole("button",{name:"Siirry"}).click();
+  await reader.getByRole("button",{name:"Siirry",exact:true}).click();
   await expect(reader.locator(".los-facs-stage")).toContainText("Wir kommen aus Berlin");
   await expect(reader.locator(".los-facs-stage")).toContainText("Ich komme aus Kyoto");
   await reader.getByRole("button",{name:"Kirjanmerkki"}).click();
