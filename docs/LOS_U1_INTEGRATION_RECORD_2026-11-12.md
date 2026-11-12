@@ -13,3 +13,12 @@
 Aiempi HEAD `7c15944770f6bb73b4578e5356950a6ddd360ace` läpäisi [Quality Gate](https://github.com/solarissongcontest/p-iv-n-opas/actions/runs/43305230391), [Chromium + WebKit Browser QA](https://github.com/solarissongcontest/p-iv-n-opas/actions/runs/43305230023) ja [PostgreSQL/Importer QA](https://github.com/solarissongcontest/p-iv-n-opas/actions/runs/43305229959). Näitä tuloksia **ei lasketa uuden integraatio-HEADin läpäisyksi**. Seuraava uusi CI-ajo on tarkistettava erikseen.
 
 Tuotantokantaan ei ole tehty migraatiota, tuontia, julkaisua eikä poistotoimenpiteitä. FreeDictin lähderivejä ei väitetä julkaistuiksi. C01:n IPA- ja äänitekysymykset sekä R1–R12:n sisällölliset hyväksynnät pysyvät avoimina.
+
+## Erillinen ympäristötodennus, read-only 12.11.2026
+
+- `bun`/Vite/TypeScript-työnkulku ja PostgreSQL 17 -sanakirjasmoke on tarkistettava aina **integraatio-HEADille**, ei aiempien PR:ien tuloksista. Tuotantokanta jätettiin muuttamatta.
+- Vercelin deployment-historiassa preview-commit `d1863fabf03039252417d91e17ed64ffd0b9997f` on `READY`. Uuden yhdistelmäcommitin GitHubin Vercel-status ilmoitti `build-rate-limit`; tätä ei korjata muuttamalla opetuksen koodia.
+- Vercelin tuotantohistorian viimeisin näkyvä `READY`-deployment on `93ae2d8517c6d290e5629421a7f80220c283dbf7`, ei nykyinen `main`. Siksi viimeisintä LOS!-koodia ei ole todistettu tuotantoon päivitettynä.
+- Supabase-projektin `ukjfjxlqmqkxgaspdmdn` read-only-skeematarkistuksessa näkyi `los_chapter_drafts`, mutta **ei** uusia `los_dictionary_*`-tauluja. `los_chapter_drafts`: RLS käytössä; 0 policyä ja 0 selaimen anon/authenticated-grantia. Tämä ei ole tuotantotietojen muutos eikä vielä toimivan synkronoinnin todiste.
+- CI:n FreeDict-TEI-tarkastuksen mittaus on de–fi **13 028**, fi–de **12 102** ja yhteensä **33 670 käännösvastinetta**; nämä ovat tiedostosta parsittuja vaiheistettuja rivejä, eivät PostgreSQL:ään ladattuja tai julkaistuja.
+- C01 IPA-manifestissa **15/16 lähteistettyä**, **0/16 ihmisarvioitua**, **0/16 hyväksyttyä sanaäänitettä**, **0 todennettua fyysistä TTS-laitetta**. Puuttuva kokonaisfraasi on `Bis später!`.
