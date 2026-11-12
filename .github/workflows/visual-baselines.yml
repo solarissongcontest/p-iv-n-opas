@@ -19,7 +19,8 @@ permissions:
 jobs:
   visual-baselines:
     if: ${{ github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main') }}
-    runs-on: ubuntu-latest
+    # Pin the browser test image: Playwright 1.55 has no Ubuntu 26.04 WebKit support.
+    runs-on: ubuntu-24.04
     timeout-minutes: 25
     env:
       E2E_BASE_URL: ${{ github.event.inputs.base_url || 'https://opiskelupaivakirja.vercel.app' }}

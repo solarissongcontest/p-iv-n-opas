@@ -134,7 +134,8 @@ jobs:
     needs:
       - wait-for-production
     if: ${{ always() && needs.wait-for-production.result == 'success' }}
-    runs-on: ubuntu-latest
+    # Playwright 1.55.0 WebKit fails to install on Ubuntu 26.04 (ubuntu-latest).
+    runs-on: ubuntu-24.04
     timeout-minutes: 40
     env:
       E2E_BASE_URL: ${{ needs.wait-for-production.outputs.base_url }}
