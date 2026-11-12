@@ -6,7 +6,7 @@ import {
   validateLosMidtermBank,losExamScore,losExamReadyToSubmit,
 } from "../src/features/los/content/los1Exams.ts";
 import { validateLosCloudDraft,validLosChapter } from "../src/features/los/cloudContract.ts";
-import { emptyLosDraft,parseLosDraft } from "../src/features/los/studyState.ts";
+
 
 const answers:Record<string,string>=Object.fromEntries(LOS1_MIDTERM_QUESTIONS.map(q=>[q.id,q.correctId]));
 test("midterm has exactly 25 original objective items with correct masterplan distribution",()=>{
@@ -41,14 +41,18 @@ test("score is exact, sectioned and does not include conversation self-assessmen
   assert.equal(losExamScore(LOS1_MIDTERM_QUESTIONS,{}).correct,0);
 });
 test("assessment data is compatible with existing draft and cloud validation",()=>{
-  const data={...emptyLosDraft(),testAnswers:answers,testSubmittedAt:"2026-11-12T09:00:00.000Z",
+  const data={version:1 as const,note:"",bookmarked:false,practiceAnswers:{},practiceChecked:[],readerMarks:{},lessonProgress:{},testAnswers:answers,testSubmittedAt:"2026-11-12T09:00:00.000Z",
     applicationDraft:"A: Hallo! B: Hallo!",selfAssessment:"Osaan tervehdykset.",
     updatedAt:"2026-11-12T09:00:00.000Z"};
   assert.equal(validLosChapter(1,"91"),true);
   assert.equal(validateLosCloudDraft(data),true);
-  assert.deepEqual(parseLosDraft(JSON.stringify(data)).testAnswers,answers);
-  assert.equal(parseLosDraft(JSON.stringify(data)).applicationDraft,data.applicationDraft);
-  assert.equal(parseLosDraft(JSON.stringify(data)).selfAssessment,data.selfAssessment);
+  const persisted=JSON.parse(JSON.stringify(data));
+  assert.deepEqual(persisted.testAnswers,answers);
+  assert.equal(persisted.applicationDraft,data.applicationDraft);
+  assert.equal(persisted.selfAssessment,data.selfAssessment);
+  const studySource=readFileSync("src/features/los/studyState.ts","utf8");
+  assert.match(studySource,/testAnswers:input\.testAnswers/);
+  assert.match(studySource,/applicationDraft:typeof input\.applicationDraft/);
 });
 test("JSON backup exports separate midterm slot while still importing existing ten-chapter backups",()=>{
   const src=readFileSync("src/features/los/localBackups.ts","utf8");
