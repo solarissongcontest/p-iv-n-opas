@@ -187,18 +187,18 @@
     {
       "id": "M-DIB-02",
       "kind": "source",
-      "description": "UT/COERLL **Harald: ”Wer bin ich?”**; toinen oikean puhujan itsensä esittely, vertailu Bernaan. C06:n kuuntelun lisäaineisto ja C10:n kertaus.",
+      "description": "UT/COERLL, Deutsch im Blick 2017: Harald Becker, Wer bin ich? (QR 1.22), alkuperäinen 14 repliikin ihmisen puhuttu haastattelu, nyt kokonaisena C10:n lukijassa. Nimi, München, noin 50 vuoden ikä, numerojono ja lempiväri. Lähteessä myös haastavampia kulttuurisia ilmauksia.",
       "sourceUrl": "https://coerll.utexas.edu/dib/vidt.php?f=01_22_int_hb_who",
-      "rightsNotes": "Alkuperäinen suora litteraattiosoite löytyi haussa, mutta tätä URL:ää ei saatu uudelleen avattua varmennetusti. **Vahvista URL, sisältö, medialisenssi ja toiminta ennen käyttöä.**",
-      "manifestReadiness": "B",
-      "manifestCheckedAt": "2026-11-10",
+      "rightsNotes": "Saksankielinen transkriptio varmistettu suoraan alkuperäisestä videolitteraatista. Deutsch im Blick -oppimateriaali on merkitty CC BY 4.0 -lisenssillä 2017 COERLL:n kirjan nimiösivulla (p. 4). Alkuperäinen teksti säilyy sanatarkkana, suomennokset ja tehtävät ovat LOS!:n omia. Videosisällön/tiedoston erilliset oikeudet ja toistot ovat vielä tarkistamatta; mitään mediaa ei kopioida tai väitetä kuunnelluksi. Alkuperäisen julkinen puhelinnumeron numerojono on vain lukuharjoituksessa, sitä ei saa käyttää todellisena yhteystietona. Lähteen kieli/tason pedagoginen tarkistus kesken.",
+      "manifestReadiness": "A tekstilitteraatti / B audio-video (ei laitetestattu)",
+      "manifestCheckedAt": "2026-11-12",
       "mediaTested": false,
-      "stage": "identified",
-      "licenseCode": null,
-      "licenseUrl": null,
-      "licenseEvidenceUrl": null,
+      "stage": "rights-verified",
+      "licenseCode": "CC BY 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
+      "licenseEvidenceUrl": "https://coerll.utexas.edu/dib/pdfs/intro.pdf",
       "languageReviewed": false,
-      "integrated": false,
+      "integrated": true,
       "deviceTested": false,
       "published": false
     },
@@ -558,9 +558,9 @@
     {
       "id": "C10",
       "primarySourceId": "M-DIB-02",
-      "textAPlan": "`M-DIB-02`, **Haraldin koko Wer bin ich? -haastattelu**",
+      "textAPlan": "`M-DIB-02`: COERLL:n Harald Becker -haastattelun koko alkuperäinen 14-repliikkinen Wer bin ich? -litteraatti (QR 1.22) LOS!-lukijassa CC BY 4.0 -attribuutiolla.",
       "textBPlan": "`M-DIB-01` Berna vertailuun + `V-GOE-01` valinnainen video",
-      "publicationGate": "**EI JULKAISUVALMIS:** Haraldin URL, koko litteraatti, oikeus ja vaikeustason tarkistus; tarpeen mukaan julkaistava kokonainen uusi ihmisen kirjoittama A1-esittelyteksti."
+      "publicationGate": "C10:n koko itsenäinen Text A on nyt tekstinä integroitu lukijaan ja kirjan CC BY 4.0 -lisenssitieto dokumentoitu. Alkeistason kielellinen tarkistus, haastattelun äänitteen tiedostokohtaiset oikeudet, toimiva mediasoitin, mobiili-/desktop-QA ja Text B:n tarkistus ovat edelleen kesken. Julkaisutila EI VALMIS."
     }
   ]
 }
