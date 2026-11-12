@@ -1,0 +1,19 @@
+/* LOS! 1 native digital chapter imagery. Not a paper facsimile. */
+.los1-digital-photo{position:relative;margin:20px 0 26px;border-radius:15px;
+  overflow:hidden;background:#eee8e1;box-shadow:0 12px 28px rgba(23,34,41,.08)}
+.los1-digital-photo>img,.los1-digital-photo-fallback{display:block;width:100%;
+  height:auto;aspect-ratio:16/7;object-fit:cover;object-position:center 44%}
+.los1-digital-photo-fallback{box-sizing:border-box;background:linear-gradient(130deg,#fbe6e1,#d7d4ce);
+  display:flex;flex-direction:column;align-items:flex-start;justify-content:center;
+  gap:10px;padding:30px;color:#8a3f35}
+.los1-digital-photo-fallback span{font-size:13px;letter-spacing:.11em;font-weight:700}
+.los1-digital-photo-fallback strong{font-size:clamp(20px,3vw,34px);letter-spacing:-.025em}
+.los1-digital-photo figcaption{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;
+  padding:10px 16px;background:#fff;color:#56616a;font-size:11px;line-height:1.5}
+.los1-digital-photo figcaption a{color:#9b4137;text-decoration:underline;text-underline-offset:2px}
+@media(max-width:700px){.los1-digital-photo{margin:14px 0 20px;border-radius:11px}
+  .los1-digital-photo>img,.los1-digital-photo-fallback{aspect-ratio:4/3}
+  .los1-digital-photo figcaption{padding:9px 12px;font-size:10px}}
+@media(prefers-reduced-motion:no-preference){
+  .los1-digital-photo>img{transition:opacity .18s ease}
+}
