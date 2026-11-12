@@ -1,4 +1,5 @@
 import {expect,test} from "@playwright/test";
+import AxeBuilder from "@axe-core/playwright";
 import {expectNoHorizontalOverflow} from "./helpers";
 
 /**
@@ -455,4 +456,35 @@ test("U1/U2: a published-source result opens the shared word card without changi
  await expect(page.getByRole("dialog",{name:/sanan .* selitys/i}))
    .toContainText("Kappaleen kontekstimerkitys");
  await expectNoHorizontalOverflow(page);
+});
+
+/**
+ * R9 partial automation. Axe detects a subset of WCAG 2.2 AA issues in the
+ * actual reader; a green result does NOT constitute a human/device signoff.
+ */
+test("U1 R9: chapter content tree has no automatic WCAG A/AA violations",async({page,isMobile})=>{
+ await enterLocalBook(page);
+ if(isMobile) await page.locator(".los-top-toc").click();
+ const tree=page.locator(".los-content-tree");
+ await expect(tree).toBeVisible();
+ const result=await new AxeBuilder({page})
+  .include(".los-content-tree")
+  .withTags(["wcag2a","wcag2aa","wcag21a","wcag21aa","wcag22aa"])
+  .analyze();
+ expect(result.violations.map(v=>({id:v.id,impact:v.impact,
+  elements:v.nodes.map(n=>n.target).slice(0,5)}))).toEqual([]);
+});
+
+test("U1 R9: shared C01 word card has no automatic WCAG A/AA violations",async({page})=>{
+ await enterLocalBook(page);
+ await page.goto("/los#/1/01/text",{waitUntil:"domcontentloaded"});
+ await page.locator(".los-c01-reader .los-c01-token").first().click();
+ const card=page.getByRole("dialog",{name:/Sanan .* selitys/i});
+ await expect(card).toBeVisible();
+ const result=await new AxeBuilder({page})
+  .include(".los-dictionary-card")
+  .withTags(["wcag2a","wcag2aa","wcag21a","wcag21aa","wcag22aa"])
+  .analyze();
+ expect(result.violations.map(v=>({id:v.id,impact:v.impact,
+  elements:v.nodes.map(n=>n.target).slice(0,5)}))).toEqual([]);
 });
