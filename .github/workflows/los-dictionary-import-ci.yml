@@ -84,7 +84,7 @@ jobs:
           approvals = json.loads(Path('docs/LOS_U2_FREEDICT_STAGING_SOURCE_APPROVALS.json').read_text())
           for entry in approvals['entries']:
               direction = entry['direction']
-              source = root / (direction + '.tei')
+              source = root / ('deu-fin.tei' if direction == 'de-fi' else 'fin-deu.tei')
               staged = root / (direction + '-staged.jsonl')
               approval = root / (direction + '-approval.json')
               approval.write_text(json.dumps({key: entry[key] for key in
