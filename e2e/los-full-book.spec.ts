@@ -271,3 +271,32 @@ test("four new culture photos are locally served, decoded and credited on deskto
    await expectNoHorizontalOverflow(page);
  }
 });
+
+
+test("L004 Teacher 2.0 opens from the study path and preserves its scene when reading the book",async({page})=>{
+  await enterLocalBook(page);
+  await page.goto("/los#/1/path",{waitUntil:"domcontentloaded"});
+  const row=page.locator(".los-path-group li button").filter({hasText:"Tervehdykset muistista"});
+  await expect(row).toHaveCount(1);
+  await row.click();
+  await expect(page).toHaveURL(/\/los-lessons\/L004$/);
+  await expect(page.locator(".los-teacher-paper h2").first()).toContainText("Tänään opit");
+
+  await page.getByRole("button",{name:"Seuraava"}).click();
+  await expect(page.locator(".los-teacher-paper h2").first()).toContainText("Mitä muistat");
+  await page.locator(".los-teacher-option").filter({hasText:"Guten Morgen!"}).click();
+  await expect(page.locator(".los-teacher-feedback")).toContainText("Oikein");
+  await page.reload({waitUntil:"domcontentloaded"});
+  await expect(page.locator(".los-teacher-paper h2").first()).toContainText("Mitä muistat");
+  await expect(page.locator(".los-teacher-feedback")).toContainText("Oikein");
+
+  await page.getByRole("button",{name:/Avaa oppikirjan sanasto ja tehtävät/}).click();
+  const bookLink=page.getByRole("link",{name:/Avaa kirjassa/}).first();
+  await expect(bookLink).toHaveAttribute("target","_blank");
+  await expect(bookLink).toHaveAttribute("href",/lessonReturn=L004.*vocabulary/);
+  await page.goto("/los?lessonReturn=L004#/1/01/vocabulary",{waitUntil:"domcontentloaded"});
+  await page.getByRole("link",{name:"Palaa oppitunnille L004"}).click();
+  await expect(page).toHaveURL(/\/los-lessons\/L004$/);
+  await expect(page.locator(".los-teacher-paper h2").first()).toContainText("Avaa oppikirjan sanasto ja tehtävät");
+  await expectNoHorizontalOverflow(page);
+});
