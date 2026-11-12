@@ -95,11 +95,11 @@ export function LosApplication({chapter}:{chapter:LosChapter}) {
     {showExample&&<div className="los-model-answer"><p className="los-overline">YKSI MAHDOLLINEN MALLIVASTAUS</p><p lang="de">{item.example}</p><small>Omaa tekstiä ei pisteytetä automaattisesti. Muitakin oikeita vastauksia voi olla.</small></div>}
   </section>;
 }
-export function LosCulture({chapter}:{chapter:LosChapter}) {
+export function LosCulture({chapter,bookId=1}:{chapter:LosChapter;bookId?:number}) {
   return <section className="los-inner-page los-culture-page">
     <p className="los-eyebrow">LAND UND LEUTE / KAPITEL {Number(chapter.id)}</p>
     <h1>Kulttuuri</h1>
-    <Los1VisualLearning key={chapter.id} chapterId={chapter.id} placement="culture"/>
+    {bookId===1&&<Los1VisualLearning key={chapter.id} chapterId={chapter.id} placement="culture"/>}
     {chapter.id==="01"?<>
       <h2>Miten saksankielisessä maailmassa tervehditään?</h2>
       <p>Opetuksessa aloitetaan yleisistä ilmauksista <span lang="de">Guten Morgen</span>, <span lang="de">Guten Tag</span> ja <span lang="de">Guten Abend</span>. Myös alueellisia tervehdysmuotoja voi kuulla.</p>
