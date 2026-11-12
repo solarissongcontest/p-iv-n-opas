@@ -1,0 +1,20 @@
+/* LOS! 1 U4 pedagogy is editorial content, not a second task system. */
+.los-c01-grammar-guide {line-height:1.68}
+.los-c01-grammar-guide > section {margin:0 0 31px}
+.los-c01-grammar-guide h3 {font-size:20px;margin:24px 0 12px}
+.los-c01-grammar-guide p {max-width:70ch}
+.los-c01-grammar-guide em,.los-c01-grammar-guide strong[lang="de"] {font-style:normal;font-weight:700}
+.los-c01-greetings-table {overflow-x:auto;max-width:100%;overscroll-behavior-inline:contain}
+.los-c01-greetings-table .los-grammar-table {width:100%;min-width:530px}
+.los-c01-greetings-table td:first-child {white-space:nowrap}
+.los-c01-phonetics {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:16px 0}
+.los-c01-phonetics article {min-width:0;border:1px solid var(--los-line);border-radius:8px;padding:14px;background:var(--los-paper)}
+.los-c01-phonetics-head {display:flex;align-items:baseline;gap:13px;flex-wrap:wrap}
+.los-c01-phonetics-head strong {font-size:22px;color:var(--los-book-accent)}
+.los-c01-phonetics-head span {font-size:17px;color:var(--los-ink)}
+.los-c01-phonetics article p {font-size:14px;margin:8px 0}
+@media(max-width:690px) {
+ .los-c01-phonetics {grid-template-columns:minmax(0,1fr)}
+ .los-c01-grammar-guide h3 {font-size:19px}
+ .los-c01-phonetics article {padding:12px}
+}

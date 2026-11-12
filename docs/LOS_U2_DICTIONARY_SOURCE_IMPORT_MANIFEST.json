@@ -1,0 +1,79 @@
+{
+  "version": "LOS-U2-FREEDICT-MEASURED/0.1",
+  "verifiedAt": "2026-11-12",
+  "execution": "GitHub Actions / los-dictionary-import-ci.yml / temporary runner filesystem",
+  "state": "STAGED_NOT_PUBLISHED",
+  "productionDatabaseRowsVerified": 0,
+  "note": "Counts measured by parsing the official downloaded FreeDict TEI bytes; not SQL row counts. Raw corpora remain outside browser assets and production DB. Source-specific CC BY-SA 3.0 attribution and legal review remain release gates.",
+  "sourceRecords": [
+    {
+      "sourceId": "freedict-de-fi-2025.11.23",
+      "direction": "de-fi",
+      "sourceUrl": "https://download.freedict.org/generated/deu-fin/deu-fin.tei",
+      "version": "2025.11.23",
+      "licenseCode": "CC BY-SA 3.0",
+      "licenseEvidence": "TEI teiHeader",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+      "sourceSha512": "b689041275b3f4eec531204b3da12bf623cbb3f563aaaf914d943a055bf0d98852da20937e63921fbbf2a45adfc1b3507242b0d2492755837ef1912e5d6a708d",
+      "teiHeaderSha256": "ffc40ec35475f86f4246daca8f70d3f98f3d09a79206e2ad6e63eb9c74ccb8b0",
+      "outputSha512": "3e698013968f13b3ac2fefc13afc39080ff07bc308a6e63832153e3f4e6140faf0f199bcadb0c39a4f467b8440c79325b190b0744cfcd90247803986ca908d6c",
+      "actualParsedRows": 13028,
+      "actualDistinctLemmaAndPos": 12967,
+      "actualRowsWithTranslation": 13028,
+      "actualTranslationVariants": 16511,
+      "publishedRows": 0
+    },
+    {
+      "sourceId": "freedict-fi-de-2025.11.23",
+      "direction": "fi-de",
+      "sourceUrl": "https://download.freedict.org/generated/fin-deu/fin-deu.tei",
+      "version": "2025.11.23",
+      "licenseCode": "CC BY-SA 3.0",
+      "licenseEvidence": "TEI teiHeader",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+      "sourceSha512": "a39c405777fb56f345d4cb2020652e3a9c55fba8bbbded261fc7f273038f1447458573061442b88cbe2fccf12389b8ccaedb97eb819408b3103ff81c8bdcb103",
+      "teiHeaderSha256": "3067601622771df44de03e107541b876c0ac060c21c638de924059facd476a98",
+      "outputSha512": "05efbde7aeaffddbe9221a25fbecc4ae6f4a6b6d31272158d1e27dd7d5db7428de56957b906797c185249517028cc55f8dad2757976033701e0dbb5f90e37bf3",
+      "actualParsedRows": 12102,
+      "actualDistinctLemmaAndPos": 12102,
+      "actualRowsWithTranslation": 12102,
+      "actualTranslationVariants": 17159,
+      "publishedRows": 0
+    }
+  ],
+  "sums": {
+    "actualParsedRows": 25130,
+    "actualTranslationVariants": 33670
+  },
+  "wiktionaryKaikki": {
+    "state": "NOT_IMPORTED",
+    "actualParsedRows": 0,
+    "sourceDumpHash": null,
+    "sourcesIdentified": [
+      {
+        "edition": "enwiktionary",
+        "sourceListing": "https://kaikki.org/dictionary/rawdata.html",
+        "targetLanguage": "de",
+        "glossLanguage": "en",
+        "dumpVersion": null,
+        "checksumSha512": null,
+        "publicationStatus": "pending-source-license-and-byte-hash"
+      },
+      {
+        "edition": "dewiktionary",
+        "sourceListing": "https://kaikki.org/dewiktionary/rawdata.html",
+        "targetLanguage": "de",
+        "glossLanguage": "de",
+        "dumpVersion": null,
+        "checksumSha512": null,
+        "publicationStatus": "pending-source-license-and-byte-hash"
+      }
+    ],
+    "sourcePolicy": "Dumps are streamed and kept in separated source records; source gloss language is mandatory. No English/German gloss is labeled a Finnish translation; per-item Commons audio requires separate review."
+  },
+  "commonsPronunciation": {
+    "state": "NOT_IMPORTED",
+    "acceptedAudioRecords": 0
+  },
+  "publicationSafety": "Dictionary sources default to published=false. SQL requires exact loaded-source-row count plus independent legal_review_approved/at/by before any source can become searchable. No data has been deployed."
+}

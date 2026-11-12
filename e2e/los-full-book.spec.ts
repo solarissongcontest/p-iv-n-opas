@@ -214,3 +214,176 @@ test("C01 facsimile page position survives reload but does not mark a lesson fin
  await page.goto("/los#/1/path",{waitUntil:"domcontentloaded"});
  await expect(page.locator("#los-lesson-runner .los-lesson-progress")).toContainText("0/60 suoritettu");
 });
+
+
+test("U1/U3: chapter tree links to persisted exercise and shared IPA word card on desktop and iPhone",async({page,isMobile})=>{
+ await enterLocalBook(page);
+ if(isMobile){
+  await page.locator(".los-top-toc").click();
+ }
+ const tree=page.locator(".los-content-tree");
+ await expect(tree).toBeVisible();
+ await expect(tree.locator(".los-tree-chapter")).toHaveCount(10);
+ const practice=tree.locator("#los-tree-children-01").getByRole("button",{name:"Avaa harjoittele-osion tehtävät"});
+ await practice.click();
+ const first=tree.locator("#los-tree-task-list-01-practice button").first();
+ await expect(first).toBeVisible();
+ await first.click();
+ await expect(page).toHaveURL(/C01-EX-01$/);
+ await expect(page.locator("#C01-EX-01")).toBeVisible();
+ await page.reload({waitUntil:"domcontentloaded"});
+ await expect(page.locator("#C01-EX-01")).toBeVisible();
+ await page.goto("/los#/1/01/text",{waitUntil:"domcontentloaded"});
+ const token=page.locator(".los-c01-reader .los-c01-token").first();
+ await expect(token).toBeVisible();
+ await token.click();
+ const card=page.getByRole("dialog",{name:/sanan .* selitys/i});
+ await expect(card).toBeVisible();
+ await expect(card).toContainText("Kappaleen kontekstimerkitys");
+ await expect(card).toContainText("IPA");
+ await card.getByRole("button",{name:"Sulje sanan selitys"}).click();
+ await expect(card).toHaveCount(0);
+ await expect(token).toBeFocused();
+ await expectNoHorizontalOverflow(page);
+});
+
+test("U3 Book + exercises reuses saved C01 answer and remains usable on both layouts",async({page,isMobile})=>{
+ await enterLocalBook(page);
+ await page.goto("/los#/1/01/text",{waitUntil:"domcontentloaded"});
+ const open=page.getByRole("button",{name:"Kirja + tehtävät"});
+ await expect(open).toBeVisible();
+ await open.click();
+ const panel=page.locator("#los-split-workbook");
+ await expect(panel).toBeVisible();
+ await expect(panel.getByRole("heading",{name:"Harjoittele"})).toBeVisible();
+ if(isMobile)await expect(panel).toHaveAttribute("role","dialog");
+ const answer=panel.locator("#C01-EX-01 input[type='radio'][value='Guten Morgen!']");
+ await answer.check();
+ await expect(answer).toBeChecked();
+ await panel.getByRole("button",{name:"Sulje",exact:true}).click();
+ await expect(panel).toHaveCount(0);
+ await expect(open).toBeFocused();
+ await page.goto("/los#/1/01/practice",{waitUntil:"domcontentloaded"});
+ await expect(page.locator("#C01-EX-01 input[type='radio'][value='Guten Morgen!']")).toBeChecked();
+ await page.reload({waitUntil:"domcontentloaded"});
+ await expect(page.locator("#C01-EX-01 input[type='radio'][value='Guten Morgen!']")).toBeChecked();
+ await expectNoHorizontalOverflow(page);
+});
+
+test("U4 C01 teaches greetings and pronunciation without requiring prior German",async({page})=>{
+ await enterLocalBook(page);
+ await page.goto("/los#/1/01/chapter",{waitUntil:"domcontentloaded"});
+ await expect(page.locator(".los-opening-lead")).toContainText("aivan nollasta");
+ await page.goto("/los#/1/01/grammar",{waitUntil:"domcontentloaded"});
+ const guide=page.locator(".los-c01-grammar-guide");
+ await expect(guide).toBeVisible();
+ await expect(guide.getByRole("heading",{name:/Aloitat aivan nollasta/})).toBeVisible();
+ await expect(guide.getByRole("heading",{name:/Näin luet Franzin ja Jörgin keskustelua/})).toBeVisible();
+ await expect(guide.locator(".los-c01-greetings-table tbody tr")).toHaveCount(8);
+ await expect(guide.locator(".los-c01-phonetics article")).toHaveCount(4);
+ await expect(guide).toContainText("ei arvostella automaattisesti");
+ await expect(guide).toContainText("synteettinen");
+ await expectNoHorizontalOverflow(page);
+});
+
+test("U3 hierarchy has all eight real books and does not invent unpublished chapters",async({page,isMobile})=>{
+ await enterLocalBook(page);
+ if(isMobile)await page.locator(".los-top-toc").click();
+ const root=page.locator(".los-tree-books");
+ await root.locator("summary").click();
+ await expect(root.locator("li")).toHaveCount(8);
+ await expect(root.getByRole("button",{name:/LOS! 8/})).toContainText("Ei vielä kappalesisältöä");
+ await root.getByRole("button",{name:/LOS! 2/}).click();
+ await expect(page).toHaveURL(/\/los#\/2\/overview$/);
+ await expect(page.locator(".los-book-workspace")).toBeVisible();
+ await expectNoHorizontalOverflow(page);
+});
+
+test("U3 section pager advances inside a chapter without changing saved task answers",async({page})=>{
+ await enterLocalBook(page);
+ await page.goto("/los#/1/01/chapter",{waitUntil:"domcontentloaded"});
+ const pager=page.getByRole("navigation",{name:"Siirry kappaleen edelliseen tai seuraavaan osioon"});
+ await expect(pager.getByRole("button",{name:/Seuraava osio Teksti A/})).toBeVisible();
+ await pager.getByRole("button",{name:/Seuraava osio Teksti A/}).click();
+ await expect(page).toHaveURL(/\/los#\/1\/01\/text$/);
+ await expect(page.locator(".los-c01-reader")).toBeVisible();
+ await page.getByRole("button",{name:/Seuraava osio Ymmärrä/}).click();
+ await expect(page).toHaveURL(/\/los#\/1\/01\/understand$/);
+ await page.reload({waitUntil:"domcontentloaded"});
+ await expect(page.locator(".los-section-pager")).toBeVisible();
+ await expectNoHorizontalOverflow(page);
+});
+
+test("U3 content-tree open/closed state persists per book without changing chapter progress",async({page,isMobile})=>{
+ await enterLocalBook(page);
+ await page.goto("/los#/1/01/chapter",{waitUntil:"domcontentloaded"});
+ if(isMobile)await page.locator(".los-top-toc").click();
+ const second=page.locator(".los-content-tree .los-tree-chapter").nth(1).locator(".los-tree-expand");
+ await expect(second).toHaveAttribute("aria-expanded","false");
+ await second.click();
+ await expect(second).toHaveAttribute("aria-expanded","true");
+ await page.waitForFunction(()=>{
+   const owner=localStorage.getItem("opk.owner-id");
+   if(!owner)return false;
+   const value=localStorage.getItem(`los.navigation.u1.${owner}.1`);
+   try{return Boolean(value&&JSON.parse(value).expandedChapters?.["02"]===true);}
+   catch{return false;}
+ });
+ await page.reload({waitUntil:"domcontentloaded"});
+ if(isMobile)await page.locator(".los-top-toc").click();
+ const after=page.locator(".los-content-tree .los-tree-chapter").nth(1).locator(".los-tree-expand");
+ await expect(after).toHaveAttribute("aria-expanded","true");
+ await after.click();
+ await expect(after).toHaveAttribute("aria-expanded","false");
+ await page.waitForFunction(()=>{
+   const owner=localStorage.getItem("opk.owner-id");
+   const value=owner&&localStorage.getItem(`los.navigation.u1.${owner}.1`);
+   try{return Boolean(value&&JSON.parse(value).expandedChapters?.["02"]===false);}
+   catch{return false;}
+ });
+ await page.reload({waitUntil:"domcontentloaded"});
+ if(isMobile)await page.locator(".los-top-toc").click();
+ await expect(page.locator(".los-content-tree .los-tree-chapter").nth(1)
+   .locator(".los-tree-expand")).toHaveAttribute("aria-expanded","false");
+ await page.goto("/los#/1/path",{waitUntil:"domcontentloaded"});
+ await expect(page.locator("#los-lesson-runner .los-lesson-progress")).toContainText("0/60 suoritettu");
+});
+
+test("U3 tree shows saved answer but never an unsubmitted test result",async({page,isMobile})=>{
+ await enterLocalBook(page);
+ await page.goto("/los#/1/01/practice",{waitUntil:"domcontentloaded"});
+ const question=page.locator("#C01-EX-01");
+ await question.locator("input[type='radio'][value='Guten Morgen!']").check();
+ await expect(question.locator("input[type='radio'][value='Guten Morgen!']")).toBeChecked();
+ if(isMobile)await page.locator(".los-top-toc").click();
+ const tree=page.locator(".los-content-tree");
+ await expect(tree).toBeVisible();
+ await tree.locator("#los-tree-children-01").getByRole("button",{
+   name:"Avaa harjoittele-osion tehtävät"
+ }).click();
+ const task=tree.locator("#los-tree-task-list-01-practice button").first();
+ await expect(task).toContainText("Vastaus tallennettu");
+ await expect(tree.locator(".los-tree-chapter").first()).not.toContainText("Kappaletesti palautettu");
+ await page.reload({waitUntil:"domcontentloaded"});
+ if(isMobile)await page.locator(".los-top-toc").click();
+ const reloadTask=page.locator("#los-tree-task-list-01-practice button").first();
+ await expect(reloadTask).toContainText("Vastaus tallennettu");
+ await expectNoHorizontalOverflow(page);
+});
+
+test("U2 dictionary clearly separates remote published search from chapter vocabulary",async({page})=>{
+ await enterLocalBook(page);
+ await page.goto("/los#/1/dictionary",{waitUntil:"domcontentloaded"});
+ await expect(page.locator(".los-dict-search")).toBeVisible();
+ const query=page.locator(".los-dict-query input");
+ await expect(query).toHaveAttribute("maxlength","80");
+ await query.fill("Haus");
+ await expect(page.locator(".los-dict-live")).toContainText(
+   /Laitetunnistus|sanakirjapalvelua|Sanakirjapalvelu|ei ole vielä käytettävissä/i,
+   {timeout:10_000});
+ await expect(page.getByRole("heading",{name:"Kappalesanasto"})).toBeVisible();
+ await expect(page.locator(".los-index-entry").first()).toBeVisible();
+ await page.getByRole("button",{name:"Suomi → saksa"}).click();
+ await expect(query).toHaveAttribute("placeholder","Esim. talo");
+ await expectNoHorizontalOverflow(page);
+});

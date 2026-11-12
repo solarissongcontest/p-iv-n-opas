@@ -1,0 +1,27 @@
+/* LOS! U2: keep large source dictionaries out of the browser bundle. */
+.los-dict-search{border-bottom:1px solid var(--los-line);padding-bottom:32px;margin-bottom:30px}
+.los-dict-search h2{font-size:24px;margin:9px 0 15px}
+.los-dict-directions{display:flex;flex-wrap:wrap;gap:7px;margin:16px 0}
+.los-dict-directions button{background:var(--los-paper);color:var(--los-ink);border:1px solid var(--los-line);padding:9px 14px;min-height:44px;border-radius:8px}
+.los-dict-directions button[aria-pressed="true"]{border-color:var(--los-book-accent);background:var(--los-book-tint);color:#1f2933;font-weight:700}
+.los-dict-query{display:flex;align-items:center;gap:9px;border:1px solid var(--los-line);padding:9px 13px;min-height:48px;background:var(--los-paper);border-radius:8px}
+.los-dict-query input{border:0;background:transparent;color:var(--los-ink);width:100%;font-size:16px;min-width:0;outline:none}
+.los-dict-query:focus-within{outline:3px solid #397ace;outline-offset:2px}
+.los-dict-live{min-height:28px;margin-top:12px}
+.los-dict-results{list-style:none;padding:0;margin:14px 0;display:flex;flex-direction:column;gap:12px}
+.los-dict-result{border:1px solid var(--los-line);background:var(--los-paper);padding:17px;border-radius:9px;overflow-wrap:anywhere}
+.los-dict-result-head{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.los-dict-result-head strong{font-size:19px}
+.los-dict-result-head span{font-size:13px;color:var(--los-soft)}
+.los-dict-result-type,.los-dict-source,.los-dict-ipa{font-size:12px;color:var(--los-soft)}
+.los-dict-senses{margin:12px 0 15px;padding-left:22px}
+.los-dict-senses li{padding-bottom:9px}
+.los-dict-result details{margin:8px 0}
+.los-dict-result summary{cursor:pointer;min-height:30px;color:var(--los-soft);font-size:13px}
+.los-dict-notice{color:var(--los-soft);font-style:italic}
+.los-dict-source a{text-decoration:underline;text-underline-offset:3px;overflow-wrap:anywhere}
+@media(max-width:650px){.los-dict-search h2{font-size:21px}.los-dict-result{padding:13px}.los-dict-result-head{gap:6px}}
+
+.los-dict-form-of {display:flex;flex-wrap:wrap;gap:7px;align-items:center;font-size:13px;line-height:1.5}
+.los-dict-lemma-button {border:1px solid var(--los-line);border-radius:6px;background:var(--los-subtle);color:var(--los-ink);padding:8px 10px;min-height:44px;font-weight:650;text-decoration:underline;text-underline-offset:2px}
+.los-dict-lemma-button:focus-visible {outline:3px solid #397ace;outline-offset:2px}
