@@ -23,6 +23,11 @@ function SourceResult({entry}:{entry:LosDictionaryResult}) {
             {t.value}{i+1<sense.translations.length?"; ":""}
           </span>) :
           <span className="los-dict-notice">Suomenkielistä käännöstä ei ole tästä lähteestä.</span>}
+        {Boolean(sense.formOfCandidates?.length) && <p className="los-dict-form-of">
+          Lähteen ilmoittama mahdollinen perusmuoto:{" "}
+          <strong lang="de">{sense.formOfCandidates?.join(", ")}</strong>.
+          Muotoyhteyttä ei ole erikseen kielentarkistettu.
+        </p>}
         {sense.glosses.length>0 && <details>
           <summary>Lähteen alkuperäiset selitteet (ei automaattisia suomennoksia)</summary>
           {sense.glosses.map((gloss,i)=><p key={i} lang={sense.glossLanguage ?? undefined}>{gloss}</p>)}
