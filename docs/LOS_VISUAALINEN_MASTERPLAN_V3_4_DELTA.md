@@ -21,7 +21,7 @@ Tämä on V3.3:n rinnalle kirjattu U1.0:n nimenomaisten muutosten versioitu tote
 | IPA | Näytä sanatarkistettu IPA sanastossa/sanakortissa, muuten avoin puuttumistila | `pronunciation.ts` sisältää 8 lähteistettyä osamerkintää; koko sanaston QA avoinna |
 | Ääni | Ihmisääni ensisijainen, saksankielinen TTS vain erikseen merkittynä, ilmoita virhe/reitittömyys | `LosPronunciationButton.tsx` tekee de-äänirajauksen; todellinen audion kuuntelutesti puuttuu |
 | Kirja + tehtävät | Vapaaehtoinen rinnakkaisnäkymä riittävällä työleveydellä; yksi tehtävädata | `LosBook.tsx` + `los-u3-split.css`: samoihin `LosWorkbook`-tunnisteisiin ja tallennukseen kytketty paneeli; ResizeObserver, leveällä kaksi palstaa, kapealla suljettava peittopaneeli. CI-laitetestaus ja saavutettavuuden loppuhyväksyntä avoinna |
-| Lukija ja tehtävät | Jatkuva sisältövirta, toimiva edellinen/seuraava ja tiivis kappaleavaus | Nykyistä toimintaa säilytetty; uudistuksen täydellinen visual QA avoinna |
+| Lukija ja tehtävät | Jatkuva sisältövirta, toimiva edellinen/seuraava ja tiivis kappaleavaus | Kappaleiden välisen navigaation rinnalle lisätty `LosBook.tsx`-osion edellinen/seuraava-lukupolku ja C01:n selkeämpi avaus. Täydellinen mobiili- ja visual QA edelleen avoin |
 | Saavutettavuus | WCAG 2.2 AA -tavoitteen mukainen näppäimistöpolku, focus ja 200% zoom | Sanakortin Escape/focus toteutettu; täydet laitetestit avoinna |
 
 ## Tekninen rajaus
