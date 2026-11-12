@@ -42,7 +42,7 @@ function readState():ReaderState{
   return {pageId:"cover",mode:"auto",zoom:100};
 }
 function PaperQuestion({number,prompt,options,fill=false}:{
- number:number;prompt:string;options?:readonly string[];fill?:boolean;
+ number:number;prompt:string;options?:readonly string[]|undefined;fill?:boolean;
 }){
   return <li className="los-facs-question">
     <strong className="los-facs-question-number">{number}.</strong>
