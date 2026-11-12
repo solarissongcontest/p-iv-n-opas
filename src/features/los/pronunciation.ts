@@ -50,7 +50,7 @@ export const LOS_PRONUNCIATIONS: readonly LosPronunciation[] =
     targetType: "lemma",
     target,
     ipa: record.ipa,
-    alternatives: record.alternatives,
+    ...(record.alternatives ? { alternatives: record.alternatives } : {}),
     ipaSourceId: "de.wiktionary:" + record.page,
     ipaSourceUrl: "https://de.wiktionary.org/wiki/" + encodeURIComponent(record.page),
     ipaReviewStatus: "source-verified",
