@@ -1,7 +1,8 @@
 import {LOS1_C01_LINES,LOS1_C01_GLOSS} from "./los1C01.ts";
 import {LOS1_M_COM_02_LINES,LOS1_M_COM_02_GLOSS} from "./los1MCom02.ts";
+import {LOS1_C02_LINES,LOS1_C02_GLOSS} from "./los1C02.ts";
 
-export type LosTextBChapter="04"|"06"|"07"|"09"|"10";
+export type LosTextBChapter="04"|"05"|"06"|"07"|"09"|"10";
 type Question={id:string;prompt:string;options:readonly {id:"a"|"b"|"c";text:string}[];correctId:"a"|"b"|"c";explanation:string};
 const question=(ch:LosTextBChapter,n:number,prompt:string,choices:[string,string,string],correctId:"a"|"b"|"c",explanation:string):Question=>({
  id:"C"+ch+"-TEXTB-Q"+String(n).padStart(2,"0"),prompt,
@@ -52,6 +53,23 @@ export const LOS1_TEXT_B_SOURCES={
    question("04",2,"Mikä luettelon ilmaus on selkeä kohtelias hyvästely?",["Moin Moin!","Auf Wiedersehen!","Guten Morgen!"],"b","Auf Wiedersehen! on tavallinen kohtelias hyvästely."),
    question("04",3,"Mikä on luettelon arkipäiväinen hyvästely?",["Guten Abend!","Grüß Gott!","Tschüss!"],"c","Tschüss! on tuttavallinen moikka."),
    question("04",4,"Mikä ilmauksista tarkoittaa nähdään pian?",["Bis bald!","Bis gleich!","Bis später!"],"a","Bis bald! = nähdään pian. Bis gleich on nähdään kohta."),
+  ],
+ },
+ "05":{
+  sourceId:"M-COM-08",title:"Franz ja Greta: Wie geht's?",
+  summary:"Koko 20 sekunnin alkuperäinen kahden ihmisen puhuma Franzin ja Gretan keskustelu (Human Robot, public domain) ja erikseen lähteistetty koko kuuden repliikin Wikibooks-teksti. Sama julkaistu tekstikohtaus on tuttu C02:sta, mutta nyt opetellaan nimen sijaan Wie geht's? ja Es geht mir gut. Äänitteen ja painetun tekstin sanatarkkaa vastaavuutta ei ole auditoitu, joten tarkistettavat tehtävät perustuvat näkyvään koko tekstiin, eivät automaattiseen kuuntelupisteytykseen.",
+  transcriptIsExact:true,lines:LOS1_C02_LINES,glossary:LOS1_C02_GLOSS,
+  textAttribution:{author:"Wikibooks German/Level I -kirjoittajat",title:"Wie heißt du? (1. Teil), kokonainen 6-repliikkinen tekstikohtaus",
+   url:"https://en.wikibooks.org/w/index.php?title=German/Level_I/Wie_heißt_du&oldid=4430449",
+   license:"CC BY-SA 4.0",licenseUrl:"https://creativecommons.org/licenses/by-sa/4.0/"},
+  attribution:{author:"Human Robot (English Wikibooks, 2006)",title:"Dialogue franz greta 1.ogg",
+   url:"https://commons.wikimedia.org/wiki/File:Dialogue_franz_greta_1.ogg",
+   license:"Public domain",licenseUrl:"https://creativecommons.org/publicdomain/mark/1.0/"},
+  questions:[
+   question("05",1,"Miten Greta kysyy Franzin vointia koko dialogissa?",["Wie geht's?","Wie alt bist du?","Woher kommst du?"],"a","Greta kysyy Wie geht's? eli mitä kuuluu."),
+   question("05",2,"Miten Franz vastaa kysymykseen Wie geht's?",["Ich bin Franz.","Es geht mir gut.","Ich komme aus Berlin."],"b","Es geht mir gut. tarkoittaa minulle kuuluu hyvää."),
+   question("05",3,"Minkä henkilön Greta kertoo tuntevansa?",["Peterin","Thomasin","Opettajan, herra Weißin"],"c","Greta sanoo Ja, er heißt Herr Weiß. Tätä edeltää kysymys tunnetko opettajan."),
+   question("05",4,"Miten Greta hyvästelee Franzin?",["Wiedersehen!","Bis morgen!","Gute Nacht!"],"a","Tekstin viimeinen repliikki on Gretan Wiedersehen!."),
   ],
  },
  "06":{
@@ -116,7 +134,7 @@ export const LOS1_TEXT_B_SOURCES={
 export function isLosTextBChapter(id:string):id is LosTextBChapter{return id in LOS1_TEXT_B_SOURCES;}
 export function validateLosTextB():string[]{
  const errors:string[]=[];
- for(const chapterId of ["04","06","07","09","10"] as const){
+ for(const chapterId of ["04","05","06","07","09","10"] as const){
   const resource=LOS1_TEXT_B_SOURCES[chapterId];
   if(resource.questions.length!==4)errors.push("C"+chapterId+" requires four checks");
   if(new Set(resource.questions.map(q=>q.id)).size!==4)errors.push("C"+chapterId+" duplicate question IDs");
