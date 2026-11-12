@@ -348,3 +348,25 @@ test("U3 content-tree open/closed state persists per book without changing chapt
  await page.goto("/los#/1/path",{waitUntil:"domcontentloaded"});
  await expect(page.locator("#los-lesson-runner .los-lesson-progress")).toContainText("0/60 suoritettu");
 });
+
+test("U3 tree shows saved answer but never an unsubmitted test result",async({page,isMobile})=>{
+ await enterLocalBook(page);
+ await page.goto("/los#/1/01/practice",{waitUntil:"domcontentloaded"});
+ const question=page.locator("#C01-EX-01");
+ await question.locator("input[type='radio'][value='Guten Morgen!']").check();
+ await expect(question.locator("input[type='radio'][value='Guten Morgen!']")).toBeChecked();
+ if(isMobile)await page.locator(".los-top-toc").click();
+ const tree=page.locator(".los-content-tree");
+ await expect(tree).toBeVisible();
+ await tree.locator("#los-tree-children-01").getByRole("button",{
+   name:"Avaa harjoittele-osion tehtävät"
+ }).click();
+ const task=tree.locator("#los-tree-task-list-01-practice button").first();
+ await expect(task).toContainText("Vastaus tallennettu");
+ await expect(tree.locator(".los-tree-chapter").first()).not.toContainText("Kappaletesti palautettu");
+ await page.reload({waitUntil:"domcontentloaded"});
+ if(isMobile)await page.locator(".los-top-toc").click();
+ const reloadTask=page.locator("#los-tree-task-list-01-practice button").first();
+ await expect(reloadTask).toContainText("Vastaus tallennettu");
+ await expectNoHorizontalOverflow(page);
+});
