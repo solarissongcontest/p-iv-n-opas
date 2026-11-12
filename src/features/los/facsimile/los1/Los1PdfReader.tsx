@@ -3,7 +3,7 @@ import {useCallback,useEffect,useMemo,useRef,useState,
 import {ArrowLeft,BookOpen,Bookmark,ChevronLeft,ChevronRight,
   FileText,Search,Upload,X,ZoomIn,ZoomOut} from "lucide-react";
 import type {PDFDocumentProxy,RenderTask} from "pdfjs-dist";
-import pdfWorkerUrl from "pdfjs-dist/build/pdf.worker.min.mjs?url";
+import pdfWorkerUrl from "pdfjs-dist/legacy/build/pdf.worker.min.mjs?url";
 import "pdfjs-dist/web/pdf_viewer.css";
 import {getDeviceOwnerId} from "@/lib/deviceSession";
 import {LOS1_C01_FACSIMILE_PAGES,type LosFacsimileSection} from "./c01Pilot";
@@ -63,7 +63,7 @@ function LocalPdfPage({document,pageNumber,availableWidth,availableHeight,zoom}:
       });
       await renderTask.promise;
       if(cancelled)return;
-      const pdfjs=await import("pdfjs-dist");
+      const pdfjs=await import("pdfjs-dist/legacy/build/pdf.mjs");
       const textContent=await pdfPage.getTextContent();
       if(cancelled)return;
       const layer=new pdfjs.TextLayer({textContentSource:textContent,container:textBox,viewport});
@@ -185,7 +185,7 @@ export function Los1PdfReader({
             Number.isInteger(n)&&n>=0&&n<LOS1_C01_PDF_CONTRACT.pageCount):[];
         }catch{/* Use an empty set of local bookmarks. */}
       }
-      const pdfjs=await import("pdfjs-dist");
+      const pdfjs=await import("pdfjs-dist/legacy/build/pdf.mjs");
       pdfjs.GlobalWorkerOptions.workerSrc=pdfWorkerUrl;
       const loadingTask=pdfjs.getDocument({data:new Uint8Array(buffer)});
       currentLoadingTask.current=loadingTask;
