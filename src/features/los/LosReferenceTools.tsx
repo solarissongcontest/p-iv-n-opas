@@ -5,7 +5,7 @@ import { LOS_1_LESSONS } from "./learningPath";
 import { LosFirstLessons } from "./LosFirstLessons";
 import { LOS1_EXECUTABLE_LESSONS, isLos1ExecutableLesson } from "./guidedLessons";
 
-export type LosDestination = "overview" | "contents" | "chapter" | "text" | "understand" | "vocabulary" | "grammar" | "text-b" | "practice" | "apply" | "culture" | "test" | "appendix" | "dictionary" | "path" | "search";
+export type LosDestination = "overview" | "contents" | "chapter" | "text" | "understand" | "vocabulary" | "grammar" | "text-b" | "practice" | "apply" | "culture" | "test" | "appendix" | "dictionary" | "path" | "search" | "midterm";
 export type LosNavigate = (chapter: string | null, section: LosDestination) => void;
 type WordEntry = { book: number; code: string; chapter: string; title: string; word: string; meaning: string };
 const DICTIONARY = LOS_BOOKS.flatMap(book => book.chapters.flatMap(chapter =>
@@ -96,9 +96,9 @@ export function LosLearningPath({ book, move }: { book: LosBookDefinition; move:
       <h2>{group.section}</h2>
       <ol>
         {group.items.map(lesson=><li key={lesson.number}>
-          <button onClick={()=>{ if(isLos1ExecutableLesson("L"+String(lesson.number).padStart(3,"0"))){ selectLesson("L"+String(lesson.number).padStart(3,"0")); document.getElementById("los-lesson-runner")?.scrollIntoView({block:"start",behavior:"smooth"}); } else move(lesson.chapter,lesson.destination); }}>
+          <button onClick={()=>{ if(isLos1ExecutableLesson("L"+String(lesson.number).padStart(3,"0"))){ selectLesson("L"+String(lesson.number).padStart(3,"0")); document.getElementById("los-lesson-runner")?.scrollIntoView({block:"start",behavior:"smooth"}); } else if(lesson.number===30) move(null,"midterm"); else move(lesson.chapter,lesson.destination); }}>
             <span className="los-path-number">{String(lesson.number).padStart(2,"0")}</span>
-            <span className="los-path-copy"><strong>{lesson.title}</strong><small>{isLos1ExecutableLesson("L"+String(lesson.number).padStart(3,"0")) ? "Avaa ohjattu oppitunti" : lesson.chapter ? `Kappale ${Number(lesson.chapter)} · Oppikirjan sisältöön (suoritus ei vielä käytössä)` : "Suoritusjärjestelmä ei vielä käytössä"}</small></span>
+            <span className="los-path-copy"><strong>{lesson.title}</strong><small>{isLos1ExecutableLesson("L"+String(lesson.number).padStart(3,"0")) ? "Avaa ohjattu oppitunti" : lesson.chapter ? `Kappale ${Number(lesson.chapter)} · Oppikirjan sisältöön (suoritus ei vielä käytössä)` : lesson.number===30 ? "Avaa 25 tehtävän välikoe (L030-tunnin suoritus vielä kesken)" : "Suoritusjärjestelmä ei vielä käytössä"}</small></span>
             <ArrowRight size={18}/>
           </button>
         </li>)}

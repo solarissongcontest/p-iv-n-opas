@@ -1,0 +1,46 @@
+.los-exam { max-width: 920px; }
+.los-exam h1 { line-height: 1.2; }
+.los-exam-overview { background: var(--los-book-tint); border: 1px solid var(--los-line); padding: 20px; border-radius: 10px; margin: 20px 0 28px; }
+.los-exam-overview p { margin: 6px 0; display: flex; gap: 8px; align-items: center; line-height: 1.6; }
+.los-exam-save.is-error { color: #b53e46; font-weight: 700; }
+.los-exam-section { border-top: 1px solid var(--los-line); padding: 22px 0 12px; }
+.los-exam-section h2 { font-size: clamp(20px, 2.4vw, 27px); margin: 0 0 4px; }
+.los-exam-section h2 > span { color: var(--los-book-accent); }
+.los-exam-section > p { color: var(--los-soft); font-size: 13px; }
+.los-exam-section > ol { padding: 0; margin: 0; list-style: none; }
+.los-exam-question { margin: 18px 0 24px; padding: 18px 20px; border: 1px solid var(--los-line); border-radius: 10px; background: var(--los-paper); }
+.los-exam-question fieldset { border: 0; margin: 0; min-width: 0; padding: 0; }
+.los-exam-question legend { font-weight: 650; padding: 0; line-height: 1.6; }
+.los-exam-question legend span { color: var(--los-book-accent); }
+.los-exam-answers { display: grid; gap: 9px; margin-top: 13px; }
+.los-exam-answers label { display: flex; align-items: center; gap: 11px; border: 1px solid var(--los-line); border-radius: 8px; padding: 12px 14px; cursor: pointer; min-height: 45px; }
+.los-exam-answers label.is-selected { border-color: var(--los-book-accent); background: var(--los-book-tint); }
+.los-exam-answers label input { width: 18px; height: 18px; accent-color: var(--los-book-accent); }
+.los-exam-answers label span { line-height: 1.5; }
+.los-exam-answers label:focus-within { outline: 2px solid var(--los-book-accent); outline-offset: 3px; }
+.los-exam-feedback { border-left: 3px solid var(--los-line); padding: 10px 12px; margin-top: 14px; font-size: 13px; line-height: 1.7; }
+.los-exam-feedback.is-correct { border-left-color: #43846c; }
+.los-exam-feedback.is-incorrect { border-left-color: #b53e46; }
+.los-exam-feedback p { margin: 4px 0 0; }
+.los-exam-submit, .los-exam-results, .los-exam-speaking { margin: 26px 0; border-top: 1px solid var(--los-line); padding: 22px 0; }
+.los-exam-submit h2, .los-exam-results h2, .los-exam-speaking h2 { font-size: 24px; }
+.los-exam-submit p, .los-exam-results p, .los-exam-speaking p { line-height: 1.75; }
+.los-exam-submit .los-primary { min-height: 48px; }
+.los-exam-results > table { border-collapse: collapse; width: 100%; margin: 18px 0; }
+.los-exam-results th, .los-exam-results td { padding: 11px 9px; text-align: left; border-bottom: 1px solid var(--los-line); }
+.los-exam-results td { text-align: right; font-variant-numeric: tabular-nums; }
+.los-exam-results caption { font-size: 12px; margin-bottom: 10px; text-align: left; color: var(--los-soft); }
+.los-exam-retake { margin-top: 25px; display: grid; gap: 12px; }
+.los-exam-retake label { display: flex; gap: 10px; align-items: flex-start; line-height: 1.6; font-size: 13px; }
+.los-exam-retake button { min-height: 44px; justify-self: start; display: flex; align-items: center; gap: 8px; }
+.los-exam-speaking { margin-top: 32px; }
+.los-exam-speaking > label { display: block; font-weight: 600; margin: 18px 0 7px; }
+.los-exam-speaking textarea { box-sizing: border-box; width: 100%; padding: 12px; font: inherit; line-height: 1.7; border: 1px solid var(--los-line); border-radius: 8px; background: var(--los-paper); color: var(--los-ink); resize: vertical; }
+.los-exam-rubric { margin-top: 25px; padding: 17px 21px; background: var(--los-book-tint); border-radius: 10px; }
+.los-exam-rubric li { margin: 7px 0; line-height: 1.65; }
+@media (max-width: 650px) {
+  .los-exam-overview, .los-exam-question { padding: 15px; }
+  .los-exam-section h2 { font-size: 20px; }
+  .los-exam-answers label { padding: 10px 12px; min-height: 48px; }
+  .los-exam-submit .los-primary { width: 100%; justify-content: center; }
+}
