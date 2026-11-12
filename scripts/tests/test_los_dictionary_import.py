@@ -49,7 +49,7 @@ class DictionaryImporterTest(unittest.TestCase):
         details = module.run(self.args())
         legal = {"sourceId": "test-deu-fin", "kind": "freedict",
                  "sourceSha512": details["sourceSha512"],
-                 "rightsApproval": {"reviewed": True, "publicationApproved": True,
+                 "rightsApproval": {"reviewed": True, "stagingApproved": True,
                     "licenseCode": "CC BY-SA 3.0", "licenseUrl":
                         "https://creativecommons.org/licenses/by-sa/3.0/",
                     "evidenceUrl": "https://example.org/test-fixture",
