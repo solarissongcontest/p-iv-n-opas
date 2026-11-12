@@ -68,3 +68,6 @@
  .los-c01-question legend{font-size:17px;}
  .los-c01-options label,.los-c01-evidence label{padding:12px;min-height:48px;}
 }
+
+/* Source-native subdialogue headings, placed on their own row inside the shared reader. */
+.los-c01-dialogue-subheading{grid-column:1/-1;margin:5px 0 0;font-size:15px;font-weight:740;color:var(--los-ink);line-height:1.5;}
