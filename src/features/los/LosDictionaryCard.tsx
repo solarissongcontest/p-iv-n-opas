@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import { X } from "lucide-react";
 import { getLosPronunciation } from "./pronunciation";
 import { LosPronunciationButton } from "./LosPronunciationButton";
+import "./los-u1-pronunciation.css";
 
 /**
  * Shared U1 dictionary card: editorial context always wins over unreviewed
@@ -12,16 +13,24 @@ export function LosDictionaryCard({
   word, contextMeaning, onClose,
 }: { word: string; contextMeaning: string; onClose: () => void }) {
   const closeButton = useRef<HTMLButtonElement>(null);
+  const previousFocus = useRef<HTMLElement | null>(null);
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
   const pronunciation = getLosPronunciation(word);
 
   useEffect(() => {
+    previousFocus.current = document.activeElement instanceof HTMLElement
+      ? document.activeElement : null;
     closeButton.current?.focus();
     const handleEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") { event.preventDefault(); onClose(); }
+      if (event.key === "Escape") { event.preventDefault(); onCloseRef.current(); }
     };
     document.addEventListener("keydown", handleEscape);
-    return () => document.removeEventListener("keydown", handleEscape);
-  }, [onClose, word]);
+    return () => {
+      document.removeEventListener("keydown", handleEscape);
+      if (previousFocus.current?.isConnected) previousFocus.current.focus();
+    };
+  }, [word]);
 
   return <section className="los-c01-gloss los-dictionary-card"
     role="dialog" aria-modal="false" aria-label={`Sanan ${word} selitys`} lang="fi">
