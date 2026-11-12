@@ -33,8 +33,12 @@ export type Los1BookOutlineEntry={
   primarySourceReady:boolean|null;
   primarySourceIssues:readonly string[];
 };
-const book=LOS_BOOKS.find(entry=>entry.id===1);
-if(!book)throw Error("LOS! 1 puuttuu sisältöluettelosta.");
+function requireLos1Book(){
+  const result=LOS_BOOKS.find(entry=>entry.id===1);
+  if(!result)throw Error("LOS! 1 puuttuu sisältöluettelosta.");
+  return result;
+}
+const book=requireLos1Book();
 
 const frontMatter=[
   ["front-cover","Etukansi"],["inside-cover","Etukannen sisäpuoli"],
