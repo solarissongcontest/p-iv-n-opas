@@ -13,7 +13,7 @@ export function LosAdditionalTextB({chapterId}:{chapterId:string}){
  if(!isLosTextBChapter(chapterId))return null;
  return <LosAdditionalTextBContent chapterId={chapterId}/>;
 }
-function LosAdditionalTextBContent({chapterId}:{chapterId:"04"|"05"|"06"|"07"|"09"|"10"}){
+function LosAdditionalTextBContent({chapterId}:{chapterId:"01"|"04"|"05"|"06"|"07"|"08"|"09"|"10"}){
  const source=LOS1_TEXT_B_SOURCES[chapterId];
  const {draft,update,saved}=useLosChapterDraft(1,chapterId);
  const checked=draft.practiceChecked;
@@ -31,12 +31,13 @@ function LosAdditionalTextBContent({chapterId}:{chapterId:"04"|"05"|"06"|"07"|"0
  return <div className="los-secondary-source" aria-label={"C"+chapterId+" toinen alkuperäinen lähde"}>
   <p>{source.summary}</p>
   <LosAuthenticAudio chapterId={chapterId} source="B"/>
+  {chapterId==="08"&&<div className="los-editorial-note" role="status"><strong>Haastattelun ääni ei ole vielä käytettävissä.</strong> COERLL:n alkuperäinen kahdeksan repliikin litteraatti on luettavissa kokonaisena tässä kirjassa. Videon tai äänen teknistä toimintaa ja tiedostokohtaisia oikeuksia ei ole vielä vahvistettu; tästä osiosta saa luetun ymmärtämisen harjoitusta, ei kuullun ymmärtämisen todistetta.</div>}
   {source.transcriptIsExact&&source.lines.length>0?
    <LosOriginalDialogue
     chapterId={chapterId} sourceId={source.sourceId} version="1.0.0"
     lines={source.lines} glossary={source.glossary}
     heading={source.title} usageLabel="ORIGINALTEXT · TEXT B"
-    guidance="Lue koko autenttinen teksti tässä oppikirjassa. Kokeile ensin ymmärtää ilman sanaselityksiä. Äänitteen toimivuutta ei ole vielä testattu oikealla laitteella."
+    guidance={chapterId==="08"?"Lue ihmisen alkuperäisen haastattelun jokainen puheenvuoro suoraan tästä lukijasta. Tämä korkeampaa kielitasoa edustava teksti on vain tunnistamista varten; mitään audiota tai videota ei vielä väitetä kuunnelluksi.":"Lue koko autenttinen teksti tässä oppikirjassa. Kokeile ensin ymmärtää ilman sanaselityksiä. Äänitteen toimivuutta ei ole vielä testattu oikealla laitteella."}
     author={"textAttribution" in source?source.textAttribution.author:source.attribution.author}
     sourceTitle={"textAttribution" in source?source.textAttribution.title:source.attribution.title}
     sourceUrl={"textAttribution" in source?source.textAttribution.url:source.attribution.url}
@@ -44,7 +45,7 @@ function LosAdditionalTextBContent({chapterId}:{chapterId:"04"|"05"|"06"|"07"|"0
     licenseUrl={"textAttribution" in source?source.textAttribution.licenseUrl:source.attribution.licenseUrl}
     sourceDetail={"textAttribution" in source
      ?"Tämä kuuden repliikin muuttamaton teksti on peräisin Wikibooksista (CC BY-SA 4.0) ja on tuttu C02:sta. Erillinen 20 sekunnin alkuperäinen ääni on Human Robotin public domain -julkaisu; äänen ja litteraatin tarkkaa vastaavuutta ei ole vielä laite- ja kielentarkistettu."
-     :"Alkuperäinen lähde on luettu kokonaisena, ei tekoälyn kirjoittama mallidialogi. Tämä lähde esiintyy myös toisessa LOS!:n kappaleessa mutta uudella oppimistavoitteella."}
+     :chapterId==="08"?"COERLL/University of Texas at Austinin Deutsch im Blick -haastattelun muuttamaton saksankielinen litteraatti, CC BY 4.0. Suomennokset, fraasituet ja tehtävät ovat LOS!:n laatimia. Haastattelun video ja ääniraita eivät sisälly tähän oppikirjasivuun; niiden oikeus- ja laitetestaus puuttuu.":"Alkuperäinen lähde on luettu kokonaisena, ei tekoälyn kirjoittama mallidialogi. Tämä lähde esiintyy myös toisessa LOS!:n kappaleessa mutta uudella oppimistavoitteella."}
    />:
    <section className="los-editorial-note" aria-label="Aakkosten oppijan oma harjoittelulista">
     <h2>Kirjainrivi lausunnan tueksi</h2>
