@@ -9,6 +9,7 @@ import {getLos1UnreadyChapterGates} from "./fullBookOutline.ts";
 
 export type Los1ReleasedPage={
   pageId:string;
+  title:string;
   pdfPageIndex:number;
   printedPageLabel:string|null;
   kind:"front-cover"|"inside-cover"|"front-matter"|"chapter-open"|
@@ -64,6 +65,9 @@ export const LOS1_REQUIRED_REVIEWS:readonly (keyof Los1PublicationReviews)[]=[
  * publish-blocking state, not a TODO that may be bypassed by changing UI.
  */
 export const RELEASED_LOS1_EDITION:Los1PublishedEdition|null=null;
+export function getPublishedLos1Edition():Los1PublishedEdition|null{
+  return RELEASED_LOS1_EDITION;
+}
 
 export function expectedLos1PdfPath(editionId:string):string{
   return "/api/los1/facsimile/editions/"+editionId+"/screen.pdf";
@@ -140,6 +144,28 @@ export function validateLos1EditionRelease(
   const blockIds=new Set(edition.pages.flatMap(page=>page.contentBlockIds));
   if(blockIds.size===0)problems.push("Sisältöankkurit puuttuvat sivukartasta.");
   return problems;
+}
+/**
+ * A published page map owns the actual left/right spread pairing.
+ * Never infer a real book's parity from PDF file indices.
+ */
+export function visibleReleasedPages(
+  pages:readonly Los1ReleasedPage[],index:number,spread:boolean,
+):number[]{
+  if(!Number.isInteger(index)||index<0||index>=pages.length)return [];
+  const current=pages[index]!;
+  if(!spread||current.spreadId===null)return [index];
+  return pages.flatMap((page,i)=>page.spreadId===current.spreadId?[i]:[]);
+}
+export function turnReleasedPage(
+  pages:readonly Los1ReleasedPage[],index:number,spread:boolean,
+  direction:-1|1,
+):number{
+  if(!pages.length)return 0;
+  const current=Math.min(pages.length-1,Math.max(0,index));
+  const visible=visibleReleasedPages(pages,current,spread);
+  const next=direction===1?Math.max(...visible)+1:Math.min(...visible)-1;
+  return Math.max(0,Math.min(pages.length-1,next));
 }
 export async function loadVerifiedLos1Pdf(edition:Los1PublishedEdition,
   requester:typeof fetch=fetch):Promise<ArrayBuffer>{
