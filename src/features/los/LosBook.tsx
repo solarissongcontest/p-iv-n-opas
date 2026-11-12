@@ -194,7 +194,7 @@ function ChapterOpening({ chapter, book, move }: { chapter: LosChapter; book: Lo
       <div>
         <p className="los-overline">TÄSSÄ KAPPALEESSA</p>
         <h2>Opit käyttämään saksaa</h2>
-        <p className="los-opening-lead">Aloita uusi aihe sen keskeisistä sanoista ja rakenteista. Lähdeaineistot avataan samaan kirjaan, kun niiden tarkistus on valmis.</p>
+        <p className="los-opening-lead">{chapter.id==="01" ? "Aloitat saksan aivan nollasta. Harjoittele ensin tervehdykset, lue Franzin ja Jörgin kokonainen alkuperäiskeskustelu, tutki sanoja ja vasta sitten tee tehtävät. Tekstin kielellinen ja audion laitetarkistus ovat vielä kesken." : "Tutustu kappaleen tavoitteisiin ja lue tekstin lähdetiedot. Opetussisällön sekä äänen julkaisu- ja laitetarkistus voivat vielä olla kesken."}</p>
       </div>
       <aside className="los-goals"><h3>Kappaleen tavoitteet</h3><ul>{chapter.objectives.map(goal => <li key={goal}>{goal}</li>)}</ul></aside>
     </div>
