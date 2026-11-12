@@ -32,3 +32,42 @@ jobs:
             echo "::error::Raw dictionary found in public/; importer output belongs server-side only."
             exit 1
           fi
+
+  freedict-source-inspection:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Download official TEI source bytes into ephemeral CI workspace only
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/los-u2-sources
+          curl --fail --location --retry 2 --max-time 120 --silent --show-error \
+            "https://download.freedict.org/generated/deu-fin/deu-fin.tei" \
+            --output /tmp/los-u2-sources/deu-fin.tei
+          curl --fail --location --retry 2 --max-time 120 --silent --show-error \
+            "https://download.freedict.org/generated/fin-deu/fin-deu.tei" \
+            --output /tmp/los-u2-sources/fin-deu.tei
+          test "$(stat -c %s /tmp/los-u2-sources/deu-fin.tei)" -lt 30000000
+          test "$(stat -c %s /tmp/los-u2-sources/fin-deu.tei)" -lt 30000000
+      - name: Inspect actual rows, translations, and SHA512 without licence approval or publishing
+        shell: bash
+        run: |
+          set -euo pipefail
+          python scripts/los-dictionary-import.py --kind freedict --direction de-fi \
+            --source-id freedict-de-fi-inspection --source /tmp/los-u2-sources/deu-fin.tei \
+            --mode inspect | tee /tmp/los-u2-sources/de-fi-report.json
+          python scripts/los-dictionary-import.py --kind freedict --direction fi-de \
+            --source-id freedict-fi-de-inspection --source /tmp/los-u2-sources/fin-deu.tei \
+            --mode inspect | tee /tmp/los-u2-sources/fi-de-report.json
+      - name: Store only inspection counts and hashes, never raw dictionary files
+        uses: actions/upload-artifact@v4
+        with:
+          name: los-u2-freedict-source-inspection
+          path: /tmp/los-u2-sources/*-report.json
+          retention-days: 7
