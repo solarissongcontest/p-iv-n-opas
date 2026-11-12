@@ -6,7 +6,7 @@ INSERT INTO public.los_dictionary_sources
 VALUES
 ('fixture-de-fi','freedict','de','fi','fixture','https://example.org/de-fi',
  repeat('a',128),repeat('b',128),'test-only','https://example.org/license',
- 'https://example.org/rights','synthetic-test','2026-11-12',3,3,false),
+ 'https://example.org/rights','synthetic-test','2026-11-12',4,4,false),
 ('fixture-fi-de','freedict','fi','de','fixture','https://example.org/fi-de',
  repeat('c',128),repeat('d',128),'test-only','https://example.org/license',
  'https://example.org/rights','synthetic-test','2026-11-12',1,1,false);
@@ -18,6 +18,7 @@ VALUES
 ('fixture-de-fi','house',1,'de','fi','Haus','haus',ARRAY['haus'],'noun','n'),
 ('fixture-de-fi','bank-1',2,'de','fi','Bank','bank',ARRAY['bank'],'noun','f'),
 ('fixture-de-fi','bank-2',3,'de','fi','Bank','bank',ARRAY['bank'],'noun','f'),
+('fixture-de-fi','houses',4,'de','fi','Häuser','häuser',ARRAY['häuser'],'noun',null),
 ('fixture-fi-de','house',1,'fi','de','talo','talo',ARRAY['talo'],'noun',null);
 
 INSERT INTO public.los_dictionary_senses
@@ -26,7 +27,13 @@ VALUES
 ('fixture-de-fi','house',1),
 ('fixture-de-fi','bank-1',1),
 ('fixture-de-fi','bank-2',1),
+('fixture-de-fi','houses',1),
 ('fixture-fi-de','house',1);
+
+UPDATE public.los_dictionary_senses
+SET form_of_candidates='["Haus"]'::jsonb,gloss_language='en',
+    source_glosses='["plural of Haus"]'::jsonb
+WHERE source_id='fixture-de-fi' AND source_entry_id='houses';
 
 INSERT INTO public.los_dictionary_translations
 (source_id,source_entry_id,sense_index,translation_index,language,value,value_key)
@@ -72,6 +79,10 @@ BEGIN
  END IF;
  IF (SELECT count(*) FROM public.los_dictionary_search('Bank','de-fi',20)) <> 2 THEN
   RAISE EXCEPTION 'Homonyms incorrectly collapsed';
+ END IF;
+ IF (SELECT count(*) FROM public.los_dictionary_search('Häuser','de-fi',20)
+   WHERE senses @> '[{"formOfCandidates":["Haus"]}]'::jsonb) <> 1 THEN
+  RAISE EXCEPTION 'Source form-of candidate metadata lost in query';
  END IF;
  IF (SELECT count(*) FROM public.los_dictionary_search('talo','fi-de',20)) <> 1 THEN
   RAISE EXCEPTION 'Finnish to German search failed';
