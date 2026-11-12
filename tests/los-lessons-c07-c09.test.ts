@@ -24,18 +24,18 @@ const draft = () => ({
   selfAssessment: "", updatedAt: now,
 });
 
-test("58 executable lessons are unique and preserve gaps for unfinished chapters", () => {
+test("60 executable lesson IDs are unique and preserve canonical sequence", () => {
   assert.equal(LOS_1_LESSONS.length,60);
-  assert.equal(LOS1_EXECUTABLE_LESSONS.length,58);
+  assert.equal(LOS1_EXECUTABLE_LESSONS.length,60);
   assert.equal(LOS1_C07_C09_LESSONS.length,10);
   const allIds = LOS1_EXECUTABLE_LESSONS.map(lesson=>lesson.id);
-  assert.equal(new Set(allIds).size,58,"No lesson may be published twice");
+  assert.equal(new Set(allIds).size,60,"No lesson may be published twice");
   const expectedC07 = ["L036","L037","L038","L039","L040"];
   const expectedC09 = ["L046","L047","L048","L049","L050"];
   assert.deepEqual(LOS1_C07_C09_LESSONS.map(x=>x.id),[...expectedC07,...expectedC09]);
   for (let number=1;number<=60;number++) {
     const id="L"+String(number).padStart(3,"0");
-    const shouldExist=(number<=58);
+    const shouldExist=(number<=60);
     assert.equal(isLos1ExecutableLesson(id),shouldExist,id+" readiness");
   }
   for (const id of expectedC07)assert.equal(los1LessonDraftChapter(id),"07");

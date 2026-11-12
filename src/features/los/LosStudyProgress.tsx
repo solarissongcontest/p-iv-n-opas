@@ -19,11 +19,11 @@ export function LosStudyProgress({book,move}:{book:LosBookDefinition;move:LosNav
     d05=useLosChapterDraft(1,"05"),d06=useLosChapterDraft(1,"06"),
     d07=useLosChapterDraft(1,"07"),d08=useLosChapterDraft(1,"08"),
     d09=useLosChapterDraft(1,"09"),d10=useLosChapterDraft(1,"10"),
-    d91=useLosChapterDraft(1,"91"),d92=useLosChapterDraft(1,"92");
+    d91=useLosChapterDraft(1,"91"),d92=useLosChapterDraft(1,"92"),d93=useLosChapterDraft(1,"93");
   const drafts:Record<string,LosChapterDraft>={
     "01":d01.draft,"02":d02.draft,"03":d03.draft,"04":d04.draft,"05":d05.draft,
     "06":d06.draft,"07":d07.draft,"08":d08.draft,"09":d09.draft,"10":d10.draft,
-    "91":d91.draft,"92":d92.draft,
+    "91":d91.draft,"92":d92.draft,"93":d93.draft,
   };
   const data=getLosStudyProgressSnapshot(book,drafts,new Date().toISOString());
   return <section className="los-inner-page los-study-progress" aria-label="LOS! 1:n opiskelun eteneminen">
@@ -48,6 +48,7 @@ export function LosStudyProgress({book,move}:{book:LosBookDefinition;move:LosNav
       <p>Automaattiset tehtävät: <strong>{data.midterm.correct}/{data.midterm.total}</strong> oikein. Itsearvioitu keskustelu ei sisälly tähän tulokseen.</p>
       <button type="button" className="los-outline-button" onClick={()=>move(null,"midterm")}>Avaa välikokeen palaute <ArrowRight size={16}/></button>
     </div>}
+    {data.finalExam&&<div className="los-progress-midterm"><h2>Loppukoe EX-FINAL</h2><p>Automaattisesti tarkistetut tehtävät: <strong>{data.finalExam.correct}/{data.finalExam.total}</strong> oikein. Oma viesti ja puhetallenne arvioidaan erikseen.</p><button type="button" className="los-outline-button" onClick={()=>move(null,"final")}>Avaa loppukokeen palaute <ArrowRight size={16}/></button></div>}
     <h2>Kappaleittain</h2>
     <div className="los-progress-chapters">
       {data.chapters.map(ch=><article key={ch.id} className="los-progress-chapter">
@@ -59,11 +60,11 @@ export function LosStudyProgress({book,move}:{book:LosBookDefinition;move:LosNav
         </div>
       </article>)}
     </div>
-    <div className="los-progress-pending">
+    {data.unfinished.length>0?<div className="los-progress-pending">
       <h2>Vielä toteuttamatta opetukseen</h2>
       <p>Seuraavat {data.unfinished.length} suunniteltua tuntia ovat vielä toimituksellisia sisältömerkintöjä. Niiden avaaminen ei merkitse niitä suoritetuiksi, ja C08:n sekä C10:n lähdetekstien kieli-, media- ja laitetestaus pysyvät erillisinä julkaisuportteina.</p>
       <ul>{data.unfinished.map(item=><li key={item.id}><strong>{item.id}</strong> · {item.title}</li>)}</ul>
-    </div>
+    </div>:<div className="los-progress-pending"><h2>Kaikki 60 oppituntia on toteutettu opetuspolkuun</h2><p>Tämä kertoo oppituntien toiminnallisesta saatavuudesta. Kunkin oppitunnin suoritus, tekstien kielentarkistus, äänitteiden käyttöoikeudet ja mobiili-/desktop-julkaisulaatutestit arvioidaan edelleen erikseen.</p></div>}
     <p className="los-progress-foot">Tiedot perustuvat tämän laitteen LOS!-luonnoksiin ja mahdollisesti erikseen tuotuihin tai synkronoituihin kappaletietoihin. Jos et ole siirtänyt aiempia tietoja tähän selaimeen, se ei voi näyttää niitä automaattisesti.</p>
   </section>;
 }

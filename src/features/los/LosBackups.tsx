@@ -55,7 +55,7 @@ export function LosBackups({bookId}:{bookId:number}){
     {preview && plan && <div className="los-backup-preview">
       <h3><FileJson2 size={18}/> Tarkistettu varmuuskopio</h3>
       <p>Varmuuskopiossa on {plan.incoming.length} tallennuskohdetta. Tällä laitteella {plan.conflicts.length} tallennuskohteessa on jo omia tallennuksia.</p>
-      {plan.incoming.length>0&&<p>Tallennuskohteet: {plan.incoming.map(x=>x==="91"?"Kertaus I / EX-MID":x==="92"?"Kertaus II":"Kappale "+Number(x)).join(", ")}.</p>}
+      {plan.incoming.length>0&&<p>Tallennuskohteet: {plan.incoming.map(x=>x==="91"?"Kertaus I / EX-MID":x==="92"?"Kertaus II":x==="93"?"EX-FINAL + yhteenveto":"Kappale "+Number(x)).join(", ")}.</p>}
       <div className="los-backup-choices">
         <button type="button" onClick={()=>apply("missing-only")} disabled={plan.newChapters.length===0}>Tuo vain puuttuvat ({plan.newChapters.length})</button>
         {plan.conflicts.length>0&&<>

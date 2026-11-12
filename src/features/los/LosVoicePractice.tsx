@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { Download, Mic, MicOff, PlayCircle, ShieldCheck } from "lucide-react";
 
-type PracticeChapter = "07" | "08" | "10";
+type PracticeChapter = "07" | "08" | "10" | "93";
 const instruction:Record<PracticeChapter,string>={
   "07":"Tavaa kahdeksan kuvitteellista nimeä ääneen ja pyydä tarvittaessa toistamaan. Tarkista kirjoitetut kirjaimet erikseen.",
   "08":"Lausu kolme selviytymisfraasia ja harjoittele niiden käyttämistä kuvitellulle opettajalle.",
   "10":"Esitä ensin tuttavallinen ja sen jälkeen kohtelias keskustelu. Voit tarvittaessa lukea toisen henkilön repliikit itse.",
+  "93":"Äänitä loppukoetta varten 6–8 puheenvuoron kuvitteellinen keskustelu. Lataa tallenne omalle laitteelle ja säilytä se itse; ääni ei siirry JSON-varmuuskopioon.",
 };
 
 /**
@@ -13,7 +14,7 @@ const instruction:Record<PracticeChapter,string>={
  * and no misleading automated pronunciation score.
  * Audio survives only in this mounted component until deliberately downloaded.
  */
-export function LosVoicePractice({chapterId}:{chapterId:PracticeChapter}){
+export function LosVoicePractice({chapterId,onDownloaded}:{chapterId:PracticeChapter;onDownloaded?:()=>void}){
   const recorderRef=useRef<MediaRecorder|null>(null);
   const streamRef=useRef<MediaStream|null>(null);
   const chunksRef=useRef<BlobPart[]>([]);
@@ -109,6 +110,7 @@ export function LosVoicePractice({chapterId}:{chapterId:PracticeChapter}){
     document.body.appendChild(link);
     link.click();
     link.remove();
+    onDownloaded?.(); // Records user-initiated download, NOT guaranteed audio quality or successful file save.
     window.setTimeout(()=>URL.revokeObjectURL(url),30_000);
   }
   return <aside className="los-voice-practice" aria-label="Oma puheharjoitus">

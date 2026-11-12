@@ -17,13 +17,13 @@ const draft=():LosChapterDraft=>({
   selfAssessment:"",updatedAt:now
 });
 
-test("empty student view distinguishes 58 executable from 60 planned without fake skill scores",()=>{
+test("empty student view distinguishes 60 executable from 60 planned without fake skill scores",()=>{
   const data=getLosStudyProgressSnapshot(book,{},now);
-  assert.equal(LOS1_EXECUTABLE_LESSONS.length,58);
-  assert.equal(data.available,58);
+  assert.equal(LOS1_EXECUTABLE_LESSONS.length,60);
+  assert.equal(data.available,60);
   assert.equal(data.planned,60);
   assert.equal(data.completed,0);
-  assert.equal(data.unfinished.length,2);
+  assert.equal(data.unfinished.length,0);
   assert.equal(data.chapters.length,10);
   assert.equal(data.scoredChapters,0);
   assert.equal(data.correct,0);
@@ -32,9 +32,7 @@ test("empty student view distinguishes 58 executable from 60 planned without fak
   assert.equal(data.delayedSelfRemembered,0);
   assert.equal(data.pendingScheduled,0,"Unseen words should not be overdue debt");
   assert.ok(data.newCards>0);
-  assert.ok(data.unfinished.some(l=>l.id==="L059"));
-  assert.ok(data.unfinished.some(l=>l.id==="L060"));
-  assert.ok(data.unfinished.some(l=>l.id==="L060"));
+  assert.deepEqual(data.unfinished,[]);
   assert.equal(data.chapters.find(x=>x.id==="08")?.sourceReady,false);
   assert.equal(data.chapters.find(x=>x.id==="10")?.sourceReady,false);
 });

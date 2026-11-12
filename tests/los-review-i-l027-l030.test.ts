@@ -14,10 +14,10 @@ const draft=()=>({
   testAnswers:{} as Record<string,string>,testSubmittedAt:null as string|null,
   selfAssessment:"",updatedAt:now,
 });
-test("review I maps exactly to L027-L030 and 58 executable lessons",()=>{
+test("review I maps exactly to L027-L030 and 60 executable lessons",()=>{
   assert.equal(LOS_1_LESSONS.length,60);
   assert.equal(LOS1_REVIEW_I_LESSONS.length,4);
-  assert.equal(LOS1_EXECUTABLE_LESSONS.length,58);
+  assert.equal(LOS1_EXECUTABLE_LESSONS.length,60);
   for(const [i,lesson] of LOS1_REVIEW_I_LESSONS.entries()){
     const id="L"+String(i+27).padStart(3,"0");
     assert.equal(lesson.id,id);
@@ -31,7 +31,7 @@ test("review I maps exactly to L027-L030 and 58 executable lessons",()=>{
   }
   assert.equal(isLos1ExecutableLesson("L041"),true);
   assert.equal(isLos1ExecutableLesson("L051"),true);
-  assert.equal(isLos1ExecutableLesson("L059"),false);
+  assert.equal(isLos1ExecutableLesson("L059"),true);
 });
 test("three review sets have 5 original questions and separate ungraded reflection IDs",()=>{
   assert.deepEqual(validateLosReviewIQuestions(),[]);

@@ -3,14 +3,14 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { LOS1_EXECUTABLE_LESSONS, los1LessonDraftChapter, isLos1ExecutableLesson } from "../src/features/los/guidedLessons.ts";
 
-test("58 real lessons form twelve stable chapter groups without publishing gaps",()=>{
-  assert.equal(LOS1_EXECUTABLE_LESSONS.length,58);
+test("60 real lessons form thirteen stable lesson groups with assessment slots",()=>{
+  assert.equal(LOS1_EXECUTABLE_LESSONS.length,60);
   const groups = Array.from(new Set(LOS1_EXECUTABLE_LESSONS.map(lesson=>los1LessonDraftChapter(lesson.id))));
-  assert.deepEqual(groups,["01","02","03","04","05","91","06","07","08","09","10","92"]);
+  assert.deepEqual(groups,["01","02","03","04","05","91","06","07","08","09","10","92","93"]);
   const counts=groups.map(code=>LOS1_EXECUTABLE_LESSONS.filter(lesson=>los1LessonDraftChapter(lesson.id)===code).length);
-  assert.deepEqual(counts,[6,5,5,5,5,4,5,5,5,5,5,3]);
+  assert.deepEqual(counts,[6,5,5,5,5,4,5,5,5,5,5,3,2]);
   for(const id of ["L059","L060"]){
-    assert.equal(isLos1ExecutableLesson(id),false);
+    assert.equal(isLos1ExecutableLesson(id),true);
   }
 });
 test("lesson runner shows only active chapter's lessons and cannot mark progress by changing chapter",()=>{

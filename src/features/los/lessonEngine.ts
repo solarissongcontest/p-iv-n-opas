@@ -8,7 +8,7 @@ import type { LosChapterDraft } from "./studyState";
 
 export type LosLessonSection =
   "overview" | "contents" | "text" | "understand" | "vocabulary" | "review" | "review-ii" | "midterm" |
-  "grammar" | "text-b" | "practice" | "apply" | "culture" | "test";
+  "grammar" | "text-b" | "practice" | "apply" | "culture" | "test" | "final" | "summary";
 export type LosLessonStep = {
   id: string;
   label: string;
