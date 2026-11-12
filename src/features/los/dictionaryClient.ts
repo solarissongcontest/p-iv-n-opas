@@ -46,7 +46,7 @@ export async function searchLosDictionary(
   try {
     response=await fetch("/api/los-dictionary?"+params,{
       method:"GET",headers:{"Authorization":"Bearer "+token},
-      cache:"no-store",signal,
+      cache:"no-store", ...(signal ? { signal } : {}),
     });
   }catch(error) {
     if(signal?.aborted)throw error;
