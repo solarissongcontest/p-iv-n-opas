@@ -9,10 +9,13 @@ import {
 } from "./lessonEngine";
 import { LOS1_C02_LESSON_BLUEPRINTS } from "./lessonEngineC02";
 import { LOS1_C03_LESSON_BLUEPRINTS } from "./lessonEngineC03";
+import { LOS1_C04_C05_LESSONS } from "./lessonEngineC04C05";
 import "./los-lessons.css";
 
-const ALL_LESSONS = [...LOS1_C01_LESSON_BLUEPRINTS, ...LOS1_C02_LESSON_BLUEPRINTS, ...LOS1_C03_LESSON_BLUEPRINTS];
-const lessonChapter = (id: string): "01" | "02" | "03" =>
+const ALL_LESSONS = [...LOS1_C01_LESSON_BLUEPRINTS, ...LOS1_C02_LESSON_BLUEPRINTS, ...LOS1_C03_LESSON_BLUEPRINTS, ...LOS1_C04_C05_LESSONS];
+const lessonChapter = (id: string): "01" | "02" | "03" | "04" | "05" =>
+  LOS1_C04_C05_LESSONS.some(lesson => lesson.id === id) ?
+    (Number(id.slice(1)) >= 22 ? "05" : "04") :
   LOS1_C03_LESSON_BLUEPRINTS.some(lesson => lesson.id === id) ? "03" :
   LOS1_C02_LESSON_BLUEPRINTS.some(lesson => lesson.id === id) ? "02" : "01";
 
@@ -31,7 +34,13 @@ export function LosFirstLessons({ selectedId, onSelect, move }: {
   const c01 = useLosChapterDraft(1, "01");
   const c02 = useLosChapterDraft(1, "02");
   const c03 = useLosChapterDraft(1, "03");
-  const chapterDraft = (id: string) => lessonChapter(id) === "03" ? c03 : lessonChapter(id) === "02" ? c02 : c01;
+  const c04 = useLosChapterDraft(1, "04");
+  const c05 = useLosChapterDraft(1, "05");
+  const chapterDraft = (id: string) => {
+    const chapter = lessonChapter(id);
+    return chapter === "05" ? c05 : chapter === "04" ? c04 :
+      chapter === "03" ? c03 : chapter === "02" ? c02 : c01;
+  };
   const lesson = ALL_LESSONS.find(item => item.id === selectedId) ?? ALL_LESSONS[0]!;
   const chapterId = lessonChapter(lesson.id);
   const { draft, update, saved } = chapterDraft(lesson.id);
@@ -55,11 +64,11 @@ export function LosFirstLessons({ selectedId, onSelect, move }: {
   const nextIndex = ALL_LESSONS.findIndex(item => item.id === lesson.id) + 1;
   const next = ALL_LESSONS[nextIndex];
   const isComplete = Boolean(progress.completedAt);
-  return <section className="los-lesson-program" id="los-lesson-runner" aria-label="Toteutetut oppitunnit L001–L016">
+  return <section className="los-lesson-program" id="los-lesson-runner" aria-label="Toteutetut oppitunnit L001–L026">
     <div className="los-lesson-program-head">
-      <p className="los-overline">OHJATTU OPETUS · L001–L016</p>
+      <p className="los-overline">OHJATTU OPETUS · L001–L026</p>
       <h2>Opiskele vaihe vaiheelta</h2>
-      <p>Ensimmäiset kuusitoista oppituntia voi suorittaa. Niissä käytetään kirjan oikeita sivuja ja samoja tallennettuja vastauksia. Oppitunnin suoritus kertoo työvaiheiden tekemisestä, ei vielä todennetusta kielitaidosta.</p>
+      <p>Ensimmäiset 26 oppituntia voi suorittaa. Niissä käytetään kirjan oikeita sivuja ja samoja tallennettuja vastauksia. Oppitunnin suoritus kertoo työvaiheiden tekemisestä, ei vielä todennetusta kielitaidosta.</p>
       <p className="los-lesson-save" role="status">{saved ? `Oppituntitiedot tallennetaan paikalliseen LOS!-varmuuskopioon. Valinnainen pilvisynkronointi tehdään kappaleen ${Number(chapterId)} muistiinpanojen kautta.` : "Tallennus epäonnistui. Älä sulje sivua ennen varmuuskopion tekemistä."}</p>
       <div className="los-lesson-progress" aria-label="Yhdentoista oppitunnin edistyminen">
         <strong>{completeCount}/{ALL_LESSONS.length} suoritettu</strong>
