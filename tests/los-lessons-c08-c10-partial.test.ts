@@ -36,7 +36,7 @@ test("C08 and C10 are still NOT source-publishable and no invented authentic dia
   assert.match(src,/ei ole vielä luettavissa/);
   assert.match(src,/ei ole vielä tarkistettu/);
   assert.match(src,/ei kutsuta uudeksi C10:n Text A:ksi/);
-  assert.match(src,/ei korvaa puuttuvaa C10-haastattelua/);
+  assert.match(src,/eivät korvaa puuttuvaa C10-haastattelua/);
 });
 test("all four guided lessons refer to real practice IDs with chapter-local submission",()=>{
   const exercise8=new Set(losExercisesFor("08").map(x=>x.id));
