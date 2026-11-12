@@ -30,7 +30,7 @@ test("No LOS! 1 whole-book edition is falsely published",()=>{
 function makeApprovedFixture(){
   const data=new Uint8Array(1400).fill(24);
   const pages:Los1ReleasedPage[]=[{
-    pageId:"los1-cover",pdfPageIndex:0,printedPageLabel:null,
+    pageId:"los1-cover",title:"Etukansi",pdfPageIndex:0,printedPageLabel:null,
     kind:"front-cover",physicalSide:"single",spreadId:null,
     chapterId:null,sectionId:null,contentBlockIds:["cover"],
     exerciseIds:[],imageIds:[],mediaIds:[],
@@ -39,7 +39,7 @@ function makeApprovedFixture(){
     const chapterId=String(i).padStart(2,"0");
     for(const side of ["left","right"] as const){
       const index=pages.length;
-      pages.push({pageId:"c"+chapterId+"-"+side,pdfPageIndex:index,
+      pages.push({pageId:"c"+chapterId+"-"+side,title:"Kappale "+chapterId,pdfPageIndex:index,
         printedPageLabel:String(index),kind:"content",
         physicalSide:side,spreadId:"spread-"+chapterId,
         chapterId,sectionId:side==="left"?"text":"practice",
