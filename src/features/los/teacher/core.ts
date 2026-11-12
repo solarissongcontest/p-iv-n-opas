@@ -17,13 +17,13 @@ const validIds=(x:unknown,max:number)=>Array.isArray(x)&&x.length<=max&&
   new Set(x).size===x.length&&x.every(validId);
 const validIso=(x:unknown)=>typeof x==="string"&&x.length<=40&&/^\d{4}-\d{2}-\d{2}T/.test(x)&&Number.isFinite(Date.parse(x));
 export function validTeacherProgress(x:unknown):x is TeacherProgress{
- if(!isObj(x)||x.version!==TEACHER_VERSION||!validId(x.scene)||
-    !validIds(x.visited,25)||!validIds(x.hints,25)||typeof x.paused!=="boolean"||
-    !isObj(x.answers)||Object.keys(x.answers).length>20)return false;
- return Object.entries(x.answers).every(([id,a])=>validId(id)&&isObj(a)&&
-    typeof a.answer==="string"&&a.answer.length<=40&&Number.isInteger(a.count)&&
-    Number(a.count)>=0&&Number(a.count)<=10&&typeof a.correct==="boolean"&&
-    typeof a.independent==="boolean"&&typeof a.revealed==="boolean"&&validIso(a.at));
+ if(!isObj(x)||x['version']!==TEACHER_VERSION||!validId(x['scene'])||
+    !validIds(x['visited'],25)||!validIds(x['hints'],25)||typeof x['paused']!=="boolean"||
+    !isObj(x['answers'])||Object.keys(x['answers']).length>20)return false;
+ return Object.entries(x['answers']).every(([id,a])=>validId(id)&&isObj(a)&&
+    typeof a['answer']==="string"&&a['answer'].length<=40&&Number.isInteger(a['count'])&&
+    Number(a['count'])>=0&&Number(a['count'])<=10&&typeof a['correct']==="boolean"&&
+    typeof a['independent']==="boolean"&&typeof a['revealed']==="boolean"&&validIso(a['at']));
 }
 export function validTeacherLesson(lesson:TeacherLesson):string[]{
  const errors:string[]=[];
