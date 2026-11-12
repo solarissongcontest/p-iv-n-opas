@@ -1,0 +1,83 @@
+{
+  "schemaVersion": "LOS-PRONUNCIATION-MANIFEST/0.1",
+  "reviewedAt": "2026-11-12",
+  "stage": "source-verified-not-published",
+  "locale": "de-DE",
+  "counts": {
+    "entryRecords": 8,
+    "qualifiedLinguistReviewed": 0,
+    "acceptedPerWordAudioRecordings": 0,
+    "verifiedTTSDevices": 0,
+    "fullyReadyActiveChapters": 0
+  },
+  "sourcePolicy": "Wiktionary source reference is not qualified human language review; a browser voice existing is not device-tested audio. Pronunciation assets are empty.",
+  "sources": [
+    {
+      "sourceId": "de.wiktionary:hallo",
+      "word": "hallo",
+      "ipa": "ˈhalo",
+      "alternatives": [
+        "haˈloː"
+      ],
+      "sourceUrl": "https://de.wiktionary.org/wiki/hallo",
+      "languageReviewStatus": "pending",
+      "audioReviewStatus": "not-available"
+    },
+    {
+      "sourceId": "de.wiktionary:tschüss",
+      "word": "tschüss",
+      "ipa": "t͡ʃʏs",
+      "sourceUrl": "https://de.wiktionary.org/wiki/tsch%C3%BCss",
+      "languageReviewStatus": "pending",
+      "audioReviewStatus": "not-available"
+    },
+    {
+      "sourceId": "de.wiktionary:danke",
+      "word": "danke",
+      "ipa": "ˈdaŋkə",
+      "sourceUrl": "https://de.wiktionary.org/wiki/danke",
+      "languageReviewStatus": "pending",
+      "audioReviewStatus": "not-available"
+    },
+    {
+      "sourceId": "de.wiktionary:ja",
+      "word": "ja",
+      "ipa": "jaː",
+      "sourceUrl": "https://de.wiktionary.org/wiki/ja",
+      "languageReviewStatus": "pending",
+      "audioReviewStatus": "not-available"
+    },
+    {
+      "sourceId": "de.wiktionary:nein",
+      "word": "nein",
+      "ipa": "naɪ̯n",
+      "sourceUrl": "https://de.wiktionary.org/wiki/nein",
+      "languageReviewStatus": "pending",
+      "audioReviewStatus": "not-available"
+    },
+    {
+      "sourceId": "de.wiktionary:ich",
+      "word": "ich",
+      "ipa": "ɪç",
+      "sourceUrl": "https://de.wiktionary.org/wiki/ich",
+      "languageReviewStatus": "pending",
+      "audioReviewStatus": "not-available"
+    },
+    {
+      "sourceId": "de.wiktionary:du",
+      "word": "du",
+      "ipa": "duː",
+      "sourceUrl": "https://de.wiktionary.org/wiki/du",
+      "languageReviewStatus": "pending",
+      "audioReviewStatus": "not-available"
+    },
+    {
+      "sourceId": "de.wiktionary:wie",
+      "word": "wie",
+      "ipa": "viː",
+      "sourceUrl": "https://de.wiktionary.org/wiki/wie",
+      "languageReviewStatus": "pending",
+      "audioReviewStatus": "not-available"
+    }
+  ]
+}
