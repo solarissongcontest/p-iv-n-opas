@@ -14,6 +14,7 @@ import { getLosOpenDialogue } from "./content/los1OpenDialogues";
 import { LosNotebook, LosWorkbook } from "./LosWorkbook";
 import { LosBackups } from "./LosBackups";
 import { LosMidtermExam } from "./LosMidtermExam";
+import { LosRecallCards } from "./LosRecallCards";
 import { LosReviewI } from "./LosReviewI";
 import { LosApplication, LosCulture, LosTextB, LosUnderstanding } from "./LosSupplementalSections";
 import "./los-book.css";
@@ -30,6 +31,7 @@ const sections: { id: LosSection; label: string }[] = [
   { id:"text", label:"Text A" },
   { id:"understand", label:"Ymmärrä" },
   { id:"vocabulary", label:"Sanasto" },
+  { id:"cards", label:"Kertauskortit" },
   { id:"grammar", label:"Kielioppi" },
   { id:"text-b", label:"Text B" },
   { id:"practice", label:"Harjoittele" },
@@ -49,7 +51,7 @@ function readLocation(): LosLocation {
   const book = Number.isInteger(parsedBook) && parsedBook >= 1 && parsedBook <= 8 ? parsedBook : null;
   const chapter = book === 1 && /^\d{2}$/.test(parts[1] ?? "") ? (parts[1] ?? null) : null;
   const token = parts[chapter ? 2 : 1];
-  const section = (["overview", "contents", "chapter", "text", "vocabulary", "grammar", "practice", "appendix", "dictionary", "path", "search", "midterm", "review", "understand", "text-b", "apply", "culture", "test"].includes(token ?? "") ? token : chapter ? "chapter" : "overview") as LosSection;
+  const section = (["overview", "contents", "chapter", "text", "vocabulary", "grammar", "practice", "appendix", "dictionary", "path", "search", "midterm", "review", "cards", "understand", "text-b", "apply", "culture", "test"].includes(token ?? "") ? token : chapter ? "chapter" : "overview") as LosSection;
   return { book, chapter, section };
 }
 function linkTo(book?: number, chapter?: string, section: LosSection = "overview") {
@@ -352,6 +354,7 @@ function LosBookWorkspace({ book, location, move, goLibrary, openBook }: { book:
               section === "text" ? <TextPage chapter={chapter} /> :
               section === "understand" ? (chapter.id==="02" ? <LosC02Understanding goToText={() => move(chapter.id,"text")}/> : chapter.id==="06" ? <LosC06AgeUnderstanding goToText={() => move(chapter.id,"text")}/> : getLosOpenDialogue(chapter.id) ? <LosOpenTextUnderstanding chapterId={chapter.id} goToText={() => move(chapter.id,"text")}/> : <LosUnderstanding chapter={chapter} goToText={() => move(chapter.id, "text")} />) :
               section === "vocabulary" ? <Vocabulary key={chapter.id} chapter={chapter} /> :
+              section === "cards" ? <LosRecallCards key={chapter.id} chapter={chapter} /> :
               section === "grammar" ? <Grammar chapter={chapter} /> :
               section === "text-b" ? <LosTextB chapter={chapter} /> :
               section === "practice" ? <LosWorkbook key={`practice-${chapter.id}`} chapter={chapter} mode="practice" /> :
