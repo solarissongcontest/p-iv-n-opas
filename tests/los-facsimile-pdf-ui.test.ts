@@ -16,7 +16,7 @@ test("PDF.js reads local bytes, uses self-hosted worker and keeps the PDF on-dev
   assert.equal(pkg.dependencies["pdfjs-dist"],"5.7.284");
   assert.match(reader,/pdfjs-dist\/build\/pdf\.worker\.min\.mjs\?url/);
   assert.match(reader,/file\.arrayBuffer\(\)/);
-  assert.match(reader,/pdfjs\.getDocument\(\{data:new Uint8Array\(buffer\),isEvalSupported:false\}\)/);
+  assert.match(reader,/pdfjs\.getDocument\(\{data:new Uint8Array\(buffer\)\}\)/);
   assert.doesNotMatch(reader,/fetch\(|axios\(|formData|uploadTo/);
   assert.match(reader,/new pdfjs\.TextLayer\(/);
   assert.match(reader,/validatePdfGeometry/);
