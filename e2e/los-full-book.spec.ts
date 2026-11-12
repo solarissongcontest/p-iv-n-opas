@@ -246,3 +246,26 @@ test("U1/U3: chapter tree links to persisted exercise and shared IPA word card o
  await expect(token).toBeFocused();
  await expectNoHorizontalOverflow(page);
 });
+
+test("U3 Book + exercises reuses saved C01 answer and remains usable on both layouts",async({page,isMobile})=>{
+ await enterLocalBook(page);
+ await page.goto("/los#/1/01/text",{waitUntil:"domcontentloaded"});
+ const open=page.getByRole("button",{name:"Kirja + tehtävät"});
+ await expect(open).toBeVisible();
+ await open.click();
+ const panel=page.locator("#los-split-workbook");
+ await expect(panel).toBeVisible();
+ await expect(panel.getByRole("heading",{name:"Harjoittele"})).toBeVisible();
+ if(isMobile)await expect(panel).toHaveAttribute("role","dialog");
+ const answer=panel.locator("#C01-EX-01 input[type='radio'][value='Guten Morgen!']");
+ await answer.check();
+ await expect(answer).toBeChecked();
+ await panel.getByRole("button",{name:"Sulje",exact:true}).click();
+ await expect(panel).toHaveCount(0);
+ await expect(open).toBeFocused();
+ await page.goto("/los#/1/01/practice",{waitUntil:"domcontentloaded"});
+ await expect(page.locator("#C01-EX-01 input[type='radio'][value='Guten Morgen!']")).toBeChecked();
+ await page.reload({waitUntil:"domcontentloaded"});
+ await expect(page.locator("#C01-EX-01 input[type='radio'][value='Guten Morgen!']")).toBeChecked();
+ await expectNoHorizontalOverflow(page);
+});
