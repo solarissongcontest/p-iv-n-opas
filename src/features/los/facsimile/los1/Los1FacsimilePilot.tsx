@@ -251,7 +251,7 @@ function FacsimileLeaf({page,zoom=100}:{page:LosFacsimilePage;zoom?:number}){
   </article>;
 }
 
-export function Los1FacsimilePilot({onOpenDigital}:{onOpenDigital:(section:LosFacsimileSection)=>void}){
+export function Los1FacsimilePilot({onOpenDigital,onOpenPdf}:{onOpenDigital:(section:LosFacsimileSection)=>void;onOpenPdf:()=>void}){
   const [state,setState]=useState<ReaderState>({pageId:"cover",mode:"auto",zoom:100});
   const [wide,setWide]=useState(false);
   const stageRef=useRef<HTMLDivElement|null>(null);
@@ -461,6 +461,7 @@ export function Los1FacsimilePilot({onOpenDigital}:{onOpenDigital:(section:LosFa
         disabled={actualMode==="continuous"||index===pages.length-1}>Seuraava <ChevronRight size={18}/></button>
     </div>
     <div className="los-facs-return">
+      <button type="button" onClick={onOpenPdf}><FileText size={17}/> Avaa PDF.js-lukija (paikallinen PDF)</button>
       <button type="button" onClick={()=>onOpenDigital(pages[index]?.section??"chapter")}>
         <ArrowLeft size={17}/> Avaa sama osio digikirjassa
       </button>
