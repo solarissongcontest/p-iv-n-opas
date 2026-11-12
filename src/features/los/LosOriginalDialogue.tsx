@@ -20,6 +20,7 @@ export type LosOriginalDialogueProps = {
   lines: readonly LosOriginalLine[];
   glossary: Readonly<Record<string,string>>;
   heading: string;
+  usageLabel?: string;
   guidance: string;
   author: string;
   sourceTitle: string;
@@ -100,7 +101,7 @@ export function LosOriginalDialogue(props: LosOriginalDialogueProps) {
 
   return <div className="los-c01-reader" aria-label={props.heading}>
     <div className="los-c01-reader-intro">
-      <p className="los-overline">ORIGINALTEXT · TEXT A · {sourceId}</p>
+      <p className="los-overline">{props.usageLabel ?? "ORIGINALTEXT · TEXT A"} · {sourceId}</p>
       <h2>{props.heading}</h2>
       <p>{props.guidance}</p>
       <p className="los-c01-reader-warning"><Info size={17}/> Kokonainen lähdeteksti on tuotu käyttöoikeuksien perusteella. Lopullinen kielellinen tarkistus ja laitetestaus ovat kesken.</p>
