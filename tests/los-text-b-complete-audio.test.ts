@@ -7,9 +7,9 @@ import {LOS1_M_COM_02_LINES} from "../src/features/los/content/los1MCom02.ts";
 import {findLosSource,validateLosSourceRegistry} from "../src/features/los/content/sourceRegistry.ts";
 import {validateLosCloudDraft} from "../src/features/los/cloudContract.ts";
 
-test("five added Text B pages use actual full published German source artifacts and 4 unique tasks each",()=>{
+test("six added Text B pages use actual full published German source artifacts and 4 unique tasks each",()=>{
  assert.deepEqual(validateLosTextB(),[]);
- assert.deepEqual(Object.keys(LOS1_TEXT_B_SOURCES).sort(),["04","06","07","09","10"]);
+ assert.deepEqual(Object.keys(LOS1_TEXT_B_SOURCES).sort(),["04","05","06","07","09","10"]);
  assert.equal(isLosTextBChapter("04"),true);
  assert.equal(isLosTextBChapter("07"),true);
  assert.equal(isLosTextBChapter("09"),true);
@@ -30,6 +30,8 @@ test("five added Text B pages use actual full published German source artifacts 
   "Bis dann!","Bis bald!","Bis gleich!","Gute Nacht!",
  ]);
  assert.deepEqual(LOS1_TEXT_B_SOURCES["06"].lines,LOS1_C01_LINES);
+ assert.equal(LOS1_TEXT_B_SOURCES["05"].lines.length,6);
+ assert.equal(LOS1_TEXT_B_SOURCES["05"].attribution.license,"Public domain");
  assert.deepEqual(LOS1_TEXT_B_SOURCES["10"].lines,LOS1_M_COM_02_LINES);
  assert.equal(LOS1_TEXT_B_SOURCES["07"].transcriptIsExact,false,
   "The alphabet aid must not be mislabeled as the recorder's transcript");
@@ -38,7 +40,7 @@ test("five added Text B pages use actual full published German source artifacts 
  assert.equal(LOS1_TEXT_B_SOURCES["09"].lines[0]?.text,"Tage: Montag, Dienstag, Mittwoch, Donnerstag, Freitag, Samstag, Sonntag.");
 });
 test("all audio resources have checked rights but retain unverified hardware and language gates",()=>{
- for(const chapter of ["04","06","07","09","10"] as const){
+ for(const chapter of ["04","05","06","07","09","10"] as const){
   const packet=LOS1_TEXT_B_SOURCES[chapter];
   const source=findLosSource(packet.sourceId);
   assert.ok(source);
@@ -58,7 +60,7 @@ test("secondary pages render full text, actual audio player, four answer checks 
  const ui=readFileSync("src/features/los/LosAdditionalTextB.tsx","utf8");
  const nav=readFileSync("src/features/los/LosSupplementalSections.tsx","utf8");
  const audio=readFileSync("src/features/los/LosReferenceTools.tsx","utf8");
- assert.match(nav,/\["04","06","07","09","10"\]\.includes\(chapter.id\)/);
+ assert.match(nav,/\["04","05","06","07","09","10"\]\.includes\(chapter.id\)/);
  assert.match(ui,/LosOriginalDialogue/);
  assert.match(ui,/usageLabel="ORIGINALTEXT · TEXT B"/);
  assert.match(ui,/LosAuthenticAudio chapterId=\{chapterId\} source="B"/);
@@ -70,6 +72,8 @@ test("secondary pages render full text, actual audio player, four answer checks 
  assert.match(audio,/chapterId==="04"/);
  assert.match(audio,/chapterId==="10"/);
  assert.match(audio,/chapterId==="09"/);
+ assert.match(audio,/id:"M-COM-08"/);
+ assert.equal(findLosSource("M-COM-08")?.licenseCode,"public-domain");
  const draft={version:1,bookmarked:false,note:"",applicationDraft:"",selfAssessment:"",
   practiceAnswers:{"C07-TEXTB-Q01":"b"},practiceChecked:["C07-TEXTB-Q01"],
   testAnswers:{},testSubmittedAt:null,updatedAt:"2026-11-12T10:00:00.000Z"};
