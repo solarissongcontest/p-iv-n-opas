@@ -43,3 +43,28 @@
 .los-section-pager button strong {color:var(--los-book-accent);font-size:14px}
 .los-section-pager button:focus-visible {outline:3px solid #397ace;outline-offset:2px}
 @media(max-width:760px){.los-section-pager{padding:0 12px;gap:8px}.los-section-pager > button{padding:8px;min-height:56px}.los-section-pager button strong{font-size:13px}}
+
+/* The mobile drawer is itself scrollable; cap expanded task groups as a second
+   keyboard/touch scroll region so a long chapter cannot move the first task
+   beyond the visible WebKit viewport. */
+@media (max-width:760px) {
+  .los-book-sidebar.is-open {
+    height:calc(100dvh - 56px);
+    max-height:calc(100dvh - 56px);
+    overflow-y:auto;
+    overscroll-behavior:contain;
+    -webkit-overflow-scrolling:touch;
+  }
+  .los-book-sidebar.is-open .los-tree-tasks {
+    max-height:min(40dvh, 300px);
+    overflow-y:auto;
+    scrollbar-width:thin;
+    overscroll-behavior:contain;
+    -webkit-overflow-scrolling:touch;
+    scroll-padding:8px;
+  }
+  .los-book-sidebar.is-open .los-tree-tasks button {
+    width:100%;
+    min-width:0;
+  }
+}
