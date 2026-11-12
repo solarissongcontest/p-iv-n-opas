@@ -65,7 +65,7 @@ BEGIN
 END $$;
 
 -- A staged source must not become searchable without explicit legal review.
-DO $
+DO $$
 BEGIN
  BEGIN
   UPDATE public.los_dictionary_sources
@@ -75,7 +75,7 @@ BEGIN
  EXCEPTION WHEN check_violation THEN
   NULL; -- expected database-level publication safety gate
  END;
-END $;
+END $$;
 
 UPDATE public.los_dictionary_sources
 SET legal_review_approved=true,legal_review_at=now(),
