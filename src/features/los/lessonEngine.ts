@@ -5,6 +5,7 @@
  * Completion is not a claim of mastery, and opening a link is not completion.
  */
 import type { LosChapterDraft } from "./studyState";
+import { validTeacherProgress, type TeacherProgress } from "./teacher/core.ts";
 
 export type LosLessonSection =
   "overview" | "contents" | "text" | "understand" | "vocabulary" | "review" | "review-ii" | "midterm" |
@@ -44,6 +45,8 @@ export type LosLessonProgress = {
   exitAnswer: string | null;
   exitCheckedAt: string | null;
   completedAt: string | null;
+  /** Optional Teacher Experience 2.0 scene progress; existing v1 data remains valid. */
+  teacher?: TeacherProgress;
 };
 
 export const LOS1_C01_LESSON_BLUEPRINTS: readonly LosLessonBlueprint[] = [
@@ -163,7 +166,8 @@ export function validateLosLessonProgressMap(value: unknown): value is Record<st
       p.completedStepIds.every(x => typeof x === "string" && x.length <= 60) &&
       (p.exitAnswer === null || (typeof p.exitAnswer === "string" && p.exitAnswer.length <= 20)) &&
       (p.exitCheckedAt === null || isIso(p.exitCheckedAt)) &&
-      (p.completedAt === null || isIso(p.completedAt));
+      (p.completedAt === null || isIso(p.completedAt)) &&
+      (p.teacher === undefined || validTeacherProgress(p.teacher));
   });
 }
 export function parseLosLessonProgressMap(value: unknown): Record<string, LosLessonProgress> {
