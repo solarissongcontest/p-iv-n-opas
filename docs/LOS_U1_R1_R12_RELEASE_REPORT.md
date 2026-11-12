@@ -8,7 +8,7 @@ Portti hyväksytään vasta oikealla testinäytöllä. Osittainen koodin olemass
 | R1 Sisältö | AUKI | C01–C10:ssa kokonaisia lähteistettyjä tekstiesikatseluja, mutta lähderekisterin julkaisuvaihe ja kaikkien tekstien lopullinen tarkastus avoin |
 | R2 Oikeudet | AUKI | C01 Commons -oikeustieto koodissa; FreeDictin, Wiktionaryn, kaikki.org:n, puheäänten ja muiden medioiden oikeuksia ei ole auditoitu kokonaisuutena |
 | R3 Kieli ja opetus | AUKI | C01:n nollatasokielioppia ja ääntämisopetusta laajennettu `LosC01GrammarGuide.tsx`-komponentilla; pätevän saksantarkastajan ja didaktisen tarkastajan hyväksyntä puuttuu |
-| R4 IPA | AUKI | 8 Wiktionary-lähteistettyä yksittäistä perusmuotoa, 0 asiantuntijavarmistettua täyttä C01-aktiivisanastoa |
+| R4 IPA | AUKI | 15 Wiktionary-lähteistettyä C01-aktiivisanaston sana-/kokofraasi-IPA-merkintää 16:sta; **Bis später!** vielä lähde-IPAta, 0/16 asiantuntijan hyväksymää IPAa ja 0/16 hyväksyttyä sanaäänitettä. Lähteistetty ≠ julkaistu |
 | R5 Ääni | AUKI | Commons-äänisoittimia on, saksankielisen TTS:n esikatselu lisätty; fyysisten laitteiden äänen laatu/toisto ei vielä tarkistettu |
 | R6 Sanakirja | AUKI | Erillisessä luonnos-PR:ssä #203 FreeDict de→fi / fi→de lähdetiedostot käsitelty CI:n tilapäisessä hakemistossa: 13 028 + 12 102 = 25 130 riviä, 33 670 käännösvastinetta. PostgreSQL:n testischema ja hakufunktio testattu. **Tuotannon julkaistuja sanakirjatietueita ei ole tuotu.** Kaikki.org ja audiot kesken |
 | R7 Käyttöliittymä | AUKI | U3 sisältöpuu, vanhojen syvälinkkien yhteensopivuus ja Kirja + tehtävät -tila toteutettu; sama `LosWorkbook` säilyttää tallennusavaimet. Uusimman muutoksen mobiili-/desktop-E2E ja saavutettavuustestit ovat vielä julkaisun ehtoja |
