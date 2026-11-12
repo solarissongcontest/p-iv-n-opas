@@ -390,6 +390,12 @@ test("U2 dictionary clearly separates remote published search from chapter vocab
    {timeout:10_000});
  await expect(page.getByRole("heading",{name:"Kappalesanasto"})).toBeVisible();
  await expect(page.locator(".los-index-entry").first()).toBeVisible();
+ const localWord=page.locator(".los-index-entry .los-index-word-card").first();
+ await localWord.click();
+ const localCard=page.getByRole("dialog",{name:/sanan .* selitys/i});
+ await expect(localCard).toContainText("Kappaleen kontekstimerkitys");
+ await localCard.getByRole("button",{name:"Sulje sanan selitys"}).click();
+ await expect(localWord).toBeFocused();
  await page.getByRole("button",{name:"Suomi → saksa"}).click();
  await expect(query).toHaveAttribute("placeholder","Esim. talo");
  await expectNoHorizontalOverflow(page);
@@ -429,6 +435,7 @@ test("U1/U2: a published-source result opens the shared word card without changi
  await expect(open).toBeVisible();
  await open.click();
  const card=page.getByRole("dialog",{name:"Sanan Haus selitys"});
+ await expect(card).toBeVisible();
  await expect(card).toContainText("Julkaistu lähdetietue");
  await expect(card).toContainText("talo");
  await expect(card).not.toContainText("Kappaleen kontekstimerkitys");

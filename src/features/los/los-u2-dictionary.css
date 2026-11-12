@@ -32,3 +32,15 @@
   border-radius:7px;padding:8px 11px;min-height:44px;cursor:pointer}
 .los-dict-open-card:focus-visible {outline:3px solid #397ace;outline-offset:2px}
 .los-dict-result-head .los-dict-open-card {margin-left:auto}
+
+/* Local chapter headwords open the same source-aware card as the full dictionary. */
+.los-index-word-card {display:inline-block;padding:6px 0;min-height:38px;border:0;background:transparent;
+  color:inherit;font:inherit;font-weight:inherit;text-align:left;text-decoration:underline;text-decoration-style:dotted;
+  text-decoration-color:var(--los-book-accent,#b7473c);text-underline-offset:4px;cursor:pointer}
+.los-index-word-card:focus-visible {outline:3px solid #397ace;outline-offset:2px}
+@media (min-width:701px) {
+  .los-dictionary-card-floating {position:fixed;z-index:90;right:max(20px,env(safe-area-inset-right));
+    top:max(70px,env(safe-area-inset-top));width:min(540px,calc(100vw - 40px));
+    max-height:calc(100dvh - 92px);overflow-y:auto;margin:0;
+    box-shadow:0 20px 55px rgb(20 28 35 / 22%)}
+}

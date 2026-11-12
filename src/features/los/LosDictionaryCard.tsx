@@ -18,11 +18,12 @@ type RemoteLookup =
  * Uses the existing chapter gloss rather than a duplicate storage model.
  */
 export function LosDictionaryCard({
-  word, contextMeaning, publishedEntry, onClose,
+  word, contextMeaning, publishedEntry, floating = false, onClose,
 }: {
   word: string;
   contextMeaning?: string;
   publishedEntry?: LosDictionaryResult;
+  floating?: boolean;
   onClose: () => void;
 }) {
   const closeButton = useRef<HTMLButtonElement>(null);
@@ -68,7 +69,7 @@ export function LosDictionaryCard({
     };
   }, [word]);
 
-  return <section className="los-c01-gloss los-dictionary-card"
+  return <section className={"los-c01-gloss los-dictionary-card"+(floating?" los-dictionary-card-floating":"")}
     role="dialog" aria-modal="false" aria-label={`Sanan ${word} selitys`} lang="fi">
     <div className="los-dictionary-card-heading">
       <strong lang={language}>{word}</strong>
