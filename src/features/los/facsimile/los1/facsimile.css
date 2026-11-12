@@ -1,0 +1,207 @@
+/* LOS! 1 facsimile layout preview only. Print PDF comes from a separate audited pipeline.
+   A fixed 440 × 625 composition is scaled uniformly to preserve B5 proportions (176 × 250 mm). */
+.los1-facsimile-reader {
+  --los1-facsimile-red: #b7473c;
+  --los1-facsimile-ink: #222b34;
+  height: 100dvh; min-height: 420px; display: flex; flex-direction: column;
+  overflow: hidden; background: #e7e5e1; color: #222b34;
+  font-family: Inter, "Segoe UI", sans-serif; font-size: 14px; line-height: 1.45;
+  isolation: isolate;
+}
+.los1-facsimile-reader * { box-sizing: border-box; }
+.los1-facsimile-reader button,.los1-facsimile-reader select,.los1-facsimile-reader input {
+  font: inherit;
+}
+.los1-facsimile-reader button { cursor: pointer; }
+.los1-facsimile-reader button:disabled { opacity: .35; cursor: not-allowed; }
+.los1-facsimile-reader button:focus-visible,.los1-facsimile-reader input:focus-visible,
+.los1-facsimile-reader select:focus-visible,.los1-facsimile-viewport:focus-visible {
+  outline: 3px solid #247cc4; outline-offset: 2px;
+}
+.los1-facsimile-toolbar {
+  height: 58px; flex: 0 0 58px; display: flex; align-items: center; gap: 13px;
+  padding: 0 18px; background: #fff; border-bottom: 1px solid #deddd9; position: relative; z-index: 11;
+}
+.los1-facsimile-identity { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.los1-facsimile-identity strong { font-size: 14px; line-height: 1.2; color: #222b34; }
+.los1-facsimile-identity span { font-size: 11px; color: #5e6972; }
+.los1-facsimile-draft-pill {
+  padding: 4px 9px; border-radius: 4px; background: #fce8e5; color: #96372f;
+  font-size: 10px; letter-spacing: .1em; font-weight: 800; white-space: nowrap;
+}
+.los1-facsimile-toolbar-actions { margin-left: auto; display: flex; align-items: center; gap: 2px; }
+.los1-facsimile-icon-button {
+  display: inline-flex; width: 44px; height: 44px; padding: 0; align-items: center;
+  justify-content: center; border-radius: 7px; border: 0; background: transparent;
+  color: #29343c;
+}
+.los1-facsimile-icon-button:hover:not(:disabled) { background: #f5f4f1; }
+.los1-facsimile-icon-button[aria-pressed="true"] { color: var(--los1-facsimile-red); background: #fce8e5; }
+.los1-facsimile-notice {
+  font-size: 12px; padding: 7px 18px; background: #fff7f0; color: #704d2a;
+  border-bottom: 1px solid #eaddcc; line-height: 1.4; flex: 0 0 auto;
+}
+.los1-facsimile-search {
+  z-index: 12; position: absolute; top: 99px; right: 15px; width: min(400px, calc(100vw - 30px));
+  border-radius: 10px; background: #fff; box-shadow: 0 16px 38px #0002;
+  border: 1px solid #deddd9; padding: 16px; display: flex; flex-direction: column; gap: 9px;
+}
+.los1-facsimile-search label { color: #222b34; font-weight: 700; }
+.los1-facsimile-search-row { display: flex; align-items: center; border: 1px solid #cfd2d2; border-radius: 7px; }
+.los1-facsimile-search-row input { flex: 1; min-width: 0; padding: 9px 10px; border: 0; background: transparent; color: #222b34; }
+.los1-facsimile-search-row button,.los1-facsimile-sidebar-head button { border: 0; background: none; padding: 10px; color: #222b34; }
+.los1-facsimile-search-results { max-height: 230px; overflow: auto; }
+.los1-facsimile-search-results button {
+  width: 100%; display: flex; flex-direction: column; text-align: left; padding: 10px;
+  border: 0; border-bottom: 1px solid #eee; background: #fff; color: #222b34;
+}
+.los1-facsimile-search-results button:hover { background: #fce8e5; }
+.los1-facsimile-search-results small { color: #66717b; font-size: 11px; }
+.los1-facsimile-search-results p { color: #66717b; padding: 8px 0; margin: 0; }
+.los1-facsimile-content { flex: 1 1 auto; min-height: 0; min-width: 0; display: flex; position: relative; }
+.los1-facsimile-viewport {
+  flex: 1; min-width: 0; min-height: 0; overflow: auto; overscroll-behavior: contain;
+  scroll-behavior: auto; background: #ddd9d4; -webkit-overflow-scrolling: touch;
+}
+.los1-facsimile-pages { width: max-content; min-height: 100%; min-width: 100%; display: flex;
+  align-items: flex-start; justify-content: center; gap: 2px; padding: 20px 26px; margin: auto; }
+.los1-facsimile-pages--continuous { width: 100%; flex-direction: column; align-items: center; gap: 16px; }
+.los1-facsimile-page-slot { position: relative; flex: 0 0 auto; box-shadow: 0 6px 24px rgba(29,31,31,.14); }
+.los1-facsimile-page-scaled { position: absolute; top: 0; left: 0; width: 440px; height: 625px; transform-origin: top left; }
+.los1-facsimile-page { position: relative; width: 440px; height: 625px; overflow: hidden;
+  padding: 30px 33px 34px; color: #222b34; background: #fff;
+  display: flex; flex-direction: column; font-size: 12px; line-height: 1.48; }
+.los1-facsimile-page h1,.los1-facsimile-page h2 { color: #222b34; letter-spacing: -.025em; }
+.los1-facsimile-page h1 { font-size: 28px; line-height: 1.15; margin: 10px 0 16px; font-weight: 750; }
+.los1-facsimile-page h2 { font-size: 16px; margin: 24px 0 12px; font-weight: 730; }
+.los1-facsimile-page p { margin: 0 0 13px; }
+.los1-facsimile-topline { display: flex; justify-content: space-between; gap: 10px;
+  border-bottom: 1px solid #e2e0dd; padding-bottom: 8px; color: #69737a;
+  font-size: 8px; font-weight: 750; letter-spacing: .06em; }
+.los1-facsimile-topline span:first-child { color: #b7473c; }
+.los1-facsimile-page-foot { display: flex; justify-content: space-between; align-items: center;
+  margin-top: auto; padding-top: 8px; border-top: 1px solid #e5e2df;
+  font-size: 8px; letter-spacing: .02em; color: #788087; }
+.los1-facsimile-red-label { font-weight: 850; letter-spacing: .11em; color: #b7473c; font-size: 10px; text-transform: uppercase; }
+.los1-facsimile-muted { color: #646f78; font-size: 11px; }
+.los1-facsimile-body { flex: 1; padding: 35px 2px 20px; overflow: hidden; }
+.los1-facsimile-body > p { font-size: 12px; line-height: 1.6; }
+.los1-facsimile-note { border-left: 3px solid #b7473c; background: #fce8e5; margin: 28px 0 18px;
+  padding: 13px 15px; color: #333a40; font-size: 11px; }
+.los1-facsimile-note strong { color: #8b332b; font-size: 12px; }
+.los1-facsimile-note p { margin: 6px 0 0; }
+.los1-facsimile-page--cover { padding: 0; }
+.los1-facsimile-original-cover { display: block; width: 100%; height: 100%; object-fit: contain; background: #b7473c; }
+.los1-facsimile-inside-cover { height: 100%; display: flex; align-items: flex-end; justify-content: center;
+  color: #a7a7a5; letter-spacing: .08em; font-size: 9px; }
+.los1-facsimile-title-page { flex: 1; display: flex; flex-direction: column; justify-content: space-between; padding: 68px 0 50px; }
+.los1-facsimile-title-mark { font-size: 68px; color: #b7473c; line-height: 1; font-weight: 800; letter-spacing: -.075em; }
+.los1-facsimile-title-mark span { font-size: 42px; margin-left: 8px; }
+.los1-facsimile-title-page h1 { font-size: 31px; max-width: 300px; }
+.los1-facsimile-contents h1 { margin-bottom: 5px; }
+.los1-facsimile-contents ol { list-style: none; margin: 22px 0 0; padding: 0; }
+.los1-facsimile-contents li { display: flex; gap: 14px; padding: 7px 0; border-bottom: 1px solid #ebe8e5; }
+.los1-facsimile-contents li > span { min-width: 28px; color: #b7473c; font-size: 22px; line-height: 1.2; font-weight: 780; }
+.los1-facsimile-contents li div { display: flex; flex-direction: column; gap: 2px; }
+.los1-facsimile-contents li strong { font-size: 12px; line-height: 1.1; }
+.los1-facsimile-contents li small { color: #68747b; font-size: 10px; }
+.los1-facsimile-page--chapter-photo { padding: 0; background: #b7473c; color: #fff; }
+.los1-facsimile-chapter-photo { height: 100%; padding: 34px 33px; display: flex; flex-direction: column; gap: 12px; }
+.los1-facsimile-chapter-number { font-size: 20px; font-weight: 800; }
+.los1-facsimile-photo-space { flex: 1; background: #d18177; border: 1px dashed rgba(255,255,255,.7);
+  display: flex; flex-direction: column; justify-content: center; align-items: center;
+  text-align: center; gap: 15px; padding: 24px; font-size: 11px; line-height: 1.5; }
+.los1-facsimile-chapter-photo h1 { color: #fff; font-size: 46px; margin: 4px 0 0; }
+.los1-facsimile-chapter-photo p { color: #fff; font-size: 14px; margin: 0; }
+.los1-facsimile-chapter-goals h1 { font-size: 43px; margin: 9px 0 25px; }
+.los1-facsimile-lead { font-size: 15px!important; line-height: 1.5!important; }
+.los1-facsimile-rule { height: 3px; width: 62px; background: #b7473c; margin: 25px 0; }
+.los1-facsimile-chapter-goals ul { padding-left: 18px; }
+.los1-facsimile-chapter-goals li { margin-bottom: 11px; }
+.los1-facsimile-vocabulary h1,.los1-facsimile-grammar h1 { font-size: 24px; }
+.los1-facsimile-vocabulary table { border-collapse: collapse; width: 100%; font-size: 11px; margin: 19px 0 0; }
+.los1-facsimile-vocabulary th { text-align: left; border-bottom: 2px solid #b7473c; padding: 8px 9px; color: #9a3c32; }
+.los1-facsimile-vocabulary td { border-bottom: 1px solid #eae5e1; padding: 7px 9px; }
+.los1-facsimile-vocabulary tr:nth-child(even) { background: #fbf7f6; }
+.los1-facsimile-example { display: flex; justify-content: space-between; gap: 16px; align-items: baseline;
+  padding: 12px 0; border-bottom: 1px solid #edeae5; }
+.los1-facsimile-example strong { font-size: 13px; }
+.los1-facsimile-example span { font-size: 11px; color: #63717b; }
+.los1-facsimile-bottom { display: flex; align-items: center; flex: 0 0 58px; min-width: 0; height: 58px;
+  gap: 13px; padding: 0 14px; background: #fff; border-top: 1px solid #deddd9;
+  color: #29343c; position: relative; }
+.los1-facsimile-control { display: flex; align-items: center; gap: 7px; min-height: 44px;
+  background: transparent; border: 0; padding: 0 8px; color: #29343c; }
+.los1-facsimile-page-controls { display: flex; align-items: center; justify-content: center; flex: 1; }
+.los1-facsimile-jump input { color: #222b34; text-align: center; width: 90px; height: 36px; border: 1px solid #d6d6d2;
+  background: #f9f8f6; border-radius: 5px; font-size: 12px; }
+.los1-facsimile-view-controls { display: flex; align-items: center; gap: 2px; }
+.los1-facsimile-view-controls select { max-width: 155px; padding: 7px 6px; color: #222b34;
+  border: 1px solid #d6d6d2; border-radius: 5px; background: #fff; font-size: 12px; }
+.los1-facsimile-zoom { font-size: 12px!important; color: #222b34; border: 0; padding: 9px; background: none; white-space: nowrap; }
+.los1-facsimile-input-error { position: absolute; right: 20%; bottom: 58px; padding: 10px; background: #fff7f0;
+  box-shadow: 0 4px 20px #0002; font-size: 12px; }
+.los1-facsimile-context { display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  padding: 5px 19px; min-height: 36px; background: #fff; border-top: 1px solid #ebe8e5;
+  font-size: 11px; color: #66727c; }
+.los1-facsimile-context > div { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.los1-facsimile-context > div > span { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.los1-facsimile-context button { display: inline-flex; align-items: center; gap: 7px; border: 0;
+  color: #9d3d35; font-size: 11px; font-weight: 700; background: transparent; white-space: nowrap; }
+.los1-facsimile-sidebar { flex: 0 0 270px; width: 270px; overflow: auto; z-index: 9;
+  background: #fff; border-right: 1px solid #d9d8d4; }
+.los1-facsimile-sidebar-head { display: flex; justify-content: space-between; align-items: center;
+  padding: 9px 11px 9px 17px; border-bottom: 1px solid #ebe7e4; }
+.los1-facsimile-sidebar-tabs { display: flex; padding: 9px; gap: 3px; }
+.los1-facsimile-sidebar-tabs button { flex: 1; padding: 9px 5px; border: 0; border-radius: 5px;
+  background: transparent; color: #525d67; font-size: 11px; }
+.los1-facsimile-sidebar-tabs button.is-active { background: #fce8e5; color: #9b3b32; font-weight: 750; }
+.los1-facsimile-sidebar-list { display: flex; flex-direction: column; padding: 6px 9px; }
+.los1-facsimile-sidebar-list button { display: flex; gap: 8px; justify-content: space-between; width: 100%;
+  padding: 11px 9px; border: 0; border-radius: 5px; text-align: left; background: #fff;
+  color: #29343c; font-size: 12px; }
+.los1-facsimile-sidebar-list button[aria-current="page"],.los1-facsimile-sidebar-list button:hover { background: #fce8e5; }
+.los1-facsimile-sidebar-list button span { color: #86909a; }
+.los1-facsimile-sidebar-note { font-size: 11px; margin: 18px 14px; color: #67717a; }
+.los1-facsimile-thumbnails { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 12px; padding: 10px; }
+.los1-facsimile-thumbnails button { padding: 3px; border: 1px solid transparent; background: none; border-radius: 5px; min-width: 0; }
+.los1-facsimile-thumbnails button.is-active { border-color: #b7473c; }
+.los1-facsimile-thumbnails button small { color: #5f6b75; }
+.los1-facsimile-thumb { display: flex; align-items: center; justify-content: center; width: 100%; aspect-ratio: 176/250;
+  padding: 5px; background: #fff; border: 1px solid #e1dedb; color: #a53d34; font-size: 8px; text-align: center; overflow: hidden; }
+.los1-facsimile-thumb--chapter-photo { background: #b7473c; color: #fff; }
+.los1-facsimile-thumb img { width: 100%; height: 100%; object-fit: contain; }
+.los1-facsimile-sidebar-backdrop { display: none; }
+.los1-facsimile-reader.is-focused { position: fixed; inset: 0; z-index: 120; }
+@media (max-width: 850px) {
+  .los1-facsimile-sidebar { position: absolute; left: 0; top: 0; bottom: 0; width: min(310px,85vw); z-index: 13;
+    box-shadow: 10px 0 27px #0002; }
+  .los1-facsimile-sidebar-backdrop { display: block; position: absolute; inset: 0; z-index: 12;
+    border: 0; background: rgba(20,26,31,.31); }
+  .los1-facsimile-view-controls select { max-width: 118px; }
+}
+@media (max-width: 620px) {
+  .los1-facsimile-toolbar { padding: 0 7px; gap: 5px; height: 55px; flex-basis: 55px; }
+  .los1-facsimile-identity strong { font-size: 12px; }
+  .los1-facsimile-identity span { font-size: 10px; }
+  .los1-facsimile-draft-pill { padding: 4px 5px; font-size: 9px; }
+  .los1-facsimile-notice { font-size: 11px; padding: 6px 10px; }
+  .los1-facsimile-pages { padding: 14px 8px; }
+  .los1-facsimile-bottom { gap: 3px; padding: 0 6px max(0px,env(safe-area-inset-bottom)); min-height: 58px;
+    flex-basis: 58px; }
+  .los1-facsimile-control { padding: 0 6px; }
+  .los1-facsimile-control span { display: none; }
+  .los1-facsimile-view-controls select,.los1-facsimile-view-controls > .los1-facsimile-icon-button { display: none; }
+  .los1-facsimile-jump input { width: 75px; }
+  .los1-facsimile-context { padding: 5px 9px; font-size: 10px; }
+  .los1-facsimile-context button { font-size: 10px; }
+  .los1-facsimile-context > div { max-width: 43%; }
+  .los1-facsimile-search { top: 92px; }
+}
+@media (max-width: 350px) {
+  .los1-facsimile-draft-pill { display: none; }
+  .los1-facsimile-context button { max-width: 55%; white-space: normal; text-align: left; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .los1-facsimile-reader * { scroll-behavior: auto!important; transition-duration: 0ms!important; animation-duration: 0ms!important; }
+}
