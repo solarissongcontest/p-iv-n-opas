@@ -133,3 +133,22 @@ test("every one of the 60 guided lessons opens from its actual chapter picker on
  await expect(page.locator("#los-lesson-runner .los-lesson-detail .los-overline")).toContainText("L060");
  await expectNoHorizontalOverflow(page);
 });
+
+
+test("search finds actual C08 German source dialogue and Finnish meaning without leaving LOS!",async({page})=>{
+ await enterLocalBook(page);
+ await page.goto("/los#/1/search",{waitUntil:"domcontentloaded"});
+ const search=page.getByPlaceholder("Hae sanaa, kappaletta tai kielioppia");
+ await expect(search).toBeVisible();
+ await search.fill("Was studierst du?");
+ const hit=page.locator(".los-search-results li button").filter({hasText:"C08"}).first();
+ await expect(hit).toContainText("Teksti B");
+ await hit.click();
+ await expect(page).toHaveURL(/\/los#\/1\/08\/text-b$/);
+ await expect(page.locator(".los-secondary-source .los-c01-turns")).toContainText("Was studierst du?");
+ await page.goto("/los#/1/search",{waitUntil:"domcontentloaded"});
+ const second=page.getByPlaceholder("Hae sanaa, kappaletta tai kielioppia");
+ await second.fill("Minun nimeni on");
+ await expect(page.locator(".los-search-results li").first()).toContainText("Alkuperäisteksti");
+ await expectNoHorizontalOverflow(page);
+});
