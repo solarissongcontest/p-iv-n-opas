@@ -71,7 +71,8 @@ export const LOS1_REVIEW_I_LESSONS:readonly LosLessonBlueprint[]=[
       {id:"submit",label:"Vastaa kaikkiin 25 tehtävään ja palauta",instruction:"Täytä koko välikoe ilman sanakirjaa tai valmiita mallivastauksia. Palauta kokeesi ja tutki vasta sen jälkeen osa-aluekohtaiset pisteet ja perustelut.",chapter:null,section:"midterm",minutes:18},
       {id:"dialogue",label:"Tee 4–6 repliikin itsearvioitu dialogi",instruction:"Tee välikokeen erillinen lyhyt keskustelu ääneen tai kirjoittaen ja arvioi se tarkistuslistalla. Puhetta ei pisteytetä koneellisesti, eikä sillä kasvateta 25 pisteen tulosta.",chapter:null,section:"midterm",minutes:4},
     ],
-    evidence:[{kind:"chapter-test",label:"Erillinen EX-MID-välikoe on palautettu."}],
+    evidence:[{kind:"chapter-test",label:"Erillinen EX-MID-välikoe on palautettu."},
+      {kind:"answered-practice",ids:["EX-MID-DIALOGUE-SELF"],label:"Oman 4–6 repliikin dialogin itsearvio kirjattu."}],
     check:{
       question:"Miten välikokeen itsearvioitu keskustelu vaikuttaa automaattiseen 25 pisteen tulokseen?",
       answers:[{id:"a",text:"Se lisää viisi pistettä."},{id:"b",text:"Sitä ei pisteytetä automaattisesti."},{id:"c",text:"Se korvaa monivalintatehtävät."}],correctId:"b",
