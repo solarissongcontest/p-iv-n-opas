@@ -393,6 +393,10 @@ function LosBookWorkspace({ book, location, move, goLibrary, openBook }: { book:
   const next = previousIndex >= 0 ? book.chapters[previousIndex + 1] : null;
   const previous = previousIndex > 0 ? book.chapters[previousIndex - 1] : null;
   const section = chapter ? location.section : ["contents", "appendix", "dictionary", "path", "search", "midterm", "review", "review-ii", "progress", "final", "summary","facsimile"].includes(location.section) ? location.section : "overview";
+  const sectionIndex = chapter ? sections.findIndex(item => item.id===section) : -1;
+  const previousSection = chapter && sectionIndex>0 ? sections[sectionIndex-1] : null;
+  const followingSection = chapter && sectionIndex>=0 && sectionIndex<sections.length-1
+    ? sections[sectionIndex+1] : null;
   const splitEligible = Boolean(chapter && ["text", "understand", "grammar", "text-b"].includes(section));
   const splitVisible = splitOpen && splitEligible;
   const closeSplit = () => {
@@ -492,6 +496,19 @@ function LosBookWorkspace({ book, location, move, goLibrary, openBook }: { book:
         </>}
         </div>
         {chapter && <LosNotebook key={`notes-${chapter.id}`} chapter={chapter} />}
+        {chapter && sectionIndex>=0 && <nav className="los-section-pager"
+          aria-label="Siirry kappaleen edelliseen tai seuraavaan osioon">
+          {previousSection ? <button type="button"
+            onClick={() => move(chapter.id,previousSection.id)}>
+            <ChevronLeft size={17} aria-hidden="true"/>
+            <span>Edellinen osio <strong>{previousSection.label}</strong></span>
+          </button> : <span aria-hidden="true"/>}
+          {followingSection ? <button type="button"
+            onClick={() => move(chapter.id,followingSection.id)}>
+            <span>Seuraava osio <strong>{followingSection.label}</strong></span>
+            <ChevronRight size={17} aria-hidden="true"/>
+          </button> : <span aria-hidden="true"/>}
+        </nav>}
         {chapter && <div className="los-pagination">
           {previous ? <button onClick={() => openChapter(previous)}><ChevronLeft size={18} /><span>Edellinen kappale<small lang="de">{previous.title}</small></span></button> : <span />}
           {next ? <button onClick={() => openChapter(next)}><span>Seuraava kappale<small lang="de">{next.title}</small></span><ChevronRight size={18} /></button> : <button onClick={() => move(null, "appendix")}>Kirjan liitteet <ChevronRight size={18} /></button>}
