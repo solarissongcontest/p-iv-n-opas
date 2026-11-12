@@ -29,7 +29,7 @@ export const LOS1_C07_C09_LESSONS: readonly LosLessonBlueprint[] = [
     id:"L038",title:"Tavaa ja ymmärrä numeroita",objective:"Tavaan nimiä ja erotan kirjoitusta sekä numeron tunnistamista koskevat fraasit.",
     estimatedMinutes:30,contentVersion:"1.0.0",steps:[
       {id:"grammar",label:"Kertaa ääntämisen ja kirjoitusasun ero",instruction:"Opiskele C07:n kielioppi- ja sanastosivuilta, kuinka Wie schreibt man das? ja Bitte buchstabieren Sie liittyvät nimen kirjoittamiseen.",chapter:"07",section:"grammar",minutes:10},
-      {id:"spelling",label:"Tee kahden nimen kirjaimittainen tehtävä",instruction:"Vastaa C07-EX-08 ja C07-EX-09. Huomaa saksan ß-kirjaimen paikka sanassa heißt.",chapter:"07",section:"practice",minutes:10},
+      {id:"spelling",label:"Tunnista nimi ja erikoiskirjain",instruction:"Vastaa C07-EX-08 (nimi Leo) ja C07-EX-09 (sanan heißt oikeinkirjoitus). Huomaa ß-kirjaimen paikka sanassa heißt.",chapter:"07",section:"practice",minutes:10},
       {id:"form",label:"Täydennä kohtelias pyyntö",instruction:"Vastaa C07-EX-14 ja C07-EX-15. Yritä muistaa buchstabieren ja einmal ilman näkyvää mallia.",chapter:"07",section:"practice",minutes:6},
     ],evidence:[{kind:"answered-practice",ids:["C07-EX-08","C07-EX-09","C07-EX-14","C07-EX-15"],label:"Neljä kirjoitusasu- ja selviytymisfraasitehtävää vastattu."}],
     check:{question:"Mikä sanan heißt oikea kirjoitusasu?",answers:[{id:"a",text:"heißt"},{id:"b",text:"heisst"},{id:"c",text:"heißst"}],correctId:"a",explanation:"Tässä saksan sanassa käytetään ß-kirjainta: du heißt."},
