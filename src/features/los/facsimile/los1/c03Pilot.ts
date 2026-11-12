@@ -30,8 +30,12 @@ const book=LOS_BOOKS.find(b=>b.id===1);
 if(!book)throw Error("LOS! 1 puuttuu kirjakatalogista.");
 const chapter=book.chapters.find(ch=>ch.id==="03");
 if(!chapter)throw Error("LOS! 1 C03 puuttuu kirjakatalogista.");
-const source=getLosOpenDialogue("03");
-if(!source)throw Error("LOS! 1 C03:n autenttinen lähde puuttuu.");
+function requireC03Source(){
+  const result=getLosOpenDialogue("03");
+  if(!result)throw Error("LOS! 1 C03:n autenttinen lähde puuttuu.");
+  return result;
+}
+const source=requireC03Source();
 export const LOS1_C03_PRINT_CHAPTER=chapter;
 export const LOS1_C03_SOURCE=source;
 export const LOS1_C03_TEXT_A=source.originalLines;
