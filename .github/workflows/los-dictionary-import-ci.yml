@@ -116,6 +116,17 @@ jobs:
                 'outputSha512':report['outputSha512'],
               },ensure_ascii=False))
           PY
+      - name: Validate staged loader using both real FreeDict corpora (without database writes)
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check scripts/los-dictionary-load.mjs
+          for direction in de-fi fi-de; do
+            node scripts/los-dictionary-load.mjs \
+              --input "/tmp/los-u2-sources/$direction-staged.jsonl" \
+              --manifest "/tmp/los-u2-sources/$direction-staged.jsonl.manifest.json" \
+              --approvals docs/LOS_U2_FREEDICT_STAGING_SOURCE_APPROVALS.json
+          done
       - name: Archive actual counts and source hashes only; NO corpus publication
         uses: actions/upload-artifact@v4
         with:
