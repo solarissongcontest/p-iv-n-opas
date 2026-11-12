@@ -13,3 +13,7 @@ Tämä on toteutusloki, ei uusi masterplan eikä julkaisuvalmiuden hyväksyntä.
 - C01:n puuttuva fraasi-IPA, asiantuntijahyväksynnät, ihmisäänitteet, laitteiden TTS-testaus ja koko kirjan sisällöllinen hyväksyntä ovat yhä avoimia.
 
 **Ennen mergeä:** integroidun haaran TypeScript, build, PostgreSQL 17, selain-QA, PDF-reitit, tallennusregressiot ja tietoturvaportit. Testien puuttuminen tai ohittaminen ei ole hyväksyntä.
+
+## Mainin 12.11.2026 valokuvamuutoksen sovittaminen
+
+Main bbb8692751de5a18af128bc208bd34933694a292 lisää kymmenen digikirjan lähdekuvaa mutta poistaa myös näköiskirjan, PDF.js:n, painojulkaisun estot ja niitä testaavan CI:n. U1.0-tehtävän säilytysvaatimuksen vuoksi integraatio säilyttää kaikki aiemmat facsimile/PDF.js-tiedostot ja testit, liittää kuvat vain digikirjan kappaleavaukseen ja testaa esitysmuotojen erillisyyden. RELEASED_LOS1_EDITION = null pysyy koskemattomana. Tämän ristiriidan omistajahyväksyntä on edelleen avoin eikä mitään tuotantojulkaisua tehdä.

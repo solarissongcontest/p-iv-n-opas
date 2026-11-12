@@ -24,6 +24,7 @@ import { Los1FacsimilePilot } from "./facsimile/los1/Los1FacsimilePilot";
 import { Los1C02FacsimilePilot } from "./facsimile/los1/Los1C02FacsimilePilot";
 import { Los1C03FacsimilePilot } from "./facsimile/los1/Los1C03FacsimilePilot";
 import { Los1C04FacsimilePilot } from "./facsimile/los1/Los1C04FacsimilePilot";
+import { Los1ChapterImage } from "./Los1ChapterImage";
 import { Los1PdfReader } from "./facsimile/los1/Los1PdfReader";
 import { LosMidtermExam } from "./LosMidtermExam";
 import { LosStudyProgress } from "./LosStudyProgress";
@@ -195,6 +196,7 @@ function ChapterOpening({ chapter, book, move }: { chapter: LosChapter; book: Lo
   return <section className="los-opening">
     <p className="los-eyebrow">KAPITEL {Number(chapter.id)} / {book.chapters.length}</p>
     <div className="los-opening-head"><span className="los-opening-number">{chapter.id}</span><div><h1 lang="de">{chapter.title}</h1><p>{chapter.subtitle}</p></div></div>
+    {book.id===1&&<Los1ChapterImage key={chapter.id} chapterId={chapter.id}/>}
     <div className="los-opening-bottom">
       <div>
         <p className="los-overline">TÄSSÄ KAPPALEESSA</p>

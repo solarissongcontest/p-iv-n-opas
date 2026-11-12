@@ -488,3 +488,17 @@ test("U1 R9: shared C01 word card has no automatic WCAG A/AA violations",async({
  expect(result.violations.map(v=>({id:v.id,impact:v.impact,
   elements:v.nodes.map(n=>n.target).slice(0,5)}))).toEqual([]);
 });
+
+test("LOS! 1 digital chapter photos coexist with the existing facsimile",async({page})=>{
+ await enterLocalBook(page);
+ for(const chapter of chapters){
+  await page.goto("/los#/1/"+chapter+"/chapter",{waitUntil:"domcontentloaded"});
+  const figure=page.locator(".los1-digital-photo");
+  await expect(figure).toBeVisible();
+  await expect(figure.locator("figcaption a")).toHaveAttribute("href",/pexels[.]com/);
+  await expectNoHorizontalOverflow(page);
+ }
+ await page.goto("/los#/1/facsimile",{waitUntil:"domcontentloaded"});
+ await expect(page.locator(".los-facs-reader")).toBeVisible();
+ await expect(page.locator(".los1-digital-photo")).toHaveCount(0);
+});
