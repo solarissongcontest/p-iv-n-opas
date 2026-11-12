@@ -205,18 +205,18 @@
     {
       "id": "M-DIB-03",
       "kind": "source",
-      "description": "UT/COERLL **Eva: ”Studium & Wohnen”**, oikean puhujan opiskelu- ja asumishaastattelu. C08:n tunnistavan ymmärtämisen lisäkuuntelu, ei opittava aktiivikielioppi.",
+      "description": "COERLL/UT Austin Eva Kunkel, Studium & Wohnen: koko 8-puheenvuoroinen saksankielinen alkuperäishaastattelun litteraatti, luettavana C08:n Text B -sivulla, CC BY 4.0. Videota ja audiota ei ole integroitu.",
       "sourceUrl": "https://coerll.utexas.edu/dib/vidt.php?f=01_19_int_ek_studies-home",
-      "rightsNotes": "Suora haastattelusivu löytyi. Puhenopeus ja kielioppi voivat ylittää alkeet: käytä vain tukitekstillä ja rajatuilla pääasiakysymyksillä. Oikeudet videolle ja litteraatille erikseen.",
-      "manifestReadiness": "B",
-      "manifestCheckedAt": "2026-11-10",
+      "rightsNotes": "8 puhuttua vuoroa varmistettu COERLL:n itsensä julkaisemalta yksilöidyltä /dib/vidt.php?f=01_19_int_ek_studies-home -sivulta. COERLL Deutsch im Blick -oppikirjan vuoden 2017 nimiösivulla CC BY 4.0 (p.4), teksti tuotu muuttamattomana, suomennokset ja tehtävät erillisinä LOS!-lisäyksinä. Videon ja äänen tiedostokohtaisia lisenssejä, sallittua upotusta tai toiston toimivuutta iOS/desktop ei ole vahvistettu: mediaa ei ole kopioitu, eikä kuuntelua lasketa tehdyn. Vaikeat tekstit vain tunnistamiseen A1-alkeisille. Älä muuta published=true ilman kieli- ja laitetestejä.",
+      "manifestReadiness": "A: 8 vuoron lisensoitu litteraatti luettavissa; B: videon/audio oikeus ja laitetesti puuttuu",
+      "manifestCheckedAt": "2026-11-12",
       "mediaTested": false,
-      "stage": "identified",
-      "licenseCode": null,
-      "licenseUrl": null,
-      "licenseEvidenceUrl": null,
+      "stage": "rights-verified",
+      "licenseCode": "CC BY 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
+      "licenseEvidenceUrl": "https://coerll.utexas.edu/dib/pdfs/intro.pdf",
       "languageReviewed": false,
-      "integrated": false,
+      "integrated": true,
       "deviceTested": false,
       "published": false
     },
@@ -569,7 +569,8 @@
       "primarySourceId": "M-COM-01",
       "textAPlan": "`M-COM-01`, Franz–Jörg-dialogi, **koko 8-repliikkinen teksti**",
       "textBPlan": "`M-COM-03` tervehdykset, lisäksi `V-DW-01`",
-      "publicationGate": "A-pääteksti valmis valintaan; videon sisäinen upotus testattava."
+      "publicationGate": "A-pääteksti valmis valintaan; videon sisäinen upotus testattava.",
+      "textBImplementationNote": "Text B: M-COM-03 public domain -tervehdysluettelon 20 alkuperäistä ilmausta kokonaisina LOS!:ssa, 28 sekunnin alkuperäinen ääni ja neljä luetun ymmärtämisen tehtävää. Sama lähde on myös C04:ssä, ero oppimistavoitteessa. Ääni ei ole yhtenäinen dialogi, iOS/desktop laitetesti puuttuu."
     },
     {
       "id": "C02",
@@ -621,8 +622,9 @@
       "id": "C08",
       "primarySourceId": "M-WB-08",
       "textAPlan": "`M-WB-08`: Wikibooks German/Level I/Schule, kokonainen 26-osainen luokkakohtaus Text A -lukijassa (CC BY-SA 4.0). COERLL Im Unterricht -haastattelu jää toistaiseksi erilliseksi mahdolliseksi Text B:ksi, koska sen yksilöityä litteraattia ei voitu varmistaa.",
-      "textBPlan": "`M-DIB-03` Evan opiskeluhaastattelu, `V-DIB-01` Studentenausweis",
-      "publicationGate": "Koko avoimella CC BY-SA 4.0 -lisenssillä julkaistu saksankielinen luokkakohtaus on nyt luvallisesti LOS!:n sisällä, mutta alkuperäisteksti sisältää A1.1-oppimäärän ylittäviä muotoja. Julkaisuvalmis vasta kun tason pedagoginen tarkistus, alkuperäisen sivun ajantasaisuus, C08:n riippumaton Text B -media ja mobiili/desktop laitetestaus on tehty. Pidetään `published=false`."
+      "textBPlan": "M-DIB-03 Eva: Studium & Wohnen, koko 8-puheenvuoroinen lisensoitu autenttinen tekstilitteraatti mukana LOS!:ssa. Alkuperäisen videon oikeus ja integrointi erillisessä tarkistuksessa; V-DIB-01 opiskelijakorttivideo on vaihtoehtoinen jatkomedia.",
+      "publicationGate": "Koko avoimella CC BY-SA 4.0 -lisenssillä julkaistu saksankielinen luokkakohtaus on nyt luvallisesti LOS!:n sisällä, mutta alkuperäisteksti sisältää A1.1-oppimäärän ylittäviä muotoja. Julkaisuvalmis vasta kun tason pedagoginen tarkistus, alkuperäisen sivun ajantasaisuus, C08:n riippumaton Text B -media ja mobiili/desktop laitetestaus on tehty. Pidetään `published=false`.",
+      "textBImplementationNote": "Text B: M-DIB-03, autenttisen Eva Kunkelin kahdeksan repliikin koko COERLL:n haastattelulitteraatti ja neljä ymmärtämistehtävää luettavissa suoraan LOS!:ssa. Suomi-käännökset ja sanastotuet kirjoitettu erikseen. Video ja ääni EIVÄT ole vielä integroituja tai laitetestattuja; kuuntelunäyttöä ei väitetä."
     },
     {
       "id": "C09",
