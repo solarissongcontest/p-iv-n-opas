@@ -1,6 +1,6 @@
-import {useCallback,useEffect,useMemo,useRef,useState,type CSSProperties} from "react";
+import {useCallback,useEffect,useMemo,useRef,useState,type CSSProperties,type TouchEvent as ReactTouchEvent} from "react";
 import {
-  ArrowLeft,BookOpen,ChevronLeft,ChevronRight,
+  ArrowLeft,BookOpen,Bookmark,Search,X,ChevronLeft,ChevronRight,
   Columns2,FileText,List,Minus,Plus,Printer,
 } from "lucide-react";
 import {getDeviceOwnerId} from "@/lib/deviceSession";
@@ -16,6 +16,7 @@ import {
   type LosFacsimilePage,
   type LosFacsimileSection,
 } from "./c01Pilot";
+import {getFacsimileSwipeDirection} from "./navigation";
 import "./facsimile.css";
 
 type ViewMode="auto"|"single"|"spread"|"continuous";
@@ -25,6 +26,7 @@ const storageKey=()=> {
   return id?"los.facsimile.c01.draft."+id:null;
 };
 const zoomLimit=(z:number)=>Math.min(200,Math.max(75,z));
+const bookmarkStorageKey=()=>{const key=storageKey();return key?key+".bookmarks":null;};
 const isMode=(v:unknown):v is ViewMode=>["auto","single","spread","continuous"].includes(String(v));
 function readState():ReaderState{
   try{
@@ -40,6 +42,15 @@ function readState():ReaderState{
     }
   }catch{/* Private/denied localStorage: reader still works in memory. */}
   return {pageId:"cover",mode:"auto",zoom:100};
+}
+function readBookmarks():string[]{
+  try{
+    const key=bookmarkStorageKey();
+    if(!key)return [];
+    const parsed:unknown=JSON.parse(localStorage.getItem(key)??"[]");
+    return Array.isArray(parsed)?parsed.filter((id):id is string=>
+      typeof id==="string"&&pages.some(page=>page.pageId===id)):[];
+  }catch{return [];}
 }
 function PaperQuestion({number,prompt,options,fill=false}:{
  number:number;prompt:string;options?:readonly string[]|undefined;fill?:boolean;
@@ -245,9 +256,15 @@ export function Los1FacsimilePilot({onOpenDigital}:{onOpenDigital:(section:LosFa
   const [wide,setWide]=useState(false);
   const stageRef=useRef<HTMLDivElement|null>(null);
   const [tocOpen,setTocOpen]=useState(false);
+  const [searchOpen,setSearchOpen]=useState(false);
+  const [query,setQuery]=useState("");
+  const [bookmarks,setBookmarks]=useState<string[]>([]);
+  const [jumpValue,setJumpValue]=useState("");
+  const [jumpError,setJumpError]=useState("");
+  const touchStartRef=useRef<{x:number;y:number;fingers:number;control:boolean}|null>(null);
   const [loaded,setLoaded]=useState(false);
   useEffect(()=>{
-    setState(readState());setLoaded(true);
+    setState(readState());setBookmarks(readBookmarks());setLoaded(true);
     const stage=stageRef.current;
     const resize=()=>setWide(Boolean(stage&&stage.clientWidth>=980));
     resize();
@@ -261,7 +278,15 @@ export function Los1FacsimilePilot({onOpenDigital}:{onOpenDigital:(section:LosFa
     try{const key=storageKey();if(key)localStorage.setItem(key,JSON.stringify(state));}
     catch{/* Reader still navigates if storage is unavailable. */}
   },[state,loaded]);
+  useEffect(()=>{
+    if(!loaded)return;
+    try{const key=bookmarkStorageKey();if(key)localStorage.setItem(key,JSON.stringify(bookmarks));}
+    catch{/* The draft bookmark stays usable in memory. */}
+  },[bookmarks,loaded]);
   const index=Math.max(0,pages.findIndex(p=>p.pageId===state.pageId));
+  const isBookmarked=bookmarks.includes(state.pageId);
+  const toggleBookmark=()=>setBookmarks(old=>old.includes(state.pageId)?
+    old.filter(id=>id!==state.pageId):[...old,state.pageId]);
   const actualMode=state.mode==="auto"?(wide?"spread":"single"):state.mode;
   const spreadAllowed=actualMode==="spread"&&wide;
   const group=useMemo(()=>{
@@ -270,6 +295,18 @@ export function Los1FacsimilePilot({onOpenDigital}:{onOpenDigital:(section:LosFa
     const start=index%2===0?index:index-1;
     return pages.slice(start,start+2);
   },[index,actualMode,spreadAllowed]);
+  const searchResults=useMemo(()=>{
+    const term=query.trim().toLocaleLowerCase("fi");
+    if(!term)return [];
+    return pages.filter(page=>{
+      const extra=page.section==="text"?
+        dialogue.map(line=>line.text+" "+line.meaning).join(" "):
+        page.section==="text-b"?textB.lines.filter(line=>page.sourceLineIds.includes(line.id))
+          .map(line=>line.text+" "+line.meaning).join(" "):
+          page.section==="vocabulary"?chapter.vocabulary.join(" "):"";
+      return [page.title,page.subtitle,extra].join(" ").toLocaleLowerCase("fi").includes(term);
+    });
+  },[query]);
   const goTo=useCallback((next:number)=>{
     const bounded=Math.min(pages.length-1,Math.max(0,next));
     setState(previous=>({...previous,pageId:pages[bounded]!.pageId}));
@@ -284,6 +321,32 @@ export function Los1FacsimilePilot({onOpenDigital}:{onOpenDigital:(section:LosFa
     if(spreadAllowed&&index>=4)goTo((index%2===0?index:index-1)-2);
     else goTo(index-1);
   },[actualMode,spreadAllowed,index,goTo]);
+  const onTouchStart=(event:ReactTouchEvent<HTMLDivElement>)=>{
+    const finger=event.touches[0];
+    touchStartRef.current=finger?{
+      x:finger.clientX,y:finger.clientY,fingers:event.touches.length,
+      control:Boolean((event.target as HTMLElement).closest("a,button,input,select,textarea")),
+    }:null;
+  };
+  const onTouchEnd=(event:ReactTouchEvent<HTMLDivElement>)=>{
+    const start=touchStartRef.current;touchStartRef.current=null;
+    const end=event.changedTouches[0];
+    if(!start||!end)return;
+    const direction=getFacsimileSwipeDirection({
+      startX:start.x,deltaX:end.clientX-start.x,deltaY:end.clientY-start.y,
+      zoom:state.zoom,continuous:actualMode==="continuous",
+      beganOnControl:start.control,fingers:start.fingers,
+    });
+    if(direction===1)next();
+    else if(direction===-1)previous();
+  };
+  const jumpToLeaf=()=>{
+    const n=Number(jumpValue);
+    if(!/^[0-9]+$/.test(jumpValue.trim())||!Number.isInteger(n)||n<1||n>pages.length){
+      setJumpError("Luonnoslehteä ei ole tässä pilotissa.");return;
+    }
+    goTo(n-1);setJumpValue("");setJumpError("");
+  };
   useEffect(()=>{
     const keydown=(e:KeyboardEvent)=>{
       if(e.altKey||e.metaKey||e.ctrlKey||e.shiftKey)return;
@@ -304,8 +367,16 @@ export function Los1FacsimilePilot({onOpenDigital}:{onOpenDigital:(section:LosFa
         <div><strong>LOS! 1 · Näköiskirja</strong><small>C01-pilotti · B5-luonnos, ei valmis painos</small></div>
       </div>
       <div className="los-facs-toolbar-actions">
-        <button type="button" onClick={()=>setTocOpen(v=>!v)} aria-expanded={tocOpen}>
+        <button type="button" onClick={()=>{setTocOpen(v=>!v);setSearchOpen(false);}} aria-expanded={tocOpen}>
           <List size={17}/> Sisältö
+        </button>
+        <button type="button" onClick={()=>{setSearchOpen(v=>!v);setTocOpen(false);}}
+          aria-pressed={searchOpen}><Search size={17}/> Hae
+        </button>
+        <button type="button" onClick={toggleBookmark} aria-pressed={isBookmarked}
+          aria-label={isBookmarked?"Poista sivun kirjanmerkki":"Lisää sivun kirjanmerkki"}>
+          <Bookmark size={17} fill={isBookmarked?"currentColor":"none"}/>
+          {isBookmarked?"Merkitty":"Kirjanmerkki"}
         </button>
         <label className="los-facs-mode-label">Näkymä
           <select value={state.mode}
@@ -331,18 +402,39 @@ export function Los1FacsimilePilot({onOpenDigital}:{onOpenDigital:(section:LosFa
       Sivut eivät ole julkaistun PDF:n sivuja, eikä tämän näkymän lukeminen
       merkitse oppitunteja tai kokeita tehdyiksi.
     </p>
+    {searchOpen&&<section className="los-facs-search" aria-label="Haku C01-näköiskirjapilotista">
+      <label htmlFor="los-facs-query">Hae pilotin teksteistä ja sanastosta</label>
+      <div className="los-facs-search-entry">
+        <input id="los-facs-query" autoFocus value={query} onChange={e=>setQuery(e.target.value)}
+          placeholder="Esimerkiksi Hallo tai Morgen"/>
+        <button type="button" onClick={()=>setSearchOpen(false)} aria-label="Sulje haku"><X size={17}/></button>
+      </div>
+      {query.trim()&&<div className="los-facs-search-hits">
+        {searchResults.length?searchResults.map(page=><button type="button" key={page.pageId}
+          onClick={()=>{goTo(page.pdfPageIndex);setSearchOpen(false);}}>
+          <strong>{page.title}</strong><small>Luonnoslehti {page.pdfPageIndex+1}</small>
+        </button>):<p>Ei hakutuloksia tästä C01-pilotista.</p>}
+      </div>}
+    </section>}
     {tocOpen&&<nav className="los-facs-toc" aria-label="Näköiskirjan sisällysluettelo">
       {pages.filter((p,i)=>i===0||i===2||p.section!==pages[i-1]?.section).map(p=>
         <button key={p.pageId} type="button"
           onClick={()=>{goTo(p.pdfPageIndex);setTocOpen(false);}}>
           <span>{p.kind==="front-cover"?"Kansi":p.title}</span>
           <small>Luonnoslehti {p.pdfPageIndex+1}</small></button>)}
+      {bookmarks.length>0&&<div className="los-facs-marked-pages">
+        <strong>Omat kirjanmerkit · tällä laitteella</strong>
+        {bookmarks.map(id=>{const page=pages.find(p=>p.pageId===id);
+          return page?<button type="button" key={id} onClick={()=>{goTo(page.pdfPageIndex);setTocOpen(false);}}>
+            <Bookmark size={15}/>{page.title}<small>{page.pdfPageIndex+1}</small>
+          </button>:null;})}
+      </div>}
     </nav>}
     {state.mode==="spread"&&!wide&&<p className="los-facs-honesty" role="status">
       <Columns2 size={15}/> Näyttö on liian kapea luettavaan aukeamaan.
       Näytetään yksi sivu; aukeamavalinta säilyy leveämpää näyttöä varten.
     </p>}
-    <div ref={stageRef}
+    <div ref={stageRef} onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}
       style={{"--los-facs-zoom":state.zoom/100} as CSSProperties}
       className={"los-facs-stage "+(actualMode==="continuous"?"is-continuous":"")}>
       <div className={"los-facs-leaves "+(group.length===2?"is-spread":"is-single")}
@@ -355,7 +447,16 @@ export function Los1FacsimilePilot({onOpenDigital}:{onOpenDigital:(section:LosFa
     <div className="los-facs-bottom">
       <button type="button" onClick={previous}
         disabled={actualMode==="continuous"||index===0}><ChevronLeft size={18}/> Edellinen</button>
-      <span>Luonnoslehti {index+1} / {pages.length} · Ei lopullinen sivunumero</span>
+      <div className="los-facs-jump">
+        <span>Luonnoslehti {index+1} / {pages.length} · Ei lopullinen sivunumero</span>
+        <form onSubmit={e=>{e.preventDefault();jumpToLeaf();}}>
+          <label htmlFor="los-facs-jump-input">Siirry luonnoslehdelle</label>
+          <input id="los-facs-jump-input" value={jumpValue} onChange={e=>{setJumpValue(e.target.value);setJumpError("");}}
+            inputMode="numeric" pattern="[0-9]*" placeholder="1–15"/>
+          <button type="submit">Siirry</button>
+        </form>
+        {jumpError&&<small role="alert">{jumpError}</small>}
+      </div>
       <button type="button" onClick={next}
         disabled={actualMode==="continuous"||index===pages.length-1}>Seuraava <ChevronRight size={18}/></button>
     </div>
