@@ -5,7 +5,7 @@ import { LOS_1_LESSONS } from "./learningPath";
 import { LosFirstLessons } from "./LosFirstLessons";
 import { LOS1_EXECUTABLE_LESSONS, isLos1ExecutableLesson } from "./guidedLessons";
 
-export type LosDestination = "overview" | "contents" | "chapter" | "text" | "understand" | "vocabulary" | "grammar" | "text-b" | "practice" | "apply" | "culture" | "test" | "appendix" | "dictionary" | "path" | "search" | "midterm" | "review" | "cards" | "progress";
+export type LosDestination = "overview" | "contents" | "chapter" | "text" | "understand" | "vocabulary" | "grammar" | "text-b" | "practice" | "apply" | "culture" | "test" | "appendix" | "dictionary" | "path" | "search" | "midterm" | "review" | "review-ii" | "cards" | "progress";
 export type LosNavigate = (chapter: string | null, section: LosDestination) => void;
 type WordEntry = { book: number; code: string; chapter: string; title: string; word: string; meaning: string };
 const DICTIONARY = LOS_BOOKS.flatMap(book => book.chapters.flatMap(chapter =>
@@ -89,7 +89,7 @@ export function LosLearningPath({ book, move }: { book: LosBookDefinition; move:
   return <section className="los-inner-page los-learning-path">
     <p className="los-eyebrow">OHJATTU LUKUJÄRJESTYS / {book.code}</p>
     <h1>Opetuspolku</h1>
-    <p className="los-page-intro">Kirjan 60 suunniteltua, noin 30 minuutin oppituntia. Opetuspolku viittaa samoihin oppikirjasivuihin, eikä tee niistä erillisiä kursseja.</p>
+    <p className="los-page-intro">Kirjan 60 suunniteltua, noin 30 minuutin oppituntia. Opetuspolku viittaa samoihin oppikirjasivuihin, eikä tee niistä erillisiä kursseja. Kertaus II:n kolme lähteistä riippumatonta tuntia ovat käytettävissä ennen varsinaisen loppukokeen valmistumista.</p>
     <div className="los-path-notice"><BookOpen size={20}/><p><strong>{LOS1_EXECUTABLE_LESSONS.length}/60 oppituntia on käytettävissä.</strong> Opetukseen toteutetut tunnit löytyvät kappaleista C01–C07 ja C09 sekä Kertaus I -jaksosta. C08:ssa ja C10:ssä vain erikseen nimetyt lähteistä riippumattomat harjoitustunnit ovat käytössä; niiden päätekstit puuttuvat edelleen. Muut tunnit ovat vasta sisältökartta, eivät valmiita suorituksia.</p></div>
     <LosFirstLessons selectedId={selectedLesson} onSelect={selectLesson} move={move} />
     {groups.map(group=><section key={group.section} className="los-path-group">
