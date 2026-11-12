@@ -173,8 +173,13 @@ def parse_kaikki(path: Path, source_id: str, gloss_language: str):
                 # explanation must not be surfaced as a Finnish translation.
                 glosses = [nfc(x)[:MAX_CONTENT_LENGTH] for x in sense.get("glosses") or []
                            if isinstance(x, str) and x.strip()]
+                related = [nfc(item.get("word")) for item in sense.get("form_of") or []
+                           if isinstance(item, dict) and isinstance(item.get("word"), str)]
+                related = list(dict.fromkeys(item for item in related
+                                            if 0 < len(item) <= MAX_WORD_LENGTH))
                 senses.append({"index": idx, "glosses": glosses,
-                               "glossLanguage": gloss_language, "translations": []})
+                               "glossLanguage": gloss_language,
+                               "formOfCandidates": related, "translations": []})
             # Keep the morphological tags on each form. The display-form
             # string list remains for older staged consumers.
             form_details: list[dict] = []
