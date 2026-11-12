@@ -12,7 +12,7 @@ SELECT d->>'sourceId','freedict',split_part(d->>'direction','-',1),
  d->>'sourceSha512',d->>'outputSha512',d->>'licenseCode',
  d->>'licenseUrl',d->>'evidenceUrl',d->>'reviewedBy',
  (d->>'reviewedAt')::date,(d->>'importedSourceRows')::bigint,false
-FROM public.los_dict_qa_sources;
+FROM (SELECT payload AS d FROM public.los_dict_qa_sources) staged_sources;
 
 INSERT INTO public.los_dictionary_lexemes
  (source_id,source_entry_id,source_row,language,target_language,
