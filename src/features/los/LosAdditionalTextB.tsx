@@ -13,7 +13,7 @@ export function LosAdditionalTextB({chapterId}:{chapterId:string}){
  if(!isLosTextBChapter(chapterId))return null;
  return <LosAdditionalTextBContent chapterId={chapterId}/>;
 }
-function LosAdditionalTextBContent({chapterId}:{chapterId:"04"|"06"|"07"|"10"}){
+function LosAdditionalTextBContent({chapterId}:{chapterId:"04"|"06"|"07"|"09"|"10"}){
  const source=LOS1_TEXT_B_SOURCES[chapterId];
  const {draft,update,saved}=useLosChapterDraft(1,chapterId);
  const checked=draft.practiceChecked;
