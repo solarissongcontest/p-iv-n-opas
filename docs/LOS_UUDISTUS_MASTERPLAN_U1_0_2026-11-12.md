@@ -1,3 +1,5 @@
+> **Uudempi tuotepäätös 12.11.2026, yhdistetty PR #212:** LOS! on yksinomaan interaktiivinen digikirja. Tämän historiallisesti säilytettävän U1.0-masterplanin vanhat B5-/näköiskirja-/PDF.js-/painojulkaisuvaatimukset ovat kumoutuneet. Niitä ei toteuteta, testata julkaisuportteina eikä palauteta yhteensovituksessa. Kaikki muut opetuksen, kuvituksen, sanakirjan, äänen, opiskelutietojen ja R1–R12:n sitoumukset säilyvät.
+
 LOS! — KOKO DIGIKIRJAN UUDISTUSMASTERPLAN
 
 Tunniste: LOS_RENEWAL_U1
