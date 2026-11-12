@@ -77,7 +77,9 @@ test("chapter tab is real and hides Finnish/German answer until the user reveals
  const view=readFileSync("src/features/los/LosRecallCards.tsx","utf8");
  const book=readFileSync("src/features/los/LosBook.tsx","utf8");
  const nav=readFileSync("src/features/los/LosReferenceTools.tsx","utf8");
- assert.match(book,/id:"cards", label:"Kertauskortit"/);
+ assert.match(book,/Kertaa sanastoa korteilla/);
+ assert.match(book,/onBack=\{\(\)=>move\(chapter\.id,"vocabulary"\)\}/);
+ assert.doesNotMatch(book,/id:"cards", label:"Kertauskortit"/);
  assert.match(book,/section === "cards" \? <LosRecallCards/);
  assert.match(nav,/"cards"/);
  assert.match(view,/!revealed\?/);
