@@ -25,6 +25,7 @@ import { Los1C02FacsimilePilot } from "./facsimile/los1/Los1C02FacsimilePilot";
 import { Los1C03FacsimilePilot } from "./facsimile/los1/Los1C03FacsimilePilot";
 import { Los1C04FacsimilePilot } from "./facsimile/los1/Los1C04FacsimilePilot";
 import { Los1ChapterImage } from "./Los1ChapterImage";
+import { Los1VisualLearning } from "./Los1VisualLearning";
 import { Los1PdfReader } from "./facsimile/los1/Los1PdfReader";
 import { LosMidtermExam } from "./LosMidtermExam";
 import { LosStudyProgress } from "./LosStudyProgress";
@@ -316,6 +317,7 @@ function Vocabulary({ chapter, bookId, move }: { chapter: LosChapter; bookId:num
     <h1>Sanasto</h1>
     <p className="los-page-intro">Kappaleen opetettavia sanoja ja ilmauksia. Tämä on tarkistettava ennakkoluettelo, ei vielä lopullinen sanakirjatietokanta.</p>
     <p className="los-vocabulary-qa" role="status">IPA:n lähde löytynyt {coverage.ipaSourced}/{coverage.total} riville; asiantuntijan hyväksymä IPA {coverage.ipaHumanReviewed}/{coverage.total}, hyväksytty sanaääni {coverage.audioApproved}/{coverage.total}. Julkaisuportti on vielä avoin.</p>
+    {bookId===1&&<Los1VisualLearning key={chapter.id} chapterId={chapter.id} placement="vocabulary"/>}
     <button type="button" className="los-outline-button" onClick={() => move(chapter.id,"cards")}>Kertaa sanastoa korteilla</button>
     <div className="los-vocabulary-tools">
       <label><Search size={17} /><span className="sr-only">Etsi sanastosta</span><input value={query} onChange={event => setQuery(event.target.value)} placeholder="Etsi sanaa…" /></label>
@@ -471,7 +473,7 @@ function LosBookWorkspace({ book, location, move, goLibrary, openBook }: { book:
               section === "text-b" ? <LosTextB chapter={chapter} /> :
               section === "practice" ? <LosWorkbook key={`practice-${chapter.id}`} chapter={chapter} mode="practice" /> :
               section === "apply" ? <LosApplication key={chapter.id} chapter={chapter} /> :
-              section === "culture" ? <LosCulture chapter={chapter} /> :
+              section === "culture" ? <LosCulture chapter={chapter} bookId={book.id} /> :
               section === "test" ? <LosWorkbook key={`test-${chapter.id}`} chapter={chapter} mode="test" /> :
               <ChapterOpening book={book} chapter={chapter} move={move} />
             ) : <Contents book={book} move={move} />}

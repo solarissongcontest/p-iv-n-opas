@@ -7,11 +7,11 @@ import "./los1-chapter-photos.css";
  * Desktop/mobile images are local, optimized WebP assets. If an image
  * cannot load, keep a readable typographic fallback.
  */
-export function Los1ChapterImage({chapterId}:{chapterId:string}){
+export function Los1ChapterImage({chapterId,variant="hero"}:{chapterId:string;variant?:"hero"|"learning"}){
   const [failed,setFailed]=useState(false);
   const photo=LOS1_CHAPTER_PHOTOS[chapterId];
   if(!photo)return null;
-  return <figure className="los1-digital-photo">
+  return <figure className={"los1-digital-photo"+(variant==="learning"?" los1-digital-photo--learning":"")}>
     {!failed?<picture key={photo.photoId}>
       <source media="(max-width: 700px)" type="image/webp" srcSet={photo.mobileSrc}/>
       <img src={photo.src} alt={photo.alt}

@@ -582,3 +582,33 @@ test("R10: checked-only chapter work survives backup export and blocks missing-o
  expect(stored.practiceChecked).toEqual(["C03-PRACTICE-01"]);
  expect(stored.note).toBe("");
 });
+
+test("LOS! 1 culture and vocabulary photos are usable as recall tasks on mobile and desktop",async({page})=>{
+ await enterLocalBook(page);
+ await openChapter(page,"03","culture");
+ const culture=page.locator(".los1-visual-learning");
+ await expect(culture).toBeVisible();
+ await expect(culture.locator("picture img")).toHaveAttribute("src",/LOS1-C03-.*desktop[.]webp$/);
+ await expect(culture.locator("figcaption a")).toHaveAttribute("href",/pexels[.]com/);
+ const reveal=culture.getByRole("button",{name:"Näytä mallifraasit"});
+ await expect(reveal).toHaveAttribute("aria-expanded","false");
+ await expect(culture.locator(".los1-visual-learning-phrases li")).toHaveCount(0);
+ await reveal.click();
+ await expect(culture.getByRole("button",{name:"Piilota mallifraasit"})).toHaveAttribute("aria-expanded","true");
+ await expect(culture.locator(".los1-visual-learning-phrases li")).toHaveCount(3);
+ await expect(culture.locator(".los1-visual-learning-phrases")).toContainText("Deutschland");
+ await culture.getByRole("button",{name:"Piilota mallifraasit"}).click();
+ await expect(culture.locator(".los1-visual-learning-phrases li")).toHaveCount(0);
+ await openChapter(page,"06","vocabulary");
+ const vocabulary=page.locator(".los1-visual-learning");
+ await expect(vocabulary).toBeVisible();
+ await vocabulary.getByRole("button",{name:"Näytä mallifraasit"}).click();
+ await expect(vocabulary.locator(".los1-visual-learning-phrases li")).toHaveCount(3);
+ await expect(vocabulary.locator(".los1-visual-learning-phrases")).toContainText("siebzehn");
+ await expect(vocabulary).toContainText("ikiä ei päätellä");
+ await openChapter(page,"04","culture");
+ await expect(page.locator(".los1-visual-learning")).toBeVisible();
+ await openChapter(page,"01","culture");
+ await expect(page.locator(".los1-visual-learning")).toHaveCount(0);
+ await expectNoHorizontalOverflow(page);
+});
