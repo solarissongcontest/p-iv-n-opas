@@ -43,3 +43,17 @@ test("C05 has full separate source dialogue while old pronunciation samples rema
   assert.equal(findLosSource("M-COM-08")?.published,false);
   assert.equal(getLosChapterSourceGate("05").ready,false);
 });
+
+
+test("C05 Text B selects only the full 20-second Human Robot source, before short phrase samples", () => {
+  const audio=readFileSync("src/features/los/LosReferenceTools.tsx","utf8");
+  const first=audio.indexOf('chapterId==="05" && source==="B"?audioSources.filter(item=>item.id==="M-COM-08")');
+  const second=audio.indexOf('chapterId==="05" && source!=="A"?audioSources.filter(item=>item.id==="M-COM-04"||item.id==="M-COM-05")');
+  assert.ok(first>0);
+  assert.ok(second>first,"C05 Text B must not be shadowed by the generic pronunciation sample selection");
+  assert.match(audio,/Dialogue_franz_greta_1\.ogg/);
+  const textB=readFileSync("src/features/los/LosAdditionalTextB.tsx","utf8");
+  assert.match(textB,/LosAuthenticAudio chapterId=\{chapterId\} source="B"/);
+  const textSources=readFileSync("src/features/los/content/los1TextBAdditional.ts","utf8");
+  assert.match(textSources,/sourceId:"M-COM-08",title:"Franz ja Greta: Wie geht's\?"/);
+});
