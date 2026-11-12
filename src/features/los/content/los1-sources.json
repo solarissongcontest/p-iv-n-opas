@@ -2,7 +2,7 @@
   "schemaVersion": "1.0.0",
   "bookId": "los-1",
   "importedFrom": "LOS1_SOURCE_MANIFEST_v1.0(1).json",
-  "sourceCount": 28,
+  "sourceCount": 29,
   "sources": [
     {
       "id": "M-COM-01",
@@ -45,16 +45,16 @@
       "kind": "source",
       "description": "**German Vocabulary - Greetings.ogg**; 28 sekunnin ihmisen lukema tervehdys- ja hyvästelylista. C01:n ääntämisen lisäkuuntelu, C04:n rekisterivertailu. **Ei ole yhtenäinen tekstikappale.**",
       "sourceUrl": "https://commons.wikimedia.org/wiki/File:German_Vocabulary_-_Greetings.ogg",
-      "rightsNotes": "German Men92; tekijä on luovuttanut tiedoston **public domain** -käyttöön; transkriptio lähdesivulla.",
+      "rightsNotes": "German Men92; tekijä on luovuttanut tiedoston **public domain** -käyttöön; transkriptio lähdesivulla. Teksti ja koko ääni nyt myös C04:n kohteliaisuuden rekisterivertailun Text B:ssä, jossa 20 luettelon ilmausta ovat lukijassa, 4 harjoitustehtävää. C01:n aiempi alkuperäisääni pysyy.",
       "manifestReadiness": "A",
-      "manifestCheckedAt": "2026-11-10",
+      "manifestCheckedAt": "2026-11-12",
       "mediaTested": false,
       "stage": "rights-verified",
       "licenseCode": "public-domain",
       "licenseUrl": "https://commons.wikimedia.org/wiki/File:German_Vocabulary_-_Greetings.ogg",
       "licenseEvidenceUrl": "https://commons.wikimedia.org/wiki/File:German_Vocabulary_-_Greetings.ogg",
       "languageReviewed": false,
-      "integrated": false,
+      "integrated": true,
       "deviceTested": false,
       "published": false
     },
@@ -507,6 +507,24 @@
       "description": "Wikibooks German/Level I/Schule: koko 26-osainen alkuperäinen luokkakohtaus, Silke, Torsten, Florian ja opettaja. C08:n uusi Text A, erillinen COERLL:n vielä epävarmasta Im Unterricht -videolähteestä.",
       "sourceUrl": "https://en.wikibooks.org/w/index.php?title=German/Level_I/Schule&oldid=4520956",
       "rightsNotes": "Wikibooks-sivun saksankielinen luokkakohtaus sisältää 26 erillistä ilmausta/narratiiviriviä ja kuuluu Wikibooksin CC BY-SA 4.0 -tekstilisenssiin. Kaikki repliikit tuotu kokonaan; mitään laulun sanoja ei tuoda. Esimerkkirakenne ylittää selvästi A1-tason, joten vain tekstistä tunnistaminen / repliikkien itsenäiset tuki- ja suomennosrivistöt. Lähteellä ei ole tarkistettua audiota; pelkkää tekstiä ei väitetä kuulluksi. Sivun oman kehitysvaiheen ilmoitus näkyy lähteen alkuperäisessä tekstissä; kielentarkistus ja mobiili/desktop laitetesti eivät ole valmiita."
+    },
+    {
+      "id": "M-COM-06",
+      "kind": "source",
+      "description": "German Grammar - The Alphabet.ogg: endymi0nin 60.8 sekunnin autenttinen koko aakkosäänite. C07:n Text B, ei saman sivun Text A:n puhe tai itse keksitty äänite.",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:German_Grammar_-_The_Alphabet.ogg",
+      "rightsNotes": "Äänen äänitti endymi0n, julkaisu alun perin German Men92:n kautta Wikibooksissa; CC BY-SA 3.0 Commons-tiedostosivulla. Täysi äänite toistetaan suoraan Commonsista LOS!-sivulla. Kirjoitettu A–Z + Ä Ö Ü ß -tuki on LOS!:n oma opetuslista eikä sitä nimetä varmennetuksi litteraatiksi. Laitetestaus iOS/desktop ja median toistotulos ovat kesken. Kielitaso rajattu kirjainten tunnistukseen.",
+      "manifestReadiness": "A lisensoitu audio; B laitetestit puuttuvat",
+      "manifestCheckedAt": "2026-11-12",
+      "mediaTested": false,
+      "stage": "rights-verified",
+      "licenseCode": "CC BY-SA 3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+      "licenseEvidenceUrl": "https://commons.wikimedia.org/wiki/File:German_Grammar_-_The_Alphabet.ogg",
+      "languageReviewed": false,
+      "integrated": true,
+      "deviceTested": false,
+      "published": false
     }
   ],
   "chapters": [
@@ -536,7 +554,8 @@
       "primarySourceId": "M-WB-06",
       "textAPlan": "`M-WB-06`, **koko Herr Schmidt–Herr Standish -dialogi**, luetaan tukimerkinnöin",
       "textBPlan": "`M-DIB-07`: luvallisesti valittu muodollisten kysymysten lähdelohko + `M-COM-03`",
-      "publicationGate": "A-pääteksti; selitä vaikeat ilmaisut tunnistustasolla; WB-tekstin attribuutio."
+      "publicationGate": "A-pääteksti; selitä vaikeat ilmaisut tunnistustasolla; WB-tekstin attribuutio.",
+      "textBImplementationNote": "C04 Text B: kokonaista julkisen domainin M-COM-03-tervehdyslistaa käytetään kohteliaisuuden vertailuun. Ei dialogi; äänen toimintatesti puuttuu."
     },
     {
       "id": "C05",
@@ -550,14 +569,16 @@
       "primarySourceId": "M-ZPE-01",
       "textAPlan": "`M-ZPE-01`: Monika Janickan koko Sag mal, wie alt bist du? (4 itsenäistä lyhyttä dialogia, 12 repliikkiä, CC BY-SA 3.0). Entinen M-COM-01 säilyy erillisenä C01:n kertauksena.",
       "textBPlan": "`M-DIB-02` Harald ”Wer bin ich?” + `M-DIB-05` Zahlen",
-      "publicationGate": "C06:n itsenäinen Text A integroitu koko litteraattina ja tekstin CC BY-SA 3.0 -lisenssi tarkistettu alkuperäisellä sivulla. Lopullinen saksan toimituksellinen tarkistus, uuden lähteen äänen tekninen/tiedostokohtainen käsittely, Text B sekä mobiili- ja desktop-testaus eivät ole valmiita. Ei merkitä julkaistuksi."
+      "publicationGate": "C06:n itsenäinen Text A integroitu koko litteraattina ja tekstin CC BY-SA 3.0 -lisenssi tarkistettu alkuperäisellä sivulla. Lopullinen saksan toimituksellinen tarkistus, uuden lähteen äänen tekninen/tiedostokohtainen käsittely, Text B sekä mobiili- ja desktop-testaus eivät ole valmiita. Ei merkitä julkaistuksi.",
+      "textBImplementationNote": "C06 Text B: M-COM-01-keskustelun koko 8 vuoroa aiemmin C01:stä; ikäilmaukset ja neljä uutta kysymystä. Haraldin C10-lähdeteksti toimii lisäksi kirjassa erillisenä tekstikertauksena. Äänen toimintatesti puuttuu."
     },
     {
       "id": "C07",
       "primarySourceId": "M-WB-02",
       "textAPlan": "`M-WB-02`: itsenäinen **kokonainen uusi puhelindialogi**, jossa tunnistetaan nimi ja sen tavaaminen",
       "textBPlan": "`M-DIB-06` aakkosten ääni + `V-DW-02`",
-      "publicationGate": "A-pääteksti on valittu erillisenä kokonaisena lähteenä; sen vaativat rakenteet selitettävä, äänitteen oikeudet ja tekninen käyttö varmistettava."
+      "publicationGate": "A-pääteksti on valittu erillisenä kokonaisena lähteenä; sen vaativat rakenteet selitettävä, äänitteen oikeudet ja tekninen käyttö varmistettava.",
+      "textBImplementationNote": "C07 Text B: M-COM-06 (koko 60.8 s alkuperäinen saksan aakkosäänite, CC BY-SA 3.0) ja LOS!:n oma kirjainlista. Tarkistettuja sisältökysymyksiä on neljä, ei automaattista ääntämisarvosanaa. Toiston laitetesti puuttuu."
     },
     {
       "id": "C08",
@@ -578,7 +599,8 @@
       "primarySourceId": "M-DIB-02",
       "textAPlan": "`M-DIB-02`: COERLL:n Harald Becker -haastattelun koko alkuperäinen 14-repliikkinen Wer bin ich? -litteraatti (QR 1.22) LOS!-lukijassa CC BY 4.0 -attribuutiolla.",
       "textBPlan": "`M-DIB-01` Berna vertailuun + `V-GOE-01` valinnainen video",
-      "publicationGate": "C10:n koko itsenäinen Text A on nyt tekstinä integroitu lukijaan ja kirjan CC BY 4.0 -lisenssitieto dokumentoitu. Alkeistason kielellinen tarkistus, haastattelun äänitteen tiedostokohtaiset oikeudet, toimiva mediasoitin, mobiili-/desktop-QA ja Text B:n tarkistus ovat edelleen kesken. Julkaisutila EI VALMIS."
+      "publicationGate": "C10:n koko itsenäinen Text A on nyt tekstinä integroitu lukijaan ja kirjan CC BY 4.0 -lisenssitieto dokumentoitu. Alkeistason kielellinen tarkistus, haastattelun äänitteen tiedostokohtaiset oikeudet, toimiva mediasoitin, mobiili-/desktop-QA ja Text B:n tarkistus ovat edelleen kesken. Julkaisutila EI VALMIS.",
+      "textBImplementationNote": "C10 Text B: M-COM-02-keskustelun koko neljä alkuperäisrepliikkiä ja ääni, harjoittelu kolmannen henkilön esittelemisestä. C02–C03 käyttävät samaa lähdettä. C10:n ensisijainen autenttinen Text A pysyy erillisenä Haraldin haastatteluna. Äänen laitetesti puuttuu."
     }
   ]
 }
