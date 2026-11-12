@@ -10,6 +10,12 @@ test("LOS! 1 opens validated B5 C01 PDF via bundled PDF.js and preserves text la
   });
   await page.goto("/los#/1/facsimile-pdf",{waitUntil:"domcontentloaded"});
   await expect(page.locator(".los1-pdf-reader")).toBeVisible({timeout:30_000});
+  // Full-book structure must be visible without invented printed page numbers.
+  await expect(page.locator(".los1-full-book-outline")).toBeVisible();
+  await page.locator(".los1-full-book-outline > summary").click();
+  await expect(page.locator(".los1-full-book-outline-chapters > details")).toHaveCount(10);
+  await expect(page.locator(".los1-full-book-outline")).toContainText("Ei sivunumeroa");
+  await expect(page.locator(".los1-full-book-outline")).toContainText("Julkaisu estetty");
   const file=path.resolve(".artifacts/los1/LOS1_C01_B5_TAITTOLUONNOS.pdf");
   await page.locator(".los1-pdf-file-label input[type=file]").setInputFiles(file);
   await expect(page.locator(".los1-pdf-stage")).toBeVisible({timeout:30_000});

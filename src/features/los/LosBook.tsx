@@ -372,7 +372,7 @@ function LosBookWorkspace({ book, location, move, goLibrary, openBook }: { book:
         <div className={"los-book-paper"+(section==="facsimile"?" los-book-paper-facsimile":section==="facsimile-pdf"?" los-book-paper-facsimile-pdf":"")}>
           {!chapter && section === "overview" ? <BookFront book={book} move={move} /> :
             section === "facsimile" && book.id===1 ? <Los1FacsimilePilot onOpenDigital={section=>move(section==="overview"||section==="appendix"?null:"01",section)} onOpenPdf={()=>move(null,"facsimile-pdf")}/> :
-            section === "facsimile-pdf" && book.id===1 ? <Los1PdfReader onBack={()=>move(null,"facsimile")} onOpenDigital={section=>move(section==="overview"||section==="appendix"?null:"01",section)} /> :
+            section === "facsimile-pdf" && book.id===1 ? <Los1PdfReader onBack={()=>move(null,"facsimile")} onOpenDigital={(section,chapterId)=>move(section==="overview"||section==="appendix"?null:(chapterId??"01"),section)} /> :
             section === "contents" ? <Contents book={book} move={move} /> :
             section === "appendix" ? <Appendix book={book} /> :
             section === "path" ? <LosLearningPath book={book} move={move} /> :
