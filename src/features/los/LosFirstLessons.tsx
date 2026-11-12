@@ -12,6 +12,8 @@ import "./los-lessons.css";
 
 const ALL_LESSONS = LOS1_EXECUTABLE_LESSONS;
 const lessonChapter = los1LessonDraftChapter;
+const CHAPTER_IDS = Array.from(new Set(ALL_LESSONS.map(lesson => lessonChapter(lesson.id))));
+const chapterLabel = (code: string) => code==="01" ? "Aloitus + 1" : "Kappale " + Number(code);
 
 const stamp = () => new Date().toISOString();
 
@@ -59,6 +61,13 @@ export function LosFirstLessons({ selectedId, onSelect, move }: {
   const stepCount = lesson.steps.filter(item => progress.completedStepIds.includes(item.id)).length;
   const evidenceReady = losLessonEvidenceMet(lesson, draft);
   const ready = losLessonCanComplete(lesson, progress, draft);
+  const chapterLessons = ALL_LESSONS.filter(item => lessonChapter(item.id) === chapterId);
+  const openChapter = (code: string) => {
+    const items = ALL_LESSONS.filter(item => lessonChapter(item.id) === code);
+    // A chapter tab only selects a lesson; it never records study evidence.
+    const target = items.find(item => !chapterDraft(item.id).draft.lessonProgress?.[item.id]?.completedAt) ?? items[0];
+    if(target) onSelect(target.id);
+  };
   const nextIndex = ALL_LESSONS.findIndex(item => item.id === lesson.id) + 1;
   const next = ALL_LESSONS[nextIndex];
   const skipsUnfinishedLessons = Boolean(next && Number(next.id.slice(1)) > Number(lesson.id.slice(1)) + 1);
@@ -76,8 +85,19 @@ export function LosFirstLessons({ selectedId, onSelect, move }: {
         </div>
       </div>
     </div>
-    <div className="los-lesson-picker" role="group" aria-label="Valitse oppitunti">
-      {ALL_LESSONS.map(item => {
+    <div className="los-lesson-chapter-picker" role="group" aria-label="Valitse kappaleen oppitunnit">
+      {CHAPTER_IDS.map(code => {
+        const lessons = ALL_LESSONS.filter(item => lessonChapter(item.id) === code);
+        const completed = lessons.filter(item => Boolean(chapterDraft(item.id).draft.lessonProgress?.[item.id]?.completedAt)).length;
+        return <button key={code} type="button" aria-pressed={code === chapterId}
+          className={code === chapterId ? "is-active" : ""} onClick={() => openChapter(code)}>
+          <strong>{chapterLabel(code)}</strong><small>{completed}/{lessons.length} tuntia</small>
+        </button>;
+      })}
+    </div>
+    <p className="los-lesson-chapter-context" aria-live="polite">{chapterLabel(chapterId)} · {chapterLessons.length} käytettävissä olevaa oppituntia. Valitse tunti jatkaaksesi.</p>
+    <div className="los-lesson-picker" role="group" aria-label={`${chapterLabel(chapterId)}: valitse oppitunti`}>
+      {chapterLessons.map(item => {
         const done = Boolean(chapterDraft(item.id).draft.lessonProgress?.[item.id]?.completedAt);
         return <button key={item.id} type="button" aria-pressed={item.id === lesson.id} onClick={() => onSelect(item.id)}
           className={item.id === lesson.id ? "is-active" : ""}>
