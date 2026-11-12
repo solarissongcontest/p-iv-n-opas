@@ -12,7 +12,7 @@ import { LOS1_C08_C10_PARTIAL_LESSONS } from "./lessonEngineC08C10Partial.ts";
  * Single canonical set of lessons with implemented completion/evidence logic.
  * An intentional gap in the 60-lesson sequence remains an editorial preview,
  * not an implicitly executable lesson. No hard-coded numeric range or fake
- * progress for missing C06/C08/C10 and module assessments.
+ * progress for missing source-dependent C08/C10 units, review II or final exam.
  */
 export const LOS1_EXECUTABLE_LESSONS: readonly LosLessonBlueprint[] = [
   ...LOS1_C01_LESSON_BLUEPRINTS,
