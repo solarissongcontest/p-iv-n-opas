@@ -49,9 +49,9 @@ export const Route = createFileRoute("/api/los-dictionary")({
           error: "Anna enintään 80 merkkiä pitkä hakusana ja oikea hakusuunta (de-fi tai fi-de).",
           status:"invalid",
         } satisfies SearchError, 400);
-        const supabaseUrl = process.env.SUPABASE_URL;
-        const secret = process.env.SUPABASE_SECRET_KEY;
-        const jwtSecret = process.env.SUPABASE_JWT_SECRET;
+        const supabaseUrl = process.env["SUPABASE_URL"];
+        const secret = process.env["SUPABASE_SECRET_KEY"];
+        const jwtSecret = process.env["SUPABASE_JWT_SECRET"];
         if (!supabaseUrl || !secret || !jwtSecret) {
           return reply({error:"Sanakirjan hakupalvelua ei ole otettu käyttöön.",status:"unavailable"} satisfies SearchError,503);
         }
