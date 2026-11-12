@@ -3,13 +3,13 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { LOS1_EXECUTABLE_LESSONS, los1LessonDraftChapter, isLos1ExecutableLesson } from "../src/features/los/guidedLessons.ts";
 
-test("53 real lessons form twelve stable chapter groups without publishing gaps",()=>{
-  assert.equal(LOS1_EXECUTABLE_LESSONS.length,53);
+test("58 real lessons form twelve stable chapter groups without publishing gaps",()=>{
+  assert.equal(LOS1_EXECUTABLE_LESSONS.length,58);
   const groups = Array.from(new Set(LOS1_EXECUTABLE_LESSONS.map(lesson=>los1LessonDraftChapter(lesson.id))));
   assert.deepEqual(groups,["01","02","03","04","05","91","06","07","08","09","10","92"]);
   const counts=groups.map(code=>LOS1_EXECUTABLE_LESSONS.filter(lesson=>los1LessonDraftChapter(lesson.id)===code).length);
-  assert.deepEqual(counts,[6,5,5,5,5,4,5,5,2,5,3,3]);
-  for(const id of ["L042","L044","L045","L054","L055","L060"]){
+  assert.deepEqual(counts,[6,5,5,5,5,4,5,5,5,5,5,3]);
+  for(const id of ["L059","L060"]){
     assert.equal(isLos1ExecutableLesson(id),false);
   }
 });
