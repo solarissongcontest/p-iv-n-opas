@@ -1,0 +1,87 @@
+name: LOS1 C01 B5 PDF Draft Preflight
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "src/features/los/facsimile/los1/**"
+      - "src/features/los/content/**"
+      - "src/features/los/catalog.ts"
+      - "src/features/los/LosBook.tsx"
+      - "scripts/los1-facsimile-export.mjs"
+      - "scripts/los1-facsimile-pdf-preflight.mjs"
+      - ".github/workflows/los-facsimile-pdf.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: los1-c01-pdf-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  draft-pdf:
+    name: B5 draft export and real-PDF checks
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    env:
+      LOS1_FACSIMILE_BASE_URL: http://127.0.0.1:5173
+    steps:
+      - name: Checkout the exact candidate
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install frozen dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Install existing E2E dependencies
+        run: bun run e2e:install
+
+      - name: Install Chromium for PDF export
+        run: bunx playwright install --with-deps chromium
+
+      - name: Install PDF inspection utilities
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq poppler-utils
+
+      - name: Start the actual LOS! app locally
+        shell: bash
+        run: |
+          nohup bun run dev -- --host 127.0.0.1 --port 5173 --strictPort >/tmp/los-c01-pdf-dev.log 2>&1 &
+          for attempt in $(seq 1 45); do
+            if curl -fsS --max-time 3 http://127.0.0.1:5173/los >/dev/null 2>&1; then
+              echo "The LOS! reader is ready"
+              exit 0
+            fi
+            sleep 2
+          done
+          cat /tmp/los-c01-pdf-dev.log
+          exit 1
+
+      - name: Export same-source C01 B5 draft PDF
+        run: node scripts/los1-facsimile-export.mjs
+
+      - name: Reject wrong dimensions, extra sheets and missing searchable text
+        run: node scripts/los1-facsimile-pdf-preflight.mjs
+
+      - name: Check a rendered physical page for inspection evidence
+        run: |
+          mkdir -p .artifacts/los1/render
+          pdftoppm -f 5 -l 5 -singlefile -png -r 96 \
+            .artifacts/los1/LOS1_C01_B5_TAITTOLUONNOS.pdf \
+            .artifacts/los1/render/c01-text-a
+          test -s .artifacts/los1/render/c01-text-a.png
+
+      # Intentionally no upload-artifact/public distribution: this is an
+      # unapproved C01 layout draft, not a rights-cleared downloadable edition.
+      - name: Report safe preflight result
+        if: always()
+        run: |
+          echo "PDF draft inspected locally. No PDF was published or uploaded."
+          echo "Source-page and media release gates remain separate."
