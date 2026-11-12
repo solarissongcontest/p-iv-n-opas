@@ -46,7 +46,7 @@ export function LosBackups({bookId}:{bookId:number}){
   return <section className="los-backup-section" aria-label="LOS! 1:n omat varmuuskopiot">
     <p className="los-eyebrow">OMAT TIEDOT · VARMUUSKOPIOT</p>
     <h2>Siirrä opiskelutyö laitteesta toiseen</h2>
-    <p>Lataa LOS! 1:n muistiinpanot, kirjoitustehtävät ja harjoitusvastaukset JSON-tiedostoksi. Voit tuoda saman tiedoston toisella laitteella myös silloin, kun pilvitallennusta ei ole otettu käyttöön.</p>
+    <p>Lataa LOS! 1:n muistiinpanot, kirjoitustehtävät, harjoitusvastaukset ja sanaston kertauskorttien aikataulut JSON-tiedostoksi. Voit tuoda saman tiedoston toisella laitteella myös silloin, kun pilvitallennusta ei ole otettu käyttöön.</p>
     <div className="los-backup-actions">
       <button type="button" onClick={exportAll}><Download size={17}/> Vie koko LOS! 1:n varmuuskopio</button>
       <label className="los-backup-upload"><FileUp size={17}/> Tuo LOS!-varmuuskopio<input type="file" accept=".json,application/json" onChange={event=>void chooseFile(event)} /></label>
