@@ -7,7 +7,11 @@ import {
   losLessonEvidenceMet, losLessonFinish, losLessonMarkStep, losLessonSubmitCheck,
   type LosLessonProgress,
 } from "./lessonEngine";
+import { LOS1_C02_LESSON_BLUEPRINTS } from "./lessonEngineC02";
 import "./los-lessons.css";
+
+const ALL_LESSONS = [...LOS1_C01_LESSON_BLUEPRINTS, ...LOS1_C02_LESSON_BLUEPRINTS];
+const isC02Lesson = (id: string) => LOS1_C02_LESSON_BLUEPRINTS.some(lesson => lesson.id === id);
 
 const stamp = () => new Date().toISOString();
 
@@ -21,9 +25,11 @@ export function LosFirstLessons({ selectedId, onSelect, move }: {
   onSelect: (id: string) => void;
   move: LosNavigate;
 }) {
-  const { draft, update, saved } = useLosChapterDraft(1, "01");
-  const lesson = LOS1_C01_LESSON_BLUEPRINTS.find(item => item.id === selectedId) ??
-    LOS1_C01_LESSON_BLUEPRINTS[0]!;
+  const c01 = useLosChapterDraft(1, "01");
+  const c02 = useLosChapterDraft(1, "02");
+  const lesson = ALL_LESSONS.find(item => item.id === selectedId) ?? ALL_LESSONS[0]!;
+  const chapterId = isC02Lesson(lesson.id) ? "02" : "01";
+  const { draft, update, saved } = chapterId === "02" ? c02 : c01;
   const [pendingAnswer, setPendingAnswer] = useState("");
   const progress = draft.lessonProgress?.[lesson.id] ?? emptyLosLessonProgress();
   useEffect(() => { setPendingAnswer(progress.exitAnswer ?? ""); }, [lesson.id, progress.exitAnswer]);
@@ -36,30 +42,30 @@ export function LosFirstLessons({ selectedId, onSelect, move }: {
       } };
     });
   };
-  const completeCount = LOS1_C01_LESSON_BLUEPRINTS.filter(item =>
-    Boolean(draft.lessonProgress?.[item.id]?.completedAt)).length;
+  const completeCount = ALL_LESSONS.filter(item =>
+    Boolean((isC02Lesson(item.id) ? c02.draft : c01.draft).lessonProgress?.[item.id]?.completedAt)).length;
   const stepCount = lesson.steps.filter(item => progress.completedStepIds.includes(item.id)).length;
   const evidenceReady = losLessonEvidenceMet(lesson, draft);
   const ready = losLessonCanComplete(lesson, progress, draft);
-  const nextIndex = LOS1_C01_LESSON_BLUEPRINTS.findIndex(item => item.id === lesson.id) + 1;
-  const next = LOS1_C01_LESSON_BLUEPRINTS[nextIndex];
+  const nextIndex = ALL_LESSONS.findIndex(item => item.id === lesson.id) + 1;
+  const next = ALL_LESSONS[nextIndex];
   const isComplete = Boolean(progress.completedAt);
-  return <section className="los-lesson-program" id="los-lesson-runner" aria-label="Toteutetut oppitunnit L001–L006">
+  return <section className="los-lesson-program" id="los-lesson-runner" aria-label="Toteutetut oppitunnit L001–L011">
     <div className="los-lesson-program-head">
-      <p className="los-overline">OHJATTU OPETUS · ENSIMMÄISET KUUSI TUNTIA</p>
+      <p className="los-overline">OHJATTU OPETUS · L001–L011</p>
       <h2>Opiskele vaihe vaiheelta</h2>
-      <p>Ensimmäiset kuusi oppituntia voi suorittaa. Niissä käytetään kirjan oikeita sivuja ja samoja tallennettuja vastauksia. Oppitunnin suoritus kertoo työvaiheiden tekemisestä, ei vielä todennetusta kielitaidosta.</p>
-      <p className="los-lesson-save" role="status">{saved ? "Oppituntitiedot tallennetaan paikalliseen LOS!-varmuuskopioon. Valinnainen pilvisynkronointi tehdään kappaleen 1 muistiinpanojen kautta." : "Tallennus epäonnistui. Älä sulje sivua ennen varmuuskopion tekemistä."}</p>
-      <div className="los-lesson-progress" aria-label="Kuuden oppitunnin edistyminen">
-        <strong>{completeCount}/6 suoritettu</strong>
-        <div role="progressbar" aria-label="Oppituntien eteneminen" aria-valuemin={0} aria-valuemax={6} aria-valuenow={completeCount}>
-          <span style={{ width: String(completeCount / 6 * 100) + "%" }} />
+      <p>Ensimmäiset yksitoista oppituntia voi suorittaa. Niissä käytetään kirjan oikeita sivuja ja samoja tallennettuja vastauksia. Oppitunnin suoritus kertoo työvaiheiden tekemisestä, ei vielä todennetusta kielitaidosta.</p>
+      <p className="los-lesson-save" role="status">{saved ? `Oppituntitiedot tallennetaan paikalliseen LOS!-varmuuskopioon. Valinnainen pilvisynkronointi tehdään kappaleen ${Number(chapterId)} muistiinpanojen kautta.` : "Tallennus epäonnistui. Älä sulje sivua ennen varmuuskopion tekemistä."}</p>
+      <div className="los-lesson-progress" aria-label="Yhdentoista oppitunnin edistyminen">
+        <strong>{completeCount}/{ALL_LESSONS.length} suoritettu</strong>
+        <div role="progressbar" aria-label="Oppituntien eteneminen" aria-valuemin={0} aria-valuemax={ALL_LESSONS.length} aria-valuenow={completeCount}>
+          <span style={{ width: String(completeCount / ALL_LESSONS.length * 100) + "%" }} />
         </div>
       </div>
     </div>
     <div className="los-lesson-picker" role="group" aria-label="Valitse oppitunti">
-      {LOS1_C01_LESSON_BLUEPRINTS.map(item => {
-        const done = Boolean(draft.lessonProgress?.[item.id]?.completedAt);
+      {ALL_LESSONS.map(item => {
+        const done = Boolean((isC02Lesson(item.id) ? c02.draft : c01.draft).lessonProgress?.[item.id]?.completedAt);
         return <button key={item.id} type="button" aria-pressed={item.id === lesson.id} onClick={() => onSelect(item.id)}
           className={item.id === lesson.id ? "is-active" : ""}>
           {done ? <CheckCircle2 size={17} /> : <Circle size={17} />}
@@ -68,7 +74,7 @@ export function LosFirstLessons({ selectedId, onSelect, move }: {
       })}
     </div>
     <article className="los-lesson-detail" key={lesson.id}>
-      <p className="los-overline">{lesson.id} · NOIN {lesson.estimatedMinutes} MIN · C01 / ALOITUS</p>
+      <p className="los-overline">{lesson.id} · NOIN {lesson.estimatedMinutes} MIN · {lesson.id === "L001" ? "KIRJAN ALOITUS" : `C${chapterId}`}</p>
       <h3>{lesson.title}</h3>
       <p className="los-lesson-objective"><strong>Tavoite:</strong> {lesson.objective}</p>
       <p className="los-lesson-status">{isComplete ? "Oppitunti suoritettu. Voit silti avata aineistot uudelleen." :
