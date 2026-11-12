@@ -62,6 +62,10 @@ class DictionaryImporterTest(unittest.TestCase):
     def test_inspect_never_publishes_and_counts_zero_until_import(self):
         details = module.run(self.args())
         self.assertEqual(details["status"], "NOT_IMPORTED_RIGHTS_UNVERIFIED")
+        self.assertEqual(details["inspectedSourceRows"], 2)
+        self.assertEqual(details["inspectedDistinctLemmaAndPos"], 1)
+        self.assertEqual(details["inspectedTranslationVariants"], 2)
+        self.assertEqual(details["publishedRows"], 0)
         self.assertEqual(len(details["sourceSha512"]), 128)
         self.assertEqual(len(details["teiHeaderSha256"]), 64)
 
