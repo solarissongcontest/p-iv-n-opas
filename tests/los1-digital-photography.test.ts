@@ -23,7 +23,7 @@ test("LOS! 1 user experience is digital-only without the abandoned print reader"
  const book=readFileSync("src/features/los/LosBook.tsx","utf8");
  const image=readFileSync("src/features/los/Los1ChapterImage.tsx","utf8");
  assert.match(book,/Los1ChapterImage/);
- assert.match(book,/chapter\.id===/);
+ assert.match(book,/chapterId=\{chapter\.id\}/);
  assert.doesNotMatch(book,/facsimile|Näköiskirja|PdfReader/);
  assert.match(image,/loading="lazy"/);
  assert.match(image,/Kuvituskuva/);
