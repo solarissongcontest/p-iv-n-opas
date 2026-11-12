@@ -32,7 +32,7 @@ test("canonical readiness is explicit: 52 actual lessons, not a fabricated conti
  assert.equal(los1LessonDraftChapter("L031"),"06");
  assert.equal(los1LessonDraftChapter("L030"),"91");
  assert.equal(los1LessonDraftChapter("L036"),"07");
- assert.equal(los1LessonDraftChapter("L052"),"09");
+ assert.equal(los1LessonDraftChapter("L049"),"09");
  assert.equal(los1LessonDraftChapter("L025"),"05");
 });
 test("C07 and C09 lesson plans use original source dialogue and valid real question IDs",()=>{
