@@ -15,7 +15,8 @@ function formSearchKeys(form,language) {
  const base=norm(form);
  if(language!=="de")return [base];
  return [...new Set([base,base.replaceAll("ß","ss"),
-  base.replaceAll("ä","ae").replaceAll("ö","oe").replaceAll("ü","ue")])];
+  base.replaceAll("ä","ae").replaceAll("ö","oe").replaceAll("ü","ue"),
+  base.replaceAll("ß","ss").replaceAll("ä","ae").replaceAll("ö","oe").replaceAll("ü","ue")])];
 }
 async function checksum(path) {
  const hash=createHash("sha512");

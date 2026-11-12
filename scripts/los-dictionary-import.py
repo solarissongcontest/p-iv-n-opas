@@ -31,7 +31,8 @@ def search_keys(word: str, lang: str) -> list[str]:
     keys = [base]
     if lang == "de":
         keys.extend([base.replace("ß", "ss"),
-                     base.replace("ä", "ae").replace("ö", "oe").replace("ü", "ue")])
+                     base.replace("ä", "ae").replace("ö", "oe").replace("ü", "ue"),
+                     base.replace("ß", "ss").replace("ä", "ae").replace("ö", "oe").replace("ü", "ue")])
     return list(dict.fromkeys(key for key in keys if key))
 
 

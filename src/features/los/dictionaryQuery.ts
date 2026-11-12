@@ -35,5 +35,6 @@ export function losDictionarySearchAliases(term: string, language: LosDictionary
     normalized,
     normalized.replace(/ß/g, "ss"),
     normalized.replace(/ä/g, "ae").replace(/ö/g, "oe").replace(/ü/g, "ue"),
+    normalized.replace(/ß/g, "ss").replace(/ä/g, "ae").replace(/ö/g, "oe").replace(/ü/g, "ue"),
   ])];
 }

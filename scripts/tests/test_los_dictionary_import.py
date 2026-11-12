@@ -137,6 +137,11 @@ class DictionaryImporterTest(unittest.TestCase):
         self.assertIn("häuser", records[0]["searchKeys"])
         self.assertIn("haeuser", records[0]["searchKeys"])
         self.assertEqual(module.search_keys("Maße", "de"), ["maße", "masse"])
+        self.assertEqual(module.search_keys("Größe", "de"),
+                         ["größe", "grösse", "groeße", "groesse"])
+        self.assertEqual(module.search_keys("Größen", "de"),
+                         ["größen", "grössen", "groeßen", "groessen"])
+        self.assertEqual(module.search_keys("Häuser", "de"), ["häuser", "haeuser"])
 
 
 if __name__ == "__main__":
