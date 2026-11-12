@@ -28,7 +28,7 @@ test("two original native-speaker pronunciation samples are registered with inde
 test("C05 has full separate source dialogue while old pronunciation samples remain available", () => {
   const source=readFileSync("src/features/los/LosSupplementalSections.tsx","utf8");
   const audio=readFileSync("src/features/los/LosReferenceTools.tsx","utf8");
-  assert.match(source,/\["04","05","06","07","09","10"\]\.includes\(chapter.id\)/);
+  assert.match(source,/\["01","04","05","06","07","08","09","10"\]\.includes\(chapter.id\)/);
   const full=readFileSync("src/features/los/content/los1TextBAdditional.ts","utf8");
   assert.match(full,/sourceId:"M-COM-08"/);
   assert.match(full,/textAttribution:/);
