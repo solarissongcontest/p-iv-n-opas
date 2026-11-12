@@ -3,7 +3,7 @@ import {CheckCircle2,Headphones,BookOpen,AlertTriangle} from "lucide-react";
 import {useLosChapterDraft} from "./studyState";
 import {LosVoicePractice} from "./LosVoicePractice";
 import {LOS1_RICH_TASKS,gradeLosRichTask,losRichTasksFor,
- type LosRichTask,type LosRichOutcome} from "./content/los1RichExercises";
+ type LosRichTask} from "./content/los1RichExercises";
 import "./los-rich-exercises.css";
 const availableTypes:Record<string,string>={
  "highlight-span":"Korosta tekstijakso","single-choice":"Yksi oikea vaihtoehto",
