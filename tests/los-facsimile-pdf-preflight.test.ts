@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import {test} from "node:test";
 import {readFileSync} from "node:fs";
 import {
-  LOS1_C01_DRAFT_PDF_SPECS,LOS1_C02_DRAFT_PDF_SPECS,LOS1_C03_DRAFT_PDF_SPECS,parsePdfInfo,inspectDraftPdf,
+  LOS1_C01_DRAFT_PDF_SPECS,LOS1_C02_DRAFT_PDF_SPECS,LOS1_C03_DRAFT_PDF_SPECS,LOS1_C04_DRAFT_PDF_SPECS,parsePdfInfo,inspectDraftPdf,
 } from "../scripts/los1-facsimile-pdf-preflight.mjs";
 
 const info=[
@@ -73,4 +73,21 @@ test("C03 PDF requires exactly 14 B5 leaves and both complete source names",()=>
   assert.ok(missing.errors.some(e=>e.includes("Thomas")));
   const extra=inspectDraftPdf({info,text:content,spec:LOS1_C03_DRAFT_PDF_SPECS});
   assert.ok(extra.errors.some(e=>e.includes("Sivumäärä")));
+});
+
+test("C04 PDF must have 16 B5 leaves and both sources visible in searchable text",()=>{
+  const c04Info=info.replace("Pages:          15","Pages:          16");
+  const tokens="Schmidt Standish Ihnen Guten Morgen Wie geht es Sie heißt du heißen Sie Wortschatz Grammatik Moin Servus Bis bald Gute Nacht Duzen siezen ";
+  const accepted=inspectDraftPdf({info:c04Info,text:tokens.repeat(38),spec:LOS1_C04_DRAFT_PDF_SPECS});
+  assert.equal(accepted.ok,true);
+  assert.equal(accepted.pages,16);
+  assert.equal(LOS1_C04_DRAFT_PDF_SPECS.widthMm,176);
+  assert.equal(LOS1_C04_DRAFT_PDF_SPECS.heightMm,250);
+  const lostGreet=inspectDraftPdf({
+    info:c04Info,text:"Schmidt Standish Ihnen Guten Morgen Wie geht es Sie heißt du heißen Sie Wortschatz Grammatik ".repeat(40),
+    spec:LOS1_C04_DRAFT_PDF_SPECS,
+  });
+  assert.ok(lostGreet.errors.some(e=>e.includes("Moin")));
+  const wrongCount=inspectDraftPdf({info,text:tokens.repeat(38),spec:LOS1_C04_DRAFT_PDF_SPECS});
+  assert.ok(wrongCount.errors.some(e=>e.includes("Sivumäärä")));
 });
