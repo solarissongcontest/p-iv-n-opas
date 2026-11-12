@@ -24,9 +24,9 @@ function extractStrings(items:readonly unknown[]):string[]{
     .map(item=>item.str??"");
 }
 
-function LocalPdfPage({document,pageNumber,availableWidth,availableHeight,zoom}:{
+function LocalPdfPage({document,pageNumber,availableWidth,availableHeight,zoom,printedPageLabel,isPublished}:{
   document:PDFDocumentProxy;pageNumber:number;availableWidth:number;
-  availableHeight:number;zoom:number;
+  availableHeight:number;zoom:number;printedPageLabel:string|null;isPublished:boolean;
 }){
   const canvasRef=useRef<HTMLCanvasElement>(null);
   const textRef=useRef<HTMLDivElement>(null);
@@ -84,14 +84,14 @@ function LocalPdfPage({document,pageNumber,availableWidth,availableHeight,zoom}:
       textBox.replaceChildren();
     };
   },[document,pageNumber,availableWidth,availableHeight,zoom]);
-  return <section className="los1-pdf-leaf" aria-label={"PDF-luonnoslehti "+pageNumber}>
+  return <section className="los1-pdf-leaf" aria-label={isPublished?"Painettu sivu "+(printedPageLabel??"ilman numeroa"):"PDF-luonnoslehti "+pageNumber}>
     <div className="los1-pdf-leaf-content">
       <canvas ref={canvasRef} aria-hidden="true"/>
       <div ref={textRef} className="textLayer los1-pdf-textlayer"
         aria-label={"PDF-sivun "+pageNumber+" valittava teksti"}/>
     </div>
     {error&&<p className="los1-pdf-error" role="alert">{error}</p>}
-    <span className="los1-pdf-folio">Luonnoslehti {pageNumber}</span>
+    <span className="los1-pdf-folio">{isPublished?(printedPageLabel?"Sivu "+printedPageLabel:"Numeroimaton sivu"):"Luonnoslehti "+pageNumber}</span>
   </section>;
 }
 
@@ -117,6 +117,7 @@ export function Los1PdfReader({
   const [searching,setSearching]=useState(false);
   const [bookmarks,setBookmarks]=useState<number[]>([]);
   const [bookmarkStorageKey,setBookmarkStorageKey]=useState<string|null>(null);
+  const [readingStorageKey,setReadingStorageKey]=useState<string|null>(null);
   const [jumpValue,setJumpValue]=useState("");
   const [jumpError,setJumpError]=useState("");
   const stageRef=useRef<HTMLDivElement>(null);
@@ -140,6 +141,11 @@ export function Los1PdfReader({
     catch{/* Browser private-mode storage can be disabled. */}
   },[bookmarks,bookmarkStorageKey]);
 
+  useEffect(()=>{
+    if(!document||!readingStorageKey)return;
+    try{localStorage.setItem(readingStorageKey,String(pageIndex));}
+    catch{/* Reading place is optional on private-browsing devices. */}
+  },[document,pageIndex,readingStorageKey]);
   useEffect(()=>()=>{void currentLoadingTask.current?.destroy();
     if(!currentLoadingTask.current)void currentDoc.current?.destroy();},[]);
 
@@ -167,7 +173,7 @@ export function Los1PdfReader({
     buffer:ArrayBuffer,name:string,release:Los1PublishedEdition|null,
   )=>{
     setBusy(true);setError("");setDocument(null);setFileName("");
-    setActiveEdition(null);setBookmarkStorageKey(null);setBookmarks([]);setHits([]);
+    setActiveEdition(null);setBookmarkStorageKey(null);setReadingStorageKey(null);setBookmarks([]);setHits([]);
     try{
       await currentLoadingTask.current?.destroy();
       currentLoadingTask.current=null;
@@ -175,6 +181,7 @@ export function Los1PdfReader({
       const owner=getDeviceOwnerId();
       let bookmarkKey:string|null=null;
       let restoredBookmarks:number[]=[];
+      let restoredPageIndex=0;
       // Compute digest before PDF.js worker may transfer/detach the bytes.
       if(owner&&typeof crypto!=="undefined"&&crypto.subtle){
         const hash=await crypto.subtle.digest("SHA-256",buffer);
@@ -187,6 +194,12 @@ export function Los1PdfReader({
           restoredBookmarks=Array.isArray(data)?data.filter((n):n is number=>
             Number.isInteger(n)&&n>=0&&n<maxPages):[];
         }catch{/* No stored bookmark set is fine. */}
+        try{
+          const raw=localStorage.getItem(bookmarkKey+".last-page");
+          const saved=raw===null?NaN:Number(raw);
+          const limit=release?.pages.length??LOS1_C01_PDF_CONTRACT.pageCount;
+          if(Number.isInteger(saved)&&saved>=0&&saved<limit)restoredPageIndex=saved;
+        }catch{/* Reading place is optional on private-browsing devices. */}
       }
       const pdfjs=await import("pdfjs-dist/legacy/build/pdf.mjs");
       pdfjs.GlobalWorkerOptions.workerSrc=pdfWorkerUrl;
@@ -213,12 +226,13 @@ export function Los1PdfReader({
         if(sourceError)throw Error(sourceError);
       }
       currentDoc.current=pdf;
-      setDocument(pdf);setActiveEdition(release);setPageIndex(0);
+      setDocument(pdf);setActiveEdition(release);setPageIndex(restoredPageIndex);
       setZoom(100);setFileName(name);
       setBookmarks(restoredBookmarks);setBookmarkStorageKey(bookmarkKey);
+      setReadingStorageKey(bookmarkKey?bookmarkKey+".last-page":null);
     }catch(e){
       setError(e instanceof Error?e.message:"PDF:n avaaminen epäonnistui.");
-      setDocument(null);setActiveEdition(null);
+      setDocument(null);setActiveEdition(null);setReadingStorageKey(null);
       await currentLoadingTask.current?.destroy().catch(()=>{});
       currentLoadingTask.current=null;currentDoc.current=null;
     }finally{setBusy(false);}
@@ -307,7 +321,7 @@ export function Los1PdfReader({
       <div className="los1-pdf-heading"><strong>LOS! 1 · PDF.js</strong>
         <small>{activeEdition?"Hyväksytty painos · "+activeEdition.editionId:
           "Paikallinen C01-taittoluonnos · ei julkaistu painos"}</small></div>
-      {document&&<button type="button" onClick={()=>{setDocument(null);setActiveEdition(null);setFileName("");setBookmarkStorageKey(null);setBookmarks([]);setHits([]);
+      {document&&<button type="button" onClick={()=>{setDocument(null);setActiveEdition(null);setFileName("");setBookmarkStorageKey(null);setReadingStorageKey(null);setBookmarks([]);setHits([]);
           void currentLoadingTask.current?.destroy().catch(()=>{});currentLoadingTask.current=null;currentDoc.current=null;}}>
           <X size={17}/> Sulje PDF
         </button>}
@@ -378,7 +392,9 @@ export function Los1PdfReader({
         aria-label="PDF-kirjan sivut">
         <div className="los1-pdf-spread">
           {visible.map(index=><LocalPdfPage key={index} document={document} pageNumber={index+1}
-            availableWidth={pageWidth} availableHeight={pageHeight} zoom={zoom}/>)}
+            availableWidth={pageWidth} availableHeight={pageHeight} zoom={zoom}
+            printedPageLabel={activeEdition?.pages[index]?.printedPageLabel??null}
+            isPublished={Boolean(activeEdition)}/>)}
         </div>
       </div>
       <footer className="los1-pdf-footer">
