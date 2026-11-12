@@ -31,7 +31,7 @@ test("review I maps exactly to L027-L030 and 60 executable lessons",()=>{
   }
   assert.equal(isLos1ExecutableLesson("L041"),true);
   assert.equal(isLos1ExecutableLesson("L051"),true);
-  assert.equal(isLos1ExecutableLesson("L059"),false);
+  assert.equal(isLos1ExecutableLesson("L059"),true);
 });
 test("three review sets have 5 original questions and separate ungraded reflection IDs",()=>{
   assert.deepEqual(validateLosReviewIQuestions(),[]);
