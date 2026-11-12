@@ -16,7 +16,7 @@
       "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
       "sourceSha512": "b689041275b3f4eec531204b3da12bf623cbb3f563aaaf914d943a055bf0d98852da20937e63921fbbf2a45adfc1b3507242b0d2492755837ef1912e5d6a708d",
       "teiHeaderSha256": "ffc40ec35475f86f4246daca8f70d3f98f3d09a79206e2ad6e63eb9c74ccb8b0",
-      "outputSha512": "3e698013968f13b3ac2fefc13afc39080ff07bc308a6e63832153e3f4e6140faf0f199bcadb0c39a4f467b8440c79325b190b0744cfcd90247803986ca908d6c",
+      "outputSha512": "6450923f387e73f89d903fad9ceeba2fd94dfadeab1a40787c727860e6823295386b5c8f521604f29eeb5ddeafe04a7b6aed7f34609c0490a41dc975a2e7a0e7",
       "actualParsedRows": 13028,
       "actualDistinctLemmaAndPos": 12967,
       "actualRowsWithTranslation": 13028,
@@ -75,5 +75,7 @@
     "state": "NOT_IMPORTED",
     "acceptedAudioRecords": 0
   },
-  "publicationSafety": "Dictionary sources default to published=false. SQL requires exact loaded-source-row count plus independent legal_review_approved/at/by before any source can become searchable. No data has been deployed."
+  "publicationSafety": "Dictionary sources default to published=false. SQL requires exact loaded-source-row count plus independent legal_review_approved/at/by before any source can become searchable. No data has been deployed.",
+  "processingEvidenceUrl": "https://github.com/solarissongcontest/p-iv-n-opas/actions/runs/43292339130",
+  "processingNote": "12.11.2026 derived staging output was regenerated after the combined umlaut + ß/ss search alias fix; original downloaded source byte hashes and row/translation counts are unchanged. Output hash is runner-measured, NOT a production import."
 }
