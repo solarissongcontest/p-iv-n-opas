@@ -200,9 +200,23 @@ def run(args: argparse.Namespace) -> dict:
     base = {"sourceId": args.source_id, "kind": args.kind, "direction": args.direction,
             "sourceFile": file.name, "sourceSha512": source_sha}
     if args.mode == "inspect":
+        # This verifies real, downloaded local bytes. It performs no release,
+        # database write or licence approval and never reports published rows.
+        inspector = parse_freedict(file, args.source_id, args.direction) if args.kind == "freedict" \
+            else parse_kaikki(file, args.source_id)
+        rows = translation_variants = 0
+        lexemes: set[tuple[str, str | None]] = set()
+        for record in inspector:
+            rows += 1
+            lexemes.add((record["lemma"], record["partOfSpeech"]))
+            translation_variants += sum(len(s.get("translations", [])) for s in record["senses"])
         return {**base, "teiHeaderSha256": hashlib.sha256(
             header.encode("utf-8")).hexdigest() if header is not None else None,
                 "headerPreview": header[:800] if header else None,
+                "inspectedSourceRows": rows,
+                "inspectedDistinctLemmaAndPos": len(lexemes),
+                "inspectedTranslationVariants": translation_variants,
+                "publishedRows": 0,
                 "status": "NOT_IMPORTED_RIGHTS_UNVERIFIED"}
     if not args.approval or not args.output:
         raise ValueError("Varsinainen tuonti edellyttää --approval ja --output")
