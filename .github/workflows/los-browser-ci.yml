@@ -9,6 +9,14 @@ on:
       - "e2e/los-c01-lessons.spec.ts"
       - "e2e/helpers.ts"
       - ".github/workflows/los-browser-ci.yml"
+  push:
+    branches: [main]
+    paths:
+      - "src/features/los/**"
+      - "e2e/los-full-book.spec.ts"
+      - "e2e/los-c01-lessons.spec.ts"
+      - "e2e/helpers.ts"
+      - ".github/workflows/los-browser-ci.yml"
   workflow_dispatch:
 
 permissions:
