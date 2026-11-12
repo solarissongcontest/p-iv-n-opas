@@ -412,7 +412,7 @@ function LosBookWorkspace({ book, location, move, goLibrary, openBook }: { book:
         <nav>
           <button className={section === "contents" ? "is-active" : ""} onClick={() => move(null, "contents")}>Sisällysluettelo</button>
           <LosContentTree book={book} chapterId={chapter?.id??null} section={section}
-            activeTaskId={location.taskId} move={move} openTask={openTask} />
+            activeTaskId={location.taskId} move={move} openTask={openTask} openBook={openBook} />
           <div className="los-sidebar-heading">HAKEMISTOT</div>
           <button className={section === "path" ? "is-active" : ""} onClick={() => move(null, "path")}>Ohjattu opetuspolku</button>
           {book.id===1&&<button className={section==="facsimile"?"is-active":""} onClick={()=>move(null,"facsimile")}>Näköiskirja · C01-pilotti</button>}
