@@ -71,3 +71,48 @@ jobs:
           name: los-u2-freedict-source-inspection
           path: /tmp/los-u2-sources/*-report.json
           retention-days: 7
+      - name: Parse real FreeDict sources with pinned evidence into ephemeral staging
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          import subprocess
+          from pathlib import Path
+
+          root = Path('/tmp/los-u2-sources')
+          approvals = json.loads(Path('docs/LOS_U2_FREEDICT_STAGING_SOURCE_APPROVALS.json').read_text())
+          for entry in approvals['entries']:
+              direction = entry['direction']
+              source = root / (direction + '.tei')
+              staged = root / (direction + '-staged.jsonl')
+              approval = root / (direction + '-approval.json')
+              approval.write_text(json.dumps({key: entry[key] for key in
+                  ('sourceId','kind','sourceSha512','rightsApproval')}))
+              command = [
+                'python','scripts/los-dictionary-import.py','--kind','freedict',
+                '--direction',direction,'--source',str(source),
+                '--source-id',entry['sourceId'],'--mode','import',
+                '--approval',str(approval),'--output',str(staged),
+              ]
+              subprocess.run(command, check=True)
+              report = json.loads(Path(str(staged)+'.manifest.json').read_text())
+              assert report['status'] == 'STAGED_NOT_PUBLISHED'
+              assert report['sourceSha512'] == entry['sourceSha512']
+              assert report['importedSourceRows'] > 10000, report
+              assert report['translationVariants'] > 1000, report
+              assert report['rowsWithTranslations'] > 1000, report
+              print('ACTUAL SOURCE IMPORT COUNTS',direction, json.dumps({
+                'rows':report['importedSourceRows'],
+                'translatedRows':report['rowsWithTranslations'],
+                'translationVariants':report['translationVariants'],
+                'distinctLemmaAndPos':report['distinctLemmaAndPos'],
+                'outputSha512':report['outputSha512'],
+              },ensure_ascii=False))
+          PY
+      - name: Archive actual counts and source hashes only; NO corpus publication
+        uses: actions/upload-artifact@v4
+        with:
+          name: los-u2-real-source-staging-metrics
+          path: /tmp/los-u2-sources/*-staged.jsonl.manifest.json
+          retention-days: 7
