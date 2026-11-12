@@ -31,7 +31,12 @@ PATTERN = re.compile(
 )
 SIZES = {"desktop": (1440, 630), "mobile": (720, 540)}
 # Keep faces near the top on the two portrait images.
-FOCUS = {"01": (0.5, 0.37), "02": (0.5, 0.32), "06": (0.5, 0.35)}
+FOCUS = {
+    "01": {"desktop": (0.5, 0.16), "mobile": (0.5, 0.37)},
+    "02": {"desktop": (0.5, 0.14), "mobile": (0.5, 0.32)},
+    "06": {"desktop": (0.5, 0.28), "mobile": (0.5, 0.35)},
+    "08": {"desktop": (0.5, 0.20), "mobile": (0.5, 0.50)},
+}
 MAX_BYTES = 16 * 1024 * 1024
 USER_AGENT = "LOS1-Textbook-Asset-Importer/1.0 (+educational fair Pexels use)"
 
@@ -110,7 +115,7 @@ def write_all() -> None:
         for variant, target_size in SIZES.items():
             rendered = ImageOps.fit(
                 picture, target_size, method=Image.Resampling.LANCZOS,
-                centering=FOCUS.get(chapter, (0.5, 0.5)),
+                centering=FOCUS.get(chapter, {}).get(variant, (0.5, 0.5)),
             )
             file_name = f"LOS1-C{chapter}-{photo}-{variant}.webp"
             dest = OUT / file_name
