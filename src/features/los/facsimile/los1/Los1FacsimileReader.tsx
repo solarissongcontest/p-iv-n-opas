@@ -28,7 +28,7 @@ const allChapters = LOS_BOOKS.find(book => book.id === 1)?.chapters ?? [];
 
 function readStoredPageIndex(): number {
   if (typeof window === "undefined") return 0;
-  const hashParts = window.location.hash.replace(/^#\\/?/, "").split("/");
+  const hashParts = window.location.hash.replace(/^#\/?/, "").split("/");
   const id = hashParts[0] === "1" && hashParts[1] === "facsimile" ? hashParts[2] : undefined;
   const requestedIndex = LOS1_DRAFT_PAGES.findIndex(page => page.id === id);
   if (requestedIndex >= 0) return requestedIndex;
