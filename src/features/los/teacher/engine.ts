@@ -82,20 +82,20 @@ export function emptyTeacherSession(lesson: TeacherLesson, now: string): Teacher
   };
 }
 export function validTeacherSession(value: unknown): value is TeacherSession {
-  if (!record(value) || value.schemaVersion !== 1 ||
-      !limitedId(value.lessonId) || !limitedId(value.sceneId) ||
-      typeof value.contentVersion !== "string" || value.contentVersion.length > 25 ||
-      !idList(value.visitedIds, 80) || !idList(value.helpedIds, 80) ||
-      !idList(value.revealedIds, 80) || !idList(value.activityIds, 80) ||
-      !iso(value.updatedAt) || (value.completedAt !== null && !iso(value.completedAt)) ||
-      !record(value.draftAnswers) || Object.keys(value.draftAnswers).length > 80 ||
-      !Object.entries(value.draftAnswers).every(([k, v]) =>
+  if (!record(value) || value["schemaVersion"] !== 1 ||
+      !limitedId(value["lessonId"]) || !limitedId(value["sceneId"]) ||
+      typeof value["contentVersion"] !== "string" || value["contentVersion"].length > 25 ||
+      !idList(value["visitedIds"], 80) || !idList(value["helpedIds"], 80) ||
+      !idList(value["revealedIds"], 80) || !idList(value["activityIds"], 80) ||
+      !iso(value["updatedAt"]) || (value["completedAt"] !== null && !iso(value["completedAt"])) ||
+      !record(value["draftAnswers"]) || Object.keys(value["draftAnswers"]).length > 80 ||
+      !Object.entries(value["draftAnswers"]).every(([k, v]) =>
         limitedId(k) && typeof v === "string" && v.length <= 500) ||
-      !Array.isArray(value.attempts) || value.attempts.length > 120) return false;
-  return value.attempts.every((attempt: unknown) =>
-    record(attempt) && limitedId(attempt.sceneId) && typeof attempt.answer === "string" &&
-    attempt.answer.length <= 500 && typeof attempt.correct === "boolean" &&
-    typeof attempt.independent === "boolean" && iso(attempt.at));
+      !Array.isArray(value["attempts"]) || value["attempts"].length > 120) return false;
+  return value["attempts"].every((attempt: unknown) =>
+    record(attempt) && limitedId(attempt["sceneId"]) && typeof attempt["answer"] === "string" &&
+    attempt["answer"].length <= 500 && typeof attempt["correct"] === "boolean" &&
+    typeof attempt["independent"] === "boolean" && iso(attempt["at"]));
 }
 export function parseTeacherSessions(value: unknown): Record<string, TeacherSession> {
   if (!record(value)) return {};
@@ -115,7 +115,7 @@ export function evaluateTeacherAnswer(question: TeacherQuestion, answer: string)
     normalizeTeacherAnswer(item) === normalizeTeacherAnswer(answer));
 }
 export function moveTeacherScene(session: TeacherSession, lesson: TeacherLesson, targetId: string, now: string): TeacherSession {
-  if (!lesson.scenes.some(s => s.id === targetId) || session.completedAt) return session;
+  if (!lesson.scenes.some(s => s.id === targetId)) return session;
   return {
     ...session, sceneId: targetId, updatedAt: now,
     visitedIds: session.visitedIds.includes(targetId) ? session.visitedIds :
