@@ -37,10 +37,10 @@ test("L052 is canonical source-based reading without claiming a listened-to audi
  assert.ok(l.steps[0]?.instruction.includes("ei todistettu kuuntelutehtävä"));
  assert.ok(l.check.explanation.includes("Kuuntelua ei arvioida"));
  assert.equal(getLosChapterSourceGate("10").ready,false);
- assert.equal(LOS1_EXECUTABLE_LESSONS.length,53);
+ assert.equal(LOS1_EXECUTABLE_LESSONS.length,58);
  assert.equal(isLos1ExecutableLesson("L052"),true);
  assert.equal(los1LessonDraftChapter("L052"),"10");
- for(const id of ["L042","L044","L045","L054","L055","L059","L060"])
+ for(const id of ["L059","L060"])
    assert.equal(isLos1ExecutableLesson(id),false);
 });
 test("L052 completion requires 5 actual checked responses, all steps and exit check",()=>{

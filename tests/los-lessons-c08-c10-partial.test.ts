@@ -14,11 +14,11 @@ const draft=()=>({version:1 as const,note:"vanha",applicationDraft:"",bookmarked
  testAnswers:{} as Record<string,string>,testSubmittedAt:null as string|null,selfAssessment:"",updatedAt:now});
 test("C08 and C10 make only four source-independent lessons executable, not source-reading chapters",()=>{
   assert.deepEqual(LOS1_C08_C10_PARTIAL_LESSONS.map(x=>x.id),["L041","L043","L051","L053"]);
-  assert.equal(LOS1_EXECUTABLE_LESSONS.length,53);
-  assert.equal(new Set(LOS1_EXECUTABLE_LESSONS.map(x=>x.id)).size,53);
+  assert.equal(LOS1_EXECUTABLE_LESSONS.length,58);
+  assert.equal(new Set(LOS1_EXECUTABLE_LESSONS.map(x=>x.id)).size,58);
   assert.deepEqual(LOS1_EXECUTABLE_LESSONS.map(x=>Number(x.id.slice(1))),[...LOS1_EXECUTABLE_LESSONS.map(x=>Number(x.id.slice(1)))].sort((a,b)=>a-b));
   for(const id of ["L041","L043","L051","L053"])assert.equal(isLos1ExecutableLesson(id),true);
-  for(const id of ["L042","L044","L045","L054","L055","L059","L060"])assert.equal(isLos1ExecutableLesson(id),false);
+  for(const id of ["L059","L060"])assert.equal(isLos1ExecutableLesson(id),false);
   assert.equal(los1LessonDraftChapter("L041"),"08");
   assert.equal(los1LessonDraftChapter("L043"),"08");
   assert.equal(los1LessonDraftChapter("L051"),"10");
@@ -26,14 +26,14 @@ test("C08 and C10 make only four source-independent lessons executable, not sour
 });
 test("C08 and C10 remain editorially blocked, even though C10 primary text is now readable",()=>{
   const c08=LOS1_CHAPTER_SOURCE_PLANS.find(x=>x.id==="C08");
-  assert.equal(c08?.primarySourceId,null);
+  assert.equal(c08?.primarySourceId,"M-WB-08");
   const gate8=getLosChapterSourceGate("08");
   const gate10=getLosChapterSourceGate("10");
   assert.equal(gate8.ready,false);
   assert.equal(gate10.ready,false);
   assert.ok(gate8.issues.length>0 && gate10.issues.length>0);
   const src=readFileSync("src/features/los/lessonEngineC08C10Partial.ts","utf8");
-  assert.match(src,/ei ole vielä luettavissa/);
+  assert.match(src,/uuden Wikibooks-koulukohtauksen koko Text A on luettavissa/);
   assert.match(src,/ei ole vielä tarkistettu/);
   assert.match(src,/nyt luettavissa suoraan Text A/);
   assert.match(src,/eivät todista C10:n autenttisen äänitteen kuullunymmärtämistä/);
@@ -79,6 +79,6 @@ test("existing v1 draft format and sparse lesson progress remain backup compatib
   const index=readFileSync("src/features/los/LosReferenceTools.tsx","utf8");
   assert.match(runner,/useLosChapterDraft\(1, "08"\)/);
   assert.match(runner,/useLosChapterDraft\(1, "10"\)/);
-  assert.match(index,/C08:ssa vain erikseen nimetyt/);
-  assert.match(index,/C10:n koko Harald-haastattelun litteraatti on nyt luettavissa/);
+  assert.match(index,/C08:n koko Wikibooksin kouluympäristön alkuperäiskohtaus/);
+  assert.match(index,/C10:n Harald-haastattelu ovat nyt kirjan sisällä/);
 });

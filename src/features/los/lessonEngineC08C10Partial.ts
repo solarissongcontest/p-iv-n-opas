@@ -1,9 +1,10 @@
 import type { LosLessonBlueprint } from "./lessonEngine";
 
 /**
- * Four delimited source-independent guided lessons. C08 primary text remains missing;
- * C10 primary Harald transcript is now readable, but audio, German level and device
- * gates are still unverified. These four lessons retain their original evidence IDs.
+ * Four source-independent foundation lessons. C08 now also has a full school
+ * scene from Wikibooks; the original COERLL Eva/Jan video remains unverified.
+ * C10 includes Harald in the reader. Audio, German level and device QA remain
+ * unverified. These lessons retain their original evidence IDs.
  * No unsupported audio is presented as tested listening.
  */
 export const LOS1_C08_C10_PARTIAL_LESSONS: readonly LosLessonBlueprint[] = [
@@ -12,7 +13,7 @@ export const LOS1_C08_C10_PARTIAL_LESSONS: readonly LosLessonBlueprint[] = [
     objective:"Osaan pyytää saksaksi toistamaan, hidastamaan ja selittämään.",
     estimatedMinutes:30, contentVersion:"1.0.0",
     steps:[
-      {id:"phrases",label:"Opiskele avunpyyntöfraasit",instruction:"Avaa C08:n sanasto. Harjoittele Ich verstehe nicht, Bitte langsamer ja Können Sie das bitte wiederholen? kokonaisina fraaseina. C08:n alkuperäishaastattelu ei ole vielä luettavissa.",chapter:"08",section:"vocabulary",minutes:10},
+      {id:"phrases",label:"Opiskele avunpyyntöfraasit",instruction:"Avaa C08:n sanasto. Harjoittele Ich verstehe nicht, Bitte langsamer ja Können Sie das bitte wiederholen? kokonaisina fraaseina. C08:n uuden Wikibooks-koulukohtauksen koko Text A on luettavissa, mutta alkuperäisen Eva/Jan-haastattelun video on vielä erillinen, keskeneräinen mediatavoite.",chapter:"08",section:"vocabulary",minutes:10},
       {id:"practice",label:"Tunnista viisi käyttötilannetta",instruction:"Vastaa harjoituksiin C08-EX-01, C08-EX-02, C08-EX-03, C08-EX-04 ja C08-EX-05. Tarkista oikeat muodot vasta oman yrityksen jälkeen.",chapter:"08",section:"practice",minutes:12},
       {id:"speak",label:"Käytä pyyntöä ääneen",instruction:"Kuvittele luokkatilanne, jossa et ymmärrä kysymystä. Valitse ja sano yksi sopiva saksankielinen selviytymisfraasi. Ääntämistä ei pisteytetä koneellisesti.",chapter:"08",section:"apply",minutes:4},
     ],

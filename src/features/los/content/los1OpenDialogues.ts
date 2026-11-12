@@ -16,7 +16,7 @@ export type LosOpenQuestion = {
   explanation: string;
 };
 export type LosOpenText = {
-  chapterId: "03"|"04"|"05"|"06"|"07"|"09"|"10";
+  chapterId: "03"|"04"|"05"|"06"|"07"|"08"|"09"|"10";
   author?:string;
   licenseCode?:string;
   licenseUrl?:string;
@@ -462,10 +462,98 @@ const c10:LosOpenText={
   evidenceExplanation:"Kahdeksannessa puheenvuorossa Harald sanoo Ich bin jetzt so um die fünfzig.",
 };
 
+
+/**
+ * The entire self-contained classroom scene "Schule" from Wikibooks
+ * German/Level I/Schule (permanent oldid=4520956), CC BY-SA 4.0.
+ * This is a substitution for the unverified COERLL C08 interview, which
+ * remains separately listed as an identified (not integrated) candidate.
+ * Original German is unedited; translation, explanations and questions
+ * are new teaching aids. This scene is ABOVE A1 productive grammar level.
+ * Text-only, no authenticated media playback claim.
+ */
+const c08:LosOpenText={
+  chapterId:"08",sourceId:"M-WB-08",revision:"4520956",
+  sourceUrl:"https://en.wikibooks.org/w/index.php?title=German/Level_I/Schule&oldid=4520956",
+  title:"German/Level I/Schule · Dialogue",
+  heading:"Luokassa: Silke, Torsten ja opettaja",
+  author:"Wikibooksin German/Level I/Schule -sivun kirjoittajat",
+  licenseCode:"CC BY-SA 4.0",
+  licenseUrl:"https://creativecommons.org/licenses/by-sa/4.0/",
+  sourceDetail:"Wikibooksin Schule-oppitunnin koko luokkakohtaus. Lähdesivun teksti on keskeneräinen ja sisältää alkeistasoa vaikeampia rakenteita. LOS! ei muokkaa alkuperäistä tekstiä eikä esitä sitä A1-tason tuottamiskielen mallina. Lähteen ääniraitaa ei ole vahvistettu eikä käytetä.",
+  guidance:"Lue alkuperäinen luokkakohtaus kokonaan. Tunnista ensiksi Guten Morgen, Mathe, Musik ja Sehr gut. Muu, huomattavasti vaikeampi puhe on lähteen mukana sellaisenaan mutta selitetään suomeksi; sitä ei tarvitse osata tuottaa. Aineisto on vielä saksan tasoarvion ja laitetestin odottava tekstiesikatselu. Luokkakohtaus ei ole sama kuin suunniteltu Eva/Jan-haastattelu.",
+  originalLines:[
+    {id:"u01",speaker:"Silke",text:"Jetzt haben wir Mathe.",meaning:"Nyt meillä on matematiikkaa."},
+    {id:"u02",speaker:"Torsten",text:"Oh nein, ich habe überhaupt keine Lust dazu.",meaning:"Voi ei, ei huvita ollenkaan."},
+    {id:"u03",speaker:"Silke",text:"Hast du die Aufgaben gemacht?",meaning:"Teitkö tehtävät?"},
+    {id:"u04",speaker:"Torsten",text:"Ja, im Bus.",meaning:"Kyllä, bussissa."},
+    {id:"u05",speaker:"Silke",text:"Super! Kann ich sie abschreiben?",meaning:"Mahtavaa! Voinko kopioida ne?"},
+    {id:"u06",speaker:"Erzähler",text:"Lehrer (Betritt den Raum):",meaning:"Opettaja (astuu huoneeseen):"},
+    {id:"u07",speaker:"Lehrer",text:"Guten Morgen!",meaning:"Hyvää huomenta!"},
+    {id:"u08",speaker:"Klasse",text:"Guten Morgen!",meaning:"Hyvää huomenta!"},
+    {id:"u09",speaker:"Lehrer",text:"Wer möchte die Aufgaben an der Tafel rechnen? Florian?",meaning:"Kuka haluaisi laskea tehtävät taululla? Florian?"},
+    {id:"u10",speaker:"Erzähler",text:"Florian geht zur Tafel, schreibt an und liest vor:",meaning:"Florian menee taululle, kirjoittaa ja lukee ääneen:"},
+    {id:"u11",speaker:"Florian",text:'"5 plus 8 ist gleich 13"',meaning:"5 + 8 = 13."},
+    {id:"u12",speaker:"Florian",text:'"8 minus 5 ist gleich 3"',meaning:"8 − 5 = 3."},
+    {id:"u13",speaker:"Florian",text:'"3 mal 8 ist gleich 24"',meaning:"3 × 8 = 24."},
+    {id:"u14",speaker:"Florian",text:'"24 geteilt durch 12 ist gleich 2"',meaning:"24 ÷ 12 = 2."},
+    {id:"u15",speaker:"Lehrer",text:"Sehr gut, Florian!",meaning:"Oikein hyvä, Florian!"},
+    {id:"u16",speaker:"Erzähler",text:"Die Glocke läutet. Es ist Fünfminutenpause.",meaning:"Kello soi. On viiden minuutin välitunti."},
+    {id:"u17",speaker:"Silke",text:"Schnell, wir müssen zu Musik!",meaning:"Nopeasti, meidän on mentävä musiikkiin!"},
+    {id:"u18",speaker:"Torsten",text:"Au ja, darauf freue ich mich schon.",meaning:"Jee, odotan sitä jo innolla."},
+    {id:"u19",speaker:"Silke",text:"Was machen wir heute?",meaning:"Mitä teemme tänään?"},
+    {id:"u20",speaker:"Torsten",text:"Wir wollen ein Lied von Grönemeyer singen!",meaning:"Haluamme laulaa Grönemeyerin laulun!"},
+    {id:"u21",speaker:"Silke",text:"Welches denn?",meaning:"Minkä niistä?"},
+    {id:"u22",speaker:"Torsten",text:'"Alkohol", glaube ich.',meaning:"Luullakseni Alkohol-nimisen."},
+    {id:"u23",speaker:"Erzähler",text:"Nach dem Musikunterricht:",meaning:"Musiikintunnin jälkeen:"},
+    {id:"u24",speaker:"Silke",text:"Jetzt haben wir nur noch Geschichte...",meaning:"Nyt meillä on enää historiaa..."},
+    {id:"u25",speaker:"Torsten",text:"Komm, wir schwänzen und gehen ins Bistro.",meaning:"Tule, lintsataan ja mennään bistroon."},
+    {id:"u26",speaker:"Silke",text:"Schon wieder!",meaning:"Taas kerran!"},
+  ],
+  glossary:{...common,
+    jetzt:"nyt",haben:"meillä on / olla, tunnistamiseen",wir:"me",mathe:"matematiikka",
+    nein:"ei",überhaupt:"ollenkaan",lust:"halu; Lust haben = huvittaa",dazu:"siihen",
+    hast:"sinulla on / olet tehnyt, tässä menneen ajan apuverbi",aufgaben:"tehtävät",
+    gemacht:"tehty, vaikea mennyt muoto vain ymmärtämiseen",ja:"kyllä",
+    im:"-ssa/-ssä, tässä im Bus = bussissa",bus:"bussi",super:"mahtavaa",
+    kann:"voinko; osaan",abschreiben:"kirjoittaa toiselta, kopioida",lehrer:"opettaja",
+    betritt:"astuu sisään, vain tunnistamiseen",raum:"huone",klasse:"luokka",
+    wer:"kuka",möchte:"haluaisi",tafel:"taulu",rechnen:"laskea",
+    geht:"menee",schreibt:"kirjoittaa",liest:"lukee",vor:"ääneen osana liest vor",
+    plus:"plus",minus:"miinus",gleich:"yhtä kuin",mal:"kertaa",
+    geteilt:"jaettu",durch:"jakamalla",sehr:"erittäin",gut:"hyvä",
+    glocke:"kello",läutet:"soi",fünfminutenpause:"viiden minuutin välitunti",
+    schnell:"nopeasti",müssen:"täytyy",musik:"musiikki",freue:"odotan innolla",
+    heute:"tänään",machen:"tehdä",wollen:"haluta",lied:"laulu",
+    singen:"laulaa",welches:"mikä niistä",glaube:"luulen",
+    nach:"jälkeen",musikunterricht:"musiikintunti",nur:"vain",noch:"enää",
+    geschichte:"historia",komm:"tule",schwänzen:"lintsata",gehen:"mennä",
+    bistro:"bistro",schon:"jo",wieder:"taas",
+  },
+  questions:[
+    {id:"C08-SCHOOL-Q01",prompt:"Mitä tuntia Silke ja Torsten sanovat alussa olevansa menossa opiskelemaan?",
+      answers:[{id:"a",text:"Matematiikkaa"},{id:"b",text:"Historiaa"},{id:"c",text:"Musiikkia"}],correctId:"a",
+      explanation:"Silke sanoo Jetzt haben wir Mathe. Mathe tarkoittaa matematiikkaa."},
+    {id:"C08-SCHOOL-Q02",prompt:"Miten opettaja ja luokka tervehtivät toisiaan?",
+      answers:[{id:"a",text:"Gute Nacht!"},{id:"b",text:"Guten Morgen!"},{id:"c",text:"Bis morgen!"}],correctId:"b",
+      explanation:"Sekä opettaja että luokka sanovat Guten Morgen! eli hyvää huomenta."},
+    {id:"C08-SCHOOL-Q03",prompt:"Mihin aineeseen oppilaat menevät kellon soitua?",
+      answers:[{id:"a",text:"Saksaan"},{id:"b",text:"Fysiikkaan"},{id:"c",text:"Musiikkiin"}],correctId:"c",
+      explanation:"Silke sanoo wir müssen zu Musik. Musiikki on seuraava tunti."},
+    {id:"C08-SCHOOL-Q04",prompt:"Mistä opettaja kiittää Floriania?",
+      answers:[{id:"a",text:"Taululla laskemisesta"},{id:"b",text:"Laulamisesta"},{id:"c",text:"Historiasta"}],correctId:"a",
+      explanation:"Florian laskee taululla neljä laskua, ja opettaja sanoo Sehr gut, Florian!"},
+  ],
+  evidenceLineId:"u15",
+  evidenceQuestion:"Missä opettaja sanoo Florianille Sehr gut, Florian!?",
+  evidenceExplanation:"Opettaja kehuu Floriania puheenvuorossa 15 heti laskujen jälkeen.",
+};
+
 export const LOS1_C06_TEXT: LosOpenText = c06;
+export const LOS1_C08_TEXT: LosOpenText = c08;
 export const LOS1_C10_TEXT: LosOpenText = c10;
 /** Legacy collection of the five independently sourced Wikibooks texts. C06 is a separate Polish OER source. */
 export const LOS1_OPEN_DIALOGUES: readonly LosOpenText[] = [c03,c04,c05,c07,c09];
 export function getLosOpenDialogue(chapterId: string): LosOpenText | undefined {
-  return chapterId==="06" ? LOS1_C06_TEXT : chapterId==="10" ? LOS1_C10_TEXT : LOS1_OPEN_DIALOGUES.find(text=>text.chapterId===chapterId);
+  return chapterId==="06" ? LOS1_C06_TEXT : chapterId==="08" ? LOS1_C08_TEXT : chapterId==="10" ? LOS1_C10_TEXT : LOS1_OPEN_DIALOGUES.find(text=>text.chapterId===chapterId);
 }
