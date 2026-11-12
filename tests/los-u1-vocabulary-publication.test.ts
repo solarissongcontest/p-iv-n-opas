@@ -7,12 +7,12 @@ import {
 test("U1 vocabulary release gate covers all 16 real C01 vocabulary rows",()=>{
   const report=inspectLosVocabularyQA(1,"01");
   assert.equal(report.total,16);
-  assert.equal(report.ipaSourced,8);
+  assert.equal(report.ipaSourced,15);
   assert.equal(report.ipaHumanReviewed,0);
   assert.equal(report.audioApproved,0);
   assert.equal(report.ready,0);
   assert.equal(report.issues.length,16);
-  assert.ok(report.issues.some(i=>i.word==="Guten Tag!"&&i.missing.includes("IPA")));
+  assert.deepEqual(report.issues.filter(i=>i.missing.includes("IPA")).map(i=>i.word),["Bis später!"]);
   assert.ok(report.issues.some(i=>i.word==="Hallo!"&&i.missing.includes("audio")));
   assert.equal(isLosVocabularyPublishable(1,"01"),false);
 });

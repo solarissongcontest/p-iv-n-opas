@@ -40,8 +40,8 @@ export function parseLosContentTreePreferences(
     };
     return {
       version:1,
-      expandedChapters:sanitize(record.expandedChapters,allowedChapterIds),
-      expandedTaskGroups:sanitize(record.expandedTaskGroups,allowedGroupIds),
+      expandedChapters:sanitize(record["expandedChapters"],allowedChapterIds),
+      expandedTaskGroups:sanitize(record["expandedTaskGroups"],allowedGroupIds),
     };
   } catch { return emptyLosContentTreePreferences(); }
 }
