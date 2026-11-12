@@ -241,6 +241,13 @@ test("U1/U3: chapter tree links to persisted exercise and shared IPA word card o
  await expect(card).toBeVisible();
  await expect(card).toContainText("Kappaleen kontekstimerkitys");
  await expect(card).toContainText("IPA");
+ // An unavailable published dictionary must not replace the chapter gloss.
+ const lookup=card.getByRole("button",{name:"Hae julkaistusta yleissanakirjasta"});
+ await expect(lookup).toBeVisible();
+ await lookup.click();
+ await expect(card.locator(".los-dictionary-remote-status"))
+   .toContainText(/(?:hakua ei ole käytettävissä|Julkaistun aineiston osumat|ei löytynyt osumia)/i,{timeout:10_000});
+ await expect(card).toContainText("Kappaleen kontekstimerkitys");
  await card.getByRole("button",{name:"Sulje sanan selitys"}).click();
  await expect(card).toHaveCount(0);
  await expect(token).toBeFocused();

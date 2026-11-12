@@ -5,7 +5,7 @@ import {
 } from "./dictionaryClient";
 import "./los-u2-dictionary.css";
 
-function SourceResult({entry,onSearch}:{entry:LosDictionaryResult;onSearch:(word:string)=>void}) {
+export function LosDictionarySourceResult({entry,onSearch}:{entry:LosDictionaryResult;onSearch:(word:string)=>void}) {
   return <li className="los-dict-result">
     <div className="los-dict-result-head">
       <strong lang={entry.language}>{entry.lemma}</strong>
@@ -107,7 +107,7 @@ export function LosDictionarySearch() {
     </div>
     {state.kind==="done"&&
       (state.results.length?<ol className="los-dict-results">
-        {state.results.map(item=><SourceResult key={item.source_id+":"+item.source_entry_id} entry={item} onSearch={setQuery}/>) }
+        {state.results.map(item=><LosDictionarySourceResult key={item.source_id+":"+item.source_entry_id} entry={item} onSearch={setQuery}/>) }
       </ol>:<p>Ei osumia julkaistusta aineistosta tällä hakusanalla.</p>)}
   </section>;
 }

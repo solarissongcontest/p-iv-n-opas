@@ -1,8 +1,16 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { X } from "lucide-react";
 import { getLosPronunciation } from "./pronunciation";
 import { LosPronunciationButton } from "./LosPronunciationButton";
+import { LosDictionarySourceResult } from "./LosDictionarySearch";
+import { searchLosDictionary, type LosDictionaryResult } from "./dictionaryClient";
 import "./los-u1-pronunciation.css";
+
+type RemoteLookup =
+  | {kind:"idle"}
+  | {kind:"loading";term:string}
+  | {kind:"unavailable";term:string}
+  | {kind:"done";term:string;entries:readonly LosDictionaryResult[]};
 
 /**
  * Shared U1 dictionary card: editorial context always wins over unreviewed
@@ -17,6 +25,28 @@ export function LosDictionaryCard({
   const onCloseRef = useRef(onClose);
   onCloseRef.current = onClose;
   const pronunciation = getLosPronunciation(word);
+  const controllerRef = useRef<AbortController | null>(null);
+  const [remote, setRemote] = useState<RemoteLookup>({kind:"idle"});
+
+  useEffect(() => {
+    setRemote({kind:"idle"});
+    return () => controllerRef.current?.abort();
+  }, [word]);
+
+  const lookupPublished = async (term: string) => {
+    controllerRef.current?.abort();
+    const controller = new AbortController();
+    controllerRef.current = controller;
+    setRemote({kind:"loading",term});
+    try {
+      const data = await searchLosDictionary(term,"de-fi",controller.signal);
+      if (!controller.signal.aborted) {
+        setRemote({kind:"done",term,entries:data.results});
+      }
+    } catch {
+      if (!controller.signal.aborted) setRemote({kind:"unavailable",term});
+    }
+  };
 
   useEffect(() => {
     previousFocus.current = document.activeElement instanceof HTMLElement
@@ -54,8 +84,29 @@ export function LosDictionaryCard({
       </> : <span>IPA tarkistamatta tälle sanamuodolle. Ei korvata arvauksella.</span>}
       <LosPronunciationButton text={word} />
     </div>
+    <div className="los-dictionary-remote">
+      <button type="button" className="los-dictionary-remote-button"
+        onClick={() => { void lookupPublished(word); }}>
+        Hae julkaistusta yleissanakirjasta
+      </button>
+      <div className="los-dictionary-remote-status" role="status" aria-live="polite">
+        {remote.kind==="idle" && <p>Lähteistetty yleissanakirja avataan erikseen. Kappaleen oma selitys toimii myös ilman sitä.</p>}
+        {remote.kind==="loading" && <p>Haetaan julkaistuista lähteistä sanaa {remote.term}…</p>}
+        {remote.kind==="unavailable" && <p>Julkaistua yleissanakirjan hakua ei ole käytettävissä tällä hetkellä. Kappaleen oma selitys toimii edelleen.</p>}
+        {remote.kind==="done" && <p>{remote.entries.length
+          ? `Julkaistun aineiston osumat: ${remote.entries.length}. Näytetään enintään viisi lähdetietuetta.`
+          : `Hakusanalle ${remote.term} ei löytynyt osumia julkaistusta aineistosta.`}</p>}
+      </div>
+      {remote.kind==="done" && remote.entries.length>0 && (
+        <ol className="los-dict-results" aria-label="Yleissanakirjan lähdetietueet">
+          {remote.entries.slice(0,5).map(entry=>
+            <LosDictionarySourceResult key={entry.source_id+":"+entry.source_entry_id}
+              entry={entry} onSearch={next => { void lookupPublished(next); }} />)}
+        </ol>
+      )}
+    </div>
     <p className="los-dictionary-card-footnote">
-      Tämä on oppikirjan oma sanaselitys, ei vielä laajasta FreeDict-sanakannasta tuotu hakutulos.
+      Kappaleen kontekstiselitys perustuu oppikirjaan. Mahdolliset yleissanakirjan osumat ovat erillisiä lähdetietueita, eivät tämän ilmauksen tarkistettuja käännöksiä.
       Puhesynteesi ei ole hyväksytty ihmisäänite eikä vielä julkaisutestattu ääntämismalli.
     </p>
   </section>;

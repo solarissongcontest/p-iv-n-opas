@@ -44,3 +44,10 @@
 }
 
 .los-vocabulary-qa {font-size:13px;color:var(--los-soft);border-left:3px solid var(--los-book-accent);padding:9px 13px;margin:14px 0 19px!important;background:var(--los-subtle);line-height:1.55}
+
+/* U1/U2: optional published-only dictionary detail in the existing word card. */
+.los-dictionary-remote {margin-top:18px;padding-top:13px;border-top:1px solid var(--los-line,#e5e7e6)}
+.los-dictionary-remote-button {color:var(--los-ink);background:var(--los-subtle,#f6f6f4);border:1px solid var(--los-line,#e5e7e6);border-radius:8px;padding:10px 13px;min-height:44px;font-weight:650}
+.los-dictionary-remote-status {font-size:12px;line-height:1.6;color:var(--los-soft,#63717b)}
+.los-dictionary-remote .los-dict-result {padding:12px}
+.los-dictionary-card .los-dict-lemma-button:focus-visible,.los-dictionary-remote-button:focus-visible {outline:3px solid #397ace;outline-offset:2px}
