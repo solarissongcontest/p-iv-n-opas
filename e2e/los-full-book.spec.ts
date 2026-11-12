@@ -193,8 +193,17 @@ test("C01–C10 show chapter-specific sourced photos instead of abandoned facsim
  await expect(page.getByRole("navigation",{name:"Näköiskirjan sisällysluettelo"})).toHaveCount(0);
  for(const chapter of chapters){
    await openChapter(page,chapter,"chapter");
-   await expect(page.locator(".los1-digital-photo")).toBeVisible();
-   await expect(page.locator(".los1-digital-photo figcaption a")).toHaveAttribute("href",/pexels[.]com/);
+   const figure=page.locator(".los1-digital-photo");
+   await expect(figure).toBeVisible();
+   await expect(figure.locator("picture source")).toHaveAttribute(
+     "srcset",new RegExp("LOS1-C"+chapter+"-.*-mobile[.]webp$"),
+   );
+   const img=figure.locator("picture img");
+   await expect(img).toHaveAttribute("src",
+     new RegExp("^/los/chapters/LOS1-C"+chapter+"-.*-desktop[.]webp$"));
+   await expect.poll(async()=>img.evaluate(el=>(el as HTMLImageElement).naturalWidth),
+     {timeout:15_000}).toBeGreaterThan(0);
+   await expect(figure.locator("figcaption a")).toHaveAttribute("href",/pexels[.]com/);
  }
  await page.goto("/los#/1/facsimile",{waitUntil:"domcontentloaded"});
  await expect(page.locator(".los-front")).toBeVisible();
