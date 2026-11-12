@@ -44,8 +44,8 @@ VALUES
 ('fixture-fi-de','house',1,1,'de','Haus','haus');
 
 INSERT INTO public.los_dictionary_forms
-(source_id,source_entry_id,form_index,written_form,form_key,grammar)
-VALUES ('fixture-de-fi','house',1,'Häuser','häuser','{"tags":["plural"]}');
+(source_id,source_entry_id,form_index,written_form,form_key,form_search_keys,grammar)
+VALUES ('fixture-de-fi','house',1,'Häuser','häuser',ARRAY['häuser','haeuser'],'{"tags":["plural"]}');
 INSERT INTO public.los_dictionary_pronunciations
 (source_id,source_entry_id,pronunciation_index,ipa,ipa_status,region)
 VALUES ('fixture-de-fi','house',1,'haʊ̯s','candidate','de-DE');
@@ -91,6 +91,10 @@ BEGIN
  IF (SELECT count(*) FROM public.los_dictionary_search('Häuser','de-fi',20)
        WHERE match_type='form') <> 1 THEN
   RAISE EXCEPTION 'Inflected-form search failed';
+ END IF;
+ IF (SELECT count(*) FROM public.los_dictionary_search('Haeuser','de-fi',20)
+       WHERE match_type='form') <> 1 THEN
+  RAISE EXCEPTION 'Umlaut transliteration should match inflected German form';
  END IF;
  IF (SELECT count(*) FROM public.los_dictionary_search('Bank','de-fi',20)) <> 2 THEN
   RAISE EXCEPTION 'Homonyms incorrectly collapsed';
