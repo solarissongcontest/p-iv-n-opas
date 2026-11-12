@@ -61,7 +61,7 @@ export function LosStudyProgress({book,move}:{book:LosBookDefinition;move:LosNav
     </div>
     <div className="los-progress-pending">
       <h2>Vielä toteuttamatta opetukseen</h2>
-      <p>Seuraavat {data.unfinished.length} suunniteltua tuntia ovat vielä toimituksellisia sisältömerkintöjä. Niiden avaaminen ei merkitse niitä suoritetuiksi, ja C08:n ja C10:n julkaisemattomat alkuperäistekstit pysyvät avoimina lähdevaatimuksina.</p>
+      <p>Seuraavat {data.unfinished.length} suunniteltua tuntia ovat vielä toimituksellisia sisältömerkintöjä. Niiden avaaminen ei merkitse niitä suoritetuiksi, ja C08:n sekä C10:n lähdetekstien kieli-, media- ja laitetestaus pysyvät erillisinä julkaisuportteina.</p>
       <ul>{data.unfinished.map(item=><li key={item.id}><strong>{item.id}</strong> · {item.title}</li>)}</ul>
     </div>
     <p className="los-progress-foot">Tiedot perustuvat tämän laitteen LOS!-luonnoksiin ja mahdollisesti erikseen tuotuihin tai synkronoituihin kappaletietoihin. Jos et ole siirtänyt aiempia tietoja tähän selaimeen, se ei voi näyttää niitä automaattisesti.</p>
