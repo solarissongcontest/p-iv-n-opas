@@ -26,7 +26,7 @@ REGISTRY = ROOT / "src/features/los/los1ChapterPhotos.ts"
 OUT = ROOT / "public/los/chapters"
 PATTERN = re.compile(
     r'chapterId:"(?P<chapter>\d{2})",photoId:(?P<photo>\d+),\s*'
-    r'src:"[^"]+",\\s*'
+    r'src:"[^"]+",\s*'
     r'sourceUrl:"(?P<page>https://www\.pexels\.com/photo/[^"]+)",'
 )
 SIZES = {"desktop": (1440, 630), "mobile": (720, 540)}
