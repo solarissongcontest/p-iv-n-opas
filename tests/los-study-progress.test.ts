@@ -17,13 +17,13 @@ const draft=():LosChapterDraft=>({
   selfAssessment:"",updatedAt:now
 });
 
-test("empty student view distinguishes 49 executable from 60 planned without fake skill scores",()=>{
+test("empty student view distinguishes 52 executable from 60 planned without fake skill scores",()=>{
   const data=getLosStudyProgressSnapshot(book,{},now);
-  assert.equal(LOS1_EXECUTABLE_LESSONS.length,49);
-  assert.equal(data.available,49);
+  assert.equal(LOS1_EXECUTABLE_LESSONS.length,52);
+  assert.equal(data.available,52);
   assert.equal(data.planned,60);
   assert.equal(data.completed,0);
-  assert.equal(data.unfinished.length,11);
+  assert.equal(data.unfinished.length,8);
   assert.equal(data.chapters.length,10);
   assert.equal(data.scoredChapters,0);
   assert.equal(data.correct,0);
