@@ -23,7 +23,7 @@ export const LOS1_EXECUTABLE_LESSONS: readonly LosLessonBlueprint[] = [
   ...LOS1_C06_LESSON_BLUEPRINTS,
   ...LOS1_C07_C09_LESSONS,
   ...LOS1_C08_C10_PARTIAL_LESSONS,
-];
+].sort((a,b)=>Number(a.id.slice(1))-Number(b.id.slice(1)));
 const executableIds = new Set(LOS1_EXECUTABLE_LESSONS.map(lesson=>lesson.id));
 export const isLos1ExecutableLesson = (id:string):boolean => executableIds.has(id);
 
