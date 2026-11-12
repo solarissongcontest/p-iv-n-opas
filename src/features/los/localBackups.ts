@@ -10,10 +10,10 @@ export type LosBookBackup={
   chapters:Record<string,LosChapterDraft>;
 };
 function chapterRange(bookId:number){
-  // Book 1 has ten actual chapters plus reserved storage slot 91 for the
-  // independently scored EX-MID. 91 is NOT a fictional chapter or lesson.
+  // Book 1 has ten real chapters and two reserved assessment slots:
+  // 91 = Kertaus I / EX-MID; 92 = Kertaus II. Neither is an extra chapter.
   const chapters=Array.from({length:10},(_,i)=>String(i+1).padStart(2,"0"));
-  return bookId===1?[...chapters,"91"]:[];
+  return bookId===1?[...chapters,"91","92"]:[];
 }
 export function createLosBookBackup(bookId=1):LosBookBackup{
   const chapters:Record<string,LosChapterDraft>={};

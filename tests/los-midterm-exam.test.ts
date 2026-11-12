@@ -56,7 +56,7 @@ test("assessment data is compatible with existing draft and cloud validation",()
 });
 test("JSON backup exports separate midterm slot while still importing existing ten-chapter backups",()=>{
   const src=readFileSync("src/features/los/localBackups.ts","utf8");
-  assert.match(src,/return bookId===1\?\[\.\.\.chapters,"91"\]/);
+  assert.match(src,/return bookId===1\?\[\.\.\.chapters,"91","92"\]/);
   assert.match(src,/entries\.length>chapterRange\(1\)\.length/);
   assert.match(src,/chapterRange\(1\)\.includes\(id\)/);
   assert.match(src,/losDraftKey\(bookId,chapter,ownerId\)/);
