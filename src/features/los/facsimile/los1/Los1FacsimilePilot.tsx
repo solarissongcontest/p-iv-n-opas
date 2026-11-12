@@ -342,7 +342,7 @@ export function Los1FacsimilePilot({onOpenDigital}:{onOpenDigital:(section:LosFa
   };
   const jumpToLeaf=()=>{
     const n=Number(jumpValue);
-    if(!/^\\d+$/.test(jumpValue.trim())||!Number.isInteger(n)||n<1||n>pages.length){
+    if(!/^[0-9]+$/.test(jumpValue.trim())||!Number.isInteger(n)||n<1||n>pages.length){
       setJumpError("Luonnoslehteä ei ole tässä pilotissa.");return;
     }
     goTo(n-1);setJumpValue("");setJumpError("");
