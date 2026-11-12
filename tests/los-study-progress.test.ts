@@ -33,7 +33,7 @@ test("empty student view distinguishes 58 executable from 60 planned without fak
   assert.equal(data.pendingScheduled,0,"Unseen words should not be overdue debt");
   assert.ok(data.newCards>0);
   assert.ok(data.unfinished.some(l=>l.id==="L059"));
-  assert.ok(data.unfinished.some(l=>l.id==="L059"));
+  assert.ok(data.unfinished.some(l=>l.id==="L060"));
   assert.ok(data.unfinished.some(l=>l.id==="L060"));
   assert.equal(data.chapters.find(x=>x.id==="08")?.sourceReady,false);
   assert.equal(data.chapters.find(x=>x.id==="10")?.sourceReady,false);
