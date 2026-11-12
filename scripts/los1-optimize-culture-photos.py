@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Import exactly four manually verified Pexels photos for LOS! 1 culture pages.
+"""Import exactly seven manually verified Pexels photos for LOS! 1 culture pages.
 
 Generates a 2-size WebP variant of each photo and a SHA-256 provenance
-manifest. No stock-photo search or bulk crawling; exactly four preapproved
+manifest. No stock-photo search or bulk crawling; exactly seven preapproved
 Pexels photo IDs are hardcoded and cross-checked against the source registry.
 """
 from __future__ import annotations
@@ -27,7 +27,10 @@ PHOTOS = {
     ("01", 29250831): ("Hamburg", "Naimish Verma"),
     ("03", 6063650): ("Wien", "Anton Uniqueton"),
     ("03", 32379758): ("Thun", "Jean-Paul Wettstein"),
+    ("04", 6925914): ("Berlin customer service", "Tom Tillhub"),
+    ("07", 30125064): ("Düsseldorf street sign", "Markus Winkler"),
     ("08", 5427660): ("classroom illustration", "Tima Miroshnichenko"),
+    ("09", 6170644): ("schedule illustration", "RDNE Stock project"),
 }
 VARIANTS = {"desktop": (1024, 640), "mobile": (720, 540)}
 MAX_DOWNLOAD = 20 * 1024 * 1024
@@ -117,7 +120,7 @@ def main() -> None:
     manifest_file = OUTPUT / "sources-manifest.json"
     manifest_file.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n",
                              encoding="utf-8")
-    print("Complete: four individually sourced photos, eight WebP files.", flush=True)
+    print("Complete: seven individually sourced photos, fourteen WebP files.", flush=True)
 
 if __name__ == "__main__":
     try:
