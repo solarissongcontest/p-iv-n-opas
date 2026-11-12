@@ -34,22 +34,22 @@ export function losArchivedExamHistory(
   if(number<1||number>MAX_ATTEMPTS)continue;
   try{
    const raw=JSON.parse(serialized) as Record<string,unknown>;
-   if(raw.v!==1||!validIso(raw.at)||typeof raw.choices!=="string"||
-     !/^[abc]+$/.test(raw.choices)||!isNonnegativeInteger(raw.correct)||
-     !isNonnegativeInteger(raw.total)||raw.correct>raw.total||
-     raw.total!==raw.choices.length||!Array.isArray(raw.sections))continue;
+   if(raw["v"]!==1||!validIso(raw["at"])||typeof raw["choices"]!=="string"||
+     !/^[abc]+$/.test(raw["choices"])||!isNonnegativeInteger(raw["correct"])||
+     !isNonnegativeInteger(raw["total"])||raw["correct"]>raw["total"]||
+     raw["total"]!==raw["choices"].length||!Array.isArray(raw["sections"]))continue;
    const sections:LosArchivedSection[]=[];
-   for(const entry of raw.sections){
+   for(const entry of raw["sections"]){
     if(!Array.isArray(entry)||entry.length!==3||typeof entry[0]!=="string"||
       entry[0].length>40||!isNonnegativeInteger(entry[1])||
       !isNonnegativeInteger(entry[2])||entry[1]>entry[2])break;
     sections.push({section:entry[0],correct:entry[1],total:entry[2]});
    }
-   if(sections.length!==raw.sections.length||
-     sections.reduce((n,item)=>n+item.total,0)!==raw.total||
-     sections.reduce((n,item)=>n+item.correct,0)!==raw.correct)continue;
-   records.push({number,submittedAt:raw.at,correct:raw.correct,total:raw.total,
-     choices:raw.choices,sections});
+   if(sections.length!==raw["sections"].length||
+     sections.reduce((n,item)=>n+item.total,0)!==raw["total"]||
+     sections.reduce((n,item)=>n+item.correct,0)!==raw["correct"])continue;
+   records.push({number,submittedAt:raw["at"],correct:raw["correct"],total:raw["total"],
+     choices:raw["choices"],sections});
   }catch{ /* Corrupt imported archive is ignored, not used to award points. */ }
  }
  return records.sort((a,b)=>a.number-b.number);
