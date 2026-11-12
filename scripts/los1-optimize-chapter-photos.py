@@ -26,7 +26,7 @@ REGISTRY = ROOT / "src/features/los/los1ChapterPhotos.ts"
 OUT = ROOT / "public/los/chapters"
 PATTERN = re.compile(
     r'chapterId:"(?P<chapter>\d{2})",photoId:(?P<photo>\d+),\s*'
-    r'src:"(?P<image>https://images\.pexels\.com/photos/[^"]+)",\s*'
+    r'src:"[^"]+",\\s*'
     r'sourceUrl:"(?P<page>https://www\.pexels\.com/photo/[^"]+)",'
 )
 SIZES = {"desktop": (1440, 630), "mobile": (720, 540)}
@@ -87,7 +87,9 @@ def write_all() -> None:
     }
     for match in matches:
         chapter, photo = match.group("chapter"), match.group("photo")
-        url, source_page = match.group("image"), match.group("page")
+        source_page = match.group("page")
+        url = (f"https://images.pexels.com/photos/{photo}/"
+               f"pexels-photo-{photo}.jpeg?auto=compress&cs=tinysrgb&w=1600")
         if not source_page.endswith(f"-{photo}/"):
             raise ValueError(f"Source photo page ID mismatch: C{chapter}")
         print(f"Downloading C{chapter}, Pexels photo {photo}", flush=True)
