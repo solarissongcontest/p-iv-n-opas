@@ -57,7 +57,7 @@ export const LOS1_C06_LESSON_BLUEPRINTS: readonly LosLessonBlueprint[] = [
     },
   },
   {
-    id:"L034",title:"Kertaa aiempi Franz–Jörg-ikäkeskustelu",
+    id:"L034",title:"Kertaa alkuperäinen ikäkeskustelu",
     objective:"Poimin alkuperäisestä Franz–Jörg-keskustelusta molempien henkilöiden iät.",
     estimatedMinutes:30,contentVersion:"1.0.0",
     steps:[
