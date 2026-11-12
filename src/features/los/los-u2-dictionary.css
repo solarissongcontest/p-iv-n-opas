@@ -21,3 +21,7 @@
 .los-dict-notice{color:var(--los-soft);font-style:italic}
 .los-dict-source a{text-decoration:underline;text-underline-offset:3px;overflow-wrap:anywhere}
 @media(max-width:650px){.los-dict-search h2{font-size:21px}.los-dict-result{padding:13px}.los-dict-result-head{gap:6px}}
+
+.los-dict-form-of {display:flex;flex-wrap:wrap;gap:7px;align-items:center;font-size:13px;line-height:1.5}
+.los-dict-lemma-button {border:1px solid var(--los-line);border-radius:6px;background:var(--los-subtle);color:var(--los-ink);padding:8px 10px;min-height:44px;font-weight:650;text-decoration:underline;text-underline-offset:2px}
+.los-dict-lemma-button:focus-visible {outline:3px solid #397ace;outline-offset:2px}
