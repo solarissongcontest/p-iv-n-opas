@@ -32,8 +32,8 @@ export const LOS1_VISUAL_LESSONS:Readonly<Record<string,Los1VisualLesson>>={
  },
  "04":{
   chapterId:"04",placement:"culture",
-  question:"Kuva esittää virallista kohtaamista. Miten voisi tervehtiä ja kysyä nimeä kohteliaasti?",
-  note:"Kättelystä ei voi päätellä puhuttelutapaa. Malli on yksi mahdollinen kielenkäyttötilanne.",
+  question:"Katso yllä olevaa berliiniläisen liikkeen asiakaspalvelukuvaa. Miten voisit aloittaa keskustelun kohteliaasti?",
+  note:"Kuvasta ei voi päätellä, käyttävätkö ihmiset du- vai Sie-muotoa. Harjoittele yhtä mahdollista kohteliasta tapaa.",
   phraseKeys:["Sie","Wie heißen Sie?","Guten Tag!"],
  },
  "05":{
@@ -50,8 +50,8 @@ export const LOS1_VISUAL_LESSONS:Readonly<Record<string,Los1VisualLesson>>={
  },
  "07":{
   chapterId:"07",placement:"culture",
-  question:"Kuvassa kirjoitetaan muistikirjaan. Millä sanoilla kysyt kirjoitusasusta ja tavaamisesta?",
-  note:"Saksan ä, ö, ü ja ß ovat oikeinkirjoituksessa merkityksellisiä, mutta kuva ei esitä saksankielistä tekstiä.",
+  question:"Tutki Düsseldorfistä kuvattua katukylttiä: Düsseldorfer Straße. Mikä kirjain on sanassa Straße suomalaisesta aakkostosta poikkeava?",
+  note:"Kyltin Straße sisältää ß-kirjaimen. Ä-, ö- ja ü-kirjaimia tai niiden korvausasuja ei voi opiskella tästä yhdestä kuvasta.",
   phraseKeys:["schreiben","buchstabieren","der Buchstabe"],
  },
  "08":{
@@ -62,8 +62,8 @@ export const LOS1_VISUAL_LESSONS:Readonly<Record<string,Los1VisualLesson>>={
  },
  "09":{
   chapterId:"09",placement:"culture",
-  question:"Kuva esittää kalenteria. Miten ilmaiset saksaksi päivän ja kellonajan?",
-  note:"Mallifraaseja ei ole otettu kuvan kalenterimerkinnöistä. Käytä kuvitteellista tapaamisaikaa.",
+  question:"Katso yllä olevaa ajankäytön suunnittelukuvaa. Miten kertoisit saksaksi viikonpäivän ja tapaamisen kellonajan?",
+  note:"Kalenteri on yleinen havainnekuva, eikä sen merkintöjä väitetä saksankielisiksi. Käytä itse valitsemaasi tapaamisaikaa.",
   phraseKeys:["Montag","am Montag","um drei Uhr"],
  },
  "10":{
