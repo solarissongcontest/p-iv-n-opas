@@ -35,3 +35,11 @@ test("LOS U2: staged dictionary foreign keys never cascade child deletion",()=>{
   assert.doesNotMatch(sql,/\bON DELETE CASCADE\b/i);
   assert.equal((sql.match(/\bON DELETE RESTRICT\b/g)||[]).length,6);
 });
+
+test("LOS U2: German aliases and inflected forms use GIN-compatible indexed array predicates",()=>{
+  assert.match(sql,/ON public\.los_dictionary_lexemes USING gin \(search_keys\)/);
+  assert.match(sql,/ON public\.los_dictionary_forms USING gin \(form_search_keys\)/);
+  assert.equal((sql.match(/l\.search_keys @> ARRAY\[p\.q\]/g)||[]).length,3);
+  assert.equal((sql.match(/f\.form_search_keys @> ARRAY\[p\.q\]/g)||[]).length,3);
+  assert.doesNotMatch(sql,/p\.q\s*=\s*ANY\(/);
+});

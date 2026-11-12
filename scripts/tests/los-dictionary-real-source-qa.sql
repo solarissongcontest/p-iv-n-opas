@@ -122,10 +122,10 @@ ANALYZE public.los_dictionary_translations;
 -- Query plans and actual elapsed times, without claiming production latency.
 EXPLAIN (ANALYZE,BUFFERS)
  SELECT lemma FROM public.los_dictionary_lexemes
- WHERE language='de' AND 'haus'=ANY(search_keys) ORDER BY lemma LIMIT 20;
+ WHERE language='de' AND search_keys @> ARRAY['haus'] ORDER BY lemma LIMIT 20;
 EXPLAIN (ANALYZE,BUFFERS)
  SELECT lemma FROM public.los_dictionary_lexemes
- WHERE language='fi' AND 'talo'=ANY(search_keys) ORDER BY lemma LIMIT 20;
+ WHERE language='fi' AND search_keys @> ARRAY['talo'] ORDER BY lemma LIMIT 20;
 
 SELECT source_id,imported_source_rows,actual_loaded_rows,published
  FROM public.los_dictionary_sources ORDER BY source_id;

@@ -152,6 +152,7 @@ BEGIN
   END LOOP;
 END $$;
 
+-- GIN-indexable array containment powers alias lookup (ANY would seq-scan).
 -- Server RPC exposes only reviewed/published sources; never global raw JSONL.
 -- No SECURITY DEFINER: the caller (server-side service role) owns the authorization.
 CREATE OR REPLACE FUNCTION public.los_dictionary_search(
@@ -173,26 +174,26 @@ AS $search$
     SELECT l.source_id, l.source_entry_id, l.lemma, l.language,
       l.part_of_speech, l.gender, s.source_kind, s.license_code,
       s.license_url, s.evidence_url,
-      CASE WHEN l.lemma_key = p.q OR p.q = ANY(l.search_keys)
+      CASE WHEN l.lemma_key = p.q OR l.search_keys @> ARRAY[p.q]
         THEN 0 WHEN EXISTS (
           SELECT 1 FROM public.los_dictionary_forms f
           WHERE f.source_id=l.source_id AND f.source_entry_id=l.source_entry_id
-            AND (f.form_key=p.q OR p.q=ANY(f.form_search_keys))
+            AND (f.form_key=p.q OR f.form_search_keys @> ARRAY[p.q])
         ) THEN 1 ELSE 2 END AS rank,
-      CASE WHEN l.lemma_key=p.q OR p.q=ANY(l.search_keys) THEN 'lemma'
+      CASE WHEN l.lemma_key=p.q OR l.search_keys @> ARRAY[p.q] THEN 'lemma'
         WHEN EXISTS (
           SELECT 1 FROM public.los_dictionary_forms f
           WHERE f.source_id=l.source_id AND f.source_entry_id=l.source_entry_id
-            AND (f.form_key=p.q OR p.q=ANY(f.form_search_keys))
+            AND (f.form_key=p.q OR f.form_search_keys @> ARRAY[p.q])
         ) THEN 'form' ELSE 'prefix' END AS match_type
     FROM param p
     JOIN public.los_dictionary_lexemes l ON l.language=p.source_lang
     JOIN public.los_dictionary_sources s ON s.source_id=l.source_id AND s.published=true
-    WHERE l.lemma_key=p.q OR p.q=ANY(l.search_keys) OR
+    WHERE l.lemma_key=p.q OR l.search_keys @> ARRAY[p.q] OR
       left(l.lemma_key,length(p.q))=p.q OR EXISTS (
         SELECT 1 FROM public.los_dictionary_forms f
         WHERE f.source_id=l.source_id AND f.source_entry_id=l.source_entry_id
-          AND (f.form_key=p.q OR p.q=ANY(f.form_search_keys))
+          AND (f.form_key=p.q OR f.form_search_keys @> ARRAY[p.q])
       )
     ORDER BY rank, length(l.lemma), l.lemma, l.source_id, l.source_entry_id
     LIMIT (SELECT p_limit FROM param)
