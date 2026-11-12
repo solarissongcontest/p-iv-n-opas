@@ -116,7 +116,7 @@ test("every one of the 60 guided lessons opens from its actual chapter picker on
   for(let j=0;j<count;j++){
    const button=lessonButtons.nth(j);
    const title=(await button.innerText()).trim();
-   expect(title).toMatch(/^L\\d{3}$/);
+   expect(title).toMatch(/^L\d{3}$/);
    expect(seen.has(title)).toBe(false);
    seen.add(title);
    await button.click();
