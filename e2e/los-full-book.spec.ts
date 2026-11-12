@@ -186,36 +186,17 @@ test("book cover resumes next unfinished lesson after completing L001",async({pa
  await expect(page.locator("#los-lesson-runner .los-lesson-detail .los-overline")).toContainText("L002");
 });
 
-test("C01 B5 facsimile pilot uses original cover and lets readers jump to the real digital chapter",async({page})=>{
+test("legacy facsimile and PDF.js links safely open the digital reader",async({page})=>{
  await enterLocalBook(page);
- await page.goto("/los#/1/facsimile",{waitUntil:"domcontentloaded"});
- const reader=page.locator(".los-facs-reader");
- await expect(reader).toBeVisible();
- await expect(reader).toContainText("C01-pilotti");
- await expect(reader.locator('.los-facs-stage [data-facsimile-page="cover"] img')).toHaveAttribute("src","/los/los-1-cover.jpeg");
- await expect(reader.locator(".los-facs-bottom")).toContainText("Luonnoslehti 1 / 15");
- await reader.getByRole("button",{name:"Sisältö"}).click();
- await reader.getByRole("navigation",{name:"Näköiskirjan sisällysluettelo"}).getByRole("button",{name:/Text A/}).click();
- await expect(reader.locator('.los-facs-stage [data-facsimile-page="c01-text-a"]')).toBeVisible();
- await expect(reader.locator('.los-facs-stage [data-facsimile-page="c01-text-a"] .los-facs-dialogue li')).toHaveCount(8);
- await reader.getByRole("button",{name:/Avaa sama osio digikirjassa/}).click();
- await expect(page).toHaveURL(/\/los#\/1\/01\/text$/);
- await expect(page.locator(".los-c01-reader")).toBeVisible();
- await expectNoHorizontalOverflow(page);
-});
-test("C01 facsimile page position survives reload but does not mark a lesson finished",async({page})=>{
- await enterLocalBook(page);
- await page.goto("/los#/1/facsimile",{waitUntil:"domcontentloaded"});
- const reader=page.locator(".los-facs-reader");
- await reader.getByRole("button",{name:"Sisältö"}).click();
- await reader.getByRole("navigation",{name:"Näköiskirjan sisällysluettelo"}).getByRole("button",{name:/Land und Leute/}).click();
- await expect(reader.locator('.los-facs-stage [data-facsimile-page="c01-culture"]')).toBeVisible();
+ for(const legacy of ["facsimile","facsimile-pdf","facsimile-c02","facsimile-c03","facsimile-c04"]){
+  await page.goto("/los#/1/"+legacy,{waitUntil:"domcontentloaded"});
+  await expect(page).toHaveURL(new RegExp("#/1/overview$"));
+  await expect(page.getByRole("heading",{name:"Tutustu ja ihastu saksan kieleen"})).toBeVisible();
+  await expect(page.locator(".los-facs-reader")).toHaveCount(0);
+ }
  await page.reload({waitUntil:"domcontentloaded"});
- await expect(reader.locator('.los-facs-stage [data-facsimile-page="c01-culture"]')).toBeVisible();
- await page.goto("/los#/1/path",{waitUntil:"domcontentloaded"});
- await expect(page.locator("#los-lesson-runner .los-lesson-progress")).toContainText("0/60 suoritettu");
+ await expect(page).toHaveURL(new RegExp("#/1/overview$"));
 });
-
 
 test("U1/U3: chapter tree links to persisted exercise and shared IPA word card on desktop and iPhone",async({page,isMobile})=>{
  await enterLocalBook(page);
@@ -489,7 +470,7 @@ test("U1 R9: shared C01 word card has no automatic WCAG A/AA violations",async({
   elements:v.nodes.map(n=>n.target).slice(0,5)}))).toEqual([]);
 });
 
-test("LOS! 1 digital chapter photos coexist with the existing facsimile",async({page})=>{
+test("LOS! 1 sourced photos survive on all ten digital chapters",async({page})=>{
  await enterLocalBook(page);
  for(const chapter of chapters){
   await page.goto("/los#/1/"+chapter+"/chapter",{waitUntil:"domcontentloaded"});
@@ -506,9 +487,8 @@ test("LOS! 1 digital chapter photos coexist with the existing facsimile",async({
   await expect(figure.locator("figcaption a")).toHaveAttribute("href",/pexels[.]com/);
   await expectNoHorizontalOverflow(page);
  }
- await page.goto("/los#/1/facsimile",{waitUntil:"domcontentloaded"});
- await expect(page.locator(".los-facs-reader")).toBeVisible();
- await expect(page.locator(".los1-digital-photo")).toHaveCount(0);
+ await page.goto("/los#/1/01/vocabulary",{waitUntil:"domcontentloaded"});
+ await expect(page.locator(".los1-visual-learning")).toBeVisible();
 });
 
 /** R10 synthetic browser storage-failure test, not a real cross-device restore signoff. */
