@@ -67,9 +67,15 @@ export function LosLearningPath({ book, move }: { book: LosBookDefinition; move:
   }, [book.id]);
   const selectLesson = (id: string) => {
     if (!isLos1ExecutableLesson(id)) return;
-    setSelectedLesson(id);
     try { sessionStorage.setItem("los1.selectedLesson", id); }
     catch { /* storage denied */ }
+    // Pilot only: the full Teacher 2.0 script is available for L004.
+    // Other lessons retain their existing evidence-aware runner.
+    if (id === "L004") {
+      window.location.assign("/los-lessons/L004");
+      return;
+    }
+    setSelectedLesson(id);
   };
   const groups = useMemo(() => {
     const result: { section: string; items: typeof LOS_1_LESSONS[number][] }[] = [];
@@ -99,7 +105,7 @@ export function LosLearningPath({ book, move }: { book: LosBookDefinition; move:
         {group.items.map(lesson=><li key={lesson.number}>
           <button onClick={()=>{ if(isLos1ExecutableLesson("L"+String(lesson.number).padStart(3,"0"))){ selectLesson("L"+String(lesson.number).padStart(3,"0")); document.getElementById("los-lesson-runner")?.scrollIntoView({block:"start",behavior:"smooth"}); } else move(lesson.chapter,lesson.destination); }}>
             <span className="los-path-number">{String(lesson.number).padStart(2,"0")}</span>
-            <span className="los-path-copy"><strong>{lesson.title}</strong><small>{isLos1ExecutableLesson("L"+String(lesson.number).padStart(3,"0")) ? "Avaa ohjattu oppitunti" : lesson.chapter ? `Kappale ${Number(lesson.chapter)} · Oppikirjan sisältöön (suoritus ei vielä käytössä)`  : "Suoritusjärjestelmä ei vielä käytössä"}</small></span>
+            <span className="los-path-copy"><strong>{lesson.title}</strong><small>{isLos1ExecutableLesson("L"+String(lesson.number).padStart(3,"0")) ? (lesson.number === 4 ? "Avaa uusi opettajajohtoinen opetustila" : "Avaa nykyinen ohjattu oppitunti") : lesson.chapter ? `Kappale ${Number(lesson.chapter)} · Oppikirjan sisältöön (suoritus ei vielä käytössä)`  : "Suoritusjärjestelmä ei vielä käytössä"}</small></span>
             <ArrowRight size={18}/>
           </button>
         </li>)}
