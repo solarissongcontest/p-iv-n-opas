@@ -107,7 +107,7 @@ test("guided C02 lessons use chapter-2 draft, and the book index routes to them"
   const index = readFileSync("src/features/los/LosReferenceTools.tsx","utf8");
   assert.match(component,/useLosChapterDraft\(1, "01"\)/);
   assert.match(component,/useLosChapterDraft\(1, "02"\)/);
-  assert.match(component,/isC02Lesson/);
+  assert.match(component,/lessonChapter/);
   assert.match(component,/LOS1_C02_LESSON_BLUEPRINTS/);
   assert.match(index,/lesson\.number <= 16/);
   assert.match(index,/L017–L060/);
