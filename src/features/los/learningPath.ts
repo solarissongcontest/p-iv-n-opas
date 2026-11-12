@@ -18,7 +18,7 @@ const chapterTitles: Record<string, [string, string, string, string, string]> = 
   "03": ["Maat ja paikat", "Lisa Müllerin alkuperäkeskustelu", "Kommen ja woher", "Alkuperä ja karttatehtävät", "Harjoittele ja testaa C03"],
   "04": ["Milloin du tai Sie?", "Herr Schmidt ja Herr Standish: koko dialogi", "Kohtelias verbinmuoto", "Käytä kohteliaisuusfraaseja", "Harjoittele ja testaa C04"],
   "05": ["Mitä kuuluu?", "Lue vointidialogi", "Vointifraasit ja nicht", "Vertaa vointidialogeja ja vastaa", "Harjoittele ja testaa C05"],
-  "06": ["Numerot 0–12", "Numerot 13–20 ja ikä", "Numerot 21–100: rakenne", "Kuuntele ikähaastattelu", "Harjoittele ja testaa C06"],
+  "06": ["Numerot 0–12", "Numerot 13–20 ja ikä", "Numerot 21–100: rakenne", "Kertaa alkuperäinen ikäkeskustelu", "Harjoittele ja testaa C06"],
   "07": ["Aakkosten ja nimen kertaus", "Lue tavaamiskeskustelu", "Tavaa ja ymmärrä numeroita", "Tavaa ja täytä harjoituslomake", "Harjoittele ja testaa C07"],
   "08": ["Selviytymisfraasit", "Luokkatilanteen alkuperäisteksti", "Kuuntelustrategiat ja selityspyynnöt", "Harjoittele vuorovaikutusta", "Harjoittele ja testaa C08"],
   "09": ["Viikonpäivät", "Lue Sport und Zeit", "Am Montag, um drei Uhr", "Lue ja merkitse kalenteriin", "Harjoittele ja testaa C09"],

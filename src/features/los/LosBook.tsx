@@ -8,6 +8,7 @@ import { LosChapterGrammar } from "./LosGrammarChapters";
 import { LosC01AuthenticText } from "./LosC01AuthenticText";
 import { LosC02AuthenticText } from "./LosC02AuthenticText";
 import { LosC02Understanding } from "./LosC02Understanding";
+import { LosC06AgeReview, LosC06AgeUnderstanding } from "./LosC06AgeReview";
 import { LosOpenTextPage, LosOpenTextUnderstanding } from "./LosOpenSourcePages";
 import { getLosOpenDialogue } from "./content/los1OpenDialogues";
 import { LosNotebook, LosWorkbook } from "./LosWorkbook";
@@ -207,6 +208,15 @@ function TextPage({ chapter }: { chapter: LosChapter }) {
       <p>{sourceGate.issues.join(" ")} Tämä on avoimeen julkaistuun aineistoon perustuva tekstiesikatselu, ei vielä valmis kappale.</p>
     </div>}
   </section>;
+  if(chapter.id==="06")return <section className="los-inner-page los-reading-page">
+    <p className="los-eyebrow">KAPPALE 06 / LUKUSANOJEN ALKUPERÄISKERTAUS</p>
+    <h1>Ikää koskeva alkuperäiskeskustelu</h1>
+    <LosC06AgeReview/>
+    <div className="los-editorial-note" role="status">
+      <h2>Uusi itsenäinen Text A puuttuu yhä</h2>
+      <p>C06:ssa on nyt kokonainen aiemmasta C01:stä tuttu autenttinen teksti uudesta näkökulmasta. Sitä ei esitetä C06:n uutena päätekstinä. {sourceGate.issues.join(" ")} Kappaleen lopullinen lähteiden hyväksyntä on edelleen kesken.</p>
+    </div>
+  </section>;
   if(getLosOpenDialogue(chapter.id))return <section className="los-inner-page los-reading-page">
     <p className="los-eyebrow">KAPPALE {chapter.id} / TEXT A</p>
     <h1>Lue alkuperäinen keskustelu</h1>
@@ -335,7 +345,7 @@ function LosBookWorkspace({ book, location, move, goLibrary, openBook }: { book:
             section === "search" ? <LosIndexSearch book={book} move={move} /> :
             chapter ? (
               section === "text" ? <TextPage chapter={chapter} /> :
-              section === "understand" ? (chapter.id==="02" ? <LosC02Understanding goToText={() => move(chapter.id,"text")}/> : getLosOpenDialogue(chapter.id) ? <LosOpenTextUnderstanding chapterId={chapter.id} goToText={() => move(chapter.id,"text")}/> : <LosUnderstanding chapter={chapter} goToText={() => move(chapter.id, "text")} />) :
+              section === "understand" ? (chapter.id==="02" ? <LosC02Understanding goToText={() => move(chapter.id,"text")}/> : chapter.id==="06" ? <LosC06AgeUnderstanding goToText={() => move(chapter.id,"text")}/> : getLosOpenDialogue(chapter.id) ? <LosOpenTextUnderstanding chapterId={chapter.id} goToText={() => move(chapter.id,"text")}/> : <LosUnderstanding chapter={chapter} goToText={() => move(chapter.id, "text")} />) :
               section === "vocabulary" ? <Vocabulary key={chapter.id} chapter={chapter} /> :
               section === "grammar" ? <Grammar chapter={chapter} /> :
               section === "text-b" ? <LosTextB chapter={chapter} /> :
