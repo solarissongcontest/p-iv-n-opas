@@ -6,6 +6,7 @@ on:
     paths:
       - "scripts/los-dictionary-import.py"
       - "scripts/tests/test_los_dictionary_import.py"
+      - "scripts/tests/test_los_dictionary_loader.py"
       - "scripts/tests/los-dictionary-postgres-smoke.sql"
       - "supabase/migrations/20261112170000_los_dictionary_search_staging.sql"
       - ".github/workflows/los-dictionary-import-ci.yml"
@@ -25,7 +26,7 @@ jobs:
         with:
           python-version: "3.12"
       - name: Run synthetic import + rights isolation tests
-        run: python -m unittest discover -s scripts/tests -p 'test_los_dictionary_import.py' -v
+        run: python -m unittest discover -s scripts/tests -p 'test_los_dictionary_*.py' -v
       - name: Verify no raw dictionaries are shipped in public browser assets
         shell: bash
         run: |
