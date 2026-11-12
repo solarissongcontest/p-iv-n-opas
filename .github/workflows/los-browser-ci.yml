@@ -1,0 +1,75 @@
+name: LOS Book Browser QA
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "src/features/los/**"
+      - "e2e/los-full-book.spec.ts"
+      - "e2e/los-c01-lessons.spec.ts"
+      - "e2e/helpers.ts"
+      - ".github/workflows/los-browser-ci.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: los-browser-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  browser-qa:
+    # Pin Ubuntu because Playwright WebKit 1.55 does not install on ubuntu-latest 26.04.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    env:
+      E2E_BASE_URL: http://127.0.0.1:5173
+      REQUIRE_GEMINI: "false"
+    steps:
+      - name: Checkout candidate commit
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install locked project dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Install Playwright test runner and axe
+        run: bun run e2e:install
+
+      - name: Install Chromium and WebKit browser engines
+        run: bunx playwright install --with-deps chromium webkit
+
+      - name: Start independent local preview
+        shell: bash
+        run: |
+          nohup bun run dev -- --host 127.0.0.1 --port 5173 --strictPort > /tmp/los-browser-dev.log 2>&1 &
+          echo $! > /tmp/los-browser-dev.pid
+          for attempt in $(seq 1 45); do
+            if curl --silent --show-error --fail --max-time 3 http://127.0.0.1:5173/ > /dev/null 2>&1; then
+              echo "Independent local preview is serving on :5173"
+              exit 0
+            fi
+            sleep 2
+          done
+          cat /tmp/los-browser-dev.log
+          echo "::error::Local LOS! preview did not start"
+          exit 1
+
+      - name: Full LOS! 1 browser flows in mobile WebKit and desktop Chromium
+        run: bunx playwright test e2e/los-full-book.spec.ts --project=desktop-chromium --project=iphone-webkit
+
+      - name: Upload browser traces and preview log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: los-book-browser-evidence-${{ github.run_id }}
+          path: |
+            test-results/
+            /tmp/los-browser-dev.log
+          if-no-files-found: ignore
+          retention-days: 14

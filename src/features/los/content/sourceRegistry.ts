@@ -1,4 +1,4 @@
-import rawManifest from "./los1-sources.json" with { type: "json" };
+import {LOS1_SOURCE_MANIFEST_DATA as rawManifest} from "./los1-sources-data.ts";
 
 /**
  * LOS! 1 source publication gates. A manifest readiness label (A/B/C) is not

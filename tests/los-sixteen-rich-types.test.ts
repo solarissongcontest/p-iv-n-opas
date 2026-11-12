@@ -5,6 +5,7 @@ import {
  LOS_RICH_TYPES,LOS1_RICH_TASKS,gradeLosRichTask,losRichTasksFor,validateLosRichBank,
 } from "../src/features/los/content/los1RichExercises.ts";
 import {validateLosCloudDraft} from "../src/features/los/cloudContract.ts";
+import {LOS1_TEXT_B_SOURCES} from "../src/features/los/content/los1TextBAdditional.ts";
 
 const get=(type:string)=>{const task=LOS1_RICH_TASKS.find(item=>item.type===type);assert.ok(task,type);return task;};
 test("every one of the 16 canonical types is represented by a stable chapter-scoped teaching exercise",()=>{
@@ -20,8 +21,12 @@ test("every one of the 16 canonical types is represented by a stable chapter-sco
  }
 });
 test("highlight, choice, truth, inflection, order, translation and evidence are genuinely evaluated",()=>{
- assert.equal(gradeLosRichTask(get("highlight-span"),"u01-t03"),"right");
- assert.equal(gradeLosRichTask(get("highlight-span"),"u01-t02"),"wrong");
+ assert.equal(gradeLosRichTask(get("highlight-span"),"M-COM-03-u03-t0"),"right");
+ const task=get("highlight-span");
+ const source=LOS1_TEXT_B_SOURCES["01"];
+ assert.deepEqual(task.tokens?.map(token=>token.id),source.lines.slice(0,3).map(line=>`${task.sourceId}-${line.id}-t0`));
+ assert.deepEqual(task.tokens?.map(token=>token.text),source.lines.slice(0,3).map(line=>line.text));
+ assert.equal(gradeLosRichTask(get("highlight-span"),"M-COM-03-u02-t0"),"wrong");
  assert.equal(gradeLosRichTask(get("single-choice"),"b"),"right");
  assert.equal(gradeLosRichTask(get("true-false"),"true"),"right");
  assert.equal(gradeLosRichTask(get("true-false"),"false"),"wrong");
@@ -88,7 +93,7 @@ test("rich examples keep the existing workbook and JSON/cloud draft protocol",()
  assert.match(ui,/media-unavailable/);
  assert.match(voice,/navigator.mediaDevices/);
  const practiceAnswers={
-  "RICH-C01-CHOICE":"b","RICH-C01-HIGHLIGHT":"u01-t03",
+  "RICH-C01-CHOICE":"b","RICH-C01-HIGHLIGHT":"M-COM-03-u03-t0",
   "RICH-C10-WRITE":"Ich heiße Leo. Ich komme aus Finnland.",
   "RICH-C10-WRITE-SELF":"reviewed",
  };
