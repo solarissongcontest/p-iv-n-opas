@@ -1,0 +1,237 @@
+{
+  "book": "los-1",
+  "license": "https://www.pexels.com/license/",
+  "note": "Curated photographs used contextually in a textbook; not a standalone photo collection. No implication of endorsement by depicted people.",
+  "images": [
+    {
+      "chapterId": "01",
+      "photoId": 5537577,
+      "originalPhotoPage": "https://www.pexels.com/photo/smiling-woman-waving-5537577/",
+      "sourceImageUrl": "https://images.pexels.com/photos/5537577/pexels-photo-5537577.jpeg?auto=compress&cs=tinysrgb&w=1600",
+      "sourceSha256": "936c80fb498d38b4f8cc5761b04f9576a3446b89f72fa4197e8e1e080dca63f6",
+      "variants": {
+        "desktop": {
+          "file": "/los/chapters/LOS1-C01-5537577-desktop.webp",
+          "width": 1440,
+          "height": 630,
+          "bytes": 35442,
+          "sha256": "da7a80d1063618785e95d4bc3574f77509a855ac917a3e7be84a29cfb70a842a"
+        },
+        "mobile": {
+          "file": "/los/chapters/LOS1-C01-5537577-mobile.webp",
+          "width": 720,
+          "height": 540,
+          "bytes": 20274,
+          "sha256": "5d4ea09e564dd3d445ef56844dfc9d4c00b271ddf301c075070ca526f18ffe28"
+        }
+      }
+    },
+    {
+      "chapterId": "02",
+      "photoId": 35605778,
+      "originalPhotoPage": "https://www.pexels.com/photo/casual-portrait-of-smiling-young-adult-35605778/",
+      "sourceImageUrl": "https://images.pexels.com/photos/35605778/pexels-photo-35605778.jpeg?auto=compress&cs=tinysrgb&w=1600",
+      "sourceSha256": "3a78f7f93fd0f545e1f3930b209e7b73420d1ae8cbd73c936185bf1f966d8161",
+      "variants": {
+        "desktop": {
+          "file": "/los/chapters/LOS1-C02-35605778-desktop.webp",
+          "width": 1440,
+          "height": 630,
+          "bytes": 29156,
+          "sha256": "08d9a40d81bffe3efa6e64ce6933e157c3d32c8c7b50793d221246b579bd44af"
+        },
+        "mobile": {
+          "file": "/los/chapters/LOS1-C02-35605778-mobile.webp",
+          "width": 720,
+          "height": 540,
+          "bytes": 15278,
+          "sha256": "ee92fb7cddf7cc7e667523f89992901b11aef0386b847d71e270a3c134e94dd4"
+        }
+      }
+    },
+    {
+      "chapterId": "03",
+      "photoId": 11041062,
+      "originalPhotoPage": "https://www.pexels.com/photo/view-of-a-tram-bicycles-and-pedestrians-on-a-street-in-berlin-in-sunlight-11041062/",
+      "sourceImageUrl": "https://images.pexels.com/photos/11041062/pexels-photo-11041062.jpeg?auto=compress&cs=tinysrgb&w=1600",
+      "sourceSha256": "ef7532ad0a97efd538d463a8eb6847bf356b44e7d04fdb629dbf22aef9b020b8",
+      "variants": {
+        "desktop": {
+          "file": "/los/chapters/LOS1-C03-11041062-desktop.webp",
+          "width": 1440,
+          "height": 630,
+          "bytes": 163138,
+          "sha256": "2f7a743d76ae26472072e1b0b4fe7cbc2d3b91b0d83a189c26ad6b237c09883f"
+        },
+        "mobile": {
+          "file": "/los/chapters/LOS1-C03-11041062-mobile.webp",
+          "width": 720,
+          "height": 540,
+          "bytes": 74598,
+          "sha256": "e38af0cfc93c2a7227e308ee17c998b7b39872bb50f37c1daf644d555e2409e9"
+        }
+      }
+    },
+    {
+      "chapterId": "04",
+      "photoId": 8297612,
+      "originalPhotoPage": "https://www.pexels.com/photo/businessman-and-businesswoman-shaking-hands-in-a-conference-room-8297612/",
+      "sourceImageUrl": "https://images.pexels.com/photos/8297612/pexels-photo-8297612.jpeg?auto=compress&cs=tinysrgb&w=1600",
+      "sourceSha256": "1ecbb5fc6e548f2533e18489a4df936f27846463300679caf1e48b134e9ce094",
+      "variants": {
+        "desktop": {
+          "file": "/los/chapters/LOS1-C04-8297612-desktop.webp",
+          "width": 1440,
+          "height": 630,
+          "bytes": 35514,
+          "sha256": "ff732248459d1cd806554178eca74923177ddd86e11eef9ad6ee4ca587d205e6"
+        },
+        "mobile": {
+          "file": "/los/chapters/LOS1-C04-8297612-mobile.webp",
+          "width": 720,
+          "height": 540,
+          "bytes": 21828,
+          "sha256": "52ad36ae534d9c8903895806ebb7f6b94673db5a0f433fcf12a204b03e2ada7d"
+        }
+      }
+    },
+    {
+      "chapterId": "05",
+      "photoId": 36729758,
+      "originalPhotoPage": "https://www.pexels.com/photo/friends-enjoying-coffee-and-conversing-at-a-cafe-36729758/",
+      "sourceImageUrl": "https://images.pexels.com/photos/36729758/pexels-photo-36729758.jpeg?auto=compress&cs=tinysrgb&w=1600",
+      "sourceSha256": "e0c9ffeb3cafce35ecb5a78ad13d133b8095424e0eb9bb9fe60fb7c1d13cc396",
+      "variants": {
+        "desktop": {
+          "file": "/los/chapters/LOS1-C05-36729758-desktop.webp",
+          "width": 1440,
+          "height": 630,
+          "bytes": 72452,
+          "sha256": "307391a571c7010d29d701c93820484c6139991b238f94828d8061779cf25a6b"
+        },
+        "mobile": {
+          "file": "/los/chapters/LOS1-C05-36729758-mobile.webp",
+          "width": 720,
+          "height": 540,
+          "bytes": 40510,
+          "sha256": "9ea5ccb7faf5cab23d047afdd9928a3106943994ed881e836f84c6552136f364"
+        }
+      }
+    },
+    {
+      "chapterId": "06",
+      "photoId": 29711471,
+      "originalPhotoPage": "https://www.pexels.com/photo/two-friends-smiling-outdoors-in-autumn-29711471/",
+      "sourceImageUrl": "https://images.pexels.com/photos/29711471/pexels-photo-29711471.jpeg?auto=compress&cs=tinysrgb&w=1600",
+      "sourceSha256": "1077daf24d804b0e7f0e4b3da0cb41398aabe2647cd57e96983143d4e8baec9d",
+      "variants": {
+        "desktop": {
+          "file": "/los/chapters/LOS1-C06-29711471-desktop.webp",
+          "width": 1440,
+          "height": 630,
+          "bytes": 88168,
+          "sha256": "0a9ca50ac7bd84d35fa9e28602c0c89f8883d84c271d56774ba175a898460248"
+        },
+        "mobile": {
+          "file": "/los/chapters/LOS1-C06-29711471-mobile.webp",
+          "width": 720,
+          "height": 540,
+          "bytes": 58844,
+          "sha256": "c5faee90bc0049d0ae1fa74a39be96c18c4e49f3995b5ad3d2b29383c5c21c20"
+        }
+      }
+    },
+    {
+      "chapterId": "07",
+      "photoId": 8716188,
+      "originalPhotoPage": "https://www.pexels.com/photo/woman-writing-on-a-notebook-8716188/",
+      "sourceImageUrl": "https://images.pexels.com/photos/8716188/pexels-photo-8716188.jpeg?auto=compress&cs=tinysrgb&w=1600",
+      "sourceSha256": "4c134c4618dc9a33b9c97a16c33fde38a505855a160ff567ee9c503f20461409",
+      "variants": {
+        "desktop": {
+          "file": "/los/chapters/LOS1-C07-8716188-desktop.webp",
+          "width": 1440,
+          "height": 630,
+          "bytes": 32244,
+          "sha256": "1bd446d472342509ebf102a350ba42ac57d2bf07cced076d350028f34ae93d8c"
+        },
+        "mobile": {
+          "file": "/los/chapters/LOS1-C07-8716188-mobile.webp",
+          "width": 720,
+          "height": 540,
+          "bytes": 24078,
+          "sha256": "476c79f409d570dc0f8465ad72b7e778e2bb5ddbd1a48821f431cdf74cf64339"
+        }
+      }
+    },
+    {
+      "chapterId": "08",
+      "photoId": 36729726,
+      "originalPhotoPage": "https://www.pexels.com/photo/friendly-barista-at-cafe-counter-assisting-customers-36729726/",
+      "sourceImageUrl": "https://images.pexels.com/photos/36729726/pexels-photo-36729726.jpeg?auto=compress&cs=tinysrgb&w=1600",
+      "sourceSha256": "1728a698eb52197ab729490f67def6ad2055f3216a0f978ef2d481f5d1c560c4",
+      "variants": {
+        "desktop": {
+          "file": "/los/chapters/LOS1-C08-36729726-desktop.webp",
+          "width": 1440,
+          "height": 630,
+          "bytes": 49762,
+          "sha256": "09633f252568f72b96b9d24124b08407069021fe02697feb7e75f41518bbf019"
+        },
+        "mobile": {
+          "file": "/los/chapters/LOS1-C08-36729726-mobile.webp",
+          "width": 720,
+          "height": 540,
+          "bytes": 28036,
+          "sha256": "ed9ca4f0f3f2c52f43fd84b1282625337213b627597f44d08507df06d04ea018"
+        }
+      }
+    },
+    {
+      "chapterId": "09",
+      "photoId": 28353121,
+      "originalPhotoPage": "https://www.pexels.com/photo/a-black-and-white-calendar-with-a-pen-on-top-28353121/",
+      "sourceImageUrl": "https://images.pexels.com/photos/28353121/pexels-photo-28353121.jpeg?auto=compress&cs=tinysrgb&w=1600",
+      "sourceSha256": "c105eb90fa59e11a113aa89f0d1f3ef5880d5a0e9af3dc7554218137ccbbbea7",
+      "variants": {
+        "desktop": {
+          "file": "/los/chapters/LOS1-C09-28353121-desktop.webp",
+          "width": 1440,
+          "height": 630,
+          "bytes": 30300,
+          "sha256": "08ff33f05bf8ed6b5f04e1d5ad8dfe5292c45b2695d392f3ffbc77554eee6762"
+        },
+        "mobile": {
+          "file": "/los/chapters/LOS1-C09-28353121-mobile.webp",
+          "width": 720,
+          "height": 540,
+          "bytes": 20884,
+          "sha256": "e1be00a71502b8124ba07f9a5c730606f0dfd822124ece176fc7999c8d705fdf"
+        }
+      }
+    },
+    {
+      "chapterId": "10",
+      "photoId": 20243345,
+      "originalPhotoPage": "https://www.pexels.com/photo/a-group-of-people-sitting-outside-and-smiling-20243345/",
+      "sourceImageUrl": "https://images.pexels.com/photos/20243345/pexels-photo-20243345.jpeg?auto=compress&cs=tinysrgb&w=1600",
+      "sourceSha256": "110bde8737d79c6a2df7aadd5cc7a1f7c1d715580e4a4ccc33bb2de67e998413",
+      "variants": {
+        "desktop": {
+          "file": "/los/chapters/LOS1-C10-20243345-desktop.webp",
+          "width": 1440,
+          "height": 630,
+          "bytes": 110578,
+          "sha256": "20b4895434c29c909b44fc078844b69ff9a162e2129eda5895552121ab83e13e"
+        },
+        "mobile": {
+          "file": "/los/chapters/LOS1-C10-20243345-mobile.webp",
+          "width": 720,
+          "height": 540,
+          "bytes": 59850,
+          "sha256": "68066619560aa2d6d7a29130ab7a13d49a814b22f99034e4368f39ee5457a04b"
+        }
+      }
+    }
+  ]
+}
