@@ -1,0 +1,31 @@
+name: LOS1 Edition Release Candidate Verification
+
+on:
+  push:
+    branches:
+      - feat/los1-edition-release-foundation
+    paths:
+      - ".github/workflows/los1-edition-candidate-verification.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  exact-head:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - name: Install exact pinned dependency graph
+        run: bun install --frozen-lockfile
+      - name: Test entire repository including full-book release gates
+        run: bun run test
+      - name: Build and typecheck exact release candidate
+        run: bun run build
+      - name: Verify that no full-book PDF is falsely published
+        run: |
+          grep -F 'RELEASED_LOS1_EDITION:Los1PublishedEdition|null=null' src/features/los/facsimile/los1/editionRelease.ts
