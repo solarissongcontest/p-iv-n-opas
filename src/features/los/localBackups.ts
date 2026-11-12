@@ -10,8 +10,10 @@ export type LosBookBackup={
   chapters:Record<string,LosChapterDraft>;
 };
 function chapterRange(bookId:number){
-  // Book 1 has ten confirmed chapters; later books are not yet authored.
-  return bookId===1?Array.from({length:10},(_,i)=>String(i+1).padStart(2,"0")):[];
+  // Book 1 has ten actual chapters plus reserved storage slot 91 for the
+  // independently scored EX-MID. 91 is NOT a fictional chapter or lesson.
+  const chapters=Array.from({length:10},(_,i)=>String(i+1).padStart(2,"0"));
+  return bookId===1?[...chapters,"91"]:[];
 }
 export function createLosBookBackup(bookId=1):LosBookBackup{
   const chapters:Record<string,LosChapterDraft>={};
@@ -37,7 +39,7 @@ export function parseLosBookBackup(value:string):LosBookBackup{
     throw new Error("Tiedosto ei ole LOS! 1:n varmuuskopio.");
   }
   const entries=Object.entries(data.chapters);
-  if(entries.length>10)throw new Error("Varmuuskopiossa on liian monta kappaletta.");
+  if(entries.length>chapterRange(1).length)throw new Error("Varmuuskopiossa on liian monta tallennuskohdetta.");
   const chapters:Record<string,LosChapterDraft>={};
   for(const [id,draft] of entries){
     if(!validLosChapter(1,id)||!chapterRange(1).includes(id)||!validateLosCloudDraft(draft))
