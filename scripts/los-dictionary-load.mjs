@@ -57,6 +57,48 @@ function makeBatch(items,sourceId){
  }
  return {lexemes,senses,translations,forms,pronunciations};
 }
+/** Two-pass integrity guard: validate every row before any DB INSERT. */
+async function preflight(input,report,approved){
+ const expectedLanguage=approved.direction.split("-")[0];
+ const expectedTarget=approved.kind==="freedict"?
+  approved.direction.split("-")[1]:null;
+ const seen=new Set();
+ let count=0,translatedRows=0,translations=0,ipaCandidates=0;
+ for await(const row of rows(input)){
+  if(row.language!==expectedLanguage||row.targetLanguage!==expectedTarget||
+   row.sourceKind!==approved.kind||!Number.isSafeInteger(row.row)||row.row<1)
+    throw new Error("Staged row language, kind or row ordinal does not match source");
+  const id=row.sourceEntryId;
+  if(typeof id!=="string"||!id||id.length>190||seen.has(id))
+    throw new Error("Duplicate or invalid source entry ID: "+id);
+  seen.add(id);
+  const batch=makeBatch([row],report.sourceId);
+  if(batch.lexemes.length!==1)throw new Error("Expected one lexeme per source row");
+  for(const form of batch.forms){
+   if(form.written_form.length>180||form.form_key.length>180)
+    throw new Error("Invalid morphological form length");
+  }
+  for(const entry of batch.translations){
+   if(entry.language!==expectedTarget ||
+      typeof entry.value!=="string" || entry.value.length>2000 ||
+      !entry.value.trim())
+    throw new Error("Source translation language/content is invalid");
+  }
+  for(const pronunciation of batch.pronunciations){
+   if(pronunciation.ipa.length>140)throw new Error("IPA candidate length exceeds schema");
+  }
+  count++;
+  translations+=batch.translations.length;
+  translatedRows+=Number(batch.translations.length>0);
+  ipaCandidates+=batch.pronunciations.length;
+ }
+ if(count!==report.importedSourceRows||
+    translations!==report.translationVariants||
+    translatedRows!==report.rowsWithTranslations||
+    ipaCandidates!==report.ipaCandidates)
+   throw new Error("Staged data counts do not match signed source manifest");
+ return {count,translatedRows,translations,ipaCandidates,distinctSourceEntries:seen.size};
+}
 async function main(){
  const input=option("--input"), report=JSON.parse(readFileSync(option("--manifest"),"utf8"));
  const approvals=JSON.parse(readFileSync(option("--approvals"),"utf8"));
@@ -68,15 +110,18 @@ async function main(){
   approved.rightsApproval?.publicationApproved===true||
   report.outputSha512!==await checksum(input))
    throw new Error("Source checksum or staging-rights evidence invalid");
+ if(report.kind!==approved.kind||report.direction!==approved.direction||
+    !/^[a-z0-9_.-]{3,160}$/.test(report.sourceId)||
+    !approved.sourceUrl?.startsWith("https://"))
+   throw new Error("Source direction, identity or HTTPS provenance not approved");
+ // The same full preflight runs for dry-run and live staging. Neither can
+ // write even one row until the complete staged file is validated.
+ const inspected=await preflight(input,report,approved);
  if(!process.argv.includes("--write-staging")){
-  let verified=0;
-  for await(const item of rows(input)){
-   makeBatch([item],report.sourceId);
-   verified++;
-  }
-  if(verified!==report.importedSourceRows)throw new Error("Staged row count does not match manifest");
   console.log(JSON.stringify({status:"VALIDATED_STAGING_ONLY",
-   actualParsedRows:verified,translations:report.translationVariants,
+   actualParsedRows:inspected.count,actualTranslationVariants:inspected.translations,
+   actualRowsWithTranslations:inspected.translatedRows,
+   actualIpaCandidates:inspected.ipaCandidates,
    sourceId:report.sourceId,publishedRows:0}));
   return;
  }
