@@ -24,7 +24,7 @@ export function LosC06AgeReview() {
       glossary={LOS1_C06_REVIEW_GLOSS}
       heading="Franz ja Jörg: ikäfraasien kertaus"
       usageLabel="ORIGINALTEXT · AIEMMAN TEKSTIN KERTAUS C01:STÄ"
-      guidance="Lue kaikki kahdeksan alkuperäistä puheenvuoroa ja keskity erityisesti neljänteen, viidenteen ja kuudenteen repliikkiin. Puhu toinen henkilö kysyy ikää, toinen kertoo 19 vuotta ja toinen 20 vuotta. Yritä tunnistaa ilmaukset myös ilman suomennosta."
+      guidance="Lue kaikki kahdeksan alkuperäistä puheenvuoroa ja keskity erityisesti neljänteen, viidenteen ja kuudenteen repliikkiin. Jörg kysyy Franzilta ikää, minkä jälkeen he kertovat 19 ja 20 vuoden iät. Yritä tunnistaa ilmaukset myös ilman suomennosta."
       author="Xzapro4 ja Erkan Yilmaz (2008)"
       sourceTitle="GesprächVorstellung.ogg, Wikimedia Commons"
       sourceUrl="https://commons.wikimedia.org/wiki/File:Gespr%C3%A4chVorstellung.ogg"
