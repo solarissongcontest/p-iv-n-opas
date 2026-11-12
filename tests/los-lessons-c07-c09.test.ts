@@ -24,25 +24,25 @@ const draft = () => ({
   selfAssessment: "", updatedAt: now,
 });
 
-test("45 executable lessons are unique and preserve gaps for unfinished chapters", () => {
+test("49 executable lessons are unique and preserve gaps for unfinished chapters", () => {
   assert.equal(LOS_1_LESSONS.length,60);
-  assert.equal(LOS1_EXECUTABLE_LESSONS.length,45);
+  assert.equal(LOS1_EXECUTABLE_LESSONS.length,49);
   assert.equal(LOS1_C07_C09_LESSONS.length,10);
   const allIds = LOS1_EXECUTABLE_LESSONS.map(lesson=>lesson.id);
-  assert.equal(new Set(allIds).size,45,"No lesson may be published twice");
+  assert.equal(new Set(allIds).size,49,"No lesson may be published twice");
   const expectedC07 = ["L036","L037","L038","L039","L040"];
   const expectedC09 = ["L046","L047","L048","L049","L050"];
   assert.deepEqual(LOS1_C07_C09_LESSONS.map(x=>x.id),[...expectedC07,...expectedC09]);
   for (let number=1;number<=60;number++) {
     const id="L"+String(number).padStart(3,"0");
-    const shouldExist=(number<=40) || (number>=36&&number<=40) || (number>=46&&number<=50);
+    const shouldExist=(number<=40) || number===41 || number===43 || (number>=46&&number<=50) || number===51 || number===53;
     assert.equal(isLos1ExecutableLesson(id),shouldExist,id+" readiness");
   }
   for (const id of expectedC07)assert.equal(los1LessonDraftChapter(id),"07");
   for (const id of expectedC09)assert.equal(los1LessonDraftChapter(id),"09");
   assert.equal(isLos1ExecutableLesson("L999"),false);
   assert.equal(isLos1ExecutableLesson("L027"),true);
-  assert.equal(isLos1ExecutableLesson("L041"),false);
+  assert.equal(isLos1ExecutableLesson("L041"),true);
 });
 
 test("chapter 7 and 9 lesson titles and source references match existing book pages", () => {
