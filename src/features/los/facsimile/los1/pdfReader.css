@@ -81,3 +81,40 @@
   .los1-pdf-search label{width:100%}
 }
 @media(prefers-reduced-motion:reduce){.los1-pdf-reader *{animation:none!important;transition:none!important}}
+
+
+/* LOS! 1 full-book editorial outline: no fabricated folios or photo placeholders. */
+.los1-full-book-outline{
+  margin:18px 0;padding:15px 17px;border:1px solid #d6d1cc;
+  border-radius:10px;background:#fff;color:#222b34;
+}
+.los1-full-book-outline>summary{
+  font-size:15px;font-weight:750;cursor:pointer;color:#9f4238;line-height:1.5;
+}
+.los1-full-book-outline>p{line-height:1.6;color:#505c66;font-size:13px}
+.los1-full-book-gate-status{
+  padding:10px 12px;border-left:3px solid #b7473c;background:#fce8e5;
+}
+.los1-full-book-outline-chapters{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:9px;
+}
+.los1-full-book-outline-chapters>details{
+  border:1px solid #e2dedb;border-radius:7px;padding:10px 12px;min-width:0;
+}
+.los1-full-book-outline-chapters>details>summary{
+  cursor:pointer;display:flex;justify-content:space-between;gap:10px;
+  align-items:center;font-size:12px;line-height:1.4;
+}
+.los1-full-book-outline-chapters>details>summary span:last-child{
+  font-size:10px;color:#9a3c32;white-space:nowrap;
+}
+.los1-full-book-outline-chapters>details>p{font-size:11px;color:#59636b}
+.los1-full-book-outline-chapters ol{padding-left:17px;font-size:11px;line-height:1.6}
+.los1-full-book-outline-chapters li{padding:3px 0}
+.los1-full-book-outline-chapters li small{
+  font-size:10px;color:#65717c;margin-left:5px;
+}
+.los1-full-book-outline-chapters .los1-full-book-issues{
+  border-top:1px solid #eadad6;padding-top:10px;color:#8a3d36;
+}
+.los1-full-book-foot{font-size:11px!important;}
