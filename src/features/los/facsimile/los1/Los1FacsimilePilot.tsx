@@ -1,4 +1,4 @@
-import {useCallback,useEffect,useMemo,useState,type CSSProperties} from "react";
+import {useCallback,useEffect,useMemo,useRef,useState,type CSSProperties} from "react";
 import {
   ArrowLeft,BookOpen,ChevronLeft,ChevronRight,
   Columns2,FileText,List,Minus,Plus,Printer,
@@ -243,13 +243,18 @@ function FacsimileLeaf({page,zoom=100}:{page:LosFacsimilePage;zoom?:number}){
 export function Los1FacsimilePilot({onOpenDigital}:{onOpenDigital:(section:LosFacsimileSection)=>void}){
   const [state,setState]=useState<ReaderState>({pageId:"cover",mode:"auto",zoom:100});
   const [wide,setWide]=useState(false);
+  const stageRef=useRef<HTMLDivElement|null>(null);
   const [tocOpen,setTocOpen]=useState(false);
   const [loaded,setLoaded]=useState(false);
   useEffect(()=>{
     setState(readState());setLoaded(true);
-    const resize=()=>setWide(window.innerWidth>=1080);
-    resize();window.addEventListener("resize",resize);
-    return ()=>window.removeEventListener("resize",resize);
+    const stage=stageRef.current;
+    const resize=()=>setWide(Boolean(stage&&stage.clientWidth>=980));
+    resize();
+    const observer=typeof ResizeObserver!=="undefined"?new ResizeObserver(resize):null;
+    if(stage)observer?.observe(stage);
+    window.addEventListener("resize",resize);
+    return ()=>{observer?.disconnect();window.removeEventListener("resize",resize);};
   },[]);
   useEffect(()=>{
     if(!loaded)return;
@@ -337,7 +342,9 @@ export function Los1FacsimilePilot({onOpenDigital}:{onOpenDigital:(section:LosFa
       <Columns2 size={15}/> Näyttö on liian kapea luettavaan aukeamaan.
       Näytetään yksi sivu; aukeamavalinta säilyy leveämpää näyttöä varten.
     </p>}
-    <div className={"los-facs-stage "+(actualMode==="continuous"?"is-continuous":"")}>
+    <div ref={stageRef}
+      style={{"--los-facs-zoom":state.zoom/100} as CSSProperties}
+      className={"los-facs-stage "+(actualMode==="continuous"?"is-continuous":"")}>
       <div className={"los-facs-leaves "+(group.length===2?"is-spread":"is-single")}
         aria-label="B5-sivut">
         {group.map(p=><div key={p.pageId} className="los-facs-sheet" data-leaf={p.pageId}>
