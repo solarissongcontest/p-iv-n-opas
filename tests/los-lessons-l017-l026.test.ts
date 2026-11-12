@@ -80,7 +80,7 @@ test("26 lessons use real C01 through C05 chapter drafts and preserve incomplete
  const lessonMap=readFileSync("src/features/los/learningPath.ts","utf8");
  assert.match(runner,/useLosChapterDraft\(1, "04"\)/);
  assert.match(runner,/useLosChapterDraft\(1, "05"\)/);
- assert.match(runner,/LOS1_C04_C05_LESSONS/);
+ assert.match(runner,/LOS1_EXECUTABLE_LESSONS/);
  assert.match(index,/isLos1ExecutableLesson/);
  assert.match(index,/LOS1_EXECUTABLE_LESSONS\.length/);
  assert.ok(lessonMap.includes("Herr Schmidt ja Herr Standish: koko dialogi"));
