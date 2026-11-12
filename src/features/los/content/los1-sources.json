@@ -2,7 +2,7 @@
   "schemaVersion": "1.0.0",
   "bookId": "los-1",
   "importedFrom": "LOS1_SOURCE_MANIFEST_v1.0(1).json",
-  "sourceCount": 24,
+  "sourceCount": 26,
   "sources": [
     {
       "id": "M-COM-01",
@@ -435,6 +435,42 @@
       "integrated": true,
       "deviceTested": false,
       "published": false
+    },
+    {
+      "id": "M-COM-04",
+      "kind": "source",
+      "manifestReadiness": "A ääni / erillinen ääntämisnäyte",
+      "manifestCheckedAt": "2026-11-12",
+      "mediaTested": false,
+      "stage": "rights-verified",
+      "licenseCode": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+      "languageReviewed": false,
+      "integrated": true,
+      "deviceTested": false,
+      "published": false,
+      "description": "Jeuwre: Wie geht es dir? (1,83 s), berliiniläisen saksaa äidinkielenään puhuvan miehen aito ääntämisnäyte. C05:n lisäkuuntelu; ei kokonainen dialogi eikä C05:n Text B.",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:De-wie_geht_es_dir.ogg",
+      "rightsNotes": "Jeuwre, 7.5.2017, CC BY-SA 4.0; alkuperäinen Ogg Vorbis. Teksti fraasin lähdesivulla. Ei muutoksia, soitetaan Wikimedia Commonsista. Mediaa ei ole laitetestattu; sen toistuminen ei ole pakollinen C05-oppitunnin suoritusnäyttö.",
+      "licenseEvidenceUrl": "https://commons.wikimedia.org/wiki/File:De-wie_geht_es_dir.ogg"
+    },
+    {
+      "id": "M-COM-05",
+      "kind": "source",
+      "manifestReadiness": "A ääni / erillinen ääntämisnäyte",
+      "manifestCheckedAt": "2026-11-12",
+      "mediaTested": false,
+      "stage": "rights-verified",
+      "licenseCode": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+      "languageReviewed": false,
+      "integrated": true,
+      "deviceTested": false,
+      "published": false,
+      "description": "Jeuwre: Wie geht's? (1,65 s), berliiniläisen saksaa äidinkielenään puhuvan miehen alkuperäinen tervehdys-/vointifraasin ääntämisnäyte. C05:n lisäkuuntelu; ei kokonainen keskustelu.",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:De-Wie_geht%27s%3F.ogg",
+      "rightsNotes": "Jeuwre, 19.2.2021, CC BY-SA 4.0; alkuperäinen 1,65 sekunnin Ogg Vorbis -äänite. Ei muutoksia, suora Wikimedia Commons -stream. Toisto mobiilissa ja tietokoneella vielä todentamatta, ei väitetä koko tekstin kuunteluksi.",
+      "licenseEvidenceUrl": "https://commons.wikimedia.org/wiki/File:De-Wie_geht%27s%3F.ogg"
     }
   ],
   "chapters": [

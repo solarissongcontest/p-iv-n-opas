@@ -164,11 +164,27 @@ const audioSources = [
     attributionUrl:"https://commons.wikimedia.org/wiki/File:Deutsch_Dialog_._Ich_bin_Peter.ogg",
     src:"https://commons.wikimedia.org/wiki/Special:Redirect/file/Deutsch_Dialog_._Ich_bin_Peter.ogg",
     note:"Tämän neljän repliikin äänitteen jokainen puheenvuoro on näkyvissä LOS!:n Text B -osassa. Toisto vielä laitetestattava.",
+  },
+  {
+    id:"M-COM-04",title:"Wie geht es dir? · ääntämisnäyte",
+    duration:"1,8 s",author:"Jeuwre",license:"CC BY-SA 4.0",
+    licenseUrl:"https://creativecommons.org/licenses/by-sa/4.0/",
+    attributionUrl:"https://commons.wikimedia.org/wiki/File:De-wie_geht_es_dir.ogg",
+    src:"https://commons.wikimedia.org/wiki/Special:Redirect/file/De-wie_geht_es_dir.ogg",
+    note:"Berliiniläisen äidinkielisen saksanpuhujan lausuma yksi fraasi. Ei kokonainen dialogi eikä korvaa C05:n puuttuvaa Text B -kuuntelua. Mobiilitoistoa ei ole vielä varmennettu.",
+  },
+  {
+    id:"M-COM-05",title:"Wie geht's? · lyhyt ääntämisnäyte",
+    duration:"1,7 s",author:"Jeuwre",license:"CC BY-SA 4.0",
+    licenseUrl:"https://creativecommons.org/licenses/by-sa/4.0/",
+    attributionUrl:"https://commons.wikimedia.org/wiki/File:De-Wie_geht%27s%3F.ogg",
+    src:"https://commons.wikimedia.org/wiki/Special:Redirect/file/De-Wie_geht%27s%3F.ogg",
+    note:"Berliiniläisen äidinkielisen saksanpuhujan lausuma yksi lyhennetty fraasi. Ei keskustelu tai koesuoritus; mobiili- ja desktop-toisto on vielä tarkistettava.",
   }
 ] as const;
 export function LosAuthenticAudio({ chapterId, source = "all" }: { chapterId: string; source?: "A" | "B" | "all" }) {
   const [errors,setErrors] = useState<string[]>([]);
-  const selected=chapterId==="01" ? (source==="A"?audioSources.slice(0,1):source==="B"?audioSources.slice(1,2):audioSources.slice(0,2)) : (chapterId==="02"||chapterId==="03") && source!=="A" ? audioSources.filter(item=>item.id==="M-COM-02") : chapterId==="06" && source!=="B"?audioSources.slice(0,1):[];
+  const selected=chapterId==="01" ? (source==="A"?audioSources.slice(0,1):source==="B"?audioSources.slice(1,2):audioSources.slice(0,2)) : (chapterId==="02"||chapterId==="03") && source!=="A" ? audioSources.filter(item=>item.id==="M-COM-02") : chapterId==="05" && source!=="A"?audioSources.filter(item=>item.id==="M-COM-04"||item.id==="M-COM-05") : chapterId==="06" && source!=="B"?audioSources.slice(0,1):[];
   if(!selected.length)return null;
   return <section className="los-authentic-audio" aria-label="Alkuperäiset kuunteluäänitteet">
     <p className="los-overline">ALKUPERÄISET ÄÄNITTEET · KOKEILUTOISTO</p>
