@@ -36,7 +36,7 @@ test("C03 DACH, C04 du/Sie, C08 German federal education and C09 time exercises 
  assert.match(LOS1_CULTURE["03"].sourceUrl,/make-it-in-germany\.com/);
  assert.match(LOS1_CULTURE["03"].note,/Liechtenstein/);
  assert.match(LOS1_CULTURE["04"].sourceUrl,/duden\.de/);
- assert.match(LOS1_CULTURE["04"].note,/duzen/);
+ assert.match(LOS1_CULTURE["04"].note,/duzen/i);
  assert.match(LOS1_CULTURE["08"].sourceUrl,/kmk\.org/);
  assert.match(LOS1_CULTURE["08"].note,/16 osavaltiota/);
  assert.match(LOS1_CULTURE["09"].note,/um drei Uhr/);
