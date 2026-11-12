@@ -28,7 +28,7 @@
       "kind": "freedict",
       "direction": "fi-de",
       "sourceUrl": "https://download.freedict.org/generated/fin-deu/fin-deu.tei",
-      "sourceSha512": "a39c405777fb56f345d4cb2020652e3a9c55fba8bbbded261fc7f273038f1447458573061442b88cbe2fccf12389b8ccaedb97eb819408b3103",
+      "sourceSha512": "a39c405777fb56f345d4cb2020652e3a9c55fba8bbbded261fc7f273038f1447458573061442b88cbe2fccf12389b8ccaedb97eb819408b3103ff81c8bdcb103",
       "teiHeaderSha256": "3067601622771df44de03e107541b876c0ac060c21c638de924059facd476a98",
       "rightsApproval": {
         "reviewed": true,
