@@ -98,3 +98,38 @@ test("C01 real original token highlight, C08 gated video and responsive exercise
  await expect(video.locator("input")).toHaveCount(0);
  await expectNoHorizontalOverflow(page);
 });
+
+
+test("every one of the 60 guided lessons opens from its actual chapter picker on iPhone and desktop",async({page})=>{
+ await enterLocalBook(page);
+ await page.goto("/los#/1/path",{waitUntil:"domcontentloaded"});
+ const runner=page.locator("#los-lesson-runner");
+ await expect(runner).toBeVisible();
+ const sections=runner.locator(".los-lesson-chapter-picker button");
+ await expect(sections).toHaveCount(13);
+ const seen=new Set<string>();
+ for(let i=0;i<13;i++){
+  await sections.nth(i).click();
+  const lessonButtons=runner.locator(".los-lesson-picker button");
+  const count=await lessonButtons.count();
+  expect(count).toBeGreaterThan(0);
+  for(let j=0;j<count;j++){
+   const button=lessonButtons.nth(j);
+   const title=(await button.innerText()).trim();
+   expect(title).toMatch(/^L\d{3}$/);
+   expect(seen.has(title)).toBe(false);
+   seen.add(title);
+   await button.click();
+   await expect(runner.locator(".los-lesson-detail .los-overline")).toContainText(title);
+   await expect(runner.locator(".los-lesson-steps li").first()).toBeVisible();
+   await expect(runner.locator(".los-lesson-exit")).toBeVisible();
+   await expect(runner.getByRole("button",{name:"Merkitse oppitunti suoritetuksi"})).toBeDisabled();
+  }
+ }
+ expect(seen.size).toBe(60);
+ for(let n=1;n<=60;n++)expect(seen.has("L"+String(n).padStart(3,"0"))).toBe(true);
+ await expect(runner.locator(".los-lesson-progress")).toContainText("0/60 suoritettu");
+ await page.reload({waitUntil:"domcontentloaded"});
+ await expect(page.locator("#los-lesson-runner .los-lesson-detail .los-overline")).toContainText("L060");
+ await expectNoHorizontalOverflow(page);
+});
