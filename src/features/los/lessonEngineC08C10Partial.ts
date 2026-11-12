@@ -1,10 +1,10 @@
 import type { LosLessonBlueprint } from "./lessonEngine";
 
 /**
- * Four clearly delimited, source-INDEPENDENT guided lessons. Full C08 and C10
- * primary reading/listening lessons remain blocked by missing vetted source.
- * The source-ready flag and sourceRegistry stay unchanged. No fabricated A1
- * source interview or unsupported audio is presented as authentic.
+ * Four delimited source-independent guided lessons. C08 primary text remains missing;
+ * C10 primary Harald transcript is now readable, but audio, German level and device
+ * gates are still unverified. These four lessons retain their original evidence IDs.
+ * No unsupported audio is presented as tested listening.
  */
 export const LOS1_C08_C10_PARTIAL_LESSONS: readonly LosLessonBlueprint[] = [
   {
@@ -36,12 +36,12 @@ export const LOS1_C08_C10_PARTIAL_LESSONS: readonly LosLessonBlueprint[] = [
     objective:"Yhdistän jo opitut esittäytymisen, nimen, lähtömaan ja kuulumisten fraasit.",
     estimatedMinutes:30,contentVersion:"1.0.0",
     steps:[
-      {id:"earlier",label:"Kertaa edellisen kappaleen aito tekstimalli",instruction:"Avaa C02:n Franz–Greta-dialogi ja etsi Ich heiße ja Wie heißt du. C10:n oma uusi alkuperäinen Harald-haastattelu odottaa vielä tarkistettavaa lähdettä, joten aiempaa tekstiä ei kutsuta uudeksi C10:n Text A:ksi.",chapter:"02",section:"text",minutes:10},
+      {id:"earlier",label:"Kertaa edellisen kappaleen aito tekstimalli",instruction:"Avaa C02:n Franz–Greta-dialogi ja etsi Ich heiße ja Wie heißt du. Vertaa niitä lopuksi C10:n uuteen Harald-haastatteluun, joka on nyt luettavissa suoraan Text A -sivulla. Äänitteen toistuminen on vielä testaamatta ja sen vaikeammat ilmaukset opetellaan vain tunnistamaan.",chapter:"02",section:"text",minutes:10},
       {id:"culture",label:"Vertaa lähtömaan kertomiseen",instruction:"Avaa C03:n Lisa Müllerin alkuperäinen keskustelu. Etsi lähtömaata ilmaiseva Ich komme aus Deutschland ja kerro vasta sitten kuvitteellinen oma lähtömaa.",chapter:"03",section:"text",minutes:9},
-      {id:"quick",label:"Vastaa kaksi kertaustehtävää",instruction:"Tee C10-EX-01 ja C10-EX-02 ja kertaa tervehdysten valinta. Ne ovat tämän tunnin itsenäiset harjoitusnäytöt, eivät korvaa puuttuvaa C10-haastattelua.",chapter:"10",section:"practice",minutes:7},
+      {id:"quick",label:"Vastaa kaksi kertaustehtävää",instruction:"Tee C10-EX-01 ja C10-EX-02 ja kertaa tervehdysten valinta. Tehtävät ovat itsenäisiä harjoitusnäyttöjä, eivät todista C10:n autenttisen äänitteen kuullunymmärtämistä tai julkaisuvalmiutta.",chapter:"10",section:"practice",minutes:7},
     ],
     evidence:[{kind:"answered-practice",ids:["C10-EX-01","C10-EX-02"],label:"Kaksi esittelyfraasien kertauskysymystä vastattu."}],
-    check:{question:"Millä fraasilla kerrot oman kuvitteellisen nimesi?",answers:[{id:"a",text:"Wie heißt du?"},{id:"b",text:"Ich heiße Mia."},{id:"c",text:"Wie geht's?"}],correctId:"b",explanation:"Ich heiße Mia. on mallilause nimen kertomiseen. C10:n uusi Text A on erillinen keskeneräinen lähdetarve."},
+    check:{question:"Millä fraasilla kerrot oman kuvitteellisen nimesi?",answers:[{id:"a",text:"Wie heißt du?"},{id:"b",text:"Ich heiße Mia."},{id:"c",text:"Wie geht's?"}],correctId:"b",explanation:"Ich heiße Mia. on mallilause nimen kertomiseen. C10:n uusi Text A on kokonaan luettavissa, mutta kuuntelun ja julkaisun tarkistus on vielä kesken."},
   },
   {
     id:"L053",title:"Esittele kolmas henkilö",
