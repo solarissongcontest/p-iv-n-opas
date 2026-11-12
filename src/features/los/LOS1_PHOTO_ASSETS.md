@@ -60,3 +60,32 @@ kasvojen rajaus kummassakin näkymässä ennen hyväksyntää.
 
 **Älä tuo takaisin** PDF.js-lukijaa, painotaittoeditoria tai
 näköiskirjan sivunvaihtomekanismia ilman uutta nimenomaista tuotevaatimusta.
+
+## Kulttuurisivujen seitsemän erillistä kuvaa
+
+Kulttuurisivut eivät käytä automaattisesti kappaleiden avauskuvia. Käytössä
+ovat seitsemän todellista ja alkuperäislähteeseen linkitettyä Pexels-valokuvaa:
+
+| Kappale | Kuvan aihe | Pexels-ID | Kuvaaja |
+|---|---|---|---|
+| C01 | Hampurin satama | 29250831 | Naimish Verma |
+| C03 | Wienin katunäkymä | 6063650 | Anton Uniqueton |
+| C03 | Thunin järvimaisema | 32379758 | Jean-Paul Wettstein |
+| C04 | Berliinissä kuvattu asiakaspalvelutilanne | 6925914 | Tom Tillhub |
+| C07 | Düsseldorfer Straße -katukyltti ja ß | 30125064 | Markus Winkler |
+| C08 | Luokkahuone, ei maantieteellistä väitettä | 5427660 | Tima Miroshnichenko |
+| C09 | Kalenteriin kirjoittaminen, ei maantieteellistä väitettä | 6170644 | RDNE Stock project |
+
+Kaikista seitsemästä on paikallinen WebP-kuva sekä tietokoneelle (1024 × 640)
+että mobiiliin (720 × 540). Niiden alkuperäisosoitteet, kuvalähteiden
+tiivisteet sekä 14 lopullisen WebP-kuvan SHA-256-tiivisteet ovat tiedostossa
+`public/los/culture/sources-manifest.json`. Tarvittaessa kuvat voi luoda
+uudelleen komennolla `python scripts/los1-optimize-culture-photos.py`.
+
+**Kulttuurinen tarkkuus:** C04:n asiakaspalvelutilanteesta ei voi tietää
+käyttävätkö henkilöt du- vai Sie-muotoa. C07:n autenttisessa Düsseldorfer
+Straße -kyltissä näkyy ß. C09:n kalenterikuvaa ei ole paikannettu Saksaan,
+eikä sen kalenterimerkintöjä esitetä saksankielisinä. Kaikki kolme
+Bildimpuls-harjoitusta viittaavat omaan kulttuurikuvaan, eivätkä toista
+kappaleen avauskuvaa. Kuvien osalta ei tehdä oletuksia todellisten
+henkilöiden identiteetistä tai kuvattujen henkilöiden kannatuksesta LOS!:lle.
