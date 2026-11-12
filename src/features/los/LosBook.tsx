@@ -214,13 +214,18 @@ function TextPage({ chapter }: { chapter: LosChapter }) {
     </div>}
   </section>;
   if(chapter.id==="06")return <section className="los-inner-page los-reading-page">
-    <p className="los-eyebrow">KAPPALE 06 / LUKUSANOJEN ALKUPERÄISKERTAUS</p>
-    <h1>Ikää koskeva alkuperäiskeskustelu</h1>
-    <LosC06AgeReview/>
-    <div className="los-editorial-note" role="status">
-      <h2>Uusi itsenäinen Text A puuttuu yhä</h2>
-      <p>C06:ssa on nyt kokonainen aiemmasta C01:stä tuttu autenttinen teksti uudesta näkökulmasta. Sitä ei esitetä C06:n uutena päätekstinä. {sourceGate.issues.join(" ")} Kappaleen lopullinen lähteiden hyväksyntä on edelleen kesken.</p>
-    </div>
+    <p className="los-eyebrow">KAPPALE 06 / TEXT A / M-ZPE-01</p>
+    <h1>Neljä alkuperäistä ikäkeskustelua</h1>
+    <p className="los-page-intro">Monika Janickan neljä lyhyttä julkaistua dialogia ovat nyt kokonaan LOS!:n sisällä, ilman ulkoista lukulinkkiä. Harjoittele sanan avaamista ja tekstin korostamista. Uuden tekstin äänitettä ei ole vielä todennettu LOS!:ssa; aiempi C01-äänite on vain erillinen kertaus.</p>
+    <LosOpenTextPage chapterId="06"/>
+    <details className="los-editorial-note">
+      <summary>Kertaa aiempi Franzin ja Jörgin keskustelu (C01, äänite)</summary>
+      <LosC06AgeReview/>
+    </details>
+    {!sourceGate.ready && <div className="los-editorial-note" role="status">
+      <h2>C06:n sisällön hyväksyntä on yhä kesken</h2>
+      <p>{sourceGate.issues.join(" ")} Täysi uusi Text A on käytettävissä lähteeseen perustuvana esikatseluna; audiota, kielentarkistusta tai mobiili-/desktop-toistoa ei ilmoiteta valmiiksi.</p>
+    </div>}
   </section>;
   if(getLosOpenDialogue(chapter.id))return <section className="los-inner-page los-reading-page">
     <p className="los-eyebrow">KAPPALE {chapter.id} / TEXT A</p>
@@ -357,7 +362,7 @@ function LosBookWorkspace({ book, location, move, goLibrary, openBook }: { book:
             section === "search" ? <LosIndexSearch book={book} move={move} /> :
             chapter ? (
               section === "text" ? <TextPage chapter={chapter} /> :
-              section === "understand" ? (chapter.id==="02" ? <LosC02Understanding goToText={() => move(chapter.id,"text")}/> : chapter.id==="06" ? <LosC06AgeUnderstanding goToText={() => move(chapter.id,"text")}/> : getLosOpenDialogue(chapter.id) ? <LosOpenTextUnderstanding chapterId={chapter.id} goToText={() => move(chapter.id,"text")}/> : <LosUnderstanding chapter={chapter} goToText={() => move(chapter.id, "text")} />) :
+              section === "understand" ? (chapter.id==="02" ? <LosC02Understanding goToText={() => move(chapter.id,"text")}/> : chapter.id==="06" ? <><LosOpenTextUnderstanding chapterId="06" goToText={() => move(chapter.id,"text")}/><details className="los-editorial-note"><summary>C01:n ikäkertauksen vanhat ymmärtämistehtävät (L034)</summary><LosC06AgeUnderstanding goToText={() => move(chapter.id,"text")}/></details></> : getLosOpenDialogue(chapter.id) ? <LosOpenTextUnderstanding chapterId={chapter.id} goToText={() => move(chapter.id,"text")}/> : <LosUnderstanding chapter={chapter} goToText={() => move(chapter.id, "text")} />) :
               section === "vocabulary" ? <Vocabulary key={chapter.id} chapter={chapter} move={move} /> :
               section === "cards" ? <LosRecallCards key={chapter.id} chapter={chapter} onBack={()=>move(chapter.id,"vocabulary")} /> :
               section === "grammar" ? <Grammar chapter={chapter} /> :
