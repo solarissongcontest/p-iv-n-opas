@@ -38,7 +38,7 @@ test("C01–C10 picture-based learning prompts use exactly the approved active v
 test("picture prompts explicitly avoid guessing people's ages, names, wellbeing or nationality",()=>{
   const all=Object.values(LOS1_VISUAL_LESSONS);
   assert.match(LOS1_VISUAL_LESSONS["02"]!.note,/nimi ei ole tiedossa/);
-  assert.match(LOS1_VISUAL_LESSONS["03"]!.note,/ei esitä koko DACH/);
+  assert.match(LOS1_VISUAL_LESSONS["03"]!.note,/ei voi päätellä kaikkien asukkaiden kieltä/);
   assert.match(LOS1_VISUAL_LESSONS["05"]!.note,/ei voi päätellä/);
   assert.match(LOS1_VISUAL_LESSONS["06"]!.note,/ikiä ei päätellä/);
   assert.match(LOS1_VISUAL_LESSONS["10"]!.note,/eivät ole kirjan lähdetekstin henkilöitä/);

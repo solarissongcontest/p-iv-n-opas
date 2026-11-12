@@ -16,14 +16,15 @@ export function Los1VisualLearning({chapterId,placement}:{
   const lesson=LOS1_VISUAL_LESSONS[chapterId];
   if(!lesson||lesson.placement!==placement)return null;
   const phrases=getLos1VisualPhrases(chapterId);
+  const galleryReferenced=chapterId==="03"&&placement==="culture";
   return <section className="los1-visual-learning"
     aria-label={"Kappaleen "+chapterId+" kuvaan perustuva sanastoharjoitus"}>
     <div className="los1-visual-learning-header">
       <span><ImageIcon size={17} aria-hidden="true"/> BILDIMPULS · KATSO JA OIVALLA</span>
       <small>Harjoitus · Ei pisteytystä</small>
     </div>
-    <div className="los1-visual-learning-layout">
-      <Los1ChapterImage key={chapterId} chapterId={chapterId} variant="learning"/>
+    <div className={"los1-visual-learning-layout"+(galleryReferenced?" is-gallery-reference":"")}>
+      {!galleryReferenced&&<Los1ChapterImage key={chapterId} chapterId={chapterId} variant="learning"/>}
       <div className="los1-visual-learning-task">
         <h2>Katso kuvaa ja mieti saksaksi</h2>
         <p>{lesson.question}</p>
