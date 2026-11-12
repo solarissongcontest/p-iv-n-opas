@@ -6,7 +6,7 @@
  */
 export type Los1CulturePhoto={
   key:string;
-  chapterId:"01"|"03"|"08";
+  chapterId:"01"|"03"|"04"|"07"|"08"|"09";
   photoId:number;
   heading:string;
   caption:string;
@@ -51,6 +51,28 @@ export const LOS1_CULTURE_PHOTOS:Readonly<Record<string,readonly Los1CulturePhot
     mobileSrc:"/los/culture/LOS1-C03-CULTURE-32379758-mobile.webp",
     locationVerified:true,licenseUrl:"https://www.pexels.com/license/",
   }],
+  "04":[{
+    key:"berlin-reception",chapterId:"04",photoId:6925914,
+    heading:"Ein Gespräch am Empfang",
+    caption:"Asiakaspalvelutilanne berliiniläisessä liikkeessä. Saksaksi puhuttelun valinta riippuu tilanteesta ja osapuolten toiveista, eikä valokuvasta voi päätellä käyttävätkö ihmiset du- vai Sie-muotoa.",
+    alt:"Asiakas keskustelee vastaanottotiskillä asiakaspalvelijan kanssa liikkeessä.",
+    photographer:"Tom Tillhub",
+    sourceUrl:"https://www.pexels.com/photo/woman-talking-to-a-receptionist-in-a-beauty-salon-6925914/",
+    desktopSrc:"/los/culture/LOS1-C04-CULTURE-6925914-desktop.webp",
+    mobileSrc:"/los/culture/LOS1-C04-CULTURE-6925914-mobile.webp",
+    locationVerified:true,licenseUrl:"https://www.pexels.com/license/",
+  }],
+  "07":[{
+    key:"duesseldorf-street-sign",chapterId:"07",photoId:30125064,
+    heading:"Straßenschilder in Düsseldorf",
+    caption:"Katukyltti Saksan Düsseldorfissä. Tutki kuvan sanojen kirjoitusasua ja etsi ß-kirjain, jos se näkyy. Tarkat saksan kirjoitussäännöt opiskellaan tekstistä, ei päätellä yhden kyltin perusteella.",
+    alt:"Saksalainen kadunnimikyltti Düsseldorfin katumaisemassa.",
+    photographer:"Markus Winkler",
+    sourceUrl:"https://www.pexels.com/photo/street-sign-in-dusseldorf-cityscape-30125064/",
+    desktopSrc:"/los/culture/LOS1-C07-CULTURE-30125064-desktop.webp",
+    mobileSrc:"/los/culture/LOS1-C07-CULTURE-30125064-mobile.webp",
+    locationVerified:true,licenseUrl:"https://www.pexels.com/license/",
+  }],
   "08":[{
     key:"classroom",chapterId:"08",photoId:5427660,
     heading:"Im Unterricht",
@@ -62,12 +84,23 @@ export const LOS1_CULTURE_PHOTOS:Readonly<Record<string,readonly Los1CulturePhot
     mobileSrc:"/los/culture/LOS1-C08-CULTURE-5427660-mobile.webp",
     locationVerified:false,licenseUrl:"https://www.pexels.com/license/",
   }],
+  "09":[{
+    key:"weekly-appointments",chapterId:"09",photoId:6170644,
+    heading:"Die Woche planen",
+    caption:"Kalenteriin merkitään tapaamisaikoja. Kuva on yleinen ajanvarauksen havainnekuva, eikä lähde vahvista saksankielistä kalenteria. Saksankieliset viikonpäivät ja am/um-rakenteet opetellaan LOS!:n omasta tekstistä.",
+    alt:"Henkilö kirjoittaa pöydällä olevaan kalenteriin ja suunnittelee aikataulua.",
+    photographer:"RDNE Stock project",
+    sourceUrl:"https://www.pexels.com/photo/a-person-writing-on-a-desk-calendar-6170644/",
+    desktopSrc:"/los/culture/LOS1-C09-CULTURE-6170644-desktop.webp",
+    mobileSrc:"/los/culture/LOS1-C09-CULTURE-6170644-mobile.webp",
+    locationVerified:false,licenseUrl:"https://www.pexels.com/license/",
+  }],
 };
 export function validateLos1CulturePhotos():string[]{
   const errors:string[]=[];
   const used=new Set<number>();
   for(const [chapterId,photos] of Object.entries(LOS1_CULTURE_PHOTOS)){
-    if(!["01","03","08"].includes(chapterId))errors.push("Ylimääräinen kulttuurikuvaosio: "+chapterId);
+    if(!["01","03","04","07","08","09"].includes(chapterId))errors.push("Ylimääräinen kulttuurikuvaosio: "+chapterId);
     if(!photos.length)errors.push("Tyhjä kulttuurikuvaosio: "+chapterId);
     for(const p of photos){
       if(p.chapterId!==chapterId)errors.push("Väärä kappale: "+p.key);
@@ -83,6 +116,6 @@ export function validateLos1CulturePhotos():string[]{
         errors.push("Omat paikalliset tiedostot puuttuvat: "+p.key);
     }
   }
-  if(used.size!==4)errors.push("Odotettu neljä ainutlaatuista kulttuurivalokuvaa.");
+  if(used.size!==7)errors.push("Odotettu seitsemän ainutlaatuista kulttuurivalokuvaa.");
   return errors;
 }
