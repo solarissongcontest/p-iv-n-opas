@@ -6,10 +6,10 @@ INSERT INTO public.los_dictionary_sources
 VALUES
 ('fixture-de-fi','freedict','de','fi','fixture','https://example.org/de-fi',
  repeat('a',128),repeat('b',128),'test-only','https://example.org/license',
- 'https://example.org/rights','synthetic-test','2026-11-12',4,4,false),
+ 'https://example.org/rights','synthetic-test','2026-11-12',8,8,false),
 ('fixture-fi-de','freedict','fi','de','fixture','https://example.org/fi-de',
  repeat('c',128),repeat('d',128),'test-only','https://example.org/license',
- 'https://example.org/rights','synthetic-test','2026-11-12',1,1,false);
+ 'https://example.org/rights','synthetic-test','2026-11-12',4,4,false);
 
 INSERT INTO public.los_dictionary_lexemes
 (source_id,source_entry_id,source_row,language,target_language,lemma,lemma_key,
@@ -19,7 +19,14 @@ VALUES
 ('fixture-de-fi','bank-1',2,'de','fi','Bank','bank',ARRAY['bank'],'noun','f'),
 ('fixture-de-fi','bank-2',3,'de','fi','Bank','bank',ARRAY['bank'],'noun','f'),
 ('fixture-de-fi','houses',4,'de','fi','Häuser','häuser',ARRAY['häuser'],'noun',null),
-('fixture-fi-de','house',1,'fi','de','talo','talo',ARRAY['talo'],'noun',null);
+('fixture-de-fi','school',5,'de','fi','Schule','schule',ARRAY['schule'],'noun','f'),
+('fixture-de-fi','named',6,'de','fi','heißen','heißen',ARRAY['heißen','heissen'],'verb',null),
+('fixture-de-fi','street',7,'de','fi','Straße','straße',ARRAY['straße','strasse'],'noun','f'),
+('fixture-de-fi','girl',8,'de','fi','Mädchen','mädchen',ARRAY['mädchen','maedchen'],'noun','n'),
+('fixture-fi-de','house',1,'fi','de','talo','talo',ARRAY['talo'],'noun',null),
+('fixture-fi-de','school',2,'fi','de','koulu','koulu',ARRAY['koulu'],'noun',null),
+('fixture-fi-de','street',3,'fi','de','katu','katu',ARRAY['katu'],'noun',null),
+('fixture-fi-de','girl',4,'fi','de','tyttö','tyttö',ARRAY['tyttö'],'noun',null);
 
 INSERT INTO public.los_dictionary_senses
 (source_id,source_entry_id,sense_index)
@@ -28,7 +35,14 @@ VALUES
 ('fixture-de-fi','bank-1',1),
 ('fixture-de-fi','bank-2',1),
 ('fixture-de-fi','houses',1),
-('fixture-fi-de','house',1);
+('fixture-de-fi','school',1),
+('fixture-de-fi','named',1),
+('fixture-de-fi','street',1),
+('fixture-de-fi','girl',1),
+('fixture-fi-de','house',1),
+('fixture-fi-de','school',1),
+('fixture-fi-de','street',1),
+('fixture-fi-de','girl',1);
 
 UPDATE public.los_dictionary_senses
 SET form_of_candidates='["Haus"]'::jsonb,gloss_language='en',
@@ -41,11 +55,20 @@ VALUES
 ('fixture-de-fi','house',1,1,'fi','talo','talo'),
 ('fixture-de-fi','bank-1',1,1,'fi','penkki','penkki'),
 ('fixture-de-fi','bank-2',1,1,'fi','pankki','pankki'),
-('fixture-fi-de','house',1,1,'de','Haus','haus');
+('fixture-de-fi','school',1,1,'fi','koulu','koulu'),
+('fixture-de-fi','named',1,1,'fi','olla nimeltään','olla nimeltään'),
+('fixture-de-fi','street',1,1,'fi','katu','katu'),
+('fixture-de-fi','girl',1,1,'fi','tyttö','tyttö'),
+('fixture-fi-de','house',1,1,'de','Haus','haus'),
+('fixture-fi-de','school',1,1,'de','Schule','schule'),
+('fixture-fi-de','street',1,1,'de','Straße','straße'),
+('fixture-fi-de','girl',1,1,'de','Mädchen','mädchen');
 
 INSERT INTO public.los_dictionary_forms
 (source_id,source_entry_id,form_index,written_form,form_key,form_search_keys,grammar)
-VALUES ('fixture-de-fi','house',1,'Häuser','häuser',ARRAY['häuser','haeuser'],'{"tags":["plural"]}');
+VALUES
+('fixture-de-fi','house',1,'Häuser','häuser',ARRAY['häuser','haeuser'],'{"tags":["plural"]}'),
+('fixture-de-fi','named',1,'heiße','heiße',ARRAY['heiße','heisse'],'{"tags":["1st-person-singular","present"]}');
 INSERT INTO public.los_dictionary_pronunciations
 (source_id,source_entry_id,pronunciation_index,ipa,ipa_status,region)
 VALUES ('fixture-de-fi','house',1,'haʊ̯s','candidate','de-DE');
@@ -95,6 +118,47 @@ BEGIN
  IF (SELECT count(*) FROM public.los_dictionary_search('Haeuser','de-fi',20)
        WHERE match_type='form') <> 1 THEN
   RAISE EXCEPTION 'Umlaut transliteration should match inflected German form';
+ END IF;
+ IF (SELECT count(*) FROM public.los_dictionary_search('Schule','de-fi',20)
+       WHERE lemma='Schule' AND match_type='lemma') <> 1 THEN
+  RAISE EXCEPTION 'Exact Schule lookup failed';
+ END IF;
+ IF (SELECT count(*) FROM public.los_dictionary_search('heiße','de-fi',20)
+       WHERE lemma='heißen' AND match_type='form') <> 1 THEN
+  RAISE EXCEPTION 'Inflected heißen lookup failed';
+ END IF;
+ IF (SELECT count(*) FROM public.los_dictionary_search('heisse','de-fi',20)
+       WHERE lemma='heißen' AND match_type='form') <> 1 THEN
+  RAISE EXCEPTION 'ß/ss transliteration in verb form failed';
+ END IF;
+ IF (SELECT count(*) FROM public.los_dictionary_search('Straße','de-fi',20)
+       WHERE lemma='Straße' AND match_type='lemma') <> 1 THEN
+  RAISE EXCEPTION 'Exact Straße lookup failed';
+ END IF;
+ IF (SELECT count(*) FROM public.los_dictionary_search('Strasse','de-fi',20)
+       WHERE lemma='Straße' AND match_type='lemma') <> 1 THEN
+  RAISE EXCEPTION 'ß/ss alias search failed';
+ END IF;
+ IF (SELECT count(*) FROM public.los_dictionary_search('Mädchen','de-fi',20)
+       WHERE lemma='Mädchen' AND match_type='lemma') <> 1 THEN
+  RAISE EXCEPTION 'Exact Mädchen lookup failed';
+ END IF;
+ IF (SELECT count(*) FROM public.los_dictionary_search('Maedchen','de-fi',20)
+       WHERE lemma='Mädchen' AND match_type='lemma') <> 1 THEN
+  RAISE EXCEPTION 'ä/ae alias search failed';
+ END IF;
+ IF (SELECT count(*) FROM public.los_dictionary_search(
+       convert_from(decode('4d61cc88646368656e','hex'),'UTF8'),'de-fi',20)
+       WHERE lemma='Mädchen' AND match_type='lemma') <> 1 THEN
+  RAISE EXCEPTION 'Unicode NFD input must normalize to NFC';
+ END IF;
+ IF (SELECT count(*) FROM public.los_dictionary_search('koulu','fi-de',20)
+       WHERE lemma='koulu' AND senses @> '[{"translations":[{"language":"de","value":"Schule"}]}]'::jsonb) <> 1 THEN
+  RAISE EXCEPTION 'Finnish-to-German school translation failed';
+ END IF;
+ IF (SELECT count(*) FROM public.los_dictionary_search('katu','fi-de',20)) <> 1 OR
+    (SELECT count(*) FROM public.los_dictionary_search('tyttö','fi-de',20)) <> 1 THEN
+  RAISE EXCEPTION 'Finnish-to-German reverse direction lookup failed';
  END IF;
  IF (SELECT count(*) FROM public.los_dictionary_search('Bank','de-fi',20)) <> 2 THEN
   RAISE EXCEPTION 'Homonyms incorrectly collapsed';

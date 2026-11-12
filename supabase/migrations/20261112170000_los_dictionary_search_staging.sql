@@ -164,7 +164,7 @@ RETURNS TABLE (
 LANGUAGE sql STABLE SECURITY INVOKER SET search_path = public, pg_temp
 AS $search$
   WITH param AS (
-    SELECT lower(btrim(p_query)) AS q, split_part(p_direction, '-', 1) AS source_lang
+    SELECT lower(normalize(btrim(p_query), NFC)) AS q, split_part(p_direction, '-', 1) AS source_lang
     WHERE p_direction IN ('de-fi','fi-de')
       AND length(btrim(p_query)) BETWEEN 1 AND 80 AND p_limit BETWEEN 1 AND 20
   ), ranked AS (
