@@ -142,3 +142,67 @@
   .los-facs-marked-pages { grid-column: 1 / -1; }
   .los-facs-toolbar-actions > button { font-size: 12px; }
 }
+
+
+/*
+ * Dedicated B5 draft PDF export: isolate the 15 physical print leaves from
+ * toolbar, screen-only sheets and the surrounding StudyOS shell. Do not silently
+ * rely on visibility:hidden: invisible DOM can still generate blank PDF pages.
+ */
+@media print {
+  @page { size: 176mm 250mm; margin: 0; }
+  html, body {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 176mm !important;
+    height: auto !important;
+    overflow: visible !important;
+    background: white !important;
+  }
+  .los-facs-reader {
+    width: 176mm !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    overflow: visible !important;
+    background: white !important;
+  }
+  .los-facs-reader > :not(.los-facs-print-only) {
+    display: none !important;
+  }
+  .los-facs-reader .los-facs-print-only {
+    display: block !important;
+    position: static !important;
+    top: auto !important;
+    left: auto !important;
+    width: 176mm !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+  }
+  .los-facs-reader .los-facs-print-only .los-facs-leaf {
+    display: block !important;
+    width: 176mm !important;
+    height: 250mm !important;
+    min-height: 250mm !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    overflow: hidden !important;
+    box-sizing: border-box !important;
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+    break-after: page !important;
+    page-break-after: always !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  .los-facs-reader .los-facs-print-only .los-facs-leaf:last-child {
+    break-after: auto !important;
+    page-break-after: auto !important;
+  }
+}
