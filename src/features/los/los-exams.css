@@ -44,3 +44,18 @@
   .los-exam-answers label { padding: 10px 12px; min-height: 48px; }
   .los-exam-submit .los-primary { width: 100%; justify-content: center; }
 }
+
+
+/* Revision I shares the same accessible answer component, not the exam score. */
+.los-review-tools { display: flex; gap: 12px; align-items: flex-start; flex-wrap: wrap; margin: 15px 0; }
+.los-review-tools p { flex: 1 1 270px; font-size: 13px; line-height: 1.65; }
+.los-review-progress { font-size: 13px; margin-top: 13px; color: var(--los-ink); }
+.los-review .los-exam-question > button { margin-top: 12px; min-height: 43px; }
+.los-review-reflection, .los-exam-dialogue-self { padding: 16px 19px; background: var(--los-book-tint); border: 1px solid var(--los-line); border-radius: 9px; margin: 15px 0; }
+.los-review-reflection fieldset, .los-exam-dialogue-self { display: grid; gap: 11px; }
+.los-review-reflection fieldset { border: 0; margin: 10px 0; padding: 0; }
+.los-review-reflection legend, .los-exam-dialogue-self legend { font-weight: 650; }
+.los-review-reflection label, .los-exam-dialogue-self label { min-height: 43px; display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 13px; line-height: 1.6; }
+.los-review-reflection input, .los-exam-dialogue-self input { width: 18px; height: 18px; accent-color: var(--los-book-accent); }
+.los-review-reflection label:focus-within, .los-exam-dialogue-self label:focus-within { outline: 2px solid var(--los-book-accent); outline-offset: 2px; }
+@media (max-width: 650px) { .los-review-reflection, .los-exam-dialogue-self { padding: 13px; } }
