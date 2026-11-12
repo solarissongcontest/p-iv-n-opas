@@ -14,7 +14,8 @@ test("PDF.js reads local bytes, uses self-hosted worker and keeps the PDF on-dev
   const reader=readFileSync("src/features/los/facsimile/los1/Los1PdfReader.tsx","utf8");
   const pkg=JSON.parse(readFileSync("package.json","utf8"));
   assert.equal(pkg.dependencies["pdfjs-dist"],"5.7.284");
-  assert.match(reader,/pdfjs-dist\/build\/pdf\.worker\.min\.mjs\?url/);
+  assert.match(reader,/pdfjs-dist\/legacy\/build\/pdf\.worker\.min\.mjs\?url/);
+  assert.match(reader,/pdfjs-dist\/legacy\/build\/pdf\.mjs/);
   assert.match(reader,/file\.arrayBuffer\(\)/);
   assert.match(reader,/pdfjs\.getDocument\(\{data:new Uint8Array\(buffer\)\}\)/);
   assert.doesNotMatch(reader,/fetch\(|axios\(|formData|uploadTo/);
