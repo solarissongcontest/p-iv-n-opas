@@ -410,23 +410,32 @@ test("U1/U2: a published-source result opens the shared word card without changi
   localStorage.setItem("opk.device-token","local-e2e-fixture-only");
   localStorage.setItem("opk.device-token-expires",String(Date.now()+3_600_000));
  });
- await page.route("**/api/los-dictionary?**", async route=>{
-  const url=new URL(route.request().url());
-  const q=url.searchParams.get("q")??"";
-  const direction=url.searchParams.get("direction")??"de-fi";
-  const entry={source_id:"synthetic-qa-only",source_entry_id:"haus",
+ // Stub the browser fetch boundary, not a service-worker-dependent network route.
+ // The fixture is loopback-only and never publishes a real dictionary record.
+ await page.addInitScript(()=>{
+  if(!["localhost","127.0.0.1"].includes(location.hostname))return;
+  const originalFetch=window.fetch.bind(window);
+  window.fetch=(input,init)=>{
+   const url=new URL(typeof input==="string"||input instanceof URL?String(input):input.url,location.href);
+   if(url.pathname!=="/api/los-dictionary")return originalFetch(input,init);
+   const q=url.searchParams.get("q")??"";
+   const direction=url.searchParams.get("direction")??"de-fi";
+   const entry={source_id:"synthetic-qa-only",source_entry_id:"haus",
     lemma:"Haus",language:"de",part_of_speech:"noun",gender:"n",source_kind:"freedict",
     license_code:"test-only",license_url:"https://example.org/license",
     evidence_url:"https://example.org/fixture",match_type:"lemma",
     senses:[{senseIndex:1,glosses:[],glossLanguage:null,formOfCandidates:[],
       translations:[{language:"fi",value:"talo"}]}],forms:[],pronunciations:[]};
-  await route.fulfill({status:200,contentType:"application/json",body:JSON.stringify({
+   return Promise.resolve(new Response(JSON.stringify({
     status:"ready",query:q,direction,limit:20,sourcesPublished:1,
     results:q==="Haus"&&direction==="de-fi"?[entry]:[],
     note:"Synthetic local-only browser fixture",
-  })});
+   }),{status:200,headers:{"content-type":"application/json"}}));
+  };
  });
  await page.goto("/los#/1/dictionary",{waitUntil:"domcontentloaded"});
+ expect(await page.evaluate(()=>localStorage.getItem("opk.device-token")))
+  .toBe("local-e2e-fixture-only");
  const query=page.locator(".los-dict-query input");
  await query.fill("Haus");
  const row=page.locator(".los-dict-search .los-dict-result");
