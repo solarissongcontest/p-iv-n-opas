@@ -165,3 +165,22 @@ test("book cover opens real L001 and remembers its position",async({page})=>{
  await expect(lesson).toContainText("L001");
  await expectNoHorizontalOverflow(page);
 });
+
+test("book cover resumes next unfinished lesson after completing L001",async({page})=>{
+ await enterLocalBook(page);
+ await page.goto("/los#/1/path");
+ const runner=page.locator("#los-lesson-runner");
+ await expect(runner).toBeVisible();
+ for(let i=0;i<3;i++){
+  await runner.getByRole("button",{name:"Tein tämän vaiheen"}).first().click();
+ }
+ await runner.getByLabel("Napautan sanaa lukijassa.").check();
+ await runner.getByRole("button",{name:"Palauta lopputarkistus"}).click();
+ await runner.getByRole("button",{name:"Merkitse oppitunti suoritetuksi"}).click();
+ await expect(runner).toContainText("L001 suoritettu");
+ await page.goto("/los#/1/overview");
+ const next=page.getByRole("button",{name:"Jatka oppituntia L002"});
+ await expect(next).toBeVisible();
+ await next.click();
+ await expect(page.locator("#los-lesson-runner .los-lesson-detail .los-overline")).toContainText("L002");
+});
