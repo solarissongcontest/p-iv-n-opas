@@ -300,3 +300,15 @@ test("L004 Teacher 2.0 opens from the study path and preserves its scene when re
   await expect(page.locator(".los-teacher-paper h2").first()).toContainText("Avaa oppikirjan sanasto ja tehtävät");
   await expectNoHorizontalOverflow(page);
 });
+
+
+test("L004 chapter picker uses the dedicated teacher instead of legacy checklist", async ({page}) => {
+  await enterLocalBook(page);
+  await page.goto("/los#/1/path", { waitUntil: "domcontentloaded" });
+  const teacherChoice = page.locator(".los-lesson-picker button").filter({hasText:"L004"});
+  await expect(teacherChoice).toHaveCount(1);
+  await teacherChoice.click();
+  await expect(page).toHaveURL(/\/los-lessons\/L004$/);
+  await expect(page.locator(".los-teacher-paper h2").first()).toContainText("Tänään opit");
+  await expectNoHorizontalOverflow(page);
+});
