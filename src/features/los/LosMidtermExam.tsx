@@ -109,6 +109,19 @@ export function LosMidtermExam() {
       <textarea id="los-midterm-self" rows={3} maxLength={5000} value={draft.selfAssessment}
         onChange={e=>update(current=>({...current,selfAssessment:e.target.value}))}
         placeholder="Kirjaa oma arvio rehellisesti."/>
+      <fieldset className="los-exam-dialogue-self">
+        <legend>Oma arvio keskustelusta (kirjataan L030-oppitunnin suoritusta varten)</legend>
+        {[
+          {id:"well",label:"Osasin puhua tai kirjoittaa 4–6 repliikkiä melko itsenäisesti."},
+          {id:"some",label:"Sain keskustelun tehtyä, mutta tarvitsin mallia tai korjauksia."},
+          {id:"again",label:"Harjoittelen keskustelua vielä uudelleen."},
+        ].map(option=><label key={option.id}>
+          <input type="radio" name="EX-MID-DIALOGUE-SELF" value={option.id}
+            checked={draft.practiceAnswers["EX-MID-DIALOGUE-SELF"]===option.id}
+            onChange={()=>update(current=>({...current,practiceAnswers:{...current.practiceAnswers,["EX-MID-DIALOGUE-SELF"]:option.id}}))}/>
+          <span>{option.label}</span>
+        </label>)}
+      </fieldset>
       {submitted&&<div className="los-exam-rubric">
         <h3>Puheen tai kirjoituksen tarkistuslista</h3>
         <p>Tarkista itse, toteutuivatko seuraavat asiat. Niitä ei ole laskettu kokeen 25 pisteeseen.</p>
