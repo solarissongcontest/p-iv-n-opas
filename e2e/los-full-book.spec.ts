@@ -495,6 +495,14 @@ test("LOS! 1 digital chapter photos coexist with the existing facsimile",async({
   await page.goto("/los#/1/"+chapter+"/chapter",{waitUntil:"domcontentloaded"});
   const figure=page.locator(".los1-digital-photo");
   await expect(figure).toBeVisible();
+  await expect(figure.locator("source")).toHaveAttribute("srcset",
+    new RegExp("^/los/chapters/LOS1-C"+chapter+"-.*-mobile[.]webp$"));
+  await expect(figure.locator("img")).toHaveAttribute("src",
+    new RegExp("^/los/chapters/LOS1-C"+chapter+"-.*-desktop[.]webp$"));
+  await figure.scrollIntoViewIfNeeded();
+  await expect.poll(async()=>figure.locator("img").evaluate(img=>
+    img instanceof HTMLImageElement && img.complete && img.naturalWidth>0),
+    {timeout:15_000}).toBe(true);
   await expect(figure.locator("figcaption a")).toHaveAttribute("href",/pexels[.]com/);
   await expectNoHorizontalOverflow(page);
  }
