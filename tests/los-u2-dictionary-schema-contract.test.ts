@@ -30,3 +30,8 @@ test("LOS U2: unpublished rows and audio remain gated server-side",()=>{
   assert.match(route,/verifyArthurDeviceToken/);
   assert.match(route,/SUPABASE_JWT_SECRET/);
 });
+
+test("LOS U2: staged dictionary foreign keys never cascade child deletion",()=>{
+  assert.doesNotMatch(sql,/\bON DELETE CASCADE\b/i);
+  assert.equal((sql.match(/\bON DELETE RESTRICT\b/g)||[]).length,6);
+});

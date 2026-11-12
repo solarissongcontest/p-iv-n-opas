@@ -1,6 +1,8 @@
 -- LOS! U2.0: source-separated, staged dictionary search model.
 -- ADDITIVE ONLY. Does not touch los_chapter_drafts or existing student data.
 -- All new source rows default to unpublished and are invisible to search.
+-- Child foreign keys RESTRICT: an editor must review dependent records
+-- before any cleanup; never remove their senses, forms or IPA implicitly.
 CREATE TABLE IF NOT EXISTS public.los_dictionary_sources (
   source_id text PRIMARY KEY CHECK (length(source_id) BETWEEN 3 AND 160),
   source_kind text NOT NULL CHECK (source_kind IN ('freedict','kaikki')),
@@ -56,7 +58,7 @@ CREATE TABLE IF NOT EXISTS public.los_dictionary_senses (
   form_of_candidates jsonb NOT NULL DEFAULT '[]'::jsonb,
   PRIMARY KEY (source_id, source_entry_id, sense_index),
   FOREIGN KEY (source_id, source_entry_id)
-    REFERENCES public.los_dictionary_lexemes(source_id, source_entry_id) ON DELETE CASCADE
+    REFERENCES public.los_dictionary_lexemes(source_id, source_entry_id) ON DELETE RESTRICT
 );
 
 CREATE TABLE IF NOT EXISTS public.los_dictionary_translations (
@@ -69,7 +71,7 @@ CREATE TABLE IF NOT EXISTS public.los_dictionary_translations (
   value_key text NOT NULL,
   PRIMARY KEY (source_id, source_entry_id, sense_index, translation_index),
   FOREIGN KEY (source_id, source_entry_id, sense_index)
-    REFERENCES public.los_dictionary_senses(source_id, source_entry_id, sense_index) ON DELETE CASCADE
+    REFERENCES public.los_dictionary_senses(source_id, source_entry_id, sense_index) ON DELETE RESTRICT
 );
 
 CREATE TABLE IF NOT EXISTS public.los_dictionary_forms (
@@ -82,7 +84,7 @@ CREATE TABLE IF NOT EXISTS public.los_dictionary_forms (
   grammar jsonb NOT NULL DEFAULT '{}'::jsonb,
   PRIMARY KEY (source_id, source_entry_id, form_index),
   FOREIGN KEY (source_id, source_entry_id)
-    REFERENCES public.los_dictionary_lexemes(source_id, source_entry_id) ON DELETE CASCADE
+    REFERENCES public.los_dictionary_lexemes(source_id, source_entry_id) ON DELETE RESTRICT
 );
 
 CREATE TABLE IF NOT EXISTS public.los_dictionary_pronunciations (
@@ -97,7 +99,7 @@ CREATE TABLE IF NOT EXISTS public.los_dictionary_pronunciations (
   region text NOT NULL DEFAULT 'unspecified',
   PRIMARY KEY (source_id, source_entry_id, pronunciation_index),
   FOREIGN KEY (source_id, source_entry_id)
-    REFERENCES public.los_dictionary_lexemes(source_id, source_entry_id) ON DELETE CASCADE
+    REFERENCES public.los_dictionary_lexemes(source_id, source_entry_id) ON DELETE RESTRICT
 );
 
 CREATE TABLE IF NOT EXISTS public.los_dictionary_audio_assets (
@@ -114,7 +116,7 @@ CREATE TABLE IF NOT EXISTS public.los_dictionary_audio_assets (
   reviewed_at timestamptz,
   PRIMARY KEY (source_id, source_entry_id, audio_id),
   FOREIGN KEY (source_id, source_entry_id)
-    REFERENCES public.los_dictionary_lexemes(source_id, source_entry_id) ON DELETE CASCADE,
+    REFERENCES public.los_dictionary_lexemes(source_id, source_entry_id) ON DELETE RESTRICT,
   CONSTRAINT los_audio_requires_review CHECK (
     playback_status <> 'ready' OR
     (reviewed_at IS NOT NULL AND source_url LIKE 'https://%'

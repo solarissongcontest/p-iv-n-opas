@@ -92,6 +92,20 @@ BEGIN
  END IF;
 END $$;
 
+-- Inspect FK catalog only; never issue DELETE or alter staged test rows.
+DO $
+BEGIN
+ IF EXISTS (
+   SELECT 1 FROM pg_constraint fk
+   JOIN pg_class child ON child.oid=fk.conrelid
+   JOIN pg_namespace ns ON ns.oid=child.relnamespace
+   WHERE fk.contype='f' AND ns.nspname='public'
+     AND child.relname LIKE 'los_dictionary_%' AND fk.confdeltype='c'
+ ) THEN
+   RAISE EXCEPTION 'Staged dictionary contains a cascading foreign key';
+ END IF;
+END $;
+
 -- A staged source must not become searchable without explicit legal review.
 DO $$
 BEGIN
