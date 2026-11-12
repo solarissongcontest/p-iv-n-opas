@@ -61,7 +61,7 @@ test("C02 is a separate owner-gated LOS! route with no fabricated source/audio o
   assert.match(reader,/los\.facsimile\.c02\.draft\./);
   assert.match(reader,/LOS1_C02_TEXT_A as dialogue/);
   assert.match(reader,/LOS1_C02_TEXT_B as textB/);
-  assert.match(reader,/Äänitiedoston käyttöoikeus/);
+  assert.match(reader,/äänitiedoston käyttöoikeus/);
   assert.match(reader,/Kieli-|kielentarkistus/);
   assert.doesNotMatch(reader,/setExerciseAnswer|recordScore|markComplete|saveScore/);
 });
