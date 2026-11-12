@@ -10,6 +10,7 @@ import {
  LOS1_SUMMARY_GOAL,LOS1_SUMMARY_CARDS,LOS1_SUMMARY_REFLECTION,
  losFinalReadyToSubmit,losFinalScore,type LosFinalSection,
 } from "./content/los1FinalExam";
+import {losArchiveExamAttempt,losArchivedExamHistory} from "./content/los1ExamArchive";
 import "./los-exams.css";
 
 const sections=Object.keys(LOS1_FINAL_SECTION_TITLES) as LosFinalSection[];
@@ -33,6 +34,8 @@ export function LosFinalExam({move}:{move:LosNavigate}){
  const {draft,update,saved}=useLosChapterDraft(1,LOS1_FINAL_DRAFT_CHAPTER);
  const [errors,setErrors]=useState<string[]>([]);
  const [confirmRetake,setConfirmRetake]=useState(false);
+ const [archiveError,setArchiveError]=useState("");
+ const history=losArchivedExamHistory(draft.practiceAnswers,"EX-FINAL");
  const answers=draft.testAnswers;
  const submitted=Boolean(draft.testSubmittedAt);
  const filled=LOS1_FINAL_QUESTIONS.filter(q=>Boolean(answers[q.id])).length;
@@ -48,13 +51,18 @@ export function LosFinalExam({move}:{move:LosNavigate}){
   update(current=>({...current,testSubmittedAt:new Date().toISOString()}));
  };
  const retake=()=>{
-  if(!confirmRetake)return;
-  update(current=>{
-   const nextPractice={...current.practiceAnswers};
-   for(const s of LOS1_FINAL_AUDIO_SOURCES)delete nextPractice[audioEvidence(s.id)];
-   return {...current,testAnswers:{},testSubmittedAt:null,practiceAnswers:nextPractice};
-  });
-  setConfirmRetake(false);
+  if(!confirmRetake||!saved)return;
+  try{
+   update(current=>{
+    const nextPractice=losArchiveExamAttempt(
+     current.practiceAnswers,"EX-FINAL",LOS1_FINAL_QUESTIONS,
+     current.testAnswers,current.testSubmittedAt??"");
+    for(const source of LOS1_FINAL_AUDIO_SOURCES)delete nextPractice[audioEvidence(source.id)];
+    return {...current,testAnswers:{},testSubmittedAt:null,practiceAnswers:nextPractice};
+   });
+   setArchiveError("");
+   setConfirmRetake(false);
+  }catch(error){setArchiveError(error instanceof Error?error.message:"Koetta ei voitu arkistoida.");}
  };
  const writingOk=writingLineCount(draft.applicationDraft)>=5&&
   writingLineCount(draft.applicationDraft)<=7&&draft.applicationDraft.trim().length>=80;
@@ -130,10 +138,26 @@ export function LosFinalExam({move}:{move:LosNavigate}){
    <p>Palautettu: {draft.testSubmittedAt?new Date(draft.testSubmittedAt).toLocaleString("fi-FI"):""}</p>
    <div className="los-exam-retake">
     <label><input type="checkbox" checked={confirmRetake} onChange={e=>setConfirmRetake(e.target.checked)}/>
-     Varmuuskopioin halutessani tuloksen ennen uutta yritystä. Tiedän, että uusinta poistaa tämän yrityksen vastaukset ja pisteet.</label>
-    <button disabled={!confirmRetake} type="button" onClick={retake}><RotateCcw size={16}/> Uusi koeyritys</button>
+     Voin tehdä JSON-varmuuskopion. Uusinta arkistoi nykyisen tuloksen ja kaikki 50 vastausta, minkä jälkeen aloitan uuden erillisen yrityksen samoista tehtävistä.</label>
+    <button disabled={!confirmRetake||!saved} type="button" onClick={retake}><RotateCcw size={16}/> Arkistoi ja aloita uusi koeyritys</button>
    </div>
+   {archiveError&&<p role="alert">{archiveError}</p>}
+   <p>Uusinnassa 50 kysymyksen pankki on toistaiseksi sama. Vastaukset ja tulokset arkistoidaan erikseen, mutta vaihtuvaa tehtäväpankkia ei vielä ole.</p>
   </div>}
+  {history.length>0&&<section className="los-exam-results" aria-label="Loppukokeen aiemmat yritykset">
+   <h2>Aiempien loppukokeiden arkisto</h2>
+   <p>Tarkat vastaukset, palautusajat ja pistemäärät jäävät talteen myös uusintaa aloittaessasi.</p>
+   <ol>{history.map(item=><li key={item.number}>
+    <strong>Yritys {item.number}</strong> · {item.correct}/{item.total} pistettä ·
+    {" "}{new Date(item.submittedAt).toLocaleString("fi-FI")}
+    <details><summary>Vanhan yrityksen vastaukset ja osiot</summary>
+     <p>{item.choices.split("").map((choice,i)=>i+1+". "+choice).join(" · ")}</p>
+     <ul>{item.sections.map(section=><li key={section.section}>
+      {LOS1_FINAL_SECTION_TITLES[section.section as LosFinalSection]??section.section}: {section.correct}/{section.total}
+     </li>)}</ul>
+    </details>
+   </li>)}</ol>
+  </section>}
   <section className="los-exam-speaking">
    <h2>Oma 5–7 lauseen viesti</h2>
    <p>Kirjoita 5–7 lyhyttä saksankielistä lausetta kuvitteelliselle uudelle tuttavalle. Kerro nimi, alkuperä, ikä ja tapaamisaika. Kirjoita jokainen virke omalle rivilleen, jotta voit itse tarkistaa määrän. Älä kirjoita oikeita henkilötietoja.</p>
