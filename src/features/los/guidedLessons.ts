@@ -1,9 +1,9 @@
-import { LOS_1_LESSONS } from "./learningPath";
-import { LOS1_C01_LESSON_BLUEPRINTS, type LosLessonBlueprint } from "./lessonEngine";
-import { LOS1_C02_LESSON_BLUEPRINTS } from "./lessonEngineC02";
-import { LOS1_C03_LESSON_BLUEPRINTS } from "./lessonEngineC03";
-import { LOS1_C04_C05_LESSONS } from "./lessonEngineC04C05";
-import { LOS1_C07_C09_LESSONS } from "./lessonEngineC07C09";
+import { LOS_1_LESSONS } from "./learningPath.ts";
+import { LOS1_C01_LESSON_BLUEPRINTS, type LosLessonBlueprint } from "./lessonEngine.ts";
+import { LOS1_C02_LESSON_BLUEPRINTS } from "./lessonEngineC02.ts";
+import { LOS1_C03_LESSON_BLUEPRINTS } from "./lessonEngineC03.ts";
+import { LOS1_C04_C05_LESSONS } from "./lessonEngineC04C05.ts";
+import { LOS1_C07_C09_LESSONS } from "./lessonEngineC07C09.ts";
 
 /**
  * Single canonical set of lessons with implemented completion/evidence logic.
