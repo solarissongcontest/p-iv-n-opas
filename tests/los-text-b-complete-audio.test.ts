@@ -7,21 +7,24 @@ import {LOS1_M_COM_02_LINES} from "../src/features/los/content/los1MCom02.ts";
 import {findLosSource,validateLosSourceRegistry} from "../src/features/los/content/sourceRegistry.ts";
 import {validateLosCloudDraft} from "../src/features/los/cloudContract.ts";
 
-test("six added Text B pages use actual full published German source artifacts and 4 unique tasks each",()=>{
+test("eight Text B pages use actual full published German source artifacts and 4 unique tasks each",()=>{
  assert.deepEqual(validateLosTextB(),[]);
- assert.deepEqual(Object.keys(LOS1_TEXT_B_SOURCES).sort(),["04","05","06","07","09","10"]);
+ assert.deepEqual(Object.keys(LOS1_TEXT_B_SOURCES).sort(),["01","04","05","06","07","08","09","10"]);
+ assert.equal(isLosTextBChapter("01"),true);
  assert.equal(isLosTextBChapter("04"),true);
+ assert.equal(isLosTextBChapter("08"),true);
  assert.equal(isLosTextBChapter("07"),true);
  assert.equal(isLosTextBChapter("09"),true);
  for(const [id,source]of Object.entries(LOS1_TEXT_B_SOURCES)){
   assert.equal(source.questions.length,4,id);
   assert.ok(source.questions.every(q=>q.id.startsWith("C"+id+"-TEXTB-Q")&&q.explanation.length>10));
   assert.equal(new Set(source.questions.map(q=>q.id)).size,4);
-  assert.ok(source.attribution.url.startsWith("https://commons.wikimedia.org/wiki/File:"));
+  assert.ok(source.attribution.url.startsWith("https://commons.wikimedia.org/wiki/File:")||source.attribution.url.startsWith("https://coerll.utexas.edu/dib/vidt.php?f="));
   assert.ok(source.attribution.author.length>3);
   assert.ok(source.attribution.license.length>3);
-  assert.ok(source.sourceId.startsWith("M-COM-"));
+  assert.ok(source.sourceId.startsWith("M-COM-")||source.sourceId==="M-DIB-03");
  }
+ assert.equal(LOS1_TEXT_B_SOURCES["01"].lines.length,20);
  assert.equal(LOS1_TEXT_B_SOURCES["04"].lines.length,20);
  assert.deepEqual(LOS1_TEXT_B_SOURCES["04"].lines.map(l=>l.text),[
   "Hallo!","Servus!","Moin!","Moin Moin!","Guten Morgen!","Morgen!",
@@ -36,11 +39,15 @@ test("six added Text B pages use actual full published German source artifacts a
  assert.equal(LOS1_TEXT_B_SOURCES["07"].transcriptIsExact,false,
   "The alphabet aid must not be mislabeled as the recorder's transcript");
  assert.equal(LOS1_TEXT_B_SOURCES["07"].lines.length,0);
+ assert.equal(LOS1_TEXT_B_SOURCES["08"].lines.length,8);
+ assert.equal(LOS1_TEXT_B_SOURCES["08"].lines[0]?.text,"Was studierst du?");
+ assert.equal(LOS1_TEXT_B_SOURCES["08"].lines[7]?.speaker,"Eva");
+ assert.equal(LOS1_TEXT_B_SOURCES["08"].attribution.license,"CC BY 4.0");
  assert.equal(LOS1_TEXT_B_SOURCES["09"].lines.length,1);
  assert.equal(LOS1_TEXT_B_SOURCES["09"].lines[0]?.text,"Tage: Montag, Dienstag, Mittwoch, Donnerstag, Freitag, Samstag, Sonntag.");
 });
 test("all audio resources have checked rights but retain unverified hardware and language gates",()=>{
- for(const chapter of ["04","05","06","07","09","10"] as const){
+ for(const chapter of ["01","04","05","06","07","08","09","10"] as const){
   const packet=LOS1_TEXT_B_SOURCES[chapter];
   const source=findLosSource(packet.sourceId);
   assert.ok(source);
@@ -50,7 +57,7 @@ test("all audio resources have checked rights but retain unverified hardware and
   assert.equal(source.mediaTested,false);
   assert.equal(source.deviceTested,false);
   assert.equal(source.published,false);
-  assert.equal(source.licenseEvidenceUrl,packet.attribution.url);
+  assert.equal(source.licenseEvidenceUrl,chapter==="08"?"https://coerll.utexas.edu/dib/pdfs/intro.pdf":packet.attribution.url);
  }
  assert.equal(findLosSource("M-COM-06")?.licenseCode,"CC BY-SA 3.0");
  assert.equal(findLosSource("M-COM-07")?.licenseCode,"CC BY-SA 3.0");
@@ -60,13 +67,15 @@ test("secondary pages render full text, actual audio player, four answer checks 
  const ui=readFileSync("src/features/los/LosAdditionalTextB.tsx","utf8");
  const nav=readFileSync("src/features/los/LosSupplementalSections.tsx","utf8");
  const audio=readFileSync("src/features/los/LosReferenceTools.tsx","utf8");
- assert.match(nav,/\["04","05","06","07","09","10"\]\.includes\(chapter.id\)/);
+ assert.match(nav,/\["01","04","05","06","07","08","09","10"\]\.includes\(chapter.id\)/);
  assert.match(ui,/LosOriginalDialogue/);
  assert.match(ui,/usageLabel="ORIGINALTEXT · TEXT B"/);
  assert.match(ui,/LosAuthenticAudio chapterId=\{chapterId\} source="B"/);
  assert.match(ui,/practiceChecked:Array\.from/);
  assert.match(ui,/Lähdelinkki on attribuutio/);
  assert.match(ui,/ei.*sanatarkka transkriptio/);
+ assert.match(ui,/chapterId==="08"/);
+ assert.match(ui,/Haastattelun ääni ei ole vielä käytettävissä/);
  assert.match(audio,/chapterId==="07"/);
  assert.match(audio,/id:"M-COM-06"/);
  assert.match(audio,/chapterId==="04"/);
