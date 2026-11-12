@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { getDeviceOwnerId } from "@/lib/deviceSession";
+import { parseLosLessonProgressMap } from "./lessonEngine.ts";
+import type { LosLessonProgress } from "./lessonEngine.ts";
 
 /**
  * Opiskelijakohtainen paikallinen luonnos. EI pilvisynkronointia.
@@ -15,6 +17,10 @@ export type LosChapterDraft = {
   testAnswers: Record<string,string>;
   testSubmittedAt: string | null;
   selfAssessment: string;
+  /** Optional for backwards compatibility with existing v1 chapter drafts. */
+  readerMarks?: Record<string,string>;
+  /** First lesson runs share this existing chapter draft and its JSON backup. */
+  lessonProgress?: Record<string,LosLessonProgress>;
   updatedAt: string;
 };
 export function emptyLosDraft(): LosChapterDraft {
@@ -41,6 +47,8 @@ export function parseLosDraft(value:string | null):LosChapterDraft {
       testAnswers:input.testAnswers,
       testSubmittedAt:typeof input.testSubmittedAt==="string"?input.testSubmittedAt:null,
       selfAssessment:typeof input.selfAssessment==="string"?input.selfAssessment.slice(0,5000):"",
+      readerMarks:input.readerMarks && isStringRecord(input.readerMarks) && Object.keys(input.readerMarks).length<=200 ? Object.fromEntries(Object.entries(input.readerMarks).filter(([k,v])=>k.length<=100&&v.length<=500)) : {},
+      lessonProgress:parseLosLessonProgressMap(input.lessonProgress),
       updatedAt:typeof input.updatedAt==="string"?input.updatedAt:"",
     };
   }catch{return emptyLosDraft();}

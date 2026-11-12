@@ -6,14 +6,15 @@ import {
   validateLosSourceRegistry,
 } from "../src/features/los/content/sourceRegistry.ts";
 
-test("LOS! 1 source manifest imports 23 unique resources and ten chapters", () => {
-  assert.equal(LOS1_SOURCE_REGISTRY.length, 23);
+test("LOS! 1 source manifest imports 24 unique resources and ten chapters", () => {
+  assert.equal(LOS1_SOURCE_REGISTRY.length, 24);
   assert.equal(LOS1_CHAPTER_SOURCE_PLANS.length, 10);
-  assert.equal(new Set(LOS1_SOURCE_REGISTRY.map(source => source.id)).size, 23);
+  assert.equal(new Set(LOS1_SOURCE_REGISTRY.map(source => source.id)).size, 24);
+  assert.ok(findLosSource("M-WB-07"),"C03 replacement source must be present");
   assert.deepEqual(validateLosSourceRegistry(), []);
 });
 
-test("manifest readiness A never means an imported or published authentic textbook text", () => {
+test("manifest readiness A never implies reviewed or published textbook content", () => {
   const dialogue = findLosSource("M-COM-01");
   const greetings = findLosSource("M-COM-03");
   assert.ok(dialogue);
@@ -23,7 +24,9 @@ test("manifest readiness A never means an imported or published authentic textbo
   assert.equal(greetings.licenseCode, "public-domain");
   assert.ok(!dialogue.deviceTested);
   assert.ok(!isLosSourcePublishable(dialogue));
-  assert.ok(sourcePublicationIssues(dialogue).some(issue => issue.includes("lukijaan")));
+  assert.equal(dialogue.integrated,true);
+  assert.ok(sourcePublicationIssues(dialogue).some(issue => issue.includes("kieli-")));
+  assert.ok(sourcePublicationIssues(dialogue).some(issue => issue.includes("mobiilissa")));
   assert.ok(LOS1_SOURCE_REGISTRY.every(source => !isLosSourcePublishable(source)));
 });
 

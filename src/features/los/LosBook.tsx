@@ -5,6 +5,11 @@ import { LOS_BOOKS, type LosBookDefinition, type LosChapter } from "./catalog";
 import { getLosChapterSourceGate } from "./content/sourceRegistry";
 import { LosAuthenticAudio, LosDictionary, LosIndexSearch, LosLearningPath, type LosDestination } from "./LosReferenceTools";
 import { LosChapterGrammar } from "./LosGrammarChapters";
+import { LosC01AuthenticText } from "./LosC01AuthenticText";
+import { LosC02AuthenticText } from "./LosC02AuthenticText";
+import { LosC02Understanding } from "./LosC02Understanding";
+import { LosOpenTextPage, LosOpenTextUnderstanding } from "./LosOpenSourcePages";
+import { getLosOpenDialogue } from "./content/los1OpenDialogues";
 import { LosNotebook, LosWorkbook } from "./LosWorkbook";
 import { LosBackups } from "./LosBackups";
 import { LosApplication, LosCulture, LosTextB, LosUnderstanding } from "./LosSupplementalSections";
@@ -181,6 +186,37 @@ const sampleByChapter:Record<string,string>={
 };
 function TextPage({ chapter }: { chapter: LosChapter }) {
   const sourceGate=getLosChapterSourceGate(chapter.id);
+  if(chapter.id==="01")return <section className="los-inner-page los-reading-page">
+    <p className="los-eyebrow">KAPPALE 01 / TEXT A</p>
+    <h1>Lue ja kuuntele</h1>
+    <p className="los-page-intro">Franzin ja Jörgin autenttinen keskustelu on tässä kokonaisena. Kuuntele alkuperäinen äänite ja napauta sanoja saadaksesi suomenkielisiä selityksiä. Tussilla voit tehdä omia korostuksia.</p>
+    <LosAuthenticAudio chapterId="01" source="A" />
+    <LosC01AuthenticText />
+    {!sourceGate.ready && <div className="los-editorial-note" role="status">
+      <h2>Sisällön tarkistus kesken</h2>
+      <p>{sourceGate.issues.join(" ")} Tämä on oikeuksiltaan tarkistettu sisältöesikatselu, ei vielä hyväksytty valmis kappale.</p>
+    </div>}
+  </section>;
+  if(chapter.id==="02")return <section className="los-inner-page los-reading-page">
+    <p className="los-eyebrow">KAPPALE 02 / TEXT A</p>
+    <h1>Lue ja ymmärrä</h1>
+    <p className="los-page-intro">Franzin ja Gretan alkuperäinen kuuden repliikin keskustelu on luettavissa tässä kirjassa. Voit napauttaa sanoja, avata suomennokset ymmärtämissivulla ja tallentaa omia korostuksia. Lähteen äänitiedostojen erillisiä käyttöoikeuksia ei ole vielä varmistettu.</p>
+    <LosC02AuthenticText />
+    {!sourceGate.ready && <div className="los-editorial-note" role="status">
+      <h2>Sisällön tarkistus kesken</h2>
+      <p>{sourceGate.issues.join(" ")} Tämä on avoimeen julkaistuun aineistoon perustuva tekstiesikatselu, ei vielä valmis kappale.</p>
+    </div>}
+  </section>;
+  if(getLosOpenDialogue(chapter.id))return <section className="los-inner-page los-reading-page">
+    <p className="los-eyebrow">KAPPALE {chapter.id} / TEXT A</p>
+    <h1>Lue alkuperäinen keskustelu</h1>
+    <p className="los-page-intro">Kokonainen julkaistu saksankielinen teksti on luettavissa tässä oppikirjassa. Sanoja voi avata, suomenkieliset tukiselitykset auttaa lukemista ja korostukset tallennetaan. Alkuperäisen mahdollisen äänitteen oikeus ja tekninen toisto tarkistetaan erikseen.</p>
+    <LosOpenTextPage chapterId={chapter.id}/>
+    {!sourceGate.ready && <div className="los-editorial-note" role="status">
+      <h2>Sisällön tarkistus kesken</h2>
+      <p>{sourceGate.issues.join(" ")} Tämä teksti on lähteeseen perustuva esikatselu, ei vielä hyväksytty valmis kappale.</p>
+    </div>}
+  </section>;
   const sample=sampleByChapter[chapter.id]??"Guten Tag!";
   return <section className="los-inner-page los-reading-page">
     <p className="los-eyebrow">KAPPALE {chapter.id} / TEKSTI A</p>
@@ -299,7 +335,7 @@ function LosBookWorkspace({ book, location, move, goLibrary, openBook }: { book:
             section === "search" ? <LosIndexSearch book={book} move={move} /> :
             chapter ? (
               section === "text" ? <TextPage chapter={chapter} /> :
-              section === "understand" ? <LosUnderstanding chapter={chapter} goToText={() => move(chapter.id, "text")} /> :
+              section === "understand" ? (chapter.id==="02" ? <LosC02Understanding goToText={() => move(chapter.id,"text")}/> : getLosOpenDialogue(chapter.id) ? <LosOpenTextUnderstanding chapterId={chapter.id} goToText={() => move(chapter.id,"text")}/> : <LosUnderstanding chapter={chapter} goToText={() => move(chapter.id, "text")} />) :
               section === "vocabulary" ? <Vocabulary key={chapter.id} chapter={chapter} /> :
               section === "grammar" ? <Grammar chapter={chapter} /> :
               section === "text-b" ? <LosTextB chapter={chapter} /> :

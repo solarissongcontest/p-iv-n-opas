@@ -1,0 +1,70 @@
+/* LOS! 1 C01 authentic transcript. Scoped editorial reader, V3.3 direction. */
+.los-c01-reader { max-width:790px;margin:26px 0 32px;color:var(--los-ink);}
+.los-c01-reader-intro h2{font-size:29px;line-height:1.25;font-family:Georgia,serif;font-weight:500;margin:10px 0 15px;}
+.los-c01-reader-intro>p:not(.los-overline){font-size:15px;line-height:1.65;}
+.los-c01-reader-warning{display:flex;gap:10px;align-items:flex-start;padding:12px 14px;margin:16px 0 22px!important;border-left:3px solid var(--los-book-accent);background:var(--los-subtle);color:var(--los-soft);}
+.los-c01-reader-warning svg{flex-shrink:0;margin-top:3px;color:var(--los-book-accent);}
+.los-c01-toolbox{padding:14px 0;border-block:1px solid var(--los-line);margin:28px 0 20px;}
+.los-c01-modes{display:flex;flex-wrap:wrap;gap:8px;}
+.los-c01-modes button{border:1px solid var(--los-line);border-radius:6px;background:var(--los-paper);color:var(--los-ink);padding:9px 12px;display:flex;align-items:center;gap:9px;min-height:44px;font-size:14px;}
+.los-c01-modes button.is-current{border-color:var(--los-book-accent);background:var(--los-book-tint);color:#222b34;font-weight:660;}
+.los-c01-colors{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:14px;}
+.los-c01-colors .los-c01-color{width:44px;height:44px;border:2px solid transparent;border-radius:50%;display:inline-flex;justify-content:center;align-items:center;color:#222b34;}
+.los-c01-colors .los-c01-color[aria-pressed="true"]{outline:2px solid var(--los-ink);outline-offset:2px;}
+.los-c01-color-yellow{background:#ffe16a!important;}
+.los-c01-color-pink{background:#f4a7c8!important;}
+.los-c01-color-green{background:#a9e3b2!important;}
+.los-c01-color-blue{background:#aacfff!important;}
+.los-c01-undo{min-height:42px;padding:8px 14px;border:1px solid var(--los-line);background:var(--los-paper);color:var(--los-ink);border-radius:5px;}
+.los-c01-undo:disabled{opacity:.45;cursor:not-allowed;}
+.los-c01-instruction{font-size:13px;color:var(--los-soft);margin:11px 0 0!important;}
+.los-c01-turn{display:grid;grid-template-columns:76px minmax(0,1fr);gap:12px;padding:15px 0;border-bottom:1px solid var(--los-line);}
+.los-c01-speaker{font-size:13px;color:var(--los-soft);padding-top:7px;font-weight:750;line-height:1.6;}
+.los-c01-words{font-family:Georgia,"Times New Roman",serif;font-size:19px;line-height:1.9;margin:0!important;overflow-wrap:break-word;}
+.los-c01-token{display:inline!important;white-space:pre-wrap!important;border:0!important;box-shadow:none!important;background:transparent;color:var(--los-ink);border-radius:3px;padding:2px 0!important;font:inherit!important;line-height:inherit!important;text-align:left;cursor:pointer;vertical-align:baseline;min-height:0!important;}
+.los-c01-token:hover{text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:4px;}
+.los-c01-token.is-first{outline:2px dotted var(--los-book-accent);outline-offset:1px;}
+.los-c01-token.los-c01-mark-yellow{background:linear-gradient(transparent 16%,#ffe16a 16%,#ffe16a 91%,transparent 91%);color:#222b34;}
+.los-c01-token.los-c01-mark-pink{background:linear-gradient(transparent 16%,#f4a7c8 16%,#f4a7c8 91%,transparent 91%);color:#222b34;}
+.los-c01-token.los-c01-mark-green{background:linear-gradient(transparent 16%,#a9e3b2 16%,#a9e3b2 91%,transparent 91%);color:#222b34;}
+.los-c01-token.los-c01-mark-blue{background:linear-gradient(transparent 16%,#aacfff 16%,#aacfff 91%,transparent 91%);color:#222b34;}
+.los-c01-clear{display:flex;align-items:center;gap:5px;margin-top:7px;border:0;background:transparent;color:var(--los-soft);font-size:12px;padding:5px 1px;min-height:32px;}
+.los-c01-clear:hover{text-decoration:underline;}
+.los-c01-gloss{margin:20px 0;padding:17px 19px;border-left:3px solid var(--los-book-accent);background:var(--los-subtle);}
+.los-c01-gloss strong{font-family:Georgia,serif;font-size:23px;}
+.los-c01-gloss p{margin:5px 0 10px!important;font-size:15px;}
+.los-c01-gloss button{border:1px solid var(--los-line);min-height:38px;padding:6px 13px;background:var(--los-paper);color:var(--los-ink);}
+.los-c01-attribution{margin:24px 0 0;padding-top:20px;border-top:1px solid var(--los-line);}
+.los-c01-attribution p,.los-c01-saved,.los-c01-outdated{font-size:12px!important;line-height:1.7;color:var(--los-soft);}
+.los-c01-attribution a{text-decoration:underline;text-underline-offset:2px;}
+.los-c01-outdated{border-left:3px solid var(--los-book-accent);padding:10px;}
+@media(max-width:760px){
+ .los-c01-reader-intro h2{font-size:25px;}
+ .los-c01-turn{grid-template-columns:1fr;gap:1px;padding:14px 0;}
+ .los-c01-speaker{padding-top:0;}
+ .los-c01-words{font-size:18px;line-height:1.85;}
+ .los-c01-toolbox{margin:23px 0 12px;}
+}
+@media(prefers-reduced-motion:reduce){.los-c01-token{transition:none!important;}}
+
+
+/* Source-based comprehension page, not an invented grammar test. */
+.los-c01-questions{margin-top:30px;}
+.los-c01-question{border:0;border-top:1px solid var(--los-line);margin:0;padding:26px 0 32px;min-width:0;}
+.los-c01-question legend{font-size:19px;font-weight:680;line-height:1.5;padding:0 0 13px;}
+.los-c01-question legend span{font-family:Georgia,serif;color:var(--los-book-accent);margin-right:7px;}
+.los-c01-question>p{font-size:14px;line-height:1.65;color:var(--los-soft);}
+.los-c01-options,.los-c01-evidence{display:grid;gap:9px;max-width:680px;}
+.los-c01-options label,.los-c01-evidence label{display:flex;align-items:flex-start;gap:12px;border:1px solid var(--los-line);padding:12px 14px;cursor:pointer;min-height:46px;background:var(--los-paper);}
+.los-c01-options label.is-selected,.los-c01-evidence label.is-selected{border-color:var(--los-book-accent);background:var(--los-book-tint);color:#222b34;}
+.los-c01-options input,.los-c01-evidence input{accent-color:var(--los-book-accent);margin:4px 0 0;flex-shrink:0;width:17px;height:17px;}
+.los-c01-feedback{padding:13px 16px;border-left:3px solid var(--los-book-accent);background:var(--los-subtle);font-size:14px!important;margin-top:17px!important;}
+.los-c01-understanding-summary{padding-top:22px;border-top:2px solid var(--los-book-accent);}
+.los-c01-understanding-summary>p:first-child{display:flex;align-items:center;gap:9px;flex-wrap:wrap;font-size:16px;}
+.los-c01-translations{padding-left:25px;margin:16px 0 25px;line-height:1.8;}
+.los-c01-translations li{padding:5px 0;border-bottom:1px solid var(--los-line);}
+.los-c01-source-version{font-size:12px!important;color:var(--los-soft);}
+@media(max-width:760px){
+ .los-c01-question legend{font-size:17px;}
+ .los-c01-options label,.los-c01-evidence label{padding:12px;min-height:48px;}
+}
