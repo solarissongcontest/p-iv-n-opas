@@ -23,18 +23,19 @@ test("every canonical LOS! 1 chapter has an individually sourced digital photo",
   assert.ok(photo.mobileSrc.startsWith("/los/chapters/"));
  }
 });
-test("LOS! 1 digital visuals remain integrated without a PDF reader",()=>{
+test("LOS! 1 self-hosted digital photos preserve the independent facsimile reader",()=>{
  const book=readFileSync("src/features/los/LosBook.tsx","utf8");
  const image=readFileSync("src/features/los/Los1ChapterImage.tsx","utf8");
  assert.match(book,/Los1ChapterImage/);
- assert.match(book,/Los1VisualLearning/);
  assert.match(book,/chapterId=\{chapter\.id\}/);
- assert.doesNotMatch(book,/Los1FacsimilePilot|Los1PdfReader|facsimile-pdf|Näköiskirja/);
+ assert.match(book,/Los1FacsimilePilot/);
+ assert.match(book,/Los1PdfReader/);
+ assert.match(book,/Los1C04FacsimilePilot/);
  assert.match(image,/loading="lazy"/);
  assert.match(image,/Kuvituskuva/);
  assert.match(image,/onError=\{\(\)=>setFailed\(true\)\}/);
- assert.equal(existsSync("src/features/los/facsimile/los1"),false);
- assert.equal(existsSync("scripts/los1-facsimile-export.mjs"),false);
+ assert.equal(existsSync("src/features/los/facsimile/los1"),true);
+ assert.equal(existsSync("scripts/los1-facsimile-export.mjs"),true);
 });
 
 test("all 20 self-hosted WebP assets exist and match the source provenance SHA-256 manifest",()=>{

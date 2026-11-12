@@ -186,17 +186,36 @@ test("book cover resumes next unfinished lesson after completing L001",async({pa
  await expect(page.locator("#los-lesson-runner .los-lesson-detail .los-overline")).toContainText("L002");
 });
 
-test("legacy facsimile and PDF.js links safely open the digital reader",async({page})=>{
+test("C01 B5 facsimile pilot uses original cover and lets readers jump to the real digital chapter",async({page})=>{
  await enterLocalBook(page);
- for(const legacy of ["facsimile","facsimile-pdf","facsimile-c02","facsimile-c03","facsimile-c04"]){
-  await page.goto("/los#/1/"+legacy,{waitUntil:"domcontentloaded"});
-  await expect(page).toHaveURL(new RegExp("#/1/overview$"));
-  await expect(page.getByRole("heading",{name:"Tutustu ja ihastu saksan kieleen"})).toBeVisible();
-  await expect(page.locator(".los-facs-reader")).toHaveCount(0);
- }
- await page.reload({waitUntil:"domcontentloaded"});
- await expect(page).toHaveURL(new RegExp("#/1/overview$"));
+ await page.goto("/los#/1/facsimile",{waitUntil:"domcontentloaded"});
+ const reader=page.locator(".los-facs-reader");
+ await expect(reader).toBeVisible();
+ await expect(reader).toContainText("C01-pilotti");
+ await expect(reader.locator('.los-facs-stage [data-facsimile-page="cover"] img')).toHaveAttribute("src","/los/los-1-cover.jpeg");
+ await expect(reader.locator(".los-facs-bottom")).toContainText("Luonnoslehti 1 / 15");
+ await reader.getByRole("button",{name:"Sisältö"}).click();
+ await reader.getByRole("navigation",{name:"Näköiskirjan sisällysluettelo"}).getByRole("button",{name:/Text A/}).click();
+ await expect(reader.locator('.los-facs-stage [data-facsimile-page="c01-text-a"]')).toBeVisible();
+ await expect(reader.locator('.los-facs-stage [data-facsimile-page="c01-text-a"] .los-facs-dialogue li')).toHaveCount(8);
+ await reader.getByRole("button",{name:/Avaa sama osio digikirjassa/}).click();
+ await expect(page).toHaveURL(/\/los#\/1\/01\/text$/);
+ await expect(page.locator(".los-c01-reader")).toBeVisible();
+ await expectNoHorizontalOverflow(page);
 });
+test("C01 facsimile page position survives reload but does not mark a lesson finished",async({page})=>{
+ await enterLocalBook(page);
+ await page.goto("/los#/1/facsimile",{waitUntil:"domcontentloaded"});
+ const reader=page.locator(".los-facs-reader");
+ await reader.getByRole("button",{name:"Sisältö"}).click();
+ await reader.getByRole("navigation",{name:"Näköiskirjan sisällysluettelo"}).getByRole("button",{name:/Land und Leute/}).click();
+ await expect(reader.locator('.los-facs-stage [data-facsimile-page="c01-culture"]')).toBeVisible();
+ await page.reload({waitUntil:"domcontentloaded"});
+ await expect(reader.locator('.los-facs-stage [data-facsimile-page="c01-culture"]')).toBeVisible();
+ await page.goto("/los#/1/path",{waitUntil:"domcontentloaded"});
+ await expect(page.locator("#los-lesson-runner .los-lesson-progress")).toContainText("0/60 suoritettu");
+});
+
 
 test("U1/U3: chapter tree links to persisted exercise and shared IPA word card on desktop and iPhone",async({page,isMobile})=>{
  await enterLocalBook(page);
@@ -470,7 +489,7 @@ test("U1 R9: shared C01 word card has no automatic WCAG A/AA violations",async({
   elements:v.nodes.map(n=>n.target).slice(0,5)}))).toEqual([]);
 });
 
-test("LOS! 1 sourced photos survive on all ten digital chapters",async({page})=>{
+test("LOS! 1 digital chapter photos coexist with the existing facsimile",async({page})=>{
  await enterLocalBook(page);
  for(const chapter of chapters){
   await page.goto("/los#/1/"+chapter+"/chapter",{waitUntil:"domcontentloaded"});
@@ -487,8 +506,9 @@ test("LOS! 1 sourced photos survive on all ten digital chapters",async({page})=>
   await expect(figure.locator("figcaption a")).toHaveAttribute("href",/pexels[.]com/);
   await expectNoHorizontalOverflow(page);
  }
- await page.goto("/los#/1/01/vocabulary",{waitUntil:"domcontentloaded"});
- await expect(page.locator(".los1-visual-learning")).toBeVisible();
+ await page.goto("/los#/1/facsimile",{waitUntil:"domcontentloaded"});
+ await expect(page.locator(".los-facs-reader")).toBeVisible();
+ await expect(page.locator(".los1-digital-photo")).toHaveCount(0);
 });
 
 /** R10 synthetic browser storage-failure test, not a real cross-device restore signoff. */
@@ -568,20 +588,15 @@ test("LOS! 1 culture and vocabulary photos are usable as recall tasks on mobile 
  await openChapter(page,"03","culture");
  const culture=page.locator(".los1-visual-learning");
  await expect(culture).toBeVisible();
- const gallery=page.locator(".los1-culture-gallery");
- await expect(gallery.locator(".los1-culture-gallery-card")).toHaveCount(2);
- await expect(gallery).toContainText("Wien, Österreich");
- await expect(gallery).toContainText("Thun, die Schweiz");
- await expect(gallery.locator("picture img").first()).toHaveAttribute("src",/LOS1-C03-CULTURE-6063650-desktop[.]webp$/);
- await expect(gallery.locator("figcaption a")).toHaveCount(2);
- await expect(culture.locator("picture img")).toHaveCount(0);
+ await expect(culture.locator("picture img")).toHaveAttribute("src",/LOS1-C03-.*desktop[.]webp$/);
+ await expect(culture.locator("figcaption a")).toHaveAttribute("href",/pexels[.]com/);
  const reveal=culture.getByRole("button",{name:"Näytä mallifraasit"});
  await expect(reveal).toHaveAttribute("aria-expanded","false");
  await expect(culture.locator(".los1-visual-learning-phrases li")).toHaveCount(0);
  await reveal.click();
  await expect(culture.getByRole("button",{name:"Piilota mallifraasit"})).toHaveAttribute("aria-expanded","true");
  await expect(culture.locator(".los1-visual-learning-phrases li")).toHaveCount(3);
- await expect(culture.locator(".los1-visual-learning-phrases")).toContainText("Österreich");
+ await expect(culture.locator(".los1-visual-learning-phrases")).toContainText("Deutschland");
  await culture.getByRole("button",{name:"Piilota mallifraasit"}).click();
  await expect(culture.locator(".los1-visual-learning-phrases li")).toHaveCount(0);
  await openChapter(page,"06","vocabulary");
@@ -595,13 +610,6 @@ test("LOS! 1 culture and vocabulary photos are usable as recall tasks on mobile 
  await expect(page.locator(".los1-visual-learning")).toBeVisible();
  await openChapter(page,"01","culture");
  await expect(page.locator(".los1-visual-learning")).toHaveCount(0);
- await expect(page.locator(".los1-culture-gallery-card")).toHaveCount(1);
- await expect(page.locator(".los1-culture-gallery")).toContainText("Hamburg");
- await openChapter(page,"08","culture");
- await expect(page.locator(".los1-culture-gallery-card")).toHaveCount(1);
- await expect(page.locator(".los1-culture-gallery")).toContainText("Havainnekuva");
- await openChapter(page,"02","culture");
- await expect(page.locator(".los1-culture-gallery")).toHaveCount(0);
  await expectNoHorizontalOverflow(page);
 });
 

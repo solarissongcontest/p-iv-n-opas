@@ -1,8 +1,6 @@
 # LOS! U1.0 — julkaisuportit R1–R12
 
 **Päiväys:** 12.11.2026 · **Tulos: EI JULKAISUVALMIS**
-
-**Tuotepäätös:** vain interaktiivinen digikirja (PR #212). B5-/PDF.js-testit eivät kuulu R1–R12-portteihin. Yhdistetyn uuden HEADin CI-tulokset ja kaikkien 28 paikallisen WebP:n todennus vaaditaan erikseen.
 Portti hyväksytään vasta oikealla testinäytöllä. Osittainen koodin olemassaolo ei ole hyväksymismerkintä.
 
 | Portti | Tila | Todellinen näyttö ja puuttuva |
