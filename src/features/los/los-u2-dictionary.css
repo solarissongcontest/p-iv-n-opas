@@ -25,3 +25,10 @@
 .los-dict-form-of {display:flex;flex-wrap:wrap;gap:7px;align-items:center;font-size:13px;line-height:1.5}
 .los-dict-lemma-button {border:1px solid var(--los-line);border-radius:6px;background:var(--los-subtle);color:var(--los-ink);padding:8px 10px;min-height:44px;font-weight:650;text-decoration:underline;text-underline-offset:2px}
 .los-dict-lemma-button:focus-visible {outline:3px solid #397ace;outline-offset:2px}
+
+/* U1/U2 shared source card action: only published-source results expose this. */
+.los-dict-open-card {border:1px solid var(--los-line,#e5e7e6);background:var(--los-subtle,#f6f6f4);
+  color:var(--los-ink,#222b34);font:inherit;font-size:13px;font-weight:650;line-height:1.3;
+  border-radius:7px;padding:8px 11px;min-height:44px;cursor:pointer}
+.los-dict-open-card:focus-visible {outline:3px solid #397ace;outline-offset:2px}
+.los-dict-result-head .los-dict-open-card {margin-left:auto}

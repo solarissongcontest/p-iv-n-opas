@@ -18,13 +18,19 @@ type RemoteLookup =
  * Uses the existing chapter gloss rather than a duplicate storage model.
  */
 export function LosDictionaryCard({
-  word, contextMeaning, onClose,
-}: { word: string; contextMeaning: string; onClose: () => void }) {
+  word, contextMeaning, publishedEntry, onClose,
+}: {
+  word: string;
+  contextMeaning?: string;
+  publishedEntry?: LosDictionaryResult;
+  onClose: () => void;
+}) {
   const closeButton = useRef<HTMLButtonElement>(null);
   const previousFocus = useRef<HTMLElement | null>(null);
   const onCloseRef = useRef(onClose);
   onCloseRef.current = onClose;
-  const pronunciation = getLosPronunciation(word);
+  const language = publishedEntry?.language ?? "de";
+  const pronunciation = language==="de" ? getLosPronunciation(word) : null;
   const controllerRef = useRef<AbortController | null>(null);
   const [remote, setRemote] = useState<RemoteLookup>({kind:"idle"});
 
@@ -39,7 +45,7 @@ export function LosDictionaryCard({
     controllerRef.current = controller;
     setRemote({kind:"loading",term});
     try {
-      const data = await searchLosDictionary(term,"de-fi",controller.signal);
+      const data = await searchLosDictionary(term,language==="de"?"de-fi":"fi-de",controller.signal);
       if (!controller.signal.aborted) {
         setRemote({kind:"done",term,entries:data.results});
       }
@@ -65,14 +71,22 @@ export function LosDictionaryCard({
   return <section className="los-c01-gloss los-dictionary-card"
     role="dialog" aria-modal="false" aria-label={`Sanan ${word} selitys`} lang="fi">
     <div className="los-dictionary-card-heading">
-      <strong lang="de">{word}</strong>
+      <strong lang={language}>{word}</strong>
       <button type="button" ref={closeButton} onClick={onClose} aria-label="Sulje sanan selitys">
         <X size={19} aria-hidden="true"/> Sulje
       </button>
     </div>
-    <p className="los-dictionary-context-label">Kappaleen kontekstimerkitys</p>
-    <p>{contextMeaning}</p>
-    <div className="los-dictionary-pronunciation">
+    {contextMeaning ? <>
+      <p className="los-dictionary-context-label">Kappaleen kontekstimerkitys</p>
+      <p>{contextMeaning}</p>
+    </> : <p className="los-dictionary-context-label">
+      Julkaistu lähdetietue · ei kappalekohtaista kontekstisuomennosta
+    </p>}
+    {publishedEntry && <ol className="los-dict-results" aria-label="Valittu lähdetietue">
+      <LosDictionarySourceResult entry={publishedEntry}
+        onSearch={next => { void lookupPublished(next); }} />
+    </ol>}
+    {language==="de" && <div className="los-dictionary-pronunciation">
       <span className="los-dictionary-context-label">Ääntäminen (de-DE)</span>
       {pronunciation?.ipa ? <>
         <span className="los-dictionary-ipa" lang="de">[{pronunciation.ipa}]</span>
@@ -83,14 +97,16 @@ export function LosDictionaryCard({
           <a href={pronunciation.ipaSourceUrl} target="_blank" rel="noopener noreferrer">IPA-lähde: Wiktionary</a>}
       </> : <span>IPA tarkistamatta tälle sanamuodolle. Ei korvata arvauksella.</span>}
       <LosPronunciationButton text={word} />
-    </div>
+    </div>}
     <div className="los-dictionary-remote">
       <button type="button" className="los-dictionary-remote-button"
         onClick={() => { void lookupPublished(word); }}>
-        Hae julkaistusta yleissanakirjasta
+        {publishedEntry ? "Hae lisää julkaistusta yleissanakirjasta" : "Hae julkaistusta yleissanakirjasta"}
       </button>
       <div className="los-dictionary-remote-status" role="status" aria-live="polite">
-        {remote.kind==="idle" && <p>Lähteistetty yleissanakirja avataan erikseen. Kappaleen oma selitys toimii myös ilman sitä.</p>}
+        {remote.kind==="idle" && <p>{contextMeaning
+          ? "Lähteistetty yleissanakirja avataan erikseen. Kappaleen oma selitys toimii myös ilman sitä."
+          : "Näytetään vain julkaistusta lähdeaineistosta saatu hakutulos. Voit hakea myös muita merkityksiä."}</p>}
         {remote.kind==="loading" && <p>Haetaan julkaistuista lähteistä sanaa {remote.term}…</p>}
         {remote.kind==="unavailable" && <p>Julkaistua yleissanakirjan hakua ei ole käytettävissä tällä hetkellä. Kappaleen oma selitys toimii edelleen.</p>}
         {remote.kind==="done" && <p>{remote.entries.length
@@ -106,8 +122,10 @@ export function LosDictionaryCard({
       )}
     </div>
     <p className="los-dictionary-card-footnote">
-      Kappaleen kontekstiselitys perustuu oppikirjaan. Mahdolliset yleissanakirjan osumat ovat erillisiä lähdetietueita, eivät tämän ilmauksen tarkistettuja käännöksiä.
-      Puhesynteesi ei ole hyväksytty ihmisäänite eikä vielä julkaisutestattu ääntämismalli.
+      {contextMeaning
+        ? "Kappaleen kontekstiselitys perustuu oppikirjaan. Yleissanakirjan osumat ovat erillisiä lähdetietueita."
+        : "Tämä sanakortti näyttää julkaistun sanakirjalähteen tietoja, ei asiantuntijan tarkistamaa oppikirjasuomennosta."}
+      {language==="de" && " Puhesynteesi ei ole hyväksytty ihmisäänite eikä vielä julkaisutestattu ääntämismalli."}
     </p>
   </section>;
 }

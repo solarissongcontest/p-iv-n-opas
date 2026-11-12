@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import { ArrowRight, BookOpen, ChevronRight, Headphones, Search, Volume2 } from "lucide-react";
 import { LOS_BOOKS, type LosBookDefinition } from "./catalog";
 import { LosDictionarySearch } from "./LosDictionarySearch";
+import { LosDictionaryCard } from "./LosDictionaryCard";
+import type { LosDictionaryResult } from "./dictionaryClient";
 import { LOS_1_LESSONS } from "./learningPath";
 import { LosFirstLessons } from "./LosFirstLessons";
 import { LOS1_EXECUTABLE_LESSONS, isLos1ExecutableLesson } from "./guidedLessons";
@@ -22,6 +24,7 @@ export function LosDictionary({ book, move, openBook }: { book: LosBookDefinitio
   const [search, setSearch] = useState("");
   const [hidden, setHidden] = useState(false);
   const [scope, setScope] = useState<"book" | "series">("book");
+  const [selectedPublished, setSelectedPublished] = useState<LosDictionaryResult | null>(null);
   const entries = useMemo(() => DICTIONARY.filter(entry =>
     (scope === "series" || entry.book === book.id) &&
     (entry.word.toLocaleLowerCase("de").includes(search.trim().toLocaleLowerCase("de")) ||
@@ -31,7 +34,9 @@ export function LosDictionary({ book, move, openBook }: { book: LosBookDefinitio
     <p className="los-eyebrow">WÖRTERBUCH · LOS! {book.id}</p>
     <h1>Sanakirja</h1>
     <p className="los-page-intro">Laaja saksa–suomi- ja suomi–saksa-sanakirja käyttää vain erikseen hyväksyttyjä, ladattuja sanakirjalähteitä. Hakutulokset näytetään lähteineen, kun aineiston julkaisu on vahvistettu.</p>
-    <LosDictionarySearch />
+    <LosDictionarySearch onOpenCard={setSelectedPublished} />
+    {selectedPublished && <LosDictionaryCard word={selectedPublished.lemma}
+      publishedEntry={selectedPublished} onClose={() => setSelectedPublished(null)} />}
     <h2>Kappalesanasto</h2>
     <p>Tämä erillinen paikallinen sanastoluettelo perustuu LOS!-kirjojen opetettaviin sanoihin. Se ei ole yleissanakirja. Alkuperäistekstien kokonaisia repliikkejä ja niiden suomennoksia voit hakea myös kirjan Haku-sivulla.</p>
     <div className="los-index-options">

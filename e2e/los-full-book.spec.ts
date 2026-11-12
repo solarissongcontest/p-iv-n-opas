@@ -394,3 +394,49 @@ test("U2 dictionary clearly separates remote published search from chapter vocab
  await expect(query).toHaveAttribute("placeholder","Esim. talo");
  await expectNoHorizontalOverflow(page);
 });
+
+
+test("U1/U2: a published-source result opens the shared word card without changing chapter meanings",async({page})=>{
+ await page.addInitScript(()=>{
+  if(!["localhost","127.0.0.1"].includes(location.hostname))return;
+  localStorage.setItem("opk.device-authorized","Arthur");
+  localStorage.setItem("opk.owner-id","00000000-0000-4000-8000-000000000195");
+  localStorage.setItem("opk.device-token","local-e2e-fixture-only");
+  localStorage.setItem("opk.device-token-expires",String(Date.now()+3_600_000));
+ });
+ await page.route("**/api/los-dictionary?**", async route=>{
+  const url=new URL(route.request().url());
+  const q=url.searchParams.get("q")??"";
+  const direction=url.searchParams.get("direction")??"de-fi";
+  const entry={source_id:"synthetic-qa-only",source_entry_id:"haus",
+    lemma:"Haus",language:"de",part_of_speech:"noun",gender:"n",source_kind:"freedict",
+    license_code:"test-only",license_url:"https://example.org/license",
+    evidence_url:"https://example.org/fixture",match_type:"lemma",
+    senses:[{senseIndex:1,glosses:[],glossLanguage:null,formOfCandidates:[],
+      translations:[{language:"fi",value:"talo"}]}],forms:[],pronunciations:[]};
+  await route.fulfill({status:200,contentType:"application/json",body:JSON.stringify({
+    status:"ready",query:q,direction,limit:20,sourcesPublished:1,
+    results:q==="Haus"&&direction==="de-fi"?[entry]:[],
+    note:"Synthetic local-only browser fixture",
+  })});
+ });
+ await page.goto("/los#/1/dictionary",{waitUntil:"domcontentloaded"});
+ const query=page.locator(".los-dict-query input");
+ await query.fill("Haus");
+ const row=page.locator(".los-dict-search .los-dict-result");
+ await expect(row).toHaveCount(1,{timeout:15_000});
+ const open=row.getByRole("button",{name:"Avaa sanakortti: Haus"});
+ await expect(open).toBeVisible();
+ await open.click();
+ const card=page.getByRole("dialog",{name:"Sanan Haus selitys"});
+ await expect(card).toContainText("Julkaistu lähdetietue");
+ await expect(card).toContainText("talo");
+ await expect(card).not.toContainText("Kappaleen kontekstimerkitys");
+ await card.getByRole("button",{name:"Sulje sanan selitys"}).click();
+ await expect(open).toBeFocused();
+ await page.goto("/los#/1/01/text",{waitUntil:"domcontentloaded"});
+ await page.locator(".los-c01-reader .los-c01-token").first().click();
+ await expect(page.getByRole("dialog",{name:/sanan .* selitys/i}))
+   .toContainText("Kappaleen kontekstimerkitys");
+ await expectNoHorizontalOverflow(page);
+});

@@ -5,10 +5,16 @@ import {
 } from "./dictionaryClient";
 import "./los-u2-dictionary.css";
 
-export function LosDictionarySourceResult({entry,onSearch}:{entry:LosDictionaryResult;onSearch:(word:string)=>void}) {
+export function LosDictionarySourceResult({entry,onSearch,onOpenCard}:{
+  entry:LosDictionaryResult; onSearch:(word:string)=>void;
+  onOpenCard?:(entry:LosDictionaryResult)=>void;
+}) {
   return <li className="los-dict-result">
     <div className="los-dict-result-head">
       <strong lang={entry.language}>{entry.lemma}</strong>
+      {onOpenCard && <button type="button" className="los-dict-open-card"
+        aria-label={`Avaa sanakortti: ${entry.lemma}`}
+        onClick={() => onOpenCard(entry)}>Avaa sanakortti</button>}
       <span>{entry.part_of_speech || "Sanaluokka ei saatavilla"}</span>
       {entry.gender && <span>Artikkeli / suku: {entry.gender}</span>}
     </div>
@@ -51,7 +57,9 @@ export function LosDictionarySourceResult({entry,onSearch}:{entry:LosDictionaryR
     </p>
   </li>;
 }
-export function LosDictionarySearch() {
+export function LosDictionarySearch({onOpenCard}:{
+  onOpenCard?:(entry:LosDictionaryResult)=>void;
+} = {}) {
   const [query,setQuery]=useState("");
   const [direction,setDirection]=useState<LosDictionaryDirection>("de-fi");
   const [state,setState]=useState<
@@ -107,7 +115,7 @@ export function LosDictionarySearch() {
     </div>
     {state.kind==="done"&&
       (state.results.length?<ol className="los-dict-results">
-        {state.results.map(item=><LosDictionarySourceResult key={item.source_id+":"+item.source_entry_id} entry={item} onSearch={setQuery}/>) }
+        {state.results.map(item=><LosDictionarySourceResult key={item.source_id+":"+item.source_entry_id} entry={item} onSearch={setQuery} onOpenCard={onOpenCard}/>) }
       </ol>:<p>Ei osumia julkaistusta aineistosta tällä hakusanalla.</p>)}
   </section>;
 }
