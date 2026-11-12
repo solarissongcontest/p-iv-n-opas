@@ -10,6 +10,7 @@ import { useLosChapterDraft } from "./studyState";
 
 
 import { getLosStudyProgressSnapshot } from "./progressSnapshot";
+import { getLosReleaseReadiness } from "./releaseReadiness";
 import "./los-progress.css";
 
 export function LosStudyProgress({book,move}:{book:LosBookDefinition;move:LosNavigate}) {
@@ -26,6 +27,7 @@ export function LosStudyProgress({book,move}:{book:LosBookDefinition;move:LosNav
     "91":d91.draft,"92":d92.draft,"93":d93.draft,
   };
   const data=getLosStudyProgressSnapshot(book,drafts,new Date().toISOString());
+  const readiness=getLosReleaseReadiness();
   return <section className="los-inner-page los-study-progress" aria-label="LOS! 1:n opiskelun eteneminen">
     <p className="los-eyebrow">LOS! 1 / OMA OPISKELU</p>
     <h1>Osaaminen ja eteneminen</h1>
@@ -65,6 +67,17 @@ export function LosStudyProgress({book,move}:{book:LosBookDefinition;move:LosNav
       <p>Seuraavat {data.unfinished.length} suunniteltua tuntia ovat vielä toimituksellisia sisältömerkintöjä. Niiden avaaminen ei merkitse niitä suoritetuiksi, ja C08:n sekä C10:n lähdetekstien kieli-, media- ja laitetestaus pysyvät erillisinä julkaisuportteina.</p>
       <ul>{data.unfinished.map(item=><li key={item.id}><strong>{item.id}</strong> · {item.title}</li>)}</ul>
     </div>:<div className="los-progress-pending"><h2>Kaikki 60 oppituntia on toteutettu opetuspolkuun</h2><p>Tämä kertoo oppituntien toiminnallisesta saatavuudesta. Kunkin oppitunnin suoritus, tekstien kielentarkistus, äänitteiden käyttöoikeudet ja mobiili-/desktop-julkaisulaatutestit arvioidaan edelleen erikseen.</p></div>}
+    <details className="los-progress-pending" aria-label="Kirjan G1–G8-julkaisulaadun tila">
+      <summary><strong>LOS! 1:n julkaisulaatu · {readiness.ready?"Hyväksytty":"Ei vielä julkaisuvalmis"}</strong></summary>
+      <p>Ohjattujen oppituntien {readiness.lessons.available}/{readiness.lessons.planned} on eri mittari kuin julkaisulaadun hyväksyntä. Alla olevat G1–G8-portit perustuvat vain todellisiin lähdemerkintöihin ja kirjallisiin testitodisteisiin. Valmis-merkintää ei anneta ennen kaikkia kahdeksaa hyväksyntää.</p>
+      <ul>{readiness.gates.map(gate=><li key={gate.id}>
+        <strong>{gate.id} · {gate.title}: {gate.passed?"Läpäisty":"Kesken"}</strong>
+        <p>{gate.detail}</p>
+        {gate.evidence&&<small>Hyväksynnän peruste: {gate.evidence}</small>}
+      </li>)}</ul>
+      {readiness.registryErrors.length>0&&<p role="alert">Lähde-/tehtävärekisterin teknisiä virheitä: {readiness.registryErrors.join(" ")}</p>}
+      <p>Kun oikeat laite- ja kielentarkistukset valmistuvat, niiden kirjalliset tulokset ja lähdeluvat on dokumentoitava projektin julkaisuportteihin. Tietoja ei voi vahvistaa pelkällä sivun avaamisella.</p>
+    </details>
     <p className="los-progress-foot">Tiedot perustuvat tämän laitteen LOS!-luonnoksiin ja mahdollisesti erikseen tuotuihin tai synkronoituihin kappaletietoihin. Jos et ole siirtänyt aiempia tietoja tähän selaimeen, se ei voi näyttää niitä automaattisesti.</p>
   </section>;
 }
