@@ -42,3 +42,5 @@
   .los-word-table {width:100%}
   .los-word-table th,.los-word-table td {overflow-wrap:anywhere}
 }
+
+.los-vocabulary-qa {font-size:13px;color:var(--los-soft);border-left:3px solid var(--los-book-accent);padding:9px 13px;margin:14px 0 19px!important;background:var(--los-subtle);line-height:1.55}
