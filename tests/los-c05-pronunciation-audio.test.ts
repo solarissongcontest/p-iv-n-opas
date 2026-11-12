@@ -22,7 +22,7 @@ test("two original native-speaker pronunciation samples are registered with inde
     assert.equal(isLosSourcePublishable(source),false);
     assert.match(source.description,/ääntämisnäyte/);
   }
-  assert.equal(LOS1_SOURCE_REGISTRY.length,28);
+  assert.equal(LOS1_SOURCE_REGISTRY.length,29);
   assert.deepEqual(validateLosSourceRegistry(),[]);
 });
 test("C05 text B remains pending, not silently promoted after audio samples", () => {
