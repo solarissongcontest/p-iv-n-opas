@@ -35,7 +35,8 @@ export function inspectLosVocabularyQA(bookId:number,chapterId:string):LosVocabu
       Boolean(asset.reviewedAt) &&
       Boolean(asset.licenseId) &&
       Boolean(asset.url) &&
-      asset.speakerType==="human"));
+      (asset.speakerType==="human" ||
+        (asset.speakerType==="synthetic" && /^de(?:-|$)/i.test(asset.voiceLocale??"")))));
     ipaSourced+=Number(sourced);
     ipaHumanReviewed+=Number(reviewed);
     audioApproved+=Number(accepted);
