@@ -21,7 +21,7 @@ export type LosRichTask={
  minLength?:number;
 };
 const opt=(...items:[string,string][]):{id:string;label:string}[]=>items.map(([id,label])=>({id,label}));
-const commons=(file:string)=>"https://commons.wikimedia.org/wiki/";
+const commons=(file:string)=>"https://commons.wikimedia.org/wiki/"+file;
 export const LOS1_RICH_TASKS:readonly LosRichTask[]=[
  {id:"RICH-C01-HIGHLIGHT",chapterId:"01",type:"highlight-span",
   prompt:"Korosta lähteen tervehdysluettelosta täsmälleen sana Moin!",
