@@ -84,8 +84,10 @@ test("completion needs visited scenes, all assessed questions, honest activities
   assert.equal(teacherCanFinish(s, lesson, actualPractice), true);
   s = finishTeacherSession(s, lesson, actualPractice, now);
   assert.equal(s.completedAt, now);
-  assert.equal(moveTeacherScene(s, lesson, "welcome", now), s);
-  assert.equal(independentTeacherEvidence(s), 5);
+  const review = moveTeacherScene(s, lesson, "welcome", now);
+  assert.equal(review.sceneId, "welcome");
+  assert.equal(review.completedAt, now);
+  assert.equal(independentTeacherEvidence(review), 5);
 });
 
 test("teacher storage rejects invalid and overlong sessions without destroying valid ones", () => {
