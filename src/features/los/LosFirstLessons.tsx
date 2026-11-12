@@ -9,6 +9,9 @@ import {
 } from "./lessonEngine";
 import { LOS1_EXECUTABLE_LESSONS, los1LessonDraftChapter } from "./guidedLessons";
 import "./los-lessons.css";
+import {LosL004TeacherPlayer} from "./teacher/LosL004TeacherPlayer";
+import {initialTeacherProgress} from "./teacher/core";
+import {TEACHER_L004} from "./teacher/content/l004";
 
 const ALL_LESSONS = LOS1_EXECUTABLE_LESSONS;
 const lessonChapter = los1LessonDraftChapter;
@@ -118,6 +121,8 @@ export function LosFirstLessons({ selectedId, onSelect, move }: {
       <p className="los-lesson-objective"><strong>Tavoite:</strong> {lesson.objective}</p>
       <p className="los-lesson-status">{isComplete ? "Oppitunti suoritettu. Voit silti avata aineistot uudelleen." :
         progress.startedAt ? "Oppitunti kesken" : "Oppituntia ei ole vielä aloitettu"} · {stepCount}/{lesson.steps.length} vaihetta merkitty tehdyksi.</p>
+      {lesson.id==="L004"&&<LosL004TeacherPlayer progress={progress.teacher??initialTeacherProgress(TEACHER_L004)}
+        onChange={teacher=>record(old=>({...old,startedAt:old.startedAt??stamp(),teacher}))}/>}
       <ol className="los-lesson-steps">
         {lesson.steps.map((step, index) => {
           const done = progress.completedStepIds.includes(step.id);

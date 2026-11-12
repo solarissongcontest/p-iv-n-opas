@@ -1,0 +1,32 @@
+/* Teacher Experience 2.0: reuse existing LOS book tokens, mobile first. */
+.los-teacher {border:1px solid var(--los-line);border-radius:14px;background:var(--los-paper);padding:clamp(15px,3vw,24px);margin:18px 0 24px;color:var(--los-ink)}
+.los-teacher-top {display:flex;justify-content:space-between;align-items:flex-start;gap:16px}
+.los-teacher-top h4 {font:500 clamp(21px,3vw,27px)/1.25 Georgia,serif;margin:5px 0 7px}
+.los-teacher-top p {line-height:1.6;margin:6px 0}
+.los-teacher-step {flex:none;font-size:12px;font-weight:700}
+.los-teacher-draft {font-size:12px;line-height:1.65;color:var(--los-soft)}
+.los-teacher-toolbar,.los-teacher-controls {display:flex;gap:9px;flex-wrap:wrap;margin:17px 0}
+.los-teacher button,.los-teacher-book-link a {min-height:44px;padding:10px 13px;border:1px solid var(--los-line);border-radius:8px;background:var(--los-paper);color:var(--los-ink);font:600 13px/1.5 inherit}
+.los-teacher button:focus-visible,.los-teacher a:focus-visible {outline:3px solid var(--los-book-accent);outline-offset:3px}
+.los-teacher button:disabled {opacity:.48;cursor:not-allowed}
+.los-teacher-controls button:last-child {background:var(--los-book-accent);color:white;border-color:var(--los-book-accent)}
+.los-teacher-map {display:flex;flex-direction:column;gap:6px;max-height:260px;overflow-y:auto;padding:10px;background:var(--los-book-tint);border-radius:9px}
+.los-teacher-map button {text-align:left}
+.los-teacher-map button[aria-current="step"] {border-color:var(--los-book-accent)}
+.los-teacher-scene {padding:17px 0;border-top:1px solid var(--los-line);border-bottom:1px solid var(--los-line)}
+.los-teacher-scene h5 {font:500 clamp(23px,3.5vw,30px)/1.3 Georgia,serif;margin:10px 0 18px}
+.los-teacher-scene p {line-height:1.78;max-width:68ch;font-size:15px}
+.los-teacher-phase {text-transform:uppercase;letter-spacing:.08em;color:var(--los-book-accent);font-size:11px!important}
+.los-teacher-example {background:var(--los-book-tint);border-left:3px solid var(--los-book-accent);padding:13px 18px;margin:20px 0}
+.los-teacher-example p {margin:5px 0}.los-teacher-example [lang="de"] {font-size:22px}
+.los-teacher-question {margin-top:22px}
+.los-teacher-question fieldset {padding:0;border:0;margin:0;min-width:0}
+.los-teacher-question legend {font-weight:700;margin-bottom:13px;font-size:15px;line-height:1.5}
+.los-teacher-choices {display:grid;gap:9px;grid-template-columns:repeat(auto-fit,minmax(170px,1fr))}
+.los-teacher-choices button {text-align:left}
+.los-teacher-choices button[aria-pressed="true"] {border-color:var(--los-book-accent);background:var(--los-book-tint)}
+.los-teacher-feedback,.los-teacher-help-text,.los-teacher-paused {background:var(--los-book-tint);border-radius:8px;padding:11px 14px;line-height:1.6}
+.los-teacher-help {margin-top:14px}
+.los-teacher-evidence,.los-teacher-book-note {font-size:12px;line-height:1.65;color:var(--los-soft)}
+.los-teacher-book-link a {display:inline-flex;align-items:center;text-decoration:none;min-height:44px}
+@media(max-width:560px){.los-teacher-top{flex-direction:column}.los-teacher-choices{grid-template-columns:1fr}}

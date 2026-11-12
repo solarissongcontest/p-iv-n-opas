@@ -306,3 +306,32 @@ test("C04, C07 and C09 culture pages use three new self-hosted photographs with 
  await openChapter(page,"09","culture");
  await expect(page.locator(".los1-culture-gallery")).toContainText("eikä lähde vahvista saksankielistä kalenteria");
 });
+
+
+test("LOS Teacher 2.0 L004 teaches greetings, saves scenes, and never invents mastery",async({page})=>{
+ await enterLocalBook(page);
+ await page.goto("/los#/1/path",{waitUntil:"domcontentloaded"});
+ const runner=page.locator("#los-lesson-runner");
+ await runner.locator(".los-lesson-picker button").filter({hasText:"L004"}).click();
+ const player=runner.locator(".los-teacher");
+ await expect(player).toBeVisible();
+ await expect(player).toContainText("Opetuskäsikirjoitus on vielä");
+ await player.getByRole("button",{name:"Opetuksen sisällysluettelo"}).click();
+ await player.getByRole("button",{name:/6\. Kokeile itse ilman mallia/}).click();
+ await player.getByRole("button",{name:"Guten Morgen!"}).click();
+ await expect(player).toContainText("Tämä sopii aamuun.");
+ await player.getByRole("button",{name:"Guten Abend!"}).click();
+ await expect(player).toContainText("ei ole ensiyrityksen itsenäinen näyttö");
+ await expect(player).toContainText("0/3");
+ await page.reload({waitUntil:"domcontentloaded"});
+ const restored=page.locator(".los-teacher");
+ await expect(restored).toContainText("Kokeile itse ilman mallia");
+ await expect(restored).toContainText("0/3");
+ await restored.getByRole("button",{name:"Keskeytä"}).click();
+ await expect(restored).toContainText("Opetus on keskeytetty");
+ await page.reload({waitUntil:"domcontentloaded"});
+ await expect(page.locator(".los-teacher")).toContainText("Opetus on keskeytetty");
+ await page.locator(".los-teacher").getByRole("button",{name:"Jatka opetusta"}).click();
+ await expect(page.locator(".los-teacher-book-link a")).toHaveAttribute("target","_blank");
+ await expectNoHorizontalOverflow(page);
+});
