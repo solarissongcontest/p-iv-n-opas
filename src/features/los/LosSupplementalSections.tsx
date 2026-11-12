@@ -49,12 +49,13 @@ export function LosTextB({chapter}:{chapter:LosChapter}) {
     <p className="los-eyebrow">TEXT B / KAPITEL {Number(chapter.id)}</p>
     <h1>Kuuntele tai katso</h1>
     <p className="los-page-intro">Toinen lähdeteksti tai kuuntelu tuo kappaleen aiheen uuteen tilanteeseen. Media toistetaan oppikirjan omalla sivulla.</p>
-    {chapter.id==="01"?<>
-      <p>Kuuntele aito, ihmisen lausuma luettelo tavallisista tervehdyksistä. Keskity tunnistamaan jo opitut ilmaukset. Äänite ei ole keskustelu.</p>
-      <LosAuthenticAudio chapterId={chapter.id} source="B" />
-      <h2>Mitä huomasit?</h2>
-      <p>Toistuvatko kaikki tutut tervehdykset? Voit käyttää sanastosivua tarkistamiseen, mutta älä luokittele sanoja opituiksi pelkän kuulemisen perusteella.</p>
-    </>:(chapter.id==="02"||chapter.id==="03")?<LosC02SecondaryText chapterId={chapter.id}/>:["04","05","06","07","09","10"].includes(chapter.id)?<LosAdditionalTextB chapterId={chapter.id}/>:<div className="los-source-pending"><Headphones size={23}/><div><h2>Toinen lähdeaineisto valmistellaan</h2><p>Kirjakohtaisessa aineistoluettelossa on tälle kappaleelle ehdokkaita, mutta kokonaisen median käyttö ja upotus varmistetaan erikseen.</p></div></div>}
+    {(chapter.id==="02"||chapter.id==="03")?<LosC02SecondaryText chapterId={chapter.id}/>:
+      ["01","04","05","06","07","08","09","10"].includes(chapter.id)?
+        <LosAdditionalTextB chapterId={chapter.id}/>:
+        <div className="los-source-pending"><Headphones size={23}/><div>
+          <h2>Toinen lähdeaineisto valmistellaan</h2>
+          <p>Tekstin lähde ja käyttöoikeus varmistetaan erikseen.</p>
+        </div></div>}
   </section>;
 }
 const applications:Record<string,{title:string;prompt:string;checklist:string[];example:string}> = {
