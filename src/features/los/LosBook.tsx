@@ -14,6 +14,8 @@ import { getLosOpenDialogue } from "./content/los1OpenDialogues";
 import { LosNotebook, LosWorkbook } from "./LosWorkbook";
 import { LosBackups } from "./LosBackups";
 import { LosBookStartAction } from "./LosBookStartAction";
+import { LosDictionaryCard } from "./LosDictionaryCard";
+import { getLosPronunciation } from "./pronunciation";
 import { Los1FacsimilePilot } from "./facsimile/los1/Los1FacsimilePilot";
 import { LosMidtermExam } from "./LosMidtermExam";
 import { LosStudyProgress } from "./LosStudyProgress";
@@ -304,6 +306,7 @@ function Grammar({ chapter }: { chapter: LosChapter }) {
 function Vocabulary({ chapter, move }: { chapter: LosChapter; move: (chapter:string|null,section:LosSection)=>void }) {
   const [query, setQuery] = useState("");
   const [showTranslations, setShowTranslations] = useState(true);
+  const [activeWord, setActiveWord] = useState<{word:string;meaning:string}|null>(null);
   const words = useMemo(() => chapter.vocabulary.map(strip).filter(parts => parts.join(" ").toLowerCase().includes(query.trim().toLowerCase())), [chapter, query]);
   return <section className="los-inner-page los-vocabulary-page">
     <p className="los-eyebrow">WORTSCHATZ / KAPITEL {Number(chapter.id)}</p>
@@ -314,9 +317,22 @@ function Vocabulary({ chapter, move }: { chapter: LosChapter; move: (chapter:str
       <label><Search size={17} /><span className="sr-only">Etsi sanastosta</span><input value={query} onChange={event => setQuery(event.target.value)} placeholder="Etsi sanaa…" /></label>
       <button aria-pressed={!showTranslations} onClick={() => setShowTranslations(v => !v)}>{showTranslations ? "Piilota suomennokset" : "Näytä suomennokset"}</button>
     </div>
-    <table className="los-word-table"><thead><tr><th>Deutsch</th><th>Suomi</th></tr></thead><tbody>
-      {words.map((parts, i) => <tr key={i}><td lang="de">{parts[0]}</td><td>{showTranslations ? parts[1] ?? "" : <span className="los-hidden-translation">Piilotettu</span>}</td></tr>)}
+    <table className="los-word-table"><thead><tr><th>Deutsch</th><th>IPA</th><th>Suomi</th></tr></thead><tbody>
+      {words.map((parts, i) => {
+        const word = parts[0] ?? "";
+        const pronunciation = getLosPronunciation(word);
+        return <tr key={i}>
+          <td><button className="los-word-open" type="button" lang="de"
+            onClick={() => setActiveWord({word,meaning:parts[1]??"Kontekstimerkitys tarkistamatta"})}
+            aria-label={`Avaa sanan ${word} ääntäminen ja selitys`}>{word}</button></td>
+          <td lang="de">{pronunciation?.ipa ? <span title="Lähteen sanamuoto tarkistettu; asiantuntija-arvio puuttuu">[{pronunciation.ipa}]</span> :
+            <span className="los-ipa-pending">Tarkistamatta</span>}</td>
+          <td>{showTranslations ? parts[1] ?? "" : <span className="los-hidden-translation">Piilotettu</span>}</td>
+        </tr>;
+      })}
     </tbody></table>
+    {activeWord && <LosDictionaryCard word={activeWord.word} contextMeaning={activeWord.meaning}
+      onClose={() => setActiveWord(null)} />}
     {!words.length && <p>Sanastosta ei löytynyt hakua vastaavaa sanaa.</p>}
   </section>;
 }
