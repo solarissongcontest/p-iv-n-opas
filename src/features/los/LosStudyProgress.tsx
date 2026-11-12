@@ -60,11 +60,11 @@ export function LosStudyProgress({book,move}:{book:LosBookDefinition;move:LosNav
         </div>
       </article>)}
     </div>
-    <div className="los-progress-pending">
+    {data.unfinished.length>0?<div className="los-progress-pending">
       <h2>Vielä toteuttamatta opetukseen</h2>
       <p>Seuraavat {data.unfinished.length} suunniteltua tuntia ovat vielä toimituksellisia sisältömerkintöjä. Niiden avaaminen ei merkitse niitä suoritetuiksi, ja C08:n sekä C10:n lähdetekstien kieli-, media- ja laitetestaus pysyvät erillisinä julkaisuportteina.</p>
       <ul>{data.unfinished.map(item=><li key={item.id}><strong>{item.id}</strong> · {item.title}</li>)}</ul>
-    </div>
+    </div>:<div className="los-progress-pending"><h2>Kaikki 60 oppituntia on toteutettu opetuspolkuun</h2><p>Tämä kertoo oppituntien toiminnallisesta saatavuudesta. Kunkin oppitunnin suoritus, tekstien kielentarkistus, äänitteiden käyttöoikeudet ja mobiili-/desktop-julkaisulaatutestit arvioidaan edelleen erikseen.</p></div>}
     <p className="los-progress-foot">Tiedot perustuvat tämän laitteen LOS!-luonnoksiin ja mahdollisesti erikseen tuotuihin tai synkronoituihin kappaletietoihin. Jos et ole siirtänyt aiempia tietoja tähän selaimeen, se ei voi näyttää niitä automaattisesti.</p>
   </section>;
 }
