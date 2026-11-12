@@ -2,7 +2,7 @@ import {LOS1_C01_LINES,LOS1_C01_GLOSS} from "./los1C01.ts";
 import {LOS1_M_COM_02_LINES,LOS1_M_COM_02_GLOSS} from "./los1MCom02.ts";
 import {LOS1_C02_LINES,LOS1_C02_GLOSS} from "./los1C02.ts";
 
-export type LosTextBChapter="04"|"05"|"06"|"07"|"09"|"10";
+export type LosTextBChapter="01"|"04"|"05"|"06"|"07"|"08"|"09"|"10";
 type Question={id:string;prompt:string;options:readonly {id:"a"|"b"|"c";text:string}[];correctId:"a"|"b"|"c";explanation:string};
 const question=(ch:LosTextBChapter,n:number,prompt:string,choices:[string,string,string],correctId:"a"|"b"|"c",explanation:string):Question=>({
  id:"C"+ch+"-TEXTB-Q"+String(n).padStart(2,"0"),prompt,
@@ -34,6 +34,29 @@ const c04Lines=greetingTranscript.map((text,i)=>({
  id:"u"+String(i+1).padStart(2,"0"),speaker:"Puhuja",text,meaning:greetingsMeaning[i]!,
 }));
 export const LOS1_TEXT_B_SOURCES={
+ "01":{
+  sourceId:"M-COM-03",title:"Koko tervehdys- ja hyvästelyäänite",
+  summary:"Koko 28 sekunnin German Men92:n public domain -tervehdys- ja hyvästelylista sekä kaikki 20 ihmisen lausumaa ilmausta kirjoitettuna suoraan oppikirjassa. Tämä sama aineisto esiintyy C04:ssä eri oppimistavoitteella. Luettelo ei ole keskustelu eikä yksittäisten sanojen tunnistamista arvioida kuullun ymmärtämisen pisteinä.",
+  transcriptIsExact:true,lines:c04Lines,
+  glossary:{hallo:"hei",servus:"hei (alueellinen)",moin:"hei (Pohjois-Saksa)",
+   guten:"hyvää",morgen:"aamu",tag:"päivä",abend:"ilta",grüß:"tervehdyksen osa",
+   gott:"Jumala, tässä vakiintunut tervehdys",auf:"osa fraasia Auf Wiedersehen",
+   wiedersehen:"näkemiin",tschüss:"moikka",tschau:"moikka",bis:"asti",
+   später:"myöhemmin",dann:"sitten",bald:"pian",gleich:"kohta",gute:"hyvää",nacht:"yö"},
+  attribution:{author:"German Men92",title:"German Vocabulary - Greetings.ogg",
+   url:"https://commons.wikimedia.org/wiki/File:German_Vocabulary_-_Greetings.ogg",
+   license:"Public domain",licenseUrl:"https://creativecommons.org/publicdomain/mark/1.0/"},
+  questions:[
+   question("01",1,"Mikä listan ilmaus tarkoittaa hyvää huomenta?",
+    ["Guten Abend!","Guten Morgen!","Gute Nacht!"],"b","Guten Morgen! on aamun tervehdys."),
+   question("01",2,"Mikä vaihtoehto on luettelon arkinen hyvästely?",
+    ["Tschüss!","Guten Tag!","Moin!"],"a","Tschüss! tarkoittaa arkisesti moikka."),
+   question("01",3,"Mikä ilmaus tarkoittaa nähdään myöhemmin?",
+    ["Guten Abend!","Auf Wiedersehen!","Bis später!"],"c","Bis später! ilmaisee myöhempää tapaamista."),
+   question("01",4,"Mitä luettelon ilmaus Gute Nacht! tarkoittaa?",
+    ["Hyvää päivää!","Hyvää yötä!","Hyvää huomenta!"],"b","Gute Nacht! on yöhön liittyvä toivotus, ei päiväsaikainen tervehdys."),
+  ],
+ },
  "04":{
   sourceId:"M-COM-03",title:"Tervehdysten rekisterit eri tilanteissa",
   summary:"Koko 28 sekunnin autenttinen tervehdys- ja hyvästelylista. Sama lähde oli myös C01:n Text B:ssä, mutta tässä verrataan tuttavallista ja kohteliasta rekisteriä. Tämä ei ole kahden henkilön dialogi.",
@@ -96,6 +119,53 @@ export const LOS1_TEXT_B_SOURCES={
    question("07",4,"Mitä tarkoittaa Bitte buchstabieren Sie?",["Vielä kerran, kiitos","Olkaa hyvä ja tavatkaa","Mikä ikänne on?"],"b","Bitte buchstabieren Sie pyytää kohteliaasti tavaamaan."),
   ],
  },
+ "08":{
+  sourceId:"M-DIB-03",title:"Eva: Studium und Wohnen",
+  summary:"COERLL:n University of Texas at Austinin kokonainen ihmisen haastattelu: Eva kertoo opinnoistaan ja siitä, miksi asuu edelleen vanhempiensa luona. Teksti ja suomennokset ovat kirjan sisällä. Alkuperäistä videota tai puheääntä EI ole tässä upotettu eikä kuullunymmärtämistä ole todistettu; opettele vain tutut kysymykset ja kouluun liittyvät sanat, ei monimutkaista puhekieltä.",
+  transcriptIsExact:true,
+  lines:[
+   {id:"u01",speaker:"Haastattelija",text:"Was studierst du?",meaning:"Mitä opiskelet?"},
+   {id:"u02",speaker:"Eva",text:"Ich studiere Englisch und Erdkunde, auf Lehramt fürs Gymnasium.",meaning:"Opiskelen englantia ja maantietoa lukionopettajaksi."},
+   {id:"u03",speaker:"Haastattelija",text:"Kannst du erklären, was Erdkunde ist?",meaning:"Voitko selittää, mitä maantieto on?"},
+   {id:"u04",speaker:"Eva",text:"Erdkunde ist Geographie, Länderkunde, man lernt über andere Länder, über die Entstehung der Erde, lauter solche Sachen, Kulturwissenschaften.",meaning:"Maantieto on maantiedettä ja maiden tutkimista. Siinä opitaan muista maista, maapallon synnystä ja kulttuureista."},
+   {id:"u05",speaker:"Haastattelija",text:"Und wo wohnst du?",meaning:"Entä missä asut?"},
+   {id:"u06",speaker:"Eva",text:"Ich wohne noch zu Hause bei meinen Eltern, in Zell am Main, einem Vorort von Würzburg.",meaning:"Asun yhä kotona vanhempieni luona Zell am Mainissa, Würzburgin esikaupungissa."},
+   {id:"u07",speaker:"Haastattelija",text:"Warum wohnst du da?",meaning:"Miksi asut siellä?"},
+   {id:"u08",speaker:"Eva",text:"Kein Geld, um eine eigene Wohnung hier zu zahlen. Und ich bin im Sportverein zu Hause sehr aktiv. Und im Gemeindewesen. Und möchte da auch momentan noch gar nicht weg.",meaning:"Minulla ei ole rahaa maksaa omaa asuntoa täällä. Olen myös hyvin aktiivinen kotiseutuni urheiluseurassa ja paikallisyhteisössä. En tällä hetkellä edes halua muuttaa pois."},
+  ],
+  glossary:{
+   was:"mitä",studierst:"opiskelet",du:"sinä",ich:"minä",studiere:"opiskelen",
+   englisch:"englanti",und:"ja",erdkunde:"maantieto",auf:"tässä opintosuunnan yhteydessä",
+   lehramt:"opettajan koulutus",fürs:"für das, varten",gymnasium:"saksalainen oppikoulutyyppi, suomalaisessa vertailussa lukio",
+   kannst:"voitko",erklären:"selittää",ist:"on",geographie:"maantiede",
+   länderkunde:"maantuntemus",man:"ihmiset yleisesti",lernt:"opitaan",
+   über:"-sta/-stä, jostakin",andere:"muut",länder:"maat",entstehung:"synty",
+   erde:"maapallo",lauter:"kaikenlaiset",sachen:"asiat",kulturwissenschaften:"kulttuuritieteet",
+   wo:"missä",wohnst:"asut",wohne:"asun",noch:"vielä",zu:"luona; zu Hause = kotona",
+   hause:"koti; zu Hause = kotona",bei:"luona",meinen:"minun, monikollinen muoto",
+   eltern:"vanhemmat",zell:"paikannimi",main:"joen nimi",einem:"eräs, tässä taivutettu muoto",
+   vorort:"esikaupunki",von:"-n, jostakin",würzburg:"kaupunki Saksassa",
+   warum:"miksi",da:"siellä",kein:"ei yhtään",geld:"raha",eine:"eräs, tässä oma",
+   eigene:"oma",wohnung:"asunto",hier:"täällä",zahlen:"maksaa",
+   bin:"olen",sportverein:"urheiluseura",sehr:"erittäin",aktiv:"aktiivinen",
+   gemeindewesen:"paikallisyhteisö",möchte:"haluaisin",auch:"myös",
+   momentan:"tällä hetkellä",gar:"lainkaan",nicht:"ei",weg:"pois",
+  },
+  attribution:{author:"COERLL / University of Texas at Austin (2017), Eva Kunkel",
+   title:"Deutsch im Blick · Eva: Studium & Wohnen",
+   url:"https://coerll.utexas.edu/dib/vidt.php?f=01_19_int_ek_studies-home",
+   license:"CC BY 4.0",licenseUrl:"https://creativecommons.org/licenses/by/4.0/"},
+  questions:[
+   question("08",1,"Mitä kahta oppiainetta Eva sanoo opiskelevansa?",
+    ["Matematiikkaa ja historiaa","Englantia ja maantietoa","Saksaa ja kemiaa"],"b","Eva sanoo Ich studiere Englisch und Erdkunde."),
+   question("08",2,"Mihin ammattiin Eva opiskelee?",
+    ["Lääkäriksi","Lakimieheksi","Koulun opettajaksi"],"c","Auf Lehramt fürs Gymnasium tarkoittaa opettajaksi opiskelua."),
+   question("08",3,"Missä Eva kertoo asuvansa?",
+    ["Vanhempiensa luona Zell am Mainissa","Yksin Berliinissä","Koulun asuntolassa Hampurissa"],"a","Hän sanoo zu Hause bei meinen Eltern ja kertoo asuvansa Zell am Mainissa."),
+   question("08",4,"Miksi Eva kertoo pysyvänsä nykyisessä asuinpaikassaan?",
+    ["Hän ei tunne siellä ketään","Oma asunto maksaisi liikaa ja hän viihtyy seuratoiminnassa","Hän ei osaa matkustaa junalla"],"b","Hänellä ei ole varaa omaan asuntoon, ja hän on aktiivinen urheiluseurassa ja yhteisössä."),
+  ],
+ },
  "09":{
   sourceId:"M-COM-07",title:"Die Wochentage · seitsemän viikonpäivää",
   summary:"Christophin itse äänittämä, noin 15 sekunnin kokonainen luettelo saksan viikonpäivistä. Tämä on aito luettu sanalista, ei tekaistu tapahtumakertomus tai dialogi. Teksti kuuluu samaan äänilähteeseen. Kirjan C09:n oma ensisijainen Text A on edelleen erillinen Sport und Zeit.",
@@ -134,14 +204,14 @@ export const LOS1_TEXT_B_SOURCES={
 export function isLosTextBChapter(id:string):id is LosTextBChapter{return id in LOS1_TEXT_B_SOURCES;}
 export function validateLosTextB():string[]{
  const errors:string[]=[];
- for(const chapterId of ["04","05","06","07","09","10"] as const){
+ for(const chapterId of ["01","04","05","06","07","08","09","10"] as const){
   const resource=LOS1_TEXT_B_SOURCES[chapterId];
   if(resource.questions.length!==4)errors.push("C"+chapterId+" requires four checks");
   if(new Set(resource.questions.map(q=>q.id)).size!==4)errors.push("C"+chapterId+" duplicate question IDs");
   for(const q of resource.questions)
    if(!q.options.some(a=>a.id===q.correctId)||q.options.length!==3||!q.explanation)errors.push(q.id);
   if(resource.transcriptIsExact&&!resource.lines.length)errors.push("C"+chapterId+" exact text missing");
-  if(!resource.attribution.url.startsWith("https://commons.wikimedia.org/wiki/File:"))errors.push("C"+chapterId+" missing source page");
+  if(!/^https:\/\/(?:commons\.wikimedia\.org\/wiki\/File:|coerll\.utexas\.edu\/dib\/vidt\.php\?f=)/.test(resource.attribution.url))errors.push("C"+chapterId+" missing source page");
  }
  return errors;
 }
