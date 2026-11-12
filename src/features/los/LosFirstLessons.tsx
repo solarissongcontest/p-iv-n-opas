@@ -13,7 +13,7 @@ import "./los-lessons.css";
 const ALL_LESSONS = LOS1_EXECUTABLE_LESSONS;
 const lessonChapter = los1LessonDraftChapter;
 const CHAPTER_IDS = Array.from(new Set(ALL_LESSONS.map(lesson => lessonChapter(lesson.id))));
-const chapterLabel = (code: string) => code==="91" ? "Kertaus I + EX-MID" : code==="01" ? "Aloitus + 1" : "Kappale " + Number(code);
+const chapterLabel = (code: string) => code==="92" ? "Kertaus II" : code==="91" ? "Kertaus I + EX-MID" : code==="01" ? "Aloitus + 1" : "Kappale " + Number(code);
 
 const stamp = () => new Date().toISOString();
 
@@ -38,9 +38,10 @@ export function LosFirstLessons({ selectedId, onSelect, move }: {
   const c10 = useLosChapterDraft(1, "10");
   const c09 = useLosChapterDraft(1, "09");
   const c91 = useLosChapterDraft(1, "91");
+  const c92 = useLosChapterDraft(1, "92");
   const chapterDraft = (id: string) => {
     const chapter = lessonChapter(id);
-    return chapter === "91" ? c91 : chapter === "10" ? c10 : chapter === "09" ? c09 :
+    return chapter === "92" ? c92 : chapter === "91" ? c91 : chapter === "10" ? c10 : chapter === "09" ? c09 :
       chapter === "08" ? c08 : chapter === "07" ? c07 :
       chapter === "06" ? c06 : chapter === "05" ? c05 : chapter === "04" ? c04 :
       chapter === "03" ? c03 : chapter === "02" ? c02 : c01;
@@ -81,7 +82,7 @@ export function LosFirstLessons({ selectedId, onSelect, move }: {
       <p className="los-overline">OHJATTU OPETUS · {ALL_LESSONS.length} TUNTIA</p>
       <h2>Opiskele vaihe vaiheelta</h2>
       <p>Oppikirjassa on {ALL_LESSONS.length} suoritettavaa oppituntia. C01–C07:n ja C09:n vaiheita voi harjoitella. C08:n ja C10:n alkuperäiset päätekstit ja osa oppitunneista ovat edelleen kesken, eikä keskeneräisiä tunteja merkitä valmiiksi. Niissä käytetään kirjan oikeita sivuja ja samoja tallennettuja vastauksia. Oppitunnin suoritus kertoo työvaiheiden tekemisestä, ei vielä todennetusta kielitaidosta.</p>
-      <p className="los-lesson-save" role="status">{saved ? (chapterId==="91" ? "Kertauksen ja välikokeen vastaukset tallentuvat paikalliseen LOS!-varmuuskopioon. Vie JSON-tiedosto siirtääksesi tiedot toiselle laitteelle." : `Oppituntitiedot tallennetaan paikalliseen LOS!-varmuuskopioon. Valinnainen pilvisynkronointi tehdään kappaleen ${Number(chapterId)} muistiinpanojen kautta.`) : "Tallennus epäonnistui. Älä sulje sivua ennen varmuuskopion tekemistä."}</p>
+      <p className="los-lesson-save" role="status">{saved ? (chapterId==="91" || chapterId==="92" ? "Kertaus- ja arviointivastaukset tallentuvat paikalliseen LOS!-varmuuskopioon. Vie JSON-tiedosto siirtääksesi tiedot toiselle laitteelle." : `Oppituntitiedot tallennetaan paikalliseen LOS!-varmuuskopioon. Valinnainen pilvisynkronointi tehdään kappaleen ${Number(chapterId)} muistiinpanojen kautta.`) : "Tallennus epäonnistui. Älä sulje sivua ennen varmuuskopion tekemistä."}</p>
       <div className="los-lesson-progress" aria-label="Toteutettujen oppituntien edistyminen">
         <strong>{completeCount}/{ALL_LESSONS.length} suoritettu</strong>
         <div role="progressbar" aria-label="Oppituntien eteneminen" aria-valuemin={0} aria-valuemax={ALL_LESSONS.length} aria-valuenow={completeCount}>
@@ -111,7 +112,7 @@ export function LosFirstLessons({ selectedId, onSelect, move }: {
       })}
     </div>
     <article className="los-lesson-detail" key={lesson.id}>
-      <p className="los-overline">{lesson.id} · NOIN {lesson.estimatedMinutes} MIN · {lesson.id === "L001" ? "KIRJAN ALOITUS" : chapterId==="91" ? "KERTAUS I / EX-MID" : `C${chapterId}`}</p>
+      <p className="los-overline">{lesson.id} · NOIN {lesson.estimatedMinutes} MIN · {lesson.id === "L001" ? "KIRJAN ALOITUS" : chapterId==="92" ? "KERTAUS II" : chapterId==="91" ? "KERTAUS I / EX-MID" : `C${chapterId}`}</p>
       <h3>{lesson.title}</h3>
       <p className="los-lesson-objective"><strong>Tavoite:</strong> {lesson.objective}</p>
       <p className="los-lesson-status">{isComplete ? "Oppitunti suoritettu. Voit silti avata aineistot uudelleen." :
