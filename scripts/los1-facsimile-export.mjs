@@ -1,5 +1,5 @@
 /**
- * Export DRAFT C01 or C02 B5 PDF from the exact LOS! React print leaves.
+ * Export DRAFT C01, C02 or C03 B5 PDF from the exact LOS! React print leaves.
  *
  * Usage (from the repo root with the Vite dev server already running):
  *   bun run e2e:install
@@ -15,13 +15,13 @@ import {fileURLToPath} from "node:url";
 
 const repoRoot=path.resolve(path.dirname(fileURLToPath(import.meta.url)),"..");
 const chapter=process.env["LOS1_FACSIMILE_CHAPTER"]??"01";
-if(!["01","02"].includes(chapter))throw Error("Only C01 or C02 draft PDF export is allowed.");
+if(!["01","02","03"].includes(chapter))throw Error("Only C01, C02 or C03 draft PDF export is allowed.");
 const expectedLeaves=chapter==="01"?15:14;
-const expectedFirst=chapter==="01"?"cover":"c02-open-left";
+const expectedFirst=chapter==="01"?"cover":chapter==="02"?"c02-open-left":"c03-open-left";
 const outputPath=path.resolve(process.env["LOS1_FACSIMILE_PDF_OUTPUT"]||
   path.join(repoRoot,`.artifacts/los1/LOS1_C${chapter}_B5_TAITTOLUONNOS.pdf`));
 const baseUrl=process.env["LOS1_FACSIMILE_BASE_URL"]||"http://127.0.0.1:5173";
-const requestedUrl=new URL(chapter==="01"?"/los#/1/facsimile":"/los#/1/facsimile-c02",baseUrl).href;
+const requestedUrl=new URL(chapter==="01"?"/los#/1/facsimile":"/los#/1/facsimile-c"+chapter,baseUrl).href;
 
 async function run(){
   const {chromium}=await import("@playwright/test");
@@ -64,9 +64,9 @@ async function run(){
     // a clean document, keeping the same loaded CSS and original source data.
     await page.evaluate(chapter=>{
       const original=document.querySelector(".los-facs-print-only");
-      if(!original)throw new Error("Missing C01 print sheet container.");
+      if(!original)throw new Error("Missing C"+chapter+" print sheet container.");
       const standalone=document.createElement("main");
-      standalone.className=chapter==="02"?"los-facs-reader los-facs-c02-reader":"los-facs-reader";
+      standalone.className=chapter==="01"?"los-facs-reader":"los-facs-reader los-facs-c"+chapter+"-reader";
       standalone.appendChild(original.cloneNode(true));
       document.body.replaceChildren(standalone);
       document.body.removeAttribute("style");
