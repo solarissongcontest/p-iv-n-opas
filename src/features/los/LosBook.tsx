@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type CSSProperties } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { ArrowLeft, ArrowRight, BookOpen, ChevronLeft, ChevronRight, Headphones, List, Menu, Search, X } from "lucide-react";
 import { readCachedDeviceUser } from "@/lib/deviceSession";
 import { LOS_BOOKS, type LosBookDefinition, type LosChapter } from "./catalog";
@@ -32,6 +32,7 @@ import "./los-workbook.css";
 import "./los-cloud.css";
 import "./los-backups.css";
 import "./los-u3-content-tree.css";
+import "./los-u3-split.css";
 
 type LosSection = LosDestination;
 type LosLocation = { book: number | null; chapter: string | null; section: LosSection; taskId: string | null };
@@ -356,7 +357,40 @@ function Appendix({ book }: { book: LosBookDefinition }) {
 function LosBookWorkspace({ book, location, move, goLibrary, openBook }: { book: LosBookDefinition; location: LosLocation; move: (chapter: string | null, section: LosSection) => void; goLibrary: () => void; openBook: (id: number) => void }) {
   const chapter = book.chapters.find(c => c.id === location.chapter) ?? null;
   const [tocOpen, setTocOpen] = useState(false);
+  const [splitOpen, setSplitOpen] = useState(false);
+  const [splitInline, setSplitInline] = useState(false);
+  const mainRef = useRef<HTMLElement>(null);
+  const splitTriggerRef = useRef<HTMLButtonElement>(null);
+  const splitCloseRef = useRef<HTMLButtonElement>(null);
   useEffect(() => setTocOpen(false), [location]);
+  useEffect(() => setSplitOpen(false), [book.id, location.chapter]);
+  useEffect(() => {
+    const element = mainRef.current;
+    if (!element || typeof ResizeObserver === "undefined") return;
+    const resize = () => {
+      const style = window.getComputedStyle(element);
+      const inside = element.clientWidth - parseFloat(style.paddingLeft || "0")
+        - parseFloat(style.paddingRight || "0");
+      setSplitInline(inside >= 1050);
+    };
+    const observer = new ResizeObserver(resize);
+    observer.observe(element);
+    resize();
+    return () => observer.disconnect();
+  }, []);
+  useEffect(() => {
+    if (!splitOpen) return;
+    if (!splitInline) splitCloseRef.current?.focus();
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        setSplitOpen(false);
+        splitTriggerRef.current?.focus();
+      }
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [splitOpen, splitInline]);
   useEffect(() => {
     if (!location.taskId) return;
     document.getElementById(location.taskId)?.scrollIntoView({block:"start"});
@@ -369,6 +403,12 @@ function LosBookWorkspace({ book, location, move, goLibrary, openBook }: { book:
   const next = previousIndex >= 0 ? book.chapters[previousIndex + 1] : null;
   const previous = previousIndex > 0 ? book.chapters[previousIndex - 1] : null;
   const section = chapter ? location.section : ["contents", "appendix", "dictionary", "path", "search", "midterm", "review", "review-ii", "progress", "final", "summary","facsimile"].includes(location.section) ? location.section : "overview";
+  const splitEligible = Boolean(chapter && ["text", "understand", "grammar", "text-b"].includes(section));
+  const splitVisible = splitOpen && splitEligible;
+  const closeSplit = () => {
+    setSplitOpen(false);
+    splitTriggerRef.current?.focus();
+  };
   return <div className="los-book-workspace" style={bookStyle(book)}>
     <header className="los-book-topbar">
       <button className="los-back-library" onClick={goLibrary} aria-label="Takaisin kirjasarjaan"><ChevronLeft size={19} /> <span>Kirjasarja</span></button>
@@ -394,8 +434,16 @@ function LosBookWorkspace({ book, location, move, goLibrary, openBook }: { book:
         </nav>
         <a className="los-sidebar-exit" href="/studies">Palaa Opintopäiväkirjaan <ArrowRight size={15} /></a>
       </aside>
-      <main className="los-book-main" id="main-content" tabIndex={-1}>
+      <main className="los-book-main" ref={mainRef} id="main-content" tabIndex={-1}>
         <div className="los-main-breadcrumb"><button onClick={() => move(null, "overview")}>LOS! {book.id}</button>{chapter ? <><ChevronRight size={12} /><button onClick={() => openChapter(chapter)}>Kappale {Number(chapter.id)}</button></> : null}{chapter && section !== "chapter" ? <><ChevronRight size={12} /><span>{section==="cards" ? "Kertauskortit" : sections.find(s => s.id === section)?.label}</span></> : null}</div>
+        {splitEligible && <div className="los-split-controls">
+          <button type="button" ref={splitTriggerRef} aria-pressed={splitVisible}
+            aria-controls="los-split-workbook" onClick={() => setSplitOpen(value => !value)}>
+            {splitVisible ? "Sulje rinnakkaistehtävät" : "Kirja + tehtävät"}
+          </button>
+          <span>Vapaaehtoinen näkymä käyttää samoja tallennettuja vastauksia.</span>
+        </div>}
+        <div className={"los-reader-workarea"+(splitVisible ? splitInline ? " is-split" : " is-overlay" : "")}>
         <div className={"los-book-paper"+(section==="facsimile"?" los-book-paper-facsimile":"")}>
           {!chapter && section === "overview" ? <BookFront book={book} move={move} /> :
             section === "facsimile" && book.id===1 ? <Los1FacsimilePilot onOpenDigital={section=>move(section==="overview"||section==="appendix"?null:"01",section)} /> :
@@ -423,6 +471,23 @@ function LosBookWorkspace({ book, location, move, goLibrary, openBook }: { book:
               section === "test" ? <LosWorkbook key={`test-${chapter.id}`} chapter={chapter} mode="test" /> :
               <ChapterOpening book={book} chapter={chapter} move={move} />
             ) : <Contents book={book} move={move} />}
+        </div>
+        {splitVisible && chapter && <>
+          {!splitInline && <button type="button" className="los-split-backdrop"
+            aria-label="Sulje rinnakkaistehtävät" onClick={closeSplit} />}
+          <aside id="los-split-workbook" className="los-split-workbook"
+            role={splitInline ? "complementary" : "dialog"}
+            aria-modal={splitInline ? undefined : true}
+            aria-label="Rinnakkaiset harjoitukset">
+            <div className="los-split-panel-top">
+              <strong>Harjoitukset · {chapter.title}</strong>
+              <button type="button" ref={splitCloseRef} onClick={closeSplit}>
+                <X size={18} aria-hidden="true"/> Sulje
+              </button>
+            </div>
+            <LosWorkbook key={"split-practice-"+chapter.id} chapter={chapter} mode="practice"/>
+          </aside>
+        </>}
         </div>
         {chapter && <LosNotebook key={`notes-${chapter.id}`} chapter={chapter} />}
         {chapter && <div className="los-pagination">
