@@ -23,18 +23,18 @@ export function inspectDraftPdf({info,text,spec=LOS1_C01_DRAFT_PDF_SPECS}){
   const errors=[];
   const data=parsePdfInfo(info);
   if(data.pages!==spec.leaves)errors.push(
-    \`Sivumäärä \${data.pages}, odotettu \${spec.leaves}. Tarkista turhat tulostussivut ja ylivuodot.\`);
+    `Sivumäärä ${data.pages}, odotettu ${spec.leaves}. Tarkista turhat tulostussivut ja ylivuodot.`);
   const targetWidth=spec.widthMm*72/25.4;
   const targetHeight=spec.heightMm*72/25.4;
   if(!Number.isFinite(data.widthPts)||Math.abs(data.widthPts-targetWidth)>1||
      !Number.isFinite(data.heightPts)||Math.abs(data.heightPts-targetHeight)>1){
-    errors.push(\`Sivukoko \${data.widthPts} x \${data.heightPts} pt, odotettu B5 176 x 250 mm.\`);
+    errors.push(`Sivukoko ${data.widthPts} x ${data.heightPts} pt, odotettu B5 176 x 250 mm.`);
   }
   const normalize=value=>value.normalize("NFC").replace(/\s+/g," ").toLocaleLowerCase("fi");
   const normalized=normalize(text);
   for(const phrase of spec.requiredTexts){
     if(!normalized.includes(normalize(phrase))){
-      errors.push(\`Valittavasta PDF-tekstikerroksesta puuttuu: \${phrase}\`);
+      errors.push(`Valittavasta PDF-tekstikerroksesta puuttuu: ${phrase}`);
     }
   }
   if(text.trim().length<1200)errors.push("PDF:n valittava tekstisisältö on epäilyttävän lyhyt.");
