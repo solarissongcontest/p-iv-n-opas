@@ -43,7 +43,7 @@ class DictionaryImporterTest(unittest.TestCase):
     def args(self, mode="inspect", kind="freedict", direction="de-fi"):
         return SimpleNamespace(kind=kind, direction=direction,
                                source=str(self.source), source_id="test-deu-fin",
-                               mode=mode, approval=None, output=None)
+                               mode=mode, approval=None, output=None, gloss_language=None)
 
     def approved(self):
         details = module.run(self.args())
@@ -105,6 +105,16 @@ class DictionaryImporterTest(unittest.TestCase):
         self.assertNotIn("Olen pankissa.", json.dumps(lines, ensure_ascii=False))
         self.assertEqual(lines[0]["gender"], "f")
 
+    def test_kaikki_requires_explicit_gloss_language(self):
+        self.source = self.root / "kaikki.jsonl"
+        self.source.write_text('{"word":"Haus","lang_code":"de"}\n', encoding="utf-8")
+        args = self.args(mode="inspect", kind="kaikki", direction="de")
+        with self.assertRaisesRegex(ValueError, "selitekieli"):
+            module.run(args)
+        args.gloss_language = "de"
+        report = module.run(args)
+        self.assertEqual(report["glossLanguage"], "de")
+
     def test_kaikki_respects_language_and_never_calls_german_gloss_finnish(self):
         self.source = self.root / "sample.jsonl"
         self.source.write_text("\n".join([
@@ -114,13 +124,13 @@ class DictionaryImporterTest(unittest.TestCase):
                         "sounds": [{"ipa": "/ˈhɔɪ̯zɐ/"}]}),
             json.dumps({"word": "house", "lang_code": "en", "senses": [{"glosses": ["home"]}]}),
         ]) + "\n", encoding="utf-8")
-        records = list(module.parse_kaikki(self.source, "sample-kaikki"))
+        records = list(module.parse_kaikki(self.source, "sample-kaikki", "en"))
         self.assertEqual(len(records), 1)
         self.assertEqual(records[0]["lemma"], "Häuser")
         self.assertEqual(records[0]["ipaCandidates"], ["/ˈhɔɪ̯zɐ/"])
         self.assertEqual(records[0]["formDetails"][0]["tags"], ["singular"])
         self.assertEqual(records[0]["formDetails"][0]["rawTags"], ["Nominativ"])
-        self.assertEqual(records[0]["senses"][0]["glossLanguage"], "source")
+        self.assertEqual(records[0]["senses"][0]["glossLanguage"], "en")
         self.assertEqual(records[0]["senses"][0]["translations"], [])
         self.assertIn("häuser", records[0]["searchKeys"])
         self.assertIn("haeuser", records[0]["searchKeys"])
