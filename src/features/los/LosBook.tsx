@@ -14,6 +14,7 @@ import { getLosOpenDialogue } from "./content/los1OpenDialogues";
 import { LosNotebook, LosWorkbook } from "./LosWorkbook";
 import { LosBackups } from "./LosBackups";
 import { LosMidtermExam } from "./LosMidtermExam";
+import { LosReviewI } from "./LosReviewI";
 import { LosApplication, LosCulture, LosTextB, LosUnderstanding } from "./LosSupplementalSections";
 import "./los-book.css";
 import "./los-appendix.css";
@@ -48,7 +49,7 @@ function readLocation(): LosLocation {
   const book = Number.isInteger(parsedBook) && parsedBook >= 1 && parsedBook <= 8 ? parsedBook : null;
   const chapter = book === 1 && /^\d{2}$/.test(parts[1] ?? "") ? (parts[1] ?? null) : null;
   const token = parts[chapter ? 2 : 1];
-  const section = (["overview", "contents", "chapter", "text", "vocabulary", "grammar", "practice", "appendix", "dictionary", "path", "search", "midterm", "understand", "text-b", "apply", "culture", "test"].includes(token ?? "") ? token : chapter ? "chapter" : "overview") as LosSection;
+  const section = (["overview", "contents", "chapter", "text", "vocabulary", "grammar", "practice", "appendix", "dictionary", "path", "search", "midterm", "review", "understand", "text-b", "apply", "culture", "test"].includes(token ?? "") ? token : chapter ? "chapter" : "overview") as LosSection;
   return { book, chapter, section };
 }
 function linkTo(book?: number, chapter?: string, section: LosSection = "overview") {
@@ -310,7 +311,7 @@ function LosBookWorkspace({ book, location, move, goLibrary, openBook }: { book:
   const previousIndex = chapter ? book.chapters.findIndex(c => c.id === chapter.id) : -1;
   const next = previousIndex >= 0 ? book.chapters[previousIndex + 1] : null;
   const previous = previousIndex > 0 ? book.chapters[previousIndex - 1] : null;
-  const section = chapter ? location.section : ["contents", "appendix", "dictionary", "path", "search", "midterm"].includes(location.section) ? location.section : "overview";
+  const section = chapter ? location.section : ["contents", "appendix", "dictionary", "path", "search", "midterm", "review"].includes(location.section) ? location.section : "overview";
   return <div className="los-book-workspace" style={bookStyle(book)}>
     <header className="los-book-topbar">
       <button className="los-back-library" onClick={goLibrary} aria-label="Takaisin kirjasarjaan"><ChevronLeft size={19} /> <span>Kirjasarja</span></button>
@@ -326,7 +327,7 @@ function LosBookWorkspace({ book, location, move, goLibrary, openBook }: { book:
           {book.chapters.map(ch => <button key={ch.id} className={chapter?.id === ch.id ? "is-active" : ""} onClick={() => openChapter(ch)}><span className="los-sidebar-num">{ch.id}</span><span lang="de">{ch.title}</span></button>)}
           <div className="los-sidebar-heading">HAKEMISTOT</div>
           <button className={section === "path" ? "is-active" : ""} onClick={() => move(null, "path")}>Ohjattu opetuspolku</button>
-          {book.id===1&&<button className={section === "midterm" ? "is-active" : ""} onClick={() => move(null, "midterm")}>Välikoe · C01–C05</button>}
+          {book.id===1&&<><button className={section === "review" ? "is-active" : ""} onClick={() => move(null, "review")}>Kertaus I · L027–L029</button><button className={section === "midterm" ? "is-active" : ""} onClick={() => move(null, "midterm")}>Välikoe · C01–C05</button></>}
           <button className={section === "dictionary" ? "is-active" : ""} onClick={() => move(null, "dictionary")}>Sanakirja</button>
           <button className={section === "search" ? "is-active" : ""} onClick={() => move(null, "search")}>Hae kirjasta</button>
           <button className={section === "appendix" ? "is-active" : ""} onClick={() => move(null, "appendix")}>Kirjan liitteet</button>
@@ -344,6 +345,7 @@ function LosBookWorkspace({ book, location, move, goLibrary, openBook }: { book:
             section === "appendix" ? <Appendix book={book} /> :
             section === "path" ? <LosLearningPath book={book} move={move} /> :
             section === "midterm" && book.id===1 ? <LosMidtermExam /> :
+            section === "review" && book.id===1 ? <LosReviewI move={move} /> :
             section === "dictionary" ? <LosDictionary book={book} move={move} openBook={openBook} /> :
             section === "search" ? <LosIndexSearch book={book} move={move} /> :
             chapter ? (

@@ -76,5 +76,5 @@ test("exam answers and explanations are hidden until submit in the UI",()=>{
   assert.match(ui,/useLosChapterDraft\(1,LOS1_MIDTERM_DRAFT_CHAPTER\)/);
   assert.match(app,/section === "midterm"/);
   assert.match(app,/Välikoe · C01–C05/);
-  assert.match(path,/lesson\.number===30/);
+  assert.match(path,/isLos1ExecutableLesson/);
 });
