@@ -3,6 +3,7 @@ import { Bookmark, BookOpen, Check, CircleAlert, Download, FileText, RotateCcw }
 import { losExercisesFor, losIsCorrect, losScore, type LosExercise } from "./exerciseBank";
 import { useLosChapterDraft } from "./studyState";
 import { LosCloudPanel } from "./LosCloudPanel";
+import { LosRichExercises } from "./LosRichExercises";
 import {losArchiveChapterExam,losChapterExamHistory,losWithoutWorkbookAnswers} from "./losWorkbookPersistence";
 import type { LosChapter } from "./catalog";
 
@@ -136,6 +137,7 @@ export function LosWorkbook({chapter,mode}:{chapter:LosChapter;mode:"practice"|"
         </details>
       </li>)}</ol>
     </div>}
+    {mode==="practice"&&<LosRichExercises chapterId={chapter.id}/>}
     {mode==="test"&&locked&&<div className="los-self-assessment">
       <h2>Itsearviointi: puhu tai kirjoita itse</h2>
       <p>{selfAssessments[chapter.id] ?? "Tee kappaleen viestintätavoitteista oma lyhyt puhe- tai kirjoitusharjoitus. Arvioi, mitä osaat ilman mallia."}</p>
