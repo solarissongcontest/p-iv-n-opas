@@ -313,3 +313,38 @@ test("U3 section pager advances inside a chapter without changing saved task ans
  await expect(page.locator(".los-section-pager")).toBeVisible();
  await expectNoHorizontalOverflow(page);
 });
+
+test("U3 content-tree open/closed state persists per book without changing chapter progress",async({page,isMobile})=>{
+ await enterLocalBook(page);
+ await page.goto("/los#/1/01/chapter",{waitUntil:"domcontentloaded"});
+ if(isMobile)await page.locator(".los-top-toc").click();
+ const second=page.locator(".los-content-tree .los-tree-chapter").nth(1).locator(".los-tree-expand");
+ await expect(second).toHaveAttribute("aria-expanded","false");
+ await second.click();
+ await expect(second).toHaveAttribute("aria-expanded","true");
+ await page.waitForFunction(()=>{
+   const owner=localStorage.getItem("opk.owner-id");
+   if(!owner)return false;
+   const value=localStorage.getItem(`los.navigation.u1.${owner}.1`);
+   try{return Boolean(value&&JSON.parse(value).expandedChapters?.["02"]===true);}
+   catch{return false;}
+ });
+ await page.reload({waitUntil:"domcontentloaded"});
+ if(isMobile)await page.locator(".los-top-toc").click();
+ const after=page.locator(".los-content-tree .los-tree-chapter").nth(1).locator(".los-tree-expand");
+ await expect(after).toHaveAttribute("aria-expanded","true");
+ await after.click();
+ await expect(after).toHaveAttribute("aria-expanded","false");
+ await page.waitForFunction(()=>{
+   const owner=localStorage.getItem("opk.owner-id");
+   const value=owner&&localStorage.getItem(`los.navigation.u1.${owner}.1`);
+   try{return Boolean(value&&JSON.parse(value).expandedChapters?.["02"]===false);}
+   catch{return false;}
+ });
+ await page.reload({waitUntil:"domcontentloaded"});
+ if(isMobile)await page.locator(".los-top-toc").click();
+ await expect(page.locator(".los-content-tree .los-tree-chapter").nth(1)
+   .locator(".los-tree-expand")).toHaveAttribute("aria-expanded","false");
+ await page.goto("/los#/1/path",{waitUntil:"domcontentloaded"});
+ await expect(page.locator("#los-lesson-runner .los-lesson-progress")).toContainText("0/60 suoritettu");
+});
