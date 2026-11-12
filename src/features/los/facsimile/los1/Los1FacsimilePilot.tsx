@@ -1,7 +1,7 @@
-import {useCallback,useEffect,useMemo,useState} from "react";
+import {useCallback,useEffect,useMemo,useState,type CSSProperties} from "react";
 import {
-  ArrowLeft,ArrowRight,BookOpen,ChevronLeft,ChevronRight,
-  Columns2,FileText,List,Maximize2,Minus,Plus,Printer,Rows3,
+  ArrowLeft,BookOpen,ChevronLeft,ChevronRight,
+  Columns2,FileText,List,Minus,Plus,Printer,
 } from "lucide-react";
 import {getDeviceOwnerId} from "@/lib/deviceSession";
 import {
@@ -222,7 +222,7 @@ function FacsimileLeaf({page,zoom=100}:{page:LosFacsimilePage;zoom?:number}){
   return <article className={"los-facs-leaf los-facs-"+page.kind}
     data-facsimile-page={page.pageId}
     data-physical-side={page.physicalSide}
-    style={{"--los-facs-zoom":zoom/100} as React.CSSProperties}>
+    style={{"--los-facs-zoom":zoom/100} as CSSProperties}>
     {page.kind!=="front-cover"&&page.kind!=="inside-cover"&&<header className="los-facs-running">
       <span>LOS! 1 · SAB31</span><span>KAPITEL 01</span>
     </header>}
