@@ -478,7 +478,19 @@ function LosBookWorkspace({ book, location, move, goLibrary, openBook }: { book:
           <aside id="los-split-workbook" className="los-split-workbook"
             role={splitInline ? "complementary" : "dialog"}
             aria-modal={splitInline ? undefined : true}
-            aria-label="Rinnakkaiset harjoitukset">
+            aria-label="Rinnakkaiset harjoitukset"
+            onKeyDown={event => {
+              if (splitInline || event.key !== "Tab") return;
+              const focusable = Array.from(event.currentTarget.querySelectorAll<HTMLElement>(
+                "a[href],button:not(:disabled),input:not(:disabled),textarea:not(:disabled),select:not(:disabled)"
+              )).filter(element => element.getClientRects().length > 0);
+              const first = focusable[0], last = focusable[focusable.length - 1];
+              if (event.shiftKey && document.activeElement === first) {
+                event.preventDefault(); last?.focus();
+              } else if (!event.shiftKey && document.activeElement === last) {
+                event.preventDefault(); first?.focus();
+              }
+            }}>
             <div className="los-split-panel-top">
               <strong>Harjoitukset · {chapter.title}</strong>
               <button type="button" ref={splitCloseRef} onClick={closeSplit}>
