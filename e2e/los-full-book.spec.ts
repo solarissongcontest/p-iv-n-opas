@@ -298,3 +298,18 @@ test("U3 hierarchy has all eight real books and does not invent unpublished chap
  await expect(page.locator(".los-book-workspace")).toBeVisible();
  await expectNoHorizontalOverflow(page);
 });
+
+test("U3 section pager advances inside a chapter without changing saved task answers",async({page})=>{
+ await enterLocalBook(page);
+ await page.goto("/los#/1/01/chapter",{waitUntil:"domcontentloaded"});
+ const pager=page.getByRole("navigation",{name:"Siirry kappaleen edelliseen tai seuraavaan osioon"});
+ await expect(pager.getByRole("button",{name:/Seuraava osio Teksti A/})).toBeVisible();
+ await pager.getByRole("button",{name:/Seuraava osio Teksti A/}).click();
+ await expect(page).toHaveURL(/\/los#\/1\/01\/text$/);
+ await expect(page.locator(".los-c01-reader")).toBeVisible();
+ await page.getByRole("button",{name:/Seuraava osio Ymmärrä/}).click();
+ await expect(page).toHaveURL(/\/los#\/1\/01\/understand$/);
+ await page.reload({waitUntil:"domcontentloaded"});
+ await expect(page.locator(".los-section-pager")).toBeVisible();
+ await expectNoHorizontalOverflow(page);
+});
