@@ -14,10 +14,10 @@ const draft=()=>({
   testAnswers:{} as Record<string,string>,testSubmittedAt:null as string|null,
   selfAssessment:"",updatedAt:now,
 });
-test("review I maps exactly to L027-L030 and 52 executable lessons",()=>{
+test("review I maps exactly to L027-L030 and 53 executable lessons",()=>{
   assert.equal(LOS_1_LESSONS.length,60);
   assert.equal(LOS1_REVIEW_I_LESSONS.length,4);
-  assert.equal(LOS1_EXECUTABLE_LESSONS.length,52);
+  assert.equal(LOS1_EXECUTABLE_LESSONS.length,53);
   for(const [i,lesson] of LOS1_REVIEW_I_LESSONS.entries()){
     const id="L"+String(i+27).padStart(3,"0");
     assert.equal(lesson.id,id);
