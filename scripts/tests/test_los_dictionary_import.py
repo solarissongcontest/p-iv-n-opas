@@ -119,7 +119,8 @@ class DictionaryImporterTest(unittest.TestCase):
         self.source = self.root / "sample.jsonl"
         self.source.write_text("\n".join([
             json.dumps({"word": "Häuser", "lang_code": "de", "pos": "noun",
-                        "senses": [{"glosses": ["Plural von Haus"]}],
+                        "senses": [{"glosses": ["Plural von Haus"],
+                                    "form_of": [{"word":"Haus"}]}],
                         "forms": [{"form": "Haus", "tags": ["singular"], "raw_tags": ["Nominativ"]}],
                         "sounds": [{"ipa": "/ˈhɔɪ̯zɐ/"}]}),
             json.dumps({"word": "house", "lang_code": "en", "senses": [{"glosses": ["home"]}]}),
@@ -131,6 +132,7 @@ class DictionaryImporterTest(unittest.TestCase):
         self.assertEqual(records[0]["formDetails"][0]["tags"], ["singular"])
         self.assertEqual(records[0]["formDetails"][0]["rawTags"], ["Nominativ"])
         self.assertEqual(records[0]["senses"][0]["glossLanguage"], "en")
+        self.assertEqual(records[0]["senses"][0]["formOfCandidates"], ["Haus"])
         self.assertEqual(records[0]["senses"][0]["translations"], [])
         self.assertIn("häuser", records[0]["searchKeys"])
         self.assertIn("haeuser", records[0]["searchKeys"])
