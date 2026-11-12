@@ -304,5 +304,5 @@ test("C04, C07 and C09 culture pages use three new self-hosted photographs with 
  await openChapter(page,"07","culture");
  await expect(page.locator(".los1-culture-gallery")).toContainText("Straße");
  await openChapter(page,"09","culture");
- await expect(page.locator(".los1-culture-gallery")).toContainText("ei lähde vahvista saksankielistä kalenteria");
+ await expect(page.locator(".los1-culture-gallery")).toContainText("eikä lähde vahvista saksankielistä kalenteria");
 });
