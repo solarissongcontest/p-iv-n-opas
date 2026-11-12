@@ -92,8 +92,10 @@ def license_approval(path: Path, kind: str, source_id: str, approval: dict,
         actual_header_sha = hashlib.sha256(header.encode("utf-8")).hexdigest()
         if legal.get("teiHeaderSha256") != actual_header_sha:
             raise ValueError("Hyväksytty TEI-header ei vastaa lähdetiedostoa")
-    if legal.get("publicationApproved") is not True:
-        raise ValueError("Tuontiaineiston julkaisuoikeutta ei ole hyväksytty")
+    # Import is always staged, NEVER published. This gate authorizes only
+    # a temporary QA conversion of evidence-matched source bytes.
+    if legal.get("stagingApproved") is not True:
+        raise ValueError("Lähdeaineiston väliaikaista laaduntarkistustuontia ei ole hyväksytty")
     return legal
 
 
