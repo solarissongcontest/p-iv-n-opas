@@ -625,3 +625,38 @@ test("four new culture photos are locally served, decoded and credited on deskto
    await expectNoHorizontalOverflow(page);
  }
 });
+
+test("C04, C07 and C09 culture pages use three new self-hosted photographs with truthful source captions",async({page})=>{
+ await enterLocalBook(page);
+ for(const [chapter,id,expected] of [
+   ["04","6925914","Ein Gespräch am Empfang"],
+   ["07","30125064","Düsseldorfer Straße"],
+   ["09","6170644","Die Woche planen"],
+ ] as const){
+   await openChapter(page,chapter,"culture");
+   const gallery=page.locator(".los1-culture-gallery");
+   await expect(gallery).toBeVisible();
+   await expect(gallery.locator(".los1-culture-gallery-card")).toHaveCount(1);
+   await expect(gallery).toContainText(expected);
+   const picture=gallery.locator("picture");
+   const img=picture.locator("img");
+   await expect(img).toHaveAttribute("src",new RegExp(
+     "LOS1-C"+chapter+"-CULTURE-"+id+"-desktop[.]webp$"));
+   await expect(picture.locator("source")).toHaveAttribute("srcset",new RegExp(
+     "LOS1-C"+chapter+"-CULTURE-"+id+"-mobile[.]webp$"));
+   await img.scrollIntoViewIfNeeded();
+   await expect.poll(async()=>img.evaluate(el=>(el as HTMLImageElement).naturalWidth),
+     {timeout:15_000}).toBeGreaterThan(0);
+   await expect(gallery.locator("figcaption a")).toHaveAttribute("href",/pexels[.]com/);
+   const lesson=page.locator(".los1-visual-learning");
+   await expect(lesson).toBeVisible();
+   await expect(lesson.locator("picture")).toHaveCount(0);
+   await lesson.getByRole("button",{name:"Näytä mallifraasit"}).click();
+   await expect(lesson.locator(".los1-visual-learning-phrases li")).toHaveCount(3);
+   await expectNoHorizontalOverflow(page);
+ }
+ await openChapter(page,"07","culture");
+ await expect(page.locator(".los1-culture-gallery")).toContainText("Straße");
+ await openChapter(page,"09","culture");
+ await expect(page.locator(".los1-culture-gallery")).toContainText("eikä lähde vahvista saksankielistä kalenteria");
+});

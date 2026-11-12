@@ -2,7 +2,7 @@
 
 **Päiväys:** 12.11.2026 · **Tulos: EI JULKAISUVALMIS**
 
-**Tuotepäätös:** vain interaktiivinen digikirja (PR #212). B5-/PDF.js-testit eivät kuulu R1–R12-portteihin. Yhdistetyn uuden HEADin CI-tulokset ja kaikkien 28 paikallisen WebP:n todennus vaaditaan erikseen.
+**Tuotepäätös:** vain interaktiivinen digikirja (PR #212). B5-/PDF.js-testit eivät kuulu R1–R12-portteihin. Yhdistetyn uuden HEADin CI-tulokset ja kaikkien 34 paikallisen WebP:n todennus vaaditaan erikseen.
 Portti hyväksytään vasta oikealla testinäytöllä. Osittainen koodin olemassaolo ei ole hyväksymismerkintä.
 
 | Portti | Tila | Todellinen näyttö ja puuttuva |
@@ -12,7 +12,7 @@ Portti hyväksytään vasta oikealla testinäytöllä. Osittainen koodin olemass
 | R3 Kieli ja opetus | AUKI | C01:n nollatasokielioppia ja ääntämisopetusta laajennettu `LosC01GrammarGuide.tsx`-komponentilla; pätevän saksantarkastajan ja didaktisen tarkastajan hyväksyntä puuttuu |
 | R4 IPA | AUKI | 15 Wiktionary-lähteistettyä C01-aktiivisanaston sana-/kokofraasi-IPA-merkintää 16:sta; **Bis später!** vielä lähde-IPAta, 0/16 asiantuntijan hyväksymää IPAa ja 0/16 hyväksyttyä sanaäänitettä. Lähteistetty ≠ julkaistu |
 | R5 Ääni | AUKI | Commons-äänisoittimia on, saksankielisen TTS:n esikatselu lisätty; fyysisten laitteiden äänen laatu/toisto ei vielä tarkistettu |
-| R6 Sanakirja | AUKI | Erillisessä luonnos-PR:ssä #203 FreeDict de→fi / fi→de lähdetiedostot käsitelty CI:n tilapäisessä hakemistossa: 13 028 + 12 102 = 25 130 riviä, 33 670 käännösvastinetta. PostgreSQL:n testischema ja hakufunktio testattu. **Tuotannon julkaistuja sanakirjatietueita ei ole tuotu.** Kaikki.org ja audiot kesken |
+| R6 Sanakirja | AUKI | FreeDictistä **25 130 lekseemiä, 26 637 merkitystä, 33 670 käännöstä** ladattu erilliseen PostgreSQL 17 -testikantaan ([CI](https://github.com/solarissongcontest/p-iv-n-opas/actions/runs/43315746358)). GIN-indeksi testattu. **Tuotantokannassa 0, julkaistuja 0.** FreeDictin erillisiä muoto-/IPA-rivejä 0; Kaikki/Wiktionary-tuonti, lisenssit ja tuotantolatauksen palautustesti auki |
 | R7 Käyttöliittymä | AUKI | U3 sisältöpuu, vanhojen syvälinkkien yhteensopivuus ja Kirja + tehtävät -tila toteutettu; sama `LosWorkbook` säilyttää tallennusavaimet. Uusimman muutoksen mobiili-/desktop-E2E ja saavutettavuustestit ovat vielä julkaisun ehtoja |
 | R8 Tehtävät | OSITTAIN TESTATTU | Vanhat 147 + 16 tehtävätyypin toteutukset säilyivät; ei vielä koko U1-uudistuksen piste-/koetilaturvatestiä |
 | R9 Saavutettavuus | AUKI | Sanakortin sulku ja fokuksen palautus toteutettu, WCAG 2.2 AA:n kokonaistesti ei tehty |

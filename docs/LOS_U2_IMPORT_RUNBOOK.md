@@ -24,6 +24,15 @@ Lue `docs/LOS_U2_DICTIONARY_SOURCE_IMPORT_MANIFEST.json`. FreeDictin virallisist
 
 Nämä ovat CI:n raakadataan perustuvia määrätietoja, eivät tuotantoon ladattujen tai julkaistujen tietueiden määriä. Kaikki.orgin täyden datasetin mitatut importtimäärät ovat vielä **0**, eikä Commons-audiota ole hyväksytty tuotantokäyttöön.
 
+## Eristetty PostgreSQL 17 -staging-QA (12.11.2026)
+
+- [GitHub Actions #43315746358](https://github.com/solarissongcontest/p-iv-n-opas/actions/runs/43315746358) varmisti molempien FreeDict-TEI-lähteiden tarkistussummat, jäsensi NDJSON:n ja suoritti tuotantolataajan kuivan ennakkotarkistuksen.
+- Erilliseen **kertakäyttöiseen** PostgreSQL 17 -kantaan ladattiin **25 130 lekseemiä**, **26 637 merkitystä** ja **33 670 käännöstä**. Kaikki lähteet pysyivät julkaisemattomina. Selainroolien pääsy raakatietueisiin estettiin, eikä julkaisematon haku palauttanut tietoja.
+- QA:n Python/CSV/SQL-tuonti ei ole sama kuin Supabase-tunnuksia käyttävä todellinen `scripts/los-dictionary-load.mjs --write-staging` -tuotantolataus. **Tuotantokantaan ladattuja sanakirjarivejä 0, julkaistuja 0.**
+- FreeDictistä saatiin **0 erillistä taivutusmuotoriviä** ja **0 IPA-ehdokasriviä**. Kaikki.org/Wiktionaryn iso aineisto, lisenssihyväksynnät ja kattavuustarkastus ovat edelleen auki.
+- [Commit 84a67993](https://github.com/solarissongcontest/p-iv-n-opas/commit/84a67993cd1834c0a694f95f610d6ba45ef4c16f) muutti vaihtoehtoisten hakumuotojen ehdot GIN-indeksoitavaan muotoon. Kaksi EXPLAIN ANALYZE -mittausta vahvisti Bitmap Index Scan -haun (1,68 ms ja 1,66 ms); tämä ei ole tuotannon kuormitustesti.
+- GitHub-artifakteihin ei lähetetä raakakorpusta tai väliaikaisen kannan dataa, vain lähdemanifestit. Julkaisuportit ja oikea varmuuskopion palautustesti pysyvät avoimina.
+
 ## Julkaisuportit ja palautus
 
 - **Ennen mitään tuotantomigraatiota:** U0-varmuuskopio ja todellinen palautustesti. Tässä PR:ssä tietokantaan ei ole kirjoitettu opiskelijadataa.
@@ -33,4 +42,4 @@ Nämä ovat CI:n raakadataan perustuvia määrätietoja, eivät tuotantoon ladat
 - **Jos API ei vastaa:** LOS!:n nykyinen paikallinen kappalesanasto jää toimivaksi ja uusi näkymä kertoo sanakirjan puuttumisesta rehellisesti.
 - **Vanha tallennus:** `los.local.v1.*`, `los_chapter_drafts`, tehtävä-, korostus- ja oppitunti-ID:t säilytetään täysin ennallaan.
 
-**Ajettava julkaisupäätös:** vielä `BLOCKED`. Kumpikaan PR #200/#203 ei ole valmis yhdistettäväksi tuotantoon pelkkien vihreiden teknisten testien perusteella.
+**Ajettava julkaisupäätös:** edelleen `BLOCKED`. Yhteinen integraatio on PR #209, eikä PR #200/#203:n töitä avata uudelleen rinnakkaisina toteutuksina.
