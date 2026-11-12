@@ -147,7 +147,7 @@ def parse_freedict(path: Path, source_id: str, direction: str):
         raise ValueError(f"TEI-parsinta epäonnistui: {error}") from error
 
 
-def parse_kaikki(path: Path, source_id: str):
+def parse_kaikki(path: Path, source_id: str, gloss_language: str):
     open_input = gzip.open if path.suffix == ".gz" else open
     with open_input(path, "rt", encoding="utf-8") as stream:
         for lineno, line in enumerate(stream, 1):
@@ -172,7 +172,7 @@ def parse_kaikki(path: Path, source_id: str):
                 glosses = [nfc(x)[:MAX_CONTENT_LENGTH] for x in sense.get("glosses") or []
                            if isinstance(x, str) and x.strip()]
                 senses.append({"index": idx, "glosses": glosses,
-                               "glossLanguage": "source", "translations": []})
+                               "glossLanguage": gloss_language, "translations": []})
             # Keep the morphological tags on each form. The display-form
             # string list remains for older staged consumers.
             form_details: list[dict] = []
@@ -210,15 +210,18 @@ def run(args: argparse.Namespace) -> dict:
         raise ValueError("FreeDict-tietueen suunnan tulee olla de-fi tai fi-de")
     if args.kind == "kaikki" and args.direction != "de":
         raise ValueError("Kaikki-tuonnissa kielen tulee olla de")
+    if args.kind == "kaikki" and args.gloss_language not in ("de", "en"):
+        raise ValueError("Kaikki-tuonnille vaaditaan oikea selitekieli --gloss-language en/de")
     source_sha = sha512_file(file)
     header = header_text(file) if args.kind == "freedict" else None
     base = {"sourceId": args.source_id, "kind": args.kind, "direction": args.direction,
+            "glossLanguage": args.gloss_language if args.kind == "kaikki" else None,
             "sourceFile": file.name, "sourceSha512": source_sha}
     if args.mode == "inspect":
         # This verifies real, downloaded local bytes. It performs no release,
         # database write or licence approval and never reports published rows.
         inspector = parse_freedict(file, args.source_id, args.direction) if args.kind == "freedict" \
-            else parse_kaikki(file, args.source_id)
+            else parse_kaikki(file, args.source_id, args.gloss_language)
         rows = translation_variants = 0
         lexemes: set[tuple[str, str | None]] = set()
         for record in inspector:
@@ -244,7 +247,7 @@ def run(args: argparse.Namespace) -> dict:
     distinct: set[tuple] = set()
     total = translations = entries_with_translations = ipa_candidates = 0
     reader = parse_freedict(file, args.source_id, args.direction) if args.kind == "freedict" \
-        else parse_kaikki(file, args.source_id)
+        else parse_kaikki(file, args.source_id, args.gloss_language)
     try:
         with pending.open("w", encoding="utf-8") as stream:
             for record in reader:
@@ -284,6 +287,8 @@ def main() -> int:
     parser.add_argument("--kind", choices=ALLOWED_KINDS, required=True)
     parser.add_argument("--direction", choices=("de-fi", "fi-de", "de"), required=True)
     parser.add_argument("--source", required=True)
+    parser.add_argument("--gloss-language", choices=("de", "en"), default=None,
+                        help="For Kaikki: language of original Wiktionary glosses, en or de")
     parser.add_argument("--source-id", required=True)
     parser.add_argument("--mode", choices=("inspect", "import"), default="inspect")
     parser.add_argument("--approval")
