@@ -56,7 +56,7 @@ export const LOS1_C03_LESSON_BLUEPRINTS: readonly LosLessonBlueprint[] = [
     },
   },
   {
-    id:"L015",title:"Nicon alkuperä ja karttatehtävät",
+    id:"L015",title:"Alkuperä ja karttatehtävät",
     objective:"Tunnistan lähtöpaikkailmauksia eri ihmisten alkuperäisteksteistä ja sijoitan maat sanalliseen karttaan.",
     estimatedMinutes:30,contentVersion:"1.0.0",
     steps:[
