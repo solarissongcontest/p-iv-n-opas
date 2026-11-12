@@ -34,7 +34,7 @@ test("all 10 chapter tests store full submitted answers, result and timestamp be
   const drills=losExercisesFor(chapter);
   const answers=full(chapter);
   assert.equal(losScore(chapter,answers).correct,drills.length);
-  const practice={"C"+chapter+"-TEXTB-Q01":"a"};
+  const practice={["C"+chapter+"-TEXTB-Q01"]:"a"};
   const saved=losArchiveChapterExam(practice,chapter,drills,answers,at);
   const records=losChapterExamHistory(saved,chapter);
   assert.equal(records.length,1,chapter);
