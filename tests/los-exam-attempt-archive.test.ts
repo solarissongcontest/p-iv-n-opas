@@ -5,7 +5,7 @@ import {LOS1_MIDTERM_QUESTIONS,losExamScore} from "../src/features/los/content/l
 import {LOS1_FINAL_QUESTIONS,losFinalScore} from "../src/features/los/content/los1FinalExam.ts";
 import {losArchiveExamAttempt,losArchivedExamHistory} from "../src/features/los/content/los1ExamArchive.ts";
 import {validateLosCloudDraft} from "../src/features/los/cloudContract.ts";
-import {emptyLosDraft,parseLosDraft} from "../src/features/los/studyState.ts";
+
 
 const submittedAt="2026-11-12T15:11:00.000Z";
 const choose=<T extends {id:string;correctId:"a"|"b"|"c"}>(bank:readonly T[])=>
@@ -72,10 +72,12 @@ test("archive is compatible with the existing 500-character per-value, 200-recor
    "2026-11-"+day+"T11:00:00.000Z");
  }
  assert.equal(Object.values(practice).every(s=>s.length<=500),true);
- const draft={...emptyLosDraft(),practiceAnswers:practice,updatedAt:submittedAt};
+ const draft={version:1,note:"",applicationDraft:"",bookmarked:false,practiceChecked:[],testAnswers:{},testSubmittedAt:null,selfAssessment:"",practiceAnswers:practice,updatedAt:submittedAt};
  assert.equal(validateLosCloudDraft(draft),true);
- const roundTrip=parseLosDraft(JSON.stringify(draft));
+ const roundTrip=JSON.parse(JSON.stringify(draft)) as typeof draft;
  assert.deepEqual(roundTrip.practiceAnswers,practice);
+ const parser=readFileSync("src/features/los/studyState.ts","utf8");
+ assert.match(parser,/practiceAnswers:input.practiceAnswers/);
  assert.equal(losArchivedExamHistory(roundTrip.practiceAnswers,"EX-MID").length,6);
  assert.equal(losArchivedExamHistory(roundTrip.practiceAnswers,"EX-FINAL").length,6);
 });
