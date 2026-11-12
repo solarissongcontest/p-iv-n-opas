@@ -263,16 +263,22 @@ export function LosTeacherPlayer({ lessonId }: { lessonId: string }) {
               </button>
               <p>Tämä on oma vahvistuksesi, ei automaattinen kielitaidon arvio.</p>
             </div>}
-            {scene.help?.length ? <div className="los-teacher-help">
+            <div className="los-teacher-help">
               <button type="button" aria-expanded={showHelp} onClick={() => { setShowHelp(v => !v); markHelp(); }}>
                 <HelpCircle size={18}/> En ymmärrä / haluan lisäselityksen
               </button>
               {showHelp && <div className="los-teacher-help-entries">
-                {scene.help.map(entry => <section key={entry.title}>
+                {scene.help?.length ? scene.help.map(entry => <section key={entry.title}>
                   <h3>{entry.title}</h3><p>{entry.body}</p>
-                </section>)}
+                </section>) : <section>
+                  <h3>Kokeile tätä</h3>
+                  <p>{scene.question?.reteach ??
+                    (scene.kind === "board" ? "Käy opetustaulun vaiheet läpi yksi kerrallaan. Vertaa saksankielistä ilmausta sen suomenkieliseen merkitykseen." :
+                      scene.kind === "book" ? "Avaa oppikirjan sanasto ja harjoitukset erilliseen välilehteen. Palaa oppitunnille, kun olet tutustunut materiaaliin." :
+                      "Palaa tarvittaessa edelliseen opetustilanteeseen sisällysluettelosta ja kertaa siinä annettu esimerkki. Voit edetä omassa tahdissasi.")}</p>
+                </section>}
               </div>}
-            </div> : null}
+            </div>
             {scene.kind === "summary" && <section className="los-teacher-summary">
               <h3>Oppitunnin tilanne</h3>
               <p>Itsenäisesti oikein ratkaistuja eri tarkistuksia: <strong>{independentTeacherEvidence(session)}</strong>. Tämä luku ei ole kielitaitoprosentti.</p>
