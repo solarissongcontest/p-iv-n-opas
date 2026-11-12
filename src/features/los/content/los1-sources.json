@@ -2,7 +2,7 @@
   "schemaVersion": "1.0.0",
   "bookId": "los-1",
   "importedFrom": "LOS1_SOURCE_MANIFEST_v1.0(1).json",
-  "sourceCount": 29,
+  "sourceCount": 30,
   "sources": [
     {
       "id": "M-COM-01",
@@ -525,6 +525,24 @@
       "integrated": true,
       "deviceTested": false,
       "published": false
+    },
+    {
+      "id": "M-COM-07",
+      "kind": "source",
+      "description": "Christoph, German Vocabulary - Days.ogg, 15 s, yksi kokonainen aidon äänen luettelo Tage: Montag, Dienstag, Mittwoch, Donnerstag, Freitag, Samstag, Sonntag. C09:n Text B.",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:German_Vocabulary_-_Days.ogg",
+      "rightsNotes": "Christophin (English Wikibooks 2007) koko seitsemän viikonpäivän äänite ja teksti ovat CC BY-SA 3.0 -lisenssin alaisia Commonsin yksittäisen tiedostosivun mukaan. Koko 15 s julkaisu toistetaan alkuperäisestä lähteestä. Kirjoitettu koko transkriptio näytetään suoraan LOS!:ssa. C09:n alkuperäinen Text A on erillinen. Mobiili- ja desktop-toiston toimivuutta ei ole vielä todistettu.",
+      "manifestReadiness": "A audio ja litteraatti, laitetesti ja toimituksellinen julkaisuportti puuttuvat",
+      "manifestCheckedAt": "2026-11-12",
+      "mediaTested": false,
+      "stage": "rights-verified",
+      "licenseCode": "CC BY-SA 3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+      "licenseEvidenceUrl": "https://commons.wikimedia.org/wiki/File:German_Vocabulary_-_Days.ogg",
+      "languageReviewed": false,
+      "integrated": true,
+      "deviceTested": false,
+      "published": false
     }
   ],
   "chapters": [
@@ -592,7 +610,8 @@
       "primarySourceId": "M-WB-03",
       "textAPlan": "`M-WB-03`, **koko Franz–Greta Sport und Zeit -dialogi**",
       "textBPlan": "`M-WB-04` viikonpäivät + `M-DIB-05` Die Woche",
-      "publicationGate": "A-pääteksti; edistyneemmät ajanilmaisut vain ymmärtämisen tuella. Äänitteen oikeus/toteutus erikseen."
+      "publicationGate": "A-pääteksti; edistyneemmät ajanilmaisut vain ymmärtämisen tuella. Äänitteen oikeus/toteutus erikseen.",
+      "textBImplementationNote": "C09:n Text B: M-COM-07, Christophin 15 sekunnin seitsemän viikonpäivän alkuperäisääni + koko alkuperäinen sanalista (CC BY-SA 3.0), neljä ymmärtämistehtävää. Tämä ei ole kokonainen kalenterin sopimisdialogi, joten sen käyttö rajataan viikonpäivien tunnistamiseen. Toiston laitetestaus avoin."
     },
     {
       "id": "C10",
