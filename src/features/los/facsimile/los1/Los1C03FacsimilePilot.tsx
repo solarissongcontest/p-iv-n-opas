@@ -267,8 +267,9 @@ function Leaf({page}:{page:LosC03PrintPage}){
     </footer>
   </article>;
 }
-export function Los1C03FacsimilePilot({onBack,onOpenDigital}:{
+export function Los1C03FacsimilePilot({onBack,onOpenDigital,onOpenC04}:{
   onBack:()=>void;
+  onOpenC04:()=>void;
   onOpenDigital:(section:LosC03Section)=>void;
 }){
   const [state,setState]=useState<State>({pageId:"c03-open-left",mode:"auto",zoom:100});
@@ -464,6 +465,7 @@ export function Los1C03FacsimilePilot({onBack,onOpenDigital}:{
         onClick={next}>Seuraava <ChevronRight size={18}/></button>
     </div>
     <div className="los-facs-return">
+      <button type="button" onClick={onOpenC04}><BookOpen size={16}/> Siirry C04-kappaleen taittoluonnokseen</button>
       <button type="button" onClick={()=>onOpenDigital(
         pages[index]!.section==="text-b-understand"?"text-b":pages[index]!.section)}>
         <BookOpen size={16}/> Avaa sama osio C03-digikirjassa</button>

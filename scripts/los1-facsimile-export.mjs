@@ -1,5 +1,5 @@
 /**
- * Export DRAFT C01, C02 or C03 B5 PDF from the exact LOS! React print leaves.
+ * Export DRAFT C01, C02, C03 or C04 B5 PDF from the exact LOS! React print leaves.
  *
  * Usage (from the repo root with the Vite dev server already running):
  *   bun run e2e:install
@@ -15,9 +15,9 @@ import {fileURLToPath} from "node:url";
 
 const repoRoot=path.resolve(path.dirname(fileURLToPath(import.meta.url)),"..");
 const chapter=process.env["LOS1_FACSIMILE_CHAPTER"]??"01";
-if(!["01","02","03"].includes(chapter))throw Error("Only C01, C02 or C03 draft PDF export is allowed.");
-const expectedLeaves=chapter==="01"?15:14;
-const expectedFirst=chapter==="01"?"cover":chapter==="02"?"c02-open-left":"c03-open-left";
+if(!["01","02","03","04"].includes(chapter))throw Error("Only C01–C04 draft PDF export is allowed.");
+const expectedLeaves=chapter==="01"?15:chapter==="04"?16:14;
+const expectedFirst=chapter==="01"?"cover":"c"+chapter+"-open-left";
 const outputPath=path.resolve(process.env["LOS1_FACSIMILE_PDF_OUTPUT"]||
   path.join(repoRoot,`.artifacts/los1/LOS1_C${chapter}_B5_TAITTOLUONNOS.pdf`));
 const baseUrl=process.env["LOS1_FACSIMILE_BASE_URL"]||"http://127.0.0.1:5173";
