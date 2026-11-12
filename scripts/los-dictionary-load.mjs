@@ -41,9 +41,13 @@ function makeBatch(items,sourceId){
      language:sense.translationLanguage,value,value_key:norm(value)});
    }
   }
-  (item.forms??[]).forEach((form,i)=>{
-   if(typeof form==="string"&&form.trim())forms.push({...id,form_index:i+1,
-    written_form:form,form_key:norm(form),grammar:{}});
+  const sourceForms=item.formDetails?.length ? item.formDetails :
+   (item.forms??[]).map(form=>({form,tags:[],rawTags:[]}));
+  sourceForms.forEach((detail,i)=>{
+   const written=detail.form;
+   if(typeof written==="string"&&written.trim())forms.push({...id,form_index:i+1,
+    written_form:written,form_key:norm(written),
+    grammar:{tags:detail.tags??[],rawTags:detail.rawTags??[]}});
   });
   (item.ipaCandidates??[]).forEach((ipa,i)=>{
    if(typeof ipa==="string"&&ipa.trim())pronunciations.push({...id,
