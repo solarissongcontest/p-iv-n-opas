@@ -3,6 +3,7 @@ import { CheckCircle2, CircleAlert, RotateCcw } from "lucide-react";
 import { useLosChapterDraft } from "./studyState";
 import { LOS1_MIDTERM_DRAFT_CHAPTER, LOS1_MIDTERM_QUESTIONS,
   LOS1_MIDTERM_SECTION_TITLES, losExamReadyToSubmit, losExamScore } from "./content/los1Exams";
+import {losArchiveExamAttempt,losArchivedExamHistory} from "./content/los1ExamArchive";
 import "./los-exams.css";
 
 const RUBRIC = [
@@ -20,6 +21,8 @@ const RUBRIC = [
 export function LosMidtermExam() {
   const {draft,update,saved}=useLosChapterDraft(1,LOS1_MIDTERM_DRAFT_CHAPTER);
   const [confirmRetake,setConfirmRetake]=useState(false);
+  const [archiveError,setArchiveError]=useState("");
+  const history=losArchivedExamHistory(draft.practiceAnswers,"EX-MID");
   const answers=draft.testAnswers;
   const submitted=Boolean(draft.testSubmittedAt);
   const filled=LOS1_MIDTERM_QUESTIONS.filter(q=>Boolean(answers[q.id])).length;
@@ -34,9 +37,17 @@ export function LosMidtermExam() {
     update(current=>({...current,testSubmittedAt:new Date().toISOString()}));
   };
   const retake=()=>{
-    if(!confirmRetake)return;
-    update(current=>({...current,testAnswers:{},testSubmittedAt:null}));
-    setConfirmRetake(false);
+    if(!confirmRetake||!saved)return;
+    try{
+      update(current=>({...current,
+        practiceAnswers:losArchiveExamAttempt(
+          current.practiceAnswers,"EX-MID",LOS1_MIDTERM_QUESTIONS,
+          current.testAnswers,current.testSubmittedAt??""),
+        testAnswers:{},testSubmittedAt:null,
+      }));
+      setArchiveError("");
+      setConfirmRetake(false);
+    }catch(error){setArchiveError(error instanceof Error?error.message:"Koetta ei voitu arkistoida.");}
   };
   const sectionIds=Array.from(new Set(LOS1_MIDTERM_QUESTIONS.map(q=>q.section)));
   return <section className="los-inner-page los-exam" aria-label="LOS! 1:n välikoe">
@@ -94,9 +105,26 @@ export function LosMidtermExam() {
       <p>Palautettu {draft.testSubmittedAt?new Date(draft.testSubmittedAt).toLocaleString("fi-FI"):""} paikalliseen opiskelutilaan.</p>
       <div className="los-exam-retake">
         <label><input type="checkbox" checked={confirmRetake} onChange={e=>setConfirmRetake(e.target.checked)}/>
-          Ymmärrän, että uusi yritys poistaa tämän kokeen tallennetut vastaukset ja pistetuloksen. Teen tarvittaessa JSON-varmuuskopion ensin.</label>
-        <button type="button" disabled={!confirmRetake} onClick={retake}><RotateCcw size={16}/> Aloita uusi yritys</button>
+          Uusi yritys säilyttää edellisen kokeen vastaukset, palautusajan ja pistetuloksen alla näkyvässä koearkistossa. Teen halutessani JSON-varmuuskopion ennen uusintaa.</label>
+        <button type="button" disabled={!confirmRetake||!saved} onClick={retake}><RotateCcw size={16}/> Arkistoi tulos ja aloita uusinta</button>
       </div>
+      {archiveError&&<p role="alert">{archiveError}</p>}
+      <p>Uusinnassa on tällä hetkellä sama 25 kysymyksen tehtäväpankki. Vain uusi yritys ja sen pisteet erotetaan aiemmista; tehtävävarianttien vaihtelua ei vielä ole toteutettu.</p>
+    </section>}
+    {history.length>0&&<section className="los-exam-results" aria-label="Välikokeen aiempien yritysten arkisto">
+      <h2>Aiempien yritysten arkisto</h2>
+      <p>Arkisto sisältää alkuperäiset valinnat ja arvioinnin palautushetkeltä. Se sisältyy varmuuskopioon.</p>
+      <ol>{history.map(item=><li key={item.number}>
+        <strong>Yritys {item.number}:</strong> {item.correct}/{item.total} pistettä ·
+        {" "}{new Date(item.submittedAt).toLocaleString("fi-FI")}
+        <details><summary>Näytä vanhat vastaukset ja osiot</summary>
+          <p>{item.choices.split("").map((choice,i)=>i+1+". "+choice).join(" · ")}</p>
+          <ul>{item.sections.map(section=><li key={section.section}>
+            {LOS1_MIDTERM_SECTION_TITLES[section.section as keyof typeof LOS1_MIDTERM_SECTION_TITLES]??section.section}:
+            {" "}{section.correct}/{section.total}
+          </li>)}</ul>
+        </details>
+      </li>)}</ol>
     </section>}
     <section className="los-exam-speaking" aria-label="Itsenäisen viestinnän itsearviointi">
       <h2>Itsearviointi: 4–6 repliikin keskustelu</h2>
