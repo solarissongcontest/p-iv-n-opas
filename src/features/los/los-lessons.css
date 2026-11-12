@@ -50,6 +50,7 @@
 .los-lesson-done { display: flex; flex-wrap: wrap; align-items: center; gap: 9px; }
 .los-lesson-done svg { color: #216D53; }
 .los-lesson-done small { flex-basis: 100%; color: var(--los-soft); line-height: 1.55; }
+.los-lesson-skip-notice { margin: 15px 0 4px; padding: 12px 14px; border-left: 3px solid var(--los-book-accent); background: var(--los-book-tint); border-radius: 0 8px 8px 0; color: var(--los-ink); font-size: 12px; line-height: 1.65; }
 .los-lesson-next { margin-top: 17px; color: var(--los-book-accent); }
 .los-lesson-retry { margin-top: 13px; }
 .los-lesson-program button:focus-visible, .los-lesson-program input:focus-visible { outline: 3px solid #1D5BC4; outline-offset: 2px; }
