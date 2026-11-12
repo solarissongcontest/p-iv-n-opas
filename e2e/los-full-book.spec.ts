@@ -285,3 +285,16 @@ test("U4 C01 teaches greetings and pronunciation without requiring prior German"
  await expect(guide).toContainText("synteettinen");
  await expectNoHorizontalOverflow(page);
 });
+
+test("U3 hierarchy has all eight real books and does not invent unpublished chapters",async({page,isMobile})=>{
+ await enterLocalBook(page);
+ if(isMobile)await page.locator(".los-top-toc").click();
+ const root=page.locator(".los-tree-books");
+ await root.locator("summary").click();
+ await expect(root.locator("li")).toHaveCount(8);
+ await expect(root.getByRole("button",{name:/LOS! 8/})).toContainText("Ei vielä kappalesisältöä");
+ await root.getByRole("button",{name:/LOS! 2/}).click();
+ await expect(page).toHaveURL(/\/los#\/2\/overview$/);
+ await expect(page.locator(".los-book-workspace")).toBeVisible();
+ await expectNoHorizontalOverflow(page);
+});
