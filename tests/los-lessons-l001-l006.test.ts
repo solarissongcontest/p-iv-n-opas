@@ -116,7 +116,7 @@ test("the learning path renders the shared lesson runner and persists in chapter
   const storage = readFileSync("src/features/los/studyState.ts", "utf8");
   const backups = readFileSync("src/features/los/localBackups.ts", "utf8");
   assert.match(index, /LosFirstLessons/);
-  assert.match(index, /lesson\.number\s*<=\s*26/);
+  assert.match(index, /isLos1ExecutableLesson/);
   assert.match(runner, /useLosChapterDraft\(1, "01"\)/);
   assert.match(runner, /losLessonFinish/);
   assert.match(storage, /parseLosLessonProgressMap/);
