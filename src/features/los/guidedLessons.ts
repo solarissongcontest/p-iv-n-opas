@@ -9,13 +9,14 @@ import { LOS1_C07_C09_LESSONS } from "./lessonEngineC07C09.ts";
 import { LOS1_C08_C10_PARTIAL_LESSONS } from "./lessonEngineC08C10Partial.ts";
 import { LOS1_REVIEW_II_LESSONS } from "./lessonEngineReviewII.ts";
 import { LOS1_C10_HARALD_READING_LESSON } from "./lessonEngineC10Harald.ts";
+import { LOS1_C08_C10_COMPLETION_LESSONS } from "./lessonEngineC08C10Completion.ts";
 
 /**
  * Single canonical set of lessons with implemented completion/evidence logic.
  * An intentional gap in the 60-lesson sequence remains an editorial preview,
  * not an implicitly executable lesson. No hard-coded numeric range or fake
- * progress for missing source-dependent C08/C10 units or final exam. L052
- * uses genuine textual evidence but does NOT claim an audio listening check.
+ * progress for the missing final exam and summary. C08/C10 source-backed
+ * reading and free writing are not counted as tested audio listening.
  */
 export const LOS1_EXECUTABLE_LESSONS: readonly LosLessonBlueprint[] = [
   ...LOS1_C01_LESSON_BLUEPRINTS,
@@ -27,6 +28,7 @@ export const LOS1_EXECUTABLE_LESSONS: readonly LosLessonBlueprint[] = [
   ...LOS1_C07_C09_LESSONS,
   ...LOS1_C08_C10_PARTIAL_LESSONS,
   LOS1_C10_HARALD_READING_LESSON,
+  ...LOS1_C08_C10_COMPLETION_LESSONS,
   ...LOS1_REVIEW_II_LESSONS,
 ].sort((a,b)=>Number(a.id.slice(1))-Number(b.id.slice(1)));
 const executableIds = new Set(LOS1_EXECUTABLE_LESSONS.map(lesson=>lesson.id));
