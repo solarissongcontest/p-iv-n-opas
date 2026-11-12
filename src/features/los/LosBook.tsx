@@ -430,7 +430,14 @@ export function LosBook() {
   if (canOpen === null) return <div className="los-loading" role="status">Avataan LOS!-oppikirjastoa…</div>;
   if (!canOpen) return <AccessGate />;
   const book = LOS_BOOKS.find(b => b.id === location.book);
+  // Return link for lessons opened in a separate textbook tab. Only known IDs
+  // are accepted; never turn arbitrary query values into navigation targets.
+  const returnLesson = typeof window !== "undefined" &&
+    new URLSearchParams(window.location.search).get("lessonReturn") === "L004" ? "L004" : null;
   return <div className="los-app">
+    {returnLesson && <a className="los-teacher-book-return" href={"/los-lessons/" + returnLesson}>
+      <ArrowLeft size={16}/> Palaa oppitunnille {returnLesson}
+    </a>}
     {book ? <LosBookWorkspace book={book} location={location} move={(chapter, section) => move(book.id, chapter, section)} goLibrary={() => move(null)} openBook={id => move(id)} /> :
       <><div className="los-series-top"><a href="/studies"><ArrowLeft size={17} /> Opintopäiväkirjaan</a><span>LOS! · Saksa B3</span></div><SeriesView openBook={id => move(id)} /></>}
   </div>;
