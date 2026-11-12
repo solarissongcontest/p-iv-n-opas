@@ -5,6 +5,7 @@ import { LosVoicePractice } from "./LosVoicePractice";
 import { LosC02SecondaryText } from "./LosC02SecondaryText";
 import { LosAdditionalTextB } from "./LosAdditionalTextB";
 import { LosCultureChecks } from "./LosCultureChecks";
+import { Los1VisualLearning } from "./Los1VisualLearning";
 import { useLosChapterDraft } from "./studyState";
 import type { LosChapter } from "./catalog";
 
@@ -98,6 +99,7 @@ export function LosCulture({chapter}:{chapter:LosChapter}) {
   return <section className="los-inner-page los-culture-page">
     <p className="los-eyebrow">LAND UND LEUTE / KAPITEL {Number(chapter.id)}</p>
     <h1>Kulttuuri</h1>
+    <Los1VisualLearning key={chapter.id} chapterId={chapter.id} placement="culture"/>
     {chapter.id==="01"?<>
       <h2>Miten saksankielisessä maailmassa tervehditään?</h2>
       <p>Opetuksessa aloitetaan yleisistä ilmauksista <span lang="de">Guten Morgen</span>, <span lang="de">Guten Tag</span> ja <span lang="de">Guten Abend</span>. Myös alueellisia tervehdysmuotoja voi kuulla.</p>
