@@ -1,0 +1,57 @@
+{
+  "schemaVersion": "LOS-U2-DICTIONARY-SOURCES/0.2",
+  "inspectedAt": "2026-11-12",
+  "measurementMethod": "Temporary GitHub Actions Ubuntu runner downloaded real official 5.6MB/similar TEI sources; scripts/los-dictionary-import.py --mode inspect streamed entries and citations. No database write or public asset. GitHub job 131338186599.",
+  "measurementEvidence": "https://github.com/solarissongcontest/p-iv-n-opas/actions/runs/43262776489/job/131338186599",
+  "sourceGroupPolicy": "FreeDict and Wiktionary/Kaikki stay separate with provenance and their own licensing; no silent relicensing, no cross-source composite publication.",
+  "sources": [
+    {
+      "sourceId": "freedict-de-fi-inspection",
+      "kind": "freedict",
+      "direction": "de-fi",
+      "downloadUrl": "https://download.freedict.org/generated/deu-fin/deu-fin.tei",
+      "sourceSha512": "b689041275b3f4eec531204b3da12bf623cbb3f563aaaf914d943a055bf0d98852da20937e63921fbbf2a45adfc1b3507242b0d2492755837ef1912e5d6a708d",
+      "inspectedSourceRows": 13028,
+      "inspectedDistinctLemmaAndPos": 12967,
+      "inspectedTranslationVariants": 16511,
+      "sourceVersionInTeiHeader": "2025.11.23",
+      "licenseHeaderObservation": "Creative Commons Attribution-ShareAlike 3.0 Unported",
+      "sourceHeaderPublisher": "FreeDict+WikDict; maintainer Karl Bartel; base data Wiktionary via DBnary",
+      "licenseReviewStatus": "header-observed-no-publication-approval",
+      "publicationApproved": false,
+      "publishedRows": 0
+    },
+    {
+      "sourceId": "freedict-fi-de-inspection",
+      "kind": "freedict",
+      "direction": "fi-de",
+      "downloadUrl": "https://download.freedict.org/generated/fin-deu/fin-deu.tei",
+      "sourceSha512": "a39c405777fb56f345d4cb2020652e3a9c55fba8bbbded261fc7f273038f1447458573061442b88cbe2fccf12389b8ccaedb97eb819408b3103ff81c8bdcb103",
+      "inspectedSourceRows": 12102,
+      "inspectedDistinctLemmaAndPos": 12102,
+      "inspectedTranslationVariants": 17159,
+      "sourceVersionInTeiHeader": "2025.11.23",
+      "licenseHeaderObservation": "Creative Commons Attribution-ShareAlike 3.0 Unported",
+      "sourceHeaderPublisher": "FreeDict+WikDict; maintainer Karl Bartel; base data Wiktionary via DBnary",
+      "licenseReviewStatus": "header-observed-no-publication-approval",
+      "publicationApproved": false,
+      "publishedRows": 0
+    }
+  ],
+  "pendingSources": [
+    {
+      "sourceId": "kaikki-german-pending",
+      "kind": "kaikki",
+      "downloadUrl": "https://kaikki.org/dewiktionary/rawdata.html",
+      "status": "not-downloaded-or-licensed",
+      "measuredRows": 0
+    }
+  ],
+  "counts": {
+    "freedictInspectedRows": 25130,
+    "freedictInspectedLemmaPosPairsSummed": 25069,
+    "freedictInspectedTranslationVariantsSummed": 33670,
+    "importedDatabaseRows": 0,
+    "publishedRows": 0
+  }
+}

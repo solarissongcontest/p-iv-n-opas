@@ -271,3 +271,21 @@ test("four new culture photos are locally served, decoded and credited on deskto
    await expectNoHorizontalOverflow(page);
  }
 });
+
+
+test("U2 dictionary clearly separates remote published search from chapter vocabulary",async({page})=>{
+ await enterLocalBook(page);
+ await page.goto("/los#/1/dictionary",{waitUntil:"domcontentloaded"});
+ await expect(page.locator(".los-dict-search")).toBeVisible();
+ const query=page.locator(".los-dict-query input");
+ await expect(query).toHaveAttribute("maxlength","80");
+ await query.fill("Haus");
+ await expect(page.locator(".los-dict-live")).toContainText(
+   /Laitetunnistus|sanakirjapalvelua|Sanakirjapalvelu|ei ole vielä käytettävissä/i,
+   {timeout:10_000});
+ await expect(page.getByRole("heading",{name:"Kappalesanasto"})).toBeVisible();
+ await expect(page.locator(".los-index-entry").first()).toBeVisible();
+ await page.getByRole("button",{name:"Suomi → saksa"}).click();
+ await expect(query).toHaveAttribute("placeholder","Esim. talo");
+ await expectNoHorizontalOverflow(page);
+});
