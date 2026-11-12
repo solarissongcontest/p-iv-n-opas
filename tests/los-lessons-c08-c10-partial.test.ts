@@ -14,11 +14,11 @@ const draft=()=>({version:1 as const,note:"vanha",applicationDraft:"",bookmarked
  testAnswers:{} as Record<string,string>,testSubmittedAt:null as string|null,selfAssessment:"",updatedAt:now});
 test("C08 and C10 make only four source-independent lessons executable, not source-reading chapters",()=>{
   assert.deepEqual(LOS1_C08_C10_PARTIAL_LESSONS.map(x=>x.id),["L041","L043","L051","L053"]);
-  assert.equal(LOS1_EXECUTABLE_LESSONS.length,52);
-  assert.equal(new Set(LOS1_EXECUTABLE_LESSONS.map(x=>x.id)).size,52);
+  assert.equal(LOS1_EXECUTABLE_LESSONS.length,53);
+  assert.equal(new Set(LOS1_EXECUTABLE_LESSONS.map(x=>x.id)).size,53);
   assert.deepEqual(LOS1_EXECUTABLE_LESSONS.map(x=>Number(x.id.slice(1))),[...LOS1_EXECUTABLE_LESSONS.map(x=>Number(x.id.slice(1)))].sort((a,b)=>a-b));
   for(const id of ["L041","L043","L051","L053"])assert.equal(isLos1ExecutableLesson(id),true);
-  for(const id of ["L042","L044","L045","L052","L054","L055","L059","L060"])assert.equal(isLos1ExecutableLesson(id),false);
+  for(const id of ["L042","L044","L045","L054","L055","L059","L060"])assert.equal(isLos1ExecutableLesson(id),false);
   assert.equal(los1LessonDraftChapter("L041"),"08");
   assert.equal(los1LessonDraftChapter("L043"),"08");
   assert.equal(los1LessonDraftChapter("L051"),"10");
