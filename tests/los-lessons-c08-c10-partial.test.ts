@@ -33,7 +33,7 @@ test("C08 and C10 remain editorially blocked, even though C10 primary text is no
   assert.equal(gate10.ready,false);
   assert.ok(gate8.issues.length>0 && gate10.issues.length>0);
   const src=readFileSync("src/features/los/lessonEngineC08C10Partial.ts","utf8");
-  assert.match(src,/ei ole vielä luettavissa/);
+  assert.match(src,/uuden Wikibooks-koulukohtauksen koko Text A on luettavissa/);
   assert.match(src,/ei ole vielä tarkistettu/);
   assert.match(src,/nyt luettavissa suoraan Text A/);
   assert.match(src,/eivät todista C10:n autenttisen äänitteen kuullunymmärtämistä/);
@@ -80,5 +80,5 @@ test("existing v1 draft format and sparse lesson progress remain backup compatib
   assert.match(runner,/useLosChapterDraft\(1, "08"\)/);
   assert.match(runner,/useLosChapterDraft\(1, "10"\)/);
   assert.match(index,/C08:n koko Wikibooksin kouluympäristön alkuperäiskohtaus/);
-  assert.match(index,/C10:n koko Harald-haastattelun litteraatti on nyt luettavissa/);
+  assert.match(index,/C10:n Harald-haastattelu ovat nyt kirjan sisällä/);
 });
