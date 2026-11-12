@@ -3,7 +3,7 @@
 import {createReadStream,readFileSync} from "node:fs";
 import {createHash} from "node:crypto";
 import {createInterface} from "node:readline";
-import {createClient} from "@supabase/supabase-js";
+// Supabase dependency is loaded only for explicitly authorized database writes.
 
 function option(key) {
  const i=process.argv.indexOf(key);
@@ -69,8 +69,14 @@ async function main(){
   report.outputSha512!==await checksum(input))
    throw new Error("Source checksum or staging-rights evidence invalid");
  if(!process.argv.includes("--write-staging")){
+  let verified=0;
+  for await(const item of rows(input)){
+   makeBatch([item],report.sourceId);
+   verified++;
+  }
+  if(verified!==report.importedSourceRows)throw new Error("Staged row count does not match manifest");
   console.log(JSON.stringify({status:"VALIDATED_STAGING_ONLY",
-   actualParsedRows:report.importedSourceRows,translations:report.translationVariants,
+   actualParsedRows:verified,translations:report.translationVariants,
    sourceId:report.sourceId,publishedRows:0}));
   return;
  }
@@ -78,6 +84,7 @@ async function main(){
    throw new Error("Requires explicit LOS_DICTIONARY_STAGING_WRITES=YES");
  if(!process.env.SUPABASE_URL||!process.env.SUPABASE_SECRET_KEY)
    throw new Error("Server-only Supabase credentials unavailable");
+ const {createClient}=await import("@supabase/supabase-js");
  const db=createClient(process.env.SUPABASE_URL,process.env.SUPABASE_SECRET_KEY,
   {auth:{persistSession:false,autoRefreshToken:false}});
  const {data:existing,error:existsError}=await db.from("los_dictionary_sources")
