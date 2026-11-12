@@ -180,15 +180,26 @@ async function main(){
   await flush();
   if(count!==report.importedSourceRows)
    throw new Error("Loaded row count does not match integrity manifest");
+  const actualDatabaseCount=async(table)=>{
+   const {count:rows,error}=await db.from("los_dictionary_"+table)
+    .select("source_id",{head:true,count:"exact"}).eq("source_id",report.sourceId);
+   if(error||rows===null)throw new Error("Could not verify actual database "+table+" count");
+   return rows;
+  };
+  const actualLexemes=await actualDatabaseCount("lexemes");
+  const actualTranslations=await actualDatabaseCount("translations");
+  if(actualLexemes!==count||actualTranslations!==report.translationVariants)
+   throw new Error("Physical Postgres row counts differ from verified staging manifest");
   const {error}=await db.from("los_dictionary_sources")
-   .update({actual_loaded_rows:count}).eq("source_id",report.sourceId).eq("published",false);
+   .update({actual_loaded_rows:actualLexemes}).eq("source_id",report.sourceId).eq("published",false);
   if(error)throw error;
  }catch(error){
   console.error("Database staging is INCOMPLETE and UNPUBLISHED. Needs manual cleanup before retry.");
   throw error;
  }
  console.log(JSON.stringify({status:"STAGED_NOT_PUBLISHED",sourceId:report.sourceId,
-  actualDatabaseRows:count,published:false}));
+  actualDatabaseRows:count,
+  actualDatabaseTranslations:report.translationVariants,published:false}));
 }
 main().catch(error=>{
  console.error(error instanceof Error?error.message:"LOS staging failed");
