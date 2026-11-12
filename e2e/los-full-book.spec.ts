@@ -152,3 +152,16 @@ test("search finds actual C08 German source dialogue and Finnish meaning without
  await expect(page.locator(".los-search-results li").first()).toContainText("Alkuperäisteksti");
  await expectNoHorizontalOverflow(page);
 });
+
+test("book cover opens real L001 and remembers its position",async({page})=>{
+ await enterLocalBook(page);
+ await page.goto("/los#/1/overview");
+ const start=page.getByRole("button",{name:"Aloita nollasta"});
+ await expect(start).toBeVisible();
+ await start.click();
+ const lesson=page.locator("#los-lesson-runner .los-lesson-detail .los-overline");
+ await expect(lesson).toContainText("L001");
+ await page.reload();
+ await expect(lesson).toContainText("L001");
+ await expectNoHorizontalOverflow(page);
+});
