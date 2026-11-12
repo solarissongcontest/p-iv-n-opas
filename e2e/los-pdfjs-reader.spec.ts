@@ -31,8 +31,8 @@ test("LOS! 1 opens validated B5 C01 PDF via bundled PDF.js and preserves text la
   }
   await page.getByRole("button",{name:"Seuraava"}).click();
   await expect(page.locator(".los1-pdf-folio").first()).toContainText("6");
-  await page.getByRole("button",{name:"Sisällys"}).click();
+  await page.getByRole("button",{name:"Sisällys",exact:true}).click();
   await expect(page.locator(".los1-pdf-toc")).toBeVisible();
-  await page.getByRole("button",{name:"Kirjanmerkki"}).click();
-  await expect(page.getByRole("button",{name:"Kirjanmerkki"})).toHaveAttribute("aria-pressed","true");
+  await page.locator(".los1-pdf-controls").getByRole("button",{name:"Kirjanmerkki",exact:true}).click();
+  await expect(page.locator(".los1-pdf-controls").getByRole("button",{name:"Kirjanmerkki",exact:true})).toHaveAttribute("aria-pressed","true");
 });
