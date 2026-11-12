@@ -3,6 +3,7 @@ import { Bookmark, BookOpen, Check, CircleAlert, Download, FileText, RotateCcw }
 import { losExercisesFor, losIsCorrect, losScore, type LosExercise } from "./exerciseBank";
 import { useLosChapterDraft } from "./studyState";
 import { LosCloudPanel } from "./LosCloudPanel";
+import {losArchiveChapterExam,losChapterExamHistory,losWithoutWorkbookAnswers} from "./losWorkbookPersistence";
 import type { LosChapter } from "./catalog";
 
 function LosSaveNotice({saved}:{saved:boolean}) {
@@ -54,6 +55,8 @@ export function LosWorkbook({chapter,mode}:{chapter:LosChapter;mode:"practice"|"
   const {draft,update,saved}=useLosChapterDraft(1,chapter.id);
   const exercises=losExercisesFor(chapter.id);
   const [revealPractice,setRevealPractice]=useState<string[]>([]);
+  const [retakeError,setRetakeError]=useState("");
+  const history=mode==="test"?losChapterExamHistory(draft.practiceAnswers,chapter.id):[];
   if(!exercises.length) return <section className="los-inner-page los-workbook">
     <p className="los-eyebrow">{mode==="test"?"WIEDERHOLEN":"ÜBEN"} / KAPITEL {Number(chapter.id)}</p>
     <h1>{mode==="test"?"Kappaletesti":"Harjoittele"}</h1>
@@ -64,6 +67,17 @@ export function LosWorkbook({chapter,mode}:{chapter:LosChapter;mode:"practice"|"
   const locked=mode==="test"&&Boolean(draft.testSubmittedAt);
   const filled=exercises.filter(ex=>Boolean(answers[ex.id]?.trim())).length;
   const score=losScore(chapter.id,answers);
+  const retake=()=>{
+    if(!saved||!draft.testSubmittedAt)return;
+    try{
+      update(current=>({...current,
+        practiceAnswers:losArchiveChapterExam(
+          current.practiceAnswers,chapter.id,exercises,current.testAnswers,current.testSubmittedAt??""),
+        testAnswers:{},testSubmittedAt:null,
+      }));
+      setRetakeError("");
+    }catch(error){setRetakeError(error instanceof Error?error.message:"Vanhaa tulosta ei voitu säilyttää.");}
+  };
   const updateAnswer=(id:string,value:string)=>{
     if(locked)return;
     update(current=>mode==="test"?
@@ -92,21 +106,35 @@ export function LosWorkbook({chapter,mode}:{chapter:LosChapter;mode:"practice"|"
       <button className="los-outline-button" onClick={()=>setRevealPractice(exercises.filter(ex=>Boolean(answers[ex.id]?.trim())).map(ex=>ex.id))} disabled={!filled}>
         <Check size={17}/> Tarkista vastatut ({filled})
       </button>
-      <button className="los-text-link" onClick={()=>{update(current=>({...current,practiceAnswers:{}}));setRevealPractice([]);}}>
-        <RotateCcw size={16}/> Tyhjennä harjoitusvastaukset
+      <button className="los-text-link" onClick={()=>{update(current=>({...current,practiceAnswers:losWithoutWorkbookAnswers(current.practiceAnswers,exercises)}));setRevealPractice([]);}}>
+        <RotateCcw size={16}/> Tyhjennä vain tämän harjoitussarjan vastaukset
       </button>
     </div>:locked?<div className="los-test-result" role="status">
       <p className="los-overline">TESTI PALAUTETTU · PAIKALLINEN TULOS</p>
       <h2>{score.correct} / {score.total} oikein</h2>
       <p>Katso kunkin tehtävän perustelu yllä. Tulos tallennetaan ensin tähän selaimeen. Mahdollinen pilvisynkronointi tehdään erikseen. Muoto- ja fraasitehtävien tulos ei yksin todista koko kappaleen kielitaitoa.</p>
-      <button className="los-outline-button" onClick={()=>{
-        update(current=>({...current,testAnswers:{},testSubmittedAt:null,selfAssessment:""}));
-      }}><RotateCcw size={17}/> Aloita uusi testiyritys</button>
+      <button className="los-outline-button" onClick={retake} disabled={!saved}>
+        <RotateCcw size={17}/> Arkistoi tulos ja aloita uusinta
+      </button>
+      {retakeError&&<p role="alert">{retakeError}</p>}
+      <p>Edellisen yrityksen pisteet, palautusaika ja vastaukset jäävät talteen. Oma itsearviointi säilyy myös uusinnassa. Sama tehtäväpankki tulee toistaiseksi uudelleen.</p>
     </div>:<div className="los-test-submit">
       <p>Testi voidaan palauttaa, kun olet vastannut kaikkiin {exercises.length} osatehtävään. Ennen palautusta ratkaisuja ei näytetä.</p>
       <button className="los-primary" disabled={filled!==exercises.length} onClick={()=>
         update(current=>({...current,testSubmittedAt:new Date().toISOString()}))
       }>Palauta testi · {filled}/{exercises.length}</button>
+    </div>}
+    {mode==="test"&&history.length>0&&<div className="los-test-result" aria-label="Kappaletestin aiemmat yritykset">
+      <h2>Aiemmat kappaletestit</h2>
+      <ol>{history.map(item=><li key={item.number}>
+        <strong>Yritys {item.number}:</strong> {item.correct}/{item.total} pistettä,
+        {" "}{new Date(item.submittedAt).toLocaleString("fi-FI")}
+        <details><summary>Näytä vanhat vastaukset</summary>
+          <ul>{item.answers.map(answer=><li key={answer.id}>
+            <strong>{answer.id}:</strong> {answer.answer}
+          </li>)}</ul>
+        </details>
+      </li>)}</ol>
     </div>}
     {mode==="test"&&locked&&<div className="los-self-assessment">
       <h2>Itsearviointi: puhu tai kirjoita itse</h2>
