@@ -8,6 +8,13 @@
 .los-lesson-progress strong { white-space: nowrap; }
 .los-lesson-progress [role="progressbar"] { height: 7px; border-radius: 9px; background: var(--los-line); flex: 1; overflow: hidden; }
 .los-lesson-progress [role="progressbar"] span { display: block; height: 100%; background: var(--los-book-accent); transition: width .15s ease; }
+.los-lesson-chapter-picker { display: flex; gap: 9px; overflow-x: auto; padding: 14px 0 12px; scrollbar-width: thin; overscroll-behavior-x: contain; }
+.los-lesson-chapter-picker button { flex: 0 0 auto; min-width: 113px; min-height: 64px; padding: 10px 13px; display: flex; flex-direction: column; align-items: flex-start; justify-content: center; gap: 4px; border: 1px solid var(--los-line); border-radius: 9px; background: var(--los-paper); color: var(--los-ink); text-align: left; }
+.los-lesson-chapter-picker button strong { font-size: 13px; }
+.los-lesson-chapter-picker button small { font-size: 11px; color: var(--los-soft); }
+.los-lesson-chapter-picker button:hover, .los-lesson-chapter-picker button.is-active { border-color: var(--los-book-accent); }
+.los-lesson-chapter-picker button.is-active { background: var(--los-book-tint); color: var(--los-book-accent); }
+.los-lesson-chapter-context { color: var(--los-soft); font-size: 12px; line-height: 1.6; margin: 0; }
 .los-lesson-picker { display: grid; grid-template-columns: repeat(6,minmax(0,1fr)); gap: 7px; padding: 17px 0 22px; }
 .los-lesson-picker button { border: 1px solid var(--los-line); border-radius: 9px; min-width: 0; min-height: 48px; display: flex; align-items: center; justify-content: center; gap: 7px; background: var(--los-paper); color: var(--los-ink); font-size: 12px; font-weight: 700; }
 .los-lesson-picker button.is-active { border-color: var(--los-book-accent); background: var(--los-book-tint); color: var(--los-book-accent); }
@@ -66,5 +73,5 @@
 @media (prefers-reduced-motion: reduce) {
   .los-lesson-progress [role="progressbar"] span { transition: none; }
 }
-.dark .los-lesson-picker button.is-active, .dark .los-lesson-exit label:has(input:checked), .dark .los-lesson-feedback { background: #38282a; color: var(--los-ink); }
+.dark .los-lesson-chapter-picker button.is-active, .dark .los-lesson-picker button.is-active, .dark .los-lesson-exit label:has(input:checked), .dark .los-lesson-feedback { background: #38282a; color: var(--los-ink); }
 .dark .los-lesson-step-title svg, .dark .los-lesson-done svg { color: #7DDBB4; }
