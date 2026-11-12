@@ -15,6 +15,9 @@ export type LosPronunciation = {
   ipaSourceId?: string;
   ipaSourceUrl?: string;
   ipaReviewStatus: "reviewed" | "source-verified" | "candidate" | "unavailable";
+  /** Evidence of qualified human review; optional on unapproved source entries. */
+  ipaReviewedBy?: string;
+  ipaReviewedAt?: string;
   audioAssets: readonly {
     id: string;
     sourceId: string;
@@ -24,6 +27,7 @@ export type LosPronunciation = {
     licenseId?: string;
     usageStatus: "ready" | "pending-review" | "unavailable";
     reviewedAt?: string;
+    reviewedBy?: string;
   }[];
 };
 

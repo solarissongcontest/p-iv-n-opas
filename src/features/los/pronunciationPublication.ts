@@ -1,5 +1,5 @@
 import { LOS_BOOKS } from "./catalog.ts";
-import { getLosPronunciation } from "./pronunciation.ts";
+import { getLosPronunciation, type LosPronunciation } from "./pronunciation.ts";
 
 export type LosVocabularyQA = {
   bookId: number;
@@ -15,6 +15,30 @@ export type LosVocabularyQA = {
   }[];
 };
 
+/** Metadata checks cannot authenticate a reviewer themselves. Release requires
+ * independent verification of these identities and actual source recordings.
+ * In particular, a browser TTS capability is never a published audio asset.
+ */
+const approvedTimestamp=(value?:string):boolean=>
+  Boolean(value && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/.test(value)
+    && Number.isFinite(Date.parse(value)));
+const namedReviewer=(value?:string):boolean=>Boolean(value && value.trim().length>=3);
+const httpsSource=(url?:string):boolean=>Boolean(url && /^https:\/\/[^/\s]+(?:\/|$)/i.test(url));
+
+export function inspectLosPronunciationEvidence(entry:LosPronunciation|null){
+  const sourced=Boolean(entry?.ipa && entry.ipaSourceId?.trim() && httpsSource(entry.ipaSourceUrl));
+  const reviewed=Boolean(sourced && entry?.ipaReviewStatus==="reviewed"
+    && namedReviewer(entry.ipaReviewedBy) && approvedTimestamp(entry.ipaReviewedAt));
+  const accepted=Boolean(entry?.audioAssets.some(asset=>
+    asset.usageStatus==="ready" &&
+    namedReviewer(asset.reviewedBy) && approvedTimestamp(asset.reviewedAt) &&
+    Boolean(asset.sourceId.trim()) && Boolean(asset.licenseId?.trim()) &&
+    httpsSource(asset.url) &&
+    (asset.speakerType==="human" ||
+      (asset.speakerType==="synthetic" && /^de-DE$/i.test(asset.voiceLocale??"")))
+  ));
+  return {sourced,reviewed,accepted};
+}
 /**
  * A staged source citation is not enough for publication. Every *active*
  * vocabulary entry needs phrase-accurate IPA plus qualified review and
@@ -28,15 +52,7 @@ export function inspectLosVocabularyQA(bookId:number,chapterId:string):LosVocabu
   for(const raw of vocabulary){
     const word=raw.split(" – ")[0]?.trim()??"";
     const entry=getLosPronunciation(word);
-    const sourced=Boolean(entry?.ipa && entry.ipaSourceUrl && entry.ipaSourceId);
-    const reviewed=Boolean(entry?.ipa && entry.ipaReviewStatus==="reviewed");
-    const accepted=Boolean(entry?.audioAssets.some(asset=>
-      asset.usageStatus==="ready" &&
-      Boolean(asset.reviewedAt) &&
-      Boolean(asset.licenseId) &&
-      Boolean(asset.url) &&
-      (asset.speakerType==="human" ||
-        (asset.speakerType==="synthetic" && /^de(?:-|$)/i.test(asset.voiceLocale??"")))));
+    const {sourced,reviewed,accepted}=inspectLosPronunciationEvidence(entry);
     ipaSourced+=Number(sourced);
     ipaHumanReviewed+=Number(reviewed);
     audioApproved+=Number(accepted);
