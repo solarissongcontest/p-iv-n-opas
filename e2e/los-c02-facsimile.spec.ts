@@ -19,7 +19,7 @@ test("LOS! 1 C02 opens 14 B5 sheets, links original dialogue and navigates",asyn
   await expect(page.locator(".los-facs-stage")).toContainText("Hallo, ich bin Franz.");
   await expect(page.locator(".los-facs-stage")).toContainText("Ich heiße Greta.");
   await page.locator("#los-facs-c02-jump").fill("7");
-  await page.getByRole("button",{name:"Siirry"}).click();
+  await page.getByRole("button",{name:"Siirry",exact:true}).click();
   await expect(page.locator(".los-facs-stage")).toContainText("Ich komme aus Kyoto.");
   await expect(page.locator(".los-facs-stage")).toContainText("Das ist Peter.");
   await page.getByRole("button",{name:"Kirjanmerkki"}).click();
