@@ -2,7 +2,7 @@
  * in the existing chapter vocabulary verbatim; this module does not invent
  * dialogue, attribute speech to people in photos, or award study points.
  */
-import {LOS_BOOKS} from "./catalog";
+import {LOS_BOOKS} from "./catalog.ts";
 export type VisualPlacement="vocabulary"|"culture";
 export type Los1VisualLesson={
   chapterId:string;
@@ -81,7 +81,7 @@ export function getLos1VisualPhrases(chapterId:string):readonly {de:string;fi:st
   const entry=chapter.vocabulary.find(v=>v.split(" – ")[0]===phrase);
   if(!entry)return [];
   const [de,fi]=entry.split(" – ");
-  return [{de,fi:fi??""}];
+  return [{de:phrase,fi:fi??""}];
  });
 }
 export function validateLos1VisualLessons():string[]{
