@@ -17,6 +17,7 @@ export type LosDictionaryResult = {
     senseIndex: number;
     glosses: readonly string[];
     glossLanguage: string | null;
+    formOfCandidates?: readonly string[];
     translations: readonly {language: "de" | "fi"; value: string}[];
   }[];
   forms: readonly {writtenForm:string;grammar:Record<string,unknown>}[];
