@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { ArrowRight, BookOpen, Headphones } from "lucide-react";
-import { LosAuthenticAudio } from "./LosReferenceTools";
 import { LosC01Understanding } from "./LosC01Understanding";
 import { LosVoicePractice } from "./LosVoicePractice";
 import { LosC02SecondaryText } from "./LosC02SecondaryText";
