@@ -96,6 +96,6 @@ test("teacher storage rejects invalid and overlong sessions without destroying v
     "hacker": valid,
   });
   assert.deepEqual(Object.keys(parsed), ["L004"]);
-  assert.equal(parseTeacherSessions({L004:{...valid, draftAnswers:{x:"x".repeat(501)}}}).L004, undefined);
-  assert.equal(parseTeacherSessions(null).L004, undefined);
+  assert.equal(parseTeacherSessions({L004:{...valid, draftAnswers:{x:"x".repeat(501)}}})["L004"], undefined);
+  assert.equal(parseTeacherSessions(null)["L004"], undefined);
 });
