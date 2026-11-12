@@ -15,6 +15,7 @@ import { LosNotebook, LosWorkbook } from "./LosWorkbook";
 import { LosBackups } from "./LosBackups";
 import { LosBookStartAction } from "./LosBookStartAction";
 import { Los1ChapterImage } from "./Los1ChapterImage";
+import { Los1VisualLearning } from "./Los1VisualLearning";
 import { LosMidtermExam } from "./LosMidtermExam";
 import { LosStudyProgress } from "./LosStudyProgress";
 import { LosRecallCards } from "./LosRecallCards";
@@ -309,6 +310,7 @@ function Vocabulary({ chapter, move }: { chapter: LosChapter; move: (chapter:str
     <p className="los-eyebrow">WORTSCHATZ / KAPITEL {Number(chapter.id)}</p>
     <h1>Sanasto</h1>
     <p className="los-page-intro">Kappaleen opetettavia sanoja ja ilmauksia. Tämä on tarkistettava ennakkoluettelo, ei vielä lopullinen sanakirjatietokanta.</p>
+    {chapter.id&&<Los1VisualLearning key={chapter.id} chapterId={chapter.id} placement="vocabulary"/>}
     <button type="button" className="los-outline-button" onClick={() => move(chapter.id,"cards")}>Kertaa sanastoa korteilla</button>
     <div className="los-vocabulary-tools">
       <label><Search size={17} /><span className="sr-only">Etsi sanastosta</span><input value={query} onChange={event => setQuery(event.target.value)} placeholder="Etsi sanaa…" /></label>
