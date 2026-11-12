@@ -245,7 +245,7 @@ test("LOS! 1 culture and vocabulary photos are usable as recall tasks on mobile 
  await expect(page.locator(".los1-culture-gallery")).toContainText("Hamburg");
  await openChapter(page,"08","culture");
  await expect(page.locator(".los1-culture-gallery-card")).toHaveCount(1);
- await expect(page.locator(".los1-culture-gallery")).toContainText("havainnekuva");
+ await expect(page.locator(".los1-culture-gallery")).toContainText("Havainnekuva");
  await openChapter(page,"02","culture");
  await expect(page.locator(".los1-culture-gallery")).toHaveCount(0);
  await expectNoHorizontalOverflow(page);
