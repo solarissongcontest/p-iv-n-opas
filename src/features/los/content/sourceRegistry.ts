@@ -1,4 +1,4 @@
-import rawManifest from "./los1-sources.json" with { type: "json" };
+import rawManifest from "./los1-sources.json";
 
 /**
  * LOS! 1 source publication gates. A manifest readiness label (A/B/C) is not
