@@ -10,6 +10,7 @@ test("LOS! 1 C02 opens 14 B5 sheets, links original dialogue and navigates",asyn
   await expect(page.locator(".los-facs-c02-reader")).toBeVisible({timeout:30_000});
   await expect(page.locator(".los-facs-c02-reader .los-facs-print-only .los-facs-leaf")).toHaveCount(14);
   await expect(page.locator(".los-facs-c02-reader")).toContainText("ei valmis painos");
+  await page.locator(".los-facs-c02-reader select").selectOption("single");
   await expect(page.locator(".los-facs-stage .los-facs-leaf")).toHaveCount(1);
   await page.getByRole("button",{name:"Sisältö"}).click();
   await expect(page.getByRole("navigation",{name:"C02-luonnoksen sisällysluettelo"})).toBeVisible();
