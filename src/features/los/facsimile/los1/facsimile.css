@@ -20,7 +20,7 @@
 .los-facs-leaves{display:flex;justify-content:center;align-items:flex-start;gap:10px;max-width:100%}
 .los-facs-leaves.is-single>.los-facs-sheet{width:min(100%,665px)}
 .los-facs-leaves.is-spread>.los-facs-sheet{width:min(calc((100% - 10px)/2),520px)}
-.los-facs-sheet{min-width:0;flex-shrink:0}
+.los-facs-sheet{min-width:0;flex-shrink:0;zoom:var(--los-facs-zoom,1)}
 .los-facs-leaf{container-type:inline-size;position:relative;isolation:isolate;box-sizing:border-box;background:var(--facs-page);aspect-ratio:176/250;min-width:0;max-width:100%;overflow:hidden;border:1px solid #ddd8d2;box-shadow:0 5px 18px rgba(12,21,31,.13);font-family:Arial,"Helvetica Neue",sans-serif;font-size:clamp(5px,2.05cqw,14.7px);line-height:1.36;color:var(--facs-ink)}
 .los-facs-page-content{box-sizing:border-box;position:relative;height:100%;padding:14% 9% 12%;overflow:hidden}
 .los-facs-front-cover .los-facs-page-content{padding:0;height:100%}
@@ -90,6 +90,7 @@
 .los-facs-print-only{display:none}
 @media(max-width:760px){.los-facs-reader{padding:8px 7px 18px}.los-facs-toolbar{padding:9px}.los-facs-toolbar-title{width:100%}.los-facs-toolbar-actions{width:100%;gap:4px}.los-facs-print-action{display:none!important}.los-facs-mode-label{flex:1}.los-facs-honesty{margin-left:4px;margin-right:4px}.los-facs-bottom span{order:-1;width:100%}.los-facs-bottom button{flex:1}}
 @media print{
+ .los-facs-print-only .los-facs-leaf{zoom:1!important}
  @page{size:176mm 250mm;margin:0}
  body{background:white!important}
  body *{visibility:hidden!important}
