@@ -103,7 +103,17 @@ export function LosContentTree({
                   {showTasks&&related.length>0&&<button type="button" className="los-tree-expand"
                     aria-expanded={taskOpen} aria-controls={`los-tree-task-list-${key}`}
                     aria-label={`${taskOpen?"Sulje":"Avaa"} ${item.label.toLowerCase()}-osion tehtävät`}
-                    onClick={()=>setTasksExpanded(state=>({...state,[key]:!taskOpen}))}>
+                    onClick={()=>{
+                      const expanding=!taskOpen;
+                      setTasksExpanded(state=>({...state,[key]:expanding}));
+                      if (expanding && window.matchMedia("(max-width: 760px)").matches) {
+                        window.requestAnimationFrame(() => {
+                          const firstTask=document.getElementById(`los-tree-task-list-${key}`)
+                            ?.querySelector("button");
+                          firstTask?.scrollIntoView({block:"nearest",inline:"nearest",behavior:"auto"});
+                        });
+                      }
+                    }}>
                     {taskOpen?<ChevronDown size={14}/>:<ChevronRight size={14}/>}
                   </button>}
                   <button type="button" className={active?"is-active los-tree-section-link":"los-tree-section-link"}
