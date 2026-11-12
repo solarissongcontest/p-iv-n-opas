@@ -6,6 +6,7 @@ import { LosFirstLessons } from "./LosFirstLessons";
 import { LOS1_EXECUTABLE_LESSONS, isLos1ExecutableLesson } from "./guidedLessons";
 
 export type LosDestination = "overview" | "contents" | "chapter" | "text" | "understand" | "vocabulary" | "grammar" | "text-b" | "practice" | "apply" | "culture" | "test" | "appendix" | "dictionary" | "path" | "search" | "midterm" | "review" | "review-ii" | "cards" | "progress" | "final" | "summary";
+import {searchLos1OriginalTexts} from "./content/los1TextSearch";
 export type LosNavigate = (chapter: string | null, section: LosDestination) => void;
 type WordEntry = { book: number; code: string; chapter: string; title: string; word: string; meaning: string };
 const DICTIONARY = LOS_BOOKS.flatMap(book => book.chapters.flatMap(chapter =>
@@ -28,7 +29,7 @@ export function LosDictionary({ book, move, openBook }: { book: LosBookDefinitio
   return <section className="los-inner-page los-dictionary-page">
     <p className="los-eyebrow">WÖRTERBUCH · LOS! {book.id}</p>
     <h1>Sanakirja</h1>
-    <p className="los-page-intro">Selaa kirjassa esiintyvien sanojen ja ilmausten hakemistoa. Alustava sanasto täydentyy sitä mukaa, kun oppikirja toimitetaan.</p>
+    <p className="los-page-intro">Selaa kirjan kappaleiden sanastoa saksaksi tai suomeksi. Alkuperäistekstien kokonaisia repliikkejä ja niiden suomennoksia voit hakea myös kirjan Haku-sivulla.</p>
     <div className="los-index-options">
       <div className="los-index-tabs" role="group" aria-label="Sanakirjan laajuus">
         <button className={scope === "book" ? "is-active" : ""} aria-pressed={scope === "book"} onClick={() => setScope("book")}>Tämä kirja</button>
@@ -106,7 +107,7 @@ export function LosLearningPath({ book, move }: { book: LosBookDefinition; move:
     </section>)}
   </section>;
 }
-type LosSearchHit={id:string;kind:"Kirja"|"Kappale"|"Kielioppi"|"Sanasto"|"Tavoite";title:string;description:string;chapter:string|null;section:LosDestination};
+type LosSearchHit={id:string;kind:"Kirja"|"Kappale"|"Kielioppi"|"Sanasto"|"Tavoite"|"Alkuperäisteksti";title:string;description:string;chapter:string|null;section:LosDestination};
 export function LosIndexSearch({book,move}:{book:LosBookDefinition;move:LosNavigate}) {
   const [query,setQuery]=useState("");
   const hits=useMemo<LosSearchHit[]>(()=>{
@@ -115,6 +116,16 @@ export function LosIndexSearch({book,move}:{book:LosBookDefinition;move:LosNavig
     const out:LosSearchHit[]=[];
     const add=(item:LosSearchHit)=>{if ((item.title+" "+item.description).toLocaleLowerCase("fi").includes(q))out.push(item);};
     add({id:"book",kind:"Kirja",title:book.title,description:book.summary,chapter:null,section:"overview"});
+    if(book.id===1){
+      for(const line of searchLos1OriginalTexts(q,55)){
+        add({
+          id:"original-"+line.id,kind:"Alkuperäisteksti",
+          title:"C"+line.chapterId+" · "+(line.section==="text"?"Teksti A":"Teksti B")+" · "+line.heading,
+          description:(line.speaker?line.speaker+": ":"")+line.original+" · "+line.meaning,
+          chapter:line.chapterId,section:line.section,
+        });
+      }
+    }
     for (const ch of book.chapters){
       add({id:`ch-${ch.id}`,kind:"Kappale",title:ch.title,description:ch.subtitle,chapter:ch.id,section:"chapter"});
       add({id:`gr-${ch.id}`,kind:"Kielioppi",title:ch.grammar,description:ch.title,chapter:ch.id,section:"grammar"});
@@ -126,7 +137,7 @@ export function LosIndexSearch({book,move}:{book:LosBookDefinition;move:LosNavig
   return <section className="los-inner-page los-index-search-page">
     <p className="los-eyebrow">HAKU · {book.code}</p>
     <h1>Hae kirjasta</h1>
-    <p className="los-page-intro">Etsi kappaleiden otsikoista, sanastosta, kielioppiaiheista ja osaamistavoitteista. Varsinaiset lähdetekstit lisätään hakuun, kun ne on julkaistu.</p>
+    <p className="los-page-intro">Hae kappaleiden nimistä, sanastosta, kieliopista, osaamistavoitteista sekä kaikista kymmenestä alkuperäisestä Teksti A -lukijasta ja niiden käytettävissä olevista kokonaisista Teksti B -litteraateista. Voit hakea myös saksankielisten repliikkien suomennoksia. Hakutulos avaa tekstin suoraan LOS!:n sisällä.</p>
     <label className="los-index-search"><Search size={19}/><span className="sr-only">Hae tästä oppikirjasta</span><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Hae sanaa, kappaletta tai kielioppia" /></label>
     {!query.trim()?<p className="los-index-footnote">Voit kokeilla esimerkiksi hakusanoja <b lang="de">heißen</b>, <b lang="de">Hallo</b> tai <b lang="de">kommen</b>.</p>:
       <><p className="los-index-count">{hits.length} tulosta</p>
