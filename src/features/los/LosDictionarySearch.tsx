@@ -25,7 +25,7 @@ function SourceResult({entry}:{entry:LosDictionaryResult}) {
           <span className="los-dict-notice">Suomenkielistä käännöstä ei ole tästä lähteestä.</span>}
         {sense.glosses.length>0 && <details>
           <summary>Lähteen alkuperäiset selitteet (ei automaattisia suomennoksia)</summary>
-          {sense.glosses.map((gloss,i)=><p key={i}>{gloss}</p>)}
+          {sense.glosses.map((gloss,i)=><p key={i} lang={sense.glossLanguage ?? undefined}>{gloss}</p>)}
         </details>}
       </li>)}
     </ol> : <p className="los-dict-notice">Tälle tietueelle ei ole vielä merkitysselitteitä.</p>}
