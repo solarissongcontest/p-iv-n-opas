@@ -1,4 +1,4 @@
-import {LOS1_C01_FACSIMILE_PAGES,LOS1_FACSIMILE_FORMAT} from "./c01Pilot";
+import {LOS1_C01_FACSIMILE_PAGES,LOS1_FACSIMILE_FORMAT} from "./c01Pilot.ts";
 
 /** Local C01 PDF is never an approved edition. */
 export const LOS1_C01_PDF_CONTRACT={
