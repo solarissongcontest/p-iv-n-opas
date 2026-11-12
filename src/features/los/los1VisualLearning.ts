@@ -26,9 +26,9 @@ export const LOS1_VISUAL_LESSONS:Readonly<Record<string,Los1VisualLesson>>={
  },
  "03":{
   chapterId:"03",placement:"culture",
-  question:"Kuvassa on Berliinin katunäkymä. Mitkä tutut sanat liittyvät maahan, kaupunkiin ja paikkaan?",
-  note:"Berliini on yksi Saksan kaupungeista. Kuva ei esitä koko DACH-alueen kulttuureja.",
-  phraseKeys:["Deutschland","die Stadt","hier"],
+  question:"Katso ylempänä olevia Wienin ja Sveitsin kuvia. Mitkä maat ja paikkoihin liittyvät sanat tunnistat?",
+  note:"Wienin kuva on Itävallasta ja Thunin kuva Sveitsistä. Kuvista ei voi päätellä kaikkien asukkaiden kieltä.",
+  phraseKeys:["Österreich","die Schweiz","die Stadt"],
  },
  "04":{
   chapterId:"04",placement:"culture",

@@ -1,0 +1,103 @@
+{
+  "book": "LOS! 1",
+  "usage": "contextual digital textbook culture photography only",
+  "licenseUrl": "https://www.pexels.com/license/",
+  "images": [
+    {
+      "chapterId": "01",
+      "photoId": 29250831,
+      "locationLabel": "Hamburg",
+      "photographer": "Naimish Verma",
+      "sourceImageSha256": "6d33fb881e77eebc8e41149c441763c5051eb8ef8c3964bdbed254c7981931b5",
+      "sourcePageUrl": "https://www.pexels.com/photo/scenic-view-of-hamburg-harbor-with-boats-and-buildings-29250831/",
+      "variants": {
+        "desktop": {
+          "path": "/los/culture/LOS1-C01-CULTURE-29250831-desktop.webp",
+          "width": 1024,
+          "height": 640,
+          "bytes": 71050,
+          "sha256": "4c19cb662eeb86fc2916fea89386d5837a4dec35e946c2fb082319b515573a38"
+        },
+        "mobile": {
+          "path": "/los/culture/LOS1-C01-CULTURE-29250831-mobile.webp",
+          "width": 720,
+          "height": 540,
+          "bytes": 43912,
+          "sha256": "92126860de159461af3abf542bcf815f7765a90ae8f246c44b3e780d41261e79"
+        }
+      }
+    },
+    {
+      "chapterId": "03",
+      "photoId": 6063650,
+      "locationLabel": "Wien",
+      "photographer": "Anton Uniqueton",
+      "sourceImageSha256": "5789ea3592fd903978f3dc30c336d59850c1a9c47e66905d86125a689cfbf34d",
+      "sourcePageUrl": "https://www.pexels.com/photo/people-walking-on-the-street-among-buildings-6063650/",
+      "variants": {
+        "desktop": {
+          "path": "/los/culture/LOS1-C03-CULTURE-6063650-desktop.webp",
+          "width": 1024,
+          "height": 640,
+          "bytes": 119736,
+          "sha256": "3cc002f8222105116d3d18e3b02862767cf3a17420478585c3aac2fbabf86d47"
+        },
+        "mobile": {
+          "path": "/los/culture/LOS1-C03-CULTURE-6063650-mobile.webp",
+          "width": 720,
+          "height": 540,
+          "bytes": 79362,
+          "sha256": "9d48969eaa55a37c6a4196ce44196a25599293c32d5c030e4b58324adf379296"
+        }
+      }
+    },
+    {
+      "chapterId": "03",
+      "photoId": 32379758,
+      "locationLabel": "Thun",
+      "photographer": "Jean-Paul Wettstein",
+      "sourceImageSha256": "0e8766b58e376be410fb7188907aa3e4d2bb2d5ceff5824bdb74b0b70f43675e",
+      "sourcePageUrl": "https://www.pexels.com/photo/scenic-swiss-landscape-with-lakeside-village-and-mountains-32379758/",
+      "variants": {
+        "desktop": {
+          "path": "/los/culture/LOS1-C03-CULTURE-32379758-desktop.webp",
+          "width": 1024,
+          "height": 640,
+          "bytes": 140828,
+          "sha256": "bb072fd5e7f71781c2dd182b80cd18da6537201767025919fe414c5f92beb3a9"
+        },
+        "mobile": {
+          "path": "/los/culture/LOS1-C03-CULTURE-32379758-mobile.webp",
+          "width": 720,
+          "height": 540,
+          "bytes": 81332,
+          "sha256": "c467e4ed370840167c5f8e5c2e2827748aef0bd06a439cd7fb2b6ba8b0a05435"
+        }
+      }
+    },
+    {
+      "chapterId": "08",
+      "photoId": 5427660,
+      "locationLabel": "classroom illustration",
+      "photographer": "Tima Miroshnichenko",
+      "sourceImageSha256": "096e395e25a99de0e026e4355dd21b5eea887252aa3263d50d9bdfd52c08bb05",
+      "sourcePageUrl": "https://www.pexels.com/photo/students-sitting-inside-a-classroom-5427660/",
+      "variants": {
+        "desktop": {
+          "path": "/los/culture/LOS1-C08-CULTURE-5427660-desktop.webp",
+          "width": 1024,
+          "height": 640,
+          "bytes": 55524,
+          "sha256": "9cf92cbbf74ec0129979654d602a756dbc356d3cb65c896e1b9d47b7b62f21ed"
+        },
+        "mobile": {
+          "path": "/los/culture/LOS1-C08-CULTURE-5427660-mobile.webp",
+          "width": 720,
+          "height": 540,
+          "bytes": 38418,
+          "sha256": "b221d94e5e1de078a316385d2b53218be6e62cfff78077764795b9907ddd6def"
+        }
+      }
+    }
+  ]
+}

@@ -43,3 +43,6 @@
 @media(prefers-reduced-motion:reduce){
  .los1-visual-learning *{scroll-behavior:auto}
 }
+\n/* C03 already shows two original culture photographs above this prompt. */
+.los1-visual-learning-layout.is-gallery-reference{display:block}
+.los1-visual-learning-layout.is-gallery-reference .los1-visual-learning-task{max-width:780px}

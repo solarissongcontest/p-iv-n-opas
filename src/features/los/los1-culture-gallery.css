@@ -1,0 +1,25 @@
+/* Culture photos are separate from the chapter-cover hero images. */
+.los1-culture-gallery{margin:18px 0 28px}
+.los1-culture-gallery-heading{margin-bottom:12px}
+.los1-culture-gallery-heading .los-overline{margin-bottom:5px}
+.los1-culture-gallery-heading h2{margin:0;font-size:clamp(18px,2.2vw,23px)}
+.los1-culture-gallery-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:15px}
+.los1-culture-gallery-card{display:flex;flex-direction:column;min-width:0;margin:0;overflow:hidden;
+ background:var(--los-paper,#fff);border:1px solid var(--los-line,#e1e4e3);border-radius:13px}
+.los1-culture-gallery-card>picture{display:block;width:100%;background:var(--los-subtle,#eee)}
+.los1-culture-gallery-card>picture img,.los1-culture-gallery-fallback{
+ display:block;width:100%;height:auto;aspect-ratio:8/5;object-fit:cover;object-position:center}
+.los1-culture-gallery-fallback{padding:17px;display:flex;flex-direction:column;justify-content:center;
+ gap:4px;background:var(--los-book-tint,#fce8e5);color:var(--los-book-accent,#b7473c)}
+.los1-culture-gallery-card figcaption{padding:14px 15px 12px;display:flex;flex-direction:column;gap:8px;flex:1}
+.los1-culture-gallery-card figcaption h3{font-size:16px;line-height:1.25;margin:0}
+.los1-culture-gallery-card figcaption p{margin:0!important;font-size:13px;line-height:1.55;
+ color:var(--los-ink,#1f2933)}
+.los1-culture-gallery-card figcaption small{font-size:11px;line-height:1.5;margin-top:auto;
+ color:var(--los-soft,#536170)}
+.los1-culture-gallery-card figcaption a{text-decoration:underline;text-underline-offset:2px;
+ color:var(--los-book-accent,#b7473c)}
+.los1-culture-gallery-card figcaption a:focus-visible{outline:3px solid #397ace;outline-offset:3px}
+@media(max-width:700px){.los1-culture-gallery-grid{grid-template-columns:minmax(0,1fr);gap:13px}
+ .los1-culture-gallery-card>picture img,.los1-culture-gallery-fallback{aspect-ratio:4/3}
+ .los1-culture-gallery-card figcaption{padding:12px}}

@@ -568,15 +568,20 @@ test("LOS! 1 culture and vocabulary photos are usable as recall tasks on mobile 
  await openChapter(page,"03","culture");
  const culture=page.locator(".los1-visual-learning");
  await expect(culture).toBeVisible();
- await expect(culture.locator("picture img")).toHaveAttribute("src",/LOS1-C03-.*desktop[.]webp$/);
- await expect(culture.locator("figcaption a")).toHaveAttribute("href",/pexels[.]com/);
+ const gallery=page.locator(".los1-culture-gallery");
+ await expect(gallery.locator(".los1-culture-gallery-card")).toHaveCount(2);
+ await expect(gallery).toContainText("Wien, Österreich");
+ await expect(gallery).toContainText("Thun, die Schweiz");
+ await expect(gallery.locator("picture img").first()).toHaveAttribute("src",/LOS1-C03-CULTURE-6063650-desktop[.]webp$/);
+ await expect(gallery.locator("figcaption a")).toHaveCount(2);
+ await expect(culture.locator("picture img")).toHaveCount(0);
  const reveal=culture.getByRole("button",{name:"Näytä mallifraasit"});
  await expect(reveal).toHaveAttribute("aria-expanded","false");
  await expect(culture.locator(".los1-visual-learning-phrases li")).toHaveCount(0);
  await reveal.click();
  await expect(culture.getByRole("button",{name:"Piilota mallifraasit"})).toHaveAttribute("aria-expanded","true");
  await expect(culture.locator(".los1-visual-learning-phrases li")).toHaveCount(3);
- await expect(culture.locator(".los1-visual-learning-phrases")).toContainText("Deutschland");
+ await expect(culture.locator(".los1-visual-learning-phrases")).toContainText("Österreich");
  await culture.getByRole("button",{name:"Piilota mallifraasit"}).click();
  await expect(culture.locator(".los1-visual-learning-phrases li")).toHaveCount(0);
  await openChapter(page,"06","vocabulary");
@@ -590,5 +595,33 @@ test("LOS! 1 culture and vocabulary photos are usable as recall tasks on mobile 
  await expect(page.locator(".los1-visual-learning")).toBeVisible();
  await openChapter(page,"01","culture");
  await expect(page.locator(".los1-visual-learning")).toHaveCount(0);
+ await expect(page.locator(".los1-culture-gallery-card")).toHaveCount(1);
+ await expect(page.locator(".los1-culture-gallery")).toContainText("Hamburg");
+ await openChapter(page,"08","culture");
+ await expect(page.locator(".los1-culture-gallery-card")).toHaveCount(1);
+ await expect(page.locator(".los1-culture-gallery")).toContainText("Havainnekuva");
+ await openChapter(page,"02","culture");
+ await expect(page.locator(".los1-culture-gallery")).toHaveCount(0);
  await expectNoHorizontalOverflow(page);
+});
+
+test("four new culture photos are locally served, decoded and credited on desktop and iPhone",async({page})=>{
+ await enterLocalBook(page);
+ for(const [chapter,photos] of [["01",["29250831"]],["03",["6063650","32379758"]],["08",["5427660"]]] as const){
+   await openChapter(page,chapter,"culture");
+   const gallery=page.locator(".los1-culture-gallery");
+   await expect(gallery).toBeVisible();
+   await expect(gallery.locator(".los1-culture-gallery-card")).toHaveCount(photos.length);
+   const images=gallery.locator("picture img");
+   for(let i=0;i<photos.length;i++){
+     const image=images.nth(i);
+     await expect(image).toHaveAttribute("src",new RegExp(photos[i]+"-desktop[.]webp$"));
+     await image.scrollIntoViewIfNeeded();
+     await expect.poll(async()=>image.evaluate(el=>(el as HTMLImageElement).naturalWidth),
+       {timeout:15_000}).toBeGreaterThan(0);
+     await expect(gallery.locator("picture source").nth(i)).toHaveAttribute(
+       "srcset",new RegExp(photos[i]+"-mobile[.]webp$"));
+   }
+   await expectNoHorizontalOverflow(page);
+ }
 });
