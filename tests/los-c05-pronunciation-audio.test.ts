@@ -25,17 +25,21 @@ test("two original native-speaker pronunciation samples are registered with inde
   assert.equal(LOS1_SOURCE_REGISTRY.length,31);
   assert.deepEqual(validateLosSourceRegistry(),[]);
 });
-test("C05 text B remains pending, not silently promoted after audio samples", () => {
+test("C05 has full separate source dialogue while old pronunciation samples remain available", () => {
   const source=readFileSync("src/features/los/LosSupplementalSections.tsx","utf8");
   const audio=readFileSync("src/features/los/LosReferenceTools.tsx","utf8");
-  assert.match(source,/chapter\.id==="05"/);
-  assert.match(source,/LosAuthenticAudio chapterId="05" source="B"/);
-  assert.match(source,/Varsinainen Text B on vielä kesken/);
-  assert.match(source,/eivät Heinrichin ja Karlin keskustelun äänitys/);
+  assert.match(source,/\["04","05","06","07","09","10"\]\.includes\(chapter.id\)/);
+  const full=readFileSync("src/features/los/content/los1TextBAdditional.ts","utf8");
+  assert.match(full,/sourceId:"M-COM-08"/);
+  assert.match(full,/textAttribution:/);
+  assert.match(full,/LOS1_C02_LINES/);
+  assert.match(audio,/M-COM-08/);
+  assert.match(audio,/Dialogue_franz_greta_1\.ogg/);
   assert.match(audio,/M-COM-04/);
   assert.match(audio,/M-COM-05/);
   assert.match(audio,/De-wie_geht_es_dir\.ogg/);
   assert.match(audio,/De-Wie_geht%27s%3F\.ogg/);
-  assert.match(audio,/Mobiilitoistoa ei ole vielä varmennettu/);
+  assert.equal(findLosSource("M-COM-08")?.licenseCode,"public-domain");
+  assert.equal(findLosSource("M-COM-08")?.published,false);
   assert.equal(getLosChapterSourceGate("05").ready,false);
 });
