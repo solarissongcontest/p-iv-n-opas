@@ -29,3 +29,28 @@ jobs:
       - name: Verify that no full-book PDF is falsely published
         run: |
           grep -F 'RELEASED_LOS1_EDITION:Los1PublishedEdition|null=null' src/features/los/facsimile/los1/editionRelease.ts
+
+      - name: Install tools for the real C01 PDF reader test
+        run: |
+          bun run e2e:install
+          bunx playwright install --with-deps chromium
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq poppler-utils
+      - name: Start LOS! locally for PDF export and reader
+        shell: bash
+        run: |
+          nohup bun run dev -- --host 127.0.0.1 --port 5173 --strictPort >/tmp/los-edition-verification.log 2>&1 &
+          for attempt in $(seq 1 45); do
+            if curl -fsS --max-time 3 http://127.0.0.1:5173/los >/dev/null 2>&1; then exit 0; fi
+            sleep 2
+          done
+          cat /tmp/los-edition-verification.log
+          exit 1
+      - name: Export and inspect the unapproved local C01 PDF
+        run: |
+          node scripts/los1-facsimile-export.mjs
+          node scripts/los1-facsimile-pdf-preflight.mjs
+      - name: Open real PDF in browser and verify future book outline
+        env:
+          E2E_BASE_URL: http://127.0.0.1:5173
+        run: bunx playwright test e2e/los-pdfjs-reader.spec.ts --project=desktop-chromium
