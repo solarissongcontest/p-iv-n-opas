@@ -12,6 +12,12 @@ export const LOS1_C01_DRAFT_PDF_SPECS={
   heightMm:250,
   requiredTexts:["Franz","Jörg","Hallo","Wortschatz","Grammatik"],
 };
+export const LOS1_C02_DRAFT_PDF_SPECS={
+  leaves:14,
+  widthMm:176,
+  heightMm:250,
+  requiredTexts:["Franz","Greta","Thomas","Takashi","Wortschatz","Grammatik","Ich heiße"],
+};
 
 export function parsePdfInfo(value){
   const pages=Number(value.match(/^Pages:\s*(\d+)/m)?.[1]??NaN);
@@ -44,11 +50,14 @@ export function inspectDraftPdf({info,text,spec=LOS1_C01_DRAFT_PDF_SPECS}){
 
 function runCli(){
   const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),"..");
+  const chapter=process.env["LOS1_FACSIMILE_CHAPTER"]??"01";
+  if(!["01","02"].includes(chapter))throw Error("Only C01 or C02 drafts can be checked.");
   const filename=path.resolve(process.argv[2]||
-    path.join(root,".artifacts/los1/LOS1_C01_B5_TAITTOLUONNOS.pdf"));
+    path.join(root,`.artifacts/los1/LOS1_C${chapter}_B5_TAITTOLUONNOS.pdf`));
   const info=execFileSync("pdfinfo",[filename],{encoding:"utf8"});
   const text=execFileSync("pdftotext",["-enc","UTF-8",filename,"-"],{encoding:"utf8"});
-  const result=inspectDraftPdf({info,text});
+  const spec=chapter==="02"?LOS1_C02_DRAFT_PDF_SPECS:LOS1_C01_DRAFT_PDF_SPECS;
+  const result=inspectDraftPdf({info,text,spec});
   process.stdout.write(JSON.stringify({file:filename,...result},null,2)+"\n");
   if(!result.ok)process.exitCode=1;
 }
