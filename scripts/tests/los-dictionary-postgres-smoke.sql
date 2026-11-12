@@ -64,8 +64,23 @@ BEGIN
  END IF;
 END $$;
 
+-- A staged source must not become searchable without explicit legal review.
+DO $
+BEGIN
+ BEGIN
+  UPDATE public.los_dictionary_sources
+  SET published=true,published_at=now()
+  WHERE source_id='fixture-de-fi';
+  RAISE EXCEPTION 'UNREVIEWED source could be published';
+ EXCEPTION WHEN check_violation THEN
+  NULL; -- expected database-level publication safety gate
+ END;
+END $;
+
 UPDATE public.los_dictionary_sources
-SET published=true,published_at=now()
+SET legal_review_approved=true,legal_review_at=now(),
+    legal_review_by='fixture only test reviewer',
+    published=true,published_at=now()
 WHERE source_id IN ('fixture-de-fi','fixture-fi-de');
 
 DO $$
