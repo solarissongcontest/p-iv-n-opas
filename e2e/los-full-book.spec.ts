@@ -214,3 +214,35 @@ test("C01 facsimile page position survives reload but does not mark a lesson fin
  await page.goto("/los#/1/path",{waitUntil:"domcontentloaded"});
  await expect(page.locator("#los-lesson-runner .los-lesson-progress")).toContainText("0/60 suoritettu");
 });
+
+
+test("U1/U3: chapter tree links to persisted exercise and shared IPA word card on desktop and iPhone",async({page,isMobile})=>{
+ await enterLocalBook(page);
+ if(isMobile){
+  await page.locator(".los-top-toc").click();
+ }
+ const tree=page.locator(".los-content-tree");
+ await expect(tree).toBeVisible();
+ await expect(tree.locator(".los-tree-chapter")).toHaveCount(10);
+ const practice=tree.locator("#los-tree-children-01").getByRole("button",{name:"Avaa harjoittele-osion tehtävät"});
+ await practice.click();
+ const first=tree.locator("#los-tree-task-list-01-practice button").first();
+ await expect(first).toBeVisible();
+ await first.click();
+ await expect(page).toHaveURL(/\\/los#\\/1\\/01\\/practice\\/C01-EX-01$/);
+ await expect(page.locator("#C01-EX-01")).toBeVisible();
+ await page.reload({waitUntil:"domcontentloaded"});
+ await expect(page.locator("#C01-EX-01")).toBeVisible();
+ await page.goto("/los#/1/01/text",{waitUntil:"domcontentloaded"});
+ const token=page.locator(".los-c01-reader .los-c01-token").first();
+ await expect(token).toBeVisible();
+ await token.click();
+ const card=page.getByRole("dialog",{name:/sanan .* selitys/i});
+ await expect(card).toBeVisible();
+ await expect(card).toContainText("Kappaleen kontekstimerkitys");
+ await expect(card).toContainText("IPA");
+ await card.getByRole("button",{name:"Sulje sanan selitys"}).click();
+ await expect(card).toHaveCount(0);
+ await expect(token).toBeFocused();
+ await expectNoHorizontalOverflow(page);
+});
