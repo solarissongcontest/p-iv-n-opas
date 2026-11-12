@@ -15,12 +15,12 @@ export function LosOpenTextPage({ chapterId }: { chapterId:string }) {
     glossary={text.glossary}
     heading={text.heading}
     guidance={text.guidance}
-    author="Wikibooksin kirjoittajat"
+    author={text.author ?? "Wikibooksin kirjoittajat"}
     sourceTitle={text.title}
     sourceUrl={text.sourceUrl}
-    license="CC BY-SA 4.0"
-    licenseUrl="https://creativecommons.org/licenses/by-sa/4.0/"
-    sourceDetail={"Lähdesivun pysyvä versio "+text.revision+". Puheäänitteiden yksilöllistä lisenssiä tai toimivuutta ei ole vahvistettu."}
+    license={text.licenseCode ?? "CC BY-SA 4.0"}
+    licenseUrl={text.licenseUrl ?? "https://creativecommons.org/licenses/by-sa/4.0/"}
+    sourceDetail={text.sourceDetail ?? ("Lähdesivun pysyvä versio "+text.revision+". Puheäänitteiden yksilöllistä lisenssiä tai toimivuutta ei ole vahvistettu.")}
   />;
 }
 

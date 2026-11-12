@@ -10,11 +10,11 @@ import {
 } from "./content/los1C06Review";
 
 /** A contextual second reading of C01's full human-recorded dialogue.
- * C06's own primary Text A is still a separate editorial requirement.
+ * C06 now also has a separate M-ZPE-01 primary Text A; this remains the independent C01-reuse exercise.
  */
 export function LosC06AgeReview() {
   return <div className="los-c06-review">
-    <p className="los-page-intro">Kertaa Franzin ja Jörgin jo kappaleessa 1 esiintynyt kokonainen alkuperäiskeskustelu. Nyt keskitymme eri asiaan: ikäkysymykseen sekä lukuihin 19 ja 20. Tämä on oikean ihmisen tuottamaa aiemman tekstin kertausaineistoa, <strong>ei uusi itsenäinen C06:n Text A</strong>.</p>
+    <p className="los-page-intro">Kertaa Franzin ja Jörgin jo kappaleessa 1 esiintynyt kokonainen alkuperäiskeskustelu. Nyt keskitymme eri asiaan: ikäkysymykseen sekä lukuihin 19 ja 20. Tämä on oikean ihmisen tuottamaa aiemman tekstin kertausaineistoa, <strong>ei uusi itsenäinen C06:n Text A</strong>. Uusi C06:n oma pääteksti luetaan saman sivun yläosasta.</p>
     <LosAuthenticAudio chapterId="06" source="A"/>
     <LosOriginalDialogue
       chapterId="06"
@@ -57,7 +57,7 @@ export function LosC06AgeUnderstanding({goToText}:{goToText:()=>void}) {
   return <section className="los-inner-page los-understanding" aria-label="C06 alkuperäistekstin ikäkertauksen ymmärtäminen">
     <p className="los-eyebrow">VERSTEHEN / KAPITEL 06 / KERTAUSTEKSTI</p>
     <h1>Ymmärrä ikäkeskustelu</h1>
-    <p className="los-page-intro">Kysymykset perustuvat samaan kahdeksan repliikin alkuperäiseen Franz–Jörg-keskusteluun kuin C01:ssä, mutta arvioivat nyt lukusanojen ja ikäfraasien ymmärtämistä. Tämä ei vielä ole itsenäinen uusi C06:n pääteksti.</p>
+    <p className="los-page-intro">Kysymykset perustuvat samaan kahdeksan repliikin alkuperäiseen Franz–Jörg-keskusteluun kuin C01:ssä, mutta arvioivat nyt lukusanojen ja ikäfraasien ymmärtämistä. Nämä kysymykset ovat vanhan C01-tekstin kertausta; C06:n oma uusi pääteksti ja sen tehtävät ovat tämän näkymän yläpuolella.</p>
     <button className="los-outline-button" type="button" onClick={goToText}><BookOpen size={17}/> Avaa koko alkuperäiskeskustelu <ArrowRight size={16}/></button>
     <div className="los-c01-questions">
       {LOS1_C06_REVIEW_QUESTIONS.map((q,index)=><fieldset className="los-c01-question" key={q.id}>
@@ -96,7 +96,7 @@ export function LosC06AgeUnderstanding({goToText}:{goToText:()=>void}) {
         {LOS1_C01_LINES.map(line=><li key={line.id}><strong>{line.speaker}:</strong> {line.meaning}</li>)}
       </ol>}
       <p className="los-c01-saved" role="status">{saved?"Vastaukset on tallennettu C06:n omaan paikalliseen varmuuskopioitavaan tilaan.":"Tallennus epäonnistui. Kopioi vastauksesi talteen."}</p>
-      <p className="los-c01-source-version">Alkuperäislähde: {LOS1_C06_REVIEW_SOURCE_ID} (sama kuin C01) · Sisältöversio {LOS1_C06_REVIEW_VERSION} · C06:n uusi itsenäinen pääteksti on vielä kesken.</p>
+      <p className="los-c01-source-version">Alkuperäislähde: {LOS1_C06_REVIEW_SOURCE_ID} (sama kuin C01) · Sisältöversio {LOS1_C06_REVIEW_VERSION} · C06:n oma uusi erillinen pääteksti on integroitu, mutta sen julkaisuportti on edelleen avoin.</p>
     </div>
   </section>;
 }

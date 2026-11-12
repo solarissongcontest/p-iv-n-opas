@@ -4,8 +4,8 @@ import type { LosLessonBlueprint } from "./lessonEngine";
  * LOS! 1 / C06 lessons L031–L035: numbers and ages.
  * Real source M-COM-01 is revisited IN FULL from C01, with independently
  * checked C06 age comprehension. It is not a new standalone C06 primary text.
- * Audio is optional and has NOT passed device checks. A second source remains
- * an editorial requirement and publication gate.
+ * Audio is optional and has NOT passed device checks. A separate source M-ZPE-01
+ * is now a C06 Text A preview, with language/device/overall publication gates open.
  */
 export const LOS1_C06_LESSON_BLUEPRINTS: readonly LosLessonBlueprint[] = [
   {
@@ -61,8 +61,8 @@ export const LOS1_C06_LESSON_BLUEPRINTS: readonly LosLessonBlueprint[] = [
     objective:"Poimin alkuperäisestä Franz–Jörg-keskustelusta molempien henkilöiden iät.",
     estimatedMinutes:30,contentVersion:"1.0.0",
     steps:[
-      {id:"source",label:"Lue koko autenttinen aiempi keskustelu",instruction:"Avaa C06:n kertausnäkymä, jossa C01:n alkuperäinen kahdeksanrepliikkinen Franz–Jörg-keskustelu on kokonaan luettavissa. Äänite on vapaaehtoinen, laitetestaamaton. Tämä ei ole uusi itsenäinen C06-pääteksti.",chapter:"06",section:"text",minutes:11},
-      {id:"questions",label:"Tarkista alkuperäiskeskustelun kaksi ikätehtävää",instruction:"Vastaa C06:n ymmärtämissivulla C06-SOURCE-Q01 ja C06-SOURCE-Q02. Tarkista, kuinka vanha Franz on ja kuinka vanha Jörg on.",chapter:"06",section:"understand",minutes:11},
+      {id:"source",label:"Lue koko autenttinen aiempi keskustelu",instruction:"Avaa C06:n tekstisivu ja laajenna sen lopussa kohta Kertaa aiempi Franzin ja Jörgin keskustelu. C01:n alkuperäinen kahdeksanrepliikkinen Franz–Jörg-keskustelu on siellä kokonaan. Äänite on vapaaehtoinen, laitetestaamaton, eikä tämä kertaus ole C06:n uusi Text A.",chapter:"06",section:"text",minutes:11},
+      {id:"questions",label:"Tarkista alkuperäiskeskustelun kaksi ikätehtävää",instruction:"Avaa C06:n ymmärtämissivun alaosasta C01:n ikäkertauksen vanhat ymmärtämistehtävät. Vastaa C06-SOURCE-Q01 ja C06-SOURCE-Q02 ja tarkista Franzin ja Jörgin iät.",chapter:"06",section:"understand",minutes:11},
       {id:"repeat",label:"Kertaa ikäfraasit ääneen",instruction:"Palaa keskustelun neljänteen, viidenteen ja kuudenteen puheenvuoroon. Sano Wie alt bist du? ja vastaa keksityllä iällä ilman oikeiden henkilötietojen antamista.",chapter:"06",section:"text",minutes:4},
     ],
     evidence:[{kind:"checked-source",ids:["C06-SOURCE-Q01","C06-SOURCE-Q02"],label:"Aiemman autenttisen keskustelun kaksi ikätehtävää tarkistettu C06:ssa."}],

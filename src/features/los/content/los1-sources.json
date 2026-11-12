@@ -2,7 +2,7 @@
   "schemaVersion": "1.0.0",
   "bookId": "los-1",
   "importedFrom": "LOS1_SOURCE_MANIFEST_v1.0(1).json",
-  "sourceCount": 26,
+  "sourceCount": 27,
   "sources": [
     {
       "id": "M-COM-01",
@@ -471,6 +471,24 @@
       "sourceUrl": "https://commons.wikimedia.org/wiki/File:De-Wie_geht%27s%3F.ogg",
       "rightsNotes": "Jeuwre, 19.2.2021, CC BY-SA 4.0; alkuperäinen 1,65 sekunnin Ogg Vorbis -äänite. Ei muutoksia, suora Wikimedia Commons -stream. Toisto mobiilissa ja tietokoneella vielä todentamatta, ei väitetä koko tekstin kuunteluksi.",
       "licenseEvidenceUrl": "https://commons.wikimedia.org/wiki/File:De-Wie_geht%27s%3F.ogg"
+    },
+    {
+      "id": "M-ZPE-01",
+      "kind": "source",
+      "manifestReadiness": "A, saksankielinen kokonainen teksti / audio vielä integroimatta",
+      "manifestCheckedAt": "2026-11-12",
+      "mediaTested": false,
+      "stage": "rights-verified",
+      "licenseCode": "CC BY-SA 3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+      "languageReviewed": false,
+      "integrated": true,
+      "deviceTested": false,
+      "published": false,
+      "description": "Monika Janicka: Sag mal, wie alt bist du? Neljän lapsille laaditun A1-ikädialogin koko 12-repliikkinen alkuperäinen saksankielinen litteraatti, C06:n uusi erillinen Text A. Ei väitetä testatuksi äänitteeksi.",
+      "sourceUrl": "https://zpe.gov.pl/a/plik-audio/DIcQL1VxT",
+      "rightsNotes": "Lähdesivu ilmoittaa Monika Janickan 12 repliikin litteraatin tekijäksi ja CC BY-SA 3.0 -lisenssin. Sivu merkitsee äänen erikseen Contentplus.pl Sp. z o.o. / CC BY-SA 3.0. LOS! tallentaa vain alkuperäisen saksankielisen tekstin, omat suomenkieliset tukiselitykset ja omat tehtävät. Äänen kopiointia tai sovellustoistoa ei ole tehty eikä laitetestattu. Puheiden B+C ja alkuperäiset numerot säilytetään. Lähdesivun harjoitusosion Lucas/Larissa-luokitteluteksti eroaa litteraatista, joten käytetään vain alkuperäistä litteraattia.",
+      "licenseEvidenceUrl": "https://zpe.gov.pl/a/plik-audio/DIcQL1VxT"
     }
   ],
   "chapters": [
@@ -511,10 +529,10 @@
     },
     {
       "id": "C06",
-      "primarySourceId": null,
-      "textAPlan": "`M-COM-01`: aiemmin luetun Franz–Jörg-dialogin **koko kertaus uudesta näkökulmasta**",
+      "primarySourceId": "M-ZPE-01",
+      "textAPlan": "`M-ZPE-01`: Monika Janickan koko Sag mal, wie alt bist du? (4 itsenäistä lyhyttä dialogia, 12 repliikkiä, CC BY-SA 3.0). Entinen M-COM-01 säilyy erillisenä C01:n kertauksena.",
       "textBPlan": "`M-DIB-02` Harald ”Wer bin ich?” + `M-DIB-05` Zahlen",
-      "publicationGate": "**EHDOLLINEN UUSI PÄÄTEKSTI:** toinen toistuva primääriteksti. Haraldin haastattelun lupa/URL ja sopivuus vahvistettava; korvaa päälähde uudella erillisellä ikädialogilla ennen lopullista julkaisua."
+      "publicationGate": "C06:n itsenäinen Text A integroitu koko litteraattina ja tekstin CC BY-SA 3.0 -lisenssi tarkistettu alkuperäisellä sivulla. Lopullinen saksan toimituksellinen tarkistus, uuden lähteen äänen tekninen/tiedostokohtainen käsittely, Text B sekä mobiili- ja desktop-testaus eivät ole valmiita. Ei merkitä julkaistuksi."
     },
     {
       "id": "C07",

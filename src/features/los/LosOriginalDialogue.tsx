@@ -12,6 +12,7 @@ export type LosOriginalLine = {
   readonly speaker: string;
   readonly text: string;
   readonly meaning: string;
+  readonly sectionTitle?: string;
 };
 export type LosOriginalDialogueProps = {
   chapterId: string;
@@ -130,6 +131,7 @@ export function LosOriginalDialogue(props: LosOriginalDialogueProps) {
         const key=losReaderMarkKey(chapterId,sourceId,line.id);
         const annotation=parseLosReaderAnnotation(marks[key],version);
         return <div className="los-c01-turn" key={line.id}>
+          {line.sectionTitle && <h3 className="los-c01-dialogue-subheading">{line.sectionTitle}</h3>}
           <span className="los-c01-speaker">{line.speaker}</span>
           <div className="los-c01-turn-body">
             <p className="los-c01-words">{tokenize(sourceId,line).map(token=>{
