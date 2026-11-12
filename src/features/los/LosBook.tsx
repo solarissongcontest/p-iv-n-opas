@@ -227,6 +227,16 @@ function TextPage({ chapter }: { chapter: LosChapter }) {
       <p>{sourceGate.issues.join(" ")} Täysi uusi Text A on käytettävissä lähteeseen perustuvana esikatseluna; audiota, kielentarkistusta tai mobiili-/desktop-toistoa ei ilmoiteta valmiiksi.</p>
     </div>}
   </section>;
+  if(chapter.id==="10")return <section className="los-inner-page los-reading-page">
+    <p className="los-eyebrow">KAPPALE 10 / TEXT A / M-DIB-02</p>
+    <h1>Haraldin kokonainen esittelyhaastattelu</h1>
+    <p className="los-page-intro">Harald Beckerin julkaistu autenttinen haastattelu on nyt luettavissa kokonaisena suoraan LOS!:ssa. Lukija sisältää sanaselitykset ja tallennettavat korostukset. Lue kaikki 14 puheenvuoroa ja etsi nimen, kotipaikan, iän ja lempivärin ilmaukset. Puheäänen toistoa ei ole vielä testattu eikä sitä lasketa kuullunymmärtämiseksi.</p>
+    <LosOpenTextPage chapterId="10"/>
+    {!sourceGate.ready&&<div className="los-editorial-note" role="status">
+      <h2>C10:n toimituksellinen tarkistus kesken</h2>
+      <p>{sourceGate.issues.join(" ")} Lähteen monimutkaisemmat puhekielen rakenteet ovat vain tunnistamista varten. Alkuperäistekstiin sisältyvää julkista puhelinnumeron lukusarjaa ei saa käyttää yhteystietona eikä sitä tarvitse muistaa.</p>
+    </div>}
+  </section>;
   if(getLosOpenDialogue(chapter.id))return <section className="los-inner-page los-reading-page">
     <p className="los-eyebrow">KAPPALE {chapter.id} / TEXT A</p>
     <h1>Lue alkuperäinen keskustelu</h1>
