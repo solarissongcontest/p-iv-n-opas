@@ -75,8 +75,8 @@ test("LOS text page and comprehension route preserve true source attribution and
   assert.match(pages,/author=\{text\.author \?\?/);
   assert.match(pages,/license=\{text\.licenseCode \?\?/);
   assert.match(index,/C10:n koko Harald-haastattelun litteraatti on nyt luettavissa/);
-  assert.equal(LOS1_EXECUTABLE_LESSONS.length,52,"Adding a text must not invent completed listening lessons");
-  for(const id of ["L052","L054","L055"])assert.equal(isLos1ExecutableLesson(id),false);
+  assert.equal(LOS1_EXECUTABLE_LESSONS.length,53,"Only evidence-backed reading lessons may be enabled");
+  for(const id of ["L054","L055"])assert.equal(isLos1ExecutableLesson(id),false);
   assert.equal(LOS1_OPEN_DIALOGUES.length,5,"Existing five Wikibooks texts remain unchanged");
 });
 
