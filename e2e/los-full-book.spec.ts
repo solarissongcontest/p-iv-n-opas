@@ -318,7 +318,7 @@ test("U3 content-tree open/closed state persists per book without changing chapt
  await enterLocalBook(page);
  await page.goto("/los#/1/01/chapter",{waitUntil:"domcontentloaded"});
  if(isMobile)await page.locator(".los-top-toc").click();
- const second=page.locator(".los-content-tree .los-tree-chapter").nth(1).locator(".los-tree-expand");
+ const second=page.locator('.los-content-tree .los-tree-chapter-head > button[aria-controls="los-tree-children-02"]');
  await expect(second).toHaveAttribute("aria-expanded","false");
  await second.click();
  await expect(second).toHaveAttribute("aria-expanded","true");
@@ -331,7 +331,7 @@ test("U3 content-tree open/closed state persists per book without changing chapt
  });
  await page.reload({waitUntil:"domcontentloaded"});
  if(isMobile)await page.locator(".los-top-toc").click();
- const after=page.locator(".los-content-tree .los-tree-chapter").nth(1).locator(".los-tree-expand");
+ const after=page.locator('.los-content-tree .los-tree-chapter-head > button[aria-controls="los-tree-children-02"]');
  await expect(after).toHaveAttribute("aria-expanded","true");
  await after.click();
  await expect(after).toHaveAttribute("aria-expanded","false");
@@ -343,8 +343,8 @@ test("U3 content-tree open/closed state persists per book without changing chapt
  });
  await page.reload({waitUntil:"domcontentloaded"});
  if(isMobile)await page.locator(".los-top-toc").click();
- await expect(page.locator(".los-content-tree .los-tree-chapter").nth(1)
-   .locator(".los-tree-expand")).toHaveAttribute("aria-expanded","false");
+ await expect(page.locator('.los-content-tree .los-tree-chapter-head > button[aria-controls="los-tree-children-02"]'))
+   .toHaveAttribute("aria-expanded","false");
  await page.goto("/los#/1/path",{waitUntil:"domcontentloaded"});
  await expect(page.locator("#los-lesson-runner .los-lesson-progress")).toContainText("0/60 suoritettu");
 });
