@@ -1,6 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { ChevronDown, ChevronRight, Search } from "lucide-react";
 import { LOS_BOOKS, type LosBookDefinition } from "./catalog";
+import { getDeviceOwnerId } from "@/lib/deviceSession";
+import {
+  emptyLosContentTreePreferences, losContentTreePrefsKey,
+  parseLosContentTreePreferences, type LosContentTreePreferences,
+} from "./contentTreePreferences";
 import type { LosDestination } from "./LosReferenceTools";
 import { losContentTasks, type LosContentTask } from "./contentTreeModel";
 
@@ -24,10 +29,48 @@ export function LosContentTree({
   openBook:(id:number)=>void;
 }) {
   const [search,setSearch]=useState("");
-  const [expanded,setExpanded]=useState<Record<string,boolean>>({});
-  const [tasksExpanded,setTasksExpanded]=useState<Record<string,boolean>>({});
+  const readPreference = (bookId:number, chapters:readonly string[]):LosContentTreePreferences => {
+    if(typeof window==="undefined")return emptyLosContentTreePreferences();
+    try {
+      const ownerId=getDeviceOwnerId();
+      if(!ownerId)return emptyLosContentTreePreferences();
+      return parseLosContentTreePreferences(
+        localStorage.getItem(losContentTreePrefsKey(ownerId,bookId)), chapters);
+    } catch { return emptyLosContentTreePreferences(); }
+  };
+  const [expanded,setExpanded]=useState<Record<string,boolean>>(()=>
+    readPreference(book.id,book.chapters.map(ch=>ch.id)).expandedChapters);
+  const [tasksExpanded,setTasksExpanded]=useState<Record<string,boolean>>(()=>
+    readPreference(book.id,book.chapters.map(ch=>ch.id)).expandedTaskGroups);
+  const [prefsBookId,setPrefsBookId]=useState(book.id);
+
+  // A book switch must not overwrite another book\'s saved tree preferences.
   useEffect(()=>{
-    if(chapterId) setExpanded(state=>({...state,[chapterId]:true}));
+    const prefs=readPreference(book.id,book.chapters.map(ch=>ch.id));
+    setExpanded(prefs.expandedChapters);
+    setTasksExpanded(prefs.expandedTaskGroups);
+    setPrefsBookId(book.id);
+  },[book.id,book.chapters]);
+
+  useEffect(()=>{
+    if(prefsBookId!==book.id || typeof window==="undefined")return;
+    try {
+      const ownerId=getDeviceOwnerId();
+      if(!ownerId)return;
+      const payload:LosContentTreePreferences={
+        version:1,expandedChapters:expanded,expandedTaskGroups:tasksExpanded,
+      };
+      localStorage.setItem(losContentTreePrefsKey(ownerId,book.id),
+        JSON.stringify(payload));
+    } catch { /* Reader navigation stays usable without localStorage. */ }
+  },[book.id,prefsBookId,expanded,tasksExpanded]);
+
+  // Open the current chapter by default, but respect explicit saved
+  // 'false' (closed) instead of re-opening against the student's choice.
+  useEffect(()=>{
+    if(chapterId) setExpanded(state=>
+      Object.prototype.hasOwnProperty.call(state,chapterId)
+        ? state : {...state,[chapterId]:true});
   },[chapterId]);
   const needle=search.trim().toLocaleLowerCase("fi");
   const found=useMemo(()=>book.chapters.map(ch=>{
