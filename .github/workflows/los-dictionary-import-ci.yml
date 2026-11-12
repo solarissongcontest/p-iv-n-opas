@@ -6,6 +6,8 @@ on:
     paths:
       - "scripts/los-dictionary-import.py"
       - "scripts/tests/test_los_dictionary_import.py"
+      - "scripts/tests/los-dictionary-postgres-smoke.sql"
+      - "supabase/migrations/20261112170000_los_dictionary_search_staging.sql"
       - ".github/workflows/los-dictionary-import-ci.yml"
   workflow_dispatch:
 
@@ -120,3 +122,42 @@ jobs:
           name: los-u2-real-source-staging-metrics
           path: /tmp/los-u2-sources/*-staged.jsonl.manifest.json
           retention-days: 7
+
+  postgres-search-smoke:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_DB: los_u2_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: los-test-only
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install psql client
+        run: sudo apt-get update -qq && sudo apt-get install -y postgresql-client
+      - name: Create Supabase-like roles for RLS checks (temporary Postgres only)
+        env:
+          PGPASSWORD: los-test-only
+        run: |
+          psql -v ON_ERROR_STOP=1 -h localhost -U postgres -d los_u2_test -c "CREATE ROLE anon NOLOGIN; CREATE ROLE authenticated NOLOGIN; CREATE ROLE service_role NOLOGIN BYPASSRLS;"
+      - name: Apply additive dictionary schema to disposable database
+        env:
+          PGPASSWORD: los-test-only
+        run: |
+          psql -v ON_ERROR_STOP=1 -h localhost -U postgres -d los_u2_test \
+            -f supabase/migrations/20261112170000_los_dictionary_search_staging.sql
+      - name: Exercise real SQL search, homographs, forms, unpublished and role gates
+        env:
+          PGPASSWORD: los-test-only
+        run: |
+          psql -v ON_ERROR_STOP=1 -h localhost -U postgres -d los_u2_test \
+            -f scripts/tests/los-dictionary-postgres-smoke.sql
