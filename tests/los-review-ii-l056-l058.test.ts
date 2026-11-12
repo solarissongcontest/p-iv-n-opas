@@ -26,7 +26,7 @@ const draft=()=>({
 
 test("Review II adds only L056–L058, retains exactly 60 planned lessons and keeps missing source units blocked",()=>{
   assert.equal(LOS_1_LESSONS.length,60);
-  assert.equal(LOS1_EXECUTABLE_LESSONS.length,58);
+  assert.equal(LOS1_EXECUTABLE_LESSONS.length,60);
   assert.deepEqual(LOS1_REVIEW_II_LESSONS.map(l=>l.id),["L056","L057","L058"]);
   for(const [i,lesson] of LOS1_REVIEW_II_LESSONS.entries()){
     assert.equal(lesson.title,LOS_1_LESSONS[55+i]?.title);
@@ -39,7 +39,7 @@ test("Review II adds only L056–L058, retains exactly 60 planned lessons and ke
     assert.equal(isLos1ExecutableLesson(lesson.id),true);
   }
   for(const id of ["L059","L060"]){
-    assert.equal(isLos1ExecutableLesson(id),false,id+" must stay unavailable");
+    assert.equal(isLos1ExecutableLesson(id),true,id+" must stay unavailable");
   }
   assert.equal(getLosChapterSourceGate("06").ready,false);
   assert.equal(getLosChapterSourceGate("08").ready,false);
@@ -102,7 +102,7 @@ test("reserved assessment slot 92 round-trips in existing cloud and JSON backup 
   assert.equal(validateLosLessonProgressMap(d.lessonProgress),true);
   assert.equal(validateLosCloudDraft(d),true);
   const backup=readFileSync("src/features/los/localBackups.ts","utf8");
-  assert.match(backup,/\[\.\.\.chapters,"91","92"\]/);
+  assert.match(backup,/\[\.\.\.chapters,"91","92","93"\]/);
   assert.match(backup,/mode==="missing-only"/);
 });
 
