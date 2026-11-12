@@ -15,6 +15,7 @@ import { LosNotebook, LosWorkbook } from "./LosWorkbook";
 import { LosBackups } from "./LosBackups";
 import { LosBookStartAction } from "./LosBookStartAction";
 import { LosDictionaryCard } from "./LosDictionaryCard";
+import { LosContentTree, isLosContentTask, type LosContentTask } from "./LosContentTree";
 import { getLosPronunciation } from "./pronunciation";
 import { Los1FacsimilePilot } from "./facsimile/los1/Los1FacsimilePilot";
 import { LosMidtermExam } from "./LosMidtermExam";
@@ -29,9 +30,10 @@ import "./los-appendix.css";
 import "./los-workbook.css";
 import "./los-cloud.css";
 import "./los-backups.css";
+import "./los-u3-content-tree.css";
 
 type LosSection = LosDestination;
-type LosLocation = { book: number | null; chapter: string | null; section: LosSection };
+type LosLocation = { book: number | null; chapter: string | null; section: LosSection; taskId: string | null };
 /** Kymmenen näkyvää kappaleosiota LOS! 1:n kirjakohtaisen masterplanin mukaan. */
 const sections: { id: LosSection; label: string }[] = [
   { id:"chapter", label:"Aloita" },
@@ -51,14 +53,18 @@ const bookStyle = (book: LosBookDefinition): CSSProperties => ({
 } as CSSProperties);
 const strip = (text: string) => text.split(" – ");
 function readLocation(): LosLocation {
-  if (typeof window === "undefined") return { book: null, chapter: null, section: "overview" };
+  if (typeof window === "undefined") return { book: null, chapter: null, section: "overview", taskId: null };
   const parts = window.location.hash.replace(/^#\/?/, "").split("/").filter(Boolean);
   const parsedBook = Number(parts[0]);
   const book = Number.isInteger(parsedBook) && parsedBook >= 1 && parsedBook <= 8 ? parsedBook : null;
   const chapter = book === 1 && /^\d{2}$/.test(parts[1] ?? "") ? (parts[1] ?? null) : null;
   const token = parts[chapter ? 2 : 1];
   const section = (["overview", "contents", "chapter", "text", "vocabulary", "grammar", "practice", "appendix", "dictionary", "path", "search", "midterm", "review", "review-ii", "cards", "progress", "final", "summary", "understand", "text-b", "apply", "culture", "test", "facsimile"].includes(token ?? "") ? token : chapter ? "chapter" : "overview") as LosSection;
-  return { book, chapter, section };
+  const requestedTaskId = parts[3] ?? "";
+  const taskId = chapter && (section === "practice" || section === "test") &&
+    /^[A-Za-z0-9][A-Za-z0-9-]{1,90}$/.test(requestedTaskId) &&
+    isLosContentTask(chapter, section, requestedTaskId) ? requestedTaskId : null;
+  return { book, chapter, section, taskId };
 }
 function linkTo(book?: number, chapter?: string, section: LosSection = "overview") {
   return !book ? "#/" : chapter ? `#/${book}/${chapter}/${section}` : `#/${book}/${section}`;
@@ -350,6 +356,13 @@ function LosBookWorkspace({ book, location, move, goLibrary, openBook }: { book:
   const chapter = book.chapters.find(c => c.id === location.chapter) ?? null;
   const [tocOpen, setTocOpen] = useState(false);
   useEffect(() => setTocOpen(false), [location]);
+  useEffect(() => {
+    if (!location.taskId) return;
+    document.getElementById(location.taskId)?.scrollIntoView({block:"start"});
+  }, [location.taskId,location.section,location.chapter]);
+  const openTask = (task:LosContentTask) => {
+    window.location.hash = `#/${book.id}/${task.chapterId}/${task.section}/${task.id}`;
+  };
   const openChapter = (ch: LosChapter) => move(ch.id, "chapter");
   const previousIndex = chapter ? book.chapters.findIndex(c => c.id === chapter.id) : -1;
   const next = previousIndex >= 0 ? book.chapters[previousIndex + 1] : null;
@@ -367,7 +380,8 @@ function LosBookWorkspace({ book, location, move, goLibrary, openBook }: { book:
         <div className="los-sidebar-heading">KIRJAN SIVUT</div>
         <nav>
           <button className={section === "contents" ? "is-active" : ""} onClick={() => move(null, "contents")}>Sisällysluettelo</button>
-          {book.chapters.map(ch => <button key={ch.id} className={chapter?.id === ch.id ? "is-active" : ""} onClick={() => openChapter(ch)}><span className="los-sidebar-num">{ch.id}</span><span lang="de">{ch.title}</span></button>)}
+          <LosContentTree book={book} chapterId={chapter?.id??null} section={section}
+            activeTaskId={location.taskId} move={move} openTask={openTask} />
           <div className="los-sidebar-heading">HAKEMISTOT</div>
           <button className={section === "path" ? "is-active" : ""} onClick={() => move(null, "path")}>Ohjattu opetuspolku</button>
           {book.id===1&&<button className={section==="facsimile"?"is-active":""} onClick={()=>move(null,"facsimile")}>Näköiskirja · C01-pilotti</button>}
@@ -381,9 +395,6 @@ function LosBookWorkspace({ book, location, move, goLibrary, openBook }: { book:
       </aside>
       <main className="los-book-main" id="main-content" tabIndex={-1}>
         <div className="los-main-breadcrumb"><button onClick={() => move(null, "overview")}>LOS! {book.id}</button>{chapter ? <><ChevronRight size={12} /><button onClick={() => openChapter(chapter)}>Kappale {Number(chapter.id)}</button></> : null}{chapter && section !== "chapter" ? <><ChevronRight size={12} /><span>{section==="cards" ? "Kertauskortit" : sections.find(s => s.id === section)?.label}</span></> : null}</div>
-        {chapter && section !== "overview" && section !== "contents" && section !== "appendix" && <nav className="los-section-nav" aria-label="Kappaleen osiot">
-          {sections.map(item => <button key={item.id} className={section === item.id || (section==="cards" && item.id==="vocabulary") ? "is-active" : ""} onClick={() => move(chapter.id, item.id)}>{item.label}</button>)}
-        </nav>}
         <div className={"los-book-paper"+(section==="facsimile"?" los-book-paper-facsimile":"")}>
           {!chapter && section === "overview" ? <BookFront book={book} move={move} /> :
             section === "facsimile" && book.id===1 ? <Los1FacsimilePilot onOpenDigital={section=>move(section==="overview"||section==="appendix"?null:"01",section)} /> :
@@ -425,7 +436,7 @@ function LosBookWorkspace({ book, location, move, goLibrary, openBook }: { book:
 }
 export function LosBook() {
   const [canOpen, setCanOpen] = useState<boolean | null>(null);
-  const [location, setLocation] = useState<LosLocation>({ book: null, chapter: null, section: "overview" });
+  const [location, setLocation] = useState<LosLocation>({ book: null, chapter: null, section: "overview", taskId: null });
   useEffect(() => {
     setCanOpen(Boolean(readCachedDeviceUser()));
     const sync = () => { setLocation(readLocation()); window.scrollTo(0, 0); };
