@@ -68,3 +68,12 @@
     min-width:0;
   }
 }
+
+/* Status here is sourced only from the existing chapter draft.  No "complete"
+   badge may be inferred merely from opening a page or task. */
+.los-tree-saved-status {margin:3px 0 5px 36px;font-size:11px;line-height:1.45;color:var(--los-soft)}
+.los-tree-task-link > span {display:block;overflow-wrap:anywhere}
+.los-book-sidebar nav .los-tree-task-link > small.los-tree-saved-status {
+  display:block;margin:4px 0 0;font-size:10px;font-weight:700;color:var(--los-soft)
+}
+.los-tree-chapter-link svg {margin-left:auto;flex-shrink:0;color:var(--los-book-accent)}
