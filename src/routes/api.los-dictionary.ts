@@ -20,7 +20,7 @@ function getSearchParams(request: Request) {
   const q = (url.searchParams.get("q") ?? "").trim().normalize("NFC");
   const direction = url.searchParams.get("direction");
   if (!isDirection(direction)) return null;
-  if (!q || q.length > 80 || /[\u0000-\u001f\u007f]/u.test(q)) return null;
+  if (!q || q.length > 80 || Array.from(q).some(char => { const code = char.charCodeAt(0); return code < 32 || code === 127; })) return null;
   const rawLimit = url.searchParams.get("limit") ?? "20";
   if (!/^\d{1,2}$/.test(rawLimit)) return null;
   const limit = Number(rawLimit);
