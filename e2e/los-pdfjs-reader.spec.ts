@@ -19,7 +19,16 @@ test("LOS! 1 opens validated B5 C01 PDF via bundled PDF.js and preserves text la
   await page.locator("#los1-pdf-jump").fill("5");
   await page.locator(".los1-pdf-footer form button").click();
   await expect(page.locator(".los1-pdf-folio").first()).toContainText("5");
-  await expect.poll(async()=>page.locator(".los1-pdf-textlayer span").count(),{timeout:25_000}).toBeGreaterThan(0);
+  try{
+    await expect.poll(async()=>page.locator(".los1-pdf-textlayer span").count(),
+      {timeout:12_000}).toBeGreaterThan(0);
+  }catch(e){
+    const errors=await page.locator(".los1-pdf-error").allTextContents();
+    const layers=await page.locator(".los1-pdf-textlayer").evaluateAll(els=>
+      els.map(el=>({html:el.innerHTML.slice(0,250),style:el.getAttribute("style")})));
+    console.log("PDFJS_RENDER_DIAGNOSTICS",JSON.stringify({errors,layers}));
+    throw e;
+  }
   await page.getByRole("button",{name:"Seuraava"}).click();
   await expect(page.locator(".los1-pdf-folio").first()).toContainText("6");
   await page.getByRole("button",{name:"Sisällys"}).click();
