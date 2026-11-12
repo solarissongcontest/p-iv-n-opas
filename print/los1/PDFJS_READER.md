@@ -22,7 +22,7 @@ Kumpikaan ei ole hyväksytty julkaistu näköiskirjapainos.
 
 ## Tekniikka
 
-- pdfjs-dist@5.7.284 ja samaan pakettiin kuuluva worker bundlataan
+- pdfjs-dist@5.7.284:n legacy ESM -versio ja vastaava worker bundlataan
   projektin omaksi resurssiksi. Ulkoista CDN:ää ei käytetä.
 - Luonnos tarkistetaan: 15 sivua, 176 × 250 mm ja C01:n alkuperäisen
   Text A -keskustelun tekstikerros. Muut PDF:t hylätään.
