@@ -75,7 +75,7 @@ test("LOS text page and comprehension route preserve true source attribution and
   assert.match(pages,/author=\{text\.author \?\?/);
   assert.match(pages,/license=\{text\.licenseCode \?\?/);
   assert.match(index,/C10:n Harald-haastattelu ovat nyt kirjan sisällä/);
-  assert.equal(LOS1_EXECUTABLE_LESSONS.length,58,"Only evidence-backed reading lessons may be enabled");
+  assert.equal(LOS1_EXECUTABLE_LESSONS.length,60,"Only evidence-backed reading lessons may be enabled");
   for(const id of ["L054","L055"])assert.equal(isLos1ExecutableLesson(id),true);
   assert.equal(LOS1_OPEN_DIALOGUES.length,5,"Existing five Wikibooks texts remain unchanged");
 });
