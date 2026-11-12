@@ -1,5 +1,21 @@
 import {expect,test} from "@playwright/test";
-import {enterApp,expectNoHorizontalOverflow} from "./helpers";
+import {expectNoHorizontalOverflow} from "./helpers";
+
+/**
+ * Local-only UI fixture, NEVER an authentication or cloud security test.
+ * Uses the existing reader's already-supported offline owner cache, and only
+ * on loopback. Does not hit or bypass the production auth endpoint.
+ */
+async function enterLocalBook(page:import("@playwright/test").Page){
+ await page.addInitScript(()=>{
+  if(!["localhost","127.0.0.1"].includes(window.location.hostname))return;
+  window.localStorage.setItem("opk.device-authorized","Arthur");
+  window.localStorage.setItem("opk.owner-id","00000000-0000-4000-8000-000000000195");
+ });
+ await page.goto("/los#/1/01/chapter",{waitUntil:"domcontentloaded"});
+ await expect(page.locator(".los-book-workspace")).toBeVisible({timeout:30_000});
+}
+
 
 const chapters=["01","02","03","04","05","06","07","08","09","10"] as const;
 const openChapter=async(page:import("@playwright/test").Page,ch:string,section:string)=>{
@@ -8,7 +24,7 @@ const openChapter=async(page:import("@playwright/test").Page,ch:string,section:s
 };
 
 test("all ten chapters provide complete Text B readers inside the book, not link-only placeholders",async({page})=>{
- await enterApp(page);
+ await enterLocalBook(page);
  for(const chapter of chapters){
   await openChapter(page,chapter,"text-b");
   await expect(page.locator("fieldset.los-c01-question")).toHaveCount(4);
@@ -28,7 +44,7 @@ test("all ten chapters provide complete Text B readers inside the book, not link
  }
 });
 test("all ten culture pages render sourced explanations, original diagrams and three responsive exercises",async({page})=>{
- await enterApp(page);
+ await enterLocalBook(page);
  for(const chapter of chapters){
   await openChapter(page,chapter,"culture");
   await expect(page.locator(".los-culture-exercises")).toBeVisible();
@@ -39,7 +55,7 @@ test("all ten culture pages render sourced explanations, original diagrams and t
  }
 });
 test("clearing chapter practice does not delete saved Text B or culture answers",async({page})=>{
- await enterApp(page);
+ await enterLocalBook(page);
  await openChapter(page,"01","text-b");
  const sourceAnswer=page.locator(".los-secondary-source fieldset.los-c01-question").first();
  await sourceAnswer.locator("input[type='radio']").first().check();
@@ -66,7 +82,7 @@ test("clearing chapter practice does not delete saved Text B or culture answers"
   .locator("input[type='radio']").first()).toBeChecked();
 });
 test("C01 real original token highlight, C08 gated video and responsive exercise frame",async({page})=>{
- await enterApp(page);
+ await enterLocalBook(page);
  await openChapter(page,"01","practice");
  const highlight=page.locator("#RICH-C01-HIGHLIGHT");
  await expect(highlight).toBeVisible();
