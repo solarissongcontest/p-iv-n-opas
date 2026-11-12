@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import {test} from "node:test";
 import {readFileSync} from "node:fs";
 import {
-  LOS1_C01_DRAFT_PDF_SPECS,LOS1_C02_DRAFT_PDF_SPECS,parsePdfInfo,inspectDraftPdf,
+  LOS1_C01_DRAFT_PDF_SPECS,LOS1_C02_DRAFT_PDF_SPECS,LOS1_C03_DRAFT_PDF_SPECS,parsePdfInfo,inspectDraftPdf,
 } from "../scripts/los1-facsimile-pdf-preflight.mjs";
 
 const info=[
@@ -59,5 +59,18 @@ test("C02 draft preflight verifies fourteen B5 leaves and both original dialogue
   });
   assert.ok(incomplete.errors.some(e=>e.includes("Thomas")));
   const extra=inspectDraftPdf({info,text:content,spec:LOS1_C02_DRAFT_PDF_SPECS});
+  assert.ok(extra.errors.some(e=>e.includes("Sivumäärä")));
+});
+
+test("C03 PDF requires exactly 14 B5 leaves and both complete source names",()=>{
+  const infoC03=info.replace("Pages:          15","Pages:          14");
+  const content="Lisa Müller Woher Deutschland Bern Thomas Takashi Wortschatz Grammatik ".repeat(38);
+  const checked=inspectDraftPdf({info:infoC03,text:content,spec:LOS1_C03_DRAFT_PDF_SPECS});
+  assert.equal(checked.ok,true);
+  assert.equal(checked.pages,14);
+  const missing=inspectDraftPdf({info:infoC03,text:"Lisa Müller Woher Deutschland Bern ".repeat(50),
+    spec:LOS1_C03_DRAFT_PDF_SPECS});
+  assert.ok(missing.errors.some(e=>e.includes("Thomas")));
+  const extra=inspectDraftPdf({info,text:content,spec:LOS1_C03_DRAFT_PDF_SPECS});
   assert.ok(extra.errors.some(e=>e.includes("Sivumäärä")));
 });

@@ -1,4 +1,4 @@
-name: LOS1 C01 and C02 B5 PDF Draft Preflight
+name: LOS1 C01–C03 B5 PDF Draft Preflight
 
 on:
   pull_request:
@@ -10,6 +10,7 @@ on:
       - "src/features/los/LosBook.tsx"
       - "e2e/los-pdfjs-reader.spec.ts"
       - "e2e/los-c02-facsimile.spec.ts"
+      - "e2e/los-c03-facsimile.spec.ts"
       - "scripts/los1-facsimile-export.mjs"
       - "scripts/los1-facsimile-pdf-preflight.mjs"
       - ".github/workflows/los-facsimile-pdf.yml"
@@ -106,6 +107,28 @@ jobs:
         env:
           E2E_BASE_URL: http://127.0.0.1:5173
         run: bunx playwright test e2e/los-c02-facsimile.spec.ts --project=desktop-chromium
+
+      - name: Export eight-turn C03 Text A as a real B5 PDF
+        env:
+          LOS1_FACSIMILE_CHAPTER: "03"
+        run: node scripts/los1-facsimile-export.mjs
+
+      - name: Check C03 14 B5 pages and searchable Lisa/Thomas source layers
+        env:
+          LOS1_FACSIMILE_CHAPTER: "03"
+        run: node scripts/los1-facsimile-pdf-preflight.mjs
+
+      - name: Render C03 original Text A page for technical inspection
+        run: |
+          pdftoppm -f 3 -l 3 -singlefile -png -r 96 \
+            .artifacts/los1/LOS1_C03_B5_TAITTOLUONNOS.pdf \
+            .artifacts/los1/render/c03-text-a
+          test -s .artifacts/los1/render/c03-text-a.png
+
+      - name: Test C03 authentic text, page turns and bookmark in Chromium
+        env:
+          E2E_BASE_URL: http://127.0.0.1:5173
+        run: bunx playwright test e2e/los-c03-facsimile.spec.ts --project=desktop-chromium
 
       # Intentionally no upload-artifact/public distribution: this is an
       # unapproved C01 layout draft, not a rights-cleared downloadable edition.

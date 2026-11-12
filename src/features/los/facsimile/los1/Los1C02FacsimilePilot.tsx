@@ -253,8 +253,9 @@ function Leaf({page}:{page:LosC02PrintPage}){
     </footer>
   </article>;
 }
-export function Los1C02FacsimilePilot({onBack,onOpenDigital}:{
+export function Los1C02FacsimilePilot({onBack,onOpenDigital,onOpenC03}:{
   onBack:()=>void;
+  onOpenC03:()=>void;
   onOpenDigital:(section:LosC02PrintSection)=>void;
 }){
   const [state,setState]=useState<ReaderState>({
@@ -449,6 +450,7 @@ export function Los1C02FacsimilePilot({onBack,onOpenDigital}:{
         onClick={next}>Seuraava <ChevronRight size={18}/></button>
     </div>
     <div className="los-facs-return">
+      <button type="button" onClick={onOpenC03}><BookOpen size={16}/> Siirry C03-kappaleen taittoluonnokseen</button>
       <button type="button" onClick={()=>onOpenDigital(
         pages[index]!.section==="text-b-understand"?"text-b":
         pages[index]!.section==="appendix"?"appendix":pages[index]!.section)}>

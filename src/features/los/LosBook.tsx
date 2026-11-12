@@ -22,6 +22,7 @@ import { getLosPronunciation } from "./pronunciation";
 import { inspectLosVocabularyQA } from "./pronunciationPublication";
 import { Los1FacsimilePilot } from "./facsimile/los1/Los1FacsimilePilot";
 import { Los1C02FacsimilePilot } from "./facsimile/los1/Los1C02FacsimilePilot";
+import { Los1C03FacsimilePilot } from "./facsimile/los1/Los1C03FacsimilePilot";
 import { Los1PdfReader } from "./facsimile/los1/Los1PdfReader";
 import { LosMidtermExam } from "./LosMidtermExam";
 import { LosStudyProgress } from "./LosStudyProgress";
@@ -38,7 +39,7 @@ import "./los-backups.css";
 import "./los-u3-content-tree.css";
 import "./los-u3-split.css";
 
-type LosSection = LosDestination | "facsimile-pdf" | "facsimile-c02";
+type LosSection = LosDestination | "facsimile-pdf" | "facsimile-c02" | "facsimile-c03";
 type LosLocation = { book: number | null; chapter: string | null; section: LosSection; taskId: string | null };
 /** Kymmenen näkyvää kappaleosiota LOS! 1:n kirjakohtaisen masterplanin mukaan. */
 const sections: { id: LosSection; label: string }[] = [
@@ -65,7 +66,7 @@ function readLocation(): LosLocation {
   const book = Number.isInteger(parsedBook) && parsedBook >= 1 && parsedBook <= 8 ? parsedBook : null;
   const chapter = book === 1 && /^\d{2}$/.test(parts[1] ?? "") ? (parts[1] ?? null) : null;
   const token = parts[chapter ? 2 : 1];
-  const section = (["overview", "contents", "chapter", "text", "vocabulary", "grammar", "practice", "appendix", "dictionary", "path", "search", "midterm", "review", "review-ii", "cards", "progress", "final", "summary", "understand", "text-b", "apply", "culture", "test", "facsimile", "facsimile-pdf", "facsimile-c02"].includes(token ?? "") ? token : chapter ? "chapter" : "overview") as LosSection;
+  const section = (["overview", "contents", "chapter", "text", "vocabulary", "grammar", "practice", "appendix", "dictionary", "path", "search", "midterm", "review", "review-ii", "cards", "progress", "final", "summary", "understand", "text-b", "apply", "culture", "test", "facsimile", "facsimile-pdf", "facsimile-c02", "facsimile-c03"].includes(token ?? "") ? token : chapter ? "chapter" : "overview") as LosSection;
   const requestedTaskId = parts[3] ?? "";
   const taskId = chapter && (section === "practice" || section === "test") &&
     /^[A-Za-z0-9][A-Za-z0-9-]{1,90}$/.test(requestedTaskId) &&
@@ -394,7 +395,7 @@ function LosBookWorkspace({ book, location, move, goLibrary, openBook }: { book:
   const previousIndex = chapter ? book.chapters.findIndex(c => c.id === chapter.id) : -1;
   const next = previousIndex >= 0 ? book.chapters[previousIndex + 1] : null;
   const previous = previousIndex > 0 ? book.chapters[previousIndex - 1] : null;
-  const section = chapter ? location.section : ["contents", "appendix", "dictionary", "path", "search", "midterm", "review", "review-ii", "progress", "final", "summary","facsimile","facsimile-pdf","facsimile-c02"].includes(location.section) ? location.section : "overview";
+  const section = chapter ? location.section : ["contents", "appendix", "dictionary", "path", "search", "midterm", "review", "review-ii", "progress", "final", "summary","facsimile","facsimile-pdf","facsimile-c02","facsimile-c03"].includes(location.section) ? location.section : "overview";
   const sectionIndex = chapter ? sections.findIndex(item => item.id===section) : -1;
   const previousSection = chapter && sectionIndex>0 ? sections[sectionIndex-1] : null;
   const followingSection = chapter && sectionIndex>=0 && sectionIndex<sections.length-1
@@ -417,11 +418,11 @@ function LosBookWorkspace({ book, location, move, goLibrary, openBook }: { book:
         <div className="los-sidebar-heading">KIRJAN SIVUT</div>
         <nav>
           <button className={section === "contents" ? "is-active" : ""} onClick={() => move(null, "contents")}>Sisällysluettelo</button>
-          <LosContentTree book={book} chapterId={chapter?.id??null} section={section === "facsimile-pdf" || section === "facsimile-c02" ? "facsimile" : section}
+          <LosContentTree book={book} chapterId={chapter?.id??null} section={section === "facsimile-pdf" || section === "facsimile-c02" || section === "facsimile-c03" ? "facsimile" : section}
             activeTaskId={location.taskId} move={move} openTask={openTask} openBook={openBook} />
           <div className="los-sidebar-heading">HAKEMISTOT</div>
           <button className={section === "path" ? "is-active" : ""} onClick={() => move(null, "path")}>Ohjattu opetuspolku</button>
-          {book.id===1&&<><button className={section==="facsimile"?"is-active":""} onClick={()=>move(null,"facsimile")}>Näköiskirja · C01-pilotti</button><button className={section==="facsimile-c02"?"is-active":""} onClick={()=>move(null,"facsimile-c02")}>Näköiskirja · C02-pilotti</button><button className={section==="facsimile-pdf"?"is-active":""} onClick={()=>move(null,"facsimile-pdf")}>PDF.js · paikallinen luonnos</button></>}
+          {book.id===1&&<><button className={section==="facsimile"?"is-active":""} onClick={()=>move(null,"facsimile")}>Näköiskirja · C01-pilotti</button><button className={section==="facsimile-c02"?"is-active":""} onClick={()=>move(null,"facsimile-c02")}>Näköiskirja · C02-pilotti</button><button className={section==="facsimile-c03"?"is-active":""} onClick={()=>move(null,"facsimile-c03")}>Näköiskirja · C03-pilotti</button><button className={section==="facsimile-pdf"?"is-active":""} onClick={()=>move(null,"facsimile-pdf")}>PDF.js · paikallinen luonnos</button></>}
           {book.id===1&&<button className={section === "progress" ? "is-active" : ""} onClick={() => move(null, "progress")}>Osaaminen ja eteneminen</button>}
           {book.id===1&&<><button className={section === "review" ? "is-active" : ""} onClick={() => move(null, "review")}>Kertaus I · L027–L029</button><button className={section === "midterm" ? "is-active" : ""} onClick={() => move(null, "midterm")}>Välikoe · C01–C05</button><button className={section === "review-ii" ? "is-active" : ""} onClick={() => move(null, "review-ii")}>Kertaus II · L056–L058</button><button className={section === "final" ? "is-active" : ""} onClick={() => move(null, "final")}>Loppukoe · EX-FINAL</button><button className={section === "summary" ? "is-active" : ""} onClick={() => move(null, "summary")}>Yhteenveto · L060</button></>}
           <button className={section === "dictionary" ? "is-active" : ""} onClick={() => move(null, "dictionary")}>Sanakirja</button>
@@ -440,10 +441,11 @@ function LosBookWorkspace({ book, location, move, goLibrary, openBook }: { book:
           <span>Vapaaehtoinen näkymä käyttää samoja tallennettuja vastauksia.</span>
         </div>}
         <div className={"los-reader-workarea"+(splitVisible ? splitInline ? " is-split" : " is-overlay" : "")}>
-        <div className={"los-book-paper"+(section==="facsimile"||section==="facsimile-c02"?" los-book-paper-facsimile":section==="facsimile-pdf"?" los-book-paper-facsimile-pdf":"")}>
+        <div className={"los-book-paper"+(section==="facsimile"||section==="facsimile-c02"||section==="facsimile-c03"?" los-book-paper-facsimile":section==="facsimile-pdf"?" los-book-paper-facsimile-pdf":"")}>
           {!chapter && section === "overview" ? <BookFront book={book} move={move} /> :
             section === "facsimile" && book.id===1 ? <Los1FacsimilePilot onOpenDigital={section=>move(section==="overview"||section==="appendix"?null:"01",section)} onOpenPdf={()=>move(null,"facsimile-pdf")} onOpenC02={()=>move(null,"facsimile-c02")}/> :
-            section === "facsimile-c02" && book.id===1 ? <Los1C02FacsimilePilot onBack={()=>move(null,"facsimile")} onOpenDigital={section=>move(section==="appendix"?null:"02",section==="text-b-understand"?"text-b":section)} /> :
+            section === "facsimile-c02" && book.id===1 ? <Los1C02FacsimilePilot onBack={()=>move(null,"facsimile")} onOpenC03={()=>move(null,"facsimile-c03")} onOpenDigital={section=>move(section==="appendix"?null:"02",section==="text-b-understand"?"text-b":section)} /> :
+            section === "facsimile-c03" && book.id===1 ? <Los1C03FacsimilePilot onBack={()=>move(null,"facsimile-c02")} onOpenDigital={section=>move(section==="appendix"?null:"03",section==="text-b-understand"?"text-b":section)} /> :
             section === "facsimile-pdf" && book.id===1 ? <Los1PdfReader onBack={()=>move(null,"facsimile")} onOpenDigital={(section,chapterId)=>move(section==="overview"||section==="appendix"?null:(chapterId??"01"),section)} /> :
             section === "contents" ? <Contents book={book} move={move} /> :
             section === "appendix" ? <Appendix book={book} /> :
