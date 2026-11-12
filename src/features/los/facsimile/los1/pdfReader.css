@@ -1,0 +1,83 @@
+/* LOS! 1 local PDF.js proof-of-reader. Unique class names prevent PDF/UI bleed. */
+.los-book-paper.los-book-paper-facsimile-pdf{max-width:none;background:#e7e5e1;box-shadow:none;border:0}
+.los1-pdf-reader{--los1-pdf-red:#b7473c;--los1-pdf-ink:#222b34;color:#222b34;background:#e7e5e1;min-height:620px;padding:16px;font-size:13px}
+.los1-pdf-reader *{box-sizing:border-box}
+.los1-pdf-reader button,.los1-pdf-reader input,.los1-pdf-reader select{font:inherit}
+.los1-pdf-reader button{cursor:pointer}
+.los1-pdf-reader button:disabled{opacity:.45;cursor:default}
+.los1-pdf-reader button:focus-visible,.los1-pdf-reader input:focus-visible,
+.los1-pdf-reader select:focus-visible,.los1-pdf-reader .los1-pdf-stage:focus-visible{outline:3px solid #327ac5;outline-offset:2px}
+.los1-pdf-header,.los1-pdf-controls,.los1-pdf-footer,.los1-pdf-digital-link{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:12px 14px;border:1px solid #d9d5d1;background:#fff;border-radius:8px}
+.los1-pdf-header button,.los1-pdf-controls button,.los1-pdf-footer button,.los1-pdf-digital-link button,
+.los1-pdf-toc button,.los1-pdf-search button{
+  display:inline-flex;align-items:center;gap:6px;justify-content:center;min-height:40px;
+  padding:8px 11px;border:1px solid #d6d2ce;background:#fff;border-radius:6px;color:#222b34}
+.los1-pdf-header button:hover,.los1-pdf-controls button:hover,.los1-pdf-footer button:hover,
+.los1-pdf-search button:hover,.los1-pdf-toc button:hover{background:#fce8e5}
+.los1-pdf-heading{display:grid;gap:2px;text-align:center}
+.los1-pdf-heading strong{font-size:16px}
+.los1-pdf-heading small{font-size:11px;color:#68717b}
+.los1-pdf-disclaimer{display:flex;align-items:flex-start;gap:8px;margin:10px 4px;color:#49545d;line-height:1.5}
+.los1-pdf-disclaimer svg{flex-shrink:0;margin-top:1px}
+.los1-pdf-upload{display:flex;align-items:center;flex-wrap:wrap;gap:12px;margin:12px 0}
+.los1-pdf-file-label{display:inline-flex;gap:9px;align-items:center;min-height:44px;padding:10px 14px;
+  border-radius:7px;background:#b7473c;color:#fff;font-weight:720;cursor:pointer;position:relative}
+.los1-pdf-file-label:hover{background:#9e3e35}
+.los1-pdf-file-label input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%}
+.los1-pdf-file-label:focus-within{outline:3px solid #327ac5;outline-offset:2px}
+.los1-pdf-upload>span{font-size:12px;color:#58626b;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:280px}
+.los1-pdf-error{background:#fff0ed;padding:12px 15px;border-left:3px solid #ae3932;color:#752e2a;border-radius:4px}
+.los1-pdf-empty{background:#fff;max-width:640px;margin:28px auto;padding:28px;border-radius:10px;text-align:center;
+  display:flex;flex-direction:column;align-items:center;gap:10px;border:1px solid #ddd6d0}
+.los1-pdf-empty svg{color:#b7473c}
+.los1-pdf-empty h2{font-size:19px;margin:0}
+.los1-pdf-empty p{max-width:520px;line-height:1.6;color:#515d67;margin:4px 0}
+.los1-pdf-controls{flex-wrap:wrap;margin-bottom:9px;justify-content:flex-start}
+.los1-pdf-controls label{display:flex;gap:6px;align-items:center}
+.los1-pdf-controls select{border:1px solid #d6d2ce;border-radius:5px;background:#fff;padding:8px;color:#222b34}
+.los1-pdf-controls output{min-width:44px;text-align:center;font-variant-numeric:tabular-nums}
+.los1-pdf-controls button[aria-pressed=true]{color:#9e4036;background:#fce8e5}
+.los1-pdf-stage{height:clamp(440px,66dvh,900px);overflow:auto;overscroll-behavior:contain;scroll-behavior:auto;
+  background:#dcd8d2;padding:14px 12px;touch-action:pan-y pinch-zoom}
+.los1-pdf-spread{display:flex;align-items:flex-start;justify-content:center;gap:5px;width:max-content;
+  min-width:100%;min-height:100%;margin:0 auto}
+.los1-pdf-leaf{position:relative;flex-shrink:0;max-width:none;text-align:center}
+.los1-pdf-leaf-content{position:relative;width:max-content;margin:0 auto;background:white;
+  box-shadow:0 5px 20px rgba(0,0,0,.17)}
+.los1-pdf-leaf-content canvas{display:block;background:white}
+.los1-pdf-leaf-content .los1-pdf-textlayer{position:absolute;left:0;top:0;overflow:hidden}
+.los1-pdf-leaf-content .los1-pdf-textlayer::selection,
+.los1-pdf-leaf-content .los1-pdf-textlayer span::selection{background:rgba(183,71,60,.24)}
+.los1-pdf-folio{display:block;text-align:center;color:#626c74;font-size:11px;margin-top:6px}
+.los1-pdf-toc,.los1-pdf-search{border-radius:8px;border:1px solid #d8d3ce;background:#fff;padding:12px;margin-bottom:9px}
+.los1-pdf-toc{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:6px;max-height:270px;overflow:auto}
+.los1-pdf-toc button{text-align:left;justify-content:space-between}
+.los1-pdf-toc button[aria-current=page]{background:#fce8e5;border-color:#b7473c}
+.los1-pdf-toc button small{color:#65707a}
+.los1-pdf-bookmarks{grid-column:1/-1;display:flex;flex-wrap:wrap;align-items:center;gap:7px;border-top:1px solid #e5e1dd;padding-top:10px}
+.los1-pdf-search{display:flex;align-items:center;flex-wrap:wrap;gap:8px}
+.los1-pdf-search input{flex:1;min-width:150px;padding:10px;border:1px solid #d2cdc7;border-radius:5px;color:#222b34}
+.los1-pdf-hits{width:100%;display:grid;gap:6px;grid-template-columns:repeat(auto-fit,minmax(190px,1fr))}
+.los1-pdf-hits button{display:grid;text-align:left;gap:3px;justify-items:start}
+.los1-pdf-hits small{font-size:11px;line-height:1.4;color:#5b6670;word-break:break-word}
+.los1-pdf-footer{margin-top:9px;flex-wrap:wrap}
+.los1-pdf-footer form{display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap}
+.los1-pdf-footer input{width:66px;height:40px;padding:0 8px;border:1px solid #d6d2ce;border-radius:5px;text-align:center}
+.los1-pdf-footer small[role=alert]{flex-basis:100%;color:#a1352e;text-align:center}
+.los1-pdf-digital-link{margin-top:8px;color:#52606b;font-size:12px}
+.los1-pdf-digital-link button{color:#9e4036;font-weight:750}
+@media(max-width:770px){
+  .los1-pdf-reader{padding:8px}
+  .los1-pdf-header{flex-wrap:wrap}
+  .los1-pdf-heading{order:-1;flex-basis:100%}
+  .los1-pdf-stage{height:62dvh;padding:8px}
+  .los1-pdf-footer{gap:6px}
+  .los1-pdf-footer form{order:-1;width:100%}
+  .los1-pdf-footer>button{flex:1}
+  .los1-pdf-digital-link{flex-wrap:wrap}
+  .los1-pdf-controls{gap:5px}
+  .los1-pdf-search label{width:100%}
+}
+@media(prefers-reduced-motion:reduce){.los1-pdf-reader *{animation:none!important;transition:none!important}}
