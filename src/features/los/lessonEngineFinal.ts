@@ -2,7 +2,7 @@ import type {LosLessonBlueprint} from "./lessonEngine";
 import {
  LOS1_FINAL_WRITING_CHECK,LOS1_FINAL_VOICE_CHECK,
  LOS1_SUMMARY_GOAL,LOS1_SUMMARY_CARDS,LOS1_SUMMARY_REFLECTION,
-} from "./content/los1FinalExam";
+} from "./content/los1FinalExam.ts";
 
 /**
  * Two original final lessons: EX-FINAL and the audited 10-goal summary.
