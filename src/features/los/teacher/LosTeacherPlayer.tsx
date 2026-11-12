@@ -13,6 +13,7 @@ import {
   teacherWrongFeedback, type TeacherScene, type TeacherSession,
 } from "./engine.ts";
 import { getLosTeacherLesson } from "./lessonL004.ts";
+import { validateTeacherLesson } from "./validateContent.ts";
 import "../los-book.css";
 import "./teacher.css";
 
@@ -111,7 +112,9 @@ export function LosTeacherPlayer({ lessonId }: { lessonId: string }) {
   const [authorized, setAuthorized] = useState<boolean | null>(null);
   const [showHelp, setShowHelp] = useState(false);
   const lesson = getLosTeacherLesson(lessonId);
-  const session = lesson
+  // Reject malformed manuscripts, not merely broken React props.
+  const contentValid = lesson ? validateTeacherLesson(lesson).length === 0 : false;
+  const session = lesson && contentValid
     ? draft.teacherSessions?.[lessonId] ?? emptyTeacherSession(lesson, stamp())
     : null;
   const scene = lesson?.scenes.find(item => item.id === session?.sceneId) ?? lesson?.scenes[0];
