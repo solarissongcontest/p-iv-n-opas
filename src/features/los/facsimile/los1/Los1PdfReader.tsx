@@ -119,7 +119,6 @@ export function Los1PdfReader({
   const currentLoadingTask=useRef<{destroy:()=>Promise<void>}|null>(null);
   const currentDoc=useRef<PDFDocumentProxy|null>(null);
   const touchStart=useRef<{x:number;y:number;fingers:number;control:boolean}|null>(null);
-  const [fileEpoch,setFileEpoch]=useState(0);
 
   useEffect(()=>{
     const node=stageRef.current;
@@ -131,14 +130,6 @@ export function Los1PdfReader({
     return ()=>observer.disconnect();
   },[document]);
 
-  useEffect(()=>{
-    if(!bookmarkStorageKey)return;
-    try{
-      const data:unknown=JSON.parse(localStorage.getItem(bookmarkStorageKey)??"[]");
-      setBookmarks(Array.isArray(data)?data.filter((n):n is number=>
-        Number.isInteger(n)&&n>=0&&n<LOS1_C01_PDF_CONTRACT.pageCount):[]);
-    }catch{setBookmarks([]);}
-  },[bookmarkStorageKey]);
   useEffect(()=>{
     if(!bookmarkStorageKey)return;
     try{localStorage.setItem(bookmarkStorageKey,JSON.stringify(bookmarks));}
@@ -175,13 +166,25 @@ export function Los1PdfReader({
     }
     setBusy(true);setDocument(null);setFileName("");
     setBookmarkStorageKey(null);setBookmarks([]);setHits([]);
-    const epoch=fileEpoch+1;
-    setFileEpoch(epoch);
     try{
       await currentLoadingTask.current?.destroy();
       currentLoadingTask.current=null;
       currentDoc.current=null;
       const buffer=await file.arrayBuffer();
+      // The PDF worker may transfer/detach the ArrayBuffer. Hash it first.
+      const owner=getDeviceOwnerId();
+      let bookmarkKey:string|null=null;
+      let restoredBookmarks:number[]=[];
+      if(owner&&typeof crypto!=="undefined"&&crypto.subtle){
+        const hash=await crypto.subtle.digest("SHA-256",buffer);
+        const digest=Array.from(new Uint8Array(hash)).map(x=>x.toString(16).padStart(2,"0")).join("");
+        bookmarkKey="los1.c01.pdf-bookmarks."+owner+"."+digest;
+        try{
+          const data:unknown=JSON.parse(localStorage.getItem(bookmarkKey)??"[]");
+          restoredBookmarks=Array.isArray(data)?data.filter((n):n is number=>
+            Number.isInteger(n)&&n>=0&&n<LOS1_C01_PDF_CONTRACT.pageCount):[];
+        }catch{/* Use an empty set of local bookmarks. */}
+      }
       const pdfjs=await import("pdfjs-dist");
       pdfjs.GlobalWorkerOptions.workerSrc=pdfWorkerUrl;
       const loadingTask=pdfjs.getDocument({data:new Uint8Array(buffer)});
@@ -197,12 +200,8 @@ export function Los1PdfReader({
       if(sourceError)throw new Error(sourceError);
       currentDoc.current=pdf;
       setDocument(pdf);setPageIndex(0);setZoom(100);setFileName(file.name);
-      const owner=getDeviceOwnerId();
-      if(owner&&typeof crypto!=="undefined"&&crypto.subtle){
-        const hash=await crypto.subtle.digest("SHA-256",buffer);
-        const digest=Array.from(new Uint8Array(hash)).map(x=>x.toString(16).padStart(2,"0")).join("");
-        setBookmarkStorageKey("los1.c01.pdf-bookmarks."+owner+"."+digest);
-      }
+      setBookmarks(restoredBookmarks);
+      setBookmarkStorageKey(bookmarkKey);
     }catch(e){
       setError(e instanceof Error?e.message:"PDF:n avaaminen epäonnistui.");
       setDocument(null);
