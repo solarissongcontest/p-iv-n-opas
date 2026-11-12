@@ -11,7 +11,7 @@ import "./los-recall.css";
 const REVIEW_LIMIT=10;
 
 /** Chapter-local vocabulary review, no automatic mastery/CEFR or speech score. */
-export function LosRecallCards({chapter}:{chapter:LosChapter}){
+export function LosRecallCards({chapter,onBack}:{chapter:LosChapter;onBack:()=>void}){
   const {draft,update,saved}=useLosChapterDraft(1,chapter.id);
   const [direction,setDirection]=useState<LosRecallDirection>("de-fi");
   const [scope,setScope]=useState<"due"|"all">("due");
@@ -49,6 +49,7 @@ export function LosRecallCards({chapter}:{chapter:LosChapter}){
     setScope(value);setSessionReviewed([]);setRevealed(false);setDate(new Date().toISOString());
   };
   return <section className="los-inner-page los-recall" aria-label={"Kappaleen "+Number(chapter.id)+" sanaston kertauskortit"}>
+    <button type="button" className="los-recall-back" onClick={onBack}>Takaisin kappaleen sanastoon</button>
     <p className="los-eyebrow">WIEDERHOLEN / KAPITEL {Number(chapter.id)} / SANASTO</p>
     <h1>Sanaston kertauskortit</h1>
     <p className="los-page-intro">Palauta saksan sanoja muistista. Käännä kortti vasta oman yrityksen jälkeen ja arvioi itse, muistitko vastauksen. Korttien väli pitenee alustavasti yhden, kolmen, seitsemän, neljäntoista ja kolmenkymmenen päivän jaksoissa. Tämä ei mittaa ääntämistä eikä automaattisesti vahvista osaamistasoa.</p>
