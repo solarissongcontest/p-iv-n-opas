@@ -105,7 +105,7 @@ export function LosFirstLessons({ selectedId, onSelect, move }: {
     <div className="los-lesson-picker" role="group" aria-label={`${chapterLabel(chapterId)}: valitse oppitunti`}>
       {chapterLessons.map(item => {
         const done = Boolean(chapterDraft(item.id).draft.lessonProgress?.[item.id]?.completedAt);
-        return <button key={item.id} type="button" aria-pressed={item.id === lesson.id} onClick={() => onSelect(item.id)}
+        return <button key={item.id} type="button" aria-pressed={item.id === lesson.id} onClick={() => item.id === "L004" ? window.location.assign("/los-lessons/L004") : onSelect(item.id)}
           className={item.id === lesson.id ? "is-active" : ""}>
           {done ? <CheckCircle2 size={17} /> : <Circle size={17} />}
           <span>{item.id}</span>
@@ -116,6 +116,11 @@ export function LosFirstLessons({ selectedId, onSelect, move }: {
       <p className="los-overline">{lesson.id} · NOIN {lesson.estimatedMinutes} MIN · {lesson.id === "L001" ? "KIRJAN ALOITUS" : chapterId==="93" ? "EX-FINAL / YHTEENVETO" : chapterId==="92" ? "KERTAUS II" : chapterId==="91" ? "KERTAUS I / EX-MID" : `C${chapterId}`}</p>
       <h3>{lesson.title}</h3>
       <p className="los-lesson-objective"><strong>Tavoite:</strong> {lesson.objective}</p>
+      {lesson.id === "L004" && <div className="los-lesson-teacher-entry">
+        <strong>Uusi: opettajajohtoinen oppitunti</strong>
+        <p>L004 on ensimmäinen uudella Teaching Engine 2.0 -järjestelmällä opetettava malliläksy. Selitykset, harjoitukset ja kirjan tehtävät toimivat yhdessä.</p>
+        <a href="/los-lessons/L004" className="los-primary">Avaa uusi oppituntinäkymä <ArrowRight size={18}/></a>
+      </div>}
       <p className="los-lesson-status">{isComplete ? "Oppitunti suoritettu. Voit silti avata aineistot uudelleen." :
         progress.startedAt ? "Oppitunti kesken" : "Oppituntia ei ole vielä aloitettu"} · {stepCount}/{lesson.steps.length} vaihetta merkitty tehdyksi.</p>
       <ol className="los-lesson-steps">
