@@ -24,7 +24,7 @@ test("C08 and C10 make only four source-independent lessons executable, not sour
   assert.equal(los1LessonDraftChapter("L051"),"10");
   assert.equal(los1LessonDraftChapter("L053"),"10");
 });
-test("C08 and C10 are still NOT source-publishable and no invented authentic dialogue exists",()=>{
+test("C08 and C10 remain editorially blocked, even though C10 primary text is now readable",()=>{
   const c08=LOS1_CHAPTER_SOURCE_PLANS.find(x=>x.id==="C08");
   assert.equal(c08?.primarySourceId,null);
   const gate8=getLosChapterSourceGate("08");
@@ -35,8 +35,8 @@ test("C08 and C10 are still NOT source-publishable and no invented authentic dia
   const src=readFileSync("src/features/los/lessonEngineC08C10Partial.ts","utf8");
   assert.match(src,/ei ole vielä luettavissa/);
   assert.match(src,/ei ole vielä tarkistettu/);
-  assert.match(src,/ei kutsuta uudeksi C10:n Text A:ksi/);
-  assert.match(src,/eivät korvaa puuttuvaa C10-haastattelua/);
+  assert.match(src,/nyt luettavissa suoraan Text A/);
+  assert.match(src,/eivät todista C10:n autenttisen äänitteen kuullunymmärtämistä/);
 });
 test("all four guided lessons refer to real practice IDs with chapter-local submission",()=>{
   const exercise8=new Set(losExercisesFor("08").map(x=>x.id));
@@ -79,5 +79,6 @@ test("existing v1 draft format and sparse lesson progress remain backup compatib
   const index=readFileSync("src/features/los/LosReferenceTools.tsx","utf8");
   assert.match(runner,/useLosChapterDraft\(1, "08"\)/);
   assert.match(runner,/useLosChapterDraft\(1, "10"\)/);
-  assert.match(index,/päätekstit puuttuvat edelleen/);
+  assert.match(index,/C08:ssa vain erikseen nimetyt/);
+  assert.match(index,/C10:n koko Harald-haastattelun litteraatti on nyt luettavissa/);
 });
