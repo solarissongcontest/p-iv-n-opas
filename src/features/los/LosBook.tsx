@@ -41,11 +41,11 @@ type LosLocation = { book: number | null; chapter: string | null; section: LosSe
 /** Kymmenen näkyvää kappaleosiota LOS! 1:n kirjakohtaisen masterplanin mukaan. */
 const sections: { id: LosSection; label: string }[] = [
   { id:"chapter", label:"Aloita" },
-  { id:"text", label:"Text A" },
+  { id:"text", label:"Teksti A" },
   { id:"understand", label:"Ymmärrä" },
   { id:"vocabulary", label:"Sanasto" },
   { id:"grammar", label:"Kielioppi" },
-  { id:"text-b", label:"Text B" },
+  { id:"text-b", label:"Teksti B" },
   { id:"practice", label:"Harjoittele" },
   { id:"apply", label:"Käytä saksaa" },
   { id:"culture", label:"Kulttuuri" },
