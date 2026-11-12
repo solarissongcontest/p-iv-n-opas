@@ -102,7 +102,7 @@ export function validTeacherSessionMap(value: unknown): value is Record<string, 
   if (!record(value)) return false;
   const entries = Object.entries(value);
   return entries.length <= 60 && entries.every(([key, entry]) =>
-    /^L\\d{3}$/.test(key) && validTeacherSession(entry) && entry.lessonId === key);
+    /^L\d{3}$/.test(key) && validTeacherSession(entry) && entry.lessonId === key);
 }
 export function parseTeacherSessions(value: unknown): Record<string, TeacherSession> {
   if (!record(value)) return {};
