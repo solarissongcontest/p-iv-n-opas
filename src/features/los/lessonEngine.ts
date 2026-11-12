@@ -18,7 +18,7 @@ export type LosLessonStep = {
   minutes: number;
 };
 export type LosEvidenceRequirement = {
-  kind: "checked-source" | "answered-practice" | "chapter-test";
+  kind: "checked-source" | "answered-practice" | "chapter-test" | "written-application" | "self-assessment";
   ids?: readonly string[];
   label: string;
 };
@@ -172,15 +172,17 @@ export function parseLosLessonProgressMap(value: unknown): Record<string, LosLes
     validateLosLessonProgressMap({ [id]: entry })
   ).slice(0, 60)) as Record<string, LosLessonProgress>;
 }
-export function losLessonEvidenceMet(lesson: LosLessonBlueprint, draft: Pick<LosChapterDraft, "practiceAnswers" | "practiceChecked" | "testSubmittedAt">): boolean {
+export function losLessonEvidenceMet(lesson: LosLessonBlueprint, draft: Pick<LosChapterDraft, "practiceAnswers" | "practiceChecked" | "testSubmittedAt"> & Partial<Pick<LosChapterDraft, "applicationDraft" | "selfAssessment">>): boolean {
   return lesson.evidence.every(item => {
     if (item.kind === "chapter-test") return Boolean(draft.testSubmittedAt);
+    if (item.kind === "written-application") return Boolean(draft.applicationDraft && draft.applicationDraft.trim().length >= 80);
+    if (item.kind === "self-assessment") return Boolean(draft.selfAssessment && draft.selfAssessment.trim().length >= 15);
     if (item.kind === "checked-source") return (item.ids ?? []).every(id =>
       draft.practiceChecked.includes(id) && Boolean(draft.practiceAnswers[id]));
     return (item.ids ?? []).every(id => Boolean(draft.practiceAnswers[id]?.trim()));
   });
 }
-export function losLessonCanComplete(lesson: LosLessonBlueprint, progress: LosLessonProgress, draft: Pick<LosChapterDraft, "practiceAnswers" | "practiceChecked" | "testSubmittedAt">): boolean {
+export function losLessonCanComplete(lesson: LosLessonBlueprint, progress: LosLessonProgress, draft: Pick<LosChapterDraft, "practiceAnswers" | "practiceChecked" | "testSubmittedAt"> & Partial<Pick<LosChapterDraft, "applicationDraft" | "selfAssessment">>): boolean {
   return lesson.steps.every(step => progress.completedStepIds.includes(step.id)) &&
     progress.exitCheckedAt !== null &&
     lesson.check.answers.some(option => option.id === progress.exitAnswer) &&
@@ -197,6 +199,6 @@ export function losLessonSubmitCheck(lesson: LosLessonBlueprint, progress: LosLe
   if (progress.completedAt || !lesson.check.answers.some(answer => answer.id === answerId)) return progress;
   return { ...progress, startedAt: progress.startedAt ?? now, exitAnswer: answerId, exitCheckedAt: now };
 }
-export function losLessonFinish(lesson: LosLessonBlueprint, progress: LosLessonProgress, draft: Pick<LosChapterDraft, "practiceAnswers" | "practiceChecked" | "testSubmittedAt">, now: string): LosLessonProgress {
+export function losLessonFinish(lesson: LosLessonBlueprint, progress: LosLessonProgress, draft: Pick<LosChapterDraft, "practiceAnswers" | "practiceChecked" | "testSubmittedAt"> & Partial<Pick<LosChapterDraft, "applicationDraft" | "selfAssessment">>, now: string): LosLessonProgress {
   return progress.completedAt || !losLessonCanComplete(lesson, progress, draft) ? progress : { ...progress, completedAt: now };
 }
