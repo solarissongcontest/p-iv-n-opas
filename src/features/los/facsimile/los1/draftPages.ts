@@ -78,7 +78,7 @@ export function validateDraftPages(pages: readonly Los1DraftPage[]): string[] {
   });
   for (const [id, entries] of spreads) {
     if (entries.length !== 2 || entries[0]?.side !== "left" || entries[1]?.side !== "right" ||
-        entries[1].index !== entries[0].index + 1) {
+        entries[1]?.index !== (entries[0]?.index ?? -1) + 1) {
       errors.push(`Virheellinen vasen–oikea-aukeama: ${id}`);
     }
   }
