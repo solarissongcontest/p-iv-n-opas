@@ -14,6 +14,7 @@ import { getLosOpenDialogue } from "./content/los1OpenDialogues";
 import { LosNotebook, LosWorkbook } from "./LosWorkbook";
 import { LosBackups } from "./LosBackups";
 import { LosMidtermExam } from "./LosMidtermExam";
+import { LosRecallCards } from "./LosRecallCards";
 import { LosReviewI } from "./LosReviewI";
 import { LosApplication, LosCulture, LosTextB, LosUnderstanding } from "./LosSupplementalSections";
 import "./los-book.css";
@@ -49,7 +50,7 @@ function readLocation(): LosLocation {
   const book = Number.isInteger(parsedBook) && parsedBook >= 1 && parsedBook <= 8 ? parsedBook : null;
   const chapter = book === 1 && /^\d{2}$/.test(parts[1] ?? "") ? (parts[1] ?? null) : null;
   const token = parts[chapter ? 2 : 1];
-  const section = (["overview", "contents", "chapter", "text", "vocabulary", "grammar", "practice", "appendix", "dictionary", "path", "search", "midterm", "review", "understand", "text-b", "apply", "culture", "test"].includes(token ?? "") ? token : chapter ? "chapter" : "overview") as LosSection;
+  const section = (["overview", "contents", "chapter", "text", "vocabulary", "grammar", "practice", "appendix", "dictionary", "path", "search", "midterm", "review", "cards", "understand", "text-b", "apply", "culture", "test"].includes(token ?? "") ? token : chapter ? "chapter" : "overview") as LosSection;
   return { book, chapter, section };
 }
 function linkTo(book?: number, chapter?: string, section: LosSection = "overview") {
@@ -275,7 +276,7 @@ function Grammar({ chapter }: { chapter: LosChapter }) {
     </> : <LosChapterGrammar chapterId={chapter.id} />}
   </section>;
 }
-function Vocabulary({ chapter }: { chapter: LosChapter }) {
+function Vocabulary({ chapter, move }: { chapter: LosChapter; move: (chapter:string|null,section:LosSection)=>void }) {
   const [query, setQuery] = useState("");
   const [showTranslations, setShowTranslations] = useState(true);
   const words = useMemo(() => chapter.vocabulary.map(strip).filter(parts => parts.join(" ").toLowerCase().includes(query.trim().toLowerCase())), [chapter, query]);
@@ -283,6 +284,7 @@ function Vocabulary({ chapter }: { chapter: LosChapter }) {
     <p className="los-eyebrow">WORTSCHATZ / KAPITEL {Number(chapter.id)}</p>
     <h1>Sanasto</h1>
     <p className="los-page-intro">Kappaleen opetettavia sanoja ja ilmauksia. Tämä on tarkistettava ennakkoluettelo, ei vielä lopullinen sanakirjatietokanta.</p>
+    <button type="button" className="los-outline-button" onClick={() => move(chapter.id,"cards")}>Kertaa sanastoa korteilla</button>
     <div className="los-vocabulary-tools">
       <label><Search size={17} /><span className="sr-only">Etsi sanastosta</span><input value={query} onChange={event => setQuery(event.target.value)} placeholder="Etsi sanaa…" /></label>
       <button aria-pressed={!showTranslations} onClick={() => setShowTranslations(v => !v)}>{showTranslations ? "Piilota suomennokset" : "Näytä suomennokset"}</button>
@@ -335,9 +337,9 @@ function LosBookWorkspace({ book, location, move, goLibrary, openBook }: { book:
         <a className="los-sidebar-exit" href="/studies">Palaa Opintopäiväkirjaan <ArrowRight size={15} /></a>
       </aside>
       <main className="los-book-main" id="main-content" tabIndex={-1}>
-        <div className="los-main-breadcrumb"><button onClick={() => move(null, "overview")}>LOS! {book.id}</button>{chapter ? <><ChevronRight size={12} /><button onClick={() => openChapter(chapter)}>Kappale {Number(chapter.id)}</button></> : null}{chapter && section !== "chapter" ? <><ChevronRight size={12} /><span>{sections.find(s => s.id === section)?.label}</span></> : null}</div>
+        <div className="los-main-breadcrumb"><button onClick={() => move(null, "overview")}>LOS! {book.id}</button>{chapter ? <><ChevronRight size={12} /><button onClick={() => openChapter(chapter)}>Kappale {Number(chapter.id)}</button></> : null}{chapter && section !== "chapter" ? <><ChevronRight size={12} /><span>{section==="cards" ? "Kertauskortit" : sections.find(s => s.id === section)?.label}</span></> : null}</div>
         {chapter && section !== "overview" && section !== "contents" && section !== "appendix" && <nav className="los-section-nav" aria-label="Kappaleen osiot">
-          {sections.map(item => <button key={item.id} className={section === item.id ? "is-active" : ""} onClick={() => move(chapter.id, item.id)}>{item.label}</button>)}
+          {sections.map(item => <button key={item.id} className={section === item.id || (section==="cards" && item.id==="vocabulary") ? "is-active" : ""} onClick={() => move(chapter.id, item.id)}>{item.label}</button>)}
         </nav>}
         <div className="los-book-paper">
           {!chapter && section === "overview" ? <BookFront book={book} move={move} /> :
@@ -351,7 +353,8 @@ function LosBookWorkspace({ book, location, move, goLibrary, openBook }: { book:
             chapter ? (
               section === "text" ? <TextPage chapter={chapter} /> :
               section === "understand" ? (chapter.id==="02" ? <LosC02Understanding goToText={() => move(chapter.id,"text")}/> : chapter.id==="06" ? <LosC06AgeUnderstanding goToText={() => move(chapter.id,"text")}/> : getLosOpenDialogue(chapter.id) ? <LosOpenTextUnderstanding chapterId={chapter.id} goToText={() => move(chapter.id,"text")}/> : <LosUnderstanding chapter={chapter} goToText={() => move(chapter.id, "text")} />) :
-              section === "vocabulary" ? <Vocabulary key={chapter.id} chapter={chapter} /> :
+              section === "vocabulary" ? <Vocabulary key={chapter.id} chapter={chapter} move={move} /> :
+              section === "cards" ? <LosRecallCards key={chapter.id} chapter={chapter} onBack={()=>move(chapter.id,"vocabulary")} /> :
               section === "grammar" ? <Grammar chapter={chapter} /> :
               section === "text-b" ? <LosTextB chapter={chapter} /> :
               section === "practice" ? <LosWorkbook key={`practice-${chapter.id}`} chapter={chapter} mode="practice" /> :

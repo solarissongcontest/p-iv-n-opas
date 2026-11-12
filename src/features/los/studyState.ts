@@ -2,6 +2,8 @@ import { useCallback, useEffect, useState } from "react";
 import { getDeviceOwnerId } from "@/lib/deviceSession";
 import { parseLosLessonProgressMap } from "./lessonEngine.ts";
 import type { LosLessonProgress } from "./lessonEngine.ts";
+import { parseLosRecallCardMap } from "./recallEngine.ts";
+import type { LosRecallCardState } from "./recallEngine.ts";
 
 /**
  * Opiskelijakohtainen paikallinen luonnos. EI pilvisynkronointia.
@@ -21,6 +23,8 @@ export type LosChapterDraft = {
   readerMarks?: Record<string,string>;
   /** First lesson runs share this existing chapter draft and its JSON backup. */
   lessonProgress?: Record<string,LosLessonProgress>;
+  /** Chapter-local spaced-recall memory, one record per word and direction. */
+  recallCards?: Record<string,LosRecallCardState>;
   updatedAt: string;
 };
 export function emptyLosDraft(): LosChapterDraft {
@@ -49,6 +53,7 @@ export function parseLosDraft(value:string | null):LosChapterDraft {
       selfAssessment:typeof input.selfAssessment==="string"?input.selfAssessment.slice(0,5000):"",
       readerMarks:input.readerMarks && isStringRecord(input.readerMarks) && Object.keys(input.readerMarks).length<=200 ? Object.fromEntries(Object.entries(input.readerMarks).filter(([k,v])=>k.length<=100&&v.length<=500)) : {},
       lessonProgress:parseLosLessonProgressMap(input.lessonProgress),
+      recallCards:parseLosRecallCardMap(input.recallCards),
       updatedAt:typeof input.updatedAt==="string"?input.updatedAt:"",
     };
   }catch{return emptyLosDraft();}

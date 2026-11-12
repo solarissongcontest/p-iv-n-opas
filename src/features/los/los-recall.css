@@ -1,0 +1,40 @@
+.los-recall { max-width: 850px; }
+.los-recall-back { border: 1px solid var(--los-line); border-radius: 7px; background: var(--los-paper); color: var(--los-ink); padding: 10px 14px; min-height: 42px; margin-bottom: 14px; }
+.los-recall-stats { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 11px; margin: 20px 0; }
+.los-recall-stats > div { display: flex; flex-direction: column; gap: 5px; padding: 16px 13px; border: 1px solid var(--los-line); border-radius: 9px; background: var(--los-book-tint); }
+.los-recall-stats strong { font-size: 25px; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.los-recall-stats span { font-size: 11px; line-height: 1.5; color: var(--los-soft); }
+.los-recall-controls { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 14px; margin: 20px 0; }
+.los-recall-controls fieldset { min-width: 0; border: 1px solid var(--los-line); border-radius: 8px; padding: 12px; display: flex; gap: 6px; flex-wrap: wrap; }
+.los-recall-controls legend { padding: 0 5px; font-weight: 650; font-size: 13px; }
+.los-recall-controls button { border: 1px solid var(--los-line); border-radius: 7px; background: var(--los-paper); color: var(--los-ink); min-height: 42px; padding: 8px 11px; font-size: 12px; }
+.los-recall-controls button.is-active { background: var(--los-book-tint); border-color: var(--los-book-accent); color: var(--los-book-accent); font-weight: 700; }
+.los-recall-save { font-size: 12px; color: var(--los-soft); line-height: 1.6; }
+.los-recall-stage { margin: 22px 0 25px; }
+.los-recall-number { margin-bottom: 12px; font-size: 12px; color: var(--los-soft); }
+.los-recall-card { border: 1px solid var(--los-line); background: var(--los-paper); padding: clamp(18px,4vw,32px); border-radius: 12px; min-height: 250px; text-align: center; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 17px; }
+.los-recall-prompt { font-size: clamp(25px,4vw,39px); font-weight: 700; line-height: 1.3; max-width: 660px; margin: 6px 0; overflow-wrap: anywhere; }
+.los-recall-card .los-primary { min-height: 48px; display: inline-flex; align-items: center; gap: 8px; }
+.los-recall-answer { display: flex; flex-direction: column; gap: 7px; padding: 14px 0; width: 100%; background: var(--los-book-tint); border-radius: 9px; }
+.los-recall-answer > span { font-size: 12px; color: var(--los-soft); }
+.los-recall-answer > strong { font-size: clamp(19px,3vw,27px); font-weight: 700; line-height: 1.3; padding: 0 12px; }
+.los-recall-last { font-size: 12px; color: var(--los-soft); line-height: 1.7; }
+.los-recall-ratings { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; width: 100%; }
+.los-recall-ratings button { min-height: 46px; padding: 10px 15px; border-radius: 8px; border: 1px solid var(--los-line); color: var(--los-ink); background: var(--los-paper); }
+.los-recall-ratings button:hover:not(:disabled),.los-recall-ratings button:focus-visible { border-color: var(--los-book-accent); outline: 2px solid var(--los-book-accent); outline-offset: 2px; }
+.los-recall-ratings button:last-child { background: var(--los-book-tint); border-color: var(--los-book-accent); }
+.los-recall-empty { padding: 28px 20px; margin: 20px 0; background: var(--los-book-tint); border-radius: 10px; display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center; }
+.los-recall-empty h2 { font-size: 21px; }
+.los-recall-empty p { line-height: 1.7; }
+.los-recall-empty button { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; border: 1px solid var(--los-book-accent); border-radius: 8px; padding: 10px 15px; color: var(--los-book-accent); background: var(--los-paper); }
+.los-recall-footnote { margin-top: 27px; border-top: 1px solid var(--los-line); padding-top: 18px; font-size: 12px; line-height: 1.8; color: var(--los-soft); }
+@media (max-width: 650px) {
+ .los-recall-stats { gap: 6px; }
+ .los-recall-stats > div { padding: 10px 7px; }
+ .los-recall-stats strong { font-size: 22px; }
+ .los-recall-stats span { font-size: 10px; }
+ .los-recall-controls { grid-template-columns: 1fr; }
+ .los-recall-card { min-height: 230px; }
+ .los-recall-ratings { flex-direction: column; }
+ .los-recall-ratings button { width: 100%; }
+}
