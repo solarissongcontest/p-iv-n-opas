@@ -1,11 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { Volume2, VolumeX } from "lucide-react";
+import { findLosGermanVoice } from "./pronunciationVoices";
+export { findLosGermanVoice } from "./pronunciationVoices";
 
-/** Browser voices are capabilities, not evidence of a reviewed pronunciation. */
-export function findLosGermanVoice(voices: readonly SpeechSynthesisVoice[]): SpeechSynthesisVoice | null {
-  const german = voices.filter(voice => /^de(?:-|$)/i.test(voice.lang));
-  return german.find(voice => /^de-DE$/i.test(voice.lang)) ?? german[0] ?? null;
-}
+/** Only a de-DE voice is offered as de-DE pronunciation training. */
 
 export function LosPronunciationButton({ text }: { text: string }) {
   const [voices, setVoices] = useState<readonly SpeechSynthesisVoice[]>([]);
@@ -57,14 +55,14 @@ export function LosPronunciationButton({ text }: { text: string }) {
   return <span className="los-pronunciation-control">
     <button type="button" className="los-pronunciation-button" disabled={!voice}
       onClick={speak} aria-label={voice
-        ? `Kuuntele ${text}, synteettinen saksankielinen esikatselu`
-        : `Ääntämismallia sanalle ${text} ei ole saatavilla tällä laitteella`}>
+        ? `Kuuntele ${text}, synteettinen de-DE-ääntämisesikatselu`
+        : `Saksan de-DE-ääntä sanalle ${text} ei ole saatavilla tällä laitteella`}>
       {voice ? <Volume2 size={17} aria-hidden="true"/> : <VolumeX size={17} aria-hidden="true"/>}
       {status === "playing" ? "Toistetaan…" : voice ? "Kuuntele (synteettinen)" : "Ääni ei saatavilla"}
     </button>
     <small className="los-pronunciation-disclaimer">
-      {voice ? "Laitteen saksankielinen TTS. Äänen laatua ei ole laitetestattu." :
-        "Saksankielistä TTS-ääntä ei löytynyt. Virheellistä vieraskielistä ääntä ei käytetä."}
+      {voice ? "Laitteen de-DE-puhesynteesi. Äänen laatua ei ole laitetestattu." :
+        "Saksan de-DE-puhesynteesiääntä ei löytynyt. Muun kielialueen ääntä ei väitetä de-DE-malliksi."}
     </small>
     {error && <span role="alert" className="los-audio-error">{error}</span>}
   </span>;
