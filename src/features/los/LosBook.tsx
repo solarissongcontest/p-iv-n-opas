@@ -302,7 +302,7 @@ function Grammar({ chapter }: { chapter: LosChapter }) {
     </> : <LosChapterGrammar chapterId={chapter.id} />}
   </section>;
 }
-function Vocabulary({ chapter, move }: { chapter: LosChapter; move: (chapter:string|null,section:LosSection)=>void }) {
+function Vocabulary({ chapter, move, bookId }: { chapter: LosChapter; bookId:number; move: (chapter:string|null,section:LosSection)=>void }) {
   const [query, setQuery] = useState("");
   const [showTranslations, setShowTranslations] = useState(true);
   const words = useMemo(() => chapter.vocabulary.map(strip).filter(parts => parts.join(" ").toLowerCase().includes(query.trim().toLowerCase())), [chapter, query]);
@@ -310,7 +310,7 @@ function Vocabulary({ chapter, move }: { chapter: LosChapter; move: (chapter:str
     <p className="los-eyebrow">WORTSCHATZ / KAPITEL {Number(chapter.id)}</p>
     <h1>Sanasto</h1>
     <p className="los-page-intro">Kappaleen opetettavia sanoja ja ilmauksia. Tämä on tarkistettava ennakkoluettelo, ei vielä lopullinen sanakirjatietokanta.</p>
-    {chapter.id&&<Los1VisualLearning key={chapter.id} chapterId={chapter.id} placement="vocabulary"/>}
+    {bookId===1&&<Los1VisualLearning key={chapter.id} chapterId={chapter.id} placement="vocabulary"/>}
     <button type="button" className="los-outline-button" onClick={() => move(chapter.id,"cards")}>Kertaa sanastoa korteilla</button>
     <div className="los-vocabulary-tools">
       <label><Search size={17} /><span className="sr-only">Etsi sanastosta</span><input value={query} onChange={event => setQuery(event.target.value)} placeholder="Etsi sanaa…" /></label>
@@ -385,13 +385,13 @@ function LosBookWorkspace({ book, location, move, goLibrary, openBook }: { book:
             chapter ? (
               section === "text" ? <TextPage chapter={chapter} /> :
               section === "understand" ? (chapter.id==="02" ? <LosC02Understanding goToText={() => move(chapter.id,"text")}/> : chapter.id==="06" ? <><LosOpenTextUnderstanding chapterId="06" goToText={() => move(chapter.id,"text")}/><details className="los-editorial-note"><summary>C01:n ikäkertauksen vanhat ymmärtämistehtävät (L034)</summary><LosC06AgeUnderstanding goToText={() => move(chapter.id,"text")}/></details></> : getLosOpenDialogue(chapter.id) ? <LosOpenTextUnderstanding chapterId={chapter.id} goToText={() => move(chapter.id,"text")}/> : <LosUnderstanding chapter={chapter} goToText={() => move(chapter.id, "text")} />) :
-              section === "vocabulary" ? <Vocabulary key={chapter.id} chapter={chapter} move={move} /> :
+              section === "vocabulary" ? <Vocabulary key={chapter.id} chapter={chapter} bookId={book.id} move={move} /> :
               section === "cards" ? <LosRecallCards key={chapter.id} chapter={chapter} onBack={()=>move(chapter.id,"vocabulary")} /> :
               section === "grammar" ? <Grammar chapter={chapter} /> :
               section === "text-b" ? <LosTextB chapter={chapter} /> :
               section === "practice" ? <LosWorkbook key={`practice-${chapter.id}`} chapter={chapter} mode="practice" /> :
               section === "apply" ? <LosApplication key={chapter.id} chapter={chapter} /> :
-              section === "culture" ? <LosCulture chapter={chapter} /> :
+              section === "culture" ? <LosCulture chapter={chapter} bookId={book.id} /> :
               section === "test" ? <LosWorkbook key={`test-${chapter.id}`} chapter={chapter} mode="test" /> :
               <ChapterOpening book={book} chapter={chapter} move={move} />
             ) : <Contents book={book} move={move} />}
