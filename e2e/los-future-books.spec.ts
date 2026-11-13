@@ -89,6 +89,7 @@ test("LOS! 2–8 show all 60 source-written lessons while keeping exams non-exec
   await page.getByRole("button",{name:/Tunti 2: Aloita ja ennakoi/}).click();
   await expect(page.locator(".los-guided-lesson-stage-nav button")).toHaveCount(6);
   await expect(page.locator(".los-guided-lesson-stage")).toContainText("Opettajan aloitus");
+  await page.getByText("Kertaus ja välikoe",{exact:true}).click();
   await page.getByRole("button",{name:/Tunti 30: välikoe/i}).click();
   await expect(page.locator(".los-guided-review")).toContainText("Kokeen ohje, ei avattu arvioitava koe");
   await expect(page.locator(".los-future-exercise-card")).toHaveCount(0);
