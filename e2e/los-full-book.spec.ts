@@ -1176,7 +1176,12 @@ test("L005 shows genuine 20-item listening source and text inside Teacher 2.0 on
  await outline.getByRole("button",{name:"Avaa koko alkuperäinen tervehdysluettelo"}).click();
  const media=lesson.locator(".los-teacher-greeting-media");
  await expect(media).toBeVisible();
- await expect(media.locator("audio")).toHaveAttribute("src",/German_Vocabulary_-_Greetings[.]ogg$/);
+ const sources=media.locator("audio source");
+ await expect(sources).toHaveCount(2);
+ await expect(sources.first()).toHaveAttribute("type","audio/mpeg");
+ await expect(sources.first()).toHaveAttribute("src",/German_Vocabulary_-_Greetings[.]ogg[.]mp3$/);
+ await expect(sources.last()).toHaveAttribute("type","audio/ogg");
+ await expect(sources.last()).toHaveAttribute("src",/German_Vocabulary_-_Greetings[.]ogg$/);
  await expect(media).toContainText("28 sekunnin");
  await expect(media).toContainText("ei todista");
  // Exercise the native media error fallback without relying on Commons/CDN access in CI.

@@ -11,7 +11,10 @@ import "./greeting-media.css";
  * understanding. No synthetic score, AI speech or tracking is performed.
  */
 const SOURCE=LOS1_TEXT_B_SOURCES["01"];
-const AUDIO_URL="https://commons.wikimedia.org/wiki/Special:Redirect/file/German_Vocabulary_-_Greetings.ogg";
+// Commons already provides an MP3 transcode of the *same* public-domain
+// human recording. Prefer MP3 for old iOS/Safari; preserve the original Ogg.
+const AUDIO_MP3_URL="https://upload.wikimedia.org/wikipedia/commons/transcoded/b/bb/German_Vocabulary_-_Greetings.ogg/German_Vocabulary_-_Greetings.ogg.mp3";
+const AUDIO_OGG_URL="https://commons.wikimedia.org/wiki/Special:Redirect/file/German_Vocabulary_-_Greetings.ogg";
 
 export function LosTeacherGreetingMedia(){
  const [showText,setShowText]=useState(false);
@@ -20,15 +23,18 @@ export function LosTeacherGreetingMedia(){
    <h3>Kuuntele alkuperäistä saksaa</h3>
    <p>German Men92:n alkuperäinen noin 28 sekunnin äänite sisältää
     20 erillistä tervehdystä ja hyvästelyä. Se on ilmausluettelo, ei keskustelu.</p>
-   <audio controls preload="none" src={AUDIO_URL}
+   <audio controls preload="none"
     aria-label="Saksankieliset tervehdykset ja hyvästelyt, koko alkuperäisäänite"
     onError={()=>setFailed(true)}
     onCanPlay={()=>setFailed(false)}>
+    <source src={AUDIO_MP3_URL} type="audio/mpeg"/>
+    <source src={AUDIO_OGG_URL} type="audio/ogg"/>
     Selaimesi ei tue äänitteen toistamista. Koko teksti löytyy alta.
    </audio>
    {failed&&<p role="alert">Äänite ei latautunut tai toisto ei ole tässä selaimessa tuettu.
      Voit jatkaa koko kirjoitetun luettelon avulla, mutta se ei ole kuullun ymmärtämisen näyttö.</p>}
-   <p className="los-teacher-greeting-notice">Äänen toiston käynnistyminen tai päättyminen
+   <p className="los-teacher-greeting-notice">Selain valitsee saatavilla olevan MP3- tai Ogg-version
+    samasta ihmisäänitteestä. Äänen toiston käynnistyminen tai päättyminen
     ei todista, että kuulit tai ymmärsit sen. Kirjallisia tehtäviä ei merkitä kuullun ymmärtämisen tuloksiksi.</p>
    <button type="button" aria-controls="los-teacher-greeting-transcript"
     aria-expanded={showText} onClick={()=>setShowText(value=>!value)}>
