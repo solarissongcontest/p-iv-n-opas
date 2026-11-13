@@ -49,7 +49,7 @@ export const TEACHER_L004:TeacherLesson={
   explanation:["Olet kirjaston palvelutiskillä ja poistut. Haluat hyvästellä virkailijan kohteliaasti.","Tämä on eri tilanne kuin tuttuun ystävään törmääminen. Mieti nyt sekä poistumista että tilanteen muodollisuutta."],
   hint:"Tilanne on kohtelias ja olet lähdössä.",
   question:{prompt:"Miten hyvästelet virkailijan?",choices:[
-   {id:"a",label:"Auf Wiedersehen!",feedback:"Oikein: tämä on kohtelias näkemiin."},
+   {id:"a",label:"Auf Wiedersehen!",feedback:"Oikein: Auf Wiedersehen! on kohtelias hyvästely, näkemiin."},
    {id:"b",label:"Guten Tag!",feedback:"Tämä tervehtii päiväsaikaan, ei hyvästele."},
    {id:"c",label:"Guten Abend!",feedback:"Tämä on illan tervehdys, ei hyvästely."}],
    correctId:"a",success:"Auf Wiedersehen! tarkoittaa näkemiin.",
