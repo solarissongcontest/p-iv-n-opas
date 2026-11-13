@@ -76,6 +76,54 @@
       }
     },
     {
+      "chapterId": "04",
+      "photoId": 6925914,
+      "locationLabel": "Berlin customer service",
+      "photographer": "Tom Tillhub",
+      "sourceImageSha256": "4cdb48be07a10845bdf2f0f146511fc5985c3d7fffb55bbf67ee588742aceaec",
+      "sourcePageUrl": "https://www.pexels.com/photo/woman-talking-to-a-receptionist-in-a-beauty-salon-6925914/",
+      "variants": {
+        "desktop": {
+          "path": "/los/culture/LOS1-C04-CULTURE-6925914-desktop.webp",
+          "width": 1024,
+          "height": 640,
+          "bytes": 57790,
+          "sha256": "3e1560a38552b8aad8b3c01c54ed2bb408c35ba24f642aaa77617298fae23fb7"
+        },
+        "mobile": {
+          "path": "/los/culture/LOS1-C04-CULTURE-6925914-mobile.webp",
+          "width": 720,
+          "height": 540,
+          "bytes": 41256,
+          "sha256": "de4de8158cfb5a808abddc78d605b7c4c512822f61a98f2f5dc6fa5657b09b98"
+        }
+      }
+    },
+    {
+      "chapterId": "07",
+      "photoId": 30125064,
+      "locationLabel": "Düsseldorf street sign",
+      "photographer": "Markus Winkler",
+      "sourceImageSha256": "e61452d42a3fbb548297ddb419b94c065edd1f6c87f7af06d1e80266bd741236",
+      "sourcePageUrl": "https://www.pexels.com/photo/street-sign-in-dusseldorf-cityscape-30125064/",
+      "variants": {
+        "desktop": {
+          "path": "/los/culture/LOS1-C07-CULTURE-30125064-desktop.webp",
+          "width": 1024,
+          "height": 640,
+          "bytes": 27774,
+          "sha256": "e447ca7447886d2c548d38da2c73143452d6ec121212c44ff5e4bffd6c70d46e"
+        },
+        "mobile": {
+          "path": "/los/culture/LOS1-C07-CULTURE-30125064-mobile.webp",
+          "width": 720,
+          "height": 540,
+          "bytes": 18636,
+          "sha256": "0c0ab5f38627e367e22d28003956a06bd5c470741f9f802b85828db1810b0a5d"
+        }
+      }
+    },
+    {
       "chapterId": "08",
       "photoId": 5427660,
       "locationLabel": "classroom illustration",
@@ -96,6 +144,30 @@
           "height": 540,
           "bytes": 38418,
           "sha256": "b221d94e5e1de078a316385d2b53218be6e62cfff78077764795b9907ddd6def"
+        }
+      }
+    },
+    {
+      "chapterId": "09",
+      "photoId": 6170644,
+      "locationLabel": "schedule illustration",
+      "photographer": "RDNE Stock project",
+      "sourceImageSha256": "57733e9e128f0d7d3319fd5507e58b7f835c60287865d714290d1d53e7cb7d32",
+      "sourcePageUrl": "https://www.pexels.com/photo/a-person-writing-on-a-desk-calendar-6170644/",
+      "variants": {
+        "desktop": {
+          "path": "/los/culture/LOS1-C09-CULTURE-6170644-desktop.webp",
+          "width": 1024,
+          "height": 640,
+          "bytes": 28596,
+          "sha256": "402e88336500163f27647d170ce24e423f9c40f284a1fadd4e04d912feb188a2"
+        },
+        "mobile": {
+          "path": "/los/culture/LOS1-C09-CULTURE-6170644-mobile.webp",
+          "width": 720,
+          "height": 540,
+          "bytes": 20710,
+          "sha256": "1762f25c937b8ac82a6fb8fc334ad8f558dcb3858e31631e1a68fe2defb1f7f7"
         }
       }
     }

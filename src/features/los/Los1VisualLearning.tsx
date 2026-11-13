@@ -16,7 +16,7 @@ export function Los1VisualLearning({chapterId,placement}:{
   const lesson=LOS1_VISUAL_LESSONS[chapterId];
   if(!lesson||lesson.placement!==placement)return null;
   const phrases=getLos1VisualPhrases(chapterId);
-  const galleryReferenced=chapterId==="03"&&placement==="culture";
+  const galleryReferenced=placement==="culture"&&["03","04","07","09"].includes(chapterId);
   return <section className="los1-visual-learning"
     aria-label={"Kappaleen "+chapterId+" kuvaan perustuva sanastoharjoitus"}>
     <div className="los1-visual-learning-header">
