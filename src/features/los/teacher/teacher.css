@@ -106,6 +106,10 @@
 .los-teacher-summary {border-top:1px solid var(--los-line);margin-top:24px;padding-top:15px;font-size:14px;}
 .los-teacher-summary h3 {font-size:19px;}
 
+.los-teacher-next-incomplete {display:flex;align-items:center;justify-content:center;gap:8px;max-width:100%;min-height:44px;white-space:normal;text-align:center;border:1px solid var(--los-book-accent);border-radius:8px;background:var(--los-book-tint);color:var(--los-ink);padding:11px 15px;margin:12px 0 16px;font-size:13px;font-weight:750;cursor:pointer;}
+.los-teacher-next-incomplete:hover {filter:brightness(.97);}
+
+
 .los-teacher-completion-checklist {list-style:disc;padding:14px 18px 14px 34px;margin:12px 0 19px;border:1px solid var(--los-line);border-radius:10px;background:var(--los-subtle);color:var(--los-ink);font-size:13px;line-height:1.65;overflow-wrap:anywhere;}
 .los-teacher-completion-checklist li+li {margin-top:8px;}
 .los-teacher-completion-checklist li::marker {color:var(--los-book-accent);}
