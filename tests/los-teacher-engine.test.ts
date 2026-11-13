@@ -50,11 +50,10 @@ test("first correct attempt gives independent evidence; hints and retries do not
   assert.equal(independentTeacherEvidence(s, lesson), 1);
   s = revealTeacherSolution(s, "independent", now);
   s = setTeacherAnswerDraft(s, "independent", "Guten Abend!", now);
-  const attemptsBeforeRevealSubmission = s.attempts.length;
+  const beforeRevealedSubmit = s.attempts.length;
   s = submitTeacherAnswer(s, lesson, "independent", "Guten Abend!", now);
-  // The canonical engine now blocks submission after the model answer was revealed.
-  // An answer copied from a reveal cannot count as an attempt or independent evidence.
-  assert.equal(s.attempts.length, attemptsBeforeRevealSubmission);
+  // C03's newer 3-attempt/reveal policy forbids scoring after the model answer is shown.
+  assert.equal(s.attempts.length, beforeRevealedSubmit);
   assert.equal(teacherLatestAttempt(s, "independent"), undefined);
   assert.equal(independentTeacherEvidence(s, lesson), 1);
 });
