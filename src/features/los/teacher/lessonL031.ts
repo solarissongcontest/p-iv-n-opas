@@ -37,31 +37,6 @@ export const LOS1_L031_TEACHER: TeacherLesson = {
       ]
     },
     {
-      "id": "recall",
-      "phase": "Harjoittelu",
-      "kind": "question",
-      "title": "Palauta muistista",
-      "paragraphs": [
-        "Kirjoita ilman näkyvää mallia. Vihje on käytettävissä, mutta silloin vastausta ei lasketa itsenäiseksi näytöksi."
-      ],
-      "question": {
-        "type": "text",
-        "skillId": "L1-NUM-01",
-        "evidenceRole": "practice",
-        "prompt": "Kirjoita numeroin: eins",
-        "accepted": [
-          "1"
-        ],
-        "success": "Oikein. Muoto tai numero vastaa kysyttyä.",
-        "hint": "Palaa opetustaulun oikeaan kohtaan ja katso sanan kirjoitusasu.",
-        "reteach": "Kertaa opettajan näyttämä saksankielinen sanamuoto ja kokeile uudelleen.",
-        "genericWrong": "Tarkista merkit ja vastaussuunta. Umlautia tai ß-kirjainta ei vaihdeta automaattisesti.",
-        "wrongAnswers": {
-          "eins": "Tehtävä pyytää numeromerkintää 1."
-        }
-      }
-    },
-    {
       "id": "zero-six",
       "phase": "Opetus",
       "kind": "explanation",
@@ -116,6 +91,31 @@ export const LOS1_L031_TEACHER: TeacherLesson = {
           "meaning": "kuusi, -chs"
         }
       ]
+    },
+    {
+      "id": "recall",
+      "phase": "Ohjattu harjoittelu",
+      "kind": "question",
+      "title": "Mitä eins tarkoittaa numeroin?",
+      "paragraphs": [
+        "Näimme jo opetustaululla, että eins tarkoittaa yhtä. Sulje malli ja kirjoita nyt vastaava numeromerkki. Tarvittaessa voit pyytää vihjeen."
+      ],
+      "question": {
+        "type": "text",
+        "skillId": "L1-NUM-01",
+        "evidenceRole": "practice",
+        "prompt": "Kirjoita numeroin: eins",
+        "accepted": [
+          "1"
+        ],
+        "success": "Oikein. Eins tarkoittaa yhtä, joten numeromerkki on 1.",
+        "hint": "Eins on opetustaulun toinen luku nollan jälkeen. Se tarkoittaa yhtä.",
+        "reteach": "Eins = yksi. Kun tehtävä pyytää kirjoittamaan numeroin, vastaa 1.",
+        "genericWrong": "Kirjoita numeromerkki, ei sanaa: eins tarkoittaa yhtä (1).",
+        "wrongAnswers": {
+          "eins": "Tehtävä pyytää numeromerkintää 1."
+        }
+      }
     },
     {
       "id": "seven-twelve",
