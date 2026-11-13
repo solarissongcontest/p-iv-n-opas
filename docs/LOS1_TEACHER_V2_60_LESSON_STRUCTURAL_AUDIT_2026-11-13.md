@@ -118,3 +118,30 @@ keksityillä oletuksilla.
 
 Tämä on data- ja yhteensopivuustarkistus, **ei** PR #232:n toisen
 opetusmoottorin käyttöönotto tai todiste toimivasta äänen toistosta.
+
+## L005:n yhden opetussoittimen media, täsmennys 13.11.2026
+
+Yhteiseen Teacher Experience 2.0 -soittimeen on lisätty L005:n alkuperäisen
+M-COM-03-äänitteen oma HTML5-toisto ja koko **20 ilmauksen saksankielinen lista
+suomennoksineen**. Luettelo luetaan suoraan kirjan olemassa olevasta
+`LOS1_TEXT_B_SOURCES["01"]`-sisällöstä. Siten samasta materiaalista ei
+synny toisistaan poikkeavia tekstikopioita. Kirjan Text B pysyy edelleen
+käytettävissä erikseen niihin **neljään kirjan omaan tarkistettavaan
+lähdetehtävään**, jotka L005:n läpikäynti edellyttää.
+
+Media on alkuperäinen Wikimedia Commonsin *German Vocabulary - Greetings.ogg*,
+German Men92, public domain, noin 28 sekuntia. Toistokomponentissa on
+selkeä virheilmoitus ja koko tekstin varavaihtoehto. Lukijan
+`teacherSessions` pysyy ainoana kirjoitettavana opetus- ja vastaustilana;
+`lessonProgress.*.teacher` on vain säilytettävä vanha tieto.
+Tähän ei lisätty kilpailevaa opetusmoottoria, uutta äänitodistetta,
+automaattista puhearviointia eikä väitettä äänen kuulemisesta.
+
+Tarkka ero: audion `play`-painike, mahdollinen onnistunut toistotapahtuma,
+20 kohdan tekstilistan avaaminen ja lukutehtävän tarkistaminen **eivät**
+itsessään todista kuullun ymmärtämistä. Täydellinen teksti sisältyy LOS!:iin,
+kun taas ulkoisia URL-osoitteita käytetään äänitiedoston lataamiseen sekä
+tekijä- ja lisenssitietojen osoittamiseen. Oikean puhelimen Ogg-toisto,
+ruudunlukijan käyttö ja saksan kielen pedagoginen auditointi ovat avoimia
+julkaisuportteja. CI-tulokset raportoidaan erikseen uusimman commitin
+perusteella.
