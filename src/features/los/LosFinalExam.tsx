@@ -11,6 +11,7 @@ import {
  losFinalReadyToSubmit,losFinalScore,type LosFinalSection,
 } from "./content/los1FinalExam";
 import {losArchiveExamAttempt,losArchivedExamHistory} from "./content/los1ExamArchive";
+import { LosMasterySummary } from "./LosMasterySummary.tsx";
 import "./los-exams.css";
 
 const sections=Object.keys(LOS1_FINAL_SECTION_TITLES) as LosFinalSection[];
@@ -290,6 +291,7 @@ export function LosFinalSummary({move}:{move:LosNavigate}){
    <p>Yhteenveto tallentuu arviointipaikkaan 93. L060-oppitunti vaatii kaikkien kymmenen tavoitteen läpikäynnin, viiden sanakortin arvioinnin, vahvistetun seuraavan tavoitteen ja tämän itsearvion. Loppukokeen pistetulos ei ole oma arvio.</p>
    <p role="status">{final.saved?"Tallennus on toiminnassa.":"Tallennus epäonnistui, kopioi tavoitteesi talteen."}</p>
   </section>
+  <LosMasterySummary/>
   <div className="los-exam-submit">
    <button className="los-primary" type="button" onClick={()=>move(null,"path")}>Palaa opetuspolkuun ja viimeistele L060</button>
   </div>
