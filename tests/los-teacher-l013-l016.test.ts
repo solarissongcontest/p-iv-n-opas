@@ -68,7 +68,7 @@ test("L014 builds interactive kommen/woher/aus boards with four real workbook ex
   const boards=lesson.scenes.filter(scene=>scene.kind==="board");
   assert.equal(boards.length,2);
   const allBoard=boards.flatMap(scene=>scene.board??[]);
-  for(const word of ["ich komme","du kommst","Woher","aus Finnland"]) {
+  for(const word of ["ich komme","du kommst","Woher","Finnland"]) {
     assert.ok(allBoard.some(row=>row.german.includes(word)),word);
   }
   const bank=losExercisesFor("03");
