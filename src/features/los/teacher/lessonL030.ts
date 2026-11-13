@@ -25,7 +25,7 @@ export const LOS1_L030_TEACHER: TeacherLesson = {
   "requiredCheckedIds": [],
   "chapterAssessment": {
     "requiredTestIds": LOS1_MIDTERM_QUESTIONS.map(item => item.id),
-    "requireApplicationDraft": true,
+    "requireApplicationDraft": false,
     "minSelfAssessmentLength": 15
   },
   "scenes": [
@@ -282,7 +282,7 @@ export const LOS1_L030_TEACHER: TeacherLesson = {
       "title": "Oma keskustelu ja itsearviointi",
       "paragraphs": [
         "Välikokeen sivun lopussa voit kirjoittaa 4–6 repliikin kuvitteellisen keskustelun tai esittää sen ääneen. Suositus: tervehdi, kysy nimi, kerro oma kuvitteellinen nimi, kysy lähtömaata ja kuulumisia sekä vastaa.",
-        "Kirjaa myös sanallinen itsearvio (vähintään 15 merkkiä) sekä valitse välikokeen EX-MID-DIALOGUE-SELF itsearviovalinta. Tämä oppitunti tarkistaa ne suoraan välikokeen nykyisestä tallennuksesta.",
+        "Kirjaa myös sanallinen itsearvio (vähintään 15 merkkiä) sekä valitse välikokeen EX-MID-DIALOGUE-SELF itsearviovalinta. Jos teit keskustelun vain ääneen, tekstikenttään ei tarvitse kirjoittaa jokaista repliikkiä; voit kertoa arvioinnissa, että harjoittelit sen puhumalla. Tämä oppitunti tarkistaa ne suoraan välikokeen nykyisestä tallennuksesta.",
         "Älä kirjoita todellisia nimiä tai yhteystietoja. Puhetta ei tallenneta eikä arvioida koneellisesti."
       ],
       "bookLinks": [
