@@ -75,7 +75,7 @@ test("L058 keeps assisted writing distinct from independently checked skill",()=
   assert.equal(teacherExternalStatus(LOS1_L058_TEACHER,draft).ready,true);
   const noWriting={...base,practiceAnswers:{...base.practiceAnswers,"EX-REV2-WRITING-058":"Hallo!"}};
   assert.equal(teacherExternalStatus(LOS1_L058_TEACHER,noWriting).ready,false);
-  const helped=markTeacherHelp(emptyTeacherSession(LOS1_L058_TEACHER,NOW),"writing-model",NOW);
+  const helped=markTeacherHelp(emptyTeacherSession(LOS1_L058_TEACHER,NOW),"writing-assisted",NOW);
   assert.equal(teacherExternalStatus(LOS1_L058_TEACHER,{...draft,teacherSessions:{L058:helped}}).lines.some(line=>line.includes("käytetty")),true);
   assert.equal(independentTeacherEvidence(completeTeacherScenes(LOS1_L058_TEACHER),LOS1_L058_TEACHER),0);
 });
