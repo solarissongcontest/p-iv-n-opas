@@ -129,9 +129,9 @@ test("every one of the 60 guided lessons opens from its actual chapter picker on
    const button=runner.locator(".los-lesson-picker button").filter({hasText:new RegExp("^"+title+"$")});
    await expect(button).toHaveCount(1);
    await button.click();
-   if(title==="L001" || title==="L002" || title==="L003" || title==="L004" || title==="L005" || title==="L006" || title==="L007" || title==="L008" || title==="L009" || title==="L010" || title==="L011"){
+   if(title==="L001" || title==="L002" || title==="L003" || title==="L004" || title==="L005" || title==="L006" || title==="L007" || title==="L008" || title==="L009" || title==="L010" || title==="L011" || title==="L012"){
      await expect(page).toHaveURL(new RegExp("/los-lessons/" + title + "$"));
-     await expect(page.locator(".los-teacher-paper h2").first()).toContainText(title==="L001" ? "Tervetuloa ensimmäiselle" : title==="L002" ? "Saksaa ei aina lausuta" : title==="L003" ? "Ensimmäinen oikea" : title==="L004" ? "Tänään opit" : title==="L005" ? "Tervehdykset kuuluvat" : title==="L006" ? "Ensimmäisen kappaleen kertaus" : title==="L007" ? "Tänään kysyt ensimmäisen kerran" : title==="L008" ? "Franzin ja Gretan koko keskustelu" : title==="L009" ? "Sama nimi, kaksi verbiä" : title==="L010" ? "Uusi keskustelu: Thomas, Takashi ja Peter" : "Toisen kappaleen kertaus: esittele itsesi");
+     await expect(page.locator(".los-teacher-paper h2").first()).toContainText(title==="L001" ? "Tervetuloa ensimmäiselle" : title==="L002" ? "Saksaa ei aina lausuta" : title==="L003" ? "Ensimmäinen oikea" : title==="L004" ? "Tänään opit" : title==="L005" ? "Tervehdykset kuuluvat" : title==="L006" ? "Ensimmäisen kappaleen kertaus" : title==="L007" ? "Tänään kysyt ensimmäisen kerran" : title==="L008" ? "Franzin ja Gretan koko keskustelu" : title==="L009" ? "Sama nimi, kaksi verbiä" : title==="L010" ? "Uusi keskustelu: Thomas, Takashi ja Peter" : title==="L011" ? "Toisen kappaleen kertaus: esittele itsesi" : "Tänään opit maiden nimet ja erotat maan kaupungista");
      await page.goto("/los#/1/path",{waitUntil:"domcontentloaded"});
    }else{
      await expect(runner.locator(".los-lesson-detail .los-overline")).toContainText(title);
@@ -1018,5 +1018,72 @@ test("L011 Teacher requires real C02 writing, submitted test and post-test self-
   });
   expect(saved).toEqual({L011:true,L010:false,testSubmitted:true,selfAssessment:true,
     application:"Ich heiße Mia.\nWie heißt du?",legacyL011:false,C01L011:false});
+  await expectNoHorizontalOverflow(page);
+});
+
+test("L012 Teacher presents the eight authentic C03 Lisa turns and saves only C03 teaching evidence",async({page})=>{
+  await enterLocalBook(page);
+  await page.goto("/los#/1/path",{waitUntil:"domcontentloaded"});
+  await page.locator(".los-lesson-chapter-picker button").filter({hasText:"Kappale 3"}).click();
+  await page.locator(".los-lesson-picker button").filter({hasText:"L012"}).click();
+  await expect(page).toHaveURL(/\/los-lessons\/L012$/);
+  await expect(page.locator(".los-teacher-paper h2").first()).toContainText("Tänään opit maiden nimet ja erotat maan kaupungista");
+  await page.locator(".los-teacher-outline nav button").filter({hasText:"Etsi Lisa Müllerin kahdeksasta repliikistä maat"}).click();
+  await expect(page.getByRole("link",{name:/Avaa kirjassa/}).first()).toHaveAttribute("href",/lessonReturn=L012.*\/1\/03\/text/);
+  await page.goto("/los?lessonReturn=L012#/1/03/text",{waitUntil:"domcontentloaded"});
+  const turns=page.locator(".los-c01-reader .los-c01-turn");
+  await expect(turns).toHaveCount(8);
+  await expect(turns.nth(6)).toContainText("Österreich");
+  await expect(turns.nth(7)).toContainText("Deutschland");
+  await expect(turns.nth(7)).toContainText("Bern");
+  await page.getByRole("link",{name:"Palaa oppitunnille L012"}).click();
+  const nav=page.locator(".los-teacher-outline nav button");
+  await expect(nav).toHaveCount(14);
+  await nav.filter({hasText:"Tunnistat nyt neljä maata ja erotat Bernin kaupungiksi"}).click();
+  await expect(page.getByRole("button",{name:"Merkitse oppitunti läpikäydyksi"})).toBeDisabled();
+  const answers:Record<string,string>={
+    "Tunnistatko Itävallan saksankielisen nimen?":"Österreich",
+    "Onko Bern maa vai kaupunki?":"Se on Sveitsin kaupunki.",
+    "Valitse Suomen saksankielinen nimi":"Finnland",
+    "Lähtömaa ei ole sama kuin asuinkaupunki":"Hän kertoo olevansa kotoisin Saksasta ja asuvansa Bernissä.",
+    "Tunnistatko maa- ja kaupunkinimet?":"die Schweiz – Bern",
+  };
+  for(let i=0;i<14;i++){
+    await nav.nth(i).click();
+    const title=(await page.locator(".los-teacher-paper h2").first().textContent())?.trim()??"";
+    if(title==="Muistatko Itävallan nimen ilman sanastoa?"){
+      await page.locator(".los-teacher-form input").fill("Österreich");
+      await page.locator(".los-teacher-form button").click();
+      await expect(page.locator(".los-teacher-feedback")).toContainText("Oikein");
+    }else if(answers[title]){
+      await page.locator(".los-teacher-option").filter({hasText:answers[title]}).click();
+      await expect(page.locator(".los-teacher-feedback")).toContainText("Oikein");
+    }
+    const activity=page.locator(".los-teacher-activity button");
+    if(await activity.count()){
+      await activity.click();
+      await expect(activity).toContainText("Harjoittelu vahvistettu");
+    }
+  }
+  await expect(page.locator(".los-teacher-paper")).toContainText("Itsenäisesti oikein ratkaistuja eri tarkistuksia: 3");
+  const finish=page.getByRole("button",{name:"Merkitse oppitunti läpikäydyksi"});
+  await expect(finish).toBeEnabled();
+  await finish.click();
+  await expect(page.locator(".los-teacher-done")).toContainText("Oppitunti merkitty suoritetuksi");
+  await page.reload({waitUntil:"domcontentloaded"});
+  await expect(page.locator(".los-teacher-done")).toContainText("Oppitunti merkitty suoritetuksi");
+  const state=await page.evaluate(()=>{
+    const k3=Object.keys(localStorage).find(x=>x.startsWith("los.local.v1.")&&x.endsWith(".1.03"));
+    if(!k3)throw Error("C03 draft missing");
+    const c3=JSON.parse(localStorage.getItem(k3)!);
+    const k2=Object.keys(localStorage).find(x=>x.startsWith("los.local.v1.")&&x.endsWith(".1.02"));
+    const c2=k2?JSON.parse(localStorage.getItem(k2)!):{};
+    return {finished:Boolean(c3.teacherSessions?.L012?.completedAt),
+      sourceDone:c3.teacherSessions?.L012?.activityIds?.includes("text-a-scanned"),
+      cultureDone:c3.teacherSessions?.L012?.activityIds?.includes("culture-read"),
+      legacy:Boolean(c3.lessonProgress?.L012?.completedAt),
+      c02:Boolean(c2.teacherSessions?.L012?.completedAt)};
+  });
+  expect(state).toEqual({finished:true,sourceDone:true,cultureDone:true,legacy:false,c02:false});
   await expectNoHorizontalOverflow(page);
 });
