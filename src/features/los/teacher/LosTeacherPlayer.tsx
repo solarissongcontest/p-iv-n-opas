@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Los1ChapterImage } from "../Los1ChapterImage.tsx";
 import { getLosOpenDialogue } from "../content/los1OpenDialogues.ts";
 import { LOS1_TEXT_B_SOURCES } from "../content/los1TextBAdditional.ts";
-import { TeacherTimeCalendar, isCorrectCalendarEntry } from "./TeacherTimeCalendar.tsx";
+import { TeacherTimeCalendar } from "./TeacherTimeCalendar.tsx";
 import { ArrowLeft, ArrowRight, BookOpen, Check, CheckCircle2, ChevronLeft, ChevronRight, HelpCircle, RotateCcw } from "lucide-react";
 import { readCachedDeviceUser } from "@/lib/deviceSession";
 import { useLosChapterDraft } from "../studyState.ts";
@@ -10,7 +10,7 @@ import {
   emptyTeacherSession, markTeacherHelp, confirmTeacherActivity, teacherChapterAssessmentStatus,
   finishTeacherSession, independentTeacherEvidence, moveTeacherScene, revealTeacherSolution,
   setTeacherAnswerDraft, submitTeacherAnswer, toggleTeacherPause, teacherCanFinish, teacherLatestAttempt,
-  teacherWrongFeedback, type TeacherScene, type TeacherSession,
+  teacherWrongFeedback, isCorrectCalendarEntry, type TeacherScene, type TeacherSession,
 } from "./engine.ts";
 import { getLosTeacherLesson } from "./lessonL004.ts";
 import { validateTeacherLesson } from "./validateContent.ts";
