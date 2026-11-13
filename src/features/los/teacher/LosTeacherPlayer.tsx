@@ -132,6 +132,8 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
   const sceneIndex = lesson?.scenes.findIndex(item => item.id === scene?.id) ?? 0;
   const available = Boolean(saved && session && lesson && teacherCanFinish(session, lesson, draft.practiceAnswers, draft.practiceChecked, draft));
   const completed = Boolean(session?.completedAt);
+  const currentEvidence=lesson?.bookEvidence ? teacherBookEvidenceStatus(lesson.bookEvidence,draft) : null;
+  const currentAssessmentChanged=Boolean(completed && currentEvidence && !currentEvidence.ready);
   const c10Dialogues = lesson?.id === "L054" ? composeLosC10Dialogues(
     session?.draftAnswers["dialogue-du"] ?? "", session?.draftAnswers["dialogue-sie"] ?? "") : null;
 
@@ -218,7 +220,7 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
             <p className="los-teacher-eyebrow">OPETUSPOLKU · {lesson.id}</p>
             <h1>{lesson.title}</h1>
             <p className="los-teacher-sidebar-copy">{lesson.objective}</p>
-            <p className="los-teacher-small">{completed ? "Oppitunti suoritettu" :
+            <p className="los-teacher-small">{completed ? (currentAssessmentChanged ? "Oppitunti suoritettu aiemmin · kirjan nykyinen yritys kesken" : "Oppitunti suoritettu") :
               "Oppitunti " + (sceneIndex + 1) + "/" + lesson.scenes.length + " · suunnitteluarvio " + lesson.estimatedMinutes + " min (ei mitattu)"}</p>
             <button className="los-teacher-pause" type="button" onClick={togglePause}>
               {session.paused ? "Jatka opetusta" : "Keskeytä oppitunti"}
@@ -383,7 +385,9 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
                 "Vielä puuttuu yksi tai useampi opetustilanne, harjoitus, kirjan vastaus tai oma harjoitteluvahvistus."}</p>
               {!completed ? <button type="button" className="los-teacher-primary"
                 disabled={!available} onClick={finish}>Merkitse oppitunti läpikäydyksi</button> :
-                <p className="los-teacher-done"><CheckCircle2 size={19}/> Oppitunti merkitty suoritetuksi. Osaamista seurataan erikseen.</p>}
+                <p className="los-teacher-done"><CheckCircle2 size={19}/> Oppitunti merkitty suoritetuksi aiemmin.
+                  {currentAssessmentChanged ? " Kirjan nykyiset tehtävämerkinnät ovat sittemmin muuttuneet, esimerkiksi uusintakokeen aloituksessa. Aiempi suoritus säilyy historiassa, mutta uusi arviointiyritys on kesken." :
+                    " Osaamista seurataan erikseen."}</p>}
             </section>}
             <div className="los-teacher-navigation">
               <button type="button" onClick={() => setReplayKey(x => x + 1)}>Toista opetustilanne</button>
