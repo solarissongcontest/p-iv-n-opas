@@ -29,6 +29,7 @@ test("L033 builds numbers interactively, persists selection on reload and fits m
   const units=board.getByLabel("Valitse yksiköt");
   // Pure decades and 100 are useful to explore, but do not prove units-first composition.
   const confirm=page.getByRole("button",{name:"Rakensin taululla vähintään neljä eri yhdistelmälukua"});
+  await units.selectOption("0");
   await tens.selectOption("30");
   await tens.selectOption("40");
   await tens.selectOption("100");
