@@ -1,0 +1,41 @@
+/* LOS! Teacher Experience 2.0: accessible authored teaching board. */
+.los-teaching-board{
+  border:1px solid var(--los-line);border-radius:12px;padding:clamp(14px,3vw,24px);
+  background:var(--los-book-tint);margin:22px 0;color:var(--los-ink)
+}
+.los-teaching-board-heading{display:flex;justify-content:space-between;align-items:start;gap:14px}
+.los-teaching-board-kicker{font-size:11px!important;letter-spacing:.09em;font-weight:750;
+  color:var(--los-book-accent);margin:0!important}
+.los-teaching-board-heading h6{font:500 clamp(19px,3vw,25px)/1.25 Georgia,serif;margin:7px 0}
+.los-teaching-board-heading p{font-size:13px;line-height:1.7;margin:8px 0}
+.los-teaching-board-count{flex:none;white-space:nowrap;border:1px solid var(--los-line);
+  border-radius:99px;background:var(--los-paper);padding:6px 11px;font-size:12px;font-weight:700}
+.los-teaching-board-stages{list-style:none;display:grid;gap:12px;padding:0;margin:19px 0}
+.los-teaching-board-stage{border:1px solid var(--los-line);background:var(--los-paper);
+  border-radius:9px;padding:15px}
+.los-teaching-board-stage.is-current{border-color:var(--los-book-accent);border-width:2px}
+.los-teaching-board-stage-head{display:flex;align-items:center;gap:10px}
+.los-teaching-board-stage-head strong{font-size:15px;line-height:1.4}
+.los-teaching-board-number{display:flex;align-items:center;justify-content:center;
+  flex:none;border-radius:50%;background:var(--los-book-accent);color:#fff;
+  height:26px;width:26px;font-size:12px;font-weight:700}
+.los-teaching-board-stage>p{font-size:14px;line-height:1.72;max-width:68ch;margin:12px 0}
+.los-teaching-board-parts{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(160px,100%),1fr));gap:9px}
+.los-teaching-board-part{display:grid;gap:5px;background:var(--los-book-tint);
+  border-radius:7px;padding:12px;overflow-wrap:anywhere}
+.los-teaching-board-part.is-emphasized{border-left:3px solid var(--los-book-accent)}
+.los-teaching-board-part-label{font-size:11px;color:var(--los-soft)}
+.los-teaching-board-part>span:last-child{font-size:clamp(14px,2.5vw,19px);line-height:1.45;font-weight:650}
+.los-teaching-board-takeaway{padding:12px 14px;border:1px solid var(--los-book-accent);
+  background:var(--los-paper);border-radius:7px;font-size:14px;line-height:1.65}
+.los-teaching-board-controls{display:flex;flex-wrap:wrap;gap:8px;margin:17px 0 10px}
+.los-teaching-board-controls button{min-height:44px;font-size:13px}
+.los-teaching-board-controls button:nth-child(2){background:var(--los-book-accent);
+ color:#fff;border-color:var(--los-book-accent)}
+.los-teaching-board-controls button:disabled{opacity:.5}
+.los-teaching-board-note{font-size:12px!important;line-height:1.65!important;color:var(--los-soft)}
+@media(max-width:540px){.los-teaching-board-heading{flex-direction:column}
+ .los-teaching-board-count{align-self:flex-start}
+ .los-teaching-board-controls{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+ .los-teaching-board-controls button{min-width:0;padding:9px 8px}
+}

@@ -7,6 +7,8 @@ import {
   selectTeacherScene,teacherEvidence,teacherCanComplete,openTeacherHelp,type TeacherProgress
 } from "./core.ts";
 import "./teacher.css";
+import {L004_BOARDS} from "./content/l004Boards.ts";
+import {LosTeachingBoard} from "./boards/LosTeachingBoard.tsx";
 
 /**
  * First working Teacher Experience 2.0 lesson. Text-only by design until
@@ -25,6 +27,7 @@ export function LosL004TeacherPlayer({
  const [helpForScene,setHelpForScene]=useState<string|null>(null);
  const helpOpen=helpForScene===scene.id&&!p.paused;
  const selectedHelp=scene.help?.find(h=>h.id===p.helpSelections?.[scene.id]);
+ const teachingBoard=scene.id==="rule"?L004_BOARDS.rule:scene.id==="model"?L004_BOARDS.model:null;
  const evidence=teacherEvidence(TEACHER_L004,p);
  const canFinish=teacherCanComplete(TEACHER_L004,p);
  const go=(i:number)=>{
@@ -75,6 +78,7 @@ export function LosL004TeacherPlayer({
    <p className="los-teacher-phase">{scene.phase.replaceAll("-"," ")}</p>
    <h5>{scene.title}</h5>
    {scene.explanation.map((paragraph,i)=><p key={i}>{paragraph}</p>)}
+   {teachingBoard&&<LosTeachingBoard key={teachingBoard.id} board={teachingBoard}/>}
    {scene.example&&<div className="los-teacher-example">
     <p lang="de"><strong>{scene.example.german}</strong></p>
     <p>{scene.example.finnish}</p>

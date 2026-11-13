@@ -477,3 +477,38 @@ test("L004 contextual En ymmärrä help is usable in every scene and persisted w
  await expect(page.locator(".los-teacher")).toContainText("0/3");
  await expectNoHorizontalOverflow(page);
 });
+
+
+test("L004 authored board shows and repeats stages without altering learner evidence",async({page})=>{
+ await enterLocalBook(page);
+ await page.goto("/los#/1/lesson/L004",{waitUntil:"domcontentloaded"});
+ const player=page.locator(".los-teacher");
+ await player.getByRole("button",{name:"Opetuksen sisällysluettelo"}).click();
+ await player.locator("#los-teacher-map").getByRole("button",{name:"3. Tervehdys vai hyvästely?"}).click();
+ const board=player.locator(".los-teaching-board");
+ await expect(board).toBeVisible();
+ await expect(board).toContainText("Illalla kohdataan vai mennään nukkumaan?");
+ await expect(board.getByRole("status")).toHaveText("Vaihe 1/5");
+ await expect(board.locator(".los-teaching-board-stage")).toHaveCount(1);
+ await board.getByRole("button",{name:"Seuraava vaihe"}).click();
+ await expect(board.locator(".los-teaching-board-stage")).toHaveCount(2);
+ await expect(board).toContainText("Guten Abend!");
+ await board.getByRole("button",{name:"Näytä kaikki vaiheet"}).click();
+ await expect(board.locator(".los-teaching-board-stage")).toHaveCount(5);
+ await expect(board.getByRole("note")).toContainText("Gute Nacht!");
+ await board.getByRole("button",{name:"Edellinen vaihe"}).click();
+ await expect(board.locator(".los-teaching-board-stage")).toHaveCount(4);
+ await board.getByRole("button",{name:"Toista alusta"}).click();
+ await expect(board.locator(".los-teaching-board-stage")).toHaveCount(1);
+ await expect(player).toContainText("0/3");
+ await player.locator("#los-teacher-map").getByRole("button",{name:"4. Opettaja näyttää ratkaisun"}).click();
+ const second=player.locator(".los-teaching-board");
+ await expect(second).toContainText("Näin opettaja päättää oikean tervehdyksen");
+ await second.getByRole("button",{name:"Näytä kaikki vaiheet"}).click();
+ await expect(second).toContainText("Guten Morgen, Frau Müller!");
+ await page.reload({waitUntil:"domcontentloaded"});
+ await expect(page.locator(".los-teaching-board")).toContainText("Näin opettaja päättää oikean tervehdyksen");
+ await expect(page.locator(".los-teaching-board-stage")).toHaveCount(1);
+ await expect(page.locator(".los-teacher")).toContainText("0/3");
+ await expectNoHorizontalOverflow(page);
+});
