@@ -77,7 +77,8 @@ export function teacherChapterAssessmentStatus(
   }).length;
   const expected = requirement.requiredTestIds.length;
   const submitted = Boolean(input?.testSubmittedAt && iso(input.testSubmittedAt));
-  const applicationDone = !requirement.requireApplicationDraft || Boolean(input?.applicationDraft.trim());
+  const applicationDone = !requirement.requireApplicationDraft ||
+    (input?.applicationDraft.trim().length ?? 0) >= (lesson.applicationDraftMinLength ?? 1);
   const reflectionDone = (input?.selfAssessment.trim().length ?? 0) >= requirement.minSelfAssessmentLength;
   return {answered,expected,submitted,applicationDone,reflectionDone,
     ready:submitted && answered===expected && applicationDone && reflectionDone};
