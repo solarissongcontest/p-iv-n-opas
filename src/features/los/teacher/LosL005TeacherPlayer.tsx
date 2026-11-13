@@ -199,6 +199,8 @@ export function LosL005TeacherPlayer({
     onClick={()=>go(index+1)}>Seuraava</button>
   </div>
   <div className="los-teacher-evidence" role="status">
+   <p><strong>Kuullun ymmärtämisen tavoite: vahvistamatta.</strong>
+    Soittimen tapahtumat, tekstivastine ja sanastotehtävät eivät yksin osoita kuuntelutaitoa.</p>
    <p>Muistista kirjoitettu oikein ensimmäisellä yrityksellä ilman vihjettä:
     {" "}{evidence.writtenIndependent.length}/{evidence.writtenRequired} avointa tehtävää.</p>
    <p>Monivalinnat oikein ensiyrityksellä ilman vihjettä:
