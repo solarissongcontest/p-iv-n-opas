@@ -289,3 +289,56 @@ test("C07 teaches the polite spelling request before assessing it and never leak
   assert.deepEqual(validateTeacherLesson(first),[],"The new teaching scene must pass manuscript validation");
   assert.deepEqual(validateTeacherLesson(second),[]);
 });
+
+
+test("all 60 independent German text checks avoid displaying a complete answer in their prompt",()=>{
+  const leaked:string[]=[];
+  const directionErrors:string[]=[];
+  for(let n=1;n<=60;n++){
+    const lessonId="L"+String(n).padStart(3,"0");
+    const lesson=getLosTeacherLesson(lessonId);
+    assert.ok(lesson,lessonId+" must remain registered");
+    for(const scene of lesson.scenes){
+      const q=scene.question;
+      if(!q || q.type!=="text")continue;
+      if(/^Kirjoita numeroin\b/i.test(q.prompt) &&
+          !q.accepted?.every(answer=>/^\d+$/.test(answer.trim()))){
+        directionErrors.push(lessonId+"/"+scene.id+" asks digits but accepts words");
+      }
+      if(/^Kirjoita saksaksi\b/i.test(q.prompt) &&
+          q.accepted?.every(answer=>/^\d+$/.test(answer.trim()))){
+        directionErrors.push(lessonId+"/"+scene.id+" asks German but only accepts digits");
+      }
+      if(!["independent","application","exit"].includes(q.evidenceRole??""))continue;
+      const normalizedPrompt=q.prompt.toLocaleLowerCase("de");
+      for(const accepted of q.accepted??[]){
+        // Only exact literal exposure is a leak. Parsing M-I-A into Mia is an
+        // intended transformation; punctuation and separators are not removed.
+        const clean=accepted.trim().replace(/[.!?]+$/,"").toLocaleLowerCase("de");
+        if(clean.length>=5 && normalizedPrompt.includes(clean)){
+          leaked.push(lessonId+"/"+scene.id+": prompt contains accepted form "+JSON.stringify(accepted));
+        }
+      }
+    }
+  }
+  assert.deepEqual(directionErrors,[],"Numeric and German answer formats must agree with their prompts");
+  assert.deepEqual(leaked,[],"Independent writing tasks must never display the literal correct answer");
+});
+
+test("C10 lessons L051–L055 show task-specific written correction instead of one generic grammar warning",()=>{
+  const oldChoice="Tarkista, kuka puhuu, mitä kysytään ja mikä verbimuoto kuuluu persoonalle.";
+  const oldText="Vertaa lauseen tekijää ja verbimuotoa. Tarkista myös sanajärjestys, paikannimi ja välilyönnit.";
+  let checked=0;
+  for(let n=51;n<=55;n++){
+    const lesson=getLosTeacherLesson("L"+String(n).padStart(3,"0"));
+    assert.ok(lesson);
+    for(const scene of lesson.scenes){
+      if(!scene.question)continue;
+      checked++;
+      assert.notEqual(scene.question.genericWrong,oldChoice,lesson.id+"/"+scene.id);
+      assert.notEqual(scene.question.genericWrong,oldText,lesson.id+"/"+scene.id);
+      assert.ok(scene.question.genericWrong.trim().length>12);
+    }
+  }
+  assert.ok(checked>=20,"The audit must cover C10's five teaching lessons, not a sample");
+});
