@@ -115,7 +115,7 @@ function SeriesView({ openBook }: { openBook: (id: number) => void }) {
         <small>{book.code} · {book.module}</small>
       </button>)}
     </div>
-    <p className="los-library-footnote">LOS! 1:n kaikki kymmenen kappaletta ja 60 ohjattua oppituntia ovat nyt opiskeltavissa oppikirjan sisällä. Alkuperäistekstit ja käytössä olevat äänilähteet näkyvät asianmukaisin lähdemerkinnöin. Lopullinen saksan kielen, äänentoiston ja tuotantojulkaisun laadunvarmistus on silti vielä kesken. LOS! 2–8:n 70 kappaleen omat tekstiluonnokset ovat luettavissa esikatselussa; niiden tehtävät, ääni ja opetuspolut eivät vielä ole julkaisuvalmiita.</p>
+    <p className="los-library-footnote">LOS! 1:n kaikki kymmenen kappaletta ja 60 ohjattua oppituntia ovat nyt opiskeltavissa oppikirjan sisällä. Alkuperäistekstit ja käytössä olevat äänilähteet näkyvät asianmukaisin lähdemerkinnöin. Lopullinen saksan kielen, äänentoiston ja tuotantojulkaisun laadunvarmistus on silti vielä kesken. LOS! 2–8:n 70 kappaleen tekstiluonnokset, 1 820 käsikirjoitustehtävää ja 420 oppituntiohjetta ovat käsiteltävissä kirjakohtaisissa esikatseluissa. Harjoittelu on paikallisesti tallentuvaa itsearviointia, ei vielä kielentarkistettua opetusta, automaattista koearviointia tai hyväksyttyä opiskelusuoritusta.</p>
   </div>;
 }
 function BookFront({ book, move }: { book: LosBookDefinition; move: (chapter: string | null, section: LosSection) => void }) {
@@ -149,7 +149,7 @@ function BookFront({ book, move }: { book: LosBookDefinition; move: (chapter: st
       <p>{book.id === 1 ? "Opiskelet aluksi saksan ääntämistä ja tervehdyksiä. Sen jälkeen etenet oman nimen ja kotipaikan kertomiseen, numeroihin ja ensimmäisiin oikeisiin keskusteluihin." : book.summary}</p>
       <div className="los-front-links">
         <button onClick={() => move(null, "contents")}><List size={18} /> Sisällysluettelo</button>
-        {book.id === 1 && <button onClick={() => move(null, "path")}><BookOpen size={18} /> Opetuspolku</button>}
+        <button onClick={() => move(null, "path")}><BookOpen size={18} /> Opetuspolku</button>
         <button onClick={() => move(null, "dictionary")}><BookOpen size={18} /> Sanakirja</button>
         <button onClick={() => move(null, "appendix")}><BookOpen size={18} /> Kirjan liitteet</button>
       </div>
