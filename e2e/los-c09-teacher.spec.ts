@@ -1,11 +1,24 @@
 import {expect,test} from "@playwright/test";
-import {enterApp,expectNoHorizontalOverflow} from "./helpers";
+import {expectNoHorizontalOverflow} from "./helpers";
 
 /**
  * Runs on desktop Chromium and iPhone WebKit using existing app test login.
  * Real-device audio playback, human German QA and perceived lesson duration
  * remain separate publication checks, not outcomes invented by these tests.
  */
+/**
+ * Loopback-only offline-owner fixture already used by los-full-book.spec.ts.
+ * Never mocks server tokens or modifies application security.
+ */
+async function enterLocalTeacher(page:import("@playwright/test").Page) {
+  await page.addInitScript(()=>{
+    if(!["localhost","127.0.0.1"].includes(window.location.hostname))return;
+    window.localStorage.setItem("opk.device-authorized","Arthur");
+    window.localStorage.setItem("opk.owner-id","00000000-0000-4000-8000-000000000195");
+  });
+  await page.goto("/los#/1/09/chapter",{waitUntil:"domcontentloaded"});
+  await expect(page.locator(".los-book-workspace")).toBeVisible({timeout:30_000});
+}
 const lessons=[
   ["L046","Viikonpäivät"],
   ["L047","Lue Sport und Zeit"],
@@ -18,7 +31,7 @@ const openScene=async(page:import("@playwright/test").Page,title:string)=>{
 };
 
 test("all five C09 Teacher routes open and expose help, lesson navigation and saved progress",async({page})=>{
-  await enterApp(page);
+  await enterLocalTeacher(page);
   for(const [id,title] of lessons){
     await page.goto("/los-lessons/"+id,{waitUntil:"domcontentloaded"});
     await expect(page.locator(".los-teacher-sidebar h1")).toHaveText(title);
@@ -34,7 +47,7 @@ test("all five C09 Teacher routes open and expose help, lesson navigation and sa
 });
 
 test("Text A keeps all seven authentic repliques and Text B remains an actual weekday list",async({page})=>{
-  await enterApp(page);
+  await enterLocalTeacher(page);
   await page.goto("/los-lessons/L047",{waitUntil:"domcontentloaded"});
   await openScene(page,"Koko Text A · seitsemän puheenvuoroa");
   await expect(page.locator(".los-teacher-source-line")).toHaveCount(7);
@@ -51,7 +64,7 @@ test("Text A keeps all seven authentic repliques and Text B remains an actual we
 });
 
 test("C09 interactive time calendar keeps a checked choice after reload without inventing audio completion",async({page})=>{
-  await enterApp(page);
+  await enterLocalTeacher(page);
   await page.goto("/los-lessons/L048",{waitUntil:"domcontentloaded"});
   await openScene(page,"Merkitse aika kalenteriin");
   const calendar=page.locator(".los-teacher-calendar");
@@ -76,7 +89,7 @@ test("C09 interactive time calendar keeps a checked choice after reload without 
 });
 
 test("L049 calendar separates transcript weekday from added practice time on mobile",async({page})=>{
-  await enterApp(page);
+  await enterLocalTeacher(page);
   await page.goto("/los-lessons/L049",{waitUntil:"domcontentloaded"});
   await openScene(page,"Merkitse lähteestä tunnistettu päivä kalenteriin");
   const calendar=page.locator(".los-teacher-calendar");
@@ -92,7 +105,7 @@ test("L049 calendar separates transcript weekday from added practice time on mob
 });
 
 test("L050 cannot claim chapter-test completion by opening its summary",async({page})=>{
-  await enterApp(page);
+  await enterLocalTeacher(page);
   await page.goto("/los-lessons/L050",{waitUntil:"domcontentloaded"});
   await openScene(page,"Itsenäinen lopputarkistus");
   await expect(page.getByRole("button",{name:"Merkitse oppitunti läpikäydyksi"})).toBeDisabled();
@@ -101,7 +114,7 @@ test("L050 cannot claim chapter-test completion by opening its summary",async({p
 });
 
 test("book exercises and lesson sessions use the same C09 chapter draft",async({page})=>{
-  await enterApp(page);
+  await enterLocalTeacher(page);
   await page.goto("/los-lessons/L046",{waitUntil:"domcontentloaded"});
   await openScene(page,"Muodosta ajanilmaus ilman mallia");
   await page.locator("#los-teacher-answer").fill("am Donnerstag");
