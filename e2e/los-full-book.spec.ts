@@ -1218,6 +1218,7 @@ test("L005 shows genuine 20-item listening source and text inside Teacher 2.0 on
  await media.locator("audio").dispatchEvent("error");
  await expect(media.getByRole("alert")).toContainText("Äänite ei latautunut");
  await media.getByRole("button",{name:"Näytä kaikki 20 ilmausta ja suomennokset"}).click();
+ await expect(media.getByRole("button",{name:"Piilota kirjoitettu luettelo"})).toHaveAttribute("aria-expanded","true");
  const lines=media.locator(".los-teacher-greeting-transcript li");
  await expect(lines).toHaveCount(20);
  await expect(lines.first()).toContainText("Hallo!");
