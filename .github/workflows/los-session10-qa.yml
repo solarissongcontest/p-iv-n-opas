@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - feat/los1-teacher-l056-l060
+      - feat/los1-teacher-integrated-review2-final-20261113
     paths:
       - "src/features/los/**"
       - "tests/los-teacher-l056-l060.test.ts"
@@ -15,6 +16,7 @@ on:
     branches:
       - main
       - feat/los1-teacher-c03-l012-20261113
+      - feat/los1-teacher-integrated-c10-20261113
     paths:
       - "src/features/los/**"
       - "tests/los-teacher-l056-l060.test.ts"
@@ -46,7 +48,11 @@ jobs:
           bun-version: latest
       - name: Dependencies
         run: bun install --frozen-lockfile
-      - name: Build and TypeScript
+      - name: TypeScript
+        run: bun run typecheck
+      - name: All repository unit tests
+        run: bun run test
+      - name: Production build
         run: bun run build
       - name: LOS lesson, EX-FINAL, backups and mastery unit tests
         run: |
