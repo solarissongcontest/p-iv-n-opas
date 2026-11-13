@@ -111,7 +111,7 @@ export function validateTeacherLesson(lesson: TeacherLesson): TeacherContentIssu
   }
   if (lesson.requiredCheckedIds &&
       (!unique(lesson.requiredCheckedIds) || lesson.requiredCheckedIds.some(id =>
-        !/^C\d{2}-(?:SOURCE|ZPE|TEXTB|MCOM02|SCHOOL)-Q\d{2}$/.test(id)))) {
+        !/^C\d{2}-(?:SOURCE|ZPE|TEXTB|MCOM02|SCHOOL|HARALD)-Q\d{2}$/.test(id)))) {
     issues.push({ location: "requiredCheckedIds", problem: "Tarkistettavan lähdetehtävän tunniste on virheellinen." });
   }
   const assessment = lesson.chapterAssessment;
@@ -128,6 +128,10 @@ export function validateTeacherLesson(lesson: TeacherLesson): TeacherContentIssu
   if (lesson.examAssessment && (lesson.examAssessment.id !== "EX-MID" ||
       lesson.id !== "L030" || lesson.chapterId !== "91" || lesson.chapterAssessment)) {
     issues.push({ location: "examAssessment", problem: "EX-MID on sallittu vain L030:n oikeassa koeluonnoksessa." });
+  }
+  if (lesson.mediaGate && (!/^M-[A-Z0-9-]+$/.test(lesson.mediaGate.sourceId) ||
+      typeof lesson.mediaGate.approved !== "boolean" || !meaningful(lesson.mediaGate.reason))) {
+    issues.push({location:"mediaGate",problem:"Median hyväksyntäportilta puuttuu lähde, tila tai perustelu."});
   }
   if (!lesson.scenes.some(scene => scene.kind === "summary")) {
     issues.push({ location: "scenes", problem: "Oppitunnilta puuttuu yhteenveto." });

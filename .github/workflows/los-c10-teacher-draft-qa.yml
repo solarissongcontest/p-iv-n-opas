@@ -1,0 +1,71 @@
+name: LOS C10 Teacher Draft QA
+on:
+  push:
+    branches:
+      - feat/los1-teacher-l051-l055
+      - feat/los1-teacher-integrated-c10-20261113
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  c10-quality:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 24
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - name: Install locked dependencies
+        run: bun install --frozen-lockfile
+      - name: Lint
+        run: bun run lint
+      - name: Repository unit and Teacher C10 regression tests
+        run: bun run test
+      - name: TypeScript
+        run: bun run typecheck
+      - name: Production build
+        run: bun run build
+
+  c10-browser:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    env:
+      E2E_BASE_URL: http://127.0.0.1:5173
+      REQUIRE_GEMINI: "false"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - name: Install locked dependencies
+        run: bun install --frozen-lockfile
+      - name: Install browser test tools
+        run: bun run e2e:install
+      - name: Install Chromium and WebKit
+        run: bunx playwright install --with-deps chromium webkit
+      - name: Start local-only preview
+        run: |
+          nohup bun run dev -- --host 127.0.0.1 --port 5173 --strictPort > /tmp/los-c10-dev.log 2>&1 &
+          for attempt in $(seq 1 45); do
+            curl --silent --fail --max-time 3 http://127.0.0.1:5173/ > /dev/null 2>&1 && exit 0
+            sleep 2
+          done
+          cat /tmp/los-c10-dev.log
+          exit 1
+      - name: C10 Teacher scenarios and 60-lesson navigation on Chromium and WebKit
+        run: |
+          bunx playwright test e2e/los-c10-teacher.spec.ts --project=desktop-chromium --project=iphone-webkit
+          bunx playwright test e2e/los-full-book.spec.ts --grep "every one of the 60 guided lessons" --project=desktop-chromium --project=iphone-webkit
+      - name: Save diagnostic browser traces
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: los-c10-teacher-browser-evidence
+          path: |
+            test-results/
+            /tmp/los-c10-dev.log
+          if-no-files-found: ignore
+          retention-days: 7
