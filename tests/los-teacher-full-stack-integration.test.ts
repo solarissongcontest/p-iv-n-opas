@@ -131,3 +131,34 @@ test("L031 number mistakes receive concrete explanations for the asked answer di
       id+" cannot use the unrelated age-question boilerplate");
   }
 });
+
+
+test("L033 feedback respects the answer direction for every numeric checkpoint",()=>{
+  const lesson=getLosTeacherLesson("L033");
+  assert.ok(lesson);
+  const expectations=[
+    ["recall","zwanzig","20","tasakymmen"],
+    ["write21","einundzwanzig","21","ein"],
+    ["write32","zweiunddreißig","32","dreißig"],
+    ["read47","47","siebenundvierzig","numeromerkintää"],
+    ["exit","dreißig","30","tasakymmen"],
+  ] as const;
+  for(const [id,accepted,promptValue,keyword] of expectations){
+    const item=lesson.scenes.find(scene=>scene.id===id);
+    assert.ok(item?.question, id+" must have an actual question");
+    assert.equal(item.question.type,"text");
+    assert.deepEqual(item.question.accepted,[accepted]);
+    assert.ok(item.question.prompt.includes(promptValue), id+" must still ask the original value");
+    const feedback=[item.question.hint,item.question.reteach,item.question.genericWrong].join(" ");
+    assert.match(feedback,new RegExp(keyword,"i"),id+" needs task-specific feedback");
+    assert.ok(!item.question.hint.includes("Hajota luku yksiköihin"),id+" must not reuse the generic mixed-number hint");
+    assert.ok(!item.question.reteach.includes("Luvussa 21 käytetään ein, ei eins. 30"),id+" must not reuse a mismatched rule");
+  }
+  const read47=lesson.scenes.find(scene=>scene.id==="read47")!.question!;
+  assert.match(read47.genericWrong,/numeromerkintää/);
+  assert.ok(!read47.genericWrong.includes("ß ei muutu"),"Writing rules are not feedback for a digits-only question");
+  for(const id of ["recall","exit"]){
+    const scene=lesson.scenes.find(item=>item.id===id)!;
+    assert.match(scene.question!.reteach,/ei (?:ole|käytetä) und/);
+  }
+});
