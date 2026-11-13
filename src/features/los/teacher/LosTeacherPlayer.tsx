@@ -285,7 +285,7 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
                 {scene.form.map(field => <p key={field.id}><strong>{field.label}:</strong> {field.sampleAnswer}</p>)}
                 <p>Vertaa kirjoitusasua itse. Tämä ei ole koneellinen ääntämis- tai kuunteluarvio.</p>
               </details>
-            </section>
+            </section>}
             {scene.numberBuilder && <LosTeacherNumberBuilder
               value={session.draftAnswers[scene.id]}
               historyCount={teacherBuiltNumberCount(session, scene.id)}
