@@ -1032,6 +1032,9 @@ test("L005 shows genuine 20-item listening source and text inside Teacher 2.0 on
  await expect(media.locator("audio")).toHaveAttribute("src",/German_Vocabulary_-_Greetings[.]ogg$/);
  await expect(media).toContainText("28 sekunnin");
  await expect(media).toContainText("ei todista");
+ // Exercise the native media error fallback without relying on Commons/CDN access in CI.
+ await media.locator("audio").dispatchEvent("error");
+ await expect(media.getByRole("alert")).toContainText("Äänite ei latautunut");
  await media.getByRole("button",{name:"Näytä kaikki 20 ilmausta ja suomennokset"}).click();
  const lines=media.locator(".los-teacher-greeting-transcript li");
  await expect(lines).toHaveCount(20);
