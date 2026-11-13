@@ -298,7 +298,7 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
                 {scene.form.map(field => <p key={field.id}><strong>{field.label}:</strong> {field.sampleAnswer}</p>)}
                 <p>Vertaa kirjoitusasua itse. Tämä ei ole koneellinen ääntämis- tai kuunteluarvio.</p>
               </details>
-            </section>
+            </section>}
             {scene.chapterPhoto && <Los1ChapterImage chapterId="09" variant="learning"/>}
             {(scene.sourceChapterId || scene.textBChapterId) && <TeacherSource scene={scene}/>}
             {scene.calendar && <TeacherTimeCalendar scene={scene}
