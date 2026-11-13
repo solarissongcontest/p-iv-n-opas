@@ -30,6 +30,8 @@ export type TeacherScene = {
   question?: TeacherQuestion;
   reflection?: TeacherReflection;
   board?: readonly TeacherBoardStep[];
+  /** Shared teacher board extension; selections stay in draftAnswers. */
+  numberBuilder?: boolean;
   bookLinks?: readonly TeacherBookLink[];
   activityId?: string;
   activityLabel?: string;
