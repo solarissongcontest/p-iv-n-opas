@@ -461,3 +461,65 @@ test("C08 options provide Finnish or German language metadata for accessible pro
   assert.ok(player.includes('<span lang={option.lang ?? "de"}>{option.label}</span>'));
   assert.ok(!player.includes('<span lang="de">{option.label}</span>'));
 });
+
+
+test("Finnish multiple-choice answers across C01–C10 carry reviewed screen-reader language metadata",()=>{
+  // Manually verified Finnish answer groups. The first option's label anchors
+  // the exact question without relying on fragile scene or source ordering.
+  const finnishGroups=[
+    ["L001","Napautan sanaa lukijassa."],
+    ["L002","Suomen v-äännettä"],
+    ["L002","Suomen pitkään i-äänteeseen"],
+    ["L002","Kuten suomen pitkä i"],
+    ["L003","Franz ja Jörg"],
+    ["L008","Greta on nimeltään Weiß."],
+    ["L013","Hän on kotoisin Saksasta."],
+    ["L013","Henkilö on kotoisin Suomesta ja asuu Wienissä."],
+    ["L015","Mistä olet kotoisin?"],
+    ["L015","Thomas ja Peter: Berlin · Takashi: Kyoto"],
+    ["L017","Tutulle ystävälle"],
+    ["L018","Hänelle kuuluu erittäin hyvää."],
+    ["L018","Hänellä on paljon työtä."],
+    ["L023","Molemmille kuuluu hyvää."],
+    ["L024","Minulle kuuluu hyvää."],
+    ["L025","Mitä kuuluu?"],
+    ["L025","Hän on väsynyt."],
+    ["L029","Franz ja Jörg"],
+    ["L037","Tavata kirjaimittain"],
+    ["L037","Hän tarvitsee kaksi puhelinnumeroa."],
+    ["L038","Kaksi L-kirjainta peräkkäin"],
+    ["L040","Miten tämä kirjoitetaan?"],
+    ["L047","14.45"],
+    ["L047","Menevänsä kotiin"],
+    ["L047","Greta kertoo kellon olevan 14.45 ennen Franzin klo 15 alkavaa jalkapalloa."],
+    ["L047","Kello 14.45"],
+    ["L052","Wienistä"],
+    ["L052","Täsmälleen 15-vuotias"],
+  ] as const;
+  let reviewedAnswers=0;
+  for(const [lessonId,firstOption] of finnishGroups){
+    const lesson=getLosTeacherLesson(lessonId);
+    assert.ok(lesson,lessonId+" must exist");
+    const matches=lesson.scenes.filter(scene=>scene.question?.options?.[0]?.label===firstOption);
+    assert.equal(matches.length,1,lessonId+": unique Finnish question anchor "+firstOption);
+    const options=matches[0]!.question!.options!;
+    assert.equal(options.length,3,lessonId+": the choice must retain all options");
+    for(const option of options){
+      assert.equal(option.lang,"fi",
+        lessonId+"/"+matches[0]!.id+" "+JSON.stringify(option.label)+" should use a Finnish screen-reader voice");
+      reviewedAnswers++;
+    }
+  }
+  assert.equal(reviewedAnswers,finnishGroups.length*3);
+  const mixed=getLosTeacherLesson("L023")!.scenes.find(scene=>
+    scene.question?.options?.[0]?.label==="Heinrich")?.question?.options;
+  assert.ok(mixed,"L023 name-and-Finnish-option question remains reachable");
+  assert.equal(mixed.find(opt=>opt.label==="Molemmat")?.lang,"fi");
+  assert.equal(mixed.find(opt=>opt.label==="Heinrich")?.lang,undefined);
+  assert.equal(mixed.find(opt=>opt.label==="Karl")?.lang,undefined);
+  const german=getLosTeacherLesson("L001")!.scenes.find(scene=>
+    scene.question?.options?.[0]?.label==="Hallo!")?.question?.options;
+  assert.ok(german,"German greeting question remains reachable");
+  assert.ok(german.every(option=>option.lang!=="fi"),
+    "Do not incorrectly tag German greeting words as Finnish");
+});
