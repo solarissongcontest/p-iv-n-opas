@@ -15,6 +15,7 @@ import { LosNotebook, LosWorkbook } from "./LosWorkbook";
 import { LosBackups } from "./LosBackups";
 import { LosBookStartAction } from "./LosBookStartAction";
 import { LosL004LessonShell } from "./teacher/LosL004LessonShell";
+import { LosL005LessonShell } from "./teacher/LosL005LessonShell";
 import { Los1ChapterImage } from "./Los1ChapterImage";
 import { Los1VisualLearning } from "./Los1VisualLearning";
 import { LosMidtermExam } from "./LosMidtermExam";
@@ -31,7 +32,7 @@ import "./los-cloud.css";
 import "./los-backups.css";
 
 type LosSection = LosDestination;
-type LosLocation = { book: number | null; chapter: string | null; section: LosSection; lessonId: "L004" | null; returnLesson: "L004" | null };
+type LosLocation = { book: number | null; chapter: string | null; section: LosSection; lessonId: "L004" | "L005" | null; returnLesson: "L004" | "L005" | null };
 /** Kymmenen näkyvää kappaleosiota LOS! 1:n kirjakohtaisen masterplanin mukaan. */
 const sections: { id: LosSection; label: string }[] = [
   { id:"chapter", label:"Aloita" },
@@ -57,8 +58,11 @@ function readLocation(): LosLocation {
   const parsedBook = Number(parts[0]);
   const book = Number.isInteger(parsedBook) && parsedBook >= 1 && parsedBook <= 8 ? parsedBook : null;
   const chapter = book === 1 && /^\d{2}$/.test(parts[1] ?? "") ? (parts[1] ?? null) : null;
-  const lessonId = book === 1 && parts[1] === "lesson" && parts[2] === "L004" ? "L004" : null;
-  const returnLesson = book === 1 && new URLSearchParams(query??"").get("fromLesson")==="L004" ? "L004" : null;
+  const requestedLesson=parts[2];
+  const lessonId = book === 1 && parts[1] === "lesson" &&
+    (requestedLesson==="L004"||requestedLesson==="L005")?requestedLesson:null;
+  const fromLesson=new URLSearchParams(query??"").get("fromLesson");
+  const returnLesson=book===1&&(fromLesson==="L004"||fromLesson==="L005")?fromLesson:null;
   const token = parts[chapter ? 2 : 1];
   const section = (["overview", "contents", "chapter", "text", "vocabulary", "grammar", "practice", "appendix", "dictionary", "path", "search", "midterm", "review", "review-ii", "cards", "progress", "final", "summary", "understand", "text-b", "apply", "culture", "test"].includes(token ?? "") ? token : chapter ? "chapter" : "overview") as LosSection;
   return { book, chapter, section, lessonId, returnLesson };
@@ -343,7 +347,7 @@ function LosBookWorkspace({ book, location, move, goLibrary, openBook }: { book:
   useEffect(()=>{
     if(book.id!==1)return;
     try{
-      if(location.returnLesson==="L004")sessionStorage.setItem("los1.returnLesson","L004");
+      if(location.returnLesson)sessionStorage.setItem("los1.returnLesson",location.returnLesson);
       else if(location.section==="path")sessionStorage.removeItem("los1.returnLesson");
     }catch{/* The initial return link works even if storage is denied. */}
   },[book.id,location.returnLesson,location.section]);
