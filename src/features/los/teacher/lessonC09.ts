@@ -11,13 +11,13 @@ import type { TeacherLesson, TeacherScene, TeacherQuestion } from "./engine.ts";
 const S=(id:string,phase:string,kind:TeacherScene["kind"],title:string,
   paragraphs:string[],extra:Partial<TeacherScene>={}):TeacherScene=>
   ({id,phase,kind,title,paragraphs,...extra});
-type Option=[id:string,label:string,wrong?:string];
+type Option=[id:string,label:string,wrong?:string,lang?:"fi"|"de"];
 const Q=(id:string,phase:string,title:string,paragraphs:string[],prompt:string,
   options:Option[],correctOption:string,evidenceRole:NonNullable<TeacherQuestion["evidenceRole"]>,
   success:string,hint:string,reteach:string):TeacherScene =>
   S(id,phase,"question",title,paragraphs,{
     question:{prompt,type:"choice",skillId:"L1-TIME-01",evidenceRole,
-      options:options.map(([id,label,wrongFeedback])=>({id,label,...(wrongFeedback ? {wrongFeedback} : {})})),
+      options:options.map(([id,label,wrongFeedback,lang])=>({id,label,...(wrongFeedback ? {wrongFeedback} : {}),...(lang ? {lang} : {})})),
       correctOption,success,hint,reteach,genericWrong:reteach},
   });
 const T=(id:string,phase:string,title:string,paragraphs:string[],prompt:string,
@@ -168,7 +168,7 @@ export const LOS1_L047_TEACHER=lesson("L047","Lue Sport und Zeit",
     {label:"5 · Hyvästely",german:"Bis dann. / Wiedersehen!",meaning:"He hyvästelevät (u06–u07)"},
   ]}),
   Q("guided-time","Ohjattu ymmärtäminen","Tunnista kaksi aikaa",["Nyt erotat Gretan ilmoittaman nykyisen kellonajan Franzin tulevasta urheiluajasta."],
-    "Mitä Gretan Viertel vor drei tarkoittaa?",[["a","14.45"],["b","15.00","Tämä on Franzin peliaika, ei Gretan ilmoittama kellonaika."],["c","15.15","Viertel nach drei olisi varttia yli kolme."]],"a","practice",
+    "Mitä Gretan Viertel vor drei tarkoittaa?",[["a","14.45",undefined,"fi"],["b","15.00","Tämä on Franzin peliaika, ei Gretan ilmoittama kellonaika.","fi"],["c","15.15","Viertel nach drei olisi varttia yli kolme.","fi"]],"a","practice",
     "Oikein. Viertel vor drei = varttia vaille kolme. Tämän harjoituksen iltapäiväoletuksella se on 14.45.","Vor tarkoittaa vaille, ei yli.","Viertel vor drei = varttia vaille kolme; um drei = kolmelta."),
   B("book-text","Tarkista kolme alkuperäisen tekstin tehtävää",[
     "Lue C09:n Text A uudelleen ja vastaa tekstinymmärtämissivun C09-SOURCE-Q01, C09-SOURCE-Q02 sekä C09-SOURCE-Q03.",
@@ -177,14 +177,14 @@ export const LOS1_L047_TEACHER=lesson("L047","Lue Sport und Zeit",
   ],["text","understand"]),
   Q("independent-action","Itsenäinen ymmärtäminen","Mihin Greta lähtee?",[
     "Vastaa ilman aikajanan katsomista. Etsi tarvittaessa tekstiin u04 vasta itsenäisen yrityksen jälkeen.",
-  ],"Mitä Greta kertoo tekevänsä?",[["a","Menevänsä kotiin"],["b","Pelaavansa jalkapalloa","Jalkapallosta kertoo Franz."],["c","Menevänsä kouluun","Nach Hause = kotiin, ei kouluun."]],"a","independent",
+  ],"Mitä Greta kertoo tekevänsä?",[["a","Menevänsä kotiin",undefined,"fi"],["b","Pelaavansa jalkapalloa","Jalkapallosta kertoo Franz.","fi"],["c","Menevänsä kouluun","Nach Hause = kotiin, ei kouluun.","fi"]],"a","independent",
     "Oikein. Ich gehe jetzt nach Hause = menen nyt kotiin.","Hause tarkoittaa kotia osana nach Hause -ilmausta.","Greta kertoo menevänsä kotiin; Franz kertoo pelaavansa jalkapalloa."),
   Q("apply-sequence","Soveltaminen","Vertaa tapahtumien aikaa",[
     "Gretan vastaus on 14.45 ja Franz kertoo jalkapallosta klo 15.00. Laske, kumpi tapahtuu ensin.",
   ],"Mikä väite perustuu todella tekstiin?",[
-    ["a","Greta kertoo kellon olevan 14.45 ennen Franzin klo 15 alkavaa jalkapalloa."],
-    ["b","Franz ja Greta sopivat jalkapallotapaamisesta klo 15.","Tekstissä ei sovita tapaamista, vaan Franz kertoo omasta peliajastaan."],
-    ["c","Greta lähtee jalkapalloon Franzin kanssa.","Greta kertoo menevänsä kotiin."],
+    ["a","Greta kertoo kellon olevan 14.45 ennen Franzin klo 15 alkavaa jalkapalloa.",undefined,"fi"],
+    ["b","Franz ja Greta sopivat jalkapallotapaamisesta klo 15.","Tekstissä ei sovita tapaamista, vaan Franz kertoo omasta peliajastaan.","fi"],
+    ["c","Greta lähtee jalkapalloon Franzin kanssa.","Greta kertoo menevänsä kotiin.","fi"],
   ],"a","application",
     "Juuri näin. Tässä erotetaan lähteessä sanottu ja itse päätelty.","Palaa u02–u04 ja erottele kuka sanoo mitä.","Teksti kertoo kellonajan ja suunnitelman, mutta ei Franzin ja Gretan sovittua tapaamista."),
   R("own-summary","Kerro mitä tapahtui", "Kirjoita 1–2 omaa suomenkielistä lausetta tapahtumista ja ajoista.",
@@ -194,7 +194,7 @@ export const LOS1_L047_TEACHER=lesson("L047","Lue Sport und Zeit",
     ]),
   Q("exit","Lopputarkistus","Muista jalkapallon kellonaika",[
     "Peitä dialogi ja vastaa täysin itsenäisesti.",
-  ],"Mihin aikaan Franz sanoo pelaavansa?",[["a","Kello 14.45","Tämä oli Gretan ilmoittama nykyinen aika."],["b","Kello 15.00"],["c","Kello 16.00","Franz sanoo um drei, ei um vier."]],"b","exit",
+  ],"Mihin aikaan Franz sanoo pelaavansa?",[["a","Kello 14.45","Tämä oli Gretan ilmoittama nykyinen aika.","fi"],["b","Kello 15.00",undefined,"fi"],["c","Kello 16.00","Franz sanoo um drei, ei um vier.","fi"]],"b","exit",
     "Oikein. Um drei tarkoittaa kello kolmelta.","Drei = 3. Um ilmaisee tietyn kellonajan.","Franz: Ich spiele um drei Fußball. = Pelaan jalkapalloa kolmelta."),
   summary([
     "Luit koko Sport und Zeit -dialogin. Tunnistit Gretan ilmauksen Viertel vor drei (varttia vaille kolme), jonka tämä harjoitus tulkitsee klo 14.45:ksi, Franzin klo 15.00 tulkitun peliajan sekä sen, että Greta menee kotiin.",
