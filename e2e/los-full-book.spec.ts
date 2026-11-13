@@ -1,5 +1,5 @@
 import {expect,test} from "@playwright/test";
-import {getLosTeacherLesson} from "../src/features/los/teacher/lessonL004.ts";
+import {getLosTeacherLesson} from "../src/features/los/teacher/lessonRegistry.ts";
 import AxeBuilder from "@axe-core/playwright";
 import {expectNoHorizontalOverflow} from "./helpers";
 
