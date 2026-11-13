@@ -335,7 +335,6 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
                 return setTeacherAnswerDraft(withValue, key, history.join(","), now);
               })}
             />}
-            {scene.kind === "board" && <TeacherBoard scene={scene}/>}
             {scene.kind === "form" && scene.form && <section className="los-teacher-form-fields" aria-label="Kirjallinen harjoituslomake">
               <p className="los-teacher-small"><strong>Kirjallinen harjoituslomake.</strong> Kentät eivät perustu varmentamattomaan kuunteluun, eikä niistä lasketa kuuntelupisteitä.</p>
               {scene.form.map(field => {
