@@ -29,8 +29,8 @@ All five use the same deep-linkable LOS Lesson Player, accessible from the 60-le
 
 - Engine tests for response checking, German umlauts and ß, hints, independence and completion gating.
 - Content checks for valid answer models, source references, unique IDs and reflection requirements.
-- New L001, L002, L003 content/evidence unit tests.
-- Browser tests for all 60 lesson entries and the four Teacher pilots, including persistence, book return and L003 source-check evidence.
+- New L001, L002, L003, L005 content/evidence unit tests.
+- Browser tests for all 60 lesson entries and the five Teacher pilots, including persistence, book return, L003 source-check evidence and L005 Text B/source checks.
 
 CI successes on earlier commits do not verify the current head. Confirm mobile WebKit and desktop Chromium checks after all changes.
 
