@@ -127,3 +127,26 @@ test("book exercises and lesson sessions use the same C09 chapter draft",async({
   await expect(page.locator(".los-teacher-feedback.is-right")).toBeVisible();
   await expectNoHorizontalOverflow(page);
 });
+
+
+test("both distinct publisher licenses remain clickable inside the full C09 reader",async({page})=>{
+  await enterLocalTeacher(page);
+  await page.goto("/los-lessons/L047",{waitUntil:"domcontentloaded"});
+  await openScene(page,"Koko Text A · seitsemän puheenvuoroa");
+  const a=page.locator(".los-teacher-original-credit");
+  await expect(a.getByRole("link",{name:/CC BY-SA 4.0 -lisenssi/}))
+    .toHaveAttribute("href","https://creativecommons.org/licenses/by-sa/4.0/");
+  await expect(a.getByRole("link",{name:/Alkuperäinen teksti ja tekijähistoria/}))
+    .toHaveAttribute("href",/German\/Level_I\/Freizeit&oldid=4003622/);
+
+  await page.goto("/los-lessons/L049",{waitUntil:"domcontentloaded"});
+  await openScene(page,"Koko Text B · Die Wochentage");
+  const b=page.locator(".los-teacher-original-credit");
+  await expect(b).toContainText("Christoph");
+  await expect(b.getByRole("link",{name:/CC BY-SA 3.0 -lisenssi/}))
+    .toHaveAttribute("href","https://creativecommons.org/licenses/by-sa/3.0/");
+  await expect(b.getByRole("link",{name:/Alkuperäinen ihmisen äänittämä sanalista/}))
+    .toHaveAttribute("href","https://commons.wikimedia.org/wiki/File:German_Vocabulary_-_Days.ogg");
+  await expect(page.locator(".los-teacher-source-warning"))
+    .toContainText("ei merkitse kuuntelua suoritetuksi");
+});
