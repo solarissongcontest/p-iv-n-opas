@@ -218,3 +218,43 @@ test("L032 teaching feedback distinguishes 12, 16, 17 and reading seventeen as d
   assert.match(exit.genericWrong,/numeromerkintää/);
   assert.ok(!exit.genericWrong.includes("ß- tai umlaut"),"Digits-only tasks cannot demand spelling symbols");
 });
+
+
+test("L034 age-dialogue questions give source-grounded numbers and format-specific feedback",()=>{
+  const lesson=getLosTeacherLesson("L034");
+  assert.ok(lesson);
+  const cases=[
+    ["recall","Kirjoita numeroin: neunzehn","19","neunzehn","numeroin"],
+    ["franz","Kirjoita numeroin: Franzin neunzehn","19","Franz","numeroin"],
+    ["application-one","Mia on kuvitteellisesti 17-vuotias. Kirjoita täydellinen vastaus: Olen 17-vuotias.","Ich bin siebzehn Jahre alt.","siebzehn","kokonaisen"],
+    ["application-two","Leo on kuvitteellisesti 20-vuotias. Kirjoita lyhyt vastaus ilman Jahre alt -osaa: Olen 20-vuotias.","Ich bin zwanzig.","zwanzig","lyhyen"],
+    ["exit","Kirjoita numeroin: zwanzig","20","Zwanzig","numeroin"],
+  ] as const;
+  for(const [id,prompt,answer,keyword,style] of cases){
+    const scene=lesson.scenes.find(item=>item.id===id);
+    assert.ok(scene?.question,id+" is required in the real lesson");
+    assert.equal(scene.question.type,"text");
+    assert.equal(scene.question.prompt,prompt);
+    assert.deepEqual(scene.question.accepted,[answer],"Do not change the original correct answer");
+    const explanation=[
+      ...scene.paragraphs,scene.question.success,scene.question.hint,
+      scene.question.reteach,scene.question.genericWrong,
+    ].join(" ");
+    assert.ok(explanation.toLocaleLowerCase("fi").includes(keyword.toLocaleLowerCase("fi")),
+      id+" must explain its specific target word or speaker");
+    assert.ok(explanation.toLocaleLowerCase("fi").includes(style.toLocaleLowerCase("fi")),
+      id+" must explain the requested answer format");
+    assert.ok(!scene.question.hint.includes("Wie alt bist du? = kuinka vanha olet"),
+      id+" must not repeat an unrelated age-phrase hint");
+    assert.ok(!scene.question.genericWrong.includes("Tarkista ikä, henkilö, bin-muoto"),
+      id+" must not use the generic source/grammar warning");
+  }
+  for(const id of ["recall","franz","exit"]){
+    const question=lesson.scenes.find(scene=>scene.id===id)!.question!;
+    assert.ok(!question.genericWrong.includes("bin-muoto"),"Digits-only questions cannot require German verbs");
+  }
+  const short=lesson.scenes.find(scene=>scene.id==="application-two")!.question!;
+  assert.match(short.reteach,/Täysi Ich bin zwanzig Jahre alt\. on myös oikeaa saksaa/);
+  assert.deepEqual(lesson.requiredCheckedIds,["C06-TEXTB-Q01","C06-TEXTB-Q02"]);
+  assert.equal(lesson.requiredActivityIds[0],"text-b-studied");
+});
