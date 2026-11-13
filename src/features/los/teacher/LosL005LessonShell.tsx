@@ -61,7 +61,7 @@ export function LosL005LessonShell({book}:{book:LosBookDefinition}){
     onFinish={()=>record(old=>losLessonFinishTeacher(TEACHER_L005,old,stamp()))}/>
    {currentCompleted&&<div className="los-teacher-shell-next">
      <a href="/los#/1/path" onClick={()=>{
-       try{sessionStorage.setItem("los1.selectedLesson","L005");}catch{/* path remains available */}
+       try{sessionStorage.setItem("los1.selectedLesson","L006");}catch{/* path remains available */}
      }}>Seuraava oppitunti: L006 · Harjoittele ja testaa C01</a>
    </div>}
    <nav className="los-teacher-shell-footer" aria-label="Oppitunnin muut materiaalit">
