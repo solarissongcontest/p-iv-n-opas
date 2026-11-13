@@ -4,7 +4,8 @@ import {
 } from "./content/l004.ts";
 import {
   answerTeacher,hintTeacher,initialTeacherProgress,pauseTeacher,revealTeacher,
-  selectTeacherScene,teacherEvidence,teacherCanComplete,openTeacherHelp,type TeacherProgress
+  selectTeacherScene,teacherEvidence,teacherCanComplete,openTeacherHelp,
+  draftTeacherWritten,answerTeacherWritten,revealTeacherWritten,normalizeTeacherWritten,type TeacherProgress
 } from "./core.ts";
 import "./teacher.css";
 import {L004_BOARDS} from "./content/l004Boards.ts";
@@ -22,6 +23,8 @@ export function LosL004TeacherPlayer({
  const scene=TEACHER_L004.scenes.find(s=>s.id===p.scene)??TEACHER_L004.scenes[0]!;
  const index=TEACHER_L004.scenes.indexOf(scene);
  const result=p.answers[scene.id];
+ const writtenResult=p.answers[scene.id+"-written"];
+ const writtenDraft=p.writtenDrafts?.[scene.id]??"";
  const hintOpen=p.hints.includes(scene.id);
  const [showMap,setShowMap]=useState(false);
  const [helpForScene,setHelpForScene]=useState<string|null>(null);
@@ -35,6 +38,9 @@ export function LosL004TeacherPlayer({
   if(target)onChange(selectTeacherScene(TEACHER_L004,p,target.id));
  };
  const feedback=scene.question?.choices.find(c=>c.id===result?.answer)?.feedback;
+ const writtenFeedback=scene.written?.mistakes?.find(m=>
+  normalizeTeacherWritten(m.answer)===normalizeTeacherWritten(writtenResult?.answer??""))?.feedback
+  ??scene.written?.wrongFeedback;
  return <section className="los-teacher" aria-label="L004: opettajajohtoinen opetus">
   <div className="los-teacher-top">
    <div><p className="los-teacher-eyebrow">LOS TEACHER EXPERIENCE 2.0 · L004</p>
@@ -84,7 +90,43 @@ export function LosL004TeacherPlayer({
     <p>{scene.example.finnish}</p>
     <p><small>{scene.example.why}</small></p>
    </div>}
-   {scene.question&&<div className="los-teacher-question">
+   {scene.written&&<form className="los-teacher-written" onSubmit={event=>{
+    event.preventDefault();
+    onChange(answerTeacherWritten(TEACHER_L004,p,writtenDraft,new Date().toISOString()));
+   }}>
+    <p className="los-teacher-written-heading">Kirjoita ensin muistista</p>
+    <label htmlFor={"los-teacher-written-"+scene.id}>{scene.written.prompt}</label>
+    <div className="los-teacher-written-entry">
+     <input id={"los-teacher-written-"+scene.id} lang="de" autoComplete="off"
+      autoCapitalize="none" spellCheck={false} maxLength={40}
+      placeholder="Kirjoita saksaksi"
+      value={writtenDraft}
+      disabled={Boolean(writtenResult?.correct||writtenResult?.revealed)}
+      onChange={event=>onChange(draftTeacherWritten(TEACHER_L004,p,event.currentTarget.value))}/>
+     <button type="submit" disabled={Boolean(writtenResult?.correct||writtenResult?.revealed)||
+        !normalizeTeacherWritten(writtenDraft)}>Tarkista kirjoittamani</button>
+    </div>
+    <p className="los-teacher-written-note">Vastaus tallentuu kirjoittaessasi. Pienet kirjainkoko- ja loppuvälimerkkierot sallitaan;
+     tämä ei arvioi ääntämistä eikä kaikkia oikeinkirjoituksen yksityiskohtia.</p>
+    {writtenResult&&<div className="los-teacher-feedback" role="status">
+      {writtenResult.revealed?
+       <p>Mallivastaus näytetty: <strong lang="de">{scene.written.accepted.join(" / ")}</strong>.
+        Näyttö ei ole itsenäinen suoritus.</p>:
+       <>
+        <p><strong>{writtenResult.correct?scene.written.success:writtenFeedback}</strong></p>
+        {writtenResult.correct&&<p>{writtenResult.independent?
+          "Tuotit ilmauksen oikein ensimmäisellä yrityksellä ilman vihjettä.":
+          "Oikein harjoitellen. Tämä ei ollut itsenäinen ensiyritys."}</p>}
+        {!writtenResult.correct&&writtenResult.count>=2&&<p>{scene.written.alternative}</p>}
+       </>}
+    </div>}
+    {writtenResult&&!writtenResult.correct&&!writtenResult.revealed&&writtenResult.count>=2&&
+     <button type="button" className="los-teacher-help" onClick={()=>
+       onChange(revealTeacherWritten(TEACHER_L004,p,new Date().toISOString()))}>
+      Näytä mallivastaus ja jatka
+     </button>}
+   </form>}
+   {scene.question&&(!scene.written||Boolean(writtenResult||result))&&<div className="los-teacher-question">
     <fieldset disabled={Boolean(result?.correct||result?.revealed)}>
      <legend>{scene.question.prompt}</legend>
      <div className="los-teacher-choices">
@@ -122,16 +164,20 @@ export function LosL004TeacherPlayer({
    <button type="button" disabled={index===TEACHER_L004.scenes.length-1}
     onClick={()=>go(index+1)}>Seuraava</button>
   </div>
-  <p className="los-teacher-evidence" role="status">
-   Ensiyrityksellä ja ilman vihjettä oikein: {evidence.independent.length}/{evidence.required}
-   {" "}soveltavaa kysymystä. Tämä ei ole kielitaidon arvosana.
-  </p>
+  <div className="los-teacher-evidence" role="status">
+   <p>Muistista kirjoitettu oikein ensimmäisellä yrityksellä ilman vihjettä:
+    {" "}{evidence.writtenIndependent.length}/{evidence.writtenRequired} avointa tehtävää.</p>
+   <p>Monivalinnat oikein ensiyrityksellä ilman vihjettä:
+    {" "}{evidence.independent.length}/{evidence.required}. Kumpikaan mittari ei ole kielitaidon arvosana.</p>
+  </div>
   <div className="los-teacher-completion">
    <p>Opetustilanteita käsitelty: {TEACHER_L004.scenes.filter(s=>p.visited.includes(s.id)).length}/{TEACHER_L004.scenes.length}.
-    {" "}Käy jokainen kohta läpi ja vastaa kaikkiin kysymyksiin. Väärä vastaus ei estä oppitunnin päättämistä.</p>
+    {" "}Käy jokainen kohta läpi ja kokeile sekä avoimia että valintatehtäviä. Väärä vastaus ei estä oppitunnin päättämistä.</p>
    {p.completedAt?
     <p role="status"><strong>Opetuskokonaisuus käyty läpi.</strong> Suoritus tallennettu.
-      Tämä ei tarkoita, että kielitaito olisi vahvistettu.</p>:
+      {TEACHER_L004.scenes.some(s=>s.written&&!p.answers[s.id+"-written"])?
+       " Merkintä on aiemmalta versiolta; uudet avoimet harjoitukset voi tehdä erikseen.":
+       " Tämä ei tarkoita, että kielitaito olisi vahvistettu."}</p>:
     <button type="button" onClick={onFinish} disabled={!canFinish}>
      Merkitse opetuskokonaisuus käsitellyksi
     </button>}
