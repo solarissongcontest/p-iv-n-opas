@@ -2,6 +2,7 @@ import { ArrowRight, BookOpen, LockKeyhole } from "lucide-react";
 import type { LosBookDefinition } from "./catalog";
 import type { LosNavigate } from "./LosReferenceTools";
 import { losFutureLessonOutline, type LosFutureLessonOutline } from "./losFutureLessonOutline";
+import "./los-future-path.css";
 
 const chapterBuckets=[{title:"Alkukartoitus",min:1,max:1},
   {title:"Kappaleet 1–5 · ensimmäinen puolisko",min:2,max:26},
@@ -23,9 +24,11 @@ function LessonItem({lesson,move}:{
     </span>
     {lesson.chapterId?<ArrowRight size={18} aria-hidden="true"/>:<LockKeyhole size={17} aria-hidden="true"/>}
   </>;
+  const chapterId=lesson.chapterId;
+  const destination=lesson.destination;
   return <li key={lesson.id}>
-    {lesson.chapterId&&lesson.destination
-      ? <button type="button" onClick={()=>move(lesson.chapterId,lesson.destination!)} aria-label={`Tunti ${lesson.number}: ${lesson.title}. Avaa kirjan sisältösivu`}>{body}</button>
+    {chapterId&&destination
+      ? <button type="button" onClick={()=>move(chapterId,destination)} aria-label={`Tunti ${lesson.number}: ${lesson.title}. Avaa kirjan sisältösivu`}>{body}</button>
       : <div className="los-future-lessons-pending" aria-label={`Tunti ${lesson.number}: ${lesson.title}. Ei vielä käytettävissä`}>{body}</div>}
   </li>;
 }
