@@ -6,11 +6,11 @@ import {
   LOS1_REVIEW_II_WRITING_ID, type LosReviewIIGroupId,
 } from "../content/los1ReviewII.ts";
 import {
-  LOS1_FINAL_QUESTIONS, LOS1_FINAL_AUDIO_SOURCES,
+  LOS1_FINAL_QUESTIONS,
   LOS1_FINAL_WRITING_CHECK, LOS1_FINAL_VOICE_CHECK,
   LOS1_FINAL_WRITING_MODEL_OPENED, LOS1_FINAL_WRITING_ASSISTED,
   LOS1_SUMMARY_CARDS, LOS1_SUMMARY_GOAL, LOS1_SUMMARY_REFLECTION,
-  losFinalReadyToSubmit, losFinalScore,
+  losValidSubmittedFinal, losFinalScore,
 } from "../content/los1FinalExam.ts";
 import { losArchivedExamHistory } from "../content/los1ExamArchive.ts";
 
@@ -62,9 +62,7 @@ export function teacherExternalStatus(
   }
   if (lesson.externalCheck === "final") {
     const archived = losArchivedExamHistory(draft.practiceAnswers, "EX-FINAL");
-    const hasCurrent = Boolean(draft.testSubmittedAt && Number.isFinite(Date.parse(draft.testSubmittedAt)) &&
-      losFinalReadyToSubmit(draft.testAnswers) &&
-      LOS1_FINAL_AUDIO_SOURCES.every(src => Boolean(draft.practiceAnswers["EX-FINAL-AUDIO-" + src.id])));
+    const hasCurrent = losValidSubmittedFinal(draft);
     const hasExam = hasCurrent || archived.length > 0;
     const examResult = hasCurrent ? losFinalScore(draft.testAnswers) : archived[archived.length - 1];
     const messageChecked = Boolean(draft.practiceAnswers[LOS1_FINAL_WRITING_CHECK] &&
