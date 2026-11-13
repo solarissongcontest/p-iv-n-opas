@@ -122,7 +122,7 @@ export const LOS1_L009_TEACHER: TeacherLesson = {
           {id:"c",label:"heißst",wrongFeedback:"Yleinen kirjoitusvirhe: oikea du-muoto on heißt, ei heißst."},
         ],
         correctOption:"b",success:"Oikein. Du heißt Mia. sisältää muodon heißt.",
-        hint:"Kirjoita mielessäsi zuerst ich heiße, sitten du heißt.",
+        hint:"Kirjoita mielessäsi ensin ich heiße, sitten du heißt.",
         reteach:"Ich heiße, du heißt. Älä kirjoita ylimääräistä s-kirjainta muotoon du heißt.",
         genericWrong:"Vertaa opetustaulun heißen-paria.",
       },
@@ -132,7 +132,7 @@ export const LOS1_L009_TEACHER: TeacherLesson = {
       title:"Täydennä oikeat heißen-muodot kirjaan",
       paragraphs:[
         "Avaa C02:n Harjoitukset-sivu. Tee tehtävät C02-EX-03 (Ich ____ Max.) ja C02-EX-04 (Du ____ Mia.) omiin vastauskenttiinsä.",
-        "Kirjoita pelkkä puuttuva verbi. Tarkista tehtävien selitykset oman yrityksesi jälkeen kirjan Näytä tarkistukset -toiminnolla.",
+        "Kirjoita pelkkä puuttuva verbi. Tarkista tehtävien selitykset oman yrityksesi jälkeen kirjan Tarkista vastatut -toiminnolla.",
         "Näiden tehtävien vastaukset säilyvät samassa C02:n kirjatallennuksessa. Pelkkä linkin avaaminen tai Teacher-oppitunnin vastausten kopiointi ei luo kirjan tehtäväsuoritusta.",
       ],
       bookLinks:[{label:"Avaa C02:n harjoitukset 3 ja 4",chapterId:"02",section:"practice",instruction:"Kirjoita C02-EX-03 ja C02-EX-04 kirjaan ennen malliselitysten avaamista."}],
@@ -172,7 +172,7 @@ export const LOS1_L009_TEACHER: TeacherLesson = {
       title:"Täydennä sein-muodot ja tutki kaikki neljä perustelua",
       paragraphs:[
         "Palaa C02:n Harjoitukset-sivulle. Täydennä C02-EX-05 (Ich ____ Greta.) ja C02-EX-06 (Du ____ Max.).",
-        "Kun olet vastannut tehtäviin 3–6, valitse kirjan Näytä tarkistukset ja lue näiden neljän tehtävän perustelut. Jos jokin vastaus oli väärä, voit korjata vastauksesi ja yrittää vielä itse.",
+        "Kun olet vastannut tehtäviin 3–6, valitse kirjan Tarkista vastatut ja lue näiden neljän tehtävän perustelut. Jos jokin vastaus oli väärä, voit korjata vastauksesi ja yrittää vielä itse.",
         "Teacher tarkistaa neljän oikean kirjan tehtävän vastauskenttien täyttymisen. Erillinen vahvistus kertoo, että luit palautteen. Pelkkä vastauskentän täyttyminen ei todista, että kaikki vastaukset ovat oikein.",
       ],
       bookLinks:[{label:"Avaa C02:n harjoitukset 5 ja 6",chapterId:"02",section:"practice",instruction:"Täytä C02-EX-05 ja C02-EX-06. Vertaa sitten kaikkien neljän tehtävän perusteluja."}],

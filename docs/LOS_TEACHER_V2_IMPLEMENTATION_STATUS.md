@@ -16,7 +16,7 @@ The LOS Teacher Experience 2.0 masterplan (2026-11-12), LOS! series masterplan, 
 - **L006 · Harjoittele ja testaa C01 (13 scenes).** New self-authored encounter in the real book application field, original C01 culture references, staged greeting instruction, a genuinely submitted C01 chapter test and post-test self-assessment. All three real chapter fields are required; merely visiting the book, saving an unsubmitted test draft or clicking a fake teacher confirmation cannot finish the lesson.
 - **L007 · Miten kysyn nimen? (14 scenes; C02 1/5).** Beginner-friendly explicit teaching of Wie heißt du?, ich heiße and ich bin; C02 vocabulary, grammar and exact authentic six-turn Franz–Greta Text A; requires C02-SOURCE-Q01 answered and checked, not an invented click proof. Optional independent speech practice and completely optional M-COM-02 audio with full text fallback. Chapter-keyed Teacher player keeps all C01 and C02 attempts, drafts and completions apart.
 - **L008 · Franz ja Greta: kokonainen dialogi (14 scenes; C02 2/5).** Complete six-turn authentic Text A; explicit teaching to distinguish name, well-being and teacher references plus both separate goodbyes; requires real saved **and checked** C02-SOURCE-Q02/Q03/Q04, alongside all scene visits and three learner actions. Reading is distinct from any claim of audio comprehension. Reuses the C02 draft, all source text remains fully inside the book.
-- **L009 · Heißen ja sein minä–sinä (14 scenes; C02 3/5).** Zero-beginner explicit teaching of exactly ich heiße/du heißt and ich bin/du bist, specific correction of *du heißst*, progressive board, independent text and exit check, C02 grammar and four genuine workbook fill tasks C02-EX-03–06. Learner must enter all four **real C02 book answers**, read explanations and confirm own practice. Workbook input presence is not correctness or speech mastery.
+- **L009 · Heißen ja sein minä–sinä (15 scenes; C02 3/5).** Zero-beginner explicit teaching of exactly ich heiße/du heißt and ich bin/du bist, specific correction of *du heißst*, progressive board, independent text and exit check, C02 grammar and four genuine workbook fill tasks C02-EX-03–06. Learner must enter all four **real C02 book answers**, read explanations and confirm own practice. Workbook input presence is not correctness or speech mastery.
 
 All nine use the same deep-linkable LOS Lesson Player, accessible from the 60-lesson study path and relevant book resume action. The reader opens separately with a verified return link; the lesson's local position remains.
 
@@ -33,8 +33,8 @@ All nine use the same deep-linkable LOS Lesson Player, accessible from the 60-le
 
 - Engine tests for response checking, German umlauts and ß, hints, independence and completion gating.
 - Content checks for valid answer models, source references, unique IDs and reflection requirements.
-- New L001, L002, L003, L005, L006, L007 and L008 content/evidence unit tests.
-- Browser tests for all 60 lesson entries and the eight Teacher pilots, including persistence, book return, L003 source-check evidence, L005 Text B/source checks, L006 original chapter-test submission, L007 real C02 checks plus C01/C02 state isolation, and L008 all six original Text A replies / three checked C02 source questions.
+- New L001, L002, L003, L005, L006, L007, L008 and L009 content/evidence unit tests.
+- Browser tests for all 60 lesson entries and the nine Teacher pilots, including persistence, book return, L003 source-check evidence, L005 Text B/source checks, L006 original chapter-test submission, L007 real C02 checks plus C01/C02 state isolation, L008 six original Text A replies / three checked C02 source questions, and L009 four canonical C02 workbook fields / real completion gates.
 
 CI successes on earlier commits do not verify the current head. Confirm mobile WebKit and desktop Chromium checks after all changes.
 
