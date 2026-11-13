@@ -19,6 +19,18 @@ Nykyinen Text B käyttää M-DIB-03: Eva, Studium und Wohnen. Kirjassa on koko k
 
 L044 käyttää kirjan jo olemassa olevaa kahdeksan vuoron litteraattia, sen neljää tarkistettavaa kysymystä ja C08-EX-07/08 -tehtäviä. Alkuperäisen videon ja audion lupa, integraatio ja todellinen toistotestaus ovat kesken. L044 ei väitä käyttäjän kuulleen alkuperäispuhetta.
 
+## Julkisen lähteen manuaalinen uudelleentarkistus 13.11.2026
+
+Tarkistin nimenomaisesti **julkaistun lähdetekstin ja julkiset lisenssimerkinnät**; en tarkistanut mediaa omalla mobiililaitteella. Tämän tarkistuksen dokumentointi ei yksin sulje toimituksellisia hyväksymisportteja.
+
+**Wikibooks / M-WB-08:** https://en.wikibooks.org/wiki/German/Level_I/Schule näyttää lähdesivulla samat 26 puhe- tai kertojayksikköä kuin nykyinen `LOS1_C08_TEXT.originalLines` (järjestys u01–u26; yksi alkuperäisessä samalle riville kirjoitettu opettajan sisääntulo ja tervehdys on kirjan lukijassa erotettu kertojariviksi ja repliikiksi). Sivun alaosan pysyvä linkki osoittaa **oldid 4520956**; sivu ilmoittaa viimeiseksi muokkauspäiväksi **2.7.2025**. Footerin lisenssilinkki vie suoraan **CC BY-SA 4.0** -lisenssiin (https://creativecommons.org/licenses/by-sa/4.0/). Lähteen oma ilmoitus kertoo keskeneräisyydestä ja siitä, ettei varmennettua saksan äänitettä ole. Koko historiallisen muokkaajaluettelon ja mahdollisten aiempien versioiden erillisoikeuksien auditointi ei ollut tässä tarkistuksessa mahdollinen. Kirjassa käytetään edelleen Wikibooksin tekijöihin, revisioon ja lisenssiin viittaavaa attribuutiota; säilytä se ja dokumentoi kaikki myöhemmät muutokset.
+
+**COERLL / M-DIB-03:** Virallinen https://coerll.utexas.edu/dib/vidt.php?f=01_19_int_ek_studies-home näyttää sanatarkasti samat kahdeksan saksankielistä puheenvuoroa kuin nykyinen `LOS1_TEXT_B_SOURCES["08"].lines`. Otsikko on `Kap 01 • Eva • Studium & Wohnen`. Julkaisun vuoden 2017 virallinen nimiöaineisto https://coerll.utexas.edu/dib/pdfs/intro.pdf (PDF:n sivu 4 / tiedoston sivu 4, nollapohjainen 3) sisältää **CC BY 4.0** -merkinnän ja listaa Eva Kunkelin haastateltaviin. Se todentaa kirjan lisenssi-ilmoituksen ja juuri tämän litteraatin olemassaolon mutta **ei vielä todista videon tai ääniraidan tiedostokohtaista käyttöoikeutta**. Mediat on jätetty tarkoituksella kopioimatta.
+
+**Mitä oikeusmerkinnät edellyttävät:** CC BY-SA 4.0:n ehdoilla tarvitaan asianmukainen tekijämaininta, lähde- ja lisenssilinkki sekä tieto muutoksista. Muokattuun materiaaliin sovelletaan ShareAlike-ehtoa. CC BY 4.0 edellyttää tekijän ja lähteen tunnustamista sekä muutosten ilmoittamista. **Yksityinen opiskelu ei poista näitä velvollisuuksia automaattisesti**, mutta oikein sovellettu avoin lisenssi sallii tekstin käytön ja muokkaamisen ehtojensa rajoissa. Tämä ei ole oikeudellinen lausunto.
+
+**Tilapäätös:** Tekstien verkkolähde, näkyvä sisältö ja sivuilta löytyvä lisenssi on tämän tarkistuksen perusteella vahvistettu, mutta **published=false säilyy**, kunnes riippumaton kieli-, attribuutio-/historia- sekä laitetarkastus on kirjattu. Aito äänen kuuleminen on edelleen erillinen avoin vaatimus.
+
 ## Aineiston ja harjoitusdialogin erottelu
 
 Wikibooksin ja COERLL:n tekstit esitetään autenttisina lähdeteksteinä vain oppikirjassa. Uudet L041–L045:n lyhyet keskustelut ovat LOS!:n **itse kirjoitettuja, fiktiivisiä ja deterministisiä opetusskenaarioita**, eivät kummankaan alkuperäislähteen litteraatteja. Niiden valinnoille on käsikirjoitettu erilliset vastausreaktiot ja selitykset; opiskelija voi pyytää lisää apua ja kokeilla uudelleen. Tämä EI ole vapaamuotoinen tekoälychat eikä puheentunnistus.
