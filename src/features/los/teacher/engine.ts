@@ -247,9 +247,12 @@ export function teacherCanFinish(session: TeacherSession, lesson: TeacherLesson,
       return Boolean(value && practiceChecked.includes(id) &&
         (id === "C08-SOURCE-EVIDENCE-01"
           ? /^u(?:0[1-9]|1\d|2[0-6])$/.test(value)
+          : id === "C10-SOURCE-EVIDENCE-01"
+          ? /^u(?:0[1-9]|1[0-4])$/.test(value)
           : !(id.startsWith("EX-REV1-Q") || /^C07-(?:SOURCE|TEXTB)-Q\d{2}$/.test(id) ||
               /^C08-(?:SCHOOL|TEXTB)-Q\d{2}$/.test(id) ||
-              /^C09-(?:SOURCE|TEXTB)-Q\d{2}$/.test(id)) || /^[abc]$/.test(value)));
+              /^C09-(?:SOURCE|TEXTB)-Q\d{2}$/.test(id) ||
+              /^C10-(?:HARALD|TEXTB)-Q\d{2}$/.test(id)) || /^[abc]$/.test(value)));
     });
 }
 export function finishTeacherSession(session: TeacherSession, lesson: TeacherLesson,
