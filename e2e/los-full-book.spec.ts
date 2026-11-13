@@ -773,7 +773,7 @@ test("C08 through final review teach the task and describe German time without i
   await outline.getByRole("button",{name:"Näin kerrot ymmärtäneesi ja kiität"}).click();
   await expect(page.locator(".los-teacher-paper")).toContainText("Danke, jetzt verstehe ich.");
   await outline.getByRole("button",{name:"Lisäselitys auttaa eteenpäin"}).click();
-  await page.getByRole("button",{name:"Danke, jetzt verstehe ich.",exact:true}).click();
+  await page.locator(".los-teacher-option").filter({hasText:"Danke, jetzt verstehe ich."}).click();
   await expect(page.locator(".los-teacher-feedback.is-right")).toContainText("Keskustelu päättyy ymmärrykseen");
   await expectNoHorizontalOverflow(page);
 
@@ -782,7 +782,7 @@ test("C08 through final review teach the task and describe German time without i
   await outline.getByRole("button",{name:"Koko Text A · seitsemän puheenvuoroa"}).click();
   await expect(page.locator(".los-teacher-paper")).toContainText("ei yksin kerro");
   await outline.getByRole("button",{name:"Tunnista kaksi aikaa"}).click();
-  await page.getByRole("button",{name:"14.45",exact:true}).click();
+  await page.locator(".los-teacher-option").filter({hasText:"14.45"}).click();
   await expect(page.locator(".los-teacher-feedback.is-right")).toContainText("iltapäiväoletuksella");
   await expectNoHorizontalOverflow(page);
 
