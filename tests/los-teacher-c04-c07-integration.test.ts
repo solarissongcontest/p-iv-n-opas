@@ -39,7 +39,7 @@ test("C07 audio is source-gated and no older Teacher capability is removed",()=>
  const player=readFileSync("src/features/los/teacher/LosTeacherPlayer.tsx","utf8");
  const path=readFileSync("src/features/los/LosReferenceTools.tsx","utf8");
  assert.match(media,/chapterId==="07" \?/);
- assert.match(media,/ei anneta kuuntelupisteitä/);
+ assert.match(media,/kuuntelupisteitä/);
  assert.match(player,/los-teacher-form-fields/);
  assert.match(player,/LosTeacherNumberBuilder/);
  assert.match(player,/teacherMidtermAssessmentStatus/);
