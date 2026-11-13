@@ -8,6 +8,7 @@ const meaningful = (value: string | undefined) => Boolean(value?.trim());
 const textbookSections = new Set([
   "overview","contents","chapter","text","understand","vocabulary","grammar",
   "text-b","practice","apply","culture","test","appendix","dictionary",
+  "review-ii","final","summary",
 ]);
 
 function checkQuestion(question: TeacherQuestion, location: string, issues: TeacherContentIssue[]) {
@@ -103,6 +104,12 @@ export function validateTeacherLesson(lesson: TeacherLesson): TeacherContentIssu
       typeof lesson.mediaGate.approved !== "boolean" || !meaningful(lesson.mediaGate.reason))) {
     issues.push({location:"mediaGate",problem:"Median hyväksyntäportilta puuttuu lähde, tila tai perustelu."});
   }
+  if (lesson.bookEvidence && (
+    (lesson.bookEvidence.kind==="review-ii" && (!["L056","L057","L058"].includes(lesson.bookEvidence.group) || lesson.chapterId!=="92")) ||
+    (lesson.bookEvidence.kind==="final-exam" && (lesson.id!=="L059" || lesson.chapterId!=="93")) ||
+    (lesson.bookEvidence.kind==="final-summary" && (lesson.id!=="L060" || lesson.chapterId!=="93")) ||
+    !["review-ii","final-exam","final-summary"].includes(lesson.bookEvidence.kind)
+  ))issues.push({location:"bookEvidence",problem:"Arviointijakson todentaminen ei vastaa oppituntia."});
   const assessment = lesson.chapterAssessment;
   if (assessment && (
     !unique(assessment.requiredTestIds) || assessment.requiredTestIds.length < 1 ||
