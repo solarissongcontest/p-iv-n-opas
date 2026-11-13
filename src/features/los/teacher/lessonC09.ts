@@ -68,6 +68,19 @@ export const LOS1_L046_TEACHER=lesson("L046","Viikonpäivät",
   Q("recall","Muistelu","Päivä vai numero?",["C06:ssa harjoittelit numeroita, joita tarvitset myöhemmin kellonaikojen sanomiseen."],
     "Mikä tarkoittaa lukua kolme?",[["a","drei"],["b","dreißig","Dreißig tarkoittaa kolmeakymmentä."],["c","zwei","Zwei tarkoittaa kahta."]],"a","practice",
     "Oikein: drei = kolme.","Etsi kolmikirjaiminen lukusana, jonka lopussa on i.","Drei = 3. Zwei = 2. Dreißig = 30."),
+  Q("precheck-weekday","Esikysymys 2","Tunnistatko maanantain?",[
+    "Tämä on lähtötason esikysymys ennen viikonpäivien varsinaista opetusta. Jos et tiedä vastausta vielä, se on odotettua. Voit kokeilla ja lukea palautteen.",
+  ],"Mikä tarkoittaa maanantaita?",[
+    ["a","Dienstag","Dienstag on tiistai. Oikea sana on Montag."],
+    ["b","Montag"],
+    ["c","Samstag","Samstag on lauantai. Oikea sana on Montag."],
+  ],"b","practice",
+    "Oikein: Montag = maanantai.","Maanantai on Montag; viikonpäivät kirjoitetaan saksaksi isolla.","Montag tarkoittaa maanantaita. Dienstag on tiistai ja Samstag lauantai."),
+  S("weekday-source","Alkuperäinen aineisto","source","Aito viikonpäiväluettelo · Text B",[
+    "Lue alta C09:n alkuperäinen, kokonainen M-COM-07-viikonpäiväluettelo. Tunnista jo nyt Montag, Dienstag ja Mittwoch. Koko aineisto näytetään suoraan LOS!:ssa.",
+    "Tämä on ihmisen äänittämä viikonpäivien sanalista, ei keskustelu tapaamisajasta. Tässä tunnissa tekstin lukeminen riittää: äänen olemassaoloa tai onnistunutta kuuntelua ei merkitä automaattisesti.",
+    "Kun olet lukenut luettelon, jatka suomenkieliseen selitykseen ja muistele viikonpäiviä opetustaulun avulla. Palaamme samaan aitoon Text B -lähteeseen L049:ssä.",
+  ],{textBChapterId:"09",help:[{title:"Mikä tässä on tärkeää?",body:"Etsi luettelosta seitsemän viikonpäivää järjestyksessä, Montag ensin ja Sonntag viimeisenä. Älä etsi kellonaikoja, sillä niitä ei tässä alkuperäisessä äänilähteessä ole."}]}),
   S("days","Opettajan selitys","explanation","Viikon seitsemän päivää",[
     "Saksassa viikko alkaa tavallisissa viikkokalenterinäkymissä maanantaista. Maanantai = Montag, tiistai = Dienstag, keskiviikko = Mittwoch, torstai = Donnerstag.",
     "Perjantai = Freitag, lauantai = Samstag ja sunnuntai = Sonntag. Nämä ovat saksan substantiiveja ja alkavat isolla kirjaimella, vaikka suomeksi viikonpäivät kirjoitetaan pienellä.",
