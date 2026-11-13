@@ -128,6 +128,44 @@ test("L060 counts five distinct real rated words, not both directions of three w
   await expectNoHorizontalOverflow(page);
 });
 
+
+test("L059 writing model is gated behind own draft and later edits are visibly assisted",async({page})=>{
+  test.setTimeout(180_000);
+  await enterLocalLos(page);
+  await page.goto("/los#/1/final",{waitUntil:"domcontentloaded"});
+  const writing=page.locator("#los-final-writing");
+  const model=page.locator(".los-exam-writing-model");
+  await expect(model).toHaveCount(0);
+  await answerExam(page);
+  await simulateCompletedAudio(page);
+  await page.getByRole("button",{name:/Palauta loppukoe ·/}).click();
+  await expect(model).toContainText("malliviesti avautuu vasta", {ignoreCase:true});
+  await expect(model.locator("details")).toHaveCount(0);
+  const own="Hallo!\nIch heiße Lara.\nIch komme aus Schweden.\nIch bin siebzehn Jahre alt.\nDas ist mein Freund Tom.\nWir sehen uns am Montag.";
+  await writing.fill(own);
+  await expect(model.locator("details")).toHaveCount(0);
+  await page.getByRole("button",{name:"Vahvista kirjoitusyritys tarkistuslistalla"}).click();
+  await expect(model.locator("details")).toHaveCount(1);
+  await model.locator("summary").click();
+  await expect(model.getByText(/Malli on LOS!:n itse laatima/)).toBeVisible();
+  const key=draftKey("93");
+  await expect.poll(async()=>page.evaluate(k=>Boolean(JSON.parse(localStorage.getItem(k)??"{}").practiceAnswers?.["EX-FINAL-WRITING-MODEL-OPENED"]),key)).toBe(true);
+  let record=await page.evaluate(k=>JSON.parse(localStorage.getItem(k)??"{}"),key);
+  expect(record.practiceAnswers["EX-FINAL-WRITING-ASSISTED"]).toBeUndefined();
+  await page.reload({waitUntil:"domcontentloaded"});
+  await expect(model).toContainText("Malliviesti on avattu");
+  await writing.fill(own.replace("Schweden","Finnland"));
+  record=await page.evaluate(k=>JSON.parse(localStorage.getItem(k)??"{}"),key);
+  expect(record.practiceAnswers["EX-FINAL-WRITING-ASSISTED"]).toBe("edited-after-model");
+  expect(record.practiceAnswers["EX-FINAL-WRITING-CHECK"]).toBe("");
+  await expect(model.locator("details")).toHaveCount(0);
+  await page.getByRole("button",{name:"Vahvista kirjoitusyritys tarkistuslistalla"}).click();
+  await page.goto("/los#/1/summary",{waitUntil:"domcontentloaded"});
+  await expect(page.locator(".los-mastery")).toContainText("avustettu kirjoitusyritys");
+  await expect(page.locator(".los-mastery")).toContainText("CEFR-tasotodistus");
+  await expectNoHorizontalOverflow(page);
+});
+
 test("EX-FINAL: 50 decisions, submit, 49/50 feedback, reload, retake archive, 50/50 and JSON backup on both layouts",async({page})=>{
   test.setTimeout(240_000);
   await enterLocalLos(page);
