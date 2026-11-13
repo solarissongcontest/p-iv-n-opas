@@ -10,7 +10,7 @@ export type TeacherScene={
 };
 export type TeacherLesson={id:string;version:typeof TEACHER_VERSION;review:"draft"|"approved";objective:string;scenes:readonly TeacherScene[]};
 export type TeacherAttempt={answer:string;count:number;correct:boolean;independent:boolean;revealed:boolean;at:string};
-export type TeacherProgress={version:typeof TEACHER_VERSION;scene:string;visited:string[];hints:string[];answers:Record<string,TeacherAttempt>;paused:boolean};
+export type TeacherProgress={version:typeof TEACHER_VERSION;scene:string;visited:string[];hints:string[];answers:Record<string,TeacherAttempt>;paused:boolean;completedAt?:string|null};
 const isObj=(x:unknown):x is Record<string,unknown>=>Boolean(x&&typeof x==="object"&&!Array.isArray(x));
 const validId=(x:unknown)=>typeof x==="string"&&/^[a-z0-9-]{1,48}$/i.test(x);
 const validIds=(x:unknown,max:number)=>Array.isArray(x)&&x.length<=max&&
@@ -19,7 +19,8 @@ const validIso=(x:unknown)=>typeof x==="string"&&x.length<=40&&/^\d{4}-\d{2}-\d{
 export function validTeacherProgress(x:unknown):x is TeacherProgress{
  if(!isObj(x)||x['version']!==TEACHER_VERSION||!validId(x['scene'])||
     !validIds(x['visited'],25)||!validIds(x['hints'],25)||typeof x['paused']!=="boolean"||
-    !isObj(x['answers'])||Object.keys(x['answers']).length>20)return false;
+    !isObj(x['answers'])||Object.keys(x['answers']).length>20||
+    (x['completedAt']!==undefined&&x['completedAt']!==null&&!validIso(x['completedAt'])))return false;
  return Object.entries(x['answers']).every(([id,a])=>validId(id)&&isObj(a)&&
     typeof a['answer']==="string"&&a['answer'].length<=40&&Number.isInteger(a['count'])&&
     Number(a['count'])>=0&&Number(a['count'])<=10&&typeof a['correct']==="boolean"&&
@@ -45,11 +46,12 @@ export function validTeacherLesson(lesson:TeacherLesson):string[]{
  return errors;
 }
 export function initialTeacherProgress(lesson:TeacherLesson):TeacherProgress{
- return {version:TEACHER_VERSION,scene:lesson.scenes[0]?.id??"intro",visited:[],hints:[],answers:{},paused:false};
+ return {version:TEACHER_VERSION,scene:lesson.scenes[0]?.id??"intro",
+  visited:lesson.scenes[0]?[lesson.scenes[0].id]:[],hints:[],answers:{},paused:false,completedAt:null};
 }
 export function selectTeacherScene(lesson:TeacherLesson,p:TeacherProgress,id:string):TeacherProgress{
  if(!lesson.scenes.some(s=>s.id===id))return p;
- return {...p,scene:id,paused:false,visited:[...new Set([...p.visited,id])]};
+ return {...p,scene:id,paused:false,visited:[...new Set([...p.visited,p.scene,id])]};
 }
 export function pauseTeacher(p:TeacherProgress):TeacherProgress{return {...p,paused:true};}
 export function hintTeacher(lesson:TeacherLesson,p:TeacherProgress):TeacherProgress{
@@ -78,4 +80,21 @@ export function teacherEvidence(lesson:TeacherLesson,p:TeacherProgress){
  const prompts=lesson.scenes.filter(s=>s.question&&["independent","application","exit"].includes(s.phase));
  return {independent:prompts.filter(s=>p.answers[s.id]?.independent).map(s=>s.id),
   required:prompts.length,visited:p.visited.length};
+}
+
+/**
+ * Lesson teaching completed is distinct from evidence of independent mastery.
+ * Require every scripted scene to have been visited and every scripted question
+ * to have an attempted or voluntarily revealed answer. Incorrect answers do
+ * not trap the learner in an endless remediation loop.
+ */
+export function teacherCanComplete(lesson:TeacherLesson,p:TeacherProgress):boolean{
+ if(p.paused||!lesson.scenes.length)return false;
+ return lesson.scenes.every(scene=>p.visited.includes(scene.id)&&
+   (!scene.question||Boolean(p.answers[scene.id]&&
+     (p.answers[scene.id]!.count>0||p.answers[scene.id]!.revealed))));
+}
+export function finishTeacher(lesson:TeacherLesson,p:TeacherProgress,at:string):TeacherProgress{
+ if(p.completedAt||!teacherCanComplete(lesson,p)||!validIso(at))return p;
+ return {...p,completedAt:at};
 }
