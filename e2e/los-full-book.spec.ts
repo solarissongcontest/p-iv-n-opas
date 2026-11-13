@@ -143,7 +143,10 @@ test("every one of the 60 guided lessons opens from its actual chapter picker on
  for(let n=1;n<=60;n++)expect(seen.has("L"+String(n).padStart(3,"0"))).toBe(true);
  await expect(runner.locator(".los-lesson-progress")).toContainText("0/60 suoritettu");
  await page.reload({waitUntil:"domcontentloaded"});
- await expect(page.locator("#los-lesson-runner .los-lesson-detail .los-overline")).toContainText("L060");
+ // L060 now opens Teacher 2.0, so the legacy inline detail must not be required after a reload.
+ await expect(runner).toBeVisible();
+ await expect(runner.locator(".los-lesson-progress")).toContainText("0/60 suoritettu");
+ await expect(sections).toHaveCount(13);
  await expectNoHorizontalOverflow(page);
 });
 
