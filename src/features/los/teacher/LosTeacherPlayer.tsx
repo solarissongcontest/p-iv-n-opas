@@ -9,6 +9,7 @@ import {
   teacherWrongFeedback, type TeacherScene, type TeacherSession,
 } from "./engine.ts";
 import { getLosTeacherLesson } from "./lessonL004.ts";
+import { LosTeacherNumberBuilder } from "./LosTeacherNumberBuilder.tsx";
 import { validateTeacherLesson } from "./validateContent.ts";
 import "../los-book.css";
 import "./teacher.css";
@@ -185,7 +186,7 @@ export function LosTeacherPlayer({ lessonId }: { lessonId: string }) {
       </section> :
       !lesson || !session || !scene ? <section className="los-teacher-status">
         <h1>Oppitunnin opetusmateriaali ei ole vielä valmis</h1>
-        <p>Teacher 2.0 on nyt käytössä oppitunneilla L001–L012. Muut oppitunnit toimivat edelleen nykyisessä Opetuspolussa.</p>
+        <p>Teacher 2.0 on nyt käytössä oppitunneilla L001–L012 ja L031–L035. Muut oppitunnit toimivat edelleen nykyisessä Opetuspolussa.</p>
         <a href={"/los#/" + (lesson?.bookId ?? 1) + "/path"}>Palaa Opetuspolkuun</a>
       </section> :
       <>
@@ -226,6 +227,18 @@ export function LosTeacherPlayer({ lessonId }: { lessonId: string }) {
               {scene.paragraphs.map((paragraph, i) => <p key={i}>{paragraph}</p>)}
             </div>
             {scene.kind === "board" && <TeacherBoard scene={scene}/>}
+            {scene.numberBuilder && <LosTeacherNumberBuilder
+              value={session.draftAnswers[scene.id]}
+              historyCount={(session.draftAnswers[scene.id + "-history"] ?? "").split(",").filter(Boolean).length}
+              onChange={value => persist(old => {
+                const now = stamp();
+                const key = scene.id + "-history";
+                const history = (old.draftAnswers[key] ?? "").split(",").filter(Boolean);
+                if (!history.includes(String(value))) history.push(String(value));
+                const withValue = setTeacherAnswerDraft(old, scene.id, String(value), now);
+                return setTeacherAnswerDraft(withValue, key, history.join(","), now);
+              })}
+            />
             {scene.question && <SceneQuestion
               scene={scene} session={session}
               submit={submit}
@@ -270,7 +283,8 @@ export function LosTeacherPlayer({ lessonId }: { lessonId: string }) {
             {scene.activityId && <div className="los-teacher-activity">
               <button type="button"
                 disabled={session.activityIds.includes(scene.activityId) || completed ||
-                  Boolean(scene.reflection && (session.draftAnswers[scene.id]?.trim().length ?? 0) < scene.reflection.minLength)}
+                  Boolean(scene.reflection && (session.draftAnswers[scene.id]?.trim().length ?? 0) < scene.reflection.minLength) ||
+                  Boolean(scene.numberBuilder && (session.draftAnswers[scene.id + "-history"] ?? "").split(",").filter(Boolean).length < 4)}
                 onClick={() => markActivity(scene.activityId!)}>
                 {session.activityIds.includes(scene.activityId) ? <CheckCircle2 size={18}/> : <Check size={18}/>}
                 {session.activityIds.includes(scene.activityId) ? "Harjoittelu vahvistettu" : scene.activityLabel}
