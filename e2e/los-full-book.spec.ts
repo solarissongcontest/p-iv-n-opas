@@ -1351,7 +1351,7 @@ test("L030 Teacher reads real submitted 25-item EX-MID, including oral-only self
  await page.goto("/los-lessons/L030",{waitUntil:"domcontentloaded"});
  const outline=page.locator(".los-teacher-outline nav button");
  await outline.filter({hasText:"Avaa ja palauta oikea 25 tehtävän välikoe"}).click();
- await expect(page.locator(".los-teacher-assessment-status")).toContainText("Kappaletesti: 0/25 vastattu");
+ await expect(page.locator(".los-teacher-assessment-status")).toContainText("Välikoe EX-MID: 0/25 vastattu");
  await expect(page.locator(".los-teacher-paper a[href*='/midterm']")).toBeVisible();
  await page.goto("/los?lessonReturn=L030#/1/01/midterm",{waitUntil:"domcontentloaded"});
  const questions=page.locator(".los-exam-question");
@@ -1367,10 +1367,10 @@ test("L030 Teacher reads real submitted 25-item EX-MID, including oral-only self
  await page.getByRole("link",{name:"Palaa oppitunnille L030"}).click();
  await outline.filter({hasText:"Avaa ja palauta oikea 25 tehtävän välikoe"}).click();
  const status=page.locator(".los-teacher-assessment-status");
- await expect(status).toContainText("Kappaletesti: 25/25 vastattu · Palautettu");
+ await expect(status).toContainText("Välikoe EX-MID: 25/25 vastattu · Palautettu");
  await expect(status).toContainText("Oma 4–6 repliikin keskustelu: Itsearvioitu");
  await expect(status).toContainText("Itsearviointi: Kirjattu");
  await page.reload({waitUntil:"domcontentloaded"});
- await expect(status).toContainText("Kappaletesti: 25/25 vastattu · Palautettu");
+ await expect(status).toContainText("Välikoe EX-MID: 25/25 vastattu · Palautettu");
  await expectNoHorizontalOverflow(page);
 });
