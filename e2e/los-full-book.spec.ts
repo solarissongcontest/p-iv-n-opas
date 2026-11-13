@@ -120,9 +120,9 @@ test("every one of the 60 guided lessons opens from its actual chapter picker on
    expect(seen.has(title)).toBe(false);
    seen.add(title);
    await button.click();
-   if(title==="L001" || title==="L002" || title==="L003" || title==="L004" || title==="L005" || title==="L006" || title==="L007"){
+   if(title==="L001" || title==="L002" || title==="L003" || title==="L004" || title==="L005" || title==="L006" || title==="L007" || title==="L008"){
      await expect(page).toHaveURL(new RegExp("/los-lessons/" + title + "$"));
-     await expect(page.locator(".los-teacher-paper h2").first()).toContainText(title==="L001" ? "Tervetuloa ensimmäiselle" : title==="L002" ? "Saksaa ei aina lausuta" : title==="L003" ? "Ensimmäinen oikea" : title==="L004" ? "Tänään opit" : title==="L005" ? "Tervehdykset kuuluvat" : title==="L006" ? "Ensimmäisen kappaleen kertaus" : "Tänään kysyt ensimmäisen kerran");
+     await expect(page.locator(".los-teacher-paper h2").first()).toContainText(title==="L001" ? "Tervetuloa ensimmäiselle" : title==="L002" ? "Saksaa ei aina lausuta" : title==="L003" ? "Ensimmäinen oikea" : title==="L004" ? "Tänään opit" : title==="L005" ? "Tervehdykset kuuluvat" : title==="L006" ? "Ensimmäisen kappaleen kertaus" : title==="L007" ? "Tänään kysyt ensimmäisen kerran" : "Franzin ja Gretan koko keskustelu");
      await page.goto("/los#/1/path",{waitUntil:"domcontentloaded"});
    }else{
      await expect(runner.locator(".los-lesson-detail .los-overline")).toContainText(title);
@@ -658,5 +658,94 @@ test("L007 Teacher stores actual C02 understanding evidence, never writes it int
   expect(saved).toEqual({c01Note:"C01 content must survive C02 teacher.",
     c01Teacher:undefined,c02TeacherComplete:true,c02Check:true,
     c02Answer:"a",c02LegacyComplete:false});
+  await expectNoHorizontalOverflow(page);
+});
+
+test("L008 full Franz-Greta dialogue uses three real checked C02 tasks and leaves L007 independent",async({page})=>{
+  await enterLocalBook(page);
+  await page.goto("/los#/1/path",{waitUntil:"domcontentloaded"});
+  await page.locator(".los-lesson-chapter-picker button").filter({hasText:"Kappale 2"}).click();
+  await page.locator(".los-lesson-picker button").filter({hasText:"L008"}).click();
+  await expect(page).toHaveURL(/\/los-lessons\/L008$/);
+  await expect(page.locator(".los-teacher-paper h2").first()).toContainText("Franzin ja Gretan koko keskustelu");
+  await page.locator(".los-teacher-outline nav button").filter({hasText:"Lue kaikki kuusi alkuperäistä repliikkiä"}).click();
+  await expect(page.getByRole("link",{name:/Avaa kirjassa/}).first()).toHaveAttribute("href",/lessonReturn=L008.*\/1\/02\/text/);
+  await page.goto("/los?lessonReturn=L008#/1/02/text",{waitUntil:"domcontentloaded"});
+  const turns=page.locator(".los-c01-reader .los-c01-turn");
+  await expect(turns).toHaveCount(6);
+  await expect(turns.first()).toContainText("Wie heißt du?");
+  await expect(turns.nth(4)).toContainText("Bis dann!");
+  await expect(turns.last()).toContainText("Wiedersehen!");
+  await page.getByRole("link",{name:"Palaa oppitunnille L008"}).click();
+  await page.locator(".los-teacher-outline nav button").filter({hasText:"Tarkista kolme kirjan omaa ymmärtämistehtävää"}).click();
+  for(const id of ["C02-SOURCE-Q02","C02-SOURCE-Q03","C02-SOURCE-Q04"]){
+    await expect(page.locator(".los-teacher-paper")).toContainText(id+": Vastaus vielä puuttuu");
+  }
+  await page.goto("/los?lessonReturn=L008#/1/02/understand",{waitUntil:"domcontentloaded"});
+  const qs=page.locator(".los-c01-question");
+  await expect(qs).toHaveCount(5);
+  await qs.nth(1).locator('input[value="b"]').check();
+  await qs.nth(2).locator('input[value="a"]').check();
+  await qs.nth(3).locator('input[value="b"]').check();
+  // Selected but unchecked answers must remain insufficient evidence.
+  await page.getByRole("link",{name:"Palaa oppitunnille L008"}).click();
+  await expect(page.locator(".los-teacher-paper")).toContainText("C02-SOURCE-Q02: Vastaus on tallennettu, mutta se pitää vielä tarkistaa kirjassa");
+  await expect(page.locator(".los-teacher-paper")).toContainText("C02-SOURCE-Q03: Vastaus on tallennettu, mutta se pitää vielä tarkistaa kirjassa");
+  await page.goto("/los?lessonReturn=L008#/1/02/understand",{waitUntil:"domcontentloaded"});
+  const source=page.locator(".los-c01-question");
+  for(const i of [1,2,3]){
+    await source.nth(i).getByRole("button",{name:"Tarkista vastaus"}).click();
+    await expect(source.nth(i)).toContainText("Oikein.");
+  }
+  await page.getByRole("link",{name:"Palaa oppitunnille L008"}).click();
+  for(const id of ["C02-SOURCE-Q02","C02-SOURCE-Q03","C02-SOURCE-Q04"]){
+    await expect(page.locator(".los-teacher-paper")).toContainText(id+": Vastaus tallennettu ja tarvittaessa tarkistettu");
+  }
+  // Even checked book tasks cannot auto-complete the lesson before teaching work.
+  await page.locator(".los-teacher-outline nav button").filter({hasText:"Ymmärrät Franzin ja Gretan keskustelun rakenteen"}).click();
+  await expect(page.getByRole("button",{name:"Merkitse oppitunti läpikäydyksi"})).toBeDisabled();
+  const outline=page.locator(".los-teacher-outline nav button");
+  await expect(outline).toHaveCount(14);
+  const choices:Record<string,string>={
+    "Miten kysyt nimen tutulta?":"Wie heißt du?",
+    "Nimikysymys vai kuulumiskysymys?":"Mitä kuuluu?",
+    "Kuka kertoo opettajan sukunimen?":"Greta",
+    "Kuka sanoo keskustelun viimeisen sanan?":"Wiedersehen!",
+  };
+  for(let i=0;i<14;i++){
+    await outline.nth(i).click();
+    const heading=(await page.locator(".los-teacher-paper h2").first().textContent())?.trim()??"";
+    if(heading==="Muistatko Franzin oman hyvästelyn?"){
+      await page.locator(".los-teacher-form input").fill("Bis dann!");
+      await page.locator(".los-teacher-form button").click();
+      await expect(page.locator(".los-teacher-feedback")).toContainText("Oikein");
+    }else if(choices[heading]){
+      await page.locator(".los-teacher-option").filter({hasText:choices[heading]}).click();
+      await expect(page.locator(".los-teacher-feedback")).toContainText("Oikein");
+    }
+    const activity=page.locator(".los-teacher-activity button");
+    if(await activity.count()){
+      await activity.click();
+      await expect(activity).toContainText("Harjoittelu vahvistettu");
+    }
+  }
+  const finish=page.getByRole("button",{name:"Merkitse oppitunti läpikäydyksi"});
+  await expect(finish).toBeEnabled();
+  await expect(page.locator(".los-teacher-paper")).toContainText("Itsenäisesti oikein ratkaistuja eri tarkistuksia: 2");
+  await finish.click();
+  await expect(page.locator(".los-teacher-done")).toContainText("Oppitunti merkitty suoritetuksi");
+  await page.reload({waitUntil:"domcontentloaded"});
+  await expect(page.locator(".los-teacher-done")).toContainText("Oppitunti merkitty suoritetuksi");
+  const state=await page.evaluate(()=>{
+    const k=Object.keys(localStorage).find(x=>x.startsWith("los.local.v1.")&&x.endsWith(".1.02"));
+    if(!k)throw Error("C02 draft missing");
+    const c2=JSON.parse(localStorage.getItem(k)!);
+    return {L008Done:Boolean(c2.teacherSessions?.L008?.completedAt),
+      L007Done:Boolean(c2.teacherSessions?.L007?.completedAt),
+      sourceChecked:["C02-SOURCE-Q02","C02-SOURCE-Q03","C02-SOURCE-Q04"].every(id=>c2.practiceChecked?.includes(id)),
+      originalL007Question:c2.practiceAnswers?.["C02-SOURCE-Q01"]??null,
+      legacyL008Done:Boolean(c2.lessonProgress?.L008?.completedAt)};
+  });
+  expect(state).toEqual({L008Done:true,L007Done:false,sourceChecked:true,originalL007Question:null,legacyL008Done:false});
   await expectNoHorizontalOverflow(page);
 });
