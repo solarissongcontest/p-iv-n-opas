@@ -121,7 +121,7 @@ test("every one of the 60 guided lessons opens from its actual chapter picker on
    expect(seen.has(title)).toBe(false);
    seen.add(title);
    await button.click();
-   if(Number(title.slice(1))<=5){
+   if(Number(title.slice(1))<=6){
     await expect(page).toHaveURL(new RegExp("/los-lessons/"+title+"$"));
     await expect(page.locator(".los-teacher-paper h2")).toBeVisible();
     await expect(page.locator(".los-teacher-sidebar h1")).toBeVisible();
@@ -832,4 +832,44 @@ test("L005 Teacher uses the real Text B transcript and checked book answers, nev
   await expect(page.getByRole("button",{name:"Merkitse oppitunti läpikäydyksi"})).toBeDisabled();
   await expect(page.locator(".los-teacher-paper")).toContainText("Jos ääni oli käytettävissä");
   await expectNoHorizontalOverflow(page);
+});
+
+
+test("L006 uses the existing submitted C01 exam and student self-assessment, not a second quiz",async({page})=>{
+ await enterLocalBook(page);
+ await page.goto("/los#/1/path",{waitUntil:"domcontentloaded"});
+ await page.locator(".los-lesson-picker button").filter({hasText:"L006"}).click();
+ await expect(page).toHaveURL(/\/los-lessons\/L006$/);
+ await expect(page.locator(".los-teacher-paper h2")).toContainText("Kertaus ja kappaletesti");
+ const outline=page.locator(".los-teacher-outline nav button");
+ await outline.filter({hasText:"Palauta C01:n 12 osatehtävän testi"}).click();
+ await expect(page.locator(".los-teacher-assessment-status")).toContainText("0/12 vastattu");
+ await expect(page.locator(".los-teacher-assessment-status")).toContainText("Ei vielä palautettu");
+ const link=page.getByRole("link",{name:/Avaa kirjassa/}).first();
+ await expect(link).toHaveAttribute("href",/lessonReturn=L006.*\/01\/test/);
+ await page.goto("/los?lessonReturn=L006#/1/01/test",{waitUntil:"domcontentloaded"});
+ const questions=page.locator(".los-workbook-question");
+ await expect(questions).toHaveCount(12);
+ for(let i=0;i<12;i++){
+  const item=questions.nth(i);
+  const radios=item.locator('input[type="radio"]');
+  if(await radios.count())await radios.first().check();
+  else await item.locator('input[type="text"]').fill("x");
+ }
+ await page.locator(".los-test-submit button").click();
+ await expect(page.locator(".los-test-result")).toContainText("TESTI PALAUTETTU");
+ await page.locator("#los-self-01").fill("Tervehdys onnistui, mutta hyvästelyn muotoa harjoittelen vielä.");
+ await page.goto("/los?lessonReturn=L006#/1/01/apply",{waitUntil:"domcontentloaded"});
+ await page.locator("#los-application-01").fill("Guten Morgen!\\nTschüss!");
+ await page.getByRole("link",{name:"Palaa oppitunnille L006"}).click();
+ await expect(page).toHaveURL(/\/los-lessons\/L006$/);
+ await outline.filter({hasText:"Palauta C01:n 12 osatehtävän testi"}).click();
+ const status=page.locator(".los-teacher-assessment-status");
+ await expect(status).toContainText("12/12 vastattu");
+ await expect(status).toContainText("Palautettu");
+ await expect(status).toContainText("Itsearviointi: Kirjattu");
+ await expect(status).toContainText("Oma sovellus: Teksti tallennettu");
+ await outline.filter({hasText:"C01 on kerrattu"}).click();
+ await expect(page.getByRole("button",{name:"Merkitse oppitunti läpikäydyksi"})).toBeDisabled();
+ await expectNoHorizontalOverflow(page);
 });

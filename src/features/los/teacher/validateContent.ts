@@ -99,6 +99,17 @@ export function validateTeacherLesson(lesson: TeacherLesson): TeacherContentIssu
         !/^C\d{2}-(?:SOURCE|TEXTB)-Q\d{2}$/.test(id)))) {
     issues.push({ location: "requiredCheckedIds", problem: "Tarkistettavan lähdetehtävän tunniste on virheellinen." });
   }
+  const assessment = lesson.chapterAssessment;
+  if (assessment && (
+    !unique(assessment.requiredTestIds) || assessment.requiredTestIds.length < 1 ||
+    assessment.requiredTestIds.length > 40 ||
+    assessment.requiredTestIds.some(id => !new RegExp("^C" + lesson.chapterId + "-EX-\\d{2,3}$").test(id)) ||
+    typeof assessment.requireApplicationDraft !== "boolean" ||
+    !Number.isInteger(assessment.minSelfAssessmentLength) || assessment.minSelfAssessmentLength < 1 ||
+    assessment.minSelfAssessmentLength > 500
+  )) {
+    issues.push({ location: "chapterAssessment", problem: "Kappaletestin tai itsearvioinnin vaatimus on virheellinen." });
+  }
   if (!lesson.scenes.some(scene => scene.kind === "summary")) {
     issues.push({ location: "scenes", problem: "Oppitunnilta puuttuu yhteenveto." });
   }

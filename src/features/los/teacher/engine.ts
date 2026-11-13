@@ -49,7 +49,32 @@ export type TeacherLesson = {
   requiredPracticeIds: readonly string[];
   /** Book comprehension checks must be both answered and explicitly checked. */
   requiredCheckedIds?: readonly string[];
+  /** Chapter-test evidence stays in the existing chapter draft. */
+  chapterAssessment?: {
+    requiredTestIds: readonly string[];
+    requireApplicationDraft: boolean;
+    minSelfAssessmentLength: number;
+  };
 };
+export type TeacherChapterAssessmentInput = {
+  testAnswers: Readonly<Record<string, string>>;
+  testSubmittedAt: string | null;
+  applicationDraft: string;
+  selfAssessment: string;
+};
+export function teacherChapterAssessmentStatus(
+  lesson: TeacherLesson, input?: TeacherChapterAssessmentInput,
+): { answered: number; expected: number; submitted: boolean; applicationDone: boolean; reflectionDone: boolean; ready: boolean } {
+  const requirement = lesson.chapterAssessment;
+  if (!requirement) return {answered:0,expected:0,submitted:false,applicationDone:false,reflectionDone:false,ready:true};
+  const answered = requirement.requiredTestIds.filter(id => Boolean(input?.testAnswers[id]?.trim())).length;
+  const expected = requirement.requiredTestIds.length;
+  const submitted = Boolean(input?.testSubmittedAt && iso(input.testSubmittedAt));
+  const applicationDone = !requirement.requireApplicationDraft || Boolean(input?.applicationDraft.trim());
+  const reflectionDone = (input?.selfAssessment.trim().length ?? 0) >= requirement.minSelfAssessmentLength;
+  return {answered,expected,submitted,applicationDone,reflectionDone,
+    ready:submitted && answered===expected && applicationDone && reflectionDone};
+}
 export type TeacherAttempt = {
   sceneId: string;
   answer: string;
@@ -192,8 +217,9 @@ export function teacherWrongFeedback(scene: TeacherScene, answer: string): strin
   return q.wrongAnswers?.[normalizeTeacherAnswer(answer)] ?? q.genericWrong;
 }
 export function teacherCanFinish(session: TeacherSession, lesson: TeacherLesson,
-  practiceAnswers: Readonly<Record<string, string>>, practiceChecked: readonly string[] = []): boolean {
-  return !session.paused && lesson.scenes.every(scene => session.visitedIds.includes(scene.id)) &&
+  practiceAnswers: Readonly<Record<string, string>>, practiceChecked: readonly string[] = [],
+  chapterAssessment?: TeacherChapterAssessmentInput): boolean {
+  return teacherChapterAssessmentStatus(lesson, chapterAssessment).ready && !session.paused && lesson.scenes.every(scene => session.visitedIds.includes(scene.id)) &&
     lesson.scenes.every(scene => !scene.reflection ||
       (session.draftAnswers[scene.id]?.trim().length ?? 0) >= scene.reflection.minLength) &&
     lesson.requiredQuestionIds.every(id => session.attempts.some(item => item.sceneId === id)) &&
@@ -204,8 +230,8 @@ export function teacherCanFinish(session: TeacherSession, lesson: TeacherLesson,
 }
 export function finishTeacherSession(session: TeacherSession, lesson: TeacherLesson,
   practiceAnswers: Readonly<Record<string, string>>, now: string,
-  practiceChecked: readonly string[] = []): TeacherSession {
-  return session.completedAt || !teacherCanFinish(session, lesson, practiceAnswers, practiceChecked) ? session :
+  practiceChecked: readonly string[] = [], chapterAssessment?: TeacherChapterAssessmentInput): TeacherSession {
+  return session.completedAt || !teacherCanFinish(session, lesson, practiceAnswers, practiceChecked, chapterAssessment) ? session :
     { ...session, updatedAt: now, completedAt: now };
 }
 export function independentTeacherEvidence(session: TeacherSession, lesson: TeacherLesson): number {

@@ -151,3 +151,7 @@
 .los-teacher-pause{display:block;width:100%;min-height:44px;padding:9px 13px;border:1px solid var(--los-border,#d5d9d8);border-radius:8px;background:transparent;text-align:center;margin:12px 0;color:inherit}
 .los-teacher-paused{min-height:320px;padding:38px 24px;background:var(--los-paper,#fff);border-radius:9px}
 .los-teacher-paused button{min-height:44px;padding:10px 16px;border-radius:8px}
+
+.los-teacher-assessment-status{margin:24px 0;padding:16px 20px;border:1px solid var(--los-line);border-radius:10px;background:var(--los-subtle);font-size:14px;line-height:1.65}
+.los-teacher-assessment-status h3{font-size:17px;margin:0 0 8px}
+.los-teacher-assessment-status p{margin:8px 0}

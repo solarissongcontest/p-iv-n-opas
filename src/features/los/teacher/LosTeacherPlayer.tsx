@@ -3,7 +3,7 @@ import { ArrowLeft, ArrowRight, BookOpen, Check, CheckCircle2, ChevronLeft, Chev
 import { readCachedDeviceUser } from "@/lib/deviceSession";
 import { useLosChapterDraft } from "../studyState.ts";
 import {
-  emptyTeacherSession, markTeacherHelp, confirmTeacherActivity,
+  emptyTeacherSession, markTeacherHelp, confirmTeacherActivity, teacherChapterAssessmentStatus,
   finishTeacherSession, independentTeacherEvidence, moveTeacherScene, revealTeacherSolution,
   setTeacherAnswerDraft, submitTeacherAnswer, toggleTeacherPause, teacherCanFinish, teacherLatestAttempt,
   teacherWrongFeedback, type TeacherScene, type TeacherSession,
@@ -116,7 +116,7 @@ export function LosTeacherPlayer({ lessonId }: { lessonId: string }) {
     : null;
   const scene = lesson?.scenes.find(item => item.id === session?.sceneId) ?? lesson?.scenes[0];
   const sceneIndex = lesson?.scenes.findIndex(item => item.id === scene?.id) ?? 0;
-  const available = Boolean(session && lesson && teacherCanFinish(session, lesson, draft.practiceAnswers, draft.practiceChecked));
+  const available = Boolean(session && lesson && teacherCanFinish(session, lesson, draft.practiceAnswers, draft.practiceChecked, draft));
   const completed = Boolean(session?.completedAt);
 
   useEffect(() => { setAuthorized(Boolean(readCachedDeviceUser())); }, []);
@@ -163,7 +163,7 @@ export function LosTeacherPlayer({ lessonId }: { lessonId: string }) {
     update(current => {
       const now = stamp();
       const old = current.teacherSessions?.[lessonId] ?? emptyTeacherSession(lesson, now);
-      const next = finishTeacherSession(old, lesson, current.practiceAnswers, now, current.practiceChecked);
+      const next = finishTeacherSession(old, lesson, current.practiceAnswers, now, current.practiceChecked, current);
       if (next === old) return current;
       // Teacher 2.0 completion is a distinct learning event. Never manufacture
       // legacy lesson steps or an exit answer that the student never submitted.
@@ -185,7 +185,7 @@ export function LosTeacherPlayer({ lessonId }: { lessonId: string }) {
       </section> :
       !lesson || !session || !scene ? <section className="los-teacher-status">
         <h1>Oppitunnin opetusmateriaali ei ole vielä valmis</h1>
-        <p>Teacher 2.0 on nyt käytössä oppitunneilla L001–L005. Muut oppitunnit toimivat edelleen nykyisessä Opetuspolussa.</p>
+        <p>Teacher 2.0 on nyt käytössä oppitunneilla L001–L006. Muut oppitunnit toimivat edelleen nykyisessä Opetuspolussa.</p>
         <a href="/los#/1/path">Palaa Opetuspolkuun</a>
       </section> :
       <>
@@ -293,6 +293,18 @@ export function LosTeacherPlayer({ lessonId }: { lessonId: string }) {
                 </section>}
               </div>}
             </div>
+            {lesson.chapterAssessment && (scene.kind === "book" || scene.kind === "summary") && <section className="los-teacher-assessment-status" aria-label="Kappaletestin ja itsearvioinnin tilanne">
+              <h3>Kirjan todellinen suoritustilanne</h3>
+              {(() => {
+                const progress = teacherChapterAssessmentStatus(lesson, draft);
+                return <>
+                  <p>Kappaletesti: {progress.answered}/{progress.expected} vastattu · {progress.submitted ? "Palautettu" : "Ei vielä palautettu"}.</p>
+                  <p>Oma sovellus: {progress.applicationDone ? "Teksti tallennettu" : "Teksti vielä puuttuu"}. Tätä ei pisteytetä automaattisesti.</p>
+                  <p>Itsearviointi: {progress.reflectionDone ? "Kirjattu" : "Puuttuu"}. Sisältöä ei arvioida koneellisesti.</p>
+                  <p>{progress.ready ? "Kirjan sovitut suoritukset ovat tallessa." : "Avaa kirjan testisivu, palauta kaikki osatehtävät ja kirjoita oma itsearviointi. Pelkkä sivun avaaminen ei riitä."}</p>
+                </>;
+              })()}
+            </section>}
             {scene.kind === "summary" && <section className="los-teacher-summary">
               <h3>Oppitunnin tilanne</h3>
               <p>Itsenäisesti oikein ratkaistuja eri tarkistuksia: <strong>{independentTeacherEvidence(session, lesson)}</strong>. Tämä luku ei ole kielitaitoprosentti.</p>
