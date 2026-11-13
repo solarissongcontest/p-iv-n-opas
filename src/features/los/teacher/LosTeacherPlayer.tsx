@@ -224,7 +224,7 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
       </section> :
       !lesson || !session || !scene ? <section className="los-teacher-status">
         <h1>Oppitunnin opetusmateriaali ei ole vielä valmis</h1>
-        <p>Teacher 2.0 on nyt käytössä oppitunneilla L001–L035. Muut oppitunnit toimivat edelleen nykyisessä Opetuspolussa.</p>
+        <p>Teacher 2.0 on nyt käytössä oppitunneilla L001–L040. Muut oppitunnit toimivat edelleen nykyisessä Opetuspolussa.</p>
         <a href={"/los#/" + (lesson?.bookId ?? 1) + "/path"}>Palaa Opetuspolkuun</a>
       </section> :
       <>
@@ -280,6 +280,24 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
                 return setTeacherAnswerDraft(withValue, key, history.join(","), now);
               })}
             />}
+            {scene.kind === "form" && scene.form && <section className="los-teacher-form-fields" aria-label="Kirjallinen harjoituslomake">
+              <p className="los-teacher-small"><strong>Kirjallinen harjoituslomake.</strong> Kentät eivät perustu varmentamattomaan kuunteluun, eikä niistä lasketa kuuntelupisteitä.</p>
+              {scene.form.map(field => {
+                const key = scene.id + "." + field.id;
+                return <div className="los-teacher-form-field" key={key}>
+                  <label htmlFor={"los-teacher-form-" + key}>{field.label}</label>
+                  <input id={"los-teacher-form-" + key} type="text" autoComplete="off"
+                    value={session.draftAnswers[key] ?? ""} maxLength={100}
+                    placeholder={field.placeholder} disabled={completed}
+                    onChange={event => persist(old => setTeacherAnswerDraft(old, key, event.target.value, stamp()))}/>
+                </div>;
+              })}
+              <details className="los-teacher-form-model">
+                <summary>Näytä mallilomake oman yrityksen jälkeen</summary>
+                {scene.form.map(field => <p key={field.id}><strong>{field.label}:</strong> {field.sampleAnswer}</p>)}
+                <p>Vertaa kirjoitusasua itse. Tämä ei ole koneellinen ääntämis- tai kuunteluarvio.</p>
+              </details>
+            </section>}
             {scene.question && <SceneQuestion
               scene={scene} session={session}
               submit={submit}
@@ -325,7 +343,8 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
               <button type="button"
                 disabled={session.activityIds.includes(scene.activityId) || completed ||
                   Boolean(scene.reflection && (session.draftAnswers[scene.id]?.trim().length ?? 0) < scene.reflection.minLength) ||
-                  Boolean(scene.numberBuilder && teacherBuiltNumberCount(session, scene.id) < 4)}
+                  Boolean(scene.numberBuilder && teacherBuiltNumberCount(session, scene.id) < 4) ||
+                  Boolean(scene.form && scene.form.some(field => !(session.draftAnswers[scene.id + "." + field.id]?.trim())))}
                 onClick={() => markActivity(scene.activityId!)}>
                 {session.activityIds.includes(scene.activityId) ? <CheckCircle2 size={18}/> : <Check size={18}/>}
                 {session.activityIds.includes(scene.activityId) ? "Harjoittelu vahvistettu" : scene.activityLabel}
