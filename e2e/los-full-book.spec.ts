@@ -120,7 +120,6 @@ test("every one of the 60 guided lessons opens from its actual chapter picker on
    expect(seen.has(title)).toBe(false);
    seen.add(title);
    await button.click();
-   await expect(runner.locator(".los-lesson-detail .los-overline")).toContainText(title);
    if(title==="L004"){
     await expect(page).toHaveURL(/\/los#\/1\/lesson\/L004$/);
     await expect(page.locator(".los-teacher-shell")).toBeVisible();
@@ -129,6 +128,7 @@ test("every one of the 60 guided lessons opens from its actual chapter picker on
     await expect(runner.locator(".los-lesson-steps li").first()).toBeHidden();
     await runner.getByRole("button",{name:"Näytä aiemmat oppituntitehtävät"}).click();
    }
+   await expect(runner.locator(".los-lesson-detail .los-overline")).toContainText(title);
    await expect(runner.locator(".los-lesson-steps li").first()).toBeVisible();
    await expect(runner.locator(".los-lesson-exit")).toBeVisible();
    await expect(runner.getByRole("button",{name:"Merkitse oppitunti suoritetuksi"})).toBeDisabled();
