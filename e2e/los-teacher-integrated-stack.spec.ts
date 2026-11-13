@@ -63,7 +63,7 @@ test("LOS! 1 library exposes the reader, teacher path and local dictionary in th
   await expect(links.getByRole("link",{name:"Kertauskortit"})).toHaveAttribute("href","/los#/1/cards");
   await expect(page.locator(".los-library-footnote")).toContainText("60/60 oppituntia");
   await links.getByRole("link",{name:"Sanakirja ja sanasto"}).click();
-  await expect(page).toHaveURL(/\\/los#\\/1\\/dictionary$/);
+  await expect(page).toHaveURL(new RegExp("/los#/1/dictionary$"));
   await expect(page.getByRole("heading",{name:"Sanakirja",exact:true})).toBeVisible();
   await expectNoHorizontalOverflow(page);
 });

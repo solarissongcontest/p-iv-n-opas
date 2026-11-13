@@ -46,7 +46,7 @@ test("StudyOS and LOS! library expose direct links without inflating approved le
   const shell=readFileSync("src/app/AppShell.tsx","utf8");
   const library=readFileSync("src/features/los/LosBook.tsx","utf8");
   const path=readFileSync("src/features/los/LosReferenceTools.tsx","utf8");
-  assert.equal((shell.match(/href="\\/los"/g)??[]).length,2,"Desktop and mobile have real LOS links");
+  assert.equal(shell.split('href="/los"').length-1,2,"Desktop and mobile have real LOS links");
   for(const destination of ["contents","path","dictionary","search","cards"]){
     assert.ok(library.includes('href="/los#/1/'+destination+'"'),destination+" must have a visible library shortcut");
   }
