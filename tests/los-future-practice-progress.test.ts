@@ -1,8 +1,11 @@
 import {test} from "node:test";
 import assert from "node:assert/strict";
 import {LOS_BOOKS} from "../src/features/los/catalog.ts";
-import {calculateLosFutureBookPractice} from "../src/features/los/losFuturePracticeProgress.ts";
-import {emptyLosDraft,losDraftKey} from "../src/features/los/studyState.ts";
+import {calculateLosFutureBookPractice,losFuturePracticeDraftKey,parseLosFuturePracticeEvidence} from "../src/features/los/losFuturePracticeProgress.ts";
+import {readFileSync} from "node:fs";
+
+type Draft={version:1;practiceChecked:string[];practiceAnswers:Record<string,string>;testAnswers:Record<string,string>};
+const emptyPracticeDraft=():Draft=>({version:1,practiceChecked:[],practiceAnswers:{},testAnswers:{}});
 
 /** No browser storage or user data required to validate the aggregation. */
 const owner="7fbb216d-607c-47d6-8a2d-a92b5bbca24d";
@@ -24,7 +27,7 @@ test("empty practice evidence reports no completed/graded lessons and a safe fir
 });
 
 test("six stage markers and task answers report only practice, and resume starts at first unchecked stage",()=>{
-  const draft=emptyLosDraft();
+  const draft=emptyPracticeDraft();
   draft.practiceChecked=[
     "los.future.guided:LOS2-L002:start",
     "los.future.guided:LOS2-L002:model",
@@ -34,7 +37,7 @@ test("six stage markers and task answers report only practice, and resume starts
   ];
   draft.practiceAnswers={"LOS2-C01-T01":"   ein Satz   ","LOS2-C01-T02":" ", "LOS2-L002:own-reflection":"Noch üben."};
   const raw=JSON.stringify(draft);
-  const read=(key:string)=>key===losDraftKey(2,"01",owner)?raw:null;
+  const read=(key:string)=>key===losFuturePracticeDraftKey(2,"01",owner)?raw:null;
   const progress=calculateLosFutureBookPractice(book,owner,read);
   assert.equal(progress.attemptedStages,2);
   assert.equal(progress.lessonsTouched,1);
@@ -51,10 +54,10 @@ test("six stage markers and task answers report only practice, and resume starts
 });
 
 test("book and owner namespaces prevent reading another book's answers",()=>{
-  const draft=emptyLosDraft();
+  const draft=emptyPracticeDraft();
   draft.practiceChecked=["los.future.guided:LOS3-L002:start"];
   draft.practiceAnswers={"LOS3-C01-T01":"bonjour"};
-  const read=(key:string)=>key===losDraftKey(3,"01",owner)?JSON.stringify(draft):null;
+  const read=(key:string)=>key===losFuturePracticeDraftKey(3,"01",owner)?JSON.stringify(draft):null;
   assert.equal(calculateLosFutureBookPractice(book,owner,read).attemptedStages,0);
   assert.equal(calculateLosFutureBookPractice(LOS_BOOKS[2]!,owner,read).attemptedStages,1);
   assert.equal(calculateLosFutureBookPractice(LOS_BOOKS[2]!,"other-user",read).attemptedStages,0);
@@ -75,18 +78,31 @@ test("corrupted or denied local storage cannot generate imaginary practice evide
 test("only all six attempted stages qualifies for six-stage self-marked status",()=>{
   const values=new Map<string,string>();
   for(const ch of book.chapters){
-    const draft=emptyLosDraft();
+    const draft=emptyPracticeDraft();
     const firstNumber=ch.id==="01"?2:ch.id==="06"?31:0;
     if(firstNumber>0){
       for(const id of ["start","model","guide","attempt","tasks","check"]){
         draft.practiceChecked.push(`los.future.guided:LOS2-L${String(firstNumber).padStart(3,"0")}:${id}`);
       }
     }
-    values.set(losDraftKey(2,ch.id,owner),JSON.stringify(draft));
+    values.set(losFuturePracticeDraftKey(2,ch.id,owner),JSON.stringify(draft));
   }
   const result=calculateLosFutureBookPractice(book,owner,key=>values.get(key)??null);
   assert.equal(result.lessonsAllStagesTried,2);
   assert.equal(result.lessonsTouched,2);
   assert.equal(result.attemptedStages,12);
   assert.deepEqual(result.resume,{number:3,stageIndex:0});
+});
+
+test("standalone practice parser rejects malformed v1 data and honors existing draft key syntax",()=>{
+  const state=readFileSync("src/features/los/studyState.ts","utf8");
+  assert.ok(state.includes("los.local.v1.${ownerId}.${bookId}.${chapterId}"));
+  assert.equal(losFuturePracticeDraftKey(2,"01",owner),`los.local.v1.${owner}.2.01`);
+  assert.deepEqual(parseLosFuturePracticeEvidence(null),{practiceAnswers:{},practiceChecked:[]});
+  assert.deepEqual(parseLosFuturePracticeEvidence('{"version":1,"practiceAnswers":{"a":"ok"},"testAnswers":{},"practiceChecked":["step",123]}'),{
+    practiceAnswers:{a:"ok"},practiceChecked:["step"],
+  });
+  assert.deepEqual(parseLosFuturePracticeEvidence('{"version":1,"practiceAnswers":{},"testAnswers":{"x":3},"practiceChecked":["step"]}'),{
+    practiceAnswers:{},practiceChecked:[],
+  });
 });
