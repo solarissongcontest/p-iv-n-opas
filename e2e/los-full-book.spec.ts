@@ -1096,7 +1096,7 @@ test("C05 L023 and L026 link original source and the single existing chapter tes
  for(const id of ["C05-SOURCE-Q01","C05-SOURCE-Q02","C05-SOURCE-Q03"]){
   await expect(page.locator(".los-teacher-paper")).toContainText(id+": Vastaus vielä puuttuu");
  }
- await expect(page.locator(".los-teacher-paper a[href*='/05/text']")).toHaveCount(1);
+ await expect(page.locator(".los-teacher-paper a[href*='/05/understand']")).toHaveCount(1);
  await page.goto("/los-lessons/L026",{waitUntil:"domcontentloaded"});
  outline=page.locator(".los-teacher-outline nav button");
  await outline.filter({hasText:"Palauta C05:n varsinainen 12 tehtävän testi"}).click();
@@ -1146,5 +1146,45 @@ test("C05 full chapter retake preserves original 12/12 result, self-assessment a
  await page.getByRole("button",{name:"Palauta testi · 12/12"}).click();
  await expect(archived).toContainText("12/12 pistettä");
  await expect(page.locator("#los-self-05")).toHaveValue("Osaan kysyä kuulumisia. Kertaan vielä nicht-sanan paikan.");
+ await expectNoHorizontalOverflow(page);
+});
+
+test("C05 L023 real Text A comprehension links, checks, and returns to Teacher with saved evidence",async({page})=>{
+ await enterLocalBook(page);
+ await page.goto("/los-lessons/L023",{waitUntil:"domcontentloaded"});
+ await page.locator(".los-teacher-outline nav button").filter({hasText:"Kolme tarkistettavaa Text A -kysymystä"}).click();
+ await expect(page.locator(".los-teacher-paper a[href*='/05/understand']")).toBeVisible();
+ await page.goto("/los?lessonReturn=L023#/1/05/understand",{waitUntil:"domcontentloaded"});
+ await expect(page.getByRole("heading",{name:"Ymmärrä alkuperäisteksti"})).toBeVisible();
+ for(const [id,correct] of [["C05-SOURCE-Q01","a"],["C05-SOURCE-Q02","b"],["C05-SOURCE-Q03","a"]] as const){
+  const field=page.locator('fieldset.los-c01-question').filter({has:page.locator('input[name="'+id+'"]')});
+  await field.locator('input[value="'+correct+'"]').check();
+  await field.getByRole("button",{name:"Tarkista vastaus"}).click();
+  await expect(field.getByRole("status")).toContainText("Oikein.");
+ }
+ await page.getByRole("link",{name:"Palaa oppitunnille L023"}).click();
+ await expect(page).toHaveURL(/\/los-lessons\/L023$/);
+ await page.locator(".los-teacher-outline nav button").filter({hasText:"Kolme tarkistettavaa Text A -kysymystä"}).click();
+ for(const id of ["C05-SOURCE-Q01","C05-SOURCE-Q02","C05-SOURCE-Q03"]){
+  await expect(page.locator(".los-teacher-paper")).toContainText(id+": Vastaus tallennettu ja tarvittaessa tarkistettu");
+ }
+ await expectNoHorizontalOverflow(page);
+});
+
+test("C05 L025 real Text B checks persist without any listening-completion evidence",async({page})=>{
+ await enterLocalBook(page);
+ await page.goto("/los?lessonReturn=L025#/1/05/text-b",{waitUntil:"domcontentloaded"});
+ for(const [id,correct] of [["C05-TEXTB-Q01","a"],["C05-TEXTB-Q02","b"]] as const){
+  const field=page.locator('fieldset.los-c01-question').filter({has:page.locator('input[name="'+id+'"]')});
+  await field.locator('input[value="'+correct+'"]').check();
+  await field.getByRole("button",{name:"Tarkista vastaus"}).click();
+  await expect(field.getByRole("status")).toContainText("Oikein.");
+ }
+ await page.getByRole("link",{name:"Palaa oppitunnille L025"}).click();
+ await page.locator(".los-teacher-outline nav button").filter({hasText:"Tee ja tarkista Text B:n kysymykset 1 ja 2"}).click();
+ for(const id of ["C05-TEXTB-Q01","C05-TEXTB-Q02"]){
+  await expect(page.locator(".los-teacher-paper")).toContainText(id+": Vastaus tallennettu ja tarvittaessa tarkistettu");
+ }
+ await expect(page.locator(".los-teacher-paper")).not.toContainText("Kuuntelukoe suoritettu");
  await expectNoHorizontalOverflow(page);
 });
