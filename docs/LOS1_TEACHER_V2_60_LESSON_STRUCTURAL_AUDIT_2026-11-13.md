@@ -8,8 +8,8 @@ Päiväys: 13.11.2026 · Integraatiokandidaatti PR #220 · Lähdekoodi PR #209 /
 
 - **60/60** ID:tä L001–L060 löydettiin nykyisistä `LosLessonBlueprint`-rakenteista, yksilöllisinä ja ilman aukkoja.
 - **60/60** vanhassa oppitunnissa on tavoite, **kolme** ohjaus-/suoritusvaihetta ja palautettava lopputarkistus. Tämä ei vielä tarkoita riittävää varsinaista opetusta.
-- **8/60** (L001–L008) sisältää erillisen Teacher Experience 2.0:n käsikirjoituksen, deterministisen ohjauksen ja opetus-/palautetilanteita; näidenkin sisältö on vielä toimituksellinen luonnos.
-- **52/60** käyttää vasta vanhaa linkki-/tehtävälistaan perustuvaa suoritusmallia. Niitä **ei** luokitella Teacher 2.0:ssa valmiiksi opetetuiksi.
+- **9/60** (L001–L009) sisältää erillisen Teacher Experience 2.0:n käsikirjoituksen, deterministisen ohjauksen ja opetus-/palautetilanteita; näidenkin sisältö on vielä toimituksellinen luonnos.
+- **51/60** käyttää vasta vanhaa linkki-/tehtävälistaan perustuvaa suoritusmallia. Niitä **ei** luokitella Teacher 2.0:ssa valmiiksi opetetuiksi.
 - **0/60** riippumatonta pedagogista kielihyväksyntää tai todellista opiskelijalla mitattua kestoa on tämän työn perusteella todettu.
 - Arvioitua `estimatedMinutes`-aikaa **ei ole mitattu**. L059 on koodissa **80 minuuttia**, muut 59 ovat **30 minuutin suunnitteluarvioita**. Aikaa ei pidä käyttää tekaistuna laatumittarina.
 - Vanhat lopputarkistukset voivat sisältää oikein tarkistettavan kysymyksen, mutta eivät yksin todista itsenäistä tai myöhemmin vahvistettua kielitaitoa.
@@ -28,7 +28,7 @@ Selite: `vastaus` = vanhaan tehtävätilaan tallennettu vastaus, ei automaattine
 | L006 | C01 · aloitus | 3 | 30 | koe | Teacher 2.0 -käsikirjoitus ja kirjan kappaletesti, hyväksyntä avoin | lessonEngine.ts |
 | L007 | C02 · nimi | 3 | 30 | ei erityistä | Teacher 2.0 -käsikirjoitus, hyväksyntä avoin | lessonEngineC02.ts |
 | L008 | C02 · nimi | 3 | 30 | tarkistettu lähdetehtävä | Teacher 2.0 -käsikirjoitus, hyväksyntä avoin | lessonEngineC02.ts |
-| L009 | C02 · nimi | 3 | 30 | vastaus | Vain vanha tehtävä-/vaihelista | lessonEngineC02.ts |
+| L009 | C02 · nimi | 3 | 30 | vastaus | Teacher 2.0 -käsikirjoitus, hyväksyntä avoin | lessonEngineC02.ts |
 | L010 | C02 · nimi | 3 | 30 | tarkistettu lähdetehtävä | Vain vanha tehtävä-/vaihelista | lessonEngineC02.ts |
 | L011 | C02 · nimi | 3 | 30 | koe | Vain vanha tehtävä-/vaihelista | lessonEngineC02.ts |
 | L012 | C03 · alkuperä | 3 | 30 | ei erityistä | Vain vanha tehtävä-/vaihelista | lessonEngineC03.ts |
@@ -85,12 +85,12 @@ Selite: `vastaus` = vanhaan tehtävätilaan tallennettu vastaus, ei automaattine
 
 **P0, data:** Historiallinen `lessonProgress.*.teacher` (#218) säilytetään vain vanhana tietona. `teacherSessions` (#217) on ainoa uusi kirjoitettava Teacher 2.0 -tila. Vanhaa näyttöä ei koskaan muunnettaessa lasketa uuden opetuksen itsenäiseksi näytöksi.
 
-**P1, L001–L008:** Tarkista jokaisen opetustilanteen oikea saksan kieli, jo opetetut ilmaukset, kirjalinkit, vihjeiden oikeellisuus ja oikea riippumaton osaamisen tarkistus. Testaa oikealla aloittelijalla. Erityisesti L004:n oikeus käyttää `Guten Morgen`, `Guten Abend`, `Tschüss`, `Gute Nacht` ja `Auf Wiedersehen` tulee osoittaa L001–L003:n opetetulla sisällöllä, eikä vain C01-sanaston olemassaololla. Tämän auditoinnin perusteella näitä hyväksyntäportteja ei suljeta.
+**P1, L001–L009:** Tarkista jokaisen opetustilanteen oikea saksan kieli, jo opetetut ilmaukset, kirjalinkit, vihjeiden oikeellisuus ja oikea riippumaton osaamisen tarkistus. Testaa oikealla aloittelijalla. Erityisesti L004:n oikeus käyttää `Guten Morgen`, `Guten Abend`, `Tschüss`, `Gute Nacht` ja `Auf Wiedersehen` tulee osoittaa L001–L003:n opetetulla sisällöllä, eikä vain C01-sanaston olemassaololla. Tämän auditoinnin perusteella näitä hyväksyntäportteja ei suljeta.
 
-**P2, L009–L026:** Kirjoita opettavat tilanteet ja tarkista, että jokainen taito opetetaan ennen itsenäistä koetta. Lisää todelliset virhepalautteet ja uudelleenharjoittelu; älä luo 56 valmista tuntia pelkästä samasta yleispohjasta.
+**P2, L010–L026:** Kirjoita opettavat tilanteet ja tarkista, että jokainen taito opetetaan ennen itsenäistä koetta. Lisää todelliset virhepalautteet ja uudelleenharjoittelu; älä luo 56 valmista tuntia pelkästä samasta yleispohjasta.
 
 **P3, L027–L060:** Kertausten ja kokeiden erilliset pedagogiset mallit, toimivat ja lisensoidut kuuntelut, alkuperäislähteiden oikeudet, vastausmallit, ääni-/IPA-hyväksynnät ja viivästetty taitonäyttö. Kertaus ja koe eivät ole tavallinen 30 min Teacher-oppitunti.
 
 ## Julkaisun portit
 
-U1.0:n **R1–R12** pysyy ainoana julkaisuporttien listana. Raportti ei luo uutta G1–G8-järjestelmää eikä sulje portteja ilman havaintoa. Tästä raportista johdettavat tärkeimmät avoimet työt ovat L009–L060:n varsinainen opetus, L001–L008:n toimituksellinen hyväksyntä, sanakirjan tuotantolataus, tarkistettu sanakohtainen ääntämistieto, oikeat ihmisäänitteet, todelliset laite-/tallennustestit ja sisällön ulkoisten oikeuksien hyväksyntä.
+U1.0:n **R1–R12** pysyy ainoana julkaisuporttien listana. Raportti ei luo uutta G1–G8-järjestelmää eikä sulje portteja ilman havaintoa. Tästä raportista johdettavat tärkeimmät avoimet työt ovat L010–L060:n varsinainen opetus, L001–L009:n toimituksellinen hyväksyntä, sanakirjan tuotantolataus, tarkistettu sanakohtainen ääntämistieto, oikeat ihmisäänitteet, todelliset laite-/tallennustestit ja sisällön ulkoisten oikeuksien hyväksyntä.

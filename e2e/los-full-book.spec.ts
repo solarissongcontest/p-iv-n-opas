@@ -121,7 +121,7 @@ test("every one of the 60 guided lessons opens from its actual chapter picker on
    expect(seen.has(title)).toBe(false);
    seen.add(title);
    await button.click();
-   if(Number(title.slice(1))<=8){
+   if(Number(title.slice(1))<=9){
     await expect(page).toHaveURL(new RegExp("/los-lessons/"+title+"$"));
     await expect(page.locator(".los-teacher-paper h2")).toBeVisible();
     await expect(page.locator(".los-teacher-sidebar h1")).toBeVisible();
@@ -926,6 +926,33 @@ test("L008 checks the real C02 source answers and preserves them across the book
   await expect(page.locator(".los-teacher-paper")).toContainText("C02-SOURCE-Q"+n+": Vastaus tallennettu ja tarvittaessa tarkistettu");
  }
  await outline.filter({hasText:"Olet lukenut ensimmäisen nimidialogin"}).click();
+ await expect(page.getByRole("button",{name:"Merkitse oppitunti läpikäydyksi"})).toBeDisabled();
+ await expectNoHorizontalOverflow(page);
+});
+
+
+test("L009 grammar lesson uses the four real C02 verb answers across book and Teacher",async({page})=>{
+ await enterLocalBook(page);
+ await page.goto("/los-lessons/L009",{waitUntil:"domcontentloaded"});
+ await expect(page.locator(".los-teacher-sidebar h1")).toContainText("Heißen ja sein");
+ const outline=page.locator(".los-teacher-outline nav button");
+ await outline.filter({hasText:"Tee neljä oikeaa C02:n verbiharjoitusta"}).click();
+ const paper=page.locator(".los-teacher-paper");
+ await expect(paper).toContainText("C02-EX-03: Vastaus vielä puuttuu");
+ const link=page.getByRole("link",{name:/Avaa kirjassa/}).last();
+ await expect(link).toHaveAttribute("href",/lessonReturn=L009.*\/02\/practice/);
+ await page.goto("/los?lessonReturn=L009#/1/02/practice",{waitUntil:"domcontentloaded"});
+ const answers=[["C02-EX-03","heiße"],["C02-EX-04","heißt"],["C02-EX-05","bin"],["C02-EX-06","bist"]];
+ for(const [id,value] of answers){
+  await page.locator('#'+id+' input[type="text"]').fill(value);
+ }
+ await page.getByRole("link",{name:"Palaa oppitunnille L009"}).click();
+ await expect(page).toHaveURL(/\/los-lessons\/L009$/);
+ await outline.filter({hasText:"Tee neljä oikeaa C02:n verbiharjoitusta"}).click();
+ for(const [id] of answers){
+  await expect(paper).toContainText(id+": Vastaus tallennettu ja tarvittaessa tarkistettu");
+ }
+ await outline.filter({hasText:"Osaat nyt kaksi minä–sinämuotoparia"}).click();
  await expect(page.getByRole("button",{name:"Merkitse oppitunti läpikäydyksi"})).toBeDisabled();
  await expectNoHorizontalOverflow(page);
 });
