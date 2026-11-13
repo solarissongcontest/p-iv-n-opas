@@ -43,6 +43,7 @@ test("real greeting audio and all twenty authored meanings stay inside LOS!",()=
  assert.match(player,/onPlaying/);
  assert.match(player,/onEnded/);
  assert.match(player,/onError/);
+ assert.match(player,/Kuullun ymmärtämisen tavoite: vahvistamatta/);
  assert.doesNotMatch(player,/speechSynthesis|SpeechRecognition|autoplay/);
 });
 
