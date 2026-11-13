@@ -19,7 +19,7 @@ export const LOS1_L038_TEACHER: TeacherLesson = {
     {id:"recall",phase:"Muistelu",kind:"question",title:"Muistatko oikean kirjoitusasun?",
       paragraphs:["Tarkista C07:n lähdetekstin tapaus: nimen Bolliger keskellä on kaksi samanlaista kirjainta."],
       question:{type:"choice",skillId:"L1-READ-01",prompt:"Mitä zweimal L tarkoittaa?",
-        options:[{id:"a",label:"Kaksi L-kirjainta peräkkäin"},{id:"b",label:"Kirjain L on sanan lopussa",wrongFeedback:"Zweimal ilmaisee toistumisen, ei sijaintia."},{id:"c",label:"Kaksi numeroa",wrongFeedback:"Tässä toistetaan kirjain L, ei numeroa."}],
+        options:[{id:"a",label:"Kaksi L-kirjainta peräkkäin", "lang": "fi"},{id:"b",label:"Kirjain L on sanan lopussa", "lang": "fi",wrongFeedback:"Zweimal ilmaisee toistumisen, ei sijaintia."},{id:"c",label:"Kaksi numeroa", "lang": "fi",wrongFeedback:"Tässä toistetaan kirjain L, ei numeroa."}],
         correctOption:"a",success:"Oikein. Kaksi L-kirjainta näkyy Bolliger-nimessä.",hint:"Zwei = kaksi, zweimal = kaksi kertaa.",reteach:"Franz sanoo zweimal L, jotta kirjoittaja merkitsee L-L.",genericWrong:"Mieti, mikä asia toistetaan."}},
     {id:"method",phase:"Opettajan selitys",kind:"explanation",title:"Kolme vaihetta, joilla tavaus onnistuu",
       paragraphs:[
