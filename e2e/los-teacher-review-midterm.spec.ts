@@ -39,9 +39,12 @@ test("EX-MID saves 25 responses, hides keys until submission and archives own te
   await page.getByRole("button",{name:/Arkistoi tulos ja aloita uusinta/}).click();
   await expect(page.getByRole("heading",{name:"Aiempien yritysten arkisto"})).toBeVisible();
   await page.reload({waitUntil:"domcontentloaded"});
-  await page.getByRole("summary",{name:"Oma keskusteluteksti ja itsearviointi"}).click();
+  const archive=page.getByRole("region",{name:"Välikokeen aiempien yritysten arkisto"});
+  await expect(archive).toContainText("25/25 pistettä");
+  await archive.locator("summary").filter({hasText:"Oma keskusteluteksti ja itsearviointi"}).click();
   await expect(page.locator(".los-exam-own-text").first()).toContainText("Ich heiße Mia");
   await expect(page.locator(".los-exam-own-text").nth(1)).toContainText("Sie-muotoa");
+  await expect(archive).toContainText("Tarvitsin mallia tai korjauksia.");
   await expect(page.locator(".los-exam-question").first().locator("input:checked")).toHaveCount(0);
   await expect(page.getByLabel("Oma keskustelu tai muistiinpanot (vapaaehtoinen)")).toHaveValue("");
   await expect(page.getByLabel("Mitä osasin ja mitä harjoittelen vielä?")).toHaveValue("");
