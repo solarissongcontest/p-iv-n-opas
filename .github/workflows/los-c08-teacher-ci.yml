@@ -1,6 +1,9 @@
 name: LOS C08 Teacher L041-L045 QA
 
 on:
+  push:
+    branches:
+      - feat/los1-teacher-l041-l045
   pull_request:
     branches:
       - feat/los1-teacher-c03-l012-20261113
