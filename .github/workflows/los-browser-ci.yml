@@ -8,6 +8,7 @@ on:
       - "e2e/los-full-book.spec.ts"
       - "e2e/los-c01-lessons.spec.ts"
       - "e2e/los-c10-teacher.spec.ts"
+      - "e2e/los-final-teacher.spec.ts"
       - "e2e/helpers.ts"
       - ".github/workflows/los-browser-ci.yml"
   push:
@@ -16,6 +17,7 @@ on:
       - "src/features/los/**"
       - "e2e/los-full-book.spec.ts"
       - "e2e/los-c01-lessons.spec.ts"
+      - "e2e/los-final-teacher.spec.ts"
       - "e2e/helpers.ts"
       - ".github/workflows/los-browser-ci.yml"
   workflow_dispatch:
@@ -70,7 +72,7 @@ jobs:
           exit 1
 
       - name: Full LOS! 1 browser flows in mobile WebKit and desktop Chromium
-        run: bunx playwright test e2e/los-full-book.spec.ts e2e/los-c10-teacher.spec.ts --project=desktop-chromium --project=iphone-webkit
+        run: bunx playwright test e2e/los-full-book.spec.ts e2e/los-c10-teacher.spec.ts e2e/los-final-teacher.spec.ts --project=desktop-chromium --project=iphone-webkit
 
       - name: Upload browser traces and preview log
         if: always()

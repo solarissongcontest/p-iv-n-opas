@@ -2,6 +2,8 @@
  * LOS Teacher 2.0: deterministic learning engine. No AI services, network requests
  * or inferred mastery. A session is independent of legacy lessonProgress.
  */
+import { teacherBookEvidenceStatus, type TeacherBookEvidence } from "./finalEvidence.ts";
+
 export type TeacherOption = { id: string; label: string; wrongFeedback?: string };
 export type TeacherQuestion = {
   prompt: string;
@@ -51,6 +53,8 @@ export type TeacherLesson = {
   requiredCheckedIds?: readonly string[];
   /** An original transcript cannot substitute for verified audio. */
   mediaGate?: {sourceId:string;approved:boolean;reason:string};
+  /** Review II and final assessment evidence must be read from real book records. */
+  bookEvidence?: TeacherBookEvidence;
   /** Chapter-test evidence stays in the existing chapter draft. */
   chapterAssessment?: {
     requiredTestIds: readonly string[];
@@ -224,6 +228,13 @@ export function teacherCanFinish(session: TeacherSession, lesson: TeacherLesson,
   practiceAnswers: Readonly<Record<string, string>>, practiceChecked: readonly string[] = [],
   chapterAssessment?: TeacherChapterAssessmentInput): boolean {
   return (!lesson.mediaGate || lesson.mediaGate.approved) && teacherChapterAssessmentStatus(lesson, chapterAssessment).ready && !session.paused && lesson.scenes.every(scene => session.visitedIds.includes(scene.id)) &&
+    (!lesson.bookEvidence || teacherBookEvidenceStatus(lesson.bookEvidence, {
+      practiceAnswers,practiceChecked,
+      testAnswers:chapterAssessment?.testAnswers??{},
+      testSubmittedAt:chapterAssessment?.testSubmittedAt??null,
+      applicationDraft:chapterAssessment?.applicationDraft??"",
+      selfAssessment:chapterAssessment?.selfAssessment??"",
+    }).ready) &&
     lesson.scenes.every(scene => !scene.reflection ||
       (session.draftAnswers[scene.id]?.trim().length ?? 0) >= scene.reflection.minLength) &&
     lesson.requiredQuestionIds.every(id => session.attempts.some(item => item.sceneId === id)) &&

@@ -9,6 +9,7 @@ import {
   teacherWrongFeedback, type TeacherScene, type TeacherSession,
 } from "./engine.ts";
 import { getLosTeacherLesson } from "./lessonL004.ts";
+import { teacherBookEvidenceStatus } from "./finalEvidence.ts";
 import { LosTeacherGreetingMedia } from "./LosTeacherGreetingMedia.tsx";
 import { composeLosC10Dialogues, storeLosC10Dialogues } from "./c10ApplicationBridge.ts";
 import { validateTeacherLesson } from "./validateContent.ts";
@@ -17,7 +18,7 @@ import "./teacher.css";
 
 const stamp = () => new Date().toISOString();
 const bookUrl = (lessonId: string, bookId: number, chapterId: string, section: string) =>
-  "/los?lessonReturn=" + encodeURIComponent(lessonId) + "#/" + bookId + "/" + chapterId + "/" + section;
+  "/los?lessonReturn=" + encodeURIComponent(lessonId) + "#/" + bookId + "/" + (["92","93"].includes(chapterId) ? "" : chapterId + "/") + section;
 
 function SceneQuestion({ scene, session, submit, saveDraft, requestHint, reveal }: {
   scene: TeacherScene;
@@ -131,6 +132,8 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
   const sceneIndex = lesson?.scenes.findIndex(item => item.id === scene?.id) ?? 0;
   const available = Boolean(saved && session && lesson && teacherCanFinish(session, lesson, draft.practiceAnswers, draft.practiceChecked, draft));
   const completed = Boolean(session?.completedAt);
+  const currentEvidence=lesson?.bookEvidence ? teacherBookEvidenceStatus(lesson.bookEvidence,draft) : null;
+  const currentAssessmentChanged=Boolean(completed && currentEvidence && !currentEvidence.ready);
   const c10Dialogues = lesson?.id === "L054" ? composeLosC10Dialogues(
     session?.draftAnswers["dialogue-du"] ?? "", session?.draftAnswers["dialogue-sie"] ?? "") : null;
 
@@ -204,7 +207,7 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
       </section> :
       !lesson || !session || !scene ? <section className="los-teacher-status">
         <h1>Oppitunnin opetusmateriaali ei ole vielä valmis</h1>
-        <p>Teacher 2.0 on nyt käytössä oppitunneilla L001–L016 sekä L051–L055. Muut oppitunnit toimivat edelleen nykyisessä Opetuspolussa.</p>
+        <p>Teacher 2.0 on nyt käytössä oppitunneilla L001–L016 sekä L051–L060. Muut oppitunnit toimivat edelleen nykyisessä Opetuspolussa.</p>
         <a href={"/los#/" + (lesson?.bookId ?? 1) + "/path"}>Palaa Opetuspolkuun</a>
       </section> :
       <>
@@ -217,7 +220,7 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
             <p className="los-teacher-eyebrow">OPETUSPOLKU · {lesson.id}</p>
             <h1>{lesson.title}</h1>
             <p className="los-teacher-sidebar-copy">{lesson.objective}</p>
-            <p className="los-teacher-small">{completed ? "Oppitunti suoritettu" :
+            <p className="los-teacher-small">{completed ? (currentAssessmentChanged ? "Oppitunti suoritettu aiemmin · kirjan nykyinen yritys kesken" : "Oppitunti suoritettu") :
               "Oppitunti " + (sceneIndex + 1) + "/" + lesson.scenes.length + " · suunnitteluarvio " + lesson.estimatedMinutes + " min (ei mitattu)"}</p>
             <button className="los-teacher-pause" type="button" onClick={togglePause}>
               {session.paused ? "Jatka opetusta" : "Keskeytä oppitunti"}
@@ -342,6 +345,22 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
                 </section>}
               </div>}
             </div>
+            {lesson.bookEvidence && (scene.kind === "book" || scene.kind === "summary") &&
+              <section className="los-teacher-assessment-status" aria-label="Kirjan todelliset kertaus- ja arviointimerkinnät">
+                <h3>{lesson.bookEvidence.kind==="review-ii" ? "Kertaus II:n oikeat suoritukset" :
+                  lesson.bookEvidence.kind==="final-exam" ? "EX-FINAL:n oikeat suoritukset" :
+                  "Yhteenvedon oikeat merkinnät"}</h3>
+                {(() => {
+                  const status=teacherBookEvidenceStatus(lesson.bookEvidence!,draft);
+                  return <>
+                    <p>{status.done}/{status.total} vaadittua suoritusta tallessa. {status.ready ?
+                      "Kaikki sovitut merkinnät löytyvät." : "Kirjan tehtäviä tai omaa arviointia puuttuu vielä."}</p>
+                    {status.missing.slice(0,5).map(item=><p key={item}><HelpCircle size={15}/> {item}</p>)}
+                    {status.missing.length>5&&<p>Lisäksi {status.missing.length-5} muuta merkintää puuttuu. Avaa kirjan alkuperäinen arviointisivu.</p>}
+                    <p>Tämä on suorituksen tarkistus, ei itsenäinen kielitaitoarvio. Kuuntelu edellyttää alkuperäisäänen päättymismerkintää, eikä äänitteen lataus yksin pisteytä puhetta.</p>
+                  </>;
+                })()}
+              </section>}
             {lesson.chapterAssessment && (scene.kind === "book" || scene.kind === "summary") && <section className="los-teacher-assessment-status" aria-label="Kappaletestin ja itsearvioinnin tilanne">
               <h3>Kirjan todellinen suoritustilanne</h3>
               {(() => {
@@ -366,7 +385,9 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
                 "Vielä puuttuu yksi tai useampi opetustilanne, harjoitus, kirjan vastaus tai oma harjoitteluvahvistus."}</p>
               {!completed ? <button type="button" className="los-teacher-primary"
                 disabled={!available} onClick={finish}>Merkitse oppitunti läpikäydyksi</button> :
-                <p className="los-teacher-done"><CheckCircle2 size={19}/> Oppitunti merkitty suoritetuksi. Osaamista seurataan erikseen.</p>}
+                <p className="los-teacher-done"><CheckCircle2 size={19}/> Oppitunti merkitty suoritetuksi aiemmin.
+                  {currentAssessmentChanged ? " Kirjan nykyiset tehtävämerkinnät ovat sittemmin muuttuneet, esimerkiksi uusintakokeen aloituksessa. Aiempi suoritus säilyy historiassa, mutta uusi arviointiyritys on kesken." :
+                    " Osaamista seurataan erikseen."}</p>}
             </section>}
             <div className="los-teacher-navigation">
               <button type="button" onClick={() => setReplayKey(x => x + 1)}>Toista opetustilanne</button>
