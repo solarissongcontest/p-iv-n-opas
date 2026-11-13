@@ -5,7 +5,7 @@ import {
   finishTeacherSession, independentTeacherEvidence, markTeacherHelp,
   moveTeacherScene, normalizeTeacherAnswer, parseTeacherSessions,
   revealTeacherSolution, setTeacherAnswerDraft, submitTeacherAnswer,
-  teacherCanFinish, teacherLatestAttempt, teacherWrongFeedback,
+  teacherCanFinish, teacherCompletionBlockers, teacherLatestAttempt, teacherWrongFeedback,
 } from "../src/features/los/teacher/engine.ts";
 import { LOS1_L004_TEACHER } from "../src/features/los/teacher/lessonL004.ts";
 
@@ -119,4 +119,36 @@ test("guided and activation questions are not independent mastery evidence", () 
   s = markTeacherHelp(s, "exit", now);
   s = submitTeacherAnswer(s, lesson, "exit", "b", now);
   assert.equal(independentTeacherEvidence(s, lesson), 1);
+});
+
+test("completion checklist lists real missing scenes, questions, activities and workbook tasks", () => {
+  let session=emptyTeacherSession(lesson,now);
+  const initial=teacherCompletionBlockers(session,lesson,{});
+  assert.ok(initial.some(reason=>reason.includes("Käy läpi")));
+  assert.ok(initial.some(reason=>reason.includes("Vastaa oppitunnin kysymyksiin")));
+  assert.ok(initial.some(reason=>reason.includes("Vahvista omat harjoittelut")));
+  assert.ok(initial.some(reason=>reason.includes("C01-EX-01")&&reason.includes("C01-EX-04")));
+  assert.equal(teacherCanFinish(session,lesson,{}),false);
+  for(const scene of lesson.scenes){
+    session=moveTeacherScene(session,lesson,scene.id,now);
+    if(scene.question){
+      session=submitTeacherAnswer(session,lesson,scene.id,
+        scene.question.type==="choice"?scene.question.correctOption!:scene.question.accepted![0]!,now);
+    }
+  }
+  for(const activity of lesson.requiredActivityIds)
+    session=confirmTeacherActivity(session,lesson,activity,now);
+  const completedAnswers={"C01-EX-01":"test","C01-EX-04":"test"};
+  assert.deepEqual(teacherCompletionBlockers(session,lesson,completedAnswers),[]);
+  assert.equal(teacherCanFinish(session,lesson,completedAnswers),true);
+});
+
+test("completion checklist identifies media and storage-independent gates without claiming mastery", () => {
+  const session=emptyTeacherSession(lesson,now);
+  const guarded={...lesson,mediaGate:{sourceId:"M-TEST-01",approved:false,
+    reason:"Ääni vaatii lisenssitarkistuksen."}};
+  const blockers=teacherCompletionBlockers(session,guarded,{},[],undefined,false);
+  assert.ok(blockers.some(reason=>reason.includes("M-TEST-01")));
+  assert.ok(blockers.some(reason=>reason.includes("erillinen kertaus- tai arviointiosio")));
+  assert.equal(teacherCanFinish(session,guarded,{},[],undefined,false),false);
 });
