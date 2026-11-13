@@ -20,20 +20,22 @@ function GuidedChapterLesson({bookId,chapterId,script,move}:{
   bookId:number;chapterId:string;script:LosFutureLessonContent;move:LosNavigate;
 }){
   const {draft,update,saved}=useLosChapterDraft(bookId,chapterId);
-  const stageStorageKey=`los.future.guided.${script.id}.selectedStage`;
+  // The existing owner/book/chapter draft persists the reading position. This is
+  // navigation state only: it must never become a completed lesson or mastery score.
+  const stageDraftKey=`los.future.guided:${script.id}:selectedStage`;
   const [stageIndex,setStageIndex]=useState(()=>{
-    try {
-      const raw=typeof sessionStorage==="undefined"?null:sessionStorage.getItem(stageStorageKey);
-      const value=Number(raw);
-      return raw!==null&&Number.isInteger(value)&&value>=0&&value<6?value:0;
-    }catch{return 0;}
+    const raw=draft.practiceAnswers[stageDraftKey];
+    const value=raw===undefined ? NaN : Number(raw);
+    return Number.isInteger(value)&&value>=0&&value<6 ? value : 0;
   });
   const stages=stagesFor(script);
   function chooseStage(index:number){
     const next=Math.max(0,Math.min(index,stages.length-1));
     setStageIndex(next);
-    try{sessionStorage.setItem(stageStorageKey,String(next));}
-    catch{/* tuntia voi käyttää myös ilman sessionStoragea */}
+    update(current=>({
+      ...current,
+      practiceAnswers:{...current.practiceAnswers,[stageDraftKey]:String(next)},
+    }));
   }
   const stage=stages[stageIndex]!;
   const marker=(s:Stage)=>`los.future.guided:${script.id}:${s.id}`;

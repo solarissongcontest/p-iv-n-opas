@@ -114,8 +114,11 @@ test("a source-guided lesson reuses chapter answers and persists its own reflect
   await runner.getByRole("button",{name:/Tunnin lopputarkistus/}).click();
   const reflection=runner.getByPlaceholder("Mikä onnistui? Mitä harjoittelet seuraavaksi?");
   await reflection.fill("Kertaan saksan persoonapäätteet.");
+  // A fresh session must still restore the selected scene from the owner-scoped chapter draft.
+  await page.evaluate(()=>sessionStorage.removeItem("los.future.guided.LOS2-L002.selectedStage"));
   await page.reload({waitUntil:"domcontentloaded"});
   await expect(reflection).toHaveValue("Kertaan saksan persoonapäätteet.");
+  await expect(runner.locator("#los-guided-lesson-stage-title")).toHaveText("Tunnin lopputarkistus");
   const separate=await page.evaluate(()=>{
     const owner=localStorage.getItem("opk.owner-id");
     return {
