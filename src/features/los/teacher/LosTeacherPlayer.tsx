@@ -6,7 +6,7 @@ import {
   emptyTeacherSession, markTeacherHelp, confirmTeacherActivity, teacherChapterAssessmentStatus,
   finishTeacherSession, independentTeacherEvidence, moveTeacherScene, revealTeacherSolution,
   setTeacherAnswerDraft, submitTeacherAnswer, toggleTeacherPause, teacherCanFinish, teacherLatestAttempt,
-  teacherWrongFeedback, type TeacherScene, type TeacherSession,
+  teacherWrongFeedback, teacherBuiltNumberCount, type TeacherScene, type TeacherSession,
 } from "./engine.ts";
 import { getLosTeacherLesson } from "./lessonRegistry.ts";
 import { LosTeacherNumberBuilder } from "./LosTeacherNumberBuilder.tsx";
@@ -240,7 +240,7 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
             {scene.kind === "board" && <TeacherBoard scene={scene}/>}
             {scene.numberBuilder && <LosTeacherNumberBuilder
               value={session.draftAnswers[scene.id]}
-              historyCount={(session.draftAnswers[scene.id + "-history"] ?? "").split(",").filter(Boolean).length}
+              historyCount={teacherBuiltNumberCount(session, scene.id)}
               onChange={value => persist(old => {
                 const now = stamp();
                 const key = scene.id + "-history";
@@ -295,7 +295,7 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
               <button type="button"
                 disabled={session.activityIds.includes(scene.activityId) || completed ||
                   Boolean(scene.reflection && (session.draftAnswers[scene.id]?.trim().length ?? 0) < scene.reflection.minLength) ||
-                  Boolean(scene.numberBuilder && (session.draftAnswers[scene.id + "-history"] ?? "").split(",").filter(Boolean).length < 4)}
+                  Boolean(scene.numberBuilder && teacherBuiltNumberCount(session, scene.id) < 4)}
                 onClick={() => markActivity(scene.activityId!)}>
                 {session.activityIds.includes(scene.activityId) ? <CheckCircle2 size={18}/> : <Check size={18}/>}
                 {session.activityIds.includes(scene.activityId) ? "Harjoittelu vahvistettu" : scene.activityLabel}
