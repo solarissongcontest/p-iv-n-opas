@@ -58,6 +58,10 @@ jobs:
       - run: bun run typecheck
       - run: bun run test
       - run: bun run build
+      # Parse all stacked browser suites before installing the 100MB+ browser
+      # engines. This catches malformed conflicts even when TS/build pass.
+      - name: Parse merged Teacher browser suites before browser installation
+        run: bunx playwright test e2e/los-full-book.spec.ts e2e/los-teacher-integrated-stack.spec.ts e2e/los-teacher-review-midterm.spec.ts e2e/los-c07-teacher.spec.ts e2e/los-c10-teacher.spec.ts --list --project=desktop-chromium
 
       - name: Install Playwright and accessibility tooling
         run: bun run e2e:install
@@ -110,6 +114,14 @@ jobs:
           path: /tmp/los-teacher-merge-review/
           if-no-files-found: error
           retention-days: 7
+      - name: Show final merged full-book test structure if CI fails
+        if: failure()
+        shell: bash
+        run: |
+          echo "Integration test source tail, for debugging merge-resolver mistakes:"
+          if [ -f e2e/los-full-book.spec.ts ]; then
+            nl -ba e2e/los-full-book.spec.ts | tail -n 110
+          fi
       - name: Preserve merged Teacher browser failures
         if: always()
         uses: actions/upload-artifact@v4
