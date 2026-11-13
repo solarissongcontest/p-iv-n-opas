@@ -87,6 +87,9 @@ test("L023 includes whole source navigation and three checked real reading items
   const original=getLosOpenDialogue("05")!;
   assert.ok(L023.requiredCheckedIds.every(id=>original.questions.some(q=>q.id===id)));
   assert.ok(L023.scenes.some(s=>s.bookLinks?.some(l=>l.section==="text")));
+  assert.ok(L023.scenes.some(s=>s.bookLinks?.some(l=>l.section==="understand")), "Text A questions live on Understand, not the reader");
+  const comprehension=L023.scenes.find(s=>s.id==="checked");
+  assert.ok(comprehension?.bookLinks?.some(l=>l.chapterId==="05"&&l.section==="understand"));
   assert.match(L023.scenes.flatMap(s=>s.paragraphs).join(" "),/nelj[aä]n? repliik/i);
 });
 test("L024 teaches nicht with four existing exercises and mistake-specific correction",()=>{
