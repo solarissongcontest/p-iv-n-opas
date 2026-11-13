@@ -97,3 +97,37 @@ test("C03 fallback comprehension prompts refer to the active Lisa source, not th
   assert.ok(fallback.includes("Missä kaupungissa Lisa kertoo asuvansa?"));
   assert.ok(!fallback.includes("Mistä maasta Berna sanoo olevansa kotoisin?"));
 });
+
+test("L031 teaches 0–6 before asking the first number-memory question",()=>{
+  const lesson=getLosTeacherLesson("L031");
+  assert.ok(lesson,"L031 must be registered");
+  const ids=lesson.scenes.map(scene=>scene.id);
+  assert.ok(ids.indexOf("zero-six") < ids.indexOf("recall"));
+  assert.ok(ids.indexOf("board-first") < ids.indexOf("recall"));
+  assert.ok(ids.indexOf("recall") < ids.indexOf("seven-twelve"));
+  const recall=lesson.scenes.find(scene=>scene.id==="recall")!;
+  assert.equal(recall.question?.prompt,"Kirjoita numeroin: eins");
+  assert.deepEqual(recall.question?.accepted,["1"]);
+  assert.match(recall.paragraphs.join(" "),/Näimme jo opetustaululla/);
+  assert.match(recall.question?.hint??"",/Eins/);
+  assert.match(recall.question?.genericWrong??"",/numeromerkkiä/);
+});
+
+test("L031 number mistakes receive concrete explanations for the asked answer direction",()=>{
+  const lesson=getLosTeacherLesson("L031");
+  assert.ok(lesson);
+  for(const [id,word,expected] of [
+    ["read-seven","Sieben","7"],
+    ["write-eight","acht","acht"],
+    ["write-eleven","elf","elf"],
+    ["exit","zwölf","zwölf"],
+  ] as const){
+    const scene=lesson.scenes.find(item=>item.id===id);
+    assert.ok(scene?.question,id+" must remain a real graded question");
+    assert.equal(scene.question.type,"text");
+    assert.equal(scene.question.accepted?.[0],expected);
+    assert.match(scene.question.success,new RegExp(word,"i"),id+" should explain the actual word");
+    assert.ok(!scene.question.reteach.includes("kysymyksen tai vastauksen muoto riippuu"),
+      id+" cannot use the unrelated age-question boilerplate");
+  }
+});
