@@ -16,7 +16,8 @@ test("the two L004 boards contain five authored deterministic stages each",()=>{
   assert.equal(L004_MODEL_BOARD.steps[3]?.parts[0]?.text,"Guten Morgen, Frau Müller!");
 });
 test("step-by-step board exposes only current and prior authored steps",()=>{
-  let view=initialBoardView(),board=L004_MODEL_BOARD;
+  const board=L004_MODEL_BOARD;
+  let view=initialBoardView();
   assert.deepEqual(visibleBoardSteps(board,view).map(s=>s.id),["situation"]);
   assert.equal(previousBoardStep(board,view),view);
   view=nextBoardStep(board,view);
