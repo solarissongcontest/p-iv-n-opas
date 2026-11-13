@@ -124,3 +124,20 @@ test("a written mistake or shown answer also disqualifies downstream choice inde
  q=answerTeacher(TEACHER_L004,q,"c",at);
  assert.equal(q.answers.exit?.independent,false);
 });
+
+test("a previous choice answer prevents double-counting later written recall",()=>{
+ for(const [scene,choice,typed] of [
+  ["independent","c","Hallo!"],
+  ["application","a","Auf Wiedersehen!"],
+  ["exit","c","Gute Nacht!"]
+ ] as const){
+  let p=start(scene);
+  p=answerTeacher(TEACHER_L004,p,choice,at);
+  assert.equal(p.answers[scene]?.independent,true);
+  p=answerTeacherWritten(TEACHER_L004,p,typed,at);
+  assert.equal(p.answers[scene+"-written"]?.correct,true);
+  assert.equal(p.answers[scene+"-written"]?.independent,false);
+  assert.deepEqual(teacherEvidence(TEACHER_L004,p).writtenIndependent,[]);
+  assert.deepEqual(teacherEvidence(TEACHER_L004,p).independent,[scene]);
+ }
+});
