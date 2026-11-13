@@ -262,7 +262,7 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
               {[...lesson.requiredPracticeIds,...(lesson.requiredCheckedIds??[])].map(id => {
                 const value=draft.practiceAnswers[id]?.trim() ?? "";
                 const mustCheck=Boolean(lesson.requiredCheckedIds?.includes(id));
-                const knownChoice=(!/^C07-(?:SOURCE|TEXTB)-Q\\d{2}$/.test(id) || /^[abc]$/.test(value));
+                const knownChoice=(!/^C07-(?:SOURCE|TEXTB)-Q\d{2}$/.test(id) || /^[abc]$/.test(value));
                 const answered=Boolean(value && knownChoice);
                 const checked=!mustCheck||draft.practiceChecked.includes(id);
                 return <p key={id} className="los-teacher-evidence">
