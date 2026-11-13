@@ -1,4 +1,4 @@
-import type { TeacherScene } from "./engine.ts";
+import { isCorrectCalendarEntry, type TeacherScene } from "./engine.ts";
 import "./teacher-calendar.css";
 
 const DAYS = [
@@ -6,8 +6,6 @@ const DAYS = [
   ["Donnerstag","torstai"],["Freitag","perjantai"],["Samstag","lauantai"],["Sonntag","sunnuntai"],
 ] as const;
 const HOURS = ["09:00","10:00","12:00","14:00","15:00","16:00","17:00","18:00","19:00"] as const;
-export const isCorrectCalendarEntry = (scene: TeacherScene, value: string) =>
-  Boolean(scene.calendar && value === scene.calendar.day + "|" + scene.calendar.time);
 
 /** Accessible interactive weekly calendar; only explicit student selections are saved. */
 export function TeacherTimeCalendar({scene,value,onChange,disabled}:{
