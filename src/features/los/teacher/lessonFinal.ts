@@ -385,7 +385,7 @@ export const LOS1_L060_TEACHER:TeacherLesson={
       "A1-tason arviointi vaatii erillistä, monipuolista kielitaidon todentamista.","exit"),
     done("LOS! 1:n oppimistavoite jatkuu seuraavaksi",
       "L060:n suoritusmerkintä vaatii oikean kirjan yhteenvetosivun kymmenen tavoitearviota, vahvistetun vähintään viiden kortin kertauksen, uuden tavoitteesi ja kokonaisarvion.",
-      "Ota tästä mukaan yksi seuraava pieni harjoitus. Oppiminen ei lopu viimeisen sivun merkintään, vaikka käyttöliittymä haluaisi niin uskotella."),
+      "Ota tästä mukaan yksi seuraava pieni harjoitus. Oppiminen jatkuu myös kirjan viimeisen oppitunnin jälkeen."),
   ],
 };
 export const LOS1_FINAL_TEACHER_LESSONS:readonly TeacherLesson[]=[
