@@ -1,0 +1,62 @@
+name: LOS Teacher C07 Integration QA
+
+on:
+  push:
+    branches:
+      - feat/los1-teacher-integrated-c07-20261113
+
+permissions:
+  contents: read
+
+jobs:
+  unit-type-build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - run: bun install --frozen-lockfile
+      - name: Typecheck
+        run: bun run typecheck
+      - name: All unit tests
+        run: bun run test
+      - name: Production build
+        run: bun run build
+
+  browser-qa:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    env:
+      E2E_BASE_URL: http://127.0.0.1:5173
+      REQUIRE_GEMINI: "false"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - run: bun install --frozen-lockfile
+      - run: bun run e2e:install
+      - run: bunx playwright install --with-deps chromium webkit
+      - name: Start preview
+        shell: bash
+        run: |
+          nohup bun run dev -- --host 127.0.0.1 --port 5173 --strictPort > /tmp/los-c07-integrated-dev.log 2>&1 &
+          for attempt in $(seq 1 45); do
+            if curl -fsS --max-time 3 http://127.0.0.1:5173/ > /dev/null 2>&1; then exit 0; fi
+            sleep 2
+          done
+          cat /tmp/los-c07-integrated-dev.log
+          exit 1
+      - name: C07 Teacher on desktop and iPhone
+        run: bunx playwright test e2e/los-c07-teacher.spec.ts --project=desktop-chromium --project=iphone-webkit
+      - name: All 60 lesson routes
+        run: bunx playwright test e2e/los-full-book.spec.ts --grep 'every one of the 60 guided lessons' --project=desktop-chromium --project=iphone-webkit
+      - name: Upload failure traces
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: los-c07-integration-failure
+          path: test-results/
+          if-no-files-found: ignore
