@@ -23,12 +23,13 @@ test("every canonical LOS! 1 chapter has an individually sourced digital photo",
   assert.ok(photo.mobileSrc.startsWith("/los/chapters/"));
  }
 });
-test("LOS! 1 user experience is digital-only without the abandoned print reader",()=>{
+test("LOS! 1 digital visuals remain integrated without a PDF reader",()=>{
  const book=readFileSync("src/features/los/LosBook.tsx","utf8");
  const image=readFileSync("src/features/los/Los1ChapterImage.tsx","utf8");
  assert.match(book,/Los1ChapterImage/);
+ assert.match(book,/Los1VisualLearning/);
  assert.match(book,/chapterId=\{chapter\.id\}/);
- assert.doesNotMatch(book,/facsimile|Näköiskirja|PdfReader/);
+ assert.doesNotMatch(book,/Los1FacsimilePilot|Los1PdfReader|facsimile-pdf|Näköiskirja/);
  assert.match(image,/loading="lazy"/);
  assert.match(image,/Kuvituskuva/);
  assert.match(image,/onError=\{\(\)=>setFailed\(true\)\}/);

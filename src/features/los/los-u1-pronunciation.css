@@ -1,0 +1,53 @@
+/* LOS! U1.0 pronunciation preview. Inherits the existing V3.3 identity. */
+.los-dictionary-card {
+  max-width: 550px;
+  padding: 18px 22px;
+  margin-top: 20px;
+  border: 1px solid var(--los-line, #e5e7e6);
+  background: var(--los-paper, #fff);
+  color: var(--los-ink, #222b34);
+  border-radius: 10px;
+  box-shadow: 0 14px 40px rgb(25 32 38 / 8%);
+  position: relative;
+}
+.los-dictionary-card-heading {display:flex;justify-content:space-between;align-items:center;gap:14px}
+.los-dictionary-card-heading strong {font-size:22px}
+.los-dictionary-card-heading button {display:inline-flex;align-items:center;gap:6px;border:1px solid var(--los-line);background:transparent;color:inherit;border-radius:7px;padding:8px;min-height:42px}
+.los-dictionary-context-label {display:block;font-size:12px;letter-spacing:.04em;font-weight:750;color:var(--los-soft);margin:16px 0 5px!important}
+.los-dictionary-pronunciation {display:flex;flex-direction:column;align-items:flex-start;gap:8px;margin-top:15px}
+.los-dictionary-pronunciation a {text-decoration:underline;text-underline-offset:3px}
+.los-dictionary-ipa {font-size:17px;line-height:1.5;letter-spacing:.01em}
+.los-dictionary-pronunciation small,.los-pronunciation-disclaimer {font-size:12px;line-height:1.5;color:var(--los-soft)}
+.los-pronunciation-control {display:flex;flex-direction:column;align-items:flex-start;gap:7px}
+.los-pronunciation-button {display:inline-flex;align-items:center;gap:8px;border:1px solid var(--los-line);border-radius:8px;background:var(--los-subtle);color:var(--los-ink);min-height:44px;padding:9px 12px;text-align:left}
+.los-pronunciation-button:disabled {opacity:.75;cursor:not-allowed}
+.los-dictionary-card-footnote {font-size:12px!important;line-height:1.6;color:var(--los-soft);margin-top:15px!important}
+.los-ipa-pending {font-size:12px;color:var(--los-soft)}
+.los-word-open {background:transparent;border:0;border-bottom:1px dotted var(--los-book-accent,#b7473c);text-align:left;color:inherit;min-height:40px;padding:4px 2px}
+.los-word-open:hover {color:var(--los-book-accent,#b7473c)}
+.los-dictionary-card :focus-visible,.los-word-open:focus-visible {outline:3px solid #397ace;outline-offset:2px}
+.dark .los-dictionary-card {box-shadow:0 12px 30px rgb(0 0 0 / 40%)}
+@media(max-width:700px) {
+  .los-dictionary-card {
+    position:fixed;z-index:90;
+    inset:auto 0 0;
+    max-width:none;
+    max-height:85dvh;
+    overflow-y:auto;
+    overscroll-behavior:contain;
+    margin:0;padding:20px max(18px,env(safe-area-inset-right)) calc(22px + env(safe-area-inset-bottom)) max(18px,env(safe-area-inset-left));
+    border-radius:18px 18px 0 0;
+    box-shadow:0 -15px 55px rgb(0 0 0 / 22%);
+  }
+  .los-word-table {width:100%}
+  .los-word-table th,.los-word-table td {overflow-wrap:anywhere}
+}
+
+.los-vocabulary-qa {font-size:13px;color:var(--los-soft);border-left:3px solid var(--los-book-accent);padding:9px 13px;margin:14px 0 19px!important;background:var(--los-subtle);line-height:1.55}
+
+/* U1/U2: optional published-only dictionary detail in the existing word card. */
+.los-dictionary-remote {margin-top:18px;padding-top:13px;border-top:1px solid var(--los-line,#e5e7e6)}
+.los-dictionary-remote-button {color:var(--los-ink);background:var(--los-subtle,#f6f6f4);border:1px solid var(--los-line,#e5e7e6);border-radius:8px;padding:10px 13px;min-height:44px;font-weight:650}
+.los-dictionary-remote-status {font-size:12px;line-height:1.6;color:var(--los-soft,#63717b)}
+.los-dictionary-remote .los-dict-result {padding:12px}
+.los-dictionary-card .los-dict-lemma-button:focus-visible,.los-dictionary-remote-button:focus-visible {outline:3px solid #397ace;outline-offset:2px}

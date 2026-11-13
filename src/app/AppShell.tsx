@@ -164,6 +164,9 @@ function SystemBar({
               {coreLabel(target)}
             </button>
           ))}
+          <a href="/los" className="studyos-los-link" aria-label="Avaa LOS!-saksanoppikirjat">
+            <BookOpen size={16} aria-hidden="true" /> LOS!
+          </a>
         </nav>
 
         <div className="studyos-systembar-spacer" />
@@ -235,6 +238,10 @@ function MobileDock({
           <span>{coreLabel(target)}</span>
         </button>
       ))}
+      <a href="/los" className="studyos-mobile-los" aria-label="Avaa LOS!-saksanoppikirjat">
+        <BookOpen size={20} aria-hidden="true" />
+        <span>LOS!</span>
+      </a>
       <button onClick={onSearch}>
         <Search size={20} />
         <span>Haku</span>
