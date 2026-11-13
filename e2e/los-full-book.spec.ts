@@ -734,6 +734,30 @@ test("L004 Teacher 2.0 opens from the study path and preserves its scene when re
 });
 
 
+
+test("Teacher 2.0 presents one teaching board with one set of controls", async ({page}) => {
+  await enterLocalBook(page);
+  await page.goto("/los-lessons/L004", {waitUntil:"domcontentloaded"});
+  const teachingScene=page.locator(".los-teacher-outline nav button").filter({
+    hasText:"Katsotaan ilmaukset opetustaululla"
+  });
+  await teachingScene.click();
+  const paper=page.locator(".los-teacher-paper");
+  await expect(paper.getByRole("heading",{name:"Katsotaan ilmaukset opetustaululla"})).toBeVisible();
+  const board=paper.locator(".los-teacher-board");
+  await expect(board).toHaveCount(1);
+  await expect(board.locator(".los-teacher-board-item")).toHaveCount(1);
+  await expect(board.getByRole("button",{name:"Näytä seuraava"})).toHaveCount(1);
+  await board.getByRole("button",{name:"Näytä seuraava"}).click();
+  await expect(board.locator(".los-teacher-board-item")).toHaveCount(2);
+  await board.getByRole("button",{name:"Näytä kaikki"}).click();
+  await expect(board.locator(".los-teacher-board-item")).toHaveCount(7);
+  await page.reload({waitUntil:"domcontentloaded"});
+  await expect(page.locator(".los-teacher-board")).toHaveCount(1);
+  await expectNoHorizontalOverflow(page);
+});
+
+
 test("L004 chapter picker uses the dedicated teacher instead of legacy checklist", async ({page}) => {
   await enterLocalBook(page);
   await page.goto("/los#/1/path", { waitUntil: "domcontentloaded" });
