@@ -109,16 +109,22 @@ test("every one of the 60 guided lessons opens from its actual chapter picker on
  await expect(sections).toHaveCount(13);
  const seen=new Set<string>();
  for(let i=0;i<13;i++){
-  await sections.nth(i).click();
-  const lessonButtons=runner.locator(".los-lesson-picker button");
-  const count=await lessonButtons.count();
-  expect(count).toBeGreaterThan(0);
-  for(let j=0;j<count;j++){
-   const button=lessonButtons.nth(j);
-   const title=(await button.innerText()).trim();
+  const chapter=sections.nth(i);
+  await chapter.click();
+  await expect(chapter).toHaveAttribute("aria-pressed","true");
+  // Snapshot chapter-specific lesson IDs before navigating to Teacher.
+  // Returning to a lesson path can reset the active tab on mobile, so never
+  // reuse a live index from a different chapter's lesson-picker contents.
+  const titles=(await runner.locator(".los-lesson-picker button").allInnerTexts()).map(s=>s.trim());
+  expect(titles.length).toBeGreaterThan(0);
+  for(const title of titles){
    expect(title).toMatch(/^L\d{3}$/);
    expect(seen.has(title)).toBe(false);
    seen.add(title);
+   await chapter.click();
+   await expect(chapter).toHaveAttribute("aria-pressed","true");
+   const button=runner.locator(".los-lesson-picker button").filter({hasText:new RegExp("^"+title+"$")});
+   await expect(button).toHaveCount(1);
    await button.click();
    if(title==="L001" || title==="L002" || title==="L003" || title==="L004" || title==="L005" || title==="L006" || title==="L007" || title==="L008" || title==="L009"){
      await expect(page).toHaveURL(new RegExp("/los-lessons/" + title + "$"));
