@@ -1,0 +1,75 @@
+name: LOS C04 Teacher 2.0 QA
+
+on:
+  pull_request:
+    branches:
+      - main
+      - feat/los1-teacher-l036-l040
+    paths:
+      - "src/features/los/teacher/**"
+      - "src/features/los/LosAdditionalTextB.tsx"
+      - "src/features/los/LosReferenceTools.tsx"
+      - "src/features/los/LosBook.tsx"
+      - "tests/los-teacher-l017-l021.test.ts"
+      - "e2e/los-c04-teacher.spec.ts"
+      - "e2e/los-full-book.spec.ts"
+      - ".github/workflows/los-c04-teacher-ci.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: los-c04-teacher-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  teacher-c04-qa:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    env:
+      E2E_BASE_URL: http://127.0.0.1:5173
+      REQUIRE_GEMINI: "false"
+    steps:
+      - uses: actions/checkout@v4
+        name: Checkout exact candidate
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - name: Install locked dependencies
+        run: bun install --frozen-lockfile
+      - name: Unit and regression tests
+        run: bun run test
+      - name: TypeScript and production build
+        run: bun run build
+      - name: Install Playwright tooling
+        run: bun run e2e:install
+      - name: Install Chromium and WebKit
+        run: bunx playwright install --with-deps chromium webkit
+      - name: Start independent preview
+        shell: bash
+        run: |
+          nohup bun run dev -- --host 127.0.0.1 --port 5173 --strictPort >/tmp/los-c04-teacher-preview.log 2>&1 &
+          for attempt in $(seq 1 50); do
+            if curl --silent --fail --max-time 3 http://127.0.0.1:5173/ >/dev/null 2>&1; then
+              echo "Preview ready on localhost:5173"
+              exit 0
+            fi
+            sleep 2
+          done
+          cat /tmp/los-c04-teacher-preview.log
+          exit 1
+      - name: C04 Teacher Player flows on desktop Chromium and iPhone WebKit
+        run: bunx playwright test e2e/los-c04-teacher.spec.ts --project=desktop-chromium --project=iphone-webkit
+      - name: Full 60-lesson chapter navigation smoke on Chromium and WebKit
+        run: bunx playwright test e2e/los-full-book.spec.ts --project=desktop-chromium --project=iphone-webkit --grep "every one of the 60 guided lessons opens"
+      - name: Upload browser traces and logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: los-c04-teacher-evidence-${{ github.run_id }}
+          path: |
+            test-results/
+            /tmp/los-c04-teacher-preview.log
+          if-no-files-found: ignore
+          retention-days: 14
