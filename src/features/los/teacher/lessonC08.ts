@@ -295,7 +295,13 @@ export const LOS1_L043_TEACHER:TeacherLesson = {
     "Opettaja: Aufgabe heißt Übung. (Suomeksi: tehtävä.) Saat sanalle yksinkertaisen selityksen.",
     "Was bedeutet + sana + ? kysyy sanan merkitystä.",
     "Was bedeutet das? toimii osoittaessasi sanaa. Was bedeutet Aufgabe? toimii nimetessäsi sanan."),
-  dialogue("independent","Ohjattu harjoitus 4/4","Lisäselitys auttaa eteenpäin","Kumppani selittää: Aufgabe bedeutet tehtävä. Ymmärsit nyt sanan, mutta haluat varmistaa kohteliaasti, että selitys tuli perille.",
+  explain("acknowledge","Näin kerrot ymmärtäneesi ja kiität",[
+    "Kun saat toiston tai sanan merkityksen ja asia selviää, voit sanoa Danke! = Kiitos. Jos haluat samalla kertoa ymmärtäneesi, käytä valmista ilmausta Danke, jetzt verstehe ich. = Kiitos, nyt ymmärrän.",
+    "Jetzt tarkoittaa nyt. Verstehe ich on ilmauksen loppuosa; sinun ei tarvitse johtaa sanajärjestystä uutena kielioppisääntönä. Opettele koko vastaus ensin tilanteeseen sopivana fraasina.",
+    "Erota kolme tilannetta: Noch einmal, bitte. pyytää toistoa; Was bedeutet das? pyytää merkitystä; Danke, jetzt verstehe ich. vahvistaa, että selitys auttoi.",
+    "Kuvitteellinen malli: Opettaja: Aufgabe heißt Übung. Oppilas: Danke, jetzt verstehe ich. Tämä on LOS!:n opetustilanne eikä alkuperäisen lähdetekstin repliikki."
+  ]),
+  dialogue("independent","Itsenäinen valinta 4/4","Lisäselitys auttaa eteenpäin","Kumppani selittää suomeksi: Aufgabe tarkoittaa tehtävää. Ymmärsit nyt sanan ja haluat vahvistaa kohteliaasti, että selitys auttoi.",
     "Mikä repliikki sopii?",
     ["Danke, jetzt verstehe ich.","Noch einmal, bitte.","Gute Nacht!"],"a",
     ["","Kumppani: Noch einmal? Voit tietysti pyytää toistoa, mutta tässä kerroit jo ymmärtäväsi.","Kumppani: Gute Nacht? Se päättää kohtaamisen."],
