@@ -4,7 +4,7 @@ import {
 } from "./content/l004.ts";
 import {
   answerTeacher,hintTeacher,initialTeacherProgress,pauseTeacher,revealTeacher,
-  selectTeacherScene,teacherEvidence,type TeacherProgress
+  selectTeacherScene,teacherEvidence,teacherCanComplete,type TeacherProgress
 } from "./core.ts";
 import "./teacher.css";
 
@@ -14,8 +14,8 @@ import "./teacher.css";
  * State is provided by the existing owner-scoped chapter draft.
  */
 export function LosL004TeacherPlayer({
- progress,onChange
-}:{progress:TeacherProgress|undefined;onChange:(next:TeacherProgress)=>void}){
+ progress,onChange,onFinish
+}:{progress:TeacherProgress|undefined;onChange:(next:TeacherProgress)=>void;onFinish:()=>void}){
  const p=progress??initialTeacherProgress(TEACHER_L004);
  const scene=TEACHER_L004.scenes.find(s=>s.id===p.scene)??TEACHER_L004.scenes[0]!;
  const index=TEACHER_L004.scenes.indexOf(scene);
@@ -23,6 +23,7 @@ export function LosL004TeacherPlayer({
  const hintOpen=p.hints.includes(scene.id);
  const [showMap,setShowMap]=useState(false);
  const evidence=teacherEvidence(TEACHER_L004,p);
+ const canFinish=teacherCanComplete(TEACHER_L004,p);
  const go=(i:number)=>{
   const target=TEACHER_L004.scenes[i];
   if(target)onChange(selectTeacherScene(TEACHER_L004,p,target.id));
@@ -103,6 +104,16 @@ export function LosL004TeacherPlayer({
    Ensiyrityksellä ja ilman vihjettä oikein: {evidence.independent.length}/{evidence.required}
    {" "}soveltavaa kysymystä. Tämä ei ole kielitaidon arvosana.
   </p>
+  <div className="los-teacher-completion">
+   <p>Opetustilanteita käsitelty: {TEACHER_L004.scenes.filter(s=>p.visited.includes(s.id)).length}/{TEACHER_L004.scenes.length}.
+    {" "}Käy jokainen kohta läpi ja vastaa kaikkiin kysymyksiin. Väärä vastaus ei estä oppitunnin päättämistä.</p>
+   {p.completedAt?
+    <p role="status"><strong>Opetuskokonaisuus käyty läpi.</strong> Suoritus tallennettu.
+      Tämä ei tarkoita, että kielitaito olisi vahvistettu.</p>:
+    <button type="button" onClick={onFinish} disabled={!canFinish}>
+     Merkitse opetuskokonaisuus käsitellyksi
+    </button>}
+  </div>
   <p className="los-teacher-book-link">
    <a href="/los#/1/01/vocabulary" target="_blank" rel="noopener noreferrer">
     Avaa LOS! 1:n kappaleen 1 sanasto uuteen välilehteen

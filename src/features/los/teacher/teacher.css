@@ -31,3 +31,14 @@
 .los-teacher-evidence,.los-teacher-book-note {font-size:12px;line-height:1.65;color:var(--los-soft)}
 .los-teacher-book-link a {display:inline-flex;align-items:center;text-decoration:none;min-height:44px}
 @media(max-width:560px){.los-teacher-top{flex-direction:column}.los-teacher-choices{grid-template-columns:1fr}}
+
+/* Teacher-first L004: keep historical work accessible, never compulsory. */
+.los-lesson-history-toggle {min-height:44px;margin:8px 0 2px;padding:10px 16px;
+ border:1px solid var(--los-line);border-radius:9px;color:var(--los-ink);
+ background:var(--los-paper);font-weight:650;cursor:pointer}
+.los-lesson-history-toggle:focus-visible {outline:3px solid var(--los-book-accent);outline-offset:3px}
+.los-lesson-history-note {color:var(--los-soft);font-size:12px;line-height:1.6;margin:5px 0 16px}
+.los-teacher-completion {margin:18px 0;padding:15px 18px;border:1px solid var(--los-line);
+ border-radius:10px;background:var(--los-book-tint)}
+.los-teacher-completion p {font-size:13px;line-height:1.6}
+.los-teacher-completion button {background:var(--los-book-accent);color:white;border-color:var(--los-book-accent)}

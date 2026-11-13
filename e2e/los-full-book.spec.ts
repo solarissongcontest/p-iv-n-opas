@@ -121,6 +121,12 @@ test("every one of the 60 guided lessons opens from its actual chapter picker on
    seen.add(title);
    await button.click();
    await expect(runner.locator(".los-lesson-detail .los-overline")).toContainText(title);
+   if(title==="L004"){
+    await expect(runner.locator(".los-teacher")).toBeVisible();
+    await expect(runner.locator(".los-lesson-steps li").first()).toBeHidden();
+    await expect(runner.locator(".los-teacher-completion button")).toBeDisabled();
+    await runner.getByRole("button",{name:"Näytä aiemmat oppituntitehtävät"}).click();
+   }
    await expect(runner.locator(".los-lesson-steps li").first()).toBeVisible();
    await expect(runner.locator(".los-lesson-exit")).toBeVisible();
    await expect(runner.getByRole("button",{name:"Merkitse oppitunti suoritetuksi"})).toBeDisabled();
@@ -333,5 +339,48 @@ test("LOS Teacher 2.0 L004 teaches greetings, saves scenes, and never invents ma
  await expect(page.locator(".los-teacher")).toContainText("Opetus on keskeytetty");
  await page.locator(".los-teacher").getByRole("button",{name:"Jatka opetusta"}).click();
  await expect(page.locator(".los-teacher-book-link a")).toHaveAttribute("target","_blank");
+ await expectNoHorizontalOverflow(page);
+});
+
+
+test("LOS Teacher L004 is the primary lesson and finishes despite nonmastered answers",async({page})=>{
+ await enterLocalBook(page);
+ await page.goto("/los#/1/path",{waitUntil:"domcontentloaded"});
+ const runner=page.locator("#los-lesson-runner");
+ await runner.locator(".los-lesson-picker button").filter({hasText:"L004"}).click();
+ const player=runner.locator(".los-teacher");
+ await expect(player).toBeVisible();
+ await expect(runner.locator(".los-lesson-steps")).toBeHidden();
+ await expect(player.getByRole("button",{name:"Merkitse opetuskokonaisuus käsitellyksi"})).toBeDisabled();
+ await player.getByRole("button",{name:"Opetuksen sisällysluettelo"}).click();
+ const script:[
+   string,string|null
+ ][]=[
+  ["1. Mitä tiedät jo?","Guten Morgen!"],
+  ["2. Tilanne ratkaisee",null],
+  ["3. Tervehdys vai hyvästely?",null],
+  ["4. Opettaja näyttää ratkaisun",null],
+  ["5. Harjoittele mallin kanssa","Gute Nacht!"],
+  ["6. Kokeile itse ilman mallia","Guten Morgen!"],
+  ["7. Sovella kohteliaasti","Guten Tag!"],
+  ["8. Tarkista vielä kerran","Guten Tag!"],
+  ["9. Kokoa opittu",null]
+ ];
+ for(const [item,wrong] of script){
+  await player.locator("#los-teacher-map").getByRole("button",{name:item,exact:true}).click();
+  if(wrong)await player.locator(".los-teacher-choices").getByRole("button",{name:wrong,exact:true}).click();
+ }
+ await expect(player).toContainText("0/3");
+ const finish=player.getByRole("button",{name:"Merkitse opetuskokonaisuus käsitellyksi"});
+ await expect(finish).toBeEnabled();
+ await finish.click();
+ await expect(player).toContainText("Opetuskokonaisuus käyty läpi");
+ await expect(runner.locator(".los-lesson-progress")).toContainText("1/60 suoritettu");
+ await page.reload({waitUntil:"domcontentloaded"});
+ await expect(page.locator(".los-teacher")).toContainText("Opetuskokonaisuus käyty läpi");
+ await expect(page.locator(".los-teacher")).toContainText("0/3");
+ await expect(page.getByRole("button",{name:/Seuraava oppitunti: L005/})).toBeVisible();
+ await page.getByRole("button",{name:/Seuraava oppitunti: L005/}).click();
+ await expect(page.locator("#los-lesson-runner .los-lesson-detail .los-overline")).toContainText("L005");
  await expectNoHorizontalOverflow(page);
 });
