@@ -11,7 +11,7 @@ Tarkistus kattaa ohjelmallisesti kaikkien **60 oppitunnin** rekisteröinnin ja p
 | Osuus | Oppitunnit | Tämän kehitystyön kohdennetut muutokset |
 | --- | --- | --- |
 | C01–C05 ja Kertaus I | L001–L030 | Kaikki rekisterissä ja koko sarjan yhteisissä regressiotarkistuksissa. Aiemmat lähdeteksti- ja aloittelijatarkistukset säilyvät. |
-| C06 · numerot ja ikä | L031–L035 | Ensimmäinen `eins`-kysymys vasta opetuksen jälkeen; numero-, tasakymmen-, ikä- ja 24 tunnin vastaussuunnat täsmällisemmin selitetty. |
+| C06 · numerot ja ikä | L031–L035 | Ensimmäinen `eins`-kysymys vasta opetuksen jälkeen; numero-, tasakymmen- ja ikätehtävien vastaussuunnat täsmällisemmin selitetty. |
 | C07 · aakkoset ja tavaus | L036–L040 | `Bitte buchstabieren Sie.` opetetaan ennen soveltamista. L038:n itsenäisestä kysymyksestä poistettiin suoraan näytetty `heißt`-mallivastaus. |
 | C08 · selviytymisfraasit | L041–L045 | L043:n `Danke, jetzt verstehe ich.` opetetaan nyt ennen itsenäistä valintaa; kuvitteellinen opetusesimerkki erotetaan lähderepliikistä. |
 | C09 · päivät ja aika | L046–L050 | L047:n `Viertel vor drei` erotetaan harjoituksen iltapäiväoletuksesta; L049 tekee näkyväksi `um fünf Uhr`-ilmauksen kontekstisidonnaisuuden ja `um siebzehn Uhr`-vaihtoehdon. |
