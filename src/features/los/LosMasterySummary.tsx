@@ -65,8 +65,11 @@ export function LosMasterySummary() {
     <h3>Oma tuottaminen ja seuraava tavoite</h3>
     <p>{result.writing.recorded ? "Oma kirjoitusyritys on tallennettu. ":
       "Omaa esittelytekstiä ei löytynyt. "}
-      {result.writing.assisted ? "Mallia on avattu L058:ssa, joten teksti on avustettu harjoitus. ":
-        "Mallin käyttöä ei ole kirjattu L058:n esittelyyn. "}
+      {result.writing.assisted
+        ? "L058:n malli avattiin ennen esittelyn valmistumista tai tekstiä muokattiin sen jälkeen. Kirjoitusyritys on avustettu harjoitus. "
+        : result.writing.modelOpened
+          ? "L058:n malli avattiin vasta valmiin kirjoitusyrityksen jälkeen. Mallin katsominen on kirjattu, mutta myöhempiä muokkauksia ei ole tallennettu. "
+          : "Mallin avaamista ei ole kirjattu L058:n esittelyyn. "}
       Vapaan tekstin ja ääntämisen kielellistä laatua ei ole tarkistettu automaattisesti.</p>
     <p><strong>Sääntöpohjainen seuraava askel:</strong> {result.nextSuggestion}</p>
     {result.ownGoal&&<p><strong>Itse kirjoittamasi tavoite:</strong> {result.ownGoal}</p>}
