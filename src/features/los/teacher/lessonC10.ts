@@ -14,7 +14,7 @@ const version = "2.0.0-preview.1";
 const phase = (
   id:string,stage:string,title:string,paragraphs:readonly string[],
   help?:TeacherScene["help"],
-):TeacherScene => ({id,phase:stage,title,kind:"explanation",paragraphs,help});
+):TeacherScene => ({id,phase:stage,title,kind:"explanation",paragraphs,...(help?{help}:{})});
 const introduction = (title:string,paragraphs:readonly string[]):TeacherScene => ({
   id:"welcome",phase:"Aloitus",title,kind:"introduction",paragraphs,
 });
@@ -22,7 +22,7 @@ const board = (
   id:string,title:string,paragraphs:readonly string[],
   steps:NonNullable<TeacherScene["board"]>,
   help?:TeacherScene["help"],
-):TeacherScene => ({id,phase:"Opettajan mallisuoritus",title,kind:"board",paragraphs,board:steps,help});
+):TeacherScene => ({id,phase:"Opettajan mallisuoritus",title,kind:"board",paragraphs,board:steps,...(help?{help}:{})});
 const question = (
   id:string,title:string,paragraphs:readonly string[],data:TeacherQuestion,
 ):TeacherScene => ({id,phase:id==="exit"?"Osaamistarkistus":id==="recall"?"Muistelu":"Harjoittele ja sovella",
@@ -32,13 +32,13 @@ const book = (
   links:NonNullable<TeacherScene["bookLinks"]>,
   activityId?:string,activityLabel?:string,
 ):TeacherScene => ({id,phase:"Oppikirjan alkuperäinen sisältö",kind:"book",
-  title,paragraphs,bookLinks:links,activityId,activityLabel});
+  title,paragraphs,bookLinks:links,...(activityId?{activityId}:{}),...(activityLabel?{activityLabel}:{})});
 const reflect = (
   id:string,title:string,paragraphs:readonly string[],
   prompt:string,placeholder:string,minLength:number,
   activityId?:string,activityLabel?:string,
 ):TeacherScene => ({id,phase:"Oma harjoittelu",title,kind:"reflection",paragraphs,
-  reflection:{prompt,placeholder,minLength},activityId,activityLabel});
+  reflection:{prompt,placeholder,minLength},...(activityId?{activityId}:{}),...(activityLabel?{activityLabel}:{})});
 const summary = (title:string,paragraphs:readonly string[]):TeacherScene => ({
   id:"summary",phase:"Yhteenveto",title,kind:"summary",paragraphs,
 });
@@ -54,7 +54,7 @@ const typed = (
   evidenceRole:TeacherQuestion["evidenceRole"]="practice",
   wrongAnswers?:TeacherQuestion["wrongAnswers"],
 ):TeacherQuestion => ({type:"text",prompt,skillId,accepted,success,hint,reteach,
-  evidenceRole,wrongAnswers,genericWrong:"Vertaa lauseen tekijää ja verbimuotoa. Tarkista myös sanajärjestys, paikannimi ja välilyönnit."});
+  evidenceRole,...(wrongAnswers?{wrongAnswers}:{}),genericWrong:"Vertaa lauseen tekijää ja verbimuotoa. Tarkista myös sanajärjestys, paikannimi ja välilyönnit."});
 const c10Link=(section:string,label:string,instruction:string)=>({chapterId:"10",section,label,instruction});
 
 export const LOS1_L051_TEACHER:TeacherLesson = {
