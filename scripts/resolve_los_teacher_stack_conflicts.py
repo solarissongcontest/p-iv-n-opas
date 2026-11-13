@@ -22,6 +22,11 @@ def choose(path: str, ours: str, theirs: str) -> str:
         return ours.rstrip("\n") + "\n\n" + theirs.lstrip("\n")
     if path == "e2e/los-full-book.spec.ts" and all("Number(title.slice(1))" in x for x in (ours, theirs)):
         return "    if(Number(title.slice(1))<=60){\n"
+    if path in {"src/features/los/LosBook.tsx", "src/features/los/LosReferenceTools.tsx"} and 'import { getLosTeacherLesson } from "./teacher/lessonL004";' in ours and 'import { getLosTeacherLesson } from "./teacher/lessonRegistry";' in theirs:
+        # Shared stack normalization registers every manuscript in lessonL004.
+        # C06's temporary delegate lookup must not replace the unified import,
+        # and the dynamic Teacher-count dependency must remain imported.
+        return ours
     if path in {"src/features/los/LosBook.tsx", "src/features/los/LosReferenceTools.tsx"} and "{teacherCount}/60" in ours and "Teacher 2.0" in theirs:
         # Preserve a live count sourced from the canonical registry instead of
         # regressing to a hard-coded claim. End-to-end stack tests require 60/60.
