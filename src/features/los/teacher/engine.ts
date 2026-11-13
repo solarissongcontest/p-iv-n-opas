@@ -266,23 +266,83 @@ export function teacherWrongFeedback(scene: TeacherScene, answer: string): strin
 export function isCorrectCalendarEntry(scene: TeacherScene, value: string): boolean {
   return Boolean(scene.calendar && value === scene.calendar.day + "|" + scene.calendar.time);
 }
+/**
+ * Explain exactly why a lesson is not ready. The same checks power both the
+ * completion button and its learner-facing checklist, so they cannot drift.
+ * Completing a lesson is activity evidence, never a claim of language mastery.
+ */
+export function teacherCompletionBlockers(session: TeacherSession, lesson: TeacherLesson,
+  practiceAnswers: Readonly<Record<string, string>>, practiceChecked: readonly string[] = [],
+  chapterAssessment?: TeacherChapterAssessmentInput, externalReady: boolean = !lesson.externalCheck): string[] {
+  const missing: string[] = [];
+  if (!externalReady) missing.push("Kirjan erillinen kertaus- tai arviointiosio on vielä kesken.");
+  if (lesson.mediaGate && !lesson.mediaGate.approved)
+    missing.push("Kuuntelumedian hyväksyntä odottaa: " + lesson.mediaGate.sourceId + ". Puuttuvaa äänitettä ei voi korvata tekstin lukemisella.");
+  const chapter = teacherChapterAssessmentStatus(lesson, chapterAssessment);
+  if (!chapter.ready) missing.push(
+    "Kappaletesti: " + chapter.answered + "/" + chapter.expected + " vastausta, " +
+    (chapter.submitted ? "palautettu" : "ei vielä palautettu") + ". " +
+    (chapter.applicationDone ? "" : "Sovellusteksti puuttuu. ") +
+    (chapter.reflectionDone ? "" : "Itsearviointi puuttuu.")
+  );
+  const midterm = teacherMidtermAssessmentStatus(lesson, chapterAssessment, practiceAnswers);
+  if (!midterm.ready) missing.push(
+    "Välikoe: " + midterm.answered + "/" + midterm.expected + " vastausta, " +
+    (midterm.submitted ? "palautettu" : "ei vielä palautettu") + ". " +
+    (midterm.selfReviewed ? "" : "Oma arviointi puuttuu.")
+  );
+  if (session.paused) missing.push("Oppitunti on keskeytetty. Jatka opetusta ennen loppumerkintää.");
+  const unvisited = lesson.scenes.filter(scene => !session.visitedIds.includes(scene.id));
+  if (unvisited.length) missing.push(
+    "Käy läpi " + unvisited.length + " opetustilannetta: " +
+    unvisited.slice(0, 3).map(scene => scene.title).join(", ") +
+    (unvisited.length > 3 ? " ja muita." : ".")
+  );
+  for (const scene of lesson.scenes) {
+    if (scene.numberBuilder) {
+      const count = teacherBuiltNumberCount(session, scene.id);
+      if (count < 4) missing.push("Rakenna numerotaululla neljä erilaista lukua (" + count + "/4): " + scene.title + ".");
+    }
+    if (scene.calendar && !isCorrectCalendarEntry(scene, session.draftAnswers[scene.id] ?? ""))
+      missing.push("Tallenna oikea kalenterimerkintä: " + scene.title + ".");
+    if (scene.reflection) {
+      const length = session.draftAnswers[scene.id]?.trim().length ?? 0;
+      if (length < scene.reflection.minLength)
+        missing.push("Täydennä kirjoitustehtävä " + scene.title +
+          " (" + length + "/" + scene.reflection.minLength + " merkkiä).");
+    }
+    if (scene.form) {
+      const missingFields = scene.form.filter(field =>
+        !session.draftAnswers[scene.id + "." + field.id]?.trim());
+      if (missingFields.length) missing.push(
+        "Täytä lomake " + scene.title + ": " + missingFields.map(field => field.label).join(", ") + "."
+      );
+    }
+  }
+  const noAttempts = lesson.requiredQuestionIds.filter(id =>
+    !session.attempts.some(attempt => attempt.sceneId === id));
+  if (noAttempts.length) missing.push(
+    "Vastaa oppitunnin kysymyksiin: " + noAttempts.map(id =>
+      lesson.scenes.find(scene => scene.id === id)?.title ?? id).join(", ") + "."
+  );
+  const missingActivities = lesson.requiredActivityIds.filter(id => !session.activityIds.includes(id));
+  if (missingActivities.length) missing.push(
+    "Vahvista omat harjoittelut: " + missingActivities.map(id =>
+      lesson.scenes.find(scene => scene.activityId === id)?.activityLabel ?? id).join(", ") + "."
+  );
+  const missingPractice = lesson.requiredPracticeIds.filter(id => !practiceAnswers[id]?.trim());
+  if (missingPractice.length) missing.push("Tee kirjan harjoitukset: " + missingPractice.join(", ") + ".");
+  const missingChecked = (lesson.requiredCheckedIds ?? []).filter(id =>
+    !practiceAnswers[id]?.trim() || !practiceChecked.includes(id));
+  if (missingChecked.length) missing.push("Vastaa ja tarkista kirjan lähdetehtävät: " + missingChecked.join(", ") + ".");
+  return missing;
+}
 export function teacherCanFinish(session: TeacherSession, lesson: TeacherLesson,
   practiceAnswers: Readonly<Record<string, string>>, practiceChecked: readonly string[] = [],
   chapterAssessment?: TeacherChapterAssessmentInput, externalReady: boolean = !lesson.externalCheck): boolean {
-  return externalReady && (!lesson.mediaGate || lesson.mediaGate.approved) && teacherChapterAssessmentStatus(lesson, chapterAssessment).ready &&
-    teacherMidtermAssessmentStatus(lesson, chapterAssessment, practiceAnswers).ready &&
-    !session.paused && lesson.scenes.every(scene => session.visitedIds.includes(scene.id)) &&
-    lesson.scenes.every(scene => !scene.numberBuilder || teacherBuiltNumberCount(session, scene.id) >= 4) &&
-    lesson.scenes.every(scene => !scene.calendar || isCorrectCalendarEntry(scene,session.draftAnswers[scene.id] ?? "")) &&
-    lesson.scenes.every(scene => !scene.reflection ||
-      (session.draftAnswers[scene.id]?.trim().length ?? 0) >= scene.reflection.minLength) &&
-    lesson.scenes.every(scene => !scene.form || scene.form.every(field =>
-      Boolean(session.draftAnswers[scene.id + "." + field.id]?.trim()))) &&
-    lesson.requiredQuestionIds.every(id => session.attempts.some(item => item.sceneId === id)) &&
-    lesson.requiredActivityIds.every(id => session.activityIds.includes(id)) &&
-    lesson.requiredPracticeIds.every(id => Boolean(practiceAnswers[id]?.trim())) &&
-    (lesson.requiredCheckedIds ?? []).every(id =>
-      Boolean(practiceAnswers[id]?.trim()) && practiceChecked.includes(id));
+  return teacherCompletionBlockers(
+    session, lesson, practiceAnswers, practiceChecked, chapterAssessment, externalReady,
+  ).length === 0;
 }
 export function finishTeacherSession(session: TeacherSession, lesson: TeacherLesson,
   practiceAnswers: Readonly<Record<string, string>>, now: string,
