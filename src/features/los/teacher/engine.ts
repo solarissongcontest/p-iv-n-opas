@@ -27,7 +27,7 @@ export type TeacherScene = {
   id: string;
   phase: string;
   title: string;
-  kind: "introduction" | "explanation" | "board" | "question" | "book" | "activity" | "reflection" | "summary";
+  kind: "introduction" | "explanation" | "board" | "question" | "book" | "activity" | "reflection" | "form" | "summary";
   paragraphs: readonly string[];
   question?: TeacherQuestion;
   reflection?: TeacherReflection;
