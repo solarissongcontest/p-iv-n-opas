@@ -1,0 +1,130 @@
+name: LOS! 1 integrated private preview candidate
+
+on:
+  push:
+    branches:
+      - feat/los1-teacher-stack-qa-20261113
+
+permissions:
+  contents: read
+
+concurrency:
+  group: los1-private-preview-integration
+  cancel-in-progress: true
+
+jobs:
+  assemble-and-verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    env:
+      E2E_BASE_URL: http://127.0.0.1:5173
+      REQUIRE_GEMINI: "false"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Assemble all Teacher feature branches into disposable preview
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "LOS Integration QA"
+          git config user.email "los-integration-qa@users.noreply.github.com"
+          branches=(
+            feat/los1-teacher-l027-l030
+            feat/los1-teacher-l031-l035
+            feat/los1-teacher-l036-l040
+            feat/los1-teacher-l041-l045
+            feat/los1-teacher-l046-l050
+            feat/los1-teacher-l051-l055
+            feat/los1-teacher-l056-l060
+          )
+          for branch in "${branches[@]}"; do
+            git fetch --no-tags origin "+refs/heads/$branch:refs/remotes/origin/$branch"
+            if ! git merge --no-ff --no-edit -m "Preview integration of $branch" "origin/$branch"; then
+              python3 scripts/resolve_los_teacher_stack_conflicts.py
+              git commit --no-edit -m "Reviewed preview integration of $branch"
+            fi
+          done
+          git merge-base --is-ancestor "$GITHUB_SHA" HEAD
+          echo "Merged all seven feature branches; no persistent refs changed yet."
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - run: bun install --frozen-lockfile
+      - name: Validate TypeScript and canonical units
+        run: |
+          bun run typecheck
+          bun run test
+      - name: Build production-format preview bundle
+        run: bun run build
+      - name: Install browser test dependencies
+        run: |
+          bun run e2e:install
+          bunx playwright install --with-deps chromium webkit
+      - name: Serve merged preview locally
+        shell: bash
+        run: |
+          nohup bun run dev -- --host 127.0.0.1 --port 5173 --strictPort > /tmp/los-preview.log 2>&1 &
+          for attempt in $(seq 1 45); do
+            if curl --silent --fail --max-time 3 http://127.0.0.1:5173/ > /dev/null; then exit 0; fi
+            sleep 2
+          done
+          cat /tmp/los-preview.log
+          exit 1
+      - name: All 60 lessons and navigation in Chromium and iPhone WebKit
+        run: bunx playwright test e2e/los-teacher-integrated-stack.spec.ts --project=desktop-chromium --project=iphone-webkit
+      - name: Package exact tested Git commit (no writes to the repository)
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p .los-tested-preview
+          git fetch origin main
+          git bundle create .los-tested-preview/merged.bundle HEAD ^origin/main
+          git rev-parse HEAD > .los-tested-preview/merged.sha
+          git bundle verify .los-tested-preview/merged.bundle
+      - uses: actions/upload-artifact@v4
+        with:
+          name: los-tested-preview-commit
+          path: .los-tested-preview/
+          if-no-files-found: error
+          retention-days: 7
+
+  publish-private-preview:
+    needs: assemble-and-verify
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/download-artifact@v4
+        with:
+          name: los-tested-preview-commit
+          path: .los-tested-preview/
+      - name: Create fast-forward-only private-preview branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF" = "refs/heads/feat/los1-teacher-stack-qa-20261113"
+          bundle=".los-tested-preview/merged.bundle"
+          test -s "$bundle"
+          git bundle verify "$bundle"
+          git fetch --no-tags "$bundle" HEAD
+          merged_sha="$(git rev-parse FETCH_HEAD)"
+          test "$merged_sha" = "$(cat .los-tested-preview/merged.sha)"
+          git merge-base --is-ancestor "$GITHUB_SHA" "$merged_sha"
+          git fetch origin main
+          git merge-base --is-ancestor origin/main "$merged_sha"
+          for path in src/features/los/teacher/lessonL056L060.ts src/features/los/LosDictionarySearch.tsx src/features/los/LosContentTree.tsx; do
+            git cat-file -e "$merged_sha:$path"
+          done
+          target="feat/los1-integrated-preview-20261113"
+          if git ls-remote --exit-code --heads origin "$target" >/dev/null; then
+            git fetch origin "$target"
+            git merge-base --is-ancestor "origin/$target" "$merged_sha" ||
+              { echo "Existing preview is not an ancestor; refuse to overwrite it."; exit 1; }
+          fi
+          git push origin "$merged_sha:refs/heads/$target"
+          echo "Published tested preview commit $merged_sha to $target, never to main."

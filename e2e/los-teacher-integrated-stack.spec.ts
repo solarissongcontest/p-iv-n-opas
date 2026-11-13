@@ -50,3 +50,20 @@ test("C06 number activity persists while switching to final review and back", as
   await expect(builder).toContainText("zweiunddreißig");
   await expectNoHorizontalOverflow(page);
 });
+
+test("LOS! 1 library exposes the reader, teacher path and local dictionary in the same website", async ({ page }) => {
+  await enterLocalTeacherFixture(page);
+  await page.goto("/los#/", {waitUntil:"domcontentloaded"});
+  const links=page.getByRole("navigation",{name:"LOS! 1:n toiminnot"});
+  await expect(links).toBeVisible();
+  await expect(links.getByRole("link",{name:"Digitaalinen oppikirja"})).toHaveAttribute("href","/los#/1/contents");
+  await expect(links.getByRole("link",{name:"Opetuspolku"})).toHaveAttribute("href","/los#/1/path");
+  await expect(links.getByRole("link",{name:"Sanakirja ja sanasto"})).toHaveAttribute("href","/los#/1/dictionary");
+  await expect(links.getByRole("link",{name:"Hae teksteistä"})).toHaveAttribute("href","/los#/1/search");
+  await expect(links.getByRole("link",{name:"Kertauskortit"})).toHaveAttribute("href","/los#/1/cards");
+  await expect(page.locator(".los-library-footnote")).toContainText("60/60 oppituntia");
+  await links.getByRole("link",{name:"Sanakirja ja sanasto"}).click();
+  await expect(page).toHaveURL(/\\/los#\\/1\\/dictionary$/);
+  await expect(page.getByRole("heading",{name:"Sanakirja",exact:true})).toBeVisible();
+  await expectNoHorizontalOverflow(page);
+});

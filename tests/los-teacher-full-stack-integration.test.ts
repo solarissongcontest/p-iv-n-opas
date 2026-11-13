@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import { getLosTeacherLesson } from "../src/features/los/teacher/lessonL004.ts";
 import { validateTeacherLesson } from "../src/features/los/teacher/validateContent.ts";
 
@@ -39,4 +40,17 @@ test("full LOS! 1 Teacher 2.0 stack registers precisely L001–L060 with origina
   assert.deepEqual(missing,[],"Every lesson must be accessible in the canonical Teacher registry");
   assert.equal(getLosTeacherLesson("L000"),undefined);
   assert.equal(getLosTeacherLesson("L061"),undefined);
+});
+
+test("StudyOS and LOS! library expose direct links without inflating approved learning claims",()=>{
+  const shell=readFileSync("src/app/AppShell.tsx","utf8");
+  const library=readFileSync("src/features/los/LosBook.tsx","utf8");
+  const path=readFileSync("src/features/los/LosReferenceTools.tsx","utf8");
+  assert.equal((shell.match(/href="\\/los"/g)??[]).length,2,"Desktop and mobile have real LOS links");
+  for(const destination of ["contents","path","dictionary","search","cards"]){
+    assert.ok(library.includes('href="/los#/1/'+destination+'"'),destination+" must have a visible library shortcut");
+  }
+  assert.ok(library.includes("getLosTeacherLesson(lesson.id)"));
+  assert.ok(path.includes("getLosTeacherLesson(lesson.id)"));
+  assert.ok(library.includes("lopullinen hyväksyntä on kesken"));
 });
