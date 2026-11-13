@@ -342,3 +342,60 @@ test("C10 lessons L051–L055 show task-specific written correction instead of o
   }
   assert.ok(checked>=20,"The audit must cover C10's five teaching lessons, not a sample");
 });
+
+
+test("C08 L043 explicitly teaches the acknowledgement before the independent response",()=>{
+  const lesson=getLosTeacherLesson("L043");
+  assert.ok(lesson);
+  const ids=lesson.scenes.map(scene=>scene.id);
+  const teaching=ids.indexOf("acknowledge"),assessment=ids.indexOf("independent");
+  assert.ok(teaching>ids.indexOf("strategy-board") && teaching<assessment,
+    "The learner must meet the phrase before independently choosing it");
+  const teach=lesson.scenes[teaching]!;
+  assert.equal(teach.kind,"explanation");
+  const body=teach.paragraphs.join(" ");
+  assert.match(body,/Danke, jetzt verstehe ich\./);
+  assert.match(body,/Kiitos, nyt ymmärrän/);
+  assert.match(body,/opetustilanne eikä alkuperäisen lähdetekstin repliikki/);
+  const answer=lesson.scenes[assessment]!;
+  assert.equal(answer.phase,"Itsenäinen valinta 4/4");
+  assert.match(answer.paragraphs.join(" "),/selittää suomeksi/);
+  assert.equal(answer.question?.options?.find(opt=>opt.id===answer.question?.correctOption)?.label,
+    "Danke, jetzt verstehe ich.");
+  assert.deepEqual(validateTeacherLesson(lesson),[]);
+});
+
+test("C09 clock lessons distinguish inferred afternoon context from explicit German time",()=>{
+  const source=getLosTeacherLesson("L047");
+  const calendar=getLosTeacherLesson("L049");
+  assert.ok(source && calendar);
+  const text=source.scenes.find(scene=>scene.id==="full-dialogue");
+  assert.ok(text);
+  assert.match(text.paragraphs.join(" "),/ei yksin kerro/);
+  assert.match(text.paragraphs.join(" "),/02\.45/);
+  assert.match(text.paragraphs.join(" "),/14\.45/);
+  const clockBoard=source.scenes.find(scene=>scene.id==="timeline")!;
+  assert.ok(clockBoard.board?.some(row=>row.german.includes("Viertel vor drei") && row.meaning.includes("tulkinta")));
+  assert.match(source.scenes.find(scene=>scene.id==="guided-time")!.question!.success,/iltapäiväoletuksella/);
+  const availability=calendar.scenes.find(scene=>scene.id==="availability")!;
+  assert.match(availability.question?.reteach??"",/um siebzehn Uhr/);
+  assert.match(availability.question?.reteach??"",/asiayhteyttä/);
+  assert.deepEqual(validateTeacherLesson(source),[]);
+  assert.deepEqual(validateTeacherLesson(calendar),[]);
+});
+
+test("L057 review instructions match both accepted greeting punctuation variants",()=>{
+  const lesson=getLosTeacherLesson("L057");
+  assert.ok(lesson);
+  const transfer=lesson.scenes.find(scene=>scene.id==="transfer");
+  assert.ok(transfer?.question);
+  assert.match(transfer.title,/tervehdys, nimi ja lähtömaa/);
+  assert.match(transfer.question.prompt,/Tervehdyksen voi erottaa huutomerkillä tai pilkulla/);
+  assert.doesNotMatch(transfer.question.prompt,/kolme lausetta/i);
+  assert.deepEqual(transfer.question.accepted,[
+    "Hallo! Ich heiße Mia. Ich komme aus Finnland.",
+    "Hallo, ich heiße Mia. Ich komme aus Finnland.",
+  ]);
+  assert.match(transfer.question.genericWrong,/Sisällytä tervehdys, nimi ja lähtömaa/);
+  assert.deepEqual(validateTeacherLesson(lesson),[]);
+});
