@@ -213,7 +213,7 @@ export const LOS1_L031_TEACHER: TeacherLesson = {
       "id": "read-seven",
       "phase": "Harjoittelu",
       "kind": "question",
-      "title": "Palauta muistista",
+      "title": "Yhdistä sieben numeroon",
       "paragraphs": [
         "Kirjoita ilman näkyvää mallia. Vihje on käytettävissä, mutta silloin vastausta ei lasketa itsenäiseksi näytöksi."
       ],
@@ -225,10 +225,10 @@ export const LOS1_L031_TEACHER: TeacherLesson = {
         "accepted": [
           "7"
         ],
-        "success": "Oikein. Muoto tai numero vastaa kysyttyä.",
-        "hint": "Palaa opetustaulun oikeaan kohtaan ja katso sanan kirjoitusasu.",
-        "reteach": "Kertaa opettajan näyttämä saksankielinen sanamuoto ja kokeile uudelleen.",
-        "genericWrong": "Tarkista merkit ja vastaussuunta. Umlautia tai ß-kirjainta ei vaihdeta automaattisesti.",
+        "success": "Oikein. Sieben tarkoittaa seitsemää, joten numero on 7.",
+        "hint": "Seitsemän on ensimmäinen 7–12-taulun numero. Sieben = seitsemän.",
+        "reteach": "Sieben = seitsemän. Kun kysytään numeroin, vastaa 7.",
+        "genericWrong": "Tehtävä pyytää numeromerkkiä, ei saksankielistä sanaa. Sieben = 7.",
         "wrongAnswers": {
           "sieben": "Kirjoita numeroin 7."
         }
@@ -238,7 +238,7 @@ export const LOS1_L031_TEACHER: TeacherLesson = {
       "id": "write-eight",
       "phase": "Harjoittelu",
       "kind": "question",
-      "title": "Palauta muistista",
+      "title": "Kirjoita acht muistista",
       "paragraphs": [
         "Kirjoita ilman näkyvää mallia. Vihje on käytettävissä, mutta silloin vastausta ei lasketa itsenäiseksi näytöksi."
       ],
@@ -250,10 +250,10 @@ export const LOS1_L031_TEACHER: TeacherLesson = {
         "accepted": [
           "acht"
         ],
-        "success": "Oikein. Muoto tai numero vastaa kysyttyä.",
-        "hint": "Palaa opetustaulun oikeaan kohtaan ja katso sanan kirjoitusasu.",
-        "reteach": "Kertaa opettajan näyttämä saksankielinen sanamuoto ja kokeile uudelleen.",
-        "genericWrong": "Tarkista merkit ja vastaussuunta. Umlautia tai ß-kirjainta ei vaihdeta automaattisesti.",
+        "success": "Oikein. Kahdeksan on saksaksi acht.",
+        "hint": "Kahdeksan sanassa on neljä kirjainta: se alkaa a:lla ja päättyy t:hen.",
+        "reteach": "8 = acht. Kirjoita a-c-h-t yhtenä sanana.",
+        "genericWrong": "Tässä pyydetään saksankielistä sanaa, ei numeroa. 8 = acht.",
         "wrongAnswers": {
           "8": "Kirjoita saksankielinen sana acht."
         }
@@ -289,7 +289,7 @@ export const LOS1_L031_TEACHER: TeacherLesson = {
       "id": "write-eleven",
       "phase": "Harjoittelu",
       "kind": "question",
-      "title": "Palauta muistista",
+      "title": "Kirjoita elf muistista",
       "paragraphs": [
         "Kirjoita ilman näkyvää mallia. Vihje on käytettävissä, mutta silloin vastausta ei lasketa itsenäiseksi näytöksi."
       ],
@@ -301,10 +301,10 @@ export const LOS1_L031_TEACHER: TeacherLesson = {
         "accepted": [
           "elf"
         ],
-        "success": "Oikein. Muoto tai numero vastaa kysyttyä.",
-        "hint": "Palaa opetustaulun oikeaan kohtaan ja katso sanan kirjoitusasu.",
-        "reteach": "Kertaa opettajan näyttämä saksankielinen sanamuoto ja kokeile uudelleen.",
-        "genericWrong": "Tarkista merkit ja vastaussuunta. Umlautia tai ß-kirjainta ei vaihdeta automaattisesti.",
+        "success": "Oikein. Elf tarkoittaa lukua yksitoista.",
+        "hint": "Yksitoista on poikkeusmuoto. Sana on kolmikirjaiminen ja alkaa e:llä.",
+        "reteach": "11 = elf. Sitä ei muodosteta sanasta eins ja päätteestä -zehn.",
+        "genericWrong": "Kirjoita 11:n oma saksankielinen nimi elf, ei numeromerkkiä tai -zehn-muotoa.",
         "wrongAnswers": {
           "einszehn": "11 ei ole einszehn. Oikea poikkeusmuoto on elf."
         }
@@ -314,7 +314,7 @@ export const LOS1_L031_TEACHER: TeacherLesson = {
       "id": "exit",
       "phase": "Lopputarkistus",
       "kind": "question",
-      "title": "Palauta muistista",
+      "title": "Lopputarkistus: zwölf",
       "paragraphs": [
         "Kirjoita ilman näkyvää mallia. Vihje on käytettävissä, mutta silloin vastausta ei lasketa itsenäiseksi näytöksi."
       ],
@@ -326,10 +326,10 @@ export const LOS1_L031_TEACHER: TeacherLesson = {
         "accepted": [
           "zwölf"
         ],
-        "success": "Oikein. Muoto tai numero vastaa kysyttyä.",
-        "hint": "Palaa opetustaulun oikeaan kohtaan ja katso sanan kirjoitusasu.",
-        "reteach": "Kertaa opettajan näyttämä saksankielinen sanamuoto ja kokeile uudelleen.",
-        "genericWrong": "Tarkista merkit ja vastaussuunta. Umlautia tai ß-kirjainta ei vaihdeta automaattisesti.",
+        "success": "Oikein. Zwölf on kaksitoista ja sen ö-kirjain kuuluu oikeaan kirjoitusasuun.",
+        "hint": "Kaksitoista on poikkeusmuoto, jossa on ö. Muista, ettei se ole zweizehn.",
+        "reteach": "12 = zwölf. Yhdistelmässä zw on alku ja ö on tärkeä oikeinkirjoituksessa.",
+        "genericWrong": "Tehtävä pyytää saksankielistä sanaa: 12 = zwölf. Käytä ö-kirjainta ja tarkista sanan loppu.",
         "wrongAnswers": {
           "zwolf": "Sana kirjoitetaan ö-kirjaimella: zwölf.",
           "zweizehn": "Kaksitoista on poikkeus: zwölf."
