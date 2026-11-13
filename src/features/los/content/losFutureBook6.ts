@@ -17,11 +17,6 @@ export const LOS_FUTURE_BOOK_6: Record<string, LosFutureManuscript> = {
     "grammarExplanation": "Hyvä A2.1-tasoinen esitys käyttää lyhyitä, selkeitä rakenteita: Das Thema ist …, Ich habe … gefunden, Ich finde …, weil … ja Zum Schluss … . Käytä vähintään yhtä faktatietoa, yhtä omaa mielipidettä ja yhtä perustelua. Jos lähde sisältää vaikeaa kieltä, tarkista sen merkitys ja muotoile oma lyhyt ilmaus sen sijaan, että kopioisit lauseen ymmärtämättä.\n\nLaajennettu opetus kirjassa:\n\nKulttuuriprojektin lopputuotos tarvitsee selkeän rakenteen: aihe, kaksi tai kolme havaintoa, oma kokemus, johtopäätös ja lähteet. Valitse aiemmin oppimasi sanat ja kielioppirakenteet, älä tee tarkoituksella liian vaikeaa tekstiä. Harjoittele myös lyhyttä kysymys–vastausosuutta, jotta pystyt puolustamaan omaa valintaasi.\n\nMallilause: Ich habe Musik aus Wien gehört. Ich finde sie interessant, weil …\n\nSuomennos: Kuuntelin wieniläistä musiikkia. Se on minusta kiinnostavaa, koska …\n\nOpettajan virheen korjaus: Ich finde das interessant, weil ich mag es. → … weil ich es mag.\n\nLähdeviitteen pedagoginen rajaus: Tekstin vaikeat muodot merkitään tunnistettaviksi, ellei niitä ole opetettu. Oppijan ei tarvitse tuottaa uuden aikamuodon tai sijamuodon muotoja ennen niiden erillistä opetusta.\n\nOma minikoe: selitä säännön vaikutus verbin paikkaan, persoonapäätteeseen tai artikkeliin omassa mallilauseessa. Sulje opetus. Tee vastaava uusi lause eri henkilöllä tai sanalla ja tarkista tulos.",
     "vocabulary": [
       {
-        "de": "Suomi",
-        "fi": "Huomio",
-        "status": ""
-      },
-      {
         "de": "das Projekt",
         "fi": "projekti",
         "status": "artikkeli mukana; monikko ja ääntäminen vielä tarkistettava"
@@ -118,11 +113,6 @@ export const LOS_FUTURE_BOOK_6: Record<string, LosFutureManuscript> = {
     "grammarTopic": "mielipidefraasit; aiemmat rakenteet",
     "grammarExplanation": "Ich finde … interessant ilmaisee mielipiteen: Ich finde den Film interessant. Ich interessiere mich für … on hieman pidempi mutta hyödyllinen fraasi: Ich interessiere mich für Musik. Keskustelussa voit vastata Das finde ich auch tai Ich sehe das anders. Erottamalla faktan ja oman kokemuksen vältät vahingossa väittämästä makuasiaa yleiseksi totuudeksi.\n\nLaajennettu opetus kirjassa:\n\nKulttuuri ei tarkoita vain suuria museoita vaan myös ihmisten jokapäiväisiä tapoja, juhlia ja tarinoita. Mielipiteen voi sanoa yksinkertaisesti: Ich finde das interessant. Jos perustelu on tärkeä, käytä weil-sivulausetta: …, weil ich gern Musik höre. Erota henkilökohtainen arvio tutkittavasta faktasta.\n\nMallilause: Ich finde die Ausstellung interessant, weil ich Geschichte mag.\n\nSuomennos: Mielestäni näyttely on kiinnostava, koska pidän historiasta.\n\nOpettajan virheen korjaus: weil ich mag Geschichte → weil ich Geschichte mag.\n\nLähdeviitteen pedagoginen rajaus: Tekstin vaikeat muodot merkitään tunnistettaviksi, ellei niitä ole opetettu. Oppijan ei tarvitse tuottaa uuden aikamuodon tai sijamuodon muotoja ennen niiden erillistä opetusta.\n\nOma minikoe: selitä säännön vaikutus verbin paikkaan, persoonapäätteeseen tai artikkeliin omassa mallilauseessa. Sulje opetus. Tee vastaava uusi lause eri henkilöllä tai sanalla ja tarkista tulos.",
     "vocabulary": [
-      {
-        "de": "Suomi",
-        "fi": "Huomio",
-        "status": ""
-      },
       {
         "de": "die Kultur",
         "fi": "kulttuuri",
@@ -231,11 +221,6 @@ export const LOS_FUTURE_BOOK_6: Record<string, LosFutureManuscript> = {
     "grammarExplanation": "Perfektissä voit sanoa Ich habe das Lied gehört. Verbillä hören on säännöllinen partisiippi gehört. Vertailussa taas Ich mag Pop lieber als Rock. Huomaa, että mieltymyksen vertaaminen ei välttämättä tarkoita laadun objektiivista arviointia. Tekstilajina artistin haastattelu voi sisältää myös vaikeita fraaseja, joita tarkastellaan tunnistamisen tasolla.\n\nLaajennettu opetus kirjassa:\n\nMusiikista kertova teksti voi verrata kahta kokemusta. Voit sanoa Die Musik ist schneller, tai kertoa kuulleesi jotakin: Ich habe das Lied gehört. Kun kirjoitat arvion, perustelu auttaa lukijaa ymmärtämään valintaasi. Älä kopioi laulujen sanoja LOS!:iin ilman erillistä oikeutta: voit analysoida omaa kuuntelukokemustasi ja kuvata musiikin piirteitä omin sanoin.\n\nMallilause: Ich habe das Lied gehört. Es ist ruhiger als das andere.\n\nSuomennos: Kuuntelin laulun. Se on rauhallisempi kuin toinen.\n\nOpettajan virheen korjaus: Ich bin das Lied gehört. → Ich habe das Lied gehört.\n\nLähdeviitteen pedagoginen rajaus: Tekstin vaikeat muodot merkitään tunnistettaviksi, ellei niitä ole opetettu. Oppijan ei tarvitse tuottaa uuden aikamuodon tai sijamuodon muotoja ennen niiden erillistä opetusta.\n\nOma minikoe: selitä säännön vaikutus verbin paikkaan, persoonapäätteeseen tai artikkeliin omassa mallilauseessa. Sulje opetus. Tee vastaava uusi lause eri henkilöllä tai sanalla ja tarkista tulos.",
     "vocabulary": [
       {
-        "de": "Suomi",
-        "fi": "Huomio",
-        "status": ""
-      },
-      {
         "de": "das Instrument",
         "fi": "soitin",
         "status": "artikkeli mukana; monikko ja ääntäminen vielä tarkistettava"
@@ -342,11 +327,6 @@ export const LOS_FUTURE_BOOK_6: Record<string, LosFutureManuscript> = {
     "grammarTopic": "aikajärjestyksen ilmaisut",
     "grammarExplanation": "Zuerst, dann, danach ja am Ende auttavat jäsentämään tapahtumia. Ne voivat aloittaa väitelauseen, jolloin taivutettu verbi on toisena: Danach geht die Figur nach Hause. Menneestä kertovassa tekstissä käytetään usein Perfektiä tai kirjallista Präteritumia. Sinun oma lyhyt kertomuksesi voi käyttää tuttua Perfektiä: Zuerst habe ich gelesen. Danach habe ich geschrieben.\n\nLaajennettu opetus kirjassa:\n\nKertomuksessa tapahtumajärjestys auttaa lukijaa. Zuerst kertoo ensin, dann sitten, danach sen jälkeen ja am Ende lopuksi. Perfektin avulla voit kertoa, mitä tapahtui. Tekstin lukemisessa kannattaa erottaa kirjailijan kuvitteelliset tapahtumat ja tosiasiat. A2.1-tasolla pyritään vielä selkeisiin, lyhyisiin lauseisiin.\n\nMallilause: Zuerst hat sie ein Buch gefunden. Danach hat sie es gelesen.\n\nSuomennos: Ensin hän löysi kirjan. Sen jälkeen hän luki sen.\n\nOpettajan virheen korjaus: Danach sie hat gelesen. → Danach hat sie gelesen.\n\nLähdeviitteen pedagoginen rajaus: Tekstin vaikeat muodot merkitään tunnistettaviksi, ellei niitä ole opetettu. Oppijan ei tarvitse tuottaa uuden aikamuodon tai sijamuodon muotoja ennen niiden erillistä opetusta.\n\nOma minikoe: selitä säännön vaikutus verbin paikkaan, persoonapäätteeseen tai artikkeliin omassa mallilauseessa. Sulje opetus. Tee vastaava uusi lause eri henkilöllä tai sanalla ja tarkista tulos.",
     "vocabulary": [
-      {
-        "de": "Suomi",
-        "fi": "Huomio",
-        "status": ""
-      },
       {
         "de": "das Buch",
         "fi": "kirja",
@@ -455,11 +435,6 @@ export const LOS_FUTURE_BOOK_6: Record<string, LosFutureManuscript> = {
     "grammarExplanation": "Ich finde den Film gut kertoo mielipiteen. Lisää syy weil-sivulauseella: Ich mag den Film, weil die Geschichte spannend ist. Jos lainaat jonkun muun mielipidettä, kerro kenestä on kyse: Meine Freundin findet den Film lustig. Adjektiivit kuten spannend ja lustig toimivat predikatiivisessa rakenteessa ilman taivutuspäätettä.\n\nLaajennettu opetus kirjassa:\n\nElokuva-arviossa erotetaan elokuvan tapahtumat ja oma arvio. Die Handlung spielt in Berlin kertoo tapahtumapaikan, Ich finde den Film spannend antaa mielipiteen. Weil-sivulause tekee perustelusta täsmällisen. Saman teoksen voi kokea eri tavoin: perustelu on tärkeämpi kuin yhden oikean mielipiteen hakeminen.\n\nMallilause: Ich finde die Serie gut, weil die Figuren interessant sind.\n\nSuomennos: Pidän sarjaa hyvänä, koska hahmot ovat kiinnostavia.\n\nOpettajan virheen korjaus: weil die Figuren sind interessant → weil die Figuren interessant sind.\n\nLähdeviitteen pedagoginen rajaus: Tekstin vaikeat muodot merkitään tunnistettaviksi, ellei niitä ole opetettu. Oppijan ei tarvitse tuottaa uuden aikamuodon tai sijamuodon muotoja ennen niiden erillistä opetusta.\n\nOma minikoe: selitä säännön vaikutus verbin paikkaan, persoonapäätteeseen tai artikkeliin omassa mallilauseessa. Sulje opetus. Tee vastaava uusi lause eri henkilöllä tai sanalla ja tarkista tulos.",
     "vocabulary": [
       {
-        "de": "Suomi",
-        "fi": "Huomio",
-        "status": ""
-      },
-      {
         "de": "der Film",
         "fi": "elokuva",
         "status": "artikkeli mukana; monikko ja ääntäminen vielä tarkistettava"
@@ -562,11 +537,6 @@ export const LOS_FUTURE_BOOK_6: Record<string, LosFutureManuscript> = {
     "grammarExplanation": "Predikatiivinen adjektiivi ei taivu: Das Bild ist modern. Kun adjektiivi on suoraan substantiivin edessä, se saa usein päätteen: ein modernes Bild. Tämän kappaleen aktiivinen tavoite on ensisijaisesti ensimmäinen malli sekä yleisten adjektiivien tunnistaminen. Älä yritä täydellistä adjektiivitaivutusta, ellei se ole erikseen opetettu; voit kuvailla luontevasti kahdella lauseella.\n\nLaajennettu opetus kirjassa:\n\nTaidekuvaa kuvaillaan aluksi havaintoina: Auf dem Bild sehe ich …; Im Vordergrund ist …; Die Farben sind … Erota näkyvä havainto tulkinnasta. Sinulla saa olla eri tulkinta kuin toisella, kunhan osaat kertoa, mihin havainto perustuu. Adjektiivien sijamuototaivutusta ei tarvitse käyttää laajasti, kun lauseen voi rakentaa olla-verbillä.\n\nMallilause: Auf dem Bild sehe ich einen roten Kreis. Die Farben sind hell.\n\nSuomennos: Kuvassa näen punaisen ympyrän. Värit ovat vaaleita.\n\nOpettajan virheen korjaus: Die Farben ist hell. → Die Farben sind hell.\n\nLähdeviitteen pedagoginen rajaus: Tekstin vaikeat muodot merkitään tunnistettaviksi, ellei niitä ole opetettu. Oppijan ei tarvitse tuottaa uuden aikamuodon tai sijamuodon muotoja ennen niiden erillistä opetusta.\n\nOma minikoe: selitä säännön vaikutus verbin paikkaan, persoonapäätteeseen tai artikkeliin omassa mallilauseessa. Sulje opetus. Tee vastaava uusi lause eri henkilöllä tai sanalla ja tarkista tulos.",
     "vocabulary": [
       {
-        "de": "Suomi",
-        "fi": "Huomio",
-        "status": ""
-      },
-      {
         "de": "das Bild",
         "fi": "kuva",
         "status": "artikkeli mukana; monikko ja ääntäminen vielä tarkistettava"
@@ -658,11 +628,6 @@ export const LOS_FUTURE_BOOK_6: Record<string, LosFutureManuscript> = {
     "grammarTopic": "Perfekt sekä historiallisten tekstien preteritin tunnistus",
     "grammarExplanation": "Perfekt on tuttu arkikerronnasta: Die Menschen haben gefeiert. Kirjoitetussa historiassa saatat nähdä Präteritumin: Die Stadt war klein. tai Die Menschen lebten dort. Tunnista erityisesti war, hatte, lebte ja wurde asiayhteydestä. Älä muunna jokaista historiallista tekstiä täydelliseksi taivutusharjoitukseksi, vaan poimi tärkeimmät tapahtumat.\n\nLaajennettu opetus kirjassa:\n\nHistoriallisissa esittelyteksteissä näkyy usein preteriti, esimerkiksi war ja hatte sekä kirjallisempia muotoja kuten lebte. Tässä tehtäväsi on ensisijaisesti tunnistaa, puhutaanko menneisyydestä. Omat kokemukset kirjoitetaan tavallisesti tutulla Perfektillä. Erota myös näyttelyn nykyinen selitys menneestä tapahtumasta ja lähteen esittämä väite.\n\nMallilause: Früher war die Straße schmal. Heute ist sie breit.\n\nSuomennos: Ennen katu oli kapea. Nyt se on leveä.\n\nOpettajan virheen korjaus: Früher ist die Straße schmal (menneestä) → Früher war die Straße schmal.\n\nLähdeviitteen pedagoginen rajaus: Tekstin vaikeat muodot merkitään tunnistettaviksi, ellei niitä ole opetettu. Oppijan ei tarvitse tuottaa uuden aikamuodon tai sijamuodon muotoja ennen niiden erillistä opetusta.\n\nOma minikoe: selitä säännön vaikutus verbin paikkaan, persoonapäätteeseen tai artikkeliin omassa mallilauseessa. Sulje opetus. Tee vastaava uusi lause eri henkilöllä tai sanalla ja tarkista tulos.",
     "vocabulary": [
-      {
-        "de": "Suomi",
-        "fi": "Huomio",
-        "status": ""
-      },
       {
         "de": "die Geschichte",
         "fi": "historia",
@@ -775,11 +740,6 @@ export const LOS_FUTURE_BOOK_6: Record<string, LosFutureManuscript> = {
     "grammarTopic": "sivulausekertaus ja vertailu",
     "grammarExplanation": "Wenn … -rakenne voi viitata toistuviin tilanteisiin: Wenn wir feiern, essen wir zusammen. Kun wenn-lause aloittaa, koko sivulause vie päälauseen ensimmäisen lauseenjäsenpaikan, joten päälause alkaa verbillä: … essen wir zusammen. Voit pysyä A2.1-tasolla ja käyttää vaihtoehtoisesti kahta lyhyttä lausetta. Kertaa Perfekt kokemuksista.\n\nLaajennettu opetus kirjassa:\n\nJuhlasta kertova teksti käyttää aiempaa aikamuotoa ja sivulauseita: Wir haben gefeiert, weil … Vertaile juhlan yksityiskohtia ilman että määrittelet kokonaista kansaa yhden perinteen perusteella. Etsi myös viestin tarkoitus: kutsu, kertomus ja palaute vaativat eri kieltä.\n\nMallilause: Wir haben zusammen getanzt, weil die Musik so gut war.\n\nSuomennos: Tanssimme yhdessä, koska musiikki oli niin hyvää.\n\nOpettajan virheen korjaus: Wir haben tanzen. → Wir haben getanzt.\n\nLähdeviitteen pedagoginen rajaus: Tekstin vaikeat muodot merkitään tunnistettaviksi, ellei niitä ole opetettu. Oppijan ei tarvitse tuottaa uuden aikamuodon tai sijamuodon muotoja ennen niiden erillistä opetusta.\n\nOma minikoe: selitä säännön vaikutus verbin paikkaan, persoonapäätteeseen tai artikkeliin omassa mallilauseessa. Sulje opetus. Tee vastaava uusi lause eri henkilöllä tai sanalla ja tarkista tulos.",
     "vocabulary": [
-      {
-        "de": "Suomi",
-        "fi": "Huomio",
-        "status": ""
-      },
       {
         "de": "das Fest",
         "fi": "juhla",
@@ -898,11 +858,6 @@ export const LOS_FUTURE_BOOK_6: Record<string, LosFutureManuscript> = {
     "grammarExplanation": "Paikan voit ilmoittaa in der Stadt, im Museum tai in Berlin; nämä ovat nyt tuttuja käyttöilmauksia. Kokemuksen saat kerrottua Perfektillä: Ich habe ein Konzert besucht. Jos siirryit paikkaan, käytä oikeaa apuverbiä: Ich bin nach Berlin gefahren. Ajanilmauksen alussa verbi pysyy toisena: Gestern habe ich ein Konzert besucht.\n\nLaajennettu opetus kirjassa:\n\nKaupunkikulttuurista puhuttaessa aikajärjestys ja sijainti auttavat seuraamaan tapahtumia: zuerst im Museum, später im Café. Voit yhdistää kartan, tekstin ja oman kokemuksen, mutta älä oleta kaikkien tapahtumien olevan ajankohtaisia. Aukioloajat ja lipun hinnat tarkistetaan ennen julkaisua.\n\nMallilause: Zuerst gehe ich ins Museum, danach treffe ich Freunde im Café.\n\nSuomennos: Ensin menen museoon, sen jälkeen tapaan ystäviä kahvilassa.\n\nOpettajan virheen korjaus: Danach ich treffe Freunde. → Danach treffe ich Freunde.\n\nLähdeviitteen pedagoginen rajaus: Tekstin vaikeat muodot merkitään tunnistettaviksi, ellei niitä ole opetettu. Oppijan ei tarvitse tuottaa uuden aikamuodon tai sijamuodon muotoja ennen niiden erillistä opetusta.\n\nOma minikoe: selitä säännön vaikutus verbin paikkaan, persoonapäätteeseen tai artikkeliin omassa mallilauseessa. Sulje opetus. Tee vastaava uusi lause eri henkilöllä tai sanalla ja tarkista tulos.",
     "vocabulary": [
       {
-        "de": "Suomi",
-        "fi": "Huomio",
-        "status": ""
-      },
-      {
         "de": "die Stadt",
         "fi": "kaupunki",
         "status": "artikkeli mukana; monikko ja ääntäminen vielä tarkistettava"
@@ -1004,11 +959,6 @@ export const LOS_FUTURE_BOOK_6: Record<string, LosFutureManuscript> = {
     "grammarTopic": "mielipide + lähdetieto + perustelu",
     "grammarExplanation": "Voit ilmoittaa lähteen ilmauksella Laut dem Artikel … ja oman mielipiteesi Ich finde … . Perustelu alkaa usein weil-lauseella. Rakennetta ei tarvitse venyttää pitkäksi: Laut dem Artikel ist das Festival neu. Ich finde es interessant, weil … . Lähdeviittaus estää toisen mielipiteen muuttumisen omaksi väitteeksesi.\n\nLaajennettu opetus kirjassa:\n\nAjankohtaista kulttuuriaihetta tutkiessa tärkeintä on erottaa lähteen tieto ja oma mielipide. Voit sanoa Laut der Website … tai Ich glaube, dass … . Merkitse tieto lähteeseen ja ajankohtaan, älä vain kopioi sitä. Yksinkertainen, ymmärrettävä A2.1-tason perustelu riittää paremmin kuin monimutkainen rakenne, jota et vielä hallitse.\n\nMallilause: Laut der Website beginnt das Konzert um acht.\n\nSuomennos: Verkkosivun mukaan konsertti alkaa kahdeksalta.\n\nOpettajan virheen korjaus: Laut die Website → Laut der Website.\n\nLähdeviitteen pedagoginen rajaus: Tekstin vaikeat muodot merkitään tunnistettaviksi, ellei niitä ole opetettu. Oppijan ei tarvitse tuottaa uuden aikamuodon tai sijamuodon muotoja ennen niiden erillistä opetusta.\n\nOma minikoe: selitä säännön vaikutus verbin paikkaan, persoonapäätteeseen tai artikkeliin omassa mallilauseessa. Sulje opetus. Tee vastaava uusi lause eri henkilöllä tai sanalla ja tarkista tulos.",
     "vocabulary": [
-      {
-        "de": "Suomi",
-        "fi": "Huomio",
-        "status": ""
-      },
       {
         "de": "aktuell",
         "fi": "ajankohtainen",
