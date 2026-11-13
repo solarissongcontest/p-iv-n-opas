@@ -771,6 +771,9 @@ test("Teacher 2.0 explains exactly why an unfinished lesson cannot be completed"
   await expect(summary.locator(".los-teacher-completion-checklist")).toContainText("C01-EX-04");
   await expect(summary.locator(".los-teacher-completion-checklist")).toContainText("Vastaa oppitunnin kysymyksiin");
   await expect(summary.getByRole("button",{name:"Merkitse oppitunti läpikäydyksi"})).toBeDisabled();
+  await summary.getByRole("button",{name:"Siirry seuraavaan keskeneräiseen vaiheeseen"}).click();
+  await expect(page.locator(".los-teacher-paper h2")).toContainText("Mitä muistat edellisiltä tunneilta?");
+  await expect(page.locator(".los-teacher-summary")).toHaveCount(0);
   await expectNoHorizontalOverflow(page);
 });
 
