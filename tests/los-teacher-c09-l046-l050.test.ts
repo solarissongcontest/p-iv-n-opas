@@ -70,6 +70,10 @@ test("L046 really teaches all seven weekday forms with am, and saves original ex
   const prose=lesson.scenes.flatMap(s=>[...s.paragraphs,...(s.board?.map(b=>b.german)??[])]).join(" ");
   for(const word of ["Montag","Dienstag","Mittwoch","Donnerstag","Freitag","Samstag","Sonntag","am Montag"])
     assert.ok(prose.includes(word),word);
+  const beforeTeaching=lesson.scenes.slice(0,lesson.scenes.findIndex(scene=>scene.kind==="explanation"));
+  assert.equal(beforeTeaching.filter(scene=>scene.question).length,2,"L046 requires two real prequestions");
+  assert.ok(lesson.scenes.some(scene=>scene.kind==="source" && scene.textBChapterId==="09"),
+    "L046 must open the canonical whole C09 Text B without inventing audio completion");
   assert.deepEqual(lesson.requiredPracticeIds,["C09-EX-01","C09-EX-02","C09-EX-03"]);
 });
 
