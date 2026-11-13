@@ -21,6 +21,8 @@ export type TeacherQuestion = {
 export type TeacherBookLink = { label: string; chapterId: string; section: string; instruction: string };
 export type TeacherBoardStep = { label: string; german: string; meaning: string };
 export type TeacherReflection = { prompt: string; placeholder: string; minLength: number };
+/** Reusable written form, not a claim that fields were dictated by approved audio. */
+export type TeacherFormField = { id: string; label: string; placeholder: string; sampleAnswer: string };
 export type TeacherScene = {
   id: string;
   phase: string;
@@ -29,6 +31,8 @@ export type TeacherScene = {
   paragraphs: readonly string[];
   question?: TeacherQuestion;
   reflection?: TeacherReflection;
+  /** Form drafts live in teacherSessions with keys sceneId.fieldId. */
+  form?: readonly TeacherFormField[];
   board?: readonly TeacherBoardStep[];
   bookLinks?: readonly TeacherBookLink[];
   activityId?: string;
@@ -222,6 +226,8 @@ export function teacherCanFinish(session: TeacherSession, lesson: TeacherLesson,
   return teacherChapterAssessmentStatus(lesson, chapterAssessment).ready && !session.paused && lesson.scenes.every(scene => session.visitedIds.includes(scene.id)) &&
     lesson.scenes.every(scene => !scene.reflection ||
       (session.draftAnswers[scene.id]?.trim().length ?? 0) >= scene.reflection.minLength) &&
+    lesson.scenes.every(scene => !scene.form || scene.form.every(field =>
+      Boolean(session.draftAnswers[scene.id + "." + field.id]?.trim()))) &&
     lesson.requiredQuestionIds.every(id => session.attempts.some(item => item.sceneId === id)) &&
     lesson.requiredActivityIds.every(id => session.activityIds.includes(id)) &&
     lesson.requiredPracticeIds.every(id => Boolean(practiceAnswers[id]?.trim())) &&
