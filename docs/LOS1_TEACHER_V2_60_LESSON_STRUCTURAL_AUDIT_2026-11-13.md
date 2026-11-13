@@ -8,8 +8,8 @@ Päiväys: 13.11.2026 · Integraatiokandidaatti PR #221 (base #220, joka perustu
 
 - **60/60** ID:tä L001–L060 löydettiin nykyisistä `LosLessonBlueprint`-rakenteista, yksilöllisinä ja ilman aukkoja.
 - **60/60** vanhassa oppitunnissa on tavoite, **kolme** ohjaus-/suoritusvaihetta ja palautettava lopputarkistus. Tämä ei vielä tarkoita riittävää varsinaista opetusta.
-- **26/60** (L001–L021 ja L036–L040) sisältää erillisen Teacher Experience 2.0:n käsikirjoituksen, deterministisen ohjauksen ja opetus-/palautetilanteita; näidenkin sisältö on vielä toimituksellinen luonnos.
-- **34/60** (L022–L035 ja L041–L060) käyttää vasta vanhaa linkki-/tehtävälistaan perustuvaa suoritusmallia. Niitä **ei** luokitella Teacher 2.0:ssa valmiiksi opetetuiksi.
+- **31/60** (L001–L026 ja L036–L040) sisältää erillisen Teacher Experience 2.0:n käsikirjoituksen, deterministisen ohjauksen ja opetus-/palautetilanteita; näidenkin sisältö on vielä toimituksellinen luonnos.
+- **29/60** (L027–L035 ja L041–L060) käyttää vasta vanhaa linkki-/tehtävälistaan perustuvaa suoritusmallia. Niitä **ei** luokitella Teacher 2.0:ssa valmiiksi opetetuiksi.
 - **0/60** riippumatonta pedagogista kielihyväksyntää tai todellista opiskelijalla mitattua kestoa on tämän työn perusteella todettu.
 - Arvioitua `estimatedMinutes`-aikaa **ei ole mitattu**. L059 on koodissa **80 minuuttia**, muut 59 ovat **30 minuutin suunnitteluarvioita**. Aikaa ei pidä käyttää tekaistuna laatumittarina.
 - Vanhat lopputarkistukset voivat sisältää oikein tarkistettavan kysymyksen, mutta eivät yksin todista itsenäistä tai myöhemmin vahvistettua kielitaitoa.
@@ -41,11 +41,11 @@ Selite: `vastaus` = vanhaan tehtävätilaan tallennettu vastaus, ei automaattine
 | L019 | C04 · du/Sie | 3 | 30 | vastaus | Teacher 2.0: Sie heißen / Sie kommen, kirjaimen koko erillisenä tarkistuksena; hyväksyntä avoin | lessonEngineC04C05.ts + lessonL019.ts |
 | L020 | C04 · du/Sie | 3 | 30 | vastaus | Teacher 2.0: 20 alkuperäistä M-COM-03-ilmausta, ei tekaistua kuunteluarviota; hyväksyntä avoin | lessonEngineC04C05.ts + lessonL020.ts |
 | L021 | C04 · du/Sie | 3 | 30 | koe | Teacher 2.0: 12 oikeaa C04-osatehtävää, palautus, sovellus ja itsearviointi; hyväksyntä avoin | lessonEngineC04C05.ts + lessonL021.ts |
-| L022 | C05 · vointi | 3 | 30 | ei erityistä | Vain vanha tehtävä-/vaihelista | lessonEngineC04C05.ts |
-| L023 | C05 · vointi | 3 | 30 | tarkistettu lähdetehtävä | Vain vanha tehtävä-/vaihelista | lessonEngineC04C05.ts |
-| L024 | C05 · vointi | 3 | 30 | vastaus | Vain vanha tehtävä-/vaihelista | lessonEngineC04C05.ts |
-| L025 | C05 · vointi | 3 | 30 | vastaus | Vain vanha tehtävä-/vaihelista | lessonEngineC04C05.ts |
-| L026 | C05 · vointi | 3 | 30 | koe | Vain vanha tehtävä-/vaihelista | lessonEngineC04C05.ts |
+| L022 | C05 · vointi | 3 | 30 | ei erityistä | Teacher 2.0: vointikysymykset ja tutut vastaukset, kontekstivertailu; riippumaton hyväksyntä avoin | lessonEngineC04C05.ts + lessonL022.ts |
+| L023 | C05 · vointi | 3 | 30 | tarkistettu lähdetehtävä | Teacher 2.0: M-WB-05:n kaikki 4 vuoroa, 3 oikeaa tarkistettua lähdekysymystä; riippumaton hyväksyntä avoin | lessonEngineC04C05.ts + lessonL023.ts |
+| L024 | C05 · vointi | 3 | 30 | vastaus | Teacher 2.0: nicht / sehr, C05-EX-03/04/05/11 ja virhekohtainen palaute; riippumaton hyväksyntä avoin | lessonEngineC04C05.ts + lessonL024.ts |
+| L025 | C05 · vointi | 3 | 30 | vastaus | Teacher 2.0: M-COM-08:n 6 vuoroa, 2 tarkistettua Text B -tehtävää, ääni hyväksymättä; riippumaton hyväksyntä avoin | lessonEngineC04C05.ts + lessonL025.ts |
+| L026 | C05 · vointi | 3 | 30 | koe | Teacher 2.0: 12 oikeaa C05-testikysymystä, palautus, sovellus ja itsearviointi; riippumaton hyväksyntä avoin | lessonEngineC04C05.ts + lessonL026.ts |
 | L027 | Kertaus I ja välikoe | 3 | 30 | tarkistettu lähdetehtävä+vastaus | Vain vanha tehtävä-/vaihelista | lessonEngineReviewI.ts |
 | L028 | Kertaus I ja välikoe | 3 | 30 | tarkistettu lähdetehtävä+vastaus | Vain vanha tehtävä-/vaihelista | lessonEngineReviewI.ts |
 | L029 | Kertaus I ja välikoe | 3 | 30 | tarkistettu lähdetehtävä+vastaus | Vain vanha tehtävä-/vaihelista | lessonEngineReviewI.ts |
@@ -108,7 +108,7 @@ Lähdevalinta **ei siis ole päätöstä vailla**. Päätös on dokumentoitu, mu
 - Yhteen `src/features/los/teacher/lessonL004.ts`-rekisteriin on lisätty L013–L016; sama `LosTeacherPlayer`, deterministinen `engine.ts`, käyttäjäkohtaisen kappaleluonnoksen `teacherSessions`-kirjoittaja ja ennestään olemassa olevat kirjan tehtävät.
 - Uudet käsikirjoitukset: `lessonL013.ts` (autenttisen Lisan tekstin ymmärtäminen), `lessonL014.ts` (kommen/woher), `lessonL015.ts` (M-COM-02:n lähtöpaikat ja kartta) ja `lessonL016.ts` (C03-kertaus ja oikea kappaletesti). Niillä on eri tavoitteet, opetusjärjestys, opetustaulut ja vastauksen virhekohtainen palaute.
 - `tests/los-teacher-c03-complete.test.ts` on lisätty C03:n tekstin, lähdekysymysten tarkistamisen, itsenäisen näytön, kirjan harjoitustunnisteiden ja varsinaisen koekirjauksen tarkastamiseen. Testit on **kirjoitettu, mutta niiden läpäisyä tällä HEADilla ei tässä auditissa vielä ole todennettu**.
-- L001–L016 ovat toteutettuja **ennakkokäsikirjoituksia**, eivät riippumattomasti hyväksyttyjä oppitunteja. L017–L035 ja L041–L060 pysyvät vanhan opetuspolun tilassa, kunnes jokainen toteutetaan omana pedagogisena kokonaisuutenaan.
+- L001–L016 ovat toteutettuja **ennakkokäsikirjoituksia**, eivät riippumattomasti hyväksyttyjä oppitunteja. C03-vaiheen 13.11.2026 tilanteessa L017–L035 ja L041–L060 olivat vielä vanhassa opetuspolussa; myöhemmät C04/C05/C07-lisäykset muuttivat tätä lukua.
 - C03:n Text A:n lähteeksi on jo valittu `M-WB-07` (Lisa Müller, Wikibooks oldid 4581896); vanha `M-DIB-01` (Berna) on poistettu päätekstin roolista yksityisyysperusteella. Lisenssin lähdemerkintöjen yksilöinti, riippumaton kielen ja tason tarkistus sekä oikeat laitetestit odottavat.
 - Tätä auditointia ei tule tulkita R1–R12-porttien sulkemiseksi. Teacher 2.0:n korjaukset eivät muuta FreeDictin tilapäisiä testilatauksia tuotantosanakirjaksi eikä vapauta julkaisemattomia ääni- tai IPA-aineistoja.
 
@@ -122,4 +122,13 @@ C07:n Text B:n M-COM-06-aakkosäänitteellä on identifioitu ihmisäänilähde, 
 
 C04:n viisi uutta henkilökohtaisen opettajan käsikirjoitusta käyttävät samaa `LosTeacherPlayer`-moottoria ja kirjan nykyistä opiskelijakohtaista tallennusta. L017 harjoittaa tilanteen mukaista du/Sie-valintaa ilman perusteetonta ikärajaa; L018 käyttää täsmälleen kaikkia kahdeksaa `M-WB-06`-alkuperäisrepliikkiä (`oldid=3823654`) suoraan sisältörekisteristä ja vaatii kolme kirjan lähdekysymystä vastattuina ja tarkistettuina; L019 opettaa kohteliaan verbimuodon ja tarkistaa ison Sie:n monivalinnalla, sillä lyhyttekstivertailu normalisoi kirjainkokoa; L020 käyttää C04:n nykyistä `M-COM-03`-lähdettä, kaikkia 20 tervehdyksen tai hyvästelyn alkuperäisilmausta sekä neljää kirjassa tarkistettavaa Text B -tehtävää. Suunniteltu `M-DIB-07` ei ole oikeus- ja versiotarkastuksin hyväksytty, joten siitä ei väitetä lähde- eikä kuuntelusuorituksia. L021 vaatii kaikki 12 nykyistä C04-kappaletestitehtävää, todellisen palautusmerkinnän, soveltamistekstin ja itsearvioinnin.
 
-Rakenteellinen tilanne tällä haaralla on **26/60 Teacher 2.0 -ennakkokäsikirjoitusta ja 34/60 vanhan mallin tuntia**, mutta **0/60 riippumattomasti kieli- ja pedagogisesti hyväksyttyä tai todellisesti mitattua 30 minuutin oppituntia**. Tämä C04-osuus on lisätty omaan testattavaan haaraan, joka riippuu C07/C03-yhteisestä Teacher-arkkitehtuurista. Kirjan media-, attribuutio-, todellisen laitteen ja oppijan kestomittauksen hyväksynnät pysyvät avoimina.
+Rakenteellinen tilanne C04-vaiheen jälkeen oli **26/60 Teacher 2.0 -ennakkokäsikirjoitusta ja 34/60 vanhan mallin tuntia**, mutta **0/60 riippumattomasti kieli- ja pedagogisesti hyväksyttyä tai todellisesti mitattua 30 minuutin oppituntia**. Tämä C04-osuus on lisätty omaan testattavaan haaraan, joka riippuu C07/C03-yhteisestä Teacher-arkkitehtuurista. Kirjan media-, attribuutio-, todellisen laitteen ja oppijan kestomittauksen hyväksynnät pysyvät avoimina.
+
+
+## C05 · L022–L026 · yhteiseen Teacher 2.0 -pohjaan siirretty toteutus (13.11.2026)
+
+C05:n viisi omaa käsikirjoitusta siirrettiin olemassa olevasta Draft PR #224 -haarasta C04/C07:n yhteisen Teacher Playerin päälle. Ne käyttävät samaa determinististä moottoria, opiskelijan `teacherSessions`-tilaa, oppikirjan ymmärtämis-/harjoitustehtäviä, kappalekokeen todellista palautusmerkintää ja itsearviointia. L022 kertaa ja opettaa vointikysymyksiä ja -vastauksia, L023 käyttää kirjan autenttista `M-WB-05` Heinrich–Karl -dialogia (neljä puheenvuoroa) ja vaatii C05-SOURCE-Q01–Q03 vastatuiksi ja tarkistetuiksi, L024 opettaa `nicht`- ja `sehr`-fraasit ilman opetussuunnitelmaan kuulumattoman datiivijärjestelmän tuottamista, L025 käyttää C05:n nykyistä `M-COM-08` Franz–Greta Text B:tä (kuusi puheenvuoroa ja kaksi tarkistettua kysymystä) kirjallisena ymmärtämisenä sekä L026 käyttää kaikkia 12 oikeaa C05-EX-tehtävää, testin palautusta, soveltamista ja itsearviointia.
+
+**Lähdesuunnitelman avoin poikkeama:** C05:n aikaisemmassa masterplanissa Text B -ehdokkaana oli `M-DIB-05` (alkuperäistä vointisanastoa). Nykyisessä digikirjan sisältörekisterissä Text B on `M-COM-08`; tässä integroinnissa se säilytetään ennallaan sen sijaan, että keksittäisiin tai väitettäisiin julkaistuksi toinen lähde. C05:n `M-COM-08`-äänilähteen reititys korjattiin kirjan Text B -näkymään; **oikeaa toistoa ei ole hyväksytty fyysisillä laitteilla eikä kirjallisesta ymmärtämisestä merkitä kuuntelupisteitä**. Myös lähteiden riippumaton saksankielinen/käyttöoikeudellinen tarkistus on avoin.
+
+Tämän integraatiohaaran **rakenteellinen kattavuus** on nyt **31/60 Teacher Experience 2.0 -ennakkokäsikirjoitusta ja 29/60 vanhaa opetusmallia** (L027–L035 ja L041–L060), mikä ei tarkoita 31 kieli- tai mediakatselmoinnilla hyväksyttyä tuntia. Aikaisemmat C03- ja C07-vaihekohtaiset lukemat on raportissa säilytetty historiallisina. Testitulokset raportoidaan vain ne tuottaneen commitin ja CI-ajon perusteella.
