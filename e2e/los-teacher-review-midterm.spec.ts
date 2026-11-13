@@ -92,7 +92,9 @@ for (const lessonId of ["L027","L028"] as const) {
     await enterLocalLos(page);
     await page.goto("/los-lessons/"+lessonId,{waitUntil:"domcontentloaded"});
     const nav=page.getByRole("navigation",{name:"Oppitunnin opetustilanteet"});
+    await expect(nav).toBeVisible();
     const buttons=nav.getByRole("button");
+    await expect(buttons.first()).toBeVisible();
     const total=await buttons.count();
     expect(total).toBeGreaterThan(8);
     for(let i=0;i<total;i++){
