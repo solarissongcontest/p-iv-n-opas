@@ -458,6 +458,6 @@ test("C08 options provide Finnish or German language metadata for accessible pro
       lessonId+"/"+sceneId+" is a German-language dialogue");
   }
   const player=readFileSync("src/features/los/teacher/LosTeacherPlayer.tsx","utf8");
-  assert.ok(player.includes('<span lang={option.lang}>{option.label}</span>'));
+  assert.ok(player.includes('<span lang={option.lang ?? "de"}>{option.label}</span>'));
   assert.ok(!player.includes('<span lang="de">{option.label}</span>'));
 });
