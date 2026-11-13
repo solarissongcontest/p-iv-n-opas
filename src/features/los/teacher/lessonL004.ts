@@ -1,3 +1,4 @@
+import { LOS1_L002_TEACHER } from "./lessonL002.ts";
 import { LOS1_L001_TEACHER } from "./lessonL001.ts";
 import type { TeacherLesson } from "./engine.ts";
 
@@ -200,5 +201,6 @@ export const LOS1_L004_TEACHER: TeacherLesson = {
 };
 export function getLosTeacherLesson(id: string): TeacherLesson | undefined {
   if (id === LOS1_L001_TEACHER.id) return LOS1_L001_TEACHER;
+  if (id === LOS1_L002_TEACHER.id) return LOS1_L002_TEACHER;
   return id === LOS1_L004_TEACHER.id ? LOS1_L004_TEACHER : undefined;
 }
