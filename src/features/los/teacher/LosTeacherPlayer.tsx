@@ -4,6 +4,8 @@ import { getLosOpenDialogue } from "../content/los1OpenDialogues.ts";
 import { LOS1_TEXT_B_SOURCES } from "../content/los1TextBAdditional.ts";
 import { TeacherTimeCalendar } from "./TeacherTimeCalendar.tsx";
 import { ArrowLeft, ArrowRight, BookOpen, Check, CheckCircle2, ChevronLeft, ChevronRight, HelpCircle, RotateCcw } from "lucide-react";
+import { teacherExternalStatus } from "./externalEvidence.ts";
+import { LosMasterySummary } from "../LosMasterySummary.tsx";
 import { composeLosC10Dialogues, storeLosC10Dialogues } from "./c10ApplicationBridge.ts";
 import { readCachedDeviceUser } from "@/lib/deviceSession";
 import { useLosChapterDraft } from "../studyState.ts";
@@ -23,7 +25,7 @@ import "./teacher.css";
 const stamp = () => new Date().toISOString();
 const bookUrl = (lessonId: string, bookId: number, chapterId: string, section: string) =>
   "/los?lessonReturn=" + encodeURIComponent(lessonId) + "#/" + bookId + "/" +
-  (section === "midterm" || section === "review" ? section : chapterId + "/" + section);
+  (["review-ii","final","summary","midterm","review"].includes(section) ? section : chapterId + "/" + section);
 
 function SceneQuestion({ scene, session, submit, saveDraft, requestHint, reveal }: {
   scene: TeacherScene;
@@ -177,6 +179,17 @@ export function LosTeacherPlayer({ lessonId }: { lessonId: string }) {
 function LosTeacherScreen({ lessonId }: { lessonId: string }) {
   const lesson = getLosTeacherLesson(lessonId);
   const { draft, update, saved } = useLosChapterDraft(lesson?.bookId ?? 1, lesson?.chapterId ?? "01");
+  // Read-only student-draft evidence for Review II, EX-FINAL and objective summaries.
+  const evidence01=useLosChapterDraft(1,"01").draft;
+  const evidence02=useLosChapterDraft(1,"02").draft;
+  const evidence03=useLosChapterDraft(1,"03").draft;
+  const evidence04=useLosChapterDraft(1,"04").draft;
+  const evidence05=useLosChapterDraft(1,"05").draft;
+  const evidence06=useLosChapterDraft(1,"06").draft;
+  const evidence07=useLosChapterDraft(1,"07").draft;
+  const evidence08=useLosChapterDraft(1,"08").draft;
+  const evidence09=useLosChapterDraft(1,"09").draft;
+  const evidence10=useLosChapterDraft(1,"10").draft;
   const [authorized, setAuthorized] = useState<boolean | null>(null);
   const [showHelp, setShowHelp] = useState(false);
   const [helpSelection, setHelpSelection] = useState<string | null>(null);
@@ -188,7 +201,11 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
     : null;
   const scene = lesson?.scenes.find(item => item.id === session?.sceneId) ?? lesson?.scenes[0];
   const sceneIndex = lesson?.scenes.findIndex(item => item.id === scene?.id) ?? 0;
-  const available = Boolean(saved && session && lesson && teacherCanFinish(session, lesson, draft.practiceAnswers, draft.practiceChecked, draft));
+  const external = lesson ? teacherExternalStatus(lesson,draft,{
+    "01":evidence01,"02":evidence02,"03":evidence03,"04":evidence04,"05":evidence05,
+    "06":evidence06,"07":evidence07,"08":evidence08,"09":evidence09,"10":evidence10,
+  }) : {ready:true,lines:[]};
+  const available = Boolean(saved && session && lesson && teacherCanFinish(session, lesson, draft.practiceAnswers, draft.practiceChecked, draft, external.ready));
   const completed = Boolean(session?.completedAt);
   const c10Dialogues = lesson?.id === "L054" ? composeLosC10Dialogues(
     session?.draftAnswers["dialogue-du"] ?? "", session?.draftAnswers["dialogue-sie"] ?? "") : null;
@@ -241,7 +258,7 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
     update(current => {
       const now = stamp();
       const old = current.teacherSessions?.[lessonId] ?? emptyTeacherSession(lesson, now);
-      const next = finishTeacherSession(old, lesson, current.practiceAnswers, now, current.practiceChecked, current);
+      const next = finishTeacherSession(old, lesson, current.practiceAnswers, now, current.practiceChecked, current, external.ready);
       if (next === old) return current;
       // Teacher 2.0 completion is a distinct learning event. Never manufacture
       // legacy lesson steps or an exit answer that the student never submitted.
@@ -263,7 +280,7 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
       </section> :
       !lesson || !session || !scene ? <section className="los-teacher-status">
         <h1>Oppitunnin opetusmateriaali ei ole vielä valmis</h1>
-        <p>Teacher 2.0 on nyt käytössä oppitunneilla L001–L055. Muut oppitunnit toimivat edelleen nykyisessä Opetuspolussa.</p>
+        <p>Teacher 2.0 on nyt käytössä oppitunneilla L001–L060. Muut oppitunnit toimivat edelleen nykyisessä Opetuspolussa.</p>
         <a href={"/los#/" + (lesson?.bookId ?? 1) + "/path"}>Palaa Opetuspolkuun</a>
       </section> :
       <>
@@ -416,7 +433,7 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
               </button>
               <p>Tämä on oma vahvistuksesi, ei automaattinen kielitaidon arvio.</p>
             </div>}
-            <div className="los-teacher-help">
+            {lesson.id !== "L059" && <div className="los-teacher-help">
               <button type="button" aria-expanded={showHelp} onClick={() => { setShowHelp(v => !v); setHelpSelection(null); markHelp(); }}>
                 <HelpCircle size={18}/> En ymmärrä / haluan lisäselityksen
               </button>
@@ -441,7 +458,7 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
                       "Palaa tarvittaessa edelliseen opetustilanteeseen sisällysluettelosta ja kertaa siinä annettu esimerkki. Voit edetä omassa tahdissasi.")}</p>
                 </section>}
               </div>}
-            </div>
+            </div>}
             {lesson.chapterAssessment && (scene.kind === "book" || scene.kind === "summary") && <section className="los-teacher-assessment-status" aria-label="Kappaletestin ja itsearvioinnin tilanne">
               <h3>Kirjan todellinen suoritustilanne</h3>
               {(() => {
@@ -470,6 +487,12 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
               <p>{lesson.mediaGate.reason}</p>
               <p>Lähdetunnus: {lesson.mediaGate.sourceId}. Alkuperäistekstin lukemista ei lasketa hyväksytyksi kuunteluksi.</p>
             </section>}
+            {scene.kind === "summary" && lesson.externalCheck && <section className="los-teacher-assessment-status" aria-label="Tallennettujen koetehtävien todellinen tilanne">
+              <h3>Kirjan oman tallennuksen näytöt</h3>
+              {external.lines.map((line,i)=><p key={i}>{line}</p>)}
+              {!external.ready && <p>Kirjan sovitut tehtävät tai itsearviot ovat vielä kesken. Palaa kirjan sivulle, jatka tallennettua työtä ja tarkista tila uudelleen.</p>}
+            </section>}
+            {lesson.id === "L060" && scene.kind === "summary" && <LosMasterySummary/>}
             {scene.kind === "summary" && <section className="los-teacher-summary">
               <h3>Oppitunnin tilanne</h3>
               <p>Itsenäisesti oikein ratkaistuja eri tarkistuksia: <strong>{independentTeacherEvidence(session, lesson)}</strong>. Tämä luku ei ole kielitaitoprosentti.</p>

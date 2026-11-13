@@ -72,6 +72,8 @@ export type TeacherLesson = {
   examAssessment?: { id: "EX-MID" };
   /** Original transcript cannot replace unverified audio. */
   mediaGate?: {sourceId:string;approved:boolean;reason:string};
+  /** Read-only adapter for existing Review II, final and summary book drafts. */
+  externalCheck?: "review-ii" | "final" | "summary";
 };
 export type TeacherChapterAssessmentInput = {
   testAnswers: Readonly<Record<string, string>>;
@@ -267,8 +269,8 @@ export function isCorrectCalendarEntry(scene: TeacherScene, value: string): bool
 }
 export function teacherCanFinish(session: TeacherSession, lesson: TeacherLesson,
   practiceAnswers: Readonly<Record<string, string>>, practiceChecked: readonly string[] = [],
-  chapterAssessment?: TeacherChapterAssessmentInput): boolean {
-  return (!lesson.mediaGate || lesson.mediaGate.approved) &&
+  chapterAssessment?: TeacherChapterAssessmentInput, externalReady: boolean = !lesson.externalCheck): boolean {
+  return externalReady && (!lesson.mediaGate || lesson.mediaGate.approved) &&
     teacherChapterAssessmentStatus(lesson, chapterAssessment).ready &&
     teacherMidtermAssessmentStatus(lesson, chapterAssessment, practiceAnswers).ready &&
     !session.paused && lesson.scenes.every(scene => session.visitedIds.includes(scene.id)) &&
@@ -286,8 +288,9 @@ export function teacherCanFinish(session: TeacherSession, lesson: TeacherLesson,
 }
 export function finishTeacherSession(session: TeacherSession, lesson: TeacherLesson,
   practiceAnswers: Readonly<Record<string, string>>, now: string,
-  practiceChecked: readonly string[] = [], chapterAssessment?: TeacherChapterAssessmentInput): TeacherSession {
-  return session.completedAt || !teacherCanFinish(session, lesson, practiceAnswers, practiceChecked, chapterAssessment) ? session :
+  practiceChecked: readonly string[] = [], chapterAssessment?: TeacherChapterAssessmentInput,
+  externalReady: boolean = !lesson.externalCheck): TeacherSession {
+  return session.completedAt || !teacherCanFinish(session, lesson, practiceAnswers, practiceChecked, chapterAssessment, externalReady) ? session :
     { ...session, updatedAt: now, completedAt: now };
 }
 export function independentTeacherEvidence(session: TeacherSession, lesson: TeacherLesson): number {
