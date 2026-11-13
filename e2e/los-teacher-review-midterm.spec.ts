@@ -86,3 +86,38 @@ test("L029 fallback is explicitly textual and never awards listening points",asy
   await expect(page.locator(".los-teacher-book-link").filter({hasText:"C01 · Franz ja Jörg, koko Text A"}).locator("a")).toHaveAttribute("href",/\/01\/text/);
   await expectNoHorizontalOverflow(page);
 });
+
+for (const lessonId of ["L027","L028"] as const) {
+  test(lessonId+" allows honest mistakes, saves independent evidence separately and resumes", async({page})=>{
+    await enterLocalLos(page);
+    await page.goto("/los-lessons/"+lessonId,{waitUntil:"domcontentloaded"});
+    const nav=page.getByRole("navigation",{name:"Oppitunnin opetustilanteet"});
+    const buttons=nav.getByRole("button");
+    const total=await buttons.count();
+    expect(total).toBeGreaterThan(8);
+    for(let i=0;i<total;i++){
+      await buttons.nth(i).click();
+      const question=page.locator(".los-teacher-question");
+      if(await question.count()){
+        const input=question.locator('input[lang="de"]');
+        if(await input.count()){
+          await input.fill("unbekannt");
+          await question.getByRole("button",{name:"Tarkista"}).click();
+        }else{
+          await question.locator(".los-teacher-option").first().click();
+        }
+        await expect(question.locator(".los-teacher-feedback")).toBeVisible();
+      }
+      const reflection=page.locator(".los-teacher-reflection textarea");
+      if(await reflection.count()) await reflection.fill("Tämä vaatii vielä kertausta.");
+    }
+    const completion=page.getByRole("button",{name:"Merkitse oppitunti läpikäydyksi"});
+    await expect(page.locator(".los-teacher-summary")).toContainText("Itsenäisesti oikein ratkaistuja eri tarkistuksia:");
+    await expect(completion).toBeEnabled();
+    await page.reload({waitUntil:"domcontentloaded"});
+    await expect(completion).toBeEnabled();
+    await completion.click();
+    await expect(page.getByText("Oppitunti merkitty suoritetuksi. Osaamista seurataan erikseen.")).toBeVisible();
+    await expectNoHorizontalOverflow(page);
+  });
+}
