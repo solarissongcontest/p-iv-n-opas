@@ -16,6 +16,7 @@ import { LosNotebook, LosWorkbook } from "./LosWorkbook";
 import { LosBackups } from "./LosBackups";
 import { LosBookStartAction } from "./LosBookStartAction";
 import { getLosTeacherLesson } from "./teacher/lessonL004";
+import { LOS1_EXECUTABLE_LESSONS } from "./guidedLessons";
 import { LosDictionaryCard } from "./LosDictionaryCard";
 import { LosContentTree } from "./LosContentTree";
 import { isLosContentTask, type LosContentTask } from "./contentTreeModel";
@@ -110,6 +111,7 @@ function AccessGate() {
   </main>;
 }
 function SeriesView({ openBook }: { openBook: (id: number) => void }) {
+  const teacherCount = LOS1_EXECUTABLE_LESSONS.filter(lesson => Boolean(getLosTeacherLesson(lesson.id))).length;
   return <div className="los-library">
     <header className="los-library-heading">
       <p className="los-eyebrow">KIELTEN OPPIKIRJASTO / SAKSA B3</p>
@@ -126,7 +128,18 @@ function SeriesView({ openBook }: { openBook: (id: number) => void }) {
         <small>{book.code} · {book.module}</small>
       </button>)}
     </div>
-    <p className="los-library-footnote">LOS! 1:n kymmenen kappaletta ovat selattavissa digikirjassa. Opiskelupolussa on 60 oppitunnin runko, mutta vain L001–L026 sisältävät uudemman, käsikirjoitetun Teacher 2.0 -opetuskokemuksen. Muut tunnit käyttävät vielä vanhaa tehtävä- ja vaihelistaa. Kaikkien sisältöjen, lähdeoikeuksien, kieliasun ja äänentoiston lopullinen hyväksyntä on kesken. Muut LOS!-sarjan kirjat ovat suunnitteluvaiheessa.</p>
+    <section className="los-library-tools" aria-labelledby="los-library-tools-title">
+      <h2 id="los-library-tools-title">LOS! 1:n työkalut</h2>
+      <p>Kaikki kymmenen kappaletta, harjoitukset ja alkuperäistekstit löytyvät tästä digikirjasta.</p>
+      <nav className="los-library-tool-links" aria-label="LOS! 1:n toiminnot">
+        <a href="/los#/1/contents"><BookOpen size={19} aria-hidden="true"/> Digitaalinen oppikirja</a>
+        <a href="/los#/1/path"><ArrowRight size={19} aria-hidden="true"/> Opetuspolku</a>
+        <a href="/los#/1/dictionary"><Search size={19} aria-hidden="true"/> Sanakirja ja sanasto</a>
+        <a href="/los#/1/search"><Search size={19} aria-hidden="true"/> Hae teksteistä</a>
+        <a href="/los#/1/cards"><BookOpen size={19} aria-hidden="true"/> Kertauskortit</a>
+      </nav>
+    </section>
+    <p className="los-library-footnote">LOS! 1:n kymmenen kappaletta ja 60 oppitunnin opetuspolku ovat käytettävissä. {teacherCount}/60 oppituntia on toteutettu käsikirjoitettuna Teacher 2.0 -esikatseluna; muut tunnit käyttävät toistaiseksi aiempaa ohjattua mallia. Sisältöjen, lähdeoikeuksien, kieliasun, oppimistulosten ja todellisen laiteäänentoiston lopullinen hyväksyntä on kesken. Muut LOS!-kirjat ovat vielä suunnitteluvaiheessa.</p>
   </div>;
 }
 function BookFront({ book, move }: { book: LosBookDefinition; move: (chapter: string | null, section: LosSection) => void }) {

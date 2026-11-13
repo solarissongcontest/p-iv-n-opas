@@ -74,6 +74,7 @@ export function LosDictionary({ book, move, openBook }: { book: LosBookDefinitio
   </section>;
 }
 export function LosLearningPath({ book, move }: { book: LosBookDefinition; move: LosNavigate }) {
+  const teacherCount = LOS1_EXECUTABLE_LESSONS.filter(lesson => Boolean(getLosTeacherLesson(lesson.id))).length;
   const [selectedLesson, setSelectedLesson] = useState("L001");
   // A book page temporarily unmounts the guided path. Restore the active lesson
   // when returning, but do not treat this UI selection as learning evidence.
@@ -109,7 +110,7 @@ export function LosLearningPath({ book, move }: { book: LosBookDefinition; move:
   return <section className="los-inner-page los-learning-path">
     <p className="los-eyebrow">OHJATTU LUKUJÄRJESTYS / {book.code}</p>
     <h1>Opetuspolku</h1>
-    <p className="los-page-intro">LOS! 1:n 60 tunnin runko on käytössä. L001–L026 sisältävät opettajajohtoisen Teacher 2.0 -esikatselun. Muiden tuntien opetusmateriaalin viimeistely jatkuu. Opetuspolku viittaa samoihin oppikirjasivuihin, eikä tee niistä erillisiä kursseja. Välikoe ja loppukoe ovat käytettävissä; äänen ja videoiden todellinen laitetestaus sekä pedagoginen lopputarkistus ovat erillisiä julkaisuportteja.</p>
+    <p className="los-page-intro">LOS! 1:n 60 tunnin runko on käytössä. {teacherCount}/60 tunnista avautuu käsikirjoitettuun Teacher 2.0 -esikatseluun; muut käyttävät vielä aiempaa ohjattua opetusta. Kaikki tunnit viittaavat samaan digikirjaan. Välikoe ja loppukoe ovat käytettävissä, mutta oppisisältöjen, äänen, videoiden, todellisten laitteiden ja pedagogiikan julkaisuportit ovat erillisiä.</p>
     <div className="los-path-notice"><BookOpen size={20}/><p><strong>{LOS1_EXECUTABLE_LESSONS.length}/60 oppituntia on käytettävissä.</strong> Opetuspolun oppitunnit ovat käytettävissä kaikissa kymmenessä kappaleessa sekä kertaus-, väliarviointi- ja loppuarviointijaksoissa. C08:n koko Wikibooksin kouluympäristön alkuperäiskohtaus ja C10:n Harald-haastattelu ovat nyt kirjan sisällä. Näiden kappaleiden lukemisen, kirjoittamisen ja kappaletestien oppitunnit ovat käytettävissä. Alkuperäisten audio-/videoaineistojen oikeudet, kuuntelun toimivuus, kielitason tarkistus ja julkaisuportit eivät kuitenkaan vielä ole valmiit. Erilliset EX-FINAL-loppukoe ja L060-yhteenveto ovat nyt opiskelupolussa; kummankin suoritus vaatii oikeat palautukset ja itsearvioinnit.</p></div>
     <LosFirstLessons selectedId={selectedLesson} onSelect={selectLesson} move={move} />
     {groups.map(group=><section key={group.section} className="los-path-group">
