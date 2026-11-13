@@ -42,7 +42,7 @@ export const LOS1_L035_TEACHER: TeacherLesson = {
       "id": "recall",
       "phase": "Harjoittelu",
       "kind": "question",
-      "title": "Kertaa ja tarkista",
+      "title": "Kertaa zwölf numerona",
       "paragraphs": [
         "Vastaa muistista ennen kuin palaat oikeaan kirjan kappaletestiin."
       ],
@@ -54,10 +54,10 @@ export const LOS1_L035_TEACHER: TeacherLesson = {
         "accepted": [
           "12"
         ],
-        "success": "Oikein. Muoto vastaa opittua.",
-        "hint": "Muista ikäfraasin bin ja lukujen yksiköt + und + kymmenet.",
-        "reteach": "Ikä kysytään Wie alt bist du? ja vastataan Ich bin ... Jahre alt. Kolmekymmentä on dreißig.",
-        "genericWrong": "Tarkista, pyydettiinkö sanoja vai numeromerkintä, ja säilytä ß sekä umlautit.",
+        "success": "Oikein. Zwölf tarkoittaa kahtatoista, joten numero on 12.",
+        "hint": "Zwölf on edellisillä tunneilla opittu poikkeusluku 12. Vastaa pelkällä numerolla.",
+        "reteach": "Zwölf = kaksitoista = 12. Kirjoita numeromerkintä 12, älä saksankielistä sanaa.",
+        "genericWrong": "Tehtävä pyytää numeroa: zwölf tarkoittaa lukua 12. Älä sekoita sitä lukuun 21.",
         "wrongAnswers": {
           "21": "21 = einundzwanzig. Zwölf tarkoittaa 12."
         }
@@ -166,7 +166,7 @@ export const LOS1_L035_TEACHER: TeacherLesson = {
       "id": "write-17",
       "phase": "Harjoittelu",
       "kind": "question",
-      "title": "Kertaa ja tarkista",
+      "title": "Kirjoita siebzehn muistista",
       "paragraphs": [
         "Vastaa muistista ennen kuin palaat oikeaan kirjan kappaletestiin."
       ],
@@ -178,10 +178,10 @@ export const LOS1_L035_TEACHER: TeacherLesson = {
         "accepted": [
           "siebzehn"
         ],
-        "success": "Oikein. Muoto vastaa opittua.",
-        "hint": "Muista ikäfraasin bin ja lukujen yksiköt + und + kymmenet.",
-        "reteach": "Ikä kysytään Wie alt bist du? ja vastataan Ich bin ... Jahre alt. Kolmekymmentä on dreißig.",
-        "genericWrong": "Tarkista, pyydettiinkö sanoja vai numeromerkintä, ja säilytä ß sekä umlautit.",
+        "success": "Oikein. 17 kirjoitetaan siebzehn: sieben lyhenee muotoon sieb.",
+        "hint": "Seitsemän on sieben. Kun lisäät -zehn, lopun -en jää pois.",
+        "reteach": "17 = siebzehn (sieb + zehn), ei siebenzehn. Muista sanan lopun -zehn.",
+        "genericWrong": "Kirjoita 17 saksankielisenä sanana siebzehn. Tarkista seitsemän sanan lyhentynyt alku sieb-.",
         "wrongAnswers": {
           "siebenzehn": "Sanan sieben loppu -en jää pois: siebzehn."
         }
@@ -191,7 +191,7 @@ export const LOS1_L035_TEACHER: TeacherLesson = {
       "id": "write-32",
       "phase": "Harjoittelu",
       "kind": "question",
-      "title": "Kertaa ja tarkista",
+      "title": "Kirjoita zweiunddreißig muistista",
       "paragraphs": [
         "Vastaa muistista ennen kuin palaat oikeaan kirjan kappaletestiin."
       ],
@@ -203,10 +203,10 @@ export const LOS1_L035_TEACHER: TeacherLesson = {
         "accepted": [
           "zweiunddreißig"
         ],
-        "success": "Oikein. Muoto vastaa opittua.",
-        "hint": "Muista ikäfraasin bin ja lukujen yksiköt + und + kymmenet.",
-        "reteach": "Ikä kysytään Wie alt bist du? ja vastataan Ich bin ... Jahre alt. Kolmekymmentä on dreißig.",
-        "genericWrong": "Tarkista, pyydettiinkö sanoja vai numeromerkintä, ja säilytä ß sekä umlautit.",
+        "success": "Oikein. 32 on zweiunddreißig: zwei + und + dreißig.",
+        "hint": "Aloita sanalla zwei (2), lisää und ja päätä sanaan dreißig (30).",
+        "reteach": "32 = zweiunddreißig. Saksassa yksiköt tulevat ensin; sanassa dreißig on ß.",
+        "genericWrong": "Kirjoita 32 yhtenä sanana: zwei + und + dreißig. Tarkista kymmenosassa ß.",
         "wrongAnswers": {
           "zweiunddreissig": "Dreißig sisältää ß-merkin.",
           "zweiunddreizig": "30 ei ole dreizig vaan dreißig."
@@ -249,7 +249,7 @@ export const LOS1_L035_TEACHER: TeacherLesson = {
       "id": "application",
       "phase": "Harjoittelu",
       "kind": "question",
-      "title": "Kertaa ja tarkista",
+      "title": "Sano ikä kokonaisella lauseella",
       "paragraphs": [
         "Vastaa muistista ennen kuin palaat oikeaan kirjan kappaletestiin."
       ],
@@ -261,10 +261,10 @@ export const LOS1_L035_TEACHER: TeacherLesson = {
         "accepted": [
           "Ich bin zwanzig Jahre alt."
         ],
-        "success": "Oikein. Muoto vastaa opittua.",
-        "hint": "Muista ikäfraasin bin ja lukujen yksiköt + und + kymmenet.",
-        "reteach": "Ikä kysytään Wie alt bist du? ja vastataan Ich bin ... Jahre alt. Kolmekymmentä on dreißig.",
-        "genericWrong": "Tarkista, pyydettiinkö sanoja vai numeromerkintä, ja säilytä ß sekä umlautit.",
+        "success": "Oikein. Ich bin zwanzig Jahre alt. kertoo iän saksan sein-verbillä.",
+        "hint": "Aloita Ich bin, lisää zwanzig ja lopuksi Jahre alt.",
+        "reteach": "Saksassa sanotaan Ich bin zwanzig Jahre alt. (Olen 20-vuotias), ei Ich habe zwanzig Jahre alt.",
+        "genericWrong": "Kirjoita koko ikälause: Ich bin + zwanzig + Jahre alt. Käytä sein-verbin muotoa bin, älä habe.",
         "wrongAnswers": {
           "ich habe zwanzig jahre alt": "Saksan ikälauseessa käytetään bin, ei habe."
         }
@@ -329,7 +329,7 @@ export const LOS1_L035_TEACHER: TeacherLesson = {
       "id": "exit",
       "phase": "Lopputarkistus",
       "kind": "question",
-      "title": "Kertaa ja tarkista",
+      "title": "Lopputarkistus: dreißig",
       "paragraphs": [
         "Vastaa muistista ennen kuin palaat oikeaan kirjan kappaletestiin."
       ],
@@ -341,10 +341,10 @@ export const LOS1_L035_TEACHER: TeacherLesson = {
         "accepted": [
           "dreißig"
         ],
-        "success": "Oikein. Muoto vastaa opittua.",
-        "hint": "Muista ikäfraasin bin ja lukujen yksiköt + und + kymmenet.",
-        "reteach": "Ikä kysytään Wie alt bist du? ja vastataan Ich bin ... Jahre alt. Kolmekymmentä on dreißig.",
-        "genericWrong": "Tarkista, pyydettiinkö sanoja vai numeromerkintä, ja säilytä ß sekä umlautit.",
+        "success": "Oikein. 30 on dreißig, ja oikeaan kirjoitusasuun kuuluu ß.",
+        "hint": "Kolmekymmentä alkaa drei- ja päättyy -ßig.",
+        "reteach": "30 = dreißig. Se on tasakymmen ilman und-osaa, ja sanassa on ß.",
+        "genericWrong": "Kirjoita tasakymmenen 30 nimi dreißig. Älä käytä und-osaa, äläkä korvaa ß-merkkiä z-kirjaimella.",
         "wrongAnswers": {
           "dreizig": "30 on dreißig.",
           "dreissig": "Tämä tehtävä edellyttää ß-kirjainta; älä muuta sitä automaattisesti ss:ksi."
