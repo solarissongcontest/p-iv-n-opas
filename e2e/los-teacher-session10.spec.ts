@@ -58,6 +58,9 @@ test("L056 remains finishable with checked incorrect review tasks and honest sel
       await page.locator(".los-teacher-option").first().click();
     }
   }
+  // Explicitly navigate to the summary; checking an answer can rerender the outline.
+  await outline.last().click();
+  await expect(page.locator(".los-teacher-paper h2")).toHaveText("Mitä tarvitsee vielä kerrata?");
   await expect(page.locator(".los-teacher-assessment-status")).toContainText("5/5 tarkistettu");
   await expect(page.getByRole("button",{name:"Merkitse oppitunti läpikäydyksi"})).toBeEnabled();
   await page.getByRole("button",{name:"Merkitse oppitunti läpikäydyksi"}).click();
