@@ -104,11 +104,11 @@ function TeacherBoard({ scene }: { scene: TeacherScene }) {
 }
 
 export function LosTeacherPlayer({ lessonId }: { lessonId: string }) {
-  const { draft, update, saved } = useLosChapterDraft(1, "01");
+  const lesson = getLosTeacherLesson(lessonId);
+  const { draft, update, saved } = useLosChapterDraft(lesson?.bookId ?? 1, lesson?.chapterId ?? "01");
   const [authorized, setAuthorized] = useState<boolean | null>(null);
   const [showHelp, setShowHelp] = useState(false);
   const [replayKey, setReplayKey] = useState(0);
-  const lesson = getLosTeacherLesson(lessonId);
   // Reject malformed manuscripts, not merely broken React props.
   const contentValid = lesson ? validateTeacherLesson(lesson).length === 0 : false;
   const session = lesson && contentValid
@@ -185,7 +185,7 @@ export function LosTeacherPlayer({ lessonId }: { lessonId: string }) {
       </section> :
       !lesson || !session || !scene ? <section className="los-teacher-status">
         <h1>Oppitunnin opetusmateriaali ei ole vielä valmis</h1>
-        <p>Teacher 2.0 on nyt käytössä oppitunneilla L001–L006. Muut oppitunnit toimivat edelleen nykyisessä Opetuspolussa.</p>
+        <p>Teacher 2.0 on nyt käytössä oppitunneilla L001–L007. Muut oppitunnit toimivat edelleen nykyisessä Opetuspolussa.</p>
         <a href="/los#/1/path">Palaa Opetuspolkuun</a>
       </section> :
       <>

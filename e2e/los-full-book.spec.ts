@@ -121,7 +121,7 @@ test("every one of the 60 guided lessons opens from its actual chapter picker on
    expect(seen.has(title)).toBe(false);
    seen.add(title);
    await button.click();
-   if(Number(title.slice(1))<=6){
+   if(Number(title.slice(1))<=7){
     await expect(page).toHaveURL(new RegExp("/los-lessons/"+title+"$"));
     await expect(page.locator(".los-teacher-paper h2")).toBeVisible();
     await expect(page.locator(".los-teacher-sidebar h1")).toBeVisible();
@@ -871,5 +871,31 @@ test("L006 uses the existing submitted C01 exam and student self-assessment, not
  await expect(status).toContainText("Oma sovellus: Teksti tallennettu");
  await outline.filter({hasText:"C01 on kerrattu"}).click();
  await expect(page.getByRole("button",{name:"Merkitse oppitunti läpikäydyksi"})).toBeDisabled();
+ await expectNoHorizontalOverflow(page);
+});
+
+
+test("L007 Teacher reads C02 draft only, never C01 answers",async({page})=>{
+ await enterLocalBook(page);
+ await page.goto("/los-lessons/L007",{waitUntil:"domcontentloaded"});
+ await expect(page.locator(".los-teacher-sidebar h1")).toContainText("Miten kysyn nimen?");
+ const outline=page.locator(".los-teacher-outline nav button");
+ await outline.filter({hasText:"Etsi nimifraasit kirjan sanastosta ja kieliopista"}).click();
+ const paper=page.locator(".los-teacher-paper");
+ await expect(paper).toContainText("C02-EX-01: Vastaus vielä puuttuu");
+ const bookLink=page.getByRole("link",{name:/Avaa kirjassa/}).last();
+ await expect(bookLink).toHaveAttribute("href",/lessonReturn=L007.*\/02\/practice/);
+ await page.goto("/los?lessonReturn=L007#/1/02/practice",{waitUntil:"domcontentloaded"});
+ await expect(page.locator("#C02-EX-01")).toBeVisible();
+ await page.locator('#C02-EX-01 input[value="Ich heiße Greta."]').check();
+ await page.getByRole("link",{name:"Palaa oppitunnille L007"}).click();
+ await expect(page).toHaveURL(/\/los-lessons\/L007$/);
+ await outline.filter({hasText:"Etsi nimifraasit kirjan sanastosta ja kieliopista"}).click();
+ await expect(paper).toContainText("C02-EX-01: Vastaus tallennettu ja tarvittaessa tarkistettu");
+ await expect(paper).toContainText("C02-EX-02: Vastaus vielä puuttuu");
+ await page.goto("/los-lessons/L006",{waitUntil:"domcontentloaded"});
+ const c01outline=page.locator(".los-teacher-outline nav button");
+ await c01outline.filter({hasText:"Palauta C01:n 12 osatehtävän testi"}).click();
+ await expect(page.locator(".los-teacher-assessment-status")).toContainText("0/12 vastattu");
  await expectNoHorizontalOverflow(page);
 });
