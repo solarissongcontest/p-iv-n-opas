@@ -1019,3 +1019,28 @@ test("L011 uses the real C02 submitted 15-question exam and student writing",asy
  await expect(page.getByRole("button",{name:"Merkitse oppitunti läpikäydyksi"})).toBeDisabled();
  await expectNoHorizontalOverflow(page);
 });
+
+test("L005 shows genuine 20-item listening source and text inside Teacher 2.0 on desktop and mobile",async({page})=>{
+ await enterLocalBook(page);
+ await page.goto("/los-lessons/L005",{waitUntil:"domcontentloaded"});
+ const lesson=page.locator(".los-teacher-paper");
+ await expect(page.locator(".los-teacher-sidebar h1")).toContainText("Kuuntele ja valitse tervehdys");
+ const outline=page.locator(".los-teacher-outline nav");
+ await outline.getByRole("button",{name:"Avaa koko alkuperäinen tervehdysluettelo"}).click();
+ const media=lesson.locator(".los-teacher-greeting-media");
+ await expect(media).toBeVisible();
+ await expect(media.locator("audio")).toHaveAttribute("src",/German_Vocabulary_-_Greetings[.]ogg$/);
+ await expect(media).toContainText("28 sekunnin");
+ await expect(media).toContainText("ei todista");
+ await media.getByRole("button",{name:"Näytä kaikki 20 ilmausta ja suomennokset"}).click();
+ const lines=media.locator(".los-teacher-greeting-transcript li");
+ await expect(lines).toHaveCount(20);
+ await expect(lines.first()).toContainText("Hallo!");
+ await expect(lines.last()).toContainText("Gute Nacht!");
+ await expect(media).toContainText("Tekstin lukeminen ei ole kuuntelunäyttö");
+ await expect(lesson.locator(".los-teacher-summary")).toHaveCount(0);
+ await outline.getByRole("button",{name:"Valitse ääni tai luettavan tekstin varaversio"}).click();
+ await expect(lesson.locator(".los-teacher-greeting-media audio")).toBeVisible();
+ await expect(lesson.locator(".los-teacher-greeting-transcript")).toHaveCount(0);
+ await expectNoHorizontalOverflow(page);
+});
