@@ -43,6 +43,10 @@ jobs:
             echo "::endgroup::"
           done
           echo "All Teacher branches merged cleanly in disposable runner."
+      - name: Inspect merged Teacher assessment JSX around conflict boundaries
+        run: |
+          nl -ba src/features/los/teacher/LosTeacherPlayer.tsx | sed -n '445,530p'
+          git status --short
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
