@@ -1510,7 +1510,6 @@ test("C07 L036–L040 Teacher scenes open on mobile WebKit and desktop Chromium"
   await expect(page.locator(".los-teacher-sidebar h1")).toBeVisible();
   await expect(page.locator(".los-teacher-paper h2")).toBeVisible();
   await expect(page.locator(".los-teacher-outline nav button")).toHaveCount(id==="L040"?16:id==="L038"||id==="L039"?13:12);
-  await page.locator(".los-teacher-outline nav button").filter({hasText:"Opettaja"}).count();
   await expectNoHorizontalOverflow(page);
  }
 });
@@ -1596,5 +1595,47 @@ test("C07 L040 real 15-item chapter exam preserves archive, self-evaluation and 
  await expect(archive).toContainText("15/15 pistettä");
  await page.goto("/los#/1/07/apply",{waitUntil:"domcontentloaded"});
  await expect(page.locator("#los-application-07")).toHaveValue(application);
+ await expectNoHorizontalOverflow(page);
+});
+
+test("C07 L038 Text B alphabet list is not an invented audio transcript and two checks persist",async({page})=>{
+ test.setTimeout(120_000);
+ await enterLocalBook(page);
+ await page.goto("/los-lessons/L038",{waitUntil:"domcontentloaded"});
+ await page.locator(".los-teacher-outline nav button").filter({hasText:"Text B:n aakkosäänite: tekstitehtävä kyllä, kuunteluarvosana ei"}).click();
+ await expect(page.locator(".los-teacher-paper a[href*='/07/text-b']")).toBeVisible();
+ await page.goto("/los?lessonReturn=L038#/1/07/text-b",{waitUntil:"domcontentloaded"});
+ const alphabet=page.locator('[aria-label="Aakkosten oppijan oma harjoittelulista"]');
+ await expect(alphabet).toContainText("ei");
+ await expect(alphabet).toContainText("äänitteen sanatarkka transkriptio");
+ await expect(page.locator(".los-secondary-source .los-c01-turn")).toHaveCount(0);
+ for(const id of ["C07-TEXTB-Q01","C07-TEXTB-Q04"]){
+  const field=page.locator(".los-secondary-source .los-c01-question").filter({has:page.locator('input[name="'+id+'"]')});
+  await field.locator('input[value="b"]').check();
+  await field.getByRole("button",{name:"Tarkista vastaus"}).click();
+  await expect(field.getByRole("status")).toContainText("Oikein.");
+ }
+ await page.getByRole("link",{name:"Palaa oppitunnille L038"}).click();
+ await page.locator(".los-teacher-outline nav button").filter({hasText:"Text B:n aakkosäänite: tekstitehtävä kyllä, kuunteluarvosana ei"}).click();
+ for(const id of ["C07-TEXTB-Q01","C07-TEXTB-Q04"])
+  await expect(page.locator(".los-teacher-paper")).toContainText(id+": Vastaus tallennettu ja tarvittaessa tarkistettu");
+ await expectNoHorizontalOverflow(page);
+});
+test("C07 L039 final original text checks cover zweimal and Frau without duplicating L037",async({page})=>{
+ test.setTimeout(120_000);
+ await enterLocalBook(page);
+ await page.goto("/los-lessons/L039",{waitUntil:"domcontentloaded"});
+ await page.locator(".los-teacher-outline nav button").filter({hasText:"Tarkista Text A:n kaksi loppukysymystä"}).click();
+ await page.goto("/los?lessonReturn=L039#/1/07/understand",{waitUntil:"domcontentloaded"});
+ for(const [id,value] of [["C07-SOURCE-Q03","a"],["C07-SOURCE-Q04","b"]] as const){
+  const field=page.locator(".los-c01-question").filter({has:page.locator('input[name="'+id+'"]')});
+  await field.locator('input[value="'+value+'"]').check();
+  await field.getByRole("button",{name:"Tarkista vastaus"}).click();
+  await expect(field.getByRole("status")).toContainText("Oikein.");
+ }
+ await page.getByRole("link",{name:"Palaa oppitunnille L039"}).click();
+ await page.locator(".los-teacher-outline nav button").filter({hasText:"Tarkista Text A:n kaksi loppukysymystä"}).click();
+ for(const id of ["C07-SOURCE-Q03","C07-SOURCE-Q04"])
+  await expect(page.locator(".los-teacher-paper")).toContainText(id+": Vastaus tallennettu ja tarvittaessa tarkistettu");
  await expectNoHorizontalOverflow(page);
 });
