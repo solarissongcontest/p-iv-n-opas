@@ -56,6 +56,9 @@ test("L051 consolidates prior taught material, and L053 reuses four actual third
     assert.match(LOS1_L051_TEACHER.scenes.flatMap(s=>s.paragraphs).join(" "),new RegExp(form.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")));
   }
   assert.ok(LOS1_L051_TEACHER.requiredPracticeIds.includes("C10-EX-20"));
+  const sourceLinks=LOS1_L051_TEACHER.scenes.flatMap(scene=>scene.bookLinks??[]);
+  for(const chapter of ["02","03","10"])assert.ok(sourceLinks.some(link=>link.chapterId===chapter && link.section==="text"),chapter);
+  assert.ok(LOS1_L051_TEACHER.requiredActivityIds.includes("source-bridges-reviewed"));
   const board=LOS1_L053_TEACHER.scenes.find(s=>s.id==="builder")?.board??[];
   assert.ok(board.some(x=>x.german.includes("Sie kommt aus Finnland")));
   assert.ok(board.some(x=>x.german.includes("Sie ist siebzehn")));

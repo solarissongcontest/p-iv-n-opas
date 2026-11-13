@@ -62,7 +62,7 @@ export const LOS1_L051_TEACHER:TeacherLesson = {
   objective:"Yhdistän tervehdyksen, nimen, alkuperän, iän, voinnin, kysymyksen ja hyvästelyn kokonaiseksi helpoksi esittäytymiseksi.",
   estimatedMinutes:30,
   requiredQuestionIds:["recall","guided","independent","application","exit"],
-  requiredActivityIds:["model-spoken"],
+  requiredActivityIds:["source-bridges-reviewed","model-spoken"],
   requiredPracticeIds:["C10-EX-01","C10-EX-02","C10-EX-03","C10-EX-04","C10-EX-14","C10-EX-16","C10-EX-20"],
   scenes:[
     introduction("Kymmenen kappaletta, yksi oikea keskustelu",[
@@ -100,6 +100,15 @@ export const LOS1_L051_TEACHER:TeacherLesson = {
       {label:"Mia 7 · Vastaus ja hyvästely",german:"Gut, danke. Tschüss!",meaning:"Hyvää, kiitos. Moikka!"},
       {label:"Ben 8 · Hyvästely",german:"Tschüss!",meaning:"Moikka!"},
     ]),
+    book("earlier-texts","Etsi vanhat fraasit niiden alkuperäisistä teksteistä",[
+      "Avaa C02:n Text A ja etsi nimifraasit Wie heißt du? ja Ich heiße. Avaa sitten C03:n Text A ja etsi tapa kertoa alkuperästä: Ich komme aus ...",
+      "Vertaa lopuksi C10:n Harald-haastattelun Text A:ta näihin kahteen tuttuun rakenteeseen. C10:n haastattelu on oikean ihmisen alkuperäinen teksti; vaikeammat ilmaukset ovat tässä vain tunnistamista varten.",
+      "Lue tekstikohdat kirjasta; älä merkitse tätä äänestä ymmärtämiseksi. Palaa opetustilaan ja vahvista vasta sitten, että löysit fraasit.",
+    ],[
+      {chapterId:"02",section:"text",label:"C02 · Text A",instruction:"Etsi tutut nimikysymykset ja -vastaukset."},
+      {chapterId:"03",section:"text",label:"C03 · Text A",instruction:"Etsi ich komme aus -ilmaus ja sen merkitys."},
+      c10Link("text","C10 · Text A / M-DIB-02","Vertaa Haraldin nimeä ja lähtöpaikkaa opittuihin fraaseihin."),
+    ],"source-bridges-reviewed","Löysin nimifraasin ja alkuperäfraasin alkuperäisteksteistä"),
     question("guided","Valitse kysymykseen sopiva vastaus",[
       "Kaveri kysyy Woher kommst du? Vastaa lähtöpaikalla, älä nimellä tai iällä.",
     ],choice("Mikä vastaus kertoo sinun olevan kotoisin Suomesta?","L1-INT-03","b",[
@@ -344,7 +353,7 @@ export const LOS1_L053_TEACHER:TeacherLesson={
       "Tarvitset kokonaisen fraasin Tämä on...",
       "Das ist Leo. kertoo keskustelukumppanille, kuka Leo on.","application")),
     reflect("self-intro","Esittele itse kuvitteellinen henkilö",[
-      "Muodosta kuvitteelliselle ihmiselle kolme tai neljä helppoa lausetta. Kerro nimi, lähtömaa ja ikä. Pidä verbit er/sie-muodossa.",
+      "Muodosta kuvitteelliselle ihmiselle neljä helppoa lausetta. Kerro ensin Das ist ..., sitten nimi, lähtömaa ja ikä. Pidä verbien tekijät er/sie-muodossa.",
       "Käytä oppikirjan Käytä saksaa -sivua tarvittaessa. Tarkista jokaisen pronominin vieressä oleva verbi itse, älä luota automaattiseen vapaatekstin pisteytykseen.",
     ],"Kirjoita oma esittelysi tai sen itsearvio (vähintään 45 merkkiä).",
       "Das ist Leo. Er heißt Leo. Er kommt aus Deutschland. Er ist ...",45,
