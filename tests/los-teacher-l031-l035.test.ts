@@ -5,7 +5,7 @@ import { LOS1_L032_TEACHER } from "../src/features/los/teacher/lessonL032.ts";
 import { LOS1_L033_TEACHER } from "../src/features/los/teacher/lessonL033.ts";
 import { LOS1_L034_TEACHER } from "../src/features/los/teacher/lessonL034.ts";
 import { LOS1_L035_TEACHER } from "../src/features/los/teacher/lessonL035.ts";
-import { getLosTeacherLesson } from "../src/features/los/teacher/lessonL004.ts";
+import { getLosTeacherLesson } from "../src/features/los/teacher/lessonRegistry.ts";
 import { validateTeacherLesson } from "../src/features/los/teacher/validateContent.ts";
 import { germanCompositeNumber } from "../src/features/los/teacher/germanNumbers.ts";
 import { losExercisesFor } from "../src/features/los/exerciseBank.ts";
