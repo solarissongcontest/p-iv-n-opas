@@ -57,7 +57,7 @@ test("L005 cannot claim listening mastery based on optional audio or a text alte
   const entireProse=lesson.scenes.flatMap(scene=>scene.paragraphs).join(" ");
   assert.match(entireProse,/tekstivastine/);
   assert.match(entireProse,/kuuntel/);
-  assert.match(entireProse,/ei.*todistettua kuullun ymmärtämistä/);
+  assert.match(entireProse,/et todistettua kuullun ymmärtämistä/);
   const audio=lesson.scenes.find(scene=>scene.id==="audio-choice")!;
   assert.equal(audio.kind,"activity");
   assert.equal(audio.question,undefined);
