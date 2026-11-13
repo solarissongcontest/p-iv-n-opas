@@ -60,7 +60,7 @@ jobs:
           cat /tmp/los-c05-teacher-preview.log
           exit 1
       - name: C05 Teacher Player flows on desktop Chromium and iPhone WebKit
-        run: bunx playwright test e2e/los-c05-teacher.spec.ts --project=desktop-chromium --project=iphone-webkit
+        run: bunx playwright test e2e/los-c05-teacher-integrated.spec.ts --project=desktop-chromium --project=iphone-webkit
       - name: Full 60-lesson chapter navigation smoke on Chromium and WebKit
         run: bunx playwright test e2e/los-full-book.spec.ts --project=desktop-chromium --project=iphone-webkit --grep "every one of the 60 guided lessons opens"
       - name: Upload browser traces and logs
