@@ -34,12 +34,12 @@ const writing=(id:string,title:string,paragraphs:string[],prompt:string,
   placeholder:string,minLength:number,activityId?:string,activityLabel?:string):TeacherScene=>({
     id,phase:"Oma harjoittelu",kind:"reflection",title,paragraphs,
     reflection:{prompt,placeholder,minLength},
-    ...(activityId?{activityId,activityLabel}:{})
+    ...(activityId?{activityId,...(activityLabel?{activityLabel}:{})}:{})
   });
 const visit=(id:string,title:string,paragraphs:string[],links:
   NonNullable<TeacherScene["bookLinks"]>,activityId?:string,activityLabel?:string):TeacherScene=>({
   id,phase:"Kirjan tehtävät",kind:"book",title,paragraphs,bookLinks:links,
-  ...(activityId?{activityId,activityLabel}:{})
+  ...(activityId?{activityId,...(activityLabel?{activityLabel}:{})}:{})
 });
 const done=(title:string,...paragraphs:string[]):TeacherScene=>({
   id:"summary",phase:"Yhteenveto",kind:"summary",title,paragraphs});
