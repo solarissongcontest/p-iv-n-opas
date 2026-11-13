@@ -118,7 +118,7 @@ export const LOS1_L004_TEACHER: TeacherLesson = {
         "Välimerkin voit jättää pois, mutta sanojen tulee olla oikein.",
       ],
       question: {
-        type: "text", skillId: "L1-INT-01",
+        type: "text", skillId: "L1-INT-01", evidenceRole: "independent",
         prompt: "Kirjoita saksaksi: Hyvää iltaa!",
         accepted: ["Guten Abend!"],
         success: "Oikein! Kirjoitit illan tervehdyksen itse.",
@@ -151,7 +151,7 @@ export const LOS1_L004_TEACHER: TeacherLesson = {
         "Valitse luonteva vastaus. Tätä ei tarvitse sanoa ääneen, mutta voit harjoitella samalla.",
       ],
       question: {
-        type: "choice", skillId: "L1-INT-01",
+        type: "choice", skillId: "L1-INT-01", evidenceRole: "application",
         prompt: "Miten vastaat ystävän tervehdykseen?",
         options: [
           { id: "a", label: "Hallo!" },
@@ -173,7 +173,7 @@ export const LOS1_L004_TEACHER: TeacherLesson = {
         "Virhe ei estä oppitunnin läpikäymistä, mutta se auttaa suunnittelemaan myöhempää kertausta.",
       ],
       question: {
-        type: "choice", skillId: "L1-INT-01",
+        type: "choice", skillId: "L1-INT-01", evidenceRole: "exit",
         prompt: "Miten hyvästelet tutun ystävän rennosti?",
         options: [
           { id: "a", label: "Guten Morgen!", wrongFeedback: "Tämä aloittaa aamun kohtaamisen, ei päätä sitä." },

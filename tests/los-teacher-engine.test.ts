@@ -47,7 +47,7 @@ test("first correct attempt gives independent evidence; hints and retries do not
   assert.equal(teacherLatestAttempt(s, "guided")!.correct, true);
   assert.equal(teacherLatestAttempt(s, "guided")!.independent, false);
   s = submitTeacherAnswer(s, lesson, "exit", "b", now);
-  assert.equal(independentTeacherEvidence(s), 1);
+  assert.equal(independentTeacherEvidence(s, lesson), 1);
   s = revealTeacherSolution(s, "independent", now);
   s = setTeacherAnswerDraft(s, "independent", "Guten Abend!", now);
   s = submitTeacherAnswer(s, lesson, "independent", "Guten Abend!", now);
@@ -87,7 +87,7 @@ test("completion needs visited scenes, all assessed questions, honest activities
   const review = moveTeacherScene(s, lesson, "welcome", now);
   assert.equal(review.sceneId, "welcome");
   assert.equal(review.completedAt, now);
-  assert.equal(independentTeacherEvidence(review), 5);
+  assert.equal(independentTeacherEvidence(review, lesson), 3);
 });
 
 test("teacher storage rejects invalid and overlong sessions without destroying valid ones", () => {
@@ -100,4 +100,21 @@ test("teacher storage rejects invalid and overlong sessions without destroying v
   assert.deepEqual(Object.keys(parsed), ["L004"]);
   assert.equal(parseTeacherSessions({L004:{...valid, draftAnswers:{x:"x".repeat(501)}}})["L004"], undefined);
   assert.equal(parseTeacherSessions(null)["L004"], undefined);
+});
+
+test("guided and activation questions are not independent mastery evidence", () => {
+  let s = emptyTeacherSession(lesson, now);
+  for (const scene of lesson.scenes) {
+    if (scene.question && ["recall", "guided"].includes(scene.id)) {
+      const correct = scene.question.type === "choice" ? scene.question.correctOption! : scene.question.accepted![0]!;
+      s = submitTeacherAnswer(s, lesson, scene.id, correct, now);
+    }
+  }
+  assert.equal(s.attempts.filter(x => x.correct && x.independent).length, 2);
+  assert.equal(independentTeacherEvidence(s, lesson), 0);
+  s = submitTeacherAnswer(s, lesson, "independent", "Guten Abend!", now);
+  assert.equal(independentTeacherEvidence(s, lesson), 1);
+  s = markTeacherHelp(s, "exit", now);
+  s = submitTeacherAnswer(s, lesson, "exit", "b", now);
+  assert.equal(independentTeacherEvidence(s, lesson), 1);
 });

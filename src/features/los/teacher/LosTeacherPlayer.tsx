@@ -3,10 +3,6 @@ import { ArrowLeft, ArrowRight, BookOpen, Check, CheckCircle2, ChevronLeft, Chev
 import { readCachedDeviceUser } from "@/lib/deviceSession";
 import { useLosChapterDraft } from "../studyState.ts";
 import {
-  emptyLosLessonProgress, losLessonFinish, losLessonMarkStep, losLessonSubmitCheck,
-} from "../lessonEngine.ts";
-import { LOS1_EXECUTABLE_LESSONS } from "../guidedLessons.ts";
-import {
   emptyTeacherSession, markTeacherHelp, confirmTeacherActivity,
   finishTeacherSession, independentTeacherEvidence, moveTeacherScene, revealTeacherSolution,
   setTeacherAnswerDraft, submitTeacherAnswer, teacherCanFinish, teacherLatestAttempt,
@@ -119,7 +115,6 @@ export function LosTeacherPlayer({ lessonId }: { lessonId: string }) {
     : null;
   const scene = lesson?.scenes.find(item => item.id === session?.sceneId) ?? lesson?.scenes[0];
   const sceneIndex = lesson?.scenes.findIndex(item => item.id === scene?.id) ?? 0;
-  const legacy = LOS1_EXECUTABLE_LESSONS.find(item => item.id === lessonId);
   const available = Boolean(session && lesson && teacherCanFinish(session, lesson, draft.practiceAnswers));
   const completed = Boolean(session?.completedAt);
 
@@ -162,30 +157,19 @@ export function LosTeacherPlayer({ lessonId }: { lessonId: string }) {
     persist(old => confirmTeacherActivity(old, lesson, id, stamp()));
   };
   const finish = () => {
-    if (!lesson || !legacy) return;
+    if (!lesson) return;
     update(current => {
       const now = stamp();
       const old = current.teacherSessions?.[lessonId] ?? emptyTeacherSession(lesson, now);
-      const result = finishTeacherSession(old, lesson, current.practiceAnswers, now);
-      if (!result.completedAt) return current;
-      let legacyProgress = current.lessonProgress?.[lessonId] ?? emptyLosLessonProgress();
-      if (!legacyProgress.completedAt) {
-        for (const step of legacy.steps) legacyProgress = losLessonMarkStep(legacy, legacyProgress, step.id, now);
-        const exit = teacherLatestAttempt(result, "exit");
-        if (exit) legacyProgress = losLessonSubmitCheck(legacy, legacyProgress, exit.answer, now);
-        legacyProgress = losLessonFinish(legacy, legacyProgress, current, now);
-      }
-      // Keep teacher completion separate if the legacy lesson's evidence differs.
-      const teacherResult = legacyProgress.completedAt ? result : old;
-      return {
-        ...current,
-        teacherSessions: { ...current.teacherSessions, [lessonId]: teacherResult },
-        lessonProgress: { ...current.lessonProgress, [lessonId]: legacyProgress },
-      };
+      const next = finishTeacherSession(old, lesson, current.practiceAnswers, now);
+      if (next === old) return current;
+      // Teacher 2.0 completion is a distinct learning event. Never manufacture
+      // legacy lesson steps or an exit answer that the student never submitted.
+      return { ...current, teacherSessions: { ...current.teacherSessions, [lessonId]: next } };
     });
   };
 
-  return <main id="main-content" className="los-app los-teacher-app">
+    return <main id="main-content" className="los-app los-teacher-app">
     <header className="los-teacher-top">
       <a className="los-teacher-back" href="/los#/1/path"><ArrowLeft size={18}/> Opetuspolku</a>
       <div className="los-teacher-brand"><span className="los-teacher-logo">LOS!</span><span>Opetustila</span></div>
@@ -297,7 +281,7 @@ export function LosTeacherPlayer({ lessonId }: { lessonId: string }) {
             </div>
             {scene.kind === "summary" && <section className="los-teacher-summary">
               <h3>Oppitunnin tilanne</h3>
-              <p>Itsenäisesti oikein ratkaistuja eri tarkistuksia: <strong>{independentTeacherEvidence(session)}</strong>. Tämä luku ei ole kielitaitoprosentti.</p>
+              <p>Itsenäisesti oikein ratkaistuja eri tarkistuksia: <strong>{independentTeacherEvidence(session, lesson)}</strong>. Tämä luku ei ole kielitaitoprosentti.</p>
               <p>{available ? "Kaikki sovitut opiskeluteot on tallennettu." :
                 "Vielä puuttuu yksi tai useampi opetustilanne, harjoitus, kirjan vastaus tai oma harjoitteluvahvistus."}</p>
               {!completed ? <button type="button" className="los-teacher-primary"

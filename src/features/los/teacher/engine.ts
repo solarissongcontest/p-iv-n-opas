@@ -10,6 +10,8 @@ export type TeacherQuestion = {
   correctOption?: string;
   accepted?: readonly string[];
   skillId: string;
+  /** Explicit human-authored evidence role; activation and guided practice do not qualify. */
+  evidenceRole?: "practice" | "independent" | "application" | "exit";
   success: string;
   hint: string;
   reteach: string;
@@ -195,7 +197,10 @@ export function finishTeacherSession(session: TeacherSession, lesson: TeacherLes
   return session.completedAt || !teacherCanFinish(session, lesson, practiceAnswers) ? session :
     { ...session, updatedAt: now, completedAt: now };
 }
-export function independentTeacherEvidence(session: TeacherSession): number {
-  return new Set(session.attempts.filter(item => item.correct && item.independent)
-    .map(item => item.sceneId)).size;
+export function independentTeacherEvidence(session: TeacherSession, lesson: TeacherLesson): number {
+  const eligible = new Set(lesson.scenes.filter(scene =>
+    scene.question && ["independent", "application", "exit"].includes(scene.question.evidenceRole ?? ""))
+    .map(scene => scene.id));
+  return new Set(session.attempts.filter(item => item.correct && item.independent &&
+    eligible.has(item.sceneId)).map(item => item.sceneId)).size;
 }
