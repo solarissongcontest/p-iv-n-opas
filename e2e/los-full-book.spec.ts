@@ -1440,7 +1440,7 @@ test("C06 L035 real 20/20 exam archives correctly and retains two fictional age 
  test.setTimeout(150_000);
  await enterLocalBook(page);
  await page.goto("/los?lessonReturn=L035#/1/06/apply",{waitUntil:"domcontentloaded"});
- const dialogue="Mia: Wie alt bist du?\\nMax: Ich bin siebzehn Jahre alt.\\n\\nLena: Wie alt bist du?\\nJonas: Ich bin zwanzig Jahre alt.";
+ const dialogue="Mia: Wie alt bist du?\nMax: Ich bin siebzehn Jahre alt.\n\nLena: Wie alt bist du?\nJonas: Ich bin zwanzig Jahre alt.";
  await page.locator("#los-application-06").fill(dialogue);
  await page.goto("/los?lessonReturn=L035#/1/06/test",{waitUntil:"domcontentloaded"});
  const opts=[
