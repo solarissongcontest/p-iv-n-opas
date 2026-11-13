@@ -30,6 +30,7 @@ function SceneQuestion({ scene, session, submit, saveDraft, requestHint, reveal 
   const latest = teacherLatestAttempt(session, scene.id);
   const attempts = session.attempts.filter(item => item.sceneId === scene.id);
   const succeeded = attempts.some(item => item.correct);
+  const exhausted = attempts.length >= 3 && !succeeded;
   const helped = session.helpedIds.includes(scene.id);
   const solutionVisible = session.revealedIds.includes(scene.id);
   const drafted = session.draftAnswers[scene.id] ?? "";
@@ -41,22 +42,22 @@ function SceneQuestion({ scene, session, submit, saveDraft, requestHint, reveal 
     {q.type === "choice" ? <div className="los-teacher-options" role="group" aria-label={q.prompt}>
       {q.options?.map(option => <button key={option.id} type="button"
         className={"los-teacher-option" + (latest?.answer === option.id ? " is-selected" : "")}
-        disabled={succeeded || Boolean(session.completedAt)} onClick={() => submit(option.id)}>
+        disabled={succeeded || exhausted || Boolean(session.completedAt)} onClick={() => submit(option.id)}>
         <span className="los-teacher-option-letter">{option.id.toUpperCase()}</span>
         <span lang="de">{option.label}</span>
         {latest?.answer === option.id && latest.correct && <Check size={18} aria-hidden="true" />}
       </button>)}
     </div> : <form className="los-teacher-form" onSubmit={event => {
       event.preventDefault();
-      if (drafted.trim() && !succeeded) submit(drafted);
+      if (drafted.trim() && !succeeded && !exhausted) submit(drafted);
     }}>
       <label htmlFor="los-teacher-answer">Vastauksesi saksaksi</label>
       <div className="los-teacher-input-row">
         <input id="los-teacher-answer" lang="de" autoComplete="off" spellCheck={false}
-          value={drafted} maxLength={500} disabled={succeeded || Boolean(session.completedAt)}
+          value={drafted} maxLength={500} disabled={succeeded || exhausted || Boolean(session.completedAt)}
           onChange={event => saveDraft(event.target.value)}
           placeholder="Kirjoita saksaksi..." />
-        <button type="submit" disabled={!drafted.trim() || succeeded || Boolean(session.completedAt)}>Tarkista</button>
+        <button type="submit" disabled={!drafted.trim() || succeeded || exhausted || Boolean(session.completedAt)}>Tarkista</button>
       </div>
     </form>}
     {latest && <div className={"los-teacher-feedback " + (latest.correct ? "is-right" : "is-wrong")}
@@ -67,8 +68,11 @@ function SceneQuestion({ scene, session, submit, saveDraft, requestHint, reveal 
       {latest.correct && !latest.independent &&
         <p>Tämä oli harjoittelussa oikein. Täysin itsenäinen näyttö arvioidaan erikseen.</p>}
     </div>}
+    {exhausted && <p className="los-teacher-hint" role="status">
+      Kolme yritystä käytetty. Avaa mallivastaus ja jatka oppimista. Tästä ei synny itsenäisen osaamisen merkintää.
+    </p>}
     {!succeeded && !session.completedAt && <div className="los-teacher-question-tools">
-      <button type="button" onClick={requestHint}><HelpCircle size={16}/> Tarvitsen vihjeen</button>
+      {!exhausted && <button type="button" onClick={requestHint}><HelpCircle size={16}/> Tarvitsen vihjeen</button>}
       {helped && <p className="los-teacher-hint">{q.hint}</p>}
       {attempts.length >= 2 && !solutionVisible && <button type="button" onClick={reveal}>
         <BookOpen size={16} /> Näytä mallivastaus
@@ -103,7 +107,13 @@ function TeacherBoard({ scene }: { scene: TeacherScene }) {
   </div>;
 }
 
+// Force a fresh chapter-scoped draft on lesson or chapter changes. This keeps
+// C01/C02/C03 data isolated even during same-route navigation without a reload.
 export function LosTeacherPlayer({ lessonId }: { lessonId: string }) {
+  const lesson = getLosTeacherLesson(lessonId);
+  return <LosTeacherScreen key={`${lesson?.bookId ?? 1}:${lesson?.chapterId ?? "01"}:${lessonId}`} lessonId={lessonId}/>;
+}
+function LosTeacherScreen({ lessonId }: { lessonId: string }) {
   const lesson = getLosTeacherLesson(lessonId);
   const { draft, update, saved } = useLosChapterDraft(lesson?.bookId ?? 1, lesson?.chapterId ?? "01");
   const [authorized, setAuthorized] = useState<boolean | null>(null);
