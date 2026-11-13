@@ -1104,3 +1104,47 @@ test("C05 L023 and L026 link original source and the single existing chapter tes
  await expect(page.locator(".los-teacher-paper a[href*='/05/test']")).toHaveCount(1);
  await expectNoHorizontalOverflow(page);
 });
+
+
+test("C05 full chapter retake preserves original 12/12 result, self-assessment and written answers",async({page})=>{
+ test.setTimeout(120_000);
+ await enterLocalBook(page);
+ await openChapter(page,"05","test");
+ const answers=[
+  {id:"C05-EX-01",option:0},{id:"C05-EX-02",option:0},{id:"C05-EX-03",option:0},
+  {id:"C05-EX-04",option:1},{id:"C05-EX-05",option:1},{id:"C05-EX-06",option:0},
+  {id:"C05-EX-07",option:1},{id:"C05-EX-08",option:0},{id:"C05-EX-09",option:1},
+  {id:"C05-EX-10",text:"gut"},{id:"C05-EX-11",text:"Nicht"},{id:"C05-EX-12",option:0},
+ ] as const;
+ await expect(page.locator(".los-workbook-question")).toHaveCount(12);
+ for(const item of answers){
+  const field=page.locator("#"+item.id);
+  if("option" in item) await field.locator('input[type="radio"]').nth(item.option).check();
+  else await field.locator('input[type="text"]').fill(item.text);
+ }
+ await page.getByRole("button",{name:"Palauta testi · 12/12"}).click();
+ await expect(page.locator(".los-test-result h2").first()).toHaveText("12 / 12 oikein");
+ await page.locator("#los-self-05").fill("Osaan kysyä kuulumisia. Kertaan vielä nicht-sanan paikan.");
+ await page.getByRole("button",{name:"Arkistoi tulos ja aloita uusinta"}).click();
+ const archived=page.getByRole("region",{name:"Kappaletestin aiemmat yritykset"});
+ await expect(archived).toContainText("Yritys 1:");
+ await expect(archived).toContainText("12/12 pistettä");
+ await expect(page.getByRole("button",{name:"Palauta testi · 0/12"})).toBeDisabled();
+ await page.reload({waitUntil:"domcontentloaded"});
+ await expect(archived).toContainText("12/12 pistettä");
+ await page.goto("/los-lessons/L026",{waitUntil:"domcontentloaded"});
+ const outline=page.locator(".los-teacher-outline nav button");
+ await outline.filter({hasText:"Palauta C05:n varsinainen 12 tehtävän testi"}).click();
+ await expect(page.locator(".los-teacher-assessment-status")).toContainText("Kappaletesti: 0/12 vastattu");
+ await page.goto("/los#/1/05/test",{waitUntil:"domcontentloaded"});
+ await expect(page.getByRole("button",{name:"Palauta testi · 0/12"})).toBeDisabled();
+ for(const item of answers){
+  const field=page.locator("#"+item.id);
+  if("option" in item) await field.locator('input[type="radio"]').first().check();
+  else await field.locator('input[type="text"]').fill("test");
+ }
+ await page.getByRole("button",{name:"Palauta testi · 12/12"}).click();
+ await expect(archived).toContainText("12/12 pistettä");
+ await expect(page.locator("#los-self-05")).toHaveValue("Osaan kysyä kuulumisia. Kertaan vielä nicht-sanan paikan.");
+ await expectNoHorizontalOverflow(page);
+});
