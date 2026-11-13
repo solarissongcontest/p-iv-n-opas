@@ -56,7 +56,7 @@ export function LosL004LessonShell({book}:{book:LosBookDefinition}){
     "Tallennus ei onnistunut. Tarkista varmuuskopio ennen sivun sulkemista."}</p>
    {progress.completedAt&&!currentCompleted&&
     <p className="los-teacher-shell-legacy" role="note">L004:stä on tallessa aiempi suoritus.
-     Päivitetty opetus kirjataan erikseen, kun uudet harjoitukset on käsitelty.</p>
+     Päivitetty opetus kirjataan erikseen, kun uudet harjoitukset on käsitelty.</p>}
    <LosL004TeacherPlayer progress={teacher} onChange={onChange}
     onFinish={()=>record(old=>losLessonFinishTeacher(TEACHER_L004,old,stamp()))}/>
    {currentCompleted&&<div className="los-teacher-shell-next">
