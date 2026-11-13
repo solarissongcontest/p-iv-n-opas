@@ -10,6 +10,7 @@ import {
 } from "./engine.ts";
 import { getLosTeacherLesson } from "./lessonRegistry.ts";
 import { LosTeacherNumberBuilder } from "./LosTeacherNumberBuilder.tsx";
+import { LosTeacherGreetingMedia } from "./LosTeacherGreetingMedia.tsx";
 import { validateTeacherLesson } from "./validateContent.ts";
 import "../los-book.css";
 import "./teacher.css";
@@ -238,6 +239,8 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
               {scene.paragraphs.map((paragraph, i) => <p key={i}>{paragraph}</p>)}
             </div>
             {scene.kind === "board" && <TeacherBoard scene={scene}/>}
+            {lesson.id === "L005" && (scene.id === "source-list" || scene.id === "audio-choice") &&
+              <LosTeacherGreetingMedia/>}
             {scene.numberBuilder && <LosTeacherNumberBuilder
               value={session.draftAnswers[scene.id]}
               historyCount={teacherBuiltNumberCount(session, scene.id)}
