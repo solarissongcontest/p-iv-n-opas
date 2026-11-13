@@ -25,7 +25,7 @@ export type TeacherScene = {
   id: string;
   phase: string;
   title: string;
-  kind: "introduction" | "explanation" | "board" | "question" | "book" | "activity" | "reflection" | "summary" | "calendar";
+  kind: "introduction" | "explanation" | "board" | "question" | "book" | "activity" | "reflection" | "summary" | "calendar" | "source";
   paragraphs: readonly string[];
   question?: TeacherQuestion;
   reflection?: TeacherReflection;
@@ -33,6 +33,10 @@ export type TeacherScene = {
   bookLinks?: readonly TeacherBookLink[];
   /** Fixed, checked timetable data. Reading Text B does not prove audio playback. */
   calendar?: { prompt: string; day: string; time: string; sourceNote: string };
+  /** Reuse unabridged published texts; never duplicate a faux-authentic passage. */
+  sourceChapterId?: string;
+  textBChapterId?: string;
+  chapterPhoto?: boolean;
   activityId?: string;
   activityLabel?: string;
   help?: readonly { title: string; body: string }[];
