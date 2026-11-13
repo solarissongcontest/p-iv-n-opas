@@ -106,7 +106,7 @@ export function LosFutureExercises({bookId,chapterId,mode,taskIds}:{
                 changeAnswer(task.id,writeLosFutureMatchingAnswer(matchingPairs,next));
               }}>
               <option value="">Valitse merkitys</option>
-              {[...matchingPairs.slice(1),matchingPairs[0]].map(option=>
+              {[...matchingPairs.slice(1),...matchingPairs.slice(0,1)].map(option=>
                 <option key={option.fi} value={option.fi}>{option.fi}</option>)}
             </select>
           </label>)}
