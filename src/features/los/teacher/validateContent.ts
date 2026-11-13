@@ -79,6 +79,8 @@ export function validateTeacherLesson(lesson: TeacherLesson): TeacherContentIssu
   }
   for (const [i, scene] of lesson.scenes.entries()) {
     checkScene(scene, "scenes[" + i + "]", issues);
+    if (scene.bookLinks?.some(link => link.chapterId !== lesson.chapterId))
+      issues.push({ location: "scenes[" + i + "].bookLinks", problem: "Oppikirjalinkki vie väärään kappaleeseen." });
   }
   const unique = (values: readonly string[]) =>
     new Set(values).size === values.length && values.every(name);
@@ -91,12 +93,12 @@ export function validateTeacherLesson(lesson: TeacherLesson): TeacherContentIssu
     issues.push({ location: "requiredActivityIds", problem: "Vaadittu opiskeluteko puuttuu oppitunnilta." });
   }
   if (!unique(lesson.requiredPracticeIds) || lesson.requiredPracticeIds.some(id =>
-      !/^C\d{2}-EX-\d{2,3}$/.test(id))) {
+      !/^C\d{2}-EX-\d{2,3}$/.test(id) || !id.startsWith("C" + lesson.chapterId + "-"))) {
     issues.push({ location: "requiredPracticeIds", problem: "Kirjan tehtävätunniste on virheellinen." });
   }
   if (lesson.requiredCheckedIds &&
       (!unique(lesson.requiredCheckedIds) || lesson.requiredCheckedIds.some(id =>
-        !/^C\d{2}-(?:SOURCE|TEXTB)-Q\d{2}$/.test(id)))) {
+        !/^C\d{2}-(?:SOURCE|TEXTB)-Q\d{2}$/.test(id) || !id.startsWith("C" + lesson.chapterId + "-")))) {
     issues.push({ location: "requiredCheckedIds", problem: "Tarkistettavan lähdetehtävän tunniste on virheellinen." });
   }
   if (lesson.requiredChapterEvidence &&

@@ -104,10 +104,16 @@ function TeacherBoard({ scene }: { scene: TeacherScene }) {
 }
 
 export function LosTeacherPlayer({ lessonId }: { lessonId: string }) {
-  const { draft, update, saved } = useLosChapterDraft(1, "01");
+  const lesson = getLosTeacherLesson(lessonId);
+  // Remount on chapter or lesson change so C01 state can never be painted or
+  // written into a C02 session during the chapter transition.
+  return <LosTeacherScreen key={`${lesson?.bookId ?? 1}:${lesson?.chapterId ?? "01"}:${lessonId}`} lessonId={lessonId}/>;
+}
+function LosTeacherScreen({ lessonId }: { lessonId: string }) {
+  const lesson = getLosTeacherLesson(lessonId);
+  const { draft, update, saved } = useLosChapterDraft(lesson?.bookId ?? 1, lesson?.chapterId ?? "01");
   const [authorized, setAuthorized] = useState<boolean | null>(null);
   const [showHelp, setShowHelp] = useState(false);
-  const lesson = getLosTeacherLesson(lessonId);
   // Reject malformed manuscripts, not merely broken React props.
   const contentValid = lesson ? validateTeacherLesson(lesson).length === 0 : false;
   const session = lesson && contentValid
@@ -183,7 +189,7 @@ export function LosTeacherPlayer({ lessonId }: { lessonId: string }) {
       </section> :
       !lesson || !session || !scene ? <section className="los-teacher-status">
         <h1>Oppitunnin opetusmateriaali ei ole vielä valmis</h1>
-        <p>Teacher 2.0 on nyt käytössä oppitunneilla L001–L006. Muut oppitunnit toimivat edelleen nykyisessä Opetuspolussa.</p>
+        <p>Teacher 2.0 on nyt käytössä oppitunneilla L001–L007. Muut oppitunnit toimivat edelleen nykyisessä Opetuspolussa.</p>
         <a href="/los#/1/path">Palaa Opetuspolkuun</a>
       </section> :
       <>
@@ -238,7 +244,7 @@ export function LosTeacherPlayer({ lessonId }: { lessonId: string }) {
                   kind === "test-submitted" ? Boolean(draft.testSubmittedAt) :
                   kind === "self-assessment" ? Boolean(draft.selfAssessment.trim()) : false;
                 const label = kind === "application-written" ? "Oma kirjan soveltamisteksti" :
-                  kind === "test-submitted" ? "C01-kappaletesti palautettu" : "Oma itsearviointi kirjoitettu";
+                  kind === "test-submitted" ? "C" + lesson.chapterId + "-kappaletesti palautettu" : "Oma itsearviointi kirjoitettu";
                 return <p key={kind} className="los-teacher-evidence">
                   {done ? <CheckCircle2 size={17}/> : <HelpCircle size={17}/>}
                   {label}: {done ? "Tallennettu" : "Puuttuu vielä kirjan suorituksesta"}
