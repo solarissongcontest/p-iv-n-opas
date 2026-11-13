@@ -50,7 +50,8 @@ export function LosMidtermExam() {
           current.practiceAnswers["EX-MID-DIALOGUE-SELF"]??"");
         // Each retake has its own ungraded personal work and rating. Earlier
         // material remains in the archive, never silently reused as new proof.
-        const {"EX-MID-DIALOGUE-SELF": _previousRating, ...freshPractice}=preserved;
+        const freshPractice={...preserved};
+        delete freshPractice["EX-MID-DIALOGUE-SELF"];
         return {...current,practiceAnswers:freshPractice,
           applicationDraft:"",selfAssessment:"",
           testAnswers:{},testSubmittedAt:null};
