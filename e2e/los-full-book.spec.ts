@@ -765,6 +765,23 @@ test("Teacher 2.0 presents one teaching board with one set of controls", async (
 
 
 
+
+test("digits-only L039 answer uses a numeric keypad without German character shortcuts",async({page})=>{
+  await enterLocalBook(page);
+  await page.goto("/los-lessons/L039",{waitUntil:"domcontentloaded"});
+  await page.locator(".los-teacher-outline nav").getByRole("button",{name:"Ymmärrä uusi numerosarja"}).click();
+  await expect(page.locator(".los-teacher-question h3")).toContainText("Kirjoita numerosarja numeroina");
+  const answer=page.locator(".los-teacher-question input");
+  await expect(answer).toHaveAttribute("inputmode","numeric");
+  await expect(page.locator("label[for='los-teacher-answer']")).toContainText("Vastauksesi numeroin");
+  await expect(page.locator(".los-teacher-special-keys")).toHaveCount(0);
+  await answer.fill("4062");
+  await page.getByRole("button",{name:"Tarkista",exact:true}).click();
+  await expect(page.locator(".los-teacher-feedback.is-right")).toContainText("Vier = 4");
+  await expectNoHorizontalOverflow(page);
+});
+
+
 test("C08 through final review teach the task and describe German time without invented certainty",async({page})=>{
   await enterLocalBook(page);
 
