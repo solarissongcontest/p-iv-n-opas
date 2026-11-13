@@ -5,6 +5,7 @@ import { LOS_BOOKS } from "../src/features/los/catalog.ts";
 import { LOS_FUTURE_MANUSCRIPTS } from "../src/features/los/content/losFutureManuscripts.ts";
 import { losFutureExercisesFor } from "../src/features/los/content/losFutureExercises.ts";
 import { losFutureExercisesForSection } from "../src/features/los/content/losFutureExerciseSections.ts";
+import { losFutureLessonOutline } from "../src/features/los/losFutureLessonOutline.ts";
 
 test("LOS! 2–8 has 70 accurately namespaced manuscript chapters", () => {
   assert.equal(LOS_BOOKS.length,8);
@@ -107,4 +108,31 @@ test("LOS! 2–8 answers use existing owner + book + chapter draft storage, with
   assert.match(exerciseUI,/ei tarkistettu automaattinen arvostelu/);
   assert.doesNotMatch(exerciseUI,/losScore\(|testSubmittedAt:\s*new Date/);
   assert.ok(state.includes("${ownerId}.${bookId}.${chapterId}"));
+});
+
+test("all seven source-aligned 60-slot lesson outlines have 50 chapter links and 10 pending reviews", () => {
+  let total=0;
+  for(const book of LOS_BOOKS.filter(x=>x.id>=2)){
+    const slots=losFutureLessonOutline(book);
+    assert.equal(slots.length,60);
+    assert.deepEqual(slots.map(x=>x.number),Array.from({length:60},(_,i)=>i+1));
+    assert.deepEqual(slots.filter(x=>x.phase==="review").map(x=>x.number),[1,27,28,29,30,56,57,58,59,60]);
+    assert.equal(slots.filter(x=>x.phase==="chapter").length,50);
+    assert.ok(slots.every(x=>x.status==="outline-only"));
+    assert.ok(slots.filter(x=>x.phase==="review").every(x=>x.chapterId===null&&x.destination===null));
+    for(const chapter of book.chapters){
+      const list=slots.filter(x=>x.chapterId===chapter.id);
+      assert.equal(list.length,5);
+      assert.deepEqual(list.map(x=>x.destination),["chapter","text","grammar","practice","apply"]);
+      assert.ok(list.every(x=>x.chapterTitle===chapter.title));
+    }
+    assert.equal(new Set(slots.map(x=>x.id)).size,60);
+    assert.match(slots[0]?.id??"",new RegExp(`^LOS${book.id}-L001$`));
+    total+=slots.length;
+  }
+  assert.equal(total,420);
+  assert.equal(losFutureLessonOutline(LOS_BOOKS[0]!).length,0);
+  const viewer=readFileSync("src/features/los/LosFutureLearningPath.tsx","utf8");
+  assert.match(viewer,/0 valmiiksi hyväksyttyä ohjattua oppituntia/);
+  assert.match(viewer,/Pelkkä siirtymä sisältösivulle/);
 });
