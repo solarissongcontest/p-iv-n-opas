@@ -44,7 +44,7 @@ export function losFutureLessonOutline(book:LosBookDefinition):LosFutureLessonOu
     const reviewTitle=reviewStages[n];
     const estimate=script.kind==="chapter"
       ? script.timings.reduce((sum,step)=>sum+step.minutes,0)
-      : (script.reviewTiming.match(/\\d+\\s*min/g)??[]).reduce((sum,part)=>sum+Number(part.match(/\\d+/)?.[0]??0),0);
+      : (script.reviewTiming.match(/\d+\s*min/g)??[]).reduce((sum,part)=>sum+Number(part.match(/\d+/)?.[0]??0),0);
     if(reviewTitle){
       if(script.kind!=="review")throw new Error(`Wrong source phase for ${script.id}`);
       out.push({id:`LOS${book.id}-L${String(n).padStart(3,"0")}`,
