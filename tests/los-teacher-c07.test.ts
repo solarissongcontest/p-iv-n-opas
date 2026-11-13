@@ -51,7 +51,7 @@ function prepared(lesson:typeof L036){
  return s;
 }
 function realEvidence(lesson:typeof L036){
- const practiceAnswers:Object=Object.fromEntries(lesson.requiredPracticeIds.map(id=>[id,rightExam[id]??"attempted"]));
+ const practiceAnswers:Record<string,string>=Object.fromEntries(lesson.requiredPracticeIds.map(id=>[id,rightExam[id]??"attempted"]));
  const checkedIds=[...(lesson.requiredCheckedIds??[])];
  return {answers:{...practiceAnswers,...Object.fromEntries(checkedIds.map(id=>[id,sourceChoices[id]??"a"]))} as Record<string,string>,checkedIds};
 }
