@@ -89,7 +89,7 @@ test("L058 finished writing stays self-produced until edited after viewing the m
   const after=await page.evaluate(k=>JSON.parse(localStorage.getItem(k)??"{}"),key);
   expect(after.teacherSessions.L058.helpedIds).toContain("writing-assisted");
   await page.reload({waitUntil:"domcontentloaded"});
-  await expect(review.getByText(/sen tuottaminen merkittiin avustetuksi/)).toBeVisible();
+  await expect(review.getByText(/kirjoitusyritys on merkitty avustetuksi/)).toBeVisible();
   await expectNoHorizontalOverflow(page);
 });
 
