@@ -40,6 +40,7 @@ export function teacherExternalStatus(
     const lines = writing.split(/\n/).map(line => line.trim()).filter(Boolean);
     const writingReady = group !== "L058" ||
       (lines.length >= 5 && lines.length <= 7 && writing.trim().length >= 80);
+    const openedWritingModel = Boolean(draft.teacherSessions?.["L058"]?.helpedIds.includes("writing-model"));
     const hintedWriting = Boolean(draft.teacherSessions?.["L058"]?.helpedIds.includes("writing-assisted"));
     return {
       ready: items.length === 5 && checked === 5 && rated && writingReady,
@@ -48,8 +49,11 @@ export function teacherExternalStatus(
         "Muistamisen oma arvio: " + (rated ? "kirjattu" : "puuttuu") + ".",
         ...(group === "L058" ? [
           "Oma 5–7 lauseen esittely: " + (writingReady ? "tallennettu" : "kesken (5–7 riviä, vähintään 80 merkkiä)") + ".",
-          "Mallin käyttö: " + (hintedWriting ? "käytetty, itsenäistä kielioppinäyttöä ei päätellä tekstistä" :
-            "ei kirjattua mallin avaamista; vapaan tekstin oikeakielisyys ei silti ole automaattisesti tarkistettu") + ".",
+          "Mallin käyttö: " + (hintedWriting
+            ? "avustettu kirjoitusyritys; itsenäistä kielioppinäyttöä ei päätellä tekstistä"
+            : openedWritingModel
+              ? "avattu valmiin kirjoitusyrityksen jälkeen; mallin avaaminen ei automaattisesti arvioi kielioppia"
+              : "ei kirjattua mallin avaamista; vapaan tekstin oikeakielisyys ei silti ole automaattisesti tarkistettu") + ".",
         ] : []),
       ],
     };
