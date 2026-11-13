@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - feat/los1-teacher-l046-l050
+      - feat/los1-teacher-integrated-c09-20261113
   workflow_dispatch:
 
 # Older pushes must not consume long browser runners after a new fix lands.
@@ -26,7 +27,9 @@ jobs:
         run: bun install --frozen-lockfile
       - name: All repository unit tests
         run: bun run test
-      - name: Typecheck and build
+      - name: Typecheck
+        run: bun run typecheck
+      - name: Production build
         run: bun run build
 
   c09-browser:
