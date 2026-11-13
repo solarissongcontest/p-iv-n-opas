@@ -55,8 +55,8 @@ def choose(path: str, ours: str, theirs: str) -> str:
                     '    !session.paused && lesson.scenes.every(scene => session.visitedIds.includes(scene.id)) &&\n'
                     '    lesson.scenes.every(scene => !scene.numberBuilder || teacherBuiltNumberCount(session, scene.id) >= 4) &&\n')
     if path == "src/features/los/teacher/validateContent.ts" and "/^C" in ours and "/^C" in theirs and "(?:" in ours and "(?:" in theirs:
-        lhs = re.search(r"\\(\\?:([A-Z|]+)\\)", ours)
-        rhs = re.search(r"\\(\\?:([A-Z|]+)\\)", theirs)
+        lhs = re.search(r"\(\?:([A-Z|]+)\)", ours)
+        rhs = re.search(r"\(\?:([A-Z|]+)\)", theirs)
         if lhs is None or rhs is None:
             raise ValueError("Malformed source-check selector alternatives")
         options = list(dict.fromkeys(lhs.group(1).split("|") + rhs.group(1).split("|")))
