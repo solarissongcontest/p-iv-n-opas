@@ -3,7 +3,7 @@ import { CheckCircle2, CircleAlert, RotateCcw } from "lucide-react";
 import { useLosChapterDraft } from "./studyState";
 import { LOS1_MIDTERM_DRAFT_CHAPTER, LOS1_MIDTERM_QUESTIONS,
   LOS1_MIDTERM_SECTION_TITLES, losExamReadyToSubmit, losExamScore } from "./content/los1Exams";
-import {losArchiveExamAttempt,losArchivedExamHistory} from "./content/los1ExamArchive";
+import {losArchiveExamAttempt,losArchivedExamHistory,losArchiveMidtermPersonalWork,losArchivedMidtermPersonalWork} from "./content/los1ExamArchive";
 import "./los-exams.css";
 
 const RUBRIC = [
@@ -40,9 +40,14 @@ export function LosMidtermExam() {
     if(!confirmRetake||!saved)return;
     try{
       update(current=>({...current,
-        practiceAnswers:losArchiveExamAttempt(
-          current.practiceAnswers,"EX-MID",LOS1_MIDTERM_QUESTIONS,
-          current.testAnswers,current.testSubmittedAt??""),
+        practiceAnswers:(()=>{
+          const objective=losArchiveExamAttempt(
+            current.practiceAnswers,"EX-MID",LOS1_MIDTERM_QUESTIONS,
+            current.testAnswers,current.testSubmittedAt??"");
+          const number=losArchivedExamHistory(objective,"EX-MID").at(-1)?.number;
+          if (!number) throw new Error("Uusintaa ei voitu tallentaa.");
+          return losArchiveMidtermPersonalWork(objective,number,current.applicationDraft,current.selfAssessment);
+        })(),
         testAnswers:{},testSubmittedAt:null,
       }));
       setArchiveError("");
@@ -124,6 +129,13 @@ export function LosMidtermExam() {
             {" "}{section.correct}/{section.total}
           </li>)}</ul>
         </details>
+        {(() => {
+          const personal=losArchivedMidtermPersonalWork(draft.practiceAnswers,item.number);
+          return personal && <details><summary>Oma keskusteluteksti ja itsearviointi</summary>
+            <p className="los-exam-own-text">{personal.applicationDraft || "(Ei kirjoitettua keskustelua; mahdollisesti suullinen.)"}</p>
+            <p className="los-exam-own-text">{personal.selfAssessment || "(Ei kirjoitettua itsearviointia.)"}</p>
+          </details>;
+        })()}
       </li>)}</ol>
     </section>}
     <section className="los-exam-speaking" aria-label="Itsenäisen viestinnän itsearviointi">
