@@ -1059,7 +1059,7 @@ test("L013 reads canonical Lisa M-WB-07 source, requires actual checked C03 Q01/
  const link=page.getByRole("link",{name:/Avaa kirjassa/}).first();
  await expect(link).toHaveAttribute("href",/lessonReturn=L013.*\/03\/understand/);
  await page.goto("/los?lessonReturn=L013#/1/03/text",{waitUntil:"domcontentloaded"});
- await expect(page.locator(".los-original-dialogue")).toContainText("ich komme aus Deutschland");
+ await expect(page.locator(".los-c01-reader")).toContainText("ich komme aus Deutschland");
  await page.goto("/los?lessonReturn=L013#/1/03/understand",{waitUntil:"domcontentloaded"});
  const questions=page.locator(".los-c01-question");
  await expect(questions).toHaveCount(5);
