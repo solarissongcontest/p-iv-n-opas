@@ -51,7 +51,7 @@ export function LosDictionary({ book, move, openBook }: { book: LosBookDefinitio
         </div>)}
       </div>
     }
-    {scope === "series" && <p className="los-index-footnote">Muiden kirjojen keskeneräiset hakemistot eivät vielä sisällä sanastoja. Tämä ei ole kattava saksan yleissanakirja.</p>}
+    {scope === "series" && <p className="los-index-footnote">LOS! 2–8:n hakemistossa näkyy toistaiseksi vain kunkin ensimmäisen kappaleen kuusi sanastoluonnosta. Sanasto ei ole kattava saksan yleissanakirja eikä ääntämistarkistettu.</p>}
   </section>;
 }
 export function LosLearningPath({ book, move }: { book: LosBookDefinition; move: LosNavigate }) {
@@ -137,7 +137,7 @@ export function LosIndexSearch({book,move}:{book:LosBookDefinition;move:LosNavig
   return <section className="los-inner-page los-index-search-page">
     <p className="los-eyebrow">HAKU · {book.code}</p>
     <h1>Hae kirjasta</h1>
-    <p className="los-page-intro">Hae kappaleiden nimistä, sanastosta, kieliopista, osaamistavoitteista sekä kaikista kymmenestä alkuperäisestä Teksti A -lukijasta ja niiden käytettävissä olevista kokonaisista Teksti B -litteraateista. Voit hakea myös saksankielisten repliikkien suomennoksia. Hakutulos avaa tekstin suoraan LOS!:n sisällä.</p>
+    <p className="los-page-intro">{book.id === 1 ? "Hae kappaleiden nimistä, sanastosta, kieliopista, osaamistavoitteista ja kirjojen käytössä olevista alkuperäisteksteistä." : "Hae tämän jatkokirjan kappaleiden otsikoista, tavoitteista, kielioppiaiheista ja ensimmäisen kappaleen sanastoluonnoksesta. Muiden kappaletekstien haku otetaan käyttöön, kun tekstit on tuotu lukijaan."}</p>
     <label className="los-index-search"><Search size={19}/><span className="sr-only">Hae tästä oppikirjasta</span><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Hae sanaa, kappaletta tai kielioppia" /></label>
     {!query.trim()?<p className="los-index-footnote">Voit kokeilla esimerkiksi hakusanoja <b lang="de">heißen</b>, <b lang="de">Hallo</b> tai <b lang="de">kommen</b>.</p>:
       <><p className="los-index-count">{hits.length} tulosta</p>
