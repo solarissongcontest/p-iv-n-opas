@@ -5,7 +5,7 @@ import {
   finishTeacherSession, independentTeacherEvidence, markTeacherHelp,
   moveTeacherScene, normalizeTeacherAnswer, parseTeacherSessions,
   revealTeacherSolution, setTeacherAnswerDraft, submitTeacherAnswer,
-  teacherCanFinish, teacherCompletionBlockers, teacherNextIncompleteSceneId, teacherLatestAttempt, teacherWrongFeedback,
+  teacherCanFinish, teacherCompletionBlockers, teacherNextIncompleteSceneId, teacherLatestAttempt, teacherWrongFeedback, teacherRequiresNumericResponse,
 } from "../src/features/los/teacher/engine.ts";
 import { LOS1_L004_TEACHER } from "../src/features/los/teacher/lessonL004.ts";
 
@@ -182,4 +182,56 @@ test("next unfinished step points to an incomplete reflection without changing a
   const before=structuredClone(session);
   assert.equal(teacherNextIncompleteSceneId(session,extra),"my-reflection");
   assert.deepEqual(session,before,"Guidance must never create learning evidence");
+});
+
+
+test("digit-only answers use a numeric keyboard regardless of Finnish wording",()=>{
+  const question=(prompt:string,accepted:string[])=>({
+    type:"text" as const,prompt,accepted,skillId:"L1-NUM-01",
+    success:"Oikein",hint:"Vihje",reteach:"Selitys",genericWrong:"Kokeile uudestaan",
+  });
+  assert.equal(teacherRequiresNumericResponse(question("Kirjoita numeroin: neunzehn",["19"])),true);
+  assert.equal(teacherRequiresNumericResponse(question("Kirjoita numerosarja numeroina ilman välilyöntejä.",["4062"])),true);
+  assert.equal(teacherRequiresNumericResponse(question("Koodi",["0042"])),true,"Leading zeros need text input");
+  assert.equal(teacherRequiresNumericResponse(question("Kirjoita saksaksi: 17",["siebzehn"])),false);
+  assert.equal(teacherRequiresNumericResponse(question("Valitse muoto",["17","siebzehn"])),false);
+  assert.equal(teacherRequiresNumericResponse(question("Kirjoita numero",[])),false);
+  assert.equal(teacherRequiresNumericResponse({
+    ...question("Mikä nimi?",[]),type:"choice",options:[{id:"a",label:"7"},{id:"b",label:"8"}],correctOption:"a",
+  }),false);
+});
+
+
+test("answered-correct questions are immutable even if the engine is called again",()=>{
+  let session=emptyTeacherSession(lesson,now);
+  session=submitTeacherAnswer(session,lesson,"guided","b",now);
+  assert.equal(session.attempts.length,1);
+  assert.equal(session.attempts[0]?.correct,true);
+  const repeated=submitTeacherAnswer(session,lesson,"guided","a",now);
+  assert.strictEqual(repeated,session,"A correct answer is final even outside the disabled UI");
+  const repeatedCorrect=submitTeacherAnswer(session,lesson,"guided","b",now);
+  assert.strictEqual(repeatedCorrect,session,"No duplicate correct attempts may be appended");
+  const incorrect=submitTeacherAnswer(session,lesson,"independent","Guten Morgen!",now);
+  assert.equal(incorrect.attempts.at(-1)?.correct,false);
+  const fixed=submitTeacherAnswer(incorrect,lesson,"independent","Guten Abend!",now);
+  assert.equal(fixed.attempts.at(-1)?.correct,true);
+  assert.equal(fixed.attempts.filter(item=>item.sceneId==="independent").length,2);
+});
+
+test("question feedback falls back to the authored explanation when specific feedback is blank",()=>{
+  const scene=lesson.scenes.find(item=>item.id==="guided")!;
+  assert.ok(scene.question);
+  const wrongOption=scene.question!.options?.find(option=>option.id==="a");
+  assert.ok(wrongOption);
+  const missingSpecific={
+    ...scene,
+    question:{
+      ...scene.question!,
+      options:scene.question!.options!.map(option=>option.id==="a"?{...option,wrongFeedback:"  "}:option),
+      genericWrong:"Mieti aloitustervehdystä.",
+    },
+  };
+  assert.equal(teacherWrongFeedback(missingSpecific,"a"),"Mieti aloitustervehdystä.");
+  assert.equal(teacherWrongFeedback(missingSpecific,"nonexistent"),"Mieti aloitustervehdystä.");
+  assert.match(teacherWrongFeedback(scene,"a"),/illan/);
 });

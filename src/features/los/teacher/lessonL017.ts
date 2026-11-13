@@ -24,7 +24,7 @@ export const LOS1_L017_TEACHER: TeacherLesson = {
     {id:"recall",phase:"Muistelu",kind:"question",title:"Mitä C02:n du tarkoitti?",
       paragraphs:["Palauta mieleen tuttu nimikysymys. Se on tämän tunnin vertailukohta."],
       question:{type:"choice",skillId:"L1-INT-02",prompt:"Kenelle Wie heißt du? tavallisesti sopii?",
-        options:[{id:"a",label:"Tutulle ystävälle"},{id:"b",label:"Virallisessa ensiasioinnissa teititeltävälle vieraalle",wrongFeedback:"Virallisessa ensiasioinnissa käytetään yleensä kohteliasta Sie-puhuttelua."},{id:"c",label:"Vain usealle ihmiselle kerralla",wrongFeedback:"Du tarkoittaa yhtä sinuteltavaa ihmistä, ei monikkoa."}],
+        options:[{id:"a",label:"Tutulle ystävälle", "lang": "fi"},{id:"b",label:"Virallisessa ensiasioinnissa teititeltävälle vieraalle", "lang": "fi",wrongFeedback:"Virallisessa ensiasioinnissa käytetään yleensä kohteliasta Sie-puhuttelua."},{id:"c",label:"Vain usealle ihmiselle kerralla", "lang": "fi",wrongFeedback:"Du tarkoittaa yhtä sinuteltavaa ihmistä, ei monikkoa."}],
         correctOption:"a",success:"Oikein. Du on yhden tuttavallisesti puhuteltavan ihmisen muoto.",
         hint:"Muistele, että du tarkoittaa sinä.",
         reteach:"Wie heißt du? kysyy tuttavan nimeä. Kohtelias vaihtoehto on Wie heißen Sie?",

@@ -25,7 +25,7 @@ export const LOS1_L037_TEACHER: TeacherLesson = {
     {id:"recall",phase:"Muistelu",kind:"question",title:"Mihin tavataan?",
       paragraphs:["L036:ssa opit erottamaan kirjaimen nimen ja sanan äänen. Muista nyt miksi toista pyydetään tavaamaan."],
       question:{type:"choice",skillId:"L1-INT-06",prompt:"Mitä tarkoittaa buchstabieren?",
-        options:[{id:"a",label:"Tavata kirjaimittain"},{id:"b",label:"Lukua ääneen numero",wrongFeedback:"Numeron kertominen on eri asia; tässä annetaan sanan kirjaimet."},{id:"c",label:"Kertoa kotimaa",wrongFeedback:"Kotimaa liittyy woher-kysymykseen, ei nimen tavaamiseen."}],
+        options:[{id:"a",label:"Tavata kirjaimittain", "lang": "fi"},{id:"b",label:"Lukua ääneen numero", "lang": "fi",wrongFeedback:"Numeron kertominen on eri asia; tässä annetaan sanan kirjaimet."},{id:"c",label:"Kertoa kotimaa", "lang": "fi",wrongFeedback:"Kotimaa liittyy woher-kysymykseen, ei nimen tavaamiseen."}],
         correctOption:"a",success:"Kyllä. Buchstabieren tarkoittaa kirjainten luettelemista järjestyksessä.",hint:"Ajattele nimeä U-W-E.",reteach:"Nimen kirjoitusasun voi varmistaa pyytämällä tavaamaan: Bitte buchstabieren Sie.",genericWrong:"Mieti kirjaimia, joita sanotaan yksi kerrallaan."}},
     {id:"context",phase:"Opettajan selitys",kind:"explanation",title:"Kuka puhuu ja miksi?",
       paragraphs:[
@@ -71,7 +71,7 @@ export const LOS1_L037_TEACHER: TeacherLesson = {
     {id:"independent",phase:"Itsenäinen ymmärtäminen",kind:"question",title:"Muistatko zweimal-ilmauksen?",
       paragraphs:["Sulje lähdeteksti ennen vastaamista. Palaa siihen vasta oman yrityksen jälkeen."],
       question:{type:"choice",skillId:"L1-READ-01",evidenceRole:"independent",prompt:"Miksi Franz sanoo zweimal L?",
-        options:[{id:"a",label:"Hän tarvitsee kaksi puhelinnumeroa.",wrongFeedback:"Zweimal viittaa tässä L-kirjaimen toistumiseen."},{id:"b",label:"Bolliger-sukunimessä on kaksi peräkkäistä L-kirjainta."},{id:"c",label:"Franz haluaa, että nimi sanotaan uudelleen.",wrongFeedback:"Vielä kerran olisi noch einmal, mutta zweimal L kertoo kahdesta L-kirjaimesta."}],
+        options:[{id:"a",label:"Hän tarvitsee kaksi puhelinnumeroa.", "lang": "fi",wrongFeedback:"Zweimal viittaa tässä L-kirjaimen toistumiseen."},{id:"b",label:"Bolliger-sukunimessä on kaksi peräkkäistä L-kirjainta.", "lang": "fi"},{id:"c",label:"Franz haluaa, että nimi sanotaan uudelleen.", "lang": "fi",wrongFeedback:"Vielä kerran olisi noch einmal, mutta zweimal L kertoo kahdesta L-kirjaimesta."}],
         correctOption:"b",success:"Juuri niin. Bolliger = B-O-L-L-I-G-E-R.",hint:"Etsi, mitä zweimal tarkoittaa; katso sitten nimen kirjoitusasua.",reteach:"Zweimal = kaksi kertaa. Bolliger-nimen kaksi L-kirjainta kirjoitetaan peräkkäin.",genericWrong:"Ajattele yhden kirjaimen toistoa."}},
     {id:"application",phase:"Soveltaminen",kind:"question",title:"Uusi nimi uudessa palvelutilanteessa",
       paragraphs:["Henkilö on nimeltään Uwe. Työntekijä haluaa varmistaa kirjoitusasun."],

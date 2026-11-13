@@ -39,12 +39,13 @@ const summary = (paragraphs:string[]):TeacherScene =>
 function dialogue(id:string,phase:string,title:string,opening:string,prompt:string,
   options:[string,string,string],correct:"a"|"b"|"c",
   partner:[string,string,string],success:string,hint:string,reteach:string,
-  evidenceRole:TeacherQuestion["evidenceRole"]="practice",skillId=S):TeacherScene {
+  evidenceRole:TeacherQuestion["evidenceRole"]="practice",skillId=S,
+  optionLanguage:"fi"|"de"="de"):TeacherScene {
   return {id,phase,kind:"question",title,
     paragraphs:[opening,"Valitse oma repliikkisi. Keskustelukumppanin vastaus on käsikirjoitettu valintasi mukaan. Jos keskustelu ei etene, saat selityksen ja voit yrittää uudelleen."],
     question:{type:"choice",skillId,evidenceRole,prompt,
       options:options.map((label,i)=>({id:(["a","b","c"] as const)[i]!,
-        label,wrongFeedback:partner[i] ?? ""})),
+        label,lang:optionLanguage,wrongFeedback:partner[i] ?? ""})),
       correctOption:correct,success,hint,reteach,
       genericWrong:"Tässä tilanteessa toinen tarvitsee tietynlaisen avunpyynnön. Mieti, haluatko hidastamista, toistoa vai merkityksen selitystä."}};
 }
@@ -157,7 +158,7 @@ export const LOS1_L042_TEACHER:TeacherLesson = {
     "Oikein. Henkilöt, Mathe ja Guten Morgen auttavat ymmärtämään kokonaisuuden.",
     "Lue ensin sen perusteella, mitä jo ymmärrät.",
     "Autenttisessa tekstissä on vieraita muotoja. Etsi ensin kuka puhuu, missä ollaan ja mitä tapahtuu. Sitten voit avata selityksiä.",
-    "practice","L1-READ-01"),
+    "practice","L1-READ-01","fi"),
   explain("reading-map","Mistä tapahtumaketju koostuu?",[
     "Alku u01–u05: Silke kertoo, että seuraavaksi on matematiikkaa. Torsten ei innostu, mutta on tehnyt tehtävät bussissa. Silke pyytää saada kopioida ne.",
     "u06–u10: opettaja saapuu, sanoo Guten Morgen!, luokka vastaa samoin. Opettaja pyytää Floriania taululle laskemaan.",
@@ -192,7 +193,7 @@ export const LOS1_L042_TEACHER:TeacherLesson = {
     "Oikein. Mathe tarkoittaa matematiikkaa. Etsi kirjan Q01 ja tarkista se erikseen.",
     "Aloitus u01 sisältää sanan Mathe.",
     "Tekstin u01 kertoo matematiikasta. Älä sekoita myöhempää Musik-sanaa alkuun.",
-    "practice","L1-READ-01"),
+    "practice","L1-READ-01","fi"),
   book("questions","Tarkista kolme alkuperäistä ymmärtämistehtävää",[
     "Vastaa oikeisiin C08-SCHOOL-Q01-, Q02- ja Q03-tehtäviin kirjan Ymmärrä-osiossa. Tarkista kukin painikkeella Tarkista vastaus. Pelkkä vastaus ilman tarkistusta ei riitä.",
     "Q01 koskee matematiikkaa, Q02 Guten Morgen -tervehdystä ja Q03 musiikkituntia. Käytä alkuperäisen tekstin kohtia perusteluna. Näiden kirjatallennus on tunnin vaatima näyttö, ei oma rinnakkainen tehtäväkopio."
@@ -204,7 +205,7 @@ export const LOS1_L042_TEACHER:TeacherLesson = {
     "Oikein. Laskut ovat u11–u14, ja kehu on u15.",
     "Mitä lukusanat, plus ja minus viestivät?",
     "Florian laskee taululla. Sehr gut! on onnistumisesta annettu myönteinen palaute.",
-    "independent","L1-READ-01"),
+    "independent","L1-READ-01","fi"),
   dialogue("application","Soveltaminen","Milloin käytät opittua fraasia?","Olet itse uudessa luokassa. Opettaja sanoo monta sanaa, mutta tärkein toimintaohje jäi kokonaan kuulematta.",
     "Mitä sanot niin, että saat uudelleen saman ohjeen?",
     ["Sehr gut, Florian!","Noch einmal, bitte.","Wir müssen zu Musik!"],"b",
@@ -220,7 +221,7 @@ export const LOS1_L042_TEACHER:TeacherLesson = {
     "Oikein. Guten Morgen! on molempien osapuolten aamutervehdys.",
     "Muista sana Morgen.",
     "Tekstissä opettaja sanoo Guten Morgen! ja koko luokka vastaa samalla tervehdyksellä.",
-    "exit","L1-READ-01"),
+    "exit","L1-READ-01","fi"),
   summary([
     "Luit lähteen koko 26-yksikköisen kohtauksen. Kolme kirjan ymmärtämistehtävää on tarkistettava erikseen ennen tunnin läpikäyntiä.",
     "Tämän tunnin alkuperäisteksti ei ole opettajan keksimä harjoitusdialogi. Sen vaikeat muodot ovat tunnistamista, eivät A1-tason tuottamisvaatimuksia. L043:ssa opit korjaamaan ymmärtämisvaikeuden itse saksaksi."
@@ -394,7 +395,7 @@ export const LOS1_L044_TEACHER:TeacherLesson = {
     "Oikein. Eva vastaa avaamalla maantiedon merkitystä.",
     "Selittämiseen liittyy erklären.",
     "Kannst du erklären ... pyytää selitystä. Tunnista rakenne, älä opettele koko kannst-taivutusta.",
-    "practice","L1-READ-01"),
+    "practice","L1-READ-01","fi"),
   dialogue("independent","Soveltava vuorovaikutus 1/2","Et ymmärrä vastapuolen puhetta","Kuvitteellinen opiskelija antaa sinulle kokonaisen ohjeen. Et ymmärrä sitä lainkaan ja haluat kertoa tästä ennen uutta kysymystä.",
     "Mitä sanot ensimmäiseksi?",
     ["Ich verstehe nicht.","Sehr gut!","Wie alt bist du?"],"a",

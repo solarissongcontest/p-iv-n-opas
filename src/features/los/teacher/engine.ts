@@ -4,7 +4,7 @@ import { LOS1_MIDTERM_QUESTIONS, losExamReadyToSubmit } from "../content/los1Exa
  * LOS Teacher 2.0: deterministic learning engine. No AI services, network requests
  * or inferred mastery. A session is independent of legacy lessonProgress.
  */
-export type TeacherOption = { id: string; label: string; wrongFeedback?: string };
+export type TeacherOption = { id: string; label: string; wrongFeedback?: string; lang?: "fi" | "de" };
 export type TeacherQuestion = {
   prompt: string;
   type: "choice" | "text";
@@ -20,6 +20,17 @@ export type TeacherQuestion = {
   genericWrong: string;
   wrongAnswers?: Readonly<Record<string, string>>;
 };
+/**
+ * Render a digits-only answer with a numeric keyboard, not German character keys.
+ * The correct-answer model is more reliable than a Finnish prompt prefix:
+ * "Kirjoita numeroin", "Kirjoita numeroina" and "Kirjoita numerosarja" must
+ * all behave consistently. Do not use <input type="number">: leading zeroes
+ * and codes are meaningful and must be preserved as strings.
+ */
+export function teacherRequiresNumericResponse(question: TeacherQuestion): boolean {
+  return question.type === "text" && Boolean(question.accepted?.length) &&
+    question.accepted!.every(value => /^\d+$/.test(value.trim()));
+}
 export type TeacherBookLink = { label: string; chapterId: string; section: string; instruction: string };
 export type TeacherBoardStep = { label: string; german: string; meaning: string };
 export type TeacherReflection = { prompt: string; placeholder: string; minLength: number };
@@ -238,6 +249,7 @@ export function submitTeacherAnswer(session: TeacherSession, lesson: TeacherLess
   const scene = lesson.scenes.find(s => s.id === sceneId);
   if (session.completedAt || session.paused || !scene?.question || session.attempts.length >= 120 ||
       session.attempts.filter(item => item.sceneId === sceneId).length >= 3 ||
+      session.attempts.some(item => item.sceneId === sceneId && item.correct) ||
       session.revealedIds.includes(sceneId)) return session;
   const q = scene.question;
   const input = answer.trim();
@@ -258,9 +270,10 @@ export function teacherLatestAttempt(session: TeacherSession, sceneId: string): 
 export function teacherWrongFeedback(scene: TeacherScene, answer: string): string {
   const q = scene.question;
   if (!q) return "";
-  if (q.type === "choice") return q.options?.find(item => item.id === answer)?.wrongFeedback ??
-    q.genericWrong;
-  return q.wrongAnswers?.[normalizeTeacherAnswer(answer)] ?? q.genericWrong;
+  const specific = q.type === "choice"
+    ? q.options?.find(item => item.id === answer)?.wrongFeedback
+    : q.wrongAnswers?.[normalizeTeacherAnswer(answer)];
+  return specific?.trim() ? specific : q.genericWrong;
 }
 /** Calendar evidence requires a correct, explicitly saved choice. It is never audio evidence. */
 export function isCorrectCalendarEntry(scene: TeacherScene, value: string): boolean {

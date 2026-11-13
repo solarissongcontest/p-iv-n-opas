@@ -10,7 +10,7 @@ import {
   emptyTeacherSession, markTeacherHelp, confirmTeacherActivity, teacherChapterAssessmentStatus, teacherMidtermAssessmentStatus,
   finishTeacherSession, independentTeacherEvidence, moveTeacherScene, revealTeacherSolution,
   setTeacherAnswerDraft, submitTeacherAnswer, toggleTeacherPause, teacherCanFinish, teacherCompletionBlockers, teacherNextIncompleteSceneId, teacherLatestAttempt,
-  teacherWrongFeedback, teacherBuiltNumberCount, type TeacherScene, type TeacherSession, isCorrectCalendarEntry,
+  teacherWrongFeedback, teacherBuiltNumberCount, teacherRequiresNumericResponse, type TeacherScene, type TeacherSession, isCorrectCalendarEntry,
 } from "./engine.ts";
 import { getLosTeacherLesson } from "./lessonRegistry.ts";
 import { LosTeacherNumberBuilder } from "./LosTeacherNumberBuilder.tsx";
@@ -38,7 +38,7 @@ function SceneQuestion({ scene, session, submit, saveDraft, requestHint, reveal 
   const inputRef = useRef<HTMLInputElement>(null);
   const q = scene.question;
   if (!q) return null;
-  const numericResponse = /^Kirjoita numeroin\b/i.test(q.prompt);
+  const numericResponse = teacherRequiresNumericResponse(q);
   const latest = teacherLatestAttempt(session, scene.id);
   const attempts = session.attempts.filter(item => item.sceneId === scene.id);
   const succeeded = attempts.some(item => item.correct);
@@ -70,7 +70,7 @@ function SceneQuestion({ scene, session, submit, saveDraft, requestHint, reveal 
         className={"los-teacher-option" + (latest?.answer === option.id ? " is-selected" : "")}
         disabled={succeeded || exhausted || solutionVisible || Boolean(session.completedAt)} onClick={() => submit(option.id)}>
         <span className="los-teacher-option-letter">{option.id.toUpperCase()}</span>
-        <span lang="de">{option.label}</span>
+        <span lang={option.lang ?? "de"}>{option.label}</span>
         {latest?.answer === option.id && latest.correct && <Check size={18} aria-hidden="true" />}
       </button>)}
     </div> : <form className="los-teacher-form" onSubmit={event => {
@@ -322,7 +322,7 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
             <div className="los-teacher-prose">
               {scene.paragraphs.map((paragraph, i) => <p key={i}>{paragraph}</p>)}
             </div>
-            {scene.kind === "board" && <TeacherBoard scene={scene}/>}
+            {scene.kind === "board" && <TeacherBoard key={scene.id} scene={scene}/>}
             {lesson.id === "L005" && (scene.id === "source-list" || scene.id === "audio-choice") &&
               <LosTeacherGreetingMedia/>}
             {scene.numberBuilder && <LosTeacherNumberBuilder

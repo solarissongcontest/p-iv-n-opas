@@ -123,9 +123,9 @@ export const LOS1_L003_TEACHER: TeacherLesson = {
       question:{
         type:"choice",skillId:"L1-READ-01",evidenceRole:"exit",prompt:"Ketkä puhuvat alkuperäisessä C01-keskustelussa?",
         options:[
-          {id:"a",label:"Franz ja Jörg"},
-          {id:"b",label:"Heinrich ja Karl",wrongFeedback:"Nämä eivät ole C01:n alkuperäisen kahdeksan repliikin dialogin puhujia."},
-          {id:"c",label:"Franz ja Greta",wrongFeedback:"Franz esiintyy keskustelussa, mutta toinen puhuja on Jörg."},
+          {id:"a",label:"Franz ja Jörg", "lang": "fi"},
+          {id:"b",label:"Heinrich ja Karl", "lang": "fi",wrongFeedback:"Nämä eivät ole C01:n alkuperäisen kahdeksan repliikin dialogin puhujia."},
+          {id:"c",label:"Franz ja Greta", "lang": "fi",wrongFeedback:"Franz esiintyy keskustelussa, mutta toinen puhuja on Jörg."},
         ],
         correctOption:"a",
         success:"Oikein. Alkuperäisessä keskustelussa puhuvat Franz ja Jörg.",

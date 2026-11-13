@@ -53,15 +53,15 @@ export const LOS1_L024_TEACHER: TeacherLesson = {
           {
             "id": "a",
             "label": "Minulle kuuluu hyvää."
-          },
+          , "lang": "fi"},
           {
             "id": "b",
-            "label": "Mikä sinun nimesi on?",
+            "label": "Mikä sinun nimesi on?", "lang": "fi",
             "wrongFeedback": "Tämä tarkoittaisi nimikysymystä, ei vointia."
           },
           {
             "id": "c",
-            "label": "Minulla on huono olo.",
+            "label": "Minulla on huono olo.", "lang": "fi",
             "wrongFeedback": "Mir geht's gut. on myönteinen vointifraasi."
           }
         ],

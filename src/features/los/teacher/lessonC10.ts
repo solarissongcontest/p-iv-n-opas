@@ -215,9 +215,9 @@ export const LOS1_L052_TEACHER:TeacherLesson = {
     question("guided","Etsi tarkka alkuperä",[
       "Harald vastaa repliikissä u04 kysymykseen Woher kommst du?.",
     ],choice("Mistä kaupungista Harald sanoo tulevansa?","L1-READ-01","c",[
-      {id:"a",label:"Wienistä",wrongFeedback:"Wien ei ole Haraldin u04-vastauksessa."},
-      {id:"b",label:"Berliinistä",wrongFeedback:"Berlin ei ole Haraldin mainitsema lähtökaupunki."},
-      {id:"c",label:"Münchenistä"},
+      {id:"a",label:"Wienistä",lang:"fi",wrongFeedback:"Wien ei ole Haraldin u04-vastauksessa."},
+      {id:"b",label:"Berliinistä",lang:"fi",wrongFeedback:"Berlin ei ole Haraldin mainitsema lähtökaupunki."},
+      {id:"c",label:"Münchenistä",lang:"fi"},
     ],"Oikein. Hän sanoo Ich komme ursprünglich aus München.",
       "Etsi u04 ja sana aus.","Ich komme ursprünglich aus München. kertoo alkuperän. u04 on lähdevuoro.")),
     phase("context","Opetus","Tunnista merkitys, älä opettele vaikeaa taivutusta",[
@@ -237,9 +237,9 @@ export const LOS1_L052_TEACHER:TeacherLesson = {
     question("independent","Palauta ikätieto ilman suomennosta",[
       "Peitä tekstin suomenkieliset tuet ja palauta Haraldin ikäilmauksen merkitys muistista.",
     ],choice("Mitä Harald tarkoittaa ilmauksella so um die fünfzig?","L1-READ-01","b",[
-      {id:"a",label:"Täsmälleen 15-vuotias",wrongFeedback:"Fünfzig on 50, ei 15; ilmaus on lisäksi likimääräinen."},
-      {id:"b",label:"Noin 50-vuotias"},
-      {id:"c",label:"Yli 70-vuotias",wrongFeedback:"Tekstissä ei mainita seitsemääkymmentä."},
+      {id:"a",label:"Täsmälleen 15-vuotias",lang:"fi",wrongFeedback:"Fünfzig on 50, ei 15; ilmaus on lisäksi likimääräinen."},
+      {id:"b",label:"Noin 50-vuotias",lang:"fi"},
+      {id:"c",label:"Yli 70-vuotias",lang:"fi",wrongFeedback:"Tekstissä ei mainita seitsemääkymmentä."},
     ],"Oikein. So um die fünfzig tarkoittaa suunnilleen 50-vuotias.",
       "Fünfzig on viisikymmentä.","U08: Ich bin jetzt so um die fünfzig. Harald sanoo olevansa noin 50-vuotias.","independent")),
     question("application","Yhdistä kysymys ja lähteen vastaus",[

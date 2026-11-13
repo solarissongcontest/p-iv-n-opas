@@ -318,16 +318,19 @@ test("U4 C01 teaches greetings and pronunciation without requiring prior German"
  await expectNoHorizontalOverflow(page);
 });
 
-test("U3 hierarchy has all eight real books and does not invent unpublished chapters",async({page,isMobile})=>{
+test("U3 hierarchy links to all eight books and shows later chapters as editorial drafts",async({page,isMobile})=>{
  await enterLocalBook(page);
  if(isMobile)await page.locator(".los-top-toc").click();
  const root=page.locator(".los-tree-books");
  await root.locator("summary").click();
  await expect(root.locator("li")).toHaveCount(8);
- await expect(root.getByRole("button",{name:/LOS! 8/})).toContainText("Ei vielä kappalesisältöä");
+ await expect(root.getByRole("button",{name:/LOS! 8/})).not.toContainText("Ei vielä kappalesisältöä");
  await root.getByRole("button",{name:/LOS! 2/}).click();
  await expect(page).toHaveURL(/\/los#\/2\/overview$/);
  await expect(page.locator(".los-book-workspace")).toBeVisible();
+ await expect(page.locator(".los-tree-chapter")).toHaveCount(10);
+ await page.goto("/los#/2/01/text",{waitUntil:"domcontentloaded"});
+ await expect(page.locator(".los-book-paper")).toContainText("Sisältöesikatselu, ei valmis oppikirja");
  await expectNoHorizontalOverflow(page);
 });
 
@@ -763,6 +766,87 @@ test("Teacher 2.0 presents one teaching board with one set of controls", async (
 
 
 
+
+
+
+
+
+
+test("Finnish comprehension options in C01, C03, C09 and C10 have correct speech language",async({page})=>{
+  await enterLocalBook(page);
+  const targets=[
+    ["L001","Viimeinen tarkistus: osaatko käyttää lukijaa?","Napautan sanaa lukijassa."],
+    ["L013","Etsi lähdemaan merkitys","Hän on kotoisin Saksasta."],
+    ["L047","Mihin Greta lähtee?","Menevänsä kotiin"],
+    ["L052","Etsi tarkka alkuperä","Münchenistä"],
+  ] as const;
+  for(const [lessonId,sceneTitle,correctAnswer] of targets){
+    await page.goto("/los-lessons/"+lessonId,{waitUntil:"domcontentloaded"});
+    await page.locator(".los-teacher-outline nav").getByRole("button",{name:sceneTitle,exact:true}).click();
+    await expect(page.locator(".los-teacher-option span[lang='fi']")).toHaveCount(3);
+    await expect(page.locator(".los-teacher-option span[lang='de']")).toHaveCount(0);
+    await expect(page.locator(".los-teacher-option").filter({hasText:correctAnswer})
+      .locator("span[lang='fi']")).toBeVisible();
+    await expectNoHorizontalOverflow(page);
+  }
+  await page.goto("/los-lessons/L001",{waitUntil:"domcontentloaded"});
+  await page.locator(".los-teacher-outline nav").getByRole("button",{name:"Ymmärsitkö tervehdyksen ja hyvästelyn eron?"}).click();
+  await expect(page.locator(".los-teacher-option span[lang='de']")).toHaveCount(3);
+  await expect(page.locator(".los-teacher-option span[lang='fi']")).toHaveCount(0);
+});
+
+
+test("C08 screen-reader language follows the actual Finnish or German answer",async({page})=>{
+  await enterLocalBook(page);
+  await page.goto("/los-lessons/L042",{waitUntil:"domcontentloaded"});
+  let outline=page.locator(".los-teacher-outline nav");
+  await outline.getByRole("button",{name:"Miten toimia vaikean tekstin äärellä?"}).click();
+  const finnish=page.locator(".los-teacher-option").filter({hasText:"Etsin tutut sanat"});
+  await expect(finnish.locator("span[lang='fi']")).toHaveCount(1);
+  await expect(page.locator(".los-teacher-option span[lang='de']")).toHaveCount(0);
+  await expectNoHorizontalOverflow(page);
+
+  await page.goto("/los-lessons/L043",{waitUntil:"domcontentloaded"});
+  outline=page.locator(".los-teacher-outline nav");
+  await outline.getByRole("button",{name:"Pyydä hidastamaan"}).click();
+  const german=page.locator(".los-teacher-option").filter({hasText:"Bitte langsamer."});
+  await expect(german.locator("span[lang='de']")).toHaveCount(1);
+  await expect(page.locator(".los-teacher-option span[lang='fi']")).toHaveCount(0);
+  await expectNoHorizontalOverflow(page);
+});
+
+
+test("stepwise teaching boards begin collapsed after directly switching scenes",async({page})=>{
+  await enterLocalBook(page);
+  await page.goto("/los-lessons/L032",{waitUntil:"domcontentloaded"});
+  const outline=page.locator(".los-teacher-outline nav");
+  await outline.getByRole("button",{name:"Opetustaulu: 13–20"}).click();
+  await expect(page.locator(".los-teacher-board-item")).toHaveCount(1);
+  await page.getByRole("button",{name:"Näytä kaikki",exact:true}).click();
+  await expect(page.locator(".los-teacher-board-item")).toHaveCount(8);
+  await outline.getByRole("button",{name:"Opettaja rakentaa ikäilmaisun"}).click();
+  await expect(page.locator(".los-teacher-board-item")).toHaveCount(1);
+  await expect(page.locator(".los-teacher-board-label")).toContainText("1/4");
+  await page.getByRole("button",{name:"Näytä seuraava"}).click();
+  await expect(page.locator(".los-teacher-board-item")).toHaveCount(2);
+  await expectNoHorizontalOverflow(page);
+});
+
+
+test("digits-only L039 answer uses a numeric keypad without German character shortcuts",async({page})=>{
+  await enterLocalBook(page);
+  await page.goto("/los-lessons/L039",{waitUntil:"domcontentloaded"});
+  await page.locator(".los-teacher-outline nav").getByRole("button",{name:"Ymmärrä uusi numerosarja"}).click();
+  await expect(page.locator(".los-teacher-question h3")).toContainText("Kirjoita numerosarja numeroina");
+  const answer=page.locator(".los-teacher-question input");
+  await expect(answer).toHaveAttribute("inputmode","numeric");
+  await expect(page.locator("label[for='los-teacher-answer']")).toContainText("Vastauksesi numeroin");
+  await expect(page.locator(".los-teacher-special-keys")).toHaveCount(0);
+  await answer.fill("4062");
+  await page.getByRole("button",{name:"Tarkista",exact:true}).click();
+  await expect(page.locator(".los-teacher-feedback.is-right")).toContainText("Vier = 4");
+  await expectNoHorizontalOverflow(page);
+});
 
 
 test("C08 through final review teach the task and describe German time without invented certainty",async({page})=>{
