@@ -165,6 +165,9 @@ test("latest C03 human-audio UI and L030 existing exam coexist in one Teacher Pl
  assert.match(player,/teacherMidtermAssessmentStatus\(lesson, draft, draft\.practiceAnswers\)/);
  assert.match(player,/section === "midterm" \|\| section === "review"/);
  assert.match(media,/audio/);
+ assert.match(media,/type="audio\\/mpeg"/);
+ assert.match(media,/type="audio\\/ogg"/);
+ assert.match(media,/aria-expanded=\\{showText\\}/);
  assert.match(media,/ei ole kuuntelunäyttö|ei todista/);
  const l005=getLosTeacherLesson("L005");
  assert.ok(l005,"upstream L005 is still registered");
