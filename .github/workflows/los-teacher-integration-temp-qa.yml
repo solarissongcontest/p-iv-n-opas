@@ -1,0 +1,56 @@
+name: LOS Teacher C04-C06 Integration QA
+
+on:
+  push:
+    branches:
+      - feat/los1-teacher-integrated-c04-c06-review-20261113
+
+permissions:
+  contents: read
+
+jobs:
+  unit-type-build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - name: Install frozen dependencies
+        run: bun install --frozen-lockfile
+      - name: Generate routes and typecheck
+        run: bun run typecheck
+      - name: Full unit tests
+        run: bun run test
+      - name: Production build
+        run: bun run build
+
+  browsers:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    env:
+      E2E_BASE_URL: http://127.0.0.1:5173
+      REQUIRE_GEMINI: "false"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - run: bun install --frozen-lockfile
+      - run: bun run e2e:install
+      - run: bunx playwright install --with-deps chromium webkit
+      - name: Start local preview
+        shell: bash
+        run: |
+          nohup bun run dev -- --host 127.0.0.1 --port 5173 --strictPort > /tmp/los-teacher-integration-dev.log 2>&1 &
+          for attempt in $(seq 1 45); do
+            if curl -fsS --max-time 3 http://127.0.0.1:5173/ > /dev/null 2>&1; then exit 0; fi
+            sleep 2
+          done
+          cat /tmp/los-teacher-integration-dev.log
+          exit 1
+      - name: C04 C06 and review exams on both browsers
+        run: bunx playwright test e2e/los-c04-teacher.spec.ts e2e/los-c06-teacher.spec.ts e2e/los-teacher-review-midterm.spec.ts --project=desktop-chromium --project=iphone-webkit
+      - name: C05 plus all-60 navigation on both browsers
+        run: bunx playwright test e2e/los-full-book.spec.ts --grep 'C05|every one of the 60 guided lessons' --project=desktop-chromium --project=iphone-webkit
