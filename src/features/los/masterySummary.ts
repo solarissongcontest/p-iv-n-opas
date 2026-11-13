@@ -1,5 +1,5 @@
 import type { LosChapterDraft } from "./studyState.ts";
-import { LOS1_FINAL_QUESTIONS, losFinalReadyToSubmit,
+import { LOS1_FINAL_QUESTIONS, losValidSubmittedFinal,
   LOS1_FINAL_WRITING_MODEL_OPENED, LOS1_FINAL_WRITING_ASSISTED,
 } from "./content/los1FinalExam.ts";
 import { losArchivedExamHistory } from "./content/los1ExamArchive.ts";
@@ -76,11 +76,7 @@ export function summarizeLos1Mastery(
   }
   const final = drafts["93"];
   const archive = losArchivedExamHistory(final?.practiceAnswers ?? {}, "EX-FINAL");
-  const validCurrent = Boolean(final?.testSubmittedAt &&
-    Number.isFinite(Date.parse(final.testSubmittedAt)) &&
-    losFinalReadyToSubmit(final.testAnswers) &&
-    ["M-COM-01","M-COM-02"].every(source =>
-      Boolean(final?.practiceAnswers["EX-FINAL-AUDIO-" + source])));
+  const validCurrent = Boolean(final && losValidSubmittedFinal(final));
   const lastArchived = archive.at(-1);
   // The archive stores immutable scores. Do NOT regrade historic choices against
   // today's question bank: its answer key or item-to-skill mapping may change.
