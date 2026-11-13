@@ -19,7 +19,7 @@ test("L008 demands checked real book answers rather than only visited/selected a
  let s=emptyTeacherSession(lesson,at);
  for(const scene of lesson.scenes){
   s=moveTeacherScene(s,lesson,scene.id,at);
-  if(scene.question){let q=scene.question;s=submitTeacherAnswer(s,lesson,scene.id,q.type==="choice"?q.correctOption!:q.accepted![0]!,at);}
+  if(scene.question){const q=scene.question;s=submitTeacherAnswer(s,lesson,scene.id,q.type==="choice"?q.correctOption!:q.accepted![0]!,at);}
  }
  s=confirmTeacherActivity(s,lesson,"source-read",at);
  const answers=Object.fromEntries(ids.map(id=>[id,"a"]));
