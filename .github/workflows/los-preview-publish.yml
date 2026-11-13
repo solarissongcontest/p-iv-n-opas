@@ -123,11 +123,29 @@ jobs:
           for path in src/features/los/teacher/lessonL056L060.ts src/features/los/LosDictionarySearch.tsx src/features/los/LosContentTree.tsx; do
             git cat-file -e "$merged_sha:$path"
           done
+          # The CI token cannot publish changed .github/workflows files.
+          # Create a single integration commit rooted on main, containing the
+          # EXACT tested application tree but the unchanged main workflows.
+          # The read-only test job has already validated all app code, and the
+          # comparison below proves we only substitute GitHub workflow files.
+          git read-tree "$merged_sha^{tree}"
+          git rm -r --cached -f -- .github/workflows
+          git checkout origin/main -- .github/workflows
+          preview_tree="$(git write-tree)"
+          preview_sha="$(git -c user.name='LOS Preview Publisher' -c user.email='los-preview@users.noreply.github.com' commit-tree "$preview_tree" -p origin/main -m 'feat(los1): preview merged Reader, Dictionary, and 60 Teacher lessons')"
+          git diff --quiet "$merged_sha" "$preview_sha" -- . ':(exclude).github/workflows/**' ||
+            { echo "Application tree differs from the tested bundle. Refusing release."; exit 1; }
+          git diff --quiet origin/main "$preview_sha" -- .github/workflows ||
+            { echo "Preview would modify GitHub workflows. Refusing release."; exit 1; }
+          git merge-base --is-ancestor origin/main "$preview_sha"
+          for path in src/features/los/teacher/lessonL056L060.ts src/features/los/LosDictionarySearch.tsx src/features/los/LosContentTree.tsx; do
+            git cat-file -e "$preview_sha:$path"
+          done
           target="feat/los1-integrated-preview-20261113"
           if git ls-remote --exit-code --heads origin "$target" >/dev/null; then
             git fetch origin "$target"
-            git merge-base --is-ancestor "origin/$target" "$merged_sha" ||
+            git merge-base --is-ancestor "origin/$target" "$preview_sha" ||
               { echo "Existing preview is not an ancestor; refuse to overwrite it."; exit 1; }
           fi
-          git push origin "$merged_sha:refs/heads/$target"
-          echo "Published tested preview commit $merged_sha to $target, never to main."
+          git push origin "$preview_sha:refs/heads/$target"
+          echo "Published verified application tree at $preview_sha to $target. Production main is unchanged."
