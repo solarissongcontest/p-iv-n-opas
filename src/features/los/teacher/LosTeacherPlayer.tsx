@@ -9,6 +9,7 @@ import {
   teacherWrongFeedback, type TeacherScene, type TeacherSession,
 } from "./engine.ts";
 import { getLosTeacherLesson } from "./lessonL004.ts";
+import { teacherBookEvidenceStatus } from "./finalEvidence.ts";
 import { LosTeacherGreetingMedia } from "./LosTeacherGreetingMedia.tsx";
 import { composeLosC10Dialogues, storeLosC10Dialogues } from "./c10ApplicationBridge.ts";
 import { validateTeacherLesson } from "./validateContent.ts";
@@ -17,7 +18,7 @@ import "./teacher.css";
 
 const stamp = () => new Date().toISOString();
 const bookUrl = (lessonId: string, bookId: number, chapterId: string, section: string) =>
-  "/los?lessonReturn=" + encodeURIComponent(lessonId) + "#/" + bookId + "/" + chapterId + "/" + section;
+  "/los?lessonReturn=" + encodeURIComponent(lessonId) + "#/" + bookId + "/" + (["92","93"].includes(chapterId) ? "" : chapterId + "/") + section;
 
 function SceneQuestion({ scene, session, submit, saveDraft, requestHint, reveal }: {
   scene: TeacherScene;
@@ -204,7 +205,7 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
       </section> :
       !lesson || !session || !scene ? <section className="los-teacher-status">
         <h1>Oppitunnin opetusmateriaali ei ole vielä valmis</h1>
-        <p>Teacher 2.0 on nyt käytössä oppitunneilla L001–L016 sekä L051–L055. Muut oppitunnit toimivat edelleen nykyisessä Opetuspolussa.</p>
+        <p>Teacher 2.0 on nyt käytössä oppitunneilla L001–L016 sekä L051–L060. Muut oppitunnit toimivat edelleen nykyisessä Opetuspolussa.</p>
         <a href={"/los#/" + (lesson?.bookId ?? 1) + "/path"}>Palaa Opetuspolkuun</a>
       </section> :
       <>
@@ -342,6 +343,22 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
                 </section>}
               </div>}
             </div>
+            {lesson.bookEvidence && (scene.kind === "book" || scene.kind === "summary") &&
+              <section className="los-teacher-assessment-status" aria-label="Kirjan todelliset kertaus- ja arviointimerkinnät">
+                <h3>{lesson.bookEvidence.kind==="review-ii" ? "Kertaus II:n oikeat suoritukset" :
+                  lesson.bookEvidence.kind==="final-exam" ? "EX-FINAL:n oikeat suoritukset" :
+                  "Yhteenvedon oikeat merkinnät"}</h3>
+                {(() => {
+                  const status=teacherBookEvidenceStatus(lesson.bookEvidence!,draft);
+                  return <>
+                    <p>{status.done}/{status.total} vaadittua suoritusta tallessa. {status.ready ?
+                      "Kaikki sovitut merkinnät löytyvät." : "Kirjan tehtäviä tai omaa arviointia puuttuu vielä."}</p>
+                    {status.missing.slice(0,5).map(item=><p key={item}><HelpCircle size={15}/> {item}</p>)}
+                    {status.missing.length>5&&<p>Lisäksi {status.missing.length-5} muuta merkintää puuttuu. Avaa kirjan alkuperäinen arviointisivu.</p>}
+                    <p>Tämä on suorituksen tarkistus, ei itsenäinen kielitaitoarvio. Kuuntelu edellyttää alkuperäisäänen päättymismerkintää, eikä äänitteen lataus yksin pisteytä puhetta.</p>
+                  </>;
+                })()}
+              </section>}
             {lesson.chapterAssessment && (scene.kind === "book" || scene.kind === "summary") && <section className="los-teacher-assessment-status" aria-label="Kappaletestin ja itsearvioinnin tilanne">
               <h3>Kirjan todellinen suoritustilanne</h3>
               {(() => {
