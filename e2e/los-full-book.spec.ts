@@ -129,9 +129,9 @@ test("every one of the 60 guided lessons opens from its actual chapter picker on
    const button=runner.locator(".los-lesson-picker button").filter({hasText:new RegExp("^"+title+"$")});
    await expect(button).toHaveCount(1);
    await button.click();
-   if(title==="L001" || title==="L002" || title==="L003" || title==="L004" || title==="L005" || title==="L006" || title==="L007" || title==="L008" || title==="L009" || title==="L010"){
+   if(title==="L001" || title==="L002" || title==="L003" || title==="L004" || title==="L005" || title==="L006" || title==="L007" || title==="L008" || title==="L009" || title==="L010" || title==="L011"){
      await expect(page).toHaveURL(new RegExp("/los-lessons/" + title + "$"));
-     await expect(page.locator(".los-teacher-paper h2").first()).toContainText(title==="L001" ? "Tervetuloa ensimmäiselle" : title==="L002" ? "Saksaa ei aina lausuta" : title==="L003" ? "Ensimmäinen oikea" : title==="L004" ? "Tänään opit" : title==="L005" ? "Tervehdykset kuuluvat" : title==="L006" ? "Ensimmäisen kappaleen kertaus" : title==="L007" ? "Tänään kysyt ensimmäisen kerran" : title==="L008" ? "Franzin ja Gretan koko keskustelu" : title==="L009" ? "Sama nimi, kaksi verbiä" : "Uusi keskustelu: Thomas, Takashi ja Peter");
+     await expect(page.locator(".los-teacher-paper h2").first()).toContainText(title==="L001" ? "Tervetuloa ensimmäiselle" : title==="L002" ? "Saksaa ei aina lausuta" : title==="L003" ? "Ensimmäinen oikea" : title==="L004" ? "Tänään opit" : title==="L005" ? "Tervehdykset kuuluvat" : title==="L006" ? "Ensimmäisen kappaleen kertaus" : title==="L007" ? "Tänään kysyt ensimmäisen kerran" : title==="L008" ? "Franzin ja Gretan koko keskustelu" : title==="L009" ? "Sama nimi, kaksi verbiä" : title==="L010" ? "Uusi keskustelu: Thomas, Takashi ja Peter" : "Toisen kappaleen kertaus: esittele itsesi");
      await page.goto("/los#/1/path",{waitUntil:"domcontentloaded"});
    }else{
      await expect(runner.locator(".los-lesson-detail .los-overline")).toContainText(title);
@@ -926,5 +926,97 @@ test("L010 uses real Commons M-COM-02 Text B and requires two checked C02 book q
       legacyL010:Boolean(d.lessonProgress?.L010?.completedAt)};
   });
   expect(state).toEqual({L010:true,L009:false,q1:"a",q2:"b",bothChecked:true,optionalQ3:null,legacyL010:false});
+  await expectNoHorizontalOverflow(page);
+});
+
+test("L011 Teacher requires real C02 writing, submitted test and post-test self-assessment",async({page})=>{
+  await enterLocalBook(page);
+  await page.goto("/los#/1/path",{waitUntil:"domcontentloaded"});
+  await page.locator(".los-lesson-chapter-picker button").filter({hasText:"Kappale 2"}).click();
+  await page.locator(".los-lesson-picker button").filter({hasText:"L011"}).click();
+  await expect(page).toHaveURL(/\/los-lessons\/L011$/);
+  await expect(page.locator(".los-teacher-paper h2").first()).toContainText("Toisen kappaleen kertaus: esittele itsesi");
+  await page.locator(".los-teacher-outline nav button").filter({hasText:"Vastaa ja palauta C02:n oikea kappaletesti"}).click();
+  await expect(page.getByRole("link",{name:/Avaa kirjassa/}).first()).toHaveAttribute("href",/lessonReturn=L011.*\/1\/02\/test/);
+  await page.goto("/los?lessonReturn=L011#/1/02/test",{waitUntil:"domcontentloaded"});
+  const qs=page.locator(".los-workbook-question");
+  await expect(qs.first()).toBeVisible({timeout:15_000});
+  const count=await qs.count();
+  expect(count).toBeGreaterThanOrEqual(8);
+  for(let i=0;i<count;i++){
+    const q=qs.nth(i);
+    if(await q.locator('input[type="radio"]').count())
+      await q.locator('input[type="radio"]').first().check();
+    else
+      await q.locator('input[type="text"]').fill("bin");
+  }
+  await expect(page.locator(".los-test-submit button")).toBeEnabled();
+  // Filled test draft is NOT submitted, so L011 must still be blocked.
+  await page.getByRole("link",{name:"Palaa oppitunnille L011"}).click();
+  await page.locator(".los-teacher-outline nav button").filter({hasText:"Vastaa ja palauta C02:n oikea kappaletesti"}).click();
+  await expect(page.locator(".los-teacher-paper")).toContainText("C02-kappaletesti palautettu: Puuttuu");
+  await page.goto("/los?lessonReturn=L011#/1/02/apply",{waitUntil:"domcontentloaded"});
+  await page.locator("#los-application-02").fill("Ich heiße Mia.\nWie heißt du?");
+  await page.getByRole("link",{name:"Palaa oppitunnille L011"}).click();
+  await expect(page.locator(".los-teacher-paper")).toContainText("Oma kirjan soveltamisteksti: Tallennettu");
+  await expect(page.locator(".los-teacher-paper")).toContainText("C02-kappaletesti palautettu: Puuttuu");
+  await page.goto("/los?lessonReturn=L011#/1/02/test",{waitUntil:"domcontentloaded"});
+  await expect(qs.first()).toBeVisible();
+  await page.locator(".los-test-submit button").click();
+  await expect(page.locator(".los-test-result").first()).toContainText("TESTI PALAUTETTU");
+  await page.getByRole("link",{name:"Palaa oppitunnille L011"}).click();
+  await expect(page.locator(".los-teacher-paper")).toContainText("C02-kappaletesti palautettu: Tallennettu");
+  await expect(page.locator(".los-teacher-paper")).toContainText("Oma itsearviointi kirjoitettu: Puuttuu");
+  await page.goto("/los?lessonReturn=L011#/1/02/test",{waitUntil:"domcontentloaded"});
+  await page.locator(".los-self-assessment textarea").fill(
+    "Osasin kertoa nimeni ilman mallia. Kertaan vielä heißen- ja sein-verbien erot.");
+  await page.getByRole("link",{name:"Palaa oppitunnille L011"}).click();
+  await expect(page.locator(".los-teacher-paper")).toContainText("Oma itsearviointi kirjoitettu: Tallennettu");
+  const outline=page.locator(".los-teacher-outline nav button");
+  await expect(outline).toHaveCount(15);
+  const correct:Record<string,string>={
+    "Muistatko nimikysymyksen?":"Wie heißt du?",
+    "Kumpi on sein-verbin minämuoto?":"bin",
+    "Miten esittelet itsesi?":"Ich heiße",
+    "Puhutko itsestäsi vai toisesta henkilöstä?":"Das ist Peter.",
+    "Valitse oikea du-muoto uudessa nimikysymyksessä":"heißt",
+  };
+  for(let i=0;i<15;i++){
+    await outline.nth(i).click();
+    const title=(await page.locator(".los-teacher-paper h2").first().textContent())?.trim()??"";
+    if(title==="Kysy keksityn henkilön nimi ilman mallia"){
+      await page.locator(".los-teacher-form input").fill("Wie heißt du?");
+      await page.locator(".los-teacher-form button").click();
+      await expect(page.locator(".los-teacher-feedback")).toContainText("Oikein");
+    }else if(correct[title]){
+      await page.locator(".los-teacher-option").filter({hasText:correct[title]}).click();
+      await expect(page.locator(".los-teacher-feedback")).toContainText("Oikein");
+    }
+    const activity=page.locator(".los-teacher-activity button");
+    if(await activity.count()){
+      await activity.click();
+      await expect(activity).toContainText("Harjoittelu vahvistettu");
+    }
+  }
+  await expect(page.locator(".los-teacher-paper")).toContainText("Itsenäisesti oikein ratkaistuja eri tarkistuksia: 3");
+  const finish=page.getByRole("button",{name:"Merkitse oppitunti läpikäydyksi"});
+  await expect(finish).toBeEnabled();
+  await finish.click();
+  await expect(page.locator(".los-teacher-done")).toContainText("Oppitunti merkitty suoritetuksi");
+  await page.reload({waitUntil:"domcontentloaded"});
+  await expect(page.locator(".los-teacher-done")).toContainText("Oppitunti merkitty suoritetuksi");
+  const saved=await page.evaluate(()=>{
+    const k=Object.keys(localStorage).find(x=>x.startsWith("los.local.v1.")&&x.endsWith(".1.02"));
+    if(!k)throw Error("C02 draft missing");
+    const d=JSON.parse(localStorage.getItem(k)!);
+    const k1=Object.keys(localStorage).find(x=>x.startsWith("los.local.v1.")&&x.endsWith(".1.01"));
+    const d1=k1?JSON.parse(localStorage.getItem(k1)!):{};
+    return {L011:Boolean(d.teacherSessions?.L011?.completedAt),L010:Boolean(d.teacherSessions?.L010?.completedAt),
+      testSubmitted:Boolean(d.testSubmittedAt),selfAssessment:Boolean(d.selfAssessment?.trim()),
+      application:d.applicationDraft,legacyL011:Boolean(d.lessonProgress?.L011?.completedAt),
+      C01L011:Boolean(d1.teacherSessions?.L011?.completedAt)};
+  });
+  expect(saved).toEqual({L011:true,L010:false,testSubmitted:true,selfAssessment:true,
+    application:"Ich heiße Mia.\nWie heißt du?",legacyL011:false,C01L011:false});
   await expectNoHorizontalOverflow(page);
 });
