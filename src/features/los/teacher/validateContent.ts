@@ -8,6 +8,7 @@ const meaningful = (value: string | undefined) => Boolean(value?.trim());
 const textbookSections = new Set([
   "overview","contents","chapter","text","understand","vocabulary","grammar",
   "text-b","practice","apply","culture","test","appendix","dictionary",
+  "review-ii","final","summary",
 ]);
 
 function checkQuestion(question: TeacherQuestion, location: string, issues: TeacherContentIssue[]) {
@@ -98,6 +99,12 @@ export function validateTeacherLesson(lesson: TeacherLesson): TeacherContentIssu
       (!unique(lesson.requiredCheckedIds) || lesson.requiredCheckedIds.some(id =>
         !/^C\d{2}-(?:SOURCE|TEXTB|MCOM02)-Q\d{2}$/.test(id)))) {
     issues.push({ location: "requiredCheckedIds", problem: "Tarkistettavan lähdetehtävän tunniste on virheellinen." });
+  }
+  if (lesson.externalCheck && (
+      (lesson.externalCheck === "review-ii" && (lesson.chapterId !== "92" || !["L056","L057","L058"].includes(lesson.id))) ||
+      (["final","summary"].includes(lesson.externalCheck) && lesson.chapterId !== "93") ||
+      !["review-ii","final","summary"].includes(lesson.externalCheck))) {
+    issues.push({location:"externalCheck",problem:"Ulkoinen näyttö ei vastaa olemassa olevaa arviointipaikkaa."});
   }
   const assessment = lesson.chapterAssessment;
   if (assessment && (
