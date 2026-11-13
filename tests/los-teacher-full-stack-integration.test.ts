@@ -77,8 +77,14 @@ test("all required workbook task IDs refer to real, unique book exercises",()=>{
     }
     for(const scene of lesson.scenes){
       for(const link of scene.bookLinks ?? []){
-        assert.ok(/^(?:0[1-9]|10)$/.test(link.chapterId),
-          id+" links to an invalid textbook chapter "+link.chapterId);
+        const validChapter=/^(?:0[1-9]|10)$/.test(link.chapterId);
+        const validAssessment=(
+          (link.chapterId==="91" && ["review","midterm"].includes(link.section)) ||
+          (link.chapterId==="92" && link.section==="review-ii") ||
+          (link.chapterId==="93" && ["final","summary"].includes(link.section))
+        );
+        assert.ok(validChapter || validAssessment,
+          id+" links to an invalid chapter/assessment route "+link.chapterId+"/"+link.section);
       }
     }
   }
