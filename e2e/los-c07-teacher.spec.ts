@@ -78,6 +78,6 @@ test("C07 L040 displays actual 15-item chapter assessment separately from Teache
     .getByRole("button",{name:"Palauta C07:n 15 osatehtävää"}).click();
   await expect(page.getByRole("region",{name:"Kappaletestin ja itsearvioinnin tilanne"})).toContainText("Kappaletesti: 0/15");
   await page.goto("/los#/1/07/test",{waitUntil:"domcontentloaded"});
-  await expect(page.locator("fieldset").count()).resolves.toBeGreaterThan(0);
+  expect(await page.locator("fieldset").count()).toBeGreaterThan(0);
   await expectNoHorizontalOverflow(page);
 });
