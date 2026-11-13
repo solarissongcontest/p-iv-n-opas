@@ -40,7 +40,7 @@ export function teacherExternalStatus(
     const lines = writing.split(/\n/).map(line => line.trim()).filter(Boolean);
     const writingReady = group !== "L058" ||
       (lines.length >= 5 && lines.length <= 7 && writing.trim().length >= 80);
-    const hintedWriting = Boolean(draft.teacherSessions?.L058?.helpedIds.includes("writing-model"));
+    const hintedWriting = Boolean(draft.teacherSessions?.["L058"]?.helpedIds.includes("writing-model"));
     return {
       ready: items.length === 5 && checked === 5 && rated && writingReady,
       lines: [
