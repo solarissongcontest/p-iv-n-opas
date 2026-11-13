@@ -126,3 +126,33 @@ test("a source-guided lesson reuses chapter answers and persists its own reflect
   expect(separate.b2).toContain("Kertaan saksan persoonapäätteet.");
   expect(separate.b1).toBeNull();
 });
+
+test("LOS! 2–8 practice dashboard restores the first untried stage across reloads and keeps book totals separate",async({page})=>{
+  await enterFutureBook(page);
+  await page.goto("/los#/2/overview",{waitUntil:"domcontentloaded"});
+  await expect(page.getByRole("button",{name:"Opetuspolku"})).toBeVisible();
+  await page.getByRole("button",{name:"Opetuspolku"}).click();
+  const dashboard=page.locator(".los-future-progress");
+  await expect(dashboard).toContainText("0/300");
+  await expect(dashboard).toContainText("0/260");
+  await page.getByRole("button",{name:/Tunti 2: Aloita ja ennakoi/}).click();
+  const lesson=page.locator("#los-future-lesson-runner");
+  await lesson.getByRole("button",{name:"Merkitse vaihe kokeilluksi"}).click();
+  await expect(dashboard).toContainText("1/300");
+  await expect(dashboard).toContainText("1/50");
+  await page.reload({waitUntil:"domcontentloaded"});
+  await expect(dashboard).toContainText("1/300");
+  await dashboard.getByRole("button",{name:"Jatka oppitunnista 002"}).click();
+  await expect(lesson.getByRole("heading",{name:"Mallin purku"})).toBeVisible();
+  await lesson.getByRole("button",{name:"Merkitse vaihe kokeilluksi"}).click();
+  await expect(dashboard).toContainText("2/300");
+  await dashboard.getByRole("button",{name:"Näytä kappaleittain"}).click();
+  await expect(dashboard.locator(".los-future-progress-chapters li")).toHaveCount(10);
+  await expect(dashboard.locator(".los-future-progress-chapters li").first()).toContainText("2/30 vaihetta");
+
+  await page.goto("/los#/3/path",{waitUntil:"domcontentloaded"});
+  await expect(page.locator(".los-future-progress")).toContainText("0/300");
+  await page.goto("/los#/2/path",{waitUntil:"domcontentloaded"});
+  await expect(page.locator(".los-future-progress")).toContainText("2/300");
+  await expectNoHorizontalOverflow(page);
+});
