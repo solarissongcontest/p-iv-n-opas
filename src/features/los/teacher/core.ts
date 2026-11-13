@@ -8,7 +8,7 @@ export type TeacherPhase =
   "guided" | "independent" | "application" | "review" | "summary";
 export type TeacherBookReference ={
   bookId:number;chapterId:string;
-  section:"chapter"|"text"|"vocabulary"|"grammar"|"practice"|"culture";
+  section:"chapter"|"text"|"vocabulary"|"grammar"|"practice"|"culture"|"apply";
   label:string;
 };
 export type TeacherQuestion={
