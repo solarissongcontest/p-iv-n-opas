@@ -8,6 +8,7 @@ import {
   teacherCanFinish, teacherLatestAttempt, teacherWrongFeedback,
 } from "../src/features/los/teacher/engine.ts";
 import { LOS1_L004_TEACHER } from "../src/features/los/teacher/lessonL004.ts";
+import { LOS1_L005_TEACHER } from "../src/features/los/teacher/lessonL005.ts";
 
 const lesson = LOS1_L004_TEACHER;
 const now = "2026-11-12T20:00:00.000Z";
@@ -117,4 +118,40 @@ test("guided and activation questions are not independent mastery evidence", () 
   s = markTeacherHelp(s, "exit", now);
   s = submitTeacherAnswer(s, lesson, "exit", "b", now);
   assert.equal(independentTeacherEvidence(s, lesson), 1);
+});
+
+test("another lesson cannot acquire progress from shared scene names or activities", () => {
+  const other = LOS1_L005_TEACHER;
+  const old = emptyTeacherSession(lesson, now);
+  const l005Exit = other.scenes.find(scene => scene.id === "exit")!;
+  const l005Answer = l005Exit.question?.type === "choice"
+    ? l005Exit.question.correctOption! : l005Exit.question?.accepted?.[0] ?? "";
+  assert.ok(l005Answer);
+  assert.equal(moveTeacherScene(old, other, "exit", now), old);
+  assert.equal(submitTeacherAnswer(old, other, "exit", l005Answer, now), old);
+  for (const id of other.requiredActivityIds) {
+    assert.equal(confirmTeacherActivity(old, other, id, now), old);
+  }
+  assert.equal(independentTeacherEvidence(old, other), 0);
+
+  // Even if a corrupted/misrouted session has scene IDs and answers matching
+  // the target, its true lessonId must forbid both completion and evidence.
+  const impersonator = {
+    ...old,
+    visitedIds:other.scenes.map(scene=>scene.id),
+    attempts:other.requiredQuestionIds.map(sceneId=>({
+      sceneId,answer:"a",correct:true,independent:true,at:now,
+    })),
+    activityIds:[...other.requiredActivityIds],
+  };
+  const requiredAnswers=Object.fromEntries([
+    ...other.requiredPracticeIds,...(other.requiredCheckedIds??[])
+  ].map(id=>[id,"a"]));
+  assert.equal(teacherCanFinish(impersonator,other,requiredAnswers,
+    other.requiredCheckedIds??[]),false);
+  assert.equal(independentTeacherEvidence(impersonator,other),0);
+  assert.equal(finishTeacherSession(impersonator,other,requiredAnswers,now,
+    other.requiredCheckedIds??[]),impersonator);
+  // The legitimate L004 session still behaves normally.
+  assert.equal(moveTeacherScene(old,lesson,"exit",now).sceneId,"exit");
 });
