@@ -90,7 +90,7 @@ export function parseTeacherProgress(raw:string|null,lesson:TeacherLesson):Teach
     const x=JSON.parse(raw) as Partial<TeacherProgress>;
     if(x.version!==2||x.lessonId!==lesson.id||x.contentVersion!==lesson.contentVersion)return fallback;
     const sceneIds=new Set(lesson.scenes.map(s=>s.id));
-    const questionMap=new Map(lesson.scenes.filter(s=>s.question).map(s=>[s.question!.id,s.question!]));
+    const questionMap=new Map(lesson.scenes.filter(s=>s.question).map(s=>[s.question!.id,s.question!] as const));
     const visited=Array.isArray(x.visitedSceneIds)?x.visitedSceneIds
       .filter((id):id is string=>typeof id==="string"&&sceneIds.has(id)).slice(0,lesson.scenes.length):[];
     const answers:Record<string,TeacherAnswer>={};
@@ -99,7 +99,7 @@ export function parseTeacherProgress(raw:string|null,lesson:TeacherLesson):Teach
         const question=questionMap.get(id);
         if(!question||!value||typeof value!=="object")continue;
         const row=value as Partial<TeacherAnswer>;
-        if(!Number.isInteger(row.attempts)||row.attempts!<0||row.attempts!>3)continue;
+        if(typeof row.attempts!=="number"||!Number.isInteger(row.attempts)||row.attempts<0||row.attempts>3)continue;
         if(!["unanswered","hint","remediation","correct","solution"].includes(row.status??""))continue;
         if(row.lastOption!==null&&!question.options.some(o=>o.id===row.lastOption))continue;
         const independentCorrect=row.independentCorrect===true&&row.attempts===1&&
@@ -124,7 +124,7 @@ export function teacherAnswer(state:TeacherProgress,lesson:TeacherLesson,
   questionId:string,optionId:string):TeacherProgress{
   const q=lesson.scenes.find(s=>s.question?.id===questionId)?.question;
   if(!q||!q.options.some(o=>o.id===optionId))return state;
-  const prev=state.answers[q.id]??{attempts:0,lastOption:null,status:"unanswered",usedHelp:false,independentCorrect:false};
+  const prev:TeacherAnswer=state.answers[q.id]??{attempts:0,lastOption:null,status:"unanswered",usedHelp:false,independentCorrect:false};
   if(prev.status==="correct"||prev.status==="solution"||prev.attempts>=3)return state;
   const attempts=prev.attempts+1;
   const correct=optionId===q.correctId;
@@ -136,14 +136,14 @@ export function teacherAnswer(state:TeacherProgress,lesson:TeacherLesson,
 export function teacherRequestHelp(state:TeacherProgress,lesson:TeacherLesson):TeacherProgress{
   const q=lesson.scenes.find(s=>s.id===state.sceneId)?.question;
   if(!q)return state;
-  const prev=state.answers[q.id]??{attempts:0,lastOption:null,status:"unanswered",usedHelp:false,independentCorrect:false};
+  const prev:TeacherAnswer=state.answers[q.id]??{attempts:0,lastOption:null,status:"unanswered",usedHelp:false,independentCorrect:false};
   if(prev.status==="correct"||prev.status==="solution")return state;
   return {...state,answers:{...state.answers,[q.id]:{...prev,usedHelp:true,independentCorrect:false}}};
 }
 export function teacherRevealSolution(state:TeacherProgress,lesson:TeacherLesson):TeacherProgress{
   const q=lesson.scenes.find(s=>s.id===state.sceneId)?.question;
   if(!q)return state;
-  const prev=state.answers[q.id]??{attempts:0,lastOption:null,status:"unanswered",usedHelp:false,independentCorrect:false};
+  const prev:TeacherAnswer=state.answers[q.id]??{attempts:0,lastOption:null,status:"unanswered",usedHelp:false,independentCorrect:false};
   if(prev.status==="correct"||prev.status==="solution")return state;
   return {...state,answers:{...state.answers,[q.id]:{...prev,status:"solution",
     usedHelp:true,independentCorrect:false}},coveredAt:null};
