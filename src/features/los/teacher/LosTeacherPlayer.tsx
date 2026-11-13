@@ -355,7 +355,7 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
                 <p>Vertaa kirjoitusasua itse. Tämä ei ole koneellinen ääntämis- tai kuunteluarvio.</p>
               </details>
             </section>}
-            {scene.chapterPhoto && <Los1ChapterImage chapterId="09" variant="learning"/>}
+            {scene.chapterPhoto && <Los1ChapterImage chapterId={lesson.chapterId} variant="learning"/>}
             {(scene.sourceChapterId || scene.textBChapterId) && <TeacherSource scene={scene}/>}
             {scene.calendar && <TeacherTimeCalendar scene={scene}
               value={session.draftAnswers[scene.id] ?? ""}
