@@ -37,8 +37,13 @@ test("all ten chapters provide complete Text B readers inside the book, not link
   }else{
    await expect(page.locator(".los-secondary-source .los-c01-turn").first()).toBeVisible();
   }
-  if(chapter==="08"){
+  if(chapter==="07"){
+   // The alphabet audio is intentionally gated pending source/device approval.
+   await expect(page.getByText("C07:n aakkosäänite odottaa hyväksyntää.")).toBeVisible();
+   await expect(page.locator(".los-secondary-source audio")).toHaveCount(0);
+  }else if(chapter==="08"){
    await expect(page.getByText("Haastattelun ääni ei ole vielä käytettävissä.")).toBeVisible();
+   await expect(page.locator(".los-secondary-source audio")).toHaveCount(0);
   }else{
    await expect(page.locator(".los-secondary-source audio").first()).toBeVisible();
   }
@@ -102,52 +107,65 @@ test("C01 real original token highlight, C08 gated video and responsive exercise
 });
 
 
-test("every one of the 60 guided lessons opens from its actual chapter picker on iPhone and desktop",async({page})=>{
- test.setTimeout(180_000); // The full 60-lesson navigation stress test exceeds the default 60s on emulated mobile WebKit.
- await enterLocalBook(page);
- await page.goto("/los#/1/path",{waitUntil:"domcontentloaded"});
- const runner=page.locator("#los-lesson-runner");
- await expect(runner).toBeVisible();
- const sections=runner.locator(".los-lesson-chapter-picker button");
- await expect(sections).toHaveCount(13);
- const seen=new Set<string>();
- for(let i=0;i<13;i++){
-  await sections.nth(i).click();
-  const lessonButtons=runner.locator(".los-lesson-picker button");
-  const count=await lessonButtons.count();
-  expect(count).toBeGreaterThan(0);
-  for(let j=0;j<count;j++){
-   const button=lessonButtons.nth(j);
-   const title=(await button.innerText()).trim();
-   expect(title).toMatch(/^L\d{3}$/);
-   expect(seen.has(title)).toBe(false);
-   seen.add(title);
-   await button.click();
-   if(getLosTeacherLesson(title)){
-    await expect(page).toHaveURL(new RegExp("/los-lessons/"+title+"$"));
-    await expect(page.locator(".los-teacher-paper h2")).toBeVisible();
-    await expect(page.locator(".los-teacher-sidebar h1")).toBeVisible();
-    await page.goto("/los#/1/path",{waitUntil:"domcontentloaded"});
-    await expect(runner).toBeVisible();
-    await expect(sections).toHaveCount(13);
-    await expect(sections.nth(i)).toBeVisible();
-    await sections.nth(i).click();
-   }else{
-    await expect(runner.locator(".los-lesson-detail .los-overline")).toContainText(title);
-    await expect(runner.locator(".los-lesson-steps li").first()).toBeVisible();
-    await expect(runner.locator(".los-lesson-exit")).toBeVisible();
-    await expect(runner.getByRole("button",{name:"Merkitse oppitunti suoritetuksi"})).toBeDisabled();
+/**
+ * Keep the full 60-lesson coverage while dividing actual route openings into
+ * independent batches. WebKit can otherwise hit the 180s test timeout despite
+ * successfully rendering individual teacher lessons. The picker still lists
+ * and validates all 60 unique IDs in every batch.
+ */
+for(const [start,end] of [[1,20],[21,40],[41,60]] as const){
+ test(`all 60 guided lessons are selectable; L${String(start).padStart(3,"0")}-L${String(end).padStart(3,"0")} open from the real chapter picker`,async({page})=>{
+  test.setTimeout(210_000);
+  await enterLocalBook(page);
+  await page.goto("/los#/1/path",{waitUntil:"domcontentloaded"});
+  const runner=page.locator("#los-lesson-runner");
+  await expect(runner).toBeVisible();
+  const sections=runner.locator(".los-lesson-chapter-picker button");
+  await expect(sections).toHaveCount(13);
+  const allTitles=new Set<string>();
+  const opened=new Set<string>();
+  for(let i=0;i<13;i++){
+   await sections.nth(i).click();
+   const lessonButtons=runner.locator(".los-lesson-picker button");
+   const count=await lessonButtons.count();
+   expect(count).toBeGreaterThan(0);
+   for(let j=0;j<count;j++){
+    const button=lessonButtons.nth(j);
+    const title=(await button.innerText()).trim();
+    expect(title).toMatch(/^L\\d{3}$/);
+    expect(allTitles.has(title)).toBe(false);
+    allTitles.add(title);
+    const number=Number(title.slice(1));
+    if(number<start||number>end)continue;
+    expect(opened.has(title)).toBe(false);
+    opened.add(title);
+    await button.click();
+    if(getLosTeacherLesson(title)){
+     await expect(page).toHaveURL(new RegExp("/los-lessons/"+title+"$"));
+     await expect(page.locator(".los-teacher-paper h2")).toBeVisible();
+     await expect(page.locator(".los-teacher-sidebar h1")).toBeVisible();
+     await page.goto("/los#/1/path",{waitUntil:"domcontentloaded"});
+     await expect(runner).toBeVisible();
+     await expect(sections).toHaveCount(13);
+     await sections.nth(i).click();
+    }else{
+     await expect(runner.locator(".los-lesson-detail .los-overline")).toContainText(title);
+     await expect(runner.locator(".los-lesson-steps li").first()).toBeVisible();
+     await expect(runner.locator(".los-lesson-exit")).toBeVisible();
+     await expect(runner.getByRole("button",{name:"Merkitse oppitunti suoritetuksi"})).toBeDisabled();
+    }
    }
   }
- }
- expect(seen.size).toBe(60);
- for(let n=1;n<=60;n++)expect(seen.has("L"+String(n).padStart(3,"0"))).toBe(true);
- await expect(runner.locator(".los-lesson-progress")).toContainText("0/60 suoritettu");
- await page.reload({waitUntil:"domcontentloaded"});
- await expect(page.locator("#los-lesson-runner .los-lesson-picker button").last()).toContainText("L060");
- await expectNoHorizontalOverflow(page);
-});
-
+  expect(allTitles.size).toBe(60);
+  for(let n=1;n<=60;n++)expect(allTitles.has("L"+String(n).padStart(3,"0"))).toBe(true);
+  expect(opened.size).toBe(end-start+1);
+  for(let n=start;n<=end;n++)expect(opened.has("L"+String(n).padStart(3,"0"))).toBe(true);
+  await expect(runner.locator(".los-lesson-progress")).toContainText("0/60 suoritettu");
+  await page.reload({waitUntil:"domcontentloaded"});
+  await expect(page.locator("#los-lesson-runner .los-lesson-picker button").last()).toContainText("L060");
+  await expectNoHorizontalOverflow(page);
+ });
+}
 
 test("search finds actual C08 German source dialogue and Finnish meaning without leaving LOS!",async({page})=>{
  await enterLocalBook(page);
