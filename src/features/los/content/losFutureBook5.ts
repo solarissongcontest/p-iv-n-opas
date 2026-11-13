@@ -17,11 +17,6 @@ export const LOS_FUTURE_BOOK_5: Record<string, LosFutureManuscript> = {
     "grammarExplanation": "Imperatiivissa tuttavallinen du-muoto voi olla pelkkä verbivartalo: Trink Wasser! Kohteliaassa Sie-muodossa käytetään infinitiivin näköistä muotoa ja Sie-pronominia: Trinken Sie Wasser! Pehmeä neuvo ei vaadi käskyä: Du solltest mehr schlafen. Älä anna kaikille samoja neuvoja, vaan muotoile tehtävissä kuvitteellisen henkilön tilanteeseen sopiva ehdotus.\n\nLaajennettu opetus kirjassa:\n\nImperatiivi sopii neuvoon: Mach eine Pause! (sinä) tai Machen Sie bitte eine Pause! (kohtelias). Solltest on pehmeämpi ehdotus: Du solltest eine Pause machen. Kohteliaisuus riippuu siitä, onko viesti ystävälle vai tuntemattomalle. Ohjeiden ei tarvitse olla ehdottomia, ja hyvinvoinnista annettavat tehtävät ovat kieliharjoituksia, eivät yksilöllisiä hoitosuosituksia.\n\nMallilause: Trink Wasser! Du solltest heute früher schlafen gehen.\n\nSuomennos: Juo vettä! Sinun kannattaisi mennä tänään aiemmin nukkumaan.\n\nOpettajan virheen korjaus: Du solltest gehst. → Du solltest gehen.\n\nLähdeviitteen pedagoginen rajaus: Tekstin vaikeat muodot merkitään tunnistettaviksi, ellei niitä ole opetettu. Oppijan ei tarvitse tuottaa uuden aikamuodon tai sijamuodon muotoja ennen niiden erillistä opetusta.\n\nOma minikoe: selitä säännön vaikutus verbin paikkaan, persoonapäätteeseen tai artikkeliin omassa mallilauseessa. Sulje opetus. Tee vastaava uusi lause eri henkilöllä tai sanalla ja tarkista tulos.",
     "vocabulary": [
       {
-        "de": "Suomi",
-        "fi": "Huomio",
-        "status": ""
-      },
-      {
         "de": "der Rat",
         "fi": "neuvo",
         "status": "artikkeli mukana; monikko ja ääntäminen vielä tarkistettava"
@@ -144,11 +139,6 @@ export const LOS_FUTURE_BOOK_5: Record<string, LosFutureManuscript> = {
     "grammarExplanation": "Ich fühle mich … ilmaisee omaa tunnetta tai vointia: Ich fühle mich müde. Sana mich on tässä refleksiivimuoto, joka viittaa takaisin tekijään. Esimerkiksi Du fühlst dich gut. Toinen tavallinen fraasi on Mir geht es gut. Mir on tässä kiinteästä rakenteesta opittava muoto; sitä ei muodosteta nominatiivisesta ich-sanasta arvauksella.\n\nLaajennettu opetus kirjassa:\n\nTunteita voi ilmaista adjektiiveilla: Ich bin froh, müde oder traurig. Sich fühlen on refleksiiviverbi: Ich fühle mich gut, du fühlst dich besser. Refleksiivipronomini viittaa samaan henkilöön kuin lauseen tekijä. Vanha kuulumisfraasi Mir geht es gut toimii edelleen, mutta siinä mir on jo valmiin ilmauksen osa. Henkilön tunteita ei tarvitse tulkita hänen puolestaan; kysy mieluummin Wie fühlst du dich?\n\nMallilause: Ich fühle mich heute müde, aber es geht mir gut.\n\nSuomennos: Tunnen itseni tänään väsyneeksi, mutta minulle kuuluu hyvää.\n\nOpettajan virheen korjaus: Ich fühle mir gut. → Ich fühle mich gut.\n\nLähdeviitteen pedagoginen rajaus: Tekstin vaikeat muodot merkitään tunnistettaviksi, ellei niitä ole opetettu. Oppijan ei tarvitse tuottaa uuden aikamuodon tai sijamuodon muotoja ennen niiden erillistä opetusta.\n\nOma minikoe: selitä säännön vaikutus verbin paikkaan, persoonapäätteeseen tai artikkeliin omassa mallilauseessa. Sulje opetus. Tee vastaava uusi lause eri henkilöllä tai sanalla ja tarkista tulos.",
     "vocabulary": [
       {
-        "de": "Suomi",
-        "fi": "Huomio",
-        "status": ""
-      },
-      {
         "de": "die Stimmung",
         "fi": "mieliala",
         "status": "artikkeli mukana; monikko ja ääntäminen vielä tarkistettava"
@@ -246,11 +236,6 @@ export const LOS_FUTURE_BOOK_5: Record<string, LosFutureManuscript> = {
     "grammarExplanation": "Tavallinen fraasi on Mein Kopf tut weh, jossa kehonosa on lauseen tekijänä. Voit myös sanoa Ich habe Kopfschmerzen. Lause Mir tut der Kopf weh sisältää datiivimuodon mir; aluksi riittää tunnistaa fraasi kokonaisena. Sanastossa kehonosien artikkelit ovat tärkeitä: der Kopf, der Bauch, das Bein. Opetettava kieli ei ole lääketieteellistä neuvontaa.\n\nLaajennettu opetus kirjassa:\n\nKehonosista puhuttaessa kannattaa opetella sana artikkelin kanssa: der Kopf, der Arm, das Bein. Särkyä ilmaiseva fraasi on Mir tut der Kopf weh. Monikossa sanot esimerkiksi Mir tun die Füße weh. Lause ei taivu suomen tavoin sanasta sanaan. Tärkeää on myös osata sanoa Ich brauche Hilfe ja pyytää kertomaan hitaammin. Tavoite on ymmärrettävä viestintä, ei lääketieteellisten diagnoosien laatiminen.\n\nMallilause: Mein Kopf tut weh. / Mir tut der Kopf weh.\n\nSuomennos: Päähäni sattuu.\n\nOpettajan virheen korjaus: Mir tut die Füße weh. → Mir tun die Füße weh.\n\nLähdeviitteen pedagoginen rajaus: Tekstin vaikeat muodot merkitään tunnistettaviksi, ellei niitä ole opetettu. Oppijan ei tarvitse tuottaa uuden aikamuodon tai sijamuodon muotoja ennen niiden erillistä opetusta.\n\nOma minikoe: selitä säännön vaikutus verbin paikkaan, persoonapäätteeseen tai artikkeliin omassa mallilauseessa. Sulje opetus. Tee vastaava uusi lause eri henkilöllä tai sanalla ja tarkista tulos.",
     "vocabulary": [
       {
-        "de": "Suomi",
-        "fi": "Huomio",
-        "status": ""
-      },
-      {
         "de": "der Kopf",
         "fi": "pää",
         "status": "artikkeli mukana; monikko ja ääntäminen vielä tarkistettava"
@@ -347,11 +332,6 @@ export const LOS_FUTURE_BOOK_5: Record<string, LosFutureManuscript> = {
     "grammarTopic": "höfliche Bitte; sollten/müssen",
     "grammarExplanation": "Müssen kertoo välttämättömyydestä: Ich muss zum Arzt gehen. Sollten on pehmeämpi suositus: Sie sollten sich ausruhen. Muoto du solltest sopii tuttavalliseksi neuvoksi. Kun päälauseessa on modaalinen apuverbi, toinen verbi pysyy infinitiivissä lopussa: Du solltest Wasser trinken. Kohtelias pyyntö voidaan tehdä esimerkiksi Könnten Sie das bitte wiederholen? mutta tämän muodon täysi taivutus ei ole vielä pääasia.\n\nLaajennettu opetus kirjassa:\n\nVastaanotolla kohtelias pyyntö auttaa ymmärrettävässä asioinnissa. Ich möchte einen Termin vereinbaren tarkoittaa, että haluat sopia ajan. Modaaliverbi sollte/sollten voi ilmaista neuvoa: Du solltest dich ausruhen. Müssen ilmaisee velvollisuutta. Pidä kertomus oireista yksinkertaisena ja täsmällisenä. Jos et ymmärrä ohjetta, käytä jo opittua Bitte wiederholen Sie das.\n\nMallilause: Ich möchte einen Termin. Können Sie das bitte wiederholen?\n\nSuomennos: Haluaisin ajan. Voitteko toistaa sen?\n\nOpettajan virheen korjaus: Ich möchte ein Termin. → Ich möchte einen Termin.\n\nLähdeviitteen pedagoginen rajaus: Tekstin vaikeat muodot merkitään tunnistettaviksi, ellei niitä ole opetettu. Oppijan ei tarvitse tuottaa uuden aikamuodon tai sijamuodon muotoja ennen niiden erillistä opetusta.\n\nOma minikoe: selitä säännön vaikutus verbin paikkaan, persoonapäätteeseen tai artikkeliin omassa mallilauseessa. Sulje opetus. Tee vastaava uusi lause eri henkilöllä tai sanalla ja tarkista tulos.",
     "vocabulary": [
-      {
-        "de": "Suomi",
-        "fi": "Huomio",
-        "status": ""
-      },
       {
         "de": "der Arzt",
         "fi": "lääkäri",
@@ -454,11 +434,6 @@ export const LOS_FUTURE_BOOK_5: Record<string, LosFutureManuscript> = {
     "grammarTopic": "weil + yksinkertainen peruste",
     "grammarExplanation": "Weil vastaa suomen koska-sanaa ja aloittaa sivulauseen. Kun sanot Ich esse Obst, weil es gesund ist, pilkku erottaa lauseet ja ist tulee sivulauseen loppuun. Päälausetta voi käyttää sellaisenaan, mutta syyn lisääminen edellyttää uutta sanajärjestystä. Älä tee lauseesta liian pitkää; yksi selkeä perustelu kerrallaan on riittävä.\n\nLaajennettu opetus kirjassa:\n\nPerustelulauseessa weil tarkoittaa koska. Sen aloittamassa sivulauseessa taivutettu verbi on yleensä lopussa: Ich trinke Wasser, weil ich Durst habe. Päälausetta ei siis saa kopioida sellaisenaan sivulauseen sisälle. Kun kirjoitat ravitsemuksesta, ilmaise oma tapasi sen sijaan että määräät kaikille yhtä oikeaa ruokavaliota. Aloita kahdesta lyhyestä lauseesta, ja yhdistä ne vasta sitten weil-sanalla.\n\nMallilause: Ich esse Gemüse, weil es mir schmeckt.\n\nSuomennos: Syön kasviksia, koska ne maistuvat minulle.\n\nOpettajan virheen korjaus: weil ich habe Hunger → weil ich Hunger habe.\n\nLähdeviitteen pedagoginen rajaus: Tekstin vaikeat muodot merkitään tunnistettaviksi, ellei niitä ole opetettu. Oppijan ei tarvitse tuottaa uuden aikamuodon tai sijamuodon muotoja ennen niiden erillistä opetusta.\n\nOma minikoe: selitä säännön vaikutus verbin paikkaan, persoonapäätteeseen tai artikkeliin omassa mallilauseessa. Sulje opetus. Tee vastaava uusi lause eri henkilöllä tai sanalla ja tarkista tulos.",
     "vocabulary": [
-      {
-        "de": "Suomi",
-        "fi": "Huomio",
-        "status": ""
-      },
       {
         "de": "gesund",
         "fi": "terveellinen",
@@ -572,11 +547,6 @@ export const LOS_FUTURE_BOOK_5: Record<string, LosFutureManuscript> = {
     "grammarExplanation": "Sich ausruhen ja sich erholen ovat refleksiiviverbejä: Ich ruhe mich aus ja Ich erhole mich. Erityisesti ausruhen on erotettava verbi, joten aus siirtyy väitelauseen loppuun. Kun verbin edellä on modaaliverbi, infinitiivi pysyy yhdessä: Ich möchte mich ausruhen. Myös tavallinen schlafen on tärkeä: Ich schlafe acht Stunden. Tämä on kielellinen esimerkki, ei unisuositus.\n\nLaajennettu opetus kirjassa:\n\nMonet arjen rutiinit käyttävät refleksiiviverbejä: Ich entspanne mich, ich wasche mich. Refleksiivipronomini vaihtuu tekijän mukaan: ich … mich, du … dich, er … sich. Adverbiaaliset ajanilmaukset am Abend ja vor dem Schlafen kertovat milloin jotakin tapahtuu. Kaikkia reflexiivisiä verbejä ei käytetä saksassa täsmälleen kuten suomessa, joten opettele ne esimerkeissä.\n\nMallilause: Am Abend entspanne ich mich und lese ein Buch.\n\nSuomennos: Illalla rentoudun ja luen kirjaa.\n\nOpettajan virheen korjaus: Ich entspanne mir. → Ich entspanne mich.\n\nLähdeviitteen pedagoginen rajaus: Tekstin vaikeat muodot merkitään tunnistettaviksi, ellei niitä ole opetettu. Oppijan ei tarvitse tuottaa uuden aikamuodon tai sijamuodon muotoja ennen niiden erillistä opetusta.\n\nOma minikoe: selitä säännön vaikutus verbin paikkaan, persoonapäätteeseen tai artikkeliin omassa mallilauseessa. Sulje opetus. Tee vastaava uusi lause eri henkilöllä tai sanalla ja tarkista tulos.",
     "vocabulary": [
       {
-        "de": "Suomi",
-        "fi": "Huomio",
-        "status": ""
-      },
-      {
         "de": "der Schlaf",
         "fi": "uni",
         "status": "artikkeli mukana; monikko ja ääntäminen vielä tarkistettava"
@@ -688,11 +658,6 @@ export const LOS_FUTURE_BOOK_5: Record<string, LosFutureManuscript> = {
     "grammarTopic": "komparatiivin kertaus, modaliteit",
     "grammarExplanation": "Komparatiivia käytetään vertailuun: besser, schneller, gesünder. Kun vertailet kahta asiaa, käytä als: Schwimmen ist leichter als Laufen. Modaaliverbi pitää toisen verbin infinitiivissä: Ich kann heute trainieren. On tärkeää erottaa vertailu arvottamisesta: jokin voi tuntua sinulle paremmalta ilman että se olisi kaikille parempi.\n\nLaajennettu opetus kirjassa:\n\nKun vertailet tapoja liikkua, tarvitset komparatiivin. Viel tarkoittaa paljon ja mehr enemmän; gut muuttuu vertailussa besser-muotoon. Silloin tällöin voit käyttää myös modaaliverbiä: Ich kann zu Fuß gehen. Erilaiset elämäntilanteet vaikuttavat liikkumisen mahdollisuuksiin, joten oppikirjan esimerkit eivät ole ohje kaikkien terveyden arvioimiseen.\n\nMallilause: Ich gehe öfter zu Fuß, weil es für mich praktisch ist.\n\nSuomennos: Kävelen useammin, koska se on minulle käytännöllistä.\n\nOpettajan virheen korjaus: mehr gut → besser.\n\nLähdeviitteen pedagoginen rajaus: Tekstin vaikeat muodot merkitään tunnistettaviksi, ellei niitä ole opetettu. Oppijan ei tarvitse tuottaa uuden aikamuodon tai sijamuodon muotoja ennen niiden erillistä opetusta.\n\nOma minikoe: selitä säännön vaikutus verbin paikkaan, persoonapäätteeseen tai artikkeliin omassa mallilauseessa. Sulje opetus. Tee vastaava uusi lause eri henkilöllä tai sanalla ja tarkista tulos.",
     "vocabulary": [
-      {
-        "de": "Suomi",
-        "fi": "Huomio",
-        "status": ""
-      },
       {
         "de": "die Bewegung",
         "fi": "liikunta",
@@ -816,11 +781,6 @@ export const LOS_FUTURE_BOOK_5: Record<string, LosFutureManuscript> = {
     "grammarExplanation": "Weil kertoo syyn, dass aloittaa sivulauseen, joka ilmaisee esimerkiksi ajatuksen sisällön: Ich denke, dass Pausen wichtig sind. Molemmissa taivutettu verbi tulee loppuun. Vertaa: Ich bin müde, weil ich viel gelernt habe. ja Ich finde, dass der Tag lang ist. Opettele erottamaan syy ja sisältö; muuten niistä tulee helposti väärä merkitys.\n\nLaajennettu opetus kirjassa:\n\nKun haluat kertoa ajatuksesta tai tunteesta, käytä esimerkiksi Ich denke, dass … tai Ich glaube, dass … Dass-sivulauseessa verbi on lopussa: Ich glaube, dass ich eine Pause brauche. Weil antaa syyn, dass kertoo sisällön; ne eivät ole keskenään vaihdettavia. Vuorovaikutuksessa kuunteleminen näkyy myös lyhyinä jatkokysymyksinä kuten Wirklich? Warum? Ja ymmärrys voidaan tarkistaa sanomalla Habe ich dich richtig verstanden?\n\nMallilause: Ich glaube, dass wir mehr Zeit brauchen.\n\nSuomennos: Luulen, että tarvitsemme enemmän aikaa.\n\nOpettajan virheen korjaus: dass wir brauchen Zeit → dass wir Zeit brauchen.\n\nLähdeviitteen pedagoginen rajaus: Tekstin vaikeat muodot merkitään tunnistettaviksi, ellei niitä ole opetettu. Oppijan ei tarvitse tuottaa uuden aikamuodon tai sijamuodon muotoja ennen niiden erillistä opetusta.\n\nOma minikoe: selitä säännön vaikutus verbin paikkaan, persoonapäätteeseen tai artikkeliin omassa mallilauseessa. Sulje opetus. Tee vastaava uusi lause eri henkilöllä tai sanalla ja tarkista tulos.",
     "vocabulary": [
       {
-        "de": "Suomi",
-        "fi": "Huomio",
-        "status": ""
-      },
-      {
         "de": "der Stress",
         "fi": "stressi",
         "status": "artikkeli mukana; monikko ja ääntäminen vielä tarkistettava"
@@ -933,11 +893,6 @@ export const LOS_FUTURE_BOOK_5: Record<string, LosFutureManuscript> = {
     "grammarExplanation": "Perfekt kertoo menneistä tapahtumista: Ich habe früher viel gespielt. Sein-verbin yleinen mennyt muoto on war, haben-verbin hatte. Ne ovat Präteritumia, mutta yleisiä myös puheessa. Näin voit sanoa Als Kind war ich oft draußen ja Ich hatte einen Hund. Pidempiä menneen ajan järjestelmiä ei tässä opetella; tärkeintä on erottaa mikä oli (war), mitä oli (hatte) ja mitä tapahtui (Perfekt).\n\nLaajennettu opetus kirjassa:\n\nMenneestä lapsuudesta kertominen yhdistää usein muotoja war ja hatte sekä Perfektin. Ich war klein on olin pieni ja Ich hatte einen Hund on minulla oli koira. Perfektissä kerrotaan yksittäisestä tapahtumasta: Ich habe Fahrradfahren gelernt. Näitä ei tarvitse vielä analysoida kaikkiin preteritin sääntöihin. Tavoite on erottaa tila ja tapahtuma sekä aikajärjestys.\n\nMallilause: Als ich klein war, hatte ich einen Hund.\n\nSuomennos: Kun olin pieni, minulla oli koira.\n\nOpettajan virheen korjaus: Als ich klein bin → Als ich klein war.\n\nLähdeviitteen pedagoginen rajaus: Tekstin vaikeat muodot merkitään tunnistettaviksi, ellei niitä ole opetettu. Oppijan ei tarvitse tuottaa uuden aikamuodon tai sijamuodon muotoja ennen niiden erillistä opetusta.\n\nOma minikoe: selitä säännön vaikutus verbin paikkaan, persoonapäätteeseen tai artikkeliin omassa mallilauseessa. Sulje opetus. Tee vastaava uusi lause eri henkilöllä tai sanalla ja tarkista tulos.",
     "vocabulary": [
       {
-        "de": "Suomi",
-        "fi": "Huomio",
-        "status": ""
-      },
-      {
         "de": "früher",
         "fi": "ennen",
         "status": "ääntämisen ja muodon tarkistus"
@@ -1049,11 +1004,6 @@ export const LOS_FUTURE_BOOK_5: Record<string, LosFutureManuscript> = {
     "grammarTopic": "aikailmaukset früher/heute/später",
     "grammarExplanation": "Früher tarkoittaa ennen, heute nykyhetkeä ja später myöhemmin. Kun ajanilmaus aloittaa lauseen, taivutettu verbi tulee toiseksi: Früher spielte er draußen on tekstissä mahdollinen, mutta omassa tuotannossa voit käyttää helpompaa Perfektiä: Früher hat er oft draußen gespielt. Heute lernt er Deutsch. Aikaa kuvaava ilmaus ei yksin määrää, mitä aikamuotoa on käytettävä; tarkista myös verbin muoto.\n\nLaajennettu opetus kirjassa:\n\nElämänvaiheita vertaillessa ajanilmaisut tekevät tekstistä ymmärrettävän: früher, heute, später. Vertaile myös vanhaa ja uutta tapaa, mutta älä päättele ihmisten arkea iän perusteella. Perfekt sopii tapahtuneisiin asioihin, preesens nykyhetkeen ja tulevaisuutta voi ilmaista esimerkeissä morgen tai später-sanoilla. Hyvässä haastattelussa annetaan toisen kertoa omasta kokemuksestaan.\n\nMallilause: Früher habe ich viel gelesen. Heute höre ich oft Podcasts.\n\nSuomennos: Ennen luin paljon. Nykyään kuuntelen usein podcasteja.\n\nOpettajan virheen korjaus: Früher ich habe viel gelesen. → Früher habe ich viel gelesen.\n\nLähdeviitteen pedagoginen rajaus: Tekstin vaikeat muodot merkitään tunnistettaviksi, ellei niitä ole opetettu. Oppijan ei tarvitse tuottaa uuden aikamuodon tai sijamuodon muotoja ennen niiden erillistä opetusta.\n\nOma minikoe: selitä säännön vaikutus verbin paikkaan, persoonapäätteeseen tai artikkeliin omassa mallilauseessa. Sulje opetus. Tee vastaava uusi lause eri henkilöllä tai sanalla ja tarkista tulos.",
     "vocabulary": [
-      {
-        "de": "Suomi",
-        "fi": "Huomio",
-        "status": ""
-      },
       {
         "de": "jung",
         "fi": "nuori",
