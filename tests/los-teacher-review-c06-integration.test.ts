@@ -2,6 +2,7 @@ import {test} from "node:test";
 import assert from "node:assert/strict";
 import {readFileSync} from "node:fs";
 import {getLosTeacherLesson} from "../src/features/los/teacher/lessonRegistry.ts";
+import {LOS1_C06_TEXT} from "../src/features/los/content/los1OpenDialogues.ts";
 import {LOS1_L030_TEACHER} from "../src/features/los/teacher/lessonL030.ts";
 import {LOS1_L033_TEACHER} from "../src/features/los/teacher/lessonL033.ts";
 import {emptyTeacherSession,setTeacherAnswerDraft,confirmTeacherActivity,teacherBuiltNumberCount,teacherMidtermAssessmentStatus} from "../src/features/los/teacher/engine.ts";
@@ -46,4 +47,18 @@ test("integrated player preserves genuine media, exact exam status, and number i
   assert.match(code,/section === "midterm" \|\| section === "review"/);
   assert.match(code,/getLosTeacherLesson.*lessonRegistry/);
   assert.match(route,/L027–L035/);
+});
+
+test("latest C06 published source text has named speakers, while older cached version differs",()=>{
+  assert.equal(LOS1_C06_TEXT.sourceId,"M-ZPE-01");
+  assert.equal(LOS1_C06_TEXT.originalLines.length,12);
+  assert.deepEqual(LOS1_C06_TEXT.originalLines.slice(0,4).map(line=>line.speaker),
+    ["Fabian","Lucas","Fabian","Lucas"]);
+  assert.equal(LOS1_C06_TEXT.originalLines[1]?.text,"Ich bin neun.");
+  assert.equal(LOS1_C06_TEXT.originalLines[3]?.text,"Lucas.");
+  assert.equal(LOS1_C06_TEXT.questions[0]?.answers[0]?.text,"9-vuotias");
+  assert.equal(LOS1_C06_TEXT.questions[0]?.correctId,"a");
+  assert.match(LOS1_C06_TEXT.sourceDetail,/välimuistissa/);
+  assert.equal(LOS1_C06_TEXT.author,"Monika Janicka");
+  assert.equal(LOS1_C06_TEXT.licenseCode,"CC BY-SA 3.0");
 });

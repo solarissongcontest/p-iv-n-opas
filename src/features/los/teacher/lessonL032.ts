@@ -313,7 +313,7 @@ export const LOS1_L032_TEACHER: TeacherLesson = {
       "kind": "book",
       "title": "Lue koko Text A ja tarkista kolme ymmärtämistehtävää",
       "paragraphs": [
-        "M-ZPE-01, Monika Janicka: neljä julkaistua minidialogia ikäkysymyksistä. Oskar sanoo ensimmäisessä Ich bin fünf; Larissa kertoo toisessa olevansa zwölf Jahre alt. Kolmannen dialogin kaksi henkilöä ovat 10-vuotiaita ja neljännessä Paul on elf Jahre alt.",
+        "M-ZPE-01, Monika Janicka: neljä julkaistua minidialogia ikäkysymyksistä. Lucas sanoo ensimmäisessä Ich bin neun; Larissa kertoo toisessa olevansa zwölf Jahre alt. Kolmannen dialogin kaksi henkilöä ovat 10-vuotiaita ja neljännessä Paul on elf Jahre alt.",
         "Lue itse kaikki neljä dialogia. Vastaa sitten C06-ZPE-Q01, C06-ZPE-Q02 ja C06-ZPE-Q03 sekä paina jokaisessa Tarkista vastaus. Opetuspolku käyttää näitä oikeita tallennettuja tarkistusmerkintöjä.",
         "Kirjan lähdetekstiä ei tarvitse hakea ulkoiselta verkkosivulta. Alkuperäisäänitteen laitetestaus on vielä avoin."
       ],
