@@ -31,10 +31,13 @@ test("L017-L021 use exactly five validated C04 manuscripts in the existing Teach
    }
    for (const link of lesson.scenes.flatMap(s=>s.bookLinks??[]))assert.equal(link.chapterId,"04");
  }
- // Do not activate the unrelated C03 previews or change their registry entries.
+ // This integration intentionally retains the neighbouring C03, C05 and Review I Teacher lessons.
  assert.ok(getLosTeacherLesson("L013"),"Current C03 L013 remains registered");
  assert.ok(getLosTeacherLesson("L016"),"Current C03 L016 remains registered");
- assert.equal(getLosTeacherLesson("L027"),undefined);
+ assert.ok(getLosTeacherLesson("L022"),"C05 L022 must be registered");
+ assert.ok(getLosTeacherLesson("L026"),"C05 L026 must be registered");
+ assert.ok(getLosTeacherLesson("L027"),"Review I L027 must be registered");
+ assert.ok(getLosTeacherLesson("L030"),"Review I L030 must be registered");
 });
 
 test("L017 uses context and relationship, not a blanket age rule",()=>{
