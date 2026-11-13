@@ -42,22 +42,22 @@ function SceneQuestion({ scene, session, submit, saveDraft, requestHint, reveal 
     {q.type === "choice" ? <div className="los-teacher-options" role="group" aria-label={q.prompt}>
       {q.options?.map(option => <button key={option.id} type="button"
         className={"los-teacher-option" + (latest?.answer === option.id ? " is-selected" : "")}
-        disabled={succeeded || exhausted || Boolean(session.completedAt)} onClick={() => submit(option.id)}>
+        disabled={succeeded || exhausted || solutionVisible || Boolean(session.completedAt)} onClick={() => submit(option.id)}>
         <span className="los-teacher-option-letter">{option.id.toUpperCase()}</span>
         <span lang="de">{option.label}</span>
         {latest?.answer === option.id && latest.correct && <Check size={18} aria-hidden="true" />}
       </button>)}
     </div> : <form className="los-teacher-form" onSubmit={event => {
       event.preventDefault();
-      if (drafted.trim() && !succeeded && !exhausted) submit(drafted);
+      if (drafted.trim() && !succeeded && !exhausted && !solutionVisible) submit(drafted);
     }}>
       <label htmlFor="los-teacher-answer">Vastauksesi saksaksi</label>
       <div className="los-teacher-input-row">
         <input id="los-teacher-answer" lang="de" autoComplete="off" spellCheck={false}
-          value={drafted} maxLength={500} disabled={succeeded || exhausted || Boolean(session.completedAt)}
+          value={drafted} maxLength={500} disabled={succeeded || exhausted || solutionVisible || Boolean(session.completedAt)}
           onChange={event => saveDraft(event.target.value)}
           placeholder="Kirjoita saksaksi..." />
-        <button type="submit" disabled={!drafted.trim() || succeeded || exhausted || Boolean(session.completedAt)}>Tarkista</button>
+        <button type="submit" disabled={!drafted.trim() || succeeded || exhausted || solutionVisible || Boolean(session.completedAt)}>Tarkista</button>
       </div>
     </form>}
     {latest && <div className={"los-teacher-feedback " + (latest.correct ? "is-right" : "is-wrong")}
@@ -77,7 +77,7 @@ function SceneQuestion({ scene, session, submit, saveDraft, requestHint, reveal 
       {attempts.length >= 2 && !solutionVisible && <button type="button" onClick={reveal}>
         <BookOpen size={16} /> Näytä mallivastaus
       </button>}
-      {solutionVisible && <p className="los-teacher-solution">Mallivastaus: <strong lang="de">{solution}</strong></p>}
+      {solutionVisible && <p className="los-teacher-solution">Mallivastaus: <strong lang="de">{solution}</strong>. Voit jatkaa seuraavaan vaiheeseen; mallivastauksen avaamista ei lasketa omaksi osaamisnäytöksi.</p>}
     </div>}
     {succeeded && <p className="los-teacher-ready"><CheckCircle2 size={17}/> Tehtävä tarkistettu. Voit jatkaa.</p>}
   </div>;
