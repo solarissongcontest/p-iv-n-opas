@@ -16,6 +16,7 @@ import { LosBackups } from "./LosBackups";
 import { LosBookStartAction } from "./LosBookStartAction";
 import { Los1ChapterImage } from "./Los1ChapterImage";
 import { Los1VisualLearning } from "./Los1VisualLearning";
+import { LosTeacherL004Player } from "./teacher/LosTeacherL004Player";
 import { LosMidtermExam } from "./LosMidtermExam";
 import { LosStudyProgress } from "./LosStudyProgress";
 import { LosRecallCards } from "./LosRecallCards";
@@ -56,7 +57,7 @@ function readLocation(): LosLocation {
   const book = Number.isInteger(parsedBook) && parsedBook >= 1 && parsedBook <= 8 ? parsedBook : null;
   const chapter = book === 1 && /^\d{2}$/.test(parts[1] ?? "") ? (parts[1] ?? null) : null;
   const token = parts[chapter ? 2 : 1];
-  const section = (["overview", "contents", "chapter", "text", "vocabulary", "grammar", "practice", "appendix", "dictionary", "path", "search", "midterm", "review", "review-ii", "cards", "progress", "final", "summary", "understand", "text-b", "apply", "culture", "test"].includes(token ?? "") ? token : chapter ? "chapter" : "overview") as LosSection;
+  const section = (["overview", "contents", "chapter", "text", "vocabulary", "grammar", "practice", "appendix", "dictionary", "path", "teacher", "search", "midterm", "review", "review-ii", "cards", "progress", "final", "summary", "understand", "text-b", "apply", "culture", "test"].includes(token ?? "") ? token : chapter ? "chapter" : "overview") as LosSection;
   return { book, chapter, section };
 }
 function linkTo(book?: number, chapter?: string, section: LosSection = "overview") {
@@ -340,7 +341,7 @@ function LosBookWorkspace({ book, location, move, goLibrary, openBook }: { book:
   const previousIndex = chapter ? book.chapters.findIndex(c => c.id === chapter.id) : -1;
   const next = previousIndex >= 0 ? book.chapters[previousIndex + 1] : null;
   const previous = previousIndex > 0 ? book.chapters[previousIndex - 1] : null;
-  const section = chapter ? location.section : ["contents", "appendix", "dictionary", "path", "search", "midterm", "review", "review-ii", "progress", "final", "summary"].includes(location.section) ? location.section : "overview";
+  const section = chapter ? location.section : ["contents", "appendix", "dictionary", "path", "teacher", "search", "midterm", "review", "review-ii", "progress", "final", "summary"].includes(location.section) ? location.section : "overview";
   return <div className="los-book-workspace" style={bookStyle(book)}>
     <header className="los-book-topbar">
       <button className="los-back-library" onClick={goLibrary} aria-label="Takaisin kirjasarjaan"><ChevronLeft size={19} /> <span>Kirjasarja</span></button>
@@ -374,6 +375,7 @@ function LosBookWorkspace({ book, location, move, goLibrary, openBook }: { book:
             section === "contents" ? <Contents book={book} move={move} /> :
             section === "appendix" ? <Appendix book={book} /> :
             section === "path" ? <LosLearningPath book={book} move={move} /> :
+            section === "teacher" && book.id===1 ? <LosTeacherL004Player onExit={()=>move(null,"path")} /> :
             section === "progress" && book.id===1 ? <LosStudyProgress book={book} move={move} /> :
             section === "midterm" && book.id===1 ? <LosMidtermExam /> :
             section === "review" && book.id===1 ? <LosReviewI move={move} /> :
