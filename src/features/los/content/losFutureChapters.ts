@@ -1,5 +1,5 @@
 import type { LosChapter } from "../catalog";
-import { LOS_FUTURE_FIRST_CHAPTERS } from "./losFutureC01Drafts";
+import { LOS_FUTURE_FIRST_CHAPTERS } from "./losFutureC01Drafts.ts";
 
 /**
  * LOS! 2–8: kirjakohtaisten v1.0-käsikirjoitusten 70 kappaleen rakenne.
