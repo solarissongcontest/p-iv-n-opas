@@ -122,8 +122,8 @@ test("every one of the 60 guided lessons opens from its actual chapter picker on
    expect(seen.has(title)).toBe(false);
    seen.add(title);
    await button.click();
-   // Teacher 2.0 is non-contiguous: C07 L036–L040 was implemented before C04–C06.
-   if(Number(title.slice(1))<=21 || (Number(title.slice(1))>=36 && Number(title.slice(1))<=40)){
+   // Teacher 2.0 is non-contiguous: C07 L036–L040 was implemented before C04–C05; C06 is still legacy in this stack.
+   if(Number(title.slice(1))<=26 || (Number(title.slice(1))>=36 && Number(title.slice(1))<=40)){
     await expect(page).toHaveURL(new RegExp("/los-lessons/"+title+"$"));
     await expect(page.locator(".los-teacher-paper h2")).toBeVisible();
     await expect(page.locator(".los-teacher-sidebar h1")).toBeVisible();
