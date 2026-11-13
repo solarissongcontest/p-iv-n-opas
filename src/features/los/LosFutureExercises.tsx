@@ -5,24 +5,28 @@ import { losFutureExercisesFor } from "./content/losFutureExercises";
 import { losFutureExercisesForSection, type LosFutureExerciseMode } from "./content/losFutureExerciseSections";
 import "./los-future-exercises.css";
 
-const modeTitle:Record<LosFutureExerciseMode,string>={
-  understand:"Ymmärrä tekstiä",practice:"Harjoittele",apply:"Käytä saksaa",
+type FutureExerciseDisplayMode = LosFutureExerciseMode | "guided";
+const modeTitle:Record<FutureExerciseDisplayMode,string>={
+  understand:"Ymmärrä tekstiä",practice:"Harjoittele",apply:"Käytä saksaa",guided:"Oppitunnin omat tehtävät",
 };
-const modeIntro:Record<LosFutureExerciseMode,string>={
+const modeIntro:Record<FutureExerciseDisplayMode,string>={
   understand:"Tee luetun ymmärtämisen ja sanaston tehtävät. Palaa tarvittaessa Text A- ja Text B -sivuille.",
   practice:"Harjoittele rakenteita ja uuden tekstin ymmärtämistä. Kokeile itse ennen ratkaisuavaimen avaamista.",
   apply:"Tuota omaa saksaa, keskustelua tai tekstiä. Avoimissa tehtävissä vastausavaimessa on vain arviointiohje tai esimerkki.",
+  guided:"Tämä tehtävälista on poimittu juuri kyseisen oppitunnin käsikirjoituksesta. Samat vastaukset ovat käytössä kappaleen harjoitussivuilla.",
 };
 
 /** Päiväkirjan olemassa oleva useLosChapterDraft erottaa omistajan, kirjan ja kappaleen.
  * Ei automaattista pisteytystä eikä itsenäistä paikallisen käyttäjän tunnistusavainta. */
-export function LosFutureExercises({bookId,chapterId,mode}:{
+export function LosFutureExercises({bookId,chapterId,mode,taskIds}:{
   bookId:number;
   chapterId:string;
-  mode:LosFutureExerciseMode;
+  mode:FutureExerciseDisplayMode;
+  taskIds?:readonly string[];
 }) {
   const {draft,update,saved}=useLosChapterDraft(bookId,chapterId);
-  const tasks=losFutureExercisesForSection(losFutureExercisesFor(bookId,chapterId),mode);
+  const sourceTasks=losFutureExercisesFor(bookId,chapterId);
+  const tasks=mode==="guided" ? sourceTasks.filter(task=>taskIds?.includes(task.id)) : losFutureExercisesForSection(sourceTasks,mode);
   const [selected,setSelected]=useState(0);
   const [showAnswer,setShowAnswer]=useState(false);
   const [showAll,setShowAll]=useState(false);
@@ -64,7 +68,7 @@ export function LosFutureExercises({bookId,chapterId,mode}:{
         {saved?"Vastaukset tallennettu paikallisesti":"Tallennus ei onnistunut"}
       </span>
     </div>
-    <div className="los-future-exercise-picker">
+    {tasks.length>0&&<div className="los-future-exercise-picker">
       <label htmlFor="los-future-exercise-choice">Valitse tehtävä</label>
       <div className="los-future-exercise-select">
         <select id="los-future-exercise-choice" value={safeIndex}
@@ -75,7 +79,7 @@ export function LosFutureExercises({bookId,chapterId,mode}:{
         </select>
         <ChevronDown size={16} aria-hidden="true"/>
       </div>
-    </div>
+    </div>}
     {!task ? <p>Tässä osiossa ei ole vielä tuotuja tehtäviä.</p> : <>
       <article className="los-future-exercise-card" aria-labelledby="los-future-exercise-title">
         <div className="los-future-exercise-topline">
