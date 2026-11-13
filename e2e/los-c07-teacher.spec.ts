@@ -31,7 +31,7 @@ test("C07 L036 grouped alphabet, pause/resume and real book deep link",async({pa
   await page.getByRole("button",{name:"Jatka opetusta"}).first().click();
   await page.getByRole("navigation",{name:"Oppitunnin opetustilanteet"})
     .getByRole("button",{name:/Aakkoset ryhmittäin/}).click();
-  await expect(page.getByText("OPETUSTAULU")).toBeVisible();
+  await expect(page.locator(".los-teacher-board-label")).toContainText("OPETUSTAULU");
   await page.getByRole("button",{name:"Näytä kaikki"}).click();
   await expect(page.locator(".los-teacher-board-item")).toHaveCount(7);
   await expect(page.locator(".los-teacher-board")).toContainText("V /faʊ/");
@@ -93,6 +93,7 @@ test("C07 L040 displays actual 15-item chapter assessment separately from Teache
     .getByRole("button",{name:"Palauta C07:n 15 osatehtävää"}).click();
   await expect(page.getByRole("region",{name:"Kappaletestin ja itsearvioinnin tilanne"})).toContainText("Kappaletesti: 0/15");
   await page.goto("/los#/1/07/test",{waitUntil:"domcontentloaded"});
-  expect(await page.locator("fieldset").count()).toBeGreaterThan(0);
+  await expect(page.getByRole("heading",{name:"Kappaletesti",exact:true})).toBeVisible();
+  await expect(page.locator("fieldset")).toHaveCount(15);
   await expectNoHorizontalOverflow(page);
 });
