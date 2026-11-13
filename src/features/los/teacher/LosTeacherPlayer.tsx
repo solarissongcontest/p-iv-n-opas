@@ -256,7 +256,7 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
                 const checked=!mustCheck||draft.practiceChecked.includes(id);
                 return <p key={id} className="los-teacher-evidence">
                   {answered&&checked?<CheckCircle2 size={17}/>:<HelpCircle size={17}/>}
-                  {id}: {answered&&checked?"Vastaus tallennettu ja tarvittaessa tarkistettu":
+                  {id}: {answered&&checked?(mustCheck?"Vastaus tallennettu ja tarvittaessa tarkistettu":"Vastaus tallennettu (tarkista oikeellisuus kirjassa)"):
                     !answered?"Vastaus vielä puuttuu":"Vastaus on tallennettu, mutta se pitää vielä tarkistaa kirjassa"}
                 </p>;
               })}

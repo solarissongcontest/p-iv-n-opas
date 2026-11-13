@@ -120,9 +120,9 @@ test("every one of the 60 guided lessons opens from its actual chapter picker on
    expect(seen.has(title)).toBe(false);
    seen.add(title);
    await button.click();
-   if(title==="L001" || title==="L002" || title==="L003" || title==="L004" || title==="L005" || title==="L006" || title==="L007" || title==="L008"){
+   if(title==="L001" || title==="L002" || title==="L003" || title==="L004" || title==="L005" || title==="L006" || title==="L007" || title==="L008" || title==="L009"){
      await expect(page).toHaveURL(new RegExp("/los-lessons/" + title + "$"));
-     await expect(page.locator(".los-teacher-paper h2").first()).toContainText(title==="L001" ? "Tervetuloa ensimmäiselle" : title==="L002" ? "Saksaa ei aina lausuta" : title==="L003" ? "Ensimmäinen oikea" : title==="L004" ? "Tänään opit" : title==="L005" ? "Tervehdykset kuuluvat" : title==="L006" ? "Ensimmäisen kappaleen kertaus" : title==="L007" ? "Tänään kysyt ensimmäisen kerran" : "Franzin ja Gretan koko keskustelu");
+     await expect(page.locator(".los-teacher-paper h2").first()).toContainText(title==="L001" ? "Tervetuloa ensimmäiselle" : title==="L002" ? "Saksaa ei aina lausuta" : title==="L003" ? "Ensimmäinen oikea" : title==="L004" ? "Tänään opit" : title==="L005" ? "Tervehdykset kuuluvat" : title==="L006" ? "Ensimmäisen kappaleen kertaus" : title==="L007" ? "Tänään kysyt ensimmäisen kerran" : title==="L008" ? "Franzin ja Gretan koko keskustelu" : "Sama nimi, kaksi verbiä");
      await page.goto("/los#/1/path",{waitUntil:"domcontentloaded"});
    }else{
      await expect(runner.locator(".los-lesson-detail .los-overline")).toContainText(title);
@@ -747,5 +747,82 @@ test("L008 full Franz-Greta dialogue uses three real checked C02 tasks and leave
       legacyL008Done:Boolean(c2.lessonProgress?.L008?.completedAt)};
   });
   expect(state).toEqual({L008Done:true,L007Done:false,sourceChecked:true,originalL007Question:null,legacyL008Done:false});
+  await expectNoHorizontalOverflow(page);
+});
+
+test("L009 Teacher requires four actual C02 heißen/sein workbook fills without fabricating lesson progress",async({page})=>{
+  await enterLocalBook(page);
+  await page.goto("/los#/1/path",{waitUntil:"domcontentloaded"});
+  await page.locator(".los-lesson-chapter-picker button").filter({hasText:"Kappale 2"}).click();
+  await page.locator(".los-lesson-picker button").filter({hasText:"L009"}).click();
+  await expect(page).toHaveURL(/\/los-lessons\/L009$/);
+  await expect(page.locator(".los-teacher-paper h2").first()).toContainText("Sama nimi, kaksi verbiä");
+  await page.locator(".los-teacher-outline nav button").filter({hasText:"Täydennä oikeat heißen-muodot kirjaan"}).click();
+  await expect(page.getByRole("link",{name:/Avaa kirjassa/}).first()).toHaveAttribute("href",/lessonReturn=L009.*\/1\/02\/practice/);
+  await expect(page.locator(".los-teacher-paper")).toContainText("C02-EX-03: Vastaus vielä puuttuu");
+  await page.goto("/los?lessonReturn=L009#/1/02/practice",{waitUntil:"domcontentloaded"});
+  const exercise=(id:string)=>page.locator("#"+id);
+  for(const id of ["C02-EX-03","C02-EX-04","C02-EX-05","C02-EX-06"])
+    await expect(exercise(id).locator('input[type="text"]')).toBeVisible();
+  await exercise("C02-EX-03").locator('input[type="text"]').fill("heiße");
+  await exercise("C02-EX-04").locator('input[type="text"]').fill("heißt");
+  await page.getByRole("link",{name:"Palaa oppitunnille L009"}).click();
+  await expect(page.locator(".los-teacher-paper")).toContainText("C02-EX-03: Vastaus tallennettu");
+  await expect(page.locator(".los-teacher-paper")).toContainText("C02-EX-05: Vastaus vielä puuttuu");
+  await page.locator(".los-teacher-outline nav button").filter({hasText:"Osaat erottaa neljä tärkeintä nimifraasin verbimuotoa"}).click();
+  await expect(page.getByRole("button",{name:"Merkitse oppitunti läpikäydyksi"})).toBeDisabled();
+  await page.goto("/los?lessonReturn=L009#/1/02/practice",{waitUntil:"domcontentloaded"});
+  await expect(exercise("C02-EX-03").locator('input[type="text"]')).toHaveValue("heiße");
+  await exercise("C02-EX-05").locator('input[type="text"]').fill("bin");
+  await exercise("C02-EX-06").locator('input[type="text"]').fill("bist");
+  await page.getByRole("button",{name:"Tarkista vastatut (4)"}).click();
+  for(const id of ["C02-EX-03","C02-EX-04","C02-EX-05","C02-EX-06"])
+    await expect(exercise(id).locator(".los-workbook-feedback")).toContainText("Oikein.");
+  await page.getByRole("link",{name:"Palaa oppitunnille L009"}).click();
+  for(const id of ["C02-EX-03","C02-EX-04","C02-EX-05","C02-EX-06"])
+    await expect(page.locator(".los-teacher-paper")).toContainText(id+": Vastaus tallennettu");
+  const outline=page.locator(".los-teacher-outline nav button");
+  await expect(outline).toHaveCount(15);
+  const options:Record<string,string>={
+    "Mikä muoto seuraa ich-pronominia?":"heiße",
+    "Onko sein-verbin muoto jo tuttu?":"bist",
+    "Valitse heißen-verbin oikea sinämuoto":"heißt",
+    "Mikä sein-verbin muoto sopii?":"bin",
+    "Erota kahden verbin oikeat parit":"bin / bist",
+  };
+  for(let i=0;i<15;i++){
+    await outline.nth(i).click();
+    const heading=(await page.locator(".los-teacher-paper h2").first().textContent())?.trim()??"";
+    if(heading==="Kirjoita sein-verbin sinämuotoinen lause muistista"){
+      await page.locator(".los-teacher-form input").fill("Du bist Max.");
+      await page.locator(".los-teacher-form button").click();
+      await expect(page.locator(".los-teacher-feedback")).toContainText("Oikein");
+    }else if(options[heading]){
+      await page.locator(".los-teacher-option").filter({hasText:options[heading]}).click();
+      await expect(page.locator(".los-teacher-feedback")).toContainText("Oikein");
+    }
+    const activity=page.locator(".los-teacher-activity button");
+    if(await activity.count()){
+      await activity.click();
+      await expect(activity).toContainText("Harjoittelu vahvistettu");
+    }
+  }
+  const finish=page.getByRole("button",{name:"Merkitse oppitunti läpikäydyksi"});
+  await expect(finish).toBeEnabled();
+  await expect(page.locator(".los-teacher-paper")).toContainText("Itsenäisesti oikein ratkaistuja eri tarkistuksia: 2");
+  await finish.click();
+  await expect(page.locator(".los-teacher-done")).toContainText("Oppitunti merkitty suoritetuksi");
+  await page.reload({waitUntil:"domcontentloaded"});
+  await expect(page.locator(".los-teacher-done")).toContainText("Oppitunti merkitty suoritetuksi");
+  const state=await page.evaluate(()=>{
+    const key=Object.keys(localStorage).find(x=>x.startsWith("los.local.v1.")&&x.endsWith(".1.02"));
+    if(!key)throw Error("C02 draft not found");
+    const d=JSON.parse(localStorage.getItem(key)!);
+    return {L009:Boolean(d.teacherSessions?.L009?.completedAt),
+      L008:Boolean(d.teacherSessions?.L008?.completedAt),
+      actualBookAnswers:["C02-EX-03","C02-EX-04","C02-EX-05","C02-EX-06"].map(id=>d.practiceAnswers?.[id]),
+      legacyL009:Boolean(d.lessonProgress?.L009?.completedAt)};
+  });
+  expect(state).toEqual({L009:true,L008:false,actualBookAnswers:["heiße","heißt","bin","bist"],legacyL009:false});
   await expectNoHorizontalOverflow(page);
 });
