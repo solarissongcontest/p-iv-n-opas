@@ -1,19 +1,7 @@
 import { useMemo } from "react";
+import { GERMAN_NUMBER_UNITS as units, GERMAN_NUMBER_TENS as tens, germanCompositeNumber } from "./germanNumbers.ts";
 
 /** Deterministic C06 learning aid, NOT audio or an alternate assessment engine. */
-const units = ["","eins","zwei","drei","vier","fünf","sechs","sieben","acht","neun"] as const;
-const tens: Readonly<Record<number,string>> = {
-  20:"zwanzig",30:"dreißig",40:"vierzig",50:"fünfzig",
-  60:"sechzig",70:"siebzig",80:"achtzig",90:"neunzig",
-};
-export function germanCompositeNumber(number: number): string {
-  if (!Number.isInteger(number) || number < 20 || number > 100) throw new RangeError("Teacher board supports 20–100 only");
-  if (number === 100) return "hundert";
-  const unit = number % 10;
-  const base = Math.floor(number / 10) * 10;
-  if (!unit) return tens[base]!;
-  return (unit === 1 ? "ein" : units[unit]) + "und" + tens[base];
-}
 export function LosTeacherNumberBuilder({ value, onChange, historyCount }: {
   value: string | undefined;
   onChange: (value: number) => void;
