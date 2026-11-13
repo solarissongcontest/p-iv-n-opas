@@ -7,7 +7,7 @@ const name = (value: string) => /^[A-Za-z0-9_.-]{1,80}$/.test(value);
 const meaningful = (value: string | undefined) => Boolean(value?.trim());
 const textbookSections = new Set([
   "overview","contents","chapter","text","understand","vocabulary","grammar",
-  "text-b","practice","apply","culture","test","appendix","dictionary",
+  "text-b","practice","apply","culture","test","appendix","dictionary","review","midterm",
 ]);
 
 function checkQuestion(question: TeacherQuestion, location: string, issues: TeacherContentIssue[]) {
@@ -90,20 +90,29 @@ export function validateTeacherLesson(lesson: TeacherLesson): TeacherContentIssu
       !lesson.scenes.some(scene => scene.activityId === id))) {
     issues.push({ location: "requiredActivityIds", problem: "Vaadittu opiskeluteko puuttuu oppitunnilta." });
   }
+  // Review I and EX-MID already share the reserved internal draft slot 91.
+  // These are real existing IDs, NOT an invented C91 textbook chapter.
+  const reviewI = lesson.chapterId === "91" && ["L027","L028","L029"].includes(lesson.id);
+  const midterm = lesson.chapterId === "91" && lesson.id === "L030";
+  const validPractice = (id: string) => /^C\d{2}-EX-\d{2,3}$/.test(id) ||
+    (reviewI && id === "EX-REV1-SELF-" + lesson.id.slice(1)) ||
+    (midterm && id === "EX-MID-DIALOGUE-SELF");
   if (!unique(lesson.requiredPracticeIds) || lesson.requiredPracticeIds.some(id =>
-      !/^C\d{2}-EX-\d{2,3}$/.test(id))) {
+      !validPractice(id))) {
     issues.push({ location: "requiredPracticeIds", problem: "Kirjan tehtävätunniste on virheellinen." });
   }
   if (lesson.requiredCheckedIds &&
       (!unique(lesson.requiredCheckedIds) || lesson.requiredCheckedIds.some(id =>
-        !/^C\d{2}-(?:SOURCE|TEXTB|MCOM02)-Q\d{2}$/.test(id)))) {
+        !(/^C\d{2}-(?:SOURCE|TEXTB|MCOM02)-Q\d{2}$/.test(id) ||
+          (reviewI && /^EX-REV1-Q\d{2}$/.test(id)) )))) {
     issues.push({ location: "requiredCheckedIds", problem: "Tarkistettavan lähdetehtävän tunniste on virheellinen." });
   }
   const assessment = lesson.chapterAssessment;
   if (assessment && (
     !unique(assessment.requiredTestIds) || assessment.requiredTestIds.length < 1 ||
     assessment.requiredTestIds.length > 40 ||
-    assessment.requiredTestIds.some(id => !new RegExp("^C" + lesson.chapterId + "-EX-\\d{2,3}$").test(id)) ||
+    assessment.requiredTestIds.some(id => !(new RegExp("^C" + lesson.chapterId + "-EX-\\d{2,3}$").test(id) ||
+      (midterm && /^EX-MID-Q\d{2}$/.test(id)))) ||
     typeof assessment.requireApplicationDraft !== "boolean" ||
     !Number.isInteger(assessment.minSelfAssessmentLength) || assessment.minSelfAssessmentLength < 1 ||
     assessment.minSelfAssessmentLength > 500
