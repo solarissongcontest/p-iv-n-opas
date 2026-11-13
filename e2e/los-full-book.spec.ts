@@ -121,7 +121,7 @@ test("every one of the 60 guided lessons opens from its actual chapter picker on
    expect(seen.has(title)).toBe(false);
    seen.add(title);
    await button.click();
-   if(Number(title.slice(1))<=7){
+   if(Number(title.slice(1))<=8){
     await expect(page).toHaveURL(new RegExp("/los-lessons/"+title+"$"));
     await expect(page.locator(".los-teacher-paper h2")).toBeVisible();
     await expect(page.locator(".los-teacher-sidebar h1")).toBeVisible();
@@ -897,5 +897,35 @@ test("L007 Teacher reads C02 draft only, never C01 answers",async({page})=>{
  const c01outline=page.locator(".los-teacher-outline nav button");
  await c01outline.filter({hasText:"Palauta C01:n 12 osatehtävän testi"}).click();
  await expect(page.locator(".los-teacher-assessment-status")).toContainText("0/12 vastattu");
+ await expectNoHorizontalOverflow(page);
+});
+
+
+test("L008 checks the real C02 source answers and preserves them across the book/teacher roundtrip",async({page})=>{
+ await enterLocalBook(page);
+ await page.goto("/los-lessons/L008",{waitUntil:"domcontentloaded"});
+ await expect(page.locator(".los-teacher-sidebar h1")).toContainText("Franz ja Greta");
+ const outline=page.locator(".los-teacher-outline nav button");
+ await outline.filter({hasText:"Tee ja tarkista neljä oikeaa lähdetekstikysymystä"}).click();
+ const paper=page.locator(".los-teacher-paper");
+ await expect(paper).toContainText("C02-SOURCE-Q01: Vastaus vielä puuttuu");
+ const link=page.getByRole("link",{name:/Avaa kirjassa/}).first();
+ await expect(link).toHaveAttribute("href",/lessonReturn=L008.*\/02\/understand/);
+ await page.goto("/los?lessonReturn=L008#/1/02/understand",{waitUntil:"domcontentloaded"});
+ const fieldsets=page.locator(".los-c01-question");
+ await expect(fieldsets).toHaveCount(5);
+ const keys=["a","b","a","b"];
+ for(let i=0;i<4;i++){
+  await fieldsets.nth(i).locator('input[value="'+keys[i]+'"]').check();
+  await fieldsets.nth(i).getByRole("button",{name:"Tarkista vastaus"}).click();
+ }
+ await page.getByRole("link",{name:"Palaa oppitunnille L008"}).click();
+ await expect(page).toHaveURL(/\/los-lessons\/L008$/);
+ await outline.filter({hasText:"Tee ja tarkista neljä oikeaa lähdetekstikysymystä"}).click();
+ for(const n of ["01","02","03","04"]){
+  await expect(page.locator(".los-teacher-paper")).toContainText("C02-SOURCE-Q"+n+": Vastaus tallennettu ja tarvittaessa tarkistettu");
+ }
+ await outline.filter({hasText:"Olet lukenut ensimmäisen nimidialogin"}).click();
+ await expect(page.getByRole("button",{name:"Merkitse oppitunti läpikäydyksi"})).toBeDisabled();
  await expectNoHorizontalOverflow(page);
 });

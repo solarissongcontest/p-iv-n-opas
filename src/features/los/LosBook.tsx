@@ -126,7 +126,7 @@ function SeriesView({ openBook }: { openBook: (id: number) => void }) {
         <small>{book.code} · {book.module}</small>
       </button>)}
     </div>
-    <p className="los-library-footnote">LOS! 1:n kaikki kymmenen kappaletta ja 60 ohjattua oppituntia ovat nyt opiskeltavissa oppikirjan sisällä. Alkuperäistekstit ja käytössä olevat äänilähteet näkyvät asianmukaisin lähdemerkinnöin. Lopullinen saksan kielen, äänentoiston ja tuotantojulkaisun laadunvarmistus on silti vielä kesken. Muut LOS!-sarjan kirjat ovat suunnitteluvaiheessa.</p>
+    <p className="los-library-footnote">LOS! 1:n kymmenen kappaletta ovat selattavissa digikirjassa. Opiskelupolussa on 60 oppitunnin runko, mutta vain L001–L008 sisältävät uudemman, käsikirjoitetun Teacher 2.0 -opetuskokemuksen. Muut tunnit käyttävät vielä vanhaa tehtävä- ja vaihelistaa. Kaikkien sisältöjen, lähdeoikeuksien, kieliasun ja äänentoiston lopullinen hyväksyntä on kesken. Muut LOS!-sarjan kirjat ovat suunnitteluvaiheessa.</p>
   </div>;
 }
 function BookFront({ book, move }: { book: LosBookDefinition; move: (chapter: string | null, section: LosSection) => void }) {
