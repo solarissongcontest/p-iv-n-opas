@@ -15,7 +15,9 @@ import {
 import {teacherExternalStatus} from "../src/features/los/teacher/externalEvidence.ts";
 import {summarizeLos1Mastery,LOS1_SKILLS} from "../src/features/los/masterySummary.ts";
 import {losReviewIIQuestionsFor,losReviewIIReflectionId} from "../src/features/los/content/los1ReviewII.ts";
-import {LOS1_FINAL_QUESTIONS,losFinalScore} from "../src/features/los/content/los1FinalExam.ts";
+import {LOS1_FINAL_QUESTIONS,losFinalScore,
+  LOS1_FINAL_WRITING_MODEL_OPENED,LOS1_FINAL_WRITING_ASSISTED,
+} from "../src/features/los/content/los1FinalExam.ts";
 import {losArchiveExamAttempt,losArchivedExamHistory} from "../src/features/los/content/los1ExamArchive.ts";
 import {parseLosDraft} from "../src/features/los/studyState.ts";
 import {LOS_BOOKS} from "../src/features/los/catalog.ts";
@@ -189,4 +191,32 @@ test("L060 uses archived immutable score and never remaps historical answers to 
   assert.equal(snapshot.skills.every(skill=>skill.examCorrect===0&&skill.examTotal===0),true,
     "Archived answer choices must not silently become new skill claims");
   assert.equal(snapshot.skills.find(skill=>skill.id==="L1-INT-01")?.status,"missing");
+});
+
+test("L059 writes model-use status to the existing draft without automatic grammar certification",()=>{
+  const modelViewed={...emptyLosDraft(),
+    applicationDraft:"Hallo!\nIch heiße Mia.\nIch komme aus Finnland.\nIch bin siebzehn Jahre alt.\nDas ist Leo.\nBis morgen!",
+    practiceAnswers:{
+      [LOS1_FINAL_WRITING_MODEL_OPENED]:NOW,
+      "EX-FINAL-WRITING-CHECK":"written-and-reviewed",
+    },
+  };
+  const before=summarizeLos1Mastery({"93":modelViewed});
+  assert.equal(before.writing.finalModelOpened,true);
+  assert.equal(before.writing.finalAssisted,false);
+  assert.equal(teacherExternalStatus(LOS1_L059_TEACHER,modelViewed).lines.some(line=>
+    line.includes("malli avattu vasta oman kirjoitusyrityksen jälkeen")),true);
+  const edited={...modelViewed,practiceAnswers:{
+    ...modelViewed.practiceAnswers,[LOS1_FINAL_WRITING_ASSISTED]:"edited-after-model",
+  }};
+  const after=summarizeLos1Mastery({"93":edited});
+  assert.equal(after.writing.finalAssisted,true);
+  assert.equal(teacherExternalStatus(LOS1_L059_TEACHER,edited).lines.some(line=>
+    line.includes("mallin katsomisen jälkeen muokattu")),true);
+  assert.equal(after.skills.find(s=>s.id==="L1-PROD-01")?.status,"missing",
+    "Even unassisted free writing is not automatically graded");
+  const component=readFileSync("src/features/los/LosFinalExam.tsx","utf8");
+  assert.match(component,/LOS1_FINAL_WRITING_CHECK\]==="written-and-reviewed"/);
+  assert.match(component,/LOS1_FINAL_WRITING_MODEL_OPENED/);
+  assert.match(component,/LOS1_FINAL_WRITING_ASSISTED/);
 });
