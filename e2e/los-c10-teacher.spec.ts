@@ -54,9 +54,9 @@ test("L054 retains two self-review dialogue drafts, not an AI score",async({page
   await outline.filter({hasText:"Kirjoita toinen oma keskustelu"}).click();
   await page.locator(".los-teacher-reflection textarea").fill("Guten Tag! Wie heißen Sie? Ich heiße Leo. Das ist Mia. Sie kommt aus Finnland. Auf Wiedersehen! ".repeat(2));
   await page.reload({waitUntil:"domcontentloaded"});
-  await expect(page.locator(".los-teacher-reflection textarea")).toContainText("Guten Tag!");
+  await expect(page.locator(".los-teacher-reflection textarea")).toHaveValue(/Guten Tag!/);
   await outline.filter({hasText:"Kirjoita ensimmäinen oma keskustelu"}).click();
-  await expect(page.locator(".los-teacher-reflection textarea")).toContainText("Hallo!");
+  await expect(page.locator(".los-teacher-reflection textarea")).toHaveValue(/Hallo!/);
   await expectNoHorizontalOverflow(page);
 });
 test("L055 requires the existing 20-item chapter submission and student self-assessment",async({page})=>{
