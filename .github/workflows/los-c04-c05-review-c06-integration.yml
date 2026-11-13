@@ -1,0 +1,76 @@
+name: LOS C04-C06 and Review I Teacher integrated QA
+
+on:
+  push:
+    branches:
+      - feat/los1-teacher-c04-c05-review-c06-integrated
+  pull_request:
+    branches:
+      - feat/los1-teacher-review-c06-integrated-20261113
+    paths:
+      - "src/features/los/**"
+      - "tests/los-teacher-review-c06-integration.test.ts"
+      - "e2e/los-c06-teacher.spec.ts"
+      - "e2e/los-c04-teacher.spec.ts"
+      - "tests/los-teacher-c05.test.ts"
+      - "e2e/los-teacher-review-midterm.spec.ts"
+      - ".github/workflows/los-c04-c05-review-c06-integration.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: los-c04-c06-integration-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  full-quality:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - name: Install locked dependencies
+        run: bun install --frozen-lockfile
+      - name: All repository unit tests
+        run: bun run test
+      - name: Typecheck and production build
+        run: bun run build
+
+  chromium-and-webkit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    env:
+      E2E_BASE_URL: http://127.0.0.1:5173
+      REQUIRE_GEMINI: "false"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - name: Install locked dependencies
+        run: bun install --frozen-lockfile
+      - name: Install Playwright dependencies
+        run: bun run e2e:install
+      - name: Install desktop Chromium and iPhone WebKit engines
+        run: bunx playwright install --with-deps chromium webkit
+      - name: Start independent local LOS preview
+        shell: bash
+        run: |
+          nohup bun run dev -- --host 127.0.0.1 --port 5173 --strictPort > /tmp/los-integration-preview.log 2>&1 &
+          for attempt in $(seq 1 45); do
+            if curl --silent --show-error --fail --max-time 3 http://127.0.0.1:5173/ > /dev/null 2>&1; then
+              exit 0
+            fi
+            sleep 2
+          done
+          cat /tmp/los-integration-preview.log
+          exit 1
+      - name: Both lesson flows and all-book navigation, desktop and iPhone
+        run: bunx playwright test e2e/los-full-book.spec.ts e2e/los-teacher-review-midterm.spec.ts e2e/los-c06-teacher.spec.ts e2e/los-c04-teacher.spec.ts --project=desktop-chromium --project=iphone-webkit
+      - name: Store failed traces and screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: los-review-c06-integrated-browser-${{ github.run_id }}
+          path: test-results/
+          if-no-files-found: ignore
+          retention-days: 14

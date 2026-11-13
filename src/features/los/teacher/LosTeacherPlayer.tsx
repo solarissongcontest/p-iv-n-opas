@@ -177,7 +177,7 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
     });
   };
   const navigate = (target: string) => {
-    if (!lesson || !scene) return;
+    if (!lesson || !scene || session?.paused) return;
     persist(old => {
       const now = stamp();
       const marked = moveTeacherScene(old, lesson, scene.id, now);
@@ -224,7 +224,7 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
       </section> :
       !lesson || !session || !scene ? <section className="los-teacher-status">
         <h1>Oppitunnin opetusmateriaali ei ole vielä valmis</h1>
-        <p>Teacher 2.0 on nyt käytössä oppitunneilla L001–L016 sekä L027–L035. Muut oppitunnit toimivat edelleen nykyisessä Opetuspolussa.</p>
+        <p>Teacher 2.0 on nyt käytössä oppitunneilla L001–L035. Muut oppitunnit toimivat edelleen nykyisessä Opetuspolussa.</p>
         <a href={"/los#/" + (lesson?.bookId ?? 1) + "/path"}>Palaa Opetuspolkuun</a>
       </section> :
       <>
@@ -248,6 +248,7 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
                 {lesson.scenes.map((item, i) => <button key={item.id} type="button"
                   aria-current={scene.id === item.id ? "step" : undefined}
                   className={scene.id === item.id ? "is-active" : ""}
+                  disabled={session.paused}
                   onClick={() => navigate(item.id)}>
                   <span>{session.visitedIds.includes(item.id) ? <Check size={15}/> : String(i + 1)}</span>
                   <span>{item.title}</span>
