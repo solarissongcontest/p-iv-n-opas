@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { getLosTeacherLesson } from "../src/features/los/teacher/lessonRegistry.ts";
 import { validateTeacherLesson } from "../src/features/los/teacher/validateContent.ts";
+import { LOS_EXERCISES } from "../src/features/los/exerciseBank.ts";
 
 /**
  * Stack-only CI guard: run after every L001–L060 feature branch has been
@@ -58,4 +59,28 @@ test("StudyOS and LOS! library expose direct links without inflating approved le
   assert.ok(library.includes("getLosTeacherLesson(lesson.id)"));
   assert.ok(path.includes("getLosTeacherLesson(lesson.id)"));
   assert.ok(library.includes("lopullinen hyväksyntä on kesken"));
+});
+
+test("all required workbook task IDs refer to real, unique book exercises",()=>{
+  const byId=new Map(LOS_EXERCISES.map(exercise=>[exercise.id,exercise]));
+  assert.equal(byId.size,LOS_EXERCISES.length,"The central exercise bank must not contain duplicate IDs");
+  const missing:string[]=[];
+  for(let n=1;n<=60;n++){
+    const id="L"+String(n).padStart(3,"0");
+    const lesson=getLosTeacherLesson(id);
+    assert.ok(lesson,id+" must be reachable before checking its book tasks");
+    for(const requiredId of lesson.requiredPracticeIds){
+      const item=byId.get(requiredId);
+      if(!item){missing.push(id+" requires missing "+requiredId);continue;}
+      assert.equal(item.chapterId,requiredId.slice(1,3),
+        id+" task "+requiredId+" must match the chapter where the book renders it");
+    }
+    for(const scene of lesson.scenes){
+      for(const link of scene.bookLinks ?? []){
+        assert.ok(/^(?:0[1-9]|10)$/.test(link.chapterId),
+          id+" links to an invalid textbook chapter "+link.chapterId);
+      }
+    }
+  }
+  assert.deepEqual(missing,[],"A required task must exist; otherwise the guided lesson cannot be completed");
 });
