@@ -258,3 +258,34 @@ test("L034 age-dialogue questions give source-grounded numbers and format-specif
   assert.deepEqual(lesson.requiredCheckedIds,["C06-TEXTB-Q01","C06-TEXTB-Q02"]);
   assert.equal(lesson.requiredActivityIds[0],"text-b-studied");
 });
+
+
+test("C07 teaches the polite spelling request before assessing it and never leaks the L038 answer",()=>{
+  const first=getLosTeacherLesson("L036");
+  assert.ok(first,"L036 must remain in the shared lesson registry");
+  const teachingIndex=first.scenes.findIndex(scene=>scene.id==="ask-to-spell");
+  const applicationIndex=first.scenes.findIndex(scene=>scene.id==="application");
+  assert.ok(teachingIndex>=0 && teachingIndex<applicationIndex,
+    "Students must learn the request before they are graded on it");
+  const instruction=first.scenes[teachingIndex]!;
+  assert.equal(instruction.kind,"explanation");
+  assert.match(instruction.paragraphs.join(" "),/Bitte buchstabieren Sie\./);
+  assert.match(instruction.paragraphs.join(" "),/tavata kirjaimittain/i);
+  assert.match(instruction.paragraphs.join(" "),/Wie heißt du\?/);
+  assert.match(instruction.paragraphs.join(" "),/opetusesimerkki, ei C07:n alkuperäislähteen repliikki/);
+  const question=first.scenes[applicationIndex]!.question!;
+  assert.equal(question.type,"choice");
+  assert.equal(question.options?.find(option=>option.id===question.correctOption)?.label,"Bitte buchstabieren Sie.");
+
+  const second=getLosTeacherLesson("L038");
+  assert.ok(second,"L038 must remain in the shared lesson registry");
+  const independent=second.scenes.find(scene=>scene.id==="independent")?.question;
+  assert.ok(independent,"L038 must contain the independent written test");
+  assert.equal(independent.type,"text");
+  assert.deepEqual(independent.accepted,["heißt"],"Do not change the correct German answer");
+  assert.match(independent.prompt,/du \.\.\./);
+  assert.doesNotMatch(independent.prompt,/heißt/i,"The question cannot display its own answer");
+  assert.match(independent.reteach,/heißt/,"The explanation after trying can include the answer");
+  assert.deepEqual(validateTeacherLesson(first),[],"The new teaching scene must pass manuscript validation");
+  assert.deepEqual(validateTeacherLesson(second),[]);
+});
