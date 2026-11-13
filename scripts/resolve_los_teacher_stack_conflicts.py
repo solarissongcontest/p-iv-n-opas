@@ -31,6 +31,18 @@ def choose(path: str, ours: str, theirs: str) -> str:
         if "L001–L060" not in result:
             raise ValueError(f"No full-coverage declaration in {path}: {result[:120]!r}")
         return result
+    if path == "src/features/los/teacher/LosTeacherPlayer.tsx" and all("teacherWrongFeedback" in v and "type TeacherScene" in v for v in (ours, theirs)):
+        terms = list(dict.fromkeys([t.strip() for v in (ours,theirs) for t in v.split(",") if t.strip()]))
+        return "  " + ", ".join(terms) + ",\n"
+    if path == "src/features/los/teacher/engine.ts" and all(v.lstrip().startswith("kind:") for v in (ours, theirs)):
+        kinds = list(dict.fromkeys(re.findall(r'"([^"]+)"', ours+theirs)))
+        if not all(k in {"introduction","explanation","board","question","book","activity","reflection","summary","form","calendar","source"} for k in kinds):
+            raise ValueError("Unexpected engine scene variant")
+        return "  kind: " + " | ".join('"'+k+'"' for k in kinds) + ";\n"
+    if path == "src/features/los/teacher/lessonL004.ts" and "LOS1_C09_TEACHER" in theirs and "LOS1_L" in ours:
+        return ours
+    if path == "src/features/los/teacher/teacher.css" and ours.lstrip().startswith("/* C06:") and theirs.lstrip().startswith("/*") and "C09" in theirs:
+        return ours.rstrip("\n") + "\n\n" + theirs.lstrip("\n")
     if path == "docs/LOS1_TEACHER_V2_60_LESSON_STRUCTURAL_AUDIT_2026-11-13.md" and ours.lstrip().startswith("## ") and theirs.lstrip().startswith("## "):
         # Two dated independent audit appendices; retain both.
         return ours.rstrip("\n") + "\n\n" + theirs.lstrip("\n")
@@ -97,6 +109,16 @@ def normalize_registry() -> None:
             boundary = "  return undefined;\n}"
             if boundary not in body:
                 raise ValueError("Cannot locate C08 registry fallback")
+            body = body.replace(boundary, lookup + "\n" + boundary, 1)
+    if Path("src/features/los/teacher/lessonC09.ts").exists():
+        imp = 'import { LOS1_C09_TEACHER } from "./lessonC09.ts";'
+        if imp not in body:
+            body = imp + "\n" + body
+        lookup = '  const c09 = LOS1_C09_TEACHER.find(lesson => lesson.id === id);\n  if (c09) return c09;'
+        if lookup not in body:
+            boundary = "  return undefined;\n}"
+            if boundary not in body:
+                raise ValueError("Cannot locate C09 registry fallback")
             body = body.replace(boundary, lookup + "\n" + boundary, 1)
     path.write_text(body)
 
