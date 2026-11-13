@@ -150,6 +150,13 @@ test("another lesson cannot acquire progress from shared scene names or activiti
   assert.equal(teacherCanFinish(impersonator,other,requiredAnswers,
     other.requiredCheckedIds??[]),false);
   assert.equal(independentTeacherEvidence(impersonator,other),0);
+  // Existing completed work is historical and cannot transfer to another lesson.
+  const completedOld={
+    ...impersonator,completedAt:now,
+    attempts:[{sceneId:"exit",answer:"b",correct:true,independent:true,at:now}],
+  };
+  assert.equal(independentTeacherEvidence(completedOld,other),0);
+  assert.equal(submitTeacherAnswer(completedOld,other,"exit",l005Answer,now),completedOld);
   assert.equal(finishTeacherSession(impersonator,other,requiredAnswers,now,
     other.requiredCheckedIds??[]),impersonator);
   // The legitimate L004 session still behaves normally.
