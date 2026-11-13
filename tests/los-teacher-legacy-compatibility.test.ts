@@ -5,6 +5,7 @@ import { validateLosCloudDraft } from "../src/features/los/cloudContract.ts";
 import { validLegacyTeacherProgress } from "../src/features/los/teacher/legacyCompatibility.ts";
 import { emptyTeacherSession, parseTeacherSessions, independentTeacherEvidence } from "../src/features/los/teacher/engine.ts";
 import { LOS1_L004_TEACHER } from "../src/features/los/teacher/lessonL004.ts";
+import { LOS1_L005_TEACHER } from "../src/features/los/teacher/lessonL005.ts";
 
 const at = "2026-11-12T21:00:00.000Z";
 const legacy = { version: "2.0.0", scene: "summary", visited: ["activation", "summary"],
@@ -39,4 +40,89 @@ test("malformed legacy data is rejected, not trusted as a student answer", () =>
   assert.equal(validateLosCloudDraft({ ...chapter(),
     lessonProgress: { L004: { ...emptyLosLessonProgress(), teacher: { ...legacy, paused: "false" } } },
   }), false);
+});
+
+test("L005 #232 audio/transcript and revision metadata survives as read-only legacy history", () => {
+  const historical = {
+    ...legacy,
+    scene: "summary",
+    completedAt: at,
+    answers: {
+      "application-written": { answer: "Bis später!", count: 1, correct: true,
+        independent: false, revealed: false, at },
+    },
+    helpSelections: { application: "simplify" },
+    writtenDrafts: { application: "Bis später!" },
+    completedContentRevision: "l005-listening-foundation-v1",
+    completedRevisionAt: at,
+    media: { sourceId: "M-COM-03", playingAt: at, endedAt: at, textOpenedAt: at },
+  };
+  assert.equal(validLegacyTeacherProgress(historical), true);
+  const existing = { ...emptyLosLessonProgress(), completedAt: at, teacher: historical };
+  const parsed = parseLosLessonProgressMap({ L005: existing });
+  assert.deepEqual(parsed.L005?.teacher, historical);
+  assert.equal(validateLosCloudDraft({ ...chapter(), lessonProgress: parsed }), true);
+
+  const fresh = emptyTeacherSession(LOS1_L005_TEACHER, at);
+  const canonical = parseTeacherSessions({ L005: fresh });
+  assert.deepEqual(canonical.L005, fresh);
+  assert.equal(independentTeacherEvidence(canonical.L005!, LOS1_L005_TEACHER), 0);
+  assert.equal(validateLosCloudDraft({
+    ...chapter(), lessonProgress: parsed, teacherSessions: canonical,
+  }), true);
+  // No answer, play event or old completion was silently promoted to mastery.
+  assert.equal(canonical.L005?.completedAt, null);
+  assert.deepEqual(canonical.L005?.attempts, []);
+});
+
+test("legacy compatibility rejects corrupt optional revision, drafts and media fields", () => {
+  const historical = {
+    ...legacy,
+    completedContentRevision: "l005-listening-foundation-v1",
+    completedRevisionAt: at,
+    media: { sourceId: "M-COM-03", playingAt: at, endedAt: at, textOpenedAt: at },
+  };
+  const invalid = [
+    { ...historical, completedRevisionAt: undefined },
+    { ...historical, completedContentRevision: undefined },
+    { ...historical, completedAt: null },
+    { ...historical, media: { sourceId: "M-COM-03", endedAt: at } },
+    { ...historical, media: { sourceId: "M-COM-03", playingAt: "not-an-iso-date" } },
+    { ...historical, media: { sourceId: "" } },
+    { ...historical, helpSelections: { application: "invalid option !" } },
+    { ...historical, writtenDrafts: { application: "x".repeat(41) } },
+  ];
+  for (const item of invalid) {
+    assert.equal(validLegacyTeacherProgress(item), false);
+    assert.equal(parseLosLessonProgressMap({
+      L005: { ...emptyLosLessonProgress(), teacher: item },
+    }).L005, undefined);
+  }
+});
+
+test("L004 and L005 historical records survive a joint C01 JSON backup roundtrip", () => {
+  const l005 = {
+    ...legacy, completedContentRevision: "l005-listening-foundation-v1",
+    completedRevisionAt: at,
+    media: { sourceId: "M-COM-03", textOpenedAt: at },
+    writtenDrafts: { application: "Bis später!" },
+  };
+  const input = {
+    L004: { ...emptyLosLessonProgress(), teacher: legacy },
+    L005: { ...emptyLosLessonProgress(), teacher: l005 },
+  };
+  const roundtrip = JSON.parse(JSON.stringify({ ...chapter(), lessonProgress: input })) as unknown;
+  assert.equal(validateLosCloudDraft(roundtrip), true);
+  const parsed = parseLosLessonProgressMap(input);
+  assert.deepEqual(parsed.L004?.teacher, legacy);
+  assert.deepEqual(parsed.L005?.teacher, l005);
+  assert.equal(Object.keys(parsed).length, 2);
+  const sessions = parseTeacherSessions({
+    L004: emptyTeacherSession(LOS1_L004_TEACHER, at),
+    L005: emptyTeacherSession(LOS1_L005_TEACHER, at),
+  });
+  assert.deepEqual(sessions.L004?.attempts, []);
+  assert.deepEqual(sessions.L005?.attempts, []);
+  assert.equal(validateLosCloudDraft({ ...chapter(), lessonProgress: parsed,
+    teacherSessions: sessions }), true);
 });
