@@ -6,7 +6,7 @@ import { LosDictionaryCard } from "./LosDictionaryCard";
 import type { LosDictionaryResult } from "./dictionaryClient";
 import { LOS_1_LESSONS } from "./learningPath";
 import { LosFirstLessons } from "./LosFirstLessons";
-import { getLosTeacherLesson } from "./teacher/lessonL004";
+import { getLosTeacherLesson } from "./teacher/lessonRegistry";
 import { LOS1_EXECUTABLE_LESSONS, isLos1ExecutableLesson } from "./guidedLessons";
 
 export type LosDestination = "overview" | "contents" | "chapter" | "text" | "understand" | "vocabulary" | "grammar" | "text-b" | "practice" | "apply" | "culture" | "test" | "appendix" | "dictionary" | "path" | "search" | "midterm" | "review" | "review-ii" | "cards" | "progress" | "final" | "summary";
