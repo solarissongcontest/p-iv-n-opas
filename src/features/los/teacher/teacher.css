@@ -155,3 +155,20 @@
 .los-teacher-assessment-status{margin:24px 0;padding:16px 20px;border:1px solid var(--los-line);border-radius:10px;background:var(--los-subtle);font-size:14px;line-height:1.65}
 .los-teacher-assessment-status h3{font-size:17px;margin:0 0 8px}
 .los-teacher-assessment-status p{margin:8px 0}
+
+/* Scripted, selectable help actions. Each option is a real scene-bound explanation. */
+.los-teacher-help-choices {
+  display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 14px;
+}
+.los-teacher-help-choices button {
+  min-height:44px;padding:9px 13px;border:1px solid var(--los-line);
+  border-radius:8px;background:var(--los-paper,#fff);
+  color:var(--los-ink);font:inherit;font-weight:650;text-align:left;
+}
+.los-teacher-help-choices button[aria-pressed="true"] {
+  border-color:var(--los-book-accent);color:var(--los-book-accent);
+  background:var(--los-subtle);
+}
+.los-teacher-help-choices button:focus-visible {
+  outline:3px solid var(--los-book-accent);outline-offset:2px;
+}
