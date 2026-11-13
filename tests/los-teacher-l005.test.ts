@@ -88,6 +88,12 @@ test("L005 canonical player hosts original audio and all source expressions dire
   assert.match(media,/LOS1_TEXT_B_SOURCES/);
   assert.match(media,/SOURCE[.]lines[.]map/);
   assert.match(media,/German_Vocabulary_-_Greetings[.]ogg/);
+  assert.match(media,/AUDIO_MP3_URL=/);
+  assert.match(media,/AUDIO_OGG_URL=/);
+  assert.match(media,/German_Vocabulary_-_Greetings[.]ogg[.]mp3/);
+  assert.match(media,/<source src=\{AUDIO_MP3_URL\} type="audio\/mpeg"\/>/);
+  assert.match(media,/<source src=\{AUDIO_OGG_URL\} type="audio\/ogg"\/>/);
+  assert.ok(media.indexOf('<source src={AUDIO_MP3_URL}')<media.indexOf('<source src={AUDIO_OGG_URL}'));
   assert.match(media,/<audio controls preload="none"/);
   assert.match(media,/onError/);
   assert.match(media,/Kuuntelunäyttö|kuuntelunäyttö|kuullun ymmärtämisen/);
