@@ -31,6 +31,12 @@ def choose(path: str, ours: str, theirs: str) -> str:
         if "L001–L060" not in result:
             raise ValueError(f"No full-coverage declaration in {path}: {result[:120]!r}")
         return result
+    if path == "src/features/los/teacher/LosTeacherPlayer.tsx" and 'lesson.examAssessment?.id === "EX-MID"' in ours and "lesson.mediaGate" in theirs:
+        # Both are separate assessment-status sections, not alternative branches.
+        return ours + theirs
+    if path == "src/features/los/teacher/lessonL004.ts" and "LOS1_C10_TEACHER_LESSONS.find" in theirs and "LOS1_L" in ours:
+        # Full registry normalization includes C10 as an additional fallback.
+        return ours
     if path == ".github/workflows/los-browser-ci.yml" and all("bunx playwright test" in v for v in (ours,theirs)):
         parts=list(dict.fromkeys(re.findall(r'e2e/[a-z0-9-]+\.spec\.ts', ours+" "+theirs)))
         if "e2e/los-full-book.spec.ts" not in parts:
