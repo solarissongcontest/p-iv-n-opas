@@ -75,7 +75,7 @@ test("C05 five scripts register without fake extra lesson or duplicate question 
     assert.ok(lesson.scenes.some(s=>s.kind==="board"),lesson.id);
     assert.ok(lesson.scenes.some(s=>s.kind==="explanation"),lesson.id);
     assert.ok(lesson.scenes.some(s=>s.kind==="summary"),lesson.id);
-    assert.ok(lesson.scenes.every(s=>(s.question?.genericWrong||s.help?.length||s.paragraphs.length)>0));
+    assert.ok(lesson.scenes.every(s=>Boolean(s.question?.genericWrong) || Boolean(s.help?.length) || s.paragraphs.length>0));
     assert.ok(lesson.scenes.flatMap(s=>s.bookLinks??[]).some(link=>link.chapterId==="05"),lesson.id);
     assert.ok(lesson.requiredQuestionIds.length>=5);
     assert.ok(lesson.requiredQuestionIds.every(id=>lesson.scenes.some(s=>s.id===id&&s.question)));
