@@ -45,8 +45,13 @@ test("full LOS! 1 Teacher 2.0 stack registers precisely L001–L060 with origina
 test("StudyOS and LOS! library expose direct links without inflating approved learning claims",()=>{
   const shell=readFileSync("src/app/AppShell.tsx","utf8");
   const library=readFileSync("src/features/los/LosBook.tsx","utf8");
+  const picker=readFileSync("src/features/los/LosFirstLessons.tsx","utf8");
   const path=readFileSync("src/features/los/LosReferenceTools.tsx","utf8");
   assert.equal(shell.split('href="/los"').length-1,2,"Desktop and mobile have real LOS links");
+  for(const [where,source] of [["reader",library],["chapter picker",picker],["study path",path]] as const){
+    assert.match(source,/from "\\.\/teacher\/lessonRegistry";/,where+" must use the canonical lesson registry");
+  }
+
   for(const destination of ["contents","path","dictionary","search","cards"]){
     assert.ok(library.includes('href="/los#/1/'+destination+'"'),destination+" must have a visible library shortcut");
   }

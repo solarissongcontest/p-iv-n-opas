@@ -15,7 +15,7 @@ import { getLosOpenDialogue } from "./content/los1OpenDialogues";
 import { LosNotebook, LosWorkbook } from "./LosWorkbook";
 import { LosBackups } from "./LosBackups";
 import { LosBookStartAction } from "./LosBookStartAction";
-import { getLosTeacherLesson } from "./teacher/lessonL004";
+import { getLosTeacherLesson } from "./teacher/lessonRegistry";
 import { LOS1_EXECUTABLE_LESSONS } from "./guidedLessons";
 import { LosDictionaryCard } from "./LosDictionaryCard";
 import { LosContentTree } from "./LosContentTree";
