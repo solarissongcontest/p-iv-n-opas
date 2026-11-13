@@ -1,0 +1,34 @@
+/* Manuscript-guided lesson; shares textbook's restrained paper and book accent. */
+.los-future-lesson-runner{max-width:940px;margin:1.25rem 0 2rem;padding:1.4rem;border:1px solid #ded9d0;background:#fffdf9;border-radius:16px;box-shadow:0 7px 28px rgb(45 37 26 / 5%)}
+.los-future-lesson-runner>h2{font-size:1.6rem;margin:.5rem 0 1rem}
+.los-guided-lesson-status{display:flex;gap:.75rem 1.25rem;flex-wrap:wrap;align-items:center;margin:.7rem 0;font-size:.87rem;color:#5e574f}
+.los-guided-lesson-status span{display:inline-flex;gap:.4rem;align-items:center}
+.los-guided-lesson-goal{margin:1rem 0;line-height:1.65;font-size:1.05rem}
+.los-guided-lesson-timetable{border-bottom:1px solid #e1ddd5;padding:.65rem 0}
+.los-guided-lesson-timetable summary{cursor:pointer;font-weight:700}
+.los-guided-lesson-timetable ol{padding-left:1.6rem;line-height:1.75}
+.los-guided-lesson-stage-nav{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.45rem;margin:1rem 0}
+.los-guided-lesson-stage-nav button{display:flex;align-items:center;gap:.5rem;min-width:0;padding:.65rem;text-align:left;background:#f6f3ee;border:1px solid transparent;border-radius:10px;cursor:pointer;color:#39332d;font:inherit;font-size:.84rem}
+.los-guided-lesson-stage-nav button>span:first-child{flex:0 0 24px;display:grid;place-items:center;height:24px;border-radius:50%;border:1px solid #b7b0a5;font-size:.7rem;font-weight:700}
+.los-guided-lesson-stage-nav .is-current{background:var(--los-book-tint,#eee4d7);border-color:var(--los-book-accent,#866644);font-weight:700}
+.los-guided-lesson-stage{padding:1.2rem;background:#fff;border:1px solid #e6e0d8;border-radius:12px}
+.los-guided-lesson-stage>h3{font-size:1.3rem;margin:.2rem 0 1rem}
+.los-guided-lesson-stage>p{line-height:1.75;white-space:pre-wrap}
+.los-guided-lesson-source{padding:1rem;background:#f9f7f2;border-left:3px solid var(--los-book-accent,#866644)}
+.los-guided-lesson-stage details{border-top:1px solid #ebe5de;margin:1rem 0;padding-top:.6rem}
+.los-guided-lesson-stage details summary{cursor:pointer;font-weight:650}
+.los-guided-lesson-stage details p{line-height:1.7}
+.los-guided-reflection{display:grid;gap:.5rem;font-size:.87rem;margin:1.3rem 0}
+.los-guided-reflection textarea{width:100%;box-sizing:border-box;border:1px solid #bbb3aa;border-radius:9px;padding:.9rem;font:inherit;line-height:1.55;resize:vertical;background:#fff;color:#2a2724}
+.los-guided-lesson-actions,.los-guided-lesson-next{display:flex;flex-wrap:wrap;gap:.6rem;margin-top:1.1rem;align-items:center}
+.los-guided-lesson-actions button,.los-guided-lesson-next button{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;padding:.65rem .9rem;border-radius:9px;border:1px solid #a9a198;background:transparent;color:#3c352e;font:inherit;font-size:.88rem;font-weight:650;cursor:pointer}
+.los-guided-lesson-actions .is-checked{color:#26724d;background:#ebf5ee;border-color:#92bc9f}
+.los-guided-lesson-next{border-top:1px solid #eae6e0;padding-top:1rem;justify-content:space-between}
+.los-guided-lesson-next button:disabled{opacity:.4;cursor:not-allowed}
+.los-guided-lesson-disclaimer{display:flex;gap:.6rem;align-items:flex-start;color:#6c6257;font-size:.84rem;line-height:1.55;margin:1.2rem 0 0}
+.los-guided-lesson-disclaimer svg{flex-shrink:0;margin-top:.12rem}
+.los-guided-review>h3{margin:1.3rem 0 .45rem;font-size:1.02rem}
+.los-guided-review>p{line-height:1.75;white-space:pre-wrap}
+.los-future-lesson-runner :is(button,summary,textarea):focus-visible{outline:3px solid var(--los-book-accent,#866644);outline-offset:3px}
+@media(max-width:720px){.los-future-lesson-runner{padding:1rem}.los-guided-lesson-stage-nav{grid-template-columns:repeat(2,minmax(0,1fr))}.los-guided-lesson-stage{padding:.85rem}}
+@media(max-width:400px){.los-guided-lesson-stage-nav button{font-size:.76rem}.los-guided-lesson-next button{font-size:.78rem}.los-guided-lesson-actions button{font-size:.78rem}}
