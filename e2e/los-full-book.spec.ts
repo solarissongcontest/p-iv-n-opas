@@ -582,6 +582,9 @@ test("L006 C01 Teacher requires real writing, submitted test and self-assessment
 
 test("L007 Teacher stores actual C02 understanding evidence, never writes it into C01",async({page})=>{
   await enterLocalBook(page);
+  // Create a real C01 draft through its own app UI before checking it survives C02.
+  await page.goto("/los#/1/01/apply",{waitUntil:"domcontentloaded"});
+  await page.locator("#los-application-01").fill("Guten Morgen!\nTschüss!");
   const c01=await page.evaluate(()=>{
     const key=Object.keys(localStorage).find(k=>k.startsWith("los.local.v1.")&&k.endsWith(".1.01"));
     if(!key)throw Error("C01 local draft not found");
