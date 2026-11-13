@@ -3,13 +3,13 @@ name: LOS! 1 integrated private preview candidate
 on:
   push:
     branches:
-      - feat/los1-teacher-stack-qa-20261113
+      - feat/los1-preview-publisher-20261113
 
 permissions:
   contents: read
 
 concurrency:
-  group: los1-private-preview-integration
+  group: los1-frozen-preview-20261113
   cancel-in-progress: true
 
 jobs:
@@ -110,7 +110,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          test "$GITHUB_REF" = "refs/heads/feat/los1-teacher-stack-qa-20261113"
+          test "$GITHUB_REF" = "refs/heads/feat/los1-preview-publisher-20261113"
           bundle=".los-tested-preview/merged.bundle"
           test -s "$bundle"
           git bundle verify "$bundle"
