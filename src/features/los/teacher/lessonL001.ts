@@ -163,9 +163,9 @@ export const LOS1_L001_TEACHER: TeacherLesson = {
         evidenceRole: "exit",
         prompt: "Miten LOSissa saat selville vieraan saksankielisen sanan merkityksen?",
         options: [
-          { id: "a", label: "Napautan sanaa lukijassa." },
-          { id: "b", label: "Minun täytyy poistua ulkoiselle sivulle.", wrongFeedback: "LOSin oikea lukija näyttää sanaselitykset itse kirjassa. Ulkoinen sivu ei ole edellytys." },
-          { id: "c", label: "Minun täytyy osata sana jo valmiiksi.", wrongFeedback: "Kirja on tarkoitettu aloittelijalle. Sanojen merkityksiä voi selvittää opiskellessa." },
+          { id: "a", label: "Napautan sanaa lukijassa." , "lang": "fi"},
+          { id: "b", label: "Minun täytyy poistua ulkoiselle sivulle.", "lang": "fi", wrongFeedback: "LOSin oikea lukija näyttää sanaselitykset itse kirjassa. Ulkoinen sivu ei ole edellytys." },
+          { id: "c", label: "Minun täytyy osata sana jo valmiiksi.", "lang": "fi", wrongFeedback: "Kirja on tarkoitettu aloittelijalle. Sanojen merkityksiä voi selvittää opiskellessa." },
         ],
         correctOption: "a",
         success: "Oikein. Lukijan sanaa napauttamalla löydät käytettävissä olevan selityksen suoraan LOSista.",
