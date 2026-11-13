@@ -8,8 +8,8 @@ Päiväys: 13.11.2026 · Integraatiokandidaatti PR #220 · Lähdekoodi PR #209 /
 
 - **60/60** ID:tä L001–L060 löydettiin nykyisistä `LosLessonBlueprint`-rakenteista, yksilöllisinä ja ilman aukkoja.
 - **60/60** vanhassa oppitunnissa on tavoite, **kolme** ohjaus-/suoritusvaihetta ja palautettava lopputarkistus. Tämä ei vielä tarkoita riittävää varsinaista opetusta.
-- **12/60** (L001–L012) sisältää erillisen Teacher Experience 2.0:n käsikirjoituksen, deterministisen ohjauksen ja opetus-/palautetilanteita; näidenkin sisältö on vielä toimituksellinen luonnos.
-- **48/60** käyttää vasta vanhaa linkki-/tehtävälistaan perustuvaa suoritusmallia. Niitä **ei** luokitella Teacher 2.0:ssa valmiiksi opetetuiksi.
+- **17/60** (L001–L012 ja L036–L040) sisältää erillisen Teacher Experience 2.0:n käsikirjoituksen, deterministisen ohjauksen ja opetus-/palautetilanteita; näidenkin sisältö on vielä toimituksellinen luonnos.
+- **43/60** käyttää vasta vanhaa linkki-/tehtävälistaan perustuvaa suoritusmallia. Niitä **ei** luokitella Teacher 2.0:ssa valmiiksi opetetuiksi.
 - **0/60** riippumatonta pedagogista kielihyväksyntää tai todellista opiskelijalla mitattua kestoa on tämän työn perusteella todettu.
 - Arvioitua `estimatedMinutes`-aikaa **ei ole mitattu**. L059 on koodissa **80 minuuttia**, muut 59 ovat **30 minuutin suunnitteluarvioita**. Aikaa ei pidä käyttää tekaistuna laatumittarina.
 - Vanhat lopputarkistukset voivat sisältää oikein tarkistettavan kysymyksen, mutta eivät yksin todista itsenäistä tai myöhemmin vahvistettua kielitaitoa.
@@ -55,11 +55,11 @@ Selite: `vastaus` = vanhaan tehtävätilaan tallennettu vastaus, ei automaattine
 | L033 | C06 · numerot/ikä | 3 | 30 | vastaus | Vain vanha tehtävä-/vaihelista | lessonEngineC06.ts |
 | L034 | C06 · numerot/ikä | 3 | 30 | tarkistettu lähdetehtävä | Vain vanha tehtävä-/vaihelista | lessonEngineC06.ts |
 | L035 | C06 · numerot/ikä | 3 | 30 | koe | Vain vanha tehtävä-/vaihelista | lessonEngineC06.ts |
-| L036 | C07 · tavaaminen | 3 | 30 | vastaus | Vain vanha tehtävä-/vaihelista | lessonEngineC07C09.ts |
-| L037 | C07 · tavaaminen | 3 | 30 | tarkistettu lähdetehtävä | Vain vanha tehtävä-/vaihelista | lessonEngineC07C09.ts |
-| L038 | C07 · tavaaminen | 3 | 30 | vastaus | Vain vanha tehtävä-/vaihelista | lessonEngineC07C09.ts |
-| L039 | C07 · tavaaminen | 3 | 30 | ei erityistä | Vain vanha tehtävä-/vaihelista | lessonEngineC07C09.ts |
-| L040 | C07 · tavaaminen | 3 | 30 | koe | Vain vanha tehtävä-/vaihelista | lessonEngineC07C09.ts |
+| L036 | C07 · tavaaminen | 3 | 30 | vastaus | Teacher 2.0: kirjainnimet, ryhmitelty aakkostaulu, nimet ja oma arvio; hyväksyntä avoin | lessonEngineC07C09.ts + lessonL036.ts |
+| L037 | C07 · tavaaminen | 3 | 30 | tarkistettu lähdetehtävä | Teacher 2.0: M-WB-02:n viisi vuoroa ja 3 tarkistettua alkuperäistehtävää; hyväksyntä avoin | lessonEngineC07C09.ts + lessonL037.ts |
+| L038 | C07 · tavaaminen | 3 | 30 | vastaus | Teacher 2.0: vaiheittainen kirjain- ja numerotaulu ja 4 kirjan tehtävää; hyväksyntä avoin | lessonEngineC07C09.ts + lessonL038.ts |
+| L039 | C07 · tavaaminen | 3 | 30 | ei erityistä | Teacher 2.0: M-COM-06:n lähde ja kirjallinen lomake; EI todennettua kuuntelunäyttöä; hyväksyntä avoin | lessonEngineC07C09.ts + lessonL039.ts |
+| L040 | C07 · tavaaminen | 3 | 30 | koe | Teacher 2.0: 15 kirjan koetehtävää, sovellus, itsearviointi; hyväksyntä avoin | lessonEngineC07C09.ts + lessonL040.ts |
 | L041 | C08 · luokkafraasit | 3 | 30 | vastaus | Vain vanha tehtävä-/vaihelista | lessonEngineC08C10Partial.ts |
 | L042 | C08 · luokkafraasit | 3 | 30 | tarkistettu lähdetehtävä | Vain vanha tehtävä-/vaihelista | lessonEngineC08C10Completion.ts |
 | L043 | C08 · luokkafraasit | 3 | 30 | vastaus | Vain vanha tehtävä-/vaihelista | lessonEngineC08C10Partial.ts |
@@ -101,3 +101,9 @@ U1.0:n **R1–R12** pysyy ainoana julkaisuporttien listana. Raportti ei luo uutt
 Projektin `Los 1.txt` ja 13.11. koottu `Los yhteinen masterplan.txt` nimeävät C03:n suunnitelluksi päätekstiksi M-DIB-01:n Bernan haastattelun. Repositoryn [11.11.2026 lähdevaihtopäätös](../los1-c03-source-replacement.md) määrittelee kuitenkin perustellun korvauksen: `M-WB-07`, Wikibooksin julkaistu kokonainen kahdeksan repliikin Lisa Müller -dialogi, pysyvä versio `oldid=4581896`. Vaihto tehtiin, koska Bernan haastattelussa esiintyy todellinen puhelinnumero ja henkilökohtaisten numeroiden välttäminen on LOS! 1:n linja.
 
 Lähdevalinta **ei siis ole päätöstä vailla**. Päätös on dokumentoitu, mutta yhdistelmämasterin vanha Berna-viittaus täytyy täsmäyttää ja lähteen riippumaton kielen, kokotekstin, vastausavainten, lisenssin sekä laitetestien hyväksyntä on edelleen avoin. L012:n maasanasto ei edellytä kummankaan haastattelun itsenäistä arviointia; L013 voidaan rakentaa nykyiselle Lisa-lähteelle ilman lähdeduplikaattia, mutta sitä ei merkitä julkaisuvalmiiksi ilman QA:ta.
+
+## C07 · L036–L040 · Session 6/10 lisäys (13.11.2026)
+
+Viisi C07:n oppituntia on kirjoitettu samaan kanoniseen Teacher Playeriin (17/60 käsikirjoitettua esikatselua, 43/60 vanhassa mallissa). Yhtäkään näistä ei ole ihmisen kieli- ja mediakatselmoinnilla hyväksytty tai 30 minuutin todellisella läpimenoajalla vahvistettu. Kirjan M-WB-02 Text A on viiden vuoron kokonainen teksti (Wikibooks, versio 3504939); L037 käyttää kolmea oikeaa C07-SOURCE-Q-tehtävää. L036 ja L038 viittaavat nykyisiin C07-EX-tehtäviin, L040 sen koko viidentoista tehtävän kokeeseen ja itsearviointiin. Opetustilanteen luetuksi merkitseminen, itsenäiset oikeat vastaukset ja kirjan kokeen palautus erotetaan toisistaan.
+
+C07:n Text B:n M-COM-06-aakkosäänitteellä on identifioitu ihmisäänilähde, mutta äänen nykyinen julkaisu-/laitetestausportti on yhä avoin. M-COM-06:n ei ole osoitettu sisältävän L039:n nimi- ja numerolomakkeen sanelua. Tämän vuoksi L039:n lomake on eksplisiittisesti **kirjallinen, keksittyjen tietojen harjoitus**, eikä tekstifallbackista tule kuunteluarvosanaa tai hyväksyttyä ääntämisnäyttöä. Todellinen kuuntelu vaatii erillisen hyväksytyn äänen ja todennetun näyttöpolun; nykyisiä tekstivastauksia ei siirretä kuuntelupisteiksi. 
