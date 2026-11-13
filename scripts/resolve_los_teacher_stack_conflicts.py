@@ -200,6 +200,24 @@ def normalize_registry() -> None:
             if boundary not in body:
                 raise ValueError("Cannot locate C10 registry fallback")
             body = body.replace(boundary, lookup + "\n" + boundary, 1)
+    # L056-L060 are intentionally authored in one source module, not five.
+    # The normal lessonLNNN glob therefore cannot discover their exports.
+    grouped = Path("src/features/los/teacher/lessonL056L060.ts")
+    if grouped.exists():
+        names = [f"LOS1_L{n:03d}_TEACHER" for n in range(56, 61)]
+        source = grouped.read_text()
+        for name in names:
+            if not re.search(r"export const " + re.escape(name) + r"\b", source):
+                raise ValueError(f"Missing grouped Teacher export: {name}")
+        if '"./lessonL056L060.ts"' not in body:
+            body = 'import { ' + ', '.join(names) + ' } from "./lessonL056L060.ts";\n' + body
+        boundary = "  return undefined;\n}"
+        if boundary not in body:
+            raise ValueError("Cannot locate grouped Teacher registry return")
+        for name in names:
+            lookup = f"  if (id === {name}.id) return {name};"
+            if lookup not in body:
+                body = body.replace(boundary, lookup + "\n" + boundary, 1)
     path.write_text(body)
 
 def normalize_full_path_test() -> None:
