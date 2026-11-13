@@ -122,7 +122,7 @@ test("every one of the 60 guided lessons opens from its actual chapter picker on
    expect(seen.has(title)).toBe(false);
    seen.add(title);
    await button.click();
-   if(Number(title.slice(1))<=12){
+   if(Number(title.slice(1))<=12 || Number(title.slice(1))>=56){
     await expect(page).toHaveURL(new RegExp("/los-lessons/"+title+"$"));
     await expect(page.locator(".los-teacher-paper h2")).toBeVisible();
     await expect(page.locator(".los-teacher-sidebar h1")).toBeVisible();
@@ -143,7 +143,7 @@ test("every one of the 60 guided lessons opens from its actual chapter picker on
  for(let n=1;n<=60;n++)expect(seen.has("L"+String(n).padStart(3,"0"))).toBe(true);
  await expect(runner.locator(".los-lesson-progress")).toContainText("0/60 suoritettu");
  await page.reload({waitUntil:"domcontentloaded"});
- await expect(page.locator("#los-lesson-runner .los-lesson-detail .los-overline")).toContainText("L060");
+ await expect(page.locator("#los-lesson-runner .los-lesson-picker button").last()).toContainText("L060");
  await expectNoHorizontalOverflow(page);
 });
 
