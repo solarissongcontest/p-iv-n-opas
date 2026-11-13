@@ -8,7 +8,7 @@ import {
   setTeacherAnswerDraft, submitTeacherAnswer, toggleTeacherPause, teacherCanFinish, teacherLatestAttempt,
   teacherWrongFeedback, type TeacherScene, type TeacherSession,
 } from "./engine.ts";
-import { getLosTeacherLesson } from "./lessonL004.ts";
+import { getLosTeacherLesson } from "./lessonRegistry.ts";
 import { LosTeacherNumberBuilder } from "./LosTeacherNumberBuilder.tsx";
 import { validateTeacherLesson } from "./validateContent.ts";
 import "../los-book.css";
