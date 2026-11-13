@@ -673,7 +673,7 @@ test("L004 Teacher 2.0 opens from the study path and preserves its scene when re
 
   await page.getByRole("button",{name:"Seuraava"}).click();
   await expect(page.locator(".los-teacher-paper h2").first()).toContainText("Mitä muistat");
-  await page.locator(".los-teacher-option").filter({hasText:"Guten Morgen!"}).click();
+  await page.locator(".los-teacher-option").filter({hasText:"Hallo!"}).click();
   await expect(page.locator(".los-teacher-feedback")).toContainText("Oikein");
   await page.reload({waitUntil:"domcontentloaded"});
   await expect(page.locator(".los-teacher-paper h2").first()).toContainText("Mitä muistat");
