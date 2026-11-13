@@ -9,8 +9,9 @@ import { expectNoHorizontalOverflow } from "./helpers";
  */
 async function enterLocalTeacherFixture(page: Page) {
   await page.addInitScript(() => {
-    localStorage.setItem("opk.device-authorized", "LOS Stack QA");
-    localStorage.setItem("opk.owner-id", "los-integrated-stack-e2e");
+    if (!["localhost", "127.0.0.1"].includes(window.location.hostname)) return;
+    localStorage.setItem("opk.device-authorized", "Arthur");
+    localStorage.setItem("opk.owner-id", "00000000-0000-4000-8000-000000000195");
   });
 }
 
