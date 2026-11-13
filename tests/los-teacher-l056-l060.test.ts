@@ -143,3 +143,20 @@ test("L060 requires 10 reviewed goals, five real saved card ratings and confirme
   assert.match(component,/Ei myönteistä tarkistettua näyttöä/);
   assert.match(component,/CEFR-tasotodistus/);
 });
+
+test("L060 uses archived immutable score and never remaps historical answers to today's skill bank",()=>{
+  const currentChoices=Object.fromEntries(LOS1_FINAL_QUESTIONS.map(q=>[q.id,q.correctId]));
+  // A past edition may have a different key, even when item identifiers match.
+  const historicalBank=LOS1_FINAL_QUESTIONS.map(q=>q.id==="EX-FINAL-Q01"
+    ? {...q,correctId:"a" as const} : q);
+  const oldRecords=losArchiveExamAttempt({},"EX-FINAL",historicalBank,currentChoices,NOW);
+  const record=losArchivedExamHistory(oldRecords,"EX-FINAL")[0]!;
+  assert.equal(record.correct,49);
+  const snapshot=summarizeLos1Mastery({"93":{
+    ...emptyLosDraft(),practiceAnswers:oldRecords,
+  }});
+  assert.deepEqual(snapshot.exam,{correct:49,total:50,attempts:1});
+  assert.equal(snapshot.skills.every(skill=>skill.examCorrect===0&&skill.examTotal===0),true,
+    "Archived answer choices must not silently become new skill claims");
+  assert.equal(snapshot.skills.find(skill=>skill.id==="L1-INT-01")?.status,"missing");
+});
