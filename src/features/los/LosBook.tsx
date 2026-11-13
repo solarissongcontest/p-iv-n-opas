@@ -445,10 +445,11 @@ export function LosBook() {
     else window.location.hash = hash;
   };
   useEffect(() => {
-    const title = location.book ? `LOS! ${location.book} · Saksan oppikirja` : "LOS! · Saksan oppikirjasarja";
+    const title = location.lessonId==="L004" ? "L004 · Tervehdykset muistista · LOS!" :
+      location.book ? `LOS! ${location.book} · Saksan oppikirja` : "LOS! · Saksan oppikirjasarja";
     document.title = title;
     return () => { document.title = "StudyOS"; };
-  }, [location.book]);
+  }, [location.book,location.lessonId]);
   if (canOpen === null) return <div className="los-loading" role="status">Avataan LOS!-oppikirjastoa…</div>;
   if (!canOpen) return <AccessGate />;
   const book = LOS_BOOKS.find(b => b.id === location.book);

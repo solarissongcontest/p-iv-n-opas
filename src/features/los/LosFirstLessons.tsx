@@ -4,14 +4,11 @@ import type { LosNavigate } from "./LosReferenceTools";
 import { useLosChapterDraft } from "./studyState";
 import {
   emptyLosLessonProgress, losLessonCanComplete, losLessonEvidenceMet,
-  losLessonFinish, losLessonFinishTeacher, losLessonMarkStep, losLessonSubmitCheck,
+  losLessonFinish, losLessonMarkStep, losLessonSubmitCheck,
   type LosLessonProgress,
 } from "./lessonEngine";
 import { LOS1_EXECUTABLE_LESSONS, los1LessonDraftChapter } from "./guidedLessons";
 import "./los-lessons.css";
-import {LosL004TeacherPlayer} from "./teacher/LosL004TeacherPlayer";
-import {initialTeacherProgress} from "./teacher/core";
-import {TEACHER_L004} from "./teacher/content/l004";
 
 const ALL_LESSONS = LOS1_EXECUTABLE_LESSONS;
 const lessonChapter = los1LessonDraftChapter;
@@ -132,10 +129,13 @@ export function LosFirstLessons({ selectedId, onSelect, move }: {
          progress.startedAt ? "Oppitunti kesken" : "Oppituntia ei ole vielä aloitettu")+ 
          ` · ${stepCount}/${lesson.steps.length} vaihetta merkitty tehdyksi.`}</p>
       {isL004&&<>
-        <a className="los-lesson-teacher-entry" href="/los#/1/lesson/L004">Avaa L004:n oma Lesson Player</a>
-        <LosL004TeacherPlayer progress={progress.teacher??initialTeacherProgress(TEACHER_L004)}
-          onChange={teacher=>record(old=>({...old,startedAt:old.startedAt??stamp(),teacher}))}
-          onFinish={()=>record(old=>losLessonFinishTeacher(TEACHER_L004,old,stamp()))}/>
+        <div className="los-lesson-teacher-launch">
+          <p>Opettajajohtoinen L004 avautuu omassa häiriöttömässä Lesson Player -näkymässä.
+            Edellinen opetustilanne ja kaikki tallennetut vastaukset säilyvät.</p>
+          <a className="los-lesson-teacher-entry" href="/los#/1/lesson/L004">
+            {teacherDone?"Kertaa L004 omassa opetustilassa":progress.teacher?"Jatka L004:n opetusta":"Aloita L004:n opetus"}
+          </a>
+        </div>
         <button type="button" className="los-lesson-history-toggle" aria-controls="los-l004-legacy"
           aria-expanded={showL004History} onClick={()=>setShowL004History(x=>!x)}>
           {showL004History?"Piilota aiemmat oppituntitehtävät":"Näytä aiemmat oppituntitehtävät"}

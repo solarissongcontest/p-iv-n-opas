@@ -122,9 +122,11 @@ test("every one of the 60 guided lessons opens from its actual chapter picker on
    await button.click();
    await expect(runner.locator(".los-lesson-detail .los-overline")).toContainText(title);
    if(title==="L004"){
-    await expect(runner.locator(".los-teacher")).toBeVisible();
+    await expect(page).toHaveURL(/\/los#\/1\/lesson\/L004$/);
+    await expect(page.locator(".los-teacher-shell")).toBeVisible();
+    await page.goto("/los#/1/path",{waitUntil:"domcontentloaded"});
+    await expect(runner.locator(".los-lesson-teacher-launch")).toBeVisible();
     await expect(runner.locator(".los-lesson-steps li").first()).toBeHidden();
-    await expect(runner.locator(".los-teacher-completion button")).toBeDisabled();
     await runner.getByRole("button",{name:"Näytä aiemmat oppituntitehtävät"}).click();
    }
    await expect(runner.locator(".los-lesson-steps li").first()).toBeVisible();
@@ -319,7 +321,8 @@ test("LOS Teacher 2.0 L004 teaches greetings, saves scenes, and never invents ma
  await page.goto("/los#/1/path",{waitUntil:"domcontentloaded"});
  const runner=page.locator("#los-lesson-runner");
  await runner.locator(".los-lesson-picker button").filter({hasText:"L004"}).click();
- const player=runner.locator(".los-teacher");
+ await expect(page).toHaveURL(/\/los#\/1\/lesson\/L004$/);
+ const player=page.locator(".los-teacher");
  await expect(player).toBeVisible();
  await expect(player).toContainText("Opetuskäsikirjoitus on vielä");
  await player.getByRole("button",{name:"Opetuksen sisällysluettelo"}).click();
@@ -348,9 +351,10 @@ test("LOS Teacher L004 is the primary lesson and finishes despite nonmastered an
  await page.goto("/los#/1/path",{waitUntil:"domcontentloaded"});
  const runner=page.locator("#los-lesson-runner");
  await runner.locator(".los-lesson-picker button").filter({hasText:"L004"}).click();
- const player=runner.locator(".los-teacher");
+ await expect(page).toHaveURL(/\/los#\/1\/lesson\/L004$/);
+ const player=page.locator(".los-teacher");
  await expect(player).toBeVisible();
- await expect(runner.locator(".los-lesson-steps")).toBeHidden();
+ await expect(page.locator(".los-lesson-chapter-picker")).toHaveCount(0);
  await expect(player.getByRole("button",{name:"Merkitse opetuskokonaisuus käsitellyksi"})).toBeDisabled();
  await player.getByRole("button",{name:"Opetuksen sisällysluettelo"}).click();
  const script:[
@@ -375,13 +379,14 @@ test("LOS Teacher L004 is the primary lesson and finishes despite nonmastered an
  await expect(finish).toBeEnabled();
  await finish.click();
  await expect(player).toContainText("Opetuskokonaisuus käyty läpi");
- await expect(runner.locator(".los-lesson-progress")).toContainText("1/60 suoritettu");
+ await expect(page.locator(".los-teacher-shell-progress")).toContainText("9/9");
  await page.reload({waitUntil:"domcontentloaded"});
  await expect(page.locator(".los-teacher")).toContainText("Opetuskokonaisuus käyty läpi");
  await expect(page.locator(".los-teacher")).toContainText("0/3");
- await expect(page.getByRole("button",{name:/Seuraava oppitunti: L005/})).toBeVisible();
- await page.getByRole("button",{name:/Seuraava oppitunti: L005/}).click();
+ await expect(page.getByRole("link",{name:/Seuraava oppitunti: L005/})).toBeVisible();
+ await page.getByRole("link",{name:/Seuraava oppitunti: L005/}).click();
  await expect(page.locator("#los-lesson-runner .los-lesson-detail .los-overline")).toContainText("L005");
+ await expect(page.locator(".los-lesson-progress")).toContainText("1/60 suoritettu");
  await expectNoHorizontalOverflow(page);
 });
 

@@ -58,6 +58,11 @@ export function LosL004LessonShell({book}:{book:LosBookDefinition}){
      Merkintäsi säilyy, mutta uusi opetuskäsikirjoitus on erillinen harjoittelu.</p>}
    <LosL004TeacherPlayer progress={teacher} onChange={onChange}
     onFinish={()=>record(old=>losLessonFinishTeacher(TEACHER_L004,old,stamp()))}/>
+   {teacher.completedAt&&<div className="los-teacher-shell-next">
+     <a href="/los#/1/path" onClick={()=>{
+       try{sessionStorage.setItem("los1.selectedLesson","L005");}catch{/* path remains available */}
+     }}>Seuraava oppitunti: L005 · Kuuntele ja valitse tervehdys</a>
+   </div>}
    <nav className="los-teacher-shell-footer" aria-label="Oppitunnin muut materiaalit">
     <a href="/los#/1/path"><ArrowLeft size={16}/> Palaa 60 oppitunnin opiskelupolkuun</a>
     <a href="/los#/1/01/practice"><BookOpen size={16}/> Harjoittele kirjan C01-tehtävillä</a>
