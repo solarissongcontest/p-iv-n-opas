@@ -761,6 +761,31 @@ test("Teacher 2.0 presents one teaching board with one set of controls", async (
 
 
 
+
+test("C06 lessons L032 and L035 show feedback for the actual number or age question",async({page})=>{
+  await enterLocalBook(page);
+  await page.goto("/los-lessons/L032",{waitUntil:"domcontentloaded"});
+  const outline=page.locator(".los-teacher-outline nav");
+  await outline.getByRole("button",{name:"Lopputarkistus: siebzehn numerona"}).click();
+  await expect(page.locator(".los-teacher-question h3")).toContainText("Kirjoita numeroin: siebzehn");
+  await page.getByRole("button",{name:"Tarvitsen vihjeen"}).click();
+  await expect(page.locator(".los-teacher-hint")).toContainText("Kirjoita vastaukseksi numero");
+  await expectNoHorizontalOverflow(page);
+
+  await page.goto("/los-lessons/L035",{waitUntil:"domcontentloaded"});
+  const review=page.locator(".los-teacher-outline nav");
+  await review.getByRole("button",{name:"Kertaa zwölf numerona"}).click();
+  await expect(page.locator(".los-teacher-question h3")).toContainText("Kirjoita numeroin: zwölf");
+  await page.getByRole("button",{name:"Tarvitsen vihjeen"}).click();
+  await expect(page.locator(".los-teacher-hint")).toContainText("Vastaa pelkällä numerolla");
+  await review.getByRole("button",{name:"Sano ikä kokonaisella lauseella"}).click();
+  await expect(page.locator(".los-teacher-question h3")).toContainText("Olen 20-vuotias");
+  await page.getByRole("button",{name:"Tarvitsen vihjeen"}).click();
+  await expect(page.locator(".los-teacher-hint")).toContainText("Ich bin");
+  await expectNoHorizontalOverflow(page);
+});
+
+
 test("L033 keeps tens feedback separate from the 21–99 word-building rule",async({page})=>{
  await enterLocalBook(page);
  await page.goto("/los-lessons/L033",{waitUntil:"domcontentloaded"});
