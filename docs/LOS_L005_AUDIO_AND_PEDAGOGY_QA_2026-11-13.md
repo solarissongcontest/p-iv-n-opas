@@ -61,3 +61,14 @@ ensiyrityksiä ei tulkita täysin tuettomaksi muistista tuottamiseksi.
 
 L005 pysyy toimituksellisena luonnoksena. Automaattinen onnistunut CI-ajokaan
 ei ole riippumattoman kielenopettajan hyväksyntä eikä fyysisen laitteen testi.
+
+## Commonsin lähdesivun erillinen tarkistus
+
+Wikimedia Commonsin tiedostosivulla (tarkistettu 13.11.2026) ilmoitetaan
+alkuperäisen Ogg-äänitteen pituudeksi 28 sekuntia, tekijäksi
+German Men92 ja lähteeksi English Wikibooks. Sivulla oleva koko transkriptio
+alkaa `Hallo!`-ilmauksesta ja päättyy `Gute Nacht!` -toivotukseen;
+siinä on 20 ilmausta. Sivun lisenssiosio ilmaisee tekijän luovuttaneen
+äänitteen public domain -käyttöön. Tämä vahvistaa käytetyn lähteen
+tunnisteen ja tekstiluettelon, **ei** vielä selaintoiston toimintaa,
+äänen ja yksittäisten kohtien aikaleimoja tai pedagogista hyväksyntää.
