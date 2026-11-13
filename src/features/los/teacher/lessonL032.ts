@@ -178,11 +178,13 @@ export const LOS1_L032_TEACHER: TeacherLesson = {
     {
       "id": "source",
       "phase": "Alkuperäisteksti",
-      "title": "Katso C06:n oikea kielioppisivu",
+      "title": "Lue C06:n koko oma Text A ja tarkista kolme kysymystä",
       "kind": "book",
       "paragraphs": [
-        "Lue numerot 13–20 ja mallikysymys Wie alt bist du? kirjan C06-kieliopista. Kirjassa on sekä numerotaulukko että valmis vastaus Ich bin siebzehn Jahre alt.",
-        "Oman Text A:n neljä alkuperäisdialogia sisältävät iän kysymistä ja ikälukuja. L034:ssä ne käydään läpi erikseen, eikä tätä lasketa kuunteluksi."
+        "Avaa C06:n numerokielioppi ja lue Wie alt bist du? sekä Ich bin ... Jahre alt. Kirjan numerotaulukossa ovat myös poikkeukset sechzehn ja siebzehn.",
+        "Avaa tämän jälkeen C06:n oma 12 repliikin Text A (neljä alkuperäistä dialogia). Lue koko lähdeteksti, mutta etsi erityisesti Oskarin viisi vuotta, Larissan kaksitoista vuotta sekä kahden puhujan kymmenen vuotta.",
+        "Avaa C06:n Ymmärrä-sivu ja tee sen yläosan kolme oikeaa lähdetehtävää C06-ZPE-Q01, Q02 ja Q03. Paina jokaisen Tarkista vastaus. Ne ovat luetun tekstin ymmärtämistä, eivät vahvistettua kuuntelua.",
+        "Myöhempi L034 kertaa näitä henkilöitä uudelleen sekä C01:n vanhan Franz–Jörg-dialogin ikätiedot."
       ],
       "bookLinks": [
         {
@@ -190,6 +192,18 @@ export const LOS1_L032_TEACHER: TeacherLesson = {
           "section": "grammar",
           "label": "C06 · Kielioppi ja numerot",
           "instruction": "Lue ikäfraasit ja numerotaulukko."
+        },
+        {
+          "chapterId": "06",
+          "section": "text",
+          "label": "C06 · 12 repliikin oma Text A",
+          "instruction": "Lue kaikki neljä alkuperäistä ikädialogia."
+        },
+        {
+          "chapterId": "06",
+          "section": "understand",
+          "label": "C06 · Ymmärrä Text A · ZPE Q01–Q03",
+          "instruction": "Tee ja tarkista kolme oikeaa ymmärtämistehtävää."
         }
       ]
     },
@@ -332,5 +346,10 @@ export const LOS1_L032_TEACHER: TeacherLesson = {
         "Väärin kirjoitettu umlaut tai puuttuva kirjain kannattaa korjata harjoittelussa, mutta yksittäinen virhe ei muuta opettajatunnin suoritusta automaattiseksi kielitaidon todistukseksi."
       ]
     }
+  ],
+  "requiredCheckedIds": [
+    "C06-ZPE-Q01",
+    "C06-ZPE-Q02",
+    "C06-ZPE-Q03"
   ]
 };
