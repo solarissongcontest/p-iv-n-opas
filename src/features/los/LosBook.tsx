@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { ArrowLeft, ArrowRight, BookOpen, ChevronLeft, ChevronRight, Headphones, List, Menu, Search, X } from "lucide-react";
 import { readCachedDeviceUser } from "@/lib/deviceSession";
+import { getLosTeacherLesson } from "./teacher/lessonL004";
 import { LOS_BOOKS, type LosBookDefinition, type LosChapter } from "./catalog";
 import { getLosChapterSourceGate } from "./content/sourceRegistry";
 import { LosAuthenticAudio, LosDictionary, LosIndexSearch, LosLearningPath, type LosDestination } from "./LosReferenceTools";
@@ -430,7 +431,14 @@ export function LosBook() {
   if (canOpen === null) return <div className="los-loading" role="status">Avataan LOS!-oppikirjastoa…</div>;
   if (!canOpen) return <AccessGate />;
   const book = LOS_BOOKS.find(b => b.id === location.book);
+  // Return link for lessons opened in a separate textbook tab. Only known IDs
+  // are accepted; never turn arbitrary query values into navigation targets.
+  const requestedLesson = typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("lessonReturn") : null;
+  const returnLesson = requestedLesson && getLosTeacherLesson(requestedLesson) ? requestedLesson : null;
   return <div className="los-app">
+    {returnLesson && <a className="los-teacher-book-return" href={"/los-lessons/" + returnLesson}>
+      <ArrowLeft size={16}/> Palaa oppitunnille {returnLesson}
+    </a>}
     {book ? <LosBookWorkspace book={book} location={location} move={(chapter, section) => move(book.id, chapter, section)} goLibrary={() => move(null)} openBook={id => move(id)} /> :
       <><div className="los-series-top"><a href="/studies"><ArrowLeft size={17} /> Opintopäiväkirjaan</a><span>LOS! · Saksa B3</span></div><SeriesView openBook={id => move(id)} /></>}
   </div>;

@@ -289,3 +289,7 @@
 .los-front-resume{display:flex;flex-direction:column;align-items:flex-start;min-width:0;gap:.2rem}
 .los-front-resume-caption{font-size:.83rem!important;line-height:1.55;color:var(--los-soft);margin:.2rem 0 1rem;max-width:48ch}
 @media(max-width:640px){.los-front-resume{width:100%}.los-front-resume .los-primary{width:100%;min-height:48px}}
+
+/* The book remains independent from the teaching route, with an explicit return. */
+.los-app .los-teacher-book-return { display:flex;align-items:center;justify-content:center;gap:9px;min-height:44px;padding:9px 16px;background:var(--los-book-tint);border-bottom:1px solid var(--los-line);color:var(--los-ink);font-size:13px;font-weight:700;text-decoration:none; }
+.los-app .los-teacher-book-return:hover {text-decoration:underline;}
