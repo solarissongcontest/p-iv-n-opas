@@ -8,11 +8,13 @@ on:
       - "tests/los-teacher-l056-l060.test.ts"
       - "tests/los-teacher-engine.test.ts"
       - "e2e/los-teacher-session10.spec.ts"
+      - "e2e/los-session10.spec.ts"
       - "e2e/los-full-book.spec.ts"
       - ".github/workflows/los-session10-qa.yml"
   pull_request:
     branches:
       - main
+      - feat/los1-teacher-c03-l012-20261113
     paths:
       - "src/features/los/**"
       - "tests/los-teacher-l056-l060.test.ts"
@@ -52,7 +54,10 @@ jobs:
             tests/los-teacher-l056-l060.test.ts \
             tests/los-teacher-engine.test.ts \
             tests/los-final-exam-l059-l060.test.ts \
-            tests/los-review-ii-l056-l058.test.ts
+            tests/los-review-ii-l056-l058.test.ts \
+            tests/los-exam-attempt-archive.test.ts \
+            tests/los-teacher-backup.test.ts \
+            tests/los-teacher-content-validation.test.ts
       - name: Install Playwright and browser dependencies
         run: |
           bun run e2e:install
@@ -68,7 +73,7 @@ jobs:
           cat /tmp/los-s10-dev.log
           exit 1
       - name: Teacher session 10 desktop and iPhone browser journeys
-        run: bunx playwright test e2e/los-teacher-session10.spec.ts --project=desktop-chromium --project=iphone-webkit
+        run: bunx playwright test e2e/los-teacher-session10.spec.ts e2e/los-session10.spec.ts --project=desktop-chromium --project=iphone-webkit
       - name: Existing 60-lesson navigation regression
         run: bunx playwright test e2e/los-full-book.spec.ts --grep "every one of the 60 guided lessons" --project=desktop-chromium --project=iphone-webkit
       - name: Upload failed-browser evidence
