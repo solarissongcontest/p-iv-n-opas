@@ -126,7 +126,7 @@ export function LosL004TeacherPlayer({
       Näytä mallivastaus ja jatka
      </button>}
    </form>}
-   {scene.question&&(!scene.written||Boolean(writtenResult||result))&&<div className="los-teacher-question">
+   {scene.question&&(!scene.written||Boolean(writtenResult?.correct||writtenResult?.revealed||(writtenResult?.count??0)>=2||result))&&<div className="los-teacher-question">
     <fieldset disabled={Boolean(result?.correct||result?.revealed)}>
      <legend>{scene.question.prompt}</legend>
      <div className="los-teacher-choices">
