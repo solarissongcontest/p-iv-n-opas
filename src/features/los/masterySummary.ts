@@ -1,5 +1,7 @@
 import type { LosChapterDraft } from "./studyState.ts";
-import { LOS1_FINAL_QUESTIONS, losFinalReadyToSubmit } from "./content/los1FinalExam.ts";
+import { LOS1_FINAL_QUESTIONS, losFinalReadyToSubmit,
+  LOS1_FINAL_WRITING_MODEL_OPENED, LOS1_FINAL_WRITING_ASSISTED,
+} from "./content/los1FinalExam.ts";
 import { losArchivedExamHistory } from "./content/los1ExamArchive.ts";
 import { getLosTeacherLesson } from "./teacher/lessonL004.ts";
 
@@ -34,7 +36,7 @@ export type LosMasterySnapshot = {
   nextSuggestion:string;
   ownGoal:string|null;
   exam:{correct:number;total:number;attempts:number}|null;
-  writing:{recorded:boolean;assisted:boolean;modelOpened:boolean};
+  writing:{recorded:boolean;assisted:boolean;modelOpened:boolean;finalModelOpened:boolean;finalAssisted:boolean};
 };
 
 /**
@@ -119,6 +121,9 @@ export function summarizeLos1Mastery(
       "Jatka LOS! 2:n arjen vuorovaikutukseen ja palaa tarvittaessa LOS! 1:n kertaustehtäviin.",
     ownGoal,
     exam:(validCurrent || lastArchived)?{correct:objectiveResult,total:50,attempts:archive.length+(validCurrent?1:0)}:null,
-    writing:{recorded:written,assisted,modelOpened},
+    writing:{recorded:written,assisted,modelOpened,
+      finalModelOpened:Boolean(final?.practiceAnswers[LOS1_FINAL_WRITING_MODEL_OPENED]),
+      finalAssisted:Boolean(final?.practiceAnswers[LOS1_FINAL_WRITING_ASSISTED]),
+    },
   };
 }
