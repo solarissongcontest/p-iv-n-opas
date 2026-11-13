@@ -50,7 +50,10 @@ test("first correct attempt gives independent evidence; hints and retries do not
   assert.equal(independentTeacherEvidence(s, lesson), 1);
   s = revealTeacherSolution(s, "independent", now);
   s = setTeacherAnswerDraft(s, "independent", "Guten Abend!", now);
+  const beforeRevealedSubmit = s.attempts.length;
   s = submitTeacherAnswer(s, lesson, "independent", "Guten Abend!", now);
+  // Once the solution was revealed, the answer must not create another scored attempt.
+  assert.equal(s.attempts.length, beforeRevealedSubmit);
   assert.equal(teacherLatestAttempt(s, "independent"), undefined);
   assert.equal(independentTeacherEvidence(s, lesson), 1);
 });
