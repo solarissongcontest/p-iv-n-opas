@@ -67,14 +67,21 @@ def normalize_registry() -> None:
 
 unmerged = subprocess.check_output(["git","diff","--name-only","--diff-filter=U"],text=True).splitlines()
 print("Detected merge conflicts:", ", ".join(unmerged))
+failures=[]
 for name in unmerged:
     path = Path(name)
     contents = path.read_text()
-    new_body, count = PATTERN.subn(lambda m:choose(name,m.group(1),m.group(2)),contents)
-    if count < 1 or "<<<<<<<" in new_body or ">>>>>>>" in new_body:
-        raise ValueError(f"Unresolved markers in {name}")
+    try:
+        new_body, count = PATTERN.subn(lambda m:choose(name,m.group(1),m.group(2)),contents)
+        if count < 1 or "<<<<<<<" in new_body or ">>>>>>>" in new_body:
+            raise ValueError(f"Unresolved markers in {name}")
+    except ValueError as err:
+        failures.append(str(err))
+        continue
     path.write_text(new_body)
     print(f"Resolved {name}: {count} explicit reviewed conflict block(s)")
+if failures:
+    raise ValueError("Unexpected semantic conflicts; refusing automatic merge:\\n" + "\\n----\\n".join(failures))
 normalize_registry()
 subprocess.run(["git","add","--",*unmerged,"src/features/los/teacher/lessonL004.ts"],check=True)
 if subprocess.check_output(["git","ls-files","-u"],text=True).strip():
