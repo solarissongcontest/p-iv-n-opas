@@ -779,6 +779,9 @@ test("L009 Teacher requires four actual C02 heißen/sein workbook fills without 
   for(const id of ["C02-EX-03","C02-EX-04","C02-EX-05","C02-EX-06"])
     await expect(exercise(id).locator(".los-workbook-feedback")).toContainText("Oikein.");
   await page.getByRole("link",{name:"Palaa oppitunnille L009"}).click();
+  // Resume restores the last visited scene (the summary); the book evidence
+  // panel belongs to the workbook scenes, not the summary.
+  await page.locator(".los-teacher-outline nav button").filter({hasText:"Täydennä sein-muodot ja tutki kaikki neljä perustelua"}).click();
   for(const id of ["C02-EX-03","C02-EX-04","C02-EX-05","C02-EX-06"])
     await expect(page.locator(".los-teacher-paper")).toContainText(id+": Vastaus tallennettu");
   const outline=page.locator(".los-teacher-outline nav button");
