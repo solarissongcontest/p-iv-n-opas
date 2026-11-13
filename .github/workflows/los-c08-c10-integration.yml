@@ -1,0 +1,61 @@
+name: LOS C08-C10 Integrated Teacher 2.0 Draft QA
+on:
+  push:
+    branches:
+      - feat/los1-teacher-c08-c10-integration
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: los-c08-c10-combined-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  quality:
+    name: Entire unit suite, typecheck, production build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - run: bun install --frozen-lockfile
+      - run: bun run test
+      - run: bun run typecheck
+      - run: bun run build
+  browser:
+    name: C08 C09 C10 and full book, Chromium + iPhone WebKit
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    env:
+      E2E_BASE_URL: http://127.0.0.1:5173
+      REQUIRE_GEMINI: "false"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install --frozen-lockfile
+      - run: bun run e2e:install
+      - run: bunx playwright install --with-deps chromium webkit
+      - name: Start isolated local preview
+        run: |
+          nohup bun run dev -- --host 127.0.0.1 --port 5173 --strictPort > /tmp/los-c08-c10-dev.log 2>&1 &
+          for attempt in $(seq 1 50); do
+            curl --silent --fail --max-time 3 http://127.0.0.1:5173/ > /dev/null 2>&1 && exit 0
+            sleep 2
+          done
+          cat /tmp/los-c08-c10-dev.log
+          exit 1
+      - name: C08 + C09 + C10 dedicated real Teacher pages
+        run: bunx playwright test e2e/los-c08-teacher.spec.ts e2e/los-c09-teacher.spec.ts e2e/los-c10-teacher.spec.ts --project=desktop-chromium --project=iphone-webkit
+      - name: All LOS 1 full-book regressions
+        run: bunx playwright test e2e/los-full-book.spec.ts --project=desktop-chromium --project=iphone-webkit
+      - name: Save diagnostic browser evidence
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: los-c08-c10-browser-evidence
+          path: |
+            test-results/
+            /tmp/los-c08-c10-dev.log
+          if-no-files-found: ignore
+          retention-days: 7

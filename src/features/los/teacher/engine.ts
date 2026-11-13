@@ -55,6 +55,8 @@ export type TeacherLesson = {
   requiredPracticeIds: readonly string[];
   /** Book comprehension checks must be both answered and explicitly checked. */
   requiredCheckedIds?: readonly string[];
+  /** Original transcript reading must not count as listening to unapproved audio. */
+  mediaGate?: { sourceId:string; approved:boolean; reason:string };
   /** Chapter-test evidence stays in the existing chapter draft. */
   chapterAssessment?: {
     requiredTestIds: readonly string[];
@@ -231,7 +233,7 @@ export function isCorrectCalendarEntry(scene: TeacherScene, value: string): bool
 export function teacherCanFinish(session: TeacherSession, lesson: TeacherLesson,
   practiceAnswers: Readonly<Record<string, string>>, practiceChecked: readonly string[] = [],
   chapterAssessment?: TeacherChapterAssessmentInput): boolean {
-  return teacherChapterAssessmentStatus(lesson, chapterAssessment).ready && !session.paused && lesson.scenes.every(scene => session.visitedIds.includes(scene.id)) &&
+  return (!lesson.mediaGate || lesson.mediaGate.approved) && teacherChapterAssessmentStatus(lesson, chapterAssessment).ready && !session.paused && lesson.scenes.every(scene => session.visitedIds.includes(scene.id)) &&
     lesson.scenes.every(scene => !scene.calendar || isCorrectCalendarEntry(scene,session.draftAnswers[scene.id] ?? "")) &&
     lesson.scenes.every(scene => !scene.reflection ||
       (session.draftAnswers[scene.id]?.trim().length ?? 0) >= scene.reflection.minLength) &&
