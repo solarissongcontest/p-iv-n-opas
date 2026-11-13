@@ -129,6 +129,53 @@ test("L060 counts five distinct real rated words, not both directions of three w
 });
 
 
+test("corrupted current EX-FINAL marker never leaks answers and can be repaired without losing work",async({page})=>{
+  test.setTimeout(210_000);
+  await enterLocalLos(page);
+  const key=draftKey("93");
+  const stamp="2026-11-13T12:00:00.000Z";
+  await page.evaluate(({key,stamp})=>{
+    const current=JSON.parse(localStorage.getItem(key)??JSON.stringify({
+      version:1,note:"",applicationDraft:"",bookmarked:false,practiceAnswers:{},
+      practiceChecked:[],testAnswers:{},testSubmittedAt:null,selfAssessment:"",updatedAt:stamp,
+    }));
+    current.testSubmittedAt=stamp;
+    current.testAnswers={"EX-FINAL-Q01":"a","EX-FINAL-Q02":"b"};
+    current.practiceAnswers={...current.practiceAnswers,
+      "EX-FINAL-AUDIO-M-COM-01":"yes","EX-FINAL-AUDIO-M-COM-02":""};
+    current.applicationDraft="Oma teksti säilyy";
+    localStorage.setItem(key,JSON.stringify(current));
+  },{key,stamp});
+  await page.goto("/los#/1/final",{waitUntil:"domcontentloaded"});
+  await expect(page.getByRole("heading",{name:"Palautusmerkintä on ristiriitainen"})).toBeVisible();
+  await expect(page.getByText("2/50 vastattu")).toBeVisible();
+  await expect(page.locator(".los-exam-feedback")).toHaveCount(0);
+  await expect(page.locator(".los-exam-results").filter({hasText:"pistettä"})).toHaveCount(0);
+  await expect(page.locator('input[name="EX-FINAL-Q01"][value="a"]')).toBeChecked();
+  await expect(page.getByRole("button",{name:/Palauta loppukoe ·/})).toBeDisabled();
+  await page.goto("/los#/1/summary",{waitUntil:"domcontentloaded"});
+  await expect(page.locator(".los-exam-overview")).toContainText("ei vielä palautettu");
+  await page.goto("/los#/1/final",{waitUntil:"domcontentloaded"});
+  await page.getByRole("button",{name:"Korjaa palautusmerkintä ja jatka luonnosta"}).click();
+  const repaired=await page.evaluate(k=>JSON.parse(localStorage.getItem(k)??"{}"),key);
+  expect(repaired.testSubmittedAt).toBeNull();
+  expect(repaired.testAnswers["EX-FINAL-Q01"]).toBe("a");
+  expect(repaired.applicationDraft).toBe("Oma teksti säilyy");
+  await answerExam(page);
+  await expect(page.getByRole("button",{name:/Palauta loppukoe ·/})).toBeDisabled();
+  await simulateCompletedAudio(page);
+  await page.getByRole("button",{name:/Palauta loppukoe ·/}).click();
+  await expect(page.locator(".los-exam-results h2").first()).toHaveText("50/50 pistettä");
+  const after=await page.evaluate(k=>JSON.parse(localStorage.getItem(k)??"{}"),key);
+  const audioAt=after.practiceAnswers["EX-FINAL-AUDIO-M-COM-01"];
+  await page.locator(".los-exam-listening audio").first().evaluate(el=>el.dispatchEvent(new Event("ended")));
+  const afterReplay=await page.evaluate(k=>JSON.parse(localStorage.getItem(k)??"{}"),key);
+  expect(afterReplay.practiceAnswers["EX-FINAL-AUDIO-M-COM-01"]).toBe(audioAt);
+  await page.goto("/los#/1/summary",{waitUntil:"domcontentloaded"});
+  await expect(page.locator(".los-exam-overview")).toContainText("50/50");
+  await expectNoHorizontalOverflow(page);
+});
+
 test("L059 writing model is gated behind own draft and later edits are visibly assisted",async({page})=>{
   test.setTimeout(180_000);
   await enterLocalLos(page);
