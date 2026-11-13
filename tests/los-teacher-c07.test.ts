@@ -133,6 +133,7 @@ test("L039 requires genuine saved multi-line application and two final source qu
 test("L040 reads exactly the actual C07 15-item chapter test and chapter-local self-assessment",()=>{
  assert.deepEqual(L040.chapterAssessment?.requiredTestIds,bank.map(q=>q.id));
  assert.equal(L040.chapterAssessment?.requireApplicationDraft,true);
+ assert.equal(L040.applicationDraftMinLength,120);
  assert.equal(L040.chapterAssessment?.minSelfAssessmentLength,15);
  assert.equal(losScore("07",rightExam).correct,15);
  assert.deepEqual(teacherChapterAssessmentStatus(L040,assessment),{
@@ -143,6 +144,7 @@ test("L040 reads exactly the actual C07 15-item chapter test and chapter-local s
  assert.equal(teacherCanFinish(s,L040,{},[],{...assessment,testSubmittedAt:null}),false);
  assert.equal(teacherCanFinish(s,L040,{},[],{...assessment,testAnswers:{...rightExam,[bank[0]!.id]:""}}),false);
  assert.equal(teacherCanFinish(s,L040,{},[],{...assessment,applicationDraft:""}),false);
+ assert.equal(teacherCanFinish(s,L040,{},[],{...assessment,applicationDraft:"Mia"}),false);
  assert.equal(teacherCanFinish(s,L040,{},[],{...assessment,selfAssessment:""}),false);
  const sections=new Set(L040.scenes.flatMap(s=>s.bookLinks??[]).map(l=>l.section));
  for(const section of ["text","practice","apply","test"])assert.ok(sections.has(section),section);
