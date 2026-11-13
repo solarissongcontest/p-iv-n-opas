@@ -31,6 +31,15 @@ def choose(path: str, ours: str, theirs: str) -> str:
         if "L001–L060" not in result:
             raise ValueError(f"No full-coverage declaration in {path}: {result[:120]!r}")
         return result
+    if path == "docs/LOS1_TEACHER_V2_60_LESSON_STRUCTURAL_AUDIT_2026-11-13.md" and ours.lstrip().startswith("## ") and theirs.lstrip().startswith("## "):
+        # Two dated independent audit appendices; retain both.
+        return ours.rstrip("\n") + "\n\n" + theirs.lstrip("\n")
+    if path == "src/features/los/teacher/teacher.css" and ours.lstrip().startswith("/* C06:") and theirs.lstrip().startswith("/* C07"):
+        # Two new scoped, disjoint teaching-widget style families.
+        return ours.rstrip("\n") + "\n\n" + theirs.lstrip("\n")
+    if path == "src/features/los/teacher/validateContent.ts" and "scene.numberBuilder" in ours and 'scene.kind === "form"' in theirs:
+        # Preserve number composition AND authentic form validation.
+        return ours + theirs
     if path == "src/features/los/teacher/LosTeacherPlayer.tsx" and "Boolean(scene.numberBuilder" in ours and "Boolean(scene.form" in theirs:
         return ours.rstrip("\n") + " ||\n" + theirs
     if path == "src/features/los/teacher/LosTeacherPlayer.tsx" and "scene.numberBuilder" in ours and 'scene.kind === "form"' in theirs:
