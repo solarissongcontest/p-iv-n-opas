@@ -24,6 +24,13 @@ def choose(path: str, ours: str, theirs: str) -> str:
         if "L001–L060" not in result:
             raise ValueError(f"No full-coverage declaration in {path}: {result[:120]!r}")
         return result
+    if path == "src/features/los/teacher/engine.ts":
+        if ("teacherMidtermAssessmentStatus" in ours and "teacherBuiltNumberCount" in theirs
+                and "teacherChapterAssessmentStatus" in ours and "teacherChapterAssessmentStatus" in theirs):
+            return ('  return teacherChapterAssessmentStatus(lesson, chapterAssessment).ready &&\n'
+                    '    teacherMidtermAssessmentStatus(lesson, chapterAssessment, practiceAnswers).ready &&\n'
+                    '    !session.paused && lesson.scenes.every(scene => session.visitedIds.includes(scene.id)) &&\n'
+                    '    lesson.scenes.every(scene => !scene.numberBuilder || teacherBuiltNumberCount(session, scene.id) >= 4) &&\n')
     if path == "src/features/los/teacher/lessonL004.ts":
         if all(re.match(r"^(?:import .*lessonL\d{3}\.ts.*|\s*)$", line) for line in (ours+theirs).splitlines()):
             return ours
