@@ -209,6 +209,18 @@ def normalize_full_path_test() -> None:
         body='import {getLosTeacherLesson} from "../src/features/los/teacher/lessonL004.ts";\n'+body
         path.write_text(body)
 
+def normalize_assessment_sections() -> None:
+    path=Path("src/features/los/teacher/LosTeacherPlayer.tsx")
+    text=path.read_text()
+    marker='''              })()}
+            {lesson.mediaGate && !lesson.mediaGate.approved'''
+    if marker in text and 'lesson.examAssessment?.id === "EX-MID"' in text:
+        text=text.replace(marker,'''              })()}
+            </section>}
+            {lesson.mediaGate && !lesson.mediaGate.approved''',1)
+        path.write_text(text)
+        print("Closed EX-MID status panel before C10 media and final-review widgets.")
+
 def normalize_activity_gate() -> None:
     path=Path("src/features/los/teacher/LosTeacherPlayer.tsx")
     source=path.read_text()
@@ -255,6 +267,7 @@ if failures:
 normalize_registry()
 normalize_full_path_test()
 normalize_activity_gate()
+normalize_assessment_sections()
 subprocess.run(["git","add","--",*unmerged,"src/features/los/teacher/lessonL004.ts"],check=True)
 if subprocess.check_output(["git","ls-files","-u"],text=True).strip():
     raise ValueError("Unmerged index stages remain")
