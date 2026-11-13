@@ -83,3 +83,24 @@ monivalintavastaus on lisäharjoittelua eikä toinen itsenäinen ensiyrityksen n
 kirjoittamisen palaute tai malliratkaisu on jo voinut paljastaa oikean ilmauksen.
 Aiemmat, ilman kirjoitusyritystä tallennetut monivalintanäytöt säilyvät historiallisina.
 Tämä muutos ei jälkikäteen muokkaa aikaisempia vastausmerkintöjä.
+
+## Jatkokorjaus 13.11.2026: versioitu oppituntisuoritus
+
+L004:n nykyisen opetusversion sisältötunniste on `l004-free-recall-v1`.
+Aiempi `teacher.completedAt` säilyy historiallisena suoritusaikana.
+Uuden version oma suoritus tallennetaan erikseen kenttiin
+`teacher.completedContentRevision` ja `teacher.completedRevisionAt`,
+vasta kun kaikki uuden version opetus- ja harjoituskohdat on käsitelty.
+Pelkkä vanha monivalinta- tai suoritusmerkintä ei vahvista uutta versiota.
+Vanhat JSON-varmuuskopiot kelpaavat edelleen ilman muunnosta.
+
+Jos opiskelija on jo vastannut saman tilanteen monivalintaan, myöhempi
+kirjoitusyritys on harjoittelua, ei täysin ensimmäistä itsenäistä
+muistista tuottamista: oikea vastaus on voinut jo paljastua.
+Kummankin tehtävän vanhat vastaukset ja alkuperäiset aikaleimat
+säilyvät erillään. Käyttöliittymä ja opiskelupolku erottavat aiemman
+ja päivitetyn opetusversion valmistumisen.
+
+**Tämän muutoksen julkaisutila:** edelleen toimituksellinen luonnos.
+GitHubin uusien testiajojen tulokset kirjataan vasta, kun ne ovat
+valmistuneet. Tämä ei korvaa riippumatonta kieli- tai pedagogista arviointia.
