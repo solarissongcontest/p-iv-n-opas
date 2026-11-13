@@ -70,7 +70,7 @@ function SceneQuestion({ scene, session, submit, saveDraft, requestHint, reveal 
         className={"los-teacher-option" + (latest?.answer === option.id ? " is-selected" : "")}
         disabled={succeeded || exhausted || solutionVisible || Boolean(session.completedAt)} onClick={() => submit(option.id)}>
         <span className="los-teacher-option-letter">{option.id.toUpperCase()}</span>
-        <span lang={option.lang}>{option.label}</span>
+        <span lang={option.lang ?? "de"}>{option.label}</span>
         {latest?.answer === option.id && latest.correct && <Check size={18} aria-hidden="true" />}
       </button>)}
     </div> : <form className="los-teacher-form" onSubmit={event => {
