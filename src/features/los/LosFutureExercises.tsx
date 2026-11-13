@@ -3,6 +3,7 @@ import { ArrowLeft, ArrowRight, CheckCircle2, ChevronDown, CircleHelp, RotateCcw
 import { useLosChapterDraft } from "./studyState";
 import { losFutureExercisesFor } from "./content/losFutureExercises";
 import { losFutureExercisesForSection, type LosFutureExerciseMode } from "./content/losFutureExerciseSections";
+import { losFutureMatchingPairs, readLosFutureMatchingAnswer, writeLosFutureMatchingAnswer } from "./content/losFutureMatching";
 import "./los-future-exercises.css";
 
 type FutureExerciseDisplayMode = LosFutureExerciseMode | "guided";
@@ -32,6 +33,9 @@ export function LosFutureExercises({bookId,chapterId,mode,taskIds}:{
   const [showAll,setShowAll]=useState(false);
   const safeIndex=Math.min(selected,Math.max(0,tasks.length-1));
   const task=tasks[safeIndex];
+  const matchingPairs=task ? losFutureMatchingPairs(task) : null;
+  const matchingSelection=matchingPairs && task
+    ? readLosFutureMatchingAnswer(draft.practiceAnswers[task.id]??"",matchingPairs) : null;
   const filled=tasks.filter(t=>Boolean(draft.practiceAnswers[t.id]?.trim())).length;
   const checked=tasks.filter(t=>draft.practiceChecked.includes(t.id)).length;
   function select(index:number){
@@ -88,13 +92,31 @@ export function LosFutureExercises({bookId,chapterId,mode,taskIds}:{
         </div>
         <h2 id="los-future-exercise-title">{task.title}</h2>
         <p className="los-future-exercise-question">{task.prompt}</p>
-        <label className="los-future-exercise-answer" htmlFor="los-future-exercise-input">
+        {matchingPairs && matchingSelection ? <fieldset className="los-future-matching">
+          <legend>Yhdistä saksan sana ja sen merkitys</legend>
+          <p>Valitse jokaiselle sanalle suomennos. Vastaukset tallentuvat samaan tehtäväluonnokseen.
+            Tämä on itsenäistä harjoittelua, ei automaattisesti pisteytettävä koe.</p>
+          {matchingPairs.map((pair,index)=><label key={pair.de} className="los-future-match-row">
+            <span lang="de">{pair.de}</span>
+            <select aria-label={`Suomennos sanalle ${pair.de}`}
+              value={matchingSelection[index]??""}
+              onChange={event=>{
+                const next=[...matchingSelection];
+                next[index]=event.target.value;
+                changeAnswer(task.id,writeLosFutureMatchingAnswer(matchingPairs,next));
+              }}>
+              <option value="">Valitse merkitys</option>
+              {[...matchingPairs.slice(1),matchingPairs[0]].map(option=>
+                <option key={option.fi} value={option.fi}>{option.fi}</option>)}
+            </select>
+          </label>)}
+        </fieldset> : <label className="los-future-exercise-answer" htmlFor="los-future-exercise-input">
           <span>Oma vastauksesi</span>
           <textarea id="los-future-exercise-input" rows={4} spellCheck={false}
             value={draft.practiceAnswers[task.id]??""} maxLength={5000}
             onChange={e=>changeAnswer(task.id,e.target.value)}
             placeholder="Kirjoita ensin oma vastauksesi tähän…" />
-        </label>
+        </label>}
         <div className="los-future-exercise-actions">
           <button type="button" className="los-future-exercise-primary"
             aria-expanded={showAnswer} aria-controls="los-future-exercise-key"

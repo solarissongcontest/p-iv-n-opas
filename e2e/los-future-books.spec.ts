@@ -129,3 +129,19 @@ test("a source-guided lesson reuses chapter answers and persists its own reflect
   expect(separate.b2).toContain("Kertaan saksan persoonapäätteet.");
   expect(separate.b1).toBeNull();
 });
+
+
+test("LOS! 2 interactive vocabulary matching saves choices across reload without grading or erasing legacy drafts",async({page})=>{
+  await enterFutureBook(page);
+  await page.goto("/los#/2/01/understand",{waitUntil:"domcontentloaded"});
+  await page.locator("#los-future-exercise-choice").selectOption({index:4});
+  const matching=page.getByRole("group",{name:"Yhdistä saksan sana ja sen merkitys"});
+  await expect(matching).toBeVisible();
+  await matching.getByRole("combobox",{name:"Suomennos sanalle der Freund"}).selectOption("ystävä");
+  await matching.getByRole("combobox",{name:"Suomennos sanalle die Freundin"}).selectOption("ystävä (naispuolinen)");
+  await page.reload({waitUntil:"domcontentloaded"});
+  await page.locator("#los-future-exercise-choice").selectOption({index:4});
+  await expect(page.getByRole("combobox",{name:"Suomennos sanalle der Freund"})).toHaveValue("ystävä");
+  await expect(page.getByRole("combobox",{name:"Suomennos sanalle die Freundin"})).toHaveValue("ystävä (naispuolinen)");
+  await expect(page.locator(".los-future-exercise-summary")).toContainText("0 verrattu vastausluonnokseen");
+});
