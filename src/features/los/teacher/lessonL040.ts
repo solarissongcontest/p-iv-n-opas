@@ -21,6 +21,7 @@ export const LOS1_L040_TEACHER: TeacherLesson = {
     "activity-L040"
   ],
   "requiredPracticeIds": [],
+  "applicationDraftMinLength": 120,
   "chapterAssessment": {
     "requiredTestIds": C07_TEST_IDS,
     "requireApplicationDraft": true,
