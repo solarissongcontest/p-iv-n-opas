@@ -122,7 +122,7 @@ test("every one of the 60 guided lessons opens from its actual chapter picker on
    expect(seen.has(title)).toBe(false);
    seen.add(title);
    await button.click();
-   if(Number(title.slice(1))<=45){
+   if(Number(title.slice(1))<=50){
     await expect(page).toHaveURL(new RegExp("/los-lessons/"+title+"$"));
     await expect(page.locator(".los-teacher-paper h2")).toBeVisible();
     await expect(page.locator(".los-teacher-sidebar h1")).toBeVisible();
@@ -1752,5 +1752,125 @@ test("C08 L045 real 12/12 test and self-assessment do not fake missing writing, 
  await page.reload({waitUntil:"domcontentloaded"});
  await expect(history).toContainText("12/12 pistettä");
  await expect(page.getByRole("button",{name:"Palauta testi · 0/12"})).toBeDisabled();
+ await expectNoHorizontalOverflow(page);
+});
+
+test("C09 L046–L050 Teacher stages render on iPhone and desktop without horizontal overflow",async({page})=>{
+ test.setTimeout(120_000);
+ await enterLocalBook(page);
+ for(const [id,count] of [["L046",13],["L047",12],["L048",12],["L049",14],["L050",15]] as const){
+  await page.goto("/los-lessons/"+id,{waitUntil:"domcontentloaded"});
+  await expect(page.locator(".los-teacher-sidebar h1")).toBeVisible();
+  await expect(page.locator(".los-teacher-paper h2")).toBeVisible();
+  await expect(page.locator(".los-teacher-outline nav button")).toHaveCount(count);
+  await expectNoHorizontalOverflow(page);
+ }
+});
+test("C09 L046 first two checks use the single original weekday text list, not invented dialogue or listening",async({page})=>{
+ test.setTimeout(120_000);
+ await enterLocalBook(page);
+ await page.goto("/los-lessons/L046",{waitUntil:"domcontentloaded"});
+ const outline=page.locator(".los-teacher-outline nav button");
+ await outline.filter({hasText:"Tarkista ensimmäiset kaksi oikeaa luettelokysymystä"}).click();
+ await expect(page.locator(".los-teacher-paper a[href*='/09/text-b']")).toBeVisible();
+ await page.goto("/los?lessonReturn=L046#/1/09/text-b",{waitUntil:"domcontentloaded"});
+ await expect(page.locator(".los-secondary-source .los-c01-turn")).toHaveCount(1);
+ await expect(page.locator(".los-secondary-source")).toContainText("Montag, Dienstag, Mittwoch");
+ for(const [id,correct] of [["C09-TEXTB-Q01","a"],["C09-TEXTB-Q02","b"]] as const){
+  const field=page.locator(".los-secondary-source .los-c01-question").filter({has:page.locator('input[name="'+id+'"]')});
+  await field.locator('input[value="'+correct+'"]').check();
+  await field.getByRole("button",{name:"Tarkista vastaus"}).click();
+  await expect(field.getByRole("status")).toContainText("Oikein.");
+ }
+ await page.getByRole("link",{name:"Palaa oppitunnille L046"}).click();
+ await outline.filter({hasText:"Tarkista ensimmäiset kaksi oikeaa luettelokysymystä"}).click();
+ for(const id of ["C09-TEXTB-Q01","C09-TEXTB-Q02"])
+  await expect(page.locator(".los-teacher-paper")).toContainText(id+": Vastaus tallennettu ja tarvittaessa tarkistettu");
+ await expectNoHorizontalOverflow(page);
+});
+test("C09 L047 has all seven authentic Franz Greta turns and three separate checked original questions",async({page})=>{
+ test.setTimeout(120_000);
+ await enterLocalBook(page);
+ await page.goto("/los-lessons/L047",{waitUntil:"domcontentloaded"});
+ const outline=page.locator(".los-teacher-outline nav button");
+ await outline.filter({hasText:"Lue tekstin kaikki seitsemän alkuperäistä repliikkiä"}).click();
+ await expect(page.locator(".los-teacher-paper a[href*='/09/text']")).toBeVisible();
+ await page.goto("/los#/1/09/text",{waitUntil:"domcontentloaded"});
+ await expect(page.locator(".los-c01-reader .los-c01-turn")).toHaveCount(7);
+ await expect(page.locator(".los-c01-reader")).toContainText("Viertel vor drei");
+ await expect(page.locator(".los-c01-reader")).toContainText("um drei Fußball");
+ await page.goto("/los?lessonReturn=L047#/1/09/understand",{waitUntil:"domcontentloaded"});
+ for(const [id,correct] of [["C09-SOURCE-Q01","a"],["C09-SOURCE-Q02","b"],["C09-SOURCE-Q03","a"]] as const){
+  const field=page.locator(".los-c01-question").filter({has:page.locator('input[name="'+id+'"]')});
+  await field.locator('input[value="'+correct+'"]').check();
+  await field.getByRole("button",{name:"Tarkista vastaus"}).click();
+  await expect(field.getByRole("status")).toContainText("Oikein.");
+ }
+ await page.getByRole("link",{name:"Palaa oppitunnille L047"}).click();
+ await outline.filter({hasText:"Tarkista kolme aitoa tekstikysymystä"}).click();
+ for(const id of ["C09-SOURCE-Q01","C09-SOURCE-Q02","C09-SOURCE-Q03"])
+  await expect(page.locator(".los-teacher-paper")).toContainText(id+": Vastaus tallennettu ja tarvittaessa tarkistettu");
+ await expectNoHorizontalOverflow(page);
+});
+test("C09 L049 checks remaining two weekday items and preserves a real fictional weekly calendar",async({page})=>{
+ test.setTimeout(120_000);
+ await enterLocalBook(page);
+ await page.goto("/los-lessons/L049",{waitUntil:"domcontentloaded"});
+ const outline=page.locator(".los-teacher-outline nav button");
+ await outline.filter({hasText:"Tallenna seitsemän päivää ja oma kolmirepliikkinen dialogi"}).click();
+ await expect(page.locator(".los-teacher-evidence[role='status']")).toContainText("0/150 merkkiä");
+ await page.goto("/los?lessonReturn=L049#/1/09/text-b",{waitUntil:"domcontentloaded"});
+ for(const [id,correct] of [["C09-TEXTB-Q03","c"],["C09-TEXTB-Q04","a"]] as const){
+  const field=page.locator(".los-secondary-source .los-c01-question").filter({has:page.locator('input[name="'+id+'"]')});
+  await field.locator('input[value="'+correct+'"]').check();
+  await field.getByRole("button",{name:"Tarkista vastaus"}).click();
+  await expect(field.getByRole("status")).toContainText("Oikein.");
+ }
+ await page.goto("/los?lessonReturn=L049#/1/09/apply",{waitUntil:"domcontentloaded"});
+ const calendar=[
+  "Montag – um drei Uhr","Dienstag – um vier Uhr","Mittwoch – um fünf Uhr",
+  "Donnerstag – um zwei Uhr","Freitag – um sechs Uhr","Samstag – um zehn Uhr",
+  "Sonntag – um elf Uhr","Mia: Wann?","Max: Am Montag um drei Uhr.",
+  "Mia: Gut, bis Montag!"
+ ].join("\n");
+ await page.locator("#los-application-09").fill(calendar);
+ await page.getByRole("link",{name:"Palaa oppitunnille L049"}).click();
+ await outline.filter({hasText:"Tallenna seitsemän päivää ja oma kolmirepliikkinen dialogi"}).click();
+ await expect(page.locator(".los-teacher-evidence[role='status']")).toContainText("Tallennettu laajuus riittää");
+ await page.reload({waitUntil:"domcontentloaded"});
+ await expect(page.locator(".los-teacher-evidence[role='status']")).toContainText("Tallennettu laajuus riittää");
+ await outline.filter({hasText:"Tarkista kaksi viimeistä aitoa Text B -kysymystä"}).click();
+ for(const id of ["C09-TEXTB-Q03","C09-TEXTB-Q04"])
+  await expect(page.locator(".los-teacher-paper")).toContainText(id+": Vastaus tallennettu ja tarvittaessa tarkistettu");
+ await expectNoHorizontalOverflow(page);
+});
+test("C09 L050 original 14-item exam returns 14/14 and retains archive, no invented listening mark",async({page})=>{
+ test.setTimeout(150_000);
+ await enterLocalBook(page);
+ await page.goto("/los?lessonReturn=L050#/1/09/test",{waitUntil:"domcontentloaded"});
+ await expect(page.locator(".los-workbook-question")).toHaveCount(14);
+ const answerIndexes=[0,1,1,1,0,0,2,0,1,1,1,1,"am","um"] as const;
+ for(let n=0;n<14;n++){
+  const field=page.locator("#C09-EX-"+String(n+1).padStart(2,"0"));
+  const answer=answerIndexes[n]!;
+  if(typeof answer==="number")await field.locator('input[type="radio"]').nth(answer).check();
+  else await field.locator('input[type="text"]').fill(answer);
+ }
+ await page.getByRole("button",{name:"Palauta testi · 14/14"}).click();
+ await expect(page.locator(".los-test-result[role='status'] h2")).toHaveText("14 / 14 oikein");
+ await page.locator("#los-self-09").fill("Osaan am Montag ja um drei Uhr, mutta kertaa vielä Donnerstag ja Sonntag.");
+ await page.getByRole("link",{name:"Palaa oppitunnille L050"}).click();
+ await page.locator(".los-teacher-outline nav button").filter({hasText:"Tee ja palauta oikea C09-kappaletesti"}).click();
+ const progress=page.locator(".los-teacher-assessment-status");
+ await expect(progress).toContainText("Kappaletesti: 14/14 vastattu · Palautettu");
+ await expect(progress).toContainText("Oma sovellus: Ei erillinen koevaatimus");
+ await expect(progress).toContainText("Itsearviointi: Kirjattu");
+ await page.goto("/los#/1/09/test",{waitUntil:"domcontentloaded"});
+ await page.getByRole("button",{name:"Arkistoi tulos ja aloita uusinta"}).click();
+ const hist=page.locator('[aria-label="Kappaletestin aiemmat yritykset"]');
+ await expect(hist).toContainText("14/14 pistettä");
+ await page.reload({waitUntil:"domcontentloaded"});
+ await expect(hist).toContainText("14/14 pistettä");
+ await expect(page.getByRole("button",{name:"Palauta testi · 0/14"})).toBeDisabled();
  await expectNoHorizontalOverflow(page);
 });
