@@ -1,12 +1,23 @@
 import {expect,test} from "@playwright/test";
-import {enterApp,expectNoHorizontalOverflow} from "./helpers";
+import {expectNoHorizontalOverflow} from "./helpers";
 import {LOS1_MIDTERM_QUESTIONS} from "../src/features/los/content/los1Exams";
 
 /** Browser integration on Chromium and simulated iPhone WebKit.
  * Actual human-audio playback and real-device Safari remain release gates.
+ * Uses the same LOCAL ONLY owner fixture as los-full-book.spec.ts, never
+ * misrepresents an unavailable remote login service as an exam failure.
  */
+async function enterLocalLos(page:import("@playwright/test").Page){
+  await page.addInitScript(() => {
+    if (!["localhost","127.0.0.1"].includes(window.location.hostname)) return;
+    window.localStorage.setItem("opk.device-authorized","Arthur");
+    window.localStorage.setItem("opk.owner-id","00000000-0000-4000-8000-000000000195");
+  });
+  await page.goto("/los#/1/01/chapter",{waitUntil:"domcontentloaded"});
+  await expect(page.locator(".los-book-workspace")).toBeVisible({timeout:30_000});
+}
 test("EX-MID saves 25 responses, hides keys until submission and archives own text on retake",async({page})=>{
-  await enterApp(page);
+  await enterLocalLos(page);
   await page.goto("/los#/1/midterm",{waitUntil:"domcontentloaded"});
   const questions=page.locator(".los-exam-question");
   await expect(questions).toHaveCount(25);
@@ -39,7 +50,7 @@ test("EX-MID saves 25 responses, hides keys until submission and archives own te
 });
 
 test("L030 Teacher uses the same submitted EX-MID state and resumes after reload",async({page})=>{
-  await enterApp(page);
+  await enterLocalLos(page);
   await page.goto("/los#/1/midterm",{waitUntil:"domcontentloaded"});
   const questions=page.locator(".los-exam-question");
   for(const [index,q] of LOS1_MIDTERM_QUESTIONS.entries())await questions.nth(index).locator('input[value="'+q.correctId+'"]').check();
@@ -63,7 +74,7 @@ test("L030 Teacher uses the same submitted EX-MID state and resumes after reload
 });
 
 test("L029 fallback is explicitly textual and never awards listening points",async({page})=>{
-  await enterApp(page);
+  await enterLocalLos(page);
   await page.goto("/los-lessons/L029",{waitUntil:"domcontentloaded"});
   await expect(page.getByRole("heading",{name:"Autenttisen keskustelun kertauskuuntelu"})).toBeVisible();
   const nav=page.getByRole("navigation",{name:"Oppitunnin opetustilanteet"});
