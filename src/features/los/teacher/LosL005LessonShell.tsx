@@ -17,7 +17,7 @@ export function LosL005LessonShell({book}:{book:LosBookDefinition}){
  const progress=draft.lessonProgress?.["L005"]??emptyLosLessonProgress();
  const teacher=progress.teacher??initialTeacherProgress(TEACHER_L005);
  useEffect(()=>{
-  try{sessionStorage.setItem("los1.selectedLesson","L006");}
+  try{sessionStorage.setItem("los1.selectedLesson","L005");}
   catch{/* Existing local draft continues to work without sessionStorage. */}
  },[]);
  const record=(fn:(current:LosLessonProgress)=>LosLessonProgress)=>{
