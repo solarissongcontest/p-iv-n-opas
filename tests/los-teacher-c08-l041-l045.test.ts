@@ -43,7 +43,7 @@ test("five context-based scripted response situations have distinct counterparty
  for(const marker of ["Ich verstehe nicht","Bitte langsamer","Noch einmal, bitte","Was bedeutet das",
    "Kannst du erklären","Können Sie das bitte wiederholen","Danke, jetzt verstehe ich"])assert.ok(text.includes(marker),marker);
  const scripted=all.filter(s=>s.question?.type==="choice" &&
-   s.question.options?.filter(o=>o.wrongFeedback?.trim()).length!>=2);
+   (s.question.options?.filter(o=>o.wrongFeedback?.trim()).length ?? 0) >= 2);
  assert.ok(scripted.length>=20,"branches must respond specifically to chosen utterances");
  assert.ok(scripted.every(s=>s.question?.success && s.question?.reteach));
  assert.ok(!text.includes("tekoälychatin avulla"));
