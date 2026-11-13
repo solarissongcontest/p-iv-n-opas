@@ -122,7 +122,7 @@ test("every one of the 60 guided lessons opens from its actual chapter picker on
    expect(seen.has(title)).toBe(false);
    seen.add(title);
    await button.click();
-   if(Number(title.slice(1))<=12){
+   if(Number(title.slice(1))<=12 || (Number(title.slice(1))>=22 && Number(title.slice(1))<=26)){
     await expect(page).toHaveURL(new RegExp("/los-lessons/"+title+"$"));
     await expect(page.locator(".los-teacher-paper h2")).toBeVisible();
     await expect(page.locator(".los-teacher-sidebar h1")).toBeVisible();
@@ -1044,5 +1044,63 @@ test("L012 countries lesson shares only the C03 workbook and returns to Teacher"
  }
  await outline.filter({hasText:"Nyt tunnistat ensimmäiset maat"}).click();
  await expect(page.getByRole("button",{name:"Merkitse oppitunti läpikäydyksi"})).toBeDisabled();
+ await expectNoHorizontalOverflow(page);
+});
+
+ 
+test("C05 Teacher 2.0 five lessons open, provide contextual help and stay readable on phone and desktop",async({page})=>{
+ await enterLocalBook(page);
+ for(const id of ["L022","L023","L024","L025","L026"]){
+  await page.goto("/los-lessons/"+id,{waitUntil:"domcontentloaded"});
+  await expect(page.locator(".los-teacher-sidebar h1")).toBeVisible();
+  await expect(page.locator(".los-teacher-paper h2")).toBeVisible();
+  await page.getByRole("button",{name:"En ymmärrä / haluan lisäselityksen"}).click();
+  await expect(page.locator(".los-teacher-help-entries")).toBeVisible();
+  await expectNoHorizontalOverflow(page);
+ }
+});
+
+test("C05 Teacher scene and attempts survive pause, refresh, and resume",async({page})=>{
+ await enterLocalBook(page);
+ await page.goto("/los-lessons/L024",{waitUntil:"domcontentloaded"});
+ const outline=page.locator(".los-teacher-outline nav button");
+ await outline.filter({hasText:"Mihin nicht kuuluu?"}).click();
+ await expect(page.locator(".los-teacher-paper h2")).toContainText("Mihin nicht kuuluu?");
+ await page.locator(".los-teacher-option").first().click();
+ await expect(page.locator(".los-teacher-feedback.is-wrong")).toContainText("nicht");
+ await page.getByRole("button",{name:"Keskeytä oppitunti"}).click();
+ await expect(page.locator(".los-teacher-paused")).toBeVisible();
+ await page.reload({waitUntil:"domcontentloaded"});
+ await expect(page.locator(".los-teacher-paused")).toBeVisible();
+ await page.getByRole("button",{name:"Jatka opetusta"}).last().click();
+ await expect(page.locator(".los-teacher-paper h2")).toContainText("Mihin nicht kuuluu?");
+ await expect(page.locator(".los-teacher-feedback.is-wrong")).toBeVisible();
+ await expectNoHorizontalOverflow(page);
+});
+
+test("C05 Text B presents its own real candidate audio and written fallback with no listening-score claim",async({page})=>{
+ await enterLocalBook(page);
+ await openChapter(page,"05","text-b");
+ await expect(page.locator(".los-secondary-source .los-c01-turn")).toHaveCount(6);
+ await expect(page.locator('.los-secondary-source audio[src*="Dialogue_franz_greta_1.ogg"]')).toBeVisible();
+ await expect(page.locator(".los-secondary-source fieldset.los-c01-question")).toHaveCount(4);
+ await expect(page.locator(".los-secondary-source")).toContainText("eivät automaattiseen kuuntelupisteytykseen");
+ await expectNoHorizontalOverflow(page);
+});
+
+test("C05 L023 and L026 link original source and the single existing chapter test",async({page})=>{
+ await enterLocalBook(page);
+ await page.goto("/los-lessons/L023",{waitUntil:"domcontentloaded"});
+ let outline=page.locator(".los-teacher-outline nav button");
+ await outline.filter({hasText:"Kolme tarkistettavaa Text A -kysymystä"}).click();
+ for(const id of ["C05-SOURCE-Q01","C05-SOURCE-Q02","C05-SOURCE-Q03"]){
+  await expect(page.locator(".los-teacher-paper")).toContainText(id+": Vastaus vielä puuttuu");
+ }
+ await expect(page.locator(".los-teacher-paper a[href*='/05/text']")).toHaveCount(1);
+ await page.goto("/los-lessons/L026",{waitUntil:"domcontentloaded"});
+ outline=page.locator(".los-teacher-outline nav button");
+ await outline.filter({hasText:"Palauta C05:n varsinainen 12 tehtävän testi"}).click();
+ await expect(page.locator(".los-teacher-assessment-status")).toContainText("Kappaletesti: 0/12 vastattu");
+ await expect(page.locator(".los-teacher-paper a[href*='/05/test']")).toHaveCount(1);
  await expectNoHorizontalOverflow(page);
 });
