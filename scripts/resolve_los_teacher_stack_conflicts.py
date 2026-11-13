@@ -24,6 +24,11 @@ def choose(path: str, ours: str, theirs: str) -> str:
         if "L001–L060" not in result:
             raise ValueError(f"No full-coverage declaration in {path}: {result[:120]!r}")
         return result
+    if path == "src/features/los/teacher/LosTeacherPlayer.tsx" and "scene.numberBuilder" in ours and 'scene.kind === "form"' in theirs:
+        # Independent adjacent JSX widgets in the same scene body: keep both.
+        if ours.count("LosTeacherNumberBuilder") != 1 or theirs.count('scene.kind === "form"') != 1:
+            raise ValueError("Unexpected duplicate Player widget in conflict")
+        return ours + theirs
     if path == "src/features/los/teacher/engine.ts":
         if ("teacherMidtermAssessmentStatus" in ours and "teacherBuiltNumberCount" in theirs
                 and "teacherChapterAssessmentStatus" in ours and "teacherChapterAssessmentStatus" in theirs):
