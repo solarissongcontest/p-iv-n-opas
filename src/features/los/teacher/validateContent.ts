@@ -47,6 +47,12 @@ function checkScene(scene: TeacherScene, location: string, issues: TeacherConten
   }
   if (scene.numberBuilder && scene.kind !== "board")
     issues.push({ location, problem: "Numeronrakennustaulu edellyttää board-tilannetta." });
+  if (scene.kind === "form" && (!scene.form || scene.form.length < 2 || scene.form.length > 8 ||
+      new Set(scene.form.map(field => field.id)).size !== scene.form.length ||
+      scene.form.some(field => !name(field.id) || !meaningful(field.label) ||
+        !meaningful(field.placeholder) || !meaningful(field.sampleAnswer)))) {
+    issues.push({ location, problem: "Lomakkeesta puuttuu nimettyjä kenttiä tai kirjallinen mallivastaus." });
+  }
   if (scene.kind === "board" && (!scene.board?.length ||
       scene.board.some(item => !meaningful(item.label) ||
         !meaningful(item.german) || !meaningful(item.meaning)))) {
@@ -98,7 +104,7 @@ export function validateTeacherLesson(lesson: TeacherLesson): TeacherContentIssu
   }
   if (lesson.requiredCheckedIds &&
       (!unique(lesson.requiredCheckedIds) || lesson.requiredCheckedIds.some(id =>
-        !/^C\d{2}-(?:SOURCE|ZPE|TEXTB|MCOM02)-Q\d{2}$/.test(id)))) {
+        !/^C\d{2}-(?:SOURCE|ZPE|TEXTB|MCOM02|SCHOOL)-Q\d{2}$/.test(id)))) {
     issues.push({ location: "requiredCheckedIds", problem: "Tarkistettavan lähdetehtävän tunniste on virheellinen." });
   }
   const assessment = lesson.chapterAssessment;
