@@ -5,7 +5,7 @@ import {
   finishTeacherSession, independentTeacherEvidence, markTeacherHelp,
   moveTeacherScene, normalizeTeacherAnswer, parseTeacherSessions,
   revealTeacherSolution, setTeacherAnswerDraft, submitTeacherAnswer,
-  teacherCanFinish, teacherCompletionBlockers, teacherNextIncompleteSceneId, teacherLatestAttempt, teacherWrongFeedback,
+  teacherCanFinish, teacherCompletionBlockers, teacherNextIncompleteSceneId, teacherLatestAttempt, teacherWrongFeedback, teacherRequiresNumericResponse,
 } from "../src/features/los/teacher/engine.ts";
 import { LOS1_L004_TEACHER } from "../src/features/los/teacher/lessonL004.ts";
 
@@ -182,4 +182,21 @@ test("next unfinished step points to an incomplete reflection without changing a
   const before=structuredClone(session);
   assert.equal(teacherNextIncompleteSceneId(session,extra),"my-reflection");
   assert.deepEqual(session,before,"Guidance must never create learning evidence");
+});
+
+
+test("digit-only answers use a numeric keyboard regardless of Finnish wording",()=>{
+  const question=(prompt:string,accepted:string[])=>({
+    type:"text" as const,prompt,accepted,skillId:"L1-NUM-01",
+    success:"Oikein",hint:"Vihje",reteach:"Selitys",genericWrong:"Kokeile uudestaan",
+  });
+  assert.equal(teacherRequiresNumericResponse(question("Kirjoita numeroin: neunzehn",["19"])),true);
+  assert.equal(teacherRequiresNumericResponse(question("Kirjoita numerosarja numeroina ilman välilyöntejä.",["4062"])),true);
+  assert.equal(teacherRequiresNumericResponse(question("Koodi",["0042"])),true,"Leading zeros need text input");
+  assert.equal(teacherRequiresNumericResponse(question("Kirjoita saksaksi: 17",["siebzehn"])),false);
+  assert.equal(teacherRequiresNumericResponse(question("Valitse muoto",["17","siebzehn"])),false);
+  assert.equal(teacherRequiresNumericResponse(question("Kirjoita numero",[])),false);
+  assert.equal(teacherRequiresNumericResponse({
+    ...question("Mikä nimi?",[]),type:"choice",options:[{id:"a",label:"7"},{id:"b",label:"8"}],correctOption:"a",
+  }),false);
 });
