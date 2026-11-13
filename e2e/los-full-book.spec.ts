@@ -120,8 +120,8 @@ test("every one of the 60 guided lessons opens from its actual chapter picker on
    expect(seen.has(title)).toBe(false);
    seen.add(title);
    await button.click();
-   if(title==="L004"){
-    await expect(page).toHaveURL(/\/los#\/1\/lesson\/L004$/);
+   if(title==="L004"||title==="L005"){
+    await expect(page).toHaveURL(new RegExp("/los#/1/lesson/"+title+"$"));
     await expect(page.locator(".los-teacher-shell")).toBeVisible();
     await page.goto("/los#/1/path",{waitUntil:"domcontentloaded"});
     await expect(runner.locator(".los-lesson-teacher-launch")).toBeVisible();
@@ -544,5 +544,69 @@ test("L004 open answers persist as drafts, distinguish recall from recognition a
  await page.reload({waitUntil:"domcontentloaded"});
  await expect(page.locator(".los-teacher")).toContainText("1/3 avointa tehtävää");
  await expect(page.locator(".los-teacher")).toContainText("0/3. Kumpikaan mittari");
+ await expectNoHorizontalOverflow(page);
+});
+
+test("L005 uses its original human audio, full inline transcript, and no fake listening evidence",async({page})=>{
+ await enterLocalBook(page);
+ await page.goto("/los#/1/lesson/L005",{waitUntil:"domcontentloaded"});
+ const player=page.locator(".los-teacher");
+ await expect(player).toBeVisible();
+ await expect(page.getByRole("heading",{name:"Kuuntele ja valitse tervehdys",level:1})).toBeVisible();
+ await player.getByRole("button",{name:"Opetuksen sisällysluettelo"}).click();
+ await player.locator("#los-teacher-map").getByRole("button",{name:"5. Kuuntele alkuperäinen tervehdysluettelo"}).click();
+ const audio=player.locator(".los-l005-media audio");
+ await expect(audio).toBeVisible();
+ await expect(audio).toHaveAttribute("src",/German_Vocabulary_-_Greetings[.]ogg$/);
+ await expect(player).toContainText("Äänentoistoa ei ole kirjattu");
+ await player.getByRole("button",{name:"Näytä koko 20 ilmauksen teksti ja suomennokset"}).click();
+ await expect(player.locator(".los-l005-transcript li")).toHaveCount(20);
+ await expect(player.locator(".los-l005-transcript")).toContainText("Bis später!");
+ await expect(player).toContainText("ei ole kuuntelutaitonäyttö");
+ await player.locator("#los-teacher-map").getByRole("button",{name:"7. Tunnista uusi hyvästely"}).click();
+ await player.locator(".los-teacher-choices").getByRole("button",{name:"Nähdään myöhemmin"}).click();
+ await expect(player).toContainText("0/2");
+ await page.reload({waitUntil:"domcontentloaded"});
+ await expect(page.locator(".los-teacher")).toContainText("Tunnista uusi hyvästely");
+ await expect(page.locator(".los-teacher")).toContainText("0/2");
+ await expectNoHorizontalOverflow(page);
+});
+
+test("L005 text fallback can finish instruction without pretending hearing or rewriting old L004",async({page})=>{
+ await enterLocalBook(page);
+ await page.goto("/los#/1/lesson/L005",{waitUntil:"domcontentloaded"});
+ const player=page.locator(".los-teacher");
+ await player.getByRole("button",{name:"Opetuksen sisällysluettelo"}).click();
+ const menu=player.locator("#los-teacher-map");
+ const script=[
+  ["1. Mitä muistat L004:stä?","Guten Morgen!"],
+  ["2. Mitä kuunteleminen tarkoittaa?",null],
+  ["3. Opettaja kertoo, mitä kannattaa kuulla",null],
+  ["4. Opettaja näyttää tunnistusstrategian",null],
+  ["5. Kuuntele alkuperäinen tervehdysluettelo",null],
+  ["6. Harjoittele erottelua","Moin!"],
+  ["7. Tunnista uusi hyvästely","Hyvää yötä"],
+  ["8. Käytä opittua uudessa tilanteessa","ei osaa"],
+  ["9. Kertaa ilta ja yö","Guten Morgen!"],
+  ["10. Mitä opit L005:ssä?",null]
+ ] as const;
+ for(const [label,answer] of script){
+  await menu.getByRole("button",{name:label,exact:true}).click();
+  if(answer){
+   if(label.startsWith("8.")){
+    await player.locator(".los-teacher-written-entry input").fill(answer);
+    await player.getByRole("button",{name:"Tarkista kirjoittamani"}).click();
+   }else await player.locator(".los-teacher-choices").getByRole("button",{name:answer,exact:true}).click();
+  }
+ }
+ const finish=player.getByRole("button",{name:"Merkitse opetuskokonaisuus käsitellyksi"});
+ await expect(finish).toBeEnabled();
+ await finish.click();
+ await expect(player).toContainText("Opetuskokonaisuus käyty läpi");
+ await expect(player).toContainText("0/1 avointa tehtävää");
+ await expect(player.locator(".los-l005-media audio")).toHaveCount(0);
+ await expect(page.getByRole("link",{name:/Seuraava oppitunti: L006/})).toBeVisible();
+ await page.reload({waitUntil:"domcontentloaded"});
+ await expect(page.locator(".los-teacher")).toContainText("Opetuskokonaisuus käyty läpi");
  await expectNoHorizontalOverflow(page);
 });
