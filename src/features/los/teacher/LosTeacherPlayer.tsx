@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ArrowLeft, ArrowRight, BookOpen, Check, CheckCircle2, ChevronLeft, ChevronRight, HelpCircle, RotateCcw } from "lucide-react";
 import { readCachedDeviceUser } from "@/lib/deviceSession";
 import { useLosChapterDraft } from "../studyState.ts";
@@ -6,10 +6,11 @@ import {
   emptyTeacherSession, markTeacherHelp, confirmTeacherActivity, teacherChapterAssessmentStatus, teacherMidtermAssessmentStatus,
   finishTeacherSession, independentTeacherEvidence, moveTeacherScene, revealTeacherSolution,
   setTeacherAnswerDraft, submitTeacherAnswer, toggleTeacherPause, teacherCanFinish, teacherLatestAttempt,
-  teacherWrongFeedback, type TeacherScene, type TeacherSession,
+  teacherWrongFeedback, teacherBuiltNumberCount, type TeacherScene, type TeacherSession,
 } from "./engine.ts";
-import { getLosTeacherLesson } from "./lessonL004.ts";
+import { getLosTeacherLesson } from "./lessonRegistry.ts";
 import { LosTeacherGreetingMedia } from "./LosTeacherGreetingMedia.tsx";
+import { LosTeacherNumberBuilder } from "./LosTeacherNumberBuilder.tsx";
 import { validateTeacherLesson } from "./validateContent.ts";
 import "../los-book.css";
 import "./teacher.css";
@@ -27,8 +28,10 @@ function SceneQuestion({ scene, session, submit, saveDraft, requestHint, reveal 
   requestHint: () => void;
   reveal: () => void;
 }) {
+  const inputRef = useRef<HTMLInputElement>(null);
   const q = scene.question;
   if (!q) return null;
+  const numericResponse = /^Kirjoita numeroin\b/i.test(q.prompt);
   const latest = teacherLatestAttempt(session, scene.id);
   const attempts = session.attempts.filter(item => item.sceneId === scene.id);
   const succeeded = attempts.some(item => item.correct);
@@ -36,6 +39,20 @@ function SceneQuestion({ scene, session, submit, saveDraft, requestHint, reveal 
   const helped = session.helpedIds.includes(scene.id);
   const solutionVisible = session.revealedIds.includes(scene.id);
   const drafted = session.draftAnswers[scene.id] ?? "";
+  const inputDisabled = succeeded || exhausted || solutionVisible || Boolean(session.completedAt);
+  const insertGermanCharacter = (character: string) => {
+    if (inputDisabled || numericResponse) return;
+    const input = inputRef.current;
+    const start = input?.selectionStart ?? drafted.length;
+    const end = input?.selectionEnd ?? start;
+    const next = drafted.slice(0, start) + character + drafted.slice(end);
+    if (next.length > 500) return;
+    saveDraft(next);
+    requestAnimationFrame(() => {
+      inputRef.current?.focus();
+      inputRef.current?.setSelectionRange(start + character.length, start + character.length);
+    });
+  };
   const solution = q.type === "choice"
     ? q.options?.find(opt => opt.id === q.correctOption)?.label ?? ""
     : q.accepted?.[0] ?? "";
@@ -53,14 +70,23 @@ function SceneQuestion({ scene, session, submit, saveDraft, requestHint, reveal 
       event.preventDefault();
       if (drafted.trim() && !succeeded && !exhausted && !solutionVisible) submit(drafted);
     }}>
-      <label htmlFor="los-teacher-answer">Vastauksesi saksaksi</label>
+      <label htmlFor="los-teacher-answer">{numericResponse ? "Vastauksesi numeroin" : "Vastauksesi saksaksi"}</label>
       <div className="los-teacher-input-row">
-        <input id="los-teacher-answer" lang="de" autoComplete="off" spellCheck={false}
-          value={drafted} maxLength={500} disabled={succeeded || exhausted || solutionVisible || Boolean(session.completedAt)}
+        <input ref={inputRef} id="los-teacher-answer" lang={numericResponse ? undefined : "de"}
+          inputMode={numericResponse ? "numeric" : "text"}
+          autoComplete="off" spellCheck={false}
+          value={drafted} maxLength={500} disabled={inputDisabled}
           onChange={event => saveDraft(event.target.value)}
-          placeholder="Kirjoita saksaksi..." />
-        <button type="submit" disabled={!drafted.trim() || succeeded || exhausted || solutionVisible || Boolean(session.completedAt)}>Tarkista</button>
+          placeholder={numericResponse ? "Kirjoita numeroina..." : "Kirjoita saksaksi..."} />
+        <button type="submit" disabled={!drafted.trim() || inputDisabled}>Tarkista</button>
       </div>
+      {!numericResponse && <div className="los-teacher-special-keys" role="group" aria-label="Saksan erikoismerkit">
+        <span>Lisää merkki</span>
+        {(["ä", "ö", "ü", "ß"] as const).map(character =>
+          <button key={character} type="button" lang="de" aria-label={"Lisää " + character}
+            disabled={inputDisabled || drafted.length >= 500}
+            onClick={() => insertGermanCharacter(character)}>{character}</button>)}
+      </div>}
     </form>}
     {latest && <div className={"los-teacher-feedback " + (latest.correct ? "is-right" : "is-wrong")}
       role="status" aria-live="polite">
@@ -151,7 +177,7 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
     });
   };
   const navigate = (target: string) => {
-    if (!lesson || !scene) return;
+    if (!lesson || !scene || session?.paused) return;
     persist(old => {
       const now = stamp();
       const marked = moveTeacherScene(old, lesson, scene.id, now);
@@ -198,7 +224,7 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
       </section> :
       !lesson || !session || !scene ? <section className="los-teacher-status">
         <h1>Oppitunnin opetusmateriaali ei ole vielä valmis</h1>
-        <p>Teacher 2.0 on nyt käytössä oppitunneilla L001–L016. Muut oppitunnit toimivat edelleen nykyisessä Opetuspolussa.</p>
+        <p>Teacher 2.0 on nyt käytössä oppitunneilla L001–L035. Muut oppitunnit toimivat edelleen nykyisessä Opetuspolussa.</p>
         <a href={"/los#/" + (lesson?.bookId ?? 1) + "/path"}>Palaa Opetuspolkuun</a>
       </section> :
       <>
@@ -222,6 +248,7 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
                 {lesson.scenes.map((item, i) => <button key={item.id} type="button"
                   aria-current={scene.id === item.id ? "step" : undefined}
                   className={scene.id === item.id ? "is-active" : ""}
+                  disabled={session.paused}
                   onClick={() => navigate(item.id)}>
                   <span>{session.visitedIds.includes(item.id) ? <Check size={15}/> : String(i + 1)}</span>
                   <span>{item.title}</span>
@@ -238,9 +265,21 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
             <div className="los-teacher-prose">
               {scene.paragraphs.map((paragraph, i) => <p key={i}>{paragraph}</p>)}
             </div>
+            {scene.kind === "board" && <TeacherBoard scene={scene}/>}
             {lesson.id === "L005" && (scene.id === "source-list" || scene.id === "audio-choice") &&
               <LosTeacherGreetingMedia/>}
-            {scene.kind === "board" && <TeacherBoard scene={scene}/>}
+            {scene.numberBuilder && <LosTeacherNumberBuilder
+              value={session.draftAnswers[scene.id]}
+              historyCount={teacherBuiltNumberCount(session, scene.id)}
+              onChange={value => persist(old => {
+                const now = stamp();
+                const key = scene.id + "-history";
+                const history = (old.draftAnswers[key] ?? "").split(",").filter(Boolean);
+                if (!history.includes(String(value))) history.push(String(value));
+                const withValue = setTeacherAnswerDraft(old, scene.id, String(value), now);
+                return setTeacherAnswerDraft(withValue, key, history.join(","), now);
+              })}
+            />}
             {scene.question && <SceneQuestion
               scene={scene} session={session}
               submit={submit}
@@ -285,7 +324,8 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
             {scene.activityId && <div className="los-teacher-activity">
               <button type="button"
                 disabled={session.activityIds.includes(scene.activityId) || completed ||
-                  Boolean(scene.reflection && (session.draftAnswers[scene.id]?.trim().length ?? 0) < scene.reflection.minLength)}
+                  Boolean(scene.reflection && (session.draftAnswers[scene.id]?.trim().length ?? 0) < scene.reflection.minLength) ||
+                  Boolean(scene.numberBuilder && teacherBuiltNumberCount(session, scene.id) < 4)}
                 onClick={() => markActivity(scene.activityId!)}>
                 {session.activityIds.includes(scene.activityId) ? <CheckCircle2 size={18}/> : <Check size={18}/>}
                 {session.activityIds.includes(scene.activityId) ? "Harjoittelu vahvistettu" : scene.activityLabel}
