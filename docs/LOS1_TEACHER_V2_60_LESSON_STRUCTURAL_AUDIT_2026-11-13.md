@@ -167,3 +167,21 @@ opetustilassa. Käyttöliittymä kertoo äänihäiriöstä. Automaattinen
 Chromium/WebKit-testaus tarkistaa lähteiden tunnisteet ja
 tekstivaraosan, ei sitä että opiskelija kuulisi tai ymmärtäisi
 äänitteen oikealla laitteella.
+
+## Oppituntien välisen tietorajan lisätarkistus (13.11.2026)
+
+Yhteinen opetusmoottori käyttää tarkoituksella samoja sisäisiä
+tilannetunnisteita eri oppitunneissa (esim. `exit` ja
+`independent`). Päivitetty moottori tarkistaa, että `TeacherSession.lessonId`
+vastaa käsiteltävää `TeacherLesson.id`-arvoa **ennen** siirtymistä,
+vastausten tarkistusta, harjoitteluvahvistuksia, itsenäisen näyttömäärän
+laskemista tai oppitunnin suorittamisen vahvistamista.
+
+Tämä on turvaraja väärin yhdistettyä istuntoa tai virheellistä
+navigointitilannetta vastaan, ei vanhojen tietojen siirtotyökalu.
+Aiemmat `lessonProgress.*.teacher`-tiedot säilyvät edelleen
+lukukelpoisena historiana; ne eivät muutu uuden opetuksen
+itsenäiseksi näytöksi. Tarkka regressiotesti simuloi erillisen
+oppitunnin tunnisteita ja tarkoituksellisesti väärään oppituntiin
+ohjattua istuntoa. Vain aidosti oikean oppitunnin istunto voidaan
+hyväksyä.
