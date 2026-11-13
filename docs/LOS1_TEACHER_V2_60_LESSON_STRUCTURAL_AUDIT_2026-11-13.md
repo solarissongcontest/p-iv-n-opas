@@ -96,6 +96,8 @@ Selite: `vastaus` = vanhaan tehtävätilaan tallennettu vastaus, ei automaattine
 U1.0:n **R1–R12** pysyy ainoana julkaisuporttien listana. Raportti ei luo uutta G1–G8-järjestelmää eikä sulje portteja ilman havaintoa. Tästä raportista johdettavat tärkeimmät avoimet työt ovat L013–L060:n varsinainen opetus, L001–L012:n toimituksellinen hyväksyntä, sanakirjan tuotantolataus, tarkistettu sanakohtainen ääntämistieto, oikeat ihmisäänitteet, todelliset laite-/tallennustestit ja sisällön ulkoisten oikeuksien hyväksyntä.
 
 
-### C03:n lähderistiriita (R1/R2, avoin)
+### C03: päätetty lähdevaihto ja avoin masterlähteen täsmäytys (R1/R2)
 
-Kanoninen `Los 1.txt` ja `Los yhteinen masterplan.txt` määrittelevät C03:n päätekstiksi M-DIB-01:n Bernan koko haastattelun, jonka tiedostokohtaiset oikeudet vaativat vahvistuksen. Nykyinen `lessonEngineC03.ts` käyttää sen sijaan Lisa Müllerin M-WB-07-dialogia ja L013:n vastaavaa tunnisteistusta. Lähteitä ei voi pitää samana. C03 Text A:n julkaisu ja L013:n pedagoginen hyväksyntä edellyttävät dokumentoitua lähdevalintaa, kokotekstin ja kysymysten tarkastusta sekä oikeusvahvistusta. L012:n maiden nimisanastoa voidaan tarkistaa tästä riippumatta.
+Projektin `Los 1.txt` ja 13.11. koottu `Los yhteinen masterplan.txt` nimeävät C03:n suunnitelluksi päätekstiksi M-DIB-01:n Bernan haastattelun. Repositoryn [11.11.2026 lähdevaihtopäätös](../los1-c03-source-replacement.md) määrittelee kuitenkin perustellun korvauksen: `M-WB-07`, Wikibooksin julkaistu kokonainen kahdeksan repliikin Lisa Müller -dialogi, pysyvä versio `oldid=4581896`. Vaihto tehtiin, koska Bernan haastattelussa esiintyy todellinen puhelinnumero ja henkilökohtaisten numeroiden välttäminen on LOS! 1:n linja.
+
+Lähdevalinta **ei siis ole päätöstä vailla**. Päätös on dokumentoitu, mutta yhdistelmämasterin vanha Berna-viittaus täytyy täsmäyttää ja lähteen riippumaton kielen, kokotekstin, vastausavainten, lisenssin sekä laitetestien hyväksyntä on edelleen avoin. L012:n maasanasto ei edellytä kummankaan haastattelun itsenäistä arviointia; L013 voidaan rakentaa nykyiselle Lisa-lähteelle ilman lähdeduplikaattia, mutta sitä ei merkitä julkaisuvalmiiksi ilman QA:ta.

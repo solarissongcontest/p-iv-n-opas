@@ -3,7 +3,8 @@ import type { TeacherLesson } from "./engine.ts";
 /**
  * L012 C03 first beginner lesson: countries and cities, not premature
  * production of woher, aus der Schweiz, or dative. C03 Text A's source
- * mismatch (canonical Berna vs current Lisa) remains an editorial gate.
+ * replacement (Berna M-DIB-01 -> Lisa M-WB-07) is documented in the repository.
+ * Reconcile the older compiled master source and obtain human rights/language QA.
  * This manuscript uses only verified chapter vocabulary and country names.
  */
 export const LOS1_L012_TEACHER: TeacherLesson = {
@@ -182,7 +183,7 @@ export const LOS1_L012_TEACHER: TeacherLesson = {
       paragraphs:[
         "Opit tunnistamaan Finnlandin, Deutschlandin, Österreichin ja die Schweiz -nimen sekä erottamaan maan ja kaupungin.",
         "Itsenäinen onnistuminen näkyy erikseen ohjatuista harjoituksista. Tunnin läpikäynti ei itsessään todista kaikkia taitoja pysyvästi hallituiksi.",
-        "L013:ssa harjoitellaan lukemaan alkuperätekstiä lähtömaan ja asuinpaikan tunnistamiseksi. C03:n päätekstin lähde ja toimituksellinen valinta tarvitsevat vielä erillisen hyväksynnän.",
+        "L013:ssa harjoitellaan lukemaan nykyiseksi päätekstiksi dokumentoidusti valittua Lisa Müllerin dialogia lähtömaan ja asuinpaikan tunnistamiseksi. Riippumaton kielen, oikeuksien, tekstin kokonaisuuden ja vastausavainten tarkistus on edelleen avoin.",
       ],
     },
   ],
