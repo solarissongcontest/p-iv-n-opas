@@ -17,11 +17,6 @@ export const LOS_FUTURE_BOOK_7: Record<string, LosFutureManuscript> = {
     "grammarExplanation": "Yhdistä lauseet Ich möchte …, Ich würde gern …, Ich werde … ja Ich denke, dass … . Futuurin infinitiivi jää loppuun: Ich werde Deutsch lernen. Weil ja dass vaativat oman sivulausejärjestyksensä. Hyvä suunnitelma kertoo yhden kiinnostuksen, tavoitteen, perustelun ja seuraavan pienen askeleen. Selkeys on tärkeämpää kuin vaikea sanasto.\n\nLaajennettu opetus kirjassa:\n\nTulevaisuussuunnitelmassa erotetaan toive, mahdollisuus ja tavoite. Ich möchte, ich könnte, ich werde ja ich plane kertovat erilaisia varmuuden asteita. Perustele vähintään yksi valinta weil-sivulauseella. Teksti ei tarvitse monimutkaista henkilökohtaista elämänsuunnitelmaa: myös kuvitteellinen henkilö kelpaa. Tavoite on A2.1-tason ymmärrettävä viesti.\n\nMallilause: Ich möchte später studieren, weil ich Neues lernen will.\n\nSuomennos: Haluaisin opiskella myöhemmin, koska haluan oppia uutta.\n\nOpettajan virheen korjaus: weil ich will Neues lernen. → weil ich Neues lernen will.\n\nLähdeviitteen pedagoginen rajaus: Tekstin vaikeat muodot merkitään tunnistettaviksi, ellei niitä ole opetettu. Oppijan ei tarvitse tuottaa uuden aikamuodon tai sijamuodon muotoja ennen niiden erillistä opetusta.\n\nOma minikoe: selitä säännön vaikutus verbin paikkaan, persoonapäätteeseen tai artikkeliin omassa mallilauseessa. Sulje opetus. Tee vastaava uusi lause eri henkilöllä tai sanalla ja tarkista tulos.",
     "vocabulary": [
       {
-        "de": "Suomi",
-        "fi": "Huomio",
-        "status": ""
-      },
-      {
         "de": "die Entscheidung",
         "fi": "päätös",
         "status": "artikkeli mukana; monikko ja ääntäminen vielä tarkistettava"
@@ -124,11 +119,6 @@ export const LOS_FUTURE_BOOK_7: Record<string, LosFutureManuscript> = {
     "grammarExplanation": "Können ilmaisee osaamista: Ich kann gut rechnen. Adjektiivit voivat kuvata taitoa: Ich bin kreativ. Valmis ilmaus gut in + datiivi/kiinteä oppiaine sopii kouluyhteyteen: Ich bin gut in Mathe. Ero on tärkeä: osaan tehdä jotakin (können + infinitiivi) ja olen hyvä jossakin (gut in + kohde).\n\nLaajennettu opetus kirjassa:\n\nOmista vahvuuksista puhuminen tarkoittaa konkreettisten taitojen kuvaamista. Können kertoo osaamisen: Ich kann gut organisieren. Gut in ilmaisee vahvuutta tietyssä asiassa, esimerkiksi Ich bin gut in Mathe. Älä sekoita osaamista ja mieltymystä, sillä Ich lerne gern kertoo halusta, ei välttämättä taidosta. Valitse mieluummin yksi todennettava esimerkki kuin pelkkä pitkä adjektiiviluettelo.\n\nMallilause: Ich kann gut planen und arbeite gern im Team.\n\nSuomennos: Osaan suunnitella hyvin ja työskentelen mielelläni ryhmässä.\n\nOpettajan virheen korjaus: Ich kann gut organisiere. → Ich kann gut organisieren.\n\nLähdeviitteen pedagoginen rajaus: Tekstin vaikeat muodot merkitään tunnistettaviksi, ellei niitä ole opetettu. Oppijan ei tarvitse tuottaa uuden aikamuodon tai sijamuodon muotoja ennen niiden erillistä opetusta.\n\nOma minikoe: selitä säännön vaikutus verbin paikkaan, persoonapäätteeseen tai artikkeliin omassa mallilauseessa. Sulje opetus. Tee vastaava uusi lause eri henkilöllä tai sanalla ja tarkista tulos.",
     "vocabulary": [
       {
-        "de": "Suomi",
-        "fi": "Huomio",
-        "status": ""
-      },
-      {
         "de": "die Stärke",
         "fi": "vahvuus",
         "status": "artikkeli mukana; monikko ja ääntäminen vielä tarkistettava"
@@ -220,11 +210,6 @@ export const LOS_FUTURE_BOOK_7: Record<string, LosFutureManuscript> = {
     "grammarTopic": "preesens, ajanmääreet, weil",
     "grammarExplanation": "Ajanilmauksella voit aloittaa lauseen: Am Montag habe ich Physik. Verbi on silti toisena. Kun perustelet mielipiteen weil-lauseella, sen verbi menee loppuun: Ich mag Chemie, weil die Experimente interessant sind. Tässä kappaleessa yhdistyvät siis kaksi erilaista sanajärjestyssääntöä. Älä jätä weil-sivulausetta ilman predikaattia.\n\nLaajennettu opetus kirjassa:\n\nKoulupäivästä kertova raportti yhdistää kellonajat, oppiaineet ja perustelut. Päälauseessa taivutettu verbi pysyy toisena: Am Montag habe ich Physik. Weil-sivulauseessa se siirtyy loppuun. Kiinnitä huomiota siihen, että opiskelu Suomessa ja Saksassa ei ole kaikille samanlaista; kuvaile omaa tilannettasi, älä kuvaile yhtä koulua kaikille.\n\nMallilause: Ich mag Biologie, weil ich gern über Tiere lerne.\n\nSuomennos: Pidän biologiasta, koska opiskelen mielelläni eläimistä.\n\nOpettajan virheen korjaus: weil ich lerne gern → weil ich gern lerne.\n\nLähdeviitteen pedagoginen rajaus: Tekstin vaikeat muodot merkitään tunnistettaviksi, ellei niitä ole opetettu. Oppijan ei tarvitse tuottaa uuden aikamuodon tai sijamuodon muotoja ennen niiden erillistä opetusta.\n\nOma minikoe: selitä säännön vaikutus verbin paikkaan, persoonapäätteeseen tai artikkeliin omassa mallilauseessa. Sulje opetus. Tee vastaava uusi lause eri henkilöllä tai sanalla ja tarkista tulos.",
     "vocabulary": [
-      {
-        "de": "Suomi",
-        "fi": "Huomio",
-        "status": ""
-      },
       {
         "de": "die Schule",
         "fi": "koulu",
@@ -323,11 +308,6 @@ export const LOS_FUTURE_BOOK_7: Record<string, LosFutureManuscript> = {
     "grammarExplanation": "Müssen ilmaisee, että jokin on pakko tehdä: Ich muss heute lernen. Sollen viittaa esimerkiksi ohjeeseen tai odotukseen: Ich soll diese Aufgabe machen. Sollten on puolestaan pehmeämpi suositus: Du solltest früher anfangen. Kaikkien kanssa tekemistä ilmaiseva verbi on infinitiivissä lopussa. Älä ajattele, että kaikki kolme tarkoittavat täsmälleen samaa.\n\nLaajennettu opetus kirjassa:\n\nMüssen kertoo velvollisuudesta, sollen ulkopuolisesta odotuksesta tai ohjeesta. Esimerkiksi Ich muss heute lernen ja Ich soll mehr üben eivät ole aivan samoja. Suunnitelmassa kannattaa käyttää aikaa ilmaisevia sanoja zuerst, danach ja morgen. Jos aiot kertoa tulevaisuudesta, preesens ja selvä ajanmääre riittävät usein.\n\nMallilause: Ich muss heute lernen. Morgen will ich üben.\n\nSuomennos: Minun täytyy opiskella tänään. Huomenna haluan harjoitella.\n\nOpettajan virheen korjaus: Ich muss lerne. → Ich muss lernen.\n\nLähdeviitteen pedagoginen rajaus: Tekstin vaikeat muodot merkitään tunnistettaviksi, ellei niitä ole opetettu. Oppijan ei tarvitse tuottaa uuden aikamuodon tai sijamuodon muotoja ennen niiden erillistä opetusta.\n\nOma minikoe: selitä säännön vaikutus verbin paikkaan, persoonapäätteeseen tai artikkeliin omassa mallilauseessa. Sulje opetus. Tee vastaava uusi lause eri henkilöllä tai sanalla ja tarkista tulos.",
     "vocabulary": [
       {
-        "de": "Suomi",
-        "fi": "Huomio",
-        "status": ""
-      },
-      {
         "de": "die Prüfung",
         "fi": "koe",
         "status": "artikkeli mukana; monikko ja ääntäminen vielä tarkistettava"
@@ -424,11 +404,6 @@ export const LOS_FUTURE_BOOK_7: Record<string, LosFutureManuscript> = {
     "grammarTopic": "möchte/würde gern; tulevaisuuden ajanilmaisut",
     "grammarExplanation": "Ich möchte … on tuttu kohtelias toive. Ich würde gern … tekee toiveesta vielä harkitsevamman: Ich würde gern Medizin studieren. Molemmissa pääverbi on infinitiivissä lopussa. Tulevaisuuden voi kertoa myös preesensillä ja ajanilmauksella: Nächstes Jahr beginne ich … . Tällaiset lauseet sopivat A2.1-tason tavoitteisiin paremmin kuin monimutkainen ehtolauseiden järjestelmä.\n\nLaajennettu opetus kirjassa:\n\nTulevaisuuden toiveesta voit sanoa Ich möchte studieren. Kohteliaampi tai kuviteltu vaihtoehto on Ich würde gern im Ausland studieren. Huomaa rakenne würde + infinitiivi lopussa. Tätä kutsutaan usein konditionaaliseksi ilmaukseksi, mutta alkeiskielessä kannattaa ensin harjoitella sitä kokonaisena toivefraasina. Omaa päätöstä ei tarvitse väittää varmaksi, jos vasta pohdit vaihtoehtoja.\n\nMallilause: Ich würde gern Medizin studieren.\n\nSuomennos: Haluaisin opiskella lääketiedettä.\n\nOpettajan virheen korjaus: Ich würde gern studiere. → Ich würde gern studieren.\n\nLähdeviitteen pedagoginen rajaus: Tekstin vaikeat muodot merkitään tunnistettaviksi, ellei niitä ole opetettu. Oppijan ei tarvitse tuottaa uuden aikamuodon tai sijamuodon muotoja ennen niiden erillistä opetusta.\n\nOma minikoe: selitä säännön vaikutus verbin paikkaan, persoonapäätteeseen tai artikkeliin omassa mallilauseessa. Sulje opetus. Tee vastaava uusi lause eri henkilöllä tai sanalla ja tarkista tulos.",
     "vocabulary": [
-      {
-        "de": "Suomi",
-        "fi": "Huomio",
-        "status": ""
-      },
       {
         "de": "die Zukunft",
         "fi": "tulevaisuus",
@@ -537,11 +512,6 @@ export const LOS_FUTURE_BOOK_7: Record<string, LosFutureManuscript> = {
     "grammarExplanation": "Werden voi tarkoittaa ‘tulla joksikin’: Ich werde Arzt. Futuurissa käytetään werden + infinitiivi: Ich werde morgen arbeiten. Arjessa tulevaisuudesta puhutaan usein myös preesensillä: Morgen arbeite ich. Siksi futuuri ei ole aina pakollinen. Vältä sekoittamasta tulla joksikin -merkitystä ja futuuriapuvälinettä: lauseen rakenne ratkaisee tulkinnan.\n\nLaajennettu opetus kirjassa:\n\nAmmattia voi kuvata nykyhetkessä Ich arbeite als … tai tulevaisuudesta puhuttaessa Ich möchte … werden. Futuurin rakenne werden + infinitiivi on myös mahdollinen: Ich werde später in einer Klinik arbeiten. Sitä ei kuitenkaan tarvita jokaiseen tulevaisuutta koskevaan lauseeseen. Tärkeintä on erottaa nykyinen tilanne, toive ja suunnitelma.\n\nMallilause: Ich möchte Ingenieurin werden. Später werde ich vielleicht in Berlin arbeiten.\n\nSuomennos: Haluan insinööriksi. Ehkä työskentelen myöhemmin Berliinissä.\n\nOpettajan virheen korjaus: Ich werde arbeite. → Ich werde arbeiten.\n\nLähdeviitteen pedagoginen rajaus: Tekstin vaikeat muodot merkitään tunnistettaviksi, ellei niitä ole opetettu. Oppijan ei tarvitse tuottaa uuden aikamuodon tai sijamuodon muotoja ennen niiden erillistä opetusta.\n\nOma minikoe: selitä säännön vaikutus verbin paikkaan, persoonapäätteeseen tai artikkeliin omassa mallilauseessa. Sulje opetus. Tee vastaava uusi lause eri henkilöllä tai sanalla ja tarkista tulos.",
     "vocabulary": [
       {
-        "de": "Suomi",
-        "fi": "Huomio",
-        "status": ""
-      },
-      {
         "de": "der Beruf",
         "fi": "ammatti",
         "status": "artikkeli mukana; monikko ja ääntäminen vielä tarkistettava"
@@ -643,11 +613,6 @@ export const LOS_FUTURE_BOOK_7: Record<string, LosFutureManuscript> = {
     "grammarTopic": "ehtojen ymmärtäminen: können/müssen",
     "grammarExplanation": "Ilmoituksessa saatat nähdä Wir suchen … , Sie müssen … ja Sie können … . Muista, että müssen ilmaisee vaatimusta, können mahdollisuutta tai kykyä. Tunnista myös zeitlich ilmaukset ab Montag, am Wochenende sekä Stunden pro Woche. Tarkista, tarkoittaako Sie kohteliasta hakijaa vai he-pronominia asiayhteydestä.\n\nLaajennettu opetus kirjassa:\n\nTyöpaikkailmoituksen lukemisessa etsi ensin keskeiset ehdot: työtehtävä, paikka, ajankohta, vaaditut taidot ja hakutapa. Voit tunnistaa müssen- ja können-ilmaukset ilman että pystyt tuottamaan kaikkea ilmoituksen sanastoa. Ilmoitus on erillinen tekstilaji, jonka yksityiskohdat voivat olla tärkeitä; älä päättele palkkaa tai ikärajaa, jos niitä ei sanota.\n\nMallilause: Du musst am Samstag arbeiten können.\n\nSuomennos: Sinun täytyy voida työskennellä lauantaina.\n\nOpettajan virheen korjaus: Du musst kannst arbeiten. → Du musst arbeiten können.\n\nLähdeviitteen pedagoginen rajaus: Tekstin vaikeat muodot merkitään tunnistettaviksi, ellei niitä ole opetettu. Oppijan ei tarvitse tuottaa uuden aikamuodon tai sijamuodon muotoja ennen niiden erillistä opetusta.\n\nOma minikoe: selitä säännön vaikutus verbin paikkaan, persoonapäätteeseen tai artikkeliin omassa mallilauseessa. Sulje opetus. Tee vastaava uusi lause eri henkilöllä tai sanalla ja tarkista tulos.",
     "vocabulary": [
-      {
-        "de": "Suomi",
-        "fi": "Huomio",
-        "status": ""
-      },
       {
         "de": "die Stellenanzeige",
         "fi": "työpaikkailmoitus",
@@ -751,11 +716,6 @@ export const LOS_FUTURE_BOOK_7: Record<string, LosFutureManuscript> = {
     "grammarExplanation": "Muodollinen aloitus voi olla Sehr geehrte Frau Müller tai Sehr geehrter Herr Weber, kun nimi tiedetään. Työstä kirjoitat Ich bewerbe mich um ein Praktikum. Voit kertoa syyn: Ich interessiere mich für die Stelle, weil … . Lopeta Mit freundlichen Grüßen ja omalla nimellä. Huomaa isolla kirjoitettu kohtelias Sie ja Ihr. Älä kopioi hakemuspohjasta väitettä kokemuksesta, jota hakijalla ei ole.\n\nLaajennettu opetus kirjassa:\n\nTyöhakemuksessa on vastaanottaja, tarkoitus ja selkeä lopetus. Aloita esimerkiksi Sehr geehrte Damen und Herren, jos vastaanottajaa ei tiedetä, tai Guten Tag, … tilanteen mukaan. Voit kirjoittaa Ich bewerbe mich um ein Praktikum. Ilmaise oma kiinnostus ja yksi taito konkreettisesti. Kohtelias rekisteri ei tarkoita vaikeaa kielioppia vaan täsmällisiä, ymmärrettäviä lauseita.\n\nMallilause: Ich bewerbe mich um das Praktikum. Ich arbeite gern im Team.\n\nSuomennos: Haen harjoittelupaikkaa. Työskentelen mielelläni ryhmässä.\n\nOpettajan virheen korjaus: Ich bewerbe mich für ein Praktikum on myös mahdollinen arkisempi vaihtoehto; opeta kirjan valittu vakiintunut rakenne.\n\nLähdeviitteen pedagoginen rajaus: Tekstin vaikeat muodot merkitään tunnistettaviksi, ellei niitä ole opetettu. Oppijan ei tarvitse tuottaa uuden aikamuodon tai sijamuodon muotoja ennen niiden erillistä opetusta.\n\nOma minikoe: selitä säännön vaikutus verbin paikkaan, persoonapäätteeseen tai artikkeliin omassa mallilauseessa. Sulje opetus. Tee vastaava uusi lause eri henkilöllä tai sanalla ja tarkista tulos.",
     "vocabulary": [
       {
-        "de": "Suomi",
-        "fi": "Huomio",
-        "status": ""
-      },
-      {
         "de": "der Lebenslauf",
         "fi": "ansioluettelo",
         "status": "artikkeli mukana; monikko ja ääntäminen vielä tarkistettava"
@@ -853,11 +813,6 @@ export const LOS_FUTURE_BOOK_7: Record<string, LosFutureManuscript> = {
     "grammarExplanation": "Kohtelias kysymys voi alkaa Könnten Sie …? ja toive Ich würde gern … . Ne ovat Konjunktiv II:n yleisiä käyttövalmiita muotoja, mutta sinun ei tarvitse osata kaikkia verbimuotoja. Vertaa: Können Sie das wiederholen? on mahdollinen, Könnten Sie das bitte wiederholen? on pehmeämpi. Vastaukset pidetään selkeinä: Ich kann …, Ich habe … gemacht, Ich lerne … .\n\nLaajennettu opetus kirjassa:\n\nHaastattelussa voit kohdata kohteliaan kysymyksen Könnten Sie sich bitte vorstellen? Se sisältää ehdollisen kohteliaisuusmuodon. Vastauksessa käytä tuttua preesensiä ja lyhyttä esimerkkiä. Jos et ymmärrä, sano Könnten Sie die Frage bitte wiederholen? Rauhallisuus ja tarkentavat kysymykset ovat taitoa, eivät virheen merkki.\n\nMallilause: Könnten Sie die Frage bitte wiederholen?\n\nSuomennos: Voisitteko toistaa kysymyksen?\n\nOpettajan virheen korjaus: Könnten Sie bitte wiederholen die Frage? → Könnten Sie die Frage bitte wiederholen?\n\nLähdeviitteen pedagoginen rajaus: Tekstin vaikeat muodot merkitään tunnistettaviksi, ellei niitä ole opetettu. Oppijan ei tarvitse tuottaa uuden aikamuodon tai sijamuodon muotoja ennen niiden erillistä opetusta.\n\nOma minikoe: selitä säännön vaikutus verbin paikkaan, persoonapäätteeseen tai artikkeliin omassa mallilauseessa. Sulje opetus. Tee vastaava uusi lause eri henkilöllä tai sanalla ja tarkista tulos.",
     "vocabulary": [
       {
-        "de": "Suomi",
-        "fi": "Huomio",
-        "status": ""
-      },
-      {
         "de": "das Gespräch",
         "fi": "keskustelu",
         "status": "artikkeli mukana; monikko ja ääntäminen vielä tarkistettava"
@@ -954,11 +909,6 @@ export const LOS_FUTURE_BOOK_7: Record<string, LosFutureManuscript> = {
     "grammarTopic": "Perfekt/preesens kertaus, ajan järjestys",
     "grammarExplanation": "Nykyisestä tavasta sanot Ich arbeite im Café. Eilisestä tapahtumasta Ich habe im Café gearbeitet. Erotettujen aikojen jäsentämiseen käytä heute, gestern, zuerst, dann ja am Ende. Jos Perfekt muodostetaan haben-apuverbillä, partisiippi sijoittuu loppuun. Älä sekoita samassa lauseessa apuverbiä ja preesensin persoonamuotoa.\n\nLaajennettu opetus kirjassa:\n\nHarjoittelupäiväkirjassa voit kertoa mitä teet yleensä ja mitä teit eilen. Preesens ilmaisee rutiinin: Ich sortiere Bücher. Perfekt kertoo menneestä: Gestern habe ich Bücher sortiert. Kytke tapahtumat ajanmääreisiin ja valitse muutama turvallinen verbimuoto. Kirjoita myös yhdestä onnistumisesta tai opitusta asiasta.\n\nMallilause: Heute helfe ich Kunden. Gestern habe ich Regale geordnet.\n\nSuomennos: Tänään autan asiakkaita. Eilen järjestin hyllyjä.\n\nOpettajan virheen korjaus: Gestern ich habe gearbeitet. → Gestern habe ich gearbeitet.\n\nLähdeviitteen pedagoginen rajaus: Tekstin vaikeat muodot merkitään tunnistettaviksi, ellei niitä ole opetettu. Oppijan ei tarvitse tuottaa uuden aikamuodon tai sijamuodon muotoja ennen niiden erillistä opetusta.\n\nOma minikoe: selitä säännön vaikutus verbin paikkaan, persoonapäätteeseen tai artikkeliin omassa mallilauseessa. Sulje opetus. Tee vastaava uusi lause eri henkilöllä tai sanalla ja tarkista tulos.",
     "vocabulary": [
-      {
-        "de": "Suomi",
-        "fi": "Huomio",
-        "status": ""
-      },
       {
         "de": "das Praktikum",
         "fi": "harjoittelu",
