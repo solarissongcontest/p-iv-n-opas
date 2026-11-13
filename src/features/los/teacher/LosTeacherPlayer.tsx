@@ -9,7 +9,7 @@ import { useLosChapterDraft } from "../studyState.ts";
 import {
   emptyTeacherSession, markTeacherHelp, confirmTeacherActivity, teacherChapterAssessmentStatus, teacherMidtermAssessmentStatus,
   finishTeacherSession, independentTeacherEvidence, moveTeacherScene, revealTeacherSolution,
-  setTeacherAnswerDraft, submitTeacherAnswer, toggleTeacherPause, teacherCanFinish, teacherCompletionBlockers, teacherLatestAttempt,
+  setTeacherAnswerDraft, submitTeacherAnswer, toggleTeacherPause, teacherCanFinish, teacherCompletionBlockers, teacherNextIncompleteSceneId, teacherLatestAttempt,
   teacherWrongFeedback, teacherBuiltNumberCount, type TeacherScene, type TeacherSession, isCorrectCalendarEntry,
 } from "./engine.ts";
 import { getLosTeacherLesson } from "./lessonRegistry.ts";
@@ -208,6 +208,7 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
   const available = Boolean(saved && session && lesson && teacherCanFinish(session, lesson, draft.practiceAnswers, draft.practiceChecked, draft, external.ready));
   const blockers = lesson && session ? teacherCompletionBlockers(session, lesson, draft.practiceAnswers, draft.practiceChecked, draft, external.ready) : [];
   const completed = Boolean(session?.completedAt);
+  const nextIncompleteSceneId = lesson && session ? teacherNextIncompleteSceneId(session, lesson, draft.practiceAnswers, draft.practiceChecked) : undefined;
   const c10Dialogues = lesson?.id === "L054" ? composeLosC10Dialogues(
     session?.draftAnswers["dialogue-du"] ?? "", session?.draftAnswers["dialogue-sie"] ?? "") : null;
 
@@ -296,9 +297,9 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
             <p className="los-teacher-sidebar-copy">{lesson.objective}</p>
             <p className="los-teacher-small">{completed ? "Oppitunti suoritettu" :
               "Oppitunti " + (sceneIndex + 1) + "/" + lesson.scenes.length + " · suunnitteluarvio " + lesson.estimatedMinutes + " min (ei mitattu)"}</p>
-            <button className="los-teacher-pause" type="button" onClick={togglePause}>
+            {!completed && <button className="los-teacher-pause" type="button" onClick={togglePause}>
               {session.paused ? "Jatka opetusta" : "Keskeytä oppitunti"}
-            </button>
+            </button>}
             <details className="los-teacher-outline" open>
               <summary>Oppitunnin sisältö</summary>
               <nav aria-label="Oppitunnin opetustilanteet">
@@ -502,6 +503,11 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
                 {!saved && <li>Tallennus ei ole onnistunut. Varmista tietojesi tallentuminen ennen loppumerkintää.</li>}
                 {blockers.map((reason, i) => <li key={i}>{reason}</li>)}
               </ul>}
+              {!completed && !available && nextIncompleteSceneId && nextIncompleteSceneId !== scene.id &&
+                <button type="button" className="los-teacher-next-incomplete"
+                  onClick={() => navigate(nextIncompleteSceneId)}>
+                  Siirry seuraavaan keskeneräiseen vaiheeseen <ArrowRight size={17}/>
+                </button>}
               {!completed ? <button type="button" className="los-teacher-primary"
                 disabled={!available} onClick={finish}>Merkitse oppitunti läpikäydyksi</button> :
                 <p className="los-teacher-done"><CheckCircle2 size={19}/> Oppitunti merkitty suoritetuksi. Osaamista seurataan erikseen.</p>}
