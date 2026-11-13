@@ -86,9 +86,13 @@ test("L031 actually teaches exceptions 11/12 and L032 explicitly corrects 16/17 
  const l031=L031.scenes.flatMap(scene=>scene.board??[]).map(item=>item.german).join(" | ");
  assert.match(l031,/elf/);
  assert.match(l031,/zwölf/);
+ assert.ok(L031.scenes.some(s=>s.id==="source"&&s.bookLinks?.some(l=>l.section==="text")));
  const independent=L031.scenes.find(scene=>scene.id==="independent")!;
  assert.match(teacherWrongFeedback(independent,"zwölf"),/12|kahtatoista/i);
  assert.deepEqual(L032.requiredPracticeIds,["C06-EX-09","C06-EX-10","C06-EX-11","C06-EX-12"]);
+ assert.deepEqual(L032.requiredCheckedIds,["C06-ZPE-Q01","C06-ZPE-Q02","C06-ZPE-Q03"]);
+ assert.ok(L032.scenes.some(s=>s.id==="source"&&s.bookLinks?.some(l=>l.section==="text")));
+ assert.ok(L032.scenes.some(s=>s.id==="source"&&s.bookLinks?.some(l=>l.section==="understand")));
  const l032=L032.scenes.flatMap(scene=>scene.board??[]).map(item=>item.german).join(" | ");
  assert.match(l032,/sechzehn/);
  assert.match(l032,/siebzehn/);
@@ -105,11 +109,11 @@ test("L033 forms 21–100 and preserves the exact six existing numeric questions
  assert.match(teacherWrongFeedback(L033.scenes.find(s=>s.id==="independent")!,"zweiunddreissig"),/ß/);
 });
 test("L034 requires actual checked tasks from both the new M-ZPE-01 and reused C01 texts",()=>{
- const required=["C06-ZPE-Q01","C06-ZPE-Q02","C06-SOURCE-Q01","C06-SOURCE-Q02"];
+ const required=["C06-ZPE-Q04","C06-SOURCE-Q01","C06-SOURCE-Q02"];
  assert.deepEqual(L034.requiredCheckedIds,required);
  const source=getLosOpenDialogue("06")!;
- assert.ok(required.slice(0,2).every(id=>source.questions.some(q=>q.id===id)));
- assert.ok(required.slice(2).every(id=>LOS1_C06_REVIEW_QUESTIONS.some(q=>q.id===id)));
+ assert.ok(source.questions.some(q=>q.id===required[0]));
+ assert.ok(required.slice(1).every(id=>LOS1_C06_REVIEW_QUESTIONS.some(q=>q.id===id)));
  assert.ok(L034.scenes.some(s=>s.id==="checked"&&s.bookLinks?.some(l=>l.section==="understand")));
  assert.ok(L034.scenes.some(s=>s.id==="original"&&s.bookLinks?.some(l=>l.section==="text")));
  assert.ok(L034.scenes.some(s=>s.id==="revisit"&&s.bookLinks?.some(l=>l.section==="text")));
