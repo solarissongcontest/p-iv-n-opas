@@ -49,8 +49,8 @@ export type TeacherLesson = {
   requiredPracticeIds: readonly string[];
   /** Book comprehension checks must be both answered and explicitly checked. */
   requiredCheckedIds?: readonly string[];
-  /** A transcript is not an audio assessment. The source gate must be explicitly approved before a listening lesson may finish. */
-  mediaGate?: { sourceId: string; approved: boolean; reason: string };
+  /** An original transcript cannot substitute for verified audio. */
+  mediaGate?: {sourceId:string;approved:boolean;reason:string};
   /** Chapter-test evidence stays in the existing chapter draft. */
   chapterAssessment?: {
     requiredTestIds: readonly string[];
@@ -194,7 +194,9 @@ export function toggleTeacherPause(session: TeacherSession, now: string): Teache
 }
 export function submitTeacherAnswer(session: TeacherSession, lesson: TeacherLesson, sceneId: string, answer: string, now: string): TeacherSession {
   const scene = lesson.scenes.find(s => s.id === sceneId);
-  if (session.completedAt || session.paused || !scene?.question || session.attempts.length >= 120) return session;
+  if (session.completedAt || session.paused || !scene?.question || session.attempts.length >= 120 ||
+      session.attempts.filter(item => item.sceneId === sceneId).length >= 3 ||
+      session.revealedIds.includes(sceneId)) return session;
   const q = scene.question;
   const input = answer.trim();
   if (!input || input.length > 500 ||
