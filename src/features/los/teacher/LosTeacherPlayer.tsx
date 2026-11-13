@@ -100,9 +100,11 @@ function TeacherSource({ scene }: { scene: TeacherScene }) {
       <div><p lang="de">{line.text}</p><small>{line.meaning}</small></div>
     </div>)}
     <p className="los-teacher-original-credit">
-      {original ? <>Wikibooks · alkuperäinen versio {original.revision} · CC BY-SA 4.0 ·
+      {original ? <>Wikibooks · versio {original.revision} ·
+        <a href={original.licenseUrl ?? "https://creativecommons.org/licenses/by-sa/4.0/"} target="_blank" rel="noopener noreferrer">{original.licenseCode ?? "CC BY-SA 4.0"} -lisenssi</a> ·
         <a href={original.sourceUrl} target="_blank" rel="noopener noreferrer">Alkuperäinen teksti ja tekijähistoria</a></>
-      : <>Christoph (English Wikibooks, 2007) · CC BY-SA 3.0 ·
+      : <>{textB?.attribution.author} ·
+        <a href={textB?.attribution.licenseUrl} target="_blank" rel="noopener noreferrer">{textB?.attribution.license} -lisenssi</a> ·
         <a href={textB?.attribution.url} target="_blank" rel="noopener noreferrer">Alkuperäinen ihmisen äänittämä sanalista</a></>}
     </p>
     {textB && <p className="los-teacher-source-warning">Lähteen äänen laitetoistoa ei ole vahvistettu.
