@@ -18,6 +18,9 @@ import {losReviewIIQuestionsFor,losReviewIIReflectionId} from "../src/features/l
 import {LOS1_FINAL_QUESTIONS,losFinalScore} from "../src/features/los/content/los1FinalExam.ts";
 import {losArchiveExamAttempt,losArchivedExamHistory} from "../src/features/los/content/los1ExamArchive.ts";
 import {parseLosDraft} from "../src/features/los/studyState.ts";
+import {LOS_BOOKS} from "../src/features/los/catalog.ts";
+import {losRecallFromVocabulary,losRecallReview} from "../src/features/los/recallEngine.ts";
+import {losCountReviewedWords} from "../src/features/los/losReviewedWords.ts";
 import type { LosChapterDraft } from "../src/features/los/studyState.ts";
 const NOW="2026-11-13T12:00:00.000Z";
 const all=[LOS1_L056_TEACHER,LOS1_L057_TEACHER,LOS1_L058_TEACHER,LOS1_L059_TEACHER,LOS1_L060_TEACHER];
@@ -141,9 +144,28 @@ test("L060 requires 10 reviewed goals, five real saved card ratings and confirme
     "EX-SUMMARY-CARDS":"reviewed-5",
     "EX-SUMMARY-GOAL":"Aion harjoitella tervehtimistä ja kysyä kuulumisia uudelleen.",
     "EX-SUMMARY-GOAL-OK":"confirmed","EX-SUMMARY-REFLECTION":"some"}};
-  const recall=Object.fromEntries(Array.from({length:5},(_,i)=>["card-"+i,{}])) as LosChapterDraft["recallCards"];
-  assert.equal(teacherExternalStatus(LOS1_L060_TEACHER,d93,{"01":{...emptyLosDraft(),recallCards:recall}}).ready,true);
+  const chapter=LOS_BOOKS[0]!.chapters.find(item=>item.id==="01")!;
+  const cards=losRecallFromVocabulary("01",chapter.vocabulary).filter(item=>item.direction==="de-fi");
+  const rated=losRecallReview(undefined,"remembered",NOW);
+  const recall=Object.fromEntries(cards.slice(0,5).map(item=>[item.id,rated]));
+  const chapterDraft={...emptyLosDraft(),recallCards:recall};
+  assert.equal(losCountReviewedWords({"01":chapterDraft}),5);
+  assert.equal(teacherExternalStatus(LOS1_L060_TEACHER,d93,{"01":chapterDraft}).ready,true);
   assert.equal(teacherExternalStatus(LOS1_L060_TEACHER,d93).ready,false);
+  // A fourth word rated in both directions is still only four words.
+  const four=Object.fromEntries(cards.slice(0,4).map(item=>[item.id,rated]));
+  const other=losRecallFromVocabulary("01",chapter.vocabulary)
+    .filter(item=>item.direction==="fi-de").slice(0,4);
+  const duplicateDirections={...four,...Object.fromEntries(other.map(item=>[item.id,rated]))};
+  assert.equal(losCountReviewedWords({"01":{...emptyLosDraft(),recallCards:duplicateDirections}}),4);
+  assert.equal(teacherExternalStatus(LOS1_L060_TEACHER,d93,{
+    "01":{...emptyLosDraft(),recallCards:duplicateDirections},
+  }).ready,false);
+  assert.equal(losCountReviewedWords({"01":{...emptyLosDraft(),recallCards:{"card-0":rated}}}),0);
+  assert.equal(losCountReviewedWords({"01":{...emptyLosDraft(),recallCards:{[cards[0]!.id]:{}} as never}}),0);
+  assert.equal(teacherExternalStatus(LOS1_L060_TEACHER,{
+    ...d93,practiceAnswers:{...d93.practiceAnswers,"EX-SUMMARY-CARDS":"reviewed-0"},
+  },{"01":chapterDraft}).ready,false);
   const overview=summarizeLos1Mastery({"93":d93});
   assert.match(overview.ownGoal??"",/tervehtimistä/);
   assert.equal(overview.skills.every(s=>s.status==="missing"),true);
