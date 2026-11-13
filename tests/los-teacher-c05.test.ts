@@ -145,6 +145,7 @@ test("all five lessons preserve pause/retry and require actual exercises or subm
     const assessment=lesson===L026?completeExam:undefined;
     assert.equal(teacherCanFinish(s,lesson,answers,checked,assessment),true,lesson.id);
     s=toggleTeacherPause(s,at);
+    assert.equal(moveTeacherScene(s,lesson,lesson.scenes[0]!.id,at),s, "Paused scene remains fixed");
     assert.equal(teacherCanFinish(s,lesson,answers,checked,assessment),false);
     assert.equal(validTeacherSession(JSON.parse(JSON.stringify(s))),true);
     s=toggleTeacherPause(s,at);
