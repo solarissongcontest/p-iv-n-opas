@@ -52,6 +52,12 @@ function checkScene(scene: TeacherScene, location: string, issues: TeacherConten
         !meaningful(item.german) || !meaningful(item.meaning)))) {
     issues.push({ location, problem: "Opetustaulussa ei ole kokonaisia, tarkistettavia vaiheita." });
   }
+  if (scene.kind === "form" && (!scene.form || scene.form.length < 2 || scene.form.length > 8 ||
+      new Set(scene.form.map(field => field.id)).size !== scene.form.length ||
+      scene.form.some(field => !name(field.id) || !meaningful(field.label) ||
+        !meaningful(field.placeholder) || !meaningful(field.sampleAnswer)))) {
+    issues.push({ location, problem: "Lomakkeesta puuttuu nimettyjä kenttiä tai kirjallinen mallivastaus." });
+  }
   if (scene.kind === "book" && !scene.bookLinks?.length)
     issues.push({ location, problem: "Oppikirjatilanteesta puuttuu täsmälinkki." });
   if (scene.bookLinks) for (const [i, link] of scene.bookLinks.entries()) {

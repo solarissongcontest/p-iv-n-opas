@@ -20,6 +20,8 @@ export type TeacherQuestion = {
   genericWrong: string;
   wrongAnswers?: Readonly<Record<string, string>>;
 };
+/** Reusable written form, never evidence of approved audio playback. */
+export type TeacherFormField = { id: string; label: string; placeholder: string; sampleAnswer: string };
 export type TeacherBookLink = { label: string; chapterId: string; section: string; instruction: string };
 export type TeacherBoardStep = { label: string; german: string; meaning: string };
 export type TeacherReflection = { prompt: string; placeholder: string; minLength: number };
@@ -27,10 +29,12 @@ export type TeacherScene = {
   id: string;
   phase: string;
   title: string;
-  kind: "introduction" | "explanation" | "board" | "question" | "book" | "activity" | "reflection" | "summary";
+  kind: "introduction" | "explanation" | "board" | "question" | "book" | "activity" | "reflection" | "form" | "summary";
   paragraphs: readonly string[];
   question?: TeacherQuestion;
   reflection?: TeacherReflection;
+  /** Text-only name/spelling form saved inside existing TeacherSession drafts. */
+  form?: readonly TeacherFormField[];
   board?: readonly TeacherBoardStep[];
   /** Interactive board uses existing TeacherSession drafts. */
   numberBuilder?: boolean;
@@ -258,6 +262,8 @@ export function teacherCanFinish(session: TeacherSession, lesson: TeacherLesson,
     lesson.scenes.every(scene => !scene.reflection ||
       (session.draftAnswers[scene.id]?.trim().length ?? 0) >= scene.reflection.minLength) &&
     lesson.scenes.every(scene => !scene.numberBuilder || teacherBuiltNumberCount(session, scene.id) >= 4) &&
+    lesson.scenes.every(scene => !scene.form || scene.form.every(field =>
+      Boolean(session.draftAnswers[scene.id + "." + field.id]?.trim()))) &&
     lesson.requiredQuestionIds.every(id => session.attempts.some(item => item.sceneId === id)) &&
     lesson.requiredActivityIds.every(id => session.activityIds.includes(id)) &&
     lesson.requiredPracticeIds.every(id => Boolean(practiceAnswers[id]?.trim())) &&
