@@ -38,7 +38,7 @@ test("LOS! 2–8 has seven honest full C01 text drafts without fake audio or mas
 test("later book navigation does not expose book 1 exercises, notebook or source reader", () => {
   const route=readFileSync("src/features/los/LosBook.tsx","utf8");
   const preview=readFileSync("src/features/los/LosFutureBookPreview.tsx","utf8");
-  assert.match(route,/book !== null && \/\^\(0\[1-9\]\|10\)\$\//);
+  assert.ok(route.includes('const chapter = book !== null && /^(0[1-9]|10)$/.test'));
   assert.ok(route.includes('book.id !== 1 && section !== "chapter"'));
   assert.ok(route.includes('chapter && book.id===1 && <LosNotebook'));
   assert.ok(preview.includes("Tätä tehtävää ei vielä pisteytetä"));
