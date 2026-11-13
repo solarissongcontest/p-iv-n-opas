@@ -1041,6 +1041,7 @@ test("L005 shows genuine 20-item listening source and text inside Teacher 2.0 on
  await expect(lesson.locator(".los-teacher-summary")).toHaveCount(0);
  await outline.getByRole("button",{name:"Valitse ääni tai luettavan tekstin varaversio"}).click();
  await expect(lesson.locator(".los-teacher-greeting-media audio")).toBeVisible();
- await expect(lesson.locator(".los-teacher-greeting-transcript")).toHaveCount(0);
+ await expect(lesson.locator(".los-teacher-greeting-transcript")).toBeHidden();
+ await expect(lesson.locator(".los-teacher-greeting-media button")).toHaveAttribute("aria-expanded","false");
  await expectNoHorizontalOverflow(page);
 });
