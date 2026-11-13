@@ -355,7 +355,7 @@ export const LOS1_L053_TEACHER:TeacherLesson={
     reflect("self-intro","Esittele itse kuvitteellinen henkilö",[
       "Muodosta kuvitteelliselle ihmiselle neljä helppoa lausetta. Kerro ensin Das ist ..., sitten nimi, lähtömaa ja ikä. Pidä verbien tekijät er/sie-muodossa.",
       "Käytä oppikirjan Käytä saksaa -sivua tarvittaessa. Tarkista jokaisen pronominin vieressä oleva verbi itse, älä luota automaattiseen vapaatekstin pisteytykseen.",
-    ],"Kirjoita oma esittelysi tai sen itsearvio (vähintään 45 merkkiä).",
+    ],"Kirjoita neljä saksankielistä esittelylausetta ja tarkista ne itse (vähintään 45 merkkiä).",
       "Das ist Leo. Er heißt Leo. Er kommt aus Deutschland. Er ist ...",45,
       "person-presented","Vertasin omaa esittelyäni taulukkoon ja harjoittelin ääneen"),
     question("exit","Tunnistatko kolmannen persoonan muistista?",[
@@ -487,7 +487,7 @@ export const LOS1_L054_TEACHER:TeacherLesson={
        "A: Hallo! Ich heiße ...\nB: Hallo! Ich bin ...",90),
     reflect("dialogue-sie","Kirjoita toinen oma keskustelu",[
       "Kirjoita eri tilanne: opiskelija tapaa opettajan kohteliaasti, kertoo omat perustietonsa, esittelee kolmannen kuvitteellisen ihmisen ja hyvästelee.",
-      "Käytä Sie-puhuttelua vain opettajaan, er/sie-muotoa vain kolmanteen henkilöön. Tarkista kaksi dialogiasi itse ja tarvittaessa kopioi valmis versio kirjan Käytä saksaa -luonnoskenttään.",
+      "Käytä Sie-puhuttelua vain opettajaan, er/sie-muotoa vain kolmanteen henkilöön. Tarkista kaksi dialogiasi itse. Voit siirtää ne erillisellä painikkeella oppikirjan Käytä saksaa -luonnokseen ilman jo kirjoitetun tekstin korvaamista.",
       "Tällä tunnilla ei ole improvisoidun puheen automaattista arviointia. Tarkistuslista: kaksi erilaista tilannetta, kysymykset, lyhyet vastaukset, kolmannen henkilön esittely, kohtelias lopetus.",
     ],"Kirjoita 6–8 repliikin Sie-keskustelu (vähintään 90 merkkiä).",
        "A: Guten Tag! Wie heißen Sie?\nB: Guten Tag! Ich heiße ...",90,
@@ -562,7 +562,7 @@ export const LOS1_L055_TEACHER:TeacherLesson={
     ]),
     book("chapter-test","Palauta C10:n oikea 20-osainen kappaletesti",[
       "Avaa C10:n Kappaletesti ja täytä kaikki C10-EX-01–20. Paina Palauta testi. Teacher tarkistaa olemassa olevasta kappaletilasta, onko kaikkiin vastattu ja onko palautuspäivä tallennettu.",
-      "Täytä samalla kirjan Käytä saksaa -sivun sovellusluonnos: kaksi erilaista keskustelua, joissa on tervehdys, kysymyksiä, kolmannen henkilön esittely sekä sopiva lopetus.",
+      "Täytä samalla kirjan Käytä saksaa -sivun sovellusluonnos: kaksi erilaista 6–8 repliikin keskustelua sekä erilliset neljä virkettä kolmannen henkilön esittelystä. Voit käyttää L054:n siirtopainiketta keskustelujen tuomiseen, mutta viimeistele ja tarkista sovellus itse.",
       "Palautuksen jälkeen kirjaa testin itsearviointi. Näitä kahta vapaata kirjoitusta ei automaattisesti kieliopillisesti pisteytetä.",
     ],[
       c10Link("test","C10 · Kappaletesti","Vastaa C10-EX-01–20 ja palauta koko testi."),
@@ -589,7 +589,7 @@ export const LOS1_L055_TEACHER:TeacherLesson={
       "Kirjan itsearviointi on oma erillinen kenttä, joka pitää täyttää, vaikka kirjoitat tähän opetustilan pohdinnan.",
     ],"Kirjoita yksi onnistuminen ja yksi konkreettinen harjoiteltava asia (vähintään 45 merkkiä).",
       "Osasin kysyä nimen ja lähtöpaikan. Haluan vielä harjoitella...",45,
-      "self-checklist","Tarkistin oman keskusteluni kaikki seitsemän kohtaa"),
+      "self-checklist","Tarkistin molemmat keskusteluni ja neljä erillistä esittelylausetta"),
     question("exit","Loppukysymys ilman mallia",[
       "Viimeinen itsenäinen tarkistus. Sinun pitää valita oikea kolmannen henkilön lause.",
     ],choice("Miten kerrot ystävästä nimeltä Ben ja hänen alkuperästään?","L1-PROD-01","b",[
