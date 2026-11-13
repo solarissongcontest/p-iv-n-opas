@@ -39,6 +39,12 @@ function checkScene(scene: TeacherScene, location: string, issues: TeacherConten
   if (scene.kind === "question" && !scene.question)
     issues.push({ location, problem: "Harjoitustilanteelta puuttuu tarkistettava tehtävä." });
   if (scene.question) checkQuestion(scene.question, location + ".question", issues);
+  if (scene.kind === "reflection" && (!scene.reflection ||
+      !meaningful(scene.reflection.prompt) || !meaningful(scene.reflection.placeholder) ||
+      !Number.isInteger(scene.reflection.minLength) ||
+      scene.reflection.minLength < 1 || scene.reflection.minLength > 500)) {
+    issues.push({ location, problem: "Kirjoitus- tai pohdintatehtävästä puuttuu kelvollinen sisältö ja pituusraja." });
+  }
   if (scene.kind === "board" && (!scene.board?.length ||
       scene.board.some(item => !meaningful(item.label) ||
         !meaningful(item.german) || !meaningful(item.meaning)))) {
