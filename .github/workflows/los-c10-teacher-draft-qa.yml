@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - feat/los1-teacher-l051-l055
+      - feat/los1-teacher-integrated-c10-20261113
   workflow_dispatch:
 
 permissions:
@@ -23,7 +24,9 @@ jobs:
         run: bun run lint
       - name: Repository unit and Teacher C10 regression tests
         run: bun run test
-      - name: TypeScript and production build
+      - name: TypeScript
+        run: bun run typecheck
+      - name: Production build
         run: bun run build
 
   c10-browser:
