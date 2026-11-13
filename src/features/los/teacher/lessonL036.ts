@@ -33,7 +33,8 @@ export const LOS1_L036_TEACHER: TeacherLesson = {
         "Alamme harjoitella saksan aakkosia ja nimen tavaamista. Tavoite on erottaa kirjainmerkki, sen nimi ja kirjaimen äänne tavallisessa sanassa.",
         "Tavaa ensin vain kuvitteelliset nimet Mia, Lena ja Uwe. Niitä käytetään myös kirjan oikeissa C07-EX-05–07-tehtävissä.",
         "Saksan alkuperäinen aakkosäänite on Text B:ssä vasta laitetarkistusta odottavana tukena. Sen toistumista tai omaa ääntämistäsi ei pisteytetä automaattisesti."
-      ]
+      ],
+      "title": "Kirjaimia ja nimiä, ei oikeita henkilötietoja"
     },
     {
       "id": "recall",
@@ -68,7 +69,8 @@ export const LOS1_L036_TEACHER: TeacherLesson = {
         "hint": "Etsi sana heißt.",
         "reteach": "Wie heißt du? kysyy nimeä. Etsi sana heißt.",
         "genericWrong": "Katso vaihtoehtojen käyttötarkoitusta ja kirjoitusasua. Etsi sana heißt."
-      }
+      },
+      "title": "Muistatko nimen kysymisen?"
     },
     {
       "id": "explain",
@@ -94,7 +96,8 @@ export const LOS1_L036_TEACHER: TeacherLesson = {
           "title": "Pitääkö osata aakkosten äänet täydellisesti?",
           "body": "Ei tässä vaiheessa. Tunnistamme kirjoitetut merkit ensin. Aakkosäänitteen järjestys ja toimivuus odottavat laitetarkistusta."
         }
-      ]
+      ],
+      "title": "Miksi W ei muutu V:ksi kirjoittaessa?"
     },
     {
       "id": "board",
@@ -134,7 +137,8 @@ export const LOS1_L036_TEACHER: TeacherLesson = {
           "german": "Bitte buchstabieren Sie.",
           "meaning": "Tavatkaa, olkaa hyvä. Kohtelias valmis fraasi."
         }
-      ]
+      ],
+      "title": "Kolme kuvitteellista nimeä kirjain kirjaimelta"
     },
     {
       "id": "guided",
@@ -169,7 +173,8 @@ export const LOS1_L036_TEACHER: TeacherLesson = {
         "hint": "Kiinnitä huomiota W-kirjaimeen.",
         "reteach": "Uwe kirjoitetaan U–W–E. Kiinnitä huomiota W-kirjaimeen.",
         "genericWrong": "Katso vaihtoehtojen käyttötarkoitusta ja kirjoitusasua. Kiinnitä huomiota W-kirjaimeen."
-      }
+      },
+      "title": "Tunnista Uwen keskimmäinen kirjain"
     },
     {
       "id": "source",
@@ -192,7 +197,8 @@ export const LOS1_L036_TEACHER: TeacherLesson = {
           "label": "C07 · Aakkoset ja nimet",
           "instruction": "Kertaa nimiä, erikoiskirjaimia ja bitte-fraasia."
         }
-      ]
+      ],
+      "title": "Lue oikeasta C07-dialogista tavaamispyyntö"
     },
     {
       "id": "practice",
@@ -209,7 +215,8 @@ export const LOS1_L036_TEACHER: TeacherLesson = {
           "label": "C07 · Harjoitukset 05–07",
           "instruction": "Vastaa Mia-, Lena- ja Uwe-tehtäviin."
         }
-      ]
+      ],
+      "title": "Tee kolme oikeaa nimitehtävää"
     },
     {
       "id": "independent",
@@ -234,7 +241,8 @@ export const LOS1_L036_TEACHER: TeacherLesson = {
           "uve": "Uve vaihtaa nimen W:n V:ksi. Kirjoita Uwe.",
           "uwi": "Nimen viimeinen kirjain on E."
         }
-      }
+      },
+      "title": "Kirjoita nimen Uwe kirjaimet muistista"
     },
     {
       "id": "application",
@@ -269,7 +277,8 @@ export const LOS1_L036_TEACHER: TeacherLesson = {
         "hint": "Nimessä on neljä kirjainta.",
         "reteach": "Lena kirjoitetaan L–E–N–A. Nimessä on neljä kirjainta.",
         "genericWrong": "Katso vaihtoehtojen käyttötarkoitusta ja kirjoitusasua. Nimessä on neljä kirjainta."
-      }
+      },
+      "title": "Harjoittele uuden kuvitteellisen nimen tavausta"
     },
     {
       "id": "activity",
@@ -280,7 +289,8 @@ export const LOS1_L036_TEACHER: TeacherLesson = {
         "Vahvista vain oma harjoitteluyrityksesi. Merkitse sitä kuunteluksi vasta jos olet todella kuullut äänen, eikä tämä järjestelmä silloinkaan arvioi ääntämisesi laatua."
       ],
       "activityId": "activity-L036",
-      "activityLabel": "Harjoittelin kolme kuvitteellista nimeä kirjain kirjaimelta"
+      "activityLabel": "Harjoittelin kolme kuvitteellista nimeä kirjain kirjaimelta",
+      "title": "Kokeile nimiä ilman mallia"
     },
     {
       "id": "exit",
@@ -315,7 +325,8 @@ export const LOS1_L036_TEACHER: TeacherLesson = {
         "hint": "Erota kirjoitettu kirjain ja sen äänne.",
         "reteach": "Oikeinkirjoitus säilyttää W:n. Erota kirjoitettu kirjain ja sen äänne.",
         "genericWrong": "Katso vaihtoehtojen käyttötarkoitusta ja kirjoitusasua. Erota kirjoitettu kirjain ja sen äänne."
-      }
+      },
+      "title": "Viimeinen valinta: mikä kirjain sopii?"
     },
     {
       "id": "summary",
@@ -325,7 +336,8 @@ export const LOS1_L036_TEACHER: TeacherLesson = {
         "Opit, että saksan erikoismerkkejä ovat ä, ö, ü ja ß. Tunnistat nimet Mia, Lena ja Uwe kirjainten järjestyksestä.",
         "Seuraavassa L037-tunnissa luet C07:n kokonaisen alkuperäisen viiden repliikin puhelinkeskustelun ja tarkistat sen ensimmäiset ymmärtämistehtävät.",
         "Omien nimien tai puhelinnumeroiden antamista ei vaadita. Aakkosäänitettä ei vielä väitetä laitetestatuksi."
-      ]
+      ],
+      "title": "Aakkosten kirjoitusasusta on alku"
     }
   ]
 };
