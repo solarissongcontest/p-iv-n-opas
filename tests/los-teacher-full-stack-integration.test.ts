@@ -191,3 +191,30 @@ test("L035 review and chapter test feedback stays specific to the requested answ
   assert.match(age.reteach,/Ich bin zwanzig Jahre alt/);
   assert.ok(!age.hint.includes("und"),"The number twenty contains no und");
 });
+
+
+test("L032 teaching feedback distinguishes 12, 16, 17 and reading seventeen as digits",()=>{
+  const lesson=getLosTeacherLesson("L032");
+  assert.ok(lesson);
+  const cases=[
+    ["recall","Kirjoita saksaksi: 12","zwölf","ö-kirjain"],
+    ["sixteen","Kirjoita saksaksi: 16","sechzehn","sechs"],
+    ["seventeen","Kirjoita saksaksi: 17","siebzehn","sieben"],
+    ["exit","Kirjoita numeroin: siebzehn","17","numeromerkintää"],
+  ] as const;
+  for(const [id,prompt,answer,keyword] of cases){
+    const scene=lesson.scenes.find(item=>item.id===id);
+    assert.ok(scene?.question,id+" must remain a real assessment");
+    assert.equal(scene.question.prompt,prompt);
+    assert.deepEqual(scene.question.accepted,[answer]);
+    const guidance=[scene.question.success,scene.question.hint,scene.question.reteach,scene.question.genericWrong].join(" ");
+    assert.ok(guidance.includes(keyword),id+" must mention the actual word or answer direction");
+    assert.ok(!scene.question.reteach.includes("kysymyksen tai vastauksen muoto riippuu"),
+      id+" must not explain unrelated age-phrase grammar");
+    assert.ok(!scene.question.hint.includes("Vertaa etenkin sanan loppua ja erikoismerkkejä."),
+      id+" needs a concrete hint rather than a generic checklist");
+  }
+  const exit=lesson.scenes.find(scene=>scene.id==="exit")!.question!;
+  assert.match(exit.genericWrong,/numeromerkintää/);
+  assert.ok(!exit.genericWrong.includes("ß- tai umlaut"),"Digits-only tasks cannot demand spelling symbols");
+});
