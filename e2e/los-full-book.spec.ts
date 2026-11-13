@@ -122,7 +122,7 @@ test("every one of the 60 guided lessons opens from its actual chapter picker on
    expect(seen.has(title)).toBe(false);
    seen.add(title);
    await button.click();
-   if(Number(title.slice(1))<=50){
+   if(Number(title.slice(1))<=55){
     await expect(page).toHaveURL(new RegExp("/los-lessons/"+title+"$"));
     await expect(page.locator(".los-teacher-paper h2")).toBeVisible();
     await expect(page.locator(".los-teacher-sidebar h1")).toBeVisible();
@@ -1872,5 +1872,142 @@ test("C09 L050 original 14-item exam returns 14/14 and retains archive, no inven
  await page.reload({waitUntil:"domcontentloaded"});
  await expect(hist).toContainText("14/14 pistettä");
  await expect(page.getByRole("button",{name:"Palauta testi · 0/14"})).toBeDisabled();
+ await expectNoHorizontalOverflow(page);
+});
+
+test("C10 L051–L055 Teacher 2.0 scenes render on iPhone and desktop without horizontal scrolling",async({page})=>{
+ test.setTimeout(120_000);
+ await enterLocalBook(page);
+ for(const [id,count] of [["L051",13],["L052",13],["L053",12],["L054",14],["L055",15]] as const){
+  await page.goto("/los-lessons/"+id,{waitUntil:"domcontentloaded"});
+  await expect(page.locator(".los-teacher-sidebar h1")).toBeVisible();
+  await expect(page.locator(".los-teacher-paper h2")).toBeVisible();
+  await expect(page.locator(".los-teacher-outline nav button")).toHaveCount(count);
+  await expectNoHorizontalOverflow(page);
+ }
+});
+test("C10 L051 authentic 14-turn Harald source and the first two real reader checks persist",async({page})=>{
+ test.setTimeout(120_000);
+ await enterLocalBook(page);
+ await page.goto("/los-lessons/L051",{waitUntil:"domcontentloaded"});
+ await page.locator(".los-teacher-outline nav button").filter({hasText:"Tarkista kaksi oikeaa Haraldin esikysymystä"}).click();
+ await expect(page.locator(".los-teacher-paper a[href*='/10/understand']")).toBeVisible();
+ await page.goto("/los#/1/10/text",{waitUntil:"domcontentloaded"});
+ await expect(page.locator(".los-c01-reader .los-c01-turn")).toHaveCount(14);
+ await expect(page.locator(".los-c01-reader")).toContainText("Ich heiße Harald Becker.");
+ await expect(page.locator(".los-c01-reader")).toContainText("Blau.");
+ await page.goto("/los?lessonReturn=L051#/1/10/understand",{waitUntil:"domcontentloaded"});
+ for(const [id,answer] of [["C10-HARALD-Q01","a"],["C10-HARALD-Q02","b"]] as const){
+  const field=page.locator(".los-c01-question").filter({has:page.locator('input[name="'+id+'"]')});
+  await field.locator('input[value="'+answer+'"]').check();
+  await field.getByRole("button",{name:"Tarkista vastaus"}).click();
+  await expect(field.getByRole("status")).toContainText("Oikein.");
+ }
+ await page.getByRole("link",{name:"Palaa oppitunnille L051"}).click();
+ await page.locator(".los-teacher-outline nav button").filter({hasText:"Tarkista kaksi oikeaa Haraldin esikysymystä"}).click();
+ for(const id of ["C10-HARALD-Q01","C10-HARALD-Q02"])
+  await expect(page.locator(".los-teacher-paper")).toContainText(id+": Vastaus tallennettu ja tarvittaessa tarkistettu");
+ await expectNoHorizontalOverflow(page);
+});
+test("C10 L052 actual u08 age evidence and final two Harald questions are checked not silently credited",async({page})=>{
+ test.setTimeout(120_000);
+ await enterLocalBook(page);
+ await page.goto("/los-lessons/L052",{waitUntil:"domcontentloaded"});
+ const outline=page.locator(".los-teacher-outline nav button");
+ await outline.filter({hasText:"Paikanna Haraldin oma ikärepliikki"}).click();
+ await expect(page.locator(".los-teacher-paper a[href*='/10/understand']")).toBeVisible();
+ await page.goto("/los?lessonReturn=L052#/1/10/understand",{waitUntil:"domcontentloaded"});
+ for(const [id,answer] of [["C10-HARALD-Q02","b"],["C10-HARALD-Q03","c"],["C10-HARALD-Q04","a"]] as const){
+  const field=page.locator(".los-c01-question").filter({has:page.locator('input[name="'+id+'"]')});
+  await field.locator('input[value="'+answer+'"]').check();
+  await field.getByRole("button",{name:"Tarkista vastaus"}).click();
+  await expect(field.getByRole("status")).toContainText("Oikein.");
+ }
+ const evidence=page.locator(".los-c01-question").filter({has:page.locator('input[name="C10-SOURCE-EVIDENCE-01"]')});
+ await evidence.locator('input[value="u08"]').check();
+ await evidence.getByRole("button",{name:"Tarkista tekstikohta"}).click();
+ await expect(evidence.getByRole("status")).toContainText("Oikein.");
+ await page.getByRole("link",{name:"Palaa oppitunnille L052"}).click();
+ await outline.filter({hasText:"Paikanna Haraldin oma ikärepliikki"}).click();
+ await expect(page.locator(".los-teacher-paper")).toContainText("C10-SOURCE-EVIDENCE-01: Vastaus tallennettu ja tarvittaessa tarkistettu");
+ await page.reload({waitUntil:"domcontentloaded"});
+ await expect(page.locator(".los-teacher-paper")).toContainText("C10-SOURCE-EVIDENCE-01: Vastaus tallennettu");
+ await expectNoHorizontalOverflow(page);
+});
+test("C10 L054 reused complete four-turn Thomas Takashi Text B and saved A/B du/Sie conversations persist",async({page})=>{
+ test.setTimeout(120_000);
+ await enterLocalBook(page);
+ await page.goto("/los-lessons/L054",{waitUntil:"domcontentloaded"});
+ const outline=page.locator(".los-teacher-outline nav button");
+ await outline.filter({hasText:"Tallenna kaksi 6–8 repliikin kohtaamista ja 4 virkettä"}).click();
+ await expect(page.locator(".los-teacher-evidence[role='status']")).toContainText("0/80 merkkiä");
+ await page.goto("/los?lessonReturn=L054#/1/10/text-b",{waitUntil:"domcontentloaded"});
+ await expect(page.locator(".los-secondary-source .los-c01-turn")).toHaveCount(4);
+ await expect(page.locator(".los-secondary-source")).toContainText("Das ist Peter.");
+ for(const [id,answer] of [["C10-TEXTB-Q02","b"],["C10-TEXTB-Q03","c"]] as const){
+  const field=page.locator(".los-secondary-source .los-c01-question").filter({has:page.locator('input[name="'+id+'"]')});
+  await field.locator('input[value="'+answer+'"]').check();
+  await field.getByRole("button",{name:"Tarkista vastaus"}).click();
+  await expect(field.getByRole("status")).toContainText("Oikein.");
+ }
+ await page.goto("/los?lessonReturn=L054#/1/10/apply",{waitUntil:"domcontentloaded"});
+ const draft=[
+  "A · Zwei Jugendliche",
+  "Mia: Hallo! Ich heiße Mia. Wie heißt du?",
+  "Leo: Hallo! Ich heiße Leo.",
+  "Mia: Woher kommst du?",
+  "Leo: Ich komme aus Deutschland. Und du?",
+  "Mia: Ich komme aus Finnland. Wie geht's?",
+  "Leo: Gut, danke!",
+  "Mia: Schön, dich kennenzulernen!",
+  "Leo: Bis morgen!",
+  "B · Schüler und Lehrerin",
+  "Mia: Guten Tag!","Lehrerin: Guten Tag!",
+  "Mia: Wie heißen Sie?","Lehrerin: Ich heiße Frau Müller.",
+  "Mia: Woher kommen Sie?","Lehrerin: Ich komme aus Deutschland.",
+  "Mia: Bitte langsamer.","Lehrerin: Auf Wiedersehen!",
+  "Das ist Leo. Er heißt Leo. Er kommt aus Finnland. Er ist siebzehn Jahre alt."
+ ].join("\n");
+ await page.locator("#los-application-10").fill(draft);
+ await page.getByRole("link",{name:"Palaa oppitunnille L054"}).click();
+ await outline.filter({hasText:"Tallenna kaksi 6–8 repliikin kohtaamista ja 4 virkettä"}).click();
+ await expect(page.locator(".los-teacher-evidence[role='status']")).toContainText("Tallennettu laajuus riittää");
+ await outline.filter({hasText:"Tarkista kaksi todellista Text B -kysymystä"}).click();
+ for(const id of ["C10-TEXTB-Q02","C10-TEXTB-Q03"])
+  await expect(page.locator(".los-teacher-paper")).toContainText(id+": Vastaus tallennettu ja tarvittaessa tarkistettu");
+ await page.reload({waitUntil:"domcontentloaded"});
+ await expect(page.locator(".los-teacher-paper")).toContainText("C10-TEXTB-Q02: Vastaus tallennettu");
+ await page.goto("/los#/1/10/apply",{waitUntil:"domcontentloaded"});
+ await expect(page.locator("#los-application-10")).toHaveValue(draft);
+ await expectNoHorizontalOverflow(page);
+});
+test("C10 L055 uses real 20 item chapter exam, preserves results and never pretends it is EX-FINAL",async({page})=>{
+ test.setTimeout(150_000);
+ await enterLocalBook(page);
+ await page.goto("/los?lessonReturn=L055#/1/10/test",{waitUntil:"domcontentloaded"});
+ await expect(page.locator(".los-workbook-question")).toHaveCount(20);
+ const answers=[0,0,"heiße",1,"bist","ist",1,"heißt","heißt","kommt","kommt",1,0,0,1,0,1,0,1,2] as const;
+ for(let i=0;i<20;i++){
+  const field=page.locator("#C10-EX-"+String(i+1).padStart(2,"0"));
+  const answer=answers[i]!;
+  if(typeof answer==="number")await field.locator('input[type="radio"]').nth(answer).check();
+  else await field.locator('input[type="text"]').fill(answer);
+ }
+ await page.getByRole("button",{name:"Palauta testi · 20/20"}).click();
+ await expect(page.locator(".los-test-result[role='status'] h2")).toHaveText("20 / 20 oikein");
+ await page.locator("#los-self-10").fill("Osaan esitellä kolmannen henkilön, mutta kerrataan vielä kohteliaat Sie-muodot.");
+ await page.getByRole("link",{name:"Palaa oppitunnille L055"}).click();
+ await page.locator(".los-teacher-outline nav button").filter({hasText:"Palauta kirjan oikea 20 tehtävän C10-koe"}).click();
+ const status=page.locator(".los-teacher-assessment-status");
+ await expect(status).toContainText("Kappaletesti: 20/20 vastattu · Palautettu");
+ await expect(status).toContainText("Oma sovellus: Ei erillinen koevaatimus");
+ await expect(status).toContainText("Itsearviointi: Kirjattu");
+ await page.goto("/los#/1/10/test",{waitUntil:"domcontentloaded"});
+ await page.getByRole("button",{name:"Arkistoi tulos ja aloita uusinta"}).click();
+ const archive=page.locator('[aria-label="Kappaletestin aiemmat yritykset"]');
+ await expect(archive).toContainText("20/20 pistettä");
+ await page.reload({waitUntil:"domcontentloaded"});
+ await expect(archive).toContainText("20/20 pistettä");
+ await expect(page.getByRole("button",{name:"Palauta testi · 0/20"})).toBeDisabled();
  await expectNoHorizontalOverflow(page);
 });
