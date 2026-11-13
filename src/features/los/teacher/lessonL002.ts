@@ -28,9 +28,9 @@ export const LOS1_L002_TEACHER: TeacherLesson = {
       question:{
         type:"choice",skillId:"L1-PHON-01",prompt:"Mitä suomen kielen äännettä saksan w tavallisesti muistuttaa?",
         options:[
-          {id:"a",label:"Suomen v-äännettä"},
-          {id:"b",label:"Englannin w-äännettä",wrongFeedback:"Monessa englannin sanassa w ääntyy eri tavalla. Saksan tavallinen w muistuttaa suomen v:tä."},
-          {id:"c",label:"Suomen u-äännettä",wrongFeedback:"Saksan w ei tavallisesti ole suomen u-äänne. Kokeile lausua v."},
+          {id:"a",label:"Suomen v-äännettä", "lang": "fi"},
+          {id:"b",label:"Englannin w-äännettä", "lang": "fi",wrongFeedback:"Monessa englannin sanassa w ääntyy eri tavalla. Saksan tavallinen w muistuttaa suomen v:tä."},
+          {id:"c",label:"Suomen u-äännettä", "lang": "fi",wrongFeedback:"Saksan w ei tavallisesti ole suomen u-äänne. Kokeile lausua v."},
         ],
         correctOption:"a",
         success:"Juuri niin. Saksan w ääntyy yleensä suomen v:n tapaan.",
@@ -45,9 +45,9 @@ export const LOS1_L002_TEACHER: TeacherLesson = {
       question:{
         type:"choice",skillId:"L1-PHON-01",prompt:"Mihin saksan ei-äänne tavallisesti vertautuu?",
         options:[
-          {id:"a",label:"Suomen pitkään i-äänteeseen",wrongFeedback:"Pitkää i-äännettä merkitään saksassa tavallisesti yhdistelmällä ie."},
-          {id:"b",label:"Suunnilleen suomen ai-yhdistelmään"},
-          {id:"c",label:"Suomen ei-sanaan",wrongFeedback:"Saksan ei ei tavallisesti äänny suomen sanan ei tapaan."},
+          {id:"a",label:"Suomen pitkään i-äänteeseen", "lang": "fi",wrongFeedback:"Pitkää i-äännettä merkitään saksassa tavallisesti yhdistelmällä ie."},
+          {id:"b",label:"Suunnilleen suomen ai-yhdistelmään", "lang": "fi"},
+          {id:"c",label:"Suomen ei-sanaan", "lang": "fi",wrongFeedback:"Saksan ei ei tavallisesti äänny suomen sanan ei tapaan."},
         ],
         correctOption:"b",
         success:"Oikein. Esimerkiksi mein sisältää ai-tyyppisen äänteen.",
@@ -144,9 +144,9 @@ export const LOS1_L002_TEACHER: TeacherLesson = {
       question:{
         type:"choice",skillId:"L1-PHON-01",evidenceRole:"exit",prompt:"Miten saksan kirjainyhdistelmä ei yleensä ääntyy?",
         options:[
-          {id:"a",label:"Kuten suomen pitkä i",wrongFeedback:"Tämä kuvaa paremmin ie-yhdistelmän yleistä ääntämistä."},
-          {id:"b",label:"Suunnilleen ai"},
-          {id:"c",label:"Kuten suomen ei",wrongFeedback:"Suomen sanan ei ääntäminen ei ole sama kuin saksan ei-yhdistelmän tavallinen ääntämys."},
+          {id:"a",label:"Kuten suomen pitkä i", "lang": "fi",wrongFeedback:"Tämä kuvaa paremmin ie-yhdistelmän yleistä ääntämistä."},
+          {id:"b",label:"Suunnilleen ai", "lang": "fi"},
+          {id:"c",label:"Kuten suomen ei", "lang": "fi",wrongFeedback:"Suomen sanan ei ääntäminen ei ole sama kuin saksan ei-yhdistelmän tavallinen ääntämys."},
         ],
         correctOption:"b",
         success:"Oikein. ei ääntyy tavallisesti ai, ja ie taas usein pitkänä i:nä.",
