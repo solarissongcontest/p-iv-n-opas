@@ -1,3 +1,4 @@
+import { LOS1_C10_TEACHER_LESSONS } from "./lessonC10.ts";
 import { LOS1_C09_TEACHER } from "./lessonC09.ts";
 import { LOS1_C08_TEACHER_LESSONS } from "./lessonC08.ts";
 import { LOS1_L036_TEACHER } from "./lessonL036.ts";
@@ -277,5 +278,5 @@ export function getLosTeacherLesson(id: string): TeacherLesson | undefined {
   if (id === LOS1_L038_TEACHER.id) return LOS1_L038_TEACHER;
   if (id === LOS1_L039_TEACHER.id) return LOS1_L039_TEACHER;
   if (id === LOS1_L040_TEACHER.id) return LOS1_L040_TEACHER;
-  return LOS1_C08_TEACHER_LESSONS.find(lesson => lesson.id === id);
+  return LOS1_C08_TEACHER_LESSONS.find(lesson => lesson.id === id) ?? LOS1_C10_TEACHER_LESSONS.find(lesson => lesson.id === id);
 }

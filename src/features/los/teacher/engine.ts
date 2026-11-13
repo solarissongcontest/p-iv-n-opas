@@ -70,6 +70,8 @@ export type TeacherLesson = {
     minSelfAssessmentLength: number;
   };
   examAssessment?: { id: "EX-MID" };
+  /** Original transcript cannot replace unverified audio. */
+  mediaGate?: {sourceId:string;approved:boolean;reason:string};
 };
 export type TeacherChapterAssessmentInput = {
   testAnswers: Readonly<Record<string, string>>;
@@ -266,7 +268,8 @@ export function isCorrectCalendarEntry(scene: TeacherScene, value: string): bool
 export function teacherCanFinish(session: TeacherSession, lesson: TeacherLesson,
   practiceAnswers: Readonly<Record<string, string>>, practiceChecked: readonly string[] = [],
   chapterAssessment?: TeacherChapterAssessmentInput): boolean {
-  return teacherChapterAssessmentStatus(lesson, chapterAssessment).ready &&
+  return (!lesson.mediaGate || lesson.mediaGate.approved) &&
+    teacherChapterAssessmentStatus(lesson, chapterAssessment).ready &&
     teacherMidtermAssessmentStatus(lesson, chapterAssessment, practiceAnswers).ready &&
     !session.paused && lesson.scenes.every(scene => session.visitedIds.includes(scene.id)) &&
     lesson.scenes.every(scene => !scene.reflection ||

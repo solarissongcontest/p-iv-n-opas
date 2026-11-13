@@ -4,6 +4,7 @@ import { getLosOpenDialogue } from "../content/los1OpenDialogues.ts";
 import { LOS1_TEXT_B_SOURCES } from "../content/los1TextBAdditional.ts";
 import { TeacherTimeCalendar } from "./TeacherTimeCalendar.tsx";
 import { ArrowLeft, ArrowRight, BookOpen, Check, CheckCircle2, ChevronLeft, ChevronRight, HelpCircle, RotateCcw } from "lucide-react";
+import { composeLosC10Dialogues, storeLosC10Dialogues } from "./c10ApplicationBridge.ts";
 import { readCachedDeviceUser } from "@/lib/deviceSession";
 import { useLosChapterDraft } from "../studyState.ts";
 import {
@@ -189,6 +190,8 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
   const sceneIndex = lesson?.scenes.findIndex(item => item.id === scene?.id) ?? 0;
   const available = Boolean(saved && session && lesson && teacherCanFinish(session, lesson, draft.practiceAnswers, draft.practiceChecked, draft));
   const completed = Boolean(session?.completedAt);
+  const c10Dialogues = lesson?.id === "L054" ? composeLosC10Dialogues(
+    session?.draftAnswers["dialogue-du"] ?? "", session?.draftAnswers["dialogue-sie"] ?? "") : null;
 
   useEffect(() => { setAuthorized(Boolean(readCachedDeviceUser())); }, []);
   useEffect(() => { setShowHelp(false); setHelpSelection(null); }, [scene?.id]);
@@ -229,6 +232,10 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
     if (!lesson) return;
     persist(old => confirmTeacherActivity(old, lesson, id, stamp()));
   };
+  const transferC10Dialogues = () => {
+    if (lesson?.id !== "L054" || !saved || !c10Dialogues) return;
+    update(current => storeLosC10Dialogues(current, c10Dialogues));
+  };
   const finish = () => {
     if (!lesson || !saved) return;
     update(current => {
@@ -256,7 +263,7 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
       </section> :
       !lesson || !session || !scene ? <section className="los-teacher-status">
         <h1>Oppitunnin opetusmateriaali ei ole vielä valmis</h1>
-        <p>Teacher 2.0 on nyt käytössä oppitunneilla L001–L050. Muut oppitunnit toimivat edelleen nykyisessä Opetuspolussa.</p>
+        <p>Teacher 2.0 on nyt käytössä oppitunneilla L001–L055. Muut oppitunnit toimivat edelleen nykyisessä Opetuspolussa.</p>
         <a href={"/los#/" + (lesson?.bookId ?? 1) + "/path"}>Palaa Opetuspolkuun</a>
       </section> :
       <>
@@ -345,7 +352,7 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
               reveal={() => persist(old => revealTeacherSolution(old, scene.id, stamp()))}
             />}
             {scene.bookLinks && <div className="los-teacher-book-links">
-              {scene.bookLinks.map(link => <div key={link.section} className="los-teacher-book-link">
+              {scene.bookLinks.map(link => <div key={link.chapterId + "-" + link.section + "-" + link.label} className="los-teacher-book-link">
                 <div><strong>{link.label}</strong><p>{link.instruction}</p></div>
                 <a href={bookUrl(lessonId, lesson.bookId, link.chapterId, link.section)} target="_blank" rel="noopener noreferrer">
                   <BookOpen size={17}/> Avaa kirjassa <ArrowRight size={16}/>
@@ -417,6 +424,65 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
                 </section>}
               </div>}
             </div>
+            {lesson.id === "L054" && (scene.id === "dialogue-sie" || scene.kind === "summary") &&
+              <section className="los-teacher-activity" aria-label="Siirrä kaksi keskustelua oppikirjaan">
+                <h3>Tallenna keskustelut myös oppikirjan sovellustehtävään</h3>
+                <p>Molemmat keskustelut säilyvät tässä oppitunnissa. Voit siirtää ne yhdellä painalluksella C10:n
+                  nykyiseen Käytä saksaa -luonnokseen. Siirto ei tarkista kielioppia eikä korvaa jo kirjoittamaasi tekstiä.</p>
+                <button type="button" onClick={transferC10Dialogues}
+                  disabled={!c10Dialogues || Boolean(draft.applicationDraft.trim()) || !saved}>
+                  <BookOpen size={17}/> Siirrä kaksi keskustelua Käytä saksaa -sivulle
+                </button>
+                {!c10Dialogues && <p>Kirjoita ensin molemmat keskustelut, vähintään 90 merkkiä kumpaankin.</p>}
+                {draft.applicationDraft.trim() && <p role="status">Kirjan sovellusluonnoksessa on jo tekstiä.
+                  Sitä ei korvata. Avaa sivu jatkaaksesi tai täydentääksesi vastausta.</p>}
+                <a href={bookUrl(lessonId, lesson.bookId, "10", "apply")} target="_blank" rel="noopener noreferrer">
+                  Avaa C10:n Käytä saksaa -sivu <ArrowRight size={16}/>
+                </a>
+                <p>Lisää kirjassa vielä erikseen neljä lausetta kolmannesta henkilöstä.
+                  Tarkista molempien keskustelujen 6–8 puheenvuoroa ja neljä esittelylausetta itse.</p>
+              </section>}
+            {scene.activityId && <div className="los-teacher-activity">
+              <button type="button"
+                disabled={session.activityIds.includes(scene.activityId) || completed ||
+                  Boolean(scene.reflection && (session.draftAnswers[scene.id]?.trim().length ?? 0) < scene.reflection.minLength)}
+                onClick={() => markActivity(scene.activityId!)}>
+                {session.activityIds.includes(scene.activityId) ? <CheckCircle2 size={18}/> : <Check size={18}/>}
+                {session.activityIds.includes(scene.activityId) ? "Harjoittelu vahvistettu" : scene.activityLabel}
+              </button>
+              <p>Tämä on oma vahvistuksesi, ei automaattinen kielitaidon arvio.</p>
+            </div>}
+            <div className="los-teacher-help">
+              <button type="button" aria-expanded={showHelp} onClick={() => { setShowHelp(v => !v); setHelpSelection(null); markHelp(); }}>
+                <HelpCircle size={18}/> En ymmärrä / haluan lisäselityksen
+              </button>
+              {showHelp && <div className="los-teacher-help-entries">
+                {scene.help?.length ? <>
+                  <p>Valitse, mikä selitys auttaisi sinua juuri nyt:</p>
+                  <div className="los-teacher-help-choices" role="group" aria-label="Valitse lisäselityksen tapa">
+                    {scene.help.map(entry => <button key={entry.title} type="button"
+                      aria-pressed={helpSelection === entry.title}
+                      onClick={() => setHelpSelection(entry.title)}>
+                      {entry.title}
+                    </button>)}
+                  </div>
+                  {scene.help.filter(entry => entry.title === helpSelection).map(entry => <section key={entry.title}>
+                    <h3>{entry.title}</h3><p>{entry.body}</p>
+                  </section>)}
+                </> : <section>
+                  <h3>Kokeile tätä</h3>
+                  <p>{scene.question?.reteach ??
+                    (scene.kind === "board" ? "Käy opetustaulun vaiheet läpi yksi kerrallaan. Vertaa saksankielistä ilmausta sen suomenkieliseen merkitykseen." :
+                      scene.kind === "book" ? "Avaa oppikirjan sanasto ja harjoitukset erilliseen välilehteen. Palaa oppitunnille, kun olet tutustunut materiaaliin." :
+                      "Palaa tarvittaessa edelliseen opetustilanteeseen sisällysluettelosta ja kertaa siinä annettu esimerkki. Voit edetä omassa tahdissasi.")}</p>
+                </section>}
+              </div>}
+            </div>
+            {lesson.mediaGate && !lesson.mediaGate.approved && <section className="los-teacher-assessment-status" role="status" aria-label="Kuuntelumedian hyväksyntäportti">
+              <h3>Kuuntelun suoritus odottaa hyväksyttyä mediaa</h3>
+              <p>{lesson.mediaGate.reason}</p>
+              <p>Lähdetunnus: {lesson.mediaGate.sourceId}. Alkuperäistekstin lukemista ei lasketa hyväksytyksi kuunteluksi.</p>
+            </section>}
             {lesson.chapterAssessment && (scene.kind === "book" || scene.kind === "summary") && <section className="los-teacher-assessment-status" aria-label="Kappaletestin ja itsearvioinnin tilanne">
               <h3>Kirjan todellinen suoritustilanne</h3>
               {(() => {
