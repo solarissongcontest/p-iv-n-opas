@@ -209,6 +209,22 @@ def normalize_full_path_test() -> None:
         body='import {getLosTeacherLesson} from "../src/features/los/teacher/lessonL004.ts";\n'+body
         path.write_text(body)
 
+def normalize_validator_gates() -> None:
+    path=Path("src/features/los/teacher/validateContent.ts")
+    source=path.read_text()
+    before='''issues.push({location:"mediaGate",problem:"Median hyväksyntäportilta puuttuu lähde, tila tai perustelu."});
+  if (lesson.externalCheck'''
+    if before in source:
+        source=source.replace(before,'''issues.push({location:"mediaGate",problem:"Median hyväksyntäportilta puuttuu lähde, tila tai perustelu."});
+  }
+  if (lesson.externalCheck''',1)
+        print("Closed C10 mediaGate validator before final review externalCheck.")
+    candidate=re.search(r'\\(\\?:SOURCE\\|[A-Z0-9|]+\\)',source)
+    if candidate:
+        ids=list(dict.fromkeys(candidate.group(0)[4:-1].split("|")+["ZPE","SCHOOL","HARALD"]))
+        source=source[:candidate.start()]+"(?:"+"|".join(ids)+")"+source[candidate.end():]
+    path.write_text(source)
+
 def normalize_assessment_sections() -> None:
     path=Path("src/features/los/teacher/LosTeacherPlayer.tsx")
     text=path.read_text()
@@ -268,6 +284,7 @@ normalize_registry()
 normalize_full_path_test()
 normalize_activity_gate()
 normalize_assessment_sections()
+normalize_validator_gates()
 subprocess.run(["git","add","--",*unmerged,"src/features/los/teacher/lessonL004.ts"],check=True)
 if subprocess.check_output(["git","ls-files","-u"],text=True).strip():
     raise ValueError("Unmerged index stages remain")
