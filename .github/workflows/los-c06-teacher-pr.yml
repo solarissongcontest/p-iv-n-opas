@@ -1,0 +1,77 @@
+name: LOS C06 Teacher Draft QA
+
+on:
+  push:
+    branches:
+      - feat/los1-teacher-l031-l035
+  pull_request:
+    branches:
+      - feat/los1-teacher-c03-l012-20261113
+    paths:
+      - "src/features/los/**"
+      - "tests/los-teacher-l031-l035.test.ts"
+      - "e2e/los-c06-teacher.spec.ts"
+      - ".github/workflows/los-c06-teacher-pr.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: los-c06-teacher-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  unit-and-typecheck:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - name: Install locked dependencies
+        run: bun install --frozen-lockfile
+      - name: LOS C06 Teacher unit and persistence regressions
+        run: bun run test
+      - name: TypeScript and build validation
+        run: bun run build
+
+  c06-browser:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    env:
+      E2E_BASE_URL: http://127.0.0.1:5173
+      REQUIRE_GEMINI: "false"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - name: Install locked dependencies
+        run: bun install --frozen-lockfile
+      - name: Install Playwright and accessibility tooling
+        run: bun run e2e:install
+      - name: Install desktop Chromium and iPhone WebKit
+        run: bunx playwright install --with-deps chromium webkit
+      - name: Start independent local LOS preview
+        shell: bash
+        run: |
+          nohup bun run dev -- --host 127.0.0.1 --port 5173 --strictPort > /tmp/los-c06-preview.log 2>&1 &
+          for attempt in $(seq 1 45); do
+            if curl --silent --show-error --fail --max-time 3 http://127.0.0.1:5173/ > /dev/null 2>&1; then
+              exit 0
+            fi
+            sleep 2
+          done
+          cat /tmp/los-c06-preview.log
+          exit 1
+      - name: Real C06 lesson browser, storage, and mobile checks
+        run: bunx playwright test e2e/los-c06-teacher.spec.ts --project=desktop-chromium --project=iphone-webkit
+      - name: Upload traces and screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: los-c06-teacher-browser-${{ github.run_id }}
+          path: test-results/
+          if-no-files-found: ignore
+          retention-days: 14

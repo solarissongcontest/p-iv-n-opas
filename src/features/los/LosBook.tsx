@@ -15,7 +15,7 @@ import { getLosOpenDialogue } from "./content/los1OpenDialogues";
 import { LosNotebook, LosWorkbook } from "./LosWorkbook";
 import { LosBackups } from "./LosBackups";
 import { LosBookStartAction } from "./LosBookStartAction";
-import { getLosTeacherLesson } from "./teacher/lessonL004";
+import { getLosTeacherLesson } from "./teacher/lessonRegistry";
 import { LosDictionaryCard } from "./LosDictionaryCard";
 import { LosContentTree } from "./LosContentTree";
 import { isLosContentTask, type LosContentTask } from "./contentTreeModel";
@@ -126,7 +126,7 @@ function SeriesView({ openBook }: { openBook: (id: number) => void }) {
         <small>{book.code} · {book.module}</small>
       </button>)}
     </div>
-    <p className="los-library-footnote">LOS! 1:n kymmenen kappaletta ovat selattavissa digikirjassa. Opiskelupolussa on 60 oppitunnin runko, mutta L001–L016 sekä L027–L030 sisältävät uudemman, käsikirjoitetun Teacher 2.0 -opetuskokemuksen. Muut tunnit käyttävät vielä vanhaa tehtävä- ja vaihelistaa. Kaikkien sisältöjen, lähdeoikeuksien, kieliasun ja äänentoiston lopullinen hyväksyntä on kesken. Muut LOS!-sarjan kirjat ovat suunnitteluvaiheessa.</p>
+    <p className="los-library-footnote">LOS! 1:n kymmenen kappaletta ovat selattavissa digikirjassa. Opiskelupolussa on 60 oppitunnin runko, mutta L001–L016 sekä L027–L035 sisältävät uudemman, käsikirjoitetun Teacher 2.0 -opetuskokemuksen. Muut tunnit käyttävät vielä vanhaa tehtävä- ja vaihelistaa. Kaikkien sisältöjen, lähdeoikeuksien, kieliasun ja äänentoiston lopullinen hyväksyntä on kesken. Muut LOS!-sarjan kirjat ovat suunnitteluvaiheessa.</p>
   </div>;
 }
 function BookFront({ book, move }: { book: LosBookDefinition; move: (chapter: string | null, section: LosSection) => void }) {

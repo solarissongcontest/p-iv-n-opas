@@ -1,0 +1,49 @@
+import {test} from "node:test";
+import assert from "node:assert/strict";
+import {readFileSync} from "node:fs";
+import {getLosTeacherLesson} from "../src/features/los/teacher/lessonRegistry.ts";
+import {LOS1_L030_TEACHER} from "../src/features/los/teacher/lessonL030.ts";
+import {LOS1_L033_TEACHER} from "../src/features/los/teacher/lessonL033.ts";
+import {emptyTeacherSession,setTeacherAnswerDraft,confirmTeacherActivity,teacherBuiltNumberCount,teacherMidtermAssessmentStatus} from "../src/features/los/teacher/engine.ts";
+import {validateTeacherLesson} from "../src/features/los/teacher/validateContent.ts";
+const now="2026-11-13T15:00:00.000Z";
+
+test("one registry includes prior lessons, Review I and five C06 lessons",()=>{
+  for(const id of ["L001","L005","L013","L016","L027","L028","L029","L030","L031","L032","L033","L034","L035"]){
+    const lesson=getLosTeacherLesson(id);
+    assert.ok(lesson,id+" must exist in canonical Teacher registry");
+    assert.equal(lesson.id,id);
+    assert.deepEqual(validateTeacherLesson(lesson),[]);
+  }
+  assert.equal(getLosTeacherLesson("L030"),LOS1_L030_TEACHER);
+  assert.equal(getLosTeacherLesson("L033"),LOS1_L033_TEACHER);
+});
+
+test("EX-MID completion evidence and C06 number-building gate coexist",()=>{
+  const empty=emptyTeacherSession(LOS1_L033_TEACHER,now);
+  const board=LOS1_L033_TEACHER.scenes.find(s=>s.numberBuilder);
+  assert.ok(board?.activityId);
+  assert.equal(teacherBuiltNumberCount(empty,board.id),0);
+  const easy=setTeacherAnswerDraft(empty,board.id+"-history","20,30,40,100,21,21,32",now);
+  assert.equal(teacherBuiltNumberCount(easy,board.id),2);
+  assert.equal(confirmTeacherActivity(easy,LOS1_L033_TEACHER,board.activityId,now).activityIds.includes(board.activityId),false);
+  const valid=setTeacherAnswerDraft(empty,board.id+"-history","21,32,43,54,60,100",now);
+  assert.equal(teacherBuiltNumberCount(valid,board.id),4);
+  assert.ok(confirmTeacherActivity(valid,LOS1_L033_TEACHER,board.activityId,now).activityIds.includes(board.activityId));
+  const midterm=teacherMidtermAssessmentStatus(LOS1_L030_TEACHER);
+  assert.equal(midterm.ready,false);
+  assert.equal(midterm.expected,25);
+});
+
+test("integrated player preserves genuine media, exact exam status, and number input support",()=>{
+  const code=readFileSync("src/features/los/teacher/LosTeacherPlayer.tsx","utf8");
+  const route=readFileSync("src/features/los/LosReferenceTools.tsx","utf8");
+  assert.match(code,/LosTeacherGreetingMedia/);
+  assert.match(code,/teacherMidtermAssessmentStatus\(lesson, draft, draft\.practiceAnswers\)/);
+  assert.match(code,/teacherBuiltNumberCount\(session, scene\.id\)/);
+  assert.match(code,/LosTeacherNumberBuilder/);
+  assert.match(code,/inputMode=\{numericResponse \? "numeric" : "text"\}/);
+  assert.match(code,/section === "midterm" \|\| section === "review"/);
+  assert.match(code,/getLosTeacherLesson.*lessonRegistry/);
+  assert.match(route,/L027–L035/);
+});
