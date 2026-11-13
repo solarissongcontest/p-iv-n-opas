@@ -249,7 +249,7 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
                 const withValue = setTeacherAnswerDraft(old, scene.id, String(value), now);
                 return setTeacherAnswerDraft(withValue, key, history.join(","), now);
               })}
-            />
+            />}
             {scene.question && <SceneQuestion
               scene={scene} session={session}
               submit={submit}
