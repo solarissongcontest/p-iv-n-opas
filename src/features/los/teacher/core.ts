@@ -14,9 +14,9 @@ export type TeacherScene={
  example?:{german:string;finnish:string;why:string};
  question?:TeacherQuestion;written?:TeacherWrittenQuestion;hint?:string;help?:readonly TeacherHelpOption[];
 };
-export type TeacherLesson={id:string;version:typeof TEACHER_VERSION;review:"draft"|"approved";objective:string;scenes:readonly TeacherScene[]};
+export type TeacherLesson={id:string;version:typeof TEACHER_VERSION;review:"draft"|"approved";contentRevision?:string;objective:string;scenes:readonly TeacherScene[]};
 export type TeacherAttempt={answer:string;count:number;correct:boolean;independent:boolean;revealed:boolean;at:string};
-export type TeacherProgress={version:typeof TEACHER_VERSION;scene:string;visited:string[];hints:string[];answers:Record<string,TeacherAttempt>;paused:boolean;completedAt?:string|null;helpSelections?:Record<string,string>;writtenDrafts?:Record<string,string>};
+export type TeacherProgress={version:typeof TEACHER_VERSION;scene:string;visited:string[];hints:string[];answers:Record<string,TeacherAttempt>;paused:boolean;completedAt?:string|null;helpSelections?:Record<string,string>;writtenDrafts?:Record<string,string>;completedContentRevision?:string;completedRevisionAt?:string};
 const isObj=(x:unknown):x is Record<string,unknown>=>Boolean(x&&typeof x==="object"&&!Array.isArray(x));
 const validId=(x:unknown)=>typeof x==="string"&&/^[a-z0-9-]{1,48}$/i.test(x);
 const validIds=(x:unknown,max:number)=>Array.isArray(x)&&x.length<=max&&
@@ -33,7 +33,11 @@ export function validTeacherProgress(x:unknown):x is TeacherProgress{
     !validIds(x['visited'],25)||!validIds(x['hints'],25)||typeof x['paused']!=="boolean"||
     !isObj(x['answers'])||Object.keys(x['answers']).length>20||
     (x['completedAt']!==undefined&&x['completedAt']!==null&&!validIso(x['completedAt']))||
-    !validHelpSelections(x['helpSelections'])||!validWrittenDrafts(x['writtenDrafts']))return false;
+    !validHelpSelections(x['helpSelections'])||!validWrittenDrafts(x['writtenDrafts'])||
+    (x['completedContentRevision']!==undefined&&!validId(x['completedContentRevision']))||
+    (x['completedRevisionAt']!==undefined&&!validIso(x['completedRevisionAt']))||
+    ((x['completedContentRevision']===undefined)!==(x['completedRevisionAt']===undefined))||
+    (x['completedContentRevision']!==undefined&&!validIso(x['completedAt'])))return false;
  return Object.entries(x['answers']).every(([id,a])=>validId(id)&&isObj(a)&&
     typeof a['answer']==="string"&&a['answer'].length<=40&&Number.isInteger(a['count'])&&
     Number(a['count'])>=0&&Number(a['count'])<=10&&typeof a['correct']==="boolean"&&
@@ -42,6 +46,7 @@ export function validTeacherProgress(x:unknown):x is TeacherProgress{
 export function validTeacherLesson(lesson:TeacherLesson):string[]{
  const errors:string[]=[];
  if(!/^L\d{3}$/.test(lesson.id)||lesson.scenes.length<5||lesson.scenes.length>20)errors.push("invalid lesson scope");
+ if(lesson.contentRevision!==undefined&&!validId(lesson.contentRevision))errors.push("invalid content revision");
  const ids=lesson.scenes.map(x=>x.id);
  if(new Set(ids).size!==ids.length)errors.push("duplicate scenes");
  for(const phase of ["explanation","worked-example","independent","summary"] as const)
@@ -120,9 +125,11 @@ export function answerTeacherWritten(lesson:TeacherLesson,p:TeacherProgress,text
  const count=(previous?.count??0)+1;
  const normalized=normalizeTeacherWritten(text);
  const correct=scene.written.accepted.some(a=>normalizeTeacherWritten(a)===normalized);
+ // A prior multiple-choice response may already have exposed the answer.
+ const priorChoiceAttempt=Boolean(p.answers[p.scene]);
  return {...p,answers:{...p.answers,[p.scene+"-written"]:{
    answer:text,count,correct,independent:correct&&count===1&&!p.hints.includes(p.scene)&&
-     ["independent","application","exit"].includes(scene.phase),revealed:false,at
+     !priorChoiceAttempt&&["independent","application","exit"].includes(scene.phase),revealed:false,at
  }}};
 }
 export function revealTeacherWritten(lesson:TeacherLesson,p:TeacherProgress,at:string):TeacherProgress{
@@ -177,7 +184,14 @@ export function teacherCanComplete(lesson:TeacherLesson,p:TeacherProgress):boole
    (!scene.written||Boolean(p.answers[scene.id+"-written"]&&
      (p.answers[scene.id+"-written"]!.count>0||p.answers[scene.id+"-written"]!.revealed))));
 }
+/** Historical completions remain; each material teaching revision is
+ * acknowledged only after its own exercises have been attempted. */
+export function teacherCurrentCompletion(lesson:TeacherLesson,p:TeacherProgress):boolean{
+ return Boolean(p.completedAt&&(!lesson.contentRevision||
+   (p.completedContentRevision===lesson.contentRevision&&Boolean(p.completedRevisionAt))));
+}
 export function finishTeacher(lesson:TeacherLesson,p:TeacherProgress,at:string):TeacherProgress{
- if(p.completedAt||!teacherCanComplete(lesson,p)||!validIso(at))return p;
- return {...p,completedAt:at};
+ if(!validIso(at)||!teacherCanComplete(lesson,p)||teacherCurrentCompletion(lesson,p))return p;
+ return {...p,completedAt:p.completedAt??at,
+   ...(lesson.contentRevision?{completedContentRevision:lesson.contentRevision,completedRevisionAt:at}:{})};
 }
