@@ -39,17 +39,22 @@ export function LosMidtermExam() {
   const retake=()=>{
     if(!confirmRetake||!saved)return;
     try{
-      update(current=>({...current,
-        practiceAnswers:(()=>{
-          const objective=losArchiveExamAttempt(
-            current.practiceAnswers,"EX-MID",LOS1_MIDTERM_QUESTIONS,
-            current.testAnswers,current.testSubmittedAt??"");
-          const number=losArchivedExamHistory(objective,"EX-MID").at(-1)?.number;
-          if (!number) throw new Error("Uusintaa ei voitu tallentaa.");
-          return losArchiveMidtermPersonalWork(objective,number,current.applicationDraft,current.selfAssessment);
-        })(),
-        testAnswers:{},testSubmittedAt:null,
-      }));
+      update(current=>{
+        const objective=losArchiveExamAttempt(
+          current.practiceAnswers,"EX-MID",LOS1_MIDTERM_QUESTIONS,
+          current.testAnswers,current.testSubmittedAt??"");
+        const number=losArchivedExamHistory(objective,"EX-MID").at(-1)?.number;
+        if (!number) throw new Error("Uusintaa ei voitu tallentaa.");
+        const preserved=losArchiveMidtermPersonalWork(
+          objective,number,current.applicationDraft,current.selfAssessment,
+          current.practiceAnswers["EX-MID-DIALOGUE-SELF"]??"");
+        // Each retake has its own ungraded personal work and rating. Earlier
+        // material remains in the archive, never silently reused as new proof.
+        const {"EX-MID-DIALOGUE-SELF": _previousRating, ...freshPractice}=preserved;
+        return {...current,practiceAnswers:freshPractice,
+          applicationDraft:"",selfAssessment:"",
+          testAnswers:{},testSubmittedAt:null};
+      });
       setArchiveError("");
       setConfirmRetake(false);
     }catch(error){setArchiveError(error instanceof Error?error.message:"Koetta ei voitu arkistoida.");}
@@ -134,6 +139,7 @@ export function LosMidtermExam() {
           return personal && <details><summary>Oma keskusteluteksti ja itsearviointi</summary>
             <p className="los-exam-own-text">{personal.applicationDraft || "(Ei kirjoitettua keskustelua; mahdollisesti suullinen.)"}</p>
             <p className="los-exam-own-text">{personal.selfAssessment || "(Ei kirjoitettua itsearviointia.)"}</p>
+            <p>Oma arvio: {personal.dialogueRating || "Ei valintaa"}</p>
           </details>;
         })()}
       </li>)}</ol>

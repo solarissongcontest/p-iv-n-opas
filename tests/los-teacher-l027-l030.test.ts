@@ -109,9 +109,9 @@ test("retake archives 25 selections, section scores, full own text and self-asse
  const application="A: Guten Tag! B: Guten Tag! A: Wie heißen Sie? B: Ich heiße Klara.\n".repeat(60).slice(0,4980);
  const reflection="Osasin tervehtimisen mutta haluan harjoitella puhuttelua.\n".repeat(80).slice(0,4950);
  const first=losArchiveExamAttempt({"EX-REV1-SELF-027":"some"},"EX-MID",LOS1_MIDTERM_QUESTIONS,objective,now);
- const withPersonal=losArchiveMidtermPersonalWork(first,1,application,reflection);
+ const withPersonal=losArchiveMidtermPersonalWork(first,1,application,reflection,"some");
  const prior=losArchivedMidtermPersonalWork(withPersonal,1);
- assert.deepEqual(prior,{applicationDraft:application,selfAssessment:reflection});
+ assert.deepEqual(prior,{applicationDraft:application,selfAssessment:reflection,dialogueRating:"some"});
  assert.equal(losArchivedExamHistory(withPersonal,"EX-MID")[0]?.correct,25);
  assert.equal(Object.values(withPersonal).every(s=>s.length<=500),true);
  const draft={version:1 as const,note:"",bookmarked:false,
@@ -122,10 +122,10 @@ test("retake archives 25 selections, section scores, full own text and self-asse
  assert.deepEqual(losArchivedMidtermPersonalWork(restored.practiceAnswers,1),prior);
  const second=losArchiveExamAttempt(restored.practiceAnswers,"EX-MID",LOS1_MIDTERM_QUESTIONS,
    {...objective,"EX-MID-Q01":"c"},"2026-11-14T15:00:00.000Z");
- const next=losArchiveMidtermPersonalWork(second,2,"Uusi keskustelu.","Uusi itsearvio.");
+ const next=losArchiveMidtermPersonalWork(second,2,"Uusi keskustelu.","Uusi itsearvio.","well");
  assert.deepEqual(losArchivedExamHistory(next,"EX-MID").map(a=>a.correct),[25,24]);
  assert.deepEqual(losArchivedMidtermPersonalWork(next,1),prior);
- assert.deepEqual(losArchivedMidtermPersonalWork(next,2),{applicationDraft:"Uusi keskustelu.",selfAssessment:"Uusi itsearvio."});
+ assert.deepEqual(losArchivedMidtermPersonalWork(next,2),{applicationDraft:"Uusi keskustelu.",selfAssessment:"Uusi itsearvio.",dialogueRating:"well"});
  assert.throws(()=>losArchiveMidtermPersonalWork(next,1,"overwrite","bad"),/ylikirjoittaa/);
 });
 

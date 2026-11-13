@@ -32,6 +32,9 @@ test("EX-MID saves 25 responses, hides keys until submission and archives own te
   await expect(page.locator(".los-exam-own-text").first()).toContainText("Ich heiße Mia");
   await expect(page.locator(".los-exam-own-text").nth(1)).toContainText("Sie-muotoa");
   await expect(page.locator(".los-exam-question").first().locator("input:checked")).toHaveCount(0);
+  await expect(page.getByLabel("Oma keskustelu tai muistiinpanot (vapaaehtoinen)")).toHaveValue("");
+  await expect(page.getByLabel("Mitä osasin ja mitä harjoittelen vielä?")).toHaveValue("");
+  await expect(page.locator('input[name="EX-MID-DIALOGUE-SELF"]:checked')).toHaveCount(0);
   await expectNoHorizontalOverflow(page);
 });
 
