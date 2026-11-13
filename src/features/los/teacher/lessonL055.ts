@@ -86,7 +86,7 @@ export const LOS1_L055_TEACHER: TeacherLesson = {
         "Kertaa nimen ja alkuperän minä-muodot Ich heiße Mia. ja Ich komme aus Finnland. Kolmannesta henkilöstä sanot Er/Sie heißt, Er/Sie kommt ja Er/Sie ist.",
         "Kertaa du-muodot du heißt, du bist, du kommst sekä kohteliaan Sie-muodon heißen, sind ja kommen. Kiinnitä huomiota siihen, että naisesta kertova sie on tässä er/sie-muoto.",
         "Muista C06:n ikäfraasi Wie alt bist du? ja C05:n vointifraasi Nicht so gut. C08:n avunpyyntö on Bitte langsamer. C09:n ajanilmaus on am Montag um drei Uhr.",
-        "C10:n todellinen koe sisältää sekä valintoja että kuusi sanan täydentämistä: heiße, bist, ist, heißt, heißt ja kommt (mukaan lukien eri henkilöt). Tee sanat itse ilman kopioitua mallia.",
+        "C10:n todellinen koe sisältää sekä valintoja että seitsemän sanan täydentämistä: heiße, bist, ist, heißt, heißt, kommt ja kommt. Tee sanat itse ilman kopioitua mallia.",
         "Oma puhe, autenttisen Harald-haastattelun kuullun ymmärtäminen ja haastattelun vaikea kielioppi eivät ole tämän 20 pisteen automaattisen testin sisältöä."
       ],
       "help": [
