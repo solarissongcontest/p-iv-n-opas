@@ -71,3 +71,43 @@ test("L055 requires the existing 20-item chapter submission and student self-ass
   await expect(page.getByRole("button",{name:"Merkitse oppitunti läpikäydyksi"})).toBeDisabled();
   await expectNoHorizontalOverflow(page);
 });
+
+test("L051 has three distinct original-text backlinks despite repeated section IDs",async({page})=>{
+  await enterLocalBook(page);
+  await page.goto("/los-lessons/L051",{waitUntil:"domcontentloaded"});
+  await page.locator(".los-teacher-outline nav button").filter({hasText:"Etsi vanhat fraasit niiden alkuperäisistä teksteistä"}).click();
+  const links=page.locator(".los-teacher-book-links .los-teacher-book-link a");
+  await expect(links).toHaveCount(3);
+  for(const [i,chapter] of ["02","03","10"].entries()){
+    await expect(links.nth(i)).toHaveAttribute("href",new RegExp("/"+chapter+"/text$"));
+  }
+  await expectNoHorizontalOverflow(page);
+});
+test("L054 explicitly transfers both dialogue drafts to C10's existing application without overwriting later edits",async({page})=>{
+  await enterLocalBook(page);
+  await page.goto("/los-lessons/L054",{waitUntil:"domcontentloaded"});
+  const outline=page.locator(".los-teacher-outline nav button");
+  await outline.filter({hasText:"Kirjoita ensimmäinen oma keskustelu"}).click();
+  await page.locator(".los-teacher-reflection textarea").fill(
+    "Mia: Hallo! Wie heißt du?\\nBen: Ich heiße Ben.\\nMia: Woher kommst du?\\nBen: Ich komme aus Deutschland.\\nMia: Tschüss!\\nBen: Tschüss!");
+  await outline.filter({hasText:"Kirjoita toinen oma keskustelu"}).click();
+  await page.locator(".los-teacher-reflection textarea").fill(
+    "Leo: Guten Tag! Wie heißen Sie?\\nFrau Weber: Ich heiße Frau Weber.\\nLeo: Das ist Mia.\\nFrau Weber: Wie geht's?\\nLeo: Gut, danke. Auf Wiedersehen!");
+  const transfer=page.getByRole("button",{name:"Siirrä kaksi keskustelua Käytä saksaa -sivulle"});
+  await expect(transfer).toBeEnabled();
+  await transfer.click();
+  await expect(transfer).toBeDisabled();
+  await page.goto("/los#/1/10/apply",{waitUntil:"domcontentloaded"});
+  const written=page.locator("#los-application-10");
+  await expect(written).toHaveValue(/Mia: Hallo!/);
+  await expect(written).toHaveValue(/Leo: Guten Tag!/);
+  await expect(written).toHaveValue(/Täydennä tähän neljä helppoa virkettä/);
+  await written.fill("OMA AIEMPI TEKSTI, JOTA EI SAA KORVATA");
+  await page.goto("/los-lessons/L054",{waitUntil:"domcontentloaded"});
+  await outline.filter({hasText:"Kirjoita toinen oma keskustelu"}).click();
+  await expect(transfer).toBeDisabled();
+  await expect(page.locator("section[aria-label='Siirrä kaksi keskustelua oppikirjaan']")).toContainText("ei korvata");
+  await page.goto("/los#/1/10/apply",{waitUntil:"domcontentloaded"});
+  await expect(page.locator("#los-application-10")).toHaveValue("OMA AIEMPI TEKSTI, JOTA EI SAA KORVATA");
+  await expectNoHorizontalOverflow(page);
+});
