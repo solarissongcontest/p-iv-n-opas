@@ -341,7 +341,7 @@ function LosBookWorkspace({ book, location, move, goLibrary, openBook }: { book:
   const previousIndex = chapter ? book.chapters.findIndex(c => c.id === chapter.id) : -1;
   const next = previousIndex >= 0 ? book.chapters[previousIndex + 1] : null;
   const previous = previousIndex > 0 ? book.chapters[previousIndex - 1] : null;
-  const section = chapter ? location.section : ["contents", "appendix", "dictionary", "path", "search", "midterm", "review", "review-ii", "progress", "final", "summary"].includes(location.section) ? location.section : "overview";
+  const section = chapter ? location.section : ["contents", "appendix", "dictionary", "path", "teacher", "search", "midterm", "review", "review-ii", "progress", "final", "summary"].includes(location.section) ? location.section : "overview";
   return <div className="los-book-workspace" style={bookStyle(book)}>
     <header className="los-book-topbar">
       <button className="los-back-library" onClick={goLibrary} aria-label="Takaisin kirjasarjaan"><ChevronLeft size={19} /> <span>Kirjasarja</span></button>
