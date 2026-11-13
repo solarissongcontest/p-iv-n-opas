@@ -38,6 +38,10 @@ test("all ten chapters provide complete Text B readers inside the book, not link
   }
   if(chapter==="08"){
    await expect(page.getByText("Haastattelun ääni ei ole vielä käytettävissä.")).toBeVisible();
+  }else if(chapter==="07"){
+   // C07 M-COM-06 is deliberately hidden pending approved audio verification.
+   await expect(page.getByText("C07:n aakkosäänite odottaa hyväksyntää.")).toBeVisible();
+   await expect(page.locator(".los-secondary-source audio")).toHaveCount(0);
   }else{
    await expect(page.locator(".los-secondary-source audio").first()).toBeVisible();
   }
@@ -122,7 +126,7 @@ test("every one of the 60 guided lessons opens from its actual chapter picker on
    expect(seen.has(title)).toBe(false);
    seen.add(title);
    await button.click();
-   if(Number(title.slice(1))<=40){
+   if(Number(title.slice(1))<=45){
     await expect(page).toHaveURL(new RegExp("/los-lessons/"+title+"$"));
     await expect(page.locator(".los-teacher-paper h2")).toBeVisible();
     await expect(page.locator(".los-teacher-sidebar h1")).toBeVisible();

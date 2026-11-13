@@ -1,0 +1,86 @@
+name: LOS C08 Teacher L041-L045 QA
+
+on:
+  push:
+    branches:
+      - feat/los1-teacher-l041-l045
+      - feat/los1-teacher-integrated-c08-20261113
+  pull_request:
+    branches:
+      - feat/los1-teacher-c03-l012-20261113
+      - feat/los1-teacher-integrated-c07-20261113
+    paths:
+      - "src/features/los/teacher/**"
+      - "tests/los-teacher-c08-l041-l045.test.ts"
+      - "e2e/los-c08-teacher.spec.ts"
+      - "e2e/los-full-book.spec.ts"
+      - "docs/los1-c08-teacher-source-review.md"
+      - ".github/workflows/los-c08-teacher-ci.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: los-c08-teacher-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: TypeScript, build and unit tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - name: Install project dependencies
+        run: bun install --frozen-lockfile
+      - name: Validate full unit suite
+        run: bun run test
+      - name: TypeScript
+        run: bun run typecheck
+      - name: Production build
+        run: bun run build
+
+  browser:
+    name: Chromium and WebKit scenario acceptance
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    env:
+      E2E_BASE_URL: http://127.0.0.1:5173
+      REQUIRE_GEMINI: "false"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - run: bun install --frozen-lockfile
+      - run: bun run e2e:install
+      - run: bunx playwright install --with-deps chromium webkit
+      - name: Start isolated local preview
+        shell: bash
+        run: |
+          nohup bun run dev -- --host 127.0.0.1 --port 5173 --strictPort > /tmp/los-c08-dev.log 2>&1 &
+          for attempt in $(seq 1 50); do
+            if curl --silent --fail --max-time 3 http://127.0.0.1:5173/ > /dev/null 2>&1; then
+              exit 0
+            fi
+            sleep 2
+          done
+          cat /tmp/los-c08-dev.log
+          exit 1
+      - name: Run C08 browser scenarios
+        run: bunx playwright test e2e/los-c08-teacher.spec.ts --project=desktop-chromium --project=iphone-webkit
+      - name: Whole LOS 1 book browser regressions
+        run: bunx playwright test e2e/los-full-book.spec.ts --project=desktop-chromium --project=iphone-webkit
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: los-c08-browser-evidence-${{ github.run_id }}
+          path: |
+            test-results/
+            /tmp/los-c08-dev.log
+          if-no-files-found: ignore
+          retention-days: 14
