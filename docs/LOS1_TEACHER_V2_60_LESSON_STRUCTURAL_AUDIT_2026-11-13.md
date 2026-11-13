@@ -112,3 +112,53 @@ Lähdevalinta **ei siis ole päätöstä vailla**. Päätös on dokumentoitu, mu
 - C03:n Text A:n lähteeksi on jo valittu `M-WB-07` (Lisa Müller, Wikibooks oldid 4581896); vanha `M-DIB-01` (Berna) on poistettu päätekstin roolista yksityisyysperusteella. Lisenssin lähdemerkintöjen yksilöinti, riippumaton kielen ja tason tarkistus sekä oikeat laitetestit odottavat.
 - Tätä auditointia ei tule tulkita R1–R12-porttien sulkemiseksi. Teacher 2.0:n korjaukset eivät muuta FreeDictin tilapäisiä testilatauksia tuotantosanakirjaksi eikä vapauta julkaisemattomia ääni- tai IPA-aineistoja.
 
+## Yhteensopivuus: L004:n ja L005:n vaihtoehtoiset opetusversiot (13.11.2026)
+
+L004:n rinnakkaisen Teacher-moottorin PR #218 sekä siitä jatkaneen L005:n
+PR #232 historialliset oppituntimerkinnät säilytetään
+`lessonProgress.L004/L005.teacher`-kentissä. PR #232 lisäsi
+`completedContentRevision`-, `completedRevisionAt`-, `writtenDrafts`-,
+`helpSelections`- ja `media`-kentät; nämä tarkistetaan nyt tietotyypin,
+kohtuullisten kokorajojen, päiväysten ja parillisten versiomerkintöjen
+perusteella. `media` sisältää vain selaimen ilmoittamia
+`playingAt`/`endedAt`-tapahtumia ja tekstivastineen avausmerkinnän,
+ei kuullun ymmärtämisen näyttöä.
+
+**Yhteinen päätös on edelleen yksiselitteinen:** kirjoitettava uusi
+Teacher Experience 2.0 -tila on vain `teacherSessions`. Historiallista
+`lessonProgress.*.teacher`-tietoa ei muunnettaessa kopioida
+`teacherSessions`-vastauksiksi, itsenäiseksi osaamisnäytöksi tai
+suorituspäiväksi. Kelvollisen vanhan tietueen kaikki kentät säilyvät
+varmuuskopion käsittelyssä muuttumattomina. Korruptoitunut uusi
+metadata hylätään sen sijaan, että sitä yritettäisiin korjata
+keksityillä oletuksilla.
+
+Tämä on data- ja yhteensopivuustarkistus, **ei** PR #232:n toisen
+opetusmoottorin käyttöönotto tai todiste toimivasta äänen toistosta.
+
+## L005:n yhden opetussoittimen media, täsmennys 13.11.2026
+
+Yhteiseen Teacher Experience 2.0 -soittimeen on lisätty L005:n alkuperäisen
+M-COM-03-äänitteen oma HTML5-toisto ja koko **20 ilmauksen saksankielinen lista
+suomennoksineen**. Luettelo luetaan suoraan kirjan olemassa olevasta
+`LOS1_TEXT_B_SOURCES["01"]`-sisällöstä. Siten samasta materiaalista ei
+synny toisistaan poikkeavia tekstikopioita. Kirjan Text B pysyy edelleen
+käytettävissä erikseen niihin **neljään kirjan omaan tarkistettavaan
+lähdetehtävään**, jotka L005:n läpikäynti edellyttää.
+
+Media on alkuperäinen Wikimedia Commonsin *German Vocabulary - Greetings.ogg*,
+German Men92, public domain, noin 28 sekuntia. Toistokomponentissa on
+selkeä virheilmoitus ja koko tekstin varavaihtoehto. Lukijan
+`teacherSessions` pysyy ainoana kirjoitettavana opetus- ja vastaustilana;
+`lessonProgress.*.teacher` on vain säilytettävä vanha tieto.
+Tähän ei lisätty kilpailevaa opetusmoottoria, uutta äänitodistetta,
+automaattista puhearviointia eikä väitettä äänen kuulemisesta.
+
+Tarkka ero: audion `play`-painike, mahdollinen onnistunut toistotapahtuma,
+20 kohdan tekstilistan avaaminen ja lukutehtävän tarkistaminen **eivät**
+itsessään todista kuullun ymmärtämistä. Täydellinen teksti sisältyy LOS!:iin,
+kun taas ulkoisia URL-osoitteita käytetään äänitiedoston lataamiseen sekä
+tekijä- ja lisenssitietojen osoittamiseen. Oikean puhelimen Ogg-toisto,
+ruudunlukijan käyttö ja saksan kielen pedagoginen auditointi ovat avoimia
+julkaisuportteja. CI-tulokset raportoidaan erikseen uusimman commitin
+perusteella.
