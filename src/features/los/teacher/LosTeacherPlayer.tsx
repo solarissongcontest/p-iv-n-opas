@@ -115,7 +115,7 @@ export function LosTeacherPlayer({ lessonId }: { lessonId: string }) {
     : null;
   const scene = lesson?.scenes.find(item => item.id === session?.sceneId) ?? lesson?.scenes[0];
   const sceneIndex = lesson?.scenes.findIndex(item => item.id === scene?.id) ?? 0;
-  const available = Boolean(session && lesson && teacherCanFinish(session, lesson, draft.practiceAnswers, draft.practiceChecked));
+  const available = Boolean(session && lesson && teacherCanFinish(session, lesson, draft.practiceAnswers, draft.practiceChecked, draft));
   const completed = Boolean(session?.completedAt);
 
   useEffect(() => { setAuthorized(Boolean(readCachedDeviceUser())); }, []);
@@ -161,7 +161,7 @@ export function LosTeacherPlayer({ lessonId }: { lessonId: string }) {
     update(current => {
       const now = stamp();
       const old = current.teacherSessions?.[lessonId] ?? emptyTeacherSession(lesson, now);
-      const next = finishTeacherSession(old, lesson, current.practiceAnswers, now, current.practiceChecked);
+      const next = finishTeacherSession(old, lesson, current.practiceAnswers, now, current.practiceChecked, current);
       if (next === old) return current;
       // Teacher 2.0 completion is a distinct learning event. Never manufacture
       // legacy lesson steps or an exit answer that the student never submitted.
@@ -183,7 +183,7 @@ export function LosTeacherPlayer({ lessonId }: { lessonId: string }) {
       </section> :
       !lesson || !session || !scene ? <section className="los-teacher-status">
         <h1>Oppitunnin opetusmateriaali ei ole vielä valmis</h1>
-        <p>Teacher 2.0 on nyt käytössä oppitunneilla L001–L005. Muut oppitunnit toimivat edelleen nykyisessä Opetuspolussa.</p>
+        <p>Teacher 2.0 on nyt käytössä oppitunneilla L001–L006. Muut oppitunnit toimivat edelleen nykyisessä Opetuspolussa.</p>
         <a href="/los#/1/path">Palaa Opetuspolkuun</a>
       </section> :
       <>
@@ -233,6 +233,17 @@ export function LosTeacherPlayer({ lessonId }: { lessonId: string }) {
                 </a>
               </div>)}
               <p className="los-teacher-small">Kirja avautuu erilliseen välilehteen. Kun palaat, oppitunti jatkuu samasta kohdasta. Pelkkä avaaminen ei ole suoritusmerkintä.</p>
+              {lesson.requiredChapterEvidence?.map(kind => {
+                const done = kind === "application-written" ? Boolean(draft.applicationDraft.trim()) :
+                  kind === "test-submitted" ? Boolean(draft.testSubmittedAt) :
+                  kind === "self-assessment" ? Boolean(draft.selfAssessment.trim()) : false;
+                const label = kind === "application-written" ? "Oma kirjan soveltamisteksti" :
+                  kind === "test-submitted" ? "C01-kappaletesti palautettu" : "Oma itsearviointi kirjoitettu";
+                return <p key={kind} className="los-teacher-evidence">
+                  {done ? <CheckCircle2 size={17}/> : <HelpCircle size={17}/>}
+                  {label}: {done ? "Tallennettu" : "Puuttuu vielä kirjan suorituksesta"}
+                </p>;
+              })}
               {[...lesson.requiredPracticeIds,...(lesson.requiredCheckedIds??[])].map(id => {
                 const answered=Boolean(draft.practiceAnswers[id]?.trim());
                 const mustCheck=Boolean(lesson.requiredCheckedIds?.includes(id));

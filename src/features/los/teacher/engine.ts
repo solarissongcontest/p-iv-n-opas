@@ -49,6 +49,13 @@ export type TeacherLesson = {
   requiredPracticeIds: readonly string[];
   /** Book comprehension checks must be both answered and explicitly checked. */
   requiredCheckedIds?: readonly string[];
+  /** These are real chapter-draft fields, never duplicate teacher-made answers. */
+  requiredChapterEvidence?: readonly ("application-written" | "test-submitted" | "self-assessment")[];
+};
+export type TeacherChapterEvidence = {
+  applicationDraft?: string;
+  testSubmittedAt?: string | null;
+  selfAssessment?: string;
 };
 export type TeacherAttempt = {
   sceneId: string;
@@ -186,7 +193,8 @@ export function teacherWrongFeedback(scene: TeacherScene, answer: string): strin
   return q.wrongAnswers?.[normalizeTeacherAnswer(answer)] ?? q.genericWrong;
 }
 export function teacherCanFinish(session: TeacherSession, lesson: TeacherLesson,
-  practiceAnswers: Readonly<Record<string, string>>, practiceChecked: readonly string[] = []): boolean {
+  practiceAnswers: Readonly<Record<string, string>>, practiceChecked: readonly string[] = [],
+  chapter: Readonly<TeacherChapterEvidence> = {}): boolean {
   return lesson.scenes.every(scene => session.visitedIds.includes(scene.id)) &&
     lesson.scenes.every(scene => !scene.reflection ||
       (session.draftAnswers[scene.id]?.trim().length ?? 0) >= scene.reflection.minLength) &&
@@ -194,12 +202,16 @@ export function teacherCanFinish(session: TeacherSession, lesson: TeacherLesson,
     lesson.requiredActivityIds.every(id => session.activityIds.includes(id)) &&
     lesson.requiredPracticeIds.every(id => Boolean(practiceAnswers[id]?.trim())) &&
     (lesson.requiredCheckedIds ?? []).every(id =>
-      Boolean(practiceAnswers[id]?.trim()) && practiceChecked.includes(id));
+      Boolean(practiceAnswers[id]?.trim()) && practiceChecked.includes(id)) &&
+    (lesson.requiredChapterEvidence ?? []).every(kind =>
+      kind === "application-written" ? Boolean(chapter.applicationDraft?.trim()) :
+      kind === "test-submitted" ? iso(chapter.testSubmittedAt) :
+      kind === "self-assessment" ? Boolean(chapter.selfAssessment?.trim()) : false);
 }
 export function finishTeacherSession(session: TeacherSession, lesson: TeacherLesson,
   practiceAnswers: Readonly<Record<string, string>>, now: string,
-  practiceChecked: readonly string[] = []): TeacherSession {
-  return session.completedAt || !teacherCanFinish(session, lesson, practiceAnswers, practiceChecked) ? session :
+  practiceChecked: readonly string[] = [], chapter: Readonly<TeacherChapterEvidence> = {}): TeacherSession {
+  return session.completedAt || !teacherCanFinish(session, lesson, practiceAnswers, practiceChecked, chapter) ? session :
     { ...session, updatedAt: now, completedAt: now };
 }
 export function independentTeacherEvidence(session: TeacherSession, lesson: TeacherLesson): number {

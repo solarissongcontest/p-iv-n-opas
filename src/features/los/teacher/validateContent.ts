@@ -99,6 +99,12 @@ export function validateTeacherLesson(lesson: TeacherLesson): TeacherContentIssu
         !/^C\d{2}-(?:SOURCE|TEXTB)-Q\d{2}$/.test(id)))) {
     issues.push({ location: "requiredCheckedIds", problem: "Tarkistettavan lähdetehtävän tunniste on virheellinen." });
   }
+  if (lesson.requiredChapterEvidence &&
+      (new Set(lesson.requiredChapterEvidence).size !== lesson.requiredChapterEvidence.length ||
+        lesson.requiredChapterEvidence.some(kind =>
+          !["application-written", "test-submitted", "self-assessment"].includes(kind)))) {
+    issues.push({ location: "requiredChapterEvidence", problem: "Kirjan opiskelunäytön vaatimus on tuntematon tai toistuu." });
+  }
   if (!lesson.scenes.some(scene => scene.kind === "summary")) {
     issues.push({ location: "scenes", problem: "Oppitunnilta puuttuu yhteenveto." });
   }
