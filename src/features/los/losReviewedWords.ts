@@ -21,7 +21,7 @@ export function losCountReviewedWords(
     for (const card of losRecallFromVocabulary(chapter.id, chapter.vocabulary)) {
       const state = ratings[card.id];
       if (!state || !validLosRecallCardMap({ [card.id]: state })) continue;
-      words.add(card.german.trim().normalize("NFC").replace(/\\s+/g, " ").toLocaleLowerCase("de"));
+      words.add(card.german.trim().normalize("NFC").replace(/\s+/g, " ").toLocaleLowerCase("de"));
     }
   }
   return words.size;
