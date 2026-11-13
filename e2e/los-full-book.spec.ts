@@ -122,7 +122,7 @@ test("every one of the 60 guided lessons opens from its actual chapter picker on
    expect(seen.has(title)).toBe(false);
    seen.add(title);
    await button.click();
-   if(Number(title.slice(1))<=30){
+   if(Number(title.slice(1))<=35){
     await expect(page).toHaveURL(new RegExp("/los-lessons/"+title+"$"));
     await expect(page.locator(".los-teacher-paper h2")).toBeVisible();
     await expect(page.locator(".los-teacher-sidebar h1")).toBeVisible();
@@ -1372,5 +1372,109 @@ test("L030 Teacher reads real submitted 25-item EX-MID, including oral-only self
  await expect(status).toContainText("Itsearviointi: Kirjattu");
  await page.reload({waitUntil:"domcontentloaded"});
  await expect(status).toContainText("Välikoe EX-MID: 25/25 vastattu · Palautettu");
+ await expectNoHorizontalOverflow(page);
+});
+
+test("C06 L031–L035 open real Teacher pages with authored contextual help on iPhone and desktop",async({page})=>{
+ test.setTimeout(120_000);
+ await enterLocalBook(page);
+ for(const id of ["L031","L032","L033","L034","L035"]){
+  await page.goto("/los-lessons/"+id,{waitUntil:"domcontentloaded"});
+  await expect(page.locator(".los-teacher-sidebar h1")).toBeVisible();
+  await expect(page.locator(".los-teacher-paper h2")).toBeVisible();
+  await page.getByRole("button",{name:"En ymmärrä / haluan lisäselityksen"}).click();
+  await expect(page.locator(".los-teacher-help-entries")).toBeVisible();
+  await expectNoHorizontalOverflow(page);
+ }
+});
+test("C06 L032 specific writing mistake and Teacher pause/resume preserve same scene",async({page})=>{
+ await enterLocalBook(page);
+ await page.goto("/los-lessons/L032",{waitUntil:"domcontentloaded"});
+ const outline=page.locator(".los-teacher-outline nav button");
+ await outline.filter({hasText:"Kirjoita 17 itsenäisesti"}).click();
+ await page.locator("#los-teacher-answer").fill("siebenzehn");
+ await page.getByRole("button",{name:"Tarkista",exact:true}).click();
+ await expect(page.locator(".los-teacher-feedback.is-wrong")).toContainText("siebzehn");
+ await page.getByRole("button",{name:"Keskeytä oppitunti"}).click();
+ await expect(outline.first()).toBeDisabled();
+ await page.reload({waitUntil:"domcontentloaded"});
+ await expect(page.locator(".los-teacher-paused")).toBeVisible();
+ await page.locator(".los-teacher-paused").getByRole("button",{name:"Jatka opetusta"}).click();
+ await expect(page.locator(".los-teacher-paper h2")).toContainText("Kirjoita 17 itsenäisesti");
+ await expect(page.locator(".los-teacher-feedback.is-wrong")).toBeVisible();
+ await expectNoHorizontalOverflow(page);
+});
+test("C06 original Text A 12 turns and reused C01 8 turns have separate real checked tasks in L034",async({page})=>{
+ test.setTimeout(120_000);
+ await enterLocalBook(page);
+ await page.goto("/los-lessons/L034",{waitUntil:"domcontentloaded"});
+ const outline=page.locator(".los-teacher-outline nav button");
+ await outline.filter({hasText:"Tarkista neljä aidosti tallennettavaa lähdevastausta"}).click();
+ await expect(page.locator(".los-teacher-paper a[href*='/06/understand']")).toBeVisible();
+ await page.goto("/los#/1/06/text",{waitUntil:"domcontentloaded"});
+ await expect(page.locator(".los-reading-page .los-c01-turn")).toHaveCount(12);
+ await page.getByText("Kertaa aiempi Franzin ja Jörgin keskustelu (C01, äänite)").click();
+ await expect(page.locator(".los-c06-review .los-c01-turn")).toHaveCount(8);
+ await page.goto("/los?lessonReturn=L034#/1/06/understand",{waitUntil:"domcontentloaded"});
+ await expect(page.getByRole("heading",{name:"Ymmärrä alkuperäisteksti"})).toBeVisible();
+ for(const [id,value] of [["C06-ZPE-Q01","a"],["C06-ZPE-Q02","b"]] as const){
+  const field=page.locator('fieldset.los-c01-question').filter({has:page.locator('input[name="'+id+'"]')});
+  await field.locator('input[value="'+value+'"]').check();
+  await field.getByRole("button",{name:"Tarkista vastaus"}).click();
+  await expect(field.getByRole("status")).toContainText("Oikein.");
+ }
+ await page.getByText("C01:n ikäkertauksen vanhat ymmärtämistehtävät (L034)").click();
+ for(const [id,value] of [["C06-SOURCE-Q01","b"],["C06-SOURCE-Q02","c"]] as const){
+  const field=page.locator('fieldset.los-c01-question').filter({has:page.locator('input[name="'+id+'"]')});
+  await field.locator('input[value="'+value+'"]').check();
+  await field.getByRole("button",{name:"Tarkista vastaus"}).click();
+  await expect(field.getByRole("status")).toContainText("Oikein.");
+ }
+ await page.getByRole("link",{name:"Palaa oppitunnille L034"}).click();
+ await outline.filter({hasText:"Tarkista neljä aidosti tallennettavaa lähdevastausta"}).click();
+ for(const id of ["C06-ZPE-Q01","C06-ZPE-Q02","C06-SOURCE-Q01","C06-SOURCE-Q02"])
+  await expect(page.locator(".los-teacher-paper")).toContainText(id+": Vastaus tallennettu ja tarvittaessa tarkistettu");
+ await expectNoHorizontalOverflow(page);
+});
+test("C06 L035 real 20/20 exam archives correctly and retains two fictional age dialogues",async({page})=>{
+ test.setTimeout(150_000);
+ await enterLocalBook(page);
+ await page.goto("/los?lessonReturn=L035#/1/06/apply",{waitUntil:"domcontentloaded"});
+ const dialogue="Mia: Wie alt bist du?\\nMax: Ich bin siebzehn Jahre alt.\\n\\nLena: Wie alt bist du?\\nJonas: Ich bin zwanzig Jahre alt.";
+ await page.locator("#los-application-06").fill(dialogue);
+ await page.goto("/los?lessonReturn=L035#/1/06/test",{waitUntil:"domcontentloaded"});
+ const opts=[
+  0,1,2,1,0,1,1,0,1,1,
+  "dreizehn","zwanzig",1,0,1,1,0,1,0,1,
+ ] as const;
+ await expect(page.locator(".los-workbook-question")).toHaveCount(20);
+ for(let n=0;n<20;n++){
+  const field=page.locator("#C06-EX-"+String(n+1).padStart(2,"0"));
+  const choice=opts[n]!;
+  if(typeof choice==="number")await field.locator('input[type="radio"]').nth(choice).check();
+  else await field.locator('input[type="text"]').fill(choice);
+ }
+ await page.getByRole("button",{name:"Palauta testi · 20/20"}).click();
+ await expect(page.locator(".los-test-result h2").first()).toHaveText("20 / 20 oikein");
+ const reflection="Kysyin kahdessa kuvitteellisessa tilanteessa ikää ja kerron numerot, mutta kertaan vielä siebzig.";
+ await page.locator("#los-self-06").fill(reflection);
+ await page.getByRole("link",{name:"Palaa oppitunnille L035"}).click();
+ const outline=page.locator(".los-teacher-outline nav button");
+ await outline.filter({hasText:"Palauta oikea C06:n 20 tehtävän testi"}).click();
+ const status=page.locator(".los-teacher-assessment-status");
+ await expect(status).toContainText("Kappaletesti: 20/20 vastattu · Palautettu");
+ await expect(status).toContainText("Oma sovellus: Teksti tallennettu");
+ await expect(status).toContainText("Itsearviointi: Kirjattu");
+ await page.goto("/los#/1/06/test",{waitUntil:"domcontentloaded"});
+ await page.getByRole("button",{name:"Arkistoi tulos ja aloita uusinta"}).click();
+ const archives=page.locator('[aria-label="Kappaletestin aiemmat yritykset"]');
+ await expect(archives).toContainText("20/20 pistettä");
+ await expect(page.getByRole("button",{name:"Palauta testi · 0/20"})).toBeDisabled();
+ await page.reload({waitUntil:"domcontentloaded"});
+ await expect(archives).toContainText("20/20 pistettä");
+ await page.goto("/los#/1/06/apply",{waitUntil:"domcontentloaded"});
+ await expect(page.locator("#los-application-06")).toHaveValue(dialogue);
+ await page.goto("/los#/1/06/test",{waitUntil:"domcontentloaded"});
+ await expect(page.getByRole("button",{name:"Palauta testi · 0/20"})).toBeDisabled();
  await expectNoHorizontalOverflow(page);
 });
