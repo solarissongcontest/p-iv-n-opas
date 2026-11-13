@@ -193,9 +193,9 @@ export const LOS1_L023_TEACHER: TeacherLesson = {
       ],
       "bookLinks": [
         {
-          "label": "C05 · Text A ja tarkistukset",
+          "label": "C05 · Ymmärrä Text A",
           "chapterId": "05",
-          "section": "text",
+          "section": "understand",
           "instruction": "Tee ja tarkista C05-SOURCE-Q01–Q03 (Q04 on lisäharjoitus)."
         }
       ]
