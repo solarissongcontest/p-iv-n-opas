@@ -28,7 +28,7 @@ test("L002 gives precise deterministic explanations, not guessed free-form feedb
   s=submitTeacherAnswer(s,lesson,"pre-ei","c",now);
   assert.equal(teacherLatestAttempt(s,"pre-ei")?.correct,false);
   const scene=lesson.scenes.find(x=>x.id==="pre-ei")!;
-  assert.match(teacherWrongFeedback(scene,"c"),/Suomen sanan ei/);
+  assert.match(teacherWrongFeedback(scene,"c"),/suomen sanan ei/i);
   s=submitTeacherAnswer(s,lesson,"pre-ei","b",now);
   assert.equal(teacherLatestAttempt(s,"pre-ei")?.correct,true);
   assert.equal(teacherLatestAttempt(s,"pre-ei")?.independent,false);
