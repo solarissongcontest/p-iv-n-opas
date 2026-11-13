@@ -6,6 +6,7 @@ on:
     paths:
       - "src/features/los/**"
       - "tests/los-teacher-l056-l060.test.ts"
+      - "tests/los-teacher-engine.test.ts"
       - "e2e/los-teacher-session10.spec.ts"
       - "e2e/los-full-book.spec.ts"
       - ".github/workflows/los-session10-qa.yml"
@@ -16,6 +17,7 @@ on:
     paths:
       - "src/features/los/**"
       - "tests/los-teacher-l056-l060.test.ts"
+      - "tests/los-teacher-engine.test.ts"
       - "e2e/los-teacher-session10.spec.ts"
       - "e2e/los-full-book.spec.ts"
       - ".github/workflows/los-session10-qa.yml"
