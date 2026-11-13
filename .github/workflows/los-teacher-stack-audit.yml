@@ -80,7 +80,7 @@ jobs:
       - name: Open every merged LOS Teacher lesson in desktop and iPhone browser
         run: bunx playwright test e2e/los-teacher-integrated-stack.spec.ts --project=desktop-chromium --project=iphone-webkit
       - name: Digital textbook and original 60-lesson browser regression
-        run: bunx playwright test e2e/los-full-book.spec.ts --project=desktop-chromium --project=iphone-webkit
+        run: bunx playwright test e2e/los-full-book.spec.ts --project=desktop-chromium --project=iphone-webkit --fully-parallel --workers=4
       - name: Midterm, C07 and C10 interactive browser regressions
         run: bunx playwright test e2e/los-teacher-review-midterm.spec.ts e2e/los-c07-teacher.spec.ts e2e/los-c10-teacher.spec.ts --project=desktop-chromium --project=iphone-webkit
       # The tested code exists only in this disposable runner. Archive the exact
