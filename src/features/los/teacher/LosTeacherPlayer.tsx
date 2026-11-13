@@ -183,7 +183,7 @@ export function LosTeacherPlayer({ lessonId }: { lessonId: string }) {
       </section> :
       !lesson || !session || !scene ? <section className="los-teacher-status">
         <h1>Oppitunnin opetusmateriaali ei ole vielä valmis</h1>
-        <p>Teacher 2.0 on nyt käytössä oppitunneilla L001 ja L004. Muut oppitunnit toimivat edelleen nykyisessä Opetuspolussa.</p>
+        <p>Teacher 2.0 on nyt käytössä oppitunneilla L001, L002 ja L004. Muut oppitunnit toimivat edelleen nykyisessä Opetuspolussa.</p>
         <a href="/los#/1/path">Palaa Opetuspolkuun</a>
       </section> :
       <>
