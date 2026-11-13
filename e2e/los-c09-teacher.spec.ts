@@ -121,8 +121,17 @@ test("book exercises and lesson sessions use the same C09 chapter draft",async({
   await page.getByRole("button",{name:"Tarkista"}).click();
   await expect(page.locator(".los-teacher-feedback.is-right")).toBeVisible();
   await page.goto("/los#/1/09/practice",{waitUntil:"domcontentloaded"});
-  await expect(page.getByText("Mikä viikonpäivä on Montag?")).toBeVisible();
+  const originalTask=page.locator("#C09-EX-01");
+  await expect(originalTask).toContainText("Mikä viikonpäivä on Montag?");
+  await originalTask.getByRole("radio",{name:"maanantai"}).check();
+  await expect(originalTask.getByRole("radio",{name:"maanantai"})).toBeChecked();
   await page.goto("/los-lessons/L046",{waitUntil:"domcontentloaded"});
+  await openScene(page,"Oikeat tehtävät samassa kirjassa");
+  await expect(page.locator(".los-teacher-evidence").filter({hasText:"C09-EX-01"}))
+    .toContainText("Vastaus tallennettu");
+  await page.reload({waitUntil:"domcontentloaded"});
+  await expect(page.locator(".los-teacher-evidence").filter({hasText:"C09-EX-01"}))
+    .toContainText("Vastaus tallennettu");
   await openScene(page,"Muodosta ajanilmaus ilman mallia");
   await expect(page.locator(".los-teacher-feedback.is-right")).toBeVisible();
   await expectNoHorizontalOverflow(page);
