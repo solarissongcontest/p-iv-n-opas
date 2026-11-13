@@ -53,7 +53,8 @@ jobs:
           cat /tmp/los-c10-dev.log
           exit 1
       - name: C10 Teacher scenarios and 60-lesson navigation on Chromium and WebKit
-        run: bunx playwright test e2e/los-c10-teacher.spec.ts --project=desktop-chromium --project=iphone-webkit
+        run: |
+          bunx playwright test e2e/los-c10-teacher.spec.ts --project=desktop-chromium --project=iphone-webkit
           bunx playwright test e2e/los-full-book.spec.ts --grep "every one of the 60 guided lessons" --project=desktop-chromium --project=iphone-webkit
       - name: Save diagnostic browser traces
         if: always()
