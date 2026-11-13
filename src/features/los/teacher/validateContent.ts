@@ -98,7 +98,7 @@ export function validateTeacherLesson(lesson: TeacherLesson): TeacherContentIssu
   }
   if (lesson.requiredCheckedIds &&
       (!unique(lesson.requiredCheckedIds) || lesson.requiredCheckedIds.some(id =>
-        !/^C\d{2}-(?:SOURCE|TEXTB)-Q\d{2}$/.test(id) || !id.startsWith("C" + lesson.chapterId + "-")))) {
+        !/^C\d{2}-(?:SOURCE|TEXTB|MCOM02)-Q\d{2}$/.test(id) || !id.startsWith("C" + lesson.chapterId + "-")))) {
     issues.push({ location: "requiredCheckedIds", problem: "Tarkistettavan lähdetehtävän tunniste on virheellinen." });
   }
   if (lesson.requiredChapterEvidence &&
