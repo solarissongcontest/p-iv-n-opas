@@ -24,7 +24,7 @@ export const L004_RULE_BOARD:TeacherBoard={
      parts:[{label:"Saksaksi",text:"Gute Nacht!",language:"de",emphasis:true},
        {label:"Suomeksi",text:"Hyvää yötä!",language:"fi"}]},
     {id:"contrast",heading:"Vertaan valintoja",
-     explanation:"Vuorokaudenaika on kummassakin ilta. Ratkaiseva ero on se, tavataanko vai mennäänkö nukkumaan.",
+     explanation:"Kyse voi olla samasta illasta, mutta ratkaisevaa on se, tervehditäänkö kohdatessa vai toivotetaanko hyvää yötä nukkumaan mennessä.",
      parts:[{label:"Illan kohtaaminen",text:"Guten Abend!",language:"de",emphasis:true},
        {label:"Nukkumaanmeno",text:"Gute Nacht!",language:"de",emphasis:true}]}
   ],
