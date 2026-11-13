@@ -102,11 +102,16 @@ test("L033 number building is persisted and ß or reversed digit ordering are no
   const q=l.scenes.find(s=>s.id==="write32")!.question!;
   assert.equal(evaluateTeacherAnswer(q,"zweiunddreißig"),true);
   let s=prepared(l);
+  assert.equal(teacherCanFinish(s,l,practiced(l)),false,"four distinct board numbers are required");
   s=setTeacherAnswerDraft(s,"number-builder","71",at);
   s=setTeacherAnswerDraft(s,"number-builder-history","21,32,37,71",at);
+  s=confirmTeacherActivity(s,l,"builder-used",at);
   assert.equal(validTeacherSession(s),true);
   assert.deepEqual(parseTeacherSessions({L033:JSON.parse(JSON.stringify(s))}).L033.draftAnswers["number-builder-history"],"21,32,37,71");
   assert.equal(teacherCanFinish(s,l,practiced(l)),true);
+  assert.equal(s.activityIds.includes("builder-used"),true);
+  const tampered=setTeacherAnswerDraft(s,"number-builder-history","21,21,19,200",at);
+  assert.equal(teacherCanFinish(tampered,l,practiced(l)),false,"invalid or duplicate values do not satisfy four");
 });
 test("L034 relies only on actual reused M-COM-01 Text B checks and does not imply assessed audio",()=>{
   const l=LOS1_L034_TEACHER;
