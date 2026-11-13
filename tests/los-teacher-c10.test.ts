@@ -13,6 +13,7 @@ import {
   independentTeacherEvidence, markTeacherHelp, teacherChapterAssessmentStatus,
 } from "../src/features/los/teacher/engine.ts";
 import type { TeacherLesson, TeacherSession } from "../src/features/los/teacher/engine.ts";
+import { composeLosC10Dialogues, storeLosC10Dialogues } from "../src/features/los/teacher/c10ApplicationBridge.ts";
 
 const at = "2026-11-13T14:00:00.000Z";
 const lessonIds = ["L051","L052","L053","L054","L055"];
@@ -130,4 +131,25 @@ test("C10 practice, independent evidence and helped answers remain distinct",()=
   let helped=markTeacherHelp(emptyTeacherSession(lesson,at),"independent",at);
   helped=submitTeacherAnswer(helped,lesson,"independent","Er kommt aus Deutschland.",at);
   assert.equal(independentTeacherEvidence(helped,lesson),0);
+});
+
+test("L054 voluntary dialogue transfer reuses the existing application draft without losing existing work",()=>{
+  const first="Mia: Hallo! Wie heißt du?\\nBen: Ich heiße Ben.\\nMia: Woher kommst du?\\nBen: Ich komme aus Deutschland.\\nMia: Tschüss!\\nBen: Tschüss!";
+  const second="Leo: Guten Tag! Wie heißen Sie?\\nFrau Weber: Ich heiße Frau Weber.\\nLeo: Das ist Mia.\\nFrau Weber: Wie geht's?\\nLeo: Gut, danke. Auf Wiedersehen!";
+  assert.equal(composeLosC10Dialogues("",second),null);
+  assert.equal(composeLosC10Dialogues(first,""),null);
+  const prepared=composeLosC10Dialogues(first,second);
+  assert.ok(prepared);
+  assert.ok(prepared.includes(first));
+  assert.ok(prepared.includes(second));
+  assert.match(prepared,/Täydennä tähän neljä helppoa virkettä/);
+  const initial={applicationDraft:"",teacherSessions:{"L054":{preserved:true}},selfAssessment:"En ymmärtänyt vielä kaikkea."};
+  const moved=storeLosC10Dialogues(initial,prepared);
+  assert.equal(moved.applicationDraft,prepared);
+  assert.deepEqual(moved.teacherSessions,initial.teacherSessions);
+  assert.equal(moved.selfAssessment,initial.selfAssessment);
+  assert.equal(storeLosC10Dialogues(moved,prepared),moved,"an existing target is never overwritten");
+  const alreadyWritten={...initial,applicationDraft:"Aiemmin kirjoitettu oma vastaus"};
+  assert.equal(storeLosC10Dialogues(alreadyWritten,prepared),alreadyWritten);
+  assert.equal(storeLosC10Dialogues(initial,null),initial);
 });
