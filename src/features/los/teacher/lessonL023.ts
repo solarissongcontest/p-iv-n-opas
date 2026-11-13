@@ -170,7 +170,7 @@ export const LOS1_L023_TEACHER: TeacherLesson = {
           },
           {
             "id": "c",
-            "label": "Molemmat",
+            "label": "Molemmat", "lang": "fi",
             "wrongFeedback": "Vointikysymyksen lausuu tekstin alussa Heinrich, ei molemmat."
           }
         ],
@@ -278,15 +278,15 @@ export const LOS1_L023_TEACHER: TeacherLesson = {
           {
             "id": "a",
             "label": "Molemmille kuuluu hyvää."
-          },
+          , "lang": "fi"},
           {
             "id": "b",
-            "label": "Karl voi huonosti.",
+            "label": "Karl voi huonosti.", "lang": "fi",
             "wrongFeedback": "Karl sanoo mir geht es gut, eli hänelle kuuluu hyvää."
           },
           {
             "id": "c",
-            "label": "Heinrich on väsynyt.",
+            "label": "Heinrich on väsynyt.", "lang": "fi",
             "wrongFeedback": "Heinrich kertoo myös voivansa hyvin, eikä sano olevansa väsynyt."
           }
         ],
