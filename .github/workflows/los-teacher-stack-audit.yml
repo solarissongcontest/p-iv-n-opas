@@ -11,7 +11,10 @@ permissions:
 jobs:
   merge-audit:
     runs-on: ubuntu-24.04
-    timeout-minutes: 12
+    timeout-minutes: 25
+    env:
+      E2E_BASE_URL: http://127.0.0.1:5173
+      REQUIRE_GEMINI: "false"
     steps:
       - uses: actions/checkout@v4
         with:
@@ -54,3 +57,30 @@ jobs:
       - run: bun run typecheck
       - run: bun run test
       - run: bun run build
+
+      - name: Install Playwright and accessibility tooling
+        run: bun run e2e:install
+      - name: Install desktop Chromium and iPhone WebKit
+        run: bunx playwright install --with-deps chromium webkit
+      - name: Start locally merged LOS preview
+        shell: bash
+        run: |
+          nohup bun run dev -- --host 127.0.0.1 --port 5173 --strictPort > /tmp/los-teacher-stack-preview.log 2>&1 &
+          for attempt in $(seq 1 45); do
+            if curl --silent --show-error --fail --max-time 3 http://127.0.0.1:5173/ > /dev/null 2>&1; then
+              exit 0
+            fi
+            sleep 2
+          done
+          cat /tmp/los-teacher-stack-preview.log
+          exit 1
+      - name: Open every merged LOS Teacher lesson in desktop and iPhone browser
+        run: bunx playwright test e2e/los-teacher-integrated-stack.spec.ts --project=desktop-chromium --project=iphone-webkit
+      - name: Preserve merged Teacher browser failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: los-teacher-stack-browser
+          path: test-results/
+          if-no-files-found: ignore
+          retention-days: 14
