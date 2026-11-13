@@ -19,7 +19,8 @@ export const LOS1_L052_TEACHER: TeacherLesson = {
   "requiredCheckedIds": [
     "C10-HARALD-Q02",
     "C10-HARALD-Q03",
-    "C10-HARALD-Q04"
+    "C10-HARALD-Q04",
+    "C10-SOURCE-EVIDENCE-01"
   ],
   "requiredActivityIds": [
     "c10-teacher-L052"
@@ -215,6 +216,25 @@ export const LOS1_L052_TEACHER: TeacherLesson = {
           "section": "understand",
           "label": "C10 · Harald Q02–Q04",
           "instruction": "Tee kolme oikeaa lähdetehtävää ja tarkista jokainen."
+        }
+      ]
+    },
+    {
+      "id": "evidence",
+      "kind": "book",
+      "phase": "Todellinen tekstikohta",
+      "title": "Paikanna Haraldin oma ikärepliikki",
+      "paragraphs": [
+        "Kirjan C10:n Ymmärrä-sivulla on erillinen oikea tekstikohdan tehtävä C10-SOURCE-EVIDENCE-01.",
+        "Valitse 14 alkuperäisestä puheenvuorosta juuri Haraldin puheenvuoro u08, jossa hän sanoo olevansa suunnilleen viisikymmentävuotias.",
+        "Paina Tarkista tekstikohta. Se tallentuu kirjan nykyisiin lähdetarkistuksiin eikä tee kuuntelusuoritusmerkintää."
+      ],
+      "bookLinks": [
+        {
+          "chapterId": "10",
+          "section": "understand",
+          "label": "C10 · Haraldin todellinen ikärepliikki",
+          "instruction": "Tarkista C10-SOURCE-EVIDENCE-01 lähderepliikistä u08."
         }
       ]
     },
