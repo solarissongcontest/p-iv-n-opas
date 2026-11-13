@@ -79,9 +79,9 @@ export const LOS1_L039_TEACHER: TeacherLesson = {
         accepted:["4062"],success:"Oikein. Vier = 4, null = 0, sechs = 6 ja zwei = 2.",hint:"Aloita 4:stä ja muista nolla toisena.",reteach:"Vier–null–sechs–zwei = 4062. Kyse on keksitystä harjoituskoodista.",genericWrong:"Yhdistä erilliset luvut kirjoitusjärjestyksessä."}},
     {id:"exit",phase:"Lopputarkistus",kind:"question",title:"Mikä on osoitettua osaamista?",
       paragraphs:["Vastaa rehellisesti sen mukaan, mitä materiaalia tässä tunnissa oli oikeasti saatavilla."],
-      question:{type:"choice",skillId:"L1-PHON-01",evidenceRole:"exit",prompt:"Mitä tämän tunnin tekstipohjainen lomakeharjoitus osoittaa?",
-        options:[{id:"a",label:"Luetun kirjain- ja numerotiedon ymmärtämistä sekä kirjoittamista."},{id:"b",label:"Virheettömästi mitattua saksankielistä ääntämistä.",wrongFeedback:"Puhettasi ei äänitetty tai arvioitu."},{id:"c",label:"Hyväksytyn audiotallenteen kuullun ymmärtämistä.",wrongFeedback:"Lomakkeen nimet ja numerot tulivat kirjoitetusta mallista, eivät hyväksytystä äänitteestä."}],
-        correctOption:"a",success:"Oikein. Kuuntelupisteitä ei synny tekstifallbackista.",hint:"Mistä lomakkeen nimi ja koodi olivat peräisin?",reteach:"Kirjallinen malli tuottaa luetun ja kirjoitetun harjoittelua, ei todennettua kuuntelunäyttöä.",genericWrong:"Erottele tekstin lukeminen ja äänen kuuleminen."}},
+      question:{type:"choice",skillId:"L1-PHON-01",evidenceRole:"exit",prompt:"Mikä kirjoitusmerkki on saksan aakkosten erikoismerkki?",
+        options:[{id:"a",label:"ß"},{id:"b",label:"Å",wrongFeedback:"Å ei kuulu saksan oikeinkirjoituksen tavallisiin erikoismerkkeihin."},{id:"c",label:"Ø",wrongFeedback:"Ø kuuluu muiden kielten kirjoitusasuihin, ei saksan perusaakkosten lisämerkkeihin."}],
+        correctOption:"a",success:"Oikein. ß on Eszett, ja tämä tehtävä arvioi kirjainmerkin tunnistamista, ei äänen kuulemista.",hint:"Katso merkkiä sanassa heißt.",reteach:"Saksan erikoismerkkejä ovat Ä, Ö, Ü ja ß. Tämän kirjainmerkkitehtävän oikea ratkaisu ei ole kuuntelupiste.",genericWrong:"Etsi kirjainmerkki, joka esiintyy sanassa heißt."}},
     {id:"summary",phase:"Yhteenveto",kind:"summary",title:"Täytit lomakkeen ilman tekaistua kuuntelua",
       paragraphs:[
         "Harjoittelit Text B:n kirjainmateriaalia, täytit kuvitteellisen nimen ja koodin kirjalliseen lomakkeeseen sekä teit kaksi uutta soveltavaa harjoitusta.",
