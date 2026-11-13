@@ -7,7 +7,7 @@ const name = (value: string) => /^[A-Za-z0-9_.-]{1,80}$/.test(value);
 const meaningful = (value: string | undefined) => Boolean(value?.trim());
 const textbookSections = new Set([
   "overview","contents","chapter","text","understand","vocabulary","grammar",
-  "text-b","practice","apply","culture","test","appendix","dictionary",
+  "text-b","practice","apply","culture","test","appendix","dictionary","review","midterm",
 ]);
 
 function checkQuestion(question: TeacherQuestion, location: string, issues: TeacherContentIssue[]) {
@@ -109,6 +109,10 @@ export function validateTeacherLesson(lesson: TeacherLesson): TeacherContentIssu
     assessment.minSelfAssessmentLength > 500
   )) {
     issues.push({ location: "chapterAssessment", problem: "Kappaletestin tai itsearvioinnin vaatimus on virheellinen." });
+  }
+  if (lesson.examAssessment && (lesson.examAssessment.id !== "EX-MID" ||
+      lesson.id !== "L030" || lesson.chapterId !== "91" || lesson.chapterAssessment)) {
+    issues.push({ location: "examAssessment", problem: "EX-MID on sallittu vain L030:n oikeassa koeluonnoksessa." });
   }
   if (!lesson.scenes.some(scene => scene.kind === "summary")) {
     issues.push({ location: "scenes", problem: "Oppitunnilta puuttuu yhteenveto." });

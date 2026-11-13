@@ -1,3 +1,5 @@
+import { LOS1_MIDTERM_QUESTIONS, losExamReadyToSubmit } from "../content/los1Exams.ts";
+
 /**
  * LOS Teacher 2.0: deterministic learning engine. No AI services, network requests
  * or inferred mastery. A session is independent of legacy lessonProgress.
@@ -55,6 +57,8 @@ export type TeacherLesson = {
     requireApplicationDraft: boolean;
     minSelfAssessmentLength: number;
   };
+  /** Reuses the actual book assessment; never embeds a second answer bank. */
+  examAssessment?: { id: "EX-MID" };
 };
 export type TeacherChapterAssessmentInput = {
   testAnswers: Readonly<Record<string, string>>;
@@ -74,6 +78,23 @@ export function teacherChapterAssessmentStatus(
   const reflectionDone = (input?.selfAssessment.trim().length ?? 0) >= requirement.minSelfAssessmentLength;
   return {answered,expected,submitted,applicationDone,reflectionDone,
     ready:submitted && answered===expected && applicationDone && reflectionDone};
+}
+/** The exam is scored and submitted only on its existing book page and draft 91. */
+export function teacherMidtermAssessmentStatus(
+  lesson: TeacherLesson,
+  input?: TeacherChapterAssessmentInput,
+  practiceAnswers: Readonly<Record<string,string>> = {},
+): { answered: number; expected: number; submitted: boolean; selfReviewed: boolean; ready: boolean } {
+  if (lesson.examAssessment?.id !== "EX-MID") return {
+    answered:0,expected:0,submitted:false,selfReviewed:false,ready:true,
+  };
+  const answered = LOS1_MIDTERM_QUESTIONS.filter(q => q.choices.some(option =>
+    option.id === input?.testAnswers[q.id])).length;
+  const submitted = Boolean(input?.testSubmittedAt && iso(input.testSubmittedAt));
+  const selfReviewed = Boolean(input?.selfAssessment.trim()) &&
+    ["well","some","again"].includes(practiceAnswers["EX-MID-DIALOGUE-SELF"] ?? "");
+  return {answered,expected:LOS1_MIDTERM_QUESTIONS.length,submitted,selfReviewed,
+    ready: submitted && selfReviewed && losExamReadyToSubmit(LOS1_MIDTERM_QUESTIONS,input?.testAnswers ?? {})};
 }
 export type TeacherAttempt = {
   sceneId: string;
@@ -219,7 +240,9 @@ export function teacherWrongFeedback(scene: TeacherScene, answer: string): strin
 export function teacherCanFinish(session: TeacherSession, lesson: TeacherLesson,
   practiceAnswers: Readonly<Record<string, string>>, practiceChecked: readonly string[] = [],
   chapterAssessment?: TeacherChapterAssessmentInput): boolean {
-  return teacherChapterAssessmentStatus(lesson, chapterAssessment).ready && !session.paused && lesson.scenes.every(scene => session.visitedIds.includes(scene.id)) &&
+  return teacherChapterAssessmentStatus(lesson, chapterAssessment).ready &&
+    teacherMidtermAssessmentStatus(lesson, chapterAssessment, practiceAnswers).ready &&
+    !session.paused && lesson.scenes.every(scene => session.visitedIds.includes(scene.id)) &&
     lesson.scenes.every(scene => !scene.reflection ||
       (session.draftAnswers[scene.id]?.trim().length ?? 0) >= scene.reflection.minLength) &&
     lesson.requiredQuestionIds.every(id => session.attempts.some(item => item.sceneId === id)) &&

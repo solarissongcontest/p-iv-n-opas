@@ -3,7 +3,7 @@ import { ArrowLeft, ArrowRight, BookOpen, Check, CheckCircle2, ChevronLeft, Chev
 import { readCachedDeviceUser } from "@/lib/deviceSession";
 import { useLosChapterDraft } from "../studyState.ts";
 import {
-  emptyTeacherSession, markTeacherHelp, confirmTeacherActivity, teacherChapterAssessmentStatus,
+  emptyTeacherSession, markTeacherHelp, confirmTeacherActivity, teacherChapterAssessmentStatus, teacherMidtermAssessmentStatus,
   finishTeacherSession, independentTeacherEvidence, moveTeacherScene, revealTeacherSolution,
   setTeacherAnswerDraft, submitTeacherAnswer, toggleTeacherPause, teacherCanFinish, teacherLatestAttempt,
   teacherWrongFeedback, type TeacherScene, type TeacherSession,
@@ -15,7 +15,8 @@ import "./teacher.css";
 
 const stamp = () => new Date().toISOString();
 const bookUrl = (lessonId: string, bookId: number, chapterId: string, section: string) =>
-  "/los?lessonReturn=" + encodeURIComponent(lessonId) + "#/" + bookId + "/" + chapterId + "/" + section;
+  "/los?lessonReturn=" + encodeURIComponent(lessonId) + "#/" + bookId + "/" +
+  (section === "midterm" || section === "review" ? section : chapterId + "/" + section);
 
 function SceneQuestion({ scene, session, submit, saveDraft, requestHint, reveal }: {
   scene: TeacherScene;
@@ -185,7 +186,7 @@ export function LosTeacherPlayer({ lessonId }: { lessonId: string }) {
       </section> :
       !lesson || !session || !scene ? <section className="los-teacher-status">
         <h1>Oppitunnin opetusmateriaali ei ole vielä valmis</h1>
-        <p>Teacher 2.0 on nyt käytössä oppitunneilla L001–L012. Muut oppitunnit toimivat edelleen nykyisessä Opetuspolussa.</p>
+        <p>Teacher 2.0 on käytössä alkupään käsikirjoitetuilla tunneilla sekä kertauksessa L027–L030. Muut tunnit käyttävät nykyistä opetuspolkua.</p>
         <a href={"/los#/" + (lesson?.bookId ?? 1) + "/path"}>Palaa Opetuspolkuun</a>
       </section> :
       <>
@@ -302,6 +303,17 @@ export function LosTeacherPlayer({ lessonId }: { lessonId: string }) {
                   <p>Oma sovellus: {progress.applicationDone ? "Teksti tallennettu" : "Teksti vielä puuttuu"}. Tätä ei pisteytetä automaattisesti.</p>
                   <p>Itsearviointi: {progress.reflectionDone ? "Kirjattu" : "Puuttuu"}. Sisältöä ei arvioida koneellisesti.</p>
                   <p>{progress.ready ? "Kirjan sovitut suoritukset ovat tallessa." : "Avaa kirjan testisivu, palauta kaikki osatehtävät ja kirjoita oma itsearviointi. Pelkkä sivun avaaminen ei riitä."}</p>
+                </>;
+              })()}
+            </section>}
+            {lesson.examAssessment?.id === "EX-MID" && (scene.kind === "book" || scene.kind === "summary") && <section className="los-teacher-assessment-status" aria-label="Välikokeen todellinen tila">
+              {(() => {
+                const progress = teacherMidtermAssessmentStatus(lesson, draft, draft.practiceAnswers);
+                return <>
+                  <h3>EX-MID · oikean kokeen tilanne</h3>
+                  <p>{progress.answered}/{progress.expected} kelvollista vastausta · {progress.submitted ? "Palautettu" : "Ei palautettu"}.</p>
+                  <p>Oma keskusteluarvio: {progress.selfReviewed ? "Kirjattu" : "Puuttuu"}.</p>
+                  <p>Kuullunymmärtämisen tai puheen pisteitä ei muodosteta tästä merkinnästä.</p>
                 </>;
               })()}
             </section>}
