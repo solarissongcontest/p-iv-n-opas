@@ -92,12 +92,13 @@ export function LosC01GrammarGuide() {
           <LosPronunciationButton text={item.word}/>
         </article>)}
       </div>
-      <p>Harjoittele vertaamalla omaa ääntäsi malliin, mutta muista:
-        painikkeen puhe on laitteen <strong>synteettinen ja vielä laitetestaamaton esikatselu</strong>.
-        Mahdollista omaa äänitystä ei arvostella automaattisesti.</p>
-      <p>Kun palaat kirjan Text A -sivulle, voit kuunnella siellä erillistä
-        alkuperäisen dialogin äänitettä. Se ei ole sama kuin yksittäisten sanojen synteettinen
-        esikatselu.</p>
+      <p>Yksittäisten sanojen tarkistettuja ihmisäänitteitä ei ole vielä saatavilla:
+        <strong> Malliääni puuttuu</strong>. Käytä kirjoitusasua ja lähdemerkitystä
+        sekä harjoittele omaan tahtiisi. IPA ei yksin korvaa kuultua ääntämismallia.
+        Ääntämistä tai mahdollista omaa äänitystä ei arvostella automaattisesti.</p>
+      <p>Kirjan Text A -sivulla on erillinen alkuperäisen dialogin äänite,
+        jonka saatavuus ja toisto on tarkistettava erikseen. Äänetön
+        tekstiharjoittelu on aina mahdollinen.</p>
     </section>
     <section aria-labelledby="los-c01-remember">
       <h3 id="los-c01-remember">5. Tarkista ymmärsitkö ennen harjoituksia</h3>

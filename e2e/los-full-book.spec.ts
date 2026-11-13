@@ -102,6 +102,9 @@ test("C01 real original token highlight, C08 gated video and responsive exercise
 
 
 test("every one of the 60 guided lessons opens from its actual chapter picker on iPhone and desktop",async({page})=>{
+ // This intentionally visits all 60 entries, including 11 full React route roundtrips.
+ // The default 60 s test budget is too short for emulated iPhone WebKit in busy CI.
+ test.setTimeout(150_000);
  await enterLocalBook(page);
  await page.goto("/los#/1/path",{waitUntil:"domcontentloaded"});
  const runner=page.locator("#los-lesson-runner");
@@ -121,10 +124,19 @@ test("every one of the 60 guided lessons opens from its actual chapter picker on
    expect(seen.has(title)).toBe(false);
    seen.add(title);
    await button.click();
-   await expect(runner.locator(".los-lesson-detail .los-overline")).toContainText(title);
-   await expect(runner.locator(".los-lesson-steps li").first()).toBeVisible();
-   await expect(runner.locator(".los-lesson-exit")).toBeVisible();
-   await expect(runner.getByRole("button",{name:"Merkitse oppitunti suoritetuksi"})).toBeDisabled();
+   if(Number(title.slice(1))<=11){
+    await expect(page).toHaveURL(new RegExp("/los-lessons/"+title+"$"));
+    await expect(page.locator(".los-teacher-paper h2")).toBeVisible();
+    await expect(page.locator(".los-teacher-sidebar h1")).toBeVisible();
+    await page.goto("/los#/1/path",{waitUntil:"domcontentloaded"});
+    await expect(runner).toBeVisible();
+    await sections.nth(i).click();
+   }else{
+    await expect(runner.locator(".los-lesson-detail .los-overline")).toContainText(title);
+    await expect(runner.locator(".los-lesson-steps li").first()).toBeVisible();
+    await expect(runner.locator(".los-lesson-exit")).toBeVisible();
+    await expect(runner.getByRole("button",{name:"Merkitse oppitunti suoritetuksi"})).toBeDisabled();
+   }
   }
  }
  expect(seen.size).toBe(60);
@@ -160,30 +172,42 @@ test("book cover opens real L001 and remembers its position",async({page})=>{
  const start=page.getByRole("button",{name:"Aloita nollasta"});
  await expect(start).toBeVisible();
  await start.click();
- const lesson=page.locator("#los-lesson-runner .los-lesson-detail .los-overline");
- await expect(lesson).toContainText("L001");
- await page.reload();
- await expect(lesson).toContainText("L001");
+ await expect(page).toHaveURL(/\/los-lessons\/L001$/);
+ const lesson=page.locator(".los-teacher-paper h2");
+ await expect(lesson).toContainText("Tervetuloa ensimmäiselle");
+ await page.getByRole("button",{name:"Seuraava"}).click();
+ await expect(lesson).toContainText("Ensimmäiset kolme");
+ await page.reload({waitUntil:"domcontentloaded"});
+ await expect(lesson).toContainText("Ensimmäiset kolme");
  await expectNoHorizontalOverflow(page);
 });
 
 test("book cover resumes next unfinished lesson after completing L001",async({page})=>{
  await enterLocalBook(page);
- await page.goto("/los#/1/path");
- const runner=page.locator("#los-lesson-runner");
- await expect(runner).toBeVisible();
- for(let i=0;i<3;i++){
-  await runner.getByRole("button",{name:"Tein tämän vaiheen"}).first().click();
+ await page.goto("/los-lessons/L001",{waitUntil:"domcontentloaded"});
+ const paper=page.locator(".los-teacher-paper");
+ const outline=page.locator(".los-teacher-outline nav button");
+ await expect(outline).toHaveCount(10);
+ for(let i=0;i<10;i++){
+  await outline.nth(i).click();
+  if(i===3)await paper.locator(".los-teacher-option").filter({hasText:"Hallo!"}).click();
+  if(i===4)await paper.getByRole("button",{name:"Kokeilin sanaselitystä ja lukijan käyttöä kirjassa"}).click();
+  if(i===6)await paper.getByRole("button",{name:"Kokeilin äänentoistoa tai totesin, ettei äänite ollut saatavilla"}).click();
+  if(i===7){
+   await paper.locator(".los-teacher-reflection textarea").fill("Haluan osata tervehtiä saksaksi itsenäisesti.");
+   await paper.getByRole("button",{name:"Tallenna oma oppimistavoitteeni"}).click();
+  }
+  if(i===8)await paper.locator(".los-teacher-option").filter({hasText:"Napautan sanaa lukijassa."}).click();
  }
- await runner.getByLabel("Napautan sanaa lukijassa.").check();
- await runner.getByRole("button",{name:"Palauta lopputarkistus"}).click();
- await runner.getByRole("button",{name:"Merkitse oppitunti suoritetuksi"}).click();
- await expect(runner).toContainText("L001 suoritettu");
- await page.goto("/los#/1/overview");
+ await expect(paper.getByRole("button",{name:"Merkitse oppitunti läpikäydyksi"})).toBeEnabled();
+ await paper.getByRole("button",{name:"Merkitse oppitunti läpikäydyksi"}).click();
+ await expect(paper).toContainText("Oppitunti merkitty suoritetuksi");
+ await page.goto("/los#/1/overview",{waitUntil:"domcontentloaded"});
  const next=page.getByRole("button",{name:"Jatka oppituntia L002"});
  await expect(next).toBeVisible();
  await next.click();
- await expect(page.locator("#los-lesson-runner .los-lesson-detail .los-overline")).toContainText("L002");
+ await expect(page).toHaveURL(/\/los-lessons\/L002$/);
+ await expect(page.locator(".los-teacher-sidebar h1")).toContainText("Aloita saksan ääntämisestä");
 });
 
 test("legacy facsimile and PDF.js links safely open the digital reader",async({page})=>{
@@ -271,7 +295,7 @@ test("U4 C01 teaches greetings and pronunciation without requiring prior German"
  await expect(guide.locator(".los-c01-greetings-table tbody tr")).toHaveCount(8);
  await expect(guide.locator(".los-c01-phonetics article")).toHaveCount(4);
  await expect(guide).toContainText("ei arvostella automaattisesti");
- await expect(guide).toContainText("synteettinen");
+ await expect(guide).toContainText("Malliääni puuttuu");
  await expectNoHorizontalOverflow(page);
 });
 
@@ -659,4 +683,376 @@ test("C04, C07 and C09 culture pages use three new self-hosted photographs with 
  await expect(page.locator(".los1-culture-gallery")).toContainText("Straße");
  await openChapter(page,"09","culture");
  await expect(page.locator(".los1-culture-gallery")).toContainText("eikä lähde vahvista saksankielistä kalenteria");
+});
+
+
+test("L004 Teacher 2.0 opens from the study path and preserves its scene when reading the book",async({page})=>{
+  await enterLocalBook(page);
+  await page.goto("/los#/1/path",{waitUntil:"domcontentloaded"});
+  const row=page.locator(".los-path-group li button").filter({hasText:"Tervehdykset muistista"});
+  await expect(row).toHaveCount(1);
+  await row.click();
+  await expect(page).toHaveURL(/\/los-lessons\/L004$/);
+  await expect(page.locator(".los-teacher-paper h2").first()).toContainText("Tänään opit");
+
+  await page.getByRole("button",{name:"Seuraava"}).click();
+  await expect(page.locator(".los-teacher-paper h2").first()).toContainText("Mitä muistat");
+  await page.locator(".los-teacher-option").filter({hasText:"Hallo!"}).click();
+  await expect(page.locator(".los-teacher-feedback")).toContainText("Oikein");
+  await page.reload({waitUntil:"domcontentloaded"});
+  await expect(page.locator(".los-teacher-paper h2").first()).toContainText("Mitä muistat");
+  await expect(page.locator(".los-teacher-feedback")).toContainText("Oikein");
+
+  await page.getByRole("button",{name:/Avaa oppikirjan sanasto ja tehtävät/}).click();
+  const bookLink=page.getByRole("link",{name:/Avaa kirjassa/}).first();
+  await expect(bookLink).toHaveAttribute("target","_blank");
+  await expect(bookLink).toHaveAttribute("href",/lessonReturn=L004.*vocabulary/);
+  await page.goto("/los?lessonReturn=L004#/1/01/vocabulary",{waitUntil:"domcontentloaded"});
+  await page.getByRole("link",{name:"Palaa oppitunnille L004"}).click();
+  await expect(page).toHaveURL(/\/los-lessons\/L004$/);
+  await expect(page.locator(".los-teacher-paper h2").first()).toContainText("Avaa oppikirjan sanasto ja tehtävät");
+  await expectNoHorizontalOverflow(page);
+});
+
+
+test("L004 chapter picker uses the dedicated teacher instead of legacy checklist", async ({page}) => {
+  await enterLocalBook(page);
+  await page.goto("/los#/1/path", { waitUntil: "domcontentloaded" });
+  const teacherChoice = page.locator(".los-lesson-picker button").filter({hasText:"L004"});
+  await expect(teacherChoice).toHaveCount(1);
+  await teacherChoice.click();
+  await expect(page).toHaveURL(/\/los-lessons\/L004$/);
+  await expect(page.locator(".los-teacher-paper h2").first()).toContainText("Tänään opit");
+  await expectNoHorizontalOverflow(page);
+});
+
+
+test("L001 Teacher 2.0 stores a genuine beginner goal and returns from the book without losing place",async({page})=>{
+  await enterLocalBook(page);
+  await page.goto("/los#/1/path",{waitUntil:"domcontentloaded"});
+  const start=page.locator(".los-lesson-picker button").filter({hasText:"L001"});
+  await start.click();
+  await expect(page).toHaveURL(/\/los-lessons\/L001$/);
+  await expect(page.locator(".los-teacher-paper h2").first()).toContainText("Tervetuloa ensimmäiselle");
+
+  await page.locator(".los-teacher-outline nav button").filter({hasText:"Mitä haluat osata ensimmäiseksi?"}).click();
+  const goal=page.locator(".los-teacher-reflection textarea");
+  await expect(goal).toBeVisible();
+  const save=page.getByRole("button",{name:"Tallenna oma oppimistavoitteeni"});
+  await expect(save).toBeDisabled();
+  await goal.fill("Haluan oppia tervehtimään ja kertomaan nimeni saksaksi.");
+  await expect(save).toBeEnabled();
+  await save.click();
+  await page.reload({waitUntil:"domcontentloaded"});
+  await expect(page.locator(".los-teacher-paper h2").first()).toContainText("Mitä haluat osata ensimmäiseksi?");
+  await expect(goal).toHaveValue("Haluan oppia tervehtimään ja kertomaan nimeni saksaksi.");
+  await expect(page.getByText("Harjoittelu vahvistettu")).toBeVisible();
+
+  await page.locator(".los-teacher-outline nav button").filter({hasText:"Oppitunti ja oppikirja tekevät eri asiat"}).click();
+  const book=page.getByRole("link",{name:/Avaa kirjassa/}).first();
+  await expect(book).toHaveAttribute("target","_blank");
+  await expect(book).toHaveAttribute("href",/lessonReturn=L001.*text/);
+  await page.goto("/los?lessonReturn=L001#/1/01/text",{waitUntil:"domcontentloaded"});
+  await page.getByRole("link",{name:"Palaa oppitunnille L001"}).click();
+  await expect(page).toHaveURL(/\/los-lessons\/L001$/);
+  await expect(page.locator(".los-teacher-paper h2").first()).toContainText("Oppitunti ja oppikirja tekevät eri asiat");
+  await expectNoHorizontalOverflow(page);
+});
+
+
+test("L002 pronunciation lesson gives targeted corrections and opens grammar in the textbook",async({page})=>{
+  await enterLocalBook(page);
+  await page.goto("/los#/1/path",{waitUntil:"domcontentloaded"});
+  await page.locator(".los-lesson-picker button").filter({hasText:"L002"}).click();
+  await expect(page).toHaveURL(/\/los-lessons\/L002$/);
+  await page.locator(".los-teacher-outline nav button").filter({hasText:"Arvaatko saksan w-kirjaimen äänen?"}).click();
+  await page.locator(".los-teacher-option").filter({hasText:"Englannin w-äännettä"}).click();
+  await expect(page.locator(".los-teacher-feedback")).toContainText("Saksan tavallinen w");
+  await page.locator(".los-teacher-option").filter({hasText:"Suomen v-äännettä"}).click();
+  await expect(page.locator(".los-teacher-feedback")).toContainText("Oikein");
+  await page.locator(".los-teacher-outline nav button").filter({hasText:"Tarkista säännöt kirjan omasta ääntämisosiosta"}).click();
+  await expect(page.getByRole("link",{name:/Avaa kirjassa/}).first()).toHaveAttribute("href",/lessonReturn=L002.*grammar/);
+  await expectNoHorizontalOverflow(page);
+});
+
+
+test("L003 original dialogue reading preserves checked source answers across book and teacher",async({page})=>{
+  await enterLocalBook(page);
+  await page.goto("/los#/1/path",{waitUntil:"domcontentloaded"});
+  await page.locator(".los-lesson-picker button").filter({hasText:"L003"}).click();
+  await expect(page).toHaveURL(/\/los-lessons\/L003$/);
+  await expect(page.locator(".los-teacher-paper h2").first()).toContainText("Ensimmäinen oikea");
+
+  await page.locator(".los-teacher-outline nav button").filter({hasText:"Tee kirjan kaksi oikeaa ymmärtämistehtävää"}).click();
+  await expect(page.getByRole("link",{name:/Avaa kirjassa/}).first()).toHaveAttribute("href",/lessonReturn=L003.*understand/);
+  await page.goto("/los?lessonReturn=L003#/1/01/understand",{waitUntil:"domcontentloaded"});
+  const questions=page.locator(".los-c01-question");
+  await questions.nth(0).locator('input[value="a"]').check();
+  await questions.nth(0).getByRole("button",{name:"Tarkista vastaus"}).click();
+  await questions.nth(1).locator('input[value="b"]').check();
+  await questions.nth(1).getByRole("button",{name:"Tarkista vastaus"}).click();
+  await page.getByRole("link",{name:"Palaa oppitunnille L003"}).click();
+  await expect(page).toHaveURL(/\/los-lessons\/L003$/);
+  await expect(page.locator(".los-teacher-paper")).toContainText("C01-SOURCE-Q01: Vastaus tallennettu ja tarvittaessa tarkistettu");
+  await expect(page.locator(".los-teacher-paper")).toContainText("C01-SOURCE-Q02: Vastaus tallennettu ja tarvittaessa tarkistettu");
+  await expectNoHorizontalOverflow(page);
+});
+
+
+test("L005 Teacher uses the real Text B transcript and checked book answers, never claims listening from text",async({page})=>{
+  await enterLocalBook(page);
+  await page.goto("/los#/1/path",{waitUntil:"domcontentloaded"});
+  await page.locator(".los-lesson-picker button").filter({hasText:"L005"}).click();
+  await expect(page).toHaveURL(/\/los-lessons\/L005$/);
+  await expect(page.locator(".los-teacher-paper h2").first()).toContainText("Tervehdykset kuuluvat");
+  await page.locator(".los-teacher-outline nav button").filter({hasText:"Avaa koko alkuperäinen tervehdysluettelo"}).click();
+  const textB=page.getByRole("link",{name:/Avaa kirjassa/}).first();
+  await expect(textB).toHaveAttribute("href",/lessonReturn=L005.*text-b/);
+  await expect(textB).toHaveAttribute("target","_blank");
+  await page.goto("/los?lessonReturn=L005#/1/01/text-b",{waitUntil:"domcontentloaded"});
+  await expect(page.getByText("Koko 28 sekunnin German Men92")).toBeVisible();
+  const checks=page.locator(".los-secondary-source .los-c01-question");
+  await expect(checks).toHaveCount(4);
+  await checks.nth(0).locator('input[value="b"]').check();
+  await checks.nth(0).getByRole("button",{name:"Tarkista vastaus"}).click();
+  await checks.nth(1).locator('input[value="a"]').check();
+  await checks.nth(1).getByRole("button",{name:"Tarkista vastaus"}).click();
+  await page.getByRole("link",{name:"Palaa oppitunnille L005"}).click();
+  await expect(page).toHaveURL(/\/los-lessons\/L005$/);
+  await expect(page.locator(".los-teacher-paper")).toContainText("C01-TEXTB-Q01: Vastaus tallennettu ja tarvittaessa tarkistettu");
+  await expect(page.locator(".los-teacher-paper")).toContainText("C01-TEXTB-Q02: Vastaus tallennettu ja tarvittaessa tarkistettu");
+  await page.locator(".los-teacher-outline nav button").filter({hasText:"Vertaa ilmausluetteloa Franzin ja Jörgin keskusteluun"}).click();
+  await page.goto("/los?lessonReturn=L005#/1/01/understand",{waitUntil:"domcontentloaded"});
+  const source=page.locator(".los-c01-question");
+  await source.nth(2).locator('input[value="c"]').check();
+  await source.nth(2).getByRole("button",{name:"Tarkista vastaus"}).click();
+  await source.nth(3).locator('input[value="a"]').check();
+  await source.nth(3).getByRole("button",{name:"Tarkista vastaus"}).click();
+  await page.getByRole("link",{name:"Palaa oppitunnille L005"}).click();
+  await expect(page.locator(".los-teacher-paper")).toContainText("C01-SOURCE-Q03: Vastaus tallennettu ja tarvittaessa tarkistettu");
+  await expect(page.locator(".los-teacher-paper")).toContainText("C01-SOURCE-Q04: Vastaus tallennettu ja tarvittaessa tarkistettu");
+  await page.locator(".los-teacher-outline nav button").filter({hasText:"Osaat valita tervehdyksen tilanteen perusteella"}).click();
+  await expect(page.getByRole("button",{name:"Merkitse oppitunti läpikäydyksi"})).toBeDisabled();
+  await expect(page.locator(".los-teacher-paper")).toContainText("Jos ääni oli käytettävissä");
+  await expectNoHorizontalOverflow(page);
+});
+
+
+test("L006 uses the existing submitted C01 exam and student self-assessment, not a second quiz",async({page})=>{
+ await enterLocalBook(page);
+ await page.goto("/los#/1/path",{waitUntil:"domcontentloaded"});
+ await page.locator(".los-lesson-picker button").filter({hasText:"L006"}).click();
+ await expect(page).toHaveURL(/\/los-lessons\/L006$/);
+ await expect(page.locator(".los-teacher-paper h2")).toContainText("Kertaus ja kappaletesti");
+ const outline=page.locator(".los-teacher-outline nav button");
+ await outline.filter({hasText:"Palauta C01:n 12 osatehtävän testi"}).click();
+ await expect(page.locator(".los-teacher-assessment-status")).toContainText("0/12 vastattu");
+ await expect(page.locator(".los-teacher-assessment-status")).toContainText("Ei vielä palautettu");
+ const link=page.getByRole("link",{name:/Avaa kirjassa/}).first();
+ await expect(link).toHaveAttribute("href",/lessonReturn=L006.*\/01\/test/);
+ await page.goto("/los?lessonReturn=L006#/1/01/test",{waitUntil:"domcontentloaded"});
+ const questions=page.locator(".los-workbook-question");
+ await expect(questions).toHaveCount(12);
+ for(let i=0;i<12;i++){
+  const item=questions.nth(i);
+  const radios=item.locator('input[type="radio"]');
+  if(await radios.count())await radios.first().check();
+  else await item.locator('input[type="text"]').fill("x");
+ }
+ await page.locator(".los-test-submit button").click();
+ await expect(page.locator(".los-test-result")).toContainText("TESTI PALAUTETTU");
+ await page.locator("#los-self-01").fill("Tervehdys onnistui, mutta hyvästelyn muotoa harjoittelen vielä.");
+ await page.goto("/los?lessonReturn=L006#/1/01/apply",{waitUntil:"domcontentloaded"});
+ await page.locator("#los-application-01").fill("Guten Morgen!\\nTschüss!");
+ await page.getByRole("link",{name:"Palaa oppitunnille L006"}).click();
+ await expect(page).toHaveURL(/\/los-lessons\/L006$/);
+ await outline.filter({hasText:"Palauta C01:n 12 osatehtävän testi"}).click();
+ const status=page.locator(".los-teacher-assessment-status");
+ await expect(status).toContainText("12/12 vastattu");
+ await expect(status).toContainText("Palautettu");
+ await expect(status).toContainText("Itsearviointi: Kirjattu");
+ await expect(status).toContainText("Oma sovellus: Teksti tallennettu");
+ await outline.filter({hasText:"C01 on kerrattu"}).click();
+ await expect(page.getByRole("button",{name:"Merkitse oppitunti läpikäydyksi"})).toBeDisabled();
+ await expectNoHorizontalOverflow(page);
+});
+
+
+test("L007 Teacher reads C02 draft only, never C01 answers",async({page})=>{
+ await enterLocalBook(page);
+ await page.goto("/los-lessons/L007",{waitUntil:"domcontentloaded"});
+ await expect(page.locator(".los-teacher-sidebar h1")).toContainText("Miten kysyn nimen?");
+ const outline=page.locator(".los-teacher-outline nav button");
+ await outline.filter({hasText:"Etsi nimifraasit kirjan sanastosta ja kieliopista"}).click();
+ const paper=page.locator(".los-teacher-paper");
+ await expect(paper).toContainText("C02-EX-01: Vastaus vielä puuttuu");
+ const bookLink=page.getByRole("link",{name:/Avaa kirjassa/}).last();
+ await expect(bookLink).toHaveAttribute("href",/lessonReturn=L007.*\/02\/practice/);
+ await page.goto("/los?lessonReturn=L007#/1/02/practice",{waitUntil:"domcontentloaded"});
+ await expect(page.locator("#C02-EX-01")).toBeVisible();
+ await page.locator('#C02-EX-01 input[value="Ich heiße Greta."]').check();
+ await page.getByRole("link",{name:"Palaa oppitunnille L007"}).click();
+ await expect(page).toHaveURL(/\/los-lessons\/L007$/);
+ await outline.filter({hasText:"Etsi nimifraasit kirjan sanastosta ja kieliopista"}).click();
+ await expect(paper).toContainText("C02-EX-01: Vastaus tallennettu ja tarvittaessa tarkistettu");
+ await expect(paper).toContainText("C02-EX-02: Vastaus vielä puuttuu");
+ await page.goto("/los-lessons/L006",{waitUntil:"domcontentloaded"});
+ const c01outline=page.locator(".los-teacher-outline nav button");
+ await c01outline.filter({hasText:"Palauta C01:n 12 osatehtävän testi"}).click();
+ await expect(page.locator(".los-teacher-assessment-status")).toContainText("0/12 vastattu");
+ await expectNoHorizontalOverflow(page);
+});
+
+
+test("L008 checks the real C02 source answers and preserves them across the book/teacher roundtrip",async({page})=>{
+ await enterLocalBook(page);
+ await page.goto("/los-lessons/L008",{waitUntil:"domcontentloaded"});
+ await expect(page.locator(".los-teacher-sidebar h1")).toContainText("Franz ja Greta");
+ const outline=page.locator(".los-teacher-outline nav button");
+ await outline.filter({hasText:"Tee ja tarkista neljä oikeaa lähdetekstikysymystä"}).click();
+ const paper=page.locator(".los-teacher-paper");
+ await expect(paper).toContainText("C02-SOURCE-Q01: Vastaus vielä puuttuu");
+ const link=page.getByRole("link",{name:/Avaa kirjassa/}).first();
+ await expect(link).toHaveAttribute("href",/lessonReturn=L008.*\/02\/understand/);
+ await page.goto("/los?lessonReturn=L008#/1/02/understand",{waitUntil:"domcontentloaded"});
+ const fieldsets=page.locator(".los-c01-question");
+ await expect(fieldsets).toHaveCount(5);
+ const keys=["a","b","a","b"];
+ for(let i=0;i<4;i++){
+  await fieldsets.nth(i).locator('input[value="'+keys[i]+'"]').check();
+  await fieldsets.nth(i).getByRole("button",{name:"Tarkista vastaus"}).click();
+ }
+ await page.getByRole("link",{name:"Palaa oppitunnille L008"}).click();
+ await expect(page).toHaveURL(/\/los-lessons\/L008$/);
+ await outline.filter({hasText:"Tee ja tarkista neljä oikeaa lähdetekstikysymystä"}).click();
+ for(const n of ["01","02","03","04"]){
+  await expect(page.locator(".los-teacher-paper")).toContainText("C02-SOURCE-Q"+n+": Vastaus tallennettu ja tarvittaessa tarkistettu");
+ }
+ await outline.filter({hasText:"Olet lukenut ensimmäisen nimidialogin"}).click();
+ await expect(page.getByRole("button",{name:"Merkitse oppitunti läpikäydyksi"})).toBeDisabled();
+ await expectNoHorizontalOverflow(page);
+});
+
+
+test("L009 grammar lesson uses the four real C02 verb answers across book and Teacher",async({page})=>{
+ await enterLocalBook(page);
+ await page.goto("/los-lessons/L009",{waitUntil:"domcontentloaded"});
+ await expect(page.locator(".los-teacher-sidebar h1")).toContainText("Heißen ja sein");
+ const outline=page.locator(".los-teacher-outline nav button");
+ await outline.filter({hasText:"Tee neljä oikeaa C02:n verbiharjoitusta"}).click();
+ const paper=page.locator(".los-teacher-paper");
+ await expect(paper).toContainText("C02-EX-03: Vastaus vielä puuttuu");
+ const link=page.getByRole("link",{name:/Avaa kirjassa/}).last();
+ await expect(link).toHaveAttribute("href",/lessonReturn=L009.*\/02\/practice/);
+ await page.goto("/los?lessonReturn=L009#/1/02/practice",{waitUntil:"domcontentloaded"});
+ const answers=[["C02-EX-03","heiße"],["C02-EX-04","heißt"],["C02-EX-05","bin"],["C02-EX-06","bist"]];
+ for(const [id,value] of answers){
+  await page.locator('#'+id+' input[type="text"]').fill(value);
+ }
+ await page.getByRole("link",{name:"Palaa oppitunnille L009"}).click();
+ await expect(page).toHaveURL(/\/los-lessons\/L009$/);
+ await outline.filter({hasText:"Tee neljä oikeaa C02:n verbiharjoitusta"}).click();
+ for(const [id] of answers){
+  await expect(paper).toContainText(id+": Vastaus tallennettu ja tarvittaessa tarkistettu");
+ }
+ await outline.filter({hasText:"Osaat nyt kaksi minä–sinämuotoparia"}).click();
+ await expect(page.getByRole("button",{name:"Merkitse oppitunti läpikäydyksi"})).toBeDisabled();
+ await expectNoHorizontalOverflow(page);
+});
+
+test("L010 uses the actual C02 Text B answer checks, never a parallel listening score",async({page})=>{
+ await enterLocalBook(page);
+ await page.goto("/los-lessons/L010",{waitUntil:"domcontentloaded"});
+ await expect(page.locator(".los-teacher-sidebar h1")).toContainText("Kuuntele ja esittele henkilö");
+ const outline=page.locator(".los-teacher-outline nav button");
+ await outline.filter({hasText:"Tee ja tarkista kaksi Text B:n ymmärtämiskysymystä"}).click();
+ const paper=page.locator(".los-teacher-paper");
+ await expect(paper).toContainText("C02-MCOM02-Q01: Vastaus vielä puuttuu");
+ const link=page.getByRole("link",{name:/Avaa kirjassa/}).first();
+ await expect(link).toHaveAttribute("href",/lessonReturn=L010.*\/02\/text-b/);
+ await page.goto("/los?lessonReturn=L010#/1/02/text-b",{waitUntil:"domcontentloaded"});
+ const questions=page.locator(".los-secondary-source .los-c01-question");
+ await expect(questions).toHaveCount(4);
+ await questions.nth(0).locator('input[value="a"]').check();
+ await questions.nth(0).getByRole("button",{name:"Tarkista vastaus"}).click();
+ await questions.nth(1).locator('input[value="b"]').check();
+ await questions.nth(1).getByRole("button",{name:"Tarkista vastaus"}).click();
+ await page.getByRole("link",{name:"Palaa oppitunnille L010"}).click();
+ await expect(page).toHaveURL(/\/los-lessons\/L010$/);
+ await outline.filter({hasText:"Tee ja tarkista kaksi Text B:n ymmärtämiskysymystä"}).click();
+ await expect(paper).toContainText("C02-MCOM02-Q01: Vastaus tallennettu ja tarvittaessa tarkistettu");
+ await expect(paper).toContainText("C02-MCOM02-Q02: Vastaus tallennettu ja tarvittaessa tarkistettu");
+ await outline.filter({hasText:"Osaat tunnistaa kaksi esittäytymistapaa"}).click();
+ await expect(page.getByRole("button",{name:"Merkitse oppitunti läpikäydyksi"})).toBeDisabled();
+ await expectNoHorizontalOverflow(page);
+});
+
+test("L011 uses the real C02 submitted 15-question exam and student writing",async({page})=>{
+ await enterLocalBook(page);
+ await page.goto("/los-lessons/L011",{waitUntil:"domcontentloaded"});
+ await expect(page.locator(".los-teacher-sidebar h1")).toContainText("Harjoittele ja testaa C02");
+ const outline=page.locator(".los-teacher-outline nav button");
+ await outline.filter({hasText:"Palauta oikea C02:n kappaletesti"}).click();
+ const status=page.locator(".los-teacher-assessment-status");
+ await expect(status).toContainText("0/15 vastattu");
+ await expect(status).toContainText("Ei vielä palautettu");
+ const link=page.getByRole("link",{name:/Avaa kirjassa/}).first();
+ await expect(link).toHaveAttribute("href",/lessonReturn=L011.*\/02\/test/);
+ await page.goto("/los?lessonReturn=L011#/1/02/test",{waitUntil:"domcontentloaded"});
+ const questions=page.locator(".los-workbook-question");
+ await expect(questions).toHaveCount(15);
+ for(let i=0;i<15;i++){
+  const item=questions.nth(i),radios=item.locator('input[type="radio"]');
+  if(await radios.count())await radios.first().check();
+  else await item.locator('input[type="text"]').fill("x");
+ }
+ await page.locator(".los-test-submit button").click();
+ await expect(page.locator(".los-test-result")).toContainText("TESTI PALAUTETTU");
+ await page.locator("#los-self-02").fill("Osaan kertoa nimen. Haluan kerrata du heißt ja du bist.");
+ await page.goto("/los?lessonReturn=L011#/1/02/apply",{waitUntil:"domcontentloaded"});
+ await page.locator("#los-application-02").fill("Ich heiße Mia.\\nWie heißt du?");
+ await page.getByRole("link",{name:"Palaa oppitunnille L011"}).click();
+ await expect(page).toHaveURL(/\/los-lessons\/L011$/);
+ await outline.filter({hasText:"Palauta oikea C02:n kappaletesti"}).click();
+ await expect(status).toContainText("15/15 vastattu");
+ await expect(status).toContainText("Palautettu");
+ await expect(status).toContainText("Oma sovellus: Teksti tallennettu");
+ await expect(status).toContainText("Itsearviointi: Kirjattu");
+ await outline.filter({hasText:"C02:n harjoitukset ja testi on tehty"}).click();
+ await expect(page.getByRole("button",{name:"Merkitse oppitunti läpikäydyksi"})).toBeDisabled();
+ await expectNoHorizontalOverflow(page);
+});
+
+test("L005 shows genuine 20-item listening source and text inside Teacher 2.0 on desktop and mobile",async({page})=>{
+ await enterLocalBook(page);
+ await page.goto("/los-lessons/L005",{waitUntil:"domcontentloaded"});
+ const lesson=page.locator(".los-teacher-paper");
+ await expect(page.locator(".los-teacher-sidebar h1")).toContainText("Kuuntele ja valitse tervehdys");
+ const outline=page.locator(".los-teacher-outline nav");
+ await outline.getByRole("button",{name:"Avaa koko alkuperäinen tervehdysluettelo"}).click();
+ const media=lesson.locator(".los-teacher-greeting-media");
+ await expect(media).toBeVisible();
+ const sources=media.locator("audio source");
+ await expect(sources).toHaveCount(2);
+ await expect(sources.first()).toHaveAttribute("type","audio/mpeg");
+ await expect(sources.first()).toHaveAttribute("src",/German_Vocabulary_-_Greetings[.]ogg[.]mp3$/);
+ await expect(sources.last()).toHaveAttribute("type","audio/ogg");
+ await expect(sources.last()).toHaveAttribute("src",/German_Vocabulary_-_Greetings[.]ogg$/);
+ await expect(media).toContainText("28 sekunnin");
+ await expect(media).toContainText("ei todista");
+ // Exercise the native media error fallback without relying on Commons/CDN access in CI.
+ await media.locator("audio").dispatchEvent("error");
+ await expect(media.getByRole("alert")).toContainText("Äänite ei latautunut");
+ await media.getByRole("button",{name:"Näytä kaikki 20 ilmausta ja suomennokset"}).click();
+ const lines=media.locator(".los-teacher-greeting-transcript li");
+ await expect(lines).toHaveCount(20);
+ await expect(lines.first()).toContainText("Hallo!");
+ await expect(lines.last()).toContainText("Gute Nacht!");
+ await expect(media).toContainText("Tekstin lukeminen ei ole kuuntelunäyttö");
+ await expect(lesson.locator(".los-teacher-summary")).toHaveCount(0);
+ await outline.getByRole("button",{name:"Valitse ääni tai luettavan tekstin varaversio"}).click();
+ await expect(lesson.locator(".los-teacher-greeting-media audio")).toBeVisible();
+ await expect(lesson.locator(".los-teacher-greeting-transcript")).toBeHidden();
+ await expect(lesson.locator(".los-teacher-greeting-media button")).toHaveAttribute("aria-expanded","false");
+ await expectNoHorizontalOverflow(page);
 });

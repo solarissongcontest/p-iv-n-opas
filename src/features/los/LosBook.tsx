@@ -15,6 +15,7 @@ import { getLosOpenDialogue } from "./content/los1OpenDialogues";
 import { LosNotebook, LosWorkbook } from "./LosWorkbook";
 import { LosBackups } from "./LosBackups";
 import { LosBookStartAction } from "./LosBookStartAction";
+import { getLosTeacherLesson } from "./teacher/lessonL004";
 import { LosDictionaryCard } from "./LosDictionaryCard";
 import { LosContentTree } from "./LosContentTree";
 import { isLosContentTask, type LosContentTask } from "./contentTreeModel";
@@ -125,7 +126,7 @@ function SeriesView({ openBook }: { openBook: (id: number) => void }) {
         <small>{book.code} · {book.module}</small>
       </button>)}
     </div>
-    <p className="los-library-footnote">LOS! 1:n kaikki kymmenen kappaletta ja 60 ohjattua oppituntia ovat nyt opiskeltavissa oppikirjan sisällä. Alkuperäistekstit ja käytössä olevat äänilähteet näkyvät asianmukaisin lähdemerkinnöin. Lopullinen saksan kielen, äänentoiston ja tuotantojulkaisun laadunvarmistus on silti vielä kesken. Muut LOS!-sarjan kirjat ovat suunnitteluvaiheessa.</p>
+    <p className="los-library-footnote">LOS! 1:n kymmenen kappaletta ovat selattavissa digikirjassa. Opiskelupolussa on 60 oppitunnin runko, mutta vain L001–L009 sisältävät uudemman, käsikirjoitetun Teacher 2.0 -opetuskokemuksen. Muut tunnit käyttävät vielä vanhaa tehtävä- ja vaihelistaa. Kaikkien sisältöjen, lähdeoikeuksien, kieliasun ja äänentoiston lopullinen hyväksyntä on kesken. Muut LOS!-sarjan kirjat ovat suunnitteluvaiheessa.</p>
   </div>;
 }
 function BookFront({ book, move }: { book: LosBookDefinition; move: (chapter: string | null, section: LosSection) => void }) {
@@ -548,7 +549,10 @@ export function LosBook() {
   if (canOpen === null) return <div className="los-loading" role="status">Avataan LOS!-oppikirjastoa…</div>;
   if (!canOpen) return <AccessGate />;
   const book = LOS_BOOKS.find(b => b.id === location.book);
+  const requestedLesson = typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("lessonReturn") : null;
+  const returnLesson = requestedLesson && getLosTeacherLesson(requestedLesson) ? requestedLesson : null;
   return <div className="los-app">
+    {returnLesson && <a className="los-teacher-book-return" href={"/los-lessons/" + returnLesson}><ArrowLeft size={16}/> Palaa oppitunnille {returnLesson}</a>}
     {book ? <LosBookWorkspace book={book} location={location} move={(chapter, section) => move(book.id, chapter, section)} goLibrary={() => move(null)} openBook={id => move(id)} /> :
       <><div className="los-series-top"><a href="/studies"><ArrowLeft size={17} /> Opintopäiväkirjaan</a><span>LOS! · Saksa B3</span></div><SeriesView openBook={id => move(id)} /></>}
   </div>;

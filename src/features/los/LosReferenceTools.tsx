@@ -6,6 +6,7 @@ import { LosDictionaryCard } from "./LosDictionaryCard";
 import type { LosDictionaryResult } from "./dictionaryClient";
 import { LOS_1_LESSONS } from "./learningPath";
 import { LosFirstLessons } from "./LosFirstLessons";
+import { getLosTeacherLesson } from "./teacher/lessonL004";
 import { LOS1_EXECUTABLE_LESSONS, isLos1ExecutableLesson } from "./guidedLessons";
 
 export type LosDestination = "overview" | "contents" | "chapter" | "text" | "understand" | "vocabulary" | "grammar" | "text-b" | "practice" | "apply" | "culture" | "test" | "appendix" | "dictionary" | "path" | "search" | "midterm" | "review" | "review-ii" | "cards" | "progress" | "final" | "summary";
@@ -108,16 +109,16 @@ export function LosLearningPath({ book, move }: { book: LosBookDefinition; move:
   return <section className="los-inner-page los-learning-path">
     <p className="los-eyebrow">OHJATTU LUKUJÄRJESTYS / {book.code}</p>
     <h1>Opetuspolku</h1>
-    <p className="los-page-intro">Kirjan 60 toteutettua, pääosin noin 30 minuutin oppituntia. Opetuspolku viittaa samoihin oppikirjasivuihin, eikä tee niistä erillisiä kursseja. Välikoe ja loppukoe ovat käytettävissä; äänen ja videoiden todellinen laitetestaus sekä pedagoginen lopputarkistus ovat erillisiä julkaisuportteja.</p>
+    <p className="los-page-intro">LOS! 1:n 60 tunnin runko on käytössä. L001–L011 sisältävät opettajajohtoisen Teacher 2.0 -esikatselun. Muiden tuntien opetusmateriaalin viimeistely jatkuu. Opetuspolku viittaa samoihin oppikirjasivuihin, eikä tee niistä erillisiä kursseja. Välikoe ja loppukoe ovat käytettävissä; äänen ja videoiden todellinen laitetestaus sekä pedagoginen lopputarkistus ovat erillisiä julkaisuportteja.</p>
     <div className="los-path-notice"><BookOpen size={20}/><p><strong>{LOS1_EXECUTABLE_LESSONS.length}/60 oppituntia on käytettävissä.</strong> Opetuspolun oppitunnit ovat käytettävissä kaikissa kymmenessä kappaleessa sekä kertaus-, väliarviointi- ja loppuarviointijaksoissa. C08:n koko Wikibooksin kouluympäristön alkuperäiskohtaus ja C10:n Harald-haastattelu ovat nyt kirjan sisällä. Näiden kappaleiden lukemisen, kirjoittamisen ja kappaletestien oppitunnit ovat käytettävissä. Alkuperäisten audio-/videoaineistojen oikeudet, kuuntelun toimivuus, kielitason tarkistus ja julkaisuportit eivät kuitenkaan vielä ole valmiit. Erilliset EX-FINAL-loppukoe ja L060-yhteenveto ovat nyt opiskelupolussa; kummankin suoritus vaatii oikeat palautukset ja itsearvioinnit.</p></div>
     <LosFirstLessons selectedId={selectedLesson} onSelect={selectLesson} move={move} />
     {groups.map(group=><section key={group.section} className="los-path-group">
       <h2>{group.section}</h2>
       <ol>
         {group.items.map(lesson=><li key={lesson.number}>
-          <button onClick={()=>{ if(isLos1ExecutableLesson("L"+String(lesson.number).padStart(3,"0"))){ selectLesson("L"+String(lesson.number).padStart(3,"0")); document.getElementById("los-lesson-runner")?.scrollIntoView({block:"start",behavior:"smooth"}); } else move(lesson.chapter,lesson.destination); }}>
+          <button onClick={()=>{ if(isLos1ExecutableLesson("L"+String(lesson.number).padStart(3,"0"))){ const id="L"+String(lesson.number).padStart(3,"0"); if(getLosTeacherLesson(id)){window.location.assign("/los-lessons/"+id);}else{selectLesson(id);document.getElementById("los-lesson-runner")?.scrollIntoView({block:"start",behavior:"smooth"});} } else move(lesson.chapter,lesson.destination); }}>
             <span className="los-path-number">{String(lesson.number).padStart(2,"0")}</span>
-            <span className="los-path-copy"><strong>{lesson.title}</strong><small>{isLos1ExecutableLesson("L"+String(lesson.number).padStart(3,"0")) ? "Avaa ohjattu oppitunti" : lesson.chapter ? `Kappale ${Number(lesson.chapter)} · Oppikirjan sisältöön (suoritus ei vielä käytössä)`  : "Suoritusjärjestelmä ei vielä käytössä"}</small></span>
+            <span className="los-path-copy"><strong>{lesson.title}</strong><small>{isLos1ExecutableLesson("L"+String(lesson.number).padStart(3,"0")) ? (getLosTeacherLesson("L"+String(lesson.number).padStart(3,"0")) ? "Avaa Teacher 2.0 -opetustila" : "Avaa nykyinen ohjattu oppitunti") : lesson.chapter ? `Kappale ${Number(lesson.chapter)} · Oppikirjan sisältöön (suoritus ei vielä käytössä)`  : "Suoritusjärjestelmä ei vielä käytössä"}</small></span>
             <ArrowRight size={18}/>
           </button>
         </li>)}
