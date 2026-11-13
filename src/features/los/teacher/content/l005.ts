@@ -5,7 +5,7 @@ import {TEACHER_VERSION,type TeacherLesson} from "../core.ts";
  * Playback is never itself evidence of comprehension or hearing. */
 export const TEACHER_L005:TeacherLesson={
  id:"L005",version:TEACHER_VERSION,review:"draft",
- contentRevision:"l005-listening-foundation-v1",
+ contentRevision:"l005-listening-foundation-v1",mediaSourceId:"M-COM-03",
  objective:"Harjoittelen tunnistamaan tuttuja tervehdyksiä äänitteen avulla ja erottamaan ne hyvästelyistä. Kuuntelun toimivuus arvioidaan erikseen.",
  scenes:[
  {id:"activation",phase:"activation",title:"Mitä muistat L004:stä?",
