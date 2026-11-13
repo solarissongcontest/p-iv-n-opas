@@ -10,7 +10,7 @@ import {validateTeacherLesson} from "../src/features/los/teacher/validateContent
 const now="2026-11-13T15:00:00.000Z";
 
 test("one registry includes prior lessons, Review I and five C06 lessons",()=>{
-  for(const id of ["L001","L005","L013","L016","L017","L018","L019","L020","L021","L022","L023","L024","L025","L026","L027","L028","L029","L030","L031","L032","L033","L034","L035"]){
+  for(const id of ["L001","L005","L013","L016","L017","L018","L019","L020","L021","L022","L023","L024","L025","L026","L027","L028","L029","L030","L031","L032","L033","L034","L035","L036","L037","L038","L039","L040"]){
     const lesson=getLosTeacherLesson(id);
     assert.ok(lesson,id+" must exist in canonical Teacher registry");
     assert.equal(lesson.id,id);
@@ -46,7 +46,7 @@ test("integrated player preserves genuine media, exact exam status, and number i
   assert.match(code,/inputMode=\{numericResponse \? "numeric" : "text"\}/);
   assert.match(code,/section === "midterm" \|\| section === "review"/);
   assert.match(code,/getLosTeacherLesson.*lessonRegistry/);
-  assert.match(route,/L001–L035/);
+  assert.match(route,/L001–L040/);
   const picker=readFileSync("src/features/los/LosFirstLessons.tsx","utf8");
   assert.match(picker,/getLosTeacherLesson.*lessonRegistry/);
 });
