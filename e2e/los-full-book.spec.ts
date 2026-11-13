@@ -132,7 +132,7 @@ for(const [start,end] of [[1,20],[21,40],[41,60]] as const){
    for(let j=0;j<count;j++){
     const button=lessonButtons.nth(j);
     const title=(await button.innerText()).trim();
-    expect(title).toMatch(/^L\\d{3}$/);
+    expect(title).toMatch(/^L\d{3}$/);
     expect(allTitles.has(title)).toBe(false);
     allTitles.add(title);
     const number=Number(title.slice(1));
