@@ -104,7 +104,7 @@ export const LOS1_L003_TEACHER: TeacherLesson = {
       id:"farewell-speaker",kind:"question",phase:"Tekstin soveltaminen",title:"Kuka sanoo keskustelun viimeisen hyvästelyn?",
       paragraphs:["Mieti, missä puheenvuorossa Tschüss esiintyy ja kuka sen sanoo. Voit tarkistaa lukijasta ennen vastaamista."],
       question:{
-        type:"choice",skillId:"L1-READ-01",prompt:", evidenceRole:"application"Kuka sanoo keskustelun viimeisen Tschüss!-repliikin?",
+        type:"choice",skillId:"L1-READ-01",evidenceRole:"application",prompt:"Kuka sanoo keskustelun viimeisen Tschüss!-repliikin?",
         options:[
           {id:"a",label:"Franz",wrongFeedback:"Franz sanoo ennen viimeistä repliikkiä Bis später! Viimeinen Tschüss kuuluu toiselle puhujalle."},
           {id:"b",label:"Jörg"},
@@ -121,7 +121,7 @@ export const LOS1_L003_TEACHER: TeacherLesson = {
       id:"exit",kind:"question",phase:"Lopputarkistus",title:"Osaatko tunnistaa keskustelun puhujat?",
       paragraphs:["Lopuksi yksi tärkeä kysymys koko alkuperäistekstistä."],
       question:{
-        type:"choice",skillId:"L1-READ-01",prompt:", evidenceRole:"exit"Ketkä puhuvat alkuperäisessä C01-keskustelussa?",
+        type:"choice",skillId:"L1-READ-01",evidenceRole:"exit",prompt:"Ketkä puhuvat alkuperäisessä C01-keskustelussa?",
         options:[
           {id:"a",label:"Franz ja Jörg"},
           {id:"b",label:"Heinrich ja Karl",wrongFeedback:"Nämä eivät ole C01:n alkuperäisen kahdeksan repliikin dialogin puhujia."},

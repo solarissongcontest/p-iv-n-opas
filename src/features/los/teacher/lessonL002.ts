@@ -142,7 +142,7 @@ export const LOS1_L002_TEACHER: TeacherLesson = {
       id:"exit",kind:"question",phase:"Lopputarkistus",title:"Tarkista nyt tärkein kirjainpari",
       paragraphs:["Lopuksi yksi kysymys ilman näkyvää mallia. Tarvittaessa voit käyttää vihjettä ja palata opetustauluun."],
       question:{
-        type:"choice",skillId:"L1-PHON-01",prompt:", evidenceRole:"exit"Miten saksan kirjainyhdistelmä ei yleensä ääntyy?",
+        type:"choice",skillId:"L1-PHON-01",evidenceRole:"exit",prompt:"Miten saksan kirjainyhdistelmä ei yleensä ääntyy?",
         options:[
           {id:"a",label:"Kuten suomen pitkä i",wrongFeedback:"Tämä kuvaa paremmin ie-yhdistelmän yleistä ääntämistä."},
           {id:"b",label:"Suunnilleen ai"},

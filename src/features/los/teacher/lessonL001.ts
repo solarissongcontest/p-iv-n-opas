@@ -160,7 +160,8 @@ export const LOS1_L001_TEACHER: TeacherLesson = {
       question: {
         type: "choice",
         skillId: "L1-BOOK-READER",
-        prompt: ", evidenceRole:"exit"Miten LOSissa saat selville vieraan saksankielisen sanan merkityksen?",
+        evidenceRole: "exit",
+        prompt: "Miten LOSissa saat selville vieraan saksankielisen sanan merkityksen?",
         options: [
           { id: "a", label: "Napautan sanaa lukijassa." },
           { id: "b", label: "Minun täytyy poistua ulkoiselle sivulle.", wrongFeedback: "LOSin oikea lukija näyttää sanaselitykset itse kirjassa. Ulkoinen sivu ei ole edellytys." },
