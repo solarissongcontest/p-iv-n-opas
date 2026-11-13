@@ -426,3 +426,38 @@ test("Teacher 2.0 chooses the actual lesson chapter for every learning illustrat
   assert.ok(teacher.includes('<Los1ChapterImage chapterId={lesson.chapterId} variant="learning"/>'));
   assert.ok(!teacher.includes('<Los1ChapterImage chapterId="09" variant="learning"/>'));
 });
+
+
+test("C08 options provide Finnish or German language metadata for accessible pronunciation",()=>{
+  const finnishAnswers=[
+    ["L042","recall","Lopetan, koska en ymmärrä heti."],
+    ["L042","guided","Historia"],
+    ["L042","independent","Laskee neljä laskua taululla"],
+    ["L042","exit","Opettaja ja luokka tervehtivät aamulla toisiaan."],
+    ["L044","guided","Toistavan oman nimensä"],
+  ] as const;
+  for(const [lessonId,sceneId,optionLabel] of finnishAnswers){
+    const lesson=getLosTeacherLesson(lessonId);
+    assert.ok(lesson);
+    const scene=lesson.scenes.find(item=>item.id===sceneId);
+    assert.ok(scene?.question?.options);
+    assert.equal(scene.question.options.find(option=>option.label===optionLabel)?.lang,"fi");
+    assert.ok(scene.question.options.every(option=>option.lang==="fi"),
+      lessonId+"/"+sceneId+" has Finnish-language answer options");
+  }
+  for(const [lessonId,sceneId,answer] of [
+    ["L041","recall","Noch einmal, bitte."],
+    ["L043","guided","Bitte langsamer."],
+    ["L044","application","Was bedeutet Eintritt?"],
+    ["L045","exit","Was bedeutet Aufgabe?"],
+  ] as const){
+    const scene=getLosTeacherLesson(lessonId)?.scenes.find(item=>item.id===sceneId);
+    assert.ok(scene?.question?.options,lessonId+"/"+sceneId);
+    assert.equal(scene.question.options.find(option=>option.label===answer)?.lang,"de");
+    assert.ok(scene.question.options.every(option=>option.lang==="de"),
+      lessonId+"/"+sceneId+" is a German-language dialogue");
+  }
+  const player=readFileSync("src/features/los/teacher/LosTeacherPlayer.tsx","utf8");
+  assert.ok(player.includes('<span lang={option.lang}>{option.label}</span>'));
+  assert.ok(!player.includes('<span lang="de">{option.label}</span>'));
+});
