@@ -45,6 +45,8 @@ function checkScene(scene: TeacherScene, location: string, issues: TeacherConten
       scene.reflection.minLength < 1 || scene.reflection.minLength > 500)) {
     issues.push({ location, problem: "Kirjoitus- tai pohdintatehtävästä puuttuu kelvollinen sisältö ja pituusraja." });
   }
+  if (scene.numberBuilder && scene.kind !== "board")
+    issues.push({ location, problem: "Numeronrakennustaulu edellyttää board-tilannetta." });
   if (scene.kind === "board" && (!scene.board?.length ||
       scene.board.some(item => !meaningful(item.label) ||
         !meaningful(item.german) || !meaningful(item.meaning)))) {
@@ -96,7 +98,7 @@ export function validateTeacherLesson(lesson: TeacherLesson): TeacherContentIssu
   }
   if (lesson.requiredCheckedIds &&
       (!unique(lesson.requiredCheckedIds) || lesson.requiredCheckedIds.some(id =>
-        !/^C\d{2}-(?:SOURCE|TEXTB|MCOM02)-Q\d{2}$/.test(id)))) {
+        !/^C\d{2}-(?:SOURCE|ZPE|TEXTB|MCOM02)-Q\d{2}$/.test(id)))) {
     issues.push({ location: "requiredCheckedIds", problem: "Tarkistettavan lähdetehtävän tunniste on virheellinen." });
   }
   const assessment = lesson.chapterAssessment;

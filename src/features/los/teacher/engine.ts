@@ -30,6 +30,8 @@ export type TeacherScene = {
   question?: TeacherQuestion;
   reflection?: TeacherReflection;
   board?: readonly TeacherBoardStep[];
+  /** Interactive board uses existing TeacherSession drafts. */
+  numberBuilder?: boolean;
   bookLinks?: readonly TeacherBookLink[];
   activityId?: string;
   activityLabel?: string;
@@ -182,8 +184,16 @@ export function revealTeacherSolution(session: TeacherSession, sceneId: string, 
       [...session.revealedIds, sceneId],
   };
 }
+/** Count distinct compound 21–99 numbers: whole tens and 100 do not practice units-first order. */
+export function teacherBuiltNumberCount(session: TeacherSession, sceneId: string): number {
+  const history = session.draftAnswers[sceneId + "-history"] ?? "";
+  return new Set(history.split(",").filter(value =>
+    /^[2-9][0-9]$/.test(value) && Number(value) % 10 !== 0)).size;
+}
 export function confirmTeacherActivity(session: TeacherSession, lesson: TeacherLesson, activityId: string, now: string): TeacherSession {
   if (session.completedAt || !lesson.requiredActivityIds.includes(activityId)) return session;
+  const numberScene = lesson.scenes.find(scene => scene.activityId === activityId && scene.numberBuilder);
+  if (numberScene && teacherBuiltNumberCount(session, numberScene.id) < 4) return session;
   return { ...session, updatedAt: now, activityIds: session.activityIds.includes(activityId) ?
     session.activityIds : [...session.activityIds, activityId] };
 }
@@ -222,6 +232,7 @@ export function teacherCanFinish(session: TeacherSession, lesson: TeacherLesson,
   practiceAnswers: Readonly<Record<string, string>>, practiceChecked: readonly string[] = [],
   chapterAssessment?: TeacherChapterAssessmentInput): boolean {
   return teacherChapterAssessmentStatus(lesson, chapterAssessment).ready && !session.paused && lesson.scenes.every(scene => session.visitedIds.includes(scene.id)) &&
+    lesson.scenes.every(scene => !scene.numberBuilder || teacherBuiltNumberCount(session, scene.id) >= 4) &&
     lesson.scenes.every(scene => !scene.reflection ||
       (session.draftAnswers[scene.id]?.trim().length ?? 0) >= scene.reflection.minLength) &&
     lesson.requiredQuestionIds.every(id => session.attempts.some(item => item.sceneId === id)) &&
