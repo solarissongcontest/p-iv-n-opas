@@ -50,5 +50,7 @@ jobs:
           done
           cat /tmp/los-c05-dev.log
           exit 1
-      - name: C05 Teacher flows and full path on desktop and iPhone
-        run: bunx playwright test e2e/los-full-book.spec.ts --grep 'C05|every one of the 60 guided lessons' --project=desktop-chromium --project=iphone-webkit
+      - name: C04 Teacher interactions on desktop and iPhone
+        run: bunx playwright test e2e/los-c04-teacher.spec.ts --project=desktop-chromium --project=iphone-webkit
+      - name: Combined C03-C05 Teacher flows and entire lesson path on both browsers
+        run: bunx playwright test e2e/los-full-book.spec.ts --grep 'C03|C04|C05|L013|L014|L015|L016|L017|L018|L019|L020|L021|every one of the 60 guided lessons' --project=desktop-chromium --project=iphone-webkit
