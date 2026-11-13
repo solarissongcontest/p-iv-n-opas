@@ -31,6 +31,10 @@ def choose(path: str, ours: str, theirs: str) -> str:
         if "L001–L060" not in result:
             raise ValueError(f"No full-coverage declaration in {path}: {result[:120]!r}")
         return result
+    if path == "e2e/los-full-book.spec.ts" and not theirs.strip() and ours.strip():
+        # Git grouped unrelated test-line deletion and local assertion as conflict.
+        # Keep the actual assertion rather than silently omitting coverage.
+        return ours
     if path == "e2e/los-full-book.spec.ts" and "Await asynchronous book hydration" in ours and not theirs.strip():
         return ours
     if path == "src/features/los/teacher/LosTeacherPlayer.tsx" and 'lesson.examAssessment?.id === "EX-MID"' in ours and "lesson.externalCheck" in theirs:
