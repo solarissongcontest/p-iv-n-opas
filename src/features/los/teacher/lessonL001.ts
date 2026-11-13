@@ -39,7 +39,7 @@ export const LOS1_L001_TEACHER: TeacherLesson = {
       ],
       help: [
         { title: "Miksi sanat päättyvät huutomerkkiin?", body: "Huutomerkki korostaa tässä puheenvuoroa. Voit tervehtiä normaalilla äänellä, eikä huutomerkki tarkoita huutamista." },
-        { title: "Mitä ß tarkoittaa sanassa Tschüss?", body: "ß on saksan kirjoitusjärjestelmän kirjain. Se liittyy s-äänteeseen. Opettelemme sen käyttöä myöhemmin; nyt riittää, että tunnistat ilmauksen oikein." },
+        { title: "Miten Tschüss kirjoitetaan?", body: "Tschüss! kirjoitetaan ü-kirjaimella ja kahdella s-kirjaimella: T-s-c-h-ü-s-s. Saksan ß on eri kirjain eikä kuulu sanaan Tschüss." },
       ],
     },
     {
