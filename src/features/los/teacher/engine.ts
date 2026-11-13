@@ -25,12 +25,14 @@ export type TeacherScene = {
   id: string;
   phase: string;
   title: string;
-  kind: "introduction" | "explanation" | "board" | "question" | "book" | "activity" | "reflection" | "summary";
+  kind: "introduction" | "explanation" | "board" | "question" | "book" | "activity" | "reflection" | "summary" | "calendar";
   paragraphs: readonly string[];
   question?: TeacherQuestion;
   reflection?: TeacherReflection;
   board?: readonly TeacherBoardStep[];
   bookLinks?: readonly TeacherBookLink[];
+  /** Fixed, checked timetable data. Reading Text B does not prove audio playback. */
+  calendar?: { prompt: string; day: string; time: string; sourceNote: string };
   activityId?: string;
   activityLabel?: string;
   help?: readonly { title: string; body: string }[];
