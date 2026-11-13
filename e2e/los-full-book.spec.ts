@@ -1412,7 +1412,7 @@ test("C06 original Text A 12 turns and reused C01 8 turns have separate real che
  await outline.filter({hasText:"Tarkista kolme aidosti tallennettavaa lähdevastausta"}).click();
  await expect(page.locator(".los-teacher-paper a[href*='/06/understand']")).toBeVisible();
  await page.goto("/los#/1/06/text",{waitUntil:"domcontentloaded"});
- await expect(page.locator(".los-reading-page .los-c01-turn")).toHaveCount(12);
+ await expect(page.locator('.los-c01-reader[aria-label="Neljä keskustelua iästä"] .los-c01-turn')).toHaveCount(12);
  await page.getByText("Kertaa aiempi Franzin ja Jörgin keskustelu (C01, äänite)").click();
  await expect(page.locator(".los-c06-review .los-c01-turn")).toHaveCount(8);
  await page.goto("/los?lessonReturn=L034#/1/06/understand",{waitUntil:"domcontentloaded"});
