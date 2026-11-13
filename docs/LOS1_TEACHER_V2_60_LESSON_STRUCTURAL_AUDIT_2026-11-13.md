@@ -32,7 +32,7 @@ Selite: `vastaus` = vanhaan tehtävätilaan tallennettu vastaus, ei automaattine
 | L010 | C02 · nimi | 3 | 30 | tarkistettu lähdetehtävä | Teacher 2.0, Text B:n tarkistetut Q01/Q02, toimituksellinen hyväksyntä avoin | lessonEngineC02.ts |
 | L011 | C02 · nimi | 3 | 30 | koe | Teacher 2.0 -käsikirjoitus ja kirjan 15 tehtävän palautus, hyväksyntä avoin | lessonEngineC02.ts |
 | L012 | C03 · alkuperä | 3 | 30 | ei erityistä | Teacher 2.0: maiden sanasto ja maa/kaupunki-vertailu, hyväksyntä avoin | lessonEngineC03.ts |
-| L013 | C03 · alkuperä | 3 | 30 | tarkistettu lähdetehtävä | Teacher 2.0: Lisan koko kahdeksan repliikin teksti ja C03-SOURCE-Q01/Q02 tarkistettuna, QA avoin | lessonEngineC03.ts |
+| L013 | C03 · alkuperä | 3 | 30 | tarkistettu lähdetehtävä | Teacher 2.0: Lisan koko kahdeksan repliikin teksti ja C03-SOURCE-Q01/Q02/Q03 tarkistettuna, QA avoin | lessonEngineC03.ts |
 | L014 | C03 · alkuperä | 3 | 30 | vastaus | Teacher 2.0: kommen (ich/du), woher-sanajärjestys, kirjan 4 oikeaa harjoitusta, QA avoin | lessonEngineC03.ts |
 | L015 | C03 · alkuperä | 3 | 30 | tarkistettu lähdetehtävä | Teacher 2.0: M-COM-02:n 4 repliikkiä sekä C03-MCOM02-Q02/Q03 tarkistettuna, QA avoin | lessonEngineC03.ts |
 | L016 | C03 · alkuperä | 3 | 30 | koe | Teacher 2.0: kertaus,  C03:n oikean kappaletestin palautus ja oma itsearviointi, QA avoin | lessonEngineC03.ts |
@@ -162,6 +162,13 @@ tekijä- ja lisenssitietojen osoittamiseen. Oikean puhelimen Ogg-toisto,
 ruudunlukijan käyttö ja saksan kielen pedagoginen auditointi ovat avoimia
 julkaisuportteja. CI-tulokset raportoidaan erikseen uusimman commitin
 perusteella.
+
+## PR #223:n L013–L016-korjaukset
+
+- L013 vaatii nyt myös kolmannen saman alkuperäisen Lisa-lähteen tarkistetun tehtävän (C03-SOURCE-Q03); alkuperäinen kahdeksan puheenvuoron teksti ei muutu.
+- L014 sisältää kysymyslauseen rakentamisen erillisen vaiheittaisen taulun; L015 sisältää karttapäättelyn vastaavan vaiheistetun taulun.
+- L016:n oikea 15 kohdan kappaletesti ei muutu suoritetuksi pelkän luonnosvastauksen perusteella, vaikka vastaus säilyy kirjan ja opetuksen välillä.
+- L013–L016:n soveltamisnäyttö, oikeat lähteet ja testin palautus tarkistetaan regressiotesteissä. Automaattinen läpäisy ei korvaa riippumatonta pedagogista tai laitehyväksyntää.
 
 ## L005:n ääniformaattien mobiiliyhteensopivuus (13.11.2026)
 

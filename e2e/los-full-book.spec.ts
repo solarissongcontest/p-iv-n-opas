@@ -1048,12 +1048,12 @@ test("L012 countries lesson shares only the C03 workbook and returns to Teacher"
 });
 
 
-test("L013 reads canonical Lisa M-WB-07 source, requires actual checked C03 Q01/Q02",async({page})=>{
+test("L013 reads canonical Lisa M-WB-07 source, requires actual checked C03 Q01/Q02/Q03",async({page})=>{
  await enterLocalBook(page);
  await page.goto("/los-lessons/L013",{waitUntil:"domcontentloaded"});
  await expect(page.locator(".los-teacher-sidebar h1")).toContainText("Lisa Müllerin alkuperäkeskustelu");
  const outline=page.locator(".los-teacher-outline nav button");
- await outline.filter({hasText:"Vastaa ja tarkista kaksi oikeaa lähdekysymystä"}).click();
+ await outline.filter({hasText:"Vastaa ja tarkista kolme oikeaa lähdekysymystä"}).click();
  const paper=page.locator(".los-teacher-paper");
  await expect(paper).toContainText("C03-SOURCE-Q01: Vastaus vielä puuttuu");
  const link=page.getByRole("link",{name:/Avaa kirjassa/}).first();
@@ -1065,18 +1065,22 @@ test("L013 reads canonical Lisa M-WB-07 source, requires actual checked C03 Q01/
  await expect(questions).toHaveCount(5);
  await questions.nth(0).locator('input[value="a"]').check();
  await questions.nth(1).locator('input[value="b"]').check();
+  await questions.nth(2).locator('input[value="c"]').check();
  await page.getByRole("link",{name:"Palaa oppitunnille L013"}).click();
- await outline.filter({hasText:"Vastaa ja tarkista kaksi oikeaa lähdekysymystä"}).click();
+ await outline.filter({hasText:"Vastaa ja tarkista kolme oikeaa lähdekysymystä"}).click();
  await expect(paper).toContainText("C03-SOURCE-Q01: Vastaus on tallennettu, mutta se pitää vielä tarkistaa kirjassa");
  await expect(paper).toContainText("C03-SOURCE-Q02: Vastaus on tallennettu, mutta se pitää vielä tarkistaa kirjassa");
+  await expect(paper).toContainText("C03-SOURCE-Q03: Vastaus on tallennettu, mutta se pitää vielä tarkistaa kirjassa");
  await page.goto("/los?lessonReturn=L013#/1/03/understand",{waitUntil:"domcontentloaded"});
  const checked=page.locator(".los-c01-question");
  await checked.nth(0).getByRole("button",{name:"Tarkista vastaus"}).click();
  await checked.nth(1).getByRole("button",{name:"Tarkista vastaus"}).click();
+  await checked.nth(2).getByRole("button",{name:"Tarkista vastaus"}).click();
  await page.getByRole("link",{name:"Palaa oppitunnille L013"}).click();
- await outline.filter({hasText:"Vastaa ja tarkista kaksi oikeaa lähdekysymystä"}).click();
+ await outline.filter({hasText:"Vastaa ja tarkista kolme oikeaa lähdekysymystä"}).click();
  await expect(paper).toContainText("C03-SOURCE-Q01: Vastaus tallennettu ja tarvittaessa tarkistettu");
  await expect(paper).toContainText("C03-SOURCE-Q02: Vastaus tallennettu ja tarvittaessa tarkistettu");
+  await expect(paper).toContainText("C03-SOURCE-Q03: Vastaus tallennettu ja tarvittaessa tarkistettu");
  await outline.filter({hasText:"Ymmärsit autenttisen keskustelun ydintiedot"}).click();
  await expect(page.getByRole("button",{name:"Merkitse oppitunti läpikäydyksi"})).toBeDisabled();
  await expectNoHorizontalOverflow(page);
@@ -1136,15 +1140,12 @@ test("L016 does not count draft C03 test as submission or as automatic mastery",
  await expect(status).toContainText("Ei vielä palautettu");
  await page.goto("/los?lessonReturn=L016#/1/03/test",{waitUntil:"domcontentloaded"});
  const items=page.locator(".los-workbook-question");
- // DOMContentLoaded does not mean React has rendered the workbook questions.
- await expect(items.first()).toBeVisible();
- const n=await items.count();
- expect(n).toBeGreaterThanOrEqual(10);
+ await expect(items).toHaveCount(15); // Wait for the chapter test to actually render after navigation.
  await items.first().locator('input[type="radio"]').first().check();
  await page.getByRole("link",{name:"Palaa oppitunnille L016"}).click();
  await outline.filter({hasText:"Palauta C03:n oikea kappaletesti"}).click();
+ await expect(status).toContainText("1/15 vastattu"); // Draft answer survives return without a submission.
  await expect(status).toContainText("Ei vielä palautettu");
- // The finish control belongs to the summary scene, not the book/test scene.
  await outline.filter({hasText:"C03:n opetus ja koe ovat eri suorituksia"}).click();
  await expect(page.getByRole("button",{name:"Merkitse oppitunti läpikäydyksi"})).toBeDisabled();
  await expectNoHorizontalOverflow(page);
@@ -1164,6 +1165,40 @@ test("L014 En ymmärrä exposes six authored choices and one scene-specific expl
  await choices.getByRole("button",{name:"Näytä toinen esimerkki"}).click();
  await expect(page.locator(".los-teacher-help-entries section")).toContainText("Österreich");
  await expect(page.locator(".los-teacher-help-entries section")).not.toContainText("1. Kysy mistä");
+ await expectNoHorizontalOverflow(page);
+});
+
+test("L016 records an actually submitted full C03 chapter exam, application and reflection across book return",async({page})=>{
+ await enterLocalBook(page);
+ await page.goto("/los-lessons/L016",{waitUntil:"domcontentloaded"});
+ const outline=page.locator(".los-teacher-outline nav button");
+ await outline.filter({hasText:"Palauta C03:n oikea kappaletesti"}).click();
+ const status=page.locator(".los-teacher-assessment-status");
+ await expect(status).toContainText("0/15 vastattu");
+ await page.goto("/los?lessonReturn=L016#/1/03/test",{waitUntil:"domcontentloaded"});
+ const qs=page.locator(".los-workbook-question");
+ await expect(qs).toHaveCount(15);
+ for(let i=0;i<15;i++){
+  const radios=qs.nth(i).locator('input[type="radio"]');
+  if(await radios.count())await radios.first().check();
+  else await qs.nth(i).locator('input[type="text"]').fill("oma yritys");
+ }
+ await page.getByRole("link",{name:"Palaa oppitunnille L016"}).click();
+ await outline.filter({hasText:"Palauta C03:n oikea kappaletesti"}).click();
+ await expect(status).toContainText("15/15 vastattu");
+ await expect(status).toContainText("Ei vielä palautettu");
+ await page.goto("/los?lessonReturn=L016#/1/03/test",{waitUntil:"domcontentloaded"});
+ await page.locator(".los-test-submit button").click();
+ await expect(page.locator(".los-test-result").first()).toContainText("TESTI PALAUTETTU");
+ await page.locator("#los-self-03").fill("Osaan kysyä woher, mutta kommst kaipaa vielä kertausta.");
+ await page.goto("/los?lessonReturn=L016#/1/03/apply",{waitUntil:"domcontentloaded"});
+ await page.locator("#los-application-03").fill("Mia: Woher kommst du? Leo: Ich komme aus Finnland.");
+ await page.getByRole("link",{name:"Palaa oppitunnille L016"}).click();
+ await outline.filter({hasText:"Palauta C03:n oikea kappaletesti"}).click();
+ await expect(status).toContainText("15/15 vastattu");
+ await expect(status).toContainText("Palautettu");
+ await expect(status).toContainText("Oma sovellus: Teksti tallennettu");
+ await expect(status).toContainText("Itsearviointi: Kirjattu");
  await expectNoHorizontalOverflow(page);
 });
 
@@ -1188,6 +1223,7 @@ test("L005 shows genuine 20-item listening source and text inside Teacher 2.0 on
  await media.locator("audio").dispatchEvent("error");
  await expect(media.getByRole("alert")).toContainText("Äänite ei latautunut");
  await media.getByRole("button",{name:"Näytä kaikki 20 ilmausta ja suomennokset"}).click();
+ await expect(media.getByRole("button",{name:"Piilota kirjoitettu luettelo"})).toHaveAttribute("aria-expanded","true");
  const lines=media.locator(".los-teacher-greeting-transcript li");
  await expect(lines).toHaveCount(20);
  await expect(lines.first()).toContainText("Hallo!");

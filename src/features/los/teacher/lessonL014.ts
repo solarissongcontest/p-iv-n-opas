@@ -147,6 +147,23 @@ export const LOS1_L014_TEACHER: TeacherLesson = {
       ],
     },
     {
+      id:"sentence-order-board",phase:"Interaktiivinen lauserakennustaulu",kind:"board",
+      title:"Rakenna woher-kysymys ja aus-vastaus",
+      paragraphs:[
+        "Käy vaiheet läpi järjestyksessä. Voit palata taaksepäin, toistaa esityksen tai näyttää koko lauseen. Erottele kysymyssana, taivutettu verbi, tekijä ja lähtömaa.",
+        "Tämä käyttää samaa determinististä Teacher-opetustaulua kuin verbin taivutus. Pelkkä esityksen katselu ei ole itsenäinen suoritusnäyttö.",
+      ],
+      board:[
+        {label:"1 · Tekijä",german:"du",meaning:"sinä: kysymys on suunnattu tutulle henkilölle"},
+        {label:"2 · Verbin sinämuoto",german:"du kommst",meaning:"kommen-verbin vartalo komm- ja pääte -st"},
+        {label:"3 · Mistä?",german:"Woher",meaning:"woher kysyy lähtöpaikkaa, ei nykyistä sijaintia"},
+        {label:"4 · Kysymys",german:"Woher + kommst + du?",meaning:"kysymyssana, verbi, tekijä"},
+        {label:"5 · Vastaus",german:"Ich komme aus Finnland.",meaning:"tekijä ich, verbin minämuoto komme, lähtömaata ilmaiseva aus"},
+        {label:"6 · Vertaa",german:"Wo wohnst du? ≠ Woher kommst du?",meaning:"wo kysyy missä, woher mistä"},
+      ],
+      help:[{title:"Miksi verbi on kysymyksessä toisena?",body:"Woher on kysymyssana. Sen jälkeen tulee taivutettu verbi kommst, ja vasta sen jälkeen du: Woher kommst du?"}],
+    },
+    {
       id:"fixed-country-phrases",phase:"Tunnistettava lisäsanasto",kind:"explanation",
       title:"Tunnista kaksi valmista maailmausta ennen kirjatehtäviä",
       paragraphs:[

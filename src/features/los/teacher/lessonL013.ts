@@ -18,7 +18,7 @@ export const LOS1_L013_TEACHER: TeacherLesson = {
   requiredQuestionIds:["recall","guided","independent","application","exit"],
   requiredActivityIds:["read-eight-turns","compare-origin-residence"],
   requiredPracticeIds:[],
-  requiredCheckedIds:["C03-SOURCE-Q01","C03-SOURCE-Q02"],
+  requiredCheckedIds:["C03-SOURCE-Q01","C03-SOURCE-Q02","C03-SOURCE-Q03"],
   scenes:[
     {
       id:"welcome",phase:"Johdanto",kind:"introduction",
@@ -125,13 +125,13 @@ export const LOS1_L013_TEACHER: TeacherLesson = {
     },
     {
       id:"question-guide",phase:"Kirjan ymmärtämistehtävät",kind:"book",
-      title:"Vastaa ja tarkista kaksi oikeaa lähdekysymystä",
+      title:"Vastaa ja tarkista kolme oikeaa lähdekysymystä",
       paragraphs:[
-        "Avaa C03:n Ymmärrä-osio. Vastaa kirjan omiin C03-SOURCE-Q01- ja C03-SOURCE-Q02-kysymyksiin. Ensimmäinen koskee lähtömaata, toinen asuinkaupunkia.",
-        "Paina molemmissa kirjan Tarkista vastaus -toimintoa. Pelkkä vastauksen valitseminen tai tekstisivun avaaminen ei täytä tarkistettua lähdetehtävää.",
+        "Avaa C03:n Ymmärrä-osio. Vastaa kirjan omiin C03-SOURCE-Q01-, C03-SOURCE-Q02- ja C03-SOURCE-Q03-kysymyksiin. Ensimmäinen koskee lähtömaata, toinen asuinkaupunkia ja kolmas woher-kysymyksen tunnistamista.",
+        "Paina kaikissa kolmessa kirjan Tarkista vastaus -toimintoa. Pelkkä vastauksen valitseminen tai tekstisivun avaaminen ei täytä tarkistettua lähdetehtävää.",
         "Vastaukset jäävät kirjan omaan tallennukseen. Tässä opetusmoottorissa tarkistetaan vain olemassa olevat vastaus- ja tarkistusmerkinnät, ei luoda toista tehtäväkantaa.",
       ],
-      bookLinks:[{label:"C03 · Ymmärrä, Q01 ja Q02",chapterId:"03",section:"understand",instruction:"Vastaa ja tarkista C03-SOURCE-Q01 sekä C03-SOURCE-Q02."}],
+      bookLinks:[{label:"C03 · Ymmärrä, Q01–Q03",chapterId:"03",section:"understand",instruction:"Vastaa ja tarkista C03-SOURCE-Q01, C03-SOURCE-Q02 sekä C03-SOURCE-Q03."}],
     },
     {
       id:"language-support",phase:"Tunnistava kielituki",kind:"explanation",
@@ -212,7 +212,7 @@ export const LOS1_L013_TEACHER: TeacherLesson = {
       title:"Ymmärsit autenttisen keskustelun ydintiedot",
       paragraphs:[
         "Luit kaikki kahdeksan puheenvuoroa, tunnistit Lisan sekä kahden vieraan roolit ja erotit hänen lähtömaansa asuinkaupungistaan.",
-        "Kirjan Q01 ja Q02 ovat erikseen tarkistettavia lähdetehtäviä. Opetustilan läpikäynti, omalla vahvistuksella tehty lukeminen ja oikea itsenäinen vastaus ovat eri asioita.",
+        "Kirjan Q01, Q02 ja Q03 ovat erikseen tarkistettavia lähdetehtäviä. Opetustilan läpikäynti, omalla vahvistuksella tehty lukeminen ja oikea itsenäinen vastaus ovat eri asioita.",
         "L014:ssa opit muodostamaan vasta omat sinuttelumuotoiset lähtömaakysymykset ja vastaukset. M-WB-07:n riippumaton kieli-, oikeus- ja pedagoginen hyväksyntä on edelleen avoin.",
       ],
     },

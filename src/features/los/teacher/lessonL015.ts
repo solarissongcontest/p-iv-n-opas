@@ -123,6 +123,21 @@ export const LOS1_L015_TEACHER: TeacherLesson = {
       help:[{title:"Miksi Berlin ei ole sama kuin Deutschland?",body:"Berlin on yksi Saksan kaupungeista. Deutschland tarkoittaa koko maata. Sama ero koskee Kyoto/Japan ja Bern/Sveitsi."}],
     },
     {
+      id:"map-reasoning-board",phase:"Interaktiivinen karttapäättely",kind:"board",
+      title:"Sijoita tekstien kaupungit oikeisiin maihin",
+      paragraphs:[
+        "Etene yksi karttapäätelmä kerrallaan. Paikan sijainti on maantieteellinen tieto, mutta ihmisen lähtöpaikka täytyy lukea hänen omasta puheenvuorostaan.",
+        "Vertaile Berliiniä ja Kiotoa Text B:n tietoihin ja Berniä Lisan Text A:n asuinpaikkaan. Älä oleta, että alkuperämaa ja nykyinen asuinpaikka ovat samat.",
+      ],
+      board:[
+        {label:"1 · Eurooppa, Saksa",german:"Berlin → Deutschland",meaning:"Thomas ja Peter kertovat tulevansa Berliinistä."},
+        {label:"2 · Aasia, Japani",german:"Kyoto → Japan",meaning:"Takashi kertoo tulevansa Kiotosta ja olevansa japanilainen."},
+        {label:"3 · Eurooppa, Sveitsi",german:"Bern → die Schweiz",meaning:"Lisa asuu Bernissä mutta kertoo olevansa kotoisin Saksasta."},
+        {label:"4 · Mitä tekstistä selviää?",german:"Wir kommen aus Berlin. / Ich komme aus Kyoto.",meaning:"Kommen aus kertoo lähtöpaikan. Asuinpaikkaa ei tästä yksin voi päätellä."},
+      ],
+      help:[{title:"Onko Kyoto maa?",body:"Ei. Kyoto on kaupunki Japanissa. Berlin on kaupunki Saksassa ja Bern kaupunki Sveitsissä."}],
+    },
+    {
       id:"culture",phase:"Karttaharjoittelu",kind:"book",
       title:"Paikanna kaupungit oppikirjan kulttuuriosasta",
       paragraphs:[

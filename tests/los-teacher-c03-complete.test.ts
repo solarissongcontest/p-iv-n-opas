@@ -66,18 +66,19 @@ test("C03 source decision and four textbook questions agree with original Lisa t
   assert.equal(lisa.questions.find(q=>q.id==="C03-SOURCE-Q03")?.correctId,"c");
   assert.equal(lisa.questions.find(q=>q.id==="C03-SOURCE-Q04")?.correctId,"a");
   assert.deepEqual(LOS1_L013_TEACHER.requiredCheckedIds,[
-    "C03-SOURCE-Q01","C03-SOURCE-Q02",
+    "C03-SOURCE-Q01","C03-SOURCE-Q02","C03-SOURCE-Q03",
   ]);
 });
 
-test("L013 needs two ACTUALLY checked original source answers, not merely opened book",()=>{
+test("L013 needs three ACTUALLY checked original source answers, not merely opened book",()=>{
   const l=LOS1_L013_TEACHER,s=fullyVisited(l);
-  const answers={"C03-SOURCE-Q01":"a","C03-SOURCE-Q02":"b"};
+  const answers={"C03-SOURCE-Q01":"a","C03-SOURCE-Q02":"b","C03-SOURCE-Q03":"c"};
   assert.equal(teacherCanFinish(s,l,answers),false);
   assert.equal(teacherCanFinish(s,l,answers,["C03-SOURCE-Q01"]),false);
-  assert.equal(teacherCanFinish(s,l,answers,["C03-SOURCE-Q01","C03-SOURCE-Q02"]),true);
+  assert.equal(teacherCanFinish(s,l,answers,["C03-SOURCE-Q01","C03-SOURCE-Q02"]),false);
+  assert.equal(teacherCanFinish(s,l,answers,["C03-SOURCE-Q01","C03-SOURCE-Q02","C03-SOURCE-Q03"]),true);
   assert.equal(independentTeacherEvidence(s,l),3);
-  assert.equal(teacherCanFinish(emptyTeacherSession(l,at),l,answers,["C03-SOURCE-Q01","C03-SOURCE-Q02"]),false);
+  assert.equal(teacherCanFinish(emptyTeacherSession(l,at),l,answers,["C03-SOURCE-Q01","C03-SOURCE-Q02","C03-SOURCE-Q03"]),false);
   const helped=markTeacherHelp(emptyTeacherSession(l,at),"independent",at);
   const assisted=submitTeacherAnswer(helped,l,"independent","Deutschland",at);
   assert.equal(independentTeacherEvidence(assisted,l),0);
@@ -122,7 +123,8 @@ test("L015 uses original four-turn M-COM-02 and checks C03-specific IDs",()=>{
 test("L016 requires the REAL C03 chapter test, real submission and own reflection",()=>{
   const l=LOS1_L016_TEACHER,s=fullyVisited(l);
   const ids=losExercisesFor("03").map(x=>x.id);
-  assert.ok(ids.length>=10);
+  assert.equal(ids.length,15,"C03 must use all 15 original textbook exam items");
+  assert.equal(new Set(ids).size,15,"C03 exam item IDs must not repeat");
   assert.deepEqual(l.chapterAssessment?.requiredTestIds,ids);
   assert.equal(teacherCanFinish(s,l,{}),false);
   const testAnswers=Object.fromEntries(ids.map(id=>[id,"attempted"]));
@@ -153,4 +155,17 @@ test("Wrong-answer correction stops after three attempts without manufacturing m
  const relieved=markTeacherHelp(emptyTeacherSession(lesson,at),"independent",at);
  const guided=submitTeacherAnswer(relieved,lesson,"independent","Woher kommst du?",at);
  assert.equal(independentTeacherEvidence(guided,lesson),0);
+});
+
+test("L014 question-order and L015 map boards work through the shared deterministic scene model",()=>{
+  const sentence=LOS1_L014_TEACHER.scenes.find(s=>s.id==="sentence-order-board");
+  const map=LOS1_L015_TEACHER.scenes.find(s=>s.id==="map-reasoning-board");
+  assert.equal(sentence?.kind,"board");
+  assert.equal(map?.kind,"board");
+  assert.ok(sentence?.board?.some(b=>b.german==="Woher + kommst + du?"));
+  assert.ok(sentence?.board?.some(b=>b.german==="Ich komme aus Finnland."));
+  assert.ok(map?.board?.some(b=>b.german.includes("Berlin → Deutschland")));
+  assert.ok(map?.board?.some(b=>b.german.includes("Kyoto → Japan")));
+  assert.deepEqual(validateTeacherLesson(LOS1_L014_TEACHER),[]);
+  assert.deepEqual(validateTeacherLesson(LOS1_L015_TEACHER),[]);
 });
