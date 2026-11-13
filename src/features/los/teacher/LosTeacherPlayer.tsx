@@ -1,4 +1,9 @@
 import { useEffect, useRef, useState } from "react";
+import { Los1ChapterImage } from "../Los1ChapterImage.tsx";
+import { getLosOpenDialogue } from "../content/los1OpenDialogues.ts";
+import { LOS1_TEXT_B_SOURCES } from "../content/los1TextBAdditional.ts";
+import { TeacherTimeCalendar } from "./TeacherTimeCalendar.tsx";
+import { composeLosC10Dialogues, storeLosC10Dialogues } from "./c10ApplicationBridge.ts";
 import { ArrowLeft, ArrowRight, BookOpen, Check, CheckCircle2, ChevronLeft, ChevronRight, HelpCircle, RotateCcw } from "lucide-react";
 import { readCachedDeviceUser } from "@/lib/deviceSession";
 import { useLosChapterDraft } from "../studyState.ts";
@@ -6,7 +11,7 @@ import {
   emptyTeacherSession, markTeacherHelp, confirmTeacherActivity, teacherChapterAssessmentStatus, teacherMidtermAssessmentStatus,
   finishTeacherSession, independentTeacherEvidence, moveTeacherScene, revealTeacherSolution,
   setTeacherAnswerDraft, submitTeacherAnswer, toggleTeacherPause, teacherCanFinish, teacherLatestAttempt,
-  teacherWrongFeedback, teacherBuiltNumberCount, type TeacherScene, type TeacherSession,
+  teacherWrongFeedback, teacherBuiltNumberCount, isCorrectCalendarEntry, type TeacherScene, type TeacherSession,
 } from "./engine.ts";
 import { getLosTeacherLesson } from "./lessonRegistry.ts";
 import { LosTeacherNumberBuilder } from "./LosTeacherNumberBuilder.tsx";
@@ -110,6 +115,34 @@ function SceneQuestion({ scene, session, submit, saveDraft, requestHint, reveal 
     {succeeded && <p className="los-teacher-ready"><CheckCircle2 size={17}/> Tehtävä tarkistettu. Voit jatkaa.</p>}
   </div>;
 }
+function TeacherSource({ scene }: { scene: TeacherScene }) {
+  const original = scene.sourceChapterId ? getLosOpenDialogue(scene.sourceChapterId) : undefined;
+  const textB = scene.textBChapterId === "09" ? LOS1_TEXT_B_SOURCES["09"] : undefined;
+  if (!original && !textB) return null;
+  const lines = original?.originalLines ?? textB?.lines ?? [];
+  return <section className="los-teacher-original" aria-label="Koko alkuperäinen lähdeteksti">
+    <p className="los-teacher-original-label">
+      {original ? original.sourceId + " · " + original.title : textB?.sourceId + " · " + textB?.title}
+    </p>
+    {lines.map(line=><div key={line.id} className="los-teacher-source-line">
+      <strong>{line.speaker}</strong>
+      <div><p lang="de">{line.text}</p><small>{line.meaning}</small></div>
+    </div>)}
+    <p className="los-teacher-original-credit">
+      {original ? <>Wikibooks · versio {original.revision} ·
+        <a href={original.licenseUrl ?? "https://creativecommons.org/licenses/by-sa/4.0/"} target="_blank" rel="noopener noreferrer">{original.licenseCode ?? "CC BY-SA 4.0"} -lisenssi</a> ·
+        <a href={original.sourceUrl} target="_blank" rel="noopener noreferrer">Alkuperäinen teksti ja tekijähistoria</a></>
+      : <>{textB?.attribution.author} ·
+        <a href={textB?.attribution.licenseUrl} target="_blank" rel="noopener noreferrer">{textB?.attribution.license} -lisenssi</a> ·
+        <a href={textB?.attribution.url} target="_blank" rel="noopener noreferrer">Alkuperäinen ihmisen äänittämä sanalista</a></>}
+    </p>
+    {textB && <p className="los-teacher-source-warning">Lähteen äänen laitetoistoa ei ole vahvistettu.
+      Tämä näkymä näyttää aidon transkription. Tekstin lukeminen ei merkitse kuuntelua suoritetuksi.
+      <a href="/los?lessonReturn=L049#/1/09/text-b" target="_blank" rel="noopener noreferrer">Avaa alkuperäinen Text B digikirjassa</a>
+    </p>}
+  </section>;
+}
+
 function TeacherBoard({ scene }: { scene: TeacherScene }) {
   const [visible, setVisible] = useState(1);
   const board = scene.board ?? [];
@@ -157,6 +190,8 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
   const sceneIndex = lesson?.scenes.findIndex(item => item.id === scene?.id) ?? 0;
   const available = Boolean(saved && session && lesson && teacherCanFinish(session, lesson, draft.practiceAnswers, draft.practiceChecked, draft));
   const completed = Boolean(session?.completedAt);
+  const c10Dialogues = lesson?.id === "L054"
+    ? composeLosC10Dialogues(session?.draftAnswers["dialogue-du"] ?? "", session?.draftAnswers["dialogue-sie"] ?? "") : null;
 
   useEffect(() => { setAuthorized(Boolean(readCachedDeviceUser())); }, []);
   useEffect(() => { setShowHelp(false); setHelpSelection(null); }, [scene?.id]);
@@ -197,6 +232,10 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
     if (!lesson) return;
     persist(old => confirmTeacherActivity(old, lesson, id, stamp()));
   };
+  const transferC10Dialogues = () => {
+    if (lesson?.id !== "L054" || !saved || !c10Dialogues) return;
+    update(current => storeLosC10Dialogues(current, c10Dialogues));
+  };
   const finish = () => {
     if (!lesson || !saved) return;
     update(current => {
@@ -224,7 +263,7 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
       </section> :
       !lesson || !session || !scene ? <section className="los-teacher-status">
         <h1>Oppitunnin opetusmateriaali ei ole vielä valmis</h1>
-        <p>Teacher 2.0 on nyt käytössä oppitunneilla L001–L040. Muut oppitunnit toimivat edelleen nykyisessä Opetuspolussa.</p>
+        <p>Teacher 2.0 on nyt käytössä oppitunneilla L001–L055. Muut oppitunnit toimivat edelleen nykyisessä Opetuspolussa.</p>
         <a href={"/los#/" + (lesson?.bookId ?? 1) + "/path"}>Palaa Opetuspolkuun</a>
       </section> :
       <>
@@ -298,6 +337,13 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
                 return setTeacherAnswerDraft(withValue, key, history.join(","), now);
               })}
             />}
+            {scene.chapterPhoto && <Los1ChapterImage chapterId="09" variant="learning"/>}
+            {(scene.sourceChapterId || scene.textBChapterId) && <TeacherSource scene={scene}/>}
+            {scene.calendar && <TeacherTimeCalendar scene={scene}
+              value={session.draftAnswers[scene.id] ?? ""}
+              disabled={completed}
+              onChange={value => persist(old => setTeacherAnswerDraft(old, scene.id, value, stamp()))}
+            />}
             {scene.question && <SceneQuestion
               scene={scene} session={session}
               submit={submit}
@@ -306,7 +352,7 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
               reveal={() => persist(old => revealTeacherSolution(old, scene.id, stamp()))}
             />}
             {scene.bookLinks && <div className="los-teacher-book-links">
-              {scene.bookLinks.map(link => <div key={link.section} className="los-teacher-book-link">
+              {scene.bookLinks.map(link => <div key={link.chapterId + "-" + link.section + "-" + link.label} className="los-teacher-book-link">
                 <div><strong>{link.label}</strong><p>{link.instruction}</p></div>
                 <a href={bookUrl(lessonId, lesson.bookId, link.chapterId, link.section)} target="_blank" rel="noopener noreferrer">
                   <BookOpen size={17}/> Avaa kirjassa <ArrowRight size={16}/>
@@ -339,12 +385,31 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
                   : "Kirjoita vähintään " + scene.reflection.minLength + " merkkiä. Tekstisi tallentuu automaattisesti."}
               </small>
             </div>}
+            {lesson.id === "L054" && (scene.id === "dialogue-sie" || scene.kind === "summary") &&
+              <section className="los-teacher-activity" aria-label="Siirrä kaksi keskustelua oppikirjaan">
+                <h3>Tallenna keskustelut myös oppikirjan sovellustehtävään</h3>
+                <p>Molemmat keskustelut säilyvät tässä oppitunnissa. Voit siirtää ne yhdellä painalluksella C10:n
+                  nykyiseen Käytä saksaa -luonnokseen. Siirto ei tarkista kielioppia eikä korvaa jo kirjoittamaasi tekstiä.</p>
+                <button type="button" onClick={transferC10Dialogues}
+                  disabled={!c10Dialogues || Boolean(draft.applicationDraft.trim()) || !saved || completed}>
+                  <BookOpen size={17}/> Siirrä kaksi keskustelua Käytä saksaa -sivulle
+                </button>
+                {!c10Dialogues && <p>Kirjoita ensin molemmat keskustelut, vähintään 90 merkkiä kumpaankin.</p>}
+                {draft.applicationDraft.trim() && <p role="status">Kirjan sovellusluonnoksessa on jo tekstiä.
+                  Sitä ei korvata. Avaa sivu jatkaaksesi tai täydentääksesi vastausta.</p>}
+                <a href={bookUrl(lessonId, lesson.bookId, "10", "apply")} target="_blank" rel="noopener noreferrer">
+                  Avaa C10:n Käytä saksaa -sivu <ArrowRight size={16}/>
+                </a>
+                <p>Lisää kirjassa vielä erikseen neljä lausetta kolmannesta henkilöstä.
+                  Tarkista molempien keskustelujen 6–8 puheenvuoroa ja neljä esittelylausetta itse.</p>
+              </section>}
             {scene.activityId && <div className="los-teacher-activity">
               <button type="button"
                 disabled={session.activityIds.includes(scene.activityId) || completed ||
                   Boolean(scene.reflection && (session.draftAnswers[scene.id]?.trim().length ?? 0) < scene.reflection.minLength) ||
                   Boolean(scene.numberBuilder && teacherBuiltNumberCount(session, scene.id) < 4) ||
-                  Boolean(scene.form && scene.form.some(field => !(session.draftAnswers[scene.id + "." + field.id]?.trim())))}
+                  Boolean(scene.form && scene.form.some(field => !(session.draftAnswers[scene.id + "." + field.id]?.trim()))) ||
+                  Boolean(scene.calendar && !isCorrectCalendarEntry(scene, session.draftAnswers[scene.id] ?? ""))}
                 onClick={() => markActivity(scene.activityId!)}>
                 {session.activityIds.includes(scene.activityId) ? <CheckCircle2 size={18}/> : <Check size={18}/>}
                 {session.activityIds.includes(scene.activityId) ? "Harjoittelu vahvistettu" : scene.activityLabel}

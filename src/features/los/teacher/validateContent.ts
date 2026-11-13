@@ -53,6 +53,13 @@ function checkScene(scene: TeacherScene, location: string, issues: TeacherConten
   }
   if (scene.numberBuilder && scene.kind !== "board")
     issues.push({ location, problem: "Numeronrakennustaulu edellyttää board-tilannetta." });
+  if (scene.kind === "calendar" && (!scene.calendar || !meaningful(scene.calendar.prompt) ||
+      !meaningful(scene.calendar.sourceNote) ||
+      !["Montag","Dienstag","Mittwoch","Donnerstag","Freitag","Samstag","Sonntag"].includes(scene.calendar.day) ||
+      !/^(?:0[0-9]|1[0-9]|2[0-3]):00$/.test(scene.calendar.time) ||
+      !scene.activityId)) issues.push({location,problem:"Kalenteriharjoituksen tiedot tai vahvistus puuttuvat."});
+  if (scene.kind === "source" && !scene.sourceChapterId && !scene.textBChapterId)
+    issues.push({location,problem:"Alkuperäistä tekstilähdettä ei ole sidottu."});
   if (scene.kind === "board" && (!scene.board?.length ||
       scene.board.some(item => !meaningful(item.label) ||
         !meaningful(item.german) || !meaningful(item.meaning)))) {
@@ -104,7 +111,7 @@ export function validateTeacherLesson(lesson: TeacherLesson): TeacherContentIssu
   }
   if (lesson.requiredCheckedIds &&
       (!unique(lesson.requiredCheckedIds) || lesson.requiredCheckedIds.some(id =>
-        !/^C\d{2}-(?:SOURCE|ZPE|TEXTB|MCOM02)-Q\d{2}$/.test(id)))) {
+        !/^C\d{2}-(?:SOURCE|ZPE|TEXTB|MCOM02|SCHOOL|HARALD)-Q\d{2}$/.test(id)))) {
     issues.push({ location: "requiredCheckedIds", problem: "Tarkistettavan lähdetehtävän tunniste on virheellinen." });
   }
   const assessment = lesson.chapterAssessment;
@@ -121,6 +128,10 @@ export function validateTeacherLesson(lesson: TeacherLesson): TeacherContentIssu
   if (lesson.examAssessment && (lesson.examAssessment.id !== "EX-MID" ||
       lesson.id !== "L030" || lesson.chapterId !== "91" || lesson.chapterAssessment)) {
     issues.push({ location: "examAssessment", problem: "EX-MID on sallittu vain L030:n oikeassa koeluonnoksessa." });
+  }
+  if (lesson.mediaGate && (!/^M-[A-Z0-9-]+$/.test(lesson.mediaGate.sourceId) ||
+      typeof lesson.mediaGate.approved !== "boolean" || !meaningful(lesson.mediaGate.reason))) {
+    issues.push({location:"mediaGate",problem:"Median hyväksyntäportilta puuttuu lähde, tila tai perustelu."});
   }
   if (!lesson.scenes.some(scene => scene.kind === "summary")) {
     issues.push({ location: "scenes", problem: "Oppitunnilta puuttuu yhteenveto." });
