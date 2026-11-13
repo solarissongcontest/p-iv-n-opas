@@ -31,6 +31,19 @@ def choose(path: str, ours: str, theirs: str) -> str:
         if "L001–L060" not in result:
             raise ValueError(f"No full-coverage declaration in {path}: {result[:120]!r}")
         return result
+    if path == ".github/workflows/los-browser-ci.yml" and all("bunx playwright test" in v for v in (ours,theirs)):
+        parts=list(dict.fromkeys(re.findall(r'e2e/[a-z0-9-]+\.spec\.ts', ours+" "+theirs)))
+        if "e2e/los-full-book.spec.ts" not in parts:
+            raise ValueError("Missing full-book browser baseline")
+        return "        run: bunx playwright test " + " ".join(parts) + " --project=desktop-chromium --project=iphone-webkit\n"
+    if path == "src/features/los/teacher/LosTeacherPlayer.tsx" and 'import { getLosTeacherLesson } from "./lessonRegistry.ts";' in ours and 'import { getLosTeacherLesson } from "./lessonL004.ts";' in theirs:
+        return theirs
+    if path == "src/features/los/teacher/engine.ts" and "teacherMidtermAssessmentStatus" in ours and "lesson.mediaGate" in theirs:
+        if "teacherChapterAssessmentStatus" not in theirs:
+            raise ValueError("Unrecognized C10 media-gate edit")
+        return ours.replace("return teacherChapterAssessmentStatus", "return (!lesson.mediaGate || lesson.mediaGate.approved) && teacherChapterAssessmentStatus", 1)
+    if path == "src/features/los/teacher/lessonL004.ts" and "LOS1_C10_TEACHER_LESSONS" in theirs and "LOS1_C09_TEACHER" in ours:
+        return ours
     if path == "src/features/los/teacher/LosTeacherPlayer.tsx" and 'import { useEffect, useRef, useState } from "react";' in ours and 'import { useEffect, useState } from "react";' in theirs:
         # Keep useRef imported for C07/C09 widgets that still use it.
         return ours
@@ -134,6 +147,16 @@ def normalize_registry() -> None:
             boundary = "  return undefined;\n}"
             if boundary not in body:
                 raise ValueError("Cannot locate C09 registry fallback")
+            body = body.replace(boundary, lookup + "\n" + boundary, 1)
+    if Path("src/features/los/teacher/lessonC10.ts").exists():
+        imp = 'import { LOS1_C10_TEACHER_LESSONS } from "./lessonC10.ts";'
+        if imp not in body:
+            body = imp + "\n" + body
+        lookup = '  const c10 = LOS1_C10_TEACHER_LESSONS.find(lesson => lesson.id === id);\n  if (c10) return c10;'
+        if lookup not in body:
+            boundary = "  return undefined;\n}"
+            if boundary not in body:
+                raise ValueError("Cannot locate C10 registry fallback")
             body = body.replace(boundary, lookup + "\n" + boundary, 1)
     path.write_text(body)
 
