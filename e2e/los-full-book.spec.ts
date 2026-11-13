@@ -385,3 +385,19 @@ test("L001 Teacher 2.0 stores a genuine beginner goal and returns from the book 
   await expect(page.locator(".los-teacher-paper h2").first()).toContainText("Oppitunti ja oppikirja tekevät eri asiat");
   await expectNoHorizontalOverflow(page);
 });
+
+
+test("L002 pronunciation lesson gives targeted corrections and opens grammar in the textbook",async({page})=>{
+  await enterLocalBook(page);
+  await page.goto("/los#/1/path",{waitUntil:"domcontentloaded"});
+  await page.locator(".los-lesson-picker button").filter({hasText:"L002"}).click();
+  await expect(page).toHaveURL(/\/los-lessons\/L002$/);
+  await page.locator(".los-teacher-outline nav button").filter({hasText:"Arvaatko saksan w-kirjaimen äänen?"}).click();
+  await page.locator(".los-teacher-option").filter({hasText:"Englannin w-äännettä"}).click();
+  await expect(page.locator(".los-teacher-feedback")).toContainText("saksan tavallinen w");
+  await page.locator(".los-teacher-option").filter({hasText:"Suomen v-äännettä"}).click();
+  await expect(page.locator(".los-teacher-feedback")).toContainText("Oikein");
+  await page.locator(".los-teacher-outline nav button").filter({hasText:"Tarkista säännöt kirjan omasta ääntämisosiosta"}).click();
+  await expect(page.getByRole("link",{name:/Avaa kirjassa/}).first()).toHaveAttribute("href",/lessonReturn=L002.*grammar/);
+  await expectNoHorizontalOverflow(page);
+});
