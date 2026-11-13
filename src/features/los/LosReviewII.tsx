@@ -29,10 +29,15 @@ export function LosReviewII({move}:{move:LosNavigate}){
     const now=new Date().toISOString();
     const before=current.teacherSessions?.["L058"]??emptyTeacherSession(LOS1_L058_TEACHER,now);
     return {...current,teacherSessions:{...current.teacherSessions,
-      L058:markTeacherHelp(before,"writing-model",now)}};
+      L058:(()=>{
+        const withModel=markTeacherHelp(before,"writing-model",now);
+        const writing=current.practiceAnswers[LOS1_REVIEW_II_WRITING_ID]??"";
+        const lines=writing.split(/\n/).map(line=>line.trim()).filter(Boolean);
+        return lines.length>=5&&lines.length<=7&&writing.trim().length>=80
+          ?withModel:markTeacherHelp(withModel,"writing-assisted",now);
+      })()}};
   });
   const openSource=(groupId:string)=>{
-    if(groupId==="L058")markWritingModel();
     if(groupId==="L056")move("06","vocabulary");
     else if(groupId==="L057")move("09","text");
     else move("10","grammar");
@@ -92,7 +97,7 @@ export function LosReviewII({move}:{move:LosNavigate}){
             onClick={()=>{if(!showModel)markWritingModel();setShowModel(old=>!old);}}>
             {showModel?"Piilota tarkistusmalli":"Näytä tarkistusmalli oman yrityksen jälkeen"}
           </button>
-          {draft.teacherSessions?.["L058"]?.helpedIds.includes("writing-model")&&<p role="status">Mallia tai vihjettä on käytetty. Tämä merkitään avustetuksi harjoitteluksi, ei itsenäisesti tarkistetuksi kielioppinäytöksi.</p>}
+          {draft.teacherSessions?.["L058"]?.helpedIds.includes("writing-model")&&<p role="status">Tarkistusmalli on avattu. Jos teksti oli tässä vaiheessa kesken, sen tuottaminen merkittiin avustetuksi. Vapaa teksti ei ole automaattisesti tarkistettu kielioppinäyttö.</p>}
           {showModel&&<div className="los-exam-rubric">
             <h4>Tarkistuslista ja malliteksti</h4>
             <ul>
