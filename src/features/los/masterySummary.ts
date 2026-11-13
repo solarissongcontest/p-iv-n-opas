@@ -65,8 +65,7 @@ export function summarizeLos1Mastery(
         const skillId = scene.question?.skillId;
         if (!skillId || (role !== "independent" && role !== "application" && role !== "exit")) continue;
         const first = session.attempts.find(attempt => attempt.sceneId === scene.id);
-        if (!first?.correct || !first.independent || session.helpedIds.includes(scene.id) ||
-            session.revealedIds.includes(scene.id)) continue;
+        if (!first?.correct || !first.independent) continue;
         const at = Date.parse(first.at);
         if (!Number.isFinite(at)) continue;
         checks.set(skillId,[...(checks.get(skillId)??[]),{lessonId,at}]);
@@ -79,7 +78,7 @@ export function summarizeLos1Mastery(
     Number.isFinite(Date.parse(final.testSubmittedAt)) &&
     losFinalReadyToSubmit(final.testAnswers) &&
     ["M-COM-01","M-COM-02"].every(source =>
-      Boolean(final.practiceAnswers["EX-FINAL-AUDIO-" + source])));
+      Boolean(final?.practiceAnswers["EX-FINAL-AUDIO-" + source])));
   const lastChoices = validCurrent ?
     LOS1_FINAL_QUESTIONS.map(q => final!.testAnswers[q.id]) :
     archive.length ? archive[archive.length - 1]!.choices.split("") : null;
