@@ -13,7 +13,7 @@ export const LOS1_L012_TEACHER: TeacherLesson = {
   title:"Maat ja paikat",
   objective:"Tunnistan Saksan, Suomen, Itävallan ja Sveitsin saksankieliset nimet sekä erotan maan kaupungista ja lähtömaan asuinpaikasta.",
   estimatedMinutes:30,
-  requiredQuestionIds:["pre-country","pre-place","guided","independent","exit"],
+  requiredQuestionIds:["pre-country","pre-place","guided","independent","application","exit"],
   requiredActivityIds:["vocabulary-read","culture-read","text-a-scanned"],
   requiredPracticeIds:[],
   scenes:[

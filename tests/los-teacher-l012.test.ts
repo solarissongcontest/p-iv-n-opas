@@ -33,7 +33,7 @@ test("L012 is a valid C03 Teacher manuscript, 14 scenes, two genuine prechecks a
   assert.equal(lesson.chapterId,"03");
   assert.equal(lesson.scenes.length,14);
   assert.deepEqual(validateTeacherLesson(lesson),[]);
-  assert.deepEqual(lesson.requiredQuestionIds,["pre-country","pre-place","guided","independent","exit"]);
+  assert.deepEqual(lesson.requiredQuestionIds,["pre-country","pre-place","guided","independent","application","exit"]);
   assert.deepEqual(lesson.requiredActivityIds,["vocabulary-read","culture-read","text-a-scanned"]);
   assert.deepEqual(lesson.requiredPracticeIds,[]);
   assert.equal(lesson.scenes.find(x=>x.id==="board")?.board?.length,6);
@@ -56,7 +56,7 @@ test("C03's actual source is eight-turn Lisa Müller M-WB-07, not the superseded
 
 test("L012 completion requires actual visits, prechecks and source-study confirmations",()=>{
   const s=prepared();
-  assert.equal(s.attempts.length,5);
+  assert.equal(s.attempts.length,6);
   assert.equal(independentTeacherEvidence(s,lesson),3);
   assert.equal(teacherCanFinish(s,lesson,{}),true);
   assert.equal(finishTeacherSession(s,lesson,{},now).completedAt,now);
@@ -64,6 +64,7 @@ test("L012 completion requires actual visits, prechecks and source-study confirm
     assert.equal(teacherCanFinish({...s,activityIds:s.activityIds.filter(x=>x!==id)},lesson,{}),false);
   assert.equal(teacherCanFinish({...s,visitedIds:s.visitedIds.filter(x=>x!=="source")},lesson,{}),false);
   assert.equal(teacherCanFinish({...s,attempts:s.attempts.filter(x=>x.sceneId!=="pre-place")},lesson,{}),false);
+  assert.equal(teacherCanFinish({...s,attempts:s.attempts.filter(x=>x.sceneId!=="application")},lesson,{}),false);
 });
 
 test("L012 aided answers and wrong country names never count as first-try independent skill",()=>{
