@@ -764,6 +764,40 @@ test("Teacher 2.0 presents one teaching board with one set of controls", async (
 
 
 
+
+test("C08 through final review teach the task and describe German time without invented certainty",async({page})=>{
+  await enterLocalBook(page);
+
+  await page.goto("/los-lessons/L043",{waitUntil:"domcontentloaded"});
+  let outline=page.locator(".los-teacher-outline nav");
+  await outline.getByRole("button",{name:"Näin kerrot ymmärtäneesi ja kiität"}).click();
+  await expect(page.locator(".los-teacher-paper")).toContainText("Danke, jetzt verstehe ich.");
+  await outline.getByRole("button",{name:"Lisäselitys auttaa eteenpäin"}).click();
+  await page.getByRole("button",{name:"Danke, jetzt verstehe ich.",exact:true}).click();
+  await expect(page.locator(".los-teacher-feedback.is-right")).toContainText("Keskustelu päättyy ymmärrykseen");
+  await expectNoHorizontalOverflow(page);
+
+  await page.goto("/los-lessons/L047",{waitUntil:"domcontentloaded"});
+  outline=page.locator(".los-teacher-outline nav");
+  await outline.getByRole("button",{name:"Koko Text A · seitsemän puheenvuoroa"}).click();
+  await expect(page.locator(".los-teacher-paper")).toContainText("ei yksin kerro");
+  await outline.getByRole("button",{name:"Tunnista kaksi aikaa"}).click();
+  await page.getByRole("button",{name:"14.45",exact:true}).click();
+  await expect(page.locator(".los-teacher-feedback.is-right")).toContainText("iltapäiväoletuksella");
+  await expectNoHorizontalOverflow(page);
+
+  await page.goto("/los-lessons/L057",{waitUntil:"domcontentloaded"});
+  await page.locator(".los-teacher-outline nav").getByRole("button",{
+    name:"Yhdistä tervehdys, nimi ja lähtömaa ilman sanastoa"
+  }).click();
+  await expect(page.locator(".los-teacher-question h3")).toContainText("huutomerkillä tai pilkulla");
+  await page.locator(".los-teacher-question input").fill("Hallo, ich heiße Mia. Ich komme aus Finnland.");
+  await page.getByRole("button",{name:"Tarkista",exact:true}).click();
+  await expect(page.locator(".los-teacher-feedback.is-right")).toBeVisible();
+  await expectNoHorizontalOverflow(page);
+});
+
+
 test("C07 teaches spelling requests before L036 application and hides the answer in L038",async({page})=>{
   await enterLocalBook(page);
   await page.goto("/los-lessons/L036",{waitUntil:"domcontentloaded"});
