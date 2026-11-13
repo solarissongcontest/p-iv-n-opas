@@ -123,3 +123,76 @@ C07:n Text B:n M-COM-06-aakkosäänitteellä on identifioitu ihmisäänilähde, 
 C04:n viisi uutta henkilökohtaisen opettajan käsikirjoitusta käyttävät samaa `LosTeacherPlayer`-moottoria ja kirjan nykyistä opiskelijakohtaista tallennusta. L017 harjoittaa tilanteen mukaista du/Sie-valintaa ilman perusteetonta ikärajaa; L018 käyttää täsmälleen kaikkia kahdeksaa `M-WB-06`-alkuperäisrepliikkiä (`oldid=3823654`) suoraan sisältörekisteristä ja vaatii kolme kirjan lähdekysymystä vastattuina ja tarkistettuina; L019 opettaa kohteliaan verbimuodon ja tarkistaa ison Sie:n monivalinnalla, sillä lyhyttekstivertailu normalisoi kirjainkokoa; L020 käyttää C04:n nykyistä `M-COM-03`-lähdettä, kaikkia 20 tervehdyksen tai hyvästelyn alkuperäisilmausta sekä neljää kirjassa tarkistettavaa Text B -tehtävää. Suunniteltu `M-DIB-07` ei ole oikeus- ja versiotarkastuksin hyväksytty, joten siitä ei väitetä lähde- eikä kuuntelusuorituksia. L021 vaatii kaikki 12 nykyistä C04-kappaletestitehtävää, todellisen palautusmerkinnän, soveltamistekstin ja itsearvioinnin.
 
 Rakenteellinen tilanne tällä haaralla on **26/60 Teacher 2.0 -ennakkokäsikirjoitusta ja 34/60 vanhan mallin tuntia**, mutta **0/60 riippumattomasti kieli- ja pedagogisesti hyväksyttyä tai todellisesti mitattua 30 minuutin oppituntia**. Tämä C04-osuus on lisätty omaan testattavaan haaraan, joka riippuu C07/C03-yhteisestä Teacher-arkkitehtuurista. Kirjan media-, attribuutio-, todellisen laitteen ja oppijan kestomittauksen hyväksynnät pysyvät avoimina.
+
+## Yhteensopivuus: L004:n ja L005:n vaihtoehtoiset opetusversiot (13.11.2026)
+
+L004:n rinnakkaisen Teacher-moottorin PR #218 sekä siitä jatkaneen L005:n
+PR #232 historialliset oppituntimerkinnät säilytetään
+`lessonProgress.L004/L005.teacher`-kentissä. PR #232 lisäsi
+`completedContentRevision`-, `completedRevisionAt`-, `writtenDrafts`-,
+`helpSelections`- ja `media`-kentät; nämä tarkistetaan nyt tietotyypin,
+kohtuullisten kokorajojen, päiväysten ja parillisten versiomerkintöjen
+perusteella. `media` sisältää vain selaimen ilmoittamia
+`playingAt`/`endedAt`-tapahtumia ja tekstivastineen avausmerkinnän,
+ei kuullun ymmärtämisen näyttöä.
+
+**Yhteinen päätös on edelleen yksiselitteinen:** kirjoitettava uusi
+Teacher Experience 2.0 -tila on vain `teacherSessions`. Historiallista
+`lessonProgress.*.teacher`-tietoa ei muunnettaessa kopioida
+`teacherSessions`-vastauksiksi, itsenäiseksi osaamisnäytöksi tai
+suorituspäiväksi. Kelvollisen vanhan tietueen kaikki kentät säilyvät
+varmuuskopion käsittelyssä muuttumattomina. Korruptoitunut uusi
+metadata hylätään sen sijaan, että sitä yritettäisiin korjata
+keksityillä oletuksilla.
+
+Tämä on data- ja yhteensopivuustarkistus, **ei** PR #232:n toisen
+opetusmoottorin käyttöönotto tai todiste toimivasta äänen toistosta.
+
+## L005:n yhden opetussoittimen media, täsmennys 13.11.2026
+
+Yhteiseen Teacher Experience 2.0 -soittimeen on lisätty L005:n alkuperäisen
+M-COM-03-äänitteen oma HTML5-toisto ja koko **20 ilmauksen saksankielinen lista
+suomennoksineen**. Luettelo luetaan suoraan kirjan olemassa olevasta
+`LOS1_TEXT_B_SOURCES["01"]`-sisällöstä. Siten samasta materiaalista ei
+synny toisistaan poikkeavia tekstikopioita. Kirjan Text B pysyy edelleen
+käytettävissä erikseen niihin **neljään kirjan omaan tarkistettavaan
+lähdetehtävään**, jotka L005:n läpikäynti edellyttää.
+
+Media on alkuperäinen Wikimedia Commonsin *German Vocabulary - Greetings.ogg*,
+German Men92, public domain, noin 28 sekuntia. Toistokomponentissa on
+selkeä virheilmoitus ja koko tekstin varavaihtoehto. Lukijan
+`teacherSessions` pysyy ainoana kirjoitettavana opetus- ja vastaustilana;
+`lessonProgress.*.teacher` on vain säilytettävä vanha tieto.
+Tähän ei lisätty kilpailevaa opetusmoottoria, uutta äänitodistetta,
+automaattista puhearviointia eikä väitettä äänen kuulemisesta.
+
+Tarkka ero: audion `play`-painike, mahdollinen onnistunut toistotapahtuma,
+20 kohdan tekstilistan avaaminen ja lukutehtävän tarkistaminen **eivät**
+itsessään todista kuullun ymmärtämistä. Täydellinen teksti sisältyy LOS!:iin,
+kun taas ulkoisia URL-osoitteita käytetään äänitiedoston lataamiseen sekä
+tekijä- ja lisenssitietojen osoittamiseen. Oikean puhelimen Ogg-toisto,
+ruudunlukijan käyttö ja saksan kielen pedagoginen auditointi ovat avoimia
+julkaisuportteja. CI-tulokset raportoidaan erikseen uusimman commitin
+perusteella.
+
+## L005:n ääniformaattien mobiiliyhteensopivuus (13.11.2026)
+
+Wikimedia Commonsin alkuperäisen
+[German Vocabulary - Greetings.ogg](https://commons.wikimedia.org/wiki/File:German_Vocabulary_-_Greetings.ogg)
+-tiedoston sivulla ilmoitetaan myös **valmiiksi muunnettu MP3**. Kyseessä
+on sama 28 sekunnin, German Men92:n lausuma ja public domainiin luovutettu
+20 ilmauksen ääni, ei erillinen ääninäyttelijä tai uusi materiaali.
+Uusi Teacher 2.0 -soitin antaa selaimen valita ensin MP3-lähteen
+(`audio/mpeg`) ja vaihtoehtoisesti alkuperäisen Ogg-lähteen
+(`audio/ogg`). Näin vanhemmillekin selaimille tarjotaan niille
+sopivampi formaatti, vaikka **fyysisellä iPhonella toimivuutta ei ole
+vielä testattu**. Lähde: Commonsin tiedostosivun *Transcode status*,
+MP3-rivi (tarkistettu 13.11.2026).
+
+Selaimen lähdevalinta ei tuota kuullun ymmärtämisen suoritusmerkintää.
+Jos kumpikaan äänitiedosto ei toimi, alkuperäinen 20 ilmauksen
+saksankielinen teksti ja suomennokset säilyvät LOS!:n omassa
+opetustilassa. Käyttöliittymä kertoo äänihäiriöstä. Automaattinen
+Chromium/WebKit-testaus tarkistaa lähteiden tunnisteet ja
+tekstivaraosan, ei sitä että opiskelija kuulisi tai ymmärtäisi
+äänitteen oikealla laitteella.

@@ -9,6 +9,7 @@ import {
   teacherWrongFeedback, type TeacherScene, type TeacherSession,
 } from "./engine.ts";
 import { getLosTeacherLesson } from "./lessonL004.ts";
+import { LosTeacherGreetingMedia } from "./LosTeacherGreetingMedia.tsx";
 import { validateTeacherLesson } from "./validateContent.ts";
 import "../los-book.css";
 import "./teacher.css";
@@ -236,6 +237,8 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
             <div className="los-teacher-prose">
               {scene.paragraphs.map((paragraph, i) => <p key={i}>{paragraph}</p>)}
             </div>
+            {lesson.id === "L005" && (scene.id === "source-list" || scene.id === "audio-choice") &&
+              <LosTeacherGreetingMedia/>}
             {scene.kind === "board" && <TeacherBoard scene={scene}/>}
             {scene.kind === "form" && scene.form && <section className="los-teacher-form-fields" aria-label="Kirjallinen harjoituslomake">
               <p className="los-teacher-small"><strong>Kirjallinen harjoituslomake.</strong> Kentät eivät perustu varmentamattomaan kuunteluun, eikä niistä lasketa kuuntelupisteitä.</p>
