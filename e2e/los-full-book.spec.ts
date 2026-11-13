@@ -102,6 +102,7 @@ test("C01 real original token highlight, C08 gated video and responsive exercise
 
 
 test("every one of the 60 guided lessons opens from its actual chapter picker on iPhone and desktop",async({page})=>{
+ test.setTimeout(180_000); // The full 60-lesson navigation stress test exceeds the default 60s on emulated mobile WebKit.
  await enterLocalBook(page);
  await page.goto("/los#/1/path",{waitUntil:"domcontentloaded"});
  const runner=page.locator("#los-lesson-runner");
@@ -127,6 +128,8 @@ test("every one of the 60 guided lessons opens from its actual chapter picker on
     await expect(page.locator(".los-teacher-sidebar h1")).toBeVisible();
     await page.goto("/los#/1/path",{waitUntil:"domcontentloaded"});
     await expect(runner).toBeVisible();
+    await expect(sections).toHaveCount(13);
+    await expect(sections.nth(i)).toBeVisible();
     await sections.nth(i).click();
    }else{
     await expect(runner.locator(".los-lesson-detail .los-overline")).toContainText(title);
