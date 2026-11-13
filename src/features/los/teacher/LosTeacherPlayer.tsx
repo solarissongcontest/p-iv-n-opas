@@ -317,8 +317,8 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
             {scene.activityId && <div className="los-teacher-activity">
               <button type="button"
                 disabled={session.activityIds.includes(scene.activityId) || completed ||
-                  Boolean(scene.reflection && (session.draftAnswers[scene.id]?.trim().length ?? 0) < scene.reflection.minLength)} ||
-                  Boolean(scene.calendar && !isCorrectCalendarEntry(scene, session.draftAnswers[scene.id] ?? ""))
+                  Boolean(scene.reflection && (session.draftAnswers[scene.id]?.trim().length ?? 0) < scene.reflection.minLength) ||
+                  Boolean(scene.calendar && !isCorrectCalendarEntry(scene, session.draftAnswers[scene.id] ?? ""))}
                 onClick={() => markActivity(scene.activityId!)}>
                 {session.activityIds.includes(scene.activityId) ? <CheckCircle2 size={18}/> : <Check size={18}/>}
                 {session.activityIds.includes(scene.activityId) ? "Harjoittelu vahvistettu" : scene.activityLabel}
