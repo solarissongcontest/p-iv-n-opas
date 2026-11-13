@@ -15,6 +15,7 @@ import { LosNotebook, LosWorkbook } from "./LosWorkbook";
 import { LosBackups } from "./LosBackups";
 import { LosBookStartAction } from "./LosBookStartAction";
 import { LosL004LessonShell } from "./teacher/LosL004LessonShell";
+import { LosL005LessonShell } from "./teacher/LosL005LessonShell";
 import { Los1ChapterImage } from "./Los1ChapterImage";
 import { Los1VisualLearning } from "./Los1VisualLearning";
 import { LosMidtermExam } from "./LosMidtermExam";
@@ -31,7 +32,7 @@ import "./los-cloud.css";
 import "./los-backups.css";
 
 type LosSection = LosDestination;
-type LosLocation = { book: number | null; chapter: string | null; section: LosSection; lessonId: "L004" | null; returnLesson: "L004" | null };
+type LosLocation = { book: number | null; chapter: string | null; section: LosSection; lessonId: "L004" | "L005" | null; returnLesson: "L004" | "L005" | null };
 /** Kymmenen näkyvää kappaleosiota LOS! 1:n kirjakohtaisen masterplanin mukaan. */
 const sections: { id: LosSection; label: string }[] = [
   { id:"chapter", label:"Aloita" },
@@ -57,8 +58,11 @@ function readLocation(): LosLocation {
   const parsedBook = Number(parts[0]);
   const book = Number.isInteger(parsedBook) && parsedBook >= 1 && parsedBook <= 8 ? parsedBook : null;
   const chapter = book === 1 && /^\d{2}$/.test(parts[1] ?? "") ? (parts[1] ?? null) : null;
-  const lessonId = book === 1 && parts[1] === "lesson" && parts[2] === "L004" ? "L004" : null;
-  const returnLesson = book === 1 && new URLSearchParams(query??"").get("fromLesson")==="L004" ? "L004" : null;
+  const requestedLesson=parts[2];
+  const lessonId = book === 1 && parts[1] === "lesson" &&
+    (requestedLesson==="L004"||requestedLesson==="L005")?requestedLesson:null;
+  const fromLesson=new URLSearchParams(query??"").get("fromLesson");
+  const returnLesson=book===1&&(fromLesson==="L004"||fromLesson==="L005")?fromLesson:null;
   const token = parts[chapter ? 2 : 1];
   const section = (["overview", "contents", "chapter", "text", "vocabulary", "grammar", "practice", "appendix", "dictionary", "path", "search", "midterm", "review", "review-ii", "cards", "progress", "final", "summary", "understand", "text-b", "apply", "culture", "test"].includes(token ?? "") ? token : chapter ? "chapter" : "overview") as LosSection;
   return { book, chapter, section, lessonId, returnLesson };
@@ -343,7 +347,7 @@ function LosBookWorkspace({ book, location, move, goLibrary, openBook }: { book:
   useEffect(()=>{
     if(book.id!==1)return;
     try{
-      if(location.returnLesson==="L004")sessionStorage.setItem("los1.returnLesson","L004");
+      if(location.returnLesson)sessionStorage.setItem("los1.returnLesson",location.returnLesson);
       else if(location.section==="path")sessionStorage.removeItem("los1.returnLesson");
     }catch{/* The initial return link works even if storage is denied. */}
   },[book.id,location.returnLesson,location.section]);
@@ -352,11 +356,14 @@ function LosBookWorkspace({ book, location, move, goLibrary, openBook }: { book:
   const next = previousIndex >= 0 ? book.chapters[previousIndex + 1] : null;
   const previous = previousIndex > 0 ? book.chapters[previousIndex - 1] : null;
   const section = chapter ? location.section : ["contents", "appendix", "dictionary", "path", "search", "midterm", "review", "review-ii", "progress", "final", "summary"].includes(location.section) ? location.section : "overview";
-  const hasTeacherReturn=book.id===1&&section!=="path"&&
-    (location.returnLesson==="L004"||(()=>{
-      try{return sessionStorage.getItem("los1.returnLesson")==="L004";}
-      catch{return false;}
-    })());
+  const previousLesson=(()=>{
+    if(location.returnLesson)return location.returnLesson;
+    try{
+      const saved=sessionStorage.getItem("los1.returnLesson");
+      return saved==="L004"||saved==="L005"?saved:null;
+    }catch{return null;}
+  })();
+  const hasTeacherReturn=book.id===1&&section!=="path"&&Boolean(previousLesson);
   return <div className="los-book-workspace" style={bookStyle(book)}>
     <header className="los-book-topbar">
       <button className="los-back-library" onClick={goLibrary} aria-label="Takaisin kirjasarjaan"><ChevronLeft size={19} /> <span>Kirjasarja</span></button>
@@ -382,9 +389,9 @@ function LosBookWorkspace({ book, location, move, goLibrary, openBook }: { book:
       </aside>
       <main className="los-book-main" id="main-content" tabIndex={-1}>
         {hasTeacherReturn&&<div className="los-book-teacher-return">
-          <a href="/los#/1/lesson/L004" onClick={()=>{
+          <a href={"/los#/1/lesson/"+previousLesson} onClick={()=>{
             try{sessionStorage.removeItem("los1.returnLesson");}catch{/* harmless */}
-          }}><ArrowLeft size={18}/> Palaa oppitunnille L004</a>
+          }}><ArrowLeft size={18}/> Palaa oppitunnille {previousLesson}</a>
           <span>Oppitunnin kohta ja vastaukset ovat tallessa.</span>
         </div>}
         <div className="los-main-breadcrumb"><button onClick={() => move(null, "overview")}>LOS! {book.id}</button>{chapter ? <><ChevronRight size={12} /><button onClick={() => openChapter(chapter)}>Kappale {Number(chapter.id)}</button></> : null}{chapter && section !== "chapter" ? <><ChevronRight size={12} /><span>{section==="cards" ? "Kertauskortit" : sections.find(s => s.id === section)?.label}</span></> : null}</div>
@@ -446,6 +453,7 @@ export function LosBook() {
   };
   useEffect(() => {
     const title = location.lessonId==="L004" ? "L004 · Tervehdykset muistista · LOS!" :
+      location.lessonId==="L005"?"L005 · Kuuntele ja valitse tervehdys · LOS!":
       location.book ? `LOS! ${location.book} · Saksan oppikirja` : "LOS! · Saksan oppikirjasarja";
     document.title = title;
     return () => { document.title = "StudyOS"; };
@@ -456,6 +464,8 @@ export function LosBook() {
   return <div className="los-app">
     {book ? (location.lessonId === "L004" && book.id === 1 ?
       <LosL004LessonShell book={book}/> :
+      location.lessonId === "L005" && book.id === 1 ?
+      <LosL005LessonShell book={book}/> :
       <LosBookWorkspace book={book} location={location} move={(chapter, section) => move(book.id, chapter, section)} goLibrary={() => move(null)} openBook={id => move(id)} />) :
       <><div className="los-series-top"><a href="/studies"><ArrowLeft size={17} /> Opintopäiväkirjaan</a><span>LOS! · Saksa B3</span></div><SeriesView openBook={id => move(id)} /></>}
   </div>;

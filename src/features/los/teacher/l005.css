@@ -1,0 +1,17 @@
+/* L005: media belongs to the same quiet, responsive lesson player. */
+.los-l005-media{margin:22px 0;padding:clamp(13px,3vw,19px);
+ background:var(--los-subtle);border:1px solid var(--los-line);border-radius:11px}
+.los-l005-media>audio{width:100%;max-width:680px;min-height:46px;display:block;margin:14px 0}
+.los-l005-media>p{font-size:14px;line-height:1.75;max-width:72ch}
+.los-l005-playback-status{padding:12px 14px;background:var(--los-book-tint);border-radius:8px}
+.los-l005-media button{min-height:44px;margin:8px 0}
+.los-l005-transcript{margin:12px 0;padding:14px 16px;background:var(--los-paper);
+ border:1px solid var(--los-line);border-radius:10px}
+.los-l005-transcript p{font-size:13px;line-height:1.7;color:var(--los-soft)}
+.los-l005-transcript ol{margin:14px 0;padding-left:23px;display:grid;gap:8px}
+.los-l005-transcript li{line-height:1.55;padding:7px 4px}
+.los-l005-transcript li span{display:block;overflow-wrap:anywhere}
+.los-l005-transcript li span[lang="de"]{font-weight:700}
+.los-l005-transcript li span+span{font-size:13px;color:var(--los-soft)}
+.los-l005-media a{color:var(--los-book-accent);text-decoration:underline}
+@media(max-width:560px){.los-l005-transcript{padding:12px}.los-l005-media>audio{max-width:100%}}
