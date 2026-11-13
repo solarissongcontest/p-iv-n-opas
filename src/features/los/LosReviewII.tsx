@@ -27,7 +27,7 @@ export function LosReviewII({move}:{move:LosNavigate}){
   };
   const markWritingModel=()=>update(current=>{
     const now=new Date().toISOString();
-    const before=current.teacherSessions?.L058??emptyTeacherSession(LOS1_L058_TEACHER,now);
+    const before=current.teacherSessions?.["L058"]??emptyTeacherSession(LOS1_L058_TEACHER,now);
     return {...current,teacherSessions:{...current.teacherSessions,
       L058:markTeacherHelp(before,"writing-model",now)}};
   });
@@ -92,7 +92,7 @@ export function LosReviewII({move}:{move:LosNavigate}){
             onClick={()=>{if(!showModel)markWritingModel();setShowModel(old=>!old);}}>
             {showModel?"Piilota tarkistusmalli":"Näytä tarkistusmalli oman yrityksen jälkeen"}
           </button>
-          {draft.teacherSessions?.L058?.helpedIds.includes("writing-model")&&<p role="status">Mallia tai vihjettä on käytetty. Tämä merkitään avustetuksi harjoitteluksi, ei itsenäisesti tarkistetuksi kielioppinäytöksi.</p>}
+          {draft.teacherSessions?.["L058"]?.helpedIds.includes("writing-model")&&<p role="status">Mallia tai vihjettä on käytetty. Tämä merkitään avustetuksi harjoitteluksi, ei itsenäisesti tarkistetuksi kielioppinäytöksi.</p>}
           {showModel&&<div className="los-exam-rubric">
             <h4>Tarkistuslista ja malliteksti</h4>
             <ul>
