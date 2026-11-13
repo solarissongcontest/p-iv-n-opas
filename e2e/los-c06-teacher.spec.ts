@@ -44,7 +44,7 @@ test("L032 uses actual four Text A source dialogues and requires checked evidenc
   await page.goto("/los#/1/06/text",{waitUntil:"domcontentloaded"});
   // C06 Text A also contains the collapsed C01 review (8 hidden turns).
   await expect(page.locator(".los-c01-turn:visible")).toHaveCount(12);
-  await expect(page.locator(".los-c01-turns")).toContainText("Ich bin schon zwölf Jahre alt.");
+  await expect(page.locator(".los-c01-turns:visible")).toContainText("Ich bin schon zwölf Jahre alt.");
   await expectNoHorizontalOverflow(page);
 });
 
@@ -54,7 +54,7 @@ test("L034 uses original C06 Text B and L035 links to actual submitted chapter t
   await expect(page.getByRole("heading",{name:"Kuuntele ikähaastattelu"})).toBeVisible();
   await page.locator(".los-teacher-outline").getByRole("button",{name:/Koko kahdeksan repliikin Text B/}).click();
   await expect(page.locator(".los-teacher-paper")).toContainText("M-COM-01");
-  await expect(page.locator(".los-teacher-paper")).toContainText("laitetestaamaton");
+  await expect(page.locator(".los-teacher-paper")).toContainText("ei ole vielä hyväksytty");
   await page.goto("/los#/1/06/text-b",{waitUntil:"domcontentloaded"});
   await expect(page.locator(".los-c01-turn")).toHaveCount(8);
   await expect(page.locator("fieldset.los-c01-question")).toHaveCount(4);
