@@ -84,11 +84,15 @@ export const LOS1_L017_TEACHER: TeacherLesson = {
         genericWrong:"Valitse juuri sovittuun sinutteluun kuuluva koko nimikysymys."}},
     {id:"exit",phase:"Lopputarkistus",kind:"question",title:"Tunnista iso S",
       paragraphs:["Vastaa ilman mallia. Tämä tarkistaa muodon kirjoitusasun erikseen sosiaalisesta tilanteesta."],
-      question:{type:"text",skillId:"L1-INT-04",evidenceRole:"exit",prompt:"Kirjoita kohtelias puhuttelupronomini saksaksi.",
-        accepted:["Sie"],success:"Oikein: kohtelias Sie kirjoitetaan isolla S:llä.",
+      question:{type:"choice",skillId:"L1-INT-04",evidenceRole:"exit",prompt:"Mikä kirjoitusasu tarkoittaa kohteliasta Te-puhuttelua?",
+        options:[
+          {id:"a",label:"sie",wrongFeedback:"Pieni sie tarkoittaa esimerkiksi hän tai he, ei kohteliasta Te-puhuttelua."},
+          {id:"b",label:"Sie"},
+          {id:"c",label:"du",wrongFeedback:"Du tarkoittaa tuttavallista sinää, ei kohteliasta Te-puhuttelua."}
+        ],correctOption:"b",success:"Oikein: kohtelias Sie kirjoitetaan isolla S:llä.",
         hint:"Kohteliaan puhuttelun ensimmäinen kirjain on iso S.",
         reteach:"du = sinä, Sie = kohtelias Te. Pieni sie ei ole sama pronominimuoto.",
-        genericWrong:"Kirjoita yksi sana, ei koko lausetta."}},
+        genericWrong:"Valitse iso S, koska kysymys käsittelee teitittelyä."}},
     {id:"summary",phase:"Yhteenveto",kind:"summary",title:"Osaat erottaa tilanteen ja puhuttelun",
       paragraphs:[
         "Tunnistit ystävän ja virallisen ensikohtaamisen eron. Osaat perustella, miksi du tai Sie sopii tilanteeseen ja miksi puhuttelutapa voi muuttua.",
