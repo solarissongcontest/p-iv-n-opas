@@ -199,7 +199,7 @@ export function LosTeacherPlayer({ lessonId }: { lessonId: string }) {
       </section> :
       !lesson || !session || !scene ? <section className="los-teacher-status">
         <h1>Oppitunnin opetusmateriaali ei ole vielä valmis</h1>
-        <p>Tämä uusi Teacher 2.0 -näkymä on ensimmäisessä vaiheessa toteutettu oppitunnille L004. Muut oppitunnit toimivat edelleen vanhassa Opetuspolussa.</p>
+        <p>Teacher 2.0 on nyt käytössä oppitunneilla L001 ja L004. Muut oppitunnit toimivat edelleen nykyisessä Opetuspolussa.</p>
         <a href="/los#/1/path">Palaa Opetuspolkuun</a>
       </section> :
       <>
@@ -254,9 +254,25 @@ export function LosTeacherPlayer({ lessonId }: { lessonId: string }) {
                 {id}: {draft.practiceAnswers[id]?.trim() ? "Vastaus tallennettu kirjassa" : "Vastaus vielä puuttuu"}
               </p>)}
             </div>}
+            {scene.reflection && <div className="los-teacher-reflection">
+              <label htmlFor={"los-teacher-reflection-" + scene.id}>{scene.reflection.prompt}</label>
+              <textarea id={"los-teacher-reflection-" + scene.id}
+                rows={4} maxLength={500}
+                placeholder={scene.reflection.placeholder}
+                value={session.draftAnswers[scene.id] ?? ""}
+                disabled={completed}
+                onChange={event => persist(old => setTeacherAnswerDraft(old, scene.id, event.target.value, stamp()))}
+              />
+              <small role="status">
+                {(session.draftAnswers[scene.id]?.trim().length ?? 0) >= scene.reflection.minLength
+                  ? "Tavoite tallennettu. Voit vahvistaa sen alla."
+                  : "Kirjoita vähintään " + scene.reflection.minLength + " merkkiä. Tekstisi tallentuu automaattisesti."}
+              </small>
+            </div>}
             {scene.activityId && <div className="los-teacher-activity">
               <button type="button"
-                disabled={session.activityIds.includes(scene.activityId) || completed}
+                disabled={session.activityIds.includes(scene.activityId) || completed ||
+                  Boolean(scene.reflection && (session.draftAnswers[scene.id]?.trim().length ?? 0) < scene.reflection.minLength)}
                 onClick={() => markActivity(scene.activityId!)}>
                 {session.activityIds.includes(scene.activityId) ? <CheckCircle2 size={18}/> : <Check size={18}/>}
                 {session.activityIds.includes(scene.activityId) ? "Harjoittelu vahvistettu" : scene.activityLabel}
