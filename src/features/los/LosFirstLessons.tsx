@@ -125,7 +125,7 @@ export function LosFirstLessons({ selectedId, onSelect, move }: {
       <h3>{lesson.title}</h3>
       <p className="los-lesson-objective"><strong>Tavoite:</strong> {lesson.objective}</p>
       <p className="los-lesson-status">{isTeacherLesson?
-        (teacherDone?"Päivitetty opetus on käyty läpi. Osaaminen arvioidaan erikseen.":
+        (teacherDone?(lesson.id==="L005"?"Opetus käsitelty. Kuullun ymmärtämisen tavoite on edelleen vahvistamatta.":"Päivitetty opetus on käyty läpi. Osaaminen arvioidaan erikseen."):
          progress.teacher?.completedAt?"Aiempi opetusversio on käyty läpi. Päivitetyn version harjoitukset ovat vielä vahvistamatta.":
          progress.teacher?"Uudistettu opetus kesken. Palaa viimeiseen opetustilanteeseen.":
          isComplete?"Aiempi oppituntisuoritus säilyy. Voit käydä uuden opetuksen erikseen.":
