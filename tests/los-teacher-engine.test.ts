@@ -51,7 +51,7 @@ test("first correct attempt gives independent evidence; hints and retries do not
   s = revealTeacherSolution(s, "independent", now);
   s = setTeacherAnswerDraft(s, "independent", "Guten Abend!", now);
   s = submitTeacherAnswer(s, lesson, "independent", "Guten Abend!", now);
-  assert.equal(teacherLatestAttempt(s, "independent")!.independent, false);
+  // A revealed solution is a model, not a new assessable submission.\n  assert.equal(teacherLatestAttempt(s, "independent"), undefined);
 });
 
 test("opening book or skipping questions cannot finish and never creates practice answers", () => {
