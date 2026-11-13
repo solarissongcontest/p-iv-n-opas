@@ -94,3 +94,27 @@ Selite: `vastaus` = vanhaan tehtävätilaan tallennettu vastaus, ei automaattine
 ## Julkaisun portit
 
 U1.0:n **R1–R12** pysyy ainoana julkaisuporttien listana. Raportti ei luo uutta G1–G8-järjestelmää eikä sulje portteja ilman havaintoa. Tästä raportista johdettavat tärkeimmät avoimet työt ovat L012–L060:n varsinainen opetus, L001–L011:n toimituksellinen hyväksyntä, sanakirjan tuotantolataus, tarkistettu sanakohtainen ääntämistieto, oikeat ihmisäänitteet, todelliset laite-/tallennustestit ja sisällön ulkoisten oikeuksien hyväksyntä.
+
+## Yhteensopivuus: L004:n ja L005:n vaihtoehtoiset opetusversiot (13.11.2026)
+
+L004:n rinnakkaisen Teacher-moottorin PR #218 sekä siitä jatkaneen L005:n
+PR #232 historialliset oppituntimerkinnät säilytetään
+`lessonProgress.L004/L005.teacher`-kentissä. PR #232 lisäsi
+`completedContentRevision`-, `completedRevisionAt`-, `writtenDrafts`-,
+`helpSelections`- ja `media`-kentät; nämä tarkistetaan nyt tietotyypin,
+kohtuullisten kokorajojen, päiväysten ja parillisten versiomerkintöjen
+perusteella. `media` sisältää vain selaimen ilmoittamia
+`playingAt`/`endedAt`-tapahtumia ja tekstivastineen avausmerkinnän,
+ei kuullun ymmärtämisen näyttöä.
+
+**Yhteinen päätös on edelleen yksiselitteinen:** kirjoitettava uusi
+Teacher Experience 2.0 -tila on vain `teacherSessions`. Historiallista
+`lessonProgress.*.teacher`-tietoa ei muunnettaessa kopioida
+`teacherSessions`-vastauksiksi, itsenäiseksi osaamisnäytöksi tai
+suorituspäiväksi. Kelvollisen vanhan tietueen kaikki kentät säilyvät
+varmuuskopion käsittelyssä muuttumattomina. Korruptoitunut uusi
+metadata hylätään sen sijaan, että sitä yritettäisiin korjata
+keksityillä oletuksilla.
+
+Tämä on data- ja yhteensopivuustarkistus, **ei** PR #232:n toisen
+opetusmoottorin käyttöönotto tai todiste toimivasta äänen toistosta.
