@@ -4,7 +4,7 @@ import {
 } from "./content/l004.ts";
 import {
   answerTeacher,hintTeacher,initialTeacherProgress,pauseTeacher,revealTeacher,
-  selectTeacherScene,teacherEvidence,teacherCanComplete,openTeacherHelp,
+  selectTeacherScene,teacherEvidence,teacherCanComplete,teacherCurrentCompletion,openTeacherHelp,
   draftTeacherWritten,answerTeacherWritten,revealTeacherWritten,normalizeTeacherWritten,type TeacherProgress
 } from "./core.ts";
 import "./teacher.css";
@@ -33,6 +33,7 @@ export function LosL004TeacherPlayer({
  const teachingBoard=scene.id==="rule"?L004_BOARDS.rule:scene.id==="model"?L004_BOARDS.model:null;
  const evidence=teacherEvidence(TEACHER_L004,p);
  const canFinish=teacherCanComplete(TEACHER_L004,p);
+ const currentCompleted=teacherCurrentCompletion(TEACHER_L004,p);
  const go=(i:number)=>{
   const target=TEACHER_L004.scenes[i];
   if(target)onChange(selectTeacherScene(TEACHER_L004,p,target.id));
@@ -173,11 +174,12 @@ export function LosL004TeacherPlayer({
   <div className="los-teacher-completion">
    <p>Opetustilanteita käsitelty: {TEACHER_L004.scenes.filter(s=>p.visited.includes(s.id)).length}/{TEACHER_L004.scenes.length}.
     {" "}Käy jokainen kohta läpi ja kokeile sekä avoimia että valintatehtäviä. Väärä vastaus ei estä oppitunnin päättämistä.</p>
-   {p.completedAt?
-    <p role="status"><strong>Opetuskokonaisuus käyty läpi.</strong> Suoritus tallennettu.
-      {TEACHER_L004.scenes.some(s=>s.written&&!p.answers[s.id+"-written"])?
-       " Merkintä on aiemmalta versiolta; uudet avoimet harjoitukset voi tehdä erikseen.":
-       " Tämä ei tarkoita, että kielitaito olisi vahvistettu."}</p>:
+   {p.completedAt&&!currentCompleted&&
+    <p role="note">Aiempi suoritusmerkintä säilyy. Päivitetyn version avoimet
+     kirjoitusharjoitukset merkitään käsitellyiksi erikseen.</p>}
+   {currentCompleted?
+    <p role="status"><strong>Opetuskokonaisuus käyty läpi.</strong> Päivitetty versio on käsitelty.
+     Tämä ei tarkoita, että kielitaito olisi vahvistettu.</p>:
     <button type="button" onClick={onFinish} disabled={!canFinish}>
      Merkitse opetuskokonaisuus käsitellyksi
     </button>}
