@@ -93,6 +93,41 @@ test("L058 finished writing stays self-produced until edited after viewing the m
   await expectNoHorizontalOverflow(page);
 });
 
+test("L060 counts five distinct real rated words, not both directions of three words",async({page})=>{
+  await enterLocalLos(page);
+  await page.goto("/los#/1/summary",{waitUntil:"domcontentloaded"});
+  await expect(page.getByText(/Olet arvioinut 0 eri sanaa/)).toBeVisible();
+  const confirm=page.getByRole("button",{name:"Vahvista vähintään viisi arvioitua sanaa"});
+  await expect(confirm).toBeDisabled();
+  await page.getByRole("button",{name:"Avaa sanakortit"}).click();
+  await expect(page.locator(".los-recall-card")).toBeVisible();
+
+  async function reviewThree(){
+    for(let i=0;i<3;i++){
+      await page.getByRole("button",{name:"Näytä vastaus"}).click();
+      await page.getByRole("button",{name:"Muistin oikein"}).click();
+    }
+  }
+  await reviewThree();
+  await page.getByRole("button",{name:"Suomi → saksa"}).click();
+  await reviewThree(); // The same three words in the reverse direction.
+  await page.goto("/los#/1/summary",{waitUntil:"domcontentloaded"});
+  await expect(page.getByText(/Olet arvioinut 3 eri sanaa/)).toBeVisible();
+  await expect(confirm).toBeDisabled();
+
+  await page.getByRole("button",{name:"Avaa sanakortit"}).click();
+  for(let i=0;i<2;i++){
+    await page.getByRole("button",{name:"Näytä vastaus"}).click();
+    await page.getByRole("button",{name:"Muistin oikein"}).click();
+  }
+  await page.goto("/los#/1/summary",{waitUntil:"domcontentloaded"});
+  await expect(page.getByText(/Olet arvioinut 5 eri sanaa/)).toBeVisible();
+  await expect(confirm).toBeEnabled();
+  await confirm.click();
+  await expect(page.getByText("Kertausvahvistus kirjattu. Korttien osaaminen on käyttäjän itse arvioimaa.")).toBeVisible();
+  await expectNoHorizontalOverflow(page);
+});
+
 test("EX-FINAL: 50 decisions, submit, 49/50 feedback, reload, retake archive, 50/50 and JSON backup on both layouts",async({page})=>{
   test.setTimeout(240_000);
   await enterLocalLos(page);
