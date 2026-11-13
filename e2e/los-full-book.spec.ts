@@ -763,6 +763,32 @@ test("Teacher 2.0 presents one teaching board with one set of controls", async (
 
 
 
+
+test("C07 teaches spelling requests before L036 application and hides the answer in L038",async({page})=>{
+  await enterLocalBook(page);
+  await page.goto("/los-lessons/L036",{waitUntil:"domcontentloaded"});
+  const outline=page.locator(".los-teacher-outline nav");
+  await outline.getByRole("button",{name:"Pyydä nimen tavaamista kohteliaasti"}).click();
+  await expect(page.locator(".los-teacher-paper")).toContainText("Bitte buchstabieren Sie.");
+  await expect(page.locator(".los-teacher-paper")).toContainText("Opettele tässä kokonainen valmis ilmaus");
+  await outline.getByRole("button",{name:"Nimikysymys ja tavaus eri tilanteissa"}).click();
+  await expect(page.locator(".los-teacher-question h3")).toContainText("haluat nimen kirjaimittain");
+  await page.getByRole("button",{name:/Bitte buchstabieren Sie\./}).click();
+  await expect(page.locator(".los-teacher-feedback.is-right")).toContainText("kohtelias tavaamispyyntö");
+  await expectNoHorizontalOverflow(page);
+
+  await page.goto("/los-lessons/L038",{waitUntil:"domcontentloaded"});
+  await page.locator(".los-teacher-outline nav").getByRole("button",{name:"Kirjoita oikein ilman mallia"}).click();
+  const question=page.locator(".los-teacher-question h3");
+  await expect(question).toContainText("Täydennä lause du");
+  await expect(question).not.toContainText("heißt");
+  await page.locator(".los-teacher-question input").fill("heißt");
+  await page.getByRole("button",{name:"Tarkista",exact:true}).click();
+  await expect(page.locator(".los-teacher-feedback.is-right")).toContainText("ß-kirjaimella");
+  await expectNoHorizontalOverflow(page);
+});
+
+
 test("L034 explains Franz's age and the intentionally short age answer",async({page})=>{
   await enterLocalBook(page);
   await page.goto("/los-lessons/L034",{waitUntil:"domcontentloaded"});
