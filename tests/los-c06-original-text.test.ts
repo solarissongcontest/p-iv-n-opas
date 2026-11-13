@@ -8,21 +8,21 @@ import {LOS1_C01_SOURCE_ID} from "../src/features/los/content/los1C01.ts";
 import {losReaderMarkKey} from "../src/features/los/content/readerAnnotations.ts";
 
 const originalText=[
-  "Hi, wie alt bist du?","Ich bin fünf.","Und wie heißt du?","Oskar.",
+  "Hi, wie alt bist du?","Ich bin neun.","Und wie heißt du?","Lucas.",
   "Hallo, ich bin Fabian. Und wie heißt du?","Ich bin Larissa.",
   "Bist du schon elf?","Ich bin schon zwölf Jahre alt.",
   "Wie alt seid ihr?","Wir sind 10.",
   "Wie alt ist er?","Paul? Er ist elf Jahre alt.",
 ] as const;
 
-test("C06 includes all four human-authored age dialogues without invented or shortened text",()=>{
+test("C06 includes the newest indexed four-dialogue transcript without shortening",()=>{
   const text=getLosOpenDialogue("06");
   assert.equal(text,LOS1_C06_TEXT);
   assert.equal(text?.chapterId,"06");
   assert.equal(text?.sourceId,"M-ZPE-01");
   assert.deepEqual(text?.originalLines.map(line=>line.text),originalText);
   assert.deepEqual(text?.originalLines.map(line=>line.speaker),
-    ["A","B","A","B","A","B","A","B","A","B+C","A","B"]);
+    ["Fabian","Lucas","Fabian","Lucas","Fabian","Larissa","Fabian","Larissa","Fabian","Tim und Mia","Fabian","Felix"]);
   assert.deepEqual(text?.originalLines.filter(line=>line.sectionTitle).map(line=>line.sectionTitle),
     ["Dialog 1","Dialog 2","Dialog 3","Dialog 4"]);
   assert.equal(new Set(text?.originalLines.map(line=>line.id)).size,12);

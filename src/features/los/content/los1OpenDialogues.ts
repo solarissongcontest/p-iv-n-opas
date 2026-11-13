@@ -321,8 +321,9 @@ const c09: LosOpenText = {
 
 /**
  * C06 Text A: four distinct complete human-authored mini-dialogues.
- * Literal German lines follow the ORIGINAL transcription, not the page's
- * inconsistent translated practice worksheet (which mentions Lucas).
+ * The official source has changed since an older cached transcription: the
+ * newest indexed rendering names speakers and uses Lucas/neun, while the
+ * older one said Oskar/fünf. Confirm audio alignment before publication.
  *
  * Source: Monika Janicka, Sag mal, wie alt bist du?,
  * https://zpe.gov.pl/a/plik-audio/DIcQL1VxT
@@ -331,45 +332,45 @@ const c09: LosOpenText = {
  * Finnish translations and questions are independent LOS! aids.
  */
 const c06:LosOpenText={
-  chapterId:"06",sourceId:"M-ZPE-01",revision:"source-checked-2026-11-12",
+  chapterId:"06",sourceId:"M-ZPE-01",revision:"text-collated-latest-index-2026-11-13",
   sourceUrl:"https://zpe.gov.pl/a/plik-audio/DIcQL1VxT",
   author:"Monika Janicka",
   licenseCode:"CC BY-SA 3.0",
   licenseUrl:"https://creativecommons.org/licenses/by-sa/3.0/",
-  sourceDetail:"Alkuperäisen lähdesivun Sag mal, wie alt bist du? -litteraatti sisältää neljä lyhyttä erillistä dialogia. Puheäänitteen itsenäinen tallennus ja toisto ovat yhä testaamatta. Suomenkieliset tukiselitykset ovat LOS!:n toimitusta.",
+  sourceDetail:"Monika Janickan Sag mal, wie alt bist du? sisältää neljä julkaistua ikädialogia (CC BY-SA 3.0). Vanhemmassa välimuistissa puhuja on Oskar ja ikä viisi; uudemmassa indeksoidussa litteraatissa puhuja on Lucas ja ikä yhdeksän, ja henkilöiden nimet näkyvät repliikeissä. Tämä esikatselu käyttää uudempaa tekstiversiota. Äänitteen vastaavuus ja toisto on varmennettava erikseen ennen julkaisua. Suomenkieliset tukiselitykset ovat LOS!:n toimitusta.",
   title:"Sag mal, wie alt bist du?",
   heading:"Neljä keskustelua iästä",
   guidance:"Lue kaikki neljä alkuperäistä lyhyttä dialogia. Etsi ensin vain nimet ja ikälukusanat. Lapsille suunnatussa tekstissä esiintyy myös vielä opettamattomia muotoja kuten seid ihr, wir sind ja ist er; ne ovat tässä vain tunnistettavia tukirakenteita. Aineisto on vielä kieli- ja laitetarkistusta odottava esikatselu.",
   originalLines:[
-    {id:"u01",sectionTitle:"Dialog 1",speaker:"A",text:"Hi, wie alt bist du?",meaning:"Hei, kuinka vanha olet?"},
-    {id:"u02",speaker:"B",text:"Ich bin fünf.",meaning:"Olen viisi."},
-    {id:"u03",speaker:"A",text:"Und wie heißt du?",meaning:"Ja mikä sinun nimesi on?"},
-    {id:"u04",speaker:"B",text:"Oskar.",meaning:"Oskar."},
-    {id:"u05",sectionTitle:"Dialog 2",speaker:"A",text:"Hallo, ich bin Fabian. Und wie heißt du?",meaning:"Hei, olen Fabian. Ja mikä sinun nimesi on?"},
-    {id:"u06",speaker:"B",text:"Ich bin Larissa.",meaning:"Olen Larissa."},
-    {id:"u07",speaker:"A",text:"Bist du schon elf?",meaning:"Oletko jo yksitoista?"},
-    {id:"u08",speaker:"B",text:"Ich bin schon zwölf Jahre alt.",meaning:"Olen jo kaksitoista vuotta vanha."},
-    {id:"u09",sectionTitle:"Dialog 3",speaker:"A",text:"Wie alt seid ihr?",meaning:"Kuinka vanhoja te olette?"},
-    {id:"u10",speaker:"B+C",text:"Wir sind 10.",meaning:"Olemme kymmenen."},
-    {id:"u11",sectionTitle:"Dialog 4",speaker:"A",text:"Wie alt ist er?",meaning:"Kuinka vanha hän on?"},
-    {id:"u12",speaker:"B",text:"Paul? Er ist elf Jahre alt.",meaning:"Paul? Hän on yksitoistavuotias."},
+    {id:"u01",sectionTitle:"Dialog 1",speaker:"Fabian",text:"Hi, wie alt bist du?",meaning:"Hei, kuinka vanha olet?"},
+    {id:"u02",speaker:"Lucas",text:"Ich bin neun.",meaning:"Olen yhdeksän."},
+    {id:"u03",speaker:"Fabian",text:"Und wie heißt du?",meaning:"Ja mikä sinun nimesi on?"},
+    {id:"u04",speaker:"Lucas",text:"Lucas.",meaning:"Lucas."},
+    {id:"u05",sectionTitle:"Dialog 2",speaker:"Fabian",text:"Hallo, ich bin Fabian. Und wie heißt du?",meaning:"Hei, olen Fabian. Ja mikä sinun nimesi on?"},
+    {id:"u06",speaker:"Larissa",text:"Ich bin Larissa.",meaning:"Olen Larissa."},
+    {id:"u07",speaker:"Fabian",text:"Bist du schon elf?",meaning:"Oletko jo yksitoista?"},
+    {id:"u08",speaker:"Larissa",text:"Ich bin schon zwölf Jahre alt.",meaning:"Olen jo kaksitoista vuotta vanha."},
+    {id:"u09",sectionTitle:"Dialog 3",speaker:"Fabian",text:"Wie alt seid ihr?",meaning:"Kuinka vanhoja te olette?"},
+    {id:"u10",speaker:"Tim und Mia",text:"Wir sind 10.",meaning:"Olemme kymmenen."},
+    {id:"u11",sectionTitle:"Dialog 4",speaker:"Fabian",text:"Wie alt ist er?",meaning:"Kuinka vanha hän on?"},
+    {id:"u12",speaker:"Felix",text:"Paul? Er ist elf Jahre alt.",meaning:"Paul? Hän on yksitoistavuotias."},
   ],
   glossary:{...common,
     hi:"hei, tuttavallinen tervehdys",alt:"vanha; Wie alt bist du? = kuinka vanha olet?",
     heißt:"on nimeltään; Wie heißt du? = mikä sinun nimesi on?",
-    fünf:"viisi",schon:"jo",elf:"yksitoista",zwölf:"kaksitoista",
+    neun:"yhdeksän",schon:"jo",elf:"yksitoista",zwölf:"kaksitoista",
     zehn:"kymmenen",jahre:"vuotta; Jahre alt = vuotta vanha",
     bist:"olet; sein-verbin du-muoto",seid:"olette; sein-verbin ihr-muoto, vain tunnistettava",
     ihr:"te (tuttavallinen monikon puhuttelu), vain tunnistettava",wir:"me",
     sind:"olemme/olette/ovat; sein-verbin monikkomuoto, vain tunnistettava",
-    er:"hän (miespuolinen), vain tunnistettava",oskar:"Oskar, etunimi",
+    er:"hän (miespuolinen), vain tunnistettava",lucas:"Lucas, etunimi",
     fabian:"Fabian, etunimi",larissa:"Larissa, etunimi",
     paul:"Paul, etunimi",
   },
   questions:[
-    {id:"C06-ZPE-Q01",prompt:"Kuinka vanha Oskar sanoo olevansa ensimmäisessä keskustelussa?",
-      answers:[{id:"a",text:"5-vuotias"},{id:"b",text:"11-vuotias"},{id:"c",text:"12-vuotias"}],correctId:"a",
-      explanation:"Ich bin fünf. on ensimmäisen keskustelun vastaus. Fünf on viisi."},
+    {id:"C06-ZPE-Q01",prompt:"Kuinka vanha Lucas sanoo olevansa ensimmäisessä keskustelussa?",
+      answers:[{id:"a",text:"9-vuotias"},{id:"b",text:"11-vuotias"},{id:"c",text:"12-vuotias"}],correctId:"a",
+      explanation:"Ich bin neun. on ensimmäisen keskustelun vastaus. Neun on yhdeksän."},
     {id:"C06-ZPE-Q02",prompt:"Kuinka vanha Larissa sanoo olevansa?",
       answers:[{id:"a",text:"11-vuotias"},{id:"b",text:"12-vuotias"},{id:"c",text:"10-vuotias"}],correctId:"b",
       explanation:"Larissa vastaa Ich bin schon zwölf Jahre alt. Zwölf on kaksitoista."},
@@ -377,7 +378,7 @@ const c06:LosOpenText={
       answers:[{id:"a",text:"12-vuotiaita"},{id:"b",text:"11-vuotiaita"},{id:"c",text:"10-vuotiaita"}],correctId:"c",
       explanation:"Wir sind 10 tarkoittaa Olemme kymmenen. Tässä luku on alkuperäisessä tekstissä numerona."},
     {id:"C06-ZPE-Q04",prompt:"Kenen ikä kerrotaan neljännessä dialogissa?",
-      answers:[{id:"a",text:"Paulin (11 vuotta)"},{id:"b",text:"Fabianin (12 vuotta)"},{id:"c",text:"Oskarin (5 vuotta)"}],correctId:"a",
+      answers:[{id:"a",text:"Paulin (11 vuotta)"},{id:"b",text:"Fabianin (12 vuotta)"},{id:"c",text:"Lucasin (9 vuotta)"}],correctId:"a",
       explanation:"Paul? Er ist elf Jahre alt. kertoo Paulin olevan yksitoistavuotias."},
   ],
   evidenceLineId:"u08",
