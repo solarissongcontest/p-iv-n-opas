@@ -89,7 +89,9 @@ test("completion needs visited scenes, all assessed questions, honest activities
   s = finishTeacherSession(s, lesson, actualPractice, now);
   assert.equal(s.completedAt, now);
   const review = moveTeacherScene(s, lesson, "welcome", now);
-  assert.equal(review.sceneId, "welcome");
+  // A completed lesson stays frozen; review can be presented without recording another navigation.
+  assert.equal(review, s);
+  assert.equal(review.sceneId, "summary");
   assert.equal(review.completedAt, now);
   assert.equal(independentTeacherEvidence(review, lesson), 3);
 });
