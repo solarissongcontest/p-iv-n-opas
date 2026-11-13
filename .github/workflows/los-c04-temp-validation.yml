@@ -50,3 +50,5 @@ jobs:
           exit 1
       - name: C04 Teacher flows on desktop Chromium and iPhone WebKit
         run: bunx playwright test e2e/los-c04-teacher.spec.ts --project=desktop-chromium --project=iphone-webkit
+      - name: Existing 60-lesson navigation regression on both projects
+        run: bunx playwright test e2e/los-full-book.spec.ts --grep 'every one of the 60 guided lessons' --project=desktop-chromium --project=iphone-webkit
