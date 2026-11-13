@@ -16,11 +16,20 @@ export function LosReviewII({move}:{move:LosNavigate}){
   const [showModel,setShowModel]=useState(false);
   const answers=draft.practiceAnswers;
   const checked=draft.practiceChecked;
-  const change=(id:string,value:string)=>update(current=>({
-    ...current,
-    practiceAnswers:{...current.practiceAnswers,[id]:value},
-    practiceChecked:current.practiceChecked.filter(item=>item!==id),
-  }));
+  const change=(id:string,value:string)=>update(current=>{
+    const next={
+      ...current,
+      practiceAnswers:{...current.practiceAnswers,[id]:value},
+      practiceChecked:current.practiceChecked.filter(item=>item!==id),
+    };
+    // A complete draft can be written before the model is opened. Any later
+    // revision may use that model, so record assistance from that point on.
+    // Keep the earlier draft and all unrelated quiz checks intact.
+    if(id!==LOS1_REVIEW_II_WRITING_ID ||
+       !current.teacherSessions?.["L058"]?.helpedIds.includes("writing-model")) return next;
+    return {...next,teacherSessions:{...current.teacherSessions,
+      L058:markTeacherHelp(current.teacherSessions["L058"],"writing-assisted",new Date().toISOString())}};
+  });
   const check=(id:string)=>{
     if(!answers[id])return;
     update(current=>({...current,practiceChecked:Array.from(new Set([...current.practiceChecked,id]))}));
@@ -106,7 +115,7 @@ export function LosReviewII({move}:{move:LosNavigate}){
               <li>Tarkistin lukusanan ja saksan erikoiskirjaimet.</li>
               <li>En käyttänyt oikeita henkilötietoja.</li>
             </ul>
-            <p lang="de">Hallo! Ich heiße Mia. Ich komme aus Finnland. Ich bin siebzehn Jahre alt. Das ist Leo. Er heißt Leo. Er kommt aus Deutschland. Tschüss!</p>
+            <p lang="de">Hallo! Ich heiße Mia. Ich komme aus Finnland. Ich bin siebzehn Jahre alt. Das ist Leo. Er kommt aus Deutschland. Tschüss!</p>
             <p>Malli on LOS!:n itse laatima oppimisesimerkki, ei autenttisena julkaistu lähdeteksti.</p>
           </div>}
         </section>}
