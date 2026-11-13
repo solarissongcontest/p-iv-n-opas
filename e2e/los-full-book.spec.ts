@@ -182,7 +182,9 @@ test("the cover advances to L002 after a real Teacher L001 completion without fo
   await expect(runner).toBeVisible();
   await runner.locator(".los-lesson-picker button").filter({hasText:"L001"}).click();
   await expect(page).toHaveURL(/\/los-lessons\/L001$/);
+  await expect(page.locator(".los-teacher-paper h2").first()).toContainText("Tervetuloa ensimmäiselle");
   const outline=page.locator(".los-teacher-outline nav button");
+  await expect(outline.first()).toBeVisible();
   const scenes=await outline.count();
   expect(scenes).toBeGreaterThanOrEqual(9);
   for(let index=0;index<scenes;index++){
