@@ -6,6 +6,7 @@ import { LOS_FUTURE_MANUSCRIPTS } from "../src/features/los/content/losFutureMan
 import { losFutureExercisesFor } from "../src/features/los/content/losFutureExercises.ts";
 import { losFutureExercisesForSection } from "../src/features/los/content/losFutureExerciseSections.ts";
 import { losFutureLessonOutline } from "../src/features/los/losFutureLessonOutline.ts";
+import { getLosFutureLesson } from "../src/features/los/content/losFutureLessons.ts";
 
 test("LOS! 2–8 has 70 accurately namespaced manuscript chapters", () => {
   assert.equal(LOS_BOOKS.length,8);
@@ -110,7 +111,7 @@ test("LOS! 2–8 answers use existing owner + book + chapter draft storage, with
   assert.ok(state.includes("${ownerId}.${bookId}.${chapterId}"));
 });
 
-test("all seven source-aligned 60-slot lesson outlines have 50 chapter links and 10 pending reviews", () => {
+test("all seven 60-slot lesson paths expose 350 chapter scripts and 70 review and exam briefs", () => {
   let total=0;
   for(const book of LOS_BOOKS.filter(x=>x.id>=2)){
     const slots=losFutureLessonOutline(book);
@@ -118,7 +119,7 @@ test("all seven source-aligned 60-slot lesson outlines have 50 chapter links and
     assert.deepEqual(slots.map(x=>x.number),Array.from({length:60},(_,i)=>i+1));
     assert.deepEqual(slots.filter(x=>x.phase==="review").map(x=>x.number),[1,27,28,29,30,56,57,58,59,60]);
     assert.equal(slots.filter(x=>x.phase==="chapter").length,50);
-    assert.ok(slots.every(x=>x.status==="outline-only"));
+    assert.ok(slots.every(x=>x.status==="manuscript-draft"));
     assert.ok(slots.filter(x=>x.phase==="review").every(x=>x.chapterId===null&&x.destination===null));
     for(const chapter of book.chapters){
       const list=slots.filter(x=>x.chapterId===chapter.id);
@@ -132,7 +133,61 @@ test("all seven source-aligned 60-slot lesson outlines have 50 chapter links and
   }
   assert.equal(total,420);
   assert.equal(losFutureLessonOutline(LOS_BOOKS[0]!).length,0);
+  assert.equal(getLosFutureLesson(1,1),null);
+  assert.equal(getLosFutureLesson(8,61),null);
   const viewer=readFileSync("src/features/los/LosFutureLearningPath.tsx","utf8");
   assert.match(viewer,/0 valmiiksi hyväksyttyä ohjattua oppituntia/);
   assert.match(viewer,/Pelkkä siirtymä sisältösivulle/);
+});
+
+test("all 420 manuscript scripts have source-grounded teaching content and safe exercise refs",()=>{
+  let lessons=0,chapters=0,reviews=0,taskLinks=0;
+  for(const book of LOS_BOOKS.filter(x=>x.id>=2)){
+    const outline=losFutureLessonOutline(book);
+    for(const slot of outline){
+      const script=getLosFutureLesson(book.id,slot.number);
+      assert.ok(script,slot.id);
+      assert.equal(script.id,slot.id);
+      assert.equal(script.title,slot.title);
+      assert.equal(script.kind,slot.phase);
+      assert.ok(script.intro.length>70,script.id);
+      if(script.kind==="chapter"){
+        chapters++;
+        assert.ok(script.objective.length>10,script.id);
+        assert.ok(script.model.length>70,script.id);
+        assert.ok(script.guidance.length>70,script.id);
+        assert.ok(script.attempt.length>25,script.id);
+        assert.ok(script.exitCheck.length>60,script.id);
+        assert.equal(script.timings.length,5,script.id);
+        assert.equal(script.timings.reduce((sum,s)=>sum+s.minutes,0),30,script.id);
+        assert.equal(slot.estimatedMinutes,30,script.id);
+        assert.ok(script.exerciseIds.length>=3,script.id);
+        const chapterTasks=losFutureExercisesFor(book.id,slot.chapterId!);
+        const knownIds=new Set(chapterTasks.map(x=>x.id));
+        for(const taskId of script.exerciseIds){
+          assert.ok(knownIds.has(taskId),`Broken task reference in ${script.id}: ${taskId}`);
+          taskLinks++;
+        }
+      }else{
+        reviews++;
+        assert.ok(script.reviewTeaching.length>45,script.id);
+        assert.ok(script.reviewTask.length>40,script.id);
+        assert.ok(script.reviewTiming.includes("min"),script.id);
+        assert.ok(script.reviewRule.length>40,script.id);
+        assert.equal(script.exerciseIds.length,0,script.id);
+        if(script.number===30||script.number===59){
+          assert.ok(slot.estimatedMinutes>=55,`Exam duration must not be silently shortened: ${script.id}`);
+        }
+      }
+      lessons++;
+    }
+  }
+  assert.equal(lessons,420);
+  assert.equal(chapters,350);
+  assert.equal(reviews,70);
+  assert.ok(taskLinks>1500);
+  const runner=readFileSync("src/features/los/LosFutureLessonRunner.tsx","utf8");
+  assert.match(runner,/mode="guided" taskIds=\{script\.exerciseIds\}/);
+  assert.match(runner,/useLosChapterDraft\(bookId,chapterId\)/);
+  assert.doesNotMatch(runner,/completedAt:\s*new Date|losScore\(/);
 });
