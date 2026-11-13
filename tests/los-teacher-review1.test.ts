@@ -69,6 +69,8 @@ test("review lessons require exactly their five existing checked questions and g
   // Completion means attempted and checked; it does not invent automatic mastery.
   const wrong={...full,[existing[0]!.id]:"a"===existing[0]!.correctId?"b":"a"};
   assert.equal(teacherCanFinish(base,lesson,wrong,existing.map(q=>q.id)),true);
+  assert.equal(teacherCanFinish(base,lesson,{...full,[existing[0]!.id]:"not-a-choice"},existing.map(q=>q.id)),false,"Imported fake review options cannot count.");
+  assert.equal(teacherCanFinish(base,lesson,{...full,[lesson.requiredPracticeIds[0]!]:"invalid-rating"},existing.map(q=>q.id)),false,"Imported fake self-assessment values cannot count.");
   const paused=toggleTeacherPause(base,at);
   assert.equal(moveTeacherScene(paused,lesson,lesson.scenes[0]!.id,at),paused);
   assert.equal(teacherCanFinish(paused,lesson,full,existing.map(q=>q.id)),false);
@@ -99,6 +101,8 @@ test("L030 reads the real EX-MID exam without duplicating its 25-point score or 
  const session=completedChecks(L030);
  const practice={"EX-MID-DIALOGUE-SELF":"some"};
  assert.equal(teacherCanFinish(session,L030,practice,[],examDraft),true);
+ assert.equal(teacherCanFinish(session,L030,{"EX-MID-DIALOGUE-SELF":"not-a-choice"},[],examDraft),false);
+ assert.equal(teacherCanFinish(session,L030,practice,[],{...examDraft,testAnswers:{...examAnswers,[LOS1_MIDTERM_QUESTIONS[0]!.id]:"invalid"}}),false);
  assert.equal(teacherCanFinish(session,L030,{},[],examDraft),false);
  assert.equal(teacherCanFinish(session,L030,practice,[],{...examDraft,testSubmittedAt:null}),false);
  assert.equal(teacherCanFinish(session,L030,practice,[],{...examDraft,testAnswers:{...examAnswers,[LOS1_MIDTERM_QUESTIONS[0]!.id]:""}}),false);
