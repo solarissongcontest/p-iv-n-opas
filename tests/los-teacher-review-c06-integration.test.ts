@@ -10,7 +10,7 @@ import {validateTeacherLesson} from "../src/features/los/teacher/validateContent
 const now="2026-11-13T15:00:00.000Z";
 
 test("one registry includes prior lessons, Review I and five C06 lessons",()=>{
-  for(const id of ["L001","L005","L013","L016","L027","L028","L029","L030","L031","L032","L033","L034","L035"]){
+  for(const id of ["L001","L005","L013","L016","L017","L018","L019","L020","L021","L022","L023","L024","L025","L026","L027","L028","L029","L030","L031","L032","L033","L034","L035"]){
     const lesson=getLosTeacherLesson(id);
     assert.ok(lesson,id+" must exist in canonical Teacher registry");
     assert.equal(lesson.id,id);
@@ -63,4 +63,14 @@ test("latest C06 published source text has named speakers, while older cached ve
   assert.match(LOS1_C06_TEXT.sourceDetail,/välimuistissa/);
   assert.equal(LOS1_C06_TEXT.author,"Monika Janicka");
   assert.equal(LOS1_C06_TEXT.licenseCode,"CC BY-SA 3.0");
+});
+
+test("C05 audio selection and pause behavior are preserved beside C06 and EX-MID",()=>{
+ const media=readFileSync("src/features/los/LosReferenceTools.tsx","utf8");
+ const player=readFileSync("src/features/los/teacher/LosTeacherPlayer.tsx","utf8");
+ assert.ok(media.indexOf('chapterId==="05" && source==="B"') <
+   media.indexOf('chapterId==="05" && source!=="A"'),
+   "C05 Text B must use M-COM-08 rather than earlier sample audio");
+ assert.match(player,/session\?\.paused \|\| completed/);
+ assert.match(player,/disabled=\{session\.paused \|\| completed\}/);
 });
