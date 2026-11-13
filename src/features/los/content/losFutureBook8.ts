@@ -18,11 +18,6 @@ export const LOS_FUTURE_BOOK_8: Record<string, LosFutureManuscript> = {
     "grammarExplanation": "Rakenna oma vastaus: Das Thema ist …, Laut dem Artikel …, Ich denke, dass … ja Ich finde das wichtig, weil … . Erota uutisen sisältö, oma mielipide ja mahdollinen epävarmuus. Tarkista weil/dass-sivulauseen verbin paikka sekä deshalb-lauseen verbi toisena. A2.1-tasolla tavoitteena on lyhyt ymmärrettävä viesti, ei pitkän analyyttisen esseen kirjoittaminen.\n\nLaajennettu opetus kirjassa:\n\nMedia-aiheinen lopputuotos kokoaa koko sarjan taitoja: lue, tulkitse, vertaile, kirjoita ja muokkaa vastaanottajalle sopivaksi. Käytä lyhyttä johdantoa, tarkistettuja faktoja, omaa merkittyä mielipidettä ja lähdeluetteloa. Opiskelija voi valita turvallisen kuvitteellisen aiheen, jos todellinen ajankohtainen aihe on liian vaikea. Tavoite on johdonmukainen, ymmärrettävä A2.1-teksti eikä ammattitoimittajan tasoinen raportti.\n\nMallilause: Laut der Stadt beginnt die Veranstaltung um zehn Uhr. Ich finde das interessant.\n\nSuomennos: Kaupungin mukaan tapahtuma alkaa kello kymmeneltä. Se on minusta kiinnostavaa.\n\nOpettajan virheen korjaus: Lähteen mainitseminen ja oman mielipiteen ilmaiseminen on pidettävä erillään.\n\nLähdeviitteen pedagoginen rajaus: Tekstin vaikeat muodot merkitään tunnistettaviksi, ellei niitä ole opetettu. Oppijan ei tarvitse tuottaa uuden aikamuodon tai sijamuodon muotoja ennen niiden erillistä opetusta.\n\nOma minikoe: selitä säännön vaikutus verbin paikkaan, persoonapäätteeseen tai artikkeliin omassa mallilauseessa. Sulje opetus. Tee vastaava uusi lause eri henkilöllä tai sanalla ja tarkista tulos.",
     "vocabulary": [
       {
-        "de": "Suomi",
-        "fi": "Huomio",
-        "status": ""
-      },
-      {
         "de": "das Medienprojekt",
         "fi": "mediaprojekti",
         "status": "artikkeli mukana; monikko ja ääntäminen vielä tarkistettava"
@@ -135,11 +130,6 @@ export const LOS_FUTURE_BOOK_8: Record<string, LosFutureManuscript> = {
     "grammarExplanation": "W-kysymykset Wer? Was? Wo? Wann? ovat uutistekstin lukijan työkaluja. Tavallisessa väitelauseessa taivutettu verbi on toisena: Heute beginnt ein Festival. Kun alussa on Heute, subjektia ei sijoiteta automaattisesti sen jälkeen ennen verbiä. Uutisessa voi olla myös menneitä muotoja; tunnista Perfekt ja tavallisimmat Präteritum-muodot.\n\nLaajennettu opetus kirjassa:\n\nUutistekstissä etsi ensin vastaukset kysymyksiin wer, was, wo, wann ja mahdollisuuksien mukaan warum. Älä sekoita otsikon lupausta ja tekstissä todella kerrottuja asioita. Taivutettu verbi on tavallisessa väitelauseessa edelleen toisena lauseenjäsenenä. Otsikoissa säännöt voivat olla tiiviimpiä, joten muuta tarvittaessa otsikko tavalliseksi virkkeeksi ymmärtämisen avuksi.\n\nMallilause: Am Montag eröffnet die Stadt einen neuen Park.\n\nSuomennos: Maanantaina kaupunki avaa uuden puiston.\n\nOpettajan virheen korjaus: Am Montag die Stadt eröffnet … → Am Montag eröffnet die Stadt …\n\nLähdeviitteen pedagoginen rajaus: Tekstin vaikeat muodot merkitään tunnistettaviksi, ellei niitä ole opetettu. Oppijan ei tarvitse tuottaa uuden aikamuodon tai sijamuodon muotoja ennen niiden erillistä opetusta.\n\nOma minikoe: selitä säännön vaikutus verbin paikkaan, persoonapäätteeseen tai artikkeliin omassa mallilauseessa. Sulje opetus. Tee vastaava uusi lause eri henkilöllä tai sanalla ja tarkista tulos.",
     "vocabulary": [
       {
-        "de": "Suomi",
-        "fi": "Huomio",
-        "status": ""
-      },
-      {
         "de": "die Nachricht",
         "fi": "uutinen",
         "status": "artikkeli mukana; monikko ja ääntäminen vielä tarkistettava"
@@ -247,11 +237,6 @@ export const LOS_FUTURE_BOOK_8: Record<string, LosFutureManuscript> = {
     "grammarExplanation": "Häufigkeitsadverbit oft, selten, manchmal ja jeden Tag auttavat kuvaamaan käyttöä. Ich lese oft Nachrichten. Jos selität syyn weil-lauseella, siirrä taivutettu verbi loppuun: Ich lese Nachrichten, weil ich informiert sein möchte. Tässä on kaksi verbimuotoa: möchte taipuu sivulauseen lopussa, sein on infinitiivinä sen edellä. Kokeile aluksi lyhempää: …, weil mich das Thema interessiert.\n\nLaajennettu opetus kirjassa:\n\nKun kuvailet omaa median käyttöä, kerro kuinka usein, miksi ja missä tilanteessa luet tai katsot jotakin. Oft, manchmal, selten ja jeden Tag kuvaavat toistuvuutta. Weil-sivulause perustelee valinnan. Erota tapa luotettavuudesta: se, että käytät palvelua päivittäin, ei vielä takaa sen sisältöjen oikeellisuutta.\n\nMallilause: Ich lese morgens Nachrichten, weil ich informiert sein möchte.\n\nSuomennos: Luen aamuisin uutisia, koska haluan pysyä ajan tasalla.\n\nOpettajan virheen korjaus: weil ich möchte informiert sein → weil ich informiert sein möchte.\n\nLähdeviitteen pedagoginen rajaus: Tekstin vaikeat muodot merkitään tunnistettaviksi, ellei niitä ole opetettu. Oppijan ei tarvitse tuottaa uuden aikamuodon tai sijamuodon muotoja ennen niiden erillistä opetusta.\n\nOma minikoe: selitä säännön vaikutus verbin paikkaan, persoonapäätteeseen tai artikkeliin omassa mallilauseessa. Sulje opetus. Tee vastaava uusi lause eri henkilöllä tai sanalla ja tarkista tulos.",
     "vocabulary": [
       {
-        "de": "Suomi",
-        "fi": "Huomio",
-        "status": ""
-      },
-      {
         "de": "die Medien",
         "fi": "media",
         "status": "artikkeli mukana; monikko ja ääntäminen vielä tarkistettava"
@@ -358,11 +343,6 @@ export const LOS_FUTURE_BOOK_8: Record<string, LosFutureManuscript> = {
     "grammarTopic": "otsikkokieli ja tavallinen sanajärjestys",
     "grammarExplanation": "Otsikossa saatetaan jättää artikkeli tai verbi pois. Esimerkiksi Neue Regeln für Busse on otsikkomainen ilmaus, kun taas Heute gelten neue Regeln für Busse on täydellinen lause. Kun kirjoitat oman neutraalin uutislauseen, käytä tavallista verbi toisena -järjestystä. Otsikon sävyä voi arvioida kysymällä, mitä siinä sanotaan ja mitä jätetään sanomatta.\n\nLaajennettu opetus kirjassa:\n\nOtsikko tiivistää, houkuttelee tai kehystää lukemista. Se ei aina sisällä kaikkia samoja sanoja kuin tavallinen virke. Vertaa kahta otsikkoa: mitä niissä korostetaan, mitä puuttuu ja tukeeko sisältö otsikkoa? Pidä omat väitteesi tekstissä nähtävissä olevassa tiedossa. Kun kirjoitat oman otsikon, tee siitä lyhyt mutta paikkansapitävä.\n\nMallilause: Neue Buslinie in Bonn. – Die Stadt eröffnet eine neue Buslinie in Bonn.\n\nSuomennos: Uusi bussilinja Bonnissa. – Kaupunki avaa Bonnissa uuden bussilinjan.\n\nOpettajan virheen korjaus: Otsikosta ei voi päätellä tapahtuman syytä, ellei siitä tai tekstistä ole näyttöä.\n\nLähdeviitteen pedagoginen rajaus: Tekstin vaikeat muodot merkitään tunnistettaviksi, ellei niitä ole opetettu. Oppijan ei tarvitse tuottaa uuden aikamuodon tai sijamuodon muotoja ennen niiden erillistä opetusta.\n\nOma minikoe: selitä säännön vaikutus verbin paikkaan, persoonapäätteeseen tai artikkeliin omassa mallilauseessa. Sulje opetus. Tee vastaava uusi lause eri henkilöllä tai sanalla ja tarkista tulos.",
     "vocabulary": [
-      {
-        "de": "Suomi",
-        "fi": "Huomio",
-        "status": ""
-      },
       {
         "de": "die Überschrift",
         "fi": "otsikko",
@@ -476,11 +456,6 @@ export const LOS_FUTURE_BOOK_8: Record<string, LosFutureManuscript> = {
     "grammarExplanation": "Ich denke, dass … kertoo oman käsityksen, vielleicht ilmaisee epävarmuutta ja laut dem Bericht osoittaa lähteen. Lause Laut dem Bericht steigt die Zahl on väite lähteen sisällöstä, ei automaattisesti tarkistettu tosiasia. Kun kirjoitat itsenäisesti, erota Mitä lähde sanoo? ja Mitä minä ajattelen? Kieliopissa huomaa verbi toisena myös lähdeilmauksen jälkeen.\n\nLaajennettu opetus kirjassa:\n\nFakta voidaan tarkistaa, mielipide kertoo arvioinnista ja arvaus ilmaisee epävarmuutta. Esimerkiksi Der Park wurde am Montag eröffnet on tarkistettava väite; Ich finde den Park schön on mielipide. Vielleicht viittaa mahdollisuuteen. Laut dem Bericht ilmaisee, minkä lähteen mukaan asia on esitetty, mutta lähteen nimeäminen ei yksin todista väitettä oikeaksi.\n\nMallilause: Laut dem Bericht kommen heute viele Besucher. Ich finde das gut.\n\nSuomennos: Raportin mukaan tänään tulee paljon kävijöitä. Se on minusta hyvä asia.\n\nOpettajan virheen korjaus: Vielleicht on epävarmuuden ilmaus, ei todiste.\n\nLähdeviitteen pedagoginen rajaus: Tekstin vaikeat muodot merkitään tunnistettaviksi, ellei niitä ole opetettu. Oppijan ei tarvitse tuottaa uuden aikamuodon tai sijamuodon muotoja ennen niiden erillistä opetusta.\n\nOma minikoe: selitä säännön vaikutus verbin paikkaan, persoonapäätteeseen tai artikkeliin omassa mallilauseessa. Sulje opetus. Tee vastaava uusi lause eri henkilöllä tai sanalla ja tarkista tulos.",
     "vocabulary": [
       {
-        "de": "Suomi",
-        "fi": "Huomio",
-        "status": ""
-      },
-      {
         "de": "der Fakt",
         "fi": "fakta",
         "status": "artikkeli mukana; monikko ja ääntäminen vielä tarkistettava"
@@ -577,11 +552,6 @@ export const LOS_FUTURE_BOOK_8: Record<string, LosFutureManuscript> = {
     "grammarTopic": "imperatiivi, kohderyhmä, perustelut",
     "grammarExplanation": "Imperatiivilla voidaan antaa toimintaohje: Lies den Text! tai Lest den Text! Kontekstissa pitää tunnistaa myös kohtelias muoto Lesen Sie bitte den Text! Kun perustelee ohjeen, käytä esimerkiksi weil-sivulausetta: Lies den Artikel, weil er wichtig ist. Älä automaattisesti oleta, että käskymuoto on totuudenmukainen tai turvallinen ohje; arvioi lähde erikseen.\n\nLaajennettu opetus kirjassa:\n\nSosiaalisen median viestissä vastaanottaja vaikuttaa tyyliin. Käskymuoto voi olla suoraviivainen: Prüfe die Quelle! Kohteliaampi neuvo voi olla Bitte prüfe zuerst die Quelle. Kerro, minkä lähteen tiedot olet tarkistanut ja mihin päivämäärään ne liittyvät. Älä harjoituksessa jaa oikeiden ihmisten arkaluonteisia tietoja tai keksittyjä uutisia tosiasioina.\n\nMallilause: Prüfe die Quelle, bevor du den Beitrag teilst.\n\nSuomennos: Tarkista lähde ennen kuin jaat julkaisun.\n\nOpettajan virheen korjaus: Teile sofort! ei ole luotettavuuden arviointi.\n\nLähdeviitteen pedagoginen rajaus: Tekstin vaikeat muodot merkitään tunnistettaviksi, ellei niitä ole opetettu. Oppijan ei tarvitse tuottaa uuden aikamuodon tai sijamuodon muotoja ennen niiden erillistä opetusta.\n\nOma minikoe: selitä säännön vaikutus verbin paikkaan, persoonapäätteeseen tai artikkeliin omassa mallilauseessa. Sulje opetus. Tee vastaava uusi lause eri henkilöllä tai sanalla ja tarkista tulos.",
     "vocabulary": [
-      {
-        "de": "Suomi",
-        "fi": "Huomio",
-        "status": ""
-      },
       {
         "de": "die sozialen Medien",
         "fi": "sosiaalinen media",
@@ -695,11 +665,6 @@ export const LOS_FUTURE_BOOK_8: Record<string, LosFutureManuscript> = {
     "grammarExplanation": "Weil aloittaa sivulauseen ja vie verbin loppuun: Ich fahre mit dem Bus, weil das praktisch ist. Deshalb tarkoittaa ‘siksi’ ja aloittaa uuden päälauseen: Das ist praktisch. Deshalb fahre ich mit dem Bus. Tässä fahre tulee heti deshalb-sanan jälkeen toiselle lauseenjäsenen paikalle. Ero kannattaa harjoitella rinnakkain.\n\nLaajennettu opetus kirjassa:\n\nYmpäristöaiheessa weil antaa perustelun ja deshalb näyttää seurauksen. Sanajärjestys muuttuu: Wir sparen Papier, weil wir weniger Abfall wollen. Deshalb sparen wir Papier. Erota käsitteet: weil aloittaa sivulauseen, deshalb aloittaa uuden päälauseen, jossa verbi tulee heti sen jälkeen. Vertaile myös konkreettisia lukumääriä ennen ja jälkeen.\n\nMallilause: Wir sammeln Papier. Deshalb brauchen wir weniger neue Hefte.\n\nSuomennos: Keräämme paperia. Siksi tarvitsemme vähemmän uusia vihkoja.\n\nOpettajan virheen korjaus: Deshalb wir sparen Papier. → Deshalb sparen wir Papier.\n\nLähdeviitteen pedagoginen rajaus: Tekstin vaikeat muodot merkitään tunnistettaviksi, ellei niitä ole opetettu. Oppijan ei tarvitse tuottaa uuden aikamuodon tai sijamuodon muotoja ennen niiden erillistä opetusta.\n\nOma minikoe: selitä säännön vaikutus verbin paikkaan, persoonapäätteeseen tai artikkeliin omassa mallilauseessa. Sulje opetus. Tee vastaava uusi lause eri henkilöllä tai sanalla ja tarkista tulos.",
     "vocabulary": [
       {
-        "de": "Suomi",
-        "fi": "Huomio",
-        "status": ""
-      },
-      {
         "de": "die Umwelt",
         "fi": "ympäristö",
         "status": "artikkeli mukana; monikko ja ääntäminen vielä tarkistettava"
@@ -811,11 +776,6 @@ export const LOS_FUTURE_BOOK_8: Record<string, LosFutureManuscript> = {
     "grammarTopic": "siksi/ehkä/tulevaisuus; futuurin kertaus",
     "grammarExplanation": "Futur I muodostetaan werden + infinitiivi: Die Technik wird sich verändern. Tavallinen preesens ja ajanilmaus voivat myös kertoa tulevasta: Morgen beginnt das Projekt. Vielleicht ilmaisee epävarmuutta; siitä ei tule sivulauseen aloittajaa, joten verbi pysyy toisena: Vielleicht wird das Projekt erfolgreich. Älä muuta mahdollista tapahtumaa varmaksi väitteeksi.\n\nLaajennettu opetus kirjassa:\n\nTeknologiasta puhuessa nykyhetki ja tulevaisuus kannattaa erottaa selvästi. Morgen tai später voi kertoa tulevasta ilman erillistä futuuria. Werken-tyyppinen väärä taivutus ei kuulu saksaan: werden on epäsäännöllinen ja futuurissa toinen verbi on infinitiivi lopussa. Älä esitä ennustetta varmana uutisena.\n\nMallilause: Vielleicht werden wir später andere Geräte benutzen.\n\nSuomennos: Ehkä käytämme tulevaisuudessa toisenlaisia laitteita.\n\nOpettajan virheen korjaus: Wir werden benutzen andere Geräte. → Wir werden andere Geräte benutzen.\n\nLähdeviitteen pedagoginen rajaus: Tekstin vaikeat muodot merkitään tunnistettaviksi, ellei niitä ole opetettu. Oppijan ei tarvitse tuottaa uuden aikamuodon tai sijamuodon muotoja ennen niiden erillistä opetusta.\n\nOma minikoe: selitä säännön vaikutus verbin paikkaan, persoonapäätteeseen tai artikkeliin omassa mallilauseessa. Sulje opetus. Tee vastaava uusi lause eri henkilöllä tai sanalla ja tarkista tulos.",
     "vocabulary": [
-      {
-        "de": "Suomi",
-        "fi": "Huomio",
-        "status": ""
-      },
       {
         "de": "die Technik",
         "fi": "tekniikka",
@@ -933,11 +893,6 @@ export const LOS_FUTURE_BOOK_8: Record<string, LosFutureManuscript> = {
     "grammarTopic": "vertailu ja mielipideilmaisut",
     "grammarExplanation": "Komparatiivi kuten wichtiger als tai besser als sopii vertailuun. Mielipide voidaan ilmoittaa Ich finde … tai Meiner Meinung nach … . Jälkimmäinen tulee usein lauseen alkuun, joten verbi on sen jälkeen toisena: Meiner Meinung nach ist das wichtig. Muista, että väite yhteiskunnasta ei muutu faktaksi siksi, että sen lausuu itsevarmasti.\n\nLaajennettu opetus kirjassa:\n\nYhdessä elämisestä keskusteltaessa ilmaise myös toisen näkökulma. Ich denke … kertoo omaa näkemystä, aber liittää vastakkaisen ajatuksen ja weil perustelee. Keskustelu voi olla lyhyt, mutta toisen väitettä ei pidä vääristellä: kokoa ensin hänen sanomansa, sitten oma ehdotuksesi.\n\nMallilause: Ich finde den Plan gut, aber wir brauchen mehr Platz.\n\nSuomennos: Suunnitelma on minusta hyvä, mutta tarvitsemme enemmän tilaa.\n\nOpettajan virheen korjaus: weil wir brauchen mehr Platz → weil wir mehr Platz brauchen.\n\nLähdeviitteen pedagoginen rajaus: Tekstin vaikeat muodot merkitään tunnistettaviksi, ellei niitä ole opetettu. Oppijan ei tarvitse tuottaa uuden aikamuodon tai sijamuodon muotoja ennen niiden erillistä opetusta.\n\nOma minikoe: selitä säännön vaikutus verbin paikkaan, persoonapäätteeseen tai artikkeliin omassa mallilauseessa. Sulje opetus. Tee vastaava uusi lause eri henkilöllä tai sanalla ja tarkista tulos.",
     "vocabulary": [
-      {
-        "de": "Suomi",
-        "fi": "Huomio",
-        "status": ""
-      },
       {
         "de": "die Gesellschaft",
         "fi": "yhteiskunta",
@@ -1065,11 +1020,6 @@ export const LOS_FUTURE_BOOK_8: Record<string, LosFutureManuscript> = {
     "grammarTopic": "aber, einerseits/andererseits tunnistuksena",
     "grammarExplanation": "Einerseits … andererseits … auttaa asettamaan kaksi puolta rinnakkain. Ne voivat aloittaa päälauseen, jolloin verbi tulee seuraavaksi: Einerseits ist das praktisch. Andererseits kostet es Geld. Myös aber on käyttökelpoinen: Ich verstehe den Punkt, aber ich sehe das anders. Kahden näkökulman esittäminen ei tarkoita, että kaikkia väitteitä pitäisi pitää yhtä hyvin perusteltuina.\n\nLaajennettu opetus kirjassa:\n\nKaksi tekstiä voi olla molemmat osittain tosia mutta painottaa eri asioita. Vertaa kuka on kirjoittanut, mitä on jätetty pois ja millaista näyttöä esitetään. Einerseits … andererseits voi auttaa hahmottamaan eri näkökulmia, mutta rakenne riittää ensin tunnistaa. A2.1-tasolla perustelu voi olla vain pari hyvin rakentunutta virkettä.\n\nMallilause: Ein Text nennt Zahlen. Der andere beschreibt persönliche Erfahrungen.\n\nSuomennos: Yksi teksti esittää lukuja. Toinen kuvaa henkilökohtaisia kokemuksia.\n\nOpettajan virheen korjaus: Kahta erilaista painotusta ei automaattisesti pidä merkitä ristiriidaksi.\n\nLähdeviitteen pedagoginen rajaus: Tekstin vaikeat muodot merkitään tunnistettaviksi, ellei niitä ole opetettu. Oppijan ei tarvitse tuottaa uuden aikamuodon tai sijamuodon muotoja ennen niiden erillistä opetusta.\n\nOma minikoe: selitä säännön vaikutus verbin paikkaan, persoonapäätteeseen tai artikkeliin omassa mallilauseessa. Sulje opetus. Tee vastaava uusi lause eri henkilöllä tai sanalla ja tarkista tulos.",
     "vocabulary": [
-      {
-        "de": "Suomi",
-        "fi": "Huomio",
-        "status": ""
-      },
       {
         "de": "die Perspektive",
         "fi": "näkökulma",
