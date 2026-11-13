@@ -2,7 +2,7 @@ import {test} from "node:test";
 import assert from "node:assert/strict";
 import {readFileSync} from "node:fs";
 import {LOS1_EXECUTABLE_LESSONS,los1LessonDraftChapter} from "../src/features/los/guidedLessons.ts";
-import {recommendLos1Resume} from "../src/features/los/losResumeRecommendation.ts";
+import {recommendLos1Resume,losLessonCompleted} from "../src/features/los/losResumeRecommendation.ts";
 import {emptyLosLessonProgress} from "../src/features/los/lessonEngine.ts";
 import type {LosChapterDraft} from "../src/features/los/studyState.ts";
 
@@ -54,4 +54,27 @@ test("actual V3.3 cover opens stored guided lesson without modifying its complet
  assert.match(button,/Jatka oppituntia/);
  assert.match(button,/Kertaa kirja alusta/);
  assert.doesNotMatch(button,/lessonProgress:|testSubmittedAt:/);
+});
+
+test("Teacher 2.0 completion advances the course without altering old lessonProgress",()=>{
+  const d=draft();
+  d.teacherSessions={L001:{schemaVersion:1,lessonId:"L001",contentVersion:"2.0.0-preview.1",
+    sceneId:"summary",visitedIds:["welcome"],attempts:[],helpedIds:[],
+    revealedIds:[],activityIds:[],draftAnswers:{},completedAt:completed,updatedAt:completed}};
+  assert.equal(losLessonCompleted(d,"L001"),true);
+  assert.deepEqual(d.lessonProgress,{});
+  assert.deepEqual(recommendLos1Resume({"01":d}),{
+    lessonId:"L002",completed:1,available:60,action:"continue"});
+});
+test("paused Teacher 2.0 session is resumable without a fake completion",()=>{
+  const d=draft();
+  d.teacherSessions={L004:{schemaVersion:1,lessonId:"L004",contentVersion:"2.0.0-preview.1",
+    sceneId:"guided",visitedIds:["welcome","recall","guided"],attempts:[],
+    helpedIds:[],revealedIds:[],activityIds:[],draftAnswers:{},completedAt:null,
+    updatedAt:"2026-11-12T11:15:00.000Z"}};
+  const choice=recommendLos1Resume({"01":d});
+  assert.equal(choice.lessonId,"L004");
+  assert.equal(choice.completed,0);
+  assert.equal(choice.action,"continue");
+  assert.equal(losLessonCompleted(d,"L004"),false);
 });
