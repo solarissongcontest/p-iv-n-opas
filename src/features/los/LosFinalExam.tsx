@@ -235,14 +235,17 @@ export function LosFinalSummary({move}:{move:LosNavigate}){
  const goal=answers[LOS1_SUMMARY_GOAL]??"";
  const goalReady=goal.trim().length>=25;
  const chapterCount=goalLabels.filter((_,i)=>Boolean(answers[losFinalSummaryChapterGoalId(i)])).length;
- const exam=final.draft.testSubmittedAt?losFinalScore(final.draft.testAnswers):null;
+ const archivedExams=losArchivedExamHistory(final.draft.practiceAnswers,"EX-FINAL");
+ const latestArchived=archivedExams.at(-1);
+ const exam=final.draft.testSubmittedAt?losFinalScore(final.draft.testAnswers):
+  latestArchived?{correct:latestArchived.correct,total:latestArchived.total}:null;
  const save=(id:string,text:string)=>final.update(current=>({...current,practiceAnswers:{...current.practiceAnswers,[id]:text}}));
  return <section className="los-inner-page los-exam" aria-label="LOS! 1:n osaamisen yhteenveto">
   <p className="los-eyebrow">LOS! 1 / L060 / SELBSTREFLEXION</p>
   <h1>Mitä osaan nyt saksaksi?</h1>
   <p className="los-page-intro">Käy läpi kaikkien 10 kappaleen tavoitteet, kertaa vähintään viisi oikeaa sanakorttia kirjan sanastossa ja kirjoita seuraava konkreettinen tavoitteesi. Oma arvio erotetaan aina automaattisesti pisteytetystä loppukokeesta.</p>
   <div className="los-exam-overview">
-   <p>EX-FINAL: <strong>{exam?exam.correct+"/"+exam.total:"ei vielä palautettu"}</strong> · tämän laitteen todellinen koetulos.</p>
+   <p>EX-FINAL: <strong>{exam?exam.correct+"/"+exam.total:"ei vielä palautettu"}</strong> · {final.draft.testSubmittedAt?"nykyinen palautettu yritys":latestArchived?"viimeisin arkistoitu yritys":"ei tallennettua koeyritystä"}; ei kielitaitotodistus.</p>
    <p>Oma tavoitteiden katselmointi: <strong>{chapterCount}/10</strong> · viivästetyn muistin itsearviot eivät todista kielitasoa.</p>
   </div>
   <section className="los-exam-section">
