@@ -42,7 +42,8 @@ test("L032 uses actual four Text A source dialogues and requires checked evidenc
   await expect(page.locator(".los-teacher-evidence")).toHaveCount(7);
   await expect(page.locator(".los-teacher-evidence")).toContainText(["C06-EX-09","C06-EX-10","C06-EX-11","C06-EX-12","C06-ZPE-Q01","C06-ZPE-Q02","C06-ZPE-Q03"]);
   await page.goto("/los#/1/06/text",{waitUntil:"domcontentloaded"});
-  await expect(page.locator(".los-c01-turn")).toHaveCount(12);
+  // C06 Text A also contains the collapsed C01 review (8 hidden turns).
+  await expect(page.locator(".los-c01-turn:visible")).toHaveCount(12);
   await expect(page.locator(".los-c01-turns")).toContainText("Ich bin schon zwölf Jahre alt.");
   await expectNoHorizontalOverflow(page);
 });
