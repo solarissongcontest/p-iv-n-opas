@@ -58,13 +58,11 @@ jobs:
       - run: bun run typecheck
       - run: bun run test
       - run: bun run build
-      # Parse all stacked browser suites before installing the 100MB+ browser
-      # engines. This catches malformed conflicts even when TS/build pass.
-      - name: Parse merged Teacher browser suites before browser installation
-        run: bunx playwright test e2e/los-full-book.spec.ts e2e/los-teacher-integrated-stack.spec.ts e2e/los-teacher-review-midterm.spec.ts e2e/los-c07-teacher.spec.ts e2e/los-c10-teacher.spec.ts --list --project=desktop-chromium
-
       - name: Install Playwright and accessibility tooling
         run: bun run e2e:install
+      # Dependencies are now available. Parse specs before installing browsers.
+      - name: Parse merged Teacher browser suites before browser installation
+        run: bunx playwright test e2e/los-full-book.spec.ts e2e/los-teacher-integrated-stack.spec.ts e2e/los-teacher-review-midterm.spec.ts e2e/los-c07-teacher.spec.ts e2e/los-c10-teacher.spec.ts --list --project=desktop-chromium
       - name: Install desktop Chromium and iPhone WebKit
         run: bunx playwright install --with-deps chromium webkit
       - name: Start locally merged LOS preview
