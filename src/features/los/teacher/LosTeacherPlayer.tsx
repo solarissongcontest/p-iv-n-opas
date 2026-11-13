@@ -385,6 +385,24 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
                   : "Kirjoita vähintään " + scene.reflection.minLength + " merkkiä. Tekstisi tallentuu automaattisesti."}
               </small>
             </div>}
+            {lesson.id === "L054" && (scene.id === "dialogue-sie" || scene.kind === "summary") &&
+              <section className="los-teacher-activity" aria-label="Siirrä kaksi keskustelua oppikirjaan">
+                <h3>Tallenna keskustelut myös oppikirjan sovellustehtävään</h3>
+                <p>Molemmat keskustelut säilyvät tässä oppitunnissa. Voit siirtää ne yhdellä painalluksella C10:n
+                  nykyiseen Käytä saksaa -luonnokseen. Siirto ei tarkista kielioppia eikä korvaa jo kirjoittamaasi tekstiä.</p>
+                <button type="button" onClick={transferC10Dialogues}
+                  disabled={!c10Dialogues || Boolean(draft.applicationDraft.trim()) || !saved}>
+                  <BookOpen size={17}/> Siirrä kaksi keskustelua Käytä saksaa -sivulle
+                </button>
+                {!c10Dialogues && <p>Kirjoita ensin molemmat keskustelut, vähintään 90 merkkiä kumpaankin.</p>}
+                {draft.applicationDraft.trim() && <p role="status">Kirjan sovellusluonnoksessa on jo tekstiä.
+                  Sitä ei korvata. Avaa sivu jatkaaksesi tai täydentääksesi vastausta.</p>}
+                <a href={bookUrl(lessonId, lesson.bookId, "10", "apply")} target="_blank" rel="noopener noreferrer">
+                  Avaa C10:n Käytä saksaa -sivu <ArrowRight size={16}/>
+                </a>
+                <p>Lisää kirjassa vielä erikseen neljä lausetta kolmannesta henkilöstä.
+                  Tarkista molempien keskustelujen 6–8 puheenvuoroa ja neljä esittelylausetta itse.</p>
+              </section>}
             {scene.activityId && <div className="los-teacher-activity">
               <button type="button"
                 disabled={session.activityIds.includes(scene.activityId) || completed ||
@@ -424,65 +442,6 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
                 </section>}
               </div>}
             </div>
-            {lesson.id === "L054" && (scene.id === "dialogue-sie" || scene.kind === "summary") &&
-              <section className="los-teacher-activity" aria-label="Siirrä kaksi keskustelua oppikirjaan">
-                <h3>Tallenna keskustelut myös oppikirjan sovellustehtävään</h3>
-                <p>Molemmat keskustelut säilyvät tässä oppitunnissa. Voit siirtää ne yhdellä painalluksella C10:n
-                  nykyiseen Käytä saksaa -luonnokseen. Siirto ei tarkista kielioppia eikä korvaa jo kirjoittamaasi tekstiä.</p>
-                <button type="button" onClick={transferC10Dialogues}
-                  disabled={!c10Dialogues || Boolean(draft.applicationDraft.trim()) || !saved}>
-                  <BookOpen size={17}/> Siirrä kaksi keskustelua Käytä saksaa -sivulle
-                </button>
-                {!c10Dialogues && <p>Kirjoita ensin molemmat keskustelut, vähintään 90 merkkiä kumpaankin.</p>}
-                {draft.applicationDraft.trim() && <p role="status">Kirjan sovellusluonnoksessa on jo tekstiä.
-                  Sitä ei korvata. Avaa sivu jatkaaksesi tai täydentääksesi vastausta.</p>}
-                <a href={bookUrl(lessonId, lesson.bookId, "10", "apply")} target="_blank" rel="noopener noreferrer">
-                  Avaa C10:n Käytä saksaa -sivu <ArrowRight size={16}/>
-                </a>
-                <p>Lisää kirjassa vielä erikseen neljä lausetta kolmannesta henkilöstä.
-                  Tarkista molempien keskustelujen 6–8 puheenvuoroa ja neljä esittelylausetta itse.</p>
-              </section>}
-            {scene.activityId && <div className="los-teacher-activity">
-              <button type="button"
-                disabled={session.activityIds.includes(scene.activityId) || completed ||
-                  Boolean(scene.reflection && (session.draftAnswers[scene.id]?.trim().length ?? 0) < scene.reflection.minLength)}
-                onClick={() => markActivity(scene.activityId!)}>
-                {session.activityIds.includes(scene.activityId) ? <CheckCircle2 size={18}/> : <Check size={18}/>}
-                {session.activityIds.includes(scene.activityId) ? "Harjoittelu vahvistettu" : scene.activityLabel}
-              </button>
-              <p>Tämä on oma vahvistuksesi, ei automaattinen kielitaidon arvio.</p>
-            </div>}
-            <div className="los-teacher-help">
-              <button type="button" aria-expanded={showHelp} onClick={() => { setShowHelp(v => !v); setHelpSelection(null); markHelp(); }}>
-                <HelpCircle size={18}/> En ymmärrä / haluan lisäselityksen
-              </button>
-              {showHelp && <div className="los-teacher-help-entries">
-                {scene.help?.length ? <>
-                  <p>Valitse, mikä selitys auttaisi sinua juuri nyt:</p>
-                  <div className="los-teacher-help-choices" role="group" aria-label="Valitse lisäselityksen tapa">
-                    {scene.help.map(entry => <button key={entry.title} type="button"
-                      aria-pressed={helpSelection === entry.title}
-                      onClick={() => setHelpSelection(entry.title)}>
-                      {entry.title}
-                    </button>)}
-                  </div>
-                  {scene.help.filter(entry => entry.title === helpSelection).map(entry => <section key={entry.title}>
-                    <h3>{entry.title}</h3><p>{entry.body}</p>
-                  </section>)}
-                </> : <section>
-                  <h3>Kokeile tätä</h3>
-                  <p>{scene.question?.reteach ??
-                    (scene.kind === "board" ? "Käy opetustaulun vaiheet läpi yksi kerrallaan. Vertaa saksankielistä ilmausta sen suomenkieliseen merkitykseen." :
-                      scene.kind === "book" ? "Avaa oppikirjan sanasto ja harjoitukset erilliseen välilehteen. Palaa oppitunnille, kun olet tutustunut materiaaliin." :
-                      "Palaa tarvittaessa edelliseen opetustilanteeseen sisällysluettelosta ja kertaa siinä annettu esimerkki. Voit edetä omassa tahdissasi.")}</p>
-                </section>}
-              </div>}
-            </div>
-            {lesson.mediaGate && !lesson.mediaGate.approved && <section className="los-teacher-assessment-status" role="status" aria-label="Kuuntelumedian hyväksyntäportti">
-              <h3>Kuuntelun suoritus odottaa hyväksyttyä mediaa</h3>
-              <p>{lesson.mediaGate.reason}</p>
-              <p>Lähdetunnus: {lesson.mediaGate.sourceId}. Alkuperäistekstin lukemista ei lasketa hyväksytyksi kuunteluksi.</p>
-            </section>}
             {lesson.chapterAssessment && (scene.kind === "book" || scene.kind === "summary") && <section className="los-teacher-assessment-status" aria-label="Kappaletestin ja itsearvioinnin tilanne">
               <h3>Kirjan todellinen suoritustilanne</h3>
               {(() => {
@@ -505,6 +464,11 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
                   <p>Kuullunymmärtämisen tai puheen pisteitä ei muodosteta tästä merkinnästä.</p>
                 </>;
               })()}
+            </section>}
+            {lesson.mediaGate && !lesson.mediaGate.approved && <section className="los-teacher-assessment-status" role="status" aria-label="Kuuntelumedian hyväksyntäportti">
+              <h3>Kuuntelun suoritus odottaa hyväksyttyä mediaa</h3>
+              <p>{lesson.mediaGate.reason}</p>
+              <p>Lähdetunnus: {lesson.mediaGate.sourceId}. Alkuperäistekstin lukemista ei lasketa hyväksytyksi kuunteluksi.</p>
             </section>}
             {scene.kind === "summary" && <section className="los-teacher-summary">
               <h3>Oppitunnin tilanne</h3>
