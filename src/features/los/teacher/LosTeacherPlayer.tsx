@@ -9,6 +9,7 @@ import {
   teacherWrongFeedback, type TeacherScene, type TeacherSession,
 } from "./engine.ts";
 import { getLosTeacherLesson } from "./lessonL004.ts";
+import { LosTeacherGreetingMedia } from "./LosTeacherGreetingMedia.tsx";
 import { validateTeacherLesson } from "./validateContent.ts";
 import "../los-book.css";
 import "./teacher.css";
@@ -197,7 +198,7 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
       </section> :
       !lesson || !session || !scene ? <section className="los-teacher-status">
         <h1>Oppitunnin opetusmateriaali ei ole vielä valmis</h1>
-        <p>Teacher 2.0 on käytössä L001–L016 sekä L027–L030. Muut oppitunnit toimivat edelleen nykyisessä Opetuspolussa.</p>
+        <p>Teacher 2.0 on nyt käytössä oppitunneilla L001–L016. Muut oppitunnit toimivat edelleen nykyisessä Opetuspolussa.</p>
         <a href={"/los#/" + (lesson?.bookId ?? 1) + "/path"}>Palaa Opetuspolkuun</a>
       </section> :
       <>
@@ -237,6 +238,8 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
             <div className="los-teacher-prose">
               {scene.paragraphs.map((paragraph, i) => <p key={i}>{paragraph}</p>)}
             </div>
+            {lesson.id === "L005" && (scene.id === "source-list" || scene.id === "audio-choice") &&
+              <LosTeacherGreetingMedia/>}
             {scene.kind === "board" && <TeacherBoard scene={scene}/>}
             {scene.question && <SceneQuestion
               scene={scene} session={session}
@@ -246,7 +249,7 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
               reveal={() => persist(old => revealTeacherSolution(old, scene.id, stamp()))}
             />}
             {scene.bookLinks && <div className="los-teacher-book-links">
-              {scene.bookLinks.map(link => <div key={link.chapterId + "-" + link.section} className="los-teacher-book-link">
+              {scene.bookLinks.map(link => <div key={link.section} className="los-teacher-book-link">
                 <div><strong>{link.label}</strong><p>{link.instruction}</p></div>
                 <a href={bookUrl(lessonId, lesson.bookId, link.chapterId, link.section)} target="_blank" rel="noopener noreferrer">
                   <BookOpen size={17}/> Avaa kirjassa <ArrowRight size={16}/>

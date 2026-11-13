@@ -1,4 +1,5 @@
 import test from "node:test";
+import {readFileSync} from "node:fs";
 import assert from "node:assert/strict";
 import {
   confirmTeacherActivity, emptyTeacherSession, finishTeacherSession,
@@ -70,4 +71,25 @@ test("Text B IDs are accepted but invalid or alien checked IDs are rejected",()=
   assert.deepEqual(validateTeacherLesson({...lesson,requiredCheckedIds:["C01-TEXTB-Q01"]}),[]);
   const problems=validateTeacherLesson({...lesson,requiredCheckedIds:["C01-TEXTB-OLD","X-BOGUS"]});
   assert.ok(problems.some(issue=>issue.location==="requiredCheckedIds"));
+});
+
+test("L005 canonical player hosts original audio and all source expressions directly inside LOS!",()=>{
+  const player=readFileSync("src/features/los/teacher/LosTeacherPlayer.tsx","utf8");
+  const media=readFileSync("src/features/los/teacher/LosTeacherGreetingMedia.tsx","utf8");
+  const original=LOS1_TEXT_B_SOURCES["01"];
+  assert.equal(original.sourceId,"M-COM-03");
+  assert.equal(original.lines.length,20);
+  assert.equal(original.lines[0]?.text,"Hallo!");
+  assert.equal(original.lines[19]?.text,"Gute Nacht!");
+  assert.match(player,/LosTeacherGreetingMedia/);
+  assert.match(player,/lesson[.]id === "L005"/);
+  assert.match(player,/scene[.]id === "source-list"/);
+  assert.match(player,/scene[.]id === "audio-choice"/);
+  assert.match(media,/LOS1_TEXT_B_SOURCES/);
+  assert.match(media,/SOURCE[.]lines[.]map/);
+  assert.match(media,/German_Vocabulary_-_Greetings[.]ogg/);
+  assert.match(media,/<audio controls preload="none"/);
+  assert.match(media,/onError/);
+  assert.match(media,/Kuuntelunäyttö|kuuntelunäyttö|kuullun ymmärtämisen/);
+  assert.doesNotMatch(media,/speechSynthesis|SpeechRecognition|autoplay|localStorage/);
 });
