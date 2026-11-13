@@ -54,9 +54,13 @@ export const LOS1_L014_TEACHER: TeacherLesson = {
       ],
       help:[
         {title:"Selitä yksinkertaisemmin",body:"Woher = mistä. Kommst = tulet (sinä). Ich komme = minä tulen. Aus Finnland = Suomesta."},
-        {title:"Miksi käytetään sanaa aus?",body:"Suomessa sanotaan Suomesta: paikan loppuun tulee -sta. Saksassa saman lähtöpaikan merkityksen ilmaisee tässä erillinen sana aus ennen maan nimeä."},
+        {title:"Selitä vaihe vaiheelta",body:"1. Kysy mistä: Woher. 2. Valitse sinämuoto: kommst. 3. Lisää puhuttelu: du. Näin syntyy Woher kommst du? 4. Vastaa minämuodossa Ich komme aus Finnland."},
+        {title:"Näytä toinen esimerkki",body:"Woher kommst du? kysyy tutulta alkuperää. Vaihda vastauksessa maata: Ich komme aus Österreich. tarkoittaa Olen kotoisin Itävallasta."},
+        {title:"Miksi tätä käytetään?",body:"Nimi, kotimaa ja asuinpaikka ovat eri asioita. Woher kommst du? kertoo lähtöpaikan; Wie heißt du? kysyy nimen. Aus ilmaisee tässä Suomesta, Saksasta tai Itävallasta."},
         {title:"Kertaa aiempi asia",body:"L012 opetti Finnland = Suomi, Deutschland = Saksa ja Österreich = Itävalta. L013 opetti tunnistamaan, että Lisa tulee Saksasta mutta asuu Bernissä."},
+        {title:"Näytä oppikirjan kohta",body:"Avaa tältä samalta tunnilta C03:n Kielioppi-linkki. Vertaa kirjan muotoja ich komme ja du kommst sekä tarkista woher-kysymyksen sanajärjestys."},
       ],
+      bookLinks:[{label:"C03 · Kielioppi",chapterId:"03",section:"grammar",instruction:"Vertaa ich komme ja du kommst sekä Woher kommst du? -kysymyksen sanajärjestystä."}],
     },
     {
       id:"verb-form",phase:"Kieliopin opetus",kind:"explanation",
