@@ -13,7 +13,6 @@ on:
   pull_request:
     branches:
       - main
-      - feat/los1-teacher-c03-l012-20261113
     paths:
       - "src/features/los/**"
       - "tests/los-teacher-l056-l060.test.ts"
