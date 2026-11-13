@@ -83,6 +83,10 @@
 .los-teacher-form label {display:block;font-size:13px;font-weight:700;margin-bottom:10px;}
 .los-teacher-input-row {display:flex;gap:10px;}
 .los-teacher-input-row input {width:100%;min-width:0;min-height:48px;padding:11px 14px;background:var(--los-paper);color:var(--los-ink);border:1px solid var(--los-line);border-radius:8px;font:inherit;}
+.los-teacher-special-keys {display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:12px;min-width:0;}
+.los-teacher-special-keys span {font-size:12px;color:var(--los-soft);margin-right:3px;}
+.los-teacher-special-keys button {display:inline-flex;justify-content:center;align-items:center;min-width:44px;min-height:44px;padding:6px 10px;border:1px solid var(--los-line);border-radius:8px;background:var(--los-paper);color:var(--los-ink);font-size:19px;font-weight:750;cursor:pointer;}
+.los-teacher-special-keys button:disabled {opacity:.55;cursor:not-allowed;}
 .los-teacher-input-row button,.los-teacher-primary {display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:11px 18px;border:0;border-radius:8px;min-height:46px;background:var(--los-book-accent);color:#fff;font-weight:750;font-size:14px;white-space:nowrap;text-decoration:none;}
 .dark .los-teacher-primary,.dark .los-teacher-input-row button {color:#211d1c;}
 .los-teacher-book-links {display:grid;gap:12px;margin:24px 0;}
@@ -204,3 +208,17 @@
 @media (max-width:520px) {
   .los-teacher-form-fields {padding:15px;gap:14px;}
 }
+
+/* C06: shared numeric composition board, including 320px mobile and increased text size. */
+.los-teacher-number-builder{min-width:0;max-width:100%;display:grid;gap:14px;margin:22px 0;padding:clamp(14px,3vw,22px);background:var(--los-subtle,#f5f4f1);border:1px solid var(--los-line,#e2e4e2);border-radius:12px}
+.los-teacher-number-builder h3{font-size:clamp(18px,2.5vw,22px);margin:0}
+.los-teacher-number-builder p{line-height:1.65;margin:0;overflow-wrap:anywhere}
+.los-teacher-number-selects{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;min-width:0}
+.los-teacher-number-selects label{min-width:0;display:grid;gap:7px;font-weight:650;font-size:14px}
+.los-teacher-number-selects select{width:100%;min-width:0;min-height:44px;padding:9px 10px;border:1px solid var(--los-line,#d5d9d8);border-radius:8px;background:var(--los-paper,#fff);color:inherit;font-size:16px}
+.los-teacher-number-result{min-width:0;display:grid;gap:6px;padding:17px;background:var(--los-paper,#fff);border:1px solid var(--los-line,#d5d9d8);border-radius:10px}
+.los-teacher-number-result span{font-size:12px;color:var(--los-soft,#65717b)}
+.los-teacher-number-result strong{font-size:clamp(22px,4vw,31px);font-weight:780;overflow-wrap:anywhere}
+.los-teacher-number-result p{font-size:14px;overflow-wrap:anywhere}
+.los-teacher-number-count{font-size:13px}
+@media(max-width:520px){.los-teacher-number-selects{grid-template-columns:1fr}.los-teacher-number-result{padding:12px}.los-teacher-number-result strong{font-size:23px}}

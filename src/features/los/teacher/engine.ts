@@ -33,6 +33,8 @@ export type TeacherScene = {
   reflection?: TeacherReflection;
   form?: readonly TeacherFormField[];
   board?: readonly TeacherBoardStep[];
+  /** C06 guided interactive number composition. */
+  numberBuilder?: boolean;
   bookLinks?: readonly TeacherBookLink[];
   /** Fixed, checked timetable data. Reading Text B does not prove audio playback. */
   calendar?: { prompt: string; day: string; time: string; sourceNote: string };
@@ -193,8 +195,16 @@ export function revealTeacherSolution(session: TeacherSession, sceneId: string, 
       [...session.revealedIds, sceneId],
   };
 }
+/** Count distinct 21–99 composite numbers, not whole tens or 100. */
+export function teacherBuiltNumberCount(session: TeacherSession, sceneId: string): number {
+  const history = session.draftAnswers[sceneId + "-history"] ?? "";
+  return new Set(history.split(",").filter(value =>
+    /^[2-9][0-9]$/.test(value) && Number(value) % 10 !== 0)).size;
+}
 export function confirmTeacherActivity(session: TeacherSession, lesson: TeacherLesson, activityId: string, now: string): TeacherSession {
   if (session.completedAt || !lesson.requiredActivityIds.includes(activityId)) return session;
+  const numberScene = lesson.scenes.find(scene => scene.activityId === activityId && scene.numberBuilder);
+  if (numberScene && teacherBuiltNumberCount(session, numberScene.id) < 4) return session;
   return { ...session, updatedAt: now, activityIds: session.activityIds.includes(activityId) ?
     session.activityIds : [...session.activityIds, activityId] };
 }
@@ -238,6 +248,7 @@ export function teacherCanFinish(session: TeacherSession, lesson: TeacherLesson,
   chapterAssessment?: TeacherChapterAssessmentInput): boolean {
   return (!lesson.mediaGate || lesson.mediaGate.approved) && teacherChapterAssessmentStatus(lesson, chapterAssessment).ready && !session.paused && lesson.scenes.every(scene => session.visitedIds.includes(scene.id)) &&
     lesson.scenes.every(scene => !scene.calendar || isCorrectCalendarEntry(scene,session.draftAnswers[scene.id] ?? "")) &&
+    lesson.scenes.every(scene => !scene.numberBuilder || teacherBuiltNumberCount(session,scene.id) >= 4) &&
     lesson.scenes.every(scene => !scene.reflection ||
       (session.draftAnswers[scene.id]?.trim().length ?? 0) >= scene.reflection.minLength) &&
     lesson.scenes.every(scene => !scene.form || scene.form.every(field =>
