@@ -34,7 +34,7 @@ export type LosMasterySnapshot = {
   nextSuggestion:string;
   ownGoal:string|null;
   exam:{correct:number;total:number;attempts:number}|null;
-  writing:{recorded:boolean;assisted:boolean};
+  writing:{recorded:boolean;assisted:boolean;modelOpened:boolean};
 };
 
 /**
@@ -111,6 +111,7 @@ export function summarizeLos1Mastery(
   const written = Boolean((drafts["92"]?.practiceAnswers["EX-REV2-WRITING-058"] ?? "").trim() ||
     (final?.applicationDraft ?? "").trim());
   const assisted = Boolean(drafts["92"]?.teacherSessions?.["L058"]?.helpedIds.includes("writing-assisted"));
+  const modelOpened = Boolean(drafts["92"]?.teacherSessions?.["L058"]?.helpedIds.includes("writing-model"));
   return {
     coveredChapters,skills,review,
     nextSuggestion: weakest ? "Kertaa " + weakest.title.toLowerCase() +
@@ -118,6 +119,6 @@ export function summarizeLos1Mastery(
       "Jatka LOS! 2:n arjen vuorovaikutukseen ja palaa tarvittaessa LOS! 1:n kertaustehtäviin.",
     ownGoal,
     exam:(validCurrent || lastArchived)?{correct:objectiveResult,total:50,attempts:archive.length+(validCurrent?1:0)}:null,
-    writing:{recorded:written,assisted},
+    writing:{recorded:written,assisted,modelOpened},
   };
 }
