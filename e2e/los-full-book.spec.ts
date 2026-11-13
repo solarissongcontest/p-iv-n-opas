@@ -768,6 +768,31 @@ test("Teacher 2.0 presents one teaching board with one set of controls", async (
 
 
 
+
+test("Finnish comprehension options in C01, C03, C09 and C10 have correct speech language",async({page})=>{
+  await enterLocalBook(page);
+  const targets=[
+    ["L001","Viimeinen tarkistus: osaatko käyttää lukijaa?","Napautan sanaa lukijassa."],
+    ["L013","Etsi lähdemaan merkitys","Hän on kotoisin Saksasta."],
+    ["L047","Mihin Greta lähtee?","Menevänsä kotiin"],
+    ["L052","Etsi tarkka alkuperä","Münchenistä"],
+  ] as const;
+  for(const [lessonId,sceneTitle,correctAnswer] of targets){
+    await page.goto("/los-lessons/"+lessonId,{waitUntil:"domcontentloaded"});
+    await page.locator(".los-teacher-outline nav").getByRole("button",{name:sceneTitle,exact:true}).click();
+    await expect(page.locator(".los-teacher-option span[lang='fi']")).toHaveCount(3);
+    await expect(page.locator(".los-teacher-option span[lang='de']")).toHaveCount(0);
+    await expect(page.locator(".los-teacher-option").filter({hasText:correctAnswer})
+      .locator("span[lang='fi']")).toBeVisible();
+    await expectNoHorizontalOverflow(page);
+  }
+  await page.goto("/los-lessons/L001",{waitUntil:"domcontentloaded"});
+  await page.locator(".los-teacher-outline nav").getByRole("button",{name:"Ensimmäinen tervehdyksesi"}).click();
+  await expect(page.locator(".los-teacher-option span[lang='de']")).toHaveCount(3);
+  await expect(page.locator(".los-teacher-option span[lang='fi']")).toHaveCount(0);
+});
+
+
 test("C08 screen-reader language follows the actual Finnish or German answer",async({page})=>{
   await enterLocalBook(page);
   await page.goto("/los-lessons/L042",{waitUntil:"domcontentloaded"});
