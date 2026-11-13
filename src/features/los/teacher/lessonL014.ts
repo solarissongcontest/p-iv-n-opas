@@ -60,7 +60,7 @@ export const LOS1_L014_TEACHER: TeacherLesson = {
     },
     {
       id:"verb-form",phase:"Kieliopin opetus",kind:"explanation",
-      title:"Muodosta kommaamisen sijasta oikea kommen-verbi",
+      title:"Näin muodostetaan oikea kommen-verbin muoto",
       paragraphs:[
         "Verbin sanakirjamuoto on kommen. Sen loppu on -en. Poista se: kommen → komm-. Tätä jäljelle jäävää osaa kutsutaan verbin vartaloksi.",
         "Kun tekijä on ich eli minä, liitämme vartaloon -e: komm + e = komme. Kun tekijä on du eli sinä, liitämme -st: komm + st = kommst.",
@@ -143,11 +143,25 @@ export const LOS1_L014_TEACHER: TeacherLesson = {
       ],
     },
     {
+      id:"fixed-country-phrases",phase:"Tunnistettava lisäsanasto",kind:"explanation",
+      title:"Tunnista kaksi valmista maailmausta ennen kirjatehtäviä",
+      paragraphs:[
+        "Joidenkin maiden yhteydessä pelkkä aus ja maan nimi eivät riitä. Siksi oikea ilmaus on aus der Schweiz eli Sveitsistä. Yhdysvalloista puhuttaessa sanotaan aus den USA.",
+        "Opettele nämä tässä kokonaisina ilmauksina: aus der Schweiz ja aus den USA. Älä yritä vielä päätellä, miksi artikkeleissa on juuri der tai den. Niiden sijamuotosäännöt kuuluvat myöhempään kielioppiin.",
+        "C03:n kirjan tehtävissä 11 ja 12 sinun tarvitsee vain tunnistaa oikea valmis ilmaus vaihtoehdoista. Näitä rakenteita ei vaadita vielä muodostettaviksi itsenäisesti uutena taivutustehtävänä.",
+        "Vertaa tuttua lausetta Ich komme aus Finnland. valmiisiin ilmauksiin aus der Schweiz ja aus den USA. Molemmat kertovat lähtömaasta, mutta eri maiden kanssa käytetään eri kiinteää sanayhdistelmää.",
+      ],
+      help:[
+        {title:"Selitä yksinkertaisemmin",body:"Suomesta = aus Finnland, Sveitsistä = aus der Schweiz, Yhdysvalloista = aus den USA. Opettele nämä valmiina kokonaisuuksina."},
+        {title:"Miksi maan nimi saa erilaisia sanoja?",body:"Saksan kielessä eräillä maiden nimillä on artikkeli, jonka muoto riippuu rakenteesta. Nyt sinun ei tarvitse taivuttaa artikkelia itse, vaan tunnistaa kaksi opetettua ilmausta."},
+      ],
+    },
+    {
       id:"textbook",phase:"Kirjan harjoittelu",kind:"book",
       title:"Tee kirjan neljä alkuperäistä harjoitusta",
       paragraphs:[
         "Avaa C03:n Kielioppi. Vertaa ensin ich komme ja du kommst sekä kysymystä Woher kommst du?. Lue selitys, kunnes pystyt muodostamaan oman esimerkin.",
-        "Siirry C03:n Harjoittele-osioon. Tee oikeat kirjan harjoitukset C03-EX-06 (komme), C03-EX-07 (kommst), C03-EX-10 (aus) ja C03-EX-13 (kommst).",
+        "Siirry C03:n Harjoittele-osioon. Tee oikeat kirjan harjoitukset C03-EX-06 (komme), C03-EX-07 (kommst), C03-EX-10 (aus) ja C03-EX-13 (kommst). Tunnista lisäksi kirjatehtävissä 11 ja 12 valmiit ilmaukset aus der Schweiz ja aus den USA; älä vielä taivuta niitä itse.",
         "Vastaukset tallentuvat kirjan nykyiseen tehtäväjärjestelmään, eivät opettajan rinnakkaiseen vastauskantaan. Pelkkä sivun avaus ei täytä tehtäväehtoa; kirjan vastaukset tulee oikeasti kirjoittaa.",
       ],
       bookLinks:[
@@ -228,7 +242,7 @@ export const LOS1_L014_TEACHER: TeacherLesson = {
       paragraphs:[
         "Opit, miten kommen → komm- → komme tai kommst. Ymmärrät suoran kysymyksen sanajärjestyksen Woher kommst du? ja vastauksen Ich komme aus Finnland.",
         "Kirjan neljän harjoituksen vastaukset tallennetaan edelleen oppikirjaan. Ensimmäisellä yrityksellä ilman apua oikein ratkaistut opettajan uudet tehtävät näkyvät erillisenä itsenäisenä näyttönä; neuvoa saanut suoritus on harjoittelua.",
-        "L015:ssa tunnistetaan lähtöpaikkoja toisessa julkaistussa dialogissa ja tehdään niitä koskevat kirjan lähdetehtävät. Sie-muodon aktiivinen opetus ja aus der Schweiz -rakenne eivät kuulu tähän tuntiin.",
+        "L015:ssa tunnistetaan lähtöpaikkoja toisessa julkaistussa dialogissa ja tehdään niitä koskevat kirjan lähdetehtävät. Sie-muodon aktiivinen opetus ja aus der Schweiz -rakenteen itsenäinen taivuttaminen eivät kuulu tähän tuntiin. Valmiit aus der Schweiz ja aus den USA -ilmaukset on kuitenkin opetettu tunnistettaviksi kirjatehtäviä varten.",
       ],
     },
   ],
