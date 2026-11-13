@@ -435,3 +435,26 @@ test("L002 pronunciation lesson gives targeted corrections and opens grammar in 
   await expect(page.getByRole("link",{name:/Avaa kirjassa/}).first()).toHaveAttribute("href",/lessonReturn=L002.*grammar/);
   await expectNoHorizontalOverflow(page);
 });
+
+
+test("L003 original dialogue reading preserves checked source answers across book and teacher",async({page})=>{
+  await enterLocalBook(page);
+  await page.goto("/los#/1/path",{waitUntil:"domcontentloaded"});
+  await page.locator(".los-lesson-picker button").filter({hasText:"L003"}).click();
+  await expect(page).toHaveURL(/\/los-lessons\/L003$/);
+  await expect(page.locator(".los-teacher-paper h2").first()).toContainText("Ensimmäinen oikea");
+
+  await page.locator(".los-teacher-outline nav button").filter({hasText:"Tee kirjan kaksi oikeaa ymmärtämistehtävää"}).click();
+  await expect(page.getByRole("link",{name:/Avaa kirjassa/}).first()).toHaveAttribute("href",/lessonReturn=L003.*understand/);
+  await page.goto("/los?lessonReturn=L003#/1/01/understand",{waitUntil:"domcontentloaded"});
+  const questions=page.locator(".los-c01-question");
+  await questions.nth(0).locator('input[value="a"]').check();
+  await questions.nth(0).getByRole("button",{name:"Tarkista vastaus"}).click();
+  await questions.nth(1).locator('input[value="b"]').check();
+  await questions.nth(1).getByRole("button",{name:"Tarkista vastaus"}).click();
+  await page.getByRole("link",{name:"Palaa oppitunnille L003"}).click();
+  await expect(page).toHaveURL(/\/los-lessons\/L003$/);
+  await expect(page.locator(".los-teacher-paper")).toContainText("C01-SOURCE-Q01: Vastaus tallennettu ja tarvittaessa tarkistettu");
+  await expect(page.locator(".los-teacher-paper")).toContainText("C01-SOURCE-Q02: Vastaus tallennettu ja tarvittaessa tarkistettu");
+  await expectNoHorizontalOverflow(page);
+});
