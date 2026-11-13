@@ -760,6 +760,25 @@ test("Teacher 2.0 presents one teaching board with one set of controls", async (
 
 
 
+
+test("L033 keeps tens feedback separate from the 21–99 word-building rule",async({page})=>{
+ await enterLocalBook(page);
+ await page.goto("/los-lessons/L033",{waitUntil:"domcontentloaded"});
+ const outline=page.locator(".los-teacher-outline nav");
+ await outline.getByRole("button",{name:"Muistatko luvun 20?"}).click();
+ await expect(page.locator(".los-teacher-question h3")).toContainText("Kirjoita saksaksi: 20");
+ await page.locator(".los-teacher-question input").fill("zwanz");
+ await page.getByRole("button",{name:"Tarkista",exact:true}).click();
+ await expect(page.locator(".los-teacher-feedback.is-wrong")).toContainText("Luku 20 ei muodostu yksiköistä");
+ await outline.getByRole("button",{name:"Lopputarkistus: dreißig"}).click();
+ await expect(page.locator(".los-teacher-question h3")).toContainText("Kirjoita saksaksi: 30");
+ await page.getByRole("button",{name:"Tarvitsen vihjeen"}).click();
+ await expect(page.locator(".los-teacher-hint")).toContainText("Kolmekymmentä alkaa drei-");
+ await expect(page.locator(".los-teacher-hint")).not.toContainText("Hajota luku yksiköihin");
+ await expectNoHorizontalOverflow(page);
+});
+
+
 test("L031 teaches eins before the first number question and gives specific feedback",async({page})=>{
   await enterLocalBook(page);
   await page.goto("/los-lessons/L031",{waitUntil:"domcontentloaded"});
