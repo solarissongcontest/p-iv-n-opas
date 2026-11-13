@@ -4,14 +4,19 @@ export type TeacherPhase="activation"|"introduction"|"explanation"|"worked-examp
 export type TeacherChoice={id:string;label:string;feedback:string};
 export type TeacherHelpOption={id:string;label:string;paragraphs:readonly string[]};
 export type TeacherQuestion={prompt:string;choices:readonly TeacherChoice[];correctId:string;success:string;alternative:string};
+/** Exact, authored answers only. No AI scoring, fuzzy matches, or claimed pronunciation assessment. */
+export type TeacherWrittenQuestion={
+ prompt:string;accepted:readonly string[];success:string;alternative:string;
+ wrongFeedback:string;mistakes?:readonly {answer:string;feedback:string}[];
+};
 export type TeacherScene={
  id:string;phase:TeacherPhase;title:string;explanation:readonly string[];
  example?:{german:string;finnish:string;why:string};
- question?:TeacherQuestion;hint?:string;help?:readonly TeacherHelpOption[];
+ question?:TeacherQuestion;written?:TeacherWrittenQuestion;hint?:string;help?:readonly TeacherHelpOption[];
 };
 export type TeacherLesson={id:string;version:typeof TEACHER_VERSION;review:"draft"|"approved";objective:string;scenes:readonly TeacherScene[]};
 export type TeacherAttempt={answer:string;count:number;correct:boolean;independent:boolean;revealed:boolean;at:string};
-export type TeacherProgress={version:typeof TEACHER_VERSION;scene:string;visited:string[];hints:string[];answers:Record<string,TeacherAttempt>;paused:boolean;completedAt?:string|null;helpSelections?:Record<string,string>};
+export type TeacherProgress={version:typeof TEACHER_VERSION;scene:string;visited:string[];hints:string[];answers:Record<string,TeacherAttempt>;paused:boolean;completedAt?:string|null;helpSelections?:Record<string,string>;writtenDrafts?:Record<string,string>};
 const isObj=(x:unknown):x is Record<string,unknown>=>Boolean(x&&typeof x==="object"&&!Array.isArray(x));
 const validId=(x:unknown)=>typeof x==="string"&&/^[a-z0-9-]{1,48}$/i.test(x);
 const validIds=(x:unknown,max:number)=>Array.isArray(x)&&x.length<=max&&
@@ -19,13 +24,16 @@ const validIds=(x:unknown,max:number)=>Array.isArray(x)&&x.length<=max&&
 const validHelpSelections=(x:unknown)=>x===undefined||
  (isObj(x)&&Object.keys(x).length<=20&&Object.entries(x).every(([id,option])=>
    validId(id)&&validId(option)));
+const validWrittenDrafts=(x:unknown)=>x===undefined||
+ (isObj(x)&&Object.keys(x).length<=20&&Object.entries(x).every(([id,value])=>
+   validId(id)&&typeof value==="string"&&value.length<=40));
 const validIso=(x:unknown)=>typeof x==="string"&&x.length<=40&&/^\d{4}-\d{2}-\d{2}T/.test(x)&&Number.isFinite(Date.parse(x));
 export function validTeacherProgress(x:unknown):x is TeacherProgress{
  if(!isObj(x)||x['version']!==TEACHER_VERSION||!validId(x['scene'])||
     !validIds(x['visited'],25)||!validIds(x['hints'],25)||typeof x['paused']!=="boolean"||
     !isObj(x['answers'])||Object.keys(x['answers']).length>20||
     (x['completedAt']!==undefined&&x['completedAt']!==null&&!validIso(x['completedAt']))||
-    !validHelpSelections(x['helpSelections']))return false;
+    !validHelpSelections(x['helpSelections'])||!validWrittenDrafts(x['writtenDrafts']))return false;
  return Object.entries(x['answers']).every(([id,a])=>validId(id)&&isObj(a)&&
     typeof a['answer']==="string"&&a['answer'].length<=40&&Number.isInteger(a['count'])&&
     Number(a['count'])>=0&&Number(a['count'])<=10&&typeof a['correct']==="boolean"&&
@@ -47,6 +55,15 @@ export function validTeacherLesson(lesson:TeacherLesson):string[]{
      options.some(x=>!validId(x.id)||x.label.trim().length<6||
        !x.paragraphs.length||x.paragraphs.some(p=>p.trim().length<25)))
    errors.push("missing or invalid contextual help: "+s.id);
+  if(s.written){
+   const w=s.written;
+   if(w.prompt.trim().length<20||w.accepted.length<1||w.accepted.length>6||
+      new Set(w.accepted.map(normalizeTeacherWritten)).size!==w.accepted.length||
+      w.accepted.some(a=>!a.trim()||a.length>40)||
+      !w.success.trim()||!w.alternative.trim()||!w.wrongFeedback.trim()||
+      w.mistakes?.some(m=>!m.answer.trim()||!m.feedback.trim()))
+     errors.push("invalid written exercise: "+s.id);
+  }
   if(s.question){
    const q=s.question;
    if(q.choices.length<2||q.choices.length>5||new Set(q.choices.map(x=>x.id)).size!==q.choices.length||
@@ -78,10 +95,43 @@ export function openTeacherHelp(lesson:TeacherLesson,p:TeacherProgress,helpId:st
  if(p.paused||!scene?.help?.some(item=>item.id===helpId)||
     p.helpSelections?.[p.scene]===helpId)return p;
  const attempted=p.answers[p.scene];
- const consumesHint=Boolean(scene.question&&!attempted?.correct&&!attempted?.revealed);
+ const written=p.answers[p.scene+"-written"];
+ const consumesHint=Boolean(
+   (scene.question&&!attempted?.correct&&!attempted?.revealed)||
+   (scene.written&&!written?.correct&&!written?.revealed));
  return {...p,
    helpSelections:{...p.helpSelections,[p.scene]:helpId},
    hints:consumesHint?[...new Set([...p.hints,p.scene])]:p.hints};
+}
+/** Allow case, extra spaces and an optional final punctuation mark; never guess synonyms. */
+export function normalizeTeacherWritten(text:string):string{
+ return text.trim().replace(/\\s+/g," ").replace(/[!.?]+$/u,"").trim().toLocaleLowerCase("de");
+}
+export function draftTeacherWritten(lesson:TeacherLesson,p:TeacherProgress,text:string):TeacherProgress{
+ const scene=lesson.scenes.find(s=>s.id===p.scene);
+ if(p.paused||!scene?.written||text.length>40||
+    p.answers[p.scene+"-written"]?.correct||p.answers[p.scene+"-written"]?.revealed)return p;
+ return {...p,writtenDrafts:{...p.writtenDrafts,[p.scene]:text}};
+}
+export function answerTeacherWritten(lesson:TeacherLesson,p:TeacherProgress,text:string,at:string):TeacherProgress{
+ const scene=lesson.scenes.find(s=>s.id===p.scene),previous=p.answers[p.scene+"-written"];
+ if(p.paused||!scene?.written||!validIso(at)||text.length>40||
+    !normalizeTeacherWritten(text)||previous?.correct||previous?.revealed||(previous?.count??0)>=10)return p;
+ const count=(previous?.count??0)+1;
+ const normalized=normalizeTeacherWritten(text);
+ const correct=scene.written.accepted.some(a=>normalizeTeacherWritten(a)===normalized);
+ return {...p,answers:{...p.answers,[p.scene+"-written"]:{
+   answer:text,count,correct,independent:correct&&count===1&&!p.hints.includes(p.scene)&&
+     ["independent","application","exit"].includes(scene.phase),revealed:false,at
+ }}};
+}
+export function revealTeacherWritten(lesson:TeacherLesson,p:TeacherProgress,at:string):TeacherProgress{
+ const scene=lesson.scenes.find(s=>s.id===p.scene),previous=p.answers[p.scene+"-written"];
+ if(p.paused||!scene?.written||!validIso(at)||previous?.correct)return p;
+ return {...p,answers:{...p.answers,[p.scene+"-written"]:{
+   answer:previous?.answer??"",count:previous?.count??0,correct:false,
+   independent:false,revealed:true,at
+ }}};
 }
 export function answerTeacher(lesson:TeacherLesson,p:TeacherProgress,answer:string,at:string):TeacherProgress{
  const scene=lesson.scenes.find(s=>s.id===p.scene);
@@ -103,7 +153,10 @@ export function revealTeacher(lesson:TeacherLesson,p:TeacherProgress,at:string):
 export function teacherEvidence(lesson:TeacherLesson,p:TeacherProgress){
  const prompts=lesson.scenes.filter(s=>s.question&&["independent","application","exit"].includes(s.phase));
  return {independent:prompts.filter(s=>p.answers[s.id]?.independent).map(s=>s.id),
-  required:prompts.length,visited:p.visited.length};
+  required:prompts.length,
+  writtenIndependent:lesson.scenes.filter(s=>s.written&&p.answers[s.id+"-written"]?.independent).map(s=>s.id),
+  writtenRequired:lesson.scenes.filter(s=>s.written).length,
+  visited:p.visited.length};
 }
 
 /**
@@ -116,7 +169,9 @@ export function teacherCanComplete(lesson:TeacherLesson,p:TeacherProgress):boole
  if(p.paused||!lesson.scenes.length)return false;
  return lesson.scenes.every(scene=>p.visited.includes(scene.id)&&
    (!scene.question||Boolean(p.answers[scene.id]&&
-     (p.answers[scene.id]!.count>0||p.answers[scene.id]!.revealed))));
+     (p.answers[scene.id]!.count>0||p.answers[scene.id]!.revealed)))&&
+   (!scene.written||Boolean(p.answers[scene.id+"-written"]&&
+     (p.answers[scene.id+"-written"]!.count>0||p.answers[scene.id+"-written"]!.revealed))));
 }
 export function finishTeacher(lesson:TeacherLesson,p:TeacherProgress,at:string):TeacherProgress{
  if(p.completedAt||!teacherCanComplete(lesson,p)||!validIso(at))return p;
