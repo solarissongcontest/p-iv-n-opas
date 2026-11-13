@@ -107,7 +107,7 @@ export function summarizeLos1Mastery(
   const ownGoal = (final?.practiceAnswers["EX-SUMMARY-GOAL"] ?? "").trim() || null;
   const written = Boolean((drafts["92"]?.practiceAnswers["EX-REV2-WRITING-058"] ?? "").trim() ||
     (final?.applicationDraft ?? "").trim());
-  const assisted = Boolean(drafts["92"]?.teacherSessions?.["L058"]?.helpedIds.includes("writing-model"));
+  const assisted = Boolean(drafts["92"]?.teacherSessions?.["L058"]?.helpedIds.includes("writing-assisted"));
   return {
     coveredChapters,skills,review,
     nextSuggestion: weakest ? "Kertaa " + weakest.title.toLowerCase() +
