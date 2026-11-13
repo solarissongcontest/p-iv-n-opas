@@ -100,9 +100,9 @@ export function LosContentTree({
   },[chapterId]);
   const needle=search.trim().toLocaleLowerCase("fi");
   const found=useMemo(()=>book.chapters.map(ch=>{
-    const tasks:LosContentTask[]=[
+    const tasks:LosContentTask[]=book.id===1 ? [
       ...losContentTasks(ch.id,"practice"),...losContentTasks(ch.id,"test"),
-    ];
+    ] : [];
     const matchingTasks=needle?tasks.filter(t=>t.id.toLowerCase().includes(needle)||
       t.label.toLocaleLowerCase("fi").includes(needle)):[];
     const chapterMatches=!needle||ch.title.toLocaleLowerCase("de").includes(needle)||
@@ -110,7 +110,7 @@ export function LosContentTree({
     const matchedSections=sectionLinks.filter(item=>item.label.toLocaleLowerCase("fi").includes(needle));
     return {chapter:ch,tasks,matchingTasks,chapterMatches,matchedSections,
       visible:chapterMatches||matchingTasks.length>0||matchedSections.length>0};
-  }).filter(row=>row.visible),[book.chapters,needle]);
+  }).filter(row=>row.visible),[book.id,book.chapters,needle]);
 
   const allExpanded=book.chapters.every(ch=>expanded[ch.id]);
   const toggleAll=()=>{

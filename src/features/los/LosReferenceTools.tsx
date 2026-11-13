@@ -11,6 +11,7 @@ import { LOS1_EXECUTABLE_LESSONS, isLos1ExecutableLesson } from "./guidedLessons
 
 export type LosDestination = "overview" | "contents" | "chapter" | "text" | "understand" | "vocabulary" | "grammar" | "text-b" | "practice" | "apply" | "culture" | "test" | "appendix" | "dictionary" | "path" | "search" | "midterm" | "review" | "review-ii" | "cards" | "progress" | "final" | "summary";
 import {searchLos1OriginalTexts} from "./content/los1TextSearch";
+import { LOS_FUTURE_MANUSCRIPTS } from "./content/losFutureManuscripts.ts";
 export type LosNavigate = (chapter: string | null, section: LosDestination) => void;
 type WordEntry = { book: number; code: string; chapter: string; title: string; word: string; meaning: string };
 type DictionarySelection =
@@ -127,7 +128,7 @@ export function LosLearningPath({ book, move }: { book: LosBookDefinition; move:
     </section>)}
   </section>;
 }
-type LosSearchHit={id:string;kind:"Kirja"|"Kappale"|"Kielioppi"|"Sanasto"|"Tavoite"|"Alkuperäisteksti";title:string;description:string;chapter:string|null;section:LosDestination};
+type LosSearchHit={id:string;kind:"Kirja"|"Kappale"|"Kielioppi"|"Sanasto"|"Tavoite"|"Alkuperäisteksti"|"Harjoitusteksti";title:string;description:string;chapter:string|null;section:LosDestination};
 export function LosIndexSearch({book,move}:{book:LosBookDefinition;move:LosNavigate}) {
   const [query,setQuery]=useState("");
   const hits=useMemo<LosSearchHit[]>(()=>{
@@ -146,6 +147,25 @@ export function LosIndexSearch({book,move}:{book:LosBookDefinition;move:LosNavig
         });
       }
     }
+    if(book.id>=2) {
+      const manuscript=LOS_FUTURE_MANUSCRIPTS[book.id] ?? {};
+      for(const [id,entry] of Object.entries(manuscript)){
+        const snippets=[
+          {section:"text" as const,title:"Text A",value:entry.textA},
+          {section:"text-b" as const,title:"Text B",value:entry.textB},
+          {section:"text-b" as const,title:"Tukidialogi",value:entry.dialogue.join(" ")},
+          {section:"grammar" as const,title:"Kieliopin selitys",value:entry.grammarExplanation},
+        ];
+        for(const snippet of snippets) {
+          const at=snippet.value.toLocaleLowerCase("fi").indexOf(q);
+          if(at<0)continue;
+          const excerpt=snippet.value.slice(Math.max(0,at-55),Math.min(snippet.value.length,at+q.length+90)).replace(/\s+/g," ");
+          add({id:`draft-${id}-${snippet.section}-${snippet.title}`,kind:"Harjoitusteksti",
+            title:`C${id} · ${snippet.title}`,description:excerpt,
+            chapter:id,section:snippet.section});
+        }
+      }
+    }
     for (const ch of book.chapters){
       add({id:`ch-${ch.id}`,kind:"Kappale",title:ch.title,description:ch.subtitle,chapter:ch.id,section:"chapter"});
       add({id:`gr-${ch.id}`,kind:"Kielioppi",title:ch.grammar,description:ch.title,chapter:ch.id,section:"grammar"});
@@ -157,7 +177,7 @@ export function LosIndexSearch({book,move}:{book:LosBookDefinition;move:LosNavig
   return <section className="los-inner-page los-index-search-page">
     <p className="los-eyebrow">HAKU · {book.code}</p>
     <h1>Hae kirjasta</h1>
-    <p className="los-page-intro">Hae kappaleiden nimistä, sanastosta, kieliopista, osaamistavoitteista sekä kaikista kymmenestä alkuperäisestä Teksti A -lukijasta ja niiden käytettävissä olevista kokonaisista Teksti B -litteraateista. Voit hakea myös saksankielisten repliikkien suomennoksia. Hakutulos avaa tekstin suoraan LOS!:n sisällä.</p>
+    <p className="los-page-intro">{book.id === 1 ? "Hae kappaleiden nimistä, sanastosta, kieliopista, osaamistavoitteista ja kirjan käytössä olevista alkuperäisteksteistä." : "Hae kaikkien kymmenen kappaleen Text A- ja Text B -luonnoksista, tukidialogeista, sanastoista, kielioppiselityksistä ja tavoitteista. Jatkokirjojen tekstiluonnoksia ei ole vielä kielentarkistettu."}</p>
     <label className="los-index-search"><Search size={19}/><span className="sr-only">Hae tästä oppikirjasta</span><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Hae sanaa, kappaletta tai kielioppia" /></label>
     {!query.trim()?<p className="los-index-footnote">Voit kokeilla esimerkiksi hakusanoja <b lang="de">heißen</b>, <b lang="de">Hallo</b> tai <b lang="de">kommen</b>.</p>:
       <><p className="los-index-count">{hits.length} tulosta</p>
