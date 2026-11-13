@@ -121,10 +121,19 @@ test("every one of the 60 guided lessons opens from its actual chapter picker on
    expect(seen.has(title)).toBe(false);
    seen.add(title);
    await button.click();
-   await expect(runner.locator(".los-lesson-detail .los-overline")).toContainText(title);
-   await expect(runner.locator(".los-lesson-steps li").first()).toBeVisible();
-   await expect(runner.locator(".los-lesson-exit")).toBeVisible();
-   await expect(runner.getByRole("button",{name:"Merkitse oppitunti suoritetuksi"})).toBeDisabled();
+   if(Number(title.slice(1))<=4){
+    await expect(page).toHaveURL(new RegExp("/los-lessons/"+title+"$"));
+    await expect(page.locator(".los-teacher-paper h2")).toBeVisible();
+    await expect(page.locator(".los-teacher-sidebar h1")).toBeVisible();
+    await page.goto("/los#/1/path",{waitUntil:"domcontentloaded"});
+    await expect(runner).toBeVisible();
+    await sections.nth(i).click();
+   }else{
+    await expect(runner.locator(".los-lesson-detail .los-overline")).toContainText(title);
+    await expect(runner.locator(".los-lesson-steps li").first()).toBeVisible();
+    await expect(runner.locator(".los-lesson-exit")).toBeVisible();
+    await expect(runner.getByRole("button",{name:"Merkitse oppitunti suoritetuksi"})).toBeDisabled();
+   }
   }
  }
  expect(seen.size).toBe(60);
@@ -160,30 +169,42 @@ test("book cover opens real L001 and remembers its position",async({page})=>{
  const start=page.getByRole("button",{name:"Aloita nollasta"});
  await expect(start).toBeVisible();
  await start.click();
- const lesson=page.locator("#los-lesson-runner .los-lesson-detail .los-overline");
- await expect(lesson).toContainText("L001");
- await page.reload();
- await expect(lesson).toContainText("L001");
+ await expect(page).toHaveURL(/\/los-lessons\/L001$/);
+ const lesson=page.locator(".los-teacher-paper h2");
+ await expect(lesson).toContainText("Tervetuloa ensimmäiselle");
+ await page.getByRole("button",{name:"Seuraava"}).click();
+ await expect(lesson).toContainText("Ensimmäiset kolme");
+ await page.reload({waitUntil:"domcontentloaded"});
+ await expect(lesson).toContainText("Ensimmäiset kolme");
  await expectNoHorizontalOverflow(page);
 });
 
 test("book cover resumes next unfinished lesson after completing L001",async({page})=>{
  await enterLocalBook(page);
- await page.goto("/los#/1/path");
- const runner=page.locator("#los-lesson-runner");
- await expect(runner).toBeVisible();
- for(let i=0;i<3;i++){
-  await runner.getByRole("button",{name:"Tein tämän vaiheen"}).first().click();
+ await page.goto("/los-lessons/L001",{waitUntil:"domcontentloaded"});
+ const paper=page.locator(".los-teacher-paper");
+ const outline=page.locator(".los-teacher-outline nav button");
+ await expect(outline).toHaveCount(10);
+ for(let i=0;i<10;i++){
+  await outline.nth(i).click();
+  if(i===3)await paper.locator(".los-teacher-option").filter({hasText:"Hallo!"}).click();
+  if(i===4)await paper.getByRole("button",{name:"Kokeilin sanaselitystä ja lukijan käyttöä kirjassa"}).click();
+  if(i===6)await paper.getByRole("button",{name:"Kokeilin äänentoistoa tai totesin, ettei äänite ollut saatavilla"}).click();
+  if(i===7){
+   await paper.locator(".los-teacher-reflection textarea").fill("Haluan osata tervehtiä saksaksi itsenäisesti.");
+   await paper.getByRole("button",{name:"Tallenna oma oppimistavoitteeni"}).click();
+  }
+  if(i===8)await paper.locator(".los-teacher-option").filter({hasText:"Napautan sanaa lukijassa."}).click();
  }
- await runner.getByLabel("Napautan sanaa lukijassa.").check();
- await runner.getByRole("button",{name:"Palauta lopputarkistus"}).click();
- await runner.getByRole("button",{name:"Merkitse oppitunti suoritetuksi"}).click();
- await expect(runner).toContainText("L001 suoritettu");
- await page.goto("/los#/1/overview");
+ await expect(paper.getByRole("button",{name:"Merkitse oppitunti läpikäydyksi"})).toBeEnabled();
+ await paper.getByRole("button",{name:"Merkitse oppitunti läpikäydyksi"}).click();
+ await expect(paper).toContainText("Oppitunti merkitty suoritetuksi");
+ await page.goto("/los#/1/overview",{waitUntil:"domcontentloaded"});
  const next=page.getByRole("button",{name:"Jatka oppituntia L002"});
  await expect(next).toBeVisible();
  await next.click();
- await expect(page.locator("#los-lesson-runner .los-lesson-detail .los-overline")).toContainText("L002");
+ await expect(page).toHaveURL(/\/los-lessons\/L002$/);
+ await expect(page.locator(".los-teacher-sidebar h1")).toContainText("Aloita saksan ääntämisestä");
 });
 
 test("legacy facsimile and PDF.js links safely open the digital reader",async({page})=>{
