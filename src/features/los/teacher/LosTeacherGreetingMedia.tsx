@@ -34,7 +34,7 @@ export function LosTeacherGreetingMedia(){
     aria-expanded={showText} onClick={()=>setShowText(value=>!value)}>
     {showText?"Piilota kirjoitettu luettelo":"Näytä kaikki 20 ilmausta ja suomennokset"}
    </button>
-   {showText&&<div className="los-teacher-greeting-transcript" id="los-teacher-greeting-transcript">
+   <div className="los-teacher-greeting-transcript" id="los-teacher-greeting-transcript" hidden={!showText}>
      <p>Kaikki alkuperäisen luettelon ilmaukset löytyvät alta.
       Tätä voi käyttää myös, jos ääni ei toimi. Tekstin lukeminen ei ole kuuntelunäyttö.</p>
      <ol>{SOURCE.lines.map(line=><li key={line.id}>
