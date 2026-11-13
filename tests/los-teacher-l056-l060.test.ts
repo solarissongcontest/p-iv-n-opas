@@ -75,8 +75,16 @@ test("L058 keeps assisted writing distinct from independently checked skill",()=
   assert.equal(teacherExternalStatus(LOS1_L058_TEACHER,draft).ready,true);
   const noWriting={...base,practiceAnswers:{...base.practiceAnswers,"EX-REV2-WRITING-058":"Hallo!"}};
   assert.equal(teacherExternalStatus(LOS1_L058_TEACHER,noWriting).ready,false);
-  const helped=markTeacherHelp(emptyTeacherSession(LOS1_L058_TEACHER,NOW),"writing-assisted",NOW);
-  assert.equal(teacherExternalStatus(LOS1_L058_TEACHER,{...draft,teacherSessions:{L058:helped}}).lines.some(line=>line.includes("käytetty")),true);
+  const viewed=markTeacherHelp(emptyTeacherSession(LOS1_L058_TEACHER,NOW),"writing-model",NOW);
+  const viewedDraft={...draft,teacherSessions:{L058:viewed}};
+  const viewedStatus=teacherExternalStatus(LOS1_L058_TEACHER,viewedDraft);
+  assert.equal(viewedStatus.lines.some(line=>line.includes("avattu valmiin kirjoitusyrityksen jälkeen")),true);
+  assert.equal(summarizeLos1Mastery({"92":viewedDraft}).writing.modelOpened,true);
+  assert.equal(summarizeLos1Mastery({"92":viewedDraft}).writing.assisted,false);
+  const helped=markTeacherHelp(viewed,"writing-assisted",NOW);
+  const assistedDraft={...draft,teacherSessions:{L058:helped}};
+  assert.equal(teacherExternalStatus(LOS1_L058_TEACHER,assistedDraft).lines.some(line=>line.includes("avustettu kirjoitusyritys")),true);
+  assert.equal(summarizeLos1Mastery({"92":assistedDraft}).writing.assisted,true);
   assert.equal(independentTeacherEvidence(completeTeacherScenes(LOS1_L058_TEACHER),LOS1_L058_TEACHER),0);
 });
 test("L059 bridges the 50-choice final, ungraded production, audio evidence and immutable retake archive",()=>{
