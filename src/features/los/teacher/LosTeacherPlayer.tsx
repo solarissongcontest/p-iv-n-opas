@@ -9,7 +9,7 @@ import { useLosChapterDraft } from "../studyState.ts";
 import {
   emptyTeacherSession, markTeacherHelp, confirmTeacherActivity, teacherChapterAssessmentStatus, teacherMidtermAssessmentStatus,
   finishTeacherSession, independentTeacherEvidence, moveTeacherScene, revealTeacherSolution,
-  setTeacherAnswerDraft, submitTeacherAnswer, toggleTeacherPause, teacherCanFinish, teacherLatestAttempt,
+  setTeacherAnswerDraft, submitTeacherAnswer, toggleTeacherPause, teacherCanFinish, teacherCompletionBlockers, teacherLatestAttempt,
   teacherWrongFeedback, teacherBuiltNumberCount, type TeacherScene, type TeacherSession, isCorrectCalendarEntry,
 } from "./engine.ts";
 import { getLosTeacherLesson } from "./lessonRegistry.ts";
@@ -206,6 +206,7 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
     "06":evidence06,"07":evidence07,"08":evidence08,"09":evidence09,"10":evidence10,
   }) : {ready:true,lines:[]};
   const available = Boolean(saved && session && lesson && teacherCanFinish(session, lesson, draft.practiceAnswers, draft.practiceChecked, draft, external.ready));
+  const blockers = lesson && session ? teacherCompletionBlockers(session, lesson, draft.practiceAnswers, draft.practiceChecked, draft, external.ready) : [];
   const completed = Boolean(session?.completedAt);
   const c10Dialogues = lesson?.id === "L054" ? composeLosC10Dialogues(
     session?.draftAnswers["dialogue-du"] ?? "", session?.draftAnswers["dialogue-sie"] ?? "") : null;
@@ -496,7 +497,11 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
               <h3>Oppitunnin tilanne</h3>
               <p>Itsenäisesti oikein ratkaistuja eri tarkistuksia: <strong>{independentTeacherEvidence(session, lesson)}</strong>. Tämä luku ei ole kielitaitoprosentti.</p>
               <p>{available ? "Kaikki sovitut opiskeluteot on tallennettu." :
-                "Vielä puuttuu yksi tai useampi opetustilanne, harjoitus, kirjan vastaus tai oma harjoitteluvahvistus."}</p>
+                "Oppituntia ei voi vielä merkitä läpikäydyksi. Alla näet täsmälleen, mitä pitää vielä tehdä."}</p>
+              {!available && <ul className="los-teacher-completion-checklist" aria-label="Oppitunnin puuttuvat suoritukset">
+                {!saved && <li>Tallennus ei ole onnistunut. Varmista tietojesi tallentuminen ennen loppumerkintää.</li>}
+                {blockers.map((reason, i) => <li key={i}>{reason}</li>)}
+              </ul>}
               {!completed ? <button type="button" className="los-teacher-primary"
                 disabled={!available} onClick={finish}>Merkitse oppitunti läpikäydyksi</button> :
                 <p className="los-teacher-done"><CheckCircle2 size={19}/> Oppitunti merkitty suoritetuksi. Osaamista seurataan erikseen.</p>}
