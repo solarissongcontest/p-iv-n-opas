@@ -4,7 +4,7 @@ import type {LosBookDefinition} from "../catalog";
 import {useLosChapterDraft} from "../studyState";
 import {emptyLosLessonProgress,losLessonFinishTeacher,type LosLessonProgress} from "../lessonEngine";
 import {TEACHER_L004} from "./content/l004";
-import {initialTeacherProgress,type TeacherProgress} from "./core";
+import {initialTeacherProgress,teacherCurrentCompletion,type TeacherProgress} from "./core";
 import {LosL004TeacherPlayer} from "./LosL004TeacherPlayer";
 import "./lesson-shell.css";
 
@@ -30,6 +30,7 @@ export function LosL004LessonShell({book}:{book:LosBookDefinition}){
   record(old=>({...old,startedAt:old.startedAt??stamp(),teacher:next}));
  };
  const visited=TEACHER_L004.scenes.filter(scene=>teacher.visited.includes(scene.id)).length;
+ const currentCompleted=teacherCurrentCompletion(TEACHER_L004,teacher);
  const style={"--los-book-accent":book.accent,"--los-book-tint":book.tint} as CSSProperties;
  return <div className="los-teacher-shell" style={style}>
   <header className="los-teacher-shell-top">
@@ -53,12 +54,12 @@ export function LosL004LessonShell({book}:{book:LosBookDefinition}){
    <p className="los-teacher-shell-save" role="status">{saved?
     "Opetuksen eteneminen tallentuu samaan LOS! 1:n opiskelutietoon kuin aiemmat tehtävät.":
     "Tallennus ei onnistunut. Tarkista varmuuskopio ennen sivun sulkemista."}</p>
-   {progress.completedAt&&!teacher.completedAt&&
-    <p className="los-teacher-shell-legacy" role="note">Olet jo suorittanut L004:n aikaisemmalla mallilla.
-     Merkintäsi säilyy, mutta uusi opetuskäsikirjoitus on erillinen harjoittelu.</p>}
+   {progress.completedAt&&!currentCompleted&&
+    <p className="los-teacher-shell-legacy" role="note">L004:stä on tallessa aiempi suoritus.
+     Päivitetty opetus kirjataan erikseen, kun uudet harjoitukset on käsitelty.</p>
    <LosL004TeacherPlayer progress={teacher} onChange={onChange}
     onFinish={()=>record(old=>losLessonFinishTeacher(TEACHER_L004,old,stamp()))}/>
-   {teacher.completedAt&&<div className="los-teacher-shell-next">
+   {currentCompleted&&<div className="los-teacher-shell-next">
      <a href="/los#/1/path" onClick={()=>{
        try{sessionStorage.setItem("los1.selectedLesson","L005");}catch{/* path remains available */}
      }}>Seuraava oppitunti: L005 · Kuuntele ja valitse tervehdys</a>
