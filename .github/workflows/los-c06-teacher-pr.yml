@@ -1,6 +1,9 @@
 name: LOS C06 Teacher Draft QA
 
 on:
+  push:
+    branches:
+      - feat/los1-teacher-l031-l035
   pull_request:
     branches:
       - feat/los1-teacher-c03-l012-20261113
