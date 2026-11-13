@@ -226,7 +226,7 @@ test("L034 age-dialogue questions give source-grounded numbers and format-specif
   const cases=[
     ["recall","Kirjoita numeroin: neunzehn","19","neunzehn","numeroin"],
     ["franz","Kirjoita numeroin: Franzin neunzehn","19","Franz","numeroin"],
-    ["application-one","Mia on kuvitteellisesti 17-vuotias. Kirjoita täydellinen vastaus: Olen 17-vuotias.","Ich bin siebzehn Jahre alt.","siebzehn","kokonaisen"],
+    ["application-one","Mia on kuvitteellisesti 17-vuotias. Kirjoita täydellinen vastaus: Olen 17-vuotias.","Ich bin siebzehn Jahre alt.","siebzehn","kokonaisena"],
     ["application-two","Leo on kuvitteellisesti 20-vuotias. Kirjoita lyhyt vastaus ilman Jahre alt -osaa: Olen 20-vuotias.","Ich bin zwanzig.","zwanzig","lyhyen"],
     ["exit","Kirjoita numeroin: zwanzig","20","Zwanzig","numeroin"],
   ] as const;
