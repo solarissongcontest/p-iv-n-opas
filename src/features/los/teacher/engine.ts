@@ -20,6 +20,17 @@ export type TeacherQuestion = {
   genericWrong: string;
   wrongAnswers?: Readonly<Record<string, string>>;
 };
+/**
+ * Render a digits-only answer with a numeric keyboard, not German character keys.
+ * The correct-answer model is more reliable than a Finnish prompt prefix:
+ * "Kirjoita numeroin", "Kirjoita numeroina" and "Kirjoita numerosarja" must
+ * all behave consistently. Do not use <input type="number">: leading zeroes
+ * and codes are meaningful and must be preserved as strings.
+ */
+export function teacherRequiresNumericResponse(question: TeacherQuestion): boolean {
+  return question.type === "text" && Boolean(question.accepted?.length) &&
+    question.accepted!.every(value => /^\d+$/.test(value.trim()));
+}
 export type TeacherBookLink = { label: string; chapterId: string; section: string; instruction: string };
 export type TeacherBoardStep = { label: string; german: string; meaning: string };
 export type TeacherReflection = { prompt: string; placeholder: string; minLength: number };
