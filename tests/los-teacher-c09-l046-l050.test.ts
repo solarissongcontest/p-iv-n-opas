@@ -118,7 +118,9 @@ test("all five scenes have real completion gates; responses survive JSON seriali
   for(const l of LOS1_C09_TEACHER) {
     const {s,answers,assessment}=simulate(l);
     assert.ok(teacherCanFinish(s,l,answers,l.requiredCheckedIds,assessment),l.id);
-    assert.ok(!teacherCanFinish(s,l,{},[],assessment),l.id+" missing exercise");
+    if(l.requiredPracticeIds.length || l.requiredCheckedIds?.length)
+      assert.ok(!teacherCanFinish(s,l,{},[],assessment),l.id+" missing exercise");
+    else assert.ok(!teacherCanFinish(s,l,{},[],undefined),l.id+" missing chapter test");
     const serial=JSON.parse(JSON.stringify({[l.id]:s}));
     assert.deepEqual(parseTeacherSessions(serial)[l.id],s,l.id);
     const done=finishTeacherSession(s,l,answers,now,l.requiredCheckedIds,assessment);
