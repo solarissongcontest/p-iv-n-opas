@@ -86,6 +86,8 @@ export const LOS1_FINAL_QUESTIONS:readonly LosFinalQuestion[]=[
   q("situations",50,"Hyvästelet ystävän ja tarkoitat 'huomiseen'.",["Wie heißt du?","Bis morgen!","Gute Nacht!"],"b","Bis morgen tarkoittaa huomiseen."),
 ];
 export const LOS1_FINAL_WRITING_CHECK="EX-FINAL-WRITING-CHECK";
+export const LOS1_FINAL_WRITING_MODEL_OPENED="EX-FINAL-WRITING-MODEL-OPENED";
+export const LOS1_FINAL_WRITING_ASSISTED="EX-FINAL-WRITING-ASSISTED";
 export const LOS1_FINAL_VOICE_CHECK="EX-FINAL-VOICE-CHECK";
 export const LOS1_SUMMARY_GOAL="EX-SUMMARY-GOAL";
 export const LOS1_SUMMARY_CARDS="EX-SUMMARY-CARDS";
