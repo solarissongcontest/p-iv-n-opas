@@ -1,0 +1,71 @@
+name: LOS C09 Teacher Draft QA
+on:
+  push:
+    branches:
+      - feat/los1-teacher-l046-l050
+      - feat/los1-teacher-integrated-c09-20261113
+  workflow_dispatch:
+
+# Older pushes must not consume long browser runners after a new fix lands.
+concurrency:
+  group: los-c09-teacher-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  c09-test-build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 22
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+      - name: All repository unit tests
+        run: bun run test
+      - name: Typecheck
+        run: bun run typecheck
+      - name: Production build
+        run: bun run build
+
+  c09-browser:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    env:
+      E2E_BASE_URL: http://127.0.0.1:5173
+      REQUIRE_GEMINI: "false"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - run: bun install --frozen-lockfile
+      - run: bun run e2e:install
+      - run: bunx playwright install --with-deps chromium webkit
+      - name: Start preview server
+        run: |
+          nohup bun run dev -- --host 127.0.0.1 --port 5173 --strictPort > /tmp/los-c09-dev.log 2>&1 &
+          for attempt in $(seq 1 45); do
+            curl --silent --fail --max-time 3 http://127.0.0.1:5173/ > /dev/null 2>&1 && exit 0
+            sleep 2
+          done
+          cat /tmp/los-c09-dev.log
+          exit 1
+      - name: C09 Teacher routes, mobile calendar and persistence
+        run: bunx playwright test e2e/los-c09-teacher.spec.ts --project=desktop-chromium --project=iphone-webkit
+      - name: Existing LOS full-book browser regressions
+        run: bunx playwright test e2e/los-full-book.spec.ts --project=desktop-chromium --project=iphone-webkit
+      - name: Save failures for diagnosis
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: los-c09-browser-evidence
+          path: |
+            test-results/
+            /tmp/los-c09-dev.log
+          if-no-files-found: ignore
+          retention-days: 7

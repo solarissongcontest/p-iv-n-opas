@@ -210,3 +210,15 @@
 @media (max-width:520px) {
   .los-teacher-form-fields {padding:15px;gap:14px;}
 }
+
+/* Unabridged C09 source text reuses the canonical original-line data. */
+.los-teacher-original{margin:24px 0;padding:18px 22px;border:1px solid var(--los-line);border-radius:10px;background:var(--los-paper)}
+.los-teacher-original-label{font-size:12px!important;color:var(--los-book-accent);font-weight:800;letter-spacing:.04em}
+.los-teacher-source-line{display:grid;grid-template-columns:minmax(50px,74px) minmax(0,1fr);gap:12px;padding:12px 0;border-bottom:1px solid var(--los-line)}
+.los-teacher-source-line>strong{font-size:12px;color:var(--los-soft)}
+.los-teacher-source-line p{margin:0 0 6px;font-size:17px;line-height:1.6}
+.los-teacher-source-line small{color:var(--los-soft);font-size:13px;line-height:1.65}
+.los-teacher-original-credit,.los-teacher-source-warning{font-size:12px!important;line-height:1.7}
+.los-teacher-original :is(a){color:var(--los-book-accent);text-decoration:underline;text-underline-offset:2px}
+.los-teacher-original .los-teacher-source-warning{padding:12px;border-left:3px solid var(--los-book-accent);background:var(--los-book-tint)}
+@media(max-width:480px){.los-teacher-original{padding:12px}.los-teacher-source-line{grid-template-columns:1fr;gap:3px}.los-teacher-source-line p{font-size:16px}}
