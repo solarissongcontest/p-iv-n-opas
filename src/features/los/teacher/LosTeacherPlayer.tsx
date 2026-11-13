@@ -321,9 +321,12 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
                 const progress = teacherChapterAssessmentStatus(lesson, draft);
                 return <>
                   <p>Kappaletesti: {progress.answered}/{progress.expected} vastattu · {progress.submitted ? "Palautettu" : "Ei vielä palautettu"}.</p>
-                  <p>Oma sovellus: {progress.applicationDone ? "Teksti tallennettu" : "Teksti vielä puuttuu"}. Tätä ei pisteytetä automaattisesti.</p>
+                  {lesson.id === "L030" ? <p>Oma 4–6 repliikin keskustelu: {draft.practiceAnswers["EX-MID-DIALOGUE-SELF"] ? "Itsearvioitu" : "Itsearvio vielä puuttuu"}. Vain opiskelija arvioi itse, eikä ääntämistä mitata koneellisesti.</p> :
+                    <p>Oma sovellus: {progress.applicationDone ? "Teksti tallennettu" : "Teksti vielä puuttuu"}. Tätä ei pisteytetä automaattisesti.</p>}
                   <p>Itsearviointi: {progress.reflectionDone ? "Kirjattu" : "Puuttuu"}. Sisältöä ei arvioida koneellisesti.</p>
-                  <p>{progress.ready ? "Kirjan sovitut suoritukset ovat tallessa." : "Avaa kirjan testisivu, palauta kaikki osatehtävät ja kirjoita oma itsearviointi. Pelkkä sivun avaaminen ei riitä."}</p>
+                  <p>{progress.ready ? "Kirjan sovitut suoritukset ovat tallessa." : lesson.id === "L030" ?
+                    "Palauta kaikki 25 EX-MID-tehtävää, arvioi oma 4–6 repliikin keskustelusi ja kirjoita sanallinen itsearvio. Pelkkä sivun avaaminen ei riitä." :
+                    "Avaa kirjan testisivu, palauta kaikki osatehtävät ja kirjoita oma itsearviointi. Pelkkä sivun avaaminen ei riitä."}</p>
                 </>;
               })()}
             </section>}
