@@ -5,6 +5,11 @@ on:
       - feat/los1-teacher-l046-l050
   workflow_dispatch:
 
+# Older pushes must not consume long browser runners after a new fix lands.
+concurrency:
+  group: los-c09-teacher-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
