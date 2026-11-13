@@ -337,6 +337,33 @@ export function teacherCompletionBlockers(session: TeacherSession, lesson: Teach
   if (missingChecked.length) missing.push("Vastaa ja tarkista kirjan lähdetehtävät: " + missingChecked.join(", ") + ".");
   return missing;
 }
+/** Find a navigable next step without changing answers, visits or mastery. */
+export function teacherNextIncompleteSceneId(
+  session: TeacherSession, lesson: TeacherLesson,
+  practiceAnswers: Readonly<Record<string,string>> = {},
+  practiceChecked: readonly string[] = [],
+): string | undefined {
+  for(const scene of lesson.scenes){
+    if(!session.visitedIds.includes(scene.id)) return scene.id;
+    if(lesson.requiredQuestionIds.includes(scene.id) &&
+      !session.attempts.some(attempt => attempt.sceneId === scene.id)) return scene.id;
+    if(scene.activityId && lesson.requiredActivityIds.includes(scene.activityId) &&
+      !session.activityIds.includes(scene.activityId)) return scene.id;
+    if(scene.numberBuilder && teacherBuiltNumberCount(session,scene.id)<4) return scene.id;
+    if(scene.calendar && !isCorrectCalendarEntry(scene,session.draftAnswers[scene.id]??"")) return scene.id;
+    if(scene.reflection && (session.draftAnswers[scene.id]?.trim().length??0)<scene.reflection.minLength)
+      return scene.id;
+    if(scene.form && scene.form.some(field=>!session.draftAnswers[scene.id+"."+field.id]?.trim()))
+      return scene.id;
+  }
+  const practiceMissing=lesson.requiredPracticeIds.some(id=>!practiceAnswers[id]?.trim());
+  const checkedMissing=(lesson.requiredCheckedIds??[]).some(id=>
+    !practiceAnswers[id]?.trim()||!practiceChecked.includes(id));
+  if(practiceMissing||checkedMissing){
+    return lesson.scenes.find(scene=>scene.kind==="book" && scene.bookLinks?.length)?.id;
+  }
+  return undefined;
+}
 export function teacherCanFinish(session: TeacherSession, lesson: TeacherLesson,
   practiceAnswers: Readonly<Record<string, string>>, practiceChecked: readonly string[] = [],
   chapterAssessment?: TeacherChapterAssessmentInput, externalReady: boolean = !lesson.externalCheck): boolean {
