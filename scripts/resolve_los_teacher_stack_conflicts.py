@@ -31,6 +31,29 @@ def choose(path: str, ours: str, theirs: str) -> str:
         if "L001–L060" not in result:
             raise ValueError(f"No full-coverage declaration in {path}: {result[:120]!r}")
         return result
+    if path == "e2e/los-full-book.spec.ts" and "Number(title.slice(1))" in ours and "getLosTeacherLesson(title)" in theirs:
+        # Dynamic routing check is stricter than a numerical threshold.
+        return theirs
+    if path == "src/features/los/teacher/LosTeacherPlayer.tsx" and "lessonReturn=" in ours and "lessonReturn=" in theirs and "review-ii" in theirs:
+        return ('  "/los?lessonReturn=" + encodeURIComponent(lessonId) + "#/" + bookId +\n'
+                '  (["review-ii","final","summary","midterm","review"].includes(section) ? "/" + section : "/" + chapterId + "/" + section);\n')
+    if path == "src/features/los/teacher/engine.ts" and "An original transcript" in ours and "Read-only adapter" in theirs:
+        # Distinct TeacherLesson fields; keep both media and final-review gates.
+        return ours + theirs
+    if path == "src/features/los/teacher/engine.ts" and "lesson.mediaGate" in ours and "externalReady" in theirs:
+        if "teacherMidtermAssessmentStatus" not in ours:
+            raise ValueError("Review II cannot discard EX-MID completion requirement")
+        return ours.replace("return (!lesson.mediaGate", "return externalReady && (!lesson.mediaGate", 1)
+    if path == "src/features/los/teacher/lessonL004.ts" and "LOS1_L056_TEACHER" in theirs and "LOS1_L017_TEACHER" in ours:
+        return ours
+    if path == "src/features/los/teacher/validateContent.ts" and '"review"' in ours and '"review-ii"' in theirs:
+        items=list(dict.fromkeys(re.findall(r'"([^"]+)"',ours+theirs)))
+        if not {"review","midterm","review-ii","final","summary"}.issubset(items):
+            raise ValueError("Missing authentic exam/review route")
+        return '  '+','.join('"'+item+'"' for item in items)+',\n'
+    if path == "tests/los-teacher-engine.test.ts" and "beforeRevealedSubmit" in ours and "attemptsBeforeModel" in theirs:
+        # Both test the same revealed-answer guard, retain the current assertion.
+        return theirs
     if path == "src/features/los/teacher/LosTeacherPlayer.tsx" and 'lesson.examAssessment?.id === "EX-MID"' in ours and "lesson.mediaGate" in theirs:
         # Both are separate assessment-status sections, not alternative branches.
         return ours + theirs
@@ -166,6 +189,13 @@ def normalize_registry() -> None:
             body = body.replace(boundary, lookup + "\n" + boundary, 1)
     path.write_text(body)
 
+def normalize_full_path_test() -> None:
+    path=Path("e2e/los-full-book.spec.ts")
+    body=path.read_text()
+    if "if(getLosTeacherLesson(title))" in body and 'import {getLosTeacherLesson}' not in body:
+        body='import {getLosTeacherLesson} from "../src/features/los/teacher/lessonL004.ts";\n'+body
+        path.write_text(body)
+
 def normalize_activity_gate() -> None:
     path=Path("src/features/los/teacher/LosTeacherPlayer.tsx")
     source=path.read_text()
@@ -210,6 +240,7 @@ for name in unmerged:
 if failures:
     raise ValueError("Unexpected semantic conflicts; refusing automatic merge:\\n" + "\\n----\\n".join(failures))
 normalize_registry()
+normalize_full_path_test()
 normalize_activity_gate()
 subprocess.run(["git","add","--",*unmerged,"src/features/los/teacher/lessonL004.ts"],check=True)
 if subprocess.check_output(["git","ls-files","-u"],text=True).strip():
