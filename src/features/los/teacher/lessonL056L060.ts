@@ -67,12 +67,12 @@ export const LOS1_L056_TEACHER: TeacherLesson = {
 
 const greetingAndOrigin: TeacherQuestion = {
   type:"text",skillId:"L1-INT-03",evidenceRole:"application",
-  prompt:"Kirjoita kolme lausetta yhteen riviin: Hei! Minun nimeni on Mia. Olen kotoisin Suomesta.",
+  prompt:"Kirjoita saksaksi samaan vastaukseen kolme viestiä: Hei! Nimeni on Mia. Olen kotoisin Suomesta. Tervehdyksen voi erottaa huutomerkillä tai pilkulla.",
   accepted:["Hallo! Ich heiße Mia. Ich komme aus Finnland.","Hallo, ich heiße Mia. Ich komme aus Finnland."],
   success:"Yhdistit tervehdyksen, nimen ja lähtömaan oikeisiin minämuotoihin.",
   hint:"Hallo aloittaa. Ich heiße kertoo nimen ja ich komme aus kertoo alkuperän.",
   reteach:"Kolme tuttua rakennetta ovat Hallo! / Ich heiße Mia. / Ich komme aus Finnland.",
-  genericWrong:"Tarkista heiße, komme, aus ja Finnland. Kirjoita kokonaiset kolme lausetta.",
+  genericWrong:"Sisällytä tervehdys, nimi ja lähtömaa. Tarkista heiße, komme, aus ja Finnland. Tervehdyksen voi erottaa huutomerkillä tai pilkulla.",
 };
 export const LOS1_L057_TEACHER: TeacherLesson = {
   id:"L057",bookId:1,chapterId:"92",version:"2.0.0-preview.1",
@@ -100,7 +100,7 @@ export const LOS1_L057_TEACHER: TeacherLesson = {
       {label:"C09 · aika",german:"am Montag um drei Uhr",meaning:"maanantaina kello kolme"},
       {label:"C10 · kolmas henkilö",german:"Das ist Mia. Sie heißt Mia.",meaning:"Tuttavan esittely"}
     ]},
-    {id:"transfer",phase:"Itsenäinen soveltaminen",kind:"question",title:"Rakenna kolme lausetta ilman sanastoa",paragraphs:[
+    {id:"transfer",phase:"Itsenäinen soveltaminen",kind:"question",title:"Yhdistä tervehdys, nimi ja lähtömaa ilman sanastoa",paragraphs:[
       "Kuvittele olevasi uusi oppilas. Tervehdi ja kerro oma kuvitteellinen nimesi sekä lähtömaasi. Ei oikeita henkilötietoja.",
       "Kokeile ennen vihjettä. Vihjeen käyttö kirjautuu avustetuksi harjoitteluksi."
     ],question:greetingAndOrigin},
