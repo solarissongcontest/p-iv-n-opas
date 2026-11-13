@@ -356,11 +356,14 @@ function LosBookWorkspace({ book, location, move, goLibrary, openBook }: { book:
   const next = previousIndex >= 0 ? book.chapters[previousIndex + 1] : null;
   const previous = previousIndex > 0 ? book.chapters[previousIndex - 1] : null;
   const section = chapter ? location.section : ["contents", "appendix", "dictionary", "path", "search", "midterm", "review", "review-ii", "progress", "final", "summary"].includes(location.section) ? location.section : "overview";
-  const hasTeacherReturn=book.id===1&&section!=="path"&&
-    (location.returnLesson==="L004"||(()=>{
-      try{return sessionStorage.getItem("los1.returnLesson")==="L004";}
-      catch{return false;}
-    })());
+  const previousLesson=(()=>{
+    if(location.returnLesson)return location.returnLesson;
+    try{
+      const saved=sessionStorage.getItem("los1.returnLesson");
+      return saved==="L004"||saved==="L005"?saved:null;
+    }catch{return null;}
+  })();
+  const hasTeacherReturn=book.id===1&&section!=="path"&&Boolean(previousLesson);
   return <div className="los-book-workspace" style={bookStyle(book)}>
     <header className="los-book-topbar">
       <button className="los-back-library" onClick={goLibrary} aria-label="Takaisin kirjasarjaan"><ChevronLeft size={19} /> <span>Kirjasarja</span></button>
@@ -386,9 +389,9 @@ function LosBookWorkspace({ book, location, move, goLibrary, openBook }: { book:
       </aside>
       <main className="los-book-main" id="main-content" tabIndex={-1}>
         {hasTeacherReturn&&<div className="los-book-teacher-return">
-          <a href="/los#/1/lesson/L004" onClick={()=>{
+          <a href={"/los#/1/lesson/"+previousLesson} onClick={()=>{
             try{sessionStorage.removeItem("los1.returnLesson");}catch{/* harmless */}
-          }}><ArrowLeft size={18}/> Palaa oppitunnille L004</a>
+          }}><ArrowLeft size={18}/> Palaa oppitunnille {previousLesson}</a>
           <span>Oppitunnin kohta ja vastaukset ovat tallessa.</span>
         </div>}
         <div className="los-main-breadcrumb"><button onClick={() => move(null, "overview")}>LOS! {book.id}</button>{chapter ? <><ChevronRight size={12} /><button onClick={() => openChapter(chapter)}>Kappale {Number(chapter.id)}</button></> : null}{chapter && section !== "chapter" ? <><ChevronRight size={12} /><span>{section==="cards" ? "Kertauskortit" : sections.find(s => s.id === section)?.label}</span></> : null}</div>
@@ -450,6 +453,7 @@ export function LosBook() {
   };
   useEffect(() => {
     const title = location.lessonId==="L004" ? "L004 · Tervehdykset muistista · LOS!" :
+      location.lessonId==="L005"?"L005 · Kuuntele ja valitse tervehdys · LOS!":
       location.book ? `LOS! ${location.book} · Saksan oppikirja` : "LOS! · Saksan oppikirjasarja";
     document.title = title;
     return () => { document.title = "StudyOS"; };
@@ -460,6 +464,8 @@ export function LosBook() {
   return <div className="los-app">
     {book ? (location.lessonId === "L004" && book.id === 1 ?
       <LosL004LessonShell book={book}/> :
+      location.lessonId === "L005" && book.id === 1 ?
+      <LosL005LessonShell book={book}/> :
       <LosBookWorkspace book={book} location={location} move={(chapter, section) => move(book.id, chapter, section)} goLibrary={() => move(null)} openBook={id => move(id)} />) :
       <><div className="los-series-top"><a href="/studies"><ArrowLeft size={17} /> Opintopäiväkirjaan</a><span>LOS! · Saksa B3</span></div><SeriesView openBook={id => move(id)} /></>}
   </div>;
