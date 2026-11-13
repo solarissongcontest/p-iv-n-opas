@@ -110,6 +110,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          git config user.name "LOS Preview Integration"
+          git config user.email "los-preview-integration@users.noreply.github.com"
           test "$GITHUB_REF" = "refs/heads/feat/los1-teacher-stack-qa-20261113"
           bundle=".los-tested-preview/merged.bundle"
           test -s "$bundle"
