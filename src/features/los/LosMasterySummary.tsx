@@ -70,6 +70,11 @@ export function LosMasterySummary() {
         : result.writing.modelOpened
           ? "L058:n malli avattiin vasta valmiin kirjoitusyrityksen jälkeen. Mallin katsominen on kirjattu, mutta myöhempiä muokkauksia ei ole tallennettu. "
           : "Mallin avaamista ei ole kirjattu L058:n esittelyyn. "}
+      {result.writing.finalAssisted
+        ? "L059:n loppukoeviestiä on muokattu mallin katsomisen jälkeen: avustettu kirjoitusyritys. "
+        : result.writing.finalModelOpened
+          ? "L059:n malliviesti on avattu oman jo vahvistetun kirjoituksen jälkeen; myöhempää muokkausta ei ole kirjattu. "
+          : "L059:n malliviestin avaamista ei ole kirjattu. "}
       Vapaan tekstin ja ääntämisen kielellistä laatua ei ole tarkistettu automaattisesti.</p>
     <p><strong>Sääntöpohjainen seuraava askel:</strong> {result.nextSuggestion}</p>
     {result.ownGoal&&<p><strong>Itse kirjoittamasi tavoite:</strong> {result.ownGoal}</p>}
