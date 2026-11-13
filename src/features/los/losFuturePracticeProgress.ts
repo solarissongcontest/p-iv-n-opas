@@ -1,8 +1,34 @@
-import type { LosBookDefinition } from "./catalog";
-import { losFutureLessonOutline } from "./losFutureLessonOutline";
-import { losFutureExercisesFor } from "./content/losFutureExercises";
-import { getLosFutureLesson } from "./content/losFutureLessons";
-import { losDraftKey, parseLosDraft, type LosChapterDraft } from "./studyState";
+import type { LosBookDefinition } from "./catalog.ts";
+import { losFutureLessonOutline } from "./losFutureLessonOutline.ts";
+import { losFutureExercisesFor } from "./content/losFutureExercises.ts";
+import { getLosFutureLesson } from "./content/losFutureLessons.ts";
+
+/** Reads only safe practice evidence from the existing v1 chapter draft format.
+ * This pure parser must agree with studyState.ts, but never imports React,
+ * device-auth or private user information into the analytics unit tests. */
+type PracticeEvidence={practiceAnswers:Record<string,string>;practiceChecked:string[]};
+const EMPTY_PRACTICE:PracticeEvidence={practiceAnswers:{},practiceChecked:[]};
+function isStringRecord(value:unknown):value is Record<string,string>{
+  return Boolean(value&&typeof value==="object"&&!Array.isArray(value)
+    &&Object.values(value).every(item=>typeof item==="string"));
+}
+export function parseLosFuturePracticeEvidence(raw:string|null):PracticeEvidence {
+  if(!raw)return EMPTY_PRACTICE;
+  try{
+    const input=JSON.parse(raw) as Record<string,unknown>;
+    if(!input||input.version!==1||!isStringRecord(input.practiceAnswers)
+      ||!isStringRecord(input.testAnswers))return EMPTY_PRACTICE;
+    return {
+      practiceAnswers:input.practiceAnswers,
+      practiceChecked:Array.isArray(input.practiceChecked)
+        ? input.practiceChecked.filter((value):value is string=>typeof value==="string")
+        : [],
+    };
+  }catch{return EMPTY_PRACTICE;}
+}
+export function losFuturePracticeDraftKey(bookId:number,chapterId:string,ownerId:string):string{
+  return `los.local.v1.${ownerId}.${bookId}.${chapterId}`;
+}
 
 export const LOS_FUTURE_STAGE_IDS=["start","model","guide","attempt","tasks","check"] as const;
 export type LosFutureStageId=typeof LOS_FUTURE_STAGE_IDS[number];
@@ -52,12 +78,12 @@ export function calculateLosFutureBookPractice(
   read:(key:string)=>string|null,
 ):LosFutureBookPractice {
   const source=losFutureLessonOutline(book);
-  const chapterDrafts=new Map<string,LosChapterDraft>();
+  const chapterDrafts=new Map<string,PracticeEvidence>();
   for(const chapter of book.chapters){
-    const key=ownerId?losDraftKey(book.id,chapter.id,ownerId):null;
+    const key=ownerId?losFuturePracticeDraftKey(book.id,chapter.id,ownerId):null;
     let raw:string|null=null;
     if(key){try{raw=read(key);}catch{/* storage access denied: use an empty draft */}}
-    chapterDrafts.set(chapter.id,parseLosDraft(raw));
+    chapterDrafts.set(chapter.id,parseLosFuturePracticeEvidence(raw));
   }
 
   const chapterLessons:LosFutureLessonPractice[]=source.flatMap(slot=>{
