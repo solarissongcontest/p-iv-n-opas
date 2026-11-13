@@ -66,3 +66,30 @@ test("L021 teacher chapter test cannot be marked complete just by visiting it",a
   await page.reload({waitUntil:"domcontentloaded"});
   await expect(page.locator(".los-teacher-sidebar h1")).toContainText("Harjoittele ja testaa C04");
 });
+
+test("L017 hinted answer stays correct practice, not independent evidence, after reload",async({page})=>{
+  await enterLocalBook(page);
+  await page.goto("/los-lessons/L017",{waitUntil:"domcontentloaded"});
+  await page.locator(".los-teacher-outline").getByRole("button",{name:"Vieraan kohtaaminen"}).click();
+  await page.getByRole("button",{name:"Tarvitsen vihjeen"}).click();
+  await expect(page.locator(".los-teacher-hint")).toBeVisible();
+  await page.locator(".los-teacher-option").filter({hasText:"Sie"}).click();
+  await expect(page.locator(".los-teacher-feedback")).toContainText("Tämä oli harjoittelussa oikein.");
+  await page.reload({waitUntil:"domcontentloaded"});
+  await expect(page.locator(".los-teacher-feedback")).toContainText("Tämä oli harjoittelussa oikein.");
+});
+
+test("L019 returns a specific verb correction and remembers the answer",async({page})=>{
+  await enterLocalBook(page);
+  await page.goto("/los-lessons/L019",{waitUntil:"domcontentloaded"});
+  await page.locator(".los-teacher-outline").getByRole("button",{name:"Korjaa Sie-nimikysymys"}).click();
+  const input=page.locator(".los-teacher-form input");
+  await input.fill("Wie heißt Sie?");
+  await page.getByRole("button",{name:"Tarkista",exact:true}).click();
+  await expect(page.locator(".los-teacher-feedback")).toContainText("Heißt on du-muoto.");
+  await input.fill("Wie heißen Sie?");
+  await page.getByRole("button",{name:"Tarkista",exact:true}).click();
+  await expect(page.locator(".los-teacher-feedback")).toContainText("Tämä oli harjoittelussa oikein.");
+  await page.reload({waitUntil:"domcontentloaded"});
+  await expect(page.locator(".los-teacher-feedback")).toContainText("Tämä oli harjoittelussa oikein.");
+});
