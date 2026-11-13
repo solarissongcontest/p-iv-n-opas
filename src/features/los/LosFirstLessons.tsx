@@ -8,7 +8,7 @@ import {
   type LosLessonProgress,
 } from "./lessonEngine";
 import { LOS1_EXECUTABLE_LESSONS, los1LessonDraftChapter } from "./guidedLessons";
-import { getLosTeacherLesson } from "./teacher/lessonL004";
+import { getLosTeacherLesson } from "./teacher/lessonRegistry";
 import { losLessonCompleted } from "./losResumeRecommendation.ts";
 import "./los-lessons.css";
 
