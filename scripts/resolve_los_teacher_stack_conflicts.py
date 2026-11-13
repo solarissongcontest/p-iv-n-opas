@@ -31,6 +31,15 @@ def choose(path: str, ours: str, theirs: str) -> str:
         if "L001–L060" not in result:
             raise ValueError(f"No full-coverage declaration in {path}: {result[:120]!r}")
         return result
+    if path == "e2e/los-full-book.spec.ts" and "Await asynchronous book hydration" in ours and not theirs.strip():
+        return ours
+    if path == "src/features/los/teacher/LosTeacherPlayer.tsx" and 'lesson.examAssessment?.id === "EX-MID"' in ours and "lesson.externalCheck" in theirs:
+        return ours + theirs
+    if path == "src/features/los/teacher/validateContent.ts" and "lesson.mediaGate" in ours and "lesson.externalCheck" in theirs:
+        return ours + theirs
+    if path == "tests/los-teacher-engine.test.ts" and 'submitTeacherAnswer(s, lesson, "independent", "Guten Abend!"' in ours and "attemptsBeforeModel" in theirs:
+        # Both exercise the same reveal guard; retain established saved test.
+        return ours
     if path == "e2e/los-full-book.spec.ts" and "Number(title.slice(1))" in ours and "getLosTeacherLesson(title)" in theirs:
         # Dynamic routing check is stricter than a numerical threshold.
         return theirs
