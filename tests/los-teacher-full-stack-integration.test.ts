@@ -110,7 +110,7 @@ test("L031 teaches 0–6 before asking the first number-memory question",()=>{
   assert.deepEqual(recall.question?.accepted,["1"]);
   assert.match(recall.paragraphs.join(" "),/Näimme jo opetustaululla/);
   assert.match(recall.question?.hint??"",/Eins/);
-  assert.match(recall.question?.genericWrong??"",/numeromerkkiä/);
+  assert.match(recall.question?.genericWrong??"",/numeromerkki/);
 });
 
 test("L031 number mistakes receive concrete explanations for the asked answer direction",()=>{
