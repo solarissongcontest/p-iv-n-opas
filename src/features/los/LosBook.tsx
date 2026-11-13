@@ -3,6 +3,7 @@ import { ArrowLeft, ArrowRight, BookOpen, ChevronLeft, ChevronRight, Headphones,
 import { readCachedDeviceUser } from "@/lib/deviceSession";
 import { LOS_BOOKS, type LosBookDefinition, type LosChapter } from "./catalog";
 import { LosFutureBookPreview } from "./LosFutureBookPreview";
+import { LosFutureLearningPath } from "./LosFutureLearningPath";
 import { getLosChapterSourceGate } from "./content/sourceRegistry";
 import { LosAuthenticAudio, LosDictionary, LosIndexSearch, LosLearningPath, type LosDestination } from "./LosReferenceTools";
 import { LosChapterGrammar } from "./LosGrammarChapters";
@@ -388,7 +389,7 @@ function LosBookWorkspace({ book, location, move, goLibrary, openBook }: { book:
           {!chapter && section === "overview" ? <BookFront book={book} move={move} /> :
             section === "contents" ? <Contents book={book} move={move} /> :
             section === "appendix" ? <Appendix book={book} /> :
-            section === "path" ? <LosLearningPath book={book} move={move} /> :
+            section === "path" ? (book.id===1 ? <LosLearningPath book={book} move={move} /> : <LosFutureLearningPath book={book} move={move} />) :
             section === "progress" && book.id===1 ? <LosStudyProgress book={book} move={move} /> :
             section === "midterm" && book.id===1 ? <LosMidtermExam /> :
             section === "review" && book.id===1 ? <LosReviewI move={move} /> :
