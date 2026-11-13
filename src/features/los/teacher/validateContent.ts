@@ -104,7 +104,8 @@ export function validateTeacherLesson(lesson: TeacherLesson): TeacherContentIssu
   if (lesson.requiredCheckedIds &&
       (!unique(lesson.requiredCheckedIds) || lesson.requiredCheckedIds.some(id =>
         !(/^C\d{2}-(?:SOURCE|TEXTB|MCOM02)-Q\d{2}$/.test(id) ||
-          (reviewI && /^EX-REV1-Q\d{2}$/.test(id)) )))) {
+          (reviewI && /^EX-REV1-Q\d{2}$/.test(id)) ||
+          (lesson.chapterId === "06" && /^C06-ZPE-Q\d{2}$/.test(id)) )))) {
     issues.push({ location: "requiredCheckedIds", problem: "Tarkistettavan lähdetehtävän tunniste on virheellinen." });
   }
   const assessment = lesson.chapterAssessment;
