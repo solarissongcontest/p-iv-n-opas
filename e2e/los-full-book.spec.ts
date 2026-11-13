@@ -122,7 +122,7 @@ test("every one of the 60 guided lessons opens from its actual chapter picker on
    await button.click();
    if(title==="L004"){
      // Teacher Experience 2.0 is an independent lesson, not another checkbox runner.
-     await expect(page).toHaveURL(/\\/los#\\/1\\/teacher$/);
+     await expect(page).toHaveURL(/\/los#\/1\/teacher$/);
      await expect(page.locator("#los-teacher-player")).toBeVisible();
      await expect(page.locator(".los-lesson-steps")).toHaveCount(0);
      await page.locator("#los-teacher-player").getByRole("button",{name:"Takaisin opiskelupolkuun",exact:true}).click();
