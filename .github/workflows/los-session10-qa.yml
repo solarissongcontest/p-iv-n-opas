@@ -1,0 +1,88 @@
+name: LOS Teacher session 10 QA
+on:
+  push:
+    branches:
+      - feat/los1-teacher-l056-l060
+    paths:
+      - "src/features/los/**"
+      - "tests/los-teacher-l056-l060.test.ts"
+      - "tests/los-teacher-engine.test.ts"
+      - "e2e/los-teacher-session10.spec.ts"
+      - "e2e/los-session10.spec.ts"
+      - "e2e/los-full-book.spec.ts"
+      - ".github/workflows/los-session10-qa.yml"
+  pull_request:
+    branches:
+      - main
+      - feat/los1-teacher-c03-l012-20261113
+    paths:
+      - "src/features/los/**"
+      - "tests/los-teacher-l056-l060.test.ts"
+      - "tests/los-teacher-engine.test.ts"
+      - "e2e/los-teacher-session10.spec.ts"
+      - "e2e/los-full-book.spec.ts"
+      - ".github/workflows/los-session10-qa.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: los-s10-qa-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  session10:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    env:
+      E2E_BASE_URL: http://127.0.0.1:5173
+      REQUIRE_GEMINI: "false"
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - name: Dependencies
+        run: bun install --frozen-lockfile
+      - name: Build and TypeScript
+        run: bun run build
+      - name: LOS lesson, EX-FINAL, backups and mastery unit tests
+        run: |
+          node --experimental-strip-types --test \
+            tests/los-teacher-l056-l060.test.ts \
+            tests/los-teacher-engine.test.ts \
+            tests/los-final-exam-l059-l060.test.ts \
+            tests/los-review-ii-l056-l058.test.ts \
+            tests/los-exam-attempt-archive.test.ts \
+            tests/los-teacher-backup.test.ts \
+            tests/los-teacher-content-validation.test.ts
+      - name: Install Playwright and browser dependencies
+        run: |
+          bun run e2e:install
+          bunx playwright install --with-deps chromium webkit
+      - name: Start isolated localhost application
+        shell: bash
+        run: |
+          nohup bun run dev -- --host 127.0.0.1 --port 5173 --strictPort > /tmp/los-s10-dev.log 2>&1 &
+          for attempt in $(seq 1 45); do
+            if curl --silent --show-error --fail --max-time 3 http://127.0.0.1:5173/ >/dev/null 2>&1; then exit 0; fi
+            sleep 2
+          done
+          cat /tmp/los-s10-dev.log
+          exit 1
+      - name: Teacher session 10 desktop and iPhone browser journeys
+        run: bunx playwright test e2e/los-teacher-session10.spec.ts e2e/los-session10.spec.ts --project=desktop-chromium --project=iphone-webkit
+      - name: Existing 60-lesson navigation regression
+        run: bunx playwright test e2e/los-full-book.spec.ts --grep "every one of the 60 guided lessons" --project=desktop-chromium --project=iphone-webkit
+      - name: Upload failed-browser evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: los-session10-qa-${{ github.run_id }}
+          path: |
+            test-results/
+            /tmp/los-s10-dev.log
+          if-no-files-found: ignore
+          retention-days: 14

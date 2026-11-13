@@ -7,7 +7,7 @@ const name = (value: string) => /^[A-Za-z0-9_.-]{1,80}$/.test(value);
 const meaningful = (value: string | undefined) => Boolean(value?.trim());
 const textbookSections = new Set([
   "overview","contents","chapter","text","understand","vocabulary","grammar",
-  "text-b","practice","apply","culture","test","appendix","dictionary","review","midterm",
+  "text-b","practice","apply","culture","test","appendix","dictionary","review","midterm","review-ii","final","summary",
 ]);
 
 function checkQuestion(question: TeacherQuestion, location: string, issues: TeacherContentIssue[]) {
@@ -128,6 +128,12 @@ export function validateTeacherLesson(lesson: TeacherLesson): TeacherContentIssu
   if (lesson.examAssessment && (lesson.examAssessment.id !== "EX-MID" ||
       lesson.id !== "L030" || lesson.chapterId !== "91" || lesson.chapterAssessment)) {
     issues.push({ location: "examAssessment", problem: "EX-MID on sallittu vain L030:n oikeassa koeluonnoksessa." });
+  }
+  if (lesson.externalCheck && (
+      (lesson.externalCheck === "review-ii" && (lesson.chapterId !== "92" || !["L056","L057","L058"].includes(lesson.id))) ||
+      (["final","summary"].includes(lesson.externalCheck) && lesson.chapterId !== "93") ||
+      !["review-ii","final","summary"].includes(lesson.externalCheck))) {
+    issues.push({location:"externalCheck",problem:"Ulkoinen näyttö ei vastaa olemassa olevaa arviointipaikka."});
   }
   if (lesson.mediaGate && (!/^M-[A-Z0-9-]+$/.test(lesson.mediaGate.sourceId) ||
       typeof lesson.mediaGate.approved !== "boolean" || !meaningful(lesson.mediaGate.reason))) {

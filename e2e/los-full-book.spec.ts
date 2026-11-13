@@ -1,3 +1,4 @@
+import {getLosTeacherLesson} from "../src/features/los/teacher/lessonRegistry.ts";
 import {expect,test} from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 import {expectNoHorizontalOverflow} from "./helpers";
@@ -122,7 +123,7 @@ test("every one of the 60 guided lessons opens from its actual chapter picker on
    expect(seen.has(title)).toBe(false);
    seen.add(title);
    await button.click();
-   if(Number(title.slice(1))<=55){
+   if(getLosTeacherLesson(title)){
     await expect(page).toHaveURL(new RegExp("/los-lessons/"+title+"$"));
     await expect(page.locator(".los-teacher-paper h2")).toBeVisible();
     await expect(page.locator(".los-teacher-sidebar h1")).toBeVisible();
@@ -143,7 +144,7 @@ test("every one of the 60 guided lessons opens from its actual chapter picker on
  for(let n=1;n<=60;n++)expect(seen.has("L"+String(n).padStart(3,"0"))).toBe(true);
  await expect(runner.locator(".los-lesson-progress")).toContainText("0/60 suoritettu");
  await page.reload({waitUntil:"domcontentloaded"});
- await expect(page.locator("#los-lesson-runner .los-lesson-detail .los-overline")).toContainText("L060");
+ await expect(page.locator("#los-lesson-runner .los-lesson-picker button").last()).toContainText("L060");
  await expectNoHorizontalOverflow(page);
 });
 
