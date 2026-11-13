@@ -47,14 +47,14 @@ const choice = (
   options:NonNullable<TeacherQuestion["options"]>,
   success:string,hint:string,reteach:string,evidenceRole:TeacherQuestion["evidenceRole"]="practice",
 ):TeacherQuestion => ({type:"choice",prompt,skillId,correctOption,options,
-  success,hint,reteach,evidenceRole,genericWrong:"Tarkista, kuka puhuu, mitä kysytään ja mikä verbimuoto kuuluu persoonalle."});
+  success,hint,reteach,evidenceRole,genericWrong:reteach});
 const typed = (
   prompt:string,skillId:string,accepted:readonly string[],
   success:string,hint:string,reteach:string,
   evidenceRole:TeacherQuestion["evidenceRole"]="practice",
   wrongAnswers?:TeacherQuestion["wrongAnswers"],
 ):TeacherQuestion => ({type:"text",prompt,skillId,accepted,success,hint,reteach,
-  evidenceRole,...(wrongAnswers?{wrongAnswers}:{}),genericWrong:"Vertaa lauseen tekijää ja verbimuotoa. Tarkista myös sanajärjestys, paikannimi ja välilyönnit."});
+  evidenceRole,...(wrongAnswers?{wrongAnswers}:{}),genericWrong:reteach});
 const c10Link=(section:string,label:string,instruction:string)=>({chapterId:"10",section,label,instruction});
 
 export const LOS1_L051_TEACHER:TeacherLesson = {
