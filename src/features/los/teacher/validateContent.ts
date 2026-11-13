@@ -7,7 +7,7 @@ const name = (value: string) => /^[A-Za-z0-9_.-]{1,80}$/.test(value);
 const meaningful = (value: string | undefined) => Boolean(value?.trim());
 const textbookSections = new Set([
   "overview","contents","chapter","text","understand","vocabulary","grammar",
-  "text-b","practice","apply","culture","test","appendix",
+  "text-b","practice","apply","culture","test","appendix","dictionary",
 ]);
 
 function checkQuestion(question: TeacherQuestion, location: string, issues: TeacherContentIssue[]) {
