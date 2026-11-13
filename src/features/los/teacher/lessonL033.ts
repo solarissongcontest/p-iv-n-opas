@@ -40,11 +40,11 @@ export const LOS1_L033_TEACHER: TeacherLesson = {
     },
     {
       "id": "recall",
-      "phase": "Harjoittelu",
+      "phase": "Muistelu",
       "kind": "question",
-      "title": "Muunna luku",
+      "title": "Muistatko luvun 20?",
       "paragraphs": [
-        "Sulje malli ja vastaa muistista. Vihjeet ovat aina käytettävissä."
+        "Palauta edellisellä tunnilla opittu tasakymmen muistista. Luku 20 on yksi sana, eikä siinä käytetä und-osaa."
       ],
       "question": {
         "type": "text",
@@ -54,10 +54,10 @@ export const LOS1_L033_TEACHER: TeacherLesson = {
         "accepted": [
           "zwanzig"
         ],
-        "success": "Oikein. Kirjoitusasu tai lukuarvo vastaa tehtävää.",
-        "hint": "Hajota luku yksiköihin, und-sanaan ja kymmeniin.",
-        "reteach": "Muista järjestys: yksiköt + und + kymmenet. Luvussa 21 käytetään ein, ei eins. 30 kirjoitetaan dreißig.",
-        "genericWrong": "Tarkista osien järjestys ja kaikki kirjaimet. ß ei muutu automaattisesti ss:ksi.",
+        "success": "Oikein. 20 kirjoitetaan saksaksi zwanzig.",
+        "hint": "Tämä tasakymmen alkaa zw- ja päättyy -zig.",
+        "reteach": "20 = zwanzig. Tasakymmenessä ei ole und-sanaa eikä erillistä yksikköosaa.",
+        "genericWrong": "Kirjoita tasakymmenen oma nimi zwanzig. Luku 20 ei muodostu yksiköistä ja und-sanasta.",
         "wrongAnswers": {}
       }
     },
@@ -252,11 +252,11 @@ export const LOS1_L033_TEACHER: TeacherLesson = {
     },
     {
       "id": "write21",
-      "phase": "Harjoittelu",
+      "phase": "Itsenäinen harjoittelu",
       "kind": "question",
-      "title": "Muunna luku",
+      "title": "Muodosta einundzwanzig",
       "paragraphs": [
-        "Sulje malli ja vastaa muistista. Vihjeet ovat aina käytettävissä."
+        "Kirjoita 21 yhtenä sanana. Muista yhdistelmämuoto ein, vaikka itsenäinen luku yksi on eins."
       ],
       "question": {
         "type": "text",
@@ -266,10 +266,10 @@ export const LOS1_L033_TEACHER: TeacherLesson = {
         "accepted": [
           "einundzwanzig"
         ],
-        "success": "Oikein. Kirjoitusasu tai lukuarvo vastaa tehtävää.",
-        "hint": "Hajota luku yksiköihin, und-sanaan ja kymmeniin.",
-        "reteach": "Muista järjestys: yksiköt + und + kymmenet. Luvussa 21 käytetään ein, ei eins. 30 kirjoitetaan dreißig.",
-        "genericWrong": "Tarkista osien järjestys ja kaikki kirjaimet. ß ei muutu automaattisesti ss:ksi.",
+        "success": "Oikein. 21 = einundzwanzig: ein + und + zwanzig.",
+        "hint": "Ykkösen yhdistelmämuoto ein tulee ensin, sitten und ja lopuksi zwanzig.",
+        "reteach": "21 = einundzwanzig. Käytä ein, älä eins, ja kirjoita kaikki osat yhteen.",
+        "genericWrong": "Tarkista järjestys ein + und + zwanzig ja kirjoita vastaus yhtenä sanana.",
         "wrongAnswers": {
           "einsundzwanzig": "Luvun 1 yhdyssanamuoto on ein, ei eins.",
           "zwanzigeins": "Yksiköt tulevat ensin, kymmenet lopuksi."
@@ -278,11 +278,11 @@ export const LOS1_L033_TEACHER: TeacherLesson = {
     },
     {
       "id": "write32",
-      "phase": "Harjoittelu",
+      "phase": "Itsenäinen harjoittelu",
       "kind": "question",
-      "title": "Muunna luku",
+      "title": "Muodosta zweiunddreißig",
       "paragraphs": [
-        "Sulje malli ja vastaa muistista. Vihjeet ovat aina käytettävissä."
+        "Kokoa ensin zwei + und ja lisää kolmeakymmentä tarkoittava dreißig. Muista ß."
       ],
       "question": {
         "type": "text",
@@ -292,10 +292,10 @@ export const LOS1_L033_TEACHER: TeacherLesson = {
         "accepted": [
           "zweiunddreißig"
         ],
-        "success": "Oikein. Kirjoitusasu tai lukuarvo vastaa tehtävää.",
-        "hint": "Hajota luku yksiköihin, und-sanaan ja kymmeniin.",
-        "reteach": "Muista järjestys: yksiköt + und + kymmenet. Luvussa 21 käytetään ein, ei eins. 30 kirjoitetaan dreißig.",
-        "genericWrong": "Tarkista osien järjestys ja kaikki kirjaimet. ß ei muutu automaattisesti ss:ksi.",
+        "success": "Oikein. 32 = zweiunddreißig: zwei + und + dreißig.",
+        "hint": "Aloita kaksi eli zwei, lisää und ja lopuksi dreißig.",
+        "reteach": "32 = zweiunddreißig. Saksaksi yksiköt tulevat ennen kymmeniä; 30 on dreißig, jossa on ß.",
+        "genericWrong": "Kirjoita zwei + und + dreißig yhteen. Tarkista myös ß-kirjain sanassa dreißig.",
         "wrongAnswers": {
           "zweiunddreissig": "Sana dreißig sisältää ß-kirjaimen. Älä korvaa sitä huomaamatta ss:llä.",
           "zweiunddreizig": "30 on dreißig, ei dreizig.",
@@ -329,11 +329,11 @@ export const LOS1_L033_TEACHER: TeacherLesson = {
     },
     {
       "id": "read47",
-      "phase": "Harjoittelu",
+      "phase": "Soveltaminen",
       "kind": "question",
-      "title": "Muunna luku",
+      "title": "Ymmärrä siebenundvierzig",
       "paragraphs": [
-        "Sulje malli ja vastaa muistista. Vihjeet ovat aina käytettävissä."
+        "Lue sana osina: sieben tarkoittaa seitsemää, vierzig neljääkymmentä. Kirjoita vastaukseksi numero, ei saksankielistä sanaa."
       ],
       "question": {
         "type": "text",
@@ -343,10 +343,10 @@ export const LOS1_L033_TEACHER: TeacherLesson = {
         "accepted": [
           "47"
         ],
-        "success": "Oikein. Kirjoitusasu tai lukuarvo vastaa tehtävää.",
-        "hint": "Hajota luku yksiköihin, und-sanaan ja kymmeniin.",
-        "reteach": "Muista järjestys: yksiköt + und + kymmenet. Luvussa 21 käytetään ein, ei eins. 30 kirjoitetaan dreißig.",
-        "genericWrong": "Tarkista osien järjestys ja kaikki kirjaimet. ß ei muutu automaattisesti ss:ksi.",
+        "success": "Oikein. Siebenundvierzig tarkoittaa lukua 47: seitsemän ja neljäkymmentä.",
+        "hint": "Sieben on 7 ja vierzig on 40. Saksassa yksiköt sanotaan ensin.",
+        "reteach": "Siebenundvierzig = sieben (7) + und + vierzig (40) = 47, ei 74.",
+        "genericWrong": "Tehtävä pyytää numeromerkintää: siebenundvierzig tarkoittaa 47. Älä vaihda 7:n ja 40:n paikkaa.",
         "wrongAnswers": {
           "74": "74 on vierundsiebzig. Siebenundvierzig = 47."
         }
@@ -354,11 +354,11 @@ export const LOS1_L033_TEACHER: TeacherLesson = {
     },
     {
       "id": "exit",
-      "phase": "Harjoittelu",
+      "phase": "Lopputarkistus",
       "kind": "question",
-      "title": "Lopputarkistus",
+      "title": "Lopputarkistus: dreißig",
       "paragraphs": [
-        "Sulje malli ja vastaa muistista. Vihjeet ovat aina käytettävissä."
+        "Kirjoita 30 muistista yhtenä saksankielisenä sanana. Tämä on tasakymmen, joten siinä ei ole und-osaa."
       ],
       "question": {
         "type": "text",
@@ -368,10 +368,10 @@ export const LOS1_L033_TEACHER: TeacherLesson = {
         "accepted": [
           "dreißig"
         ],
-        "success": "Oikein. Kirjoitusasu tai lukuarvo vastaa tehtävää.",
-        "hint": "Hajota luku yksiköihin, und-sanaan ja kymmeniin.",
-        "reteach": "Muista järjestys: yksiköt + und + kymmenet. Luvussa 21 käytetään ein, ei eins. 30 kirjoitetaan dreißig.",
-        "genericWrong": "Tarkista osien järjestys ja kaikki kirjaimet. ß ei muutu automaattisesti ss:ksi.",
+        "success": "Oikein. 30 = dreißig. Se on tasakymmen, jossa on ß.",
+        "hint": "Kolmekymmentä alkaa drei- ja päättyy -ßig.",
+        "reteach": "30 on dreißig. Siinä on ß, ei z. Tasakymmenessä ei käytetä und-sanaa.",
+        "genericWrong": "Kirjoita 30:n oma saksankielinen nimi dreißig: käytä ß-kirjainta, älä rakenna yksikkö–und-yhdistelmää.",
         "wrongAnswers": {
           "dreizig": "30 on dreißig, ß ei z.",
           "dreissig": "Tämä tehtävä vaatii kirjoitusasun dreißig. ß ei muutu huomaamatta ss:ksi."
