@@ -1409,7 +1409,7 @@ test("C06 original Text A 12 turns and reused C01 8 turns have separate real che
  await enterLocalBook(page);
  await page.goto("/los-lessons/L034",{waitUntil:"domcontentloaded"});
  const outline=page.locator(".los-teacher-outline nav button");
- await outline.filter({hasText:"Tarkista neljä aidosti tallennettavaa lähdevastausta"}).click();
+ await outline.filter({hasText:"Tarkista kolme aidosti tallennettavaa lähdevastausta"}).click();
  await expect(page.locator(".los-teacher-paper a[href*='/06/understand']")).toBeVisible();
  await page.goto("/los#/1/06/text",{waitUntil:"domcontentloaded"});
  await expect(page.locator(".los-reading-page .los-c01-turn")).toHaveCount(12);
@@ -1417,7 +1417,7 @@ test("C06 original Text A 12 turns and reused C01 8 turns have separate real che
  await expect(page.locator(".los-c06-review .los-c01-turn")).toHaveCount(8);
  await page.goto("/los?lessonReturn=L034#/1/06/understand",{waitUntil:"domcontentloaded"});
  await expect(page.getByRole("heading",{name:"Ymmärrä alkuperäisteksti"})).toBeVisible();
- for(const [id,value] of [["C06-ZPE-Q01","a"],["C06-ZPE-Q02","b"]] as const){
+ for(const [id,value] of [["C06-ZPE-Q04","a"]] as const){
   const field=page.locator('fieldset.los-c01-question').filter({has:page.locator('input[name="'+id+'"]')});
   await field.locator('input[value="'+value+'"]').check();
   await field.getByRole("button",{name:"Tarkista vastaus"}).click();
@@ -1431,8 +1431,8 @@ test("C06 original Text A 12 turns and reused C01 8 turns have separate real che
   await expect(field.getByRole("status")).toContainText("Oikein.");
  }
  await page.getByRole("link",{name:"Palaa oppitunnille L034"}).click();
- await outline.filter({hasText:"Tarkista neljä aidosti tallennettavaa lähdevastausta"}).click();
- for(const id of ["C06-ZPE-Q01","C06-ZPE-Q02","C06-SOURCE-Q01","C06-SOURCE-Q02"])
+ await outline.filter({hasText:"Tarkista kolme aidosti tallennettavaa lähdevastausta"}).click();
+ for(const id of ["C06-ZPE-Q04","C06-SOURCE-Q01","C06-SOURCE-Q02"])
   await expect(page.locator(".los-teacher-paper")).toContainText(id+": Vastaus tallennettu ja tarvittaessa tarkistettu");
  await expectNoHorizontalOverflow(page);
 });
@@ -1476,5 +1476,28 @@ test("C06 L035 real 20/20 exam archives correctly and retains two fictional age 
  await expect(page.locator("#los-application-06")).toHaveValue(dialogue);
  await page.goto("/los#/1/06/test",{waitUntil:"domcontentloaded"});
  await expect(page.getByRole("button",{name:"Palauta testi · 0/20"})).toBeDisabled();
+ await expectNoHorizontalOverflow(page);
+});
+
+test("C06 L032 checks all three new Text A questions without claiming audio comprehension",async({page})=>{
+ test.setTimeout(120_000);
+ await enterLocalBook(page);
+ await page.goto("/los-lessons/L032",{waitUntil:"domcontentloaded"});
+ const outline=page.locator(".los-teacher-outline nav button");
+ await outline.filter({hasText:"Lue C06:n koko oma Text A ja tarkista kolme kysymystä"}).click();
+ await expect(page.locator(".los-teacher-paper a[href*='/06/text']")).toBeVisible();
+ await expect(page.locator(".los-teacher-paper a[href*='/06/understand']")).toBeVisible();
+ await page.goto("/los?lessonReturn=L032#/1/06/understand",{waitUntil:"domcontentloaded"});
+ const checks=[["C06-ZPE-Q01","a"],["C06-ZPE-Q02","b"],["C06-ZPE-Q03","c"]] as const;
+ for(const [id,value] of checks){
+  const field=page.locator("fieldset.los-c01-question").filter({has:page.locator('input[name="'+id+'"]')});
+  await field.locator('input[value="'+value+'"]').check();
+  await field.getByRole("button",{name:"Tarkista vastaus"}).click();
+  await expect(field.getByRole("status")).toContainText("Oikein.");
+ }
+ await page.getByRole("link",{name:"Palaa oppitunnille L032"}).click();
+ await outline.filter({hasText:"Lue C06:n koko oma Text A ja tarkista kolme kysymystä"}).click();
+ for(const [id] of checks)
+  await expect(page.locator(".los-teacher-paper")).toContainText(id+": Vastaus tallennettu ja tarvittaessa tarkistettu");
  await expectNoHorizontalOverflow(page);
 });
