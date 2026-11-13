@@ -54,6 +54,15 @@ def choose(path: str, ours: str, theirs: str) -> str:
                     '    teacherMidtermAssessmentStatus(lesson, chapterAssessment, practiceAnswers).ready &&\n'
                     '    !session.paused && lesson.scenes.every(scene => session.visitedIds.includes(scene.id)) &&\n'
                     '    lesson.scenes.every(scene => !scene.numberBuilder || teacherBuiltNumberCount(session, scene.id) >= 4) &&\n')
+    if path == "src/features/los/teacher/validateContent.ts" and "/^C" in ours and "/^C" in theirs and "(?:" in ours and "(?:" in theirs:
+        lhs = re.search(r"\\(\\?:([A-Z|]+)\\)", ours)
+        rhs = re.search(r"\\(\\?:([A-Z|]+)\\)", theirs)
+        if lhs is None or rhs is None:
+            raise ValueError("Malformed source-check selector alternatives")
+        options = list(dict.fromkeys(lhs.group(1).split("|") + rhs.group(1).split("|")))
+        return ours.replace(lhs.group(1), "|".join(options), 1)
+    if path == "src/features/los/teacher/lessonL004.ts" and "LOS1_C08_TEACHER_LESSONS.find" in theirs and "LOS1_L" in ours:
+        return ours
     if path == "src/features/los/teacher/lessonL004.ts":
         if all(re.match(r"^(?:import .*lessonL\d{3}\.ts.*|\s*)$", line) for line in (ours+theirs).splitlines()):
             return ours
@@ -79,6 +88,16 @@ def normalize_registry() -> None:
             if boundary not in body:
                 raise ValueError("Cannot locate registry final return")
             body = body.replace(boundary, lookup+"\n"+boundary, 1)
+    if Path("src/features/los/teacher/lessonC08.ts").exists():
+        imp = 'import { LOS1_C08_TEACHER_LESSONS } from "./lessonC08.ts";'
+        if imp not in body:
+            body = imp + "\n" + body
+        lookup = '  const c08 = LOS1_C08_TEACHER_LESSONS.find(lesson => lesson.id === id);\n  if (c08) return c08;'
+        if lookup not in body:
+            boundary = "  return undefined;\n}"
+            if boundary not in body:
+                raise ValueError("Cannot locate C08 registry fallback")
+            body = body.replace(boundary, lookup + "\n" + boundary, 1)
     path.write_text(body)
 
 unmerged = subprocess.check_output(["git","diff","--name-only","--diff-filter=U"],text=True).splitlines()
