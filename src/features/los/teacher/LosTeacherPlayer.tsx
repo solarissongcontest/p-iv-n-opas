@@ -149,7 +149,7 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
     });
   };
   const navigate = (target: string) => {
-    if (!lesson || !scene) return;
+    if (!lesson || !scene || session?.paused || completed) return;
     persist(old => {
       const now = stamp();
       const marked = moveTeacherScene(old, lesson, scene.id, now);
@@ -220,6 +220,7 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
                 {lesson.scenes.map((item, i) => <button key={item.id} type="button"
                   aria-current={scene.id === item.id ? "step" : undefined}
                   className={scene.id === item.id ? "is-active" : ""}
+                  disabled={session.paused || completed}
                   onClick={() => navigate(item.id)}>
                   <span>{session.visitedIds.includes(item.id) ? <Check size={15}/> : String(i + 1)}</span>
                   <span>{item.title}</span>
