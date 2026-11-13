@@ -33,7 +33,7 @@ export const LOS1_L017_TEACHER: TeacherLesson = {
       "kind": "introduction",
       "title": "Sama kysymys, kaksi puhuttelutapaa",
       "paragraphs": [
-        "L002:ssa opit Wie heißt du? ja L014:ssa Woher kommst du? Nyt kohtaat tilanteita, joissa toinen ei ole tuttu ystävä ja kysymys muotoillaan toisin.",
+        "C02:ssa opit Wie heißt du? ja L014:ssa Woher kommst du? Nyt kohtaat tilanteita, joissa toinen ei ole tuttu ystävä ja kysymys muotoillaan toisin.",
         "Tällä tunnilla tutustut sekä du- että Sie-puhutteluun. Saksassa valinta riippuu suhteesta, ympäristöstä ja keskinäisestä sopimuksesta, ei pelkästään toisen iästä.",
         "Käsittelemme ensin tilanteet, sitten kirjainten ja verbimuotojen eron. Seuraavilla C04-tunneilla luemme aidon muodollisen keskustelun ja harjoittelemme kysymysten muodostamista."
       ]
