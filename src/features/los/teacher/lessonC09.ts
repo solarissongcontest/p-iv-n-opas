@@ -13,19 +13,19 @@ const S=(id:string,phase:string,kind:TeacherScene["kind"],title:string,
   ({id,phase,kind,title,paragraphs,...extra});
 type Option=[id:string,label:string,wrong?:string];
 const Q=(id:string,phase:string,title:string,paragraphs:string[],prompt:string,
-  options:Option[],correctOption:string,evidenceRole:TeacherQuestion["evidenceRole"],
+  options:Option[],correctOption:string,evidenceRole:NonNullable<TeacherQuestion["evidenceRole"]>,
   success:string,hint:string,reteach:string):TeacherScene =>
   S(id,phase,"question",title,paragraphs,{
     question:{prompt,type:"choice",skillId:"L1-TIME-01",evidenceRole,
-      options:options.map(([id,label,wrongFeedback])=>({id,label,wrongFeedback})),
+      options:options.map(([id,label,wrongFeedback])=>({id,label,...(wrongFeedback ? {wrongFeedback} : {})})),
       correctOption,success,hint,reteach,genericWrong:reteach},
   });
 const T=(id:string,phase:string,title:string,paragraphs:string[],prompt:string,
-  accepted:string[],evidenceRole:TeacherQuestion["evidenceRole"],
+  accepted:string[],evidenceRole:NonNullable<TeacherQuestion["evidenceRole"]>,
   success:string,hint:string,reteach:string,wrongAnswers?:Record<string,string>):TeacherScene=>
   S(id,phase,"question",title,paragraphs,{
     question:{prompt,type:"text",skillId:"L1-TIME-01",evidenceRole,
-      accepted,success,hint,reteach,genericWrong:reteach,wrongAnswers},
+      accepted,success,hint,reteach,genericWrong:reteach,...(wrongAnswers ? {wrongAnswers} : {})},
   });
 const B=(id:string,title:string,paragraphs:string[],sections:string[]):TeacherScene =>
   S(id,"Oppikirjan tehtävät","book",title,paragraphs,{
@@ -55,7 +55,7 @@ const lesson=(id:string,title:string,objective:string,scenes:TeacherScene[],
   requiredActivityIds:string[]=[],chapterAssessment?:TeacherLesson["chapterAssessment"]):TeacherLesson=>({
     id,bookId:1,chapterId:"09",version:"2.0.0-preview.1",title,objective,estimatedMinutes:30,
     scenes,requiredQuestionIds:scenes.filter(s=>s.question).map(s=>s.id),
-    requiredPracticeIds,requiredCheckedIds,requiredActivityIds,chapterAssessment,
+    requiredPracticeIds,requiredCheckedIds,requiredActivityIds,...(chapterAssessment ? {chapterAssessment} : {}),
   });
 
 export const LOS1_L046_TEACHER=lesson("L046","Viikonpäivät",
