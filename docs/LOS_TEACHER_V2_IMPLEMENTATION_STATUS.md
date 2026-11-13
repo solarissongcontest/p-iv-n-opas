@@ -6,7 +6,7 @@
 
 The LOS Teacher Experience 2.0 masterplan (2026-11-12), LOS! series masterplan, LOS! 1 book-specific masterplan and approved visual V3.3 plan govern this implementation. There are no AI models, generative runtime APIs, machine learning, synthetic speech services or automatic pronunciation scoring.
 
-## Implemented teaching pilot: L001–L011
+## Implemented teaching pilot: L001–L012
 
 - **L001 · Miten LOS! 1:llä opiskellaan? (10 scenes).** Zero-beginner introduction to the reader, words, optional original audio, vocabulary and dictionary. Learner writes a concrete personal goal in a persistent, validated reflection exercise. Manual reader/audio confirmations are not proofs of listening proficiency.
 - **L002 · Aloita saksan ääntämisestä (11 scenes).** Two diagnostic pre-questions, explanations of five spelling/pronunciation patterns (w, z, ei, ie, sch), progressive teaching board, targeted corrections, grammar references and optional human-voice textbook audio. No automatic speech scoring.
@@ -19,8 +19,9 @@ The LOS Teacher Experience 2.0 masterplan (2026-11-12), LOS! series masterplan, 
 - **L009 · Heißen ja sein minä–sinä (15 scenes; C02 3/5).** Zero-beginner explicit teaching of exactly ich heiße/du heißt and ich bin/du bist, specific correction of *du heißst*, progressive board, independent text and exit check, C02 grammar and four genuine workbook fill tasks C02-EX-03–06. Learner must enter all four **real C02 book answers**, read explanations and confirm own practice. Workbook input presence is not correctness or speech mastery.
 - **L010 · Kuuntele ja esittele henkilö (15 scenes; C02 4/5).** Whole human-recorded, four-turn original Commons M-COM-02 conversation is fully present in C02 Text B; audio optional with complete in-app transcript. Requires two **answered and checked** original Text B tasks C02-MCOM02-Q01/Q02, source comparison and meaning recall; teaches Thomas/Takashi/Peter, Berlin/Kyoto and Ich heiße / Ich bin / Das ist. Optional listening never becomes an invented listening-comprehension score.
 - **L011 · Harjoittele ja testaa C02 (15 scenes; C02 5/5).** Structured review of personal introductions, name questions, heiße/heißt and bin/bist, grounded in C02 Text A and B. Requires the real C02 applicationDraft with fictional Mia/Max names, actual submitted C02 chapter test (testSubmittedAt) and post-test selfAssessment, plus independent writing and end check. Unsubmitted drafts cannot finish; saved prose is not automatically scored for language accuracy.
+- **L012 · Maat ja paikat (14 scenes; C03 1/5).** Teaches Deutschland, Finnland, Österreich, die Schweiz and distinguishes Bern/other cities from countries and Lisa Müller’s German origin from Swiss residence. Two prechecks, guided board, source-grounded application and first-try independent recall; requires genuine study confirmations on C03 vocabulary, DACH culture and *all eight* M-WB-07 Text A turns. No audio is claimed for Lisa; C03’s original M-WB-07 replacement source avoids personal-number issues in earlier unapproved Berna material.
 
-All eleven use the same deep-linkable LOS Lesson Player, accessible from the 60-lesson study path and relevant book resume action. The reader opens separately with a verified return link; the lesson's local position remains.
+All twelve use the same deep-linkable LOS Lesson Player, accessible from the 60-lesson study path and relevant book resume action. The reader opens separately with a verified return link; the lesson's local position remains.
 
 ## Engine, data and safety
 
@@ -46,7 +47,7 @@ CI successes on earlier commits do not verify the current head. Confirm mobile W
 - Human-recorded Finnish teaching voice, pronunciation clips and synchronized animation.
 - Full skill-level learning evidence and cross-lesson spaced review scheduling.
 - Real phone hardware accessibility checks.
-- Conversion of the remaining **49 LOS! 1 lessons** and LOS! 2–8.
+- Conversion of the remaining **48 LOS! 1 lessons** and LOS! 2–8.
 - Compatibility with V3.4 reader PR #209.
 - Production deployment and final publication approval.
 
