@@ -6,6 +6,12 @@ import { LOS1_MIDTERM_DRAFT_CHAPTER, LOS1_MIDTERM_QUESTIONS,
 import {losArchiveExamAttempt,losArchivedExamHistory,losArchiveMidtermPersonalWork,losArchivedMidtermPersonalWork} from "./content/los1ExamArchive";
 import "./los-exams.css";
 
+const archivedRatingLabel: Readonly<Record<string,string>> = {
+  well:"Tein keskustelun melko itsenäisesti.",
+  some:"Tarvitsin mallia tai korjauksia.",
+  again:"Harjoittelen keskustelua vielä.",
+};
+
 const RUBRIC = [
   {id:"greeting",label:"Aloitan tervehdyksellä, joka sopii tilanteeseen."},
   {id:"name",label:"Osaan kysyä nimen ja kertoa oman kuvitteellisen nimeni."},
@@ -140,7 +146,7 @@ export function LosMidtermExam() {
           return personal && <details><summary>Oma keskusteluteksti ja itsearviointi</summary>
             <p className="los-exam-own-text">{personal.applicationDraft || "(Ei kirjoitettua keskustelua; mahdollisesti suullinen.)"}</p>
             <p className="los-exam-own-text">{personal.selfAssessment || "(Ei kirjoitettua itsearviointia.)"}</p>
-            <p>Oma arvio: {personal.dialogueRating || "Ei valintaa"}</p>
+            <p>Oma arvio: {archivedRatingLabel[personal.dialogueRating] ?? "Ei valintaa"}</p>
           </details>;
         })()}
       </li>)}</ol>
