@@ -58,15 +58,15 @@ export const LOS1_L025_TEACHER: TeacherLesson = {
           {
             "id": "a",
             "label": "Mitä kuuluu?"
-          },
+          , "lang": "fi"},
           {
             "id": "b",
-            "label": "Mikä sinun nimesi on?",
+            "label": "Mikä sinun nimesi on?", "lang": "fi",
             "wrongFeedback": "Tämä on Wie heißt du?, ei Wie geht's?."
           },
           {
             "id": "c",
-            "label": "Mistä olet kotoisin?",
+            "label": "Mistä olet kotoisin?", "lang": "fi",
             "wrongFeedback": "Tämä olisi Woher kommst du?."
           }
         ],
@@ -291,18 +291,18 @@ export const LOS1_L025_TEACHER: TeacherLesson = {
         "options": [
           {
             "id": "a",
-            "label": "Hän on väsynyt.",
+            "label": "Hän on väsynyt.", "lang": "fi",
             "wrongFeedback": "Teksti ei sisällä Gretan omaa lausetta Ich bin müde."
           },
           {
             "id": "b",
-            "label": "Hän voi erittäin hyvin.",
+            "label": "Hän voi erittäin hyvin.", "lang": "fi",
             "wrongFeedback": "Teksti ei sisällä Gretan omaa vastausta Sehr gut."
           },
           {
             "id": "c",
             "label": "Teksti ei kerro Gretan vointia suoraan."
-          }
+          , "lang": "fi"}
         ],
         "correctOption": "c",
         "success": "Oikein. Greta kysyy Franzin kuulumisia mutta ei itse vastaa samanlaiseen kysymykseen.",
