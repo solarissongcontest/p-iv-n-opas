@@ -159,7 +159,7 @@ export function LosTeacherL004Player({onExit}:{onExit:()=>void}){
           </button>}
       </fieldset>}
       <div className="los-teacher-help">
-        <button type="button" onClick={()=>setHelpMode(m=>m===null?"simpler":null)}
+        <button type="button" onClick={()=>{if(helpMode===null){setHelpMode("simpler");if(question)apply(current=>teacherRequestHelp(current,lesson));}else setHelpMode(null);}}
           aria-expanded={helpMode!==null}>
           <HelpCircle size={17}/> En ymmärrä · pyydä lisäselitys
         </button>
@@ -183,7 +183,7 @@ export function LosTeacherL004Player({onExit}:{onExit:()=>void}){
       </aside>}
       {scene.phase==="summary"&&<div className="los-teacher-summary">
         <h3>Oppimisen tilanne</h3>
-        <p><strong>{independent}/2</strong> itsenäisen ensiyrityksen valintatehtävää oikein (enintään kaksi uutta tilannetta).
+        <p><strong>{independent}/3</strong> itsenäisen ensiyrityksen valintatehtävää oikein (kolme erillistä harjoitustilannetta).
           Tämä ei tarkoita automaattisesti osoitettua tai vahvistettua kielitaitoa.</p>
         <p>{allCovered?"Olet käynyt kaikki opetustilanteet ja käsitellyt tehtävät.":"Osa opetustilanteista tai kysymyksistä on vielä käsittelemättä. Voit palata sisällysluettelosta."}</p>
         {isRecorded?<p role="status"><CheckCircle2 size={18}/> Opetussisältö käsitelty ja merkitty paikallisesti. Osaaminen arvioidaan erikseen.</p>:
