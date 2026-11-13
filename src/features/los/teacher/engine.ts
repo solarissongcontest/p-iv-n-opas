@@ -192,7 +192,9 @@ export function toggleTeacherPause(session: TeacherSession, now: string): Teache
 }
 export function submitTeacherAnswer(session: TeacherSession, lesson: TeacherLesson, sceneId: string, answer: string, now: string): TeacherSession {
   const scene = lesson.scenes.find(s => s.id === sceneId);
-  if (session.completedAt || session.paused || !scene?.question || session.attempts.length >= 120) return session;
+  if (session.completedAt || session.paused || !scene?.question || session.attempts.length >= 120 ||
+      session.attempts.filter(item => item.sceneId === sceneId).length >= 3 ||
+      session.revealedIds.includes(sceneId)) return session;
   const q = scene.question;
   const input = answer.trim();
   if (!input || input.length > 500 ||

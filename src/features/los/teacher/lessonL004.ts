@@ -1,3 +1,7 @@
+import { LOS1_L016_TEACHER } from "./lessonL016.ts";
+import { LOS1_L015_TEACHER } from "./lessonL015.ts";
+import { LOS1_L014_TEACHER } from "./lessonL014.ts";
+import { LOS1_L013_TEACHER } from "./lessonL013.ts";
 import { LOS1_L012_TEACHER } from "./lessonL012.ts";
 import { LOS1_L011_TEACHER } from "./lessonL011.ts";
 import { LOS1_L010_TEACHER } from "./lessonL010.ts";
@@ -9,8 +13,8 @@ import { LOS1_L005_TEACHER } from "./lessonL005.ts";
 import { LOS1_L003_TEACHER } from "./lessonL003.ts";
 import { LOS1_L002_TEACHER } from "./lessonL002.ts";
 import { LOS1_L001_TEACHER } from "./lessonL001.ts";
-import type { TeacherLesson } from "./engine.ts";
 import { LOS1_C08_TEACHER_LESSONS } from "./lessonC08.ts";
+import type { TeacherLesson } from "./engine.ts";
 
 /**
  * Pedagogical preview, not yet marked language-reviewed or audio-approved.
@@ -227,7 +231,10 @@ export function getLosTeacherLesson(id: string): TeacherLesson | undefined {
   if (id === LOS1_L009_TEACHER.id) return LOS1_L009_TEACHER;
   if (id === LOS1_L010_TEACHER.id) return LOS1_L010_TEACHER;
   if (id === LOS1_L011_TEACHER.id) return LOS1_L011_TEACHER;
-  const c08 = LOS1_C08_TEACHER_LESSONS.find(lesson => lesson.id === id);
-  if (c08) return c08;
-  return id === LOS1_L012_TEACHER.id ? LOS1_L012_TEACHER : undefined;
+  if (id === LOS1_L012_TEACHER.id) return LOS1_L012_TEACHER;
+  if (id === LOS1_L013_TEACHER.id) return LOS1_L013_TEACHER;
+  if (id === LOS1_L014_TEACHER.id) return LOS1_L014_TEACHER;
+  if (id === LOS1_L015_TEACHER.id) return LOS1_L015_TEACHER;
+  if (id === LOS1_L016_TEACHER.id) return LOS1_L016_TEACHER;
+  return LOS1_C08_TEACHER_LESSONS.find(lesson => lesson.id === id);
 }
