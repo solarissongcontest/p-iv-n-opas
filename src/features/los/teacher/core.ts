@@ -14,9 +14,10 @@ export type TeacherScene={
  example?:{german:string;finnish:string;why:string};
  question?:TeacherQuestion;written?:TeacherWrittenQuestion;hint?:string;help?:readonly TeacherHelpOption[];
 };
-export type TeacherLesson={id:string;version:typeof TEACHER_VERSION;review:"draft"|"approved";contentRevision?:string;objective:string;scenes:readonly TeacherScene[]};
+export type TeacherLesson={id:string;version:typeof TEACHER_VERSION;review:"draft"|"approved";contentRevision?:string;mediaSourceId?:string;objective:string;scenes:readonly TeacherScene[]};
 export type TeacherAttempt={answer:string;count:number;correct:boolean;independent:boolean;revealed:boolean;at:string};
-export type TeacherProgress={version:typeof TEACHER_VERSION;scene:string;visited:string[];hints:string[];answers:Record<string,TeacherAttempt>;paused:boolean;completedAt?:string|null;helpSelections?:Record<string,string>;writtenDrafts?:Record<string,string>;completedContentRevision?:string;completedRevisionAt?:string};
+export type TeacherMediaActivity={sourceId:string;playingAt?:string;endedAt?:string;textOpenedAt?:string};
+export type TeacherProgress={version:typeof TEACHER_VERSION;scene:string;visited:string[];hints:string[];answers:Record<string,TeacherAttempt>;paused:boolean;completedAt?:string|null;helpSelections?:Record<string,string>;writtenDrafts?:Record<string,string>;completedContentRevision?:string;completedRevisionAt?:string;media?:TeacherMediaActivity};
 const isObj=(x:unknown):x is Record<string,unknown>=>Boolean(x&&typeof x==="object"&&!Array.isArray(x));
 const validId=(x:unknown)=>typeof x==="string"&&/^[a-z0-9-]{1,48}$/i.test(x);
 const validIds=(x:unknown,max:number)=>Array.isArray(x)&&x.length<=max&&
@@ -28,12 +29,17 @@ const validWrittenDrafts=(x:unknown)=>x===undefined||
  (isObj(x)&&Object.keys(x).length<=20&&Object.entries(x).every(([id,value])=>
    validId(id)&&typeof value==="string"&&value.length<=40));
 const validIso=(x:unknown)=>typeof x==="string"&&x.length<=40&&/^\d{4}-\d{2}-\d{2}T/.test(x)&&Number.isFinite(Date.parse(x));
+const validMedia=(x:unknown)=>x===undefined||(isObj(x)&&validId(x.sourceId)&&
+ (x.playingAt===undefined||validIso(x.playingAt))&&
+ (x.endedAt===undefined||validIso(x.endedAt))&&
+ (x.textOpenedAt===undefined||validIso(x.textOpenedAt))&&
+ (x.endedAt===undefined||x.playingAt!==undefined));
 export function validTeacherProgress(x:unknown):x is TeacherProgress{
  if(!isObj(x)||x['version']!==TEACHER_VERSION||!validId(x['scene'])||
     !validIds(x['visited'],25)||!validIds(x['hints'],25)||typeof x['paused']!=="boolean"||
     !isObj(x['answers'])||Object.keys(x['answers']).length>20||
     (x['completedAt']!==undefined&&x['completedAt']!==null&&!validIso(x['completedAt']))||
-    !validHelpSelections(x['helpSelections'])||!validWrittenDrafts(x['writtenDrafts'])||
+    !validHelpSelections(x['helpSelections'])||!validWrittenDrafts(x['writtenDrafts'])||!validMedia(x['media'])||
     (x['completedContentRevision']!==undefined&&!validId(x['completedContentRevision']))||
     (x['completedRevisionAt']!==undefined&&!validIso(x['completedRevisionAt']))||
     ((x['completedContentRevision']===undefined)!==(x['completedRevisionAt']===undefined))||
@@ -47,6 +53,7 @@ export function validTeacherLesson(lesson:TeacherLesson):string[]{
  const errors:string[]=[];
  if(!/^L\d{3}$/.test(lesson.id)||lesson.scenes.length<5||lesson.scenes.length>20)errors.push("invalid lesson scope");
  if(lesson.contentRevision!==undefined&&!validId(lesson.contentRevision))errors.push("invalid content revision");
+ if(lesson.mediaSourceId!==undefined&&!validId(lesson.mediaSourceId))errors.push("invalid media source");
  const ids=lesson.scenes.map(x=>x.id);
  if(new Set(ids).size!==ids.length)errors.push("duplicate scenes");
  for(const phase of ["explanation","worked-example","independent","summary"] as const)
@@ -87,6 +94,26 @@ export function selectTeacherScene(lesson:TeacherLesson,p:TeacherProgress,id:str
  return {...p,scene:id,paused:false,visited:[...new Set([...p.visited,p.scene,id])]};
 }
 export function pauseTeacher(p:TeacherProgress):TeacherProgress{return {...p,paused:true};}
+/** Media events show only what the browser did. They never prove that a learner
+ * listened, heard every word, or understood the recorded material. */
+export function recordTeacherMedia(lesson:TeacherLesson,p:TeacherProgress,
+ event:"playing"|"ended"|"transcript",at:string):TeacherProgress{
+ if(p.paused||!lesson.mediaSourceId||!validIso(at))return p;
+ const old=p.media?.sourceId===lesson.mediaSourceId?p.media:{sourceId:lesson.mediaSourceId};
+ if(event==="playing"){
+  if(old.playingAt)return p;
+  return {...p,media:{...old,playingAt:at}};
+ }
+ if(event==="ended"){
+  if(!old.playingAt||old.endedAt)return p;
+  return {...p,media:{...old,endedAt:at}};
+ }
+ if(old.textOpenedAt)return p;
+ // Opening the entire answer-bearing transcript disqualifies subsequent
+ // independent first tries, but never revokes previously earned evidence.
+ const exposed=lesson.scenes.filter(s=>["independent","application","exit"].includes(s.phase)).map(s=>s.id);
+ return {...p,media:{...old,textOpenedAt:at},hints:[...new Set([...p.hints,...exposed])]};
+}
 export function hintTeacher(lesson:TeacherLesson,p:TeacherProgress):TeacherProgress{
  const scene=lesson.scenes.find(s=>s.id===p.scene);
  if(p.paused||!scene?.hint)return p;
