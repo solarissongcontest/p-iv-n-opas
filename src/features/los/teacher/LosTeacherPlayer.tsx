@@ -118,6 +118,7 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
   const { draft, update, saved } = useLosChapterDraft(lesson?.bookId ?? 1, lesson?.chapterId ?? "01");
   const [authorized, setAuthorized] = useState<boolean | null>(null);
   const [showHelp, setShowHelp] = useState(false);
+  const [helpSelection, setHelpSelection] = useState<string | null>(null);
   const [replayKey, setReplayKey] = useState(0);
   // Reject malformed manuscripts, not merely broken React props.
   const contentValid = lesson ? validateTeacherLesson(lesson).length === 0 : false;
@@ -130,7 +131,7 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
   const completed = Boolean(session?.completedAt);
 
   useEffect(() => { setAuthorized(Boolean(readCachedDeviceUser())); }, []);
-  useEffect(() => { setShowHelp(false); }, [scene?.id]);
+  useEffect(() => { setShowHelp(false); setHelpSelection(null); }, [scene?.id]);
   useEffect(() => {
     if (!lesson) return;
     document.title = lesson.title + " · LOS! Opetustila";
@@ -288,13 +289,23 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
               <p>Tämä on oma vahvistuksesi, ei automaattinen kielitaidon arvio.</p>
             </div>}
             <div className="los-teacher-help">
-              <button type="button" aria-expanded={showHelp} onClick={() => { setShowHelp(v => !v); markHelp(); }}>
+              <button type="button" aria-expanded={showHelp} onClick={() => { setShowHelp(v => !v); setHelpSelection(null); markHelp(); }}>
                 <HelpCircle size={18}/> En ymmärrä / haluan lisäselityksen
               </button>
               {showHelp && <div className="los-teacher-help-entries">
-                {scene.help?.length ? scene.help.map(entry => <section key={entry.title}>
-                  <h3>{entry.title}</h3><p>{entry.body}</p>
-                </section>) : <section>
+                {scene.help?.length ? <>
+                  <p>Valitse, mikä selitys auttaisi sinua juuri nyt:</p>
+                  <div className="los-teacher-help-choices" role="group" aria-label="Valitse lisäselityksen tapa">
+                    {scene.help.map(entry => <button key={entry.title} type="button"
+                      aria-pressed={helpSelection === entry.title}
+                      onClick={() => setHelpSelection(entry.title)}>
+                      {entry.title}
+                    </button>)}
+                  </div>
+                  {scene.help.filter(entry => entry.title === helpSelection).map(entry => <section key={entry.title}>
+                    <h3>{entry.title}</h3><p>{entry.body}</p>
+                  </section>)}
+                </> : <section>
                   <h3>Kokeile tätä</h3>
                   <p>{scene.question?.reteach ??
                     (scene.kind === "board" ? "Käy opetustaulun vaiheet läpi yksi kerrallaan. Vertaa saksankielistä ilmausta sen suomenkieliseen merkitykseen." :
