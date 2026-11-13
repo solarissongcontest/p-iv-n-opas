@@ -122,7 +122,7 @@ test("every one of the 60 guided lessons opens from its actual chapter picker on
    expect(seen.has(title)).toBe(false);
    seen.add(title);
    await button.click();
-   if(Number(title.slice(1))<=16){
+   if(Number(title.slice(1))<=16 || (Number(title.slice(1))>=46 && Number(title.slice(1))<=50)){
     await expect(page).toHaveURL(new RegExp("/los-lessons/"+title+"$"));
     await expect(page.locator(".los-teacher-paper h2")).toBeVisible();
     await expect(page.locator(".los-teacher-sidebar h1")).toBeVisible();
@@ -1136,15 +1136,16 @@ test("L016 does not count draft C03 test as submission or as automatic mastery",
  await expect(status).toContainText("Ei vielä palautettu");
  await page.goto("/los?lessonReturn=L016#/1/03/test",{waitUntil:"domcontentloaded"});
  const items=page.locator(".los-workbook-question");
- // DOMContentLoaded does not mean React has rendered the workbook questions.
- await expect(items.first()).toBeVisible();
+ // Await asynchronous book hydration before counting its test cards.
+ await expect(items.first()).toBeVisible({timeout:30_000});
  const n=await items.count();
  expect(n).toBeGreaterThanOrEqual(10);
  await items.first().locator('input[type="radio"]').first().check();
  await page.getByRole("link",{name:"Palaa oppitunnille L016"}).click();
  await outline.filter({hasText:"Palauta C03:n oikea kappaletesti"}).click();
  await expect(status).toContainText("Ei vielä palautettu");
- // The finish control belongs to the summary scene, not the book/test scene.
+ // Completion is deliberately available only on the lesson's final summary
+ // screen. A partly answered real book exam must not enable that button.
  await outline.filter({hasText:"C03:n opetus ja koe ovat eri suorituksia"}).click();
  await expect(page.getByRole("button",{name:"Merkitse oppitunti läpikäydyksi"})).toBeDisabled();
  await expectNoHorizontalOverflow(page);

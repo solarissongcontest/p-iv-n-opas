@@ -59,7 +59,14 @@ function checkScene(scene: TeacherScene, location: string, issues: TeacherConten
         problem: "Oppikirjaviite on puutteellinen tai sen osio ei ole sallittu." });
     }
   }
-  if (scene.activityId && !name(scene.activityId))
+  if (scene.kind === "calendar" && (!scene.calendar || !meaningful(scene.calendar.prompt) ||
+    !meaningful(scene.calendar.sourceNote) ||
+    !["Montag","Dienstag","Mittwoch","Donnerstag","Freitag","Samstag","Sonntag"].includes(scene.calendar.day) ||
+    !/^(?:0[0-9]|1[0-9]|2[0-3]):00$/.test(scene.calendar.time) ||
+    !scene.activityId)) issues.push({location,problem:"Kalenteriharjoituksen tiedot tai vahvistus puuttuvat."});
+  if (scene.kind === "source" && !scene.sourceChapterId && !scene.textBChapterId)
+    issues.push({location,problem:"Alkuperäistä tekstilähdettä ei ole sidottu."});
+    if (scene.activityId && !name(scene.activityId))
     issues.push({ location, problem: "Opiskeluteon tunniste ei ole kelvollinen." });
 }
 

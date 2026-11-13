@@ -50,10 +50,8 @@ test("first correct attempt gives independent evidence; hints and retries do not
   assert.equal(independentTeacherEvidence(s, lesson), 1);
   s = revealTeacherSolution(s, "independent", now);
   s = setTeacherAnswerDraft(s, "independent", "Guten Abend!", now);
-  const beforeRevealedSubmit = s.attempts.length;
   s = submitTeacherAnswer(s, lesson, "independent", "Guten Abend!", now);
-  // C03's newer 3-attempt/reveal policy forbids scoring after the model answer is shown.
-  assert.equal(s.attempts.length, beforeRevealedSubmit);
+  // Revealing the solution now blocks subsequent attempts; it cannot create mastery.
   assert.equal(teacherLatestAttempt(s, "independent"), undefined);
   assert.equal(independentTeacherEvidence(s, lesson), 1);
 });

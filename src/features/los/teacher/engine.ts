@@ -25,12 +25,18 @@ export type TeacherScene = {
   id: string;
   phase: string;
   title: string;
-  kind: "introduction" | "explanation" | "board" | "question" | "book" | "activity" | "reflection" | "summary";
+  kind: "introduction" | "explanation" | "board" | "question" | "book" | "activity" | "reflection" | "summary" | "calendar" | "source";
   paragraphs: readonly string[];
   question?: TeacherQuestion;
   reflection?: TeacherReflection;
   board?: readonly TeacherBoardStep[];
   bookLinks?: readonly TeacherBookLink[];
+  /** Fixed, checked timetable data. Reading Text B does not prove audio playback. */
+  calendar?: { prompt: string; day: string; time: string; sourceNote: string };
+  /** Reuse unabridged published texts; never duplicate a faux-authentic passage. */
+  sourceChapterId?: string;
+  textBChapterId?: string;
+  chapterPhoto?: boolean;
   activityId?: string;
   activityLabel?: string;
   help?: readonly { title: string; body: string }[];
@@ -218,10 +224,15 @@ export function teacherWrongFeedback(scene: TeacherScene, answer: string): strin
     q.genericWrong;
   return q.wrongAnswers?.[normalizeTeacherAnswer(answer)] ?? q.genericWrong;
 }
+/** Calendar evidence requires a correct, explicitly saved choice. It is never audio evidence. */
+export function isCorrectCalendarEntry(scene: TeacherScene, value: string): boolean {
+  return Boolean(scene.calendar && value === scene.calendar.day + "|" + scene.calendar.time);
+}
 export function teacherCanFinish(session: TeacherSession, lesson: TeacherLesson,
   practiceAnswers: Readonly<Record<string, string>>, practiceChecked: readonly string[] = [],
   chapterAssessment?: TeacherChapterAssessmentInput): boolean {
   return teacherChapterAssessmentStatus(lesson, chapterAssessment).ready && !session.paused && lesson.scenes.every(scene => session.visitedIds.includes(scene.id)) &&
+    lesson.scenes.every(scene => !scene.calendar || isCorrectCalendarEntry(scene,session.draftAnswers[scene.id] ?? "")) &&
     lesson.scenes.every(scene => !scene.reflection ||
       (session.draftAnswers[scene.id]?.trim().length ?? 0) >= scene.reflection.minLength) &&
     lesson.requiredQuestionIds.every(id => session.attempts.some(item => item.sceneId === id)) &&
