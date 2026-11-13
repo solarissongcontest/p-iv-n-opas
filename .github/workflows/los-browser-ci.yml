@@ -71,6 +71,9 @@ jobs:
       - name: Full LOS! 1 browser flows in mobile WebKit and desktop Chromium
         run: bunx playwright test e2e/los-full-book.spec.ts --project=desktop-chromium --project=iphone-webkit
 
+      - name: C07 Teacher Player flows in desktop Chromium and iPhone WebKit
+        run: bunx playwright test e2e/los-c07-teacher.spec.ts --project=desktop-chromium --project=iphone-webkit
+
       - name: Upload browser traces and preview log
         if: always()
         uses: actions/upload-artifact@v4
