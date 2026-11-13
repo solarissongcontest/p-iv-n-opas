@@ -105,7 +105,8 @@ export function validateTeacherLesson(lesson: TeacherLesson): TeacherContentIssu
       (!unique(lesson.requiredCheckedIds) || lesson.requiredCheckedIds.some(id =>
         !(/^C\d{2}-(?:SOURCE|TEXTB|MCOM02)-Q\d{2}$/.test(id) ||
           (reviewI && /^EX-REV1-Q\d{2}$/.test(id)) ||
-          (lesson.chapterId === "06" && /^C06-ZPE-Q\d{2}$/.test(id)) )))) {
+          (lesson.chapterId === "06" && /^C06-ZPE-Q\d{2}$/.test(id)) ||
+          (lesson.chapterId === "08" && (/^C08-SCHOOL-Q\d{2}$/.test(id) || id === "C08-SOURCE-EVIDENCE-01")) )))) {
     issues.push({ location: "requiredCheckedIds", problem: "Tarkistettavan lähdetehtävän tunniste on virheellinen." });
   }
   if (lesson.applicationDraftMinLength !== undefined &&

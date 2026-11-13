@@ -245,8 +245,10 @@ export function teacherCanFinish(session: TeacherSession, lesson: TeacherLesson,
     (lesson.requiredCheckedIds ?? []).every(id => {
       const value = practiceAnswers[id]?.trim();
       return Boolean(value && practiceChecked.includes(id) &&
-        (!(id.startsWith("EX-REV1-Q") || /^C07-(?:SOURCE|TEXTB)-Q\d{2}$/.test(id)) ||
-          /^[abc]$/.test(value)));
+        (id === "C08-SOURCE-EVIDENCE-01"
+          ? /^u(?:0[1-9]|1\d|2[0-6])$/.test(value)
+          : !(id.startsWith("EX-REV1-Q") || /^C07-(?:SOURCE|TEXTB)-Q\d{2}$/.test(id) ||
+              /^C08-(?:SCHOOL|TEXTB)-Q\d{2}$/.test(id)) || /^[abc]$/.test(value)));
     });
 }
 export function finishTeacherSession(session: TeacherSession, lesson: TeacherLesson,
