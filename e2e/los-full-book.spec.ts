@@ -1136,7 +1136,7 @@ test("L016 does not count draft C03 test as submission or as automatic mastery",
  await expect(status).toContainText("Ei vielä palautettu");
  await page.goto("/los?lessonReturn=L016#/1/03/test",{waitUntil:"domcontentloaded"});
  const items=page.locator(".los-workbook-question");
- // Wait for asynchronous book hydration before inspecting the exercise list.
+ // Await asynchronous book hydration before counting its test cards.
  await expect(items.first()).toBeVisible({timeout:30_000});
  const n=await items.count();
  expect(n).toBeGreaterThanOrEqual(10);
@@ -1145,5 +1145,22 @@ test("L016 does not count draft C03 test as submission or as automatic mastery",
  await outline.filter({hasText:"Palauta C03:n oikea kappaletesti"}).click();
  await expect(status).toContainText("Ei vielä palautettu");
  await expect(page.getByRole("button",{name:"Merkitse oppitunti läpikäydyksi"})).toBeDisabled();
+ await expectNoHorizontalOverflow(page);
+});
+
+
+test("L014 En ymmärrä exposes six authored choices and one scene-specific explanation at a time",async({page})=>{
+ await enterLocalBook(page);
+ await page.goto("/los-lessons/L014",{waitUntil:"domcontentloaded"});
+ const outline=page.locator(".los-teacher-outline nav button");
+ await outline.filter({hasText:"Miksi tarvitaan woher ja kommen?"}).click();
+ await page.getByRole("button",{name:"En ymmärrä / haluan lisäselityksen"}).click();
+ const choices=page.getByRole("group",{name:"Valitse lisäselityksen tapa"});
+ await expect(choices.locator("button")).toHaveCount(6);
+ await choices.getByRole("button",{name:"Selitä vaihe vaiheelta"}).click();
+ await expect(page.locator(".los-teacher-help-entries section")).toContainText("Woher");
+ await choices.getByRole("button",{name:"Näytä toinen esimerkki"}).click();
+ await expect(page.locator(".los-teacher-help-entries section")).toContainText("Österreich");
+ await expect(page.locator(".los-teacher-help-entries section")).not.toContainText("1. Kysy mistä");
  await expectNoHorizontalOverflow(page);
 });
