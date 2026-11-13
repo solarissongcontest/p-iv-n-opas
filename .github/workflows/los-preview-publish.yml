@@ -106,7 +106,7 @@ jobs:
         with:
           name: los-tested-preview-commit
           path: .los-tested-preview/
-      - name: Create fast-forward-only private-preview branch
+      - name: Publish private preview source without workflow changes
         shell: bash
         run: |
           set -euo pipefail
@@ -123,11 +123,30 @@ jobs:
           for path in src/features/los/teacher/lessonL056L060.ts src/features/los/LosDictionarySearch.tsx src/features/los/LosContentTree.tsx; do
             git cat-file -e "$merged_sha:$path"
           done
+
+          # GitHub Actions' token does not have the elevated workflows permission.
+          # Keep the exact verified application, test, documentation, and asset
+          # files, but preserve the *unchanged* main workflow directory.
+          git checkout --detach "$merged_sha"
+          git rm -rf --ignore-unmatch .github/workflows
+          git checkout origin/main -- .github/workflows
+          candidate_tree="$(git write-tree)"
+          candidate_sha="$(printf 'LOS! 1: verified 60-lesson private preview\n\nSource integration: %s\nQA workflow: %s\nNon-workflow content unchanged from tested source.\nDraft only; release gates remain open.\n' "$merged_sha" "$GITHUB_SHA" | git commit-tree "$candidate_tree" -p "$(git rev-parse origin/main)")"
+
+          git diff --exit-code origin/main "$candidate_sha" -- .github/workflows
+          git diff --exit-code "$merged_sha" "$candidate_sha" -- . ':(exclude).github/workflows/**'
+          test "$(git rev-list --count origin/main.."$candidate_sha")" = "1"
+
+          # Never force-push or silently replace another reviewed candidate.
           target="feat/los1-integrated-preview-20261113"
           if git ls-remote --exit-code --heads origin "$target" >/dev/null; then
             git fetch origin "$target"
-            git merge-base --is-ancestor "origin/$target" "$merged_sha" ||
-              { echo "Existing preview is not an ancestor; refuse to overwrite it."; exit 1; }
+            if [ "$(git rev-parse "origin/$target^{tree}")" = "$candidate_tree" ]; then
+              echo "Identical source already published; no further write necessary."
+              exit 0
+            fi
+            echo "::error::Existing preview differs. Refusing automatic overwrite."
+            exit 1
           fi
-          git push origin "$merged_sha:refs/heads/$target"
-          echo "Published tested preview commit $merged_sha to $target, never to main."
+          git push origin "$candidate_sha:refs/heads/$target"
+          echo "Published verified non-workflow source as $candidate_sha to $target, never to main."
