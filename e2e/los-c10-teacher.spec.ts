@@ -41,7 +41,7 @@ test("L052 shows all 14 source turns and does not allow false listening completi
   await expect(page.locator(".los-teacher-board")).toContainText("Ich heiße Harald Becker.");
   await expect(page.locator(".los-teacher-board")).toContainText("Der Himmel ist blau.");
   await outline.filter({hasText:"Teksti ymmärretty, kuuntelun hyväksyntä vielä auki"}).click();
-  await expect(page.getByRole("region",{name:"Kuuntelumedian hyväksyntäportti"})).toContainText("M-DIB-02");
+  await expect(page.locator('section[aria-label="Kuuntelumedian hyväksyntäportti"]')).toContainText("M-DIB-02");
   await expect(page.getByRole("button",{name:"Merkitse oppitunti läpikäydyksi"})).toBeDisabled();
   await expectNoHorizontalOverflow(page);
 });
