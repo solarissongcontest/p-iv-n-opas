@@ -44,5 +44,5 @@ test("C07 audio is source-gated and no older Teacher capability is removed",()=>
  assert.match(player,/LosTeacherNumberBuilder/);
  assert.match(player,/teacherMidtermAssessmentStatus/);
  assert.match(player,/LosTeacherGreetingMedia/);
- assert.match(path,/L001–L040/);
+ assert.match(path,/L001–L055/);
 });

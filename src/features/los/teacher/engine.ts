@@ -29,13 +29,18 @@ export type TeacherScene = {
   id: string;
   phase: string;
   title: string;
-  kind: "introduction" | "explanation" | "board" | "question" | "book" | "activity" | "reflection" | "form" | "summary";
+  kind: "introduction" | "explanation" | "board" | "question" | "book" | "activity" | "reflection" | "form" | "summary" | "calendar" | "source";
   paragraphs: readonly string[];
   question?: TeacherQuestion;
   reflection?: TeacherReflection;
   /** Drafts use the same TeacherSession store: sceneId.fieldId. */
   form?: readonly TeacherFormField[];
   board?: readonly TeacherBoardStep[];
+  /** Fixed, checked timetable data: source reading never proves audio playback. */
+  calendar?: { prompt: string; day: string; time: string; sourceNote: string };
+  sourceChapterId?: string;
+  textBChapterId?: string;
+  chapterPhoto?: boolean;
   /** Interactive number board uses saved session drafts, never a parallel progress store. */
   numberBuilder?: boolean;
   bookLinks?: readonly TeacherBookLink[];
@@ -64,6 +69,8 @@ export type TeacherLesson = {
     minSelfAssessmentLength: number;
   };
   examAssessment?: { id: "EX-MID" };
+  /** An unapproved media-dependent lesson must not fabricate completion evidence. */
+  mediaGate?: { sourceId: string; approved: boolean; reason: string };
 };
 export type TeacherChapterAssessmentInput = {
   testAnswers: Readonly<Record<string, string>>;
@@ -252,13 +259,19 @@ export function teacherWrongFeedback(scene: TeacherScene, answer: string): strin
     q.genericWrong;
   return q.wrongAnswers?.[normalizeTeacherAnswer(answer)] ?? q.genericWrong;
 }
+/** Calendar evidence requires a correct explicitly saved choice, not a media play event. */
+export function isCorrectCalendarEntry(scene: TeacherScene, value: string): boolean {
+  return Boolean(scene.calendar && value === scene.calendar.day + "|" + scene.calendar.time);
+}
 export function teacherCanFinish(session: TeacherSession, lesson: TeacherLesson,
   practiceAnswers: Readonly<Record<string, string>>, practiceChecked: readonly string[] = [],
   chapterAssessment?: TeacherChapterAssessmentInput): boolean {
-  return teacherChapterAssessmentStatus(lesson, chapterAssessment).ready &&
+  return (!lesson.mediaGate || lesson.mediaGate.approved) &&
+    teacherChapterAssessmentStatus(lesson, chapterAssessment).ready &&
     teacherMidtermAssessmentStatus(lesson, chapterAssessment, practiceAnswers).ready &&
     !session.paused && lesson.scenes.every(scene => session.visitedIds.includes(scene.id)) &&
     lesson.scenes.every(scene => !scene.numberBuilder || teacherBuiltNumberCount(session, scene.id) >= 4) &&
+    lesson.scenes.every(scene => !scene.calendar || isCorrectCalendarEntry(scene, session.draftAnswers[scene.id] ?? "")) &&
     lesson.scenes.every(scene => !scene.reflection ||
       (session.draftAnswers[scene.id]?.trim().length ?? 0) >= scene.reflection.minLength) &&
     lesson.scenes.every(scene => !scene.form || scene.form.every(field =>
