@@ -52,10 +52,12 @@ test("L056 remains finishable with checked incorrect review tasks and honest sel
   await group.locator('input[name="EX-REV2-SELF-056"][value="some"]').check();
   await page.goto("/los-lessons/L056",{waitUntil:"domcontentloaded"});
   const outline=page.locator(".los-teacher-outline nav button");
-  for(let i=0;i<await outline.count();i++){
+  await expect(outline).toHaveCount(6);
+  for(let i=0;i<6;i++){
     await outline.nth(i).click();
-    if(await page.locator(".los-teacher-question").isVisible().catch(()=>false)){
-      await page.locator(".los-teacher-option").first().click();
+    if(i===3){
+      await page.locator(".los-teacher-option")
+        .filter({hasText:"Bitte buchstabieren Sie. Am Montag."}).click();
     }
   }
   // Explicitly navigate to the summary; checking an answer can rerender the outline.
