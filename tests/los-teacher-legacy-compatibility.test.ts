@@ -99,3 +99,30 @@ test("legacy compatibility rejects corrupt optional revision, drafts and media f
     }).L005, undefined);
   }
 });
+
+test("L004 and L005 historical records survive a joint C01 JSON backup roundtrip", () => {
+  const l005 = {
+    ...legacy, completedContentRevision: "l005-listening-foundation-v1",
+    completedRevisionAt: at,
+    media: { sourceId: "M-COM-03", textOpenedAt: at },
+    writtenDrafts: { application: "Bis später!" },
+  };
+  const input = {
+    L004: { ...emptyLosLessonProgress(), teacher: legacy },
+    L005: { ...emptyLosLessonProgress(), teacher: l005 },
+  };
+  const roundtrip = JSON.parse(JSON.stringify({ ...chapter(), lessonProgress: input })) as unknown;
+  assert.equal(validateLosCloudDraft(roundtrip), true);
+  const parsed = parseLosLessonProgressMap(input);
+  assert.deepEqual(parsed.L004?.teacher, legacy);
+  assert.deepEqual(parsed.L005?.teacher, l005);
+  assert.equal(Object.keys(parsed).length, 2);
+  const sessions = parseTeacherSessions({
+    L004: emptyTeacherSession(LOS1_L004_TEACHER, at),
+    L005: emptyTeacherSession(LOS1_L005_TEACHER, at),
+  });
+  assert.deepEqual(sessions.L004?.attempts, []);
+  assert.deepEqual(sessions.L005?.attempts, []);
+  assert.equal(validateLosCloudDraft({ ...chapter(), lessonProgress: parsed,
+    teacherSessions: sessions }), true);
+});
