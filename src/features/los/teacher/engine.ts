@@ -67,7 +67,12 @@ export function teacherChapterAssessmentStatus(
 ): { answered: number; expected: number; submitted: boolean; applicationDone: boolean; reflectionDone: boolean; ready: boolean } {
   const requirement = lesson.chapterAssessment;
   if (!requirement) return {answered:0,expected:0,submitted:false,applicationDone:false,reflectionDone:false,ready:true};
-  const answered = requirement.requiredTestIds.filter(id => Boolean(input?.testAnswers[id]?.trim())).length;
+  // EX-MID objective items can only be one of the actual A/B/C choices.
+  // Reject damaged/imported arbitrary strings rather than counting them as answered.
+  const answered = requirement.requiredTestIds.filter(id => {
+    const value = input?.testAnswers[id]?.trim();
+    return Boolean(value && (!id.startsWith("EX-MID-Q") || /^[abc]$/.test(value)));
+  }).length;
   const expected = requirement.requiredTestIds.length;
   const submitted = Boolean(input?.testSubmittedAt && iso(input.testSubmittedAt));
   const applicationDone = !requirement.requireApplicationDraft || Boolean(input?.applicationDraft.trim());
@@ -226,9 +231,16 @@ export function teacherCanFinish(session: TeacherSession, lesson: TeacherLesson,
       (session.draftAnswers[scene.id]?.trim().length ?? 0) >= scene.reflection.minLength) &&
     lesson.requiredQuestionIds.every(id => session.attempts.some(item => item.sceneId === id)) &&
     lesson.requiredActivityIds.every(id => session.activityIds.includes(id)) &&
-    lesson.requiredPracticeIds.every(id => Boolean(practiceAnswers[id]?.trim())) &&
-    (lesson.requiredCheckedIds ?? []).every(id =>
-      Boolean(practiceAnswers[id]?.trim()) && practiceChecked.includes(id));
+    lesson.requiredPracticeIds.every(id => {
+      const value = practiceAnswers[id]?.trim();
+      return Boolean(value && (!(id.startsWith("EX-REV1-SELF-") || id === "EX-MID-DIALOGUE-SELF") ||
+        ["well", "some", "again"].includes(value)));
+    }) &&
+    (lesson.requiredCheckedIds ?? []).every(id => {
+      const value = practiceAnswers[id]?.trim();
+      return Boolean(value && practiceChecked.includes(id) &&
+        (!id.startsWith("EX-REV1-Q") || /^[abc]$/.test(value)));
+    });
 }
 export function finishTeacherSession(session: TeacherSession, lesson: TeacherLesson,
   practiceAnswers: Readonly<Record<string, string>>, now: string,

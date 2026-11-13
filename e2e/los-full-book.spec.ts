@@ -122,7 +122,7 @@ test("every one of the 60 guided lessons opens from its actual chapter picker on
    expect(seen.has(title)).toBe(false);
    seen.add(title);
    await button.click();
-   if(Number(title.slice(1))<=26){
+   if(Number(title.slice(1))<=30){
     await expect(page).toHaveURL(new RegExp("/los-lessons/"+title+"$"));
     await expect(page.locator(".los-teacher-paper h2")).toBeVisible();
     await expect(page.locator(".los-teacher-sidebar h1")).toBeVisible();
@@ -1307,5 +1307,70 @@ test("C05 L025 real Text B checks persist without any listening-completion evide
   await expect(page.locator(".los-teacher-paper")).toContainText(id+": Vastaus tallennettu ja tarvittaessa tarkistettu");
  }
  await expect(page.locator(".los-teacher-paper")).not.toContainText("Kuuntelukoe suoritettu");
+ await expectNoHorizontalOverflow(page);
+});
+
+test("L027–L029 exact Review I IDs persist across original review page and Teacher on iPhone and desktop",async({page})=>{
+ test.setTimeout(120_000);
+ await enterLocalBook(page);
+ const cases=[
+  {id:"L027",first:1,correct:["a","b","c","a","b"],self:"some"},
+  {id:"L028",first:6,correct:["c","a","b","a","b"],self:"again"},
+  {id:"L029",first:11,correct:["c","a","b","c","a"],self:"well"},
+ ] as const;
+ for(const group of cases){
+  await page.goto("/los-lessons/"+group.id,{waitUntil:"domcontentloaded"});
+  await expect(page.locator(".los-teacher-sidebar h1")).toBeVisible();
+  const outline=page.locator(".los-teacher-outline nav button");
+  await outline.filter({hasText:"Tarkista viisi aitoa kertaustehtävää"}).click();
+  await expect(page.locator(".los-teacher-paper a[href*='/review']")).toBeVisible();
+  await page.goto("/los?lessonReturn="+group.id+"#/1/01/review",{waitUntil:"domcontentloaded"});
+  const review=page.locator("#los-review-"+group.id);
+  await expect(review.locator(".los-exam-question")).toHaveCount(5);
+  for(let i=0;i<5;i++){
+   const id="EX-REV1-Q"+String(group.first+i).padStart(2,"0");
+   const field=review.locator(".los-exam-question").nth(i);
+   await field.locator('input[name="'+id+'"][value="'+group.correct[i]+'"]').check();
+   await field.getByRole("button",{name:"Tarkista vastaus"}).click();
+   await expect(field.getByRole("status")).toContainText("Oikein.");
+  }
+  await review.locator('input[name="EX-REV1-SELF-'+group.id.slice(1)+'"][value="'+group.self+'"]').check();
+  await expect(review.locator(".los-review-progress")).toContainText("5/5 tarkistettu");
+  await page.getByRole("link",{name:"Palaa oppitunnille "+group.id}).click();
+  await outline.filter({hasText:"Tarkista viisi aitoa kertaustehtävää"}).click();
+  for(let i=0;i<5;i++){
+   const id="EX-REV1-Q"+String(group.first+i).padStart(2,"0");
+   await expect(page.locator(".los-teacher-paper")).toContainText(id+": Vastaus tallennettu ja tarvittaessa tarkistettu");
+  }
+  await expectNoHorizontalOverflow(page);
+ }
+});
+test("L030 Teacher reads real submitted 25-item EX-MID, including oral-only self-assessed dialogue",async({page})=>{
+ test.setTimeout(120_000);
+ await enterLocalBook(page);
+ await page.goto("/los-lessons/L030",{waitUntil:"domcontentloaded"});
+ const outline=page.locator(".los-teacher-outline nav button");
+ await outline.filter({hasText:"Avaa ja palauta oikea 25 tehtävän välikoe"}).click();
+ await expect(page.locator(".los-teacher-assessment-status")).toContainText("Välikoe EX-MID: 0/25 vastattu");
+ await expect(page.locator(".los-teacher-paper a[href*='/midterm']")).toBeVisible();
+ await page.goto("/los?lessonReturn=L030#/1/01/midterm",{waitUntil:"domcontentloaded"});
+ const questions=page.locator(".los-exam-question");
+ await expect(questions).toHaveCount(25);
+ for(let n=0;n<25;n++){
+  await questions.nth(n).locator('input[type="radio"]').first().check();
+ }
+ await page.getByRole("button",{name:"Palauta välikoe · 25/25"}).click();
+ await expect(page.locator(".los-exam-results")).toBeVisible();
+ await page.locator("#los-midterm-self").fill("Esitin oman kuvitteellisen keskustelun ääneen ja tarvitsen vielä kertausta.");
+ await page.locator('input[name="EX-MID-DIALOGUE-SELF"][value="some"]').check();
+ await expect(page.locator("#los-midterm-script")).toHaveValue("");
+ await page.getByRole("link",{name:"Palaa oppitunnille L030"}).click();
+ await outline.filter({hasText:"Avaa ja palauta oikea 25 tehtävän välikoe"}).click();
+ const status=page.locator(".los-teacher-assessment-status");
+ await expect(status).toContainText("Välikoe EX-MID: 25/25 vastattu · Palautettu");
+ await expect(status).toContainText("Oma 4–6 repliikin keskustelu: Itsearvioitu");
+ await expect(status).toContainText("Itsearviointi: Kirjattu");
+ await page.reload({waitUntil:"domcontentloaded"});
+ await expect(status).toContainText("Välikoe EX-MID: 25/25 vastattu · Palautettu");
  await expectNoHorizontalOverflow(page);
 });
