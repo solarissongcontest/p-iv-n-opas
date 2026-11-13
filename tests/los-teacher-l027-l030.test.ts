@@ -156,3 +156,17 @@ test("upstream C03 Teacher lessons remain separate from review I after integrati
  assert.equal(next.lessonId,"L030");
  assert.equal(next.completedAt,null);
 });
+
+test("latest C03 human-audio UI and L030 existing exam coexist in one Teacher Player",()=>{
+ const player=readFileSync("src/features/los/teacher/LosTeacherPlayer.tsx","utf8");
+ const media=readFileSync("src/features/los/teacher/LosTeacherGreetingMedia.tsx","utf8");
+ assert.match(player,/LosTeacherGreetingMedia/);
+ assert.match(player,/<LosTeacherGreetingMedia\s*\/>/);
+ assert.match(player,/teacherMidtermAssessmentStatus\(lesson, draft, draft\.practiceAnswers\)/);
+ assert.match(player,/section === "midterm" \|\| section === "review"/);
+ assert.match(media,/audio/);
+ assert.match(media,/ei ole kuuntelunäyttö|ei todista/);
+ const l005=getLosTeacherLesson("L005");
+ assert.ok(l005,"upstream L005 is still registered");
+ assert.notEqual(l005.chapterId,LOS1_L030_TEACHER.chapterId);
+});
