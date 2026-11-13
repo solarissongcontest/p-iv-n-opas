@@ -15,7 +15,7 @@ import { LOS1_C02_LINES, LOS1_C02_QUESTIONS } from "../src/features/los/content/
 const lesson=LOS1_L008_TEACHER;
 const now="2026-11-13T11:10:00.000Z";
 const ids=["C02-SOURCE-Q02","C02-SOURCE-Q03","C02-SOURCE-Q04"];
-const answers:Object=Object.fromEntries(LOS1_C02_QUESTIONS.slice(1,4).map(q=>[q.id,q.correctId]));
+const answers:Record<string,string>=Object.fromEntries(LOS1_C02_QUESTIONS.slice(1,4).map(q=>[q.id,q.correctId]));
 
 function prepared(){
   let s=emptyTeacherSession(lesson,now);
@@ -60,7 +60,7 @@ test("L008 uses exactly three real C02 questions Q02-Q04 and never manufactures 
 
 test("L008 completion requires checked Q02, Q03 and Q04; saving unanswered or unchecked choices never counts",()=>{
   const s=prepared();
-  const recorded=answers as Record<string,string>;
+  const recorded=answers;
   assert.equal(teacherCanFinish(s,lesson,recorded,[]),false);
   assert.equal(teacherCanFinish(s,lesson,recorded,ids.slice(0,2)),false);
   assert.equal(finishTeacherSession(s,lesson,recorded,now,ids.slice(0,2)).completedAt,null);
@@ -88,7 +88,7 @@ test("L008 is a reading lesson, not a false measurement of spoken or listening p
 
 test("L008 backup serialization does not touch L007 or C01 data, and absent activity blocks completion",()=>{
   const s=prepared();
-  const recorded=answers as Record<string,string>;
+  const recorded=answers;
   const noMapping={...s,activityIds:s.activityIds.filter(id=>id!=="replies-mapped")};
   assert.equal(teacherCanFinish(noMapping,lesson,recorded,ids),false);
   const completed=finishTeacherSession(s,lesson,recorded,now,ids);
