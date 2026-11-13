@@ -322,7 +322,7 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
             <div className="los-teacher-prose">
               {scene.paragraphs.map((paragraph, i) => <p key={i}>{paragraph}</p>)}
             </div>
-            {scene.kind === "board" && <TeacherBoard scene={scene}/>}
+            {scene.kind === "board" && <TeacherBoard key={scene.id} scene={scene}/>}
             {lesson.id === "L005" && (scene.id === "source-list" || scene.id === "audio-choice") &&
               <LosTeacherGreetingMedia/>}
             {scene.numberBuilder && <LosTeacherNumberBuilder
