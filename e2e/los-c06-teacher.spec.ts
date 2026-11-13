@@ -115,3 +115,16 @@ test("C06 responses show numeric input where required and offer explicit German 
   await expect(page.getByRole("textbox",{name:"Vastauksesi saksaksi"})).toHaveValue("zweiunddreißig");
   await expectNoHorizontalOverflow(page);
 });
+
+
+test("C06 L031 opens from the actual 60-lesson chapter picker, not only by a direct URL",async({page})=>{
+  await enterLocalLosFixture(page);
+  await page.goto("/los#/1/path",{waitUntil:"domcontentloaded"});
+  const runner=page.locator("#los-lesson-runner");
+  await expect(runner).toBeVisible({timeout:30_000});
+  await runner.locator(".los-lesson-chapter-picker button").filter({hasText:"Kappale 6"}).click();
+  await runner.locator(".los-lesson-picker button").filter({hasText:"L031"}).click();
+  await expect(page).toHaveURL(/\/los-lessons\/L031$/);
+  await expect(page.locator(".los-teacher-sidebar h1")).toContainText("Numerot 0–12");
+  await expectNoHorizontalOverflow(page);
+});

@@ -36,7 +36,12 @@ test("all ten chapters provide complete Text B readers inside the book, not link
   }else{
    await expect(page.locator(".los-secondary-source .los-c01-turn").first()).toBeVisible();
   }
-  if(chapter==="08"){
+  if(chapter==="07"){
+   // M-COM-06 is not yet approved. Test source availability and safety
+   // separately; no playback or listening result can be invented here.
+   await expect(page.getByText("C07:n aakkosäänite odottaa hyväksyntää.")).toBeVisible();
+   await expect(page.locator(".los-secondary-source audio")).toHaveCount(0);
+  }else if(chapter==="08"){
    await expect(page.getByText("Haastattelun ääni ei ole vielä käytettävissä.")).toBeVisible();
   }else{
    await expect(page.locator(".los-secondary-source audio").first()).toBeVisible();
