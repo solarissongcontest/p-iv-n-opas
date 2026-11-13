@@ -489,7 +489,7 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
             </section>}
             {scene.kind === "summary" && lesson.externalCheck && <section className="los-teacher-assessment-status" aria-label="Tallennettujen koetehtävien todellinen tilanne">
               <h3>Kirjan oman tallennuksen näytöt</h3>
-              {external.lines.map((line,i)=><p key={i}>{line}</p>}
+              {external.lines.map((line,i)=><p key={i}>{line}</p>)}
               {!external.ready && <p>Kirjan sovitut tehtävät tai itsearviot ovat vielä kesken. Palaa kirjan sivulle, jatka tallennettua työtä ja tarkista tila uudelleen.</p>}
             </section>}
             {lesson.id === "L060" && scene.kind === "summary" && <LosMasterySummary/>}
