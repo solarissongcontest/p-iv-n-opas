@@ -45,7 +45,7 @@ export const LOS1_L032_TEACHER: TeacherLesson = {
       "id": "recall",
       "phase": "Harjoittelu",
       "kind": "question",
-      "title": "Muista ja kirjoita",
+      "title": "Kertaa zwölf muistista",
       "paragraphs": [
         "Yritä ensin ilman vastausta näkyvillä. Saat halutessasi kohdennetun vihjeen."
       ],
@@ -57,10 +57,10 @@ export const LOS1_L032_TEACHER: TeacherLesson = {
         "accepted": [
           "zwölf"
         ],
-        "success": "Oikein. Saksan muoto tai numero täsmää.",
-        "hint": "Vertaa etenkin sanan loppua ja erikoismerkkejä.",
-        "reteach": "Palaa malliesimerkkiin: kysymyksen tai vastauksen muoto riippuu siitä, kerrotaanko ikä vai kysytäänkö sitä.",
-        "genericWrong": "Vastauksessa on kirjoitusasu- tai merkitysvirhe. Tarkista kirjain kirjaimelta, älä korvaa ß- tai umlaut-merkkejä.",
+        "success": "Oikein. 12 on zwölf, ja sanan ö-kirjain on olennainen.",
+        "hint": "Kaksitoista on poikkeusluku. Sen kirjoitusasu alkaa zw- ja sisältää ö-kirjaimen.",
+        "reteach": "12 = zwölf, ei zwolf eikä zweizehn. Muista ö-kirjain.",
+        "genericWrong": "Kirjoita luvun 12 saksankielinen nimi zwölf. Tarkista erityisesti ö-kirjain.",
         "wrongAnswers": {
           "zwolf": "Muista ö-kirjain."
         }
@@ -177,7 +177,7 @@ export const LOS1_L032_TEACHER: TeacherLesson = {
       "id": "sixteen",
       "phase": "Harjoittelu",
       "kind": "question",
-      "title": "Muista ja kirjoita",
+      "title": "Kirjoita sechzehn muistista",
       "paragraphs": [
         "Yritä ensin ilman vastausta näkyvillä. Saat halutessasi kohdennetun vihjeen."
       ],
@@ -189,10 +189,10 @@ export const LOS1_L032_TEACHER: TeacherLesson = {
         "accepted": [
           "sechzehn"
         ],
-        "success": "Oikein. Saksan muoto tai numero täsmää.",
-        "hint": "Vertaa etenkin sanan loppua ja erikoismerkkejä.",
-        "reteach": "Palaa malliesimerkkiin: kysymyksen tai vastauksen muoto riippuu siitä, kerrotaanko ikä vai kysytäänkö sitä.",
-        "genericWrong": "Vastauksessa on kirjoitusasu- tai merkitysvirhe. Tarkista kirjain kirjaimelta, älä korvaa ß- tai umlaut-merkkejä.",
+        "success": "Oikein. 16 on sechzehn: sanasta sechs jää viimeinen s pois.",
+        "hint": "Kuusi on sechs. Liitä -zehn vasta sen jälkeen, kun poistat viimeisen s:n.",
+        "reteach": "16 = sechzehn (sech + zehn), ei sechszehn eikä sechzig (60).",
+        "genericWrong": "Kirjoita 16 saksaksi sechzehn. Sechs menettää viimeisen s:n, ja loppu on -zehn.",
         "wrongAnswers": {
           "sechszehn": "Sechs menettää viimeisen s:n: sechzehn."
         }
@@ -202,7 +202,7 @@ export const LOS1_L032_TEACHER: TeacherLesson = {
       "id": "seventeen",
       "phase": "Harjoittelu",
       "kind": "question",
-      "title": "Muista ja kirjoita",
+      "title": "Kirjoita siebzehn muistista",
       "paragraphs": [
         "Yritä ensin ilman vastausta näkyvillä. Saat halutessasi kohdennetun vihjeen."
       ],
@@ -214,10 +214,10 @@ export const LOS1_L032_TEACHER: TeacherLesson = {
         "accepted": [
           "siebzehn"
         ],
-        "success": "Oikein. Saksan muoto tai numero täsmää.",
-        "hint": "Vertaa etenkin sanan loppua ja erikoismerkkejä.",
-        "reteach": "Palaa malliesimerkkiin: kysymyksen tai vastauksen muoto riippuu siitä, kerrotaanko ikä vai kysytäänkö sitä.",
-        "genericWrong": "Vastauksessa on kirjoitusasu- tai merkitysvirhe. Tarkista kirjain kirjaimelta, älä korvaa ß- tai umlaut-merkkejä.",
+        "success": "Oikein. 17 on siebzehn: sieben menettää loppunsa -en.",
+        "hint": "Seitsemän on sieben. Lyhennä loppu -en pois ennen -zehn-osaa.",
+        "reteach": "17 = siebzehn (sieb + zehn), ei siebenzehn. 70 olisi siebzig.",
+        "genericWrong": "Kirjoita 17 saksaksi siebzehn. Tarkista lyhentynyt alku sieb- ja loppu -zehn.",
         "wrongAnswers": {
           "siebenzehn": "Sieben menettää loppuosan -en: siebzehn."
         }
@@ -356,7 +356,7 @@ export const LOS1_L032_TEACHER: TeacherLesson = {
       "id": "exit",
       "phase": "Lopputarkistus",
       "kind": "question",
-      "title": "Muista ja kirjoita",
+      "title": "Lopputarkistus: siebzehn numerona",
       "paragraphs": [
         "Yritä ensin ilman vastausta näkyvillä. Saat halutessasi kohdennetun vihjeen."
       ],
@@ -368,10 +368,10 @@ export const LOS1_L032_TEACHER: TeacherLesson = {
         "accepted": [
           "17"
         ],
-        "success": "Oikein. Saksan muoto tai numero täsmää.",
-        "hint": "Vertaa etenkin sanan loppua ja erikoismerkkejä.",
-        "reteach": "Palaa malliesimerkkiin: kysymyksen tai vastauksen muoto riippuu siitä, kerrotaanko ikä vai kysytäänkö sitä.",
-        "genericWrong": "Vastauksessa on kirjoitusasu- tai merkitysvirhe. Tarkista kirjain kirjaimelta, älä korvaa ß- tai umlaut-merkkejä.",
+        "success": "Oikein. Siebzehn tarkoittaa lukua 17, ei lukua 70.",
+        "hint": "Sieb- liittyy seitsemään ja -zehn teinilukuun. Kirjoita vastaukseksi numero.",
+        "reteach": "Siebzehn = 17. Seitsemänkymmentä on siebzig (70), jossa loppu on -zig.",
+        "genericWrong": "Tehtävä pyytää numeromerkintää: siebzehn tarkoittaa 17. Älä sekoita sitä lukuun 70.",
         "wrongAnswers": {
           "70": "Seitsemänkymmentä on siebzig. Siebzehn on seitsemäntoista."
         }
