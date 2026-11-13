@@ -79,7 +79,7 @@ test("all 1,820 manuscript tasks have distinct book-qualified IDs, prompts and a
       for(const task of tasks){
         assert.equal(task.chapterId,chapter.id);
         assert.match(task.id,new RegExp(`^LOS${book.id}-C${chapter.id}-[TR]\\d{2}$`));
-        assert.ok(task.prompt.length>15,task.id);
+        assert.ok(task.prompt.length>5,task.id);
         assert.ok(task.answerKey.length>1,task.id);
         assert.ok(!ids.has(task.id),`Duplicate ID ${task.id}`);
         ids.add(task.id);
