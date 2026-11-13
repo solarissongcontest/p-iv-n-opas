@@ -1,12 +1,24 @@
-import { expect, test } from "@playwright/test";
-import { enterApp, expectNoHorizontalOverflow } from "./helpers";
+import { expect, test, type Page } from "@playwright/test";
+import { expectNoHorizontalOverflow } from "./helpers";
 
 /**
  * Teacher C06 browser acceptance. Runs under existing desktop Chromium and
  * iPhone WebKit configurations; does not pretend to test physical device audio.
  */
+/**
+ * Book and Teacher local-storage browser fixture. Never used in production code,
+ * never supplies a server access token, and does not claim device authentication.
+ * The CI preview cannot call the real device-identification backend.
+ */
+async function enterLocalLosFixture(page: Page) {
+  await page.addInitScript(() => {
+    localStorage.setItem("opk.device-authorized", "Arthur");
+    localStorage.setItem("opk.owner-id", "los-c06-browser-fixture");
+  });
+}
+
 test("L033 builds numbers interactively, persists selection on reload and fits mobile",async ({page})=>{
-  await enterApp(page);
+  await enterLocalLosFixture(page);
   await page.goto("/los-lessons/L033",{waitUntil:"domcontentloaded"});
   await expect(page.getByRole("heading",{name:"Numerot 21–100: rakenne"})).toBeVisible();
   await page.locator(".los-teacher-outline").getByRole("button",{name:/Rakenna itse numeroita/}).click();
@@ -34,7 +46,7 @@ test("L033 builds numbers interactively, persists selection on reload and fits m
 });
 
 test("L032 uses actual four Text A source dialogues and requires checked evidence",async ({page})=>{
-  await enterApp(page);
+  await enterLocalLosFixture(page);
   await page.goto("/los-lessons/L032",{waitUntil:"domcontentloaded"});
   await expect(page.getByRole("heading",{name:"Numerot 13–20 ja ikä"})).toBeVisible();
   await page.locator(".los-teacher-outline").getByRole("button",{name:/Lue koko Text A/}).click();
@@ -49,7 +61,7 @@ test("L032 uses actual four Text A source dialogues and requires checked evidenc
 });
 
 test("L034 uses original C06 Text B and L035 links to actual submitted chapter test",async ({page})=>{
-  await enterApp(page);
+  await enterLocalLosFixture(page);
   await page.goto("/los-lessons/L034",{waitUntil:"domcontentloaded"});
   await expect(page.getByRole("heading",{name:"Kuuntele ikähaastattelu"})).toBeVisible();
   await page.locator(".los-teacher-outline").getByRole("button",{name:/Koko kahdeksan repliikin Text B/}).click();
