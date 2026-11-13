@@ -304,6 +304,7 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
               <summary>Oppitunnin sisältö</summary>
               <nav aria-label="Oppitunnin opetustilanteet">
                 {lesson.scenes.map((item, i) => <button key={item.id} type="button"
+                  disabled={Boolean(session.paused)}
                   aria-current={scene.id === item.id ? "step" : undefined}
                   className={scene.id === item.id ? "is-active" : ""}
                   onClick={() => navigate(item.id)}>

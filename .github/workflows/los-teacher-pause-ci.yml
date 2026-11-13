@@ -1,0 +1,68 @@
+name: LOS Teacher Pause Gate QA
+
+on:
+  pull_request:
+    branches:
+      - feat/los1-integrated-preview-20261113
+    paths:
+      - "src/features/los/teacher/engine.ts"
+      - "src/features/los/teacher/LosTeacherPlayer.tsx"
+      - "tests/los-teacher-pause-navigation.test.ts"
+      - "e2e/los-full-book.spec.ts"
+      - ".github/workflows/los-teacher-pause-ci.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: los-pause-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  pause-gate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    env:
+      E2E_BASE_URL: http://127.0.0.1:5173
+      REQUIRE_GEMINI: "false"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - name: Install locked dependencies
+        run: bun install --frozen-lockfile
+      - name: Full unit and regression suite
+        run: bun run test
+      - name: TypeScript and production build
+        run: bun run build
+      - name: Install Playwright test tools
+        run: bun run e2e:install
+      - name: Install Chromium and WebKit
+        run: bunx playwright install --with-deps chromium webkit
+      - name: Start local preview without touching the production deployment
+        shell: bash
+        run: |
+          nohup bun run dev -- --host 127.0.0.1 --port 5173 --strictPort > /tmp/los-pause-preview.log 2>&1 &
+          for attempt in $(seq 1 50); do
+            if curl --silent --fail --max-time 3 http://127.0.0.1:5173/ > /dev/null 2>&1; then
+              echo "Local preview ready"
+              exit 0
+            fi
+            sleep 2
+          done
+          cat /tmp/los-pause-preview.log
+          exit 1
+      - name: Pause resume and neighboring Teacher flows in Chromium and iPhone WebKit
+        run: bunx playwright test e2e/los-full-book.spec.ts --project=desktop-chromium --project=iphone-webkit --grep "C05 Teacher scene and attempts survive pause|Teacher 2.0 presents one teaching board|C05 Teacher 2.0 five lessons open"
+      - name: Upload browser evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: los-teacher-pause-${{ github.run_id }}
+          path: |
+            test-results/
+            /tmp/los-pause-preview.log
+          if-no-files-found: ignore
+          retention-days: 14
