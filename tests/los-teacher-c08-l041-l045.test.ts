@@ -118,3 +118,35 @@ test("helped answers do not become independent proficiency evidence",()=>{
  s=submitTeacherAnswer(s,lesson,"independent",choice.correctOption!,at);
  assert.equal(independentTeacherEvidence(s,lesson),0);
 });
+
+
+// Regression: whole-sentence teacher instructions must be grammatical German,
+// while translations belong in a separate Finnish explanation, not a fake source quote.
+test("C08 models distinguish spoken German from Finnish teaching glosses",()=>{
+ const all=LOS1_C08_TEACHER_LESSONS.flatMap(lesson=>lesson.scenes);
+ const boards=all.flatMap(scene=>scene.board??[]);
+ const text=all.flatMap(scene=>[...scene.paragraphs,scene.question?.success??"",
+  ...(scene.question?.options?.map(option=>option.wrongFeedback??"")??[])]).join(" ");
+ assert.ok(text.includes("Bearbeitet bitte Aufgabe zwei."));
+ assert.ok(boards.some(step=>step.german==="Bearbeitet bitte Aufgabe fünf."));
+ assert.ok(boards.some(step=>step.german==="Aufgabe heißt Übung."));
+ assert.ok(!text.includes("Bitte die Aufgabe zwei."));
+ assert.ok(!boards.some(step=>step.german.includes(" bedeutet tehtävä")));
+ assert.ok(!text.includes("Pyyntö betrifft"));
+ assert.ok(text.includes("Ausgang ist der Weg nach draußen."));
+});
+
+test("C08 source attributions remain attached to the two original publishers",()=>{
+ const sourceA=LOS1_C08_TEXT;
+ const sourceB=LOS1_TEXT_B_SOURCES["08"];
+ assert.equal(sourceA.sourceId,"M-WB-08");
+ assert.equal(sourceA.sourceUrl,"https://en.wikibooks.org/w/index.php?title=German/Level_I/Schule&oldid=4520956");
+ assert.equal(sourceA.licenseUrl,"https://creativecommons.org/licenses/by-sa/4.0/");
+ assert.equal(sourceA.originalLines[0]?.text,"Jetzt haben wir Mathe.");
+ assert.equal(sourceA.originalLines[25]?.text,"Schon wieder!");
+ assert.equal(sourceB.sourceId,"M-DIB-03");
+ assert.equal(sourceB.attribution.url,"https://coerll.utexas.edu/dib/vidt.php?f=01_19_int_ek_studies-home");
+ assert.equal(sourceB.attribution.licenseUrl,"https://creativecommons.org/licenses/by/4.0/");
+ assert.equal(sourceB.lines[0]?.text,"Was studierst du?");
+ assert.match(sourceB.lines[7]?.text??"",/Kein Geld, um eine eigene Wohnung/);
+});
