@@ -8,6 +8,8 @@ import {
   type LosLessonProgress,
 } from "./lessonEngine";
 import { LOS1_EXECUTABLE_LESSONS, los1LessonDraftChapter } from "./guidedLessons";
+import {TEACHER_L004} from "./teacher/content/l004";
+import {teacherCurrentCompletion} from "./teacher/core";
 import "./los-lessons.css";
 
 const ALL_LESSONS = LOS1_EXECUTABLE_LESSONS;
@@ -51,6 +53,8 @@ export function LosFirstLessons({ selectedId, onSelect, move }: {
   const chapterId = lessonChapter(lesson.id);
   const { draft, update, saved } = chapterDraft(lesson.id);
   const [pendingAnswer, setPendingAnswer] = useState("");
+  const [showL004History,setShowL004History]=useState(false);
+  useEffect(()=>setShowL004History(false),[lesson.id]);
   const progress = draft.lessonProgress?.[lesson.id] ?? emptyLosLessonProgress();
   useEffect(() => { setPendingAnswer(progress.exitAnswer ?? ""); }, [lesson.id, progress.exitAnswer]);
   const record = (action: (current: LosLessonProgress) => LosLessonProgress) => {
@@ -78,6 +82,8 @@ export function LosFirstLessons({ selectedId, onSelect, move }: {
   const next = ALL_LESSONS[nextIndex];
   const skipsUnfinishedLessons = Boolean(next && Number(next.id.slice(1)) > Number(lesson.id.slice(1)) + 1);
   const isComplete = Boolean(progress.completedAt);
+  const isL004=lesson.id==="L004";
+  const teacherDone=Boolean(progress.teacher&&teacherCurrentCompletion(TEACHER_L004,progress.teacher));
   return <section className="los-lesson-program" id="los-lesson-runner" aria-label="Toteutetut LOS! 1 -oppitunnit">
     <div className="los-lesson-program-head">
       <p className="los-overline">OHJATTU OPETUS · {ALL_LESSONS.length} TUNTIA</p>
@@ -116,8 +122,31 @@ export function LosFirstLessons({ selectedId, onSelect, move }: {
       <p className="los-overline">{lesson.id} · NOIN {lesson.estimatedMinutes} MIN · {lesson.id === "L001" ? "KIRJAN ALOITUS" : chapterId==="93" ? "EX-FINAL / YHTEENVETO" : chapterId==="92" ? "KERTAUS II" : chapterId==="91" ? "KERTAUS I / EX-MID" : `C${chapterId}`}</p>
       <h3>{lesson.title}</h3>
       <p className="los-lesson-objective"><strong>Tavoite:</strong> {lesson.objective}</p>
-      <p className="los-lesson-status">{isComplete ? "Oppitunti suoritettu. Voit silti avata aineistot uudelleen." :
-        progress.startedAt ? "Oppitunti kesken" : "Oppituntia ei ole vielä aloitettu"} · {stepCount}/{lesson.steps.length} vaihetta merkitty tehdyksi.</p>
+      <p className="los-lesson-status">{isL004?
+        (teacherDone?"Päivitetty opetus on käyty läpi. Osaaminen arvioidaan erikseen.":
+         progress.teacher?.completedAt?"Aiempi opetusversio on käyty läpi. Päivitetyn version harjoitukset ovat vielä vahvistamatta.":
+         progress.teacher?"Uudistettu opetus kesken. Palaa viimeiseen opetustilanteeseen.":
+         isComplete?"Aiempi oppituntisuoritus säilyy. Voit käydä uuden opetuksen erikseen.":
+         "Uudistettu opetus on aloittamatta. Etene opetustilanteissa omaan tahtiin."):
+        (isComplete ? "Oppitunti suoritettu. Voit silti avata aineistot uudelleen." :
+         progress.startedAt ? "Oppitunti kesken" : "Oppituntia ei ole vielä aloitettu")+ 
+         ` · ${stepCount}/${lesson.steps.length} vaihetta merkitty tehdyksi.`}</p>
+      {isL004&&<>
+        <div className="los-lesson-teacher-launch">
+          <p>Opettajajohtoinen L004 avautuu omassa häiriöttömässä Lesson Player -näkymässä.
+            Edellinen opetustilanne ja kaikki tallennetut vastaukset säilyvät.</p>
+          <a className="los-lesson-teacher-entry" href="/los#/1/lesson/L004">
+            {teacherDone?"Kertaa L004 omassa opetustilassa":progress.teacher?"Jatka L004:n opetusta":"Aloita L004:n opetus"}
+          </a>
+        </div>
+        <button type="button" className="los-lesson-history-toggle" aria-controls="los-l004-legacy"
+          aria-expanded={showL004History} onClick={()=>setShowL004History(x=>!x)}>
+          {showL004History?"Piilota aiemmat oppituntitehtävät":"Näytä aiemmat oppituntitehtävät"}
+        </button>
+        <p className="los-lesson-history-note">Vanhan mallin suoritukset, vastaukset ja harjoitukset säilyvät.
+          Niitä ei muunneta automaattisesti uudeksi osaamisnäytöksi.</p>
+      </>}
+      <div id={isL004?"los-l004-legacy":undefined} hidden={isL004&&!showL004History}>
       <ol className="los-lesson-steps">
         {lesson.steps.map((step, index) => {
           const done = progress.completedStepIds.includes(step.id);
@@ -173,7 +202,7 @@ export function LosFirstLessons({ selectedId, onSelect, move }: {
           <CheckCircle2 size={22} /><strong>{lesson.id} suoritettu</strong>
           <small>Merkintä tallennettu {progress.completedAt ? new Date(progress.completedAt).toLocaleString("fi-FI") : ""}. Osaaminen arvioidaan erikseen.</small>
         </div>}
-        {isComplete && next && <>
+        {isComplete && next && !isL004 && <>
           {skipsUnfinishedLessons && <p className="los-lesson-skip-notice" role="note">Tuntien {`L${String(Number(lesson.id.slice(1)) + 1).padStart(3,"0")}`}–{`L${String(Number(next.id.slice(1)) - 1).padStart(3,"0")}`} suoritus ei ole vielä käytössä. Siirtyminen seuraavaan käytettävissä olevaan tuntiin ei merkitse niitä suoritetuiksi.</p>}
           <button type="button" className="los-lesson-next" onClick={() => onSelect(next.id)}>{skipsUnfinishedLessons ? "Seuraava käytettävissä oleva" : "Seuraava"}: {next.id} · {next.title} <ArrowRight size={17} /></button>
         </>}
@@ -181,6 +210,9 @@ export function LosFirstLessons({ selectedId, onSelect, move }: {
       {progress.exitCheckedAt && !isComplete && <button type="button" className="los-lesson-retry" onClick={() => record(old => ({
         ...old, exitAnswer: null, exitCheckedAt: null,
       }))}><RotateCcw size={15} /> Tee lopputarkistus uudelleen</button>}
+      </div>
+      {isL004 && isComplete && next && <button type="button" className="los-lesson-next"
+        onClick={()=>onSelect(next.id)}>Seuraava oppitunti: {next.id} · {next.title} <ArrowRight size={17}/></button>}
     </article>
   </section>;
 }

@@ -5,6 +5,8 @@
  * Completion is not a claim of mastery, and opening a link is not completion.
  */
 import type { LosChapterDraft } from "./studyState";
+import { validTeacherProgress, initialTeacherProgress, finishTeacher,
+  type TeacherLesson, type TeacherProgress } from "./teacher/core.ts";
 
 export type LosLessonSection =
   "overview" | "contents" | "text" | "understand" | "vocabulary" | "review" | "review-ii" | "midterm" |
@@ -44,6 +46,8 @@ export type LosLessonProgress = {
   exitAnswer: string | null;
   exitCheckedAt: string | null;
   completedAt: string | null;
+  /** Optional Teacher Experience 2.0 scene progress; existing v1 data remains valid. */
+  teacher?: TeacherProgress;
 };
 
 export const LOS1_C01_LESSON_BLUEPRINTS: readonly LosLessonBlueprint[] = [
@@ -163,7 +167,8 @@ export function validateLosLessonProgressMap(value: unknown): value is Record<st
       p.completedStepIds.every(x => typeof x === "string" && x.length <= 60) &&
       (p.exitAnswer === null || (typeof p.exitAnswer === "string" && p.exitAnswer.length <= 20)) &&
       (p.exitCheckedAt === null || isIso(p.exitCheckedAt)) &&
-      (p.completedAt === null || isIso(p.completedAt));
+      (p.completedAt === null || isIso(p.completedAt)) &&
+      (p.teacher === undefined || validTeacherProgress(p.teacher));
   });
 }
 export function parseLosLessonProgressMap(value: unknown): Record<string, LosLessonProgress> {
@@ -201,4 +206,20 @@ export function losLessonSubmitCheck(lesson: LosLessonBlueprint, progress: LosLe
 }
 export function losLessonFinish(lesson: LosLessonBlueprint, progress: LosLessonProgress, draft: Pick<LosChapterDraft, "practiceAnswers" | "practiceChecked" | "testSubmittedAt"> & Partial<Pick<LosChapterDraft, "applicationDraft" | "selfAssessment">>, now: string): LosLessonProgress {
   return progress.completedAt || !losLessonCanComplete(lesson, progress, draft) ? progress : { ...progress, completedAt: now };
+}
+
+/**
+ * Preserve every legacy field and the historical completion timestamp.
+ * A teacher-first completion is evidence of completing instruction, NEVER
+ * proof of German proficiency or an upgrade of older skill records.
+ */
+export function losLessonFinishTeacher(
+  lesson:TeacherLesson, progress:LosLessonProgress, now:string
+):LosLessonProgress {
+  const current=progress.teacher??initialTeacherProgress(lesson);
+  const next=finishTeacher(lesson,current,now);
+  if(!next.completedAt)return progress;
+  if(next===current)return progress;
+  return {...progress, startedAt:progress.startedAt??now,
+    completedAt:progress.completedAt??now,teacher:next};
 }

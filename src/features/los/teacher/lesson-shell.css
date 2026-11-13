@@ -1,0 +1,46 @@
+/* LOS Teacher 2.0: dedicated scene player, no book sidebar or long path list. */
+.los-teacher-shell{min-height:100dvh;background:var(--los-bg);color:var(--los-ink)}
+.los-teacher-shell-top{min-height:64px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:12px;
+ padding:7px clamp(14px,4vw,40px);border-bottom:1px solid var(--los-line);background:var(--los-paper)}
+.los-teacher-shell-top a,.los-teacher-shell-footer a{display:inline-flex;align-items:center;gap:8px;min-height:44px;
+ color:var(--los-ink);text-decoration:none;font-size:13px;font-weight:650}
+.los-teacher-shell-back{justify-self:start}
+.los-teacher-shell-brand{font-family:"LOS Takota",Georgia,serif;font-size:34px;letter-spacing:-.05em;
+ color:var(--los-book-accent);white-space:nowrap}
+.los-teacher-shell-tag{justify-self:end;color:var(--los-soft);font-size:12px;font-weight:650}
+.los-teacher-shell-main{max-width:920px;padding:28px clamp(14px,4vw,34px) 70px;margin:0 auto}
+.los-teacher-shell-heading h1{font:500 clamp(26px,4vw,40px)/1.2 Georgia,serif;margin:8px 0 14px}
+.los-teacher-shell-heading>p:not(.los-eyebrow){font-size:15px;line-height:1.7;max-width:68ch}
+.los-teacher-shell-progress{display:grid;gap:8px;max-width:550px;margin:19px 0 12px;font-size:12px}
+.los-teacher-shell-progress [role="progressbar"]{height:7px;background:var(--los-line);border-radius:6px;overflow:hidden}
+.los-teacher-shell-progress [role="progressbar"]>span{display:block;height:100%;
+ background:var(--los-book-accent);transition:width .2s}
+.los-teacher-shell-save,.los-teacher-shell-legacy{font-size:12px;line-height:1.65;color:var(--los-soft)}
+.los-teacher-shell-legacy{padding:13px;background:var(--los-book-tint);border-radius:8px}
+.los-teacher-shell .los-teacher{margin-top:20px}
+.los-teacher-shell-footer{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;
+ border-top:1px solid var(--los-line);padding-top:16px}
+.los-teacher-shell a:focus-visible{outline:3px solid var(--los-book-accent);outline-offset:3px}
+@media(max-width:600px){.los-teacher-shell-top{grid-template-columns:1fr auto}.los-teacher-shell-brand{display:none}
+ .los-teacher-shell-main{padding-top:18px}.los-teacher-shell-tag{font-size:11px}}
+@media(prefers-reduced-motion:reduce){.los-teacher-shell-progress [role="progressbar"]>span{transition:none}}
+
+.los-book-teacher-return{display:flex;align-items:center;gap:15px;flex-wrap:wrap;
+ margin:14px auto 4px;padding:10px 14px;max-width:900px;
+ background:var(--los-book-tint);border-radius:9px}
+.los-book-teacher-return a{display:inline-flex;align-items:center;gap:8px;
+ min-height:44px;font-size:14px;font-weight:700;color:var(--los-ink);text-decoration:none}
+.los-book-teacher-return span{font-size:12px;color:var(--los-soft)}
+.los-book-teacher-return a:focus-visible{outline:3px solid var(--los-book-accent);outline-offset:3px}
+
+.los-teacher-shell-next{margin:16px 0 22px}
+.los-teacher-shell-next a{display:inline-flex;align-items:center;min-height:46px;
+ padding:11px 18px;background:var(--los-book-accent);color:white;
+ text-decoration:none;border-radius:8px;font-size:14px;font-weight:700}
+.los-lesson-teacher-launch{background:var(--los-book-tint);border-radius:10px;
+ padding:18px 20px;margin:16px 0}
+.los-lesson-teacher-launch p{font-size:14px;line-height:1.7}
+.los-lesson-teacher-entry{display:inline-flex;align-items:center;justify-content:center;
+ min-height:46px;padding:10px 16px;background:var(--los-book-accent);color:white!important;
+ font-size:14px;font-weight:700;text-decoration:none;border-radius:8px}
+.los-lesson-teacher-entry:focus-visible{outline:3px solid var(--los-ink);outline-offset:3px}
