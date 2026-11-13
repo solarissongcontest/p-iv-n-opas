@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { getLosTeacherLesson } from "../src/features/los/teacher/lessonL004.ts";
+import { getLosTeacherLesson } from "../src/features/los/teacher/lessonRegistry.ts";
 import { validateTeacherLesson } from "../src/features/los/teacher/validateContent.ts";
 
 /**
