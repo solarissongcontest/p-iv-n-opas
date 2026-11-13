@@ -3,6 +3,8 @@ import { ArrowRight, BookOpen, ClipboardList, LockKeyhole } from "lucide-react";
 import type { LosBookDefinition } from "./catalog";
 import type { LosNavigate } from "./LosReferenceTools";
 import { LosFutureLessonRunner } from "./LosFutureLessonRunner";
+import { LosFutureProgressPanel } from "./LosFutureProgressPanel";
+import { getLosFutureLesson } from "./content/losFutureLessons.ts";
 import { losFutureLessonOutline, type LosFutureLessonOutline } from "./losFutureLessonOutline";
 import "./los-future-path.css";
 import "./los-future-lesson-runner.css";
@@ -46,6 +48,7 @@ export function LosFutureLearningPath({book,move}:{
 }) {
   const lessons=losFutureLessonOutline(book);
   const [selectedNumber,setSelectedNumber]=useState(1);
+  const [runnerRevision,setRunnerRevision]=useState(0);
   const storageKey=`los.future.book${book.id}.selectedLesson`;
   useEffect(()=>{
     try {
@@ -59,6 +62,16 @@ export function LosFutureLearningPath({book,move}:{
     if(typeof document!=="undefined"){
       requestAnimationFrame(()=>document.getElementById("los-future-lesson-runner")?.scrollIntoView({behavior:"smooth",block:"start"}));
     }
+  }
+  function resumeLesson(number:number,stageIndex:number){
+    const script=getLosFutureLesson(book.id,number);
+    if(!script||script.kind!=="chapter")return;
+    try{
+      sessionStorage.setItem(`los.future.guided.${script.id}.selectedStage`,
+        String(Math.min(5,Math.max(0,stageIndex))));
+    }catch{/* opetuspolku toimii ilman sessionStoragea */}
+    setRunnerRevision(n=>n+1);
+    selectLesson(number);
   }
   const active=lessons.find(lesson=>lesson.number===selectedNumber)??lessons[0];
   return <section className="los-inner-page los-learning-path">
@@ -77,7 +90,8 @@ export function LosFutureLearningPath({book,move}:{
         Kokeita ei käynnistetä pelkistä koetuntien ohjeista. Pelkkä siirtymä sisältösivulle
         ei muuta oppituntia suoritetuksi.</p>
     </div>
-    {active&&<LosFutureLessonRunner key={`${book.id}-${active.id}`}
+    <LosFutureProgressPanel book={book} onResume={resumeLesson}/>
+    {active&&<LosFutureLessonRunner key={`${book.id}-${active.id}-${runnerRevision}`}
       bookId={book.id} number={active.number} chapterId={active.chapterId} move={move}/>}
     <h2>Kaikki kirjan 60 oppituntia</h2>
     {groups.map((bucket,i)=>{
