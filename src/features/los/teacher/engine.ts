@@ -249,6 +249,7 @@ export function submitTeacherAnswer(session: TeacherSession, lesson: TeacherLess
   const scene = lesson.scenes.find(s => s.id === sceneId);
   if (session.completedAt || session.paused || !scene?.question || session.attempts.length >= 120 ||
       session.attempts.filter(item => item.sceneId === sceneId).length >= 3 ||
+      session.attempts.some(item => item.sceneId === sceneId && item.correct) ||
       session.revealedIds.includes(sceneId)) return session;
   const q = scene.question;
   const input = answer.trim();
@@ -269,9 +270,10 @@ export function teacherLatestAttempt(session: TeacherSession, sceneId: string): 
 export function teacherWrongFeedback(scene: TeacherScene, answer: string): string {
   const q = scene.question;
   if (!q) return "";
-  if (q.type === "choice") return q.options?.find(item => item.id === answer)?.wrongFeedback ??
-    q.genericWrong;
-  return q.wrongAnswers?.[normalizeTeacherAnswer(answer)] ?? q.genericWrong;
+  const specific = q.type === "choice"
+    ? q.options?.find(item => item.id === answer)?.wrongFeedback
+    : q.wrongAnswers?.[normalizeTeacherAnswer(answer)];
+  return specific?.trim() ? specific : q.genericWrong;
 }
 /** Calendar evidence requires a correct, explicitly saved choice. It is never audio evidence. */
 export function isCorrectCalendarEntry(scene: TeacherScene, value: string): boolean {
