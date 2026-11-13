@@ -10,7 +10,7 @@ import {
   emptyTeacherSession, markTeacherHelp, confirmTeacherActivity, teacherChapterAssessmentStatus, teacherMidtermAssessmentStatus,
   finishTeacherSession, independentTeacherEvidence, moveTeacherScene, revealTeacherSolution,
   setTeacherAnswerDraft, submitTeacherAnswer, toggleTeacherPause, teacherCanFinish, teacherCompletionBlockers, teacherNextIncompleteSceneId, teacherLatestAttempt,
-  teacherWrongFeedback, teacherBuiltNumberCount, type TeacherScene, type TeacherSession, isCorrectCalendarEntry,
+  teacherWrongFeedback, teacherBuiltNumberCount, teacherRequiresNumericResponse, type TeacherScene, type TeacherSession, isCorrectCalendarEntry,
 } from "./engine.ts";
 import { getLosTeacherLesson } from "./lessonRegistry.ts";
 import { LosTeacherNumberBuilder } from "./LosTeacherNumberBuilder.tsx";
@@ -38,7 +38,7 @@ function SceneQuestion({ scene, session, submit, saveDraft, requestHint, reveal 
   const inputRef = useRef<HTMLInputElement>(null);
   const q = scene.question;
   if (!q) return null;
-  const numericResponse = /^Kirjoita numeroin\b/i.test(q.prompt);
+  const numericResponse = teacherRequiresNumericResponse(q);
   const latest = teacherLatestAttempt(session, scene.id);
   const attempts = session.attempts.filter(item => item.sceneId === scene.id);
   const succeeded = attempts.some(item => item.correct);
