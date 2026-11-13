@@ -1126,7 +1126,7 @@ test("C05 full chapter retake preserves original 12/12 result, self-assessment a
  await expect(page.locator(".los-test-result h2").first()).toHaveText("12 / 12 oikein");
  await page.locator("#los-self-05").fill("Osaan kysyä kuulumisia. Kertaan vielä nicht-sanan paikan.");
  await page.getByRole("button",{name:"Arkistoi tulos ja aloita uusinta"}).click();
- const archived=page.getByRole("region",{name:"Kappaletestin aiemmat yritykset"});
+ const archived=page.locator('[aria-label="Kappaletestin aiemmat yritykset"]');
  await expect(archived).toContainText("Yritys 1:");
  await expect(archived).toContainText("12/12 pistettä");
  await expect(page.getByRole("button",{name:"Palauta testi · 0/12"})).toBeDisabled();
