@@ -101,6 +101,9 @@ test("C01 real original token highlight, C08 gated video and responsive exercise
 
 
 test("every one of the 60 guided lessons opens from its actual chapter picker on iPhone and desktop",async({page})=>{
+ // 60 route changes + chapter reselects exceed the 60s default on mobile WebKit.
+ // Preserve all 60 entry and source checks; this is a long integration test.
+ test.setTimeout(180_000);
  await enterLocalBook(page);
  await page.goto("/los#/1/path",{waitUntil:"domcontentloaded"});
  const runner=page.locator("#los-lesson-runner");
