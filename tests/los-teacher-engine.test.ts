@@ -5,7 +5,7 @@ import {
   finishTeacherSession, independentTeacherEvidence, markTeacherHelp,
   moveTeacherScene, normalizeTeacherAnswer, parseTeacherSessions,
   revealTeacherSolution, setTeacherAnswerDraft, submitTeacherAnswer,
-  teacherCanFinish, teacherCompletionBlockers, teacherLatestAttempt, teacherWrongFeedback,
+  teacherCanFinish, teacherCompletionBlockers, teacherNextIncompleteSceneId, teacherLatestAttempt, teacherWrongFeedback,
 } from "../src/features/los/teacher/engine.ts";
 import { LOS1_L004_TEACHER } from "../src/features/los/teacher/lessonL004.ts";
 
@@ -151,4 +151,35 @@ test("completion checklist identifies media and storage-independent gates withou
   assert.ok(blockers.some(reason=>reason.includes("M-TEST-01")));
   assert.ok(blockers.some(reason=>reason.includes("erillinen kertaus- tai arviointiosio")));
   assert.equal(teacherCanFinish(session,guarded,{},[],undefined,false),false);
+});
+
+test("next unfinished step prioritizes unvisited lessons, unanswered questions and book practice", () => {
+  let session=emptyTeacherSession(lesson,now);
+  assert.equal(teacherNextIncompleteSceneId(session,lesson), "welcome");
+  session=moveTeacherScene(session,lesson,"welcome",now);
+  assert.equal(teacherNextIncompleteSceneId(session,lesson),"recall");
+
+  for(const scene of lesson.scenes) session=moveTeacherScene(session,lesson,scene.id,now);
+  assert.equal(teacherNextIncompleteSceneId(session,lesson),"recall");
+  for(const scene of lesson.scenes){
+    if(scene.question){
+      const answer=scene.question.type==="choice"?scene.question.correctOption!:scene.question.accepted![0]!;
+      session=submitTeacherAnswer(session,lesson,scene.id,answer,now);
+    }
+  }
+  assert.equal(teacherNextIncompleteSceneId(session,lesson),"book");
+  for(const id of lesson.requiredActivityIds) session=confirmTeacherActivity(session,lesson,id,now);
+  const answers={"C01-EX-01":"x","C01-EX-04":"x"};
+  assert.equal(teacherNextIncompleteSceneId(session,lesson,answers),undefined);
+});
+
+test("next unfinished step points to an incomplete reflection without changing any evidence", () => {
+  const reflection={id:"my-reflection",phase:"Harjoittelu",title:"Pohdi",kind:"reflection" as const,
+    paragraphs:["Kirjoita oma tavoite."],reflection:{prompt:"Mitä harjoittelit?",placeholder:"Vastaukseni",minLength:12}};
+  const extra={...lesson,scenes:[...lesson.scenes.slice(0,1),reflection,...lesson.scenes.slice(1)]};
+  let session=emptyTeacherSession(extra,now);
+  for(const scene of extra.scenes) session=moveTeacherScene(session,extra,scene.id,now);
+  const before=structuredClone(session);
+  assert.equal(teacherNextIncompleteSceneId(session,extra),"my-reflection");
+  assert.deepEqual(session,before,"Guidance must never create learning evidence");
 });
