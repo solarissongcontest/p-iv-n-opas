@@ -106,7 +106,12 @@ export function LosReviewII({move}:{move:LosNavigate}){
             onClick={()=>{if(!showModel)markWritingModel();setShowModel(old=>!old);}}>
             {showModel?"Piilota tarkistusmalli":"Näytä tarkistusmalli oman yrityksen jälkeen"}
           </button>
-          {draft.teacherSessions?.["L058"]?.helpedIds.includes("writing-model")&&<p role="status">Tarkistusmalli on avattu. Jos teksti oli tässä vaiheessa kesken, sen tuottaminen merkittiin avustetuksi. Vapaa teksti ei ole automaattisesti tarkistettu kielioppinäyttö.</p>}
+          {draft.teacherSessions?.["L058"]?.helpedIds.includes("writing-model")&&<p role="status">
+            Tarkistusmalli on avattu. {draft.teacherSessions["L058"].helpedIds.includes("writing-assisted")
+              ? "Esittely oli kesken mallin avautuessa tai sitä muokattiin mallin katsomisen jälkeen, joten kirjoitusyritys on merkitty avustetuksi."
+              : "Esittely oli tallennettu valmiiksi ennen mallin avaamista. Mallin katsominen on kirjattu; myöhemmät tekstimuokkaukset merkitään avustetuiksi."}
+            {" "}Vapaa teksti ei ole automaattisesti tarkistettu kielioppinäyttö.
+          </p>}
           {showModel&&<div className="los-exam-rubric">
             <h4>Tarkistuslista ja malliteksti</h4>
             <ul>
