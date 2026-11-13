@@ -139,7 +139,7 @@ export function LosIndexSearch({book,move}:{book:LosBookDefinition;move:LosNavig
         for(const snippet of snippets) {
           const at=snippet.value.toLocaleLowerCase("fi").indexOf(q);
           if(at<0)continue;
-          const excerpt=snippet.value.slice(Math.max(0,at-55),Math.min(snippet.value.length,at+q.length+90)).replace(/\\s+/g," ");
+          const excerpt=snippet.value.slice(Math.max(0,at-55),Math.min(snippet.value.length,at+q.length+90)).replace(/\s+/g," ");
           add({id:`draft-${id}-${snippet.section}-${snippet.title}`,kind:"Harjoitusteksti",
             title:`C${id} · ${snippet.title}`,description:excerpt,
             chapter:id,section:snippet.section});
