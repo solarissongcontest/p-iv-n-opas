@@ -1,7 +1,7 @@
 import {TEACHER_VERSION,type TeacherLesson} from "../core.ts";
 /** L004 draft manuscript; pedagogical and linguistic editorial approval pending. */
 export const TEACHER_L004:TeacherLesson={
- id:"L004",version:TEACHER_VERSION,review:"draft",
+ id:"L004",version:TEACHER_VERSION,review:"draft",contentRevision:"l004-free-recall-v1",
  objective:"Erotan vuorokaudenajan tervehdykset ja tilanteeseen sopivat hyvästelyt.",
  scenes:[
  {id:"activation",phase:"activation",title:"Mitä tiedät jo?",
