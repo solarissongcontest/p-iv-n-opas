@@ -116,7 +116,7 @@ export function LosTeacherPlayer({ lessonId }: { lessonId: string }) {
     : null;
   const scene = lesson?.scenes.find(item => item.id === session?.sceneId) ?? lesson?.scenes[0];
   const sceneIndex = lesson?.scenes.findIndex(item => item.id === scene?.id) ?? 0;
-  const available = Boolean(session && lesson && teacherCanFinish(session, lesson, draft.practiceAnswers, draft.practiceChecked, draft));
+  const available = Boolean(saved && session && lesson && teacherCanFinish(session, lesson, draft.practiceAnswers, draft.practiceChecked, draft));
   const completed = Boolean(session?.completedAt);
 
   useEffect(() => { setAuthorized(Boolean(readCachedDeviceUser())); }, []);
@@ -159,7 +159,7 @@ export function LosTeacherPlayer({ lessonId }: { lessonId: string }) {
     persist(old => confirmTeacherActivity(old, lesson, id, stamp()));
   };
   const finish = () => {
-    if (!lesson) return;
+    if (!lesson || !saved) return;
     update(current => {
       const now = stamp();
       const old = current.teacherSessions?.[lessonId] ?? emptyTeacherSession(lesson, now);
