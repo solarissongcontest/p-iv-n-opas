@@ -13,6 +13,13 @@ import sys
 PATTERN = re.compile(r"(?ms)^<<<<<<< HEAD\n(.*?)^=======\n(.*?)^>>>>>>> [^\n]*\n")
 
 def choose(path: str, ours: str, theirs: str) -> str:
+    if path == "e2e/los-full-book.spec.ts" and ours.lstrip().startswith('test("') and theirs.lstrip().startswith('test("'):
+        # Distinct appended Playwright test definitions have no shared application state.
+        ours_names=set(re.findall(r'test\\("([^"]+)"',ours))
+        theirs_names=set(re.findall(r'test\\("([^"]+)"',theirs))
+        if not ours_names or not theirs_names or ours_names & theirs_names:
+            raise ValueError("Overlapping names in appended E2E test cases")
+        return ours.rstrip("\n") + "\n\n" + theirs.lstrip("\n")
     if path == "e2e/los-full-book.spec.ts" and all("Number(title.slice(1))" in x for x in (ours, theirs)):
         return "    if(Number(title.slice(1))<=60){\n"
     if path in {
