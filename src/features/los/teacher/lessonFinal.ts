@@ -52,7 +52,7 @@ const reviewLink=link("92","review-ii","Avaa Kertaus II",
 export const LOS1_L056_TEACHER:TeacherLesson={
   id:"L056",bookId:1,chapterId:"92",version,
   title:"Luvut, tavaaminen ja viikonpäivät",
-  objective:"Muistan lukusanat 16, 17, 21 ja 32, kertaa iän, tavaamispyynnön ja viikonpäivän sekä tunnistan kertaustarpeeni.",
+  objective:"Muistan lukusanat 16, 17, 21 ja 32, kertaan iän, tavaamispyynnön ja viikonpäivän sekä tunnistan kertaustarpeeni.",
   estimatedMinutes:30,
   bookEvidence:{kind:"review-ii",group:"L056"},
   requiredQuestionIds:["recall","guided","independent","exit"],
