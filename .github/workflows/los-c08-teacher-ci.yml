@@ -4,9 +4,11 @@ on:
   push:
     branches:
       - feat/los1-teacher-l041-l045
+      - feat/los1-teacher-integrated-c08-20261113
   pull_request:
     branches:
       - feat/los1-teacher-c03-l012-20261113
+      - feat/los1-teacher-integrated-c07-20261113
     paths:
       - "src/features/los/teacher/**"
       - "tests/los-teacher-c08-l041-l045.test.ts"
