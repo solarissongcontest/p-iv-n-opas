@@ -184,7 +184,7 @@ export const LOS1_L031_TEACHER: TeacherLesson = {
       "kind": "book",
       "paragraphs": [
         "Avaa C06:n kielioppi- tai sanastosivu. Etsi null, eins, elf ja zwölf ja käy läpi kaikki muut luvut 0–12.",
-        "C06:n uusi Text A sisältää myös lukusanat fünf, elf ja zwölf oikean julkaistun keskustelun osana. Tekstiä harjoitellaan tarkemmin L034:ssä."
+        "C06:n uusi 12 repliikin Text A sisältää myös lukusanat fünf, elf ja zwölf julkaistujen keskustelujen osana. Avaa teksti ja etsi kaksi ennakkovastausta: mikä sana on viisi ja kenen repliikissä on zwölf? Niitä ei pisteytetä kuunteluna. Koko tekstin ymmärtäminen harjoitellaan L032:ssa ja lähteiden vertailu L034:ssä."
       ],
       "bookLinks": [
         {
@@ -198,6 +198,12 @@ export const LOS1_L031_TEACHER: TeacherLesson = {
           "section": "vocabulary",
           "label": "C06 · Sanasto",
           "instruction": "Kertaa saksan lukusanat 0–12."
+        },
+        {
+          "chapterId": "06",
+          "section": "text",
+          "label": "C06 · Oma alkuperäinen Text A",
+          "instruction": "Lue kaikki 12 repliikkiä, etsi fünf ja zwölf; esikysymyksiä ei lasketa kuunteluksi."
         }
       ]
     },
