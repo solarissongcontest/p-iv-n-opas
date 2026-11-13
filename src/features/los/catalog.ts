@@ -1,4 +1,4 @@
-import { LOS_FUTURE_CHAPTERS } from "./content/losFutureChapters";
+import { LOS_FUTURE_CHAPTERS } from "./content/losFutureChapters.ts";
 /**
  * LOS! – sarjan kirjamainen sisältörunko.
  * Lähde: LOS! masterplan v1.1 ja LOS! 1 -kirjakohtainen masterplan.
