@@ -197,7 +197,7 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
       </section> :
       !lesson || !session || !scene ? <section className="los-teacher-status">
         <h1>Oppitunnin opetusmateriaali ei ole vielä valmis</h1>
-        <p>Teacher 2.0 on käytössä oppitunneilla L001–L016 sekä L036–L040. Muut oppitunnit toimivat edelleen nykyisessä Opetuspolussa.</p>
+        <p>Teacher 2.0 on käytössä oppitunneilla L001–L026 sekä L036–L040. Muut oppitunnit toimivat edelleen nykyisessä Opetuspolussa.</p>
         <a href={"/los#/" + (lesson?.bookId ?? 1) + "/path"}>Palaa Opetuspolkuun</a>
       </section> :
       <>
@@ -219,6 +219,7 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
               <summary>Oppitunnin sisältö</summary>
               <nav aria-label="Oppitunnin opetustilanteet">
                 {lesson.scenes.map((item, i) => <button key={item.id} type="button"
+                  disabled={Boolean(session.paused)}
                   aria-current={scene.id === item.id ? "step" : undefined}
                   className={scene.id === item.id ? "is-active" : ""}
                   onClick={() => navigate(item.id)}>

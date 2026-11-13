@@ -160,7 +160,8 @@ export function evaluateTeacherAnswer(question: TeacherQuestion, answer: string)
     normalizeTeacherAnswer(item) === normalizeTeacherAnswer(answer));
 }
 export function moveTeacherScene(session: TeacherSession, lesson: TeacherLesson, targetId: string, now: string): TeacherSession {
-  if (!lesson.scenes.some(s => s.id === targetId)) return session;
+  // Pausing freezes navigation; completed lessons remain reviewable (C07 contract).
+  if (session.paused || !lesson.scenes.some(s => s.id === targetId)) return session;
   return {
     ...session, sceneId: targetId, updatedAt: now,
     visitedIds: session.visitedIds.includes(targetId) ? session.visitedIds :
