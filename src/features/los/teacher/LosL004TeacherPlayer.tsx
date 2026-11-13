@@ -115,8 +115,12 @@ export function LosL004TeacherPlayer({
     </button>}
   </div>
   <p className="los-teacher-book-link">
-   <a href="/los#/1/01/vocabulary" target="_blank" rel="noopener noreferrer">
+   <a className="los-teacher-book-desktop" href="/los#/1/01/vocabulary?fromLesson=L004"
+      target="_blank" rel="noopener noreferrer">
     Avaa LOS! 1:n kappaleen 1 sanasto uuteen välilehteen
+   </a>
+   <a className="los-teacher-book-mobile" href="/los#/1/01/vocabulary?fromLesson=L004">
+    Avaa LOS! 1:n kappaleen 1 sanasto
    </a>
   </p>
   <p className="los-teacher-book-note">Kirjan avaaminen ei sulje oppitunnin opetustilaa eikä merkitse tehtävää suoritetuksi.

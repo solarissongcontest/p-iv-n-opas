@@ -24,3 +24,11 @@
 @media(max-width:600px){.los-teacher-shell-top{grid-template-columns:1fr auto}.los-teacher-shell-brand{display:none}
  .los-teacher-shell-main{padding-top:18px}.los-teacher-shell-tag{font-size:11px}}
 @media(prefers-reduced-motion:reduce){.los-teacher-shell-progress [role="progressbar"]>span{transition:none}}
+
+.los-book-teacher-return{display:flex;align-items:center;gap:15px;flex-wrap:wrap;
+ margin:14px auto 4px;padding:10px 14px;max-width:900px;
+ background:var(--los-book-tint);border-radius:9px}
+.los-book-teacher-return a{display:inline-flex;align-items:center;gap:8px;
+ min-height:44px;font-size:14px;font-weight:700;color:var(--los-ink);text-decoration:none}
+.los-book-teacher-return span{font-size:12px;color:var(--los-soft)}
+.los-book-teacher-return a:focus-visible{outline:3px solid var(--los-book-accent);outline-offset:3px}

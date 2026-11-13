@@ -338,7 +338,7 @@ test("LOS Teacher 2.0 L004 teaches greetings, saves scenes, and never invents ma
  await page.reload({waitUntil:"domcontentloaded"});
  await expect(page.locator(".los-teacher")).toContainText("Opetus on keskeytetty");
  await page.locator(".los-teacher").getByRole("button",{name:"Jatka opetusta"}).click();
- await expect(page.locator(".los-teacher-book-link a")).toHaveAttribute("target","_blank");
+ await expect(page.locator(".los-teacher-book-desktop")).toHaveAttribute("target","_blank");
  await expectNoHorizontalOverflow(page);
 });
 
@@ -411,5 +411,24 @@ test("L004 opens in a dedicated scene player without the 60-lesson navigation",a
  await shell.locator(".los-teacher-shell-back").click();
  await expect(page).toHaveURL(/\/los#\/1\/path$/);
  await expect(page.locator("#los-lesson-runner")).toBeVisible();
+ await expectNoHorizontalOverflow(page);
+});
+
+
+test("L004 book reference retains a return to the same lesson on mobile and desktop",async({page})=>{
+ await enterLocalBook(page);
+ await page.goto("/los#/1/lesson/L004",{waitUntil:"domcontentloaded"});
+ await expect(page.locator(".los-teacher")).toBeVisible();
+ await expect(page.locator(".los-teacher-book-mobile")).toHaveAttribute("href","/los#/1/01/vocabulary?fromLesson=L004");
+ await expect(page.locator(".los-teacher-book-desktop")).toHaveAttribute("target","_blank");
+ await page.goto("/los#/1/01/vocabulary?fromLesson=L004",{waitUntil:"domcontentloaded"});
+ await expect(page.locator(".los-book-teacher-return")).toBeVisible();
+ await page.goto("/los#/1/01/grammar",{waitUntil:"domcontentloaded"});
+ await expect(page.getByRole("link",{name:"Palaa oppitunnille L004"})).toBeVisible();
+ await page.getByRole("link",{name:"Palaa oppitunnille L004"}).click();
+ await expect(page).toHaveURL(/\/los#\/1\/lesson\/L004$/);
+ await expect(page.locator(".los-teacher-shell")).toBeVisible();
+ await page.goto("/los#/1/path",{waitUntil:"domcontentloaded"});
+ await expect(page.locator(".los-book-teacher-return")).toHaveCount(0);
  await expectNoHorizontalOverflow(page);
 });

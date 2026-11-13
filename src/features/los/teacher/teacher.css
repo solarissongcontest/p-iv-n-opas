@@ -42,3 +42,9 @@
  border-radius:10px;background:var(--los-book-tint)}
 .los-teacher-completion p {font-size:13px;line-height:1.6}
 .los-teacher-completion button {background:var(--los-book-accent);color:white;border-color:var(--los-book-accent)}
+
+.los-teacher-book-mobile{display:none!important}
+@media(max-width:700px){
+ .los-teacher-book-desktop{display:none!important}
+ .los-teacher-book-mobile{display:inline-flex!important}
+}
