@@ -79,11 +79,14 @@ export function summarizeLos1Mastery(
     losFinalReadyToSubmit(final.testAnswers) &&
     ["M-COM-01","M-COM-02"].every(source =>
       Boolean(final?.practiceAnswers["EX-FINAL-AUDIO-" + source])));
+  const lastArchived = archive.at(-1);
+  // The archive stores immutable scores. Do NOT regrade historic choices against
+  // today's question bank: its answer key or item-to-skill mapping may change.
   const lastChoices = validCurrent ?
-    LOS1_FINAL_QUESTIONS.map(q => final!.testAnswers[q.id]) :
-    archive.length ? archive[archive.length - 1]!.choices.split("") : null;
-  const objectiveResult = lastChoices
-    ? LOS1_FINAL_QUESTIONS.filter((q,i)=>lastChoices[i]===q.correctId).length : 0;
+    LOS1_FINAL_QUESTIONS.map(q => final!.testAnswers[q.id]) : null;
+  const objectiveResult = validCurrent ?
+    LOS1_FINAL_QUESTIONS.filter((q,i)=>lastChoices?.[i]===q.correctId).length :
+    lastArchived?.correct ?? 0;
   const skills:LosMasterySkill[] = LOS1_SKILLS.map(spec => {
     const attempts = (checks.get(spec.id) ?? []).sort((a,b)=>a.at-b.at);
     const independentChecks = attempts.length;
@@ -114,7 +117,7 @@ export function summarizeLos1Mastery(
       " ja tee uusi vihjeetön tarkistus eri päivänä." :
       "Jatka LOS! 2:n arjen vuorovaikutukseen ja palaa tarvittaessa LOS! 1:n kertaustehtäviin.",
     ownGoal,
-    exam:lastChoices?{correct:objectiveResult,total:50,attempts:archive.length+(validCurrent?1:0)}:null,
+    exam:(validCurrent || lastArchived)?{correct:objectiveResult,total:50,attempts:archive.length+(validCurrent?1:0)}:null,
     writing:{recorded:written,assisted},
   };
 }
