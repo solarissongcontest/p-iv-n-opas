@@ -11,14 +11,16 @@ on:
       - "src/features/los/**"
       - "tests/los-teacher-review-c06-integration.test.ts"
       - "e2e/los-c06-teacher.spec.ts"
+      - "e2e/los-c04-teacher.spec.ts"
+      - "tests/los-teacher-c05.test.ts"
       - "e2e/los-teacher-review-midterm.spec.ts"
-      - ".github/workflows/los-c04-c06-integration-integration.yml"
+      - ".github/workflows/los-c04-c05-review-c06-integration.yml"
 
 permissions:
   contents: read
 
 concurrency:
-  group: los-review-c06-${{ github.event.pull_request.number || github.ref }}
+  group: los-c04-c06-integration-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
