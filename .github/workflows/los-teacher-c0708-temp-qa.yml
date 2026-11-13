@@ -1,0 +1,55 @@
+name: LOS Teacher C07-C08 Integration QA
+
+on:
+  push:
+    branches:
+      - feat/los1-teacher-integrated-c07-c08-20261113
+
+permissions:
+  contents: read
+
+jobs:
+  tests-build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - run: bun install --frozen-lockfile
+      - name: TypeScript with generated routes
+        run: bun run typecheck
+      - name: Full regression units
+        run: bun run test
+      - name: Production bundle
+        run: bun run build
+
+  browsers:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    env:
+      E2E_BASE_URL: http://127.0.0.1:5173
+      REQUIRE_GEMINI: "false"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - run: bun install --frozen-lockfile
+      - run: bun run e2e:install
+      - run: bunx playwright install --with-deps chromium webkit
+      - name: Start local LOS app
+        shell: bash
+        run: |
+          nohup bun run dev -- --host 127.0.0.1 --port 5173 --strictPort > /tmp/los-teacher-c0708-dev.log 2>&1 &
+          for attempt in $(seq 1 45); do
+            if curl -fsS --max-time 3 http://127.0.0.1:5173/ > /dev/null 2>&1; then exit 0; fi
+            sleep 2
+          done
+          cat /tmp/los-teacher-c0708-dev.log
+          exit 1
+      - name: Real C07 C08 Teacher flows both browsers
+        run: bunx playwright test e2e/los-c07-teacher.spec.ts e2e/los-c08-teacher.spec.ts --project=desktop-chromium --project=iphone-webkit
+      - name: All 60 lesson picker routing (L001-L045 are scripted)
+        run: bunx playwright test e2e/los-full-book.spec.ts --grep 'every one of the 60 guided lessons' --project=desktop-chromium --project=iphone-webkit
