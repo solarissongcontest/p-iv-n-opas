@@ -141,7 +141,7 @@ function SeriesView({ openBook }: { openBook: (id: number) => void }) {
         <a href="/los#/1/cards"><BookOpen size={19} aria-hidden="true"/> Kertauskortit</a>
       </nav>
     </section>
-    <p className="los-library-footnote">LOS! 1: {teacherCount}/60 Teacher 2.0 -oppituntia esikatselussa. LOS! 2–8: yhteensä 70 kappaletta, 1 820 tehtäväluonnosta ja 420 käsikirjoitettua ohjattua tuntia erillisessä toimituksellisessa esikatselussa. Jatkokirjojen kokeet, riippumaton kielentarkistus, autenttiset aineistot, IPA, äänet ja julkaisuportit odottavat hyväksyntää. Sisältöön tutustuminen ei ole todistettu oppimistulos.</p>
+    <p className="los-library-footnote">LOS! 1: {teacherCount}/60 Teacher 2.0 -oppituntia esikatselussa. LOS! 2–8: yhteensä 70 kappaletta, 1 820 tehtäväluonnosta ja 420 käsikirjoitettua ohjattua tuntia erillisessä toimituksellisessa esikatselussa. Jatkokirjojen kokeet, riippumaton kielentarkistus, autenttiset aineistot, IPA, äänet ja julkaisuportit odottavat hyväksyntää; kaikkien kirjojen lopullinen hyväksyntä on kesken. Sisältöön tutustuminen ei ole todistettu oppimistulos.</p>
   </div>;
 }
 function BookFront({ book, move }: { book: LosBookDefinition; move: (chapter: string | null, section: LosSection) => void }) {
