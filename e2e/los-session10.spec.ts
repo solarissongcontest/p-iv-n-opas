@@ -74,6 +74,25 @@ test("L058 tracks model use before writing, but does not certify ungraded German
   await expectNoHorizontalOverflow(page);
 });
 
+test("L058 finished writing stays self-produced until edited after viewing the model",async({page})=>{
+  await enterLocalLos(page);
+  const review=page.locator("#los-review-L058");
+  const writing=review.locator("#los-review-ii-writing");
+  const initial="Hallo!\\nIch heiße Mia.\\nIch komme aus Finnland.\\nIch bin siebzehn Jahre alt.\\nDas ist Leo.\\nBis morgen!".replaceAll("\\n","\n");
+  await writing.fill(initial);
+  await review.getByRole("button",{name:"Näytä tarkistusmalli oman yrityksen jälkeen"}).click();
+  const key=draftKey("92");
+  const before=await page.evaluate(k=>JSON.parse(localStorage.getItem(k)??"{}"),key);
+  expect(before.teacherSessions.L058.helpedIds).toContain("writing-model");
+  expect(before.teacherSessions.L058.helpedIds).not.toContain("writing-assisted");
+  await writing.fill(initial+"\\nIch lerne Deutsch.".replaceAll("\\n","\n"));
+  const after=await page.evaluate(k=>JSON.parse(localStorage.getItem(k)??"{}"),key);
+  expect(after.teacherSessions.L058.helpedIds).toContain("writing-assisted");
+  await page.reload({waitUntil:"domcontentloaded"});
+  await expect(review.getByText(/sen tuottaminen merkittiin avustetuksi/)).toBeVisible();
+  await expectNoHorizontalOverflow(page);
+});
+
 test("EX-FINAL: 50 decisions, submit, 49/50 feedback, reload, retake archive, 50/50 and JSON backup on both layouts",async({page})=>{
   test.setTimeout(240_000);
   await enterLocalLos(page);
