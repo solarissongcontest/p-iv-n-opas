@@ -610,3 +610,18 @@ test("L005 text fallback can finish instruction without pretending hearing or re
  await expect(page.locator(".los-teacher")).toContainText("Opetuskokonaisuus käyty läpi");
  await expectNoHorizontalOverflow(page);
 });
+
+test("L005 remains selected when returning from its player to the lesson path",async({page})=>{
+ await enterLocalBook(page);
+ await page.goto("/los#/1/lesson/L005",{waitUntil:"domcontentloaded"});
+ await expect(page.locator(".los-teacher-shell")).toBeVisible();
+ await page.locator(".los-teacher-shell-back").click();
+ await expect(page).toHaveURL(/\/los#\/1\/path$/);
+ const runner=page.locator("#los-lesson-runner");
+ await expect(runner.locator(".los-lesson-detail .los-overline")).toContainText("L005");
+ await expect(runner.locator(".los-lesson-teacher-launch")).toBeVisible();
+ await expect(runner.locator(".los-lesson-steps li").first()).toBeHidden();
+ await runner.getByRole("button",{name:"Näytä aiemmat oppituntitehtävät"}).click();
+ await expect(runner.locator(".los-lesson-steps li").first()).toBeVisible();
+ await expectNoHorizontalOverflow(page);
+});
