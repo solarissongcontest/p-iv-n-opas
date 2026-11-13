@@ -1,4 +1,5 @@
 import {expect,test} from "@playwright/test";
+import {getLosTeacherLesson} from "../src/features/los/teacher/lessonL004.ts";
 import AxeBuilder from "@axe-core/playwright";
 import {expectNoHorizontalOverflow} from "./helpers";
 
@@ -122,7 +123,7 @@ test("every one of the 60 guided lessons opens from its actual chapter picker on
    expect(seen.has(title)).toBe(false);
    seen.add(title);
    await button.click();
-   if(Number(title.slice(1))<=12 || Number(title.slice(1))>=56){
+   if(getLosTeacherLesson(title)){
     await expect(page).toHaveURL(new RegExp("/los-lessons/"+title+"$"));
     await expect(page.locator(".los-teacher-paper h2")).toBeVisible();
     await expect(page.locator(".los-teacher-sidebar h1")).toBeVisible();
