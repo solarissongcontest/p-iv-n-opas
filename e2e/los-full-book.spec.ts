@@ -787,7 +787,7 @@ test("Finnish comprehension options in C01, C03, C09 and C10 have correct speech
     await expectNoHorizontalOverflow(page);
   }
   await page.goto("/los-lessons/L001",{waitUntil:"domcontentloaded"});
-  await page.locator(".los-teacher-outline nav").getByRole("button",{name:"Ensimmäinen tervehdyksesi"}).click();
+  await page.locator(".los-teacher-outline nav").getByRole("button",{name:"Ymmärsitkö tervehdyksen ja hyvästelyn eron?"}).click();
   await expect(page.locator(".los-teacher-option span[lang='de']")).toHaveCount(3);
   await expect(page.locator(".los-teacher-option span[lang='fi']")).toHaveCount(0);
 });
