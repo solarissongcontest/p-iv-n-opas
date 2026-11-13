@@ -17,11 +17,6 @@ export const LOS_FUTURE_BOOK_3: Record<string, LosFutureManuscript> = {
     "grammarExplanation": "Modaaliverbin paikka pysyy samana riippumatta siitä, mikä modaaliverbi on kyseessä: Ich kann kommen, Ich will kommen, Ich muss kommen. Niiden merkitykset ovat eri. Kun lisäät ajanmääreen alkuun, taivutettu modaaliverbi tulee edelleen toiselle paikalle: Am Sonntag können wir kommen. Toiminnan perusmuoto säilyy lauseen lopussa.\n\nLaajennettu opetus kirjassa:\n\nRetken suunnittelu harjoittaa aiemmin opittua yhdistelyä. Modaaliverbi antaa mahdollisuuden, tarvetta tai suunnitelman: Wir können gehen, wir müssen warten, wir wollen essen. Ajanilmauksen paikka voi vaihtua, mutta taivutettu verbi säilyy toisena: Morgen fahren wir los. Valitse vain selviä sanoja, joita pystyt itse käyttämään. Hyvä suunnitelma sisältää milloin, minne, millä ja mitä tehdään.\n\nMallilause: Am Samstag wollen wir nach Dresden fahren.\n\nSuomennos: Lauantaina haluamme matkustaa Dresdeniin.\n\nOpettajan virheen korjaus: Am Samstag wir wollen fahren. → Am Samstag wollen wir fahren.\n\nLähdeviitteen pedagoginen rajaus: Tekstin vaikeat muodot merkitään tunnistettaviksi, ellei niitä ole opetettu. Oppijan ei tarvitse tuottaa uuden aikamuodon tai sijamuodon muotoja ennen niiden erillistä opetusta.\n\nOma minikoe: selitä säännön vaikutus verbin paikkaan, persoonapäätteeseen tai artikkeliin omassa mallilauseessa. Sulje opetus. Tee vastaava uusi lause eri henkilöllä tai sanalla ja tarkista tulos.",
     "vocabulary": [
       {
-        "de": "Suomi",
-        "fi": "Huomio",
-        "status": ""
-      },
-      {
         "de": "der Plan",
         "fi": "suunnitelma",
         "status": "artikkeli mukana; monikko ja ääntäminen vielä tarkistettava"
@@ -139,11 +134,6 @@ export const LOS_FUTURE_BOOK_3: Record<string, LosFutureManuscript> = {
     "grammarExplanation": "Gern ja gerne ovat rinnakkaisia muotoja, joilla ilmaistaan mielellään tekemistä. Ich spiele gern Fußball ja Ich lese gerne ovat molemmat luontevia. Jos verbi on epäsäännöllinen, sen persoonamuoto pitää silti tarkistaa: du liest, er liest verbistä lesen. Opettele muutokset osana tavallisia ilmauksia, älä yritä muodostaa niitä pelkällä säännöllisellä päätteellä.\n\nLaajennettu opetus kirjassa:\n\nVapaa-ajasta kertominen alkaa preesensistä: Ich spiele Tennis, ich lese, ich höre Musik. Gern tekee toiminnasta mieluisan: Ich spiele gern Tennis. Osa tavallisista verbeistä vaihtaa vokaalia du- ja er/sie/es-muodoissa: lesen → du liest, er liest. Älä yritä soveltaa vokaalinvaihdosta kaikkiin verbeihin. Sanaa Hobby voi käyttää, mutta usein luonteva kieli syntyy yksinkertaisesta verbistä ja tekemisestä.\n\nMallilause: Ich lese gern, aber meine Freundin spielt lieber Tennis.\n\nSuomennos: Luen mielelläni, mutta ystäväni pelaa mieluummin tennistä.\n\nOpettajan virheen korjaus: Er leset ein Buch. → Er liest ein Buch.\n\nLähdeviitteen pedagoginen rajaus: Tekstin vaikeat muodot merkitään tunnistettaviksi, ellei niitä ole opetettu. Oppijan ei tarvitse tuottaa uuden aikamuodon tai sijamuodon muotoja ennen niiden erillistä opetusta.\n\nOma minikoe: selitä säännön vaikutus verbin paikkaan, persoonapäätteeseen tai artikkeliin omassa mallilauseessa. Sulje opetus. Tee vastaava uusi lause eri henkilöllä tai sanalla ja tarkista tulos.",
     "vocabulary": [
       {
-        "de": "Suomi",
-        "fi": "Huomio",
-        "status": ""
-      },
-      {
         "de": "die Freizeit",
         "fi": "vapaa-aika",
         "status": "artikkeli mukana; monikko ja ääntäminen vielä tarkistettava"
@@ -245,11 +235,6 @@ export const LOS_FUTURE_BOOK_3: Record<string, LosFutureManuscript> = {
     "grammarTopic": "häufigkeitsadverbit, kysymyssanat",
     "grammarExplanation": "Usein käytettyjä määrän ja toistuvuuden adverbeja ovat immer, oft, manchmal, selten ja nie. Tavallisessa väitelauseessa ne sijoittuvat usein taivutetun verbin jälkeen: Ich spiele oft Tennis. Kun aloitat ajanilmauksella, pidä verbi edelleen toisena: Am Wochenende spiele ich oft Tennis. Kysy harrastuksesta esimerkiksi Was machst du in deiner Freizeit?\n\nLaajennettu opetus kirjassa:\n\nHarrastuksista voi kertoa myös niiden yleisyyden avulla: oft (usein), manchmal (joskus), selten (harvoin), nie (ei koskaan), jeden Tag (joka päivä). Tavallisessa päälauseessa taivutettu verbi on edelleen toisella paikalla, vaikka ajanilmaus vaihtuu. Esimerkiksi Am Samstag spiele ich Gitarre. Kun kysyt tavasta, käytä Wie oft …? Kysymys on hyödyllinen arjessa, eikä vastauksen tarvitse sisältää tarkkaa lukua.\n\nMallilause: Wie oft spielst du Gitarre? Ich spiele zweimal pro Woche.\n\nSuomennos: Kuinka usein soitat kitaraa? Soitan kaksi kertaa viikossa.\n\nOpettajan virheen korjaus: Am Samstag ich spiele. → Am Samstag spiele ich.\n\nLähdeviitteen pedagoginen rajaus: Tekstin vaikeat muodot merkitään tunnistettaviksi, ellei niitä ole opetettu. Oppijan ei tarvitse tuottaa uuden aikamuodon tai sijamuodon muotoja ennen niiden erillistä opetusta.\n\nOma minikoe: selitä säännön vaikutus verbin paikkaan, persoonapäätteeseen tai artikkeliin omassa mallilauseessa. Sulje opetus. Tee vastaava uusi lause eri henkilöllä tai sanalla ja tarkista tulos.",
     "vocabulary": [
-      {
-        "de": "Suomi",
-        "fi": "Huomio",
-        "status": ""
-      },
       {
         "de": "die Gitarre",
         "fi": "kitara",
@@ -373,11 +358,6 @@ export const LOS_FUTURE_BOOK_3: Record<string, LosFutureManuscript> = {
     "grammarExplanation": "Können ilmaisee kykyä tai mahdollisuutta: Ich kann schwimmen. Kun modaaliverbi on lauseessa, toinen verbi tulee perusmuodossa loppuun. Taivuta können: ich kann, du kannst, er kann, wir können, ihr könnt, sie können. Kun sanot Ich schwimme gern, kerrot pitäväsi uimisesta, et välttämättä siitä, kuinka hyvin osaat.\n\nLaajennettu opetus kirjassa:\n\nKönnen kertoo osaamisesta tai mahdollisuudesta. Se on modaaliverbi, jonka kanssa toinen verbi tulee infinitiivissä lauseen loppuun: Ich kann schwimmen. Du kannst Tennis spielen. Er kann kommen. Huomaa, että können taipuu epäsäännöllisesti ja infinitiivi on yleensä kokonaisen lauseen lopussa. Vertaa gern-sanaa: Ich schwimme gern tarkoittaa, että pidän uimisesta, kun taas Ich kann schwimmen tarkoittaa, että osaan uida.\n\nMallilause: Ich kann gut laufen, aber ich schwimme lieber.\n\nSuomennos: Osaan juosta hyvin, mutta uin mieluummin.\n\nOpettajan virheen korjaus: Ich kann schwimme. → Ich kann schwimmen.\n\nLähdeviitteen pedagoginen rajaus: Tekstin vaikeat muodot merkitään tunnistettaviksi, ellei niitä ole opetettu. Oppijan ei tarvitse tuottaa uuden aikamuodon tai sijamuodon muotoja ennen niiden erillistä opetusta.\n\nOma minikoe: selitä säännön vaikutus verbin paikkaan, persoonapäätteeseen tai artikkeliin omassa mallilauseessa. Sulje opetus. Tee vastaava uusi lause eri henkilöllä tai sanalla ja tarkista tulos.",
     "vocabulary": [
       {
-        "de": "Suomi",
-        "fi": "Huomio",
-        "status": ""
-      },
-      {
         "de": "der Sport",
         "fi": "urheilu",
         "status": "artikkeli mukana; monikko ja ääntäminen vielä tarkistettava"
@@ -490,11 +470,6 @@ export const LOS_FUTURE_BOOK_3: Record<string, LosFutureManuscript> = {
     "grammarExplanation": "Mögen ilmaisee pitämistä: Ich mag Musik ja Du magst Filme. Muoto ich mag on opittava erikseen eikä se ole ich möge tässä merkityksessä. Vertailussa voit käyttää lieber (‘mieluummin’) ja am liebsten (‘mieluiten’). Esimerkiksi Ich höre lieber Musik kuin Ich sehe lieber Filme. Kysy Was magst du? tai Was hörst du gern?\n\nLaajennettu opetus kirjassa:\n\nMögen tarkoittaa pitää jostakin: Ich mag Musik, du magst Filme. Se käyttäytyy eri tavoin kuin gern: Ich höre gern Musik kertoo mieluisasta toiminnasta, Ich mag Musik mieluisasta asiasta. Lieber ilmoittaa mieltymyksen vaihtoehtojen välillä. Kun kerrot mielipiteen elokuvasta, käytä selkeitä adjektiiveja: lustig, spannend, langweilig. Älä käytä vahvaa kieliopillista rakennetta vain siksi, että se kuulostaisi hienolta.\n\nMallilause: Ich mag Filme, aber ich sehe lieber Serien.\n\nSuomennos: Pidän elokuvista, mutta katson mieluummin sarjoja.\n\nOpettajan virheen korjaus: Ich mage Musik. → Ich mag Musik.\n\nLähdeviitteen pedagoginen rajaus: Tekstin vaikeat muodot merkitään tunnistettaviksi, ellei niitä ole opetettu. Oppijan ei tarvitse tuottaa uuden aikamuodon tai sijamuodon muotoja ennen niiden erillistä opetusta.\n\nOma minikoe: selitä säännön vaikutus verbin paikkaan, persoonapäätteeseen tai artikkeliin omassa mallilauseessa. Sulje opetus. Tee vastaava uusi lause eri henkilöllä tai sanalla ja tarkista tulos.",
     "vocabulary": [
       {
-        "de": "Suomi",
-        "fi": "Huomio",
-        "status": ""
-      },
-      {
         "de": "die Musik",
         "fi": "musiikki",
         "status": "artikkeli mukana; monikko ja ääntäminen vielä tarkistettava"
@@ -596,11 +571,6 @@ export const LOS_FUTURE_BOOK_3: Record<string, LosFutureManuscript> = {
     "grammarTopic": "müssen, dürfen ja verbi-infinitiivi",
     "grammarExplanation": "Müssen ilmaisee pakkoa: Ich muss lernen. Dürfen ilmaisee lupaa: Ich darf gehen. Kieltolause Du darfst hier nicht telefonieren tarkoittaa, ettei puhelinta saa käyttää täällä. Tämä ei ole sama kuin Du musst nicht telefonieren, joka tarkoittaa, ettei tarvitse puhua puhelimessa. Modaaliverbi taipuu, ja pääverbi menee infinitiivissä lauseen loppuun.\n\nLaajennettu opetus kirjassa:\n\nMüssen tarkoittaa täytymistä ja dürfen lupaa: Ich muss lernen, ich darf gehen. Molemmissa toinen verbi on infinitiivissä loppupuolella. Älä sekoita muotoja nicht müssen ja nicht dürfen: Du musst nicht kommen tarkoittaa, ettei sinun tarvitse tulla; Du darfst nicht kommen tarkoittaa, ettei sinun ole lupa tulla. Tämä ero on erityisen tärkeä koulun säännöissä. Muista myös, että modaaliverbi taipuu persoonan mukaan.\n\nMallilause: Ich muss Hausaufgaben machen, aber ich darf später spielen.\n\nSuomennos: Minun täytyy tehdä läksyjä, mutta saan pelata myöhemmin.\n\nOpettajan virheen korjaus: Du musst nicht gehen = et saa mennä (väärin). Oikea merkitys: sinun ei tarvitse mennä.\n\nLähdeviitteen pedagoginen rajaus: Tekstin vaikeat muodot merkitään tunnistettaviksi, ellei niitä ole opetettu. Oppijan ei tarvitse tuottaa uuden aikamuodon tai sijamuodon muotoja ennen niiden erillistä opetusta.\n\nOma minikoe: selitä säännön vaikutus verbin paikkaan, persoonapäätteeseen tai artikkeliin omassa mallilauseessa. Sulje opetus. Tee vastaava uusi lause eri henkilöllä tai sanalla ja tarkista tulos.",
     "vocabulary": [
-      {
-        "de": "Suomi",
-        "fi": "Huomio",
-        "status": ""
-      },
       {
         "de": "das Fach",
         "fi": "oppiaine",
@@ -714,11 +684,6 @@ export const LOS_FUTURE_BOOK_3: Record<string, LosFutureManuscript> = {
     "grammarExplanation": "Viikonpäivän yhteydessä käytetään am, kellonajan yhteydessä um: am Montag, um acht Uhr. Ajanilmauksen saa laittaa virkkeen alkuun: Am Dienstag habe ich Mathe. Taivutettu verbi säilyy toisena. Kun ilmaus sisältää useita sanoja, esimerkiksi am Dienstag, se muodostaa silti yhden ajanmääreen lauseen alussa. Kysy Wann hast du Deutsch?\n\nLaajennettu opetus kirjassa:\n\nAjanilmauksissa saksan am viittaa moniin päiviin ja viikonpäiviin: am Montag, am Wochenende. Um kertoo kellonajan: um acht Uhr. Kun haluat kertoa tuntijärjestyksestä, voit aloittaa ajan ilmauksella: Am Dienstag habe ich Mathe. Muista jälleen taivutetun verbin toinen paikka. Halb neun tarkoittaa puoli yhdeksää eli 8.30, ei 9.30. Selitä ensin tunti ja vasta sen jälkeen tarkka aika.\n\nMallilause: Am Mittwoch habe ich um neun Uhr Deutsch.\n\nSuomennos: Keskiviikkona minulla on saksaa kello yhdeksältä.\n\nOpettajan virheen korjaus: Am Montag um acht ich lerne. → Am Montag um acht lerne ich.\n\nLähdeviitteen pedagoginen rajaus: Tekstin vaikeat muodot merkitään tunnistettaviksi, ellei niitä ole opetettu. Oppijan ei tarvitse tuottaa uuden aikamuodon tai sijamuodon muotoja ennen niiden erillistä opetusta.\n\nOma minikoe: selitä säännön vaikutus verbin paikkaan, persoonapäätteeseen tai artikkeliin omassa mallilauseessa. Sulje opetus. Tee vastaava uusi lause eri henkilöllä tai sanalla ja tarkista tulos.",
     "vocabulary": [
       {
-        "de": "Suomi",
-        "fi": "Huomio",
-        "status": ""
-      },
-      {
         "de": "der Stundenplan",
         "fi": "lukujärjestys",
         "status": "artikkeli mukana; monikko ja ääntäminen vielä tarkistettava"
@@ -825,11 +790,6 @@ export const LOS_FUTURE_BOOK_3: Record<string, LosFutureManuscript> = {
     "grammarTopic": "erotettavat verbit, preesensin kokonaiskertaus",
     "grammarExplanation": "Erotettavan verbin osat voivat erota toisistaan väitelauseessa. Anrufen on ‘soittaa jollekulle’. Ich rufe meine Freundin an. Sen taivutettu osa rufe tulee toiselle paikalle ja etuliite an lauseen loppuun. Infinitiivissä osat pysyvät yhdessä: Ich möchte meine Freundin anrufen. Näiden kahden mallin erottaminen on tämän kappaleen ydintaito.\n\nLaajennettu opetus kirjassa:\n\nErotettava verbi koostuu alkuosasta ja verbin rungosta. Päälauseessa alkuosa menee loppuun: aufstehen → Ich stehe um sieben Uhr auf. Kun käytät modaaliverbiä, koko infinitiivi pysyy yhdessä: Ich muss um sieben Uhr aufstehen. Tämä ero on tärkeä, jotta alussa opittu sanajärjestys ei johda harhaan. Osa verbeistä, esimerkiksi anrufen ja einkaufen, taipuu samalla tavalla.\n\nMallilause: Nach der Schule rufe ich meine Freundin an.\n\nSuomennos: Koulun jälkeen soitan ystävälleni.\n\nOpettajan virheen korjaus: Ich anrufe meine Freundin. → Ich rufe meine Freundin an.\n\nLähdeviitteen pedagoginen rajaus: Tekstin vaikeat muodot merkitään tunnistettaviksi, ellei niitä ole opetettu. Oppijan ei tarvitse tuottaa uuden aikamuodon tai sijamuodon muotoja ennen niiden erillistä opetusta.\n\nOma minikoe: selitä säännön vaikutus verbin paikkaan, persoonapäätteeseen tai artikkeliin omassa mallilauseessa. Sulje opetus. Tee vastaava uusi lause eri henkilöllä tai sanalla ja tarkista tulos.",
     "vocabulary": [
-      {
-        "de": "Suomi",
-        "fi": "Huomio",
-        "status": ""
-      },
       {
         "de": "nach Hause",
         "fi": "kotiin",
@@ -953,11 +913,6 @@ export const LOS_FUTURE_BOOK_3: Record<string, LosFutureManuscript> = {
     "grammarExplanation": "Wollen ilmaisee tahtomista: Ich will ins Kino gehen. Taivutus: ich will, du willst, er will, wir wollen, ihr wollt, sie wollen. Kuten können-verbin kanssa, tekemistä kuvaava toinen verbi sijoittuu infinitiivissä lauseen loppuun. Ero: ich will on usein suorempi kuin kohtelias ich möchte; ystävien kesken molemmat voivat toimia tilanteesta riippuen.\n\nLaajennettu opetus kirjassa:\n\nWollen ilmaisee aikomusta tai tahtoa: Wir wollen ins Kino gehen. Können ilmaisee mahdollisuutta: Wir können am Freitag gehen. Molemmissa pääverbi jää infinitiiviksi loppuun. Kun sovitte tapaamisesta, sopiva kysymys sisältää myös ajan tai paikan: Wann können wir uns treffen? Vastauksessa kannattaa tarjota toteuttamiskelpoinen vaihtoehto. Lyhyt vahvistus kuten Das passt! tekee vuoropuhelusta luontevan.\n\nMallilause: Wir wollen uns treffen. Kannst du am Samstag kommen?\n\nSuomennos: Haluamme tavata. Voitko tulla lauantaina?\n\nOpettajan virheen korjaus: Wir wollen treffen uns. → Wir wollen uns treffen.\n\nLähdeviitteen pedagoginen rajaus: Tekstin vaikeat muodot merkitään tunnistettaviksi, ellei niitä ole opetettu. Oppijan ei tarvitse tuottaa uuden aikamuodon tai sijamuodon muotoja ennen niiden erillistä opetusta.\n\nOma minikoe: selitä säännön vaikutus verbin paikkaan, persoonapäätteeseen tai artikkeliin omassa mallilauseessa. Sulje opetus. Tee vastaava uusi lause eri henkilöllä tai sanalla ja tarkista tulos.",
     "vocabulary": [
       {
-        "de": "Suomi",
-        "fi": "Huomio",
-        "status": ""
-      },
-      {
         "de": "sich treffen",
         "fi": "tavata toisensa",
         "status": "ääntämisen ja muodon tarkistus"
@@ -1069,11 +1024,6 @@ export const LOS_FUTURE_BOOK_3: Record<string, LosFutureManuscript> = {
     "grammarTopic": "mit/nach/zu fraaseissa; akkusatiivi kertaantuu",
     "grammarExplanation": "Opettele alkuun kokonaisina ilmaukset mit dem Bus, mit dem Zug, nach Berlin ja zu Freunden. Mit vaatii datiivin, mikä näkyy muodossa dem; monikon zu Freunden sisältää myös datiivimuodon. Suuntaan viittaava nach käytetään tavallisesti kaupunkien ja monien artikkelittomien maiden kanssa: nach München, nach Deutschland. Muiden paikannimien kanssa tarvitaan eri rakenteita, joten älä yleistä nach kaikkialle.\n\nLaajennettu opetus kirjassa:\n\nMatkustamisesta kerrottaessa moni ilmaus kannattaa oppia kokonaisuutena: mit dem Zug, mit dem Bus, nach Berlin, zu meiner Freundin. Mit ottaa datiivin ja siksi der Zug muuttuu dem Zug -muotoon. Et kuitenkaan tarvitse kaikkia sijamuotosääntöjä yhtä aikaa, kun osaat kysyä Wie fahren wir? ja vastata ymmärrettävästi. Älä käytä mit + akkusatiivi vahingossa.\n\nMallilause: Wir fahren mit dem Zug nach Dresden.\n\nSuomennos: Matkustamme junalla Dresdeniin.\n\nOpettajan virheen korjaus: mit den Zug → mit dem Zug.\n\nLähdeviitteen pedagoginen rajaus: Tekstin vaikeat muodot merkitään tunnistettaviksi, ellei niitä ole opetettu. Oppijan ei tarvitse tuottaa uuden aikamuodon tai sijamuodon muotoja ennen niiden erillistä opetusta.\n\nOma minikoe: selitä säännön vaikutus verbin paikkaan, persoonapäätteeseen tai artikkeliin omassa mallilauseessa. Sulje opetus. Tee vastaava uusi lause eri henkilöllä tai sanalla ja tarkista tulos.",
     "vocabulary": [
-      {
-        "de": "Suomi",
-        "fi": "Huomio",
-        "status": ""
-      },
       {
         "de": "der Ausflug",
         "fi": "retki",
