@@ -41,7 +41,7 @@ export function LosTeacherGreetingMedia(){
        <span lang="de">{line.text}</span>
        <span>{line.meaning}</span>
      </li>)}</ol>
-   </div>}
+   </div>
    <p className="los-teacher-greeting-source">Lähde:
     <a href={SOURCE.attribution.url} target="_blank" rel="noopener noreferrer">
      {SOURCE.attribution.title}</a>, {SOURCE.attribution.author},
