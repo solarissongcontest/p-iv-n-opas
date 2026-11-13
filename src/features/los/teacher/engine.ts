@@ -49,6 +49,8 @@ export type TeacherLesson = {
   requiredPracticeIds: readonly string[];
   /** Book comprehension checks must be both answered and explicitly checked. */
   requiredCheckedIds?: readonly string[];
+  /** Optional non-scored saved writing evidence, using the existing chapter applicationDraft. */
+  applicationDraftMinLength?: number;
   /** Chapter-test evidence stays in the existing chapter draft. */
   chapterAssessment?: {
     requiredTestIds: readonly string[];
@@ -75,7 +77,8 @@ export function teacherChapterAssessmentStatus(
   }).length;
   const expected = requirement.requiredTestIds.length;
   const submitted = Boolean(input?.testSubmittedAt && iso(input.testSubmittedAt));
-  const applicationDone = !requirement.requireApplicationDraft || Boolean(input?.applicationDraft.trim());
+  const applicationDone = !requirement.requireApplicationDraft ||
+    (input?.applicationDraft.trim().length ?? 0) >= (lesson.applicationDraftMinLength ?? 1);
   const reflectionDone = (input?.selfAssessment.trim().length ?? 0) >= requirement.minSelfAssessmentLength;
   return {answered,expected,submitted,applicationDone,reflectionDone,
     ready:submitted && answered===expected && applicationDone && reflectionDone};
@@ -226,7 +229,10 @@ export function teacherWrongFeedback(scene: TeacherScene, answer: string): strin
 export function teacherCanFinish(session: TeacherSession, lesson: TeacherLesson,
   practiceAnswers: Readonly<Record<string, string>>, practiceChecked: readonly string[] = [],
   chapterAssessment?: TeacherChapterAssessmentInput): boolean {
-  return teacherChapterAssessmentStatus(lesson, chapterAssessment).ready && !session.paused && lesson.scenes.every(scene => session.visitedIds.includes(scene.id)) &&
+  return teacherChapterAssessmentStatus(lesson, chapterAssessment).ready &&
+    (!lesson.applicationDraftMinLength ||
+      (chapterAssessment?.applicationDraft.trim().length ?? 0) >= lesson.applicationDraftMinLength) &&
+    !session.paused && lesson.scenes.every(scene => session.visitedIds.includes(scene.id)) &&
     lesson.scenes.every(scene => !scene.reflection ||
       (session.draftAnswers[scene.id]?.trim().length ?? 0) >= scene.reflection.minLength) &&
     lesson.requiredQuestionIds.every(id => session.attempts.some(item => item.sceneId === id)) &&
@@ -239,7 +245,8 @@ export function teacherCanFinish(session: TeacherSession, lesson: TeacherLesson,
     (lesson.requiredCheckedIds ?? []).every(id => {
       const value = practiceAnswers[id]?.trim();
       return Boolean(value && practiceChecked.includes(id) &&
-        (!id.startsWith("EX-REV1-Q") || /^[abc]$/.test(value)));
+        (!(id.startsWith("EX-REV1-Q") || /^C07-(?:SOURCE|TEXTB)-Q\d{2}$/.test(id)) ||
+          /^[abc]$/.test(value)));
     });
 }
 export function finishTeacherSession(session: TeacherSession, lesson: TeacherLesson,

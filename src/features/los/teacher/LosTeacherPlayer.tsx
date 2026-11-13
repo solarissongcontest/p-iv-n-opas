@@ -196,7 +196,7 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
       </section> :
       !lesson || !session || !scene ? <section className="los-teacher-status">
         <h1>Oppitunnin opetusmateriaali ei ole vielä valmis</h1>
-        <p>Teacher 2.0 on nyt käytössä oppitunneilla L001–L035. Muut oppitunnit toimivat edelleen nykyisessä Opetuspolussa.</p>
+        <p>Teacher 2.0 on nyt käytössä oppitunneilla L001–L040. Muut oppitunnit toimivat edelleen nykyisessä Opetuspolussa.</p>
         <a href={"/los#/" + (lesson?.bookId ?? 1) + "/path"}>Palaa Opetuspolkuun</a>
       </section> :
       <>
@@ -253,9 +253,17 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
                 </a>
               </div>)}
               <p className="los-teacher-small">Kirja avautuu erilliseen välilehteen. Kun palaat, oppitunti jatkuu samasta kohdasta. Pelkkä avaaminen ei ole suoritusmerkintä.</p>
+              {lesson.applicationDraftMinLength !== undefined && <p className="los-teacher-evidence" role="status">
+                {draft.applicationDraft.trim().length >= lesson.applicationDraftMinLength ? <CheckCircle2 size={17}/> : <HelpCircle size={17}/>}
+                Oma soveltamisteksti: {draft.applicationDraft.trim().length}/{lesson.applicationDraftMinLength} merkkiä
+                · {draft.applicationDraft.trim().length >= lesson.applicationDraftMinLength ? "Tallennettu laajuus riittää" : "Kirjoita lisää Sovella-sivulla"}.
+                Tämä ei ole automaattinen oikeinkirjoituksen arvio.
+              </p>}
               {[...lesson.requiredPracticeIds,...(lesson.requiredCheckedIds??[])].map(id => {
-                const answered=Boolean(draft.practiceAnswers[id]?.trim());
+                const value=draft.practiceAnswers[id]?.trim() ?? "";
                 const mustCheck=Boolean(lesson.requiredCheckedIds?.includes(id));
+                const knownChoice=(!/^C07-(?:SOURCE|TEXTB)-Q\d{2}$/.test(id) || /^[abc]$/.test(value));
+                const answered=Boolean(value && knownChoice);
                 const checked=!mustCheck||draft.practiceChecked.includes(id);
                 return <p key={id} className="los-teacher-evidence">
                   {answered&&checked?<CheckCircle2 size={17}/>:<HelpCircle size={17}/>}

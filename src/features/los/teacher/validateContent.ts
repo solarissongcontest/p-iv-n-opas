@@ -108,6 +108,11 @@ export function validateTeacherLesson(lesson: TeacherLesson): TeacherContentIssu
           (lesson.chapterId === "06" && /^C06-ZPE-Q\d{2}$/.test(id)) )))) {
     issues.push({ location: "requiredCheckedIds", problem: "Tarkistettavan lähdetehtävän tunniste on virheellinen." });
   }
+  if (lesson.applicationDraftMinLength !== undefined &&
+      (!Number.isInteger(lesson.applicationDraftMinLength) ||
+        lesson.applicationDraftMinLength < 1 || lesson.applicationDraftMinLength > 5000)) {
+    issues.push({ location: "applicationDraftMinLength", problem: "Oman soveltamistekstin pituusvaatimus on virheellinen." });
+  }
   const assessment = lesson.chapterAssessment;
   if (assessment && (
     !unique(assessment.requiredTestIds) || assessment.requiredTestIds.length < 1 ||
