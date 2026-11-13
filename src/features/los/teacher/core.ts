@@ -105,7 +105,7 @@ export function openTeacherHelp(lesson:TeacherLesson,p:TeacherProgress,helpId:st
 }
 /** Allow case, extra spaces and an optional final punctuation mark; never guess synonyms. */
 export function normalizeTeacherWritten(text:string):string{
- return text.trim().replace(/\\s+/g," ").replace(/[!.?]+$/u,"").trim().toLocaleLowerCase("de");
+ return text.trim().replace(/\s+/g," ").replace(/[!.?]+$/u,"").trim().toLocaleLowerCase("de");
 }
 export function draftTeacherWritten(lesson:TeacherLesson,p:TeacherProgress,text:string):TeacherProgress{
  const scene=lesson.scenes.find(s=>s.id===p.scene);
