@@ -222,10 +222,15 @@ export function teacherWrongFeedback(scene: TeacherScene, answer: string): strin
     q.genericWrong;
   return q.wrongAnswers?.[normalizeTeacherAnswer(answer)] ?? q.genericWrong;
 }
+/** Calendar evidence requires a correct, explicitly saved choice. It is never audio evidence. */
+export function isCorrectCalendarEntry(scene: TeacherScene, value: string): boolean {
+  return Boolean(scene.calendar && value === scene.calendar.day + "|" + scene.calendar.time);
+}
 export function teacherCanFinish(session: TeacherSession, lesson: TeacherLesson,
   practiceAnswers: Readonly<Record<string, string>>, practiceChecked: readonly string[] = [],
   chapterAssessment?: TeacherChapterAssessmentInput): boolean {
   return teacherChapterAssessmentStatus(lesson, chapterAssessment).ready && !session.paused && lesson.scenes.every(scene => session.visitedIds.includes(scene.id)) &&
+    lesson.scenes.every(scene => !scene.calendar || isCorrectCalendarEntry(scene,session.draftAnswers[scene.id] ?? "")) &&
     lesson.scenes.every(scene => !scene.reflection ||
       (session.draftAnswers[scene.id]?.trim().length ?? 0) >= scene.reflection.minLength) &&
     lesson.requiredQuestionIds.every(id => session.attempts.some(item => item.sceneId === id)) &&
