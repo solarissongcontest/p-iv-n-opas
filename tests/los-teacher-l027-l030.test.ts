@@ -25,6 +25,10 @@ test("four new Teacher manuscripts reuse existing Teacher Player and EX-MID rout
    assert.equal(lesson.requiredPracticeIds.length,0);
    assert.ok(lesson.scenes.some(scene=>scene.kind==="summary"));
  }
+ for(const id of ["L013","L014","L015","L016"]){
+   assert.ok(getLosTeacherLesson(id),"Previously approved upstream C03 Teacher "+id+" must remain registered");
+ }
+ assert.match(readFileSync("src/features/los/teacher/LosTeacherPlayer.tsx","utf8"),/helpSelection/);
  assert.deepEqual(reviews.map(l=>l.id),["L027","L028","L029"]);
  assert.equal(LOS1_L030_TEACHER.examAssessment?.id,"EX-MID");
  assert.equal(LOS1_L030_TEACHER.scenes.filter(s=>s.question).length,0);
