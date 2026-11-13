@@ -77,15 +77,51 @@ test("LOS! 2–8 answer drafts and review marks persist by owner/book/chapter wi
   await expectNoHorizontalOverflow(page);
 });
 
-test("LOS! 2–8 show 60 honest lesson slots, 50 chapter links and 10 non-executable reviews",async({page})=>{
+test("LOS! 2–8 show all 60 source-written lessons while keeping exams non-executable",async({page})=>{
   await enterFutureBook(page);
   await page.goto("/los#/4/path",{waitUntil:"domcontentloaded"});
   await expect(page.locator(".los-future-path-group")).toHaveCount(5);
   await expect(page.locator(".los-future-path-group li")).toHaveCount(60);
-  await expect(page.locator(".los-future-lessons-pending")).toHaveCount(10);
-  await expect(page.locator(".los-future-path-group li button")).toHaveCount(50);
+  await expect(page.locator(".los-future-path-group li button")).toHaveCount(60);
+  await expect(page.locator("#los-future-lesson-runner")).toBeVisible();
+  await expect(page.locator(".los-guided-review")).toContainText("Opettajan aloitus");
   await expect(page.getByText("0 valmiiksi hyväksyttyä ohjattua oppituntia")).toBeVisible();
   await page.getByRole("button",{name:/Tunti 2: Aloita ja ennakoi/}).click();
-  await expect(page).toHaveURL(/\/los#\/4\/01\/chapter$/);
-  await expect(page.locator(".los-reading-page")).toContainText("Wo spricht man Deutsch?");
+  await expect(page.locator(".los-guided-lesson-stage-nav button")).toHaveCount(6);
+  await expect(page.locator(".los-guided-lesson-stage")).toContainText("Opettajan aloitus");
+  await page.getByRole("button",{name:/Tunti 30: välikoe/i}).click();
+  await expect(page.locator(".los-guided-review")).toContainText("Kokeen ohje, ei avattu arvioitava koe");
+  await expect(page.locator(".los-future-exercise-card")).toHaveCount(0);
+  await expectNoHorizontalOverflow(page);
+});
+
+test("a source-guided lesson reuses chapter answers and persists its own reflection",async({page})=>{
+  await enterFutureBook(page);
+  await page.goto("/los#/2/path",{waitUntil:"domcontentloaded"});
+  await page.getByRole("button",{name:/Tunti 2: Aloita ja ennakoi/}).click();
+  const runner=page.locator("#los-future-lesson-runner");
+  await expect(runner).toContainText("Meine kleine Welt");
+  await runner.getByRole("button",{name:/Tehtävät ja itsekorjaus/}).click();
+  await expect(runner.locator(".los-future-exercise-select option")).toHaveCount(5);
+  await runner.locator("#los-future-exercise-input").fill("Harjoitustunnin ensimmäinen oma vastaus.");
+  await runner.getByRole("button",{name:"Merkitse vaihe kokeilluksi"}).click();
+  await expect(runner).toContainText("1/6 vaihetta kokeiltu");
+  await page.goto("/los#/2/01/understand",{waitUntil:"domcontentloaded"});
+  await expect(page.locator("#los-future-exercise-input")).toHaveValue("Harjoitustunnin ensimmäinen oma vastaus.");
+  await page.goto("/los#/2/path",{waitUntil:"domcontentloaded"});
+  await expect(runner).toContainText("Aloita ja ennakoi");
+  await runner.getByRole("button",{name:/Tunnin lopputarkistus/}).click();
+  const reflection=runner.getByPlaceholder("Mikä onnistui? Mitä harjoittelet seuraavaksi?");
+  await reflection.fill("Kertaan saksan persoonapäätteet.");
+  await page.reload({waitUntil:"domcontentloaded"});
+  await expect(reflection).toHaveValue("Kertaan saksan persoonapäätteet.");
+  const separate=await page.evaluate(()=>{
+    const owner=localStorage.getItem("opk.owner-id");
+    return {
+      b2:localStorage.getItem(`los.local.v1.${owner}.2.01`),
+      b1:localStorage.getItem(`los.local.v1.${owner}.1.01`),
+    };
+  });
+  expect(separate.b2).toContain("Kertaan saksan persoonapäätteet.");
+  expect(separate.b1).toBeNull();
 });
