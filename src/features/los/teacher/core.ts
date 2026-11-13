@@ -29,11 +29,11 @@ const validWrittenDrafts=(x:unknown)=>x===undefined||
  (isObj(x)&&Object.keys(x).length<=20&&Object.entries(x).every(([id,value])=>
    validId(id)&&typeof value==="string"&&value.length<=40));
 const validIso=(x:unknown)=>typeof x==="string"&&x.length<=40&&/^\d{4}-\d{2}-\d{2}T/.test(x)&&Number.isFinite(Date.parse(x));
-const validMedia=(x:unknown)=>x===undefined||(isObj(x)&&validId(x.sourceId)&&
- (x.playingAt===undefined||validIso(x.playingAt))&&
- (x.endedAt===undefined||validIso(x.endedAt))&&
- (x.textOpenedAt===undefined||validIso(x.textOpenedAt))&&
- (x.endedAt===undefined||x.playingAt!==undefined));
+const validMedia=(x:unknown)=>x===undefined||(isObj(x)&&validId(x['sourceId'])&&
+ (x['playingAt']===undefined||validIso(x['playingAt']))&&
+ (x['endedAt']===undefined||validIso(x['endedAt']))&&
+ (x['textOpenedAt']===undefined||validIso(x['textOpenedAt']))&&
+ (x['endedAt']===undefined||x['playingAt']!==undefined));
 export function validTeacherProgress(x:unknown):x is TeacherProgress{
  if(!isObj(x)||x['version']!==TEACHER_VERSION||!validId(x['scene'])||
     !validIds(x['visited'],25)||!validIds(x['hints'],25)||typeof x['paused']!=="boolean"||
