@@ -6,7 +6,7 @@
 
 The LOS Teacher Experience 2.0 masterplan (2026-11-12), LOS! series masterplan, LOS! 1 book-specific masterplan and approved visual V3.3 plan govern this implementation. There are no AI models, generative runtime APIs, machine learning, synthetic speech services or automatic pronunciation scoring.
 
-## Implemented teaching pilot: L001–L008
+## Implemented teaching pilot: L001–L009
 
 - **L001 · Miten LOS! 1:llä opiskellaan? (10 scenes).** Zero-beginner introduction to the reader, words, optional original audio, vocabulary and dictionary. Learner writes a concrete personal goal in a persistent, validated reflection exercise. Manual reader/audio confirmations are not proofs of listening proficiency.
 - **L002 · Aloita saksan ääntämisestä (11 scenes).** Two diagnostic pre-questions, explanations of five spelling/pronunciation patterns (w, z, ei, ie, sch), progressive teaching board, targeted corrections, grammar references and optional human-voice textbook audio. No automatic speech scoring.
@@ -16,8 +16,9 @@ The LOS Teacher Experience 2.0 masterplan (2026-11-12), LOS! series masterplan, 
 - **L006 · Harjoittele ja testaa C01 (13 scenes).** New self-authored encounter in the real book application field, original C01 culture references, staged greeting instruction, a genuinely submitted C01 chapter test and post-test self-assessment. All three real chapter fields are required; merely visiting the book, saving an unsubmitted test draft or clicking a fake teacher confirmation cannot finish the lesson.
 - **L007 · Miten kysyn nimen? (14 scenes; C02 1/5).** Beginner-friendly explicit teaching of Wie heißt du?, ich heiße and ich bin; C02 vocabulary, grammar and exact authentic six-turn Franz–Greta Text A; requires C02-SOURCE-Q01 answered and checked, not an invented click proof. Optional independent speech practice and completely optional M-COM-02 audio with full text fallback. Chapter-keyed Teacher player keeps all C01 and C02 attempts, drafts and completions apart.
 - **L008 · Franz ja Greta: kokonainen dialogi (14 scenes; C02 2/5).** Complete six-turn authentic Text A; explicit teaching to distinguish name, well-being and teacher references plus both separate goodbyes; requires real saved **and checked** C02-SOURCE-Q02/Q03/Q04, alongside all scene visits and three learner actions. Reading is distinct from any claim of audio comprehension. Reuses the C02 draft, all source text remains fully inside the book.
+- **L009 · Heißen ja sein minä–sinä (14 scenes; C02 3/5).** Zero-beginner explicit teaching of exactly ich heiße/du heißt and ich bin/du bist, specific correction of *du heißst*, progressive board, independent text and exit check, C02 grammar and four genuine workbook fill tasks C02-EX-03–06. Learner must enter all four **real C02 book answers**, read explanations and confirm own practice. Workbook input presence is not correctness or speech mastery.
 
-All eight use the same deep-linkable LOS Lesson Player, accessible from the 60-lesson study path and relevant book resume action. The reader opens separately with a verified return link; the lesson's local position remains.
+All nine use the same deep-linkable LOS Lesson Player, accessible from the 60-lesson study path and relevant book resume action. The reader opens separately with a verified return link; the lesson's local position remains.
 
 ## Engine, data and safety
 
@@ -43,7 +44,7 @@ CI successes on earlier commits do not verify the current head. Confirm mobile W
 - Human-recorded Finnish teaching voice, pronunciation clips and synchronized animation.
 - Full skill-level learning evidence and cross-lesson spaced review scheduling.
 - Real phone hardware accessibility checks.
-- Conversion of the remaining **52 LOS! 1 lessons** and LOS! 2–8.
+- Conversion of the remaining **51 LOS! 1 lessons** and LOS! 2–8.
 - Compatibility with V3.4 reader PR #209.
 - Production deployment and final publication approval.
 
