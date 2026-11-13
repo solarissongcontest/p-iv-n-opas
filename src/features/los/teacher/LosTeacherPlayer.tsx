@@ -14,8 +14,8 @@ import "../los-book.css";
 import "./teacher.css";
 
 const stamp = () => new Date().toISOString();
-const bookUrl = (lessonId: string, chapterId: string, section: string) =>
-  "/los?lessonReturn=" + encodeURIComponent(lessonId) + "#/1/" + chapterId + "/" + section;
+const bookUrl = (lessonId: string, bookId: number, chapterId: string, section: string) =>
+  "/los?lessonReturn=" + encodeURIComponent(lessonId) + "#/" + bookId + "/" + chapterId + "/" + section;
 
 function SceneQuestion({ scene, session, submit, saveDraft, requestHint, reveal }: {
   scene: TeacherScene;
@@ -173,7 +173,7 @@ export function LosTeacherPlayer({ lessonId }: { lessonId: string }) {
 
     return <main id="main-content" className="los-app los-teacher-app">
     <header className="los-teacher-top">
-      <a className="los-teacher-back" href="/los#/1/path"><ArrowLeft size={18}/> Opetuspolku</a>
+      <a className="los-teacher-back" href={"/los#/" + (lesson?.bookId ?? 1) + "/path"}><ArrowLeft size={18}/> Opetuspolku</a>
       <div className="los-teacher-brand"><span className="los-teacher-logo">LOS!</span><span>Opetustila</span></div>
       <span className="los-teacher-book">LOS! 1 · SAB31</span>
     </header>
@@ -186,7 +186,7 @@ export function LosTeacherPlayer({ lessonId }: { lessonId: string }) {
       !lesson || !session || !scene ? <section className="los-teacher-status">
         <h1>Oppitunnin opetusmateriaali ei ole vielä valmis</h1>
         <p>Teacher 2.0 on nyt käytössä oppitunneilla L001–L007. Muut oppitunnit toimivat edelleen nykyisessä Opetuspolussa.</p>
-        <a href="/los#/1/path">Palaa Opetuspolkuun</a>
+        <a href={"/los#/" + (lesson?.bookId ?? 1) + "/path"}>Palaa Opetuspolkuun</a>
       </section> :
       <>
         <div className="los-teacher-progress" role="progressbar" aria-label="Oppitunnin opetustilanteet"
@@ -236,7 +236,7 @@ export function LosTeacherPlayer({ lessonId }: { lessonId: string }) {
             {scene.bookLinks && <div className="los-teacher-book-links">
               {scene.bookLinks.map(link => <div key={link.section} className="los-teacher-book-link">
                 <div><strong>{link.label}</strong><p>{link.instruction}</p></div>
-                <a href={bookUrl(lessonId, link.chapterId, link.section)} target="_blank" rel="noopener noreferrer">
+                <a href={bookUrl(lessonId, lesson.bookId, link.chapterId, link.section)} target="_blank" rel="noopener noreferrer">
                   <BookOpen size={17}/> Avaa kirjassa <ArrowRight size={16}/>
                 </a>
               </div>)}
@@ -325,7 +325,7 @@ export function LosTeacherPlayer({ lessonId }: { lessonId: string }) {
                   onClick={() => navigate(lesson.scenes[sceneIndex + 1]!.id)}>
                   Seuraava <ChevronRight size={18}/>
                 </button>}
-              {sceneIndex === lesson.scenes.length - 1 && <a href="/los#/1/path">Takaisin Opetuspolkuun <ArrowRight size={17}/></a>}
+              {sceneIndex === lesson.scenes.length - 1 && <a href={"/los#/" + (lesson?.bookId ?? 1) + "/path"}>Takaisin Opetuspolkuun <ArrowRight size={17}/></a>}
             </div>
             <p className={"los-teacher-save" + (!saved ? " is-error" : "")} role="status">
               {saved ? "Opiskelutiedot tallentuvat tämän laitteen LOS-varmuuskopioon." :
