@@ -166,7 +166,7 @@ export function LosFinalExam({move}:{move:LosNavigate}){
    <textarea id="los-final-writing" value={draft.applicationDraft} rows={8} maxLength={5000}
     onChange={event=>update(current=>({...current,applicationDraft:event.target.value,
       practiceAnswers:{...current.practiceAnswers,[LOS1_FINAL_WRITING_CHECK]:""}}))}
-    placeholder={"Hallo!\nIch heiße ...\nIch komme aus ..."} />
+    placeholder="Kirjoita 5–7 omaa lausetta, jokainen omalle rivilleen." />
    <p role="status">{writingLineCount(draft.applicationDraft)} / 5–7 lausetta · {draft.applicationDraft.trim().length} merkkiä. Harjoitus ei saa automaattista kielioppiarvosanaa.</p>
    <button type="button" className="los-outline-button" disabled={!writingOk} onClick={()=>update(current=>({...current,
     practiceAnswers:{...current.practiceAnswers,[LOS1_FINAL_WRITING_CHECK]:"written-and-reviewed"}}))}>
