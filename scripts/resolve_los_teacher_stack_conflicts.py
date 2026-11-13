@@ -225,7 +225,27 @@ def normalize_full_path_test() -> None:
     body=path.read_text()
     if "if(getLosTeacherLesson(title))" in body and 'import {getLosTeacherLesson}' not in body:
         body='import {getLosTeacherLesson} from "../src/features/los/teacher/lessonL004.ts";\n'+body
-        path.write_text(body)
+    # An appended L005 source-media test may overlap the end of C05's prior
+    # Text B check in a Git conflict hunk. Preserve the C05 completion and
+    # the entire independent L005 test, with no inferred generic bracket fixes.
+    unfinished = (
+        ' await expect(page.locator(".los-teacher-paper")).not.toContainText("Kuuntelukoe suoritettu");\n'
+        '\n'
+        'test("L005 shows genuine 20-item listening source and text inside Teacher 2.0 on desktop and mobile"'
+    )
+    closed = (
+        ' await expect(page.locator(".los-teacher-paper")).not.toContainText("Kuuntelukoe suoritettu");\n'
+        ' await expectNoHorizontalOverflow(page);\n'
+        '});\n'
+        '\n'
+        'test("L005 shows genuine 20-item listening source and text inside Teacher 2.0 on desktop and mobile"'
+    )
+    if unfinished in body:
+        if body.count(unfinished) != 1:
+            raise ValueError("Ambiguous C05/L005 source-media test merge boundary")
+        body=body.replace(unfinished,closed,1)
+        print("Restored reviewed C05 Text B test closure before separate L005 media test.")
+    path.write_text(body)
 
 def normalize_validator_gates() -> None:
     path=Path("src/features/los/teacher/validateContent.ts")
