@@ -36,7 +36,12 @@ test("all ten chapters provide complete Text B readers inside the book, not link
   }else{
    await expect(page.locator(".los-secondary-source .los-c01-turn").first()).toBeVisible();
   }
-  if(chapter==="08"){
+  if(chapter==="07"){
+   // The M-COM-06 recording is intentionally unapproved. Keep its complete
+   // written source in LOS!, without manufacturing a listening result.
+   await expect(page.getByText("C07:n aakkosäänite odottaa hyväksyntää.")).toBeVisible();
+   await expect(page.locator(".los-secondary-source audio")).toHaveCount(0);
+  }else if(chapter==="08"){
    await expect(page.getByText("Haastattelun ääni ei ole vielä käytettävissä.")).toBeVisible();
   }else{
    await expect(page.locator(".los-secondary-source audio").first()).toBeVisible();
