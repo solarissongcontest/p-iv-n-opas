@@ -384,3 +384,32 @@ test("LOS Teacher L004 is the primary lesson and finishes despite nonmastered an
  await expect(page.locator("#los-lesson-runner .los-lesson-detail .los-overline")).toContainText("L005");
  await expectNoHorizontalOverflow(page);
 });
+
+
+test("L004 opens in a dedicated scene player without the 60-lesson navigation",async({page})=>{
+ await enterLocalBook(page);
+ await page.goto("/los#/1/path",{waitUntil:"domcontentloaded"});
+ const card=page.locator(".los-path-group button").filter({hasText:"Tervehdykset muistista"});
+ await expect(card).toHaveCount(1);
+ await card.click();
+ await expect(page).toHaveURL(/\/los#\/1\/lesson\/L004$/);
+ const shell=page.locator(".los-teacher-shell");
+ await expect(shell).toBeVisible();
+ await expect(shell.getByRole("heading",{name:"Tervehdykset muistista"})).toBeVisible();
+ await expect(page.locator(".los-lesson-chapter-picker")).toHaveCount(0);
+ await expect(page.locator(".los-book-sidebar")).toHaveCount(0);
+ const player=page.locator(".los-teacher");
+ await expect(player).toBeVisible();
+ await player.getByRole("button",{name:"Opetuksen sisällysluettelo"}).click();
+ await player.getByRole("button",{name:/6\. Kokeile itse ilman mallia/}).click();
+ await player.getByRole("button",{name:"Guten Abend!"}).click();
+ await expect(player).toContainText("1/3");
+ await page.reload({waitUntil:"domcontentloaded"});
+ await expect(page).toHaveURL(/\/los#\/1\/lesson\/L004$/);
+ await expect(page.locator(".los-teacher")).toContainText("Kokeile itse ilman mallia");
+ await expect(page.locator(".los-teacher")).toContainText("1/3");
+ await shell.getByRole("link",{name:"Opiskelupolkuun"}).click();
+ await expect(page).toHaveURL(/\/los#\/1\/path$/);
+ await expect(page.locator("#los-lesson-runner")).toBeVisible();
+ await expectNoHorizontalOverflow(page);
+});

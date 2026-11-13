@@ -97,7 +97,14 @@ export function LosLearningPath({ book, move }: { book: LosBookDefinition; move:
       <h2>{group.section}</h2>
       <ol>
         {group.items.map(lesson=><li key={lesson.number}>
-          <button onClick={()=>{ if(isLos1ExecutableLesson("L"+String(lesson.number).padStart(3,"0"))){ selectLesson("L"+String(lesson.number).padStart(3,"0")); document.getElementById("los-lesson-runner")?.scrollIntoView({block:"start",behavior:"smooth"}); } else move(lesson.chapter,lesson.destination); }}>
+          <button onClick={()=>{ const lessonId="L"+String(lesson.number).padStart(3,"0");
+            if(lessonId==="L004"){
+              selectLesson(lessonId);
+              window.location.hash="#/1/lesson/L004";
+            } else if(isLos1ExecutableLesson(lessonId)){
+              selectLesson(lessonId);
+              document.getElementById("los-lesson-runner")?.scrollIntoView({block:"start",behavior:"smooth"});
+            } else move(lesson.chapter,lesson.destination); }}>
             <span className="los-path-number">{String(lesson.number).padStart(2,"0")}</span>
             <span className="los-path-copy"><strong>{lesson.title}</strong><small>{isLos1ExecutableLesson("L"+String(lesson.number).padStart(3,"0")) ? "Avaa ohjattu oppitunti" : lesson.chapter ? `Kappale ${Number(lesson.chapter)} · Oppikirjan sisältöön (suoritus ei vielä käytössä)`  : "Suoritusjärjestelmä ei vielä käytössä"}</small></span>
             <ArrowRight size={18}/>

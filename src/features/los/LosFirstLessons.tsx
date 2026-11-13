@@ -132,6 +132,7 @@ export function LosFirstLessons({ selectedId, onSelect, move }: {
          progress.startedAt ? "Oppitunti kesken" : "Oppituntia ei ole vielä aloitettu")+ 
          ` · ${stepCount}/${lesson.steps.length} vaihetta merkitty tehdyksi.`}</p>
       {isL004&&<>
+        <a className="los-lesson-teacher-entry" href="/los#/1/lesson/L004">Avaa L004:n oma Lesson Player</a>
         <LosL004TeacherPlayer progress={progress.teacher??initialTeacherProgress(TEACHER_L004)}
           onChange={teacher=>record(old=>({...old,startedAt:old.startedAt??stamp(),teacher}))}
           onFinish={()=>record(old=>losLessonFinishTeacher(TEACHER_L004,old,stamp()))}/>
