@@ -762,6 +762,28 @@ test("Teacher 2.0 presents one teaching board with one set of controls", async (
 
 
 
+
+test("L034 explains Franz's age and the intentionally short age answer",async({page})=>{
+  await enterLocalBook(page);
+  await page.goto("/los-lessons/L034",{waitUntil:"domcontentloaded"});
+  const outline=page.locator(".los-teacher-outline nav");
+  await outline.getByRole("button",{name:"Kuinka vanha Franz on?"}).click();
+  await expect(page.locator(".los-teacher-question h3")).toContainText("Kirjoita numeroin: Franzin neunzehn");
+  await page.locator(".los-teacher-question input").fill("18");
+  await page.getByRole("button",{name:"Tarkista",exact:true}).click();
+  await expect(page.locator(".los-teacher-feedback.is-wrong")).toContainText("Franzin ikää numeroin");
+  await outline.getByRole("button",{name:"Leon ikä lyhyenä lauseena"}).click();
+  await expect(page.locator(".los-teacher-question h3")).toContainText("ilman Jahre alt -osaa");
+  await page.getByRole("button",{name:"Tarvitsen vihjeen"}).click();
+  await expect(page.locator(".los-teacher-hint")).toContainText("Jätä Jahre alt pois");
+  await outline.getByRole("button",{name:"Lopputarkistus: zwanzig numerona"}).click();
+  await expect(page.locator(".los-teacher-question h3")).toContainText("Kirjoita numeroin: zwanzig");
+  await page.getByRole("button",{name:"Tarvitsen vihjeen"}).click();
+  await expect(page.locator(".los-teacher-hint")).toContainText("Kirjoita pelkkä numero");
+  await expectNoHorizontalOverflow(page);
+});
+
+
 test("C06 lessons L032 and L035 show feedback for the actual number or age question",async({page})=>{
   await enterLocalBook(page);
   await page.goto("/los-lessons/L032",{waitUntil:"domcontentloaded"});
