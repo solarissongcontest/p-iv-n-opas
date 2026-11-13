@@ -60,6 +60,8 @@ jobs:
       - name: Install browser test dependencies
         run: |
           bun run e2e:install
+          # Fail before the browser download if the merged full-book suite is malformed.
+          bunx playwright test e2e/los-full-book.spec.ts --list
           bunx playwright install --with-deps chromium webkit
       - name: Serve merged preview locally
         shell: bash
