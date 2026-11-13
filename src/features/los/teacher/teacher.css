@@ -83,6 +83,10 @@
 .los-teacher-form label {display:block;font-size:13px;font-weight:700;margin-bottom:10px;}
 .los-teacher-input-row {display:flex;gap:10px;}
 .los-teacher-input-row input {width:100%;min-width:0;min-height:48px;padding:11px 14px;background:var(--los-paper);color:var(--los-ink);border:1px solid var(--los-line);border-radius:8px;font:inherit;}
+.los-teacher-special-keys {display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:12px;min-width:0;}
+.los-teacher-special-keys span {font-size:12px;color:var(--los-soft);margin-right:3px;}
+.los-teacher-special-keys button {display:inline-flex;justify-content:center;align-items:center;min-width:44px;min-height:44px;padding:6px 10px;border:1px solid var(--los-line);border-radius:8px;background:var(--los-paper);color:var(--los-ink);font-size:19px;font-weight:750;cursor:pointer;}
+.los-teacher-special-keys button:disabled {opacity:.55;cursor:not-allowed;}
 .los-teacher-input-row button,.los-teacher-primary {display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:11px 18px;border:0;border-radius:8px;min-height:46px;background:var(--los-book-accent);color:#fff;font-weight:750;font-size:14px;white-space:nowrap;text-decoration:none;}
 .dark .los-teacher-primary,.dark .los-teacher-input-row button {color:#211d1c;}
 .los-teacher-book-links {display:grid;gap:12px;margin:24px 0;}

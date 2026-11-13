@@ -86,3 +86,32 @@ test("L034 uses original C06 Text B and L035 links to actual submitted chapter t
   await expect(page.getByRole("button",{name:/Palauta testi/})).toBeDisabled();
   await expectNoHorizontalOverflow(page);
 });
+
+test("C06 responses show numeric input where required and offer explicit German characters",async ({page})=>{
+  await enterLocalLosFixture(page);
+  await page.goto("/los-lessons/L033",{waitUntil:"domcontentloaded"});
+  await expect(page.getByRole("heading",{name:"Numerot 21–100: rakenne"})).toBeVisible();
+
+  const conversions=page.locator(".los-teacher-outline button").filter({hasText:"Muunna luku"});
+  await conversions.nth(3).click(); // read47 asks for a numerical response
+  const digits=page.getByRole("textbox",{name:"Vastauksesi numeroin"});
+  await expect(digits).toHaveAttribute("inputmode","numeric");
+  await expect(digits).toHaveAttribute("placeholder","Kirjoita numeroina...");
+  await expect(page.getByRole("group",{name:"Saksan erikoismerkit"})).toHaveCount(0);
+
+  await conversions.nth(2).click(); // write32 requires the exact ß in dreißig
+  const word=page.getByRole("textbox",{name:"Vastauksesi saksaksi"});
+  const germanKeys=page.getByRole("group",{name:"Saksan erikoismerkit"});
+  await expect(germanKeys.getByRole("button")).toHaveCount(4);
+  await word.fill("zweiunddreiig");
+  await word.evaluate(input=>(input as HTMLInputElement).setSelectionRange(11,11));
+  await germanKeys.getByRole("button",{name:"Lisää ß"}).click();
+  await expect(word).toHaveValue("zweiunddreißig");
+  await page.getByRole("button",{name:"Tarkista",exact:true}).click();
+  await expect(page.locator(".los-teacher-feedback")).toContainText("Oikein");
+
+  await page.reload({waitUntil:"domcontentloaded"});
+  await page.locator(".los-teacher-outline button").filter({hasText:"Muunna luku"}).nth(2).click();
+  await expect(page.getByRole("textbox",{name:"Vastauksesi saksaksi"})).toHaveValue("zweiunddreißig");
+  await expectNoHorizontalOverflow(page);
+});
