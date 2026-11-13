@@ -59,7 +59,7 @@ export function summarizeLos1Mastery(
   for (const chapter of [...chapterIds,"91","92","93"]) {
     for (const [lessonId,session] of Object.entries(drafts[chapter]?.teacherSessions ?? {})) {
       const lesson = getLosTeacherLesson(lessonId);
-      if (!lesson || session.lessonId !== lessonId || !/^L\d{3}$/.test(lessonId)) continue;
+      if (!lesson || lesson.chapterId !== chapter || session.lessonId !== lessonId || !/^L\d{3}$/.test(lessonId)) continue;
       for (const scene of lesson.scenes) {
         const role = scene.question?.evidenceRole;
         const skillId = scene.question?.skillId;
