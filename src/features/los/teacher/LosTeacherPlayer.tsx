@@ -88,7 +88,7 @@ function SceneQuestion({ scene, session, submit, saveDraft, requestHint, reveal 
         {(["ä","ö","ü","ß"] as const).map(character => <button key={character} type="button"
           lang="de" aria-label={"Lisää "+character} disabled={inputDisabled || drafted.length>=500}
           onClick={()=>insertGermanCharacter(character)}>{character}</button>)}
-      </div>
+      </div>}
     </form>}
     {latest && <div className={"los-teacher-feedback " + (latest.correct ? "is-right" : "is-wrong")}
       role="status" aria-live="polite">
