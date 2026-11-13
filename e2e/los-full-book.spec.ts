@@ -758,6 +758,23 @@ test("Teacher 2.0 presents one teaching board with one set of controls", async (
 });
 
 
+
+test("Teacher 2.0 explains exactly why an unfinished lesson cannot be completed", async ({page}) => {
+  await enterLocalBook(page);
+  await page.goto("/los-lessons/L004", {waitUntil:"domcontentloaded"});
+  const outline=page.locator(".los-teacher-outline nav");
+  await outline.getByRole("button",{name:"Mitä opit tänään?"}).click();
+  const summary=page.locator(".los-teacher-summary");
+  await expect(summary).toBeVisible();
+  await expect(summary.locator(".los-teacher-completion-checklist")).toBeVisible();
+  await expect(summary.locator(".los-teacher-completion-checklist")).toContainText("C01-EX-01");
+  await expect(summary.locator(".los-teacher-completion-checklist")).toContainText("C01-EX-04");
+  await expect(summary.locator(".los-teacher-completion-checklist")).toContainText("Vastaa oppitunnin kysymyksiin");
+  await expect(summary.getByRole("button",{name:"Merkitse oppitunti läpikäydyksi"})).toBeDisabled();
+  await expectNoHorizontalOverflow(page);
+});
+
+
 test("L004 chapter picker uses the dedicated teacher instead of legacy checklist", async ({page}) => {
   await enterLocalBook(page);
   await page.goto("/los#/1/path", { waitUntil: "domcontentloaded" });
