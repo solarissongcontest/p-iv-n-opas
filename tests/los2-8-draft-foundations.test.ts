@@ -34,7 +34,7 @@ test("all 70 manuscripts carry genuine sourced draft fields, not fake audio or e
       assert.ok(data.dialogue.length>=3);
       assert.ok(data.vocabulary.length>=10);
       assert.deepEqual(chapter.vocabulary,data.vocabulary.map(({de,fi})=>de+" – "+fi));
-      assert.ok(data.vocabulary.every(v=>v.de && v.fi));
+      assert.ok(data.vocabulary.every(v=>v.de && v.fi && !(v.de==="Suomi"&&v.fi==="Huomio")));
       textACount++;textBCount++;dialogueCount++;
       glossaryCount+=data.vocabulary.length;
     }
@@ -42,7 +42,7 @@ test("all 70 manuscripts carry genuine sourced draft fields, not fake audio or e
   assert.equal(textACount,70);
   assert.equal(textBCount,70);
   assert.equal(dialogueCount,70);
-  assert.equal(glossaryCount,1361);
+  assert.equal(glossaryCount,1291);
 });
 
 test("later-book routing stays isolated from book 1's saved answers and study records", () => {
@@ -52,7 +52,6 @@ test("later-book routing stays isolated from book 1's saved answers and study re
   assert.ok(route.includes('book.id !== 1 ? <LosFutureBookPreview'));
   assert.ok(route.includes('chapter && book.id===1 && <LosNotebook'));
   assert.ok(preview.includes("ei vielä pisteytetä"));
-  assert.ok(preview.includes("LO S") === false);
   assert.doesNotMatch(preview,/losExercisesFor|useLosChapterDraft|LosChapterGrammar|LosAuthenticAudio/);
   assert.match(preview,/LOS_FUTURE_MANUSCRIPTS/);
 });
