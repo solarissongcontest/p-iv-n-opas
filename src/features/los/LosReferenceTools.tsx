@@ -70,7 +70,7 @@ export function LosLearningPath({ book, move }: { book: LosBookDefinition; move:
     setSelectedLesson(id);
     try { sessionStorage.setItem("los1.selectedLesson", id); }
     catch { /* storage denied */ }
-    if(id==="L004")window.location.hash="#/1/lesson/L004";
+    if(id==="L004"||id==="L005")window.location.hash="#/1/lesson/"+id;
   };
   const groups = useMemo(() => {
     const result: { section: string; items: typeof LOS_1_LESSONS[number][] }[] = [];
@@ -99,7 +99,7 @@ export function LosLearningPath({ book, move }: { book: LosBookDefinition; move:
       <ol>
         {group.items.map(lesson=><li key={lesson.number}>
           <button onClick={()=>{ const lessonId="L"+String(lesson.number).padStart(3,"0");
-            if(lessonId==="L004"){
+            if(lessonId==="L004"||lessonId==="L005"){
               selectLesson(lessonId);
             } else if(isLos1ExecutableLesson(lessonId)){
               selectLesson(lessonId);
