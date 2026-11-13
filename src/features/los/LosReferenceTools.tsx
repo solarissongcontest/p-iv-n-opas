@@ -5,7 +5,7 @@ import { LOS_1_LESSONS } from "./learningPath";
 import { LosFirstLessons } from "./LosFirstLessons";
 import { LOS1_EXECUTABLE_LESSONS, isLos1ExecutableLesson } from "./guidedLessons";
 
-export type LosDestination = "overview" | "contents" | "chapter" | "text" | "understand" | "vocabulary" | "grammar" | "text-b" | "practice" | "apply" | "culture" | "test" | "appendix" | "dictionary" | "path" | "search" | "midterm" | "review" | "review-ii" | "cards" | "progress" | "final" | "summary" | "facsimile";
+export type LosDestination = "overview" | "contents" | "chapter" | "text" | "understand" | "vocabulary" | "grammar" | "text-b" | "practice" | "apply" | "culture" | "test" | "appendix" | "dictionary" | "path" | "teacher" | "search" | "midterm" | "review" | "review-ii" | "cards" | "progress" | "final" | "summary" | "facsimile";
 import {searchLos1OriginalTexts} from "./content/los1TextSearch";
 export type LosNavigate = (chapter: string | null, section: LosDestination) => void;
 type WordEntry = { book: number; code: string; chapter: string; title: string; word: string; meaning: string };
@@ -62,11 +62,12 @@ export function LosLearningPath({ book, move }: { book: LosBookDefinition; move:
     if (book.id !== 1) return;
     try {
       const stored = sessionStorage.getItem("los1.selectedLesson");
-      if (stored && isLos1ExecutableLesson(stored)) setSelectedLesson(stored);
+      if (stored && isLos1ExecutableLesson(stored)) setSelectedLesson(stored==="L004"?"L003":stored);
     } catch { /* storage denied: navigation still works in memory */ }
   }, [book.id]);
   const selectLesson = (id: string) => {
     if (!isLos1ExecutableLesson(id)) return;
+    if(id==="L004"){move(null,"teacher");return;}
     setSelectedLesson(id);
     try { sessionStorage.setItem("los1.selectedLesson", id); }
     catch { /* storage denied */ }
