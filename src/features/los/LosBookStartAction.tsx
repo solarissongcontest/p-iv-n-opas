@@ -1,3 +1,4 @@
+import { getLosTeacherLesson } from "./teacher/lessonL004";
 import {ArrowRight} from "lucide-react";
 import {useLosChapterDraft} from "./studyState";
 import type {LosChapterDraft} from "./studyState";
@@ -40,8 +41,8 @@ export function LosBookStartAction({move}:{move:(chapter:string|null,section:"pa
   const open=()=>{
     try{sessionStorage.setItem("los1.selectedLesson",recommendation.lessonId);}
     catch{ /* The path still opens safely at its first lesson. */ }
-    if (recommendation.lessonId === "L004") {
-      window.location.assign("/los-lessons/L004");
+    if (getLosTeacherLesson(recommendation.lessonId)) {
+      window.location.assign("/los-lessons/" + recommendation.lessonId);
       return;
     }
     move(null,"path");
