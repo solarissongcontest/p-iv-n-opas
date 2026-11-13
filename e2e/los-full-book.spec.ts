@@ -509,6 +509,7 @@ test("L006 C01 Teacher requires real writing, submitted test and self-assessment
   await expect(page.getByRole("link",{name:/Avaa kirjassa/}).first()).toHaveAttribute("href",/lessonReturn=L006.*test/);
   await page.goto("/los?lessonReturn=L006#/1/01/test",{waitUntil:"domcontentloaded"});
   const questions=page.locator(".los-workbook-question");
+  await expect(questions.first()).toBeVisible({timeout:15_000});
   const amount=await questions.count();
   expect(amount).toBeGreaterThanOrEqual(8);
   for(let i=0;i<amount;i++){
