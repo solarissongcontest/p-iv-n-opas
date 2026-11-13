@@ -50,8 +50,11 @@ test("first correct attempt gives independent evidence; hints and retries do not
   assert.equal(independentTeacherEvidence(s, lesson), 1);
   s = revealTeacherSolution(s, "independent", now);
   s = setTeacherAnswerDraft(s, "independent", "Guten Abend!", now);
+  const beforeRevealSubmit = s.attempts.length;
   s = submitTeacherAnswer(s, lesson, "independent", "Guten Abend!", now);
-  assert.equal(teacherLatestAttempt(s, "independent")!.independent, false);
+  assert.equal(s.attempts.length, beforeRevealSubmit,
+    "A revealed model answer must not create a new assessed attempt");
+  assert.equal(teacherLatestAttempt(s, "independent"), undefined);
 });
 
 test("opening book or skipping questions cannot finish and never creates practice answers", () => {
