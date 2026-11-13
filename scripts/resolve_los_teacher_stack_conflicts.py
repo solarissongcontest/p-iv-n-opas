@@ -31,6 +31,15 @@ def choose(path: str, ours: str, theirs: str) -> str:
         if "L001–L060" not in result:
             raise ValueError(f"No full-coverage declaration in {path}: {result[:120]!r}")
         return result
+    if path == "src/features/los/teacher/LosTeacherPlayer.tsx" and 'lesson.id === "L005"' in ours and "scene.chapterPhoto" in theirs:
+        # The existing L005 source panel and C09 photo/calendar/source widgets are siblings.
+        return ours + theirs
+    if path == "src/features/los/teacher/engine.ts" and "teacherMidtermAssessmentStatus" in ours and "isCorrectCalendarEntry" in theirs:
+        # Combine independent midterm, number-builder, and calendar evidence requirements.
+        if "teacherBuiltNumberCount" not in ours or "lesson.scenes.every(scene => !scene.calendar" not in theirs:
+            raise ValueError("Unexpected Teacher completion gate layout")
+        calendar = '    lesson.scenes.every(scene => !scene.calendar || isCorrectCalendarEntry(scene,session.draftAnswers[scene.id] ?? "")) &&\n'
+        return ours + calendar
     if path == "src/features/los/teacher/LosTeacherPlayer.tsx" and all("teacherWrongFeedback" in v and "type TeacherScene" in v for v in (ours, theirs)):
         terms = list(dict.fromkeys([t.strip() for v in (ours,theirs) for t in v.split(",") if t.strip()]))
         return "  " + ", ".join(terms) + ",\n"
