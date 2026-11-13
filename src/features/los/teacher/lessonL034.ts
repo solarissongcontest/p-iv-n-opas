@@ -20,8 +20,7 @@ export const LOS1_L034_TEACHER: TeacherLesson = {
   ],
   "requiredPracticeIds": [],
   "requiredCheckedIds": [
-    "C06-ZPE-Q01",
-    "C06-ZPE-Q02",
+    "C06-ZPE-Q04",
     "C06-SOURCE-Q01",
     "C06-SOURCE-Q02"
   ],
@@ -223,19 +222,19 @@ export const LOS1_L034_TEACHER: TeacherLesson = {
     {
       "id": "checked",
       "kind": "book",
-      "title": "Tarkista neljä aidosti tallennettavaa lähdevastausta",
+      "title": "Tarkista kolme aidosti tallennettavaa lähdevastausta",
       "phase": "Todelliset ymmärtämistehtävät",
       "paragraphs": [
-        "Avaa C06:n Ymmärrä-sivu. Sen yläosassa ovat uuden Text A:n C06-ZPE-Q01 ja C06-ZPE-Q02: Oskarin ja Larissan iät. Tee ja tarkista ne.",
+        "Avaa C06:n Ymmärrä-sivu. Sen yläosassa ovat uuden Text A:n oikeat tehtävät. Tee ja tarkista erityisesti C06-ZPE-Q04, joka kysyy neljännen dialogin Paulin ikää (11 vuotta). Kolme aiempaa kysymystä tehtiin L032:ssa.",
         "Avaa sitten sivun alaosasta avattava C01:n ikäkertauksen vanhat ymmärtämistehtävät. Siellä sijaitsevat C06-SOURCE-Q01 ja C06-SOURCE-Q02: Franzin ja Jörgin iät. Tee ja tarkista myös ne.",
-        "Neljä oikeasti tallennettua vastausta ja neljä tarkistuspainallusta ovat tämän opettajatunnin lähdevaatimus. Pelkkä tekstisivun avaaminen ei riitä, eikä vastauksen tarvitse olla ensin oikein."
+        "Kolme oikeasti tallennettua vastausta ja kolme tarkistuspainallusta ovat tämän opettajatunnin lähdevaatimus. Pelkkä tekstisivun avaaminen ei riitä, eikä vastauksen tarvitse olla ensin oikein."
       ],
       "bookLinks": [
         {
           "chapterId": "06",
           "section": "understand",
           "label": "C06 · Ymmärrä · uudet ja aiemmat ikätekstit",
-          "instruction": "Tarkista ZPE-Q01/02; avaa alaosan kertaus ja tarkista SOURCE-Q01/02."
+          "instruction": "Tarkista ZPE-Q04 ja avaa alaosan kertaus SOURCE-Q01/02."
         }
       ]
     },
