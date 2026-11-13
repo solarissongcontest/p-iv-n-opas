@@ -50,8 +50,12 @@ test("first correct attempt gives independent evidence; hints and retries do not
   assert.equal(independentTeacherEvidence(s, lesson), 1);
   s = revealTeacherSolution(s, "independent", now);
   s = setTeacherAnswerDraft(s, "independent", "Guten Abend!", now);
+  const beforeRevealedSubmit = s.attempts.length;
   s = submitTeacherAnswer(s, lesson, "independent", "Guten Abend!", now);
-  // A revealed solution is a model, not a new assessable submission.\n  assert.equal(teacherLatestAttempt(s, "independent"), undefined);
+  // C03's newer 3-attempt/reveal policy forbids scoring after the model answer is shown.
+  assert.equal(s.attempts.length, beforeRevealedSubmit);
+  assert.equal(teacherLatestAttempt(s, "independent"), undefined);
+  assert.equal(independentTeacherEvidence(s, lesson), 1);
 });
 
 test("opening book or skipping questions cannot finish and never creates practice answers", () => {

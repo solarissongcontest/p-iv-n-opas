@@ -1136,6 +1136,8 @@ test("L016 does not count draft C03 test as submission or as automatic mastery",
  await expect(status).toContainText("Ei vielä palautettu");
  await page.goto("/los?lessonReturn=L016#/1/03/test",{waitUntil:"domcontentloaded"});
  const items=page.locator(".los-workbook-question");
+ // DOMContentLoaded does not mean React has rendered the workbook questions.
+ await expect(items.first()).toBeVisible();
  const n=await items.count();
  expect(n).toBeGreaterThanOrEqual(10);
  await items.first().locator('input[type="radio"]').first().check();
