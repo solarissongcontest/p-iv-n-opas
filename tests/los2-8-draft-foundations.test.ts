@@ -3,6 +3,8 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { LOS_BOOKS } from "../src/features/los/catalog.ts";
 import { LOS_FUTURE_MANUSCRIPTS } from "../src/features/los/content/losFutureManuscripts.ts";
+import { losFutureExercisesFor } from "../src/features/los/content/losFutureExercises.ts";
+import { losFutureExercisesForSection } from "../src/features/los/content/losFutureExerciseSections.ts";
 
 test("LOS! 2–8 has 70 accurately namespaced manuscript chapters", () => {
   assert.equal(LOS_BOOKS.length,8);
@@ -51,7 +53,7 @@ test("later-book routing stays isolated from book 1's saved answers and study re
   assert.ok(route.includes('const chapter = book !== null && /^(0[1-9]|10)$/.test'));
   assert.ok(route.includes('book.id !== 1 ? <LosFutureBookPreview'));
   assert.ok(route.includes('chapter && book.id===1 && <LosNotebook'));
-  assert.ok(preview.includes("ei vielä pisteytetä"));
+  assert.ok(preview.includes("LosFutureExercises"));
   assert.doesNotMatch(preview,/losExercisesFor|useLosChapterDraft|LosChapterGrammar|LosAuthenticAudio/);
   assert.match(preview,/LOS_FUTURE_MANUSCRIPTS/);
 });
@@ -62,4 +64,47 @@ test("LOS! 2–8 searchable texts remain explicitly labelled editorial drafts", 
   assert.match(search,/Harjoitusteksti/);
   assert.match(search,/textA/);
   assert.match(search,/textB/);
+});
+
+test("all 1,820 manuscript tasks have distinct book-qualified IDs, prompts and answer keys", () => {
+  const ids=new Set<string>();
+  let total=0;
+  for(const book of LOS_BOOKS.filter(b=>b.id>=2)){
+    for(const chapter of book.chapters){
+      const tasks=losFutureExercisesFor(book.id,chapter.id);
+      assert.equal(tasks.length,26,`LOS${book.id} C${chapter.id}: unexpected task count`);
+      assert.deepEqual(tasks.map(x=>x.id),
+        [...Array.from({length:20},(_,i)=>`LOS${book.id}-C${chapter.id}-T${String(i+1).padStart(2,"0")}`),
+         ...Array.from({length:6},(_,i)=>`LOS${book.id}-C${chapter.id}-R${String(i+1).padStart(2,"0")}`)]);
+      for(const task of tasks){
+        assert.equal(task.chapterId,chapter.id);
+        assert.match(task.id,new RegExp(`^LOS${book.id}-C${chapter.id}-[TR]\\d{2}$`));
+        assert.ok(task.prompt.length>15,task.id);
+        assert.ok(task.answerKey.length>1,task.id);
+        assert.ok(!ids.has(task.id),`Duplicate ID ${task.id}`);
+        ids.add(task.id);
+        total++;
+      }
+      assert.deepEqual(["understand","practice","apply"].map(mode =>
+        losFutureExercisesForSection(tasks,mode as "understand"|"practice"|"apply").length),[9,14,3]);
+      const assigned=["understand","practice","apply"].flatMap(mode =>
+        losFutureExercisesForSection(tasks,mode as "understand"|"practice"|"apply").map(t=>t.id));
+      assert.equal(new Set(assigned).size,26,"A task occurs in multiple sections");
+      assert.deepEqual(new Set(assigned),new Set(tasks.map(t=>t.id)));
+    }
+  }
+  assert.equal(total,1820);
+  assert.equal(losFutureExercisesFor(1,"01").length,0,"LOS! 1 must never reuse manuscript exercises");
+  assert.equal(losFutureExercisesFor(2,"11").length,0,"No invalid chapter data");
+});
+
+test("LOS! 2–8 answers use existing owner + book + chapter draft storage, with no false grading", () => {
+  const exerciseUI=readFileSync("src/features/los/LosFutureExercises.tsx","utf8");
+  const state=readFileSync("src/features/los/studyState.ts","utf8");
+  assert.match(exerciseUI,/useLosChapterDraft\(bookId,chapterId\)/);
+  assert.match(exerciseUI,/practiceAnswers:\{\.\.\.current\.practiceAnswers/);
+  assert.match(exerciseUI,/practiceChecked:/);
+  assert.match(exerciseUI,/ei tarkistettu automaattinen arvostelu/);
+  assert.doesNotMatch(exerciseUI,/losScore\(|testSubmittedAt:\s*new Date/);
+  assert.ok(state.includes("${ownerId}.${bookId}.${chapterId}"));
 });
