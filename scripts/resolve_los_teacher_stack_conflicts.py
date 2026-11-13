@@ -31,6 +31,9 @@ def choose(path: str, ours: str, theirs: str) -> str:
         if "L001–L060" not in result:
             raise ValueError(f"No full-coverage declaration in {path}: {result[:120]!r}")
         return result
+    if path == "src/features/los/teacher/LosTeacherPlayer.tsx" and 'import { useEffect, useRef, useState } from "react";' in ours and 'import { useEffect, useState } from "react";' in theirs:
+        # Keep useRef imported for C07/C09 widgets that still use it.
+        return ours
     if path == "src/features/los/teacher/LosTeacherPlayer.tsx" and "Boolean(scene.numberBuilder" in ours and "Boolean(scene.calendar" in theirs:
         # A temporary concatenation; normalize the entire activity-disabled prop below.
         return ours + "\n" + theirs
