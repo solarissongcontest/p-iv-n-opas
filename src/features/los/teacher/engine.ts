@@ -156,7 +156,10 @@ export function evaluateTeacherAnswer(question: TeacherQuestion, answer: string)
     normalizeTeacherAnswer(item) === normalizeTeacherAnswer(answer));
 }
 export function moveTeacherScene(session: TeacherSession, lesson: TeacherLesson, targetId: string, now: string): TeacherSession {
-  if (!lesson.scenes.some(s => s.id === targetId)) return session;
+  // Scene IDs (e.g. "independent", "exit") recur across lessons. They are never
+  // a sufficient identity for switching or crediting a different lesson.
+  if (session.lessonId !== lesson.id ||
+      !lesson.scenes.some(s => s.id === targetId)) return session;
   return {
     ...session, sceneId: targetId, updatedAt: now,
     visitedIds: session.visitedIds.includes(targetId) ? session.visitedIds :
@@ -183,7 +186,8 @@ export function revealTeacherSolution(session: TeacherSession, sceneId: string, 
   };
 }
 export function confirmTeacherActivity(session: TeacherSession, lesson: TeacherLesson, activityId: string, now: string): TeacherSession {
-  if (session.completedAt || !lesson.requiredActivityIds.includes(activityId)) return session;
+  if (session.lessonId !== lesson.id || session.completedAt ||
+      !lesson.requiredActivityIds.includes(activityId)) return session;
   return { ...session, updatedAt: now, activityIds: session.activityIds.includes(activityId) ?
     session.activityIds : [...session.activityIds, activityId] };
 }
@@ -191,6 +195,7 @@ export function toggleTeacherPause(session: TeacherSession, now: string): Teache
   return session.completedAt ? session : { ...session, paused: !session.paused, updatedAt: now };
 }
 export function submitTeacherAnswer(session: TeacherSession, lesson: TeacherLesson, sceneId: string, answer: string, now: string): TeacherSession {
+  if (session.lessonId !== lesson.id) return session;
   const scene = lesson.scenes.find(s => s.id === sceneId);
   if (session.completedAt || session.paused || !scene?.question || session.attempts.length >= 120) return session;
   const q = scene.question;
@@ -219,7 +224,8 @@ export function teacherWrongFeedback(scene: TeacherScene, answer: string): strin
 export function teacherCanFinish(session: TeacherSession, lesson: TeacherLesson,
   practiceAnswers: Readonly<Record<string, string>>, practiceChecked: readonly string[] = [],
   chapterAssessment?: TeacherChapterAssessmentInput): boolean {
-  return teacherChapterAssessmentStatus(lesson, chapterAssessment).ready && !session.paused && lesson.scenes.every(scene => session.visitedIds.includes(scene.id)) &&
+  return session.lessonId === lesson.id &&
+    teacherChapterAssessmentStatus(lesson, chapterAssessment).ready && !session.paused && lesson.scenes.every(scene => session.visitedIds.includes(scene.id)) &&
     lesson.scenes.every(scene => !scene.reflection ||
       (session.draftAnswers[scene.id]?.trim().length ?? 0) >= scene.reflection.minLength) &&
     lesson.requiredQuestionIds.every(id => session.attempts.some(item => item.sceneId === id)) &&
@@ -235,6 +241,8 @@ export function finishTeacherSession(session: TeacherSession, lesson: TeacherLes
     { ...session, updatedAt: now, completedAt: now };
 }
 export function independentTeacherEvidence(session: TeacherSession, lesson: TeacherLesson): number {
+  // A correct answer to L004/"exit" must never count for L005/"exit".
+  if (session.lessonId !== lesson.id) return 0;
   const eligible = new Set(lesson.scenes.filter(scene =>
     scene.question && ["independent", "application", "exit"].includes(scene.question.evidenceRole ?? ""))
     .map(scene => scene.id));
