@@ -73,6 +73,13 @@ test("L030 Teacher uses the same submitted EX-MID state and resumes after reload
   await expect(page.getByRole("button",{name:"Merkitse oppitunti läpikäydyksi"})).toBeEnabled();
   await finish.click();
   await expect(page.getByText("Oppitunti merkitty suoritetuksi. Osaamista seurataan erikseen.")).toBeVisible();
+  // Completion locks answers, not the right to revisit earlier teaching scenes.
+  const firstScene=page.getByRole("navigation",{name:"Oppitunnin opetustilanteet"}).getByRole("button").first();
+  await firstScene.click();
+  await expect(firstScene).toHaveAttribute("aria-current","step");
+  await expect(page.getByText("Oppitunti suoritettu")).toBeVisible();
+  await page.reload({waitUntil:"domcontentloaded"});
+  await expect(firstScene).toHaveAttribute("aria-current","step");
   await expectNoHorizontalOverflow(page);
 });
 
