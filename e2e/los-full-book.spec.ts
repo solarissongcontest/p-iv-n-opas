@@ -767,6 +767,27 @@ test("Teacher 2.0 presents one teaching board with one set of controls", async (
 
 
 
+
+test("C08 screen-reader language follows the actual Finnish or German answer",async({page})=>{
+  await enterLocalBook(page);
+  await page.goto("/los-lessons/L042",{waitUntil:"domcontentloaded"});
+  let outline=page.locator(".los-teacher-outline nav");
+  await outline.getByRole("button",{name:"Miten toimia vaikean tekstin äärellä?"}).click();
+  const finnish=page.locator(".los-teacher-option").filter({hasText:"Etsin tutut sanat"});
+  await expect(finnish.locator("span[lang='fi']")).toHaveCount(1);
+  await expect(page.locator(".los-teacher-option span[lang='de']")).toHaveCount(0);
+  await expectNoHorizontalOverflow(page);
+
+  await page.goto("/los-lessons/L043",{waitUntil:"domcontentloaded"});
+  outline=page.locator(".los-teacher-outline nav");
+  await outline.getByRole("button",{name:"Pyydä hidastamaan"}).click();
+  const german=page.locator(".los-teacher-option").filter({hasText:"Bitte langsamer."});
+  await expect(german.locator("span[lang='de']")).toHaveCount(1);
+  await expect(page.locator(".los-teacher-option span[lang='fi']")).toHaveCount(0);
+  await expectNoHorizontalOverflow(page);
+});
+
+
 test("stepwise teaching boards begin collapsed after directly switching scenes",async({page})=>{
   await enterLocalBook(page);
   await page.goto("/los-lessons/L032",{waitUntil:"domcontentloaded"});
