@@ -9,6 +9,7 @@ import {
   teacherWrongFeedback, type TeacherScene, type TeacherSession,
 } from "./engine.ts";
 import { getLosTeacherLesson } from "./lessonL004.ts";
+import { composeLosC10Dialogues, storeLosC10Dialogues } from "./c10ApplicationBridge.ts";
 import { validateTeacherLesson } from "./validateContent.ts";
 import "../los-book.css";
 import "./teacher.css";
@@ -129,6 +130,8 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
   const sceneIndex = lesson?.scenes.findIndex(item => item.id === scene?.id) ?? 0;
   const available = Boolean(saved && session && lesson && teacherCanFinish(session, lesson, draft.practiceAnswers, draft.practiceChecked, draft));
   const completed = Boolean(session?.completedAt);
+  const c10Dialogues = lesson?.id === "L054" ? composeLosC10Dialogues(
+    session?.draftAnswers["dialogue-du"] ?? "", session?.draftAnswers["dialogue-sie"] ?? "") : null;
 
   useEffect(() => { setAuthorized(Boolean(readCachedDeviceUser())); }, []);
   useEffect(() => { setShowHelp(false); setHelpSelection(null); }, [scene?.id]);
@@ -168,6 +171,10 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
   const markActivity = (id: string) => {
     if (!lesson) return;
     persist(old => confirmTeacherActivity(old, lesson, id, stamp()));
+  };
+  const transferC10Dialogues = () => {
+    if (lesson?.id !== "L054" || !saved || !c10Dialogues) return;
+    update(current => storeLosC10Dialogues(current, c10Dialogues));
   };
   const finish = () => {
     if (!lesson || !saved) return;
@@ -245,7 +252,7 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
               reveal={() => persist(old => revealTeacherSolution(old, scene.id, stamp()))}
             />}
             {scene.bookLinks && <div className="los-teacher-book-links">
-              {scene.bookLinks.map(link => <div key={link.section} className="los-teacher-book-link">
+              {scene.bookLinks.map(link => <div key={link.chapterId + "-" + link.section + "-" + link.label} className="los-teacher-book-link">
                 <div><strong>{link.label}</strong><p>{link.instruction}</p></div>
                 <a href={bookUrl(lessonId, lesson.bookId, link.chapterId, link.section)} target="_blank" rel="noopener noreferrer">
                   <BookOpen size={17}/> Avaa kirjassa <ArrowRight size={16}/>
@@ -278,6 +285,24 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
                   : "Kirjoita vähintään " + scene.reflection.minLength + " merkkiä. Tekstisi tallentuu automaattisesti."}
               </small>
             </div>}
+            {lesson.id === "L054" && (scene.id === "dialogue-sie" || scene.kind === "summary") &&
+              <section className="los-teacher-activity" aria-label="Siirrä kaksi keskustelua oppikirjaan">
+                <h3>Tallenna keskustelut myös oppikirjan sovellustehtävään</h3>
+                <p>Molemmat keskustelut säilyvät tässä oppitunnissa. Voit siirtää ne yhdellä painalluksella C10:n
+                  nykyiseen Käytä saksaa -luonnokseen. Siirto ei tarkista kielioppia eikä korvaa jo kirjoittamaasi tekstiä.</p>
+                <button type="button" onClick={transferC10Dialogues}
+                  disabled={!c10Dialogues || Boolean(draft.applicationDraft.trim()) || !saved}>
+                  <BookOpen size={17}/> Siirrä kaksi keskustelua Käytä saksaa -sivulle
+                </button>
+                {!c10Dialogues && <p>Kirjoita ensin molemmat keskustelut, vähintään 90 merkkiä kumpaankin.</p>}
+                {draft.applicationDraft.trim() && <p role="status">Kirjan sovellusluonnoksessa on jo tekstiä.
+                  Sitä ei korvata. Avaa sivu jatkaaksesi tai täydentääksesi vastausta.</p>}
+                <a href={bookUrl(lessonId, lesson.bookId, "10", "apply")} target="_blank" rel="noopener noreferrer">
+                  Avaa C10:n Käytä saksaa -sivu <ArrowRight size={16}/>
+                </a>
+                <p>Lisää kirjassa vielä erikseen neljä lausetta kolmannesta henkilöstä.
+                  Tarkista molempien keskustelujen 6–8 puheenvuoroa ja neljä esittelylausetta itse.</p>
+              </section>}
             {scene.activityId && <div className="los-teacher-activity">
               <button type="button"
                 disabled={session.activityIds.includes(scene.activityId) || completed ||
