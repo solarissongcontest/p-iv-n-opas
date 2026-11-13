@@ -3,7 +3,7 @@ import {strict as assert} from "node:assert";
 import {TEACHER_L004} from "../src/features/los/teacher/content/l004.ts";
 import {initialTeacherProgress,validTeacherProgress,validTeacherLesson,selectTeacherScene,
  hintTeacher,answerTeacher,revealTeacher,pauseTeacher,teacherEvidence,
- teacherCanComplete,finishTeacher,openTeacherHelp} from "../src/features/los/teacher/core.ts";
+ teacherCanComplete,finishTeacher,openTeacherHelp,answerTeacherWritten,revealTeacherWritten} from "../src/features/los/teacher/core.ts";
 const at="2026-11-12T21:00:00Z";
 import {emptyLosLessonProgress,losLessonFinishTeacher} from "../src/features/los/lessonEngine.ts";
 test("L004 has full scripted teaching, not a generic task list",()=>{
@@ -62,6 +62,7 @@ test("teacher lesson completion requires reviewed attempts, not correct answers"
  let p=initialTeacherProgress(TEACHER_L004);
  for(const scene of TEACHER_L004.scenes){
    p=selectTeacherScene(TEACHER_L004,p,scene.id);
+   if(scene.written)p=answerTeacherWritten(TEACHER_L004,p,"Guten Tag!",at);
    if(scene.question){
      const wrong=scene.question.choices.find(x=>x.id!==scene.question?.correctId)!;
      p=answerTeacher(TEACHER_L004,p,wrong.id,at);
@@ -80,6 +81,7 @@ test("old lesson completion and answers survive teacher completion without migra
  let p=initialTeacherProgress(TEACHER_L004);
  for(const scene of TEACHER_L004.scenes){
    p=selectTeacherScene(TEACHER_L004,p,scene.id);
+   if(scene.written)p=revealTeacherWritten(TEACHER_L004,p,at);
    if(scene.question)p=revealTeacher(TEACHER_L004,p,at);
  }
  const completed=losLessonFinishTeacher(TEACHER_L004,{...legacy,teacher:p},at);
