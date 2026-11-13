@@ -327,6 +327,8 @@ test("LOS Teacher 2.0 L004 teaches greetings, saves scenes, and never invents ma
  await expect(player).toContainText("Opetuskäsikirjoitus on vielä");
  await player.getByRole("button",{name:"Opetuksen sisällysluettelo"}).click();
  await player.getByRole("button",{name:/6\. Kokeile itse ilman mallia/}).click();
+ await player.locator(".los-teacher-written-entry input").fill("Hallo!");
+ await player.getByRole("button",{name:"Tarkista kirjoittamani"}).click();
  await player.getByRole("button",{name:"Guten Morgen!"}).click();
  await expect(player).toContainText("Tämä sopii aamuun.");
  await player.getByRole("button",{name:"Guten Abend!"}).click();
@@ -372,6 +374,12 @@ test("LOS Teacher L004 is the primary lesson and finishes despite nonmastered an
  ];
  for(const [item,wrong] of script){
   await player.locator("#los-teacher-map").getByRole("button",{name:item,exact:true}).click();
+  if(item.startsWith("6.")||item.startsWith("7.")||item.startsWith("8.")){
+    const input=player.locator(".los-teacher-written-entry input");
+    await input.fill("Guten Tag!");
+    await player.getByRole("button",{name:"Tarkista kirjoittamani"}).click();
+    await player.getByRole("button",{name:"Tarkista kirjoittamani"}).click();
+  }
   if(wrong)await player.locator(".los-teacher-choices").getByRole("button",{name:wrong,exact:true}).click();
  }
  await expect(player).toContainText("0/3");
@@ -407,6 +415,8 @@ test("L004 opens in a dedicated scene player without the 60-lesson navigation",a
  await expect(player).toBeVisible();
  await player.getByRole("button",{name:"Opetuksen sisällysluettelo"}).click();
  await player.getByRole("button",{name:/6\. Kokeile itse ilman mallia/}).click();
+ await player.locator(".los-teacher-written-entry input").fill("Guten Abend!");
+ await player.getByRole("button",{name:"Tarkista kirjoittamani"}).click();
  await player.getByRole("button",{name:"Guten Abend!"}).click();
  await expect(player).toContainText("1/3");
  await page.reload({waitUntil:"domcontentloaded"});
@@ -466,6 +476,8 @@ test("L004 contextual En ymmärrä help is usable in every scene and persisted w
   await expect(panel.locator(".los-teacher-help-result")).toBeVisible();
  }
  await player.locator("#los-teacher-map").getByRole("button",{name:"6. Kokeile itse ilman mallia"}).click();
+ await player.locator(".los-teacher-written-entry input").fill("Guten Abend!");
+ await player.getByRole("button",{name:"Tarkista kirjoittamani"}).click();
  await player.locator(".los-teacher-choices").getByRole("button",{name:"Guten Abend!"}).click();
  await expect(player).toContainText("0/3");
  await page.reload({waitUntil:"domcontentloaded"});
@@ -510,5 +522,27 @@ test("L004 authored board shows and repeats stages without altering learner evid
  await expect(page.locator(".los-teaching-board")).toContainText("Näin opettaja päättää oikean tervehdyksen");
  await expect(page.locator(".los-teaching-board-stage")).toHaveCount(1);
  await expect(page.locator(".los-teacher")).toContainText("0/3");
+ await expectNoHorizontalOverflow(page);
+});
+
+test("L004 open answers persist as drafts, distinguish recall from recognition and survive reload",async({page})=>{
+ await enterLocalBook(page);
+ await page.goto("/los#/1/lesson/L004",{waitUntil:"domcontentloaded"});
+ const player=page.locator(".los-teacher");
+ await player.getByRole("button",{name:"Opetuksen sisällysluettelo"}).click();
+ await player.locator("#los-teacher-map").getByRole("button",{name:"6. Kokeile itse ilman mallia"}).click();
+ const input=player.locator(".los-teacher-written-entry input");
+ await input.fill("Guten Abe");
+ await expect(player.locator(".los-teacher-choices")).toHaveCount(0);
+ await page.reload({waitUntil:"domcontentloaded"});
+ await expect(page.locator(".los-teacher-written-entry input")).toHaveValue("Guten Abe");
+ await expect(page.locator(".los-teacher")).toContainText("0/3 avointa tehtävää");
+ await page.locator(".los-teacher-written-entry input").fill("Hallo!");
+ await page.getByRole("button",{name:"Tarkista kirjoittamani"}).click();
+ await expect(page.locator(".los-teacher")).toContainText("1/3 avointa tehtävää");
+ await expect(page.locator(".los-teacher-choices")).toBeVisible();
+ await page.reload({waitUntil:"domcontentloaded"});
+ await expect(page.locator(".los-teacher")).toContainText("1/3 avointa tehtävää");
+ await expect(page.locator(".los-teacher")).toContainText("0/3. Kumpikaan mittari");
  await expectNoHorizontalOverflow(page);
 });
