@@ -9,6 +9,7 @@ import {
   teacherWrongFeedback, type TeacherScene, type TeacherSession,
 } from "./engine.ts";
 import { getLosTeacherLesson } from "./lessonL004.ts";
+import { LosTeacherGreetingMedia } from "./LosTeacherGreetingMedia.tsx";
 import { composeLosC10Dialogues, storeLosC10Dialogues } from "./c10ApplicationBridge.ts";
 import { validateTeacherLesson } from "./validateContent.ts";
 import "../los-book.css";
@@ -243,6 +244,8 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
             <div className="los-teacher-prose">
               {scene.paragraphs.map((paragraph, i) => <p key={i}>{paragraph}</p>)}
             </div>
+            {lesson.id === "L005" && (scene.id === "source-list" || scene.id === "audio-choice") &&
+              <LosTeacherGreetingMedia/>}
             {scene.kind === "board" && <TeacherBoard scene={scene}/>}
             {scene.question && <SceneQuestion
               scene={scene} session={session}
