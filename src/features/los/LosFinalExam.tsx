@@ -12,6 +12,7 @@ import {
 } from "./content/los1FinalExam";
 import {losArchiveExamAttempt,losArchivedExamHistory} from "./content/los1ExamArchive";
 import { LosMasterySummary } from "./LosMasterySummary.tsx";
+import { losCountReviewedWords } from "./losReviewedWords.ts";
 import "./los-exams.css";
 
 const sections=Object.keys(LOS1_FINAL_SECTION_TITLES) as LosFinalSection[];
@@ -230,7 +231,8 @@ export function LosFinalSummary({move}:{move:LosNavigate}){
   d07=useLosChapterDraft(1,"07"),d08=useLosChapterDraft(1,"08"),d09=useLosChapterDraft(1,"09"),
   d10=useLosChapterDraft(1,"10");
  const drafts=[d01.draft,d02.draft,d03.draft,d04.draft,d05.draft,d06.draft,d07.draft,d08.draft,d09.draft,d10.draft];
- const reviewed=Array.from(new Set(drafts.flatMap(d=>Object.keys(d.recallCards??{})))).length;
+ const reviewed=losCountReviewedWords(Object.fromEntries(drafts.map((draft,index)=>
+   [String(index+1).padStart(2,"0"),draft])));
  const answers=final.draft.practiceAnswers;
  const goal=answers[LOS1_SUMMARY_GOAL]??"";
  const goalReady=goal.trim().length>=25;
@@ -243,7 +245,7 @@ export function LosFinalSummary({move}:{move:LosNavigate}){
  return <section className="los-inner-page los-exam" aria-label="LOS! 1:n osaamisen yhteenveto">
   <p className="los-eyebrow">LOS! 1 / L060 / SELBSTREFLEXION</p>
   <h1>Mitä osaan nyt saksaksi?</h1>
-  <p className="los-page-intro">Käy läpi kaikkien 10 kappaleen tavoitteet, kertaa vähintään viisi oikeaa sanakorttia kirjan sanastossa ja kirjoita seuraava konkreettinen tavoitteesi. Oma arvio erotetaan aina automaattisesti pisteytetystä loppukokeesta.</p>
+  <p className="los-page-intro">Käy läpi kaikkien 10 kappaleen tavoitteet, kertaa vähintään viisi eri sanaa kirjan sanakorteilla ja kirjoita seuraava konkreettinen tavoitteesi. Oma arvio erotetaan aina automaattisesti pisteytetystä loppukokeesta.</p>
   <div className="los-exam-overview">
    <p>EX-FINAL: <strong>{exam?exam.correct+"/"+exam.total:"ei vielä palautettu"}</strong> · {final.draft.testSubmittedAt?"nykyinen palautettu yritys":latestArchived?"viimeisin arkistoitu yritys":"ei tallennettua koeyritystä"}; ei kielitaitotodistus.</p>
    <p>Oma tavoitteiden katselmointi: <strong>{chapterCount}/10</strong> · viivästetyn muistin itsearviot eivät todista kielitasoa.</p>
@@ -261,13 +263,13 @@ export function LosFinalSummary({move}:{move:LosNavigate}){
   </section>
   <section className="los-exam-section">
    <h2>2. Aktivoi sanakorttien kertaus</h2>
-   <p>Olet arvioinut {reviewed} eri sanakorttisuuntaa tässä laitteessa. Avaa kirjan sanakortit ja arvioi vähintään viisi sanaa muistamisen mukaan. Vasta sen jälkeen voit vahvistaa kertauksen tähän yhteenvetoon.</p>
+   <p>Olet arvioinut {reviewed} eri sanaa tässä laitteessa. Saman sanan kertaaminen molempiin suuntiin lasketaan vain kerran. Avaa kirjan sanakortit ja arvioi vähintään viisi eri sanaa muistamisen mukaan. Vasta sen jälkeen voit vahvistaa kertauksen tähän yhteenvetoon.</p>
    <button type="button" className="los-outline-button" onClick={()=>move("01","cards")}>
     <BookOpen size={16}/> Avaa sanakortit
    </button>
    <button type="button" className="los-outline-button" disabled={reviewed<5}
     onClick={()=>save(LOS1_SUMMARY_CARDS,"reviewed-"+reviewed)}>
-    <CheckCircle2 size={16}/> Vahvista vähintään viisi arvioitua korttia
+    <CheckCircle2 size={16}/> Vahvista vähintään viisi arvioitua sanaa
    </button>
    {answers[LOS1_SUMMARY_CARDS]&&<p role="status">Kertausvahvistus kirjattu. Korttien osaaminen on käyttäjän itse arvioimaa.</p>}
   </section>
