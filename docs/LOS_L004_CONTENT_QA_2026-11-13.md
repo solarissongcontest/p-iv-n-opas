@@ -59,3 +59,19 @@ Kaksi opetustaulua täsmäävät samoihin kohteisiin: aamutervehdyksen viisivaih
 - **Ääni, IPA, sanakirjan julkaisu ja LOS! 1:n muut julkaisuportit eivät muutu hyväksytyiksi tällä auditoinnilla.**
 
 Käsikirjoitus on edelleen nimenomaisesti **luonnos**. Lähdeauditointia ei saa kutsua ulkopuolisen asiantuntijan hyväksynnäksi.
+
+## Täydennys 13.11.2026: avoimet muistista tuottamisen harjoitukset
+
+**Rajaus:** L004:ssa on yhä yhdeksän opetustilannetta ja alkuperäiset monivalintatunnisteet. Kolmen tilanteen (itsenäinen harjoittelu, soveltaminen, lopputarkistus) alkuun lisättiin tekstikenttä, jossa opiskelija kirjoittaa saksankielisen ilmauksen ennen vastausvaihtoehtojen näkymistä. Vastausvaihtoehdot näytetään kirjoitetun oikean vastauksen, mallivastauksen avaamisen tai kahden virheellisen kirjoitusyrityksen jälkeen. Tehtävät ovat edelleen **toimituksellisia luonnoksia**.
+
+| Tilanne | Tekstitehtävän oikea(t) vastaus(t) | Rajauksen peruste |
+| --- | --- | --- |
+| Ystävän kohtaaminen illalla | `Guten Abend!` **tai** `Hallo!` | Goethe-Institutin A1-lähde sallii illalla sekä aikakohtaisen että tutun arkisen tervehdyksen |
+| Kohtelias hyvästely palvelutiskillä | `Auf Wiedersehen!` | A1-lähteen muodollisempi hyvästely; `Tschüss!` opetetaan erikseen rennompana ilmauksena |
+| Hyvän yön toivotus ennen nukkumaanmenoa | `Gute Nacht!` | Goethe-Institutin ja Dudenin mukainen käyttöyhteys, ei illan kohtaamisen tervehdys |
+
+**Automaattinen tarkistus:** vain etukäteen nimetyt hyväksytyt ilmaukset. Kirjainkoko, toistuvat välilyönnit ja viimeinen huuto-/piste-/kysymysmerkki jätetään huomiotta, mutta sanojen lisäämistä, korvaamista tai väärää ilmausta ei arvata oikeaksi. Tämä ei ole laajan kirjoitustaidon, oikeinkirjoituksen tai suullisen ääntämisen arviointia. Tunnetuille virhevastauksille on käsin laadittu selitys; tuntemattomat vastaukset saavat yleisen, tilanteeseen perustuvan palautteen. Kahden virheen jälkeen opiskelija voi nähdä mallin ja jatkaa.
+
+**Tallennus ja pedagoginen näyttö:** keskeneräiset, enintään 40 merkin kirjoitusvastaukset tallennetaan nykyiseen `lessonProgress.L004.teacher.writtenDrafts`-tietoon; tarkistetut vastaukset ovat `answers["independent-written"]`, `answers["application-written"]` ja `answers["exit-written"]`. Aiemmat `answers.independent`-, `answers.application`- ja `answers.exit`-merkinnät eivät muutu. Erillinen `writtenIndependent`-mittari kertoo vain ensimmäisellä yrityksellä ilman vihjettä oikein kirjoitetut vastaukset. Koko oppitunnin läpikäynti ei tarkoita kielen hallintaa. Vanhojen jo päättyneiden oppituntien `completedAt` säilyy eikä uusia tehtäviä taannehtivasti väitetä tehdyiksi.
+
+**Testattava julkaisuraja:** oikeiden ilmausten hyväksyntä, tunnettujen väärien vastausten hylkääminen, rajattu normalisointi, vihjeen vaikutus näyttöön, kirjoitusluonnosten tallennus ja uudelleenavaaminen, alkuperäisten monivalintojen säilyminen, vanhojen suoritusten yhteensopivuus sekä mobiilin näppäimistö ja vaakavieritys. Automatisoidut testit eivät korvaa riippumatonta kieli- ja pedagogista tarkistusta, oikeaa mobiililaitetta tai käyttäjäkoetta.
