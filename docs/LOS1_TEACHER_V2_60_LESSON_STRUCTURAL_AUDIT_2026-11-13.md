@@ -32,7 +32,7 @@ Selite: `vastaus` = vanhaan tehtävätilaan tallennettu vastaus, ei automaattine
 | L010 | C02 · nimi | 3 | 30 | tarkistettu lähdetehtävä | Teacher 2.0, Text B:n tarkistetut Q01/Q02, toimituksellinen hyväksyntä avoin | lessonEngineC02.ts |
 | L011 | C02 · nimi | 3 | 30 | koe | Teacher 2.0 -käsikirjoitus ja kirjan 15 tehtävän palautus, hyväksyntä avoin | lessonEngineC02.ts |
 | L012 | C03 · alkuperä | 3 | 30 | ei erityistä | Teacher 2.0: maiden sanasto ja maa/kaupunki-vertailu, hyväksyntä avoin | lessonEngineC03.ts |
-| L013 | C03 · alkuperä | 3 | 30 | tarkistettu lähdetehtävä | Teacher 2.0: Lisan koko kahdeksan repliikin teksti ja C03-SOURCE-Q01/Q02 tarkistettuna, QA avoin | lessonEngineC03.ts |
+| L013 | C03 · alkuperä | 3 | 30 | tarkistettu lähdetehtävä | Teacher 2.0: Lisan koko kahdeksan repliikin teksti ja C03-SOURCE-Q01/Q02/Q03 tarkistettuna, QA avoin | lessonEngineC03.ts |
 | L014 | C03 · alkuperä | 3 | 30 | vastaus | Teacher 2.0: kommen (ich/du), woher-sanajärjestys, kirjan 4 oikeaa harjoitusta, QA avoin | lessonEngineC03.ts |
 | L015 | C03 · alkuperä | 3 | 30 | tarkistettu lähdetehtävä | Teacher 2.0: M-COM-02:n 4 repliikkiä sekä C03-MCOM02-Q02/Q03 tarkistettuna, QA avoin | lessonEngineC03.ts |
 | L016 | C03 · alkuperä | 3 | 30 | koe | Teacher 2.0: kertaus,  C03:n oikean kappaletestin palautus ja oma itsearviointi, QA avoin | lessonEngineC03.ts |
@@ -112,3 +112,60 @@ Lähdevalinta **ei siis ole päätöstä vailla**. Päätös on dokumentoitu, mu
 - C03:n Text A:n lähteeksi on jo valittu `M-WB-07` (Lisa Müller, Wikibooks oldid 4581896); vanha `M-DIB-01` (Berna) on poistettu päätekstin roolista yksityisyysperusteella. Lisenssin lähdemerkintöjen yksilöinti, riippumaton kielen ja tason tarkistus sekä oikeat laitetestit odottavat.
 - Tätä auditointia ei tule tulkita R1–R12-porttien sulkemiseksi. Teacher 2.0:n korjaukset eivät muuta FreeDictin tilapäisiä testilatauksia tuotantosanakirjaksi eikä vapauta julkaisemattomia ääni- tai IPA-aineistoja.
 
+## Yhteensopivuus: L004:n ja L005:n vaihtoehtoiset opetusversiot (13.11.2026)
+
+L004:n rinnakkaisen Teacher-moottorin PR #218 sekä siitä jatkaneen L005:n
+PR #232 historialliset oppituntimerkinnät säilytetään
+`lessonProgress.L004/L005.teacher`-kentissä. PR #232 lisäsi
+`completedContentRevision`-, `completedRevisionAt`-, `writtenDrafts`-,
+`helpSelections`- ja `media`-kentät; nämä tarkistetaan nyt tietotyypin,
+kohtuullisten kokorajojen, päiväysten ja parillisten versiomerkintöjen
+perusteella. `media` sisältää vain selaimen ilmoittamia
+`playingAt`/`endedAt`-tapahtumia ja tekstivastineen avausmerkinnän,
+ei kuullun ymmärtämisen näyttöä.
+
+**Yhteinen päätös on edelleen yksiselitteinen:** kirjoitettava uusi
+Teacher Experience 2.0 -tila on vain `teacherSessions`. Historiallista
+`lessonProgress.*.teacher`-tietoa ei muunnettaessa kopioida
+`teacherSessions`-vastauksiksi, itsenäiseksi osaamisnäytöksi tai
+suorituspäiväksi. Kelvollisen vanhan tietueen kaikki kentät säilyvät
+varmuuskopion käsittelyssä muuttumattomina. Korruptoitunut uusi
+metadata hylätään sen sijaan, että sitä yritettäisiin korjata
+keksityillä oletuksilla.
+
+Tämä on data- ja yhteensopivuustarkistus, **ei** PR #232:n toisen
+opetusmoottorin käyttöönotto tai todiste toimivasta äänen toistosta.
+
+## L005:n yhden opetussoittimen media, täsmennys 13.11.2026
+
+Yhteiseen Teacher Experience 2.0 -soittimeen on lisätty L005:n alkuperäisen
+M-COM-03-äänitteen oma HTML5-toisto ja koko **20 ilmauksen saksankielinen lista
+suomennoksineen**. Luettelo luetaan suoraan kirjan olemassa olevasta
+`LOS1_TEXT_B_SOURCES["01"]`-sisällöstä. Siten samasta materiaalista ei
+synny toisistaan poikkeavia tekstikopioita. Kirjan Text B pysyy edelleen
+käytettävissä erikseen niihin **neljään kirjan omaan tarkistettavaan
+lähdetehtävään**, jotka L005:n läpikäynti edellyttää.
+
+Media on alkuperäinen Wikimedia Commonsin *German Vocabulary - Greetings.ogg*,
+German Men92, public domain, noin 28 sekuntia. Toistokomponentissa on
+selkeä virheilmoitus ja koko tekstin varavaihtoehto. Lukijan
+`teacherSessions` pysyy ainoana kirjoitettavana opetus- ja vastaustilana;
+`lessonProgress.*.teacher` on vain säilytettävä vanha tieto.
+Tähän ei lisätty kilpailevaa opetusmoottoria, uutta äänitodistetta,
+automaattista puhearviointia eikä väitettä äänen kuulemisesta.
+
+Tarkka ero: audion `play`-painike, mahdollinen onnistunut toistotapahtuma,
+20 kohdan tekstilistan avaaminen ja lukutehtävän tarkistaminen **eivät**
+itsessään todista kuullun ymmärtämistä. Täydellinen teksti sisältyy LOS!:iin,
+kun taas ulkoisia URL-osoitteita käytetään äänitiedoston lataamiseen sekä
+tekijä- ja lisenssitietojen osoittamiseen. Oikean puhelimen Ogg-toisto,
+ruudunlukijan käyttö ja saksan kielen pedagoginen auditointi ovat avoimia
+julkaisuportteja. CI-tulokset raportoidaan erikseen uusimman commitin
+perusteella.
+
+## PR #223:n L013–L016-korjaukset
+
+- L013 vaatii nyt myös kolmannen saman alkuperäisen Lisa-lähteen tarkistetun tehtävän (C03-SOURCE-Q03); alkuperäinen kahdeksan puheenvuoron teksti ei muutu.
+- L014 sisältää kysymyslauseen rakentamisen erillisen vaiheittaisen taulun; L015 sisältää karttapäättelyn vastaavan vaiheistetun taulun.
+- L016:n oikea 15 kohdan kappaletesti ei muutu suoritetuksi pelkän luonnosvastauksen perusteella, vaikka vastaus säilyy kirjan ja opetuksen välillä.
+- L013–L016:n soveltamisnäyttö, oikeat lähteet ja testin palautus tarkistetaan regressiotesteissä. Automaattinen läpäisy ei korvaa riippumatonta pedagogista tai laitehyväksyntää.
