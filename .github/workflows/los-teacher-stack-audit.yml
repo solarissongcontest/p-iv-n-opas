@@ -11,7 +11,7 @@ permissions:
 jobs:
   merge-audit:
     runs-on: ubuntu-24.04
-    timeout-minutes: 25
+    timeout-minutes: 40
     env:
       E2E_BASE_URL: http://127.0.0.1:5173
       REQUIRE_GEMINI: "false"
@@ -76,6 +76,10 @@ jobs:
           exit 1
       - name: Open every merged LOS Teacher lesson in desktop and iPhone browser
         run: bunx playwright test e2e/los-teacher-integrated-stack.spec.ts --project=desktop-chromium --project=iphone-webkit
+      - name: Digital textbook and original 60-lesson browser regression
+        run: bunx playwright test e2e/los-full-book.spec.ts --project=desktop-chromium --project=iphone-webkit
+      - name: Midterm, C07 and C10 interactive browser regressions
+        run: bunx playwright test e2e/los-teacher-review-midterm.spec.ts e2e/los-c07-teacher.spec.ts e2e/los-c10-teacher.spec.ts --project=desktop-chromium --project=iphone-webkit
       - name: Preserve merged Teacher browser failures
         if: always()
         uses: actions/upload-artifact@v4
