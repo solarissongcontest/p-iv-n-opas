@@ -45,6 +45,12 @@ function checkScene(scene: TeacherScene, location: string, issues: TeacherConten
       scene.reflection.minLength < 1 || scene.reflection.minLength > 500)) {
     issues.push({ location, problem: "Kirjoitus- tai pohdintatehtävästä puuttuu kelvollinen sisältö ja pituusraja." });
   }
+  if (scene.kind === "form" && (!scene.form || scene.form.length < 2 || scene.form.length > 8 ||
+      new Set(scene.form.map(field => field.id)).size !== scene.form.length ||
+      scene.form.some(field => !name(field.id) || !meaningful(field.label) ||
+        !meaningful(field.placeholder) || !meaningful(field.sampleAnswer)))) {
+    issues.push({ location, problem: "Lomakkeesta puuttuu nimettyjä kenttiä tai kirjallinen mallivastaus." });
+  }
   if (scene.numberBuilder && scene.kind !== "board")
     issues.push({ location, problem: "Numeronrakennustaulu edellyttää board-tilannetta." });
   if (scene.kind === "board" && (!scene.board?.length ||
