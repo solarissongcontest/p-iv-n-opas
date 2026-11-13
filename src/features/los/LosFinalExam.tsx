@@ -7,6 +7,7 @@ import {LOS1_C06_TEXT,LOS1_C08_TEXT,LOS1_C10_TEXT} from "./content/los1OpenDialo
 import {
  LOS1_FINAL_DRAFT_CHAPTER,LOS1_FINAL_AUDIO_SOURCES,LOS1_FINAL_QUESTIONS,
  LOS1_FINAL_SECTION_TITLES,LOS1_FINAL_WRITING_CHECK,LOS1_FINAL_VOICE_CHECK,
+ LOS1_FINAL_WRITING_MODEL_OPENED,LOS1_FINAL_WRITING_ASSISTED,
  LOS1_SUMMARY_GOAL,LOS1_SUMMARY_CARDS,LOS1_SUMMARY_REFLECTION,
  losFinalReadyToSubmit,losFinalScore,type LosFinalSection,
 } from "./content/los1FinalExam";
@@ -165,8 +166,15 @@ export function LosFinalExam({move}:{move:LosNavigate}){
    <p>Kirjoita 5–7 lyhyttä saksankielistä lausetta kuvitteelliselle uudelle tuttavalle. Kerro nimi, alkuperä, ikä ja tapaamisaika. Kirjoita jokainen virke omalle rivilleen, jotta voit itse tarkistaa määrän. Älä kirjoita oikeita henkilötietoja.</p>
    <label htmlFor="los-final-writing">Oma viesti, jokainen lause omalla rivillään</label>
    <textarea id="los-final-writing" value={draft.applicationDraft} rows={8} maxLength={5000}
-    onChange={event=>update(current=>({...current,applicationDraft:event.target.value,
-      practiceAnswers:{...current.practiceAnswers,[LOS1_FINAL_WRITING_CHECK]:""}}))}
+    onChange={event=>update(current=>({
+      ...current,applicationDraft:event.target.value,
+      practiceAnswers:{
+        ...current.practiceAnswers,
+        [LOS1_FINAL_WRITING_CHECK]:"",
+        ...(current.practiceAnswers[LOS1_FINAL_WRITING_MODEL_OPENED]
+          ? {[LOS1_FINAL_WRITING_ASSISTED]:"edited-after-model"} : {}),
+      },
+    }))}
     placeholder="Kirjoita 5–7 omaa lausetta, jokainen omalle rivilleen." />
    <p role="status">{writingLineCount(draft.applicationDraft)} / 5–7 lausetta · {draft.applicationDraft.trim().length} merkkiä. Harjoitus ei saa automaattista kielioppiarvosanaa.</p>
    <button type="button" className="los-outline-button" disabled={!writingOk} onClick={()=>update(current=>({...current,
@@ -175,10 +183,25 @@ export function LosFinalExam({move}:{move:LosNavigate}){
    </button>
    {draft.practiceAnswers[LOS1_FINAL_WRITING_CHECK]&&<p role="status"><CheckCircle2 size={15}/> Oma kirjoitusyritys on tallennettu ja merkitty itse arvioitavaksi.</p>}
    <ul><li>Kirjoitin 5–7 omaa lausetta.</li><li>Tarkistin ich bin, ich komme ja oikeat alkukirjaimet.</li><li>Käytin am ja um oikeissa paikoissa.</li><li>Viestissä ei ole oikeita henkilötietoja.</li></ul>
-   {submitted&&<details className="los-exam-rubric"><summary>Näytä malliviesti oman yrityksen jälkeen</summary>
-    <p lang="de">Hallo! Ich heiße Mia. Ich komme aus Finnland. Ich bin siebzehn Jahre alt. Am Montag habe ich Zeit. Wir treffen uns um drei Uhr. Bis morgen!</p>
-    <p>Malli on LOS!:n itse laatima opetusesimerkki eikä osa 50 pisteen koetta.</p>
-   </details>}
+   {submitted&&<div className="los-exam-writing-model">
+    <p role="status">{draft.practiceAnswers[LOS1_FINAL_WRITING_ASSISTED]
+      ? "Mallia on käytetty ennen nykyisen kirjoitusversion valmistumista. Nykyinen viesti on avustettu harjoitus, ei itsenäisesti arvioitu kielioppinäyttö."
+      : draft.practiceAnswers[LOS1_FINAL_WRITING_MODEL_OPENED]
+        ? "Malliviesti on avattu vasta oman kirjoitusyrityksen vahvistamisen jälkeen. Jos muokkaat tekstiä nyt, yritys merkitään avustetuksi."
+        : "Malliviesti avautuu vasta, kun olet kirjoittanut ja itse tarkistanut oman 5–7 lauseen viestisi."}</p>
+    {draft.practiceAnswers[LOS1_FINAL_WRITING_CHECK]==="written-and-reviewed"
+      ? <details className="los-exam-rubric" onToggle={event=>{
+          if (!event.currentTarget.open || draft.practiceAnswers[LOS1_FINAL_WRITING_MODEL_OPENED]) return;
+          update(current=>({...current,practiceAnswers:{
+            ...current.practiceAnswers,[LOS1_FINAL_WRITING_MODEL_OPENED]:new Date().toISOString(),
+          }}));
+        }}>
+          <summary>Näytä malliviesti oman yrityksen jälkeen</summary>
+          <p lang="de">Hallo! Ich heiße Mia. Ich komme aus Finnland. Ich bin siebzehn Jahre alt. Am Montag habe ich Zeit. Wir treffen uns um drei Uhr. Bis morgen!</p>
+          <p>Malli on LOS!:n itse laatima opetusesimerkki eikä osa 50 pisteen koetta. Jos muokkaat omaa tekstiäsi sen avaamisen jälkeen, teksti merkitään avustetuksi.</p>
+        </details>
+      : <p>Vahvista ensin oma kirjoitusyrityksesi yllä olevasta tarkistuslistasta.</p>}
+   </div>}
   </section>
   <section className="los-exam-speaking">
    <h2>Äänitä 6–8 repliikin keskustelu</h2>
