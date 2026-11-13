@@ -114,7 +114,7 @@ function SeriesView({ openBook }: { openBook: (id: number) => void }) {
         <small>{book.code} · {book.module}</small>
       </button>)}
     </div>
-    <p className="los-library-footnote">LOS! 1:n kaikki kymmenen kappaletta ja 60 ohjattua oppituntia ovat nyt opiskeltavissa oppikirjan sisällä. Alkuperäistekstit ja käytössä olevat äänilähteet näkyvät asianmukaisin lähdemerkinnöin. Lopullinen saksan kielen, äänentoiston ja tuotantojulkaisun laadunvarmistus on silti vielä kesken. Muut LOS!-sarjan kirjat ovat suunnitteluvaiheessa.</p>
+    <p className="los-library-footnote">LOS! 1:n kaikki kymmenen kappaletta ja 60 ohjattua oppituntia ovat nyt opiskeltavissa oppikirjan sisällä. Alkuperäistekstit ja käytössä olevat äänilähteet näkyvät asianmukaisin lähdemerkinnöin. Lopullinen saksan kielen, äänentoiston ja tuotantojulkaisun laadunvarmistus on silti vielä kesken. LOS! 2–8:n 70 kappaleen omat tekstiluonnokset ovat luettavissa esikatselussa; niiden tehtävät, ääni ja opetuspolut eivät vielä ole julkaisuvalmiita.</p>
   </div>;
 }
 function BookFront({ book, move }: { book: LosBookDefinition; move: (chapter: string | null, section: LosSection) => void }) {
@@ -331,8 +331,8 @@ function Appendix({ book }: { book: LosBookDefinition }) {
     <div className="los-editorial-note">
       <h2>Käsikirjoitusvaihe</h2>
       <p>Kirjan kymmenen kappaleen sisältörunko on tuotu projektin lähteistä.
-      Ensimmäisen kappaleen LOS!-harjoitustekstien luonnokset ovat esikatselussa.
-      Loput tekstit, äänitteet, tarkistetut tehtävät ja opetuspolun 60 oppituntia
+      Kaikkien kymmenen kappaleen LOS!-harjoitustekstien luonnokset ovat esikatselussa.
+      Äänitteet, tarkistetut tehtävät ja opetuspolun 60 oppituntia
       eivät vielä ole käytettävissä sovelluksessa.</p>
       <p>Opiskelun vastauksia ja pisteitä ei saa merkitä suoritetuiksi ennen
       kirjakohtaisesti eroteltua tallennus- ja arviointijärjestelmää.</p>
@@ -398,7 +398,7 @@ function LosBookWorkspace({ book, location, move, goLibrary, openBook }: { book:
             section === "dictionary" ? <LosDictionary book={book} move={move} openBook={openBook} /> :
             section === "search" ? <LosIndexSearch book={book} move={move} /> :
             chapter ? (
-              book.id !== 1 && section !== "chapter" ? <LosFutureBookPreview key={`${book.id}-${chapter.id}-${section}`} book={book} chapter={chapter} section={section} /> :
+              book.id !== 1 ? <LosFutureBookPreview key={`${book.id}-${chapter.id}-${section}`} book={book} chapter={chapter} section={section} /> :
               section === "text" ? <TextPage chapter={chapter} /> :
               section === "understand" ? (chapter.id==="02" ? <LosC02Understanding goToText={() => move(chapter.id,"text")}/> : chapter.id==="06" ? <><LosOpenTextUnderstanding chapterId="06" goToText={() => move(chapter.id,"text")}/><details className="los-editorial-note"><summary>C01:n ikäkertauksen vanhat ymmärtämistehtävät (L034)</summary><LosC06AgeUnderstanding goToText={() => move(chapter.id,"text")}/></details></> : getLosOpenDialogue(chapter.id) ? <LosOpenTextUnderstanding chapterId={chapter.id} goToText={() => move(chapter.id,"text")}/> : <LosUnderstanding chapter={chapter} goToText={() => move(chapter.id, "text")} />) :
               section === "vocabulary" ? <Vocabulary key={chapter.id} chapter={chapter} bookId={book.id} move={move} /> :
