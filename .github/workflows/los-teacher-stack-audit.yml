@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - feat/los1-teacher-stack-qa-20261113
+      - feat/los1-teacher-stack-archive-20261113
 
 permissions:
   contents: read
@@ -80,6 +81,35 @@ jobs:
         run: bunx playwright test e2e/los-full-book.spec.ts --project=desktop-chromium --project=iphone-webkit
       - name: Midterm, C07 and C10 interactive browser regressions
         run: bunx playwright test e2e/los-teacher-review-midterm.spec.ts e2e/los-c07-teacher.spec.ts e2e/los-c10-teacher.spec.ts --project=desktop-chromium --project=iphone-webkit
+      # The tested code exists only in this disposable runner. Archive the exact
+      # post-merge tree for reviewers without publishing or moving any branch.
+      - name: Package non-published merged Teacher source snapshot
+        if: success()
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/los-teacher-merge-review
+          git archive --format=tar HEAD | gzip -9 > /tmp/los-teacher-merge-review/merged-source.tar.gz
+          {
+            echo "LOS! 1 Teacher 2.0 · CI-only integrated preview"
+            echo "NOT a published build, pedagogical approval or production release."
+            echo "Workflow branch: ${GITHUB_REF_NAME}"
+            echo "Workflow run: ${GITHUB_RUN_ID}"
+            echo "Tested temporary merge commit: $(git rev-parse HEAD)"
+            echo ""
+            echo "Merged commit parents and summary:"
+            git log --format="%H %P %s" -n 16
+          } > /tmp/los-teacher-merge-review/PROVENANCE.txt
+          test -s /tmp/los-teacher-merge-review/merged-source.tar.gz
+          test -s /tmp/los-teacher-merge-review/PROVENANCE.txt
+      - name: Upload tested Teacher source for manual review
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: los-teacher-stack-merged-preview
+          path: /tmp/los-teacher-merge-review/
+          if-no-files-found: error
+          retention-days: 7
       - name: Preserve merged Teacher browser failures
         if: always()
         uses: actions/upload-artifact@v4
