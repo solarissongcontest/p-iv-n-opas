@@ -11,6 +11,7 @@ import { getLosOpenDialogue } from "../src/features/los/content/los1OpenDialogue
 import { LOS1_TEXT_B_SOURCES } from "../src/features/los/content/los1TextBAdditional.ts";
 import { losExercisesFor, losScore } from "../src/features/los/exerciseBank.ts";
 import { parseLosDraft } from "../src/features/los/studyState.ts";
+import { losArchiveChapterExam, losChapterExamHistory } from "../src/features/los/losWorkbookPersistence.ts";
 import {
   emptyTeacherSession, moveTeacherScene, submitTeacherAnswer, markTeacherHelp,
   confirmTeacherActivity, teacherCanFinish, finishTeacherSession,
@@ -154,19 +155,35 @@ test("all five lessons preserve pause/retry and require actual exercises or subm
     assert.equal(independentTeacherEvidence(attempt,lesson),0);
   }
 });
-test("persisted C05 exam and its archived attempt survive Teacher session deserialization",()=>{
-  const archivedKey="C05-TEST-HISTORY";
+test("C05 archives real previous test points and preserves them across Teacher session recovery",()=>{
+  const previousAnswers={...examAnswers,[bank[0]!.id]:"incorrect on purpose"};
+  const archived=losArchiveChapterExam({},"05",bank,previousAnswers,at);
+  let history=losChapterExamHistory(archived,"05");
+  assert.equal(history.length,1);
+  assert.deepEqual(history.map(item=>({number:item.number,score:item.correct,total:item.total})),
+    [{number:1,score:11,total:12}]);
+  assert.equal(history[0]!.answers.find(item=>item.id===bank[0]!.id)?.answer,"incorrect on purpose");
+
   const legacy={
-    version:1,note:"",applicationDraft:"Wie geht's?\nGut, danke.",bookmarked:false,
-    practiceAnswers:{[archivedKey]:"previous score 7/12",...examAnswers},
+    version:1,note:"",applicationDraft:"Wie geht's?\\nGut, danke.",bookmarked:false,
+    practiceAnswers:{...archived,"C05-EX-04":"nicht"},
     practiceChecked:[],testAnswers:examAnswers,testSubmittedAt:at,
     selfAssessment:"Kertaan Und Ihnen? -kysymyksen.",
     teacherSessions:{L026:prepared(L026)},updatedAt:at,
   };
   const parsed=parseLosDraft(JSON.stringify(legacy));
-  assert.equal(parsed.practiceAnswers[archivedKey],"previous score 7/12");
+  history=losChapterExamHistory(parsed.practiceAnswers,"05");
+  assert.equal(history.length,1);
+  assert.equal(history[0]!.correct,11);
+  assert.equal(parsed.practiceAnswers["C05-EX-04"],"nicht");
   assert.deepEqual(parsed.testAnswers,examAnswers);
   assert.equal(parsed.testSubmittedAt,at);
   assert.equal(parsed.applicationDraft,legacy.applicationDraft);
   assert.equal(parsed.teacherSessions?.L026?.lessonId,"L026");
+
+  const afterRetake=losArchiveChapterExam(parsed.practiceAnswers,"05",bank,parsed.testAnswers,at);
+  history=losChapterExamHistory(afterRetake,"05");
+  assert.deepEqual(history.map(item=>item.correct),[11,12]);
+  assert.equal(history[0]!.answers.length,12);
+  assert.equal(history[1]!.answers.length,12);
 });
