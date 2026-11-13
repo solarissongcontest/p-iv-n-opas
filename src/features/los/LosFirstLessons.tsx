@@ -8,6 +8,8 @@ import {
   type LosLessonProgress,
 } from "./lessonEngine";
 import { LOS1_EXECUTABLE_LESSONS, los1LessonDraftChapter } from "./guidedLessons";
+import {TEACHER_L004} from "./teacher/content/l004";
+import {teacherCurrentCompletion} from "./teacher/core";
 import "./los-lessons.css";
 
 const ALL_LESSONS = LOS1_EXECUTABLE_LESSONS;
@@ -81,7 +83,7 @@ export function LosFirstLessons({ selectedId, onSelect, move }: {
   const skipsUnfinishedLessons = Boolean(next && Number(next.id.slice(1)) > Number(lesson.id.slice(1)) + 1);
   const isComplete = Boolean(progress.completedAt);
   const isL004=lesson.id==="L004";
-  const teacherDone=Boolean(progress.teacher?.completedAt);
+  const teacherDone=Boolean(progress.teacher&&teacherCurrentCompletion(TEACHER_L004,progress.teacher));
   return <section className="los-lesson-program" id="los-lesson-runner" aria-label="Toteutetut LOS! 1 -oppitunnit">
     <div className="los-lesson-program-head">
       <p className="los-overline">OHJATTU OPETUS · {ALL_LESSONS.length} TUNTIA</p>
@@ -121,7 +123,8 @@ export function LosFirstLessons({ selectedId, onSelect, move }: {
       <h3>{lesson.title}</h3>
       <p className="los-lesson-objective"><strong>Tavoite:</strong> {lesson.objective}</p>
       <p className="los-lesson-status">{isL004?
-        (teacherDone?"Uudistettu opetus on käyty läpi. Osaaminen arvioidaan erikseen.":
+        (teacherDone?"Päivitetty opetus on käyty läpi. Osaaminen arvioidaan erikseen.":
+         progress.teacher?.completedAt?"Aiempi opetusversio on käyty läpi. Päivitetyn version harjoitukset ovat vielä vahvistamatta.":
          progress.teacher?"Uudistettu opetus kesken. Palaa viimeiseen opetustilanteeseen.":
          isComplete?"Aiempi oppituntisuoritus säilyy. Voit käydä uuden opetuksen erikseen.":
          "Uudistettu opetus on aloittamatta. Etene opetustilanteissa omaan tahtiin."):
