@@ -162,3 +162,25 @@ tekijä- ja lisenssitietojen osoittamiseen. Oikean puhelimen Ogg-toisto,
 ruudunlukijan käyttö ja saksan kielen pedagoginen auditointi ovat avoimia
 julkaisuportteja. CI-tulokset raportoidaan erikseen uusimman commitin
 perusteella.
+
+## L005:n ääniformaattien mobiiliyhteensopivuus (13.11.2026)
+
+Wikimedia Commonsin alkuperäisen
+[German Vocabulary - Greetings.ogg](https://commons.wikimedia.org/wiki/File:German_Vocabulary_-_Greetings.ogg)
+-tiedoston sivulla ilmoitetaan myös **valmiiksi muunnettu MP3**. Kyseessä
+on sama 28 sekunnin, German Men92:n lausuma ja public domainiin luovutettu
+20 ilmauksen ääni, ei erillinen ääninäyttelijä tai uusi materiaali.
+Uusi Teacher 2.0 -soitin antaa selaimen valita ensin MP3-lähteen
+(`audio/mpeg`) ja vaihtoehtoisesti alkuperäisen Ogg-lähteen
+(`audio/ogg`). Näin vanhemmillekin selaimille tarjotaan niille
+sopivampi formaatti, vaikka **fyysisellä iPhonella toimivuutta ei ole
+vielä testattu**. Lähde: Commonsin tiedostosivun *Transcode status*,
+MP3-rivi (tarkistettu 13.11.2026).
+
+Selaimen lähdevalinta ei tuota kuullun ymmärtämisen suoritusmerkintää.
+Jos kumpikaan äänitiedosto ei toimi, alkuperäinen 20 ilmauksen
+saksankielinen teksti ja suomennokset säilyvät LOS!:n omassa
+opetustilassa. Käyttöliittymä kertoo äänihäiriöstä. Automaattinen
+Chromium/WebKit-testaus tarkistaa lähteiden tunnisteet ja
+tekstivaraosan, ei sitä että opiskelija kuulisi tai ymmärtäisi
+äänitteen oikealla laitteella.
