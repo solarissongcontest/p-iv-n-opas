@@ -1,0 +1,70 @@
+name: LOS C08 + C09 Stacked Integration Draft QA
+on:
+  push:
+    branches:
+      - feat/los1-teacher-c08-c09-integration
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: los-c08-c09-integration-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: Unit suite, typecheck and production build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - run: bun install --frozen-lockfile
+      - name: All unit tests, including C08 and C09
+        run: bun run test
+      - name: TypeScript
+        run: bun run typecheck
+      - name: Production build
+        run: bun run build
+
+  browser:
+    name: C08, C09 and whole-book Chromium + iPhone WebKit
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    env:
+      E2E_BASE_URL: http://127.0.0.1:5173
+      REQUIRE_GEMINI: "false"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - run: bun install --frozen-lockfile
+      - run: bun run e2e:install
+      - run: bunx playwright install --with-deps chromium webkit
+      - name: Start isolated local preview
+        run: |
+          nohup bun run dev -- --host 127.0.0.1 --port 5173 --strictPort > /tmp/los-c08-c09-dev.log 2>&1 &
+          for attempt in $(seq 1 50); do
+            curl --silent --fail --max-time 3 http://127.0.0.1:5173/ > /dev/null 2>&1 && exit 0
+            sleep 2
+          done
+          cat /tmp/los-c08-c09-dev.log
+          exit 1
+      - name: C08 & C09 dedicated Teacher routes
+        run: bunx playwright test e2e/los-c08-teacher.spec.ts e2e/los-c09-teacher.spec.ts --project=desktop-chromium --project=iphone-webkit
+      - name: Whole LOS 1 book regression
+        run: bunx playwright test e2e/los-full-book.spec.ts --project=desktop-chromium --project=iphone-webkit
+      - name: Save diagnostic evidence
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: los-c08-c09-browser-evidence
+          path: |
+            test-results/
+            /tmp/los-c08-c09-dev.log
+          if-no-files-found: ignore
+          retention-days: 7
