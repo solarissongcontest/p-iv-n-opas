@@ -60,7 +60,7 @@ export const LOS1_L014_TEACHER: TeacherLesson = {
     },
     {
       id:"verb-form",phase:"Kieliopin opetus",kind:"explanation",
-      title:"Muodosta kommaamisen sijasta oikea kommen-verbi",
+      title:"Näin muodostetaan oikea kommen-verbin muoto",
       paragraphs:[
         "Verbin sanakirjamuoto on kommen. Sen loppu on -en. Poista se: kommen → komm-. Tätä jäljelle jäävää osaa kutsutaan verbin vartaloksi.",
         "Kun tekijä on ich eli minä, liitämme vartaloon -e: komm + e = komme. Kun tekijä on du eli sinä, liitämme -st: komm + st = kommst.",
