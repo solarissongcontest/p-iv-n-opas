@@ -18,8 +18,8 @@ jobs:
         with:
           bun-version: latest
       - run: bun install --frozen-lockfile
-      - name: TypeScript (noEmit)
-        run: bunx tsc --noEmit
+      - name: Generate routes and validate TypeScript
+        run: bun run typecheck
       - name: Full unit suite
         run: bun run test
       - name: Production build
