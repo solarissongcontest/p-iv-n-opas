@@ -31,6 +31,9 @@ def choose(path: str, ours: str, theirs: str) -> str:
         if "L001–L060" not in result:
             raise ValueError(f"No full-coverage declaration in {path}: {result[:120]!r}")
         return result
+    if path == "src/features/los/teacher/LosTeacherPlayer.tsx" and "Boolean(scene.numberBuilder" in ours and "Boolean(scene.calendar" in theirs:
+        # A temporary concatenation; normalize the entire activity-disabled prop below.
+        return ours + "\n" + theirs
     if path == "src/features/los/teacher/LosTeacherPlayer.tsx" and 'lesson.id === "L005"' in ours and "scene.chapterPhoto" in theirs:
         # The existing L005 source panel and C09 photo/calendar/source widgets are siblings.
         return ours + theirs
@@ -131,6 +134,32 @@ def normalize_registry() -> None:
             body = body.replace(boundary, lookup + "\n" + boundary, 1)
     path.write_text(body)
 
+def normalize_activity_gate() -> None:
+    path=Path("src/features/los/teacher/LosTeacherPlayer.tsx")
+    source=path.read_text()
+    begin='disabled={session.activityIds.includes(scene.activityId) || completed ||'
+    start=source.find(begin)
+    if start<0:
+        return
+    end=source.find('onClick={() => markActivity(scene.activityId!)}>',start)
+    if end<0 or end-start>1600:
+        raise ValueError("Unexpected teacher activity control layout")
+    fragment=source[start:end]
+    # Only repair after the form + number-builder + calendar feature trio exists.
+    if not all(x in source for x in ('teacherBuiltNumberCount','isCorrectCalendarEntry','scene.form')):
+        return
+    if not all(x in fragment for x in ("scene.reflection","scene.numberBuilder","scene.form","scene.calendar")):
+        raise ValueError("Cannot prove every shared activity requirement is present")
+    replacement = '''disabled={session.activityIds.includes(scene.activityId) || completed ||
+                  Boolean(scene.reflection && (session.draftAnswers[scene.id]?.trim().length ?? 0) < scene.reflection.minLength) ||
+                  Boolean(scene.numberBuilder && teacherBuiltNumberCount(session, scene.id) < 4) ||
+                  Boolean(scene.form && scene.form.some(field => !(session.draftAnswers[scene.id + "." + field.id]?.trim()))) ||
+                  Boolean(scene.calendar && !isCorrectCalendarEntry(scene, session.draftAnswers[scene.id] ?? ""))}
+                '''
+    source=source[:start]+replacement+source[end:]
+    path.write_text(source)
+    print("Normalized shared lesson activity gate to retain reflection, builder, form and calendar evidence.")
+
 unmerged = subprocess.check_output(["git","diff","--name-only","--diff-filter=U"],text=True).splitlines()
 print("Detected merge conflicts:", ", ".join(unmerged))
 failures=[]
@@ -149,6 +178,7 @@ for name in unmerged:
 if failures:
     raise ValueError("Unexpected semantic conflicts; refusing automatic merge:\\n" + "\\n----\\n".join(failures))
 normalize_registry()
+normalize_activity_gate()
 subprocess.run(["git","add","--",*unmerged,"src/features/los/teacher/lessonL004.ts"],check=True)
 if subprocess.check_output(["git","ls-files","-u"],text=True).strip():
     raise ValueError("Unmerged index stages remain")
