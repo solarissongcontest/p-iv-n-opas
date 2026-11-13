@@ -178,7 +178,7 @@ export function evaluateTeacherAnswer(question: TeacherQuestion, answer: string)
     normalizeTeacherAnswer(item) === normalizeTeacherAnswer(answer));
 }
 export function moveTeacherScene(session: TeacherSession, lesson: TeacherLesson, targetId: string, now: string): TeacherSession {
-  if (session.paused || session.completedAt || !lesson.scenes.some(s => s.id === targetId)) return session;
+  if (session.paused || !lesson.scenes.some(s => s.id === targetId)) return session;
   return {
     ...session, sceneId: targetId, updatedAt: now,
     visitedIds: session.visitedIds.includes(targetId) ? session.visitedIds :

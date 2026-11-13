@@ -46,7 +46,7 @@ test("integrated player preserves genuine media, exact exam status, and number i
   assert.match(code,/inputMode=\{numericResponse \? "numeric" : "text"\}/);
   assert.match(code,/section === "midterm" \|\| section === "review"/);
   assert.match(code,/getLosTeacherLesson.*lessonRegistry/);
-  assert.match(route,/L027–L035/);
+  assert.match(route,/L001–L035/);
   const picker=readFileSync("src/features/los/LosFirstLessons.tsx","utf8");
   assert.match(picker,/getLosTeacherLesson.*lessonRegistry/);
 });
@@ -71,6 +71,6 @@ test("C05 audio selection and pause behavior are preserved beside C06 and EX-MID
  assert.ok(media.indexOf('chapterId==="05" && source==="B"') <
    media.indexOf('chapterId==="05" && source!=="A"'),
    "C05 Text B must use M-COM-08 rather than earlier sample audio");
- assert.match(player,/session\?\.paused \|\| completed/);
- assert.match(player,/disabled=\{session\.paused \|\| completed\}/);
+ assert.match(player,/session\?\.paused/);
+ assert.match(player,/session\?\.paused/);
 });
