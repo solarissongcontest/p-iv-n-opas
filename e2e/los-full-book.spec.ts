@@ -793,6 +793,25 @@ test("Finnish comprehension options in C01, C03, C09 and C10 have correct speech
 });
 
 
+
+test("C07 number choices have Finnish screen-reader language in both number lessons",async({page})=>{
+  await enterLocalBook(page);
+  await page.goto("/los-lessons/L038",{waitUntil:"domcontentloaded"});
+  await page.locator(".los-teacher-outline nav").getByRole("button",{name:"Muistatko lukusanat?"}).click();
+  const first=page.locator(".los-teacher-option");
+  await expect(first).toHaveCount(3);
+  await expect(first.locator("span[lang='fi']")).toHaveCount(3);
+  await expect(first.locator("span[lang='de']")).toHaveCount(0);
+  await expectNoHorizontalOverflow(page);
+  await page.goto("/los-lessons/L039",{waitUntil:"domcontentloaded"});
+  await page.locator(".los-teacher-outline nav").getByRole("button",{name:"Mikä numero kirjoitetaan?"}).click();
+  const second=page.locator(".los-teacher-option");
+  await expect(second).toHaveCount(3);
+  await expect(second.locator("span[lang='fi']")).toHaveCount(3);
+  await expect(second.locator("span[lang='de']")).toHaveCount(0);
+  await expectNoHorizontalOverflow(page);
+});
+
 test("C08 screen-reader language follows the actual Finnish or German answer",async({page})=>{
   await enterLocalBook(page);
   await page.goto("/los-lessons/L042",{waitUntil:"domcontentloaded"});
