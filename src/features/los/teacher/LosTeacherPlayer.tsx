@@ -320,7 +320,7 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
               {(() => {
                 const progress = teacherChapterAssessmentStatus(lesson, draft);
                 return <>
-                  <p>Kappaletesti: {progress.answered}/{progress.expected} vastattu · {progress.submitted ? "Palautettu" : "Ei vielä palautettu"}.</p>
+                  <p>{lesson.id === "L030" ? "Välikoe EX-MID" : "Kappaletesti"}: {progress.answered}/{progress.expected} vastattu · {progress.submitted ? "Palautettu" : "Ei vielä palautettu"}.</p>
                   {lesson.id === "L030" ? <p>Oma 4–6 repliikin keskustelu: {draft.practiceAnswers["EX-MID-DIALOGUE-SELF"] ? "Itsearvioitu" : "Itsearvio vielä puuttuu"}. Vain opiskelija arvioi itse, eikä ääntämistä mitata koneellisesti.</p> :
                     <p>Oma sovellus: {progress.applicationDone ? "Teksti tallennettu" : "Teksti vielä puuttuu"}. Tätä ei pisteytetä automaattisesti.</p>}
                   <p>Itsearviointi: {progress.reflectionDone ? "Kirjattu" : "Puuttuu"}. Sisältöä ei arvioida koneellisesti.</p>
