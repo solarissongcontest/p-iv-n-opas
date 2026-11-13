@@ -123,7 +123,8 @@ test("L015 uses original four-turn M-COM-02 and checks C03-specific IDs",()=>{
 test("L016 requires the REAL C03 chapter test, real submission and own reflection",()=>{
   const l=LOS1_L016_TEACHER,s=fullyVisited(l);
   const ids=losExercisesFor("03").map(x=>x.id);
-  assert.ok(ids.length>=10);
+  assert.equal(ids.length,15,"C03 must use all 15 original textbook exam items");
+  assert.equal(new Set(ids).size,15,"C03 exam item IDs must not repeat");
   assert.deepEqual(l.chapterAssessment?.requiredTestIds,ids);
   assert.equal(teacherCanFinish(s,l,{}),false);
   const testAnswers=Object.fromEntries(ids.map(id=>[id,"attempted"]));
