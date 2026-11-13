@@ -99,7 +99,7 @@ jobs:
           fi
           mkdir -p /tmp/los-teacher-merge-review
           git archive --format=tar HEAD | gzip -n -9 > /tmp/los-teacher-merge-review/merged-source.tar.gz
-          sha256sum /tmp/los-teacher-merge-review/merged-source.tar.gz > /tmp/los-teacher-merge-review/SHA256SUMS
+          (cd /tmp/los-teacher-merge-review && sha256sum merged-source.tar.gz > SHA256SUMS && sha256sum --check SHA256SUMS)
           {
             echo "LOS! 1 Teacher 2.0 · CI-only integrated preview"
             echo "NOT a published build, pedagogical approval or production release."
