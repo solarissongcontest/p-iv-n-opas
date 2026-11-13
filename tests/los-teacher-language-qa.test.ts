@@ -11,7 +11,7 @@ const byId=(id:string)=>{
  return scene;
 };
 test("L004 greeting assessments keep the distinct source-backed situation/answer mapping",()=>{
- const reference:[
+ const reference=[
   ["activation","Tschüss!"],
   ["guided","Guten Morgen!"],
   ["independent","Guten Abend!"],
