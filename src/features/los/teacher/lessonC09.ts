@@ -11,7 +11,7 @@ import type { TeacherLesson, TeacherScene, TeacherQuestion } from "./engine.ts";
 const S=(id:string,phase:string,kind:TeacherScene["kind"],title:string,
   paragraphs:string[],extra:Partial<TeacherScene>={}):TeacherScene=>
   ({id,phase,kind,title,paragraphs,...extra});
-type Option=[id:string,label:string,wrong?:string,lang?:"fi"|"de"];
+type Option=[id:string,label:string,wrong?:string|undefined,lang?:"fi"|"de"];
 const Q=(id:string,phase:string,title:string,paragraphs:string[],prompt:string,
   options:Option[],correctOption:string,evidenceRole:NonNullable<TeacherQuestion["evidenceRole"]>,
   success:string,hint:string,reteach:string):TeacherScene =>
