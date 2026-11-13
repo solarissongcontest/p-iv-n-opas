@@ -94,6 +94,11 @@ export function validateTeacherLesson(lesson: TeacherLesson): TeacherContentIssu
       !/^C\d{2}-EX-\d{2,3}$/.test(id))) {
     issues.push({ location: "requiredPracticeIds", problem: "Kirjan tehtävätunniste on virheellinen." });
   }
+  if (lesson.requiredCheckedIds &&
+      (!unique(lesson.requiredCheckedIds) || lesson.requiredCheckedIds.some(id =>
+        !/^C\d{2}-SOURCE-Q\d{2}$/.test(id)))) {
+    issues.push({ location: "requiredCheckedIds", problem: "Tarkistettavan lähdetehtävän tunniste on virheellinen." });
+  }
   if (!lesson.scenes.some(scene => scene.kind === "summary")) {
     issues.push({ location: "scenes", problem: "Oppitunnilta puuttuu yhteenveto." });
   }
