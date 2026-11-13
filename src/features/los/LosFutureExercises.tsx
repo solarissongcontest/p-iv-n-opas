@@ -1,30 +1,14 @@
 import { useState } from "react";
 import { ArrowLeft, ArrowRight, CheckCircle2, ChevronDown, CircleHelp, RotateCcw } from "lucide-react";
 import { useLosChapterDraft } from "./studyState";
-import type { LosFutureExerciseDraft } from "./content/losFutureExerciseTypes";
 import { losFutureExercisesFor } from "./content/losFutureExercises";
+import { losFutureExercisesForSection, type LosFutureExerciseMode } from "./content/losFutureExerciseSections";
 import "./los-future-exercises.css";
 
-type ExerciseMode = "understand" | "practice" | "apply";
-
-function numberOf(item:LosFutureExerciseDraft):number {
-  return Number(item.id.match(/(?:T|R)(\d{2})$/)?.[1] ?? 0);
-}
-
-/** Alkuperäisen käsikirjoituksen 26 tehtävää jakautuvat kolmeen oikeaan kappaleosioon.
- * R-tehtävät ovat päätekstin lisätehtäviä, eivät muiden kirjojen lainatehtäviä. */
-export function losFutureExercisesForSection(items:LosFutureExerciseDraft[],mode:ExerciseMode) {
-  return items.filter(item=>{
-    const number=numberOf(item);
-    if(mode==="understand")return (item.group==="T" && number<=6)||(item.group==="R"&&number<=3);
-    if(mode==="practice")return (item.group==="T"&&number>=7&&number<=17)||(item.group==="R"&&number>=4);
-    return item.group==="T"&&number>=18&&number<=20;
-  });
-}
-const modeTitle:Record<ExerciseMode,string>={
+const modeTitle:Record<LosFutureExerciseMode,string>={
   understand:"Ymmärrä tekstiä",practice:"Harjoittele",apply:"Käytä saksaa",
 };
-const modeIntro:Record<ExerciseMode,string>={
+const modeIntro:Record<LosFutureExerciseMode,string>={
   understand:"Tee luetun ymmärtämisen ja sanaston tehtävät. Palaa tarvittaessa Text A- ja Text B -sivuille.",
   practice:"Harjoittele rakenteita ja uuden tekstin ymmärtämistä. Kokeile itse ennen ratkaisuavaimen avaamista.",
   apply:"Tuota omaa saksaa, keskustelua tai tekstiä. Avoimissa tehtävissä vastausavaimessa on vain arviointiohje tai esimerkki.",
@@ -35,7 +19,7 @@ const modeIntro:Record<ExerciseMode,string>={
 export function LosFutureExercises({bookId,chapterId,mode}:{
   bookId:number;
   chapterId:string;
-  mode:ExerciseMode;
+  mode:LosFutureExerciseMode;
 }) {
   const {draft,update,saved}=useLosChapterDraft(bookId,chapterId);
   const tasks=losFutureExercisesForSection(losFutureExercisesFor(bookId,chapterId),mode);
