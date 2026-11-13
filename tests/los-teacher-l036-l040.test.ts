@@ -80,7 +80,8 @@ test("L037 displays the exact five source turns using existing M-WB-02 rather th
   assert.equal(source.sourceId,"M-WB-02");
   assert.equal(source.revision,"3504939");
   assert.equal(source.originalLines.length,5);
-  const board=LOS1_L037_TEACHER.scenes.find(scene=>scene.id==="original")?.board!;
+  const board=LOS1_L037_TEACHER.scenes.find(scene=>scene.id==="original")?.board;
+  assert.ok(board);
   assert.deepEqual(board.map(item=>item.german),source.originalLines.map(line=>line.text));
   assert.deepEqual(board.map(item=>item.meaning),source.originalLines.map(line=>line.meaning));
   assert.deepEqual(LOS1_L037_TEACHER.requiredCheckedIds,["C07-SOURCE-Q01","C07-SOURCE-Q02","C07-SOURCE-Q03"]);
@@ -118,7 +119,7 @@ test("L039 uses actual C07 Text B source IDs, but never fabricates a dictated na
 test("L039 form is mandatory for written completion but never increases independent listening evidence",()=>{
   const lesson=LOS1_L039_TEACHER;
   const answers=chapterAnswers(lesson);
-  let session=simulate(lesson);
+  const session=simulate(lesson);
   assert.equal(teacherCanFinish(session,lesson,answers,lesson.requiredCheckedIds!),true);
   assert.equal(independentTeacherEvidence(session,lesson),3);
   const missing={...session,draftAnswers:{...session.draftAnswers}};
@@ -148,7 +149,7 @@ test("L040 reuses all 15 real chapter test answers, an application draft and sel
 
 test("C07 session pause/resume persists in teacherSessions and hints are not independent evidence",()=>{
   const lesson=LOS1_L036_TEACHER;
-  let session=simulate(lesson);
+  const session=simulate(lesson);
   assert.equal(teacherCanFinish(session,lesson,chapterAnswers(lesson)),true);
   const paused=toggleTeacherPause(session,timestamp);
   assert.equal(paused.paused,true);
