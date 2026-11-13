@@ -34,3 +34,12 @@
 .los-future-exercise-footer{font-size:.82rem;color:#686059;line-height:1.55;margin:1.5rem 0}
 @media(max-width:560px){.los-future-exercise-card{padding:1rem}.los-future-exercise-nav{gap:.5rem}.los-future-exercise-nav button{padding:.7rem .8rem}.los-future-exercise-overview li button{font-size:.85rem}}
 @media(prefers-reduced-motion:reduce){.los-future-exercises *{scroll-behavior:auto!important}}
+
+/* Structured source-matching activity. Native labels and selects remain operable by keyboard. */
+.los-future-matching{margin:1.1rem 0 0;padding:1rem;border:1px solid #dad5cd;border-radius:10px;min-width:0}
+.los-future-matching legend{font-weight:750;padding:0 .35rem}
+.los-future-matching>p{font-size:.85rem;line-height:1.55;color:#62594f;margin:.25rem 0 1rem}
+.los-future-match-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.25fr);align-items:center;gap:.75rem;margin:.7rem 0;font-size:.94rem;font-weight:650}
+.los-future-match-row select{box-sizing:border-box;width:100%;min-width:0;padding:.75rem .7rem;border:1px solid #aaa49b;border-radius:9px;background:#fff;color:#252525;font:inherit}
+.los-future-match-row select:focus-visible{outline:3px solid var(--los-book-accent,#8d6a50);outline-offset:2px}
+@media(max-width:560px){.los-future-matching{padding:.75rem}.los-future-match-row{grid-template-columns:1fr;gap:.3rem}.los-future-match-row select{min-height:44px}}
