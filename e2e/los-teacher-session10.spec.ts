@@ -44,11 +44,9 @@ test("L056 remains finishable with checked incorrect review tasks and honest sel
   await page.goto("/los#/1/review-ii",{waitUntil:"domcontentloaded"});
   const group=page.locator("#los-review-L056");
   await expect(group).toBeVisible();
-  for(const q of LOS1_FINAL_QUESTIONS.slice(0,0))void q;
-  for(const fieldset of await group.locator("ol > li.los-exam-question fieldset").all()){
-    await fieldset.locator("input[type=radio]").first().check();
-  }
+  // Persist each checked answer before advancing to the next row, as the real UI does.
   for(const item of await group.locator("ol > li.los-exam-question").all()){
+    await item.locator("input[type=radio]").first().check();
     await item.getByRole("button",{name:"Tarkista vastaus"}).click();
   }
   await group.locator('input[name="EX-REV2-SELF-056"][value="some"]').check();
@@ -60,7 +58,7 @@ test("L056 remains finishable with checked incorrect review tasks and honest sel
       await page.locator(".los-teacher-option").first().click();
     }
   }
-  await expect(page.getByText(/5\/5 tarkistettu/)).toBeVisible();
+  await expect(page.locator(".los-teacher-assessment-status")).toContainText("5/5 tarkistettu");
   await expect(page.getByRole("button",{name:"Merkitse oppitunti läpikäydyksi"})).toBeEnabled();
   await page.getByRole("button",{name:"Merkitse oppitunti läpikäydyksi"}).click();
   await expect(page.getByText(/Oppitunti merkitty suoritetuksi/)).toBeVisible();
