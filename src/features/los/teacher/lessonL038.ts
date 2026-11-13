@@ -61,7 +61,7 @@ export const LOS1_L038_TEACHER: TeacherLesson = {
     },
     {id:"independent",phase:"Itsenäinen harjoitus 2/4",kind:"question",title:"Kirjoita oikein ilman mallia",
       paragraphs:["Kokeile palauttaa sanojen kirjoitusasu muistista. Tässä ei mitata puhetta."],
-      question:{type:"text",skillId:"L1-PHON-01",evidenceRole:"independent",prompt:"Kirjoita saksan sana nimeltään (du ...): heißt",
+      question:{type:"text",skillId:"L1-PHON-01",evidenceRole:"independent",prompt:"Täydennä lause du ... (sinä olet nimeltäsi). Kirjoita vain yksi saksankielinen verbimuoto.",
         accepted:["heißt"],success:"Oikein: heißt kirjoitetaan ß-kirjaimella.",hint:"Sana sisältää ei-yhdistelmän ja ß-kirjaimen.",reteach:"Du heißt ... sisältää ß:n. Huomaa muoto heißt, ei heißst.",genericWrong:"Vertaa harjoituksen C07-EX-09 malliin."}},
     {id:"number-reminder",phase:"Numeroiden kertaus",kind:"explanation",title:"C06:n numerot yhdistyvät lomakkeen tietoihin",
       paragraphs:[
