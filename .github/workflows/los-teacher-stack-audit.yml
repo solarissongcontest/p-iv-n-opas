@@ -1,0 +1,55 @@
+name: LOS Teacher stacked integration dry run
+
+on:
+  push:
+    branches:
+      - feat/los1-teacher-stack-qa-20261113
+
+permissions:
+  contents: read
+
+jobs:
+  merge-audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Dry-run full Teacher lesson stack without publishing or pushing
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "LOS Integration QA"
+          git config user.email "los-integration-qa@users.noreply.github.com"
+          branches=(
+            feat/los1-teacher-l027-l030
+            feat/los1-teacher-l031-l035
+            feat/los1-teacher-l036-l040
+            feat/los1-teacher-l041-l045
+            feat/los1-teacher-l046-l050
+            feat/los1-teacher-l051-l055
+            feat/los1-teacher-l056-l060
+          )
+          for branch in "${branches[@]}"; do
+            echo "::group::Merge $branch"
+            git fetch --no-tags origin "+refs/heads/$branch:refs/remotes/origin/$branch"
+            if ! git merge --no-ff --no-edit -m "Dry-run integration of $branch" "origin/$branch"; then
+              echo "::error title=Teacher stack merge conflict::Cannot combine $branch with the prior integrated branches"
+              echo "Conflicting paths:"
+              git diff --name-only --diff-filter=U
+              echo "Unmerged stages:"
+              git ls-files -u | head -60
+              exit 1
+            fi
+            echo "Merged $branch into temporary CI workspace"
+            echo "::endgroup::"
+          done
+          echo "All Teacher branches merged cleanly in disposable runner."
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - run: bun install --frozen-lockfile
+      - run: bun run typecheck
+      - run: bun run test
+      - run: bun run build
