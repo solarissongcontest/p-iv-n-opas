@@ -122,7 +122,7 @@ test("every one of the 60 guided lessons opens from its actual chapter picker on
    expect(seen.has(title)).toBe(false);
    seen.add(title);
    await button.click();
-   if(Number(title.slice(1))<=12 || (Number(title.slice(1))>=22 && Number(title.slice(1))<=26)){
+   if(Number(title.slice(1))<=12 || (Number(title.slice(1))>=17 && Number(title.slice(1))<=21) || (Number(title.slice(1))>=22 && Number(title.slice(1))<=26)){
     await expect(page).toHaveURL(new RegExp("/los-lessons/"+title+"$"));
     await expect(page.locator(".los-teacher-paper h2")).toBeVisible();
     await expect(page.locator(".los-teacher-sidebar h1")).toBeVisible();
@@ -1047,7 +1047,7 @@ test("L012 countries lesson shares only the C03 workbook and returns to Teacher"
  await expectNoHorizontalOverflow(page);
 });
 
- 
+
 test("C05 Teacher 2.0 five lessons open, provide contextual help and stay readable on phone and desktop",async({page})=>{
  await enterLocalBook(page);
  for(const id of ["L022","L023","L024","L025","L026"]){
