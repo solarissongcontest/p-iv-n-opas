@@ -15,7 +15,7 @@ const intro = (id:string,title:string,paragraphs:string[]):TeacherScene =>
   ({ id,phase:"Aloitus",kind:"introduction",title,paragraphs });
 const explain = (id:string,title:string,paragraphs:string[],
   help?:{title:string;body:string}[]):TeacherScene =>
-  ({ id,phase:"Opettajan selitys",kind:"explanation",title,paragraphs,help });
+  ({ id,phase:"Opettajan selitys",kind:"explanation",title,paragraphs,...(help ? {help} : {}) });
 const model = (id:string,title:string,paragraphs:string[],
   rows:[string,string,string][]):TeacherScene =>
   ({ id,phase:"Opetustaulu",kind:"board",title,paragraphs,
@@ -44,7 +44,7 @@ function dialogue(id:string,phase:string,title:string,opening:string,prompt:stri
     paragraphs:[opening,"Valitse oma repliikkisi. Keskustelukumppanin vastaus on käsikirjoitettu valintasi mukaan. Jos keskustelu ei etene, saat selityksen ja voit yrittää uudelleen."],
     question:{type:"choice",skillId,evidenceRole,prompt,
       options:options.map((label,i)=>({id:(["a","b","c"] as const)[i]!,
-        label,wrongFeedback:partner[i]})),
+        label,wrongFeedback:partner[i] ?? ""})),
       correctOption:correct,success,hint,reteach,
       genericWrong:"Tässä tilanteessa toinen tarvitsee tietynlaisen avunpyynnön. Mieti, haluatko hidastamista, toistoa vai merkityksen selitystä."}};
 }
