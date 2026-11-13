@@ -1,145 +1,212 @@
 import type { TeacherLesson } from "./engine.ts";
 
 /**
- * L015 · C03 Text B is M-COM-02, a complete Ariser four-turn dialogue.
- * The optional Nicos Weg video has no approved synchronized in-app transcript
- * or tested playback. Never fabricate Nico dialogue or score unverified audio.
+ * LOS! 1 L015: four-turn Ariser M-COM-02 source reused in C03.
+ * Reading, map interpretation and authentic book question evidence.
+ * No unverified audio playback, invented transcript or listening marks.
+ * Recognition of "wir kommen" is NOT production of an untaught plural form.
  */
 export const LOS1_L015_TEACHER: TeacherLesson = {
   id:"L015",bookId:1,chapterId:"03",version:"2.0.0-preview.1",
   title:"Alkuperä ja karttatehtävät",
-  objective:"Luen Thomasin, Takashin ja Peterin aidon neljän repliikin Text B:n, tunnistan Berliinin ja Kioton alkuperäpaikoiksi ja päättelen sijainnit kartan avulla.",
+  objective:"Ymmärrän Thomasin ja Takashin neljästä alkuperäisestä puheenvuorosta, kuka on mistäkin kaupungista, ja erotan lähteen tiedot kartan maiden nimistä.",
   estimatedMinutes:30,
-  requiredQuestionIds:["recall","guided","source-detail","independent","application","exit"],
-  requiredActivityIds:["read-complete-textb","map-reviewed"],
+  requiredQuestionIds:["recall","guided","independent","application","exit"],
+  requiredActivityIds:["source-compared","place-map-reviewed"],
   requiredPracticeIds:[],
   requiredCheckedIds:["C03-MCOM02-Q02","C03-MCOM02-Q03"],
   scenes:[
-    {id:"welcome",phase:"Aloitus",kind:"introduction",title:"Tutki toista oikeaa saksankielistä keskustelua",
-     paragraphs:[
-      "Tässä tunnissa palaat C03:n toiseen alkuperäisaineistoon, M-COM-02:een. Sen neljässä aidossa puheenvuorossa Thomas, Takashi ja Peter tulevat mainituiksi.",
-      "Kirjassa näkyy koko saksankielinen teksti sekä sen sanaselitykset. Lähteellä on alkuperäinen ihmisäänite, jota voi kokeilla, mutta äänentoiston toimivuutta ei ole vahvistettu kaikilla laitteilla.",
-      "Nicos Weg -videota ei käsitellä suoritettuna kuunteluna eikä Nicoa lisätä keksityksi puhujaksi tähän tekstiin. Voit tehdä koko tehtävän myös pelkästään lukemalla.",
-      "Lopuksi vertaat henkilötietoja maantieteellisiin paikkoihin: maa, kaupunki ja niihin liittyvä päättely."
-     ],help:[{title:"Pitääkö ääni kuulla?",body:"Ei. Autenttinen äänite on lisämahdollisuus. Varsinaiset tarkistukset perustuvat kirjan neljään näkyvään puheenvuoroon."}]},
-    {id:"recall",phase:"Aktivointi",kind:"question",title:"Mitä woher kysyy?",
-     paragraphs:["Ennen toista tekstiä tarkista, mitä L014:n kysymyksellä selvitetään."],
-     question:{type:"choice",skillId:"L1-INT-03",prompt:"Mitä Woher kommst du? tarkoittaa?",
-      options:[{id:"a",label:"Mistä olet kotoisin?"},{id:"b",label:"Missä asut?",wrongFeedback:"Missä asut? kysyy sijaintia, ei alkuperää."},
-       {id:"c",label:"Mikä nimesi on?",wrongFeedback:"Nimeä kysytään Wie heißt du?"}],
-      correctOption:"a",success:"Oikein. Woher = mistä.",
-      hint:"Muista alkuperää ja lähtöpaikkaa koskeva kysymys.",
-      reteach:"Woher kommst du? = Mistä olet kotoisin? Wo wohnst du? = Missä asut?",
-      genericWrong:"Tarkista ero woher ja wo."}},
-    {id:"reading",phase:"Tekstin ennakointi",kind:"explanation",title:"Etsi ensin nimet ja paikat, älä jokaista kielioppimuotoa",
-     paragraphs:[
-      "Lähteen neljä puheenvuoroa ovat: Thomasin kysymys Wie heißt du?, Takashin esittäytyminen, Thomasin oma esittäytyminen ja Peterin mainitseminen sekä Takashin lähtöpaikkavastaus.",
-      "Kun luet, katso ensin kuka sanoo Ich komme aus Kyoto. Tämän jälkeen etsi ilmaus Wir kommen aus Berlin. Molemmat antavat lähtöpaikan.",
-      "Wir tarkoittaa me. Wir kommen aus Berlin. kertoo kahdesta henkilöstä, joihin Thomas viittaa: hänestä itsestään ja Peteristä. Monikkomuoto kommen on tässä tekstin tunnistustukea.",
-      "Ich bin Japaner. tarkoittaa Olen japanilainen (mies). Se ei tarkoita, että Kyoto olisi maa. Kyoto on Japanissa sijaitseva kaupunki."
-     ],help:[{title:"Mikä on wir?",body:"Wir = me. Tekstissä Thomas puhuu itsestään ja Peteristä, joten hän sanoo wir kommen."},
-      {title:"Onko Kyoto maa?",body:"Ei. Kyoto on kaupunki Japanissa. Berlin on kaupunki Saksassa."}]},
-    {id:"source-board",phase:"Näytetty lukumalli",kind:"board",title:"Neljän alkuperäisen repliikin merkityskartta",
-     paragraphs:["Paina Seuraava ja seuraa puhujia lähteen oikeassa järjestyksessä. Lue varsinainen kokonainen teksti myös kirjan Text B -sivulta."],
-     board:[
-      {label:"1 · Thomas kysyy",german:"Wie heißt du?",meaning:"Thomas kysyy Takashin nimeä."},
-      {label:"2 · Takashi vastaa",german:"Ich heiße Takashi. Und du?",meaning:"Takashi kertoo oman nimensä ja kysyy vastavuoroisesti."},
-      {label:"3 · Thomas vastaa",german:"Ich bin Thomas. Das ist Peter. Wir kommen aus Berlin.",meaning:"Thomas esittelee Peterin ja kertoo molempien tulevan Berliinistä."},
-      {label:"4 · Takashi kertoo paikkansa",german:"Ich komme aus Kyoto. Ich bin Japaner.",meaning:"Takashi tulee Kiotosta ja kertoo olevansa japanilainen."}
-     ]},
-    {id:"model",phase:"Opetettu malliesimerkki",kind:"explanation",title:"Näin poimin paikkatiedon tekstistä",
-     paragraphs:[
-      "Kysymys: Mistä Thomas ja Peter tulevat? Etsin Thomasin puheenvuorosta Wir kommen aus Berlin. Wir viittaa Thomasin ja Peterin yhteiseen vastaukseen.",
-      "Vastaus on siis Berliinistä, ei Kiotosta. Berlin on kaupunki Saksassa. En sano heidän olevan suoraan peräisin vain Saksasta, jos kysyttiin nimenomaan kaupunkia.",
-      "Seuraava kysymys: Mistä Takashi tulee? Takashin omassa viimeisessä vastauksessa lukee Ich komme aus Kyoto. Vastaus on Kiotosta.",
-      "Kaksi lähdetietoa eivät ole ristiriidassa: eri henkilöt tulevat eri paikoista."
-     ]},
-    {id:"guided",phase:"Ohjattu harjoittelu",kind:"question",title:"Ymmärrä wir kommen",
-     paragraphs:["Palaa opettajan malliin tarvittaessa."],
-     question:{type:"choice",skillId:"L1-READ-01",prompt:"Mitä Wir kommen aus Berlin. tarkoittaa lähteessä?",
-      options:[{id:"a",label:"Me tulemme Berliinistä."},{id:"b",label:"Minä tulen Kiotosta.",wrongFeedback:"Ich komme aus Kyoto on Takashin erillinen vastaus."},
-       {id:"c",label:"Me asumme Kiotossa.",wrongFeedback:"Kommen aus kertoo lähtöpaikan, ei missä asutaan."}],
-      correctOption:"a",success:"Oikein. Wir = me ja aus Berlin = Berliinistä.",
-      hint:"Tunnistatko sanan wir, me?",
-      reteach:"Ich komme = minä tulen; wir kommen = me tulemme. Aus Berlin kertoo kaupungin.",
-      genericWrong:"Tarkista pronomini ja paikan nimi."}},
-    {id:"book",phase:"Teksti B ja valinnainen ihmisäänite",kind:"book",title:"Lue koko M-COM-02-teksti kirjasta",
-     paragraphs:[
-      "Avaa C03:n Text B. Lue kaikki neljä puheenvuoroa sellaisina kuin ne ovat alkuperäisessä lähteessä. Avaamalla sanoja voit tarkistaa esimerkiksi wir, kommen, Kyoto ja Japaner.",
-      "Jos alkuperäinen Ariserin äänite toistuu laitteellasi, voit kuunnella sen ja lukea samanaikaisesti. Jos toisto epäonnistuu, jatka näkyvästä tekstistä. Älä vahvista kuuntelua suorituksena vain siksi, että näit soittimen.",
-      "Tekstin CC BY-SA 3.0 -attribuutio on kirjassa. Äänitteen laitetestausta tai riippumatonta kielentarkistusta ei ole merkitty tehdyksi."
-     ],bookLinks:[{label:"C03 · Text B (M-COM-02)",chapterId:"03",section:"text-b",instruction:"Lue Thomasin ja Takashin neljä alkuperäistä repliikkiä, halutessasi kokeile ihmisäänitettä."}],
-     activityId:"read-complete-textb",activityLabel:"Luin kaikki neljä Text B -puheenvuoroa"},
-    {id:"source-detail",phase:"Tekstikohtainen harjoitus",kind:"question",title:"Kuka esittelee Peterin?",
-     paragraphs:["Etsi repliikki Das ist Peter. ja tunnista sen puhuja."],
-     question:{type:"choice",skillId:"L1-READ-01",prompt:"Kuka kertoo keskustelussa Das ist Peter.?",
-      options:[{id:"a",label:"Thomas"},{id:"b",label:"Takashi",wrongFeedback:"Takashi kertoo nimensä ja tulevansa Kiotosta."},
-       {id:"c",label:"Peter",wrongFeedback:"Peter on esitelty henkilö, mutta hänellä ei ole omaa repliikkiä tässä tekstissä."}],
-      correctOption:"a",success:"Oikein. Thomas esittelee Peterin.",
-      hint:"Lause on lähteen kolmannessa puheenvuorossa.",
-      reteach:"Thomas: Ich bin Thomas. Das ist Peter. Wir kommen aus Berlin.",
-      genericWrong:"Tarkista kolmannen puheenvuoron puhuja."}},
-    {id:"questions",phase:"Kirjan oikeat ymmärtämistehtävät",kind:"book",title:"Tee ja tarkista kaksi Text B:n tehtävää",
-     paragraphs:[
-      "Vastaa kirjan Text B:n kysymyksiin C03-MCOM02-Q02 (Thomas ja Peter) ja C03-MCOM02-Q03 (Takashi).",
-      "Paina molempien kohdalla Tarkista vastaus. Teacher hyväksyy tässä vain kirjassa tallennetut vastaukset, joilla on erillinen tarkistusmerkintä.",
-      "Virheellinen vastauskin kirjautuu tarkistetuksi harjoitukseksi, mutta ei ole itsenäisen osaamisen osoitus. Lue selite ja yritä uudelleen."
-     ],bookLinks:[{label:"C03 · Text B -tehtävät",chapterId:"03",section:"text-b",instruction:"Vastaa ja tarkista C03-MCOM02-Q02 sekä C03-MCOM02-Q03."}]},
-    {id:"geo-teaching",phase:"Karttapäättely",kind:"explanation",title:"Kaupunki ei ole sama asia kuin maa",
-     paragraphs:[
-      "Piirrä mielessäsi kolme tasoa: maanosat, maat ja kaupungit. Berliini on Saksassa Euroopassa. Bern on Sveitsissä Euroopassa. Kioto on Japanissa Aasiassa.",
-      "Lue lähteen ilmaukset täsmälleen: Thomas ja Peter tulevat Berliinistä, Takashi Kiotosta. Lähdeteksti ei väitä, että kummankaan nykyinen asuinpaikka olisi sama kuin lähtöpaikka.",
-      "L013:n Lisa asuu Bernissä mutta on kotoisin Saksasta. Tästä ei voi päätellä, että myös Thomas ja Peter asuisivat Bernissä.",
-      "Kartassa maan ja kaupungin sijainti auttaa ymmärtämään alkuperää, mutta älä päättele henkilön kansalaisuutta pelkän lähtökaupungin perusteella."
-     ]},
-    {id:"map-board",phase:"Interaktiivinen karttataulu",kind:"board",title:"Yhdistä lähteen paikannimet kartan alueisiin",
-     paragraphs:["Tämä sanallinen karttataulu ei ole uusi ulkoinen karttamedia. Siirry vaiheittain ja tarkista kaupunki, maa ja maanosa."],
-     board:[
-      {label:"1 · Eurooppa → Saksa",german:"Berlin → Deutschland",meaning:"Berliini, Saksa; Thomas ja Peter sanovat tulevansa Berliinistä"},
-      {label:"2 · Aasia → Japani",german:"Kyoto → Japan",meaning:"Kioto, Japani; Takashi sanoo tulevansa Kiotosta"},
-      {label:"3 · Eurooppa → Sveitsi",german:"Bern → die Schweiz",meaning:"Bern, Sveitsi; Lisa sanoo asuvansa siellä, mutta tulevansa Saksasta"},
-      {label:"4 · Tarkista lähde",german:"Wir kommen aus Berlin. / Ich komme aus Kyoto.",meaning:"Alkuperä määräytyy puheenvuoron tekstistä, ei kartalla lähimmästä kaupungista"}
-     ]},
-    {id:"independent",phase:"Itsenäinen muistista palauttaminen",kind:"question",title:"Kirjoita Takashin kaupunki",
-     paragraphs:["Sulje teksti hetkeksi. Vastaa vain kaupungin nimi, jonka Takashi sanoo omassa vastauksessaan."],
-     question:{type:"text",skillId:"L1-READ-01",evidenceRole:"independent",prompt:"Kirjoita saksankielisessä tekstissä mainittu Takashin lähtökaupunki.",
-      accepted:["Kyoto"],
-      success:"Oikein. Takashi sanoo Ich komme aus Kyoto.",
-      hint:"Kaupunki on Japanissa, ei Saksassa.",
-      reteach:"Takashin viimeisessä repliikissä lukee Ich komme aus Kyoto.",
-      genericWrong:"Älä sekoita Thomasin Berliiniä Takashin Kiotoon.",
-      wrongAnswers:{"berlin":"Berlin on Thomasin ja Peterin kaupunki.","bern":"Bern on Lisan asuinkaupunki eri tekstissä.","japan":"Japan on maa, mutta kysyttiin kaupunkia."}}},
-    {id:"map-activity",phase:"Soveltava karttatehtävä",kind:"activity",title:"Vertaa oikeaa kirjan kartta- ja kulttuurisisältöä",
-     paragraphs:[
-      "Avaa C03:n Kulttuuri. Etsi saksankieliset maat ja alueet ja vertaa niihin Berliinin sekä Bernin paikkoja. Kioto sijoittuu Euroopan ulkopuolelle Japaniin.",
-      "Kerro itsellesi tai kirjoita paperille: Berlin → Deutschland; Bern → die Schweiz; Kyoto → Japan. Älä sekoita Lisan lähtömaata hänen nykyiseen kaupunkiinsa.",
-      "Vahvista vain, kun olet todella tarkistanut kartan alueet tai tehnyt vastaavan vertailun. Tämä on oma harjoittelumerkintä, ei geografin arvosana."
-     ],bookLinks:[{label:"C03 · Kulttuuri",chapterId:"03",section:"culture",instruction:"Vertaa Saksaa ja Sveitsiä sekä Berliinin, Bernin ja Kioton sijainteja."}],
-     activityId:"map-reviewed",activityLabel:"Vertasin kaupunkeja niiden maihin ja maanosaan"},
-    {id:"application",phase:"Soveltaminen",kind:"question",title:"Päättele kartasta uusi tilanne",
-     paragraphs:["Kuvitteellisen matkakortin kaupunki on Berlin ja maa Deutschland. Valitse täsmällinen tulkinta, älä lisää tietoja henkilön asumisesta."],
-     question:{type:"choice",skillId:"L1-CULT-01",evidenceRole:"application",prompt:"Mikä seuraavista on tekstin ja kartan perusteella oikein?",
-      options:[{id:"a",label:"Berliini on Saksan kaupunki ja Thomas sekä Peter kertovat tulevansa sieltä."},
-       {id:"b",label:"Berliini on Japanissa, josta myös Takashi tulee.",wrongFeedback:"Berliini on Saksassa. Takashi kertoo tulevansa Kiotosta Japanista."},
-       {id:"c",label:"Thomas ja Peter varmasti asuvat Berliinissä tällä hetkellä.",wrongFeedback:"Teksti kertoo lähtöpaikan, ei heidän nykyistä asuinpaikkaansa."}],
-      correctOption:"a",success:"Oikein. Kartta kertoo kaupungin maan ja puheenvuoro kertoo alkuperän.",
-      hint:"Tarkista Wir kommen aus Berlin. ja sijoita Berlin oikeaan maahan.",
-      reteach:"Berlin → Deutschland, Kyoto → Japan. Kommen aus kertoo mistä tullaan, ei varmuudella missä nyt asutaan.",
-      genericWrong:"Erota lähteestä luettu fakta ja omat oletukset."}},
-    {id:"exit",phase:"Lopputarkistus",kind:"question",title:"Kenen alkuperä selviää viimeisestä repliikistä?",
-     paragraphs:["Vastaa ilman näkyvää tekstiä."],
-     question:{type:"choice",skillId:"L1-READ-01",evidenceRole:"exit",prompt:"Kenen puheenvuorossa on Ich komme aus Kyoto?",
-      options:[{id:"a",label:"Takashi"},{id:"b",label:"Thomas",wrongFeedback:"Thomas sanoo Wir kommen aus Berlin."},
-       {id:"c",label:"Lisa Müller",wrongFeedback:"Lisa kuuluu C03:n erilliseen Text A:han."}],
-      correctOption:"a",success:"Oikein. Takashi tulee Kiotosta.",
-      hint:"Henkilö, joka kertoo olevansa Japaner.",
-      reteach:"Takashi: Ich komme aus Kyoto. Ich bin Japaner.",
-      genericWrong:"Etsi viimeisen, neljännen repliikin puhuja."}},
-    {id:"summary",phase:"Yhteenveto",kind:"summary",title:"Osaat erottaa lähteen kaupungit ja maat",
-     paragraphs:[
-      "Luit M-COM-02:n kaikki neljä puheenvuoroa: Thomas ja Peter kertovat tulevansa Berliinistä, Takashi Kiotosta. Karttataulu sijoittaa Berliinin Saksaan ja Kioton Japaniin.",
-      "Kirjan kaksi tarkistettua Text B -tehtävää on vaadittu. Kuuntelua ei ole merkitty automaattisesti onnistuneeksi eikä Nicon videolle ole luotu keksittyä transkriptiota.",
-      "L016:ssa harjoittelet näitä muotoja ja palautat oikean kappaletestin."
-     ]}
-  ]
+    {
+      id:"welcome",phase:"Aloitus",kind:"introduction",
+      title:"Yksi oikea keskustelu, kaksi eri lähtökaupunkia",
+      paragraphs:[
+        "Olet jo opetellut Woher kommst du? ja Ich komme aus Finnland. Nyt tarvitset tarkkaa tekstinymmärtämistä: kahdessa puheenvuorossa kerrotaan eri henkilöiden lähtöpaikat.",
+        "C03:n Text B sisältää ihmispuheena julkaistun M-COM-02-lähteen neljä puheenvuoroa sekä saman tekstin kirjoitettuna. Äänen toimivuutta oikeilla laitteilla ei ole vielä hyväksytty.",
+        "Jos kuuntelet toimivaa alkuperäisäänitettä, harjoittelet kuullun ymmärtämistä. Jos luet vain tekstin, harjoittelet luetun ymmärtämistä. Kummastakaan ei synny automaattista kuuntelutaitomerkintää.",
+      ],
+    },
+    {
+      id:"recall",phase:"Muistelu",kind:"question",
+      title:"Mitä woher kysyy?",
+      paragraphs:["Kertaa ensin L014:n kysymyssana. Tämä on muistia aktivoiva harjoitus, ei uusi näyttö."],
+      question:{
+        type:"choice",skillId:"L1-INT-03",
+        prompt:"Mitä tarkoittaa kysymys Woher kommst du?",
+        options:[
+          {id:"a",label:"Mistä olet kotoisin?"},
+          {id:"b",label:"Mikä sinun nimesi on?",wrongFeedback:"Nimeä kysytään Wie heißt du? -ilmauksella."},
+          {id:"c",label:"Mitä kuuluu?",wrongFeedback:"Mitä kuuluu? ei ole lähtömaakysymys."},
+        ],
+        correctOption:"a",success:"Oikein. Woher kysyy alkuperää.",
+        hint:"Muista L014:n woher = mistä.",
+        reteach:"Woher kommst du? = Mistä olet kotoisin? Wie heißt du? = Mikä sinun nimesi on?",
+        genericWrong:"Erota nimi ja alkuperä toisistaan.",
+      },
+    },
+    {
+      id:"method",phase:"Opettajan selitys",kind:"explanation",
+      title:"Miten luen keskustelun, jossa on monta ihmistä?",
+      paragraphs:[
+        "Ensimmäisessä repliikissä Thomas kysyy Takashin nimeä. Toisessa Takashi esittäytyy. Kolmannessa Thomas sanoo oman nimensä, esittelee Peterin ja kertoo heidän lähtöpaikkansa. Neljännessä Takashi kertoo omastaan.",
+        "Lukemisen vaikein kohta on pronomini wir: se tarkoittaa me. Thomasin lause Wir kommen aus Berlin. viittaa Thomasiin ja hänen esittelemäänsä Peteriin.",
+        "Sinun ei tarvitse osata vielä tuottaa kommen-verbin monikon muotoa. Riittää, että tunnistat kokonaisen alkuperäislauseen merkityksen.",
+        "Takashin lause Ich komme aus Kyoto. käyttää samaa ich komme aus -rakennetta, jonka opit L014:ssa. Tässä vain paikan nimi vaihtuu.",
+      ],
+      help:[
+        {title:"Selitä yksinkertaisemmin",body:"Thomas ja Peter ovat Berliinistä. Takashi on Kiotosta. Kolmas ja neljäs repliikki kertovat tämän."},
+        {title:"Kertaa aiempi asia",body:"L014:ssa opit Ich komme aus Finnland. Kun loppuun vaihdetaan Kyoto, merkitys muuttuu: Olen kotoisin Kiotosta."},
+      ],
+    },
+    {
+      id:"board",phase:"Vaiheittainen lähdetaulu",kind:"board",
+      title:"Yhdistä puhuja, ilmaus ja paikka",
+      paragraphs:[
+        "Opettaja etsii ensin, kenen puheenvuoro on kyseessä, sitten lähtöpaikkaa ilmaisevan ilmauksen ja vasta lopuksi karttapaikan.",
+        "Paina seuraavaa vaihetta. Huomaa, ettei nimen arvaaminen kerro vielä mitään alkuperästä.",
+      ],
+      board:[
+        {label:"1 · Thomas kysyy",german:"Wie heißt du?",meaning:"Mikä sinun nimesi on?"},
+        {label:"2 · Takashi vastaa",german:"Ich heiße Takashi.",meaning:"Minun nimeni on Takashi."},
+        {label:"3 · Thomas esittelee",german:"Ich bin Thomas. Das ist Peter.",meaning:"Thomas esittelee myös Peterin."},
+        {label:"4 · Kaksi henkilöä",german:"Wir kommen aus Berlin.",meaning:"Thomas ja Peter tulevat Berliinistä. Wir = me, tunnistettava muoto."},
+        {label:"5 · Yksi henkilö",german:"Ich komme aus Kyoto.",meaning:"Takashi on Kiotosta."},
+        {label:"6 · Eri kaupungit",german:"Berlin · Kyoto",meaning:"Berliini on Saksassa; Kioto on Japanissa."},
+      ],
+    },
+    {
+      id:"guided",phase:"Ohjattu harjoittelu",kind:"question",
+      title:"Kuka sanoo Wir kommen aus Berlin?",
+      paragraphs:["Käytä taulua apuna. Tässä ei kysytä monikon kielioppipäätettä."],
+      question:{
+        type:"choice",skillId:"L1-READ-01",
+        prompt:"Kuka sanoo alkuperäisessä dialogissa Wir kommen aus Berlin?",
+        options:[
+          {id:"a",label:"Thomas"},
+          {id:"b",label:"Takashi",wrongFeedback:"Takashi kertoo erikseen tulevansa Kiotosta."},
+          {id:"c",label:"Peter",wrongFeedback:"Peter esitellään, mutta hänellä ei ole omaa repliikkiä tässä tekstissä."},
+        ],
+        correctOption:"a",success:"Oikein. Thomas sanoo lauseen ja viittaa myös Peteriin.",
+        hint:"Etsi kolmas puheenvuoro, jossa lukee myös Das ist Peter.",
+        reteach:"Thomas sanoo Ich bin Thomas. Das ist Peter. Wir kommen aus Berlin.",
+        genericWrong:"Katso kolmannen puheenvuoron puhujan nimi.",
+      },
+    },
+    {
+      id:"read",phase:"Alkuperäisteksti",kind:"book",
+      title:"Tutki neljän repliikin Text B",
+      paragraphs:[
+        "Avaa C03:n Text B ja lue kaikki neljä julkaistua puheenvuoroa. Kuuntele halutessasi alkuperäistä Ariserin ihmisten äänittämää OGG-tiedostoa, jos se toimii selaimessasi.",
+        "Jos äänite ei toimi, tekstin ja suomennosten avulla voi silti tehdä oikean lukutehtävän. Älä valitse tai vahvista kuuntelusuoritusta, jota et tehnyt.",
+        "Vertaa kolmannen ja neljännen vuoron komme/kommen-muotoja vain ymmärtämistä varten. Tämän tunnin itsenäiset kysymykset eivät vaadi wir-verbin taivutuksen tuottamista.",
+      ],
+      bookLinks:[{label:"C03 · Text B, M-COM-02",chapterId:"03",section:"text-b",instruction:"Lue kaikki neljä repliikkiä ja kuuntele vain, jos oikea äänite toimii."}],
+      activityId:"source-compared",activityLabel:"Vertasin alkuperäisen Text B:n paikkatiedot",
+    },
+    {
+      id:"questions",phase:"Kirjan tarkistettavat kysymykset",kind:"book",
+      title:"Tee oikeat Q02 ja Q03",
+      paragraphs:[
+        "Text B:n lähdetehtävä C03-MCOM02-Q02 kysyy Thomasin ja Peterin alkuperää. C03-MCOM02-Q03 kysyy Takashin alkuperää.",
+        "Valitse kummankin vastaus ja paina Tarkista vastaus kirjan omassa tehtävänäkymässä. Tarkistusmerkintä ja vastaukset säilyvät C03:n nykyisessä tallennuksessa.",
+        "Oikean kysymyksen avaaminen ei ole vastaus. Ainoastaan kirjan tallennetut vastaukset ja tarkistusmerkinnät täyttävät nämä kaksi opetuspolun vaatimusta.",
+      ],
+      bookLinks:[{label:"C03 · Text B, kysymykset 2 ja 3",chapterId:"03",section:"text-b",instruction:"Vastaa ja tarkista C03-MCOM02-Q02 sekä C03-MCOM02-Q03."}],
+    },
+    {
+      id:"map",phase:"Kulttuuri ja kartta",kind:"explanation",
+      title:"Kaupunki ei automaattisesti tarkoita lähtömaata",
+      paragraphs:[
+        "Berlin eli Berliini sijaitsee Saksassa, Deutschland. Kyoto eli Kioto sijaitsee Japanissa. Bern puolestaan sijaitsee Sveitsissä.",
+        "Kun alkuperäisteksti sanoo aus Berlin, kyseessä on kaupunki. Kun sanot aus Deutschland, kyseessä on maa. Samaa aus-sanaa voi käyttää molemmissa tässä opetetuissa esimerkeissä.",
+        "Päättele ensin henkilö ja paikka itse tekstistä. Kartta ja kulttuurisivu auttavat vasta sen jälkeen sijoittamaan kaupungin oikeaan maahan.",
+      ],
+      help:[{title:"Miksi Berlin ei ole sama kuin Deutschland?",body:"Berlin on yksi Saksan kaupungeista. Deutschland tarkoittaa koko maata. Sama ero koskee Kyoto/Japan ja Bern/Sveitsi."}],
+    },
+    {
+      id:"map-reasoning-board",phase:"Interaktiivinen karttapäättely",kind:"board",
+      title:"Sijoita tekstien kaupungit oikeisiin maihin",
+      paragraphs:[
+        "Etene yksi karttapäätelmä kerrallaan. Paikan sijainti on maantieteellinen tieto, mutta ihmisen lähtöpaikka täytyy lukea hänen omasta puheenvuorostaan.",
+        "Vertaile Berliiniä ja Kiotoa Text B:n tietoihin ja Berniä Lisan Text A:n asuinpaikkaan. Älä oleta, että alkuperämaa ja nykyinen asuinpaikka ovat samat.",
+      ],
+      board:[
+        {label:"1 · Eurooppa, Saksa",german:"Berlin → Deutschland",meaning:"Thomas ja Peter kertovat tulevansa Berliinistä."},
+        {label:"2 · Aasia, Japani",german:"Kyoto → Japan",meaning:"Takashi kertoo tulevansa Kiotosta ja olevansa japanilainen."},
+        {label:"3 · Eurooppa, Sveitsi",german:"Bern → die Schweiz",meaning:"Lisa asuu Bernissä mutta kertoo olevansa kotoisin Saksasta."},
+        {label:"4 · Mitä tekstistä selviää?",german:"Wir kommen aus Berlin. / Ich komme aus Kyoto.",meaning:"Kommen aus kertoo lähtöpaikan. Asuinpaikkaa ei tästä yksin voi päätellä."},
+      ],
+      help:[{title:"Onko Kyoto maa?",body:"Ei. Kyoto on kaupunki Japanissa. Berlin on kaupunki Saksassa ja Bern kaupunki Sveitsissä."}],
+    },
+    {
+      id:"culture",phase:"Karttaharjoittelu",kind:"book",
+      title:"Paikanna kaupungit oppikirjan kulttuuriosasta",
+      paragraphs:[
+        "Avaa C03:n Kulttuuri ja tarkista, miten saksankieliset maat sijoittuvat Euroopassa. Vertaa kaupungin ja maan käsitteitä.",
+        "Berliini ja Bern alkavat samankaltaisesti, mutta eivät ole sama kaupunki. Kioto on Japanissa eikä kuulu saksankielisiin maihin.",
+        "Tämä on lähteen täydentävää maantieteellistä ymmärtämistä. Valinnaisen ulkoisen videon katsominen ei ole oppitunnin suoritusvaatimus.",
+      ],
+      bookLinks:[{label:"C03 · Kulttuuri",chapterId:"03",section:"culture",instruction:"Erota Berliini, Bern ja Kioto toisistaan."}],
+      activityId:"place-map-reviewed",activityLabel:"Tarkistin kartta- ja maavertailun",
+    },
+    {
+      id:"independent",phase:"Itsenäinen lukutaito",kind:"question",
+      title:"Kirjoita Takashin lähtökaupunki",
+      paragraphs:["Sulje lähdeteksti ja palauttele sen viimeinen repliikki mieleen. Älä tuota vielä uuden persoonan verbimuotoa."],
+      question:{
+        type:"text",skillId:"L1-READ-01",evidenceRole:"independent",
+        prompt:"Kirjoita saksaksi sen kaupungin nimi, josta Takashi kertoo tulevansa.",
+        accepted:["Kyoto"],
+        success:"Oikein. Takashi sanoo Ich komme aus Kyoto.",
+        hint:"Se on Japanissa sijaitseva kaupunki, jonka nimi alkaa K-kirjaimella.",
+        reteach:"Thomas ja Peter ovat Berliinistä, mutta Takashi kertoo tulleensa Kiotosta eli Kyoto.",
+        genericWrong:"Kertaa neljäs puheenvuoro ja sen kaupungin nimi.",
+        wrongAnswers:{"berlin":"Berlin on Thomasin ja Peterin lähtökaupunki.","bern":"Bern on Lisan asuinkaupunki C03:n Text A:ssa."},
+      },
+    },
+    {
+      id:"application",phase:"Soveltaminen",kind:"question",
+      title:"Päättele kaksi lähtöpaikkaa",
+      paragraphs:["Vertaa kahta lähteen henkilöryhmää. Tämä on uusi muistin perusteella tehtävä yhdistämistehtävä."],
+      question:{
+        type:"choice",skillId:"L1-READ-01",evidenceRole:"application",
+        prompt:"Mikä yhdistelmä vastaa alkuperäistä M-COM-02-keskustelua?",
+        options:[
+          {id:"a",label:"Thomas ja Peter: Berlin · Takashi: Kyoto"},
+          {id:"b",label:"Thomas ja Peter: Kyoto · Takashi: Berlin",wrongFeedback:"Kaupunkien henkilöt ovat menneet ristiin."},
+          {id:"c",label:"Thomas ja Peter: Bern · Takashi: Österreich",wrongFeedback:"Bern liittyy Lisan toiseen tekstiin ja Österreich on maa, ei Takashin lähteen kaupunki."},
+        ],
+        correctOption:"a",success:"Oikein. Kolmas ja neljäs repliikki kertovat nämä paikat.",
+        hint:"Löydät Thomasin tiedon kolmannesta ja Takashin neljännestä repliikistä.",
+        reteach:"Thomas sanoo Wir kommen aus Berlin. Takashi sanoo Ich komme aus Kyoto.",
+        genericWrong:"Etsi kumpikin lähtöpaikka erikseen lähdetekstistä.",
+      },
+    },
+    {
+      id:"exit",phase:"Lopputarkistus",kind:"question",
+      title:"Älä sekoita lukemista kuuntelemiseen",
+      paragraphs:["Lopuksi varmista yksi keskustelun todellinen lähdetieto. Äänitteen kuuntelua ei vaadita eikä pisteytetä."],
+      question:{
+        type:"choice",skillId:"L1-READ-01",evidenceRole:"exit",
+        prompt:"Mikä näistä henkilöistä esitellään tekstissä mutta ei puhu omalla vuorollaan?",
+        options:[
+          {id:"a",label:"Peter"},
+          {id:"b",label:"Takashi",wrongFeedback:"Takashi vastaa kahdessa repliikissä."},
+          {id:"c",label:"Thomas",wrongFeedback:"Thomas kysyy nimen ja kertoo itsestään sekä Peteristä."},
+        ],
+        correctOption:"a",success:"Oikein. Peter mainitaan, mutta hän ei puhu lähteen neljässä repliikissä.",
+        hint:"Hänet esitellään sanoilla Das ist ...",
+        reteach:"Thomas sanoo Das ist Peter. Peterin nimi mainitaan, mutta omaa repliikkiä ei ole.",
+        genericWrong:"Kertaa puhujat: Thomas, Takashi, Thomas, Takashi.",
+      },
+    },
+    {
+      id:"summary",phase:"Yhteenveto",kind:"summary",
+      title:"Ymmärrät kahden keskustelun paikkatiedot",
+      paragraphs:[
+        "Luit Thomasin ja Takashin neljä alkuperäistä repliikkiä, selvitit Thomasin ja Peterin sekä Takashin lähtökaupungit ja erotit kaupungit maista.",
+        "Jos kuuntelit oikean ihmisäänitteen, se oli harjoittelua. Tämän oppitunnin arvioitavat vastaukset eivät väitä todistavansa kuullun ymmärtämistä ilman varmistettua kuuntelua.",
+        "Seuraava L016 kertaa C03:n opitut taidot ja käyttää kirjan omaa kappaletestiä. Sie-muotojen itsenäinen kielioppituottaminen kuuluu vasta myöhemmälle tunnille.",
+      ],
+    },
+  ],
 };

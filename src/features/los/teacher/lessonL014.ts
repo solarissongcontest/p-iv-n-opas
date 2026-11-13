@@ -1,153 +1,270 @@
 import type { TeacherLesson } from "./engine.ts";
 
 /**
- * L014 · C03. Entirely scripted Finnish instruction, no runtime AI.
- * The step-controlled TeacherBoard is the existing interactive conjugation /
- * sentence-order board; the four canonical workbook answers stay in C03 storage.
- * No formal Sie production or Swiss dative morphology is required here.
+ * LOS! 1 · L014, C03 beginner grammar production.
+ * The first ACTIVE woher + kommen lesson follows L013 reading-only support.
+ * Introduces ich komme / du kommst and aus + Finnland/Deutschland/Österreich;
+ * deliberately does not test aus der Schweiz, Sie conjugation or dative.
+ * Workbook answers stay in the canonical C03 chapter draft.
  */
 export const LOS1_L014_TEACHER: TeacherLesson = {
   id:"L014",bookId:1,chapterId:"03",version:"2.0.0-preview.1",
   title:"Kommen ja woher",
-  objective:"Kysyn sinutellen lähtömaan, taivutan kommen-verbin ich- ja du-muodot ja vastaan aus + maa -rakenteella.",
+  objective:"Kysyn tutulta Woher kommst du? ja vastaan Ich komme aus Finnland. sekä valitsen oikeat ich/du-verbimuodot.",
   estimatedMinutes:30,
-  requiredQuestionIds:["recall","guided-verb","guided-question","guided-meaning","independent","application","exit"],
-  requiredActivityIds:["sentence-rehearsed"],
+  requiredQuestionIds:["recall","stem-check","guided","independent","application","exit"],
+  requiredActivityIds:["grammar-followed"],
   requiredPracticeIds:["C03-EX-06","C03-EX-07","C03-EX-10","C03-EX-13"],
   scenes:[
-    {id:"welcome",phase:"Aloitus",kind:"introduction",title:"Osaat pian kysyä, mistä toinen on kotoisin",
-     paragraphs:[
-      "L013:ssa tunnistit Lisan vastauksesta lähtömaan Deutschland ja asuinpaikan Bern. Tänään opit sanomaan saman asian itse yksinkertaisella sinuttelumuodolla.",
-      "Aloitamme merkityksestä, rakennamme sitten kommen-verbin muodot ja kysymyslauseen vaihe kerrallaan. Lopuksi vastaat ilman näkyvää mallia.",
-      "Kaikki neljä kirjaharjoitusta tallentuvat C03:n tavalliseen oppikirjaan. Keskeneräisen oppitunnin voi jättää kesken ja siihen voi palata."
-     ],
-     help:[{title:"Tarvitseeko osata saksaa ennestään?",body:"Ei muuta kuin aikaisempien tuntien nimet, ich ja du. Kertaus on heti seuraavaksi."}]},
-    {id:"recall",phase:"Aktivointi",kind:"question",title:"Palauta mieliin, mikä on lähtömaa",
-     paragraphs:["Lisa sanoi tulevansa Saksasta ja asuvansa Bernissä. Erota nämä tiedot ennen kielioppia."],
-     question:{type:"choice",skillId:"L1-READ-01",prompt:"Mikä ilmaus kertoo lähtömaan eikä nykyistä asuinpaikkaa?",
-      options:[{id:"a",label:"Ich wohne in Bern.",wrongFeedback:"Wohne in kertoo, missä asutaan, ei mistä ollaan kotoisin."},
-       {id:"b",label:"Ich komme aus Deutschland."},
-       {id:"c",label:"Wie heißen Sie?",wrongFeedback:"Tässä kysytään nimeä kohteliaasti."}],
-      correctOption:"b",success:"Oikein. Komme aus kertoo alkuperän.",hint:"Etsi ilmaus, jonka perässä on Deutschland.",
-      reteach:"Komme aus + maa kertoo alkuperän; wohne in + kaupunki kertoo nykyisen asuinpaikan.",
-      genericWrong:"Erota mistä henkilö tulee ja missä hän asuu."}},
-    {id:"meaning",phase:"Opettajan selitys",kind:"explanation",title:"Woher = mistä, wo = missä",
-     paragraphs:[
-      "Saksan woher kysyy lähtöpaikkaa tai alkuperää: Woher kommst du? = Mistä olet kotoisin? Tämä on uusi aktiivinen kysymys.",
-      "Wo kysyy sijaintia: Wo wohnst du? = Missä asut? Tätä voit ymmärtää, vaikka wohnen-verbin koko taivutusta ei tällä tunnilla harjoitella.",
-      "Vastaus alkaa usein Ich komme aus ... . Aus tarkoittaa tässä -sta/-stä: Ich komme aus Finnland. = Olen kotoisin Suomesta.",
-      "Woher ja wo eivät ole vaihtokelpoisia. Jos kysyt Woher, vastaaja kertoo mistä; jos kysyt Wo, hän kertoo missä."
-     ],
-     help:[{title:"En ymmärrä eroa",body:"Ajattele kahta suomalaista kysymystä: MISTÄ olet kotoisin? = woher. MISSÄ asut? = wo. Alkuperä ei aina ole sama kuin asuinpaikka."},
-      {title:"Mitä aus tekee?",body:"Se sitoo lähtöpaikan vastaukseen: komme aus Finnland = tulen Suomesta. Maan nimi pysyy tässä perusmuodossa."}]},
-    {id:"verb-rule",phase:"Opettajan selitys",kind:"explanation",title:"Miksi kommen muuttuu?",
-     paragraphs:[
-      "Kommen on verbin perusmuoto, joka tarkoittaa tulla. Saksassa verbin muoto riippuu persoonasta: ich = minä ja du = sinä.",
-      "Poista kommen-sanasta -en, niin saat vartalon komm-. Lisää ich-persoonaan -e: komm + e = komme. Lisää du-persoonaan -st: komm + st = kommst.",
-      "Siksi sanot Ich komme aus Finnland. mutta Du kommst aus Deutschland. Kirjoitusasu kommst sisältää kaksi m-kirjainta ja st-päätteen.",
-      "Kolmannen persoonan tunnistusesimerkki on er/sie kommt = hän tulee. Kohteliaan Sie-kysymyksen muoto tulee L013:n lähdetekstistä, mutta sen tuottamista harjoitellaan vasta C04:ssä."
-     ],
-     help:[{title:"Miksi du ei ole komme?",body:"Du vaatii tässä -st-päätteen. Vartalo pysyy komm-: du + kommst."},
-      {title:"Entä esimerkki er/sie kommt?",body:"Se on lyhyt tunnistusesimerkki. Tuota tällä tunnilla ensisijaisesti muodot ich komme ja du kommst."}]},
-    {id:"conjugation-board",phase:"Interaktiivinen taivutustaulu",kind:"board",title:"Rakenna kommen-verbi vaiheittain",
-     paragraphs:["Paina Näytä seuraava ja seuraa, miten sama vartalo saa eri persoonapäätteen. Voit palata edelliseen vaiheeseen tai aloittaa alusta."],
-     board:[
-      {label:"1 · Perusmuoto",german:"kommen",meaning:"tulla / olla kotoisin; vartalo komm- + pääte -en"},
-      {label:"2 · Vartalo",german:"komm-",meaning:"poista perusmuodosta -en"},
-      {label:"3 · Minä",german:"ich + komm + e → ich komme",meaning:"Ich komme = minä tulen / olen kotoisin"},
-      {label:"4 · Sinä",german:"du + komm + st → du kommst",meaning:"Du kommst = sinä tulet / olet kotoisin"},
-      {label:"5 · Tunnista myös hän",german:"er / sie kommt",meaning:"Hän tulee. Ei tämän tunnin itsenäinen tuottamisvaatimus."},
-      {label:"6 · Vertaa",german:"Ich komme. · Du kommst.",meaning:"Subjekti ratkaisee verbin päätteen."}
-     ]},
-    {id:"model",phase:"Opetettu malliesimerkki",kind:"explanation",title:"Mallinnan kaksi lausetta itse",
-     paragraphs:[
-      "Tehtävä: sano, että kuvitteellinen Mia on puhujana ja tulee Suomesta. Valitsen tekijäksi ich, sitten kommen-verbin ich-muodon komme ja lopuksi aus Finnland: Ich komme aus Finnland.",
-      "Toinen tehtävä: kerro sinulle osoitettuna, että toinen henkilö on Saksasta. Tekijä on du, joten sanon Du kommst aus Deutschland. En kirjoita Du kommen, koska du tarvitsee muodon kommst.",
-      "Tarkistan lopuksi kaksi asiaa: tuleeko taivutettu verbi tekijän jälkeen väitelauseessa ja seuraako lähtömaan nimeä edeltävä aus.",
-      "Maiden Finnland, Deutschland ja Österreich edellä käytetään näissä perusesimerkeissä aus ilman artikkelia. Sveitsistä sanotaan valmiina ilmauksena aus der Schweiz; sen datiivia ei tarvitse vielä itse johtaa."
-     ]},
-    {id:"guided-verb",phase:"Ohjattu harjoittelu",kind:"question",title:"Valitse ich-muoto",
-     paragraphs:["Käytä apuna hetki sitten rakennettua taivutustaulua."],
-     question:{type:"choice",skillId:"L1-GRA-01",prompt:"Ich ___ aus Finnland.",
-      options:[{id:"a",label:"kommst",wrongFeedback:"Kommst kuuluu du-persoonalle."},
-       {id:"b",label:"komme"},{id:"c",label:"kommen",wrongFeedback:"Kommen on perusmuoto, mutta ich tarvitsee taipuneen muodon."}],
-      correctOption:"b",success:"Oikein. Ich komme.",hint:"Ich saa komm-vartaloon -e-päätteen.",
-      reteach:"komm- + -e = komme. Sano Ich komme aus Finnland.",
-      genericWrong:"Tarkista verbin persoona ja pääte."}},
-    {id:"sentence-board",phase:"Interaktiivinen lauserakennustaulu",kind:"board",title:"Kokoa lähtömaakysymys sana kerrallaan",
-     paragraphs:["Etene nuolilla. Näet ensin tavallisen väitelauseen ja sen jälkeen kysymyksen, jossa kysymyssana on alussa."],
-     board:[
-      {label:"1 · Kuka?",german:"du",meaning:"sinä, kysymyksen kohde"},
-      {label:"2 · Valitse oikea muoto",german:"du kommst",meaning:"du + kommst, ei du komme"},
-      {label:"3 · Lisää kysymyssana",german:"woher",meaning:"mistä; kysymys alkuperästä"},
-      {label:"4 · Muodosta kysymys",german:"Woher + kommst + du?",meaning:"kysymyssana ensin, taivutettu verbi seuraavaksi, sitten du"},
-      {label:"5 · Vastaa",german:"Ich + komme + aus + Finnland.",meaning:"väitelauseessa ich ennen verbiä, sitten aus ja maa"},
-      {label:"6 · Vertaa sijaintiin",german:"Wo wohnen Sie? ≠ Woher kommst du?",meaning:"wo = missä, woher = mistä; Sie on lähdetekstin kohtelias muoto"}
-     ]},
-    {id:"guided-question",phase:"Ohjattu harjoittelu",kind:"question",title:"Mikä kysymys sopii?",
-     paragraphs:["Kysyt tutulta, mistä hän on kotoisin. Muistele lauserakennustaulun neljättä vaihetta."],
-     question:{type:"choice",skillId:"L1-INT-03",prompt:"Valitse oikein muodostettu alkuperäkysymys.",
-      options:[{id:"a",label:"Woher du kommst?",wrongFeedback:"Kysymyssanan jälkeen tulee taivutettu verbi, vasta sitten du."},
-       {id:"b",label:"Woher kommst du?"},{id:"c",label:"Wo kommst du?",wrongFeedback:"Tällä tunnilla alkuperän kysymyssana on woher, ei wo."}],
-      correctOption:"b",success:"Oikein. Woher kommst du?",
-      hint:"Sanajärjestys on woher + kommst + du.",
-      reteach:"Kysymys = Woher kommst du? Väitelause = Du kommst aus Finnland.",
-      genericWrong:"Muista sekä kysymyssana että sen jälkeinen verbin paikka."}},
-    {id:"guided-meaning",phase:"Merkityksen tarkistus",kind:"question",title:"Aus ja lähtömaa",
-     paragraphs:["Mia sanoo Ich komme aus Österreich. Sinun ei tarvitse muuttaa Österreich-sanaa."],
-     question:{type:"choice",skillId:"L1-INT-03",prompt:"Mitä Mia sanoo?",
-      options:[{id:"a",label:"Hän on kotoisin Itävallasta."},{id:"b",label:"Hän asuu Suomessa.",wrongFeedback:"Aus Österreich ei kerro asumisesta Suomessa."},
-       {id:"c",label:"Hän kysyy toisen nimeä.",wrongFeedback:"Lause on alkuperää koskeva vastaus, ei nimikysymys."}],
-      correctOption:"a",success:"Oikein. Aus Österreich = Itävallasta.",
-      hint:"Österreich on Itävalta. Aus ilmaisee mistä.",
-      reteach:"Ich komme aus Österreich. = Olen kotoisin Itävallasta.",
-      genericWrong:"Tarkista aus-sanan merkitys ja maan nimi."}},
-    {id:"book-practice",phase:"Oppikirjan oikeat tehtävät",kind:"book",title:"Ratkaise neljä taivutus- ja aus-harjoitusta",
-     paragraphs:[
-      "Avaa C03:n Harjoittele-osio. Tee C03-EX-06 (komme), C03-EX-07 (kommst), C03-EX-10 (aus) ja C03-EX-13 (kommst).",
-      "Vastaa kirjassa ennen kuin tarkistat ratkaisut. Teacher näyttää vain saman kappaleen oikean vastaustallennuksen tilan.",
-      "Jos teet virheen, kertaa kaksi taulua ja ratkaise tehtävä uudelleen. Pelkkä oppikirjan avaaminen ei kirjaa tehtävää vastatuksi."
-     ],
-     bookLinks:[{label:"C03 · Harjoittele",chapterId:"03",section:"practice",instruction:"Tee C03-EX-06, 07, 10 ja 13. Tarkista vasta oman vastauksen jälkeen."}]},
-    {id:"independent",phase:"Itsenäinen harjoittelu",kind:"question",title:"Kirjoita koko kysymys ilman mallia",
-     paragraphs:["Sulje taulu. Kirjoita saksaksi kysymys tutulle henkilölle."],
-     question:{type:"text",skillId:"L1-INT-03",evidenceRole:"independent",prompt:"Kirjoita: Mistä olet kotoisin?",
-      accepted:["Woher kommst du?"],
-      success:"Oikein. Kirjoitit woher + kommst + du oikeassa järjestyksessä.",
-      hint:"Kolme sanaa: woher, kommst, du.",
-      reteach:"Woher = mistä; du saa verbin kommst. Kysymys: Woher kommst du?",
-      genericWrong:"Tarkista woher-sana, kommst-muoto ja kysymyksen sanajärjestys.",
-      wrongAnswers:{"wo kommst du":"Wo kysyy missä. Alkuperäkysymykseen tarvitset woher.","woher kommen du":"Du-persoonan muoto on kommst.","woher du kommst":"Kysymyksessä verbi tulee ennen du-sanaa.","woher komme du":"Komme kuuluu ich-persoonalle."}}},
-    {id:"application",phase:"Soveltaminen",kind:"question",title:"Vastaa uuteen kysymykseen itsenäisesti",
-     paragraphs:["Kuvitteellinen henkilö kysyy: Woher kommst du? Vastaa hänen puolestaan niin, että lähtömaa on Saksa."],
-     question:{type:"text",skillId:"L1-INT-03",evidenceRole:"application",prompt:"Kirjoita koko vastaus: Olen kotoisin Saksasta.",
-      accepted:["Ich komme aus Deutschland."],
-      success:"Oikein. Ich + komme + aus Deutschland.",
-      hint:"Aloita Ich komme, sitten aus ja maan nimi.",
-      reteach:"Ich = minä, komme = tulen, aus Deutschland = Saksasta.",
-      genericWrong:"Tarkista tekijä, verbin ich-muoto ja aus.",
-      wrongAnswers:{"ich kommst aus deutschland":"Kommst on du-muoto; ich saa komme.","ich komme in deutschland":"In kertoo sijainnista; lähtömaa ilmaistaan tässä aus-sanalla.","ich kommen aus deutschland":"Kommen on perusmuoto; ich tarvitsee komme."}}},
-    {id:"rehearsal",phase:"Oma tuotanto",kind:"activity",title:"Harjoittele kysymys ja vastaus ääneen",
-     paragraphs:[
-      "Lue itse ääneen Woher kommst du? ja Ich komme aus Finnland. Toista sitten kumpikin ilman tekstiä.",
-      "Voit myös kirjoittaa ne paperille. Puhetta tai ääntämistä ei pisteytetä automaattisesti.",
-      "Vahvista harjoittelu vasta oman yrityksen jälkeen. Ääntämisen ihmistarkistus on edelleen erillinen julkaisuportti."
-     ],
-     activityId:"sentence-rehearsed",activityLabel:"Harjoittelin kysymyksen ja vastauksen ilman mallia"},
-    {id:"exit",phase:"Lopputarkistus",kind:"question",title:"Tunnista vielä wo ja woher",
-     paragraphs:["Tee tämä ilman taulua. Nämä kaksi kysymyssanaa tarkoittavat eri asioita."],
-     question:{type:"choice",skillId:"L1-INT-03",evidenceRole:"exit",prompt:"Millä kysyt nimenomaan mistä ystäväsi on kotoisin?",
-      options:[{id:"a",label:"Wo wohnst du?",wrongFeedback:"Wo wohnst du? kysyy, missä ystävä asuu."},
-       {id:"b",label:"Woher kommst du?"},{id:"c",label:"Wie heißt du?",wrongFeedback:"Wie heißt du? kysyy nimeä."}],
-      correctOption:"b",success:"Oikein. Woher kommst du? kysyy alkuperää.",
-      hint:"Alkuperä = mistä, ei missä eikä mikä nimi.",
-      reteach:"Woher kommst du? = Mistä olet kotoisin? Wo wohnst du? = Missä asut?",
-      genericWrong:"Tarkista, mitä kysymyksellä halutaan selvittää."}},
-    {id:"summary",phase:"Yhteenveto",kind:"summary",title:"Osaat rakentaa ensimmäisen alkuperäkeskustelun",
-     paragraphs:[
-      "Kertaa pari Woher kommst du? ja Ich komme aus Finnland. Verbin muodot ovat ich komme ja du kommst. Wo kysyy missä, woher mistä.",
-      "Kirjan neljä oikeaa C03-harjoitusta ja Teacherin itsenäiset vastaukset säilyvät eri näyttöinä samassa opiskelijakohtaisessa tallennuksessa. Vihjeellä ratkaistu vastaus ei ole itsenäinen näyttö.",
-      "L015:ssa luet toisen aidon neljän puheenvuoron keskustelun ja päät­telet kartan avulla, mistä paikkakunnista henkilöt tulevat. Sveitsin artikkelitaivutusta ei tässä edellytetty."
-     ]}
-  ]
+    {
+      id:"welcome",phase:"Johdanto",kind:"introduction",
+      title:"Opit nyt kysymään itse, mistä toinen on kotoisin",
+      paragraphs:[
+        "L012:ssa tutustuit maiden nimiin. L013:ssa tunnistit Lisan lähdetekstistä fraasin ich komme aus Deutschland. Nyt opetellaan muodostamaan ensimmäinen oma lähtömaakysymys ja vastaus.",
+        "Tämä on ensimmäinen aktiivinen kommen-verbin ja woher-kysymyksen kielioppituntisi. Harjoittelemme vain tuttuja ich- ja du-muotoja, emme vielä kohteliasta Sie-puhuttelua.",
+        "Kun lauseen osat ovat tutut, kirjoitat uusia vastauksia ja teet C03:n oikeat harjoitukset oppikirjassa.",
+      ],
+    },
+    {
+      id:"recall",phase:"Muistelu",kind:"question",
+      title:"Mikä kertoo alkuperän eikä nimeä?",
+      paragraphs:["Erota ensin kaksi aikaisemmin opittua sisältöä."],
+      question:{
+        type:"choice",skillId:"L1-INT-03",
+        prompt:"Mikä näistä tarkoittaa Saksaa?",
+        options:[
+          {id:"a",label:"Deutschland"},
+          {id:"b",label:"Finnland",wrongFeedback:"Finnland tarkoittaa Suomea."},
+          {id:"c",label:"Bern",wrongFeedback:"Bern on Sveitsissä sijaitseva kaupunki, ei Saksa."},
+        ],
+        correctOption:"a",success:"Oikein. Deutschland on Saksa. Se sopii kohta lähtömaavastaukseen.",
+        hint:"Maan nimi alkaa Deutsch-.",
+        reteach:"Deutschland = Saksa. Finnland = Suomi. Bern = kaupunki.",
+        genericWrong:"Kertaa L012:n maiden nimet.",
+      },
+    },
+    {
+      id:"purpose",phase:"Opettajan selitys",kind:"explanation",
+      title:"Miksi tarvitaan woher ja kommen?",
+      paragraphs:[
+        "Kun haluat tietää toisen nimen, kysyt Wie heißt du? Mutta jos haluat tietää, mistä hän on kotoisin, nimi ei riitä. Tarvitset uuden kysymyssanan woher, joka tarkoittaa mistä.",
+        "Kommen tarkoittaa perusmuodossaan tulla. Lause Ich komme aus Finnland. tarkoittaa tässä Olen kotoisin Suomesta. Suomen -sta/-stä ilmaistaan tässä saksan sanalla aus.",
+        "Saksan verbi muuttuu sen mukaan, puhutaanko minästä (ich) vai sinusta (du). Siksi et voi vaihtaa ich-sanaa du-sanaksi muuttamatta myös verbiä.",
+        "Tällä tunnilla aus liitetään tuttuihin maihin Finnland, Deutschland ja Österreich. Älä muodosta vielä aus der Schweiz -rakennetta. Sen kielioppia ei ole opetettu.",
+      ],
+      help:[
+        {title:"Selitä yksinkertaisemmin",body:"Woher = mistä. Kommst = tulet (sinä). Ich komme = minä tulen. Aus Finnland = Suomesta."},
+        {title:"Selitä vaihe vaiheelta",body:"1. Kysy mistä: Woher. 2. Valitse sinämuoto: kommst. 3. Lisää puhuttelu: du. Näin syntyy Woher kommst du? 4. Vastaa minämuodossa Ich komme aus Finnland."},
+        {title:"Näytä toinen esimerkki",body:"Woher kommst du? kysyy tutulta alkuperää. Vaihda vastauksessa maata: Ich komme aus Österreich. tarkoittaa Olen kotoisin Itävallasta."},
+        {title:"Miksi tätä käytetään?",body:"Nimi, kotimaa ja asuinpaikka ovat eri asioita. Woher kommst du? kertoo lähtöpaikan; Wie heißt du? kysyy nimen. Aus ilmaisee tässä Suomesta, Saksasta tai Itävallasta."},
+        {title:"Kertaa aiempi asia",body:"L012 opetti Finnland = Suomi, Deutschland = Saksa ja Österreich = Itävalta. L013 opetti tunnistamaan, että Lisa tulee Saksasta mutta asuu Bernissä."},
+        {title:"Näytä oppikirjan kohta",body:"Avaa tältä samalta tunnilta C03:n Kielioppi-linkki. Vertaa kirjan muotoja ich komme ja du kommst sekä tarkista woher-kysymyksen sanajärjestys."},
+      ],
+      bookLinks:[{label:"C03 · Kielioppi",chapterId:"03",section:"grammar",instruction:"Vertaa ich komme ja du kommst sekä Woher kommst du? -kysymyksen sanajärjestystä."}],
+    },
+    {
+      id:"verb-form",phase:"Kieliopin opetus",kind:"explanation",
+      title:"Näin muodostetaan oikea kommen-verbin muoto",
+      paragraphs:[
+        "Verbin sanakirjamuoto on kommen. Sen loppu on -en. Poista se: kommen → komm-. Tätä jäljelle jäävää osaa kutsutaan verbin vartaloksi.",
+        "Kun tekijä on ich eli minä, liitämme vartaloon -e: komm + e = komme. Kun tekijä on du eli sinä, liitämme -st: komm + st = kommst.",
+        "Näin syntyvät ich komme ja du kommst. Ne eivät ole mielivaltaisia muotoja: pääte muuttuu persoonan mukaan, kuten aiemmin ich heiße ja du heißt.",
+        "Virhe Ich kommst aus Finnland. sekoittaa minäpronominin ja sinämuodon. Oikea muoto on Ich komme aus Finnland. Virhe Du komme aus Finnland. korjataan muotoon Du kommst aus Finnland.",
+      ],
+      help:[
+        {title:"Vaihe vaiheelta: ich",body:"1) kommen 2) poista -en → komm 3) lisää ich-muodon -e → komme 4) Ich komme aus Finnland."},
+        {title:"Vaihe vaiheelta: du",body:"1) kommen 2) poista -en → komm 3) lisää du-muodon -st → kommst 4) Du kommst aus Finnland."},
+        {title:"Näytä toinen esimerkki",body:"Ich komme aus Deutschland. = Olen Saksasta. Du kommst aus Österreich. = Sinä olet Itävallasta."},
+      ],
+    },
+    {
+      id:"construction-board",phase:"Vaiheittainen opetustaulu",kind:"board",
+      title:"Rakenna kysymys ja vastaus osa osalta",
+      paragraphs:[
+        "Ensiksi vaihdamme tekijän mukaan verbin päätteen. Sen jälkeen sijoitamme sanat oikeaan järjestykseen.",
+        "Tavallisessa vastauksessa aloitetaan Ich ja seuraavaksi tulee komme. Kysymyksessä woher tulee alkuun, kommst sen jälkeen ja du verbin perään.",
+        "Seuraa vaiheita ja sulje malli ennen myöhempää itsenäistä vastausta.",
+      ],
+      board:[
+        {label:"1 · Verbin perusmuoto",german:"kommen",meaning:"Tulla; poista perusmuodon loppu -en."},
+        {label:"2 · Vartalo",german:"komm-",meaning:"Vartalo säilyy kummassakin persoonassa."},
+        {label:"3 · Minän pääte",german:"komm + e = komme",meaning:"Ich tarvitsee -e-päätteen."},
+        {label:"4 · Sinän pääte",german:"komm + st = kommst",meaning:"Du tarvitsee -st-päätteen."},
+        {label:"5 · Vastauksen alku",german:"Ich komme",meaning:"Ich ensin, taivutettu verbi toisena."},
+        {label:"6 · Lähtömaa",german:"Ich komme aus Finnland.",meaning:"Aus + Finnland ilmoittaa lähtöpaikan."},
+        {label:"7 · Kysymyssana",german:"Woher",meaning:"Mistä?" },
+        {label:"8 · Koko kysymys",german:"Woher kommst du?",meaning:"Kysymyssana + taivutettu verbi + du."},
+      ],
+    },
+    {
+      id:"stem-check",phase:"Välikysymys",kind:"question",
+      title:"Valitse oikea verbin pääte",
+      paragraphs:["Opettajan malli on vielä käytettävissä. Tässä tarkistetaan vain pääte, ei kaikkea lauserakennetta."],
+      question:{
+        type:"choice",skillId:"L1-GRA-01",
+        prompt:"Mitä tulee vartalon komm- perään, kun tekijä on du?",
+        options:[
+          {id:"a",label:"-e",wrongFeedback:"-e kuuluu tässä ich-muotoon: ich komme."},
+          {id:"b",label:"-st"},
+          {id:"c",label:"-en",wrongFeedback:"-en on perusmuodossa kommen, ei tässä opetetussa du-muodossa."},
+        ],
+        correctOption:"b",success:"Oikein. Komm + st = kommst.",
+        hint:"Muista aiempi du heißt: myös kommen tarvitsee du-muodon päätteen.",
+        reteach:"Ich komme mutta du kommst. Vartalo komm- ei muutu, pääte muuttuu.",
+        genericWrong:"Kertaa opetustaulun vaiheet 3 ja 4.",
+      },
+    },
+    {
+      id:"guided",phase:"Ohjattu harjoittelu",kind:"question",
+      title:"Täydennä vastaus mallin avulla",
+      paragraphs:["Näet aiemmin opetetun mallin. Valitse oikea minämuoto."],
+      question:{
+        type:"choice",skillId:"L1-GRA-01",
+        prompt:"Mikä sopii: Ich ___ aus Finnland.",
+        options:[
+          {id:"a",label:"komme"},
+          {id:"b",label:"kommst",wrongFeedback:"Kommst kuuluu du-muotoon, mutta lauseen tekijä on ich."},
+          {id:"c",label:"kommen",wrongFeedback:"Kommen on verbin perusmuoto. Ich tarvitsee taivutetun muodon komme."},
+        ],
+        correctOption:"a",success:"Oikein. Ich komme aus Finnland.",
+        hint:"Ich ottaa tässä päätteen -e.",
+        reteach:"Kommen → komm- → ich komme. Du kommst on toinen muoto.",
+        genericWrong:"Katso lauseen ensimmäinen sana ja valitse samaan persoonaan sopiva verbi.",
+      },
+    },
+    {
+      id:"word-order",phase:"Sanajärjestyksen opetus",kind:"explanation",
+      title:"Miksi kysymyksessä on Woher kommst du?",
+      paragraphs:[
+        "Vastaus on Ich komme aus Finnland. Sen ensimmäinen osa on tekijä ich, toinen on taivutettu verbi komme. Lopuksi tulee aus Finnland.",
+        "Kysymys Woher kommst du? alkaa sanalla woher, koska kysytään mistä. Sen jälkeen tulee du-muodon verbi kommst ja vasta sitten du. Kysymyssanan jälkeinen taivutettu verbi on siis tässä toisena osana.",
+        "Älä kirjoita Woher du kommst? tässä tavallisena itsenäisenä suorana kysymyksenä. Korjaa järjestys: Woher kommst du?",
+        "Wo wohnst du? kysyisi missä asut. Se ei tarkoita samaa kuin Woher kommst du? Tämä ero auttaa sinua välttämään Lisan lähtömaan sekoittamisen hänen asuinpaikkaansa.",
+      ],
+      help:[
+        {title:"Selitä vaihe vaiheelta",body:"1) Mitä kysytään? Mistä → Woher. 2) Keneltä? Sinulta → du. 3) Mikä verbimuoto? kommst. 4) Rakenna: Woher + kommst + du?"},
+        {title:"Miksi sanajärjestys muuttuu?",body:"Saksan suorassa woher-kysymyksessä kysymyssana on ensin ja taivutettu verbi heti sen jälkeen: Woher kommst du?"},
+      ],
+    },
+    {
+      id:"sentence-order-board",phase:"Interaktiivinen lauserakennustaulu",kind:"board",
+      title:"Rakenna woher-kysymys ja aus-vastaus",
+      paragraphs:[
+        "Käy vaiheet läpi järjestyksessä. Voit palata taaksepäin, toistaa esityksen tai näyttää koko lauseen. Erottele kysymyssana, taivutettu verbi, tekijä ja lähtömaa.",
+        "Tämä käyttää samaa determinististä Teacher-opetustaulua kuin verbin taivutus. Pelkkä esityksen katselu ei ole itsenäinen suoritusnäyttö.",
+      ],
+      board:[
+        {label:"1 · Tekijä",german:"du",meaning:"sinä: kysymys on suunnattu tutulle henkilölle"},
+        {label:"2 · Verbin sinämuoto",german:"du kommst",meaning:"kommen-verbin vartalo komm- ja pääte -st"},
+        {label:"3 · Mistä?",german:"Woher",meaning:"woher kysyy lähtöpaikkaa, ei nykyistä sijaintia"},
+        {label:"4 · Kysymys",german:"Woher + kommst + du?",meaning:"kysymyssana, verbi, tekijä"},
+        {label:"5 · Vastaus",german:"Ich komme aus Finnland.",meaning:"tekijä ich, verbin minämuoto komme, lähtömaata ilmaiseva aus"},
+        {label:"6 · Vertaa",german:"Wo wohnst du? ≠ Woher kommst du?",meaning:"wo kysyy missä, woher mistä"},
+      ],
+      help:[{title:"Miksi verbi on kysymyksessä toisena?",body:"Woher on kysymyssana. Sen jälkeen tulee taivutettu verbi kommst, ja vasta sen jälkeen du: Woher kommst du?"}],
+    },
+    {
+      id:"fixed-country-phrases",phase:"Tunnistettava lisäsanasto",kind:"explanation",
+      title:"Tunnista kaksi valmista maailmausta ennen kirjatehtäviä",
+      paragraphs:[
+        "Joidenkin maiden yhteydessä pelkkä aus ja maan nimi eivät riitä. Siksi oikea ilmaus on aus der Schweiz eli Sveitsistä. Yhdysvalloista puhuttaessa sanotaan aus den USA.",
+        "Opettele nämä tässä kokonaisina ilmauksina: aus der Schweiz ja aus den USA. Älä yritä vielä päätellä, miksi artikkeleissa on juuri der tai den. Niiden sijamuotosäännöt kuuluvat myöhempään kielioppiin.",
+        "C03:n kirjan tehtävissä 11 ja 12 sinun tarvitsee vain tunnistaa oikea valmis ilmaus vaihtoehdoista. Näitä rakenteita ei vaadita vielä muodostettaviksi itsenäisesti uutena taivutustehtävänä.",
+        "Vertaa tuttua lausetta Ich komme aus Finnland. valmiisiin ilmauksiin aus der Schweiz ja aus den USA. Molemmat kertovat lähtömaasta, mutta eri maiden kanssa käytetään eri kiinteää sanayhdistelmää.",
+      ],
+      help:[
+        {title:"Selitä yksinkertaisemmin",body:"Suomesta = aus Finnland, Sveitsistä = aus der Schweiz, Yhdysvalloista = aus den USA. Opettele nämä valmiina kokonaisuuksina."},
+        {title:"Miksi maan nimi saa erilaisia sanoja?",body:"Saksan kielessä eräillä maiden nimillä on artikkeli, jonka muoto riippuu rakenteesta. Nyt sinun ei tarvitse taivuttaa artikkelia itse, vaan tunnistaa kaksi opetettua ilmausta."},
+      ],
+    },
+    {
+      id:"textbook",phase:"Kirjan harjoittelu",kind:"book",
+      title:"Tee kirjan neljä alkuperäistä harjoitusta",
+      paragraphs:[
+        "Avaa C03:n Kielioppi. Vertaa ensin ich komme ja du kommst sekä kysymystä Woher kommst du?. Lue selitys, kunnes pystyt muodostamaan oman esimerkin.",
+        "Siirry C03:n Harjoittele-osioon. Tee oikeat kirjan harjoitukset C03-EX-06 (komme), C03-EX-07 (kommst), C03-EX-10 (aus) ja C03-EX-13 (kommst). Tunnista lisäksi kirjatehtävissä 11 ja 12 valmiit ilmaukset aus der Schweiz ja aus den USA; älä vielä taivuta niitä itse.",
+        "Vastaukset tallentuvat kirjan nykyiseen tehtäväjärjestelmään, eivät opettajan rinnakkaiseen vastauskantaan. Pelkkä sivun avaus ei täytä tehtäväehtoa; kirjan vastaukset tulee oikeasti kirjoittaa.",
+      ],
+      bookLinks:[
+        {label:"C03 · Kielioppi",chapterId:"03",section:"grammar",instruction:"Tarkista kommen-verbin ich- ja du-muoto sekä woher-kysymyksen rakenne."},
+        {label:"C03 · Harjoittele",chapterId:"03",section:"practice",instruction:"Kirjoita C03-EX-06, 07, 10 ja 13. Tarkista ne kirjassa."},
+      ],
+      activityId:"grammar-followed",activityLabel:"Kävin läpi kielioppimallin ja harjoittelin sitä",
+    },
+    {
+      id:"independent",phase:"Itsenäinen tuottaminen",kind:"question",
+      title:"Muodosta kysymys ilman näkyvää mallia",
+      paragraphs:["Sulje oppikirjan kielioppitaulu. Kirjoita nyt uusi kysymys kokonaan itse. Voit katsoa vihjeen tarvittaessa, mutta silloin vastaus ei ole itsenäinen näyttö."],
+      question:{
+        type:"text",skillId:"L1-INT-03",evidenceRole:"independent",
+        prompt:"Kirjoita saksaksi tutulle: Mistä olet kotoisin?",
+        accepted:["Woher kommst du?"],
+        success:"Oikein. Woher kommst du? on kokonainen suora kysymys.",
+        hint:"Woher ensin, sitten kommst, lopuksi du.",
+        reteach:"Kysymyssana woher + taivutettu verbi kommst + tekijä du: Woher kommst du?",
+        genericWrong:"Tarkista sekä kommst-muodon pääte että sanojen järjestys.",
+        wrongAnswers:{
+          "woher komme du":"Du-muoto on kommst, ei komme.",
+          "woher du kommst":"Suorassa kysymyksessä sanajärjestys on Woher kommst du?",
+          "wo kommst du":"Wo tarkoittaa missä, mutta lähtöpaikkaa kysytään woher-sanalla.",
+        },
+      },
+    },
+    {
+      id:"apply-model",phase:"Soveltamisen opetus",kind:"explanation",
+      title:"Vaihda lähtömaa mutta säilytä sääntö",
+      paragraphs:[
+        "Kysymys pysyy samana riippumatta siitä, tuleeko henkilö Suomesta vai Saksasta: Woher kommst du?",
+        "Kun vastaat omasta lähtöpaikastasi, alkuosa pysyy muodossa Ich komme aus. Vain lopun maa vaihtuu: Finnland, Deutschland tai Österreich.",
+        "Esimerkiksi Ich komme aus Deutschland. ja Ich komme aus Österreich. ovat oikein. Älä muodosta vielä Sveitsistä monimutkaisempaa aus der Schweiz -rakennetta omin päin.",
+        "Tässä harjoitellaan kuvitteellisia henkilöitä. Oikeaa nimeä, kotiosoitetta tai puhelinnumeroa ei tarvitse syöttää.",
+      ],
+    },
+    {
+      id:"application",phase:"Soveltaminen",kind:"question",
+      title:"Kerro uusi lähtömaa",
+      paragraphs:["Kuvitteellinen henkilö sanoo olevansa Itävallasta. Sinun tehtäväsi on muodostaa tutulla ich-muodolla itsenäinen vastaus."],
+      question:{
+        type:"text",skillId:"L1-INT-03",evidenceRole:"application",
+        prompt:"Kirjoita saksaksi: Olen kotoisin Itävallasta.",
+        accepted:["Ich komme aus Österreich."],
+        success:"Oikein. Ich komme aus Österreich. vaihtaa vain tutun maan nimen.",
+        hint:"Aloita Ich komme aus ja muista Itävallan Ö.",
+        reteach:"Minä = ich, tulen/olen kotoisin = komme, -sta = aus, Itävalta = Österreich.",
+        genericWrong:"Tarkista pronomini, kommen-verbin ich-pääte sekä maan nimi.",
+        wrongAnswers:{
+          "ich kommst aus österreich":"Ich tarvitsee komme, ei kommst.",
+          "ich komme österreich":"Lähtömaan edellä tarvitaan aus.",
+          "ich komme aus deutschland":"Deutschland on Saksa, mutta pyydettiin Itävaltaa.",
+        },
+      },
+    },
+    {
+      id:"exit",phase:"Lopputarkistus",kind:"question",
+      title:"Erota kysymys ja vastaus uudessa tilanteessa",
+      paragraphs:["Ystävä kysyy kuvitteellisen Ainon lähtömaata. Valitse jo opetettu oikea kysymys, älä kohteliasta Sie-muotoa."],
+      question:{
+        type:"choice",skillId:"L1-INT-03",evidenceRole:"exit",
+        prompt:"Mitä sanot tutulle, kun haluat kysyä hänen lähtömaansa?",
+        options:[
+          {id:"a",label:"Woher kommst du?"},
+          {id:"b",label:"Woher komme ich?",wrongFeedback:"Tämä kysyy mistä minä olen, ei mistä sinä olet."},
+          {id:"c",label:"Wie heißt du?",wrongFeedback:"Tämä kysyy nimeä, ei lähtömaata."},
+        ],
+        correctOption:"a",success:"Oikein. Woher kommst du? kysyy tutun lähtömaan.",
+        hint:"Tarvitset woher-sanan ja du-muodon kommst.",
+        reteach:"Woher = mistä, kommst = tulet, du = sinä. Kysymys: Woher kommst du?",
+        genericWrong:"Kysytään lähtömaata, ei nimeä eikä omaa alkuperää.",
+      },
+    },
+    {
+      id:"summary",phase:"Yhteenveto",kind:"summary",
+      title:"Nyt voit kysyä ja kertoa alkuperän",
+      paragraphs:[
+        "Opit, miten kommen → komm- → komme tai kommst. Ymmärrät suoran kysymyksen sanajärjestyksen Woher kommst du? ja vastauksen Ich komme aus Finnland.",
+        "Kirjan neljän harjoituksen vastaukset tallennetaan edelleen oppikirjaan. Ensimmäisellä yrityksellä ilman apua oikein ratkaistut opettajan uudet tehtävät näkyvät erillisenä itsenäisenä näyttönä; neuvoa saanut suoritus on harjoittelua.",
+        "L015:ssa tunnistetaan lähtöpaikkoja toisessa julkaistussa dialogissa ja tehdään niitä koskevat kirjan lähdetehtävät. Sie-muodon aktiivinen opetus ja aus der Schweiz -rakenteen itsenäinen taivuttaminen eivät kuulu tähän tuntiin. Valmiit aus der Schweiz ja aus den USA -ilmaukset on kuitenkin opetettu tunnistettaviksi kirjatehtäviä varten.",
+      ],
+    },
+  ],
 };

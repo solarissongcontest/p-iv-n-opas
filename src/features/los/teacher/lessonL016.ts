@@ -2,137 +2,214 @@ import { losExercisesFor } from "../exerciseBank.ts";
 import type { TeacherLesson } from "./engine.ts";
 
 /**
- * L016 · C03 completion uses the SAME 15-item chapter workbook test as the
- * textbook; Teacher never stores a second score, grants automatic mastery,
- * or marks an unsubmitted test complete.
+ * C03 L016 chapter review and EXISTING book exam.
+ * No extra exam table or duplicate answers; uses current chapter draft.
+ * A submitted test is evidence of participation, not proof of correctness,
+ * independent proficiency or delayed retention.
  */
 const C03_TEST_IDS = losExercisesFor("03").map(item => item.id);
 export const LOS1_L016_TEACHER: TeacherLesson = {
   id:"L016",bookId:1,chapterId:"03",version:"2.0.0-preview.1",
   title:"Harjoittele ja testaa C03",
-  objective:"Muodostan alkuperäkysymyksen ja vastauksen, ratkaisen C03:n oikean kappaletestin sekä kirjaan soveltavan tekstin ja rehellisen itsearvioinnin.",
+  objective:"Kertaan maiden nimet, alkuperäkysymyksen, kommen-verbin ich/du-muodot ja lähdetekstien paikat sekä palautan C03:n kirjan oman kappaletestin.",
   estimatedMinutes:30,
   requiredQuestionIds:["recall","guided","independent","application","exit"],
-  requiredActivityIds:["source-rehearsed"],
-  requiredPracticeIds:["C03-EX-01","C03-EX-02","C03-EX-09","C03-EX-15"],
+  requiredActivityIds:["source-review"],
+  requiredPracticeIds:[],
   chapterAssessment:{
     requiredTestIds:C03_TEST_IDS,
     requireApplicationDraft:true,
     minSelfAssessmentLength:15,
   },
   scenes:[
-    {id:"welcome",phase:"Aloitus",kind:"introduction",title:"Kappaleen 3 harjoittelu ja oikea testi",
-     paragraphs:[
-      "Olet tutustunut saksankielisiin maihin, lukenut Lisan keskustelun ja Thomasin ja Takashin Text B:n sekä muodostanut ensimmäiset woher-kysymykset.",
-      "Tänään palautat asioita muistista, harjoittelet ilman valmista ratkaisua ja teet oikean C03:n kappaletestin kirjassa. Teacher ei rakenna toista testiä tai muuta sen tuloksia.",
-      "Tunti voidaan merkitä läpikäydyksi vasta, kun olet vastannut ja oikeasti palauttanut kirjan kaikki 15 testiosatehtävää, kirjoittanut oman sovelluksen sekä itsearvioinnin.",
-      "Virheet eivät estä harjoittelun suorittamista. Tulos auttaa valitsemaan, mitä kannattaa kerrata. Aitoa kielitaitoa ei päätellä läpikäynnistä yksin."
-     ],help:[{title:"Miksi pitää palauttaa testi?",body:"Pelkkä testisivun avaaminen tai vastausten täyttäminen ei kerro, että palautit suorituksen. Palautuspäivä tallentuu kirjaan erikseen."}]},
-    {id:"recall",phase:"Aktivointi",kind:"question",title:"Mitä kysyt tutulta?",
-     paragraphs:["Palauta mieleen L014:n keskeinen kysymys ilman kirjaa."],
-     question:{type:"choice",skillId:"L1-INT-03",prompt:"Mikä kysyy mistä toinen on kotoisin?",
-      options:[{id:"a",label:"Wie heißt du?",wrongFeedback:"Tämä kysyy nimen."},
-       {id:"b",label:"Woher kommst du?"},{id:"c",label:"Wo wohnst du?",wrongFeedback:"Tämä kysyy, missä toinen asuu."}],
-      correctOption:"b",success:"Oikein. Woher kommst du? kysyy alkuperää.",
-      hint:"Mistä = woher.",reteach:"Woher kommst du? = Mistä olet kotoisin? Wo wohnst du? = Missä asut?",
-      genericWrong:"Erota alkuperä, nykyinen asuinpaikka ja nimi."}},
-    {id:"review",phase:"Opettajan kertaus",kind:"explanation",title:"Kolme rakennetta, yksi selkeä ero",
-     paragraphs:[
-      "Nimi: Ich heiße Mia. / Wie heißt du? Nämä kysyvät ja kertovat henkilön nimen, eivät alkuperää.",
-      "Alkuperä: Ich komme aus Finnland. / Woher kommst du? Näissä kommen-verbi muuttuu persoonan mukaan: ich komme, du kommst.",
-      "Asuinpaikka: Ich wohne in Bern. / Wo wohnst du? Näissä on kyse nykyisestä sijainnista eikä lähtömaasta.",
-      "Muista myös vieras teksti: Lisa sanoo tulevansa Saksasta ja asuvansa Bernissä. Thomas ja Peter kertovat tulevansa Berliinistä, Takashi Kiotosta."
-     ],help:[{title:"Mistä aloitan kertaamisen?",body:"Kysy itseltäsi yksi asia: onko tarkoitus selvittää nimi, lähtömaa vai asuinpaikka? Valitse vasta sitten wie, woher tai wo."}]},
-    {id:"board",phase:"Näytetty mallisuoritus",kind:"board",title:"Rakenna kolme eri vastausta",
-     paragraphs:["Paina Seuraava ja katso, miten kysymys määrää vastauksessa tarvittavan tiedon."],
-     board:[
-      {label:"1 · Nimi",german:"Wie heißt du? → Ich heiße Mia.",meaning:"kysymys ja vastaus nimestä"},
-      {label:"2 · Alkuperä",german:"Woher kommst du? → Ich komme aus Finnland.",meaning:"kysymys ja vastaus mistä"},
-      {label:"3 · Asuinpaikka",german:"Wo wohnst du? → Ich wohne in Bern.",meaning:"kysymys ja vastaus missä"},
-      {label:"4 · Väärä muoto",german:"Ich kommst aus Finnland. ✗",meaning:"ich ei saa du-persoonan -st-päätettä"},
-      {label:"5 · Korjattu muoto",german:"Ich komme aus Finnland. ✓",meaning:"ich → komme, aus → lähtömaa"}
-     ]},
-    {id:"guided",phase:"Ohjattu harjoittelu",kind:"question",title:"Kumman muodon valitset?",
-     paragraphs:["Voit vilkaista mallitaulua. Valitse du-persoonan muoto."],
-     question:{type:"choice",skillId:"L1-GRA-01",prompt:"Du ___ aus Deutschland.",
-      options:[{id:"a",label:"komme",wrongFeedback:"Komme on ich-muoto."},{id:"b",label:"kommst"},
-       {id:"c",label:"kommen",wrongFeedback:"Kommen on verbin perusmuoto, ei du-muoto."}],
-      correctOption:"b",success:"Oikein. Du kommst.",
-      hint:"Du lisää vartaloon -st.",
-      reteach:"Kommen → komm-; ich komme, du kommst.",
-      genericWrong:"Kertaa verbin persoona ja pääte."}},
-    {id:"practice",phase:"Kirjan harjoitukset",kind:"book",title:"Ratkaise neljä C03:n oikeaa harjoitusta",
-     paragraphs:[
-      "Avaa C03:n Harjoittele-osio. Tee C03-EX-01 (woher-kysymyksen merkitys), EX-02 (vastaus), EX-09 (kysymyksen sanajärjestys) ja EX-15 (väitelauseen sanajärjestys).",
-      "Yritä ensin ilman sanastoa. Tarkista sen jälkeen kirjasta ja lue selite, jos vastaus on väärin. Nämä ovat oikeita oppikirjaharjoituksia, eivät Teacherin kopioita.",
-      "Tehtävämerkinnät luetaan samaan käyttäjäkohtaiseen C03:n tallennukseen. Tehtävän avaus yksin ei riitä."
-     ],bookLinks:[{label:"C03 · Harjoittele",chapterId:"03",section:"practice",instruction:"Tee C03-EX-01, 02, 09 ja 15 omilla vastauksilla."}]},
-    {id:"independent",phase:"Itsenäinen harjoittelu",kind:"question",title:"Kirjoita kokonainen vastaus ilman mallia",
-     paragraphs:["Laita harjoitukset hetkeksi piiloon. Kuvitteellinen kysyjä haluaa tietää, mistä olet kotoisin. Lähtömaa on tässä Itävalta."],
-     question:{type:"text",skillId:"L1-INT-03",evidenceRole:"independent",prompt:"Kirjoita saksaksi: Olen kotoisin Itävallasta.",
-      accepted:["Ich komme aus Österreich."],
-      success:"Oikein. Ich komme aus Österreich.",
-      hint:"Aloita Ich komme, lisää aus ja kirjoita maa isolla Ö:llä.",
-      reteach:"Lähtömaa: ich + komme + aus + Österreich.",
-      genericWrong:"Tarkista ich-muoto, aus ja Itävallan kirjoitusasu.",
-      wrongAnswers:{"ich kommst aus österreich":"Kommst on du-muoto. Ich tarvitsee komme.","ich komme in österreich":"Lähtömaasta käytetään tässä aus, ei in.","ich komme aus deutschland":"Deutschland on Saksa, ei Itävalta."}}},
-    {id:"apply",phase:"Kirjan soveltamistehtävä",kind:"book",title:"Kirjoita oma lyhyt vuoropuhelu",
-     paragraphs:[
-      "Avaa C03:n Käytä saksaa -osio. Kirjoita siellä lyhyt kuvitteellinen kohtaaminen, jossa henkilö kysyy Woher kommst du? ja toinen vastaa Ich komme aus ... .",
-      "Voit käyttää nimiä Mia ja Leo sekä maita Finnland tai Deutschland. Älä kirjoita oikeita henkilötietoja tai yhteystietoja.",
-      "Tämä teksti tallentuu kirjan applicationDraft-kenttään. Teacher tarkistaa vain, että opiskelutyö on tallennettu. Vapaata kirjoittamista ei arvostella tekaistulla automaattisella pisteellä."
-     ],bookLinks:[{label:"C03 · Käytä saksaa",chapterId:"03",section:"apply",instruction:"Tallenna oma kuvitteellinen alkuperäkeskustelu."}]},
-    {id:"application",phase:"Soveltaminen",kind:"question",title:"Havaitse väärä tulkinta",
-     paragraphs:["Kuvitteellinen Leo sanoo Ich komme aus Deutschland. Hän ei kerro mitään siitä, missä nyt asuu."],
-     question:{type:"choice",skillId:"L1-INT-03",evidenceRole:"application",prompt:"Mikä seuraavista on ainoa varmasti oikea päätelmä?",
-      options:[{id:"a",label:"Leo on kotoisin Saksasta."},
-       {id:"b",label:"Leo asuu nyt Berliinissä.",wrongFeedback:"Kommen aus Deutschland ei ilmoita nykyistä kaupunkia."},
-       {id:"c",label:"Leon nimi on Deutschland.",wrongFeedback:"Deutschland on maa eikä henkilön nimi."}],
-      correctOption:"a",success:"Oikein. Aus Deutschland kertoo lähtömaan, ei nykyistä asuinpaikkaa.",
-      hint:"Erota alkuperä ja asuinpaikka.",
-      reteach:"Komme aus kertoo mistä; wohne in kertoo missä asun.",
-      genericWrong:"Teksti ei kerro Leon asuinpaikkaa."}},
-    {id:"source-replay",phase:"Lukemisen kertaus",kind:"activity",title:"Kertaa kahden lähdetekstin avainlauseet",
-     paragraphs:[
-      "Lue vielä muistinvaraisesti Lisan Ich komme aus Deutschland. ja Takashin Ich komme aus Kyoto. Vertaile, mistä kummassakin henkilö kertoo tulevansa.",
-      "Tarkista tarvittaessa Text A ja Text B kirjan kautta. Aitoa kuuntelua ei pidetä suoritettuna, ellet ole kuullut ja todennut äänitettä erikseen.",
-      "Vahvista vasta, kun olet tehnyt kertauksen. Tämä on oma merkintäsi, ei automaattinen kielitaidon arvio."
-     ],bookLinks:[{label:"C03 · Text A",chapterId:"03",section:"text",instruction:"Kertaa Lisan viimeinen repliikki."},
-      {label:"C03 · Text B",chapterId:"03",section:"text-b",instruction:"Kertaa Takashin viimeinen repliikki."}],
-     activityId:"source-rehearsed",activityLabel:"Kertaan molempien lähdetekstien alkuperäilmaukset"},
-    {id:"exam-intro",phase:"Kappaletestin ohje",kind:"explanation",title:"Näin oikea kappaletesti toimii",
-     paragraphs:[
-      "Kirjan C03:n Kappaletesti käyttää samaa 15 tehtävän harjoituspankkia koetilassa. Siellä ratkaisujen selitykset pysyvät piilossa, kunnes palautat testin.",
-      "Opetuspolun eteneminen vaatii, että testAnswers sisältää vastaukset kaikkiin 15 tehtävään ja testSubmittedAt on kelvollinen palautusaika. Pelkkä vastausten täyttäminen ei riitä.",
-      "Testin pistemäärän ei tarvitse olla täydellinen, jotta voit kirjata oppitunnin läpikäydyksi. Sen sijaan katso palautteen jälkeen, mitä todella osaat ja mitä pitää harjoitella.",
-      "Jos aloitat testin uusinnan, edellinen yritys arkistoidaan ja tämänhetkinen palautus poistuu näkyvistä. Uusi palautus tarvitaan tunnin keskeneräiseen suoritukseen."
-     ],help:[{title:"Pitääkö saada kaikki oikein?",body:"Ei. Testin palauttaminen osoittaa yrityksen, ei automaattisesti osaamista. Erilliset oikein vastatut itsenäiset tehtävät kirjataan omana näyttönään."}]},
-    {id:"exam",phase:"Kappaletesti",kind:"book",title:"Palauta kirjan oikea C03:n kappaletesti",
-     paragraphs:[
-      "Avaa C03:n Kappaletesti. Vastaa kaikkiin viiteentoista osatehtävään. Kun Palauta testi -painike aktivoituu, palauta testi todella.",
-      "Palaa Teacheriin ja tarkista, että tilassa näkyy 15/15 vastattu ja Palautettu. Pelkkä testin avaaminen tai kaikkien vaihtoehtojen valitseminen ei riitä.",
-      "Testin tulos sekä palautusaika tallentuvat nykyiseen C03:n käyttäjäkohtaiseen oppikirjaluonnokseen, eivät Teacherin keksimään toiseen kokeeseen."
-     ],bookLinks:[{label:"C03 · Kappaletesti",chapterId:"03",section:"test",instruction:"Täytä 15 tehtävää ja paina Palauta testi."}]},
-    {id:"reflection",phase:"Itsearviointi",kind:"book",title:"Kirjaa, mikä onnistui ja mitä kertaat",
-     paragraphs:[
-      "Palauttamisen jälkeen kirjan testisivulla avautuu itsearviointikenttä. Vastaa siellä suomeksi tai saksaksi: osasitko kysyä woher, käyttää ich komme ja du kommst sekä erottaa aus- ja in-rakenteet?",
-      "Kirjoita vähintään 15 merkkiä oikeaa omaa havaintoasi. Pituusraja varmistaa, että kenttään todella kirjoitettiin jotakin, mutta se ei arvioi tekstin laatua.",
-      "Voit harjoitella kysymyksen ääneen ilman nauhoitusta. Ääntämistä ei pisteytetä automaattisesti."
-     ],bookLinks:[{label:"C03 · Kappaletestin itsearviointi",chapterId:"03",section:"test",instruction:"Kirjoita mikä onnistui, mikä tuntui vaikealta ja mitä kertaa seuraavaksi."}]},
-    {id:"exit",phase:"Lopputarkistus",kind:"question",title:"Päätä sanajärjestys oikein",
-     paragraphs:["Vastaa ilman näkyvää taulua. Opitun mallin pitää toimia myös uudessa kysymyksessä."],
-     question:{type:"text",skillId:"L1-GRA-01",evidenceRole:"exit",prompt:"Järjestä sanat oikeaksi kysymykseksi: du / kommst / woher",
-      accepted:["Woher kommst du?"],
-      success:"Oikein. Kysymyssana + verbi + du.",
-      hint:"Aloita woher-sanalla.",
-      reteach:"Woher kommst du? = kysymyssana woher, taivutettu verbi kommst, tekijä du.",
-      genericWrong:"Tarkista kysymyssanan paikka ja kommst-muoto.",
-      wrongAnswers:{"woher du kommst":"Kysymyksessä kommst tulee ennen du-sanaa.","woher kommen du":"Du tarvitsee muodon kommst, ei kommen."}}},
-    {id:"summary",phase:"Yhteenveto",kind:"summary",title:"C03:n testi ja oma arviointi ovat osa opetuspolkua",
-     paragraphs:[
-      "Kertasit woher-, wo-, kommen- ja aus-rakenteet, vastasit Teacherin omiin tarkistuksiin ja harjoittelit oikeilla C03:n tehtävillä.",
-      "Tunnin valmistuminen vaatii oikean 15 tehtävän palautetun kappaletestin, kirjaan tallennetun oman sovelluksen ja itsearvioinnin. Pistemäärä ei muutu Teacherissa erilliseksi arvosanaksi.",
-      "Seuraavaksi C04:ssa opit käyttämään du- ja Sie-puhuttelua tilanteeseen sopivasti. Kieli- ja oikeushyväksyntä sekä oikeiden laitteiden testaus pysyvät avoimina, kunnes ne on todennettu."
-     ]}
-  ]
+    {
+      id:"welcome",phase:"Johdanto",kind:"introduction",
+      title:"Kokoa C03:n osaaminen ennen testiä",
+      paragraphs:[
+        "L012 opetti maiden nimet, L013 Lisan kahdeksan repliikkiä, L014 Woher kommst du? -kysymyksen ja L015 toisen alkuperäisen keskustelun lähtöpaikat.",
+        "Tässä tunnissa ei opeteta uusia kielioppirakenteita kesken testin. Ensin muistelet opittua, harjoittelet ja kirjoitat uuden esimerkin. Vasta sen jälkeen palautat kirjan oikean C03-kappaletestin.",
+        "Testi tallentuu samaan kappaleen nykyiseen kirjatilaan. Opettajan suoritusmerkintä ei ole automaattinen osaamisarvosana.",
+      ],
+    },
+    {
+      id:"recall",phase:"Muistelu",kind:"question",
+      title:"Mistä Lisa on kotoisin?",
+      paragraphs:["Kertaa L013:n lähtömaa ilman Text A:n näkyvää vastausta."],
+      question:{
+        type:"choice",skillId:"L1-READ-01",
+        prompt:"Minkä maan Lisa ilmoittaa lähtömaakseen?",
+        options:[
+          {id:"a",label:"Deutschland"},
+          {id:"b",label:"Österreich",wrongFeedback:"Lisa kieltää tulevansa Itävallasta."},
+          {id:"c",label:"die Schweiz",wrongFeedback:"Lisa asuu Bernissä Sveitsissä, mutta kertoo olevansa kotoisin Saksasta."},
+        ],
+        correctOption:"a",success:"Oikein. Lisa sanoo Ich komme aus Deutschland.",
+        hint:"Kertaa Lisan viimeinen puheenvuoro.",
+        reteach:"Deutschland on Lisa Müllerin lähtömaa; Bern on hänen asuinkaupunkinsa.",
+        genericWrong:"Tarkista, kysyttiinkö alkuperää vai asumista.",
+      },
+    },
+    {
+      id:"review-board",phase:"Opetettu kertausmalli",kind:"board",
+      title:"Kertaa kuusi tuttua esimerkkiä",
+      paragraphs:[
+        "Aloita nimistä ja etene vasta sitten kielioppirakenteeseen. Tunnistat jokaisessa vaiheessa sekä merkityksen että sanajärjestyksen.",
+        "Taulu on kertaus, ei koetilanne. Kun aloitat varsinaisen testin, sulje malli.",
+      ],
+      board:[
+        {label:"1 · Suomi",german:"Finnland",meaning:"Maa; isolla alkukirjaimella."},
+        {label:"2 · Saksa",german:"Deutschland",meaning:"Maa; Lisa on kotoisin sieltä."},
+        {label:"3 · Itävalta",german:"Österreich",meaning:"Maa; alussa iso Ö."},
+        {label:"4 · Minämuoto",german:"Ich komme aus Finnland.",meaning:"Komme on ich-muoto."},
+        {label:"5 · Sinämuoto",german:"Du kommst aus Deutschland.",meaning:"Kommst on du-muoto."},
+        {label:"6 · Kysymys",german:"Woher kommst du?",meaning:"Woher + taivutettu verbi + du."},
+        {label:"7 · Lähdetekstin paikka",german:"Ich wohne hier in Bern.",meaning:"Asuinkaupunki, ei lähtömaa."},
+      ],
+    },
+    {
+      id:"guided",phase:"Ohjattu kertaus",kind:"question",
+      title:"Korjaa verbin persoonamuoto",
+      paragraphs:["Mieti pronominia ennen verbin loppua. Tämä on vielä opettajan tukema harjoitus."],
+      question:{
+        type:"choice",skillId:"L1-GRA-01",
+        prompt:"Mikä on oikea lause?",
+        options:[
+          {id:"a",label:"Ich kommst aus Finnland.",wrongFeedback:"Ich ei saa du-muodon -st-päätettä."},
+          {id:"b",label:"Ich komme aus Finnland."},
+          {id:"c",label:"Ich kommen aus Finnland.",wrongFeedback:"Kommen on perusmuoto, kun taas ich tarvitsee komme-muodon."},
+        ],
+        correctOption:"b",success:"Oikein. Ich + komme muodostavat oikean parin.",
+        hint:"Poista kommen-sanasta -en ja lisää ich-muodon -e.",
+        reteach:"Kommen → komm-; ich komme, du kommst. Lauseessa on ich.",
+        genericWrong:"Tarkista, että verbi vastaa tekijää.",
+      },
+    },
+    {
+      id:"text-review",phase:"Tekstien kertaus",kind:"book",
+      title:"Vertaile Text A:n ja Text B:n paikkatiedot",
+      paragraphs:[
+        "Avaa Lisa Müllerin Text A ja lue viimeinen puheenvuoro. Vertaa lähtömaata ja asuinkaupunkia.",
+        "Avaa sitten Thomasin ja Takashin Text B ja tarkista, mistä he kertovat tulevansa. Text B:n ihmisäänite on valinnainen, eikä sitä esitetä hyväksyttynä kuuntelukokeena.",
+        "Näiden kahden alkuperäisaineiston omat kysymykset pysyvät kirjassa. Älä sekoita niihin nyt palautettavaa kappaletestiä.",
+      ],
+      bookLinks:[
+        {label:"C03 · Text A",chapterId:"03",section:"text",instruction:"Muista Lisan lähtömaa ja asuinkaupunki."},
+        {label:"C03 · Text B",chapterId:"03",section:"text-b",instruction:"Muista Thomasin, Peterin ja Takashin paikat."},
+      ],
+      activityId:"source-review",activityLabel:"Kertasin kahden lähdetekstin paikkatiedot",
+    },
+    {
+      id:"difference",phase:"Virhekohtainen kertaus",kind:"explanation",
+      title:"Kolme yleistä sekaannusta",
+      paragraphs:[
+        "Ensimmäinen virhe: Woher ja wo sekoitetaan. Woher kommst du? kysyy lähtöpaikkaa. Wo wohnen Sie? kysyy tässä asuinpaikkaa, mutta Sie-muotoa ei tarvitse vielä itse taivuttaa.",
+        "Toinen virhe: ich kommst tai du komme. Tekijä määrää verbin päätteen: ich komme mutta du kommst.",
+        "Kolmas virhe: tekstissä näkyvä Bern tulkitaan Lisan lähtömaaksi. Oikea tieto on Deutschland; Bern on hänen nykyinen asuinkaupunkinsa.",
+        "Nämä kertaukset ovat opiskelutukea. Itsenäinen koevastaus tehdään vasta, kun malli on suljettu.",
+      ],
+      help:[
+        {title:"Kertaa yksi sääntö",body:"Ich komme, du kommst. Woher kommst du? Ich komme aus Finnland."},
+        {title:"Miksi asuinpaikka ja lähtömaa eroavat?",body:"Ihminen voi asua eri paikassa kuin mistä hän on kotoisin. Lisa on Saksasta mutta asuu Bernissä."},
+      ],
+    },
+    {
+      id:"independent",phase:"Itsenäinen kertaustehtävä",kind:"question",
+      title:"Kirjoita oikea kysymys muistista",
+      paragraphs:["Sulje kertausmalli ja kirjoita tutulle osoitettu kysymys itsenäisesti."],
+      question:{
+        type:"text",skillId:"L1-INT-03",evidenceRole:"independent",
+        prompt:"Kirjoita saksaksi: Mistä olet kotoisin? (sinuttelu)",
+        accepted:["Woher kommst du?"],
+        success:"Oikein. Woher kommst du? on tutulle esitetty alkuperäkysymys.",
+        hint:"Woher ensin, kommst toisena, du lopuksi.",
+        reteach:"Woher + kommst + du? Kysymyssanan jälkeen tulee verbi.",
+        genericWrong:"Tarkista woher, du-muodon -st ja sanajärjestys.",
+        wrongAnswers:{"woher komme du":"Du tarvitsee kommst.","woher du kommst":"Suorassa kysymyksessä verbi tulee heti woher-sanan jälkeen."},
+      },
+    },
+    {
+      id:"application",phase:"Uusi soveltamistilanne",kind:"question",
+      title:"Esittäydy ja kerro lähtömaa",
+      paragraphs:["Kuvitteellisen henkilön nimi on Mia, ja hän on Saksasta. Valitse kaksi opetettua lausetta oikeassa merkityksessä."],
+      question:{
+        type:"choice",skillId:"L1-INT-03",evidenceRole:"application",
+        prompt:"Mikä pari kertoo ensin Mian nimen ja sitten hänen lähtömaansa?",
+        options:[
+          {id:"a",label:"Ich heiße Mia. Ich komme aus Deutschland."},
+          {id:"b",label:"Du heißt Mia. Ich komme aus Deutschland.",wrongFeedback:"Ensimmäisen lauseen on kerrottava puhujan oma nimi, joten tarvitaan ich."},
+          {id:"c",label:"Ich heiße Mia. Ich kommst aus Deutschland.",wrongFeedback:"Ich tarvitsee komme-muodon, ei kommst."},
+        ],
+        correctOption:"a",success:"Oikein. Ensimmäinen lause esittelee, toinen kertoo alkuperän.",
+        hint:"Oma nimi alkaa Ich heiße ja oma lähtömaa Ich komme aus.",
+        reteach:"Ich heiße Mia. = Nimeni on Mia. Ich komme aus Deutschland. = Olen Saksasta.",
+        genericWrong:"Etsi molempiin lauseisiin ich-pronominille sopivat verbimuodot.",
+      },
+    },
+    {
+      id:"application-book",phase:"Oma soveltava kirjoitus",kind:"book",
+      title:"Kirjoita oma lyhyt esittely kirjan tehtäväkenttään",
+      paragraphs:[
+        "Avaa C03:n Käytä saksaa. Kirjoita kaksi lyhyttä lausetta kuvitteellisesta itsestäsi. Voit käyttää esimerkiksi nimeä Mia ja maata Finnland, mutta muodosta lauseet itse.",
+        "Soveltamisteksti tallennetaan kirjan omaan applicationDraft-kenttään. Sitä ei arvioida automaattisesti hyvän saksan arvosanaksi.",
+        "Tämä on testistä erillinen työ. Pelkkä kappaletestin palautus ei kirjoita puolestasi soveltamistekstiä.",
+      ],
+      bookLinks:[{label:"C03 · Käytä saksaa",chapterId:"03",section:"apply",instruction:"Tallenna vähintään kaksi omaa harjoituslausetta kuvitteellisilla henkilötiedoilla."}],
+    },
+    {
+      id:"pre-exam",phase:"Koeohje",kind:"explanation",
+      title:"Koetehtävät osoittavat, mitä muistat ilman apua",
+      paragraphs:[
+        "C03:n kappaletestissä näkyvät kirjan omat osatehtävät. Ne on tehtävä kirjan varsinaisessa testissä, ei opetustilassa itse keksityllä lomakkeella.",
+        "Tee vastaukset itsenäisesti. Jos jokin ei onnistu, voit palata opetukseen, mutta se ei automaattisesti todista samaa asiaa hallituksi.",
+        "Vasta kun olet antanut vastauksesi, palauta testi kirjan omalla Palauta testi -toiminnolla. Katsottu tai keskeneräinen testi ei ole palautettu testi.",
+      ],
+    },
+    {
+      id:"exam",phase:"Kappaletesti",kind:"book",
+      title:"Palauta C03:n oikea kappaletesti",
+      paragraphs:[
+        "Avaa C03:n Kappaletesti. Tee kaikki vaaditut osatehtävät ja paina Palauta testi. Opetusmoottori käyttää kirjan omaa palautusaikaa sekä vastauksia.",
+        "Testin palautus on työskentelyn näyttö. Se ei tarkoita automaattisesti, että jokainen vastaus olisi oikein eikä korvaa kielitaidon myöhempää vahvistusta.",
+        "Tässä tunnissa ei anneta uutta kielioppia kesken testin eikä lasketa äänen puuttumisesta keksittyjä kuuntelupisteitä.",
+      ],
+      bookLinks:[{label:"C03 · Kappaletesti",chapterId:"03",section:"test",instruction:"Täytä ja palauta nykyisen kirjan kaikki C03-testitehtävät."}],
+    },
+    {
+      id:"reflection",phase:"Itsearviointi",kind:"book",
+      title:"Kirjaa havainto onnistumisesta ja harjoittelutarpeesta",
+      paragraphs:[
+        "Kirjoita kappaletestin itsearviointikenttään, osaatko erottaa ich komme ja du kommst sekä maan ja kaupungin. Kerro myös yksi asia, jota haluat kerrata.",
+        "Kirjaa omia havaintojasi. Pituusvaatimus varmistaa, että vastaus on todella kirjoitettu, mutta se ei tarkoita tiettyä CEFR-tasoa.",
+        "Opettajan tila tarkistaa, että testi on palautettu, soveltamisteksti löytyy ja itsearviointi on tallennettu. Se ei keksi puuttuvia suorituksia.",
+      ],
+      bookLinks:[{label:"C03 · Testin itsearviointi",chapterId:"03",section:"test",instruction:"Kirjaa osaaminen ja kertaustarve."}],
+    },
+    {
+      id:"exit",phase:"Lopputarkistus",kind:"question",
+      title:"Tunnista lähtöpaikkakysymys",
+      paragraphs:["Vastaa yhdellä tutulla ilmauksella. Tämä on opettajan pieni lopputarkistus, ei uusi kappalekoe."],
+      question:{
+        type:"choice",skillId:"L1-INT-03",evidenceRole:"exit",
+        prompt:"Millä kysymyksellä tiedustelet tutulta hänen lähtöpaikkaansa?",
+        options:[
+          {id:"a",label:"Wie heißt du?",wrongFeedback:"Tämä kysyy nimeä."},
+          {id:"b",label:"Woher kommst du?"},
+          {id:"c",label:"Wie geht's?",wrongFeedback:"Tämä kysyy kuulumisia."},
+        ],
+        correctOption:"b",success:"Oikein. Woher kommst du? kysyy lähtöpaikkaa.",
+        hint:"Muista mistä = woher.",
+        reteach:"Woher kommst du? = Mistä olet kotoisin?",
+        genericWrong:"Valitse kysymys, jossa on woher.",
+      },
+    },
+    {
+      id:"summary",phase:"Yhteenveto",kind:"summary",
+      title:"C03:n opetus ja koe ovat eri suorituksia",
+      paragraphs:[
+        "Kertasit maiden nimet, woher-kysymyksen ja kommen-verbin ich/du-muodot sekä kahden autenttisen tekstin paikkatiedot.",
+        "Tunti voidaan merkitä käsitellyksi vain oikeiden opiskelutoimintojen, talletetun soveltamistekstin, palautetun kappaletestin ja itsearvioinnin jälkeen. Varsinainen osaaminen ja myöhempi muistaminen tarkistetaan erikseen.",
+        "Seuraava L017 aloittaa C04:n sinuttelun ja kohteliaan puhuttelun. L016 ei edellytä vielä uuden Sie-kieliopin itsenäistä tuottamista.",
+      ],
+    },
+  ],
 };
