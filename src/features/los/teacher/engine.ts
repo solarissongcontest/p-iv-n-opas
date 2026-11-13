@@ -18,13 +18,15 @@ export type TeacherQuestion = {
 };
 export type TeacherBookLink = { label: string; chapterId: string; section: string; instruction: string };
 export type TeacherBoardStep = { label: string; german: string; meaning: string };
+export type TeacherReflection = { prompt: string; placeholder: string; minLength: number };
 export type TeacherScene = {
   id: string;
   phase: string;
   title: string;
-  kind: "introduction" | "explanation" | "board" | "question" | "book" | "activity" | "summary";
+  kind: "introduction" | "explanation" | "board" | "question" | "book" | "activity" | "reflection" | "summary";
   paragraphs: readonly string[];
   question?: TeacherQuestion;
+  reflection?: TeacherReflection;
   board?: readonly TeacherBoardStep[];
   bookLinks?: readonly TeacherBookLink[];
   activityId?: string;
@@ -182,6 +184,8 @@ export function teacherWrongFeedback(scene: TeacherScene, answer: string): strin
 export function teacherCanFinish(session: TeacherSession, lesson: TeacherLesson,
   practiceAnswers: Readonly<Record<string, string>>): boolean {
   return lesson.scenes.every(scene => session.visitedIds.includes(scene.id)) &&
+    lesson.scenes.every(scene => !scene.reflection ||
+      (session.draftAnswers[scene.id]?.trim().length ?? 0) >= scene.reflection.minLength) &&
     lesson.requiredQuestionIds.every(id => session.attempts.some(item => item.sceneId === id)) &&
     lesson.requiredActivityIds.every(id => session.activityIds.includes(id)) &&
     lesson.requiredPracticeIds.every(id => Boolean(practiceAnswers[id]?.trim()));
