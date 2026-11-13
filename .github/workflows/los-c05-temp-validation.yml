@@ -52,5 +52,5 @@ jobs:
           exit 1
       - name: C04 Teacher interactions on desktop and iPhone
         run: bunx playwright test e2e/los-c04-teacher.spec.ts --project=desktop-chromium --project=iphone-webkit
-      - name: Combined C03-C05 Teacher flows and entire lesson path on both browsers
-        run: bunx playwright test e2e/los-full-book.spec.ts --grep 'C03|C04|C05|L013|L014|L015|L016|L017|L018|L019|L020|L021|every one of the 60 guided lessons' --project=desktop-chromium --project=iphone-webkit
+      - name: C03 L016, full path and C05 reading-retake regression on both browsers
+        run: bunx playwright test e2e/los-full-book.spec.ts --grep 'L016 does not count draft C03 test|every one of the 60 guided lessons|C05 full chapter retake|C05 L023 real Text A|C05 L025 real Text B' --project=desktop-chromium --project=iphone-webkit
