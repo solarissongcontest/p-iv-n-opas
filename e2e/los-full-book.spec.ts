@@ -121,7 +121,7 @@ test("every one of the 60 guided lessons opens from its actual chapter picker on
    expect(seen.has(title)).toBe(false);
    seen.add(title);
    await button.click();
-   if(Number(title.slice(1))<=9){
+   if(Number(title.slice(1))<=10){
     await expect(page).toHaveURL(new RegExp("/los-lessons/"+title+"$"));
     await expect(page.locator(".los-teacher-paper h2")).toBeVisible();
     await expect(page.locator(".los-teacher-sidebar h1")).toBeVisible();
@@ -953,6 +953,33 @@ test("L009 grammar lesson uses the four real C02 verb answers across book and Te
   await expect(paper).toContainText(id+": Vastaus tallennettu ja tarvittaessa tarkistettu");
  }
  await outline.filter({hasText:"Osaat nyt kaksi minä–sinämuotoparia"}).click();
+ await expect(page.getByRole("button",{name:"Merkitse oppitunti läpikäydyksi"})).toBeDisabled();
+ await expectNoHorizontalOverflow(page);
+});
+
+test("L010 uses the actual C02 Text B answer checks, never a parallel listening score",async({page})=>{
+ await enterLocalBook(page);
+ await page.goto("/los-lessons/L010",{waitUntil:"domcontentloaded"});
+ await expect(page.locator(".los-teacher-sidebar h1")).toContainText("Kuuntele ja esittele henkilö");
+ const outline=page.locator(".los-teacher-outline nav button");
+ await outline.filter({hasText:"Tee ja tarkista kaksi Text B:n ymmärtämiskysymystä"}).click();
+ const paper=page.locator(".los-teacher-paper");
+ await expect(paper).toContainText("C02-MCOM02-Q01: Vastaus vielä puuttuu");
+ const link=page.getByRole("link",{name:/Avaa kirjassa/}).first();
+ await expect(link).toHaveAttribute("href",/lessonReturn=L010.*\/02\/text-b/);
+ await page.goto("/los?lessonReturn=L010#/1/02/text-b",{waitUntil:"domcontentloaded"});
+ const questions=page.locator(".los-secondary-source .los-c01-question");
+ await expect(questions).toHaveCount(4);
+ await questions.nth(0).locator('input[value="a"]').check();
+ await questions.nth(0).getByRole("button",{name:"Tarkista vastaus"}).click();
+ await questions.nth(1).locator('input[value="b"]').check();
+ await questions.nth(1).getByRole("button",{name:"Tarkista vastaus"}).click();
+ await page.getByRole("link",{name:"Palaa oppitunnille L010"}).click();
+ await expect(page).toHaveURL(/\/los-lessons\/L010$/);
+ await outline.filter({hasText:"Tee ja tarkista kaksi Text B:n ymmärtämiskysymystä"}).click();
+ await expect(paper).toContainText("C02-MCOM02-Q01: Vastaus tallennettu ja tarvittaessa tarkistettu");
+ await expect(paper).toContainText("C02-MCOM02-Q02: Vastaus tallennettu ja tarvittaessa tarkistettu");
+ await outline.filter({hasText:"Osaat tunnistaa kaksi esittäytymistapaa"}).click();
  await expect(page.getByRole("button",{name:"Merkitse oppitunti läpikäydyksi"})).toBeDisabled();
  await expectNoHorizontalOverflow(page);
 });
