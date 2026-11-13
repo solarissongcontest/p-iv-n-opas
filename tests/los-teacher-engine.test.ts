@@ -50,8 +50,12 @@ test("first correct attempt gives independent evidence; hints and retries do not
   assert.equal(independentTeacherEvidence(s, lesson), 1);
   s = revealTeacherSolution(s, "independent", now);
   s = setTeacherAnswerDraft(s, "independent", "Guten Abend!", now);
+  const attemptsBeforeModel = s.attempts.length;
   s = submitTeacherAnswer(s, lesson, "independent", "Guten Abend!", now);
-  assert.equal(teacherLatestAttempt(s, "independent"), undefined, "revealed model must block later answer submission");
+  // Model-revealed answers cannot be submitted or inflate independent evidence.
+  assert.equal(s.attempts.length, attemptsBeforeModel);
+  assert.equal(teacherLatestAttempt(s, "independent"), undefined);
+  assert.equal(independentTeacherEvidence(s, lesson), 1);
 });
 
 test("opening book or skipping questions cannot finish and never creates practice answers", () => {
