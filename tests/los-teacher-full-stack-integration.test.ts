@@ -162,3 +162,32 @@ test("L033 feedback respects the answer direction for every numeric checkpoint",
     assert.match(scene.question!.reteach,/ei (?:ole|käytetä) und/);
   }
 });
+
+
+test("L035 review and chapter test feedback stays specific to the requested answer",()=>{
+  const lesson=getLosTeacherLesson("L035");
+  assert.ok(lesson);
+  const cases=[
+    {id:"recall",prompt:"Kirjoita numeroin: zwölf",answer:"12",marker:"Zwölf",word:"numeromerkintä"},
+    {id:"write-17",prompt:"Kirjoita saksaksi: 17",answer:"siebzehn",marker:"siebzehn",word:"sieben"},
+    {id:"write-32",prompt:"Kirjoita saksaksi: 32",answer:"zweiunddreißig",marker:"dreißig",word:"ß"},
+    {id:"application",prompt:"Kirjoita saksaksi täydellinen lause: Olen 20-vuotias.",answer:"Ich bin zwanzig Jahre alt.",marker:"Ich bin",word:"bin"},
+    {id:"exit",prompt:"Kirjoita saksaksi: 30",answer:"dreißig",marker:"dreißig",word:"tasakymmen"},
+  ] as const;
+  for(const {id,prompt,answer,marker,word} of cases){
+    const scene=lesson.scenes.find(item=>item.id===id);
+    assert.ok(scene?.question,id+" needs a real question");
+    assert.equal(scene.question.prompt,prompt);
+    assert.deepEqual(scene.question.accepted,[answer],"Existing answer key may not change");
+    const feedback=[scene.question.success,scene.question.hint,scene.question.reteach,scene.question.genericWrong].join(" ");
+    assert.ok(feedback.toLocaleLowerCase("fi").includes(marker.toLocaleLowerCase("fi")),id+" must explain the target word");
+    assert.ok(feedback.toLocaleLowerCase("fi").includes(word.toLocaleLowerCase("fi")),id+" must give task-relevant guidance");
+    assert.ok(!scene.question.hint.includes("Muista ikäfraasin bin ja lukujen yksiköt"),id+" must not have unrelated generic hint");
+    assert.ok(!scene.question.reteach.includes("Kolmekymmentä on dreißig."),id+" must not have unrelated copy/paste reteach");
+  }
+  const numberAnswer=lesson.scenes.find(item=>item.id==="recall")!.question!;
+  assert.match(numberAnswer.genericWrong,/numeroa|numeromerkintää/);
+  const age=lesson.scenes.find(item=>item.id==="application")!.question!;
+  assert.match(age.reteach,/Ich bin zwanzig Jahre alt/);
+  assert.ok(!age.hint.includes("und"),"The number twenty contains no und");
+});
