@@ -106,7 +106,7 @@ test("C01 real original token highlight, C08 gated video and responsive exercise
 
 
 test("every one of the 60 guided lessons opens from its actual chapter picker on iPhone and desktop",async({page})=>{
- test.setTimeout(180_000); // The full 60-lesson navigation stress test exceeds the default 60s on emulated mobile WebKit.
+ test.setTimeout(540_000); // Visit all 60 Teacher routes with real book return on both emulated mobile and desktop; slow CI needs headroom.
  await enterLocalBook(page);
  await page.goto("/los#/1/path",{waitUntil:"domcontentloaded"});
  const runner=page.locator("#los-lesson-runner");
