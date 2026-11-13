@@ -90,3 +90,10 @@ test("all required workbook task IDs refer to real, unique book exercises",()=>{
   }
   assert.deepEqual(missing,[],"A required task must exist; otherwise the guided lesson cannot be completed");
 });
+
+test("C03 fallback comprehension prompts refer to the active Lisa source, not the retired Berna text",()=>{
+  const fallback=readFileSync("src/features/los/LosSupplementalSections.tsx","utf8");
+  assert.ok(fallback.includes("Mistä maasta Lisa sanoo olevansa kotoisin?"));
+  assert.ok(fallback.includes("Missä kaupungissa Lisa kertoo asuvansa?"));
+  assert.ok(!fallback.includes("Mistä maasta Berna sanoo olevansa kotoisin?"));
+});
