@@ -399,3 +399,30 @@ test("L057 review instructions match both accepted greeting punctuation variants
   assert.match(transfer.question.genericWrong,/Sisällytä tervehdys, nimi ja lähtömaa/);
   assert.deepEqual(validateTeacherLesson(lesson),[]);
 });
+
+
+test("every LOS 1 lesson stages instruction or source reading before scored application",()=>{
+  const missingFoundation:string[]=[];
+  const badBoundaries:string[]=[];
+  for(let i=1;i<=60;i++){
+    const id="L"+String(i).padStart(3,"0");
+    const lesson=getLosTeacherLesson(id);
+    assert.ok(lesson);
+    if(lesson.scenes[0]?.kind!=="introduction")badBoundaries.push(id+" must begin with an introduction");
+    if(lesson.scenes.at(-1)?.kind!=="summary")badBoundaries.push(id+" must end with a summary");
+    let taught=false;
+    for(const scene of lesson.scenes){
+      if(["explanation","board","book","source"].includes(scene.kind))taught=true;
+      if(["independent","application","exit"].includes(scene.question?.evidenceRole??"") && !taught)
+        missingFoundation.push(id+"/"+scene.id+" has no earlier model, teaching or original text");
+    }
+  }
+  assert.deepEqual(badBoundaries,[],"Every session needs a clear beginning and summary");
+  assert.deepEqual(missingFoundation,[],"Do not grade transfer before showing any relevant material");
+});
+
+test("Teacher 2.0 chooses the actual lesson chapter for every learning illustration",()=>{
+  const teacher=readFileSync("src/features/los/teacher/LosTeacherPlayer.tsx","utf8");
+  assert.ok(teacher.includes('<Los1ChapterImage chapterId={lesson.chapterId} variant="learning"/>'));
+  assert.ok(!teacher.includes('<Los1ChapterImage chapterId="09" variant="learning"/>'));
+});
