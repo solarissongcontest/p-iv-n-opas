@@ -3,7 +3,7 @@ import {strict as assert} from "node:assert";
 import {TEACHER_L004} from "../src/features/los/teacher/content/l004.ts";
 import {initialTeacherProgress,validTeacherProgress,validTeacherLesson,selectTeacherScene,
  hintTeacher,answerTeacher,revealTeacher,pauseTeacher,teacherEvidence,
- teacherCanComplete,finishTeacher,openTeacherHelp,answerTeacherWritten,revealTeacherWritten} from "../src/features/los/teacher/core.ts";
+ teacherCanComplete,teacherCurrentCompletion,finishTeacher,openTeacherHelp,answerTeacherWritten,revealTeacherWritten} from "../src/features/los/teacher/core.ts";
 const at="2026-11-12T21:00:00Z";
 import {emptyLosLessonProgress,losLessonFinishTeacher} from "../src/features/los/lessonEngine.ts";
 test("L004 has full scripted teaching, not a generic task list",()=>{
@@ -144,4 +144,36 @@ test("old stored states without help remain valid; malformed option selections a
  assert.equal(validTeacherProgress({...state,helpSelections:{independent:"compare"}}),true);
  assert.equal(validTeacherProgress({...state,helpSelections:{independent:999}}),false);
  assert.equal(validTeacherProgress({...state,helpSelections:Array(40).fill("foo")}),false);
+});
+
+test("historical L004 teacher completion is not updated without new writing",()=>{
+ const previous="2026-11-12T12:15:00Z";
+ let old={...initialTeacherProgress(TEACHER_L004),completedAt:previous};
+ for(const scene of TEACHER_L004.scenes){
+  old=selectTeacherScene(TEACHER_L004,old,scene.id);
+  if(scene.question)old=answerTeacher(TEACHER_L004,old,scene.question.correctId,at);
+ }
+ assert.equal(teacherCurrentCompletion(TEACHER_L004,old),false);
+ assert.equal(teacherCanComplete(TEACHER_L004,old),false);
+ assert.equal(finishTeacher(TEACHER_L004,old,at),old);
+ for(const scene of TEACHER_L004.scenes){
+  if(!scene.written)continue;
+  old=selectTeacherScene(TEACHER_L004,old,scene.id);
+  old=answerTeacherWritten(TEACHER_L004,old,scene.written.accepted[0]!,at);
+ }
+ assert.equal(teacherCanComplete(TEACHER_L004,old),true);
+ const updated=finishTeacher(TEACHER_L004,old,at);
+ assert.equal(updated.completedAt,previous);
+ assert.equal(updated.completedContentRevision,TEACHER_L004.contentRevision);
+ assert.equal(updated.completedRevisionAt,at);
+ assert.equal(teacherCurrentCompletion(TEACHER_L004,updated),true);
+ assert.equal(validTeacherProgress(updated),true);
+ assert.equal(finishTeacher(TEACHER_L004,updated,at),updated);
+});
+test("old backups stay valid; an unpaired or fabricated revision completion does not",()=>{
+ const old=initialTeacherProgress(TEACHER_L004);
+ assert.equal(validTeacherProgress(old),true);
+ assert.equal(validTeacherProgress({...old,completedContentRevision:"l004-free-recall-v1"}),false);
+ assert.equal(validTeacherProgress({...old,completedRevisionAt:at}),false);
+ assert.equal(validTeacherProgress({...old,completedContentRevision:"l004-free-recall-v1",completedRevisionAt:at}),false);
 });
