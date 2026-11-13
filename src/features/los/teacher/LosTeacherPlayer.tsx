@@ -235,7 +235,7 @@ export function LosTeacherPlayer({ lessonId }: { lessonId: string }) {
               reveal={() => persist(old => revealTeacherSolution(old, scene.id, stamp()))}
             />}
             {scene.bookLinks && <div className="los-teacher-book-links">
-              {scene.bookLinks.map(link => <div key={link.section} className="los-teacher-book-link">
+              {scene.bookLinks.map(link => <div key={link.chapterId + "-" + link.section} className="los-teacher-book-link">
                 <div><strong>{link.label}</strong><p>{link.instruction}</p></div>
                 <a href={bookUrl(lessonId, lesson.bookId, link.chapterId, link.section)} target="_blank" rel="noopener noreferrer">
                   <BookOpen size={17}/> Avaa kirjassa <ArrowRight size={16}/>

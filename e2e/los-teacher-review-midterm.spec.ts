@@ -66,6 +66,6 @@ test("L029 fallback is explicitly textual and never awards listening points",asy
   const nav=page.getByRole("navigation",{name:"Oppitunnin opetustilanteet"});
   await nav.getByRole("button",{name:/Avaa C01:n autenttinen dialogi ja soitin/}).click();
   await expect(page.getByText(/ei merkitä kuuntelupisteitä/i)).toBeVisible();
-  await expect(page.getByRole("link",{name:/C01 · Franz ja Jörg, koko Text A/})).toHaveAttribute("href",/\/01\/text/);
+  await expect(page.locator(".los-teacher-book-link").filter({hasText:"C01 · Franz ja Jörg, koko Text A"}).locator("a")).toHaveAttribute("href",/\/01\/text/);
   await expectNoHorizontalOverflow(page);
 });
