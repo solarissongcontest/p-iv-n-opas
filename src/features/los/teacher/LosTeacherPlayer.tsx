@@ -196,7 +196,7 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
       </section> :
       !lesson || !session || !scene ? <section className="los-teacher-status">
         <h1>Oppitunnin opetusmateriaali ei ole vielä valmis</h1>
-        <p>Teacher 2.0 on nyt käytössä oppitunneilla L001–L040. Muut oppitunnit toimivat edelleen nykyisessä Opetuspolussa.</p>
+        <p>Teacher 2.0 on nyt käytössä oppitunneilla L001–L045. Muut oppitunnit toimivat edelleen nykyisessä Opetuspolussa.</p>
         <a href={"/los#/" + (lesson?.bookId ?? 1) + "/path"}>Palaa Opetuspolkuun</a>
       </section> :
       <>
@@ -262,7 +262,10 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
               {[...lesson.requiredPracticeIds,...(lesson.requiredCheckedIds??[])].map(id => {
                 const value=draft.practiceAnswers[id]?.trim() ?? "";
                 const mustCheck=Boolean(lesson.requiredCheckedIds?.includes(id));
-                const knownChoice=(!/^C07-(?:SOURCE|TEXTB)-Q\d{2}$/.test(id) || /^[abc]$/.test(value));
+                const knownChoice=id === "C08-SOURCE-EVIDENCE-01"
+                  ? /^u(?:0[1-9]|1\d|2[0-6])$/.test(value)
+                  : (!( /^C07-(?:SOURCE|TEXTB)-Q\d{2}$/.test(id) ||
+                         /^C08-(?:SCHOOL|TEXTB)-Q\d{2}$/.test(id) ) || /^[abc]$/.test(value));
                 const answered=Boolean(value && knownChoice);
                 const checked=!mustCheck||draft.practiceChecked.includes(id);
                 return <p key={id} className="los-teacher-evidence">
