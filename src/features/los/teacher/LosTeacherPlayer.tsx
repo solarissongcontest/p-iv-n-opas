@@ -10,12 +10,15 @@ import {
 } from "./engine.ts";
 import { getLosTeacherLesson } from "./lessonL004.ts";
 import { validateTeacherLesson } from "./validateContent.ts";
+import { teacherExternalStatus } from "./externalEvidence.ts";
+import { LosMasterySummary } from "../LosMasterySummary.tsx";
 import "../los-book.css";
 import "./teacher.css";
 
 const stamp = () => new Date().toISOString();
 const bookUrl = (lessonId: string, bookId: number, chapterId: string, section: string) =>
-  "/los?lessonReturn=" + encodeURIComponent(lessonId) + "#/" + bookId + "/" + chapterId + "/" + section;
+  "/los?lessonReturn=" + encodeURIComponent(lessonId) + "#/" + bookId +
+  (["review-ii","final","summary"].includes(section) ? "/" + section : "/" + chapterId + "/" + section);
 
 function SceneQuestion({ scene, session, submit, saveDraft, requestHint, reveal }: {
   scene: TeacherScene;
@@ -106,6 +109,17 @@ function TeacherBoard({ scene }: { scene: TeacherScene }) {
 export function LosTeacherPlayer({ lessonId }: { lessonId: string }) {
   const lesson = getLosTeacherLesson(lessonId);
   const { draft, update, saved } = useLosChapterDraft(lesson?.bookId ?? 1, lesson?.chapterId ?? "01");
+  // Existing draft hooks, read-only for skill evidence; no copy of answers or exam history.
+  const evidence01=useLosChapterDraft(1,"01").draft;
+  const evidence02=useLosChapterDraft(1,"02").draft;
+  const evidence03=useLosChapterDraft(1,"03").draft;
+  const evidence04=useLosChapterDraft(1,"04").draft;
+  const evidence05=useLosChapterDraft(1,"05").draft;
+  const evidence06=useLosChapterDraft(1,"06").draft;
+  const evidence07=useLosChapterDraft(1,"07").draft;
+  const evidence08=useLosChapterDraft(1,"08").draft;
+  const evidence09=useLosChapterDraft(1,"09").draft;
+  const evidence10=useLosChapterDraft(1,"10").draft;
   const [authorized, setAuthorized] = useState<boolean | null>(null);
   const [showHelp, setShowHelp] = useState(false);
   const [replayKey, setReplayKey] = useState(0);
@@ -116,7 +130,11 @@ export function LosTeacherPlayer({ lessonId }: { lessonId: string }) {
     : null;
   const scene = lesson?.scenes.find(item => item.id === session?.sceneId) ?? lesson?.scenes[0];
   const sceneIndex = lesson?.scenes.findIndex(item => item.id === scene?.id) ?? 0;
-  const available = Boolean(saved && session && lesson && teacherCanFinish(session, lesson, draft.practiceAnswers, draft.practiceChecked, draft));
+  const external = lesson ? teacherExternalStatus(lesson,draft,{
+    "01":evidence01,"02":evidence02,"03":evidence03,"04":evidence04,"05":evidence05,
+    "06":evidence06,"07":evidence07,"08":evidence08,"09":evidence09,"10":evidence10,
+  }) : {ready:true,lines:[]};
+  const available = Boolean(saved && session && lesson && teacherCanFinish(session, lesson, draft.practiceAnswers, draft.practiceChecked, draft, external.ready));
   const completed = Boolean(session?.completedAt);
 
   useEffect(() => { setAuthorized(Boolean(readCachedDeviceUser())); }, []);
@@ -163,7 +181,7 @@ export function LosTeacherPlayer({ lessonId }: { lessonId: string }) {
     update(current => {
       const now = stamp();
       const old = current.teacherSessions?.[lessonId] ?? emptyTeacherSession(lesson, now);
-      const next = finishTeacherSession(old, lesson, current.practiceAnswers, now, current.practiceChecked, current);
+      const next = finishTeacherSession(old, lesson, current.practiceAnswers, now, current.practiceChecked, current, external.ready);
       if (next === old) return current;
       // Teacher 2.0 completion is a distinct learning event. Never manufacture
       // legacy lesson steps or an exit answer that the student never submitted.
@@ -185,7 +203,7 @@ export function LosTeacherPlayer({ lessonId }: { lessonId: string }) {
       </section> :
       !lesson || !session || !scene ? <section className="los-teacher-status">
         <h1>Oppitunnin opetusmateriaali ei ole vielä valmis</h1>
-        <p>Teacher 2.0 on nyt käytössä oppitunneilla L001–L012. Muut oppitunnit toimivat edelleen nykyisessä Opetuspolussa.</p>
+        <p>Teacher 2.0 on käytössä oppitunneilla L001–L012 ja L056–L060. Muut tunnit käyttävät edelleen olemassa olevaa opetuspolkua.</p>
         <a href={"/los#/" + (lesson?.bookId ?? 1) + "/path"}>Palaa Opetuspolkuun</a>
       </section> :
       <>
@@ -277,7 +295,7 @@ export function LosTeacherPlayer({ lessonId }: { lessonId: string }) {
               </button>
               <p>Tämä on oma vahvistuksesi, ei automaattinen kielitaidon arvio.</p>
             </div>}
-            <div className="los-teacher-help">
+            {lesson.id !== "L059" && <div className="los-teacher-help">
               <button type="button" aria-expanded={showHelp} onClick={() => { setShowHelp(v => !v); markHelp(); }}>
                 <HelpCircle size={18}/> En ymmärrä / haluan lisäselityksen
               </button>
@@ -292,7 +310,7 @@ export function LosTeacherPlayer({ lessonId }: { lessonId: string }) {
                       "Palaa tarvittaessa edelliseen opetustilanteeseen sisällysluettelosta ja kertaa siinä annettu esimerkki. Voit edetä omassa tahdissasi.")}</p>
                 </section>}
               </div>}
-            </div>
+            </div>}
             {lesson.chapterAssessment && (scene.kind === "book" || scene.kind === "summary") && <section className="los-teacher-assessment-status" aria-label="Kappaletestin ja itsearvioinnin tilanne">
               <h3>Kirjan todellinen suoritustilanne</h3>
               {(() => {
@@ -305,6 +323,12 @@ export function LosTeacherPlayer({ lessonId }: { lessonId: string }) {
                 </>;
               })()}
             </section>}
+            {scene.kind === "summary" && lesson.externalCheck && <section className="los-teacher-assessment-status" aria-label="Tallennettujen koetehtävien todellinen tilanne">
+              <h3>Kirjan oman tallennuksen näytöt</h3>
+              {external.lines.map((line,i)=><p key={i}>{line}</p>)}
+              {!external.ready && <p>Kirjan sovitut tehtävät tai itsearviot ovat vielä kesken. Palaa kirjan sivulle, jatka tallennettua työtä ja tarkista tila uudelleen.</p>}
+            </section>}
+            {lesson.id === "L060" && scene.kind === "summary" && <LosMasterySummary/>}
             {scene.kind === "summary" && <section className="los-teacher-summary">
               <h3>Oppitunnin tilanne</h3>
               <p>Itsenäisesti oikein ratkaistuja eri tarkistuksia: <strong>{independentTeacherEvidence(session, lesson)}</strong>. Tämä luku ei ole kielitaitoprosentti.</p>
