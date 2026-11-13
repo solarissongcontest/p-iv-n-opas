@@ -8,6 +8,7 @@ import {
 import {
   LOS1_FINAL_QUESTIONS, LOS1_FINAL_AUDIO_SOURCES,
   LOS1_FINAL_WRITING_CHECK, LOS1_FINAL_VOICE_CHECK,
+  LOS1_FINAL_WRITING_MODEL_OPENED, LOS1_FINAL_WRITING_ASSISTED,
   LOS1_SUMMARY_CARDS, LOS1_SUMMARY_GOAL, LOS1_SUMMARY_REFLECTION,
   losFinalReadyToSubmit, losFinalScore,
 } from "../content/los1FinalExam.ts";
@@ -79,6 +80,10 @@ export function teacherExternalStatus(
         "EX-FINAL: " + (hasExam ? (examResult?.correct ?? "?") + "/50 pistettä; palautettu yritys." : "ei vielä palautettua 50 tehtävän yritystä."),
         "Arkistoidut aiemmat yritykset: " + archived.length + ". Nykyistä koehistoriaa ei kopioida.",
         "Oma 5–7 lauseen viesti: " + (messageChecked ? "tallennettu ja vahvistettu" : "puuttuu tai vahvistamatta") + ".",
+        "Kirjoitusmallin käyttö: " + (
+          draft.practiceAnswers[LOS1_FINAL_WRITING_ASSISTED] ? "mallin katsomisen jälkeen muokattu, avustettu harjoitus" :
+          draft.practiceAnswers[LOS1_FINAL_WRITING_MODEL_OPENED] ? "malli avattu vasta oman kirjoitusyrityksen jälkeen" :
+          "mallia ei ole avattu") + ". Automaattista kielioppipistettä ei anneta.",
         "Keskustelun tallennuksen lataus: " + (voiceChecked ? "käynnistetty" : "puuttuu") +
           ". Puhetta ei pisteytetä koneellisesti.",
         "Keskustelun oma arvio ja sanallinen palaute: " + (voiceSelf && self ? "kirjattu" : "kesken") + ".",
