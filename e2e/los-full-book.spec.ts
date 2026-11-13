@@ -759,6 +759,26 @@ test("Teacher 2.0 presents one teaching board with one set of controls", async (
 
 
 
+
+test("L031 teaches eins before the first number question and gives specific feedback",async({page})=>{
+  await enterLocalBook(page);
+  await page.goto("/los-lessons/L031",{waitUntil:"domcontentloaded"});
+  const heading=page.locator(".los-teacher-paper h2");
+  await expect(heading).toContainText("Saksan numerot alkavat nollasta");
+  await page.getByRole("button",{name:"Seuraava",exact:true}).click();
+  await expect(heading).toContainText("Ensimmäiset luvut 0–6");
+  await page.getByRole("button",{name:"Seuraava",exact:true}).click();
+  await expect(heading).toContainText("Opettaja näyttää 0–6");
+  await page.getByRole("button",{name:"Seuraava",exact:true}).click();
+  await expect(heading).toContainText("Mitä eins tarkoittaa numeroin?");
+  const answer=page.locator(".los-teacher-question input");
+  await answer.fill("1");
+  await page.getByRole("button",{name:"Tarkista",exact:true}).click();
+  await expect(page.locator(".los-teacher-feedback.is-right")).toContainText("Eins tarkoittaa yhtä");
+  await expectNoHorizontalOverflow(page);
+});
+
+
 test("Teacher 2.0 explains exactly why an unfinished lesson cannot be completed", async ({page}) => {
   await enterLocalBook(page);
   await page.goto("/los-lessons/L004", {waitUntil:"domcontentloaded"});
