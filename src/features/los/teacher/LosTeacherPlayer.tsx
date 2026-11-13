@@ -25,7 +25,7 @@ import "./teacher.css";
 const stamp = () => new Date().toISOString();
 const bookUrl = (lessonId: string, bookId: number, chapterId: string, section: string) =>
   "/los?lessonReturn=" + encodeURIComponent(lessonId) + "#/" + bookId + "/" +
-  (["midterm","review","review-ii","final","summary"].includes(section) ? section : chapterId + "/" + section);
+  (["review-ii","final","summary","midterm","review"].includes(section) ? section : chapterId + "/" + section);
 
 function SceneQuestion({ scene, session, submit, saveDraft, requestHint, reveal }: {
   scene: TeacherScene;
