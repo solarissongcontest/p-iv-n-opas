@@ -48,3 +48,16 @@
  .los-teacher-book-desktop{display:none!important}
  .los-teacher-book-mobile{display:inline-flex!important}
 }
+
+/* Contextual human-authored help, available in every teaching scene. */
+.los-teacher-help-panel{border:1px solid var(--los-line);border-radius:10px;
+ background:var(--los-subtle);padding:18px;margin:12px 0 18px}
+.los-teacher-help-panel[hidden]{display:none!important}
+.los-teacher-help-panel h5{font:500 20px/1.4 Georgia,serif;margin:0 0 10px}
+.los-teacher-help-panel>p{max-width:68ch;font-size:13px;line-height:1.7;color:var(--los-soft)}
+.los-teacher-help-options{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+.los-teacher-help-options button[aria-pressed="true"]{border-color:var(--los-book-accent);
+ background:var(--los-book-tint)}
+.los-teacher-help-result{margin-top:16px;padding:14px 16px;border-left:3px solid var(--los-book-accent);
+ background:var(--los-paper);border-radius:4px}
+.los-teacher-help-result p{font-size:14px;line-height:1.75;margin:7px 0 0}

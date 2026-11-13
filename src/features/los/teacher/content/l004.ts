@@ -5,6 +5,7 @@ export const TEACHER_L004:TeacherLesson={
  objective:"Erotan vuorokaudenajan tervehdykset ja tilanteeseen sopivat hyvästelyt.",
  scenes:[
  {id:"activation",phase:"activation",title:"Mitä tiedät jo?",
+  help:[{"id":"simplify","label":"Selitä yksinkertaisemmin","paragraphs":["Tervehdit, kun tapaat jonkun. Hyvästelet, kun toinen lähtee tai sinä lähdet. Saksassa nämä ovat eri ilmauksia."]},{"id":"example","label":"Näytä toinen esimerkki","paragraphs":["Kaveri tulee aamulla luoksesi: Guten Morgen! Kaveri lähtee kotiin: Tschüss! Huomaa, että ensin tavataan ja sitten erotaan."]}],
   explanation:["Aloitat saksan aivan perusteista. Saksaksi tervehtiminen ja hyvästely ovat eri tilanteita, eikä niiden eroa tarvitse osata valmiiksi.","Guten Morgen! tarkoittaa hyvää huomenta. Tschüss! tarkoittaa arkista heippaa silloin, kun lähdetään."],
   question:{prompt:"Mikä sopii tutulle, joka lähtee kotiin?",choices:[
    {id:"a",label:"Guten Morgen!",feedback:"Tämä on aamun tervehdys, ei hyvästely."},
@@ -12,15 +13,19 @@ export const TEACHER_L004:TeacherLesson={
    correctId:"b",success:"Tschüss! sopii tuttujen väliseen hyvästelyyn.",alternative:"Kohtaaminen on tervehtimistä. Poistuminen on hyvästelyä."},
   hint:"Henkilö on lähdössä, ei tulossa paikalle."},
  {id:"introduction",phase:"introduction",title:"Tilanne ratkaisee",
+  help:[{"id":"simplify","label":"Selitä yksinkertaisemmin","paragraphs":["Morgen tarkoittaa tässä aamua, Tag päivää ja Abend iltaa. Nacht on yö. Nukkumaanmenon toivotuksessa sanotaan Gute Nacht!, ei Guten Abend!."]},{"id":"example","label":"Näytä toinen esimerkki","paragraphs":["Kohtaat naapurin kello 19: Guten Abend! Myöhemmin ystävä sanoo menevänsä nukkumaan: Gute Nacht! Sama ilta, mutta eri tilanne."]}],
   explanation:["Guten Morgen! sanotaan aamulla, Guten Tag! päivällä ja Guten Abend! illalla. Ne ovat tervehdyksiä, joita käytetään kohdatessa.","Gute Nacht! tarkoittaa hyvää yötä ja kuuluu tavallisesti nukkumaanmenoon, ei jokaiseen iltakohtaamiseen."],
   example:{german:"Guten Abend!",finnish:"Hyvää iltaa!",why:"Illalla tavatessa tervehditään Guten Abend!, ei toivoteta vielä hyvää yötä."}},
  {id:"rule",phase:"explanation",title:"Tervehdys vai hyvästely?",
+  help:[{"id":"steps","label":"Selitä vaihe vaiheelta","paragraphs":["1. Kysy, kohtaatko vai hyvästeletkö. 2. Jos kohtaat, mieti vuorokaudenaikaa. 3. Jos hyvästelet, mieti onko tilanne arkinen vai kohtelias. 4. Nukkumaanmenossa käytetään Gute Nacht!."]},{"id":"compare","label":"Mikä näissä on ero?","paragraphs":["Tschüss! sopii tavallisesti tuttujen väliseen rentoon hyvästelyyn. Auf Wiedersehen! tarkoittaa kohteliaampaa näkemiin. Molemmissa joku lähtee."]}],
   explanation:["Kysy ensin: tulenko paikalle vai poistunko? Jos kohtaat jonkun, valitset tervehdyksen esimerkiksi vuorokaudenajan mukaan.","Jos lähdet tutun luota, Tschüss! on tavallinen rento hyvästely. Muodollisemmassa tilanteessa Auf Wiedersehen! tarkoittaa näkemiin.","Gute Nacht! on erityistapaus: toivotat toiselle hyvää yötä esimerkiksi ennen nukkumaanmenoa."],
   example:{german:"Guten Abend! ≠ Gute Nacht!",finnish:"Hyvää iltaa! ei ole sama kuin hyvää yötä!",why:"Illan tervehdys ja nukkumaanmenon toivotus ovat eri asioita."}},
  {id:"model",phase:"worked-example",title:"Opettaja näyttää ratkaisun",
+  help:[{"id":"steps","label":"Selitä vaihe vaiheelta","paragraphs":["Tilanne: tapaat opettajan. Kyse on siis tervehdyksestä. Kellonaika: aamu. Valinta: Guten Morgen! Tarkistan vielä, etten käyttänyt illan tervehdystä tai hyvästelyä."]},{"id":"example","label":"Näytä toinen esimerkki","paragraphs":["Saavut kirjastoon illalla ja näet virkailijan. Koska kohtaat hänet illalla, sanot Guten Abend!. Jos lähdet myöhemmin pois, voit sanoa Auf Wiedersehen!."]}],
   explanation:["Saavut aamulla kouluun ja tapaat opettajan. Ensimmäiseksi päätän: onko kyse kohtaamisesta? Kyllä. Siksi tarvitsen tervehdyksen.","Seuraavaksi tarkistan vuorokaudenajan: on aamu. Valitsen Guten Morgen!, en Guten Abend! enkä Tschüss!. Näin voit päätellä vastauksen itse."],
   example:{german:"Guten Morgen, Frau Müller!",finnish:"Hyvää huomenta, rouva Müller!",why:"Aamu ja kohtaaminen tarkoittavat Guten Morgen! -tervehdystä."}},
  {id:"guided",phase:"guided",title:"Harjoittele mallin kanssa",
+  help:[{"id":"simplify","label":"Selitä yksinkertaisemmin","paragraphs":["Kello on kahdeksan aamulla. Kun astut luokkaan ja tapaat opettajan, käytät aamun tervehdystä. Illan ja yön ilmaukset eivät sovi."]},{"id":"steps","label":"Näytä päättely vaiheittain","paragraphs":["1. Et ole poistumassa. 2. Et ole menossa nukkumaan. 3. On aamu. 4. Valitse aamun tervehdys, Guten Morgen!."]}],
   explanation:["On kahdeksan aamulla ja näet opettajan koulussa. Voit käyttää vihjettä ilman aikarangaistusta.","Tämän kohdan tavoitteena on oppia oikea perustelu, ei todistaa täydellistä kielitaitoa."],
   hint:"Kohtaat henkilön aamulla. Et ole lähdössä etkä menossa nukkumaan.",
   question:{prompt:"Mitä sanot aamulla opettajalle?",choices:[
@@ -30,6 +35,7 @@ export const TEACHER_L004:TeacherLesson={
    correctId:"b",success:"Aamu + kohtaaminen = Guten Morgen!",
    alternative:"Vertaa: aamulla Guten Morgen!, illalla Guten Abend!, nukkumaan mennessä Gute Nacht!."}},
  {id:"independent",phase:"independent",title:"Kokeile itse ilman mallia",
+  help:[{"id":"simplify","label":"Selitä yksinkertaisemmin","paragraphs":["Ystävä on tulossa sinua vastaan illalla. Tarkoitus on tervehtiä, ei toivottaa hyvää yötä. Guten Abend! tarkoittaa hyvää iltaa."]},{"id":"compare","label":"Mikä näissä on ero?","paragraphs":["Guten Abend! on tervehdys illalla. Gute Nacht! sanotaan yleensä silloin, kun joku menee nukkumaan. Guten Morgen! kuuluu aamuun."]}],
   explanation:["Kohtaat ystävän illalla seitsemältä. Vastaa ensin muistista. Voit silti pyytää vihjeen; silloin vastaus ei ole ensimmäisen yrityksen itsenäinen näyttö.","Huomaa, että nyt vasta kohdataan. Kukaan ei ole lähdössä eikä menossa nukkumaan."],
   hint:"Valitse juuri illan tervehdys.",
   question:{prompt:"Mitä sanot ystävälle kello 19?",choices:[
@@ -39,6 +45,7 @@ export const TEACHER_L004:TeacherLesson={
    correctId:"c",success:"Guten Abend! on illan tervehdys.",
    alternative:"Tässä kohdataan illalla, joten Guten Abend! on oikea valinta."}},
  {id:"application",phase:"application",title:"Sovella kohteliaasti",
+  help:[{"id":"simplify","label":"Selitä yksinkertaisemmin","paragraphs":["Kun poistut palvelutiskiltä, et enää tervehdi vaan hyvästelet. Virkailija on sinulle tuntematon, joten kohtelias ilmaus sopii hyvin."]},{"id":"compare","label":"Vertaa kahta hyvästelyä","paragraphs":["Tutulle voit sanoa Tschüss!. Palvelutilanteessa voit sanoa Auf Wiedersehen!. Molemmat ovat hyvästelyjä, mutta jälkimmäinen on muodollisempi."]}],
   explanation:["Olet kirjaston palvelutiskillä ja poistut. Haluat hyvästellä virkailijan kohteliaasti.","Tämä on eri tilanne kuin tuttuun ystävään törmääminen. Mieti nyt sekä poistumista että tilanteen muodollisuutta."],
   hint:"Tilanne on kohtelias ja olet lähdössä.",
   question:{prompt:"Miten hyvästelet virkailijan?",choices:[
@@ -48,6 +55,7 @@ export const TEACHER_L004:TeacherLesson={
    correctId:"a",success:"Auf Wiedersehen! tarkoittaa näkemiin.",
    alternative:"Tutulle sopii usein Tschüss!; kohteliaassa tilanteessa Auf Wiedersehen!."}},
  {id:"exit",phase:"exit",title:"Tarkista vielä kerran",
+  help:[{"id":"simplify","label":"Selitä yksinkertaisemmin","paragraphs":["Nyt ystävä on menossa nukkumaan. Valitse hyvän yön toivotus, Gute Nacht!. Se ei ole sama asia kuin illan tervehdys Guten Abend!."]},{"id":"steps","label":"Käy ratkaisu läpi","paragraphs":["1. Ystävä ei juuri saavu paikalle. 2. Hän menee nukkumaan. 3. Kyse ei ole tavallisesta päivän tervehdyksestä. 4. Sopiva toivotus on Gute Nacht!."]}],
   explanation:["Kokeile uutta tilannetta ilman mallia. Yksi oikein ratkaistu monivalinta ei vielä tarkoita, että hallitsisit kaikki tervehdykset.","Voit nähdä lisäselityksen ja yrittää uudelleen, jos ensimmäinen vastaus ei onnistu."],
   hint:"Gute Nacht! liittyy nukkumaanmenoon.",
   question:{prompt:"Ystävä menee nukkumaan. Mitä toivotat?",choices:[
@@ -57,6 +65,7 @@ export const TEACHER_L004:TeacherLesson={
    correctId:"c",success:"Gute Nacht! toivotetaan ennen nukkumaanmenoa.",
    alternative:"Illalla kohdatessa Guten Abend!, nukkumaan mennessä Gute Nacht!."}},
  {id:"summary",phase:"summary",title:"Kokoa opittu",
+  help:[{"id":"simplify","label":"Kertaa kaikkein tärkein","paragraphs":["Kun tapaat jonkun, tervehdi. Kun lähdet, hyvästele. Päivänajasta riippuvat esimerkiksi Guten Morgen!, Guten Tag! ja Guten Abend!. Nukkumaan mennessä sanotaan Gute Nacht!."]},{"id":"example","label":"Kertaa lyhyellä tilanteella","paragraphs":["Tapaat ystävän aamulla: Guten Morgen! Lähdette eri suuntiin: Tschüss! Myöhemmin käyt palvelutiskillä ja hyvästelet kohteliaasti: Auf Wiedersehen!."]}],
   explanation:["Osaat nyt harjoitella tervehdyksen valintaa tilanteen ja vuorokaudenajan perusteella. Muista ensin erottaa kohtaaminen ja hyvästely.","Kertaa vielä itsenäisesti sanastosta Guten Morgen!, Guten Tag!, Guten Abend!, Gute Nacht!, Tschüss! ja Auf Wiedersehen!. Palaa myöhemmin samaan taitoon uudessa tilanteessa.","Tämän oppitunnin harjoitustulokset eivät yksin todista virallista kielitaitotasoa."],
   example:{german:"Guten Morgen! · Guten Abend! · Tschüss! · Auf Wiedersehen!",
    finnish:"Hyvää huomenta! · Hyvää iltaa! · Heippa! · Näkemiin!",

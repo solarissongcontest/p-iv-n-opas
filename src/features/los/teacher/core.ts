@@ -2,25 +2,30 @@
 export const TEACHER_VERSION="2.0.0" as const;
 export type TeacherPhase="activation"|"introduction"|"explanation"|"worked-example"|"guided"|"independent"|"application"|"exit"|"summary";
 export type TeacherChoice={id:string;label:string;feedback:string};
+export type TeacherHelpOption={id:string;label:string;paragraphs:readonly string[]};
 export type TeacherQuestion={prompt:string;choices:readonly TeacherChoice[];correctId:string;success:string;alternative:string};
 export type TeacherScene={
  id:string;phase:TeacherPhase;title:string;explanation:readonly string[];
  example?:{german:string;finnish:string;why:string};
- question?:TeacherQuestion;hint?:string;
+ question?:TeacherQuestion;hint?:string;help?:readonly TeacherHelpOption[];
 };
 export type TeacherLesson={id:string;version:typeof TEACHER_VERSION;review:"draft"|"approved";objective:string;scenes:readonly TeacherScene[]};
 export type TeacherAttempt={answer:string;count:number;correct:boolean;independent:boolean;revealed:boolean;at:string};
-export type TeacherProgress={version:typeof TEACHER_VERSION;scene:string;visited:string[];hints:string[];answers:Record<string,TeacherAttempt>;paused:boolean;completedAt?:string|null};
+export type TeacherProgress={version:typeof TEACHER_VERSION;scene:string;visited:string[];hints:string[];answers:Record<string,TeacherAttempt>;paused:boolean;completedAt?:string|null;helpSelections?:Record<string,string>};
 const isObj=(x:unknown):x is Record<string,unknown>=>Boolean(x&&typeof x==="object"&&!Array.isArray(x));
 const validId=(x:unknown)=>typeof x==="string"&&/^[a-z0-9-]{1,48}$/i.test(x);
 const validIds=(x:unknown,max:number)=>Array.isArray(x)&&x.length<=max&&
   new Set(x).size===x.length&&x.every(validId);
+const validHelpSelections=(x:unknown)=>x===undefined||
+ (isObj(x)&&Object.keys(x).length<=20&&Object.entries(x).every(([id,option])=>
+   validId(id)&&validId(option)));
 const validIso=(x:unknown)=>typeof x==="string"&&x.length<=40&&/^\d{4}-\d{2}-\d{2}T/.test(x)&&Number.isFinite(Date.parse(x));
 export function validTeacherProgress(x:unknown):x is TeacherProgress{
  if(!isObj(x)||x['version']!==TEACHER_VERSION||!validId(x['scene'])||
     !validIds(x['visited'],25)||!validIds(x['hints'],25)||typeof x['paused']!=="boolean"||
     !isObj(x['answers'])||Object.keys(x['answers']).length>20||
-    (x['completedAt']!==undefined&&x['completedAt']!==null&&!validIso(x['completedAt'])))return false;
+    (x['completedAt']!==undefined&&x['completedAt']!==null&&!validIso(x['completedAt']))||
+    !validHelpSelections(x['helpSelections']))return false;
  return Object.entries(x['answers']).every(([id,a])=>validId(id)&&isObj(a)&&
     typeof a['answer']==="string"&&a['answer'].length<=40&&Number.isInteger(a['count'])&&
     Number(a['count'])>=0&&Number(a['count'])<=10&&typeof a['correct']==="boolean"&&
@@ -36,6 +41,12 @@ export function validTeacherLesson(lesson:TeacherLesson):string[]{
  for(const s of lesson.scenes){
   if(!validId(s.id)||s.title.trim().length<4||!s.explanation.length||
      s.explanation.some(p=>p.trim().length<20))errors.push("empty teaching: "+s.id);
+  const options=s.help??[];
+  if(options.length<2||options.length>6||
+     new Set(options.map(x=>x.id)).size!==options.length||
+     options.some(x=>!validId(x.id)||x.label.trim().length<6||
+       !x.paragraphs.length||x.paragraphs.some(p=>p.trim().length<25)))
+   errors.push("missing or invalid contextual help: "+s.id);
   if(s.question){
    const q=s.question;
    if(q.choices.length<2||q.choices.length>5||new Set(q.choices.map(x=>x.id)).size!==q.choices.length||
@@ -58,6 +69,19 @@ export function hintTeacher(lesson:TeacherLesson,p:TeacherProgress):TeacherProgr
  const scene=lesson.scenes.find(s=>s.id===p.scene);
  if(p.paused||!scene?.hint)return p;
  return {...p,hints:[...new Set([...p.hints,p.scene])]};
+}
+/** Selecting authored help is a hint on any unanswered question. Merely
+ * opening the help menu does not consume a hint or change learning evidence.
+ * Previously earned independent first-try evidence is never changed. */
+export function openTeacherHelp(lesson:TeacherLesson,p:TeacherProgress,helpId:string):TeacherProgress{
+ const scene=lesson.scenes.find(s=>s.id===p.scene);
+ if(p.paused||!scene?.help?.some(item=>item.id===helpId)||
+    p.helpSelections?.[p.scene]===helpId)return p;
+ const attempted=p.answers[p.scene];
+ const consumesHint=Boolean(scene.question&&!attempted?.correct&&!attempted?.revealed);
+ return {...p,
+   helpSelections:{...p.helpSelections,[p.scene]:helpId},
+   hints:consumesHint?[...new Set([...p.hints,p.scene])]:p.hints};
 }
 export function answerTeacher(lesson:TeacherLesson,p:TeacherProgress,answer:string,at:string):TeacherProgress{
  const scene=lesson.scenes.find(s=>s.id===p.scene);

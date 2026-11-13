@@ -3,7 +3,7 @@ import {strict as assert} from "node:assert";
 import {TEACHER_L004} from "../src/features/los/teacher/content/l004.ts";
 import {initialTeacherProgress,validTeacherProgress,validTeacherLesson,selectTeacherScene,
  hintTeacher,answerTeacher,revealTeacher,pauseTeacher,teacherEvidence,
- teacherCanComplete,finishTeacher} from "../src/features/los/teacher/core.ts";
+ teacherCanComplete,finishTeacher,openTeacherHelp} from "../src/features/los/teacher/core.ts";
 const at="2026-11-12T21:00:00Z";
 import {emptyLosLessonProgress,losLessonFinishTeacher} from "../src/features/los/lessonEngine.ts";
 test("L004 has full scripted teaching, not a generic task list",()=>{
@@ -95,4 +95,51 @@ test("teacher state from the previous preview stays valid and un-upgraded",()=>{
  const previous={...p,completedAt:undefined};
  assert.equal(validTeacherProgress(previous),true);
  assert.equal(finishTeacher(TEACHER_L004,previous,at),previous);
+});
+
+test("all L004 scenes have distinct, contextual, sufficiently substantive authored help",()=>{
+ assert.equal(TEACHER_L004.scenes.length,9);
+ for(const scene of TEACHER_L004.scenes){
+   assert.ok(scene.help?.length && scene.help.length>=2,scene.id);
+   assert.ok(scene.help.every(item=>item.paragraphs.join(" ").length>=25),scene.id);
+ }
+ assert.deepEqual(validTeacherLesson(TEACHER_L004),[]);
+});
+test("opening help in a non-question scene preserves progress without fabricating evidence",()=>{
+ let p=selectTeacherScene(TEACHER_L004,initialTeacherProgress(TEACHER_L004),"introduction");
+ p=openTeacherHelp(TEACHER_L004,p,"example");
+ assert.equal(p.helpSelections?.introduction,"example");
+ assert.deepEqual(p.hints,[]);
+ assert.equal(teacherEvidence(TEACHER_L004,p).independent.length,0);
+ assert.equal(validTeacherProgress(p),true);
+ assert.equal(openTeacherHelp(TEACHER_L004,p,"example"),p);
+ assert.equal(openTeacherHelp(TEACHER_L004,p,"invalid"),p);
+ assert.equal(openTeacherHelp(TEACHER_L004,pauseTeacher(p),"simplify").paused,true);
+});
+test("getting contextual help before answering disqualifies only first-try independence",()=>{
+ let p=selectTeacherScene(TEACHER_L004,initialTeacherProgress(TEACHER_L004),"independent");
+ p=openTeacherHelp(TEACHER_L004,p,"simplify");
+ assert.ok(p.hints.includes("independent"));
+ p=answerTeacher(TEACHER_L004,p,"c",at);
+ assert.equal(p.answers.independent?.correct,true);
+ assert.equal(p.answers.independent?.independent,false);
+ assert.equal(teacherEvidence(TEACHER_L004,p).independent.length,0);
+ assert.equal(validTeacherProgress(p),true);
+});
+test("looking up an explanation after a correct independent first attempt never revokes its evidence",()=>{
+ let p=selectTeacherScene(TEACHER_L004,initialTeacherProgress(TEACHER_L004),"independent");
+ p=answerTeacher(TEACHER_L004,p,"c",at);
+ assert.equal(p.answers.independent?.independent,true);
+ p=openTeacherHelp(TEACHER_L004,p,"compare");
+ assert.equal(p.helpSelections?.independent,"compare");
+ assert.equal(p.answers.independent?.independent,true);
+ assert.equal(teacherEvidence(TEACHER_L004,p).independent.length,1);
+});
+test("old stored states without help remain valid; malformed option selections are rejected",()=>{
+ const state=initialTeacherProgress(TEACHER_L004);
+ assert.equal(validTeacherProgress(state),true);
+ assert.equal(validTeacherProgress({...state,helpSelections:undefined}),true);
+ assert.equal(validTeacherProgress({...state,helpSelections:{independent:"compare"}}),true);
+ assert.equal(validTeacherProgress({...state,helpSelections:{independent:999}}),false);
+ assert.equal(validTeacherProgress({...state,helpSelections:Array(40).fill("foo")}),false);
 });

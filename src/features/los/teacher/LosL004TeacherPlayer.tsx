@@ -4,7 +4,7 @@ import {
 } from "./content/l004.ts";
 import {
   answerTeacher,hintTeacher,initialTeacherProgress,pauseTeacher,revealTeacher,
-  selectTeacherScene,teacherEvidence,teacherCanComplete,type TeacherProgress
+  selectTeacherScene,teacherEvidence,teacherCanComplete,openTeacherHelp,type TeacherProgress
 } from "./core.ts";
 import "./teacher.css";
 
@@ -22,6 +22,9 @@ export function LosL004TeacherPlayer({
  const result=p.answers[scene.id];
  const hintOpen=p.hints.includes(scene.id);
  const [showMap,setShowMap]=useState(false);
+ const [helpForScene,setHelpForScene]=useState<string|null>(null);
+ const helpOpen=helpForScene===scene.id&&!p.paused;
+ const selectedHelp=scene.help?.find(h=>h.id===p.helpSelections?.[scene.id]);
  const evidence=teacherEvidence(TEACHER_L004,p);
  const canFinish=teacherCanComplete(TEACHER_L004,p);
  const go=(i:number)=>{
@@ -42,6 +45,8 @@ export function LosL004TeacherPlayer({
   <div className="los-teacher-toolbar">
    <button type="button" onClick={()=>setShowMap(x=>!x)}
     aria-expanded={showMap} aria-controls="los-teacher-map">Opetuksen sisällysluettelo</button>
+   <button type="button" aria-controls="los-teacher-help-panel" aria-expanded={helpOpen}
+    disabled={p.paused} onClick={()=>setHelpForScene(helpOpen?null:scene.id)}>En ymmärrä</button>
    {p.paused?
     <button type="button" onClick={()=>onChange(selectTeacherScene(TEACHER_L004,p,scene.id))}>Jatka opetusta</button>:
     <button type="button" onClick={()=>onChange(pauseTeacher(p))}>Keskeytä</button>}
@@ -51,6 +56,19 @@ export function LosL004TeacherPlayer({
      aria-current={item.id===scene.id?"step":undefined}
      onClick={()=>go(i)}>{i+1}. {item.title}</button>)}
   </nav>}
+  <div id="los-teacher-help-panel" className="los-teacher-help-panel" hidden={!helpOpen}>
+   <h5>Autetaan ymmärtämään: {scene.title}</h5>
+   <p>Valitse tarvitsemasi selitys. Jos katsot apua ennen vastaamista, kyseistä vastausta ei lasketa itsenäiseksi ensiyritykseksi.</p>
+   <div className="los-teacher-help-options" role="group" aria-label="Valitse lisäselitys">
+    {(scene.help??[]).map(option=><button type="button" key={option.id}
+      aria-pressed={selectedHelp?.id===option.id}
+      onClick={()=>onChange(openTeacherHelp(TEACHER_L004,p,option.id))}>{option.label}</button>)}
+   </div>
+   {selectedHelp&&<div className="los-teacher-help-result" role="status">
+    <strong>{selectedHelp.label}</strong>
+    {selectedHelp.paragraphs.map((item,i)=><p key={i}>{item}</p>)}
+   </div>}
+  </div>
   {p.paused?<p className="los-teacher-paused" role="status">
    Opetus on keskeytetty. Aktiivinen kohta ja harjoitusvastaukset pysyvät tallessa.
   </p>:<article className="los-teacher-scene" aria-live="polite">
@@ -75,7 +93,7 @@ export function LosL004TeacherPlayer({
     </fieldset>
     {scene.hint&&!hintOpen&&!result?.correct&&!result?.revealed&&
      <button className="los-teacher-help" type="button" onClick={()=>onChange(hintTeacher(TEACHER_L004,p))}>
-      En ymmärrä · näytä vihje
+      Näytä tehtävän vihje
      </button>}
     {hintOpen&&<p className="los-teacher-help-text" role="note">{scene.hint}</p>}
     {result&&<div className="los-teacher-feedback" role="status">

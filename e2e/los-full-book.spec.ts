@@ -437,3 +437,43 @@ test("L004 book reference retains a return to the same lesson on mobile and desk
  await expect(page.locator(".los-book-teacher-return")).toHaveCount(0);
  await expectNoHorizontalOverflow(page);
 });
+
+test("L004 contextual En ymmärrä help is usable in every scene and persisted without false mastery",async({page})=>{
+ await enterLocalBook(page);
+ await page.goto("/los#/1/lesson/L004",{waitUntil:"domcontentloaded"});
+ const player=page.locator(".los-teacher");
+ const menu=player.getByRole("button",{name:"Opetuksen sisällysluettelo"});
+ await menu.click();
+ for(const [scene,option] of [
+  ["1. Mitä tiedät jo?","Selitä yksinkertaisemmin"],
+  ["2. Tilanne ratkaisee","Näytä toinen esimerkki"],
+  ["3. Tervehdys vai hyvästely?","Selitä vaihe vaiheelta"],
+  ["4. Opettaja näyttää ratkaisun","Näytä toinen esimerkki"],
+  ["5. Harjoittele mallin kanssa","Selitä yksinkertaisemmin"],
+  ["6. Kokeile itse ilman mallia","Mikä näissä on ero?"],
+  ["7. Sovella kohteliaasti","Vertaa kahta hyvästelyä"],
+  ["8. Tarkista vielä kerran","Käy ratkaisu läpi"],
+  ["9. Kokoa opittu","Kertaa kaikkein tärkein"]
+ ]){
+  await player.locator("#los-teacher-map").getByRole("button",{name:scene,exact:true}).click();
+  const help=player.getByRole("button",{name:"En ymmärrä",exact:true});
+  await expect(help).toBeVisible();
+  await help.click();
+  const panel=player.locator("#los-teacher-help-panel");
+  await expect(panel).toBeVisible();
+  await panel.getByRole("button",{name:option,exact:true}).click();
+  await expect(panel.getByRole("button",{name:option,exact:true})).toHaveAttribute("aria-pressed","true");
+  await expect(panel.locator(".los-teacher-help-result")).toBeVisible();
+ }
+ await player.locator("#los-teacher-map").getByRole("button",{name:"6. Kokeile itse ilman mallia"}).click();
+ await player.locator(".los-teacher-choices").getByRole("button",{name:"Guten Abend!"}).click();
+ await expect(player).toContainText("0/3");
+ await page.reload({waitUntil:"domcontentloaded"});
+ await expect(page.locator(".los-teacher")).toContainText("Kokeile itse ilman mallia");
+ await page.locator(".los-teacher").getByRole("button",{name:"En ymmärrä",exact:true}).click();
+ const panel=page.locator("#los-teacher-help-panel");
+ await expect(panel.getByRole("button",{name:"Mikä näissä on ero?"})).toHaveAttribute("aria-pressed","true");
+ await expect(panel.locator(".los-teacher-help-result")).toContainText("Guten Abend!");
+ await expect(page.locator(".los-teacher")).toContainText("0/3");
+ await expectNoHorizontalOverflow(page);
+});
