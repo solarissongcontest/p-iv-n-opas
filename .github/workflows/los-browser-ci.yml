@@ -69,7 +69,7 @@ jobs:
           exit 1
 
       - name: Full LOS! 1 browser flows in mobile WebKit and desktop Chromium
-        run: bunx playwright test e2e/los-full-book.spec.ts --project=desktop-chromium --project=iphone-webkit
+        run: bunx playwright test e2e/los-full-book.spec.ts e2e/los-teacher-review-midterm.spec.ts --project=desktop-chromium --project=iphone-webkit
 
       - name: Upload browser traces and preview log
         if: always()

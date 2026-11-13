@@ -90,3 +90,52 @@ export function losArchiveExamAttempt(
  if(packed.length>500)throw new Error("Koetulos ei mahdu turvalliseen varmuuskopioformaattiin.");
  return {...existing,[keyFor(prefix,next)]:packed};
 }
+
+/** Preserve the student's writing per exam attempt in the existing backed-up
+ * practiceAnswers store, with per-field and total cloud-contract size limits.
+ * Refuse a retake instead of erasing old work when the archive is full.
+ */
+export function losArchiveMidtermPersonalWork(
+  existing: Readonly<Record<string,string>>, number: number,
+  applicationDraft: string, selfAssessment: string, dialogueRating = "",
+): Record<string,string> {
+  if (!Number.isInteger(number) || number < 1 || number > 99 ||
+      !existing[keyFor("EX-MID",number)])
+    throw new Error("Aiemman kokeen pistemerkintä pitää arkistoida ensin.");
+  if (applicationDraft.length > 5000 || selfAssessment.length > 5000)
+    throw new Error("Oma teksti ylittää tallennusrajan. Uusintaa ei aloitettu.");
+  const entries: Record<string,string> = {};
+  if (dialogueRating && !["well","some","again"].includes(dialogueRating))
+    throw new Error("Vanhalla itsearviolla on tuntematon arvo.");
+  for (const [kind,value] of [["A",applicationDraft],["S",selfAssessment],["R",dialogueRating]] as const) {
+    const chunks: string[] = [];
+    for (let offset=0;offset<value.length;offset+=440) chunks.push(value.slice(offset,offset+440));
+    if (!chunks.length) chunks.push("");
+    chunks.forEach((part,index)=>{
+      const key="EX-MID-OWN-"+String(number).padStart(2,"0")+"-"+kind+"-"+String(index+1).padStart(2,"0");
+      if (Object.hasOwn(existing,key)) throw new Error("Omaa tekstiarkistoa ei saa ylikirjoittaa.");
+      entries[key]=part;
+    });
+  }
+  const updated={...existing,...entries};
+  if (Object.keys(updated).length > 200 || new TextEncoder().encode(JSON.stringify(updated)).length > 60_000)
+    throw new Error("Oman tekstin arkistolle ei ole riittävästi tilaa. Tee varmuuskopio; uusintaa ei aloitettu.");
+  return updated;
+}
+export function losArchivedMidtermPersonalWork(
+  answers: Readonly<Record<string,string>>, number: number,
+): {applicationDraft:string;selfAssessment:string;dialogueRating:string} | null {
+  if (!Number.isInteger(number) || number < 1 || number > 99) return null;
+  const read=(kind:"A"|"S"|"R"):string|null=>{
+    const prefix="EX-MID-OWN-"+String(number).padStart(2,"0")+"-"+kind+"-";
+    const parts=Object.entries(answers).filter(([key])=>key.startsWith(prefix))
+      .map(([key,value])=>({index:Number(key.slice(prefix.length)),value}))
+      .sort((x,y)=>x.index-y.index);
+    if (!parts.length || parts.length>25 ||
+        parts.some((part,i)=>part.index!==i+1||part.value.length>440)) return null;
+    return parts.map(part=>part.value).join("");
+  };
+  const applicationDraft=read("A"),selfAssessment=read("S");
+  const dialogueRating=read("R") ?? ""; // legacy personal archives have no saved rating
+  return applicationDraft===null||selfAssessment===null?null:{applicationDraft,selfAssessment,dialogueRating};
+}
