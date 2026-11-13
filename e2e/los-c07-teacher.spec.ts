@@ -1,12 +1,27 @@
-import { expect, test } from "@playwright/test";
-import { enterApp, expectNoHorizontalOverflow } from "./helpers";
+import { expect, test, type Page } from "@playwright/test";
+import { expectNoHorizontalOverflow } from "./helpers";
+
+/**
+ * These tests exercise local-only Teacher state and book navigation. The
+ * isolated preview deliberately has no production Supabase auth secrets.
+ * Inject only a fake browser-local device marker: it grants no backend access.
+ */
+async function enterLocalTeacherPreview(page:Page){
+  await page.addInitScript(() => {
+    localStorage.setItem("opk.device-authorized","Arthur");
+    localStorage.setItem("opk.owner-id","00000000-0000-4000-8000-000000000707");
+    localStorage.setItem("opk.device-token","los-c07-browser-mock-not-a-jwt");
+    localStorage.setItem("opk.device-token-expires",String(Date.now()+60*60*1000));
+  });
+}
+
 
 /**
  * Run on both desktop Chromium and iPhone WebKit.
  * These tests verify browser flow and persistence, not real-device audio QA.
  */
 test("C07 L036 grouped alphabet, pause/resume and real book deep link",async({page})=>{
-  await enterApp(page);
+  await enterLocalTeacherPreview(page);
   await page.goto("/los-lessons/L036",{waitUntil:"domcontentloaded"});
   await expect(page.getByRole("heading",{name:"Aakkosten ja nimen kertaus"})).toBeVisible();
   await page.getByRole("button",{name:"Keskeytä oppitunti"}).click();
@@ -33,7 +48,7 @@ test("C07 L036 grouped alphabet, pause/resume and real book deep link",async({pa
 });
 
 test("C07 L037 shows five real source turns and same textbook comprehension checks",async({page})=>{
-  await enterApp(page);
+  await enterLocalTeacherPreview(page);
   await page.goto("/los-lessons/L037",{waitUntil:"domcontentloaded"});
   await page.getByRole("navigation",{name:"Oppitunnin opetustilanteet"})
     .getByRole("button",{name:"Kaikki viisi alkuperäistä puheenvuoroa"}).click();
@@ -53,7 +68,7 @@ test("C07 L037 shows five real source turns and same textbook comprehension chec
 });
 
 test("C07 L039 form saves two fictional fields and Text B cannot earn listening points",async({page})=>{
-  await enterApp(page);
+  await enterLocalTeacherPreview(page);
   await page.goto("/los-lessons/L039",{waitUntil:"domcontentloaded"});
   await expect(page.getByRole("heading",{name:"Kuuntele ja täytä lomake"})).toBeVisible();
   await page.getByRole("navigation",{name:"Oppitunnin opetustilanteet"})
@@ -72,7 +87,7 @@ test("C07 L039 form saves two fictional fields and Text B cannot earn listening 
 });
 
 test("C07 L040 displays actual 15-item chapter assessment separately from Teacher completion",async({page})=>{
-  await enterApp(page);
+  await enterLocalTeacherPreview(page);
   await page.goto("/los-lessons/L040",{waitUntil:"domcontentloaded"});
   await page.getByRole("navigation",{name:"Oppitunnin opetustilanteet"})
     .getByRole("button",{name:"Palauta C07:n 15 osatehtävää"}).click();
