@@ -225,6 +225,47 @@ def normalize_validator_gates() -> None:
         source=source[:candidate.start()]+"(?:"+"|".join(ids)+")"+source[candidate.end():]
     path.write_text(source)
 
+def normalize_integrated_imports_and_signatures() -> None:
+    path=Path("src/features/los/teacher/LosTeacherPlayer.tsx")
+    source=path.read_text()
+    required={
+        "getLosOpenDialogue":'import { getLosOpenDialogue } from "../content/los1OpenDialogues.ts";',
+        "LOS1_TEXT_B_SOURCES":'import { LOS1_TEXT_B_SOURCES } from "../content/los1TextBAdditional.ts";',
+        "LosTeacherGreetingMedia":'import { LosTeacherGreetingMedia } from "./LosTeacherGreetingMedia.tsx";',
+        "LosTeacherNumberBuilder":'import { LosTeacherNumberBuilder } from "./LosTeacherNumberBuilder.tsx";',
+        "Los1ChapterImage":'import { Los1ChapterImage } from "../Los1ChapterImage.tsx";',
+        "TeacherTimeCalendar":'import { TeacherTimeCalendar } from "./TeacherTimeCalendar.tsx";',
+    }
+    for symbol,line in required.items():
+        if symbol in source and line not in source:
+            source=line+"\n"+source
+            print("Preserved merged Teacher widget import:",symbol)
+    path.write_text(source)
+    path=Path("src/features/los/teacher/engine.ts")
+    source=path.read_text()
+    if "return externalReady &&" in source:
+        needle="chapterAssessment?: TeacherChapterAssessmentInput): boolean {"
+        replacement="chapterAssessment?: TeacherChapterAssessmentInput, externalReady: boolean = !lesson.externalCheck): boolean {"
+        if needle in source:
+            source=source.replace(needle,replacement,1)
+        elif replacement not in source:
+            raise ValueError("Unexpected teacherCanFinish signature")
+        start=source.index("export function finishTeacherSession(")
+        before=source[:start]
+        after=source[start:]
+        needle="chapterAssessment?: TeacherChapterAssessmentInput): TeacherSession {"
+        replacement="chapterAssessment?: TeacherChapterAssessmentInput,\n  externalReady: boolean = !lesson.externalCheck): TeacherSession {"
+        if needle in after:
+            after=after.replace(needle,replacement,1)
+        elif replacement not in after:
+            raise ValueError("Unexpected finishTeacherSession signature")
+        after=after.replace(
+            "!teacherCanFinish(session, lesson, practiceAnswers, practiceChecked, chapterAssessment)",
+            "!teacherCanFinish(session, lesson, practiceAnswers, practiceChecked, chapterAssessment, externalReady)",1)
+        source=before+after
+        print("Combined external assessment completion across both Teacher finish functions.")
+    path.write_text(source)
+
 def normalize_assessment_sections() -> None:
     path=Path("src/features/los/teacher/LosTeacherPlayer.tsx")
     text=path.read_text()
@@ -285,6 +326,7 @@ normalize_full_path_test()
 normalize_activity_gate()
 normalize_assessment_sections()
 normalize_validator_gates()
+normalize_integrated_imports_and_signatures()
 subprocess.run(["git","add","--",*unmerged,"src/features/los/teacher/lessonL004.ts"],check=True)
 if subprocess.check_output(["git","ls-files","-u"],text=True).strip():
     raise ValueError("Unmerged index stages remain")
