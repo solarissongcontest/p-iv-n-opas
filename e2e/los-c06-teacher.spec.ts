@@ -27,6 +27,13 @@ test("L033 builds numbers interactively, persists selection on reload and fits m
   await expect(board).toContainText("einundzwanzig");
   const tens=board.getByLabel("Valitse kymmenet");
   const units=board.getByLabel("Valitse yksiköt");
+  // Pure decades and 100 are useful to explore, but do not prove units-first composition.
+  const confirm=page.getByRole("button",{name:"Rakensin taululla vähintään neljä eri yhdistelmälukua"});
+  await tens.selectOption("30");
+  await tens.selectOption("40");
+  await tens.selectOption("100");
+  await expect(board).toContainText("0/4");
+  await expect(confirm).toBeDisabled();
   await tens.selectOption("30");
   await units.selectOption("2");
   await expect(board).toContainText("zweiunddreißig");
@@ -36,7 +43,6 @@ test("L033 builds numbers interactively, persists selection on reload and fits m
   await units.selectOption("1");
   await expect(board).toContainText("einundsiebzig");
   await expect(board).toContainText(/[4-9]\/4/);
-  const confirm=page.getByRole("button",{name:"Rakensin taululla vähintään neljä eri lukua"});
   await expect(confirm).toBeEnabled();
   await page.reload({waitUntil:"domcontentloaded"});
   await page.locator(".los-teacher-outline").getByRole("button",{name:/Rakenna itse numeroita/}).click();
