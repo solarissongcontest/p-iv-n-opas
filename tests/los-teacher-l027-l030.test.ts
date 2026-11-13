@@ -36,7 +36,7 @@ test("four new Teacher manuscripts reuse existing Teacher Player and EX-MID rout
  assert.ok(links.some(link=>link.section==="midterm"));
  assert.equal(LOS1_L030_TEACHER.chapterId,"91");
  const player=readFileSync("src/features/los/teacher/LosTeacherPlayer.tsx","utf8");
- assert.match(player,/section === "midterm" \|\| section === "review"/);
+ assert.match(player,/section === "midterm" \|\| section === "review"|\["review-ii","final","summary","midterm","review"\]\.includes\(section\)/);
  assert.match(player,/teacherMidtermAssessmentStatus/);
 });
 
@@ -163,7 +163,7 @@ test("latest C03 human-audio UI and L030 existing exam coexist in one Teacher Pl
  assert.match(player,/LosTeacherGreetingMedia/);
  assert.match(player,/<LosTeacherGreetingMedia\s*\/>/);
  assert.match(player,/teacherMidtermAssessmentStatus\(lesson, draft, draft\.practiceAnswers\)/);
- assert.match(player,/section === "midterm" \|\| section === "review"/);
+ assert.match(player,/section === "midterm" \|\| section === "review"|\["review-ii","final","summary","midterm","review"\]\.includes\(section\)/);
  assert.match(media,/audio/);
  assert.match(media,/type="audio\/mpeg"/);
  assert.match(media,/type="audio\/ogg"/);
