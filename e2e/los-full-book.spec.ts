@@ -394,7 +394,7 @@ test("L002 pronunciation lesson gives targeted corrections and opens grammar in 
   await expect(page).toHaveURL(/\/los-lessons\/L002$/);
   await page.locator(".los-teacher-outline nav button").filter({hasText:"Arvaatko saksan w-kirjaimen äänen?"}).click();
   await page.locator(".los-teacher-option").filter({hasText:"Englannin w-äännettä"}).click();
-  await expect(page.locator(".los-teacher-feedback")).toContainText("saksan tavallinen w");
+  await expect(page.locator(".los-teacher-feedback")).toContainText("Saksan tavallinen w");
   await page.locator(".los-teacher-option").filter({hasText:"Suomen v-äännettä"}).click();
   await expect(page.locator(".los-teacher-feedback")).toContainText("Oikein");
   await page.locator(".los-teacher-outline nav button").filter({hasText:"Tarkista säännöt kirjan omasta ääntämisosiosta"}).click();
