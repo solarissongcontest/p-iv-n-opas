@@ -12,6 +12,7 @@ on:
       - "src/features/los/LosBook.tsx"
       - "tests/los-teacher-l036-l040.test.ts"
       - "e2e/los-c07-teacher.spec.ts"
+      - "e2e/los-full-book.spec.ts"
       - ".github/workflows/los-c07-teacher-ci.yml"
   workflow_dispatch:
 
@@ -60,6 +61,8 @@ jobs:
           exit 1
       - name: C07 Teacher Player flows on desktop Chromium and iPhone WebKit
         run: bunx playwright test e2e/los-c07-teacher.spec.ts --project=desktop-chromium --project=iphone-webkit
+      - name: Full 60-lesson chapter navigation smoke on Chromium and WebKit
+        run: bunx playwright test e2e/los-full-book.spec.ts --project=desktop-chromium --project=iphone-webkit --grep "every one of the 60 guided lessons opens"
       - name: Upload browser traces and logs
         if: always()
         uses: actions/upload-artifact@v4
