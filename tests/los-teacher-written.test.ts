@@ -94,3 +94,33 @@ test("old multiple choice evidence is retained, but cannot substitute for typed 
  assert.deepEqual(teacherEvidence(TEACHER_L004,p).writtenIndependent,[]);
  assert.equal(teacherCanComplete(TEACHER_L004,p),false);
 });
+
+test("a choice after a written answer is practice, not a second independent demonstration",()=>{
+ for(const [scene,typed,choice] of [
+  ["independent","Hallo!","c"],
+  ["application","Auf Wiedersehen!","a"],
+  ["exit","Gute Nacht!","c"]
+ ] as const){
+  let p=start(scene);
+  p=answerTeacherWritten(TEACHER_L004,p,typed,at);
+  assert.equal(p.answers[scene+"-written"]?.independent,true,scene);
+  p=answerTeacher(TEACHER_L004,p,choice,at);
+  assert.equal(p.answers[scene]?.correct,true,scene);
+  assert.equal(p.answers[scene]?.independent,false,scene);
+  assert.deepEqual(teacherEvidence(TEACHER_L004,p).writtenIndependent,[scene]);
+  assert.deepEqual(teacherEvidence(TEACHER_L004,p).independent,[]);
+ }
+ // A historical MC-only response remains untouched without a written attempt.
+ const old=answerTeacher(TEACHER_L004,start("independent"),"c",at);
+ assert.equal(old.answers.independent?.independent,true);
+});
+test("a written mistake or shown answer also disqualifies downstream choice independence",()=>{
+ let p=start("application");
+ p=answerTeacherWritten(TEACHER_L004,p,"Tschüss!",at);
+ p=answerTeacher(TEACHER_L004,p,"a",at);
+ assert.equal(p.answers.application?.independent,false);
+ let q=start("exit");
+ q=revealTeacherWritten(TEACHER_L004,q,at);
+ q=answerTeacher(TEACHER_L004,q,"c",at);
+ assert.equal(q.answers.exit?.independent,false);
+});

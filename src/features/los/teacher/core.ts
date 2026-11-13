@@ -138,8 +138,12 @@ export function answerTeacher(lesson:TeacherLesson,p:TeacherProgress,answer:stri
  const q=scene?.question,prev=p.answers[p.scene];
  if(p.paused||!validIso(at)||!q||!q.choices.some(x=>x.id===answer)||prev?.correct||prev?.revealed||((prev?.count??0)>=10))return p;
  const count=(prev?.count??0)+1,correct=answer===q.correctId;
+ // After a written attempt, the learner has already seen the answer/feedback.
+ // Keep historical MC-only evidence, but do not count the follow-up choice
+ // as a second independent first-try demonstration of the same expression.
+ const hasWrittenAttempt=Boolean(p.answers[p.scene+"-written"]);
  return {...p,answers:{...p.answers,[p.scene]:{answer,count,correct,
-    independent:correct&&count===1&&!p.hints.includes(p.scene)&&
+    independent:correct&&count===1&&!p.hints.includes(p.scene)&&!hasWrittenAttempt&&
      (scene.phase==="independent"||scene.phase==="application"||scene.phase==="exit"),
     revealed:false,at}}};
 }

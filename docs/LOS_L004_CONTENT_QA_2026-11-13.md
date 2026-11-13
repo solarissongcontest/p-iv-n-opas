@@ -75,3 +75,11 @@ Käsikirjoitus on edelleen nimenomaisesti **luonnos**. Lähdeauditointia ei saa 
 **Tallennus ja pedagoginen näyttö:** keskeneräiset, enintään 40 merkin kirjoitusvastaukset tallennetaan nykyiseen `lessonProgress.L004.teacher.writtenDrafts`-tietoon; tarkistetut vastaukset ovat `answers["independent-written"]`, `answers["application-written"]` ja `answers["exit-written"]`. Aiemmat `answers.independent`-, `answers.application`- ja `answers.exit`-merkinnät eivät muutu. Erillinen `writtenIndependent`-mittari kertoo vain ensimmäisellä yrityksellä ilman vihjettä oikein kirjoitetut vastaukset. Koko oppitunnin läpikäynti ei tarkoita kielen hallintaa. Vanhojen jo päättyneiden oppituntien `completedAt` säilyy eikä uusia tehtäviä taannehtivasti väitetä tehdyiksi.
 
 **Testattava julkaisuraja:** oikeiden ilmausten hyväksyntä, tunnettujen väärien vastausten hylkääminen, rajattu normalisointi, vihjeen vaikutus näyttöön, kirjoitusluonnosten tallennus ja uudelleenavaaminen, alkuperäisten monivalintojen säilyminen, vanhojen suoritusten yhteensopivuus sekä mobiilin näppäimistö ja vaakavieritys. Automatisoidut testit eivät korvaa riippumatonta kieli- ja pedagogista tarkistusta, oikeaa mobiililaitetta tai käyttäjäkoetta.
+
+### Täsmennys: avointa vastausta seuraavan monivalinnan näyttö
+
+Kun samalla opetustilanteella on jo tallennettu kirjoitusyritys, sitä seuraava
+monivalintavastaus on lisäharjoittelua eikä toinen itsenäinen ensiyrityksen näyttö:
+kirjoittamisen palaute tai malliratkaisu on jo voinut paljastaa oikean ilmauksen.
+Aiemmat, ilman kirjoitusyritystä tallennetut monivalintanäytöt säilyvät historiallisina.
+Tämä muutos ei jälkikäteen muokkaa aikaisempia vastausmerkintöjä.
