@@ -15,7 +15,7 @@ import {
   emptyTeacherSession, moveTeacherScene, submitTeacherAnswer, confirmTeacherActivity,
   evaluateTeacherAnswer, teacherCanFinish, teacherChapterAssessmentStatus,
   setTeacherAnswerDraft, validTeacherSession, parseTeacherSessions,
-  independentTeacherEvidence, markTeacherHelp, teacherWrongFeedback,
+  independentTeacherEvidence, markTeacherHelp, teacherWrongFeedback, teacherBuiltNumberCount,
 } from "../src/features/los/teacher/engine.ts";
 
 const lessons = [LOS1_L031_TEACHER, LOS1_L032_TEACHER, LOS1_L033_TEACHER, LOS1_L034_TEACHER, LOS1_L035_TEACHER] as const;
@@ -103,6 +103,12 @@ test("L033 number building is persisted and ß or reversed digit ordering are no
   assert.equal(evaluateTeacherAnswer(q,"zweiunddreißig"),true);
   let s=prepared(l);
   assert.equal(teacherCanFinish(s,l,practiced(l)),false,"four distinct board numbers are required");
+  const onlyTens=setTeacherAnswerDraft(s,"number-builder-history","20,30,40,100",at);
+  assert.equal(teacherBuiltNumberCount(onlyTens,"number-builder"),0,"round tens and 100 do not test units-first order");
+  assert.equal(teacherCanFinish(onlyTens,l,practiced(l)),false);
+  const mixed=setTeacherAnswerDraft(s,"number-builder-history","21,32,37,40,100",at);
+  assert.equal(teacherBuiltNumberCount(mixed,"number-builder"),3,"only distinct compound numerals count");
+  assert.equal(teacherCanFinish(mixed,l,practiced(l)),false);
   s=setTeacherAnswerDraft(s,"number-builder","71",at);
   s=setTeacherAnswerDraft(s,"number-builder-history","21,32,37,71",at);
   s=confirmTeacherActivity(s,l,"builder-used",at);

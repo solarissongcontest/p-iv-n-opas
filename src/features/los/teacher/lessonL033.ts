@@ -192,7 +192,7 @@ export const LOS1_L033_TEACHER: TeacherLesson = {
       "title": "Rakenna itse numeroita",
       "paragraphs": [
         "Valitse kymmenet ja yksiköt alla olevasta interaktiivisesta taulusta. Se tuottaa yhden saksankielisen yhdyssanan ja perustelee osien järjestyksen.",
-        "Kokeile erityisesti 21, 32, 37, 71 sekä 100. Opetustaulun esimerkkivaihetta voi myös toistaa."
+        "Kokeile erityisesti 21, 32, 37 ja 71. Tutki myös tasakymmeniä ja lukua 100, mutta neljän luvun harjoitusvaatimukseen lasketaan vain 21–99, joissa yksikköosa ei ole nolla. Opetustaulun esimerkkivaihetta voi myös toistaa."
       ],
       "board": [
         {
@@ -203,7 +203,7 @@ export const LOS1_L033_TEACHER: TeacherLesson = {
       ],
       "numberBuilder": true,
       "activityId": "builder-used",
-      "activityLabel": "Rakensin taululla vähintään neljä eri lukua",
+      "activityLabel": "Rakensin taululla vähintään neljä eri yhdistelmälukua",
       "help": [
         {
           "title": "Miksi sanassa on ß?",

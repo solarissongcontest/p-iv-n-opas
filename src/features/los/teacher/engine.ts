@@ -184,10 +184,11 @@ export function revealTeacherSolution(session: TeacherSession, sceneId: string, 
       [...session.revealedIds, sceneId],
   };
 }
-/** Count distinct valid 20–100 values from the existing session draft. No second store. */
+/** Count distinct compound 21–99 numbers: whole tens and 100 do not practice units-first order. */
 export function teacherBuiltNumberCount(session: TeacherSession, sceneId: string): number {
   const history = session.draftAnswers[sceneId + "-history"] ?? "";
-  return new Set(history.split(",").filter(value => /^(?:[2-9][0-9]|100)$/.test(value))).size;
+  return new Set(history.split(",").filter(value =>
+    /^[2-9][0-9]$/.test(value) && Number(value) % 10 !== 0)).size;
 }
 export function confirmTeacherActivity(session: TeacherSession, lesson: TeacherLesson, activityId: string, now: string): TeacherSession {
   if (session.completedAt || !lesson.requiredActivityIds.includes(activityId)) return session;

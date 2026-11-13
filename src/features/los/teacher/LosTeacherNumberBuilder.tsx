@@ -19,7 +19,7 @@ export function LosTeacherNumberBuilder({ value, onChange, historyCount }: {
     (unit === 1 ? "ein" : units[unit]) + " + und + " + tens[base] + " = " + german;
   return <section className="los-teacher-number-builder" aria-label="Interaktiivinen saksan numeroiden rakennustaulu">
     <h3>Rakenna itse luku 20–100</h3>
-    <p>Vaihda kymmeniä ja yksiköitä. Huomaa saksan sanajärjestys: ensin yksiköt, sitten und, sitten kymmenet.</p>
+    <p>Vaihda kymmeniä ja yksiköitä. Huomaa saksan sanajärjestys: ensin yksiköt, sitten und, sitten kymmenet. Voit tutkia myös tasakymmeniä ja sataa.</p>
     <div className="los-teacher-number-selects">
       <label>Kymmenet
         <select aria-label="Valitse kymmenet" value={base} onChange={e => onChange(Number(e.target.value) === 100 ? 100 : Number(e.target.value) + unit)}>
@@ -43,6 +43,6 @@ export function LosTeacherNumberBuilder({ value, onChange, historyCount }: {
         "Yksikköosa tulee ensin, sitten und ja lopuksi kymmenet. Sana kirjoitetaan yhteen."}</p>
       {Math.floor(number/10) === 3 && <p>Kolmekymmentä on dreißig: ß säilyy myös yhdistelmäluvussa.</p>}
     </div>
-    <p className="los-teacher-number-count">Erilaisia rakennettuja lukuja tallessa: {historyCount}/4 vaadittua. Käytä vähintään neljää yhdistelmää.</p>
+    <p className="los-teacher-number-count">Erilaisia rakennettuja yhdistelmälukuja: {historyCount}/4 vaadittua. Kokeile vähintään neljää lukua, esimerkiksi 21, 32, 47 ja 71. Tasakymmenet ja 100 eivät kartuta laskuria.</p>
   </section>;
 }
