@@ -1,4 +1,5 @@
 import type { LosChapter } from "../catalog";
+import { LOS_FUTURE_FIRST_CHAPTERS } from "./losFutureC01Drafts";
 
 /**
  * LOS! 2–8: kirjakohtaisten v1.0-käsikirjoitusten 70 kappaleen rakenne.
@@ -106,7 +107,7 @@ export const LOS_FUTURE_CHAPTERS: Record<number, LosChapter[]> = Object.fromEntr
         subtitle: objective.replace(/\.$/, ""),
         objectives: [objective],
         grammar,
-        vocabulary: [],
+        vocabulary: i === 0 ? LOS_FUTURE_FIRST_CHAPTERS[Number(bookId)]?.vocabulary.map(([de, fi]) => `${de} – ${fi}`) ?? [] : [],
       };
     }),
   ]),
