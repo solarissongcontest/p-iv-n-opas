@@ -29,12 +29,18 @@ export type TeacherScene = {
   id: string;
   phase: string;
   title: string;
-  kind: "introduction" | "explanation" | "board" | "question" | "book" | "activity" | "reflection" | "form" | "summary";
+  kind: "introduction" | "explanation" | "board" | "question" | "book" | "activity" | "reflection" | "form" | "summary" | "calendar" | "source";
   paragraphs: readonly string[];
   question?: TeacherQuestion;
   reflection?: TeacherReflection;
   /** Text-only name/spelling form saved inside existing TeacherSession drafts. */
   form?: readonly TeacherFormField[];
+  /** A fixed, checked timetable; not evidence of listened audio. */
+  calendar?: { prompt: string; day: string; time: string; sourceNote: string };
+  /** Source content stays in the canonical textbook objects. */
+  sourceChapterId?: string;
+  textBChapterId?: string;
+  chapterPhoto?: boolean;
   board?: readonly TeacherBoardStep[];
   /** Interactive board uses existing TeacherSession drafts. */
   numberBuilder?: boolean;
@@ -253,6 +259,10 @@ export function teacherWrongFeedback(scene: TeacherScene, answer: string): strin
     q.genericWrong;
   return q.wrongAnswers?.[normalizeTeacherAnswer(answer)] ?? q.genericWrong;
 }
+/** Saved calendar choices count only when explicitly correct, never as listening points. */
+export function isCorrectCalendarEntry(scene: TeacherScene, value: string): boolean {
+  return Boolean(scene.calendar && value === scene.calendar.day + "|" + scene.calendar.time);
+}
 export function teacherCanFinish(session: TeacherSession, lesson: TeacherLesson,
   practiceAnswers: Readonly<Record<string, string>>, practiceChecked: readonly string[] = [],
   chapterAssessment?: TeacherChapterAssessmentInput): boolean {
@@ -264,6 +274,7 @@ export function teacherCanFinish(session: TeacherSession, lesson: TeacherLesson,
     lesson.scenes.every(scene => !scene.numberBuilder || teacherBuiltNumberCount(session, scene.id) >= 4) &&
     lesson.scenes.every(scene => !scene.form || scene.form.every(field =>
       Boolean(session.draftAnswers[scene.id + "." + field.id]?.trim()))) &&
+    lesson.scenes.every(scene => !scene.calendar || isCorrectCalendarEntry(scene,session.draftAnswers[scene.id] ?? "")) &&
     lesson.requiredQuestionIds.every(id => session.attempts.some(item => item.sceneId === id)) &&
     lesson.requiredActivityIds.every(id => session.activityIds.includes(id)) &&
     lesson.requiredPracticeIds.every(id => Boolean(practiceAnswers[id]?.trim())) &&
