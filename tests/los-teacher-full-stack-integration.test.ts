@@ -49,7 +49,7 @@ test("StudyOS and LOS! library expose direct links without inflating approved le
   const path=readFileSync("src/features/los/LosReferenceTools.tsx","utf8");
   assert.equal(shell.split('href="/los"').length-1,2,"Desktop and mobile have real LOS links");
   for(const [where,source] of [["reader",library],["chapter picker",picker],["study path",path]] as const){
-    assert.match(source,/from "\\.\/teacher\/lessonRegistry";/,where+" must use the canonical lesson registry");
+    assert.ok(source.includes('from "./teacher/lessonRegistry";'),where+" must use the canonical lesson registry");
   }
 
   for(const destination of ["contents","path","dictionary","search","cards"]){
