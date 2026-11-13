@@ -4,7 +4,7 @@ import { LOS1_MIDTERM_QUESTIONS, losExamReadyToSubmit } from "../content/los1Exa
  * LOS Teacher 2.0: deterministic learning engine. No AI services, network requests
  * or inferred mastery. A session is independent of legacy lessonProgress.
  */
-export type TeacherOption = { id: string; label: string; wrongFeedback?: string };
+export type TeacherOption = { id: string; label: string; wrongFeedback?: string; lang?: "fi" | "de" };
 export type TeacherQuestion = {
   prompt: string;
   type: "choice" | "text";
