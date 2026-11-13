@@ -34,7 +34,8 @@ test("L017-L021 use exactly five validated C04 manuscripts in the existing Teach
  // Do not activate the unrelated C03 previews or change their registry entries.
  assert.ok(getLosTeacherLesson("L013"),"Current C03 L013 remains registered");
  assert.ok(getLosTeacherLesson("L016"),"Current C03 L016 remains registered");
- assert.equal(getLosTeacherLesson("L027"),undefined);
+ const next=getLosTeacherLesson("L027");
+ assert.ok(!next || next.chapterId==="91","C04 must not replace the separate L027 review lesson");
 });
 
 test("L017 uses context and relationship, not a blanket age rule",()=>{
