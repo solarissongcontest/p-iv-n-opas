@@ -1140,8 +1140,7 @@ test("L016 does not count draft C03 test as submission or as automatic mastery",
  await expect(status).toContainText("Ei vielä palautettu");
  await page.goto("/los?lessonReturn=L016#/1/03/test",{waitUntil:"domcontentloaded"});
  const items=page.locator(".los-workbook-question");
- const n=await items.count();
- expect(n).toBeGreaterThanOrEqual(10);
+ await expect(items).toHaveCount(15); // Wait for the chapter test to actually render after navigation.
  await items.first().locator('input[type="radio"]').first().check();
  await page.getByRole("link",{name:"Palaa oppitunnille L016"}).click();
  await outline.filter({hasText:"Palauta C03:n oikea kappaletesti"}).click();
