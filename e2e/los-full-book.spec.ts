@@ -1144,6 +1144,9 @@ test("L016 does not count draft C03 test as submission or as automatic mastery",
  await page.getByRole("link",{name:"Palaa oppitunnille L016"}).click();
  await outline.filter({hasText:"Palauta C03:n oikea kappaletesti"}).click();
  await expect(status).toContainText("Ei vielä palautettu");
+ // Completion is deliberately available only on the lesson's final summary
+ // screen. A partly answered real book exam must not enable that button.
+ await outline.filter({hasText:"C03:n opetus ja koe ovat eri suorituksia"}).click();
  await expect(page.getByRole("button",{name:"Merkitse oppitunti läpikäydyksi"})).toBeDisabled();
  await expectNoHorizontalOverflow(page);
 });
