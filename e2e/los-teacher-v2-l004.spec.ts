@@ -81,7 +81,7 @@ test("Teacher 2.0 help, book reference and free navigation never count as indepe
  await lesson.getByRole("button",{name:/En ymmärrä/}).click();
  await expect(lesson).toContainText("Kun toinen lähtee, sano hyvästely");
  await lesson.getByRole("button",{name:"Tschüss!"}).click();
- await expect(lesson.locator(".los-teacher-feedback")).toContainText("tuetuksi");
+ await expect(lesson.locator(".los-teacher-feedback")).toContainText("ei ole sama asia kuin itsenäinen");
  const saved=await page.evaluate(()=>{
    const raw=localStorage.getItem("los.teacher.v2.00000000-0000-4000-8000-000000000204.1.L004");
    return raw?JSON.parse(raw):null;
