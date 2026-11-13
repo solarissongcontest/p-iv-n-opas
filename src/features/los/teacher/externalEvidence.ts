@@ -1,5 +1,6 @@
 import type { LosChapterDraft } from "../studyState.ts";
 import type { TeacherLesson } from "./engine.ts";
+import { losCountReviewedWords } from "../losReviewedWords.ts";
 import {
   losReviewIIQuestionsFor, losReviewIIReflectionId,
   LOS1_REVIEW_II_WRITING_ID, type LosReviewIIGroupId,
@@ -87,9 +88,9 @@ export function teacherExternalStatus(
   if (lesson.externalCheck === "summary") {
     const goals = Array.from({length:10},(_,i) =>
       draft.practiceAnswers["EX-SUMMARY-C" + String(i + 1).padStart(2,"0")] === "reviewed").filter(Boolean).length;
-    const reviewed = new Set(Object.entries(allDrafts).flatMap(([chapter, d]) =>
-      /^0[1-9]$|^10$/.test(chapter) ? Object.keys(d.recallCards ?? {}) : [])).size;
-    const cards = reviewed >= 5 && /^reviewed-\d+$/.test(draft.practiceAnswers[LOS1_SUMMARY_CARDS] ?? "");
+    const reviewed = losCountReviewedWords(allDrafts);
+    const storedCardCount = Number((draft.practiceAnswers[LOS1_SUMMARY_CARDS] ?? "").match(/^reviewed-(\d+)$/)?.[1] ?? 0);
+    const cards = reviewed >= 5 && storedCardCount >= 5;
     const goal = (draft.practiceAnswers[LOS1_SUMMARY_GOAL] ?? "").trim();
     const goalOk = goal.length >= 25 && draft.practiceAnswers["EX-SUMMARY-GOAL-OK"] === "confirmed";
     const reflection = ["well","some","again"].includes(draft.practiceAnswers[LOS1_SUMMARY_REFLECTION] ?? "");
@@ -97,7 +98,7 @@ export function teacherExternalStatus(
       ready: goals === 10 && cards && goalOk && reflection,
       lines: [
         "Opetustavoitteet katselmoitu: " + goals + "/10. Katselmointi ei ole hyväksytty osaamisnäyttö.",
-        "Oikeasti arvioituja sanakortteja: " + reviewed + ". Vahvistus: " + (cards ? "kyllä" : "kesken") + ".",
+        "Eri sanoja, joista löytyy kelvollinen arviointimerkintä: " + reviewed + ". Vahvistus: " + (cards ? "kyllä" : "kesken") + ".",
         "Oma seuraava tavoite: " + (goalOk ? "vahvistettu" : "puuttuu tai vahvistamatta") + ".",
         "Oma kokonaisarvio: " + (reflection ? "kirjattu" : "puuttuu") + ".",
       ],
