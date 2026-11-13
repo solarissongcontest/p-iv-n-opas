@@ -1,40 +1,48 @@
 # LOS Teacher Experience 2.0: implementation status
 
-Date: 2026-11-12. This file records **what is in code**, not a release certificate.
+**Date:** 2026-11-13. Source-code inventory, not a release certificate.
 
 ## Authority
-The attached LOS Teacher Experience 2.0 masterplan (2026-11-12) governs the learning design, alongside the existing LOS series and V3.3 visual masterplans. No AI models, generative services, machine learning or AI speech services belong in the lesson runtime.
 
-## Scope of this pilot
-- Dedicated deep link \`/los-lessons/L004\`. Study path L004's chapter list entry opens it.
-- Eleven human-authored teaching scenes: introduction, recall, explanation, incremental board, guided practice, book references, unassisted short answer, spoken self-practice, dialogue, exit check and summary.
-- Deterministic feedback for exact choice and short-answer tasks. Normalization preserves German umlauts and ß. Retries, hints and viewed solutions never turn into unassisted successes.
-- Book C01 vocabulary and practice open via actual LOS book hash links in another tab, with a safe return link. Their source of truth remains the existing chapter draft.
-- Student state is an **optional** \`teacherSessions\` field within existing version 1 chapter drafts, with validation; old \`lessonProgress\` and backup keys are unchanged.
-- Finishing L004 requires all scenes visited, every required question attempted, explicit self-confirmations and saved book task responses for C01-EX-01 and C01-EX-04. Legacy L004 completion is only recorded after its own evidence check also succeeds. Completing or opening a scene is not proof of language mastery.
-- Mobile-first responsive teaching layout; no required audio, no automatic pronunciation scoring.
+The LOS Teacher Experience 2.0 masterplan (2026-11-12), LOS! series masterplan, LOS! 1 book-specific masterplan and approved visual V3.3 plan govern this implementation. There are no AI models, generative runtime APIs, machine learning, synthetic speech services or automatic pronunciation scoring.
 
-## Not yet done
-- The other 59 LOS! 1 teaching scripts and all LOS! 2-8 content.
-- Human-recorded Finnish teaching narration, pronunciation playback and audio sync.
-- Independent skill-level evidence analysis and full spaced review scheduling (existing book review features are retained).
-- Expert proofreading of L004's Finnish teaching prose and German examples. It is a **preview**, not a published language-reviewed lesson.
-- Production deployment, verified iPhone hardware accessibility and full publication approval.
-- The separately drafted LOS reader V3.4 PR #209 compatibility/merge review. PR #217 is additive but should be retested on the final integrated head.
+## Implemented teaching pilot: L001–L004
 
-## Verification commands
-- \`bun run test\` (includes \`tests/los-teacher-engine.test.ts\`).
-- \`bun run build\` (includes TypeScript).
-- \`bun run lint\`.
-- \`bunx playwright test e2e/los-full-book.spec.ts --project=desktop-chromium --project=iphone-webkit\`.
-- Confirm all relevant CI runs are passing on the **same head SHA**, not merely on an earlier commit.
-- Real-device tests and expert linguistic review remain manual gates.
+- **L001 · Miten LOS! 1:llä opiskellaan? (10 scenes).** Zero-beginner introduction to the reader, words, optional original audio, vocabulary and dictionary. Learner writes a concrete personal goal in a persistent, validated reflection exercise. Manual reader/audio confirmations are not proofs of listening proficiency.
+- **L002 · Aloita saksan ääntämisestä (11 scenes).** Two diagnostic pre-questions, explanations of five spelling/pronunciation patterns (w, z, ei, ie, sch), progressive teaching board, targeted corrections, grammar references and optional human-voice textbook audio. No automatic speech scoring.
+- **L003 · Lue Franzin ja Jörgin keskustelu (10 scenes).** Real human-authored source dialogue in the book, guided reading, comprehension and highlighting. Requires actual C01-SOURCE-Q01 and C01-SOURCE-Q02 textbook answers AND their checked states. Opening a link is not evidence.
+- **L004 · Tervehdykset muistista (11 scenes).** Introduction, retrieval, explanation, board, guided and unassisted answers, book exercises C01-EX-01/C01-EX-04, spoken self-practice, dialogue and exit check.
 
-## Next safe steps
-1. Resolve CI and browser regressions without weakening legacy L001-L060 tests.
-2. Review L004 on actual mobile and desktop devices.
-3. Generalize lesson player primitives, then script another representative grammar lesson (L009, C02: heißen/sein).
-4. Add skills-and-review evidence per masterplan without conflating lesson completion with mastery.
-5. Integrate with PR #209 after verifying actual merged code, not by force-push or rewriting shared branch history.
+All four use the same deep-linkable LOS Lesson Player, accessible from the 60-lesson study path and relevant book resume action. The reader opens separately with a verified return link; the lesson's local position remains.
 
-Do not call this pilot the complete Teacher Experience 2.0 or advertise all 60 lessons as converted.
+## Engine, data and safety
+
+- Deterministic lesson manuscripts, structurally validated scene, question and activity IDs. Teaching text is never generated at runtime.
+- Targeted feedback, hints, reteaching, manual confirmations, structured reflection tasks and persistent teaching position.
+- Separate attempts, help use, self-report and lesson completion. Completion is not automatically a claim of lasting mastery.
+- Versioned, owner-scoped teacherSessions data alongside existing v1 chapter drafts. Existing lessonProgress, answers, notes and reader marks remain intact.
+- Backup/import validation updated. Return links accept only recognized lessons.
+- Resume recommendations recognize new Teacher completion without manufacturing old checklist evidence.
+
+## Included tests
+
+- Engine tests for response checking, German umlauts and ß, hints, independence and completion gating.
+- Content checks for valid answer models, source references, unique IDs and reflection requirements.
+- New L001, L002, L003 content/evidence unit tests.
+- Browser tests for all 60 lesson entries and the four Teacher pilots, including persistence, book return and L003 source-check evidence.
+
+CI successes on earlier commits do not verify the current head. Confirm mobile WebKit and desktop Chromium checks after all changes.
+
+## Not complete
+
+- Expert German-language and pedagogical editing. All scripts remain previews.
+- Human-recorded Finnish teaching voice, pronunciation clips and synchronized animation.
+- Full skill-level learning evidence and cross-lesson spaced review scheduling.
+- Real phone hardware accessibility checks.
+- Conversion of the remaining **56 LOS! 1 lessons** and LOS! 2–8.
+- Compatibility with V3.4 reader PR #209.
+- Production deployment and final publication approval.
+
+## Verification gate
+
+Run full lint, unit tests, TypeScript/typecheck, production build, desktop Chromium and iPhone WebKit browser tests on the exact final head SHA. Keep PR #217 in Draft status until all gates are satisfied. Do not claim all 60 lessons are upgraded.
