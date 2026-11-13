@@ -130,7 +130,7 @@ export function LosIndexSearch({book,move}:{book:LosBookDefinition;move:LosNavig
     if(book.id>=2) {
       const manuscript=LOS_FUTURE_MANUSCRIPTS[book.id] ?? {};
       for(const [id,entry] of Object.entries(manuscript)){
-        const snippets:[
+        const snippets=[
           {section:"text" as const,title:"Text A",value:entry.textA},
           {section:"text-b" as const,title:"Text B",value:entry.textB},
           {section:"text-b" as const,title:"Tukidialogi",value:entry.dialogue.join(" ")},
