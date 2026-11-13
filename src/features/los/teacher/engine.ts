@@ -49,6 +49,8 @@ export type TeacherLesson = {
   requiredPracticeIds: readonly string[];
   /** Book comprehension checks must be both answered and explicitly checked. */
   requiredCheckedIds?: readonly string[];
+  /** Read-only adapter for existing Review II, EX-FINAL or summary drafts. */
+  externalCheck?: "review-ii" | "final" | "summary";
   /** Chapter-test evidence stays in the existing chapter draft. */
   chapterAssessment?: {
     requiredTestIds: readonly string[];
@@ -220,8 +222,8 @@ export function teacherWrongFeedback(scene: TeacherScene, answer: string): strin
 }
 export function teacherCanFinish(session: TeacherSession, lesson: TeacherLesson,
   practiceAnswers: Readonly<Record<string, string>>, practiceChecked: readonly string[] = [],
-  chapterAssessment?: TeacherChapterAssessmentInput): boolean {
-  return teacherChapterAssessmentStatus(lesson, chapterAssessment).ready && !session.paused && lesson.scenes.every(scene => session.visitedIds.includes(scene.id)) &&
+  chapterAssessment?: TeacherChapterAssessmentInput, externalReady: boolean = !lesson.externalCheck): boolean {
+  return externalReady && teacherChapterAssessmentStatus(lesson, chapterAssessment).ready && !session.paused && lesson.scenes.every(scene => session.visitedIds.includes(scene.id)) &&
     lesson.scenes.every(scene => !scene.reflection ||
       (session.draftAnswers[scene.id]?.trim().length ?? 0) >= scene.reflection.minLength) &&
     lesson.requiredQuestionIds.every(id => session.attempts.some(item => item.sceneId === id)) &&
@@ -232,8 +234,9 @@ export function teacherCanFinish(session: TeacherSession, lesson: TeacherLesson,
 }
 export function finishTeacherSession(session: TeacherSession, lesson: TeacherLesson,
   practiceAnswers: Readonly<Record<string, string>>, now: string,
-  practiceChecked: readonly string[] = [], chapterAssessment?: TeacherChapterAssessmentInput): TeacherSession {
-  return session.completedAt || !teacherCanFinish(session, lesson, practiceAnswers, practiceChecked, chapterAssessment) ? session :
+  practiceChecked: readonly string[] = [], chapterAssessment?: TeacherChapterAssessmentInput,
+  externalReady: boolean = !lesson.externalCheck): TeacherSession {
+  return session.completedAt || !teacherCanFinish(session, lesson, practiceAnswers, practiceChecked, chapterAssessment, externalReady) ? session :
     { ...session, updatedAt: now, completedAt: now };
 }
 export function independentTeacherEvidence(session: TeacherSession, lesson: TeacherLesson): number {
