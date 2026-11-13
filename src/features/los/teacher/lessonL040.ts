@@ -28,7 +28,7 @@ export const LOS1_L040_TEACHER: TeacherLesson = {
     {id:"recall",phase:"Muistelu",kind:"question",title:"Millä fraasilla kysyt kirjoitusasua?",
       paragraphs:["Kokeile ensin ilman sanastoa. Tarkista sitten tarkoitus."],
       question:{type:"choice",skillId:"L1-STRAT-01",prompt:"Mitä Wie schreibt man das? tarkoittaa?",
-        options:[{id:"a",label:"Miten tämä kirjoitetaan?"},{id:"b",label:"Minkä ikäinen olet?",wrongFeedback:"Ikää kysytään Wie alt bist du?"},{id:"c",label:"Missä asut?",wrongFeedback:"Asuinpaikkaa kysytään Wo wohnst du?"}],
+        options:[{id:"a",label:"Miten tämä kirjoitetaan?", "lang": "fi"},{id:"b",label:"Minkä ikäinen olet?", "lang": "fi",wrongFeedback:"Ikää kysytään Wie alt bist du?"},{id:"c",label:"Missä asut?", "lang": "fi",wrongFeedback:"Asuinpaikkaa kysytään Wo wohnst du?"}],
         correctOption:"a",success:"Oikein. Schreibt liittyy kirjoittamiseen.",hint:"Schreiben = kirjoittaa.",reteach:"Wie schreibt man das? kysyy kirjoitusasua; Bitte buchstabieren Sie. pyytää tavaaamaan.",genericWrong:"Etsi vaihtoehto, jossa kysytään kirjoitusasua."}},
     {id:"teacher",phase:"Opettajan kertaus",kind:"explanation",title:"Kolme asiaa, jotka helposti menevät sekaisin",
       paragraphs:[
