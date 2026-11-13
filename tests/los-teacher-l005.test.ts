@@ -148,3 +148,9 @@ test("contextual help remains optional but invalidates only future blind first a
  assert.equal(after.answers.exit?.independent,true);
  assert.equal(teacherEvidence(lesson,after).independent.length,1);
 });
+
+test("L005 remains the selected lesson on mount; only explicit Next selects L006",()=>{
+ const shell=readFileSync("src/features/los/teacher/LosL005LessonShell.tsx","utf8");
+ assert.match(shell,/useEffect\(\(\)=>\{\s*try\{sessionStorage\.setItem\("los1\.selectedLesson","L005"\);\}/);
+ assert.match(shell,/sessionStorage\.setItem\("los1\.selectedLesson","L006"\);\}catch\{\/\* path remains available \*\//);
+});
