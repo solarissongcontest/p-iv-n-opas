@@ -145,9 +145,9 @@ export const LOS1_L008_TEACHER: TeacherLesson = {
         type:"choice",skillId:"L1-READ-01",evidenceRole:"application",
         prompt:"Mitä lause Ja, er heißt Herr Weiß. kertoo?",
         options:[
-          {id:"a",label:"Greta on nimeltään Weiß.",wrongFeedback:"Greta kertoo opettajasta, ei omasta nimestään."},
-          {id:"b",label:"Opettajan sukunimi on Weiß."},
-          {id:"c",label:"Franzin sukunimi on Weiß.",wrongFeedback:"Franz kysyy opettajasta. Weiß on opettajan sukunimi."},
+          {id:"a",label:"Greta on nimeltään Weiß.", "lang": "fi",wrongFeedback:"Greta kertoo opettajasta, ei omasta nimestään."},
+          {id:"b",label:"Opettajan sukunimi on Weiß.", "lang": "fi"},
+          {id:"c",label:"Franzin sukunimi on Weiß.", "lang": "fi",wrongFeedback:"Franz kysyy opettajasta. Weiß on opettajan sukunimi."},
         ],
         correctOption:"b",success:"Oikein. Herr Weiß on opettajan nimi.",
         hint:"Herr tarkoittaa herraa. Ketä neljännen repliikin er tarkoittaa?",
