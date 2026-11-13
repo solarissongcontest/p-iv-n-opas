@@ -139,3 +139,20 @@ test("archive refuses to lose personal work when storage is exhausted",()=>{
  assert.throws(()=>losArchiveMidtermPersonalWork(full,1,"My dialogue","My assessment"),/riittävästi tilaa/);
  assert.equal(full["keep-0"],"unchanged");
 });
+
+test("upstream C03 Teacher lessons remain separate from review I after integration",()=>{
+ for (const id of ["L014","L015","L016"]) {
+   const existing=getLosTeacherLesson(id);
+   assert.ok(existing, id+" must stay registered as an actual C03 Teacher lesson");
+   assert.equal(existing.chapterId,"03",id+" must keep its C03 draft evidence");
+ }
+ for (const lesson of [...reviews,LOS1_L030_TEACHER]) {
+   assert.equal(getLosTeacherLesson(lesson.id)?.chapterId,"91");
+ }
+ // Completing any previous C03 lesson never creates a review/exam result.
+ const previous=emptyTeacherSession(getLosTeacherLesson("L016")!,now);
+ const next=emptyTeacherSession(LOS1_L030_TEACHER,now);
+ assert.equal(previous.lessonId,"L016");
+ assert.equal(next.lessonId,"L030");
+ assert.equal(next.completedAt,null);
+});
