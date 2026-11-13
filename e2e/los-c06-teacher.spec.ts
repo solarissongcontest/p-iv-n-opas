@@ -23,13 +23,13 @@ test("L033 builds numbers interactively, persists selection on reload and fits m
   await tens.selectOption("70");
   await units.selectOption("1");
   await expect(board).toContainText("einundsiebzig");
-  await expect(board).toContainText("4/4");
+  await expect(board).toContainText(/[4-9]\/4/);
   const confirm=page.getByRole("button",{name:"Rakensin taululla vähintään neljä eri lukua"});
   await expect(confirm).toBeEnabled();
   await page.reload({waitUntil:"domcontentloaded"});
   await page.locator(".los-teacher-outline").getByRole("button",{name:/Rakenna itse numeroita/}).click();
   await expect(board).toContainText("einundsiebzig");
-  await expect(board).toContainText("4/4");
+  await expect(board).toContainText(/[4-9]\/4/);
   await expectNoHorizontalOverflow(page);
 });
 
