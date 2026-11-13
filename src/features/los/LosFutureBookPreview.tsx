@@ -2,13 +2,14 @@ import { useState } from "react";
 import type { LosBookDefinition, LosChapter } from "./catalog";
 import type { LosDestination } from "./LosReferenceTools";
 import { LOS_FUTURE_MANUSCRIPTS } from "./content/losFutureManuscripts.ts";
+import { LosFutureExercises } from "./LosFutureExercises";
 
 /**
  * Sisältöluonnosten lukija. Näyttää jokaisen luvun kokonaisen käsikirjoituksen
  * LOS!:n sisällä, ilman ulkoisen linkin takana olevaa pakollista tekstiä.
  *
  * Käsikirjoitusten status on PENDING EDITORIAL REVIEW. Ääni, itsenäinen
- * tarkistettu koe, varmistetut vastaukset ja oppituntisuoritukset EIVÄT
+ * tarkistettu koe, hyväksytyt vastausavaimet ja oppituntisuoritukset EIVÄT
  * kuulu tähän esikatseluun. Ei LOS! 1:n chapter-keyed answer storea.
  */
 export function LosFutureBookPreview({book,chapter,section}:{
@@ -19,7 +20,6 @@ export function LosFutureBookPreview({book,chapter,section}:{
   const manuscript=LOS_FUTURE_MANUSCRIPTS[book.id]?.[chapter.id];
   const [query,setQuery]=useState("");
   const [showTranslations,setShowTranslations]=useState(true);
-  const [showPrompts,setShowPrompts]=useState(false);
   const [activeWord,setActiveWord]=useState(0);
   const [revealCard,setRevealCard]=useState(false);
   const labels:Partial<Record<LosDestination,string>>={
@@ -35,7 +35,7 @@ export function LosFutureBookPreview({book,chapter,section}:{
     <p>Nämä ovat LOS!:n omia 12.11.2026 käsikirjoitusluonnoksia. Niitä ei ole
       vielä riippumattomasti kielentarkistettu, eikä niitä saa kutsua autenttisiksi
       saksankielisten kirjoittajien alkuperäisteksteiksi. Ihmisen äänitteet,
-      IPA, tehtävien ratkaisu- ja taitotestit sekä synkronoitu opiskelunäyttö
+      IPA, tehtävien hyväksytty arviointi, taitotestit sekä synkronoitu opiskelunäyttö
       vaativat erillisen hyväksynnän.</p>
   </div>;
   if(!manuscript) return <section className="los-inner-page">
@@ -109,40 +109,8 @@ export function LosFutureBookPreview({book,chapter,section}:{
       {!words.length&&<p>Hakusanalle ei löytynyt osumia.</p>}
     </>}
 
-    {section==="understand"&&<>
-      <h2>Ymmärrä lukemaasi</h2>
-      <p>Vastaa ensin omin sanoin suomeksi käyttäen Text A:n ja Text B:n sisältöä.
-        Lähdekäsikirjoituksen tehtävien kielellinen validointi on vielä kesken,
-        joten tätä esikatselua ei pisteytetä.</p>
-      <button type="button" className="los-outline-button" aria-expanded={showPrompts}
-        onClick={()=>setShowPrompts(v=>!v)}>{showPrompts?"Piilota ymmärtämiskysymykset":"Näytä ymmärtämiskysymykset"}</button>
-      {showPrompts&&<ol style={{lineHeight:1.85}}>
-        <li>Ketkä ovat Text A:n henkilöt tai toimijat?</li>
-        <li>Missä tilanteessa teksti tapahtuu tai mistä siinä kerrotaan?</li>
-        <li>Mikä on tekstin tärkein tapahtuma tai viesti?</li>
-        <li>Mikä yksittäinen saksankielinen ilmaus tukee vastaustasi?</li>
-      </ol>}
-      <p>Tätä tehtävää ei vielä pisteytetä. Malliratkaisut lisätään
-        tekstikohtaisen toimituksellisen hyväksynnän jälkeen.</p>
-    </>}
-
-    {section==="practice"&&<>
-      <h2>Harjoittele sanastoa ja rakennetta</h2>
-      <p>Kirjoita kolme omaa virkettä kappaleen sanastosta ja käytä vähintään
-        yhtä kirjassa opetettua kielioppirakennetta. Vertaa omia virkkeitä
-        Text A:n ja kielioppiosion esimerkkeihin.</p>
-      <p>Lähdekäsikirjoituksen yksilöidyt harjoitustehtävät tuodaan
-        yhteiseen tehtävämoottoriin erillisellä versiolla. Tämä ei ole koe,
-        eikä vastauksia vielä tallenneta tai pisteytetä.</p>
-    </>}
-
-    {section==="apply"&&<>
-      <h2>Käytä saksaa omassa tilanteessa</h2>
-      <p>Laadi neljän repliikin keskustelu samaan aiheeseen kuin kappaleen
-        tukidialogi. Käytä vähintään kolmea sanaston ilmausta.
-        Vertaa keskusteluasi Text B:n tukidialogiin vasta lopuksi.</p>
-      <p>Puheen tai vapaan tekstin onnistumista ei arvioida automaattisella arvosanalla.</p>
-    </>}
+    {(section==="understand"||section==="practice"||section==="apply")&&
+      <LosFutureExercises bookId={book.id} chapterId={chapter.id} mode={section} />}
 
     {section==="culture"&&<>
       <h2>Kulttuurin näkökulma</h2>
