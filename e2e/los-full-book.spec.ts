@@ -121,7 +121,7 @@ test("every one of the 60 guided lessons opens from its actual chapter picker on
    expect(seen.has(title)).toBe(false);
    seen.add(title);
    await button.click();
-   if(Number(title.slice(1))<=11){
+   if(Number(title.slice(1))<=12){
     await expect(page).toHaveURL(new RegExp("/los-lessons/"+title+"$"));
     await expect(page.locator(".los-teacher-paper h2")).toBeVisible();
     await expect(page.locator(".los-teacher-sidebar h1")).toBeVisible();
@@ -1016,6 +1016,30 @@ test("L011 uses the real C02 submitted 15-question exam and student writing",asy
  await expect(status).toContainText("Oma sovellus: Teksti tallennettu");
  await expect(status).toContainText("Itsearviointi: Kirjattu");
  await outline.filter({hasText:"C02:n harjoitukset ja testi on tehty"}).click();
+ await expect(page.getByRole("button",{name:"Merkitse oppitunti läpikäydyksi"})).toBeDisabled();
+ await expectNoHorizontalOverflow(page);
+});
+
+test("L012 countries lesson shares only the C03 workbook and returns to Teacher",async({page})=>{
+ await enterLocalBook(page);
+ await page.goto("/los-lessons/L012",{waitUntil:"domcontentloaded"});
+ await expect(page.locator(".los-teacher-sidebar h1")).toContainText("Maat ja paikat");
+ const outline=page.locator(".los-teacher-outline nav button");
+ await outline.filter({hasText:"Harjoittele maiden nimet kirjassa"}).click();
+ const paper=page.locator(".los-teacher-paper");
+ await expect(paper).toContainText("C03-EX-03: Vastaus vielä puuttuu");
+ await expect(page.getByRole("link",{name:/Avaa kirjassa/}).last()).toHaveAttribute("href",/lessonReturn=L012.*\/03\/practice/);
+ await page.goto("/los?lessonReturn=L012#/1/03/practice",{waitUntil:"domcontentloaded"});
+ await page.locator('#C03-EX-03 input[value="Finnland"]').check();
+ await page.locator('#C03-EX-04 input[value="Deutschland"]').check();
+ await page.locator('#C03-EX-05 input[value="Österreich"]').check();
+ await page.getByRole("link",{name:"Palaa oppitunnille L012"}).click();
+ await expect(page).toHaveURL(/\/los-lessons\/L012$/);
+ await outline.filter({hasText:"Harjoittele maiden nimet kirjassa"}).click();
+ for(const id of ["C03-EX-03","C03-EX-04","C03-EX-05"]){
+  await expect(paper).toContainText(id+": Vastaus tallennettu ja tarvittaessa tarkistettu");
+ }
+ await outline.filter({hasText:"Nyt tunnistat ensimmäiset maat"}).click();
  await expect(page.getByRole("button",{name:"Merkitse oppitunti läpikäydyksi"})).toBeDisabled();
  await expectNoHorizontalOverflow(page);
 });
