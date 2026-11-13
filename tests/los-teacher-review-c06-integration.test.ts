@@ -47,6 +47,8 @@ test("integrated player preserves genuine media, exact exam status, and number i
   assert.match(code,/section === "midterm" \|\| section === "review"/);
   assert.match(code,/getLosTeacherLesson.*lessonRegistry/);
   assert.match(route,/L027–L035/);
+  const picker=readFileSync("src/features/los/LosFirstLessons.tsx","utf8");
+  assert.match(picker,/getLosTeacherLesson.*lessonRegistry/);
 });
 
 test("latest C06 published source text has named speakers, while older cached version differs",()=>{
