@@ -187,7 +187,7 @@ export const LOS1_L023_TEACHER: TeacherLesson = {
       "kind": "book",
       "title": "Kolme tarkistettavaa Text A -kysymystä",
       "paragraphs": [
-        "Avaa C05:n Text A -sivun kysymykset C05-SOURCE-Q01, Q02 ja Q03. Kysymykset koskevat Heinrichin kysymystä, Karlin vointivastausta ja molempien hyvästelyä.",
+        "Avaa C05:n Ymmärrä-sivu, jossa ovat Text A:n kysymykset C05-SOURCE-Q01, Q02 ja Q03. Kysymykset koskevat Heinrichin kysymystä, Karlin vointivastausta ja molempien hyvästelyä.",
         "Vastaa jokaiseen ja paina kunkin kohdalla Tarkista vastaus. Vain aidosti tallennettu ja tarkistettu vastaus täyttää tämän kohdan. Väärä vastauskin jää harjoitushistoriaan ja palaute auttaa korjaamaan.",
         "Neljäs C05-SOURCE-Q04 koskee Und dir? -ilmausta. Voit tehdä sen lisäharjoituksena."
       ],
