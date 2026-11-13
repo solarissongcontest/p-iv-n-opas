@@ -1167,3 +1167,37 @@ test("L014 En ymmärrä exposes six authored choices and one scene-specific expl
  await expect(page.locator(".los-teacher-help-entries section")).not.toContainText("1. Kysy mistä");
  await expectNoHorizontalOverflow(page);
 });
+
+test("L005 shows genuine 20-item listening source and text inside Teacher 2.0 on desktop and mobile",async({page})=>{
+ await enterLocalBook(page);
+ await page.goto("/los-lessons/L005",{waitUntil:"domcontentloaded"});
+ const lesson=page.locator(".los-teacher-paper");
+ await expect(page.locator(".los-teacher-sidebar h1")).toContainText("Kuuntele ja valitse tervehdys");
+ const outline=page.locator(".los-teacher-outline nav");
+ await outline.getByRole("button",{name:"Avaa koko alkuperäinen tervehdysluettelo"}).click();
+ const media=lesson.locator(".los-teacher-greeting-media");
+ await expect(media).toBeVisible();
+ const sources=media.locator("audio source");
+ await expect(sources).toHaveCount(2);
+ await expect(sources.first()).toHaveAttribute("type","audio/mpeg");
+ await expect(sources.first()).toHaveAttribute("src",/German_Vocabulary_-_Greetings[.]ogg[.]mp3$/);
+ await expect(sources.last()).toHaveAttribute("type","audio/ogg");
+ await expect(sources.last()).toHaveAttribute("src",/German_Vocabulary_-_Greetings[.]ogg$/);
+ await expect(media).toContainText("28 sekunnin");
+ await expect(media).toContainText("ei todista");
+ // Exercise the native media error fallback without relying on Commons/CDN access in CI.
+ await media.locator("audio").dispatchEvent("error");
+ await expect(media.getByRole("alert")).toContainText("Äänite ei latautunut");
+ await media.getByRole("button",{name:"Näytä kaikki 20 ilmausta ja suomennokset"}).click();
+ const lines=media.locator(".los-teacher-greeting-transcript li");
+ await expect(lines).toHaveCount(20);
+ await expect(lines.first()).toContainText("Hallo!");
+ await expect(lines.last()).toContainText("Gute Nacht!");
+ await expect(media).toContainText("Tekstin lukeminen ei ole kuuntelunäyttö");
+ await expect(lesson.locator(".los-teacher-summary")).toHaveCount(0);
+ await outline.getByRole("button",{name:"Valitse ääni tai luettavan tekstin varaversio"}).click();
+ await expect(lesson.locator(".los-teacher-greeting-media audio")).toBeVisible();
+ await expect(lesson.locator(".los-teacher-greeting-transcript")).toBeHidden();
+ await expect(lesson.locator(".los-teacher-greeting-media button")).toHaveAttribute("aria-expanded","false");
+ await expectNoHorizontalOverflow(page);
+});

@@ -24,7 +24,7 @@ export const LOS1_L005_TEACHER: TeacherLesson = {
       paragraphs:[
         "Tänään tutustut ihmisen äänittämään saksankielisten tervehdysten ja hyvästelyjen luetteloon. Alkuperäisessä 28 sekunnin tallenteessa lausutaan 20 ilmausta. Sama koko luettelo on kirjoitettuna LOSin Text B -lukijaan.",
         "Äänite on ilmausluettelo, ei kahden henkilön keskustelu. Kun harjoittelet kuuntelemalla, etsi tuttuja sanoja ja vertaa niitä vasta jälkeenpäin kirjoitusasuihin.",
-        "Jos äänite ei lataudu tai et voi käyttää ääntä, koko oppitunnin voi käydä läpi tekstivastineella. Silloin harjoittelet lukemista ja tilannevalintoja, et todistettua kuullun ymmärtämistä.",
+        "Jos äänite ei lataudu tai et voi käyttää ääntä, koko oppitunnin voi käydä läpi tässä opetustilanteessa avattavalla tekstivastineella. Silloin harjoittelet lukemista ja tilannevalintoja, et todistettua kuullun ymmärtämistä.",
       ],
       help:[{title:"Tarvitsenko kuulokkeet?",body:"Et. Tekstivastine ja tehtävät löytyvät kokonaan kirjasta. Äänen kuunteleminen on suositeltua silloin, kun toisto toimii ja voit käyttää ääntä."}],
     },
@@ -80,8 +80,8 @@ export const LOS1_L005_TEACHER: TeacherLesson = {
       id:"source-list",phase:"Aito Text B",kind:"book",
       title:"Avaa koko alkuperäinen tervehdysluettelo",
       paragraphs:[
-        "Avaa C01:n Text B. Yritä kuunnella German Men92:n alkuperäinen 28 sekunnin äänite, jos se on laitteellasi käytettävissä. Äänitettä ei ole vielä varmennettu oikealla iPhonella tai koulun Linux-laitteella.",
-        "Lue joka tapauksessa kaikki 20 ilmausta samalta LOSin sivulta. Listassa on myös alueellisia tervehdyksiä, kuten Moin ja Servus, joita sinun ei tarvitse vielä osata tuottaa.",
+        "Kokeile ensin tässä opetustilanteessa olevaa German Men92:n alkuperäistä 28 sekunnin äänitettä, jos se toimii. Voit halutessasi avata kaikki 20 ilmausta ja suomennokset suoraan alta. Äänitettä ei ole vielä varmennettu oikealla iPhonella tai koulun Linux-laitteella.",
+        "Lue myös kaikki 20 ilmausta ja suomennokset tämän opetussoittimen tekstivastineesta tai C01:n Text B -sivulta. Listassa on alueellisia tervehdyksiä, kuten Moin ja Servus, joita ei vielä tarvitse osata tuottaa.",
         "Vastaa Text B:n kysymyksiin 1 ja 2 ja paina molemmissa Tarkista vastaus. Vastaus tallentuu samaan oppikirjan luonnokseen, ei opettajan erilliseen kopioon.",
       ],
       bookLinks:[{label:"Avaa C01 · Text B ja alkuperäinen tervehdysäänite",chapterId:"01",section:"text-b",instruction:"Kokeile ääntä tai lue kaikki 20 ilmausta, tee ja tarkista C01-TEXTB-Q01/Q02."}],
