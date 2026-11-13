@@ -39,9 +39,9 @@ export const LOS1_L034_TEACHER: TeacherLesson = {
       "id": "recall",
       "phase": "Harjoitus",
       "kind": "question",
-      "title": "Tunnista ja sovella",
+      "title": "Tunnista neunzehn numerona",
       "paragraphs": [
-        "Yritä ensin itse, tarkista tarvittaessa lähdetekstistä."
+        "Muistatko, mikä numeromerkintä vastaa sanaa neunzehn? Tässä ei tarvitse kirjoittaa ikälausetta."
       ],
       "question": {
         "type": "text",
@@ -51,10 +51,10 @@ export const LOS1_L034_TEACHER: TeacherLesson = {
         "accepted": [
           "19"
         ],
-        "success": "Oikein, käytit oikeaa ikäilmausta tai lukua.",
-        "hint": "Wie alt bist du? = kuinka vanha olet; Ich bin ... = olen ...",
-        "reteach": "Franz sanoo neunzehn (19) ja Jörg zwanzig (20). Ikä kerrotaan bin-muodolla.",
-        "genericWrong": "Tarkista ikä, henkilö, bin-muoto ja numeron tarkka kirjoitusasu.",
+        "success": "Oikein. Neunzehn tarkoittaa lukua 19.",
+        "hint": "Loppu -zehn viittaa teinilukuun, ja neun tarkoittaa yhdeksää. Kirjoita luvun numeromerkintä.",
+        "reteach": "Neunzehn = 19, mutta neunzig = 90. Tässä kirjoitetaan pelkkä numero 19.",
+        "genericWrong": "Kirjoita neunzehn numeroin: 19. Älä sekoita -zehn- ja -zig-loppuja.",
         "wrongAnswers": {
           "90": "90 on neunzig, 19 neunzehn."
         }
@@ -181,9 +181,9 @@ export const LOS1_L034_TEACHER: TeacherLesson = {
       "id": "franz",
       "phase": "Harjoitus",
       "kind": "question",
-      "title": "Tunnista ja sovella",
+      "title": "Kuinka vanha Franz on?",
       "paragraphs": [
-        "Yritä ensin itse, tarkista tarvittaessa lähdetekstistä."
+        "Palaa tarvittaessa Franzin omaan puheenvuoroon. Kirjoita hänen ikänsä numeroin, älä kokonaista lausetta."
       ],
       "question": {
         "type": "text",
@@ -193,10 +193,10 @@ export const LOS1_L034_TEACHER: TeacherLesson = {
         "accepted": [
           "19"
         ],
-        "success": "Oikein, käytit oikeaa ikäilmausta tai lukua.",
-        "hint": "Wie alt bist du? = kuinka vanha olet; Ich bin ... = olen ...",
-        "reteach": "Franz sanoo neunzehn (19) ja Jörg zwanzig (20). Ikä kerrotaan bin-muodolla.",
-        "genericWrong": "Tarkista ikä, henkilö, bin-muoto ja numeron tarkka kirjoitusasu.",
+        "success": "Oikein. Franz sanoo neunzehn, joten hänen ikänsä on 19 vuotta.",
+        "hint": "Franzin vastauksessa on neunzehn; Jörg puolestaan sanoo zwanzig.",
+        "reteach": "Franz = neunzehn = 19 vuotta. Jörg = zwanzig = 20 vuotta. Älä vaihda puhujia.",
+        "genericWrong": "Tehtävä kysyy Franzin ikää numeroin: hänen vastauksensa neunzehn tarkoittaa 19:ää.",
         "wrongAnswers": {
           "20": "Jörgin ikä on 20. Franz sanoo neunzehn."
         }
@@ -216,9 +216,9 @@ export const LOS1_L034_TEACHER: TeacherLesson = {
       "id": "application-one",
       "phase": "Harjoitus",
       "kind": "question",
-      "title": "Tunnista ja sovella",
+      "title": "Mian ikä kokonaisella lauseella",
       "paragraphs": [
-        "Yritä ensin itse, tarkista tarvittaessa lähdetekstistä."
+        "Kirjoita kuvitteellisen Mian vastaus kokonaisena ikälauseena. Käytä minämuotoa ja opittua 17:n kirjoitusasua."
       ],
       "question": {
         "type": "text",
@@ -228,10 +228,10 @@ export const LOS1_L034_TEACHER: TeacherLesson = {
         "accepted": [
           "Ich bin siebzehn Jahre alt."
         ],
-        "success": "Oikein, käytit oikeaa ikäilmausta tai lukua.",
-        "hint": "Wie alt bist du? = kuinka vanha olet; Ich bin ... = olen ...",
-        "reteach": "Franz sanoo neunzehn (19) ja Jörg zwanzig (20). Ikä kerrotaan bin-muodolla.",
-        "genericWrong": "Tarkista ikä, henkilö, bin-muoto ja numeron tarkka kirjoitusasu.",
+        "success": "Oikein. Ich bin siebzehn Jahre alt. on kokonainen saksankielinen ikälause.",
+        "hint": "Yhdistä Ich bin + siebzehn + Jahre alt. Muista, että sieben lyhenee tässä sieb-muotoon.",
+        "reteach": "Olen 17-vuotias = Ich bin siebzehn Jahre alt. Saksassa ikä ilmaistaan sein-verbillä (bin), ei habe-verbillä. Luku on siebzehn.",
+        "genericWrong": "Tarvitset kokonaisen ikälauseen: Ich bin + siebzehn + Jahre alt. Tarkista bin ja luvun kirjoitusasu.",
         "wrongAnswers": {
           "ich habe siebzehn jahre alt": "Saksan iän kanssa käytetään bin, ei habe.",
           "ich bin siebenzehn jahre alt": "17 kirjoitetaan siebzehn, ei siebenzehn."
@@ -242,9 +242,9 @@ export const LOS1_L034_TEACHER: TeacherLesson = {
       "id": "application-two",
       "phase": "Harjoitus",
       "kind": "question",
-      "title": "Tunnista ja sovella",
+      "title": "Leon ikä lyhyenä lauseena",
       "paragraphs": [
-        "Yritä ensin itse, tarkista tarvittaessa lähdetekstistä."
+        "Kirjoita kuvitteellisen Leon ikä saksaksi lyhyenä vastauksena. Älä lisää Jahre alt -osaa, koska se ei kuulu tämän tehtävän pyydettyyn muotoon."
       ],
       "question": {
         "type": "text",
@@ -254,10 +254,10 @@ export const LOS1_L034_TEACHER: TeacherLesson = {
         "accepted": [
           "Ich bin zwanzig."
         ],
-        "success": "Oikein, käytit oikeaa ikäilmausta tai lukua.",
-        "hint": "Wie alt bist du? = kuinka vanha olet; Ich bin ... = olen ...",
-        "reteach": "Franz sanoo neunzehn (19) ja Jörg zwanzig (20). Ikä kerrotaan bin-muodolla.",
-        "genericWrong": "Tarkista ikä, henkilö, bin-muoto ja numeron tarkka kirjoitusasu.",
+        "success": "Oikein. Ich bin zwanzig. on tässä pyydetty lyhyt ikävastaus.",
+        "hint": "Aloita Ich bin ja lisää vain zwanzig. Jätä Jahre alt pois tässä harjoituksessa.",
+        "reteach": "Lyhyt vastaus on Ich bin zwanzig. Täysi Ich bin zwanzig Jahre alt. on myös oikeaa saksaa, mutta tehtävä pyytää lyhyen muodon.",
+        "genericWrong": "Käytä muotoa Ich bin zwanzig. Täysi ikälause on sinänsä oikein, mutta tehtävä pyytää vastausta ilman Jahre alt -osaa.",
         "wrongAnswers": {
           "ich habe zwanzig": "Ikä ilmaistaan bin-verbillä.",
           "ich bin zwanzig jahre alt": "Tässä pyydetään nimenomaan lyhyttä vastausta."
@@ -268,9 +268,9 @@ export const LOS1_L034_TEACHER: TeacherLesson = {
       "id": "exit",
       "phase": "Harjoitus",
       "kind": "question",
-      "title": "Tunnista ja sovella",
+      "title": "Lopputarkistus: zwanzig numerona",
       "paragraphs": [
-        "Yritä ensin itse, tarkista tarvittaessa lähdetekstistä."
+        "Muuta jo opittu tasakymmen numeroksi. Vastaukseen ei tarvita saksankielisiä sanoja."
       ],
       "question": {
         "type": "text",
@@ -280,10 +280,10 @@ export const LOS1_L034_TEACHER: TeacherLesson = {
         "accepted": [
           "20"
         ],
-        "success": "Oikein, käytit oikeaa ikäilmausta tai lukua.",
-        "hint": "Wie alt bist du? = kuinka vanha olet; Ich bin ... = olen ...",
-        "reteach": "Franz sanoo neunzehn (19) ja Jörg zwanzig (20). Ikä kerrotaan bin-muodolla.",
-        "genericWrong": "Tarkista ikä, henkilö, bin-muoto ja numeron tarkka kirjoitusasu.",
+        "success": "Oikein. Zwanzig on kaksikymmentä eli 20.",
+        "hint": "Zwanzig on tasakymmen, joka tarkoittaa kahtakymmentä. Kirjoita pelkkä numero.",
+        "reteach": "Zwanzig = 20, mutta zwölf = 12. Tässä vastaukseksi kirjoitetaan numero 20.",
+        "genericWrong": "Kirjoita zwanzig numeroin: 20. Älä sekoita sitä lukuun zwölf (12).",
         "wrongAnswers": {
           "12": "12 on zwölf, 20 zwanzig."
         }
