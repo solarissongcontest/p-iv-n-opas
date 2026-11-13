@@ -17,11 +17,6 @@ export const LOS_FUTURE_BOOK_4: Record<string, LosFutureManuscript> = {
     "grammarExplanation": "Kertaa kolme toimivaa lauserakennetta: Die Stadt liegt … (sijainti), Man kann … besuchen (tekemisen mahdollisuus) ja Ich war dort / Ich habe … gesehen (oma kokemus). Kun perusteleminen onnistuu, lisää weil: Ich empfehle die Stadt, weil sie interessant ist. Tarkista erisnimet ja tosiasiat, käytä lyhyttä lähdemerkintää. Tavoite on ymmärrettävä A1.3-tasoinen esittely, ei matkailumainos.\n\nLaajennettu opetus kirjassa:\n\nMatkaoppaassa yhdistät sijainnin, mahdollisuudet, henkilökohtaiset kokemukset ja kohteliaat suositukset. Man kann ja es gibt sopivat yleiskuvaukseen. Perfekt erottaa oman aikaisemman käynnin: Ich habe das Museum besucht. Weil mahdollistaa yksinkertaisen perustelun. Erota lähteestä saatu tieto omasta mielipiteestäsi: virallinen aukioloaika tulee tarkistaa ajantasaisesta lähteestä, mutta oma vaikutelma on henkilökohtainen.\n\nMallilause: Ich empfehle den Park, weil man dort spazieren gehen kann.\n\nSuomennos: Suosittelen puistoa, koska siellä voi kävellä.\n\nOpettajan virheen korjaus: weil man kann spazieren gehen → weil man spazieren gehen kann.\n\nLähdeviitteen pedagoginen rajaus: Tekstin vaikeat muodot merkitään tunnistettaviksi, ellei niitä ole opetettu. Oppijan ei tarvitse tuottaa uuden aikamuodon tai sijamuodon muotoja ennen niiden erillistä opetusta.\n\nOma minikoe: selitä säännön vaikutus verbin paikkaan, persoonapäätteeseen tai artikkeliin omassa mallilauseessa. Sulje opetus. Tee vastaava uusi lause eri henkilöllä tai sanalla ja tarkista tulos.",
     "vocabulary": [
       {
-        "de": "Suomi",
-        "fi": "Huomio",
-        "status": ""
-      },
-      {
         "de": "der Reiseführer",
         "fi": "matkaopas",
         "status": "artikkeli mukana; monikko ja ääntäminen vielä tarkistettava"
@@ -144,11 +139,6 @@ export const LOS_FUTURE_BOOK_4: Record<string, LosFutureManuscript> = {
     "grammarExplanation": "Ilmaus Man spricht Deutsch in … kuvaa sitä, missä kieltä puhutaan. Man on yleistävä pronomini ja sen kanssa verbi taipuu yksikön kolmannessa persoonassa: man spricht. Maiden nimet ovat yleensä ilman artikkelia: in Deutschland, in Österreich, in Finnland. Sveitsin nimi on poikkeus: in der Schweiz. Huomaa ero puhumisen ja matkustamisen välillä: Ich spreche Deutsch; ich fahre nach Deutschland.\n\nLaajennettu opetus kirjassa:\n\nSaksaa puhutaan useassa maassa ja monilla alueilla. Kielen ja maan nimeä ei saa aina päätellä samasta sanamuodosta: Deutschland – Deutsch, Österreich – Deutsch, die Schweiz – Deutsch muun muassa. Kysyessäsi kielestä voit sanoa Welche Sprachen spricht man hier? Vastauksissa vältä yleistäviä väitteitä, kuten että kaikki ihmiset jossakin maassa puhuisivat vain yhtä kieltä.\n\nMallilause: In Österreich spricht man Deutsch.\n\nSuomennos: Itävallassa puhutaan saksaa.\n\nOpettajan virheen korjaus: In die Schweiz spricht man Deutsch. → In der Schweiz spricht man Deutsch.\n\nLähdeviitteen pedagoginen rajaus: Tekstin vaikeat muodot merkitään tunnistettaviksi, ellei niitä ole opetettu. Oppijan ei tarvitse tuottaa uuden aikamuodon tai sijamuodon muotoja ennen niiden erillistä opetusta.\n\nOma minikoe: selitä säännön vaikutus verbin paikkaan, persoonapäätteeseen tai artikkeliin omassa mallilauseessa. Sulje opetus. Tee vastaava uusi lause eri henkilöllä tai sanalla ja tarkista tulos.",
     "vocabulary": [
       {
-        "de": "Suomi",
-        "fi": "Huomio",
-        "status": ""
-      },
-      {
         "de": "Deutsch",
         "fi": "saksa",
         "status": "ääntämisen ja muodon tarkistus"
@@ -240,11 +230,6 @@ export const LOS_FUTURE_BOOK_4: Record<string, LosFutureManuscript> = {
     "grammarTopic": "paikanilmaukset in/im, pohjois-etelä",
     "grammarExplanation": "Im on sanojen in dem supistuma: im Süden, im Norden. Kaupungeista voi usein sanoa in Berlin tai in Hamburg ilman artikkelia. Kuvattaessa sijaintia käytät valmista muotoa: Berlin liegt im Osten Deutschlands. Säännön ydin ei ole ulkoa opettelu kaikista maantieteellisistä sijoista vaan se, että tunnistat paikannuksen ja pystyt kertomaan yksinkertaisen faktan kartasta.\n\nLaajennettu opetus kirjassa:\n\nPaikkoja kuvailtaessa käytetään tavallisia sijainnin ilmauksia: in Berlin, im Norden, im Süden. Im on yhdistelmä in dem. Tässä käsitellään sijaintia, ei vielä kaikkea liikkeen ja paikallissijojen vaihtelua. Kuvailussa kannattaa täsmentää, puhutaanko tietystä kaupungista vai koko valtiosta. Samalla opitaan kriittistä kulttuurikuvailua: yksi kaupunki ei edusta kaikkia saksankielisiä alueita.\n\nMallilause: Berlin liegt im Osten Deutschlands.\n\nSuomennos: Berliini sijaitsee Saksan itäosassa.\n\nOpettajan virheen korjaus: in dem Norden on mahdollinen, mutta vakiintunut lyhyt muoto on im Norden.\n\nLähdeviitteen pedagoginen rajaus: Tekstin vaikeat muodot merkitään tunnistettaviksi, ellei niitä ole opetettu. Oppijan ei tarvitse tuottaa uuden aikamuodon tai sijamuodon muotoja ennen niiden erillistä opetusta.\n\nOma minikoe: selitä säännön vaikutus verbin paikkaan, persoonapäätteeseen tai artikkeliin omassa mallilauseessa. Sulje opetus. Tee vastaava uusi lause eri henkilöllä tai sanalla ja tarkista tulos.",
     "vocabulary": [
-      {
-        "de": "Suomi",
-        "fi": "Huomio",
-        "status": ""
-      },
       {
         "de": "die Hauptstadt",
         "fi": "pääkaupunki",
@@ -363,11 +348,6 @@ export const LOS_FUTURE_BOOK_4: Record<string, LosFutureManuscript> = {
     "grammarExplanation": "Komparatiivilla verrataan kahta asiaa. Perusmalli on adjektiivi + -er + als: Wien ist größer als Salzburg. Kaikki adjektiivit eivät käyttäydy täysin säännöllisesti: groß → größer; gut → besser. Kun kaksi asiaa ovat samanlaisia, käytä so … wie: Die Stadt ist so groß wie … . Tässä käytät ensisijaisesti adjektiiveja predikatiivisesti, jolloin pääte ei riipu substantiivin suvusta.\n\nLaajennettu opetus kirjassa:\n\nVertailussa komparatiivi ilmaisee, että jokin on enemmän jotakin kuin toinen. Esimerkiksi klein → kleiner, schön → schöner. Monet yksitavuiset adjektiivit saavat myös umlautin: groß → größer, alt → älter. Kuin-sanaksi tulee als: Wien ist größer als Innsbruck. Adjektiivin merkitys ja vertailun kohde on mietittävä tarkasti, eikä kulttuureista tehdä arvioivia yleistyksiä.\n\nMallilause: Wien ist größer als Salzburg.\n\nSuomennos: Wien on suurempi kuin Salzburg.\n\nOpettajan virheen korjaus: größer wie Salzburg → größer als Salzburg.\n\nLähdeviitteen pedagoginen rajaus: Tekstin vaikeat muodot merkitään tunnistettaviksi, ellei niitä ole opetettu. Oppijan ei tarvitse tuottaa uuden aikamuodon tai sijamuodon muotoja ennen niiden erillistä opetusta.\n\nOma minikoe: selitä säännön vaikutus verbin paikkaan, persoonapäätteeseen tai artikkeliin omassa mallilauseessa. Sulje opetus. Tee vastaava uusi lause eri henkilöllä tai sanalla ja tarkista tulos.",
     "vocabulary": [
       {
-        "de": "Suomi",
-        "fi": "Huomio",
-        "status": ""
-      },
-      {
         "de": "Wien",
         "fi": "Wien",
         "status": "ääntämisen ja muodon tarkistus"
@@ -484,11 +464,6 @@ export const LOS_FUTURE_BOOK_4: Record<string, LosFutureManuscript> = {
     "grammarTopic": "mit/zu/nach sekä yksinkertaiset paikalliset muodot",
     "grammarExplanation": "Mit tarvitsee datiivin: mit dem Zug, mit der Straßenbahn. Matkakohdetta ilmaistaan usein nach kaupungin kanssa: nach Zürich. Henkilön luo mennään usein zu-rakenteella: zu meiner Freundin. Nämä ovat nyt harjoiteltavia fraaseja; datiivin muiden käyttötapojen täydellinen järjestelmä ei ole tämän kappaleen tavoite.\n\nLaajennettu opetus kirjassa:\n\nSveitsistä puhuessa tarvitset sekä maan nimen artikkelin että kulkemisen ilmauksia. Toisin kuin monissa maannimissä, sanot die Schweiz; määräpaikassa in die Schweiz ja sijainnissa in der Schweiz. Välineen kanssa voidaan sanoa mit dem Zug. Muotojen taustalla ovat sijamuodot, mutta harjoittele ensin näiden arjen ilmauksien ero. Muista myös, että Sveitsissä on useita kansalliskieliä ja erilaisia saksankielisiä murteita.\n\nMallilause: Ich fahre in die Schweiz. Ich bin in der Schweiz.\n\nSuomennos: Matkustan Sveitsiin. Olen Sveitsissä.\n\nOpettajan virheen korjaus: Ich fahre nach Schweiz. → Ich fahre in die Schweiz.\n\nLähdeviitteen pedagoginen rajaus: Tekstin vaikeat muodot merkitään tunnistettaviksi, ellei niitä ole opetettu. Oppijan ei tarvitse tuottaa uuden aikamuodon tai sijamuodon muotoja ennen niiden erillistä opetusta.\n\nOma minikoe: selitä säännön vaikutus verbin paikkaan, persoonapäätteeseen tai artikkeliin omassa mallilauseessa. Sulje opetus. Tee vastaava uusi lause eri henkilöllä tai sanalla ja tarkista tulos.",
     "vocabulary": [
-      {
-        "de": "Suomi",
-        "fi": "Huomio",
-        "status": ""
-      },
       {
         "de": "Zürich",
         "fi": "Zürich",
@@ -622,11 +597,6 @@ export const LOS_FUTURE_BOOK_4: Record<string, LosFutureManuscript> = {
     "grammarExplanation": "Kolme rakennetta tekevät kuvailusta joustavaa: In Finnland gibt es … (‘Suomessa on’), Man kann … (‘voi tehdä’) ja Wir haben … (‘meillä on’). Es gibt tarvitsee objektin: In Finnland gibt es viele Seen. Kann taas vie toisen verbin infinitiivin loppuun: Man kann im Winter Ski fahren. Muista, että kannanotot ja tilastot ovat eri asia: tarkista faktat ennen kuin kirjoitat väitteen.\n\nLaajennettu opetus kirjassa:\n\nKun esittelet Suomea saksaksi, rakenna viesti helposti tarkistettavista väitteistä. Man kann kertoo mitä voi tehdä: In Finnland kann man wandern. Es gibt kertoo olemassaolosta: Es gibt viele Seen. Wir haben sopii me-muotoiseen, henkilökohtaiseen kuvaukseen. Muista, että myös suomalaiset elävät keskenään hyvin erilaisia arkiä. Pieni, täsmällinen kuvaus on vakuuttavampi kuin yleistys jokaisesta suomalaisesta.\n\nMallilause: In Finnland gibt es viele Seen. Man kann im Sommer schwimmen.\n\nSuomennos: Suomessa on paljon järviä. Kesällä voi uida.\n\nOpettajan virheen korjaus: Es gibt viele See. → Es gibt viele Seen.\n\nLähdeviitteen pedagoginen rajaus: Tekstin vaikeat muodot merkitään tunnistettaviksi, ellei niitä ole opetettu. Oppijan ei tarvitse tuottaa uuden aikamuodon tai sijamuodon muotoja ennen niiden erillistä opetusta.\n\nOma minikoe: selitä säännön vaikutus verbin paikkaan, persoonapäätteeseen tai artikkeliin omassa mallilauseessa. Sulje opetus. Tee vastaava uusi lause eri henkilöllä tai sanalla ja tarkista tulos.",
     "vocabulary": [
       {
-        "de": "Suomi",
-        "fi": "Huomio",
-        "status": ""
-      },
-      {
         "de": "Finnland",
         "fi": "Suomi",
         "status": "ääntämisen ja muodon tarkistus"
@@ -734,11 +704,6 @@ export const LOS_FUTURE_BOOK_4: Record<string, LosFutureManuscript> = {
     "grammarExplanation": "Man ilmaisee epäpersoonallista tekijää: Man sagt oft …, Man isst manchmal … . Se ei tarkoita, että aivan jokainen tekisi niin. Hyödyllisiä täsmennyksiä ovat oft, manchmal ja in vielen Familien. Myös vertailukieli suojaa liialliselta yleistämiseltä: In einigen Regionen … . Taivutettu verbi on man-pronominin kanssa yksikön kolmannessa persoonassa.\n\nLaajennettu opetus kirjassa:\n\nPronomini man vastaa monissa yhteyksissä suomen yleistäväksi tekevää ilmaisua kuten täällä tehdään. Se ei tarkoita yksittäistä miestä. Verbi tulee yksikön kolmannen persoonan muotoon: Man isst, man geht, man spricht. Vertaile sitä ilmaisuun wir, joka kertoo omasta ryhmästä. Käytä yleistämistä varovasti: voit sanoa In meiner Familie isst man oft zusammen, mutta et voi päätellä siitä kaikkien maan asukkaiden tapoja.\n\nMallilause: In unserer Familie kocht man oft zusammen.\n\nSuomennos: Meidän perheessämme laitetaan usein ruokaa yhdessä.\n\nOpettajan virheen korjaus: Man essen zusammen. → Man isst zusammen.\n\nLähdeviitteen pedagoginen rajaus: Tekstin vaikeat muodot merkitään tunnistettaviksi, ellei niitä ole opetettu. Oppijan ei tarvitse tuottaa uuden aikamuodon tai sijamuodon muotoja ennen niiden erillistä opetusta.\n\nOma minikoe: selitä säännön vaikutus verbin paikkaan, persoonapäätteeseen tai artikkeliin omassa mallilauseessa. Sulje opetus. Tee vastaava uusi lause eri henkilöllä tai sanalla ja tarkista tulos.",
     "vocabulary": [
       {
-        "de": "Suomi",
-        "fi": "Huomio",
-        "status": ""
-      },
-      {
         "de": "der Alltag",
         "fi": "arki",
         "status": "artikkeli mukana; monikko ja ääntäminen vielä tarkistettava"
@@ -845,11 +810,6 @@ export const LOS_FUTURE_BOOK_4: Record<string, LosFutureManuscript> = {
     "grammarTopic": "Perfekt alkeena: haben/sein ja yleiset partisiipit",
     "grammarExplanation": "Perfekt muodostuu apuverbistä haben tai sein ja pääverbin partisiipista. Ich habe Berlin besucht. Ich bin nach Berlin gefahren. Haben käytetään monien verbien kanssa, sein esimerkiksi paikasta toiseen siirtymistä ilmaisevan fahren-verbin kanssa tässä merkityksessä. Apuverbi taipuu toisella paikalla, partisiippi tulee yleensä loppuun. Partisiippimuotoja kannattaa opetella verbin yhteydessä, ei arvata.\n\nLaajennettu opetus kirjassa:\n\nPerfekt on saksan yleinen menneen ajan rakenne puhekielessä. Se koostuu apuverbistä haben tai sein sekä partisiipista: Ich habe gelernt, ich bin gefahren. Partisiippi sijoittuu päälauseen loppuun. Sein liittyy usein liikkumiseen ja olotilan muutoksiin, mutta valinta ei perustu pelkästään suomen käännökseen. Tässä opetellaan muutama tavallinen verbi ja niiden taivutus; kaikkia menneen ajan muotoja ei vielä tarvitse hallita.\n\nMallilause: Ich habe meine Tante besucht. Ich bin nach Hamburg gefahren.\n\nSuomennos: Vierailin tätini luona. Matkustin Hampuriin.\n\nOpettajan virheen korjaus: Ich habe gefahren. → Ich bin gefahren.\n\nLähdeviitteen pedagoginen rajaus: Tekstin vaikeat muodot merkitään tunnistettaviksi, ellei niitä ole opetettu. Oppijan ei tarvitse tuottaa uuden aikamuodon tai sijamuodon muotoja ennen niiden erillistä opetusta.\n\nOma minikoe: selitä säännön vaikutus verbin paikkaan, persoonapäätteeseen tai artikkeliin omassa mallilauseessa. Sulje opetus. Tee vastaava uusi lause eri henkilöllä tai sanalla ja tarkista tulos.",
     "vocabulary": [
-      {
-        "de": "Suomi",
-        "fi": "Huomio",
-        "status": ""
-      },
       {
         "de": "der Besuch",
         "fi": "vierailu",
@@ -973,11 +933,6 @@ export const LOS_FUTURE_BOOK_4: Record<string, LosFutureManuscript> = {
     "grammarExplanation": "Säännöllisten verbien Perfektissä esiintyy usein ge-…-t: machen → gemacht, feiern → gefeiert. Epäsäännölliset partisiipit on muistettava erikseen: essen → gegessen, gehen → gegangen. Valitse apuverbi verbin mukaan: Wir haben gefeiert, Wir sind nach Hause gegangen. Käytä ajanmääreitä gestern ja letztes Jahr varmistamaan, että lukija tietää, milloin asia tapahtui.\n\nLaajennettu opetus kirjassa:\n\nJuhlista kerrottaessa Perfekt auttaa kuvaamaan jo tapahtunutta: Wir haben gekocht, wir haben gefeiert. Opettele tapahtumajärjestys ilmaisujen zuerst, dann ja am Ende avulla. Monien säännöllisten verbien partisiippi muodostuu ge- + vartalo + -t, esimerkiksi gemacht. Mutta kaikki verbit eivät noudata tätä muottia: gesehen ja gegessen on opeteltava erikseen. Tärkeintä on, että lukija ymmärtää mitä tapahtui ja milloin.\n\nMallilause: Am Samstag haben wir zusammen gekocht und gefeiert.\n\nSuomennos: Lauantaina laitoimme ruokaa ja juhlimme yhdessä.\n\nOpettajan virheen korjaus: Wir haben feiern. → Wir haben gefeiert.\n\nLähdeviitteen pedagoginen rajaus: Tekstin vaikeat muodot merkitään tunnistettaviksi, ellei niitä ole opetettu. Oppijan ei tarvitse tuottaa uuden aikamuodon tai sijamuodon muotoja ennen niiden erillistä opetusta.\n\nOma minikoe: selitä säännön vaikutus verbin paikkaan, persoonapäätteeseen tai artikkeliin omassa mallilauseessa. Sulje opetus. Tee vastaava uusi lause eri henkilöllä tai sanalla ja tarkista tulos.",
     "vocabulary": [
       {
-        "de": "Suomi",
-        "fi": "Huomio",
-        "status": ""
-      },
-      {
         "de": "das Fest",
         "fi": "juhla",
         "status": "artikkeli mukana; monikko ja ääntäminen vielä tarkistettava"
@@ -1089,11 +1044,6 @@ export const LOS_FUTURE_BOOK_4: Record<string, LosFutureManuscript> = {
     "grammarTopic": "komparatiivi; weil perustelussa",
     "grammarExplanation": "Komparatiivin kanssa käytät als: größer als, ruhiger als. Kun selität syyn, voit käyttää weil-sivulausetta. Sen jälkeen taivutettu verbi tulee sivulauseen loppuun: Ich mag die Stadt, weil sie lebendig ist. Weil-lause erotetaan päälauseesta pilkulla. Ero tavalliseen väitelauseeseen on suuri: Die Stadt ist lebendig, mutta weil die Stadt lebendig ist.\n\nLaajennettu opetus kirjassa:\n\nKun vertailet kulttuurisia käytäntöjä, tarvitset komparatiivin ja perustelun. Weil aloittaa sivulauseen, jossa taivutettu verbi siirtyy loppuun: Ich fahre mit dem Zug, weil es bequem ist. Vasta opitun weil-rakenteen kanssa kannattaa opetella sitä käyttämään rauhallisesti, sillä sanajärjestys muuttuu. Vältä toteamasta henkilökohtaisia kokemuksia kaikkia koskeviksi tosiasioiksi.\n\nMallilause: Ich fahre lieber mit dem Zug, weil es bequem ist.\n\nSuomennos: Matkustan mieluummin junalla, koska se on mukavaa.\n\nOpettajan virheen korjaus: weil es ist bequem → weil es bequem ist.\n\nLähdeviitteen pedagoginen rajaus: Tekstin vaikeat muodot merkitään tunnistettaviksi, ellei niitä ole opetettu. Oppijan ei tarvitse tuottaa uuden aikamuodon tai sijamuodon muotoja ennen niiden erillistä opetusta.\n\nOma minikoe: selitä säännön vaikutus verbin paikkaan, persoonapäätteeseen tai artikkeliin omassa mallilauseessa. Sulje opetus. Tee vastaava uusi lause eri henkilöllä tai sanalla ja tarkista tulos.",
     "vocabulary": [
-      {
-        "de": "Suomi",
-        "fi": "Huomio",
-        "status": ""
-      },
       {
         "de": "größer",
         "fi": "suurempi",
