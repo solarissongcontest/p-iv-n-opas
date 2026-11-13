@@ -20,8 +20,21 @@ function GuidedChapterLesson({bookId,chapterId,script,move}:{
   bookId:number;chapterId:string;script:LosFutureLessonContent;move:LosNavigate;
 }){
   const {draft,update,saved}=useLosChapterDraft(bookId,chapterId);
-  const [stageIndex,setStageIndex]=useState(0);
+  const stageStorageKey=`los.future.guided.${script.id}.selectedStage`;
+  const [stageIndex,setStageIndex]=useState(()=>{
+    try {
+      const raw=typeof sessionStorage==="undefined"?null:sessionStorage.getItem(stageStorageKey);
+      const value=Number(raw);
+      return raw!==null&&Number.isInteger(value)&&value>=0&&value<6?value:0;
+    }catch{return 0;}
+  });
   const stages=stagesFor(script);
+  function chooseStage(index:number){
+    const next=Math.max(0,Math.min(index,stages.length-1));
+    setStageIndex(next);
+    try{sessionStorage.setItem(stageStorageKey,String(next));}
+    catch{/* tuntia voi käyttää myös ilman sessionStoragea */}
+  }
   const stage=stages[stageIndex]!;
   const marker=(s:Stage)=>`los.future.guided:${script.id}:${s.id}`;
   const checked=stages.filter(s=>draft.practiceChecked.includes(marker(s))).length;
@@ -55,7 +68,7 @@ function GuidedChapterLesson({bookId,chapterId,script,move}:{
       {stages.map((item,i)=><button type="button" key={item.id}
         className={stageIndex===i?"is-current":""}
         aria-current={stageIndex===i?"step":undefined}
-        onClick={()=>setStageIndex(i)}>
+        onClick={()=>chooseStage(i)}>
         <span>{draft.practiceChecked.includes(marker(item))?<Check size={13} aria-label="Vaihe kokeiltu"/>:i+1}</span>
         <span>{item.label}</span>
       </button>)}
@@ -87,10 +100,10 @@ function GuidedChapterLesson({bookId,chapterId,script,move}:{
         </button>
       </div>
       <div className="los-guided-lesson-next">
-        <button type="button" disabled={stageIndex===0} onClick={()=>setStageIndex(i=>Math.max(0,i-1))}>
+        <button type="button" disabled={stageIndex===0} onClick={()=>chooseStage(stageIndex-1)}>
           <ArrowLeft size={16} aria-hidden="true"/> Edellinen vaihe
         </button>
-        <button type="button" disabled={stageIndex>=stages.length-1} onClick={()=>setStageIndex(i=>Math.min(stages.length-1,i+1))}>
+        <button type="button" disabled={stageIndex>=stages.length-1} onClick={()=>chooseStage(stageIndex+1)}>
           Seuraava vaihe <ArrowRight size={16} aria-hidden="true"/>
         </button>
       </div>
