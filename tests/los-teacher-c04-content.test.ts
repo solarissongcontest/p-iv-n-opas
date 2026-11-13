@@ -32,8 +32,8 @@ test("L017-L021 use exactly five validated C04 manuscripts in the existing Teach
    for (const link of lesson.scenes.flatMap(s=>s.bookLinks??[]))assert.equal(link.chapterId,"04");
  }
  // Do not activate the unrelated C03 previews or change their registry entries.
- assert.equal(getLosTeacherLesson("L013"),undefined);
- assert.equal(getLosTeacherLesson("L016"),undefined);
+ assert.ok(getLosTeacherLesson("L013"),"Current C03 L013 remains registered");
+ assert.ok(getLosTeacherLesson("L016"),"Current C03 L016 remains registered");
  assert.equal(getLosTeacherLesson("L027"),undefined);
 });
 
