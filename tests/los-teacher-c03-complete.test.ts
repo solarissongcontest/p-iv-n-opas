@@ -141,3 +141,16 @@ test("L016 requires the REAL C03 chapter test, real submission and own reflectio
   assert.equal(teacherChapterAssessmentStatus(l,{...chapter,testAnswers:wrong}).ready,true);
   // Participation can be complete even with incorrect answers; mastery cannot be invented.
 });
+
+test("Wrong-answer correction stops after three attempts without manufacturing mastery",()=>{
+ const lesson=LOS1_L014_TEACHER;
+ let s=emptyTeacherSession(lesson,at);
+ for(let n=0;n<3;n++)s=submitTeacherAnswer(s,lesson,"independent","Woher du kommst",at);
+ assert.equal(s.attempts.length,3);
+ const fourth=submitTeacherAnswer(s,lesson,"independent","Woher kommst du?",at);
+ assert.equal(fourth.attempts.length,3);
+ assert.equal(independentTeacherEvidence(fourth,lesson),0);
+ const relieved=markTeacherHelp(emptyTeacherSession(lesson,at),"independent",at);
+ const guided=submitTeacherAnswer(relieved,lesson,"independent","Woher kommst du?",at);
+ assert.equal(independentTeacherEvidence(guided,lesson),0);
+});
