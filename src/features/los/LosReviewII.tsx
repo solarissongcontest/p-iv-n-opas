@@ -86,7 +86,7 @@ export function LosReviewII({move}:{move:LosNavigate}){
           <textarea id="los-review-ii-writing" rows={6} maxLength={500}
             value={answers[LOS1_REVIEW_II_WRITING_ID]??""}
             onChange={e=>change(LOS1_REVIEW_II_WRITING_ID,e.target.value)}
-            placeholder="Hallo! Ich heiße ..."/>
+            placeholder="Kirjoita tähän 5–7 omaa lausetta ilman mallia."/>
           <p>Tekstiä ei pisteytetä automaattisesti. Oppituntimerkintä kertoo kirjoitusyrityksestä, ei tarkistetusta kielioppiosaamisesta.</p>
           <button className="los-outline-button" type="button" aria-expanded={showModel}
             onClick={()=>{if(!showModel)markWritingModel();setShowModel(old=>!old);}}>
