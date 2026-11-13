@@ -102,7 +102,7 @@ export const LOS1_L041_TEACHER:TeacherLesson = {
     "Opettaja: Kein Problem. (Ei haittaa.) Hän tietää nyt, että tarvitset tukea. Seuraavaksi voit pyytää toistoa.",
     "Kerro ensin, ettei ohje auennut.",
     "Ich verstehe nicht. ei ole pahoittelu vaan hyödyllinen viesti: tarvitset selityksen tai toiston.",
-    "practice"),
+    "application"),
   book("practice","Harjoittele kirjan oikeissa C08-tehtävissä",[
     "Avaa Sanasto ja katso, missä tilanteessa kukin fraasi toimii. Tee C08-EX-01...05 kirjan Harjoittele-osiossa.",
     "Ne ovat jo olemassa olevia tehtäviä. Vastaukset tallentuvat oppikirjaan, eivät uuteen tunnin vastauskantaan. Valmiin mallin avaaminen on harjoittelua, ei itsenäinen näyttö."
