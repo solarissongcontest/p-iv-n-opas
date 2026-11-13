@@ -133,7 +133,7 @@ export const LOS1_L010_TEACHER: TeacherLesson = {
       paragraphs:[
         "Kuvittele, että seisot ystäväsi vieressä. Jos kerrot oman nimesi, voit sanoa Ich bin Thomas. Kun osoitat ystävääsi, voit sanoa Das ist Peter. eli Tämä on Peter.",
         "Tämä on tämän tunnin kolmas tärkeä ajatus: puhuja Thomas, hänen mainitsemansa Peter ja heistä molemmista käytetty wir eivät tarkoita samaa asiaa.",
-        "Kun Takashi vastaa Ich komme aus Kyoto., hän kertoo vain omasta kaupungistaan. Kyoton ja Berliinin muistaminen auttaa tehtävässä, mutta komen-verbin kokonainen taivutus tulee myöhemmässä C03:ssa.",
+        "Kun Takashi vastaa Ich komme aus Kyoto., hän kertoo vain omasta kaupungistaan. Kyoton ja Berliinin muistaminen auttaa tehtävässä, mutta kommen-verbin kokonainen taivutus tulee myöhemmässä C03:ssa.",
       ],
     },
     {
