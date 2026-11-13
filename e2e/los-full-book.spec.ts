@@ -395,7 +395,7 @@ test("L004 opens in a dedicated scene player without the 60-lesson navigation",a
  await expect(page).toHaveURL(/\/los#\/1\/lesson\/L004$/);
  const shell=page.locator(".los-teacher-shell");
  await expect(shell).toBeVisible();
- await expect(shell.getByRole("heading",{name:"Tervehdykset muistista"})).toBeVisible();
+ await expect(shell.getByRole("heading",{name:"Tervehdykset muistista",level:1})).toBeVisible();
  await expect(page.locator(".los-lesson-chapter-picker")).toHaveCount(0);
  await expect(page.locator(".los-book-sidebar")).toHaveCount(0);
  const player=page.locator(".los-teacher");
@@ -408,7 +408,7 @@ test("L004 opens in a dedicated scene player without the 60-lesson navigation",a
  await expect(page).toHaveURL(/\/los#\/1\/lesson\/L004$/);
  await expect(page.locator(".los-teacher")).toContainText("Kokeile itse ilman mallia");
  await expect(page.locator(".los-teacher")).toContainText("1/3");
- await shell.getByRole("link",{name:"Opiskelupolkuun"}).click();
+ await shell.locator(".los-teacher-shell-back").click();
  await expect(page).toHaveURL(/\/los#\/1\/path$/);
  await expect(page.locator("#los-lesson-runner")).toBeVisible();
  await expectNoHorizontalOverflow(page);

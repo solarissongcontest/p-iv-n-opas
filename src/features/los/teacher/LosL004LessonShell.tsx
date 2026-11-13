@@ -14,7 +14,7 @@ const stamp=()=>new Date().toISOString();
  * Uses the exact same owner-scoped chapter draft as the legacy learning path. */
 export function LosL004LessonShell({book}:{book:LosBookDefinition}){
  const {draft,update,saved}=useLosChapterDraft(1,"01");
- const progress=draft.lessonProgress?.L004??emptyLosLessonProgress();
+ const progress=draft.lessonProgress?.["L004"]??emptyLosLessonProgress();
  const teacher=progress.teacher??initialTeacherProgress(TEACHER_L004);
  useEffect(()=>{
   try{sessionStorage.setItem("los1.selectedLesson","L004");}
@@ -22,8 +22,8 @@ export function LosL004LessonShell({book}:{book:LosBookDefinition}){
  },[]);
  const record=(fn:(current:LosLessonProgress)=>LosLessonProgress)=>{
   update(current=>{
-   const old=current.lessonProgress?.L004??emptyLosLessonProgress();
-   return {...current,lessonProgress:{...current.lessonProgress,L004:fn(old)}};
+   const old=current.lessonProgress?.["L004"]??emptyLosLessonProgress();
+   return {...current,lessonProgress:{...current.lessonProgress,["L004"]:fn(old)}};
   });
  };
  const onChange=(next:TeacherProgress)=>{
