@@ -1,7 +1,8 @@
 import type { LosFutureExerciseDraft } from "./losFutureExerciseTypes";
 
-/** A guarded interactive format for the 70 source T05 matching exercises.
- * Duplicate Finnish meanings remain free-text, not a misleading graded selector. */
+/** All 70 source T05 activities use one answer per German term. Two different
+ * words may share a correct Finnish meaning (Arzt/Ärztin → lääkäri); dropdowns
+ * permit repeated meanings and never invent a one-to-one grading rule. */
 export type LosFutureMatchPair = {de:string;fi:string};
 export function losFutureMatchingPairs(task:LosFutureExerciseDraft):LosFutureMatchPair[]|null {
   if(!/-T05$/.test(task.id) || task.title!=="Yhdistä uusi sana ja merkitys")return null;
@@ -14,8 +15,7 @@ export function losFutureMatchingPairs(task:LosFutureExerciseDraft):LosFutureMat
   });
   if(pairs.some(pair=>!pair?.de || !pair.fi))return null;
   const valid=pairs as LosFutureMatchPair[];
-  if(new Set(valid.map(pair=>pair.de)).size!==4 || new Set(valid.map(pair=>pair.fi)).size!==4)
-    return null;
+  if(new Set(valid.map(pair=>pair.de)).size!==4)return null;
   return valid;
 }
 
