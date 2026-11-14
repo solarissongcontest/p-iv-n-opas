@@ -6,6 +6,7 @@ import { losFutureExercisesForSection, type LosFutureExerciseMode } from "./cont
 import { losFutureMatchingPairs, readLosFutureMatchingAnswer, writeLosFutureMatchingAnswer } from "./content/losFutureMatching";
 import { losFutureGapParts } from "./content/losFutureGap.ts";
 import { losFutureRecallPairs, readLosFutureRecallAnswer, writeLosFutureRecallAnswer } from "./content/losFutureRecall.ts";
+import { losFutureExitTicket, readLosFutureExitAnswer, writeLosFutureExitAnswer } from "./content/losFutureExitTicket.ts";
 import { losFutureOrderingTiles, readLosFutureOrderingAnswer, writeLosFutureOrderingAnswer } from "./content/losFutureOrdering.ts";
 import "./los-future-exercises.css";
 
@@ -36,6 +37,9 @@ export function LosFutureExercises({bookId,chapterId,mode,taskIds}:{
   const [showAll,setShowAll]=useState(false);
   const safeIndex=Math.min(selected,Math.max(0,tasks.length-1));
   const task=tasks[safeIndex];
+  const exitTicket=task ? losFutureExitTicket(task) : null;
+  const exitAnswers=exitTicket && task
+    ? readLosFutureExitAnswer(draft.practiceAnswers[task.id]??"",exitTicket) : null;
   const recallPairs=task ? losFutureRecallPairs(task) : null;
   const recallSelection=recallPairs && task
     ? readLosFutureRecallAnswer(draft.practiceAnswers[task.id]??"",recallPairs) : null;
@@ -106,7 +110,23 @@ export function LosFutureExercises({bookId,chapterId,mode,taskIds}:{
             ? "Järjestä sanapalat oikeaan järjestykseen. Tarkista sitten kielioppi ja välimerkit mallivastauksesta."
             : task.prompt}
         </p>
-        {recallPairs && recallSelection ? <fieldset className="los-future-recall">
+        {exitTicket && exitAnswers ? <fieldset className="los-future-exit-ticket">
+          <legend>Kaksi itsenäistä lopputarkistusta</legend>
+          <p>Vastaa molempiin kysymyksiin ensin muistista. Malli avataan vasta oman
+            yrityksen jälkeen. Tehtävä on itsearviointia, ei automaattinen koe.</p>
+          {exitTicket.questions.map((question,index)=><label key={index} className="los-future-exit-row">
+            <span lang="fi">{index+1}. {question}</span>
+            <textarea rows={2} autoComplete="off" spellCheck={false}
+              lang={index===0?"de":"fi"} maxLength={400}
+              aria-label={`Kysymyksen ${index+1} oma vastauksesi`}
+              value={exitAnswers[index]??""}
+              onChange={event=>{
+                const next=[...exitAnswers];
+                next[index]=event.target.value;
+                changeAnswer(task.id,writeLosFutureExitAnswer(exitTicket,next));
+              }}/>
+          </label>)}
+        </fieldset> : recallPairs && recallSelection ? <fieldset className="los-future-recall">
           <legend>Palauta kuusi sanaa muistista</legend>
           <p>Kirjoita saksankielinen sana tai ilmaus jokaisen suomennoksen perusteella.
             Voit tarkistaa vastaukset vasta oman yrityksesi jälkeen. Tehtävä ei anna konearvosanaa.</p>
