@@ -20,8 +20,10 @@ export function futureExamAutoResult(exam:LosFutureExam,answers:Record<string,st
     /^[\p{L}äöüÄÖÜß-]+$/u.test(question.answerKey.trim()));
   return {
     possible:checked.reduce((sum,q)=>sum+q.points,0),
-    awarded:checked.reduce((sum,q)=>sum+
-      (answers[q.id]?.trim()&&futureExamNormalize(answers[q.id])===futureExamNormalize(q.answerKey)?q.points:0),0),
+    awarded:checked.reduce((sum,q)=>{
+      const written=answers[q.id]??"";
+      return sum+(written.trim()&&futureExamNormalize(written)===futureExamNormalize(q.answerKey)?q.points:0);
+    },0),
     checkedIds:checked.map(q=>q.id),
     restRequiresReview:35-checked.reduce((sum,q)=>sum+q.points,0),
   };
@@ -38,9 +40,10 @@ export function readFutureExamHistory(raw:string|undefined,exam:LosFutureExam):F
     if(!data.every((record:unknown)=>{
       if(!record||typeof record!=="object"||Array.isArray(record))return false;
       const item=record as Record<string,unknown>;
-      if(typeof item.submittedAt!=="string"||!Number.isFinite(Date.parse(item.submittedAt)))return false;
-      if(!item.answers||typeof item.answers!=="object"||Array.isArray(item.answers))return false;
-      return Object.entries(item.answers).every(([k,v])=>allowed.has(k)&&typeof v==="string"&&v.length<=3000);
+      const submittedAt=item["submittedAt"], answers=item["answers"];
+      if(typeof submittedAt!=="string"||!Number.isFinite(Date.parse(submittedAt)))return false;
+      if(!answers||typeof answers!=="object"||Array.isArray(answers))return false;
+      return Object.entries(answers).every(([k,v])=>allowed.has(k)&&typeof v==="string"&&v.length<=3000);
     }))return null;
     return data as FutureExamSnapshot[];
   } catch{return null;}
