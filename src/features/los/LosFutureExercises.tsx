@@ -130,15 +130,20 @@ export function LosFutureExercises({bookId,chapterId,mode,taskIds}:{
           </label>)}
         </fieldset> : shortAnswer ? <div className="los-future-short-answer">
           <label htmlFor="los-future-short-input">
-            {shortAnswer.kind==="translation"?"Kirjoita saksankielinen käännös":"Kirjoita kielioppitehtävän vastauksesi"}
+            {shortAnswer.kind==="reading"?"Vastaa Text A:n sisältökysymykseen suomeksi":
+              shortAnswer.kind==="translation"?"Kirjoita saksankielinen käännös":"Kirjoita kielioppitehtävän vastauksesi"}
           </label>
           <input id="los-future-short-input" type="text" spellCheck={false} autoCapitalize="off"
             autoComplete="off" maxLength={300} lang={shortAnswer.language}
             value={draft.practiceAnswers[task.id]??""}
             onChange={event=>changeAnswer(task.id,event.target.value)}
-            placeholder={shortAnswer.kind==="translation"?"Kirjoita lause saksaksi…":"Kirjoita oma korjauksesi tai vastauksesi…"} />
-          <p className="los-future-exercise-hint">Kirjoita vastaus itse. Vertaa sitä käsikirjoituksen
-            malliin vasta yrityksen jälkeen. Eri oikeita ilmaisuja ei pisteytetä automaattisesti.</p>
+            placeholder={shortAnswer.kind==="reading"?"Kirjoita tekstistä löytämäsi vastaus…":
+              shortAnswer.kind==="translation"?"Kirjoita lause saksaksi…":"Kirjoita oma korjauksesi tai vastauksesi…"} />
+          <p className="los-future-exercise-hint">Kirjoita vastaus itse. {shortAnswer.kind==="reading"
+            ?"Perustele mielessäsi, mistä Text A:n kohdasta löysit tiedon. "
+            :"Muista tarkistaa oppimasi rakenne. "}
+            Vertaa omaa vastaustasi käsikirjoituksen malliin vasta yrityksen jälkeen.
+            Eri oikeita ilmaisuja ei pisteytetä automaattisesti.</p>
         </div> : recallPairs && recallSelection ? <fieldset className="los-future-recall">
           <legend>Palauta kuusi sanaa muistista</legend>
           <p>Kirjoita saksankielinen sana tai ilmaus jokaisen suomennoksen perusteella.
