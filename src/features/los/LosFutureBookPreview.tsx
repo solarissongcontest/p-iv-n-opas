@@ -5,6 +5,7 @@ import { LOS_FUTURE_MANUSCRIPTS } from "./content/losFutureManuscripts.ts";
 import { LosFutureExercises } from "./LosFutureExercises";
 import { LosFutureChapterCheck } from "./LosFutureChapterCheck";
 import {LosRecallCards} from "./LosRecallCards.tsx";
+import {LosFutureInteractiveReader} from "./LosFutureInteractiveReader.tsx";
 
 /**
  * Sisältöluonnosten lukija. Näyttää jokaisen luvun kokonaisen käsikirjoituksen
@@ -61,20 +62,20 @@ export function LosFutureBookPreview({book,chapter,section}:{
 
     {section==="text"&&<>
       <h2 lang="de">{manuscript.title}</h2>
-      <div lang="de" style={{fontSize:"1.08rem",lineHeight:1.85,maxWidth:"68ch"}}>
-        {manuscript.textA.split(/\n\s*\n/).map((para,i)=><p key={i}>{para}</p>)}
-      </div>
+      <LosFutureInteractiveReader bookId={book.id} chapterId={chapter.id}
+        source="text-a" text={manuscript.textA} vocabulary={manuscript.vocabulary}/>
       <p className="los-page-intro">Lue ensin pääajatus. Etsi sitten tekstin henkilöt, paikka ja tärkeät tapahtumat.
         Tekstiluonnos on kokonaisena LOS!:n sisällä. Äänitettä ei ole hyväksytty.</p>
     </>}
 
     {section==="text-b"&&<>
       <h2>Toinen tekstilaji</h2>
-      <p lang="de" style={{fontSize:"1.06rem",lineHeight:1.8,whiteSpace:"pre-wrap"}}>{manuscript.textB}</p>
+      <LosFutureInteractiveReader bookId={book.id} chapterId={chapter.id}
+        source="text-b" text={manuscript.textB} vocabulary={manuscript.vocabulary}/>
       <h2>Tukidialogi</h2>
-      <div lang="de" style={{fontSize:"1.03rem",lineHeight:1.75}}>
-        {manuscript.dialogue.map((line,i)=><p key={i}>{line}</p>)}
-      </div>
+      <LosFutureInteractiveReader bookId={book.id} chapterId={chapter.id}
+        source="dialogue" text={manuscript.dialogue.join("\n")}
+        vocabulary={manuscript.vocabulary} showNotes={false}/>
       <p>Vertaa Text B:tä pidempään Text A:han. Mitä tietoja tässä tekstilajissa
         ilmaistaan lyhyemmin? Tukidialogin ääntäminen arvioidaan myöhemmin.</p>
     </>}

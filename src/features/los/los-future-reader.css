@@ -1,0 +1,42 @@
+/* LOS! 2–8: edition-neutral inline reader, shared dictionary and marks. */
+.los-future-interactive-reader{max-width:790px;margin:1rem 0 1.7rem;min-width:0}
+.los-future-reader-tools{padding:1rem 0;border-top:1px solid var(--los-line,#ddd);
+  border-bottom:1px solid var(--los-line,#ddd);display:grid;gap:.65rem}
+.los-future-reader-modes,.los-future-reader-colors,.los-future-reader-actions{
+  display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
+.los-future-reader-tools button{font:inherit;font-size:.89rem;min-height:42px;padding:.55rem .7rem;
+  border-radius:8px;border:1px solid var(--los-line,#aaa);background:var(--los-paper,#fff);
+  color:var(--los-ink,#242a2c);cursor:pointer}
+.los-future-reader-modes button[aria-pressed="true"]{
+  border-color:var(--los-book-accent,#8d6a50);background:var(--los-book-tint,#f2e9df);
+  color:#242a2c;font-weight:700}
+.los-future-reader-colors button.los-future-reader-color{min-height:40px;font-size:.8rem;color:#292929}
+.los-future-reader-color-yellow{background:#ffe16a!important}
+.los-future-reader-color-pink{background:#f4a7c8!important}
+.los-future-reader-color-green{background:#a9e3b2!important}
+.los-future-reader-color-blue{background:#aacfff!important}
+.los-future-reader-color[aria-pressed="true"]{outline:2px solid var(--los-book-accent,#8d6a50);outline-offset:2px}
+.los-future-reader-tools button:disabled{opacity:.42;cursor:not-allowed}
+.los-future-reader-tools button:focus-visible,.los-future-reader-token:focus-visible{
+  outline:3px solid var(--los-book-accent,#8d6a50);outline-offset:2px}
+.los-future-reader-help,.los-future-reader-saved{font-size:.87rem;line-height:1.6;
+  color:var(--los-soft,#565b60);margin:0!important}
+.los-future-reader-text{font-family:Georgia,"Times New Roman",serif;
+  font-size:1.12rem;line-height:2.02;white-space:pre-wrap;overflow-wrap:anywhere;
+  margin:1.2rem 0 1rem!important}
+.los-future-reader-token{display:inline!important;background:transparent;border:0!important;
+  margin:0!important;padding:1px 0!important;color:inherit;font:inherit!important;
+  line-height:inherit!important;min-height:0!important;vertical-align:baseline;cursor:pointer}
+.los-future-reader-token:hover{text-decoration:underline;text-underline-offset:4px}
+.los-future-reader-token.is-first{outline:2px dotted var(--los-book-accent,#8d6a50);outline-offset:2px}
+.los-future-reader-token.is-yellow{background:linear-gradient(transparent 15%,#ffe16a 15%,#ffe16a 90%,transparent 90%)!important;color:#242424}
+.los-future-reader-token.is-pink{background:linear-gradient(transparent 15%,#f4a7c8 15%,#f4a7c8 90%,transparent 90%)!important;color:#242424}
+.los-future-reader-token.is-green{background:linear-gradient(transparent 15%,#a9e3b2 15%,#a9e3b2 90%,transparent 90%)!important;color:#242424}
+.los-future-reader-token.is-blue{background:linear-gradient(transparent 15%,#aacfff 15%,#aacfff 90%,transparent 90%)!important;color:#242424}
+.los-future-reader-note{display:grid;gap:.55rem;font-size:.95rem}
+.los-future-reader-note textarea{width:100%;min-width:0;box-sizing:border-box;
+  resize:vertical;font:inherit;padding:.75rem;border:1px solid var(--los-line,#aaa);
+  color:var(--los-ink,#252525);background:var(--los-paper,#fff);border-radius:8px}
+.los-future-reader-saved{margin:.75rem 0 1.5rem!important}
+@media(max-width:600px){.los-future-reader-text{font-size:1.05rem;line-height:1.95}
+  .los-future-reader-modes button{flex:1}}

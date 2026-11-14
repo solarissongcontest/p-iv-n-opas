@@ -11,6 +11,7 @@ import {losFutureChapterCheckPlan} from "./losFutureChapterCheckPlan.ts";
 import {readLosFutureChapterCheckAttempt} from "./losFutureChapterCheckState.ts";
 import {losFutureRecallCardsFor} from "./losFutureRecallCards.ts";
 import {validLosRecallCardMap} from "./recallEngine.ts";
+import {validLosFutureReaderMarks} from "./losFutureReaderMarks.ts";
 
 export const LOS_FUTURE_BACKUP_FORMAT="los-future-book-backup-v1";
 export const LOS_FUTURE_BACKUP_MAX_BYTES=5_000_000;
@@ -62,7 +63,8 @@ function validDraft(draft:unknown,bookId:number,chapterId:string):draft is LosCh
     ||!Array.isArray(draft["practiceChecked"])||draft["practiceChecked"].length>100
     ||!draft["practiceChecked"].every((x:unknown)=>textUnder(x,110))
     ||!isObject(draft["testAnswers"]))return false;
-  if(draft["readerMarks"]!==undefined&&!strMap(draft["readerMarks"],200,500))return false;
+  if(draft["readerMarks"]!==undefined&&
+    !validLosFutureReaderMarks(draft["readerMarks"],bookId,chapterId))return false;
   // Do not allow imports to fabricate approved mastery. Source-authored exam
   // drafts may be transferred, but are clearly labelled LOCAL practice and
   // do not create validated marks or published exam completion.

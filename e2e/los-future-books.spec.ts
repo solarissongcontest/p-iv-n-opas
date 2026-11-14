@@ -955,3 +955,31 @@ test("later-book recall cards share LOS! 1 spaced-recall logic but keep book-spe
   expect(other).toBeNull();
   await expectNoHorizontalOverflow(page);
 });
+
+test("LOS! 2 Text A highlights and chapter notes survive reload without leaking into book 3",async({page})=>{
+  await enterFutureBook(page);
+  await page.goto("/los#/2/01/text",{waitUntil:"domcontentloaded"});
+  const reader=page.locator(".los-future-interactive-reader");
+  await expect(reader).toHaveCount(1);
+  await expect(reader.locator(".los-future-reader-token")).not.toHaveCount(0);
+  await reader.getByRole("button",{name:"Korosta tekstiä"}).click();
+  const tokens=reader.locator(".los-future-reader-token");
+  await tokens.nth(0).click();
+  await tokens.nth(1).click();
+  await expect(tokens.nth(0)).toHaveClass(/is-yellow/);
+  await reader.getByRole("textbox",{name:"Kappaleen omat muistiinpanot"})
+    .fill("Muistan nyt sanan neu.");
+  await page.reload({waitUntil:"domcontentloaded"});
+  await expect(reader.locator(".los-future-reader-token").first()).toHaveClass(/is-yellow/);
+  await expect(reader.getByRole("textbox",{name:"Kappaleen omat muistiinpanot"}))
+    .toHaveValue("Muistan nyt sanan neu.");
+  await reader.getByRole("button",{name:"Avaa sanaselitys"}).click();
+  await reader.locator(".los-future-reader-token").first().click();
+  await expect(reader.getByRole("dialog",{name:/Sanan .* selitys/})).toBeVisible();
+  await reader.getByRole("button",{name:"Sulje sanan selitys"}).click();
+  await page.goto("/los#/3/01/text",{waitUntil:"domcontentloaded"});
+  const other=page.locator(".los-future-interactive-reader");
+  await expect(other.locator(".los-future-reader-token.is-yellow")).toHaveCount(0);
+  await expect(other.getByRole("textbox",{name:"Kappaleen omat muistiinpanot"})).toHaveValue("");
+  await expectNoHorizontalOverflow(page);
+});

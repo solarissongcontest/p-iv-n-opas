@@ -15,6 +15,7 @@ import {losFutureChapterCheckPlan} from "../src/features/los/losFutureChapterChe
 import {saveLosFutureChapterCheckAnswer,submitLosFutureChapterCheck,retakeLosFutureChapterCheck} from "../src/features/los/losFutureChapterCheckState.ts";
 import {losFutureRecallCardsFor} from "../src/features/los/losFutureRecallCards.ts";
 import {losRecallReview} from "../src/features/los/recallEngine.ts";
+import {losFutureReaderMarkKey,losFutureReaderText,losFutureReaderAppend} from "../src/features/los/losFutureReaderMarks.ts";
 
 const owner="backup-test-owner";
 const makeDraft=():LosChapterDraft=>({
@@ -333,4 +334,22 @@ test("future recall backup rejects foreign cards and forged grade fields",()=>{
     const invalid=makeDraft();invalid.recallCards=recallCards as LosChapterDraft["recallCards"];
     assert.throws(()=>parseLosFutureBackup(JSON.stringify({...base,chapters:{"01":invalid}})),/virheellinen/);
   }
+});
+
+test("future Text A highlights survive backup, while foreign text marks are rejected",()=>{
+  const id=losFutureReaderMarkKey(2,"01","text-a");
+  const text=losFutureReaderText(2,"01","text-a");
+  const highlight=losFutureReaderAppend(undefined,text,0,2,"pink");assert.ok(highlight);
+  const store=new FakeStore();const draft=makeDraft();
+  draft.readerMarks={[id]:highlight};draft.note="Huomasin uuden sanan tekstissä.";
+  store.setItem(key(2,"01"),JSON.stringify(draft));
+  const exported=createLosFutureBackup(2,owner,store,fixedDate);
+  assert.equal(exported.chapters["01"]?.readerMarks?.[id],highlight);
+  const target=new FakeStore();
+  assert.equal(applyLosFutureBackup(parseLosFutureBackup(JSON.stringify(exported)),2,"next-owner",target,"missing-only").imported,1);
+  assert.equal(JSON.parse(target.getItem(key(2,"01","next-owner"))!).readerMarks[id],highlight);
+  const bogus=makeDraft();bogus.readerMarks={[losFutureReaderMarkKey(3,"01","text-a")]:highlight};
+  assert.throws(()=>parseLosFutureBackup(JSON.stringify({
+    format:LOS_FUTURE_BACKUP_FORMAT,bookId:2,exportedAt:fixedDate.toISOString(),chapters:{"01":bogus},
+  })),/virheellinen/);
 });
