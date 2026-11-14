@@ -67,7 +67,7 @@ export function getLosFutureTeacherLesson(id: string): TeacherLesson | undefined
         "Opetusmateriaalin, arvioinnin, kieliasun ja medioiden julkaisuportit ovat edelleen avoinna."],help},
   ];
   const lesson:TeacherLesson={
-    id,bookId,chapterId,version:"2.0.0-draft.1",title:script.title,objective:script.objective,
+    id,bookId,chapterId,version:"2.0.0-draft.2",title:script.title,objective:script.objective,
     estimatedMinutes:outline.estimatedMinutes,publicationStatus:"editorial-draft",scenes,
     requiredQuestionIds:[],requiredActivityIds:[],requiredPracticeIds:[],
   };
