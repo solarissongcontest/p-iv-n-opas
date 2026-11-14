@@ -71,9 +71,17 @@ export function LosDictionary({ book, move, openBook }: { book: LosBookDefinitio
             aria-label={`Avaa sanakortti: ${item.word}`}
             onClick={()=>setSelection({kind:"local",entry:item})}>{item.word}</button></strong>
           <span role="cell">{hidden ? <span className="los-muted-hidden">Piilotettu</span> : item.meaning}</span>
-          <button type="button" role="cell" title={`Avaa ${item.title}`} onClick={()=>item.book === book.id ? move(item.chapter, "vocabulary") : openBook(item.book)}>
-            <span>{item.code} · {Number(item.chapter)}</span><ChevronRight size={15}/>
-          </button>
+          <span role="cell" className="los-index-source-cell">
+            <button type="button" title={item.book===book.id
+              ? `Avaa kappaleen ${Number(item.chapter)} sanasto`
+              : `Avaa LOS! ${item.book}, kappale ${Number(item.chapter)}`}
+              aria-label={item.book===book.id
+                ? `Avaa kappaleen ${Number(item.chapter)} sanasto`
+                : `Avaa LOS! ${item.book}. Siirry sitten kappaleeseen ${Number(item.chapter)}.`}
+              onClick={()=>item.book===book.id?move(item.chapter,"vocabulary"):openBook(item.book)}>
+              <span>{item.code} · {Number(item.chapter)}</span><ChevronRight size={15} aria-hidden="true"/>
+            </button>
+          </span>
         </div>)}
       </div>
     }
