@@ -67,7 +67,7 @@ export const LOS1_L008_TEACHER: TeacherLesson = {
         {label:"1 · Franz aloittaa",german:"Hallo, ich bin Franz.",meaning:"Hei, minä olen Franz. Franz kertoo nimensä ich bin -rakenteella."},
         {label:"2 · Franz kysyy",german:"Wie heißt du?",meaning:"Mikä sinun nimesi on?"},
         {label:"3 · Greta vastaa",german:"Ich heiße Greta.",meaning:"Nimeni on Greta. Greta käyttää heißen-verbiä."},
-        {label:"4 · Greta kertoo opettajasta",german:"Er heißt Herr Weiß.",meaning:"Hänen nimensä on herra Weiß. Er heißt riittää tässä tunnistaa."},
+        {label:"4 · Greta kertoo opettajasta",german:"Er heißt Herr Weiß.",meaning:"Kyllä, häntä kutsutaan herra Weißiksi. Er heißt riittää tässä tunnistaa; Herr on puhuttelu, ei etunimi."},
         {label:"5 · Franz hyvästelee",german:"Bis dann!",meaning:"Nähdään!"},
         {label:"6 · Greta hyvästelee",german:"Wiedersehen!",meaning:"Näkemiin!"},
       ],
