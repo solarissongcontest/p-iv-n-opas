@@ -69,6 +69,11 @@ Tämä tiedosto on ainoa LOS! 1–8:n *toteutuksen* jatkotilaraportti. Visuaalin
 - Kysymysten omat tunnisteet, arvioinnin rajaus ja vastausten tallennusavaimet pysyivät samoina; vanhoja oppilaan vastauksia ei poisteta eikä arvostella uudelleen. T04 käsittelee yhä erillistä tukidialogia, eikä sitä pidä sekoittaa Text A:n T02:een. Uusi 70 kysymys–mallivastausparin regressiotesti suojaa vanhojen lähdemallien tahattomalta palautumiselta. **Riippumaton kieli-, taso- ja pedagoginen tarkistus on edelleen tehtävä.**
 - **Edellisen HEADin `901a5bfc56fc8ca1c45939b7c4d26c34f1935e10` vahvistus:** [Quality Gate 43610107342](https://github.com/solarissongcontest/p-iv-n-opas/actions/runs/43610107342) **791/791** sekä lint, TypeScript, build ja Vercel-pariteetti hyväksytty; [Chromium ja WebKit 43610107502](https://github.com/solarissongcontest/p-iv-n-opas/actions/runs/43610107502) **204/204** hyväksytty. Uuden sisältökorjauscommitin omat ajot vaativat erillisen vahvistuksen.
 
+## 14.11.2026 · T09-käännöstehtävien 70 tehtävänannon välimerkkikorjausta
+
+- Korjattiin LOS! 2–8:n kaikkien **70 T09-käännöstehtävän** suomenkieliset kehotteet. Tehtävänannon loppupiste tuotti aiemmin muotoja `Lauantaina ostan omenan..`, `Mitä kahvi maksaa?.` ja `Tarkista lähde!.`. Nyt lähdelauseen piste, kysymysmerkki tai huutomerkki näkyy täsmälleen kerran. Myös monivirkkeisen kehotteen sisäinen piste säilyy.
+- Tehtävätunnisteet, saksankieliset käännösmallit, tehtävätyyppi ja opiskelijan kirjoitettu vastaus säilyvät ennallaan. Korjaus ei ole näiden saksankielisten mallien erillinen kielentarkistus. Kattava 70 tehtävän testi ja selaimen vastauksen uudelleenlataustesti lisätty.
+
 ## 14.11.2026 · Kaikkien tehtävien vastausmallin avaaminen vasta omasta yrityksestä
 
 - LOS! 2–8:n yhteisessä harjoitusmoottorissa mallivastauksen painike on nyt estetty **myös yksittäisissä yleisissä tekstitehtävissä, aukontäytössä, yhdistelyssä ja muissa aiemmin ilman yritystä avattavissa tehtävissä**, kun tehtävälle ei ole vielä tallennettu omaa vastausta. Monikenttäisten tehtävien erilliset vaadittujen vastausten tarkistukset säilyvät.
