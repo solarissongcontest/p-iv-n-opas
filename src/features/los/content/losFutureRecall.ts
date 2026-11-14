@@ -31,12 +31,13 @@ export function readLosFutureRecallAnswer(value: string, pairs: readonly LosFutu
   try {
     const parsed: unknown = JSON.parse(value);
     if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return null;
-    const row = parsed as Record<string, unknown>;
-    if (row.version !== 1 || !Array.isArray(row.meanings) || !Array.isArray(row.answers) ||
-        row.meanings.length !== pairs.length || row.answers.length !== pairs.length) return null;
-    if (!pairs.every((pair, i) => row.meanings[i] === pair.fi)) return null;
-    if (!row.answers.every((v: unknown) => typeof v === "string" && v.length <= 100)) return null;
-    return [...row.answers] as string[];
+    const row = parsed as {version?: unknown; meanings?: unknown; answers?: unknown};
+    const meanings = row.meanings, answers = row.answers;
+    if (row.version !== 1 || !Array.isArray(meanings) || !Array.isArray(answers) ||
+        meanings.length !== pairs.length || answers.length !== pairs.length) return null;
+    if (!pairs.every((pair, i) => meanings[i] === pair.fi)) return null;
+    if (!answers.every((v: unknown) => typeof v === "string" && v.length <= 100)) return null;
+    return [...answers] as string[];
   } catch { return null; }
 }
 
