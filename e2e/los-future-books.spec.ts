@@ -1222,9 +1222,9 @@ test("eight-book chapter dictionary pages 60 rows at a time while searching all 
   // A source action must remain a real accessible button, not a role="cell"
   // button that hides its interactive semantics from screen readers.
   await expect(entries.first().locator('[role="cell"]')).toHaveCount(3);
-  const firstSource=entries.first().getByRole("button",{name:/Avaa kappaleen \d+ sanasto/});
+  const firstSource=entries.first().getByRole("button",{name:/Avaa LOS! 2, kappaleen \d+ sanasto/});
   await expect(firstSource).toBeVisible();
-  await expect(firstSource).toHaveAttribute("title",/Avaa kappaleen \d+ sanasto/);
+  await expect(firstSource).toHaveAttribute("title",/Avaa LOS! 2, kappaleen \d+ sanasto/);
   await firstSource.click();
   await expect(page).toHaveURL(/\/2\/\d{2}\/vocabulary/);
   await page.goto("/los#/2/dictionary",{waitUntil:"domcontentloaded"});
@@ -1249,5 +1249,22 @@ test("eight-book chapter dictionary pages 60 rows at a time while searching all 
   await expect(page.getByText("Ei osumia tällä rajauksella.",{exact:false})).toBeVisible();
   await query.clear();
   await expect(entries).toHaveCount(60);
+  await expectNoHorizontalOverflow(page);
+});
+
+
+test("whole-series dictionary source goes directly to the other book's chapter",async({page})=>{
+  await enterFutureBook(page);
+  await page.goto("/los#/2/dictionary",{waitUntil:"domcontentloaded"});
+  await page.getByRole("button",{name:"Koko sarja"}).click();
+  const query=page.locator(".los-index-search input");
+  await query.fill("die Mannschaft");
+  const rows=page.locator(".los-index-entry");
+  await expect(rows).toHaveCount(1);
+  await expect(rows.first().locator('[role="cell"]')).toHaveCount(3);
+  await rows.first().getByRole("button",{name:"Avaa LOS! 3, kappaleen 3 sanasto"}).click();
+  await expect(page).toHaveURL(/\/3\/03\/vocabulary$/);
+  await expect(page.locator(".los-book-workspace")).toBeVisible();
+  await expect(page.getByText("die Mannschaft",{exact:true}).first()).toBeVisible();
   await expectNoHorizontalOverflow(page);
 });
