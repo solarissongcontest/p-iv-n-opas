@@ -28,7 +28,7 @@ export const LOS_FUTURE_EXERCISES_2: Record<string, LosFutureExerciseDraft[]> = 
       "group": "T",
       "title": "Puhujat ja vuorot",
       "prompt": "Lue saksankielinen tukidialogi. Kuinka monta puheenvuoroa siinä on, ja mitä kukin puhuja tekee ensimmäisellä vuorollaan?",
-      "answerKey": "4 puheenvuoroa. Puhujien ensimmäiset vuorot: Lea: Was machen wir am Samstag? | Max: Am Nachmittag kaufen wir ein.. Suomenkielinen tulkinta: Lea kysyy lauantain suunnitelmasta. Max kertoo heidän menevän iltapäivällä ostoksille. Tarkista, että oma vastauksesi kuvaa kummankin puhujan ensimmäistä vuoroa.",
+      "answerKey": "4 puheenvuoroa. Puhujien ensimmäiset vuorot: Lea: Was machen wir am Samstag? | Max: Am Nachmittag kaufen wir ein. Suomenkielinen tulkinta: Lea kysyy lauantain suunnitelmasta. Max kertoo heidän menevän iltapäivällä ostoksille. Tarkista, että oma vastauksesi kuvaa kummankin puhujan ensimmäistä vuoroa.",
       "feedback": "",
       "assessment": "self-review"
     },
@@ -290,7 +290,7 @@ export const LOS_FUTURE_EXERCISES_2: Record<string, LosFutureExerciseDraft[]> = 
       "group": "T",
       "title": "Puhujat ja vuorot",
       "prompt": "Lue saksankielinen tukidialogi. Kuinka monta puheenvuoroa siinä on, ja mitä kukin puhuja tekee ensimmäisellä vuorollaan?",
-      "answerKey": "4 puheenvuoroa. Puhujien ensimmäiset vuorot: Mira: Hallo, ich bin Mira. | Jonas: Ich heiße Jonas. Wir lernen Deutsch.. Suomenkielinen tulkinta: Mira tervehtii ja esittelee itsensä. Jonas kertoo nimensä ja mainitsee saksan opiskelun. Tarkista, että oma vastauksesi kuvaa kummankin puhujan ensimmäistä vuoroa.",
+      "answerKey": "4 puheenvuoroa. Puhujien ensimmäiset vuorot: Mira: Hallo, ich bin Mira. | Jonas: Ich heiße Jonas. Wir lernen Deutsch. Suomenkielinen tulkinta: Mira tervehtii ja esittelee itsensä. Jonas kertoo nimensä ja mainitsee saksan opiskelun. Tarkista, että oma vastauksesi kuvaa kummankin puhujan ensimmäistä vuoroa.",
       "feedback": "",
       "assessment": "self-review"
     },
@@ -552,7 +552,7 @@ export const LOS_FUTURE_EXERCISES_2: Record<string, LosFutureExerciseDraft[]> = 
       "group": "T",
       "title": "Puhujat ja vuorot",
       "prompt": "Lue saksankielinen tukidialogi. Kuinka monta puheenvuoroa siinä on, ja mitä kukin puhuja tekee ensimmäisellä vuorollaan?",
-      "answerKey": "4 puheenvuoroa. Puhujien ensimmäiset vuorot: Lina: Ist das deine Familie? | Amir: Ja. Das ist meine Mutter, und das ist mein Bruder.. Suomenkielinen tulkinta: Lina kysyy, onko kyse Amirin perheestä. Amir esittelee äitinsä ja veljensä. Tarkista, että oma vastauksesi kuvaa kummankin puhujan ensimmäistä vuoroa.",
+      "answerKey": "4 puheenvuoroa. Puhujien ensimmäiset vuorot: Lina: Ist das deine Familie? | Amir: Ja. Das ist meine Mutter, und das ist mein Bruder. Suomenkielinen tulkinta: Lina kysyy, onko kyse Amirin perheestä. Amir esittelee äitinsä ja veljensä. Tarkista, että oma vastauksesi kuvaa kummankin puhujan ensimmäistä vuoroa.",
       "feedback": "",
       "assessment": "self-review"
     },
@@ -814,7 +814,7 @@ export const LOS_FUTURE_EXERCISES_2: Record<string, LosFutureExerciseDraft[]> = 
       "group": "T",
       "title": "Puhujat ja vuorot",
       "prompt": "Lue saksankielinen tukidialogi. Kuinka monta puheenvuoroa siinä on, ja mitä kukin puhuja tekee ensimmäisellä vuorollaan?",
-      "answerKey": "4 puheenvuoroa. Puhujien ensimmäiset vuorot: Tessa: Wie ist deine Wohnung? | Ben: Sie ist klein, aber schön.. Suomenkielinen tulkinta: Tessa kysyy Benin asunnosta. Ben kuvailee asuntoaan pieneksi mutta kauniiksi. Tarkista, että oma vastauksesi kuvaa kummankin puhujan ensimmäistä vuoroa.",
+      "answerKey": "4 puheenvuoroa. Puhujien ensimmäiset vuorot: Tessa: Wie ist deine Wohnung? | Ben: Sie ist klein, aber schön. Suomenkielinen tulkinta: Tessa kysyy Benin asunnosta. Ben kuvailee asuntoaan pieneksi mutta kauniiksi. Tarkista, että oma vastauksesi kuvaa kummankin puhujan ensimmäistä vuoroa.",
       "feedback": "",
       "assessment": "self-review"
     },
@@ -1076,7 +1076,7 @@ export const LOS_FUTURE_EXERCISES_2: Record<string, LosFutureExerciseDraft[]> = 
       "group": "T",
       "title": "Puhujat ja vuorot",
       "prompt": "Lue saksankielinen tukidialogi. Kuinka monta puheenvuoroa siinä on, ja mitä kukin puhuja tekee ensimmäisellä vuorollaan?",
-      "answerKey": "4 puheenvuoroa. Puhujien ensimmäiset vuorot: Eva: Hast du einen Schreibtisch? | Paul: Ja, aber ich brauche einen Stuhl.. Suomenkielinen tulkinta: Eva kysyy, onko Paulilla kirjoituspöytä. Paul sanoo, että on, mutta hän tarvitsee tuolin. Tarkista, että oma vastauksesi kuvaa kummankin puhujan ensimmäistä vuoroa.",
+      "answerKey": "4 puheenvuoroa. Puhujien ensimmäiset vuorot: Eva: Hast du einen Schreibtisch? | Paul: Ja, aber ich brauche einen Stuhl. Suomenkielinen tulkinta: Eva kysyy, onko Paulilla kirjoituspöytä. Paul sanoo, että on, mutta hän tarvitsee tuolin. Tarkista, että oma vastauksesi kuvaa kummankin puhujan ensimmäistä vuoroa.",
       "feedback": "",
       "assessment": "self-review"
     },
@@ -1338,7 +1338,7 @@ export const LOS_FUTURE_EXERCISES_2: Record<string, LosFutureExerciseDraft[]> = 
       "group": "T",
       "title": "Puhujat ja vuorot",
       "prompt": "Lue saksankielinen tukidialogi. Kuinka monta puheenvuoroa siinä on, ja mitä kukin puhuja tekee ensimmäisellä vuorollaan?",
-      "answerKey": "4 puheenvuoroa. Puhujien ensimmäiset vuorot: Nele: Wann stehst du auf? | Luca: Ich stehe um sieben Uhr auf.. Suomenkielinen tulkinta: Nele kysyy, milloin Luca herää. Luca kertoo heräävänsä seitsemältä. Tarkista, että oma vastauksesi kuvaa kummankin puhujan ensimmäistä vuoroa.",
+      "answerKey": "4 puheenvuoroa. Puhujien ensimmäiset vuorot: Nele: Wann stehst du auf? | Luca: Ich stehe um sieben Uhr auf. Suomenkielinen tulkinta: Nele kysyy, milloin Luca herää. Luca kertoo heräävänsä seitsemältä. Tarkista, että oma vastauksesi kuvaa kummankin puhujan ensimmäistä vuoroa.",
       "feedback": "",
       "assessment": "self-review"
     },
@@ -1600,7 +1600,7 @@ export const LOS_FUTURE_EXERCISES_2: Record<string, LosFutureExerciseDraft[]> = 
       "group": "T",
       "title": "Puhujat ja vuorot",
       "prompt": "Lue saksankielinen tukidialogi. Kuinka monta puheenvuoroa siinä on, ja mitä kukin puhuja tekee ensimmäisellä vuorollaan?",
-      "answerKey": "4 puheenvuoroa. Puhujien ensimmäiset vuorot: Sara: Isst du gern Brot? | Leon: Ja, aber ich esse lieber Obst.. Suomenkielinen tulkinta: Sara kysyy, pitääkö Leon leivästä. Leon vastaa kyllä mutta sanoo pitävänsä enemmän hedelmistä. Tarkista, että oma vastauksesi kuvaa kummankin puhujan ensimmäistä vuoroa.",
+      "answerKey": "4 puheenvuoroa. Puhujien ensimmäiset vuorot: Sara: Isst du gern Brot? | Leon: Ja, aber ich esse lieber Obst. Suomenkielinen tulkinta: Sara kysyy, pitääkö Leon leivästä. Leon vastaa kyllä mutta sanoo pitävänsä enemmän hedelmistä. Tarkista, että oma vastauksesi kuvaa kummankin puhujan ensimmäistä vuoroa.",
       "feedback": "",
       "assessment": "self-review"
     },
@@ -1862,7 +1862,7 @@ export const LOS_FUTURE_EXERCISES_2: Record<string, LosFutureExerciseDraft[]> = 
       "group": "T",
       "title": "Puhujat ja vuorot",
       "prompt": "Lue saksankielinen tukidialogi. Kuinka monta puheenvuoroa siinä on, ja mitä kukin puhuja tekee ensimmäisellä vuorollaan?",
-      "answerKey": "4 puheenvuoroa. Puhujien ensimmäiset vuorot: Gast: Guten Tag! Ich möchte einen Tee, bitte. | Kellnerin: Gern. Möchten Sie auch Kuchen?. Suomenkielinen tulkinta: Asiakas tervehtii ja tilaa teetä. Tarjoilija ottaa pyynnön vastaan ja tarjoaa myös kakkua. Tarkista, että oma vastauksesi kuvaa kummankin puhujan ensimmäistä vuoroa.",
+      "answerKey": "4 puheenvuoroa. Puhujien ensimmäiset vuorot: Gast: Guten Tag! Ich möchte einen Tee, bitte. | Kellnerin: Gern. Möchten Sie auch Kuchen? Suomenkielinen tulkinta: Asiakas tervehtii ja tilaa teetä. Tarjoilija ottaa pyynnön vastaan ja tarjoaa myös kakkua. Tarkista, että oma vastauksesi kuvaa kummankin puhujan ensimmäistä vuoroa.",
       "feedback": "",
       "assessment": "self-review"
     },
@@ -2124,7 +2124,7 @@ export const LOS_FUTURE_EXERCISES_2: Record<string, LosFutureExerciseDraft[]> = 
       "group": "T",
       "title": "Puhujat ja vuorot",
       "prompt": "Lue saksankielinen tukidialogi. Kuinka monta puheenvuoroa siinä on, ja mitä kukin puhuja tekee ensimmäisellä vuorollaan?",
-      "answerKey": "4 puheenvuoroa. Puhujien ensimmäiset vuorot: Mia: Wir brauchen zwei Äpfel und ein Brot. | Tom: Brauchen wir auch Milch?. Suomenkielinen tulkinta: Mia mainitsee kaksi omenaa ja leivän ostoslistalta. Tom kysyy, tarvitaanko myös maitoa. Tarkista, että oma vastauksesi kuvaa kummankin puhujan ensimmäistä vuoroa.",
+      "answerKey": "4 puheenvuoroa. Puhujien ensimmäiset vuorot: Mia: Wir brauchen zwei Äpfel und ein Brot. | Tom: Brauchen wir auch Milch? Suomenkielinen tulkinta: Mia mainitsee kaksi omenaa ja leivän ostoslistalta. Tom kysyy, tarvitaanko myös maitoa. Tarkista, että oma vastauksesi kuvaa kummankin puhujan ensimmäistä vuoroa.",
       "feedback": "",
       "assessment": "self-review"
     },
@@ -2386,7 +2386,7 @@ export const LOS_FUTURE_EXERCISES_2: Record<string, LosFutureExerciseDraft[]> = 
       "group": "T",
       "title": "Puhujat ja vuorot",
       "prompt": "Lue saksankielinen tukidialogi. Kuinka monta puheenvuoroa siinä on, ja mitä kukin puhuja tekee ensimmäisellä vuorollaan?",
-      "answerKey": "4 puheenvuoroa. Puhujien ensimmäiset vuorot: Touristin: Entschuldigung, wo ist der Bahnhof? | Frau: Der Bahnhof ist dort, links.. Suomenkielinen tulkinta: Turisti pyytää aseman sijaintia. Nainen opastaa, että asema on vasemmalla. Tarkista, että oma vastauksesi kuvaa kummankin puhujan ensimmäistä vuoroa.",
+      "answerKey": "4 puheenvuoroa. Puhujien ensimmäiset vuorot: Touristin: Entschuldigung, wo ist der Bahnhof? | Frau: Der Bahnhof ist dort, links. Suomenkielinen tulkinta: Turisti pyytää aseman sijaintia. Nainen opastaa, että asema on vasemmalla. Tarkista, että oma vastauksesi kuvaa kummankin puhujan ensimmäistä vuoroa.",
       "feedback": "",
       "assessment": "self-review"
     },
