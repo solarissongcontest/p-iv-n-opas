@@ -3,8 +3,14 @@ import { CheckCircle2, CircleAlert, RotateCcw } from "lucide-react";
 import { useLosChapterDraft } from "./studyState";
 import { LOS1_MIDTERM_DRAFT_CHAPTER, LOS1_MIDTERM_QUESTIONS,
   LOS1_MIDTERM_SECTION_TITLES, losExamReadyToSubmit, losExamScore } from "./content/los1Exams";
-import {losArchiveExamAttempt,losArchivedExamHistory} from "./content/los1ExamArchive";
+import {losArchiveExamAttempt,losArchivedExamHistory,losArchiveMidtermPersonalWork,losArchivedMidtermPersonalWork} from "./content/los1ExamArchive";
 import "./los-exams.css";
+
+const archivedRatingLabel: Readonly<Record<string,string>> = {
+  well:"Tein keskustelun melko itsenäisesti.",
+  some:"Tarvitsin mallia tai korjauksia.",
+  again:"Harjoittelen keskustelua vielä.",
+};
 
 const RUBRIC = [
   {id:"greeting",label:"Aloitan tervehdyksellä, joka sopii tilanteeseen."},
@@ -39,12 +45,23 @@ export function LosMidtermExam() {
   const retake=()=>{
     if(!confirmRetake||!saved)return;
     try{
-      update(current=>({...current,
-        practiceAnswers:losArchiveExamAttempt(
+      update(current=>{
+        const objective=losArchiveExamAttempt(
           current.practiceAnswers,"EX-MID",LOS1_MIDTERM_QUESTIONS,
-          current.testAnswers,current.testSubmittedAt??""),
-        testAnswers:{},testSubmittedAt:null,
-      }));
+          current.testAnswers,current.testSubmittedAt??"");
+        const number=losArchivedExamHistory(objective,"EX-MID").at(-1)?.number;
+        if (!number) throw new Error("Uusintaa ei voitu tallentaa.");
+        const preserved=losArchiveMidtermPersonalWork(
+          objective,number,current.applicationDraft,current.selfAssessment,
+          current.practiceAnswers["EX-MID-DIALOGUE-SELF"]??"");
+        // Each retake has its own ungraded personal work and rating. Earlier
+        // material remains in the archive, never silently reused as new proof.
+        const freshPractice={...preserved};
+        delete freshPractice["EX-MID-DIALOGUE-SELF"];
+        return {...current,practiceAnswers:freshPractice,
+          applicationDraft:"",selfAssessment:"",
+          testAnswers:{},testSubmittedAt:null};
+      });
       setArchiveError("");
       setConfirmRetake(false);
     }catch(error){setArchiveError(error instanceof Error?error.message:"Koetta ei voitu arkistoida.");}
@@ -124,6 +141,14 @@ export function LosMidtermExam() {
             {" "}{section.correct}/{section.total}
           </li>)}</ul>
         </details>
+        {(() => {
+          const personal=losArchivedMidtermPersonalWork(draft.practiceAnswers,item.number);
+          return personal && <details><summary>Oma keskusteluteksti ja itsearviointi</summary>
+            <p className="los-exam-own-text">{personal.applicationDraft || "(Ei kirjoitettua keskustelua; mahdollisesti suullinen.)"}</p>
+            <p className="los-exam-own-text">{personal.selfAssessment || "(Ei kirjoitettua itsearviointia.)"}</p>
+            <p>Oma arvio: {archivedRatingLabel[personal.dialogueRating] ?? "Ei valintaa"}</p>
+          </details>;
+        })()}
       </li>)}</ol>
     </section>}
     <section className="los-exam-speaking" aria-label="Itsenäisen viestinnän itsearviointi">

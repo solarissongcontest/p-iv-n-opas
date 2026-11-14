@@ -8,6 +8,8 @@ import {
   type LosLessonProgress,
 } from "./lessonEngine";
 import { LOS1_EXECUTABLE_LESSONS, los1LessonDraftChapter } from "./guidedLessons";
+import { getLosTeacherLesson } from "./teacher/lessonRegistry";
+import { losLessonCompleted } from "./losResumeRecommendation.ts";
 import "./los-lessons.css";
 
 const ALL_LESSONS = LOS1_EXECUTABLE_LESSONS;
@@ -63,7 +65,7 @@ export function LosFirstLessons({ selectedId, onSelect, move }: {
     });
   };
   const completeCount = ALL_LESSONS.filter(item =>
-    Boolean(chapterDraft(item.id).draft.lessonProgress?.[item.id]?.completedAt)).length;
+    losLessonCompleted(chapterDraft(item.id).draft,item.id)).length;
   const stepCount = lesson.steps.filter(item => progress.completedStepIds.includes(item.id)).length;
   const evidenceReady = losLessonEvidenceMet(lesson, draft);
   const ready = losLessonCanComplete(lesson, progress, draft);
@@ -71,13 +73,14 @@ export function LosFirstLessons({ selectedId, onSelect, move }: {
   const openChapter = (code: string) => {
     const items = ALL_LESSONS.filter(item => lessonChapter(item.id) === code);
     // A chapter tab only selects a lesson; it never records study evidence.
-    const target = items.find(item => !chapterDraft(item.id).draft.lessonProgress?.[item.id]?.completedAt) ?? items[0];
+    const target = items.find(item => !losLessonCompleted(chapterDraft(item.id).draft,item.id)) ?? items[0];
     if(target) onSelect(target.id);
   };
   const nextIndex = ALL_LESSONS.findIndex(item => item.id === lesson.id) + 1;
   const next = ALL_LESSONS[nextIndex];
   const skipsUnfinishedLessons = Boolean(next && Number(next.id.slice(1)) > Number(lesson.id.slice(1)) + 1);
-  const isComplete = Boolean(progress.completedAt);
+  const isComplete = losLessonCompleted(draft,lesson.id);
+  const teacherPilot = Boolean(getLosTeacherLesson(lesson.id));
   return <section className="los-lesson-program" id="los-lesson-runner" aria-label="Toteutetut LOS! 1 -oppitunnit">
     <div className="los-lesson-program-head">
       <p className="los-overline">OHJATTU OPETUS · {ALL_LESSONS.length} TUNTIA</p>
@@ -94,7 +97,7 @@ export function LosFirstLessons({ selectedId, onSelect, move }: {
     <div className="los-lesson-chapter-picker" role="group" aria-label="Valitse kappaleen oppitunnit">
       {CHAPTER_IDS.map(code => {
         const lessons = ALL_LESSONS.filter(item => lessonChapter(item.id) === code);
-        const completed = lessons.filter(item => Boolean(chapterDraft(item.id).draft.lessonProgress?.[item.id]?.completedAt)).length;
+        const completed = lessons.filter(item => losLessonCompleted(chapterDraft(item.id).draft,item.id)).length;
         return <button key={code} type="button" aria-pressed={code === chapterId}
           className={code === chapterId ? "is-active" : ""} onClick={() => openChapter(code)}>
           <strong>{chapterLabel(code)}</strong><small>{completed}/{lessons.length} tuntia</small>
@@ -104,8 +107,8 @@ export function LosFirstLessons({ selectedId, onSelect, move }: {
     <p className="los-lesson-chapter-context" aria-live="polite">{chapterLabel(chapterId)} · {chapterLessons.length} käytettävissä olevaa oppituntia. Valitse tunti jatkaaksesi.</p>
     <div className="los-lesson-picker" role="group" aria-label={`${chapterLabel(chapterId)}: valitse oppitunti`}>
       {chapterLessons.map(item => {
-        const done = Boolean(chapterDraft(item.id).draft.lessonProgress?.[item.id]?.completedAt);
-        return <button key={item.id} type="button" aria-pressed={item.id === lesson.id} onClick={() => onSelect(item.id)}
+        const done = losLessonCompleted(chapterDraft(item.id).draft,item.id);
+        return <button key={item.id} type="button" aria-pressed={item.id === lesson.id} onClick={() => getLosTeacherLesson(item.id) ? window.location.assign("/los-lessons/"+item.id) : onSelect(item.id)}
           className={item.id === lesson.id ? "is-active" : ""}>
           {done ? <CheckCircle2 size={17} /> : <Circle size={17} />}
           <span>{item.id}</span>
@@ -116,6 +119,14 @@ export function LosFirstLessons({ selectedId, onSelect, move }: {
       <p className="los-overline">{lesson.id} · NOIN {lesson.estimatedMinutes} MIN · {lesson.id === "L001" ? "KIRJAN ALOITUS" : chapterId==="93" ? "EX-FINAL / YHTEENVETO" : chapterId==="92" ? "KERTAUS II" : chapterId==="91" ? "KERTAUS I / EX-MID" : `C${chapterId}`}</p>
       <h3>{lesson.title}</h3>
       <p className="los-lesson-objective"><strong>Tavoite:</strong> {lesson.objective}</p>
+      {teacherPilot && <div className="los-lesson-teacher-entry">
+        <strong>{isComplete ? "Opetus käsitelty · Teacher 2.0" : "Opettajajohtoinen oppitunti · Teacher 2.0"}</strong>
+        <p>Tässä tunnissa opettaja selittää aiheen vaiheittain, tarkistaa vastauksia ja auttaa tarvittaessa lisäselityksillä. Oppikirja pysyy erillisenä mutta käytettävissä koko tunnin ajan.</p>
+        <a href={"/los-lessons/" + lesson.id} className="los-primary">{isComplete ? "Kertaa opetus" : "Aloita tai jatka opetusta"} <ArrowRight size={18}/></a>
+      </div>}
+      {teacherPilot ? <p className="los-lesson-status">{isComplete
+        ? "Opetus käsitelty. Voit kerrata sen ilman, että vanhoja suoritusmerkintöjä muutetaan."
+        : "Jatka opettajajohtoiseen oppituntiin. Vanhaa työvaihelistaa ei tarvita tässä opetusversiossa."}</p> : <>
       <p className="los-lesson-status">{isComplete ? "Oppitunti suoritettu. Voit silti avata aineistot uudelleen." :
         progress.startedAt ? "Oppitunti kesken" : "Oppituntia ei ole vielä aloitettu"} · {stepCount}/{lesson.steps.length} vaihetta merkitty tehdyksi.</p>
       <ol className="los-lesson-steps">
@@ -181,6 +192,7 @@ export function LosFirstLessons({ selectedId, onSelect, move }: {
       {progress.exitCheckedAt && !isComplete && <button type="button" className="los-lesson-retry" onClick={() => record(old => ({
         ...old, exitAnswer: null, exitCheckedAt: null,
       }))}><RotateCcw size={15} /> Tee lopputarkistus uudelleen</button>}
+      </>}
     </article>
   </section>;
 }
