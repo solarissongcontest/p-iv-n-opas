@@ -109,7 +109,7 @@ export function getLosPronunciation(word: string): LosPronunciation | null {
 export function getLosSourcedWordIpaParts(phrase:string):readonly {
   word:string; ipa:string; sourceUrl:string;
 }[] {
-  const words=phrase.trim().split(/\\s+/u).filter(Boolean);
+  const words=phrase.trim().split(/\s+/u).filter(Boolean);
   if(words.length<2)return [];
   const result:{word:string;ipa:string;sourceUrl:string}[]=[];
   for(const word of words){
