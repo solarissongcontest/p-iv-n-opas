@@ -11,7 +11,7 @@ export type LosFutureTwoPartTask={
 const correctionPrefix="Korjaa virheellinen lause ";
 const correctionSuffix=" ja selitä, miksi alkuperäinen muoto ei sovi.";
 const textPrefix="Lue Text B: ";
-const textPivot=". Etsi siitä kaksi konkreettista asiaa";
+const textPivot=". Kirjoita kaksi havaintoa suomeksi.";
 export function losFutureTwoPartTask(task:LosFutureExerciseDraft):LosFutureTwoPartTask|null {
   if(/-T10$/.test(task.id)&&task.title==="Korjaa oppijan kielivirhe"&&
     task.prompt.startsWith(correctionPrefix)&&task.prompt.endsWith(correctionSuffix)){
@@ -27,8 +27,8 @@ export function losFutureTwoPartTask(task:LosFutureExerciseDraft):LosFutureTwoPa
     const sourceText=task.prompt.slice(textPrefix.length,pivot+1).trim();
     if(!sourceText||sourceText.length>400)return null;
     return {kind:"text-b",sourceText,
-      questions:["Poimi Text B:stä ensimmäinen konkreettinen tieto ja selitä se suomeksi",
-        "Poimi Text B:stä toinen, eri tieto ja selitä se suomeksi"],
+      questions:["Kerro yksi tekstistä löytyvä tieto tai ilmaus suomeksi",
+        "Tee toinen havainto: uusi tieto, tekstin tarkoitus tai ilmaisutapa"],
       languages:["fi","fi"]};
   }
   return null;
