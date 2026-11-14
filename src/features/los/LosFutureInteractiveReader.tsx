@@ -88,7 +88,8 @@ export function LosFutureInteractiveReader({bookId,chapterId,source,text,vocabul
           <button type="button" disabled={!annotation.ranges.length} onClick={reset}>Tyhjennä tämän tekstin korostukset</button>
         </div>}
     </div>
-    <p className="los-future-reader-text" lang="de">
+    <div lang="de" className="los-future-reader-language">
+      <p className="los-future-reader-text">
       {parts.map((part,i)=>part.index===null
         ? <span key={i}>{part.value}</span>
         : <button type="button" key={i}
@@ -97,7 +98,8 @@ export function LosFutureInteractiveReader({bookId,chapterId,source,text,vocabul
             (first===part.index?" is-first":"")}
           aria-label={(mode==="dictionary"?"Avaa sanan selitys: ":"Valitse korostukseen: ")+part.value}
           onClick={()=>choose(part.index!,part.value)}>{part.value}</button>)}
-    </p>
+      </p>
+    </div>
     {word&&mode==="dictionary"&&<LosDictionaryCard word={word}
       {...(meaning?{contextMeaning:meaning}:{})} onClose={()=>setWord(null)}/>}
     {showNotes&&<label className="los-future-reader-note">
