@@ -620,9 +620,9 @@ export const LOS_FUTURE_EXERCISES_8: Record<string, LosFutureExerciseDraft[]> = 
       "id": "LOS8-C02-T10",
       "chapterId": "02",
       "group": "T",
-      "title": "Korjaa oppijan kielivirhe",
-      "prompt": "Korjaa virheellinen lause Ich lese Nachrichten oft jeden Tag. ja selitä, miksi alkuperäinen muoto ei sovi.",
-      "answerKey": "Korjauksen perustelu: Valitse yksi selkeä ajan tai tiheyden ilmaus: Ich lese jeden Tag Nachrichten tai Ich lese oft Nachrichten.",
+      "title": "Hio ilmaus yleiskieliseksi",
+      "prompt": "Muokkaa ilmaus Ich lese Nachrichten oft jeden Tag. selkeäksi yleiskieliseksi malliksi ja perustele valintasi.",
+      "answerKey": "Täsmällisempi ja luontevampi malli: Ich lese jeden Tag Nachrichten tai Ich lese oft Nachrichten. Alkuperäinen yhdistää kaksi tiheyttä kuvaavaa ilmausta epätarkasti. Kyse ei ole yksiselitteisesti virheellisestä verbin taivutuksesta tai sanajärjestyksestä.",
       "feedback": "",
       "assessment": "teacher-checked"
     },
