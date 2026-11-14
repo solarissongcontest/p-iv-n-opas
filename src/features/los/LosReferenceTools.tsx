@@ -74,7 +74,7 @@ export function LosDictionary({ book, move, openBook }: { book: LosBookDefinitio
           <span role="cell" className="los-index-source-cell">
             <button type="button" title={item.book===book.id
               ? `Avaa kappaleen ${Number(item.chapter)} sanasto`
-              : `Avaa LOS! ${item.book}, kappale ${Number(item.chapter)}`}
+              : `Avaa LOS! ${item.book} ja siirry sitten kappaleeseen ${Number(item.chapter)}`}
               aria-label={item.book===book.id
                 ? `Avaa kappaleen ${Number(item.chapter)} sanasto`
                 : `Avaa LOS! ${item.book}. Siirry sitten kappaleeseen ${Number(item.chapter)}.`}
