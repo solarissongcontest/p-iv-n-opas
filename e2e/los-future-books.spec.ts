@@ -1025,3 +1025,39 @@ test("revised Text A archives old highlights instead of overwriting them in WebK
   await expect(reader.locator(".los-future-reader-token").nth(2)).toHaveClass(/is-yellow/);
   await expectNoHorizontalOverflow(page);
 });
+
+test("T14 model and old prompt migration preserve the learner's two saved observations",async({page})=>{
+  await enterFutureBook(page);
+  await page.goto("/los#/2/01/practice",{waitUntil:"domcontentloaded"});
+  await selectFutureTask(page,"T14");
+  const form=page.locator(".los-future-span-genre");
+  await expect(form.locator("textarea")).toHaveCount(2);
+  await form.locator("textarea").nth(0).fill("Puheessa on kaksi keskustelijaa.");
+  await form.locator("textarea").nth(1).fill("Text B on Jonasilta Miralle.");
+  const oldPrompt="Vertaa tukidialogia ja Text B -viestiä. Miten vastaanottaja, tavoite ja kielen tyyli eroavat? Kirjoita kaksi havaintoa.";
+  await page.evaluate(({oldPrompt})=>{
+    const owner=localStorage.getItem("opk.owner-id");
+    const key=`los.local.v1.${owner}.2.01`;
+    const draft=JSON.parse(localStorage.getItem(key)??"null");
+    const previous=JSON.parse(draft.practiceAnswers["LOS2-C01-T14"]);
+    previous.prompt=oldPrompt;
+    draft.practiceAnswers["LOS2-C01-T14"]=JSON.stringify(previous);
+    localStorage.setItem(key,JSON.stringify(draft));
+  },{oldPrompt});
+  await page.reload({waitUntil:"domcontentloaded"});
+  await selectFutureTask(page,"T14");
+  await expect(form.getByText("Tekstilajin nimitys ja tehtävänanto on tarkennettu.",{exact:false})).toBeVisible();
+  await expect(form.locator("textarea").first()).toHaveValue("Puheessa on kaksi keskustelijaa.");
+  await expect(form.locator("textarea").nth(1)).toHaveValue("Text B on Jonasilta Miralle.");
+  await form.locator("textarea").nth(1).fill("Text B on lyhyt Jonasilta Miralle.");
+  const persisted=await page.evaluate(()=>{
+    const owner=localStorage.getItem("opk.owner-id");
+    const key=`los.local.v1.${owner}.2.01`;
+    const draft=JSON.parse(localStorage.getItem(key)??"null");
+    return JSON.parse(draft.practiceAnswers["LOS2-C01-T14"]);
+  });
+  expect(persisted.prompt).toContain("Text B -tekstiä");
+  expect(persisted.answers[0]).toBe("Puheessa on kaksi keskustelijaa.");
+  expect(persisted.answers[1]).toBe("Text B on lyhyt Jonasilta Miralle.");
+  await expectNoHorizontalOverflow(page);
+});
