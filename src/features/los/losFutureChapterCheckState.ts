@@ -26,7 +26,8 @@ export function readLosFutureChapterCheckAttempt(
   try{
     if(raw.length>4900)return null;
     const value:unknown=JSON.parse(raw);
-    if(!isRecord(value)||value["version"]!==1||!isRecord(value["answers"]))return null;
+    if(!isRecord(value)||value["version"]!==1||!isRecord(value["answers"])||
+      Object.keys(value).sort().join(",")!=="answers,submittedAt,version")return null;
     if(value["submittedAt"]!==null&&!validTimestamp(value["submittedAt"]))return null;
     if(requireSubmitted&&!value["submittedAt"])return null;
     const answers=value["answers"] as Record<string,unknown>;
