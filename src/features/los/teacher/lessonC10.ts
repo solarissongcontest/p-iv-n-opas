@@ -293,6 +293,7 @@ export const LOS1_L053_TEACHER:TeacherLesson={
       "Kohtelias isolla kirjoitettava Sie tarkoittaa Te. Se käyttää eri verbimuotoja: Sie sind, Sie heißen ja Sie kommen. Tämä on C04:ssa jo opetettu kohtelias puhuttelu, ei sama asia kuin kolmannen henkilön sie.",
       "Lauseen alussa sekä Sie ist Mia. että Sie heißen Mia. alkavat isolla S:llä. Ero pitää siksi tunnistaa kontekstista ja verbistä: ist on hän, heißen on kohtelias Te.",
       "Kolmannen henkilön esittely voi alkaa valmiilla ilmauksella Das ist Mia. Sana Das toimii tässä kokonaisen tutun esittelyfraasin osana. Sinun ei tarvitse selittää kaikkia demonstratiivipronominin taivutuksia.",
+      "Sanastossa mein Freund ja meine Freundin voivat tilanteesta riippuen tarkoittaa ystävää tai poika-/tyttöystävää. Esimerkiksi Das ist mein Freund. ei yksin ratkaise suhteen laatua. Jos haluat painottaa tavallista ystävyyttä, voit tunnistaa ilmauksen ein Freund von mir tai eine Freundin von mir. Tässä riittää merkityseron ymmärtäminen, ei uusien sijamuotojen taivuttaminen.",
     ],[{title:"Mistä erotan sie ja Sie?",body:"Keskellä lausetta sie on hän (nainen), Sie kohtelias Te. Lauseen alussa seuraa verbiä: Sie kommt = hän tulee, Sie kommen = Te tulette."}]),
     board("persons","Kolmen verbin neljä näkökulmaa",[
       "Seuraa vuorotellen pronominia ja sitä vastaavaa verbiä. Uutta ovat vain er/sie-muodot; muut on opetettu aiemmin.",
