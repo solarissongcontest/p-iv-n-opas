@@ -1,3 +1,5 @@
+import "./los-c08-reading-guide.css";
+
 /**
  * LOS! 1 · C08 scaffold for a complete, difficult historical Text A.
  * These are original Finnish reading instructions, not alternate source
@@ -44,7 +46,7 @@ export const LOS1_C08_READING_STAGES = [
 ] as const;
 
 export function LosC08ReadingGuide() {
-  return <section className="los-editorial-note los-c08-reading-guide" aria-labelledby="los-c08-reading-guide-title">
+  return <section className="los-c08-reading-guide" aria-labelledby="los-c08-reading-guide-title">
     <p className="los-eyebrow">LUKUTUKI · C08 · TEXT A</p>
     <h3 id="los-c08-reading-guide-title">Lue pitkä alkuperäisteksti neljässä osassa</h3>
     <p>Seuraava alkuperäisteksti on 26-rivinen luokkahuonekohtaus. Se sisältää myös
