@@ -90,3 +90,22 @@
 .los-future-short-answer>input:focus-visible{outline:3px solid var(--los-book-accent,#8d6a50);outline-offset:2px}
 .los-future-exercise-actions button:disabled{opacity:.5;cursor:not-allowed}
 @media(max-width:560px){.los-future-short-answer{gap:.5rem}}
+
+/* Source T10/T13: two distinct written operations without losing legacy prose drafts. */
+.los-future-two-part{min-width:0;margin:1.1rem 0;padding:1rem;border:1px solid #dad5cd;border-radius:10px}
+.los-future-two-part legend{font-weight:750;padding:0 .35rem}
+.los-future-two-part>p{font-size:.87rem;line-height:1.6;color:#62594f}
+.los-future-two-part-source{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.8;
+  padding:.9rem 1rem;margin:1rem 0;background:#faf8f3;
+  border-left:3px solid var(--los-book-accent,#8d6a50)}
+.los-future-two-part-row{display:grid;gap:.45rem;margin:1rem 0;line-height:1.55;font-size:.95rem;font-weight:650}
+.los-future-two-part-row textarea{width:100%;min-width:0;box-sizing:border-box;resize:vertical;
+  min-height:76px;padding:.75rem;background:#fff;color:#252525;border:1px solid #aaa49b;
+  border-radius:9px;font:inherit;line-height:1.6}
+.los-future-two-part-row textarea:focus-visible{outline:3px solid var(--los-book-accent,#8d6a50);outline-offset:2px}
+.dark .los-future-two-part{border-color:var(--los-line,#37434f)}
+.dark .los-future-two-part>p{color:var(--los-soft,#bec8cf)}
+.dark .los-future-two-part-source{background:var(--los-subtle,#222d37);color:var(--los-ink,#f2f5f5)}
+.dark .los-future-two-part-row textarea{background:var(--los-bg,#11161d);color:var(--los-ink,#f2f5f5);
+  border-color:var(--los-line,#37434f)}
+@media(max-width:560px){.los-future-two-part{padding:.8rem}.los-future-two-part-row textarea{min-height:88px}}

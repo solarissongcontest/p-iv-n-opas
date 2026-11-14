@@ -42,14 +42,14 @@ test("LOS! 2–8 exercise pages use the source's exact 9/14/3 section distributi
   }
 });
 
-/** Select T13, a real open-response task in the *practice* section.
- * T18 belongs to the separate apply section. T07 is now an inline gap. */
+/** Select T16, the source-authored open question-generation task in *practice*.
+ * T10 and T13 are now two-part interactions; T18 lives under apply. */
 async function selectOpenDraftExercise(page:import("@playwright/test").Page){
   const picker=page.locator("#los-future-exercise-choice");
   await expect(picker).toBeVisible();
   const options=await picker.locator("option").allTextContents();
-  const index=options.findIndex(label=>label.trim().startsWith("T13 ·"));
-  expect(index,"T13 open-response exercise must be listed in practice").toBeGreaterThanOrEqual(0);
+  const index=options.findIndex(label=>label.trim().startsWith("T16 ·"));
+  expect(index,"T16 open-response exercise must be listed in practice").toBeGreaterThanOrEqual(0);
   await picker.selectOption({index});
   const answer=page.locator("#los-future-exercise-input");
   await expect(answer).toBeVisible();
@@ -663,5 +663,42 @@ test("LOS! 8 chapter 10 check uses its own sourced Text A and exercise IDs",asyn
   await check.locator(".los-future-check-reading summary").click();
   await expect(check.locator(".los-future-check-reading p[lang='de']")).toBeVisible();
   await expect(check.locator(".los-future-check-model")).toHaveCount(0);
+  await expectNoHorizontalOverflow(page);
+});
+
+test("source T10 correction and T13 Text B keep separate written fields and hide models until both answered",async({page})=>{
+  await enterFutureBook(page);
+  await page.goto("/los#/2/01/practice",{waitUntil:"domcontentloaded"});
+  const choose=page.locator("#los-future-exercise-choice");
+  await choose.selectOption({label:"T10 · Korjaa oppijan kielivirhe"});
+  const rows=page.locator(".los-future-two-part-row");
+  await expect(rows).toHaveCount(2);
+  await expect(page.locator(".los-future-two-part-source[lang='de']")).toContainText("Wir lernt Deutsch");
+  const show=page.getByRole("button",{name:"Näytä vastausluonnos"});
+  await expect(show).toBeDisabled();
+  await rows.nth(0).locator("textarea").fill("Wir lernen Deutsch.");
+  await expect(show).toBeDisabled();
+  await rows.nth(1).locator("textarea").fill("Wir saa monikon -en-päätteen.");
+  await expect(show).toBeEnabled();
+  await page.reload({waitUntil:"domcontentloaded"});
+  await choose.selectOption({label:"T10 · Korjaa oppijan kielivirhe"});
+  await expect(rows.nth(1).locator("textarea")).toHaveValue("Wir saa monikon -en-päätteen.");
+  await show.click();
+  await expect(page.locator(".los-future-exercise-solution")).toBeVisible();
+  await choose.selectOption({label:"T13 · Erillisen Text B:n tulkinta"});
+  await expect(rows).toHaveCount(2);
+  await expect(page.locator(".los-future-two-part-source")).toContainText("Hallo Mira");
+  await expect(show).toBeDisabled();
+  await rows.nth(0).locator("textarea").fill("Jonas kirjoittaa Miralle.");
+  await rows.nth(1).locator("textarea").fill("He opiskelevat yhdessä tiistaina.");
+  await expect(show).toBeEnabled();
+  const stored=await page.evaluate(()=>{
+    const owner=localStorage.getItem("opk.owner-id");
+    return JSON.parse(localStorage.getItem(`los.local.v1.${owner}.2.01`)??"{}");
+  });
+  expect(JSON.parse(stored.practiceAnswers["LOS2-C01-T10"]).answers)
+    .toEqual(["Wir lernen Deutsch.","Wir saa monikon -en-päätteen."]);
+  expect(JSON.parse(stored.practiceAnswers["LOS2-C01-T13"]).answers)
+    .toEqual(["Jonas kirjoittaa Miralle.","He opiskelevat yhdessä tiistaina."]);
   await expectNoHorizontalOverflow(page);
 });

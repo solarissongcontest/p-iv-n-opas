@@ -7,6 +7,7 @@ import { losFutureMatchingPairs, readLosFutureMatchingAnswer, writeLosFutureMatc
 import { losFutureGapParts } from "./content/losFutureGap.ts";
 import { losFutureRecallPairs, readLosFutureRecallAnswer, writeLosFutureRecallAnswer } from "./content/losFutureRecall.ts";
 import { losFutureExitTicket, readLosFutureExitAnswer, writeLosFutureExitAnswer } from "./content/losFutureExitTicket.ts";
+import {losFutureTwoPartTask,readLosFutureTwoPartAnswer,writeLosFutureTwoPartAnswer} from "./content/losFutureTwoPart.ts";
 import { losFutureShortAnswer } from "./content/losFutureShortAnswer.ts";
 import { losFutureOrderingTiles, readLosFutureOrderingAnswer, writeLosFutureOrderingAnswer } from "./content/losFutureOrdering.ts";
 import "./los-future-exercises.css";
@@ -38,6 +39,9 @@ export function LosFutureExercises({bookId,chapterId,mode,taskIds}:{
   const [showAll,setShowAll]=useState(false);
   const safeIndex=Math.min(selected,Math.max(0,tasks.length-1));
   const task=tasks[safeIndex];
+  const twoPart=task ? losFutureTwoPartTask(task) : null;
+  const twoAnswers=twoPart && task
+    ? readLosFutureTwoPartAnswer(draft.practiceAnswers[task.id]??"",twoPart) : null;
   const shortAnswer=task ? losFutureShortAnswer(task) : null;
   const exitTicket=task ? losFutureExitTicket(task) : null;
   const exitAnswers=exitTicket && task
@@ -127,6 +131,23 @@ export function LosFutureExercises({bookId,chapterId,mode,taskIds}:{
                 next[index]=event.target.value;
                 changeAnswer(task.id,writeLosFutureExitAnswer(exitTicket,next));
               }}/>
+          </label>)}
+        </fieldset> : twoPart && twoAnswers ? <fieldset className="los-future-two-part">
+          <legend>{twoPart.kind==="correction"?"Korjaa lause ja perustele":"Tutki Text B:tä: kaksi erillistä havaintoa"}</legend>
+          <p>Kirjoita kumpikin vastaus itse ennen vertailumallin avaamista.
+            Tämä on harjoittelua, ei automaattinen arvosana.</p>
+          <blockquote lang="de" className="los-future-two-part-source">{twoPart.sourceText}</blockquote>
+          {twoPart.questions.map((question,index)=><label key={index} className="los-future-two-part-row">
+            <span>{index+1}. {question}</span>
+            <textarea rows={2} maxLength={600} autoComplete="off" spellCheck={false}
+              lang={twoPart.languages[index]}
+              aria-label={`Osan ${index+1} vastaus: ${question}`}
+              value={twoAnswers[index]??""}
+              onChange={event=>{
+                const next=[...twoAnswers];
+                next[index]=event.target.value;
+                changeAnswer(task.id,writeLosFutureTwoPartAnswer(twoPart,next));
+              }} />
           </label>)}
         </fieldset> : shortAnswer ? <div className="los-future-short-answer">
           <label htmlFor="los-future-short-input">
@@ -229,7 +250,8 @@ export function LosFutureExercises({bookId,chapterId,mode,taskIds}:{
             disabled={(Boolean(exitTicket)&&(exitAnswers
               ? exitAnswers.some(answer=>!answer.trim())
               : !draft.practiceAnswers[task.id]?.trim()))
-              ||(Boolean(shortAnswer)&&!draft.practiceAnswers[task.id]?.trim())}
+              ||(Boolean(shortAnswer)&&!draft.practiceAnswers[task.id]?.trim())
+              ||(Boolean(twoPart)&&Boolean(twoAnswers)&&twoAnswers!.some(answer=>!answer.trim()))}
             onClick={()=>setShowAnswer(v=>!v)}>
             <CircleHelp size={16} aria-hidden="true"/>
             {showAnswer?"Piilota vastausluonnos":"Näytä vastausluonnos"}
@@ -238,6 +260,8 @@ export function LosFutureExercises({bookId,chapterId,mode,taskIds}:{
             <span className="los-future-exercise-checked"><CheckCircle2 size={16}/> Verrattu</span>}
           {exitTicket && exitAnswers?.some(answer=>!answer.trim())&&
             <span className="los-future-exercise-hint">Vastaa ensin molempiin loppukysymyksiin.</span>}
+          {twoPart && twoAnswers?.some(answer=>!answer.trim())&&
+            <span className="los-future-exercise-hint">Vastaa ensin molempiin tehtävän osiin.</span>}
         </div>
         {showAnswer&&<div id="los-future-exercise-key" className="los-future-exercise-solution">
           <h3>Alkuperäisen käsikirjoituksen ratkaisu tai arviointiohje</h3>
