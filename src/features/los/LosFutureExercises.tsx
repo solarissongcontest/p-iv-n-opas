@@ -138,7 +138,9 @@ export function LosFutureExercises({bookId,chapterId,mode,taskIds}:{
             ? "Järjestä sanapalat oikeaan järjestykseen. Tarkista sitten kielioppi ja välimerkit mallivastauksesta."
             : twoPart?.kind==="text-b"
               ? "Lue alla oleva Text B ja kirjoita kaksi perusteltua havaintoa suomeksi. Huomaa myös tekstin tarkoitus ja ilmaisutapa."
-              : task.prompt}
+              : remaining?.kind==="pronunciation"
+                ? "Lue alla olevat kaksi saksankielistä lausetta ääneen kahdesti. Kirjaa havaintosi ja tarkista sanapainot vain luotettavasta lähteestä."
+                : task.prompt}
         </p>
         {exitTicket && exitAnswers ? <fieldset className="los-future-exit-ticket">
           <legend>Kaksi itsenäistä lopputarkistusta</legend>
