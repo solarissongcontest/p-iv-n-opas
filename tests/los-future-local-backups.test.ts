@@ -174,3 +174,39 @@ test("future-book backup rejects fabricated Teacher mastery and cross-book sessi
   store.setItem(key(2,"01"),JSON.stringify(badCursor));
   assert.throws(()=>createLosFutureBackup(2,owner,store),/tietoja ei voitu tarkistaa/);
 });
+
+test("formative review positions and answers round-trip without fabricated completion",()=>{
+  const store=new FakeStore();
+  const draft=makeDraft();
+  draft.practiceAnswers={
+    "LOS2-L027:review:stage":"3",
+    "LOS2-L027:review:recall":"Muistan epäsäännöllisen verbin.",
+    "LOS2-L027:review:transfer":"Ich lerne Deutsch.",
+    "LOS2-L027:review:reflection":"Kertaan nyt sanajärjestystä.",
+  };
+  store.setItem(key(2,"05"),JSON.stringify(draft));
+  const backup=createLosFutureBackup(2,owner,store,fixedDate);
+  assert.ok(backup.chapters["05"]);
+  const parsed=parseLosFutureBackup(JSON.stringify(backup));
+  const restored=new FakeStore();
+  assert.equal(applyLosFutureBackup(parsed,2,"new-owner",restored,"missing-only").imported,1);
+  const reloaded=JSON.parse(restored.getItem(key(2,"05","new-owner"))!);
+  assert.deepEqual(reloaded.practiceAnswers,draft.practiceAnswers);
+  assert.deepEqual(reloaded.practiceChecked,[]);
+  assert.deepEqual(reloaded.testAnswers,{});
+  assert.equal(restored.getItem(key(3,"05","new-owner")),null);
+});
+
+test("review backup rejects unauthorised lessons, bad stages and false exam completion",()=>{
+  const store=new FakeStore();
+  for(const bad of [
+    {"LOS2-L030:review:transfer":"Fake midterm grade"},
+    {"LOS3-L027:review:recall":"Wrong book"},
+    {"LOS2-L027:review:stage":"4"},
+    {"LOS2-L027:review:stage":"done"},
+  ]){
+    const draft=makeDraft();draft.practiceAnswers=bad;
+    store.setItem(key(2,"05"),JSON.stringify(draft));
+    assert.throws(()=>createLosFutureBackup(2,owner,store),/tietoja ei voitu tarkistaa/);
+  }
+});
