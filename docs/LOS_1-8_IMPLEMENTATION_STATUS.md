@@ -63,6 +63,12 @@ Tämä tiedosto on ainoa LOS! 1–8:n *toteutuksen* jatkotilaraportti. Visuaalin
 20. `3eac0020`: kaikki viimeiset 490 lähdetehtävää saivat omat T01/T15/T16/T17/T18/R04/R05-työtilansa säilyttävällä paikallistallennuksella. Ennustustehtävän tekstin avaaminen edellyttää ensin kahta omaa ennustusta, Text A -sanasto- ja tiivistystehtävät ovat kirjakohtaisia, eikä ääntä tai avointen vastausten arvosanoja keksitä. Seitsemän tehtävätyypin 490 lähdetapauksen rakenne- ja varmuuskopioyhteensopivuus testataan yksikkötasolla.
 21. `8f3d2d46`: T04:ssä tarkka lähteestä kirjoitettu ilmaus korostetaan valittuun puheenvuoroon, mutta pelkkä löytyminen ei ole arvioinnillinen hyväksyntä. `3eac0020`: kaikki seitsemän viimeistä tehtävätyyppiä; tämän jälkeen kattavuus 1 820/1 820 rakennepolkua. Uusi koko 1 820 harjoituksen parserikattavuuden tarkistus ja T15-äännelauseiden tarkka poiminta lisätään tässä yhteydessä.
 
+## 14.11.2026 · T02–Text A -sisältökorjaus ja CI-todiste
+
+- **70/70** jatkokirjojen T02-kysymystä ja mallivastausta toimitettiin kunkin kappaleen *Text A*:n perusteella. Vanhat T02-versiot kysyivät usein erillisen tukidialogin henkilöistä tai tapahtumista; esimerkiksi LOS! 2 C02 kysyi Amirista Lenan sijaan ja LOS! 6 C01 Mirasta Paulin, Saran ja Malikin sijaan.
+- Kysymysten omat tunnisteet, arvioinnin rajaus ja vastausten tallennusavaimet pysyivät samoina; vanhoja oppilaan vastauksia ei poisteta eikä arvostella uudelleen. T04 käsittelee yhä erillistä tukidialogia, eikä sitä pidä sekoittaa Text A:n T02:een. Uusi 70 kysymys–mallivastausparin regressiotesti suojaa vanhojen lähdemallien tahattomalta palautumiselta. **Riippumaton kieli-, taso- ja pedagoginen tarkistus on edelleen tehtävä.**
+- **Edellisen HEADin `901a5bfc56fc8ca1c45939b7c4d26c34f1935e10` vahvistus:** [Quality Gate 43610107342](https://github.com/solarissongcontest/p-iv-n-opas/actions/runs/43610107342) **791/791** sekä lint, TypeScript, build ja Vercel-pariteetti hyväksytty; [Chromium ja WebKit 43610107502](https://github.com/solarissongcontest/p-iv-n-opas/actions/runs/43610107502) **204/204** hyväksytty. Uuden sisältökorjauscommitin omat ajot vaativat erillisen vahvistuksen.
+
 ## Todellinen QA / versiot
 
 - **Edellinen varmistettu koodi:** `d54769c9229c2b908bf13f7f191fa0fe4917dfb0`: Quality Gate 729/729 yksikkötestiä + lint, TS ja build hyväksytty ([ajo 43533825654](https://github.com/solarissongcontest/p-iv-n-opas/actions/runs/43533825654)). Browser QA ([ajo 43533825781](https://github.com/solarissongcontest/p-iv-n-opas/actions/runs/43533825781)) **150/156**, kuusi epäonnistui.
