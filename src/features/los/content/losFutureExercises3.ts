@@ -87,7 +87,7 @@ export const LOS_FUTURE_EXERCISES_3: Record<string, LosFutureExerciseDraft[]> = 
       "chapterId": "10",
       "group": "T",
       "title": "Käännä asiayhteydestä",
-      "prompt": "Kirjoita saksaksi: Minun täytyy olla kotona kahdeksalta..",
+      "prompt": "Kirjoita saksaksi: Minun täytyy olla kotona kahdeksalta.",
       "answerKey": "Ich muss um acht Uhr zu Hause sein.",
       "feedback": "",
       "assessment": "accepted-variants-review"
@@ -349,7 +349,7 @@ export const LOS_FUTURE_EXERCISES_3: Record<string, LosFutureExerciseDraft[]> = 
       "chapterId": "01",
       "group": "T",
       "title": "Käännä asiayhteydestä",
-      "prompt": "Kirjoita saksaksi: Sinä luet joka ilta..",
+      "prompt": "Kirjoita saksaksi: Sinä luet joka ilta.",
       "answerKey": "Du liest jeden Abend.",
       "feedback": "",
       "assessment": "accepted-variants-review"
@@ -611,7 +611,7 @@ export const LOS_FUTURE_EXERCISES_3: Record<string, LosFutureExerciseDraft[]> = 
       "chapterId": "02",
       "group": "T",
       "title": "Käännä asiayhteydestä",
-      "prompt": "Kirjoita saksaksi: Pelaamme usein yhdessä..",
+      "prompt": "Kirjoita saksaksi: Pelaamme usein yhdessä.",
       "answerKey": "Wir spielen oft zusammen.",
       "feedback": "",
       "assessment": "accepted-variants-review"
@@ -873,7 +873,7 @@ export const LOS_FUTURE_EXERCISES_3: Record<string, LosFutureExerciseDraft[]> = 
       "chapterId": "03",
       "group": "T",
       "title": "Käännä asiayhteydestä",
-      "prompt": "Kirjoita saksaksi: Osaatko pelata tennistä?.",
+      "prompt": "Kirjoita saksaksi: Osaatko pelata tennistä?",
       "answerKey": "Kannst du Tennis spielen?",
       "feedback": "",
       "assessment": "accepted-variants-review"
@@ -1135,7 +1135,7 @@ export const LOS_FUTURE_EXERCISES_3: Record<string, LosFutureExerciseDraft[]> = 
       "chapterId": "04",
       "group": "T",
       "title": "Käännä asiayhteydestä",
-      "prompt": "Kirjoita saksaksi: Kuuntelen mieluummin podcasteja..",
+      "prompt": "Kirjoita saksaksi: Kuuntelen mieluummin podcasteja.",
       "answerKey": "Ich höre lieber Podcasts.",
       "feedback": "",
       "assessment": "accepted-variants-review"
@@ -1397,7 +1397,7 @@ export const LOS_FUTURE_EXERCISES_3: Record<string, LosFutureExerciseDraft[]> = 
       "chapterId": "05",
       "group": "T",
       "title": "Käännä asiayhteydestä",
-      "prompt": "Kirjoita saksaksi: Et saa syödä täällä..",
+      "prompt": "Kirjoita saksaksi: Et saa syödä täällä.",
       "answerKey": "Du darfst hier nicht essen.",
       "feedback": "",
       "assessment": "accepted-variants-review"
@@ -1659,7 +1659,7 @@ export const LOS_FUTURE_EXERCISES_3: Record<string, LosFutureExerciseDraft[]> = 
       "chapterId": "06",
       "group": "T",
       "title": "Käännä asiayhteydestä",
-      "prompt": "Kirjoita saksaksi: Oppitunti alkaa yhdeksältä..",
+      "prompt": "Kirjoita saksaksi: Oppitunti alkaa yhdeksältä.",
       "answerKey": "Der Unterricht beginnt um neun Uhr.",
       "feedback": "",
       "assessment": "accepted-variants-review"
@@ -1921,7 +1921,7 @@ export const LOS_FUTURE_EXERCISES_3: Record<string, LosFutureExerciseDraft[]> = 
       "chapterId": "07",
       "group": "T",
       "title": "Käännä asiayhteydestä",
-      "prompt": "Kirjoita saksaksi: Käyn ostoksilla koulun jälkeen..",
+      "prompt": "Kirjoita saksaksi: Käyn ostoksilla koulun jälkeen.",
       "answerKey": "Nach der Schule kaufe ich ein.",
       "feedback": "",
       "assessment": "accepted-variants-review"
@@ -2183,7 +2183,7 @@ export const LOS_FUTURE_EXERCISES_3: Record<string, LosFutureExerciseDraft[]> = 
       "chapterId": "08",
       "group": "T",
       "title": "Käännä asiayhteydestä",
-      "prompt": "Kirjoita saksaksi: Haluatko tulla mukaan?.",
+      "prompt": "Kirjoita saksaksi: Haluatko tulla mukaan?",
       "answerKey": "Willst du mitkommen?",
       "feedback": "",
       "assessment": "accepted-variants-review"
@@ -2445,7 +2445,7 @@ export const LOS_FUTURE_EXERCISES_3: Record<string, LosFutureExerciseDraft[]> = 
       "chapterId": "09",
       "group": "T",
       "title": "Käännä asiayhteydestä",
-      "prompt": "Kirjoita saksaksi: Lauantaina matkustamme Müncheniin..",
+      "prompt": "Kirjoita saksaksi: Lauantaina matkustamme Müncheniin.",
       "answerKey": "Am Samstag fahren wir nach München.",
       "feedback": "",
       "assessment": "accepted-variants-review"
