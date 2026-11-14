@@ -221,7 +221,9 @@ export function LosFutureExercises({bookId,chapterId,mode,taskIds}:{
         <div className="los-future-exercise-actions">
           <button type="button" className="los-future-exercise-primary"
             aria-expanded={showAnswer} aria-controls="los-future-exercise-key"
-            disabled={(Boolean(exitTicket)&&(!exitAnswers || exitAnswers.some(answer=>!answer.trim())))
+            disabled={(Boolean(exitTicket)&&(exitAnswers
+              ? exitAnswers.some(answer=>!answer.trim())
+              : !draft.practiceAnswers[task.id]?.trim()))
               ||(Boolean(shortAnswer)&&!draft.practiceAnswers[task.id]?.trim())}
             onClick={()=>setShowAnswer(v=>!v)}>
             <CircleHelp size={16} aria-hidden="true"/>
