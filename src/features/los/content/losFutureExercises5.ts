@@ -87,7 +87,7 @@ export const LOS_FUTURE_EXERCISES_5: Record<string, LosFutureExerciseDraft[]> = 
       "chapterId": "10",
       "group": "T",
       "title": "Käännä asiayhteydestä",
-      "prompt": "Kirjoita saksaksi: Juokaa vettä, olkaa hyvä..",
+      "prompt": "Kirjoita saksaksi: Juokaa vettä, olkaa hyvä.",
       "answerKey": "Trinken Sie bitte Wasser!",
       "feedback": "",
       "assessment": "accepted-variants-review"
@@ -349,7 +349,7 @@ export const LOS_FUTURE_EXERCISES_5: Record<string, LosFutureExerciseDraft[]> = 
       "chapterId": "01",
       "group": "T",
       "title": "Käännä asiayhteydestä",
-      "prompt": "Kirjoita saksaksi: Miltä sinusta tuntuu?.",
+      "prompt": "Kirjoita saksaksi: Miltä sinusta tuntuu?",
       "answerKey": "Wie fühlst du dich?",
       "feedback": "",
       "assessment": "accepted-variants-review"
@@ -611,7 +611,7 @@ export const LOS_FUTURE_EXERCISES_5: Record<string, LosFutureExerciseDraft[]> = 
       "chapterId": "02",
       "group": "T",
       "title": "Käännä asiayhteydestä",
-      "prompt": "Kirjoita saksaksi: Minulla on vatsakipuja..",
+      "prompt": "Kirjoita saksaksi: Minulla on vatsakipuja.",
       "answerKey": "Ich habe Bauchschmerzen.",
       "feedback": "",
       "assessment": "accepted-variants-review"
@@ -873,7 +873,7 @@ export const LOS_FUTURE_EXERCISES_5: Record<string, LosFutureExerciseDraft[]> = 
       "chapterId": "03",
       "group": "T",
       "title": "Käännä asiayhteydestä",
-      "prompt": "Kirjoita saksaksi: Minun täytyy mennä lääkäriin..",
+      "prompt": "Kirjoita saksaksi: Minun täytyy mennä lääkäriin.",
       "answerKey": "Ich muss zum Arzt gehen.",
       "feedback": "",
       "assessment": "accepted-variants-review"
@@ -1135,7 +1135,7 @@ export const LOS_FUTURE_EXERCISES_5: Record<string, LosFutureExerciseDraft[]> = 
       "chapterId": "04",
       "group": "T",
       "title": "Käännä asiayhteydestä",
-      "prompt": "Kirjoita saksaksi: Juon vettä, koska minulla on jano..",
+      "prompt": "Kirjoita saksaksi: Juon vettä, koska minulla on jano.",
       "answerKey": "Ich trinke Wasser, weil ich Durst habe.",
       "feedback": "",
       "assessment": "accepted-variants-review"
@@ -1397,7 +1397,7 @@ export const LOS_FUTURE_EXERCISES_5: Record<string, LosFutureExerciseDraft[]> = 
       "chapterId": "05",
       "group": "T",
       "title": "Käännä asiayhteydestä",
-      "prompt": "Kirjoita saksaksi: Haluaisin palautua tänään..",
+      "prompt": "Kirjoita saksaksi: Haluaisin palautua tänään.",
       "answerKey": "Ich möchte mich heute erholen.",
       "feedback": "",
       "assessment": "accepted-variants-review"
@@ -1659,7 +1659,7 @@ export const LOS_FUTURE_EXERCISES_5: Record<string, LosFutureExerciseDraft[]> = 
       "chapterId": "06",
       "group": "T",
       "title": "Käännä asiayhteydestä",
-      "prompt": "Kirjoita saksaksi: Uiminen on helpompaa kuin juokseminen..",
+      "prompt": "Kirjoita saksaksi: Uiminen on helpompaa kuin juokseminen.",
       "answerKey": "Schwimmen ist leichter als Laufen.",
       "feedback": "",
       "assessment": "accepted-variants-review"
@@ -1921,7 +1921,7 @@ export const LOS_FUTURE_EXERCISES_5: Record<string, LosFutureExerciseDraft[]> = 
       "chapterId": "07",
       "group": "T",
       "title": "Käännä asiayhteydestä",
-      "prompt": "Kirjoita saksaksi: Olen väsynyt, koska olen opiskellut paljon..",
+      "prompt": "Kirjoita saksaksi: Olen väsynyt, koska olen opiskellut paljon.",
       "answerKey": "Ich bin müde, weil ich viel gelernt habe.",
       "feedback": "",
       "assessment": "accepted-variants-review"
@@ -2183,7 +2183,7 @@ export const LOS_FUTURE_EXERCISES_5: Record<string, LosFutureExerciseDraft[]> = 
       "chapterId": "08",
       "group": "T",
       "title": "Käännä asiayhteydestä",
-      "prompt": "Kirjoita saksaksi: Minulla oli koira..",
+      "prompt": "Kirjoita saksaksi: Minulla oli koira.",
       "answerKey": "Ich hatte einen Hund.",
       "feedback": "",
       "assessment": "accepted-variants-review"
@@ -2445,7 +2445,7 @@ export const LOS_FUTURE_EXERCISES_5: Record<string, LosFutureExerciseDraft[]> = 
       "chapterId": "09",
       "group": "T",
       "title": "Käännä asiayhteydestä",
-      "prompt": "Kirjoita saksaksi: Nykyään opiskelen saksaa..",
+      "prompt": "Kirjoita saksaksi: Nykyään opiskelen saksaa.",
       "answerKey": "Heute lerne ich Deutsch.",
       "feedback": "",
       "assessment": "accepted-variants-review"
