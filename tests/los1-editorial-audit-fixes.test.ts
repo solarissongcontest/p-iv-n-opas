@@ -107,3 +107,18 @@ test("C09 corrected scored choice accepts saved legacy response without regradin
   assert.match(workbook,/Aiemmin tallennettu vaihtoehto/);
   assert.match(workbook,/Palautettu vastauksesi säilyy ennallaan/);
 });
+
+test("C07 includes modern fictitious email spelling without replacing authentic phone dialogue",()=>{
+  const application=readFileSync("src/features/los/LosSupplementalSections.tsx","utf8");
+  const teacher=readFileSync("src/features/los/teacher/lessonL040.ts","utf8");
+  assert.match(application,/Vapaaehtoinen nykyaikainen lisäharjoitus/);
+  assert.match(application,/mia@example\.invalid/);
+  assert.match(application,/vain harjoitusmerkintä/);
+  assert.match(teacher,/example\.invalid-päätteistä esimerkkiä/);
+  assert.doesNotMatch(teacher,/Tavatkaa, olkaa hyvä|tavaaamaan/);
+  const c07=getLosOpenDialogue("07");
+  assert.ok(c07);
+  assert.equal(c07.sourceId,"M-WB-02");
+  assert.equal(c07.originalLines.length,5);
+  assert.match(c07.originalLines[2]?.text??"",/Bitte buchstabieren Sie/);
+});
