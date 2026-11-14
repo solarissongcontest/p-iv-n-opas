@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import {LOS_BOOKS} from "../src/features/los/catalog.ts";
 import {LOS_FUTURE_MANUSCRIPTS} from "../src/features/los/content/losFutureManuscripts.ts";
 import {losFutureExercisesFor} from "../src/features/los/content/losFutureExercises.ts";
-import {losFutureEvidenceTask,readLosFutureEvidenceAnswer,writeLosFutureEvidenceAnswer}
+import {losFutureEvidenceTask,losFutureEvidenceExcerptInSource,readLosFutureEvidenceAnswer,writeLosFutureEvidenceAnswer}
   from "../src/features/los/content/losFutureEvidence.ts";
 
 test("70 source dialogues and 70 source text-evidence questions are mapped to their own chapter",()=>{
@@ -45,4 +45,39 @@ test("legacy evidence submissions never disappear if source text or JSON schema 
   assert.deepEqual(readLosFutureEvidenceAnswer(answer,evidence),["Das ist mein Beleg.","Tämä kertoo tilanteesta."]);
   assert.throws(()=>writeLosFutureEvidenceAnswer(evidence,[""]),/Invalid/);
   assert.throws(()=>writeLosFutureEvidenceAnswer(evidence,["x".repeat(701),"."]),/Invalid/);
+});
+
+
+test("all 70 R01 excerpt fields check only exact Text A location, not response correctness",()=>{
+  let tested=0;
+  for(const book of LOS_BOOKS.filter(b=>b.id>=2))for(const chapter of book.chapters){
+    const item=losFutureExercisesFor(book.id,chapter.id).find(t=>t.id.endsWith("-R01"));assert.ok(item);
+    const task=losFutureEvidenceTask(item);assert.ok(task);
+    const text=task.sourceText;
+    const excerpt=text.slice(0,Math.min(30,text.length)).trim();
+    assert.equal(losFutureEvidenceExcerptInSource(task,excerpt),true,item.id);
+    assert.equal(losFutureEvidenceExcerptInSource(task,excerpt.toLocaleUpperCase("de")),true,item.id);
+    assert.equal(losFutureEvidenceExcerptInSource(task,""),false,item.id);
+    assert.equal(losFutureEvidenceExcerptInSource(task,"Joku virke, joka ei varmasti ole lähteessä 99999."),false,item.id);
+    const dialogue=losFutureExercisesFor(book.id,chapter.id).find(t=>t.id.endsWith("-T03"));assert.ok(dialogue);
+    const dialogueTask=losFutureEvidenceTask(dialogue);assert.ok(dialogueTask);
+    assert.equal(losFutureEvidenceExcerptInSource(dialogueTask,dialogueTask.sourceText.slice(0,20)),false);
+    tested++;
+  }
+  assert.equal(tested,70);
+});
+test("evidence JSON is strictly scoped and keeps legitimate two-part learner answers",()=>{
+  const item=losFutureExercisesFor(6,"04").find(t=>t.id.endsWith("-R01"));assert.ok(item);
+  const task=losFutureEvidenceTask(item);assert.ok(task);
+  const raw=writeLosFutureEvidenceAnswer(task,["Saksankielinen lainaukseni","Suomenkielinen perustelu"]);
+  const parsed=JSON.parse(raw);
+  assert.deepEqual(readLosFutureEvidenceAnswer(raw,task),["Saksankielinen lainaukseni","Suomenkielinen perustelu"]);
+  for(const bad of [
+    {...parsed,score:10},{...parsed,isCorrect:true},
+    {...parsed,chapterId:"99"},{...parsed,sourceText:"other text"},
+    {...parsed,version:2},{...parsed,id:"LOS8-C04-R01"},
+    {...parsed,answers:["a",5]},{...parsed,answers:["x".repeat(701),"y"]},
+  ])assert.equal(readLosFutureEvidenceAnswer(JSON.stringify(bad),task),null);
+  assert.equal(readLosFutureEvidenceAnswer(" ".repeat(7001),task),null);
+  assert.equal(readLosFutureEvidenceAnswer('{"__proto__":{"isCorrect":true}}',task),null);
 });
