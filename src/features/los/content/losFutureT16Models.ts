@@ -110,7 +110,10 @@ export function losFutureT16Model(bookId:number,chapterId:string,sourcePrompt:st
   if(!sourcePrompt.startsWith(start))return null;
   const end=sourcePrompt.indexOf(divider,start.length);
   if(end<start.length)return null;
-  const original=sourcePrompt.slice(start.length,end).trim();
+  // Strip literal markdown emphasis artifacts in one archived 8/C05 prompt.
+  // Preserve the prompt itself as the student's saved-answer identity.
+  const original=sourcePrompt.slice(start.length,end).trim()
+    .replace(/^\*\*/u,"").replace(/\*\*$/u,"").trim();
   if(!original)return null;
   const note=LOS_FUTURE_T16_SPECIAL_NOTES[`${bookId}-${chapterId}`];
   return "Toimituksellinen esimerkkikysymys (ei vielä ulkopuolisen saksanopettajan tarkistama):\n"
