@@ -349,7 +349,7 @@ export const LOS_FUTURE_EXERCISES_2: Record<string, LosFutureExerciseDraft[]> = 
       "chapterId": "01",
       "group": "T",
       "title": "Käännä asiayhteydestä",
-      "prompt": "Kirjoita saksaksi: Te asutte Berliinissä. (Puhuttelet useita tuttavia.)",
+      "prompt": "Kirjoita saksaksi: Te asutte Berliinissä. Käytä usean tutun puhuttelua.",
       "answerKey": "Ihr wohnt in Berlin.",
       "feedback": "Tässä puhutellaan useita tuttuja, joten käytetään monikon sinuttelumuotoa ihr: Ihr wohnt in Berlin. Jos puhuttelu on kohtelias tai muodollinen, oikein on puolestaan Sie wohnen in Berlin. Pelkkä suomen Te ilman tilannevihjettä ei erottaisi näitä kahta.",
       "assessment": "accepted-variants-review"
