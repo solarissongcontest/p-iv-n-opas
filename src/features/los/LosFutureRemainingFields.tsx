@@ -29,8 +29,10 @@ export function LosFutureRemainingFields({task,answer,onChange}:{
     (Boolean(answer.answers[0]?.trim())&&Boolean(answer.answers[1]?.trim()));
   const questionSituation=task.kind==="question"
     ? task.prompt.split(". Varmista, että kysymys sopii tilaisuuteen ")[1]?.replace(/\.$/u,""):null;
-  const visibleSource=task.kind==="question"&&task.sourceText.endsWith(".")
-    ? task.sourceText.slice(0,-1):task.sourceText;
+  const visibleSource=task.kind==="question"
+    ? (task.sourceText.endsWith(".")?task.sourceText.slice(0,-1):task.sourceText)
+      .replace(/^\*\*/u,"").replace(/\*\*$/u,"").trim()
+    :task.sourceText;
   return <fieldset className="los-future-remaining">
     <legend>{title[task.kind]}</legend>
     {task.kind==="pronunciation"?<p>Hyväksyttyä ääni-, IPA- tai painomallia ei vielä ole.
