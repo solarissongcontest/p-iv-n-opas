@@ -1268,3 +1268,34 @@ test("whole-series dictionary source goes directly to the other book's chapter",
   await expect(page.getByText("die Mannschaft",{exact:true}).first()).toBeVisible();
   await expectNoHorizontalOverflow(page);
 });
+
+
+test("T16 shows the scenario, keeps a real source reply and reveals an authored German question",async({page})=>{
+  await enterFutureBook(page);
+  await page.goto("/los#/2/01/practice",{waitUntil:"domcontentloaded"});
+  const picker=page.locator("#los-future-exercise-choice");
+  await picker.selectOption({label:"T16 · Rakenna uusi kysymys"});
+  const fields=page.locator(".los-future-remaining textarea");
+  const source=page.locator(".los-future-remaining-source blockquote");
+  const show=page.getByRole("button",{name:"Näytä vastausluonnos"});
+  await expect(source).toHaveText("Wir lernen Deutsch.");
+  await expect(page.getByText("Tilanne: Kaksi uutta opiskelijaa tapaa kielikurssilla.",{exact:false})).toBeVisible();
+  await expect(page.locator(".los-future-exercise-question")).toContainText("Muodosta saksaksi tilanteeseen sopiva kysymys");
+  await expect(show).toBeDisabled();
+  await fields.nth(0).fill("Was lernt ihr?");
+  await fields.nth(1).fill("Kysymyssana Was ja taivutettu verbi lernt.");
+  await expect(show).toBeEnabled();
+  await show.click();
+  await expect(page.locator(".los-future-exercise-solution")).toContainText("Was lernt ihr?");
+  await expect(page.locator(".los-future-exercise-solution")).toContainText("Annettu lähtöilmaus: Wir lernen Deutsch.");
+  await page.reload({waitUntil:"domcontentloaded"});
+  await picker.selectOption({label:"T16 · Rakenna uusi kysymys"});
+  await expect(fields.nth(0)).toHaveValue("Was lernt ihr?");
+  await expect(fields.nth(1)).toHaveValue("Kysymyssana Was ja taivutettu verbi lernt.");
+
+  await page.goto("/los#/8/05/practice",{waitUntil:"domcontentloaded"});
+  await picker.selectOption({label:"T16 · Rakenna uusi kysymys"});
+  await expect(source).toHaveText("Lies den Artikel!");
+  await expect(source).not.toContainText("**");
+  await expectNoHorizontalOverflow(page);
+});
