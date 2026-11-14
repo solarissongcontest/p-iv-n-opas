@@ -613,3 +613,55 @@ test("LOS! 2 source midterm keeps all answers hidden until explicit submission a
   expect(attempts[0].answers["LOS2-MID-R01"]).toBe("Pienessä kaupungissa, perheensä kanssa.");
   await expectNoHorizontalOverflow(page);
 });
+
+test("70 LOS! 2–8 chapter check pages have independently saved answers and delayed model reveal",async({page})=>{
+  await enterFutureBook(page);
+  await page.goto("/los#/2/01/test",{waitUntil:"domcontentloaded"});
+  const check=page.locator(".los-future-chapter-check");
+  await expect(check).toBeVisible();
+  await expect(check.locator(".los-future-check-question")).toHaveCount(5);
+  await expect(check.locator(".los-future-check-model")).toHaveCount(0);
+  await expect(check).toContainText("Meinen kleine Welt".replace("Meinen","Meine"));
+  await check.locator("#los-check-LOS2-C01-T02").fill("He opiskelevat saksaa.");
+  await check.locator("#los-check-LOS2-C01-T18").fill("Ich heiße Mira. Wir lernen Deutsch.");
+  await expect(check.getByRole("button",{name:"Palauta oma tarkistus"})).toBeDisabled();
+  await check.getByRole("checkbox",{name:/Olen valmis vertaamaan vastauksiani/}).check();
+  await check.getByRole("button",{name:"Palauta oma tarkistus"}).click();
+  await expect(check.locator(".los-future-check-model")).toHaveCount(5);
+  await expect(check.locator("#los-check-LOS2-C01-T02")).toBeDisabled();
+  await page.reload({waitUntil:"domcontentloaded"});
+  await expect(check.locator(".los-future-check-model")).toHaveCount(5);
+  await expect(check.locator("#los-check-LOS2-C01-T18"))
+    .toHaveValue("Ich heiße Mira. Wir lernen Deutsch.");
+  await check.getByRole("checkbox",{name:/Tallenna koko nykyinen yritys/}).check();
+  await check.getByRole("button",{name:"Aloita uusi harjoituskierros"}).click();
+  await expect(check.locator(".los-future-check-model")).toHaveCount(0);
+  await expect(check.locator("#los-check-LOS2-C01-T02")).toHaveValue("");
+  const stored=await page.evaluate(()=>{
+    const owner=localStorage.getItem("opk.owner-id");
+    return {
+      book2:localStorage.getItem(`los.local.v1.${owner}.2.01`),
+      book8:localStorage.getItem(`los.local.v1.${owner}.8.01`),
+    };
+  });
+  const data=JSON.parse(stored.book2??"{}");
+  const old=JSON.parse(data.practiceAnswers["LOS2-C01-CHECK:previous-1"]);
+  expect(old.answers["LOS2-C01-T18"]).toBe("Ich heiße Mira. Wir lernen Deutsch.");
+  expect(data.practiceAnswers["LOS2-C01-T18"]).toBeUndefined();
+  expect(stored.book8).toBeNull();
+  await expectNoHorizontalOverflow(page);
+});
+
+test("LOS! 8 chapter 10 check uses its own sourced Text A and exercise IDs",async({page})=>{
+  await enterFutureBook(page);
+  await page.goto("/los#/8/10/test",{waitUntil:"domcontentloaded"});
+  const check=page.locator(".los-future-chapter-check");
+  await expect(check).toBeVisible();
+  await expect(check.locator(".los-future-check-question")).toHaveCount(5);
+  await expect(check.locator("#los-check-LOS8-C10-T09")).toBeVisible();
+  await expect(check.locator("#los-check-LOS2-C01-T09")).toHaveCount(0);
+  await check.locator(".los-future-check-reading summary").click();
+  await expect(check.locator(".los-future-check-reading p[lang='de']")).toBeVisible();
+  await expect(check.locator(".los-future-check-model")).toHaveCount(0);
+  await expectNoHorizontalOverflow(page);
+});
