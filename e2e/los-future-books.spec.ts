@@ -130,8 +130,8 @@ test("a source-guided lesson reuses chapter answers and persists its own reflect
 test("LOS! 2–8 practice dashboard restores the first untried stage across reloads and keeps book totals separate",async({page})=>{
   await enterFutureBook(page);
   await page.goto("/los#/2/overview",{waitUntil:"domcontentloaded"});
-  await expect(page.getByRole("button",{name:"Opetuspolku"})).toBeVisible();
-  await page.getByRole("button",{name:"Opetuspolku"}).click();
+  await expect(page.getByRole("button",{name:"Opetuspolku",exact:true})).toBeVisible();
+  await page.getByRole("button",{name:"Opetuspolku",exact:true}).click();
   const dashboard=page.locator(".los-future-progress");
   await expect(dashboard).toContainText("0/300");
   await expect(dashboard).toContainText("0/260");
