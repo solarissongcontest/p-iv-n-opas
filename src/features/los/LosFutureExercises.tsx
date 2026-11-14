@@ -136,7 +136,9 @@ export function LosFutureExercises({bookId,chapterId,mode,taskIds}:{
         <p className="los-future-exercise-question">
           {orderingTiles && task.id.endsWith("-R02")
             ? "Järjestä sanapalat oikeaan järjestykseen. Tarkista sitten kielioppi ja välimerkit mallivastauksesta."
-            : task.prompt}
+            : twoPart?.kind==="text-b"
+              ? "Lue alla oleva Text B ja kirjoita kaksi perusteltua havaintoa suomeksi. Huomaa myös tekstin tarkoitus ja ilmaisutapa."
+              : task.prompt}
         </p>
         {exitTicket && exitAnswers ? <fieldset className="los-future-exit-ticket">
           <legend>Kaksi itsenäistä lopputarkistusta</legend>
@@ -214,7 +216,7 @@ export function LosFutureExercises({bookId,chapterId,mode,taskIds}:{
           <legend>{twoPart.kind==="correction"?"Korjaa lause ja perustele":"Tutki Text B:tä: kaksi erillistä havaintoa"}</legend>
           <p>Kirjoita kumpikin vastaus itse ennen vertailumallin avaamista.
             Tämä on harjoittelua, ei automaattinen arvosana.</p>
-          <blockquote lang="de" className="los-future-two-part-source">{twoPart.sourceText}</blockquote>
+          <blockquote lang="de" className="los-future-two-part-source">{twoPart.readingText}</blockquote>
           {twoPart.questions.map((question,index)=><label key={index} className="los-future-two-part-row">
             <span>{index+1}. {question}</span>
             <textarea rows={2} maxLength={600} autoComplete="off" spellCheck={false}
