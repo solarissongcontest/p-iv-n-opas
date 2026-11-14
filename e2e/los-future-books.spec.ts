@@ -804,3 +804,37 @@ test("T19 and R06 four-turn dialogues save all turns without pretending to asses
   expect(JSON.parse(draft["LOS2-C01-R06"]).answers).toHaveLength(4);
   await expectNoHorizontalOverflow(page);
 });
+
+test("T04 literal span and T14 two-source genres persist separately without premature model",async({page})=>{
+  await enterFutureBook(page);
+  await page.goto("/los#/2/01/understand",{waitUntil:"domcontentloaded"});
+  const picker=page.locator("#los-future-exercise-choice");
+  await picker.selectOption({label:"T04 · Etsi täsmällinen ilmaus"});
+  const box=page.locator(".los-future-span-genre");
+  await expect(box).toBeVisible();
+  await expect(box.locator('input[type="radio"]')).toHaveCount(4);
+  const show=page.getByRole("button",{name:"Näytä vastausluonnos"});
+  await expect(show).toBeDisabled();
+  await box.locator('input[type="radio"]').first().check();
+  await box.locator("textarea").first().fill("Hallo");
+  await box.locator("textarea").nth(1).fill("Tervehdys aloittaa keskustelun.");
+  await expect(show).toBeEnabled();
+  await page.reload({waitUntil:"domcontentloaded"});
+  await picker.selectOption({label:"T04 · Etsi täsmällinen ilmaus"});
+  await expect(box.locator('input[type="radio"]').first()).toBeChecked();
+  await expect(box.locator("textarea").nth(1)).toHaveValue("Tervehdys aloittaa keskustelun.");
+  await page.goto("/los#/2/01/practice",{waitUntil:"domcontentloaded"});
+  await picker.selectOption({label:"T14 · Vertaa tekstilajeja"});
+  await expect(box.locator(".los-future-span-genre-source")).toHaveCount(2);
+  await expect(show).toBeDisabled();
+  await box.locator("textarea").first().fill("Dialogissa henkilöt puhuvat, viestillä on lukija.");
+  await box.locator("textarea").nth(1).fill("Dialogissa on vuorot, Text B on kirjoitettu viesti.");
+  await expect(show).toBeEnabled();
+  const data=await page.evaluate(()=>{
+    const owner=localStorage.getItem("opk.owner-id");
+    return JSON.parse(localStorage.getItem(`los.local.v1.${owner}.2.01`)??"{}").practiceAnswers;
+  });
+  expect(JSON.parse(data["LOS2-C01-T04"]).selection).toBe(0);
+  expect(JSON.parse(data["LOS2-C01-T14"]).answers).toHaveLength(2);
+  await expectNoHorizontalOverflow(page);
+});

@@ -1,0 +1,20 @@
+/* T04 literal evidence spans and T14 source genre comparison. */
+.los-future-span-genre{min-width:0;margin:1.1rem 0;padding:1rem;border:1px solid #dad5cd;border-radius:10px}
+.los-future-span-genre legend{font-weight:750;padding:0 .35rem}
+.los-future-span-genre>p{line-height:1.6;font-size:.9rem;color:#62594f}
+.los-future-span-genre-choices{border:1px solid #d7d0c7;border-radius:9px;padding:.75rem;min-width:0;margin:1rem 0}
+.los-future-span-genre-choices legend{font-size:.9rem;font-weight:650}
+.los-future-span-genre-choices label{display:flex;gap:.6rem;align-items:flex-start;cursor:pointer;padding:.6rem 0;line-height:1.65;font-size:.95rem}
+.los-future-span-genre-choices input{flex-shrink:0;width:20px;height:20px;margin:.1rem 0 0}
+.los-future-span-genre-source{margin:1rem 0;display:grid;gap:.35rem}
+.los-future-span-genre-source blockquote{white-space:pre-wrap;overflow-wrap:anywhere;padding:.85rem 1rem;
+  border-left:3px solid var(--los-book-accent,#866644);margin:0;background:#faf8f3;line-height:1.8}
+.los-future-span-genre-row{display:grid;gap:.4rem;margin:1rem 0;line-height:1.6;font-weight:650}
+.los-future-span-genre-row textarea{box-sizing:border-box;width:100%;min-width:0;resize:vertical;
+  font:inherit;padding:.75rem;background:#fff;color:#24211d;border:1px solid #aaa49b;border-radius:9px;line-height:1.6}
+.los-future-span-genre :is(input,textarea):focus-visible{outline:3px solid var(--los-book-accent,#866644);outline-offset:3px}
+.dark .los-future-span-genre,.dark .los-future-span-genre-choices{border-color:var(--los-line,#37434f)}
+.dark .los-future-span-genre>p{color:var(--los-soft,#bec8cf)}
+.dark .los-future-span-genre-source blockquote{background:var(--los-subtle,#222d37);color:var(--los-ink,#f2f5f5)}
+.dark .los-future-span-genre-row textarea{background:var(--los-bg,#11161d);color:var(--los-ink,#f2f5f5);border-color:var(--los-line,#37434f)}
+@media(max-width:560px){.los-future-span-genre{padding:.8rem}.los-future-span-genre-row textarea{min-height:85px}}
