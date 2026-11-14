@@ -7,6 +7,7 @@ import { losFutureMatchingPairs, readLosFutureMatchingAnswer, writeLosFutureMatc
 import { losFutureGapParts } from "./content/losFutureGap.ts";
 import { losFutureRecallPairs, readLosFutureRecallAnswer, writeLosFutureRecallAnswer } from "./content/losFutureRecall.ts";
 import { losFutureExitTicket, readLosFutureExitAnswer, writeLosFutureExitAnswer } from "./content/losFutureExitTicket.ts";
+import { losFutureShortAnswer } from "./content/losFutureShortAnswer.ts";
 import { losFutureOrderingTiles, readLosFutureOrderingAnswer, writeLosFutureOrderingAnswer } from "./content/losFutureOrdering.ts";
 import "./los-future-exercises.css";
 
@@ -37,6 +38,7 @@ export function LosFutureExercises({bookId,chapterId,mode,taskIds}:{
   const [showAll,setShowAll]=useState(false);
   const safeIndex=Math.min(selected,Math.max(0,tasks.length-1));
   const task=tasks[safeIndex];
+  const shortAnswer=task ? losFutureShortAnswer(task) : null;
   const exitTicket=task ? losFutureExitTicket(task) : null;
   const exitAnswers=exitTicket && task
     ? readLosFutureExitAnswer(draft.practiceAnswers[task.id]??"",exitTicket) : null;
@@ -126,7 +128,18 @@ export function LosFutureExercises({bookId,chapterId,mode,taskIds}:{
                 changeAnswer(task.id,writeLosFutureExitAnswer(exitTicket,next));
               }}/>
           </label>)}
-        </fieldset> : recallPairs && recallSelection ? <fieldset className="los-future-recall">
+        </fieldset> : shortAnswer ? <div className="los-future-short-answer">
+          <label htmlFor="los-future-short-input">
+            {shortAnswer.kind==="translation"?"Kirjoita saksankielinen käännös":"Kirjoita kielioppitehtävän vastauksesi"}
+          </label>
+          <input id="los-future-short-input" type="text" spellCheck={false} autoCapitalize="off"
+            autoComplete="off" maxLength={300} lang={shortAnswer.language}
+            value={draft.practiceAnswers[task.id]??""}
+            onChange={event=>changeAnswer(task.id,event.target.value)}
+            placeholder={shortAnswer.kind==="translation"?"Kirjoita lause saksaksi…":"Kirjoita oma korjauksesi tai vastauksesi…"} />
+          <p className="los-future-exercise-hint">Kirjoita vastaus itse. Vertaa sitä käsikirjoituksen
+            malliin vasta yrityksen jälkeen. Eri oikeita ilmaisuja ei pisteytetä automaattisesti.</p>
+        </div> : recallPairs && recallSelection ? <fieldset className="los-future-recall">
           <legend>Palauta kuusi sanaa muistista</legend>
           <p>Kirjoita saksankielinen sana tai ilmaus jokaisen suomennoksen perusteella.
             Voit tarkistaa vastaukset vasta oman yrityksesi jälkeen. Tehtävä ei anna konearvosanaa.</p>
@@ -208,12 +221,16 @@ export function LosFutureExercises({bookId,chapterId,mode,taskIds}:{
         <div className="los-future-exercise-actions">
           <button type="button" className="los-future-exercise-primary"
             aria-expanded={showAnswer} aria-controls="los-future-exercise-key"
+            disabled={(Boolean(exitTicket)&&(!exitAnswers || exitAnswers.some(answer=>!answer.trim())))
+              ||(Boolean(shortAnswer)&&!draft.practiceAnswers[task.id]?.trim())}
             onClick={()=>setShowAnswer(v=>!v)}>
             <CircleHelp size={16} aria-hidden="true"/>
             {showAnswer?"Piilota vastausluonnos":"Näytä vastausluonnos"}
           </button>
           {draft.practiceChecked.includes(task.id)&&
             <span className="los-future-exercise-checked"><CheckCircle2 size={16}/> Verrattu</span>}
+          {exitTicket && exitAnswers?.some(answer=>!answer.trim())&&
+            <span className="los-future-exercise-hint">Vastaa ensin molempiin loppukysymyksiin.</span>}
         </div>
         {showAnswer&&<div id="los-future-exercise-key" className="los-future-exercise-solution">
           <h3>Alkuperäisen käsikirjoituksen ratkaisu tai arviointiohje</h3>
