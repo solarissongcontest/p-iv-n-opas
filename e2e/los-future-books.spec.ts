@@ -739,3 +739,35 @@ test("T03 dialog and R01 textual evidence bind to the right chapter without reve
     .toBe("Lauseessa kuvataan heidän opiskeluaan.");
   await expectNoHorizontalOverflow(page);
 });
+
+test("T11 grammar explanations and R03 three claims each persist separate source-grounded responses",async({page})=>{
+  await enterFutureBook(page);
+  await page.goto("/los#/2/01/practice",{waitUntil:"domcontentloaded"});
+  const select=page.locator("#los-future-exercise-choice");
+  await select.selectOption({label:"T11 · Kieliopin selitys omin sanoin"});
+  let rows=page.locator(".los-future-reasoning-row");
+  const show=page.getByRole("button",{name:"Näytä vastausluonnos"});
+  await expect(rows).toHaveCount(3);
+  await expect(show).toBeDisabled();
+  await rows.nth(0).locator("textarea").fill("Wir päättyy usein -en.");
+  await rows.nth(1).locator("textarea").fill("Wir lernen Deutsch.");
+  await rows.nth(2).locator("textarea").fill("Lernen-verbin loppuosa -en.");
+  await expect(show).toBeEnabled();
+  await page.goto("/los#/2/01/understand",{waitUntil:"domcontentloaded"});
+  await select.selectOption({label:"R03 · reading-inference"});
+  rows=page.locator(".los-future-reasoning-row");
+  await expect(rows).toHaveCount(6);
+  await expect(page.locator(".los-future-reasoning-source p[lang='de']")).toContainText("Mira");
+  await expect(show).toBeDisabled();
+  for(let index=0;index<6;index++){
+    await rows.nth(index).locator("textarea").fill(index%2===0?"Mira lernt Deutsch.":"Mira lernt Deutsch.");
+  }
+  await expect(show).toBeEnabled();
+  const saved=await page.evaluate(()=>{
+    const owner=localStorage.getItem("opk.owner-id");
+    return JSON.parse(localStorage.getItem(`los.local.v1.${owner}.2.01`)??"{}").practiceAnswers;
+  });
+  expect(JSON.parse(saved["LOS2-C01-T11"]).answers).toHaveLength(3);
+  expect(JSON.parse(saved["LOS2-C01-R03"]).answers).toHaveLength(6);
+  await expectNoHorizontalOverflow(page);
+});

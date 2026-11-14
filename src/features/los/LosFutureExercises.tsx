@@ -9,6 +9,7 @@ import { losFutureRecallPairs, readLosFutureRecallAnswer, writeLosFutureRecallAn
 import { losFutureExitTicket, readLosFutureExitAnswer, writeLosFutureExitAnswer } from "./content/losFutureExitTicket.ts";
 import {losFutureTwoPartTask,readLosFutureTwoPartAnswer,writeLosFutureTwoPartAnswer} from "./content/losFutureTwoPart.ts";
 import {losFutureEvidenceTask,readLosFutureEvidenceAnswer,writeLosFutureEvidenceAnswer} from "./content/losFutureEvidence.ts";
+import {losFutureReasoningTask,readLosFutureReasoningAnswer,writeLosFutureReasoningAnswer} from "./content/losFutureReasoning.ts";
 import { losFutureShortAnswer } from "./content/losFutureShortAnswer.ts";
 import { losFutureOrderingTiles, readLosFutureOrderingAnswer, writeLosFutureOrderingAnswer } from "./content/losFutureOrdering.ts";
 import "./los-future-exercises.css";
@@ -40,6 +41,9 @@ export function LosFutureExercises({bookId,chapterId,mode,taskIds}:{
   const [showAll,setShowAll]=useState(false);
   const safeIndex=Math.min(selected,Math.max(0,tasks.length-1));
   const task=tasks[safeIndex];
+  const reasoning=task ? losFutureReasoningTask(task) : null;
+  const reasoningAnswers=reasoning && task
+    ? readLosFutureReasoningAnswer(draft.practiceAnswers[task.id]??"",reasoning) : null;
   const evidenceTask=task ? losFutureEvidenceTask(task) : null;
   const evidenceAnswers=evidenceTask && task
     ? readLosFutureEvidenceAnswer(draft.practiceAnswers[task.id]??"",evidenceTask) : null;
@@ -135,6 +139,25 @@ export function LosFutureExercises({bookId,chapterId,mode,taskIds}:{
                 next[index]=event.target.value;
                 changeAnswer(task.id,writeLosFutureExitAnswer(exitTicket,next));
               }}/>
+          </label>)}
+        </fieldset> : reasoning && reasoningAnswers ? <fieldset className="los-future-reasoning">
+          <legend>{reasoning.kind==="grammar"?"Selitä, näytä ja perustele kielioppisääntö":
+            "Kolme tekstiväitettä ja jokaisen lähdetodiste"}</legend>
+          <p>Jokainen vastaus tallennetaan saman lähdetehtävän omiin kenttiin.
+            Kirjoita kaikki kohdat ennen ratkaisuohjeen avaamista. Tehtävää ei pisteytetä automaattisesti.</p>
+          <details className="los-future-reasoning-source" open={reasoning.kind==="claims"}>
+            <summary>{reasoning.sourceTitle}</summary>
+            <p lang={reasoning.kind==="grammar"?"fi":"de"}>{reasoning.sourceText}</p>
+          </details>
+          {reasoning.parts.map((part,index)=><label key={index} className="los-future-reasoning-row">
+            <span>{index+1}. {part.label}</span>
+            <textarea rows={2} spellCheck={false} autoComplete="off" maxLength={350}
+              lang={part.lang} aria-label={`Tehtävän ${index+1}. vastaus: ${part.label}`}
+              value={reasoningAnswers[index]??""}
+              onChange={event=>{
+                const next=[...reasoningAnswers];next[index]=event.target.value;
+                changeAnswer(task.id,writeLosFutureReasoningAnswer(reasoning,next));
+              }} />
           </label>)}
         </fieldset> : evidenceTask && evidenceAnswers ? <fieldset className="los-future-evidence">
           <legend>{evidenceTask.kind==="dialogue"?"Tulkitse puheenvuoroja":"Etsi tekstistä näyttöä"}</legend>
@@ -274,7 +297,8 @@ export function LosFutureExercises({bookId,chapterId,mode,taskIds}:{
               : !draft.practiceAnswers[task.id]?.trim()))
               ||(Boolean(shortAnswer)&&!draft.practiceAnswers[task.id]?.trim())
               ||(Boolean(twoPart)&&Boolean(twoAnswers)&&twoAnswers!.some(answer=>!answer.trim()))
-              ||(Boolean(evidenceTask)&&Boolean(evidenceAnswers)&&evidenceAnswers!.some(answer=>!answer.trim()))}
+              ||(Boolean(evidenceTask)&&Boolean(evidenceAnswers)&&evidenceAnswers!.some(answer=>!answer.trim()))
+              ||(Boolean(reasoning)&&Boolean(reasoningAnswers)&&reasoningAnswers!.some(answer=>!answer.trim()))}
             onClick={()=>setShowAnswer(v=>!v)}>
             <CircleHelp size={16} aria-hidden="true"/>
             {showAnswer?"Piilota vastausluonnos":"Näytä vastausluonnos"}
@@ -287,6 +311,8 @@ export function LosFutureExercises({bookId,chapterId,mode,taskIds}:{
             <span className="los-future-exercise-hint">Vastaa ensin molempiin tehtävän osiin.</span>}
           {evidenceTask && evidenceAnswers?.some(answer=>!answer.trim())&&
             <span className="los-future-exercise-hint">Kirjoita sekä tekstin havainto että oma perustelusi.</span>}
+          {reasoning && reasoningAnswers?.some(answer=>!answer.trim())&&
+            <span className="los-future-exercise-hint">Täydennä kaikki selitykset ja lähdetodisteet ennen itsevertailua.</span>}
         </div>
         {showAnswer&&<div id="los-future-exercise-key" className="los-future-exercise-solution">
           <h3>Alkuperäisen käsikirjoituksen ratkaisu tai arviointiohje</h3>

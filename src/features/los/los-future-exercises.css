@@ -128,3 +128,22 @@
 .dark .los-future-evidence-row textarea{background:var(--los-bg,#11161d);color:var(--los-ink,#f2f5f5);
   border-color:var(--los-line,#37434f)}
 @media(max-width:560px){.los-future-evidence{padding:.8rem}.los-future-evidence-source{max-height:320px}}
+
+/* T11/R03: explicit rule-explanation and evidence claim scaffolding. */
+.los-future-reasoning{min-width:0;margin:1.1rem 0;padding:1rem;border:1px solid #dad5cd;border-radius:10px}
+.los-future-reasoning legend{padding:0 .35rem;font-weight:750}
+.los-future-reasoning>p{font-size:.87rem;line-height:1.65;color:#62594f}
+.los-future-reasoning-source{padding:.85rem 1rem;margin:1rem 0;background:#faf8f3;border-left:3px solid var(--los-book-accent,#8d6a50)}
+.los-future-reasoning-source summary{cursor:pointer;font-weight:650}
+.los-future-reasoning-source p{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.85;max-height:350px;overflow-y:auto}
+.los-future-reasoning-row{display:grid;gap:.45rem;margin:1rem 0;line-height:1.55;font-weight:650;font-size:.94rem}
+.los-future-reasoning-row textarea{box-sizing:border-box;width:100%;min-width:0;min-height:72px;
+  resize:vertical;padding:.75rem;background:#fff;color:#252525;border:1px solid #aaa49b;
+  border-radius:9px;font:inherit;line-height:1.6}
+.los-future-reasoning-row textarea:focus-visible{outline:3px solid var(--los-book-accent,#8d6a50);outline-offset:2px}
+.dark .los-future-reasoning{border-color:var(--los-line,#37434f)}
+.dark .los-future-reasoning>p{color:var(--los-soft,#bec8cf)}
+.dark .los-future-reasoning-source{background:var(--los-subtle,#222d37);color:var(--los-ink,#f2f5f5)}
+.dark .los-future-reasoning-row textarea{background:var(--los-bg,#11161d);color:var(--los-ink,#f2f5f5);
+  border-color:var(--los-line,#37434f)}
+@media(max-width:560px){.los-future-reasoning{padding:.8rem}.los-future-reasoning-source p{max-height:240px}}
