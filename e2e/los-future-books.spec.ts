@@ -182,3 +182,16 @@ test("LOS! 2–8 chapter Teacher 2.0 shares its own saved exercises, paused scen
   await expect(page.locator(".los-teacher-editorial-gate")).toBeVisible();
   await expect(page.locator(".los-teacher-outline nav button")).toHaveCount(9);
 });
+
+test("LOS! 5 source gap exercise keeps punctuation and saves the exact draft on reload",async({page})=>{
+  await enterFutureBook(page);
+  await page.goto("/los#/5/07/practice",{waitUntil:"domcontentloaded"});
+  const field=page.getByRole("textbox",{name:"Puuttuva saksankielinen sana tai ilmaus"});
+  await expect(field).toBeVisible();
+  await expect(page.locator(".los-future-gap-sentence")).toContainText("Ich");
+  await field.fill("denke,");
+  await page.reload({waitUntil:"domcontentloaded"});
+  await expect(field).toHaveValue("denke,");
+  await expect(page.locator(".los-future-exercise-summary")).toContainText("0 verrattu vastausluonnokseen");
+  await expect(page.locator(".los-future-exercise-notice")).toContainText("ei tarkistettu automaattinen arvostelu");
+});

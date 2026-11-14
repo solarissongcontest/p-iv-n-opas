@@ -4,6 +4,7 @@ import { useLosChapterDraft } from "./studyState";
 import { losFutureExercisesFor } from "./content/losFutureExercises";
 import { losFutureExercisesForSection, type LosFutureExerciseMode } from "./content/losFutureExerciseSections";
 import { losFutureMatchingPairs, readLosFutureMatchingAnswer, writeLosFutureMatchingAnswer } from "./content/losFutureMatching";
+import { losFutureGapParts } from "./content/losFutureGap.ts";
 import "./los-future-exercises.css";
 
 type FutureExerciseDisplayMode = LosFutureExerciseMode | "guided";
@@ -36,6 +37,7 @@ export function LosFutureExercises({bookId,chapterId,mode,taskIds}:{
   const matchingPairs=task ? losFutureMatchingPairs(task) : null;
   const matchingSelection=matchingPairs && task
     ? readLosFutureMatchingAnswer(draft.practiceAnswers[task.id]??"",matchingPairs) : null;
+  const gapParts=task ? losFutureGapParts(task) : null;
   const filled=tasks.filter(t=>Boolean(draft.practiceAnswers[t.id]?.trim())).length;
   const checked=tasks.filter(t=>draft.practiceChecked.includes(t.id)).length;
   function select(index:number){
@@ -110,7 +112,20 @@ export function LosFutureExercises({bookId,chapterId,mode,taskIds}:{
                 <option key={option.fi} value={option.fi}>{option.fi}</option>)}
             </select>
           </label>)}
-        </fieldset> : <label className="los-future-exercise-answer" htmlFor="los-future-exercise-input">
+        </fieldset> : gapParts ? <div className="los-future-gap">
+          <label htmlFor="los-future-gap-input">Täydennä saksankielinen lause</label>
+          <p lang="de" className="los-future-gap-sentence">
+            <span>{gapParts.before}</span>
+            <input id="los-future-gap-input" type="text" autoComplete="off"
+              autoCapitalize="off" spellCheck={false} maxLength={100}
+              aria-label="Puuttuva saksankielinen sana tai ilmaus"
+              value={draft.practiceAnswers[task.id]??""}
+              onChange={e=>changeAnswer(task.id,e.target.value)}/>
+            <span>{gapParts.after}</span>
+          </p>
+          <p className="los-future-exercise-hint">Kirjoita sana tai ilmaus itse, myös välimerkki tarvittaessa.
+            Vastaus tallentuu luonnoksena; mallin avaaminen on itsevertailua, ei koneellinen arvosana.</p>
+        </div> : <label className="los-future-exercise-answer" htmlFor="los-future-exercise-input">
           <span>Oma vastauksesi</span>
           <textarea id="los-future-exercise-input" rows={4} spellCheck={false}
             value={draft.practiceAnswers[task.id]??""} maxLength={5000}
