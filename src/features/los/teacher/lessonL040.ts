@@ -29,7 +29,7 @@ export const LOS1_L040_TEACHER: TeacherLesson = {
       paragraphs:["Kokeile ensin ilman sanastoa. Tarkista sitten tarkoitus."],
       question:{type:"choice",skillId:"L1-STRAT-01",prompt:"Mitä Wie schreibt man das? tarkoittaa?",
         options:[{id:"a",label:"Miten tämä kirjoitetaan?", "lang": "fi"},{id:"b",label:"Minkä ikäinen olet?", "lang": "fi",wrongFeedback:"Ikää kysytään Wie alt bist du?"},{id:"c",label:"Missä asut?", "lang": "fi",wrongFeedback:"Asuinpaikkaa kysytään Wo wohnst du?"}],
-        correctOption:"a",success:"Oikein. Schreibt liittyy kirjoittamiseen.",hint:"Schreiben = kirjoittaa.",reteach:"Wie schreibt man das? kysyy kirjoitusasua; Bitte buchstabieren Sie. pyytää tavaaamaan.",genericWrong:"Etsi vaihtoehto, jossa kysytään kirjoitusasua."}},
+        correctOption:"a",success:"Oikein. Schreibt liittyy kirjoittamiseen.",hint:"Schreiben = kirjoittaa.",reteach:"Wie schreibt man das? kysyy kirjoitusasua; Bitte buchstabieren Sie. pyytää tavaamaan.",genericWrong:"Etsi vaihtoehto, jossa kysytään kirjoitusasua."}},
     {id:"teacher",phase:"Opettajan kertaus",kind:"explanation",title:"Kolme asiaa, jotka helposti menevät sekaisin",
       paragraphs:[
         "1. Nimen kysyminen: Wie heißt du? Vastaat Ich heiße Mia. Kirjoitusasun varmistaminen on eri asia: Wie schreibt man das? ja Bitte buchstabieren Sie.",
@@ -44,7 +44,7 @@ export const LOS1_L040_TEACHER: TeacherLesson = {
         {label:"1 · Kysymys",german:"Wie heißt du?",meaning:"Mikä sinun nimesi on?"},
         {label:"2 · Vastaus",german:"Ich heiße Uwe.",meaning:"Minun nimeni on Uwe."},
         {label:"3 · Tarkennus",german:"Wie schreibt man das?",meaning:"Miten se kirjoitetaan?"},
-        {label:"4 · Kohtelias pyyntö",german:"Bitte buchstabieren Sie.",meaning:"Tavatkaa, olkaa hyvä."},
+        {label:"4 · Kohtelias pyyntö",german:"Bitte buchstabieren Sie.",meaning:"Voisitteko tavata nimen, kiitos?"},
         {label:"5 · Kirjaimet",german:"U · W · E",meaning:"Kirjoita U-W-E, älä U-V-E."},
         {label:"6 · Toisto",german:"Noch einmal, bitte.",meaning:"Vielä kerran, kiitos."},
       ]},
@@ -73,7 +73,7 @@ export const LOS1_L040_TEACHER: TeacherLesson = {
     {id:"test",phase:"Oikea kappaletesti",kind:"book",title:"Palauta C07:n 15 osatehtävää",
       paragraphs:[
         "Avaa C07:n Kappaletesti. Tee kaikki nykyiset C07-EX-01–C07-EX-15-osatehtävät ja palauta koko testi kirjan toiminnolla. Pelkkä vastauksen kirjoittaminen ei ole sama asia kuin testin palauttaminen.",
-        "Siirry sen jälkeen Käytä saksaa -sivulle ja kirjoita lyhyt oma sovellus kuvitteellisella nimellä, esimerkiksi kahden repliikin nimikysymys ja tavattu vastaus. Tähän käytetään kirjan applicationDraft-tallennusta.",
+        "Siirry sen jälkeen Käytä saksaa -sivulle ja kirjoita oma sovellus kuvitteellisilla tiedoilla. Harjoittele myös nykyajan tilannetta, jossa kirjoitusasua kysytään sähköpostiosoitteesta. Käytä vain selvästi keinotekoista example.invalid-päätteistä esimerkkiä, älä oikeaa yhteystietoasi. Tähän käytetään kirjan applicationDraft-tallennusta.",
         "Kirjoita lopuksi kirjan itsearviointiin, mikä kirjainnimi tuntuu vielä vaikealta ja miten aiot kerrata sen. Järjestelmä edellyttää tallennettua itsearviointia, ei määrättyä arvosanaa tai täydellisiä koepisteitä.",
       ],
       bookLinks:[{label:"C07 · Kappaletesti",chapterId:"07",section:"test",instruction:"Tee ja palauta kaikki 15 nykyistä osatehtävää."},
