@@ -51,21 +51,19 @@ export function LosC08ReadingGuide() {
       selvästi tähän oppikirjaan kuulumatonta vaikeampaa kielioppia.
       <strong> Sinun ei tarvitse osata kaikkea saksaa, joka tekstissä esiintyy.</strong>
       Tavoitteesi on tunnistaa tilanteet, puhujat, neljä tuttua sanaa ja tapahtumien järjestys.</p>
-    <p><strong>Työskentely:</strong> avaa alla olevat neljä lukuvaihetta järjestyksessä.
+    <p><strong>Työskentely:</strong> etene alla olevissa neljässä lukuvaiheessa järjestyksessä.
       Lue aina mainitut repliikit kokonaisesta tekstistä, vastaa kysymykseen ensin itse
       ja avaa vasta sitten mallivastaus. Voit napauttaa saksankielisiä sanoja saadaksesi
       niiden selityksen. Tämä on vapaaehtoinen lukutuki, ei uusi pisteytettävä koe.</p>
     <ol className="los-c08-reading-stages">
       {LOS1_C08_READING_STAGES.map(stage=><li key={stage.id}>
+        <h4>{stage.title}</h4>
+        <p>{stage.strategy}</p>
+        <p><strong>Pohdi ensin:</strong> {stage.question}</p>
         <details>
-          <summary><strong>{stage.title}</strong></summary>
-          <p>{stage.strategy}</p>
-          <p><strong>Pohdi ensin:</strong> {stage.question}</p>
-          <details>
-            <summary>Paljasta vastausesimerkki oman yrityksen jälkeen</summary>
-            <p>{stage.answer}</p>
-            <p><strong>Tunnistamissanasto:</strong> {stage.recognise}</p>
-          </details>
+          <summary>Paljasta vastausesimerkki oman yrityksen jälkeen</summary>
+          <p>{stage.answer}</p>
+          <p><strong>Tunnistamissanasto:</strong> {stage.recognise}</p>
         </details>
       </li>)}
     </ol>
