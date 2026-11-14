@@ -256,7 +256,7 @@ const c07: LosOpenText = {
     {id:"C07-SOURCE-Q03",prompt:"Mitä zweimal tarkoittaa nimessä Bolliger?",
       answers:[{id:"a",text:"Kaksi kertaa"},{id:"b",text:"Uusi nimi"},{id:"c",text:"Kymmenen"}],correctId:"a",
       explanation:"Franz sanoo zweimal L eli L-kirjain kahdesti."},
-    {id:"C07-SOURCE-Q04",prompt:"Mitä Frau tarkoittaa sukunimen edellä?",
+    {id:"C07-SOURCE-Q04",prompt:"Mitä Frau tarkoittaa henkilön nimen edellä?",
       answers:[{id:"a",text:"herra"},{id:"b",text:"rouva"},{id:"c",text:"opettaja"}],correctId:"b",
       explanation:"Frau on kohtelias puhuttelusana esimerkiksi sukunimen edellä."},
   ],
@@ -531,7 +531,7 @@ const c08:LosOpenText={
     bistro:"bistro",schon:"jo",wieder:"taas",
   },
   questions:[
-    {id:"C08-SCHOOL-Q01",prompt:"Mitä tuntia Silke ja Torsten sanovat alussa olevansa menossa opiskelemaan?",
+    {id:"C08-SCHOOL-Q01",prompt:"Mikä oppiaine Silkellä ja Torstenilla on kohtauksen alussa?",
       answers:[{id:"a",text:"Matematiikkaa"},{id:"b",text:"Historiaa"},{id:"c",text:"Musiikkia"}],correctId:"a",
       explanation:"Silke sanoo Jetzt haben wir Mathe. Mathe tarkoittaa matematiikkaa."},
     {id:"C08-SCHOOL-Q02",prompt:"Miten opettaja ja luokka tervehtivät toisiaan?",
