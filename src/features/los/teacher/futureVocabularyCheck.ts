@@ -45,7 +45,7 @@ export function futureVocabularyCheck(
       skillId:`LOS${bookId}-C${chapterId}-VOCAB`,
       evidenceRole:"practice",
       options:choices.map((pair,index)=>({
-        id:letters[index]!,label:pair.fi,lang:"fi",
+        id:letters[index]!,label:pair.fi,lang:"fi" as const,
         ...(pair.de===target.de?{}:{wrongFeedback:`Valitsemasi merkitys kuuluu ilmaisuun "${pair.de}". Palaa opetustaulun sanaan "${target.de}" ja yritä uudelleen.`}),
       })),
       correctOption:letters[correctIndex]!,
