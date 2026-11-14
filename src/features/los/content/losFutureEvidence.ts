@@ -1,5 +1,6 @@
 import type {LosFutureExerciseDraft} from "./losFutureExerciseTypes.ts";
 import {LOS_FUTURE_MANUSCRIPTS} from "./losFutureManuscripts.ts";
+import {losFutureContainsSourcePhrase} from "./losFutureWordsEvidence.ts";
 
 /** T03 dialogue turn counting and R01 Text A evidence, exactly as source-authored.
  * Two independent responses: text evidence and the student's interpretation.
@@ -65,6 +66,7 @@ export function writeLosFutureEvidenceAnswer(task:LosFutureEvidenceTask,answers:
  * Keep learner prose intact even when the excerpt is not found. */
 export function losFutureEvidenceExcerptInSource(task:LosFutureEvidenceTask,excerpt:string):boolean{
   if(task.kind!=="text-evidence"||!excerpt.trim())return false;
-  const normalize=(value:string)=>value.normalize("NFC").replace(/\s+/gu," ").trim().toLocaleLowerCase("de").replace(/ß/g,"ss");
-  return normalize(task.sourceText).includes(normalize(excerpt));
+  // A short sequence found inside a longer word (e.g. "in" in "Finnland")
+  // is not an independently quoted German phrase.
+  return losFutureContainsSourcePhrase(task.sourceText,excerpt);
 }
