@@ -217,8 +217,8 @@ export const LOS_FUTURE_EXERCISES_8: Record<string, LosFutureExerciseDraft[]> = 
       "chapterId": "10",
       "group": "R",
       "title": "sentence-order",
-      "prompt": "Kirjoita seuraava tekstin virke oikeassa sanajärjestyksessä. Sanat näytetään oppijalle sekoitettuina: Er wählt das Thema „Unterwegs zur Schule“.",
-      "answerKey": "Er wählt das Thema „Unterwegs zur Schule“.",
+      "prompt": "Kirjoita seuraava tekstin virke oikeassa sanajärjestyksessä. Sanat näytetään oppijalle sekoitettuina: Seine Meinung kennzeichnet er klar.",
+      "answerKey": "Seine Meinung kennzeichnet er klar.",
       "feedback": "Tarkista ensin taivutetun verbin paikka ja vasta sitten muut osat. Pilkut ja nimien isot alkukirjaimet tarkistetaan erikseen.",
       "assessment": "self-review"
     },
@@ -237,7 +237,7 @@ export const LOS_FUTURE_EXERCISES_8: Record<string, LosFutureExerciseDraft[]> = 
       "chapterId": "10",
       "group": "R",
       "title": "vocab-in-context",
-      "prompt": "Etsi päätekstistä kolme sinulle uutta sanaa. Kirjoita kukin sanayhteyteen ja selitä, mikä auttaa päättelemään merkityksen. Aloita sanasta tai ilmauksesta “Für” vain, jos et tunne sitä.",
+      "prompt": "Etsi päätekstistä kolme sinulle uutta sanaa. Kirjoita kukin sanayhteyteen ja selitä, mikä auttaa päättelemään merkityksen. Valitse tekstistä kolme merkityksellistä sanaa tai ilmausta; älä poimi automaattisesti tekstin ensimmäistä sanaa tai henkilönnimeä.",
       "answerKey": "Avoin tehtävä: sana + tarkka tekstikohta + perusteltu kontekstiselitys.",
       "feedback": "Tarkista ehdotettu merkitys kirjan sanastosta tai luotettavasta sanakirjasta.",
       "assessment": "self-review"
@@ -499,7 +499,7 @@ export const LOS_FUTURE_EXERCISES_8: Record<string, LosFutureExerciseDraft[]> = 
       "chapterId": "01",
       "group": "R",
       "title": "vocab-in-context",
-      "prompt": "Etsi päätekstistä kolme sinulle uutta sanaa. Kirjoita kukin sanayhteyteen ja selitä, mikä auttaa päättelemään merkityksen. Aloita sanasta tai ilmauksesta “Heute” vain, jos et tunne sitä.",
+      "prompt": "Etsi päätekstistä kolme sinulle uutta sanaa. Kirjoita kukin sanayhteyteen ja selitä, mikä auttaa päättelemään merkityksen. Valitse tekstistä kolme merkityksellistä sanaa tai ilmausta; älä poimi automaattisesti tekstin ensimmäistä sanaa tai henkilönnimeä.",
       "answerKey": "Avoin tehtävä: sana + tarkka tekstikohta + perusteltu kontekstiselitys.",
       "feedback": "Tarkista ehdotettu merkitys kirjan sanastosta tai luotettavasta sanakirjasta.",
       "assessment": "self-review"
@@ -741,8 +741,8 @@ export const LOS_FUTURE_EXERCISES_8: Record<string, LosFutureExerciseDraft[]> = 
       "chapterId": "02",
       "group": "R",
       "title": "sentence-order",
-      "prompt": "Kirjoita seuraava tekstin virke oikeassa sanajärjestyksessä. Sanat näytetään oppijalle sekoitettuina: Morgens liest er Nachrichten, mittags schreibt er Freunden und abends hört er manchmal einen Podcast.",
-      "answerKey": "Morgens liest er Nachrichten, mittags schreibt er Freunden und abends hört er manchmal einen Podcast.",
+      "prompt": "Kirjoita seuraava tekstin virke oikeassa sanajärjestyksessä. Sanat näytetään oppijalle sekoitettuina: Seine Schwester sieht lieber kurze Videos.",
+      "answerKey": "Seine Schwester sieht lieber kurze Videos.",
       "feedback": "Tarkista ensin taivutetun verbin paikka ja vasta sitten muut osat. Pilkut ja nimien isot alkukirjaimet tarkistetaan erikseen.",
       "assessment": "self-review"
     },
@@ -761,7 +761,7 @@ export const LOS_FUTURE_EXERCISES_8: Record<string, LosFutureExerciseDraft[]> = 
       "chapterId": "02",
       "group": "R",
       "title": "vocab-in-context",
-      "prompt": "Etsi päätekstistä kolme sinulle uutta sanaa. Kirjoita kukin sanayhteyteen ja selitä, mikä auttaa päättelemään merkityksen. Aloita sanasta tai ilmauksesta “Paul” vain, jos et tunne sitä.",
+      "prompt": "Etsi päätekstistä kolme sinulle uutta sanaa. Kirjoita kukin sanayhteyteen ja selitä, mikä auttaa päättelemään merkityksen. Valitse tekstistä kolme merkityksellistä sanaa tai ilmausta; älä poimi automaattisesti tekstin ensimmäistä sanaa tai henkilönnimeä.",
       "answerKey": "Avoin tehtävä: sana + tarkka tekstikohta + perusteltu kontekstiselitys.",
       "feedback": "Tarkista ehdotettu merkitys kirjan sanastosta tai luotettavasta sanakirjasta.",
       "assessment": "self-review"
@@ -1023,7 +1023,7 @@ export const LOS_FUTURE_EXERCISES_8: Record<string, LosFutureExerciseDraft[]> = 
       "chapterId": "03",
       "group": "R",
       "title": "vocab-in-context",
-      "prompt": "Etsi päätekstistä kolme sinulle uutta sanaa. Kirjoita kukin sanayhteyteen ja selitä, mikä auttaa päättelemään merkityksen. Aloita sanasta tai ilmauksesta “Die” vain, jos et tunne sitä.",
+      "prompt": "Etsi päätekstistä kolme sinulle uutta sanaa. Kirjoita kukin sanayhteyteen ja selitä, mikä auttaa päättelemään merkityksen. Valitse tekstistä kolme merkityksellistä sanaa tai ilmausta; älä poimi automaattisesti tekstin ensimmäistä sanaa tai henkilönnimeä.",
       "answerKey": "Avoin tehtävä: sana + tarkka tekstikohta + perusteltu kontekstiselitys.",
       "feedback": "Tarkista ehdotettu merkitys kirjan sanastosta tai luotettavasta sanakirjasta.",
       "assessment": "self-review"
@@ -1285,7 +1285,7 @@ export const LOS_FUTURE_EXERCISES_8: Record<string, LosFutureExerciseDraft[]> = 
       "chapterId": "04",
       "group": "R",
       "title": "vocab-in-context",
-      "prompt": "Etsi päätekstistä kolme sinulle uutta sanaa. Kirjoita kukin sanayhteyteen ja selitä, mikä auttaa päättelemään merkityksen. Aloita sanasta tai ilmauksesta “In” vain, jos et tunne sitä.",
+      "prompt": "Etsi päätekstistä kolme sinulle uutta sanaa. Kirjoita kukin sanayhteyteen ja selitä, mikä auttaa päättelemään merkityksen. Valitse tekstistä kolme merkityksellistä sanaa tai ilmausta; älä poimi automaattisesti tekstin ensimmäistä sanaa tai henkilönnimeä.",
       "answerKey": "Avoin tehtävä: sana + tarkka tekstikohta + perusteltu kontekstiselitys.",
       "feedback": "Tarkista ehdotettu merkitys kirjan sanastosta tai luotettavasta sanakirjasta.",
       "assessment": "self-review"
@@ -1547,7 +1547,7 @@ export const LOS_FUTURE_EXERCISES_8: Record<string, LosFutureExerciseDraft[]> = 
       "chapterId": "05",
       "group": "R",
       "title": "vocab-in-context",
-      "prompt": "Etsi päätekstistä kolme sinulle uutta sanaa. Kirjoita kukin sanayhteyteen ja selitä, mikä auttaa päättelemään merkityksen. Aloita sanasta tai ilmauksesta “Lina” vain, jos et tunne sitä.",
+      "prompt": "Etsi päätekstistä kolme sinulle uutta sanaa. Kirjoita kukin sanayhteyteen ja selitä, mikä auttaa päättelemään merkityksen. Valitse tekstistä kolme merkityksellistä sanaa tai ilmausta; älä poimi automaattisesti tekstin ensimmäistä sanaa tai henkilönnimeä.",
       "answerKey": "Avoin tehtävä: sana + tarkka tekstikohta + perusteltu kontekstiselitys.",
       "feedback": "Tarkista ehdotettu merkitys kirjan sanastosta tai luotettavasta sanakirjasta.",
       "assessment": "self-review"
@@ -1809,7 +1809,7 @@ export const LOS_FUTURE_EXERCISES_8: Record<string, LosFutureExerciseDraft[]> = 
       "chapterId": "06",
       "group": "R",
       "title": "vocab-in-context",
-      "prompt": "Etsi päätekstistä kolme sinulle uutta sanaa. Kirjoita kukin sanayhteyteen ja selitä, mikä auttaa päättelemään merkityksen. Aloita sanasta tai ilmauksesta “Eine” vain, jos et tunne sitä.",
+      "prompt": "Etsi päätekstistä kolme sinulle uutta sanaa. Kirjoita kukin sanayhteyteen ja selitä, mikä auttaa päättelemään merkityksen. Valitse tekstistä kolme merkityksellistä sanaa tai ilmausta; älä poimi automaattisesti tekstin ensimmäistä sanaa tai henkilönnimeä.",
       "answerKey": "Avoin tehtävä: sana + tarkka tekstikohta + perusteltu kontekstiselitys.",
       "feedback": "Tarkista ehdotettu merkitys kirjan sanastosta tai luotettavasta sanakirjasta.",
       "assessment": "self-review"
@@ -2071,7 +2071,7 @@ export const LOS_FUTURE_EXERCISES_8: Record<string, LosFutureExerciseDraft[]> = 
       "chapterId": "07",
       "group": "R",
       "title": "vocab-in-context",
-      "prompt": "Etsi päätekstistä kolme sinulle uutta sanaa. Kirjoita kukin sanayhteyteen ja selitä, mikä auttaa päättelemään merkityksen. Aloita sanasta tai ilmauksesta “In” vain, jos et tunne sitä.",
+      "prompt": "Etsi päätekstistä kolme sinulle uutta sanaa. Kirjoita kukin sanayhteyteen ja selitä, mikä auttaa päättelemään merkityksen. Valitse tekstistä kolme merkityksellistä sanaa tai ilmausta; älä poimi automaattisesti tekstin ensimmäistä sanaa tai henkilönnimeä.",
       "answerKey": "Avoin tehtävä: sana + tarkka tekstikohta + perusteltu kontekstiselitys.",
       "feedback": "Tarkista ehdotettu merkitys kirjan sanastosta tai luotettavasta sanakirjasta.",
       "assessment": "self-review"
@@ -2333,7 +2333,7 @@ export const LOS_FUTURE_EXERCISES_8: Record<string, LosFutureExerciseDraft[]> = 
       "chapterId": "08",
       "group": "R",
       "title": "vocab-in-context",
-      "prompt": "Etsi päätekstistä kolme sinulle uutta sanaa. Kirjoita kukin sanayhteyteen ja selitä, mikä auttaa päättelemään merkityksen. Aloita sanasta tai ilmauksesta “Eine” vain, jos et tunne sitä.",
+      "prompt": "Etsi päätekstistä kolme sinulle uutta sanaa. Kirjoita kukin sanayhteyteen ja selitä, mikä auttaa päättelemään merkityksen. Valitse tekstistä kolme merkityksellistä sanaa tai ilmausta; älä poimi automaattisesti tekstin ensimmäistä sanaa tai henkilönnimeä.",
       "answerKey": "Avoin tehtävä: sana + tarkka tekstikohta + perusteltu kontekstiselitys.",
       "feedback": "Tarkista ehdotettu merkitys kirjan sanastosta tai luotettavasta sanakirjasta.",
       "assessment": "self-review"
@@ -2595,7 +2595,7 @@ export const LOS_FUTURE_EXERCISES_8: Record<string, LosFutureExerciseDraft[]> = 
       "chapterId": "09",
       "group": "R",
       "title": "vocab-in-context",
-      "prompt": "Etsi päätekstistä kolme sinulle uutta sanaa. Kirjoita kukin sanayhteyteen ja selitä, mikä auttaa päättelemään merkityksen. Aloita sanasta tai ilmauksesta “Zwei” vain, jos et tunne sitä.",
+      "prompt": "Etsi päätekstistä kolme sinulle uutta sanaa. Kirjoita kukin sanayhteyteen ja selitä, mikä auttaa päättelemään merkityksen. Valitse tekstistä kolme merkityksellistä sanaa tai ilmausta; älä poimi automaattisesti tekstin ensimmäistä sanaa tai henkilönnimeä.",
       "answerKey": "Avoin tehtävä: sana + tarkka tekstikohta + perusteltu kontekstiselitys.",
       "feedback": "Tarkista ehdotettu merkitys kirjan sanastosta tai luotettavasta sanakirjasta.",
       "assessment": "self-review"

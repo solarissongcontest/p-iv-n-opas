@@ -23,6 +23,11 @@ export function LosFutureRemainingFields({task,answer,onChange}:{
       Näistä vastauksista ei päätellä ääntämisen oikeellisuutta.</p>:
       <p>Vastaa ensin itse ja vertaa vasta sitten lähdekäsikirjoituksen itsearviointiohjeeseen.
         Tämä ei ole automaattisesti pisteytettävä koe.</p>}
+    {task.kind==="words"&&answer.legacyPromptUpdated&&
+      <p className="los-future-remaining-hint" role="status">
+        Sanastonvalinnan ohjetta on tarkennettu. Kolme aikaisempaa sanaasi ja
+        selityksesi ovat edelleen tallessa. Tarkista, haluatko päivittää valintasi.
+      </p>}
     {task.kind==="prediction"&&task.intro&&<>
       <strong>Kappaleen tilannekuvaus</strong>
       <p className="los-future-remaining-intro">{task.intro}</p>

@@ -9,6 +9,15 @@ export type LosFutureRemainingTask={id:string;kind:LosFutureRemainingKind;prompt
   sourceText:string;intro:string;sourceTitle:string;fields:readonly LosFutureRemainingField[]};
 const fi=(label:string,max=350,optional=false):LosFutureRemainingField=>({label,lang:"fi",max,rows:max>=600?4:2,optional});
 const de=(label:string,max=350,optional=false):LosFutureRemainingField=>({label,lang:"de",max,rows:max>=600?5:2,optional});
+/** R04 used to recommend the *first token* (often a person's name) as
+ * vocabulary. Recognize only that exact old prompt for the unchanged Text A. */
+export const LOS_FUTURE_WORDS_PROMPT="Etsi päätekstistä kolme sinulle uutta sanaa. Kirjoita kukin sanayhteyteen ja selitä, mikä auttaa päättelemään merkityksen. Valitse tekstistä kolme merkityksellistä sanaa tai ilmausta; älä poimi automaattisesti tekstin ensimmäistä sanaa tai henkilönnimeä.";
+const formerWordsPrompt=(textA:string)=>{
+  const first=textA.match(/^[^\p{L}\p{N}]*([\p{L}\p{N}]+)/u)?.[1];
+  return first
+    ? `Etsi päätekstistä kolme sinulle uutta sanaa. Kirjoita kukin sanayhteyteen ja selitä, mikä auttaa päättelemään merkityksen. Aloita sanasta tai ilmauksesta “${first}” vain, jos et tunne sitä.`
+    : null;
+};
 export function losFutureRemainingTask(task:LosFutureExerciseDraft):LosFutureRemainingTask|null{
   const m=task.id.match(/^LOS([2-8])-C(0[1-9]|10)-(T01|T15|T16|T17|T18|R04|R05)$/);
   if(!m)return null;
@@ -90,7 +99,9 @@ export function losFutureRemainingTask(task:LosFutureExerciseDraft):LosFutureRem
   return null;
 }
 export type LosFutureRemainingAnswer={version:1;id:string;kind:LosFutureRemainingKind;
-  prompt:string;intro:string;sourceText:string;answers:string[]};
+  prompt:string;intro:string;sourceText:string;answers:string[];
+  /** UI-only legacy prompt notice; deliberately not included in saved JSON. */
+  legacyPromptUpdated?:boolean;};
 const empty=(t:LosFutureRemainingTask):LosFutureRemainingAnswer=>({
   version:1,id:t.id,kind:t.kind,prompt:t.prompt,intro:t.intro,
   sourceText:t.sourceText,answers:t.fields.map(()=>"")});
@@ -100,12 +111,18 @@ export function readLosFutureRemainingAnswer(raw:string,t:LosFutureRemainingTask
     const parsed:unknown=JSON.parse(raw);
     if(!parsed||typeof parsed!=="object"||Array.isArray(parsed))return null;
     const a=parsed as Partial<LosFutureRemainingAnswer>;
+    const oldPrompt=t.kind==="words"&&t.prompt===LOS_FUTURE_WORDS_PROMPT
+      ? formerWordsPrompt(t.sourceText):null;
+    const migrated=Boolean(oldPrompt&&a.prompt===oldPrompt);
     if(Object.keys(a).sort().join(",")!=="answers,id,intro,kind,prompt,sourceText,version"||
-      a.version!==1||a.id!==t.id||a.kind!==t.kind||a.prompt!==t.prompt||
+      a.version!==1||a.id!==t.id||a.kind!==t.kind||
+      (a.prompt!==t.prompt&&!migrated)||
       a.intro!==t.intro||a.sourceText!==t.sourceText||
       !Array.isArray(a.answers)||a.answers.length!==t.fields.length||
       !a.answers.every((v,i)=>typeof v==="string"&&v.length<=t.fields[i]!.max))return null;
-    return a as LosFutureRemainingAnswer;
+    return migrated
+      ? {...a,prompt:t.prompt,legacyPromptUpdated:true} as LosFutureRemainingAnswer
+      : a as LosFutureRemainingAnswer;
   }catch{return null;}
 }
 export function writeLosFutureRemainingAnswer(t:LosFutureRemainingTask,answers:readonly string[]):string{

@@ -75,6 +75,13 @@ Tämä tiedosto on ainoa LOS! 1–8:n *toteutuksen* jatkotilaraportti. Visuaalin
 - Samojen 70 tehtävän itsearviointimalli muistuttaa, että tekstilajit ja kohderyhmät on pääteltävä nimenomaan kappaleen omasta aineistosta. Tämä ei ole itsenäinen tarkastajan laatima 70 tekstin mallivastaus eikä automaattinen oikeellisuusarvio.
 - **Vanhojen harjoitusvastausten säilyminen:** T14:n aikaisempi täsmällinen kysymysversio hyväksytään rajatussa yhden version migraatiossa. Kaksi aiempaa havaintoa säilyvät, ja käyttäjälle näytetään muutosilmoitus; seuraava tallennus kirjoittaa uuden kysymysversion. Tehtävän ID ja harjoitusluonnoksen avain eivät muutu. Testi käy läpi kaikki 70 lähdettä ja takaisin yhteensopivat luonnokset. CI-/selaintestit ja riippumaton saksankielinen/didaktinen tarkistus vaaditaan erikseen.
 
+## 14.11.2026 · R02-virkkeet ja R04-kontekstisanasto
+
+- Kaikkien LOS! 2–8:n 70 R02-sanajärjestystehtävän alkuperä tarkistettiin Text A -käsikirjoituksista. **13 tehtävän** malliksi valittiin yksi selkeä, samassa kappaleessa kirjaimellisesti esiintyvä saksankielinen virke; aiemmissa versioissa oli useaan osaan katkenneita lainauksia, yhteen liitettyjä lauseita tai pedagogisesti tarpeettoman pitkiä sekvenssejä. Samat tehtävätunnisteet ja tallennusavaimet säilyvät.
+- R02:n aiemmat sanapalatehtäviin kirjoitetut vastaukset **säilyvät vapaatekstinä**, jos niitä ei voida esittää uudella palasarjalla. Käyttöliittymä ilmoittaa mahdollisesta lähdevirkkeen muutoksesta; muutosta ei tulkita oppilaan virheeksi eikä siitä synny automaattista pisteytystä.
+- **70 R04-kontekstisanastotehtävän** aiempi ohje valita ensimmäinen sana (usein henkilönnimi) korjattiin valitsemaan kolme merkityksellistä sanaa tai ilmausta. Vanhat yhdeksän kentän R04-vastausluonnokset tunnistetaan **vain**, kun niiden vanha ohje vastaa täsmälleen alkuperäisen saman Text A -tekstin ensimmäistä sanaa; ratkaisu säilyttää omat sana-, konteksti- ja merkitysvastaukset ja ilmoittaa ohjemuutoksesta.
+- Vastaavat regressiotestit tarkistavat 70 R02:n Text A -lähdekohdan ja 13 tarkennetun mallivirkkeen sekä 70 R04-tehtävän aiemmat turvalliset vastaussiirtymät. Saksan kieliopillinen, didaktinen ja ulkopuolinen sisältöhyväksyntä on edelleen avoinna.
+
 ## 14.11.2026 · T04:n 70 lähdetodistetta ja 12 kysymyskorjausta
 
 - Tarkistettiin kaikkien LOS! 2–8:n 70 T04-tekstinäyttöharjoituksen tukidialogit. Jokaiseen vastausmalliin lisättiin **aito, kirjan samasta tukidialogista löytyvä saksankielinen ilmaus** ja suomenkielinen selitys. Vanhentunut ”Tokenikohdistus lisättävä” -teksti poistettiin: käyttöliittymä tarkistaa täsmällisen tekstikohdan esiintymisen, **ei** selityksen semanttista oikeellisuutta.

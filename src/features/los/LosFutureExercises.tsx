@@ -317,6 +317,12 @@ export function LosFutureExercises({bookId,chapterId,mode,taskIds}:{
             Vastaus tallentuu luonnoksena; mallin avaaminen on itsevertailua, ei koneellinen arvosana.</p>
         </div> : <label className="los-future-exercise-answer" htmlFor="los-future-exercise-input">
           <span>Oma vastauksesi</span>
+          {orderingTiles && orderingSelection===null && draft.practiceAnswers[task.id]?.trim()&&
+            <span className="los-future-exercise-hint" role="status">
+              Sanajärjestystehtävän lähdevirkettä on voitu korjata. Aiempi vastauksesi on
+              säilytetty tässä tekstinä, koska sitä ei voi turvallisesti muuttaa uuden
+              tehtävän sanapalajonoksi.
+            </span>}
           <textarea id="los-future-exercise-input" rows={4} spellCheck={false}
             value={draft.practiceAnswers[task.id]??""} maxLength={5000}
             onChange={e=>changeAnswer(task.id,e.target.value)}

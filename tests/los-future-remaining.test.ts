@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import {LOS_BOOKS} from "../src/features/los/catalog.ts";
 import {LOS_FUTURE_MANUSCRIPTS} from "../src/features/los/content/losFutureManuscripts.ts";
 import {losFutureExercisesFor} from "../src/features/los/content/losFutureExercises.ts";
-import {losFutureRemainingTask,readLosFutureRemainingAnswer,writeLosFutureRemainingAnswer,losFutureRemainingComplete}
+import {losFutureRemainingTask,readLosFutureRemainingAnswer,writeLosFutureRemainingAnswer,losFutureRemainingComplete,LOS_FUTURE_WORDS_PROMPT}
   from "../src/features/los/content/losFutureRemaining.ts";
 
 test("all 490 source T01/T15/T16/T17/T18/R04/R05 prompts have their own structured response plan",()=>{
@@ -60,4 +60,32 @@ test("malformed, cross-book, extra score fields and oversized drafts are rejecte
   assert.equal(readLosFutureRemainingAnswer(raw,{...task,id:"LOS3-C01-T18"}),null);
   assert.throws(()=>writeLosFutureRemainingAnswer(task,["x".repeat(1701),"",""]),/Invalid/);
   assert.equal(losFutureRemainingTask(losFutureExercisesFor(2,"01").find(x=>x.id.endsWith("-T03"))!),null);
+});
+
+test("all 70 R04 tasks invite meaningful vocabulary rather than the first token, preserving legacy drafts",()=>{
+  let count=0;
+  for(const book of LOS_BOOKS.filter(b=>b.id>=2))for(const chapter of book.chapters){
+    const item=losFutureExercisesFor(book.id,chapter.id).find(t=>t.id.endsWith("-R04"));
+    assert.ok(item);
+    assert.equal(item.prompt,LOS_FUTURE_WORDS_PROMPT);
+    const task=losFutureRemainingTask(item);assert.ok(task);
+    const words=task.fields.map((field,i)=>field.lang==="de"?"Freund":"Merkityksen päättely");
+    const encoded=writeLosFutureRemainingAnswer(task,words);
+    const previous=task.sourceText.match(/^[^\p{L}\p{N}]*([\p{L}\p{N}]+)/u)?.[1];
+    assert.ok(previous);
+    const oldPrompt=`Etsi päätekstistä kolme sinulle uutta sanaa. Kirjoita kukin sanayhteyteen ja selitä, mikä auttaa päättelemään merkityksen. Aloita sanasta tai ilmauksesta “${previous}” vain, jos et tunne sitä.`;
+    const legacy={...JSON.parse(encoded),prompt:oldPrompt};
+    const opened=readLosFutureRemainingAnswer(JSON.stringify(legacy),task);
+    assert.ok(opened,item.id);
+    assert.equal(opened.legacyPromptUpdated,true);
+    assert.deepEqual(opened.answers,words);
+    assert.equal(opened.prompt,task.prompt);
+    const saved=readLosFutureRemainingAnswer(writeLosFutureRemainingAnswer(task,opened.answers),task);
+    assert.ok(saved);assert.deepEqual(saved.answers,words);
+    assert.equal(saved.legacyPromptUpdated,undefined);
+    assert.equal(readLosFutureRemainingAnswer(
+      JSON.stringify({...legacy,prompt:oldPrompt+"!"}),task),null);
+    count++;
+  }
+  assert.equal(count,70);
 });
