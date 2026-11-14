@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { getDeviceOwnerId } from "@/lib/deviceSession";
+import { losFutureStageCursorKey } from "./losFutureSessionKeys.ts";
 import { ArrowLeft, ArrowRight, BookOpen, Check, CircleAlert, ClipboardList, LockKeyhole } from "lucide-react";
 import { getLosFutureLesson } from "./content/losFutureLessons.ts";
 import type { LosFutureLessonContent } from "./content/losFutureLessonTypes.ts";
@@ -23,15 +25,24 @@ function GuidedChapterLesson({bookId,chapterId,script,move}:{
   // The existing owner/book/chapter draft persists the reading position. This is
   // navigation state only: it must never become a completed lesson or mastery score.
   const stageDraftKey=`los.future.guided:${script.id}:selectedStage`;
+  const ownerStageKey=losFutureStageCursorKey(getDeviceOwnerId(),script.id);
   const [stageIndex,setStageIndex]=useState(()=>{
-    const raw=draft.practiceAnswers[stageDraftKey];
-    const value=raw===undefined ? NaN : Number(raw);
-    return Number.isInteger(value)&&value>=0&&value<6 ? value : 0;
+    // The chapter draft is the durable record. The owner-scoped session cursor
+    // may override display when the learner selects "continue" from progress.
+    // Never replace or delete existing chapter-draft answers.
+    let cursor:string|null=null;
+    try{if(ownerStageKey && typeof sessionStorage!=="undefined")
+      cursor=sessionStorage.getItem(ownerStageKey);}catch{/* local draft still works */}
+    const raw=cursor??draft.practiceAnswers[stageDraftKey];
+    const value=raw===undefined?NaN:Number(raw);
+    return Number.isInteger(value)&&value>=0&&value<6?value:0;
   });
   const stages=stagesFor(script);
   function chooseStage(index:number){
     const next=Math.max(0,Math.min(index,stages.length-1));
     setStageIndex(next);
+    try{if(ownerStageKey)sessionStorage.setItem(ownerStageKey,String(next));}
+    catch{/* persisted chapter draft remains authoritative */}
     update(current=>({
       ...current,
       practiceAnswers:{...current.practiceAnswers,[stageDraftKey]:String(next)},
