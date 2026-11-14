@@ -40,7 +40,9 @@ function inDevice<T>(store:FakeStore,fn:()=>T):T{
   });
   if(typeof CustomEvent==="undefined"){
     class TestCustomEvent {
-      constructor(public type:string,public init:unknown){}
+      type:string;
+      init:unknown;
+      constructor(type:string,init:unknown){this.type=type;this.init=init;}
     }
     Object.defineProperty(globalThis,"CustomEvent",{
       configurable:true,writable:true,value:TestCustomEvent,
