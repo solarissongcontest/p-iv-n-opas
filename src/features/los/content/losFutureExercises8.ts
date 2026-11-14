@@ -28,7 +28,7 @@ export const LOS_FUTURE_EXERCISES_8: Record<string, LosFutureExerciseDraft[]> = 
       "group": "T",
       "title": "Puhujat ja vuorot",
       "prompt": "Lue saksankielinen tukidialogi. Kuinka monta puheenvuoroa siinä on, ja mitä kukin puhuja tekee ensimmäisellä vuorollaan?",
-      "answerKey": "5 puheenvuoroa. Ensimmäinen: Lehrerin: Was ist dein Thema?. Huomaa, että jos sama puhuja palaa, vastaa myös jatkokysymykseen.",
+      "answerKey": "5 puheenvuoroa. Puhujien ensimmäiset vuorot: Lehrerin: Was ist dein Thema? | Mia: Wie Jugendliche Nachrichten lesen.. Suomenkielinen tulkinta: Opettaja kysyy Mian projektin aihetta. Mia kertoo nuorten uutistenlukutottumuksista. Tarkista, että oma vastauksesi kuvaa kummankin puhujan ensimmäistä vuoroa.",
       "feedback": "",
       "assessment": "self-review"
     },
@@ -290,7 +290,7 @@ export const LOS_FUTURE_EXERCISES_8: Record<string, LosFutureExerciseDraft[]> = 
       "group": "T",
       "title": "Puhujat ja vuorot",
       "prompt": "Lue saksankielinen tukidialogi. Kuinka monta puheenvuoroa siinä on, ja mitä kukin puhuja tekee ensimmäisellä vuorollaan?",
-      "answerKey": "4 puheenvuoroa. Ensimmäinen: Mira: Was ist heute passiert?. Huomaa, että jos sama puhuja palaa, vastaa myös jatkokysymykseen.",
+      "answerKey": "4 puheenvuoroa. Puhujien ensimmäiset vuorot: Mira: Was ist heute passiert? | Leo: Die Stadt eröffnet einen neuen Park.. Suomenkielinen tulkinta: Mira kysyy päivän tapahtumista. Leo kertoo uuden puiston avaamisesta. Tarkista, että oma vastauksesi kuvaa kummankin puhujan ensimmäistä vuoroa.",
       "feedback": "",
       "assessment": "self-review"
     },
@@ -552,7 +552,7 @@ export const LOS_FUTURE_EXERCISES_8: Record<string, LosFutureExerciseDraft[]> = 
       "group": "T",
       "title": "Puhujat ja vuorot",
       "prompt": "Lue saksankielinen tukidialogi. Kuinka monta puheenvuoroa siinä on, ja mitä kukin puhuja tekee ensimmäisellä vuorollaan?",
-      "answerKey": "4 puheenvuoroa. Ensimmäinen: Anna: Liest du Nachrichten auf dem Handy?. Huomaa, että jos sama puhuja palaa, vastaa myös jatkokysymykseen.",
+      "answerKey": "4 puheenvuoroa. Puhujien ensimmäiset vuorot: Anna: Liest du Nachrichten auf dem Handy? | Tom: Ja, meistens am Morgen.. Suomenkielinen tulkinta: Anna kysyy, lukeeko Tom uutisia puhelimesta. Tom vastaa yleensä aamuisin. Tarkista, että oma vastauksesi kuvaa kummankin puhujan ensimmäistä vuoroa.",
       "feedback": "",
       "assessment": "self-review"
     },
@@ -814,7 +814,7 @@ export const LOS_FUTURE_EXERCISES_8: Record<string, LosFutureExerciseDraft[]> = 
       "group": "T",
       "title": "Puhujat ja vuorot",
       "prompt": "Lue saksankielinen tukidialogi. Kuinka monta puheenvuoroa siinä on, ja mitä kukin puhuja tekee ensimmäisellä vuorollaan?",
-      "answerKey": "4 puheenvuoroa. Ensimmäinen: Mara: Was bedeutet diese Überschrift?. Huomaa, että jos sama puhuja palaa, vastaa myös jatkokysymykseen.",
+      "answerKey": "4 puheenvuoroa. Puhujien ensimmäiset vuorot: Mara: Was bedeutet diese Überschrift? | Ben: „Neue Buslinie ab Montag“.. Suomenkielinen tulkinta: Mara kysyy otsikon merkitystä. Ben lukee maanantaina alkavaa bussilinjaa koskevan otsikon. Tarkista, että oma vastauksesi kuvaa kummankin puhujan ensimmäistä vuoroa.",
       "feedback": "",
       "assessment": "self-review"
     },
@@ -1076,7 +1076,7 @@ export const LOS_FUTURE_EXERCISES_8: Record<string, LosFutureExerciseDraft[]> = 
       "group": "T",
       "title": "Puhujat ja vuorot",
       "prompt": "Lue saksankielinen tukidialogi. Kuinka monta puheenvuoroa siinä on, ja mitä kukin puhuja tekee ensimmäisellä vuorollaan?",
-      "answerKey": "4 puheenvuoroa. Ensimmäinen: Lena: Hier steht: Der Zug fährt um neun Uhr.. Huomaa, että jos sama puhuja palaa, vastaa myös jatkokysymykseen.",
+      "answerKey": "4 puheenvuoroa. Puhujien ensimmäiset vuorot: Lena: Hier steht: Der Zug fährt um neun Uhr. | Oli: Das kann man im Fahrplan prüfen.. Suomenkielinen tulkinta: Lena esittää aikataulun lähtöajan. Oli sanoo tiedon olevan tarkistettavissa aikataulusta. Tarkista, että oma vastauksesi kuvaa kummankin puhujan ensimmäistä vuoroa.",
       "feedback": "",
       "assessment": "self-review"
     },
@@ -1338,7 +1338,7 @@ export const LOS_FUTURE_EXERCISES_8: Record<string, LosFutureExerciseDraft[]> = 
       "group": "T",
       "title": "Puhujat ja vuorot",
       "prompt": "Lue saksankielinen tukidialogi. Kuinka monta puheenvuoroa siinä on, ja mitä kukin puhuja tekee ensimmäisellä vuorollaan?",
-      "answerKey": "4 puheenvuoroa. Ensimmäinen: Nina: Hast du die Nachricht gelesen?. Huomaa, että jos sama puhuja palaa, vastaa myös jatkokysymykseen.",
+      "answerKey": "4 puheenvuoroa. Puhujien ensimmäiset vuorot: Nina: Hast du die Nachricht gelesen? | Tom: Ja, aber ich kenne die Quelle nicht.. Suomenkielinen tulkinta: Nina kysyy, onko Tom lukenut viestin. Tom kertoo lukeneensa mutta ettei tunne lähdettä. Tarkista, että oma vastauksesi kuvaa kummankin puhujan ensimmäistä vuoroa.",
       "feedback": "",
       "assessment": "self-review"
     },
@@ -1600,7 +1600,7 @@ export const LOS_FUTURE_EXERCISES_8: Record<string, LosFutureExerciseDraft[]> = 
       "group": "T",
       "title": "Puhujat ja vuorot",
       "prompt": "Lue saksankielinen tukidialogi. Kuinka monta puheenvuoroa siinä on, ja mitä kukin puhuja tekee ensimmäisellä vuorollaan?",
-      "answerKey": "4 puheenvuoroa. Ensimmäinen: Mila: Fährst du heute mit dem Rad?. Huomaa, että jos sama puhuja palaa, vastaa myös jatkokysymykseen.",
+      "answerKey": "4 puheenvuoroa. Puhujien ensimmäiset vuorot: Mila: Fährst du heute mit dem Rad? | Jan: Ja, weil die Strecke kurz ist.. Suomenkielinen tulkinta: Mila kysyy Janin pyöräilystä tänään. Jan vastaa kyllä, koska matka on lyhyt. Tarkista, että oma vastauksesi kuvaa kummankin puhujan ensimmäistä vuoroa.",
       "feedback": "",
       "assessment": "self-review"
     },
@@ -1862,7 +1862,7 @@ export const LOS_FUTURE_EXERCISES_8: Record<string, LosFutureExerciseDraft[]> = 
       "group": "T",
       "title": "Puhujat ja vuorot",
       "prompt": "Lue saksankielinen tukidialogi. Kuinka monta puheenvuoroa siinä on, ja mitä kukin puhuja tekee ensimmäisellä vuorollaan?",
-      "answerKey": "4 puheenvuoroa. Ensimmäinen: Lea: Benutzt du eine Lern-App?. Huomaa, että jos sama puhuja palaa, vastaa myös jatkokysymykseen.",
+      "answerKey": "4 puheenvuoroa. Puhujien ensimmäiset vuorot: Lea: Benutzt du eine Lern-App? | Ben: Ja, aber ich lerne auch mit Büchern.. Suomenkielinen tulkinta: Lea kysyy Benin opiskelusovelluksen käytöstä. Ben kertoo käyttävänsä sovellusta ja kirjoja. Tarkista, että oma vastauksesi kuvaa kummankin puhujan ensimmäistä vuoroa.",
       "feedback": "",
       "assessment": "self-review"
     },
@@ -2124,7 +2124,7 @@ export const LOS_FUTURE_EXERCISES_8: Record<string, LosFutureExerciseDraft[]> = 
       "group": "T",
       "title": "Puhujat ja vuorot",
       "prompt": "Lue saksankielinen tukidialogi. Kuinka monta puheenvuoroa siinä on, ja mitä kukin puhuja tekee ensimmäisellä vuorollaan?",
-      "answerKey": "4 puheenvuoroa. Ensimmäinen: Oskar: Wir brauchen mehr Platz für Fahrräder.. Huomaa, että jos sama puhuja palaa, vastaa myös jatkokysymykseen.",
+      "answerKey": "4 puheenvuoroa. Puhujien ensimmäiset vuorot: Oskar: Wir brauchen mehr Platz für Fahrräder. | Mara: Ich finde auch, dass sichere Wege wichtig sind.. Suomenkielinen tulkinta: Oskar vaatii lisää tilaa pyörille. Mara kannattaa turvallisia kulkureittejä. Tarkista, että oma vastauksesi kuvaa kummankin puhujan ensimmäistä vuoroa.",
       "feedback": "",
       "assessment": "self-review"
     },
@@ -2386,7 +2386,7 @@ export const LOS_FUTURE_EXERCISES_8: Record<string, LosFutureExerciseDraft[]> = 
       "group": "T",
       "title": "Puhujat ja vuorot",
       "prompt": "Lue saksankielinen tukidialogi. Kuinka monta puheenvuoroa siinä on, ja mitä kukin puhuja tekee ensimmäisellä vuorollaan?",
-      "answerKey": "4 puheenvuoroa. Ensimmäinen: Nina: Ich fahre gern mit dem Bus.. Huomaa, että jos sama puhuja palaa, vastaa myös jatkokysymykseen.",
+      "answerKey": "4 puheenvuoroa. Puhujien ensimmäiset vuorot: Nina: Ich fahre gern mit dem Bus. | Leo: Ich gehe lieber zu Fuß.. Suomenkielinen tulkinta: Nina kertoo pitävänsä bussilla matkustamisesta. Leo kertoo kävelevänsä mieluummin. Tarkista, että oma vastauksesi kuvaa kummankin puhujan ensimmäistä vuoroa.",
       "feedback": "",
       "assessment": "self-review"
     },
