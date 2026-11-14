@@ -45,3 +45,21 @@ test("unknown and longer open responses do not masquerade as a closed grammar pr
   assert.equal(losFutureShortAnswer({...source,answerKey:"x".repeat(151)}),null);
   assert.equal(losFutureShortAnswer({...source,prompt:" "}),null);
 });
+
+
+test("70 T09 instructions have exactly their Finnish source sentence punctuation",()=>{
+  let count=0;
+  for(const book of LOS_BOOKS.filter(item=>item.id>=2))for(const chapter of book.chapters){
+    const task=losFutureExercisesFor(book.id,chapter.id).find(item=>item.id.endsWith("-T09"));
+    assert.ok(task);
+    assert.match(task.prompt,/^Kirjoita saksaksi: .+[.!?]$/u,task.id);
+    assert.doesNotMatch(task.prompt,/[.!?]\.$/u,task.id);
+    assert.ok(losFutureShortAnswer(task)?.kind==="translation");
+    if(book.id===2&&chapter.id==="07")assert.equal(task.prompt,"Kirjoita saksaksi: Mitä kahvi maksaa?");
+    if(book.id===8&&chapter.id==="05")assert.equal(task.prompt,"Kirjoita saksaksi: Tarkista lähde!");
+    if(book.id===8&&chapter.id==="06")
+      assert.equal(task.prompt,"Kirjoita saksaksi: Matka on lyhyt. Siksi kävelen.");
+    count++;
+  }
+  assert.equal(count,70);
+});
