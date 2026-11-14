@@ -353,3 +353,45 @@ test("future Text A highlights survive backup, while foreign text marks are reje
     format:LOS_FUTURE_BACKUP_FORMAT,bookId:2,exportedAt:fixedDate.toISOString(),chapters:{"01":bogus},
   })),/virheellinen/);
 });
+
+test("later-book backup refuses top-level owner/grade metadata and fabricated chapter mastery",()=>{
+  const base={format:LOS_FUTURE_BACKUP_FORMAT,bookId:2,exportedAt:fixedDate.toISOString()};
+  const original=makeDraft();original.note="Oma keskeneräinen harjoitus.";
+  for(const extra of [
+    {grade:"10"},{ownerId:"someone-else"},{masteryCertified:true},
+  ]){
+    assert.throws(()=>parseLosFutureBackup(JSON.stringify({
+      ...base,...extra,chapters:{"01":original},
+    })),/kelvollinen/);
+  }
+  for(const extra of [
+    {grade:"10"},{masteryScore:100},{certificate:true},
+  ]){
+    assert.throws(()=>parseLosFutureBackup(JSON.stringify({
+      ...base,chapters:{"01":{...original,...extra}},
+    })),/virheellinen/);
+  }
+  const olderDraft=makeDraft();
+  olderDraft.practiceAnswers={"LOS2-C01-T01":"Ennustin tilanteen ennen lukua."};
+  const imported=parseLosFutureBackup(JSON.stringify({...base,chapters:{"01":olderDraft}}));
+  assert.deepEqual(imported.chapters["01"]?.practiceAnswers,olderDraft.practiceAnswers,
+    "Older v1 draft with no optional future-book fields still imports");
+});
+
+test("direct import cannot write tampered draft even if caller bypasses the file parser",()=>{
+  const store=new FakeStore();
+  const previous=makeDraft();previous.note="Säilytä tämä vanha vastaus.";
+  store.setItem(key(2,"01"),JSON.stringify(previous));
+  const goodDraft=makeDraft();goodDraft.note="Tämä tulisi vasta hyväksytyn tuonnin mukana.";
+  const parsed=parseLosFutureBackup(JSON.stringify({
+    format:LOS_FUTURE_BACKUP_FORMAT,bookId:2,exportedAt:fixedDate.toISOString(),
+    chapters:{"01":goodDraft},
+  }));
+  const forged={...parsed,chapters:{"01":{...goodDraft,masteryScore:100}}};
+  assert.throws(()=>applyLosFutureBackup(
+    forged as unknown as typeof parsed,2,owner,store,"replace"),/virheellinen/);
+  assert.equal(JSON.parse(store.getItem(key(2,"01"))!).note,previous.note);
+  const result=applyLosFutureBackup(parsed,2,owner,store,"replace");
+  assert.equal(result.imported,1);
+  assert.equal(JSON.parse(store.getItem(key(2,"01"))!).note,goodDraft.note);
+});

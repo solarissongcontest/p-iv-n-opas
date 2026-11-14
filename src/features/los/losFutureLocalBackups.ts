@@ -23,6 +23,16 @@ export type LosFutureBookBackup={
 };
 export type LosFutureBackupStorage=Pick<Storage,"getItem"|"setItem"|"removeItem">;
 const chapters=Array.from({length:10},(_,n)=>String(n+1).padStart(2,"0"));
+/** Explicit wire-format fields. Unknown grade/owner/mastery metadata must not
+ * silently survive an import or be republished as if it were verified data. */
+const BACKUP_FIELDS=new Set<string>(["format","bookId","exportedAt","chapters"]);
+const DRAFT_FIELDS=new Set<string>([
+  "version","note","applicationDraft","bookmarked","practiceAnswers",
+  "practiceChecked","testAnswers","testSubmittedAt","selfAssessment",
+  "readerMarks","lessonProgress","teacherSessions","recallCards","updatedAt",
+]);
+const onlyFields=(value:Record<string,unknown>,allowed:ReadonlySet<string>)=>
+  Object.keys(value).every(key=>allowed.has(key));
 const isObject=(v:unknown):v is Record<string,unknown>=>v!==null&&typeof v==="object"&&!Array.isArray(v);
 const textUnder=(v:unknown,max:number)=>typeof v==="string"&&v.length<=max;
 const strMap=(v:unknown,maxKeys:number,maxLength:number)=>{
@@ -55,7 +65,7 @@ function allowedKeys(bookId:number,chapterId:string){
   return {answers,marks,teacherIds:new Set(scripts.map(s=>s.id))};
 }
 function validDraft(draft:unknown,bookId:number,chapterId:string):draft is LosChapterDraft {
-  if(!isObject(draft)||draft["version"]!==1||!textUnder(draft["note"],8000)
+  if(!isObject(draft)||!onlyFields(draft,DRAFT_FIELDS)||draft["version"]!==1||!textUnder(draft["note"],8000)
     ||!textUnder(draft["applicationDraft"],5000)||typeof draft["bookmarked"]!=="boolean"
     ||!textUnder(draft["selfAssessment"],5000)||!textUnder(draft["updatedAt"],40)
     ||(draft["updatedAt"]!==""&&!validDate(draft["updatedAt"]))
@@ -147,7 +157,8 @@ export function parseLosFutureBackup(raw:string):LosFutureBookBackup{
   if(new TextEncoder().encode(raw).length>LOS_FUTURE_BACKUP_MAX_BYTES)throw Error("Varmuuskopio on liian suuri (enintään 5 Mt).");
   let input:unknown;
   try{input=JSON.parse(raw);}catch{throw Error("Tiedosto ei ole kelvollista JSON-muotoa.");}
-  if(!isObject(input)||input["format"]!==LOS_FUTURE_BACKUP_FORMAT||!validBook(input["bookId"])
+  if(!isObject(input)||!onlyFields(input,BACKUP_FIELDS)||
+    input["format"]!==LOS_FUTURE_BACKUP_FORMAT||!validBook(input["bookId"])
     ||!validDate(input["exportedAt"])||!isObject(input["chapters"])
     ||Object.keys(input["chapters"]).length>10)throw Error("Tiedosto ei ole kelvollinen LOS! 2–8 -kirjan varmuuskopio.");
   const entries=Object.entries(input["chapters"]);
@@ -173,15 +184,18 @@ export function applyLosFutureBackup(
 ) {
   checkedBook(bookId,ownerId);
   if(incoming.bookId!==bookId)throw Error("Toisen kirjan varmuuskopiota ei voi tuoda tähän kirjaan.");
+  // A caller can mutate an object after the file picker has parsed it. Validate
+  // and detach the complete payload again before touching even one local key.
+  const verified=parseLosFutureBackup(JSON.stringify(incoming));
   const current=createLosFutureBackup(bookId,ownerId,storage);
-  const plan=planLosFutureBackupImport(incoming,current);
+  const plan=planLosFutureBackupImport(verified,current);
   const selected=mode==="replace"?plan.incoming:plan.missing;
   const previous=selected.map(id=>({id,key:losFuturePracticeDraftKey(bookId,id,ownerId),
     raw:storage.getItem(losFuturePracticeDraftKey(bookId,id,ownerId))}));
   let imported=0;
   try {
     for(const {id,key} of previous){
-      storage.setItem(key,JSON.stringify(incoming.chapters[id]));
+      storage.setItem(key,JSON.stringify(verified.chapters[id]));
       imported++;
     }
   }catch{
@@ -195,5 +209,5 @@ export function applyLosFutureBackup(
       :"Tallennus epäonnistui. Aiemmat paikalliset tiedot palautettiin.");
   }
   return {imported,skipped:plan.incoming.length-imported,
-    changes:selected.map(id=>({key:losFuturePracticeDraftKey(bookId,id,ownerId),draft:incoming.chapters[id]}))};
+    changes:selected.map(id=>({key:losFuturePracticeDraftKey(bookId,id,ownerId),draft:verified.chapters[id]}))};
 }

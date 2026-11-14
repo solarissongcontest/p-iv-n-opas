@@ -69,6 +69,12 @@ Tämä tiedosto on ainoa LOS! 1–8:n *toteutuksen* jatkotilaraportti. Visuaalin
 - Kysymysten omat tunnisteet, arvioinnin rajaus ja vastausten tallennusavaimet pysyivät samoina; vanhoja oppilaan vastauksia ei poisteta eikä arvostella uudelleen. T04 käsittelee yhä erillistä tukidialogia, eikä sitä pidä sekoittaa Text A:n T02:een. Uusi 70 kysymys–mallivastausparin regressiotesti suojaa vanhojen lähdemallien tahattomalta palautumiselta. **Riippumaton kieli-, taso- ja pedagoginen tarkistus on edelleen tehtävä.**
 - **Edellisen HEADin `901a5bfc56fc8ca1c45939b7c4d26c34f1935e10` vahvistus:** [Quality Gate 43610107342](https://github.com/solarissongcontest/p-iv-n-opas/actions/runs/43610107342) **791/791** sekä lint, TypeScript, build ja Vercel-pariteetti hyväksytty; [Chromium ja WebKit 43610107502](https://github.com/solarissongcontest/p-iv-n-opas/actions/runs/43610107502) **204/204** hyväksytty. Uuden sisältökorjauscommitin omat ajot vaativat erillisen vahvistuksen.
 
+## 14.11.2026 · Varmuuskopion tiukennettu validointi
+
+- LOS! 2–8:n kirjatiedoston ja kappaleluonnoksen **sallitut JSON-kentät** on nyt rajattu eksplisiittisesti. Ylimääräinen `ownerId`, `grade`, `masteryScore` tai `certificate` ei läpäise tuontia eikä siirry vahingossa takaisin varmuuskopioon. Kertauskorttien, Reader-merkintöjen, paikallisten harjoituskokeiden ja Teacher-istuntojen jo olemassa olevat hyväksytyt kentät pysyvät sallittuina.
+- `applyLosFutureBackup` validoi ja irrottaa vastaanotetun objektin uudelleen ennen **yhtäkään** paikallisen tallennuksen kirjoitusta, myös jos kutsuja on ohittanut tiedoston alkuperäisen tarkistusvaiheen. Testit kattavat taotut arvosanakentät ja jo olemassa olevan vastauksen säilymisen epäonnistuneessa tuonnissa. Vanhat v1-luonnokset ilman valinnaisia lisäkenttiä ovat edelleen yhteensopivia.
+- Tämä on **vain JSON-tuonnin tietorakennesuoja**; se ei ole salaus, käyttäjien vahva tunnistautuminen, pilvisynkronointi tai virallisen kokeen turva. Uuden commitin Quality Gate ja selain-QA on vahvistettava erikseen.
+
 ## Todellinen QA / versiot
 
 - **Edellinen varmistettu koodi:** `d54769c9229c2b908bf13f7f191fa0fe4917dfb0`: Quality Gate 729/729 yksikkötestiä + lint, TS ja build hyväksytty ([ajo 43533825654](https://github.com/solarissongcontest/p-iv-n-opas/actions/runs/43533825654)). Browser QA ([ajo 43533825781](https://github.com/solarissongcontest/p-iv-n-opas/actions/runs/43533825781)) **150/156**, kuusi epäonnistui.
