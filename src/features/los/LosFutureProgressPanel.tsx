@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useReducer, useState } from "react";
 import { ArrowRight, BookOpenCheck, CircleAlert, RotateCcw } from "lucide-react";
 import { getDeviceOwnerId } from "@/lib/deviceSession";
 import type { LosBookDefinition } from "./catalog";
@@ -10,16 +10,16 @@ export function LosFutureProgressPanel({book,onResume}:{
   onResume:(number:number,stageIndex:number)=>void;
 }) {
   const ownerId=getDeviceOwnerId();
-  const [revision,setRevision]=useState(0);
+  const [,refresh]=useReducer((revision:number)=>revision+1,0);
   useEffect(()=>{
     if(!ownerId)return;
     const prefix=`los.local.v1.${ownerId}.${book.id}.`;
     const onLocal=(event:Event)=>{
       const key=(event as CustomEvent<{key?:string}>).detail?.key;
-      if(key?.startsWith(prefix))setRevision(n=>n+1);
+      if(key?.startsWith(prefix))refresh();
     };
     const onStorage=(event:StorageEvent)=>{
-      if(event.key===null||event.key.startsWith(prefix))setRevision(n=>n+1);
+      if(event.key===null||event.key.startsWith(prefix))refresh();
     };
     window.addEventListener("los:draft-change",onLocal);
     window.addEventListener("storage",onStorage);
@@ -28,10 +28,10 @@ export function LosFutureProgressPanel({book,onResume}:{
       window.removeEventListener("storage",onStorage);
     };
   },[ownerId,book.id]);
-  const progress=useMemo(()=>calculateLosFutureBookPractice(book,ownerId,key=>{
+  const progress=calculateLosFutureBookPractice(book,ownerId,key=>{
     if(typeof localStorage==="undefined")return null;
     return localStorage.getItem(key);
-  }),[book,ownerId,revision]);
+  });
   const percent=Math.round(progress.attemptedStages/progress.totalStages*100);
   const [showChapters,setShowChapters]=useState(false);
   const resume=progress.resume;
