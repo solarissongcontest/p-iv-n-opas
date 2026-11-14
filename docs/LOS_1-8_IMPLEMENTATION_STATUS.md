@@ -1,9 +1,19 @@
 # LOS! 1–8 — kanoninen toteutuksen tilanne
 
-**Päivitetty:** 14.11.2026. **Repository:** `solarissongcontest/p-iv-n-opas`.
+**Päivitetty:** 15.11.2026. **Repository:** `solarissongcontest/p-iv-n-opas`.
 **Kanoninen kehityshaara:** `feat/los1-8-safe-integration-20261114`, **PR:** [#264](https://github.com/solarissongcontest/p-iv-n-opas/pull/264), **Draft**.
 **Päätös:** EI tuotantoyhdistämistä, tietokantakirjoitusta tai julkaisuvalmiusväitettä.
 Tämä tiedosto on ainoa LOS! 1–8:n *toteutuksen* jatkotilaraportti. Visuaalinen V3.3/V3.4, kirjakohtaiset käsikirjoitukset ja olemassa olevat lähde-/lisenssidokumentit pysyvät omissa auktoritatiivisissa tiedostoissaan.
+
+## 15.11.2026 · LOS! 1:n arviointien pedagoginen johdonmukaisuus
+
+**Hyväksytty vertailuversio:** PR #264:n commit `51fa062cd8b58411a8a1b22596ea9aaeecee8d91`. Sekä Quality Gate (https://github.com/solarissongcontest/p-iv-n-opas/actions/runs/43634235258) että mobiili-WebKitin ja työpöytä-Chromiumin Browser QA (https://github.com/solarissongcontest/p-iv-n-opas/actions/runs/43634235380) päättyivät onnistuneesti **ennen** alla olevia uusia muutoksia. Uudemman commitin testaus on tarkistettava erikseen.
+
+- **EX-FINAL-Q41:** aiempi `Wir ___ aus Berlin.` vaati itsenäistä `wir`-taivuttamista, vaikka `L054`-opetus tekee `wir kommen`-muodosta vain tunnistettavan. Nyt kysytään valmiin `Wir kommen aus Berlin.` -ilmauksen merkitystä saksankielisistä lausevaihtoehdoista. `sourceId`-pohjainen Text B ja opetuspolku eivät muutu; `EX-FINAL-Q41` ja sen oikea vastaus-ID `b` säilyvät. `LosGrammarChapters.tsx` kertoo suoraan, että C10:n `M-COM-02`-lause on tunnistamista, ei uutta itsenäistä verbintaivutusta.
+- **C09-SOURCE-Q01:** aiempi oikein merkityksi asetettu kellonaika 14.45 ei seurannut yksin ilmauksesta `Viertel vor drei`. Lähteen käsittelytehtävä kysyy nyt sen suomenkielistä merkitystä *varttia vaille kolme* ja selittää erikseen 02.45:n / 14.45:n mahdollisuuden. `teacher/lessonC09.ts` ohjaa samaan perusteluun. Harjoituksen erikseen määritelty iltapäivätilanne säilyy iltapäiväoletuksena, ei alkuperäisen kieli-ilmauksen yksiselitteisenä sisältönä. Sama `C09-SOURCE-Q01` ja oikea vastaus-ID `a` säilyvät.
+- **C08-SCHOOL-Q04:** kysymys puhuu nyt opettajan *kehumisesta*, ei *kiittämisestä*, sillä `Sehr gut, Florian!` on kehu. Oikea vastaus-ID `a`, `M-WB-08`-lähteen kaikki 26 alkuperäistä repliikkiä sekä muut kysymykset säilyvät.
+- **Regressiot:** `tests/los-final-exam-l059-l060.test.ts` suojaa C10:n tunnistamistavoitteen ja historiallisen `Q41=b`-vastauksen 50/50-pisteyksen; `tests/los1-c08-reading-scaffold.test.ts` suojaa C08:n kehukysymyksen ja C09:n kahden vuorokausivaihtoehdon erottamisen.
+- **Avoin julkaisuvaihe:** nämä ovat johdonmukaisuuskorjauksia eivätkä tarkoita, että 75 koetehtävän riippumaton kieliarviointi, lisenssihyväksynnät, ihmismedian auditointi tai todellinen kaksilaitetestaus olisi valmis. Ei yhdistämistä `main`-haaraan ilman erillistä hyväksyntää.
 
 ## 14.11.2026 · LOS! 1:n toimituksellisen auditoinnin toteutetut korjaukset
 
