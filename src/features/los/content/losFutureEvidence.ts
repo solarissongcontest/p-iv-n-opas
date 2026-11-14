@@ -40,11 +40,13 @@ export function losFutureEvidenceTask(task:LosFutureExerciseDraft):LosFutureEvid
 /** Keep legacy free text and source revisions intact. */
 export function readLosFutureEvidenceAnswer(value:string,task:LosFutureEvidenceTask):string[]|null{
   if(!value)return ["",""];
+  if(value.length>7000)return null;
   try{
     const raw:unknown=JSON.parse(value);
     if(!raw||typeof raw!=="object"||Array.isArray(raw))return null;
     const item=raw as {version?:unknown;id?:unknown;sourceText?:unknown;answers?:unknown};
-    if(item.version!==1||item.id!==task.id||item.sourceText!==task.sourceText||
+    if(Object.keys(item).sort().join(",")!=="answers,id,sourceText,version"||
+      item.version!==1||item.id!==task.id||item.sourceText!==task.sourceText||
       !Array.isArray(item.answers)||item.answers.length!==2||
       !item.answers.every((answer:unknown)=>typeof answer==="string"&&answer.length<=700))return null;
     return [...item.answers] as string[];
@@ -54,4 +56,15 @@ export function writeLosFutureEvidenceAnswer(task:LosFutureEvidenceTask,answers:
   if(answers.length!==2||answers.some(v=>typeof v!=="string"||v.length>700))throw Error("Invalid LOS T03/R01 answer");
   if(answers.every(v=>!v.trim()))return "";
   return JSON.stringify({version:1,id:task.id,sourceText:task.sourceText,answers:[...answers]});
+}
+
+
+/** Exact excerpt check for the 70 R01 Text A activities.
+ * A located excerpt is ONLY a mechanical source match, never a grade or
+ * confirmation that the sentence correctly establishes the initial situation.
+ * Keep learner prose intact even when the excerpt is not found. */
+export function losFutureEvidenceExcerptInSource(task:LosFutureEvidenceTask,excerpt:string):boolean{
+  if(task.kind!=="text-evidence"||!excerpt.trim())return false;
+  const normalize=(value:string)=>value.normalize("NFC").replace(/\\s+/gu," ").trim().toLocaleLowerCase("de");
+  return normalize(task.sourceText).includes(normalize(excerpt));
 }
