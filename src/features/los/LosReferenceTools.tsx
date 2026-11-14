@@ -26,7 +26,11 @@ const DICTIONARY = LOS_BOOKS.flatMap(book => book.chapters.flatMap(chapter =>
 function compare(a: string, b: string) { return a.localeCompare(b, "de"); }
 const LOCAL_DICTIONARY_PAGE_SIZE = 60;
 
-export function LosDictionary({ book, move, openBook }: { book: LosBookDefinition; move: LosNavigate; openBook: (id: number) => void }) {
+export function LosDictionary({ book, move, openChapter }: {
+  book: LosBookDefinition;
+  move: LosNavigate;
+  openChapter: (bookId:number,chapterId:string)=>void;
+}) {
   const [search, setSearch] = useState("");
   const [hidden, setHidden] = useState(false);
   const [scope, setScope] = useState<"book" | "series">("book");
@@ -72,13 +76,12 @@ export function LosDictionary({ book, move, openBook }: { book: LosBookDefinitio
             onClick={()=>setSelection({kind:"local",entry:item})}>{item.word}</button></strong>
           <span role="cell">{hidden ? <span className="los-muted-hidden">Piilotettu</span> : item.meaning}</span>
           <span role="cell" className="los-index-source-cell">
-            <button type="button" title={item.book===book.id
-              ? `Avaa kappaleen ${Number(item.chapter)} sanasto`
-              : `Avaa LOS! ${item.book} ja siirry sitten kappaleeseen ${Number(item.chapter)}`}
-              aria-label={item.book===book.id
-                ? `Avaa kappaleen ${Number(item.chapter)} sanasto`
-                : `Avaa LOS! ${item.book}. Siirry sitten kappaleeseen ${Number(item.chapter)}.`}
-              onClick={()=>item.book===book.id?move(item.chapter,"vocabulary"):openBook(item.book)}>
+            <button type="button"
+              title={`Avaa LOS! ${item.book}, kappaleen ${Number(item.chapter)} sanasto`}
+              aria-label={`Avaa LOS! ${item.book}, kappaleen ${Number(item.chapter)} sanasto`}
+              onClick={()=>item.book===book.id
+                ? move(item.chapter,"vocabulary")
+                : openChapter(item.book,item.chapter)}>
               <span>{item.code} · {Number(item.chapter)}</span><ChevronRight size={15} aria-hidden="true"/>
             </button>
           </span>
