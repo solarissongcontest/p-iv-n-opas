@@ -95,7 +95,7 @@ function ExamSession({exam}:{exam:LosFutureExam}){
       <h4>Kirjoitustehtävä · 10 p</h4>
       <label className="los-future-exam-writing">
         <strong>{exam.writing.prompt}</strong>
-        <textarea rows={9} lang="de" spellCheck={false} maxLength={3000}
+        <textarea id={exam.writing.id} rows={9} lang="de" spellCheck={false} maxLength={3000}
           disabled={submitted} value={draft.testAnswers[exam.writing.id]??""}
           onChange={e=>write(exam.writing.id,e.target.value)}
           placeholder="Kirjoita oma saksankielinen tekstisi tähän"/>
