@@ -681,7 +681,8 @@ test("source T10 correction and T13 Text B keep separate written fields and hide
   await rows.nth(1).locator("textarea").fill("Wir saa monikon -en-päätteen.");
   await expect(show).toBeEnabled();
   await page.reload({waitUntil:"domcontentloaded"});
-  await choose.selectOption({label:"T10 · Korjaa oppijan kielivirhe"});
+  await choose.selectOption({index:(await choose.locator("option").allTextContents())
+    .findIndex(label=>label.trim().startsWith("T10 ·"))});
   await expect(rows.nth(1).locator("textarea")).toHaveValue("Wir saa monikon -en-päätteen.");
   await show.click();
   await expect(page.locator(".los-future-exercise-solution")).toBeVisible();
@@ -700,5 +701,41 @@ test("source T10 correction and T13 Text B keep separate written fields and hide
     .toEqual(["Wir lernen Deutsch.","Wir saa monikon -en-päätteen."]);
   expect(JSON.parse(stored.practiceAnswers["LOS2-C01-T13"]).answers)
     .toEqual(["Jonas kirjoittaa Miralle.","He opiskelevat yhdessä tiistaina."]);
+  await expectNoHorizontalOverflow(page);
+});
+
+test("T03 dialog and R01 textual evidence bind to the right chapter without revealing model early",async({page})=>{
+  await enterFutureBook(page);
+  await page.goto("/los#/2/01/understand",{waitUntil:"domcontentloaded"});
+  const picker=page.locator("#los-future-exercise-choice");
+  await picker.selectOption({label:"T03 · Puhujat ja vuorot"});
+  const rows=page.locator(".los-future-evidence-row");
+  const show=page.getByRole("button",{name:"Näytä vastausluonnos"});
+  await expect(rows).toHaveCount(2);
+  await expect(page.locator(".los-future-evidence-source[lang='de']")).toContainText("Mira: Hallo");
+  await expect(show).toBeDisabled();
+  await rows.nth(0).locator("textarea").fill("Neljä puheenvuoroa.");
+  await expect(show).toBeDisabled();
+  await rows.nth(1).locator("textarea").fill("Mira tervehtii ja esittelee itsensä.");
+  await expect(show).toBeEnabled();
+  await picker.selectOption({label:"R01 · text-evidence"});
+  await expect(rows).toHaveCount(2);
+  await expect(page.locator(".los-future-evidence-source")).toContainText("Mira");
+  await expect(show).toBeDisabled();
+  await rows.nth(0).locator("textarea").fill("Mira und Jonas lernen zusammen Deutsch.");
+  await rows.nth(1).locator("textarea").fill("Lauseessa kuvataan heidän opiskeluaan.");
+  await expect(show).toBeEnabled();
+  await page.reload({waitUntil:"domcontentloaded"});
+  const options=await picker.locator("option").allTextContents();
+  await picker.selectOption({index:options.findIndex(label=>label.trim().startsWith("R01 ·"))});
+  await expect(rows.nth(0).locator("textarea"))
+    .toHaveValue("Mira und Jonas lernen zusammen Deutsch.");
+  const stored=await page.evaluate(()=>{
+    const owner=localStorage.getItem("opk.owner-id");
+    return JSON.parse(localStorage.getItem(`los.local.v1.${owner}.2.01`)??"{}");
+  });
+  expect(JSON.parse(stored.practiceAnswers["LOS2-C01-T03"]).answers).toHaveLength(2);
+  expect(JSON.parse(stored.practiceAnswers["LOS2-C01-R01"]).answers[1])
+    .toBe("Lauseessa kuvataan heidän opiskeluaan.");
   await expectNoHorizontalOverflow(page);
 });

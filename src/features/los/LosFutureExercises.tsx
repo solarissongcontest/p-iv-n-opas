@@ -8,6 +8,7 @@ import { losFutureGapParts } from "./content/losFutureGap.ts";
 import { losFutureRecallPairs, readLosFutureRecallAnswer, writeLosFutureRecallAnswer } from "./content/losFutureRecall.ts";
 import { losFutureExitTicket, readLosFutureExitAnswer, writeLosFutureExitAnswer } from "./content/losFutureExitTicket.ts";
 import {losFutureTwoPartTask,readLosFutureTwoPartAnswer,writeLosFutureTwoPartAnswer} from "./content/losFutureTwoPart.ts";
+import {losFutureEvidenceTask,readLosFutureEvidenceAnswer,writeLosFutureEvidenceAnswer} from "./content/losFutureEvidence.ts";
 import { losFutureShortAnswer } from "./content/losFutureShortAnswer.ts";
 import { losFutureOrderingTiles, readLosFutureOrderingAnswer, writeLosFutureOrderingAnswer } from "./content/losFutureOrdering.ts";
 import "./los-future-exercises.css";
@@ -39,6 +40,9 @@ export function LosFutureExercises({bookId,chapterId,mode,taskIds}:{
   const [showAll,setShowAll]=useState(false);
   const safeIndex=Math.min(selected,Math.max(0,tasks.length-1));
   const task=tasks[safeIndex];
+  const evidenceTask=task ? losFutureEvidenceTask(task) : null;
+  const evidenceAnswers=evidenceTask && task
+    ? readLosFutureEvidenceAnswer(draft.practiceAnswers[task.id]??"",evidenceTask) : null;
   const twoPart=task ? losFutureTwoPartTask(task) : null;
   const twoAnswers=twoPart && task
     ? readLosFutureTwoPartAnswer(draft.practiceAnswers[task.id]??"",twoPart) : null;
@@ -131,6 +135,24 @@ export function LosFutureExercises({bookId,chapterId,mode,taskIds}:{
                 next[index]=event.target.value;
                 changeAnswer(task.id,writeLosFutureExitAnswer(exitTicket,next));
               }}/>
+          </label>)}
+        </fieldset> : evidenceTask && evidenceAnswers ? <fieldset className="los-future-evidence">
+          <legend>{evidenceTask.kind==="dialogue"?"Tulkitse puheenvuoroja":"Etsi tekstistä näyttöä"}</legend>
+          <p>Vastaa ensin kumpaankin osaan omin sanoin. Lähdeteksti on tässä, jotta
+            perustelusi voi tarkistaa oikeasta tekstikohdasta.
+            Automaattista pisteytystä ei tehdä.</p>
+          <blockquote lang="de" className="los-future-evidence-source">{evidenceTask.sourceText}</blockquote>
+          {evidenceTask.questions.map((question,index)=><label key={index} className="los-future-evidence-row">
+            <span>{index+1}. {question}</span>
+            <textarea rows={index===1?3:2} spellCheck={false} autoComplete="off"
+              lang={evidenceTask.languages[index]} maxLength={700}
+              aria-label={`Lähdetehtävän osan ${index+1} vastaus: ${question}`}
+              value={evidenceAnswers[index]??""}
+              onChange={event=>{
+                const next=[...evidenceAnswers];
+                next[index]=event.target.value;
+                changeAnswer(task.id,writeLosFutureEvidenceAnswer(evidenceTask,next));
+              }} />
           </label>)}
         </fieldset> : twoPart && twoAnswers ? <fieldset className="los-future-two-part">
           <legend>{twoPart.kind==="correction"?"Korjaa lause ja perustele":"Tutki Text B:tä: kaksi erillistä havaintoa"}</legend>
@@ -251,7 +273,8 @@ export function LosFutureExercises({bookId,chapterId,mode,taskIds}:{
               ? exitAnswers.some(answer=>!answer.trim())
               : !draft.practiceAnswers[task.id]?.trim()))
               ||(Boolean(shortAnswer)&&!draft.practiceAnswers[task.id]?.trim())
-              ||(Boolean(twoPart)&&Boolean(twoAnswers)&&twoAnswers!.some(answer=>!answer.trim()))}
+              ||(Boolean(twoPart)&&Boolean(twoAnswers)&&twoAnswers!.some(answer=>!answer.trim()))
+              ||(Boolean(evidenceTask)&&Boolean(evidenceAnswers)&&evidenceAnswers!.some(answer=>!answer.trim()))}
             onClick={()=>setShowAnswer(v=>!v)}>
             <CircleHelp size={16} aria-hidden="true"/>
             {showAnswer?"Piilota vastausluonnos":"Näytä vastausluonnos"}
@@ -262,6 +285,8 @@ export function LosFutureExercises({bookId,chapterId,mode,taskIds}:{
             <span className="los-future-exercise-hint">Vastaa ensin molempiin loppukysymyksiin.</span>}
           {twoPart && twoAnswers?.some(answer=>!answer.trim())&&
             <span className="los-future-exercise-hint">Vastaa ensin molempiin tehtävän osiin.</span>}
+          {evidenceTask && evidenceAnswers?.some(answer=>!answer.trim())&&
+            <span className="los-future-exercise-hint">Kirjoita sekä tekstin havainto että oma perustelusi.</span>}
         </div>
         {showAnswer&&<div id="los-future-exercise-key" className="los-future-exercise-solution">
           <h3>Alkuperäisen käsikirjoituksen ratkaisu tai arviointiohje</h3>
