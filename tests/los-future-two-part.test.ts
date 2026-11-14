@@ -16,6 +16,7 @@ test("all 140 source T10/T13 manuscript prompts have an exact two-operation lear
       const two=losFutureTwoPartTask(item);
       assert.ok(two,item.id);
       assert.equal(two.kind,suffix==="T10"?"correction":"text-b");
+      assert.equal(typeof two.styleOnly,"boolean");
       assert.ok(two.sourceText.length>10);
       assert.ok(two.sourceText.length<=400);
       assert.ok(two.readingText.length>0);
@@ -99,4 +100,42 @@ test("strict T10/T13 draft decoding rejects forged fields, malformed types and o
     assert.equal(readLosFutureTwoPartAnswer(" ".repeat(5001),parsed),null);
     assert.equal(readLosFutureTwoPartAnswer('{"__proto__":true}',parsed),null);
   }
+});
+
+
+test("four stylistic T10 exercises do not falsely mark allowable German as categorical errors",()=>{
+  const styleCases=new Map([
+    ["LOS7-C03-T10","Ich muss lernen für die Prüfung."],
+    ["LOS7-C06-T10","Sie müssen arbeiten am Wochenende."],
+    ["LOS7-C09-T10","Gestern habe ich gearbeitet im Café."],
+    ["LOS8-C02-T10","Ich lese Nachrichten oft jeden Tag."],
+  ]);
+  let corrected=0,remaining=0;
+  for(const book of LOS_BOOKS.filter(b=>b.id>=2))for(const chapter of book.chapters){
+    const task=losFutureExercisesFor(book.id,chapter.id).find(t=>t.id.endsWith("-T10"));
+    assert.ok(task);
+    const two=losFutureTwoPartTask(task);assert.ok(two);
+    assert.equal(two.kind,"correction");
+    assert.equal(two.readingText,two.sourceText);
+    if(styleCases.has(task.id)){
+      assert.equal(two.styleOnly,true,task.id);
+      assert.equal(two.sourceText,styleCases.get(task.id));
+      assert.equal(task.title,"Hio ilmaus yleiskieliseksi");
+      assert.ok(!task.prompt.includes("Korjaa virheellinen lause"));
+      assert.ok(!task.answerKey.includes("Korjauksen perustelu:"));
+      assert.match(task.answerKey,/Yleiskielinen malli:|Täsmällisempi ja luontevampi malli:/u);
+      corrected++;
+    }else{
+      assert.equal(two.styleOnly,false,task.id);
+      assert.equal(task.title,"Korjaa oppijan kielivirhe");
+      remaining++;
+    }
+    const oldSave=JSON.stringify({version:1,kind:"correction",sourceText:two.sourceText,
+      answers:["Vanha korjaus saksaksi","Vanha perustelu suomeksi"]});
+    assert.deepEqual(readLosFutureTwoPartAnswer(oldSave,two),
+      ["Vanha korjaus saksaksi","Vanha perustelu suomeksi"],
+      task.id+" must retain the original source identity");
+  }
+  assert.equal(corrected,4);
+  assert.equal(remaining,66);
 });
