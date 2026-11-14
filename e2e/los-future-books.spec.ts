@@ -460,3 +460,32 @@ test("legacy T20 free-text work remains readable, reviewable and untouched by th
   await expect(page.locator("#los-future-exercise-input")).toHaveValue(original);
   await expectNoHorizontalOverflow(page);
 });
+
+test("LOS! 2 reading T02 accepts an independent Finnish evidence answer, saves and never auto-scores",async({page})=>{
+  await enterFutureBook(page);
+  await page.goto("/los#/2/01/understand",{waitUntil:"domcontentloaded"});
+  const picker=page.locator("#los-future-exercise-choice");
+  const labels=await picker.locator("option").allTextContents();
+  const index=labels.findIndex(label=>label.trim().startsWith("T02 ·"));
+  expect(index).toBeGreaterThanOrEqual(0);
+  await picker.selectOption({index});
+  const answer=page.locator("#los-future-short-input");
+  await expect(answer).toBeVisible();
+  await expect(answer).toHaveAttribute("lang","fi");
+  const reveal=page.getByRole("button",{name:"Näytä vastausluonnos"});
+  await expect(reveal).toBeDisabled();
+  await answer.fill("Henkilöt keskustelevat siitä, missä he asuvat.");
+  await expect(reveal).toBeEnabled();
+  await page.reload({waitUntil:"domcontentloaded"});
+  await picker.selectOption({index});
+  await expect(answer).toHaveValue("Henkilöt keskustelevat siitä, missä he asuvat.");
+  await expect(page.locator(".los-future-exercise-summary")).toContainText("0 verrattu vastausluonnokseen");
+  await expect(page.locator(".los-future-exercise-solution")).toHaveCount(0);
+  await page.goto("/los#/4/01/understand",{waitUntil:"domcontentloaded"});
+  const options4=await page.locator("#los-future-exercise-choice option").allTextContents();
+  const index4=options4.findIndex(label=>label.trim().startsWith("T02 ·"));
+  expect(index4).toBeGreaterThanOrEqual(0);
+  await page.locator("#los-future-exercise-choice").selectOption({index:index4});
+  await expect(page.locator("#los-future-short-input")).toHaveValue("");
+  await expectNoHorizontalOverflow(page);
+});
