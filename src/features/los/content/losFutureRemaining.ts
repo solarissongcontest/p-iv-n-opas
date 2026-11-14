@@ -24,15 +24,19 @@ export function losFutureRemainingTask(task:LosFutureExerciseDraft):LosFutureRem
         fi("Ensimmäinen ennustus: mitä tekstissä voisi tapahtua?"),
         fi("Toinen erilainen ennustus: mitä muuta tekstissä voisi tapahtua?"),
         fi("Lue Text A ja arvioi suomeksi, kumpi ennustus vastasi tekstin sisältöä",500)]};
-  case "T15":
+  case "T15": {
+    const note=". Ääntämisen mallia ei ole vielä sisällytetty.";
     if(task.title!=="Harjoittele puheen rytmiä"||
       !task.prompt.startsWith("Lue ääneen kaksi kertaa: ")||
-      !task.answerKey.startsWith("Tekstit: "))return null;
+      !task.answerKey.startsWith("Tekstit: ")||!task.answerKey.endsWith(note))return null;
+    const texts=task.answerKey.slice("Tekstit: ".length,-note.length).split(" | ");
+    if(texts.length!==2||texts.some(text=>!text.trim()))return null;
     return {...prefix,kind:"pronunciation",sourceTitle:"Kaksi alkuperäistä harjoituslausetta",
-      sourceText:task.answerKey.slice("Tekstit: ".length),fields:[
+      sourceText:texts.join("\n"),fields:[
         de("Kirjoita ensimmäinen lause ja merkitse tarkistamasi painot",300),
         de("Kirjoita toinen lause ja merkitse tarkistamasi painot",300),
         fi("Kerro, luitko lauseet kaksi kertaa ja mistä tarkistit ääntämisen. Jos lähde puuttuu, kirjoita se.",450)]};
+  }
   case "T16": {
     const begin="Keksi kysymys, johon vastaus voisi olla ";
     const pivot=". Varmista, että kysymys sopii tilaisuuteen ";
