@@ -137,6 +137,17 @@ function ReviewLesson({script}: {script:LosFutureLessonContent}){
     </div>
     <h3>Opettajan aloitus</h3><p>{script.intro}</p>
     <h3>Opetus ja palaute</h3><p>{script.reviewTeaching}</p>
+    {script.number===60&&<>
+      <h3>Tämän kirjan lopputaitojen kertaus</h3>
+      <p><strong>Tavoite:</strong> {script.objective}</p>
+      <p><strong>Tekstin ja mallin lähde:</strong> {script.resource}</p>
+      {script.model&&<blockquote lang="de" className="los-guided-review-model">{script.model}</blockquote>}
+      {script.guidance&&<details className="los-guided-review-grammar">
+        <summary>Avaa kappaleen 10 kieliopin perusteellinen kertaus</summary>
+        <p>{script.guidance}</p>
+      </details>}
+      <p>{script.exitCheck}</p>
+    </>}
     <h3>Ohjattu tehtävä</h3><p>{script.reviewTask}</p>
     <h3>Ajanjako</h3><p>{script.reviewTiming}</p>
     <div className="los-editorial-note"><strong>Kertauksen ja kokeen sääntö:</strong> {script.reviewRule}</div>
