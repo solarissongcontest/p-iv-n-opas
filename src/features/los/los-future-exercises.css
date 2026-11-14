@@ -64,3 +64,12 @@
 .los-future-ordering-answer{font-size:1.05rem;line-height:1.65;overflow-wrap:anywhere}
 .los-future-ordering-actions{display:flex;gap:.6rem;flex-wrap:wrap}
 .los-future-ordering-actions button:disabled{opacity:.4;cursor:not-allowed}
+
+/* T06: six independent recall prompts; no visible answer-key leakage or grading. */
+.los-future-recall{min-width:0;margin:1.1rem 0;padding:1rem;border:1px solid #dad5cd;border-radius:10px}
+.los-future-recall legend{font-weight:750;padding:0 .35rem}
+.los-future-recall>p{font-size:.87rem;line-height:1.6;color:#62594f;margin:.2rem 0 1rem}
+.los-future-recall-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);align-items:center;gap:.8rem;margin:.8rem 0;font-size:.95rem;font-weight:650}
+.los-future-recall-row input{box-sizing:border-box;width:100%;min-width:0;padding:.7rem .8rem;min-height:44px;border:1px solid #aaa49b;border-radius:9px;background:#fff;color:#252525;font:inherit}
+.los-future-recall-row input:focus-visible{outline:3px solid var(--los-book-accent,#8d6a50);outline-offset:2px}
+@media(max-width:560px){.los-future-recall{padding:.8rem}.los-future-recall-row{grid-template-columns:1fr;gap:.3rem}}
