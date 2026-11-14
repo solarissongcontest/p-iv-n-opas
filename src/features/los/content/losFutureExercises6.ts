@@ -28,7 +28,7 @@ export const LOS_FUTURE_EXERCISES_6: Record<string, LosFutureExerciseDraft[]> = 
       "group": "T",
       "title": "Puhujat ja vuorot",
       "prompt": "Lue saksankielinen tukidialogi. Kuinka monta puheenvuoroa siinä on, ja mitä kukin puhuja tekee ensimmäisellä vuorollaan?",
-      "answerKey": "4 puheenvuoroa. Ensimmäinen: Schülerin: Mein Projekt handelt von Musik.. Huomaa, että jos sama puhuja palaa, vastaa myös jatkokysymykseen.",
+      "answerKey": "4 puheenvuoroa. Puhujien ensimmäiset vuorot: Schülerin: Mein Projekt handelt von Musik. | Lehrer: Warum hast du dieses Thema gewählt?. Suomenkielinen tulkinta: Oppilas esittelee musiikkiprojektinsa. Opettaja kysyy aiheen valinnan syytä. Tarkista, että oma vastauksesi kuvaa kummankin puhujan ensimmäistä vuoroa.",
       "feedback": "",
       "assessment": "self-review"
     },
@@ -290,7 +290,7 @@ export const LOS_FUTURE_EXERCISES_6: Record<string, LosFutureExerciseDraft[]> = 
       "group": "T",
       "title": "Puhujat ja vuorot",
       "prompt": "Lue saksankielinen tukidialogi. Kuinka monta puheenvuoroa siinä on, ja mitä kukin puhuja tekee ensimmäisellä vuorollaan?",
-      "answerKey": "4 puheenvuoroa. Ensimmäinen: Mira: Was bedeutet Kultur für dich?. Huomaa, että jos sama puhuja palaa, vastaa myös jatkokysymykseen.",
+      "answerKey": "4 puheenvuoroa. Puhujien ensimmäiset vuorot: Mira: Was bedeutet Kultur für dich? | Tom: Musik, Filme und auch Essen.. Suomenkielinen tulkinta: Mira kysyy, mitä kulttuuri merkitsee Tomille. Tom mainitsee musiikin, elokuvat ja ruoan. Tarkista, että oma vastauksesi kuvaa kummankin puhujan ensimmäistä vuoroa.",
       "feedback": "",
       "assessment": "self-review"
     },
@@ -552,7 +552,7 @@ export const LOS_FUTURE_EXERCISES_6: Record<string, LosFutureExerciseDraft[]> = 
       "group": "T",
       "title": "Puhujat ja vuorot",
       "prompt": "Lue saksankielinen tukidialogi. Kuinka monta puheenvuoroa siinä on, ja mitä kukin puhuja tekee ensimmäisellä vuorollaan?",
-      "answerKey": "4 puheenvuoroa. Ensimmäinen: Lena: Hörst du gern Musik auf Deutsch?. Huomaa, että jos sama puhuja palaa, vastaa myös jatkokysymykseen.",
+      "answerKey": "4 puheenvuoroa. Puhujien ensimmäiset vuorot: Lena: Hörst du gern Musik auf Deutsch? | Jona: Ja, manchmal.. Suomenkielinen tulkinta: Lena kysyy Jonan saksankielisen musiikin kuuntelusta. Jona vastaa kuuntelevansa joskus. Tarkista, että oma vastauksesi kuvaa kummankin puhujan ensimmäistä vuoroa.",
       "feedback": "",
       "assessment": "self-review"
     },
@@ -814,7 +814,7 @@ export const LOS_FUTURE_EXERCISES_6: Record<string, LosFutureExerciseDraft[]> = 
       "group": "T",
       "title": "Puhujat ja vuorot",
       "prompt": "Lue saksankielinen tukidialogi. Kuinka monta puheenvuoroa siinä on, ja mitä kukin puhuja tekee ensimmäisellä vuorollaan?",
-      "answerKey": "4 puheenvuoroa. Ensimmäinen: Nina: Was liest du gerade?. Huomaa, että jos sama puhuja palaa, vastaa myös jatkokysymykseen.",
+      "answerKey": "4 puheenvuoroa. Puhujien ensimmäiset vuorot: Nina: Was liest du gerade? | Max: Eine kurze Geschichte.. Suomenkielinen tulkinta: Nina kysyy Maxin tämänhetkisestä kirjasta. Max kertoo lukevansa lyhyttä tarinaa. Tarkista, että oma vastauksesi kuvaa kummankin puhujan ensimmäistä vuoroa.",
       "feedback": "",
       "assessment": "self-review"
     },
@@ -1076,7 +1076,7 @@ export const LOS_FUTURE_EXERCISES_6: Record<string, LosFutureExerciseDraft[]> = 
       "group": "T",
       "title": "Puhujat ja vuorot",
       "prompt": "Lue saksankielinen tukidialogi. Kuinka monta puheenvuoroa siinä on, ja mitä kukin puhuja tekee ensimmäisellä vuorollaan?",
-      "answerKey": "4 puheenvuoroa. Ensimmäinen: Oli: Wie fandest du den Film?. Huomaa, että jos sama puhuja palaa, vastaa myös jatkokysymykseen.",
+      "answerKey": "4 puheenvuoroa. Puhujien ensimmäiset vuorot: Oli: Wie fandest du den Film? | Sara: Ich fand ihn gut, weil die Geschichte interessant war.. Suomenkielinen tulkinta: Oli kysyy Saran mielipidettä elokuvasta. Sara piti siitä kiinnostavan tarinan vuoksi. Tarkista, että oma vastauksesi kuvaa kummankin puhujan ensimmäistä vuoroa.",
       "feedback": "",
       "assessment": "self-review"
     },
@@ -1338,7 +1338,7 @@ export const LOS_FUTURE_EXERCISES_6: Record<string, LosFutureExerciseDraft[]> = 
       "group": "T",
       "title": "Puhujat ja vuorot",
       "prompt": "Lue saksankielinen tukidialogi. Kuinka monta puheenvuoroa siinä on, ja mitä kukin puhuja tekee ensimmäisellä vuorollaan?",
-      "answerKey": "4 puheenvuoroa. Ensimmäinen: Guide: Was seht ihr auf dem Bild?. Huomaa, että jos sama puhuja palaa, vastaa myös jatkokysymykseen.",
+      "answerKey": "4 puheenvuoroa. Puhujien ensimmäiset vuorot: Guide: Was seht ihr auf dem Bild? | Ella: Viele Menschen und einen großen Platz.. Suomenkielinen tulkinta: Opas kysyy, mitä kuvassa näkyy. Ella näkee paljon ihmisiä ja suuren aukion. Tarkista, että oma vastauksesi kuvaa kummankin puhujan ensimmäistä vuoroa.",
       "feedback": "",
       "assessment": "self-review"
     },
@@ -1600,7 +1600,7 @@ export const LOS_FUTURE_EXERCISES_6: Record<string, LosFutureExerciseDraft[]> = 
       "group": "T",
       "title": "Puhujat ja vuorot",
       "prompt": "Lue saksankielinen tukidialogi. Kuinka monta puheenvuoroa siinä on, ja mitä kukin puhuja tekee ensimmäisellä vuorollaan?",
-      "answerKey": "4 puheenvuoroa. Ensimmäinen: Mara: Was hast du im Museum gesehen?. Huomaa, että jos sama puhuja palaa, vastaa myös jatkokysymykseen.",
+      "answerKey": "4 puheenvuoroa. Puhujien ensimmäiset vuorot: Mara: Was hast du im Museum gesehen? | Ben: Alte Fotos und Briefe.. Suomenkielinen tulkinta: Mara kysyy, mitä Ben näki museossa. Ben kertoo vanhoista kuvista ja kirjeistä. Tarkista, että oma vastauksesi kuvaa kummankin puhujan ensimmäistä vuoroa.",
       "feedback": "",
       "assessment": "self-review"
     },
@@ -1862,7 +1862,7 @@ export const LOS_FUTURE_EXERCISES_6: Record<string, LosFutureExerciseDraft[]> = 
       "group": "T",
       "title": "Puhujat ja vuorot",
       "prompt": "Lue saksankielinen tukidialogi. Kuinka monta puheenvuoroa siinä on, ja mitä kukin puhuja tekee ensimmäisellä vuorollaan?",
-      "answerKey": "4 puheenvuoroa. Ensimmäinen: Tessa: Wie feiert deine Familie?. Huomaa, että jos sama puhuja palaa, vastaa myös jatkokysymykseen.",
+      "answerKey": "4 puheenvuoroa. Puhujien ensimmäiset vuorot: Tessa: Wie feiert deine Familie? | Ali: Wir essen zusammen und hören Musik.. Suomenkielinen tulkinta: Tessa kysyy perheen juhlatavoista. Ali kertoo heidän syövän yhdessä ja kuuntelevan musiikkia. Tarkista, että oma vastauksesi kuvaa kummankin puhujan ensimmäistä vuoroa.",
       "feedback": "",
       "assessment": "self-review"
     },
@@ -2124,7 +2124,7 @@ export const LOS_FUTURE_EXERCISES_6: Record<string, LosFutureExerciseDraft[]> = 
       "group": "T",
       "title": "Puhujat ja vuorot",
       "prompt": "Lue saksankielinen tukidialogi. Kuinka monta puheenvuoroa siinä on, ja mitä kukin puhuja tekee ensimmäisellä vuorollaan?",
-      "answerKey": "4 puheenvuoroa. Ensimmäinen: Jonas: Was ist in deinem Viertel interessant?. Huomaa, että jos sama puhuja palaa, vastaa myös jatkokysymykseen.",
+      "answerKey": "4 puheenvuoroa. Puhujien ensimmäiset vuorot: Jonas: Was ist in deinem Viertel interessant? | Lia: Es gibt kleine Cafés und viele Bilder an den Wänden.. Suomenkielinen tulkinta: Jonas kysyy Lian kaupunginosan kiinnostavista asioista. Lia kertoo pienistä kahviloista ja seinäkuvista. Tarkista, että oma vastauksesi kuvaa kummankin puhujan ensimmäistä vuoroa.",
       "feedback": "",
       "assessment": "self-review"
     },
@@ -2386,7 +2386,7 @@ export const LOS_FUTURE_EXERCISES_6: Record<string, LosFutureExerciseDraft[]> = 
       "group": "T",
       "title": "Puhujat ja vuorot",
       "prompt": "Lue saksankielinen tukidialogi. Kuinka monta puheenvuoroa siinä on, ja mitä kukin puhuja tekee ensimmäisellä vuorollaan?",
-      "answerKey": "4 puheenvuoroa. Ensimmäinen: Nina: Hast du den Artikel über das Festival gelesen?. Huomaa, että jos sama puhuja palaa, vastaa myös jatkokysymykseen.",
+      "answerKey": "4 puheenvuoroa. Puhujien ensimmäiset vuorot: Nina: Hast du den Artikel über das Festival gelesen? | Tom: Ja, er ist interessant.. Suomenkielinen tulkinta: Nina kysyy, onko Tom lukenut festivaalista kertovan artikkelin. Tom vastaa kyllä ja pitää sitä kiinnostavana. Tarkista, että oma vastauksesi kuvaa kummankin puhujan ensimmäistä vuoroa.",
       "feedback": "",
       "assessment": "self-review"
     },
