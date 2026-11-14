@@ -771,3 +771,36 @@ test("T11 grammar explanations and R03 three claims each persist separate source
   expect(JSON.parse(saved["LOS2-C01-R03"]).answers).toHaveLength(6);
   await expectNoHorizontalOverflow(page);
 });
+
+test("T19 and R06 four-turn dialogues save all turns without pretending to assess speech",async({page})=>{
+  await enterFutureBook(page);
+  await page.goto("/los#/2/01/apply",{waitUntil:"domcontentloaded"});
+  const picker=page.locator("#los-future-exercise-choice");
+  await picker.selectOption({label:"T19 · Tilannesimulaatio"});
+  let rows=page.locator(".los-future-four-turn-row");
+  const show=page.getByRole("button",{name:"Näytä vastausluonnos"});
+  await expect(rows).toHaveCount(4);
+  await expect(show).toBeDisabled();
+  for(let n=0;n<4;n++)await rows.nth(n).locator("textarea").fill(
+    ["Hallo!","Guten Tag!","Was machst du?","Ich lerne Deutsch."][n]!);
+  await expect(show).toBeEnabled();
+  await page.goto("/los#/2/01/practice",{waitUntil:"domcontentloaded"});
+  await picker.selectOption({label:"R06 · dialogue-production"});
+  rows=page.locator(".los-future-four-turn-row");
+  await expect(rows).toHaveCount(4);
+  await expect(show).toBeDisabled();
+  for(let n=0;n<4;n++)await rows.nth(n).locator("textarea").fill(
+    ["Hallo Jonas!","Hallo Mira!","Lernst du Deutsch?","Ja, zusammen."][n]!);
+  await expect(show).toBeEnabled();
+  await page.reload({waitUntil:"domcontentloaded"});
+  const opts=await picker.locator("option").allTextContents();
+  await picker.selectOption({index:opts.findIndex(s=>s.trim().startsWith("R06 ·"))});
+  await expect(rows.nth(3).locator("textarea")).toHaveValue("Ja, zusammen.");
+  const draft=await page.evaluate(()=>{
+    const owner=localStorage.getItem("opk.owner-id");
+    return JSON.parse(localStorage.getItem(`los.local.v1.${owner}.2.01`)??"{}").practiceAnswers;
+  });
+  expect(JSON.parse(draft["LOS2-C01-T19"]).answers).toHaveLength(4);
+  expect(JSON.parse(draft["LOS2-C01-R06"]).answers).toHaveLength(4);
+  await expectNoHorizontalOverflow(page);
+});

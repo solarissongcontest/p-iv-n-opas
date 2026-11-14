@@ -147,3 +147,17 @@
 .dark .los-future-reasoning-row textarea{background:var(--los-bg,#11161d);color:var(--los-ink,#f2f5f5);
   border-color:var(--los-line,#37434f)}
 @media(max-width:560px){.los-future-reasoning{padding:.8rem}.los-future-reasoning-source p{max-height:240px}}
+
+/* T19/R06: four distinct speech turns, own written dialogue, no audio claims. */
+.los-future-four-turn{min-width:0;margin:1.1rem 0;padding:1rem;border:1px solid #dad5cd;border-radius:10px}
+.los-future-four-turn legend{font-weight:750;padding:0 .35rem}
+.los-future-four-turn>p{font-size:.88rem;line-height:1.65;color:#62594f}
+.los-future-four-turn-row{display:grid;gap:.45rem;margin:1rem 0;line-height:1.55;font-size:.95rem;font-weight:650}
+.los-future-four-turn-row textarea{box-sizing:border-box;width:100%;min-width:0;min-height:76px;padding:.75rem;
+  border:1px solid #aaa49b;border-radius:9px;background:#fff;color:#252525;font:inherit;line-height:1.6;resize:vertical}
+.los-future-four-turn-row textarea:focus-visible{outline:3px solid var(--los-book-accent,#8d6a50);outline-offset:2px}
+.dark .los-future-four-turn{border-color:var(--los-line,#37434f)}
+.dark .los-future-four-turn>p{color:var(--los-soft,#bec8cf)}
+.dark .los-future-four-turn-row textarea{background:var(--los-bg,#11161d);color:var(--los-ink,#f2f5f5);
+  border-color:var(--los-line,#37434f)}
+@media(max-width:560px){.los-future-four-turn{padding:.8rem}.los-future-four-turn-row textarea{min-height:86px}}
