@@ -326,8 +326,10 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
               Oppitunnin käsikirjoitusta on päivitetty. {recoveredNavigation
                 ? "Aiempi opetustilanne ei enää ole käytössä. Jatkaminen ohjataan seuraavaan keskeneräiseen vaiheeseen. "
                 : ""}
-              Aiemmat vastaukset ja luonnokset säilyvät tallessa, mutta niitä ei tulkita automaattisesti uuden sisällön osaamisnäytöiksi.
-              Käy päivitetyt kohdat läpi ennen oppitunnin loppumerkintää.
+              Aiemmat vastaukset ja luonnokset säilyvät tallessa. Sovellus ei kuitenkaan vertaa vanhoja vastauksia
+              uuden käsikirjoituksen mahdollisesti muuttuneisiin tehtävänantoihin.
+              {completed ? "Oppitunnin aiempi loppumerkintä säilyy historiassa. Kertaa muuttuneet kohdat tarvittaessa." :
+                "Käy päivitetyt kohdat läpi ennen oppitunnin loppumerkintää."}
             </p>}
             <div className="los-teacher-prose">
               {scene.paragraphs.map((paragraph, i) => <p key={i}>{paragraph}</p>)}
