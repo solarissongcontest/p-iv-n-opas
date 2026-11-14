@@ -17,7 +17,8 @@ test("all 70 T06 manuscript vocabulary tasks become six independent recall entri
     const first=[pairs[0]!.de,"","","","",""];
     const saved=writeLosFutureRecallAnswer(pairs,first);
     assert.deepEqual(readLosFutureRecallAnswer(saved,pairs),first);
-    assert.ok(!saved.includes(pairs[1]!.de),"unanswered words are not written into learner drafts");
+    assert.deepEqual(JSON.parse(saved).answers.slice(1),["","","","",""],
+      "unanswered prompts remain empty in learner drafts");
     assert.equal(writeLosFutureRecallAnswer(pairs,["","","","","",""]),"");
     assert.equal(readLosFutureRecallAnswer("my older free-form draft",pairs),null);
     assert.equal(readLosFutureRecallAnswer(JSON.stringify({version:1,meanings:["changed"],answers:first}),pairs),null);
