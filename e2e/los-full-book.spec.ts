@@ -900,7 +900,7 @@ test("stepwise teaching boards begin collapsed after directly switching scenes",
   await expect(page.locator(".los-teacher-board-item")).toHaveCount(8);
   await outline.getByRole("button",{name:"Opettaja rakentaa ikäilmaisun"}).click();
   await expect(page.locator(".los-teacher-board-item")).toHaveCount(1);
-  await expect(page.locator(".los-teacher-board-label")).toContainText("1/4");
+  await expect(page.locator(".los-teacher-board-label")).toContainText("1/7");
   await page.getByRole("button",{name:"Näytä seuraava"}).click();
   await expect(page.locator(".los-teacher-board-item")).toHaveCount(2);
   await expectNoHorizontalOverflow(page);
