@@ -140,7 +140,9 @@ export function LosFutureExercises({bookId,chapterId,mode,taskIds}:{
               ? "Lue alla oleva Text B ja kirjoita kaksi perusteltua havaintoa suomeksi. Huomaa myös tekstin tarkoitus ja ilmaisutapa."
               : remaining?.kind==="pronunciation"
                 ? "Lue alla olevat kaksi saksankielistä lausetta ääneen kahdesti. Kirjaa havaintosi ja tarkista sanapainot vain luotettavasta lähteestä."
-                : task.prompt}
+                : remaining?.kind==="question"
+                  ? "Muodosta saksaksi tilanteeseen sopiva kysymys annetusta ilmauksesta. Lähtöilmaus voi olla myös kysymys, kehotus, otsikko tai puhuttelu. Kysy silloin, mitä tilanteessa sanotaan tai kirjoitetaan."
+                  : task.prompt}
         </p>
         {exitTicket && exitAnswers ? <fieldset className="los-future-exit-ticket">
           <legend>Kaksi itsenäistä lopputarkistusta</legend>
