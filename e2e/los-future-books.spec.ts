@@ -426,3 +426,37 @@ test("LOS! 2–8 T09 and T12 one-line exercises save under original task IDs wit
   await expect(page.locator("#los-future-short-input")).toHaveValue("");
   await expectNoHorizontalOverflow(page);
 });
+
+test("legacy T20 free-text work remains readable, reviewable and untouched by the two-field migration",async({page})=>{
+  await enterFutureBook(page);
+  const key=await page.evaluate(()=>{
+    const owner=localStorage.getItem("opk.owner-id");
+    return `los.local.v1.${owner}.2.10`;
+  });
+  const original="(1) Oma aiempi vastaukseni. (2) Toinen selitykseni.";
+  await page.evaluate(({key,original})=>localStorage.setItem(key,JSON.stringify({
+    version:1,note:"",applicationDraft:"",bookmarked:false,
+    practiceAnswers:{"LOS2-C10-T20":original},practiceChecked:[],
+    testAnswers:{},testSubmittedAt:null,selfAssessment:"",
+    updatedAt:"2026-11-14T00:00:00.000Z",
+  })),{key,original});
+  await page.goto("/los#/2/10/apply",{waitUntil:"domcontentloaded"});
+  const picker=page.locator("#los-future-exercise-choice");
+  const labels=await picker.locator("option").allTextContents();
+  const index=labels.findIndex(label=>label.trim().startsWith("T20 ·"));
+  expect(index).toBeGreaterThanOrEqual(0);
+  await picker.selectOption({index});
+  await expect(page.getByRole("group",{name:"Kaksi itsenäistä lopputarkistusta"})).toHaveCount(0);
+  await expect(page.locator("#los-future-exercise-input")).toHaveValue(original);
+  const reveal=page.getByRole("button",{name:"Näytä vastausluonnos"});
+  await expect(reveal).toBeEnabled();
+  await reveal.click();
+  await expect(page.locator(".los-future-exercise-solution")).toBeVisible();
+  await page.getByRole("button",{name:"Olen verrannut vastaukseni"}).click();
+  const saved=await page.evaluate(key=>localStorage.getItem(key),key);
+  expect(JSON.parse(saved??"{}").practiceAnswers["LOS2-C10-T20"]).toBe(original);
+  await page.reload({waitUntil:"domcontentloaded"});
+  await picker.selectOption({index});
+  await expect(page.locator("#los-future-exercise-input")).toHaveValue(original);
+  await expectNoHorizontalOverflow(page);
+});
