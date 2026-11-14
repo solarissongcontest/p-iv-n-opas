@@ -146,3 +146,20 @@ test("final and summary navigation, authentic audio-gated submission and privacy
  assert.match(runner,/useLosChapterDraft\(1, "93"\)/);
  assert.match(progress,/useLosChapterDraft\(1,"93"\)/);
 });
+
+test("EX-FINAL-Q41 recognizes source phrase without testing untaught wir conjugation and preserves old answer ID",()=>{
+ const q=LOS1_FINAL_QUESTIONS.find(item=>item.id==="EX-FINAL-Q41");
+ assert.ok(q);
+ assert.equal(q.section,"grammar");
+ assert.equal(q.correctId,"b","legacy submitted answer IDs must stay correct");
+ assert.match(q.prompt,/Mikä lause tarkoittaa.*Me olemme kotoisin Berliinistä/);
+ assert.deepEqual(q.choices.map(c=>c.text),[
+   "Er kommt aus Berlin.","Wir kommen aus Berlin.","Du kommst aus Berlin.",
+ ]);
+ assert.doesNotMatch(q.prompt,/Täydennä.*Wir/);
+ assert.match(q.explanation,/tunnistamista, ei uuden persoonamuodon itsenäistä taivutusta/);
+ const old=Object.fromEntries(LOS1_FINAL_QUESTIONS.map(item=>[item.id,item.correctId]));
+ assert.equal(old["EX-FINAL-Q41"],"b");
+ assert.equal(losFinalScore(old).correct,50);
+ assert.equal(losFinalReadyToSubmit(old),true);
+});
