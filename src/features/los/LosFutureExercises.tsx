@@ -213,7 +213,9 @@ export function LosFutureExercises({bookId,chapterId,mode,taskIds}:{
               }} />
           </label>)}
         </fieldset> : twoPart && twoAnswers ? <fieldset className="los-future-two-part">
-          <legend>{twoPart.kind==="correction"?"Korjaa lause ja perustele":"Tutki Text B:tä: kaksi erillistä havaintoa"}</legend>
+          <legend>{twoPart.kind==="correction"
+            ? (twoPart.styleOnly?"Hio ilmaus ja perustele":"Korjaa lause ja perustele")
+            : "Tutki Text B:tä: kaksi erillistä havaintoa"}</legend>
           <p>Kirjoita kumpikin vastaus itse ennen vertailumallin avaamista.
             Tämä on harjoittelua, ei automaattinen arvosana.</p>
           <blockquote lang="de" className="los-future-two-part-source">{twoPart.readingText}</blockquote>
