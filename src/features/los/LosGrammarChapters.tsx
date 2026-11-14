@@ -211,6 +211,14 @@ export function LosChapterGrammar({chapterId}:{chapterId:string}) {
       ].map(([person,named,be,from])=><tr key={person}><td lang="de">{person}</td><td lang="de">{named}</td><td lang="de">{be}</td><td lang="de">{from}</td></tr>)}</tbody>
     </table>
     <p>Kolmannen henkilön esitteleminen onnistuu lyhyillä lauseilla: <span lang="de">Das ist Mia. Sie heißt Mia. Sie kommt aus Finnland.</span> Muista, että kohtelias <span lang="de">Sie</span> ja naisesta käytetty <span lang="de">sie</span> ovat eri käyttötapoja.</p>
+    <Note title="Ystävä vai seurustelukumppani?">Saksassa <span lang="de">mein Freund</span>
+      ja <span lang="de">meine Freundin</span> voivat tarkoittaa tavallista ystävää
+      tai poika-/tyttöystävää. Tilanne ratkaisee.
+      Jos haluat sanoa selvemmin miespuolinen tai naispuolinen ystävä,
+      voit sanoa <span lang="de">ein Freund von mir</span> tai
+      <span lang="de">eine Freundin von mir</span>.
+      Nämä ovat lisähuomioita sanan merkityksestä: rakenteiden sijamuotoja
+      ei vielä tarvitse osata muodostaa itse.</Note>
     <h3>Harjoittele kaksi erilaista kohtaamista</h3>
     <p>Kirjoita ensin 6–8 repliikin tuttavallinen keskustelu ja sen jälkeen erillinen kohtelias keskustelu opettajan kanssa. Kerro tervehdyksen jälkeen nimet, alkuperä ja jokin tuttu perustieto. Lopeta sopivaan hyvästelyyn. Kirjoita myös erikseen neljä lausetta kolmannesta henkilöstä.</p>
     <Note title="Kappaletesti ei ole kirjan loppukoe">C10 tarkistaa opittuja muotoja ja fraaseja. Täydellinen omien kohtaamisten tuottaminen arvioidaan erillisellä tarkistuslistalla, ja koko kirjan loppukoe on oma osionsa. Ei automaattista kielitaidon prosenttilukua.</Note>
