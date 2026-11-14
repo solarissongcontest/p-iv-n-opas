@@ -55,6 +55,12 @@ test("70 T09 instructions have exactly their Finnish source sentence punctuation
     assert.match(task.prompt,/^Kirjoita saksaksi: .+[.!?]$/u,task.id);
     assert.doesNotMatch(task.prompt,/[.!?]\.$/u,task.id);
     assert.ok(losFutureShortAnswer(task)?.kind==="translation");
+    if(book.id===2&&chapter.id==="01"){
+      assert.equal(task.prompt,"Kirjoita saksaksi: Te asutte Berliinissä. Käytä usean tutun puhuttelua.");
+      assert.equal(task.answerKey,"Ihr wohnt in Berlin.");
+      assert.ok(task.feedback.includes("Sie wohnen in Berlin."));
+      assert.ok(task.feedback.includes("ihr"));
+    }
     if(book.id===2&&chapter.id==="07")assert.equal(task.prompt,"Kirjoita saksaksi: Mitä kahvi maksaa?");
     if(book.id===8&&chapter.id==="05")assert.equal(task.prompt,"Kirjoita saksaksi: Tarkista lähde!");
     if(book.id===8&&chapter.id==="06")
