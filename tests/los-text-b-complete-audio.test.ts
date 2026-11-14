@@ -4,6 +4,7 @@ import {readFileSync} from "node:fs";
 import {LOS1_TEXT_B_SOURCES,isLosTextBChapter,validateLosTextB} from "../src/features/los/content/los1TextBAdditional.ts";
 import {LOS1_C01_LINES} from "../src/features/los/content/los1C01.ts";
 import {LOS1_M_COM_02_LINES} from "../src/features/los/content/los1MCom02.ts";
+import {LOS1_FINAL_AUDIO_SOURCES} from "../src/features/los/content/los1FinalExam.ts";
 import {findLosSource,validateLosSourceRegistry} from "../src/features/los/content/sourceRegistry.ts";
 import {validateLosCloudDraft} from "../src/features/los/cloudContract.ts";
 
@@ -87,4 +88,40 @@ test("secondary pages render full text, actual audio player, four answer checks 
   practiceAnswers:{"C07-TEXTB-Q01":"b"},practiceChecked:["C07-TEXTB-Q01"],
   testAnswers:{},testSubmittedAt:null,updatedAt:"2026-11-12T10:00:00.000Z"};
  assert.equal(validateLosCloudDraft(draft),true);
+});
+
+test("M-COM-01 / M-COM-02 Commons evidence preserves every published spoken turn and attribution",()=>{
+ assert.deepEqual(LOS1_C01_LINES.map(line=>line.text),[
+  "Hallo, wie heißt du?",
+  "Hallo, ich heiße Jörg. Und du?",
+  "Ich heiße Franz.",
+  "Wie alt bist du?",
+  "Ich bin neunzehn Jahre alt, und du?",
+  "Ich bin zwanzig.",
+  "Gut. Bis später!",
+  "Tschüss!",
+ ]);
+ assert.deepEqual(LOS1_M_COM_02_LINES.map(line=>line.text),[
+  "Wie heißt du?",
+  "Ich heiße Takashi. Und du?",
+  "Ich bin Thomas. Das ist Peter. Wir kommen aus Berlin.",
+  "Ich komme aus Kyoto. Ich bin Japaner.",
+ ]);
+ assert.deepEqual(LOS1_FINAL_AUDIO_SOURCES.map(src=>src.id),["M-COM-01","M-COM-02"]);
+ for(const src of LOS1_FINAL_AUDIO_SOURCES){
+  const registry=findLosSource(src.id);
+  assert.ok(registry);
+  assert.equal(registry.stage,"rights-verified");
+  assert.equal(registry.licenseCode,"CC BY-SA 3.0");
+  assert.equal(registry.licenseUrl,"https://creativecommons.org/licenses/by-sa/3.0/");
+  assert.equal(src.license,"CC BY-SA 3.0");
+  assert.equal(registry.mediaTested,false,"License verification is not device playback QA");
+  assert.equal(registry.deviceTested,false);
+  assert.equal(registry.languageReviewed,false);
+  assert.equal(registry.published,false);
+ }
+ const a=LOS1_FINAL_AUDIO_SOURCES.find(src=>src.id==="M-COM-01");
+ const b=LOS1_FINAL_AUDIO_SOURCES.find(src=>src.id==="M-COM-02");
+ assert.match(a?.attributionUrl??"",/Gespr%C3%A4chVorstellung\.ogg/);
+ assert.match(b?.attributionUrl??"",/Deutsch_Dialog_\._Ich_bin_Peter\.ogg/);
 });
