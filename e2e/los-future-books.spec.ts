@@ -1140,8 +1140,13 @@ test("all unattempted exercises keep the model hidden until learner work exists"
   const model=page.getByRole("button",{name:"Näytä vastausluonnos"});
   await expect(model).toBeDisabled();
   await expect(page.locator(".los-future-exercise-solution")).toHaveCount(0);
-  await expect(page.getByText("Kokeile tehtävää ensin itse ennen vastausluonnoksen avaamista.")).toBeVisible();
-  await page.locator("#los-future-exercise-input").fill("Arvaan, että henkilöt keskustelevat koulusta.");
+  const prediction=page.locator(".los-future-remaining-row textarea");
+  await expect(prediction).toHaveCount(3);
+  await prediction.nth(0).fill("Arvaan, että henkilöt keskustelevat koulusta.");
+  await expect(model).toBeDisabled();
+  await prediction.nth(1).fill("Arvaan, että joku muuttaa kaupunkiin.");
+  await expect(model).toBeDisabled();
+  await prediction.nth(2).fill("Tarkistan arvaukset Text A:sta.");
   await expect(model).toBeEnabled();
   await model.click();
   await expect(page.locator(".los-future-exercise-solution")).toBeVisible();
