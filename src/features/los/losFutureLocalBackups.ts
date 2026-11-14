@@ -23,7 +23,7 @@ const strMap=(v:unknown,maxKeys:number,maxLength:number)=>{
 function validBook(bookId:unknown):bookId is number{
   return typeof bookId==="number"&&Number.isInteger(bookId)&&bookId>=2&&bookId<=8;
 }
-const validDate=(date:unknown)=>typeof date==="string"&&date.length<=40&&
+const validDate=(date:unknown):date is string=>typeof date==="string"&&date.length<=40&&
   /^\d{4}-\d{2}-\d{2}T/.test(date)&&Number.isFinite(Date.parse(date));
 
 function allowedKeys(bookId:number,chapterId:string){
