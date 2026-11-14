@@ -117,3 +117,18 @@ test("R01 German uppercase excerpts preserve orthographic ß-to-SS case matching
   }
   assert.equal(losFutureEvidenceExcerptInSource(task,"GROSSMUTTERXYZ"),false);
 });
+
+
+test("Text A evidence needs German word boundaries, not an accidental substring",()=>{
+  const source=losFutureExercisesFor(2,"01").find(item=>item.id.endsWith("-R01"));
+  assert.ok(source);
+  const task=losFutureEvidenceTask(source);assert.ok(task);
+  const synthetic={...task,sourceText:"Finnland ist schön. Das heißt: grüßen."};
+  assert.equal(losFutureEvidenceExcerptInSource(synthetic,"in"),false);
+  assert.equal(losFutureEvidenceExcerptInSource(synthetic,"Land"),false);
+  assert.equal(losFutureEvidenceExcerptInSource(synthetic,"Finnland"),true);
+  assert.equal(losFutureEvidenceExcerptInSource(synthetic,"FINNLAND IST SCHÖN."),true);
+  assert.equal(losFutureEvidenceExcerptInSource(synthetic,"GRÜSSEN"),true);
+  assert.equal(losFutureEvidenceExcerptInSource(synthetic,"Das   heißt:"),true);
+  assert.equal(losFutureEvidenceExcerptInSource(synthetic,"  "),false);
+});
