@@ -69,6 +69,12 @@ Tämä tiedosto on ainoa LOS! 1–8:n *toteutuksen* jatkotilaraportti. Visuaalin
 - Kysymysten omat tunnisteet, arvioinnin rajaus ja vastausten tallennusavaimet pysyivät samoina; vanhoja oppilaan vastauksia ei poisteta eikä arvostella uudelleen. T04 käsittelee yhä erillistä tukidialogia, eikä sitä pidä sekoittaa Text A:n T02:een. Uusi 70 kysymys–mallivastausparin regressiotesti suojaa vanhojen lähdemallien tahattomalta palautumiselta. **Riippumaton kieli-, taso- ja pedagoginen tarkistus on edelleen tehtävä.**
 - **Edellisen HEADin `901a5bfc56fc8ca1c45939b7c4d26c34f1935e10` vahvistus:** [Quality Gate 43610107342](https://github.com/solarissongcontest/p-iv-n-opas/actions/runs/43610107342) **791/791** sekä lint, TypeScript, build ja Vercel-pariteetti hyväksytty; [Chromium ja WebKit 43610107502](https://github.com/solarissongcontest/p-iv-n-opas/actions/runs/43610107502) **204/204** hyväksytty. Uuden sisältökorjauscommitin omat ajot vaativat erillisen vahvistuksen.
 
+## 14.11.2026 · Kaikkien tehtävien vastausmallin avaaminen vasta omasta yrityksestä
+
+- LOS! 2–8:n yhteisessä harjoitusmoottorissa mallivastauksen painike on nyt estetty **myös yksittäisissä yleisissä tekstitehtävissä, aukontäytössä, yhdistelyssä ja muissa aiemmin ilman yritystä avattavissa tehtävissä**, kun tehtävälle ei ole vielä tallennettu omaa vastausta. Monikenttäisten tehtävien erilliset vaadittujen vastausten tarkistukset säilyvät.
+- Tyhjän vastauksen tilalle näytetään ohje yrittää itse ensin. Myös tehtävästä toiseen siirtyminen sulkee auki olleen mallin. Selaintesti tarkistaa alkutilan, oman vastauksen vaikutuksen, mallin avaamisen, seuraavan tehtävän eston ja aukontäytön.
+- **Rajaus:** tämä on ohjattu oppiminen, ei valvottu koe eikä täydellinen estomekanismi tahalliselle huijaamiselle. Tallennettu lyhytkin yritys voi avata mallin; avoimen vastauksen oikeellisuutta ei pidä päätellä painikkeen tilasta. Oppijan aikaisempia vastauksia ei kirjoiteta uusiksi.
+
 ## 14.11.2026 · T10/T13:n lähdetekstit, vastausturva ja tyylierottelu
 
 - T13:n 70 saksankielisen lähdetekstin tehtäväpaketissa säilytettiin aiempi `sourceText`-tunniste, jotta vanhat kahteen kenttään tallennetut vastaukset pysyvät luettavina. Lukijalle näytettävä `readingText` jättää pois tehtävänannon lisäämän ylimääräisen pisteen, joten lyhyet tekstit eivät enää näytä esimerkiksi kaksinkertaista lopetuspistettä. Sama alkuperäinen Text B näytetään vain kerran varsinaisena lähteenä; tehtävänanto on erillinen.
