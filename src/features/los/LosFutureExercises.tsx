@@ -96,8 +96,12 @@ export function LosFutureExercises({bookId,chapterId,mode,taskIds}:{
           <span>LOS! {bookId} · {chapterId} · {task.id.split("-").at(-1)}</span>
           <span>{safeIndex+1} / {tasks.length}</span>
         </div>
-        <h2 id="los-future-exercise-title">{task.title}</h2>
-        <p className="los-future-exercise-question">{task.prompt}</p>
+        <h2 id="los-future-exercise-title">{task.title==="sentence-order"?"Järjestä tekstin sanat":task.title}</h2>
+        <p className="los-future-exercise-question">
+          {orderingTiles && task.id.endsWith("-R02")
+            ? "Järjestä sanapalat oikeaan järjestykseen. Tarkista sitten kielioppi ja välimerkit mallivastauksesta."
+            : task.prompt}
+        </p>
         {matchingPairs && matchingSelection ? <fieldset className="los-future-matching">
           <legend>Yhdistä saksan sana ja sen merkitys</legend>
           <p>Valitse jokaiselle sanalle suomennos. Vastaukset tallentuvat samaan tehtäväluonnokseen.

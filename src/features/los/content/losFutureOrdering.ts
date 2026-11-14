@@ -8,6 +8,19 @@ export type LosFutureOrderingTile={index:number;word:string};
 const normalize=(text:string)=>text.normalize("NFC").toLocaleLowerCase("de")
   .replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu,"");
 export function losFutureOrderingTiles(task:LosFutureExerciseDraft):LosFutureOrderingTile[]|null {
+  // All 70 R02 source prompts incorrectly expose the complete answer while
+  // describing words as shuffled. Hide that source prompt in the UI and provide
+  // a deterministic shuffled version of its exact original model words.
+  if(/-R02$/.test(task.id) && task.title==="sentence-order"){
+    const prefix="Kirjoita seuraava tekstin virke oikeassa sanajärjestyksessä. Sanat näytetään oppijalle sekoitettuina: ";
+    if(!task.prompt.startsWith(prefix) || task.prompt.slice(prefix.length)!==task.answerKey)return null;
+    const words=task.answerKey.trim().split(/\s+/u);
+    if(words.length<3 || words.length>40)return null;
+    const offset=Math.floor(words.length/2);
+    const indices=words.map((_,i)=>i);
+    const rotated=[...indices.slice(offset),...indices.slice(0,offset)];
+    return rotated.map((sourceIndex,index)=>({index,word:words[sourceIndex]!}));
+  }
   const prefix="Järjestä nämä osat oikeaksi lauseeksi: ";
   if(!/-T08$/.test(task.id) || task.title!=="Rakenna lause" ||
     !task.prompt.startsWith(prefix))return null;

@@ -34,3 +34,20 @@ test("punctuation on supplied unsorted tiles is replaced only by their own sourc
   assert.equal(tiles.find(t=>t.index===4)?.word,"denke,");
   assert.equal(tiles.find(t=>t.index===0)?.word,"ist.");
 });
+
+test("all 70 R02 reading tasks hide their originally exposed full model and use actual shuffled word tiles",()=>{
+  let count=0;
+  for(const book of LOS_BOOKS.filter(x=>x.id>=2))for(const chapter of book.chapters){
+    const task=losFutureExercisesFor(book.id,chapter.id).find(x=>x.id.endsWith("-R02"));
+    assert.ok(task);
+    const tiles=losFutureOrderingTiles(task);
+    assert.ok(tiles,task.id);
+    assert.notEqual(tiles.map(t=>t.word).join(" "),task.answerKey,"Words must actually be shuffled");
+    const ordered=readLosFutureOrderingAnswer(task.answerKey,tiles);
+    assert.ok(ordered,task.id);
+    assert.equal(ordered.length,tiles.length);
+    assert.equal(writeLosFutureOrderingAnswer(tiles,ordered),task.answerKey);
+    count++;
+  }
+  assert.equal(count,70);
+});

@@ -212,3 +212,21 @@ test("LOS! 8 ordered words assemble into the same original answer and survive re
   await expect(page.locator(".los-future-ordering-answer")).toHaveText("Ich");
   await expect(page.locator(".los-future-exercise-summary")).toContainText("0 verrattu vastausluonnokseen");
 });
+
+test("LOS! 2 source R02 no longer reveals the answer before assembling its shuffled words",async({page})=>{
+  await enterFutureBook(page);
+  await page.goto("/los#/2/01/understand",{waitUntil:"domcontentloaded"});
+  await page.locator("#los-future-exercise-choice").selectOption({index:7});
+  const card=page.locator(".los-future-exercise-card");
+  await expect(card.locator(".los-future-exercise-question")).toContainText("Järjestä sanapalat");
+  await expect(card.locator(".los-future-exercise-question")).not.toContainText("Am Montag trifft sie Jonas in einem Deutschkurs.");
+  const pieces=page.getByRole("group",{name:"Lauseen rakennuspalat"});
+  await expect(pieces).toBeVisible();
+  await pieces.getByRole("button",{name:"Am",exact:true}).click();
+  await pieces.getByRole("button",{name:"Montag",exact:true}).click();
+  await expect(card.locator(".los-future-ordering-answer")).toHaveText("Am Montag");
+  await page.reload({waitUntil:"domcontentloaded"});
+  await page.locator("#los-future-exercise-choice").selectOption({index:7});
+  await expect(card.locator(".los-future-ordering-answer")).toHaveText("Am Montag");
+  await expect(page.locator(".los-future-exercise-summary")).toContainText("0 verrattu vastausluonnokseen");
+});
