@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import { getDeviceOwnerId } from "@/lib/deviceSession";
+import { losFutureLessonCursorKey,losFutureStageCursorKey } from "./losFutureSessionKeys.ts";
 import { ArrowRight, BookOpen, ClipboardList, LockKeyhole } from "lucide-react";
 import type { LosBookDefinition } from "./catalog";
 import type { LosNavigate } from "./LosReferenceTools";
@@ -49,8 +51,10 @@ export function LosFutureLearningPath({book,move}:{
   const lessons=losFutureLessonOutline(book);
   const [selectedNumber,setSelectedNumber]=useState(1);
   const [runnerRevision,setRunnerRevision]=useState(0);
-  const storageKey=`los.future.book${book.id}.selectedLesson`;
+  const ownerId=getDeviceOwnerId();
+  const storageKey=losFutureLessonCursorKey(ownerId,book.id);
   useEffect(()=>{
+    if(!storageKey){setSelectedNumber(1);return;}
     try {
       const n=Number(sessionStorage.getItem(storageKey));
       setSelectedNumber(Number.isInteger(n)&&n>=1&&n<=60?n:1);
@@ -58,7 +62,7 @@ export function LosFutureLearningPath({book,move}:{
   },[storageKey]);
   function selectLesson(n:number){
     setSelectedNumber(n);
-    try{sessionStorage.setItem(storageKey,String(n));}catch{/* valinta toimii myös ilman sessionStoragea */}
+    try{if(storageKey)sessionStorage.setItem(storageKey,String(n));}catch{/* valinta toimii myös ilman sessionStoragea */}
     if(typeof document!=="undefined"){
       requestAnimationFrame(()=>document.getElementById("los-future-lesson-runner")?.scrollIntoView({behavior:"smooth",block:"start"}));
     }
@@ -66,8 +70,9 @@ export function LosFutureLearningPath({book,move}:{
   function resumeLesson(number:number,stageIndex:number){
     const script=getLosFutureLesson(book.id,number);
     if(!script||script.kind!=="chapter")return;
+    const stageKey=losFutureStageCursorKey(ownerId,script.id);
     try{
-      sessionStorage.setItem(`los.future.guided.${script.id}.selectedStage`,
+      if(stageKey)sessionStorage.setItem(stageKey,
         String(Math.min(5,Math.max(0,stageIndex))));
     }catch{/* opetuspolku toimii ilman sessionStoragea */}
     setRunnerRevision(n=>n+1);
