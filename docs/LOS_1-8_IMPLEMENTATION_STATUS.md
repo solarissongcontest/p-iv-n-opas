@@ -109,6 +109,12 @@ Tämä on rajattu sisältökorjaussarja PR #264:n kehityshaaraan, **ei** riippum
 - Näiden neljän harjoituksen tunnisteet, saksankieliset alkuperäiset lähtölauseet, `correction`-vastaustyyppi ja aiemmin tallennetut kaksi vastauskenttää säilyivät. Nimi, suomenkielinen ohje ja itsearviointimalli korjattiin. Testi käy läpi kaikki 70 T10-tehtävää sekä vanhan rakenteen vastaukset.
 - Nachfeldin kielioppiperiaatteen ulkoinen tarkistus: Institut für Deutsche Sprache / grammis, [Nachfeld](https://grammis.ids-mannheim.de/systematische-grammatik/4787) ja [Wortstellung](https://grammis.ids-mannheim.de/progr%40mm/6860). Tämä lähdepohjainen korjaus **ei ole** koko LOS!-materiaalin riippumaton natiivikielentarkistus. CI ja erillinen opiskelijatestin näyttö vaaditaan.
 
+## 14.11.2026 · Sanaston lähdelinkin oikea kappalesiirtymä ja T09:n sinuttelu
+
+- **Koko sarjan kappalesanasto:** haetun sanan lähdepainike on oikeasti saavutettava `button` taulukon `cell`-solun sisällä, ei painike, jonka semanttinen rooli oli peitetty `cell`-roolilla. Mobiilissa painikkeen kosketusalue ja taulukon asettelu säilyvät. **Toisesta kirjasta löytyvä sana avaa nyt suoraan saman kirjan oikean kappaleen Sanasto-osion**, ei enää pelkkää toisen kirjan etusivua. Lisätty WebKit/Chromium-selaintesti yksiselitteisellä LOS! 3/C03:n `die Mannschaft` -lähderivillä ja kirjakohtaisella lähdepainikkeella.
+- **LOS! 2/C01/T09:** suomenkielinen ”Te asutte Berliinissä” ei yksin kerro, puhutaanko usealle tutulle (`ihr wohnt`) vai kohteliaasti (`Sie wohnen`). Tehtävä täsmennettiin usean tutun puhutteluksi ja palautteeseen kirjoitettiin molemmat todelliset vaihtoehdot oikeissa konteksteissa. Opiskelijan aiempi vastaus on tallennettu tehtävän muuttumattomaan ID:hen, joten tätä ei pidä tulkita uudeksi koearvioinniksi. Regressiotesti lisätty.
+- **Todennus:** muutokset ovat kehityshaarassa. Viimeisimmän HEADin laatutarkistus ja selaintesti on vielä tarkistettava ennen teknistä hyväksyntää; saksan toimitukselliset hyväksynnät ovat edelleen avoimia.
+
 ## 14.11.2026 · T15:n 70 ääneenlukuharjoituksen lähdelauseet näkyviin
 
 - LOS! 2–8:n T15:ssä kaksi saksankielistä lausetta näytetään nyt **suoraan avoimessa lähdelaatikossa**, säilyttäen kirjoitetut rivinvaihdot ja välimerkit. Aiempi toistuva tehtävänanto ja siihen syntyneet kaksinkertaiset välimerkit on korvattu selkeällä, yhteisellä ääneenlukuohjeella.
