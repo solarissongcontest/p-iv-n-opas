@@ -10,15 +10,15 @@ Tämä tiedosto on ainoa LOS! 1–8:n *toteutuksen* jatkotilaraportti. Visuaalin
 | Kirja | Moduuli | Kappaleet | Opetustunnit | Tehtävät ja rajat |
 | --- | --- | --- | --- | --- |
 | LOS! 1 | SAB31 | 10 toimivaa lukurakennetta; Text A/B ja osaharjoituksia | 60 Teacher 2.0 -rekisterissä | Erilliset LOS! 1:n harjoitukset, kokeet ja tilanhallinta; sisältö-, media- ja laiteportit auki |
-| LOS! 2 | SAB32 | 10 käsikirjoituskappaletta lukijassa | 50 Teacher 2.0 -kappaletunnin sovitusta, 10 rajoitettua kertaus-/koeluonnosta | 260 lähdetehtävää; osalla interaktiivinen rakenne, osalla toimituksellinen vastausluonnos |
-| LOS! 3 | SAB33 | 10 käsikirjoituskappaletta lukijassa | 50 + 10 samalla rajauksella | 260 lähdetehtävää; sama rajaus |
-| LOS! 4 | SAB34 | 10 käsikirjoituskappaletta lukijassa | 50 + 10 samalla rajauksella | 260 lähdetehtävää; sama rajaus |
-| LOS! 5 | SAB35 | 10 käsikirjoituskappaletta lukijassa | 50 + 10 samalla rajauksella | 260 lähdetehtävää; sama rajaus |
-| LOS! 6 | SAB36 | 10 käsikirjoituskappaletta lukijassa | 50 + 10 samalla rajauksella | 260 lähdetehtävää; sama rajaus |
-| LOS! 7 | SAB37 | 10 käsikirjoituskappaletta lukijassa | 50 + 10 samalla rajauksella | 260 lähdetehtävää; sama rajaus |
-| LOS! 8 | SAB38 | 10 käsikirjoituskappaletta lukijassa | 50 + 10 samalla rajauksella | 260 lähdetehtävää; sama rajaus |
+| LOS! 2 | SAB32 | 10 käsikirjoituskappaletta lukijassa | 50 Teacher 2.0 -kappaletunnin sovitusta, 8 interaktiivista kertaus-/yhteenvetotuntia, 2 kirjallista paikallista harjoituskoetta (kaikki toimituksellisia) | 260 lähdetehtävää; osalla interaktiivinen rakenne, osalla toimituksellinen vastausluonnos |
+| LOS! 3 | SAB33 | 10 käsikirjoituskappaletta lukijassa | 50 + 8 kertaus-/yhteenvetotuntia + 2 paikallista harjoituskoetta | 260 lähdetehtävää; sama rajaus |
+| LOS! 4 | SAB34 | 10 käsikirjoituskappaletta lukijassa | 50 + 8 kertaus-/yhteenvetotuntia + 2 paikallista harjoituskoetta | 260 lähdetehtävää; sama rajaus |
+| LOS! 5 | SAB35 | 10 käsikirjoituskappaletta lukijassa | 50 + 8 kertaus-/yhteenvetotuntia + 2 paikallista harjoituskoetta | 260 lähdetehtävää; sama rajaus |
+| LOS! 6 | SAB36 | 10 käsikirjoituskappaletta lukijassa | 50 + 8 kertaus-/yhteenvetotuntia + 2 paikallista harjoituskoetta | 260 lähdetehtävää; sama rajaus |
+| LOS! 7 | SAB37 | 10 käsikirjoituskappaletta lukijassa | 50 + 8 kertaus-/yhteenvetotuntia + 2 paikallista harjoituskoetta | 260 lähdetehtävää; sama rajaus |
+| LOS! 8 | SAB38 | 10 käsikirjoituskappaletta lukijassa | 50 + 8 kertaus-/yhteenvetotuntia + 2 paikallista harjoituskoetta | 260 lähdetehtävää; sama rajaus |
 
-**Yhteensä:** 80 kappaletta; 480 nimettyä tuntia (410 yhteiseen Teacher-soittimeen sovitettua kappaletuntia LOS! 1 mukaan lukien, 70 jatkokirjojen rajoitettua kertaus-/koetuntia). Rekisteröity tunti ei vielä merkitse pedagogisesti valmista tai osaamista todentavaa tuntia.
+**Yhteensä:** 80 kappaletta ja 480 nimettyä tuntia. LOS! 1:n 60 sekä LOS! 2–8:n 350 kappaletuntia on sovitettu Teacher 2.0:aan; jatkokirjojen 56 muuta tuntia on nyt nelivaiheisia harjoituskertauksia ja 14 tunnilla on lähdeperustainen kirjallinen paikallinen harjoituskoe. Kaikki 480 tuntia **eivät vielä käytä samaa Teacher 2.0 -soitinta tai hyväksyttyä osaamisarviointia**. Ei julkaisuvalmiutta.
 
 **LOS! 2–8 tehtävämoottorin tämän haaran tilanne:** 1 820 alkuperäistä tunnistettua tehtävää. Rakenteisesti toteutettuja ovat 70 yhdistelyä (T05), 70 aukkoa (T07), 70 sanajärjestystä (T08), 70 tekstin sanajärjestystä (R02), 70 sanastomuistia (T06), 70 kaksiosaista loppulappua (T20), 70 luetunymmärtämisen lyhytvastausta (T02), 70 käännöksen lyhytvastausta (T09) ja 70 kieliopin lyhytvastausta (T12). **Yhteensä 630/1 820 rakenteista käyttöliittymää (34,6 % tehtäväluonnosten määrästä)**. Loput 1 190 ovat pääosin avoimen tekstiluonnoksen / itsevertailun muodossa. Tämä on vain rakenteisen interaktion kattavuusluku, ei pedagogisen tai kielellisen julkaisuvalmiuden prosentti. Automaattista arvosanaa ei myönnetä lähdevastausten perusteella.
 
@@ -37,17 +37,21 @@ Tämä tiedosto on ainoa LOS! 1–8:n *toteutuksen* jatkotilaraportti. Visuaalin
 
 10. `5668797c`, `ae9fe8c8`, `15915ba7`, `84fbbf30`, `8c3191da`: neljän aiemmin pelkäksi tekstiksi jääneen T05-yhdistelytehtävän oikeat päällekkäiset suomennokset (esim. Arzt/Ärztin = lääkäri) toimivat nyt saavutettavina valintoina ja tallentuvat. Teacher 2.0:n neljän vaihtoehdon tarkistus käyttää edelleen vain yksiselitteisiä merkityksiä.
 
+11. `6db4c7b6`, `75902d16`, `d174a8ca`, `94ca669c`, `9c24b1d4`, `205edb6d`, `4c9aaf44`, `60bcfe41`, `104b7d35`, `55e58b22`: seitsemän jatkokirjan yhteensä 56 ei-koemuotoista tuntia muutettiin 4-vaiheisiksi muistista palauttamisen, opetuksen, yhteisen tehtävämoottorin ja itsearvioinnin kertauksiksi. Oman kirjan lähde-esimerkit, tauolta paluu, kirjakohtaiset vastaustiedot ja varmuuskopiot. LOS! x-L001:n lähtötilakartoitus ei vaadi aiempaa saksaa.
+12. `d43c0ad2`: kaikkien 14 väli- ja loppukokeen todelliset erilliset lukutekstit, 210 R/G/V-kysymystä pisteineen ja avaimineen, 14 kirjoitustehtävää rubriikkeineen sekä 14 kuuntelun **hyväksymätöntä käsikirjoitusta** tuotiin `losFutureExams.ts`-rekisteriin. Lähteinä `Los2-5.txt` ja `Los6-8.txt`. Ei kopioitu ulkopuolista luvittamatonta materiaalia.
+13. `5ef066cb`, `97f2ed2e`, `bc333743`, `93b2f199`, `3b1c54c8`, `c1142330`, `478e8234`, `14da00d6`, `18d483ad`, `b26e086e`: 14 kirjallista 35 pisteen harjoituskoetta sai omat lähdetekstit ja vastauslomakkeet, kirjakohtaisen paikallistallennuksen, palautuksen jälkeisen ratkaisuavaimen, selvästi rajatun yksiselitteisten aukkojen tarkistuksen, ihmisen tarkistusta odottavat avoimet vastaukset, arviointirubriikit ja edelliset yritykset säilyttävän uusintalogiikan. Varmuuskopio siirtää myös harjoituskoevastaukset. **Ei hyväksyttyjä koearvosanoja, kuuntelua, valvottua koeturvaa tai koko 35 pisteen automaattiarvostelua.** Uusimmat testit vielä vahvistettava.
+
 ## Todellinen QA / versiot
 
 - **Edellinen varmistettu koodi:** `d54769c9229c2b908bf13f7f191fa0fe4917dfb0`: Quality Gate 729/729 yksikkötestiä + lint, TS ja build hyväksytty ([ajo 43533825654](https://github.com/solarissongcontest/p-iv-n-opas/actions/runs/43533825654)). Browser QA ([ajo 43533825781](https://github.com/solarissongcontest/p-iv-n-opas/actions/runs/43533825781)) **150/156**, kuusi epäonnistui.
-- **Viimeisin todetusti hyväksytty Quality Gate tässä toteutuskierroksessa:** commit `b3063ace8a383cd319e767aa27a52ab8aeb03b45`, [ajo 43583050823](https://github.com/solarissongcontest/p-iv-n-opas/actions/runs/43583050823): **751/751** yksikkötestiä, TypeScript, lint, build ja Vercel-build-pariteetti hyväksytty. Tämä ajo edeltää myöhempiä Teacher 2.0 -muutoksia.
-- **Viimeisin toiminnallinen koodicommitti tämän merkinnän kohdalla:** `8c3191da953bfb2e114dc90df95107f5a2f6a93d` (T05:n selaintesti), jonka jälkeen vain tätä tilaraporttia on päivitetty. Uusimman HEADin Quality Gate- ja Chromium/WebKit-tulos **ei vielä varmistunut** tämän kirjauksen hetkellä. Tarkista GitHub Actions ennen mitään yhdistämistä.
+- **Viimeisin varmistettu Quality Gate:** commit `55e58b22e9056a29126868e4bf60df8db6257eb3`, [ajo 43585025985](https://github.com/solarissongcontest/p-iv-n-opas/actions/runs/43585025985): **757/757** yksikkötestiä, TypeScript, lint, build sekä Vercel-build-pariteetti läpäisty. Tämä hyväksyntä kattaa 56 uuden kertauksen työvaiheen, mutta **ei vielä sen jälkeen tuotua 14-koejärjestelmää**.
+- **Viimeisin toiminnallinen koodicommitti tässä merkinnässä:** `b26e086e36947b5e227d6a447754ccd95f3f3f80`. Sen jälkeisen HEADin kaikki Quality Gate-/Chromium-/WebKit-hyväksynnät ovat tarkistettava GitHub Actionsista ennen main-yhdistämistä. Erityisesti selaintestejä ei ole vielä kuitattu vihreiksi.
 - Fyysinen iPhone/Linux, oikea ulkoisen audion toisto, riippumaton saksanopettaja, 30 minuutin oppimispilotit sekä manuaalinen ruudunlukija- ja 200 % zoom -auditointi: **ei tehty**.
 
 ## Pääominaisuuksien avoimet portit
 
-- **Opetus:** 350 jatkokirjan kappaletunnin sovitukset käyttävät samaa Teacher-soitinta sekä kappalekohtaista sanastotarkistusta, mutta osa opetuksesta on edelleen yleisluonteista. 70 kertaus-/koetuntia vain rajoitettuina luonnoksina, ei läpikäydyksi merkittäviä. Todellinen osaaminen erotettava näyttöön perustuen.
-- **Kokeet:** LOS! 1:ssä toimivia koeosia, mutta kaikki kahdeksan kirjaa kattavaa hyväksyttyä koe-/uusinta-/paljastuslogiikkaa ei ole osoitettu. Jatkokirjojen 14 väli- ja loppukokeen käsikirjoitusta sekä 14 kuuntelukäsikirjoitusta eivät vielä ole julkaistavia kokeita.
+- **Opetus:** 350 jatkokirjan kappaletunnin sovitukset käyttävät Teacher 2.0 -soitinta ja kappalekohtaista sanastotarkistusta, mutta osa opetuksesta on yleisluonteista. 56 kertaus-/yhteenvetotuntia ovat nyt interaktiivisia, mutta eivät vielä saman Teacher-soittimen täydellisesti käsikirjoitettuja ohjauksia. Osaaminen pitää edelleen todentaa erikseen.
+- **Kokeet:** jatkokirjojen kaikki 14 alkuperäistä kirjallista koeaineistoa ovat nyt omissa paikallisissa harjoituskoetyötiloissa. Suljetut vastausavaimet avautuvat vasta harjoituskoeyrityksen palauttamisen jälkeen; turvallinen uusinta arkistoi edelliset vastaukset. Vain täsmälliset yksisanaiset aukot voidaan konearvioida; muu 35 pisteen arviointi ja kirjoitus vaativat ihmisen. Kuunteluista on pelkät käsikirjoitukset eikä niitä esitetä toimivana audiona. **Ei vielä julkaisuvalmista arviointikoetta.**
 - **Sisältö ja oikeudet:** jatkokirjojen Text A/Text B -tekstit ovat LOS!:n omia vielä kielellisesti tarkistamattomia harjoitustekstejä, eivät automaattisesti autenttisia ulkopuolisia tekstejä. Ulkoiset media- ja tekijänoikeusportit auki.
 - **Sanakirja:** FreeDictistä vaiheistettu 25 130 lähderiviä (33 670 käännöstä) eristetyssä PostgreSQL-testissä. Todellisia tuotantokantaan ladattuja **0**, julkaistuja **0** vahvistetun dokumentin mukaan. Wiktionary/IPA/täysi kattavuus, oikeudellinen hyväksyntä ja todellinen palautustesti puuttuvat.
 - **Audio:** laitteissa hyväksyttyjen luonnollisten äänitteiden ja IPA-peiton julkaisuportit auki, toimimattomia lähteitä ei esitetä toimiviksi.
@@ -59,7 +63,7 @@ Tämä tiedosto on ainoa LOS! 1–8:n *toteutuksen* jatkotilaraportti. Visuaalin
 1. Tarkista **uusimman HEADin** Quality Gate- ja Chromium/WebKit-ajon tulokset; korjaa todetut viat sovitun testinavigaation, todellisen DOM:n ja tallennusdatan perusteella, suorita uudelleen.
 2. Tarkista PR #253:n suora commit-esi-isä ja PR #258:sta kopioidut myöhemmät varmuuskopio-/progress-toiminnot tuoreesta koodista; korjaa regressiot ilman rinnakkais-PR:ää.
 3. Jatka muiden 1 820 tehtävän oikeaa interaktiota ja palautteen laatua alkuperäisen tehtävätyypin mukaan. Älä luo automaattista pisteytystä avoimille tehtäville.
-4. Toteuta 70 jatkokirjan kertaus-/arviointituntia turvalliseen opetus-/koeprosessiin ilman vastauksien ennenaikaista paljastamista.
+4. Paranna 56 kertaus-/yhteenvetotunnin sisältöä saman Teacher 2.0 -laatuvaatimuksen tasolle. Tarkista 14 harjoituskoetyötilan kaikki käyttötapaukset, arviointirubriikit, historian tallennus ja todellinen iPhone/WebKit-toteutus; älä väitä hyväksyttyä koetta.
 5. Toteuta kirjakohtaiset oikeat kokeet, kieli- ja lähde-QA, sanakirja, media, synkronointi, koko V3.3/V3.4 ja QA-portit riippuvuusjärjestyksessä.
 
 **Jatkosession sääntö:** lue tämä tiedosto, hae uusin GitHubin HEAD ja Actions-tilanne; jatka PR #264:n omaa kehityshaaraa. Päivitä tätä tiedostoa, älä rakenna uutta rinnakkaista tilaraporttia. Älä yhdistä mainiin ennen julkaisuehtojen hyväksymistä.
