@@ -42,16 +42,24 @@ test("LOS! 2–8 exercise pages use the source's exact 9/14/3 section distributi
   }
 });
 
-/** Select T16, the source-authored open question-generation task in *practice*.
- * T10 and T13 are now two-part interactions; T18 lives under apply. */
-async function selectOpenDraftExercise(page:import("@playwright/test").Page){
+/** Pick the manuscript task by stable suffix rather than its display label.
+ * Answered/checked options append a status glyph, so exact label selectors
+ * are not stable across reload. Wait for React to render before reading options. */
+async function selectFutureTask(page:import("@playwright/test").Page,suffix:string){
   const picker=page.locator("#los-future-exercise-choice");
   await expect(picker).toBeVisible();
+  await expect(picker.locator("option").filter({hasText:new RegExp("^"+suffix+" ·")})).toHaveCount(1);
   const options=await picker.locator("option").allTextContents();
-  const index=options.findIndex(label=>label.trim().startsWith("T16 ·"));
-  expect(index,"T16 open-response exercise must be listed in practice").toBeGreaterThanOrEqual(0);
+  const index=options.findIndex(label=>label.trim().startsWith(suffix+" ·"));
+  expect(index,"Source task "+suffix+" is listed for the current book and section").toBeGreaterThanOrEqual(0);
   await picker.selectOption({index});
-  const answer=page.locator("#los-future-exercise-input");
+  return picker;
+}
+/** T16 now has two separate authored responses, not a legacy generic textarea. */
+async function selectOpenDraftExercise(page:import("@playwright/test").Page){
+  await selectFutureTask(page,"T16");
+  const answer=page.locator(".los-future-remaining-row textarea").first();
+  await expect(page.locator(".los-future-remaining-row textarea")).toHaveCount(2);
   await expect(answer).toBeVisible();
   return answer;
 }
@@ -61,6 +69,8 @@ test("LOS! 2–8 answer drafts and review marks persist by owner/book/chapter wi
   await page.goto("/los#/2/01/practice",{waitUntil:"domcontentloaded"});
   const answer=await selectOpenDraftExercise(page);
   await answer.fill("Antwort nur für LOS! 2.");
+  await page.locator(".los-future-remaining-row textarea").nth(1)
+    .fill("Tarkistin sanajärjestyksen ja kysymysmerkin.");
   await page.getByRole("button",{name:"Näytä vastausluonnos"}).click();
   await expect(page.locator(".los-future-exercise-solution")).toBeVisible();
   await page.getByRole("button",{name:"Olen verrannut vastaukseni"}).click();
@@ -123,11 +133,15 @@ test("a source-guided lesson reuses chapter answers and persists its own reflect
   await expect(runner).toContainText("Meine kleine Welt");
   await runner.getByRole("button",{name:/Tehtävät ja itsekorjaus/}).click();
   await expect(runner.locator(".los-future-exercise-select option")).toHaveCount(5);
-  await runner.locator("#los-future-exercise-input").fill("Harjoitustunnin ensimmäinen oma vastaus.");
+  const prediction=runner.locator(".los-future-remaining-row textarea");
+  await expect(prediction).toHaveCount(3);
+  await prediction.nth(0).fill("Harjoitustunnin ensimmäinen oma vastaus.");
+  await prediction.nth(1).fill("He tutustuvat kielikurssilla.");
+  await prediction.nth(2).fill("Ensimmäinen ennustukseni vastasi päätekstiä.");
   await runner.getByRole("button",{name:"Merkitse vaihe kokeilluksi"}).click();
   await expect(runner).toContainText("1/6 vaihetta kokeiltu");
   await page.goto("/los#/2/01/understand",{waitUntil:"domcontentloaded"});
-  await expect(page.locator("#los-future-exercise-input")).toHaveValue("Harjoitustunnin ensimmäinen oma vastaus.");
+  await expect(page.locator(".los-future-remaining-row textarea").first()).toHaveValue("Harjoitustunnin ensimmäinen oma vastaus.");
   await page.goto("/los#/2/path",{waitUntil:"domcontentloaded"});
   await expect(runner).toContainText("Aloita ja ennakoi");
   await runner.getByRole("button",{name:/Tunnin lopputarkistus/}).click();
@@ -183,9 +197,13 @@ test("LOS! 2–8 chapter Teacher 2.0 shares its own saved exercises, paused scen
   await expect(page.locator(".los-teacher-paused")).toBeVisible();
   await page.getByRole("button",{name:"Jatka opetusta"}).first().click();
   await expect(recall).toHaveValue("Muistan saksan sanan Hallo.");
-  await outline.nth(5).click();
+  // The vocabulary-check scene is optional and takes slot 6; select by
+  // the actual scene title, not by its changing position.
+  await outline.filter({hasText:"Tämän tunnin omat tehtävät"}).click();
   await expect(page.locator(".los-future-exercises")).toBeVisible();
-  await page.locator("#los-future-exercise-input").fill("Oma lähdetekstin ennakointi.");
+  const teacherPrediction=page.locator(".los-future-remaining-row textarea");
+  await expect(teacherPrediction).toHaveCount(3);
+  await teacherPrediction.first().fill("Oma lähdetekstin ennakointi.");
   await outline.last().click();
   await expect(page.getByRole("button",{name:"Merkitse oppitunti läpikäydyksi"})).toBeDisabled();
   await expect(page.locator(".los-teacher-completion-checklist")).toContainText("käsikirjoitusluonnos");
@@ -593,7 +611,10 @@ test("LOS! 2 source midterm keeps all answers hidden until explicit submission a
   await exam.getByRole("checkbox",{name:/Ymmärrän, että palauttamisen jälkeen/}).check();
   await exam.getByRole("button",{name:"Palauta harjoituskoe"}).click();
   await expect(exam.locator(".los-future-exam-model")).toHaveCount(16);
-  await expect(exam.getByText("Pienessä kaupungissa, perheensä kanssa.")).toBeVisible();
+  // The same words also occur in the student's disabled textbox.
+  // Scope the assertion to the revealed answer key, not both elements.
+  await expect(exam.locator(".los-future-exam-model").first())
+    .toContainText("Pienessä kaupungissa, perheensä kanssa.");
   await expect(response).toBeDisabled();
   await expect(exam).toContainText("Muut");
   await page.reload({waitUntil:"domcontentloaded"});
@@ -681,8 +702,7 @@ test("source T10 correction and T13 Text B keep separate written fields and hide
   await rows.nth(1).locator("textarea").fill("Wir saa monikon -en-päätteen.");
   await expect(show).toBeEnabled();
   await page.reload({waitUntil:"domcontentloaded"});
-  await choose.selectOption({index:(await choose.locator("option").allTextContents())
-    .findIndex(label=>label.trim().startsWith("T10 ·"))});
+  await selectFutureTask(page,"T10");
   await expect(rows.nth(1).locator("textarea")).toHaveValue("Wir saa monikon -en-päätteen.");
   await show.click();
   await expect(page.locator(".los-future-exercise-solution")).toBeVisible();
@@ -726,8 +746,7 @@ test("T03 dialog and R01 textual evidence bind to the right chapter without reve
   await rows.nth(1).locator("textarea").fill("Lauseessa kuvataan heidän opiskeluaan.");
   await expect(show).toBeEnabled();
   await page.reload({waitUntil:"domcontentloaded"});
-  const options=await picker.locator("option").allTextContents();
-  await picker.selectOption({index:options.findIndex(label=>label.trim().startsWith("R01 ·"))});
+  await selectFutureTask(page,"R01");
   await expect(rows.nth(0).locator("textarea"))
     .toHaveValue("Mira und Jonas lernen zusammen Deutsch.");
   const stored=await page.evaluate(()=>{
@@ -793,8 +812,7 @@ test("T19 and R06 four-turn dialogues save all turns without pretending to asses
     ["Hallo Jonas!","Hallo Mira!","Lernst du Deutsch?","Ja, zusammen."][n]!);
   await expect(show).toBeEnabled();
   await page.reload({waitUntil:"domcontentloaded"});
-  const opts=await picker.locator("option").allTextContents();
-  await picker.selectOption({index:opts.findIndex(s=>s.trim().startsWith("R06 ·"))});
+  await selectFutureTask(page,"R06");
   await expect(rows.nth(3).locator("textarea")).toHaveValue("Ja, zusammen.");
   const draft=await page.evaluate(()=>{
     const owner=localStorage.getItem("opk.owner-id");
@@ -809,7 +827,7 @@ test("T04 literal span and T14 two-source genres persist separately without prem
   await enterFutureBook(page);
   await page.goto("/los#/2/01/understand",{waitUntil:"domcontentloaded"});
   const picker=page.locator("#los-future-exercise-choice");
-  await picker.selectOption({label:"T04 · Etsi täsmällinen ilmaus"});
+  await selectFutureTask(page,"T04");
   const box=page.locator(".los-future-span-genre");
   await expect(box).toBeVisible();
   await expect(box.locator('input[type="radio"]')).toHaveCount(4);
@@ -821,11 +839,11 @@ test("T04 literal span and T14 two-source genres persist separately without prem
   await box.locator("textarea").nth(1).fill("Tervehdys aloittaa keskustelun.");
   await expect(show).toBeEnabled();
   await page.reload({waitUntil:"domcontentloaded"});
-  await picker.selectOption({label:"T04 · Etsi täsmällinen ilmaus"});
+  await selectFutureTask(page,"T04");
   await expect(box.locator('input[type="radio"]').first()).toBeChecked();
   await expect(box.locator("textarea").nth(1)).toHaveValue("Tervehdys aloittaa keskustelun.");
   await page.goto("/los#/2/01/practice",{waitUntil:"domcontentloaded"});
-  await picker.selectOption({label:"T14 · Vertaa tekstilajeja"});
+  await selectFutureTask(page,"T14");
   await expect(box.locator(".los-future-span-genre-source")).toHaveCount(2);
   await expect(show).toBeDisabled();
   await box.locator("textarea").first().fill("Dialogissa henkilöt puhuvat, viestillä on lukija.");
