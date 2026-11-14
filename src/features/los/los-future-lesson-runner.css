@@ -32,3 +32,17 @@
 .los-future-lesson-runner :is(button,summary,textarea):focus-visible{outline:3px solid var(--los-book-accent,#866644);outline-offset:3px}
 @media(max-width:720px){.los-future-lesson-runner{padding:1rem}.los-guided-lesson-stage-nav{grid-template-columns:repeat(2,minmax(0,1fr))}.los-guided-lesson-stage{padding:.85rem}}
 @media(max-width:400px){.los-guided-lesson-stage-nav button{font-size:.76rem}.los-guided-lesson-next button{font-size:.78rem}.los-guided-lesson-actions button{font-size:.78rem}}
+
+/* Source-bound non-exam review sessions. Inherit the accepted LOS! book accent. */
+.los-review-practice{min-width:0}
+.los-review-practice .los-guided-lesson-stage>p{line-height:1.7;white-space:pre-wrap}
+.los-review-practice .los-guided-lesson-stage-nav{grid-template-columns:repeat(4,minmax(0,1fr))}
+.los-review-vocab-board{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.6rem;margin:1rem 0}
+.los-review-vocab-board>div{display:flex;flex-direction:column;gap:.3rem;min-width:0;border:1px solid #e8dfd5;border-radius:8px;background:#faf8f4;padding:.8rem}
+.los-review-vocab-board strong{color:#28231d}
+.los-review-vocab-board span{color:#62564c}
+.los-guided-review-model{overflow-wrap:anywhere;white-space:pre-wrap;border-left:3px solid var(--los-book-accent,#866644);margin:1rem 0;padding:.8rem 1rem;background:#f8f5ef;line-height:1.8}
+.los-review-source-button{display:inline-flex;align-items:center;gap:.45rem;min-height:44px;padding:.65rem .8rem;border-radius:8px;border:1px solid #a99a88;background:#fff;color:#352d24;font:inherit;font-size:.88rem;cursor:pointer}
+.los-review-practice textarea{min-height:104px}
+@media(max-width:720px){.los-review-practice .los-guided-lesson-stage-nav{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:400px){.los-review-vocab-board{grid-template-columns:1fr}.los-review-practice .los-guided-lesson-stage-nav button{font-size:.76rem}}
