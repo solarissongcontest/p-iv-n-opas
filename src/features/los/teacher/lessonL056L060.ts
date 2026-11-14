@@ -97,7 +97,7 @@ export const LOS1_L057_TEACHER: TeacherLesson = {
       {label:"C06 · ikä",german:"Ich bin siebzehn Jahre alt.",meaning:"Olen seitsemäntoistavuotias"},
       {label:"C07 · tavataan",german:"Bitte buchstabieren Sie.",meaning:"Tavaisitteko nimen, kiitos"},
       {label:"C08 · selviytyminen",german:"Noch einmal, bitte. / Bitte langsamer.",meaning:"Toiston tai hidastamisen pyytäminen"},
-      {label:"C09 · aika",german:"am Montag um drei Uhr",meaning:"maanantaina kello kolme"},
+      {label:"C09 · aika",german:"am Montag um drei Uhr",meaning:"maanantaina kello kolmelta"},
       {label:"C10 · kolmas henkilö",german:"Das ist Mia. Sie heißt Mia.",meaning:"Tuttavan esittely"}
     ]},
     {id:"transfer",phase:"Itsenäinen soveltaminen",kind:"question",title:"Yhdistä tervehdys, nimi ja lähtömaa ilman sanastoa",paragraphs:[
