@@ -56,7 +56,9 @@ test("all 70 R01 excerpt fields check only exact Text A location, not response c
     const text=task.sourceText;
     const excerpt=text.slice(0,Math.min(30,text.length)).trim();
     assert.equal(losFutureEvidenceExcerptInSource(task,excerpt),true,item.id);
-    assert.equal(losFutureEvidenceExcerptInSource(task,excerpt.toLocaleUpperCase("de")),true,item.id);
+    // Lowercasing preserves the original ß character. Uppercasing expands ß
+    // to SS (e.g. Großmutter -> GROSSMUTTER) and is not an exact excerpt.
+    assert.equal(losFutureEvidenceExcerptInSource(task,excerpt.toLocaleLowerCase("de")),true,item.id);
     assert.equal(losFutureEvidenceExcerptInSource(task,""),false,item.id);
     assert.equal(losFutureEvidenceExcerptInSource(task,"Joku virke, joka ei varmasti ole lähteessä 99999."),false,item.id);
     const dialogue=losFutureExercisesFor(book.id,chapter.id).find(t=>t.id.endsWith("-T03"));assert.ok(dialogue);
