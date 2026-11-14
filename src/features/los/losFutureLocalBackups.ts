@@ -4,6 +4,7 @@ import { validTeacherSessionMap } from "./teacher/engine.ts";
 import { losFutureExercisesFor } from "./content/losFutureExercises.ts";
 import { losFutureLessonOutline } from "./losFutureLessonOutline.ts";
 import { LOS_FUTURE_STAGE_IDS,losFuturePracticeDraftKey } from "./losFuturePracticeProgress.ts";
+import { LOS_FUTURE_REVIEW_NUMBERS,losFutureReviewPlan } from "./losFutureReviewPlan.ts";
 
 export const LOS_FUTURE_BACKUP_FORMAT="los-future-book-backup-v1";
 export const LOS_FUTURE_BACKUP_MAX_BYTES=5_000_000;
@@ -32,7 +33,11 @@ function allowedKeys(bookId:number,chapterId:string){
   if(!book||book.id!==bookId)throw Error("Kirjan sisältörunkoa ei löydy varmuuskopion tarkistusta varten.");
   const taskIds=losFutureExercisesFor(bookId,chapterId).map(x=>x.id);
   const scripts=losFutureLessonOutline(book).filter(item=>item.chapterId===chapterId);
-  const answers=new Set([...taskIds,...scripts.map(s=>s.id+":own-reflection"),
+  const reviews=LOS_FUTURE_REVIEW_NUMBERS
+    .map(number=>losFutureReviewPlan(bookId,number))
+    .filter(plan=>plan?.chapterId===chapterId);
+  const reviewAnswers=reviews.flatMap(plan=>plan?Object.values(plan.keys):[]);
+  const answers=new Set([...taskIds,...reviewAnswers,...scripts.map(s=>s.id+":own-reflection"),
     // PR #264 stores its legacy guided-reader cursor inside the chapter draft.
     // It must survive export/import together with teacher lesson answers.
     ...scripts.map(s=>"los.future.guided:"+s.id+":selectedStage")]);
@@ -45,7 +50,7 @@ function validDraft(draft:unknown,bookId:number,chapterId:string):draft is LosCh
     ||!textUnder(draft["applicationDraft"],5000)||typeof draft["bookmarked"]!=="boolean"
     ||!textUnder(draft["selfAssessment"],5000)||!textUnder(draft["updatedAt"],40)
     ||(draft["updatedAt"]!==""&&!validDate(draft["updatedAt"]))
-    ||!strMap(draft["practiceAnswers"],50,5000)
+    ||!strMap(draft["practiceAnswers"],80,5000)
     ||!Array.isArray(draft["practiceChecked"])||draft["practiceChecked"].length>100
     ||!draft["practiceChecked"].every((x:unknown)=>textUnder(x,110))
     ||!isObject(draft["testAnswers"])||Object.keys(draft["testAnswers"]).length!==0
@@ -64,7 +69,8 @@ function validDraft(draft:unknown,bookId:number,chapterId:string):draft is LosCh
   }
   const cursors=draft["practiceAnswers"] as Record<string,string>;
   if(Object.entries(cursors).some(([key,value])=>
-    key.endsWith(":selectedStage")&&(!/^[0-5]$/.test(value))))return false;
+    (key.endsWith(":selectedStage")&&!/^[0-5]$/.test(value))||
+    (key.endsWith(":review:stage")&&!/^[0-3]$/.test(value))))return false;
   return Object.keys(cursors).every(k=>keys.answers.has(k))
     &&(draft["practiceChecked"] as string[]).every(k=>keys.marks.has(k))
     &&new TextEncoder().encode(JSON.stringify(draft)).length<=200_000;
