@@ -108,6 +108,30 @@ export function LosChapterGrammar({chapterId}:{chapterId:string}) {
     <Example de="Nicht so gut." fi="Ei kovin hyvää." />
     <p>Sana <b lang="de">nicht</b> on tavallinen kieltoilmaus. Se vastaa usein suomen sanaa ”ei”. Sana <b lang="de">sehr</b> puolestaan vahvistaa merkitystä: <span lang="de">sehr gut</span> tarkoittaa ”erittäin hyvää”.</p>
     <Note title="Opettele fraasit tässä vaiheessa kokonaisina">Sanojen <span lang="de">mir</span> ja <span lang="de">dir</span> sijamuotoja ei vielä tarvitse osata muodostaa itse.</Note>
+    <h3>Kaksi erilaista kuulumistilannetta</h3>
+    <p>Kaikki ihmiset eivät vastaa kuulumiskysymykseen samalla tavalla.
+      Harjoittele seuraavia tilanteita ensin ilman mallivastausta:
+      1) Ystävällä menee hyvin. 2) Ystävä on väsynyt eikä hänellä mene erityisen hyvin.
+      Kirjoita kumpaankin tilanteeseen kuulumiskysymys ja vähintään yksi vastaus.</p>
+    <details className="los-grammar-self-check">
+      <summary>Vertaa kahta LOS!:n omaa mallikeskustelua vasta yrityksen jälkeen</summary>
+      <p><strong>Tilanne A, tavallinen myönteinen vastaus</strong></p>
+      <Example de="Mia: Wie geht's?" fi="Mia: Mitä kuuluu?" />
+      <Example de="Leo: Gut, danke. Und dir?" fi="Leo: Hyvää, kiitos. Entä sinulle?" />
+      <p><strong>Tilanne B, väsynyt henkilö</strong></p>
+      <Example de="Mia: Wie geht's?" fi="Mia: Mitä kuuluu?" />
+      <Example de="Leo: Nicht so gut. Ich bin müde." fi="Leo: Ei kovin hyvää. Olen väsynyt." />
+      <p>Sinun ei tarvitse kertoa omaa todellista vointiasi. Molemmat ovat
+        LOS!:n omia opetusdialogeja, eivät C05:n alkuperäistekstin rivejä.
+        Kumpaakaan vastausta ei pidä merkitä vääräksi vain siksi, että toinen
+        mallikeskustelu on myönteinen.</p>
+    </details>
+    <p><strong>Vertaa tuttavallista ja kohteliasta kysymystä:</strong>
+      <span lang="de"> Wie geht es dir?</span> kysytään sinuteltavalta ja
+      <span lang="de"> Wie geht es Ihnen?</span> teititeltävältä.
+      Jälkimmäisen kohtelias puhuttelu tulee C04:n opista.
+      Saat käyttää myös lyhyttä tuttavallista muotoa
+      <span lang="de"> Wie geht's?</span>.</p>
   </>;
   if(chapterId==="06")return <>
     <p>Saksassa ikä kerrotaan <b lang="de">sein</b>-verbillä: kirjaimellisesti ”olen … vuotta vanha”. Älä käännä suomen ikälausetta sanasta sanaan tai käytä siihen <span lang="de">haben</span>-verbiä.</p>
@@ -190,6 +214,26 @@ export function LosChapterGrammar({chapterId}:{chapterId:string}) {
     <h3>Harjoittele kaksi erilaista kohtaamista</h3>
     <p>Kirjoita ensin 6–8 repliikin tuttavallinen keskustelu ja sen jälkeen erillinen kohtelias keskustelu opettajan kanssa. Kerro tervehdyksen jälkeen nimet, alkuperä ja jokin tuttu perustieto. Lopeta sopivaan hyvästelyyn. Kirjoita myös erikseen neljä lausetta kolmannesta henkilöstä.</p>
     <Note title="Kappaletesti ei ole kirjan loppukoe">C10 tarkistaa opittuja muotoja ja fraaseja. Täydellinen omien kohtaamisten tuottaminen arvioidaan erillisellä tarkistuslistalla, ja koko kirjan loppukoe on oma osionsa. Ei automaattista kielitaidon prosenttilukua.</Note>
+    <h3>Oman osaamisen arviointi</h3>
+    <p>Kirjoita ensin molemmat keskustelut ja erillinen neljän virkkeen henkilökuvaus
+      kirjan Käytä saksaa -osioon. Tarkista tuotoksesi vasta sen jälkeen tämän
+      taulukon avulla. Arvioi jokainen kohta: <em>onnistuu itsenäisesti</em>,
+      <em> onnistuu mallin avulla</em> tai <em> vaatii vielä harjoittelua</em>.</p>
+    <table className="los-grammar-table">
+      <thead><tr><th scope="col">Taito</th><th scope="col">Mitä tarkistat?</th></tr></thead>
+      <tbody>
+        <tr><td>Tervehdys ja hyvästely</td><td>Onko alussa tilanteeseen sopiva tervehdys ja lopussa hyvästely?</td></tr>
+        <tr><td>Nimet ja alkuperä</td><td>Osaatko kysyä nimen ja alkuperän sekä vastata omilla kuvitteellisilla tiedoilla?</td></tr>
+        <tr><td>Sinuttelu ja teitittely</td><td>Onko nuorten keskustelussa du ja muodollisessa kohtaamisessa Sie johdonmukaisesti?</td></tr>
+        <tr><td>Kolmannen henkilön esittely</td><td>Ovatko er/sie ja heißen-, sein- sekä kommen-verbien muodot oikein?</td></tr>
+        <tr><td>Selviytymisfraasit</td><td>Osaatko tarvittaessa pyytää hidastamaan tai toistamaan?</td></tr>
+        <tr><td>Oma suullinen harjoittelu</td><td>Pystyitkö lukemisen lisäksi muodostamaan repliikkejä myös muistista ääneen?</td></tr>
+      </tbody>
+    </table>
+    <p>Jos tarvitset mallia, palaa siihen kappaleeseen, jossa taito opetetaan.
+      Kirjan oma loppukoe ja itsearviointi tallennetaan erillisinä nykyiseen
+      opiskelutilaan. Tätä taulukkoa ei saa käyttää automaattisena
+      puhe- tai kirjoitustaidon arvosanana.</p>
   </>;
   return null;
 }
