@@ -113,9 +113,9 @@ export function losFutureT16Model(bookId:number,chapterId:string,sourcePrompt:st
   const original=sourcePrompt.slice(start.length,end).trim();
   if(!original)return null;
   const note=LOS_FUTURE_T16_SPECIAL_NOTES[`${bookId}-${chapterId}`];
-  return "Toimituksellinen esimerkkikysymys (ei vielä ulkopuolisen saksanopettajan tarkistama):\\n"
-    +question+"\\nAnnettu lähtöilmaus: "+original+"\\n"
-    +(note?note+"\\n":"")
+  return "Toimituksellinen esimerkkikysymys (ei vielä ulkopuolisen saksanopettajan tarkistama):\n"
+    +question+"\nAnnettu lähtöilmaus: "+original+"\n"
+    +(note?note+"\n":"")
     +"Vertaile kysymyssanan merkitystä, persoonamuotoa, taivutetun verbin paikkaa ja vastausilmauksen sopivuutta. "
     +"Tämä on vain yksi mahdollinen esimerkki, ei automaattinen oikeellisuusarvio.";
 }
