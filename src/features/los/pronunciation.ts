@@ -31,7 +31,9 @@ export type LosPronunciation = {
   }[];
 };
 
-// The following German-language Wiktionary entries were inspected 2026-11-12.
+// German Wiktionary headword sources inspected 2026-11-12; separate
+// bis and später entries additionally checked 2026-11-15. These are
+// individual word pronunciations, NOT the full "Bis später!" phrase.
 // No separate spoken-word audio has yet passed LOS! device + licence QA.
 const verifiedWords: Readonly<Record<string, { ipa: string; alternatives?: readonly string[]; page: string }>> = {
   hallo: { ipa: "ˈhalo", alternatives: ["haˈloː"], page: "hallo" },
@@ -43,6 +45,8 @@ const verifiedWords: Readonly<Record<string, { ipa: string; alternatives?: reado
   du: { ipa: "duː", page: "du" },
   wie: { ipa: "viː", page: "wie" },
   bitte: { ipa: "ˈbɪtə", page: "bitte" },
+  bis: { ipa: "bɪs", page: "bis" },
+  später: { ipa: "ˈʃpɛːtɐ", page: "später" },
 };
 
 // These are standalone *phrase* entries in German Wiktionary, inspected
