@@ -231,3 +231,9 @@
 .los-teacher-original :is(a){color:var(--los-book-accent);text-decoration:underline;text-underline-offset:2px}
 .los-teacher-original .los-teacher-source-warning{padding:12px;border-left:3px solid var(--los-book-accent);background:var(--los-book-tint)}
 @media(max-width:480px){.los-teacher-original{padding:12px}.los-teacher-source-line{grid-template-columns:1fr;gap:3px}.los-teacher-source-line p{font-size:16px}}
+
+/* Future-book Teacher 2.0 uses the existing app shell, with a visible release gate. */
+.los-teacher-editorial-gate{max-width:1060px;margin:20px auto 0;padding:16px 22px;border:1px solid var(--los-book-accent);border-radius:12px;background:var(--los-book-tint);color:var(--los-ink);line-height:1.6}
+.los-teacher-editorial-gate strong{display:block;font-weight:800;font-size:.95rem}
+.los-teacher-editorial-gate p{font-size:.88rem;margin:5px 0 0}
+@media(max-width:600px){.los-teacher-editorial-gate{margin:12px 12px 0;padding:12px 14px}}
