@@ -87,7 +87,7 @@ export const LOS_FUTURE_EXERCISES_2: Record<string, LosFutureExerciseDraft[]> = 
       "chapterId": "10",
       "group": "T",
       "title": "Käännä asiayhteydestä",
-      "prompt": "Kirjoita saksaksi: Lauantaina ostan omenan..",
+      "prompt": "Kirjoita saksaksi: Lauantaina ostan omenan.",
       "answerKey": "Am Samstag kaufe ich einen Apfel.",
       "feedback": "",
       "assessment": "accepted-variants-review"
@@ -349,7 +349,7 @@ export const LOS_FUTURE_EXERCISES_2: Record<string, LosFutureExerciseDraft[]> = 
       "chapterId": "01",
       "group": "T",
       "title": "Käännä asiayhteydestä",
-      "prompt": "Kirjoita saksaksi: Te asutte Berliinissä..",
+      "prompt": "Kirjoita saksaksi: Te asutte Berliinissä.",
       "answerKey": "Ihr wohnt in Berlin.",
       "feedback": "",
       "assessment": "accepted-variants-review"
@@ -611,7 +611,7 @@ export const LOS_FUTURE_EXERCISES_2: Record<string, LosFutureExerciseDraft[]> = 
       "chapterId": "02",
       "group": "T",
       "title": "Käännä asiayhteydestä",
-      "prompt": "Kirjoita saksaksi: Siskoni asuu täällä..",
+      "prompt": "Kirjoita saksaksi: Siskoni asuu täällä.",
       "answerKey": "Meine Schwester wohnt hier.",
       "feedback": "",
       "assessment": "accepted-variants-review"
@@ -873,7 +873,7 @@ export const LOS_FUTURE_EXERCISES_2: Record<string, LosFutureExerciseDraft[]> = 
       "chapterId": "03",
       "group": "T",
       "title": "Käännä asiayhteydestä",
-      "prompt": "Kirjoita saksaksi: Siellä on keittiö..",
+      "prompt": "Kirjoita saksaksi: Siellä on keittiö.",
       "answerKey": "Es gibt eine Küche.",
       "feedback": "",
       "assessment": "accepted-variants-review"
@@ -1135,7 +1135,7 @@ export const LOS_FUTURE_EXERCISES_2: Record<string, LosFutureExerciseDraft[]> = 
       "chapterId": "04",
       "group": "T",
       "title": "Käännä asiayhteydestä",
-      "prompt": "Kirjoita saksaksi: Minulla on lamppu..",
+      "prompt": "Kirjoita saksaksi: Minulla on lamppu.",
       "answerKey": "Ich habe eine Lampe.",
       "feedback": "",
       "assessment": "accepted-variants-review"
@@ -1397,7 +1397,7 @@ export const LOS_FUTURE_EXERCISES_2: Record<string, LosFutureExerciseDraft[]> = 
       "chapterId": "05",
       "group": "T",
       "title": "Käännä asiayhteydestä",
-      "prompt": "Kirjoita saksaksi: Syön aamiaista aamulla..",
+      "prompt": "Kirjoita saksaksi: Syön aamiaista aamulla.",
       "answerKey": "Am Morgen frühstücke ich.",
       "feedback": "",
       "assessment": "accepted-variants-review"
@@ -1659,7 +1659,7 @@ export const LOS_FUTURE_EXERCISES_2: Record<string, LosFutureExerciseDraft[]> = 
       "chapterId": "06",
       "group": "T",
       "title": "Käännä asiayhteydestä",
-      "prompt": "Kirjoita saksaksi: Sinä syöt leipää..",
+      "prompt": "Kirjoita saksaksi: Sinä syöt leipää.",
       "answerKey": "Du isst Brot.",
       "feedback": "",
       "assessment": "accepted-variants-review"
@@ -1921,7 +1921,7 @@ export const LOS_FUTURE_EXERCISES_2: Record<string, LosFutureExerciseDraft[]> = 
       "chapterId": "07",
       "group": "T",
       "title": "Käännä asiayhteydestä",
-      "prompt": "Kirjoita saksaksi: Mitä kahvi maksaa?.",
+      "prompt": "Kirjoita saksaksi: Mitä kahvi maksaa?",
       "answerKey": "Was kostet der Kaffee?",
       "feedback": "",
       "assessment": "accepted-variants-review"
@@ -2183,7 +2183,7 @@ export const LOS_FUTURE_EXERCISES_2: Record<string, LosFutureExerciseDraft[]> = 
       "chapterId": "08",
       "group": "T",
       "title": "Käännä asiayhteydestä",
-      "prompt": "Kirjoita saksaksi: Kuinka paljon leipä maksaa?.",
+      "prompt": "Kirjoita saksaksi: Kuinka paljon leipä maksaa?",
       "answerKey": "Wie viel kostet das Brot?",
       "feedback": "",
       "assessment": "accepted-variants-review"
@@ -2445,7 +2445,7 @@ export const LOS_FUTURE_EXERCISES_2: Record<string, LosFutureExerciseDraft[]> = 
       "chapterId": "09",
       "group": "T",
       "title": "Käännä asiayhteydestä",
-      "prompt": "Kirjoita saksaksi: Olen kaupungissa..",
+      "prompt": "Kirjoita saksaksi: Olen kaupungissa.",
       "answerKey": "Ich bin in der Stadt.",
       "feedback": "",
       "assessment": "accepted-variants-review"
