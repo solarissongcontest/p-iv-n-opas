@@ -14,6 +14,7 @@ test("70 T04 and 70 T14 tasks have exact source lines, safe models and two saved
     for(const kind of ["T04","T14"]){
       const item=tasks.find(x=>x.id.endsWith("-"+kind));assert.ok(item);
       const form=losFutureSpanGenreTask(item);assert.ok(form,item.id);
+      if(kind==="T14")assert.equal(item.prompt,"Vertaa tukidialogia ja Text B -tekstiä. Tarkastele tarkoitusta, mahdollista vastaanottajaa ja ilmaisutapaa. Kirjoita kaksi havaintoa ja perustele ne tekstistä. Kaikkien piirteiden ei tarvitse erota.");
       assert.deepEqual(form.dialogue,manuscript.dialogue);
       assert.equal(form.textB,kind==="T04"?"":manuscript.textB);
       assert.equal(form.kind,kind==="T04"?"span":"genre");
@@ -165,4 +166,33 @@ test("12 corrected T04 questions migrate old student excerpts without accepting 
     assert.equal(rewritten.legacyPromptUpdated,undefined);
     assert.deepEqual(rewritten.answers,saved.answers);
   }
+});
+
+
+test("all 70 T14 text-genre exercises migrate the previously saved message-only prompt",()=>{
+  const oldPrompt="Vertaa tukidialogia ja Text B -viestiä. Miten vastaanottaja, tavoite ja kielen tyyli eroavat? Kirjoita kaksi havaintoa.";
+  const newPrompt="Vertaa tukidialogia ja Text B -tekstiä. Tarkastele tarkoitusta, mahdollista vastaanottajaa ja ilmaisutapaa. Kirjoita kaksi havaintoa ja perustele ne tekstistä. Kaikkien piirteiden ei tarvitse erota.";
+  let migrated=0;
+  for(const book of LOS_BOOKS.filter(book=>book.id>=2))for(const chapter of book.chapters){
+    const task=losFutureExercisesFor(book.id,chapter.id).find(t=>t.id.endsWith("-T14"));
+    assert.ok(task);
+    const form=losFutureSpanGenreTask(task);assert.ok(form);
+    assert.equal(form.prompt,newPrompt);
+    assert.ok(form.textB.length>0);
+    const answers=["Tukidialogissa on puheenvuoroja.","Text B:n tekstilaji ja tarkoitus eroavat."];
+    const saved=writeLosFutureSpanGenreAnswer(form,null,answers);
+    const old=JSON.stringify({...JSON.parse(saved),prompt:oldPrompt});
+    const restored=readLosFutureSpanGenreAnswer(old,form);assert.ok(restored);
+    assert.equal(restored.legacyPromptUpdated,true);
+    assert.deepEqual(restored.answers,answers);
+    assert.equal(restored.selection,null);
+    assert.equal(restored.prompt,newPrompt);
+    assert.equal(readLosFutureSpanGenreAnswer(JSON.stringify({...JSON.parse(old),grade:10}),form),null);
+    assert.equal(readLosFutureSpanGenreAnswer(JSON.stringify({...JSON.parse(old),prompt:oldPrompt+"?"}),form),null);
+    assert.equal(readLosFutureSpanGenreAnswer(
+      writeLosFutureSpanGenreAnswer(form,restored.selection,restored.answers),form)?.legacyPromptUpdated,
+      undefined);
+    migrated++;
+  }
+  assert.equal(migrated,70);
 });
