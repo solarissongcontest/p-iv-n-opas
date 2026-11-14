@@ -1543,9 +1543,12 @@ test("C05 Teacher scene and attempts survive pause, refresh, and resume",async({
  await expect(page.locator(".los-teacher-feedback.is-wrong")).toContainText("nicht");
  await page.getByRole("button",{name:"Keskeytä oppitunti"}).click();
  await expect(page.locator(".los-teacher-paused")).toBeVisible();
+ await expect(outline.first()).toBeDisabled();
  await page.reload({waitUntil:"domcontentloaded"});
  await expect(page.locator(".los-teacher-paused")).toBeVisible();
+ await expect(outline.first()).toBeDisabled();
  await page.getByRole("button",{name:"Jatka opetusta"}).last().click();
+ await expect(outline.first()).toBeEnabled();
  await expect(page.locator(".los-teacher-paper h2")).toContainText("Mihin nicht kuuluu?");
  await expect(page.locator(".los-teacher-feedback.is-wrong")).toBeVisible();
  await expectNoHorizontalOverflow(page);

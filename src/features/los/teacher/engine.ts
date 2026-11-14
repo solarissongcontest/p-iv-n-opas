@@ -222,7 +222,8 @@ export function recoverTeacherSession(session: TeacherSession, lesson: TeacherLe
 }
 
 export function moveTeacherScene(session: TeacherSession, lesson: TeacherLesson, targetId: string, now: string): TeacherSession {
-  if (!lesson.scenes.some(s => s.id === targetId)) return session;
+  // A paused session is read-only. Completed sessions remain navigable for revision.
+  if (session.paused || !lesson.scenes.some(s => s.id === targetId)) return session;
   return {
     ...session, sceneId: targetId, updatedAt: now,
     visitedIds: session.visitedIds.includes(targetId) ? session.visitedIds :
