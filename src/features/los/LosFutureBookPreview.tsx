@@ -4,6 +4,7 @@ import type { LosDestination } from "./LosReferenceTools";
 import { LOS_FUTURE_MANUSCRIPTS } from "./content/losFutureManuscripts.ts";
 import { LosFutureExercises } from "./LosFutureExercises";
 import { LosFutureChapterCheck } from "./LosFutureChapterCheck";
+import {LosRecallCards} from "./LosRecallCards.tsx";
 
 /**
  * Sisältöluonnosten lukija. Näyttää jokaisen luvun kokonaisen käsikirjoituksen
@@ -21,8 +22,7 @@ export function LosFutureBookPreview({book,chapter,section}:{
   const manuscript=LOS_FUTURE_MANUSCRIPTS[book.id]?.[chapter.id];
   const [query,setQuery]=useState("");
   const [showTranslations,setShowTranslations]=useState(true);
-  const [activeWord,setActiveWord]=useState(0);
-  const [revealCard,setRevealCard]=useState(false);
+
   const labels:Partial<Record<LosDestination,string>>={
     chapter:"Aloita",text:"Text A",understand:"Ymmärrä",vocabulary:"Sanasto",
     grammar:"Kielioppi","text-b":"Text B",practice:"Harjoittele",
@@ -30,7 +30,7 @@ export function LosFutureBookPreview({book,chapter,section}:{
   };
   const title=labels[section]??chapter.title;
   const words=manuscript?.vocabulary.filter(word=>`${word.de} ${word.fi}`.toLocaleLowerCase("fi").includes(query.toLocaleLowerCase("fi")))??[];
-  const card=manuscript?.vocabulary[activeWord];
+
   const notice=<div className="los-editorial-note" role="status">
     <h2>Sisältöesikatselu, ei valmis oppikirja</h2>
     <p>Nämä ovat LOS!:n omia 12.11.2026 käsikirjoitusluonnoksia. Niitä ei ole
@@ -46,7 +46,7 @@ export function LosFutureBookPreview({book,chapter,section}:{
 
   return <section className="los-inner-page los-reading-page">
     <p className="los-eyebrow">LOS! {book.id} · {book.code} · KAPITEL {chapter.id} / {title}</p>
-    <h1>{section==="chapter" ? manuscript.title : title}</h1>
+    {section!=="cards"&&<h1>{section==="chapter" ? manuscript.title : title}</h1>}
     <p className="los-page-intro">{manuscript.objective}</p>
     {notice}
 
@@ -122,25 +122,8 @@ export function LosFutureBookPreview({book,chapter,section}:{
         yksilöllisen lisenssin ja soveltuvuuden tarkistuksen jälkeen.</p>
     </>}
 
-    {section==="cards"&&<>
-      <h2>Kokeile sanaston palauttamista</h2>
-      <p>Kertauskortit ovat esikatselussa. Näillä ei vielä tallenneta osaamis- tai
-        muistamismerkintöjä.</p>
-      {card&&<div className="los-editorial-note">
-        <p>{activeWord+1} / {manuscript.vocabulary.length}</p>
-        <h2 lang="de">{card.de}</h2>
-        <button type="button" className="los-outline-button" onClick={()=>setRevealCard(v=>!v)}>
-          {revealCard?"Piilota suomennos":"Näytä suomennos"}
-        </button>
-        {revealCard&&<p>{card.fi}</p>}
-        <div style={{display:"flex",gap:12,marginTop:16}}>
-          <button type="button" disabled={activeWord===0} onClick={()=>{setActiveWord(v=>Math.max(0,v-1));setRevealCard(false);}}>Edellinen</button>
-          <button type="button" disabled={activeWord>=manuscript.vocabulary.length-1}
-            onClick={()=>{setActiveWord(v=>Math.min(manuscript.vocabulary.length-1,v+1));setRevealCard(false);}}>Seuraava</button>
-        </div>
-      </div>}
-    </>}
-
+    {section==="cards"&&<LosRecallCards bookId={book.id} chapter={chapter}/>}
+    
     {section==="test"&&<LosFutureChapterCheck bookId={book.id} chapterId={chapter.id}/>} 
   </section>;
 }

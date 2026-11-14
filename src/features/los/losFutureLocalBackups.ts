@@ -9,6 +9,8 @@ import { getLosFutureExam } from "./content/losFutureExams.ts";
 import { futureExamHistoryKey,futureExamQuestionIds,readFutureExamHistory } from "./losFutureExamEngine.ts";
 import {losFutureChapterCheckPlan} from "./losFutureChapterCheckPlan.ts";
 import {readLosFutureChapterCheckAttempt} from "./losFutureChapterCheckState.ts";
+import {losFutureRecallCardsFor} from "./losFutureRecallCards.ts";
+import {validLosRecallCardMap} from "./recallEngine.ts";
 
 export const LOS_FUTURE_BACKUP_FORMAT="los-future-book-backup-v1";
 export const LOS_FUTURE_BACKUP_MAX_BYTES=5_000_000;
@@ -65,7 +67,14 @@ function validDraft(draft:unknown,bookId:number,chapterId:string):draft is LosCh
   // drafts may be transferred, but are clearly labelled LOCAL practice and
   // do not create validated marks or published exam completion.
   if(draft["lessonProgress"]!==undefined&&(!isObject(draft["lessonProgress"])||Object.keys(draft["lessonProgress"]).length>0))return false;
-  if(draft["recallCards"]!==undefined&&(!isObject(draft["recallCards"])||Object.keys(draft["recallCards"]).length>0))return false;
+  if(draft["recallCards"]!==undefined){
+    const cards=draft["recallCards"];
+    const authorized=new Set(losFutureRecallCardsFor(bookId,chapterId).map(card=>card.id));
+    if(!validLosRecallCardMap(cards)||
+      Object.entries(cards).some(([key,entry])=>!authorized.has(key)||
+        Object.keys(entry).sort().join(",")!=="contentVersion,lastRating,lastReviewedAt,level,nextDueAt"))
+      return false;
+  }
   const testAnswers=draft["testAnswers"] as Record<string,unknown>;
   const exam=chapterId==="05"?getLosFutureExam(bookId,"midterm"):
     chapterId==="10"?getLosFutureExam(bookId,"final"):null;
@@ -106,6 +115,7 @@ function hasStudentData(draft:LosChapterDraft):boolean {
     ||draft.selfAssessment.trim()||draft.practiceChecked.length
     ||Object.values(draft.practiceAnswers).some(v=>Boolean(v.trim()))
     ||(draft.readerMarks&&Object.values(draft.readerMarks).some(Boolean))
+    ||(draft.recallCards&&Object.keys(draft.recallCards).length>0)
     ||(draft.teacherSessions&&Object.keys(draft.teacherSessions).length>0)
     ||Object.values(draft.testAnswers).some(v=>Boolean(v.trim()))||Boolean(draft.testSubmittedAt));
 }

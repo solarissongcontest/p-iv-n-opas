@@ -924,3 +924,34 @@ test("T18 writing revision, R04 context words and R05 two-sentence summary use i
   await expect(page.getByRole("button",{name:"Näytä vastausluonnos"})).toBeEnabled();
   await expectNoHorizontalOverflow(page);
 });
+
+test("later-book recall cards share LOS! 1 spaced-recall logic but keep book-specific progress",async({page})=>{
+  await enterFutureBook(page);
+  await page.goto("/los#/2/01/cards",{waitUntil:"domcontentloaded"});
+  const recall=page.locator(".los-recall");
+  await expect(recall).toBeVisible();
+  await expect(recall.getByRole("heading",{name:"Sanaston kertauskortit"})).toBeVisible();
+  await expect(recall.locator(".los-recall-stage")).toBeVisible();
+  await expect(recall.locator(".los-recall-save")).toContainText("JSON-varmuuskopiossa");
+  const first=await recall.locator(".los-recall-prompt").textContent();
+  await recall.getByRole("button",{name:"Näytä vastaus"}).click();
+  await expect(recall.locator(".los-recall-answer")).toBeVisible();
+  await recall.getByRole("button",{name:"Muistin oikein"}).click();
+  await page.reload({waitUntil:"domcontentloaded"});
+  await expect(recall.locator(".los-recall-stage")).toBeVisible();
+  await expect(recall.locator(".los-recall-prompt")).not.toHaveText(first!.trim());
+  const saved=await page.evaluate(()=>{
+    const owner=localStorage.getItem("opk.owner-id");
+    return JSON.parse(localStorage.getItem(`los.local.v1.${owner}.2.01`)??"{}");
+  });
+  expect(Object.keys(saved.recallCards)).toHaveLength(1);
+  expect(Object.values(saved.recallCards)[0]).toMatchObject({level:1,lastRating:"remembered"});
+  await page.goto("/los#/3/01/cards",{waitUntil:"domcontentloaded"});
+  await expect(recall.locator(".los-recall-stage")).toBeVisible();
+  const other=await page.evaluate(()=>{
+    const owner=localStorage.getItem("opk.owner-id");
+    return localStorage.getItem(`los.local.v1.${owner}.3.01`);
+  });
+  expect(other).toBeNull();
+  await expectNoHorizontalOverflow(page);
+});

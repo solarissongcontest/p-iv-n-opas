@@ -13,6 +13,8 @@ import {getLosFutureExam} from "../src/features/los/content/losFutureExams.ts";
 import {beginFutureExamRetake,futureExamHistoryKey} from "../src/features/los/losFutureExamEngine.ts";
 import {losFutureChapterCheckPlan} from "../src/features/los/losFutureChapterCheckPlan.ts";
 import {saveLosFutureChapterCheckAnswer,submitLosFutureChapterCheck,retakeLosFutureChapterCheck} from "../src/features/los/losFutureChapterCheckState.ts";
+import {losFutureRecallCardsFor} from "../src/features/los/losFutureRecallCards.ts";
+import {losRecallReview} from "../src/features/los/recallEngine.ts";
 
 const owner="backup-test-owner";
 const makeDraft=():LosChapterDraft=>({
@@ -301,4 +303,34 @@ test("chapter check backups reject fabricated grades, invalid history and cross-
     [plan.previousKeys[0]!]:"{invalid-json"};
   store.setItem(key(3,"04"),JSON.stringify(badHistory));
   assert.throws(()=>createLosFutureBackup(3,owner,store),/tietoja ei voitu tarkistaa/);
+});
+
+test("70-book-deck recall ratings round-trip with local backup but never create mastery",()=>{
+  const card=losFutureRecallCardsFor(2,"01")[0];assert.ok(card);
+  const store=new FakeStore();
+  const draft=makeDraft();
+  draft.recallCards={[card.id]:losRecallReview(undefined,"remembered",fixedDate.toISOString())};
+  store.setItem(key(2,"01"),JSON.stringify(draft));
+  const saved=createLosFutureBackup(2,owner,store,fixedDate);
+  assert.deepEqual(saved.chapters["01"]?.recallCards,draft.recallCards);
+  const other=new FakeStore();
+  const imported=applyLosFutureBackup(parseLosFutureBackup(JSON.stringify(saved)),2,"other-device",other,"missing-only");
+  assert.equal(imported.imported,1);
+  assert.deepEqual(JSON.parse(other.getItem(key(2,"01","other-device"))!).recallCards,draft.recallCards);
+  assert.equal(JSON.parse(other.getItem(key(2,"01","other-device"))!).lessonProgress,undefined);
+  assert.equal(JSON.parse(other.getItem(key(2,"01","other-device"))!).testSubmittedAt,null);
+});
+test("future recall backup rejects foreign cards and forged grade fields",()=>{
+  const validCard=losFutureRecallCardsFor(2,"01")[0];assert.ok(validCard);
+  const different=losFutureRecallCardsFor(3,"03")[0];assert.ok(different);
+  const state=losRecallReview(undefined,"remembered",fixedDate.toISOString());
+  const base={format:LOS_FUTURE_BACKUP_FORMAT,bookId:2,exportedAt:fixedDate.toISOString()};
+  for(const recallCards of [
+    {[different.id]:state},
+    {[validCard.id]:{...state,score:99}},
+    {[validCard.id]:{...state,level:999}},
+  ]){
+    const invalid=makeDraft();invalid.recallCards=recallCards as LosChapterDraft["recallCards"];
+    assert.throws(()=>parseLosFutureBackup(JSON.stringify({...base,chapters:{"01":invalid}})),/virheellinen/);
+  }
 });
