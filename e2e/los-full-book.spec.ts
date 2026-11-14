@@ -516,6 +516,29 @@ test("U1 R9: shared C01 word card has no automatic WCAG A/AA violations",async({
   elements:v.nodes.map(n=>n.target).slice(0,5)}))).toEqual([]);
 });
 
+
+test("U1: Bis später phrase card displays two sourced words but never invents phrase IPA or audio",async({page})=>{
+  await enterLocalBook(page);
+  await page.goto("/los#/1/dictionary",{waitUntil:"domcontentloaded"});
+  await page.locator(".los-index-search input").fill("Bis später!");
+  const open=page.getByRole("button",{name:"Avaa sanakortti: Bis später!"}).first();
+  await expect(open).toBeVisible();
+  await open.click();
+  const card=page.getByRole("dialog",{name:"Sanan Bis später! selitys"});
+  await expect(card).toBeVisible();
+  await expect(card).toContainText("IPA tarkistamatta tälle sanamuodolle");
+  await expect(card).toContainText("eivät ole koko ilmauksen ääntämismalli");
+  const parts=card.locator(".los-dictionary-word-ipa li");
+  await expect(parts).toHaveCount(2);
+  await expect(parts.nth(0)).toContainText("bɪs");
+  await expect(parts.nth(1)).toContainText("ˈʃpɛːtɐ");
+  await expect(card.locator(".los-dictionary-word-ipa a")).toHaveCount(2);
+  await expect(card).toContainText("Malliääni puuttuu");
+  await expectNoHorizontalOverflow(page);
+  await card.getByRole("button",{name:"Sulje sanan selitys"}).click();
+  await expect(open).toBeFocused();
+});
+
 test("LOS! 1 sourced photos survive on all ten digital chapters",async({page})=>{
  await enterLocalBook(page);
  for(const chapter of chapters){
