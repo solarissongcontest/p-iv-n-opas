@@ -4,7 +4,10 @@ import type {LosFutureExerciseDraft} from "./losFutureExerciseTypes.ts";
  * Preserve their original text; no fabricated feedback or machine grade. */
 export type LosFutureTwoPartTask={
   kind:"correction"|"text-b";
+  /** Stable original source identity used in saved T10/T13 responses. */
   sourceText:string;
+  /** The source as written in Text B, without the delimiter period. Never used as a storage key. */
+  readingText:string;
   questions:readonly [string,string];
   languages:readonly ["de","fi"]|readonly ["fi","fi"];
 };
@@ -17,7 +20,7 @@ export function losFutureTwoPartTask(task:LosFutureExerciseDraft):LosFutureTwoPa
     task.prompt.startsWith(correctionPrefix)&&task.prompt.endsWith(correctionSuffix)){
     const sourceText=task.prompt.slice(correctionPrefix.length,-correctionSuffix.length).trim();
     if(!sourceText||sourceText.length>400)return null;
-    return {kind:"correction",sourceText,
+    return {kind:"correction",sourceText,readingText:sourceText,
       questions:["Kirjoita korjattu lause saksaksi","Selitä suomeksi, miksi alkuperäinen lause on virheellinen"],
       languages:["de","fi"]};
   }
@@ -25,8 +28,11 @@ export function losFutureTwoPartTask(task:LosFutureExerciseDraft):LosFutureTwoPa
     const pivot=task.prompt.indexOf(textPivot,textPrefix.length);
     if(pivot<textPrefix.length)return null;
     const sourceText=task.prompt.slice(textPrefix.length,pivot+1).trim();
-    if(!sourceText||sourceText.length>400)return null;
-    return {kind:"text-b",sourceText,
+    // The source manuscript already supplies punctuation. The extra full stop
+    // is the T13 prompt delimiter, retained only to read earlier JSON drafts.
+    const readingText=sourceText.endsWith(".")?sourceText.slice(0,-1):"";
+    if(!readingText||sourceText.length>400)return null;
+    return {kind:"text-b",sourceText,readingText,
       questions:["Kerro yksi tekstistä löytyvä tieto tai ilmaus suomeksi",
         "Tee toinen havainto: uusi tieto, tekstin tarkoitus tai ilmaisutapa"],
       languages:["fi","fi"]};
@@ -36,12 +42,14 @@ export function losFutureTwoPartTask(task:LosFutureExerciseDraft):LosFutureTwoPa
 /** Incompatible old prose remains untouched. Return null for legacy drafts. */
 export function readLosFutureTwoPartAnswer(value:string,task:LosFutureTwoPartTask):string[]|null{
   if(!value)return ["",""];
+  if(value.length>5000)return null;
   try{
     const parsed:unknown=JSON.parse(value);
     if(!parsed||typeof parsed!=="object"||Array.isArray(parsed))return null;
     const row=parsed as {version?:unknown;kind?:unknown;sourceText?:unknown;answers?:unknown};
     const answers=row.answers;
-    if(row.version!==1||row.kind!==task.kind||row.sourceText!==task.sourceText||
+    if(Object.keys(row).sort().join(",")!=="answers,kind,sourceText,version"||
+      row.version!==1||row.kind!==task.kind||row.sourceText!==task.sourceText||
       !Array.isArray(answers)||answers.length!==2||
       !answers.every((v:unknown)=>typeof v==="string"&&v.length<=600))return null;
     return [...answers] as string[];
