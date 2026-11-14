@@ -5,6 +5,8 @@ import {LOS_FUTURE_MANUSCRIPTS} from "./losFutureManuscripts.ts";
  * learner's earlier highlighted excerpt and written Finnish justification.
  * Only the official corrected prompt can activate a legacy question. */
 const SPAN_QUESTION_PREFIX="Etsi ja korosta tukidialogista kohta, joka auttaa vastaamaan kysymykseen: ";
+const GENRE_PROMPT_OLD="Vertaa tukidialogia ja Text B -viestiä. Miten vastaanottaja, tavoite ja kielen tyyli eroavat? Kirjoita kaksi havaintoa.";
+const GENRE_PROMPT_NEW="Vertaa tukidialogia ja Text B -tekstiä. Tarkastele tarkoitusta, mahdollista vastaanottajaa ja ilmaisutapaa. Kirjoita kaksi havaintoa ja perustele ne tekstistä. Kaikkien piirteiden ei tarvitse erota.";
 const REVISED_T04_QUESTIONS:Record<string,readonly [string,string]>={
   "LOS2-C03-T04": ["Mitä huoneita Benin asunnossa on?","Mitä Ben kertoo asunnossa olevan keittiön lisäksi?"],
   "LOS2-C08-T04": ["Mitä kolme tuotetta ostoslistalla on?","Mitä kahta ostettavaa Mia mainitsee ensimmäisessä puheenvuorossaan?"],
@@ -41,7 +43,7 @@ export function losFutureSpanGenreTask(t:LosFutureExerciseDraft):LosFutureSpanGe
         "Selitä suomeksi, miten ilmaus auttaa vastaamaan kysymykseen"]};
   }
   if(m[3]==="T14"&&t.title==="Vertaa tekstilajeja"&&
-    t.prompt.startsWith("Vertaa tukidialogia ja Text B -viestiä.")&&chapter.textB.trim()){
+    t.prompt===GENRE_PROMPT_NEW&&chapter.textB.trim()){
     return {id:t.id,kind:"genre",prompt:t.prompt,dialogue:chapter.dialogue,textB:chapter.textB,
       questions:["Havainto 1: vertaa tekstien vastaanottajaa tai tarkoitusta",
         "Havainto 2: vertaa tekstien tyyliä, sanastoa tai rakennetta"]};
@@ -58,9 +60,11 @@ export function readLosFutureSpanGenreAnswer(raw:string,t:LosFutureSpanGenreTask
     if(!d||typeof d!=="object"||Array.isArray(d))return null;
     const a=d as Partial<LosFutureSpanGenreAnswer>;
     const revision=t.kind==="span"?REVISED_T04_QUESTIONS[t.id]:undefined;
-    const isLegacyPrompt=Boolean(revision&&
+    const isLegacySpan=Boolean(revision&&
       t.prompt===SPAN_QUESTION_PREFIX+revision[1]&&
       a.prompt===SPAN_QUESTION_PREFIX+revision[0]);
+    const isLegacyGenre=t.kind==="genre"&&t.prompt===GENRE_PROMPT_NEW&&a.prompt===GENRE_PROMPT_OLD;
+    const isLegacyPrompt=isLegacySpan||isLegacyGenre;
     if(Object.keys(a).sort().join(",")!=="answers,dialogue,id,prompt,selection,textB,version"||
       a.version!==1||a.id!==t.id||(a.prompt!==t.prompt&&!isLegacyPrompt)||a.textB!==t.textB||
       !Array.isArray(a.dialogue)||a.dialogue.length!==t.dialogue.length||
