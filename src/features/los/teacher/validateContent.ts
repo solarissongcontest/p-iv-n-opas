@@ -81,7 +81,10 @@ function checkScene(scene: TeacherScene, location: string, issues: TeacherConten
 export function validateTeacherLesson(lesson: TeacherLesson): TeacherContentIssue[] {
   const issues: TeacherContentIssue[] = [];
   const allIds = lesson.scenes.map(scene => scene.id);
-  if (!/^L\d{3}$/.test(lesson.id) || !Number.isInteger(lesson.bookId) ||
+  const idMatchesBook = lesson.bookId === 1
+    ? /^L\d{3}$/.test(lesson.id)
+    : new RegExp("^LOS" + lesson.bookId + "-L\\d{3}$").test(lesson.id);
+  if (!idMatchesBook || !Number.isInteger(lesson.bookId) ||
       lesson.bookId < 1 || lesson.bookId > 8 ||
       !/^\d{2}$/.test(lesson.chapterId) || !meaningful(lesson.version) ||
       !meaningful(lesson.title) || !meaningful(lesson.objective) ||

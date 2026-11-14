@@ -68,6 +68,8 @@ export type TeacherLesson = {
   title: string;
   objective: string;
   estimatedMinutes: number;
+  /** Editorial manuscript previews cannot be completed or treated as proof of mastery. */
+  publicationStatus?: "editorial-draft";
   scenes: readonly TeacherScene[];
   requiredQuestionIds: readonly string[];
   requiredActivityIds: readonly string[];
@@ -183,12 +185,12 @@ export function validTeacherSessionMap(value: unknown): value is Record<string, 
   if (!record(value)) return false;
   const entries = Object.entries(value);
   return entries.length <= 60 && entries.every(([key, entry]) =>
-    /^L\d{3}$/.test(key) && validTeacherSession(entry) && entry.lessonId === key);
+    /^(?:L\d{3}|LOS[2-8]-L\d{3})$/.test(key) && validTeacherSession(entry) && entry.lessonId === key);
 }
 export function parseTeacherSessions(value: unknown): Record<string, TeacherSession> {
   if (!record(value)) return {};
   return Object.fromEntries(Object.entries(value).filter(([key, entry]) =>
-    /^L\d{3}$/.test(key) && validTeacherSession(entry) && entry.lessonId === key,
+    /^(?:L\d{3}|LOS[2-8]-L\d{3})$/.test(key) && validTeacherSession(entry) && entry.lessonId === key,
   ).slice(0, 60)) as Record<string, TeacherSession>;
 }
 export function normalizeTeacherAnswer(answer: string): string {
@@ -288,6 +290,8 @@ export function teacherCompletionBlockers(session: TeacherSession, lesson: Teach
   practiceAnswers: Readonly<Record<string, string>>, practiceChecked: readonly string[] = [],
   chapterAssessment?: TeacherChapterAssessmentInput, externalReady: boolean = !lesson.externalCheck): string[] {
   const missing: string[] = [];
+  if (lesson.publicationStatus === "editorial-draft")
+    missing.push("Tämä oppitunti on tarkistamaton käsikirjoitusluonnos. Hyväksyttyä suoritusta ei voi vielä tallentaa.");
   if (!externalReady) missing.push("Kirjan erillinen kertaus- tai arviointiosio on vielä kesken.");
   if (lesson.mediaGate && !lesson.mediaGate.approved)
     missing.push("Kuuntelumedian hyväksyntä odottaa: " + lesson.mediaGate.sourceId + ". Puuttuvaa äänitettä ei voi korvata tekstin lukemisella.");
