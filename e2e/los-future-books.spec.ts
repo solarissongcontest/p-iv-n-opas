@@ -247,3 +247,34 @@ test("LOS! 2 source R02 no longer reveals the answer before assembling its shuff
   await expect(card.locator(".los-future-ordering-answer")).toHaveText("Am Montag");
   await expect(page.locator(".los-future-exercise-summary")).toContainText("0 verrattu vastausluonnokseen");
 });
+
+test("LOS! 2 T06 uses six independent recall fields with saved text across reload, not fake grading",async({page})=>{
+  await enterFutureBook(page);
+  await page.goto("/los#/2/01/understand",{waitUntil:"domcontentloaded"});
+  const picker=page.locator("#los-future-exercise-choice");
+  const labels=await picker.locator("option").allTextContents();
+  const index=labels.findIndex(label=>label.trim().startsWith("T06 ·"));
+  expect(index).toBeGreaterThanOrEqual(0);
+  await picker.selectOption({index});
+  const recall=page.getByRole("group",{name:"Palauta kuusi sanaa muistista"});
+  await expect(recall).toBeVisible();
+  const answers=recall.locator("input");
+  await expect(answers).toHaveCount(6);
+  await answers.nth(0).fill("der Freund");
+  await answers.nth(1).fill("die Freundin");
+  await expect(page.locator(".los-future-exercise-summary")).toContainText("1 vastattu");
+  await expect(page.locator(".los-future-exercise-summary")).toContainText("0 verrattu vastausluonnokseen");
+  await page.reload({waitUntil:"domcontentloaded"});
+  await picker.selectOption({index});
+  await expect(recall.locator("input").nth(0)).toHaveValue("der Freund");
+  await expect(recall.locator("input").nth(1)).toHaveValue("die Freundin");
+  await expect(recall.locator("input").nth(2)).toHaveValue("");
+  await expect(page.locator(".los-future-exercise-solution")).toHaveCount(0);
+  const stored=await page.evaluate(()=>{
+    const owner=localStorage.getItem("opk.owner-id");
+    return localStorage.getItem(`los.local.v1.${owner}.2.01`)??"";
+  });
+  expect(stored).toContain("der Freund");
+  expect(stored).toContain("die Freundin");
+  await expectNoHorizontalOverflow(page);
+});
