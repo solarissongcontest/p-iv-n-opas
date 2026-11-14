@@ -11,7 +11,7 @@ const greetings = [
   {de:"Guten Morgen!",fi:"Hyvää huomenta!",when:"Tervehdit aamulla."},
   {de:"Guten Tag!",fi:"Hyvää päivää!",when:"Tervehdit päivällä, myös kohteliaassa tilanteessa."},
   {de:"Guten Abend!",fi:"Hyvää iltaa!",when:"Tervehdit illalla."},
-  {de:"Gute Nacht!",fi:"Hyvää yötä!",when:"Toivotat hyvää yötä, esimerkiksi nukkumaan mennessä."},
+  {de:"Gute Nacht!",fi:"Hyvää yötä!",when:"Hyvästelet illalla tai toivotat hyvää yötä nukkumaan mennessä; ei tavallinen saapumistervehdys."},
   {de:"Tschüss!",fi:"Moikka!",when:"Hyvästelet tuttavallisesti."},
   {de:"Auf Wiedersehen!",fi:"Näkemiin!",when:"Hyvästelet kohteliaasti."},
   {de:"Bis später!",fi:"Nähdään myöhemmin!",when:"Tiedät tai oletat tapaavasi myöhemmin."},
@@ -48,6 +48,10 @@ export function LosC01GrammarGuide() {
           </tr>)}</tbody>
         </table>
       </div>
+      <p><strong>Bitte eri tilanteissa:</strong> <span lang="de">Danke! – Bitte!</span> = Kiitos! – Eipä kestä!
+        Pyynnössä <span lang="de">bitte</span> voi vastata suomen sanaa <em>kiitos</em>:
+        <span lang="de"> Ein Wasser, bitte.</span> = Vettä, kiitos.
+        Tämä vesitilaus on LOS!:n oma opetusmalli, ei Franzin ja Jörgin alkuperäistekstin lainaus.</p>
       <p><strong>Huomaa:</strong> sanat <span lang="de">Guten</span> ja <span lang="de">Gute</span>
         eivät vielä vaadi sijamuotojen opettelua. Tässä niitä käytetään valmiiden
         tervehdysten osina.</p>
@@ -102,6 +106,17 @@ export function LosC01GrammarGuide() {
     </section>
     <section aria-labelledby="los-c01-remember">
       <h3 id="los-c01-remember">5. Tarkista ymmärsitkö ennen harjoituksia</h3>
+      <p><strong>Harjoittele ensin itse:</strong> A) Saavut kello 20 kylään.
+        B) Toivotat kello 23 hyvää yötä mennessäsi nukkumaan.
+        C) Ystävä sanoo sinulle <span lang="de">Danke!</span>.
+        Valitse jokaiselle tilanteelle saksankielinen ilmaus ennen vastausten avaamista.</p>
+      <details className="los-c01-self-check">
+        <summary>Näytä vastausesimerkit vasta oman yrityksen jälkeen</summary>
+        <p>A) <span lang="de">Guten Abend!</span> B) <span lang="de">Gute Nacht!</span>
+          C) <span lang="de">Bitte!</span> (= Eipä kestä!).
+          Sama kohteliaisuusfraasi voi merkitä eri asioita tilanteen mukaan.
+          Tämä on itsearvioitava opetusharjoitus, ei pisteytetty kappaletesti.</p>
+      </details>
       <p>Osaat aloittaa harjoitukset, kun erotat seuraavat tilanteet ilman valmista suomennosta:
         aamulla tervehtiminen, illalla tervehtiminen, hyvän yön toivottaminen,
         ystävän hyvästely ja kohtelias hyvästely. Palaa tarvittaessa yllä olevaan taulukkoon.
