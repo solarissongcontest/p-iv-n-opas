@@ -16,12 +16,12 @@ export function parseLosFuturePracticeEvidence(raw:string|null):PracticeEvidence
   if(!raw)return EMPTY_PRACTICE;
   try{
     const input=JSON.parse(raw) as Record<string,unknown>;
-    if(!input||input.version!==1||!isStringRecord(input.practiceAnswers)
-      ||!isStringRecord(input.testAnswers))return EMPTY_PRACTICE;
+    if(!input||input["version"]!==1||!isStringRecord(input["practiceAnswers"])
+      ||!isStringRecord(input["testAnswers"]))return EMPTY_PRACTICE;
     return {
-      practiceAnswers:input.practiceAnswers,
-      practiceChecked:Array.isArray(input.practiceChecked)
-        ? input.practiceChecked.filter((value):value is string=>typeof value==="string")
+      practiceAnswers:input["practiceAnswers"],
+      practiceChecked:Array.isArray(input["practiceChecked"])
+        ? input["practiceChecked"].filter((value):value is string=>typeof value==="string")
         : [],
     };
   }catch{return EMPTY_PRACTICE;}
