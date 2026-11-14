@@ -8,6 +8,7 @@ import {LOS1_L032_TEACHER} from "../src/features/los/teacher/lessonL032.ts";
 import {LOS1_L035_TEACHER} from "../src/features/los/teacher/lessonL035.ts";
 import {LOS1_MIDTERM_QUESTIONS} from "../src/features/los/content/los1Exams.ts";
 import {LOS1_FINAL_QUESTIONS} from "../src/features/los/content/los1FinalExam.ts";
+import {losExercisesFor, losIsCorrect, losScore} from "../src/features/los/exerciseBank.ts";
 
 const chapter=(id:string)=>{
   const result=LOS_BOOKS.find(b=>b.id===1)?.chapters.find(c=>c.id===id);
@@ -79,4 +80,30 @@ test("C06 age transfer uses fictitious teenage examples without overwriting less
   assert.match(apply.paragraphs.join(" "),/kuvitteellisista 16-, 17-, 18- ja 19-vuotiaista/);
   assert.equal(LOS1_MIDTERM_QUESTIONS.length,25);
   assert.equal(LOS1_FINAL_QUESTIONS.length,50);
+});
+
+test("C07 instructional pages and source translation use clear Finnish spelling request",()=>{
+  const grammar=readFileSync("src/features/los/LosGrammarChapters.tsx","utf8");
+  assert.match(grammar,/Voisitteko tavata nimen, kiitos/);
+  assert.doesNotMatch(grammar,/Tavatkaa, olkaa hyvä/);
+  const c07=getLosOpenDialogue("07");
+  assert.ok(c07);
+  assert.match(c07.originalLines.find(l=>l.id==="u03")?.meaning??"",/Voisitteko tavata nimen, kiitos/);
+  assert.match(c07.originalLines.find(l=>l.id==="u03")?.text??"",/Bitte buchstabieren Sie/);
+});
+
+test("C09 corrected scored choice accepts saved legacy response without regrading",()=>{
+  const q=losExercisesFor("09").find(x=>x.id==="C09-EX-09");
+  assert.ok(q);
+  assert.equal(q.correct,"kello kolmelta");
+  assert.deepEqual(q.options,["kolmen tunnin ajan","kello kolmelta","kolmantena päivänä"]);
+  assert.ok(q.accepted.includes("kello kolme"),"historical answer must remain valid");
+  assert.equal(losIsCorrect(q,"kello kolme"),true);
+  assert.equal(losIsCorrect(q,"kello kolmelta"),true);
+  assert.equal(losScore("09",{"C09-EX-09":"kello kolme"}).correct,1);
+  const grammar=readFileSync("src/features/los/LosGrammarChapters.tsx","utf8");
+  assert.match(grammar,/Maanantaina kello kolmelta/);
+  const workbook=readFileSync("src/features/los/LosWorkbook.tsx","utf8");
+  assert.match(workbook,/Aiemmin tallennettu vaihtoehto/);
+  assert.match(workbook,/Palautettu vastauksesi säilyy ennallaan/);
 });
