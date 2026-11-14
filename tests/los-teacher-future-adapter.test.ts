@@ -23,7 +23,15 @@ test("exactly 350 distinct book-qualified chapter Teacher lessons reuse their ow
       assert.equal(adapted.bookId,book.id);
       assert.equal(adapted.chapterId,slot.chapterId);
       assert.equal(adapted.publicationStatus,"editorial-draft");
-      assert.equal(adapted.scenes.length,9);
+      assert.equal(adapted.scenes.length,10);
+      const check=adapted.scenes.find(scene=>scene.id==="vocabulary-check");
+      assert.ok(check?.question,slot.id);
+      assert.equal(check.question.type,"choice");
+      assert.equal(check.question.evidenceRole,"practice");
+      assert.equal(check.question.options?.length,4);
+      assert.ok(check.question.options?.every(option=>option.lang==="fi"));
+      assert.ok(check.question.options?.some(option=>option.id===check.question!.correctOption));
+      assert.ok(check.question.options?.filter(option=>option.wrongFeedback).length===3);
       assert.ok(adapted.scenes.find(x=>x.id==="model")?.paragraphs.includes(source.model));
       assert.equal(adapted.scenes.find(x=>x.id==="board")?.board?.length,4);
       assert.deepEqual(validateTeacherLesson(adapted),[],slot.id);
