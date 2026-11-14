@@ -51,9 +51,9 @@ function FormativeReview({bookId,script,move,plan}:{
       <h3 id="los-review-stage-heading">{stages[stageIndex]}</h3>
       {stageIndex===0&&<>
         <p>{script.intro}</p>
-        <p>Muista ensin omin sanoin: mitä kappaleissa {Number(plan.compareId)}–{Number(plan.chapterId)} opittiin?
-          Kirjoita vähintään kaksi sanaa tai rakennetta ja yksi asia, jota haluat vielä harjoitella.
-          Tämä on muistista palauttamista, ei arvosana.</p>
+        <p>{script.number===1
+          ?"Tämä on alkukartoitus. Kirjoita, mitä osaat jo saksaksi, vaikka muistaisit vain yhden tervehdyksen. Jos aloitat täysin nollasta, kirjoita se. Sinun ei tarvitse osata ensimmäisen kappaleen sisältöä etukäteen."
+          :`Palauta mieleen aiemmin opittua kappaleista ${Number(plan.compareId)}–${Number(plan.chapterId)}. Kirjoita vähintään kaksi sanaa tai rakennetta ja yksi asia, jota haluat vielä harjoitella. Tämä on muistista palauttamista, ei arvosana.`}</p>
         <label className="los-guided-reflection">
           <strong>Omat aikaisemmat tiedot ja kysymykset</strong>
           <textarea rows={5} maxLength={3000} value={recall}
