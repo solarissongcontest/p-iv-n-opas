@@ -28,13 +28,13 @@ function LessonItem({lesson,selected,onSelect}:{
       className={selected?"is-selected":undefined}
       aria-pressed={selected}
       onClick={()=>onSelect(lesson.number)}
-      aria-label={`Tunti ${lesson.number}: ${lesson.title}. Avaa ${lesson.phase==="review"?"kertaus- tai kokeen ohjeteksti":"ohjattu oppitunti"}`}>
+      aria-label={`Tunti ${lesson.number}: ${lesson.title}. Avaa ${isExam?"kokeen ohjeteksti":lesson.phase==="review"?"ohjattu kertaus":"ohjattu oppitunti"}`}>
       <span className="los-path-number">{String(lesson.number).padStart(2,"0")}</span>
       <span className="los-path-copy">
         <strong>{lesson.title}</strong>
         <small>{lesson.chapterId
           ? `Kappale ${Number(lesson.chapterId)} · ${lesson.chapterTitle} · ${lesson.estimatedMinutes} min · käsikirjoitusluonnos`
-          : `${isExam?"Kokeen ohje, ei toimiva koe":"Kertauksen käsikirjoitus"} · ${lesson.estimatedMinutes} min`}</small>
+          : `${isExam?"Kokeen ohje, ei toimiva koe":"Ohjattu kertaus, ei hyväksytty arviointi"} · ${lesson.estimatedMinutes} min`}</small>
       </span>
       {isExam?<LockKeyhole size={17} aria-hidden="true"/>:
         lesson.phase==="review"?<ClipboardList size={17} aria-hidden="true"/>:
@@ -94,8 +94,10 @@ export function LosFutureLearningPath({book,move}:{
         Kaikkien 50 kappaletunnin aloitus, mallin purku, vaiheittainen ohjaus, käytännön
         tehtävät ja itsekorjaus ovat nyt esikatseltavissa myös yhteisessä Teacher 2.0 -opetustilassa. Opettajasisältö, kielellinen oikeellisuus,
         äänitteet, lopputarkistuksen luotettavuus ja koko tuntien suorituskriteeristö odottavat hyväksyntää.
-        Kokeita ei käynnistetä pelkistä koetuntien ohjeista. Pelkkä siirtymä sisältösivulle
-        ei muuta oppituntia suoritetuksi.</p>
+        Kahdeksan kirjan ei-koemuotoiset kertaukset sisältävät nelivaiheisen harjoituspolun,
+        jossa omat vastaukset tallentuvat turvallisesti kirjakohtaisesti.
+        Väli- ja loppukokeita ei käynnistetä pelkistä koetuntien ohjeista.
+        Pelkkä siirtymä sisältösivulle ei muuta oppituntia suoritetuksi.</p>
     </div>
     <LosFutureProgressPanel book={book} onResume={resumeLesson}/>
     {active&&<LosFutureLessonRunner key={`${book.id}-${ownerId??"device-unknown"}-${active.id}-${runnerRevision}`}
