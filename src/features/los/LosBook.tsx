@@ -362,11 +362,12 @@ function Appendix({ book }: { book: LosBookDefinition }) {
     <LosBackups key={book.id} bookId={book.id} />
   </section>;
 }
-function LosBookWorkspace({ book, location, move, goLibrary, openChapterFromDictionary }: {
+function LosBookWorkspace({ book, location, move, goLibrary, openBook, openChapterFromDictionary }: {
   book: LosBookDefinition;
   location: LosLocation;
   move: (chapter: string | null, section: LosSection) => void;
   goLibrary: () => void;
+  openBook: (bookId:number)=>void;
   openChapterFromDictionary: (bookId:number,chapterId:string)=>void;
 }) {
   const chapter = book.chapters.find(c => c.id === location.chapter) ?? null;
@@ -575,7 +576,7 @@ export function LosBook() {
   const returnLesson = requestedLesson && getLosTeacherLesson(requestedLesson) ? requestedLesson : null;
   return <div className="los-app">
     {returnLesson && <a className="los-teacher-book-return" href={"/los-lessons/" + returnLesson}><ArrowLeft size={16}/> Palaa oppitunnille {returnLesson}</a>}
-    {book ? <LosBookWorkspace book={book} location={location} move={(chapter, section) => move(book.id, chapter, section)} goLibrary={() => move(null)} openChapterFromDictionary={(id,chapter) => move(id,chapter,"vocabulary")} /> :
+    {book ? <LosBookWorkspace book={book} location={location} move={(chapter, section) => move(book.id, chapter, section)} goLibrary={() => move(null)} openBook={(id)=>move(id)} openChapterFromDictionary={(id,chapter) => move(id,chapter,"vocabulary")} /> :
       <><div className="los-series-top"><a href="/studies"><ArrowLeft size={17} /> Opintopäiväkirjaan</a><span>LOS! · Saksa B3</span></div><SeriesView openBook={id => move(id)} /></>}
   </div>;
 }
