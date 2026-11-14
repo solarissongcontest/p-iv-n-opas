@@ -38,7 +38,7 @@ export const LOS_FUTURE_EXERCISES_8: Record<string, LosFutureExerciseDraft[]> = 
       "group": "T",
       "title": "Etsi täsmällinen ilmaus",
       "prompt": "Etsi ja korosta tukidialogista kohta, joka auttaa vastaamaan kysymykseen: Miten Mia kerää tietoa?",
-      "answerKey": "Tarkista valinta omasta tekstistä ja perustele suomeksi: Kahdesta artikkelista ja kyselystä.. Tokenikohdistus lisättävä ennen automaattista pisteytystä.",
+      "answerKey": "Tarkka saksankielinen ilmaus: Zwei Artikel und eine Umfrage.\nMalliselitys: Kahdesta artikkelista ja kyselystä.\nVertaa omaa ilmaisua ja perustelua tähän malliin. Kone tarkistaa vain, että kopioitu ilmaus löytyy valitusta puheenvuorosta, ei selityksen oikeellisuutta.",
       "feedback": "",
       "assessment": "teacher-review-pending-span"
     },
@@ -300,7 +300,7 @@ export const LOS_FUTURE_EXERCISES_8: Record<string, LosFutureExerciseDraft[]> = 
       "group": "T",
       "title": "Etsi täsmällinen ilmaus",
       "prompt": "Etsi ja korosta tukidialogista kohta, joka auttaa vastaamaan kysymykseen: Mitä kaupungissa avataan?",
-      "answerKey": "Tarkista valinta omasta tekstistä ja perustele suomeksi: Uusi puisto.. Tokenikohdistus lisättävä ennen automaattista pisteytystä.",
+      "answerKey": "Tarkka saksankielinen ilmaus: Die Stadt eröffnet einen neuen Park.\nMalliselitys: Uusi puisto.\nVertaa omaa ilmaisua ja perustelua tähän malliin. Kone tarkistaa vain, että kopioitu ilmaus löytyy valitusta puheenvuorosta, ei selityksen oikeellisuutta.",
       "feedback": "",
       "assessment": "teacher-review-pending-span"
     },
@@ -562,7 +562,7 @@ export const LOS_FUTURE_EXERCISES_8: Record<string, LosFutureExerciseDraft[]> = 
       "group": "T",
       "title": "Etsi täsmällinen ilmaus",
       "prompt": "Etsi ja korosta tukidialogista kohta, joka auttaa vastaamaan kysymykseen: Milloin Tom lukee uutisia yleensä?",
-      "answerKey": "Tarkista valinta omasta tekstistä ja perustele suomeksi: Aamulla.. Tokenikohdistus lisättävä ennen automaattista pisteytystä.",
+      "answerKey": "Tarkka saksankielinen ilmaus: meistens am Morgen.\nMalliselitys: Aamulla.\nVertaa omaa ilmaisua ja perustelua tähän malliin. Kone tarkistaa vain, että kopioitu ilmaus löytyy valitusta puheenvuorosta, ei selityksen oikeellisuutta.",
       "feedback": "",
       "assessment": "teacher-review-pending-span"
     },
@@ -824,7 +824,7 @@ export const LOS_FUTURE_EXERCISES_8: Record<string, LosFutureExerciseDraft[]> = 
       "group": "T",
       "title": "Etsi täsmällinen ilmaus",
       "prompt": "Etsi ja korosta tukidialogista kohta, joka auttaa vastaamaan kysymykseen: Milloin uusi bussilinja alkaa?",
-      "answerKey": "Tarkista valinta omasta tekstistä ja perustele suomeksi: Maanantaina.. Tokenikohdistus lisättävä ennen automaattista pisteytystä.",
+      "answerKey": "Tarkka saksankielinen ilmaus: die Buslinie am Montag startet.\nMalliselitys: Maanantaina.\nVertaa omaa ilmaisua ja perustelua tähän malliin. Kone tarkistaa vain, että kopioitu ilmaus löytyy valitusta puheenvuorosta, ei selityksen oikeellisuutta.",
       "feedback": "",
       "assessment": "teacher-review-pending-span"
     },
@@ -1086,7 +1086,7 @@ export const LOS_FUTURE_EXERCISES_8: Record<string, LosFutureExerciseDraft[]> = 
       "group": "T",
       "title": "Etsi täsmällinen ilmaus",
       "prompt": "Etsi ja korosta tukidialogista kohta, joka auttaa vastaamaan kysymykseen: Kumpi tieto on tarkistettavissa aikataulusta?",
-      "answerKey": "Tarkista valinta omasta tekstistä ja perustele suomeksi: Lähtöaika 9.00.. Tokenikohdistus lisättävä ennen automaattista pisteytystä.",
+      "answerKey": "Tarkka saksankielinen ilmaus: Der Zug fährt um neun Uhr.\nMalliselitys: Lähtöaika 9.00.\nVertaa omaa ilmaisua ja perustelua tähän malliin. Kone tarkistaa vain, että kopioitu ilmaus löytyy valitusta puheenvuorosta, ei selityksen oikeellisuutta.",
       "feedback": "",
       "assessment": "teacher-review-pending-span"
     },
@@ -1348,7 +1348,7 @@ export const LOS_FUTURE_EXERCISES_8: Record<string, LosFutureExerciseDraft[]> = 
       "group": "T",
       "title": "Etsi täsmällinen ilmaus",
       "prompt": "Etsi ja korosta tukidialogista kohta, joka auttaa vastaamaan kysymykseen: Mikä viestissä aiheuttaa epävarmuuden?",
-      "answerKey": "Tarkista valinta omasta tekstistä ja perustele suomeksi: Lähdettä ei ole ilmoitettu.. Tokenikohdistus lisättävä ennen automaattista pisteytystä.",
+      "answerKey": "Tarkka saksankielinen ilmaus: ich kenne die Quelle nicht.\nMalliselitys: Tom ei tiedä viestin lähdettä.\nVertaa omaa ilmaisua ja perustelua tähän malliin. Kone tarkistaa vain, että kopioitu ilmaus löytyy valitusta puheenvuorosta, ei selityksen oikeellisuutta.",
       "feedback": "",
       "assessment": "teacher-review-pending-span"
     },
@@ -1610,7 +1610,7 @@ export const LOS_FUTURE_EXERCISES_8: Record<string, LosFutureExerciseDraft[]> = 
       "group": "T",
       "title": "Etsi täsmällinen ilmaus",
       "prompt": "Etsi ja korosta tukidialogista kohta, joka auttaa vastaamaan kysymykseen: Miksi Jan pyöräilee?",
-      "answerKey": "Tarkista valinta omasta tekstistä ja perustele suomeksi: Matka on lyhyt.. Tokenikohdistus lisättävä ennen automaattista pisteytystä.",
+      "answerKey": "Tarkka saksankielinen ilmaus: weil die Strecke kurz ist.\nMalliselitys: Matka on lyhyt.\nVertaa omaa ilmaisua ja perustelua tähän malliin. Kone tarkistaa vain, että kopioitu ilmaus löytyy valitusta puheenvuorosta, ei selityksen oikeellisuutta.",
       "feedback": "",
       "assessment": "teacher-review-pending-span"
     },
@@ -1872,7 +1872,7 @@ export const LOS_FUTURE_EXERCISES_8: Record<string, LosFutureExerciseDraft[]> = 
       "group": "T",
       "title": "Etsi täsmällinen ilmaus",
       "prompt": "Etsi ja korosta tukidialogista kohta, joka auttaa vastaamaan kysymykseen: Uskooko Ben tietävänsä varmasti tulevaisuuden?",
-      "answerKey": "Tarkista valinta omasta tekstistä ja perustele suomeksi: Ei.. Tokenikohdistus lisättävä ennen automaattista pisteytystä.",
+      "answerKey": "Tarkka saksankielinen ilmaus: Vielleicht. Ich weiß es nicht.\nMalliselitys: Ei.\nVertaa omaa ilmaisua ja perustelua tähän malliin. Kone tarkistaa vain, että kopioitu ilmaus löytyy valitusta puheenvuorosta, ei selityksen oikeellisuutta.",
       "feedback": "",
       "assessment": "teacher-review-pending-span"
     },
@@ -2134,7 +2134,7 @@ export const LOS_FUTURE_EXERCISES_8: Record<string, LosFutureExerciseDraft[]> = 
       "group": "T",
       "title": "Etsi täsmällinen ilmaus",
       "prompt": "Etsi ja korosta tukidialogista kohta, joka auttaa vastaamaan kysymykseen: Miten Mara ehdottaa erimielisyyden käsittelyä?",
-      "answerKey": "Tarkista valinta omasta tekstistä ja perustele suomeksi: Kysymällä myös muiden toiveita.. Tokenikohdistus lisättävä ennen automaattista pisteytystä.",
+      "answerKey": "Tarkka saksankielinen ilmaus: Wir sollten sie fragen.\nMalliselitys: Kysymällä myös muiden toiveita.\nVertaa omaa ilmaisua ja perustelua tähän malliin. Kone tarkistaa vain, että kopioitu ilmaus löytyy valitusta puheenvuorosta, ei selityksen oikeellisuutta.",
       "feedback": "",
       "assessment": "teacher-review-pending-span"
     },
@@ -2396,7 +2396,7 @@ export const LOS_FUTURE_EXERCISES_8: Record<string, LosFutureExerciseDraft[]> = 
       "group": "T",
       "title": "Etsi täsmällinen ilmaus",
       "prompt": "Etsi ja korosta tukidialogista kohta, joka auttaa vastaamaan kysymykseen: Mikä on Leon näkökulma?",
-      "answerKey": "Tarkista valinta omasta tekstistä ja perustele suomeksi: Kävellen näkee enemmän kaupunkia.. Tokenikohdistus lisättävä ennen automaattista pisteytystä.",
+      "answerKey": "Tarkka saksankielinen ilmaus: Zu Fuß sehe ich mehr von der Stadt.\nMalliselitys: Kävellen näkee enemmän kaupunkia.\nVertaa omaa ilmaisua ja perustelua tähän malliin. Kone tarkistaa vain, että kopioitu ilmaus löytyy valitusta puheenvuorosta, ei selityksen oikeellisuutta.",
       "feedback": "",
       "assessment": "teacher-review-pending-span"
     },

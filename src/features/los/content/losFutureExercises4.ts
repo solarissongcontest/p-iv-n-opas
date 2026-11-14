@@ -38,7 +38,7 @@ export const LOS_FUTURE_EXERCISES_4: Record<string, LosFutureExerciseDraft[]> = 
       "group": "T",
       "title": "Etsi täsmällinen ilmaus",
       "prompt": "Etsi ja korosta tukidialogista kohta, joka auttaa vastaamaan kysymykseen: Mitä vierailija voi tehdä Turussa?",
-      "answerKey": "Tarkista valinta omasta tekstistä ja perustele suomeksi: Kävellä joen varrella ja tutustua linnaan.. Tokenikohdistus lisättävä ennen automaattista pisteytystä.",
+      "answerKey": "Tarkka saksankielinen ilmaus: Man kann am Fluss spazieren und das Schloss besuchen.\nMalliselitys: Kävellä joen varrella ja tutustua linnaan.\nVertaa omaa ilmaisua ja perustelua tähän malliin. Kone tarkistaa vain, että kopioitu ilmaus löytyy valitusta puheenvuorosta, ei selityksen oikeellisuutta.",
       "feedback": "",
       "assessment": "teacher-review-pending-span"
     },
@@ -300,7 +300,7 @@ export const LOS_FUTURE_EXERCISES_4: Record<string, LosFutureExerciseDraft[]> = 
       "group": "T",
       "title": "Etsi täsmällinen ilmaus",
       "prompt": "Etsi ja korosta tukidialogista kohta, joka auttaa vastaamaan kysymykseen: Puhutaanko saksaa vain yhdessä maassa?",
-      "answerKey": "Tarkista valinta omasta tekstistä ja perustele suomeksi: Ei, useissa maissa.. Tokenikohdistus lisättävä ennen automaattista pisteytystä.",
+      "answerKey": "Tarkka saksankielinen ilmaus: In Deutschland, Österreich und in der Schweiz.\nMalliselitys: Ei, useissa maissa.\nVertaa omaa ilmaisua ja perustelua tähän malliin. Kone tarkistaa vain, että kopioitu ilmaus löytyy valitusta puheenvuorosta, ei selityksen oikeellisuutta.",
       "feedback": "",
       "assessment": "teacher-review-pending-span"
     },
@@ -562,7 +562,7 @@ export const LOS_FUTURE_EXERCISES_4: Record<string, LosFutureExerciseDraft[]> = 
       "group": "T",
       "title": "Etsi täsmällinen ilmaus",
       "prompt": "Etsi ja korosta tukidialogista kohta, joka auttaa vastaamaan kysymykseen: Missä päin Saksaa Hampuri sijaitsee?",
-      "answerKey": "Tarkista valinta omasta tekstistä ja perustele suomeksi: Pohjoisessa.. Tokenikohdistus lisättävä ennen automaattista pisteytystä.",
+      "answerKey": "Tarkka saksankielinen ilmaus: Im Norden Deutschlands.\nMalliselitys: Pohjoisessa.\nVertaa omaa ilmaisua ja perustelua tähän malliin. Kone tarkistaa vain, että kopioitu ilmaus löytyy valitusta puheenvuorosta, ei selityksen oikeellisuutta.",
       "feedback": "",
       "assessment": "teacher-review-pending-span"
     },
@@ -823,8 +823,8 @@ export const LOS_FUTURE_EXERCISES_4: Record<string, LosFutureExerciseDraft[]> = 
       "chapterId": "03",
       "group": "T",
       "title": "Etsi täsmällinen ilmaus",
-      "prompt": "Etsi ja korosta tukidialogista kohta, joka auttaa vastaamaan kysymykseen: Mistä kaupungista kortti lähetetään?",
-      "answerKey": "Tarkista valinta omasta tekstistä ja perustele suomeksi: Wienistä.. Tokenikohdistus lisättävä ennen automaattista pisteytystä.",
+      "prompt": "Etsi ja korosta tukidialogista kohta, joka auttaa vastaamaan kysymykseen: Mistä kaupungista Ella kysyy Nilsiltä?",
+      "answerKey": "Tarkka saksankielinen ilmaus: Wie gefällt dir Wien?\nMalliselitys: Wienistä.\nVertaa omaa ilmaisua ja perustelua tähän malliin. Kone tarkistaa vain, että kopioitu ilmaus löytyy valitusta puheenvuorosta, ei selityksen oikeellisuutta.",
       "feedback": "",
       "assessment": "teacher-review-pending-span"
     },
@@ -1086,7 +1086,7 @@ export const LOS_FUTURE_EXERCISES_4: Record<string, LosFutureExerciseDraft[]> = 
       "group": "T",
       "title": "Etsi täsmällinen ilmaus",
       "prompt": "Etsi ja korosta tukidialogista kohta, joka auttaa vastaamaan kysymykseen: Miksi on virheellistä väittää, että Sveitsissä puhuttaisiin vain saksaa?",
-      "answerKey": "Tarkista valinta omasta tekstistä ja perustele suomeksi: Maassa on useita kansalliskieliä.. Tokenikohdistus lisättävä ennen automaattista pisteytystä.",
+      "answerKey": "Tarkka saksankielinen ilmaus: die Schweiz hat mehrere Landessprachen.\nMalliselitys: Maassa on useita kansalliskieliä.\nVertaa omaa ilmaisua ja perustelua tähän malliin. Kone tarkistaa vain, että kopioitu ilmaus löytyy valitusta puheenvuorosta, ei selityksen oikeellisuutta.",
       "feedback": "",
       "assessment": "teacher-review-pending-span"
     },
@@ -1348,7 +1348,7 @@ export const LOS_FUTURE_EXERCISES_4: Record<string, LosFutureExerciseDraft[]> = 
       "group": "T",
       "title": "Etsi täsmällinen ilmaus",
       "prompt": "Etsi ja korosta tukidialogista kohta, joka auttaa vastaamaan kysymykseen: Mitä Aino kertoo Suomesta?",
-      "answerKey": "Tarkista valinta omasta tekstistä ja perustele suomeksi: Siellä on paljon järviä ja metsiä.. Tokenikohdistus lisättävä ennen automaattista pisteytystä.",
+      "answerKey": "Tarkka saksankielinen ilmaus: Es gibt viele Seen und Wälder.\nMalliselitys: Siellä on paljon järviä ja metsiä.\nVertaa omaa ilmaisua ja perustelua tähän malliin. Kone tarkistaa vain, että kopioitu ilmaus löytyy valitusta puheenvuorosta, ei selityksen oikeellisuutta.",
       "feedback": "",
       "assessment": "teacher-review-pending-span"
     },
@@ -1609,8 +1609,8 @@ export const LOS_FUTURE_EXERCISES_4: Record<string, LosFutureExerciseDraft[]> = 
       "chapterId": "06",
       "group": "T",
       "title": "Etsi täsmällinen ilmaus",
-      "prompt": "Etsi ja korosta tukidialogista kohta, joka auttaa vastaamaan kysymykseen: Onko keskustelussa kuvattu tapa kaikkien tapa?",
-      "answerKey": "Tarkista valinta omasta tekstistä ja perustele suomeksi: Ei, sitä ei pidä yleistää.. Tokenikohdistus lisättävä ennen automaattista pisteytystä.",
+      "prompt": "Etsi ja korosta tukidialogista kohta, joka auttaa vastaamaan kysymykseen: Mitä Sara kertoo itse tekevänsä sunnuntaisin?",
+      "answerKey": "Tarkka saksankielinen ilmaus: Ich lese meistens.\nMalliselitys: Hän lukee yleensä.\nVertaa omaa ilmaisua ja perustelua tähän malliin. Kone tarkistaa vain, että kopioitu ilmaus löytyy valitusta puheenvuorosta, ei selityksen oikeellisuutta.",
       "feedback": "",
       "assessment": "teacher-review-pending-span"
     },
@@ -1871,8 +1871,8 @@ export const LOS_FUTURE_EXERCISES_4: Record<string, LosFutureExerciseDraft[]> = 
       "chapterId": "07",
       "group": "T",
       "title": "Etsi täsmällinen ilmaus",
-      "prompt": "Etsi ja korosta tukidialogista kohta, joka auttaa vastaamaan kysymykseen: Miten Ben matkusti viikonloppuna kertomansa mukaan?",
-      "answerKey": "Tarkista valinta omasta tekstistä ja perustele suomeksi: Hän meni Bonniin, mutta kulkuneuvo ei ilmene.. Tokenikohdistus lisättävä ennen automaattista pisteytystä.",
+      "prompt": "Etsi ja korosta tukidialogista kohta, joka auttaa vastaamaan kysymykseen: Mihin Ben kertoo matkustaneensa viikonloppuna?",
+      "answerKey": "Tarkka saksankielinen ilmaus: ich bin nach Bonn gefahren.\nMalliselitys: Bonniin.\nVertaa omaa ilmaisua ja perustelua tähän malliin. Kone tarkistaa vain, että kopioitu ilmaus löytyy valitusta puheenvuorosta, ei selityksen oikeellisuutta.",
       "feedback": "",
       "assessment": "teacher-review-pending-span"
     },
@@ -2134,7 +2134,7 @@ export const LOS_FUTURE_EXERCISES_4: Record<string, LosFutureExerciseDraft[]> = 
       "group": "T",
       "title": "Etsi täsmällinen ilmaus",
       "prompt": "Etsi ja korosta tukidialogista kohta, joka auttaa vastaamaan kysymykseen: Mitä juhlapäivänä tehtiin?",
-      "answerKey": "Tarkista valinta omasta tekstistä ja perustele suomeksi: Syötiin yhdessä.. Tokenikohdistus lisättävä ennen automaattista pisteytystä.",
+      "answerKey": "Tarkka saksankielinen ilmaus: wir haben zusammen gegessen.\nMalliselitys: Syötiin yhdessä.\nVertaa omaa ilmaisua ja perustelua tähän malliin. Kone tarkistaa vain, että kopioitu ilmaus löytyy valitusta puheenvuorosta, ei selityksen oikeellisuutta.",
       "feedback": "",
       "assessment": "teacher-review-pending-span"
     },
@@ -2395,8 +2395,8 @@ export const LOS_FUTURE_EXERCISES_4: Record<string, LosFutureExerciseDraft[]> = 
       "chapterId": "09",
       "group": "T",
       "title": "Etsi täsmällinen ilmaus",
-      "prompt": "Etsi ja korosta tukidialogista kohta, joka auttaa vastaamaan kysymykseen: Mitä Olli sanoo pitävänsä talvesta?",
-      "answerKey": "Tarkista valinta omasta tekstistä ja perustele suomeksi: Koska hän hiihtää mielellään.. Tokenikohdistus lisättävä ennen automaattista pisteytystä.",
+      "prompt": "Etsi ja korosta tukidialogista kohta, joka auttaa vastaamaan kysymykseen: Miksi Olli pitää talvesta?",
+      "answerKey": "Tarkka saksankielinen ilmaus: Weil ich gern Ski fahre.\nMalliselitys: Koska hän hiihtää mielellään.\nVertaa omaa ilmaisua ja perustelua tähän malliin. Kone tarkistaa vain, että kopioitu ilmaus löytyy valitusta puheenvuorosta, ei selityksen oikeellisuutta.",
       "feedback": "",
       "assessment": "teacher-review-pending-span"
     },

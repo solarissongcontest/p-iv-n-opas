@@ -38,7 +38,7 @@ export const LOS_FUTURE_EXERCISES_2: Record<string, LosFutureExerciseDraft[]> = 
       "group": "T",
       "title": "Etsi täsmällinen ilmaus",
       "prompt": "Etsi ja korosta tukidialogista kohta, joka auttaa vastaamaan kysymykseen: Mitä ystävät tekevät illalla?",
-      "answerKey": "Tarkista valinta omasta tekstistä ja perustele suomeksi: Syövät yhdessä ja opiskelevat vähän saksaa.. Tokenikohdistus lisättävä ennen automaattista pisteytystä.",
+      "answerKey": "Tarkka saksankielinen ilmaus: Wir essen zusammen und lernen ein bisschen Deutsch.\nMalliselitys: Syövät yhdessä ja opiskelevat vähän saksaa.\nVertaa omaa ilmaisua ja perustelua tähän malliin. Kone tarkistaa vain, että kopioitu ilmaus löytyy valitusta puheenvuorosta, ei selityksen oikeellisuutta.",
       "feedback": "",
       "assessment": "teacher-review-pending-span"
     },
@@ -300,7 +300,7 @@ export const LOS_FUTURE_EXERCISES_2: Record<string, LosFutureExerciseDraft[]> = 
       "group": "T",
       "title": "Etsi täsmällinen ilmaus",
       "prompt": "Etsi ja korosta tukidialogista kohta, joka auttaa vastaamaan kysymykseen: Mitä Jonas ja Mira tekevät yhdessä?",
-      "answerKey": "Tarkista valinta omasta tekstistä ja perustele suomeksi: He opiskelevat saksaa.. Tokenikohdistus lisättävä ennen automaattista pisteytystä.",
+      "answerKey": "Tarkka saksankielinen ilmaus: Wir lernen Deutsch.\nMalliselitys: He opiskelevat saksaa.\nVertaa omaa ilmaisua ja perustelua tähän malliin. Kone tarkistaa vain, että kopioitu ilmaus löytyy valitusta puheenvuorosta, ei selityksen oikeellisuutta.",
       "feedback": "",
       "assessment": "teacher-review-pending-span"
     },
@@ -562,7 +562,7 @@ export const LOS_FUTURE_EXERCISES_2: Record<string, LosFutureExerciseDraft[]> = 
       "group": "T",
       "title": "Etsi täsmällinen ilmaus",
       "prompt": "Etsi ja korosta tukidialogista kohta, joka auttaa vastaamaan kysymykseen: Mikä suhde Amirilla on kuvassa näkyvään poikaan?",
-      "answerKey": "Tarkista valinta omasta tekstistä ja perustele suomeksi: Poika on hänen veljensä.. Tokenikohdistus lisättävä ennen automaattista pisteytystä.",
+      "answerKey": "Tarkka saksankielinen ilmaus: Das ist meine Mutter, und das ist mein Bruder.\nMalliselitys: Poika on hänen veljensä.\nVertaa omaa ilmaisua ja perustelua tähän malliin. Kone tarkistaa vain, että kopioitu ilmaus löytyy valitusta puheenvuorosta, ei selityksen oikeellisuutta.",
       "feedback": "",
       "assessment": "teacher-review-pending-span"
     },
@@ -823,8 +823,8 @@ export const LOS_FUTURE_EXERCISES_2: Record<string, LosFutureExerciseDraft[]> = 
       "chapterId": "03",
       "group": "T",
       "title": "Etsi täsmällinen ilmaus",
-      "prompt": "Etsi ja korosta tukidialogista kohta, joka auttaa vastaamaan kysymykseen: Mitä huoneita Benin asunnossa on?",
-      "answerKey": "Tarkista valinta omasta tekstistä ja perustele suomeksi: Keittiö ja kylpyhuone; huoneita mainitaan erillisessä ilmoituksessa kaksi.. Tokenikohdistus lisättävä ennen automaattista pisteytystä.",
+      "prompt": "Etsi ja korosta tukidialogista kohta, joka auttaa vastaamaan kysymykseen: Mitä Ben kertoo asunnossa olevan keittiön lisäksi?",
+      "answerKey": "Tarkka saksankielinen ilmaus: es gibt auch ein Bad.\nMalliselitys: Kylpyhuoneen.\nVertaa omaa ilmaisua ja perustelua tähän malliin. Kone tarkistaa vain, että kopioitu ilmaus löytyy valitusta puheenvuorosta, ei selityksen oikeellisuutta.",
       "feedback": "",
       "assessment": "teacher-review-pending-span"
     },
@@ -1086,7 +1086,7 @@ export const LOS_FUTURE_EXERCISES_2: Record<string, LosFutureExerciseDraft[]> = 
       "group": "T",
       "title": "Etsi täsmällinen ilmaus",
       "prompt": "Etsi ja korosta tukidialogista kohta, joka auttaa vastaamaan kysymykseen: Mitä Paul tarvitsee?",
-      "answerKey": "Tarkista valinta omasta tekstistä ja perustele suomeksi: Tuolin.. Tokenikohdistus lisättävä ennen automaattista pisteytystä.",
+      "answerKey": "Tarkka saksankielinen ilmaus: ich brauche einen Stuhl.\nMalliselitys: Tuolin.\nVertaa omaa ilmaisua ja perustelua tähän malliin. Kone tarkistaa vain, että kopioitu ilmaus löytyy valitusta puheenvuorosta, ei selityksen oikeellisuutta.",
       "feedback": "",
       "assessment": "teacher-review-pending-span"
     },
@@ -1348,7 +1348,7 @@ export const LOS_FUTURE_EXERCISES_2: Record<string, LosFutureExerciseDraft[]> = 
       "group": "T",
       "title": "Etsi täsmällinen ilmaus",
       "prompt": "Etsi ja korosta tukidialogista kohta, joka auttaa vastaamaan kysymykseen: Milloin Luca opiskelee saksaa?",
-      "answerKey": "Tarkista valinta omasta tekstistä ja perustele suomeksi: Illalla.. Tokenikohdistus lisättävä ennen automaattista pisteytystä.",
+      "answerKey": "Tarkka saksankielinen ilmaus: Am Abend lerne ich Deutsch.\nMalliselitys: Illalla.\nVertaa omaa ilmaisua ja perustelua tähän malliin. Kone tarkistaa vain, että kopioitu ilmaus löytyy valitusta puheenvuorosta, ei selityksen oikeellisuutta.",
       "feedback": "",
       "assessment": "teacher-review-pending-span"
     },
@@ -1610,7 +1610,7 @@ export const LOS_FUTURE_EXERCISES_2: Record<string, LosFutureExerciseDraft[]> = 
       "group": "T",
       "title": "Etsi täsmällinen ilmaus",
       "prompt": "Etsi ja korosta tukidialogista kohta, joka auttaa vastaamaan kysymykseen: Mitä Leon syö mieluummin kuin leipää?",
-      "answerKey": "Tarkista valinta omasta tekstistä ja perustele suomeksi: Hedelmiä.. Tokenikohdistus lisättävä ennen automaattista pisteytystä.",
+      "answerKey": "Tarkka saksankielinen ilmaus: ich esse lieber Obst.\nMalliselitys: Hedelmiä.\nVertaa omaa ilmaisua ja perustelua tähän malliin. Kone tarkistaa vain, että kopioitu ilmaus löytyy valitusta puheenvuorosta, ei selityksen oikeellisuutta.",
       "feedback": "",
       "assessment": "teacher-review-pending-span"
     },
@@ -1872,7 +1872,7 @@ export const LOS_FUTURE_EXERCISES_2: Record<string, LosFutureExerciseDraft[]> = 
       "group": "T",
       "title": "Etsi täsmällinen ilmaus",
       "prompt": "Etsi ja korosta tukidialogista kohta, joka auttaa vastaamaan kysymykseen: Mitä asiakas tilaa?",
-      "answerKey": "Tarkista valinta omasta tekstistä ja perustele suomeksi: Teetä.. Tokenikohdistus lisättävä ennen automaattista pisteytystä.",
+      "answerKey": "Tarkka saksankielinen ilmaus: Ich möchte einen Tee, bitte.\nMalliselitys: Teetä.\nVertaa omaa ilmaisua ja perustelua tähän malliin. Kone tarkistaa vain, että kopioitu ilmaus löytyy valitusta puheenvuorosta, ei selityksen oikeellisuutta.",
       "feedback": "",
       "assessment": "teacher-review-pending-span"
     },
@@ -2133,8 +2133,8 @@ export const LOS_FUTURE_EXERCISES_2: Record<string, LosFutureExerciseDraft[]> = 
       "chapterId": "08",
       "group": "T",
       "title": "Etsi täsmällinen ilmaus",
-      "prompt": "Etsi ja korosta tukidialogista kohta, joka auttaa vastaamaan kysymykseen: Mitä kolme tuotetta ostoslistalla on?",
-      "answerKey": "Tarkista valinta omasta tekstistä ja perustele suomeksi: Omenat, leipä ja maito.. Tokenikohdistus lisättävä ennen automaattista pisteytystä.",
+      "prompt": "Etsi ja korosta tukidialogista kohta, joka auttaa vastaamaan kysymykseen: Mitä kahta ostettavaa Mia mainitsee ensimmäisessä puheenvuorossaan?",
+      "answerKey": "Tarkka saksankielinen ilmaus: Wir brauchen zwei Äpfel und ein Brot.\nMalliselitys: Omenoita ja leipää.\nVertaa omaa ilmaisua ja perustelua tähän malliin. Kone tarkistaa vain, että kopioitu ilmaus löytyy valitusta puheenvuorosta, ei selityksen oikeellisuutta.",
       "feedback": "",
       "assessment": "teacher-review-pending-span"
     },
@@ -2396,7 +2396,7 @@ export const LOS_FUTURE_EXERCISES_2: Record<string, LosFutureExerciseDraft[]> = 
       "group": "T",
       "title": "Etsi täsmällinen ilmaus",
       "prompt": "Etsi ja korosta tukidialogista kohta, joka auttaa vastaamaan kysymykseen: Missä rautatieasema sijaitsee annetussa opasteessa?",
-      "answerKey": "Tarkista valinta omasta tekstistä ja perustele suomeksi: Vasemmalla.. Tokenikohdistus lisättävä ennen automaattista pisteytystä.",
+      "answerKey": "Tarkka saksankielinen ilmaus: Der Bahnhof ist dort, links.\nMalliselitys: Vasemmalla.\nVertaa omaa ilmaisua ja perustelua tähän malliin. Kone tarkistaa vain, että kopioitu ilmaus löytyy valitusta puheenvuorosta, ei selityksen oikeellisuutta.",
       "feedback": "",
       "assessment": "teacher-review-pending-span"
     },

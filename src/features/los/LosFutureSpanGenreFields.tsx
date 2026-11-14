@@ -15,6 +15,10 @@ export function LosFutureSpanGenreFields({task,answer,onChange}:{
     <legend>{task.kind==="span"?"Valitse ja perustele täsmällinen tekstinäyttö":"Vertaa tukidialogia ja Text B:tä"}</legend>
     <p>Kirjoita molemmat vastaukset itse ennen mallivastauksen avaamista.
       Tämä on lähdetekstiin perustuva harjoitus, ei automaattinen arvosana.</p>
+    {answer.legacyPromptUpdated&&<p className="los-future-span-genre-hint" role="status">
+      Kysymystä on tarkennettu lähdedialogin perusteella. Vanha vastauksesi on säilytetty.
+      Tarkista, vastaako oma ilmauksesi ja perustelusi uutta kysymystä.
+    </p>}
     {task.kind==="span"?<fieldset className="los-future-span-genre-choices">
       <legend>Valitse lähdedialogista puheenvuoro</legend>
       {task.dialogue.map((line,index)=>{

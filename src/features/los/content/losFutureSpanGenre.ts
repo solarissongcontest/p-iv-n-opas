@@ -1,12 +1,34 @@
 import type {LosFutureExerciseDraft} from "./losFutureExerciseTypes.ts";
 import {LOS_FUTURE_MANUSCRIPTS} from "./losFutureManuscripts.ts";
 
+/** One-time, exact T04 question migrations. A source fix must not erase a
+ * learner's earlier highlighted excerpt and written Finnish justification.
+ * Only the official corrected prompt can activate a legacy question. */
+const SPAN_QUESTION_PREFIX="Etsi ja korosta tukidialogista kohta, joka auttaa vastaamaan kysymykseen: ";
+const REVISED_T04_QUESTIONS:Record<string,readonly [string,string]>={
+  "LOS2-C03-T04": ["Mitä huoneita Benin asunnossa on?","Mitä Ben kertoo asunnossa olevan keittiön lisäksi?"],
+  "LOS2-C08-T04": ["Mitä kolme tuotetta ostoslistalla on?","Mitä kahta ostettavaa Mia mainitsee ensimmäisessä puheenvuorossaan?"],
+  "LOS3-C04-T04": ["Mistä David pitää elokuvaa enemmän?","Mistä David pitää enemmän kuin elokuvasta?"],
+  "LOS3-C08-T04": ["Missä ja milloin he tapaavat?","Mihin aikaan Mila ehdottaa tapaamista?"],
+  "LOS4-C03-T04": ["Mistä kaupungista kortti lähetetään?","Mistä kaupungista Ella kysyy Nilsiltä?"],
+  "LOS4-C06-T04": ["Onko keskustelussa kuvattu tapa kaikkien tapa?","Mitä Sara kertoo itse tekevänsä sunnuntaisin?"],
+  "LOS4-C07-T04": ["Miten Ben matkusti viikonloppuna kertomansa mukaan?","Mihin Ben kertoo matkustaneensa viikonloppuna?"],
+  "LOS4-C09-T04": ["Mitä Olli sanoo pitävänsä talvesta?","Miksi Olli pitää talvesta?"],
+  "LOS5-C07-T04": ["Miten Sara reagoi?","Mitä Sara kertoo tekevänsä?"],
+  "LOS5-C10-T04": ["Mitä Ben neuvoo?","Mikä on Benin ensimmäinen neuvo Ninalle?"],
+  "LOS6-C03-T04": ["Millainen Maxin lukema tarina on?","Miten Maxin mukaan tarinan juoni kehittyy?"],
+  "LOS7-C07-T04": ["Mitä sähköpostin aihe on?","Millä tervehdyksellä muodollisen sähköpostin voi aloittaa?"],
+};
+
+
 /** T04 highlights a literal source excerpt; T14 compares two source genres.
  * No semantic or speech grading: both are formative self-review tasks. */
 export type LosFutureSpanGenreTask={id:string;kind:"span"|"genre";prompt:string;dialogue:readonly string[];
   textB:string;questions:readonly [string,string]};
 export type LosFutureSpanGenreAnswer={version:1;id:string;prompt:string;
-  dialogue:string[];textB:string;selection:number|null;answers:string[]};
+  dialogue:string[];textB:string;selection:number|null;answers:string[];
+  /** UI-only indicator: the saved prompt was transparently migrated. */
+  legacyPromptUpdated?:boolean;};
 export function losFutureSpanGenreTask(t:LosFutureExerciseDraft):LosFutureSpanGenreTask|null{
   const m=t.id.match(/^LOS([2-8])-C(0[1-9]|10)-(T04|T14)$/);
   if(!m)return null;
@@ -35,8 +57,12 @@ export function readLosFutureSpanGenreAnswer(raw:string,t:LosFutureSpanGenreTask
     const d:unknown=JSON.parse(raw);
     if(!d||typeof d!=="object"||Array.isArray(d))return null;
     const a=d as Partial<LosFutureSpanGenreAnswer>;
+    const revision=t.kind==="span"?REVISED_T04_QUESTIONS[t.id]:undefined;
+    const isLegacyPrompt=Boolean(revision&&
+      t.prompt===SPAN_QUESTION_PREFIX+revision[1]&&
+      a.prompt===SPAN_QUESTION_PREFIX+revision[0]);
     if(Object.keys(a).sort().join(",")!=="answers,dialogue,id,prompt,selection,textB,version"||
-      a.version!==1||a.id!==t.id||a.prompt!==t.prompt||a.textB!==t.textB||
+      a.version!==1||a.id!==t.id||(a.prompt!==t.prompt&&!isLegacyPrompt)||a.textB!==t.textB||
       !Array.isArray(a.dialogue)||a.dialogue.length!==t.dialogue.length||
       !t.dialogue.every((line,i)=>a.dialogue?.[i]===line)||
       !Array.isArray(a.answers)||a.answers.length!==2||
@@ -45,7 +71,9 @@ export function readLosFutureSpanGenreAnswer(raw:string,t:LosFutureSpanGenreTask
       if(a.selection!==null&&(!Number.isInteger(a.selection)||typeof a.selection!=="number"||
         a.selection<0||a.selection>=t.dialogue.length))return null;
     }else if(a.selection!==null)return null;
-    return a as LosFutureSpanGenreAnswer;
+    return isLegacyPrompt
+      ? {...a,prompt:t.prompt,legacyPromptUpdated:true} as LosFutureSpanGenreAnswer
+      : a as LosFutureSpanGenreAnswer;
   }catch{return null;}
 }
 export function writeLosFutureSpanGenreAnswer(
