@@ -5,6 +5,25 @@
 **Päätös:** EI tuotantoyhdistämistä, tietokantakirjoitusta tai julkaisuvalmiusväitettä.
 Tämä tiedosto on ainoa LOS! 1–8:n *toteutuksen* jatkotilaraportti. Visuaalinen V3.3/V3.4, kirjakohtaiset käsikirjoitukset ja olemassa olevat lähde-/lisenssidokumentit pysyvät omissa auktoritatiivisissa tiedostoissaan.
 
+## 14.11.2026 · LOS! 1:n toimituksellisen auditoinnin toteutetut korjaukset
+
+Tämä on rajattu sisältökorjaussarja PR #264:n kehityshaaraan, **ei** riippumaton saksantarkistus eikä julkaisuportin sulkeminen. Muutokset on tehty alkuperäisiä saksankielisiä lähderivejä, `sourceId`-tunnisteita, kysymys-ID:itä ja vastausten tallennusavaimia vaihtamatta.
+
+- `catalog.ts`: C01 `Bitte!`-ilmauksen useat merkitykset, C06 `Jahre` iän yhteydessä = *vuotta*, C07 `Bitte buchstabieren Sie.` -pyynnön luonteva suomennos, C09 `um drei Uhr` = *kello kolmelta*. Sanastorivien yhteismäärä säilyy 173:ssa.
+- `content/los1C02.ts`: C02:n `er heißt Herr Weiß` -kohdan suomennos täsmennetty ilman alkuperäisrivin muutosta.
+- `content/los1OpenDialogues.ts`: C07:n Frau-puhuttelun kysymys koskee koko nimeä, C08:n matematiikkakysymys vastaa ilmauksen `Jetzt haben wir Mathe` merkitystä. Alkuperäiset Q-ID:t ja vastausvaihtoehtojen tunnisteet säilyvät.
+- `LosC01GrammarGuide.tsx`: Guten Abend / Gute Nacht -ero tarkennettu, Bitte-lause esimerkillä, sekä oma ennen mallivastausta tehtävä itsearvioitava kolmen tilanteen harjoitus. Uutta harjoitusta **ei** pisteytetä.
+- `teacher/lessonL032.ts` ja `teacher/lessonL035.ts`: C06:ssa 16–19-vuotiaiden kuvitteellisten henkilöiden esimerkit sekä itsenäinen sovellustehtävä; alkutekstin 5–12-vuotiaiden dialogeja ei muokattu.
+- `tests/los1-editorial-audit-fixes.test.ts`: automaattiset lähde-, tunniste-, sanasto- ja opetussisältöregressiot. Uusimman commitin CI ja Browser QA on hyväksyttävä erikseen.
+
+**Lähdekartan yhtenäistäminen:** kanoninen koneellisesti luettu rekisteri on `src/features/los/content/los1-sources.json`, jossa on 31 tietuetta (18 `rights-verified`, 13 `identified`), mutta 0 julkaistuksi hyväksyttyä aineistoa. Projektin vanha `Los 1.txt` / 23 lähteen manifesti on historiallinen suunnittelutila, **ei** uuden koodin totuuslähde. Nykyiset ensisijaiset Text A -ID:t:
+
+| C01 | C02 | C03 | C04 | C05 | C06 | C07 | C08 | C09 | C10 |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| M-COM-01 | M-WB-01 | M-WB-07 | M-WB-06 | M-WB-05 | M-ZPE-01 | M-WB-02 | M-WB-08 | M-WB-03 | M-DIB-02 |
+
+**Avoimet työvaiheet:** saksan riippumaton kielellinen ja pedagoginen tarkistus, äänten ja IPA:n hyväksyntä, todellisten laitteiden testit, sanakirjan lisenssi-/tuotantotuonti, palautus toisella laitteella, koko 60 tunnin laadullinen arviointi sekä R1–R12-julkaisuehdot. Toteutettu rajattu korjaussarja ei oikeuta yhdistämään keskeneräistä kokonaisuutta tuotantoon.
+
 ## Koodin ja sisällön todettu tilanne
 
 | Kirja | Moduuli | Kappaleet | Opetustunnit | Tehtävät ja rajat |
