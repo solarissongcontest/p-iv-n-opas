@@ -64,7 +64,7 @@ export function losFutureReaderBeginUpdatedText(
   if(raw){
     const old=parseLosReaderAnnotation(raw,version);
     if(old.contentVersion!==version&&old.ranges.length>0&&
-      /^source-[0-9a-f]{8}-\\d{1,5}$/.test(old.contentVersion)){
+      /^source-[0-9a-f]{8}-\d{1,5}$/.test(old.contentVersion)){
       const archiveKey=key+"@"+old.contentVersion;
       if(!marks[archiveKey])marks[archiveKey]=raw;
     }
@@ -86,7 +86,7 @@ export function validLosFutureReaderMarks(value:unknown,bookId:number,chapterId:
     const identity=identities.find(x=>id===x.base||id.startsWith(x.base+"@"));
     if(!identity||typeof raw!=="string"||raw.length>500)return false;
     const archivedVersion=id===identity.base?null:id.slice(identity.base.length+1);
-    if(archivedVersion!==null&&!/^source-[0-9a-f]{8}-\\d{1,5}$/.test(archivedVersion))
+    if(archivedVersion!==null&&!/^source-[0-9a-f]{8}-\d{1,5}$/.test(archivedVersion))
       return false;
     let parsed:unknown;
     try{parsed=JSON.parse(raw);}catch{return false;}
@@ -94,7 +94,7 @@ export function validLosFutureReaderMarks(value:unknown,bookId:number,chapterId:
     const data=parsed as Partial<LosReaderAnnotation>;
     if(Object.keys(data).sort().join(",")!=="contentVersion,ranges"||
       typeof data.contentVersion!=="string"||
-      !/^source-[0-9a-f]{8}-\\d{1,5}$/.test(data.contentVersion)||
+      !/^source-[0-9a-f]{8}-\d{1,5}$/.test(data.contentVersion)||
       archivedVersion!==null&&archivedVersion!==data.contentVersion||
       !Array.isArray(data.ranges)||data.ranges.length>8)return false;
     const text=losFutureReaderText(bookId,chapterId,identity.source);
