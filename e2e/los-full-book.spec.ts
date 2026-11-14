@@ -794,6 +794,49 @@ test("Finnish comprehension options in C01, C03, C09 and C10 have correct speech
 
 
 
+
+test("a renamed teacher scene resumes saved unfinished work without erasing history",async({page})=>{
+  await enterLocalBook(page);
+  const key="los.local.v1.00000000-0000-4000-8000-000000000195.1.01";
+  const at="2026-11-10T15:00:00.000Z";
+  const historical={
+    schemaVersion:1,lessonId:"L004",contentVersion:"1.9.0-preview.1",
+    sceneId:"retired-teaching-scene",visitedIds:["welcome","recall"],
+    attempts:[{sceneId:"recall",answer:"b",correct:true,independent:true,at}],
+    helpedIds:["guided"],revealedIds:[],activityIds:["vocabulary-reviewed"],
+    draftAnswers:{independent:"Guten Abend!"},
+    completedAt:null,updatedAt:at,paused:false,
+  };
+  const draft={
+    version:1,note:"",applicationDraft:"",bookmarked:false,practiceAnswers:{},
+    practiceChecked:[],testAnswers:{},testSubmittedAt:null,selfAssessment:"",
+    teacherSessions:{L004:historical},updatedAt:at,
+  };
+  await page.evaluate(({key,draft})=>localStorage.setItem(key,JSON.stringify(draft)),{key,draft});
+  await page.goto("/los-lessons/L004",{waitUntil:"domcontentloaded"});
+  await expect(page.locator(".los-teacher-paper h2")).toHaveText("Tervehdys valitaan tilanteen mukaan");
+  await expect(page.locator(".los-teacher-paper [role='status']")).toContainText(
+    "Aiempi opetustilanne ei enää ole käytössä");
+  await expect(page.locator(".los-teacher-paper [role='status']")).toContainText(
+    "Aiemmat vastaukset ja luonnokset säilyvät");
+  await page.getByRole("button",{name:"Seuraava",exact:true}).click();
+  await expect(page.locator(".los-teacher-paper h2")).toHaveText("Katsotaan ilmaukset opetustaululla");
+  const stored=await page.evaluate(key=>
+    JSON.parse(localStorage.getItem(key)??"null")?.teacherSessions?.L004,key);
+  expect(stored.sceneId).toBe("board");
+  expect(stored.contentVersion).toBe("1.9.0-preview.1");
+  expect(stored.visitedIds).toEqual(["welcome","recall","situations","board"]);
+  expect(stored.attempts).toEqual(historical.attempts);
+  expect(stored.draftAnswers.independent).toBe("Guten Abend!");
+  expect(stored.activityIds).toEqual(["vocabulary-reviewed"]);
+  expect(stored.helpedIds).toEqual(["guided"]);
+  expect(stored.completedAt).toBeNull();
+  await page.reload({waitUntil:"domcontentloaded"});
+  await expect(page.locator(".los-teacher-paper h2")).toHaveText("Katsotaan ilmaukset opetustaululla");
+  await expectNoHorizontalOverflow(page);
+});
+
+
 test("C07 number choices have Finnish screen-reader language in both number lessons",async({page})=>{
   await enterLocalBook(page);
   await page.goto("/los-lessons/L038",{waitUntil:"domcontentloaded"});
