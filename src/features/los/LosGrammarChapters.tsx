@@ -153,6 +153,7 @@ export function LosChapterGrammar({chapterId}:{chapterId:string}) {
     <p>Opettele erottamaan myös saksan kirjainmerkit <b lang="de">ä, ö, ü</b> ja <b lang="de">ß</b>. Joissakin teknisissä yhteyksissä käytetään korvaavia merkintöjä <span lang="de">ae, oe, ue</span> ja <span lang="de">ss</span>. Korvausmerkintä ei ole yleispätevästi sama kuin sanan oikea kirjoitusasu.</p>
     <Example de="M – I – A" fi="Kirjaimittain kirjoitettu nimi Mia. Tämä esimerkki näyttää kirjaimet, ei niiden saksalaista ääntämistä." />
     <Example de="Wie schreibt man das? Bitte buchstabieren Sie." fi="Miten se kirjoitetaan? Voisitteko tavata nimen, kiitos?" />
+    <p><strong>Kohtelias puhuttelu lähdetekstissä:</strong> <span lang="de">Frau Claudia Bolliger</span> sisältää sanan <span lang="de">Frau</span>, joka on kohtelias puhuttelunimike (suomeksi usein ”rouva”). Saksassa se ei kuitenkaan kerro, onko henkilö naimisissa. Miehestä käytetään vastaavasti <span lang="de">Herr</span>. Puhuttelun ja sinuttelun eroa harjoiteltiin C04:ssa.</p>
     <Note title="Tavatun nimen kuuntelu ei ole vielä automaattinen testi">Harjoittele kahdeksan kuvitteellista nimeä ja neljä numerosarjaa ääneen. Kun oikea aakkosäänite lisätään luvallisesti oppikirjaan, voit verrata myös ääntämistä. Pelkkä tekstimuoto ei todista ääntämistä.</Note>
   </>;
   if(chapterId==="08")return <>
