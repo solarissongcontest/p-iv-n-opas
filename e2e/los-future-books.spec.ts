@@ -1061,3 +1061,33 @@ test("T14 model and old prompt migration preserve the learner's two saved observ
   expect(persisted.answers[1]).toBe("Text B on lyhyt Jonasilta Miralle.");
   await expectNoHorizontalOverflow(page);
 });
+
+
+test("T13 displays manuscript punctuation exactly and keeps the older structured draft",async({page})=>{
+  await enterFutureBook(page);
+  await page.goto("/los#/2/01/practice",{waitUntil:"domcontentloaded"});
+  await selectFutureTask(page,"T13");
+  const source=page.locator(".los-future-two-part-source");
+  await expect(source).toHaveText("Hallo Mira! Wir lernen am Dienstag zusammen Deutsch. Bis bald! Jonas");
+  await expect(page.locator(".los-future-exercise-question"))
+    .toHaveText("Lue alla oleva Text B ja kirjoita kaksi perusteltua havaintoa suomeksi. Huomaa myös tekstin tarkoitus ja ilmaisutapa.");
+  const entries=page.locator(".los-future-two-part textarea");
+  await entries.nth(0).fill("Jonas kirjoittaa Miralle.");
+  await entries.nth(1).fill("He opiskelevat tiistaina.");
+  const previouslySaved=await page.evaluate(()=>{
+    const owner=localStorage.getItem("opk.owner-id");
+    const draft=JSON.parse(localStorage.getItem(`los.local.v1.${owner}.2.01`)??"null");
+    return JSON.parse(draft.practiceAnswers["LOS2-C01-T13"]);
+  });
+  expect(previouslySaved.sourceText).toBe("Hallo Mira! Wir lernen am Dienstag zusammen Deutsch. Bis bald! Jonas.");
+  expect(previouslySaved.answers).toEqual(["Jonas kirjoittaa Miralle.","He opiskelevat tiistaina."]);
+  await page.reload({waitUntil:"domcontentloaded"});
+  await selectFutureTask(page,"T13");
+  await expect(entries.nth(0)).toHaveValue("Jonas kirjoittaa Miralle.");
+  await expect(entries.nth(1)).toHaveValue("He opiskelevat tiistaina.");
+  await page.goto("/los#/5/06/practice",{waitUntil:"domcontentloaded"});
+  await selectFutureTask(page,"T13");
+  await expect(source).toHaveText("Bewegung: Ein kleiner Spaziergang ist auch Bewegung.");
+  await expect(source).not.toContainText("Bewegung..");
+  await expectNoHorizontalOverflow(page);
+});
