@@ -276,7 +276,8 @@ export const LOS1_L035_TEACHER: TeacherLesson = {
       "kind": "book",
       "title": "Kirjoita oma ikäkeskustelu kirjaan",
       "paragraphs": [
-        "Kirjoita nykyisen C06:n Käytä saksaa -sivulle kaksi lyhyttä keskustelua kuvitteellisista 17- ja 20-vuotiaista. Käytä Wie alt bist du? ja Ich bin … Jahre alt.",
+        "Ennen keskusteluja muodosta ilman mallia neljä itsenäistä ikälausetta kuvitteellisista 16-, 17-, 18- ja 19-vuotiaista. Tarkista vasta sitten lukusanojen sechzehn, siebzehn, achtzehn ja neunzehn oikeinkirjoitus. Älä tallenna kenenkään oikeaa ikää.",
+         "Kirjoita nykyisen C06:n Käytä saksaa -sivulle kaksi lyhyttä keskustelua kuvitteellisista 17- ja 20-vuotiaista. Käytä Wie alt bist du? ja Ich bin … Jahre alt.",
         "Tämä on vapaa tekstintuotos. Ohjelma varmistaa, että teksti on tallennettu, mutta ei anna automaattista kielioppipistettä."
       ],
       "bookLinks": [
