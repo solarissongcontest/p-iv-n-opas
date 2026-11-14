@@ -31,3 +31,14 @@
 .los-future-check-actions button:disabled{opacity:.45;cursor:not-allowed}
 .los-future-check-error{padding:.8rem 1rem;border-left:3px solid #c43b34}
 @media(max-width:600px){.los-future-check-question{padding:.85rem}.los-future-check-actions{padding:.85rem}.los-future-check-actions button{max-width:100%;width:100%}.los-future-check-warning{padding:.85rem}}
+
+/* LOS! dark reading mode, never a light paper floating on dark ink. */
+.dark .los-future-chapter-check{color:var(--los-ink,#f2f5f5)}
+.dark .los-future-check-warning{background:var(--los-subtle,#222d37);border-color:var(--los-line,#37434f);color:var(--los-ink,#f2f5f5)}
+.dark .los-future-check-status{border-color:var(--los-line,#37434f);color:var(--los-soft,#bec8cf)}
+.dark .los-future-check-reading,.dark .los-future-check-question,.dark .los-future-check-actions{background:var(--los-paper,#1a222b);border-color:var(--los-line,#37434f)}
+.dark .los-future-check-question textarea{background:var(--los-bg,#11161d);color:var(--los-ink,#f2f5f5);border-color:var(--los-line,#37434f)}
+.dark .los-future-check-question textarea:disabled{background:var(--los-subtle,#222d37);color:var(--los-soft,#bec8cf)}
+.dark .los-future-check-model{background:var(--los-subtle,#222d37);color:var(--los-ink,#f2f5f5)}
+.dark .los-future-check-model .los-future-check-review{color:var(--los-soft,#bec8cf)}
+.dark .los-future-check-actions button{color:white}
