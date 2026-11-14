@@ -7,6 +7,8 @@ import {
   createLosFutureBackup,parseLosFutureBackup,planLosFutureBackupImport,applyLosFutureBackup,
 } from "../src/features/los/losFutureLocalBackups.ts";
 import {losFuturePracticeDraftKey} from "../src/features/los/losFuturePracticeProgress.ts";
+import {getLosTeacherLesson} from "../src/features/los/teacher/lessonRegistry.ts";
+import {emptyTeacherSession} from "../src/features/los/teacher/engine.ts";
 
 const owner="backup-test-owner";
 const makeDraft=():LosChapterDraft=>({
@@ -131,4 +133,44 @@ test("LOS! 1's backup and lessons remain routed to their original implementation
   assert.match(source,/bookId!==1\)return <LosFutureBackups bookId=\{bookId\}\/>/);
   assert.match(source,/createLosBookBackup/);
   assert.match(source,/importLosBookBackup/);
+});
+
+test("PR #264 chapter cursor and unfinished Teacher answers round-trip in later-book backups",()=>{
+  const store=new FakeStore();
+  const draft=makeDraft();
+  const lesson=getLosTeacherLesson("LOS2-L002");
+  assert.ok(lesson);
+  const session=emptyTeacherSession(lesson,"2026-11-14T00:00:00.000Z");
+  session.sceneId=lesson.scenes[1]!.id;
+  session.visitedIds=[lesson.scenes[0]!.id];
+  session.draftAnswers={recall:"Ich kenne Hallo."};
+  draft.teacherSessions={"LOS2-L002":session};
+  draft.practiceAnswers={"los.future.guided:LOS2-L002:selectedStage":"3",
+    "LOS2-C01-T06":JSON.stringify({version:1,meanings:["ystävä"],answers:["der Freund"]})};
+  store.setItem(key(2,"01"),JSON.stringify(draft));
+  const exported=createLosFutureBackup(2,owner,store,fixedDate);
+  const checked=parseLosFutureBackup(JSON.stringify(exported));
+  const restored=new FakeStore();
+  const transfer=applyLosFutureBackup(checked,2,"second-owner",restored,"missing-only");
+  assert.equal(transfer.imported,1);
+  const data=JSON.parse(restored.getItem(key(2,"01","second-owner"))??"null");
+  assert.equal(data.practiceAnswers["los.future.guided:LOS2-L002:selectedStage"],"3");
+  assert.equal(data.teacherSessions["LOS2-L002"].draftAnswers.recall,"Ich kenne Hallo.");
+  assert.equal(data.teacherSessions["LOS2-L002"].completedAt,null);
+  assert.equal(data.practiceAnswers["LOS2-C01-T06"],draft.practiceAnswers["LOS2-C01-T06"]);
+});
+
+test("future-book backup rejects fabricated Teacher mastery and cross-book sessions",()=>{
+  const store=new FakeStore();
+  const lesson=getLosTeacherLesson("LOS2-L002");assert.ok(lesson);
+  const session=emptyTeacherSession(lesson,"2026-11-14T00:00:00.000Z");
+  const spoof=makeDraft();spoof.teacherSessions={"LOS2-L002":{...session,completedAt:"2026-11-14T00:00:00.000Z"}};
+  store.setItem(key(2,"01"),JSON.stringify(spoof));
+  assert.throws(()=>createLosFutureBackup(2,owner,store),/tietoja ei voitu tarkistaa/);
+  const other=makeDraft();other.teacherSessions={"LOS3-L002":{...session,lessonId:"LOS3-L002"}};
+  store.setItem(key(2,"01"),JSON.stringify(other));
+  assert.throws(()=>createLosFutureBackup(2,owner,store),/tietoja ei voitu tarkistaa/);
+  const badCursor=makeDraft();badCursor.practiceAnswers={"los.future.guided:LOS2-L002:selectedStage":"999"};
+  store.setItem(key(2,"01"),JSON.stringify(badCursor));
+  assert.throws(()=>createLosFutureBackup(2,owner,store),/tietoja ei voitu tarkistaa/);
 });
