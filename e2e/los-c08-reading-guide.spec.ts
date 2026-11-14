@@ -16,9 +16,8 @@ test("C08 shows four ungraded reading stages before the complete source in book"
   await expect(paper.locator(".los-c01-reader .los-c01-turn")).toHaveCount(26);
   await expect(paper.locator(".los-c01-reader")).toContainText("M-WB-08");
   const first=guide.locator("ol > li").first();
-  await first.locator("details > summary").first().click();
   await expect(first).toContainText("Mikä oppiaine on meneillään?");
-  const answer=first.locator("details details p").first();
+  const answer=first.locator("details p").first();
   await expect(answer).toBeHidden();
   await first.getByText("Paljasta vastausesimerkki oman yrityksen jälkeen").click();
   await expect(answer).toBeVisible();
