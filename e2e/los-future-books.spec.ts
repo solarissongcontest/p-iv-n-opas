@@ -817,6 +817,7 @@ test("T04 literal span and T14 two-source genres persist separately without prem
   await expect(show).toBeDisabled();
   await box.locator('input[type="radio"]').first().check();
   await box.locator("textarea").first().fill("Hallo");
+  await expect(box.locator("mark")).toHaveText("Hallo");
   await box.locator("textarea").nth(1).fill("Tervehdys aloittaa keskustelun.");
   await expect(show).toBeEnabled();
   await page.reload({waitUntil:"domcontentloaded"});

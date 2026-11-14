@@ -17,12 +17,16 @@ export function LosFutureSpanGenreFields({task,answer,onChange}:{
       Tämä on lähdetekstiin perustuva harjoitus, ei automaattinen arvosana.</p>
     {task.kind==="span"?<fieldset className="los-future-span-genre-choices">
       <legend>Valitse lähdedialogista puheenvuoro</legend>
-      {task.dialogue.map((line,index)=><label key={index}>
-        <input type="radio" name={"los-span-"+task.id}
-          checked={answer.selection===index}
-          onChange={()=>onChange(writeLosFutureSpanGenreAnswer(task,index,answer.answers))}/>
-        <span lang="de">{line}</span>
-      </label>)}
+      {task.dialogue.map((line,index)=>{
+        const excerpt=answer.selection===index?(answer.answers[0]?.trim()??""):"";
+        const at=excerpt?line.toLocaleLowerCase("de").indexOf(excerpt.toLocaleLowerCase("de")):-1;
+        return <label key={index}>
+          <input type="radio" name={"los-span-"+task.id}
+            checked={answer.selection===index}
+            onChange={()=>onChange(writeLosFutureSpanGenreAnswer(task,index,answer.answers))}/>
+          <span lang="de">{at>=0?<>{line.slice(0,at)}<mark>{line.slice(at,at+excerpt.length)}</mark>{line.slice(at+excerpt.length)}</>:line}</span>
+        </label>;
+      })}
     </fieldset>:<>
       <div className="los-future-span-genre-source">
         <strong>Tukidialogi</strong>
