@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import {LOS_BOOKS} from "../src/features/los/catalog.ts";
 import {calculateLosFutureBookPractice,losFuturePracticeDraftKey,parseLosFuturePracticeEvidence} from "../src/features/los/losFuturePracticeProgress.ts";
 import {readFileSync} from "node:fs";
+import {losFutureLessonCursorKey,losFutureStageCursorKey} from "../src/features/los/losFutureSessionKeys.ts";
 
 type Draft={version:1;practiceChecked:string[];practiceAnswers:Record<string,string>;testAnswers:Record<string,string>};
 const emptyPracticeDraft=():Draft=>({version:1,practiceChecked:[],practiceAnswers:{},testAnswers:{}});
@@ -105,4 +106,19 @@ test("standalone practice parser rejects malformed v1 data and honors existing d
   assert.deepEqual(parseLosFuturePracticeEvidence('{"version":1,"practiceAnswers":{},"testAnswers":{"x":3},"practiceChecked":["step"]}'),{
     practiceAnswers:{},practiceChecked:[],
   });
+});
+
+test("temporary reader cursors stay owner and book specific, and anonymous devices do not persist them",()=>{
+  assert.equal(losFutureLessonCursorKey(owner,2),`los.future.reader.${owner}.book2.lesson`);
+  assert.equal(losFutureLessonCursorKey(owner,3),`los.future.reader.${owner}.book3.lesson`);
+  assert.notEqual(losFutureLessonCursorKey(owner,2),losFutureLessonCursorKey("other-user",2));
+  assert.equal(losFutureLessonCursorKey(null,2),null);
+  assert.equal(losFutureLessonCursorKey(owner,1),null);
+  assert.equal(losFutureStageCursorKey(owner,"LOS2-L002"),`los.future.reader.${owner}.LOS2-L002.stage`);
+  assert.notEqual(losFutureStageCursorKey(owner,"LOS2-L002"),losFutureStageCursorKey(owner,"LOS3-L002"));
+  assert.equal(losFutureStageCursorKey(null,"LOS2-L002"),null);
+  assert.equal(losFutureStageCursorKey(owner,"LOS1-L002"),null);
+  assert.equal(losFutureStageCursorKey(owner,"invalid"),null);
+  assert.match(readFileSync("src/features/los/LosFutureLearningPath.tsx","utf8"),/losFutureStageCursorKey/);
+  assert.match(readFileSync("src/features/los/LosFutureLessonRunner.tsx","utf8"),/losFutureStageCursorKey/);
 });
