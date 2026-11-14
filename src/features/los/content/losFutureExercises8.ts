@@ -87,7 +87,7 @@ export const LOS_FUTURE_EXERCISES_8: Record<string, LosFutureExerciseDraft[]> = 
       "chapterId": "10",
       "group": "T",
       "title": "Käännä asiayhteydestä",
-      "prompt": "Kirjoita saksaksi: Ajattelen, että se on tärkeää..",
+      "prompt": "Kirjoita saksaksi: Ajattelen, että se on tärkeää.",
       "answerKey": "Ich denke, dass das wichtig ist.",
       "feedback": "",
       "assessment": "accepted-variants-review"
@@ -349,7 +349,7 @@ export const LOS_FUTURE_EXERCISES_8: Record<string, LosFutureExerciseDraft[]> = 
       "chapterId": "01",
       "group": "T",
       "title": "Käännä asiayhteydestä",
-      "prompt": "Kirjoita saksaksi: Festivaali järjestetään Berliinissä..",
+      "prompt": "Kirjoita saksaksi: Festivaali järjestetään Berliinissä.",
       "answerKey": "Das Festival findet in Berlin statt.",
       "feedback": "",
       "assessment": "accepted-variants-review"
@@ -611,7 +611,7 @@ export const LOS_FUTURE_EXERCISES_8: Record<string, LosFutureExerciseDraft[]> = 
       "chapterId": "02",
       "group": "T",
       "title": "Käännä asiayhteydestä",
-      "prompt": "Kirjoita saksaksi: Kuuntelen joskus podcasteja..",
+      "prompt": "Kirjoita saksaksi: Kuuntelen joskus podcasteja.",
       "answerKey": "Ich höre manchmal Podcasts.",
       "feedback": "",
       "assessment": "accepted-variants-review"
@@ -873,7 +873,7 @@ export const LOS_FUTURE_EXERCISES_8: Record<string, LosFutureExerciseDraft[]> = 
       "chapterId": "03",
       "group": "T",
       "title": "Käännä asiayhteydestä",
-      "prompt": "Kirjoita saksaksi: Tänään ovat voimassa uudet säännöt..",
+      "prompt": "Kirjoita saksaksi: Tänään ovat voimassa uudet säännöt.",
       "answerKey": "Heute gelten neue Regeln.",
       "feedback": "",
       "assessment": "accepted-variants-review"
@@ -1135,7 +1135,7 @@ export const LOS_FUTURE_EXERCISES_8: Record<string, LosFutureExerciseDraft[]> = 
       "chapterId": "04",
       "group": "T",
       "title": "Käännä asiayhteydestä",
-      "prompt": "Kirjoita saksaksi: Ajattelen, että se on tärkeää..",
+      "prompt": "Kirjoita saksaksi: Ajattelen, että se on tärkeää.",
       "answerKey": "Ich denke, dass das wichtig ist.",
       "feedback": "",
       "assessment": "accepted-variants-review"
@@ -1397,7 +1397,7 @@ export const LOS_FUTURE_EXERCISES_8: Record<string, LosFutureExerciseDraft[]> = 
       "chapterId": "05",
       "group": "T",
       "title": "Käännä asiayhteydestä",
-      "prompt": "Kirjoita saksaksi: Tarkista lähde!.",
+      "prompt": "Kirjoita saksaksi: Tarkista lähde!",
       "answerKey": "Prüfe die Quelle!",
       "feedback": "",
       "assessment": "accepted-variants-review"
@@ -1659,7 +1659,7 @@ export const LOS_FUTURE_EXERCISES_8: Record<string, LosFutureExerciseDraft[]> = 
       "chapterId": "06",
       "group": "T",
       "title": "Käännä asiayhteydestä",
-      "prompt": "Kirjoita saksaksi: Matka on lyhyt. Siksi kävelen..",
+      "prompt": "Kirjoita saksaksi: Matka on lyhyt. Siksi kävelen.",
       "answerKey": "Der Weg ist kurz. Deshalb gehe ich zu Fuß.",
       "feedback": "",
       "assessment": "accepted-variants-review"
@@ -1921,7 +1921,7 @@ export const LOS_FUTURE_EXERCISES_8: Record<string, LosFutureExerciseDraft[]> = 
       "chapterId": "07",
       "group": "T",
       "title": "Käännä asiayhteydestä",
-      "prompt": "Kirjoita saksaksi: Teknologia muuttuu..",
+      "prompt": "Kirjoita saksaksi: Teknologia muuttuu.",
       "answerKey": "Die Technik wird sich verändern.",
       "feedback": "",
       "assessment": "accepted-variants-review"
@@ -2183,7 +2183,7 @@ export const LOS_FUTURE_EXERCISES_8: Record<string, LosFutureExerciseDraft[]> = 
       "chapterId": "08",
       "group": "T",
       "title": "Käännä asiayhteydestä",
-      "prompt": "Kirjoita saksaksi: Tämä ratkaisu on parempi kuin vanha..",
+      "prompt": "Kirjoita saksaksi: Tämä ratkaisu on parempi kuin vanha.",
       "answerKey": "Diese Lösung ist besser als die alte.",
       "feedback": "",
       "assessment": "accepted-variants-review"
@@ -2445,7 +2445,7 @@ export const LOS_FUTURE_EXERCISES_8: Record<string, LosFutureExerciseDraft[]> = 
       "chapterId": "09",
       "group": "T",
       "title": "Käännä asiayhteydestä",
-      "prompt": "Kirjoita saksaksi: Toisaalta se maksaa paljon rahaa..",
+      "prompt": "Kirjoita saksaksi: Toisaalta se maksaa paljon rahaa.",
       "answerKey": "Andererseits kostet es viel Geld.",
       "feedback": "",
       "assessment": "accepted-variants-review"
