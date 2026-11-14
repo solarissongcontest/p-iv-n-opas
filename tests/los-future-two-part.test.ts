@@ -46,3 +46,28 @@ test("old T10/T13 written work and source revisions are never overwritten",()=>{
     assert.throws(()=>writeLosFutureTwoPartAnswer(original,["x".repeat(601),""]),/Invalid/);
   }
 });
+
+
+test("all 70 Text B responses provide two chapter-specific Finnish model observations",()=>{
+  let count=0;
+  for(const book of LOS_BOOKS.filter(b=>b.id>=2))for(const chapter of book.chapters){
+    const task=losFutureExercisesFor(book.id,chapter.id).find(t=>t.id.endsWith("-T13"));
+    assert.ok(task);
+    assert.ok(task.prompt.includes("Kirjoita kaksi havaintoa suomeksi."),task.id);
+    assert.match(task.answerKey,/^Mallihavainnot: 1\. .+ 2\. .+ Myös muut Text B:stä perusteltavat havainnot voivat olla oikein\.$/u,task.id);
+    assert.doesNotMatch(task.answerKey,/Alkuperäinen Text B:|Mallin hyväksyntä riippuu/u,task.id);
+    const parsed=losFutureTwoPartTask(task);assert.ok(parsed);
+    assert.equal(parsed.kind,"text-b");
+    const oldSource="Lue Text B: "+parsed.sourceText+". Etsi siitä kaksi konkreettista asiaa";
+    const extracted=oldSource.slice("Lue Text B: ".length,oldSource.indexOf(". Etsi siitä")+1).trim();
+    assert.equal(parsed.sourceText,extracted,"prompt revision must preserve source identity");
+    const oldSaved=JSON.stringify({version:1,kind:"text-b",sourceText:parsed.sourceText,
+      answers:["Aiempi tekstihavainto","Aiempi tulkinta"]});
+    assert.deepEqual(readLosFutureTwoPartAnswer(oldSaved,parsed),
+      ["Aiempi tekstihavainto","Aiempi tulkinta"]);
+    if(book.id===5&&chapter.id==="06")assert.match(task.answerKey,/pieni|kävely/iu);
+    if(book.id===8&&chapter.id==="05")assert.match(task.answerKey,/lähdettä ei ilmoiteta/iu);
+    count++;
+  }
+  assert.equal(count,70);
+});
