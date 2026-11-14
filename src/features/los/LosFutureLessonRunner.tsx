@@ -6,6 +6,7 @@ import { getLosFutureLesson } from "./content/losFutureLessons.ts";
 import type { LosFutureLessonContent } from "./content/losFutureLessonTypes.ts";
 import { LosFutureExercises } from "./LosFutureExercises";
 import { LosFutureReviewPractice } from "./LosFutureReviewPractice";
+import { LosFutureExamPractice } from "./LosFutureExamPractice";
 import { useLosChapterDraft } from "./studyState";
 import type { LosNavigate } from "./LosReferenceTools";
 
@@ -134,7 +135,7 @@ function ReviewLesson({script}: {script:LosFutureLessonContent}){
   return <div className="los-guided-review">
     <div className="los-guided-lesson-status">
       {isExam?<LockKeyhole size={19} aria-hidden="true"/>:<ClipboardList size={19} aria-hidden="true"/>}
-      <strong>{isExam?"Kokeen ohje, ei avattu arvioitava koe":"Kertauksen käsikirjoitusluonnos"}</strong>
+      <strong>{isExam?"Kirjallinen harjoituskoe, ei hyväksytty arviointikoe":"Kertauksen käsikirjoitusluonnos"}</strong>
     </div>
     <h3>Opettajan aloitus</h3><p>{script.intro}</p>
     <h3>Opetus ja palaute</h3><p>{script.reviewTeaching}</p>
@@ -154,8 +155,10 @@ function ReviewLesson({script}: {script:LosFutureLessonContent}){
     <div className="los-editorial-note"><strong>Kertauksen ja kokeen sääntö:</strong> {script.reviewRule}</div>
     {isExam&&<p className="los-guided-lesson-disclaimer">
       <LockKeyhole size={16} aria-hidden="true"/>
-      Varsinaista koetta ei ole tässä toteutettu: testikysymyksiä, turvallista palautusta,
-      vastausten paljastusta tai pisteytystä ei käynnistetä tästä ohjesivusta.</p>}
+      Alla on lähdekäsikirjoituksen kirjallinen, paikallinen harjoituskoe vastauksineen
+      ja vasta palautuksen jälkeen avautuvine ratkaisumalleineen. Kuuntelua,
+      ihmisen tekemää kirjoituksen arviointia tai julkaisuhyväksyttyä koesuoritusta
+      tämä harjoitusversio ei sisällä.</p>}
   </div>;
 }
 
@@ -173,7 +176,8 @@ export function LosFutureLessonRunner({bookId,number,chapterId,move}:{
     {script.kind==="chapter"&&chapterId
       ? <GuidedChapterLesson key={script.id} bookId={bookId} chapterId={chapterId} script={script} move={move}/>
       : (number===30||number===59)
-        ? <ReviewLesson script={script}/>
+        ? <><ReviewLesson script={script}/><LosFutureExamPractice
+          bookId={bookId} kind={number===30?"midterm":"final"}/></>
         : <LosFutureReviewPractice key={script.id} bookId={bookId} script={script} move={move}/>} 
   </section>;
 }
