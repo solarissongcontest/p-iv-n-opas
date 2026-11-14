@@ -1091,3 +1091,27 @@ test("T13 displays manuscript punctuation exactly and keeps the older structured
   await expect(source).not.toContainText("Bewegung..");
   await expectNoHorizontalOverflow(page);
 });
+
+
+test("style-only German T10 teaching is not called an error and preserves learner drafts",async({page})=>{
+  await enterFutureBook(page);
+  await page.goto("/los#/7/03/practice",{waitUntil:"domcontentloaded"});
+  await selectFutureTask(page,"T10");
+  await expect(page.locator(".los-future-exercise-card")).toContainText("Hio ilmaus yleiskieliseksi");
+  await expect(page.locator(".los-future-two-part legend")).toHaveText("Hio ilmaus ja perustele");
+  await expect(page.locator(".los-future-two-part-source"))
+    .toHaveText("Ich muss lernen für die Prüfung.");
+  const entries=page.locator(".los-future-two-part textarea");
+  await entries.nth(0).fill("Ich muss für die Prüfung lernen.");
+  await entries.nth(1).fill("Tämä on neutraali yleiskielinen sanajärjestys.");
+  await page.reload({waitUntil:"domcontentloaded"});
+  await selectFutureTask(page,"T10");
+  await expect(entries.nth(0)).toHaveValue("Ich muss für die Prüfung lernen.");
+  await expect(entries.nth(1)).toHaveValue("Tämä on neutraali yleiskielinen sanajärjestys.");
+  await page.goto("/los#/8/02/practice",{waitUntil:"domcontentloaded"});
+  await selectFutureTask(page,"T10");
+  await expect(page.locator(".los-future-two-part-source"))
+    .toHaveText("Ich lese Nachrichten oft jeden Tag.");
+  await expect(page.locator(".los-future-exercise-card")).toContainText("Hio ilmaus yleiskieliseksi");
+  await expectNoHorizontalOverflow(page);
+});
