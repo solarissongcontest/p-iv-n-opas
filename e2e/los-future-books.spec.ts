@@ -489,3 +489,28 @@ test("LOS! 2 reading T02 accepts an independent Finnish evidence answer, saves a
   await expect(page.locator("#los-future-short-input")).toHaveValue("");
   await expectNoHorizontalOverflow(page);
 });
+
+test("LOS! 5 medical vocabulary matching accepts the same Finnish meaning for Arzt and Ärztin",async({page})=>{
+  await enterFutureBook(page);
+  await page.goto("/los#/5/03/understand",{waitUntil:"domcontentloaded"});
+  const picker=page.locator("#los-future-exercise-choice");
+  const list=await picker.locator("option").allTextContents();
+  const index=list.findIndex(label=>label.trim().startsWith("T05 ·"));
+  expect(index).toBeGreaterThanOrEqual(0);
+  await picker.selectOption({index});
+  const matching=page.getByRole("group",{name:"Yhdistä saksan sana ja sen merkitys"});
+  await expect(matching).toBeVisible();
+  const doctor=matching.getByRole("combobox",{name:"Suomennos sanalle der Arzt",exact:true});
+  const doctorF=matching.getByRole("combobox",{name:"Suomennos sanalle die Ärztin",exact:true});
+  await doctor.selectOption("lääkäri");
+  await doctorF.selectOption("lääkäri");
+  await expect(doctor).toHaveValue("lääkäri");
+  await expect(doctorF).toHaveValue("lääkäri");
+  await page.reload({waitUntil:"domcontentloaded"});
+  await picker.selectOption({index});
+  await expect(doctor).toHaveValue("lääkäri");
+  await expect(doctorF).toHaveValue("lääkäri");
+  await expect(page.locator(".los-future-exercise-summary")).toContainText("1 vastattu");
+  await expect(page.locator(".los-future-exercise-summary")).toContainText("0 verrattu vastausluonnokseen");
+  await expectNoHorizontalOverflow(page);
+});
