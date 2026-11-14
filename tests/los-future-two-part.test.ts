@@ -2,6 +2,7 @@ import {test} from "node:test";
 import assert from "node:assert/strict";
 import {LOS_BOOKS} from "../src/features/los/catalog.ts";
 import {losFutureExercisesFor} from "../src/features/los/content/losFutureExercises.ts";
+import {LOS_FUTURE_MANUSCRIPTS} from "../src/features/los/content/losFutureManuscripts.ts";
 import {losFutureTwoPartTask,readLosFutureTwoPartAnswer,writeLosFutureTwoPartAnswer}
   from "../src/features/los/content/losFutureTwoPart.ts";
 
@@ -58,7 +59,8 @@ test("all 70 Text B responses provide two chapter-specific Finnish model observa
     assert.doesNotMatch(task.answerKey,/Alkuperäinen Text B:|Mallin hyväksyntä riippuu/u,task.id);
     const parsed=losFutureTwoPartTask(task);assert.ok(parsed);
     assert.equal(parsed.kind,"text-b");
-    const oldSource="Lue Text B: "+parsed.sourceText+". Etsi siitä kaksi konkreettista asiaa";
+    const manuscript=LOS_FUTURE_MANUSCRIPTS[book.id]?.[chapter.id];assert.ok(manuscript);
+    const oldSource="Lue Text B: "+manuscript.textB+". Etsi siitä kaksi konkreettista asiaa";
     const extracted=oldSource.slice("Lue Text B: ".length,oldSource.indexOf(". Etsi siitä")+1).trim();
     assert.equal(parsed.sourceText,extracted,"prompt revision must preserve source identity");
     const oldSaved=JSON.stringify({version:1,kind:"text-b",sourceText:parsed.sourceText,
