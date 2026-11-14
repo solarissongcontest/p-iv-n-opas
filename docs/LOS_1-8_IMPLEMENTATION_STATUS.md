@@ -20,7 +20,7 @@ Tämä tiedosto on ainoa LOS! 1–8:n *toteutuksen* jatkotilaraportti. Visuaalin
 
 **Yhteensä:** 80 kappaletta; 480 nimettyä tuntia (410 yhteiseen Teacher-soittimeen sovitettua kappaletuntia LOS! 1 mukaan lukien, 70 jatkokirjojen rajoitettua kertaus-/koetuntia). Rekisteröity tunti ei vielä merkitse pedagogisesti valmista tai osaamista todentavaa tuntia.
 
-**LOS! 2–8 tehtävämoottorin tämän haaran tilanne:** 1 820 alkuperäistä tunnistettua tehtävää. Rakenteisesti toteutettuja ovat 66 yhdistelyä (T05), 70 aukkoa (T07), 70 sanajärjestystä (T08), 70 tekstin sanajärjestystä (R02), 70 sanastomuistia (T06), 70 kaksiosaista loppulappua (T20), 70 luetunymmärtämisen lyhytvastausta (T02), 70 käännöksen lyhytvastausta (T09) ja 70 kieliopin lyhytvastausta (T12). **Yhteensä 626/1 820 rakenteista käyttöliittymää (34,4 % tehtäväluonnosten määrästä)**. Loput 1 194 ovat pääosin avoimen tekstiluonnoksen / itsevertailun muodossa. Tämä on vain rakenteisen interaktion kattavuusluku, ei pedagogisen tai kielellisen julkaisuvalmiuden prosentti. Automaattista arvosanaa ei myönnetä lähdevastausten perusteella.
+**LOS! 2–8 tehtävämoottorin tämän haaran tilanne:** 1 820 alkuperäistä tunnistettua tehtävää. Rakenteisesti toteutettuja ovat 70 yhdistelyä (T05), 70 aukkoa (T07), 70 sanajärjestystä (T08), 70 tekstin sanajärjestystä (R02), 70 sanastomuistia (T06), 70 kaksiosaista loppulappua (T20), 70 luetunymmärtämisen lyhytvastausta (T02), 70 käännöksen lyhytvastausta (T09) ja 70 kieliopin lyhytvastausta (T12). **Yhteensä 630/1 820 rakenteista käyttöliittymää (34,6 % tehtäväluonnosten määrästä)**. Loput 1 190 ovat pääosin avoimen tekstiluonnoksen / itsevertailun muodossa. Tämä on vain rakenteisen interaktion kattavuusluku, ei pedagogisen tai kielellisen julkaisuvalmiuden prosentti. Automaattista arvosanaa ei myönnetä lähdevastausten perusteella.
 
 ## 14.11.2026 tehdyt konkreettiset muutokset (PR #264)
 
@@ -34,6 +34,8 @@ Tämä tiedosto on ainoa LOS! 1–8:n *toteutuksen* jatkotilaraportti. Visuaalin
 8. `d5dd9490`, `369e85d9`, `b3063ace`: kaikkien seitsemän kirjan L060:n seuraavaan kirjaan vuotanut sisältö korjattiin käyttämään saman kirjan kappaletta 10. Omat kielioppiselitykset näytetään lopputunnilla, mutta kertausta ei esitetä hyväksyttynä kokeena.
 9. `044fd45e`, `ec97cf71`, `e62c9f4d`, `cdb55f7c`, `260acc31`, `dde8e2d5`, `be6e8fa0`: Teacher 2.0:n 350 kappaletuntiin lisättiin opetustaulusta lähtevä, deterministinen sanastotarkistus ja väärinvalintaan liittyvä selitys. Neljän suomennokseltaan päällekkäisen lähde-T05:n sanapareille käytetään saman kappaleen käsikirjoituksesta neljää yksiselitteistä merkitystä. Teacher-käsikirjoituksen versio nostettiin `2.0.0-draft.2`:een; osaamishyväksynnät edelleen estetty.
 
+
+10. `5668797c`, `ae9fe8c8`, `15915ba7`, `84fbbf30`, `8c3191da`: neljän aiemmin pelkäksi tekstiksi jääneen T05-yhdistelytehtävän oikeat päällekkäiset suomennokset (esim. Arzt/Ärztin = lääkäri) toimivat nyt saavutettavina valintoina ja tallentuvat. Teacher 2.0:n neljän vaihtoehdon tarkistus käyttää edelleen vain yksiselitteisiä merkityksiä.
 
 ## Todellinen QA / versiot
 
