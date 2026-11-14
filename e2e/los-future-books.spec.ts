@@ -101,7 +101,7 @@ test("LOS! 2–8 show all 60 source-written lessons while keeping exams non-exec
   await expect(page.locator(".los-future-path-group li")).toHaveCount(60);
   await expect(page.locator(".los-future-path-group li button")).toHaveCount(60);
   await expect(page.locator("#los-future-lesson-runner")).toBeVisible();
-  await expect(page.locator(".los-guided-review")).toContainText("Opettajan aloitus");
+  await expect(page.locator(".los-review-practice")).toContainText("Muistista palautus");
   await expect(page.getByText("0 valmiiksi hyväksyttyä ohjattua oppituntia")).toBeVisible();
   await page.getByRole("button",{name:/Tunti 2: Aloita ja ennakoi/}).click();
   await expect(page.locator(".los-guided-lesson-stage-nav button")).toHaveCount(6);
@@ -512,5 +512,61 @@ test("LOS! 5 medical vocabulary matching accepts the same Finnish meaning for Ar
   await expect(doctorF).toHaveValue("lääkäri");
   await expect(page.locator(".los-future-exercise-summary")).toContainText("1 vastattu");
   await expect(page.locator(".los-future-exercise-summary")).toContainText("0 verrattu vastausluonnokseen");
+  await expectNoHorizontalOverflow(page);
+});
+
+test("LOS! 2 review L027 resumes written recall, shared exercise and self-assessment without a fake grade",async({page})=>{
+  await enterFutureBook(page);
+  await page.goto("/los#/2/path",{waitUntil:"domcontentloaded"});
+  await page.locator(".los-future-path-group").nth(2).locator("summary").click();
+  await page.getByRole("button",{name:/Tunti 27: ensimmäinen kertaus/i}).click();
+  const review=page.locator(".los-review-practice");
+  await expect(review).toBeVisible();
+  const steps=page.getByRole("navigation",{name:"Kertausoppitunnin vaiheet"});
+  await expect(steps.getByRole("button")).toHaveCount(4);
+  await review.getByRole("textbox",{name:"Omat aikaisemmat tiedot ja kysymykset"}).fill("Wir lernen Deutsch.");
+  await steps.getByRole("button",{name:/Opettajan kertaus/}).click();
+  await expect(review.locator(".los-review-vocab-board>div")).toHaveCount(4);
+  await expect(review.locator("blockquote[lang='de']")).toBeVisible();
+  await steps.getByRole("button",{name:/Ohjattu harjoittelu/}).click();
+  const task=review.locator("#los-future-short-input");
+  await expect(task).toBeVisible();
+  await task.fill("Lähdetekstin henkilö kertoo arjestaan.");
+  await steps.getByRole("button",{name:/Sovella ja arvioi itse/}).click();
+  await review.getByRole("textbox",{name:"Oma uusi saksankielinen esimerkki"}).fill("Ich lerne am Freitag Deutsch.");
+  await review.getByRole("textbox",{name:"Itsearviointi suomeksi ja seuraava kertaus"}).fill("Kertaan sanajärjestystä.");
+  await expect(review).toContainText("Niitä ei ole arvioitu automaattisesti.");
+  await page.reload({waitUntil:"domcontentloaded"});
+  await expect(review).toBeVisible();
+  await expect(review.getByRole("textbox",{name:"Oma uusi saksankielinen esimerkki"}))
+    .toHaveValue("Ich lerne am Freitag Deutsch.");
+  await steps.getByRole("button",{name:/Muistista palautus/}).click();
+  await expect(review.getByRole("textbox",{name:"Omat aikaisemmat tiedot ja kysymykset"}))
+    .toHaveValue("Wir lernen Deutsch.");
+  const values=await page.evaluate(()=>{
+    const owner=localStorage.getItem("opk.owner-id");
+    return {
+      los2:localStorage.getItem(`los.local.v1.${owner}.2.05`),
+      los3:localStorage.getItem(`los.local.v1.${owner}.3.05`),
+    };
+  });
+  expect(JSON.parse(values.los2??"{}").practiceAnswers["LOS2-L027:review:reflection"]).toBe("Kertaan sanajärjestystä.");
+  expect(values.los3).toBeNull();
+  await expectNoHorizontalOverflow(page);
+});
+
+test("book exams L030 and L059 remain locked while other review sessions teach",async({page})=>{
+  await enterFutureBook(page);
+  await page.goto("/los#/2/path",{waitUntil:"domcontentloaded"});
+  await page.getByText("Kertaus ja välikoe",{exact:true}).click();
+  await page.getByRole("button",{name:/Tunti 30: välikoe/i}).click();
+  await expect(page.locator(".los-review-practice")).toHaveCount(0);
+  await expect(page.locator(".los-guided-review")).toContainText("Kokeen ohje, ei avattu arvioitava koe");
+  await expect(page.locator(".los-guided-review textarea")).toHaveCount(0);
+  await page.goto("/los#/8/path",{waitUntil:"domcontentloaded"});
+  await page.locator(".los-future-path-group").nth(4).locator("summary").click();
+  await page.getByRole("button",{name:/Tunti 59: loppukoe/i}).click();
+  await expect(page.locator(".los-review-practice")).toHaveCount(0);
+  await expect(page.locator(".los-guided-review")).toContainText("Varsinaista koetta ei ole tässä toteutettu");
   await expectNoHorizontalOverflow(page);
 });
