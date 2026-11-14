@@ -1152,3 +1152,22 @@ test("all unattempted exercises keep the model hidden until learner work exists"
   await expect(model).toBeEnabled();
   await expectNoHorizontalOverflow(page);
 });
+
+
+test("translation prompts show Finnish punctuation once and keep written answers on reload",async({page})=>{
+  await enterFutureBook(page);
+  await page.goto("/los#/2/07/practice",{waitUntil:"domcontentloaded"});
+  await selectFutureTask(page,"T09");
+  await expect(page.locator(".los-future-exercise-question"))
+    .toHaveText("Kirjoita saksaksi: Mitä kahvi maksaa?");
+  const translation=page.locator("#los-future-short-input");
+  await translation.fill("Was kostet der Kaffee?");
+  await page.reload({waitUntil:"domcontentloaded"});
+  await selectFutureTask(page,"T09");
+  await expect(translation).toHaveValue("Was kostet der Kaffee?");
+  await page.goto("/los#/8/05/practice",{waitUntil:"domcontentloaded"});
+  await selectFutureTask(page,"T09");
+  await expect(page.locator(".los-future-exercise-question"))
+    .toHaveText("Kirjoita saksaksi: Tarkista lähde!");
+  await expectNoHorizontalOverflow(page);
+});
