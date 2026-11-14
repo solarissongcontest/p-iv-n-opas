@@ -9,6 +9,8 @@ import {
 import {losFuturePracticeDraftKey} from "../src/features/los/losFuturePracticeProgress.ts";
 import {getLosTeacherLesson} from "../src/features/los/teacher/lessonRegistry.ts";
 import {emptyTeacherSession} from "../src/features/los/teacher/engine.ts";
+import {getLosFutureExam} from "../src/features/los/content/losFutureExams.ts";
+import {beginFutureExamRetake,futureExamHistoryKey} from "../src/features/los/losFutureExamEngine.ts";
 
 const owner="backup-test-owner";
 const makeDraft=():LosChapterDraft=>({
@@ -209,4 +211,48 @@ test("review backup rejects unauthorised lessons, bad stages and false exam comp
     store.setItem(key(2,"05"),JSON.stringify(draft));
     assert.throws(()=>createLosFutureBackup(2,owner,store),/tietoja ei voitu tarkistaa/);
   }
+});
+
+test("all pending midterm and final practice exam answers plus retakes survive a book backup",()=>{
+  const owner="backup-test-owner";
+  const store=new FakeStore();
+  const exam=getLosFutureExam(2,"midterm");
+  assert.ok(exam);
+  const draft=makeDraft();
+  draft.testAnswers={
+    [exam.questions[0]!.id]:"Pienessä kaupungissa.",
+    [exam.writing.id]:"Ich wohne mit meiner Familie in Bonn.",
+  };
+  draft.testSubmittedAt="2026-11-14T11:00:00.000Z";
+  const afterRetake=beginFutureExamRetake(draft,exam);
+  afterRetake.testAnswers[exam.questions[1]!.id]="Leipomossa";
+  store.setItem(key(2,"05",owner),JSON.stringify(afterRetake));
+  const exported=createLosFutureBackup(2,owner,store,fixedDate);
+  const parsed=parseLosFutureBackup(JSON.stringify(exported));
+  assert.ok(parsed.chapters["05"]);
+  const restored=new FakeStore();
+  applyLosFutureBackup(parsed,2,"new-owner",restored,"missing-only");
+  const back=JSON.parse(restored.getItem(key(2,"05","new-owner"))??"null");
+  assert.equal(back.testAnswers[exam.questions[1]!.id],"Leipomossa");
+  assert.equal(JSON.parse(back.testAnswers[futureExamHistoryKey(exam)])[0]
+    .answers[exam.writing.id],"Ich wohne mit meiner Familie in Bonn.");
+  assert.equal(back.testSubmittedAt,null);
+  assert.equal(restored.getItem(key(3,"05","new-owner")),null);
+});
+
+test("import of another book's exam, fabricated score or malformed attempt history is blocked",()=>{
+  const store=new FakeStore();
+  const exam=getLosFutureExam(2,"midterm");assert.ok(exam);
+  for(const bad of [
+    {"LOS3-MID-R01":"Wrong book"},
+    {"LOS2-MID-GRADING":"35"},
+    {[futureExamHistoryKey(exam)]:"not json"},
+  ]){
+    const draft=makeDraft();draft.testAnswers=bad;
+    store.setItem(key(2,"05"),JSON.stringify(draft));
+    assert.throws(()=>createLosFutureBackup(2,owner,store),/tietoja ei voitu tarkistaa/);
+  }
+  const fake=makeDraft();fake.testSubmittedAt="2026-11-14T00:00:00.000Z";
+  store.setItem(key(2,"05"),JSON.stringify(fake));
+  assert.throws(()=>createLosFutureBackup(2,owner,store),/tietoja ei voitu tarkistaa/);
 });
