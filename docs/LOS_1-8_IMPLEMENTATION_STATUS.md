@@ -119,6 +119,13 @@ Tämä tiedosto on ainoa LOS! 1–8:n *toteutuksen* jatkotilaraportti. Visuaalin
 - LOS! 7/C05 hyväksyy itsevertailussa tulevaa ilmaisevan saksan preesensin `Ich arbeite morgen.` sekä futuurimallin; LOS! 7/C06 erottaa `ihr`- ja kohteliaisuuden `Sie`-puhuttelut. LOS! 8/C07 erottaa yleisen nykyhetken ja futuurin sekä `Technik`/`Technologie`-sanavalinnat.
 - Tehtävien ID:t, kysymystekstit, tallennetut vapaatekstivastaukset ja arvioinnin rajat säilyvät. Huomautukset näytetään vasta ratkaisumallin avauksen yhteydessä, eikä niitä käsitellä automaattisesti pisteytettyinä vastausvariantteina. Sisältö vaatii yhä erillisen kielentarkastuksen.
 
+## 14.11.2026 · R05:n 70 kappalekohtaista mallitiivistelmää
+
+- LOS! 2–8:n **70 R05-tiivistelmäharjoitusta** saivat kaksi saksankielistä mallivirkettä per kappale: 70 erillistä malliluonnosta alkuperäisen Text A:n sisällöstä. Tämä korvaa opiskelijan näkemän aiemman saman yleisluontoisen ”Käsin tarkistettava mallivastaus” -paikkamerkin.
+- Mallit on erotettu toimitukselliseen `content/losFutureR05Models.ts`-moduuliin. `losFutureExercises.ts` liittää ne oikeisiin R05-tehtäviin **muuttamatta lähdekäsikirjoitusten tehtävätiedostoja**, jolloin samaan aikaan tehdyt muut teksti- ja palauteeditoinnit säilyvät. Ratkaisu ei lisää tehtävätunnisteita, progress-avaimia tai opiskelijaan liittyviä tietoja.
+- Näkyvä teksti merkitsee ne **kielentarkistamattomiksi saksankielisiksi malliluonnoksiksi** ja muistuttaa, että useat tekstin pääasian ja opetetun rakenteen huomioivat tiivistelmät voivat olla oikein. Mallit eivät anna automaattista arvosanaa, eikä niille ole vielä riippumatonta kieli-/opettajahyväksyntää.
+- Regressiotesti kattaa kaikki 70 mallia, kahden virkkeen rakenteen, Text A:n manuaalisesti valitut sisältöankkurit, yksilöllisyyden ja vanhan nelikenttäisen oppilasvastauksen säilymisen. Selain-QA tarkistaa yhden mallin yritys ensin -avaamisen ja opiskelijaluonnoksen säilymisen. **Uuden HEADin Actions-testien tulos tarkistettava erikseen.**
+
 ## 14.11.2026 · R04:n Text A -tekstinäytön palautetarkistus
 
 - LOS! 2–8:n **70 R04-kontekstisanastoharjoituksessa** näkyy nyt heti itse valittua saksankielistä sanaa ja sen kopioitua sanayhteyttä koskeva tarkistus. Verrataan kirjaimellista tekstikohtaa saman kappaleen **Text A:han**; Unicode-NFC, saksalainen kirjainkoon rinnastus ja välilyöntien normalisointi hyväksytään, mutta sanan esiintymistä toisen sanan sisällä ei pidetä oikeana tekstinäyttönä.

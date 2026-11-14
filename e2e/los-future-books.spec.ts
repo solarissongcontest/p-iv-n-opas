@@ -1179,3 +1179,28 @@ test("translation prompts show Finnish punctuation once and keep written answers
     .toHaveText("Kirjoita saksaksi: Tarkista lähde!");
   await expectNoHorizontalOverflow(page);
 });
+
+test("R05 source-specific German model appears only after the learner writes a summary",async({page})=>{
+  await enterFutureBook(page);
+  await page.goto("/los#/2/01/practice",{waitUntil:"domcontentloaded"});
+  await selectFutureTask(page,"R05");
+  const form=page.locator(".los-future-remaining");
+  const fields=form.locator("textarea");
+  await expect(fields).toHaveCount(4);
+  const show=page.getByRole("button",{name:"Näytä vastausluonnos"});
+  await expect(show).toBeDisabled();
+  await fields.nth(0).fill("Mira kommt aus Finnland.");
+  await fields.nth(1).fill("Sie lernt mit ihren Freunden Deutsch.");
+  await fields.nth(3).fill("Tarkistin pääasian ja verbimuodot.");
+  await expect(show).toBeEnabled();
+  await show.click();
+  const model=page.locator(".los-future-exercise-solution");
+  await expect(model).toContainText("Mira kommt aus Finnland und lernt jetzt in Bonn Deutsch.");
+  await expect(model).not.toContainText("Käsin tarkistettava mallivastaus;");
+  await model.getByRole("button",{name:"Olen verrannut vastaukseni"}).click();
+  await page.reload({waitUntil:"domcontentloaded"});
+  await selectFutureTask(page,"R05");
+  await expect(fields.nth(0)).toHaveValue("Mira kommt aus Finnland.");
+  await expect(fields.nth(3)).toHaveValue("Tarkistin pääasian ja verbimuodot.");
+  await expectNoHorizontalOverflow(page);
+});
