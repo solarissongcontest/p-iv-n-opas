@@ -162,4 +162,10 @@ test("EX-FINAL-Q41 recognizes source phrase without testing untaught wir conjuga
  assert.equal(old["EX-FINAL-Q41"],"b");
  assert.equal(losFinalScore(old).correct,50);
  assert.equal(losFinalReadyToSubmit(old),true);
+ const grammar=readFileSync("src/features/los/LosGrammarChapters.tsx","utf8");
+ assert.match(grammar,/M-COM-02-keskustelussa/);
+ assert.match(grammar,/Wir kommen aus Berlin\./);
+ assert.match(grammar,/Sen verbimuotoa ei tarvitse/);
+ const teacher=readFileSync("src/features/los/teacher/lessonC10.ts","utf8");
+ assert.match(teacher,/uutta wir-taivutusta/);
 });
