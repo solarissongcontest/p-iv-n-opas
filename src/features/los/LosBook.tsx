@@ -412,7 +412,7 @@ function LosBookWorkspace({ book, location, move, goLibrary, openChapter }: {
   const openTask = (task:LosContentTask) => {
     window.location.hash = `#/${book.id}/${task.chapterId}/${task.section}/${task.id}`;
   };
-  const openChapter = (ch: LosChapter) => move(ch.id, "chapter");
+  const openChapterHere = (ch: LosChapter) => move(ch.id, "chapter");
   const previousIndex = chapter ? book.chapters.findIndex(c => c.id === chapter.id) : -1;
   const next = previousIndex >= 0 ? book.chapters[previousIndex + 1] : null;
   const previous = previousIndex > 0 ? book.chapters[previousIndex - 1] : null;
@@ -452,7 +452,7 @@ function LosBookWorkspace({ book, location, move, goLibrary, openChapter }: {
         <a className="los-sidebar-exit" href="/studies">Palaa Opintopäiväkirjaan <ArrowRight size={15} /></a>
       </aside>
       <main className="los-book-main" ref={mainRef} id="main-content" tabIndex={-1}>
-        <div className="los-main-breadcrumb"><button onClick={() => move(null, "overview")}>LOS! {book.id}</button>{chapter ? <><ChevronRight size={12} /><button onClick={() => openChapter(chapter)}>Kappale {Number(chapter.id)}</button></> : null}{chapter && section !== "chapter" ? <><ChevronRight size={12} /><span>{section==="cards" ? "Kertauskortit" : sections.find(s => s.id === section)?.label}</span></> : null}</div>
+        <div className="los-main-breadcrumb"><button onClick={() => move(null, "overview")}>LOS! {book.id}</button>{chapter ? <><ChevronRight size={12} /><button onClick={() => openChapterHere(chapter)}>Kappale {Number(chapter.id)}</button></> : null}{chapter && section !== "chapter" ? <><ChevronRight size={12} /><span>{section==="cards" ? "Kertauskortit" : sections.find(s => s.id === section)?.label}</span></> : null}</div>
         {splitEligible && <div className="los-split-controls">
           <button type="button" ref={splitTriggerRef} aria-pressed={splitVisible}
             aria-controls="los-split-workbook" onClick={() => setSplitOpen(value => !value)}>
@@ -533,8 +533,8 @@ function LosBookWorkspace({ book, location, move, goLibrary, openChapter }: {
           </button> : <span aria-hidden="true"/>}
         </nav>}
         {chapter && <div className="los-pagination">
-          {previous ? <button onClick={() => openChapter(previous)}><ChevronLeft size={18} /><span>Edellinen kappale<small lang="de">{previous.title}</small></span></button> : <span />}
-          {next ? <button onClick={() => openChapter(next)}><span>Seuraava kappale<small lang="de">{next.title}</small></span><ChevronRight size={18} /></button> : <button onClick={() => move(null, "appendix")}>Kirjan liitteet <ChevronRight size={18} /></button>}
+          {previous ? <button onClick={() => openChapterHere(previous)}><ChevronLeft size={18} /><span>Edellinen kappale<small lang="de">{previous.title}</small></span></button> : <span />}
+          {next ? <button onClick={() => openChapterHere(next)}><span>Seuraava kappale<small lang="de">{next.title}</small></span><ChevronRight size={18} /></button> : <button onClick={() => move(null, "appendix")}>Kirjan liitteet <ChevronRight size={18} /></button>}
         </div>}
         <footer className="los-page-footer">LOS! · {book.code} · {book.module} <span>Kappaleiden varmistettuja aineistoja täydennetään</span></footer>
       </main>
