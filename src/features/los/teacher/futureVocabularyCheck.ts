@@ -14,7 +14,9 @@ type Pair={de:string;fi:string};
 export function futureVocabularyPairs(bookId:number,chapterId:string,manuscript:LosFutureManuscript):Pair[]|null{
   const t05=losFutureExercisesFor(bookId,chapterId).find(task=>task.id.endsWith("-T05"));
   const authored=t05?losFutureMatchingPairs(t05):null;
-  if(authored)return authored;
+  // Teacher's four-answer choice requires four different meanings, even though
+  // the book's matching activity correctly permits Arzt and Ärztin -> lääkäri.
+  if(authored&&new Set(authored.map(pair=>pair.fi)).size===4)return authored;
   const unique:Pair[]=[];
   const german=new Set<string>(),finnish=new Set<string>();
   for(const entry of manuscript.vocabulary){
