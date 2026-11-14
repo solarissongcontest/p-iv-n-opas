@@ -28,7 +28,7 @@ export const LOS_FUTURE_EXERCISES_4: Record<string, LosFutureExerciseDraft[]> = 
       "group": "T",
       "title": "Puhujat ja vuorot",
       "prompt": "Lue saksankielinen tukidialogi. Kuinka monta puheenvuoroa siinä on, ja mitä kukin puhuja tekee ensimmäisellä vuorollaan?",
-      "answerKey": "4 puheenvuoroa. Puhujien ensimmäiset vuorot: Guide: Willkommen in Turku! | Gast: Was kann man hier machen?. Suomenkielinen tulkinta: Opas toivottaa vieraan tervetulleeksi Turkuun. Vieras kysyy, mitä kaupungissa voi tehdä. Tarkista, että oma vastauksesi kuvaa kummankin puhujan ensimmäistä vuoroa.",
+      "answerKey": "4 puheenvuoroa. Puhujien ensimmäiset vuorot: Guide: Willkommen in Turku! | Gast: Was kann man hier machen? Suomenkielinen tulkinta: Opas toivottaa vieraan tervetulleeksi Turkuun. Vieras kysyy, mitä kaupungissa voi tehdä. Tarkista, että oma vastauksesi kuvaa kummankin puhujan ensimmäistä vuoroa.",
       "feedback": "",
       "assessment": "self-review"
     },
@@ -290,7 +290,7 @@ export const LOS_FUTURE_EXERCISES_4: Record<string, LosFutureExerciseDraft[]> = 
       "group": "T",
       "title": "Puhujat ja vuorot",
       "prompt": "Lue saksankielinen tukidialogi. Kuinka monta puheenvuoroa siinä on, ja mitä kukin puhuja tekee ensimmäisellä vuorollaan?",
-      "answerKey": "4 puheenvuoroa. Puhujien ensimmäiset vuorot: Mia: Wo spricht man Deutsch? | Tariq: In Deutschland, Österreich und in der Schweiz.. Suomenkielinen tulkinta: Mia kysyy, missä puhutaan saksaa. Tariq luettelee Saksan, Itävallan ja Sveitsin. Tarkista, että oma vastauksesi kuvaa kummankin puhujan ensimmäistä vuoroa.",
+      "answerKey": "4 puheenvuoroa. Puhujien ensimmäiset vuorot: Mia: Wo spricht man Deutsch? | Tariq: In Deutschland, Österreich und in der Schweiz. Suomenkielinen tulkinta: Mia kysyy, missä puhutaan saksaa. Tariq luettelee Saksan, Itävallan ja Sveitsin. Tarkista, että oma vastauksesi kuvaa kummankin puhujan ensimmäistä vuoroa.",
       "feedback": "",
       "assessment": "self-review"
     },
@@ -552,7 +552,7 @@ export const LOS_FUTURE_EXERCISES_4: Record<string, LosFutureExerciseDraft[]> = 
       "group": "T",
       "title": "Puhujat ja vuorot",
       "prompt": "Lue saksankielinen tukidialogi. Kuinka monta puheenvuoroa siinä on, ja mitä kukin puhuja tekee ensimmäisellä vuorollaan?",
-      "answerKey": "4 puheenvuoroa. Puhujien ensimmäiset vuorot: Lena: Wo liegt Hamburg? | Tom: Im Norden Deutschlands.. Suomenkielinen tulkinta: Lena kysyy Hampurin sijaintia. Tom kertoo sen olevan Pohjois-Saksassa. Tarkista, että oma vastauksesi kuvaa kummankin puhujan ensimmäistä vuoroa.",
+      "answerKey": "4 puheenvuoroa. Puhujien ensimmäiset vuorot: Lena: Wo liegt Hamburg? | Tom: Im Norden Deutschlands. Suomenkielinen tulkinta: Lena kysyy Hampurin sijaintia. Tom kertoo sen olevan Pohjois-Saksassa. Tarkista, että oma vastauksesi kuvaa kummankin puhujan ensimmäistä vuoroa.",
       "feedback": "",
       "assessment": "self-review"
     },
@@ -814,7 +814,7 @@ export const LOS_FUTURE_EXERCISES_4: Record<string, LosFutureExerciseDraft[]> = 
       "group": "T",
       "title": "Puhujat ja vuorot",
       "prompt": "Lue saksankielinen tukidialogi. Kuinka monta puheenvuoroa siinä on, ja mitä kukin puhuja tekee ensimmäisellä vuorollaan?",
-      "answerKey": "4 puheenvuoroa. Puhujien ensimmäiset vuorot: Ella: Wie gefällt dir Wien? | Nils: Sehr gut. Die Stadt ist groß und schön.. Suomenkielinen tulkinta: Ella kysyy Nilsin mielipidettä Wienistä. Nils pitää kaupungista ja kuvailee sitä suureksi ja kauniiksi. Tarkista, että oma vastauksesi kuvaa kummankin puhujan ensimmäistä vuoroa.",
+      "answerKey": "4 puheenvuoroa. Puhujien ensimmäiset vuorot: Ella: Wie gefällt dir Wien? | Nils: Sehr gut. Die Stadt ist groß und schön. Suomenkielinen tulkinta: Ella kysyy Nilsin mielipidettä Wienistä. Nils pitää kaupungista ja kuvailee sitä suureksi ja kauniiksi. Tarkista, että oma vastauksesi kuvaa kummankin puhujan ensimmäistä vuoroa.",
       "feedback": "",
       "assessment": "self-review"
     },
@@ -1076,7 +1076,7 @@ export const LOS_FUTURE_EXERCISES_4: Record<string, LosFutureExerciseDraft[]> = 
       "group": "T",
       "title": "Puhujat ja vuorot",
       "prompt": "Lue saksankielinen tukidialogi. Kuinka monta puheenvuoroa siinä on, ja mitä kukin puhuja tekee ensimmäisellä vuorollaan?",
-      "answerKey": "4 puheenvuoroa. Puhujien ensimmäiset vuorot: Mara: Fahren wir morgen in die Schweiz? | Leo: Ja, wir fahren mit dem Zug nach Zürich.. Suomenkielinen tulkinta: Mara kysyy, matkustavatko he huomenna Sveitsiin. Leo vahvistaa ja kertoo heidän menevän junalla Zürichiin. Tarkista, että oma vastauksesi kuvaa kummankin puhujan ensimmäistä vuoroa.",
+      "answerKey": "4 puheenvuoroa. Puhujien ensimmäiset vuorot: Mara: Fahren wir morgen in die Schweiz? | Leo: Ja, wir fahren mit dem Zug nach Zürich. Suomenkielinen tulkinta: Mara kysyy, matkustavatko he huomenna Sveitsiin. Leo vahvistaa ja kertoo heidän menevän junalla Zürichiin. Tarkista, että oma vastauksesi kuvaa kummankin puhujan ensimmäistä vuoroa.",
       "feedback": "",
       "assessment": "self-review"
     },
@@ -1338,7 +1338,7 @@ export const LOS_FUTURE_EXERCISES_4: Record<string, LosFutureExerciseDraft[]> = 
       "group": "T",
       "title": "Puhujat ja vuorot",
       "prompt": "Lue saksankielinen tukidialogi. Kuinka monta puheenvuoroa siinä on, ja mitä kukin puhuja tekee ensimmäisellä vuorollaan?",
-      "answerKey": "4 puheenvuoroa. Puhujien ensimmäiset vuorot: Gast: Was gibt es in Finnland? | Aino: Es gibt viele Seen und Wälder.. Suomenkielinen tulkinta: Vieras kysyy, mitä Suomessa on. Aino mainitsee monet järvet ja metsät. Tarkista, että oma vastauksesi kuvaa kummankin puhujan ensimmäistä vuoroa.",
+      "answerKey": "4 puheenvuoroa. Puhujien ensimmäiset vuorot: Gast: Was gibt es in Finnland? | Aino: Es gibt viele Seen und Wälder. Suomenkielinen tulkinta: Vieras kysyy, mitä Suomessa on. Aino mainitsee monet järvet ja metsät. Tarkista, että oma vastauksesi kuvaa kummankin puhujan ensimmäistä vuoroa.",
       "feedback": "",
       "assessment": "self-review"
     },
@@ -1600,7 +1600,7 @@ export const LOS_FUTURE_EXERCISES_4: Record<string, LosFutureExerciseDraft[]> = 
       "group": "T",
       "title": "Puhujat ja vuorot",
       "prompt": "Lue saksankielinen tukidialogi. Kuinka monta puheenvuoroa siinä on, ja mitä kukin puhuja tekee ensimmäisellä vuorollaan?",
-      "answerKey": "4 puheenvuoroa. Puhujien ensimmäiset vuorot: Mika: Was macht man hier am Sonntag? | Sara: Viele Leute treffen Freunde oder gehen spazieren.. Suomenkielinen tulkinta: Mika kysyy paikallisista sunnuntaitavoista. Sara kuvaa monien ihmisten tapaavan ystäviä tai käyvän kävelyllä. Tarkista, että oma vastauksesi kuvaa kummankin puhujan ensimmäistä vuoroa.",
+      "answerKey": "4 puheenvuoroa. Puhujien ensimmäiset vuorot: Mika: Was macht man hier am Sonntag? | Sara: Viele Leute treffen Freunde oder gehen spazieren. Suomenkielinen tulkinta: Mika kysyy paikallisista sunnuntaitavoista. Sara kuvaa monien ihmisten tapaavan ystäviä tai käyvän kävelyllä. Tarkista, että oma vastauksesi kuvaa kummankin puhujan ensimmäistä vuoroa.",
       "feedback": "",
       "assessment": "self-review"
     },
@@ -1862,7 +1862,7 @@ export const LOS_FUTURE_EXERCISES_4: Record<string, LosFutureExerciseDraft[]> = 
       "group": "T",
       "title": "Puhujat ja vuorot",
       "prompt": "Lue saksankielinen tukidialogi. Kuinka monta puheenvuoroa siinä on, ja mitä kukin puhuja tekee ensimmäisellä vuorollaan?",
-      "answerKey": "4 puheenvuoroa. Puhujien ensimmäiset vuorot: Rosa: Was hast du am Wochenende gemacht? | Ben: Ich habe Freunde besucht.. Suomenkielinen tulkinta: Rosa kysyy, mitä Ben teki viikonloppuna. Ben kertoo käyneensä ystäviensä luona. Tarkista, että oma vastauksesi kuvaa kummankin puhujan ensimmäistä vuoroa.",
+      "answerKey": "4 puheenvuoroa. Puhujien ensimmäiset vuorot: Rosa: Was hast du am Wochenende gemacht? | Ben: Ich habe Freunde besucht. Suomenkielinen tulkinta: Rosa kysyy, mitä Ben teki viikonloppuna. Ben kertoo käyneensä ystäviensä luona. Tarkista, että oma vastauksesi kuvaa kummankin puhujan ensimmäistä vuoroa.",
       "feedback": "",
       "assessment": "self-review"
     },
@@ -2124,7 +2124,7 @@ export const LOS_FUTURE_EXERCISES_4: Record<string, LosFutureExerciseDraft[]> = 
       "group": "T",
       "title": "Puhujat ja vuorot",
       "prompt": "Lue saksankielinen tukidialogi. Kuinka monta puheenvuoroa siinä on, ja mitä kukin puhuja tekee ensimmäisellä vuorollaan?",
-      "answerKey": "4 puheenvuoroa. Puhujien ensimmäiset vuorot: Aylin: Habt ihr gestern gefeiert? | Max: Ja, wir haben zusammen gegessen.. Suomenkielinen tulkinta: Aylin kysyy, juhlivatko muut eilen. Max vastaa kyllä ja kertoo heidän syöneen yhdessä. Tarkista, että oma vastauksesi kuvaa kummankin puhujan ensimmäistä vuoroa.",
+      "answerKey": "4 puheenvuoroa. Puhujien ensimmäiset vuorot: Aylin: Habt ihr gestern gefeiert? | Max: Ja, wir haben zusammen gegessen. Suomenkielinen tulkinta: Aylin kysyy, juhlivatko muut eilen. Max vastaa kyllä ja kertoo heidän syöneen yhdessä. Tarkista, että oma vastauksesi kuvaa kummankin puhujan ensimmäistä vuoroa.",
       "feedback": "",
       "assessment": "self-review"
     },
@@ -2386,7 +2386,7 @@ export const LOS_FUTURE_EXERCISES_4: Record<string, LosFutureExerciseDraft[]> = 
       "group": "T",
       "title": "Puhujat ja vuorot",
       "prompt": "Lue saksankielinen tukidialogi. Kuinka monta puheenvuoroa siinä on, ja mitä kukin puhuja tekee ensimmäisellä vuorollaan?",
-      "answerKey": "4 puheenvuoroa. Puhujien ensimmäiset vuorot: Lena: Ist der Winter in Finnland kälter als in Deutschland? | Olli: Oft ja, aber das hängt vom Ort ab.. Suomenkielinen tulkinta: Lena kysyy Suomen talven kylmyydestä Saksaan verrattuna. Olli toteaa, että se on usein kylmempi mutta riippuu paikasta. Tarkista, että oma vastauksesi kuvaa kummankin puhujan ensimmäistä vuoroa.",
+      "answerKey": "4 puheenvuoroa. Puhujien ensimmäiset vuorot: Lena: Ist der Winter in Finnland kälter als in Deutschland? | Olli: Oft ja, aber das hängt vom Ort ab. Suomenkielinen tulkinta: Lena kysyy Suomen talven kylmyydestä Saksaan verrattuna. Olli toteaa, että se on usein kylmempi mutta riippuu paikasta. Tarkista, että oma vastauksesi kuvaa kummankin puhujan ensimmäistä vuoroa.",
       "feedback": "",
       "assessment": "self-review"
     },
