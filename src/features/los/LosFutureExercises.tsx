@@ -173,8 +173,8 @@ export function LosFutureExercises({bookId,chapterId,mode,taskIds}:{
                 changeAnswer(task.id,writeLosFutureMatchingAnswer(matchingPairs,next));
               }}>
               <option value="">Valitse merkitys</option>
-              {[...matchingPairs.slice(1),...matchingPairs.slice(0,1)].map(option=>
-                <option key={option.fi} value={option.fi}>{option.fi}</option>)}
+              {[...new Set([...matchingPairs.slice(1),...matchingPairs.slice(0,1)].map(option=>option.fi))].map(fi=>
+                <option key={fi} value={fi}>{fi}</option>)}
             </select>
           </label>)}
         </fieldset> : orderingTiles && orderingSelection ? <div className="los-future-ordering">
