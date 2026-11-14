@@ -30,6 +30,7 @@ test("350 lesson-specific formative vocabulary checks use source-only German/Fin
       const result=futureVocabularyCheck(book.id,lesson.chapterId,number,manuscript);
       assert.ok(result,id);
       const question=lesson.scenes.find(s=>s.id==="vocabulary-check")?.question;
+      assert.ok(question);
       assert.deepEqual(question,result.question);
       assert.equal(question.type,"choice");
       assert.equal(question.evidenceRole,"practice");
