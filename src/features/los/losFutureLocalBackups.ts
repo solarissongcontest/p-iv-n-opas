@@ -7,6 +7,8 @@ import { LOS_FUTURE_STAGE_IDS,losFuturePracticeDraftKey } from "./losFuturePract
 import { LOS_FUTURE_REVIEW_NUMBERS,losFutureReviewPlan } from "./losFutureReviewPlan.ts";
 import { getLosFutureExam } from "./content/losFutureExams.ts";
 import { futureExamHistoryKey,futureExamQuestionIds,readFutureExamHistory } from "./losFutureExamEngine.ts";
+import {losFutureChapterCheckPlan} from "./losFutureChapterCheckPlan.ts";
+import {readLosFutureChapterCheckAttempt} from "./losFutureChapterCheckState.ts";
 
 export const LOS_FUTURE_BACKUP_FORMAT="los-future-book-backup-v1";
 export const LOS_FUTURE_BACKUP_MAX_BYTES=5_000_000;
@@ -34,12 +36,14 @@ function allowedKeys(bookId:number,chapterId:string){
   const book=LOS_BOOKS[bookId-1];
   if(!book||book.id!==bookId)throw Error("Kirjan sisältörunkoa ei löydy varmuuskopion tarkistusta varten.");
   const taskIds=losFutureExercisesFor(bookId,chapterId).map(x=>x.id);
+  const checkpoint=losFutureChapterCheckPlan(bookId,chapterId);
   const scripts=losFutureLessonOutline(book).filter(item=>item.chapterId===chapterId);
   const reviews=LOS_FUTURE_REVIEW_NUMBERS
     .map(number=>losFutureReviewPlan(bookId,number))
     .filter(plan=>plan?.chapterId===chapterId);
   const reviewAnswers=reviews.flatMap(plan=>plan?Object.values(plan.keys):[]);
-  const answers=new Set([...taskIds,...reviewAnswers,...scripts.map(s=>s.id+":own-reflection"),
+  const chapterCheckKeys=checkpoint?[checkpoint.currentKey,...checkpoint.previousKeys]:[];
+  const answers=new Set([...taskIds,...reviewAnswers,...chapterCheckKeys,...scripts.map(s=>s.id+":own-reflection"),
     // PR #264 stores its legacy guided-reader cursor inside the chapter draft.
     // It must survive export/import together with teacher lesson answers.
     ...scripts.map(s=>"los.future.guided:"+s.id+":selectedStage")]);
@@ -83,6 +87,13 @@ function validDraft(draft:unknown,bookId:number,chapterId:string):draft is LosCh
       !keys.teacherIds.has(id)||session.completedAt!==null))return false;
   }
   const cursors=draft["practiceAnswers"] as Record<string,string>;
+  const checkpoint=losFutureChapterCheckPlan(bookId,chapterId);
+  if(checkpoint){
+    if(cursors[checkpoint.currentKey]!==undefined&&
+      !readLosFutureChapterCheckAttempt(cursors[checkpoint.currentKey],checkpoint))return false;
+    if(checkpoint.previousKeys.some(key=>cursors[key]!==undefined&&
+      !readLosFutureChapterCheckAttempt(cursors[key],checkpoint,true)))return false;
+  }
   if(Object.entries(cursors).some(([key,value])=>
     (key.endsWith(":selectedStage")&&!/^[0-5]$/.test(value))||
     (key.endsWith(":review:stage")&&!/^[0-3]$/.test(value))))return false;
