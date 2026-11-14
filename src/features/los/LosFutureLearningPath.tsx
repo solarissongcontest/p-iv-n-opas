@@ -36,6 +36,9 @@ function LessonItem({lesson,selected,onSelect}:{
         lesson.phase==="review"?<ClipboardList size={17} aria-hidden="true"/>:
           <ArrowRight size={18} aria-hidden="true"/>}
     </button>
+    {lesson.phase === "chapter" && <a className="los-future-teacher-link" href={"/los-lessons/" + lesson.id}>
+      Avaa Teacher 2.0 -opetustila (esikatselu) <ArrowRight size={15} aria-hidden="true"/>
+    </a>}
   </li>;
 }
 
@@ -72,7 +75,7 @@ export function LosFutureLearningPath({book,move}:{
       <BookOpen size={20} aria-hidden="true"/>
       <p><strong>60 sisällöltään käsikirjoitettua tuntia, 0 valmiiksi hyväksyttyä ohjattua oppituntia.</strong>{" "}
         Kaikkien 50 kappaletunnin aloitus, mallin purku, vaiheittainen ohjaus, käytännön
-        tehtävät ja itsekorjaus ovat nyt esikatseltavissa. Opettajasisältö, kielellinen oikeellisuus,
+        tehtävät ja itsekorjaus ovat nyt esikatseltavissa myös yhteisessä Teacher 2.0 -opetustilassa. Opettajasisältö, kielellinen oikeellisuus,
         äänitteet, lopputarkistuksen luotettavuus ja koko tuntien suorituskriteeristö odottavat hyväksyntää.
         Kokeita ei käynnistetä pelkistä koetuntien ohjeista. Pelkkä siirtymä sisältösivulle
         ei muuta oppituntia suoritetuksi.</p>

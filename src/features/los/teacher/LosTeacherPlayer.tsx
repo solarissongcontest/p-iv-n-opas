@@ -19,6 +19,9 @@ import { composeLosC10Dialogues, storeLosC10Dialogues } from "./c10ApplicationBr
 import { validateTeacherLesson } from "./validateContent.ts";
 import { teacherExternalStatus } from "./externalEvidence.ts";
 import { LosMasterySummary } from "../LosMasterySummary.tsx";
+import { LOS_BOOKS } from "../catalog.ts";
+import { LosFutureExercises } from "../LosFutureExercises.tsx";
+import { getLosFutureLesson } from "../content/losFutureLessons.ts";
 import "../los-book.css";
 import "./teacher.css";
 
@@ -180,16 +183,16 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
   const lesson = getLosTeacherLesson(lessonId);
   const { draft, update, saved } = useLosChapterDraft(lesson?.bookId ?? 1, lesson?.chapterId ?? "01");
   // Existing draft hooks, read-only for skill evidence; no copy of answers or exam history.
-  const evidence01=useLosChapterDraft(1,"01").draft;
-  const evidence02=useLosChapterDraft(1,"02").draft;
-  const evidence03=useLosChapterDraft(1,"03").draft;
-  const evidence04=useLosChapterDraft(1,"04").draft;
-  const evidence05=useLosChapterDraft(1,"05").draft;
-  const evidence06=useLosChapterDraft(1,"06").draft;
-  const evidence07=useLosChapterDraft(1,"07").draft;
-  const evidence08=useLosChapterDraft(1,"08").draft;
-  const evidence09=useLosChapterDraft(1,"09").draft;
-  const evidence10=useLosChapterDraft(1,"10").draft;
+  const evidence01=useLosChapterDraft(lesson?.bookId ?? 1,"01").draft;
+  const evidence02=useLosChapterDraft(lesson?.bookId ?? 1,"02").draft;
+  const evidence03=useLosChapterDraft(lesson?.bookId ?? 1,"03").draft;
+  const evidence04=useLosChapterDraft(lesson?.bookId ?? 1,"04").draft;
+  const evidence05=useLosChapterDraft(lesson?.bookId ?? 1,"05").draft;
+  const evidence06=useLosChapterDraft(lesson?.bookId ?? 1,"06").draft;
+  const evidence07=useLosChapterDraft(lesson?.bookId ?? 1,"07").draft;
+  const evidence08=useLosChapterDraft(lesson?.bookId ?? 1,"08").draft;
+  const evidence09=useLosChapterDraft(lesson?.bookId ?? 1,"09").draft;
+  const evidence10=useLosChapterDraft(lesson?.bookId ?? 1,"10").draft;
   const [authorized, setAuthorized] = useState<boolean | null>(null);
   const [showHelp, setShowHelp] = useState(false);
   const [helpSelection, setHelpSelection] = useState<string | null>(null);
@@ -206,6 +209,8 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
     "06":evidence06,"07":evidence07,"08":evidence08,"09":evidence09,"10":evidence10,
   }) : {ready:true,lines:[]};
   const available = Boolean(saved && session && lesson && teacherCanFinish(session, lesson, draft.practiceAnswers, draft.practiceChecked, draft, external.ready));
+  const editorialDraft = lesson?.publicationStatus === "editorial-draft";
+  const bookMeta = LOS_BOOKS.find(book => book.id === lesson?.bookId);
   const blockers = lesson && session ? teacherCompletionBlockers(session, lesson, draft.practiceAnswers, draft.practiceChecked, draft, external.ready) : [];
   const completed = Boolean(session?.completedAt);
   const nextIncompleteSceneId = lesson && session ? teacherNextIncompleteSceneId(session, lesson, draft.practiceAnswers, draft.practiceChecked) : undefined;
@@ -272,7 +277,7 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
     <header className="los-teacher-top">
       <a className="los-teacher-back" href={"/los#/" + (lesson?.bookId ?? 1) + "/path"}><ArrowLeft size={18}/> Opetuspolku</a>
       <div className="los-teacher-brand"><span className="los-teacher-logo">LOS!</span><span>Opetustila</span></div>
-      <span className="los-teacher-book">LOS! 1 · SAB31</span>
+      <span className="los-teacher-book">LOS! {bookMeta?.id ?? 1} · {bookMeta?.code ?? "SAB31"}</span>
     </header>
     {authorized === null ? <div className="los-teacher-status">Avataan oppituntia…</div> :
       !authorized ? <section className="los-teacher-status">
@@ -286,6 +291,12 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
         <a href={"/los#/" + (lesson?.bookId ?? 1) + "/path"}>Palaa Opetuspolkuun</a>
       </section> :
       <>
+        {editorialDraft && <section className="los-teacher-editorial-gate" role="status">
+          <strong>Teacher 2.0 · käsikirjoitusluonnoksen esikatselu</strong>
+          <p>Voit opiskella, käyttää kirjan tehtäviä ja jatkaa tallennetusta kohdasta.
+          Kieltä ja vastausavaimia ei ole riippumattomasti tarkistettu. Tämä tunti ei muodosta
+          hyväksyttyä suoritusta, arvosanaa, kuuntelunäyttöä tai osaamismerkintää.</p>
+        </section>}
         <div className="los-teacher-progress" role="progressbar" aria-label="Oppitunnin opetustilanteet"
           aria-valuemin={0} aria-valuemax={lesson.scenes.length} aria-valuenow={sceneIndex + 1}>
           <span style={{ width: ((sceneIndex + 1) / lesson.scenes.length * 100) + "%" }}/>
@@ -323,6 +334,10 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
               {scene.paragraphs.map((paragraph, i) => <p key={i}>{paragraph}</p>)}
             </div>
             {scene.kind === "board" && <TeacherBoard key={scene.id} scene={scene}/>}
+            {editorialDraft && scene.id === "guided" && lesson.bookId >= 2 && <section aria-label="Oppitunnin samat kappaletehtävät">
+              <LosFutureExercises bookId={lesson.bookId} chapterId={lesson.chapterId} mode="guided"
+                taskIds={getLosFutureLesson(lesson.bookId,Number(lesson.id.slice(-3)))?.exerciseIds ?? []}/>
+            </section>}
             {lesson.id === "L005" && (scene.id === "source-list" || scene.id === "audio-choice") &&
               <LosTeacherGreetingMedia/>}
             {scene.numberBuilder && <LosTeacherNumberBuilder

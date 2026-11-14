@@ -11,3 +11,10 @@
 .los-future-path-group li button{width:100%}
 .los-future-path-group summary:focus-visible{outline:3px solid var(--los-book-accent,#806d52);outline-offset:3px;border-radius:6px}
 @media(max-width:560px){.los-future-path-group .los-future-lessons-pending{gap:.6rem;padding:.75rem .5rem}}
+
+/* Shared Teacher 2.0 link keeps the legacy manuscript preview accessible. */
+.los-future-teacher-link{display:inline-flex;align-items:center;gap:.35rem;padding:.45rem .8rem .7rem;margin-left:2.5rem;color:var(--los-book-accent,#4c6c82);text-decoration:underline;text-underline-offset:3px;font-size:.88rem;font-weight:650}
+.los-future-teacher-link:focus-visible{outline:3px solid var(--los-book-accent,#4c6c82);outline-offset:2px}
+.los-teacher-editorial-gate{margin:1rem auto;padding:1rem 1.35rem;max-width:1040px;border:1px solid var(--los-book-accent,#8d6a50);border-radius:12px;background:#fcf4e7;color:#332d26;line-height:1.55}
+.los-teacher-editorial-gate p{margin:.4rem 0 0;font-size:.9rem}
+@media(max-width:560px){.los-future-teacher-link{margin-left:0;padding-left:.5rem}}

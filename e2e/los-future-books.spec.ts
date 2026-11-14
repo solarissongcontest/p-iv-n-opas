@@ -145,3 +145,40 @@ test("LOS! 2 interactive vocabulary matching saves choices across reload without
   await expect(page.getByRole("combobox",{name:"Suomennos sanalle die Freundin"})).toHaveValue("ystävä (naispuolinen)");
   await expect(page.locator(".los-future-exercise-summary")).toContainText("0 verrattu vastausluonnokseen");
 });
+
+test("LOS! 2–8 chapter Teacher 2.0 shares its own saved exercises, paused scene, and non-completion gate",async({page})=>{
+  await enterFutureBook(page);
+  await page.goto("/los#/2/path",{waitUntil:"domcontentloaded"});
+  await expect(page.locator(".los-future-teacher-link")).toHaveCount(50);
+  await page.locator(".los-future-teacher-link").first().click();
+  await expect(page).toHaveURL(/\/los-lessons\/LOS2-L002$/);
+  await expect(page.locator(".los-teacher-editorial-gate")).toContainText("ei muodosta");
+  await expect(page.locator(".los-teacher-book")).toContainText("LOS! 2 · SAB32");
+  const outline=page.locator(".los-teacher-outline nav button");
+  await outline.nth(1).click();
+  const recall=page.getByRole("textbox",{name:"Mitä muistat ennestään tästä aiheesta?"});
+  await recall.fill("Muistan saksan sanan Hallo.");
+  await page.getByRole("button",{name:"Keskeytä oppitunti"}).click();
+  await expect(page.locator(".los-teacher-paused")).toBeVisible();
+  await page.reload({waitUntil:"domcontentloaded"});
+  await expect(page.locator(".los-teacher-paused")).toBeVisible();
+  await page.getByRole("button",{name:"Jatka opetusta"}).first().click();
+  await expect(recall).toHaveValue("Muistan saksan sanan Hallo.");
+  await outline.nth(5).click();
+  await expect(page.locator(".los-future-exercises")).toBeVisible();
+  await page.locator("#los-future-exercise-input").fill("Oma lähdetekstin ennakointi.");
+  await outline.last().click();
+  await expect(page.getByRole("button",{name:"Merkitse oppitunti läpikäydyksi"})).toBeDisabled();
+  await expect(page.locator(".los-teacher-completion-checklist")).toContainText("käsikirjoitusluonnos");
+  const records=await page.evaluate(()=>{
+    const owner=localStorage.getItem("opk.owner-id");
+    return {book2:localStorage.getItem("los.local.v1."+owner+".2.01"),book1:localStorage.getItem("los.local.v1."+owner+".1.01")};
+  });
+  expect(records.book2).toContain("LOS2-L002");
+  expect(records.book2).toContain("Oma lähdetekstin ennakointi.");
+  expect(records.book1).toBeNull();
+  await page.goto("/los-lessons/LOS3-L002",{waitUntil:"domcontentloaded"});
+  await expect(page.locator(".los-teacher-book")).toContainText("LOS! 3 · SAB33");
+  await expect(page.locator(".los-teacher-editorial-gate")).toBeVisible();
+  await expect(page.locator(".los-teacher-outline nav button")).toHaveCount(9);
+});
