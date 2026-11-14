@@ -5,6 +5,8 @@ import { losFutureExercisesFor } from "./content/losFutureExercises.ts";
 import { losFutureLessonOutline } from "./losFutureLessonOutline.ts";
 import { LOS_FUTURE_STAGE_IDS,losFuturePracticeDraftKey } from "./losFuturePracticeProgress.ts";
 import { LOS_FUTURE_REVIEW_NUMBERS,losFutureReviewPlan } from "./losFutureReviewPlan.ts";
+import { getLosFutureExam } from "./content/losFutureExams.ts";
+import { futureExamHistoryKey,futureExamQuestionIds,readFutureExamHistory } from "./losFutureExamEngine.ts";
 
 export const LOS_FUTURE_BACKUP_FORMAT="los-future-book-backup-v1";
 export const LOS_FUTURE_BACKUP_MAX_BYTES=5_000_000;
@@ -53,13 +55,26 @@ function validDraft(draft:unknown,bookId:number,chapterId:string):draft is LosCh
     ||!strMap(draft["practiceAnswers"],80,5000)
     ||!Array.isArray(draft["practiceChecked"])||draft["practiceChecked"].length>100
     ||!draft["practiceChecked"].every((x:unknown)=>textUnder(x,110))
-    ||!isObject(draft["testAnswers"])||Object.keys(draft["testAnswers"]).length!==0
-    ||draft["testSubmittedAt"]!==null)return false;
+    ||!isObject(draft["testAnswers"]))return false;
   if(draft["readerMarks"]!==undefined&&!strMap(draft["readerMarks"],200,500))return false;
-  // Later-book graded exams and recall/lesson evidence are not approved yet.
-  // Don't allow an imported file to invent either of them.
+  // Do not allow imports to fabricate approved mastery. Source-authored exam
+  // drafts may be transferred, but are clearly labelled LOCAL practice and
+  // do not create validated marks or published exam completion.
   if(draft["lessonProgress"]!==undefined&&(!isObject(draft["lessonProgress"])||Object.keys(draft["lessonProgress"]).length>0))return false;
   if(draft["recallCards"]!==undefined&&(!isObject(draft["recallCards"])||Object.keys(draft["recallCards"]).length>0))return false;
+  const testAnswers=draft["testAnswers"] as Record<string,unknown>;
+  const exam=chapterId==="05"?getLosFutureExam(bookId,"midterm"):
+    chapterId==="10"?getLosFutureExam(bookId,"final"):null;
+  const allowedExamIds=new Set(exam?futureExamQuestionIds(exam):[]);
+  const historyId=exam?futureExamHistoryKey(exam):null;
+  if(Object.keys(testAnswers).length>30||
+    Object.entries(testAnswers).some(([id,value])=>
+      !((allowedExamIds.has(id)&&textUnder(value,3000))||
+        (id===historyId&&textUnder(value,120000)&&
+          readFutureExamHistory(value as string,exam!)!==null))))return false;
+  if(draft["testSubmittedAt"]!==null&&
+      (!validDate(draft["testSubmittedAt"])||!Object.entries(testAnswers).some(([id,value])=>
+        allowedExamIds.has(id)&&typeof value==="string"&&Boolean(value.trim()))))return false;
   const keys=allowedKeys(bookId,chapterId);
   if(draft["teacherSessions"]!==undefined){
     if(!validTeacherSessionMap(draft["teacherSessions"]))return false;
@@ -80,7 +95,8 @@ function hasStudentData(draft:LosChapterDraft):boolean {
     ||draft.selfAssessment.trim()||draft.practiceChecked.length
     ||Object.values(draft.practiceAnswers).some(v=>Boolean(v.trim()))
     ||(draft.readerMarks&&Object.values(draft.readerMarks).some(Boolean))
-    ||(draft.teacherSessions&&Object.keys(draft.teacherSessions).length>0));
+    ||(draft.teacherSessions&&Object.keys(draft.teacherSessions).length>0)
+    ||Object.values(draft.testAnswers).some(v=>Boolean(v.trim()))||Boolean(draft.testSubmittedAt));
 }
 function checkedBook(bookId:number,ownerId:string) {
   if(!validBook(bookId))throw Error("Varmuuskopion kirjanumero on virheellinen.");
