@@ -893,6 +893,13 @@ test("T15 pronunciation notes, T16 own question and T17 transformations keep the
     ["T17 · Muokkaa henkilötietoa",["Wir lernen Deutsch.","Vaihdoin puhujan.","Monikon verbimuoto on lernen."]],
   ] as const){
     await picker.selectOption({label:id});
+    if(id.startsWith("T15")){
+      await expect(page.locator(".los-future-exercise-question"))
+        .toContainText("Lue alla olevat kaksi saksankielistä lausetta ääneen kahdesti.");
+      await expect(form.locator(".los-future-remaining-source details")).toHaveAttribute("open","");
+      await expect(form.locator(".los-future-remaining-source blockquote"))
+        .toHaveText("Wir lernen Deutsch.\nSie wohnen zusammen.");
+    }
     await expect(form.locator("textarea")).toHaveCount(labels.length);
     await expect(show).toBeDisabled();
     for(let i=0;i<labels.length;i++)await form.locator("textarea").nth(i).fill(labels[i]!);
