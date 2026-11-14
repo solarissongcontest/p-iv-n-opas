@@ -8,7 +8,7 @@ import { losFutureGapParts } from "./content/losFutureGap.ts";
 import { losFutureRecallPairs, readLosFutureRecallAnswer, writeLosFutureRecallAnswer } from "./content/losFutureRecall.ts";
 import { losFutureExitTicket, readLosFutureExitAnswer, writeLosFutureExitAnswer } from "./content/losFutureExitTicket.ts";
 import {losFutureTwoPartTask,readLosFutureTwoPartAnswer,writeLosFutureTwoPartAnswer} from "./content/losFutureTwoPart.ts";
-import {losFutureEvidenceTask,readLosFutureEvidenceAnswer,writeLosFutureEvidenceAnswer} from "./content/losFutureEvidence.ts";
+import {losFutureEvidenceTask,losFutureEvidenceExcerptInSource,readLosFutureEvidenceAnswer,writeLosFutureEvidenceAnswer} from "./content/losFutureEvidence.ts";
 import {losFutureReasoningTask,readLosFutureReasoningAnswer,writeLosFutureReasoningAnswer} from "./content/losFutureReasoning.ts";
 import {losFutureSpanGenreTask,readLosFutureSpanGenreAnswer,losFutureSpanGenreComplete} from "./content/losFutureSpanGenre.ts";
 import {LosFutureSpanGenreFields} from "./LosFutureSpanGenreFields.tsx";
@@ -211,6 +211,12 @@ export function LosFutureExercises({bookId,chapterId,mode,taskIds}:{
                 next[index]=event.target.value;
                 changeAnswer(task.id,writeLosFutureEvidenceAnswer(evidenceTask,next));
               }} />
+            {evidenceTask.kind==="text-evidence"&&index===0&&Boolean(evidenceAnswers[0]?.trim())&&
+              <span className="los-future-exercise-hint" role="status">
+                {losFutureEvidenceExcerptInSource(evidenceTask,evidenceAnswers[0]!)
+                  ?"Kopioimasi teksti löytyy Text A:sta. Tarkista itse, onko se kokonainen virke ja osoittaako se lähtötilanteen."
+                  :"Kopioimaasi tekstikohtaa ei löydy Text A:sta täsmälleen näin. Tarkista lainaus, välimerkit ja sanamuodot."}
+              </span>}
           </label>)}
         </fieldset> : twoPart && twoAnswers ? <fieldset className="los-future-two-part">
           <legend>{twoPart.kind==="correction"
