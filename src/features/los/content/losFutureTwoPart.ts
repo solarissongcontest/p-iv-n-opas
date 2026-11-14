@@ -4,6 +4,8 @@ import type {LosFutureExerciseDraft} from "./losFutureExerciseTypes.ts";
  * Preserve their original text; no fabricated feedback or machine grade. */
 export type LosFutureTwoPartTask={
   kind:"correction"|"text-b";
+  /** A style improvement is not a correction of a categorical grammar error. */
+  styleOnly:boolean;
   /** Stable original source identity used in saved T10/T13 responses. */
   sourceText:string;
   /** The source as written in Text B, without the delimiter period. Never used as a storage key. */
@@ -13,15 +15,26 @@ export type LosFutureTwoPartTask={
 };
 const correctionPrefix="Korjaa virheellinen lause ";
 const correctionSuffix=" ja selitä, miksi alkuperäinen muoto ei sovi.";
+const stylePrefix="Muokkaa ilmaus ";
+const styleSuffix=" selkeäksi yleiskieliseksi malliksi ja perustele valintasi.";
 const textPrefix="Lue Text B: ";
 const textPivot=". Kirjoita kaksi havaintoa suomeksi.";
 export function losFutureTwoPartTask(task:LosFutureExerciseDraft):LosFutureTwoPartTask|null {
-  if(/-T10$/.test(task.id)&&task.title==="Korjaa oppijan kielivirhe"&&
-    task.prompt.startsWith(correctionPrefix)&&task.prompt.endsWith(correctionSuffix)){
-    const sourceText=task.prompt.slice(correctionPrefix.length,-correctionSuffix.length).trim();
+  const isCorrection=task.title==="Korjaa oppijan kielivirhe"&&
+    task.prompt.startsWith(correctionPrefix)&&task.prompt.endsWith(correctionSuffix);
+  const isStyle=task.title==="Hio ilmaus yleiskieliseksi"&&
+    task.prompt.startsWith(stylePrefix)&&task.prompt.endsWith(styleSuffix);
+  if(/-T10$/.test(task.id)&&(isCorrection||isStyle)){
+    const prefix=isStyle?stylePrefix:correctionPrefix;
+    const suffix=isStyle?styleSuffix:correctionSuffix;
+    const sourceText=task.prompt.slice(prefix.length,-suffix.length).trim();
     if(!sourceText||sourceText.length>400)return null;
-    return {kind:"correction",sourceText,readingText:sourceText,
-      questions:["Kirjoita korjattu lause saksaksi","Selitä suomeksi, miksi alkuperäinen lause on virheellinen"],
+    return {kind:"correction",styleOnly:isStyle,sourceText,readingText:sourceText,
+      questions:isStyle
+        ? ["Kirjoita luonteva, neutraali yleiskielinen versio",
+          "Perustele sanajärjestyksen tai ilmauksen selkeys suomeksi"]
+        : ["Kirjoita korjattu lause saksaksi",
+          "Selitä suomeksi, miksi alkuperäinen lause on virheellinen"],
       languages:["de","fi"]};
   }
   if(/-T13$/.test(task.id)&&task.title==="Erillisen Text B:n tulkinta"&&task.prompt.startsWith(textPrefix)){
@@ -32,7 +45,7 @@ export function losFutureTwoPartTask(task:LosFutureExerciseDraft):LosFutureTwoPa
     // is the T13 prompt delimiter, retained only to read earlier JSON drafts.
     const readingText=sourceText.endsWith(".")?sourceText.slice(0,-1):"";
     if(!readingText||sourceText.length>400)return null;
-    return {kind:"text-b",sourceText,readingText,
+    return {kind:"text-b",styleOnly:false,sourceText,readingText,
       questions:["Kerro yksi tekstistä löytyvä tieto tai ilmaus suomeksi",
         "Tee toinen havainto: uusi tieto, tekstin tarkoitus tai ilmaisutapa"],
       languages:["fi","fi"]};
