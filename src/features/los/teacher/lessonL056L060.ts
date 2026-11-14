@@ -17,7 +17,7 @@ const situationalQuestion: TeacherQuestion = {
   correctOption:"a",
   success:"Bitte buchstabieren Sie on kohtelias tavaamispyyntö ja am Montag tarkoittaa maanantaina.",
   hint:"Tavaaminen = buchstabieren, viikonpäivä = am + päivä.",
-  reteach:"Vertaa kahta eri tarvetta: Bitte buchstabieren Sie. = Tavaisitteko, kiitos. Am Montag. = maanantaina.",
+  reteach:"Vertaa kahta eri tarvetta: Bitte buchstabieren Sie. = Voisitteko tavata nimen, kiitos? Am Montag. = maanantaina.",
   genericWrong:"Valitse sekä kohtelias tavaamispyyntö että oikea viikonpäivän ilmaus.",
 };
 export const LOS1_L056_TEACHER: TeacherLesson = {
@@ -43,7 +43,7 @@ export const LOS1_L056_TEACHER: TeacherLesson = {
     ],board:[
       {label:"1 · Luku",german:"sechzehn / siebzehn",meaning:"16 / 17: erikoiset lyhennetyt kirjoitusasut"},
       {label:"2 · Luku",german:"einundzwanzig / zweiunddreißig",meaning:"21 / 32: ykköset ennen kymmeniä"},
-      {label:"3 · Tavaus",german:"Bitte buchstabieren Sie.",meaning:"Tavaisitteko, kiitos. Kohtelias pyyntö."},
+      {label:"3 · Tavaus",german:"Bitte buchstabieren Sie.",meaning:"Voisitteko tavata nimen, kiitos? Kohtelias pyyntö."},
       {label:"4 · Viikonpäivä",german:"am Montag / am Mittwoch",meaning:"maanantaina / keskiviikkona"},
       {label:"5 · Kellonaika",german:"um drei Uhr",meaning:"kello kolmelta"}
     ]},
@@ -95,7 +95,7 @@ export const LOS1_L057_TEACHER: TeacherLesson = {
       {label:"C04 · kohteliaisuus",german:"Wie heißen Sie?",meaning:"Kohtelias nimikysymys"},
       {label:"C05 · vointi",german:"Wie geht es dir? / Gut, danke.",meaning:"Kuulumisten kysyminen"},
       {label:"C06 · ikä",german:"Ich bin siebzehn Jahre alt.",meaning:"Olen seitsemäntoistavuotias"},
-      {label:"C07 · tavataan",german:"Bitte buchstabieren Sie.",meaning:"Tavaisitteko nimen, kiitos"},
+      {label:"C07 · tavataan",german:"Bitte buchstabieren Sie.",meaning:"Voisitteko tavata nimen, kiitos?"},
       {label:"C08 · selviytyminen",german:"Noch einmal, bitte. / Bitte langsamer.",meaning:"Toiston tai hidastamisen pyytäminen"},
       {label:"C09 · aika",german:"am Montag um drei Uhr",meaning:"maanantaina kello kolmelta"},
       {label:"C10 · kolmas henkilö",german:"Das ist Mia. Sie heißt Mia.",meaning:"Tuttavan esittely"}
