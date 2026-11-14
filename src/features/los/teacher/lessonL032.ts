@@ -230,7 +230,7 @@ export const LOS1_L032_TEACHER: TeacherLesson = {
       "title": "Wie alt bist du? ja Ich bin … Jahre alt.",
       "paragraphs": [
         "Wie alt bist du? = Kuinka vanha olet? Bist on sein-verbin du-muoto.",
-        "Vastaus Ich bin siebzehn Jahre alt. tarkoittaa Olen 17-vuotias. Saksassa iästä puhutaan sein-verbillä: Ich bin, ei Ich habe. Lyhyesti voidaan sanoa myös Ich bin siebzehn.",
+        "Vastaus Ich bin siebzehn Jahre alt. tarkoittaa Olen 17-vuotias. Saksassa iästä puhutaan sein-verbillä: Ich bin, ei Ich habe. Tässä Jahre tarkoittaa suomeksi vuotta, ei itsenäistä lausetta vuodet. Lyhyesti voidaan sanoa myös Ich bin siebzehn.",
         "Tekstissä tulevat vastaan myös wir sind, seid ihr ja er ist. Ne ovat tällä tunnilla tunnistettavia tukimuotoja eivätkä uuden kieliopin itsenäisiä kirjoitustehtäviä."
       ],
       "help": [
@@ -246,7 +246,7 @@ export const LOS1_L032_TEACHER: TeacherLesson = {
       "kind": "board",
       "title": "Opettaja rakentaa ikäilmaisun",
       "paragraphs": [
-        "Seuraa ensin kysymyksen ja sitten vastauksen rakennetta."
+        "Seuraa ensin kysymyksen ja sitten vastauksen rakennetta. Kokeile sen jälkeen kuvitteellisten 16-, 17-, 18- ja 19-vuotiaiden ikäilmauksia. Peitä esimerkit ennen omaa yritystä."
       ],
       "board": [
         {
@@ -263,6 +263,21 @@ export const LOS1_L032_TEACHER: TeacherLesson = {
           "label": "Lisään iän",
           "german": "Ich bin siebzehn Jahre alt.",
           "meaning": "Olen 17-vuotias."
+        },
+        {
+          "label": "16-vuotias",
+          "german": "Ich bin sechzehn Jahre alt.",
+          "meaning": "Olen 16-vuotias."
+        },
+        {
+          "label": "18-vuotias",
+          "german": "Ich bin achtzehn Jahre alt.",
+          "meaning": "Olen 18-vuotias."
+        },
+        {
+          "label": "19-vuotias",
+          "german": "Ich bin neunzehn Jahre alt.",
+          "meaning": "Olen 19-vuotias."
         },
         {
           "label": "Lyhyt vastaus",
