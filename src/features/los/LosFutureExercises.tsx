@@ -335,7 +335,8 @@ export function LosFutureExercises({bookId,chapterId,mode,taskIds}:{
         <div className="los-future-exercise-actions">
           <button type="button" className="los-future-exercise-primary"
             aria-expanded={showAnswer} aria-controls="los-future-exercise-key"
-            disabled={(Boolean(exitTicket)&&(exitAnswers
+            disabled={!draft.practiceAnswers[task.id]?.trim()
+              ||(Boolean(exitTicket)&&(exitAnswers
               ? exitAnswers.some(answer=>!answer.trim())
               : !draft.practiceAnswers[task.id]?.trim()))
               ||(Boolean(shortAnswer)&&!draft.practiceAnswers[task.id]?.trim())
@@ -351,6 +352,11 @@ export function LosFutureExercises({bookId,chapterId,mode,taskIds}:{
           </button>
           {draft.practiceChecked.includes(task.id)&&
             <span className="los-future-exercise-checked"><CheckCircle2 size={16}/> Verrattu</span>}
+          {!draft.practiceAnswers[task.id]?.trim()&&!exitTicket&&!shortAnswer&&!twoPart&&
+            !evidenceTask&&!reasoning&&!fourTurn&&!spanGenre&&!remaining&&
+            <span className="los-future-exercise-hint" role="status">
+              Kokeile tehtävää ensin itse ennen vastausluonnoksen avaamista.
+            </span>}
           {exitTicket && exitAnswers?.some(answer=>!answer.trim())&&
             <span className="los-future-exercise-hint">Vastaa ensin molempiin loppukysymyksiin.</span>}
           {twoPart && twoAnswers?.some(answer=>!answer.trim())&&
