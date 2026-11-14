@@ -14,7 +14,7 @@ test("all 70 sourced T07 tasks have exactly one rendered blank with their origin
     assert.ok(parsed,gap.id);
     assert.equal(parsed.before.includes("_____"),false);
     assert.equal(parsed.after.includes("_____"),false);
-    assert.equal(parsed.before+gap.answerKey+parsed.after,gap.prompt.slice("Täydennä puuttuva sana: ".length));
+    assert.equal(parsed.before+gap.answerKey+parsed.after,gap.prompt.slice("Täydennä puuttuva sana: ".length).replace("_____",gap.answerKey));
     assert.equal(losFutureGapParts(exercises.find(t=>t.id.endsWith("-T08"))!),null);
     count++;
   }
