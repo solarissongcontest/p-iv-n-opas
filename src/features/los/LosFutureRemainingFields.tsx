@@ -1,5 +1,7 @@
 import type {LosFutureRemainingTask,LosFutureRemainingAnswer} from "./content/losFutureRemaining.ts";
 import {writeLosFutureRemainingAnswer} from "./content/losFutureRemaining.ts";
+import {losFutureWordsEvidenceStatus,type LosFutureWordsEvidenceStatus}
+  from "./content/losFutureWordsEvidence.ts";
 import "./los-future-remaining.css";
 
 const title:Record<LosFutureRemainingTask["kind"],string>={
@@ -11,9 +13,18 @@ const title:Record<LosFutureRemainingTask["kind"],string>={
   words:"Kolme sanaa alkuperäisessä sanayhteydessä",
   summary:"Tiivistä Text A kahteen tai kolmeen virkkeeseen",
 };
+const sourceFeedback:Record<LosFutureWordsEvidenceStatus,string>={
+  "word-not-found":"Sanaa ei löydy Text A:sta täsmälleen tässä muodossa. Tarkista sana lähteestä.",
+  "excerpt-not-found":"Kopioitua tekstikohtaa ei löydy Text A:sta täsmälleen tässä muodossa.",
+  "word-outside-excerpt":"Valitse tekstikohta, jossa valitsemasi sana todella esiintyy.",
+  "duplicate-word":"Olet valinnut tämän saman sanan jo aiemmin. Kokeile toista sanaa.",
+  located:"Sana ja tekstikohta löytyvät Text A:sta. Suomennos ja merkityspäätelmä on arvioitava itse.",
+};
 export function LosFutureRemainingFields({task,answer,onChange}:{
   task:LosFutureRemainingTask;answer:LosFutureRemainingAnswer;onChange:(value:string)=>void;
 }){
+  const sourceStatuses=task.kind==="words"
+    ? [0,1,2].map(slot=>losFutureWordsEvidenceStatus(task,answer.answers,slot)):null;
   const readyToRead=task.kind!=="prediction"||
     (Boolean(answer.answers[0]?.trim())&&Boolean(answer.answers[1]?.trim()));
   return <fieldset className="los-future-remaining">
@@ -47,6 +58,10 @@ export function LosFutureRemainingFields({task,answer,onChange}:{
           const answers=[...answer.answers];answers[index]=e.target.value;
           onChange(writeLosFutureRemainingAnswer(task,answers));
         }}/>
+      {task.kind==="words"&&index%3===1&&sourceStatuses?.[Math.floor(index/3)]&&
+        <span className="los-future-remaining-hint" role="status">
+          {sourceFeedback[sourceStatuses[Math.floor(index/3)]!]}
+        </span>}
     </label>)}
     {task.kind==="summary"&&<p className="los-future-remaining-hint">Kaksi omaa virkettä riittää, kolmas on vapaaehtoinen.
       Vertaa pääasiaa alkuperäiseen tekstiin.</p>}

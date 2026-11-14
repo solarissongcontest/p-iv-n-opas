@@ -81,6 +81,13 @@ Tämä tiedosto on ainoa LOS! 1–8:n *toteutuksen* jatkotilaraportti. Visuaalin
 - Samojen 70 tehtävän itsearviointimalli muistuttaa, että tekstilajit ja kohderyhmät on pääteltävä nimenomaan kappaleen omasta aineistosta. Tämä ei ole itsenäinen tarkastajan laatima 70 tekstin mallivastaus eikä automaattinen oikeellisuusarvio.
 - **Vanhojen harjoitusvastausten säilyminen:** T14:n aikaisempi täsmällinen kysymysversio hyväksytään rajatussa yhden version migraatiossa. Kaksi aiempaa havaintoa säilyvät, ja käyttäjälle näytetään muutosilmoitus; seuraava tallennus kirjoittaa uuden kysymysversion. Tehtävän ID ja harjoitusluonnoksen avain eivät muutu. Testi käy läpi kaikki 70 lähdettä ja takaisin yhteensopivat luonnokset. CI-/selaintestit ja riippumaton saksankielinen/didaktinen tarkistus vaaditaan erikseen.
 
+## 14.11.2026 · R04:n Text A -tekstinäytön palautetarkistus
+
+- LOS! 2–8:n **70 R04-kontekstisanastoharjoituksessa** näkyy nyt heti itse valittua saksankielistä sanaa ja sen kopioitua sanayhteyttä koskeva tarkistus. Verrataan kirjaimellista tekstikohtaa saman kappaleen **Text A:han**; Unicode-NFC, saksalainen kirjainkoon rinnastus ja välilyöntien normalisointi hyväksytään, mutta sanan esiintymistä toisen sanan sisällä ei pidetä oikeana tekstinäyttönä.
+- Palaute erottaa sanan puuttumisen, lainatun tekstikohdan puuttumisen, sanan puuttumisen lainauksesta ja toistuvan sanavalinnan. Kun sana ja lainaus löytyvät, ilmoitetaan vain **lähdekohdan löytymisestä**. Suomenkielisen merkityspäätelmän oikeellisuutta ei arvioida koneellisesti.
+- Muutos ei lisää automaattisia arvosanoja, suoritustodistuksia, uusia tallennusavaimia tai uusia hyväksymissääntöjä. Vanhat v1-muotoiset vastaukset ja aiemmat R04-kehotemigraatiot säilyvät. Testit kattavat koko 70 tehtävän aineiston, virheelliset lähdelainaukset, identtiset sanavalinnat, sananrajat, tallennuksen sekä Chromium/WebKit-käyttöliittymän testipolun.
+- Uuden commitin testien **lopullinen tulos on vahvistettava GitHub Actionsista erikseen**; tämä toiminto ei ole kielentarkistus eikä FreeDictin julkaisu.
+
 ## 14.11.2026 · R02-virkkeet ja R04-kontekstisanasto
 
 - Kaikkien LOS! 2–8:n 70 R02-sanajärjestystehtävän alkuperä tarkistettiin Text A -käsikirjoituksista. **13 tehtävän** malliksi valittiin yksi selkeä, samassa kappaleessa kirjaimellisesti esiintyvä saksankielinen virke; aiemmissa versioissa oli useaan osaan katkenneita lainauksia, yhteen liitettyjä lauseita tai pedagogisesti tarpeettoman pitkiä sekvenssejä. Samat tehtävätunnisteet ja tallennusavaimet säilyvät.

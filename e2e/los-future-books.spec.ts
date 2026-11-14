@@ -1092,26 +1092,39 @@ test("T13 displays manuscript punctuation exactly and keeps the older structured
   await expectNoHorizontalOverflow(page);
 });
 
-
-test("style-only German T10 teaching is not called an error and preserves learner drafts",async({page})=>{
+test("R04 gives literal Text A evidence feedback in both desktop and mobile layouts",async({page})=>{
   await enterFutureBook(page);
-  await page.goto("/los#/7/03/practice",{waitUntil:"domcontentloaded"});
-  await selectFutureTask(page,"T10");
-  await expect(page.locator(".los-future-exercise-card")).toContainText("Hio ilmaus yleiskieliseksi");
-  await expect(page.locator(".los-future-two-part legend")).toHaveText("Hio ilmaus ja perustele");
-  await expect(page.locator(".los-future-two-part-source"))
-    .toHaveText("Ich muss lernen für die Prüfung.");
-  const entries=page.locator(".los-future-two-part textarea");
-  await entries.nth(0).fill("Ich muss für die Prüfung lernen.");
-  await entries.nth(1).fill("Tämä on neutraali yleiskielinen sanajärjestys.");
+  await page.goto("/los#/2/01/practice",{waitUntil:"domcontentloaded"});
+  await selectFutureTask(page,"R04");
+  const form=page.locator(".los-future-remaining");
+  const rows=form.locator(".los-future-remaining-row textarea");
+  await expect(rows).toHaveCount(9);
+  await rows.nth(0).fill("Xenon");
+  await rows.nth(1).fill("Mira ist neu in Bonn.");
+  await expect(form.getByText("Sanaa ei löydy Text A:sta",{exact:false})).toBeVisible();
+  await rows.nth(0).fill("Mira");
+  await expect(form.getByText("Sana ja tekstikohta löytyvät Text A:sta",{exact:false}))
+    .toHaveCount(1);
+  await rows.nth(2).fill("Henkilön nimi, jota käytän tässä testissä vain lähteen tarkistamiseen.");
+  await rows.nth(3).fill("mira");
+  await rows.nth(4).fill("Mira ist neu in Bonn.");
+  await expect(form.getByText("Olet valinnut tämän saman sanan jo aiemmin.",{exact:false})).toBeVisible();
+  await rows.nth(3).fill("Jonas");
+  await rows.nth(4).fill("Am Montag trifft sie Jonas in einem Deutschkurs.");
+  await rows.nth(5).fill("Henkilön nimi.");
+  await rows.nth(6).fill("Nora");
+  await rows.nth(7).fill("Sie heißen Nora und Tim.");
+  await rows.nth(8).fill("Henkilön nimi.");
+  await expect(form.getByText("Sana ja tekstikohta löytyvät Text A:sta",{exact:false}))
+    .toHaveCount(3);
+  await expect(page.getByRole("button",{name:"Näytä vastausluonnos"})).toBeEnabled();
   await page.reload({waitUntil:"domcontentloaded"});
-  await selectFutureTask(page,"T10");
-  await expect(entries.nth(0)).toHaveValue("Ich muss für die Prüfung lernen.");
-  await expect(entries.nth(1)).toHaveValue("Tämä on neutraali yleiskielinen sanajärjestys.");
-  await page.goto("/los#/8/02/practice",{waitUntil:"domcontentloaded"});
-  await selectFutureTask(page,"T10");
-  await expect(page.locator(".los-future-two-part-source"))
-    .toHaveText("Ich lese Nachrichten oft jeden Tag.");
-  await expect(page.locator(".los-future-exercise-card")).toContainText("Hio ilmaus yleiskieliseksi");
+  await selectFutureTask(page,"R04");
+  await expect(rows.nth(3)).toHaveValue("Jonas");
+  await expect(rows.nth(4)).toHaveValue("Am Montag trifft sie Jonas in einem Deutschkurs.");
+  await expect(form.getByText("Sana ja tekstikohta löytyy Text A:sta",{exact:false}))
+    .toHaveCount(0);
+  await expect(form.getByText("Sana ja tekstikohta löytyvät Text A:sta",{exact:false}))
+    .toHaveCount(3);
   await expectNoHorizontalOverflow(page);
 });
