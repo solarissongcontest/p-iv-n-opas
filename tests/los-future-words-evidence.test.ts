@@ -62,3 +62,12 @@ test("R04 exact-source checks respect German letter boundaries and reject invent
   assert.equal(losFutureWordsEvidenceStatus(task,["",""],0),null);
   assert.equal(losFutureWordsEvidenceStatus(task,complete("Mira","Mira besucht Bonn."),3),null);
 });
+
+test("R04 source matching case-folds German ß and uppercase ẞ without hiding real mismatches",()=>{
+  const source="Die Großmutter wohnt in einer Straße.";
+  for(const text of ["Großmutter","GROSSMUTTER","GROẞMUTTER","grossmutter"])
+    assert.equal(losFutureContainsSourcePhrase(source,text),true,text);
+  assert.equal(losFutureContainsSourcePhrase(source,"STRASSE"),true);
+  assert.equal(losFutureContainsSourcePhrase(source,"GROSSMUTTERXYZ"),false);
+  assert.equal(losFutureContainsSourcePhrase(source,"Strassen"),false);
+});

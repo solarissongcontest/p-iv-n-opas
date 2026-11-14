@@ -106,6 +106,13 @@ Tämä tiedosto on ainoa LOS! 1–8:n *toteutuksen* jatkotilaraportti. Visuaalin
 - Samojen 70 tehtävän itsearviointimalli muistuttaa, että tekstilajit ja kohderyhmät on pääteltävä nimenomaan kappaleen omasta aineistosta. Tämä ei ole itsenäinen tarkastajan laatima 70 tekstin mallivastaus eikä automaattinen oikeellisuusarvio.
 - **Vanhojen harjoitusvastausten säilyminen:** T14:n aikaisempi täsmällinen kysymysversio hyväksytään rajatussa yhden version migraatiossa. Kaksi aiempaa havaintoa säilyvät, ja käyttäjälle näytetään muutosilmoitus; seuraava tallennus kirjoittaa uuden kysymysversion. Tehtävän ID ja harjoitusluonnoksen avain eivät muutu. Testi käy läpi kaikki 70 lähdettä ja takaisin yhteensopivat luonnokset. CI-/selaintestit ja riippumaton saksankielinen/didaktinen tarkistus vaaditaan erikseen.
 
+## 14.11.2026 · Saksan ß/SS-lähdekohdistuksen korjaus
+
+- LOS! 5/C09 R01:n lähdetestissä löytyi oikea normalisointivirhe: `Großmutter` muuttuu saksan versaaleissa muotoon `GROSSMUTTER`. Pelkkä pienaakkosvertailu ei tulkinnut `ß`- ja `SS`-muotoja saman tekstikohdan kirjoitusasuiksi.
+- R01:n ja R04:n tekstikohdistus käyttää nyt Unicode NFC -normalisointia sekä saksan `ß`/`ẞ` ↔ `ss` -kirjainvertailua. Tämä koskee **vain lähteen löytymisen palautetta**; tekstin alkuperäinen kirjoitusasu ja opiskelijan tallennettu saksankielinen vastaus eivät muutu.
+- Regressiotestit kattavat LOS! 5/C09:n `Großmutter` / `GROSSMUTTER`, `Straße` / `STRASSE` sekä virheellisen sanan lisäämisen. Vastausta ei tulkita automaattisesti semanttisesti oikeaksi tai pisteytetyksi.
+- Lopullinen Quality Gate ja Chromium/WebKit-hyväksyntä on vahvistettava uusimmalta commitilta.
+
 ## 14.11.2026 · T09-käännösvaihtoehdot ja kontekstin täsmennys
 
 - Neljä erityisen tulkinnanvaraista LOS! 6–8:n T09-käännöstehtävää täydentyy toimituksellisilla vaihtoehtohuomautuksilla. Suomen `hän` voi vastata `er` tai `sie` kontekstista riippuen; LOS! 6/C03:n Text A:ssa päähenkilö on Ben, minkä vuoksi oletusmalli käyttää `er`-muotoa. Vanha `sie`-vastaus on edelleen selitetty kieliopillisesti mahdolliseksi toisessa asiayhteydessä.

@@ -8,8 +8,8 @@ export type LosFutureWordsEvidenceStatus =
 /** Spaces and German case are ignored, but letter boundaries are respected:
  * "in" must never count as evidence for "Finnland". */
 export function losFutureContainsSourcePhrase(source:string,phrase:string):boolean{
-  const hay=source.normalize("NFC").replace(/\s+/gu," ").toLocaleLowerCase("de");
-  const needle=phrase.normalize("NFC").replace(/\s+/gu," ").trim().toLocaleLowerCase("de");
+  const hay=source.normalize("NFC").replace(/\s+/gu," ").toLocaleLowerCase("de").replace(/ß/g,"ss");
+  const needle=phrase.normalize("NFC").replace(/\s+/gu," ").trim().toLocaleLowerCase("de").replace(/ß/g,"ss");
   if(!needle)return false;
   const letter=/[\p{L}\p{N}]/u;
   let at=0;

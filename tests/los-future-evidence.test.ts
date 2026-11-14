@@ -56,9 +56,9 @@ test("all 70 R01 excerpt fields check only exact Text A location, not response c
     const text=task.sourceText;
     const excerpt=text.slice(0,Math.min(30,text.length)).trim();
     assert.equal(losFutureEvidenceExcerptInSource(task,excerpt),true,item.id);
-    // Lowercasing preserves the original ß character. Uppercasing expands ß
-    // to SS (e.g. Großmutter -> GROSSMUTTER) and is not an exact excerpt.
-    assert.equal(losFutureEvidenceExcerptInSource(task,excerpt.toLocaleLowerCase("de")),true,item.id);
+    // German uppercase ß expands to SS; source matching must tolerate that
+    // normal writing transformation without changing the learner's draft.
+    assert.equal(losFutureEvidenceExcerptInSource(task,excerpt.toLocaleUpperCase("de")),true,item.id);
     assert.equal(losFutureEvidenceExcerptInSource(task,""),false,item.id);
     assert.equal(losFutureEvidenceExcerptInSource(task,"Joku virke, joka ei varmasti ole lähteessä 99999."),false,item.id);
     const dialogue=losFutureExercisesFor(book.id,chapter.id).find(t=>t.id.endsWith("-T03"));assert.ok(dialogue);
@@ -106,4 +106,14 @@ test("all 70 T03 self-review models quote the first turn of each source speaker"
     total++;
   }
   assert.equal(total,70);
+});
+
+test("R01 German uppercase excerpts preserve orthographic ß-to-SS case matching",()=>{
+  const item=losFutureExercisesFor(5,"09").find(t=>t.id.endsWith("-R01"));assert.ok(item);
+  const task=losFutureEvidenceTask(item);assert.ok(task);
+  assert.ok(task.sourceText.includes("Großmutter"));
+  for(const value of ["GROSSMUTTER","GROẞMUTTER","GROßMUTTER"]){
+    assert.equal(losFutureEvidenceExcerptInSource(task,value),true,value);
+  }
+  assert.equal(losFutureEvidenceExcerptInSource(task,"GROSSMUTTERXYZ"),false);
 });
