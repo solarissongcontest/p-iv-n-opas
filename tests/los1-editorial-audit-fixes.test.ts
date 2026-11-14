@@ -48,6 +48,12 @@ test("C07 and C08 editorial questions are faithful to the original German lines"
   const frauq=c07.questions.find(q=>q.id==="C07-SOURCE-Q04");
   assert.ok(frauq);
   assert.equal(frauq.prompt,"Mitä Frau tarkoittaa henkilön nimen edellä?");
+  assert.equal(frauq.correctId,"b","old source exercise responses stay valid");
+  assert.match(frauq.answers.find(a=>a.id==="b")?.text??"",/kohtelias naisen puhuttelunimike/);
+  assert.match(frauq.explanation,/ei kerro, onko henkilö naimisissa/);
+  assert.match(c07.glossary.frau,/ei tieto siviilisäädystä/);
+  const grammar=readFileSync("src/features/los/LosGrammarChapters.tsx","utf8");
+  assert.match(grammar,/Saksassa se ei kuitenkaan kerro, onko henkilö naimisissa/);
   const mathq=c08.questions.find(q=>q.id==="C08-SCHOOL-Q01");
   assert.ok(mathq);
   assert.equal(mathq.prompt,"Mikä oppiaine Silkellä ja Torstenilla on kohtauksen alussa?");
