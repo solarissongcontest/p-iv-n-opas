@@ -358,3 +358,28 @@ test("LOS! 2 download offers a private book-specific file instead of claiming cl
   await expect(page.locator(".los-backup-section")).toContainText("ei ole automaattinen pilvisynkronointi");
   await expectNoHorizontalOverflow(page);
 });
+
+
+test("LOS! 7 T20 preserves two independently written answers across reload without early model reveal",async({page})=>{
+  await enterFutureBook(page);
+  await page.goto("/los#/7/01/apply",{waitUntil:"domcontentloaded"});
+  const picker=page.locator("#los-future-exercise-choice");
+  const labels=await picker.locator("option").allTextContents();
+  const index=labels.findIndex(label=>label.trim().startsWith("T20 ·"));
+  expect(index).toBeGreaterThanOrEqual(0);
+  await picker.selectOption({index});
+  const ticket=page.getByRole("group",{name:"Kaksi itsenäistä lopputarkistusta"});
+  await expect(ticket).toBeVisible();
+  const answers=ticket.locator("textarea");
+  await expect(answers).toHaveCount(2);
+  await answers.nth(0).fill("arbeiten");
+  await answers.nth(1).fill("Koska hän haluaa oppia lisää.");
+  await expect(page.locator(".los-future-exercise-solution")).toHaveCount(0);
+  await page.reload({waitUntil:"domcontentloaded"});
+  await picker.selectOption({index});
+  await expect(ticket.locator("textarea").nth(0)).toHaveValue("arbeiten");
+  await expect(ticket.locator("textarea").nth(1)).toHaveValue("Koska hän haluaa oppia lisää.");
+  await expect(page.locator(".los-future-exercise-summary")).toContainText("1 vastattu");
+  await expect(page.locator(".los-future-exercise-summary")).toContainText("0 verrattu vastausluonnokseen");
+  await expectNoHorizontalOverflow(page);
+});
