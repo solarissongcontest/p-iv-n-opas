@@ -24,17 +24,22 @@ const DICTIONARY = LOS_BOOKS.flatMap(book => book.chapters.flatMap(chapter =>
   })
 ));
 function compare(a: string, b: string) { return a.localeCompare(b, "de"); }
+const LOCAL_DICTIONARY_PAGE_SIZE = 60;
 
 export function LosDictionary({ book, move, openBook }: { book: LosBookDefinition; move: LosNavigate; openBook: (id: number) => void }) {
   const [search, setSearch] = useState("");
   const [hidden, setHidden] = useState(false);
   const [scope, setScope] = useState<"book" | "series">("book");
+  const [visibleCount, setVisibleCount] = useState(LOCAL_DICTIONARY_PAGE_SIZE);
   const [selection,setSelection] = useState<DictionarySelection|null>(null);
   const entries = useMemo(() => DICTIONARY.filter(entry =>
     (scope === "series" || entry.book === book.id) &&
     (entry.word.toLocaleLowerCase("de").includes(search.trim().toLocaleLowerCase("de")) ||
       entry.meaning.toLocaleLowerCase("fi").includes(search.trim().toLocaleLowerCase("fi")))
   ).sort((a,b) => compare(a.word,b.word)), [search,book.id,scope]);
+  // Rendering all eight books' vocabulary rows at once is especially slow
+  // on smaller phones. Search still covers every source row, not just the visible page.
+  const visibleEntries = entries.slice(0,visibleCount);
   return <section className="los-inner-page los-dictionary-page">
     <p className="los-eyebrow">WÖRTERBUCH · LOS! {book.id}</p>
     <h1>Sanakirja</h1>
@@ -50,17 +55,18 @@ export function LosDictionary({ book, move, openBook }: { book: LosBookDefinitio
     <p>Tämä erillinen paikallinen sanastoluettelo perustuu LOS!-kirjojen opetettaviin sanoihin. Se ei ole yleissanakirja. Alkuperäistekstien kokonaisia repliikkejä ja niiden suomennoksia voit hakea myös kirjan Haku-sivulla.</p>
     <div className="los-index-options">
       <div className="los-index-tabs" role="group" aria-label="Kappalesanaston laajuus">
-        <button className={scope === "book" ? "is-active" : ""} aria-pressed={scope === "book"} onClick={() => setScope("book")}>Tämä kirja</button>
-        <button className={scope === "series" ? "is-active" : ""} aria-pressed={scope === "series"} onClick={() => setScope("series")}>Koko sarja</button>
+        <button className={scope === "book" ? "is-active" : ""} aria-pressed={scope === "book"} onClick={() => {setScope("book");setVisibleCount(LOCAL_DICTIONARY_PAGE_SIZE);}}>Tämä kirja</button>
+        <button className={scope === "series" ? "is-active" : ""} aria-pressed={scope === "series"} onClick={() => {setScope("series");setVisibleCount(LOCAL_DICTIONARY_PAGE_SIZE);}}>Koko sarja</button>
       </div>
       <button className="los-index-toggle" onClick={() => setHidden(v => !v)} aria-pressed={hidden}>{hidden ? "Näytä suomennokset" : "Peitä suomennokset"}</button>
     </div>
-    <label className="los-index-search"><Search size={19}/><span className="sr-only">Hae saksaksi tai suomeksi</span><input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Hae saksaksi tai suomeksi" autoComplete="off" /></label>
-    <p className="los-index-count">{entries.length} kappalesanaston hakusanaa</p>
-    {entries.length === 0 ? <p>Ei hakusanoja tällä rajauksella. Muut kirjat saavat hakusanastonsa, kun niiden sisällöt valmistuvat.</p> :
+    <label className="los-index-search"><Search size={19}/><span className="sr-only">Hae saksaksi tai suomeksi</span><input value={search} onChange={e=>{setSearch(e.target.value);setVisibleCount(LOCAL_DICTIONARY_PAGE_SIZE);}} placeholder="Hae saksaksi tai suomeksi" autoComplete="off" /></label>
+    <p className="los-index-count" role="status" aria-live="polite">{entries.length} kappalesanaston hakusanaa
+      {" · "}Näytetään {visibleEntries.length} / {entries.length}</p>
+    {entries.length === 0 ? <p>Ei osumia tällä rajauksella. Kappalesanasto sisältää vain kirjojen käsikirjoituksissa opetettavia sanoja.</p> :
       <div className="los-index-table" role="table" aria-label="Sanakirjahakemisto">
         <div className="los-index-table-head" role="row"><span role="columnheader">Deutsch</span><span role="columnheader">Suomi</span><span role="columnheader">Lähde</span></div>
-        {entries.map((item,i)=><div role="row" className="los-index-entry" key={`${item.book}-${item.chapter}-${i}-${item.word}`}>
+        {visibleEntries.map((item,i)=><div role="row" className="los-index-entry" key={`${item.book}-${item.chapter}-${i}-${item.word}`}>
           <strong role="cell"><button type="button" lang="de" className="los-index-word-card"
             aria-label={`Avaa sanakortti: ${item.word}`}
             onClick={()=>setSelection({kind:"local",entry:item})}>{item.word}</button></strong>
@@ -71,7 +77,16 @@ export function LosDictionary({ book, move, openBook }: { book: LosBookDefinitio
         </div>)}
       </div>
     }
-    {scope === "series" && <p className="los-index-footnote">Muiden kirjojen keskeneräiset hakemistot eivät vielä sisällä sanastoja. Tämä ei ole kattava saksan yleissanakirja.</p>}
+    {entries.length>visibleEntries.length&&<button type="button" className="los-index-show-more"
+      onClick={()=>setVisibleCount(count=>Math.min(entries.length,count+LOCAL_DICTIONARY_PAGE_SIZE))}>
+      Näytä seuraavat {Math.min(LOCAL_DICTIONARY_PAGE_SIZE,entries.length-visibleEntries.length)} sanaa
+    </button>}
+    {visibleCount>LOCAL_DICTIONARY_PAGE_SIZE&&entries.length>0&&
+      <button type="button" className="los-index-show-less"
+        onClick={()=>setVisibleCount(LOCAL_DICTIONARY_PAGE_SIZE)}>
+        Näytä vähemmän
+      </button>}
+    {scope === "series" && <p className="los-index-footnote">Koko sarjan kappalesanastot ovat keskeneräisiä käsikirjoitusluonnoksia. Tämä ei ole kattava, tarkistettu saksan yleissanakirja.</p>}
   </section>;
 }
 export function LosLearningPath({ book, move }: { book: LosBookDefinition; move: LosNavigate }) {
