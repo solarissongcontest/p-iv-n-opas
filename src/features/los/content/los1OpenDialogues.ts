@@ -211,7 +211,7 @@ const c07: LosOpenText = {
   originalLines:[
     {id:"u01",speaker:"Auskunft",text:"Auskunft, guten Tag.",meaning:"Numerotiedustelu, hyvää päivää."},
     {id:"u02",speaker:"Franz",text:"Guten Tag. Ich hätte gerne die Telefonnummer von Frau Claudia Bolliger aus Bern.",meaning:"Hyvää päivää. Haluaisin rouva Claudia Bolligerin puhelinnumeron Bernistä."},
-    {id:"u03",speaker:"Auskunft",text:"Wie schreibt man das? Bitte buchstabieren Sie.",meaning:"Miten se kirjoitetaan? Tavatkaa, olkaa hyvä."},
+    {id:"u03",speaker:"Auskunft",text:"Wie schreibt man das? Bitte buchstabieren Sie.",meaning:"Miten se kirjoitetaan? Voisitteko tavata nimen, kiitos?"},
     {id:"u04",speaker:"Franz",text:"Natürlich. Claudia: C wie Cäsar, L wie Ludwig, A wie Anton, U wie Ursula, D wie Dora, I wie Ida, A wie Anton. Bolliger: B wie Berta, O wie Otto, zweimal L wie Ludwig, I wie Ida, G wie Gustav, E wie Emil und R wie Richard.",meaning:"Tietysti. Franz tavaa etu- ja sukunimen käyttämällä joka kirjaimen yhteydessä esimerkkisanaa."},
     {id:"u05",speaker:"Auskunft",text:"Danke. Die Nummer lautet ...",meaning:"Kiitos. Numero on..."},
   ],
@@ -252,7 +252,7 @@ const c07: LosOpenText = {
       explanation:"Puhelinpalvelun työntekijä pyytää nimen kirjoitusasua."},
     {id:"C07-SOURCE-Q02",prompt:"Kuka pyytää nimen tavaamista?",
       answers:[{id:"a",text:"Franz"},{id:"b",text:"Claudia"},{id:"c",text:"Auskunft (numerotiedustelu)"}],correctId:"c",
-      explanation:"Auskunft sanoo Bitte buchstabieren Sie. Se tarkoittaa: tavatkaa, olkaa hyvä."},
+      explanation:"Auskunft sanoo Bitte buchstabieren Sie. Se tarkoittaa kohteliasta pyyntöä tavata nimi kirjain kirjaimelta."},
     {id:"C07-SOURCE-Q03",prompt:"Mitä zweimal tarkoittaa nimessä Bolliger?",
       answers:[{id:"a",text:"Kaksi kertaa"},{id:"b",text:"Uusi nimi"},{id:"c",text:"Kymmenen"}],correctId:"a",
       explanation:"Franz sanoo zweimal L eli L-kirjain kahdesti."},
