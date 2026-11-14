@@ -42,26 +42,43 @@ test("LOS! 2–8 exercise pages use the source's exact 9/14/3 section distributi
   }
 });
 
+/** Select the real open-response T18 exercise, rather than assuming every
+ * source task renders the legacy textarea. T07 is now a working inline gap. */
+async function selectOpenDraftExercise(page:import("@playwright/test").Page){
+  const picker=page.locator("#los-future-exercise-choice");
+  await expect(picker).toBeVisible();
+  const options=await picker.locator("option").allTextContents();
+  const index=options.findIndex(label=>label.trim().startsWith("T18 ·"));
+  expect(index,"T18 open-response exercise must be listed").toBeGreaterThanOrEqual(0);
+  await picker.selectOption({index});
+  const answer=page.locator("#los-future-exercise-input");
+  await expect(answer).toBeVisible();
+  return answer;
+}
+
 test("LOS! 2–8 answer drafts and review marks persist by owner/book/chapter without touching LOS! 1",async({page})=>{
   await enterFutureBook(page);
-  const answer=page.locator("#los-future-exercise-input");
   await page.goto("/los#/2/01/practice",{waitUntil:"domcontentloaded"});
-  await expect(answer).toBeVisible();
+  const answer=await selectOpenDraftExercise(page);
   await answer.fill("Antwort nur für LOS! 2.");
   await page.getByRole("button",{name:"Näytä vastausluonnos"}).click();
   await expect(page.locator(".los-future-exercise-solution")).toBeVisible();
   await page.getByRole("button",{name:"Olen verrannut vastaukseni"}).click();
   await expect(page.locator(".los-future-exercise-checked")).toContainText("Verrattu");
   await page.reload({waitUntil:"domcontentloaded"});
+  await selectOpenDraftExercise(page);
   await expect(answer).toHaveValue("Antwort nur für LOS! 2.");
   await expect(page.locator(".los-future-exercise-summary")).toContainText("1 verrattu vastausluonnokseen");
 
   await page.goto("/los#/3/01/practice",{waitUntil:"domcontentloaded"});
+  await selectOpenDraftExercise(page);
   await expect(answer).toHaveValue("");
   await answer.fill("Antwort nur für LOS! 3.");
   await page.goto("/los#/2/02/practice",{waitUntil:"domcontentloaded"});
+  await selectOpenDraftExercise(page);
   await expect(answer).toHaveValue("");
   await page.goto("/los#/2/01/practice",{waitUntil:"domcontentloaded"});
+  await selectOpenDraftExercise(page);
   await expect(answer).toHaveValue("Antwort nur für LOS! 2.");
   const keys=await page.evaluate(()=>{
     const id=localStorage.getItem("opk.owner-id");
