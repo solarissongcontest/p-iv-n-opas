@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { getDeviceOwnerId } from "@/lib/deviceSession";
+import { losFutureStageCursorKey } from "./losFutureSessionKeys.ts";
 import { ArrowLeft, ArrowRight, BookOpen, Check, CircleAlert, ClipboardList, LockKeyhole } from "lucide-react";
 import { getLosFutureLesson } from "./content/losFutureLessons.ts";
 import type { LosFutureLessonContent } from "./content/losFutureLessonTypes.ts";
@@ -20,10 +22,10 @@ function GuidedChapterLesson({bookId,chapterId,script,move}:{
   bookId:number;chapterId:string;script:LosFutureLessonContent;move:LosNavigate;
 }){
   const {draft,update,saved}=useLosChapterDraft(bookId,chapterId);
-  const stageStorageKey=`los.future.guided.${script.id}.selectedStage`;
+  const stageStorageKey=losFutureStageCursorKey(getDeviceOwnerId(),script.id);
   const [stageIndex,setStageIndex]=useState(()=>{
     try {
-      const raw=typeof sessionStorage==="undefined"?null:sessionStorage.getItem(stageStorageKey);
+      const raw=!stageStorageKey||typeof sessionStorage==="undefined"?null:sessionStorage.getItem(stageStorageKey);
       const value=Number(raw);
       return raw!==null&&Number.isInteger(value)&&value>=0&&value<6?value:0;
     }catch{return 0;}
@@ -32,7 +34,7 @@ function GuidedChapterLesson({bookId,chapterId,script,move}:{
   function chooseStage(index:number){
     const next=Math.max(0,Math.min(index,stages.length-1));
     setStageIndex(next);
-    try{sessionStorage.setItem(stageStorageKey,String(next));}
+    try{if(stageStorageKey)sessionStorage.setItem(stageStorageKey,String(next));}
     catch{/* tuntia voi käyttää myös ilman sessionStoragea */}
   }
   const stage=stages[stageIndex]!;
