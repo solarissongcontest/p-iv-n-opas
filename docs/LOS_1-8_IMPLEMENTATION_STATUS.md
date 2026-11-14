@@ -24,6 +24,8 @@ Tämä on rajattu sisältökorjaussarja PR #264:n kehityshaaraan, **ei** riippum
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | M-COM-01 | M-WB-01 | M-WB-07 | M-WB-06 | M-WB-05 | M-ZPE-01 | M-WB-02 | M-WB-08 | M-WB-03 | M-DIB-02 |
 
+**P0-tallennuksen testilaajennus (14.11.2026):** `tests/los1-cross-device-backup-restore.test.ts` simuloi kaksi erillistä paikallista tallennusympäristöä ja eri omistajatunnukset. Testit tarkistavat JSON-viennin/tuonnin, korvaamattoman tuonnin, olemassa olevan työn säilymisen, tarkoituksellisen korvaamisen edeltävän tilannekuvan sekä toisen kohteen kirjoitusvirheen jälkeisen palautuksen. Kyse on automatisoidusta testivarjosta, **ei** todellisesta mobiili–Linux-pilotista, Supabase-pilvisynkronoinnista tai tuotannon varmuuskopion hyväksynnästä.
+
 **Avoimet työvaiheet:** saksan riippumaton kielellinen ja pedagoginen tarkistus, äänten ja IPA:n hyväksyntä, todellisten laitteiden testit, sanakirjan lisenssi-/tuotantotuonti, palautus toisella laitteella, koko 60 tunnin laadullinen arviointi sekä R1–R12-julkaisuehdot. Toteutettu rajattu korjaussarja ei oikeuta yhdistämään keskeneräistä kokonaisuutta tuotantoon.
 
 ## Koodin ja sisällön todettu tilanne
