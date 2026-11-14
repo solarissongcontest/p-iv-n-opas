@@ -18,6 +18,8 @@ test("all 140 source T10/T13 manuscript prompts have an exact two-operation lear
       assert.equal(two.kind,suffix==="T10"?"correction":"text-b");
       assert.ok(two.sourceText.length>10);
       assert.ok(two.sourceText.length<=400);
+      assert.ok(two.readingText.length>0);
+      if(two.kind==="correction")assert.equal(two.readingText,two.sourceText);
       assert.equal(two.questions.length,2);
       assert.notEqual(two.questions[0],two.questions[1]);
       assert.equal(two.languages[1],"fi");
@@ -63,6 +65,8 @@ test("all 70 Text B responses provide two chapter-specific Finnish model observa
     const oldSource="Lue Text B: "+manuscript.textB+". Etsi siitä kaksi konkreettista asiaa";
     const extracted=oldSource.slice("Lue Text B: ".length,oldSource.indexOf(". Etsi siitä")+1).trim();
     assert.equal(parsed.sourceText,extracted,"prompt revision must preserve source identity");
+    assert.equal(parsed.readingText,manuscript.textB,"render the actual manuscript, not the delimiter period");
+    assert.equal(parsed.sourceText,manuscript.textB+".","old draft source identity stays unchanged");
     const oldSaved=JSON.stringify({version:1,kind:"text-b",sourceText:parsed.sourceText,
       answers:["Aiempi tekstihavainto","Aiempi tulkinta"]});
     assert.deepEqual(readLosFutureTwoPartAnswer(oldSaved,parsed),
@@ -72,4 +76,27 @@ test("all 70 Text B responses provide two chapter-specific Finnish model observa
     count++;
   }
   assert.equal(count,70);
+});
+
+
+test("strict T10/T13 draft decoding rejects forged fields, malformed types and oversized JSON",()=>{
+  for(const [bookId,chapterId,suffix] of [[2,"01","T10"],[8,"05","T13"]] as const){
+    const task=losFutureExercisesFor(bookId,chapterId).find(item=>item.id.endsWith("-"+suffix));
+    assert.ok(task);
+    const parsed=losFutureTwoPartTask(task);assert.ok(parsed);
+    const oldSaved=writeLosFutureTwoPartAnswer(parsed,["Oma vastaukseni","Oma perusteluni"]);
+    const model=JSON.parse(oldSaved);
+    assert.deepEqual(readLosFutureTwoPartAnswer(oldSaved,parsed),
+      ["Oma vastaukseni","Oma perusteluni"]);
+    for(const forged of [
+      {...model,score:10},{...model,isCorrect:true},
+      {...model,questionId:"LOS8-C10-T13"},
+      {...model,sourceText:parsed.sourceText+" muuta"},
+      {...model,version:2},{...model,kind:"other"},
+      {...model,answers:["Yksi"]},{...model,answers:["a",4]},
+      {...model,answers:["a".repeat(601),"b"]},
+    ])assert.equal(readLosFutureTwoPartAnswer(JSON.stringify(forged),parsed),null);
+    assert.equal(readLosFutureTwoPartAnswer(" ".repeat(5001),parsed),null);
+    assert.equal(readLosFutureTwoPartAnswer('{"__proto__":true}',parsed),null);
+  }
 });
