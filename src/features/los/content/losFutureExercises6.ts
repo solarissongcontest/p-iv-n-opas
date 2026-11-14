@@ -874,8 +874,8 @@ export const LOS_FUTURE_EXERCISES_6: Record<string, LosFutureExerciseDraft[]> = 
       "group": "T",
       "title": "Käännä asiayhteydestä",
       "prompt": "Kirjoita saksaksi: Sen jälkeen hän menee kotiin.",
-      "answerKey": "Danach geht sie nach Hause.",
-      "feedback": "",
+      "answerKey": "Danach geht er nach Hause.",
+      "feedback": "Suomen hän ei ilmaise sukupuolta. Kappaleen Text A:ssa päähenkilö on Ben, joten er sopii tähän kontekstiin. Myös Danach geht sie nach Hause. on kieliopillisesti oikein, jos hän tarkoittaa naista. Tärkeä rakenne: Danach + taivutettu verbi.",
       "assessment": "accepted-variants-review"
     },
     {

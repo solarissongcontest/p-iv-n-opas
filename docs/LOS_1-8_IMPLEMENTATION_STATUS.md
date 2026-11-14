@@ -100,6 +100,12 @@ Tämä tiedosto on ainoa LOS! 1–8:n *toteutuksen* jatkotilaraportti. Visuaalin
 - Samojen 70 tehtävän itsearviointimalli muistuttaa, että tekstilajit ja kohderyhmät on pääteltävä nimenomaan kappaleen omasta aineistosta. Tämä ei ole itsenäinen tarkastajan laatima 70 tekstin mallivastaus eikä automaattinen oikeellisuusarvio.
 - **Vanhojen harjoitusvastausten säilyminen:** T14:n aikaisempi täsmällinen kysymysversio hyväksytään rajatussa yhden version migraatiossa. Kaksi aiempaa havaintoa säilyvät, ja käyttäjälle näytetään muutosilmoitus; seuraava tallennus kirjoittaa uuden kysymysversion. Tehtävän ID ja harjoitusluonnoksen avain eivät muutu. Testi käy läpi kaikki 70 lähdettä ja takaisin yhteensopivat luonnokset. CI-/selaintestit ja riippumaton saksankielinen/didaktinen tarkistus vaaditaan erikseen.
 
+## 14.11.2026 · T09-käännösvaihtoehdot ja kontekstin täsmennys
+
+- Neljä erityisen tulkinnanvaraista LOS! 6–8:n T09-käännöstehtävää täydentyy toimituksellisilla vaihtoehtohuomautuksilla. Suomen `hän` voi vastata `er` tai `sie` kontekstista riippuen; LOS! 6/C03:n Text A:ssa päähenkilö on Ben, minkä vuoksi oletusmalli käyttää `er`-muotoa. Vanha `sie`-vastaus on edelleen selitetty kieliopillisesti mahdolliseksi toisessa asiayhteydessä.
+- LOS! 7/C05 hyväksyy itsevertailussa tulevaa ilmaisevan saksan preesensin `Ich arbeite morgen.` sekä futuurimallin; LOS! 7/C06 erottaa `ihr`- ja kohteliaisuuden `Sie`-puhuttelut. LOS! 8/C07 erottaa yleisen nykyhetken ja futuurin sekä `Technik`/`Technologie`-sanavalinnat.
+- Tehtävien ID:t, kysymystekstit, tallennetut vapaatekstivastaukset ja arvioinnin rajat säilyvät. Huomautukset näytetään vasta ratkaisumallin avauksen yhteydessä, eikä niitä käsitellä automaattisesti pisteytettyinä vastausvariantteina. Sisältö vaatii yhä erillisen kielentarkastuksen.
+
 ## 14.11.2026 · R04:n Text A -tekstinäytön palautetarkistus
 
 - LOS! 2–8:n **70 R04-kontekstisanastoharjoituksessa** näkyy nyt heti itse valittua saksankielistä sanaa ja sen kopioitua sanayhteyttä koskeva tarkistus. Verrataan kirjaimellista tekstikohtaa saman kappaleen **Text A:han**; Unicode-NFC, saksalainen kirjainkoon rinnastus ja välilyöntien normalisointi hyväksytään, mutta sanan esiintymistä toisen sanan sisällä ei pidetä oikeana tekstinäyttönä.

@@ -1399,7 +1399,7 @@ export const LOS_FUTURE_EXERCISES_7: Record<string, LosFutureExerciseDraft[]> = 
       "title": "Käännä asiayhteydestä",
       "prompt": "Kirjoita saksaksi: Työskentelen huomenna.",
       "answerKey": "Ich werde morgen arbeiten.",
-      "feedback": "",
+      "feedback": "Myös Ich arbeite morgen. on luonteva ja oikea käännös. Saksassa preesensiä käytetään usein tulevasta tapahtumasta, kun ajankohta ilmenee sanasta morgen. Ich werde morgen arbeiten. korostaa futuurirakennetta.",
       "assessment": "accepted-variants-review"
     },
     {
@@ -1661,7 +1661,7 @@ export const LOS_FUTURE_EXERCISES_7: Record<string, LosFutureExerciseDraft[]> = 
       "title": "Käännä asiayhteydestä",
       "prompt": "Kirjoita saksaksi: Teidän täytyy työskennellä viikonloppuna.",
       "answerKey": "Sie müssen am Wochenende arbeiten.",
-      "feedback": "",
+      "feedback": "Suomen teidän ei kerro, puhutaanko tutulle ryhmälle vai teititelläänkö. Mallin Sie müssen am Wochenende arbeiten. on kohtelias puhuttelu. Myös Ihr müsst am Wochenende arbeiten. on oikein tuttavalliselle monikolle.",
       "assessment": "accepted-variants-review"
     },
     {

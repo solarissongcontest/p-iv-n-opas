@@ -63,3 +63,20 @@ test("70 T09 instructions have exactly their Finnish source sentence punctuation
   }
   assert.equal(count,70);
 });
+
+test("four ambiguous T09 translations explain contextual German variants instead of falsely rejecting them",()=>{
+  const examples=[
+    [6,"03","Danach geht er nach Hause.",["Ben","er","sie"]],
+    [7,"05","Ich werde morgen arbeiten.",["Ich arbeite morgen","preesensiä"]],
+    [7,"06","Sie müssen am Wochenende arbeiten.",["Ihr müsst am Wochenende arbeiten","teititelläänkö"]],
+    [8,"07","Die Technik wird sich verändern.",["Die Technik verändert sich","Technologie"]],
+  ] as const;
+  for(const [book,chapter,model,hints] of examples){
+    const task=losFutureExercisesFor(book,chapter).find(x=>x.id.endsWith("-T09"));
+    assert.ok(task,book+"/"+chapter);
+    assert.equal(task.answerKey,model);
+    assert.ok(task.feedback.length>=100,task.id);
+    for(const hint of hints)assert.ok(task.feedback.includes(hint),task.id+": "+hint);
+    assert.equal(losFutureShortAnswer(task)?.kind,"translation");
+  }
+});

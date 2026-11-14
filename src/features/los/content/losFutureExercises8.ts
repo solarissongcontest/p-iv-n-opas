@@ -1923,7 +1923,7 @@ export const LOS_FUTURE_EXERCISES_8: Record<string, LosFutureExerciseDraft[]> = 
       "title": "Käännä asiayhteydestä",
       "prompt": "Kirjoita saksaksi: Teknologia muuttuu.",
       "answerKey": "Die Technik wird sich verändern.",
-      "feedback": "",
+      "feedback": "Suomen Teknologia muuttuu. ei yksin ilmaise, tarkoitetaanko nykyistä muutosta vai tulevaisuutta. Die Technik verändert sich. sopii yleiseen nykyhetkeen; Die Technik wird sich verändern. sopii tulevaisuutta ennakoivaan tilanteeseen. Myös Technologie on mahdollinen sanavalinta.",
       "assessment": "accepted-variants-review"
     },
     {
