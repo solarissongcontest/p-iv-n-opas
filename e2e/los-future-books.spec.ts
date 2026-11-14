@@ -217,7 +217,9 @@ test("LOS! 2–8 chapter Teacher 2.0 shares its own saved exercises, paused scen
   await page.goto("/los-lessons/LOS3-L002",{waitUntil:"domcontentloaded"});
   await expect(page.locator(".los-teacher-book")).toContainText("LOS! 3 · SAB33");
   await expect(page.locator(".los-teacher-editorial-gate")).toBeVisible();
-  await expect(page.locator(".los-teacher-outline nav button")).toHaveCount(9);
+  // Both chapters have the same scripted optional vocabulary-check scene.
+  // This is 10 scenes, not the old nine-scene placeholder outline.
+  await expect(page.locator(".los-teacher-outline nav button")).toHaveCount(10);
 });
 
 test("LOS! 5 source gap exercise keeps punctuation and saves the exact draft on reload",async({page})=>{
