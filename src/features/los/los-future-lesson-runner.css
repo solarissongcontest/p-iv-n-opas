@@ -46,3 +46,35 @@
 .los-review-practice textarea{min-height:104px}
 @media(max-width:720px){.los-review-practice .los-guided-lesson-stage-nav{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:400px){.los-review-vocab-board{grid-template-columns:1fr}.los-review-practice .los-guided-lesson-stage-nav button{font-size:.76rem}}
+
+/* Paper practice exams: textbook reading space, accessible questions and safe reveal. */
+.los-future-exam{display:grid;gap:1.2rem;min-width:0;margin:1.4rem 0}
+.los-future-exam-header{display:flex;align-items:flex-start;gap:.85rem}
+.los-future-exam-header>svg{flex-shrink:0;margin-top:.25rem}
+.los-future-exam-header h3{margin:0 0 .3rem}
+.los-future-exam-header p{margin:.2rem 0;line-height:1.55;font-size:.9rem}
+.los-future-exam-warning{display:flex;gap:.6rem;align-items:flex-start;padding:1rem;border:1px solid #bbaa8d;border-radius:10px;background:#fbf8f1;font-size:.9rem;line-height:1.65}
+.los-future-exam-warning svg{flex-shrink:0}
+.los-future-exam-progress{display:flex;gap:.8rem 1.4rem;flex-wrap:wrap;font-size:.84rem;color:#575047}
+.los-future-exam-reading{padding:1.25rem 1.4rem;border:1px solid #e0d8ca;border-radius:10px;background:#fefdfa}
+.los-future-exam-reading h4,.los-future-exam-group h4{display:flex;align-items:center;gap:.5rem;font-size:1.12rem;margin:.15rem 0 1rem}
+.los-future-exam-reading>p{white-space:pre-wrap;font-size:1.06rem;line-height:1.9;max-width:68ch;margin:0 auto}
+.los-future-exam-group{border-top:1px solid #e0dbd3;padding-top:1.2rem;display:grid;gap:1rem}
+.los-future-exam-question{display:grid;gap:.5rem;padding:.85rem 0}
+.los-future-exam-question>label{line-height:1.65}
+.los-future-exam-question>label strong{margin-right:.45rem}
+.los-future-exam input[type=text],.los-future-exam textarea{box-sizing:border-box;width:100%;min-width:0;max-width:100%;background:#fff;color:#28231f;border:1px solid #afa69b;border-radius:9px;font:inherit;line-height:1.5;padding:.72rem .85rem}
+.los-future-exam input[type=text]{min-height:44px}
+.los-future-exam :is(input,textarea,button):focus-visible{outline:3px solid var(--los-book-accent,#866644);outline-offset:2px}
+.los-future-exam :is(input[type=text],textarea):disabled{background:#f4f1ed;opacity:1;color:#4c4740}
+.los-future-exam-writing{display:grid;gap:.7rem;line-height:1.65}
+.los-future-exam-model{padding:.85rem 1rem;background:#f3f0ea;border-left:3px solid var(--los-book-accent,#866644);border-radius:5px;line-height:1.55;overflow-wrap:anywhere}
+.los-future-exam-model p{font-size:.85rem;margin:.5rem 0 0}
+.los-future-exam-model h5{margin:.1rem 0 .5rem;font-size:.95rem}
+.los-future-exam-actions{padding:1rem;border:1px solid #d8d0c5;border-radius:10px;display:grid;gap:.8rem}
+.los-future-exam-actions p{line-height:1.65}
+.los-future-exam-confirm{display:flex;gap:.6rem;align-items:flex-start;line-height:1.55;font-size:.91rem}
+.los-future-exam-confirm input{min-width:20px;min-height:20px;margin:.1rem 0 0;flex-shrink:0}
+.los-future-exam-actions button{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;min-height:44px;max-width:max-content;border:1px solid var(--los-book-accent,#866644);background:var(--los-book-accent,#866644);color:white;border-radius:9px;padding:.7rem .95rem;font:inherit;font-weight:700;cursor:pointer}
+.los-future-exam-actions button:disabled{opacity:.5;cursor:not-allowed}
+@media(max-width:600px){.los-future-exam-reading{padding:1rem}.los-future-exam-actions{padding:.8rem}.los-future-exam-actions button{width:100%;max-width:100%}}
