@@ -75,12 +75,12 @@ export function LosChapterGrammar({chapterId}:{chapterId:string}) {
   if(chapterId==="07")return <>
     <p>Kun nimeä ei kuule oikein, voit pyytää toista tavaamaan sen. Saksassa kirjaimet ääntyvät osin eri tavoin kuin suomessa.</p>
     <Example de="Wie schreibt man das?" fi="Miten se kirjoitetaan?" />
-    <Example de="Bitte buchstabieren Sie." fi="Tavatkaa, olkaa hyvä." />
+    <Example de="Bitte buchstabieren Sie." fi="Voisitteko tavata nimen, kiitos?" />
     <h3>Kirjoitusasu ja kirjaimen nimi ovat eri asioita</h3>
     <p>Saksan aakkosissa on tutut latinalaiset kirjaimet A–Z. Saksan kirjaimet eivät kuitenkaan välttämättä äänny samoin kuin suomen kirjaimet: esimerkiksi <span lang="de">J</span> on tavallisesti j-äänne sanassa, mutta kirjaimen oma saksankielinen nimi on erillinen opeteltava asia. Oikea tavaaminen kuunnellaan mieluiten ihmisen puheesta.</p>
     <p>Opettele erottamaan myös saksan kirjainmerkit <b lang="de">ä, ö, ü</b> ja <b lang="de">ß</b>. Joissakin teknisissä yhteyksissä käytetään korvaavia merkintöjä <span lang="de">ae, oe, ue</span> ja <span lang="de">ss</span>. Korvausmerkintä ei ole yleispätevästi sama kuin sanan oikea kirjoitusasu.</p>
     <Example de="M – I – A" fi="Kirjaimittain kirjoitettu nimi Mia. Tämä esimerkki näyttää kirjaimet, ei niiden saksalaista ääntämistä." />
-    <Example de="Wie schreibt man das? Bitte buchstabieren Sie." fi="Miten se kirjoitetaan? Tavatkaa, olkaa hyvä." />
+    <Example de="Wie schreibt man das? Bitte buchstabieren Sie." fi="Miten se kirjoitetaan? Voisitteko tavata nimen, kiitos?" />
     <Note title="Tavatun nimen kuuntelu ei ole vielä automaattinen testi">Harjoittele kahdeksan kuvitteellista nimeä ja neljä numerosarjaa ääneen. Kun oikea aakkosäänite lisätään luvallisesti oppikirjaan, voit verrata myös ääntämistä. Pelkkä tekstimuoto ei todista ääntämistä.</Note>
   </>;
   if(chapterId==="08")return <>
@@ -101,7 +101,7 @@ export function LosChapterGrammar({chapterId}:{chapterId:string}) {
   </>;
   if(chapterId==="09")return <>
     <p>Viikonpäivien kanssa käytetään tavallisesti ilmausta <b lang="de">am Montag</b> (maanantaina). Kellonajan edellä käytetään sanaa <b lang="de">um</b>.</p>
-    <Example de="Am Montag um drei Uhr." fi="Maanantaina kello kolme." />
+    <Example de="Am Montag um drei Uhr." fi="Maanantaina kello kolmelta." />
     <Example de="Am Freitag um vier Uhr." fi="Perjantaina kello neljä." />
     <h3>Viikonpäivät</h3>
     <table className="los-grammar-table"><thead><tr><th>Suomeksi</th><th lang="de">Deutsch</th></tr></thead><tbody>
