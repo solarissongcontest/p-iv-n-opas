@@ -28,7 +28,7 @@ export const LOS_FUTURE_EXERCISES_7: Record<string, LosFutureExerciseDraft[]> = 
       "group": "T",
       "title": "Puhujat ja vuorot",
       "prompt": "Lue saksankielinen tukidialogi. Kuinka monta puheenvuoroa siinä on, ja mitä kukin puhuja tekee ensimmäisellä vuorollaan?",
-      "answerKey": "4 puheenvuoroa. Ensimmäinen: Mia: Was willst du nächstes Jahr machen?. Huomaa, että jos sama puhuja palaa, vastaa myös jatkokysymykseen.",
+      "answerKey": "4 puheenvuoroa. Puhujien ensimmäiset vuorot: Mia: Was willst du nächstes Jahr machen? | Ben: Ich möchte mehr Deutsch lernen.. Suomenkielinen tulkinta: Mia kysyy Benin ensi vuoden suunnitelmista. Ben haluaa opiskella lisää saksaa. Tarkista, että oma vastauksesi kuvaa kummankin puhujan ensimmäistä vuoroa.",
       "feedback": "",
       "assessment": "self-review"
     },
@@ -290,7 +290,7 @@ export const LOS_FUTURE_EXERCISES_7: Record<string, LosFutureExerciseDraft[]> = 
       "group": "T",
       "title": "Puhujat ja vuorot",
       "prompt": "Lue saksankielinen tukidialogi. Kuinka monta puheenvuoroa siinä on, ja mitä kukin puhuja tekee ensimmäisellä vuorollaan?",
-      "answerKey": "4 puheenvuoroa. Ensimmäinen: Mira: Was kannst du gut?. Huomaa, että jos sama puhuja palaa, vastaa myös jatkokysymykseen.",
+      "answerKey": "4 puheenvuoroa. Puhujien ensimmäiset vuorot: Mira: Was kannst du gut? | Jonas: Ich kann gut erklären und organisieren.. Suomenkielinen tulkinta: Mira kysyy Jonaksen vahvuuksista. Jonas mainitsee selittämisen ja järjestämisen. Tarkista, että oma vastauksesi kuvaa kummankin puhujan ensimmäistä vuoroa.",
       "feedback": "",
       "assessment": "self-review"
     },
@@ -552,7 +552,7 @@ export const LOS_FUTURE_EXERCISES_7: Record<string, LosFutureExerciseDraft[]> = 
       "group": "T",
       "title": "Puhujat ja vuorot",
       "prompt": "Lue saksankielinen tukidialogi. Kuinka monta puheenvuoroa siinä on, ja mitä kukin puhuja tekee ensimmäisellä vuorollaan?",
-      "answerKey": "4 puheenvuoroa. Ensimmäinen: Aylin: Wann beginnt dein Unterricht?. Huomaa, että jos sama puhuja palaa, vastaa myös jatkokysymykseen.",
+      "answerKey": "4 puheenvuoroa. Puhujien ensimmäiset vuorot: Aylin: Wann beginnt dein Unterricht? | Leo: Um acht Uhr.. Suomenkielinen tulkinta: Aylin kysyy Leon koulupäivän alkua. Leo vastaa kello kahdeksan. Tarkista, että oma vastauksesi kuvaa kummankin puhujan ensimmäistä vuoroa.",
       "feedback": "",
       "assessment": "self-review"
     },
@@ -814,7 +814,7 @@ export const LOS_FUTURE_EXERCISES_7: Record<string, LosFutureExerciseDraft[]> = 
       "group": "T",
       "title": "Puhujat ja vuorot",
       "prompt": "Lue saksankielinen tukidialogi. Kuinka monta puheenvuoroa siinä on, ja mitä kukin puhuja tekee ensimmäisellä vuorollaan?",
-      "answerKey": "4 puheenvuoroa. Ensimmäinen: Sara: Musst du heute lernen?. Huomaa, että jos sama puhuja palaa, vastaa myös jatkokysymykseen.",
+      "answerKey": "4 puheenvuoroa. Puhujien ensimmäiset vuorot: Sara: Musst du heute lernen? | Ben: Ja, morgen habe ich eine Prüfung.. Suomenkielinen tulkinta: Sara kysyy, pitääkö Benin opiskella tänään. Ben kertoo huomisen kokeesta. Tarkista, että oma vastauksesi kuvaa kummankin puhujan ensimmäistä vuoroa.",
       "feedback": "",
       "assessment": "self-review"
     },
@@ -1076,7 +1076,7 @@ export const LOS_FUTURE_EXERCISES_7: Record<string, LosFutureExerciseDraft[]> = 
       "group": "T",
       "title": "Puhujat ja vuorot",
       "prompt": "Lue saksankielinen tukidialogi. Kuinka monta puheenvuoroa siinä on, ja mitä kukin puhuja tekee ensimmäisellä vuorollaan?",
-      "answerKey": "4 puheenvuoroa. Ensimmäinen: Nina: Was möchtest du nach der Schule machen?. Huomaa, että jos sama puhuja palaa, vastaa myös jatkokysymykseen.",
+      "answerKey": "4 puheenvuoroa. Puhujien ensimmäiset vuorot: Nina: Was möchtest du nach der Schule machen? | Paul: Ich würde gern an einer Universität studieren.. Suomenkielinen tulkinta: Nina kysyy Paulin jatkosuunnitelmista. Paul haluaisi opiskella yliopistossa. Tarkista, että oma vastauksesi kuvaa kummankin puhujan ensimmäistä vuoroa.",
       "feedback": "",
       "assessment": "self-review"
     },
@@ -1338,7 +1338,7 @@ export const LOS_FUTURE_EXERCISES_7: Record<string, LosFutureExerciseDraft[]> = 
       "group": "T",
       "title": "Puhujat ja vuorot",
       "prompt": "Lue saksankielinen tukidialogi. Kuinka monta puheenvuoroa siinä on, ja mitä kukin puhuja tekee ensimmäisellä vuorollaan?",
-      "answerKey": "4 puheenvuoroa. Ensimmäinen: Mara: Was möchtest du später werden?. Huomaa, että jos sama puhuja palaa, vastaa myös jatkokysymykseen.",
+      "answerKey": "4 puheenvuoroa. Puhujien ensimmäiset vuorot: Mara: Was möchtest du später werden? | Oli: Vielleicht Arzt, aber ich bin noch nicht sicher.. Suomenkielinen tulkinta: Mara kysyy Olin ammattihaaveesta. Oli mainitsee lääkärin mutta ei ole varma. Tarkista, että oma vastauksesi kuvaa kummankin puhujan ensimmäistä vuoroa.",
       "feedback": "",
       "assessment": "self-review"
     },
@@ -1600,7 +1600,7 @@ export const LOS_FUTURE_EXERCISES_7: Record<string, LosFutureExerciseDraft[]> = 
       "group": "T",
       "title": "Puhujat ja vuorot",
       "prompt": "Lue saksankielinen tukidialogi. Kuinka monta puheenvuoroa siinä on, ja mitä kukin puhuja tekee ensimmäisellä vuorollaan?",
-      "answerKey": "4 puheenvuoroa. Ensimmäinen: Lea: Hier gibt es einen Ferienjob.. Huomaa, että jos sama puhuja palaa, vastaa myös jatkokysymykseen.",
+      "answerKey": "4 puheenvuoroa. Puhujien ensimmäiset vuorot: Lea: Hier gibt es einen Ferienjob. | Tom: Was muss man können?. Suomenkielinen tulkinta: Lea kertoo kesätyöpaikasta. Tom kysyy, mitä työssä pitää osata. Tarkista, että oma vastauksesi kuvaa kummankin puhujan ensimmäistä vuoroa.",
       "feedback": "",
       "assessment": "self-review"
     },
@@ -1862,7 +1862,7 @@ export const LOS_FUTURE_EXERCISES_7: Record<string, LosFutureExerciseDraft[]> = 
       "group": "T",
       "title": "Puhujat ja vuorot",
       "prompt": "Lue saksankielinen tukidialogi. Kuinka monta puheenvuoroa siinä on, ja mitä kukin puhuja tekee ensimmäisellä vuorollaan?",
-      "answerKey": "4 puheenvuoroa. Ensimmäinen: Mira: Wie beginnt eine formelle E-Mail?. Huomaa, että jos sama puhuja palaa, vastaa myös jatkokysymykseen.",
+      "answerKey": "4 puheenvuoroa. Puhujien ensimmäiset vuorot: Mira: Wie beginnt eine formelle E-Mail? | Jonas: Zum Beispiel mit „Sehr geehrte Damen und Herren“.. Suomenkielinen tulkinta: Mira kysyy muodollisen sähköpostin aloittamisesta. Jonas antaa kohteliaan puhutteluesimerkin. Tarkista, että oma vastauksesi kuvaa kummankin puhujan ensimmäistä vuoroa.",
       "feedback": "",
       "assessment": "self-review"
     },
@@ -2124,7 +2124,7 @@ export const LOS_FUTURE_EXERCISES_7: Record<string, LosFutureExerciseDraft[]> = 
       "group": "T",
       "title": "Puhujat ja vuorot",
       "prompt": "Lue saksankielinen tukidialogi. Kuinka monta puheenvuoroa siinä on, ja mitä kukin puhuja tekee ensimmäisellä vuorollaan?",
-      "answerKey": "4 puheenvuoroa. Ensimmäinen: Chefin: Warum möchten Sie hier arbeiten?. Huomaa, että jos sama puhuja palaa, vastaa myös jatkokysymykseen.",
+      "answerKey": "4 puheenvuoroa. Puhujien ensimmäiset vuorot: Chefin: Warum möchten Sie hier arbeiten? | Bewerber: Ich arbeite gern mit Menschen.. Suomenkielinen tulkinta: Esihenkilö kysyy hakijan työhön hakeutumisen syytä. Hakija pitää ihmisten kanssa työskentelystä. Tarkista, että oma vastauksesi kuvaa kummankin puhujan ensimmäistä vuoroa.",
       "feedback": "",
       "assessment": "self-review"
     },
@@ -2386,7 +2386,7 @@ export const LOS_FUTURE_EXERCISES_7: Record<string, LosFutureExerciseDraft[]> = 
       "group": "T",
       "title": "Puhujat ja vuorot",
       "prompt": "Lue saksankielinen tukidialogi. Kuinka monta puheenvuoroa siinä on, ja mitä kukin puhuja tekee ensimmäisellä vuorollaan?",
-      "answerKey": "4 puheenvuoroa. Ensimmäinen: Lea: Wie war dein erster Tag im Praktikum?. Huomaa, että jos sama puhuja palaa, vastaa myös jatkokysymykseen.",
+      "answerKey": "4 puheenvuoroa. Puhujien ensimmäiset vuorot: Lea: Wie war dein erster Tag im Praktikum? | Noah: Gut. Ich habe Kunden geholfen und Regale sortiert.. Suomenkielinen tulkinta: Lea kysyy Noahin ensimmäisestä harjoittelupäivästä. Noah kertoo auttaneensa asiakkaita ja järjestelleensä hyllyjä. Tarkista, että oma vastauksesi kuvaa kummankin puhujan ensimmäistä vuoroa.",
       "feedback": "",
       "assessment": "self-review"
     },
