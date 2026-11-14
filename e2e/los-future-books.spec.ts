@@ -372,8 +372,12 @@ test("LOS! 7 T20 preserves two independently written answers across reload witho
   await expect(ticket).toBeVisible();
   const answers=ticket.locator("textarea");
   await expect(answers).toHaveCount(2);
+  const reveal=page.getByRole("button",{name:"Näytä vastausluonnos"});
+  await expect(reveal).toBeDisabled();
   await answers.nth(0).fill("arbeiten");
+  await expect(reveal).toBeDisabled();
   await answers.nth(1).fill("Koska hän haluaa oppia lisää.");
+  await expect(reveal).toBeEnabled();
   await expect(page.locator(".los-future-exercise-solution")).toHaveCount(0);
   await page.reload({waitUntil:"domcontentloaded"});
   await picker.selectOption({index});
@@ -381,5 +385,44 @@ test("LOS! 7 T20 preserves two independently written answers across reload witho
   await expect(ticket.locator("textarea").nth(1)).toHaveValue("Koska hän haluaa oppia lisää.");
   await expect(page.locator(".los-future-exercise-summary")).toContainText("1 vastattu");
   await expect(page.locator(".los-future-exercise-summary")).toContainText("0 verrattu vastausluonnokseen");
+  await expectNoHorizontalOverflow(page);
+});
+
+test("LOS! 2–8 T09 and T12 one-line exercises save under original task IDs with delayed self-review",async({page})=>{
+  await enterFutureBook(page);
+  await page.goto("/los#/2/01/practice",{waitUntil:"domcontentloaded"});
+  const picker=page.locator("#los-future-exercise-choice");
+  const options=await picker.locator("option").allTextContents();
+  const translation=options.findIndex(label=>label.trim().startsWith("T09 ·"));
+  const grammar=options.findIndex(label=>label.trim().startsWith("T12 ·"));
+  expect(translation).toBeGreaterThanOrEqual(0);
+  expect(grammar).toBeGreaterThanOrEqual(0);
+
+  await picker.selectOption({index:translation});
+  const short=page.locator("#los-future-short-input");
+  await expect(short).toBeVisible();
+  await expect(short).toHaveAttribute("lang","de");
+  const reveal=page.getByRole("button",{name:"Näytä vastausluonnos"});
+  await expect(reveal).toBeDisabled();
+  await short.fill("Ich lerne jeden Tag Deutsch.");
+  await expect(reveal).toBeEnabled();
+  await page.reload({waitUntil:"domcontentloaded"});
+  await picker.selectOption({index:translation});
+  await expect(short).toHaveValue("Ich lerne jeden Tag Deutsch.");
+  await expect(page.locator(".los-future-exercise-solution")).toHaveCount(0);
+
+  await picker.selectOption({index:grammar});
+  await expect(short).toBeVisible();
+  await expect(short).not.toHaveAttribute("lang","de");
+  await expect(short).toHaveValue("");
+  await short.fill("Wir lernen Deutsch.");
+  await expect(page.locator(".los-future-exercise-summary")).toContainText("2 vastattu");
+  await page.goto("/los#/3/01/practice",{waitUntil:"domcontentloaded"});
+  const picker3=page.locator("#los-future-exercise-choice");
+  const options3=await picker3.locator("option").allTextContents();
+  const grammar3=options3.findIndex(label=>label.trim().startsWith("T12 ·"));
+  expect(grammar3).toBeGreaterThanOrEqual(0);
+  await picker3.selectOption({index:grammar3});
+  await expect(page.locator("#los-future-short-input")).toHaveValue("");
   await expectNoHorizontalOverflow(page);
 });
