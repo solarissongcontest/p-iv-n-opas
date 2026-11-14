@@ -69,6 +69,12 @@ Tämä tiedosto on ainoa LOS! 1–8:n *toteutuksen* jatkotilaraportti. Visuaalin
 - Kysymysten omat tunnisteet, arvioinnin rajaus ja vastausten tallennusavaimet pysyivät samoina; vanhoja oppilaan vastauksia ei poisteta eikä arvostella uudelleen. T04 käsittelee yhä erillistä tukidialogia, eikä sitä pidä sekoittaa Text A:n T02:een. Uusi 70 kysymys–mallivastausparin regressiotesti suojaa vanhojen lähdemallien tahattomalta palautumiselta. **Riippumaton kieli-, taso- ja pedagoginen tarkistus on edelleen tehtävä.**
 - **Edellisen HEADin `901a5bfc56fc8ca1c45939b7c4d26c34f1935e10` vahvistus:** [Quality Gate 43610107342](https://github.com/solarissongcontest/p-iv-n-opas/actions/runs/43610107342) **791/791** sekä lint, TypeScript, build ja Vercel-pariteetti hyväksytty; [Chromium ja WebKit 43610107502](https://github.com/solarissongcontest/p-iv-n-opas/actions/runs/43610107502) **204/204** hyväksytty. Uuden sisältökorjauscommitin omat ajot vaativat erillisen vahvistuksen.
 
+## 14.11.2026 · T13: 70 todellista suomenkielistä Text B -mallihavaintoa
+
+- Korvattiin kaikkien LOS! 2–8:n 70 T13-tehtävän aiemmat mallivastaukset, jotka vain toistivat saksankielisen Text B:n ja jättivät oikeat havainnot opiskelijan pääteltäväksi. Jokainen tehtävä sisältää nyt **kaksi kappaleensa omaan Text B:hen perustuvaa suomenkielistä mallihavaintoa**. Nämä ovat käsikirjoituksesta toimitettuja palautemalleja, eivät riippumattoman kielentarkastajan hyväksymiä vastauksia.
+- Tarkennettiin tehtävää: hyvin lyhyestä ilmoituksesta, mielipidetekstistä tai kyselystä saa kirjata tekstin tarkoituksen tai ilmaisutavan, eikä tarvitse keksiä kahta eri tietofaktaa. Tekstistä puuttuvaa tietoa ei saa päätellä todeksi.
+- Jatkokirjojen T13:n tyyppimoottori käyttää samoja alkuperäisiä lähdetekstin tunnisteita ja tallennusavaimia; opiskelijan kaksi kirjoitettua vastausta säilyvät aikaisempien ja nykyisten tehtävänantojen välillä. Regressiotesti käy läpi kaikki 70 mallivastausta ja tarkistaa vanhan tietorakenteen lukemisen. Ei automaattista kieliarvostelua, koearvosanaa tai vahvistettua osaamistasoa.
+
 ## 14.11.2026 · T14: 70 tekstilajivertailua korjattu
 
 - Kaikkien 70 LOS! 2–8 T14-tehtävän vanha tehtävänanto kutsui Text B:tä **viestiksi**. Käsikirjoituksissa on myös ilmoituksia, listoja, aikatauluja, suunnitelmia, kyselyjä, arvioita ja muita tekstejä. Uusi tehtävänanto käyttää neutraalia tekstin käsitettä, ei oleta vastaanottajaa tunnetuksi eikä pakota jokaista tekstipiirrettä eroamaan.
