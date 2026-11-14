@@ -76,7 +76,7 @@ Tämä tiedosto on ainoa LOS! 1–8:n *toteutuksen* jatkotilaraportti. Visuaalin
 
 ## 14.11.2026 · Kaikkien tehtävien vastausmallin avaaminen vasta omasta yrityksestä
 
-- LOS! 2–8:n yhteisessä harjoitusmoottorissa mallivastauksen painike on nyt estetty **myös yksittäisissä yleisissä tekstitehtävissä, aukontäytössä, yhdistelyssä ja muissa aiemmin ilman yritystä avattavissa tehtävissä**, kun tehtävälle ei ole vielä tallennettu omaa vastausta. Monikenttäisten tehtävien erilliset vaadittujen vastausten tarkistukset säilyvät.
+- LOS! 2–8:n yhteisessä harjoitusmoottorissa mallivastauksen painike on estetty aina, kun tehtävälle ei ole vielä tallennettu omaa vastausta. Tämä kattaa myös aukontäytön, yhdistelyn ja mahdollisen yleisen tekstikenttävaran; monikenttäisten tehtävien omat kaikkien vaadittujen vastausten tarkistukset säilyvät. T01 on jo erillinen kolmiosainen ennakointiharjoitus eikä yleinen tekstikenttä.
 - Tyhjän vastauksen tilalle näytetään ohje yrittää itse ensin. Myös tehtävästä toiseen siirtyminen sulkee auki olleen mallin. Selaintesti tarkistaa alkutilan, oman vastauksen vaikutuksen, mallin avaamisen, seuraavan tehtävän eston ja aukontäytön.
 - **Rajaus:** tämä on ohjattu oppiminen, ei valvottu koe eikä täydellinen estomekanismi tahalliselle huijaamiselle. Tallennettu lyhytkin yritys voi avata mallin; avoimen vastauksen oikeellisuutta ei pidä päätellä painikkeen tilasta. Oppijan aikaisempia vastauksia ei kirjoiteta uusiksi.
 
