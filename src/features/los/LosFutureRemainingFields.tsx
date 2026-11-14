@@ -44,7 +44,7 @@ export function LosFutureRemainingFields({task,answer,onChange}:{
       <p className="los-future-remaining-intro">{task.intro}</p>
     </>}
     {task.sourceText&&<div className="los-future-remaining-source">
-      {readyToRead?<details open={task.kind==="words"||task.kind==="summary"}>
+      {readyToRead?<details open={task.kind==="words"||task.kind==="summary"||task.kind==="pronunciation"}>
         <summary>{task.sourceTitle}</summary>
         <blockquote lang={task.kind==="writing"?"fi":"de"}>{task.sourceText}</blockquote>
       </details>:<p role="status">Text A avautuu tähän, kun kirjoitat kaksi erilaista ennustusta.</p>}
