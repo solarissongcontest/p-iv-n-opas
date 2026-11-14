@@ -172,7 +172,7 @@ export const LOS1_L047_TEACHER=lesson("L047","Lue Sport und Zeit",
     "Oikein. Viertel vor drei = varttia vaille kolme. Tämän harjoituksen iltapäiväoletuksella se on 14.45.","Vor tarkoittaa vaille, ei yli.","Viertel vor drei = varttia vaille kolme; um drei = kolmelta."),
   B("book-text","Tarkista kolme alkuperäisen tekstin tehtävää",[
     "Lue C09:n Text A uudelleen ja vastaa tekstinymmärtämissivun C09-SOURCE-Q01, C09-SOURCE-Q02 sekä C09-SOURCE-Q03.",
-    "Q01 kysyy Gretan ilmoittamaa aikaa. Q02 kysyy Franzin jalkapalloaikaa. Q03 selvittää, mitä Greta tekee seuraavaksi. Tarkista jokainen vastaus digikirjassa, älä vain valitse vaihtoehtoa.",
+    "Q01 kysyy, mitä Gretan ilmaus Viertel vor drei tarkoittaa (varttia vaille kolme). Q02 kysyy Franzin jalkapalloaikaa. Q03 selvittää, mitä Greta tekee seuraavaksi. Älä väitä pelkän ilmauksen perusteella, onko kello 02.45 vai 14.45. Tarkista jokainen vastaus digikirjassa, älä vain valitse vaihtoehtoa.",
     "Lähteen repliikit, alkuperäiset tehtävätunnisteet ja tarkistus tallentuvat C09:n samaan kirjatilaan.",
   ],["text","understand"]),
   Q("independent-action","Itsenäinen ymmärtäminen","Mihin Greta lähtee?",[
