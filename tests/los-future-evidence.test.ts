@@ -81,3 +81,27 @@ test("evidence JSON is strictly scoped and keeps legitimate two-part learner ans
   assert.equal(readLosFutureEvidenceAnswer(" ".repeat(7001),task),null);
   assert.equal(readLosFutureEvidenceAnswer('{"__proto__":{"isCorrect":true}}',task),null);
 });
+
+
+test("all 70 T03 self-review models quote the first turn of each source speaker",()=>{
+  let total=0;
+  for(const book of LOS_BOOKS.filter(b=>b.id>=2))for(const chapter of book.chapters){
+    const task=losFutureExercisesFor(book.id,chapter.id).find(item=>item.id.endsWith("-T03"));
+    const manuscript=LOS_FUTURE_MANUSCRIPTS[book.id]?.[chapter.id];
+    assert.ok(task);assert.ok(manuscript);
+    const seen=new Set<string>(),firstTurns:string[]=[];
+    for(const line of manuscript.dialogue){
+      const speaker=line.split(":")[0]!;
+      if(!seen.has(speaker)){seen.add(speaker);firstTurns.push(line);}
+    }
+    assert.equal(firstTurns.length,2,task.id);
+    assert.match(task.answerKey,new RegExp("^"+manuscript.dialogue.length+" puheenvuoroa\\."));
+    for(const first of firstTurns)assert.ok(task.answerKey.includes(first),
+      task.id+" must quote the first turn of "+first.split(":")[0]);
+    assert.ok(task.answerKey.includes("Suomenkielinen tulkinta:"),task.id);
+    assert.ok(!task.answerKey.includes("Huomaa, että jos sama puhuja palaa"),task.id);
+    assert.ok(task.answerKey.length>140,task.id);
+    total++;
+  }
+  assert.equal(total,70);
+});
