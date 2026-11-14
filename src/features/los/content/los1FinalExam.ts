@@ -74,7 +74,7 @@ export const LOS1_FINAL_QUESTIONS:readonly LosFinalQuestion[]=[
   q("grammar",38,"Täydennä: Ich ___ Leo.",["heißt","heiße","heißen"],"b","Ich heiße Leo."),
   q("grammar",39,"Valitse oikea viikonpäivän ilmaus.",["um Montag","in Montag","am Montag"],"c","Am Montag tarkoittaa maanantaina."),
   q("grammar",40,"Valitse kello kolmelta.",["um drei Uhr","am drei Uhr","im drei Uhr"],"a","Kellonajan edessä käytetään um."),
-  q("grammar",41,"Täydennä: Wir ___ aus Berlin.",["kommt","kommen","kommst"],"b","Wir kommen tarkoittaa me tulemme."),
+  q("grammar",41,"Mikä lause tarkoittaa: Me olemme kotoisin Berliinistä?",["Er kommt aus Berlin.","Wir kommen aus Berlin.","Du kommst aus Berlin."],"b","Wir kommen aus Berlin. tarkoittaa, että me olemme kotoisin Berliinistä. Wir on tässä valmiin lähdeilmauksen tunnistamista, ei uuden persoonamuodon itsenäistä taivutusta."),
   q("grammar",42,"Täydennä: ___ alt bist du?",["Woher","Was","Wie"],"c","Wie alt bist du? kysyy ikää."),
   q("situations",43,"Et ymmärtänyt opettajan ohjetta. Mitä sanot?",["Ich verstehe nicht.","Ich heiße Mia.","Bis morgen."],"a","Ich verstehe nicht kertoo, ettet ymmärrä."),
   q("situations",44,"Pyydät samaa lausetta toistettavaksi. Mikä sopii?",["Guten Tag!","Noch einmal, bitte.","Ich bin zwölf."],"b","Noch einmal, bitte. tarkoittaa vielä kerran, kiitos."),
