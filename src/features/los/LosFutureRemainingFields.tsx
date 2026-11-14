@@ -27,6 +27,10 @@ export function LosFutureRemainingFields({task,answer,onChange}:{
     ? [0,1,2].map(slot=>losFutureWordsEvidenceStatus(task,answer.answers,slot)):null;
   const readyToRead=task.kind!=="prediction"||
     (Boolean(answer.answers[0]?.trim())&&Boolean(answer.answers[1]?.trim()));
+  const questionSituation=task.kind==="question"
+    ? task.prompt.split(". Varmista, että kysymys sopii tilaisuuteen ")[1]?.replace(/\.$/u,""):null;
+  const visibleSource=task.kind==="question"&&task.sourceText.endsWith(".")
+    ? task.sourceText.slice(0,-1):task.sourceText;
   return <fieldset className="los-future-remaining">
     <legend>{title[task.kind]}</legend>
     {task.kind==="pronunciation"?<p>Hyväksyttyä ääni-, IPA- tai painomallia ei vielä ole.
@@ -39,14 +43,16 @@ export function LosFutureRemainingFields({task,answer,onChange}:{
         Sanastonvalinnan ohjetta on tarkennettu. Kolme aikaisempaa sanaasi ja
         selityksesi ovat edelleen tallessa. Tarkista, haluatko päivittää valintasi.
       </p>}
+    {task.kind==="question"&&questionSituation&&
+      <p className="los-future-remaining-hint">Tilanne: {questionSituation}. Muodosta kysymys, johon annettu ilmaus sopii luontevasti.</p>}
     {task.kind==="prediction"&&task.intro&&<>
       <strong>Kappaleen tilannekuvaus</strong>
       <p className="los-future-remaining-intro">{task.intro}</p>
     </>}
     {task.sourceText&&<div className="los-future-remaining-source">
-      {readyToRead?<details open={task.kind==="words"||task.kind==="summary"||task.kind==="pronunciation"}>
+      {readyToRead?<details open={task.kind==="words"||task.kind==="summary"||task.kind==="pronunciation"||task.kind==="question"}>
         <summary>{task.sourceTitle}</summary>
-        <blockquote lang={task.kind==="writing"?"fi":"de"}>{task.sourceText}</blockquote>
+        <blockquote lang={task.kind==="writing"?"fi":"de"}>{visibleSource}</blockquote>
       </details>:<p role="status">Text A avautuu tähän, kun kirjoitat kaksi erilaista ennustusta.</p>}
     </div>}
     {task.fields.map((field,index)=><label key={index} className="los-future-remaining-row">
