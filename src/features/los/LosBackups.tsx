@@ -1,5 +1,6 @@
 import { useState, type ChangeEvent } from "react";
 import { Download, FileJson2, FileUp, ShieldAlert } from "lucide-react";
+import { LosFutureBackups } from "./LosFutureBackups";
 import {
   createLosBookBackup, downloadLosBookBackup, importLosBookBackup,
   parseLosBookBackup, planLosBookImport, type LosBookBackup,
@@ -9,7 +10,7 @@ export function LosBackups({bookId}:{bookId:number}){
   const [preview,setPreview]=useState<LosBookBackup|null>(null);
   const [replaceConfirmed,setReplaceConfirmed]=useState(false);
   const [status,setStatus]=useState("");
-  if(bookId!==1)return null;
+  if(bookId!==1)return <LosFutureBackups bookId={bookId}/>;
   const exportAll=()=>{
     try {
       const backup=createLosBookBackup(bookId);
