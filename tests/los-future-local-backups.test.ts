@@ -15,7 +15,8 @@ import {losFutureChapterCheckPlan} from "../src/features/los/losFutureChapterChe
 import {saveLosFutureChapterCheckAnswer,submitLosFutureChapterCheck,retakeLosFutureChapterCheck} from "../src/features/los/losFutureChapterCheckState.ts";
 import {losFutureRecallCardsFor} from "../src/features/los/losFutureRecallCards.ts";
 import {losRecallReview} from "../src/features/los/recallEngine.ts";
-import {losFutureReaderMarkKey,losFutureReaderText,losFutureReaderAppend} from "../src/features/los/losFutureReaderMarks.ts";
+import {losFutureReaderMarkKey,losFutureReaderText,losFutureReaderAppend,
+  losFutureReaderBeginUpdatedText,losFutureReaderTextVersion} from "../src/features/los/losFutureReaderMarks.ts";
 
 const owner="backup-test-owner";
 const makeDraft=():LosChapterDraft=>({
@@ -394,4 +395,30 @@ test("direct import cannot write tampered draft even if caller bypasses the file
   const result=applyLosFutureBackup(parsed,2,owner,store,"replace");
   assert.equal(result.imported,1);
   assert.equal(JSON.parse(store.getItem(key(2,"01"))!).note,goodDraft.note);
+});
+
+
+test("old and new reader highlights both survive an actual cross-device JSON transfer",()=>{
+  const bookId=2,chapterId="01",source="text-a";
+  const markKey=losFutureReaderMarkKey(bookId,chapterId,source);
+  const text=losFutureReaderText(bookId,chapterId,source);
+  const initial=losFutureReaderAppend(undefined,text,0,1,"yellow");
+  assert.ok(initial);
+  // The currently published source need not change to validate an archived
+  // older content version; the revision only changes the active hash.
+  const olderVersion=losFutureReaderTextVersion(text+" old revision");
+  const oldRaw=JSON.stringify({contentVersion:olderVersion,ranges:[{startToken:0,endToken:1,color:"yellow"}]});
+  const draft=makeDraft();
+  draft.readerMarks=losFutureReaderBeginUpdatedText({[markKey]:oldRaw},bookId,chapterId,source,text);
+  draft.readerMarks[markKey]=initial;
+  const store=new FakeStore();
+  store.setItem(key(bookId,chapterId),JSON.stringify(draft));
+  const exported=createLosFutureBackup(bookId,owner,store,fixedDate);
+  const imported=parseLosFutureBackup(JSON.stringify(exported));
+  const restored=new FakeStore();
+  applyLosFutureBackup(imported,bookId,"new-owner",restored,"missing-only");
+  const saved=JSON.parse(restored.getItem(key(bookId,chapterId,"new-owner"))??"null");
+  assert.equal(saved.readerMarks[markKey],initial);
+  assert.equal(saved.readerMarks[markKey+"@"+olderVersion],oldRaw);
+  assert.equal(JSON.stringify(saved.readerMarks).includes("grade"),false);
 });

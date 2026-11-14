@@ -5,7 +5,8 @@ import {LOS_READER_COLORS,type LosReaderColor} from "./content/c01Annotations.ts
 import {parseLosReaderAnnotation} from "./content/readerAnnotations.ts";
 import {
   losFutureReaderMarkKey,losFutureReaderTextVersion,losFutureReaderWords,
-  losFutureReaderAppend,losFutureReaderColor,type LosFutureReaderSource,
+  losFutureReaderAppend,losFutureReaderColor,losFutureReaderBeginUpdatedText,
+  type LosFutureReaderSource,
 } from "./losFutureReaderMarks.ts";
 import "./los-future-reader.css";
 
@@ -59,7 +60,9 @@ export function LosFutureInteractiveReader({bookId,chapterId,source,text,vocabul
     setFirst(null);
   }
   function reset(){
-    persist(JSON.stringify({contentVersion:version,ranges:[]}));
+    update(current=>({...current,readerMarks:losFutureReaderBeginUpdatedText(
+      current.readerMarks,bookId,chapterId,source,text,
+    )}));
     setFirst(null);setWord(null);
   }
   return <section className="los-future-interactive-reader"
@@ -78,11 +81,11 @@ export function LosFutureInteractiveReader({bookId,chapterId,source,text,vocabul
           onClick={()=>{setColor(item);setFirst(null);}}>{colorLabels[item]}</button>)}
       </div>}
       <p className="los-future-reader-help" role="status">
-        {stale?"Tekstiä on muutettu korostusten tallentamisen jälkeen. Vanhat merkit säilyvät tallessa, mutta niitä ei aseteta väärään kohtaan.":
+        {stale?"Tekstiä on muutettu. Vanhat korostukset eivät siirry uusille sanoille. Kun aloitat uudet korostukset, aiemmat arkistoidaan JSON-varmuuskopioon.":
           mode==="dictionary"?"Valitse tekstistä sana nähdäksesi lähteistetyn sanakirjakortin. Kaikille taivutusmuodoille ei ole valmista selitystä.":
           first!==null?"Valitse korostuksen viimeinen sana.":"Valitse ensin korostuksen alkusana ja sitten loppusana."}
       </p>
-      {stale?<button type="button" onClick={reset}>Aloita korostukset nykyiseen tekstiversioon</button>:
+      {stale?<button type="button" onClick={reset}>Aloita uudet korostukset ja arkistoi vanhat</button>:
         <div className="los-future-reader-actions">
           <button type="button" disabled={!annotation.ranges.length} onClick={removeLast}>Poista viimeisin korostus</button>
           <button type="button" disabled={!annotation.ranges.length} onClick={reset}>Tyhjennä tämän tekstin korostukset</button>
