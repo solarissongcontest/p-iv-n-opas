@@ -96,7 +96,7 @@ export function LosFutureLearningPath({book,move}:{
         ei muuta oppituntia suoritetuksi.</p>
     </div>
     <LosFutureProgressPanel book={book} onResume={resumeLesson}/>
-    {active&&<LosFutureLessonRunner key={`${book.id}-${active.id}-${runnerRevision}`}
+    {active&&<LosFutureLessonRunner key={`${book.id}-${ownerId??"device-unknown"}-${active.id}-${runnerRevision}`}
       bookId={book.id} number={active.number} chapterId={active.chapterId} move={move}/>}
     <h2>Kaikki kirjan 60 oppituntia</h2>
     {groups.map((bucket,i)=>{
