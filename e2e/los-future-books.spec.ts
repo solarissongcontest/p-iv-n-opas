@@ -1128,3 +1128,27 @@ test("R04 gives literal Text A evidence feedback in both desktop and mobile layo
     .toHaveCount(3);
   await expectNoHorizontalOverflow(page);
 });
+
+
+test("all unattempted exercises keep the model hidden until learner work exists",async({page})=>{
+  await enterFutureBook(page);
+  await page.goto("/los#/2/01/understand",{waitUntil:"domcontentloaded"});
+  await selectFutureTask(page,"T01");
+  const model=page.getByRole("button",{name:"Näytä vastausluonnos"});
+  await expect(model).toBeDisabled();
+  await expect(page.locator(".los-future-exercise-solution")).toHaveCount(0);
+  await expect(page.getByText("Kokeile tehtävää ensin itse ennen vastausluonnoksen avaamista.")).toBeVisible();
+  await page.locator("#los-future-exercise-input").fill("Arvaan, että henkilöt keskustelevat koulusta.");
+  await expect(model).toBeEnabled();
+  await model.click();
+  await expect(page.locator(".los-future-exercise-solution")).toBeVisible();
+  await selectFutureTask(page,"T05");
+  await expect(model).toBeDisabled();
+  await expect(page.locator(".los-future-exercise-solution")).toHaveCount(0);
+  await page.goto("/los#/2/01/practice",{waitUntil:"domcontentloaded"});
+  await selectFutureTask(page,"T07");
+  await expect(model).toBeDisabled();
+  await page.locator("#los-future-gap-input").fill("Deutsch");
+  await expect(model).toBeEnabled();
+  await expectNoHorizontalOverflow(page);
+});
