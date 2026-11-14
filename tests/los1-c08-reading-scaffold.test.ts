@@ -29,3 +29,31 @@ test("C08 reading guide is rendered on the original Text A route only",()=>{
   assert.doesNotMatch(readFileSync("src/features/los/LosC08ReadingGuide.tsx","utf8"),
     /update\(|saveScore|localStorage|setExerciseAnswer|practiceAnswers/);
 });
+
+test("C08 authentic classroom question assesses praise, not gratitude",()=>{
+  const source=getLosOpenDialogue("08");
+  assert.ok(source);
+  const q=source.questions.find(q=>q.id==="C08-SCHOOL-Q04");
+  assert.ok(q);
+  assert.equal(q.correctId,"a");
+  assert.match(q.prompt,/opettaja kehuu Floriania/);
+  assert.doesNotMatch(q.prompt,/kiittää/);
+  assert.equal(q.answers.find(a=>a.id==="a")?.text,"Taululla laskemisesta");
+  assert.equal(source.originalLines.length,26);
+});
+
+test("C09 original Text A time question distinguishes quarter to three from 14.45 assumption",()=>{
+  const source=getLosOpenDialogue("09");
+  assert.ok(source);
+  assert.equal(source.sourceId,"M-WB-03");
+  const q=source.questions.find(q=>q.id==="C09-SOURCE-Q01");
+  assert.ok(q);
+  assert.equal(q.correctId,"a","previously recorded answers must remain valid");
+  assert.equal(q.answers.find(a=>a.id==="a")?.text,"Varttia vaille kolme");
+  assert.deepEqual(q.answers.map(answer=>answer.id),["a","b","c"]);
+  assert.doesNotMatch(q.prompt,/14\.45/);
+  assert.match(q.explanation,/02\.45:tä tai 14\.45:tä/);
+  const teacher=readFileSync("src/features/los/teacher/lessonC09.ts","utf8");
+  assert.match(teacher,/Q01 kysyy, mitä Gretan ilmaus Viertel vor drei tarkoittaa/);
+  assert.match(teacher,/Älä väitä pelkän ilmauksen perusteella/);
+});
