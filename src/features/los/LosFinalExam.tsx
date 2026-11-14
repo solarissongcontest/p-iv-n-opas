@@ -7,10 +7,13 @@ import {LOS1_C06_TEXT,LOS1_C08_TEXT,LOS1_C10_TEXT} from "./content/los1OpenDialo
 import {
  LOS1_FINAL_DRAFT_CHAPTER,LOS1_FINAL_AUDIO_SOURCES,LOS1_FINAL_QUESTIONS,
  LOS1_FINAL_SECTION_TITLES,LOS1_FINAL_WRITING_CHECK,LOS1_FINAL_VOICE_CHECK,
+ LOS1_FINAL_WRITING_MODEL_OPENED,LOS1_FINAL_WRITING_ASSISTED,
  LOS1_SUMMARY_GOAL,LOS1_SUMMARY_CARDS,LOS1_SUMMARY_REFLECTION,
- losFinalReadyToSubmit,losFinalScore,type LosFinalSection,
+ losFinalReadyToSubmit,losFinalScore,losValidSubmittedFinal,losFinalAudioPlayed,type LosFinalSection,
 } from "./content/los1FinalExam";
 import {losArchiveExamAttempt,losArchivedExamHistory} from "./content/los1ExamArchive";
+import { LosMasterySummary } from "./LosMasterySummary.tsx";
+import { losCountReviewedWords } from "./losReviewedWords.ts";
 import "./los-exams.css";
 
 const sections=Object.keys(LOS1_FINAL_SECTION_TITLES) as LosFinalSection[];
@@ -37,23 +40,36 @@ export function LosFinalExam({move}:{move:LosNavigate}){
  const [archiveError,setArchiveError]=useState("");
  const history=losArchivedExamHistory(draft.practiceAnswers,"EX-FINAL");
  const answers=draft.testAnswers;
- const submitted=Boolean(draft.testSubmittedAt);
- const filled=LOS1_FINAL_QUESTIONS.filter(q=>Boolean(answers[q.id])).length;
- const allPlayed=LOS1_FINAL_AUDIO_SOURCES.every(s=>Boolean(draft.practiceAnswers[audioEvidence(s.id)]));
+ const submitted=losValidSubmittedFinal(draft);
+ const invalidSubmission=Boolean(draft.testSubmittedAt)&&!submitted;
+ const filled=LOS1_FINAL_QUESTIONS.filter(q=>q.choices.some(c=>c.id===answers[q.id])).length;
+ const allPlayed=LOS1_FINAL_AUDIO_SOURCES.every(src=>losFinalAudioPlayed(draft.practiceAnswers,src.id));
  const ready=losFinalReadyToSubmit(answers)&&allPlayed&&saved;
  const result=submitted?losFinalScore(answers):null;
- const change=(id:string,value:string)=>update(current=>({...current,testAnswers:{...current.testAnswers,[id]:value}}));
- const recordPlayed=(id:string)=>update(current=>({...current,practiceAnswers:{
-  ...current.practiceAnswers,[audioEvidence(id)]:new Date().toISOString(),
- }}));
+ const change=(id:string,value:string)=>update(current=>current.testSubmittedAt?current:
+  {...current,testAnswers:{...current.testAnswers,[id]:value}});
+ const recordPlayed=(id:string)=>update(current=>current.testSubmittedAt?current:
+  {...current,practiceAnswers:{
+    ...current.practiceAnswers,[audioEvidence(id)]:new Date().toISOString(),
+  }});
  const submit=()=>{
-  if(submitted||!ready)return;
-  update(current=>({...current,testSubmittedAt:new Date().toISOString()}));
+  if(draft.testSubmittedAt||!ready)return;
+  update(current=>current.testSubmittedAt||
+    !losFinalReadyToSubmit(current.testAnswers)||
+    !LOS1_FINAL_AUDIO_SOURCES.every(src=>losFinalAudioPlayed(current.practiceAnswers,src.id))
+      ?current:{...current,testSubmittedAt:new Date().toISOString()});
+ };
+ const repair=()=>{
+  if(!saved||!invalidSubmission)return;
+  update(current=>current.testSubmittedAt&&!losValidSubmittedFinal(current)
+    ?{...current,testSubmittedAt:null}:current);
  };
  const retake=()=>{
-  if(!confirmRetake||!saved)return;
+  if(!confirmRetake||!saved||!submitted)return;
   try{
    update(current=>{
+    if(!losValidSubmittedFinal(current))
+      throw new Error("Nykyinen koeyritys ei ole ehjä. Virheellistä palautusta ei arkistoida.");
     const nextPractice=losArchiveExamAttempt(
      current.practiceAnswers,"EX-FINAL",LOS1_FINAL_QUESTIONS,
      current.testAnswers,current.testSubmittedAt??"");
@@ -71,11 +87,19 @@ export function LosFinalExam({move}:{move:LosNavigate}){
   <h1>Koko kirjan loppukoe</h1>
   <p className="los-page-intro">Koe sisältää 50 uutta automaattisesti arvioitavaa tehtävää: 12 kuuntelua, 10 lukemista, 10 sanastoa, 10 kielioppia ja 8 arkitilannetta. Lisäksi teet itsenäisen viestin ja tallennettavan 6–8 repliikin keskustelun. Niitä ei lasketa 50 pisteeseen. Loppukoe ei ole virallinen kielitaitotodistus.</p>
   <div className="los-exam-overview">
-   <p><strong>{filled}/50 vastattu</strong> · {submitted?"Palautettu":"Luonnos tallentuu automaattisesti"} · 1 piste / tehtävä</p>
+   <p><strong>{filled}/50 vastattu</strong> · {submitted?"Palautettu":invalidSubmission?"Tallenteessa ristiriita":"Luonnos tallentuu automaattisesti"} · 1 piste / tehtävä</p>
    <p role="status" className={saved?"los-exam-save":"los-exam-save is-error"}>{saved?
     "EX-FINAL-vastaukset tallennettu paikalliseen LOS!-varmuuskopion arviointipaikkaan 93.":
     "Tallennus epäonnistui. Älä sulje sivua ennen vastausten kopioimista talteen."}</p>
    <p>Oikeat vastaukset näytetään vasta palautuksen jälkeen. Ääni on ulkoisen julkaisijan palvelimella, eikä sen iPhone- tai tietokonetoistoa ole vielä laitetestattu.</p>
+   {invalidSubmission&&<section className="los-exam-rubric" role="alert" aria-label="Virheellinen loppukokeen palautus">
+    <h2>Palautusmerkintä on ristiriitainen</h2>
+    <p>Tallennuksessa on palautusaika, mutta täydet 50 vastausta tai molempien äänitteiden kelvolliset kuuntelumerkinnät puuttuvat. LOS! ei näytä tästä pistemäärää tai oikeita vastauksia.</p>
+    <p>Voit palauttaa kokeen luonnokseksi. Nykyiset vastausvalinnat, kirjoitus, puheharjoituksen merkinnät ja aiempien yritysten arkisto säilyvät. Puuttuvat kuuntelut on tehtävä uudelleen ennen palautusta.</p>
+    <button type="button" className="los-outline-button" disabled={!saved} onClick={repair}>
+      Korjaa palautusmerkintä ja jatka luonnosta
+    </button>
+   </section>}
   </div>
   {sections.map((section,index)=>{
    const questions=LOS1_FINAL_QUESTIONS.filter(q=>q.section===section);
@@ -105,7 +129,7 @@ export function LosFinalExam({move}:{move:LosNavigate}){
      </details>)}
     </div>}
     <ol>{questions.map(question=><li key={question.id} className="los-exam-question">
-     <fieldset disabled={submitted}>
+     <fieldset disabled={Boolean(draft.testSubmittedAt)}>
       <legend><span>{Number(question.id.slice(-2))}.</span> {question.prompt}</legend>
       {section==="listening"&&<p><small>Kuuntelulähde: {sourceLabel(question.sourceId??"")}</small></p>}
       <div className="los-exam-answers">
@@ -126,7 +150,7 @@ export function LosFinalExam({move}:{move:LosNavigate}){
   {!submitted?<div className="los-exam-submit">
    <h2>Palauta loppukoe</h2>
    <p>Palautus avautuu, kun kaikkiin 50 tehtävään on vastattu, molemmat alkuperäisäänet ovat toistuneet loppuun asti ja vastausten paikallinen tallennus onnistuu.</p>
-   <button type="button" className="los-primary" disabled={!ready} onClick={submit}>
+   <button type="button" className="los-primary" disabled={!ready||Boolean(draft.testSubmittedAt)} onClick={submit}>
     <CheckCircle2 size={18}/> Palauta loppukoe · {filled}/50
    </button>
   </div>:<div className="los-exam-results" aria-label="Koko loppukokeen pisteet">
@@ -163,9 +187,16 @@ export function LosFinalExam({move}:{move:LosNavigate}){
    <p>Kirjoita 5–7 lyhyttä saksankielistä lausetta kuvitteelliselle uudelle tuttavalle. Kerro nimi, alkuperä, ikä ja tapaamisaika. Kirjoita jokainen virke omalle rivilleen, jotta voit itse tarkistaa määrän. Älä kirjoita oikeita henkilötietoja.</p>
    <label htmlFor="los-final-writing">Oma viesti, jokainen lause omalla rivillään</label>
    <textarea id="los-final-writing" value={draft.applicationDraft} rows={8} maxLength={5000}
-    onChange={event=>update(current=>({...current,applicationDraft:event.target.value,
-      practiceAnswers:{...current.practiceAnswers,[LOS1_FINAL_WRITING_CHECK]:""}}))}
-    placeholder={"Hallo!\nIch heiße ...\nIch komme aus ..."} />
+    onChange={event=>update(current=>({
+      ...current,applicationDraft:event.target.value,
+      practiceAnswers:{
+        ...current.practiceAnswers,
+        [LOS1_FINAL_WRITING_CHECK]:"",
+        ...(current.practiceAnswers[LOS1_FINAL_WRITING_MODEL_OPENED]
+          ? {[LOS1_FINAL_WRITING_ASSISTED]:"edited-after-model"} : {}),
+      },
+    }))}
+    placeholder="Kirjoita 5–7 omaa lausetta, jokainen omalle rivilleen." />
    <p role="status">{writingLineCount(draft.applicationDraft)} / 5–7 lausetta · {draft.applicationDraft.trim().length} merkkiä. Harjoitus ei saa automaattista kielioppiarvosanaa.</p>
    <button type="button" className="los-outline-button" disabled={!writingOk} onClick={()=>update(current=>({...current,
     practiceAnswers:{...current.practiceAnswers,[LOS1_FINAL_WRITING_CHECK]:"written-and-reviewed"}}))}>
@@ -173,10 +204,25 @@ export function LosFinalExam({move}:{move:LosNavigate}){
    </button>
    {draft.practiceAnswers[LOS1_FINAL_WRITING_CHECK]&&<p role="status"><CheckCircle2 size={15}/> Oma kirjoitusyritys on tallennettu ja merkitty itse arvioitavaksi.</p>}
    <ul><li>Kirjoitin 5–7 omaa lausetta.</li><li>Tarkistin ich bin, ich komme ja oikeat alkukirjaimet.</li><li>Käytin am ja um oikeissa paikoissa.</li><li>Viestissä ei ole oikeita henkilötietoja.</li></ul>
-   {submitted&&<details className="los-exam-rubric"><summary>Näytä malliviesti oman yrityksen jälkeen</summary>
-    <p lang="de">Hallo! Ich heiße Mia. Ich komme aus Finnland. Ich bin siebzehn Jahre alt. Am Montag habe ich Zeit. Wir treffen uns um drei Uhr. Bis morgen!</p>
-    <p>Malli on LOS!:n itse laatima opetusesimerkki eikä osa 50 pisteen koetta.</p>
-   </details>}
+   {submitted&&<div className="los-exam-writing-model">
+    <p role="status">{draft.practiceAnswers[LOS1_FINAL_WRITING_ASSISTED]
+      ? "Mallia on käytetty ennen nykyisen kirjoitusversion valmistumista. Nykyinen viesti on avustettu harjoitus, ei itsenäisesti arvioitu kielioppinäyttö."
+      : draft.practiceAnswers[LOS1_FINAL_WRITING_MODEL_OPENED]
+        ? "Malliviesti on avattu vasta oman kirjoitusyrityksen vahvistamisen jälkeen. Jos muokkaat tekstiä nyt, yritys merkitään avustetuksi."
+        : "Malliviesti avautuu vasta, kun olet kirjoittanut ja itse tarkistanut oman 5–7 lauseen viestisi."}</p>
+    {draft.practiceAnswers[LOS1_FINAL_WRITING_CHECK]==="written-and-reviewed"
+      ? <details className="los-exam-rubric" onToggle={event=>{
+          if (!event.currentTarget.open || draft.practiceAnswers[LOS1_FINAL_WRITING_MODEL_OPENED]) return;
+          update(current=>({...current,practiceAnswers:{
+            ...current.practiceAnswers,[LOS1_FINAL_WRITING_MODEL_OPENED]:new Date().toISOString(),
+          }}));
+        }}>
+          <summary>Näytä malliviesti oman yrityksen jälkeen</summary>
+          <p lang="de">Hallo! Ich heiße Mia. Ich komme aus Finnland. Ich bin siebzehn Jahre alt. Am Montag habe ich Zeit. Wir treffen uns um drei Uhr. Bis morgen!</p>
+          <p>Malli on LOS!:n itse laatima opetusesimerkki eikä osa 50 pisteen koetta. Jos muokkaat omaa tekstiäsi sen avaamisen jälkeen, teksti merkitään avustetuksi.</p>
+        </details>
+      : <p>Vahvista ensin oma kirjoitusyrityksesi yllä olevasta tarkistuslistasta.</p>}
+   </div>}
   </section>
   <section className="los-exam-speaking">
    <h2>Äänitä 6–8 repliikin keskustelu</h2>
@@ -229,19 +275,24 @@ export function LosFinalSummary({move}:{move:LosNavigate}){
   d07=useLosChapterDraft(1,"07"),d08=useLosChapterDraft(1,"08"),d09=useLosChapterDraft(1,"09"),
   d10=useLosChapterDraft(1,"10");
  const drafts=[d01.draft,d02.draft,d03.draft,d04.draft,d05.draft,d06.draft,d07.draft,d08.draft,d09.draft,d10.draft];
- const reviewed=Array.from(new Set(drafts.flatMap(d=>Object.keys(d.recallCards??{})))).length;
+ const reviewed=losCountReviewedWords(Object.fromEntries(drafts.map((draft,index)=>
+   [String(index+1).padStart(2,"0"),draft])));
  const answers=final.draft.practiceAnswers;
  const goal=answers[LOS1_SUMMARY_GOAL]??"";
  const goalReady=goal.trim().length>=25;
  const chapterCount=goalLabels.filter((_,i)=>Boolean(answers[losFinalSummaryChapterGoalId(i)])).length;
- const exam=final.draft.testSubmittedAt?losFinalScore(final.draft.testAnswers):null;
+ const archivedExams=losArchivedExamHistory(final.draft.practiceAnswers,"EX-FINAL");
+ const latestArchived=archivedExams.at(-1);
+ const validCurrent=losValidSubmittedFinal(final.draft);
+ const exam=validCurrent?losFinalScore(final.draft.testAnswers):
+  latestArchived?{correct:latestArchived.correct,total:latestArchived.total}:null;
  const save=(id:string,text:string)=>final.update(current=>({...current,practiceAnswers:{...current.practiceAnswers,[id]:text}}));
  return <section className="los-inner-page los-exam" aria-label="LOS! 1:n osaamisen yhteenveto">
   <p className="los-eyebrow">LOS! 1 / L060 / SELBSTREFLEXION</p>
   <h1>Mitä osaan nyt saksaksi?</h1>
-  <p className="los-page-intro">Käy läpi kaikkien 10 kappaleen tavoitteet, kertaa vähintään viisi oikeaa sanakorttia kirjan sanastossa ja kirjoita seuraava konkreettinen tavoitteesi. Oma arvio erotetaan aina automaattisesti pisteytetystä loppukokeesta.</p>
+  <p className="los-page-intro">Käy läpi kaikkien 10 kappaleen tavoitteet, kertaa vähintään viisi eri sanaa kirjan sanakorteilla ja kirjoita seuraava konkreettinen tavoitteesi. Oma arvio erotetaan aina automaattisesti pisteytetystä loppukokeesta.</p>
   <div className="los-exam-overview">
-   <p>EX-FINAL: <strong>{exam?exam.correct+"/"+exam.total:"ei vielä palautettu"}</strong> · tämän laitteen todellinen koetulos.</p>
+   <p>EX-FINAL: <strong>{exam?exam.correct+"/"+exam.total:"ei vielä palautettu"}</strong> · {validCurrent?"nykyinen palautettu yritys":latestArchived?"viimeisin arkistoitu yritys":"ei tallennettua koeyritystä"}; ei kielitaitotodistus.</p>
    <p>Oma tavoitteiden katselmointi: <strong>{chapterCount}/10</strong> · viivästetyn muistin itsearviot eivät todista kielitasoa.</p>
   </div>
   <section className="los-exam-section">
@@ -257,13 +308,13 @@ export function LosFinalSummary({move}:{move:LosNavigate}){
   </section>
   <section className="los-exam-section">
    <h2>2. Aktivoi sanakorttien kertaus</h2>
-   <p>Olet arvioinut {reviewed} eri sanakorttisuuntaa tässä laitteessa. Avaa kirjan sanakortit ja arvioi vähintään viisi sanaa muistamisen mukaan. Vasta sen jälkeen voit vahvistaa kertauksen tähän yhteenvetoon.</p>
+   <p>Olet arvioinut {reviewed} eri sanaa tässä laitteessa. Saman sanan kertaaminen molempiin suuntiin lasketaan vain kerran. Avaa kirjan sanakortit ja arvioi vähintään viisi eri sanaa muistamisen mukaan. Vasta sen jälkeen voit vahvistaa kertauksen tähän yhteenvetoon.</p>
    <button type="button" className="los-outline-button" onClick={()=>move("01","cards")}>
     <BookOpen size={16}/> Avaa sanakortit
    </button>
    <button type="button" className="los-outline-button" disabled={reviewed<5}
     onClick={()=>save(LOS1_SUMMARY_CARDS,"reviewed-"+reviewed)}>
-    <CheckCircle2 size={16}/> Vahvista vähintään viisi arvioitua korttia
+    <CheckCircle2 size={16}/> Vahvista vähintään viisi arvioitua sanaa
    </button>
    {answers[LOS1_SUMMARY_CARDS]&&<p role="status">Kertausvahvistus kirjattu. Korttien osaaminen on käyttäjän itse arvioimaa.</p>}
   </section>
@@ -290,6 +341,7 @@ export function LosFinalSummary({move}:{move:LosNavigate}){
    <p>Yhteenveto tallentuu arviointipaikkaan 93. L060-oppitunti vaatii kaikkien kymmenen tavoitteen läpikäynnin, viiden sanakortin arvioinnin, vahvistetun seuraavan tavoitteen ja tämän itsearvion. Loppukokeen pistetulos ei ole oma arvio.</p>
    <p role="status">{final.saved?"Tallennus on toiminnassa.":"Tallennus epäonnistui, kopioi tavoitteesi talteen."}</p>
   </section>
+  <LosMasterySummary/>
   <div className="los-exam-submit">
    <button className="los-primary" type="button" onClick={()=>move(null,"path")}>Palaa opetuspolkuun ja viimeistele L060</button>
   </div>

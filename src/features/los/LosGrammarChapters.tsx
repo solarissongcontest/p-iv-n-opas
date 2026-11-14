@@ -31,6 +31,23 @@ export function LosChapterGrammar({chapterId}:{chapterId:string}) {
     <Example de="Ich bin Greta." fi="Minä olen Greta." />
     <p><span lang="de">Ich bin Greta.</span> ja <span lang="de">Ich heiße Greta.</span> voivat molemmat olla luontevia esittäytymisiä. Ensimmäinen kertoo ”minä olen Greta”, toinen nimen.</p>
     <Note title="Muista kysymyksen sanajärjestys">Kysymyssana tulee tässä ensin: <span lang="de">Wie heißt du?</span> Kun vastaat, aloita subjektista: <span lang="de">Ich heiße …</span>.</Note>
+    <h3>Muodosta vastaus vaiheittain</h3>
+    <p>1. Valitse tekijäksi <span lang="de">ich</span> (= minä).
+      2. Valitse verbiksi <span lang="de">heißen</span> (= olla nimeltään).
+      3. Käytä minämuotoa <strong lang="de">heiße</strong>.
+      4. Lisää kuvitteellinen nimi. Saat <strong lang="de">Ich heiße Mira.</strong>
+      Nimen kysymisessä vaihdat henkilöä: <span lang="de">du</span> vaatii muodon <span lang="de">heißt</span>.</p>
+    <p><strong>Kokeile ilman mallia:</strong> Miten kysyt kaverilta hänen nimensä?
+      Miten vastaat, jos oma kuvitteellinen nimesi on Leo? Kirjoita molemmat lauseet
+      ensin omaan muistiinpanoosi ja avaa vasta sitten mallivastaukset.</p>
+    <details className="los-grammar-self-check">
+      <summary>Katso mallivastaukset oman yrityksen jälkeen</summary>
+      <p><span lang="de">Wie heißt du?</span> ja <span lang="de">Ich heiße Leo.</span></p>
+      <p>Itsearviointi: alkaako kysymys sanalla <span lang="de">Wie</span>?
+        Onko verbissä <span lang="de">heißt</span> lopussa t?
+        Onko vastauksessa <span lang="de">ich heiße</span> ja alussa iso kirjain?
+        Tämä on itsearvioitava opetusharjoitus, ei uusi pisteytetty tehtävä.</p>
+    </details>
   </>;
   if(chapterId==="03")return <>
     <p>Kun joku kysyy, mistä olet kotoisin, hän voi sanoa <b lang="de">Woher kommst du?</b> Sana <b lang="de">woher</b> kysyy lähtöpaikkaa: ”mistä”. Vastauksessa käytetään usein rakennetta <span lang="de">ich komme aus …</span>.</p>
@@ -42,7 +59,16 @@ export function LosChapterGrammar({chapterId}:{chapterId:string}) {
     <h3>Wo ja woher</h3>
     <p><b lang="de">Wo?</b> kysyy, missä jokin on. <b lang="de">Woher?</b> kysyy, mistä jokin tai joku tulee. Tässä kappaleessa harjoittelet erityisesti jälkimmäistä.</p>
     <Note title="Maanimen yhteydessä pieni poikkeus">Useimmista maista sanotaan <span lang="de">aus Finnland</span> tai <span lang="de">aus Deutschland</span>. Tunnista poikkeukset <span lang="de">aus der Schweiz</span> ja <span lang="de">aus den USA</span>. Niiden sijamuotoja ei tarvitse vielä muodostaa itse.</Note>
-    <p>Kun luet toisen henkilön esittelyä, voit nähdä myös muodon <span lang="de">er/sie kommt</span> (hän tulee). Se riittää tässä vaiheessa tunnistaa, eikä koko taivutusta opetella ulkoa.</p>
+    <p>Huomaa ero <strong lang="de">Woher kommst du?</strong> (Mistä olet kotoisin?)
+      ja <strong lang="de">Wo wohnst du?</strong> (Missä asut?). Jälkimmäinen
+      kertoo nykyisen asuinpaikan, joka ei välttämättä ole sama kuin kotimaa.
+      Opettele tällä tunnilla kysymään alkuperää; asuinpaikkakysymys riittää
+      ensin tunnistaa lähdetekstistä.</p>
+    <p>Alkuperäistekstissä voi esiintyä myös kohtelias <span lang="de">Sie</span>
+      (= Te). Sen aktiivinen käyttö opetetaan seuraavassa kappaleessa C04.
+      Kun luet toisen henkilön esittelyä, voit nähdä myös muodon
+      <span lang="de"> er/sie kommt</span> (hän tulee). Se riittää tässä vaiheessa
+      tunnistaa, eikä koko taivutusta opetella ulkoa.</p>
   </>;
   if(chapterId==="04")return <>
     <p>Saksassa puhuttelu riippuu tilanteesta, suhteesta ja yhteisön tavoista. <b lang="de">du</b> on tuttavallinen sinä. Isolla alkukirjaimella kirjoitettu <b lang="de">Sie</b> on kohtelias teitittelymuoto.</p>
@@ -51,7 +77,29 @@ export function LosChapterGrammar({chapterId}:{chapterId:string}) {
     <p>Teititeltäessä verbi on tavallisesti samassa muodossa kuin perusmuodon näköinen monikon persoonamuoto: <span lang="de">Sie heißen</span>, <span lang="de">Sie kommen</span>.</p>
     <Example de="Woher kommen Sie?" fi="Mistä Te olette kotoisin?" />
     <p>Isolla alkukirjaimella kirjoitettu <b lang="de">Sie</b> tarkoittaa teitittelyä. Pienellä alkukirjaimella kirjoitetulla <span lang="de">sie</span>-pronominilla voi olla toinen merkitys (hän, naisesta, tai he). Tunnista ero, mutta älä opettele tässä vielä kaikkia muotoja.</p>
-    <Note title="Miten valitsen puhuttelumuodon?">Nuorten kesken käytetään yleensä du-muotoa. Virallisissa tilanteissa Sie voi olla luonteva. Pelkkä henkilön ikä ei ratkaise asiaa aina.</Note>
+    <Note title="Miten valitsen puhuttelumuodon?">Nuorten kesken käytetään yleensä du-muotoa. Virallisissa tilanteissa Sie voi olla luonteva. Pelkkä henkilön ikä ei ratkaise asiaa aina. Opettajan, asiakkaan ja työpaikan puhuttelu riippuu myös sovitusta käytännöstä.</Note>
+    <h3>Valitse puhuttelu tilanteen mukaan</h3>
+    <p><strong>Pohdi ennen vastauksia:</strong> 1) Kysyt samanikäisen kaverin nimen.
+      2) Kysyt tuntemattoman asiakkaan nimeä muodollisessa asiakaspalvelussa.
+      3) Puhuttelet opettajaa, joka on erikseen pyytänyt sinuttelemaan.
+      4) Et tiedä vielä, onko tuntematonta aikuista sopivaa sinutella.
+      Valitse, milloin <span lang="de">du</span> tai <span lang="de">Sie</span> on
+      luonteva, ja miksi.</p>
+    <details className="los-grammar-self-check">
+      <summary>Näytä perustellut vastausesimerkit</summary>
+      <p>1) Tavallisesti <span lang="de">Wie heißt du?</span>.
+        2) Kohteliaassa asiakaspalvelussa <span lang="de">Wie heißen Sie?</span>.
+        3) Sovitun käytännön mukaan <span lang="de">du</span> voi olla luonteva.
+        4) Muodollisessa tai epäselvässä tilanteessa <span lang="de">Sie</span>
+        on usein turvallinen lähtökohta; seuraa tilanteen ja toisen henkilön käytäntöä.
+        Ikä ei yksin ratkaise puhuttelua.</p>
+    </details>
+    <p>Alkuperäinen Herr Schmidtin ja Herr Standishin keskustelu sisältää myös
+      <span lang="de"> Ihnen</span>-puhuttelun, esimerkiksi
+      <span lang="de"> Wie geht es Ihnen?</span> (= Mitä Teille kuuluu?).
+      Tunnista tämä fraasina. Tekstin verbit <span lang="de">habe</span>,
+      <span lang="de"> kann</span> ja <span lang="de">verstehen</span>
+      eivät vielä kuulu kappaleen itsenäiseen tuottamistavoitteeseen.</p>
   </>;
   if(chapterId==="05")return <>
     <p>Kuulumisia kysytään tavallisesti valmiilla fraasilla <b lang="de">Wie geht's?</b>. Alussa tärkeintä on oppia yleiset kysymykset ja vastaukset kokonaisina ilmauksina.</p>
@@ -60,6 +108,30 @@ export function LosChapterGrammar({chapterId}:{chapterId:string}) {
     <Example de="Nicht so gut." fi="Ei kovin hyvää." />
     <p>Sana <b lang="de">nicht</b> on tavallinen kieltoilmaus. Se vastaa usein suomen sanaa ”ei”. Sana <b lang="de">sehr</b> puolestaan vahvistaa merkitystä: <span lang="de">sehr gut</span> tarkoittaa ”erittäin hyvää”.</p>
     <Note title="Opettele fraasit tässä vaiheessa kokonaisina">Sanojen <span lang="de">mir</span> ja <span lang="de">dir</span> sijamuotoja ei vielä tarvitse osata muodostaa itse.</Note>
+    <h3>Kaksi erilaista kuulumistilannetta</h3>
+    <p>Kaikki ihmiset eivät vastaa kuulumiskysymykseen samalla tavalla.
+      Harjoittele seuraavia tilanteita ensin ilman mallivastausta:
+      1) Ystävällä menee hyvin. 2) Ystävä on väsynyt eikä hänellä mene erityisen hyvin.
+      Kirjoita kumpaankin tilanteeseen kuulumiskysymys ja vähintään yksi vastaus.</p>
+    <details className="los-grammar-self-check">
+      <summary>Vertaa kahta LOS!:n omaa mallikeskustelua vasta yrityksen jälkeen</summary>
+      <p><strong>Tilanne A, tavallinen myönteinen vastaus</strong></p>
+      <Example de="Mia: Wie geht's?" fi="Mia: Mitä kuuluu?" />
+      <Example de="Leo: Gut, danke. Und dir?" fi="Leo: Hyvää, kiitos. Entä sinulle?" />
+      <p><strong>Tilanne B, väsynyt henkilö</strong></p>
+      <Example de="Mia: Wie geht's?" fi="Mia: Mitä kuuluu?" />
+      <Example de="Leo: Nicht so gut. Ich bin müde." fi="Leo: Ei kovin hyvää. Olen väsynyt." />
+      <p>Sinun ei tarvitse kertoa omaa todellista vointiasi. Molemmat ovat
+        LOS!:n omia opetusdialogeja, eivät C05:n alkuperäistekstin rivejä.
+        Kumpaakaan vastausta ei pidä merkitä vääräksi vain siksi, että toinen
+        mallikeskustelu on myönteinen.</p>
+    </details>
+    <p><strong>Vertaa tuttavallista ja kohteliasta kysymystä:</strong>
+      <span lang="de"> Wie geht es dir?</span> kysytään sinuteltavalta ja
+      <span lang="de"> Wie geht es Ihnen?</span> teititeltävältä.
+      Jälkimmäisen kohtelias puhuttelu tulee C04:n opista.
+      Saat käyttää myös lyhyttä tuttavallista muotoa
+      <span lang="de"> Wie geht's?</span>.</p>
   </>;
   if(chapterId==="06")return <>
     <p>Saksassa ikä kerrotaan <b lang="de">sein</b>-verbillä: kirjaimellisesti ”olen … vuotta vanha”. Älä käännä suomen ikälausetta sanasta sanaan tai käytä siihen <span lang="de">haben</span>-verbiä.</p>
@@ -75,12 +147,12 @@ export function LosChapterGrammar({chapterId}:{chapterId:string}) {
   if(chapterId==="07")return <>
     <p>Kun nimeä ei kuule oikein, voit pyytää toista tavaamaan sen. Saksassa kirjaimet ääntyvät osin eri tavoin kuin suomessa.</p>
     <Example de="Wie schreibt man das?" fi="Miten se kirjoitetaan?" />
-    <Example de="Bitte buchstabieren Sie." fi="Tavatkaa, olkaa hyvä." />
+    <Example de="Bitte buchstabieren Sie." fi="Voisitteko tavata nimen, kiitos?" />
     <h3>Kirjoitusasu ja kirjaimen nimi ovat eri asioita</h3>
     <p>Saksan aakkosissa on tutut latinalaiset kirjaimet A–Z. Saksan kirjaimet eivät kuitenkaan välttämättä äänny samoin kuin suomen kirjaimet: esimerkiksi <span lang="de">J</span> on tavallisesti j-äänne sanassa, mutta kirjaimen oma saksankielinen nimi on erillinen opeteltava asia. Oikea tavaaminen kuunnellaan mieluiten ihmisen puheesta.</p>
     <p>Opettele erottamaan myös saksan kirjainmerkit <b lang="de">ä, ö, ü</b> ja <b lang="de">ß</b>. Joissakin teknisissä yhteyksissä käytetään korvaavia merkintöjä <span lang="de">ae, oe, ue</span> ja <span lang="de">ss</span>. Korvausmerkintä ei ole yleispätevästi sama kuin sanan oikea kirjoitusasu.</p>
     <Example de="M – I – A" fi="Kirjaimittain kirjoitettu nimi Mia. Tämä esimerkki näyttää kirjaimet, ei niiden saksalaista ääntämistä." />
-    <Example de="Wie schreibt man das? Bitte buchstabieren Sie." fi="Miten se kirjoitetaan? Tavatkaa, olkaa hyvä." />
+    <Example de="Wie schreibt man das? Bitte buchstabieren Sie." fi="Miten se kirjoitetaan? Voisitteko tavata nimen, kiitos?" />
     <Note title="Tavatun nimen kuuntelu ei ole vielä automaattinen testi">Harjoittele kahdeksan kuvitteellista nimeä ja neljä numerosarjaa ääneen. Kun oikea aakkosäänite lisätään luvallisesti oppikirjaan, voit verrata myös ääntämistä. Pelkkä tekstimuoto ei todista ääntämistä.</Note>
   </>;
   if(chapterId==="08")return <>
@@ -101,8 +173,8 @@ export function LosChapterGrammar({chapterId}:{chapterId:string}) {
   </>;
   if(chapterId==="09")return <>
     <p>Viikonpäivien kanssa käytetään tavallisesti ilmausta <b lang="de">am Montag</b> (maanantaina). Kellonajan edellä käytetään sanaa <b lang="de">um</b>.</p>
-    <Example de="Am Montag um drei Uhr." fi="Maanantaina kello kolme." />
-    <Example de="Am Freitag um vier Uhr." fi="Perjantaina kello neljä." />
+    <Example de="Am Montag um drei Uhr." fi="Maanantaina kello kolmelta." />
+    <Example de="Am Freitag um vier Uhr." fi="Perjantaina kello neljältä." />
     <h3>Viikonpäivät</h3>
     <table className="los-grammar-table"><thead><tr><th>Suomeksi</th><th lang="de">Deutsch</th></tr></thead><tbody>
       {[["maanantai","Montag"],["tiistai","Dienstag"],["keskiviikko","Mittwoch"],["torstai","Donnerstag"],["perjantai","Freitag"],["lauantai","Samstag"],["sunnuntai","Sonntag"]].map(([fi,de])=><tr key={de}><td>{fi}</td><td lang="de">{de}</td></tr>)}
@@ -110,6 +182,18 @@ export function LosChapterGrammar({chapterId}:{chapterId:string}) {
     <p>Viikonpäivät kirjoitetaan isolla, sillä ne ovat saksassa substantiiveja. Kirjoita <span lang="de">am Montag</span> mutta <span lang="de">um drei Uhr</span>. Sana <b lang="de">wann</b> kysyy <i>milloin</i>.</p>
     <p>Erota <span lang="de">heute</span> (tänään), <span lang="de">morgen</span> (huomenna) ja <span lang="de">gestern</span> (eilen). Isolla kirjoitettu <span lang="de">der Morgen</span> tarkoittaa aamua.</p>
     <Note title="Rajattu ajanilmaisu riittää">Tasatunnit ja am/um ovat aktiivisia tavoitteita. Lähdetekstin muotoja <span lang="de">halb</span>, <span lang="de">Viertel vor</span> ja <span lang="de">Viertel nach</span> saa oppia tunnistamaan, mutta niitä ei vaadita vielä itsenäisessä testissä.</Note>
+    <p><strong>Mitä kellonaika tarkoittaa?</strong>
+      <span lang="de"> Es ist drei Uhr.</span> = Kello on kolme.
+      <span lang="de"> Wir treffen uns um drei Uhr.</span> = Tapaamme kello kolmelta.
+      Sana <span lang="de">um</span> ilmaisee tapahtuman ajankohdan.
+      Pelkkä <span lang="de">um drei Uhr</span> ei kerro, tarkoitetaanko
+      kello 03.00 vai 15.00. Tilanne tai esimerkiksi
+      <span lang="de"> nachmittags</span> (iltapäivällä) ratkaisee.</p>
+    <p><strong>Kokeile itse:</strong> Miten sanoisit saksaksi
+      maanantaina kello kolmelta ja perjantaina kello neljältä?
+      Vertaa omia vastauksiasi yllä oleviin esimerkkeihin.
+      Tarkista, että viikonpäivän edellä on <span lang="de">am</span>
+      ja ajan edellä <span lang="de">um</span>.</p>
   </>;
   if(chapterId==="10")return <>
     <p>Viimeisessä kappaleessa kokoat opitut perusilmaukset yhdeksi kohtaamiseksi: tervehtiminen, nimen kysyminen, kotipaikka, ikä ja hyvästely.</p>
@@ -127,9 +211,37 @@ export function LosChapterGrammar({chapterId}:{chapterId:string}) {
       ].map(([person,named,be,from])=><tr key={person}><td lang="de">{person}</td><td lang="de">{named}</td><td lang="de">{be}</td><td lang="de">{from}</td></tr>)}</tbody>
     </table>
     <p>Kolmannen henkilön esitteleminen onnistuu lyhyillä lauseilla: <span lang="de">Das ist Mia. Sie heißt Mia. Sie kommt aus Finnland.</span> Muista, että kohtelias <span lang="de">Sie</span> ja naisesta käytetty <span lang="de">sie</span> ovat eri käyttötapoja.</p>
+    <Note title="Ystävä vai seurustelukumppani?">Saksassa <span lang="de">mein Freund</span>
+      ja <span lang="de">meine Freundin</span> voivat tarkoittaa tavallista ystävää
+      tai poika-/tyttöystävää. Tilanne ratkaisee.
+      Jos haluat sanoa selvemmin miespuolinen tai naispuolinen ystävä,
+      voit sanoa <span lang="de">ein Freund von mir</span> tai
+      <span lang="de">eine Freundin von mir</span>.
+      Nämä ovat lisähuomioita sanan merkityksestä: rakenteiden sijamuotoja
+      ei vielä tarvitse osata muodostaa itse.</Note>
     <h3>Harjoittele kaksi erilaista kohtaamista</h3>
     <p>Kirjoita ensin 6–8 repliikin tuttavallinen keskustelu ja sen jälkeen erillinen kohtelias keskustelu opettajan kanssa. Kerro tervehdyksen jälkeen nimet, alkuperä ja jokin tuttu perustieto. Lopeta sopivaan hyvästelyyn. Kirjoita myös erikseen neljä lausetta kolmannesta henkilöstä.</p>
     <Note title="Kappaletesti ei ole kirjan loppukoe">C10 tarkistaa opittuja muotoja ja fraaseja. Täydellinen omien kohtaamisten tuottaminen arvioidaan erillisellä tarkistuslistalla, ja koko kirjan loppukoe on oma osionsa. Ei automaattista kielitaidon prosenttilukua.</Note>
+    <h3>Oman osaamisen arviointi</h3>
+    <p>Kirjoita ensin molemmat keskustelut ja erillinen neljän virkkeen henkilökuvaus
+      kirjan Käytä saksaa -osioon. Tarkista tuotoksesi vasta sen jälkeen tämän
+      taulukon avulla. Arvioi jokainen kohta: <em>onnistuu itsenäisesti</em>,
+      <em> onnistuu mallin avulla</em> tai <em> vaatii vielä harjoittelua</em>.</p>
+    <table className="los-grammar-table">
+      <thead><tr><th scope="col">Taito</th><th scope="col">Mitä tarkistat?</th></tr></thead>
+      <tbody>
+        <tr><td>Tervehdys ja hyvästely</td><td>Onko alussa tilanteeseen sopiva tervehdys ja lopussa hyvästely?</td></tr>
+        <tr><td>Nimet ja alkuperä</td><td>Osaatko kysyä nimen ja alkuperän sekä vastata omilla kuvitteellisilla tiedoilla?</td></tr>
+        <tr><td>Sinuttelu ja teitittely</td><td>Onko nuorten keskustelussa du ja muodollisessa kohtaamisessa Sie johdonmukaisesti?</td></tr>
+        <tr><td>Kolmannen henkilön esittely</td><td>Ovatko er/sie ja heißen-, sein- sekä kommen-verbien muodot oikein?</td></tr>
+        <tr><td>Selviytymisfraasit</td><td>Osaatko tarvittaessa pyytää hidastamaan tai toistamaan?</td></tr>
+        <tr><td>Oma suullinen harjoittelu</td><td>Pystyitkö lukemisen lisäksi muodostamaan repliikkejä myös muistista ääneen?</td></tr>
+      </tbody>
+    </table>
+    <p>Jos tarvitset mallia, palaa siihen kappaleeseen, jossa taito opetetaan.
+      Kirjan oma loppukoe ja itsearviointi tallennetaan erillisinä nykyiseen
+      opiskelutilaan. Tätä taulukkoa ei saa käyttää automaattisena
+      puhe- tai kirjoitustaidon arvosanana.</p>
   </>;
   return null;
 }

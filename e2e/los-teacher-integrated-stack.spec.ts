@@ -1,0 +1,69 @@
+import { expect, test, type Page } from "@playwright/test";
+import { expectNoHorizontalOverflow } from "./helpers";
+
+/**
+ * This file exists only on the independent integration-QA branch.
+ * CI merges every lesson PR into a disposable runner before launching browsers.
+ * The local storage fixture never supplies a server access token and must not
+ * be described as evidence of production login or real-device testing.
+ */
+async function enterLocalTeacherFixture(page: Page) {
+  await page.addInitScript(() => {
+    if (!["localhost", "127.0.0.1"].includes(window.location.hostname)) return;
+    localStorage.setItem("opk.device-authorized", "Arthur");
+    localStorage.setItem("opk.owner-id", "00000000-0000-4000-8000-000000000195");
+  });
+}
+
+test("all sixty merged Teacher 2.0 lessons open a real scene", async ({ page }) => {
+  test.setTimeout(360_000);
+  await enterLocalTeacherFixture(page);
+  for (let number = 1; number <= 60; number += 1) {
+    const id = "L" + String(number).padStart(3, "0");
+    await page.goto("/los-lessons/" + id, { waitUntil: "domcontentloaded" });
+    const sidebar = page.locator(".los-teacher-sidebar");
+    await expect(sidebar, id + " must be registered, valid, and visible").toBeVisible();
+    await expect(sidebar.locator("h1"), id + " must have an actual title").not.toBeEmpty();
+    await expect(page.locator(".los-teacher-paper h2"), id + " must render a teaching scene").toBeVisible();
+    await expect(page.locator(".los-teacher-status"), id + " must not display a fallback/error").toHaveCount(0);
+    if (number === 1 || number % 5 === 0) await expectNoHorizontalOverflow(page);
+  }
+});
+
+test("C06 number activity persists while switching to final review and back", async ({ page }) => {
+  await enterLocalTeacherFixture(page);
+  await page.goto("/los-lessons/L033", { waitUntil: "domcontentloaded" });
+  await page.locator(".los-teacher-outline").getByRole("button", { name: /Rakenna itse numeroita/ }).click();
+  const builder = page.getByRole("region", { name: "Interaktiivinen saksan numeroiden rakennustaulu" });
+  await builder.getByLabel("Valitse kymmenet").selectOption("30");
+  await builder.getByLabel("Valitse yksiköt").selectOption("2");
+  await expect(builder).toContainText("zweiunddreißig");
+
+  await page.goto("/los-lessons/L056", { waitUntil: "domcontentloaded" });
+  await expect(page.locator(".los-teacher-sidebar h1")).toBeVisible();
+  await expect(page.locator(".los-teacher-paper h2")).toBeVisible();
+
+  await page.goto("/los-lessons/L033", { waitUntil: "domcontentloaded" });
+  await page.locator(".los-teacher-outline").getByRole("button", { name: /Rakenna itse numeroita/ }).click();
+  await expect(builder.getByLabel("Valitse kymmenet")).toHaveValue("30");
+  await expect(builder.getByLabel("Valitse yksiköt")).toHaveValue("2");
+  await expect(builder).toContainText("zweiunddreißig");
+  await expectNoHorizontalOverflow(page);
+});
+
+test("LOS! 1 library exposes the reader, teacher path and local dictionary in the same website", async ({ page }) => {
+  await enterLocalTeacherFixture(page);
+  await page.goto("/los#/", {waitUntil:"domcontentloaded"});
+  const links=page.getByRole("navigation",{name:"LOS! 1:n toiminnot"});
+  await expect(links).toBeVisible();
+  await expect(links.getByRole("link",{name:"Digitaalinen oppikirja"})).toHaveAttribute("href","/los#/1/contents");
+  await expect(links.getByRole("link",{name:"Opetuspolku"})).toHaveAttribute("href","/los#/1/path");
+  await expect(links.getByRole("link",{name:"Sanakirja ja sanasto"})).toHaveAttribute("href","/los#/1/dictionary");
+  await expect(links.getByRole("link",{name:"Hae teksteistä"})).toHaveAttribute("href","/los#/1/search");
+  await expect(links.getByRole("link",{name:"Kertauskortit"})).toHaveAttribute("href","/los#/1/cards");
+  await expect(page.locator(".los-library-footnote")).toContainText("60/60 oppituntia");
+  await links.getByRole("link",{name:"Sanakirja ja sanasto"}).click();
+  await expect(page).toHaveURL(new RegExp("/los#/1/dictionary$"));
+  await expect(page.getByRole("heading",{name:"Sanakirja",exact:true})).toBeVisible();
+  await expectNoHorizontalOverflow(page);
+});

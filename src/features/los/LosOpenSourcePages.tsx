@@ -1,13 +1,16 @@
 import { useState } from "react";
 import { ArrowRight, BookOpen, CheckCircle2 } from "lucide-react";
 import { LosOriginalDialogue } from "./LosOriginalDialogue";
+import { LosC08ReadingGuide } from "./LosC08ReadingGuide";
 import { useLosChapterDraft } from "./studyState";
 import { getLosOpenDialogue, type LosOpenText } from "./content/los1OpenDialogues";
 
 export function LosOpenTextPage({ chapterId }: { chapterId:string }) {
   const text=getLosOpenDialogue(chapterId);
   if(!text)return null;
-  return <LosOriginalDialogue
+  return <>
+    {text.chapterId==="08" && <LosC08ReadingGuide />}
+    <LosOriginalDialogue
     chapterId={text.chapterId}
     sourceId={text.sourceId}
     version="1.0.0"
@@ -21,7 +24,8 @@ export function LosOpenTextPage({ chapterId }: { chapterId:string }) {
     license={text.licenseCode ?? "CC BY-SA 4.0"}
     licenseUrl={text.licenseUrl ?? "https://creativecommons.org/licenses/by-sa/4.0/"}
     sourceDetail={text.sourceDetail ?? ("Lähdesivun pysyvä versio "+text.revision+". Puheäänitteiden yksilöllistä lisenssiä tai toimivuutta ei ole vahvistettu.")}
-  />;
+    />
+  </>;
 }
 
 /**

@@ -1,0 +1,57 @@
+/* V3.3: editorial reading support is part of the book, not a card dashboard. */
+.los-c08-reading-guide {
+  max-width: 790px;
+  margin: 25px 0 34px;
+  line-height: 1.65;
+  color: var(--los-ink);
+}
+.los-c08-reading-guide > h3 {
+  margin: 9px 0 13px;
+  font-size: clamp(21px, 2.5vw, 26px);
+  line-height: 1.3;
+  font-weight: 650;
+}
+.los-c08-reading-guide > p { margin: 10px 0 15px; max-width: 70ch; }
+.los-c08-reading-stages {
+  padding: 0;
+  margin: 22px 0;
+  list-style: none;
+  border-block-end: 1px solid var(--los-line);
+}
+.los-c08-reading-stages > li {
+  padding: 18px 0 20px;
+  border-block-start: 1px solid var(--los-line);
+}
+.los-c08-reading-stages h4 {
+  font-size: 18px;
+  line-height: 1.38;
+  font-weight: 650;
+  margin: 0 0 9px;
+}
+.los-c08-reading-stages p { max-width: 68ch; margin: 8px 0; }
+.los-c08-reading-stages details { margin: 12px 0 0; }
+.los-c08-reading-stages summary {
+  display: list-item;
+  width: fit-content;
+  max-width: 100%;
+  color: var(--los-book-accent);
+  font-weight: 600;
+  cursor: pointer;
+  line-height: 1.55;
+  padding: 3px 2px;
+}
+.los-c08-reading-stages summary:focus-visible {
+  outline: 3px solid var(--los-book-accent);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+.los-c08-reading-stages details[open] { padding-block-end: 5px; }
+.los-c08-reading-stages details[open] > p {
+  padding-inline-start: 16px;
+  border-inline-start: 2px solid var(--los-line);
+}
+@media (max-width: 640px) {
+  .los-c08-reading-guide { margin: 18px 0 28px; }
+  .los-c08-reading-stages > li { padding: 16px 0 18px; }
+  .los-c08-reading-stages h4 { font-size: 17px; }
+}

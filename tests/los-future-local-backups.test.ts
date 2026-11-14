@@ -1,0 +1,424 @@
+import {test} from "node:test";
+import assert from "node:assert/strict";
+import {readFileSync} from "node:fs";
+import type {LosChapterDraft} from "../src/features/los/studyState.ts";
+import {
+  LOS_FUTURE_BACKUP_FORMAT,LOS_FUTURE_BACKUP_MAX_BYTES,
+  createLosFutureBackup,parseLosFutureBackup,planLosFutureBackupImport,applyLosFutureBackup,
+} from "../src/features/los/losFutureLocalBackups.ts";
+import {losFuturePracticeDraftKey} from "../src/features/los/losFuturePracticeProgress.ts";
+import {getLosTeacherLesson} from "../src/features/los/teacher/lessonRegistry.ts";
+import {emptyTeacherSession} from "../src/features/los/teacher/engine.ts";
+import {getLosFutureExam} from "../src/features/los/content/losFutureExams.ts";
+import {beginFutureExamRetake,futureExamHistoryKey} from "../src/features/los/losFutureExamEngine.ts";
+import {losFutureChapterCheckPlan} from "../src/features/los/losFutureChapterCheckPlan.ts";
+import {saveLosFutureChapterCheckAnswer,submitLosFutureChapterCheck,retakeLosFutureChapterCheck} from "../src/features/los/losFutureChapterCheckState.ts";
+import {losFutureRecallCardsFor} from "../src/features/los/losFutureRecallCards.ts";
+import {losRecallReview} from "../src/features/los/recallEngine.ts";
+import {losFutureReaderMarkKey,losFutureReaderText,losFutureReaderAppend,
+  losFutureReaderBeginUpdatedText,losFutureReaderTextVersion} from "../src/features/los/losFutureReaderMarks.ts";
+
+const owner="backup-test-owner";
+const makeDraft=():LosChapterDraft=>({
+  version:1,note:"",applicationDraft:"",bookmarked:false,
+  practiceAnswers:{},practiceChecked:[],testAnswers:{},testSubmittedAt:null,
+  selfAssessment:"",updatedAt:"2026-11-14T00:00:00.000Z",
+});
+class FakeStore {
+  data=new Map<string,string>();
+  failOnce:string|null=null;
+  getItem(key:string){return this.data.get(key)??null;}
+  setItem(key:string,value:string){
+    if(key===this.failOnce){this.failOnce=null;throw Error("QuotaExceeded");}
+    this.data.set(key,value);
+  }
+  removeItem(key:string){this.data.delete(key);}
+}
+const key=(bookId:number,id:string,who=owner)=>losFuturePracticeDraftKey(bookId,id,who);
+const fixedDate=new Date("2026-11-14T00:00:00.000Z");
+
+test("later books back up only their own authorized chapter drafts, including stage-only evidence",()=>{
+  const store=new FakeStore();
+  const stageOnly=makeDraft();
+  stageOnly.practiceChecked=["los.future.guided:LOS2-L002:start"];
+  store.setItem(key(2,"01"),JSON.stringify(stageOnly));
+  const anotherBook=makeDraft();
+  anotherBook.note="private in LOS! 3";
+  store.setItem(key(3,"01"),JSON.stringify(anotherBook));
+  const backup=createLosFutureBackup(2,owner,store,fixedDate);
+  assert.equal(backup.format,LOS_FUTURE_BACKUP_FORMAT);
+  assert.equal(backup.bookId,2);
+  assert.deepEqual(Object.keys(backup.chapters),["01"]);
+  assert.equal(backup.chapters["01"]?.practiceChecked.length,1);
+  assert.equal(JSON.stringify(backup).includes(owner),false,"No owner ID must be exported");
+  assert.equal(JSON.stringify(backup).includes("private in LOS! 3"),false);
+  assert.deepEqual(Object.keys(createLosFutureBackup(3,owner,store,fixedDate).chapters),["01"]);
+  assert.deepEqual(Object.keys(createLosFutureBackup(2,"other",store,fixedDate).chapters),[]);
+});
+
+test("authored tasks and lesson reflections transfer without test scores or cross-book IDs",()=>{
+  const store=new FakeStore();
+  const draft=makeDraft();
+  draft.note="Harjoittelin saksan lauseita.";
+  draft.practiceAnswers={
+    "LOS2-C01-T01":"Richtig.",
+    "LOS2-L002:own-reflection":"Kertaan persoonapäätteet.",
+  };
+  draft.practiceChecked=["LOS2-C01-T01","los.future.guided:LOS2-L002:tasks"];
+  store.setItem(key(2,"01"),JSON.stringify(draft));
+  const original=createLosFutureBackup(2,owner,store,fixedDate);
+  const imported=parseLosFutureBackup(JSON.stringify(original));
+  const other=new FakeStore();
+  const result=applyLosFutureBackup(imported,2,"new-device-owner",other,"missing-only");
+  assert.equal(result.imported,1);
+  assert.equal(result.skipped,0);
+  assert.equal(other.getItem(key(2,"01","new-device-owner"))?.includes("Kertaan persoonapäätteet."),true);
+  assert.equal(other.getItem(key(2,"01",owner)),null);
+  assert.equal(other.getItem(key(3,"01","new-device-owner")),null);
+  const reread=createLosFutureBackup(2,"new-device-owner",other,fixedDate);
+  assert.deepEqual(reread.chapters["01"]?.practiceChecked,draft.practiceChecked);
+});
+
+test("reject corrupt, future graded, mismatched and oversized backups before writing",()=>{
+  const store=new FakeStore();
+  const draft=makeDraft();
+  draft.practiceAnswers={"LOS3-C01-T01":"wrong book"};
+  store.setItem(key(2,"01"),JSON.stringify(draft));
+  assert.throws(()=>createLosFutureBackup(2,owner,store),/Kappaleen 01 tietoja/);
+  store.data.clear();
+  const good=createLosFutureBackup(2,owner,store,fixedDate);
+  const wrongIds={...good,chapters:{"01":draft}};
+  assert.throws(()=>parseLosFutureBackup(JSON.stringify(wrongIds)),/väärään kirjaan/);
+  const scores=makeDraft();scores.testAnswers={"unapproved":"999"};
+  const badScores={...good,chapters:{"01":scores}};
+  assert.throws(()=>parseLosFutureBackup(JSON.stringify(badScores)),/virheellinen/);
+  assert.throws(()=>parseLosFutureBackup('{"format":"los-book-backup-v1","bookId":1}'),/kelvollinen/);
+  assert.throws(()=>parseLosFutureBackup("{bad"),/JSON/);
+  assert.throws(()=>parseLosFutureBackup("x".repeat(LOS_FUTURE_BACKUP_MAX_BYTES+1)),/liian suuri/);
+  assert.throws(()=>applyLosFutureBackup(good,3,owner,store,"replace"),/Toisen kirjan/);
+});
+
+test("missing-only import never overwrites existing work; replacement deliberately does",()=>{
+  const store=new FakeStore();
+  const old=makeDraft();old.note="my existing answer";
+  store.setItem(key(2,"01"),JSON.stringify(old));
+  const one=makeDraft();one.note="backup answer";
+  const two=makeDraft();two.note="backup other chapter";
+  const backup=parseLosFutureBackup(JSON.stringify({
+    format:LOS_FUTURE_BACKUP_FORMAT,bookId:2,exportedAt:fixedDate.toISOString(),
+    chapters:{"01":one,"02":two},
+  }));
+  const plan=planLosFutureBackupImport(backup,createLosFutureBackup(2,owner,store,fixedDate));
+  assert.deepEqual(plan.conflicts,["01"]);
+  assert.deepEqual(plan.missing,["02"]);
+  const safe=applyLosFutureBackup(backup,2,owner,store,"missing-only");
+  assert.equal(safe.imported,1);
+  assert.equal(JSON.parse(store.getItem(key(2,"01"))!).note,"my existing answer");
+  assert.equal(JSON.parse(store.getItem(key(2,"02"))!).note,"backup other chapter");
+  const replace=applyLosFutureBackup(backup,2,owner,store,"replace");
+  assert.equal(replace.imported,2);
+  assert.equal(JSON.parse(store.getItem(key(2,"01"))!).note,"backup answer");
+});
+
+test("local storage quota failure rolls back every already-written chapter",()=>{
+  const store=new FakeStore();
+  const old=makeDraft();old.note="original";
+  store.setItem(key(2,"01"),JSON.stringify(old));
+  const first=makeDraft();first.note="replacement";
+  const second=makeDraft();second.note="new chapter";
+  const backup=parseLosFutureBackup(JSON.stringify({
+    format:LOS_FUTURE_BACKUP_FORMAT,bookId:2,exportedAt:fixedDate.toISOString(),
+    chapters:{"01":first,"02":second},
+  }));
+  store.failOnce=key(2,"02");
+  assert.throws(()=>applyLosFutureBackup(backup,2,owner,store,"replace"),/palautettiin/);
+  assert.equal(JSON.parse(store.getItem(key(2,"01"))!).note,"original");
+  assert.equal(store.getItem(key(2,"02")),null);
+});
+
+test("LOS! 1's backup and lessons remain routed to their original implementation",()=>{
+  const source=readFileSync("src/features/los/LosBackups.tsx","utf8");
+  assert.match(source,/bookId!==1\)return <LosFutureBackups bookId=\{bookId\}\/>/);
+  assert.match(source,/createLosBookBackup/);
+  assert.match(source,/importLosBookBackup/);
+});
+
+test("PR #264 chapter cursor and unfinished Teacher answers round-trip in later-book backups",()=>{
+  const store=new FakeStore();
+  const draft=makeDraft();
+  const lesson=getLosTeacherLesson("LOS2-L002");
+  assert.ok(lesson);
+  const session=emptyTeacherSession(lesson,"2026-11-14T00:00:00.000Z");
+  session.sceneId=lesson.scenes[1]!.id;
+  session.visitedIds=[lesson.scenes[0]!.id];
+  session.draftAnswers={recall:"Ich kenne Hallo."};
+  draft.teacherSessions={"LOS2-L002":session};
+  draft.practiceAnswers={"los.future.guided:LOS2-L002:selectedStage":"3",
+    "LOS2-C01-T06":JSON.stringify({version:1,meanings:["ystävä"],answers:["der Freund"]})};
+  store.setItem(key(2,"01"),JSON.stringify(draft));
+  const exported=createLosFutureBackup(2,owner,store,fixedDate);
+  const checked=parseLosFutureBackup(JSON.stringify(exported));
+  const restored=new FakeStore();
+  const transfer=applyLosFutureBackup(checked,2,"second-owner",restored,"missing-only");
+  assert.equal(transfer.imported,1);
+  const data=JSON.parse(restored.getItem(key(2,"01","second-owner"))??"null");
+  assert.equal(data.practiceAnswers["los.future.guided:LOS2-L002:selectedStage"],"3");
+  assert.equal(data.teacherSessions["LOS2-L002"].draftAnswers.recall,"Ich kenne Hallo.");
+  assert.equal(data.teacherSessions["LOS2-L002"].completedAt,null);
+  assert.equal(data.practiceAnswers["LOS2-C01-T06"],draft.practiceAnswers["LOS2-C01-T06"]);
+});
+
+test("future-book backup rejects fabricated Teacher mastery and cross-book sessions",()=>{
+  const store=new FakeStore();
+  const lesson=getLosTeacherLesson("LOS2-L002");assert.ok(lesson);
+  const session=emptyTeacherSession(lesson,"2026-11-14T00:00:00.000Z");
+  const spoof=makeDraft();spoof.teacherSessions={"LOS2-L002":{...session,completedAt:"2026-11-14T00:00:00.000Z"}};
+  store.setItem(key(2,"01"),JSON.stringify(spoof));
+  assert.throws(()=>createLosFutureBackup(2,owner,store),/tietoja ei voitu tarkistaa/);
+  const other=makeDraft();other.teacherSessions={"LOS3-L002":{...session,lessonId:"LOS3-L002"}};
+  store.setItem(key(2,"01"),JSON.stringify(other));
+  assert.throws(()=>createLosFutureBackup(2,owner,store),/tietoja ei voitu tarkistaa/);
+  const badCursor=makeDraft();badCursor.practiceAnswers={"los.future.guided:LOS2-L002:selectedStage":"999"};
+  store.setItem(key(2,"01"),JSON.stringify(badCursor));
+  assert.throws(()=>createLosFutureBackup(2,owner,store),/tietoja ei voitu tarkistaa/);
+});
+
+test("formative review positions and answers round-trip without fabricated completion",()=>{
+  const store=new FakeStore();
+  const draft=makeDraft();
+  draft.practiceAnswers={
+    "LOS2-L027:review:stage":"3",
+    "LOS2-L027:review:recall":"Muistan epäsäännöllisen verbin.",
+    "LOS2-L027:review:transfer":"Ich lerne Deutsch.",
+    "LOS2-L027:review:reflection":"Kertaan nyt sanajärjestystä.",
+  };
+  store.setItem(key(2,"05"),JSON.stringify(draft));
+  const backup=createLosFutureBackup(2,owner,store,fixedDate);
+  assert.ok(backup.chapters["05"]);
+  const parsed=parseLosFutureBackup(JSON.stringify(backup));
+  const restored=new FakeStore();
+  assert.equal(applyLosFutureBackup(parsed,2,"new-owner",restored,"missing-only").imported,1);
+  const reloaded=JSON.parse(restored.getItem(key(2,"05","new-owner"))!);
+  assert.deepEqual(reloaded.practiceAnswers,draft.practiceAnswers);
+  assert.deepEqual(reloaded.practiceChecked,[]);
+  assert.deepEqual(reloaded.testAnswers,{});
+  assert.equal(restored.getItem(key(3,"05","new-owner")),null);
+});
+
+test("review backup rejects unauthorised lessons, bad stages and false exam completion",()=>{
+  const store=new FakeStore();
+  for(const bad of [
+    {"LOS2-L030:review:transfer":"Fake midterm grade"},
+    {"LOS3-L027:review:recall":"Wrong book"},
+    {"LOS2-L027:review:stage":"4"},
+    {"LOS2-L027:review:stage":"done"},
+  ]){
+    const draft=makeDraft();draft.practiceAnswers=bad;
+    store.setItem(key(2,"05"),JSON.stringify(draft));
+    assert.throws(()=>createLosFutureBackup(2,owner,store),/tietoja ei voitu tarkistaa/);
+  }
+});
+
+test("all pending midterm and final practice exam answers plus retakes survive a book backup",()=>{
+  const owner="backup-test-owner";
+  const store=new FakeStore();
+  const exam=getLosFutureExam(2,"midterm");
+  assert.ok(exam);
+  const draft=makeDraft();
+  draft.testAnswers={
+    [exam.questions[0]!.id]:"Pienessä kaupungissa.",
+    [exam.writing.id]:"Ich wohne mit meiner Familie in Bonn.",
+  };
+  draft.testSubmittedAt="2026-11-14T11:00:00.000Z";
+  const afterRetake=beginFutureExamRetake(draft,exam);
+  afterRetake.testAnswers[exam.questions[1]!.id]="Leipomossa";
+  store.setItem(key(2,"05",owner),JSON.stringify(afterRetake));
+  const exported=createLosFutureBackup(2,owner,store,fixedDate);
+  const parsed=parseLosFutureBackup(JSON.stringify(exported));
+  assert.ok(parsed.chapters["05"]);
+  const restored=new FakeStore();
+  applyLosFutureBackup(parsed,2,"new-owner",restored,"missing-only");
+  const back=JSON.parse(restored.getItem(key(2,"05","new-owner"))??"null");
+  assert.equal(back.testAnswers[exam.questions[1]!.id],"Leipomossa");
+  assert.equal(JSON.parse(back.testAnswers[futureExamHistoryKey(exam)])[0]
+    .answers[exam.writing.id],"Ich wohne mit meiner Familie in Bonn.");
+  assert.equal(back.testSubmittedAt,null);
+  assert.equal(restored.getItem(key(3,"05","new-owner")),null);
+});
+
+test("import of another book's exam, fabricated score or malformed attempt history is blocked",()=>{
+  const store=new FakeStore();
+  const exam=getLosFutureExam(2,"midterm");assert.ok(exam);
+  for(const bad of [
+    {"LOS3-MID-R01":"Wrong book"},
+    {"LOS2-MID-GRADING":"35"},
+    {[futureExamHistoryKey(exam)]:"not json"},
+  ]){
+    const draft=makeDraft();draft.testAnswers=bad;
+    store.setItem(key(2,"05"),JSON.stringify(draft));
+    assert.throws(()=>createLosFutureBackup(2,owner,store),/tietoja ei voitu tarkistaa/);
+  }
+  const fake=makeDraft();fake.testSubmittedAt="2026-11-14T00:00:00.000Z";
+  store.setItem(key(2,"05"),JSON.stringify(fake));
+  assert.throws(()=>createLosFutureBackup(2,owner,store),/tietoja ei voitu tarkistaa/);
+});
+
+test("all chapter check retake snapshots survive a per-book backup and restore",()=>{
+  const plan=losFutureChapterCheckPlan(2,"01");assert.ok(plan);
+  let draft=makeDraft();
+  draft=saveLosFutureChapterCheckAnswer(draft,plan,plan.tasks[0]!.id,"He opiskelevat saksaa.");
+  draft=submitLosFutureChapterCheck(draft,plan,fixedDate);
+  draft=retakeLosFutureChapterCheck(draft,plan);
+  draft=saveLosFutureChapterCheckAnswer(draft,plan,plan.tasks[4]!.id,
+    "Ich heiße Mira. Ich wohne in Bonn.");
+  const storage=new FakeStore();
+  storage.setItem(key(2,"01"),JSON.stringify(draft));
+  const backup=createLosFutureBackup(2,owner,storage,fixedDate);
+  const restored=new FakeStore();
+  const parsed=parseLosFutureBackup(JSON.stringify(backup));
+  assert.equal(applyLosFutureBackup(parsed,2,"different-owner",restored,"missing-only").imported,1);
+  const reloaded=JSON.parse(restored.getItem(key(2,"01","different-owner"))??"null");
+  assert.deepEqual(reloaded.practiceAnswers,draft.practiceAnswers);
+  assert.equal(reloaded.testSubmittedAt,null);
+  assert.deepEqual(reloaded.testAnswers,{});
+  assert.equal(restored.getItem(key(3,"01","different-owner")),null);
+});
+
+test("chapter check backups reject fabricated grades, invalid history and cross-chapter answer IDs",()=>{
+  const plan=losFutureChapterCheckPlan(3,"04");assert.ok(plan);
+  const store=new FakeStore();
+  const good=saveLosFutureChapterCheckAnswer(makeDraft(),plan,plan.tasks[0]!.id,"Test");
+  const fake=makeDraft();
+  fake.practiceAnswers[plan.currentKey]=JSON.stringify({
+    version:1,answers:{},submittedAt:null,grade:"A",
+  });
+  store.setItem(key(3,"04"),JSON.stringify(fake));
+  assert.throws(()=>createLosFutureBackup(3,owner,store),/tietoja ei voitu tarkistaa/);
+  const wrong=makeDraft();
+  wrong.practiceAnswers[plan.currentKey]=JSON.stringify({
+    version:1,answers:{"LOS2-C04-T02":"Cross-book"},submittedAt:null,
+  });
+  store.setItem(key(3,"04"),JSON.stringify(wrong));
+  assert.throws(()=>createLosFutureBackup(3,owner,store),/tietoja ei voitu tarkistaa/);
+  const badHistory=makeDraft();
+  badHistory.practiceAnswers={...good.practiceAnswers,
+    [plan.previousKeys[0]!]:"{invalid-json"};
+  store.setItem(key(3,"04"),JSON.stringify(badHistory));
+  assert.throws(()=>createLosFutureBackup(3,owner,store),/tietoja ei voitu tarkistaa/);
+});
+
+test("70-book-deck recall ratings round-trip with local backup but never create mastery",()=>{
+  const card=losFutureRecallCardsFor(2,"01")[0];assert.ok(card);
+  const store=new FakeStore();
+  const draft=makeDraft();
+  draft.recallCards={[card.id]:losRecallReview(undefined,"remembered",fixedDate.toISOString())};
+  store.setItem(key(2,"01"),JSON.stringify(draft));
+  const saved=createLosFutureBackup(2,owner,store,fixedDate);
+  assert.deepEqual(saved.chapters["01"]?.recallCards,draft.recallCards);
+  const other=new FakeStore();
+  const imported=applyLosFutureBackup(parseLosFutureBackup(JSON.stringify(saved)),2,"other-device",other,"missing-only");
+  assert.equal(imported.imported,1);
+  assert.deepEqual(JSON.parse(other.getItem(key(2,"01","other-device"))!).recallCards,draft.recallCards);
+  assert.equal(JSON.parse(other.getItem(key(2,"01","other-device"))!).lessonProgress,undefined);
+  assert.equal(JSON.parse(other.getItem(key(2,"01","other-device"))!).testSubmittedAt,null);
+});
+test("future recall backup rejects foreign cards and forged grade fields",()=>{
+  const validCard=losFutureRecallCardsFor(2,"01")[0];assert.ok(validCard);
+  const different=losFutureRecallCardsFor(3,"03")[0];assert.ok(different);
+  const state=losRecallReview(undefined,"remembered",fixedDate.toISOString());
+  const base={format:LOS_FUTURE_BACKUP_FORMAT,bookId:2,exportedAt:fixedDate.toISOString()};
+  for(const recallCards of [
+    {[different.id]:state},
+    {[validCard.id]:{...state,score:99}},
+    {[validCard.id]:{...state,level:999}},
+  ]){
+    const invalid=makeDraft();invalid.recallCards=recallCards as LosChapterDraft["recallCards"];
+    assert.throws(()=>parseLosFutureBackup(JSON.stringify({...base,chapters:{"01":invalid}})),/virheellinen/);
+  }
+});
+
+test("future Text A highlights survive backup, while foreign text marks are rejected",()=>{
+  const id=losFutureReaderMarkKey(2,"01","text-a");
+  const text=losFutureReaderText(2,"01","text-a");
+  const highlight=losFutureReaderAppend(undefined,text,0,2,"pink");assert.ok(highlight);
+  const store=new FakeStore();const draft=makeDraft();
+  draft.readerMarks={[id]:highlight};draft.note="Huomasin uuden sanan tekstissä.";
+  store.setItem(key(2,"01"),JSON.stringify(draft));
+  const exported=createLosFutureBackup(2,owner,store,fixedDate);
+  assert.equal(exported.chapters["01"]?.readerMarks?.[id],highlight);
+  const target=new FakeStore();
+  assert.equal(applyLosFutureBackup(parseLosFutureBackup(JSON.stringify(exported)),2,"next-owner",target,"missing-only").imported,1);
+  assert.equal(JSON.parse(target.getItem(key(2,"01","next-owner"))!).readerMarks[id],highlight);
+  const bogus=makeDraft();bogus.readerMarks={[losFutureReaderMarkKey(3,"01","text-a")]:highlight};
+  assert.throws(()=>parseLosFutureBackup(JSON.stringify({
+    format:LOS_FUTURE_BACKUP_FORMAT,bookId:2,exportedAt:fixedDate.toISOString(),chapters:{"01":bogus},
+  })),/virheellinen/);
+});
+
+test("later-book backup refuses top-level owner/grade metadata and fabricated chapter mastery",()=>{
+  const base={format:LOS_FUTURE_BACKUP_FORMAT,bookId:2,exportedAt:fixedDate.toISOString()};
+  const original=makeDraft();original.note="Oma keskeneräinen harjoitus.";
+  for(const extra of [
+    {grade:"10"},{ownerId:"someone-else"},{masteryCertified:true},
+  ]){
+    assert.throws(()=>parseLosFutureBackup(JSON.stringify({
+      ...base,...extra,chapters:{"01":original},
+    })),/kelvollinen/);
+  }
+  for(const extra of [
+    {grade:"10"},{masteryScore:100},{certificate:true},
+  ]){
+    assert.throws(()=>parseLosFutureBackup(JSON.stringify({
+      ...base,chapters:{"01":{...original,...extra}},
+    })),/virheellinen/);
+  }
+  const olderDraft=makeDraft();
+  olderDraft.practiceAnswers={"LOS2-C01-T01":"Ennustin tilanteen ennen lukua."};
+  const imported=parseLosFutureBackup(JSON.stringify({...base,chapters:{"01":olderDraft}}));
+  assert.deepEqual(imported.chapters["01"]?.practiceAnswers,olderDraft.practiceAnswers,
+    "Older v1 draft with no optional future-book fields still imports");
+});
+
+test("direct import cannot write tampered draft even if caller bypasses the file parser",()=>{
+  const store=new FakeStore();
+  const previous=makeDraft();previous.note="Säilytä tämä vanha vastaus.";
+  store.setItem(key(2,"01"),JSON.stringify(previous));
+  const goodDraft=makeDraft();goodDraft.note="Tämä tulisi vasta hyväksytyn tuonnin mukana.";
+  const parsed=parseLosFutureBackup(JSON.stringify({
+    format:LOS_FUTURE_BACKUP_FORMAT,bookId:2,exportedAt:fixedDate.toISOString(),
+    chapters:{"01":goodDraft},
+  }));
+  const forged={...parsed,chapters:{"01":{...goodDraft,masteryScore:100}}};
+  assert.throws(()=>applyLosFutureBackup(
+    forged as unknown as typeof parsed,2,owner,store,"replace"),/virheellinen/);
+  assert.equal(JSON.parse(store.getItem(key(2,"01"))!).note,previous.note);
+  const result=applyLosFutureBackup(parsed,2,owner,store,"replace");
+  assert.equal(result.imported,1);
+  assert.equal(JSON.parse(store.getItem(key(2,"01"))!).note,goodDraft.note);
+});
+
+
+test("old and new reader highlights both survive an actual cross-device JSON transfer",()=>{
+  const bookId=2,chapterId="01",source="text-a";
+  const markKey=losFutureReaderMarkKey(bookId,chapterId,source);
+  const text=losFutureReaderText(bookId,chapterId,source);
+  const initial=losFutureReaderAppend(undefined,text,0,1,"yellow");
+  assert.ok(initial);
+  // The currently published source need not change to validate an archived
+  // older content version; the revision only changes the active hash.
+  const olderVersion=losFutureReaderTextVersion(text+" old revision");
+  const oldRaw=JSON.stringify({contentVersion:olderVersion,ranges:[{startToken:0,endToken:1,color:"yellow"}]});
+  const draft=makeDraft();
+  draft.readerMarks=losFutureReaderBeginUpdatedText({[markKey]:oldRaw},bookId,chapterId,source,text);
+  draft.readerMarks[markKey]=initial;
+  const store=new FakeStore();
+  store.setItem(key(bookId,chapterId),JSON.stringify(draft));
+  const exported=createLosFutureBackup(bookId,owner,store,fixedDate);
+  const imported=parseLosFutureBackup(JSON.stringify(exported));
+  const restored=new FakeStore();
+  applyLosFutureBackup(imported,bookId,"new-owner",restored,"missing-only");
+  const saved=JSON.parse(restored.getItem(key(bookId,chapterId,"new-owner"))??"null");
+  assert.equal(saved.readerMarks[markKey],initial);
+  assert.equal(saved.readerMarks[markKey+"@"+olderVersion],oldRaw);
+  assert.equal(JSON.stringify(saved.readerMarks).includes("grade"),false);
+});

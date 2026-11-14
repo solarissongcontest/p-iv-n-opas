@@ -1,0 +1,44 @@
+/* The ten-page LOS! reading shell remains a textbook, not a dashboard.
+ * This formative check shares the chapter accent and accessible typography. */
+.los-future-chapter-check{display:grid;gap:1.25rem;max-width:820px;margin:1.3rem auto 3rem;min-width:0}
+.los-future-check-heading{display:flex;align-items:flex-start;gap:.85rem}
+.los-future-check-heading>svg{flex-shrink:0;margin-top:.28rem;color:var(--los-book-accent,#866644)}
+.los-future-check-heading h2{margin:0;font-size:clamp(1.2rem,2vw,1.7rem)}
+.los-future-check-heading p{line-height:1.55;margin:.4rem 0 0}
+.los-future-check-warning{display:flex;align-items:flex-start;gap:.8rem;margin:0;border:1px solid #cabda7;background:#fbf8f0;padding:1rem 1.1rem;border-radius:10px;line-height:1.7;font-size:.91rem;color:#493e33}
+.los-future-check-warning svg{flex-shrink:0;margin-top:.12rem}
+.los-future-check-status{display:flex;gap:.6rem 1.3rem;flex-wrap:wrap;border-bottom:1px solid #e4ded6;padding:0 0 1rem;font-size:.84rem;color:#5b544d}
+.los-future-check-reading{border:1px solid #e3dccf;border-radius:10px;padding:.8rem 1.1rem;background:#fdfbf8}
+.los-future-check-reading summary{display:flex;align-items:center;gap:.6rem;cursor:pointer;font-weight:680;min-height:36px}
+.los-future-check-reading>p{white-space:pre-wrap;line-height:1.85;font-size:1.05rem;max-width:68ch}
+.los-future-check-questions{display:grid;gap:1.2rem}
+.los-future-check-question{min-width:0;padding:1.2rem;border:1px solid #e2dad1;border-radius:11px;background:#fffdfa}
+.los-future-check-question .los-eyebrow{font-size:.76rem;margin:0 0 .45rem}
+.los-future-check-question label{display:grid;gap:.5rem;line-height:1.65;margin-bottom:.85rem}
+.los-future-check-question label strong{font-size:1.07rem}
+.los-future-check-question label span{white-space:pre-wrap}
+.los-future-check-question textarea{box-sizing:border-box;width:100%;min-width:0;max-width:100%;border:1px solid #a9a098;border-radius:8px;background:#fff;color:#2d2926;padding:.8rem .95rem;font:inherit;font-size:1rem;line-height:1.55;resize:vertical}
+.los-future-check-question textarea:disabled{opacity:1;background:#f5f3ef;color:#4a443e}
+.los-future-chapter-check :is(textarea,input,button,summary):focus-visible{outline:3px solid var(--los-book-accent,#866644);outline-offset:3px}
+.los-future-check-model{display:grid;gap:.4rem;padding:1rem;margin-top:1rem;background:#f4f1eb;border-left:4px solid var(--los-book-accent,#866644);border-radius:5px;overflow-wrap:anywhere}
+.los-future-check-model p{margin:.2rem 0;line-height:1.65;white-space:pre-wrap}
+.los-future-check-model .los-future-check-review{color:#5a5046;font-size:.85rem}
+.los-future-check-actions{display:grid;gap:1rem;padding:1.2rem;border:1px solid #d9d2c8;border-radius:10px;background:#fffdfa}
+.los-future-check-actions>p{line-height:1.65;margin:0}
+.los-future-check-confirm{display:flex;align-items:flex-start;gap:.7rem;line-height:1.65;font-size:.93rem}
+.los-future-check-confirm input{flex-shrink:0;min-width:20px;min-height:20px;margin:.1rem 0 0}
+.los-future-check-actions button{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;min-height:44px;max-width:max-content;border:1px solid var(--los-book-accent,#866644);border-radius:9px;background:var(--los-book-accent,#866644);color:#fff;font:inherit;font-weight:700;padding:.7rem 1rem;cursor:pointer}
+.los-future-check-actions button:disabled{opacity:.45;cursor:not-allowed}
+.los-future-check-error{padding:.8rem 1rem;border-left:3px solid #c43b34}
+@media(max-width:600px){.los-future-check-question{padding:.85rem}.los-future-check-actions{padding:.85rem}.los-future-check-actions button{max-width:100%;width:100%}.los-future-check-warning{padding:.85rem}}
+
+/* LOS! dark reading mode, never a light paper floating on dark ink. */
+.dark .los-future-chapter-check{color:var(--los-ink,#f2f5f5)}
+.dark .los-future-check-warning{background:var(--los-subtle,#222d37);border-color:var(--los-line,#37434f);color:var(--los-ink,#f2f5f5)}
+.dark .los-future-check-status{border-color:var(--los-line,#37434f);color:var(--los-soft,#bec8cf)}
+.dark .los-future-check-reading,.dark .los-future-check-question,.dark .los-future-check-actions{background:var(--los-paper,#1a222b);border-color:var(--los-line,#37434f)}
+.dark .los-future-check-question textarea{background:var(--los-bg,#11161d);color:var(--los-ink,#f2f5f5);border-color:var(--los-line,#37434f)}
+.dark .los-future-check-question textarea:disabled{background:var(--los-subtle,#222d37);color:var(--los-soft,#bec8cf)}
+.dark .los-future-check-model{background:var(--los-subtle,#222d37);color:var(--los-ink,#f2f5f5)}
+.dark .los-future-check-model .los-future-check-review{color:var(--los-soft,#bec8cf)}
+.dark .los-future-check-actions button{color:white}

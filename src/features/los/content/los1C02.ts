@@ -15,7 +15,7 @@ export const LOS1_C02_LINES = [
   { id: "u01", speaker: "Franz", text: "Hallo, ich bin Franz. Wie heißt du?", meaning: "Hei, olen Franz. Mikä sinun nimesi on?" },
   { id: "u02", speaker: "Greta", text: "Hallo, Franz. Ich heiße Greta. Wie geht's?", meaning: "Hei, Franz. Minun nimeni on Greta. Mitä kuuluu?" },
   { id: "u03", speaker: "Franz", text: "Es geht mir gut. Kennst du den Lehrer?", meaning: "Minulle kuuluu hyvää. Tunnetko opettajan?" },
-  { id: "u04", speaker: "Greta", text: "Ja, er heißt Herr Weiß.", meaning: "Kyllä, hänen nimensä on herra Weiß." },
+  { id: "u04", speaker: "Greta", text: "Ja, er heißt Herr Weiß.", meaning: "Kyllä, häntä kutsutaan herra Weißiksi." },
   { id: "u05", speaker: "Franz", text: "Oh, danke, Greta. Bis dann!", meaning: "Ai, kiitos, Greta. Nähdään!" },
   { id: "u06", speaker: "Greta", text: "Wiedersehen!", meaning: "Näkemiin!" },
 ] as const;

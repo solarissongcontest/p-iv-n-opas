@@ -6,19 +6,25 @@ import {
   losRecallFromVocabulary,losRecallIsDue,losRecallReview,
   type LosRecallDirection,type LosRecallRating,
 } from "./recallEngine";
+import {losFutureRecallCardsFor} from "./losFutureRecallCards.ts";
 import "./los-recall.css";
 
 const REVIEW_LIMIT=10;
 
 /** Chapter-local vocabulary review, no automatic mastery/CEFR or speech score. */
-export function LosRecallCards({chapter,onBack}:{chapter:LosChapter;onBack:()=>void}){
-  const {draft,update,saved}=useLosChapterDraft(1,chapter.id);
+export function LosRecallCards({chapter,onBack,bookId=1}:{
+  chapter:LosChapter;onBack?:()=>void;bookId?:number;
+}){
+  const {draft,update,saved}=useLosChapterDraft(bookId,chapter.id);
   const [direction,setDirection]=useState<LosRecallDirection>("de-fi");
   const [scope,setScope]=useState<"due"|"all">("due");
   const [revealed,setRevealed]=useState(false);
   const [sessionReviewed,setSessionReviewed]=useState<string[]>([]);
   const [date,setDate]=useState(()=>new Date().toISOString());
-  const allCards=useMemo(()=>losRecallFromVocabulary(chapter.id,chapter.vocabulary),[chapter.id,chapter.vocabulary]);
+  const allCards=useMemo(()=>
+    bookId===1?losRecallFromVocabulary(chapter.id,chapter.vocabulary):
+      losFutureRecallCardsFor(bookId,chapter.id),
+    [bookId,chapter.id,chapter.vocabulary]);
   const cards=allCards.filter(card=>card.direction===direction);
   const progress=draft.recallCards??{};
   const due=cards.filter(card=>losRecallIsDue(progress[card.id],date));
@@ -48,8 +54,9 @@ export function LosRecallCards({chapter,onBack}:{chapter:LosChapter;onBack:()=>v
   const changeScope=(value:"due"|"all")=>{
     setScope(value);setSessionReviewed([]);setRevealed(false);setDate(new Date().toISOString());
   };
-  return <section className="los-inner-page los-recall" aria-label={"Kappaleen "+Number(chapter.id)+" sanaston kertauskortit"}>
-    <button type="button" className="los-recall-back" onClick={onBack}>Takaisin kappaleen sanastoon</button>
+  return <section className={bookId===1?"los-inner-page los-recall":"los-recall"}
+    aria-label={"Kappaleen "+Number(chapter.id)+" sanaston kertauskortit"}>
+    {onBack&&<button type="button" className="los-recall-back" onClick={onBack}>Takaisin kappaleen sanastoon</button>}
     <p className="los-eyebrow">WIEDERHOLEN / KAPITEL {Number(chapter.id)} / SANASTO</p>
     <h1>Sanaston kertauskortit</h1>
     <p className="los-page-intro">Palauta saksan sanoja muistista. Käännä kortti vasta oman yrityksen jälkeen ja arvioi itse, muistitko vastauksen. Korttien väli pitenee alustavasti yhden, kolmen, seitsemän, neljäntoista ja kolmenkymmenen päivän jaksoissa. Tämä ei mittaa ääntämistä eikä automaattisesti vahvista osaamistasoa.</p>
@@ -69,7 +76,9 @@ export function LosRecallCards({chapter,onBack}:{chapter:LosChapter;onBack:()=>v
       </fieldset>
     </div>
     <p className="los-recall-save" role="status">{saved?
+      bookId===1?
       "Kertausajat tallentuvat kappaleen opiskelutietoihin, JSON-varmuuskopioon ja valinnaiseen manuaaliseen pilvisynkronointiin.":
+      "Kertausajat tallentuvat tähän selaimeen ja siirtyvät kirjan omassa JSON-varmuuskopiossa. Automaattista laitteiden välistä synkronointia ei ole.":
       "Tallennus epäonnistui. Kertausmerkintää ei ole varmistettu."}</p>
     {!cards.length?<div className="los-recall-empty">
       <BookOpenCheck size={23}/><h2>Sanastokortteja valmistellaan</h2>
@@ -100,6 +109,9 @@ export function LosRecallCards({chapter,onBack}:{chapter:LosChapter;onBack:()=>v
         </>}
       </div>
     </div>}
+    {bookId>=2&&<p className="los-recall-footnote">LOS! {bookId}: sanasto on käsikirjoituksen toimituksellinen luonnos.
+      Suomenkieliset merkitykset ja saksan oikeinkirjoitus on vielä tarkistettava.
+      Kertauksen itsearvio ei osoita hyväksyttyä kielitaitotasoa.</p>}
     <p className="los-recall-footnote">Sanat tulevat vain LOS!:n omasta kappalesanastosta. Samaan sanapariin liittyvät tunnistus- ja tuottamismuisti tallennetaan erikseen. Kortin itsearvio ei korvaa kappaletestiä, alkuperäistekstin ymmärtämistä tai oikeaa puheen arviointia.</p>
   </section>;
 }
