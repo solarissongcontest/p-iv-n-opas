@@ -87,7 +87,7 @@ export const LOS_FUTURE_EXERCISES_4: Record<string, LosFutureExerciseDraft[]> = 
       "chapterId": "10",
       "group": "T",
       "title": "Käännä asiayhteydestä",
-      "prompt": "Kirjoita saksaksi: Voi käydä museossa..",
+      "prompt": "Kirjoita saksaksi: Voi käydä museossa.",
       "answerKey": "Man kann ein Museum besuchen.",
       "feedback": "",
       "assessment": "accepted-variants-review"
@@ -349,7 +349,7 @@ export const LOS_FUTURE_EXERCISES_4: Record<string, LosFutureExerciseDraft[]> = 
       "chapterId": "01",
       "group": "T",
       "title": "Käännä asiayhteydestä",
-      "prompt": "Kirjoita saksaksi: Opiskelen saksaa..",
+      "prompt": "Kirjoita saksaksi: Opiskelen saksaa.",
       "answerKey": "Ich lerne Deutsch.",
       "feedback": "",
       "assessment": "accepted-variants-review"
@@ -611,7 +611,7 @@ export const LOS_FUTURE_EXERCISES_4: Record<string, LosFutureExerciseDraft[]> = 
       "chapterId": "02",
       "group": "T",
       "title": "Käännä asiayhteydestä",
-      "prompt": "Kirjoita saksaksi: Berliini sijaitsee Saksan itäosassa..",
+      "prompt": "Kirjoita saksaksi: Berliini sijaitsee Saksan itäosassa.",
       "answerKey": "Berlin liegt im Osten Deutschlands.",
       "feedback": "",
       "assessment": "accepted-variants-review"
@@ -873,7 +873,7 @@ export const LOS_FUTURE_EXERCISES_4: Record<string, LosFutureExerciseDraft[]> = 
       "chapterId": "03",
       "group": "T",
       "title": "Käännä asiayhteydestä",
-      "prompt": "Kirjoita saksaksi: Tämä puisto on yhtä suuri kuin tuo puisto..",
+      "prompt": "Kirjoita saksaksi: Tämä puisto on yhtä suuri kuin tuo puisto.",
       "answerKey": "Dieser Park ist so groß wie jener Park.",
       "feedback": "",
       "assessment": "accepted-variants-review"
@@ -1135,7 +1135,7 @@ export const LOS_FUTURE_EXERCISES_4: Record<string, LosFutureExerciseDraft[]> = 
       "chapterId": "04",
       "group": "T",
       "title": "Käännä asiayhteydestä",
-      "prompt": "Kirjoita saksaksi: Matkustan junalla..",
+      "prompt": "Kirjoita saksaksi: Matkustan junalla.",
       "answerKey": "Ich fahre mit dem Zug.",
       "feedback": "",
       "assessment": "accepted-variants-review"
@@ -1397,7 +1397,7 @@ export const LOS_FUTURE_EXERCISES_4: Record<string, LosFutureExerciseDraft[]> = 
       "chapterId": "05",
       "group": "T",
       "title": "Käännä asiayhteydestä",
-      "prompt": "Kirjoita saksaksi: Talvella voi hiihtää..",
+      "prompt": "Kirjoita saksaksi: Talvella voi hiihtää.",
       "answerKey": "Man kann im Winter Ski fahren.",
       "feedback": "",
       "assessment": "accepted-variants-review"
@@ -1659,7 +1659,7 @@ export const LOS_FUTURE_EXERCISES_4: Record<string, LosFutureExerciseDraft[]> = 
       "chapterId": "06",
       "group": "T",
       "title": "Käännä asiayhteydestä",
-      "prompt": "Kirjoita saksaksi: Usein sanotaan ‘hei’..",
+      "prompt": "Kirjoita saksaksi: Usein sanotaan ‘hei’.",
       "answerKey": "Man sagt oft Hallo.",
       "feedback": "",
       "assessment": "accepted-variants-review"
@@ -1921,7 +1921,7 @@ export const LOS_FUTURE_EXERCISES_4: Record<string, LosFutureExerciseDraft[]> = 
       "chapterId": "07",
       "group": "T",
       "title": "Käännä asiayhteydestä",
-      "prompt": "Kirjoita saksaksi: Matkustimme Berliiniin..",
+      "prompt": "Kirjoita saksaksi: Matkustimme Berliiniin.",
       "answerKey": "Wir sind nach Berlin gefahren.",
       "feedback": "",
       "assessment": "accepted-variants-review"
@@ -2183,7 +2183,7 @@ export const LOS_FUTURE_EXERCISES_4: Record<string, LosFutureExerciseDraft[]> = 
       "chapterId": "08",
       "group": "T",
       "title": "Käännä asiayhteydestä",
-      "prompt": "Kirjoita saksaksi: Söin kakkua..",
+      "prompt": "Kirjoita saksaksi: Söin kakkua.",
       "answerKey": "Ich habe Kuchen gegessen.",
       "feedback": "",
       "assessment": "accepted-variants-review"
@@ -2445,7 +2445,7 @@ export const LOS_FUTURE_EXERCISES_4: Record<string, LosFutureExerciseDraft[]> = 
       "chapterId": "09",
       "group": "T",
       "title": "Käännä asiayhteydestä",
-      "prompt": "Kirjoita saksaksi: Pidän puistosta, koska se on rauhallinen..",
+      "prompt": "Kirjoita saksaksi: Pidän puistosta, koska se on rauhallinen.",
       "answerKey": "Ich mag den Park, weil er ruhig ist.",
       "feedback": "",
       "assessment": "accepted-variants-review"
