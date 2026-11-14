@@ -100,3 +100,23 @@ export function getLosPronunciation(word: string): LosPronunciation | null {
       entry.targetType === (normalized.includes(" ") ? "phrase" : "lemma"),
   ) ?? null;
 }
+
+/**
+ * Optional word-by-word reference when an entire phrase lacks its own IPA.
+ * Return *nothing* unless every word has a separately sourced lemma IPA.
+ * Do not join IPA strings or present them as a connected-speech reading.
+ */
+export function getLosSourcedWordIpaParts(phrase:string):readonly {
+  word:string; ipa:string; sourceUrl:string;
+}[] {
+  const words=phrase.trim().split(/\\s+/u).filter(Boolean);
+  if(words.length<2)return [];
+  const result:{word:string;ipa:string;sourceUrl:string}[]=[];
+  for(const word of words){
+    const pronunciation=getLosPronunciation(word);
+    if(pronunciation?.targetType!=="lemma"||!pronunciation.ipa||!pronunciation.ipaSourceUrl)
+      return [];
+    result.push({word,ipa:pronunciation.ipa,sourceUrl:pronunciation.ipaSourceUrl});
+  }
+  return result;
+}
