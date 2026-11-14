@@ -94,7 +94,7 @@ test("LOS! 2–8 answer drafts and review marks persist by owner/book/chapter wi
   await expectNoHorizontalOverflow(page);
 });
 
-test("LOS! 2–8 show all 60 source-written lessons while keeping exams non-executable",async({page})=>{
+test("LOS! 2–8 show all 60 lessons and protect local paper exam answer keys",async({page})=>{
   await enterFutureBook(page);
   await page.goto("/los#/4/path",{waitUntil:"domcontentloaded"});
   await expect(page.locator(".los-future-path-group")).toHaveCount(5);
@@ -108,7 +108,9 @@ test("LOS! 2–8 show all 60 source-written lessons while keeping exams non-exec
   await expect(page.locator(".los-guided-lesson-stage")).toContainText("Opettajan aloitus");
   await page.getByText("Kertaus ja välikoe",{exact:true}).click();
   await page.getByRole("button",{name:/Tunti 30: välikoe/i}).click();
-  await expect(page.locator(".los-guided-review")).toContainText("Kokeen ohje, ei avattu arvioitava koe");
+  await expect(page.locator(".los-guided-review")).toContainText("Kirjallinen harjoituskoe, ei hyväksytty arviointikoe");
+  await expect(page.locator(".los-future-exam")).toBeVisible();
+  await expect(page.locator(".los-future-exam-model")).toHaveCount(0);
   await expect(page.locator(".los-future-exercise-card")).toHaveCount(0);
   await expectNoHorizontalOverflow(page);
 });
@@ -555,18 +557,59 @@ test("LOS! 2 review L027 resumes written recall, shared exercise and self-assess
   await expectNoHorizontalOverflow(page);
 });
 
-test("book exams L030 and L059 remain locked while other review sessions teach",async({page})=>{
+test("book exams L030 and L059 offer manuscript practice, with no answers or audio leaked before submission",async({page})=>{
   await enterFutureBook(page);
   await page.goto("/los#/2/path",{waitUntil:"domcontentloaded"});
   await page.getByText("Kertaus ja välikoe",{exact:true}).click();
   await page.getByRole("button",{name:/Tunti 30: välikoe/i}).click();
   await expect(page.locator(".los-review-practice")).toHaveCount(0);
-  await expect(page.locator(".los-guided-review")).toContainText("Kokeen ohje, ei avattu arvioitava koe");
+  await expect(page.locator(".los-future-exam")).toBeVisible();
+  await expect(page.locator(".los-future-exam-model")).toHaveCount(0);
   await expect(page.locator(".los-guided-review textarea")).toHaveCount(0);
   await page.goto("/los#/8/path",{waitUntil:"domcontentloaded"});
   await page.locator(".los-future-path-group").nth(4).locator("summary").click();
   await page.getByRole("button",{name:/Tunti 59: loppukoe/i}).click();
   await expect(page.locator(".los-review-practice")).toHaveCount(0);
-  await expect(page.locator(".los-guided-review")).toContainText("Varsinaista koetta ei ole tässä toteutettu");
+  await expect(page.locator(".los-future-exam")).toBeVisible();
+  await expect(page.locator(".los-future-exam-model")).toHaveCount(0);
+  await expect(page.locator(".los-future-exam audio")).toHaveCount(0);
+  await expectNoHorizontalOverflow(page);
+});
+
+test("LOS! 2 source midterm keeps all answers hidden until explicit submission and preserves a retake archive",async({page})=>{
+  await enterFutureBook(page);
+  await page.goto("/los#/2/path",{waitUntil:"domcontentloaded"});
+  await page.getByText("Kertaus ja välikoe",{exact:true}).click();
+  await page.getByRole("button",{name:/Tunti 30: välikoe/i}).click();
+  const exam=page.locator(".los-future-exam");
+  await expect(exam).toBeVisible();
+  await expect(exam.locator(".los-future-exam-question")).toHaveCount(15);
+  await expect(exam.locator(".los-future-exam-reading p[lang='de']")).toContainText("Eva wohnt");
+  await expect(exam.getByText("Pienessä kaupungissa, perheensä kanssa.")).toHaveCount(0);
+  const response=exam.locator("textarea#LOS2-MID-R01");
+  await response.fill("Pienessä kaupungissa, perheensä kanssa.");
+  await exam.locator("textarea#LOS2-MID-W01").fill("Eva wohnt in einer kleinen Stadt.");
+  await expect(exam.getByRole("button",{name:"Palauta harjoituskoe"})).toBeDisabled();
+  await exam.getByRole("checkbox",{name:/Ymmärrän, että palauttamisen jälkeen/}).check();
+  await exam.getByRole("button",{name:"Palauta harjoituskoe"}).click();
+  await expect(exam.locator(".los-future-exam-model")).toHaveCount(16);
+  await expect(exam.getByText("Pienessä kaupungissa, perheensä kanssa.")).toBeVisible();
+  await expect(response).toBeDisabled();
+  await expect(exam).toContainText("Muut");
+  await page.reload({waitUntil:"domcontentloaded"});
+  await expect(exam.locator(".los-future-exam-model")).toHaveCount(16);
+  await exam.getByRole("checkbox",{name:/Aloita uusinta/}).check();
+  await exam.getByRole("button",{name:"Aloita uusi yritys"}).click();
+  await expect(response).toBeEnabled();
+  await expect(response).toHaveValue("");
+  await expect(exam.locator(".los-future-exam-model")).toHaveCount(0);
+  const stored=await page.evaluate(()=>{
+    const owner=localStorage.getItem("opk.owner-id");
+    return localStorage.getItem(`los.local.v1.${owner}.2.05`);
+  });
+  const parsed=JSON.parse(stored??"{}");
+  const attempts=JSON.parse(parsed.testAnswers["LOS2-MID:history"]);
+  expect(attempts).toHaveLength(1);
+  expect(attempts[0].answers["LOS2-MID-R01"]).toBe("Pienessä kaupungissa, perheensä kanssa.");
   await expectNoHorizontalOverflow(page);
 });
