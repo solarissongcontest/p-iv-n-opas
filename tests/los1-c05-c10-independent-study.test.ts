@@ -2,6 +2,7 @@ import {test} from "node:test";
 import assert from "node:assert/strict";
 import {readFileSync} from "node:fs";
 import {getLosOpenDialogue} from "../src/features/los/content/los1OpenDialogues.ts";
+import {LOS_BOOKS} from "../src/features/los/catalog.ts";
 
 const grammar=()=>readFileSync("src/features/los/LosGrammarChapters.tsx","utf8");
 
@@ -39,4 +40,18 @@ test("C10 provides an ungraded six-skill check after existing 2 dialogues and th
   const application=readFileSync("src/features/los/LosSupplementalSections.tsx","utf8");
   assert.match(application,/"10":\{title:"Kaksi kohtaamista ja kolmannen henkilön esittely"/);
   assert.match(application,/Kirjoita lopuksi erillinen neljän helpon virkkeen esittely/);
+});
+
+test("C10 core vocabulary does not incorrectly force Freund/Freundin to mean only platonic friend",()=>{
+  const ch=LOS_BOOKS.find(b=>b.id===1)?.chapters.find(c=>c.id==="10");
+  assert.ok(ch);
+  assert.equal(ch.vocabulary.length,16,"chapter word count must not change");
+  const masculine=ch.vocabulary.find(x=>x.startsWith("mein Freund – "));
+  const feminine=ch.vocabulary.find(x=>x.startsWith("meine Freundin – "));
+  assert.ok(masculine?.includes("ystäväni") && masculine.includes("poikaystäväni"));
+  assert.ok(feminine?.includes("ystäväni") && feminine.includes("tyttöystäväni"));
+  assert.match(grammar(),/ein Freund von mir/);
+  assert.match(grammar(),/eine Freundin von mir/);
+  assert.match(grammar(),/Tilanne ratkaisee/);
+  assert.equal(LOS_BOOKS.find(b=>b.id===1)?.chapters.reduce((n,c)=>n+c.vocabulary.length,0),173);
 });
