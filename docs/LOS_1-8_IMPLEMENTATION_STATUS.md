@@ -41,7 +41,7 @@ Tämä tiedosto on ainoa LOS! 1–8:n *toteutuksen* jatkotilaraportti. Visuaalin
 
 - **Edellinen varmistettu koodi:** `d54769c9229c2b908bf13f7f191fa0fe4917dfb0`: Quality Gate 729/729 yksikkötestiä + lint, TS ja build hyväksytty ([ajo 43533825654](https://github.com/solarissongcontest/p-iv-n-opas/actions/runs/43533825654)). Browser QA ([ajo 43533825781](https://github.com/solarissongcontest/p-iv-n-opas/actions/runs/43533825781)) **150/156**, kuusi epäonnistui.
 - **Viimeisin todetusti hyväksytty Quality Gate tässä toteutuskierroksessa:** commit `b3063ace8a383cd319e767aa27a52ab8aeb03b45`, [ajo 43583050823](https://github.com/solarissongcontest/p-iv-n-opas/actions/runs/43583050823): **751/751** yksikkötestiä, TypeScript, lint, build ja Vercel-build-pariteetti hyväksytty. Tämä ajo edeltää myöhempiä Teacher 2.0 -muutoksia.
-- **Viimeisin koodicommitti tämän merkinnän kohdalla:** `0899f49c3bf06d5be3ad37fb3ab45b2706b7e5f3`. Uusimman HEADin Quality Gate- ja Chromium/WebKit-tulos **ei vielä varmistunut** tämän kirjauksen hetkellä. Tarkista GitHub Actions ennen mitään yhdistämistä.
+- **Viimeisin toiminnallinen koodicommitti tämän merkinnän kohdalla:** `8c3191da953bfb2e114dc90df95107f5a2f6a93d` (T05:n selaintesti), jonka jälkeen vain tätä tilaraporttia on päivitetty. Uusimman HEADin Quality Gate- ja Chromium/WebKit-tulos **ei vielä varmistunut** tämän kirjauksen hetkellä. Tarkista GitHub Actions ennen mitään yhdistämistä.
 - Fyysinen iPhone/Linux, oikea ulkoisen audion toisto, riippumaton saksanopettaja, 30 minuutin oppimispilotit sekä manuaalinen ruudunlukija- ja 200 % zoom -auditointi: **ei tehty**.
 
 ## Pääominaisuuksien avoimet portit
