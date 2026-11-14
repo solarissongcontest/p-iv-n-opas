@@ -34,7 +34,7 @@ function LessonItem({lesson,selected,onSelect}:{
         <strong>{lesson.title}</strong>
         <small>{lesson.chapterId
           ? `Kappale ${Number(lesson.chapterId)} · ${lesson.chapterTitle} · ${lesson.estimatedMinutes} min · käsikirjoitusluonnos`
-          : `${isExam?"Kokeen ohje, ei toimiva koe":"Ohjattu kertaus, ei hyväksytty arviointi"} · ${lesson.estimatedMinutes} min`}</small>
+          : `${isExam?"Kirjallinen harjoituskoe, ei arviointihyväksytty":"Ohjattu kertaus, ei hyväksytty arviointi"} · ${lesson.estimatedMinutes} min`}</small>
       </span>
       {isExam?<LockKeyhole size={17} aria-hidden="true"/>:
         lesson.phase==="review"?<ClipboardList size={17} aria-hidden="true"/>:
@@ -96,7 +96,9 @@ export function LosFutureLearningPath({book,move}:{
         äänitteet, lopputarkistuksen luotettavuus ja koko tuntien suorituskriteeristö odottavat hyväksyntää.
         Kahdeksan kirjan ei-koemuotoiset kertaukset sisältävät nelivaiheisen harjoituspolun,
         jossa omat vastaukset tallentuvat turvallisesti kirjakohtaisesti.
-        Väli- ja loppukokeita ei käynnistetä pelkistä koetuntien ohjeista.
+        Väli- ja loppukokeissa on nyt alkuperäisiin käsikirjoituksiin perustuva kirjallinen
+        harjoituskoe, jonka vastaukset avautuvat vasta oman yrityksen palauttamisen jälkeen.
+        Kuuntelua ja luotettavaa avointen vastausten kokonaisarviointia ei vielä ole.
         Pelkkä siirtymä sisältösivulle ei muuta oppituntia suoritetuksi.</p>
     </div>
     <LosFutureProgressPanel book={book} onResume={resumeLesson}/>
