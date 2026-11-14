@@ -5,6 +5,7 @@ import { ArrowLeft, ArrowRight, BookOpen, Check, CircleAlert, ClipboardList, Loc
 import { getLosFutureLesson } from "./content/losFutureLessons.ts";
 import type { LosFutureLessonContent } from "./content/losFutureLessonTypes.ts";
 import { LosFutureExercises } from "./LosFutureExercises";
+import { LosFutureReviewPractice } from "./LosFutureReviewPractice";
 import { useLosChapterDraft } from "./studyState";
 import type { LosNavigate } from "./LosReferenceTools";
 
@@ -171,6 +172,8 @@ export function LosFutureLessonRunner({bookId,number,chapterId,move}:{
     <h2>{script.title}</h2>
     {script.kind==="chapter"&&chapterId
       ? <GuidedChapterLesson key={script.id} bookId={bookId} chapterId={chapterId} script={script} move={move}/>
-      : <ReviewLesson script={script}/>}
+      : (number===30||number===59)
+        ? <ReviewLesson script={script}/>
+        : <LosFutureReviewPractice key={script.id} bookId={bookId} script={script} move={move}/>} 
   </section>;
 }
