@@ -202,6 +202,25 @@ export function evaluateTeacherAnswer(question: TeacherQuestion, answer: string)
   return (question.accepted ?? []).some(item =>
     normalizeTeacherAnswer(item) === normalizeTeacherAnswer(answer));
 }
+/**
+ * Recover navigation after a manuscript changes scene IDs. A saved session may
+ * still refer to an earlier scene that no longer exists. Prefer the next
+ * unvisited current scene, then the most recently visited surviving scene.
+ *
+ * This is navigation recovery, NOT content migration: keep every historical
+ * draft, answer, attempt, activity, completion timestamp and contentVersion.
+ * Do not manufacture visits or independent skill evidence.
+ */
+export function recoverTeacherSession(session: TeacherSession, lesson: TeacherLesson): TeacherSession {
+  if(session.lessonId!==lesson.id || lesson.scenes.some(scene=>scene.id===session.sceneId))
+    return session;
+  const known=new Set(lesson.scenes.map(scene=>scene.id));
+  const next=lesson.scenes.find(scene=>!session.visitedIds.includes(scene.id))?.id ??
+    [...session.visitedIds].reverse().find(id=>known.has(id)) ??
+    lesson.scenes[0]?.id;
+  return next ? {...session,sceneId:next} : session;
+}
+
 export function moveTeacherScene(session: TeacherSession, lesson: TeacherLesson, targetId: string, now: string): TeacherSession {
   if (!lesson.scenes.some(s => s.id === targetId)) return session;
   return {
