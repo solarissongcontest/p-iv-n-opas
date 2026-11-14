@@ -93,7 +93,7 @@ test("malformed or cross-book chapter check data cannot be silently repaired or 
   const wrong=JSON.stringify({version:1,answers:{[other.tasks[0]!.id]:"Wrong book"},submittedAt:null});
   assert.equal(readLosFutureChapterCheckAttempt(wrong,plan),null);
   const inventedGrade=JSON.stringify({...emptyLosFutureChapterCheckAttempt(),score:5});
-  assert.ok(readLosFutureChapterCheckAttempt(inventedGrade,plan));
+  assert.equal(readLosFutureChapterCheckAttempt(inventedGrade,plan),null);
   const tooLarge=JSON.stringify({version:1,answers:{[plan.tasks[4]!.id]:"x".repeat(3000)},submittedAt:null});
   assert.equal(readLosFutureChapterCheckAttempt(tooLarge,plan),null);
   const submitted=saveLosFutureChapterCheckAnswer(emptyLosDraft(),plan,plan.tasks[0]!.id,"correct");
