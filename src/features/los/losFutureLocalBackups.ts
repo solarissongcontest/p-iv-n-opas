@@ -28,6 +28,7 @@ const validDate=(date:unknown):date is string=>typeof date==="string"&&date.leng
 
 function allowedKeys(bookId:number,chapterId:string){
   const book=LOS_BOOKS[bookId-1];
+  if(!book||book.id!==bookId)throw Error("Kirjan sisältörunkoa ei löydy varmuuskopion tarkistusta varten.");
   const taskIds=losFutureExercisesFor(bookId,chapterId).map(x=>x.id);
   const scripts=losFutureLessonOutline(book).filter(item=>item.chapterId===chapterId);
   const answers=new Set([...taskIds,...scripts.map(s=>s.id+":own-reflection")]);
