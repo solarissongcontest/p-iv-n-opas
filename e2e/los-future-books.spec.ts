@@ -156,3 +156,52 @@ test("LOS! 2–8 practice dashboard restores the first untried stage across relo
   await expect(page.locator(".los-future-progress")).toContainText("2/300");
   await expectNoHorizontalOverflow(page);
 });
+
+test("LOS! 2 backup import restores exercise answers and guided self-checks without spilling into another book",async({page})=>{
+  await enterFutureBook(page);
+  const draft={
+    version:1,note:"My private German practice.",applicationDraft:"",bookmarked:false,
+    practiceAnswers:{"LOS2-C01-T07":"Ich spreche Deutsch."},
+    practiceChecked:["los.future.guided:LOS2-L002:start"],
+    testAnswers:{},testSubmittedAt:null,selfAssessment:"",updatedAt:"2026-11-14T00:00:00.000Z",
+  };
+  const payload=Buffer.from(JSON.stringify({
+    format:"los-future-book-backup-v1",bookId:2,
+    exportedAt:"2026-11-14T00:00:00.000Z",chapters:{"01":draft},
+  }),"utf8");
+  await page.goto("/los#/2/appendix",{waitUntil:"domcontentloaded"});
+  await expect(page.getByRole("heading",{name:"Varmuuskopioi harjoittelu ja siirrä se laitteiden välillä"})).toBeVisible();
+  await page.locator('.los-backup-section input[type="file"]').setInputFiles({
+    name:"LOS-2-testi.json",mimeType:"application/json",buffer:payload,
+  });
+  await expect(page.locator(".los-backup-preview")).toContainText("LOS! 2");
+  await page.getByRole("button",{name:"Tuo vain puuttuvat (1)"}).click();
+  await expect(page.locator(".los-backup-status")).toContainText("Tuotu 1 kappaleen tallennusta");
+  await page.goto("/los#/2/01/practice",{waitUntil:"domcontentloaded"});
+  await expect(page.locator("#los-future-exercise-input")).toHaveValue("Ich spreche Deutsch.");
+  await page.goto("/los#/2/path",{waitUntil:"domcontentloaded"});
+  await expect(page.locator(".los-future-progress")).toContainText("1/300");
+  await expect(page.locator(".los-future-progress")).toContainText("1/260");
+  await page.goto("/los#/3/01/practice",{waitUntil:"domcontentloaded"});
+  await expect(page.locator("#los-future-exercise-input")).toHaveValue("");
+  await page.goto("/los#/3/appendix",{waitUntil:"domcontentloaded"});
+  await page.locator('.los-backup-section input[type="file"]').setInputFiles({
+    name:"LOS-2-testi.json",mimeType:"application/json",buffer:payload,
+  });
+  await expect(page.locator(".los-backup-status")).toContainText("kuuluu kirjaan LOS! 2");
+  await expect(page.locator(".los-backup-preview")).toHaveCount(0);
+  await expectNoHorizontalOverflow(page);
+});
+
+test("LOS! 2 download offers a private book-specific file instead of claiming cloud sync",async({page})=>{
+  await enterFutureBook(page);
+  await page.goto("/los#/2/appendix",{waitUntil:"domcontentloaded"});
+  const [download]=await Promise.all([
+    page.waitForEvent("download"),
+    page.getByRole("button",{name:"Vie LOS! 2:n varmuuskopio"}).click(),
+  ]);
+  expect(download.suggestedFilename()).toMatch(/^LOS-2-varmuuskopio-\d{4}-\d{2}-\d{2}\.json$/);
+  await expect(page.locator(".los-backup-status")).toContainText("Ladattiin LOS! 2:n varmuuskopio");
+  await expect(page.locator(".los-backup-section")).toContainText("ei ole automaattinen pilvisynkronointi");
+  await expectNoHorizontalOverflow(page);
+});
