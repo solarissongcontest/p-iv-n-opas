@@ -88,6 +88,12 @@ Tämä tiedosto on ainoa LOS! 1–8:n *toteutuksen* jatkotilaraportti. Visuaalin
 - Näiden neljän harjoituksen tunnisteet, saksankieliset alkuperäiset lähtölauseet, `correction`-vastaustyyppi ja aiemmin tallennetut kaksi vastauskenttää säilyivät. Nimi, suomenkielinen ohje ja itsearviointimalli korjattiin. Testi käy läpi kaikki 70 T10-tehtävää sekä vanhan rakenteen vastaukset.
 - Nachfeldin kielioppiperiaatteen ulkoinen tarkistus: Institut für Deutsche Sprache / grammis, [Nachfeld](https://grammis.ids-mannheim.de/systematische-grammatik/4787) ja [Wortstellung](https://grammis.ids-mannheim.de/progr%40mm/6860). Tämä lähdepohjainen korjaus **ei ole** koko LOS!-materiaalin riippumaton natiivikielentarkistus. CI ja erillinen opiskelijatestin näyttö vaaditaan.
 
+## 14.11.2026 · T15:n 70 ääneenlukuharjoituksen lähdelauseet näkyviin
+
+- LOS! 2–8:n T15:ssä kaksi saksankielistä lausetta näytetään nyt **suoraan avoimessa lähdelaatikossa**, säilyttäen kirjoitetut rivinvaihdot ja välimerkit. Aiempi toistuva tehtävänanto ja siihen syntyneet kaksinkertaiset välimerkit on korvattu selkeällä, yhteisellä ääneenlukuohjeella.
+- Omat kolme harjoitusvastauksen kenttää, alkuperäiset lähdelauseet ja aiemmin tallennetut vastaukset pysyvät samoina. Tämä on ääntämisen *oman harjoittelun* käyttöliittymä, ei tutkittu puheentunnistus, autenttinen äänite, hyväksytty IPA tai ääntämisen pistemäärä. E2E-testi tarkistaa lähdelauseiden näkyvyyden ja oikean tehtävänannon.
+- Muutosten CI-kokonaisuus on hyväksyttävä uudesta HEADista; aikaisemman testiajon onnistuminen ei riitä hyväksynnäksi uudelle koodille.
+
 ## 14.11.2026 · Koko sarjan kappalesanaston mobiilihakemisto ja R01:n sanarajat
 
 - **Kappalesanasto (LOS! 1–8):** kahdeksan kirjan paikallinen opetussanasto säilyy kokonaan haettavana suomeksi ja saksaksi, mutta hakemisto näyttää aluksi vain 60 riviä kerrallaan. Seuraavat 60 riviä voidaan avata kosketukselle sopivilla painikkeilla, ja haun tai kirjalaajuuden vaihtaminen palaa ensimmäiseen erään. Tämä vähentää pitkän lista-UI:n tarpeetonta renderöintiä etenkin puhelimilla; mitään sanastoa ei poisteta eikä pilvisanakirjaan kirjoiteta. Korjattu myös virheellinen teksti, jonka mukaan muiden keskeneräisten kirjojen sanastoja ei olisi lainkaan mukana. Koko sarjan sanastot ovat edelleen lähdekäsikirjoituksen luonnoksia, eivät hyväksytty yleissanakirja.
