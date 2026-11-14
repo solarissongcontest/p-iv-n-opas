@@ -3,6 +3,7 @@ import { LOS_BOOKS } from "../catalog.ts";
 import { LOS_FUTURE_MANUSCRIPTS } from "../content/losFutureManuscripts.ts";
 import { getLosFutureLesson } from "../content/losFutureLessons.ts";
 import { losFutureLessonOutline } from "../losFutureLessonOutline.ts";
+import { futureVocabularyCheck } from "./futureVocabularyCheck.ts";
 
 /** Reuse the exact Teacher 2.0 player and its owner/book/chapter session store.
  * The 350 sourced chapter scripts are *unapproved previews*, never scores.
@@ -25,6 +26,7 @@ export function getLosFutureTeacherLesson(id: string): TeacherLesson | undefined
   const chapterId = outline.chapterId;
   const manuscript = LOS_FUTURE_MANUSCRIPTS[bookId]?.[chapterId];
   if (!manuscript || manuscript.vocabulary.length < 4) return undefined;
+  const vocabCheck=futureVocabularyCheck(bookId,chapterId,number,manuscript);
   const bookLinks = [
     {label:"Lue koko Text A",chapterId,section:"text",instruction:"Avaa oman kappaleen kokonainen harjoituslukuteksti."},
     {label:"Katso kieliopin opetus",chapterId,section:"grammar",instruction:"Vertaa käsikirjoituksen lausetta omaan malliin."},
@@ -42,11 +44,16 @@ export function getLosFutureTeacherLesson(id: string): TeacherLesson | undefined
       reflection:{prompt:"Mitä muistat ennestään tästä aiheesta?",placeholder:"Kirjoita yksi muistamasi asia...",minLength:2},help},
     {id:"board",phase:"Havainnollista",kind:"board",title:"Opetustaulu: neljä kappaleen ilmaisua",
       paragraphs:["Tutustu kappaleen sanoihin. Avaa suomenkielinen merkitys vaiheittain. Sanasto odottaa toimituksellista tarkistusta."],
-      board:manuscript.vocabulary.slice(0,4).map(entry=>({label:"Sana ja merkitys",german:entry.de,meaning:entry.fi})),help},
+      board:vocabCheck?.board ?? manuscript.vocabulary.slice(0,4).map(entry=>({label:"Sana ja merkitys",german:entry.de,meaning:entry.fi})),help},
     {id:"model",phase:"Mallin purku",kind:"explanation",title:"Näin esimerkkivastaus rakentuu",
       paragraphs:[script.model],help},
     {id:"guide",phase:"Opeta",kind:"explanation",title:"Vaiheittainen opetus",
       paragraphs:[script.guidance],help},
+    ...(vocabCheck?[{id:"vocabulary-check",phase:"Ymmärryksen tarkistus",kind:"question" as const,
+      title:"Palauta yksi kappaleen sana muistista",
+      paragraphs:["Valitse opetustaulun sanan merkitys ilman mallia. Tämä on ohjattua kertauspalautetta, ei arvioitua kielitaidon näyttöä.",
+        "Virheellisen vastauksen jälkeen saat täsmällisen sanakohtaisen korjausohjeen."],
+      question:vocabCheck.question,help}]:[]),
     {id:"guided",phase:"Harjoittele ohjatusti",kind:"book",title:"Tämän tunnin omat tehtävät",
       paragraphs:[script.attempt,"Tee alla käsikirjoituksesta poimitut tehtävät. Vertaa vastaustasi itse. Tätä ei arvostella automaattisesti."],bookLinks,help},
     {id:"practice",phase:"Harjoittele itsenäisesti",kind:"book",title:"Itsenäinen soveltava harjoitus",
