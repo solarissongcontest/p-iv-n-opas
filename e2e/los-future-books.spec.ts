@@ -42,14 +42,14 @@ test("LOS! 2–8 exercise pages use the source's exact 9/14/3 section distributi
   }
 });
 
-/** Select the real open-response T18 exercise, rather than assuming every
- * source task renders the legacy textarea. T07 is now a working inline gap. */
+/** Select T13, a real open-response task in the *practice* section.
+ * T18 belongs to the separate apply section. T07 is now an inline gap. */
 async function selectOpenDraftExercise(page:import("@playwright/test").Page){
   const picker=page.locator("#los-future-exercise-choice");
   await expect(picker).toBeVisible();
   const options=await picker.locator("option").allTextContents();
-  const index=options.findIndex(label=>label.trim().startsWith("T18 ·"));
-  expect(index,"T18 open-response exercise must be listed").toBeGreaterThanOrEqual(0);
+  const index=options.findIndex(label=>label.trim().startsWith("T13 ·"));
+  expect(index,"T13 open-response exercise must be listed in practice").toBeGreaterThanOrEqual(0);
   await picker.selectOption({index});
   const answer=page.locator("#los-future-exercise-input");
   await expect(answer).toBeVisible();
