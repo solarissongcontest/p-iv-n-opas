@@ -21,7 +21,7 @@ const strMap=(v:unknown,maxKeys:number,maxLength:number)=>{
     key.length<=110&&textUnder(value,maxLength));
 };
 function validBook(bookId:unknown):bookId is number{
-  return Number.isInteger(bookId)&&typeof bookId==="number"&&bookId>=2&&bookId<=8;
+  return typeof bookId==="number"&&Number.isInteger(bookId)&&bookId>=2&&bookId<=8;
 }
 const validDate=(date:unknown)=>typeof date==="string"&&date.length<=40&&
   /^\d{4}-\d{2}-\d{2}T/.test(date)&&Number.isFinite(Date.parse(date));
