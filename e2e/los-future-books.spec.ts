@@ -839,3 +839,68 @@ test("T04 literal span and T14 two-source genres persist separately without prem
   expect(JSON.parse(data["LOS2-C01-T14"]).answers).toHaveLength(2);
   await expectNoHorizontalOverflow(page);
 });
+
+test("T01 prediction unlocks the original text only after two guesses, then saves reflection",async({page})=>{
+  await enterFutureBook(page);
+  await page.goto("/los#/2/01/understand",{waitUntil:"domcontentloaded"});
+  const task=page.locator(".los-future-remaining");
+  await expect(task).toBeVisible();
+  await expect(task.locator("textarea")).toHaveCount(3);
+  await expect(task.locator(".los-future-remaining-source blockquote")).toHaveCount(0);
+  await task.locator("textarea").nth(0).fill("Uudet opiskelijat kohtaavat.");
+  await task.locator("textarea").nth(1).fill("He opiskelevat saksaa yhdessä.");
+  await expect(task.locator(".los-future-remaining-source details")).toBeVisible();
+  await expect(task.locator("textarea").nth(2)).toBeEnabled();
+  await task.locator("textarea").nth(2).fill("Toinen ennustus osui lähelle.");
+  await expect(page.getByRole("button",{name:"Näytä vastausluonnos"})).toBeEnabled();
+  await page.reload({waitUntil:"domcontentloaded"});
+  await expect(task.locator("textarea").nth(2)).toHaveValue("Toinen ennustus osui lähelle.");
+  await expectNoHorizontalOverflow(page);
+});
+
+test("T15 pronunciation notes, T16 own question and T17 transformations keep their source drafts",async({page})=>{
+  await enterFutureBook(page);
+  await page.goto("/los#/2/01/practice",{waitUntil:"domcontentloaded"});
+  const picker=page.locator("#los-future-exercise-choice");
+  const form=page.locator(".los-future-remaining");
+  const show=page.getByRole("button",{name:"Näytä vastausluonnos"});
+  for(const [id,labels] of [
+    ["T15 · Harjoittele puheen rytmiä",["Wir LERnen Deutsch.","SIE wohnen ZUsammen.","Harjoittelin, mutta äänimallia ei vielä ole."]],
+    ["T16 · Rakenna uusi kysymys",["Was macht ihr am Wochenende?","Tarkistin verbin paikkaa ja kysymysmerkin."]],
+    ["T17 · Muokkaa henkilötietoa",["Wir lernen Deutsch.","Vaihdoin puhujan.","Monikon verbimuoto on lernen."]],
+  ] as const){
+    await picker.selectOption({label:id});
+    await expect(form.locator("textarea")).toHaveCount(labels.length);
+    await expect(show).toBeDisabled();
+    for(let i=0;i<labels.length;i++)await form.locator("textarea").nth(i).fill(labels[i]!);
+    await expect(show).toBeEnabled();
+  }
+  await expect(page.locator(".los-future-remaining audio")).toHaveCount(0);
+  await expectNoHorizontalOverflow(page);
+});
+
+test("T18 writing revision, R04 context words and R05 two-sentence summary use independent source steps",async({page})=>{
+  await enterFutureBook(page);
+  await page.goto("/los#/8/10/apply",{waitUntil:"domcontentloaded"});
+  let picker=page.locator("#los-future-exercise-choice");
+  await picker.selectOption({label:"T18 · Tuota kappaleen oma teksti"});
+  let form=page.locator(".los-future-remaining");
+  await expect(form.locator("textarea")).toHaveCount(3);
+  await form.locator("textarea").nth(0).fill("Ich lerne Deutsch. Das ist wichtig.");
+  await form.locator("textarea").nth(1).fill("Korjasin verbin paikan.");
+  await form.locator("textarea").nth(2).fill("Ich lerne jeden Tag Deutsch.");
+  await page.goto("/los#/8/10/practice",{waitUntil:"domcontentloaded"});
+  picker=page.locator("#los-future-exercise-choice");
+  await picker.selectOption({label:"R04 · vocab-in-context"});
+  form=page.locator(".los-future-remaining");
+  await expect(form.locator("textarea")).toHaveCount(9);
+  await form.locator("textarea").nth(0).fill("Thema");
+  await expect(page.getByRole("button",{name:"Näytä vastausluonnos"})).toBeDisabled();
+  await picker.selectOption({label:"R05 · text-summary"});
+  await expect(form.locator("textarea")).toHaveCount(4);
+  await form.locator("textarea").nth(0).fill("Die Schüler lernen.");
+  await form.locator("textarea").nth(1).fill("Sie arbeiten zusammen.");
+  await form.locator("textarea").nth(3).fill("Otin pääasian mukaan.");
+  await expect(page.getByRole("button",{name:"Näytä vastausluonnos"})).toBeEnabled();
+  await expectNoHorizontalOverflow(page);
+});

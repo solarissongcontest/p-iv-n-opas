@@ -12,6 +12,8 @@ import {losFutureEvidenceTask,readLosFutureEvidenceAnswer,writeLosFutureEvidence
 import {losFutureReasoningTask,readLosFutureReasoningAnswer,writeLosFutureReasoningAnswer} from "./content/losFutureReasoning.ts";
 import {losFutureSpanGenreTask,readLosFutureSpanGenreAnswer,losFutureSpanGenreComplete} from "./content/losFutureSpanGenre.ts";
 import {LosFutureSpanGenreFields} from "./LosFutureSpanGenreFields.tsx";
+import {losFutureRemainingTask,readLosFutureRemainingAnswer,losFutureRemainingComplete} from "./content/losFutureRemaining.ts";
+import {LosFutureRemainingFields} from "./LosFutureRemainingFields.tsx";
 import {losFutureFourTurnTask,readLosFutureFourTurnAnswer,writeLosFutureFourTurnAnswer} from "./content/losFutureFourTurn.ts";
 import { losFutureShortAnswer } from "./content/losFutureShortAnswer.ts";
 import { losFutureOrderingTiles, readLosFutureOrderingAnswer, writeLosFutureOrderingAnswer } from "./content/losFutureOrdering.ts";
@@ -47,6 +49,9 @@ export function LosFutureExercises({bookId,chapterId,mode,taskIds}:{
   const fourTurn=task ? losFutureFourTurnTask(task) : null;
   const fourAnswers=fourTurn && task
     ? readLosFutureFourTurnAnswer(draft.practiceAnswers[task.id]??"",fourTurn) : null;
+  const remaining=task ? losFutureRemainingTask(task) : null;
+  const remainingAnswers=remaining && task
+    ? readLosFutureRemainingAnswer(draft.practiceAnswers[task.id]??"",remaining) : null;
   const spanGenre=task ? losFutureSpanGenreTask(task) : null;
   const spanGenreAnswer=spanGenre && task
     ? readLosFutureSpanGenreAnswer(draft.practiceAnswers[task.id]??"",spanGenre) : null;
@@ -149,7 +154,9 @@ export function LosFutureExercises({bookId,chapterId,mode,taskIds}:{
                 changeAnswer(task.id,writeLosFutureExitAnswer(exitTicket,next));
               }}/>
           </label>)}
-        </fieldset> : spanGenre && spanGenreAnswer ? <LosFutureSpanGenreFields
+        </fieldset> : remaining && remainingAnswers ? <LosFutureRemainingFields
+          task={remaining} answer={remainingAnswers} onChange={raw=>changeAnswer(task.id,raw)}/>
+          : spanGenre && spanGenreAnswer ? <LosFutureSpanGenreFields
           task={spanGenre} answer={spanGenreAnswer} onChange={raw=>changeAnswer(task.id,raw)}/>
           : fourTurn && fourAnswers ? <fieldset className="los-future-four-turn">
           <legend>Kirjoita itse neljän vuoron keskustelu</legend>
@@ -326,7 +333,8 @@ export function LosFutureExercises({bookId,chapterId,mode,taskIds}:{
               ||(Boolean(evidenceTask)&&Boolean(evidenceAnswers)&&evidenceAnswers!.some(answer=>!answer.trim()))
               ||(Boolean(reasoning)&&Boolean(reasoningAnswers)&&reasoningAnswers!.some(answer=>!answer.trim()))
               ||(Boolean(fourTurn)&&Boolean(fourAnswers)&&fourAnswers!.some(answer=>!answer.trim()))
-              ||(Boolean(spanGenre)&&Boolean(spanGenreAnswer)&&!losFutureSpanGenreComplete(spanGenre!,spanGenreAnswer!))}
+              ||(Boolean(spanGenre)&&Boolean(spanGenreAnswer)&&!losFutureSpanGenreComplete(spanGenre!,spanGenreAnswer!))
+              ||(Boolean(remaining)&&Boolean(remainingAnswers)&&!losFutureRemainingComplete(remaining!,remainingAnswers!))}
             onClick={()=>setShowAnswer(v=>!v)}>
             <CircleHelp size={16} aria-hidden="true"/>
             {showAnswer?"Piilota vastausluonnos":"Näytä vastausluonnos"}
@@ -345,6 +353,8 @@ export function LosFutureExercises({bookId,chapterId,mode,taskIds}:{
             <span className="los-future-exercise-hint">Kirjoita neljä erillistä puheenvuoroa ennen itsevertailua.</span>}
           {spanGenre && spanGenreAnswer && !losFutureSpanGenreComplete(spanGenre,spanGenreAnswer)&&
             <span className="los-future-exercise-hint">Valitse tekstinäyttö ja täydennä molemmat vastaukset.</span>}
+          {remaining && remainingAnswers && !losFutureRemainingComplete(remaining,remainingAnswers)&&
+            <span className="los-future-exercise-hint">Täytä tehtävän vaaditut osat ennen itsevertailua.</span>}
         </div>
         {showAnswer&&<div id="los-future-exercise-key" className="los-future-exercise-solution">
           <h3>Alkuperäisen käsikirjoituksen ratkaisu tai arviointiohje</h3>
