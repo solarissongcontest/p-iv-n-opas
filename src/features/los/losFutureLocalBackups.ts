@@ -36,23 +36,23 @@ function allowedKeys(bookId:number,chapterId:string){
   return {answers,marks};
 }
 function validDraft(draft:unknown,bookId:number,chapterId:string):draft is LosChapterDraft {
-  if(!isObject(draft)||draft.version!==1||!textUnder(draft.note,8000)
-    ||!textUnder(draft.applicationDraft,5000)||typeof draft.bookmarked!=="boolean"
-    ||!textUnder(draft.selfAssessment,5000)||!textUnder(draft.updatedAt,40)
-    ||(draft.updatedAt!==""&&!validDate(draft.updatedAt))
-    ||!strMap(draft.practiceAnswers,50,5000)
-    ||!Array.isArray(draft.practiceChecked)||draft.practiceChecked.length>100
-    ||!draft.practiceChecked.every((x:unknown)=>textUnder(x,110))
-    ||!isObject(draft.testAnswers)||Object.keys(draft.testAnswers).length!==0
-    ||draft.testSubmittedAt!==null)return false;
-  if(draft.readerMarks!==undefined&&!strMap(draft.readerMarks,200,500))return false;
+  if(!isObject(draft)||draft["version"]!==1||!textUnder(draft["note"],8000)
+    ||!textUnder(draft["applicationDraft"],5000)||typeof draft["bookmarked"]!=="boolean"
+    ||!textUnder(draft["selfAssessment"],5000)||!textUnder(draft["updatedAt"],40)
+    ||(draft["updatedAt"]!==""&&!validDate(draft["updatedAt"]))
+    ||!strMap(draft["practiceAnswers"],50,5000)
+    ||!Array.isArray(draft["practiceChecked"])||draft["practiceChecked"].length>100
+    ||!draft["practiceChecked"].every((x:unknown)=>textUnder(x,110))
+    ||!isObject(draft["testAnswers"])||Object.keys(draft["testAnswers"]).length!==0
+    ||draft["testSubmittedAt"]!==null)return false;
+  if(draft["readerMarks"]!==undefined&&!strMap(draft["readerMarks"],200,500))return false;
   // Later-book graded exams and recall/lesson evidence are not approved yet.
   // Don't allow an imported file to invent either of them.
-  if(draft.lessonProgress!==undefined&&(!isObject(draft.lessonProgress)||Object.keys(draft.lessonProgress).length>0))return false;
-  if(draft.recallCards!==undefined&&(!isObject(draft.recallCards)||Object.keys(draft.recallCards).length>0))return false;
+  if(draft["lessonProgress"]!==undefined&&(!isObject(draft["lessonProgress"])||Object.keys(draft["lessonProgress"]).length>0))return false;
+  if(draft["recallCards"]!==undefined&&(!isObject(draft["recallCards"])||Object.keys(draft["recallCards"]).length>0))return false;
   const keys=allowedKeys(bookId,chapterId);
-  return Object.keys(draft.practiceAnswers as Record<string,string>).every(k=>keys.answers.has(k))
-    &&(draft.practiceChecked as string[]).every(k=>keys.marks.has(k))
+  return Object.keys(draft["practiceAnswers"] as Record<string,string>).every(k=>keys.answers.has(k))
+    &&(draft["practiceChecked"] as string[]).every(k=>keys.marks.has(k))
     &&new TextEncoder().encode(JSON.stringify(draft)).length<=200_000;
 }
 function hasStudentData(draft:LosChapterDraft):boolean {
@@ -87,17 +87,17 @@ export function parseLosFutureBackup(raw:string):LosFutureBookBackup{
   if(new TextEncoder().encode(raw).length>LOS_FUTURE_BACKUP_MAX_BYTES)throw Error("Varmuuskopio on liian suuri (enintään 5 Mt).");
   let input:unknown;
   try{input=JSON.parse(raw);}catch{throw Error("Tiedosto ei ole kelvollista JSON-muotoa.");}
-  if(!isObject(input)||input.format!==LOS_FUTURE_BACKUP_FORMAT||!validBook(input.bookId)
-    ||!validDate(input.exportedAt)||!isObject(input.chapters)
-    ||Object.keys(input.chapters).length>10)throw Error("Tiedosto ei ole kelvollinen LOS! 2–8 -kirjan varmuuskopio.");
-  const entries=Object.entries(input.chapters);
+  if(!isObject(input)||input["format"]!==LOS_FUTURE_BACKUP_FORMAT||!validBook(input["bookId"])
+    ||!validDate(input["exportedAt"])||!isObject(input["chapters"])
+    ||Object.keys(input["chapters"]).length>10)throw Error("Tiedosto ei ole kelvollinen LOS! 2–8 -kirjan varmuuskopio.");
+  const entries=Object.entries(input["chapters"]);
   const drafts:Record<string,LosChapterDraft>=Object.create(null);
   for(const [id,value] of entries){
-    if(!chapters.includes(id)||!validDraft(value,input.bookId,id))
+    if(!chapters.includes(id)||!validDraft(value,input["bookId"],id))
       throw Error(`Varmuuskopion kappale ${id} on virheellinen tai kuuluu väärään kirjaan.`);
     drafts[id]=value;
   }
-  return {format:LOS_FUTURE_BACKUP_FORMAT,bookId:input.bookId,exportedAt:input.exportedAt,chapters:drafts};
+  return {format:LOS_FUTURE_BACKUP_FORMAT,bookId:input["bookId"],exportedAt:input["exportedAt"],chapters:drafts};
 }
 export function planLosFutureBackupImport(incoming:LosFutureBookBackup,existing:LosFutureBookBackup){
   if(incoming.bookId!==existing.bookId)throw Error("Varmuuskopio kuuluu eri LOS!-kirjaan.");
