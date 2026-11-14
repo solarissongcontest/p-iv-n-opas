@@ -1204,3 +1204,33 @@ test("R05 source-specific German model appears only after the learner writes a s
   await expect(fields.nth(3)).toHaveValue("Tarkistin pääasian ja verbimuodot.");
   await expectNoHorizontalOverflow(page);
 });
+
+test("eight-book chapter dictionary pages 60 rows at a time while searching all source rows",async({page})=>{
+  await enterFutureBook(page);
+  await page.goto("/los#/2/dictionary",{waitUntil:"domcontentloaded"});
+  await expect(page.getByRole("heading",{name:"Kappalesanasto"})).toBeVisible();
+  const entries=page.locator(".los-index-entry");
+  const status=page.locator(".los-index-count");
+  await expect(entries).toHaveCount(60);
+  await expect(status).toContainText("Näytetään 60 /");
+  await page.getByRole("button",{name:"Näytä seuraavat 60 sanaa"}).click();
+  await expect(entries).toHaveCount(120);
+  await expect(status).toContainText("Näytetään 120 /");
+  await page.getByRole("button",{name:"Näytä vähemmän"}).click();
+  await expect(entries).toHaveCount(60);
+
+  await page.getByRole("button",{name:"Koko sarja"}).click();
+  await expect(entries).toHaveCount(60);
+  await expect(page.locator(".los-index-footnote")).toContainText("Koko sarjan kappalesanastot");
+  const query=page.locator(".los-index-search input");
+  await query.fill("Hallo");
+  await expect(entries.first()).toContainText("Hallo");
+  await expect(page.getByRole("button",{name:/Näytä seuraavat \d+ sanaa/})).toHaveCount(0);
+  await query.fill("varta-vasten-hakutermi-jota-ei-ole-kirjoissa-123");
+  await expect(entries).toHaveCount(0);
+  await expect(status).toContainText("Näytetään 0 / 0");
+  await expect(page.getByText("Ei osumia tällä rajauksella.",{exact:false})).toBeVisible();
+  await query.clear();
+  await expect(entries).toHaveCount(60);
+  await expectNoHorizontalOverflow(page);
+});
