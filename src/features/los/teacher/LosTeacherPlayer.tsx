@@ -10,7 +10,7 @@ import {
   emptyTeacherSession, markTeacherHelp, confirmTeacherActivity, teacherChapterAssessmentStatus, teacherMidtermAssessmentStatus,
   finishTeacherSession, independentTeacherEvidence, moveTeacherScene, revealTeacherSolution,
   setTeacherAnswerDraft, submitTeacherAnswer, toggleTeacherPause, teacherCanFinish, teacherCompletionBlockers, teacherNextIncompleteSceneId, teacherLatestAttempt,
-  teacherWrongFeedback, teacherBuiltNumberCount, teacherRequiresNumericResponse, type TeacherScene, type TeacherSession, isCorrectCalendarEntry,
+  teacherWrongFeedback, teacherBuiltNumberCount, teacherRequiresNumericResponse, recoverTeacherSession, type TeacherScene, type TeacherSession, isCorrectCalendarEntry,
 } from "./engine.ts";
 import { getLosTeacherLesson } from "./lessonRegistry.ts";
 import { LosTeacherNumberBuilder } from "./LosTeacherNumberBuilder.tsx";
@@ -196,9 +196,12 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
   const [replayKey, setReplayKey] = useState(0);
   // Reject malformed manuscripts, not merely broken React props.
   const contentValid = lesson ? validateTeacherLesson(lesson).length === 0 : false;
-  const session = lesson && contentValid
+  const storedSession = lesson && contentValid
     ? draft.teacherSessions?.[lessonId] ?? emptyTeacherSession(lesson, stamp())
     : null;
+  const session = lesson && storedSession ? recoverTeacherSession(storedSession, lesson) : null;
+  const recoveredNavigation = Boolean(storedSession && session && storedSession.sceneId !== session.sceneId);
+  const olderContentVersion = Boolean(lesson && session && session.contentVersion !== lesson.version);
   const scene = lesson?.scenes.find(item => item.id === session?.sceneId) ?? lesson?.scenes[0];
   const sceneIndex = lesson?.scenes.findIndex(item => item.id === scene?.id) ?? 0;
   const external = lesson ? teacherExternalStatus(lesson,draft,{
@@ -223,7 +226,7 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
   const persist = (transform: (current: TeacherSession) => TeacherSession) => {
     if (!lesson) return;
     update(current => {
-      const old = current.teacherSessions?.[lessonId] ?? emptyTeacherSession(lesson, stamp());
+      const old = recoverTeacherSession(current.teacherSessions?.[lessonId] ?? emptyTeacherSession(lesson, stamp()), lesson);
       return {
         ...current,
         teacherSessions: { ...current.teacherSessions, [lessonId]: transform(old) },
@@ -259,7 +262,7 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
     if (!lesson || !saved) return;
     update(current => {
       const now = stamp();
-      const old = current.teacherSessions?.[lessonId] ?? emptyTeacherSession(lesson, now);
+      const old = recoverTeacherSession(current.teacherSessions?.[lessonId] ?? emptyTeacherSession(lesson, now), lesson);
       const next = finishTeacherSession(old, lesson, current.practiceAnswers, now, current.practiceChecked, current, external.ready);
       if (next === old) return current;
       // Teacher 2.0 completion is a distinct learning event. Never manufacture
@@ -319,6 +322,13 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
           </section> : <article className="los-teacher-paper" key={scene.id + "-" + replayKey}>
             <div className="los-teacher-scene-kicker">{scene.phase} · {sceneIndex + 1}/{lesson.scenes.length}</div>
             <h2>{scene.title}</h2>
+            {(recoveredNavigation || olderContentVersion) && <p className="los-teacher-hint" role="status">
+              Oppitunnin käsikirjoitusta on päivitetty. {recoveredNavigation
+                ? "Aiempi opetustilanne ei enää ole käytössä. Jatkaminen ohjataan seuraavaan keskeneräiseen vaiheeseen. "
+                : ""}
+              Aiemmat vastaukset ja luonnokset säilyvät tallessa, mutta niitä ei tulkita automaattisesti uuden sisällön osaamisnäytöiksi.
+              Käy päivitetyt kohdat läpi ennen oppitunnin loppumerkintää.
+            </p>}
             <div className="los-teacher-prose">
               {scene.paragraphs.map((paragraph, i) => <p key={i}>{paragraph}</p>)}
             </div>
