@@ -745,19 +745,22 @@ test("T03 dialog and R01 textual evidence bind to the right chapter without reve
   await expect(page.locator(".los-future-evidence-source")).toContainText("Mira");
   await expect(show).toBeDisabled();
   await rows.nth(0).locator("textarea").fill("Mira und Jonas lernen zusammen Deutsch.");
-  await rows.nth(1).locator("textarea").fill("Lauseessa kuvataan heidän opiskeluaan.");
+  await expect(page.getByText("Kopioimaasi tekstikohtaa ei löydy Text A:sta täsmälleen näin.",{exact:false})).toBeVisible();
+  await rows.nth(0).locator("textarea").fill("Mira ist neu in Bonn.");
+  await expect(page.getByText("Kopioimasi teksti löytyy Text A:sta.",{exact:false})).toBeVisible();
+  await rows.nth(1).locator("textarea").fill("Lause kertoo Miran olevan uusi Bonnissa.");
   await expect(show).toBeEnabled();
   await page.reload({waitUntil:"domcontentloaded"});
   await selectFutureTask(page,"R01");
   await expect(rows.nth(0).locator("textarea"))
-    .toHaveValue("Mira und Jonas lernen zusammen Deutsch.");
+    .toHaveValue("Mira ist neu in Bonn.");
   const stored=await page.evaluate(()=>{
     const owner=localStorage.getItem("opk.owner-id");
     return JSON.parse(localStorage.getItem(`los.local.v1.${owner}.2.01`)??"{}");
   });
   expect(JSON.parse(stored.practiceAnswers["LOS2-C01-T03"]).answers).toHaveLength(2);
   expect(JSON.parse(stored.practiceAnswers["LOS2-C01-R01"]).answers[1])
-    .toBe("Lauseessa kuvataan heidän opiskeluaan.");
+    .toBe("Lause kertoo Miran olevan uusi Bonnissa.");
   await expectNoHorizontalOverflow(page);
 });
 
