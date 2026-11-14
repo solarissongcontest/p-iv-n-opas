@@ -86,7 +86,7 @@ export const LOS1_L036_TEACHER: TeacherLesson = {
     },
     {id:"ask-to-spell",phase:"Opetus",kind:"explanation",title:"Pyydä nimen tavaamista kohteliaasti",
       paragraphs:[
-        "Jos kuulet nimen mutta et tiedä, miten se kirjoitetaan, voit pyytää: Bitte buchstabieren Sie. = Tavatkaa, olkaa hyvä. Buchstabieren tarkoittaa tavata kirjaimittain; bitte tekee pyynnöstä kohteliaan.",
+        "Jos kuulet nimen mutta et tiedä, miten se kirjoitetaan, voit pyytää: Bitte buchstabieren Sie. = Voisitteko tavata nimen, kiitos? Buchstabieren tarkoittaa tavata kirjaimittain; bitte tekee pyynnöstä kohteliaan.",
         "Opettele tässä kokonainen valmis ilmaus. Sie on kohtelias puhuttelumuoto, mutta sinun ei vielä tarvitse osata muodostaa sen käskymuotoja itse.",
         "Vertaa kahta tilannetta: Wie heißt du? kysyy nimeä, kun et vielä tiedä sitä. Bitte buchstabieren Sie. pyytää kertomaan jo kuullun nimen kirjaimet.",
         "Kuvitteellinen mallikeskustelu: Ich heiße Lena. — Bitte buchstabieren Sie. — L-E-N-A. Tämä on opetusesimerkki, ei C07:n alkuperäislähteen repliikki.",
