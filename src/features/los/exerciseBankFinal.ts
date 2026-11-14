@@ -9,12 +9,12 @@ import type { LosExercise } from "./exerciseBank";
  */
 type Skill = LosExercise["skill"];
 
-function choice(chapterId:string,n:number,skill:Skill,prompt:string,options:[string,string,string],correct:string,explanation:string):LosExercise{
+function choice(chapterId:string,n:number,skill:Skill,prompt:string,options:[string,string,string],correct:string,explanation:string,legacyAccepted:readonly string[]=[]):LosExercise{
   if(!options.includes(correct))throw new Error("LOS! tehtävän vastaus puuttuu vaihtoehdoista");
   return {
     id:"C"+chapterId+"-EX-"+String(n).padStart(2,"0"),chapterId,skill,
     kind:"choice",instruction:"Valitse oikea vaihtoehto.",prompt,options,
-    correct,accepted:[correct],explanation
+    correct,accepted:[correct,...legacyAccepted],explanation
   };
 }
 function fill(chapterId:string,n:number,skill:Skill,prompt:string,correct:string,explanation:string):LosExercise{
@@ -40,7 +40,7 @@ export const LOS_C07_C10_EXERCISES:ReadonlyArray<LosExercise>=[
   choice("07",11,"sanasto","Mitä die E-Mail-Adresse tarkoittaa?",["sähköpostiosoite","osoitteen numero","puhelin"],"sähköpostiosoite","Die E-Mail-Adresse tarkoittaa sähköpostiosoitetta."),
   choice("07",12,"selviytyminen","Mitä Noch einmal, bitte. tarkoittaa?",["Puhukaa kovempaa.","Vielä kerran, kiitos.","Kiitos, näkemiin."],"Vielä kerran, kiitos.","Noch einmal, bitte. pyytää toistamaan."),
   choice("07",13,"sanasto","Mitä richtig tarkoittaa tässä yhteydessä?",["hitaasti","oikein","yhdessä"],"oikein","Richtig tarkoittaa oikeaa tai oikein."),
-  fill("07",14,"tavaaminen","Bitte ____ Sie. (Tavatkaa, olkaa hyvä.)","buchstabieren","Kohteliaassa tavaamispyynnössä käytetään muotoa buchstabieren."),
+  fill("07",14,"tavaaminen","Bitte ____ Sie. (Voisitteko tavata nimen, kiitos?)","buchstabieren","Kohteliaassa tavaamispyynnössä käytetään muotoa buchstabieren."),
   fill("07",15,"selviytyminen","Noch ____, bitte. (Vielä kerran, kiitos.)","einmal","Noch einmal, bitte. on käyttövalmis toistopyyntö."),
 
   // C08, 12 tehtävää. Kokonaiset fraasit ovat tavoitteena, eivät modaaliverbitaulukot.
@@ -66,7 +66,7 @@ export const LOS_C07_C10_EXERCISES:ReadonlyArray<LosExercise>=[
   choice("09",6,"ajanilmaukset","Mikä viikonpäivä on Samstag?",["lauantai","sunnuntai","tiistai"],"lauantai","Samstag tarkoittaa lauantaita."),
   choice("09",7,"ajanilmaukset","Mikä viikonpäivä on Sonntag?",["maanantai","perjantai","sunnuntai"],"sunnuntai","Sonntag tarkoittaa sunnuntaita."),
   choice("09",8,"ajanilmaukset","Mitä am Montag tarkoittaa?",["maanantaina","maanantaisin aamulla","ennen maanantaita"],"maanantaina","Am Montag tarkoittaa tässä maanantaina."),
-  choice("09",9,"ajanilmaukset","Mitä um drei Uhr tarkoittaa?",["kolmen tunnin ajan","kello kolme","kolmantena päivänä"],"kello kolme","Um drei Uhr ilmaisee kellonajan; drei tarkoittaa kolmea."),
+  choice("09",9,"ajanilmaukset","Mitä um drei Uhr tarkoittaa?",["kolmen tunnin ajan","kello kolmelta","kolmantena päivänä"],"kello kolmelta","Um drei Uhr tarkoittaa kello kolmelta. Ilmaus ei yksin kerro, onko kyse klo 03.00 vai 15.00.",["kello kolme"]),
   choice("09",10,"ajanilmaukset","Mitä Wann? kysyy?",["Miksi?","Milloin?","Kenen kanssa?"],"Milloin?","Wann? tarkoittaa milloin?"),
   choice("09",11,"ajanilmaukset","Mikä on morgen pienellä alkukirjaimella?",["aamu (substantiivi)","huomenna","eilen"],"huomenna","Morgen isolla on aamu, morgen pienellä tarkoittaa huomenna."),
   choice("09",12,"ajanilmaukset","Mitä heute tarkoittaa?",["eilen","tänään","huomenna"],"tänään","Heute tarkoittaa tänään."),
@@ -92,6 +92,6 @@ export const LOS_C07_C10_EXERCISES:ReadonlyArray<LosExercise>=[
   choice("10",16,"kertaus","Miten kysyt tuttavan ikää?",["Wie alt bist du?","Wie heißt du?","Wie geht's?"],"Wie alt bist du?","Wie alt bist du? kysyy, kuinka vanha henkilö on."),
   choice("10",17,"kertaus","Mikä sopii vastaukseksi, kun sinulle ei kuulu kovin hyvää?",["Gut, danke.","Nicht so gut.","Schön, dich kennenzulernen!"],"Nicht so gut.","Nicht so gut. on yksinkertainen vointivastaus."),
   choice("10",18,"kertaus","Miten pyydät puhumaan hitaammin?",["Bitte langsamer.","Bitte buchstabieren Sie.","Bis morgen!"],"Bitte langsamer.","Bitte langsamer. auttaa, kun puhe on liian nopeaa."),
-  choice("10",19,"kertaus","Mikä ilmaus tarkoittaa 'Maanantaina kello kolme'?",["Um Montag am drei Uhr.","Am Montag um drei Uhr.","Heute am drei Montag."],"Am Montag um drei Uhr.","Päivän edellä on am ja tasatunnin edellä um."),
+  choice("10",19,"kertaus","Mikä ilmaus tarkoittaa 'Maanantaina kello kolmelta'?",["Um Montag am drei Uhr.","Am Montag um drei Uhr.","Heute am drei Montag."],"Am Montag um drei Uhr.","Päivän edellä on am ja tasatunnin edellä um."),
   choice("10",20,"kertaus","Miten hyvästelet kohteliaasti?",["Guten Morgen!","Wie geht's?","Auf Wiedersehen!"],"Auf Wiedersehen!","Auf Wiedersehen! sopii kohteliaaseen hyvästelyyn.")
 ];
