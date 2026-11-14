@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { ArrowLeft, ArrowRight, BookOpen, ChevronLeft, ChevronRight, Headphones, List, Menu, Search, X } from "lucide-react";
 import { readCachedDeviceUser } from "@/lib/deviceSession";
 import { LOS_BOOKS, type LosBookDefinition, type LosChapter } from "./catalog";
+import { LosFutureBookPreview } from "./LosFutureBookPreview";
+import { LosFutureLearningPath } from "./LosFutureLearningPath";
 import { getLosChapterSourceGate } from "./content/sourceRegistry";
 import { LosAuthenticAudio, LosDictionary, LosIndexSearch, LosLearningPath, type LosDestination } from "./LosReferenceTools";
 import { LosChapterGrammar } from "./LosGrammarChapters";
@@ -54,7 +56,7 @@ function readLocation(): LosLocation {
   const parts = window.location.hash.replace(/^#\/?/, "").split("/").filter(Boolean);
   const parsedBook = Number(parts[0]);
   const book = Number.isInteger(parsedBook) && parsedBook >= 1 && parsedBook <= 8 ? parsedBook : null;
-  const chapter = book === 1 && /^\d{2}$/.test(parts[1] ?? "") ? (parts[1] ?? null) : null;
+  const chapter = book !== null && /^(0[1-9]|10)$/.test(parts[1] ?? "") ? (parts[1] ?? null) : null;
   const token = parts[chapter ? 2 : 1];
   const section = (["overview", "contents", "chapter", "text", "vocabulary", "grammar", "practice", "appendix", "dictionary", "path", "search", "midterm", "review", "review-ii", "cards", "progress", "final", "summary", "understand", "text-b", "apply", "culture", "test"].includes(token ?? "") ? token : chapter ? "chapter" : "overview") as LosSection;
   return { book, chapter, section };
@@ -113,7 +115,7 @@ function SeriesView({ openBook }: { openBook: (id: number) => void }) {
         <small>{book.code} · {book.module}</small>
       </button>)}
     </div>
-    <p className="los-library-footnote">LOS! 1:n kaikki kymmenen kappaletta ja 60 ohjattua oppituntia ovat nyt opiskeltavissa oppikirjan sisällä. Alkuperäistekstit ja käytössä olevat äänilähteet näkyvät asianmukaisin lähdemerkinnöin. Lopullinen saksan kielen, äänentoiston ja tuotantojulkaisun laadunvarmistus on silti vielä kesken. Muut LOS!-sarjan kirjat ovat suunnitteluvaiheessa.</p>
+    <p className="los-library-footnote">LOS! 1:n kaikki kymmenen kappaletta ja 60 ohjattua oppituntia ovat nyt opiskeltavissa oppikirjan sisällä. Alkuperäistekstit ja käytössä olevat äänilähteet näkyvät asianmukaisin lähdemerkinnöin. Lopullinen saksan kielen, äänentoiston ja tuotantojulkaisun laadunvarmistus on silti vielä kesken. LOS! 2–8:n 70 kappaleen tekstiluonnokset, 1 820 käsikirjoitustehtävää ja 420 oppituntiohjetta ovat käsiteltävissä kirjakohtaisissa esikatseluissa. Harjoittelu on paikallisesti tallentuvaa itsearviointia, ei vielä kielentarkistettua opetusta, automaattista koearviointia tai hyväksyttyä opiskelusuoritusta.</p>
   </div>;
 }
 function BookFront({ book, move }: { book: LosBookDefinition; move: (chapter: string | null, section: LosSection) => void }) {
@@ -147,7 +149,7 @@ function BookFront({ book, move }: { book: LosBookDefinition; move: (chapter: st
       <p>{book.id === 1 ? "Opiskelet aluksi saksan ääntämistä ja tervehdyksiä. Sen jälkeen etenet oman nimen ja kotipaikan kertomiseen, numeroihin ja ensimmäisiin oikeisiin keskusteluihin." : book.summary}</p>
       <div className="los-front-links">
         <button onClick={() => move(null, "contents")}><List size={18} /> Sisällysluettelo</button>
-        {book.id === 1 && <button onClick={() => move(null, "path")}><BookOpen size={18} /> Opetuspolku</button>}
+        <button onClick={() => move(null, "path")}><BookOpen size={18} /> Opetuspolku</button>
         <button onClick={() => move(null, "dictionary")}><BookOpen size={18} /> Sanakirja</button>
         <button onClick={() => move(null, "appendix")}><BookOpen size={18} /> Kirjan liitteet</button>
       </div>
@@ -323,13 +325,27 @@ function Vocabulary({ chapter, move, bookId }: { chapter: LosChapter; bookId:num
   </section>;
 }
 function Appendix({ book }: { book: LosBookDefinition }) {
+  if (book.id !== 1) return <section className="los-inner-page los-appendix">
+    <p className="los-eyebrow">LOS! {book.id} / LIITTEET</p>
+    <h1>Kirjan liitteet</h1>
+    <p>{book.code} · Saksa B3 · LOPS21 · 2 op</p>
+    <div className="los-editorial-note">
+      <h2>Käsikirjoitusvaihe</h2>
+      <p>Kirjan kymmenen kappaleen sisältörunko on tuotu projektin lähteistä.
+      Kaikkien kymmenen kappaleen LOS!-harjoitustekstien luonnokset ovat esikatselussa.
+      Äänitteet, tarkistetut tehtävät ja opetuspolun 60 oppituntia
+      eivät vielä ole käytettävissä sovelluksessa.</p>
+      <p>Opiskelun vastauksia ja pisteitä ei saa merkitä suoritetuiksi ennen
+      kirjakohtaisesti eroteltua tallennus- ja arviointijärjestelmää.</p>
+    </div>
+  </section>;
   return <section className="los-inner-page los-appendix">
     <p className="los-eyebrow">LOS! {book.id} / LIITTEET</p>
     <h1>Kirjan liitteet</h1>
     <div className="los-appendix-section"><h2>Kirjan tiedot</h2><dl><div><dt>Moduuli</dt><dd>{book.code} · {book.module}</dd></div><div><dt>Laajuus</dt><dd>2 op</dd></div><div><dt>Oppimäärä</dt><dd>Saksa B3 · LOPS21</dd></div></dl></div>
     <div className="los-appendix-section"><h2>Lähteet ja materiaalit</h2><p>Kymmenen kappaleen päätekstit, avointen lähteiden sisään kirjoitetut Text B -sisällöt ja käytössä olevat äänitteet ovat kirjan lukijoissa. Lähteiden oikeus-, kielitason, kuuntelun ja laitetestien portit pysyvät erillisinä. Pelkkä sisältöön integrointi ei merkitse materiaalia lopullisesti julkaisutestattavaksi.</p></div>
     <div className="los-appendix-section"><h2>Opetuspolku, sanakirja ja kappaletestit</h2><p>Opetuspolku ja sanakirja löytyvät kirjan valikosta. LOS! 1:n kaikissa kymmenessä kappaleessa on rajattu automaattisesti tarkistettava alkeistesti, yhteensä 147 osatehtävää. Kymmenen kappaleen lisäksi EX-MID (25 pistettä) ja EX-FINAL (50 pistettä) ovat käytettävissä; loppukokeessa oikeiden alkuperäisäänitteiden on toimittava ennen palautusta. Kuuntelun laitetestaus sekä puheen ja kirjoituksen ihmisen tekemä laadunarviointi ovat vielä erillisiä julkaisuvaatimuksia. LOS! 1:n oma välikoe sisältää 25 pisteytettävää tehtävää ja erillisen itsearvioitavan dialogin. Kappalekohtaisissa muistiinpanoissa on erillinen, salasanalla suojattu manuaalinen pilvisynkronointi, joka vaatii palvelimen käyttöönoton.</p></div>
-    <LosBackups bookId={book.id} />
+    <LosBackups key={book.id} bookId={book.id} />
   </section>;
 }
 function LosBookWorkspace({ book, location, move, goLibrary, openBook }: { book: LosBookDefinition; location: LosLocation; move: (chapter: string | null, section: LosSection) => void; goLibrary: () => void; openBook: (id: number) => void }) {
@@ -373,7 +389,7 @@ function LosBookWorkspace({ book, location, move, goLibrary, openBook }: { book:
           {!chapter && section === "overview" ? <BookFront book={book} move={move} /> :
             section === "contents" ? <Contents book={book} move={move} /> :
             section === "appendix" ? <Appendix book={book} /> :
-            section === "path" ? <LosLearningPath book={book} move={move} /> :
+            section === "path" ? (book.id===1 ? <LosLearningPath book={book} move={move} /> : <LosFutureLearningPath book={book} move={move} />) :
             section === "progress" && book.id===1 ? <LosStudyProgress book={book} move={move} /> :
             section === "midterm" && book.id===1 ? <LosMidtermExam /> :
             section === "review" && book.id===1 ? <LosReviewI move={move} /> :
@@ -383,6 +399,7 @@ function LosBookWorkspace({ book, location, move, goLibrary, openBook }: { book:
             section === "dictionary" ? <LosDictionary book={book} move={move} openBook={openBook} /> :
             section === "search" ? <LosIndexSearch book={book} move={move} /> :
             chapter ? (
+              book.id !== 1 ? <LosFutureBookPreview key={`${book.id}-${chapter.id}-${section}`} book={book} chapter={chapter} section={section} /> :
               section === "text" ? <TextPage chapter={chapter} /> :
               section === "understand" ? (chapter.id==="02" ? <LosC02Understanding goToText={() => move(chapter.id,"text")}/> : chapter.id==="06" ? <><LosOpenTextUnderstanding chapterId="06" goToText={() => move(chapter.id,"text")}/><details className="los-editorial-note"><summary>C01:n ikäkertauksen vanhat ymmärtämistehtävät (L034)</summary><LosC06AgeUnderstanding goToText={() => move(chapter.id,"text")}/></details></> : getLosOpenDialogue(chapter.id) ? <LosOpenTextUnderstanding chapterId={chapter.id} goToText={() => move(chapter.id,"text")}/> : <LosUnderstanding chapter={chapter} goToText={() => move(chapter.id, "text")} />) :
               section === "vocabulary" ? <Vocabulary key={chapter.id} chapter={chapter} bookId={book.id} move={move} /> :
@@ -396,7 +413,7 @@ function LosBookWorkspace({ book, location, move, goLibrary, openBook }: { book:
               <ChapterOpening book={book} chapter={chapter} move={move} />
             ) : <Contents book={book} move={move} />}
         </div>
-        {chapter && <LosNotebook key={`notes-${chapter.id}`} chapter={chapter} />}
+        {chapter && book.id===1 && <LosNotebook key={`notes-${chapter.id}`} chapter={chapter} />}
         {chapter && <div className="los-pagination">
           {previous ? <button onClick={() => openChapter(previous)}><ChevronLeft size={18} /><span>Edellinen kappale<small lang="de">{previous.title}</small></span></button> : <span />}
           {next ? <button onClick={() => openChapter(next)}><span>Seuraava kappale<small lang="de">{next.title}</small></span><ChevronRight size={18} /></button> : <button onClick={() => move(null, "appendix")}>Kirjan liitteet <ChevronRight size={18} /></button>}

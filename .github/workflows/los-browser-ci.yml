@@ -6,6 +6,7 @@ on:
     paths:
       - "src/features/los/**"
       - "e2e/los-full-book.spec.ts"
+      - "e2e/los-future-books.spec.ts"
       - "e2e/los-c01-lessons.spec.ts"
       - "e2e/helpers.ts"
       - ".github/workflows/los-browser-ci.yml"
@@ -14,6 +15,7 @@ on:
     paths:
       - "src/features/los/**"
       - "e2e/los-full-book.spec.ts"
+      - "e2e/los-future-books.spec.ts"
       - "e2e/los-c01-lessons.spec.ts"
       - "e2e/helpers.ts"
       - ".github/workflows/los-browser-ci.yml"
@@ -68,8 +70,8 @@ jobs:
           echo "::error::Local LOS! preview did not start"
           exit 1
 
-      - name: Full LOS! 1 browser flows in mobile WebKit and desktop Chromium
-        run: bunx playwright test e2e/los-full-book.spec.ts --project=desktop-chromium --project=iphone-webkit
+      - name: LOS! 1–8 browser flows in mobile WebKit and desktop Chromium
+        run: bunx playwright test e2e/los-full-book.spec.ts e2e/los-future-books.spec.ts --project=desktop-chromium --project=iphone-webkit
 
       - name: Upload browser traces and preview log
         if: always()

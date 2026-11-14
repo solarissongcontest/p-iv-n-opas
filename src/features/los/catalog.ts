@@ -1,3 +1,4 @@
+import { LOS_FUTURE_CHAPTERS } from "./content/losFutureChapters.ts";
 /**
  * LOS! – sarjan kirjamainen sisältörunko.
  * Lähde: LOS! masterplan v1.1 ja LOS! 1 -kirjakohtainen masterplan.
@@ -37,11 +38,11 @@ const introductoryChapters: LosChapter[] = [
 ];
 export const LOS_BOOKS: LosBookDefinition[] = [
   {id:1, code:"SAB31", title:"Tutustu ja ihastu saksan kieleen", module:"Perustason alkeet 1", theme:"Ensimmäiset kohtaamiset", summary:"Saksan alkeet täysin nollasta: tervehdykset, esittäytyminen, ääntäminen ja ensimmäiset keskustelut.",accent:"#B43D33",tint:"#FCE8E5",chapters:introductoryChapters},
-  {id:2, code:"SAB32", title:"Saksaa arjessa",module:"Perustason alkeet 2",theme:"Arki ja kohtaamiset",summary:"Lähipiiri, arki, kohtaamiset ja asiointi.",accent:"#2D766F",tint:"#E2F3EE",chapters:[]},
-  {id:3, code:"SAB33", title:"Saksaa vapaa-aikana ja lomalla",module:"Perustason alkeet 3",theme:"Vapaa-aika ja matkat",summary:"Harrastukset, koulu, matkailu ja vapaa-aika.",accent:"#2A609D",tint:"#E7F2FC",chapters:[]},
-  {id:4, code:"SAB34", title:"Elämää Saksassa ja Suomessa",module:"Perustaso 1",theme:"Kulttuuri ja kielet",summary:"Saksankielinen maailma, tavat ja kulttuurivertailu.",accent:"#765291",tint:"#F2EAF9",chapters:[]},
-  {id:5, code:"SAB35", title:"Hyvinvointia ja elämää nyt ja tulevaisuudessa",module:"Perustaso 2",theme:"Hyvinvointi",summary:"Terveys, hyvinvointi ja elämänvaiheet.",accent:"#876010",tint:"#FFF2D3",chapters:[]},
-  {id:6, code:"SAB36", title:"Kulttuuria saksaksi",module:"Perustaso 3",theme:"Taide ja media",summary:"Taide, media, kulttuuri ja erilaiset tekstit.",accent:"#367149",tint:"#E7F3E9",chapters:[]},
-  {id:7, code:"SAB37", title:"Opiskelua ja työelämää saksaksi",module:"Perustaso 4",theme:"Tulevaisuus",summary:"Opiskelu, työelämä ja tulevaisuuden suunnitelmat.",accent:"#A33B65",tint:"#FBE9F0",chapters:[]},
-  {id:8, code:"SAB38", title:"Muuttuva maailma saksaksi",module:"Perustaso 5",theme:"Yhteiskunta ja maailma",summary:"Ajankohtaiset aiheet, yhteiskunta ja muuttuva maailma.",accent:"#28647E",tint:"#E3F2F8",chapters:[]},
+  {id:2, code:"SAB32", title:"Saksaa arjessa",module:"Perustason alkeet 2",theme:"Arki ja kohtaamiset",summary:"Lähipiiri, arki, kohtaamiset ja asiointi.",accent:"#2D766F",tint:"#E2F3EE",chapters:LOS_FUTURE_CHAPTERS[2] ?? []},
+  {id:3, code:"SAB33", title:"Saksaa vapaa-aikana ja lomalla",module:"Perustason alkeet 3",theme:"Vapaa-aika ja matkat",summary:"Harrastukset, koulu, matkailu ja vapaa-aika.",accent:"#2A609D",tint:"#E7F2FC",chapters:LOS_FUTURE_CHAPTERS[3] ?? []},
+  {id:4, code:"SAB34", title:"Elämää Saksassa ja Suomessa",module:"Perustaso 1",theme:"Kulttuuri ja kielet",summary:"Saksankielinen maailma, tavat ja kulttuurivertailu.",accent:"#765291",tint:"#F2EAF9",chapters:LOS_FUTURE_CHAPTERS[4] ?? []},
+  {id:5, code:"SAB35", title:"Hyvinvointia ja elämää nyt ja tulevaisuudessa",module:"Perustaso 2",theme:"Hyvinvointi",summary:"Terveys, hyvinvointi ja elämänvaiheet.",accent:"#876010",tint:"#FFF2D3",chapters:LOS_FUTURE_CHAPTERS[5] ?? []},
+  {id:6, code:"SAB36", title:"Kulttuuria saksaksi",module:"Perustaso 3",theme:"Taide ja media",summary:"Taide, media, kulttuuri ja erilaiset tekstit.",accent:"#367149",tint:"#E7F3E9",chapters:LOS_FUTURE_CHAPTERS[6] ?? []},
+  {id:7, code:"SAB37", title:"Opiskelua ja työelämää saksaksi",module:"Perustaso 4",theme:"Tulevaisuus",summary:"Opiskelu, työelämä ja tulevaisuuden suunnitelmat.",accent:"#A33B65",tint:"#FBE9F0",chapters:LOS_FUTURE_CHAPTERS[7] ?? []},
+  {id:8, code:"SAB38", title:"Muuttuva maailma saksaksi",module:"Perustaso 5",theme:"Yhteiskunta ja maailma",summary:"Ajankohtaiset aiheet, yhteiskunta ja muuttuva maailma.",accent:"#28647E",tint:"#E3F2F8",chapters:LOS_FUTURE_CHAPTERS[8] ?? []},
 ];
