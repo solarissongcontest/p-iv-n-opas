@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { X } from "lucide-react";
-import { getLosPronunciation } from "./pronunciation";
+import { getLosPronunciation, getLosSourcedWordIpaParts } from "./pronunciation";
 import { LosPronunciationButton } from "./LosPronunciationButton";
 import { LosDictionarySourceResult } from "./LosDictionarySearch";
 import { searchLosDictionary, type LosDictionaryResult } from "./dictionaryClient";
@@ -32,6 +32,8 @@ export function LosDictionaryCard({
   onCloseRef.current = onClose;
   const language = publishedEntry?.language ?? "de";
   const pronunciation = language==="de" ? getLosPronunciation(word) : null;
+  const wordIpaParts = language==="de" && !pronunciation?.ipa
+    ? getLosSourcedWordIpaParts(word) : [];
   const controllerRef = useRef<AbortController | null>(null);
   const [remote, setRemote] = useState<RemoteLookup>({kind:"idle"});
 
@@ -97,6 +99,13 @@ export function LosDictionaryCard({
         {pronunciation.ipaSourceUrl &&
           <a href={pronunciation.ipaSourceUrl} target="_blank" rel="noopener noreferrer">IPA-lähde: Wiktionary</a>}
       </> : <span>IPA tarkistamatta tälle sanamuodolle. Ei korvata arvauksella.</span>}
+      {wordIpaParts.length>0 && <section className="los-dictionary-word-ipa" aria-label="Yksittäisten sanojen IPA-merkinnät">
+        <p>Yksittäisten sanojen merkinnät (eivät ole koko ilmauksen ääntämismalli):</p>
+        <ul>{wordIpaParts.map(part=><li key={part.word}>
+          <span lang="de">{part.word}</span>: <span className="los-dictionary-ipa" lang="de">[{part.ipa}]</span>
+          <a href={part.sourceUrl} target="_blank" rel="noopener noreferrer">Lähde</a>
+        </li>)}</ul>
+      </section>}
       <LosPronunciationButton text={word} />
     </div>}
     <div className="los-dictionary-remote">
