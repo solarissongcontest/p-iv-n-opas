@@ -1219,6 +1219,16 @@ test("eight-book chapter dictionary pages 60 rows at a time while searching all 
   const entries=page.locator(".los-index-entry");
   const status=page.locator(".los-index-count");
   await expect(entries).toHaveCount(60);
+  // A source action must remain a real accessible button, not a role="cell"
+  // button that hides its interactive semantics from screen readers.
+  await expect(entries.first().locator('[role="cell"]')).toHaveCount(3);
+  const firstSource=entries.first().getByRole("button",{name:/Avaa kappaleen \d+ sanasto/});
+  await expect(firstSource).toBeVisible();
+  await expect(firstSource).toHaveAttribute("title",/Avaa kappaleen \d+ sanasto/);
+  await firstSource.click();
+  await expect(page).toHaveURL(/\/2\/\d{2}\/vocabulary/);
+  await page.goto("/los#/2/dictionary",{waitUntil:"domcontentloaded"});
+  await expect(entries).toHaveCount(60);
   await expect(status).toContainText("Näytetään 60 /");
   await page.getByRole("button",{name:"Näytä seuraavat 60 sanaa"}).click();
   await expect(entries).toHaveCount(120);
