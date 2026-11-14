@@ -200,6 +200,13 @@ export function LosChapterGrammar({chapterId}:{chapterId:string}) {
     <Example de="Hallo! Ich heiße Mia." fi="Hei! Nimeni on Mia." />
     <Example de="Ich komme aus Finnland." fi="Olen kotoisin Suomesta." />
     <Example de="Schön, dich kennenzulernen!" fi="Hauska tutustua!" />
+    <Note title="Mitä wir kommen tarkoittaa?">C10:n Text B:n autenttisessa M-COM-02-keskustelussa
+      esiintyy ilmaus <span lang="de">Wir kommen aus Berlin.</span>,
+      eli <em>Olemme kotoisin Berliinistä.</em>
+      Sana <span lang="de">wir</span> tarkoittaa me.
+      Tunnista tämä valmis lause. Sen verbimuotoa ei tarvitse
+      vielä muodostaa itse, koska tässä kirjassa harjoitellaan
+      itsenäisesti ennen kaikkea ich-, du-, er/sie- ja kohteliasta Sie-muotoa.</Note>
     <h3>Kolmen tärkeän verbin kertaus</h3>
     <table className="los-grammar-table">
       <thead><tr><th>Persoona</th><th lang="de">heißen</th><th lang="de">sein</th><th lang="de">kommen</th></tr></thead>
