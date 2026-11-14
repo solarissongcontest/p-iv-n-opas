@@ -621,7 +621,7 @@ test("70 LOS! 2–8 chapter check pages have independently saved answers and del
   await expect(check).toBeVisible();
   await expect(check.locator(".los-future-check-question")).toHaveCount(5);
   await expect(check.locator(".los-future-check-model")).toHaveCount(0);
-  await expect(check).toContainText("Meinen kleine Welt".replace("Meinen","Meine"));
+  await expect(check).toContainText("Meine kleine Welt");
   await check.locator("#los-check-LOS2-C01-T02").fill("He opiskelevat saksaa.");
   await check.locator("#los-check-LOS2-C01-T18").fill("Ich heiße Mira. Wir lernen Deutsch.");
   await expect(check.getByRole("button",{name:"Palauta oma tarkistus"})).toBeDisabled();
