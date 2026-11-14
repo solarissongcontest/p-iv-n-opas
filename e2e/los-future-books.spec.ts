@@ -195,3 +195,20 @@ test("LOS! 5 source gap exercise keeps punctuation and saves the exact draft on 
   await expect(page.locator(".los-future-exercise-summary")).toContainText("0 verrattu vastausluonnokseen");
   await expect(page.locator(".los-future-exercise-notice")).toContainText("ei tarkistettu automaattinen arvostelu");
 });
+
+test("LOS! 8 ordered words assemble into the same original answer and survive reload",async({page})=>{
+  await enterFutureBook(page);
+  await page.goto("/los#/8/10/practice",{waitUntil:"domcontentloaded"});
+  await page.locator("#los-future-exercise-choice").selectOption({index:1});
+  const pieces=page.getByRole("group",{name:"Lauseen rakennuspalat"});
+  await expect(pieces).toBeVisible();
+  await pieces.getByRole("button",{name:"Ich",exact:true}).click();
+  await pieces.getByRole("button",{name:"denke,",exact:true}).click();
+  await expect(page.locator(".los-future-ordering-answer")).toHaveText("Ich denke,");
+  await page.reload({waitUntil:"domcontentloaded"});
+  await page.locator("#los-future-exercise-choice").selectOption({index:1});
+  await expect(page.locator(".los-future-ordering-answer")).toHaveText("Ich denke,");
+  await page.getByRole("button",{name:"Poista viimeinen"}).click();
+  await expect(page.locator(".los-future-ordering-answer")).toHaveText("Ich");
+  await expect(page.locator(".los-future-exercise-summary")).toContainText("0 verrattu vastausluonnokseen");
+});

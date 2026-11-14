@@ -5,6 +5,7 @@ import { losFutureExercisesFor } from "./content/losFutureExercises";
 import { losFutureExercisesForSection, type LosFutureExerciseMode } from "./content/losFutureExerciseSections";
 import { losFutureMatchingPairs, readLosFutureMatchingAnswer, writeLosFutureMatchingAnswer } from "./content/losFutureMatching";
 import { losFutureGapParts } from "./content/losFutureGap.ts";
+import { losFutureOrderingTiles, readLosFutureOrderingAnswer, writeLosFutureOrderingAnswer } from "./content/losFutureOrdering.ts";
 import "./los-future-exercises.css";
 
 type FutureExerciseDisplayMode = LosFutureExerciseMode | "guided";
@@ -38,6 +39,9 @@ export function LosFutureExercises({bookId,chapterId,mode,taskIds}:{
   const matchingSelection=matchingPairs && task
     ? readLosFutureMatchingAnswer(draft.practiceAnswers[task.id]??"",matchingPairs) : null;
   const gapParts=task ? losFutureGapParts(task) : null;
+  const orderingTiles=task ? losFutureOrderingTiles(task) : null;
+  const orderingSelection=orderingTiles && task
+    ? readLosFutureOrderingAnswer(draft.practiceAnswers[task.id]??"",orderingTiles) : null;
   const filled=tasks.filter(t=>Boolean(draft.practiceAnswers[t.id]?.trim())).length;
   const checked=tasks.filter(t=>draft.practiceChecked.includes(t.id)).length;
   function select(index:number){
@@ -112,7 +116,33 @@ export function LosFutureExercises({bookId,chapterId,mode,taskIds}:{
                 <option key={option.fi} value={option.fi}>{option.fi}</option>)}
             </select>
           </label>)}
-        </fieldset> : gapParts ? <div className="los-future-gap">
+        </fieldset> : orderingTiles && orderingSelection ? <div className="los-future-ordering">
+          <p><strong>Rakenna lause.</strong> Valitse sanapalat oikeassa järjestyksessä.
+            Tämä on oma harjoitus, ei tarkistettu pisteytettävä koe.</p>
+          <div role="group" aria-label="Lauseen rakennuspalat" className="los-future-ordering-pieces">
+            {orderingTiles.map(tile=><button type="button" key={tile.index}
+              disabled={orderingSelection.includes(tile.index)}
+              onClick={()=>changeAnswer(task.id,writeLosFutureOrderingAnswer(orderingTiles,[...orderingSelection,tile.index]))}>
+              <span lang="de">{tile.word}</span>
+            </button>)}
+          </div>
+          <div className="los-future-ordering-built">
+            <strong>Rakentamasi lause</strong>
+            <output lang="de" className="los-future-ordering-answer">
+              {draft.practiceAnswers[task.id] || "Valitse ensimmäinen sanapala"}
+            </output>
+          </div>
+          <div className="los-future-ordering-actions">
+            <button type="button" disabled={orderingSelection.length===0}
+              onClick={()=>changeAnswer(task.id,writeLosFutureOrderingAnswer(orderingTiles,orderingSelection.slice(0,-1)))}>
+              Poista viimeinen
+            </button>
+            <button type="button" disabled={orderingSelection.length===0}
+              onClick={()=>changeAnswer(task.id,"")}>Aloita alusta</button>
+          </div>
+          <p className="los-future-exercise-hint">Välimerkit perustuvat vastausluonnokseen ja vaativat vielä kielentarkistuksen.
+            Näytä mallivastaus vasta oman yrityksen jälkeen.</p>
+        </div> : gapParts ? <div className="los-future-gap">
           <label htmlFor="los-future-gap-input">Täydennä saksankielinen lause</label>
           <p lang="de" className="los-future-gap-sentence">
             <span>{gapParts.before}</span>

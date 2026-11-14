@@ -51,3 +51,16 @@
 .los-future-gap-sentence input{font:inherit;box-sizing:border-box;width:min(100%,15ch);min-width:8ch;background:white;color:#252525;padding:.55rem .65rem;border:1px solid #aaa49b;border-radius:8px}
 .los-future-gap-sentence input:focus-visible{outline:3px solid var(--los-book-accent,#8d6a50);outline-offset:2px}
 @media(max-width:560px){.los-future-gap-sentence input{min-height:44px}}
+
+/* Accessible click-to-build ordering; the answer is a single existing task draft. */
+.los-future-ordering{display:grid;gap:.8rem;margin:1.2rem 0}
+.los-future-ordering>p{margin:.25rem 0;font-size:.9rem;line-height:1.6}
+.los-future-ordering-pieces{display:flex;flex-wrap:wrap;gap:.5rem}
+.los-future-ordering-pieces button,.los-future-ordering-actions button{font:inherit;color:#2a2620;border:1px solid #aaa49b;border-radius:9px;background:white;padding:.6rem .8rem;cursor:pointer;min-height:42px}
+.los-future-ordering-pieces button:disabled{opacity:.45;cursor:default;text-decoration:line-through}
+.los-future-ordering-pieces button:focus-visible,.los-future-ordering-actions button:focus-visible{outline:3px solid var(--los-book-accent,#8d6a50);outline-offset:2px}
+.los-future-ordering-built{display:grid;gap:.5rem;padding:1rem;border-radius:9px;border:1px dashed #bbb6ae;background:#faf8f4;min-height:65px}
+.los-future-ordering-built strong{font-size:.85rem}
+.los-future-ordering-answer{font-size:1.05rem;line-height:1.65;overflow-wrap:anywhere}
+.los-future-ordering-actions{display:flex;gap:.6rem;flex-wrap:wrap}
+.los-future-ordering-actions button:disabled{opacity:.4;cursor:not-allowed}
