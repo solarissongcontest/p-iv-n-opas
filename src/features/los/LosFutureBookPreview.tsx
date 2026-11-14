@@ -3,6 +3,7 @@ import type { LosBookDefinition, LosChapter } from "./catalog";
 import type { LosDestination } from "./LosReferenceTools";
 import { LOS_FUTURE_MANUSCRIPTS } from "./content/losFutureManuscripts.ts";
 import { LosFutureExercises } from "./LosFutureExercises";
+import { LosFutureChapterCheck } from "./LosFutureChapterCheck";
 
 /**
  * Sisältöluonnosten lukija. Näyttää jokaisen luvun kokonaisen käsikirjoituksen
@@ -140,11 +141,6 @@ export function LosFutureBookPreview({book,chapter,section}:{
       </div>}
     </>}
 
-    {section==="test"&&<div className="los-editorial-note">
-      <h2>Ei vielä arvioitavissa</h2>
-      <p>Kappaletesti valmistellaan alkuperäisen kirjakohtaisen tehtäväpankin,
-        vastausavainten ja kielellisen tarkistuksen perusteella. Keskeneräistä
-        testikantaa ei käytetä todistamaan kielitaitoa.</p>
-    </div>}
+    {section==="test"&&<LosFutureChapterCheck bookId={book.id} chapterId={chapter.id}/>} 
   </section>;
 }
