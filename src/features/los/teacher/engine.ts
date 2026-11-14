@@ -204,6 +204,20 @@ export function evaluateTeacherAnswer(question: TeacherQuestion, answer: string)
   return (question.accepted ?? []).some(item =>
     normalizeTeacherAnswer(item) === normalizeTeacherAnswer(answer));
 }
+
+/** Navigation recovery only: retain every historical attempt, draft, activity,
+ * content version and completion timestamp when a manuscript renames a scene.
+ */
+export function recoverTeacherSession(session: TeacherSession, lesson: TeacherLesson): TeacherSession {
+  if(session.lessonId!==lesson.id || lesson.scenes.some(scene=>scene.id===session.sceneId))
+    return session;
+  const known=new Set(lesson.scenes.map(scene=>scene.id));
+  const next=lesson.scenes.find(scene=>!session.visitedIds.includes(scene.id))?.id ??
+    [...session.visitedIds].reverse().find(id=>known.has(id)) ??
+    lesson.scenes[0]?.id;
+  return next ? {...session,sceneId:next} : session;
+}
+
 export function moveTeacherScene(session: TeacherSession, lesson: TeacherLesson, targetId: string, now: string): TeacherSession {
   if (!lesson.scenes.some(s => s.id === targetId)) return session;
   return {

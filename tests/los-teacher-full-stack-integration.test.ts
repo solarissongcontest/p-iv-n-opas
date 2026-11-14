@@ -523,3 +523,22 @@ test("Finnish multiple-choice answers across C01–C10 carry reviewed screen-rea
   assert.ok(german.every(option=>option.lang!=="fi"),
     "Do not incorrectly tag German greeting words as Finnish");
 });
+
+
+test("C07 digit choices are pronounced in Finnish, not read as German prose",()=>{
+  const cases=[
+    ["L038","application",["142","124","412"]],
+    ["L039","guided",["6","7","17"]],
+  ] as const;
+  for(const [lessonId,sceneId,values] of cases){
+    const lesson=getLosTeacherLesson(lessonId);
+    assert.ok(lesson,lessonId+" must remain in the teacher registry");
+    const scene=lesson.scenes.find(item=>item.id===sceneId);
+    assert.ok(scene?.question?.options,lessonId+"/"+sceneId+" must remain a multiple-choice question");
+    assert.deepEqual(scene.question.options.map(option=>option.label),values);
+    assert.ok(scene.question.options.every(option=>option.lang==="fi"),
+      "Numeric symbols in a Finnish question should use the Finnish screen-reader voice");
+  }
+  assert.deepEqual(validateTeacherLesson(getLosTeacherLesson("L038")!),[]);
+  assert.deepEqual(validateTeacherLesson(getLosTeacherLesson("L039")!),[]);
+});

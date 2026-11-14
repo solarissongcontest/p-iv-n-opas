@@ -48,7 +48,7 @@ export const LOS1_L039_TEACHER: TeacherLesson = {
     {id:"guided",phase:"Ohjattu harjoitus",kind:"question",title:"Mikä numero kirjoitetaan?",
       paragraphs:["Saat käyttää mallitaulun kolmatta kohtaa."],
       question:{type:"choice",skillId:"L1-NUM-01",prompt:"Mikä numero on sieben?",
-        options:[{id:"a",label:"6",wrongFeedback:"Sechs on kuusi."},{id:"b",label:"7"},{id:"c",label:"17",wrongFeedback:"Siebzehn on seitsemäntoista, sieben seitsemän."}],
+        options:[{id:"a",label:"6",lang:"fi",wrongFeedback:"Sechs on kuusi."},{id:"b",label:"7",lang:"fi"},{id:"c",label:"17",lang:"fi",wrongFeedback:"Siebzehn on seitsemäntoista, sieben seitsemän."}],
         correctOption:"b",success:"Oikein. Sieben vastaa numeroa 7.",hint:"Se tulee saksaksi sechs-sanan jälkeen.",reteach:"Sechs = 6, sieben = 7, acht = 8.",genericWrong:"Etsi seitsemän, ei seitsemäntoista."}},
     {id:"textb",phase:"Oppikirjan Text B",kind:"book",title:"Lue C07:n Text B ja tarkista kaksi kirjaintehtävää",
       paragraphs:[

@@ -3,9 +3,9 @@ import assert from "node:assert/strict";
 import {
   confirmTeacherActivity, emptyTeacherSession, evaluateTeacherAnswer,
   finishTeacherSession, independentTeacherEvidence, markTeacherHelp,
-  moveTeacherScene, normalizeTeacherAnswer, parseTeacherSessions,
+  moveTeacherScene, normalizeTeacherAnswer, parseTeacherSessions, recoverTeacherSession,
   revealTeacherSolution, setTeacherAnswerDraft, submitTeacherAnswer,
-  teacherCanFinish, teacherCompletionBlockers, teacherNextIncompleteSceneId, teacherLatestAttempt, teacherWrongFeedback, teacherRequiresNumericResponse,
+  teacherCanFinish, teacherCompletionBlockers, teacherNextIncompleteSceneId, teacherLatestAttempt, teacherWrongFeedback, teacherRequiresNumericResponse, validTeacherSessionMap,
 } from "../src/features/los/teacher/engine.ts";
 import { LOS1_L004_TEACHER } from "../src/features/los/teacher/lessonL004.ts";
 
@@ -234,4 +234,57 @@ test("question feedback falls back to the authored explanation when specific fee
   assert.equal(teacherWrongFeedback(missingSpecific,"a"),"Mieti aloitustervehdystä.");
   assert.equal(teacherWrongFeedback(missingSpecific,"nonexistent"),"Mieti aloitustervehdystä.");
   assert.match(teacherWrongFeedback(scene,"a"),/illan/);
+});
+
+test("removed scene IDs resume at unfinished current content without rewriting learner evidence",()=>{
+  let saved=emptyTeacherSession(lesson,now);
+  saved=moveTeacherScene(saved,lesson,"welcome",now);
+  saved=moveTeacherScene(saved,lesson,"recall",now);
+  saved=submitTeacherAnswer(saved,lesson,"recall","b",now);
+  saved=setTeacherAnswerDraft(saved,"independent","Guten Abend!",now);
+  saved=markTeacherHelp(saved,"guided",now);
+  const previous={...saved,
+    sceneId:"retired-teaching-scene",
+    contentVersion:"1.9.0-preview.1",
+    activityIds:["vocabulary-reviewed"],
+    completedAt:null,
+  };
+  const before=structuredClone(previous);
+  assert.equal(validTeacherSessionMap({L004:previous}),true);
+  const recovered=recoverTeacherSession(previous,lesson);
+  assert.equal(recovered.sceneId,"situations","Resume the first unvisited current scene");
+  assert.equal(recovered.contentVersion,"1.9.0-preview.1","Do not silently assert a new curriculum version was mastered");
+  assert.deepEqual(recovered.visitedIds,previous.visitedIds);
+  assert.deepEqual(recovered.attempts,previous.attempts);
+  assert.deepEqual(recovered.helpedIds,previous.helpedIds);
+  assert.deepEqual(recovered.activityIds,previous.activityIds);
+  assert.deepEqual(recovered.draftAnswers,previous.draftAnswers);
+  assert.equal(recovered.updatedAt,previous.updatedAt);
+  assert.deepEqual(previous,before,"Reading a saved session must not mutate stored evidence");
+  assert.equal(independentTeacherEvidence(recovered,lesson),independentTeacherEvidence(previous,lesson));
+  assert.deepEqual(teacherCompletionBlockers(recovered,lesson,{}),
+    teacherCompletionBlockers(previous,lesson,{}),"Recovery cannot fabricate completion");
+  assert.deepEqual(parseTeacherSessions({L004:recovered}).L004,recovered,
+    "A navigation-repaired session remains compatible with the existing backup schema");
+});
+
+test("removed scenes recover with a stable fallback and leave valid sessions untouched",()=>{
+  const current=emptyTeacherSession(lesson,now);
+  assert.strictEqual(recoverTeacherSession(current,lesson),current);
+  const empty={...current,sceneId:"old-removed-scene"};
+  const first=recoverTeacherSession(empty,lesson);
+  assert.equal(first.sceneId,"welcome");
+  assert.deepEqual(first.visitedIds,[]);
+  assert.deepEqual(first.attempts,[]);
+  const all={...current,sceneId:"old-removed-scene",
+    visitedIds:lesson.scenes.map(scene=>scene.id),
+    draftAnswers:{independent:"Guten Abend!"},
+    completedAt:now,
+  };
+  const last=recoverTeacherSession(all,lesson);
+  assert.equal(last.sceneId,"summary","Completed lessons remain navigable after a scene rename");
+  assert.equal(last.completedAt,now,"Historical completion is preserved, never backdated or erased");
+  assert.deepEqual(last.draftAnswers,all.draftAnswers);
+  assert.strictEqual(recoverTeacherSession({...current,lessonId:"L999",sceneId:"old-removed-scene"},lesson).sceneId,
+    "old-removed-scene","A mismatched lesson must not inherit another lesson's route");
 });

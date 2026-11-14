@@ -72,7 +72,7 @@ export const LOS1_L038_TEACHER: TeacherLesson = {
     {id:"application",phase:"Soveltava harjoitus 3/4",kind:"question",title:"Muistatko lukusanat?",
       paragraphs:["Nyt tarvitset aiempien tuntien numerotietoa."],
       question:{type:"choice",skillId:"L1-NUM-01",evidenceRole:"application",prompt:"Mikä numerosarja vastaa eins – vier – zwei?",
-        options:[{id:"a",label:"142"},{id:"b",label:"124",wrongFeedback:"Tässä kaksi ja neljä ovat väärässä järjestyksessä."},{id:"c",label:"412",wrongFeedback:"Ensimmäisen numeron tulee olla eins eli 1."}],
+        options:[{id:"a",label:"142",lang:"fi"},{id:"b",label:"124",lang:"fi",wrongFeedback:"Tässä kaksi ja neljä ovat väärässä järjestyksessä."},{id:"c",label:"412",lang:"fi",wrongFeedback:"Ensimmäisen numeron tulee olla eins eli 1."}],
         correctOption:"a",success:"Oikein. Eins–vier–zwei muodostaa sarjan 142, ei lukua hundertvierundzwanzig.",hint:"Tulkitaan erillisiä numeroita, yksi kerrallaan.",reteach:"Eins=1, vier=4, zwei=2, joten erillinen sarja on 1-4-2.",genericWrong:"Säilytä numeroiden järjestys."}},
     {id:"exit",phase:"Lopputarkistus 4/4",kind:"question",title:"Pyydä sanomaan uudelleen",
       paragraphs:["Et näe mallia. Valitse tilanne, jossa et ehtinyt kirjoittaa nimeä."],
