@@ -54,7 +54,9 @@ test("all 70 R01 excerpt fields check only exact Text A location, not response c
     const item=losFutureExercisesFor(book.id,chapter.id).find(t=>t.id.endsWith("-R01"));assert.ok(item);
     const task=losFutureEvidenceTask(item);assert.ok(task);
     const text=task.sourceText;
-    const excerpt=text.slice(0,Math.min(30,text.length)).trim();
+    // Test a genuine complete-word excerpt, never a 30-character fragment
+    // that cuts the final German word in half.
+    const excerpt=text.trim().split(/\s+/u).slice(0,5).join(" ");
     assert.equal(losFutureEvidenceExcerptInSource(task,excerpt),true,item.id);
     // German uppercase ß expands to SS; source matching must tolerate that
     // normal writing transformation without changing the learner's draft.
