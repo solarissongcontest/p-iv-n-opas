@@ -1,5 +1,6 @@
 import { LOS_BOOKS } from "./catalog.ts";
 import type { LosChapterDraft } from "./studyState.ts";
+import { validTeacherSessionMap } from "./teacher/engine.ts";
 import { losFutureExercisesFor } from "./content/losFutureExercises.ts";
 import { losFutureLessonOutline } from "./losFutureLessonOutline.ts";
 import { LOS_FUTURE_STAGE_IDS,losFuturePracticeDraftKey } from "./losFuturePracticeProgress.ts";
@@ -31,10 +32,13 @@ function allowedKeys(bookId:number,chapterId:string){
   if(!book||book.id!==bookId)throw Error("Kirjan sisältörunkoa ei löydy varmuuskopion tarkistusta varten.");
   const taskIds=losFutureExercisesFor(bookId,chapterId).map(x=>x.id);
   const scripts=losFutureLessonOutline(book).filter(item=>item.chapterId===chapterId);
-  const answers=new Set([...taskIds,...scripts.map(s=>s.id+":own-reflection")]);
+  const answers=new Set([...taskIds,...scripts.map(s=>s.id+":own-reflection"),
+    // PR #264 stores its legacy guided-reader cursor inside the chapter draft.
+    // It must survive export/import together with teacher lesson answers.
+    ...scripts.map(s=>"los.future.guided:"+s.id+":selectedStage")]);
   const marks=new Set([...taskIds,...scripts.flatMap(s=>
     LOS_FUTURE_STAGE_IDS.map(stage=>"los.future.guided:"+s.id+":"+stage))]);
-  return {answers,marks};
+  return {answers,marks,teacherIds:new Set(scripts.map(s=>s.id))};
 }
 function validDraft(draft:unknown,bookId:number,chapterId:string):draft is LosChapterDraft {
   if(!isObject(draft)||draft["version"]!==1||!textUnder(draft["note"],8000)
@@ -52,7 +56,16 @@ function validDraft(draft:unknown,bookId:number,chapterId:string):draft is LosCh
   if(draft["lessonProgress"]!==undefined&&(!isObject(draft["lessonProgress"])||Object.keys(draft["lessonProgress"]).length>0))return false;
   if(draft["recallCards"]!==undefined&&(!isObject(draft["recallCards"])||Object.keys(draft["recallCards"]).length>0))return false;
   const keys=allowedKeys(bookId,chapterId);
-  return Object.keys(draft["practiceAnswers"] as Record<string,string>).every(k=>keys.answers.has(k))
+  if(draft["teacherSessions"]!==undefined){
+    if(!validTeacherSessionMap(draft["teacherSessions"]))return false;
+    const sessions=draft["teacherSessions"];
+    if(Object.entries(sessions).some(([id,session])=>
+      !keys.teacherIds.has(id)||session.completedAt!==null))return false;
+  }
+  const cursors=draft["practiceAnswers"] as Record<string,string>;
+  if(Object.entries(cursors).some(([key,value])=>
+    key.endsWith(":selectedStage")&&(!/^[0-5]$/.test(value))))return false;
+  return Object.keys(cursors).every(k=>keys.answers.has(k))
     &&(draft["practiceChecked"] as string[]).every(k=>keys.marks.has(k))
     &&new TextEncoder().encode(JSON.stringify(draft)).length<=200_000;
 }
@@ -60,7 +73,8 @@ function hasStudentData(draft:LosChapterDraft):boolean {
   return Boolean(draft.note.trim()||draft.applicationDraft.trim()||draft.bookmarked
     ||draft.selfAssessment.trim()||draft.practiceChecked.length
     ||Object.values(draft.practiceAnswers).some(v=>Boolean(v.trim()))
-    ||(draft.readerMarks&&Object.values(draft.readerMarks).some(Boolean)));
+    ||(draft.readerMarks&&Object.values(draft.readerMarks).some(Boolean))
+    ||(draft.teacherSessions&&Object.keys(draft.teacherSessions).length>0));
 }
 function checkedBook(bookId:number,ownerId:string) {
   if(!validBook(bookId))throw Error("Varmuuskopion kirjanumero on virheellinen.");
