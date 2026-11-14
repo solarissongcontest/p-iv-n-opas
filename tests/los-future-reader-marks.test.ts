@@ -61,7 +61,9 @@ test("revised texts retain earlier highlights in isolated backup-safe archives",
   assert.equal(validLosFutureReaderMarks(updated,3,chapterId),false);
   assert.equal(validLosFutureReaderMarks({...updated,[key+"@fake"]:old},bookId,chapterId),false);
   assert.equal(validLosFutureReaderMarks({...updated,[key+"@"+losFutureReaderTextVersion(revised)]:old},bookId,chapterId),false);
-  const altered=JSON.parse(newMark) as {contentVersion:string;ranges:{startToken:number;endToken:number;color:string}[]};
+  const canonical=losFutureReaderAppend(undefined,text,1,2,"blue");
+  assert.ok(canonical);
+  const altered=JSON.parse(canonical) as {contentVersion:string;ranges:{startToken:number;endToken:number;color:string}[]};
   altered.ranges[0]!.endToken=3000;
   assert.equal(validLosFutureReaderMarks({...updated,[key]:JSON.stringify(altered)},bookId,chapterId),false,
     "current source token ranges must remain inside the actual text");

@@ -983,3 +983,45 @@ test("LOS! 2 Text A highlights and chapter notes survive reload without leaking 
   await expect(other.getByRole("textbox",{name:"Kappaleen omat muistiinpanot"})).toHaveValue("");
   await expectNoHorizontalOverflow(page);
 });
+
+test("revised Text A archives old highlights instead of overwriting them in WebKit/Chromium",async({page})=>{
+  await enterFutureBook(page);
+  await page.goto("/los#/2/01/text",{waitUntil:"domcontentloaded"});
+  const reader=page.locator(".los-future-interactive-reader");
+  await expect(reader).toBeVisible();
+  await reader.getByRole("button",{name:"Korosta tekstiä"}).click();
+  const tokens=reader.locator(".los-future-reader-token");
+  await tokens.nth(0).click();
+  await tokens.nth(1).click();
+  await expect(tokens.nth(0)).toHaveClass(/is-yellow/);
+  const archivedRaw=await page.evaluate(()=>{
+    const owner=localStorage.getItem("opk.owner-id");
+    const path=`los.local.v1.${owner}.2.01`;
+    const key="los-future-2-01-text-a";
+    const draft=JSON.parse(localStorage.getItem(path)??"null");
+    const old=JSON.parse(draft.readerMarks[key]);
+    old.contentVersion="source-deadbeef-123";
+    draft.readerMarks[key]=JSON.stringify(old);
+    localStorage.setItem(path,JSON.stringify(draft));
+    return draft.readerMarks[key] as string;
+  });
+  await page.reload({waitUntil:"domcontentloaded"});
+  await expect(reader.getByText("Tekstiä on muutettu.",{exact:false})).toBeVisible();
+  await reader.getByRole("button",{name:"Aloita uudet korostukset ja arkistoi vanhat"}).click();
+  await expect(reader.getByText("Tekstiä on muutettu.",{exact:false})).toHaveCount(0);
+  await reader.getByRole("button",{name:"Korosta tekstiä"}).click();
+  await tokens.nth(2).click();
+  await tokens.nth(3).click();
+  await expect(tokens.nth(2)).toHaveClass(/is-yellow/);
+  await expect(tokens.nth(0)).not.toHaveClass(/is-yellow/);
+  const marks=await page.evaluate(()=>{
+    const owner=localStorage.getItem("opk.owner-id");
+    const draft=JSON.parse(localStorage.getItem(`los.local.v1.${owner}.2.01`)??"null");
+    return draft.readerMarks as Record<string,string>;
+  });
+  expect(marks["los-future-2-01-text-a@source-deadbeef-123"]).toBe(archivedRaw);
+  expect(marks["los-future-2-01-text-a"]).not.toBe(archivedRaw);
+  await page.reload({waitUntil:"domcontentloaded"});
+  await expect(reader.locator(".los-future-reader-token").nth(2)).toHaveClass(/is-yellow/);
+  await expectNoHorizontalOverflow(page);
+});
