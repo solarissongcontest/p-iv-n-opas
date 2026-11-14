@@ -20,11 +20,12 @@ export function readLosFutureExitAnswer(value:string,ticket:LosFutureExitTicket)
     const parsed:unknown=JSON.parse(value);
     if(!parsed||typeof parsed!=="object"||Array.isArray(parsed))return null;
     const row=parsed as {version?:unknown;questions?:unknown;answers?:unknown};
-    if(row.version!==1||!Array.isArray(row.questions)||!Array.isArray(row.answers)
-      ||row.questions.length!==2||row.answers.length!==2)return null;
-    if(!ticket.questions.every((q,i)=>row.questions?.[i]===q))return null;
-    if(!row.answers.every((answer:unknown)=>typeof answer==="string"&&answer.length<=400))return null;
-    return [...row.answers] as string[];
+    const questions=row.questions, answers=row.answers;
+    if(row.version!==1||!Array.isArray(questions)||!Array.isArray(answers)
+      ||questions.length!==2||answers.length!==2)return null;
+    if(!ticket.questions.every((q,i)=>questions[i]===q))return null;
+    if(!answers.every((answer:unknown)=>typeof answer==="string"&&answer.length<=400))return null;
+    return [...answers] as string[];
   }catch{return null;}
 }
 export function writeLosFutureExitAnswer(ticket:LosFutureExitTicket,answers:readonly string[]):string{
