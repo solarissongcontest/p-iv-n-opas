@@ -16,8 +16,8 @@ export function LosFutureSpanGenreFields({task,answer,onChange}:{
     <p>Kirjoita molemmat vastaukset itse ennen mallivastauksen avaamista.
       Tämä on lähdetekstiin perustuva harjoitus, ei automaattinen arvosana.</p>
     {answer.legacyPromptUpdated&&<p className="los-future-span-genre-hint" role="status">
-      Kysymystä on tarkennettu lähdedialogin perusteella. Vanha vastauksesi on säilytetty.
-      Tarkista, vastaako oma ilmauksesi ja perustelusi uutta kysymystä.
+      {task.kind==="span"?"Kysymystä on tarkennettu lähdedialogin perusteella.":"Tekstilajin nimitys ja tehtävänanto on tarkennettu."}
+      {" "}Vanha vastauksesi on säilytetty. Tarkista, että omat havainnot ja perustelut sopivat tehtävänantoon.
     </p>}
     {task.kind==="span"?<fieldset className="los-future-span-genre-choices">
       <legend>Valitse lähdedialogista puheenvuoro</legend>
