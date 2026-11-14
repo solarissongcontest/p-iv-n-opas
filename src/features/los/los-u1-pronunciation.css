@@ -17,6 +17,11 @@
 .los-dictionary-pronunciation {display:flex;flex-direction:column;align-items:flex-start;gap:8px;margin-top:15px}
 .los-dictionary-pronunciation a {text-decoration:underline;text-underline-offset:3px}
 .los-dictionary-ipa {font-size:17px;line-height:1.5;letter-spacing:.01em}
+.los-dictionary-word-ipa {width:100%;margin-top:4px;padding:10px 0 2px;border-top:1px solid var(--los-line)}
+.los-dictionary-word-ipa p {font-size:12px;line-height:1.6;color:var(--los-soft);margin:0 0 6px!important}
+.los-dictionary-word-ipa ul {margin:0;padding-left:21px;display:grid;gap:6px}
+.los-dictionary-word-ipa li {font-size:14px;line-height:1.5;overflow-wrap:anywhere}
+.los-dictionary-word-ipa li a {margin-left:8px;font-size:12px}
 .los-dictionary-pronunciation small,.los-pronunciation-disclaimer {font-size:12px;line-height:1.5;color:var(--los-soft)}
 .los-pronunciation-control {display:flex;flex-direction:column;align-items:flex-start;gap:7px}
 .los-pronunciation-button {display:inline-flex;align-items:center;gap:8px;border:1px solid var(--los-line);border-radius:8px;background:var(--los-subtle);color:var(--los-ink);min-height:44px;padding:9px 12px;text-align:left}
