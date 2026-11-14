@@ -5,6 +5,7 @@ import { losFutureExercisesFor } from "./content/losFutureExercises";
 import { losFutureExercisesForSection, type LosFutureExerciseMode } from "./content/losFutureExerciseSections";
 import { losFutureMatchingPairs, readLosFutureMatchingAnswer, writeLosFutureMatchingAnswer } from "./content/losFutureMatching";
 import { losFutureGapParts } from "./content/losFutureGap.ts";
+import { losFutureRecallPairs, readLosFutureRecallAnswer, writeLosFutureRecallAnswer } from "./content/losFutureRecall.ts";
 import { losFutureOrderingTiles, readLosFutureOrderingAnswer, writeLosFutureOrderingAnswer } from "./content/losFutureOrdering.ts";
 import "./los-future-exercises.css";
 
@@ -35,6 +36,9 @@ export function LosFutureExercises({bookId,chapterId,mode,taskIds}:{
   const [showAll,setShowAll]=useState(false);
   const safeIndex=Math.min(selected,Math.max(0,tasks.length-1));
   const task=tasks[safeIndex];
+  const recallPairs=task ? losFutureRecallPairs(task) : null;
+  const recallSelection=recallPairs && task
+    ? readLosFutureRecallAnswer(draft.practiceAnswers[task.id]??"",recallPairs) : null;
   const matchingPairs=task ? losFutureMatchingPairs(task) : null;
   const matchingSelection=matchingPairs && task
     ? readLosFutureMatchingAnswer(draft.practiceAnswers[task.id]??"",matchingPairs) : null;
@@ -102,7 +106,22 @@ export function LosFutureExercises({bookId,chapterId,mode,taskIds}:{
             ? "Järjestä sanapalat oikeaan järjestykseen. Tarkista sitten kielioppi ja välimerkit mallivastauksesta."
             : task.prompt}
         </p>
-        {matchingPairs && matchingSelection ? <fieldset className="los-future-matching">
+        {recallPairs && recallSelection ? <fieldset className="los-future-recall">
+          <legend>Palauta kuusi sanaa muistista</legend>
+          <p>Kirjoita saksankielinen sana tai ilmaus jokaisen suomennoksen perusteella.
+            Voit tarkistaa vastaukset vasta oman yrityksesi jälkeen. Tehtävä ei anna konearvosanaa.</p>
+          {recallPairs.map((pair,index)=><label key={index} className="los-future-recall-row">
+            <span lang="fi">{index+1}. {pair.fi}</span>
+            <input type="text" lang="de" autoComplete="off" autoCapitalize="off" spellCheck={false}
+              maxLength={100} aria-label={`Saksaksi: ${pair.fi}, kohta ${index+1}`}
+              value={recallSelection[index]??""}
+              onChange={event=>{
+                const next=[...recallSelection];
+                next[index]=event.target.value;
+                changeAnswer(task.id,writeLosFutureRecallAnswer(recallPairs,next));
+              }} />
+          </label>)}
+        </fieldset> : matchingPairs && matchingSelection ? <fieldset className="los-future-matching">
           <legend>Yhdistä saksan sana ja sen merkitys</legend>
           <p>Valitse jokaiselle sanalle suomennos. Vastaukset tallentuvat samaan tehtäväluonnokseen.
             Tämä on itsenäistä harjoittelua, ei automaattisesti pisteytettävä koe.</p>
