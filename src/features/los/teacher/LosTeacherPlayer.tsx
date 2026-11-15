@@ -214,6 +214,7 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
   const available = Boolean(!olderContentVersion && saved && session && lesson && teacherCanFinish(session, lesson, draft.practiceAnswers, draft.practiceChecked, draft, external.ready));
   const blockers = lesson && session ? teacherCompletionBlockers(session, lesson, draft.practiceAnswers, draft.practiceChecked, draft, external.ready) : [];
   const completed = Boolean(session?.completedAt && !olderContentVersion);
+  const isPaused = Boolean(session?.paused);
   const nextIncompleteSceneId = lesson && session ? teacherNextIncompleteSceneId(session, lesson, draft.practiceAnswers, draft.practiceChecked) : undefined;
   const c10Dialogues = lesson?.id === "L054" ? composeLosC10Dialogues(
     session?.draftAnswers["dialogue-du"] ?? "", session?.draftAnswers["dialogue-sie"] ?? "") : null;
@@ -358,7 +359,7 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
               Varmista ensin tallennus ja vie LOS! 1:n varmuuskopio kirjan Liitteet-sivulta.
               Vanhaa suoritusta ei poisteta.</p>}
             <p>Aiempia tallennettuja versioita: {archivedVersions.length}.</p>
-          </section> : session.paused ? <section className="los-teacher-paused" role="status">
+          </section> : isPaused ? <section className="los-teacher-paused" role="status">
             <h2>Oppitunti keskeytetty</h2><p>Opetustilanne ja vastaukset ovat tallessa. Jatka omassa tahdissasi.</p>
             <button type="button" onClick={togglePause}>Jatka opetusta</button>
           </section> : <article className="los-teacher-paper" key={scene.id + "-" + replayKey}>
