@@ -58,7 +58,7 @@ export function LosDictionary({ book, move, openChapter }: {
       word={selection.entry.word} contextMeaning={selection.entry.meaning}
       onClose={() => setSelection(null)} />}
     <h2>Kappalesanasto</h2>
-    <p>Tämä erillinen paikallinen sanastoluettelo sisältää kirjojen kappaleissa opetettavia sanoja, taivutusmuotoja ja kokonaisia fraaseja. Sama ilmaus voi esiintyä useassa kappaleessa. Rivien tai erilaisten kirjoitusasujen määrä ei ole eri kantasanojen, uusien aktiivisanojen tai tarkistetun sanakirjan lemmojen määrä. Alkuperäistekstien kokonaisia repliikkejä ja niiden suomennoksia voit hakea myös kirjan Haku-sivulla.</p>
+    <p>Tämä erillinen paikallinen sanastoluettelo sisältää kirjojen kappaleissa opetettavia sanoja, taivutusmuotoja ja kokonaisia fraaseja. Sama ilmaus voi esiintyä useassa kappaleessa. Rivien tai erilaisten kirjoitusasujen määrä ei ole eri kantasanojen, uusien aktiivisanojen tai tarkistetun sanakirjan lemmojen määrä. Saksassa iso ja pieni alkukirjain voivat erottaa merkityksiä: esimerkiksi kohtelias Sie ja naista tarkoittava sie lasketaan eri kirjoitusasuiksi. Alkuperäistekstien kokonaisia repliikkejä ja niiden suomennoksia voit hakea myös kirjan Haku-sivulla.</p>
     <div className="los-index-options">
       <div className="los-index-tabs" role="group" aria-label="Kappalesanaston laajuus">
         <button className={scope === "book" ? "is-active" : ""} aria-pressed={scope === "book"} onClick={() => {setScope("book");setVisibleCount(LOCAL_DICTIONARY_PAGE_SIZE);}}>Tämä kirja</button>
