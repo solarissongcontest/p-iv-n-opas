@@ -332,6 +332,25 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
                 </button>)}
               </nav>
             </details>
+            {archivedVersions.length>0 && <details className="los-teacher-session-history">
+              <summary>Aiemmat oppituntiversiot ({archivedVersions.length})</summary>
+              <p>Vanhoja vastauksia ei lasketa nykyisen oppitunnin osaamisnäytöiksi.</p>
+              {archivedVersions.map((previous,index)=><details key={index}>
+                <summary>Versio {previous.contentVersion} · {previous.completedAt?"suoritettu":"keskeneräinen"}</summary>
+                <p>Viimeksi tallennettu: {previous.updatedAt}. Osaamispisteitä ei arvioida uudelleen.</p>
+                <p>Vastausyrityksiä {previous.attempts.length}, harjoittelumerkintöjä {previous.activityIds.length}.</p>
+                {previous.attempts.length>0 && <ul>
+                  {previous.attempts.map((attempt,i)=><li key={i}>
+                    {attempt.sceneId}: {attempt.answer} · {attempt.correct?"oikein":"väärin"}
+                  </li>)}
+                </ul>}
+                {Object.keys(previous.draftAnswers).length>0 && <details>
+                  <summary>Vanhat kirjoitusluonnokset</summary>
+                  <ul>{Object.entries(previous.draftAnswers).map(([id,value])=>
+                    <li key={id}>{id}: {value}</li>)}</ul>
+                </details>}
+              </details>)}
+            </details>}
           </aside>
           {olderContentVersion ? <section className="los-teacher-paused los-teacher-version-review" role="status">
             <h2>Oppitunnin sisältö on päivittynyt</h2>
