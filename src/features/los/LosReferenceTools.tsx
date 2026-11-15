@@ -67,8 +67,8 @@ export function LosDictionary({ book, move, openChapter }: {
       <button className="los-index-toggle" onClick={() => setHidden(v => !v)} aria-pressed={hidden}>{hidden ? "Näytä suomennokset" : "Peitä suomennokset"}</button>
     </div>
     <label className="los-index-search"><Search size={19}/><span className="sr-only">Hae saksaksi tai suomeksi</span><input value={search} onChange={e=>{setSearch(e.target.value);setVisibleCount(LOCAL_DICTIONARY_PAGE_SIZE);}} placeholder="Hae saksaksi tai suomeksi" autoComplete="off" /></label>
-    <p className="los-index-count" role="status" aria-live="polite">{vocabularyRowSummary.rowCount} sanastoriviä
-      {" · "}{vocabularyRowSummary.distinctWrittenEntries} eri kirjoitusasua
+    <p className="los-index-count" role="status" aria-live="polite">{vocabularyRowSummary.rowCount} {vocabularyRowSummary.rowCount===1?"sanastorivi":"sanastoriviä"}
+      {" · "}{vocabularyRowSummary.distinctWrittenEntries} {vocabularyRowSummary.distinctWrittenEntries===1?"eri kirjoitusasu":"eri kirjoitusasua"}
       {" · "}Näytetään {visibleEntries.length} / {entries.length}</p>
     {entries.length === 0 ? <p>Ei osumia tällä rajauksella. Kappalesanasto sisältää kirjojen käsikirjoitusten sanoja, muotoja ja fraaseja.</p> :
       <div className="los-index-table" role="table" aria-label="Sanakirjahakemisto">
