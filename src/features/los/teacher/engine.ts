@@ -133,6 +133,8 @@ export type TeacherSession = {
   schemaVersion: 1;
   lessonId: string;
   contentVersion: string;
+  /** Stable content checksum, optional for pre-upgrade v1 saves. Not a security hash. */
+  contentSignature?: string;
   sceneId: string;
   visitedIds: string[];
   attempts: TeacherAttempt[];
@@ -153,10 +155,72 @@ const record = (v: unknown): v is Record<string, unknown> =>
 const idList = (v: unknown, cap: number): v is string[] =>
   Array.isArray(v) && v.length <= cap && v.every(limitedId) && new Set(v).size === v.length;
 
+/**
+ * Version labels in existing LOS manuscripts were historically not incremented
+ * for every edit. Fingerprint the actual authored content and requirements.
+ * This is a deterministic change detector, not a cryptographic authenticity check.
+ */
+export function teacherContentSignature(lesson: TeacherLesson): string {
+  const content=JSON.stringify({
+    id:lesson.id,version:lesson.version,scenes:lesson.scenes,
+    requiredQuestionIds:lesson.requiredQuestionIds,
+    requiredActivityIds:lesson.requiredActivityIds,
+    requiredPracticeIds:lesson.requiredPracticeIds,
+    requiredCheckedIds:lesson.requiredCheckedIds,
+    chapterAssessment:lesson.chapterAssessment,examAssessment:lesson.examAssessment,
+    externalCheck:lesson.externalCheck,mediaGate:lesson.mediaGate,
+  });
+  let hash=0x811c9dc5;
+  for(let i=0;i<content.length;i++){
+    hash=Math.imul(hash^content.charCodeAt(i),0x01000193);
+  }
+  return (hash>>>0).toString(16).padStart(8,"0");
+}
+export function teacherSessionNeedsReview(session: TeacherSession,lesson: TeacherLesson): boolean {
+  return session.lessonId===lesson.id &&
+    (session.contentVersion!==lesson.version ||
+     session.contentSignature!==teacherContentSignature(lesson));
+}
+export type TeacherSessionHistory = Record<string,TeacherSession[]>;
+const MAX_SESSION_HISTORY_PER_LESSON=8;
+const MAX_SESSION_HISTORY_BYTES=180_000;
+export function validTeacherSessionHistoryMap(value:unknown):value is TeacherSessionHistory {
+  if(!record(value)||Object.keys(value).length>60)return false;
+  const entries=Object.entries(value);
+  if(!entries.every(([id,sessions])=>/^L\d{3}$/.test(id) && Array.isArray(sessions) &&
+    sessions.length>0 && sessions.length<=MAX_SESSION_HISTORY_PER_LESSON &&
+    sessions.every(session=>validTeacherSession(session) && session.lessonId===id)))return false;
+  return new TextEncoder().encode(JSON.stringify(value)).length<=MAX_SESSION_HISTORY_BYTES;
+}
+export function parseTeacherSessionHistory(value:unknown):TeacherSessionHistory {
+  if(!record(value))return {};
+  const result=Object.fromEntries(Object.entries(value).filter(([id,entries])=>
+    /^L\d{3}$/.test(id) && Array.isArray(entries) && entries.length>0 &&
+    entries.length<=MAX_SESSION_HISTORY_PER_LESSON &&
+    entries.every(session=>validTeacherSession(session) && session.lessonId===id)
+  ).slice(0,60)) as TeacherSessionHistory;
+  return validTeacherSessionHistoryMap(result)?result:{};
+}
+/**
+ * Explicit student action: archive the OLD entire session and start a clean
+ * current-version attempt. Return null rather than discard old history when
+ * storage limits are reached. Legacy attempts never become new mastery.
+ */
+export function restartUpdatedTeacherSession(
+  session:TeacherSession,lesson:TeacherLesson,
+  history:TeacherSessionHistory,now:string,
+):{current:TeacherSession;history:TeacherSessionHistory}|null {
+  if(!validTeacherSession(session) || !validTeacherSessionHistoryMap(history) ||
+     !teacherSessionNeedsReview(session,lesson))return null;
+  const nextHistory={...history,[lesson.id]:[...(history[lesson.id]??[]),session]};
+  if(!validTeacherSessionHistoryMap(nextHistory))return null;
+  return {current:emptyTeacherSession(lesson,now),history:nextHistory};
+}
+
 export function emptyTeacherSession(lesson: TeacherLesson, now: string): TeacherSession {
   return {
     schemaVersion: 1, lessonId: lesson.id, contentVersion: lesson.version,
-    sceneId: lesson.scenes[0]?.id ?? "", visitedIds: [], attempts: [],
+    contentSignature:teacherContentSignature(lesson), sceneId: lesson.scenes[0]?.id ?? "", visitedIds: [], attempts: [],
     helpedIds: [], revealedIds: [], activityIds: [], draftAnswers: {},
     completedAt: null, updatedAt: now, paused: false,
   };
@@ -165,6 +229,7 @@ export function validTeacherSession(value: unknown): value is TeacherSession {
   if (!record(value) || value["schemaVersion"] !== 1 ||
       !limitedId(value["lessonId"]) || !limitedId(value["sceneId"]) ||
       typeof value["contentVersion"] !== "string" || value["contentVersion"].length > 25 ||
+      (value["contentSignature"]!==undefined && (typeof value["contentSignature"]!=="string" || !/^[0-9a-f]{8}$/.test(value["contentSignature"]))) ||
       !idList(value["visitedIds"], 80) || !idList(value["helpedIds"], 80) ||
       !idList(value["revealedIds"], 80) || !idList(value["activityIds"], 80) ||
       !iso(value["updatedAt"]) || (value["completedAt"] !== null && !iso(value["completedAt"])) ||
