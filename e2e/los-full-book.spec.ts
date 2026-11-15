@@ -779,7 +779,7 @@ test("Finnish comprehension options in C01, C03, C09 and C10 have correct speech
   ] as const;
   for(const [lessonId,sceneTitle,correctAnswer] of targets){
     await page.goto("/los-lessons/"+lessonId,{waitUntil:"domcontentloaded"});
-    await page.locator(".los-teacher-outline nav").getByRole("button",{name:sceneTitle,exact:true}).click();
+    await page.locator(".los-teacher-outline nav button").filter({hasText:sceneTitle}).click();
     await expect(page.locator(".los-teacher-option span[lang='fi']")).toHaveCount(3);
     await expect(page.locator(".los-teacher-option span[lang='de']")).toHaveCount(0);
     await expect(page.locator(".los-teacher-option").filter({hasText:correctAnswer})
@@ -815,9 +815,9 @@ test("a renamed teacher scene resumes saved unfinished work without erasing hist
   await page.evaluate(({key,draft})=>localStorage.setItem(key,JSON.stringify(draft)),{key,draft});
   await page.goto("/los-lessons/L004",{waitUntil:"domcontentloaded"});
   await expect(page.locator(".los-teacher-paper h2")).toHaveText("Tervehdys valitaan tilanteen mukaan");
-  await expect(page.locator(".los-teacher-paper [role='status']")).toContainText(
+  await expect(page.locator(".los-teacher-paper .los-teacher-hint[role='status']")).toContainText(
     "Aiempi opetustilanne ei enää ole käytössä");
-  await expect(page.locator(".los-teacher-paper [role='status']")).toContainText(
+  await expect(page.locator(".los-teacher-paper .los-teacher-hint[role='status']")).toContainText(
     "Aiemmat vastaukset ja luonnokset säilyvät");
   await page.getByRole("button",{name:"Seuraava",exact:true}).click();
   await expect(page.locator(".los-teacher-paper h2")).toHaveText("Katsotaan ilmaukset opetustaululla");
