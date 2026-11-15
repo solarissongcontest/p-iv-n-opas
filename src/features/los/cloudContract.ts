@@ -1,7 +1,7 @@
 import type { LosChapterDraft } from "./studyState";
 import { validateLosLessonProgressMap } from "./lessonEngine.ts";
 import { validLosRecallCardMap } from "./recallEngine.ts";
-import { validTeacherSessionMap } from "./teacher/engine.ts";
+import { validTeacherSessionMap, validTeacherSessionHistoryMap } from "./teacher/engine.ts";
 
 export type LosCloudRecord = {
   revision: number;
@@ -30,6 +30,7 @@ export function validateLosCloudDraft(raw:unknown):raw is LosChapterDraft {
   if(d.lessonProgress!==undefined && !validateLosLessonProgressMap(d.lessonProgress))return false;
   if(d.recallCards!==undefined && !validLosRecallCardMap(d.recallCards))return false;
   if(d.teacherSessions!==undefined && !validTeacherSessionMap(d.teacherSessions))return false;
+  if(d.teacherSessionHistory!==undefined && !validTeacherSessionHistoryMap(d.teacherSessionHistory))return false;
   if(!Array.isArray(d.practiceChecked)||d.practiceChecked.length>200 ||
     !d.practiceChecked.every(item=>typeof item==="string" && item.length<=100))return false;
   if(d.testSubmittedAt!==null && (typeof d.testSubmittedAt!=="string"||!isValidIso(d.testSubmittedAt)))return false;
@@ -51,6 +52,7 @@ export function draftIsEmpty(draft:LosChapterDraft) {
     !(draft.lessonProgress && Object.values(draft.lessonProgress).some(progress=>Boolean(progress.startedAt || progress.completedAt || progress.exitCheckedAt || progress.completedStepIds.length || progress.teacher))) &&
     !(draft.recallCards && Object.keys(draft.recallCards).length>0) &&
     !(draft.teacherSessions && Object.keys(draft.teacherSessions).length>0) &&
+    !(draft.teacherSessionHistory && Object.keys(draft.teacherSessionHistory).length>0) &&
     !Object.values(draft.testAnswers).some(Boolean) &&
     !draft.testSubmittedAt && !draft.selfAssessment.trim();
 }
