@@ -520,7 +520,12 @@ test("U1 R9: shared C01 word card has no automatic WCAG A/AA violations",async({
 test("U1: Bis später phrase card displays two sourced words but never invents phrase IPA or audio",async({page})=>{
   await enterLocalBook(page);
   await page.goto("/los#/1/dictionary",{waitUntil:"domcontentloaded"});
+  const vocabularyCount=page.locator(".los-index-count");
+  await expect(vocabularyCount).toContainText("173 sanastoriviä");
+  await expect(vocabularyCount).toContainText("168 eri kirjoitusasua");
   await page.locator(".los-index-search input").fill("Bis später!");
+  await expect(vocabularyCount).toContainText("1 sanastorivi");
+  await expect(vocabularyCount).toContainText("1 eri kirjoitusasu");
   const open=page.getByRole("button",{name:"Avaa sanakortti: Bis später!"}).first();
   await expect(open).toBeVisible();
   await open.click();
