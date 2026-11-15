@@ -34,11 +34,11 @@ test("cloud and import validation reject malformed Teacher 2.0 progress", () => 
 test("version history is preserved in local draft JSON and whole-book backups",()=>{
   const at="2026-11-12T20:00:00.000Z";
   const saved=emptyTeacherSession(LOS1_L004_TEACHER,at);
-  const legacy={...saved,contentSignature:undefined,
+  const legacy=JSON.parse(JSON.stringify({...saved,contentSignature:undefined,
     draftAnswers:{independent:"Guten Abend!"},attempts:[
       {sceneId:"independent",answer:"Guten Abend!",correct:true,independent:true,at},
     ],completedAt:at,
-  };
+  })) as typeof saved;
   const restarted=restartUpdatedTeacherSession(legacy,LOS1_L004_TEACHER,{},at);
   assert.ok(restarted);
   const draft={...emptyDraft(),teacherSessions:{L004:restarted.current},
