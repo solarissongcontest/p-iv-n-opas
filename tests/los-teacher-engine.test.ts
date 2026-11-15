@@ -336,7 +336,7 @@ test("explicit restart archives the intact prior lesson and never reuses its mas
 
 test("legacy teacher sessions can be archived without losing earlier backup schema",()=>{
   const saved=emptyTeacherSession(lesson,now);
-  const legacy={...saved,contentSignature:undefined};
+  const legacy=JSON.parse(JSON.stringify({...saved,contentSignature:undefined})) as typeof saved;
   assert.equal(validTeacherSessionMap({L004:legacy}),true);
   assert.equal(teacherSessionNeedsReview(legacy,lesson),true,
     "A missing signature cannot certify that old answers match the current manuscript");
