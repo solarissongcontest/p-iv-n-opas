@@ -78,9 +78,13 @@ test("L052 uses the whole canonical 14-turn Harald interview but cannot claim li
   const s=completeSceneWork(LOS1_L052_TEACHER);
   assert.equal(teacherCanFinish(s,LOS1_L052_TEACHER,practice,checked),false,
     "reading and three source checks must not unlock a hearing certificate");
-  assert.equal(teacherCanFinish(s,{...LOS1_L052_TEACHER,mediaGate:{...LOS1_L052_TEACHER.mediaGate!,approved:true}},practice,checked),true,
-    "once explicitly approved, the ordinary requirements still apply");
-  assert.equal(teacherCanFinish(s,{...LOS1_L052_TEACHER,mediaGate:{...LOS1_L052_TEACHER.mediaGate!,approved:true}},practice,checked.slice(0,2)),false);
+  const approved={...LOS1_L052_TEACHER,mediaGate:{...LOS1_L052_TEACHER.mediaGate!,approved:true}};
+  assert.equal(teacherCanFinish(s,approved,practice,checked),false,
+    "Changing the media gate must not retrospectively certify the previous manuscript's answers");
+  const updatedSession=completeSceneWork(approved);
+  assert.equal(teacherCanFinish(updatedSession,approved,practice,checked),true,
+    "once explicitly approved, fresh work under that approved lesson follows the ordinary requirements");
+  assert.equal(teacherCanFinish(updatedSession,approved,practice,checked.slice(0,2)),false);
 });
 test("L054 checks two real C10 Text B identifiers and requires two independent self-reviewed scripts",()=>{
   assert.equal(LOS1_TEXT_B_SOURCES["10"].sourceId,"M-COM-02");
