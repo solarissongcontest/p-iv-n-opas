@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { getDeviceOwnerId } from "../../lib/deviceSession.ts";
 import { parseLosLessonProgressMap } from "./lessonEngine.ts";
 import type { LosLessonProgress } from "./lessonEngine.ts";
-import { parseTeacherSessions, type TeacherSession } from "./teacher/engine.ts";
+import { parseTeacherSessions, parseTeacherSessionHistory, type TeacherSession, type TeacherSessionHistory } from "./teacher/engine.ts";
 import { parseLosRecallCardMap } from "./recallEngine.ts";
 import type { LosRecallCardState } from "./recallEngine.ts";
 
@@ -26,6 +26,8 @@ export type LosChapterDraft = {
   lessonProgress?: Record<string,LosLessonProgress>;
   /** Teacher 2.0 is additive; old chapter backups and lessonProgress remain valid. */
   teacherSessions?: Record<string,TeacherSession>;
+  /** Prior authored versions, retained when a student explicitly restarts an updated lesson. */
+  teacherSessionHistory?: TeacherSessionHistory;
   /** Chapter-local spaced-recall memory, one record per word and direction. */
   recallCards?: Record<string,LosRecallCardState>;
   updatedAt: string;
@@ -57,6 +59,7 @@ export function parseLosDraft(value:string | null):LosChapterDraft {
       readerMarks:input.readerMarks && isStringRecord(input.readerMarks) && Object.keys(input.readerMarks).length<=200 ? Object.fromEntries(Object.entries(input.readerMarks).filter(([k,v])=>k.length<=100&&v.length<=500)) : {},
       lessonProgress:parseLosLessonProgressMap(input.lessonProgress),
       teacherSessions:parseTeacherSessions(input.teacherSessions),
+      teacherSessionHistory:parseTeacherSessionHistory(input.teacherSessionHistory),
       recallCards:parseLosRecallCardMap(input.recallCards),
       updatedAt:typeof input.updatedAt==="string"?input.updatedAt:"",
     };
