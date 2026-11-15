@@ -10,7 +10,7 @@ import {
   emptyTeacherSession, markTeacherHelp, confirmTeacherActivity, teacherChapterAssessmentStatus, teacherMidtermAssessmentStatus,
   finishTeacherSession, independentTeacherEvidence, moveTeacherScene, revealTeacherSolution,
   setTeacherAnswerDraft, submitTeacherAnswer, toggleTeacherPause, teacherCanFinish, teacherCompletionBlockers, teacherNextIncompleteSceneId, teacherLatestAttempt,
-  teacherWrongFeedback, teacherBuiltNumberCount, teacherRequiresNumericResponse, recoverTeacherSession, type TeacherScene, type TeacherSession, isCorrectCalendarEntry,
+  teacherWrongFeedback, teacherBuiltNumberCount, teacherRequiresNumericResponse, recoverTeacherSession, teacherSessionNeedsReview, restartUpdatedTeacherSession, type TeacherScene, type TeacherSession, isCorrectCalendarEntry,
 } from "./engine.ts";
 import { getLosTeacherLesson } from "./lessonRegistry.ts";
 import { LosTeacherNumberBuilder } from "./LosTeacherNumberBuilder.tsx";
@@ -201,16 +201,19 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
     : null;
   const session = lesson && storedSession ? recoverTeacherSession(storedSession, lesson) : null;
   const recoveredNavigation = Boolean(storedSession && session && storedSession.sceneId !== session.sceneId);
-  const olderContentVersion = Boolean(lesson && session && session.contentVersion !== lesson.version);
+  const olderContentVersion = Boolean(lesson && session && teacherSessionNeedsReview(session,lesson));
+  const archivedVersions = draft.teacherSessionHistory?.[lessonId] ?? [];
+  const canArchive = Boolean(lesson && session && olderContentVersion && saved &&
+    restartUpdatedTeacherSession(session,lesson,draft.teacherSessionHistory??{},stamp()));
   const scene = lesson?.scenes.find(item => item.id === session?.sceneId) ?? lesson?.scenes[0];
   const sceneIndex = lesson?.scenes.findIndex(item => item.id === scene?.id) ?? 0;
   const external = lesson ? teacherExternalStatus(lesson,draft,{
     "01":evidence01,"02":evidence02,"03":evidence03,"04":evidence04,"05":evidence05,
     "06":evidence06,"07":evidence07,"08":evidence08,"09":evidence09,"10":evidence10,
   }) : {ready:true,lines:[]};
-  const available = Boolean(saved && session && lesson && teacherCanFinish(session, lesson, draft.practiceAnswers, draft.practiceChecked, draft, external.ready));
+  const available = Boolean(!olderContentVersion && saved && session && lesson && teacherCanFinish(session, lesson, draft.practiceAnswers, draft.practiceChecked, draft, external.ready));
   const blockers = lesson && session ? teacherCompletionBlockers(session, lesson, draft.practiceAnswers, draft.practiceChecked, draft, external.ready) : [];
-  const completed = Boolean(session?.completedAt);
+  const completed = Boolean(session?.completedAt && !olderContentVersion);
   const nextIncompleteSceneId = lesson && session ? teacherNextIncompleteSceneId(session, lesson, draft.practiceAnswers, draft.practiceChecked) : undefined;
   const c10Dialogues = lesson?.id === "L054" ? composeLosC10Dialogues(
     session?.draftAnswers["dialogue-du"] ?? "", session?.draftAnswers["dialogue-sie"] ?? "") : null;
@@ -224,7 +227,7 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
   }, [lesson]);
 
   const persist = (transform: (current: TeacherSession) => TeacherSession) => {
-    if (!lesson) return;
+    if (!lesson || olderContentVersion) return;
     update(current => {
       const old = recoverTeacherSession(current.teacherSessions?.[lessonId] ?? emptyTeacherSession(lesson, stamp()), lesson);
       return {
@@ -259,7 +262,7 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
     update(current => storeLosC10Dialogues(current, c10Dialogues));
   };
   const finish = () => {
-    if (!lesson || !saved) return;
+    if (!lesson || !saved || olderContentVersion) return;
     update(current => {
       const now = stamp();
       const old = recoverTeacherSession(current.teacherSessions?.[lessonId] ?? emptyTeacherSession(lesson, now), lesson);
@@ -268,6 +271,20 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
       // Teacher 2.0 completion is a distinct learning event. Never manufacture
       // legacy lesson steps or an exit answer that the student never submitted.
       return { ...current, teacherSessions: { ...current.teacherSessions, [lessonId]: next } };
+    });
+  };
+
+  const restartUpdatedLesson=()=>{
+    if(!lesson || !session || !saved || !olderContentVersion)return;
+    update(current=>{
+      const old=current.teacherSessions?.[lessonId];
+      if(!old)return current;
+      const restarted=restartUpdatedTeacherSession(old,lesson,current.teacherSessionHistory??{},stamp());
+      if(!restarted)return current;
+      return {...current,
+        teacherSessions:{...current.teacherSessions,[lessonId]:restarted.current},
+        teacherSessionHistory:restarted.history,
+      };
     });
   };
 
@@ -300,13 +317,13 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
             <p className="los-teacher-sidebar-copy">{lesson.objective}</p>
             <p className="los-teacher-small">{completed ? "Oppitunti suoritettu" :
               "Oppitunti " + (sceneIndex + 1) + "/" + lesson.scenes.length + " · suunnitteluarvio " + lesson.estimatedMinutes + " min (ei mitattu)"}</p>
-            {!completed && <button className="los-teacher-pause" type="button" onClick={togglePause}>
+            {!completed && !olderContentVersion && <button className="los-teacher-pause" type="button" onClick={togglePause}>
               {session.paused ? "Jatka opetusta" : "Keskeytä oppitunti"}
             </button>}
             <details className="los-teacher-outline" open>
               <summary>Oppitunnin sisältö</summary>
               <nav aria-label="Oppitunnin opetustilanteet">
-                {lesson.scenes.map((item, i) => <button key={item.id} type="button"
+                {lesson.scenes.map((item, i) => <button key={item.id} type="button" disabled={olderContentVersion}
                   aria-current={scene.id === item.id ? "step" : undefined}
                   className={scene.id === item.id ? "is-active" : ""}
                   onClick={() => navigate(item.id)}>
@@ -316,7 +333,22 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
               </nav>
             </details>
           </aside>
-          {session.paused ? <section className="los-teacher-paused" role="status">
+          {olderContentVersion ? <section className="los-teacher-paused los-teacher-version-review" role="status">
+            <h2>Oppitunnin sisältö on päivittynyt</h2>
+            <p>Tämä tallenne on tehty vanhan tai tunnistamattoman käsikirjoitusversion perusteella.
+              Vanhat vastaukset, yritykset ja mahdollinen loppumerkintä pysyvät historiassa.</p>
+            {recoveredNavigation && <p>Aiempi opetustilanne ei enää ole käytössä nykyisessä käsikirjoituksessa.</p>}
+            <p>Jotta muuttuneista tehtävistä ei synny virheellisiä osaamismerkintöjä,
+              aloita päivitetty oppitunti uutena suorituksena. Tämä ei poista vanhaa työtä.</p>
+            {session.completedAt && <p>Aiempi suoritusmerkintä säilyy historiallisena: {session.completedAt}.</p>}
+            <button type="button" onClick={restartUpdatedLesson} disabled={!canArchive}>
+              Arkistoi vanha suoritus ja aloita päivitetty oppitunti
+            </button>
+            {!canArchive && <p>Uuden version aloittaminen ei onnistunut turvallisesti.
+              Varmista ensin tallennus ja vie LOS! 1:n varmuuskopio kirjan Liitteet-sivulta.
+              Vanhaa suoritusta ei poisteta.</p>}
+            <p>Aiempia tallennettuja versioita: {archivedVersions.length}.</p>
+          </section> : session.paused ? <section className="los-teacher-paused" role="status">
             <h2>Oppitunti keskeytetty</h2><p>Opetustilanne ja vastaukset ovat tallessa. Jatka omassa tahdissasi.</p>
             <button type="button" onClick={togglePause}>Jatka opetusta</button>
           </section> : <article className="los-teacher-paper" key={scene.id + "-" + replayKey}>
