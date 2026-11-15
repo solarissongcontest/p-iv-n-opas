@@ -5,6 +5,15 @@
 **Päätös:** EI tuotantoyhdistämistä, tietokantakirjoitusta tai julkaisuvalmiusväitettä.
 Tämä tiedosto on ainoa LOS! 1–8:n *toteutuksen* jatkotilaraportti. Visuaalinen V3.3/V3.4, kirjakohtaiset käsikirjoitukset ja olemassa olevat lähde-/lisenssidokumentit pysyvät omissa auktoritatiivisissa tiedostoissaan.
 
+## 15.11.2026 · LOS! 1:n sanaston rivimäärän totuudenmukainen esittäminen
+
+- `catalog.ts` sisältää yhä täsmälleen **173 kappalesanaston riviä** (C01–C10 yhteensä) ja **168 erillistä kirjoitusasua** täsmällisellä, kirjainkoon säilyttävällä vertailulla. Viisi kirjoitusasua esiintyy kahdessa eri kappaleessa: `Guten Tag!`, `Auf Wiedersehen!`, `Das ist …`, `Freut mich!` ja `noch einmal`. Kohtelias `Sie` (C04) ja `sie` = hän (nainen, C10) säilytetään erillisinä, sillä ero on merkityksellinen.
+- **168 eri kirjoitusasua ei tarkoita 168 eri lemma- tai aktiivisanayksikköä**. Listassa on mm. sanoja, taivutusmuotoja, fraaseja, toistoja ja eri vaikeustason sisältöjä. Masterplanin 160–190 uniikin aktiivisen yksikön tavoitetta **ei voi** kuitata rivimäärällä; se vaatii oikean aktiivinen/tunnistettava-luokittelun ja lemmatisoinnin.
+- `vocabularyRowSummary.ts` laskee raportoitavat arvot nykyisestä varsinaisesta tietoaineistosta, säilyttää kirjainkoon ja listaa identtiset toistot. `LosReferenceTools.tsx` näyttää sekä rivien että erilaisten kirjoitusasujen määrän hakuun rajattuna, ei nimitä rivejä uusiksi hakusanoiksi. Sama pätee kaikkien kahdeksan kirjan yhteiseen sanastohakuun; esikatselu ei muutu hyväksytyksi yleissanakirjaksi.
+- `catalog.ts` C02:n `die Frau` selittää naista tarkoittavan substantiivin ja nimen edellä käytetyn kohteliaan puhuttelun yhtenevästi C07:n opetuksen kanssa, ilman avioliitto-oletusta.
+- `tests/los1-vocabulary-row-integrity.test.ts` suojaa 173/168-laskennan, viisi toistoa, `Sie`/`sie`-eron, oikean suomenkielisen laskentatavan ja C02:n merkityksen. `e2e/los-full-book.spec.ts` tarkistaa mobiili- ja työpöytäselaimessa sekä kokonaisluvun että yhden ilmauksen hakuun rajatun laskurin.
+- Alkuperäiset saksankieliset lähdetekstit, kysymystunnisteet, tehtävien vastausavaimet ja sanastorivien järjestys pysyvät muuttumattomina. Tämä ei ole sanaston kielellinen julkaisu- tai lemmatasoinen auditointi.
+
 ## 15.11.2026 · C07:n puhuttelun ja C01:n ääntämislähteiden rajattu tarkennus
 
 - **C07 · Frau:** `content/los1OpenDialogues.ts` selittää `Frau`-puhuttelun nimen edellä ilman oletusta avioliitosta. Oikean vaihtoehdon `b`, kysymyksen `C07-SOURCE-Q04`, alkuperäisen viiden repliikin `M-WB-02`-lähteen ja tallennusavaimet säilytettiin. `LosGrammarChapters.tsx` antaa vastaavan selityksen kirjassa. Uudet regressiot varmistavat tämän.
