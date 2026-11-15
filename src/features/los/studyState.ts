@@ -2,7 +2,8 @@ import { useCallback, useEffect, useState } from "react";
 import { getDeviceOwnerId } from "../../lib/deviceSession.ts";
 import { parseLosLessonProgressMap } from "./lessonEngine.ts";
 import type { LosLessonProgress } from "./lessonEngine.ts";
-import { parseTeacherSessions, parseTeacherSessionHistory, type TeacherSession, type TeacherSessionHistory } from "./teacher/engine.ts";
+import { parseTeacherSessions, parseTeacherSessionHistory, restartUpdatedTeacherSession, type TeacherSession, type TeacherSessionHistory, type TeacherLesson } from "./teacher/engine.ts";
+import { validateLosCloudDraft } from "./cloudContract.ts";
 import { parseLosRecallCardMap } from "./recallEngine.ts";
 import type { LosRecallCardState } from "./recallEngine.ts";
 
@@ -65,6 +66,25 @@ export function parseLosDraft(value:string | null):LosChapterDraft {
     };
   }catch{return emptyLosDraft();}
 }
+/**
+ * Version reset is an explicit, validated transaction on a chapter draft.
+ * Reject unsafe growth instead of writing a record that cloud/JSON backup
+ * validators would refuse. The old draft stays untouched on failure.
+ */
+export function prepareLosTeacherVersionRestart(
+  draft:LosChapterDraft,lesson:TeacherLesson,now:string,
+):LosChapterDraft|null {
+  const previous=draft.teacherSessions?.[lesson.id];
+  if(!previous)return null;
+  const migrated=restartUpdatedTeacherSession(previous,lesson,draft.teacherSessionHistory??{},now);
+  if(!migrated)return null;
+  const proposed={...draft,
+    teacherSessions:{...draft.teacherSessions,[lesson.id]:migrated.current},
+    teacherSessionHistory:migrated.history,
+  };
+  return validateLosCloudDraft(proposed)?proposed:null;
+}
+
 export function useLosChapterDraft(bookId:number,chapterId:string) {
   const ownerId=typeof window==="undefined"?null:getDeviceOwnerId();
   const key=ownerId?losDraftKey(bookId,chapterId,ownerId):null;
