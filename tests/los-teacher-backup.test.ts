@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { draftIsEmpty, validateLosCloudDraft } from "../src/features/los/cloudContract.ts";
 import { emptyTeacherSession, restartUpdatedTeacherSession } from "../src/features/los/teacher/engine.ts";
-import { parseLosDraft } from "../src/features/los/studyState.ts";
+import { parseLosDraft, prepareLosTeacherVersionRestart } from "../src/features/los/studyState.ts";
 import { parseLosBookBackup } from "../src/features/los/localBackups.ts";
 import { LOS1_L004_TEACHER } from "../src/features/los/teacher/lessonL004.ts";
 
@@ -67,4 +67,23 @@ test("malformed archives are rejected at the cloud and import boundaries",()=>{
   const payload={format:"los-book-backup-v1",bookId:1,exportedAt:at,
     chapters:{"01":bogus}};
   assert.throws(()=>parseLosBookBackup(JSON.stringify(payload)),/virheellisiä tietoja/);
+});
+
+
+test("version restart is atomic and refuses chapter drafts failing backup validation",()=>{
+  const at="2026-11-12T20:00:00.000Z";
+  const old={...emptyTeacherSession(LOS1_L004_TEACHER,at),contentSignature:undefined,
+    attempts:[{sceneId:"independent",answer:"Guten Abend!",correct:true,independent:true,at}],
+  };
+  const draft={...emptyDraft(),teacherSessions:{L004:old}};
+  const current=prepareLosTeacherVersionRestart(draft,LOS1_L004_TEACHER,at);
+  assert.ok(current);
+  assert.equal(validateLosCloudDraft(current),true);
+  assert.deepEqual(current.teacherSessionHistory?.L004,[old]);
+  assert.deepEqual(current.teacherSessions?.L004?.attempts,[]);
+  assert.deepEqual(draft.teacherSessions.L004,old,"Never mutate the source draft");
+  assert.deepEqual(prepareLosTeacherVersionRestart(current,LOS1_L004_TEACHER,at),null);
+  const unsafe={...draft,note:"x".repeat(8001)};
+  assert.equal(prepareLosTeacherVersionRestart(unsafe,LOS1_L004_TEACHER,at),null);
+  assert.deepEqual(unsafe.teacherSessions.L004,old,"Rejected drafts retain the original work");
 });
