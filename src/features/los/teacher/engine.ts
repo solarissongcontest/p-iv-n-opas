@@ -320,7 +320,7 @@ export function teacherBuiltNumberCount(session: TeacherSession, sceneId: string
     /^[2-9][0-9]$/.test(value) && Number(value) % 10 !== 0)).size;
 }
 export function confirmTeacherActivity(session: TeacherSession, lesson: TeacherLesson, activityId: string, now: string): TeacherSession {
-  if (session.completedAt || !lesson.requiredActivityIds.includes(activityId)) return session;
+  if (session.completedAt || teacherSessionNeedsReview(session,lesson) || !lesson.requiredActivityIds.includes(activityId)) return session;
   const numberScene = lesson.scenes.find(scene => scene.activityId === activityId && scene.numberBuilder);
   if (numberScene && teacherBuiltNumberCount(session, numberScene.id) < 4) return session;
   return { ...session, updatedAt: now, activityIds: session.activityIds.includes(activityId) ?
@@ -331,7 +331,7 @@ export function toggleTeacherPause(session: TeacherSession, now: string): Teache
 }
 export function submitTeacherAnswer(session: TeacherSession, lesson: TeacherLesson, sceneId: string, answer: string, now: string): TeacherSession {
   const scene = lesson.scenes.find(s => s.id === sceneId);
-  if (session.completedAt || session.paused || !scene?.question || session.attempts.length >= 120 ||
+  if (session.completedAt || session.paused || teacherSessionNeedsReview(session,lesson) || !scene?.question || session.attempts.length >= 120 ||
       session.attempts.filter(item => item.sceneId === sceneId).length >= 3 ||
       session.attempts.some(item => item.sceneId === sceneId && item.correct) ||
       session.revealedIds.includes(sceneId)) return session;
@@ -372,6 +372,8 @@ export function teacherCompletionBlockers(session: TeacherSession, lesson: Teach
   practiceAnswers: Readonly<Record<string, string>>, practiceChecked: readonly string[] = [],
   chapterAssessment?: TeacherChapterAssessmentInput, externalReady: boolean = !lesson.externalCheck): string[] {
   const missing: string[] = [];
+  if (teacherSessionNeedsReview(session,lesson))
+    missing.push("Oppitunnin sisältö on muuttunut. Arkistoi vanha suoritus ja aloita päivitetty oppitunti.");
   if (!externalReady) missing.push("Kirjan erillinen kertaus- tai arviointiosio on vielä kesken.");
   if (lesson.mediaGate && !lesson.mediaGate.approved)
     missing.push("Kuuntelumedian hyväksyntä odottaa: " + lesson.mediaGate.sourceId + ". Puuttuvaa äänitettä ei voi korvata tekstin lukemisella.");
@@ -476,6 +478,7 @@ export function finishTeacherSession(session: TeacherSession, lesson: TeacherLes
     { ...session, updatedAt: now, completedAt: now };
 }
 export function independentTeacherEvidence(session: TeacherSession, lesson: TeacherLesson): number {
+  if(teacherSessionNeedsReview(session,lesson))return 0;
   const eligible = new Set(lesson.scenes.filter(scene =>
     scene.question && ["independent", "application", "exit"].includes(scene.question.evidenceRole ?? ""))
     .map(scene => scene.id));
