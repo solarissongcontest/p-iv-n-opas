@@ -1,0 +1,163 @@
+/* LOS! 2–8 manuscript exercise preview. Adapt to the shared book accent and paper. */
+.los-future-exercises{max-width:900px;margin:1rem auto 2.5rem}
+.los-future-exercise-notice{margin:1rem 0;padding:1rem 1.2rem;border-radius:12px;border:1px solid var(--los-book-accent,#8d6a50);background:color-mix(in srgb,var(--los-book-tint,#f1e9df) 55%,white);line-height:1.55;font-size:.9rem}
+.los-future-exercise-summary{display:flex;flex-wrap:wrap;gap:.6rem 1.2rem;align-items:center;padding:.75rem 0 1.15rem;font-size:.87rem;color:inherit;border-bottom:1px solid color-mix(in srgb,currentColor 16%,transparent)}
+.los-future-exercise-summary .is-saved{color:#226b49}
+.los-future-exercise-summary .is-unsaved{color:#aa442f}
+.los-future-exercise-picker{display:grid;gap:.4rem;margin:1.2rem 0 1.5rem;font-size:.9rem;font-weight:600}
+.los-future-exercise-select{position:relative;max-width:620px}
+.los-future-exercise-select select{width:100%;min-width:0;appearance:none;border:1px solid #c6c3bc;border-radius:10px;background:white;color:#262626;padding:.8rem 2.5rem .8rem 1rem;font:inherit}
+.los-future-exercise-select svg{position:absolute;right:.9rem;top:50%;transform:translateY(-50%);pointer-events:none}
+.los-future-exercise-card{border:1px solid #ddd9d3;border-radius:15px;overflow:hidden;background:#fff;padding:1.5rem;box-shadow:0 2px 16px rgba(42,36,30,.04)}
+.los-future-exercise-topline{display:flex;justify-content:space-between;gap:1rem;color:#6f685e;font-size:.8rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase}
+.los-future-exercise-card h2{font-size:1.35rem;line-height:1.25;margin:1rem 0 .6rem}
+.los-future-exercise-question{font-size:1.045rem;line-height:1.7;white-space:pre-wrap;margin:1.15rem 0 1.5rem}
+.los-future-exercise-answer{display:grid;gap:.5rem;font-weight:700;font-size:.88rem}
+.los-future-exercise-answer textarea{display:block;box-sizing:border-box;width:100%;padding:1rem;font:normal 1rem/1.6 inherit;font-family:inherit;line-height:1.6;border:1px solid #bbb6af;border-radius:11px;min-height:110px;resize:vertical;background:#fff;color:#28231f}
+.los-future-exercise-answer textarea:focus-visible,.los-future-exercise-select select:focus-visible,.los-future-exercise-nav button:focus-visible,.los-future-exercise-actions button:focus-visible{outline:3px solid var(--los-book-accent,#8d6a50);outline-offset:3px}
+.los-future-exercise-actions{display:flex;align-items:center;gap:1rem;flex-wrap:wrap;margin-top:1rem}
+.los-future-exercise-actions button,.los-future-exercise-solution button,.los-future-exercise-nav button{display:inline-flex;align-items:center;justify-content:center;gap:.55rem;padding:.75rem 1rem;border:1px solid #b7b1a8;border-radius:9px;background:#fff;color:#322a25;font:inherit;font-size:.9rem;font-weight:650;cursor:pointer}
+.los-future-exercise-actions .los-future-exercise-primary{background:var(--los-book-accent,#8d6a50);color:white;border-color:transparent}
+.los-future-exercise-checked{display:inline-flex;align-items:center;gap:.35rem;color:#226b49;font-weight:650;font-size:.86rem}
+.los-future-exercise-solution{margin-top:1.25rem;padding:1rem 1.2rem;background:#faf8f3;border-radius:11px;border:1px solid #ded8cb}
+.los-future-exercise-solution h3{margin:0 0 .8rem;font-size:.95rem}
+.los-future-exercise-solution p{white-space:pre-wrap;line-height:1.65}
+.los-future-exercise-solution button:disabled,.los-future-exercise-nav button:disabled{opacity:.38;cursor:not-allowed}
+.los-future-exercise-hint{font-size:.82rem;color:#60574d}
+.los-future-exercise-nav{display:flex;gap:1rem;justify-content:space-between;margin:1rem 0 1.5rem}
+.los-future-exercise-overview{border-top:1px solid #ddd9d3;padding-top:.8rem}
+.los-future-exercise-overview summary{display:flex;gap:.6rem;align-items:center;cursor:pointer;font-weight:700;padding:.5rem 0}
+.los-future-exercise-overview ol{list-style:none;margin:.6rem 0;padding:0}
+.los-future-exercise-overview li button{width:100%;display:flex;align-items:center;justify-content:space-between;gap:1rem;border:none;border-bottom:1px solid #ebe7e0;background:transparent;padding:.7rem .3rem;text-align:left;font:inherit;cursor:pointer}
+.los-future-exercise-overview li button[aria-current="true"]{font-weight:700;color:var(--los-book-accent,#8d6a50)}
+.los-future-exercise-overview li button span:last-child{font-size:.77rem;white-space:nowrap;color:#665e54}
+.los-future-exercise-footer{font-size:.82rem;color:#686059;line-height:1.55;margin:1.5rem 0}
+@media(max-width:560px){.los-future-exercise-card{padding:1rem}.los-future-exercise-nav{gap:.5rem}.los-future-exercise-nav button{padding:.7rem .8rem}.los-future-exercise-overview li button{font-size:.85rem}}
+@media(prefers-reduced-motion:reduce){.los-future-exercises *{scroll-behavior:auto!important}}
+
+/* Structured source-matching activity. Native labels and selects remain operable by keyboard. */
+.los-future-matching{margin:1.1rem 0 0;padding:1rem;border:1px solid #dad5cd;border-radius:10px;min-width:0}
+.los-future-matching legend{font-weight:750;padding:0 .35rem}
+.los-future-matching>p{font-size:.85rem;line-height:1.55;color:#62594f;margin:.25rem 0 1rem}
+.los-future-match-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.25fr);align-items:center;gap:.75rem;margin:.7rem 0;font-size:.94rem;font-weight:650}
+.los-future-match-row select{box-sizing:border-box;width:100%;min-width:0;padding:.75rem .7rem;border:1px solid #aaa49b;border-radius:9px;background:#fff;color:#252525;font:inherit}
+.los-future-match-row select:focus-visible{outline:3px solid var(--los-book-accent,#8d6a50);outline-offset:2px}
+@media(max-width:560px){.los-future-matching{padding:.75rem}.los-future-match-row{grid-template-columns:1fr;gap:.3rem}.los-future-match-row select{min-height:44px}}
+
+/* Manuscript T07 single-gap exercise uses the same saved answer identifier. */
+.los-future-gap{margin:1.1rem 0}
+.los-future-gap>label{display:block;font-size:.9rem;font-weight:700;margin:0 0 .6rem}
+.los-future-gap-sentence{display:flex;flex-wrap:wrap;gap:.3rem .45rem;align-items:center;line-height:1.7;font-size:1.06rem}
+.los-future-gap-sentence input{font:inherit;box-sizing:border-box;width:min(100%,15ch);min-width:8ch;background:white;color:#252525;padding:.55rem .65rem;border:1px solid #aaa49b;border-radius:8px}
+.los-future-gap-sentence input:focus-visible{outline:3px solid var(--los-book-accent,#8d6a50);outline-offset:2px}
+@media(max-width:560px){.los-future-gap-sentence input{min-height:44px}}
+
+/* Accessible click-to-build ordering; the answer is a single existing task draft. */
+.los-future-ordering{display:grid;gap:.8rem;margin:1.2rem 0}
+.los-future-ordering>p{margin:.25rem 0;font-size:.9rem;line-height:1.6}
+.los-future-ordering-pieces{display:flex;flex-wrap:wrap;gap:.5rem}
+.los-future-ordering-pieces button,.los-future-ordering-actions button{font:inherit;color:#2a2620;border:1px solid #aaa49b;border-radius:9px;background:white;padding:.6rem .8rem;cursor:pointer;min-height:42px}
+.los-future-ordering-pieces button:disabled{opacity:.45;cursor:default;text-decoration:line-through}
+.los-future-ordering-pieces button:focus-visible,.los-future-ordering-actions button:focus-visible{outline:3px solid var(--los-book-accent,#8d6a50);outline-offset:2px}
+.los-future-ordering-built{display:grid;gap:.5rem;padding:1rem;border-radius:9px;border:1px dashed #bbb6ae;background:#faf8f4;min-height:65px}
+.los-future-ordering-built strong{font-size:.85rem}
+.los-future-ordering-answer{font-size:1.05rem;line-height:1.65;overflow-wrap:anywhere}
+.los-future-ordering-actions{display:flex;gap:.6rem;flex-wrap:wrap}
+.los-future-ordering-actions button:disabled{opacity:.4;cursor:not-allowed}
+
+/* T06: six independent recall prompts; no visible answer-key leakage or grading. */
+.los-future-recall{min-width:0;margin:1.1rem 0;padding:1rem;border:1px solid #dad5cd;border-radius:10px}
+.los-future-recall legend{font-weight:750;padding:0 .35rem}
+.los-future-recall>p{font-size:.87rem;line-height:1.6;color:#62594f;margin:.2rem 0 1rem}
+.los-future-recall-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);align-items:center;gap:.8rem;margin:.8rem 0;font-size:.95rem;font-weight:650}
+.los-future-recall-row input{box-sizing:border-box;width:100%;min-width:0;padding:.7rem .8rem;min-height:44px;border:1px solid #aaa49b;border-radius:9px;background:#fff;color:#252525;font:inherit}
+.los-future-recall-row input:focus-visible{outline:3px solid var(--los-book-accent,#8d6a50);outline-offset:2px}
+@media(max-width:560px){.los-future-recall{padding:.8rem}.los-future-recall-row{grid-template-columns:1fr;gap:.3rem}}
+
+/* T20: distinct recall and comprehension answers on the same persisted task. */
+.los-future-exit-ticket{margin:1.1rem 0;padding:1rem;min-width:0;border:1px solid #dad5cd;border-radius:10px}
+.los-future-exit-ticket legend{font-weight:750;padding:0 .35rem}
+.los-future-exit-ticket>p{font-size:.86rem;line-height:1.6;color:#62594f}
+.los-future-exit-row{display:grid;gap:.5rem;margin:1rem 0;font-weight:650;line-height:1.55}
+.los-future-exit-row textarea{font:inherit;line-height:1.6;box-sizing:border-box;resize:vertical;width:100%;min-height:75px;min-width:0;padding:.75rem;background:#fff;color:#252525;border:1px solid #aaa49b;border-radius:9px}
+.los-future-exit-row textarea:focus-visible{outline:3px solid var(--los-book-accent,#8d6a50);outline-offset:2px}
+@media(max-width:560px){.los-future-exit-ticket{padding:.8rem}.los-future-exit-row textarea{min-height:90px}}
+
+/* Source T09 and T12: one concise written response rather than a generic essay box. */
+.los-future-short-answer{display:grid;gap:.65rem;margin:1.1rem 0}
+.los-future-short-answer>label{font-size:.94rem;font-weight:750;line-height:1.4}
+.los-future-short-answer>input{box-sizing:border-box;width:100%;min-width:0;min-height:48px;border:1px solid #a9a298;border-radius:9px;background:#fff;color:#24211d;padding:.75rem .9rem;font:inherit;font-size:1rem;line-height:1.5}
+.los-future-short-answer>input:focus-visible{outline:3px solid var(--los-book-accent,#8d6a50);outline-offset:2px}
+.los-future-exercise-actions button:disabled{opacity:.5;cursor:not-allowed}
+@media(max-width:560px){.los-future-short-answer{gap:.5rem}}
+
+/* Source T10/T13: two distinct written operations without losing legacy prose drafts. */
+.los-future-two-part{min-width:0;margin:1.1rem 0;padding:1rem;border:1px solid #dad5cd;border-radius:10px}
+.los-future-two-part legend{font-weight:750;padding:0 .35rem}
+.los-future-two-part>p{font-size:.87rem;line-height:1.6;color:#62594f}
+.los-future-two-part-source{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.8;
+  padding:.9rem 1rem;margin:1rem 0;background:#faf8f3;
+  border-left:3px solid var(--los-book-accent,#8d6a50)}
+.los-future-two-part-row{display:grid;gap:.45rem;margin:1rem 0;line-height:1.55;font-size:.95rem;font-weight:650}
+.los-future-two-part-row textarea{width:100%;min-width:0;box-sizing:border-box;resize:vertical;
+  min-height:76px;padding:.75rem;background:#fff;color:#252525;border:1px solid #aaa49b;
+  border-radius:9px;font:inherit;line-height:1.6}
+.los-future-two-part-row textarea:focus-visible{outline:3px solid var(--los-book-accent,#8d6a50);outline-offset:2px}
+.dark .los-future-two-part{border-color:var(--los-line,#37434f)}
+.dark .los-future-two-part>p{color:var(--los-soft,#bec8cf)}
+.dark .los-future-two-part-source{background:var(--los-subtle,#222d37);color:var(--los-ink,#f2f5f5)}
+.dark .los-future-two-part-row textarea{background:var(--los-bg,#11161d);color:var(--los-ink,#f2f5f5);
+  border-color:var(--los-line,#37434f)}
+@media(max-width:560px){.los-future-two-part{padding:.8rem}.los-future-two-part-row textarea{min-height:88px}}
+
+/* Source T03/R01: dialogue and text-evidence tasks with two clearly separated answers. */
+.los-future-evidence{min-width:0;margin:1.1rem 0;padding:1rem;border:1px solid #dad5cd;border-radius:10px}
+.los-future-evidence legend{font-weight:750;padding:0 .35rem}
+.los-future-evidence>p{font-size:.87rem;line-height:1.65;color:#62594f}
+.los-future-evidence-source{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.85;
+  max-height:420px;overflow-y:auto;padding:.9rem 1rem;margin:1rem 0;background:#faf8f3;
+  border-left:3px solid var(--los-book-accent,#8d6a50)}
+.los-future-evidence-row{display:grid;gap:.45rem;margin:1rem 0;line-height:1.6;font-size:.95rem;font-weight:650}
+.los-future-evidence-row textarea{box-sizing:border-box;width:100%;min-width:0;min-height:76px;
+  resize:vertical;padding:.75rem;background:#fff;color:#252525;border:1px solid #aaa49b;
+  border-radius:9px;font:inherit;line-height:1.6}
+.los-future-evidence-row textarea:focus-visible{outline:3px solid var(--los-book-accent,#8d6a50);outline-offset:2px}
+.dark .los-future-evidence{border-color:var(--los-line,#37434f)}
+.dark .los-future-evidence>p{color:var(--los-soft,#bec8cf)}
+.dark .los-future-evidence-source{background:var(--los-subtle,#222d37);color:var(--los-ink,#f2f5f5)}
+.dark .los-future-evidence-row textarea{background:var(--los-bg,#11161d);color:var(--los-ink,#f2f5f5);
+  border-color:var(--los-line,#37434f)}
+@media(max-width:560px){.los-future-evidence{padding:.8rem}.los-future-evidence-source{max-height:320px}}
+
+/* T11/R03: explicit rule-explanation and evidence claim scaffolding. */
+.los-future-reasoning{min-width:0;margin:1.1rem 0;padding:1rem;border:1px solid #dad5cd;border-radius:10px}
+.los-future-reasoning legend{padding:0 .35rem;font-weight:750}
+.los-future-reasoning>p{font-size:.87rem;line-height:1.65;color:#62594f}
+.los-future-reasoning-source{padding:.85rem 1rem;margin:1rem 0;background:#faf8f3;border-left:3px solid var(--los-book-accent,#8d6a50)}
+.los-future-reasoning-source summary{cursor:pointer;font-weight:650}
+.los-future-reasoning-source p{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.85;max-height:350px;overflow-y:auto}
+.los-future-reasoning-row{display:grid;gap:.45rem;margin:1rem 0;line-height:1.55;font-weight:650;font-size:.94rem}
+.los-future-reasoning-row textarea{box-sizing:border-box;width:100%;min-width:0;min-height:72px;
+  resize:vertical;padding:.75rem;background:#fff;color:#252525;border:1px solid #aaa49b;
+  border-radius:9px;font:inherit;line-height:1.6}
+.los-future-reasoning-row textarea:focus-visible{outline:3px solid var(--los-book-accent,#8d6a50);outline-offset:2px}
+.dark .los-future-reasoning{border-color:var(--los-line,#37434f)}
+.dark .los-future-reasoning>p{color:var(--los-soft,#bec8cf)}
+.dark .los-future-reasoning-source{background:var(--los-subtle,#222d37);color:var(--los-ink,#f2f5f5)}
+.dark .los-future-reasoning-row textarea{background:var(--los-bg,#11161d);color:var(--los-ink,#f2f5f5);
+  border-color:var(--los-line,#37434f)}
+@media(max-width:560px){.los-future-reasoning{padding:.8rem}.los-future-reasoning-source p{max-height:240px}}
+
+/* T19/R06: four distinct speech turns, own written dialogue, no audio claims. */
+.los-future-four-turn{min-width:0;margin:1.1rem 0;padding:1rem;border:1px solid #dad5cd;border-radius:10px}
+.los-future-four-turn legend{font-weight:750;padding:0 .35rem}
+.los-future-four-turn>p{font-size:.88rem;line-height:1.65;color:#62594f}
+.los-future-four-turn-row{display:grid;gap:.45rem;margin:1rem 0;line-height:1.55;font-size:.95rem;font-weight:650}
+.los-future-four-turn-row textarea{box-sizing:border-box;width:100%;min-width:0;min-height:76px;padding:.75rem;
+  border:1px solid #aaa49b;border-radius:9px;background:#fff;color:#252525;font:inherit;line-height:1.6;resize:vertical}
+.los-future-four-turn-row textarea:focus-visible{outline:3px solid var(--los-book-accent,#8d6a50);outline-offset:2px}
+.dark .los-future-four-turn{border-color:var(--los-line,#37434f)}
+.dark .los-future-four-turn>p{color:var(--los-soft,#bec8cf)}
+.dark .los-future-four-turn-row textarea{background:var(--los-bg,#11161d);color:var(--los-ink,#f2f5f5);
+  border-color:var(--los-line,#37434f)}
+@media(max-width:560px){.los-future-four-turn{padding:.8rem}.los-future-four-turn-row textarea{min-height:86px}}

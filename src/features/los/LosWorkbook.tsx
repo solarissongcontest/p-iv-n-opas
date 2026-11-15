@@ -33,6 +33,12 @@ function Question({item,index,value,locked,reveal,onValue}:{
           onChange={event=>onValue(event.target.value)} placeholder="Kirjoita vastaus tähän" maxLength={100}/>
       </label>}
     </fieldset>
+    {item.kind==="choice" && Boolean(value.trim()) && !(item.options??[]).includes(value) &&
+      <p className="los-workbook-legacy-answer" role="status">
+        Aiemmin tallennettu vaihtoehto: <strong>{value}</strong>. Tehtävän sanamuotoa on tarkennettu.
+        {locked ? " Palautettu vastauksesi säilyy ennallaan." :
+          " Voit halutessasi valita tarkennetun vaihtoehdon."}
+      </p>}
     {reveal && <div className={`los-workbook-feedback ${correct?"is-right":"is-wrong"}`} role="status">
       <strong>{correct?"Oikein.":"Korjattavaa."}</strong> {item.explanation}
       {!correct && <span className="los-workbook-answer">Oikea vastaus: <b lang={item.chapterId==="01"||item.chapterId==="02"?"de":undefined}>{item.correct}</b></span>}

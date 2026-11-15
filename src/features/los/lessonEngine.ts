@@ -5,6 +5,7 @@
  * Completion is not a claim of mastery, and opening a link is not completion.
  */
 import type { LosChapterDraft } from "./studyState";
+import { validLegacyTeacherProgress, type LegacyTeacherProgress } from "./teacher/legacyCompatibility.ts";
 
 export type LosLessonSection =
   "overview" | "contents" | "text" | "understand" | "vocabulary" | "review" | "review-ii" | "midterm" |
@@ -44,6 +45,8 @@ export type LosLessonProgress = {
   exitAnswer: string | null;
   exitCheckedAt: string | null;
   completedAt: string | null;
+  /** Historical #218 pilot record: retained without promoting it to new mastery. */
+  teacher?: LegacyTeacherProgress;
 };
 
 export const LOS1_C01_LESSON_BLUEPRINTS: readonly LosLessonBlueprint[] = [
@@ -163,7 +166,8 @@ export function validateLosLessonProgressMap(value: unknown): value is Record<st
       p.completedStepIds.every(x => typeof x === "string" && x.length <= 60) &&
       (p.exitAnswer === null || (typeof p.exitAnswer === "string" && p.exitAnswer.length <= 20)) &&
       (p.exitCheckedAt === null || isIso(p.exitCheckedAt)) &&
-      (p.completedAt === null || isIso(p.completedAt));
+      (p.completedAt === null || isIso(p.completedAt)) &&
+      (p.teacher === undefined || validLegacyTeacherProgress(p.teacher));
   });
 }
 export function parseLosLessonProgressMap(value: unknown): Record<string, LosLessonProgress> {

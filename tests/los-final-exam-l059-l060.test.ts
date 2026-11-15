@@ -7,7 +7,7 @@ import {
  LOS1_FINAL_QUESTIONS,LOS1_FINAL_AUDIO_SOURCES,LOS1_FINAL_DRAFT_CHAPTER,
  LOS1_FINAL_SECTION_TITLES,LOS1_FINAL_WRITING_CHECK,LOS1_FINAL_VOICE_CHECK,
  LOS1_SUMMARY_CARDS,LOS1_SUMMARY_GOAL,LOS1_SUMMARY_REFLECTION,
- losFinalReadyToSubmit,losFinalScore,validateLosFinalBank,
+ losFinalReadyToSubmit,losFinalScore,losValidSubmittedFinal,losFinalAudioPlayed,validateLosFinalBank,
 } from "../src/features/los/content/los1FinalExam.ts";
 import {LOS1_FINAL_LESSONS} from "../src/features/los/lessonEngineFinal.ts";
 import {
@@ -50,6 +50,28 @@ test("EX-FINAL score only reports the objective 50 points, ready requires all 50
  ]});
  assert.equal(losFinalReadyToSubmit({...all,["EX-FINAL-Q01"]:""}),false);
 });
+test("EX-FINAL never treats a malformed saved submission marker as a scored attempt",()=>{
+ const choices=Object.fromEntries(LOS1_FINAL_QUESTIONS.map(q=>[q.id,q.correctId]));
+ const valid={testSubmittedAt:now,testAnswers:choices,
+   practiceAnswers:{
+     "EX-FINAL-AUDIO-M-COM-01":now,
+     "EX-FINAL-AUDIO-M-COM-02":now,
+   }};
+ assert.equal(losValidSubmittedFinal(valid),true);
+ assert.equal(losFinalAudioPlayed(valid.practiceAnswers,"M-COM-01"),true);
+ assert.equal(losValidSubmittedFinal({...valid,testSubmittedAt:null}),false);
+ assert.equal(losValidSubmittedFinal({...valid,testSubmittedAt:"not-a-date"}),false);
+ assert.equal(losValidSubmittedFinal({...valid,testAnswers:{...choices,"EX-FINAL-Q50":""}}),false);
+ assert.equal(losValidSubmittedFinal({...valid,practiceAnswers:{...valid.practiceAnswers,
+   "EX-FINAL-AUDIO-M-COM-02":"yes"}}),false);
+ assert.equal(losValidSubmittedFinal({...valid,practiceAnswers:{...valid.practiceAnswers,
+   "EX-FINAL-AUDIO-M-COM-02":""}}),false);
+ const ui=readFileSync("src/features/los/LosFinalExam.tsx","utf8");
+ assert.match(ui,/losValidSubmittedFinal\(draft\)/);
+ assert.match(ui,/Korjaa palautusmerkintä ja jatka luonnosta/);
+ assert.match(ui,/const exam=validCurrent\?losFinalScore/);
+});
+
 test("L059 and L060 complete the canonical 60 with distinct reserved final slot",()=>{
  assert.deepEqual(LOS1_FINAL_LESSONS.map(l=>l.id),["L059","L060"]);
  assert.equal(LOS_1_LESSONS.length,60);
@@ -123,4 +145,27 @@ test("final and summary navigation, authentic audio-gated submission and privacy
  assert.match(backup,/\[\.\.\.chapters,"91","92","93"\]/);
  assert.match(runner,/useLosChapterDraft\(1, "93"\)/);
  assert.match(progress,/useLosChapterDraft\(1,"93"\)/);
+});
+
+test("EX-FINAL-Q41 recognizes source phrase without testing untaught wir conjugation and preserves old answer ID",()=>{
+ const q=LOS1_FINAL_QUESTIONS.find(item=>item.id==="EX-FINAL-Q41");
+ assert.ok(q);
+ assert.equal(q.section,"grammar");
+ assert.equal(q.correctId,"b","legacy submitted answer IDs must stay correct");
+ assert.match(q.prompt,/Mikä lause tarkoittaa.*Me olemme kotoisin Berliinistä/);
+ assert.deepEqual(q.choices.map(c=>c.text),[
+   "Er kommt aus Berlin.","Wir kommen aus Berlin.","Du kommst aus Berlin.",
+ ]);
+ assert.doesNotMatch(q.prompt,/Täydennä.*Wir/);
+ assert.match(q.explanation,/tunnistamista, ei uuden persoonamuodon itsenäistä taivutusta/);
+ const old=Object.fromEntries(LOS1_FINAL_QUESTIONS.map(item=>[item.id,item.correctId]));
+ assert.equal(old["EX-FINAL-Q41"],"b");
+ assert.equal(losFinalScore(old).correct,50);
+ assert.equal(losFinalReadyToSubmit(old),true);
+ const grammar=readFileSync("src/features/los/LosGrammarChapters.tsx","utf8");
+ assert.match(grammar,/M-COM-02-keskustelussa/);
+ assert.match(grammar,/Wir kommen aus Berlin\./);
+ assert.match(grammar,/Sen verbimuotoa ei tarvitse/);
+ const teacher=readFileSync("src/features/los/teacher/lessonC10.ts","utf8");
+ assert.match(teacher,/uutta wir-taivutusta/);
 });

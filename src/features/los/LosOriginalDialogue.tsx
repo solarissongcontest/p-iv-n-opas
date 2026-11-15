@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Check, Eraser, Highlighter, Info, MousePointerClick } from "lucide-react";
 import { useLosChapterDraft } from "./studyState";
 import { LOS_READER_COLORS, type LosReaderColor } from "./content/c01Annotations";
 import {
   appendLosReaderRange, losReaderMarkKey, losReaderTokenColor, parseLosReaderAnnotation,
 } from "./content/readerAnnotations";
+import { LosDictionaryCard } from "./LosDictionaryCard";
 import "./los-authentic-reader.css";
 
 export type LosOriginalLine = {
@@ -53,11 +54,13 @@ export function LosOriginalDialogue(props: LosOriginalDialogueProps) {
   const [color,setColor] = useState<LosReaderColor>("yellow");
   const [first,setFirst] = useState<{lineId:string;index:number}|null>(null);
   const [gloss,setGloss] = useState<{word:string;meaning:string}|null>(null);
+  const wordTrigger = useRef<HTMLButtonElement | null>(null);
   const [undoMark,setUndoMark] = useState<{key:string;previous:string|undefined}|null>(null);
   const marks = draft.readerMarks ?? {};
 
-  const selectWord = (line:LosOriginalLine,index:number,word:string) => {
+  const selectWord = (line:LosOriginalLine,index:number,word:string,trigger:HTMLButtonElement) => {
     if(mode==="meaning") {
+      wordTrigger.current = trigger;
       setGloss({word,meaning:glossary[word] ?? "Tälle sanalle ei ole vielä tarkistettua kontekstiselitystä."});
       return;
     }
@@ -139,7 +142,7 @@ export function LosOriginalDialogue(props: LosOriginalDialogueProps) {
               const pending=first?.lineId===line.id&&first.index===token.index;
               return <button type="button" key={token.id}
                 className={"los-c01-token "+(marker?"los-c01-mark-"+marker:"")+(pending?" is-first":"")}
-                onClick={()=>selectWord(line,token.index,token.word)}
+                onClick={event=>selectWord(line,token.index,token.word,event.currentTarget)}
                 aria-label={token.word+", "+(mode==="meaning"?"selitys":"korostuksen sana")}
                 aria-pressed={mode==="highlight"?Boolean(marker||pending):undefined}
                 title={mode==="meaning"?"Näytä sanan merkitys":"Valitse korostukseen"}>{token.display}</button>;
@@ -149,10 +152,8 @@ export function LosOriginalDialogue(props: LosOriginalDialogueProps) {
         </div>;
       })}
     </div>
-    {gloss&&<div className="los-c01-gloss" role="status">
-      <strong lang="de">{gloss.word}</strong><p>{gloss.meaning}</p>
-      <button type="button" onClick={()=>setGloss(null)}>Sulje selitys</button>
-    </div>}
+    {gloss && <LosDictionaryCard word={gloss.word} contextMeaning={gloss.meaning}
+      onClose={() => { setGloss(null); wordTrigger.current?.focus(); }} />}
     {outdated&&<p role="status" className="los-c01-outdated">Vanhat korostukset kuuluvat tekstin toiseen versioon. Ne säilyvät tallessa, mutta niitä ei sijoiteta uuteen tekstiin arvauksella.</p>}
     <p className="los-c01-saved" role="status">{saved?
       "Korostukset tallentuvat tähän selaimeen ja sisältyvät LOS!-varmuuskopioon.":

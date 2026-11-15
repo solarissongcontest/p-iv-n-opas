@@ -1,6 +1,6 @@
-import { getDeviceOwnerId } from "@/lib/deviceSession";
-import { validLosChapter, validateLosCloudDraft, draftIsEmpty } from "./cloudContract";
-import { losDraftKey, parseLosDraft, type LosChapterDraft } from "./studyState";
+import { getDeviceOwnerId } from "../../lib/deviceSession.ts";
+import { validLosChapter, validateLosCloudDraft, draftIsEmpty } from "./cloudContract.ts";
+import { losDraftKey, parseLosDraft, type LosChapterDraft } from "./studyState.ts";
 
 export const LOS_BACKUP_FORMAT="los-book-backup-v1";
 export type LosBookBackup={
@@ -63,18 +63,47 @@ export function importLosBookBackup(backup:LosBookBackup,mode:"missing-only"|"re
   const current=createLosBookBackup(backup.bookId);
   const plan=planLosBookImport(backup,current);
   const chosen=mode==="missing-only"?plan.newChapters:plan.incoming;
-  let imported=0;
-  for(const chapter of chosen){
+
+  // Validate and serialize every chapter, then snapshot all target keys,
+  // before the first write. No existing storage key/ID is renamed.
+  const pending=chosen.map(chapter=>{
     const draft=backup.chapters[chapter];
-    if(!draft)continue;
+    if(!draft||!validateLosCloudDraft(draft))
+      throw new Error("Varmuuskopion kappale "+chapter+" ei ole kelvollinen.");
     const key=losDraftKey(backup.bookId,chapter,ownerId);
-    try{
-      localStorage.setItem(key,JSON.stringify(draft));
-      window.dispatchEvent(new CustomEvent("los:draft-change",{detail:{key,draft}}));
-      imported++;
-    }catch{throw new Error(`Tallennustila täyttyi. Tuotiin ${imported}/${chosen.length} kappaletta, ja vanha varmuuskopio on edelleen ladattavissa.`);}
+    let previous:string|null;
+    try{previous=localStorage.getItem(key);}
+    catch{throw new Error("Nykyisten tallennusten varmistaminen epäonnistui. Tietoja ei muutettu.");}
+    return {key,draft,previous,serialized:JSON.stringify(draft)};
+  });
+
+  const written:typeof pending=[];
+  try{
+    for(const item of pending){
+      localStorage.setItem(item.key,item.serialized);
+      written.push(item);
+    }
+  }catch{
+    // Web Storage does not support multi-key transactions. Best-effort
+    // reverse rollback prevents the usual quota-error partial restore.
+    let rollbackFailed=false;
+    for(const item of written.reverse()){
+      try{
+        if(item.previous===null)localStorage.removeItem(item.key);
+        else localStorage.setItem(item.key,item.previous);
+      }catch{rollbackFailed=true;}
+    }
+    if(rollbackFailed)throw new Error(
+      "Tuonti keskeytyi, eikä kaikkia paikallisia tallennuksia voitu palauttaa. "+
+      "Säilytä varmuuskopiot ja tarkista kappaleet ennen uutta yritystä.");
+    throw new Error("Tuonti keskeytyi. Aiemmat paikalliset tallennukset palautettiin.");
   }
-  return {imported,skipped:plan.incoming.length-imported};
+  // The current tab receives no partial success events before all writes pass.
+  for(const item of pending)
+    window.dispatchEvent(new CustomEvent("los:draft-change",{
+      detail:{key:item.key,draft:item.draft},
+    }));
+  return {imported:pending.length,skipped:plan.incoming.length-pending.length};
 }
 export function downloadLosBookBackup(backup:LosBookBackup,name?:string){
   const blob=new Blob([JSON.stringify(backup,null,2)],{type:"application/json;charset=utf-8"});

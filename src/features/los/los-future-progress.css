@@ -1,0 +1,28 @@
+/* Local, explicitly ungraded practice stats for LOS! 2–8. */
+.los-future-progress{border:1px solid #dfd9cc;border-radius:15px;background:#fffdfa;padding:1.2rem;margin:1.2rem 0;box-shadow:0 3px 15px rgb(48 38 25 / 4%)}
+.los-future-progress-header{display:flex;justify-content:space-between;align-items:center;gap:1rem;color:var(--los-book-accent,#795b3f)}
+.los-future-progress-header h2{font-size:1.45rem;color:#29231d;margin:.2rem 0 1rem}
+.los-future-progress-metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.65rem;margin:.4rem 0 1.1rem}
+.los-future-progress-metrics>div{min-width:0;display:grid;gap:.28rem;padding:.8rem .7rem;border-radius:10px;background:#f6f3ed}
+.los-future-progress-metrics strong{font-size:1.1rem;color:#332920;font-variant-numeric:tabular-nums}
+.los-future-progress-metrics span{font-size:.74rem;line-height:1.38;color:#61584d}
+.los-future-progress-meter{display:grid;gap:.4rem;font-size:.83rem}
+.los-future-progress-meter>span{display:flex;justify-content:space-between;gap:1rem}
+.los-future-progress :is(progress){display:block;width:100%;height:.55rem;appearance:none;overflow:hidden;border:0;border-radius:12px;background:#e8e3db;accent-color:var(--los-book-accent,#795b3f)}
+.los-future-progress progress::-webkit-progress-bar{background:#e8e3db;border-radius:12px}
+.los-future-progress progress::-webkit-progress-value{background:var(--los-book-accent,#795b3f);border-radius:12px}
+.los-future-progress progress::-moz-progress-bar{background:var(--los-book-accent,#795b3f);border-radius:12px}
+.los-future-progress-caveat{display:flex;gap:.4rem;align-items:flex-start;margin:.75rem 0 1rem;color:#756b5e;font-size:.8rem;line-height:1.55}
+.los-future-progress-caveat svg{flex:0 0 15px;margin-top:.1rem}
+.los-future-progress-actions{display:flex;align-items:center;flex-wrap:wrap;gap:.6rem}
+.los-future-progress-actions button,.los-future-progress-chapters button{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;padding:.66rem .85rem;border:1px solid #aaa094;border-radius:9px;background:transparent;color:#362b21;font:inherit;font-size:.87rem;font-weight:650;cursor:pointer}
+.los-future-progress-actions .los-future-progress-continue{border-color:transparent;background:var(--los-book-accent,#795b3f);color:#fff}
+.los-future-progress-chapters{list-style:none;padding:0;margin:1rem 0 0;border-top:1px solid #e6e0d8}
+.los-future-progress-chapters li{display:flex;align-items:center;gap:.7rem;border-bottom:1px solid #eee8df;padding:.72rem 0}
+.los-future-progress-chapter-id{flex:0 0 2rem;color:#786e62;font-size:.85rem;font-weight:700}
+.los-future-progress-chapter-details{display:grid;gap:.3rem;flex:1;min-width:0}
+.los-future-progress-chapter-details>strong{overflow-wrap:anywhere;font-size:.87rem}
+.los-future-progress-chapter-details small{font-size:.74rem;color:#61584d}
+.los-future-progress-chapters button{padding:.55rem;flex-shrink:0}
+.los-future-progress :is(button):focus-visible{outline:3px solid var(--los-book-accent,#795b3f);outline-offset:3px}
+@media(max-width:600px){.los-future-progress{padding:.9rem}.los-future-progress-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.los-future-progress-header h2{font-size:1.25rem}}

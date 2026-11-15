@@ -23,7 +23,7 @@ export const LOS1_C07_C09_LESSONS: readonly LosLessonBlueprint[] = [
       {id:"questions",label:"Tarkista kaksi tekstikysymystä",instruction:"Tee C07-SOURCE-Q01 ja C07-SOURCE-Q02. Etsi keskustelusta kysymys Wie schreibt man das? ja tunnista, kuka pyytää tavaamista.",chapter:"07",section:"understand",minutes:11},
       {id:"repeat",label:"Harjoittele kohteliasta tavaamispyyntöä",instruction:"Yritä sanoa Bitte buchstabieren Sie ilman sanalistaa. Palaa sen jälkeen lähdetekstiin tarkistamaan oikea kirjoitusasu.",chapter:"07",section:"text",minutes:4},
     ],evidence:[{kind:"checked-source",ids:["C07-SOURCE-Q01","C07-SOURCE-Q02"],label:"Kaksi alkuperäistekstin tavaamiskysymystä vastattu ja tarkistettu."}],
-    check:{question:"Mitä Bitte buchstabieren Sie tarkoittaa?",answers:[{id:"a",text:"Tavatkaa, olkaa hyvä."},{id:"b",text:"Kertokaa ikänne."},{id:"c",text:"Mistä olette kotoisin?"}],correctId:"a",explanation:"Buchstabieren tarkoittaa tavaamista. Sie on tässä kohteliaan puhuttelun muoto."},
+    check:{question:"Mitä Bitte buchstabieren Sie tarkoittaa?",answers:[{id:"a",text:"Voisitteko tavata nimen, kiitos?"},{id:"b",text:"Kertokaa ikänne."},{id:"c",text:"Mistä olette kotoisin?"}],correctId:"a",explanation:"Buchstabieren tarkoittaa tavaamista. Sie on tässä kohteliaan puhuttelun muoto."},
   },
   {
     id:"L038",title:"Tavaa ja ymmärrä numeroita",objective:"Tavaan nimiä ja erotan kirjoitusta sekä numeron tunnistamista koskevat fraasit.",
@@ -40,7 +40,7 @@ export const LOS1_C07_C09_LESSONS: readonly LosLessonBlueprint[] = [
       {id:"wordlist",label:"Kertaa nimien kirjoitusasut",instruction:"Avaa C07:n sanasto, muista Buchstabe, buchstabieren, Nummer ja bitte. Tavaa nimet Anna, Emil ja Greta ääneen.",chapter:"07",section:"vocabulary",minutes:9},
       {id:"model",label:"Lue alkuperäinen tavaamismalli",instruction:"Avaa C07:n Franzin puhelinpalveludialogi. Hän luettelee kirjaimet esimerkkisanoina; sitä ei saa esittää todennettuna erillisenä äänitteenä.",chapter:"07",section:"text",minutes:10},
       {id:"write",label:"Täytä itse kuvitteellinen lomake",instruction:"Tee C07:n soveltamistehtävä, jossa tavataan nimiä ja kirjoitetaan neljä erillistä numerosarjaa. Ne eivät ole oikeita puhelinnumeroita. Äänitettä ei vaadita.",chapter:"07",section:"apply",minutes:7},
-    ],evidence:[],check:{question:"Millä fraasilla pyydät kohteliaasti tavaamaan?",answers:[{id:"a",text:"Bitte buchstabieren Sie."},{id:"b",text:"Wie alt sind Sie?"},{id:"c",text:"Guten Morgen."}],correctId:"a",explanation:"Bitte buchstabieren Sie tarkoittaa Tavatkaa, olkaa hyvä. Todellista ääneenlukua ei arvioida koneellisesti."},
+    ],evidence:[],check:{question:"Millä fraasilla pyydät kohteliaasti tavaamaan?",answers:[{id:"a",text:"Bitte buchstabieren Sie."},{id:"b",text:"Wie alt sind Sie?"},{id:"c",text:"Guten Morgen."}],correctId:"a",explanation:"Bitte buchstabieren Sie tarkoittaa Voisitteko tavata nimen, kiitos? Todellista ääneenlukua ei arvioida koneellisesti."},
   },
   {
     id:"L040",title:"Harjoittele ja testaa C07",objective:"Palautan tavaamisen ja kirjoitusasun kappaletestin.",

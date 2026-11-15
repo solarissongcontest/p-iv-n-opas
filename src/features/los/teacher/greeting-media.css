@@ -1,0 +1,23 @@
+/* Canonical Teacher 2.0 L005: in-player human audio and complete transcript. */
+.los-teacher-greeting-media{margin:20px 0;padding:clamp(14px,3vw,22px);
+ border:1px solid var(--los-line);border-radius:12px;background:var(--los-paper)}
+.los-teacher-greeting-media h3{font-size:20px;line-height:1.4;margin:0 0 10px}
+.los-teacher-greeting-media>p{line-height:1.65;font-size:14px}
+.los-teacher-greeting-media audio{display:block;width:100%;max-width:700px;
+ min-height:48px;margin:14px 0}
+.los-teacher-greeting-media>button{min-height:44px;margin:8px 0;
+ padding:10px 16px;border:1px solid var(--los-line);border-radius:8px;
+ background:var(--los-paper);color:var(--los-ink);font-weight:700;cursor:pointer}
+.los-teacher-greeting-media>button:focus-visible{outline:3px solid var(--los-book-accent);outline-offset:3px}
+.los-teacher-greeting-notice{padding:12px 14px;background:var(--los-book-tint);border-radius:8px}
+.los-teacher-greeting-transcript{padding:14px 18px;margin-top:12px;
+ border:1px solid var(--los-line);border-radius:9px}
+.los-teacher-greeting-transcript p{font-size:13px;line-height:1.65}
+.los-teacher-greeting-transcript ol{padding-left:26px;display:grid;gap:8px}
+.los-teacher-greeting-transcript li{line-height:1.6;padding:5px 3px;overflow-wrap:anywhere}
+.los-teacher-greeting-transcript li span{display:block}
+.los-teacher-greeting-transcript li span[lang="de"]{font-weight:700}
+.los-teacher-greeting-transcript li span+span{font-size:13px;color:var(--los-soft)}
+.los-teacher-greeting-source a{color:var(--los-book-accent);text-decoration:underline}
+@media(max-width:560px){.los-teacher-greeting-transcript{padding:10px 12px}
+ .los-teacher-greeting-media{padding:14px}}

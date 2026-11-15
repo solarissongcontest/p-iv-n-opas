@@ -39,7 +39,7 @@ export const LOS1_REVIEW_II_LESSONS:readonly LosLessonBlueprint[]=[
     estimatedMinutes:30,contentVersion:"1.0.0",
     steps:[
       {id:"time",label:"Palauta mieleen viikonpäivät ja kellonajat",
-        instruction:"Kertaa C09:n sanastosta am Montag ja um drei Uhr sekä C07:n tavaamispyyntö. C08:n uuden päätekstin puuttuminen ei estä näiden erillisten käyttöfraasien harjoittelua.",
+        instruction:"Kertaa C09:n sanastosta am Montag ja um drei Uhr sekä C07:n tavaamispyyntö. C08:n nykyinen pääteksti on lukuharjoitus; selviytymisfraasit opetetaan erikseen.",
         chapter:"09",section:"vocabulary",minutes:9},
       {id:"tasks",label:"Tarkista viisi ajan ja tavaamisen tehtävää",
         instruction:"Avaa Kertaus II ja tee L057-osion viisi alkuperäistä harjoituskysymystä. Vastaa ensin ilman näkyvää sanastoa.",
@@ -54,7 +54,7 @@ export const LOS1_REVIEW_II_LESSONS:readonly LosLessonBlueprint[]=[
       {kind:"answered-practice",ids:["EX-REV2-SELF-057"],label:"Oma selviytymisfraasien arvio kirjattu."},
     ],
     check:{
-      question:"Millä ilmauksella aloitat kellonajan kello kolme?",
+      question:"Mikä ilmaus tarkoittaa kello kolmelta?",
       answers:[{id:"a",text:"am drei Uhr"},{id:"b",text:"um drei Uhr"},{id:"c",text:"in drei Uhr"}],
       correctId:"b",explanation:"Um ilmaisee kellonajan, am puolestaan esimerkiksi viikonpäivän: am Montag.",
     },

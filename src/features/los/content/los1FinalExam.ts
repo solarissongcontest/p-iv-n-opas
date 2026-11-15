@@ -74,7 +74,7 @@ export const LOS1_FINAL_QUESTIONS:readonly LosFinalQuestion[]=[
   q("grammar",38,"Täydennä: Ich ___ Leo.",["heißt","heiße","heißen"],"b","Ich heiße Leo."),
   q("grammar",39,"Valitse oikea viikonpäivän ilmaus.",["um Montag","in Montag","am Montag"],"c","Am Montag tarkoittaa maanantaina."),
   q("grammar",40,"Valitse kello kolmelta.",["um drei Uhr","am drei Uhr","im drei Uhr"],"a","Kellonajan edessä käytetään um."),
-  q("grammar",41,"Täydennä: Wir ___ aus Berlin.",["kommt","kommen","kommst"],"b","Wir kommen tarkoittaa me tulemme."),
+  q("grammar",41,"Mikä lause tarkoittaa: Me olemme kotoisin Berliinistä?",["Er kommt aus Berlin.","Wir kommen aus Berlin.","Du kommst aus Berlin."],"b","Wir kommen aus Berlin. tarkoittaa, että me olemme kotoisin Berliinistä. Wir on tässä valmiin lähdeilmauksen tunnistamista, ei uuden persoonamuodon itsenäistä taivutusta."),
   q("grammar",42,"Täydennä: ___ alt bist du?",["Woher","Was","Wie"],"c","Wie alt bist du? kysyy ikää."),
   q("situations",43,"Et ymmärtänyt opettajan ohjetta. Mitä sanot?",["Ich verstehe nicht.","Ich heiße Mia.","Bis morgen."],"a","Ich verstehe nicht kertoo, ettet ymmärrä."),
   q("situations",44,"Pyydät samaa lausetta toistettavaksi. Mikä sopii?",["Guten Tag!","Noch einmal, bitte.","Ich bin zwölf."],"b","Noch einmal, bitte. tarkoittaa vielä kerran, kiitos."),
@@ -86,6 +86,8 @@ export const LOS1_FINAL_QUESTIONS:readonly LosFinalQuestion[]=[
   q("situations",50,"Hyvästelet ystävän ja tarkoitat 'huomiseen'.",["Wie heißt du?","Bis morgen!","Gute Nacht!"],"b","Bis morgen tarkoittaa huomiseen."),
 ];
 export const LOS1_FINAL_WRITING_CHECK="EX-FINAL-WRITING-CHECK";
+export const LOS1_FINAL_WRITING_MODEL_OPENED="EX-FINAL-WRITING-MODEL-OPENED";
+export const LOS1_FINAL_WRITING_ASSISTED="EX-FINAL-WRITING-ASSISTED";
 export const LOS1_FINAL_VOICE_CHECK="EX-FINAL-VOICE-CHECK";
 export const LOS1_SUMMARY_GOAL="EX-SUMMARY-GOAL";
 export const LOS1_SUMMARY_CARDS="EX-SUMMARY-CARDS";
@@ -93,6 +95,32 @@ export const LOS1_SUMMARY_REFLECTION="EX-SUMMARY-REFLECTION";
 export function losFinalReadyToSubmit(answers:Readonly<Record<string,string>>){
  return LOS1_FINAL_QUESTIONS.every(q=>q.choices.some(c=>c.id===answers[q.id]));
 }
+/** Only a browser-recorded end-of-playback timestamp is valid evidence.
+ * Arbitrary nonempty strings from old or damaged JSON backups are not.
+ */
+export function losFinalAudioPlayed(
+  answers:Readonly<Record<string,string>>,sourceId:string,
+):boolean{
+  const value=answers["EX-FINAL-AUDIO-"+sourceId];
+  return typeof value==="string" && /^\d{4}-\d{2}-\d{2}T/.test(value) &&
+    Number.isFinite(Date.parse(value));
+}
+
+/** One canonical check for persisted current EX-FINAL submissions.
+ * Historic retake snapshots are verified separately by losArchivedExamHistory.
+ */
+export function losValidSubmittedFinal(draft:Pick<
+  import("../studyState.ts").LosChapterDraft,
+  "testSubmittedAt"|"testAnswers"|"practiceAnswers"
+>):boolean{
+  const submittedAt=draft.testSubmittedAt;
+  return typeof submittedAt==="string" &&
+    /^\d{4}-\d{2}-\d{2}T/.test(submittedAt) &&
+    Number.isFinite(Date.parse(submittedAt)) &&
+    losFinalReadyToSubmit(draft.testAnswers) &&
+    LOS1_FINAL_AUDIO_SOURCES.every(src=>losFinalAudioPlayed(draft.practiceAnswers,src.id));
+}
+
 export function losFinalScore(answers:Readonly<Record<string,string>>){
  const perSection=(Object.keys(LOS1_FINAL_SECTION_TITLES) as LosFinalSection[]).map(section=>{
   const questions=LOS1_FINAL_QUESTIONS.filter(q=>q.section===section);

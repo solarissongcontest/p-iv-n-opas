@@ -1,0 +1,380 @@
+#!/usr/bin/env python3
+"""Resolve only reviewed, non-semantic Teacher stack merge conflicts in disposable CI.
+
+Any unexpected code conflict raises instead of silently selecting a side.
+This script is not a general-purpose 'ours wins' merge policy.
+"""
+from __future__ import annotations
+from pathlib import Path
+import re
+import subprocess
+import sys
+
+PATTERN = re.compile(r"(?ms)^<<<<<<< HEAD\n(.*?)^=======\n(.*?)^>>>>>>> [^\n]*\n")
+
+def choose(path: str, ours: str, theirs: str) -> str:
+    if path == "e2e/los-full-book.spec.ts" and ours.lstrip().startswith('test("') and theirs.lstrip().startswith('test("'):
+        # Distinct appended Playwright test definitions have no shared application state.
+        ours_names=set(re.findall(r'test\("([^"]+)"',ours))
+        theirs_names=set(re.findall(r'test\("([^"]+)"',theirs))
+        if not ours_names or not theirs_names or ours_names & theirs_names:
+            raise ValueError("Overlapping names in appended E2E test cases")
+        return ours.rstrip("\n") + "\n\n" + theirs.lstrip("\n")
+    if path == "e2e/los-full-book.spec.ts" and all("Number(title.slice(1))" in x for x in (ours, theirs)):
+        return "    if(Number(title.slice(1))<=60){\n"
+    if path in {"src/features/los/LosBook.tsx", "src/features/los/LosReferenceTools.tsx"} and 'import { getLosTeacherLesson } from "./teacher/lessonL004";' in ours and 'import { getLosTeacherLesson } from "./teacher/lessonRegistry";' in theirs:
+        # Shared stack normalization registers every manuscript in lessonL004.
+        # C06's temporary delegate lookup must not replace the unified import,
+        # and the dynamic Teacher-count dependency must remain imported.
+        return ours
+    if path in {"src/features/los/LosBook.tsx", "src/features/los/LosReferenceTools.tsx"} and "{teacherCount}/60" in ours and "Teacher 2.0" in theirs:
+        # Preserve a live count sourced from the canonical registry instead of
+        # regressing to a hard-coded claim. End-to-end stack tests require 60/60.
+        return ours
+    if path in {
+        "src/features/los/LosBook.tsx",
+        "src/features/los/LosReferenceTools.tsx",
+        "src/features/los/teacher/LosTeacherPlayer.tsx",
+    } and all("Teacher 2.0" in x for x in (ours, theirs)):
+        result = ours.replace("L001–L026", "L001–L060").replace("L001–L021", "L001–L060")
+        if "L001–L060" not in result:
+            raise ValueError(f"No full-coverage declaration in {path}: {result[:120]!r}")
+        return result
+    if path == "e2e/los-full-book.spec.ts" and not theirs.strip() and ours.strip():
+        # Git grouped unrelated test-line deletion and local assertion as conflict.
+        # Keep the actual assertion rather than silently omitting coverage.
+        return ours
+    if path == "e2e/los-full-book.spec.ts" and "Await asynchronous book hydration" in ours and not theirs.strip():
+        return ours
+    if path == "src/features/los/teacher/LosTeacherPlayer.tsx" and 'lesson.examAssessment?.id === "EX-MID"' in ours and "lesson.externalCheck" in theirs:
+        return ours + theirs
+    if path == "src/features/los/teacher/validateContent.ts" and "lesson.mediaGate" in ours and "lesson.externalCheck" in theirs:
+        return ours + theirs
+    if path == "tests/los-teacher-engine.test.ts" and 'submitTeacherAnswer(s, lesson, "independent", "Guten Abend!"' in ours and "attemptsBeforeModel" in theirs:
+        # Both exercise the same reveal guard; retain established saved test.
+        return ours
+    if path == "e2e/los-full-book.spec.ts" and "Number(title.slice(1))" in ours and "getLosTeacherLesson(title)" in theirs:
+        # Dynamic routing check is stricter than a numerical threshold.
+        return theirs
+    if path == "src/features/los/teacher/LosTeacherPlayer.tsx" and "lessonReturn=" in ours and "lessonReturn=" in theirs and "review-ii" in theirs:
+        return ('  "/los?lessonReturn=" + encodeURIComponent(lessonId) + "#/" + bookId +\n'
+                '  (["review-ii","final","summary","midterm","review"].includes(section) ? "/" + section : "/" + chapterId + "/" + section);\n')
+    if path == "src/features/los/teacher/engine.ts" and "An original transcript" in ours and "Read-only adapter" in theirs:
+        # Distinct TeacherLesson fields; keep both media and final-review gates.
+        return ours + theirs
+    if path == "src/features/los/teacher/engine.ts" and "lesson.mediaGate" in ours and "externalReady" in theirs:
+        if "teacherMidtermAssessmentStatus" not in ours:
+            raise ValueError("Review II cannot discard EX-MID completion requirement")
+        return ours.replace("return (!lesson.mediaGate", "return externalReady && (!lesson.mediaGate", 1)
+    if path == "src/features/los/teacher/lessonL004.ts" and "LOS1_L056_TEACHER" in theirs and "LOS1_L017_TEACHER" in ours:
+        return ours
+    if path == "src/features/los/teacher/validateContent.ts" and '"review"' in ours and '"review-ii"' in theirs:
+        items=list(dict.fromkeys(re.findall(r'"([^"]+)"',ours+theirs)))
+        if not {"review","midterm","review-ii","final","summary"}.issubset(items):
+            raise ValueError("Missing authentic exam/review route")
+        return '  '+','.join('"'+item+'"' for item in items)+',\n'
+    if path == "tests/los-teacher-engine.test.ts" and "beforeRevealedSubmit" in ours and "attemptsBeforeModel" in theirs:
+        # Both test the same revealed-answer guard, retain the current assertion.
+        return theirs
+    if path == "src/features/los/teacher/LosTeacherPlayer.tsx" and 'lesson.examAssessment?.id === "EX-MID"' in ours and "lesson.mediaGate" in theirs:
+        # Both are separate assessment-status sections, not alternative branches.
+        return ours + theirs
+    if path == "src/features/los/teacher/lessonL004.ts" and "LOS1_C10_TEACHER_LESSONS.find" in theirs and "LOS1_L" in ours:
+        # Full registry normalization includes C10 as an additional fallback.
+        return ours
+    if path == ".github/workflows/los-browser-ci.yml" and all("bunx playwright test" in v for v in (ours,theirs)):
+        parts=list(dict.fromkeys(re.findall(r'e2e/[a-z0-9-]+\.spec\.ts', ours+" "+theirs)))
+        if "e2e/los-full-book.spec.ts" not in parts:
+            raise ValueError("Missing full-book browser baseline")
+        return "        run: bunx playwright test " + " ".join(parts) + " --project=desktop-chromium --project=iphone-webkit\n"
+    if path == "src/features/los/teacher/LosTeacherPlayer.tsx" and 'import { getLosTeacherLesson } from "./lessonRegistry.ts";' in ours and 'import { getLosTeacherLesson } from "./lessonL004.ts";' in theirs:
+        return theirs
+    if path == "src/features/los/teacher/engine.ts" and "teacherMidtermAssessmentStatus" in ours and "lesson.mediaGate" in theirs:
+        if "teacherChapterAssessmentStatus" not in theirs:
+            raise ValueError("Unrecognized C10 media-gate edit")
+        return ours.replace("return teacherChapterAssessmentStatus", "return (!lesson.mediaGate || lesson.mediaGate.approved) && teacherChapterAssessmentStatus", 1)
+    if path == "src/features/los/teacher/lessonL004.ts" and "LOS1_C10_TEACHER_LESSONS" in theirs and "LOS1_C09_TEACHER" in ours:
+        return ours
+    if path == "src/features/los/teacher/LosTeacherPlayer.tsx" and 'import { useEffect, useRef, useState } from "react";' in ours and 'import { useEffect, useState } from "react";' in theirs:
+        # Keep useRef imported for C07/C09 widgets that still use it.
+        return ours
+    if path == "src/features/los/teacher/LosTeacherPlayer.tsx" and "Boolean(scene.numberBuilder" in ours and "Boolean(scene.calendar" in theirs:
+        # A temporary concatenation; normalize the entire activity-disabled prop below.
+        return ours + "\n" + theirs
+    if path == "src/features/los/teacher/LosTeacherPlayer.tsx" and 'lesson.id === "L005"' in ours and "scene.chapterPhoto" in theirs:
+        # The existing L005 source panel and C09 photo/calendar/source widgets are siblings.
+        return ours + theirs
+    if path == "src/features/los/teacher/engine.ts" and "teacherMidtermAssessmentStatus" in ours and "isCorrectCalendarEntry" in theirs:
+        # Combine independent midterm, number-builder, and calendar evidence requirements.
+        if "teacherBuiltNumberCount" not in ours or "lesson.scenes.every(scene => !scene.calendar" not in theirs:
+            raise ValueError("Unexpected Teacher completion gate layout")
+        calendar = '    lesson.scenes.every(scene => !scene.calendar || isCorrectCalendarEntry(scene,session.draftAnswers[scene.id] ?? "")) &&\n'
+        return ours + calendar
+    if path == "src/features/los/teacher/LosTeacherPlayer.tsx" and all("teacherWrongFeedback" in v and "type TeacherScene" in v for v in (ours, theirs)):
+        terms = list(dict.fromkeys([t.strip() for v in (ours,theirs) for t in v.split(",") if t.strip()]))
+        return "  " + ", ".join(terms) + ",\n"
+    if path == "src/features/los/teacher/engine.ts" and all(v.lstrip().startswith("kind:") for v in (ours, theirs)):
+        kinds = list(dict.fromkeys(re.findall(r'"([^"]+)"', ours+theirs)))
+        if not all(k in {"introduction","explanation","board","question","book","activity","reflection","summary","form","calendar","source"} for k in kinds):
+            raise ValueError("Unexpected engine scene variant")
+        return "  kind: " + " | ".join('"'+k+'"' for k in kinds) + ";\n"
+    if path == "src/features/los/teacher/lessonL004.ts" and "LOS1_C09_TEACHER" in theirs and "LOS1_L" in ours:
+        return ours
+    if path == "src/features/los/teacher/teacher.css" and ours.lstrip().startswith("/* C06:") and theirs.lstrip().startswith("/*") and "C09" in theirs:
+        return ours.rstrip("\n") + "\n\n" + theirs.lstrip("\n")
+    if path == "docs/LOS1_TEACHER_V2_60_LESSON_STRUCTURAL_AUDIT_2026-11-13.md" and ours.lstrip().startswith("## ") and theirs.lstrip().startswith("## "):
+        # Two dated independent audit appendices; retain both.
+        return ours.rstrip("\n") + "\n\n" + theirs.lstrip("\n")
+    if path == "src/features/los/teacher/teacher.css" and ours.lstrip().startswith("/* C06:") and theirs.lstrip().startswith("/* C07"):
+        # Two new scoped, disjoint teaching-widget style families.
+        return ours.rstrip("\n") + "\n\n" + theirs.lstrip("\n")
+    if path == "src/features/los/teacher/validateContent.ts" and "scene.numberBuilder" in ours and 'scene.kind === "form"' in theirs:
+        # Preserve number composition AND authentic form validation.
+        return ours + theirs
+    if path == "src/features/los/teacher/LosTeacherPlayer.tsx" and "Boolean(scene.numberBuilder" in ours and "Boolean(scene.form" in theirs:
+        return ours.rstrip("\n") + " ||\n" + theirs
+    if path == "src/features/los/teacher/LosTeacherPlayer.tsx" and "scene.numberBuilder" in ours and 'scene.kind === "form"' in theirs:
+        # Independent adjacent JSX widgets in the same scene body: keep both.
+        if ours.count("LosTeacherNumberBuilder") != 1 or theirs.count('scene.kind === "form"') != 1:
+            raise ValueError("Unexpected duplicate Player widget in conflict")
+        return ours + theirs
+    if path == "src/features/los/teacher/engine.ts":
+        if ("teacherMidtermAssessmentStatus" in ours and "teacherBuiltNumberCount" in theirs
+                and "teacherChapterAssessmentStatus" in ours and "teacherChapterAssessmentStatus" in theirs):
+            return ('  return teacherChapterAssessmentStatus(lesson, chapterAssessment).ready &&\n'
+                    '    teacherMidtermAssessmentStatus(lesson, chapterAssessment, practiceAnswers).ready &&\n'
+                    '    !session.paused && lesson.scenes.every(scene => session.visitedIds.includes(scene.id)) &&\n'
+                    '    lesson.scenes.every(scene => !scene.numberBuilder || teacherBuiltNumberCount(session, scene.id) >= 4) &&\n')
+    if path == "src/features/los/teacher/validateContent.ts" and "/^C" in ours and "/^C" in theirs and "(?:" in ours and "(?:" in theirs:
+        lhs = re.search(r"\(\?:([A-Z0-9|]+)\)", ours)
+        rhs = re.search(r"\(\?:([A-Z0-9|]+)\)", theirs)
+        if lhs is None or rhs is None:
+            raise ValueError("Malformed source-check selector alternatives")
+        options = list(dict.fromkeys(lhs.group(1).split("|") + rhs.group(1).split("|")))
+        return ours.replace(lhs.group(1), "|".join(options), 1)
+    if path == "src/features/los/teacher/lessonL004.ts" and "LOS1_C08_TEACHER_LESSONS.find" in theirs and "LOS1_L" in ours:
+        return ours
+    if path == "src/features/los/teacher/lessonL004.ts":
+        if all(re.match(r"^(?:import .*lessonL\d{3}\.ts.*|\s*)$", line) for line in (ours+theirs).splitlines()):
+            return ours
+        if all(re.match(r"^\s*(?:if \(id === LOS1_L\d{3}_TEACHER\.id\) return LOS1_L\d{3}_TEACHER;|return (?:undefined|id === LOS1_L\d{3}_TEACHER\.id \? LOS1_L\d{3}_TEACHER : undefined);)?\s*$", line) for line in (ours+theirs).splitlines()):
+            return ours
+    raise ValueError(f"Unreviewed source conflict: {path}\nOURS: {ours[:300]}\nTHEIRS: {theirs[:300]}")
+
+def normalize_registry() -> None:
+    path = Path("src/features/los/teacher/lessonL004.ts")
+    body = path.read_text()
+    files = sorted(Path("src/features/los/teacher").glob("lessonL[0-9][0-9][0-9].ts"))
+    for lesson in files:
+        number = lesson.stem.removeprefix("lessonL")
+        if number == "004":
+            continue
+        name = f"LOS1_L{number}_TEACHER"
+        imp = f'import {{ {name} }} from "./{lesson.name}";'
+        if imp not in body:
+            body = imp + "\n" + body
+        lookup = f"  if (id === {name}.id) return {name};"
+        if lookup not in body:
+            boundary = "  return undefined;\n}"
+            if boundary not in body:
+                raise ValueError("Cannot locate registry final return")
+            body = body.replace(boundary, lookup+"\n"+boundary, 1)
+    if Path("src/features/los/teacher/lessonC08.ts").exists():
+        imp = 'import { LOS1_C08_TEACHER_LESSONS } from "./lessonC08.ts";'
+        if imp not in body:
+            body = imp + "\n" + body
+        lookup = '  const c08 = LOS1_C08_TEACHER_LESSONS.find(lesson => lesson.id === id);\n  if (c08) return c08;'
+        if lookup not in body:
+            boundary = "  return undefined;\n}"
+            if boundary not in body:
+                raise ValueError("Cannot locate C08 registry fallback")
+            body = body.replace(boundary, lookup + "\n" + boundary, 1)
+    if Path("src/features/los/teacher/lessonC09.ts").exists():
+        imp = 'import { LOS1_C09_TEACHER } from "./lessonC09.ts";'
+        if imp not in body:
+            body = imp + "\n" + body
+        lookup = '  const c09 = LOS1_C09_TEACHER.find(lesson => lesson.id === id);\n  if (c09) return c09;'
+        if lookup not in body:
+            boundary = "  return undefined;\n}"
+            if boundary not in body:
+                raise ValueError("Cannot locate C09 registry fallback")
+            body = body.replace(boundary, lookup + "\n" + boundary, 1)
+    if Path("src/features/los/teacher/lessonC10.ts").exists():
+        imp = 'import { LOS1_C10_TEACHER_LESSONS } from "./lessonC10.ts";'
+        if imp not in body:
+            body = imp + "\n" + body
+        lookup = '  const c10 = LOS1_C10_TEACHER_LESSONS.find(lesson => lesson.id === id);\n  if (c10) return c10;'
+        if lookup not in body:
+            boundary = "  return undefined;\n}"
+            if boundary not in body:
+                raise ValueError("Cannot locate C10 registry fallback")
+            body = body.replace(boundary, lookup + "\n" + boundary, 1)
+    # L056-L060 are intentionally authored in one source module, not five.
+    # The normal lessonLNNN glob therefore cannot discover their exports.
+    grouped = Path("src/features/los/teacher/lessonL056L060.ts")
+    if grouped.exists():
+        names = [f"LOS1_L{n:03d}_TEACHER" for n in range(56, 61)]
+        source = grouped.read_text()
+        for name in names:
+            if not re.search(r"export const " + re.escape(name) + r"\b", source):
+                raise ValueError(f"Missing grouped Teacher export: {name}")
+        if '"./lessonL056L060.ts"' not in body:
+            body = 'import { ' + ', '.join(names) + ' } from "./lessonL056L060.ts";\n' + body
+        boundary = "  return undefined;\n}"
+        if boundary not in body:
+            raise ValueError("Cannot locate grouped Teacher registry return")
+        for name in names:
+            lookup = f"  if (id === {name}.id) return {name};"
+            if lookup not in body:
+                body = body.replace(boundary, lookup + "\n" + boundary, 1)
+    path.write_text(body)
+
+def normalize_full_path_test() -> None:
+    path=Path("e2e/los-full-book.spec.ts")
+    body=path.read_text()
+    if "if(getLosTeacherLesson(title))" in body and 'import {getLosTeacherLesson}' not in body:
+        body='import {getLosTeacherLesson} from "../src/features/los/teacher/lessonL004.ts";\n'+body
+    # An appended L005 source-media test may overlap the end of C05's prior
+    # Text B check in a Git conflict hunk. Preserve the C05 completion and
+    # the entire independent L005 test, with no inferred generic bracket fixes.
+    unfinished = (
+        ' await expect(page.locator(".los-teacher-paper")).not.toContainText("Kuuntelukoe suoritettu");\n'
+        '\n'
+        'test("L005 shows genuine 20-item listening source and text inside Teacher 2.0 on desktop and mobile"'
+    )
+    closed = (
+        ' await expect(page.locator(".los-teacher-paper")).not.toContainText("Kuuntelukoe suoritettu");\n'
+        ' await expectNoHorizontalOverflow(page);\n'
+        '});\n'
+        '\n'
+        'test("L005 shows genuine 20-item listening source and text inside Teacher 2.0 on desktop and mobile"'
+    )
+    if unfinished in body:
+        if body.count(unfinished) != 1:
+            raise ValueError("Ambiguous C05/L005 source-media test merge boundary")
+        body=body.replace(unfinished,closed,1)
+        print("Restored reviewed C05 Text B test closure before separate L005 media test.")
+    path.write_text(body)
+
+def normalize_validator_gates() -> None:
+    path=Path("src/features/los/teacher/validateContent.ts")
+    source=path.read_text()
+    before='''issues.push({location:"mediaGate",problem:"Median hyväksyntäportilta puuttuu lähde, tila tai perustelu."});
+  if (lesson.externalCheck'''
+    if before in source:
+        source=source.replace(before,'''issues.push({location:"mediaGate",problem:"Median hyväksyntäportilta puuttuu lähde, tila tai perustelu."});
+  }
+  if (lesson.externalCheck''',1)
+        print("Closed C10 mediaGate validator before final review externalCheck.")
+    candidate=re.search(r'\\(\\?:SOURCE\\|[A-Z0-9|]+\\)',source)
+    if candidate:
+        ids=list(dict.fromkeys(candidate.group(0)[4:-1].split("|")+["ZPE","SCHOOL","HARALD"]))
+        source=source[:candidate.start()]+"(?:"+"|".join(ids)+")"+source[candidate.end():]
+    path.write_text(source)
+
+def normalize_integrated_imports_and_signatures() -> None:
+    path=Path("src/features/los/teacher/LosTeacherPlayer.tsx")
+    source=path.read_text()
+    required={
+        "getLosOpenDialogue":'import { getLosOpenDialogue } from "../content/los1OpenDialogues.ts";',
+        "LOS1_TEXT_B_SOURCES":'import { LOS1_TEXT_B_SOURCES } from "../content/los1TextBAdditional.ts";',
+        "LosTeacherGreetingMedia":'import { LosTeacherGreetingMedia } from "./LosTeacherGreetingMedia.tsx";',
+        "LosTeacherNumberBuilder":'import { LosTeacherNumberBuilder } from "./LosTeacherNumberBuilder.tsx";',
+        "Los1ChapterImage":'import { Los1ChapterImage } from "../Los1ChapterImage.tsx";',
+        "TeacherTimeCalendar":'import { TeacherTimeCalendar } from "./TeacherTimeCalendar.tsx";',
+    }
+    for symbol,line in required.items():
+        if symbol in source and line not in source:
+            source=line+"\n"+source
+            print("Preserved merged Teacher widget import:",symbol)
+    path.write_text(source)
+    path=Path("src/features/los/teacher/engine.ts")
+    source=path.read_text()
+    if "return externalReady &&" in source:
+        needle="chapterAssessment?: TeacherChapterAssessmentInput): boolean {"
+        replacement="chapterAssessment?: TeacherChapterAssessmentInput, externalReady: boolean = !lesson.externalCheck): boolean {"
+        if needle in source:
+            source=source.replace(needle,replacement,1)
+        elif replacement not in source:
+            raise ValueError("Unexpected teacherCanFinish signature")
+        start=source.index("export function finishTeacherSession(")
+        before=source[:start]
+        after=source[start:]
+        needle="chapterAssessment?: TeacherChapterAssessmentInput): TeacherSession {"
+        replacement="chapterAssessment?: TeacherChapterAssessmentInput,\n  externalReady: boolean = !lesson.externalCheck): TeacherSession {"
+        if needle in after:
+            after=after.replace(needle,replacement,1)
+        elif replacement not in after:
+            raise ValueError("Unexpected finishTeacherSession signature")
+        after=after.replace(
+            "!teacherCanFinish(session, lesson, practiceAnswers, practiceChecked, chapterAssessment)",
+            "!teacherCanFinish(session, lesson, practiceAnswers, practiceChecked, chapterAssessment, externalReady)",1)
+        source=before+after
+        print("Combined external assessment completion across both Teacher finish functions.")
+    path.write_text(source)
+
+def normalize_assessment_sections() -> None:
+    path=Path("src/features/los/teacher/LosTeacherPlayer.tsx")
+    text=path.read_text()
+    marker='''              })()}
+            {lesson.mediaGate && !lesson.mediaGate.approved'''
+    if marker in text and 'lesson.examAssessment?.id === "EX-MID"' in text:
+        text=text.replace(marker,'''              })()}
+            </section>}
+            {lesson.mediaGate && !lesson.mediaGate.approved''',1)
+        path.write_text(text)
+        print("Closed EX-MID status panel before C10 media and final-review widgets.")
+
+def normalize_activity_gate() -> None:
+    path=Path("src/features/los/teacher/LosTeacherPlayer.tsx")
+    source=path.read_text()
+    begin='disabled={session.activityIds.includes(scene.activityId) || completed ||'
+    start=source.find(begin)
+    if start<0:
+        return
+    end=source.find('onClick={() => markActivity(scene.activityId!)}>',start)
+    if end<0 or end-start>1600:
+        raise ValueError("Unexpected teacher activity control layout")
+    fragment=source[start:end]
+    # Only repair after the form + number-builder + calendar feature trio exists.
+    if not all(x in source for x in ('teacherBuiltNumberCount','isCorrectCalendarEntry','scene.form')):
+        return
+    if not all(x in fragment for x in ("scene.reflection","scene.numberBuilder","scene.form","scene.calendar")):
+        raise ValueError("Cannot prove every shared activity requirement is present")
+    replacement = '''disabled={session.activityIds.includes(scene.activityId) || completed ||
+                  Boolean(scene.reflection && (session.draftAnswers[scene.id]?.trim().length ?? 0) < scene.reflection.minLength) ||
+                  Boolean(scene.numberBuilder && teacherBuiltNumberCount(session, scene.id) < 4) ||
+                  Boolean(scene.form && scene.form.some(field => !(session.draftAnswers[scene.id + "." + field.id]?.trim()))) ||
+                  Boolean(scene.calendar && !isCorrectCalendarEntry(scene, session.draftAnswers[scene.id] ?? ""))}
+                '''
+    source=source[:start]+replacement+source[end:]
+    path.write_text(source)
+    print("Normalized shared lesson activity gate to retain reflection, builder, form and calendar evidence.")
+
+unmerged = subprocess.check_output(["git","diff","--name-only","--diff-filter=U"],text=True).splitlines()
+print("Detected merge conflicts:", ", ".join(unmerged))
+failures=[]
+for name in unmerged:
+    path = Path(name)
+    contents = path.read_text()
+    try:
+        new_body, count = PATTERN.subn(lambda m:choose(name,m.group(1),m.group(2)),contents)
+        if count < 1 or "<<<<<<<" in new_body or ">>>>>>>" in new_body:
+            raise ValueError(f"Unresolved markers in {name}")
+    except ValueError as err:
+        failures.append(str(err))
+        continue
+    path.write_text(new_body)
+    print(f"Resolved {name}: {count} explicit reviewed conflict block(s)")
+if failures:
+    raise ValueError("Unexpected semantic conflicts; refusing automatic merge:\\n" + "\\n----\\n".join(failures))
+normalize_registry()
+normalize_full_path_test()
+normalize_activity_gate()
+normalize_assessment_sections()
+normalize_validator_gates()
+normalize_integrated_imports_and_signatures()
+subprocess.run(["git","add","--",*unmerged,"src/features/los/teacher/lessonL004.ts"],check=True)
+if subprocess.check_output(["git","ls-files","-u"],text=True).strip():
+    raise ValueError("Unmerged index stages remain")
+print("Merge conflict blocks cleared with strict path and content checks.")

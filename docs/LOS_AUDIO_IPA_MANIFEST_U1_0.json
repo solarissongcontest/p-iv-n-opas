@@ -1,0 +1,159 @@
+{
+  "schemaVersion": "LOS-PRONUNCIATION-MANIFEST/0.1",
+  "reviewedAt": "2026-11-12",
+  "stage": "source-verified-not-published",
+  "locale": "de-DE",
+  "counts": {
+    "entryRecords": 15,
+    "qualifiedLinguistReviewed": 0,
+    "acceptedPerWordAudioRecordings": 0,
+    "verifiedTTSDevices": 0,
+    "fullyReadyActiveChapters": 0,
+    "c01ActiveVocabularyTotal": 16,
+    "c01ActiveVocabularyIpaSourced": 15,
+    "c01ActiveVocabularyIpaExpertReviewed": 0,
+    "c01ActiveVocabularyAudioApproved": 0
+  },
+  "sourcePolicy": "All 15 records are transcribed from standalone German Wiktionary lemma/phrase entries (the six new greetings use the complete phrase IPA, not word concatenation). One C01 phrase, 'Bis später!', still lacks a verified complete phrase IPA. These are source-verified, not expert-reviewed. No separate audio has passed device and rights QA.",
+  "sources": [
+    {
+      "sourceId": "de.wiktionary:hallo",
+      "word": "hallo",
+      "ipa": "ˈhalo",
+      "alternatives": [
+        "haˈloː"
+      ],
+      "sourceUrl": "https://de.wiktionary.org/wiki/hallo",
+      "languageReviewStatus": "pending",
+      "audioReviewStatus": "not-available"
+    },
+    {
+      "sourceId": "de.wiktionary:tschüss",
+      "word": "tschüss",
+      "ipa": "t͡ʃʏs",
+      "sourceUrl": "https://de.wiktionary.org/wiki/tsch%C3%BCss",
+      "languageReviewStatus": "pending",
+      "audioReviewStatus": "not-available"
+    },
+    {
+      "sourceId": "de.wiktionary:danke",
+      "word": "danke",
+      "ipa": "ˈdaŋkə",
+      "sourceUrl": "https://de.wiktionary.org/wiki/danke",
+      "languageReviewStatus": "pending",
+      "audioReviewStatus": "not-available"
+    },
+    {
+      "sourceId": "de.wiktionary:ja",
+      "word": "ja",
+      "ipa": "jaː",
+      "sourceUrl": "https://de.wiktionary.org/wiki/ja",
+      "languageReviewStatus": "pending",
+      "audioReviewStatus": "not-available"
+    },
+    {
+      "sourceId": "de.wiktionary:nein",
+      "word": "nein",
+      "ipa": "naɪ̯n",
+      "sourceUrl": "https://de.wiktionary.org/wiki/nein",
+      "languageReviewStatus": "pending",
+      "audioReviewStatus": "not-available"
+    },
+    {
+      "sourceId": "de.wiktionary:ich",
+      "word": "ich",
+      "ipa": "ɪç",
+      "sourceUrl": "https://de.wiktionary.org/wiki/ich",
+      "languageReviewStatus": "pending",
+      "audioReviewStatus": "not-available"
+    },
+    {
+      "sourceId": "de.wiktionary:du",
+      "word": "du",
+      "ipa": "duː",
+      "sourceUrl": "https://de.wiktionary.org/wiki/du",
+      "languageReviewStatus": "pending",
+      "audioReviewStatus": "not-available"
+    },
+    {
+      "sourceId": "de.wiktionary:wie",
+      "word": "wie",
+      "ipa": "viː",
+      "sourceUrl": "https://de.wiktionary.org/wiki/wie",
+      "languageReviewStatus": "pending",
+      "audioReviewStatus": "not-available"
+    },
+    {
+      "sourceId": "de.wiktionary:bitte",
+      "word": "bitte",
+      "targetType": "lemma",
+      "ipa": "ˈbɪtə",
+      "sourceUrl": "https://de.wiktionary.org/wiki/bitte",
+      "languageReviewStatus": "pending",
+      "audioReviewStatus": "not-available"
+    },
+    {
+      "sourceId": "de.wiktionary:guten_Morgen",
+      "word": "guten morgen",
+      "targetType": "phrase",
+      "ipa": "ˈɡuːtn̩ ˈmɔʁɡŋ̍",
+      "alternatives": [
+        "ˈɡuːtn̩ ˈmɔʁɡn̩"
+      ],
+      "sourceUrl": "https://de.wiktionary.org/wiki/guten_Morgen",
+      "languageReviewStatus": "pending",
+      "audioReviewStatus": "not-available"
+    },
+    {
+      "sourceId": "de.wiktionary:guten_Tag",
+      "word": "guten tag",
+      "targetType": "phrase",
+      "ipa": "ˌɡutn̩ ˈtaːk",
+      "sourceUrl": "https://de.wiktionary.org/wiki/guten_Tag",
+      "languageReviewStatus": "pending",
+      "audioReviewStatus": "not-available"
+    },
+    {
+      "sourceId": "de.wiktionary:guten_Abend",
+      "word": "guten abend",
+      "targetType": "phrase",
+      "ipa": "ˌɡuːtən ˈaːbənt",
+      "alternatives": [
+        "ˌɡuːtn̩ ˈaːbm̩t"
+      ],
+      "sourceUrl": "https://de.wiktionary.org/wiki/guten_Abend",
+      "languageReviewStatus": "pending",
+      "audioReviewStatus": "not-available"
+    },
+    {
+      "sourceId": "de.wiktionary:gute_Nacht",
+      "word": "gute nacht",
+      "targetType": "phrase",
+      "ipa": "ˌɡutə ˈnaxt",
+      "sourceUrl": "https://de.wiktionary.org/wiki/gute_Nacht",
+      "languageReviewStatus": "pending",
+      "audioReviewStatus": "not-available"
+    },
+    {
+      "sourceId": "de.wiktionary:auf_Wiedersehen",
+      "word": "auf wiedersehen",
+      "targetType": "phrase",
+      "ipa": "aʊ̯f ˈviːdɐˌzeːən",
+      "sourceUrl": "https://de.wiktionary.org/wiki/auf_Wiedersehen",
+      "languageReviewStatus": "pending",
+      "audioReviewStatus": "not-available"
+    },
+    {
+      "sourceId": "de.wiktionary:bis_bald",
+      "word": "bis bald",
+      "targetType": "phrase",
+      "ipa": "bɪs ˈbalt",
+      "sourceUrl": "https://de.wiktionary.org/wiki/bis_bald",
+      "languageReviewStatus": "pending",
+      "audioReviewStatus": "not-available"
+    }
+  ],
+  "unsourcedActiveC01Phrases": [
+    "Bis später!"
+  ]
+}
