@@ -6,6 +6,7 @@ import {
   moveTeacherScene, normalizeTeacherAnswer, parseTeacherSessions, recoverTeacherSession,
   revealTeacherSolution, setTeacherAnswerDraft, submitTeacherAnswer,
   teacherCanFinish, teacherCompletionBlockers, teacherNextIncompleteSceneId, teacherLatestAttempt, teacherWrongFeedback, teacherRequiresNumericResponse, validTeacherSessionMap,
+  teacherContentSignature, teacherSessionNeedsReview, restartUpdatedTeacherSession, validTeacherSessionHistoryMap, parseTeacherSessionHistory,
 } from "../src/features/los/teacher/engine.ts";
 import { LOS1_L004_TEACHER } from "../src/features/los/teacher/lessonL004.ts";
 
@@ -288,4 +289,67 @@ test("removed scenes recover with a stable fallback and leave valid sessions unt
   assert.deepEqual(last.draftAnswers,all.draftAnswers);
   assert.strictEqual(recoverTeacherSession({...current,lessonId:"L999",sceneId:"old-removed-scene"},lesson).sceneId,
     "old-removed-scene","A mismatched lesson must not inherit another lesson's route");
+});
+
+
+test("content edits without a version bump require a fresh current lesson",()=>{
+  const previous=emptyTeacherSession(lesson,now);
+  const modified={...lesson,scenes:lesson.scenes.map(scene=>scene.id==="situations"
+    ? {...scene,paragraphs:[...scene.paragraphs,"Päivitetty opetuslause."]}:scene)};
+  assert.equal(modified.version,lesson.version);
+  assert.notEqual(teacherContentSignature(modified),teacherContentSignature(lesson));
+  assert.equal(teacherSessionNeedsReview(previous,modified),true);
+  assert.equal(teacherCanFinish(previous,modified,{}),false);
+  assert.match(teacherCompletionBlockers(previous,modified,{})[0]!,/sisältö on muuttunut/);
+  assert.strictEqual(submitTeacherAnswer(previous,modified,"guided","b",now),previous,
+    "A mismatched content signature must not add another attempt");
+  assert.strictEqual(confirmTeacherActivity(previous,modified,"vocabulary-reviewed",now),previous);
+  assert.equal(independentTeacherEvidence(previous,modified),0);
+  assert.equal(teacherSessionNeedsReview(emptyTeacherSession(modified,now),modified),false);
+});
+
+test("explicit restart archives the intact prior lesson and never reuses its mastery",()=>{
+  let previous=emptyTeacherSession(lesson,now);
+  previous=moveTeacherScene(previous,lesson,"independent",now);
+  previous=submitTeacherAnswer(previous,lesson,"independent","Guten Abend!",now);
+  previous=setTeacherAnswerDraft(previous,"independent","Guten Abend!",now);
+  previous=confirmTeacherActivity(previous,lesson,"vocabulary-reviewed",now);
+  const updated={...lesson,version:"2.0.0-preview.2"};
+  const original=structuredClone(previous);
+  const upgraded=restartUpdatedTeacherSession(previous,updated,{},"2026-11-15T10:00:00.000Z");
+  assert.ok(upgraded);
+  assert.deepEqual(upgraded.history.L004,[original]);
+  assert.deepEqual(previous,original,"The existing learner record must not be mutated");
+  assert.equal(upgraded.current.lessonId,"L004");
+  assert.equal(upgraded.current.contentVersion,"2.0.0-preview.2");
+  assert.equal(upgraded.current.contentSignature,teacherContentSignature(updated));
+  assert.deepEqual(upgraded.current.visitedIds,[]);
+  assert.deepEqual(upgraded.current.attempts,[]);
+  assert.deepEqual(upgraded.current.activityIds,[]);
+  assert.deepEqual(upgraded.current.draftAnswers,{});
+  assert.equal(upgraded.current.completedAt,null);
+  assert.equal(independentTeacherEvidence(upgraded.current,updated),0);
+  assert.equal(teacherSessionNeedsReview(upgraded.current,updated),false);
+  assert.strictEqual(restartUpdatedTeacherSession(upgraded.current,updated,upgraded.history,now),null,
+    "A current lesson must not generate a redundant history snapshot");
+});
+
+test("legacy teacher sessions can be archived without losing earlier backup schema",()=>{
+  const saved=emptyTeacherSession(lesson,now);
+  const legacy={...saved,contentSignature:undefined};
+  assert.equal(validTeacherSessionMap({L004:legacy}),true);
+  assert.equal(teacherSessionNeedsReview(legacy,lesson),true,
+    "A missing signature cannot certify that old answers match the current manuscript");
+  const restarted=restartUpdatedTeacherSession(legacy,lesson,{},now);
+  assert.ok(restarted);
+  assert.equal(restarted.current.contentSignature,teacherContentSignature(lesson));
+  assert.equal(restarted.history.L004[0].contentSignature,undefined);
+  assert.deepEqual(parseTeacherSessionHistory(JSON.parse(JSON.stringify(restarted.history))),restarted.history);
+  assert.equal(validTeacherSessionHistoryMap(restarted.history),true);
+  assert.equal(validTeacherSessionHistoryMap({L004:[{...legacy,lessonId:"L777"}]}),false);
+  assert.equal(validTeacherSessionHistoryMap({L004:[{...legacy,completedAt:"invalid"}]}),false);
+  const full={L004:Array.from({length:8},()=>legacy)};
+  assert.equal(validTeacherSessionHistoryMap(full),true);
+  assert.equal(restartUpdatedTeacherSession(legacy,lesson,full,now),null,
+    "Full archives must block a restart rather than discard the oldest learning record");
 });
