@@ -1,7 +1,9 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { draftIsEmpty, validateLosCloudDraft } from "../src/features/los/cloudContract.ts";
-import { emptyTeacherSession } from "../src/features/los/teacher/engine.ts";
+import { emptyTeacherSession, restartUpdatedTeacherSession } from "../src/features/los/teacher/engine.ts";
+import { parseLosDraft } from "../src/features/los/studyState.ts";
+import { parseLosBookBackup } from "../src/features/los/localBackups.ts";
 import { LOS1_L004_TEACHER } from "../src/features/los/teacher/lessonL004.ts";
 
 const emptyDraft = () => ({
@@ -26,4 +28,43 @@ test("cloud and import validation reject malformed Teacher 2.0 progress", () => 
   assert.equal(validateLosCloudDraft({ ...emptyDraft(), teacherSessions: { L004: {
     ...session, attempts: [{ sceneId: "guided", answer: "x", correct: "yes", independent: false, at: "2026-11-12T20:00:00.000Z" }],
   } } }), false);
+});
+
+
+test("version history is preserved in local draft JSON and whole-book backups",()=>{
+  const at="2026-11-12T20:00:00.000Z";
+  const saved=emptyTeacherSession(LOS1_L004_TEACHER,at);
+  const legacy={...saved,contentSignature:undefined,
+    draftAnswers:{independent:"Guten Abend!"},attempts:[
+      {sceneId:"independent",answer:"Guten Abend!",correct:true,independent:true,at},
+    ],completedAt:at,
+  };
+  const restarted=restartUpdatedTeacherSession(legacy,LOS1_L004_TEACHER,{},at);
+  assert.ok(restarted);
+  const draft={...emptyDraft(),teacherSessions:{L004:restarted.current},
+    teacherSessionHistory:restarted.history};
+  assert.equal(validateLosCloudDraft(draft),true);
+  const parsed=parseLosDraft(JSON.stringify(draft));
+  assert.deepEqual(parsed.teacherSessionHistory,restarted.history);
+  assert.deepEqual(parsed.teacherSessions?.L004?.attempts,[]);
+  const onlyHistory={...emptyDraft(),teacherSessionHistory:restarted.history};
+  assert.equal(draftIsEmpty(onlyHistory),false,
+    "Even an archive without current answers is irreplaceable learner work");
+  const raw=JSON.stringify({format:"los-book-backup-v1",bookId:1,
+    exportedAt:at,chapters:{"01":draft}});
+  const backup=parseLosBookBackup(raw);
+  assert.deepEqual(backup.chapters["01"]?.teacherSessionHistory?.L004?.[0]?.draftAnswers,
+    {independent:"Guten Abend!"});
+  assert.equal(backup.chapters["01"]?.teacherSessions?.L004?.attempts.length,0);
+});
+
+test("malformed archives are rejected at the cloud and import boundaries",()=>{
+  const at="2026-11-12T20:00:00.000Z";
+  const original=emptyTeacherSession(LOS1_L004_TEACHER,at);
+  const bogus={...emptyDraft(),teacherSessionHistory:{L004:[{...original,lessonId:"L999"}]}};
+  assert.equal(validateLosCloudDraft(bogus),false);
+  assert.deepEqual(parseLosDraft(JSON.stringify(bogus)).teacherSessionHistory,{});
+  const payload={format:"los-book-backup-v1",bookId:1,exportedAt:at,
+    chapters:{"01":bogus}};
+  assert.throws(()=>parseLosBookBackup(JSON.stringify(payload)),/virheellisiä tietoja/);
 });
