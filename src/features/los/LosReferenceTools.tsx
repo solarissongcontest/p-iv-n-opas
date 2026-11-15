@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { ArrowRight, BookOpen, ChevronRight, Headphones, Search, Volume2 } from "lucide-react";
 import { LOS_BOOKS, type LosBookDefinition } from "./catalog";
+import { summarizeLosVocabularyRows } from "./vocabularyRowSummary";
 import { LosDictionarySearch } from "./LosDictionarySearch";
 import { LosDictionaryCard } from "./LosDictionaryCard";
 import type { LosDictionaryResult } from "./dictionaryClient";
@@ -41,6 +42,7 @@ export function LosDictionary({ book, move, openChapter }: {
     (entry.word.toLocaleLowerCase("de").includes(search.trim().toLocaleLowerCase("de")) ||
       entry.meaning.toLocaleLowerCase("fi").includes(search.trim().toLocaleLowerCase("fi")))
   ).sort((a,b) => compare(a.word,b.word)), [search,book.id,scope]);
+  const vocabularyRowSummary=summarizeLosVocabularyRows(entries);
   // Rendering all eight books' vocabulary rows at once is especially slow
   // on smaller phones. Search still covers every source row, not just the visible page.
   const visibleEntries = entries.slice(0,visibleCount);
@@ -56,7 +58,7 @@ export function LosDictionary({ book, move, openChapter }: {
       word={selection.entry.word} contextMeaning={selection.entry.meaning}
       onClose={() => setSelection(null)} />}
     <h2>Kappalesanasto</h2>
-    <p>Tämä erillinen paikallinen sanastoluettelo perustuu LOS!-kirjojen opetettaviin sanoihin. Se ei ole yleissanakirja. Alkuperäistekstien kokonaisia repliikkejä ja niiden suomennoksia voit hakea myös kirjan Haku-sivulla.</p>
+    <p>Tämä erillinen paikallinen sanastoluettelo sisältää kirjojen kappaleissa opetettavia sanoja, taivutusmuotoja ja kokonaisia fraaseja. Sama ilmaus voi esiintyä useassa kappaleessa. Rivien tai erilaisten kirjoitusasujen määrä ei ole eri kantasanojen, uusien aktiivisanojen tai tarkistetun sanakirjan lemmojen määrä. Alkuperäistekstien kokonaisia repliikkejä ja niiden suomennoksia voit hakea myös kirjan Haku-sivulla.</p>
     <div className="los-index-options">
       <div className="los-index-tabs" role="group" aria-label="Kappalesanaston laajuus">
         <button className={scope === "book" ? "is-active" : ""} aria-pressed={scope === "book"} onClick={() => {setScope("book");setVisibleCount(LOCAL_DICTIONARY_PAGE_SIZE);}}>Tämä kirja</button>
@@ -65,9 +67,10 @@ export function LosDictionary({ book, move, openChapter }: {
       <button className="los-index-toggle" onClick={() => setHidden(v => !v)} aria-pressed={hidden}>{hidden ? "Näytä suomennokset" : "Peitä suomennokset"}</button>
     </div>
     <label className="los-index-search"><Search size={19}/><span className="sr-only">Hae saksaksi tai suomeksi</span><input value={search} onChange={e=>{setSearch(e.target.value);setVisibleCount(LOCAL_DICTIONARY_PAGE_SIZE);}} placeholder="Hae saksaksi tai suomeksi" autoComplete="off" /></label>
-    <p className="los-index-count" role="status" aria-live="polite">{entries.length} kappalesanaston hakusanaa
+    <p className="los-index-count" role="status" aria-live="polite">{vocabularyRowSummary.rowCount} sanastoriviä
+      {" · "}{vocabularyRowSummary.distinctWrittenEntries} eri kirjoitusasua
       {" · "}Näytetään {visibleEntries.length} / {entries.length}</p>
-    {entries.length === 0 ? <p>Ei osumia tällä rajauksella. Kappalesanasto sisältää vain kirjojen käsikirjoituksissa opetettavia sanoja.</p> :
+    {entries.length === 0 ? <p>Ei osumia tällä rajauksella. Kappalesanasto sisältää kirjojen käsikirjoitusten sanoja, muotoja ja fraaseja.</p> :
       <div className="los-index-table" role="table" aria-label="Sanakirjahakemisto">
         <div className="los-index-table-head" role="row"><span role="columnheader">Deutsch</span><span role="columnheader">Suomi</span><span role="columnheader">Lähde</span></div>
         {visibleEntries.map((item,i)=><div role="row" className="los-index-entry" key={`${item.book}-${item.chapter}-${i}-${item.word}`}>
