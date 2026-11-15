@@ -795,7 +795,7 @@ test("Finnish comprehension options in C01, C03, C09 and C10 have correct speech
 
 
 
-test("a renamed teacher scene resumes saved unfinished work without erasing history",async({page})=>{
+test("updated teacher content archives past work and requires a fresh learner attempt",async({page})=>{
   await enterLocalBook(page);
   const key="los.local.v1.00000000-0000-4000-8000-000000000195.1.01";
   const at="2026-11-10T15:00:00.000Z";
@@ -814,28 +814,38 @@ test("a renamed teacher scene resumes saved unfinished work without erasing hist
   };
   await page.evaluate(({key,draft})=>localStorage.setItem(key,JSON.stringify(draft)),{key,draft});
   await page.goto("/los-lessons/L004",{waitUntil:"domcontentloaded"});
+  const review=page.locator(".los-teacher-version-review");
+  await expect(review).toContainText("Oppitunnin sisältö on päivittynyt");
+  await expect(review).toContainText("Aiempi opetustilanne ei enää ole käytössä");
+  await expect(page.locator(".los-teacher-paper")).toHaveCount(0);
+  await expect(page.locator(".los-teacher-outline nav button").first()).toBeDisabled();
+  await review.getByRole("button",{name:"Arkistoi vanha suoritus ja aloita päivitetty oppitunti"}).click();
+  await expect(review).toHaveCount(0);
+  await expect(page.locator(".los-teacher-paper h2")).toHaveText("Tänään opit tervehtimään oikeassa tilanteessa");
+  const archived=await page.evaluate(key=>
+    JSON.parse(localStorage.getItem(key)??"null"),key);
+  expect(archived.teacherSessionHistory.L004).toEqual([historical]);
+  expect(archived.teacherSessions.L004.contentVersion).toBe("2.0.0-preview.1");
+  expect(archived.teacherSessions.L004.contentSignature).toMatch(/^[0-9a-f]{8}$/);
+  expect(archived.teacherSessions.L004.visitedIds).toEqual([]);
+  expect(archived.teacherSessions.L004.attempts).toEqual([]);
+  expect(archived.teacherSessions.L004.activityIds).toEqual([]);
+  expect(archived.teacherSessions.L004.draftAnswers).toEqual({});
+  await page.locator(".los-teacher-session-history").getByText("Aiemmat oppituntiversiot").click();
+  await expect(page.locator(".los-teacher-session-history")).toContainText("Versio 1.9.0-preview.1");
+  await page.locator(".los-teacher-outline nav button").filter({hasText:"Tervehdys valitaan tilanteen mukaan"}).click();
   await expect(page.locator(".los-teacher-paper h2")).toHaveText("Tervehdys valitaan tilanteen mukaan");
-  await expect(page.locator(".los-teacher-paper .los-teacher-hint[role='status']")).toContainText(
-    "Aiempi opetustilanne ei enää ole käytössä");
-  await expect(page.locator(".los-teacher-paper .los-teacher-hint[role='status']")).toContainText(
-    "Aiemmat vastaukset ja luonnokset säilyvät");
   await page.getByRole("button",{name:"Seuraava",exact:true}).click();
   await expect(page.locator(".los-teacher-paper h2")).toHaveText("Katsotaan ilmaukset opetustaululla");
-  const stored=await page.evaluate(key=>
-    JSON.parse(localStorage.getItem(key)??"null")?.teacherSessions?.L004,key);
-  expect(stored.sceneId).toBe("board");
-  expect(stored.contentVersion).toBe("1.9.0-preview.1");
-  expect(stored.visitedIds).toEqual(["welcome","recall","situations","board"]);
-  expect(stored.attempts).toEqual(historical.attempts);
-  expect(stored.draftAnswers.independent).toBe("Guten Abend!");
-  expect(stored.activityIds).toEqual(["vocabulary-reviewed"]);
-  expect(stored.helpedIds).toEqual(["guided"]);
-  expect(stored.completedAt).toBeNull();
+  const later=await page.evaluate(key=>
+    JSON.parse(localStorage.getItem(key)??"null"),key);
+  expect(later.teacherSessions.L004.visitedIds).toEqual(["welcome","situations","board"]);
+  expect(later.teacherSessionHistory.L004).toEqual([historical]);
   await page.reload({waitUntil:"domcontentloaded"});
   await expect(page.locator(".los-teacher-paper h2")).toHaveText("Katsotaan ilmaukset opetustaululla");
+  await expect(page.locator(".los-teacher-session-history")).toContainText("Aiemmat oppituntiversiot (1)");
   await expectNoHorizontalOverflow(page);
 });
-
 
 test("C07 number choices have Finnish screen-reader language in both number lessons",async({page})=>{
   await enterLocalBook(page);
