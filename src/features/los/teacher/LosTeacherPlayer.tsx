@@ -5,12 +5,12 @@ import { getLosOpenDialogue } from "../content/los1OpenDialogues.ts";
 import { useEffect, useRef, useState } from "react";
 import { ArrowLeft, ArrowRight, BookOpen, Check, CheckCircle2, ChevronLeft, ChevronRight, HelpCircle, RotateCcw } from "lucide-react";
 import { readCachedDeviceUser } from "@/lib/deviceSession";
-import { useLosChapterDraft } from "../studyState.ts";
+import { useLosChapterDraft, prepareLosTeacherVersionRestart } from "../studyState.ts";
 import {
   emptyTeacherSession, markTeacherHelp, confirmTeacherActivity, teacherChapterAssessmentStatus, teacherMidtermAssessmentStatus,
   finishTeacherSession, independentTeacherEvidence, moveTeacherScene, revealTeacherSolution,
   setTeacherAnswerDraft, submitTeacherAnswer, toggleTeacherPause, teacherCanFinish, teacherCompletionBlockers, teacherNextIncompleteSceneId, teacherLatestAttempt,
-  teacherWrongFeedback, teacherBuiltNumberCount, teacherRequiresNumericResponse, recoverTeacherSession, teacherSessionNeedsReview, restartUpdatedTeacherSession, type TeacherScene, type TeacherSession, isCorrectCalendarEntry,
+  teacherWrongFeedback, teacherBuiltNumberCount, teacherRequiresNumericResponse, recoverTeacherSession, teacherSessionNeedsReview, type TeacherScene, type TeacherSession, isCorrectCalendarEntry,
 } from "./engine.ts";
 import { getLosTeacherLesson } from "./lessonRegistry.ts";
 import { LosTeacherNumberBuilder } from "./LosTeacherNumberBuilder.tsx";
@@ -204,7 +204,7 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
   const olderContentVersion = Boolean(lesson && session && teacherSessionNeedsReview(session,lesson));
   const archivedVersions = draft.teacherSessionHistory?.[lessonId] ?? [];
   const canArchive = Boolean(lesson && session && olderContentVersion && saved &&
-    restartUpdatedTeacherSession(session,lesson,draft.teacherSessionHistory??{},stamp()));
+    prepareLosTeacherVersionRestart(draft,lesson,stamp()));
   const scene = lesson?.scenes.find(item => item.id === session?.sceneId) ?? lesson?.scenes[0];
   const sceneIndex = lesson?.scenes.findIndex(item => item.id === scene?.id) ?? 0;
   const external = lesson ? teacherExternalStatus(lesson,draft,{
@@ -276,16 +276,7 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
 
   const restartUpdatedLesson=()=>{
     if(!lesson || !session || !saved || !olderContentVersion)return;
-    update(current=>{
-      const old=current.teacherSessions?.[lessonId];
-      if(!old)return current;
-      const restarted=restartUpdatedTeacherSession(old,lesson,current.teacherSessionHistory??{},stamp());
-      if(!restarted)return current;
-      return {...current,
-        teacherSessions:{...current.teacherSessions,[lessonId]:restarted.current},
-        teacherSessionHistory:restarted.history,
-      };
-    });
+    update(current=>prepareLosTeacherVersionRestart(current,lesson,stamp())??current);
   };
 
     return <main id="main-content" className="los-app los-teacher-app">
