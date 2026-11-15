@@ -6,6 +6,8 @@ import {
   LOS1_REVIEW_II_DRAFT_CHAPTER, LOS1_REVIEW_II_GROUPS,
   LOS1_REVIEW_II_WRITING_ID, losReviewIIQuestionsFor, losReviewIIReflectionId,
 } from "./content/los1ReviewII";
+import { markTeacherHelp, emptyTeacherSession } from "./teacher/engine.ts";
+import { LOS1_L058_TEACHER } from "./teacher/lessonL056L060.ts";
 import "./los-exams.css";
 
 /** Standalone Review II. Its 15 authored practice items never feed EX-FINAL. */
@@ -14,15 +16,36 @@ export function LosReviewII({move}:{move:LosNavigate}){
   const [showModel,setShowModel]=useState(false);
   const answers=draft.practiceAnswers;
   const checked=draft.practiceChecked;
-  const change=(id:string,value:string)=>update(current=>({
-    ...current,
-    practiceAnswers:{...current.practiceAnswers,[id]:value},
-    practiceChecked:current.practiceChecked.filter(item=>item!==id),
-  }));
+  const change=(id:string,value:string)=>update(current=>{
+    const next={
+      ...current,
+      practiceAnswers:{...current.practiceAnswers,[id]:value},
+      practiceChecked:current.practiceChecked.filter(item=>item!==id),
+    };
+    // A complete draft can be written before the model is opened. Any later
+    // revision may use that model, so record assistance from that point on.
+    // Keep the earlier draft and all unrelated quiz checks intact.
+    if(id!==LOS1_REVIEW_II_WRITING_ID ||
+       !current.teacherSessions?.["L058"]?.helpedIds.includes("writing-model")) return next;
+    return {...next,teacherSessions:{...current.teacherSessions,
+      L058:markTeacherHelp(current.teacherSessions["L058"],"writing-assisted",new Date().toISOString())}};
+  });
   const check=(id:string)=>{
     if(!answers[id])return;
     update(current=>({...current,practiceChecked:Array.from(new Set([...current.practiceChecked,id]))}));
   };
+  const markWritingModel=()=>update(current=>{
+    const now=new Date().toISOString();
+    const before=current.teacherSessions?.["L058"]??emptyTeacherSession(LOS1_L058_TEACHER,now);
+    return {...current,teacherSessions:{...current.teacherSessions,
+      L058:(()=>{
+        const withModel=markTeacherHelp(before,"writing-model",now);
+        const writing=current.practiceAnswers[LOS1_REVIEW_II_WRITING_ID]??"";
+        const lines=writing.split(/\n/).map(line=>line.trim()).filter(Boolean);
+        return lines.length>=5&&lines.length<=7&&writing.trim().length>=80
+          ?withModel:markTeacherHelp(withModel,"writing-assisted",now);
+      })()}};
+  });
   const openSource=(groupId:string)=>{
     if(groupId==="L056")move("06","vocabulary");
     else if(groupId==="L057")move("09","text");
@@ -77,12 +100,18 @@ export function LosReviewII({move}:{move:LosNavigate}){
           <textarea id="los-review-ii-writing" rows={6} maxLength={500}
             value={answers[LOS1_REVIEW_II_WRITING_ID]??""}
             onChange={e=>change(LOS1_REVIEW_II_WRITING_ID,e.target.value)}
-            placeholder="Hallo! Ich heiße ..."/>
+            placeholder="Kirjoita tähän 5–7 omaa lausetta ilman mallia."/>
           <p>Tekstiä ei pisteytetä automaattisesti. Oppituntimerkintä kertoo kirjoitusyrityksestä, ei tarkistetusta kielioppiosaamisesta.</p>
           <button className="los-outline-button" type="button" aria-expanded={showModel}
-            onClick={()=>setShowModel(old=>!old)}>
+            onClick={()=>{if(!showModel)markWritingModel();setShowModel(old=>!old);}}>
             {showModel?"Piilota tarkistusmalli":"Näytä tarkistusmalli oman yrityksen jälkeen"}
           </button>
+          {draft.teacherSessions?.["L058"]?.helpedIds.includes("writing-model")&&<p role="status">
+            Tarkistusmalli on avattu. {draft.teacherSessions["L058"].helpedIds.includes("writing-assisted")
+              ? "Esittely oli kesken mallin avautuessa tai sitä muokattiin mallin katsomisen jälkeen, joten kirjoitusyritys on merkitty avustetuksi."
+              : "Esittely oli tallennettu valmiiksi ennen mallin avaamista. Mallin katsominen on kirjattu; myöhemmät tekstimuokkaukset merkitään avustetuiksi."}
+            {" "}Vapaa teksti ei ole automaattisesti tarkistettu kielioppinäyttö.
+          </p>}
           {showModel&&<div className="los-exam-rubric">
             <h4>Tarkistuslista ja malliteksti</h4>
             <ul>
@@ -91,7 +120,7 @@ export function LosReviewII({move}:{move:LosNavigate}){
               <li>Tarkistin lukusanan ja saksan erikoiskirjaimet.</li>
               <li>En käyttänyt oikeita henkilötietoja.</li>
             </ul>
-            <p lang="de">Hallo! Ich heiße Mia. Ich komme aus Finnland. Ich bin siebzehn Jahre alt. Das ist Leo. Er heißt Leo. Er kommt aus Deutschland. Tschüss!</p>
+            <p lang="de">Hallo! Ich heiße Mia. Ich komme aus Finnland. Ich bin siebzehn Jahre alt. Das ist Leo. Er kommt aus Deutschland. Tschüss!</p>
             <p>Malli on LOS!:n itse laatima oppimisesimerkki, ei autenttisena julkaistu lähdeteksti.</p>
           </div>}
         </section>}

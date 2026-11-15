@@ -1,14 +1,21 @@
 import { useEffect, useMemo, useState } from "react";
 import { ArrowRight, BookOpen, ChevronRight, Headphones, Search, Volume2 } from "lucide-react";
 import { LOS_BOOKS, type LosBookDefinition } from "./catalog";
+import { LosDictionarySearch } from "./LosDictionarySearch";
+import { LosDictionaryCard } from "./LosDictionaryCard";
+import type { LosDictionaryResult } from "./dictionaryClient";
 import { LOS_1_LESSONS } from "./learningPath";
 import { LosFirstLessons } from "./LosFirstLessons";
+import { getLosTeacherLesson } from "./teacher/lessonRegistry";
 import { LOS1_EXECUTABLE_LESSONS, isLos1ExecutableLesson } from "./guidedLessons";
 
-export type LosDestination = "overview" | "contents" | "chapter" | "text" | "understand" | "vocabulary" | "grammar" | "text-b" | "practice" | "apply" | "culture" | "test" | "appendix" | "dictionary" | "path" | "search" | "midterm" | "review" | "review-ii" | "cards" | "progress" | "final" | "summary" | "facsimile";
+export type LosDestination = "overview" | "contents" | "chapter" | "text" | "understand" | "vocabulary" | "grammar" | "text-b" | "practice" | "apply" | "culture" | "test" | "appendix" | "dictionary" | "path" | "search" | "midterm" | "review" | "review-ii" | "cards" | "progress" | "final" | "summary";
 import {searchLos1OriginalTexts} from "./content/los1TextSearch";
 export type LosNavigate = (chapter: string | null, section: LosDestination) => void;
 type WordEntry = { book: number; code: string; chapter: string; title: string; word: string; meaning: string };
+type DictionarySelection =
+  | {kind:"local";entry:WordEntry}
+  | {kind:"published";entry:LosDictionaryResult};
 const DICTIONARY = LOS_BOOKS.flatMap(book => book.chapters.flatMap(chapter =>
   chapter.vocabulary.map(item => {
     const [word, ...rest] = item.split(" – ");
@@ -21,6 +28,7 @@ export function LosDictionary({ book, move, openBook }: { book: LosBookDefinitio
   const [search, setSearch] = useState("");
   const [hidden, setHidden] = useState(false);
   const [scope, setScope] = useState<"book" | "series">("book");
+  const [selection,setSelection] = useState<DictionarySelection|null>(null);
   const entries = useMemo(() => DICTIONARY.filter(entry =>
     (scope === "series" || entry.book === book.id) &&
     (entry.word.toLocaleLowerCase("de").includes(search.trim().toLocaleLowerCase("de")) ||
@@ -29,21 +37,32 @@ export function LosDictionary({ book, move, openBook }: { book: LosBookDefinitio
   return <section className="los-inner-page los-dictionary-page">
     <p className="los-eyebrow">WÖRTERBUCH · LOS! {book.id}</p>
     <h1>Sanakirja</h1>
-    <p className="los-page-intro">Selaa kirjan kappaleiden sanastoa saksaksi tai suomeksi. Alkuperäistekstien kokonaisia repliikkejä ja niiden suomennoksia voit hakea myös kirjan Haku-sivulla.</p>
+    <p className="los-page-intro">Laaja saksa–suomi- ja suomi–saksa-sanakirja käyttää vain erikseen hyväksyttyjä, ladattuja sanakirjalähteitä. Hakutulokset näytetään lähteineen, kun aineiston julkaisu on vahvistettu.</p>
+    <LosDictionarySearch onOpenCard={entry=>setSelection({kind:"published",entry})} />
+    {selection?.kind==="published" && <LosDictionaryCard floating
+      word={selection.entry.lemma} publishedEntry={selection.entry}
+      onClose={() => setSelection(null)} />}
+    {selection?.kind==="local" && <LosDictionaryCard floating
+      word={selection.entry.word} contextMeaning={selection.entry.meaning}
+      onClose={() => setSelection(null)} />}
+    <h2>Kappalesanasto</h2>
+    <p>Tämä erillinen paikallinen sanastoluettelo perustuu LOS!-kirjojen opetettaviin sanoihin. Se ei ole yleissanakirja. Alkuperäistekstien kokonaisia repliikkejä ja niiden suomennoksia voit hakea myös kirjan Haku-sivulla.</p>
     <div className="los-index-options">
-      <div className="los-index-tabs" role="group" aria-label="Sanakirjan laajuus">
+      <div className="los-index-tabs" role="group" aria-label="Kappalesanaston laajuus">
         <button className={scope === "book" ? "is-active" : ""} aria-pressed={scope === "book"} onClick={() => setScope("book")}>Tämä kirja</button>
         <button className={scope === "series" ? "is-active" : ""} aria-pressed={scope === "series"} onClick={() => setScope("series")}>Koko sarja</button>
       </div>
       <button className="los-index-toggle" onClick={() => setHidden(v => !v)} aria-pressed={hidden}>{hidden ? "Näytä suomennokset" : "Peitä suomennokset"}</button>
     </div>
     <label className="los-index-search"><Search size={19}/><span className="sr-only">Hae saksaksi tai suomeksi</span><input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Hae saksaksi tai suomeksi" autoComplete="off" /></label>
-    <p className="los-index-count">{entries.length} hakusanaa</p>
+    <p className="los-index-count">{entries.length} kappalesanaston hakusanaa</p>
     {entries.length === 0 ? <p>Ei hakusanoja tällä rajauksella. Muut kirjat saavat hakusanastonsa, kun niiden sisällöt valmistuvat.</p> :
       <div className="los-index-table" role="table" aria-label="Sanakirjahakemisto">
         <div className="los-index-table-head" role="row"><span role="columnheader">Deutsch</span><span role="columnheader">Suomi</span><span role="columnheader">Lähde</span></div>
         {entries.map((item,i)=><div role="row" className="los-index-entry" key={`${item.book}-${item.chapter}-${i}-${item.word}`}>
-          <strong role="cell" lang="de">{item.word}</strong>
+          <strong role="cell"><button type="button" lang="de" className="los-index-word-card"
+            aria-label={`Avaa sanakortti: ${item.word}`}
+            onClick={()=>setSelection({kind:"local",entry:item})}>{item.word}</button></strong>
           <span role="cell">{hidden ? <span className="los-muted-hidden">Piilotettu</span> : item.meaning}</span>
           <button type="button" role="cell" title={`Avaa ${item.title}`} onClick={()=>item.book === book.id ? move(item.chapter, "vocabulary") : openBook(item.book)}>
             <span>{item.code} · {Number(item.chapter)}</span><ChevronRight size={15}/>
@@ -55,6 +74,7 @@ export function LosDictionary({ book, move, openBook }: { book: LosBookDefinitio
   </section>;
 }
 export function LosLearningPath({ book, move }: { book: LosBookDefinition; move: LosNavigate }) {
+  const teacherCount = LOS1_EXECUTABLE_LESSONS.filter(lesson => Boolean(getLosTeacherLesson(lesson.id))).length;
   const [selectedLesson, setSelectedLesson] = useState("L001");
   // A book page temporarily unmounts the guided path. Restore the active lesson
   // when returning, but do not treat this UI selection as learning evidence.
@@ -90,16 +110,16 @@ export function LosLearningPath({ book, move }: { book: LosBookDefinition; move:
   return <section className="los-inner-page los-learning-path">
     <p className="los-eyebrow">OHJATTU LUKUJÄRJESTYS / {book.code}</p>
     <h1>Opetuspolku</h1>
-    <p className="los-page-intro">Kirjan 60 toteutettua, pääosin noin 30 minuutin oppituntia. Opetuspolku viittaa samoihin oppikirjasivuihin, eikä tee niistä erillisiä kursseja. Välikoe ja loppukoe ovat käytettävissä; äänen ja videoiden todellinen laitetestaus sekä pedagoginen lopputarkistus ovat erillisiä julkaisuportteja.</p>
+    <p className="los-page-intro">LOS! 1:n 60 tunnin runko on käytössä. {teacherCount}/60 tunnista avautuu käsikirjoitettuun Teacher 2.0 -esikatseluun; muut käyttävät vielä aiempaa ohjattua opetusta. Kaikki tunnit viittaavat samaan digikirjaan. Välikoe ja loppukoe ovat käytettävissä, mutta oppisisältöjen, äänen, videoiden, todellisten laitteiden ja pedagogiikan julkaisuportit ovat erillisiä.</p>
     <div className="los-path-notice"><BookOpen size={20}/><p><strong>{LOS1_EXECUTABLE_LESSONS.length}/60 oppituntia on käytettävissä.</strong> Opetuspolun oppitunnit ovat käytettävissä kaikissa kymmenessä kappaleessa sekä kertaus-, väliarviointi- ja loppuarviointijaksoissa. C08:n koko Wikibooksin kouluympäristön alkuperäiskohtaus ja C10:n Harald-haastattelu ovat nyt kirjan sisällä. Näiden kappaleiden lukemisen, kirjoittamisen ja kappaletestien oppitunnit ovat käytettävissä. Alkuperäisten audio-/videoaineistojen oikeudet, kuuntelun toimivuus, kielitason tarkistus ja julkaisuportit eivät kuitenkaan vielä ole valmiit. Erilliset EX-FINAL-loppukoe ja L060-yhteenveto ovat nyt opiskelupolussa; kummankin suoritus vaatii oikeat palautukset ja itsearvioinnit.</p></div>
     <LosFirstLessons selectedId={selectedLesson} onSelect={selectLesson} move={move} />
     {groups.map(group=><section key={group.section} className="los-path-group">
       <h2>{group.section}</h2>
       <ol>
         {group.items.map(lesson=><li key={lesson.number}>
-          <button onClick={()=>{ if(isLos1ExecutableLesson("L"+String(lesson.number).padStart(3,"0"))){ selectLesson("L"+String(lesson.number).padStart(3,"0")); document.getElementById("los-lesson-runner")?.scrollIntoView({block:"start",behavior:"smooth"}); } else move(lesson.chapter,lesson.destination); }}>
+          <button onClick={()=>{ if(isLos1ExecutableLesson("L"+String(lesson.number).padStart(3,"0"))){ const id="L"+String(lesson.number).padStart(3,"0"); if(getLosTeacherLesson(id)){window.location.assign("/los-lessons/"+id);}else{selectLesson(id);document.getElementById("los-lesson-runner")?.scrollIntoView({block:"start",behavior:"smooth"});} } else move(lesson.chapter,lesson.destination); }}>
             <span className="los-path-number">{String(lesson.number).padStart(2,"0")}</span>
-            <span className="los-path-copy"><strong>{lesson.title}</strong><small>{isLos1ExecutableLesson("L"+String(lesson.number).padStart(3,"0")) ? "Avaa ohjattu oppitunti" : lesson.chapter ? `Kappale ${Number(lesson.chapter)} · Oppikirjan sisältöön (suoritus ei vielä käytössä)`  : "Suoritusjärjestelmä ei vielä käytössä"}</small></span>
+            <span className="los-path-copy"><strong>{lesson.title}</strong><small>{isLos1ExecutableLesson("L"+String(lesson.number).padStart(3,"0")) ? (getLosTeacherLesson("L"+String(lesson.number).padStart(3,"0")) ? "Avaa Teacher 2.0 -opetustila" : "Avaa nykyinen ohjattu oppitunti") : lesson.chapter ? `Kappale ${Number(lesson.chapter)} · Oppikirjan sisältöön (suoritus ei vielä käytössä)`  : "Suoritusjärjestelmä ei vielä käytössä"}</small></span>
             <ArrowRight size={18}/>
           </button>
         </li>)}
@@ -220,7 +240,7 @@ const audioSources = [
 ] as const;
 export function LosAuthenticAudio({ chapterId, source = "all" }: { chapterId: string; source?: "A" | "B" | "all" }) {
   const [errors,setErrors] = useState<string[]>([]);
-  const selected=chapterId==="01" ? (source==="A"?audioSources.slice(0,1):source==="B"?audioSources.slice(1,2):audioSources.slice(0,2)) : (chapterId==="02"||chapterId==="03") && source!=="A" ? audioSources.filter(item=>item.id==="M-COM-02") : chapterId==="05" && source!=="A"?audioSources.filter(item=>item.id==="M-COM-04"||item.id==="M-COM-05") : chapterId==="06"?audioSources.filter(item=>item.id==="M-COM-01") : chapterId==="04" && source!=="A"?audioSources.filter(item=>item.id==="M-COM-03") : chapterId==="07" && source!=="A"?audioSources.filter(item=>item.id==="M-COM-06") : chapterId==="05" && source==="B"?audioSources.filter(item=>item.id==="M-COM-08") : chapterId==="09" && source!=="A"?audioSources.filter(item=>item.id==="M-COM-07") : chapterId==="10" && source!=="A"?audioSources.filter(item=>item.id==="M-COM-02") : [];
+  const selected=chapterId==="01" ? (source==="A"?audioSources.slice(0,1):source==="B"?audioSources.slice(1,2):audioSources.slice(0,2)) : (chapterId==="02"||chapterId==="03") && source!=="A" ? audioSources.filter(item=>item.id==="M-COM-02") : chapterId==="05" && source==="B"?audioSources.filter(item=>item.id==="M-COM-08") : chapterId==="05" && source!=="A"?audioSources.filter(item=>item.id==="M-COM-04"||item.id==="M-COM-05") : chapterId==="06"?audioSources.filter(item=>item.id==="M-COM-01") : chapterId==="04" && source!=="A"?audioSources.filter(item=>item.id==="M-COM-03") : chapterId==="07" && source!=="A"?audioSources.filter(item=>item.id==="M-COM-06") : chapterId==="09" && source!=="A"?audioSources.filter(item=>item.id==="M-COM-07") : chapterId==="10" && source!=="A"?audioSources.filter(item=>item.id==="M-COM-02") : [];
   if(!selected.length)return null;
   return <section className="los-authentic-audio" aria-label="Alkuperäiset kuunteluäänitteet">
     <p className="los-overline">ALKUPERÄISET ÄÄNITTEET · KOKEILUTOISTO</p>

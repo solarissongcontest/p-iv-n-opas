@@ -75,3 +75,17 @@
 }
 .dark .los-lesson-chapter-picker button.is-active, .dark .los-lesson-picker button.is-active, .dark .los-lesson-exit label:has(input:checked), .dark .los-lesson-feedback { background: #38282a; color: var(--los-ink); }
 .dark .los-lesson-step-title svg, .dark .los-lesson-done svg { color: #7DDBB4; }
+
+/* Teacher 2.0 entry keeps the legacy study-path overview intact during the pilot. */
+.los-lesson-teacher-entry {
+  padding:18px 20px;margin:18px 0 22px;border:1px solid var(--los-line);
+  border-left:3px solid var(--los-book-accent);border-radius:7px;
+  background:var(--los-book-tint);
+}
+.los-lesson-teacher-entry strong {display:block;font-size:15px;color:var(--los-ink);}
+.los-lesson-teacher-entry p {font-size:13px;line-height:1.7;margin:8px 0 14px!important;color:var(--los-soft);}
+.los-lesson-teacher-entry a {text-decoration:none;max-width:100%;}
+@media(max-width:520px) {
+  .los-lesson-teacher-entry {padding:16px;}
+  .los-lesson-teacher-entry a {width:100%;}
+}

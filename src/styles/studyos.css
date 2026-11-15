@@ -57,10 +57,12 @@
 
 .studyos-brand,
 .studyos-primary-nav button,
+.studyos-primary-nav a,
 .studyos-command,
 .studyos-icon-action,
 .studyos-more-trigger,
 .studyos-mobile-dock button,
+.studyos-mobile-dock a,
 .studyos-more-menu button {
   -webkit-tap-highlight-color: transparent;
 }
@@ -78,7 +80,9 @@
 
 .studyos-brand:focus-visible,
 .studyos-systembar button:focus-visible,
+.studyos-systembar a:focus-visible,
 .studyos-mobile-dock button:focus-visible,
+.studyos-mobile-dock a:focus-visible,
 .studyos-flow button:focus-visible,
 .studyos-map button:focus-visible {
   outline: 3px solid color-mix(in srgb, var(--studyos-primary) 45%, transparent);
@@ -107,7 +111,8 @@
   background: color-mix(in srgb, var(--studyos-line) 48%, transparent);
 }
 
-.studyos-primary-nav button {
+.studyos-primary-nav button,
+.studyos-primary-nav .studyos-los-link {
   min-height: 34px;
   display: inline-flex;
   align-items: center;
@@ -120,7 +125,9 @@
   transition: background 150ms ease, color 150ms ease, box-shadow 150ms ease;
 }
 
-.studyos-primary-nav button:hover { color: var(--studyos-ink); }
+.studyos-primary-nav button:hover,
+.studyos-primary-nav .studyos-los-link:hover { color: var(--studyos-ink); }
+.studyos-primary-nav .studyos-los-link { text-decoration: none; white-space: nowrap; }
 .studyos-primary-nav button.is-active {
   background: var(--studyos-raised);
   color: var(--studyos-ink);
@@ -363,11 +370,11 @@
     left: 50%;
     bottom: max(10px, env(safe-area-inset-bottom));
     z-index: 45;
-    width: min(288px, calc(100vw - 28px));
+    width: min(344px, calc(100vw - 28px));
     min-height: 58px;
     transform: translateX(-50%);
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     padding: 5px;
     border: 1px solid color-mix(in srgb, var(--studyos-line) 85%, transparent);
     border-radius: 18px;
@@ -375,7 +382,9 @@
     box-shadow: 0 14px 38px color-mix(in srgb, #000 16%, transparent);
     backdrop-filter: blur(20px);
   }
-  .studyos-mobile-dock button { min-height: 48px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; border-radius: 13px; color: var(--studyos-muted); font-size: 10px; }
+  .studyos-mobile-dock button,
+  .studyos-mobile-dock a { min-height: 48px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; border-radius: 13px; color: var(--studyos-muted); font-size: 10px; }
+  .studyos-mobile-dock a { text-decoration: none; }
   .studyos-mobile-dock button.is-active { background: var(--studyos-primary-soft); color: var(--studyos-primary); }
   .studyos-assistive-action { right: 16px; bottom: 86px; }
   .studyos-menu-backdrop { align-items: flex-end; padding: 12px 12px max(12px, env(safe-area-inset-bottom)); }

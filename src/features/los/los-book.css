@@ -5,7 +5,7 @@
 .los-app,.los-access,.los-loading {
   --los-bg:#f7f7f5; --los-paper:#fff; --los-ink:#1f2933;
   --los-soft:#536170; --los-line:#e1e4e3; --los-subtle:#f2f4f3;
-  --los-book-accent:#b43d33; --los-book-tint:#fce8e5;
+  --los-book-accent:#b7473c; --los-book-tint:#fce8e5;
   min-height:100dvh; background:var(--los-bg); color:var(--los-ink);
   font-family:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
   font-size:16px; line-height:1.6;
@@ -289,3 +289,15 @@
 .los-front-resume{display:flex;flex-direction:column;align-items:flex-start;min-width:0;gap:.2rem}
 .los-front-resume-caption{font-size:.83rem!important;line-height:1.55;color:var(--los-soft);margin:.2rem 0 1rem;max-width:48ch}
 @media(max-width:640px){.los-front-resume{width:100%}.los-front-resume .los-primary{width:100%;min-height:48px}}
+
+.los-teacher-book-return{display:flex;align-items:center;justify-content:center;gap:9px;min-height:44px;padding:9px 16px;background:var(--los-book-tint);border-bottom:1px solid var(--los-line);color:var(--los-ink);font-size:13px;font-weight:700;text-decoration:none}
+.los-teacher-book-return:hover{text-decoration:underline}
+
+/* LOS! 1: make existing reader, teacher, dictionary and recall tools discoverable. */
+.los-library-tools { margin-top: 45px; padding: 25px 0 3px; border-top: 1px solid var(--los-line); }
+.los-library-tools h2 { margin: 0 0 8px; font: 500 clamp(22px, 3vw, 28px)/1.2 Georgia,serif; }
+.los-library-tools > p { margin: 0 0 17px; color: var(--los-soft); line-height: 1.6; }
+.los-library-tool-links { display: flex; flex-wrap: wrap; gap: 8px; }
+.los-library-tool-links a { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 10px 14px; border: 1px solid var(--los-line); border-radius: 9px; color: var(--los-ink); font-size: 14px; font-weight: 650; text-decoration: none; }
+.los-library-tool-links a:hover { background: var(--los-book-tint); }
+.los-library-tool-links a:focus-visible { outline: 3px solid var(--los-book-accent); outline-offset: 2px; }

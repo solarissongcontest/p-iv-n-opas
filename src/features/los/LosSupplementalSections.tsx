@@ -17,7 +17,7 @@ export function LosUnderstanding({chapter,goToText}:{chapter:LosChapter;goToText
     chapter.id==="02"?
     ["Kuka kertoo nimensä?", "Miten nimeä kysytään?", "Mikä kysymyksen vastaus on?"]:
     chapter.id==="03"?
-    ["Mistä maasta Berna sanoo olevansa kotoisin?", "Mikä kaupunki tekstissä nimetään?", "Missä kohdassa esiintyy aus-ilmaus?"]:
+    ["Mistä maasta Lisa sanoo olevansa kotoisin?", "Missä kaupungissa Lisa kertoo asuvansa?", "Missä Lisan vastauksessa esiintyy aus-ilmaus?"]:
     chapter.id==="04"?
     ["Ketkä henkilöt käyvät keskustelun?", "Missä repliikissä käytetään kohteliasta puhuttelua?", "Mitä vointiin liittyvää ilmausta tunnistat?"]:
     chapter.id==="05"?

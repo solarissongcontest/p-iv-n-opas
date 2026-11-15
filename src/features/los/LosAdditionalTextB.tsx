@@ -30,7 +30,11 @@ function LosAdditionalTextBContent({chapterId}:{chapterId:"01"|"04"|"05"|"06"|"0
  };
  return <div className="los-secondary-source" aria-label={"C"+chapterId+" toinen alkuperäinen lähde"}>
   <p>{source.summary}</p>
-  <LosAuthenticAudio chapterId={chapterId} source="B"/>
+  {chapterId==="07" ? <div className="los-editorial-note" role="status">
+    <strong>C07:n aakkosäänite odottaa hyväksyntää.</strong>
+    M-COM-06 on oikea ihmisen tekemä äänilähde, mutta sen laite- ja sisältötarkistus on kesken.
+    Tämä Text B on nyt kirjallinen harjoitus; puhetta ei merkitä kuulluksi eikä siitä anneta kuuntelupisteitä.
+  </div> : <LosAuthenticAudio chapterId={chapterId} source="B"/>}
   {chapterId==="08"&&<div className="los-editorial-note" role="status"><strong>Haastattelun ääni ei ole vielä käytettävissä.</strong> COERLL:n alkuperäinen kahdeksan repliikin litteraatti on luettavissa kokonaisena tässä kirjassa. Videon tai äänen teknistä toimintaa ja tiedostokohtaisia oikeuksia ei ole vielä vahvistettu; tästä osiosta saa luetun ymmärtämisen harjoitusta, ei kuullun ymmärtämisen todistetta.</div>}
   {source.transcriptIsExact&&source.lines.length>0?
    <LosOriginalDialogue
