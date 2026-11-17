@@ -722,6 +722,10 @@ export const LOS1_REVISED_AB = {
         "textType": "mixed",
         "blocks": [
           {
+            "kind": "stage",
+            "text": "Nora ja Aino viestittelevät illalla."
+          },
+          {
             "kind": "prose",
             "text": "**Nora:** Hallo Aino! Wie geht’s?"
           },
@@ -926,6 +930,14 @@ export const LOS1_REVISED_AB = {
           {
             "kind": "prose",
             "text": "**Aino:** Aino. A-I-N-O."
+          },
+          {
+            "kind": "prose",
+            "text": "**Leon:** E-I-N-O? Richtig?"
+          },
+          {
+            "kind": "prose",
+            "text": "**Aino:** Nein! A-I-N-O. Mit A!"
           },
           {
             "kind": "prose",
@@ -1348,7 +1360,7 @@ export const LOS1_REVISED_AB = {
           },
           {
             "kind": "prose",
-            "text": "**Dienstag:** frei am Nachmittag"
+            "text": "**Dienstag:** kein Deutschkurs"
           },
           {
             "kind": "prose",
