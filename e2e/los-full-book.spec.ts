@@ -21,13 +21,16 @@ const chapters=["01","02","03","04","05","06","07","08","09","10"] as const;
 const openChapter=async(page:import("@playwright/test").Page,ch:string,section:string)=>{
  await page.goto("/los#/1/"+ch+"/"+section,{waitUntil:"domcontentloaded"});
  await expect(page.locator(".los-book-paper")).toBeVisible();
+ await expect(page.locator(".los-main-breadcrumb")).toContainText("Kappale "+Number(ch));
 };
 
 test("all ten chapters provide complete Text B readers inside the book, not link-only placeholders",async({page})=>{
  await enterLocalBook(page);
  for(const chapter of chapters){
   await openChapter(page,chapter,"text-b");
-  await page.locator("details.los-revised-supplement > summary").first().click();
+  const legacy=page.locator("details.los-revised-supplement").first();
+  await legacy.locator("summary").click();
+  await expect(legacy).toHaveAttribute("open","");
   await expect(page.locator("fieldset.los-c01-question")).toHaveCount(4);
   const sourceLinks=page.locator(".los-secondary-source a[href^='https://']");
   await expect(sourceLinks.first()).toBeVisible();
