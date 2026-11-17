@@ -1,7 +1,7 @@
-import { LOS1_READING_QUESTIONS_PART1 } from "./los1ReadingQuestionsPart1";
-import { LOS1_READING_QUESTIONS_PART2 } from "./los1ReadingQuestionsPart2";
-import { LOS1_REVISED_AB } from "./los1RevisedAB";
-import { LOS1_REVISED_C } from "./los1RevisedC";
+import { LOS1_READING_QUESTIONS_PART1 } from "./los1ReadingQuestionsPart1.ts";
+import { LOS1_READING_QUESTIONS_PART2 } from "./los1ReadingQuestionsPart2.ts";
+import { LOS1_REVISED_AB } from "./los1RevisedAB.ts";
+import { LOS1_REVISED_C } from "./los1RevisedC.ts";
 
 export type LosReadingText = "A" | "B" | "C";
 export type LosReadingSkill = "detail" | "evidence" | "inference" | "transfer";
