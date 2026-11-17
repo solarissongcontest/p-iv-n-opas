@@ -23,7 +23,7 @@ import { LosReviewI } from "./LosReviewI";
 import { LosReviewII } from "./LosReviewII";
 import { LosFinalExam,LosFinalSummary } from "./LosFinalExam";
 import { LosApplication, LosCulture, LosTextB, LosUnderstanding } from "./LosSupplementalSections";
-import { LosHilfstextPage, LosRevisedTextPage } from "./LosRevisedTextPages";
+import { LosHilfstextPage, LosRevisedTextPage, LosRevisedUnderstanding } from "./LosRevisedTextPages";
 import "./los-book.css";
 import "./los-appendix.css";
 import "./los-workbook.css";
@@ -395,8 +395,14 @@ function LosBookWorkspace({ book, location, move, goLibrary, openBook }: { book:
             section === "search" ? <LosIndexSearch book={book} move={move} /> :
             chapter ? (
               section === "text" ? <TextPage chapter={chapter} /> :
-              section === "understand" ? (chapter.id==="02" ? <LosC02Understanding goToText={() => move(chapter.id,"text")}/> : chapter.id==="06" ? <><LosOpenTextUnderstanding chapterId="06" goToText={() => move(chapter.id,"text")}/><details className="los-editorial-note"><summary>C01:n ikäkertauksen vanhat ymmärtämistehtävät (L034)</summary><LosC06AgeUnderstanding goToText={() => move(chapter.id,"text")}/></details></> : getLosOpenDialogue(chapter.id) ? <LosOpenTextUnderstanding chapterId={chapter.id} goToText={() => move(chapter.id,"text")}/> : <LosUnderstanding chapter={chapter} goToText={() => move(chapter.id, "text")} />) :
-              section === "vocabulary" ? <Vocabulary key={chapter.id} chapter={chapter} bookId={book.id} move={move} /> :
+              section === "understand" ? <section className="los-revised-understanding-host">
+                 <LosRevisedUnderstanding chapterId={chapter.id}/>
+                 <details className="los-revised-supplement">
+                   <summary>Aiemman autenttisen lähdetekstin erilliset ymmärtämistehtävät</summary>
+                   {(chapter.id==="02" ? <LosC02Understanding goToText={() => move(chapter.id,"text")}/> : chapter.id==="06" ? <><LosOpenTextUnderstanding chapterId="06" goToText={() => move(chapter.id,"text")}/><details className="los-editorial-note"><summary>C01:n ikäkertauksen vanhat ymmärtämistehtävät (L034)</summary><LosC06AgeUnderstanding goToText={() => move(chapter.id,"text")}/></details></> : getLosOpenDialogue(chapter.id) ? <LosOpenTextUnderstanding chapterId={chapter.id} goToText={() => move(chapter.id,"text")}/> : <LosUnderstanding chapter={chapter} goToText={() => move(chapter.id, "text")} />)}
+                 </details>
+               </section> :
+               section === "vocabulary" ? <Vocabulary key={chapter.id} chapter={chapter} bookId={book.id} move={move} /> :
               section === "cards" ? <LosRecallCards key={chapter.id} chapter={chapter} onBack={()=>move(chapter.id,"vocabulary")} /> :
               section === "grammar" ? <Grammar chapter={chapter} /> :
               section === "text-b" ? <LosTextB chapter={chapter} /> :
