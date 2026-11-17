@@ -114,6 +114,75 @@ export function LosRevisedTextPage({ chapterId, kind }: { chapterId: string; kin
   </section>;
 }
 
+type UnderstandingQuestion = { prompt: string; answer: string };
+const revisedComprehension: Record<string, readonly UnderstandingQuestion[]> = {
+  "01": [
+    { prompt:"Mistä Aino etsii apua ja kenet hän tapaa?",answer:"Aino etsii saksan kurssia ja tapaa Leonin sekä Frau Bergerin." },
+    { prompt:"Minkä tervehdyksen Aino sanoo vahingossa aamulla?",answer:"Hän sanoo Guten Abend, vaikka kello on vasta yhdeksän aamulla." },
+    { prompt:"Miten Aino hyvästelee Leonin ja opettajan?",answer:"Leonille hän sanoo Tschüss ja opettajalle Auf Wiedersehen." },
+  ],
+  "02": [
+    { prompt:"Minkä uuden henkilön Aino tapaa?",answer:"Aino tutustuu Noraan." },
+    { prompt:"Miten Aino tavaa nimensä?",answer:"A-I-N-O." },
+    { prompt:"Kuka on Frau Berger?",answer:"Hän on heidän saksanopettajansa." },
+  ],
+  "03": [
+    { prompt:"Mistä maista Aino ja Selma tulevat?",answer:"Aino tulee Suomesta ja Selma Ruotsista." },
+    { prompt:"Missä kaupungissa Leon kertoo asuvansa?",answer:"Berliinissä." },
+    { prompt:"Mistä maasta Herr Weber on?",answer:"Itävallasta, Wienistä." },
+  ],
+  "04": [
+    { prompt:"Mikä on Herr Weberin rooli tilanteessa?",answer:"Hän on vieras, jota kurssilaiset tervehtivät." },
+    { prompt:"Mitä puhuttelumuotoa Leon neuvoo Ainoa käyttämään?",answer:"Kohteliasta Sie-muotoa." },
+    { prompt:"Miten Aino kertoo nimensä Herr Weberille?",answer:"Ich heiße Aino." },
+  ],
+  "05": [
+    { prompt:"Miksi Leon ei vastaa kuulumisiin myönteisesti?",answer:"Hän on hyvin väsynyt." },
+    { prompt:"Mitä Selma sanoo omista kuulumisistaan?",answer:"Prima!" },
+    { prompt:"Mitä Leon toivoo seuraavasta päivästä?",answer:"Että seuraavana päivänä hänelle kuuluisi jo oikein hyvää." },
+  ],
+  "06": [
+    { prompt:"Kuinka vanhoja Aino, Nora, Leon ja Selma ovat?",answer:"Aino ja Leon ovat 17, Nora 16 ja Selma 18." },
+    { prompt:"Miksi Frau Berger ei kerro ikäänsä?",answer:"Hän vitsailee sen olevan salaisuus." },
+    { prompt:"Minkä suuren lukusanan Aino sanoo lopuksi?",answer:"Neunundneunzig, eli 99." },
+  ],
+  "07": [
+    { prompt:"Mitä Leon on kirjoittamassa?",answer:"Osallistujien nimiä, joiden kirjoitusasun hän tarkistaa." },
+    { prompt:"Miten Ainon sukunimi tavataan?",answer:"L-A-I-N-E." },
+    { prompt:"Millä pyynnöllä Leon pyytää Ainoa hidastamaan?",answer:"Noch einmal, bitte. Langsam!" },
+  ],
+  "08": [
+    { prompt:"Mitä sanaa Frau Berger selittää oppitunnilla?",answer:"Sanaa schnell." },
+    { prompt:"Mitä Aino sanoo, kun hän ei ymmärrä?",answer:"Ich verstehe nicht. Was bedeutet schnell?" },
+    { prompt:"Mitä Selma pyytää opettajalta?",answer:"Toistoa ja hitaampaa puhetta." },
+  ],
+  "09": [
+    { prompt:"Miksi alkuperäinen keskiviikon tapaamisaika muuttuu?",answer:"Noralle keskiviikko ei sovi." },
+    { prompt:"Mille päivälle tapaaminen lopulta sovitaan?",answer:"Torstaille." },
+    { prompt:"Mihin kellonaikaan kaikki sopivat tapaavansa?",answer:"Kello neljältä, um vier Uhr." },
+  ],
+  "10": [
+    { prompt:"Kuka on kurssin uusi opiskelija?",answer:"Mila." },
+    { prompt:"Mistä Mila on kotoisin ja kuinka vanha hän on?",answer:"Hän on Virosta, Tallinnasta, ja 17-vuotias." },
+    { prompt:"Mistä vitsistä Leon muistuttaa Ainoa?",answer:"Ensimmäisen päivän Guten Abend -tervehdyksestä aamulla." },
+  ],
+};
+
+export function LosRevisedUnderstanding({chapterId}:{chapterId:string}) {
+  const questions = revisedComprehension[chapterId] ?? [];
+  return <section className="los-inner-page los-revised-understanding">
+    <p className="los-eyebrow">KAPPALE {chapterId} · TEXT A / VERSTEHEN</p>
+    <h1>Ymmärrä Text A</h1>
+    <p className="los-page-intro">Lue uusi Text A ja vastaa ensin kysymyksiin omin sanoin. Avaa mallivastaus vasta sen jälkeen. Tämän osion vastauksia ei pisteytetä automaattisesti.</p>
+    <ol className="los-revised-questions">
+      {questions.map((item, index) => <li key={index}>
+        <p>{item.prompt}</p>
+        <details className="los-revised-answer"><summary>Näytä mallivastaus</summary><p>{item.answer}</p></details>
+      </li>)}
+    </ol>
+  </section>;
+}
+
 function splitCells(line: string): string[] {
   return line.replace(/^\s*\|/, "").replace(/\|\s*$/, "").split("|").map(cell => cell.trim());
 }
