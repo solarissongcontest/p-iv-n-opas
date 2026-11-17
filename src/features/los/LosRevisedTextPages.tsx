@@ -25,7 +25,7 @@ function voiceIndex(speaker: string, voiceCount: number): number {
   for (const character of speaker) hash = (hash * 31 + character.charCodeAt(0)) >>> 0;
   return hash % voiceCount;
 }
-function TextSpeech({ blocks }: { blocks: readonly ReaderBlock[] }) {
+function TextSpeech({ blocks, chapterId, kind }: { blocks: readonly ReaderBlock[]; chapterId:string; kind:"A"|"B" }) {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [rate, setRate] = useState("1");
   const [message, setMessage] = useState("");
@@ -46,7 +46,9 @@ function TextSpeech({ blocks }: { blocks: readonly ReaderBlock[] }) {
     const utterances = blocks.filter(block => block.kind === "prose" && block.text?.trim()).map(block => {
       const raw = block.text ?? "";
       const dialogue = dialogueLine(raw);
-      const words = (dialogue?.words ?? raw).replace(/\*\*/g, "").replace(/\*/g, "")
+      const readLabel = kind === "B" && ["03","06","07","09","10"].includes(chapterId);
+      const spoken = dialogue && readLabel ? dialogue.speaker + ": " + dialogue.words : (dialogue?.words ?? raw);
+      const words = spoken.replace(/\*\*/g, "").replace(/\*/g, "")
         .replace(/\b(?:[A-ZÄÖÜ]\s*[-–]\s*){2,}[A-ZÄÖÜ]\b/g,
           letters => letters.replace(/\s*[-–]\s*/g, ", "))
         .trim();
@@ -109,7 +111,7 @@ export function LosRevisedTextPage({ chapterId, kind }: { chapterId: string; kin
     <p className="los-eyebrow">KAPPALE {chapterId} / TEXT {kind}</p>
     <h1 id={"los-revised-heading-" + chapterId + kind} lang="de">{source.title}</h1>
     <p className="los-page-intro">{kind === "A" ? "Kappaleen uusi pääteksti. Lue ensin tilanteen kuvaus ja seuraa keskustelua." : "Toinen tekstilaji. Harjoittele kappaleen ilmauksia uudessa tilanteessa."}</p>
-    <TextSpeech blocks={source.blocks} />
+    <TextSpeech blocks={source.blocks} chapterId={chapterId} kind={kind} />
     <ReaderLines blocks={source.blocks} />
     {kind === "B" && <LosReadingExercises chapterId={chapterId} text="B" />}
     <aside className="los-revised-disclaimer" role="note">
