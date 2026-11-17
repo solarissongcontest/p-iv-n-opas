@@ -22,6 +22,11 @@ const openChapter=async(page:import("@playwright/test").Page,ch:string,section:s
  await page.goto("/los#/1/"+ch+"/"+section,{waitUntil:"domcontentloaded"});
  await expect(page.locator(".los-book-paper")).toBeVisible();
  await expect(page.locator(".los-main-breadcrumb")).toContainText("Kappale "+Number(ch));
+ if(section==="text-b"){
+   await expect(page.locator(".los-main-breadcrumb")).toContainText("Text B");
+   await expect(page.locator(".los-section-nav button.is-active")).toHaveText("Text B");
+   await expect(page.locator(".los-revised-page h1").first()).toBeVisible();
+ }
 };
 
 test("all ten chapters provide complete Text B readers inside the book, not link-only placeholders",async({page})=>{
