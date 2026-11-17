@@ -107,7 +107,7 @@ export const LOS1_REVISED_AB = {
             "text": "**Frau Berger:** Auf Wiedersehen!"
           }
         ],
-        "approxWordCount": 117,
+        "approxWordCount": 101,
         "audio": {
           "mode": "pre-rendered-de-DE-TTS",
           "generated": false,
@@ -185,7 +185,7 @@ export const LOS1_REVISED_AB = {
             "text": "**Selma:** Gute Nacht! Bis morgen!"
           }
         ],
-        "approxWordCount": 48,
+        "approxWordCount": 33,
         "audio": {
           "mode": "pre-rendered-de-DE-TTS",
           "generated": false,
@@ -278,7 +278,7 @@ export const LOS1_REVISED_AB = {
             "text": "**Nora:** Danke schön!"
           }
         ],
-        "approxWordCount": 89,
+        "approxWordCount": 79,
         "audio": {
           "mode": "pre-rendered-de-DE-TTS",
           "generated": false,
@@ -425,7 +425,7 @@ export const LOS1_REVISED_AB = {
             "text": "**Aino:** Und wir lernen Deutsch!"
           }
         ],
-        "approxWordCount": 101,
+        "approxWordCount": 98,
         "audio": {
           "mode": "pre-rendered-de-DE-TTS",
           "generated": false,
@@ -552,7 +552,7 @@ export const LOS1_REVISED_AB = {
             "text": "**Aino und Leon:** Auf Wiedersehen!"
           }
         ],
-        "approxWordCount": 115,
+        "approxWordCount": 104,
         "audio": {
           "mode": "pre-rendered-de-DE-TTS",
           "generated": false,
@@ -615,7 +615,7 @@ export const LOS1_REVISED_AB = {
             "text": "Aino Laine"
           }
         ],
-        "approxWordCount": 46,
+        "approxWordCount": 37,
         "audio": {
           "mode": "pre-rendered-de-DE-TTS",
           "generated": false,
@@ -708,7 +708,7 @@ export const LOS1_REVISED_AB = {
             "text": "**Aino:** Das ist ein guter Plan!"
           }
         ],
-        "approxWordCount": 90,
+        "approxWordCount": 78,
         "audio": {
           "mode": "pre-rendered-de-DE-TTS",
           "generated": false,
@@ -750,7 +750,7 @@ export const LOS1_REVISED_AB = {
             "text": "**Aino:** Bis morgen!"
           }
         ],
-        "approxWordCount": 37,
+        "approxWordCount": 35,
         "audio": {
           "mode": "pre-rendered-de-DE-TTS",
           "generated": false,
@@ -851,7 +851,7 @@ export const LOS1_REVISED_AB = {
             "text": "**Alle:** Ha, ha!"
           }
         ],
-        "approxWordCount": 97,
+        "approxWordCount": 91,
         "audio": {
           "mode": "pre-rendered-de-DE-TTS",
           "generated": false,
@@ -1012,7 +1012,7 @@ export const LOS1_REVISED_AB = {
             "text": "**Leon:** Oh nein!"
           }
         ],
-        "approxWordCount": 96,
+        "approxWordCount": 84,
         "audio": {
           "mode": "pre-rendered-de-DE-TTS",
           "generated": false,
@@ -1080,7 +1080,7 @@ export const LOS1_REVISED_AB = {
             "text": "Die Adresse example.com ist eine reservierte Beispieldomain, keine echte Kontaktadresse."
           }
         ],
-        "approxWordCount": 53,
+        "approxWordCount": 29,
         "audio": {
           "mode": "pre-rendered-de-DE-TTS",
           "generated": false,
@@ -1181,7 +1181,7 @@ export const LOS1_REVISED_AB = {
             "text": "**Aino:** Nein, danke. Jetzt ist alles klar!"
           }
         ],
-        "approxWordCount": 106,
+        "approxWordCount": 93,
         "audio": {
           "mode": "pre-rendered-de-DE-TTS",
           "generated": false,
@@ -1341,7 +1341,7 @@ export const LOS1_REVISED_AB = {
             "text": "**Alle:** Bis Donnerstag!"
           }
         ],
-        "approxWordCount": 109,
+        "approxWordCount": 99,
         "audio": {
           "mode": "pre-rendered-de-DE-TTS",
           "generated": false,
@@ -1394,7 +1394,7 @@ export const LOS1_REVISED_AB = {
             "text": "Hallo zusammen! Das Treffen ist am Donnerstag um vier Uhr. Nicht am Mittwoch! Bis Donnerstag! Nora"
           }
         ],
-        "approxWordCount": 49,
+        "approxWordCount": 45,
         "audio": {
           "mode": "pre-rendered-de-DE-TTS",
           "generated": false,
@@ -1551,7 +1551,7 @@ export const LOS1_REVISED_AB = {
             "text": "**Leon:** Tschüss!"
           }
         ],
-        "approxWordCount": 207,
+        "approxWordCount": 198,
         "audio": {
           "mode": "pre-rendered-de-DE-TTS",
           "generated": false,
