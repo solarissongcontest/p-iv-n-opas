@@ -23,7 +23,7 @@ import { LosReviewI } from "./LosReviewI";
 import { LosReviewII } from "./LosReviewII";
 import { LosFinalExam,LosFinalSummary } from "./LosFinalExam";
 import { LosApplication, LosCulture, LosTextB, LosUnderstanding } from "./LosSupplementalSections";
-import { LosHilfstextPage, LosRevisedTextPage, LosRevisedUnderstanding } from "./LosRevisedTextPages";
+import { LosHilfstextPage, LosLegacySourcePanel, LosRevisedTextPage, LosRevisedUnderstanding } from "./LosRevisedTextPages";
 import "./los-book.css";
 import "./los-appendix.css";
 import "./los-workbook.css";
@@ -284,10 +284,9 @@ function OriginalTextPage({ chapter }: { chapter: LosChapter }) {
 function TextPage({ chapter }: { chapter: LosChapter }) {
   return <section className="los-inner-page los-reading-page">
     <LosRevisedTextPage chapterId={chapter.id} kind="A" />
-    <details className="los-revised-supplement">
-      <summary>Avaa aiempi autenttinen lisäteksti ja mahdollinen alkuperäisäänite</summary>
+    <LosLegacySourcePanel key={chapter.id+"-A"} chapterId={chapter.id} kind="A">
       <OriginalTextPage chapter={chapter} />
-    </details>
+    </LosLegacySourcePanel>
   </section>;
 }
 function Grammar({ chapter }: { chapter: LosChapter }) {
