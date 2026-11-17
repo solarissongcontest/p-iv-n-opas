@@ -46,7 +46,10 @@ function TextSpeech({ blocks }: { blocks: readonly ReaderBlock[] }) {
     const utterances = blocks.filter(block => block.kind === "prose" && block.text?.trim()).map(block => {
       const raw = block.text ?? "";
       const dialogue = dialogueLine(raw);
-      const words = (dialogue?.words ?? raw).replace(/\*\*/g, "").replace(/\*/g, "").trim();
+      const words = (dialogue?.words ?? raw).replace(/\*\*/g, "").replace(/\*/g, "")
+        .replace(/\b(?:[A-ZÄÖÜ]\s*[-–]\s*){2,}[A-ZÄÖÜ]\b/g,
+          letters => letters.replace(/\s*[-–]\s*/g, ", "))
+        .trim();
       const utterance = new SpeechSynthesisUtterance(words);
       utterance.lang = "de-DE";
       utterance.rate = Number(rate);
@@ -153,9 +156,9 @@ function renderSupportMarkdown(source: string): ReactNode[] {
       </table></div>);
       continue;
     }
-    if (/^\*\*Vastaus:\*\*/.test(line)) {
+    if (/^\*\*(?:Vastaus|Mallivastaus|Mallirunko):\*\*/.test(line)) {
       rendered.push(<details className="los-revised-answer" key={i}>
-        <summary>Näytä mallivastaus</summary><p>{inlineContent(line.replace(/^\*\*Vastaus:\*\*\s*/, ""))}</p>
+        <summary>Näytä mallivastaus</summary><p>{inlineContent(line.replace(/^\*\*(?:Vastaus|Mallivastaus|Mallirunko):\*\*\s*/, ""))}</p>
       </details>);
       i++; continue;
     }
@@ -170,7 +173,7 @@ function renderSupportMarkdown(source: string): ReactNode[] {
     const paragraph: string[] = [line];
     i++;
     while (i < lines.length && (lines[i] ?? "").trim() &&
-      !isTableLine(lines[i] ?? "") && !/^### |^---$|^\*\*Vastaus:\*\*|^- /.test((lines[i] ?? "").trim())) {
+      !isTableLine(lines[i] ?? "") && !/^### |^---$|^\*\*(?:Vastaus|Mallivastaus|Mallirunko):\*\*|^- /.test((lines[i] ?? "").trim())) {
       paragraph.push((lines[i] ?? "").trim()); i++;
     }
     rendered.push(<p key={first}>{paragraph.map((fragment, index) => <span key={index}>{index > 0 && <br />}{inlineContent(fragment)}</span>)}</p>);
