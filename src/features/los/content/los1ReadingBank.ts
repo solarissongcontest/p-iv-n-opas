@@ -47,7 +47,7 @@ export const LOS1_READING_BANK: Readonly<Record<string, Readonly<Record<LosReadi
         text,
       })),
     ])),
-  ])) as Record<string, Readonly<Record<LosReadingText, readonly LosReadingItem[]>>>;
+  ])) as unknown as Record<string, Readonly<Record<LosReadingText, readonly LosReadingItem[]>>>;
 
 export function losReadingQuestions(chapterId: string, text: LosReadingText): readonly LosReadingItem[] {
   return LOS1_READING_BANK[chapterId]?.[text] ?? [];
@@ -75,7 +75,7 @@ export function validateLos1ReadingBank(): string[] {
       const expected = text === "A" ? 8 : text === "B" ? 5 : 2;
       if (questions.length !== expected) issues.push(chapterId + text + ": tehtävien määrä " + questions.length);
       const source = text === "C" ? sourceC.contentMarkdown :
-        (text === "A" ? sourceAB.textA : sourceAB.textB).blocks.map(block => block.text ?? "").join(" ");
+        (text === "A" ? sourceAB.textA : sourceAB.textB).blocks.map(block => ("text" in block ? block.text : "")).join(" ");
       const normalizedSource = normalizeEvidence(source);
       const actualKinds = new Set<string>();
       for (const item of questions) {
