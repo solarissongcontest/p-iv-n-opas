@@ -3,6 +3,7 @@ import { ArrowRight, BookOpen, Headphones } from "lucide-react";
 import { LosC01Understanding } from "./LosC01Understanding";
 import { LosVoicePractice } from "./LosVoicePractice";
 import { LosC02SecondaryText } from "./LosC02SecondaryText";
+import { LosRevisedTextPage } from "./LosRevisedTextPages";
 import { LosAdditionalTextB } from "./LosAdditionalTextB";
 import { LosCultureChecks } from "./LosCultureChecks";
 import { Los1VisualLearning } from "./Los1VisualLearning";
@@ -48,16 +49,17 @@ export function LosUnderstanding({chapter,goToText}:{chapter:LosChapter;goToText
 }
 export function LosTextB({chapter}:{chapter:LosChapter}) {
   return <section className="los-inner-page los-text-b">
-    <p className="los-eyebrow">TEXT B / KAPITEL {Number(chapter.id)}</p>
-    <h1>Kuuntele tai katso</h1>
-    <p className="los-page-intro">Toinen lähdeteksti tai kuuntelu tuo kappaleen aiheen uuteen tilanteeseen. Media toistetaan oppikirjan omalla sivulla.</p>
-    {(chapter.id==="02"||chapter.id==="03")?<LosC02SecondaryText chapterId={chapter.id}/>:
-      ["01","04","05","06","07","08","09","10"].includes(chapter.id)?
-        <LosAdditionalTextB chapterId={chapter.id}/>:
-        <div className="los-source-pending"><Headphones size={23}/><div>
-          <h2>Toinen lähdeaineisto valmistellaan</h2>
-          <p>Tekstin lähde ja käyttöoikeus varmistetaan erikseen.</p>
-        </div></div>}
+    <LosRevisedTextPage chapterId={chapter.id} kind="B" />
+    <details className="los-revised-supplement">
+      <summary>Avaa aiempi autenttinen lisäaineisto tai alkuperäisäänite</summary>
+      {(chapter.id==="02"||chapter.id==="03")?<LosC02SecondaryText chapterId={chapter.id}/>:
+        ["01","04","05","06","07","08","09","10"].includes(chapter.id)?
+          <LosAdditionalTextB chapterId={chapter.id}/>:
+          <div className="los-source-pending"><Headphones size={23}/><div>
+            <h2>Toinen autenttinen lähdeaineisto valmistellaan</h2>
+            <p>Lähteen ja äänitteen käyttöoikeus sekä toiminta tarkistetaan erikseen.</p>
+          </div></div>}
+    </details>
   </section>;
 }
 const applications:Record<string,{title:string;prompt:string;checklist:string[];example:string}> = {
