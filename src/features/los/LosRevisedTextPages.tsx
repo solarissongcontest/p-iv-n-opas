@@ -125,7 +125,7 @@ export function LosRevisedUnderstanding({chapterId,navigate}: {
   chapterId:string;
   navigate?: (section:"text"|"text-b"|"text-c")=>void;
 }) {
-  return <LosReadingUnderstanding chapterId={chapterId} navigate={navigate}/>;
+  return <LosReadingUnderstanding chapterId={chapterId} {...(navigate ? {navigate} : {})}/>;
 }
 
 function splitCells(line: string): string[] {
