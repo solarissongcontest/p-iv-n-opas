@@ -3,7 +3,7 @@ import { ArrowRight, BookOpen, Headphones } from "lucide-react";
 import { LosC01Understanding } from "./LosC01Understanding";
 import { LosVoicePractice } from "./LosVoicePractice";
 import { LosC02SecondaryText } from "./LosC02SecondaryText";
-import { LosRevisedTextPage } from "./LosRevisedTextPages";
+import { LosLegacySourcePanel, LosRevisedTextPage } from "./LosRevisedTextPages";
 import { LosAdditionalTextB } from "./LosAdditionalTextB";
 import { LosCultureChecks } from "./LosCultureChecks";
 import { Los1VisualLearning } from "./Los1VisualLearning";
@@ -50,8 +50,7 @@ export function LosUnderstanding({chapter,goToText}:{chapter:LosChapter;goToText
 export function LosTextB({chapter}:{chapter:LosChapter}) {
   return <section className="los-inner-page los-text-b">
     <LosRevisedTextPage chapterId={chapter.id} kind="B" />
-    <details className="los-revised-supplement">
-      <summary>Avaa aiempi autenttinen lisäaineisto tai alkuperäisäänite</summary>
+    <LosLegacySourcePanel key={chapter.id+"-B"} chapterId={chapter.id} kind="B">
       {(chapter.id==="02"||chapter.id==="03")?<LosC02SecondaryText chapterId={chapter.id}/>:
         ["01","04","05","06","07","08","09","10"].includes(chapter.id)?
           <LosAdditionalTextB chapterId={chapter.id}/>:
@@ -59,7 +58,7 @@ export function LosTextB({chapter}:{chapter:LosChapter}) {
             <h2>Toinen autenttinen lähdeaineisto valmistellaan</h2>
             <p>Lähteen ja äänitteen käyttöoikeus sekä toiminta tarkistetaan erikseen.</p>
           </div></div>}
-    </details>
+    </LosLegacySourcePanel>
   </section>;
 }
 const applications:Record<string,{title:string;prompt:string;checklist:string[];example:string}> = {
