@@ -130,6 +130,28 @@ export function LosRevisedUnderstanding({chapterId,navigate}: {
   return <LosReadingUnderstanding chapterId={chapterId} {...(navigate ? {navigate} : {})}/>;
 }
 
+/** Explicit, accessible source expander: old reader stays mounted only while open.
+ * Unlike nested native details toggles, the button's state survives child re-renders. */
+export function LosLegacySourcePanel({chapterId,kind,children}:{
+  chapterId:string;
+  kind:"A"|"B";
+  children:ReactNode;
+}) {
+  const [isOpen,setIsOpen] = useState(false);
+  const panelId="los-legacy-source-"+chapterId+"-"+kind.toLowerCase();
+  return <section className="los-revised-supplement">
+    <button type="button" className="los-revised-supplement-toggle"
+      aria-expanded={isOpen} aria-controls={panelId}
+      onClick={()=>setIsOpen(open=>!open)}>
+      {isOpen?"Piilota aiempi autenttinen lisäaineisto":
+        "Avaa aiempi autenttinen lisäaineisto tai alkuperäisäänite"}
+    </button>
+    {isOpen && <div id={panelId} className="los-revised-supplement-content">
+      {children}
+    </div>}
+  </section>;
+}
+
 function splitCells(line: string): string[] {
   return line.replace(/^\s*\|/, "").replace(/\|\s*$/, "").split("|").map(cell => cell.trim());
 }
