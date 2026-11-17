@@ -23,6 +23,7 @@ import { LosReviewI } from "./LosReviewI";
 import { LosReviewII } from "./LosReviewII";
 import { LosFinalExam,LosFinalSummary } from "./LosFinalExam";
 import { LosApplication, LosCulture, LosTextB, LosUnderstanding } from "./LosSupplementalSections";
+import { LosHilfstextPage, LosRevisedTextPage, LosRevisedUnderstanding } from "./LosRevisedTextPages";
 import "./los-book.css";
 import "./los-appendix.css";
 import "./los-workbook.css";
@@ -31,7 +32,7 @@ import "./los-backups.css";
 
 type LosSection = LosDestination;
 type LosLocation = { book: number | null; chapter: string | null; section: LosSection };
-/** Kymmenen näkyvää kappaleosiota LOS! 1:n kirjakohtaisen masterplanin mukaan. */
+/** LOS! 1 includes a third support text (Text C) in every chapter. */
 const sections: { id: LosSection; label: string }[] = [
   { id:"chapter", label:"Aloita" },
   { id:"text", label:"Text A" },
@@ -39,6 +40,7 @@ const sections: { id: LosSection; label: string }[] = [
   { id:"vocabulary", label:"Sanasto" },
   { id:"grammar", label:"Kielioppi" },
   { id:"text-b", label:"Text B" },
+  { id:"text-c", label:"Text C · Tukiteksti" },
   { id:"practice", label:"Harjoittele" },
   { id:"apply", label:"Käytä saksaa" },
   { id:"culture", label:"Kulttuuri" },
@@ -56,7 +58,7 @@ function readLocation(): LosLocation {
   const book = Number.isInteger(parsedBook) && parsedBook >= 1 && parsedBook <= 8 ? parsedBook : null;
   const chapter = book === 1 && /^\d{2}$/.test(parts[1] ?? "") ? (parts[1] ?? null) : null;
   const token = parts[chapter ? 2 : 1];
-  const section = (["overview", "contents", "chapter", "text", "vocabulary", "grammar", "practice", "appendix", "dictionary", "path", "search", "midterm", "review", "review-ii", "cards", "progress", "final", "summary", "understand", "text-b", "apply", "culture", "test"].includes(token ?? "") ? token : chapter ? "chapter" : "overview") as LosSection;
+  const section = (["overview", "contents", "chapter", "text", "vocabulary", "grammar", "practice", "appendix", "dictionary", "path", "search", "midterm", "review", "review-ii", "cards", "progress", "final", "summary", "understand", "text-b", "text-c", "apply", "culture", "test"].includes(token ?? "") ? token : chapter ? "chapter" : "overview") as LosSection;
   return { book, chapter, section };
 }
 function linkTo(book?: number, chapter?: string, section: LosSection = "overview") {
@@ -184,7 +186,7 @@ function ChapterOpening({ chapter, book, move }: { chapter: LosChapter; book: Lo
       <div>
         <p className="los-overline">TÄSSÄ KAPPALEESSA</p>
         <h2>Opit käyttämään saksaa</h2>
-        <p className="los-opening-lead">Aloita uusi aihe sen keskeisistä sanoista ja rakenteista. Lähdeaineistot avataan samaan kirjaan, kun niiden tarkistus on valmis.</p>
+        <p className="los-opening-lead">Aloita uusi aihe sen keskeisistä sanoista ja rakenteista. Lue uusi Text A, harjoittele Text B:llä ja käytä Text C -tukitekstiä tarvittaessa. Autenttiset lisäaineistot säilyvät erikseen avattavina.</p>
       </div>
       <aside className="los-goals"><h3>Kappaleen tavoitteet</h3><ul>{chapter.objectives.map(goal => <li key={goal}>{goal}</li>)}</ul></aside>
     </div>
@@ -199,7 +201,7 @@ const sampleByChapter:Record<string,string>={
   "09":"Am Montag um drei Uhr.",
   "10":"Das ist Mia.",
 };
-function TextPage({ chapter }: { chapter: LosChapter }) {
+function OriginalTextPage({ chapter }: { chapter: LosChapter }) {
   const sourceGate=getLosChapterSourceGate(chapter.id);
   if(chapter.id==="01")return <section className="los-inner-page los-reading-page">
     <p className="los-eyebrow">KAPPALE 01 / TEXT A</p>
@@ -277,6 +279,15 @@ function TextPage({ chapter }: { chapter: LosChapter }) {
       <blockquote lang="de">{sample}</blockquote>
       <p>Tämä on LOS!:n itse kirjoittama lyhyt kielioppiesimerkki. Se ei ole lähdetekstin sitaatti eikä korvaa puuttuvaa kokonaista alkuperäistekstiä.</p>
     </div>
+  </section>;
+}
+function TextPage({ chapter }: { chapter: LosChapter }) {
+  return <section className="los-inner-page los-reading-page">
+    <LosRevisedTextPage chapterId={chapter.id} kind="A" />
+    <details className="los-revised-supplement">
+      <summary>Avaa aiempi autenttinen lisäteksti ja mahdollinen alkuperäisäänite</summary>
+      <OriginalTextPage chapter={chapter} />
+    </details>
   </section>;
 }
 function Grammar({ chapter }: { chapter: LosChapter }) {
@@ -384,11 +395,18 @@ function LosBookWorkspace({ book, location, move, goLibrary, openBook }: { book:
             section === "search" ? <LosIndexSearch book={book} move={move} /> :
             chapter ? (
               section === "text" ? <TextPage chapter={chapter} /> :
-              section === "understand" ? (chapter.id==="02" ? <LosC02Understanding goToText={() => move(chapter.id,"text")}/> : chapter.id==="06" ? <><LosOpenTextUnderstanding chapterId="06" goToText={() => move(chapter.id,"text")}/><details className="los-editorial-note"><summary>C01:n ikäkertauksen vanhat ymmärtämistehtävät (L034)</summary><LosC06AgeUnderstanding goToText={() => move(chapter.id,"text")}/></details></> : getLosOpenDialogue(chapter.id) ? <LosOpenTextUnderstanding chapterId={chapter.id} goToText={() => move(chapter.id,"text")}/> : <LosUnderstanding chapter={chapter} goToText={() => move(chapter.id, "text")} />) :
-              section === "vocabulary" ? <Vocabulary key={chapter.id} chapter={chapter} bookId={book.id} move={move} /> :
+              section === "understand" ? <section className="los-revised-understanding-host">
+                 <LosRevisedUnderstanding chapterId={chapter.id}/>
+                 <details className="los-revised-supplement">
+                   <summary>Aiemman autenttisen lähdetekstin erilliset ymmärtämistehtävät</summary>
+                   {(chapter.id==="02" ? <LosC02Understanding goToText={() => move(chapter.id,"text")}/> : chapter.id==="06" ? <><LosOpenTextUnderstanding chapterId="06" goToText={() => move(chapter.id,"text")}/><details className="los-editorial-note"><summary>C01:n ikäkertauksen vanhat ymmärtämistehtävät (L034)</summary><LosC06AgeUnderstanding goToText={() => move(chapter.id,"text")}/></details></> : getLosOpenDialogue(chapter.id) ? <LosOpenTextUnderstanding chapterId={chapter.id} goToText={() => move(chapter.id,"text")}/> : <LosUnderstanding chapter={chapter} goToText={() => move(chapter.id, "text")} />)}
+                 </details>
+               </section> :
+               section === "vocabulary" ? <Vocabulary key={chapter.id} chapter={chapter} bookId={book.id} move={move} /> :
               section === "cards" ? <LosRecallCards key={chapter.id} chapter={chapter} onBack={()=>move(chapter.id,"vocabulary")} /> :
               section === "grammar" ? <Grammar chapter={chapter} /> :
               section === "text-b" ? <LosTextB chapter={chapter} /> :
+               section === "text-c" ? <LosHilfstextPage chapterId={chapter.id} /> :
               section === "practice" ? <LosWorkbook key={`practice-${chapter.id}`} chapter={chapter} mode="practice" /> :
               section === "apply" ? <LosApplication key={chapter.id} chapter={chapter} /> :
               section === "culture" ? <LosCulture chapter={chapter} bookId={book.id} /> :
