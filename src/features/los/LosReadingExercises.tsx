@@ -75,7 +75,7 @@ function ReadingQuestion({ question, index, draftController }: {
       {question.kind==="choice" && correct===false && <p><strong>Oikea vastaus:</strong> {question.options[question.answerIndex]}</p>}
       <details className="los-reading-evidence">
         <summary>Katso kohta Text A:sta, B:stä tai C:stä</summary>
-        <blockquote>{question.evidence}</blockquote>
+        <blockquote>{question.evidence.replace(/\*\*/g,"")}</blockquote>
         <p>{question.explanation}</p>
       </details>
     </div>}
