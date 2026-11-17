@@ -851,7 +851,7 @@ export const LOS1_READING_QUESTIONS_PART2 = {
           "aus"
         ],
         "answerIndex": 1,
-        "evidence": "am",
+        "evidence": "am Donnerstag",
         "explanation": "Am Montag tarkoittaa maanantaina.",
         "skill": "detail"
       },
