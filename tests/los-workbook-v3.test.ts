@@ -44,12 +44,12 @@ test("score never counts a missing or wrong answer",()=>{
   assert.deepEqual(losScore("01",{}),{correct:0,total:12});
   assert.deepEqual(losScore("01",{...perfect,"C01-EX-01":"Tschüss!"}),{correct:11,total:12});
 });
-test("LOS! chapter reader shows precisely ten named sections",()=>{
+test("LOS! chapter reader shows all eleven named sections including Text C",()=>{
   const file=readFileSync("src/features/los/LosBook.tsx","utf8");
   const m=file.match(/const sections:.*?= \[([\s\S]*?)\];/);
   assert.ok(m,"chapter section map missing");
   const ids=Array.from((m[1]??"").matchAll(/id:\s*"([^"]+)"/g)).map(hit=>hit[1]);
-  assert.deepEqual(ids,["chapter","text","understand","vocabulary","grammar","text-b","practice","apply","culture","test"]);
+  assert.deepEqual(ids,["chapter","text","understand","vocabulary","grammar","text-b","text-c","practice","apply","culture","test"]);
   assert.match(file,/LosNotebook/);
   assert.match(file,/LosWorkbook/);
 });
