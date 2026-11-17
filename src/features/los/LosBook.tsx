@@ -396,7 +396,7 @@ function LosBookWorkspace({ book, location, move, goLibrary, openBook }: { book:
             chapter ? (
               section === "text" ? <TextPage chapter={chapter} /> :
               section === "understand" ? <section className="los-revised-understanding-host">
-                 <LosRevisedUnderstanding chapterId={chapter.id}/>
+                 <LosRevisedUnderstanding chapterId={chapter.id} navigate={section=>move(chapter.id,section)}/>
                  <details className="los-revised-supplement">
                    <summary>Aiemman autenttisen lähdetekstin erilliset ymmärtämistehtävät</summary>
                    {(chapter.id==="02" ? <LosC02Understanding goToText={() => move(chapter.id,"text")}/> : chapter.id==="06" ? <><LosOpenTextUnderstanding chapterId="06" goToText={() => move(chapter.id,"text")}/><details className="los-editorial-note"><summary>C01:n ikäkertauksen vanhat ymmärtämistehtävät (L034)</summary><LosC06AgeUnderstanding goToText={() => move(chapter.id,"text")}/></details></> : getLosOpenDialogue(chapter.id) ? <LosOpenTextUnderstanding chapterId={chapter.id} goToText={() => move(chapter.id,"text")}/> : <LosUnderstanding chapter={chapter} goToText={() => move(chapter.id, "text")} />)}
