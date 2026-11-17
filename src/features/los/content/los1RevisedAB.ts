@@ -1504,19 +1504,19 @@ export const LOS1_REVISED_AB = {
           },
           {
             "kind": "prose",
-            "text": "**Mila:** Danke. Entschuldigung, wie heißt Ihre Lehrerin?"
+            "text": "**Mila:** Danke. Entschuldigung, ich verstehe nicht alles."
           },
           {
             "kind": "prose",
-            "text": "**Aino:** Das ist Frau Berger."
+            "text": "**Aino:** Kein Problem. Sag einfach: „Noch einmal, bitte!“"
           },
           {
             "kind": "prose",
-            "text": "**Mila:** Oh! Guten Tag, Frau Berger!"
+            "text": "**Mila:** Noch einmal, bitte!"
           },
           {
             "kind": "prose",
-            "text": "**Frau Berger:** Guten Tag, Mila!"
+            "text": "**Frau Berger:** Sehr gut, Mila!"
           },
           {
             "kind": "prose",
