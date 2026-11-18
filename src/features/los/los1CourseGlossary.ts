@@ -1,5 +1,6 @@
 import {LOS_BOOKS} from "./catalog.ts";
 import {LOS1_AB_EXTRA_GLOSSES} from "./los1ExtraGlosses.ts";
+import {LOS1_SYNTHETIC_IPA} from "./los1GeneratedIPA.ts";
 
 /** Finite, editorially controllable course glossary. A missing entry is shown
  * as unreviewed rather than silently making up a dictionary translation. */
@@ -84,6 +85,17 @@ const firstIPA:Readonly<Record<string,string>>={
  "heißen":"/ˈhaɪ̯sn̩/","aus":"/aʊ̯s/","komme":"/ˈkɔmə/",
  "bitte":"/ˈbɪtə/","danke":"/ˈdaŋkə/","nicht":"/nɪçt/",
 };
+/** Pronunciation provenance is preserved: a machine-generated IPA candidate is
+ * not equivalent to a reviewed dictionary pronunciation. */
+export function los1TokenIPADetail(token:string):{ipa:string;source:"editorial"|"espeak-candidate"}|null{
+ const normalized=token.toLocaleLowerCase("de").replace(/^[^\p{L}]+|[^\p{L}]+$/gu,"")
+  .replace(/[!?.,…]/g,"").replace(/\s+/g," ").trim();
+ if(!normalized)return null;
+ const editorial=firstIPA[normalized];
+ if(editorial)return{ipa:editorial,source:"editorial"};
+ const candidate=LOS1_SYNTHETIC_IPA[normalized.replace(/ß/g,"ss")];
+ return candidate?{ipa:candidate,source:"espeak-candidate"}:null;
+}
 export function los1TokenIPA(token:string):string|null{
- return firstIPA[token.toLocaleLowerCase("de").replace(/^[^\p{L}]+|[^\p{L}]+$/gu,"")]??null;
+ return los1TokenIPADetail(token)?.ipa??null;
 }

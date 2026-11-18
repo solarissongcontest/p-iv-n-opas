@@ -10,6 +10,7 @@ import {searchLos1OriginalTexts} from "./content/los1TextSearch";
 import {LOS1_REVISED_AB} from "./content/los1RevisedAB";
 import {LOS1_REVISED_C} from "./content/los1RevisedC";
 import {LOS1_AB_EXTRA_GLOSSES} from "./los1ExtraGlosses";
+import {LosFreeDictSearch} from "./LosFreeDictSearch";
 export type LosNavigate = (chapter: string | null, section: LosDestination) => void;
 type WordEntry = { book: number; code: string; chapter: string; title: string; word: string; meaning: string; source?: "text" };
 const DICTIONARY:WordEntry[] = LOS_BOOKS.flatMap(book => book.chapters.flatMap(chapter =>
@@ -44,7 +45,7 @@ export function LosDictionary({ book, move, openBook }: { book: LosBookDefinitio
   return <section className="los-inner-page los-dictionary-page">
     <p className="los-eyebrow">WÖRTERBUCH · LOS! {book.id}</p>
     <h1>Sanakirja</h1>
-    <p className="los-page-intro">Selaa opetettavia kappalesanoja sekä uusien Text A/B -tekstien täydentäviä sanaselityksiä. Sanakirjan tekstisanasto ei automaattisesti kuulu aktiiviseen sanastotavoitteeseen. Tämä on LOS!:n sisäinen opintosanakirja, ei vielä laaja yleissanakirja.</p>
+    <p className="los-page-intro">Selaa opetettavia kappalesanoja sekä uusien Text A/B -tekstien täydentäviä sanaselityksiä. Sanakirjan tekstisanasto ei automaattisesti kuulu aktiiviseen sanastotavoitteeseen. Laaja erillinen FreeDict-sanakirja löytyy tämän opetussanaston alta, kun sen aineisto on asennettu.</p>
     <div className="los-index-options">
       <div className="los-index-tabs" role="group" aria-label="Sanakirjan laajuus">
         <button className={scope === "book" ? "is-active" : ""} aria-pressed={scope === "book"} onClick={() => setScope("book")}>Tämä kirja</button>
@@ -66,7 +67,8 @@ export function LosDictionary({ book, move, openBook }: { book: LosBookDefinitio
         </div>)}
       </div>
     }
-    {scope === "series" && <p className="los-index-footnote">Muiden kirjojen keskeneräiset hakemistot eivät vielä sisällä sanastoja. Tämä ei ole kattava saksan yleissanakirja.</p>}
+    {scope === "series" && <p className="los-index-footnote">Muiden kirjojen keskeneräiset hakemistot eivät vielä sisällä sanastoja.</p>}
+    {book.id===1&&<LosFreeDictSearch/>}
   </section>;
 }
 export function LosLearningPath({ book, move }: { book: LosBookDefinition; move: LosNavigate }) {

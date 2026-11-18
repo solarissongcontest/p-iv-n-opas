@@ -4,7 +4,8 @@ import {
   backupLosLocalDraft, fetchLosCloud, hasLosSyncPassphrase, loadLosCloudMeta,
   losDraftFingerprint, setLosSyncPassphrase, storeLosCloudMeta, uploadLosCloud
 } from "./cloudClient";
-import { draftIsEmpty, type LosCloudRecord } from "./cloudContract";
+import { type LosCloudRecord } from "./cloudContract";
+import {decideLosCloudSync,losSyncNeedsConflictReview} from "./losCloudDecision";
 import type { LosChapterDraft } from "./studyState";
 
 export function LosCloudPanel({bookId,chapterId,draft,replaceDraft}:{
@@ -48,36 +49,28 @@ export function LosCloudPanel({bookId,chapterId,draft,replaceDraft}:{
         setMessage("Vastaus muuttui tarkistuksen aikana. Paina Synkronoi uudelleen.");return;
       }
       const localMeta=loadLosCloudMeta(bookId,chapterId);
-      if(!remote){
-        if(draftIsEmpty(snapshot)){setMessage("Pilvessä tai tällä laitteella ei vielä ole kappaleen tallennettavia tietoja.");return;}
-        const saved=await uploadLosCloud(bookId,chapterId,snapshot,0);
-        if(!saved)throw new Error("Palvelin ei vahvistanut tallennusta.");
-        storeLosCloudMeta(bookId,chapterId,saved);
-        setMessage("Kappale tallennettu pilveen. Avaa pilvitallennus myös toisella laitteella ja synkronoi siellä.");
+      const decision=decideLosCloudSync({local:snapshot,remote,lastSynced:localMeta,fingerprint:losDraftFingerprint});
+      if(decision.kind==="no-change"){
+        if(remote){storeLosCloudMeta(bookId,chapterId,remote);setMessage("Tämän laitteen ja pilven tiedot ovat samat.");}
+        else setMessage("Pilvessä tai tällä laitteella ei vielä ole kappaleen tallennettavia tietoja.");
         return;
       }
-      const serverFingerprint=losDraftFingerprint(remote.payload);
-      if(fingerprint===serverFingerprint){
-        storeLosCloudMeta(bookId,chapterId,remote);
-        setMessage("Tämän laitteen ja pilven tiedot ovat samat.");return;
+      if(decision.kind==="download"){
+        if(remote)importRecord(remote);
+        return;
       }
-      if(draftIsEmpty(snapshot)){
-        importRecord(remote);return;
+      if(decision.kind==="create"||decision.kind==="upload"){
+        const saved=await uploadLosCloud(bookId,chapterId,snapshot,decision.expectedRevision);
+        if(!saved)throw new Error("Palvelin ei vahvistanut tallennusta.");
+        storeLosCloudMeta(bookId,chapterId,saved);
+        setMessage(decision.kind==="create"?"Kappale tallennettu pilveen. Synkronoi myös toisella laitteella.":"Laitteen uudet muutokset tallennettu pilveen.");
+        return;
       }
-      if(localMeta?.revision===remote.revision){
-        const uploaded=await uploadLosCloud(bookId,chapterId,snapshot,remote.revision);
-        if(!uploaded)throw new Error("Palvelin ei vahvistanut tallennusta.");
-        storeLosCloudMeta(bookId,chapterId,uploaded);
-        setMessage("Laitteen uudet muutokset tallennettu pilveen.");return;
-      }
-      if((localMeta?.fingerprint===fingerprint)||draftIsEmpty(snapshot)){
-        importRecord(remote);return;
-      }
-      setConflict(remote);setHasConflict(true);
+      setConflict(remote);setHasConflict(Boolean(remote));
       setMessage("Pilvessä ja tällä laitteella on eri muutoksia. Valitse kumpi säilytetään. Mitään ei korvattu automaattisesti.");
     }catch(error){
       setMessage(errorMessage(error));
-      if(error && typeof error==="object" && "status" in error && error.status===409){
+      if(error && typeof error==="object" && "status" in error && typeof error.status==="number" && losSyncNeedsConflictReview(error.status)){
         const version=(error as {record?:LosCloudRecord|null}).record??null;
         if(version){setConflict(version);setHasConflict(true);}
       }

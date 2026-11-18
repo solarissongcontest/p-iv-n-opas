@@ -70,3 +70,36 @@
   .los-study-layout-toggle button{flex:1 1 auto}
   .los-study-layout.is-split .los-study-questions{padding:12px}
 }
+
+
+/* Calm reader is opt-in and never destroys answers or highlighter annotations. */
+.los-revised-page.is-reading-focus{max-width:780px;margin-inline:auto}
+.los-revised-page.is-reading-focus .los-study-layout{display:block;max-width:740px;margin-inline:auto}
+.los-revised-page.is-reading-focus .los-study-questions{display:none}
+.los-revised-page.is-reading-focus .los-study-reading{min-width:0;max-width:100%}
+.los-book-workspace:has(.los-revised-page.is-reading-focus) .los-book-sidebar{display:none}
+.los-book-workspace:has(.los-revised-page.is-reading-focus) .los-main-breadcrumb,
+.los-book-workspace:has(.los-revised-page.is-reading-focus) .los-section-nav{display:none}
+.los-book-workspace:has(.los-revised-page.is-reading-focus) .los-book-main{max-width:980px;margin-inline:auto;width:100%}
+.los-reading-page:has(.los-revised-page.is-reading-focus)>.los-revised-supplement{display:none}
+.los-revised-page.is-reading-focus .los-study-layout-toggle{position:sticky;top:0;z-index:4;background:var(--los-paper);border-bottom:1px solid var(--los-line);padding:.45rem 0}
+@media(max-width:680px){.los-revised-page.is-reading-focus .los-study-layout-toggle{position:static}}
+@media(prefers-reduced-motion:reduce){.los-revised-page *{scroll-behavior:auto!important;transition:none!important}}
+
+.los-book-workspace:has(.los-revised-page.is-reading-focus) .los-book-layout{display:block;max-width:980px;margin-inline:auto}
+.los-book-workspace:has(.los-revised-page.is-reading-focus) .los-book-main{min-width:0;max-width:980px;width:100%;margin-inline:auto}
+
+
+/* Reflow long German/source explanations at 200% text zoom instead of allowing
+   an intrinsic flex-item min-content width to enlarge the page on phones. */
+@media(max-width:760px){
+  .los-book-main,.los-book-paper,.los-reading-page,.los-revised-page,.los-study-reading{
+    box-sizing:border-box;max-width:100%;min-width:0;
+  }
+  .los-revised-disclaimer{
+    display:block;box-sizing:border-box;min-width:0;max-width:100%;
+    overflow-wrap:anywhere;word-break:normal;
+  }
+  .los-revised-disclaimer p{display:block;min-width:0;max-width:100%;overflow-wrap:anywhere}
+  .los-section-nav{box-sizing:border-box;width:100%;max-width:100%;min-width:0;overflow-x:auto}
+}
