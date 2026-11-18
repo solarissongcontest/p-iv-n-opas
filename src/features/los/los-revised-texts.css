@@ -70,3 +70,37 @@
   .los-study-layout-toggle button{flex:1 1 auto}
   .los-study-layout.is-split .los-study-questions{padding:12px}
 }
+
+
+/* Focus reading mode. Hide navigation and right-side tasks only when explicitly
+   enabled. A prominent in-page escape button stays visible and keyboard Esc exits. */
+.los-focus-controls{position:relative;z-index:2;display:flex;align-items:center;gap:12px;margin:5px 0 15px}
+.los-focus-controls .los-outline-button{min-height:44px}
+.los-revised-page.is-focus-reader .los-focus-controls{position:sticky;top:8px;z-index:20;align-self:start;background:var(--los-paper);padding:7px 0}
+.los-book-workspace:has(.los-revised-page.is-focus-reader) .los-book-topbar,
+.los-book-workspace:has(.los-revised-page.is-focus-reader) .los-book-sidebar,
+.los-book-main:has(.los-revised-page.is-focus-reader) .los-main-breadcrumb,
+.los-book-main:has(.los-revised-page.is-focus-reader) .los-section-nav,
+.los-book-main:has(.los-revised-page.is-focus-reader) .los-pagination,
+.los-book-main:has(.los-revised-page.is-focus-reader) .los-page-footer,
+.los-reading-page:has(.los-revised-page.is-focus-reader)>.los-revised-supplement,
+.los-revised-page.is-focus-reader .los-study-layout-toggle,
+.los-revised-page.is-focus-reader .los-study-questions{display:none!important}
+.los-book-workspace:has(.los-revised-page.is-focus-reader) .los-book-layout{
+  display:block!important;max-width:1150px!important;margin:auto
+}
+.los-book-main:has(.los-revised-page.is-focus-reader){padding:clamp(8px,2vw,24px)}
+.los-book-paper:has(.los-revised-page.is-focus-reader){max-width:none;border-color:transparent;box-shadow:none}
+.los-reading-page:has(.los-revised-page.is-focus-reader){
+  padding:clamp(16px,4vw,44px);max-width:100%
+}
+.los-revised-page.is-focus-reader,.los-revised-page.is-focus-reader .los-study-reading{max-width:76ch;margin:auto}
+.los-revised-page.is-focus-reader .los-study-layout{display:block}
+.los-revised-page.is-focus-reader .los-c01-words{font-size:1.15rem;line-height:2}
+@media(max-width:540px){
+ .los-revised-page.is-focus-reader .los-c01-words{font-size:1rem;line-height:1.85}
+ .los-reading-page:has(.los-revised-page.is-focus-reader){padding:18px 16px}
+}
+@media(prefers-reduced-motion:reduce){
+ .los-revised-page.is-focus-reader *{scroll-behavior:auto}
+}
