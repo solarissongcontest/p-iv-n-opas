@@ -4,11 +4,11 @@ import {LOS_BOOKS} from "./catalog";
  * as unreviewed rather than silently making up a dictionary translation. */
 const common:Readonly<Record<string,string>>={
  "hallo":"hei","ja":"kyllä","nein":"ei","danke":"kiitos","bitte":"ole hyvä / kohtelias pyyntö",
- "guten":"hyvää (tervehdyksessä)","morgen":"huomenta / huomenna (kontekstista riippuen)",
+ "guten":"hyvää (tervehdyksessä)",
  "tag":"päivä","abend":"ilta","nacht":"yö","tschüss":"moikka","auf":"-lla / -lle (kiinteässä ilmauksessa)",
  "wiedersehen":"näkemiin (Auf Wiedersehen)","bis":"asti / kunnes; Bis morgen = huomiseen",
- "ich":"minä","du":"sinä","sie":"hän/he / kohtelias Te (isolla Sie)","ihr":"hänen / heidän / Teidän",
- "er":"hän (mies)","wir":"me","ihr":"te / hänen","mich":"minua",
+ "ich":"minä","du":"sinä","sie":"hän/he / kohtelias Te (isolla Sie)",
+ "er":"hän (mies)","ihr":"te / hänen","mich":"minua",
  "bin":"olen","bist":"olet","ist":"on","sind":"ovat / olette","heiße":"olen nimeltäni",
  "heißt":"on nimeltään / olet nimeltäsi","heißen":"olla nimeltään","wie":"miten / kuinka",
  "wer":"kuka","was":"mikä / mitä","wo":"missä","woher":"mistä","wann":"milloin",
