@@ -14,7 +14,7 @@ test("phone and desktop exchange notes, reject conflicting edits and preserve lo
  let rejected=0;
  const requestDiagnostics:string[]=[];
  const create=async() => {
-  const context=await browser.newContext({acceptDownloads:true});
+  const context=await browser.newContext({acceptDownloads:true,serviceWorkers:"block"});
   await context.addInitScript((args)=>{
     if(!["localhost","127.0.0.1"].includes(location.hostname))return;
     localStorage.setItem("opk.device-authorized","Arthur");
@@ -22,7 +22,10 @@ test("phone and desktop exchange notes, reject conflicting edits and preserve lo
     localStorage.setItem("opk.device-token","test-only-device-access-token");
     localStorage.setItem("opk.device-token-expires",String(Date.now()+3600000));
   },{owner});
-  await context.route(/\/api\/los-sync(?:\?.*)?$/,async route=>{
+  context.on("request",request=>{
+    if(request.url().includes("/api/los-sync"))requestDiagnostics.push("seen="+request.method()+" "+new URL(request.url()).pathname);
+  });
+  await context.route("**/api/los-sync**",async route=>{
     const request=route.request();
     const header=request.headers();
     requestDiagnostics.push(request.method()+" bearer="+Boolean(header.authorization)+" keyMatches="+(header["x-los-sync-key"]===password));
