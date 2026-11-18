@@ -712,7 +712,7 @@ export const LOS1_REVISED_AB = {
             "text": "**Aino:** Bis morgen, Leon!"
           }
         ],
-        "approxWordCount": 78,
+        "approxWordCount": 82,
         "audio": {
           "mode": "browser-de-DE-speechSynthesis",
           "generated": false,
@@ -855,7 +855,7 @@ export const LOS1_REVISED_AB = {
             "text": "Kaikki nauravat."
           }
         ],
-        "approxWordCount": 91,
+        "approxWordCount": 93,
         "audio": {
           "mode": "browser-de-DE-speechSynthesis",
           "generated": false,
