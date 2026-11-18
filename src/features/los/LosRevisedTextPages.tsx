@@ -1,8 +1,9 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { BookOpen, Headphones, Square, Volume2 } from "lucide-react";
 import { LOS1_REVISED_AB } from "./content/los1RevisedAB";
 import { LOS1_REVISED_C } from "./content/los1RevisedC";
 import { LosReadingExercises, LosReadingUnderstanding } from "./LosReadingExercises";
+import { losGermanVoices, losSpeakerSlot, losSpeechSegments } from "./losSpeech";
 import "./los-revised-texts.css";
 
 /** These pages show LOS!-authored drafts. They are NOT authentic source transcripts. */
@@ -19,57 +20,77 @@ function dialogueLine(value: string): { speaker: string; words: string } | null 
   const match = /^\*\*([^*]+):\*\*\s*(.*)$/.exec(value);
   return match ? { speaker: match[1] ?? "", words: match[2] ?? "" } : null;
 }
-function voiceIndex(speaker: string, voiceCount: number): number {
-  if (!voiceCount) return 0;
-  let hash = 0;
-  for (const character of speaker) hash = (hash * 31 + character.charCodeAt(0)) >>> 0;
-  return hash % voiceCount;
-}
 function TextSpeech({ blocks, chapterId, kind }: { blocks: readonly ReaderBlock[]; chapterId:string; kind:"A"|"B" }) {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [rate, setRate] = useState("1");
   const [message, setMessage] = useState("");
-  useEffect(() => () => {
-    if (typeof window !== "undefined" && "speechSynthesis" in window) window.speechSynthesis.cancel();
+  const [voiceCount, setVoiceCount] = useState(0);
+  const playbackId = useRef(0);
+  useEffect(() => {
+    if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
+    const synthesis = window.speechSynthesis;
+    const refreshVoices = () => setVoiceCount(losGermanVoices(synthesis.getVoices()).length);
+    refreshVoices();
+    synthesis.addEventListener?.("voiceschanged", refreshVoices);
+    return () => {
+      playbackId.current += 1;
+      synthesis.removeEventListener?.("voiceschanged", refreshVoices);
+      synthesis.cancel();
+    };
   }, [blocks]);
+
   const stop = () => {
-    if ("speechSynthesis" in window) window.speechSynthesis.cancel();
+    playbackId.current += 1;
+    if (typeof window !== "undefined" && "speechSynthesis" in window) window.speechSynthesis.cancel();
     setIsSpeaking(false);
+    setMessage("Toisto pysäytetty.");
   };
+
   const start = () => {
-    if (!("speechSynthesis" in window) || !("SpeechSynthesisUtterance" in window)) {
+    if (typeof window === "undefined" || !("speechSynthesis" in window) || !("SpeechSynthesisUtterance" in window)) {
       setMessage("Tämä selain ei tue laitteen puhesynteesiä.");
       return;
     }
-    window.speechSynthesis.cancel();
-    const voices = window.speechSynthesis.getVoices().filter(voice => /^de([_-]|$)/i.test(voice.lang));
-    const utterances = blocks.filter(block => block.kind === "prose" && block.text?.trim()).map(block => {
-      const raw = block.text ?? "";
-      const dialogue = dialogueLine(raw);
-      const readLabel = kind === "B" && ["03","06","07","09","10"].includes(chapterId);
-      const spoken = dialogue && readLabel ? dialogue.speaker + ": " + dialogue.words : (dialogue?.words ?? raw);
-      const words = spoken.replace(/\*\*/g, "").replace(/\*/g, "")
-        .replace(/\b(?:[A-ZÄÖÜ]\s*[-–]\s*){2,}[A-ZÄÖÜ]\b/g,
-          letters => letters.replace(/\s*[-–]\s*/g, ", "))
-        .trim();
-      const utterance = new SpeechSynthesisUtterance(words);
-      utterance.lang = "de-DE";
-      utterance.rate = Number(rate);
-      if (voices.length) utterance.voice = voices[voiceIndex(dialogue?.speaker ?? "", voices.length)] ?? null;
-      return utterance;
-    }).filter(utterance => utterance.text.length > 0);
-    if (!utterances.length) {
+    const synthesis = window.speechSynthesis;
+    const voices = losGermanVoices(synthesis.getVoices());
+    setVoiceCount(voices.length);
+    if (!voices.length) {
+      setMessage("Laitteelta ei löydy saksankielistä puheääntä. Tarkista laitteen puheäänet ja avaa lukija uudelleen. Vääränkielisellä äänellä ei harjoitella ääntämistä.");
+      return;
+    }
+    const segments = losSpeechSegments(blocks, chapterId, kind);
+    if (!segments.length) {
       setMessage("Tässä tekstissä ei ole luettavia saksankielisiä puheenvuoroja.");
       return;
     }
-    const last = utterances[utterances.length - 1];
-    if (last) {
-      last.onend = () => setIsSpeaking(false);
-      last.onerror = () => { setIsSpeaking(false); setMessage("Puheentoisto keskeytyi. Tarkista laitteen saksan puheääni."); };
-    }
-    utterances.forEach(utterance => window.speechSynthesis.speak(utterance));
+    playbackId.current += 1;
+    const currentPlayback = playbackId.current;
+    synthesis.cancel();
+    const utterances = segments.map(segment => {
+      const utterance = new SpeechSynthesisUtterance(segment.text);
+      utterance.lang = "de-DE";
+      utterance.rate = Math.max(0.5, Math.min(2, Number(rate) * segment.rateFactor));
+      utterance.voice = voices[losSpeakerSlot(segment.speaker, voices.length)] ?? voices[0] ?? null;
+      utterance.onerror = event => {
+        if (playbackId.current !== currentPlayback) return;
+        playbackId.current += 1;
+        synthesis.cancel();
+        setIsSpeaking(false);
+        setMessage("Puheentoisto epäonnistui ("+event.error+"). Tarkista laitteen saksankielinen puheääni tai kokeile uudelleen.");
+      };
+      return utterance;
+    });
+    const last = utterances.at(-1);
+    if (last) last.onend = () => {
+      if (playbackId.current !== currentPlayback) return;
+      setIsSpeaking(false);
+      setMessage("Kuuntelu päättyi. Voit kuunnella tekstin uudelleen.");
+    };
     setIsSpeaking(true);
-    setMessage(voices.length ? "Toistetaan laitteen saksankielisillä synteettisillä äänillä." : "Laite valitsee äänen. Saksankielisen äänen saatavuus vaihtelee laitteittain.");
+    setMessage(voices.length>1 ?
+      "Toistetaan laitteen "+voices.length+" saksankielisellä äänellä. Henkilöillä voi olla eri ääniä laitteen valikoiman mukaan." :
+      "Toistetaan laitteen saksankielisellä puheäänellä. Kaikilla henkilöillä on sama ääni.");
+    utterances.forEach(utterance => synthesis.speak(utterance));
   };
   return <div className="los-revised-speech">
     <div className="los-revised-speech-controls">
@@ -83,7 +104,11 @@ function TextSpeech({ blocks, chapterId, kind }: { blocks: readonly ReaderBlock[
         </select>
       </label>
     </div>
-    <p className="los-revised-muted" role="status">{message || "Laitteen puhesynteesi (TTS). Varsinaista toimituksellisesti hyväksyttyä äänitettä ei ole vielä tuotettu."}</p>
+    <p className="los-revised-muted" role="status">{message || (
+      voiceCount>0 ?
+        "Saksankielisiä puheääniä laitteessa: "+voiceCount+". Selaimen synteettistä ääntämistä ei ole akustisesti hyväksytty." :
+        "TTS käyttää laitteen puheääniä. Saksankielisen äänen saatavuus tarkistetaan kuuntelupainikkeella."
+    )}</p>
   </div>;
 }
 
