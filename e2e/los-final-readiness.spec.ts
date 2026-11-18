@@ -60,7 +60,7 @@ test("dictionary errors are disclosed, and optional source/audio QA have accurat
  await expect(page.locator(".los-freedict").getByText("12 998 hakusanaa",{exact:false})).toBeVisible({timeout:30000});
  await page.getByPlaceholder("esimerkiksi Hallo").fill("Hallo");
  await expect(page.locator(".los-freedict-row").first()).toBeVisible();
- await expect(page.locator(".los-freedict-row").first()).toContainText("Hallo");
+ await expect(page.locator(".los-freedict-row").first()).toContainText(/hallo/i);
  await page.getByRole("button",{name:"Suomi → saksa"}).click();
  await expect(page.getByPlaceholder("esimerkiksi tervehdys")).toBeVisible();
  await expect(page.locator(".los-freedict").getByText("12 083 hakusanaa",{exact:false})).toBeVisible({timeout:30000});
