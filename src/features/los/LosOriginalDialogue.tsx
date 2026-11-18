@@ -3,6 +3,7 @@ import { Check, Eraser, Highlighter, Info, MousePointerClick } from "lucide-reac
 import { useLosChapterDraft } from "./studyState";
 import {los1TokenIPA} from "./los1CourseGlossary";
 import {losGermanVoices} from "./losSpeech";
+import {losSaveWord,losSavedWordKey} from "./los1SavedVocabulary";
 import { LOS_READER_COLORS, type LosReaderColor } from "./content/c01Annotations";
 import {
   appendLosReaderRange, losReaderMarkKey, losReaderTokenColor, parseLosReaderAnnotation,
@@ -58,6 +59,7 @@ export function LosOriginalDialogue(props: LosOriginalDialogueProps) {
   const [first,setFirst] = useState<{lineId:string;index:number}|null>(null);
   const [gloss,setGloss] = useState<{word:string;meaning:string}|null>(null);
   const [speechNote,setSpeechNote] = useState("");
+  const [savedWordNote,setSavedWordNote] = useState("");
   const [undoMark,setUndoMark] = useState<{key:string;previous:string|undefined}|null>(null);
   const marks = draft.readerMarks ?? {};
   const speakWord=()=>{
@@ -73,10 +75,22 @@ export function LosOriginalDialogue(props: LosOriginalDialogueProps) {
     setSpeechNote("Toisto käyttää laitteen saksankielistä synteettistä ääntä.");
   };
 
+  const addWordToReview=()=>{
+    if(!gloss||!saved){setSavedWordNote("Tallennus ei ole saatavilla tällä laitteella.");return;}
+    if(!props.glossary[gloss.word]){
+      setSavedWordNote("Tälle sanalle ei ole vielä tarkistettua suomennosta, joten sitä ei lisätä kertaukseen.");return;
+    }
+    try{
+      const updated=losSaveWord(draft.savedWords??{},gloss.word,gloss.meaning);
+      update(current=>({...current,savedWords:updated}));
+      setSavedWordNote("Sana lisätty tämän kappaleen kertauskortteihin.");
+    }catch(error){setSavedWordNote(error instanceof Error?error.message:"Sanan tallennus epäonnistui.");}
+  };
   const selectWord = (line:LosOriginalLine,index:number,word:string) => {
     if(mode==="meaning") {
       setGloss({word,meaning:glossary[word] ?? "Tälle sanalle ei ole vielä tarkistettua kontekstiselitystä."});
       setSpeechNote("");
+      setSavedWordNote("");
       return;
     }
     if(!first || first.lineId!==line.id) {
@@ -173,6 +187,11 @@ export function LosOriginalDialogue(props: LosOriginalDialogueProps) {
       <strong lang="de">{gloss.word}</strong><p>{gloss.meaning}</p>
       <p><strong>IPA:</strong> <span lang="de">{los1TokenIPA(gloss.word)??"Ei vielä tarkistettua ääntämismerkintää"}</span></p>
       <button type="button" onClick={speakWord}>Kuuntele sana</button>
+      <button type="button" onClick={addWordToReview}
+        disabled={!saved || !props.glossary[gloss.word] || Boolean(draft.savedWords?.[losSavedWordKey(gloss.word)])}>
+        {draft.savedWords?.[losSavedWordKey(gloss.word)]?"Kertauskortissa":"Lisää omaan sanastoon"}
+      </button>
+      {savedWordNote&&<p role="status">{savedWordNote}</p>}
       {speechNote&&<p role="status">{speechNote}</p>}
       <button type="button" onClick={()=>setGloss(null)}>Sulje selitys</button>
     </div>}
