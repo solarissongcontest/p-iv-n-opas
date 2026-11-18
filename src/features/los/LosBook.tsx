@@ -332,9 +332,9 @@ function Vocabulary({ chapter, move, bookId }: { chapter: LosChapter; bookId:num
       <button aria-pressed={!showTranslations} onClick={() => setShowTranslations(v => !v)}>{showTranslations ? "Piilota suomennokset" : "Näytä suomennokset"}</button>
     </div>
     <table className="los-word-table"><thead><tr><th>Deutsch</th><th>Suomi</th></tr></thead><tbody>
-      {words.map((parts, i) => <tr key={i}><td lang="de">{parts[0]}{bookId===1&&los1TokenIPADetail(parts[0])&&
-       <small className="los-vocab-ipa" aria-label="IPA-ääntämisehdotus">{los1TokenIPADetail(parts[0])?.ipa}
-        {los1TokenIPADetail(parts[0])?.source==="espeak-candidate"?" · koneellinen ehdotus":""}
+      {words.map((parts, i) => <tr key={i}><td lang="de">{parts[0]}{bookId===1&&los1TokenIPADetail(parts[0]??"")&&
+       <small className="los-vocab-ipa" aria-label="IPA-ääntämisehdotus">{los1TokenIPADetail(parts[0]??"")?.ipa}
+        {los1TokenIPADetail(parts[0]??"")?.source==="espeak-candidate"?" · koneellinen ehdotus":""}
        </small>}</td><td>{showTranslations ? parts[1] ?? "" : <span className="los-hidden-translation">Piilotettu</span>}</td></tr>)}
     </tbody></table>
     {!words.length && <p>Sanastosta ei löytynyt hakua vastaavaa sanaa.</p>}
