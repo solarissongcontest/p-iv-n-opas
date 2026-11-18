@@ -45,8 +45,12 @@ export function parseFreeDictTEI(xml,pair){
 }
 export function getLicence(xml){
  const header=xml.slice(0,Math.min(xml.indexOf("<body>")>0?xml.indexOf("<body>"):14000,25000));
- const candidates=[...header.matchAll(/<licen[cs]e\b[^>]*?(?:target|href)=["']([^"']+)["'][^>]*>([\s\S]*?)<\/licen[cs]e>/gi)];
- return candidates.map(m=>({url:xmlDecode(m[1]),text:strip(m[2])})).filter(x=>x.url.startsWith("http"));
+ const availability=/<availability\b[^>]*>([\s\S]*?)<\/availability>/i.exec(header)?.[1]??"";
+ // FreeDict/WikDict 2025.11.23 publishes its actual licence in an
+ // <availability><p><ref target=...> element (NOT in a <licence> tag).
+ const candidateTags=[...availability.matchAll(/<(?:licen[cs]e|ref)\b[^>]*?(?:target|href)=["']([^"']+)["'][^>]*>([\s\S]*?)<\/(?:licen[cs]e|ref)>/gi)];
+ return candidateTags.map(m=>({url:xmlDecode(m[1]),text:strip(m[2])}))
+  .filter(x=>/^https:\/\/creativecommons\.org\/licenses\/by-sa\/3\.0\/(?:legalcode)?$/i.test(x.url));
 }
 export async function createDictionaryAsset(pair,{fetcher=fetch,output=OUT}={}){
  const parent=await mkdtemp(join(tmpdir(),"los-freedict-"));
@@ -63,13 +67,7 @@ export async function createDictionaryAsset(pair,{fetcher=fetch,output=OUT}={}){
   if(paths.length!==1)throw Error(pair+": TEI-tiedostoa ei löydy yksiselitteisesti.");
   const xml=execFileSync("tar",["-xJOf",file,paths[0]],{encoding:"utf8",maxBuffer:65*1024*1024,timeout:35000});
   const licenses=getLicence(xml);
-  if(!licenses.length){
-    const archiveContents=execFileSync("tar",["-tJf",file],{encoding:"utf8",timeout:25000});
-    const header=xml.slice(0,7500).replace(/\s+/g," ");
-    console.warn("[LOS! FreeDict source inspection] "+pair+" files "+archiveContents.slice(0,1400).replace(/\n/g,"; ")+
-      " TEI header "+header.slice(0,1700));
-    throw Error(pair+": lisenssitietoa ei löytynyt TEI-tiedoston otsakkeesta: julkaisu estetty.");
-  }
+  if(!licenses.length)throw Error(pair+": CC BY-SA 3.0 -lisenssiä ei vahvistettu tästä TEI-lähteestä.");
   // This distribution is WikDict-derived: check the actual license, not simply the project.
   const label=(licenses.map(x=>x.text+" "+x.url).join(" ")).toLowerCase();
   if(!/(creativecommons\.org\/licenses\/by-sa|gnu\.org\/licenses\/(?:gpl|fdl)|spdx\.org\/licenses\/(?:cc-by-sa|gpl|gfdl))/i.test(label))
