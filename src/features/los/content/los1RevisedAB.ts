@@ -608,7 +608,11 @@ export const LOS1_REVISED_AB = {
           },
           {
             "kind": "prose",
-            "text": "Vielen Dank und auf Wiedersehen!"
+            "text": "Vielen Dank!"
+          },
+          {
+            "kind": "prose",
+            "text": "Mit freundlichen Grüßen"
           },
           {
             "kind": "prose",
