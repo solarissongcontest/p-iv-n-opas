@@ -225,6 +225,29 @@ function renderSupportMarkdown(source: string): ReactNode[] {
   return rendered;
 }
 
+function LosCInteractiveExamples({chapterId}: {chapterId:string}) {
+  const [show,setShow] = useState(false);
+  const examples = LOS1_C_SPEECH_BLOCKS[chapterId]??[];
+  return <section className="los-revised-supplement los-c-interactive-words" aria-label="Saksankielisten mallien sanakohtainen lukija">
+    <button type="button" className="los-revised-supplement-toggle"
+      aria-expanded={show} aria-controls={"los-c-words-"+chapterId} onClick={()=>setShow(state=>!state)}>
+      {show?"Piilota sanakohtainen harjoittelu":"Avaa saksankielisten mallien sanaselitykset ja korostukset"}
+    </button>
+    {show&&<div id={"los-c-words-"+chapterId} className="los-revised-supplement-content">
+      <LosOriginalDialogue chapterId={chapterId} sourceId="los-own-text-c"
+        version={LOS1_CANONICAL_VERSION} heading="Text C:n saksankieliset mallit"
+        usageLabel="LOS!:N OMA TEKSTI · TEXT C"
+        guidance="Napauta sanaa nähdäksesi sen merkityksen tai valitse korostustussi. Samat mallit voi kuunnella tukitekstin kuuntelupainikkeella."
+        lines={examples.map((block,index)=>({
+          id:"e"+String(index).padStart(3,"0"),speaker:"",text:block.text,meaning:"",
+        }))}
+        glossary={los1CourseGlossary(chapterId)}
+        author="LOS!" sourceTitle="Text C · Hilfstext" sourceUrl="" license="LOS!:n oma tukiteksti"
+        licenseUrl="" sourceDetail="" isOwnText/>
+    </div>}
+  </section>;
+}
+
 export function LosHilfstextPage({ chapterId }: { chapterId: string }) {
   const page = LOS1_REVISED_C.chapters.find(chapter => chapter.chapterId === chapterId);
   if (!page) return <div role="status">Tämän kappaleen tukitekstiä ei löydy sisältöaineistosta.</div>;
@@ -238,6 +261,7 @@ export function LosHilfstextPage({ chapterId }: { chapterId: string }) {
       <TextSpeech blocks={LOS1_C_SPEECH_BLOCKS[chapterId]??[]} chapterId={chapterId} kind="C" />
     </aside>
     <div className="los-revised-support-content">{renderSupportMarkdown(page.contentMarkdown)}</div>
+    <LosCInteractiveExamples chapterId={chapterId} />
     <LosReadingExercises chapterId={chapterId} text="C" />
     <aside className="los-revised-disclaimer" role="note">
       <BookOpen size={18} aria-hidden="true" />
