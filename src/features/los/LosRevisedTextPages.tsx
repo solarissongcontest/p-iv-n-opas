@@ -2,6 +2,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import { BookOpen, Headphones, Square, Volume2 } from "lucide-react";
 import { LOS1_REVISED_AB } from "./content/los1RevisedAB";
 import { LOS1_REVISED_C } from "./content/los1RevisedC";
+import { LosReadingExercises, LosReadingUnderstanding } from "./LosReadingExercises";
 import "./los-revised-texts.css";
 
 /** These pages show LOS!-authored drafts. They are NOT authentic source transcripts. */
@@ -24,7 +25,7 @@ function voiceIndex(speaker: string, voiceCount: number): number {
   for (const character of speaker) hash = (hash * 31 + character.charCodeAt(0)) >>> 0;
   return hash % voiceCount;
 }
-function TextSpeech({ blocks }: { blocks: readonly ReaderBlock[] }) {
+function TextSpeech({ blocks, chapterId, kind }: { blocks: readonly ReaderBlock[]; chapterId:string; kind:"A"|"B" }) {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [rate, setRate] = useState("1");
   const [message, setMessage] = useState("");
@@ -45,7 +46,12 @@ function TextSpeech({ blocks }: { blocks: readonly ReaderBlock[] }) {
     const utterances = blocks.filter(block => block.kind === "prose" && block.text?.trim()).map(block => {
       const raw = block.text ?? "";
       const dialogue = dialogueLine(raw);
-      const words = (dialogue?.words ?? raw).replace(/\*\*/g, "").replace(/\*/g, "").trim();
+      const readLabel = kind === "B" && ["03","06","07","09","10"].includes(chapterId);
+      const spoken = dialogue && readLabel ? dialogue.speaker + ": " + dialogue.words : (dialogue?.words ?? raw);
+      const words = spoken.replace(/\*\*/g, "").replace(/\*/g, "")
+        .replace(/\b(?:[A-ZÄÖÜ]\s*[-–]\s*){2,}[A-ZÄÖÜ]\b/g,
+          letters => letters.replace(/\s*[-–]\s*/g, ", "))
+        .trim();
       const utterance = new SpeechSynthesisUtterance(words);
       utterance.lang = "de-DE";
       utterance.rate = Number(rate);
@@ -105,8 +111,9 @@ export function LosRevisedTextPage({ chapterId, kind }: { chapterId: string; kin
     <p className="los-eyebrow">KAPPALE {chapterId} / TEXT {kind}</p>
     <h1 id={"los-revised-heading-" + chapterId + kind} lang="de">{source.title}</h1>
     <p className="los-page-intro">{kind === "A" ? "Kappaleen uusi pääteksti. Lue ensin tilanteen kuvaus ja seuraa keskustelua." : "Toinen tekstilaji. Harjoittele kappaleen ilmauksia uudessa tilanteessa."}</p>
-    <TextSpeech blocks={source.blocks} />
+    <TextSpeech blocks={source.blocks} chapterId={chapterId} kind={kind} />
     <ReaderLines blocks={source.blocks} />
+    {kind === "B" && <LosReadingExercises chapterId={chapterId} text="B" />}
     <aside className="los-revised-disclaimer" role="note">
       <strong>LOS!:n oma opetusteksti · toimitusluonnos</strong>
       <p>Uusi teksti ei ole ulkopuolinen autenttinen lähdeteksti. Riippumaton saksan kielentarkistus ja toimitettu äänite ovat vielä kesken. Laitteen TTS ei korvaa alkuperäistä ihmisäänitettä.</p>
@@ -114,72 +121,34 @@ export function LosRevisedTextPage({ chapterId, kind }: { chapterId: string; kin
   </section>;
 }
 
-type UnderstandingQuestion = { prompt: string; answer: string };
-const revisedComprehension: Record<string, readonly UnderstandingQuestion[]> = {
-  "01": [
-    { prompt:"Mistä Aino etsii apua ja kenet hän tapaa?",answer:"Aino etsii saksan kurssia ja tapaa Leonin sekä Frau Bergerin." },
-    { prompt:"Minkä tervehdyksen Aino sanoo vahingossa aamulla?",answer:"Hän sanoo Guten Abend, vaikka kello on vasta yhdeksän aamulla." },
-    { prompt:"Miten Aino hyvästelee Leonin ja opettajan?",answer:"Leonille hän sanoo Tschüss ja opettajalle Auf Wiedersehen." },
-  ],
-  "02": [
-    { prompt:"Minkä uuden henkilön Aino tapaa?",answer:"Aino tutustuu Noraan." },
-    { prompt:"Miten Aino tavaa nimensä?",answer:"A-I-N-O." },
-    { prompt:"Kuka on Frau Berger?",answer:"Hän on heidän saksanopettajansa." },
-  ],
-  "03": [
-    { prompt:"Mistä maista Aino ja Selma tulevat?",answer:"Aino tulee Suomesta ja Selma Ruotsista." },
-    { prompt:"Missä kaupungissa Leon kertoo asuvansa?",answer:"Berliinissä." },
-    { prompt:"Mistä maasta Herr Weber on?",answer:"Itävallasta, Wienistä." },
-  ],
-  "04": [
-    { prompt:"Mikä on Herr Weberin rooli tilanteessa?",answer:"Hän on vieras, jota kurssilaiset tervehtivät." },
-    { prompt:"Mitä puhuttelumuotoa Leon neuvoo Ainoa käyttämään?",answer:"Kohteliasta Sie-muotoa." },
-    { prompt:"Miten Aino kertoo nimensä Herr Weberille?",answer:"Ich heiße Aino." },
-  ],
-  "05": [
-    { prompt:"Miksi Leon ei vastaa kuulumisiin myönteisesti?",answer:"Hän on hyvin väsynyt." },
-    { prompt:"Mitä Selma sanoo omista kuulumisistaan?",answer:"Prima!" },
-    { prompt:"Mitä Leon toivoo seuraavasta päivästä?",answer:"Että seuraavana päivänä hänelle kuuluisi jo oikein hyvää." },
-  ],
-  "06": [
-    { prompt:"Kuinka vanhoja Aino, Nora, Leon ja Selma ovat?",answer:"Aino ja Leon ovat 17, Nora 16 ja Selma 18." },
-    { prompt:"Miksi Frau Berger ei kerro ikäänsä?",answer:"Hän vitsailee sen olevan salaisuus." },
-    { prompt:"Minkä suuren lukusanan Aino sanoo lopuksi?",answer:"Neunundneunzig, eli 99." },
-  ],
-  "07": [
-    { prompt:"Mitä Leon on kirjoittamassa?",answer:"Osallistujien nimiä, joiden kirjoitusasun hän tarkistaa." },
-    { prompt:"Miten Ainon sukunimi tavataan?",answer:"L-A-I-N-E." },
-    { prompt:"Millä pyynnöllä Leon pyytää Ainoa hidastamaan?",answer:"Noch einmal, bitte. Langsam!" },
-  ],
-  "08": [
-    { prompt:"Mitä sanaa Frau Berger selittää oppitunnilla?",answer:"Sanaa schnell." },
-    { prompt:"Mitä Aino sanoo, kun hän ei ymmärrä?",answer:"Ich verstehe nicht. Was bedeutet schnell?" },
-    { prompt:"Mitä Selma pyytää opettajalta?",answer:"Toistoa ja hitaampaa puhetta." },
-  ],
-  "09": [
-    { prompt:"Miksi alkuperäinen keskiviikon tapaamisaika muuttuu?",answer:"Noralle keskiviikko ei sovi." },
-    { prompt:"Mille päivälle tapaaminen lopulta sovitaan?",answer:"Torstaille." },
-    { prompt:"Mihin kellonaikaan kaikki sopivat tapaavansa?",answer:"Kello neljältä, um vier Uhr." },
-  ],
-  "10": [
-    { prompt:"Kuka on kurssin uusi opiskelija?",answer:"Mila." },
-    { prompt:"Mistä Mila on kotoisin ja kuinka vanha hän on?",answer:"Hän on Virosta, Tallinnasta, ja 17-vuotias." },
-    { prompt:"Mistä vitsistä Leon muistuttaa Ainoa?",answer:"Ensimmäisen päivän Guten Abend -tervehdyksestä aamulla." },
-  ],
-};
+/** Retain the public component name while replacing the former three-question mock-up
+ * with the 15-question evidence-grounded A/B/C exercise system. */
+export function LosRevisedUnderstanding({chapterId,navigate}: {
+  chapterId:string;
+  navigate?: (section:"text"|"text-b"|"text-c")=>void;
+}) {
+  return <LosReadingUnderstanding chapterId={chapterId} {...(navigate ? {navigate} : {})}/>;
+}
 
-export function LosRevisedUnderstanding({chapterId}:{chapterId:string}) {
-  const questions = revisedComprehension[chapterId] ?? [];
-  return <section className="los-inner-page los-revised-understanding">
-    <p className="los-eyebrow">KAPPALE {chapterId} · TEXT A / VERSTEHEN</p>
-    <h1>Ymmärrä Text A</h1>
-    <p className="los-page-intro">Lue uusi Text A ja vastaa ensin kysymyksiin omin sanoin. Avaa mallivastaus vasta sen jälkeen. Tämän osion vastauksia ei pisteytetä automaattisesti.</p>
-    <ol className="los-revised-questions">
-      {questions.map((item, index) => <li key={index}>
-        <p>{item.prompt}</p>
-        <details className="los-revised-answer"><summary>Näytä mallivastaus</summary><p>{item.answer}</p></details>
-      </li>)}
-    </ol>
+/** Explicit, accessible source expander: old reader stays mounted only while open.
+ * Unlike nested native details toggles, the button's state survives child re-renders. */
+export function LosLegacySourcePanel({chapterId,kind,children}:{
+  chapterId:string;
+  kind:"A"|"B";
+  children:ReactNode;
+}) {
+  const [isOpen,setIsOpen] = useState(false);
+  const panelId="los-legacy-source-"+chapterId+"-"+kind.toLowerCase();
+  return <section className="los-revised-supplement">
+    <button type="button" className="los-revised-supplement-toggle"
+      aria-expanded={isOpen} aria-controls={panelId}
+      onClick={()=>setIsOpen(open=>!open)}>
+      {isOpen?"Piilota aiempi autenttinen lisäaineisto":
+        "Avaa aiempi autenttinen lisäaineisto tai alkuperäisäänite"}
+    </button>
+    {isOpen && <div id={panelId} className="los-revised-supplement-content">
+      {children}
+    </div>}
   </section>;
 }
 
@@ -211,9 +180,9 @@ function renderSupportMarkdown(source: string): ReactNode[] {
       </table></div>);
       continue;
     }
-    if (/^\*\*Vastaus:\*\*/.test(line)) {
+    if (/^\*\*(?:Vastaus|Mallivastaus|Mallirunko):\*\*/.test(line)) {
       rendered.push(<details className="los-revised-answer" key={i}>
-        <summary>Näytä mallivastaus</summary><p>{inlineContent(line.replace(/^\*\*Vastaus:\*\*\s*/, ""))}</p>
+        <summary>Näytä mallivastaus</summary><p>{inlineContent(line.replace(/^\*\*(?:Vastaus|Mallivastaus|Mallirunko):\*\*\s*/, ""))}</p>
       </details>);
       i++; continue;
     }
@@ -228,7 +197,7 @@ function renderSupportMarkdown(source: string): ReactNode[] {
     const paragraph: string[] = [line];
     i++;
     while (i < lines.length && (lines[i] ?? "").trim() &&
-      !isTableLine(lines[i] ?? "") && !/^### |^---$|^\*\*Vastaus:\*\*|^- /.test((lines[i] ?? "").trim())) {
+      !isTableLine(lines[i] ?? "") && !/^### |^---$|^\*\*(?:Vastaus|Mallivastaus|Mallirunko):\*\*|^- /.test((lines[i] ?? "").trim())) {
       paragraph.push((lines[i] ?? "").trim()); i++;
     }
     rendered.push(<p key={first}>{paragraph.map((fragment, index) => <span key={index}>{index > 0 && <br />}{inlineContent(fragment)}</span>)}</p>);
@@ -244,6 +213,7 @@ export function LosHilfstextPage({ chapterId }: { chapterId: string }) {
     <h1 id={"los-c-heading-" + chapterId} lang="de">{page.title}</h1>
     <p className="los-page-intro">{page.purpose}. Tämä tukiteksti täydentää Text A:ta ja Text B:tä. Saat palata siihen aina tarvittaessa.</p>
     <div className="los-revised-support-content">{renderSupportMarkdown(page.contentMarkdown)}</div>
+    <LosReadingExercises chapterId={chapterId} text="C" />
     <aside className="los-revised-disclaimer" role="note">
       <BookOpen size={18} aria-hidden="true" />
       <span>LOS!:n oma opetuksellinen tukiteksti · kielentarkistus kesken. Tukiteksti ei ole autenttinen ulkopuolinen lähde.</span>

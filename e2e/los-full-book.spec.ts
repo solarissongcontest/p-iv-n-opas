@@ -21,13 +21,21 @@ const chapters=["01","02","03","04","05","06","07","08","09","10"] as const;
 const openChapter=async(page:import("@playwright/test").Page,ch:string,section:string)=>{
  await page.goto("/los#/1/"+ch+"/"+section,{waitUntil:"domcontentloaded"});
  await expect(page.locator(".los-book-paper")).toBeVisible();
+ await expect(page.locator(".los-main-breadcrumb")).toContainText("Kappale "+Number(ch));
+ if(section==="text-b"){
+   await expect(page.locator(".los-main-breadcrumb")).toContainText("Text B");
+   await expect(page.locator(".los-section-nav button.is-active")).toHaveText("Text B");
+   await expect(page.locator(".los-revised-page h1").first()).toBeVisible();
+ }
 };
 
 test("all ten chapters provide complete Text B readers inside the book, not link-only placeholders",async({page})=>{
  await enterLocalBook(page);
  for(const chapter of chapters){
   await openChapter(page,chapter,"text-b");
-  await page.locator("details.los-revised-supplement > summary").first().click();
+  const toggle=page.locator(".los-revised-supplement-toggle").first();
+  await toggle.click();
+  await expect(toggle).toHaveAttribute("aria-expanded","true");
   await expect(page.locator("fieldset.los-c01-question")).toHaveCount(4);
   const sourceLinks=page.locator(".los-secondary-source a[href^='https://']");
   await expect(sourceLinks.first()).toBeVisible();
@@ -58,7 +66,8 @@ test("all ten culture pages render sourced explanations, original diagrams and t
 test("clearing chapter practice does not delete saved Text B or culture answers",async({page})=>{
  await enterLocalBook(page);
  await openChapter(page,"01","text-b");
- await page.locator("details.los-revised-supplement > summary").first().click();
+ await page.locator(".los-revised-supplement-toggle").first().click();
+ await expect(page.locator(".los-revised-supplement-toggle").first()).toHaveAttribute("aria-expanded","true");
  const sourceAnswer=page.locator(".los-secondary-source fieldset.los-c01-question").first();
  await sourceAnswer.locator("input[type='radio']").first().check();
  await sourceAnswer.getByRole("button",{name:"Tarkista vastaus"}).click();
@@ -74,7 +83,8 @@ test("clearing chapter practice does not delete saved Text B or culture answers"
  await page.getByRole("button",{name:/Tyhjennä vain tämän harjoitussarjan vastaukset/}).click();
  await expect(exercise.locator("input[type='radio']").first()).not.toBeChecked();
  await openChapter(page,"01","text-b");
- await page.locator("details.los-revised-supplement > summary").first().click();
+ await page.locator(".los-revised-supplement-toggle").first().click();
+ await expect(page.locator(".los-revised-supplement-toggle").first()).toHaveAttribute("aria-expanded","true");
  await expect(page.locator(".los-secondary-source fieldset.los-c01-question").first()
   .locator("input[type='radio']").first()).toBeChecked();
  await openChapter(page,"01","culture");
@@ -148,7 +158,8 @@ test("search finds actual C08 German source dialogue and Finnish meaning without
  await expect(hit).toContainText("Teksti B");
  await hit.click();
  await expect(page).toHaveURL(/\/los#\/1\/08\/text-b$/);
- await page.locator("details.los-revised-supplement > summary").first().click();
+ await page.locator(".los-revised-supplement-toggle").first().click();
+ await expect(page.locator(".los-revised-supplement-toggle").first()).toHaveAttribute("aria-expanded","true");
  await expect(page.locator(".los-secondary-source .los-c01-turns")).toContainText("Was studierst du?");
  await page.goto("/los#/1/search",{waitUntil:"domcontentloaded"});
  const second=page.getByPlaceholder("Hae sanaa, kappaletta tai kielioppia");
