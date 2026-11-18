@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { BookOpen, Headphones, Square, Volume2 } from "lucide-react";
 import { LOS1_REVISED_AB } from "./content/los1RevisedAB";
 import { LOS1_REVISED_C } from "./content/los1RevisedC";
-import { losSupportSpeechBlocks, LOS1_C_AUDIO_EXAMPLES } from "./content/los1SupportSpeech";
+import { LOS1_C_SPEECH_BLOCKS, LOS1_C_AUDIO_EXAMPLES } from "./content/los1SupportSpeech";
 import { LosReadingExercises, LosReadingUnderstanding } from "./LosReadingExercises";
 import { losGermanVoices, losSpeakerSlot, losSpeechSegments } from "./losSpeech";
 import "./los-revised-texts.css";
@@ -241,7 +241,7 @@ export function LosHilfstextPage({ chapterId }: { chapterId: string }) {
     <aside className="los-revised-support-audio">
       <p><strong>Kuuntele tukitekstin saksankieliset mallilauseet</strong></p>
       <p className="los-revised-muted">{LOS1_C_AUDIO_EXAMPLES[chapterId]?.length ?? 0} mallia. Suomenkielisiä selityksiä ei lueta saksankielisellä puheäänellä.</p>
-      <TextSpeech blocks={losSupportSpeechBlocks(chapterId)} chapterId={chapterId} kind="C" />
+      <TextSpeech blocks={LOS1_C_SPEECH_BLOCKS[chapterId]??[]} chapterId={chapterId} kind="C" />
     </aside>
     <div className="los-revised-support-content">{renderSupportMarkdown(page.contentMarkdown)}</div>
     <LosReadingExercises chapterId={chapterId} text="C" />
