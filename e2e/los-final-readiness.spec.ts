@@ -82,3 +82,42 @@ test("calm reading controls have no critical accessibility failures",async({page
  const critical=results.violations.filter(v=>v.impact==="critical");
  expect(critical.map(x=>x.id+" "+x.description)).toEqual([]);
 });
+
+
+test("both real imported dictionary assets are licensed, searchable and visible in the book",async({page})=>{
+ await enter(page,"dictionary");
+ const deResponse=await page.request.get("/los-dictionary/v1/deu-fin.json");
+ const fiResponse=await page.request.get("/los-dictionary/v1/fin-deu.json");
+ expect(deResponse.ok()).toBeTruthy();
+ expect(fiResponse.ok()).toBeTruthy();
+ const de=await deResponse.json();
+ const fi=await fiResponse.json();
+ for(const [dataset,pair] of [[de,"deu-fin"],[fi,"fin-deu"]] as const){
+  expect(dataset.meta.pair).toBe(pair);
+  expect(dataset.meta.license.length).toBeGreaterThan(0);
+  expect(dataset.entries.length).toBeGreaterThan(8500);
+  expect(dataset.meta.entryCount).toBe(dataset.entries.length);
+ }
+ expect(de.entries.some((x:[string,string])=>x[0].toLocaleLowerCase("de")==="hallo")).toBeTruthy();
+ await page.getByRole("button",{name:"Saksa → suomi"}).click();
+ await page.getByPlaceholder("esimerkiksi Hallo").fill("Hallo");
+ await expect(page.locator(".los-freedict-row").first()).toContainText(/Hallo/i);
+ await page.getByRole("button",{name:"Suomi → saksa"}).click();
+ await page.getByPlaceholder("esimerkiksi tervehdys").fill("hei");
+ await expect(page.locator(".los-freedict-row").first()).toBeVisible();
+});
+
+test("every A/B and C support page exposes single-line German listening controls",async({page})=>{
+ await enter(page,"01/text");
+ const selector=page.locator(".los-revised-speech-segments");
+ await expect(selector).toBeVisible();
+ await selector.locator("summary").click();
+ await expect(selector.getByRole("button",{name:"Kuuntele puheenvuoro 1"})).toBeVisible();
+ await page.goto("/los#/1/01/text-b",{waitUntil:"domcontentloaded"});
+ await expect(page.locator(".los-revised-speech-segments")).toBeVisible();
+ await page.goto("/los#/1/01/text-c",{waitUntil:"domcontentloaded"});
+ const c=page.locator(".los-revised-speech-segments");
+ await expect(c).toBeVisible();
+ await c.locator("summary").click();
+ await expect(c.getByRole("button",{name:"Kuuntele mallilause 1"})).toBeVisible();
+});
