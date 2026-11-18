@@ -1,10 +1,13 @@
 import {test} from "node:test";
 import assert from "node:assert/strict";
 import {decideLosCloudSync,losSyncNeedsConflictReview} from "../src/features/los/losCloudDecision.ts";
-import {emptyLosDraft} from "../src/features/los/studyState.ts";
 import type {LosChapterDraft} from "../src/features/los/studyState.ts";
 import type {LosCloudRecord} from "../src/features/los/cloudContract.ts";
 const fingerprint=(draft:LosChapterDraft)=>JSON.stringify({...draft,updatedAt:""});
+const emptyLosDraft=():LosChapterDraft=>({
+ version:1,note:"",applicationDraft:"",bookmarked:false,practiceAnswers:{},
+ practiceChecked:[],testAnswers:{},testSubmittedAt:null,selfAssessment:"",updatedAt:"",
+});
 function edited(note:string):LosChapterDraft{
  return {...emptyLosDraft(),note,practiceAnswers:{"LOS1-READ-V2-C01-A-01":"Saksan kurssia"},
   readerMarks:{"los1-reader-test":"test"},savedWords:{"hallo":"hei"}};
