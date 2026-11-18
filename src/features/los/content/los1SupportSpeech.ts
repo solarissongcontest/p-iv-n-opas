@@ -13,6 +13,6 @@ export const LOS1_C_AUDIO_EXAMPLES: Readonly<Record<string, readonly string[]>> 
   "09": ["Montag","Dienstag","Mittwoch","Donnerstag","Freitag","Samstag","Sonntag","am Donnerstag","um vier Uhr","am Donnerstag um vier Uhr","Bis Donnerstag!"],
   "10": ["Hallo!","Ich heiße Aino.","Wie heißt du?","Ich komme aus Finnland.","Ich bin siebzehn Jahre alt.","Wie geht’s?","Noch einmal, bitte!","Am Donnerstag um vier Uhr?","Bis Donnerstag!","Tschüss!"],
 } as const;
-export function losSupportSpeechBlocks(chapterId:string) {
-  return (LOS1_C_AUDIO_EXAMPLES[chapterId]??[]).map(text=>({kind:"prose" as const,text}));
-}
+export const LOS1_C_SPEECH_BLOCKS: Readonly<Record<string,readonly {kind:"prose";text:string}[]>> =
+  Object.fromEntries(Object.entries(LOS1_C_AUDIO_EXAMPLES).map(([chapterId,lines])=>
+    [chapterId,lines.map(text=>({kind:"prose" as const,text}))]));
