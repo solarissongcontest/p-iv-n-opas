@@ -5,6 +5,9 @@ import { LOS1_REVISED_C } from "./content/los1RevisedC";
 import { LOS1_C_SPEECH_BLOCKS, LOS1_C_AUDIO_EXAMPLES } from "./content/los1SupportSpeech";
 import { LosReadingExercises, LosReadingUnderstanding } from "./LosReadingExercises";
 import { losGermanVoices, losSpeakerSlot, losSpeechSegments } from "./losSpeech";
+import {LosOriginalDialogue} from "./LosOriginalDialogue";
+import {los1CanonicalLines,LOS1_CANONICAL_VERSION} from "./los1Canonical";
+import {los1CourseGlossary} from "./los1CourseGlossary";
 import "./los-revised-texts.css";
 
 /** These pages show LOS!-authored drafts. They are NOT authentic source transcripts. */
@@ -16,10 +19,6 @@ function inlineContent(value: string): ReactNode[] {
     if (part.startsWith("*") && part.endsWith("*")) return <em key={index} lang="de">{part.slice(1, -1)}</em>;
     return <span key={index}>{part}</span>;
   });
-}
-function dialogueLine(value: string): { speaker: string; words: string } | null {
-  const match = /^\*\*([^*]+):\*\*\s*(.*)$/.exec(value);
-  return match ? { speaker: match[1] ?? "", words: match[2] ?? "" } : null;
 }
 function TextSpeech({ blocks, chapterId, kind }: { blocks: readonly ReaderBlock[]; chapterId:string; kind:"A"|"B"|"C" }) {
   const [isSpeaking, setIsSpeaking] = useState(false);
@@ -113,22 +112,6 @@ function TextSpeech({ blocks, chapterId, kind }: { blocks: readonly ReaderBlock[
   </div>;
 }
 
-function ReaderLines({ blocks }: { blocks: readonly ReaderBlock[] }) {
-  return <div className="los-revised-dialogue">
-    {blocks.map((block, index) => {
-      if (block.kind === "break") return <hr key={index} className="los-revised-pause" />;
-      const value = block.text ?? "";
-      if (block.kind === "stage") return <p key={index} className="los-revised-stage">{inlineContent(value)}</p>;
-      const line = dialogueLine(value);
-      if (line) return <div className="los-revised-line" key={index}>
-        <strong className="los-revised-speaker">{line.speaker}</strong>
-        <p lang="de">{inlineContent(line.words)}</p>
-      </div>;
-      return <p key={index} lang="de" className="los-revised-prose">{inlineContent(value)}</p>;
-    })}
-  </div>;
-}
-
 export function LosRevisedTextPage({ chapterId, kind }: { chapterId: string; kind: "A" | "B" }) {
   const chapter = LOS1_REVISED_AB.chapters.find(candidate => candidate.chapterId === "C" + chapterId);
   if (!chapter) return <div role="status">Tämän kappaleen tekstiä ei löydy sisältöaineistosta.</div>;
@@ -138,7 +121,18 @@ export function LosRevisedTextPage({ chapterId, kind }: { chapterId: string; kin
     <h1 id={"los-revised-heading-" + chapterId + kind} lang="de">{source.title}</h1>
     <p className="los-page-intro">{kind === "A" ? "Kappaleen uusi pääteksti. Lue ensin tilanteen kuvaus ja seuraa keskustelua." : "Toinen tekstilaji. Harjoittele kappaleen ilmauksia uudessa tilanteessa."}</p>
     <TextSpeech blocks={source.blocks} chapterId={chapterId} kind={kind} />
-    <ReaderLines blocks={source.blocks} />
+    <LosOriginalDialogue
+      chapterId={chapterId}
+      sourceId={kind==="A"?"los-own-text-a":"los-own-text-b"}
+      version={LOS1_CANONICAL_VERSION}
+      heading="Tekstin sanat ja omat korostukset"
+      usageLabel={"LOS!:N OMA TEKSTI · TEXT "+kind}
+      guidance="Napauta saksankielistä sanaa avataksesi tarkistetun selityksen. Valitse korostustussi ja merkitse haluamasi kohdat. Merkinnät tallennetaan omaan opiskelutilaasi."
+      lines={los1CanonicalLines(chapterId,kind).map(line=>({...line,meaning:""}))}
+      glossary={los1CourseGlossary(chapterId)}
+      author="LOS!" sourceTitle={source.title} sourceUrl="" license="LOS!:n oma opetusteksti" licenseUrl=""
+      sourceDetail="" isOwnText
+    />
     {kind === "B" && <LosReadingExercises chapterId={chapterId} text="B" />}
     <aside className="los-revised-disclaimer" role="note">
       <strong>LOS!:n oma opetusteksti · toimitusluonnos</strong>
