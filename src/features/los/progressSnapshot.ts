@@ -31,7 +31,7 @@ export function getLosStudyProgressSnapshot(book:LosBookDefinition,drafts:Readon
     const d=drafts[ch.id];
     const actual=LOS1_EXECUTABLE_LESSONS.filter(lesson=>los1LessonDraftChapter(lesson.id)===ch.id);
     const completed=actual.filter(l=>Boolean(d?.lessonProgress?.[l.id]?.completedAt)).length;
-    const scored=d?.testSubmittedAt?losScore(ch.id,d.testAnswers):null;
+    const scored=d?.testSubmittedAt?losChapterExamScore(ch.id,d.testAnswers):null;
     const cards=losRecallFromVocabulary(ch.id,ch.vocabulary);
     const states=d?.recallCards??{};
     const reviewed=cards.filter(card=>Boolean(states[card.id]));
