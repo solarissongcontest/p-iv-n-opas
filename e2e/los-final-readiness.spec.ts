@@ -57,8 +57,15 @@ test("dictionary errors are disclosed, and optional source/audio QA have accurat
  await enter(page,"dictionary");
  await expect(page.getByRole("heading",{name:"Laaja saksa–suomi-sanakirja"})).toBeVisible({timeout:30000});
  await expect(page.getByRole("button",{name:"Suomi → saksa"})).toBeVisible();
+ await expect(page.locator(".los-freedict").getByText("12 998 hakusanaa",{exact:false})).toBeVisible({timeout:30000});
+ await page.getByPlaceholder("esimerkiksi Hallo").fill("Hallo");
+ await expect(page.locator(".los-freedict-row").first()).toBeVisible();
+ await expect(page.locator(".los-freedict-row").first()).toContainText("Hallo");
  await page.getByRole("button",{name:"Suomi → saksa"}).click();
  await expect(page.getByPlaceholder("esimerkiksi tervehdys")).toBeVisible();
+ await expect(page.locator(".los-freedict").getByText("12 083 hakusanaa",{exact:false})).toBeVisible({timeout:30000});
+ await page.getByPlaceholder("esimerkiksi tervehdys").fill("hei");
+ await expect(page.locator(".los-freedict-row").first()).toBeVisible();
  await page.goto("/los#/1/appendix",{waitUntil:"domcontentloaded"});
  await expect(page.getByRole("heading",{name:"Tarkista saksan ääntäminen omalla laitteella"})).toBeVisible();
  await expect(page.getByText("31 rekisteröityä aineistoa",{exact:false})).toBeVisible();
