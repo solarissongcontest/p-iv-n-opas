@@ -33,3 +33,15 @@
  .los-progress-chapters { grid-template-columns: 1fr; }
  .los-progress-recall-note { padding: 12px 14px; }
 }
+
+
+.los-progress-competencies{margin:1.6rem 0;padding:1.1rem;border:1px solid #dcd7d3;border-radius:12px;background:var(--los-paper,#fff)}
+.los-progress-competencies>summary{cursor:pointer;font-weight:700;font-size:1.1rem}
+.los-progress-competencies>p{line-height:1.6;margin:1rem 0}
+.los-progress-competencies ol{list-style:decimal outside;margin:0;padding:0 0 0 1.25rem;display:grid;gap:.7rem}
+.los-progress-competencies li{padding:.8rem;border-bottom:1px solid #e4e0dc;line-height:1.6}
+.los-progress-competencies li small{font-size:.8rem;color:inherit;opacity:.8;display:block}
+.los-progress-competencies li p{margin:.5rem 0}
+.los-progress-competencies .los-progress-actions{display:flex;flex-wrap:wrap;gap:.5rem}
+.los-progress-competencies button{min-height:44px}
+@media(max-width:600px){.los-progress-competencies{padding:.9rem}.los-progress-competencies li{padding:.8rem .25rem}}
