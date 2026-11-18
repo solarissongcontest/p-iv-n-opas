@@ -21,7 +21,7 @@ const draft=()=>({version:1 as const,note:"old note",applicationDraft:"",bookmar
 test("L052 is canonical source-based reading without claiming a listened-to audio file",()=>{
  const l=LOS1_C10_HARALD_READING_LESSON;
  assert.equal(l.id,"L052");
- assert.equal(l.title,LOS_1_LESSONS[51]?.title);
+ assert.equal(LOS1_EXECUTABLE_LESSONS.find(item=>item.id===l.id)?.title,LOS_1_LESSONS[51]?.title);
  assert.equal(l.estimatedMinutes,30);
  assert.equal(l.contentVersion,"1.0.0");
  assert.equal(l.steps.length,3);
