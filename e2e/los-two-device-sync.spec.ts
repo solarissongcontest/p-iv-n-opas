@@ -12,6 +12,7 @@ test("phone and desktop exchange notes, reject conflicting edits and preserve lo
  type RecordShape={revision:number;payload:Record<string,unknown>;updated_at:string};
  let cloud:RecordShape|null=null;
  let rejected=0;
+ const requestDiagnostics:string[]=[];
  const create=async() => {
   const context=await browser.newContext({acceptDownloads:true});
   await context.addInitScript((args)=>{
@@ -24,6 +25,7 @@ test("phone and desktop exchange notes, reject conflicting edits and preserve lo
   await context.route("**/api/los-sync?*",async route=>{
     const request=route.request();
     const header=request.headers();
+    requestDiagnostics.push(request.method()+" bearer="+Boolean(header.authorization)+" keyMatches="+(header["x-los-sync-key"]===password));
     if(header.authorization!=="Bearer test-only-device-access-token" || header["x-los-sync-key"]!==password){
       rejected++;await route.fulfill({status:401,json:{error:"Väärä salasana"}});return;
     }
@@ -49,7 +51,17 @@ test("phone and desktop exchange notes, reject conflicting edits and preserve lo
  const open=async(page:Page)=>{
   await page.getByLabel("Synkronoinnin salasana").fill(password);
   await page.locator(".los-cloud-panel button[type=submit]").click();
-  await expect(page.locator(".los-cloud-panel").getByText("Pilvitallennus avattu",{exact:false})).toBeVisible();
+  await expect(page.locator(".los-cloud-message")).not.toContainText("Yhdistetään pilvitallennukseen",{timeout:15000});
+  const unlockMessage=await page.locator(".los-cloud-message").textContent();
+  if(!unlockMessage?.includes("Pilvitallennus avattu")){
+    const authState=await page.evaluate(()=>({
+      owner:Boolean(localStorage.getItem("opk.owner-id")),
+      token:Boolean(localStorage.getItem("opk.device-token")),
+      expiresAt:Number(localStorage.getItem("opk.device-token-expires")),
+    }));
+    console.log("LOS_SYNC_UNLOCK_DIAG "+JSON.stringify({unlockMessage,authState,requestDiagnostics}));
+  }
+  await expect(page.locator(".los-cloud-message")).toContainText("Pilvitallennus avattu");
   const leaked=await page.evaluate(secret=>Object.values(localStorage).some(v=>v.includes(secret)),password);
   expect(leaked).toBe(false);
  };
