@@ -48,3 +48,14 @@
  .los-reading-options label{padding:.65rem}
  .los-reading-source-nav button{flex:1 1 28%;white-space:nowrap}
 }
+
+
+/* WCAG 1.4.10 reflow at 200% text scale: the long task intro and counter
+ * must stack instead of forcing a wide minimum-content flex row. */
+.los-reading-exercises-head>div:first-child{min-width:0;max-width:100%}
+.los-reading-exercises-head p{overflow-wrap:anywhere}
+@media(max-width:700px){
+ .los-reading-exercises-head{flex-direction:column;align-items:stretch}
+ .los-reading-counter{flex:none;align-self:flex-start;max-width:100%;min-width:0}
+ .los-reading-question,.los-reading-options,.los-reading-question-list{min-width:0;max-width:100%}
+}
