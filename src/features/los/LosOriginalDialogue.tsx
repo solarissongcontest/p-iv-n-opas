@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { Check, Eraser, Highlighter, Info, MousePointerClick } from "lucide-react";
 import { useLosChapterDraft } from "./studyState";
+import {los1TokenIPA} from "./los1CourseGlossary";
+import {losGermanVoices} from "./losSpeech";
 import { LOS_READER_COLORS, type LosReaderColor } from "./content/c01Annotations";
 import {
   appendLosReaderRange, losReaderMarkKey, losReaderTokenColor, parseLosReaderAnnotation,
@@ -29,6 +31,8 @@ export type LosOriginalDialogueProps = {
   license: string;
   licenseUrl: string;
   sourceDetail: string;
+  /** New book-owned texts are pedagogical readings, not purported historic sources. */
+  isOwnText?:boolean;
 };
 
 const colorLabels: Record<LosReaderColor,string> = {
@@ -53,12 +57,26 @@ export function LosOriginalDialogue(props: LosOriginalDialogueProps) {
   const [color,setColor] = useState<LosReaderColor>("yellow");
   const [first,setFirst] = useState<{lineId:string;index:number}|null>(null);
   const [gloss,setGloss] = useState<{word:string;meaning:string}|null>(null);
+  const [speechNote,setSpeechNote] = useState("");
   const [undoMark,setUndoMark] = useState<{key:string;previous:string|undefined}|null>(null);
   const marks = draft.readerMarks ?? {};
+  const speakWord=()=>{
+    if(!gloss||typeof window==="undefined"||!("speechSynthesis" in window)||!("SpeechSynthesisUtterance" in window)){
+      setSpeechNote("Selaimen saksan puheääni ei ole saatavilla.");return;
+    }
+    const voices=losGermanVoices(window.speechSynthesis.getVoices());
+    if(!voices.length){setSpeechNote("Tällä laitteella ei ole saatavilla saksankielistä puheääntä.");return;}
+    window.speechSynthesis.cancel();
+    const voice=new SpeechSynthesisUtterance(gloss.word);
+    voice.lang="de-DE";voice.voice=voices[0]??null;voice.rate=0.9;
+    window.speechSynthesis.speak(voice);
+    setSpeechNote("Toisto käyttää laitteen saksankielistä synteettistä ääntä.");
+  };
 
   const selectWord = (line:LosOriginalLine,index:number,word:string) => {
     if(mode==="meaning") {
       setGloss({word,meaning:glossary[word] ?? "Tälle sanalle ei ole vielä tarkistettua kontekstiselitystä."});
+      setSpeechNote("");
       return;
     }
     if(!first || first.lineId!==line.id) {
@@ -105,7 +123,9 @@ export function LosOriginalDialogue(props: LosOriginalDialogueProps) {
       <p className="los-overline">{props.usageLabel ?? "ORIGINALTEXT · TEXT A"} · {sourceId}</p>
       <h2>{props.heading}</h2>
       <p>{props.guidance}</p>
-      <p className="los-c01-reader-warning"><Info size={17}/> Kokonainen lähdeteksti on tuotu käyttöoikeuksien perusteella. Lopullinen kielellinen tarkistus ja laitetestaus ovat kesken.</p>
+      <p className="los-c01-reader-warning"><Info size={17}/>{props.isOwnText?
+        "Tämä on LOS!:lle laadittu opetusteksti, ei ulkopuolinen autenttinen julkaisu. Sanaselitysten ja IPA:n kattavuutta täydennetään.":
+        "Kokonainen lähdeteksti on tuotu käyttöoikeuksien perusteella. Lopullinen kielellinen tarkistus ja laitetestaus ovat kesken."}</p>
     </div>
     <div className="los-c01-toolbox" aria-label="Lukijan työkalut">
       <div className="los-c01-modes" role="group" aria-label="Sanan napautuksen toiminto">
@@ -131,7 +151,7 @@ export function LosOriginalDialogue(props: LosOriginalDialogueProps) {
         const key=losReaderMarkKey(chapterId,sourceId,line.id);
         const annotation=parseLosReaderAnnotation(marks[key],version);
         return <div className="los-c01-turn" key={line.id}>
-          {line.sectionTitle && <h3 className="los-c01-dialogue-subheading">{line.sectionTitle}</h3>}
+          {line.sectionTitle && <h3 lang="fi" className="los-c01-dialogue-subheading">{line.sectionTitle}</h3>}
           <span className="los-c01-speaker">{line.speaker}</span>
           <div className="los-c01-turn-body">
             <p className="los-c01-words">{tokenize(sourceId,line).map(token=>{
@@ -151,6 +171,9 @@ export function LosOriginalDialogue(props: LosOriginalDialogueProps) {
     </div>
     {gloss&&<div className="los-c01-gloss" role="status">
       <strong lang="de">{gloss.word}</strong><p>{gloss.meaning}</p>
+      <p><strong>IPA:</strong> <span lang="de">{los1TokenIPA(gloss.word)??"Ei vielä tarkistettua ääntämismerkintää"}</span></p>
+      <button type="button" onClick={speakWord}>Kuuntele sana</button>
+      {speechNote&&<p role="status">{speechNote}</p>}
       <button type="button" onClick={()=>setGloss(null)}>Sulje selitys</button>
     </div>}
     {outdated&&<p role="status" className="los-c01-outdated">Vanhat korostukset kuuluvat tekstin toiseen versioon. Ne säilyvät tallessa, mutta niitä ei sijoiteta uuteen tekstiin arvauksella.</p>}
@@ -158,11 +181,13 @@ export function LosOriginalDialogue(props: LosOriginalDialogueProps) {
       "Korostukset tallentuvat tähän selaimeen ja sisältyvät LOS!-varmuuskopioon.":
       "Tallennus epäonnistui. Säilytä vastauksesi muualla ennen sivun sulkemista."}</p>
     <div className="los-c01-attribution">
-      <p><strong>Alkuperäinen teksti:</strong> {props.author}, <a href={props.sourceUrl} target="_blank" rel="noopener noreferrer">{props.sourceTitle}</a>.
-        {" "}Lisenssi <a href={props.licenseUrl} target="_blank" rel="noopener noreferrer">{props.license}</a>.
-        {" "}{props.sourceDetail} Saksankielinen alkuperäisteksti on muuttamaton.
-        Suomenkieliset käännökset ja selitteet ovat erillistä opetusaineistoa; lähdetekstin käännöksissä noudatetaan samaa ShareAlike-lisenssiä.
-        Sisältöversio {version}.</p>
+      {props.isOwnText ?
+        <p><strong>LOS!:n oma opetusteksti.</strong> Teksti ei ole ulkopuolinen autenttinen lähde. Sisältöversio {version}. Vanhat autenttiset aineistot säilyvät erillisinä lisäaineistoina.</p> :
+        <p><strong>Alkuperäinen teksti:</strong> {props.author}, <a href={props.sourceUrl} target="_blank" rel="noopener noreferrer">{props.sourceTitle}</a>.
+          {" "}Lisenssi <a href={props.licenseUrl} target="_blank" rel="noopener noreferrer">{props.license}</a>.
+          {" "}{props.sourceDetail} Saksankielinen alkuperäisteksti on muuttamaton.
+          Suomenkieliset käännökset ja selitteet ovat erillistä opetusaineistoa; lähdetekstin käännöksissä noudatetaan samaa ShareAlike-lisenssiä.
+          Sisältöversio {version}.</p>}
     </div>
   </div>;
 }
