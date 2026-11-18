@@ -75,3 +75,19 @@
  .los-index-entry button{grid-column:1 / -1;justify-content:flex-start;min-height:24px;}
  .los-path-copy strong{font-size:14px;}
 }
+
+
+.los-voice-diagnostics{border:1px solid var(--los-line);padding:1.2rem;border-radius:12px;margin:1.5rem 0}
+.los-voice-diagnostics h3{margin:.2rem 0 1rem}
+.los-voice-diagnostics>label{display:grid;gap:.45rem;max-width:450px}
+.los-voice-diagnostics select{min-height:44px;color:var(--los-ink);background:var(--los-paper);border:1px solid var(--los-line);border-radius:8px;padding:.5rem}
+.los-voice-diagnostics li{padding:.8rem 0;border-bottom:1px solid var(--los-line);display:flex;flex-wrap:wrap;align-items:center;gap:.65rem}
+.los-voice-diagnostics li>strong{flex-basis:100%}
+.los-voice-diagnostics li>span{flex:1 1 240px}
+.los-voice-diagnostics button{border:1px solid var(--los-book-accent);border-radius:8px;padding:.6rem 1rem;min-height:44px}
+.los-voice-diagnostics button:disabled{opacity:.5}
+.los-voice-diagnostics li label{display:flex;align-items:start;gap:.5rem;flex-basis:100%;font-size:.87rem}
+.los-voice-diagnostics li input{accent-color:var(--los-book-accent);width:18px;height:18px}
+.los-supplemental-audit>summary{cursor:pointer;padding:.65rem 0;font-weight:700}
+.los-supplemental-audit li{overflow-wrap:anywhere;margin:.8rem 0}
+.los-supplemental-audit a{color:var(--los-book-accent);text-decoration:underline}
