@@ -88,3 +88,18 @@
 
 .los-book-workspace:has(.los-revised-page.is-reading-focus) .los-book-layout{display:block;max-width:980px;margin-inline:auto}
 .los-book-workspace:has(.los-revised-page.is-reading-focus) .los-book-main{min-width:0;max-width:980px;width:100%;margin-inline:auto}
+
+
+/* Reflow long German/source explanations at 200% text zoom instead of allowing
+   an intrinsic flex-item min-content width to enlarge the page on phones. */
+@media(max-width:760px){
+  .los-book-main,.los-book-paper,.los-reading-page,.los-revised-page,.los-study-reading{
+    box-sizing:border-box;max-width:100%;min-width:0;
+  }
+  .los-revised-disclaimer{
+    display:block;box-sizing:border-box;min-width:0;max-width:100%;
+    overflow-wrap:anywhere;word-break:normal;
+  }
+  .los-revised-disclaimer p{display:block;min-width:0;max-width:100%;overflow-wrap:anywhere}
+  .los-section-nav{box-sizing:border-box;width:100%;max-width:100%;min-width:0;overflow-x:auto}
+}
