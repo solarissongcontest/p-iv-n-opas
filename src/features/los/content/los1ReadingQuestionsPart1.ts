@@ -755,8 +755,8 @@ export const LOS1_READING_QUESTIONS_PART1 = {
           "Että hän matkustaisi"
         ],
         "answerIndex": 0,
-        "evidence": "Morgen: prima!",
-        "explanation": "Leon leikittelee ajatuksella, että huomenna voisi mennä paremmin.",
+        "evidence": "hoffentlich geht’s mir morgen besser!",
+        "explanation": "Leon toivoo, että hänen olonsa olisi seuraavana päivänä parempi.",
         "skill": "detail"
       },
       {
