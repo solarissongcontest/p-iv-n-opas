@@ -1,7 +1,7 @@
-import {LOS_BOOKS} from "./catalog";
-import {LOS1_REVISED_AB} from "./content/los1RevisedAB";
-import {LOS1_REVISED_C} from "./content/los1RevisedC";
-import {LOS1_READING_BANK} from "./content/los1ReadingBank";
+import {LOS_BOOKS} from "./catalog.ts";
+import {LOS1_REVISED_AB} from "./content/los1RevisedAB.ts";
+import {LOS1_REVISED_C} from "./content/los1RevisedC.ts";
+import {LOS1_READING_BANK} from "./content/los1ReadingBank.ts";
 
 /** Canonical LOS!-authored lesson texts. Authentic sources are supplemental and
  * remain in sourceRegistry with their own licensing/publication gates. */
