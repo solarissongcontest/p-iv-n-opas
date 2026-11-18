@@ -47,7 +47,7 @@ test("C07 and C09 lesson plans use original source dialogue and valid real quest
  for(const item of LOS1_C07_C09_LESSONS){
    const n=Number(item.id.slice(1));
    assert.ok(n>=36 && n<=40 || n>=46 && n<=50);
-   assert.equal(item.title,LOS_1_LESSONS[n-1]?.title);
+   assert.equal(LOS1_EXECUTABLE_LESSONS.find(l=>l.id===item.id)?.title,LOS_1_LESSONS[n-1]?.title);
    assert.equal(item.estimatedMinutes,30);
    assert.ok(item.steps.length>=3);
    assert.ok(item.steps.every(s=>s.instruction.length>48 && s.minutes>0));
