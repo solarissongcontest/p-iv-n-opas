@@ -12,7 +12,7 @@ import {LOS1_REVISED_C} from "./content/los1RevisedC";
 import {LOS1_AB_EXTRA_GLOSSES} from "./los1ExtraGlosses";
 export type LosNavigate = (chapter: string | null, section: LosDestination) => void;
 type WordEntry = { book: number; code: string; chapter: string; title: string; word: string; meaning: string; source?: "text" };
-const DICTIONARY = LOS_BOOKS.flatMap(book => book.chapters.flatMap(chapter =>
+const DICTIONARY:WordEntry[] = LOS_BOOKS.flatMap(book => book.chapters.flatMap(chapter =>
   chapter.vocabulary.map(item => {
     const [word, ...rest] = item.split(" – ");
     return { book: book.id, code: book.code, chapter: chapter.id, title: chapter.title, word: word ?? "", meaning: rest.join(" – ") } satisfies WordEntry;
