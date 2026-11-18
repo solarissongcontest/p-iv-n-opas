@@ -38,7 +38,7 @@ test("readable at narrow phone width, 200% text, keyboard and dark mode",async({
   viewport:innerWidth,scroll:document.documentElement.scrollWidth,
   offenders:[...document.querySelectorAll("*")].map(el=>{
     const rect=el.getBoundingClientRect();
-    return {tag:el.tagName,cls:String(el.className).slice(0,100),right:Math.round(rect.right),width:Math.round(rect.width),left:Math.round(rect.left)};
+    return {tag:el.tagName,cls:String(el.className).slice(0,100),parent:String(el.parentElement?.className??"").slice(0,100),grandparent:String(el.parentElement?.parentElement?.className??"").slice(0,100),text:(el.textContent??"").slice(0,45),right:Math.round(rect.right),width:Math.round(rect.width),left:Math.round(rect.left)};
   }).filter(r=>r.right>innerWidth+3 && r.width>0).sort((a,b)=>b.right-a.right).slice(0,16)
  }));
  console.log("LOS_ZOOM_LAYOUT_DIAG "+JSON.stringify(widthDiag));
