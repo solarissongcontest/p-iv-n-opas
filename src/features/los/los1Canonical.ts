@@ -38,17 +38,21 @@ export function los1CanonicalLines(chapterId:string, kind:"A"|"B"):readonly LosC
   const chapter=LOS1_REVISED_AB.chapters.find(c=>c.chapterId==="C"+chapterId);
   const text=kind==="A"?chapter?.textA:chapter?.textB;
   if(!text)return [];
+  let pendingStage:string|undefined;
   return text.blocks.flatMap((block,index):LosCanonicalLine[]=>{
     if(block.kind==="break")return [];
     const raw="text" in block ? block.text : "";
     if(!raw)return [];
-    if(block.kind==="stage")return [];
+    if(block.kind==="stage"){pendingStage=raw;return [];}
     const match=/^\*\*([^*]+):\*\*\s*(.*)$/s.exec(raw);
-    return [{
+    const line:LosCanonicalLine={
       id:"b"+String(index).padStart(3,"0"),
       speaker:match?.[1]??"",
       text:(match?.[2]??raw).replace(/\*\*/g,"").replace(/(?<!\*)\*([^*]+)\*(?!\*)/g,"$1").trim(),
-    }];
+      ...(pendingStage?{sectionTitle:pendingStage}:{}),
+    };
+    pendingStage=undefined;
+    return [line];
   });
 }
 
