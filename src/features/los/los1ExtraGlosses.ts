@@ -55,6 +55,15 @@ export const LOS1_AB_EXTRA_GLOSSES:Readonly<Record<string,string>>={
   "neunundneunzig":"yhdeksänkymmentäyhdeksän",
   "fragezeichen":"kysymysmerkki",
   // Domain text in one sample exercise is a placeholder, not a learner lemma.
+  // Cross-checked against all 20 original LOS!-authored A/B texts and ten C audio scripts.
+  "sorge":"huoli; Keine Sorge! = ei hätää!",
+  "vielen":"paljon (taivutettu muoto; Vielen Dank! = paljon kiitoksia!)",
+  "dank":"kiitos; Vielen Dank! = paljon kiitoksia!",
+  "namen":"nimi, taivutusmuoto sanasta der Name",
+  "wohnst":"asut (du wohnst, wohnen-verbi)",
+  "den":"määräinen artikkeli (monikon datiivissa; aus den USA)",
+  "usa":"Yhdysvallat (die USA; aus den USA = Yhdysvalloista)",
+  "münchen":"München (Saksan kaupunki)",
   "example":"esimerkki (verkkotunnuksen paikkamerkki)",
   "com":"verkkotunnuksen osa, ei saksan sana",
 };
