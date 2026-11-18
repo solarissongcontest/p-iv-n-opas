@@ -5,6 +5,7 @@ import { LOS_BOOKS, type LosBookDefinition, type LosChapter } from "./catalog";
 import {losExercisesFor} from "./exerciseBank";
 import {losReadingQuestions} from "./content/los1ReadingBank";
 import { getLosChapterSourceGate } from "./content/sourceRegistry";
+import {los1SupplementalSourceAudit} from "./los1SupplementalAudit";
 import { LosAuthenticAudio, LosDictionary, LosIndexSearch, LosLearningPath, type LosDestination } from "./LosReferenceTools";
 import { LosChapterGrammar } from "./LosGrammarChapters";
 import { LosC01AuthenticText } from "./LosC01AuthenticText";
@@ -335,10 +336,24 @@ function Vocabulary({ chapter, move, bookId }: { chapter: LosChapter; bookId:num
   </section>;
 }
 function Appendix({ book }: { book: LosBookDefinition }) {
+  const supplements=los1SupplementalSourceAudit();
   return <section className="los-inner-page los-appendix">
     <p className="los-eyebrow">LOS! {book.id} / LIITTEET</p>
     <h1>Kirjan liitteet</h1>
     <div className="los-appendix-section"><h2>Kirjan tiedot</h2><dl><div><dt>Moduuli</dt><dd>{book.code} · {book.module}</dd></div><div><dt>Laajuus</dt><dd>2 op</dd></div><div><dt>Oppimäärä</dt><dd>Saksa B3 · LOPS21</dd></div></dl></div>
+    {book.id===1&&<div className="los-appendix-section" aria-label="Autenttisten lisäaineistojen julkaisuauditointi">
+      <h2>Autenttisten lisäaineistojen julkaisutilat</h2>
+      <p>LOS!:n omat Text A–C -opetustekstit ovat erillään näistä valinnaisista ulkoisista aineistoista. Käytettävissä oleva lisäteksti ei ole automaattisesti lopullisesti hyväksytty.</p>
+      <p><strong>{supplements.total} rekisteröityä aineistoa · {supplements.published} kaikkien julkaisuehtojen mukaan hyväksyttyä.</strong> Oikeusvarmistus yksin ei riitä kieli- ja laitetestien hyväksynnäksi.</p>
+      <details className="los-supplemental-audit">
+        <summary>Näytä jokaisen lähteen tarkka tila</summary>
+        <ul>{supplements.pending.map(item=><li key={item.id}>
+          <strong>{item.id} · {item.description}</strong>
+          <p>Tila: {item.stage}. {item.ready?"Julkaisuportit täyttyvät.":item.issues.join(" ")}</p>
+          {item.sourceUrl&&<a href={item.sourceUrl} rel="noopener noreferrer" target="_blank">Aineiston lähdetieto</a>}
+        </li>)}</ul>
+      </details>
+    </div>}
     <div className="los-appendix-section"><h2>Lähteet ja materiaalit</h2><p>Kymmenen kappaleen päätekstit, avointen lähteiden sisään kirjoitetut Text B -sisällöt ja käytössä olevat äänitteet ovat kirjan lukijoissa. Lähteiden oikeus-, kielitason, kuuntelun ja laitetestien portit pysyvät erillisinä. Pelkkä sisältöön integrointi ei merkitse materiaalia lopullisesti julkaisutestattavaksi.</p></div>
     <div className="los-appendix-section"><h2>Opetuspolku, sanakirja ja kappaletestit</h2><p>Opetuspolku ja sanakirja löytyvät kirjan valikosta. LOS! 1:n kaikissa kymmenessä kappaleessa on rajattu automaattisesti tarkistettava alkeistesti, yhteensä 147 osatehtävää. Kymmenen kappaleen lisäksi EX-MID (25 pistettä) ja EX-FINAL (50 pistettä) ovat käytettävissä; loppukokeessa oikeiden alkuperäisäänitteiden on toimittava ennen palautusta. Kuuntelun laitetestaus sekä puheen ja kirjoituksen ihmisen tekemä laadunarviointi ovat vielä erillisiä julkaisuvaatimuksia. LOS! 1:n oma välikoe sisältää 25 pisteytettävää tehtävää ja erillisen itsearvioitavan dialogin. Kappalekohtaisissa muistiinpanoissa on erillinen, salasanalla suojattu manuaalinen pilvisynkronointi, joka vaatii palvelimen käyttöönoton.</p></div>
     <LosBackups bookId={book.id} />
