@@ -22,7 +22,6 @@ export const LOS1_AB_EXTRA_GLOSSES:Readonly<Record<string,string>>={
   "grüße":"terveiset; Grüße = terveisin","viele":"monet / paljon (taivutusmuoto)",
   "mit":"kanssa; tervehdyksen lopussa myös '...terveisin'",
   "von":"-lta / -ltä; jonkun","gast":"vieras","schülerin":"koululainen/opiskelija (tyttö/nainen)",
-  "willkommen":"tervetuloa",
   "freut":"ilahduttaa; Freut mich! = Hauska tutustua!",
   "freue":"iloitsen; Ich freue mich = ilahdun / odotan ilolla",
   "kennenzulernen":"tutustua","nett":"mukava / ystävällinen",
