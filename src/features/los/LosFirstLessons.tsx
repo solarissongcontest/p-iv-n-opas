@@ -8,6 +8,7 @@ import {
   type LosLessonProgress,
 } from "./lessonEngine";
 import { LOS1_EXECUTABLE_LESSONS, los1LessonDraftChapter } from "./guidedLessons";
+import {los1LessonTeaching} from "./los1LessonTeaching";
 import "./los-lessons.css";
 
 const ALL_LESSONS = LOS1_EXECUTABLE_LESSONS;
@@ -49,6 +50,7 @@ export function LosFirstLessons({ selectedId, onSelect, move }: {
   };
   const lesson = ALL_LESSONS.find(item => item.id === selectedId) ?? ALL_LESSONS[0]!;
   const chapterId = lessonChapter(lesson.id);
+  const teaching=los1LessonTeaching(lesson.id);
   const { draft, update, saved } = chapterDraft(lesson.id);
   const [pendingAnswer, setPendingAnswer] = useState("");
   const progress = draft.lessonProgress?.[lesson.id] ?? emptyLosLessonProgress();
@@ -116,6 +118,23 @@ export function LosFirstLessons({ selectedId, onSelect, move }: {
       <p className="los-overline">{lesson.id} · NOIN {lesson.estimatedMinutes} MIN · {lesson.id === "L001" ? "KIRJAN ALOITUS" : chapterId==="93" ? "EX-FINAL / YHTEENVETO" : chapterId==="92" ? "KERTAUS II" : chapterId==="91" ? "KERTAUS I / EX-MID" : `C${chapterId}`}</p>
       <h3>{lesson.title}</h3>
       <p className="los-lesson-objective"><strong>Tavoite:</strong> {lesson.objective}</p>
+      {teaching&&<section className="los-lesson-teaching" aria-label="Oppitunnin oma selitys">
+        <p className="los-overline">OPETTAJAN SELITYS · OPISKELE ENNEN TEHTÄVIÄ</p>
+        <p className="los-lesson-teaching-explanation">{teaching.explanation}</p>
+        <div className="los-lesson-teaching-model">
+          <span>Esimerkki</span>
+          <strong lang="de">{teaching.german}</strong>
+          <p lang="fi">{teaching.finnish}</p>
+        </div>
+        <div className="los-lesson-teaching-caution">
+          <strong>Yleinen väärinkäsitys</strong>
+          <p>{teaching.commonMistake}</p>
+        </div>
+        <div className="los-lesson-teaching-apply">
+          <strong>Kokeile ensin itse</strong>
+          <p>{teaching.apply}</p>
+        </div>
+      </section>}
       <p className="los-lesson-status">{isComplete ? "Oppitunti suoritettu. Voit silti avata aineistot uudelleen." :
         progress.startedAt ? "Oppitunti kesken" : "Oppituntia ei ole vielä aloitettu"} · {stepCount}/{lesson.steps.length} vaihetta merkitty tehdyksi.</p>
       <ol className="los-lesson-steps">
