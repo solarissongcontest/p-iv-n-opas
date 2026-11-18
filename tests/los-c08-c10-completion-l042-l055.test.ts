@@ -51,7 +51,7 @@ test("the five added C08/C10 lesson IDs are canonical, unique, 30 minutes and su
  assert.equal(new Set(LOS1_EXECUTABLE_LESSONS.map(x=>x.id)).size,60);
  for(const lesson of LOS1_C08_C10_COMPLETION_LESSONS){
   const number=Number(lesson.id.slice(1));
-  assert.equal(lesson.title,LOS_1_LESSONS[number-1]?.title);
+  assert.equal(LOS1_EXECUTABLE_LESSONS.find(item=>item.id===lesson.id)?.title,LOS_1_LESSONS[number-1]?.title);
   assert.equal(lesson.estimatedMinutes,30);
   assert.equal(lesson.contentVersion,"1.0.0");
   assert.equal(lesson.steps.length,3);
