@@ -1,4 +1,4 @@
-import {LOS_BOOKS} from "./catalog";
+import {LOS_BOOKS} from "./catalog.ts";
 
 /** Finite, editorially controllable course glossary. A missing entry is shown
  * as unreviewed rather than silently making up a dictionary translation. */
