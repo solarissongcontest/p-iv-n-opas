@@ -29,7 +29,7 @@ export function searchLosFreeDict(
  return [...starts,...contains].slice(0,limit);
 }
 export async function fetchLosFreeDict(pair:LosFreeDictPair,signal?:AbortSignal):Promise<LosFreeDictAsset>{
- const response=await fetch("/los-dictionary/v1/"+pair+".json",{signal});
+ const response=await fetch("/los-dictionary/v1/"+pair+".json",signal?{signal}:{});
  if(!response.ok)throw Error("Sanakirja-aineistoa "+pair+" ei ole asennettu ("+response.status+").");
  const data:unknown=await response.json();
  if(!isLosFreeDictAsset(data,pair))throw Error("Sanakirjan tiedostoa ei voitu vahvistaa.");
