@@ -2,6 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { LOS_1_LESSONS } from "../src/features/los/learningPath.ts";
+import {LOS1_EXECUTABLE_LESSONS} from "../src/features/los/guidedLessons.ts";
 import { LOS1_C03_LESSON_BLUEPRINTS } from "../src/features/los/lessonEngineC03.ts";
 import { LOS1_C02_LESSON_BLUEPRINTS } from "../src/features/los/lessonEngineC02.ts";
 import { LOS1_C01_LESSON_BLUEPRINTS, emptyLosLessonProgress,
@@ -26,7 +27,7 @@ test("L012-L016 follow original 60-lesson ordering and reuse three chapter draft
   assert.equal(LOS_1_LESSONS.length,60);
   LOS1_C03_LESSON_BLUEPRINTS.forEach((lesson,index)=>{
     assert.equal(lesson.id,"L"+String(index+12).padStart(3,"0"));
-    assert.equal(lesson.title,LOS_1_LESSONS[index+11]?.title);
+    assert.equal(LOS1_EXECUTABLE_LESSONS.find(item=>item.id===lesson.id)?.title,LOS_1_LESSONS[index+11]?.title);
     assert.equal(lesson.estimatedMinutes,30);
     assert.equal(lesson.contentVersion,"1.0.0");
     assert.ok(lesson.steps.length>=3);
