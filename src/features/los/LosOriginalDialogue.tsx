@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Check, Eraser, Highlighter, Info, MousePointerClick } from "lucide-react";
 import { useLosChapterDraft } from "./studyState";
-import {los1TokenIPA} from "./los1CourseGlossary";
+import {los1TokenIPADetail} from "./los1CourseGlossary";
 import {losGermanVoices} from "./losSpeech";
 import {losSaveWord,losSavedWordKey} from "./los1SavedVocabulary";
 import { LOS_READER_COLORS, type LosReaderColor } from "./content/c01Annotations";
@@ -184,7 +184,10 @@ export function LosOriginalDialogue(props: LosOriginalDialogueProps) {
     </div>
     {gloss&&<div className="los-c01-gloss" role="status">
       <strong lang="de">{gloss.word}</strong><p>{gloss.meaning}</p>
-      <p><strong>IPA:</strong> <span lang="de">{los1TokenIPA(gloss.word)??"Ei vielä tarkistettua ääntämismerkintää"}</span></p>
+      <p><strong>IPA:</strong> <span lang="de">{los1TokenIPADetail(gloss.word)?.ipa??"Ei saatavilla"}</span>
+        {los1TokenIPADetail(gloss.word)?.source==="espeak-candidate"&&
+          <small> eSpeak-pohjainen koneellinen IPA-ehdotus, ei tarkistettu sanakirjaääntämys</small>}
+      </p>
       <button type="button" onClick={speakWord}>Kuuntele sana</button>
       <button type="button" onClick={addWordToReview}
         disabled={!saved || !props.glossary[gloss.word] || Boolean(draft.savedWords?.[losSavedWordKey(gloss.word)])}>
