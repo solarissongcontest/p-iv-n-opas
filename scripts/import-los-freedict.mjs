@@ -63,7 +63,13 @@ export async function createDictionaryAsset(pair,{fetcher=fetch,output=OUT}={}){
   if(paths.length!==1)throw Error(pair+": TEI-tiedostoa ei löydy yksiselitteisesti.");
   const xml=execFileSync("tar",["-xJOf",file,paths[0]],{encoding:"utf8",maxBuffer:65*1024*1024,timeout:35000});
   const licenses=getLicence(xml);
-  if(!licenses.length)throw Error(pair+": lisenssitietoa ei löytynyt TEI-tiedoston otsakkeesta: julkaisu estetty.");
+  if(!licenses.length){
+    const archiveContents=execFileSync("tar",["-tJf",file],{encoding:"utf8",timeout:25000});
+    const header=xml.slice(0,7500).replace(/\s+/g," ");
+    console.warn("[LOS! FreeDict source inspection] "+pair+" files "+archiveContents.slice(0,1400).replace(/\n/g,"; ")+
+      " TEI header "+header.slice(0,1700));
+    throw Error(pair+": lisenssitietoa ei löytynyt TEI-tiedoston otsakkeesta: julkaisu estetty.");
+  }
   // This distribution is WikDict-derived: check the actual license, not simply the project.
   const label=(licenses.map(x=>x.text+" "+x.url).join(" ")).toLowerCase();
   if(!/(creativecommons\.org\/licenses\/by-sa|gnu\.org\/licenses\/(?:gpl|fdl)|spdx\.org\/licenses\/(?:cc-by-sa|gpl|gfdl))/i.test(label))
