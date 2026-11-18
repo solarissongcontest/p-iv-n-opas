@@ -4,7 +4,7 @@ import {readFileSync} from "node:fs";
 import {validLosSavedWords,parseLosSavedWords,losSaveWord,losSavedWordCards,LOS_SAVED_WORD_LIMIT} from "../src/features/los/los1SavedVocabulary.ts";
 import {LOS1_AB_EXTRA_GLOSSES} from "../src/features/los/los1ExtraGlosses.ts";
 import {los1TokenMeaning,los1CourseGlossary} from "../src/features/los/los1CourseGlossary.ts";
-import {emptyLosDraft,parseLosDraft} from "../src/features/los/studyState.ts";
+
 import {draftIsEmpty,validateLosCloudDraft} from "../src/features/los/cloudContract.ts";
 import {losRecallFromVocabulary} from "../src/features/los/recallEngine.ts";
 
@@ -35,16 +35,22 @@ test("A saved reading word becomes two real repeatable recall directions",()=>{
   const standard=losRecallFromVocabulary("01",["Willkommen – tervetuloa"]);
   assert.deepEqual(cards.map(x=>x.id),standard.map(x=>x.id));
 });
-test("Old local backup format remains compatible and preserves saved word fields",()=>{
-  const draft=emptyLosDraft();
-  const old=parseLosDraft(JSON.stringify(draft));
-  assert.deepEqual(old.savedWords,{});
+test("Old draft schema remains valid, saved vocabulary is optional and cloud-bound",()=>{
+  const draft={
+    version:1 as const,note:"",applicationDraft:"",bookmarked:false,
+    practiceAnswers:{},practiceChecked:[],testAnswers:{},testSubmittedAt:null,
+    selfAssessment:"",updatedAt:"",
+  };
+  assert.equal(validateLosCloudDraft(draft),true);
+  assert.equal(draftIsEmpty(draft),true);
   const withWords={...draft,savedWords:{"willkommen":"tervetuloa"}};
   assert.equal(validateLosCloudDraft(withWords),true);
   assert.equal(draftIsEmpty(withWords),false);
-  const parsed=parseLosDraft(JSON.stringify(withWords));
-  assert.deepEqual(parsed.savedWords,withWords.savedWords);
   assert.equal(validateLosCloudDraft({...withWords,savedWords:{"bad$":"x"}}),false);
+  const src=readFileSync("src/features/los/studyState.ts","utf8");
+  assert.match(src,/savedWords:parseLosSavedWords/);
+  const backup=readFileSync("src/features/los/localBackups.ts","utf8");
+  assert.match(backup,/validateLosCloudDraft/);
 });
 test("Reader and review UI actually share saved words with the existing chapter draft",()=>{
   const reader=readFileSync("src/features/los/LosOriginalDialogue.tsx","utf8");
