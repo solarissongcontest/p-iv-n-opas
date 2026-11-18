@@ -13,16 +13,16 @@ export type LosLesson = {
   destination: "chapter" | "text" | "vocabulary" | "grammar" | "practice" | "appendix";
 };
 const chapterTitles: Record<string, [string, string, string, string, string]> = {
-  "01": ["Aloita saksan ääntämisestä", "Lue Franzin ja Jörgin keskustelu", "Tervehdykset muistista", "Kuuntele ja valitse tervehdys", "Harjoittele ja testaa C01"],
-  "02": ["Miten kysyn nimen?", "Franz ja Greta: kokonainen dialogi", "Heißen ja sein minä–sinä", "Kuuntele ja esittele henkilö", "Harjoittele ja testaa C02"],
-  "03": ["Maat ja paikat", "Lisa Müllerin alkuperäkeskustelu", "Kommen ja woher", "Alkuperä ja karttatehtävät", "Harjoittele ja testaa C03"],
-  "04": ["Milloin du tai Sie?", "Herr Schmidt ja Herr Standish: koko dialogi", "Kohtelias verbinmuoto", "Käytä kohteliaisuusfraaseja", "Harjoittele ja testaa C04"],
-  "05": ["Mitä kuuluu?", "Lue vointidialogi", "Vointifraasit ja nicht", "Vertaa vointidialogeja ja vastaa", "Harjoittele ja testaa C05"],
-  "06": ["Numerot 0–12", "Numerot 13–20 ja ikä", "Numerot 21–100: rakenne", "Kertaa alkuperäinen ikäkeskustelu", "Harjoittele ja testaa C06"],
+  "01": ["Aloita saksan ääntämisestä", "Lue Ainon ja Leonin Text A", "Tervehdykset muistista", "Kuuntele ja valitse tervehdys", "Harjoittele ja testaa C01"],
+  "02": ["Miten kysyn nimen?", "Aino tutustuu Noraan (Text A)", "Heißen ja sein minä–sinä", "Kuuntele ja esittele henkilö", "Harjoittele ja testaa C02"],
+  "03": ["Maat ja paikat", "Aino ja Selma kertovat kotimaansa", "Kommen ja woher", "Alkuperä ja karttatehtävät", "Harjoittele ja testaa C03"],
+  "04": ["Milloin du tai Sie?", "Aino teitittelee Herr Weberiä", "Kohtelias verbinmuoto", "Käytä kohteliaisuusfraaseja", "Harjoittele ja testaa C04"],
+  "05": ["Mitä kuuluu?", "Leonin kuulumiset (Text A)", "Vointifraasit ja nicht", "Vertaa vointidialogeja ja vastaa", "Harjoittele ja testaa C05"],
+  "06": ["Numerot 0–12", "Numerot 13–20 ja ikä", "Numerot 21–100: rakenne", "Lue ikäkeskustelu ja tukiteksti", "Harjoittele ja testaa C06"],
   "07": ["Aakkosten ja nimen kertaus", "Lue tavaamiskeskustelu", "Tavaa ja ymmärrä numeroita", "Tavaa ja täytä harjoituslomake", "Harjoittele ja testaa C07"],
-  "08": ["Selviytymisfraasit", "Luokkatilanteen alkuperäisteksti", "Kuuntelustrategiat ja selityspyynnöt", "Harjoittele vuorovaikutusta", "Harjoittele ja testaa C08"],
-  "09": ["Viikonpäivät", "Lue Sport und Zeit", "Am Montag, um drei Uhr", "Lue ja merkitse kalenteriin", "Harjoittele ja testaa C09"],
-  "10": ["Kokoa esittelyfraasit", "Kuuntele Haraldin haastattelu", "Esittele kolmas henkilö", "Rakenna kaksi keskustelua", "Harjoittele ja testaa C10"],
+  "08": ["Selviytymisfraasit", "Aino pyytää selitystä (Text A)", "Kuuntelustrategiat ja selityspyynnöt", "Harjoittele vuorovaikutusta", "Harjoittele ja testaa C08"],
+  "09": ["Viikonpäivät", "Aino sopii tapaamisesta (Text A)", "Am Montag, um drei Uhr", "Lue ja merkitse kalenteriin", "Harjoittele ja testaa C09"],
+  "10": ["Kokoa esittelyfraasit", "Mila aloittaa kurssilla (Text A)", "Esittele kolmas henkilö", "Rakenna kaksi keskustelua", "Harjoittele ja testaa C10"],
 };
 const phases = ["chapter", "text", "grammar", "text", "practice"] as const;
 const lessons: LosLesson[] = [];
@@ -35,7 +35,7 @@ for (const chapter of LOS_BOOKS[0]?.chapters ?? []) {
     // Neljä erillistä kertaus-/koetuntia ennen kirjan jälkipuoliskoa.
     push("Muistanko tervehtimisen ja esittäytymisen?", "Kertaus I", "01", "practice");
     push("Voinnin ja kohteliaisuuden taitosekoitus", "Kertaus I", "05", "practice");
-    push("Autenttisen keskustelun kertaus (kuuntelu valinnainen)", "Kertaus I", "02", "text");
+    push("Kertaa Text A ja B:n esittäytymisilmaukset", "Kertaus I", "02", "text");
     push("Välikoe: kappaleet 1–5", "Välikoe", null, "appendix");
   }
   const titles = chapterTitles[chapter.id];

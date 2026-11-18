@@ -43,7 +43,7 @@ test("C06 five real numeric lessons match canonical plan and use only existing q
   const source=new Set(LOS1_C06_REVIEW_QUESTIONS.map(x=>x.id));
   for(const [i,lesson] of LOS1_C06_LESSON_BLUEPRINTS.entries()){
     assert.equal(lesson.id,"L"+String(31+i).padStart(3,"0"));
-    assert.equal(lesson.title,LOS_1_LESSONS[30+i]?.title);
+    assert.equal(LOS1_EXECUTABLE_LESSONS.find(item=>item.id===lesson.id)?.title,LOS_1_LESSONS[30+i]?.title);
     assert.equal(lesson.estimatedMinutes,30);
     assert.equal(lesson.contentVersion,"1.0.0");
     assert.ok(lesson.steps.length>=3);

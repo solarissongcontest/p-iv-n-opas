@@ -86,7 +86,7 @@ test("dashboard routes through the book sidebar, does not add an eleventh chapte
   assert.match(bookSource,/Osaaminen ja eteneminen/);
   assert.match(view,/getLosStudyProgressSnapshot/);
   assert.match(view,/Puuttuvia 60 tunnin sisältöjä ei lasketa valmiiksi/);
-  assert.match(view,/Päätekstin julkaisu- tai laadunvarmistusportteja on vielä kesken/);
+  assert.match(view,/Erillisen autenttisen lisälähteen hyväksyntä on vielä kesken/);
   assert.match(view,/Sanakorttisuuntaa itse muistetuiksi arvioitu/);
   assert.doesNotMatch(bookSource,/id:"progress", label:/);
   assert.match(view,/useLosChapterDraft\(1,"91"\)/);

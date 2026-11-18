@@ -1,6 +1,6 @@
 import type { LosBookDefinition } from "./catalog.ts";
 import type { LosChapterDraft } from "./studyState.ts";
-import { losScore } from "./exerciseBank.ts";
+import {losChapterExamScore} from "./los1ChapterExams.ts";
 import { LOS1_EXECUTABLE_LESSONS,isLos1ExecutableLesson,los1LessonDraftChapter } from "./guidedLessons.ts";
 import { LOS_1_LESSONS } from "./learningPath.ts";
 import { losExamScore, LOS1_MIDTERM_QUESTIONS } from "./content/los1Exams.ts";
@@ -31,7 +31,7 @@ export function getLosStudyProgressSnapshot(book:LosBookDefinition,drafts:Readon
     const d=drafts[ch.id];
     const actual=LOS1_EXECUTABLE_LESSONS.filter(lesson=>los1LessonDraftChapter(lesson.id)===ch.id);
     const completed=actual.filter(l=>Boolean(d?.lessonProgress?.[l.id]?.completedAt)).length;
-    const scored=d?.testSubmittedAt?losScore(ch.id,d.testAnswers):null;
+    const scored=d?.testSubmittedAt?losChapterExamScore(ch.id,d.testAnswers):null;
     const cards=losRecallFromVocabulary(ch.id,ch.vocabulary);
     const states=d?.recallCards??{};
     const reviewed=cards.filter(card=>Boolean(states[card.id]));

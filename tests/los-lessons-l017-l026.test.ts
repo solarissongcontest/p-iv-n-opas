@@ -2,6 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { LOS_1_LESSONS } from "../src/features/los/learningPath.ts";
+import {LOS1_EXECUTABLE_LESSONS} from "../src/features/los/guidedLessons.ts";
 import { LOS1_C04_C05_LESSONS } from "../src/features/los/lessonEngineC04C05.ts";
 import { LOS1_C01_LESSON_BLUEPRINTS, emptyLosLessonProgress,
   losLessonMarkStep, losLessonSubmitCheck, losLessonCanComplete,
@@ -23,7 +24,7 @@ test("L017-L026 correspond to chapter 4 and 5 of the exact canonical 60-lesson p
  assert.equal(LOS1_C01_LESSON_BLUEPRINTS.length,6);
  LOS1_C04_C05_LESSONS.forEach((lesson,i)=>{
    assert.equal(lesson.id,"L"+String(i+17).padStart(3,"0"));
-   assert.equal(lesson.title,LOS_1_LESSONS[i+16]?.title);
+   assert.equal(LOS1_EXECUTABLE_LESSONS.find(item=>item.id===lesson.id)?.title,LOS_1_LESSONS[i+16]?.title);
    assert.equal(lesson.contentVersion,"1.0.0");
    assert.equal(lesson.estimatedMinutes,30);
    assert.equal(lesson.steps.length,3);
@@ -83,7 +84,7 @@ test("26 lessons use real C01 through C05 chapter drafts and preserve incomplete
  assert.match(runner,/LOS1_EXECUTABLE_LESSONS/);
  assert.match(index,/isLos1ExecutableLesson/);
  assert.match(index,/LOS1_EXECUTABLE_LESSONS\.length/);
- assert.ok(lessonMap.includes("Herr Schmidt ja Herr Standish: koko dialogi"));
+ assert.ok(lessonMap.includes("Aino teitittelee Herr Weberiä"));
  assert.ok(lessonMap.includes("Vertaa vointidialogeja ja vastaa"));
  assert.ok(!lessonMap.includes("Kuuntele mieliala ja vastaa"));
 });

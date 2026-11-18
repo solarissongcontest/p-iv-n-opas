@@ -5,6 +5,9 @@ import { LOS1_REVISED_C } from "./content/los1RevisedC";
 import { LOS1_C_SPEECH_BLOCKS, LOS1_C_AUDIO_EXAMPLES } from "./content/los1SupportSpeech";
 import { LosReadingExercises, LosReadingUnderstanding } from "./LosReadingExercises";
 import { losGermanVoices, losSpeakerSlot, losSpeechSegments } from "./losSpeech";
+import {LosOriginalDialogue} from "./LosOriginalDialogue";
+import {los1CanonicalLines,LOS1_CANONICAL_VERSION} from "./los1Canonical";
+import {los1CourseGlossary} from "./los1CourseGlossary";
 import "./los-revised-texts.css";
 
 /** These pages show LOS!-authored drafts. They are NOT authentic source transcripts. */
@@ -16,10 +19,6 @@ function inlineContent(value: string): ReactNode[] {
     if (part.startsWith("*") && part.endsWith("*")) return <em key={index} lang="de">{part.slice(1, -1)}</em>;
     return <span key={index}>{part}</span>;
   });
-}
-function dialogueLine(value: string): { speaker: string; words: string } | null {
-  const match = /^\*\*([^*]+):\*\*\s*(.*)$/.exec(value);
-  return match ? { speaker: match[1] ?? "", words: match[2] ?? "" } : null;
 }
 function TextSpeech({ blocks, chapterId, kind }: { blocks: readonly ReaderBlock[]; chapterId:string; kind:"A"|"B"|"C" }) {
   const [isSpeaking, setIsSpeaking] = useState(false);
@@ -113,22 +112,6 @@ function TextSpeech({ blocks, chapterId, kind }: { blocks: readonly ReaderBlock[
   </div>;
 }
 
-function ReaderLines({ blocks }: { blocks: readonly ReaderBlock[] }) {
-  return <div className="los-revised-dialogue">
-    {blocks.map((block, index) => {
-      if (block.kind === "break") return <hr key={index} className="los-revised-pause" />;
-      const value = block.text ?? "";
-      if (block.kind === "stage") return <p key={index} className="los-revised-stage">{inlineContent(value)}</p>;
-      const line = dialogueLine(value);
-      if (line) return <div className="los-revised-line" key={index}>
-        <strong className="los-revised-speaker">{line.speaker}</strong>
-        <p lang="de">{inlineContent(line.words)}</p>
-      </div>;
-      return <p key={index} lang="de" className="los-revised-prose">{inlineContent(value)}</p>;
-    })}
-  </div>;
-}
-
 export function LosRevisedTextPage({ chapterId, kind }: { chapterId: string; kind: "A" | "B" }) {
   const chapter = LOS1_REVISED_AB.chapters.find(candidate => candidate.chapterId === "C" + chapterId);
   if (!chapter) return <div role="status">Tämän kappaleen tekstiä ei löydy sisältöaineistosta.</div>;
@@ -138,7 +121,18 @@ export function LosRevisedTextPage({ chapterId, kind }: { chapterId: string; kin
     <h1 id={"los-revised-heading-" + chapterId + kind} lang="de">{source.title}</h1>
     <p className="los-page-intro">{kind === "A" ? "Kappaleen uusi pääteksti. Lue ensin tilanteen kuvaus ja seuraa keskustelua." : "Toinen tekstilaji. Harjoittele kappaleen ilmauksia uudessa tilanteessa."}</p>
     <TextSpeech blocks={source.blocks} chapterId={chapterId} kind={kind} />
-    <ReaderLines blocks={source.blocks} />
+    <LosOriginalDialogue
+      chapterId={chapterId}
+      sourceId={kind==="A"?"los-own-text-a":"los-own-text-b"}
+      version={LOS1_CANONICAL_VERSION}
+      heading="Tekstin sanat ja omat korostukset"
+      usageLabel={"LOS!:N OMA TEKSTI · TEXT "+kind}
+      guidance="Napauta saksankielistä sanaa avataksesi tarkistetun selityksen. Valitse korostustussi ja merkitse haluamasi kohdat. Merkinnät tallennetaan omaan opiskelutilaasi."
+      lines={los1CanonicalLines(chapterId,kind).map(line=>({...line,meaning:""}))}
+      glossary={los1CourseGlossary(chapterId)}
+      author="LOS!" sourceTitle={source.title} sourceUrl="" license="LOS!:n oma opetusteksti" licenseUrl=""
+      sourceDetail="" isOwnText
+    />
     {kind === "B" && <LosReadingExercises chapterId={chapterId} text="B" />}
     <aside className="los-revised-disclaimer" role="note">
       <strong>LOS!:n oma opetusteksti · toimitusluonnos</strong>
@@ -231,6 +225,29 @@ function renderSupportMarkdown(source: string): ReactNode[] {
   return rendered;
 }
 
+function LosCInteractiveExamples({chapterId}: {chapterId:string}) {
+  const [show,setShow] = useState(false);
+  const examples = LOS1_C_SPEECH_BLOCKS[chapterId]??[];
+  return <section className="los-revised-supplement los-c-interactive-words" aria-label="Saksankielisten mallien sanakohtainen lukija">
+    <button type="button" className="los-revised-supplement-toggle"
+      aria-expanded={show} aria-controls={"los-c-words-"+chapterId} onClick={()=>setShow(state=>!state)}>
+      {show?"Piilota sanakohtainen harjoittelu":"Avaa saksankielisten mallien sanaselitykset ja korostukset"}
+    </button>
+    {show&&<div id={"los-c-words-"+chapterId} className="los-revised-supplement-content">
+      <LosOriginalDialogue chapterId={chapterId} sourceId="los-own-text-c"
+        version={LOS1_CANONICAL_VERSION} heading="Text C:n saksankieliset mallit"
+        usageLabel="LOS!:N OMA TEKSTI · TEXT C"
+        guidance="Napauta sanaa nähdäksesi sen merkityksen tai valitse korostustussi. Samat mallit voi kuunnella tukitekstin kuuntelupainikkeella."
+        lines={examples.map((block,index)=>({
+          id:"e"+String(index).padStart(3,"0"),speaker:"",text:block.text,meaning:"",
+        }))}
+        glossary={los1CourseGlossary(chapterId)}
+        author="LOS!" sourceTitle="Text C · Hilfstext" sourceUrl="" license="LOS!:n oma tukiteksti"
+        licenseUrl="" sourceDetail="" isOwnText/>
+    </div>}
+  </section>;
+}
+
 export function LosHilfstextPage({ chapterId }: { chapterId: string }) {
   const page = LOS1_REVISED_C.chapters.find(chapter => chapter.chapterId === chapterId);
   if (!page) return <div role="status">Tämän kappaleen tukitekstiä ei löydy sisältöaineistosta.</div>;
@@ -244,6 +261,7 @@ export function LosHilfstextPage({ chapterId }: { chapterId: string }) {
       <TextSpeech blocks={LOS1_C_SPEECH_BLOCKS[chapterId]??[]} chapterId={chapterId} kind="C" />
     </aside>
     <div className="los-revised-support-content">{renderSupportMarkdown(page.contentMarkdown)}</div>
+    <LosCInteractiveExamples chapterId={chapterId} />
     <LosReadingExercises chapterId={chapterId} text="C" />
     <aside className="los-revised-disclaimer" role="note">
       <BookOpen size={18} aria-hidden="true" />

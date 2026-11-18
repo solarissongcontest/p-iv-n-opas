@@ -53,7 +53,7 @@ export function LosStudyProgress({book,move}:{book:LosBookDefinition;move:LosNav
     <div className="los-progress-chapters">
       {data.chapters.map(ch=><article key={ch.id} className="los-progress-chapter">
         <div className="los-progress-chapter-head"><span className="los-progress-num">{ch.id}</span><div><h3>{ch.title}</h3><p>{ch.completed}/{ch.available} toteutetusta oppitunnista suoritettu · Kappaletesti {ch.scored?ch.scored.correct+"/"+ch.scored.total:"ei palautettu"}</p></div></div>
-        <p className="los-progress-source">{ch.sourceReady?"Päätekstin kaikki julkaisuportit täyttyvät.":"Päätekstin julkaisu- tai laadunvarmistusportteja on vielä kesken."}</p>
+        <p className="los-progress-source">LOS!:n Text A–C -opetustekstit ovat luettavissa. {ch.sourceReady?"Erillinen autenttinen lisälähde on julkaistuksi hyväksytty.":"Erillisen autenttisen lisälähteen hyväksyntä on vielä kesken. Se ei estä LOS!:n oman päätekstin lukemista."}</p>
         <div className="los-progress-actions">
           <button type="button" onClick={()=>move(ch.id,"chapter")}><BookOpen size={15}/> Avaa kappale</button>
           <button type="button" onClick={()=>move(ch.id,"cards")}><RotateCcw size={15}/> Kertaa sanastoa</button>

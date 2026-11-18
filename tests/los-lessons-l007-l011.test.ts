@@ -2,6 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { LOS_1_LESSONS } from "../src/features/los/learningPath.ts";
+import {LOS1_EXECUTABLE_LESSONS} from "../src/features/los/guidedLessons.ts";
 import { LOS1_C01_LESSON_BLUEPRINTS, emptyLosLessonProgress,
   losLessonMarkStep, losLessonSubmitCheck, losLessonFinish,
   losLessonCanComplete, losLessonEvidenceMet,
@@ -33,7 +34,7 @@ test("C02 L007-L011 are the next exact five lessons in the existing 60-lesson pl
   assert.equal(LOS_1_LESSONS.length,60);
   for (const [index,lesson] of LOS1_C02_LESSON_BLUEPRINTS.entries()) {
     assert.equal(lesson.id, "L"+String(index+7).padStart(3,"0"));
-    assert.equal(lesson.title, LOS_1_LESSONS[index+6]?.title);
+    assert.equal(LOS1_EXECUTABLE_LESSONS.find(item=>item.id===lesson.id)?.title,LOS_1_LESSONS[index+6]?.title);
     assert.equal(lesson.estimatedMinutes,30);
     assert.equal(lesson.contentVersion,"1.0.0");
     assert.ok(lesson.steps.length>=3);

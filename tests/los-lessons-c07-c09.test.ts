@@ -56,7 +56,7 @@ test("chapter 7 and 9 lesson titles and source references match existing book pa
   const existingPractice=new Set([...losExercisesFor("07"),...losExercisesFor("09")].map(q=>q.id));
   for(const lesson of LOS1_C07_C09_LESSONS) {
     const index=Number(lesson.id.slice(1))-1;
-    assert.equal(lesson.title,LOS_1_LESSONS[index]?.title);
+    assert.equal(LOS1_EXECUTABLE_LESSONS.find(l=>l.id===lesson.id)?.title,LOS_1_LESSONS[index]?.title);
     assert.equal(lesson.estimatedMinutes,30);
     assert.equal(lesson.contentVersion,"1.0.0");
     assert.equal(lesson.steps.length,3);

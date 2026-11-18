@@ -327,10 +327,10 @@ test("revised Text A, Text B and supporting Text C are available in every LOS! 1
   for(const chapter of chapters){
     await openChapter(page,chapter,"text");
     await expect(page.locator(".los-revised-page h1").first()).toBeVisible();
-    await expect(page.locator(".los-revised-dialogue")).toBeVisible();
+    await expect(page.locator(".los-revised-page .los-c01-turns")).toBeVisible();
     await openChapter(page,chapter,"text-b");
     await expect(page.locator(".los-revised-page h1").first()).toBeVisible();
-    await expect(page.locator(".los-revised-dialogue")).toBeVisible();
+    await expect(page.locator(".los-revised-page .los-c01-turns")).toBeVisible();
     await openChapter(page,chapter,"text-c");
     await expect(page.locator(".los-revised-support h1")).toBeVisible();
     await expect(page.locator(".los-revised-support-content")).toBeVisible();

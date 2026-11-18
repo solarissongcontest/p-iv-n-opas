@@ -7,6 +7,8 @@ import { LOS1_EXECUTABLE_LESSONS, isLos1ExecutableLesson } from "./guidedLessons
 
 export type LosDestination = "overview" | "contents" | "chapter" | "text" | "understand" | "vocabulary" | "grammar" | "text-b" | "text-c" | "practice" | "apply" | "culture" | "test" | "appendix" | "dictionary" | "path" | "search" | "midterm" | "review" | "review-ii" | "cards" | "progress" | "final" | "summary" | "facsimile";
 import {searchLos1OriginalTexts} from "./content/los1TextSearch";
+import {LOS1_REVISED_AB} from "./content/los1RevisedAB";
+import {LOS1_REVISED_C} from "./content/los1RevisedC";
 export type LosNavigate = (chapter: string | null, section: LosDestination) => void;
 type WordEntry = { book: number; code: string; chapter: string; title: string; word: string; meaning: string };
 const DICTIONARY = LOS_BOOKS.flatMap(book => book.chapters.flatMap(chapter =>
@@ -107,7 +109,7 @@ export function LosLearningPath({ book, move }: { book: LosBookDefinition; move:
     </section>)}
   </section>;
 }
-type LosSearchHit={id:string;kind:"Kirja"|"Kappale"|"Kielioppi"|"Sanasto"|"Tavoite"|"Alkuperäisteksti";title:string;description:string;chapter:string|null;section:LosDestination};
+type LosSearchHit={id:string;kind:"Kirja"|"Kappale"|"Kielioppi"|"Sanasto"|"Tavoite"|"Alkuperäisteksti"|"LOS!-teksti";title:string;description:string;chapter:string|null;section:LosDestination};
 export function LosIndexSearch({book,move}:{book:LosBookDefinition;move:LosNavigate}) {
   const [query,setQuery]=useState("");
   const hits=useMemo<LosSearchHit[]>(()=>{
@@ -117,6 +119,38 @@ export function LosIndexSearch({book,move}:{book:LosBookDefinition;move:LosNavig
     const add=(item:LosSearchHit)=>{if ((item.title+" "+item.description).toLocaleLowerCase("fi").includes(q))out.push(item);};
     add({id:"book",kind:"Kirja",title:book.title,description:book.summary,chapter:null,section:"overview"});
     if(book.id===1){
+      // Canonical texts first: the current A/B/C are the textbook, old authentic
+      // transcripts are optional extras with a separate publication gate.
+      for(const chapter of LOS1_REVISED_AB.chapters){
+        const chapterId=chapter.chapterId.slice(1);
+        for(const [kind,entry,section] of [
+          ["A",chapter.textA,"text"],["B",chapter.textB,"text-b"],
+        ] as const){
+          add({id:"los-own-"+chapterId+"-"+kind+"-title",kind:"LOS!-teksti",
+            title:"C"+chapterId+" · Text "+kind+" · "+entry.title,
+            description:kind==="A"?"Uusi tarinallinen pääteksti":"Täydentävä opetusteksti",
+            chapter:chapterId,section});
+          for(const [index,line] of entry.blocks.entries()){
+            if(line.kind!=="prose"||!("text" in line))continue;
+            const full=line.text.replace(/\*\*/g,"").replace(/\*/g,"");
+            add({id:"los-own-"+chapterId+"-"+kind+"-"+index,kind:"LOS!-teksti",
+              title:"C"+chapterId+" · Text "+kind+" · "+entry.title,
+              description:full,chapter:chapterId,section});
+          }
+        }
+      }
+      for(const page of LOS1_REVISED_C.chapters){
+        add({id:"los-own-"+page.chapterId+"-C-title",kind:"LOS!-teksti",
+          title:"C"+page.chapterId+" · Text C · "+page.title,
+          description:page.purpose,chapter:page.chapterId,section:"text-c"});
+        for(const [index,line] of page.contentMarkdown.split("\n").entries()){
+          if(!line.trim() || /^\s*\|[:\s-]+\|?\s*$/.test(line))continue;
+          add({id:"los-own-"+page.chapterId+"-C-"+index,kind:"LOS!-teksti",
+            title:"C"+page.chapterId+" · Text C · "+page.title,
+            description:line.replace(/\*\*/g,"").replace(/\*/g,"").replace(/^#+\s*/,""),
+            chapter:page.chapterId,section:"text-c"});
+        }
+      }
       for(const line of searchLos1OriginalTexts(q,55)){
         add({
           id:"original-"+line.id,kind:"Alkuperäisteksti",
@@ -137,7 +171,7 @@ export function LosIndexSearch({book,move}:{book:LosBookDefinition;move:LosNavig
   return <section className="los-inner-page los-index-search-page">
     <p className="los-eyebrow">HAKU · {book.code}</p>
     <h1>Hae kirjasta</h1>
-    <p className="los-page-intro">Hae kappaleiden nimistä, sanastosta, kieliopista, osaamistavoitteista sekä kaikista kymmenestä alkuperäisestä Teksti A -lukijasta ja niiden käytettävissä olevista kokonaisista Teksti B -litteraateista. Voit hakea myös saksankielisten repliikkien suomennoksia. Hakutulos avaa tekstin suoraan LOS!:n sisällä.</p>
+    <p className="los-page-intro">Hae kappaleiden nimistä, sanastosta, kieliopista, osaamistavoitteista sekä uusien Text A–C -tekstien saksankielisistä repliikeistä ja suomenkielisistä tukiselityksistä. Vanhat autenttiset lähdetekstit säilyvät erillisinä lisäaineistoina. Hakutulos avaa oikean kirjansivun.</p>
     <label className="los-index-search"><Search size={19}/><span className="sr-only">Hae tästä oppikirjasta</span><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Hae sanaa, kappaletta tai kielioppia" /></label>
     {!query.trim()?<p className="los-index-footnote">Voit kokeilla esimerkiksi hakusanoja <b lang="de">heißen</b>, <b lang="de">Hallo</b> tai <b lang="de">kommen</b>.</p>:
       <><p className="los-index-count">{hits.length} tulosta</p>
