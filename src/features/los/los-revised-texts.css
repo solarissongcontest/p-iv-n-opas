@@ -85,3 +85,6 @@
 .los-revised-page.is-reading-focus .los-study-layout-toggle{position:sticky;top:0;z-index:4;background:var(--los-paper);border-bottom:1px solid var(--los-line);padding:.45rem 0}
 @media(max-width:680px){.los-revised-page.is-reading-focus .los-study-layout-toggle{position:static}}
 @media(prefers-reduced-motion:reduce){.los-revised-page *{scroll-behavior:auto!important;transition:none!important}}
+
+.los-book-workspace:has(.los-revised-page.is-reading-focus) .los-book-layout{display:block;max-width:980px;margin-inline:auto}
+.los-book-workspace:has(.los-revised-page.is-reading-focus) .los-book-main{min-width:0;max-width:980px;width:100%;margin-inline:auto}
