@@ -327,3 +327,7 @@
 .los-freedict-row span{line-height:1.55;overflow-wrap:anywhere}
 .los-freedict a{color:var(--los-book-accent);text-decoration:underline}
 @media(max-width:460px){.los-freedict-head,.los-freedict-row{grid-template-columns:minmax(90px,1fr) minmax(110px,1.45fr);gap:.5rem;padding:.7rem}}
+
+
+.los-vocab-ipa{display:block;color:var(--los-soft);font-weight:450;font-size:.78rem;line-height:1.55;margin-top:.25rem;overflow-wrap:anywhere}
+@media(forced-colors:active){.los-freedict-row,.los-revised-page.is-reading-focus{forced-color-adjust:auto}}
