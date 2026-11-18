@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { ArrowLeft, ArrowRight, BookOpen, ChevronLeft, ChevronRight, Headphones, List, Menu, Search, X } from "lucide-react";
 import { readCachedDeviceUser } from "@/lib/deviceSession";
 import { LOS_BOOKS, type LosBookDefinition, type LosChapter } from "./catalog";
+import {losExercisesFor} from "./exerciseBank";
+import {losReadingQuestions} from "./content/los1ReadingBank";
 import { getLosChapterSourceGate } from "./content/sourceRegistry";
 import { LosAuthenticAudio, LosDictionary, LosIndexSearch, LosLearningPath, type LosDestination } from "./LosReferenceTools";
 import { LosChapterGrammar } from "./LosGrammarChapters";
@@ -345,7 +347,24 @@ function Appendix({ book }: { book: LosBookDefinition }) {
 function LosBookWorkspace({ book, location, move, goLibrary, openBook }: { book: LosBookDefinition; location: LosLocation; move: (chapter: string | null, section: LosSection) => void; goLibrary: () => void; openBook: (id: number) => void }) {
   const chapter = book.chapters.find(c => c.id === location.chapter) ?? null;
   const [tocOpen, setTocOpen] = useState(false);
+  const [tocSearch,setTocSearch] = useState("");
+  const [expanded,setExpanded] = useState<Record<string,boolean>>({});
+  const [focusTask,setFocusTask] = useState<string|null>(null);
   useEffect(() => setTocOpen(false), [location]);
+  useEffect(()=>{
+    if(!focusTask)return;
+    const timer=window.setTimeout(()=>{
+      const node=document.getElementById(focusTask);
+      if(node){node.scrollIntoView({behavior:"smooth",block:"start"});setFocusTask(null);}
+    },80);
+    return ()=>window.clearTimeout(timer);
+  },[focusTask,location]);
+  const openTask=(ch:string,section:LosSection,taskId:string)=>{
+    setFocusTask(taskId);
+    move(ch,section);
+  };
+  const filteredChapters=book.chapters.filter(ch=>(ch.id+" "+ch.title+" "+ch.subtitle)
+    .toLocaleLowerCase("fi").includes(tocSearch.trim().toLocaleLowerCase("fi")));
   const openChapter = (ch: LosChapter) => move(ch.id, "chapter");
   const previousIndex = chapter ? book.chapters.findIndex(c => c.id === chapter.id) : -1;
   const next = previousIndex >= 0 ? book.chapters[previousIndex + 1] : null;
@@ -363,7 +382,55 @@ function LosBookWorkspace({ book, location, move, goLibrary, openBook }: { book:
         <div className="los-sidebar-heading">KIRJAN SIVUT</div>
         <nav>
           <button className={section === "contents" ? "is-active" : ""} onClick={() => move(null, "contents")}>Sisällysluettelo</button>
-          {book.chapters.map(ch => <button key={ch.id} className={chapter?.id === ch.id ? "is-active" : ""} onClick={() => openChapter(ch)}><span className="los-sidebar-num">{ch.id}</span><span lang="de">{ch.title}</span></button>)}
+          <div className="los-sidebar-tree-controls">
+             <label className="los-sidebar-tree-search"><Search size={14} aria-hidden="true"/><span className="sr-only">Suodata kappaleita</span><input
+               value={tocSearch} onChange={event=>setTocSearch(event.target.value)} placeholder="Etsi kappaletta"/></label>
+             <div className="los-sidebar-tree-actions">
+               <button type="button" onClick={()=>setExpanded(Object.fromEntries(book.chapters.map(ch=>[ch.id,true])))}>Avaa kaikki</button>
+               <button type="button" onClick={()=>setExpanded(Object.fromEntries(book.chapters.map(ch=>[ch.id,false])))}>Sulje kaikki</button>
+             </div>
+           </div>
+           {filteredChapters.map(ch=>{
+             const isExpanded=expanded[ch.id]??chapter?.id===ch.id;
+             return <div className="los-sidebar-chapter-group" key={ch.id}>
+               <div className="los-sidebar-chapter-head">
+                 <button type="button" className={chapter?.id===ch.id?"is-active":""}
+                   aria-current={chapter?.id===ch.id?"page":undefined}
+                   onClick={()=>openChapter(ch)}><span className="los-sidebar-num">{ch.id}</span><span lang="de">{ch.title}</span></button>
+                 <button type="button" className="los-sidebar-chapter-expand"
+                   aria-label={(isExpanded?"Sulje ":"Avaa ")+ch.title+"-kappaleen alavalikko"}
+                   aria-expanded={isExpanded} onClick={()=>setExpanded(prev=>({...prev,[ch.id]:!isExpanded}))}>
+                   {isExpanded?"−":"+"}
+                 </button>
+               </div>
+               {isExpanded&&<div className="los-sidebar-chapter-children" aria-label={"Kappaleen "+ch.id+" sivut"}>
+                 {sections.slice(1).map(item=><div key={item.id}>
+                   <button type="button" className={chapter?.id===ch.id&&section===item.id?"is-active":""}
+                     aria-current={chapter?.id===ch.id&&section===item.id?"page":undefined}
+                     onClick={()=>move(ch.id,item.id)}>{item.label}</button>
+                   {book.id===1 && item.id==="understand" && <details className="los-sidebar-task-group">
+                     <summary>Tekstitehtävät · 15</summary>
+                     {(["A","B","C"] as const).map(kind=>
+                       <div key={kind} className="los-sidebar-task-kind">
+                         <span>Text {kind}</span>
+                         {losReadingQuestions(ch.id,kind).map((item,i)=>
+                           <button type="button" key={item.id} title={item.prompt}
+                             onClick={()=>openTask(ch.id,kind==="A"?"text":kind==="B"?"text-b":"text-c",item.id)}>
+                             Tehtävä {i+1} · {item.kind==="choice"?"Valinta":"Oma vastaus"}
+                           </button>)}
+                       </div>)}
+                   </details>}
+                   {book.id===1 && item.id==="practice" && <details className="los-sidebar-task-group">
+                     <summary>Harjoitukset · {losExercisesFor(ch.id).length}</summary>
+                     {losExercisesFor(ch.id).map((task,i)=><button type="button" key={task.id}
+                       title={task.prompt} onClick={()=>openTask(ch.id,"practice",task.id)}>
+                       Harjoitus {i+1} · {task.skill}
+                     </button>)}
+                   </details>}
+                 </div>)}
+               </div>}
+             </div>;
+           })}
           <div className="los-sidebar-heading">HAKEMISTOT</div>
           <button className={section === "path" ? "is-active" : ""} onClick={() => move(null, "path")}>Ohjattu opetuspolku</button>
           {book.id===1&&<button className={section === "progress" ? "is-active" : ""} onClick={() => move(null, "progress")}>Osaaminen ja eteneminen</button>}

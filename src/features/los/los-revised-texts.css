@@ -35,3 +35,38 @@
 .los-revised-supplement-toggle{display:block;width:100%;min-height:44px;padding:.8rem 1rem;border:1px solid color-mix(in srgb,var(--los-ink) 18%,transparent);border-radius:8px;text-align:left;font:inherit;font-weight:700;line-height:1.55;color:var(--los-ink);background:var(--los-paper);cursor:pointer}
 .los-revised-supplement-toggle:hover,.los-revised-supplement-toggle:focus-visible{border-color:var(--los-book-accent);outline-offset:2px}
 .los-revised-supplement-content{padding:1.25rem 0}
+
+
+/* v3.3: one answer controller, optional twin-pane study workspace.
+   Below a usable desktop width, the same question component moves below
+   the reading without overlays, duplicated inputs or unsaved drafts. */
+.los-study-layout-toggle{display:inline-flex;gap:4px;flex-wrap:wrap;margin:12px 0 21px;padding:4px;border:1px solid var(--los-line);border-radius:10px;background:var(--los-subtle)}
+.los-study-layout-toggle button{border:0;border-radius:7px;min-height:44px;padding:9px 14px;background:transparent;color:var(--los-ink);font-weight:700;font-size:.9rem}
+.los-study-layout-toggle button.is-active{background:var(--los-paper);color:var(--los-book-accent);box-shadow:0 1px 4px rgb(0 0 0 / .08)}
+.los-study-layout{display:flex;flex-direction:column;gap:26px;min-width:0}
+.los-study-reading,.los-study-questions{min-width:0}
+.los-study-questions{padding-top:18px;border-top:1px solid var(--los-line)}
+.los-reading-compact-nav{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:1rem 0;padding:.4rem 0}
+.los-reading-compact-nav button{border:1px solid var(--los-line);background:var(--los-paper);color:var(--los-ink);border-radius:8px;min-height:44px;padding:8px 12px;font-size:.85rem}
+.los-reading-compact-nav button:disabled{opacity:.45;cursor:not-allowed}
+.los-reading-compact-nav span{font-variant-numeric:tabular-nums;font-size:.82rem;font-weight:700;text-align:center}
+.los-book-layout:has(.los-revised-page.is-study-split){max-width:1640px;grid-template-columns:260px minmax(0,1fr)}
+.los-book-main:has(.los-revised-page.is-study-split){padding-inline:clamp(18px,2.2vw,36px)}
+.los-book-paper:has(.los-revised-page.is-study-split){max-width:none}
+.los-reading-page:has(.los-revised-page.is-study-split){max-width:none;padding:32px clamp(16px,2.4vw,38px) 66px}
+.los-revised-page.is-study-split{max-width:none}
+@media (min-width:1400px){
+  .los-study-layout.is-split{display:grid;grid-template-columns:minmax(420px,1fr) minmax(325px,380px);gap:24px;align-items:start}
+  .los-study-layout.is-split .los-study-reading{max-width:74ch}
+  .los-study-layout.is-split .los-study-questions{position:sticky;top:84px;max-height:calc(100dvh - 106px);overflow-y:auto;overscroll-behavior:contain;padding:15px 16px;border:1px solid var(--los-line);border-radius:12px;background:var(--los-paper)}
+  .los-study-layout.is-split .los-reading-exercises-head h2{font-size:1.3rem}
+  .los-study-layout.is-split .los-reading-question{max-width:100%}
+}
+@media(max-width:1399px){
+  .los-study-layout.is-split .los-study-questions{border:1px solid var(--los-line);border-radius:10px;padding:16px;max-width:780px}
+}
+@media(max-width:700px){
+  .los-study-layout-toggle{display:flex;width:100%}
+  .los-study-layout-toggle button{flex:1 1 auto}
+  .los-study-layout.is-split .los-study-questions{padding:12px}
+}

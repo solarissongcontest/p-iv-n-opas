@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useLosChapterDraft } from "./studyState";
 import { losReadingQuestionCorrect, losReadingQuestions, type LosReadingItem, type LosReadingText } from "./content/los1ReadingBank";
 import "./los-reading-exercises.css";
@@ -82,7 +83,8 @@ function ReadingQuestion({ question, index, draftController }: {
   </li>;
 }
 
-export function LosReadingExercises({chapterId,text}: {chapterId:string;text:LosReadingText}) {
+export function LosReadingExercises({chapterId,text,compact=false}: {chapterId:string;text:LosReadingText;compact?:boolean}) {
+  const [questionIndex,setQuestionIndex]=useState(0);
   const controller=useLosChapterDraft(1,chapterId);
   const questions=losReadingQuestions(chapterId,text);
   if(!questions.length)return <p role="status">Tämän tekstin ymmärtämistehtävät puuttuvat.</p>;
@@ -108,8 +110,15 @@ export function LosReadingExercises({chapterId,text}: {chapterId:string;text:Los
       {answered} vastattu · {objectiveChecked ? correct+"/"+objectiveChecked+" automaattisesti oikein · " : ""}
       Avoimet vastaukset arvioidaan itse.
     </p>
-    <ol className="los-reading-question-list">
-      {questions.map((question,index)=><ReadingQuestion key={question.id} question={question} index={index} draftController={controller}/>)}
+    {compact&&<nav className="los-reading-compact-nav" aria-label="Siirry tekstitehtävästä toiseen">
+      <button type="button" disabled={questionIndex<=0} onClick={()=>setQuestionIndex(n=>Math.max(0,n-1))}>Edellinen</button>
+      <span>Tehtävä {questionIndex+1} / {questions.length}</span>
+      <button type="button" disabled={questionIndex>=questions.length-1}
+        onClick={()=>setQuestionIndex(n=>Math.min(questions.length-1,n+1))}>Seuraava</button>
+    </nav>}
+    <ol className="los-reading-question-list" start={compact?questionIndex+1:1}>
+      {questions.map((question,index)=>compact&&index!==questionIndex?null:
+        <ReadingQuestion key={question.id} question={question} index={index} draftController={controller}/>)}
     </ol>
     <p className={"los-save-state "+(controller.saved?"":"is-error")} role="status">
       {controller.saved ? "Vastaukset tallennetaan automaattisesti oman laitteen paikalliseen LOS!-opiskelutilaan." :

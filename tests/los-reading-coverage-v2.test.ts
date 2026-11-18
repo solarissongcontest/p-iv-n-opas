@@ -68,7 +68,7 @@ test("The new A/B/C tasks preserve original tasks and share the existing learner
   const ui=readFileSync("src/features/los/LosReadingExercises.tsx","utf8");
   assert.match(book,/LosRevisedUnderstanding chapterId=\{chapter.id\}/);
   assert.match(book,/OriginalTextPage chapter=\{chapter\}/);
-  assert.match(reader,/LosReadingExercises chapterId=\{chapterId\} text="B"/);
+  assert.match(reader,/LosReadingExercises chapterId=\{chapterId\} text=\{kind\}/);
   assert.match(reader,/LosReadingExercises chapterId=\{chapterId\} text="C"/);
   assert.match(ui,/useLosChapterDraft\(1,chapterId\)/);
   assert.match(ui,/practiceAnswers/);
