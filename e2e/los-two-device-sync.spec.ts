@@ -22,7 +22,7 @@ test("phone and desktop exchange notes, reject conflicting edits and preserve lo
     localStorage.setItem("opk.device-token","test-only-device-access-token");
     localStorage.setItem("opk.device-token-expires",String(Date.now()+3600000));
   },{owner});
-  await context.route("**/api/los-sync?*",async route=>{
+  await context.route(/\/api\/los-sync(?:\?.*)?$/,async route=>{
     const request=route.request();
     const header=request.headers();
     requestDiagnostics.push(request.method()+" bearer="+Boolean(header.authorization)+" keyMatches="+(header["x-los-sync-key"]===password));
