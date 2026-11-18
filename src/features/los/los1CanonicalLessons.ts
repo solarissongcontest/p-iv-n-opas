@@ -1,6 +1,5 @@
 import type {LosLessonBlueprint, LosLessonStep} from "./lessonEngine.ts";
 import {LOS1_READING_BANK} from "./content/los1ReadingBank.ts";
-import {LOS1_REVISED_AB} from "./content/los1RevisedAB.ts";
 import {LOS_1_LESSONS} from "./learningPath.ts";
 
 /** Reconnect the existing 60 executable lessons to the new, canonical Text A/B/C.
@@ -91,8 +90,7 @@ export function canonicalizeLos1Lessons(original:readonly LosLessonBlueprint[]):
       evidence.push({kind:"checked-source",ids:LOS1_READING_BANK[chapterId]?.A.slice(0,2).map(x=>x.id)??[],
         label:"Text A:n kaksi ensimmäistä ymmärtämistehtävää vastattu ja tarkistettu."});
     }
-    const title=isReading?LOS1_REVISED_AB.chapters.find(ch=>ch.chapterId==="C"+chapterId)?.textA.title+" · Text A":
-      oldNames.test(lesson.title) ? (LOS_1_LESSONS[number-1]?.title??lesson.title) : lesson.title;
+    const title=LOS_1_LESSONS[number-1]?.title??lesson.title;
     const check=isReading || oldNames.test(lesson.check.question+" "+lesson.check.explanation)
       ?mappedCheck(lesson,chapterId,Math.max(0,phase)):lesson.check;
     return {...lesson,title,objective:isReading?"Ymmärrän kappaleen "+chapterId+" uuden Text A:n ja osaan käyttää Text C:n tukea.":lesson.objective,
