@@ -5,7 +5,7 @@ import {LOS1_C_AUDIO_EXAMPLES} from "../src/features/los/content/los1SupportSpee
 import {los1CourseGlossary} from "../src/features/los/los1CourseGlossary.ts";
 
 function words(text:string):string[]{
- return (text.match(/[\\p{L}]+/gu)??[]).map(x=>x.toLocaleLowerCase("de"));
+ return (text.match(/[\p{L}]+/gu)??[]).map(x=>x.toLocaleLowerCase("de"));
 }
 test("Every word in twenty canonical German A/B texts has a German-Finnish study explanation",()=>{
  const glossary=los1CourseGlossary("10");
