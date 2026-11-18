@@ -113,31 +113,55 @@ function TextSpeech({ blocks, chapterId, kind }: { blocks: readonly ReaderBlock[
 }
 
 export function LosRevisedTextPage({ chapterId, kind }: { chapterId: string; kind: "A" | "B" }) {
+  const [sideBySide,setSideBySide] = useState<boolean>(()=>{
+    if(typeof window==="undefined")return false;
+    try{return window.localStorage.getItem("los1.reader.split") === "true";}
+    catch{return false;}
+  });
+  const setLayout=(value:boolean)=>{
+    setSideBySide(value);
+    if(typeof window!=="undefined"){
+      try{window.localStorage.setItem("los1.reader.split",String(value));}catch {/* personal layout preference is optional */}
+    }
+  };
   const chapter = LOS1_REVISED_AB.chapters.find(candidate => candidate.chapterId === "C" + chapterId);
   if (!chapter) return <div role="status">Tämän kappaleen tekstiä ei löydy sisältöaineistosta.</div>;
   const source = kind === "A" ? chapter.textA : chapter.textB;
-  return <section className="los-revised-page" aria-labelledby={"los-revised-heading-" + chapterId + kind}>
+  const supportId="los-reading-task-pane-"+chapterId+"-"+kind;
+  return <section className={"los-revised-page"+(sideBySide?" is-study-split":"")} aria-labelledby={"los-revised-heading-" + chapterId + kind}>
     <p className="los-eyebrow">KAPPALE {chapterId} / TEXT {kind}</p>
     <h1 id={"los-revised-heading-" + chapterId + kind} lang="de">{source.title}</h1>
     <p className="los-page-intro">{kind === "A" ? "Kappaleen uusi pääteksti. Lue ensin tilanteen kuvaus ja seuraa keskustelua." : "Toinen tekstilaji. Harjoittele kappaleen ilmauksia uudessa tilanteessa."}</p>
-    <TextSpeech blocks={source.blocks} chapterId={chapterId} kind={kind} />
-    <LosOriginalDialogue
-      chapterId={chapterId}
-      sourceId={kind==="A"?"los-own-text-a":"los-own-text-b"}
-      version={LOS1_CANONICAL_VERSION}
-      heading="Tekstin sanat ja omat korostukset"
-      usageLabel={"LOS!:N OMA TEKSTI · TEXT "+kind}
-      guidance="Napauta saksankielistä sanaa avataksesi tarkistetun selityksen. Valitse korostustussi ja merkitse haluamasi kohdat. Merkinnät tallennetaan omaan opiskelutilaasi."
-      lines={los1CanonicalLines(chapterId,kind).map(line=>({...line,meaning:""}))}
-      glossary={los1CourseGlossary(chapterId)}
-      author="LOS!" sourceTitle={source.title} sourceUrl="" license="LOS!:n oma opetusteksti" licenseUrl=""
-      sourceDetail="" isOwnText
-    />
-    {kind === "B" && <LosReadingExercises chapterId={chapterId} text="B" />}
-    <aside className="los-revised-disclaimer" role="note">
-      <strong>LOS!:n oma opetusteksti · toimitusluonnos</strong>
-      <p>Uusi teksti ei ole ulkopuolinen autenttinen lähdeteksti. Riippumaton saksan kielentarkistus ja toimitettu äänite ovat vielä kesken. Laitteen TTS ei korvaa alkuperäistä ihmisäänitettä.</p>
-    </aside>
+    <div className="los-study-layout-toggle" role="group" aria-label="Tekstin ja tehtävien asettelu">
+      <button type="button" className={!sideBySide?"is-active":""} aria-pressed={!sideBySide}
+        onClick={()=>setLayout(false)}>Kirja</button>
+      <button type="button" className={sideBySide?"is-active":""} aria-pressed={sideBySide}
+        onClick={()=>setLayout(true)} aria-controls={supportId}>Kirja + tehtävät</button>
+    </div>
+    <div className={"los-study-layout"+(sideBySide?" is-split":"")}>
+      <div className="los-study-reading">
+        <TextSpeech blocks={source.blocks} chapterId={chapterId} kind={kind} />
+        <LosOriginalDialogue
+          chapterId={chapterId}
+          sourceId={kind==="A"?"los-own-text-a":"los-own-text-b"}
+          version={LOS1_CANONICAL_VERSION}
+          heading="Tekstin sanat ja omat korostukset"
+          usageLabel={"LOS!:N OMA TEKSTI · TEXT "+kind}
+          guidance="Napauta saksankielistä sanaa avataksesi sanaselityksen tai vaihda korostustussiin. Korostukset tallentuvat omaan opiskelutilaasi."
+          lines={los1CanonicalLines(chapterId,kind).map(line=>({...line,meaning:""}))}
+          glossary={los1CourseGlossary(chapterId)}
+          author="LOS!" sourceTitle={source.title} sourceUrl="" license="LOS!:n oma opetusteksti" licenseUrl=""
+          sourceDetail="" isOwnText
+        />
+        <aside className="los-revised-disclaimer" role="note">
+          <strong>LOS!:n oma opetusteksti</strong>
+          <p>Teksti ei ole ulkopuolinen autenttinen lähdeteksti. Toimituksellinen kielentarkistus on tehty tekoälyllä, ei riippumattomalla kieliasiantuntijalla. Selaimen saksankielinen TTS-ääni ei ole erillinen ihmisäänite.</p>
+        </aside>
+      </div>
+      <div className="los-study-questions" id={supportId} aria-label={"Text "+kind+" -tehtävät"}>
+        <LosReadingExercises chapterId={chapterId} text={kind} compact={sideBySide}/>
+      </div>
+    </div>
   </section>;
 }
 
