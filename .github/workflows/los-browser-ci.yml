@@ -56,7 +56,7 @@ jobs:
         run: bun run e2e:install
 
       - name: Install Chromium and WebKit browser engines
-        run: bunx playwright install chromium webkit
+        run: bunx playwright install --with-deps chromium webkit
 
       - name: Verify and prepare real FreeDict dictionary data for browser QA
         run: node scripts/import-los-freedict.mjs --strict
