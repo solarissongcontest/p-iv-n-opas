@@ -1,4 +1,5 @@
 import { LOS_1_LESSONS } from "./learningPath.ts";
+import {canonicalizeLos1Lessons} from "./los1CanonicalLessons";
 import { LOS1_C01_LESSON_BLUEPRINTS, type LosLessonBlueprint } from "./lessonEngine.ts";
 import { LOS1_C02_LESSON_BLUEPRINTS } from "./lessonEngineC02.ts";
 import { LOS1_C03_LESSON_BLUEPRINTS } from "./lessonEngineC03.ts";
@@ -19,7 +20,7 @@ import { LOS1_FINAL_LESSONS } from "./lessonEngineFinal.ts";
  * progress for the missing final exam and summary. C08/C10 source-backed
  * reading and free writing are not counted as tested audio listening.
  */
-export const LOS1_EXECUTABLE_LESSONS: readonly LosLessonBlueprint[] = [
+export const LOS1_EXECUTABLE_LESSONS: readonly LosLessonBlueprint[] = canonicalizeLos1Lessons([
   ...LOS1_C01_LESSON_BLUEPRINTS,
   ...LOS1_C02_LESSON_BLUEPRINTS,
   ...LOS1_C03_LESSON_BLUEPRINTS,
@@ -32,7 +33,7 @@ export const LOS1_EXECUTABLE_LESSONS: readonly LosLessonBlueprint[] = [
   ...LOS1_C08_C10_COMPLETION_LESSONS,
   ...LOS1_REVIEW_II_LESSONS,
   ...LOS1_FINAL_LESSONS,
-].sort((a,b)=>Number(a.id.slice(1))-Number(b.id.slice(1)));
+].sort((a,b)=>Number(a.id.slice(1))-Number(b.id.slice(1))));
 const executableIds = new Set(LOS1_EXECUTABLE_LESSONS.map(lesson=>lesson.id));
 export const isLos1ExecutableLesson = (id:string):boolean => executableIds.has(id);
 
