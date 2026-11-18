@@ -5,7 +5,7 @@ export const LOS1_REVISED_AB = {
   "schemaVersion": "1.0",
   "bookId": "los-1",
   "module": "SAB31",
-  "status": "editorial-draft-not-published",
+  "status": "editorially-reviewed-in-app-independent-native-review-pending",
   "createdAt": "2026-11-17",
   "authorStatus": "original AI-drafted LOS instructional texts; not human-authored authentic sources",
   "reviewedByNativeGermanSpeaker": false,
@@ -109,7 +109,7 @@ export const LOS1_REVISED_AB = {
         ],
         "approxWordCount": 101,
         "audio": {
-          "mode": "pre-rendered-de-DE-TTS",
+          "mode": "browser-de-DE-speechSynthesis",
           "generated": false,
           "verified": false
         }
@@ -187,7 +187,7 @@ export const LOS1_REVISED_AB = {
         ],
         "approxWordCount": 33,
         "audio": {
-          "mode": "pre-rendered-de-DE-TTS",
+          "mode": "browser-de-DE-speechSynthesis",
           "generated": false,
           "verified": false
         }
@@ -280,7 +280,7 @@ export const LOS1_REVISED_AB = {
         ],
         "approxWordCount": 79,
         "audio": {
-          "mode": "pre-rendered-de-DE-TTS",
+          "mode": "browser-de-DE-speechSynthesis",
           "generated": false,
           "verified": false
         }
@@ -326,7 +326,7 @@ export const LOS1_REVISED_AB = {
         ],
         "approxWordCount": 44,
         "audio": {
-          "mode": "pre-rendered-de-DE-TTS",
+          "mode": "browser-de-DE-speechSynthesis",
           "generated": false,
           "verified": false
         }
@@ -427,7 +427,7 @@ export const LOS1_REVISED_AB = {
         ],
         "approxWordCount": 98,
         "audio": {
-          "mode": "pre-rendered-de-DE-TTS",
+          "mode": "browser-de-DE-speechSynthesis",
           "generated": false,
           "verified": false
         }
@@ -457,7 +457,7 @@ export const LOS1_REVISED_AB = {
         ],
         "approxWordCount": 54,
         "audio": {
-          "mode": "pre-rendered-de-DE-TTS",
+          "mode": "browser-de-DE-speechSynthesis",
           "generated": false,
           "verified": false
         }
@@ -554,7 +554,7 @@ export const LOS1_REVISED_AB = {
         ],
         "approxWordCount": 104,
         "audio": {
-          "mode": "pre-rendered-de-DE-TTS",
+          "mode": "browser-de-DE-speechSynthesis",
           "generated": false,
           "verified": false
         }
@@ -608,7 +608,11 @@ export const LOS1_REVISED_AB = {
           },
           {
             "kind": "prose",
-            "text": "Vielen Dank und auf Wiedersehen!"
+            "text": "Vielen Dank!"
+          },
+          {
+            "kind": "prose",
+            "text": "Mit freundlichen Grüßen"
           },
           {
             "kind": "prose",
@@ -617,7 +621,7 @@ export const LOS1_REVISED_AB = {
         ],
         "approxWordCount": 37,
         "audio": {
-          "mode": "pre-rendered-de-DE-TTS",
+          "mode": "browser-de-DE-speechSynthesis",
           "generated": false,
           "verified": false
         }
@@ -697,20 +701,20 @@ export const LOS1_REVISED_AB = {
           },
           {
             "kind": "prose",
-            "text": "**Frau Berger:** Hoffentlich morgen besser!"
+            "text": "**Frau Berger:** Hoffentlich geht es dir morgen besser!"
           },
           {
             "kind": "prose",
-            "text": "**Leon:** Ja. Morgen: prima!"
+            "text": "**Leon:** Ja, hoffentlich geht’s mir morgen besser!"
           },
           {
             "kind": "prose",
-            "text": "**Aino:** Das ist ein guter Plan!"
+            "text": "**Aino:** Bis morgen, Leon!"
           }
         ],
-        "approxWordCount": 78,
+        "approxWordCount": 82,
         "audio": {
-          "mode": "pre-rendered-de-DE-TTS",
+          "mode": "browser-de-DE-speechSynthesis",
           "generated": false,
           "verified": false
         }
@@ -752,7 +756,7 @@ export const LOS1_REVISED_AB = {
         ],
         "approxWordCount": 35,
         "audio": {
-          "mode": "pre-rendered-de-DE-TTS",
+          "mode": "browser-de-DE-speechSynthesis",
           "generated": false,
           "verified": false
         }
@@ -844,16 +848,16 @@ export const LOS1_REVISED_AB = {
           },
           {
             "kind": "prose",
-            "text": "**Frau Berger:** Neunundneunzig? Nein, danke!"
+            "text": "**Frau Berger:** Neunundneunzig? Nein, so alt bin ich noch nicht!"
           },
           {
-            "kind": "prose",
-            "text": "**Alle:** Ha, ha!"
+            "kind": "stage",
+            "text": "Kaikki nauravat."
           }
         ],
-        "approxWordCount": 91,
+        "approxWordCount": 93,
         "audio": {
-          "mode": "pre-rendered-de-DE-TTS",
+          "mode": "browser-de-DE-speechSynthesis",
           "generated": false,
           "verified": false
         }
@@ -901,7 +905,7 @@ export const LOS1_REVISED_AB = {
         ],
         "approxWordCount": 31,
         "audio": {
-          "mode": "pre-rendered-de-DE-TTS",
+          "mode": "browser-de-DE-speechSynthesis",
           "generated": false,
           "verified": false
         }
@@ -1014,7 +1018,7 @@ export const LOS1_REVISED_AB = {
         ],
         "approxWordCount": 84,
         "audio": {
-          "mode": "pre-rendered-de-DE-TTS",
+          "mode": "browser-de-DE-speechSynthesis",
           "generated": false,
           "verified": false
         }
@@ -1082,7 +1086,7 @@ export const LOS1_REVISED_AB = {
         ],
         "approxWordCount": 29,
         "audio": {
-          "mode": "pre-rendered-de-DE-TTS",
+          "mode": "browser-de-DE-speechSynthesis",
           "generated": false,
           "verified": false
         }
@@ -1149,6 +1153,10 @@ export const LOS1_REVISED_AB = {
             "text": "**Selma:** Bitte langsamer!"
           },
           {
+            "kind": "stage",
+            "text": "Frau Berger toistaa sanan hitaammin ja selkeästi."
+          },
+          {
             "kind": "prose",
             "text": "**Frau Berger:** Schnell."
           },
@@ -1183,7 +1191,7 @@ export const LOS1_REVISED_AB = {
         ],
         "approxWordCount": 93,
         "audio": {
-          "mode": "pre-rendered-de-DE-TTS",
+          "mode": "browser-de-DE-speechSynthesis",
           "generated": false,
           "verified": false
         }
@@ -1242,7 +1250,7 @@ export const LOS1_REVISED_AB = {
         ],
         "approxWordCount": 35,
         "audio": {
-          "mode": "pre-rendered-de-DE-TTS",
+          "mode": "browser-de-DE-speechSynthesis",
           "generated": false,
           "verified": false
         }
@@ -1343,7 +1351,7 @@ export const LOS1_REVISED_AB = {
         ],
         "approxWordCount": 99,
         "audio": {
-          "mode": "pre-rendered-de-DE-TTS",
+          "mode": "browser-de-DE-speechSynthesis",
           "generated": false,
           "verified": false
         }
@@ -1396,7 +1404,7 @@ export const LOS1_REVISED_AB = {
         ],
         "approxWordCount": 45,
         "audio": {
-          "mode": "pre-rendered-de-DE-TTS",
+          "mode": "browser-de-DE-speechSynthesis",
           "generated": false,
           "verified": false
         }
@@ -1553,7 +1561,7 @@ export const LOS1_REVISED_AB = {
         ],
         "approxWordCount": 198,
         "audio": {
-          "mode": "pre-rendered-de-DE-TTS",
+          "mode": "browser-de-DE-speechSynthesis",
           "generated": false,
           "verified": false
         }
@@ -1617,11 +1625,14 @@ export const LOS1_REVISED_AB = {
         ],
         "approxWordCount": 87,
         "audio": {
-          "mode": "pre-rendered-de-DE-TTS",
+          "mode": "browser-de-DE-speechSynthesis",
           "generated": false,
           "verified": false
         }
       }
     }
-  ]
+  ],
+  "editorialReviewDate": "2026-11-18",
+  "editorialReviewScope": "German usage, content continuity, key teaching expressions and browser TTS plan; editorial AI review only",
+  "independentNativeReviewStatus": "not-completed"
 } as const;

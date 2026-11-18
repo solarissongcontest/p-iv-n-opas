@@ -662,9 +662,9 @@ export const LOS1_READING_QUESTIONS_PART1 = {
       {
         "kind": "open",
         "prompt": "Kirjoita yksi täsmällinen kohtelias ilmaus toisesta viestistä.",
-        "modelAnswer": "Esimerkiksi Guten Tag, Herr Weber! tai Vielen Dank und auf Wiedersehen!",
-        "evidence": "Vielen Dank und auf Wiedersehen!",
-        "explanation": "Jompikumpi tekstistä löytyvä ilmaus sopii.",
+        "modelAnswer": "Esimerkiksi Guten Tag, Herr Weber! tai Mit freundlichen Grüßen.",
+        "evidence": "Mit freundlichen Grüßen",
+        "explanation": "Mit freundlichen Grüßen on kohtelias kirjallisen viestin lopetus.",
         "skill": "evidence"
       }
     ],
@@ -755,8 +755,8 @@ export const LOS1_READING_QUESTIONS_PART1 = {
           "Että hän matkustaisi"
         ],
         "answerIndex": 0,
-        "evidence": "Morgen: prima!",
-        "explanation": "Leon leikittelee ajatuksella, että huomenna voisi mennä paremmin.",
+        "evidence": "hoffentlich geht’s mir morgen besser!",
+        "explanation": "Leon toivoo, että hänen olonsa olisi seuraavana päivänä parempi.",
         "skill": "detail"
       },
       {
