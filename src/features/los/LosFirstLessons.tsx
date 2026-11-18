@@ -119,7 +119,7 @@ export function LosFirstLessons({ selectedId, onSelect, move }: {
       <h3>{lesson.title}</h3>
       <p className="los-lesson-objective"><strong>Tavoite:</strong> {lesson.objective}</p>
       {teachingNote&&<section className="los-lesson-teaching-note" aria-label="Oppitunnin perusteellinen opetus">
-        <p className="los-overline">OPETUS · SELITÄ JA YMMÄRRÄ</p>
+        <p className="los-lesson-teaching-kicker">OPETUS · SELITÄ JA YMMÄRRÄ</p>
         <h4>{teachingNote.concept}</h4>
         <p>{teachingNote.explanation}</p>
         <div className="los-lesson-teaching-example" lang="de"><strong>{teachingNote.example}</strong>
