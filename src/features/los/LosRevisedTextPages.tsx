@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { BookOpen, Headphones, Square, Volume2 } from "lucide-react";
 import { LOS1_REVISED_AB } from "./content/los1RevisedAB";
 import { LOS1_REVISED_C } from "./content/los1RevisedC";
+import { losSupportSpeechBlocks, LOS1_C_AUDIO_EXAMPLES } from "./content/los1SupportSpeech";
 import { LosReadingExercises, LosReadingUnderstanding } from "./LosReadingExercises";
 import { losGermanVoices, losSpeakerSlot, losSpeechSegments } from "./losSpeech";
 import "./los-revised-texts.css";
@@ -20,7 +21,7 @@ function dialogueLine(value: string): { speaker: string; words: string } | null 
   const match = /^\*\*([^*]+):\*\*\s*(.*)$/.exec(value);
   return match ? { speaker: match[1] ?? "", words: match[2] ?? "" } : null;
 }
-function TextSpeech({ blocks, chapterId, kind }: { blocks: readonly ReaderBlock[]; chapterId:string; kind:"A"|"B" }) {
+function TextSpeech({ blocks, chapterId, kind }: { blocks: readonly ReaderBlock[]; chapterId:string; kind:"A"|"B"|"C" }) {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [rate, setRate] = useState("1");
   const [message, setMessage] = useState("");
@@ -237,6 +238,11 @@ export function LosHilfstextPage({ chapterId }: { chapterId: string }) {
     <p className="los-eyebrow">KAPPALE {chapterId} / TEXT C · HILFSTEXT</p>
     <h1 id={"los-c-heading-" + chapterId} lang="de">{page.title}</h1>
     <p className="los-page-intro">{page.purpose}. Tämä tukiteksti täydentää Text A:ta ja Text B:tä. Saat palata siihen aina tarvittaessa.</p>
+    <aside className="los-revised-support-audio">
+      <p><strong>Kuuntele tukitekstin saksankieliset mallilauseet</strong></p>
+      <p className="los-revised-muted">{LOS1_C_AUDIO_EXAMPLES[chapterId]?.length ?? 0} mallia. Suomenkielisiä selityksiä ei lueta saksankielisellä puheäänellä.</p>
+      <TextSpeech blocks={losSupportSpeechBlocks(chapterId)} chapterId={chapterId} kind="C" />
+    </aside>
     <div className="los-revised-support-content">{renderSupportMarkdown(page.contentMarkdown)}</div>
     <LosReadingExercises chapterId={chapterId} text="C" />
     <aside className="los-revised-disclaimer" role="note">
