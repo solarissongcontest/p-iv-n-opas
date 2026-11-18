@@ -1,5 +1,5 @@
 import { LOS_1_LESSONS } from "./learningPath.ts";
-import {canonicalizeLos1Lessons} from "./los1CanonicalLessons";
+import {canonicalizeLos1Lessons} from "./los1CanonicalLessons.ts";
 import { LOS1_C01_LESSON_BLUEPRINTS, type LosLessonBlueprint } from "./lessonEngine.ts";
 import { LOS1_C02_LESSON_BLUEPRINTS } from "./lessonEngineC02.ts";
 import { LOS1_C03_LESSON_BLUEPRINTS } from "./lessonEngineC03.ts";
