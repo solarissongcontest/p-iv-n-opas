@@ -50,7 +50,7 @@ function cleanSpokenText(value: string): string {
 export function losSpeechSegments(
   blocks: readonly LosSpeechBlock[],
   chapterId: string,
-  kind: "A" | "B",
+  kind: "A" | "B" | "C",
 ): LosSpeechSegment[] {
   const segments: LosSpeechSegment[] = [];
   let nextSlow = false;
