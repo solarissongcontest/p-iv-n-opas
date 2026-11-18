@@ -1,4 +1,5 @@
 import {LOS_BOOKS} from "./catalog.ts";
+import {LOS1_AB_EXTRA_GLOSSES} from "./los1ExtraGlosses.ts";
 
 /** Finite, editorially controllable course glossary. A missing entry is shown
  * as unreviewed rather than silently making up a dictionary translation. */
@@ -66,10 +67,10 @@ export function los1TokenMeaning(chapterId:string,display:string):string|null {
     const chapter=chapterGlossaries[String(i).padStart(2,"0")];
     if(chapter?.[word])return chapter[word];
   }
-  return common[word]??null;
+  return common[word]??LOS1_AB_EXTRA_GLOSSES[word]??null;
 }
 export function los1CourseGlossary(chapterId:string):Readonly<Record<string,string>>{
-  const words:Record<string,string>={...common};
+  const words:Record<string,string>={...common,...LOS1_AB_EXTRA_GLOSSES};
   for(let i=1;i<=Number(chapterId);i++){
     Object.assign(words,chapterGlossaries[String(i).padStart(2,"0")]??{});
   }
