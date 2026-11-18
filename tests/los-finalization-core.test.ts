@@ -70,6 +70,8 @@ test("Original annotations and prior learner storage are preserved in the new re
   assert.match(original,/isOwnText/);
   assert.match(revised,/LosOriginalDialogue/);
   assert.match(revised,/los1CanonicalLines/);
+  assert.match(revised,/LosCInteractiveExamples chapterId=\{chapterId\}/);
+  assert.match(revised,/sourceId="los-own-text-c"/);
   assert.match(book,/LosLegacySourcePanel/);
   assert.match(workbook,/losChapterExamExercises/);
 });
