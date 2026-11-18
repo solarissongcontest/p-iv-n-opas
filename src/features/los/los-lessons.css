@@ -75,3 +75,18 @@
 }
 .dark .los-lesson-chapter-picker button.is-active, .dark .los-lesson-picker button.is-active, .dark .los-lesson-exit label:has(input:checked), .dark .los-lesson-feedback { background: #38282a; color: var(--los-ink); }
 .dark .los-lesson-step-title svg, .dark .los-lesson-done svg { color: #7DDBB4; }
+
+
+/* Actual scripted teaching before task navigation; one source of truth for L001–L060. */
+.los-lesson-teaching{margin:22px 0 26px;padding:clamp(16px,2.5vw,26px);border:1px solid var(--los-line);border-left:3px solid var(--los-book-accent);border-radius:9px;background:var(--los-paper);line-height:1.7}
+.los-lesson-teaching>.los-overline{margin:0 0 13px;color:var(--los-book-accent)}
+.los-lesson-teaching-explanation{max-width:70ch;font-size:1.01rem;line-height:1.85}
+.los-lesson-teaching-model{padding:15px 17px;margin:18px 0 16px;border-radius:8px;background:var(--los-subtle)}
+.los-lesson-teaching-model>span{display:block;color:var(--los-soft);font-size:.72rem;font-weight:750;text-transform:uppercase;letter-spacing:.08em}
+.los-lesson-teaching-model strong{display:block;margin:6px 0 2px;color:var(--los-ink);font-size:1.3rem;line-height:1.6}
+.los-lesson-teaching-model p{color:var(--los-soft);margin:0;font-size:.91rem}
+.los-lesson-teaching-caution,.los-lesson-teaching-apply{padding-block:7px}
+.los-lesson-teaching-caution strong,.los-lesson-teaching-apply strong{display:block;font-size:.9rem;color:var(--los-ink)}
+.los-lesson-teaching-caution p,.los-lesson-teaching-apply p{margin:3px 0 7px;line-height:1.75}
+.los-lesson-teaching-apply{border-top:1px solid var(--los-line);padding-top:13px}
+@media(max-width:540px){.los-lesson-teaching{padding:16px}.los-lesson-teaching-model strong{font-size:1.13rem}}
