@@ -52,7 +52,7 @@ export async function createDictionaryAsset(pair,{fetcher=fetch,output=OUT}={}){
  const parent=await mkdtemp(join(tmpdir(),"los-freedict-"));
  try{
   const file=join(parent,pair+".tar.xz");
-  const url="https://download.freedict.org/dictionaries/"+pair+"/"+VERSION+"/freedict-"+pair+"-"+VERSION+".tei.tar.xz";
+  const url="https://download.freedict.org/dictionaries/"+pair+"/"+VERSION+"/freedict-"+pair+"-"+VERSION+".src.tar.xz";
   const response=await fetcher(url,{signal:AbortSignal.timeout(85000)});
   if(!response.ok)throw Error(pair+": FreeDict latausvirhe "+response.status);
   const raw=Buffer.from(await response.arrayBuffer());
