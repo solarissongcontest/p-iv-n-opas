@@ -34,6 +34,14 @@ test("readable at narrow phone width, 200% text, keyboard and dark mode",async({
  }
  await page.setViewportSize({width:375,height:780});
  await page.evaluate(()=>document.documentElement.style.fontSize="200%");
+ const widthDiag=await page.evaluate(()=>({
+  viewport:innerWidth,scroll:document.documentElement.scrollWidth,
+  offenders:[...document.querySelectorAll("*")].map(el=>{
+    const rect=el.getBoundingClientRect();
+    return {tag:el.tagName,cls:String(el.className).slice(0,100),right:Math.round(rect.right),width:Math.round(rect.width),left:Math.round(rect.left)};
+  }).filter(r=>r.right>innerWidth+3 && r.width>0).sort((a,b)=>b.right-a.right).slice(0,16)
+ }));
+ console.log("LOS_ZOOM_LAYOUT_DIAG "+JSON.stringify(widthDiag));
  await expectNoHorizontalOverflow(page);
  await page.evaluate(()=>{document.documentElement.classList.add("dark");});
  await page.emulateMedia({reducedMotion:"reduce",colorScheme:"dark"});
