@@ -6,6 +6,7 @@ import {
   losRecallFromVocabulary,losRecallIsDue,losRecallReview,
   type LosRecallDirection,type LosRecallRating,
 } from "./recallEngine";
+import {losSavedWordCards} from "./los1SavedVocabulary";
 import "./los-recall.css";
 
 const REVIEW_LIMIT=10;
@@ -18,7 +19,12 @@ export function LosRecallCards({chapter,onBack}:{chapter:LosChapter;onBack:()=>v
   const [revealed,setRevealed]=useState(false);
   const [sessionReviewed,setSessionReviewed]=useState<string[]>([]);
   const [date,setDate]=useState(()=>new Date().toISOString());
-  const allCards=useMemo(()=>losRecallFromVocabulary(chapter.id,chapter.vocabulary),[chapter.id,chapter.vocabulary]);
+  const allCards=useMemo(()=>{
+    const standard=losRecallFromVocabulary(chapter.id,chapter.vocabulary);
+    const seen=new Set(standard.map(card=>card.id));
+    const added=losSavedWordCards(chapter.id,draft.savedWords??{}).filter(card=>!seen.has(card.id));
+    return [...standard,...added];
+  },[chapter.id,chapter.vocabulary,draft.savedWords]);
   const cards=allCards.filter(card=>card.direction===direction);
   const progress=draft.recallCards??{};
   const due=cards.filter(card=>losRecallIsDue(progress[card.id],date));
@@ -100,6 +106,6 @@ export function LosRecallCards({chapter,onBack}:{chapter:LosChapter;onBack:()=>v
         </>}
       </div>
     </div>}
-    <p className="los-recall-footnote">Sanat tulevat vain LOS!:n omasta kappalesanastosta. Samaan sanapariin liittyvät tunnistus- ja tuottamismuisti tallennetaan erikseen. Kortin itsearvio ei korvaa kappaletestiä, alkuperäistekstin ymmärtämistä tai oikeaa puheen arviointia.</p>
+    <p className="los-recall-footnote">Kortit tulevat LOS!:n kappalesanastosta ja käyttäjän itse lukijasta tallettamista sanoista. Samaan sanapariin liittyvät tunnistus- ja tuottamismuisti tallennetaan erikseen. Kortin itsearvio ei korvaa kappaletestiä, alkuperäistekstin ymmärtämistä tai oikeaa puheen arviointia.</p>
   </section>;
 }
