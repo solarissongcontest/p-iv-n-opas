@@ -81,8 +81,7 @@ export function LosOriginalDialogue(props: LosOriginalDialogueProps) {
       setSavedWordNote("Tälle sanalle ei ole vielä tarkistettua suomennosta, joten sitä ei lisätä kertaukseen.");return;
     }
     try{
-      const updated=losSaveWord(draft.savedWords??{},gloss.word,gloss.meaning);
-      update(current=>({...current,savedWords:updated}));
+      update(current=>({...current,savedWords:losSaveWord(current.savedWords??{},gloss.word,gloss.meaning)}));
       setSavedWordNote("Sana lisätty tämän kappaleen kertauskortteihin.");
     }catch(error){setSavedWordNote(error instanceof Error?error.message:"Sanan tallennus epäonnistui.");}
   };
