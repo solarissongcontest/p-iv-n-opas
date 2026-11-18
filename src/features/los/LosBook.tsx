@@ -6,6 +6,7 @@ import {losExercisesFor} from "./exerciseBank";
 import {losReadingQuestions} from "./content/los1ReadingBank";
 import { getLosChapterSourceGate } from "./content/sourceRegistry";
 import {los1SupplementalSourceAudit} from "./los1SupplementalAudit";
+import {LosVoiceDiagnostics} from "./LosVoiceDiagnostics";
 import { LosAuthenticAudio, LosDictionary, LosIndexSearch, LosLearningPath, type LosDestination } from "./LosReferenceTools";
 import { LosChapterGrammar } from "./LosGrammarChapters";
 import { LosC01AuthenticText } from "./LosC01AuthenticText";
@@ -341,6 +342,7 @@ function Appendix({ book }: { book: LosBookDefinition }) {
     <p className="los-eyebrow">LOS! {book.id} / LIITTEET</p>
     <h1>Kirjan liitteet</h1>
     <div className="los-appendix-section"><h2>Kirjan tiedot</h2><dl><div><dt>Moduuli</dt><dd>{book.code} · {book.module}</dd></div><div><dt>Laajuus</dt><dd>2 op</dd></div><div><dt>Oppimäärä</dt><dd>Saksa B3 · LOPS21</dd></div></dl></div>
+    {book.id===1&&<LosVoiceDiagnostics/>}
     {book.id===1&&<div className="los-appendix-section" aria-label="Autenttisten lisäaineistojen julkaisuauditointi">
       <h2>Autenttisten lisäaineistojen julkaisutilat</h2>
       <p>LOS!:n omat Text A–C -opetustekstit ovat erillään näistä valinnaisista ulkoisista aineistoista. Käytettävissä oleva lisäteksti ei ole automaattisesti lopullisesti hyväksytty.</p>
