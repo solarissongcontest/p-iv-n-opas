@@ -9,21 +9,34 @@ export type LosDestination = "overview" | "contents" | "chapter" | "text" | "und
 import {searchLos1OriginalTexts} from "./content/los1TextSearch";
 import {LOS1_REVISED_AB} from "./content/los1RevisedAB";
 import {LOS1_REVISED_C} from "./content/los1RevisedC";
+import {LOS1_AB_EXTRA_GLOSSES} from "./los1ExtraGlosses";
 export type LosNavigate = (chapter: string | null, section: LosDestination) => void;
-type WordEntry = { book: number; code: string; chapter: string; title: string; word: string; meaning: string };
+type WordEntry = { book: number; code: string; chapter: string; title: string; word: string; meaning: string; source?: "text" };
 const DICTIONARY = LOS_BOOKS.flatMap(book => book.chapters.flatMap(chapter =>
   chapter.vocabulary.map(item => {
     const [word, ...rest] = item.split(" – ");
     return { book: book.id, code: book.code, chapter: chapter.id, title: chapter.title, word: word ?? "", meaning: rest.join(" – ") } satisfies WordEntry;
   })
 ));
+const courseWordKeys=new Set(DICTIONARY.filter(x=>x.book===1).map(x=>x.word.toLocaleLowerCase("de")));
+const TEXT_DICTIONARY:WordEntry[]=Object.entries(LOS1_AB_EXTRA_GLOSSES)
+ .filter(([word])=>!courseWordKeys.has(word)&&!/^[a-z]$/u.test(word)&&word!=="com"&&word!=="example")
+ .map(([word,meaning])=>{
+   const chapter=LOS1_REVISED_AB.chapters.find(ch=>
+     [ch.textA,ch.textB].some(t=>t.blocks.some(block=>
+       block.kind==="prose"&&("text" in block)&&
+       (block.text??"").toLocaleLowerCase("de").includes(word)
+     )));
+   const chapterId=chapter?.chapterId.slice(1)??"01";
+   return {book:1,code:"SAB31",chapter:chapterId,title:"Text A/B",word,meaning,source:"text" as const};
+ });
 function compare(a: string, b: string) { return a.localeCompare(b, "de"); }
 
 export function LosDictionary({ book, move, openBook }: { book: LosBookDefinition; move: LosNavigate; openBook: (id: number) => void }) {
   const [search, setSearch] = useState("");
   const [hidden, setHidden] = useState(false);
   const [scope, setScope] = useState<"book" | "series">("book");
-  const entries = useMemo(() => DICTIONARY.filter(entry =>
+  const entries = useMemo(() => [...DICTIONARY,...(book.id===1?TEXT_DICTIONARY:[])].filter(entry =>
     (scope === "series" || entry.book === book.id) &&
     (entry.word.toLocaleLowerCase("de").includes(search.trim().toLocaleLowerCase("de")) ||
       entry.meaning.toLocaleLowerCase("fi").includes(search.trim().toLocaleLowerCase("fi")))
@@ -31,7 +44,7 @@ export function LosDictionary({ book, move, openBook }: { book: LosBookDefinitio
   return <section className="los-inner-page los-dictionary-page">
     <p className="los-eyebrow">WÖRTERBUCH · LOS! {book.id}</p>
     <h1>Sanakirja</h1>
-    <p className="los-page-intro">Selaa kirjan kappaleiden sanastoa saksaksi tai suomeksi. Alkuperäistekstien kokonaisia repliikkejä ja niiden suomennoksia voit hakea myös kirjan Haku-sivulla.</p>
+    <p className="los-page-intro">Selaa opetettavia kappalesanoja sekä uusien Text A/B -tekstien täydentäviä sanaselityksiä. Sanakirjan tekstisanasto ei automaattisesti kuulu aktiiviseen sanastotavoitteeseen. Tämä on LOS!:n sisäinen opintosanakirja, ei vielä laaja yleissanakirja.</p>
     <div className="los-index-options">
       <div className="los-index-tabs" role="group" aria-label="Sanakirjan laajuus">
         <button className={scope === "book" ? "is-active" : ""} aria-pressed={scope === "book"} onClick={() => setScope("book")}>Tämä kirja</button>
@@ -48,7 +61,7 @@ export function LosDictionary({ book, move, openBook }: { book: LosBookDefinitio
           <strong role="cell" lang="de">{item.word}</strong>
           <span role="cell">{hidden ? <span className="los-muted-hidden">Piilotettu</span> : item.meaning}</span>
           <button type="button" role="cell" title={`Avaa ${item.title}`} onClick={()=>item.book === book.id ? move(item.chapter, "vocabulary") : openBook(item.book)}>
-            <span>{item.code} · {Number(item.chapter)}</span><ChevronRight size={15}/>
+            <span>{item.source==="text"?"Tekstisanasto · C"+item.chapter:item.code+" · "+Number(item.chapter)}</span><ChevronRight size={15}/>
           </button>
         </div>)}
       </div>
