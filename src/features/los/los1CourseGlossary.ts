@@ -88,8 +88,8 @@ const firstIPA:Readonly<Record<string,string>>={
 /** Pronunciation provenance is preserved: a machine-generated IPA candidate is
  * not equivalent to a reviewed dictionary pronunciation. */
 export function los1TokenIPADetail(token:string):{ipa:string;source:"editorial"|"espeak-candidate"}|null{
- const normalized=token.toLocaleLowerCase("de").replace(/^[^\\p{L}]+|[^\\p{L}]+$/gu,"")
-  .replace(/[!?.,…]/g,"").replace(/\\s+/g," ").trim();
+ const normalized=token.toLocaleLowerCase("de").replace(/^[^\p{L}]+|[^\p{L}]+$/gu,"")
+  .replace(/[!?.,…]/g,"").replace(/\s+/g," ").trim();
  if(!normalized)return null;
  const editorial=firstIPA[normalized];
  if(editorial)return{ipa:editorial,source:"editorial"};
