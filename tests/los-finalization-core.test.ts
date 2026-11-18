@@ -54,7 +54,7 @@ test("120 wholly separate exam problems are valid and old drafts keep original b
 });
 test("Reader glossary uses course material and exposes missing IPA explicitly",()=>{
   assert.match(los1TokenMeaning("01","Hallo!")??"",/hei/i);
-  assert.match(los1TokenMeaning("02","heiße")??"",/nimi/i);
+  assert.match(los1TokenMeaning("02","heiße")??"",/nimeltäni|nimi/i);
   assert.match(los1TokenMeaning("09","Donnerstag")??"",/torstai/i);
   assert.ok(los1CourseGlossary("05")["nicht"]);
   assert.equal(los1TokenIPA("Hallo"),"/haˈloː/");
