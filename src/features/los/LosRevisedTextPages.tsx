@@ -113,6 +113,14 @@ function TextSpeech({ blocks, chapterId, kind }: { blocks: readonly ReaderBlock[
 }
 
 export function LosRevisedTextPage({ chapterId, kind }: { chapterId: string; kind: "A" | "B" }) {
+  const [readingFocus,setReadingFocus] = useState<boolean>(()=>{
+    if(typeof window==="undefined")return false;
+    try{return window.localStorage.getItem("los1.reader.focus")==="true";}catch{return false;}
+  });
+  const setFocus=(value:boolean)=>{
+    setReadingFocus(value);
+    if(typeof window!=="undefined")try{window.localStorage.setItem("los1.reader.focus",String(value));}catch{/* optional preference */}
+  };
   const [sideBySide,setSideBySide] = useState<boolean>(()=>{
     if(typeof window==="undefined")return false;
     try{return window.localStorage.getItem("los1.reader.split") === "true";}
@@ -128,7 +136,7 @@ export function LosRevisedTextPage({ chapterId, kind }: { chapterId: string; kin
   if (!chapter) return <div role="status">Tämän kappaleen tekstiä ei löydy sisältöaineistosta.</div>;
   const source = kind === "A" ? chapter.textA : chapter.textB;
   const supportId="los-reading-task-pane-"+chapterId+"-"+kind;
-  return <section className={"los-revised-page"+(sideBySide?" is-study-split":"")} aria-labelledby={"los-revised-heading-" + chapterId + kind}>
+  return <section className={"los-revised-page"+(sideBySide&&!readingFocus?" is-study-split":"")+(readingFocus?" is-reading-focus":"")} aria-labelledby={"los-revised-heading-" + chapterId + kind}>
     <p className="los-eyebrow">KAPPALE {chapterId} / TEXT {kind}</p>
     <h1 id={"los-revised-heading-" + chapterId + kind} lang="de">{source.title}</h1>
     <p className="los-page-intro">{kind === "A" ? "Kappaleen uusi pääteksti. Lue ensin tilanteen kuvaus ja seuraa keskustelua." : "Toinen tekstilaji. Harjoittele kappaleen ilmauksia uudessa tilanteessa."}</p>
@@ -137,8 +145,10 @@ export function LosRevisedTextPage({ chapterId, kind }: { chapterId: string; kin
         onClick={()=>setLayout(false)}>Kirja</button>
       <button type="button" className={sideBySide?"is-active":""} aria-pressed={sideBySide}
         onClick={()=>setLayout(true)} aria-controls={supportId}>Kirja + tehtävät</button>
+      <button type="button" className={readingFocus?"is-active":""} aria-pressed={readingFocus}
+        onClick={()=>setFocus(!readingFocus)}>{readingFocus?"Sulje lukutila":"Rauhallinen lukutila"}</button>
     </div>
-    <div className={"los-study-layout"+(sideBySide?" is-split":"")}>
+    <div className={"los-study-layout"+(sideBySide&&!readingFocus?" is-split":"")}>
       <div className="los-study-reading">
         <TextSpeech blocks={source.blocks} chapterId={chapterId} kind={kind} />
         <LosOriginalDialogue
