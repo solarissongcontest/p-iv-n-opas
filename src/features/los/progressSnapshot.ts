@@ -7,6 +7,7 @@ import { losExamScore, LOS1_MIDTERM_QUESTIONS } from "./content/los1Exams.ts";
 import { losFinalScore } from "./content/los1FinalExam.ts";
 import { getLosChapterSourceGate } from "./content/sourceRegistry.ts";
 import { losRecallFromVocabulary,losRecallIsDue } from "./recallEngine.ts";
+import {losSavedWordCards} from "./los1SavedVocabulary.ts";
 
 type ChapterProgress={
   id:string; title:string; completed:number; available:number;
@@ -32,7 +33,9 @@ export function getLosStudyProgressSnapshot(book:LosBookDefinition,drafts:Readon
     const actual=LOS1_EXECUTABLE_LESSONS.filter(lesson=>los1LessonDraftChapter(lesson.id)===ch.id);
     const completed=actual.filter(l=>Boolean(d?.lessonProgress?.[l.id]?.completedAt)).length;
     const scored=d?.testSubmittedAt?losChapterExamScore(ch.id,d.testAnswers):null;
-    const cards=losRecallFromVocabulary(ch.id,ch.vocabulary);
+    const standard=losRecallFromVocabulary(ch.id,ch.vocabulary);
+    const ids=new Set(standard.map(card=>card.id));
+    const cards=[...standard,...losSavedWordCards(ch.id,d?.savedWords??{}).filter(card=>!ids.has(card.id))];
     const states=d?.recallCards??{};
     const reviewed=cards.filter(card=>Boolean(states[card.id]));
     return {

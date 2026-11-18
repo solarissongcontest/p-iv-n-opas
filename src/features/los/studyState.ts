@@ -3,6 +3,7 @@ import { getDeviceOwnerId } from "@/lib/deviceSession";
 import { parseLosLessonProgressMap } from "./lessonEngine.ts";
 import type { LosLessonProgress } from "./lessonEngine.ts";
 import { parseLosRecallCardMap } from "./recallEngine.ts";
+import {parseLosSavedWords} from "./los1SavedVocabulary.ts";
 import type { LosRecallCardState } from "./recallEngine.ts";
 
 /**
@@ -25,6 +26,8 @@ export type LosChapterDraft = {
   lessonProgress?: Record<string,LosLessonProgress>;
   /** Chapter-local spaced-recall memory, one record per word and direction. */
   recallCards?: Record<string,LosRecallCardState>;
+  /** Learner-selected words from A/B/C text reader, one contextual meaning each. */
+  savedWords?: Record<string,string>;
   updatedAt: string;
 };
 export function emptyLosDraft(): LosChapterDraft {
@@ -54,6 +57,7 @@ export function parseLosDraft(value:string | null):LosChapterDraft {
       readerMarks:input.readerMarks && isStringRecord(input.readerMarks) && Object.keys(input.readerMarks).length<=200 ? Object.fromEntries(Object.entries(input.readerMarks).filter(([k,v])=>k.length<=100&&v.length<=500)) : {},
       lessonProgress:parseLosLessonProgressMap(input.lessonProgress),
       recallCards:parseLosRecallCardMap(input.recallCards),
+      savedWords:parseLosSavedWords(input.savedWords),
       updatedAt:typeof input.updatedAt==="string"?input.updatedAt:"",
     };
   }catch{return emptyLosDraft();}
