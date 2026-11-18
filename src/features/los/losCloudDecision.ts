@@ -1,5 +1,5 @@
-import type {LosChapterDraft} from "./studyState";
-import type {LosCloudRecord} from "./cloudContract";
+import type {LosChapterDraft} from "./studyState.ts";
+import type {LosCloudRecord} from "./cloudContract.ts";
 import {draftIsEmpty} from "./cloudContract";
 
 export type LosSyncDecision=
