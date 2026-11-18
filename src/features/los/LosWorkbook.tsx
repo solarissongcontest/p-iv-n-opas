@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Bookmark, BookOpen, Check, CircleAlert, Download, FileText, RotateCcw } from "lucide-react";
-import { losExercisesFor, losIsCorrect, losScore, type LosExercise } from "./exerciseBank";
+import { losExercisesFor, losIsCorrect, type LosExercise } from "./exerciseBank";
+import {losChapterExamExercises,losChapterExamScore} from "./los1ChapterExams";
 import { useLosChapterDraft } from "./studyState";
 import { LosCloudPanel } from "./LosCloudPanel";
 import { LosRichExercises } from "./LosRichExercises";
@@ -54,7 +55,7 @@ const selfAssessments:Record<string,string> = {
 
 export function LosWorkbook({chapter,mode}:{chapter:LosChapter;mode:"practice"|"test"}) {
   const {draft,update,saved}=useLosChapterDraft(1,chapter.id);
-  const exercises=losExercisesFor(chapter.id);
+  const exercises=mode==="test"?losChapterExamExercises(chapter.id,draft.testAnswers):losExercisesFor(chapter.id);
   const [revealPractice,setRevealPractice]=useState<string[]>([]);
   const [retakeError,setRetakeError]=useState("");
   const history=mode==="test"?losChapterExamHistory(draft.practiceAnswers,chapter.id):[];
@@ -67,7 +68,7 @@ export function LosWorkbook({chapter,mode}:{chapter:LosChapter;mode:"practice"|"
   const answers=mode==="test"?draft.testAnswers:draft.practiceAnswers;
   const locked=mode==="test"&&Boolean(draft.testSubmittedAt);
   const filled=exercises.filter(ex=>Boolean(answers[ex.id]?.trim())).length;
-  const score=losScore(chapter.id,answers);
+  const score=mode==="test"?losChapterExamScore(chapter.id,answers):{correct:exercises.filter(ex=>losIsCorrect(ex,answers[ex.id]??"")).length,total:exercises.length};
   const retake=()=>{
     if(!saved||!draft.testSubmittedAt)return;
     try{
@@ -118,7 +119,7 @@ export function LosWorkbook({chapter,mode}:{chapter:LosChapter;mode:"practice"|"
         <RotateCcw size={17}/> Arkistoi tulos ja aloita uusinta
       </button>
       {retakeError&&<p role="alert">{retakeError}</p>}
-      <p>Edellisen yrityksen pisteet, palautusaika ja vastaukset jäävät talteen. Oma itsearviointi säilyy myös uusinnassa. Sama tehtäväpankki tulee toistaiseksi uudelleen.</p>
+      <p>Edellisen yrityksen pisteet, palautusaika ja vastaukset jäävät talteen. Oma itsearviointi säilyy myös uusinnassa. Uusinnassa käytetään samaa uusien koetehtävien sarjaa, mutta harjoitussarjan vastaukset ovat erillisiä.</p>
     </div>:<div className="los-test-submit">
       <p>Testi voidaan palauttaa, kun olet vastannut kaikkiin {exercises.length} osatehtävään. Ennen palautusta ratkaisuja ei näytetä.</p>
       <button className="los-primary" disabled={filled!==exercises.length} onClick={()=>
