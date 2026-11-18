@@ -1,6 +1,6 @@
 import type { LosBookDefinition } from "./catalog.ts";
 import type { LosChapterDraft } from "./studyState.ts";
-import { losScore } from "./exerciseBank.ts";
+import {losChapterExamScore} from "./los1ChapterExams.ts";
 import { LOS1_EXECUTABLE_LESSONS,isLos1ExecutableLesson,los1LessonDraftChapter } from "./guidedLessons.ts";
 import { LOS_1_LESSONS } from "./learningPath.ts";
 import { losExamScore, LOS1_MIDTERM_QUESTIONS } from "./content/los1Exams.ts";
