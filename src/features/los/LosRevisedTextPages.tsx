@@ -113,6 +113,19 @@ function TextSpeech({ blocks, chapterId, kind }: { blocks: readonly ReaderBlock[
 }
 
 export function LosRevisedTextPage({ chapterId, kind }: { chapterId: string; kind: "A" | "B" }) {
+  const [focusReader,setFocusReader] = useState(false);
+  const focusButtonRef=useRef<HTMLButtonElement>(null);
+  useEffect(()=>{
+    if(!focusReader)return;
+    const onKeyDown=(event:KeyboardEvent)=>{
+      if(event.key==="Escape"){
+        setFocusReader(false);
+        window.requestAnimationFrame(()=>focusButtonRef.current?.focus());
+      }
+    };
+    window.addEventListener("keydown",onKeyDown);
+    return ()=>window.removeEventListener("keydown",onKeyDown);
+  },[focusReader]);
   const [sideBySide,setSideBySide] = useState<boolean>(()=>{
     if(typeof window==="undefined")return false;
     try{return window.localStorage.getItem("los1.reader.split") === "true";}
@@ -128,10 +141,18 @@ export function LosRevisedTextPage({ chapterId, kind }: { chapterId: string; kin
   if (!chapter) return <div role="status">Tämän kappaleen tekstiä ei löydy sisältöaineistosta.</div>;
   const source = kind === "A" ? chapter.textA : chapter.textB;
   const supportId="los-reading-task-pane-"+chapterId+"-"+kind;
-  return <section className={"los-revised-page"+(sideBySide?" is-study-split":"")} aria-labelledby={"los-revised-heading-" + chapterId + kind}>
+  return <section className={"los-revised-page"+(sideBySide?" is-study-split":"")+(focusReader?" is-focus-reader":"")} aria-labelledby={"los-revised-heading-" + chapterId + kind}>
     <p className="los-eyebrow">KAPPALE {chapterId} / TEXT {kind}</p>
     <h1 id={"los-revised-heading-" + chapterId + kind} lang="de">{source.title}</h1>
     <p className="los-page-intro">{kind === "A" ? "Kappaleen uusi pääteksti. Lue ensin tilanteen kuvaus ja seuraa keskustelua." : "Toinen tekstilaji. Harjoittele kappaleen ilmauksia uudessa tilanteessa."}</p>
+    <div className="los-focus-controls">
+      <button type="button" ref={focusButtonRef} className="los-outline-button"
+        aria-pressed={focusReader} aria-label={focusReader?"Poistu lukutilasta":"Avaa rauhallinen lukutila"}
+        onClick={()=>setFocusReader(value=>!value)}>
+        {focusReader?"Poistu lukutilasta":"Rauhallinen lukutila"}
+      </button>
+      {focusReader&&<span className="los-revised-muted" role="status">Voit poistua myös Esc-näppäimellä.</span>}
+    </div>
     <div className="los-study-layout-toggle" role="group" aria-label="Tekstin ja tehtävien asettelu">
       <button type="button" className={!sideBySide?"is-active":""} aria-pressed={!sideBySide}
         onClick={()=>setLayout(false)}>Kirja</button>
