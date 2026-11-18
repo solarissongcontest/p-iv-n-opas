@@ -1,7 +1,7 @@
-import type {LosLessonBlueprint, LosLessonStep} from "./lessonEngine";
-import {LOS1_READING_BANK} from "./content/los1ReadingBank";
-import {LOS1_REVISED_AB} from "./content/los1RevisedAB";
-import {LOS_1_LESSONS} from "./learningPath";
+import type {LosLessonBlueprint, LosLessonStep} from "./lessonEngine.ts";
+import {LOS1_READING_BANK} from "./content/los1ReadingBank.ts";
+import {LOS1_REVISED_AB} from "./content/los1RevisedAB.ts";
+import {LOS_1_LESSONS} from "./learningPath.ts";
 
 /** Reconnect the existing 60 executable lessons to the new, canonical Text A/B/C.
  * The original L001-L060 and step IDs are retained. Historical drafts survive.
