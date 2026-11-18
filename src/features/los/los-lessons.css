@@ -87,3 +87,5 @@
 .los-lesson-teaching-note details{margin-top:.85rem;padding:.65rem .8rem;background:#fff;border:1px solid #e6e2df;border-radius:8px}
 .los-lesson-teaching-note details summary{cursor:pointer;font-weight:650}
 @media(prefers-color-scheme:dark){.los-lesson-teaching-note{background:var(--los-card-bg,#222)}.los-lesson-teaching-example,.los-lesson-teaching-note details{background:var(--los-card-bg,#252525);border-color:#555}.los-lesson-teaching-example small{color:inherit}}
+
+.los-lesson-teaching-kicker{font-size:.76rem;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--los-book-accent,#B7473C)}
