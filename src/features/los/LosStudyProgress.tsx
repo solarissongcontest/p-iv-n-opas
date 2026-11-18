@@ -10,6 +10,7 @@ import { useLosChapterDraft } from "./studyState";
 
 
 import { getLosStudyProgressSnapshot } from "./progressSnapshot";
+import {LOS1_COMPETENCIES} from "./los1Competencies";
 import "./los-progress.css";
 
 export function LosStudyProgress({book,move}:{book:LosBookDefinition;move:LosNavigate}) {
@@ -49,6 +50,22 @@ export function LosStudyProgress({book,move}:{book:LosBookDefinition;move:LosNav
       <button type="button" className="los-outline-button" onClick={()=>move(null,"midterm")}>Avaa välikokeen palaute <ArrowRight size={16}/></button>
     </div>}
     {data.finalExam&&<div className="los-progress-midterm"><h2>Loppukoe EX-FINAL</h2><p>Automaattisesti tarkistetut tehtävät: <strong>{data.finalExam.correct}/{data.finalExam.total}</strong> oikein. Oma viesti ja puhetallenne arvioidaan erikseen.</p><button type="button" className="los-outline-button" onClick={()=>move(null,"final")}>Avaa loppukokeen palaute <ArrowRight size={16}/></button></div>}
+    <details className="los-progress-competencies">
+      <summary>15 oppimistavoitetta · opetus, harjoittelu ja arviointi</summary>
+      <p>Alla ovat LOS! 1:n alkuperäiset taitotavoitteet. Linkit avaavat niitä opettavat kappaleet ja oikeat harjoitukset. Tehtävässä yrittäminen tai oppitunnin suorittaminen ei yksin todista kielitaitoa. Ääntämistä, vapaata kirjoittamista ja puheen ymmärtämistä ei väitetä automaattisesti hyväksytyiksi.</p>
+      <ol>
+        {LOS1_COMPETENCIES.map(goal=><li key={goal.id}>
+          <div><strong>{goal.name}</strong> <small>{goal.id} · {goal.introducedIn.join(", ")}</small></div>
+          <p>{goal.verification}</p>
+          <div className="los-progress-actions">
+            <button type="button" onClick={()=>move(goal.chapter,"chapter")}>Opetus · C{goal.chapter}</button>
+            {goal.practicedIn.length>0&&<button type="button" onClick={()=>move(goal.chapter,"practice")}>Harjoittele</button>}
+            {goal.assessedIn.length>0&&<button type="button" onClick={()=>move(goal.chapter,"test")}>Kappaletesti</button>}
+          </div>
+          <small>{goal.mode==="objective"?"Osa taitotavoitteesta voidaan tarkistaa automaattisesti.":"Tämä tavoite tarvitsee opiskelijan oman tai erillisen laadullisen näytön."}</small>
+        </li>)}
+      </ol>
+    </details>
     <h2>Kappaleittain</h2>
     <div className="los-progress-chapters">
       {data.chapters.map(ch=><article key={ch.id} className="los-progress-chapter">
