@@ -115,7 +115,7 @@ export function validateLos1LessonTeaching():string[]{
    const guidance=los1LessonTeaching(id);
    if(!guidance){issues.push(id+" opettajan selitys puuttuu");continue;}
    for(const [key,value] of Object.entries(guidance)){
-     if(value.trim().length<(key==="explanation"?80:15))
+     if(value.trim().length<(key==="explanation"?80:key==="commonMistake"||key==="apply"?30:3))
        issues.push(id+" sisältää liian lyhyen opetusosan: "+key);
    }
  }
