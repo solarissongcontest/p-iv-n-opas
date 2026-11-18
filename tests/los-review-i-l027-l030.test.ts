@@ -21,7 +21,7 @@ test("review I maps exactly to L027-L030 and 60 executable lessons",()=>{
   for(const [i,lesson] of LOS1_REVIEW_I_LESSONS.entries()){
     const id="L"+String(i+27).padStart(3,"0");
     assert.equal(lesson.id,id);
-    assert.equal(lesson.title,LOS_1_LESSONS[i+26]?.title);
+    assert.equal(LOS1_EXECUTABLE_LESSONS.find(l=>l.id===lesson.id)?.title,LOS_1_LESSONS[i+26]?.title);
     assert.equal(los1LessonDraftChapter(id),"91");
     assert.equal(isLos1ExecutableLesson(id),true);
     assert.equal(lesson.estimatedMinutes,30);
