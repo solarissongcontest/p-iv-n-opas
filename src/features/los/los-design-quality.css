@@ -129,3 +129,47 @@
   background:var(--los-paper);
  }
 }
+
+/* Screenshot review: the first actual German sentence previously began below
+ * the phone's first screen. Keep playback available but collapse secondary
+ * controls instead of stacking a tall configuration dashboard above the text. */
+.los-revised-speech{padding:.72rem .82rem;margin:.9rem 0 .65rem}
+.los-revised-speech-controls{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
+.los-revised-speech-controls>.los-outline-button{min-height:44px}
+.los-revised-speech-options{margin-left:auto;min-width:0}
+.los-revised-speech-options>summary{
+ display:flex;align-items:center;justify-content:center;min-height:44px;
+ padding:8px 12px;border:1px solid var(--los-line);border-radius:7px;
+ background:var(--los-paper);font-size:13px;font-weight:680;
+ cursor:pointer;list-style:none;
+}
+.los-revised-speech-options>summary::-webkit-details-marker{display:none}
+.los-revised-speech-options[open]{width:100%;flex-basis:100%}
+.los-revised-speech-option-fields{display:flex;align-items:center;gap:9px;flex-wrap:wrap;padding:12px 4px 4px}
+.los-revised-speech-option-fields label{min-height:44px}
+.los-speech-secondary-controls{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:8px}
+.los-speech-secondary-controls :is(.los-revised-speech-segments,.los-revised-speech-sentences){
+ min-width:0;margin:0;border-radius:8px;
+}
+.los-speech-secondary-controls :is(.los-revised-speech-segments,.los-revised-speech-sentences)[open]{grid-column:1/-1}
+.los-speech-secondary-controls :is(.los-revised-speech-segments,.los-revised-speech-sentences)>summary{
+ display:flex;align-items:center;min-height:44px;padding:8px 10px;
+ font-size:13px;font-weight:650;line-height:1.4;cursor:pointer;
+}
+.los-revised-speech .los-revised-muted{font-size:12px;line-height:1.45;margin:.4rem 0 0}
+.los-c01-reader{margin-top:14px}
+.los-c01-reader-intro h2{font-size:clamp(22px,2.3vw,26px);margin:0 0 6px}
+.los-c01-reader-intro>p:not(.los-overline){font-size:13px;line-height:1.5;margin:0 0 10px}
+.los-c01-toolbox{padding:9px 0;margin:10px 0}
+.los-c01-instruction{margin:5px 0 0!important}
+.los-revised-page .los-page-intro{margin-bottom:.65rem}
+.los-revised-page .los-study-layout-toggle{margin:7px 0 12px}
+@media(max-width:480px){
+ .los-revised-speech-controls>svg{display:none}
+ .los-speech-secondary-controls :is(.los-revised-speech-segments,.los-revised-speech-sentences)>summary{
+  padding:8px;font-size:12px;
+ }
+ .los-revised-speech-options>summary{padding:7px 9px}
+ .los-c01-reader-intro h2{font-size:22px}
+ .los-c01-reader{margin-top:9px}
+}
