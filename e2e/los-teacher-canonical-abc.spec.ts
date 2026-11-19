@@ -38,7 +38,8 @@ test("canonical L003 teaches current C01 Text A/B/C, including Hilfstext",async(
   await page.reload({waitUntil:"domcontentloaded"});
   await expect(page.locator(".los-teacher-paper h2")).toContainText("Text C:");
   await page.goto("/los#/1/01/text-c",{waitUntil:"domcontentloaded"});
-  await expect(page.locator(".los-hilfstext")).toBeVisible();
+  await expect(page.locator(".los-revised-support h1")).toContainText("So begrüßt man sich!");
+  await expect(page.locator(".los-revised-support-content")).toBeVisible();
 });
 test("320px Teacher 2.0 preserves canonical Text C and safe versioned progress",async({page},info)=>{
   await withLocalOwner(page);
@@ -48,6 +49,8 @@ test("320px Teacher 2.0 preserves canonical Text C and safe versioned progress",
   await expect(page.locator(".los-teacher-outline")).toContainText("Text C");
   await expectNoHorizontalOverflow(page);
   await page.screenshot({path:info.outputPath("teacher20-mobile320-current-C02.png"),animations:"disabled"});
+  await page.locator(".los-teacher-outline nav button").last().click();
+  await expect(page.locator(".los-teacher-paper .los-teacher-summary")).toBeVisible();
   const finish=page.getByRole("button",{name:"Merkitse oppitunti läpikäydyksi"});
   await expect(finish).toBeDisabled();
 });
