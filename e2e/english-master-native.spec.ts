@@ -42,14 +42,14 @@ test("English Master opens as a first-class book route, imports one content pack
   const fixture = gzipSync(Buffer.from(JSON.stringify(tinyStructuralFixture()), "utf8"));
   await page.locator("input[type=file]").first().setInputFiles({ name: "content.pack.json.gz", mimeType: "application/gzip", buffer: fixture });
   await expect(page.getByRole("heading", { name: "English Master", exact: true })).toBeVisible();
-  await expect(page.locator(".em-cover")).toBeVisible();
-  await expect(page.locator(".em-toc-toggle")).toHaveCount(8);
+  await expect(page.locator(".los-front-banner")).toBeVisible();
+  await expect(page.locator(".los-sidebar-chapter-group")).toHaveCount(1);
   await page.reload({ waitUntil: "domcontentloaded" });
   await expect(page.getByRole("heading", { name: "English Master", exact: true })).toBeVisible();
 
   await page.getByRole("button", { name: "Oppikirja", exact: true }).click();
-  await expect(page.locator(".em-chapter h2")).toHaveText("How English Sentences Work");
-  await expect(page.locator(".em-chapter-pager")).toBeVisible();
+  await expect(page.locator(".em-chapter h1")).toHaveText("How English Sentences Work");
+  await expect(page.locator(".los-pagination")).toBeVisible();
   await expect(page.getByText("Tämä on vain testin sisältöä.").first()).toBeVisible();
 
   await page.getByRole("button", { name: "Opetuspolku", exact: true }).click();
@@ -77,7 +77,8 @@ test("English Master loads the real 122/192/20 content automatically and keeps i
   await expect(page.getByRole("heading", { name: "English Master", exact: true })).toBeVisible({ timeout: 45_000 });
   await expect(page.getByText("122 kirjalukua")).toBeVisible();
   await page.getByRole("button", { name: "Oppikirja", exact: true }).click();
-  await expect(page.locator(".em-book-toolbar select option")).toHaveCount(122);
+  await page.getByRole("button", { name: "Avaa kaikki", exact: true }).click();
+  await expect(page.locator(".em-los-toc-chapter")).toHaveCount(122);
   await page.getByRole("button", { name: "Opetuspolku", exact: true }).click();
   await expect(page.locator(".em-unit")).toHaveCount(32);
   await page.getByRole("button", { name: "Kuuntelu", exact: true }).click();
