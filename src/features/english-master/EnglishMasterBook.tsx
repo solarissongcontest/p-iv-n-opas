@@ -97,6 +97,58 @@ async function parsePack(blob: Blob): Promise<Pack> {
   if (Object.keys(pack.media).length !== 20) throw new Error("Kuunteluäänitteiden määrä ei täsmää.");
   return pack;
 }
+type BundledContentManifest = {
+  schema: "english-master-asset-manifest-v1";
+  version: "0.8";
+  size_bytes: number;
+  sha256: string;
+  parts: Array<{ file: string; size: number; sha: string }>;
+};
+
+/**
+ * The complete Alpha 0.8 package is committed as immutable binary slices.
+ * Fetching the bundle on first launch removes the manual installation step.
+ * IndexedDB remains an offline cache, never the canonical content source.
+ */
+async function fetchBundledPack(): Promise<Blob> {
+  const response = await fetch("/english-master/content.manifest.json", { cache: "no-store" });
+  if (!response.ok) throw new Error("Kirjan sisältöpaketin hakemistoa ei löytynyt palvelimelta.");
+  const manifest = (await response.json()) as BundledContentManifest;
+  if (
+    manifest.schema !== "english-master-asset-manifest-v1" ||
+    manifest.version !== "0.8" ||
+    manifest.size_bytes !== 4794010 ||
+    !/^[a-f0-9]{64}$/.test(manifest.sha256 ?? "") ||
+    !Array.isArray(manifest.parts) ||
+    manifest.parts.length !== 16
+  ) throw new Error("Palvelimen English Master -sisältöluettelo on virheellinen.");
+
+  // Fetch four at a time to keep memory and connection use reasonable on mobile.
+  const chunks: Array<ArrayBuffer> = [];
+  for (let i = 0; i < manifest.parts.length; i += 4) {
+    const batch = await Promise.all(manifest.parts.slice(i, i + 4).map(async (part, offset) => {
+      const expectedFile = `pack-part-${String(i + offset).padStart(2, "0")}.bin`;
+      if (part.file !== expectedFile || !Number.isInteger(part.size) || part.size < 1 || part.size > 310000) {
+        throw new Error("English Master -paketissa on virheellinen sisältöosa.");
+      }
+      const result = await fetch("/english-master/" + expectedFile);
+      if (!result.ok) throw new Error("English Masterin sisältöosaa ei voitu ladata: " + expectedFile);
+      const bytes = await result.arrayBuffer();
+      if (bytes.byteLength !== part.size) throw new Error("English Masterin sisältöosan koko ei täsmää.");
+      return bytes;
+    }));
+    chunks.push(...batch);
+  }
+  const blob = new Blob(chunks, { type: "application/gzip" });
+  if (blob.size !== manifest.size_bytes) throw new Error("English Masterin ladattu sisältöpaketti on puutteellinen.");
+  if (typeof crypto !== "undefined" && crypto.subtle) {
+    const hash = await crypto.subtle.digest("SHA-256", await blob.arrayBuffer());
+    const actual = Array.from(new Uint8Array(hash), byte => byte.toString(16).padStart(2, "0")).join("");
+    if (actual !== manifest.sha256) throw new Error("English Masterin sisältöpaketin tarkistussumma ei täsmää.");
+  }
+  return blob;
+}
+
 function readProgress(owner: string): Progress {
   try { return JSON.parse(localStorage.getItem("em-native-progress-" + owner) ?? "{}") as Progress; }
   catch { return {}; }
@@ -130,7 +182,7 @@ function ImportPanel({ onImported }: { onImported: (pack: Pack) => void }) {
   return <section className="em-paper em-import">
     <p className="em-overline">ENGLISH MASTER · ALPHA 0.8</p>
     <h1>Ota englannin oppikirja käyttöön</h1>
-    <p>English Master toimii Opintopäiväkirjan omana kirjana LOS!-sarjan rinnalla. Tuo ensimmäisellä kerralla yksi sisältöpaketti; sen jälkeen se avautuu tältä sivulta automaattisesti samalla laitteella.</p>
+    <p>English Master lataa oppikirjan sisällön tavallisesti automaattisesti. Jos verkkoyhteys tai paikallinen tallennus estää sen, voit tuoda oman sisältöpakettisi tästä.</p>
     <div className="em-upload">
       <FileUp size={28} aria-hidden="true" />
       <strong>Valitse English Masterin sisältöpaketti</strong>
@@ -170,19 +222,24 @@ export function EnglishMasterBook() {
     let live = true;
     void (async () => {
       try {
-        let blob = await storedBlob();
-        if (!blob) {
-          const response = await fetch("/english-master/content.pack.json.gz").catch(() => null);
-          if (response?.ok) {
-            blob = await response.blob();
-            const content = await parsePack(blob);
-            if (!live) return;
-            setPack(content); await rememberBlob(blob).catch(() => undefined);
-          }
+        let content: Pack | null = null;
+        let stored: Blob | null = null;
+        try { stored = await storedBlob(); } catch { /* IndexedDB may be unavailable; online reading still works. */ }
+        if (stored) {
+          try { content = await parsePack(stored); }
+          catch { /* A corrupt old cache must not prevent downloading the bundled book. */ }
         }
-        if (blob && live) setPack(await parsePack(blob));
-      } catch (e) { if (live) setError(e instanceof Error ? e.message : "Sisältöjen lataus epäonnistui."); }
-      finally { if (live) setLoading(false); }
+        if (!content) {
+          const bundle = await fetchBundledPack();
+          content = await parsePack(bundle);
+          await rememberBlob(bundle).catch(() => undefined);
+        }
+        if (live) { setPack(content); setError(""); }
+      } catch (e) {
+        if (live) setError(e instanceof Error ? e.message : "Sisältöjen lataus epäonnistui.");
+      } finally {
+        if (live) setLoading(false);
+      }
     })();
     return () => { live = false; window.removeEventListener("hashchange", sync); };
   }, []);
