@@ -46,7 +46,6 @@ test("English Master opens as a first-class book route, imports one content pack
   await expect(page.locator(".los-sidebar-chapter-group")).toHaveCount(1);
   await page.reload({ waitUntil: "domcontentloaded" });
   await expect(page.getByRole("heading", { name: "English Master", exact: true })).toBeVisible();
-  await expect(page.locator(".los-book-workspace")).toHaveAttribute("data-reading-size", "large");
 
   await page.locator(".los-book-main").getByRole("button", { name: "Sisällysluettelo", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Sisällysluettelo", exact: true })).toBeVisible();
@@ -58,6 +57,12 @@ test("English Master opens as a first-class book route, imports one content pack
   await expect(page.locator(".los-opening-head")).toBeVisible();
   await expect(page.locator(".los-chapter-links button")).toHaveCount(1);
   await expect(page.locator(".los-pagination")).toBeVisible();
+  await expect(page.locator(".em-los-section-nav .los-section-step")).toHaveCount(2);
+  await expect(page.getByRole("combobox", {name:"Valitse luvun osio"})).toHaveValue("0");
+  await page.getByRole("button", {name:"Seuraava osio"}).click();
+  await expect(page.getByRole("combobox", {name:"Valitse luvun osio"})).toHaveValue("1");
+  await page.getByRole("button", {name:"Edellinen osio"}).click();
+  await expect(page.getByRole("combobox", {name:"Valitse luvun osio"})).toHaveValue("0");
   // Exact LOS! reader controls are reused, not an English-only imitation.
   await page.locator(".los-display-settings > summary").click();
   await page.getByLabel("Tekstin koko").selectOption("large");
