@@ -42,7 +42,7 @@ export function losSpeakerSlot(speaker: string, count: number): number {
  * A turn remains available as an exact fallback even if punctuation is absent.
  */
 export function losSpeechSentenceSegments(text:string):string[]{
- const normalized=text.replace(/\\s+/g," ").trim();
+ const normalized=text.replace(/\s+/g," ").trim();
  if(!normalized)return [];
  return normalized.split(/(?<=[.!?])\\s+(?=[A-ZÄÖÜ„«])/u).map(part=>part.trim()).filter(Boolean);
 }
