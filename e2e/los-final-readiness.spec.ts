@@ -313,3 +313,67 @@ test("all ten grammar chapters offer audio for German examples",async({page})=>{
   expect(count,"chapter "+ch+" grammar should offer German TTS").toBeGreaterThan(0);
  }
 });
+
+test("reader typography options are persistent, accessible and reflow at 320 pixels",async({page},testInfo)=>{
+ await enter(page,"01/text");
+ await expect(page.locator(".los-reading-page")).toBeVisible({timeout:30000});
+ const options=page.locator(".los-display-settings");
+ await expect(options.locator("summary")).toBeVisible();
+ await options.locator("summary").click();
+ await options.getByLabel("Tekstin koko").selectOption("extra");
+ await options.getByLabel("Riviväli").selectOption("relaxed");
+ await options.getByLabel("Lukurivin leveys").selectOption("narrow");
+ await expect(page.locator(".los-book-workspace")).toHaveAttribute("data-reading-size","extra");
+ await expect(page.locator(".los-book-workspace")).toHaveAttribute("data-reading-spacing","relaxed");
+ await expect(page.locator(".los-book-workspace")).toHaveAttribute("data-reading-measure","narrow");
+ await expect.poll(()=>page.locator(".los-c01-words").first().evaluate(el=>getComputedStyle(el).fontSize)).toBe("24px");
+ await page.reload({waitUntil:"domcontentloaded"});
+ await expect(page.locator(".los-book-workspace")).toHaveAttribute("data-reading-size","extra");
+ await expect(page.locator(".los-book-workspace")).toHaveAttribute("data-reading-spacing","relaxed");
+ await page.setViewportSize({width:320,height:780});
+ await expectNoHorizontalOverflow(page);
+ await page.screenshot({path:testInfo.outputPath("reader-320px-large-text.png"),fullPage:true,animations:"disabled"});
+ await page.locator(".los-display-settings summary").click();
+ await page.getByRole("button",{name:"Palauta oletukset"}).click();
+ await expect(page.locator(".los-book-workspace")).toHaveAttribute("data-reading-size","normal");
+ await expect(page.locator(".los-book-workspace")).toHaveAttribute("data-reading-measure","normal");
+});
+
+test("mobile chapter drawer traps focus, closes with Escape and does not leave the page inert",async({page},testInfo)=>{
+ await enter(page,"01/text");
+ await page.setViewportSize({width:390,height:844});
+ await expect(page.locator(".los-top-toc")).toBeVisible({timeout:30000});
+ await page.locator(".los-top-toc").click();
+ const drawer=page.locator(".los-book-sidebar.is-open");
+ await expect(drawer).toBeVisible();
+ await expect(drawer).toHaveAttribute("role","dialog");
+ await expect(drawer).toHaveAttribute("aria-modal","true");
+ await expect(drawer.getByRole("button",{name:"Sulje sisällysluettelo"})).toBeFocused();
+ await page.keyboard.press("Shift+Tab");
+ await expect(drawer.locator("a[href]").last()).toBeFocused();
+ await page.keyboard.press("Tab");
+ await expect(drawer.getByRole("button",{name:"Sulje sisällysluettelo"})).toBeFocused();
+ await page.screenshot({path:testInfo.outputPath("mobile-chapter-drawer.png"),fullPage:false,animations:"disabled"});
+ await page.keyboard.press("Escape");
+ await expect(drawer).toHaveCount(0);
+ await expect(page.locator(".los-top-toc")).toBeFocused();
+ await page.locator(".los-top-toc").click();
+ await drawer.getByRole("button",{name:"Sisällysluettelo",exact:true}).click();
+ await expect(page.locator(".los-book-sidebar.is-open")).toHaveCount(0);
+ await expect(page.locator("#main-content")).toBeFocused();
+ await expectNoHorizontalOverflow(page);
+});
+
+test("desktop reader screenshot and true container-based study layout",async({page},testInfo)=>{
+ await enter(page,"01/text");
+ await expect(page.locator(".los-revised-page")).toBeVisible({timeout:30000});
+ await page.setViewportSize({width:1440,height:900});
+ await page.screenshot({path:testInfo.outputPath("textbook-desktop-reading.png"),fullPage:true,animations:"disabled"});
+ await page.getByRole("button",{name:"Kirja + tehtävät"}).click();
+ await expect(page.locator(".los-study-layout")).toHaveClass(/is-split/);
+ const layout=await page.locator(".los-study-layout").evaluate(el=>getComputedStyle(el).display);
+ const available=await page.locator(".los-reading-page").evaluate(el=>el.getBoundingClientRect().width);
+ if(available>=1000)expect(layout).toBe("grid");
+ else expect(layout).not.toBe("grid");
+ await expectNoHorizontalOverflow(page);
+});
