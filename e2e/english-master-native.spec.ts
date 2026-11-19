@@ -23,6 +23,7 @@ function tinyStructuralFixture() {
     const id = "EM-LP-" + unit + "-L" + String(n).padStart(3, "0");
     lessons[id] = { content_id: id, title: "Test lesson " + n, status: "draft", book_refs: ["G01"],
       payload: { hook_fi: "Opi muodostamaan lause.", explanations: [{ heading_fi: "Sääntö", text_fi: "Tämä on vain testin sisältöä." }],
+        teacher_scenes: [{ id: "scene-1", title_fi: "Ensimmäinen vaihe", teacher_fi: "Opettajan ensimmäinen selitys." }, { id: "scene-2", title_fi: "Toinen vaihe", teacher_fi: "Opettajan toinen selitys." }],
         tasks: [{ task_id: id + "-T01", format: "single_choice", phase: "guided", prompt_en: "Choose the correct sentence.",
           options: [{ id: "A", text: "I study English." }, { id: "B", text: "I studies English." }], correct_option: "A",
           feedback_correct_fi: "Study is correct with I.", wrong_option_feedback_fi: { B: "Studies belongs with he/she/it." } }] } };
@@ -41,16 +42,22 @@ test("English Master opens as a first-class book route, imports one content pack
   const fixture = gzipSync(Buffer.from(JSON.stringify(tinyStructuralFixture()), "utf8"));
   await page.locator("input[type=file]").first().setInputFiles({ name: "content.pack.json.gz", mimeType: "application/gzip", buffer: fixture });
   await expect(page.getByRole("heading", { name: "English Master", exact: true })).toBeVisible();
+  await expect(page.locator(".em-cover")).toBeVisible();
+  await expect(page.locator(".em-toc-toggle")).toHaveCount(8);
   await page.reload({ waitUntil: "domcontentloaded" });
   await expect(page.getByRole("heading", { name: "English Master", exact: true })).toBeVisible();
 
   await page.getByRole("button", { name: "Oppikirja", exact: true }).click();
   await expect(page.locator(".em-chapter h2")).toHaveText("How English Sentences Work");
+  await expect(page.locator(".em-chapter-pager")).toBeVisible();
   await expect(page.getByText("Tämä on vain testin sisältöä.").first()).toBeVisible();
 
   await page.getByRole("button", { name: "Opetuspolku", exact: true }).click();
   await expect(page.getByText("Test lesson 1")).toBeVisible();
   await page.getByRole("button", { name: /Test lesson 1/ }).first().click();
+  await expect(page.getByRole("heading", { name: "Ensimmäinen vaihe" })).toBeVisible();
+  await page.getByRole("button", { name: /Seuraava vaihe/ }).click();
+  await expect(page.getByRole("heading", { name: "Toinen vaihe" })).toBeVisible();
   await page.locator(".em-task input[type=radio]").first().check();
   await page.getByRole("button", { name: "Tarkista vastaus" }).click();
   await expect(page.getByRole("status")).toContainText("Oikein");
