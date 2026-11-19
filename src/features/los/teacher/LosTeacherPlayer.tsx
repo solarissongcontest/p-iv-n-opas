@@ -191,6 +191,16 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
   const evidence09=useLosChapterDraft(1,"09").draft;
   const evidence10=useLosChapterDraft(1,"10").draft;
   const [authorized, setAuthorized] = useState<boolean | null>(null);
+  const [outlineOpen,setOutlineOpen]=useState(false);
+  // Desktop sidebar is useful; on a phone, the teaching card must come BEFORE
+  // an optional 10–25-scene outline. Avoid server/client hydration drift.
+  useEffect(()=>{
+    const media=window.matchMedia("(min-width: 821px)");
+    const onSize=()=>setOutlineOpen(media.matches);
+    onSize();
+    media.addEventListener("change",onSize);
+    return ()=>media.removeEventListener("change",onSize);
+  },[]);
   const [showHelp, setShowHelp] = useState(false);
   const [helpSelection, setHelpSelection] = useState<string | null>(null);
   const [replayKey, setReplayKey] = useState(0);
@@ -312,13 +322,21 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
             {!completed && !olderContentVersion && <button className="los-teacher-pause" type="button" onClick={togglePause}>
               {session.paused ? "Jatka opetusta" : "Keskeytä oppitunti"}
             </button>}
-            <details className="los-teacher-outline" open>
+            <details className="los-teacher-outline" open={outlineOpen}
+              onToggle={event=>setOutlineOpen(event.currentTarget.open)}>
               <summary>Oppitunnin sisältö</summary>
               <nav aria-label="Oppitunnin opetustilanteet">
                 {lesson.scenes.map((item, i) => <button key={item.id} type="button" disabled={olderContentVersion}
                   aria-current={scene.id === item.id ? "step" : undefined}
                   className={scene.id === item.id ? "is-active" : ""}
-                  onClick={() => navigate(item.id)}>
+                  onClick={() => {
+                    navigate(item.id);
+                    if(window.innerWidth<=820){
+                      setOutlineOpen(false);
+                      window.requestAnimationFrame(()=>
+                        document.querySelector(".los-teacher-paper")?.scrollIntoView({block:"start",behavior:"auto"}));
+                    }
+                  }}>
                   <span>{session.visitedIds.includes(item.id) ? <Check size={15}/> : String(i + 1)}</span>
                   <span>{item.title}</span>
                 </button>)}
