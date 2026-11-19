@@ -187,6 +187,7 @@ test("preferred German voice follows the learner across Text A, B, C and appendi
   }});
  });
  await enter(page,"01/text");
+ await page.locator(".los-revised-speech-options summary").click();
  const picker=page.getByLabel("Saksan puheääni");
  await expect(picker).toBeVisible({timeout:30000});
  await picker.selectOption({label:"QA Österreich · de-AT"});
@@ -375,5 +376,21 @@ test("desktop reader screenshot and true container-based study layout",async({pa
  const available=await page.locator(".los-reading-page").evaluate(el=>el.getBoundingClientRect().width);
  if(available>=1000)expect(layout).toBe("grid");
  else expect(layout).not.toBe("grid");
+ await expectNoHorizontalOverflow(page);
+});
+
+test("first German sentence is not buried under a tall audio settings dashboard",async({page},testInfo)=>{
+ await enter(page,"01/text");
+ await page.setViewportSize({width:390,height:844});
+ const speechSettings=page.locator(".los-revised-speech-options");
+ await expect(speechSettings.locator("summary")).toBeVisible({timeout:30000});
+ await expect(speechSettings.getByLabel("Saksan puheääni")).toBeHidden();
+ const firstTurn=page.locator(".los-revised-page .los-c01-turn").first();
+ await expect(firstTurn).toBeAttached();
+ const top=await firstTurn.evaluate(el=>Math.round(el.getBoundingClientRect().top));
+ expect(top,"The first original German turn should appear within about one extra mobile screen").toBeLessThan(1200);
+ await page.screenshot({path:testInfo.outputPath("mobile-reader-prioritizes-german-text.png"),fullPage:false,animations:"disabled"});
+ await speechSettings.locator("summary").click();
+ await expect(speechSettings.getByLabel("Saksan puheääni")).toBeVisible();
  await expectNoHorizontalOverflow(page);
 });
