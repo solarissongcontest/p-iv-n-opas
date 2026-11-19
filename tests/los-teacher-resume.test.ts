@@ -28,13 +28,12 @@ test("Teacher 2.0 resumes the active current scene and continues from L002 after
    {lessonId:"L002",completed:1,available:60,action:"continue"});
 });
 test("outdated Teacher 2.0 session must be reopened for safe archive rather than counted done",()=>{
- const d:dDraft=emptyLosDraft();
+ const d:LosChapterDraft=emptyLosDraft();
  const old=emptyTeacherSession(two(),time);
  d.teacherSessions={L002:{...old,completedAt:time,
    contentVersion:"2.0.0-preview.1",contentSignature:"12345678",visitedIds:[two().scenes[0]!.id]}};
- const recommendation=recommendLosTeacherResume({"02":d});
+ const recommendation=recommendLosTeacherResume({"01":d});
  assert.equal(recommendation.lessonId,"L002");
  assert.equal(recommendation.completed,0);
  assert.equal(recommendation.action,"continue");
 });
-type dDraft=LosChapterDraft;
