@@ -42,11 +42,11 @@ test("English Master opens as a first-class book route, imports one content pack
   await page.reload({ waitUntil: "domcontentloaded" });
   await expect(page.getByRole("heading", { name: "English Master", exact: true })).toBeVisible();
 
-  await page.getByRole("button", { name: "Oppikirja" }).click();
+  await page.getByRole("button", { name: "Oppikirja", exact: true }).click();
   await expect(page.getByText("How English Sentences Work")).toBeVisible();
   await expect(page.getByText("Tämä on vain testin sisältöä.").first()).toBeVisible();
 
-  await page.getByRole("button", { name: "Opetuspolku" }).click();
+  await page.getByRole("button", { name: "Opetuspolku", exact: true }).click();
   await expect(page.getByText("Test lesson 1")).toBeVisible();
   await page.getByRole("button", { name: /Test lesson 1/ }).first().click();
   await page.locator(".em-task input[type=radio]").first().check();
