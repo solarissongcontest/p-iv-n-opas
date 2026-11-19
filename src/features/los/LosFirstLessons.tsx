@@ -84,7 +84,11 @@ export function LosFirstLessons({ selectedId, onSelect, move }: {
     <div className="los-lesson-program-head">
       <p className="los-overline">OHJATTU OPETUS · {ALL_LESSONS.length} TUNTIA</p>
       <h2>Opiskele vaihe vaiheelta</h2>
-      <p>Oppikirjassa on {ALL_LESSONS.length} suoritettavaa oppituntia. Kaikkien kymmenen kappaleen opetuspolku ja molemmat kertausten arviointijaksot ovat käytettävissä. C08:n ja C10:n lähdetekstit ovat kirjassa, mutta äänen, kielen ja laitteiden lopulliset julkaisutarkistukset ovat erillisiä. Loppukokeen kuuntelu tarvitsee toimivan alkuperäisäänen, ja itsearvioitavat tuotokset eivät ole automaattisesti kielitasoltaan hyväksyttyjä. Niissä käytetään kirjan oikeita sivuja ja samoja tallennettuja vastauksia. Oppitunnin suoritus kertoo työvaiheiden tekemisestä, ei vielä todennetusta kielitaidosta.</p>
+      <p className="los-lesson-program-lead">Valitse kappale ja avaa sen oppitunti. Voit jatkaa aiemmin tallennettujen tehtävien parista tai aloittaa ensimmäisestä tunnista.</p>
+      <details className="los-lesson-publication-note">
+        <summary>Oppituntien aineistot ja arvioinnin rajat</summary>
+        <p>Oppikirjassa on {ALL_LESSONS.length} suoritettavaa oppituntia. Kaikkien kymmenen kappaleen opetuspolku ja molemmat kertausten arviointijaksot ovat käytettävissä. C08:n ja C10:n lähdetekstit ovat kirjassa, mutta äänen, kielen ja laitteiden lopulliset julkaisutarkistukset ovat erillisiä. Loppukokeen kuuntelu tarvitsee toimivan alkuperäisäänen, ja itsearvioitavat tuotokset eivät ole automaattisesti kielitasoltaan hyväksyttyjä. Niissä käytetään kirjan oikeita sivuja ja samoja tallennettuja vastauksia. Oppitunnin suoritus kertoo työvaiheiden tekemisestä, ei vielä todennetusta kielitaidosta.</p>
+      </details>
       <p className="los-lesson-save" role="status">{saved ? (chapterId==="91" || chapterId==="92" || chapterId==="93" ? "Kertaus- ja arviointivastaukset tallentuvat paikalliseen LOS!-varmuuskopioon. Vie JSON-tiedosto siirtääksesi tiedot toiselle laitteelle." : `Oppituntitiedot tallennetaan paikalliseen LOS!-varmuuskopioon. Valinnainen pilvisynkronointi tehdään kappaleen ${Number(chapterId)} muistiinpanojen kautta.`) : "Tallennus epäonnistui. Älä sulje sivua ennen varmuuskopion tekemistä."}</p>
       <div className="los-lesson-progress" aria-label="Toteutettujen oppituntien edistyminen">
         <strong>{completeCount}/{ALL_LESSONS.length} suoritettu</strong>
