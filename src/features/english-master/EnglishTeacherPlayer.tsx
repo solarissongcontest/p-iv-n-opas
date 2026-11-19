@@ -258,11 +258,11 @@ export function EnglishTeacherPlayer({ lesson, ownerId, previouslyCompleted, onB
                 disabled={!session.answers[scene.task.task_id]?.trim()}>Tarkista itse</button>}
             </form>}
           {session.checks[scene.task.task_id] && <div className={"los-teacher-feedback "+
-              (session.checks[scene.task.task_id].ok===false?"is-wrong":"is-right")} role="status">
-              <strong>{session.checks[scene.task.task_id].ok===null?"Itsearviointi":
-                session.checks[scene.task.task_id].ok?"Oikein":"Katsotaan tätä vielä"}</strong>
-              <p>{session.checks[scene.task.task_id].explanation}</p>
-              {session.checks[scene.task.task_id].ok===null &&
+              (session.checks[scene.task.task_id]?.ok===false?"is-wrong":"is-right")} role="status">
+              <strong>{session.checks[scene.task.task_id]?.ok===null?"Itsearviointi":
+                session.checks[scene.task.task_id]?.ok?"Oikein":"Katsotaan tätä vielä"}</strong>
+              <p>{session.checks[scene.task.task_id]?.explanation}</p>
+              {session.checks[scene.task.task_id]?.ok===null &&
                 <p>Vastausta ei ole automaattisesti hyväksytty. Arvioi kieli itse tai opettajan avulla.</p>}
             </div>}
           <div className="los-teacher-question-tools">
