@@ -282,8 +282,9 @@ export function validateCanonicalTeacherLesson(lesson:TeacherLesson):string[]{
  for(const scene of lesson.scenes) {
    // The current book can legitimately use an old character name as a wrong
    // multiple-choice option. That is not an obsolete taught dialogue.
+   const {question:_currentBankQuestion,...withoutQuestion}=scene;
    const sourceCheck=scene.question&&currentPrompts.has(scene.question.prompt)
-     ? {...scene,question:undefined} : scene;
+     ? withoutQuestion : scene;
    if(isObsolete(sourceCheck))issues.push(lesson.id+" obsolete source in scene "+scene.id);
  }
  return issues;
