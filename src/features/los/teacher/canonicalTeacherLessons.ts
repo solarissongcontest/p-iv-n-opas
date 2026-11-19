@@ -2,6 +2,7 @@ import {LOS1_REVISED_AB} from "../content/los1RevisedAB.ts";
 import {LOS1_REVISED_C} from "../content/los1RevisedC.ts";
 import {losReadingQuestions, type LosReadingChoice, type LosReadingText} from "../content/los1ReadingBank.ts";
 import {losExercisesFor} from "../exerciseBank.ts";
+import {losTeacherChapterTeaching} from "./chapterTeaching.ts";
 import type {TeacherLesson,TeacherScene,TeacherQuestion,TeacherBookLink,TeacherBoardStep} from "./engine.ts";
 
 /**
@@ -89,8 +90,10 @@ function canonicalScene(chapterId:string,kind:LosReadingText):TeacherScene[] {
       id:"canonical-text-"+kind.toLowerCase(),kind:"book",phase:"Nykyinen oppikirja",
       title:"Text "+kind+": "+title,
       paragraphs:[
-        "Lue LOS! 1:n kappaleen "+Number(chapterId)+" uusi Text "+kind+". Se on oppikirjan nykyinen sisältö, ei aiempien versioiden lainattu dialogi.",
+        losTeacherChapterTeaching(chapterId).goal,
         purpose,
+        losTeacherChapterTeaching(chapterId).rule,
+        "Lue kappaleen "+Number(chapterId)+" Text "+kind+" ja etsi opetettuun asiaan liittyvä saksankielinen ilmaus.",
         kind==="A"||kind==="B"? "Opettajan esimerkki: "+firstSentence(kind==="A"?data.ab.textA:data.ab.textB):
       "Text C:n opetus: "+supportExplanation(chapterId),
     "Avaa koko teksti kirjan sisällä. Voit hyödyntää saksankielistä laiteääntä, mutta lukeminen ei yksin todista kuuntelun toteutuneen.",
@@ -138,11 +141,14 @@ function rewriteObsoleteScene(scene:TeacherScene,chapterId:string,sequence:numbe
     /text c|hilfstext/i.test(scene.title)?"C":
     /text b/i.test(scene.title)?"B":"A";
   const label="Text "+kind;
+  const teaching=losTeacherChapterTeaching(chapterId);
   const intro=[
-    "Tämä opetustilanne on päivitetty nykyisen LOS! 1:n teksteihin. Vanhan painoksen nimet, dialogit ja tehtävät eivät enää ohjaa opiskelua.",
-    "Lue kappaleen "+Number(chapterId)+" "+label+" ja tunnista sen aihe, tärkeät ilmaukset ja henkilöt. Voit käyttää Text C:n tukitekstiä.",
-    actualTeachingExample(chapterId),
-    "Tukitekstin selitys: "+supportExplanation(chapterId),
+    teaching.goal,
+    teaching.rule,
+    teaching.contrast,
+    "Malliesimerkki: "+actualTeachingExample(chapterId),
+    "Text C:n selitys: "+supportExplanation(chapterId),
+    teaching.apply,
   ];
   if(scene.kind==="question"){
     const q=choiceQuestion(chapterId,kind,sequence)??choiceQuestion(chapterId,"A",0);
@@ -153,7 +159,8 @@ function rewriteObsoleteScene(scene:TeacherScene,chapterId:string,sequence:numbe
   }
   if(scene.kind==="board"){
     return {...base,title:"Näin luet nykyisiä Text A-, B- ja C -tekstejä",
-      paragraphs:["Seuraa uudistettujen tekstien todellisia ilmauksia. Etsi ensin tilanne ja puhujat, vasta sitten päättele sanojen merkitys."],
+      paragraphs:[teaching.goal,teaching.rule,teaching.contrast,
+        "Seuraa Text A:n ja Text B:n ilmauksia ja käytä Text C:n tukitekstiä apuna."],
       board:canonicalBoard(chapterId)};
   }
   if(scene.kind==="reflection"){
@@ -225,10 +232,12 @@ export function canonicalizeLosTeacherLesson(original:TeacherLesson):TeacherLess
       {id:"canonical-intro",kind:"explanation",phase:"Nykyiset oppikirjatekstit",
         title:"Tekstit A, B ja C kuuluvat yhteen",
         paragraphs:[
-          "Kappaleen "+Number(chapterId)+" nykyinen Text A on '"+current.ab.textA.title+"'.",
-          "Text B on '"+current.ab.textB.title+"'. Vertaa sen tilannetta päätekstiin.",
-          "Uusi Text C on '"+current.c.title+"'. Sen tarkoitus on: "+current.c.purpose+".",
-          "Aiemman LOS-version dialogit ovat erillistä lisäaineistoa, eivät tämän opetuspolun päätekstejä."
+          losTeacherChapterTeaching(chapterId).goal,
+          losTeacherChapterTeaching(chapterId).rule,
+          losTeacherChapterTeaching(chapterId).contrast,
+          "Tutki ensin Text A '"+current.ab.textA.title+"'. Vertaa sitä Text B:hen '"+current.ab.textB.title+
+            "' ja tarkista Text C:n '"+current.c.title+"' avulla hankalat ilmaukset.",
+          losTeacherChapterTeaching(chapterId).apply,
         ],board:canonicalBoard(chapterId)},
       ...(["A","B","C"] as const).flatMap(kind=>canonicalScene(chapterId,kind)),
     ];
