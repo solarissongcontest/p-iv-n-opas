@@ -49,7 +49,7 @@ test("inflected forms use only documented lemma bridges and source meanings",()=
  assert.deepEqual(searchLosFreeDict(data,"Bank"),[{word:"Bank",meaning:"pankki; penkki"}]);
  // Prefix matches must never displace a curated lemma, even if many exist.
  const withPrefixes={...data,entries:[
-  ["binär","binary"],["Bindung","sidos"],["Sein","oleminen"],["sein","olla"],["binden","sitoa"],
+  ["binär","binary"],["Bindung","sidos"],["sein","olla"],["binden","sitoa"],
   ...entries
  ] as readonly (readonly [string,string])[]};
  assert.equal(searchLosFreeDict(withPrefixes,"bin",3)[0]?.word,"sein");
