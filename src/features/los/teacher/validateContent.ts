@@ -7,7 +7,7 @@ const name = (value: string) => /^[A-Za-z0-9_.-]{1,80}$/.test(value);
 const meaningful = (value: string | undefined) => Boolean(value?.trim());
 const textbookSections = new Set([
   "overview","contents","chapter","text","understand","vocabulary","grammar",
-  "text-b","practice","apply","culture","test","appendix","dictionary","review","midterm","review-ii","final","summary",
+  "text-b","text-c","practice","apply","culture","test","appendix","dictionary","review","midterm","review-ii","final","summary",
 ]);
 
 function checkQuestion(question: TeacherQuestion, location: string, issues: TeacherContentIssue[]) {
@@ -111,7 +111,7 @@ export function validateTeacherLesson(lesson: TeacherLesson): TeacherContentIssu
   }
   if (lesson.requiredCheckedIds &&
       (!unique(lesson.requiredCheckedIds) || lesson.requiredCheckedIds.some(id =>
-        !/^C\d{2}-(?:SOURCE|ZPE|TEXTB|MCOM02|SCHOOL|HARALD)-Q\d{2}$/.test(id)))) {
+        !/^(?:C\\d{2}-(?:SOURCE|ZPE|TEXTB|MCOM02|SCHOOL|HARALD)-Q\\d{2}|LOS1-READ-V2-C\\d{2}-[ABC]-\\d{2})$/.test(id)))) {
     issues.push({ location: "requiredCheckedIds", problem: "Tarkistettavan lähdetehtävän tunniste on virheellinen." });
   }
   if (lesson.mediaGate && (!/^M-[A-Z0-9-]+$/.test(lesson.mediaGate.sourceId) ||
