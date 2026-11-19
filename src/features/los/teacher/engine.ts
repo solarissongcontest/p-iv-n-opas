@@ -287,7 +287,9 @@ export function recoverTeacherSession(session: TeacherSession, lesson: TeacherLe
 }
 
 export function moveTeacherScene(session: TeacherSession, lesson: TeacherLesson, targetId: string, now: string): TeacherSession {
-  if (!lesson.scenes.some(s => s.id === targetId)) return session;
+  // A paused session is immutable until explicitly resumed. Completed sessions
+  // can still navigate for revision without recording new competence.
+  if (session.paused || !lesson.scenes.some(s => s.id === targetId)) return session;
   return {
     ...session, sceneId: targetId, updatedAt: now,
     visitedIds: session.visitedIds.includes(targetId) ? session.visitedIds :
