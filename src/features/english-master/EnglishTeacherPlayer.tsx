@@ -97,11 +97,11 @@ export function EnglishTeacherPlayer({ lesson, ownerId, previouslyCompleted, onB
   const scenes = useMemo(()=>buildScenes(lesson),[lesson]);
   const signature = useMemo(()=>scriptSignature(lesson),[lesson]);
   const key = "em-teacher-v2-"+ownerId+"-"+lesson.content_id;
-  const [session,setSession] = useState<Session>(()=>loadSession(key,signature,scenes[0].id));
+  const [session,setSession] = useState<Session>(()=>loadSession(key,signature,scenes[0]!.id));
   const [hintOpen,setHintOpen] = useState(false);
   const [saveError,setSaveError] = useState(false);
   const idx = Math.max(0,Math.min(session.sceneIndex,scenes.length-1));
-  const scene = scenes[idx];
+  const scene = scenes[idx]!;
   const tasks = lesson.payload.tasks ?? [];
   const checkedCount = tasks.filter(task=>Boolean(session.checks[task.task_id])).length;
   const allVisited = scenes.every(item=>session.visitedIds.includes(item.id));
@@ -117,7 +117,7 @@ export function EnglishTeacherPlayer({ lesson, ownerId, previouslyCompleted, onB
   const move = (index:number)=>{
     const next=Math.max(0,Math.min(index,scenes.length-1));
     update(old=>({...old,sceneIndex:next,
-      visitedIds:old.visitedIds.includes(scenes[next].id)?old.visitedIds:[...old.visitedIds,scenes[next].id]}));
+      visitedIds:old.visitedIds.includes(scenes[next]!.id)?old.visitedIds:[...old.visitedIds,scenes[next]!.id]}));
     window.scrollTo({top:0,behavior:"auto"});
   };
   const answer = (taskId:string,value:string)=>update(old=>({
