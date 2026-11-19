@@ -149,7 +149,9 @@ function TextSpeech({ blocks, chapterId, kind }: { blocks: readonly ReaderBlock[
         </div>
       </details>
     </div>
-    <div className="los-speech-secondary-controls">
+    <details className="los-speech-unit-picker">
+      <summary>Kuuntele osissa: lauseet ja puheenvuorot</summary>
+      <div className="los-speech-secondary-controls">
     {segments.length>1&&<details className="los-revised-speech-segments">
       <summary>Kuuntele yksittäinen {kind==="C"?"mallilause":"puheenvuoro"} ({segments.length})</summary>
       <ol>{segments.map((segment,index)=><li key={index}>
@@ -175,7 +177,8 @@ function TextSpeech({ blocks, chapterId, kind }: { blocks: readonly ReaderBlock[
         <LosVocabularyAudio word={text} kind="lause" rate={Number(rate)}/>
       </li>)}</ol>
     </details>}
-    </div>
+      </div>
+    </details>
     <p className="los-revised-muted" role="status">{message || (
       voiceCount>0 ?
         "Saksankielinen puheääni käytettävissä ("+voiceCount+")." :
