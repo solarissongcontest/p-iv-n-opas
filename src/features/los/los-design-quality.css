@@ -761,8 +761,9 @@
   .los-section-nav .los-display-settings>summary {min-width:39px;min-height:40px;padding:7px}
   .los-section-nav .los-section-step {width:39px;min-width:39px}
   .los-section-nav .los-display-settings-panel {right:-85px}
-  .los-section-nav .los-section-jump {flex:1 1 auto;min-width:0}
-  .los-section-nav .los-section-jump select {width:100%;max-width:none}
+  .los-section-nav .los-section-jump {flex:1 1 0;width:0;min-width:0;max-width:none}
+  .los-section-nav .los-section-jump select {display:block;box-sizing:border-box;width:100%;min-width:0;max-width:100%}
+  .los-section-nav .los-section-actions {width:100%;max-width:100%;min-width:0;gap:3px}
   .los-reading-page h1 {font-size:clamp(30px,8vw,38px);line-height:1.13}
   .los-revised-page .los-page-intro {margin-bottom:9px}
   .los-study-mode-picker>span {display:none}
