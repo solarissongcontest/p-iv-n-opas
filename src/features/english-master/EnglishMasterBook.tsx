@@ -377,8 +377,8 @@ export function EnglishMasterBook() {
               <p>Kirja sisältää kieliopin, sanaston, kirjoittamisen, luetun ja kuullun ymmärtämisen sekä YO-valmennuksen. Sisällöt löytyvät vasemman reunan sisällysluettelosta.</p>
               <div className="em-stats"><span><b>122</b> kirjalukua</span><span><b>192</b> oppituntia</span><span><b>{completed}</b> harjoiteltua tuntia</span></div>
               <div className="em-front-links">
-                <button onClick={() => goChapter(chapters[0]?.content_id ?? "G01")}><BookText size={19}/> Oppikirja</button>
-                <button onClick={() => navigate("path")}><BookOpen size={19}/> Opetuspolku</button>
+                <button onClick={() => goChapter(chapters[0]?.content_id ?? "G01")}><BookText size={19}/> Sisällysluettelo</button>
+                <button onClick={() => navigate("path")}><BookOpen size={19}/> Ohjatut oppitunnit</button>
                 <button onClick={() => navigate("writing")}><PenLine size={19}/> Kirjoittaminen</button>
                 <button onClick={() => navigate("listening")}><Headphones size={19}/> Kuuntelu</button>
               </div>
