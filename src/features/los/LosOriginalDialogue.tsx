@@ -135,12 +135,12 @@ export function LosOriginalDialogue(props: LosOriginalDialogueProps) {
 
   return <div className="los-c01-reader" aria-label={props.heading}>
     <div className="los-c01-reader-intro">
-      <p className="los-overline">{props.usageLabel ?? "ORIGINALTEXT · TEXT A"} · {sourceId}</p>
+      {!props.isOwnText&&<p className="los-overline">{props.usageLabel ?? "ORIGINALTEXT · TEXT A"} · {sourceId}</p>}
       <h2>{props.heading}</h2>
       <p>{props.guidance}</p>
-      <p className="los-c01-reader-warning"><Info size={17}/>{props.isOwnText?
-        "Tämä on LOS!:lle laadittu opetusteksti, ei ulkopuolinen autenttinen julkaisu. Sanaselitysten ja IPA:n kattavuutta täydennetään.":
-        "Kokonainen lähdeteksti on tuotu käyttöoikeuksien perusteella. Lopullinen kielellinen tarkistus ja laitetestaus ovat kesken."}</p>
+      {!props.isOwnText&&<p className="los-c01-reader-warning"><Info size={17}/>
+        Kokonainen lähdeteksti on tuotu käyttöoikeuksien perusteella. Lopullinen kielellinen tarkistus ja laitetestaus ovat kesken.
+      </p>}
     </div>
     <div className="los-c01-toolbox" aria-label="Lukijan työkalut">
       <div className="los-c01-modes" role="group" aria-label="Sanan napautuksen toiminto">
