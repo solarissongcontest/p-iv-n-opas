@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { getOriginalLosTeacherLesson as getLosTeacherLesson } from "../src/features/los/teacher/lessonRegistry.ts";
+import { getOriginalLosTeacherLesson as getLosTeacherLesson, getLosTeacherLesson as getCurrentLosTeacherLesson } from "../src/features/los/teacher/lessonRegistry.ts";
 import { validateTeacherLesson } from "../src/features/los/teacher/validateContent.ts";
 import { LOS_EXERCISES } from "../src/features/los/exerciseBank.ts";
 
@@ -103,7 +103,7 @@ test("C03 reading now uses canonical Aino/Selma/Leon text and real A/B/C questio
   assert.match(support,/"chapterId": "03"/);
   assert.match(bank,/LOS1-READ-V2-C/);
   assert.match(path,/canonicalScene\(chapterId,kind\)/);
-  const live=getLosTeacherLesson("L013")!;
+  const live=getCurrentLosTeacherLesson("L013")!;
   assert.ok(live.scenes.some(scene=>scene.id==="canonical-text-c"));
   assert.ok(live.requiredCheckedIds?.some(id=>id.startsWith("LOS1-READ-V2-C03")));
 });
