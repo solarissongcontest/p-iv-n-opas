@@ -491,20 +491,50 @@ export function EnglishMasterBook() {
               <button onClick={()=>navigate("progress")}>Oma edistyminen <ArrowRight size={16}/></button>
             </div>
           </section> :
-          location.page === "book" ? <section className="los-inner-page em-los-chapter-page">
-            {currentChapter && <article className="em-chapter los-grammar-page">
-              <p className="los-eyebrow">{currentChapter.content_id} / OPPIKIRJAN LUKU</p>
-              <h1>{currentChapter.title}</h1>
-              {currentChapter.payload.objectives_fi?.length ? <div className="los-goals"><h3>Tässä luvussa opit</h3><ul>{currentChapter.payload.objectives_fi.map((item,i)=><li key={i}>{item}</li>)}</ul></div> : null}
-              {currentChapter.payload.sections?.map(section=><section key={section.section_id} className="em-section" id={"em-sec-"+section.section_id}>
-                <h3>{section.title}</h3><p>{section.theory_fi}</p>
-                {section.worked_examples?.map((ex,i)=><div key={i} className="los-example em-los-example">
-                  <p lang="en">{ex.en}</p>{ex.meaning_fi&&<span>{ex.meaning_fi}</span>}{ex.why_fi&&<small>{ex.why_fi}</small>}
-                </div>)}
-                {section.common_errors_fi&&<div className="los-editorial-note"><p>{Array.isArray(section.common_errors_fi)?section.common_errors_fi.join(" "):section.common_errors_fi}</p></div>}
-              </section>)}
-              {currentChapter.payload.summary_fi&&<div className="los-grammar-aside"><strong>Yhteenveto</strong><p>{currentChapter.payload.summary_fi}</p></div>}
-              {currentChapter.payload.linked_lesson_ids?.length?<div className="em-related"><h3>Harjoittele Opetuspolussa</h3>{currentChapter.payload.linked_lesson_ids.filter(id=>pack.lessons[id]).map(id=><button key={id} onClick={()=>navigate("lesson",id)}>{id} · {pack.lessons[id]?.title}<ChevronRight size={16}/></button>)}</div>:null}
+          location.page === "book" ? <section className="em-los-chapter-page">
+            {currentChapter && <article className="em-chapter">
+              <div className="los-opening em-los-opening">
+                <p className="los-eyebrow">{currentChapter.content_id} / {chapters.length} · ENGLISH MASTER</p>
+                <div className="los-opening-head">
+                  <span className="los-opening-number em-los-opening-number">{currentChapter.content_id}</span>
+                  <div>
+                    <h1 lang="en">{currentChapter.title}</h1>
+                    <p>{currentChapter.payload.objectives_fi?.[0] ?? "Pitkän englannin oppikirjan luku"}</p>
+                  </div>
+                </div>
+                <div className="los-opening-bottom">
+                  <div>
+                    <p className="los-overline">TÄSSÄ LUVUSSA</p>
+                    <h2>Opettele ja harjoittele</h2>
+                    <p className="los-opening-lead">Lue luvun selitykset ja esimerkit. Avaa lopuksi aiheeseen liittyvä oppitunti, jos sellainen on liitetty tähän lukuun.</p>
+                  </div>
+                  {currentChapter.payload.objectives_fi?.length ? <aside className="los-goals">
+                    <h3>Luvun tavoitteet</h3>
+                    <ul>{currentChapter.payload.objectives_fi.map((item,i)=><li key={i}>{item}</li>)}</ul>
+                  </aside> : null}
+                </div>
+                {currentChapter.payload.sections?.length ? <nav className="los-chapter-links" aria-label="Luvun osiot">
+                  {currentChapter.payload.sections.map(section=><button type="button" key={section.section_id}
+                    onClick={()=>document.getElementById("em-sec-"+section.section_id)?.scrollIntoView({behavior:"smooth",block:"start"})}>
+                    <span>{section.title}</span><ArrowRight size={17}/>
+                  </button>)}
+                </nav> : null}
+              </div>
+              <div className="los-inner-page los-grammar-page em-los-chapter-body">
+                {currentChapter.payload.sections?.map(section=><section key={section.section_id} className="em-section" id={"em-sec-"+section.section_id}>
+                  <h2>{section.title}</h2><p>{section.theory_fi}</p>
+                  {section.worked_examples?.map((ex,i)=><div key={i} className="los-example em-los-example">
+                    <p lang="en">{ex.en}</p>{ex.meaning_fi&&<span>{ex.meaning_fi}</span>}{ex.why_fi&&<small>{ex.why_fi}</small>}
+                  </div>)}
+                  {section.common_errors_fi&&<div className="los-editorial-note"><p>{Array.isArray(section.common_errors_fi)?section.common_errors_fi.join(" "):section.common_errors_fi}</p></div>}
+                </section>)}
+                {currentChapter.payload.summary_fi&&<div className="los-grammar-aside"><strong>Yhteenveto</strong><p>{currentChapter.payload.summary_fi}</p></div>}
+                {currentChapter.payload.linked_lesson_ids?.length?<div className="em-related">
+                  <h2>Harjoittele Opetuspolussa</h2>
+                  {currentChapter.payload.linked_lesson_ids.filter(id=>pack.lessons[id]).map(id=>
+                    <button key={id} onClick={()=>navigate("lesson",id)}>{id} · {pack.lessons[id]?.title}<ChevronRight size={16}/></button>)}
+                </div>:null}
+              </div>
             </article>}
           </section> :
           location.page === "path" ? <section className="los-inner-page los-learning-path">
