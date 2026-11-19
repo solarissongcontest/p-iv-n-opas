@@ -155,7 +155,14 @@ export function TeacherSceneOutline({ scenes, currentId, visitedIds, onSelect, d
       {scenes.map((item, i) => <button key={item.id} type="button" disabled={disabled}
         aria-current={currentId===item.id?"step":undefined}
         className={currentId===item.id?"is-active":""}
-        onClick={()=>onSelect(item.id)}>
+        onClick={()=>{
+          onSelect(item.id);
+          if(typeof window!=="undefined"&&window.innerWidth<=820){
+            onToggle?.(false);
+            window.requestAnimationFrame(()=>
+              document.querySelector(".los-teacher-paper")?.scrollIntoView({block:"start",behavior:"auto"}));
+          }
+        }}>
         <span>{visitedIds.includes(item.id)?<Check size={15}/>:String(i+1)}</span>
         <span>{item.title}</span>
       </button>)}
