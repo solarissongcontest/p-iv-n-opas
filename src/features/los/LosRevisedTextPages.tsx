@@ -76,9 +76,10 @@ function TextSpeech({ blocks, chapterId, kind }: { blocks: readonly ReaderBlock[
     const chosenVoice=matchLosPreferredVoice(voices,preferredVoice);
     const utterances = selected.map(segment => {
       const utterance = new SpeechSynthesisUtterance(segment.text);
-      utterance.lang = "de-DE";
       utterance.rate = Math.max(0.5, Math.min(2, Number(rate) * segment.rateFactor));
-      utterance.voice = chosenVoice ?? voices[losSpeakerSlot(segment.speaker, voices.length)] ?? voices[0] ?? null;
+      const spokenVoice=chosenVoice ?? voices[losSpeakerSlot(segment.speaker, voices.length)] ?? voices[0] ?? null;
+      utterance.voice = spokenVoice;
+      utterance.lang = spokenVoice?.lang ?? "de-DE";
       utterance.onerror = event => {
         if (playbackId.current !== currentPlayback) return;
         playbackId.current += 1;
