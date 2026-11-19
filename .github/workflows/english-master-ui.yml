@@ -19,7 +19,7 @@ concurrency:
 jobs:
   english-master-browser:
     name: English Master desktop and mobile UX
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     env:
       E2E_BASE_URL: http://127.0.0.1:5173
