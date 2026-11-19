@@ -85,7 +85,7 @@ export function LosVoiceDiagnostics(){
   setFinished(prev=>({...prev,[key]:false}));
   const synth=window.speechSynthesis;
   const utterance=new SpeechSynthesisUtterance(probe.text);
-  utterance.voice=chosen;utterance.lang="de-DE";utterance.rate=0.86;
+  utterance.voice=chosen;utterance.lang=chosen.lang;utterance.rate=0.86;
   utterance.onstart=()=>{
    if(playback.current!==current)return;
    setPlaying(probe.id);
