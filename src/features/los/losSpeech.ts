@@ -44,7 +44,7 @@ export function losSpeakerSlot(speaker: string, count: number): number {
 export function losSpeechSentenceSegments(text:string):string[]{
  const normalized=text.replace(/\s+/g," ").trim();
  if(!normalized)return [];
- return normalized.split(/(?<=[.!?])\\s+(?=[A-ZÄÖÜ„«])/u).map(part=>part.trim()).filter(Boolean);
+ return normalized.split(/(?<=[.!?])\s+(?=[A-ZÄÖÜ„«])/u).map(part=>part.trim()).filter(Boolean);
 }
 
 function cleanSpokenText(value: string): string {
