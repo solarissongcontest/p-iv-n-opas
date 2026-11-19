@@ -1,5 +1,6 @@
 import type { TeacherLesson } from "./engine.ts";
 import {canonicalizeLosTeacherLesson} from "./canonicalTeacherLessons.ts";
+import {canonicalizeReviewI} from "./canonicalReviewI.ts";
 import { getLosTeacherLesson as getEarlierLesson } from "./lessonL004.ts";
 import { LOS1_L031_TEACHER } from "./lessonL031.ts";
 import { LOS1_L032_TEACHER } from "./lessonL032.ts";
@@ -22,5 +23,5 @@ export function getOriginalLosTeacherLesson(id: string): TeacherLesson | undefin
 /** Runtime always binds the original authored teaching to the current textbook. */
 export function getLosTeacherLesson(id: string): TeacherLesson | undefined {
   const original=getOriginalLosTeacherLesson(id);
-  return original?canonicalizeLosTeacherLesson(original):undefined;
+  return original?canonicalizeLosTeacherLesson(canonicalizeReviewI(original)):undefined;
 }
