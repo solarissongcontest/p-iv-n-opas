@@ -1250,28 +1250,3 @@
 .dark .los-app .los-dictionary-about[open]>summary {
   color:var(--los-accent-text);
 }
-
-
-/* Teacher Experience 2.0 is distinct from the 60 legacy lesson outlines.
-   Explain the implementation scope instead of presenting all lessons as v2. */
-.los-teacher-entry {
-  display:flex;flex-direction:column;align-items:flex-start;
-  gap:9px;padding:clamp(20px,3vw,28px);margin:24px 0;
-  border:1px solid color-mix(in srgb,var(--los-book-accent) 26%,var(--los-line));
-  border-left:4px solid var(--los-book-accent);border-radius:12px;
-  background:linear-gradient(125deg,var(--los-coral-wash),var(--los-paper) 65%);
-}
-.los-teacher-entry>p.los-eyebrow {margin:0}
-.los-teacher-entry h2 {
-  margin:0;font-family:"Inter",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
-  font-size:clamp(21px,2.6vw,27px);font-weight:755;line-height:1.25;letter-spacing:-.037em;
-}
-.los-teacher-entry>p:not(.los-eyebrow) {
-  color:var(--los-soft);max-width:64ch;font-size:14px;line-height:1.7;margin:0 0 5px;
-}
-.los-teacher-entry .los-primary {margin:4px 0 1px}
-.los-teacher-entry>small {font-size:12px;line-height:1.65;color:var(--los-soft);max-width:66ch}
-@media(max-width:760px) {
-  .los-teacher-entry{padding:20px;margin:19px 0}
-  .los-teacher-entry .los-primary{width:100%;justify-content:center}
-}

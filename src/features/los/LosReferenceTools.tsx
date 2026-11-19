@@ -72,7 +72,7 @@ export function LosDictionary({ book, move, openBook }: { book: LosBookDefinitio
     {book.id===1&&<LosFreeDictSearch/>}
   </section>;
 }
-export function LosLearningPath({ book, move, openTeacherV2 }: { book: LosBookDefinition; move: LosNavigate; openTeacherV2?:()=>void }) {
+export function LosLearningPath({ book, move }: { book: LosBookDefinition; move: LosNavigate }) {
   const [selectedLesson, setSelectedLesson] = useState("L001");
   // A book page temporarily unmounts the guided path. Restore the active lesson
   // when returning, but do not treat this UI selection as learning evidence.
@@ -116,13 +116,6 @@ export function LosLearningPath({ book, move, openTeacherV2 }: { book: LosBookDe
         <p>Alkuperäisten audio-/videoaineistojen oikeudet, kuuntelun toimivuus, kielitason tarkistus ja julkaisuportit eivät kuitenkaan vielä ole valmiit. Erilliset EX-FINAL-loppukoe ja L060-yhteenveto ovat opiskelupolussa; kummankin suoritus vaatii oikeat palautukset ja itsearvioinnit.</p>
       </div>
     </details>
-    {openTeacherV2&&<section className="los-teacher-entry" aria-labelledby="los-v2-entry-title">
-      <p className="los-eyebrow">UUSI OPETUSKOKEMUS · 2.0</p>
-      <h2 id="los-v2-entry-title">Oppitunti, joka oikeasti opettaa</h2>
-      <p>Uudessa opetustilassa etenet yhden opetustilanteen kerrallaan. Opettaja selittää, havainnollistaa taululla, antaa vihjeitä ja mukauttaa palautteen vastauksesi mukaan.</p>
-      <button type="button" className="los-primary" onClick={openTeacherV2}>Avaa L004:n Lesson Player <ArrowRight size={17}/></button>
-      <small>2.0-mallioppitunti: L004 · Tervehdykset muistista. Muut oppitunnit käyttävät toistaiseksi aiempaa ohjattua opetustilaa. Niitä ei merkitä 2.0-valmiiksi.</small>
-    </section>}
     <LosFirstLessons selectedId={selectedLesson} onSelect={selectLesson} move={move} />
     {groups.map(group=><section key={group.section} className="los-path-group">
       <h2>{group.section}</h2>

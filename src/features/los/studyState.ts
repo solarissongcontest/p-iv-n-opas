@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { getDeviceOwnerId } from "@/lib/deviceSession";
 import { parseLosLessonProgressMap } from "./lessonEngine.ts";
-import { parseTeacherSessions, type TeacherSession } from "./teacher/core.ts";
 import type { LosLessonProgress } from "./lessonEngine.ts";
 import { parseLosRecallCardMap } from "./recallEngine.ts";
 import {parseLosSavedWords} from "./los1SavedVocabulary.ts";
@@ -25,8 +24,6 @@ export type LosChapterDraft = {
   readerMarks?: Record<string,string>;
   /** First lesson runs share this existing chapter draft and its JSON backup. */
   lessonProgress?: Record<string,LosLessonProgress>;
-  /** Teacher 2.0 separate instruction-only sessions; old v1 answers remain untouched. */
-  teacherV2Sessions?: Record<string,TeacherSession>;
   /** Chapter-local spaced-recall memory, one record per word and direction. */
   recallCards?: Record<string,LosRecallCardState>;
   /** Learner-selected words from A/B/C text reader, one contextual meaning each. */
@@ -59,7 +56,6 @@ export function parseLosDraft(value:string | null):LosChapterDraft {
       selfAssessment:typeof input.selfAssessment==="string"?input.selfAssessment.slice(0,5000):"",
       readerMarks:input.readerMarks && isStringRecord(input.readerMarks) && Object.keys(input.readerMarks).length<=200 ? Object.fromEntries(Object.entries(input.readerMarks).filter(([k,v])=>k.length<=100&&v.length<=500)) : {},
       lessonProgress:parseLosLessonProgressMap(input.lessonProgress),
-      teacherV2Sessions:parseTeacherSessions(input.teacherV2Sessions),
       recallCards:parseLosRecallCardMap(input.recallCards),
       savedWords:parseLosSavedWords(input.savedWords),
       updatedAt:typeof input.updatedAt==="string"?input.updatedAt:"",

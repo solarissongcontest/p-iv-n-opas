@@ -9,7 +9,6 @@ on:
       - "e2e/los-reading-comprehension-v2.spec.ts"
       - "e2e/los-final-readiness.spec.ts"
       - "e2e/los-editorial-v4.spec.ts"
-      - "e2e/los-teacher-v2.spec.ts"
       - "e2e/los-two-device-sync.spec.ts"
       - "e2e/los-c01-lessons.spec.ts"
       - "e2e/helpers.ts"
@@ -22,7 +21,6 @@ on:
       - "e2e/los-reading-comprehension-v2.spec.ts"
       - "e2e/los-final-readiness.spec.ts"
       - "e2e/los-editorial-v4.spec.ts"
-      - "e2e/los-teacher-v2.spec.ts"
       - "e2e/los-two-device-sync.spec.ts"
       - "e2e/los-c01-lessons.spec.ts"
       - "e2e/helpers.ts"
@@ -93,7 +91,7 @@ jobs:
           exit 1
 
       - name: Full LOS! 1 browser flows in mobile WebKit and desktop Chromium
-        run: bunx playwright test e2e/los-full-book.spec.ts e2e/los-reading-comprehension-v2.spec.ts e2e/los-final-readiness.spec.ts e2e/los-two-device-sync.spec.ts e2e/los-editorial-v4.spec.ts e2e/los-teacher-v2.spec.ts --project=desktop-chromium --project=iphone-webkit
+        run: bunx playwright test e2e/los-full-book.spec.ts e2e/los-reading-comprehension-v2.spec.ts e2e/los-final-readiness.spec.ts e2e/los-two-device-sync.spec.ts e2e/los-editorial-v4.spec.ts --project=desktop-chromium --project=iphone-webkit
 
       - name: Upload browser traces and preview log
         if: always()

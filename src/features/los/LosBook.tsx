@@ -22,7 +22,6 @@ import { LosOpenTextPage, LosOpenTextUnderstanding } from "./LosOpenSourcePages"
 import { getLosOpenDialogue } from "./content/los1OpenDialogues";
 import { LosNotebook, LosWorkbook } from "./LosWorkbook";
 import { LosBackups } from "./LosBackups";
-import {LosTeacherPlayerV2} from "./teacher/LosTeacherPlayerV2";
 import { LosBookStartAction } from "./LosBookStartAction";
 import { Los1ChapterImage } from "./Los1ChapterImage";
 import { Los1VisualLearning } from "./Los1VisualLearning";
@@ -42,7 +41,7 @@ import "./los-backups.css";
 import "./los-design-quality.css";
 
 type LosSection = LosDestination;
-type LosLocation = { book: number | null; chapter: string | null; section: LosSection; lessonId?: string | null };
+type LosLocation = { book: number | null; chapter: string | null; section: LosSection };
 /** LOS! 1 includes a third support text (Text C) in every chapter. */
 const sections: { id: LosSection; label: string }[] = [
   { id:"chapter", label:"Aloita" },
@@ -67,8 +66,6 @@ function readLocation(): LosLocation {
   const parts = window.location.hash.replace(/^#\/?/, "").split("/").filter(Boolean);
   const parsedBook = Number(parts[0]);
   const book = Number.isInteger(parsedBook) && parsedBook >= 1 && parsedBook <= 8 ? parsedBook : null;
-  if(book===1 && parts[1]==="lessons" && parts[2]==="L004")
-    return {book,chapter:null,section:"path",lessonId:"L004"};
   const chapter = book === 1 && /^\d{2}$/.test(parts[1] ?? "") ? (parts[1] ?? null) : null;
   const token = parts[chapter ? 2 : 1];
   const section = (["overview", "contents", "chapter", "text", "vocabulary", "grammar", "practice", "appendix", "dictionary", "path", "search", "midterm", "review", "review-ii", "cards", "progress", "final", "summary", "understand", "text-b", "text-c", "apply", "culture", "test"].includes(token ?? "") ? token : chapter ? "chapter" : "overview") as LosSection;
@@ -483,9 +480,6 @@ function LosBookWorkspace({ book, location, move, goLibrary, openBook }: { book:
   const section = chapter ? location.section : ["contents", "appendix", "dictionary", "path", "search", "midterm", "review", "review-ii", "progress", "final", "summary"].includes(location.section) ? location.section : "overview";
   const selectedSection = section === "cards" ? "vocabulary" : section;
   const selectedSectionIndex = Math.max(0,sections.findIndex(item=>item.id===selectedSection));
-  if(location.lessonId==="L004"&&book.id===1)return <div className="los-book-workspace" style={bookStyle(book)}>
-    <LosTeacherPlayerV2 onBack={()=>move(null,"path")}/>
-  </div>;
   return <div className="los-book-workspace" style={bookStyle(book)} data-reading-size={readingView.size} data-reading-spacing={readingView.spacing} data-reading-measure={readingView.measure}>
     <header className="los-book-topbar">
       <button className="los-back-library" onClick={goLibrary} aria-label="Takaisin kirjasarjaan"><ChevronLeft size={19} /> <span>Kirjasarja</span></button>
@@ -594,8 +588,7 @@ function LosBookWorkspace({ book, location, move, goLibrary, openBook }: { book:
           {!chapter && section === "overview" ? <BookFront book={book} move={move} /> :
             section === "contents" ? <Contents book={book} move={move} /> :
             section === "appendix" ? <Appendix book={book} /> :
-            section === "path" ? <LosLearningPath book={book} move={move}
-              openTeacherV2={()=>{window.location.hash="#/1/lessons/L004";}} /> :
+            section === "path" ? <LosLearningPath book={book} move={move} /> :
             section === "progress" && book.id===1 ? <LosStudyProgress book={book} move={move} /> :
             section === "midterm" && book.id===1 ? <LosMidtermExam /> :
             section === "review" && book.id===1 ? <LosReviewI move={move} /> :
