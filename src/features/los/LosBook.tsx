@@ -304,16 +304,16 @@ function Grammar({ chapter }: { chapter: LosChapter }) {
     <h2>{chapter.grammar}</h2>
     {first ? <>
       <p>Saksan opiskelun alussa kannattaa opetella muutama tervehdys kokonaisena ilmauksena. Ne ovat käytännöllisiä, vaikka et vielä tunne sanojen kielioppia.</p>
-      <div className="los-example"><p lang="de">Guten Morgen!</p><span>Hyvää huomenta!</span></div>
-      <div className="los-example"><p lang="de">Guten Tag!</p><span>Hyvää päivää!</span></div>
-      <p><strong>Guten Morgen</strong> on aamun tervehdys. <strong>Guten Tag</strong> sopii päivään. Illalla sanotaan <strong>Guten Abend</strong>. Nämä ilmaukset kannattaa tässä vaiheessa opetella sellaisinaan.</p>
+      <div className="los-example"><p lang="de">Guten Morgen!</p><LosVocabularyAudio word="Guten Morgen!" kind="lause"/><span>Hyvää huomenta!</span></div>
+      <div className="los-example"><p lang="de">Guten Tag!</p><LosVocabularyAudio word="Guten Tag!" kind="lause"/><span>Hyvää päivää!</span></div>
+      <p><strong lang="de">Guten Morgen</strong><LosVocabularyAudio word="Guten Morgen" kind="ilmaus"/> on aamun tervehdys. <strong lang="de">Guten Tag</strong><LosVocabularyAudio word="Guten Tag" kind="ilmaus"/> sopii päivään. Illalla sanotaan <strong lang="de">Guten Abend</strong><LosVocabularyAudio word="Guten Abend" kind="ilmaus"/>. Nämä ilmaukset kannattaa tässä vaiheessa opetella sellaisinaan.</p>
       <h3>Ensimmäiset ääntämissäännöt</h3>
       <table className="los-grammar-table"><thead><tr><th>Kirjain / yhdistelmä</th><th>Ääntäminen</th><th>Esimerkki</th></tr></thead><tbody>
-        <tr><td>w</td><td>yleensä kuten suomen v</td><td lang="de">wie</td></tr>
-        <tr><td>z</td><td>ts</td><td lang="de">zehn</td></tr>
-        <tr><td>ei</td><td>ai</td><td lang="de">mein</td></tr>
-        <tr><td>ie</td><td>pitkä i</td><td lang="de">wie</td></tr>
-        <tr><td>sch</td><td>š-äänne</td><td lang="de">Schule</td></tr>
+        <tr><td>w</td><td>yleensä kuten suomen v</td><td lang="de">wie<LosVocabularyAudio word="wie"/></td></tr>
+        <tr><td>z</td><td>ts</td><td lang="de">zehn<LosVocabularyAudio word="zehn"/></td></tr>
+        <tr><td>ei</td><td>ai</td><td lang="de">mein<LosVocabularyAudio word="mein"/></td></tr>
+        <tr><td>ie</td><td>pitkä i</td><td lang="de">wie<LosVocabularyAudio word="wie"/></td></tr>
+        <tr><td>sch</td><td>š-äänne</td><td lang="de">Schule<LosVocabularyAudio word="Schule"/></td></tr>
       </tbody></table>
       <aside className="los-grammar-aside"><strong>Huomaa</strong><p>Saksan substantiivit kirjoitetaan isolla alkukirjaimella. Kirjaimet ä, ö, ü ja ß tulevat tutuiksi vähitellen.</p></aside>
     </> : <LosChapterGrammar chapterId={chapter.id} />}
