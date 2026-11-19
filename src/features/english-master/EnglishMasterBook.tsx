@@ -202,6 +202,8 @@ export function EnglishMasterBook() {
   const [error, setError] = useState("");
   const [location, setLocation] = useState(getLocation);
   const [tocOpen, setTocOpen] = useState(false);
+  const [expandedGroup, setExpandedGroup] = useState<string | null>("G");
+  const [sceneStep, setSceneStep] = useState(0);
   const [query, setQuery] = useState("");
   const [progress, setProgress] = useState<Progress>({});
   const [answer, setAnswer] = useState<Record<string, string>>({});
@@ -247,10 +249,11 @@ export function EnglishMasterBook() {
     document.title = "English Master · Opintopäiväkirja";
     return () => { document.title = "StudyOS"; };
   }, []);
-  useEffect(() => { setAnswer({}); setFeedback({}); setShowHelp(false); setTranscriptOpen(false); }, [location.id, location.page]);
+  useEffect(() => { setAnswer({}); setFeedback({}); setShowHelp(false); setTranscriptOpen(false); setSceneStep(0); }, [location.id, location.page]);
   const chapters = useMemo(() => Object.values(pack?.chapters ?? {}).sort((a, b) => a.content_id.localeCompare(b.content_id, "en", { numeric: true })), [pack]);
   const lessons = useMemo(() => Object.values(pack?.lessons ?? {}).sort((a, b) => a.content_id.localeCompare(b.content_id, "en", { numeric: true })), [pack]);
   const currentChapter = pack?.chapters[location.id] ?? chapters[0];
+  const chapterIndex = chapters.findIndex(ch => ch.content_id === currentChapter?.content_id);
   const currentLesson = pack?.lessons[location.id] ?? lessons[0];
   const completed = Object.values(progress).filter(item => item.completed).length;
   const progressKey = owner ? "em-native-progress-" + owner : "";
@@ -260,6 +263,7 @@ export function EnglishMasterBook() {
     else window.location.hash = next;
     window.scrollTo(0, 0);
   };
+  const goChapter = (id: string) => { setExpandedGroup(id.slice(0, 1)); navigate("book", id); };
   const markLesson = (id: string, answered: number, isCompleted = false) => {
     if (!owner) return;
     setProgress(previous => {
@@ -317,40 +321,93 @@ export function EnglishMasterBook() {
       <button className="em-menu-button" onClick={() => setTocOpen(!tocOpen)} aria-expanded={tocOpen} aria-label="Avaa kirjan navigaatio">{tocOpen ? <X size={21}/> : <Menu size={21}/>}</button>
     </header>
     <div className="em-layout">
-      <aside className={"em-side " + (tocOpen ? "is-open" : "")}>
-        <div className="em-side-title"><BookOpen size={24}/><span>English Master<small>Your Path to Laudatur</small></span></div>
+      <aside className={"em-side " + (tocOpen ? "is-open" : "")} aria-label="English Masterin kirjanavigaatio">
+        <div className="em-side-title"><BookOpen size={25}/><span>English Master<small>Your Path to Laudatur</small></span></div>
         <nav aria-label="English Masterin osiot">
           {navItems.map(item => <button key={item.id} className={location.page === item.id || (item.id === "path" && location.page === "lesson") ? "is-active" : ""} onClick={() => navigate(item.id)}>{item.label}<ChevronRight size={15}/></button>)}
-          <button onClick={() => navigate("import")}>Sisältöpaketti <FileUp size={16}/></button>
         </nav>
-        <div className="em-side-foot">Pitkä englanti · kevät 2028<p>Alpha 0.8 · tuotetut opetussisällöt ovat luonnoksia.</p></div>
+        <div className="em-toc-wrap" aria-label="Oppikirjan sisällysluettelo">
+          <p className="em-toc-label">KIRJAN SISÄLLYS <span>8 OSAA · 122 LUKUA</span></p>
+          {BOOK_GROUPS.map(([prefix, label]) => <div className="em-toc-group" key={prefix}>
+            <button className={"em-toc-toggle " + (expandedGroup === prefix ? "is-expanded" : "")} onClick={() => setExpandedGroup(expandedGroup === prefix ? null : prefix)} aria-expanded={expandedGroup === prefix}>
+              <span className="em-toc-code">{prefix}</span><span className="em-toc-name">{label}</span><ChevronRight size={16} aria-hidden="true"/>
+            </button>
+            {expandedGroup === prefix && <div className="em-toc-children">
+              {chapters.filter(ch => ch.content_id.startsWith(prefix)).map(ch => <button key={ch.content_id}
+                className={"em-toc-chapter " + (location.page === "book" && currentChapter?.content_id === ch.content_id ? "is-active" : "")}
+                aria-current={location.page === "book" && currentChapter?.content_id === ch.content_id ? "page" : undefined}
+                onClick={() => goChapter(ch.content_id)}>
+                <span>{ch.content_id}</span><span>{ch.title}</span>
+              </button>)}
+            </div>}
+          </div>)}
+        </div>
+        <div className="em-side-foot">Pitkä englanti · kevät 2028<p>Alpha 0.8 · sisältöjen toimituksellinen tarkistus on kesken.</p>
+          <button className="em-side-import" onClick={() => navigate("import")}><FileUp size={15}/> Sisältöpaketin hallinta</button>
+        </div>
       </aside>
       <main id="main-content" className="em-main" tabIndex={-1}>
         {!pack ? <><ImportPanel onImported={value => { setPack(value); navigate("home"); }} />{error && <p className="em-error" role="alert">{error}</p>}</> :
           location.page === "import" ? <ImportPanel onImported={value => { setPack(value); navigate("home"); }}/> :
-          location.page === "home" ? <div className="em-paper em-home">
-            <p className="em-overline">LONG ENGLISH · LOPS21 · SPRING 2028</p><h1>English Master</h1><p className="em-lead">Your Path to Laudatur</p>
-            <p>Englannin oppikirja, ohjattu Opetuspolku, itsenäiset tehtävät ja kertaaminen samassa opiskelutilassa.</p>
-            <div className="em-stats"><span><b>122</b> kirjalukua</span><span><b>192</b> oppituntia</span><span><b>{completed}</b> harjoiteltua tuntia</span></div>
-            <div className="em-action-grid">
-              <button onClick={() => navigate("path")}><BookOpen/> Jatka Opetuspolulle <ChevronRight/></button>
-              <button onClick={() => navigate("book", "G01")}><BookText/> Avaa oppikirja <ChevronRight/></button>
-              <button onClick={() => navigate("writing")}><PenLine/> Writing Academy <ChevronRight/></button>
-              <button onClick={() => navigate("listening")}><Headphones/> Listening Lab <ChevronRight/></button>
-            </div><p className="em-note">Koko luonnossisältö on käytettävissä tässä versiossa. Loppuarviointia ja aitoja täysmittaisia YO-harjoituskokeita ei ole vielä julkaistu.</p>
-          </div> :
-          location.page === "book" ? <section className="em-paper">
+          location.page === "home" ? <section className="em-paper em-home">
+            <div className="em-front">
+              <div className="em-front-art">
+                <div className="em-cover" aria-label="English Masterin typografinen kansi">
+                  <span className="em-cover-kicker">LONG ENGLISH · LOPS21</span>
+                  <span className="em-cover-mark">EM.</span>
+                  <strong>English<br/>Master</strong>
+                  <span className="em-cover-subtitle">YOUR PATH TO LAUDATUR</span>
+                  <span className="em-cover-foot">2028 · ENGLISH</span>
+                </div>
+              </div>
+              <div className="em-front-copy">
+                <p className="em-overline">ENGLISH MASTER / PITKÄ ENGLANTI</p>
+                <h1>English Master</h1>
+                <p className="em-lead">Your Path to Laudatur</p>
+                <div className="em-front-rule"/>
+                <p>Englannin digitaalinen oppikirja ja vaiheittainen opetuspolku. Lue kirjaa, harjoittele sen sisältöjä ja valmistaudu kevään 2028 ylioppilaskokeeseen.</p>
+                <p className="em-front-meta">LOPS21 · pitkä englanti · kevät 2028</p>
+                <button className="em-primary" onClick={() => navigate("path")}>Jatka Opetuspolulle <ChevronRight size={18}/></button>
+                <button className="em-textlink em-front-secondary" onClick={() => goChapter(chapters[0]?.content_id ?? "G01")}>Avaa oppikirja <ChevronRight size={17}/></button>
+              </div>
+            </div>
+            <div className="em-front-after">
+              <p className="em-overline">TÄSTÄ KIRJASTA</p>
+              <h2>Englannin osaamisesta vahva kokonaisuus</h2>
+              <p>Kirja sisältää kieliopin, sanaston, kirjoittamisen, luetun ja kuullun ymmärtämisen sekä YO-valmennuksen. Sisällöt löytyvät vasemman reunan sisällysluettelosta.</p>
+              <div className="em-stats"><span><b>122</b> kirjalukua</span><span><b>192</b> oppituntia</span><span><b>{completed}</b> harjoiteltua tuntia</span></div>
+              <div className="em-front-links">
+                <button onClick={() => goChapter(chapters[0]?.content_id ?? "G01")}><BookText size={19}/> Oppikirja</button>
+                <button onClick={() => navigate("path")}><BookOpen size={19}/> Opetuspolku</button>
+                <button onClick={() => navigate("writing")}><PenLine size={19}/> Kirjoittaminen</button>
+                <button onClick={() => navigate("listening")}><Headphones size={19}/> Kuuntelu</button>
+              </div>
+              <p className="em-note">Alpha 0.8: opetussisällöt ovat luonnoksia. Täysmittaiset YO-harjoituskokeet ja lopullinen arviointi eivät vielä sisälly tähän versioon.</p>
+            </div>
+          </section> :
+          location.page === "book" ? <section className="em-paper em-reader-paper">
+            <div className="em-chapter-pager">
+              <div className="em-breadcrumb">English Master <ChevronRight size={13}/> Oppikirja <ChevronRight size={13}/> <strong>{currentChapter?.content_id}</strong></div>
+              <div className="em-pager-buttons">
+                <button aria-label="Edellinen kirjaluku" disabled={chapterIndex <= 0} onClick={() => goChapter(chapters[chapterIndex - 1].content_id)}>‹</button>
+                <button aria-label="Seuraava kirjaluku" disabled={chapterIndex < 0 || chapterIndex >= chapters.length - 1} onClick={() => goChapter(chapters[chapterIndex + 1].content_id)}>›</button>
+              </div>
+            </div>
             <p className="em-overline">ENGLISH MASTER / OPPIKIRJA</p><h1>Oppikirja</h1>
             <div className="em-book-toolbar"><label><Search size={16}/> <input value={query} onChange={e => setQuery(e.target.value)} placeholder="Hae 122 luvusta" aria-label="Hae kirjaluku"/></label>
-              <select aria-label="Valitse kirjaluku" value={currentChapter?.content_id ?? ""} onChange={e => navigate("book", e.target.value)}>{BOOK_GROUPS.map(([prefix, label]) => <optgroup key={prefix} label={label}>{chapters.filter(ch => ch.content_id.startsWith(prefix)).map(ch => <option key={ch.content_id} value={ch.content_id}>{ch.content_id} · {ch.title}</option>)}</optgroup>)}</select></div>
-            {query ? <div className="em-search-results">{chapters.filter(ch => (ch.title + " " + ch.content_id).toLocaleLowerCase().includes(query.toLocaleLowerCase())).map(ch => <button key={ch.content_id} onClick={() => { setQuery(""); navigate("book", ch.content_id); }}>{ch.content_id} · {ch.title}</button>)}</div> : null}
+              <select aria-label="Siirry kirjalukuun" value={currentChapter?.content_id ?? ""} onChange={e => goChapter(e.target.value)}>{BOOK_GROUPS.map(([prefix, label]) => <optgroup key={prefix} label={label}>{chapters.filter(ch => ch.content_id.startsWith(prefix)).map(ch => <option key={ch.content_id} value={ch.content_id}>{ch.content_id} · {ch.title}</option>)}</optgroup>)}</select></div>
+            {query ? <div className="em-search-results">{chapters.filter(ch => (ch.title + " " + ch.content_id).toLocaleLowerCase().includes(query.toLocaleLowerCase())).map(ch => <button key={ch.content_id} onClick={() => { setQuery(""); goChapter(ch.content_id); }}>{ch.content_id} · {ch.title}</button>)}</div> : null}
             {currentChapter && <article className="em-chapter">
-              <p className="em-overline">{currentChapter.content_id} · ALKUPERÄINEN LUONNOS</p><h2>{currentChapter.title}</h2>
-              {currentChapter.payload.objectives_fi?.length ? <ul>{currentChapter.payload.objectives_fi.map((item, i) => <li key={i}>{item}</li>)}</ul> : null}
-              {currentChapter.payload.sections?.map(section => <div key={section.section_id} className="em-section"><h3>{section.title}</h3><p>{section.theory_fi}</p>{section.worked_examples?.map((ex, i) => <figure key={i} className="em-example"><blockquote lang="en">{ex.en}</blockquote>{ex.meaning_fi && <p>{ex.meaning_fi}</p>}{ex.why_fi && <figcaption>{ex.why_fi}</figcaption>}</figure>)}{section.common_errors_fi && <p className="em-help">{Array.isArray(section.common_errors_fi) ? section.common_errors_fi.join(" ") : section.common_errors_fi}</p>}</div>)}
+              <p className="em-overline">{currentChapter.content_id} · KIRJALUKU</p><h2>{currentChapter.title}</h2>
+              {currentChapter.payload.objectives_fi?.length ? <div className="em-chapter-objectives"><h3>Tässä luvussa opit</h3><ul>{currentChapter.payload.objectives_fi.map((item, i) => <li key={i}>{item}</li>)}</ul></div> : null}
+              {currentChapter.payload.sections?.map(section => <div key={section.section_id} className="em-section" id={"em-sec-" + section.section_id}><h3>{section.title}</h3><p>{section.theory_fi}</p>{section.worked_examples?.map((ex, i) => <figure key={i} className="em-example"><blockquote lang="en">{ex.en}</blockquote>{ex.meaning_fi && <p>{ex.meaning_fi}</p>}{ex.why_fi && <figcaption>{ex.why_fi}</figcaption>}</figure>)}{section.common_errors_fi && <p className="em-help">{Array.isArray(section.common_errors_fi) ? section.common_errors_fi.join(" ") : section.common_errors_fi}</p>}</div>)}
               {currentChapter.payload.summary_fi && <p className="em-summary">{currentChapter.payload.summary_fi}</p>}
               {currentChapter.payload.linked_lesson_ids?.length ? <div className="em-related"><h3>Harjoittele Opetuspolussa</h3>{currentChapter.payload.linked_lesson_ids.filter(id => pack.lessons[id]).map(id => <button key={id} onClick={() => navigate("lesson", id)}>{id} · {pack.lessons[id]?.title} <ChevronRight size={16}/></button>)}</div> : null}
             </article>}
+            <div className="em-chapter-bottom">
+              <button disabled={chapterIndex <= 0} onClick={() => goChapter(chapters[chapterIndex - 1].content_id)}>‹ Edellinen luku</button>
+              <button disabled={chapterIndex < 0 || chapterIndex >= chapters.length - 1} onClick={() => goChapter(chapters[chapterIndex + 1].content_id)}>Seuraava luku <ChevronRight size={16}/></button>
+            </div>
           </section> :
           location.page === "path" ? <section className="em-paper"><p className="em-overline">32 JAKSOA · 192 OPPITUNTIA</p><h1>Opetuspolku</h1><p>Valitse oppitunti. Edistyminen tallentuu tähän selaimeen, ei vielä palvelimen käyttäjätilille.</p>
             {Array.from({ length: 32 }, (_, i) => "J" + String(i + 1).padStart(2, "0")).map(unit => {
@@ -363,8 +420,19 @@ export function EnglishMasterBook() {
             {currentLesson.payload.hook_fi && <p className="em-lead">{currentLesson.payload.hook_fi}</p>}
             {currentLesson.payload.objectives_fi?.length ? <ul>{currentLesson.payload.objectives_fi.map((item, i) => <li key={i}>{item}</li>)}</ul> : null}
             {currentLesson.payload.explanations?.map((ex, i) => <div key={i} className="em-section"><h2>{ex.heading_fi ?? "Opetus " + (i + 1)}</h2><p>{ex.text_fi}</p>{ex.examples?.map((model, j) => <figure key={j} className="em-example"><blockquote lang="en">{model.en}</blockquote>{model.meaning_fi && <p>{model.meaning_fi}</p>}{model.why_fi && <figcaption>{model.why_fi}</figcaption>}</figure>)}</div>)}
-            {currentLesson.payload.teacher_scenes?.length ? <details className="em-scenes"><summary>Vaiheittainen opetustaulu ({currentLesson.payload.teacher_scenes.length} vaihetta)</summary>
-              {currentLesson.payload.teacher_scenes.map((scene, i) => <div className="em-scene" key={scene.scene_id ?? scene.id ?? i}><h3>{i + 1}. {scene.title_fi ?? "Opetusvaihe"}</h3><p>{scene.teacher_fi ?? scene.text_fi}</p>{scene.board?.visible_en && <pre lang="en">{scene.board.visible_en}</pre>}{scene.board?.teacher_fi && <p>{scene.board.teacher_fi}</p>}</div>)}</details> : null}
+            {currentLesson.payload.teacher_scenes?.length ? <section className="em-lesson-board" aria-label="Vaiheittainen opetustaulu">
+              <div className="em-board-top"><span>OPETUSTAULU</span><span>Vaihe {sceneStep + 1} / {currentLesson.payload.teacher_scenes.length}</span></div>
+              {currentLesson.payload.teacher_scenes.slice(sceneStep, sceneStep + 1).map((scene, i) => <div className="em-board-scene" key={scene.scene_id ?? scene.id ?? i}>
+                <h3>{scene.title_fi ?? "Opetusvaihe " + (sceneStep + 1)}</h3>
+                <p>{scene.teacher_fi ?? scene.text_fi}</p>
+                {scene.board?.visible_en && <pre lang="en">{scene.board.visible_en}</pre>}
+                {scene.board?.teacher_fi && <p>{scene.board.teacher_fi}</p>}
+              </div>)}
+              <div className="em-board-controls">
+                <button disabled={sceneStep === 0} onClick={() => setSceneStep(n => Math.max(0, n - 1))}>‹ Edellinen vaihe</button>
+                <button disabled={sceneStep >= currentLesson.payload.teacher_scenes.length - 1} onClick={() => setSceneStep(n => Math.min(currentLesson.payload.teacher_scenes!.length - 1, n + 1))}>Seuraava vaihe <ChevronRight size={16}/></button>
+              </div>
+            </section>
             {currentLesson.payload.alternative_explanation_fi && <><button className="em-textlink" onClick={() => setShowHelp(!showHelp)} aria-expanded={showHelp}>En ymmärrä · {showHelp ? "Piilota" : "Näytä toinen selitys"}</button>{showHelp && <p className="em-help">{currentLesson.payload.alternative_explanation_fi}</p>}</>}
             <h2>Harjoitukset</h2>{currentLesson.payload.tasks?.map((task, index) => {
               const result = feedback[task.task_id];
