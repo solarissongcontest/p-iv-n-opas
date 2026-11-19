@@ -48,10 +48,10 @@ jobs:
       - name: Checkout candidate commit
         uses: actions/checkout@v4
 
-      - name: Install unzip required by Bun setup in the Playwright container
+      - name: Install Bun and FreeDict archive prerequisites in the Playwright container
         run: |
           apt-get update -qq
-          apt-get install -y -qq --no-install-recommends unzip
+          apt-get install -y -qq --no-install-recommends unzip xz-utils
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
