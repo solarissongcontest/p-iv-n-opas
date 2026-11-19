@@ -43,22 +43,23 @@ test("full LOS! 1 Teacher 2.0 stack registers precisely L001–L060 with origina
   assert.equal(getLosTeacherLesson("L061"),undefined);
 });
 
-test("StudyOS and LOS! library expose direct links without inflating approved learning claims",()=>{
+test("StudyOS and LOS! book expose original Teacher 2.0 entry and chapter links",()=>{
   const shell=readFileSync("src/app/AppShell.tsx","utf8");
   const library=readFileSync("src/features/los/LosBook.tsx","utf8");
-  const picker=readFileSync("src/features/los/LosFirstLessons.tsx","utf8");
   const path=readFileSync("src/features/los/LosReferenceTools.tsx","utf8");
-  assert.equal(shell.split('href="/los"').length-1,2,"Desktop and mobile have real LOS links");
-  for(const [where,source] of [["reader",library],["chapter picker",picker],["study path",path]] as const){
-    assert.ok(source.includes('from "./teacher/lessonRegistry";'),where+" must use the canonical lesson registry");
-  }
-
-  for(const destination of ["contents","path","dictionary","search","cards"]){
-    assert.ok(library.includes('href="/los#/1/'+destination+'"'),destination+" must have a visible library shortcut");
-  }
-  assert.ok(library.includes("getLosTeacherLesson(lesson.id)"));
-  assert.ok(path.includes("getLosTeacherLesson(lesson.id)"));
-  assert.ok(library.includes("lopullinen hyväksyntä on kesken"));
+  const teacher=readFileSync("src/routes/los-lessons.$lessonId.tsx","utf8");
+  assert.match(shell,/window\.location\.assign\("\/los"\)/,
+    "StudyOS navigation must lead to the standalone LOS book");
+  assert.match(library,/section === "path" \? <LosLearningPath/,
+    "The book must render its actual teaching path");
+  assert.match(path,/href="\/los-lessons\/L001"/,
+    "Opetuspolku 2.0 must be primary and visible");
+  assert.match(path,/getLosTeacherLesson\(id\)/,
+    "All chapter lessons must open from the shared Teacher registry");
+  assert.match(teacher,/LosTeacherPlayer/,
+    "Teacher lessons use the original independently routed player");
+  assert.match(path,/Avaa aiempi ohjattu oppitunti/,
+    "Legacy lessons remain available without being falsely claimed as 2.0");
 });
 
 test("all required workbook task IDs refer to real, unique book exercises",()=>{
@@ -91,11 +92,20 @@ test("all required workbook task IDs refer to real, unique book exercises",()=>{
   assert.deepEqual(missing,[],"A required task must exist; otherwise the guided lesson cannot be completed");
 });
 
-test("C03 fallback comprehension prompts refer to the active Lisa source, not the retired Berna text",()=>{
-  const fallback=readFileSync("src/features/los/LosSupplementalSections.tsx","utf8");
-  assert.ok(fallback.includes("Mistä maasta Lisa sanoo olevansa kotoisin?"));
-  assert.ok(fallback.includes("Missä kaupungissa Lisa kertoo asuvansa?"));
-  assert.ok(!fallback.includes("Mistä maasta Berna sanoo olevansa kotoisin?"));
+test("C03 reading now uses canonical Aino/Selma/Leon text and real A/B/C questions",()=>{
+  const source=readFileSync("src/features/los/content/los1RevisedAB.ts","utf8");
+  const support=readFileSync("src/features/los/content/los1RevisedC.ts","utf8");
+  const bank=readFileSync("src/features/los/content/los1ReadingBank.ts","utf8");
+  const path=readFileSync("src/features/los/teacher/canonicalTeacherLessons.ts","utf8");
+  assert.match(source,/"chapterId": "C03"/);
+  assert.match(source,/Aino/);
+  assert.match(source,/Selma/);
+  assert.match(support,/"chapterId": "03"/);
+  assert.match(bank,/LOS1-READ-V2-C/);
+  assert.match(path,/canonicalScene\(chapterId,kind\)/);
+  const live=getLosTeacherLesson("L013")!;
+  assert.ok(live.scenes.some(scene=>scene.id==="canonical-text-c"));
+  assert.ok(live.requiredCheckedIds?.some(id=>id.startsWith("LOS1-READ-V2-C03")));
 });
 
 test("L031 teaches 0–6 before asking the first number-memory question",()=>{
