@@ -277,7 +277,14 @@ export function validateCanonicalTeacherLesson(lesson:TeacherLesson):string[]{
  const bank=new Set((["A","B","C"] as const).flatMap(k=>losReadingQuestions(lesson.chapterId,k).map(q=>q.id)));
  for(const id of lesson.requiredCheckedIds??[])
    if(!bank.has(id))issues.push(lesson.id+" retired checked task "+id);
- for(const scene of lesson.scenes)
-   if(isObsolete(scene))issues.push(lesson.id+" obsolete source in scene "+scene.id);
+ const currentPrompts=new Set((["A","B","C"] as const).flatMap(kind=>
+    losReadingQuestions(lesson.chapterId,kind).filter(q=>q.kind==="choice").map(q=>q.prompt)));
+ for(const scene of lesson.scenes) {
+   // The current book can legitimately use an old character name as a wrong
+   // multiple-choice option. That is not an obsolete taught dialogue.
+   const sourceCheck=scene.question&&currentPrompts.has(scene.question.prompt)
+     ? {...scene,question:undefined} : scene;
+   if(isObsolete(sourceCheck))issues.push(lesson.id+" obsolete source in scene "+scene.id);
+ }
  return issues;
 }
