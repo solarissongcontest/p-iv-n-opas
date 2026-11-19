@@ -70,3 +70,18 @@ test("Teacher 2.0 new texts are reachable at 320px and pause prevents accidental
   await expect(page.locator(".los-teacher-paper")).toBeVisible();
   await expectNoHorizontalOverflow(page);
 });
+
+test("Teacher 2.0 hides non-urgent PWA updates rather than obscuring German instruction",async({page})=>{
+  await page.setViewportSize({width:390,height:844});
+  await authorize(page);
+  await page.goto("/los-lessons/L003",{waitUntil:"domcontentloaded"});
+  await expect(page.locator(".los-teacher-paper")).toBeVisible({timeout:30_000});
+  await page.evaluate(()=>{
+    const banner=document.createElement("div");
+    banner.className="pwa-update-prompt";
+    banner.textContent="Uusi versio on valmis";
+    document.body.appendChild(banner);
+  });
+  await expect(page.locator(".pwa-update-prompt")).toHaveCSS("display","none");
+  await expect(page.locator(".los-teacher-paper")).toBeVisible();
+});
