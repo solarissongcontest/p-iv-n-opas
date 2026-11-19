@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { getDeviceOwnerId } from "@/lib/deviceSession";
 import { parseLosLessonProgressMap } from "./lessonEngine.ts";
+import {parseTeacherSessions,parseTeacherSessionHistory,restartUpdatedTeacherSession,type TeacherSession,type TeacherSessionHistory,type TeacherLesson} from "./teacher/engine.ts";
+import {validateLosCloudDraft} from "./cloudContract.ts";
 import type { LosLessonProgress } from "./lessonEngine.ts";
 import { parseLosRecallCardMap } from "./recallEngine.ts";
 import {parseLosSavedWords} from "./los1SavedVocabulary.ts";
@@ -24,6 +26,9 @@ export type LosChapterDraft = {
   readerMarks?: Record<string,string>;
   /** First lesson runs share this existing chapter draft and its JSON backup. */
   lessonProgress?: Record<string,LosLessonProgress>;
+  /** Original Teacher 2.0, separate from historical guided lesson progress. */
+  teacherSessions?: Record<string,TeacherSession>;
+  teacherSessionHistory?: TeacherSessionHistory;
   /** Chapter-local spaced-recall memory, one record per word and direction. */
   recallCards?: Record<string,LosRecallCardState>;
   /** Learner-selected words from A/B/C text reader, one contextual meaning each. */
@@ -56,12 +61,27 @@ export function parseLosDraft(value:string | null):LosChapterDraft {
       selfAssessment:typeof input.selfAssessment==="string"?input.selfAssessment.slice(0,5000):"",
       readerMarks:input.readerMarks && isStringRecord(input.readerMarks) && Object.keys(input.readerMarks).length<=200 ? Object.fromEntries(Object.entries(input.readerMarks).filter(([k,v])=>k.length<=100&&v.length<=500)) : {},
       lessonProgress:parseLosLessonProgressMap(input.lessonProgress),
+      teacherSessions:parseTeacherSessions(input.teacherSessions),
+      teacherSessionHistory:parseTeacherSessionHistory(input.teacherSessionHistory),
       recallCards:parseLosRecallCardMap(input.recallCards),
       savedWords:parseLosSavedWords(input.savedWords),
       updatedAt:typeof input.updatedAt==="string"?input.updatedAt:"",
     };
   }catch{return emptyLosDraft();}
 }
+/** Explicit migration; previously saved content stays archived for the learner. */
+export function prepareLosTeacherVersionRestart(draft:LosChapterDraft,lesson:TeacherLesson,now:string):LosChapterDraft|null {
+  const previous=draft.teacherSessions?.[lesson.id];
+  if(!previous)return null;
+  const migrated=restartUpdatedTeacherSession(previous,lesson,draft.teacherSessionHistory??{},now);
+  if(!migrated)return null;
+  const proposed:LosChapterDraft={...draft,
+    teacherSessions:{...draft.teacherSessions,[lesson.id]:migrated.current},
+    teacherSessionHistory:migrated.history,
+  };
+  return validateLosCloudDraft(proposed)?proposed:null;
+}
+
 export function useLosChapterDraft(bookId:number,chapterId:string) {
   const ownerId=typeof window==="undefined"?null:getDeviceOwnerId();
   const key=ownerId?losDraftKey(bookId,chapterId,ownerId):null;
