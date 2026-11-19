@@ -34,8 +34,12 @@ concurrency:
 
 jobs:
   browser-qa:
-    # Pin Ubuntu because Playwright WebKit 1.55 does not install on ubuntu-latest 26.04.
+    # Official version-pinned Playwright image includes matching Chromium, WebKit and OS dependencies.
+    # Avoid apt installation hangs that previously cancelled the browser QA without running tests.
     runs-on: ubuntu-24.04
+    container:
+      image: mcr.microsoft.com/playwright:v1.55.0-noble
+      options: --ipc=host
     timeout-minutes: 35
     env:
       E2E_BASE_URL: http://127.0.0.1:5173
@@ -55,8 +59,10 @@ jobs:
       - name: Install Playwright test runner and axe
         run: bun run e2e:install
 
-      - name: Install Chromium and WebKit browser engines
-        run: bunx playwright install --with-deps chromium webkit
+      - name: Verify bundled Chromium and WebKit browser engines
+        run: |
+          bunx playwright --version
+          node -e "const fs=require('fs');for(const f of ['chromium','webkit']){const p=process.env.PLAYWRIGHT_BROWSERS_PATH||'/ms-playwright';if(!fs.existsSync(p))process.exit(1);console.log(f+' browser cache available in '+p)}"
 
       - name: Verify and prepare real FreeDict dictionary data for browser QA
         run: node scripts/import-los-freedict.mjs --strict
