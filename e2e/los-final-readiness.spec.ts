@@ -183,7 +183,7 @@ test("preferred German voice follows the learner across Text A, B, C and appendi
    addEventListener:()=>{},
    removeEventListener:()=>{},
    cancel:()=>{},
-   speak:()=>{},
+   speak:(utterance:{voice?:{name:string};lang:string})=>localStorage.setItem("los1.qa.voice-used",(utterance.voice?.name??"")+"|"+utterance.lang),
   };
   Object.defineProperty(window,"speechSynthesis",{configurable:true,value:synthesis});
   Object.defineProperty(window,"SpeechSynthesisUtterance",{configurable:true,value:class {
@@ -195,6 +195,8 @@ test("preferred German voice follows the learner across Text A, B, C and appendi
  await expect(picker).toBeVisible({timeout:30000});
  await picker.selectOption({label:"QA Österreich · de-AT"});
  await expect(picker).toHaveValue("de-AT / QA Österreich");
+ await page.getByRole("button",{name:"Kuuntele teksti"}).click();
+ await expect.poll(()=>page.evaluate(()=>localStorage.getItem("los1.qa.voice-used"))).toBe("QA Österreich|de-AT");
  await page.goto("/los#/1/02/text-b",{waitUntil:"domcontentloaded"});
  await expect(page.getByLabel("Saksan puheääni")).toHaveValue("de-AT / QA Österreich");
  await page.goto("/los#/1/03/text-c",{waitUntil:"domcontentloaded"});
