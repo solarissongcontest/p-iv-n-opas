@@ -110,7 +110,7 @@ export function LosChapterGrammar({chapterId}:{chapterId:string}) {
     <Example de="Am Freitag um vier Uhr." fi="Perjantaina kello neljä." />
     <h3>Viikonpäivät</h3>
     <table className="los-grammar-table"><thead><tr><th>Suomeksi</th><th lang="de">Deutsch</th></tr></thead><tbody>
-      {[["maanantai","Montag"],["tiistai","Dienstag"],["keskiviikko","Mittwoch"],["torstai","Donnerstag"],["perjantai","Freitag"],["lauantai","Samstag"],["sunnuntai","Sonntag"]].map(([fi,de])=><tr key={de}><td>{fi}</td><td lang="de">{de}<LosVocabularyAudio word={de}/></td></tr>)}
+      {[["maanantai","Montag"],["tiistai","Dienstag"],["keskiviikko","Mittwoch"],["torstai","Donnerstag"],["perjantai","Freitag"],["lauantai","Samstag"],["sunnuntai","Sonntag"]].map(([fi,de])=><tr key={de}><td>{fi}</td><td lang="de">{de}<LosVocabularyAudio word={de??""}/></td></tr>)}
     </tbody></table>
     <p>Viikonpäivät kirjoitetaan isolla, sillä ne ovat saksassa substantiiveja. Kirjoita <GermanInline as="span" de="am Montag" /> mutta <GermanInline as="span" de="um drei Uhr" />. Sana <GermanInline as="b" de="wann" /> kysyy <i>milloin</i>.</p>
     <p>Erota <GermanInline as="span" de="heute" /> (tänään), <GermanInline as="span" de="morgen" /> (huomenna) ja <GermanInline as="span" de="gestern" /> (eilen). Isolla kirjoitettu <GermanInline as="span" de="der Morgen" /> tarkoittaa aamua.</p>
@@ -129,7 +129,7 @@ export function LosChapterGrammar({chapterId}:{chapterId:string}) {
         ["du","heißt","bist","kommst"],
         ["er/sie","heißt","ist","kommt"],
         ["Sie (kohtelias)","heißen","sind","kommen"],
-      ].map(([person,named,be,from])=><tr key={person}><td lang="de">{person}</td><td lang="de">{named}<LosVocabularyAudio word={named}/></td><td lang="de">{be}<LosVocabularyAudio word={be}/></td><td lang="de">{from}<LosVocabularyAudio word={from}/></td></tr>)}</tbody>
+      ].map(([person,named,be,from])=><tr key={person}><td lang="de">{person}</td><td lang="de">{named}<LosVocabularyAudio word={named??""}/></td><td lang="de">{be}<LosVocabularyAudio word={be??""}/></td><td lang="de">{from}<LosVocabularyAudio word={from??""}/></td></tr>)}</tbody>
     </table>
     <p>Kolmannen henkilön esitteleminen onnistuu lyhyillä lauseilla: <GermanInline as="span" de="Das ist Mia. Sie heißt Mia. Sie kommt aus Finnland." /> Muista, että kohtelias <GermanInline as="span" de="Sie" /> ja naisesta käytetty <GermanInline as="span" de="sie" /> ovat eri käyttötapoja.</p>
     <h3>Harjoittele kaksi erilaista kohtaamista</h3>
