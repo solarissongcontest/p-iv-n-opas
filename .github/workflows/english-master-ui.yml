@@ -31,7 +31,7 @@ jobs:
       - name: Install Playwright test dependencies
         run: bun run e2e:install
       - name: Verify TypeScript before browser setup
-        run: bunx tsc --noEmit
+        run: bun run typecheck
       - name: Install Playwright Chromium
         run: bunx playwright install chromium
       - name: Start isolated English Master test server
