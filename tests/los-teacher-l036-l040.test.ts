@@ -112,7 +112,8 @@ test("L039 uses actual C07 Text B source IDs, but never fabricates a dictated na
   assert.match(all,/ei.*kuuntelupisteitä/i);
   assert.match(all,/kirjalli/i);
   const textB=readFileSync("src/features/los/LosAdditionalTextB.tsx","utf8");
-  assert.match(textB,/chapterId==="07".*los-editorial-note/s);
+  assert.match(textB,/chapterId==="08".*los-editorial-note/s, "The unapproved interview is disclosed for C08");
+  assert.match(textB,/source.transcriptIsExact&&source.lines.length>0/, "Unverified source transcriptions are not invented");
   assert.match(textB,/odottaa hyväksyntää/);
 });
 
