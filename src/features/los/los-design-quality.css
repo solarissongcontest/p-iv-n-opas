@@ -735,10 +735,13 @@
  .los-book-workspace .los-reading-page .los-c01-words{line-height:1.67}
 }
 /* The dialogue situation is pedagogical context, not another screen title. */
-.los-c01-turns > p:first-child,
-.los-c01-turns .los-c01-context{
+.los-c01-dialogue-subheading{
+ grid-column:1 / -1;
+ margin:0 0 5px;
+ font-family:"Inter",ui-sans-serif,system-ui,sans-serif;
  font-size:13px;
- font-weight:500;
+ font-weight:590;
  line-height:1.55;
+ letter-spacing:-.01em;
  color:var(--los-soft);
 }
