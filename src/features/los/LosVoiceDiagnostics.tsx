@@ -1,5 +1,6 @@
 import {useEffect,useRef,useState} from "react";
 import {losGermanVoices} from "./losSpeech";
+import {losVoiceIdentity,readLosPreferredVoice,saveLosPreferredVoice} from "./losVoicePreference";
 
 const STORAGE_KEY="los1.audio.device-approval.v2";
 /** Each probe tests one difficult German sound family or prosody pattern. */
@@ -41,11 +42,11 @@ function deviceClass():string{
  if(/Android/i.test(ua))return "Android";
  return "tietokone";
 }
-const voiceKey=(voice:SpeechSynthesisVoice)=>voice.lang+" / "+voice.name;
+const voiceKey=losVoiceIdentity;
 
 export function LosVoiceDiagnostics(){
  const [voices,setVoices]=useState<SpeechSynthesisVoice[]>([]);
- const [selected,setSelected]=useState("");
+ const [selected,setSelected]=useState(readLosPreferredVoice);
  const [status,setStatus]=useState("Saksankielisten puheäänien saatavuutta tarkistetaan.");
  const [playing,setPlaying]=useState<string|null>(null);
  const [finished,setFinished]=useState<Record<string,boolean>>({});
@@ -134,12 +135,19 @@ export function LosVoiceDiagnostics(){
    Pelkkä painikkeen painaminen tai selaintestin läpäisy ei riitä.</p>
   <p><strong>Tämä laite: {device}.</strong> Merkinnät tallentuvat vain tähän selaimeen ja valittuun puheääneen.
    Tee tarkistus erikseen iPhonella ja tietokoneella.</p>
-  <label>Saksankielinen puheääni
-   <select value={id} onChange={e=>{cancel();setSelected(e.target.value);setStatus("Puheääni vaihdettu. Tällä äänellä on oma hyväksyntätilansa.");}}>
+  <label>Saksankielinen puheääni (käytetään myös Text A–C -teksteissä)
+   <select value={id} onChange={e=>{cancel();setSelected(e.target.value);saveLosPreferredVoice(e.target.value);setStatus("Puheääni vaihdettu myös kirjan tekstien kuunteluun. Tällä äänellä on oma hyväksyntätilansa.");}}>
     {voices.length?voices.map(v=><option key={voiceKey(v)} value={voiceKey(v)}>{v.name} · {v.lang}</option>):
      <option value="">Laitteelta ei löytynyt saksankielisiä puheääniä</option>}
    </select>
   </label>
+  {voices.length===0&&<button type="button" onClick={()=>{
+    if(typeof window==="undefined"||!("speechSynthesis" in window))return;
+    const available=losGermanVoices(window.speechSynthesis.getVoices());
+    setVoices(available);
+    setStatus(available.length?"Saksankielisiä puheääniä löytyi: "+available.length:
+      "Saksankielisiä ääniä ei löytynyt. Tarkista laitteen puhekieli ja yritä uudelleen.");
+   }}>Päivitä saksan puheäänet</button>}
   <p role="status">{status}</p>
   <ul>{LOS_VOICE_PROBES.map(probe=>{
    const done=Boolean(finished[id+"/"+probe.id]);
