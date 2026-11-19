@@ -1,0 +1,126 @@
+/*
+ * English Master deliberately reuses the real LOS! Teacher 2.0 stylesheet
+ * (src/features/los/teacher/teacher.css). Only English brand/content
+ * adaptations belong here; don't duplicate the teaching layout.
+ */
+.em-teacher-app{
+ --los-book-accent:#2E617D;
+ --los-book-tint:#E9F2F6;
+ --los-bg:#F5F4F1;
+ --los-paper:#FFFFFF;
+ --los-ink:#222B34;
+ --los-soft:#596773;
+ --los-line:#E2E5E5;
+ --los-subtle:#F3F4F3;
+ min-height:100dvh;background:var(--los-bg);color:var(--los-ink);
+ font-family:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+}
+.dark .em-teacher-app{
+ --los-book-accent:#A8D7ED;
+ --los-book-tint:#203747;
+ --los-bg:#11161D;
+ --los-paper:#1A222B;
+ --los-ink:#F2F5F5;
+ --los-soft:#BCC7CF;
+ --los-line:#37434F;
+ --los-subtle:#222D37;
+}
+.em-teacher-app .los-teacher-brand .los-teacher-logo{
+ color:var(--los-book-accent);font-family:Georgia,"Times New Roman",serif;
+ font-size:clamp(14px,1.9vw,20px);letter-spacing:-.045em;
+ white-space:nowrap;
+}
+.em-teacher-app .los-teacher-top{box-sizing:border-box}
+.em-teacher-app .los-teacher-back{border:0;background:transparent;color:var(--los-ink);cursor:pointer}
+.em-teacher-app .los-teacher-sidebar .los-teacher-outline button{color:var(--los-soft)}
+.em-teacher-app .los-teacher-sidebar .los-teacher-outline button.is-active{
+ color:var(--los-ink);background:var(--los-book-tint);
+}
+.em-teacher-app .los-teacher-paper .los-teacher-prose{
+ max-width:68ch;font-size:clamp(16px,1.5vw,18px);line-height:1.8;
+ color:var(--los-ink);
+}
+.em-teacher-app .los-teacher-paper .los-teacher-board-item strong[lang="en"]{
+ overflow-wrap:anywhere;white-space:pre-wrap;
+}
+.em-teacher-app .los-teacher-paper .los-teacher-board-item p{
+ margin:4px 0 0;color:var(--los-soft);font-size:13px;line-height:1.6;
+}
+.em-teacher-app .los-teacher-scene-kicker{color:var(--los-book-accent)}
+.em-teacher-app .los-teacher-paper .em-teacher-goals{
+ background:var(--los-goal-wash,#fff7ea);
+ border:1px solid var(--los-goal-edge,#ddbb7d);
+ border-left:3px solid var(--los-goal-gold,#966a29);
+ border-radius:9px;padding:20px 24px;margin:26px 0;
+}
+.em-teacher-app .em-teacher-goals h3{margin:0 0 12px;font-size:16px}
+.em-teacher-app .em-teacher-goals ul{margin:0;padding-left:22px}
+.em-teacher-app .em-teacher-goals li{margin:6px 0;line-height:1.7;font-size:14px}
+.em-teacher-app .los-teacher-board{
+ background:var(--los-subtle);border:1px solid var(--los-line);
+}
+.em-teacher-app .los-teacher-board-item{background:var(--los-paper)}
+.em-teacher-app .los-teacher-question{
+ border-top:0;padding-top:0;margin-top:0;
+}
+.em-teacher-app .los-teacher-question .los-teacher-option{
+ cursor:pointer;color:var(--los-ink);background:var(--los-paper);
+}
+.em-teacher-app .los-teacher-question .los-teacher-option:hover,
+.em-teacher-app .los-teacher-question .los-teacher-option.is-selected{
+ border-color:var(--los-book-accent);background:var(--los-book-tint);
+}
+.em-teacher-app .los-teacher-form textarea{
+ display:block;width:100%;min-height:130px;resize:vertical;
+ margin:0 0 13px;padding:14px 16px;
+ border:1px solid var(--los-line);border-radius:9px;
+ color:var(--los-ink);background:var(--los-paper);
+ font:inherit;line-height:1.6;
+}
+.em-teacher-app .los-teacher-form .los-teacher-primary{margin-top:4px}
+.em-teacher-app .los-teacher-question-tools .em-teacher-model{
+ max-width:100%;padding:11px 14px;border-radius:8px;
+ background:var(--los-subtle);color:var(--los-ink);
+ font-size:13px;
+}
+.em-teacher-app .em-teacher-model summary{cursor:pointer;font-weight:650}
+.em-teacher-app .em-teacher-model p{
+ font-size:15px;overflow-wrap:anywhere;line-height:1.7;margin:12px 0 0;
+}
+.em-teacher-app .los-teacher-paused{
+ background:var(--los-paper);color:var(--los-ink);
+}
+.em-teacher-app .los-teacher-navigation .los-teacher-primary{
+ border:0;background:var(--los-book-accent);color:#fff;
+}
+.dark .em-teacher-app .los-teacher-navigation .los-teacher-primary,
+.dark .em-teacher-app .los-teacher-paper .los-teacher-primary{
+ color:#11222d;
+}
+.em-teacher-app .los-teacher-board-actions button{cursor:pointer}
+.em-teacher-app .los-teacher-option:focus-visible,
+.em-teacher-app .los-teacher-navigation button:focus-visible,
+.em-teacher-app .los-teacher-outline button:focus-visible{
+ outline:3px solid #397ace;outline-offset:3px;
+}
+@media(max-width:760px){
+ .em-teacher-app .los-teacher-brand{gap:8px;min-width:0;}
+ .em-teacher-app .los-teacher-brand .los-teacher-logo{font-size:14px}
+ .em-teacher-app .los-teacher-top{grid-template-columns:1fr auto;gap:6px}
+ .em-teacher-app .los-teacher-top .los-teacher-book{display:none}
+ .em-teacher-app .los-teacher-layout{grid-template-columns:minmax(0,1fr)}
+ .em-teacher-app .los-teacher-paper{min-width:0}
+}
+@media(max-width:390px){
+ .em-teacher-app .los-teacher-top{padding:0 10px}
+ .em-teacher-app .los-teacher-brand{gap:5px}
+ .em-teacher-app .los-teacher-brand .los-teacher-logo{font-size:12px}
+ .em-teacher-app .los-teacher-brand>span:last-child{font-size:11px}
+ .em-teacher-app .los-teacher-back{font-size:11px;gap:5px}
+ .em-teacher-app .los-teacher-layout{padding-inline:10px}
+ .em-teacher-app .los-teacher-paper{padding-inline:16px}
+ .em-teacher-app .los-teacher-navigation>button{min-width:0}
+}
+@media(prefers-reduced-motion:reduce){
+ .em-teacher-app .los-teacher-progress span{transition:none}
+}
