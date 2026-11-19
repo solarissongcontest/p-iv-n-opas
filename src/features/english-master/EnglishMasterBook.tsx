@@ -4,6 +4,8 @@ import { readCachedDeviceUser } from "@/lib/deviceSession";
 import "../los/los-book.css";
 import "../los/los-appendix.css";
 import "../los/los-design-quality.css";
+import "../los/los-lessons.css";
+import { LosReaderDisplayControls, readLosReaderSettings } from "../los/LosReaderDisplayControls";
 import "./english-master.css";
 
 /**
@@ -205,6 +207,9 @@ export function EnglishMasterBook() {
   const [error, setError] = useState("");
   const [location, setLocation] = useState(getLocation);
   const [tocOpen, setTocOpen] = useState(false);
+  const [readingView, setReadingView] = useState(readLosReaderSettings);
+  const tocPanelRef = useRef<HTMLElement>(null);
+  const tocTriggerRef = useRef<HTMLButtonElement>(null);
   const [expandedGroup, setExpandedGroup] = useState<string | null>("G");
   const [sceneStep, setSceneStep] = useState(0);
   const [query, setQuery] = useState("");
@@ -254,6 +259,38 @@ export function EnglishMasterBook() {
     return () => { document.title = "StudyOS"; };
   }, []);
   useEffect(() => { setAnswer({}); setFeedback({}); setShowHelp(false); setTranscriptOpen(false); setSceneStep(0); }, [location.id, location.page]);
+  // Keep the mobile contents drawer as keyboard-accessible as the original LOS! 1.
+  useEffect(() => {
+    if (!tocOpen || !window.matchMedia("(max-width:760px)").matches) return;
+    const panel = tocPanelRef.current;
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    panel?.querySelector<HTMLElement>(".los-sidebar-close")?.focus();
+    const handleKeys = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        setTocOpen(false);
+        tocTriggerRef.current?.focus();
+        return;
+      }
+      if (event.key !== "Tab" || !panel) return;
+      const candidates = Array.from(panel.querySelectorAll<HTMLElement>(
+        'button:not([disabled]),input:not([disabled]),a[href],summary,select:not([disabled])'
+      )).filter(node => node.getClientRects().length > 0);
+      const first = candidates[0], last = candidates.at(-1);
+      if (!first || !last) return;
+      if (event.shiftKey && (document.activeElement === first || !panel.contains(document.activeElement))) {
+        event.preventDefault(); last.focus();
+      } else if (!event.shiftKey && (document.activeElement === last || !panel.contains(document.activeElement))) {
+        event.preventDefault(); first.focus();
+      }
+    };
+    document.addEventListener("keydown", handleKeys);
+    return () => {
+      document.removeEventListener("keydown", handleKeys);
+      document.body.style.overflow = originalOverflow;
+    };
+  }, [tocOpen]);
   const chapters = useMemo(() => Object.values(pack?.chapters ?? {}).sort((a, b) => a.content_id.localeCompare(b.content_id, "en", { numeric: true })), [pack]);
   const lessons = useMemo(() => Object.values(pack?.lessons ?? {}).sort((a, b) => a.content_id.localeCompare(b.content_id, "en", { numeric: true })), [pack]);
   const currentChapter = pack?.chapters[location.id] ?? chapters[0];
@@ -262,6 +299,7 @@ export function EnglishMasterBook() {
   const completed = Object.values(progress).filter(item => item.completed).length;
   const progressKey = owner ? "em-native-progress-" + owner : "";
   const navigate = (page: Page, id = "") => {
+    setTocOpen(false);
     const next = "#/" + page + (id ? "/" + encodeURIComponent(id) : "");
     if (window.location.hash === next) setLocation(getLocation());
     else window.location.hash = next;
@@ -319,18 +357,18 @@ export function EnglishMasterBook() {
   if (owner === undefined || loading) return <main className="em-loading" role="status">Avataan English Masteria…</main>;
   if (!owner) return <main className="em-gate"><h1>English Master kuuluu Opintopäiväkirjaan.</h1><p>Avaa ensin Opintopäiväkirja tällä laitteella, aivan kuten LOS!-kirjaa käyttäessäsi.</p><a href="/today" className="em-primary">Avaa Opintopäiväkirja <ChevronRight size={18}/></a></main>;
   return <div className="los-app em-app" style={{"--los-book-accent":"#2E617D","--los-book-tint":"#E9F2F6"} as CSSProperties}>
-    <div className="los-book-workspace em-los-workspace">
+    <div className="los-book-workspace em-los-workspace" data-reading-size={readingView.size} data-reading-spacing={readingView.spacing} data-reading-measure={readingView.measure}>
       <header className="los-book-topbar">
         <a href="/studies" className="los-back-library"><ChevronLeft size={19}/><span>Opintopäiväkirja</span></a>
         <button className="los-top-title" onClick={() => navigate("home")}><strong className="em-los-brand">ENGLISH MASTER<span className="em-dot">.</span></strong><span> / 2028 <span className="los-top-separator">·</span> ENA</span></button>
         <div className="los-top-actions">
-          <button className="los-top-search" onClick={() => { setTocOpen(true); window.requestAnimationFrame(() => tocSearchRef.current?.focus()); }} aria-label="Hae oppikirjasta"><Search size={19}/></button>
-          <button className="los-top-toc" onClick={() => setTocOpen(v => !v)} aria-expanded={tocOpen} aria-controls="em-mobile-toc" aria-label={tocOpen?"Sulje sisällysluettelo":"Avaa sisällysluettelo"}>{tocOpen ? <X size={19}/> : <Menu size={19}/>}<span>Sisältö</span></button>
+          <button className="los-top-search" onClick={() => { if (window.matchMedia("(max-width:760px)").matches) setTocOpen(true); window.requestAnimationFrame(() => tocSearchRef.current?.focus()); }} aria-label="Hae oppikirjasta"><Search size={19}/></button>
+          <button ref={tocTriggerRef} className="los-top-toc" onClick={() => setTocOpen(v => !v)} aria-expanded={tocOpen} aria-controls="em-mobile-toc" aria-label={tocOpen?"Sulje sisällysluettelo":"Avaa sisällysluettelo"}>{tocOpen ? <X size={19}/> : <Menu size={19}/>}<span>Sisältö</span></button>
         </div>
       </header>
       <div className="los-book-layout">
-        <aside id="em-mobile-toc" className={"los-book-sidebar "+(tocOpen?"is-open":"")} role={tocOpen?"dialog":undefined} aria-modal={tocOpen?true:undefined} aria-label="English Masterin sisällysluettelo">
-          {tocOpen && <button type="button" className="em-toc-mobile-close" onClick={() => setTocOpen(false)}><X size={18}/> Sulje sisällysluettelo</button>}
+        <aside ref={tocPanelRef} id="em-mobile-toc" className={"los-book-sidebar "+(tocOpen?"is-open":"")} role={tocOpen?"dialog":undefined} aria-modal={tocOpen?true:undefined} aria-label="English Masterin sisällysluettelo">
+          {tocOpen && <button type="button" className="los-sidebar-close" onClick={() => {setTocOpen(false);tocTriggerRef.current?.focus();}}><X size={18}/> Sulje sisällysluettelo</button>}
           <button className="los-sidebar-book" onClick={() => navigate("home")}>
             <span className="los-cover"><span className="los-cover-fallback"><span className="los-cover-mark">EM.</span></span></span>
             <span><b>English Master</b><small>Your Path to Laudatur</small></span>
@@ -386,6 +424,7 @@ export function EnglishMasterBook() {
             <button onClick={()=>navigate("home")}>English Master</button>
             {location.page!=="home" && <><ChevronRight size={12}/><span>{location.page==="book"?currentChapter?.title:location.page==="lesson"?currentLesson?.title:navItems.find(item=>item.id===location.page)?.label??"Sisältöpaketti"}</span></>}
           </div>
+          {pack && <LosReaderDisplayControls value={readingView} onChange={setReadingView}/>}
           <div className="los-book-paper">
         {!pack ? <><ImportPanel onImported={value => { setPack(value); navigate("home"); }} />{error && <p className="em-error" role="alert">{error}</p>}</> :
           location.page === "import" ? <ImportPanel onImported={value => { setPack(value); navigate("home"); }}/> :
@@ -461,15 +500,26 @@ export function EnglishMasterBook() {
             {currentLesson.payload.hook_fi && <p className="em-lead">{currentLesson.payload.hook_fi}</p>}
             {currentLesson.payload.objectives_fi?.length ? <ul>{currentLesson.payload.objectives_fi.map((item, i) => <li key={i}>{item}</li>)}</ul> : null}
             {currentLesson.payload.explanations?.map((ex, i) => <div key={i} className="em-section"><h2>{ex.heading_fi ?? "Opetus " + (i + 1)}</h2><p>{ex.text_fi}</p>{ex.examples?.map((model, j) => <figure key={j} className="em-example"><blockquote lang="en">{model.en}</blockquote>{model.meaning_fi && <p>{model.meaning_fi}</p>}{model.why_fi && <figcaption>{model.why_fi}</figcaption>}</figure>)}</div>)}
-            {currentLesson.payload.teacher_scenes?.length ? <section className="em-lesson-board" aria-label="Vaiheittainen opetustaulu">
-              <div className="em-board-top"><span>OPETUSTAULU</span><span>Vaihe {sceneStep + 1} / {currentLesson.payload.teacher_scenes.length}</span></div>
-              {currentLesson.payload.teacher_scenes.slice(sceneStep, sceneStep + 1).map((scene, i) => <div className="em-board-scene" key={scene.scene_id ?? scene.id ?? i}>
+            {currentLesson.payload.teacher_scenes?.length ? <section className="los-lesson-program em-lesson-board" aria-label="Vaiheittainen opetustaulu">
+              <div className="los-lesson-program-head em-board-top"><p className="los-overline">OPETUSTAULU · OHJATTU OPETUS</p>
+                <p>Vaihe {sceneStep + 1} / {currentLesson.payload.teacher_scenes.length}</p>
+                <div className="los-lesson-progress" aria-label="Opetustaulun vaiheiden eteneminen">
+                  <strong>{sceneStep + 1} / {currentLesson.payload.teacher_scenes.length}</strong>
+                  <div role="progressbar" aria-label="Opetustaulun eteneminen" aria-valuemin={0}
+                    aria-valuemax={currentLesson.payload.teacher_scenes.length} aria-valuenow={sceneStep + 1}>
+                    <span style={{width:((sceneStep + 1) / currentLesson.payload.teacher_scenes.length * 100)+"%"}}/>
+                  </div>
+                </div>
+              </div>
+              {currentLesson.payload.teacher_scenes.slice(sceneStep, sceneStep + 1).map((scene, i) => <div className="los-lesson-detail em-board-scene" key={scene.scene_id ?? scene.id ?? i}>
                 <h3>{scene.title_fi ?? "Opetusvaihe " + (sceneStep + 1)}</h3>
-                <p>{scene.teacher_fi ?? scene.text_fi}</p>
-                {scene.board?.visible_en && <pre lang="en">{scene.board.visible_en}</pre>}
-                {scene.board?.teacher_fi && <p>{scene.board.teacher_fi}</p>}
+                <div className="los-lesson-teaching-note">
+                  <p>{scene.teacher_fi ?? scene.text_fi}</p>
+                  {scene.board?.visible_en && <div className="los-lesson-teaching-example em-board-example" lang="en"><strong>{scene.board.visible_en}</strong></div>}
+                  {scene.board?.teacher_fi && <p>{scene.board.teacher_fi}</p>}
+                </div>
               </div>)}
-              <div className="em-board-controls">
+              <div className="los-lesson-step-actions em-board-controls">
                 <button disabled={sceneStep === 0} onClick={() => setSceneStep(n => Math.max(0, n - 1))}>‹ Edellinen vaihe</button>
                 <button disabled={sceneStep >= currentLesson.payload.teacher_scenes.length - 1} onClick={() => setSceneStep(n => Math.min(currentLesson.payload.teacher_scenes!.length - 1, n + 1))}>Seuraava vaihe <ChevronRight size={16}/></button>
               </div>
@@ -477,18 +527,18 @@ export function EnglishMasterBook() {
             {currentLesson.payload.alternative_explanation_fi && <><button className="em-textlink" onClick={() => setShowHelp(!showHelp)} aria-expanded={showHelp}>En ymmärrä · {showHelp ? "Piilota" : "Näytä toinen selitys"}</button>{showHelp && <p className="em-help">{currentLesson.payload.alternative_explanation_fi}</p>}</>}
             <h2>Harjoitukset</h2>{currentLesson.payload.tasks?.map((task, index) => {
               const result = feedback[task.task_id];
-              return <div className="em-task" key={task.task_id}>
+              return <div className="em-task los-exercise" key={task.task_id}>
                 <small>TEHTÄVÄ {index + 1} · {task.phase ?? "Harjoitus"}</small><p lang="en">{task.prompt_en ?? task.prompt_fi}</p>
-                {task.format === "single_choice" && task.options ? <div className="em-choices">{task.options.map(option => <label key={option.id}><input type="radio" name={task.task_id} value={option.id} checked={answer[task.task_id] === option.id} onChange={() => setAnswer(prev => ({ ...prev, [task.task_id]: option.id }))}/><span lang="en">{option.text}</span></label>)}</div> :
+                {task.format === "single_choice" && task.options ? <div className="em-choices los-answer-list">{task.options.map(option => <label key={option.id}><input type="radio" name={task.task_id} value={option.id} checked={answer[task.task_id] === option.id} onChange={() => setAnswer(prev => ({ ...prev, [task.task_id]: option.id }))}/><span lang="en">{option.text}</span></label>)}</div> :
                   task.format === "free_response" ? <textarea aria-label={"Vastaus tehtävään " + (index + 1)} value={answer[task.task_id] ?? ""} onChange={event => setAnswer(prev => ({ ...prev, [task.task_id]: event.target.value }))} rows={3}/> :
                   <input aria-label={"Vastaus tehtävään " + (index + 1)} value={answer[task.task_id] ?? ""} onChange={event => setAnswer(prev => ({ ...prev, [task.task_id]: event.target.value }))} placeholder="Kirjoita vastauksesi" />}
-                <button className="em-check" onClick={() => checkTask(task)} disabled={!answer[task.task_id]?.trim()}>Tarkista vastaus</button>
-                {result && <div role="status" className={"em-feedback " + (result.ok === false ? "is-wrong" : "")}><strong>{result.ok === null ? "Itsearviointi" : result.ok ? "Oikein!" : "Tarkista vielä"}</strong><p>{result.explanation}</p>{result.ok === null && <><p lang="en">{task.model_answer_en ?? task.acceptable_answers?.[0]}</p><p>{task.criteria_fi}</p></>}</div>}
+                <button className="em-check los-exercise-check" onClick={() => checkTask(task)} disabled={!answer[task.task_id]?.trim()}>Tarkista vastaus</button>
+                {result && <div role="status" className={"em-feedback " + (result.ok === false ? "is-wrong los-answer-wrong" : "los-answer-right")}><strong>{result.ok === null ? "Itsearviointi" : result.ok ? "Oikein!" : "Tarkista vielä"}</strong><p>{result.explanation}</p>{result.ok === null && <><p lang="en">{task.model_answer_en ?? task.acceptable_answers?.[0]}</p><p>{task.criteria_fi}</p></>}</div>}
                 {task.hint_fi && <details><summary>Vihje</summary><p>{task.hint_fi}</p></details>}
               </div>;
             })}
             {currentLesson.payload.summary_fi && <p className="em-summary">{currentLesson.payload.summary_fi}</p>}
-            <button className="em-primary" onClick={() => { markLesson(currentLesson.content_id, Object.keys(feedback).length, true); navigate("path"); }}>Merkitse harjoitelluksi <CheckCircle2 size={17}/></button>
+            <button className="los-primary" onClick={() => { markLesson(currentLesson.content_id, Object.keys(feedback).length, true); navigate("path"); }}>Merkitse harjoitelluksi <CheckCircle2 size={17}/></button>
             <p className="em-note">Harjoitelluksi merkitseminen ei tarkoita, että koko taito olisi todistetusti hallittu. Avoimien vastausten arvioinnissa käytä omaa tai opettajan arviota.</p>
           </section> :
           location.page === "writing" ? <section className="em-paper"><p className="em-overline">WRITING ACADEMY</p><h1>Kirjoittaminen</h1><p>Kirjoita englanniksi. Teksti säilyy tällä laitteella, eikä sitä lähetetä automaattisesti ChatGPT:hen.</p>
@@ -514,7 +564,7 @@ export function EnglishMasterBook() {
           <footer className="los-page-footer">English Master · LOPS21 · pitkä englanti <span>Kevään 2028 YO-valmennus</span></footer>
         </main>
       </div>
-      {tocOpen&&<button className="los-toc-backdrop" aria-label="Sulje sisällysluettelo" tabIndex={-1} onClick={()=>setTocOpen(false)}/>}
+      {tocOpen&&<button className="los-toc-backdrop" aria-label="Sulje sisällysluettelo" tabIndex={-1} onClick={()=>{setTocOpen(false);tocTriggerRef.current?.focus();}}/>}
     </div>
   </div>;
 }
