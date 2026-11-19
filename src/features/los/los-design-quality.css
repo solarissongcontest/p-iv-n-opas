@@ -1221,3 +1221,11 @@
   .los-book-workspace .los-lesson-program-head {padding-top:16px}
   .los-lesson-program-head .los-lesson-program-lead {font-size:13px;line-height:1.65}
 }
+
+
+/* Mobile audit: the permanent book title in the header already supplies the
+   context. Remove the redundant nearly-empty breadcrumb strip on overview,
+   index, dictionary and learning-path pages as well as chapter readers. */
+@media(max-width:760px) {
+  .los-book-main > .los-reader-context {display:none}
+}
