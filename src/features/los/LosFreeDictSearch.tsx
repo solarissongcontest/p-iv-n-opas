@@ -40,7 +40,7 @@ export function LosFreeDictSearch(){
    {" "}Lisenssit: {current.meta.license.map((lic,i)=><span key={lic.url}>{i?", ":""}<a href={lic.url} target="_blank" rel="noreferrer">{lic.text||"Lue ehdot"}</a></span>)}.
    Muunnos: FreeDict TEI → LOS! JSON. Aineiston alkuperäinen tekijyys säilyy.</p>}
   {current&&query.trim().length<2&&<p>Kirjoita vähintään kaksi kirjainta nähdäksesi tulokset.</p>}
-  {lemma&&rows.length>0&&
+  {lemma&&rows.some(row=>row.word.toLocaleLowerCase("de")===lemma.toLocaleLowerCase("de"))&&
     <p className="los-dictionary-lemma-note">Sanan <strong lang="de">{query}</strong> hakua täydennetään perusmuodolla <strong lang="de">{lemma}</strong>.
       Käännös tulee FreeDict-lähteestä. Taivutusvastaavuus on LOS!:n toimituksellisesti määritelty.</p>}
   {query.trim().length>=2&&<div role="status" className="los-index-count">{rows.length} tulosta (enintään 120)</div>}
