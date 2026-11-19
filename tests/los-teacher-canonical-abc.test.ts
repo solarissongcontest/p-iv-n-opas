@@ -17,8 +17,11 @@ test("all 60 original Teacher 2.0 lessons remain available with canonical conten
   const lesson=getLosTeacherLesson("L"+pad(n));
   assert.ok(lesson,"L"+pad(n)+" must exist");
   assert.equal(lesson.id,"L"+pad(n));
-  if(/^0[1-9]$|^10$/.test(lesson.chapterId))
+  if(readingIds.includes(lesson.id))
    assert.equal(lesson.version,LOS1_TEACHER_CANONICAL_VERSION);
+  else
+   assert.ok(lesson.version===LOS1_TEACHER_CANONICAL_VERSION||lesson.version.startsWith("2.0.0"),
+     lesson.id+" should preserve unmodified historical version");
   assert.ok(lesson.scenes.length>2,lesson.id+" must have authored instructional scenes");
   assert.deepEqual(validateCanonicalTeacherLesson(lesson),[],lesson.id+" has retired or broken references");
  }
