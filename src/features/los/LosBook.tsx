@@ -8,6 +8,7 @@ import { getLosChapterSourceGate } from "./content/sourceRegistry";
 import {los1SupplementalSourceAudit} from "./los1SupplementalAudit";
 import {LosVoiceDiagnostics} from "./LosVoiceDiagnostics";
 import {LosVocabularyAudio} from "./LosVocabularyAudio";
+import {LosSelectionAudio} from "./LosSelectionAudio";
 import {los1AudioInventory,los1IPAAudit} from "./los1QualityAudit";
 import {los1TokenIPADetail} from "./los1CourseGlossary";
 import { LosAuthenticAudio, LosDictionary, LosIndexSearch, LosLearningPath, type LosDestination } from "./LosReferenceTools";
@@ -511,6 +512,7 @@ function LosBookWorkspace({ book, location, move, goLibrary, openBook }: { book:
       </aside>
       <main className="los-book-main" id="main-content" tabIndex={-1}>
         <div className="los-main-breadcrumb"><button onClick={() => move(null, "overview")}>LOS! {book.id}</button>{chapter ? <><ChevronRight size={12} /><button onClick={() => openChapter(chapter)}>Kappale {Number(chapter.id)}</button></> : null}{chapter && section !== "chapter" ? <><ChevronRight size={12} /><span>{section==="cards" ? "Kertauskortit" : sections.find(s => s.id === section)?.label}</span></> : null}</div>
+        {book.id===1&&<LosSelectionAudio key={(chapter?.id??"book")+"-"+section}/>}
         {chapter && section !== "overview" && section !== "contents" && section !== "appendix" && <nav className="los-section-nav" aria-label="Kappaleen osiot">
           {sections.map(item => <button key={item.id} className={section === item.id || (section==="cards" && item.id==="vocabulary") ? "is-active" : ""} onClick={() => move(chapter.id, item.id)}>{item.label}</button>)}
         </nav>}
