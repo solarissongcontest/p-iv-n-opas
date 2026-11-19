@@ -1,0 +1,59 @@
+name: English Master LOS UI E2E
+
+on:
+  pull_request:
+    paths:
+      - "src/features/english-master/**"
+      - "src/features/los/**"
+      - "e2e/english-master-native.spec.ts"
+      - ".github/workflows/english-master-ui.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: english-master-ui-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  english-master-browser:
+    name: English Master desktop and mobile UX
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      E2E_BASE_URL: http://127.0.0.1:5173
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - name: Install project dependencies
+        run: bun install --frozen-lockfile
+      - name: Install Playwright test dependencies
+        run: bun run e2e:install
+      - name: Install Chromium and system libraries
+        run: bunx playwright install --with-deps chromium
+      - name: Start isolated English Master test server
+        run: |
+          bunx vite dev --host 127.0.0.1 --port 5173 > /tmp/english-master-vite.log 2>&1 &
+          echo $! > /tmp/english-master-vite.pid
+          for attempt in $(seq 1 75); do
+            if curl --fail --silent http://127.0.0.1:5173/english-master > /dev/null; then
+              echo "Vite is ready"
+              exit 0
+            fi
+            sleep 2
+          done
+          cat /tmp/english-master-vite.log
+          exit 1
+      - name: Run native-book desktop and phone-width tests
+        run: bunx playwright test e2e/english-master-native.spec.ts --project=desktop-chromium
+      - name: Attach traces and server log on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: english-master-browser-failure
+          path: |
+            test-results/
+            /tmp/english-master-vite.log
+          if-no-files-found: ignore
+          retention-days: 7
