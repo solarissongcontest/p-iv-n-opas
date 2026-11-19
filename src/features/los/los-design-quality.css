@@ -206,3 +206,9 @@
   white-space:nowrap;padding:8px 10px;font-size:12px;
  }
 }
+
+/* Native <details> hides non-summary descendants with a user-agent rule.
+ * Our authored display:grid for the nested audio list otherwise overrides
+ * that rule and leaks all extra controls even when the disclosure is closed. */
+.los-speech-unit-picker:not([open]) > .los-speech-secondary-controls{display:none}
+.los-revised-speech-options:not([open]) > .los-revised-speech-option-fields{display:none}
