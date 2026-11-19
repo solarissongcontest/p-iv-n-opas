@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {getLosTeacherLesson} from "../src/features/los/teacher/lessonRegistry.ts";
+import {losTeacherChapterTeaching} from "../src/features/los/teacher/chapterTeaching.ts";
 import {validateCanonicalTeacherLesson,LOS1_TEACHER_CANONICAL_VERSION} from "../src/features/los/teacher/canonicalTeacherLessons.ts";
 import {LOS1_REVISED_AB} from "../src/features/los/content/los1RevisedAB.ts";
 import {LOS1_REVISED_C} from "../src/features/los/content/los1RevisedC.ts";
@@ -84,4 +85,22 @@ test("earlier completed lessons do not become current-version mastery or complet
  assert.ok(teacherContentSignature(lesson));
  assert.equal(teacherSessionNeedsReview(oldSave,lesson),true);
  assert.equal(teacherCanFinish(oldSave,lesson,{}),false);
+});
+
+test("all 10 rewritten topics teach concrete German instead of exposing edition-change notes",()=>{
+ for(let n=1;n<=10;n++){
+  const chapter=String(n).padStart(2,"0");
+  const teaching=losTeacherChapterTeaching(chapter);
+  assert.ok(teaching.goal.length>30,"C"+chapter+" learning goal");
+  assert.ok(teaching.rule.length>50,"C"+chapter+" explanation");
+  assert.ok(teaching.contrast.length>45,"C"+chapter+" likely misconception");
+  assert.ok(teaching.apply.length>40,"C"+chapter+" learner application");
+  const lessons=["L003","L008","L013","L018","L023","L032","L037","L042","L047","L052"];
+  const lesson=getLosTeacherLesson(lessons[n-1]!)!;
+  const intro=lesson.scenes.find(scene=>scene.id==="canonical-intro");
+  assert.ok(intro?.paragraphs.some(paragraph=>paragraph===teaching.rule),"C"+chapter+" teaches topic");
+  for(const scene of lesson.scenes.filter(x=>x.id.startsWith("canonical-")))
+    assert.ok(!scene.paragraphs.some(p=>/vanhan painoksen|aiemman LOS-version|tämä opetustilanne on päivitetty/i.test(p)),
+      lesson.id+" "+scene.id+" should teach the language instead of the product change history");
+ }
 });
