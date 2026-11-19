@@ -4,7 +4,7 @@ import { LOS1_MIDTERM_QUESTIONS, losExamReadyToSubmit } from "../content/los1Exa
  * LOS Teacher 2.0: deterministic learning engine. No AI services, network requests
  * or inferred mastery. A session is independent of legacy lessonProgress.
  */
-export type TeacherOption = { id: string; label: string; wrongFeedback?: string; lang?: "fi" | "de" };
+export type TeacherOption = { id: string; label: string; wrongFeedback?: string; lang?: "fi" | "de" | "en" };
 export type TeacherQuestion = {
   prompt: string;
   type: "choice" | "text";
@@ -65,6 +65,8 @@ export type TeacherLesson = {
   bookId: number;
   chapterId: string;
   version: string;
+  /** German by default; shared Teacher 2.0 also supports English manuscripts. */
+  language?: "de" | "en";
   title: string;
   objective: string;
   estimatedMinutes: number;
@@ -162,7 +164,7 @@ const idList = (v: unknown, cap: number): v is string[] =>
  */
 export function teacherContentSignature(lesson: TeacherLesson): string {
   const content=JSON.stringify({
-    id:lesson.id,version:lesson.version,scenes:lesson.scenes,
+    id:lesson.id,version:lesson.version,language:lesson.language,scenes:lesson.scenes,
     requiredQuestionIds:lesson.requiredQuestionIds,
     requiredActivityIds:lesson.requiredActivityIds,
     requiredPracticeIds:lesson.requiredPracticeIds,
@@ -256,16 +258,16 @@ export function parseTeacherSessions(value: unknown): Record<string, TeacherSess
     /^L\d{3}$/.test(key) && validTeacherSession(entry) && entry.lessonId === key,
   ).slice(0, 60)) as Record<string, TeacherSession>;
 }
-export function normalizeTeacherAnswer(answer: string): string {
+export function normalizeTeacherAnswer(answer: string, language: "de" | "en" = "de"): string {
   // Do not silently turn umlauts or ß into different characters.
   return answer.normalize("NFC").trim().replace(/\s+/g, " ")
-    .replace(/[.!?]+$/u, "").trim().toLocaleLowerCase("de");
+    .replace(/[.!?]+$/u, "").trim().toLocaleLowerCase(language);
 }
-export function evaluateTeacherAnswer(question: TeacherQuestion, answer: string): boolean {
+export function evaluateTeacherAnswer(question: TeacherQuestion, answer: string, language: "de" | "en" = "de"): boolean {
   if (question.type === "choice") return question.correctOption === answer &&
     Boolean(question.options?.some(item => item.id === answer));
   return (question.accepted ?? []).some(item =>
-    normalizeTeacherAnswer(item) === normalizeTeacherAnswer(answer));
+    normalizeTeacherAnswer(item, language) === normalizeTeacherAnswer(answer, language));
 }
 /**
  * Recover navigation after a manuscript changes scene IDs. A saved session may
@@ -342,7 +344,7 @@ export function submitTeacherAnswer(session: TeacherSession, lesson: TeacherLess
   if (!input || input.length > 500 ||
       (q.type === "choice" && !q.options?.some(option => option.id === input))) return session;
   const attempt: TeacherAttempt = {
-    sceneId, answer: input, correct: evaluateTeacherAnswer(q, input),
+    sceneId, answer: input, correct: evaluateTeacherAnswer(q, input, lesson.language ?? "de"),
     independent: !session.helpedIds.includes(sceneId) &&
       !session.revealedIds.includes(sceneId) &&
       !session.attempts.some(item => item.sceneId === sceneId),
@@ -353,12 +355,12 @@ export function submitTeacherAnswer(session: TeacherSession, lesson: TeacherLess
 export function teacherLatestAttempt(session: TeacherSession, sceneId: string): TeacherAttempt | undefined {
   return [...session.attempts].reverse().find(item => item.sceneId === sceneId);
 }
-export function teacherWrongFeedback(scene: TeacherScene, answer: string): string {
+export function teacherWrongFeedback(scene: TeacherScene, answer: string, language: "de" | "en" = "de"): string {
   const q = scene.question;
   if (!q) return "";
   const specific = q.type === "choice"
     ? q.options?.find(item => item.id === answer)?.wrongFeedback
-    : q.wrongAnswers?.[normalizeTeacherAnswer(answer)];
+    : q.wrongAnswers?.[normalizeTeacherAnswer(answer, language)];
   return specific?.trim() ? specific : q.genericWrong;
 }
 /** Calendar evidence requires a correct, explicitly saved choice. It is never audio evidence. */
