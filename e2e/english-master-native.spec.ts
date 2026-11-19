@@ -48,8 +48,15 @@ test("English Master opens as a first-class book route, imports one content pack
   await expect(page.getByRole("heading", { name: "English Master", exact: true })).toBeVisible();
   await expect(page.locator(".los-book-workspace")).toHaveAttribute("data-reading-size", "large");
 
+  await page.locator(".los-book-main").getByRole("button", { name: "Sisällysluettelo", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "Sisällysluettelo", exact: true })).toBeVisible();
+  await expect(page.locator(".em-los-contents-part")).toHaveCount(1);
+  await expect(page.locator(".em-los-contents .los-contents-list li")).toHaveCount(122);
+
   await page.getByRole("button", { name: "Oppikirja", exact: true }).click();
   await expect(page.locator(".em-chapter h1")).toHaveText("How English Sentences Work");
+  await expect(page.locator(".los-opening-head")).toBeVisible();
+  await expect(page.locator(".los-chapter-links button")).toHaveCount(1);
   await expect(page.locator(".los-pagination")).toBeVisible();
   // Exact LOS! reader controls are reused, not an English-only imitation.
   await page.locator(".los-display-settings > summary").click();
