@@ -35,6 +35,16 @@ test("editorial v4 mobile controls do not crowd reading or cause horizontal scro
   await expect(page.locator(".los-section-nav .los-section-step")).toHaveCount(2);
   await expect(page.getByRole("combobox",{name:"Valitse kappaleen osio"})).toBeVisible();
   await expect(page.locator(".los-display-settings")).toBeVisible();
+  await page.locator(".los-display-settings summary").click();
+  const settingsPanel=page.locator(".los-display-settings-panel");
+  await expect(settingsPanel).toBeVisible();
+  const bounds=await settingsPanel.evaluate(el=>{
+    const rect=el.getBoundingClientRect();
+    return {left:rect.left,right:rect.right,viewport:window.innerWidth};
+  });
+  expect(bounds.left).toBeGreaterThanOrEqual(0);
+  expect(bounds.right).toBeLessThanOrEqual(bounds.viewport+1);
+  await page.locator(".los-display-settings summary").click();
   const fullWidth=await page.locator(".los-book-paper").evaluate(el=>Math.round(el.getBoundingClientRect().width));
   expect(fullWidth).toBeGreaterThanOrEqual(315);
   const firstGermanTurnTop=await page.locator(".los-c01-turn").first().evaluate(el=>el.getBoundingClientRect().top);
