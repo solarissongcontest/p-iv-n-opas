@@ -82,7 +82,7 @@ export function LosFirstLessons({ selectedId, onSelect, move }: {
   const isComplete = Boolean(progress.completedAt);
   return <section className="los-lesson-program" id="los-lesson-runner" aria-label="Toteutetut LOS! 1 -oppitunnit">
     <div className="los-lesson-program-head">
-      <p className="los-overline">OHJATTU OPETUS · {ALL_LESSONS.length} TUNTIA</p>
+      <p className="los-overline">OHJATTU OPETUS · {ALL_LESSONS.length} OPPITUNTIA</p>
       <h2>Opiskele vaihe vaiheelta</h2>
       <p className="los-lesson-program-lead">Valitse kappale ja avaa sen oppitunti. Voit jatkaa aiemmin tallennettujen tehtävien parista tai aloittaa ensimmäisestä tunnista.</p>
       <details className="los-lesson-publication-note">
@@ -103,7 +103,7 @@ export function LosFirstLessons({ selectedId, onSelect, move }: {
         const completed = lessons.filter(item => Boolean(chapterDraft(item.id).draft.lessonProgress?.[item.id]?.completedAt)).length;
         return <button key={code} type="button" aria-pressed={code === chapterId}
           className={code === chapterId ? "is-active" : ""} onClick={() => openChapter(code)}>
-          <strong>{chapterLabel(code)}</strong><small>{completed}/{lessons.length} tuntia</small>
+          <strong>{chapterLabel(code)}</strong><small>{completed}/{lessons.length} oppituntia</small>
         </button>;
       })}
     </div>
