@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { gzipSync } from "node:zlib";
+import { readFile } from "node:fs/promises";
 import { expectNoHorizontalOverflow } from "./helpers";
 
 const owner = "00000000-0000-4000-8000-000000000195";
@@ -109,6 +110,29 @@ test("English Master opens as a first-class book route, imports one content pack
   await page.getByRole("button", { name: "Merkitse oppitunti läpikäydyksi" }).click();
   await page.getByRole("button", { name: "Oma edistyminen" }).click();
   await expect(page.getByText("1 / 192")).toBeVisible();
+  // Backups must contain the real shared Teacher 2.0 session, including
+  // attempts and persisted navigation, not only a superficial completion flag.
+  const downloadPromise=page.waitForEvent("download");
+  await page.getByRole("button",{name:"Vie opiskelun varmuuskopio"}).click();
+  const downloaded=await downloadPromise;
+  const backup=JSON.parse(await readFile(await downloaded.path(),"utf8")) as {
+    schema:string;teacherSessions:Record<string,{schemaVersion:number;attempts:unknown[]}>;
+  };
+  const firstLessonId="EM-LP-J01-L001";
+  expect(backup.schema).toBe("em-native-progress-1");
+  expect(backup.teacherSessions[firstLessonId]?.schemaVersion).toBe(1);
+  expect(backup.teacherSessions[firstLessonId]?.attempts).toHaveLength(3);
+  const savedKey="em-teacher-core-v1-"+owner+"-"+firstLessonId;
+  await page.evaluate(key=>localStorage.removeItem(key),savedKey);
+  await page.locator(".em-import-button input[type=file]").setInputFiles({
+    name:"english-master-oma-varmuuskopio.json",mimeType:"application/json",
+    buffer:Buffer.from(JSON.stringify(backup)),
+  });
+  await expect.poll(()=>page.evaluate(key=>{
+    const data=localStorage.getItem(key);
+    return data?JSON.parse(data).attempts.length:0;
+  },savedKey)).toBe(3);
+  await expect(page.getByRole("alert")).toHaveCount(0);
 });
 
 test("English Master requires the same local device entry as LOS!", async ({ page }) => {
