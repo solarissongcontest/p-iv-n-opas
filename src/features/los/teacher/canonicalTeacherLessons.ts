@@ -250,7 +250,11 @@ export function canonicalizeLosTeacherLesson(original:TeacherLesson):TeacherLess
   const touched=reading||changedIndex>0||practice.length!==original.requiredPracticeIds.length||
     checked.join("|")!==(original.requiredCheckedIds??[]).join("|");
   if(!touched)return original;
-  return {...original,
+  const currentEdition={...original};
+  // L052's unapproved Harald media belongs to the retired interview, not to
+  // the new A/B/C reading task. Never claim it was heard or passed.
+  if(reading)delete currentEdition.mediaGate;
+  return {...currentEdition,
     version:LOS1_TEACHER_CANONICAL_VERSION,
     title:reading?"Lue ja ymmärrä: "+current.ab.chapterTitle:stale.test(original.title)?
       "Harjoittele kappaleen "+Number(chapterId)+" saksaa":original.title,
