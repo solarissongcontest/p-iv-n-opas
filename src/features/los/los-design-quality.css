@@ -1131,3 +1131,68 @@
 @media(prefers-reduced-motion:reduce) {
   .los-book-workspace .los-reading-options label {transition:none}
 }
+
+
+/* V4.2 second pass: typography and input precision after visual inspection. */
+.los-grammar-page>.los-eyebrow {
+  font-size:10px!important;line-height:1.6;
+  letter-spacing:.13em;font-weight:780;
+}
+.los-grammar-page h2,.los-grammar-page>h2 {
+  font-family:"Inter",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  font-size:clamp(23px,2.7vw,29px);font-weight:730;
+  line-height:1.23;letter-spacing:-.038em;text-wrap:balance;
+}
+.los-grammar-page h3 {
+  font-family:"Inter",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  font-size:20px;font-weight:700;letter-spacing:-.022em;
+}
+.los-book-workspace .los-workbook-intro {
+  margin:22px 0 8px;padding:13px 0;
+  border-top:1px solid var(--los-line);border-bottom:1px solid var(--los-border-quiet);
+}
+.los-book-workspace .los-workbook-question {padding:25px 0 28px}
+.los-book-workspace .los-question-number {
+  font-family:"Inter",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  font-size:21px;font-weight:750;letter-spacing:-.04em;
+}
+.los-book-workspace .los-workbook-question legend {
+  font-weight:650;line-height:1.55;
+}
+.los-book-workspace .los-workbook-choices label {
+  min-height:49px;padding:11px 14px;
+  border-radius:9px;background:var(--los-soft-surface);
+  border-color:var(--los-border-quiet);font-size:14px;
+  transition:background-color .12s ease,border-color .12s ease;
+}
+.los-book-workspace .los-workbook-choices label:hover {
+  border-color:var(--los-coral-edge);background:var(--los-coral-wash);
+}
+.los-book-workspace .los-workbook-choices label.is-selected {
+  background:var(--los-coral-soft);border-color:var(--los-coral-edge);
+  color:var(--los-ink);box-shadow:inset 3px 0 0 var(--los-book-accent);
+}
+.los-book-workspace .los-workbook-fill input,
+.los-book-workspace .los-self-assessment textarea,
+.los-book-workspace .los-chapter-notes textarea,
+.los-book-workspace .los-application-page textarea {
+  border-radius:9px;border-color:var(--los-line);
+}
+.los-vocab-ipa-note {
+  padding-top:10px;margin:14px 0 10px;color:var(--los-soft);
+  border-top:1px solid var(--los-border-quiet);
+}
+.los-vocab-ipa-note>summary {
+  min-height:43px;display:flex;align-items:center;width:max-content;
+  max-width:100%;cursor:pointer;font-size:12px;font-weight:670;
+}
+.los-vocab-ipa-note>p {font-size:12px;line-height:1.7;max-width:62ch}
+@media(max-width:760px) {
+  .los-grammar-page>.los-eyebrow {padding:4px 9px}
+  .los-grammar-page h2 {font-size:24px;line-height:1.25}
+  .los-book-workspace .los-workbook-question {padding-block:20px}
+  .los-book-workspace .los-workbook-choices label {min-height:48px}
+}
+@media(prefers-reduced-motion:reduce) {
+  .los-book-workspace .los-workbook-choices label {transition:none}
+}
