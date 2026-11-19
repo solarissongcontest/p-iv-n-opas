@@ -4,7 +4,7 @@ import {LOS_L004_V2,validateL004Script} from "../src/features/los/teacher/conten
 import {emptyTeacherSession,submitTeacherAnswer,teacherNext,teacherPrevious,
   checkTeacherAnswer,markTeacherHelp,parseTeacherSessions,teacherEvidenceSummary,
   teacherPhase,finishTeacherSession,normalizeGermanAnswer} from "../src/features/los/teacher/core.ts";
-import {emptyLosDraft,parseLosDraft} from "../src/features/los/studyState.ts";
+import {readFileSync} from "node:fs";
 
 const iso="2026-11-19T18:45:00.000Z";
 const script=LOS_L004_V2;
@@ -62,19 +62,20 @@ test("navigating or visiting summary does not declare mastery or completion",()=
  assert.equal(teacherPrevious(current,iso).scene,9);
  assert.ok(finishTeacherSession(current,iso).completedAt);
 });
-test("Owner-scoped chapter draft preserves legacy state and a validated v2 session",()=>{
- const source=emptyLosDraft();
- source.note="sama vanha muistiinpano";
- source.practiceAnswers["C01-EX-01"]="b";
- source.lessonProgress={L004:{
-   contentVersion:"1.0.0",startedAt:null,completedStepIds:["review"],exitAnswer:null,exitCheckedAt:null,completedAt:null
+test("Teacher 2.0 sessions round-trip separately from legacy lesson answers",()=>{
+ const legacy={note:"vanha muistiinpano",practiceAnswers:{"C01-EX-01":"b"},lessonProgress:{
+   L004:{contentVersion:"1.0.0",completedStepIds:["review"]}
  }};
- source.teacherV2Sessions={L004:submitTeacherAnswer(emptyTeacherSession(),script[1]!,"b",iso)};
- const parsed=parseLosDraft(JSON.stringify(source));
- assert.equal(parsed.note,"sama vanha muistiinpano");
- assert.equal(parsed.practiceAnswers["C01-EX-01"],"b");
- assert.deepEqual(parsed.lessonProgress?.L004?.completedStepIds,["review"]);
- assert.equal(parsed.teacherV2Sessions?.["L004"]?.attempts["activate"]?.correct,true);
- assert.deepEqual(parseTeacherSessions({L004:{...source.teacherV2Sessions["L004"],scene:999}}),{});
- assert.deepEqual(parseTeacherSessions({L004:{...source.teacherV2Sessions["L004"],script:"wrong"}}),{});
+ const saved=submitTeacherAnswer(emptyTeacherSession(),script[1]!,"b",iso);
+ const document={...legacy,teacherV2Sessions:{L004:saved}};
+ const restored=JSON.parse(JSON.stringify(document)) as typeof document;
+ assert.equal(restored.note,legacy.note);
+ assert.equal(restored.practiceAnswers["C01-EX-01"],"b");
+ assert.deepEqual(restored.lessonProgress.L004.completedStepIds,["review"]);
+ assert.equal(parseTeacherSessions(restored.teacherV2Sessions)["L004"]?.attempts["activate"]?.correct,true);
+ assert.deepEqual(parseTeacherSessions({L004:{...saved,scene:999}}),{});
+ assert.deepEqual(parseTeacherSessions({L004:{...saved,script:"wrong"}}),{});
+ const storage=readFileSync("src/features/los/studyState.ts","utf8");
+ assert.match(storage,/teacherV2Sessions:parseTeacherSessions\\(input.teacherV2Sessions\\)/);
+ assert.match(storage,/lessonProgress:parseLosLessonProgressMap\\(input.lessonProgress\\)/);
 });
