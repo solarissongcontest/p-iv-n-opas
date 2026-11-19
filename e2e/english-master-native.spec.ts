@@ -73,6 +73,10 @@ test("English Master opens as a first-class book route, imports one content pack
   await page.getByRole("button", { name: "Opetuspolku", exact: true }).click();
   await expect(page.getByText("Test lesson 1", {exact:true})).toBeVisible();
   await page.getByRole("button", { name: /Test lesson 1/ }).first().click();
+  await expect(page.locator(".em-lesson-program > .los-lesson-program-head")).toBeVisible();
+  await expect(page.locator(".em-lesson-detail")).toBeVisible();
+  await expect(page.locator(".em-lesson-program > .los-lesson-program-head [role=progressbar]"))
+    .toHaveAttribute("aria-valuemax", "192");
   await expect(page.getByRole("heading", { name: "Ensimmäinen vaihe" })).toBeVisible();
   await page.getByRole("button", { name: /Seuraava vaihe/ }).click();
   await expect(page.getByRole("heading", { name: "Toinen vaihe" })).toBeVisible();
