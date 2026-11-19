@@ -4,7 +4,8 @@ import { LOS1_REVISED_AB } from "./content/los1RevisedAB";
 import { LOS1_REVISED_C } from "./content/los1RevisedC";
 import { LOS1_C_SPEECH_BLOCKS, LOS1_C_AUDIO_EXAMPLES } from "./content/los1SupportSpeech";
 import { LosReadingExercises, LosReadingUnderstanding } from "./LosReadingExercises";
-import { losGermanVoices, losSpeakerSlot, losSpeechSegments } from "./losSpeech";
+import { losGermanVoices, losSpeakerSlot, losSpeechSegments, losSpeechSentenceSegments } from "./losSpeech";
+import {LosVocabularyAudio} from "./LosVocabularyAudio";
 import {losVoiceIdentity,readLosPreferredVoice,saveLosPreferredVoice,matchLosPreferredVoice} from "./losVoicePreference";
 import {LosOriginalDialogue} from "./LosOriginalDialogue";
 import {los1CanonicalLines,LOS1_CANONICAL_VERSION} from "./los1Canonical";
@@ -30,6 +31,8 @@ function TextSpeech({ blocks, chapterId, kind }: { blocks: readonly ReaderBlock[
   const voiceCount=voices.length;
   const [activeSegment, setActiveSegment] = useState<number | null>(null);
   const segments = losSpeechSegments(blocks,chapterId,kind);
+  const sentences=segments.flatMap((segment,turnIndex)=>losSpeechSentenceSegments(segment.text)
+    .map((text,sentenceIndex)=>({text,turnIndex,sentenceIndex,speaker:segment.speaker})));
   const playbackId = useRef(0);
   useEffect(() => {
     if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
@@ -154,6 +157,16 @@ function TextSpeech({ blocks, chapterId, kind }: { blocks: readonly ReaderBlock[
           {isSpeaking&&activeSegment===index?<Square size={14} aria-hidden="true"/>:<Volume2 size={16} aria-hidden="true"/>}
           {isSpeaking&&activeSegment===index?" Pysäytä":" Kuuntele"}
         </button>
+      </li>)}</ol>
+    </details>}
+    {sentences.length>0&&<details className="los-revised-speech-sentences">
+      <summary>Kuuntele jokainen lause erikseen ({sentences.length})</summary>
+      <ol>{sentences.map(({text,turnIndex,sentenceIndex,speaker})=><li key={turnIndex+"-"+sentenceIndex}>
+        <div className="los-revised-speech-segment-label">
+          <strong>{speaker==="Erzähler"?"Lause":speaker+" · lause"}</strong>
+          <span lang="de">{text}</span>
+        </div>
+        <LosVocabularyAudio word={text} kind="lause" rate={Number(rate)}/>
       </li>)}</ol>
     </details>}
     <p className="los-revised-muted" role="status">{message || (

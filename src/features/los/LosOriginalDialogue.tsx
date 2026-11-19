@@ -3,6 +3,7 @@ import { Check, Eraser, Highlighter, Info, MousePointerClick } from "lucide-reac
 import { useLosChapterDraft } from "./studyState";
 import {los1TokenIPADetail} from "./los1CourseGlossary";
 import {losGermanVoices} from "./losSpeech";
+import {matchLosPreferredVoice,readLosPreferredVoice} from "./losVoicePreference";
 import {losSaveWord,losSavedWordKey} from "./los1SavedVocabulary";
 import { LOS_READER_COLORS, type LosReaderColor } from "./content/c01Annotations";
 import {
@@ -70,7 +71,8 @@ export function LosOriginalDialogue(props: LosOriginalDialogueProps) {
     if(!voices.length){setSpeechNote("Tällä laitteella ei ole saatavilla saksankielistä puheääntä.");return;}
     window.speechSynthesis.cancel();
     const voice=new SpeechSynthesisUtterance(gloss.word);
-    voice.lang="de-DE";voice.voice=voices[0]??null;voice.rate=0.9;
+    const selected=matchLosPreferredVoice(voices,readLosPreferredVoice())??voices[0];
+    voice.lang=selected?.lang??"de-DE";voice.voice=selected??null;voice.rate=0.9;
     window.speechSynthesis.speak(voice);
     setSpeechNote("Toisto käyttää laitteen saksankielistä synteettistä ääntä.");
   };
@@ -184,10 +186,9 @@ export function LosOriginalDialogue(props: LosOriginalDialogueProps) {
     </div>
     {gloss&&<div className="los-c01-gloss" role="status">
       <strong lang="de">{gloss.word}</strong><p>{gloss.meaning}</p>
-      <p><strong>IPA:</strong> <span lang="de">{los1TokenIPADetail(gloss.word)?.ipa??"Ei saatavilla"}</span>
-        {los1TokenIPADetail(gloss.word)?.source==="espeak-candidate"&&
-          <small> eSpeak-pohjainen koneellinen IPA-ehdotus, ei tarkistettu sanakirjaääntämys</small>}
-      </p>
+      {los1TokenIPADetail(gloss.word)?.source==="editorial"?
+        <p><strong>Toimituksellinen IPA:</strong> <span lang="de">{los1TokenIPADetail(gloss.word)?.ipa}</span></p>:
+        <p>IPA-merkintää ei ole vahvistettu opetuskäyttöön. Kuuntele sana saksankielisellä synteettisellä puheäänellä.</p>}
       <button type="button" onClick={speakWord}>Kuuntele sana</button>
       <button type="button" onClick={addWordToReview}
         disabled={!saved || !props.glossary[gloss.word] || Boolean(draft.savedWords?.[losSavedWordKey(gloss.word)])}>
