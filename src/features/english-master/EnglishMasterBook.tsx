@@ -432,7 +432,7 @@ export function EnglishMasterBook() {
                 <button disabled={sceneStep === 0} onClick={() => setSceneStep(n => Math.max(0, n - 1))}>‹ Edellinen vaihe</button>
                 <button disabled={sceneStep >= currentLesson.payload.teacher_scenes.length - 1} onClick={() => setSceneStep(n => Math.min(currentLesson.payload.teacher_scenes!.length - 1, n + 1))}>Seuraava vaihe <ChevronRight size={16}/></button>
               </div>
-            </section>
+            </section> : null}
             {currentLesson.payload.alternative_explanation_fi && <><button className="em-textlink" onClick={() => setShowHelp(!showHelp)} aria-expanded={showHelp}>En ymmärrä · {showHelp ? "Piilota" : "Näytä toinen selitys"}</button>{showHelp && <p className="em-help">{currentLesson.payload.alternative_explanation_fi}</p>}</>}
             <h2>Harjoitukset</h2>{currentLesson.payload.tasks?.map((task, index) => {
               const result = feedback[task.task_id];
