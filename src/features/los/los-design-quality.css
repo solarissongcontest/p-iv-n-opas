@@ -636,11 +636,13 @@
     padding-bottom:max(26px,env(safe-area-inset-bottom));
   }
   .los-toc-backdrop {inset:56px 0 0}
-  .los-book-main {padding:0 0 38px}
+  .los-book-layout {display:block;grid-template-columns:minmax(0,1fr);width:100%;max-width:100%}
+  .los-book-main {width:100%;padding:0 0 38px}
   .los-reader-context {
-    padding:4px 15px;min-height:47px;
+    padding:4px 15px;min-height:40px;
     gap:8px;flex-wrap:nowrap;
   }
+  .los-book-main:has(.los-section-nav) .los-reader-context {display:none}
   .los-main-breadcrumb {max-width:calc(100% - 52px);font-size:11px;min-width:0}
   .los-main-breadcrumb button {font-size:11px;padding:4px}
   .los-display-settings>summary {
@@ -655,9 +657,10 @@
   .los-section-index {display:none}
   .los-section-location strong {font-size:12px}
   .los-section-actions {gap:5px}
+  .los-section-jump {min-width:0;flex:1}
   .los-section-jump select {
-    min-height:40px;width:135px;max-width:40vw;
-    padding:7px 8px;font-size:11px;
+    min-height:40px;width:100%;max-width:100%;
+    padding:7px 7px;font-size:11px;
   }
   .los-section-nav .los-section-step {
     width:39px;height:40px;min-height:40px;border-radius:7px;
@@ -672,12 +675,7 @@
   .los-revised-page .los-page-intro {font-size:14px;margin-bottom:14px}
   .los-book-workspace[data-reading-size="normal"] {--los-reader-text-size:18px}
   .los-revised-speech {margin:3px 0 10px;padding-bottom:11px}
-  .los-study-layout-toggle {
-    max-width:100%;overflow-x:auto;gap:2px;margin-bottom:8px;
-  }
-  .los-study-layout-toggle button {
-    font-size:11px;padding:7px 9px;white-space:nowrap;
-  }
+  .los-study-layout-toggle {max-width:100%;margin:0 0 8px;padding:0;border:0;background:none;overflow:visible}
   .los-c01-turn,.los-revised-line {padding:14px 0;gap:7px}
   .los-front.los-front-has-banner {
     grid-template-columns:1fr;padding:24px 21px;gap:20px;
@@ -699,7 +697,7 @@
 @media (max-width:420px) {
   .los-section-nav {justify-content:flex-end}
   .los-section-location {display:none}
-  .los-section-actions {width:100%;justify-content:space-between}
+  .los-section-actions {width:100%;min-width:0;justify-content:space-between;gap:4px}
   .los-section-jump {flex:1}
   .los-section-jump select {width:100%;max-width:100%;font-size:12px}
   .los-c01-modes {display:flex;flex-wrap:nowrap;gap:5px}
@@ -715,4 +713,69 @@
   .los-app :is(.los-shelf-book,.los-book-sidebar nav button) {
     transition:none!important;transform:none!important;
   }
+}
+
+
+/* Reader-first cleanup: verified against actual Chromium screenshots. */
+.los-section-nav .los-display-settings {
+  display:block;flex:0 0 auto;margin:0;max-width:none;
+}
+.los-section-nav .los-display-settings>summary {
+  min-height:42px;min-width:42px;display:flex;align-items:center;
+  justify-content:center;padding:8px;
+  border-radius:8px;border:1px solid var(--los-line);
+  background:var(--los-paper);font-size:0;
+}
+.los-section-nav .los-display-settings>summary svg {width:18px;height:18px;flex:none}
+.los-section-nav .los-display-settings-panel {right:-94px}
+.los-study-layout-toggle {
+  display:block;width:max-content;max-width:100%;padding:0;margin:3px 0 8px;
+  border:0;box-shadow:none;background:transparent;
+}
+.los-study-mode-picker {
+  display:inline-flex;align-items:center;gap:9px;
+  color:var(--los-soft);font-size:12px;font-weight:650;
+}
+.los-study-mode-picker select {
+  height:39px;min-width:150px;max-width:100%;padding:7px 29px 7px 11px;
+  background:var(--los-paper);border:1px solid var(--los-line);
+  border-radius:8px;color:var(--los-ink);font:inherit;font-size:12px;
+}
+.los-revised-speech {padding-block:3px 8px;margin:2px 0 8px}
+.los-revised-speech-controls {display:flex;align-items:center;flex-wrap:wrap;gap:6px}
+.los-revised-speech-controls>svg {display:none}
+.los-revised-speech-controls>.los-outline-button {min-height:40px;padding:8px 12px}
+.los-revised-speech-options>summary,.los-speech-unit-picker>summary {
+  min-height:39px;display:flex;align-items:center;padding:7px 10px;
+  white-space:normal;
+}
+.los-speech-unit-picker {margin:5px 0 0}
+.los-speech-unit-picker>summary {font-size:12px;padding:7px 0;border:0;background:transparent}
+.los-c01-toolbox {padding:6px 0;margin:5px 0 3px;border:0}
+.los-c01-instruction {font-size:12px;line-height:1.45;margin:5px 0!important;color:var(--los-soft)}
+.los-c01-turns {margin-top:2px}
+.los-c01-saved,.los-c01-attribution {font-size:12px}
+@media(max-width:760px) {
+  .los-book-main .los-book-paper {width:100%;min-width:0}
+  .los-section-actions {flex:1;min-width:0;gap:4px}
+  .los-section-nav .los-display-settings>summary {min-width:39px;min-height:40px;padding:7px}
+  .los-section-nav .los-section-step {width:39px;min-width:39px}
+  .los-section-nav .los-display-settings-panel {right:-85px}
+  .los-section-nav .los-section-jump {flex:1 1 auto;min-width:0}
+  .los-section-nav .los-section-jump select {width:100%;max-width:none}
+  .los-reading-page h1 {font-size:clamp(30px,8vw,38px);line-height:1.13}
+  .los-revised-page .los-page-intro {margin-bottom:9px}
+  .los-study-mode-picker>span {display:none}
+  .los-study-mode-picker select {min-height:39px}
+  .los-revised-speech {border-bottom:0;padding-block:3px 4px}
+  .los-revised-speech-controls {gap:5px}
+  .los-revised-speech-controls>.los-outline-button {min-height:40px}
+  .los-speech-unit-picker {margin-top:1px}
+  .los-c01-toolbox {margin-block:4px 2px;padding-block:4px}
+  .los-c01-instruction {font-size:11px}
+}
+@media(max-width:420px) {
+  .los-section-nav .los-display-settings-panel {right:-74px}
+  .los-study-layout-toggle {margin-top:0}
+  .los-c01-turn {padding-block:11px}
 }
