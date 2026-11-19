@@ -560,10 +560,11 @@ function LosBookWorkspace({ book, location, move, goLibrary, openBook }: { book:
           </div>
         </div>
         {book.id===1&&<LosSelectionAudio key={(chapter?.id??"book")+"-"+section}/>}
-        {chapter && <nav className="los-section-nav" aria-label="Kappaleen osiot">
+        {chapter && <nav className="los-section-nav" aria-label="Kappaleen osiot"
+          style={{"--los-section-fill":`${((selectedSectionIndex+1)/sections.length)*100}%`} as CSSProperties}>
           <div className="los-section-location">
-            <span className="los-section-index">KAPPALE {chapter.id} <span aria-hidden="true">/</span> {selectedSectionIndex+1} / {sections.length}</span>
-            <strong>{sections[selectedSectionIndex]?.label}</strong>
+            <span className="los-section-index">KAPPALE {chapter.id} <span aria-hidden="true">·</span> OSIO {String(selectedSectionIndex+1).padStart(2,"0")} / {sections.length}</span>
+            <strong>{section==="cards" ? "Kertauskortit" : sections[selectedSectionIndex]?.label}</strong>
           </div>
           <div className="los-section-actions">
             <label className="los-section-jump">
