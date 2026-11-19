@@ -402,7 +402,7 @@ test("first German sentence is not buried under a tall audio settings dashboard"
  await expectNoHorizontalOverflow(page);
 });
 
-test("LOS1 contemporary design system is consistent at desktop, mobile, dark mode and zoom",async({page},testInfo)=>{
+test("LOS1 editorial v4 reading design is consistent at desktop, mobile and dark mode",async({page},testInfo)=>{
  await page.setViewportSize({width:1440,height:900});
  await enter(page,"01/text");
  await expect(page.locator(".los-revised-page")).toBeVisible({timeout:30000});
@@ -410,7 +410,7 @@ test("LOS1 contemporary design system is consistent at desktop, mobile, dark mod
  const font=await title.evaluate(el=>getComputedStyle(el).fontFamily);
  expect(font).not.toMatch(/Georgia|Times New Roman/);
  await expect.poll(()=>page.locator(".los-book-topbar").evaluate(el=>getComputedStyle(el).borderTopWidth)).toBe("0px");
- await expect.poll(()=>page.locator(".los-book-paper").evaluate(el=>getComputedStyle(el).borderTopLeftRadius)).toBe("20px");
+ await expect.poll(()=>page.locator(".los-book-paper").evaluate(el=>getComputedStyle(el).borderTopLeftRadius)).toBe("10px");
  const textFont=await page.locator(".los-c01-words").first().evaluate(el=>getComputedStyle(el).fontFamily);
  expect(textFont).not.toMatch(/Georgia|Times New Roman/);
  await page.screenshot({path:testInfo.outputPath("los-contemporary-reading-desktop.png"),fullPage:true,animations:"disabled"});
