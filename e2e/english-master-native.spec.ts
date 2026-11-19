@@ -73,17 +73,31 @@ test("English Master opens as a first-class book route, imports one content pack
   await page.getByRole("button", { name: "Opetuspolku", exact: true }).click();
   await expect(page.getByText("Test lesson 1", {exact:true})).toBeVisible();
   await page.getByRole("button", { name: /Test lesson 1/ }).first().click();
-  await expect(page.locator(".em-lesson-program > .los-lesson-program-head")).toBeVisible();
-  await expect(page.locator(".em-lesson-detail")).toBeVisible();
-  await expect(page.locator(".em-lesson-program > .los-lesson-program-head [role=progressbar]"))
-    .toHaveAttribute("aria-valuemax", "192");
+  await expect(page.locator(".em-teacher-app")).toBeVisible();
+  await expect(page.locator(".los-teacher-layout")).toBeVisible();
+  await expect(page.locator(".los-teacher-paper")).toBeVisible();
+  await expect(page.locator(".los-teacher-outline")).toBeVisible();
+  await expect(page.getByRole("progressbar", { name: "Oppitunnin opetustilanteet" }))
+    .toHaveAttribute("aria-valuemax", "6");
+  await expect(page.getByRole("heading", { name: "Aloitus ja tavoitteet" })).toBeVisible();
+  await page.getByRole("button", { name: "Keskeytä oppitunti" }).click();
+  await expect(page.getByRole("heading", { name: "Oppitunti keskeytetty" })).toBeVisible();
+  await page.getByRole("button", { name: "Jatka opetusta" }).first().click();
+  await page.getByRole("button", { name: "Seuraava vaihe" }).click();
+  await expect(page.getByRole("heading", { name: "Sääntö" })).toBeVisible();
+  await page.getByRole("button", { name: "Seuraava vaihe" }).click();
   await expect(page.getByRole("heading", { name: "Ensimmäinen vaihe" })).toBeVisible();
-  await page.getByRole("button", { name: /Seuraava vaihe/ }).click();
+  await page.reload({ waitUntil: "domcontentloaded" });
+  await expect(page.getByRole("heading", { name: "Ensimmäinen vaihe" })).toBeVisible();
+  await page.getByRole("button", { name: "Seuraava vaihe" }).click();
   await expect(page.getByRole("heading", { name: "Toinen vaihe" })).toBeVisible();
-  await page.locator(".em-task input[type=radio]").first().check();
-  await page.getByRole("button", { name: "Tarkista vastaus" }).click();
-  await expect(page.getByRole("status")).toContainText("Oikein");
-  await page.getByRole("button", { name: /Merkitse harjoitelluksi/ }).click();
+  await page.getByRole("button", { name: "Seuraava vaihe" }).click();
+  await expect(page.getByRole("heading", { name: "Harjoitus 1" })).toBeVisible();
+  await page.getByRole("button", { name: /I study English\./ }).click();
+  await expect(page.locator(".los-teacher-feedback")).toContainText("Oikein");
+  await page.getByRole("button", { name: "Seuraava vaihe" }).click();
+  await expect(page.getByRole("heading", { name: "Kertaa ja päätä oppitunti" })).toBeVisible();
+  await page.getByRole("button", { name: "Merkitse harjoitelluksi" }).click();
   await page.getByRole("button", { name: "Oma edistyminen" }).click();
   await expect(page.getByText("1 / 192")).toBeVisible();
 });
@@ -159,7 +173,7 @@ test("English Master reuses the LOS! v4 editorial layouts at 1440, 390 and 320 p
     { slug: "contents", hash: "#/contents", selector: ".em-los-contents" },
     { slug: "chapter", hash: "#/book/G01", selector: ".los-opening" },
     { slug: "lessons", hash: "#/path", selector: ".los-learning-path" },
-    { slug: "lesson", hash: "#/lesson", selector: ".em-lesson" },
+    { slug: "teacher-2", hash: "#/lesson", selector: ".em-teacher-app" },
   ] as const;
 
   for (const size of [{ name: "desktop", width: 1440, height: 900 },
@@ -198,4 +212,38 @@ test("English Master reuses the LOS! v4 editorial layouts at 1440, 390 and 320 p
     fullPage: false, animations: "disabled",
   });
   await expectNoHorizontalOverflow(page);
+});
+
+test("English Teacher 2.0 saves stage and drafts locally without claiming automatic mastery", async ({ page }) => {
+  await enterLocalBook(page);
+  await expect(page.locator(".los-front")).toBeVisible({ timeout: 45_000 });
+  await page.goto("/english-master#/lesson", { waitUntil: "domcontentloaded" });
+  await expect(page.locator(".em-teacher-app")).toBeVisible({ timeout: 45_000 });
+  await expect(page.locator(".los-teacher-sidebar")).toBeVisible();
+  await expect(page.locator(".los-teacher-paper")).toBeVisible();
+  await page.getByRole("button", { name: "Keskeytä oppitunti" }).click();
+  await expect(page.getByRole("heading", { name: "Oppitunti keskeytetty" })).toBeVisible();
+  await page.reload({ waitUntil: "domcontentloaded" });
+  await expect(page.getByRole("heading", { name: "Oppitunti keskeytetty" })).toBeVisible({ timeout: 45_000 });
+  await page.getByRole("button", { name: "Jatka opetusta" }).first().click();
+  await expect(page.locator(".los-teacher-paper")).toBeVisible();
+  const saved = await page.evaluate(() => Object.keys(localStorage)
+    .filter(key => key.startsWith("em-teacher-v2-")));
+  expect(saved).toHaveLength(1);
+  await expect(page.getByRole("button", { name: "Merkitse harjoitelluksi" })).toHaveCount(0);
+});
+
+test("English Teacher 2.0 reflows on narrow mobile screens without importing German lesson content", async ({ page }, testInfo) => {
+  await page.setViewportSize({ width: 320, height: 780 });
+  await enterLocalBook(page);
+  await expect(page.locator(".los-front")).toBeVisible({ timeout: 45_000 });
+  await page.goto("/english-master#/lesson", { waitUntil: "domcontentloaded" });
+  await expect(page.locator(".em-teacher-app")).toBeVisible({ timeout: 45_000 });
+  await expect(page.locator(".los-teacher-sidebar")).toBeVisible();
+  await expect(page.locator(".los-teacher-paper")).toBeVisible();
+  await expectNoHorizontalOverflow(page);
+  await page.screenshot({ path: testInfo.outputPath("english-master-teacher-2-mobile320.png"), animations: "disabled" });
+  await page.evaluate(() => document.documentElement.classList.add("dark"));
+  await expectNoHorizontalOverflow(page);
+  await page.screenshot({ path: testInfo.outputPath("english-master-teacher-2-mobile320-dark.png"), animations: "disabled" });
 });
