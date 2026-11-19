@@ -122,3 +122,52 @@ test("all ten chapters expose exact German per-turn and C model listening contro
   }
  }
 });
+
+test("device voice QA cannot be self-certified before full German playback and stays voice-scoped",async({page})=>{
+ await page.addInitScript(()=>{
+  class FakeUtterance{
+   text:string;
+   voice:unknown=null;
+   lang="";
+   rate=1;
+   onstart:(()=>void)|null=null;
+   onend:(()=>void)|null=null;
+   onerror:(()=>void)|null=null;
+   constructor(text:string){this.text=text;}
+  }
+  const mock={
+   getVoices:()=>[
+    {name:"QA Deutsch",lang:"de-DE",localService:true},
+    {name:"QA Österreich",lang:"de-AT",localService:true},
+   ],
+   addEventListener:()=>{},
+   removeEventListener:()=>{},
+   cancel:()=>{},
+   speak:(utterance:FakeUtterance)=>{
+    setTimeout(()=>{
+     utterance.onstart?.();
+     setTimeout(()=>utterance.onend?.(),70);
+    },20);
+   },
+  };
+  Object.defineProperty(window,"speechSynthesis",{configurable:true,value:mock});
+  Object.defineProperty(window,"SpeechSynthesisUtterance",{configurable:true,value:FakeUtterance});
+ });
+ await enter(page,"appendix");
+ const diagnostics=page.locator(".los-voice-diagnostics");
+ await expect(diagnostics).toBeVisible({timeout:30000});
+ const checkbox=diagnostics.locator("input[type='checkbox']").first();
+ await expect(checkbox).toBeDisabled();
+ await diagnostics.getByRole("button",{name:"Kuuntele",exact:true}).first().click();
+ await expect(checkbox).toBeDisabled();
+ await expect(checkbox).toBeEnabled({timeout:10000});
+ await checkbox.check();
+ await expect(diagnostics.getByText("Tämän laitteen ja puheäänen oma hyväksyntä: 1/8.")).toBeVisible();
+ await diagnostics.locator("select").selectOption({label:"QA Österreich · de-AT"});
+ await expect(diagnostics.getByText("Tämän laitteen ja puheäänen oma hyväksyntä: 0/8.")).toBeVisible();
+ await expect(checkbox).toBeDisabled();
+ await diagnostics.locator("select").selectOption({label:"QA Deutsch · de-DE"});
+ await expect(checkbox).toBeChecked();
+ await page.reload({waitUntil:"domcontentloaded"});
+ await expect(page.locator(".los-voice-diagnostics").getByText("Tämän laitteen ja puheäänen oma hyväksyntä: 1/8.")).toBeVisible();
+});
