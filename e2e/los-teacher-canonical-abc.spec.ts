@@ -49,6 +49,7 @@ test("320px Teacher 2.0 preserves canonical Text C and safe versioned progress",
   await expect(page.locator(".los-teacher-outline")).toContainText("Text C");
   await expectNoHorizontalOverflow(page);
   await page.screenshot({path:info.outputPath("teacher20-mobile320-current-C02.png"),animations:"disabled"});
+  await page.locator(".los-teacher-outline summary").click();
   await page.locator(".los-teacher-outline nav button").last().click();
   await expect(page.locator(".los-teacher-paper .los-teacher-summary")).toBeVisible();
   const finish=page.getByRole("button",{name:"Merkitse oppitunti läpikäydyksi"});
