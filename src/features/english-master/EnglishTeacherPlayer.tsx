@@ -158,7 +158,13 @@ export function EnglishTeacherPlayer({lesson:source,ownerId,previouslyCompleted,
   const [showHelp,setShowHelp]=useState(false);
   const [replay,setReplay]=useState(0);
   const [outlineOpen,setOutlineOpen]=useState(false);
-  useEffect(()=>{setOutlineOpen(window.matchMedia("(min-width:821px)").matches);},[]);
+  useEffect(()=>{
+    const media=window.matchMedia("(min-width:821px)");
+    const onSize=()=>setOutlineOpen(media.matches);
+    onSize();
+    media.addEventListener("change",onSize);
+    return ()=>media.removeEventListener("change",onSize);
+  },[]);
   useEffect(()=>{
     try{localStorage.setItem(storageKey,JSON.stringify(session));setSaved(true);}
     catch{setSaved(false);}
