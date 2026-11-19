@@ -62,7 +62,7 @@ function asTeacherLesson(source:Lesson):TeacherLesson {
         meaning:entry.board.teacher_fi??"",
       }]:[],
       activityId,activityLabel:"Olen käynyt opetustaulun vaiheen läpi",
-      help:entry.help_fi?[{title:"Toinen selitys",body:entry.help_fi}]:undefined,
+      ...(entry.help_fi?{help:[{title:"Toinen selitys",body:entry.help_fi}]}:{}),
     });
   }
   for(const [i,task] of (source.payload.tasks??[]).entries()){
@@ -75,7 +75,7 @@ function asTeacherLesson(source:Lesson):TeacherLesson {
           "Tämä tehtävä arvioidaan itse. Sen tekeminen ei ole automaattinen kielitaidon osaamisnäyttö."],
         reflection:{prompt:"Kirjoita oma vastauksesi englanniksi",
           placeholder:"Oma vastaus englanniksi",minLength:1},
-        help:task.hint_fi?[{title:"Vihje",body:task.hint_fi}]:undefined,
+        ...(task.hint_fi?{help:[{title:"Vihje",body:task.hint_fi}]}:{}),
       });
     }else{
       scenes.push({
@@ -86,11 +86,13 @@ function asTeacherLesson(source:Lesson):TeacherLesson {
           skillId:task.task_id,
           evidenceRole:["independent","application","exit"].includes(task.phase??"")
             ?task.phase as "independent"|"application"|"exit":"practice",
-          options:task.options?.map(option=>({
+          ...(task.options?{options:task.options.map(option=>({
             id:option.id,label:option.text,lang:"en" as const,
-            wrongFeedback:task.wrong_option_feedback_fi?.[option.id],
-          })),
-          correctOption:task.correct_option,accepted:task.acceptable_answers,
+            ...(task.wrong_option_feedback_fi?.[option.id]?
+              {wrongFeedback:task.wrong_option_feedback_fi[option.id]}:{}),
+          }))}:{}),
+          ...(task.correct_option?{correctOption:task.correct_option}:{}),
+          ...(task.acceptable_answers?{accepted:task.acceptable_answers}:{}),
           success:task.feedback_correct_fi??"Oikein!",
           hint:task.hint_fi??"Palaa opetukseen, vertaa esimerkkiin ja mieti uudelleen.",
           reteach:task.hint_fi??"Palaa edelliseen vaiheeseen ja kertaa sääntö.",
