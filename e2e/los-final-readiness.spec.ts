@@ -284,3 +284,32 @@ test("vocabulary speech uses the learner's available German voice preference",as
  await page.locator(".los-vocab-audio-button").first().click();
  await expect.poll(()=>page.evaluate(()=>localStorage.getItem("los1.qa.vocab-language"))).toBe("de-AT|Österreich QA");
 });
+
+test("each of the thirty LOS1 A/B/C texts offers per-sentence speech",async({page})=>{
+ test.setTimeout(210_000);
+ await enter(page,"01/text");
+ for(let n=1;n<=10;n++){
+  const ch=String(n).padStart(2,"0");
+  for(const kind of ["text","text-b","text-c"] as const){
+   await page.goto("/los#/1/"+ch+"/"+kind,{waitUntil:"domcontentloaded"});
+   const panel=page.locator(".los-revised-speech-sentences");
+   await expect(panel.locator("summary")).toBeVisible({timeout:30000});
+   await panel.locator("summary").click();
+   const count=await panel.locator("li").count();
+   expect(count).toBeGreaterThan(0);
+   await expect(panel.locator("button[aria-label^='Kuuntele saksaksi:']")).toHaveCount(count);
+  }
+ }
+});
+
+test("all ten grammar chapters offer audio for German examples",async({page})=>{
+ test.setTimeout(150_000);
+ await enter(page,"01/grammar");
+ for(let n=1;n<=10;n++){
+  const ch=String(n).padStart(2,"0");
+  if(n>1)await page.goto("/los#/1/"+ch+"/grammar",{waitUntil:"domcontentloaded"});
+  await expect(page.locator(".los-grammar-page")).toBeVisible({timeout:30000});
+  const count=await page.locator(".los-grammar-page button[aria-label^='Kuuntele saksaksi:']").count();
+  expect(count,"chapter "+ch+" grammar should offer German TTS").toBeGreaterThan(0);
+ }
+});
