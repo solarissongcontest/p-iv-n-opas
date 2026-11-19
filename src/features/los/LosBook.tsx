@@ -477,6 +477,8 @@ function LosBookWorkspace({ book, location, move, goLibrary, openBook }: { book:
   const next = previousIndex >= 0 ? book.chapters[previousIndex + 1] : null;
   const previous = previousIndex > 0 ? book.chapters[previousIndex - 1] : null;
   const section = chapter ? location.section : ["contents", "appendix", "dictionary", "path", "search", "midterm", "review", "review-ii", "progress", "final", "summary"].includes(location.section) ? location.section : "overview";
+  const selectedSection = section === "cards" ? "vocabulary" : section;
+  const selectedSectionIndex = Math.max(0,sections.findIndex(item=>item.id===selectedSection));
   return <div className="los-book-workspace" style={bookStyle(book)} data-reading-size={readingView.size} data-reading-spacing={readingView.spacing} data-reading-measure={readingView.measure}>
     <header className="los-book-topbar">
       <button className="los-back-library" onClick={goLibrary} aria-label="Takaisin kirjasarjaan"><ChevronLeft size={19} /> <span>Kirjasarja</span></button>
@@ -550,11 +552,35 @@ function LosBookWorkspace({ book, location, move, goLibrary, openBook }: { book:
         <a className="los-sidebar-exit" href="/studies">Palaa Opintopäiväkirjaan <ArrowRight size={15} /></a>
       </aside>
       <main className="los-book-main" id="main-content" tabIndex={-1}>
-        <div className="los-main-breadcrumb"><button onClick={() => move(null, "overview")}>LOS! {book.id}</button>{chapter ? <><ChevronRight size={12} /><button onClick={() => openChapter(chapter)}>Kappale {Number(chapter.id)}</button></> : null}{chapter && section !== "chapter" ? <><ChevronRight size={12} /><span>{section==="cards" ? "Kertauskortit" : sections.find(s => s.id === section)?.label}</span></> : null}</div>
-        {book.id===1&&<LosReaderDisplayControls value={readingView} onChange={setReadingView}/>}
+        <div className="los-reader-context">
+          <div className="los-main-breadcrumb">
+            <button type="button" onClick={() => move(null, "overview")}>LOS! {book.id}</button>
+            {chapter && <><ChevronRight size={12} aria-hidden="true"/><button type="button" onClick={() => openChapter(chapter)}>Kappale {Number(chapter.id)}</button></>}
+            {chapter && section !== "chapter" && <><ChevronRight size={12} aria-hidden="true"/><span aria-current="page">{section==="cards" ? "Kertauskortit" : sections.find(s => s.id === section)?.label}</span></>}
+          </div>
+          {book.id===1 && ["text","text-b","text-c","vocabulary","grammar"].includes(section) &&
+            <LosReaderDisplayControls value={readingView} onChange={setReadingView}/>}
+        </div>
         {book.id===1&&<LosSelectionAudio key={(chapter?.id??"book")+"-"+section}/>}
-        {chapter && section !== "overview" && section !== "contents" && section !== "appendix" && <nav className="los-section-nav" aria-label="Kappaleen osiot">
-          {sections.map(item => <button key={item.id} className={section === item.id || (section==="cards" && item.id==="vocabulary") ? "is-active" : ""} onClick={() => move(chapter.id, item.id)}>{item.label}</button>)}
+        {chapter && <nav className="los-section-nav" aria-label="Kappaleen osiot">
+          <div className="los-section-location">
+            <span className="los-section-index">KAPPALE {chapter.id} <span aria-hidden="true">/</span> {selectedSectionIndex+1} / {sections.length}</span>
+            <strong>{sections[selectedSectionIndex]?.label}</strong>
+          </div>
+          <div className="los-section-actions">
+            <label className="los-section-jump">
+              <span className="sr-only">Valitse kappaleen osio</span>
+              <select value={selectedSection} aria-label="Valitse kappaleen osio" onChange={event=>move(chapter.id,event.target.value as LosSection)}>
+                {sections.map(item=><option key={item.id} value={item.id}>{item.label}</option>)}
+              </select>
+            </label>
+            <button type="button" className="los-section-step" aria-label="Edellinen osio"
+              disabled={selectedSectionIndex===0}
+              onClick={()=>move(chapter.id,sections[Math.max(0,selectedSectionIndex-1)]!.id)}><ChevronLeft size={18}/></button>
+            <button type="button" className="los-section-step" aria-label="Seuraava osio"
+              disabled={selectedSectionIndex===sections.length-1}
+              onClick={()=>move(chapter.id,sections[Math.min(sections.length-1,selectedSectionIndex+1)]!.id)}><ChevronRight size={18}/></button>
+          </div>
         </nav>}
         <div className="los-book-paper">
           {!chapter && section === "overview" ? <BookFront book={book} move={move} /> :
