@@ -112,7 +112,7 @@ export function LosLearningPath({ book, move }: { book: LosBookDefinition; move:
     <details className="los-path-notice los-path-details">
       <summary><BookOpen size={20} aria-hidden="true"/><span><strong>{LOS1_EXECUTABLE_LESSONS.length}/60 oppituntia käytettävissä</strong><small>Opetuspolun aineistot ja julkaisutarkistusten tila</small></span></summary>
       <div className="los-path-details-body">
-        <p>Oppitunnit ovat käytettävissä kaikissa kymmenessä kappaleessa sekä kertaus-, väliarviointi- ja loppuarviointijaksoissa. C08:n Wikibooksin kouluympäristön alkuperäiskohtaus ja C10:n Harald-haastattelu ovat kirjan sisällä. Näiden kappaleiden lukemisen, kirjoittamisen ja kappaletestien oppitunnit ovat käytettävissä.</p>
+        <p>Oppitunnit ovat käytettävissä kaikissa kymmenessä kappaleessa sekä kertaus-, väliarviointi- ja loppuarviointijaksoissa. C08:n koko Wikibooksin kouluympäristön alkuperäiskohtaus ja C10:n Harald-haastattelu ovat nyt kirjan sisällä. Näiden kappaleiden lukemisen, kirjoittamisen ja kappaletestien oppitunnit ovat käytettävissä.</p>
         <p>Alkuperäisten audio-/videoaineistojen oikeudet, kuuntelun toimivuus, kielitason tarkistus ja julkaisuportit eivät kuitenkaan vielä ole valmiit. Erilliset EX-FINAL-loppukoe ja L060-yhteenveto ovat opiskelupolussa; kummankin suoritus vaatii oikeat palautukset ja itsearvioinnit.</p>
       </div>
     </details>
