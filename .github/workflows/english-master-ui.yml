@@ -49,6 +49,14 @@ jobs:
           exit 1
       - name: Run native-book desktop and phone-width tests
         run: bunx playwright test e2e/english-master-native.spec.ts --project=desktop-chromium
+      - name: Upload English Master v4 visual QA screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: english-master-v4-visual-qa
+          path: test-results/**/*.png
+          if-no-files-found: ignore
+          retention-days: 14
       - name: Attach traces and server log on failure
         if: failure()
         uses: actions/upload-artifact@v4
