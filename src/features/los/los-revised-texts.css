@@ -116,3 +116,7 @@
 .los-revised-speech-segment-label span{overflow-wrap:anywhere}
 .los-revised-speech-segments button{min-height:44px;flex-shrink:0}
 @media(max-width:480px){.los-revised-speech-segments li{align-items:flex-start;flex-direction:column;gap:.45rem}.los-revised-speech-segments button{align-self:flex-end}}
+
+/* Long OS voice names must not widen narrow phone readers. */
+.los-revised-speech-controls label{min-width:0;max-width:100%;flex-wrap:wrap}
+.los-revised-speech-controls label select{min-width:0;max-width:min(100%,270px)}
