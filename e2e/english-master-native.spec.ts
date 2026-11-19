@@ -241,6 +241,9 @@ test("English Teacher 2.0 reflows on narrow mobile screens without importing Ger
   await expect(page.locator(".em-teacher-app")).toBeVisible({ timeout: 45_000 });
   await expect(page.locator(".los-teacher-sidebar")).toBeVisible();
   await expect(page.locator(".los-teacher-paper")).toBeVisible();
+  await expect(page.locator(".los-teacher-outline")).not.toHaveAttribute("open");
+  const teacherPaperTop = await page.locator(".los-teacher-paper").evaluate(el=>el.getBoundingClientRect().top);
+  expect(teacherPaperTop, "The teaching surface must appear above the fold on a 320px phone").toBeLessThan(780);
   await expectNoHorizontalOverflow(page);
   await page.screenshot({ path: testInfo.outputPath("english-master-teacher-2-mobile320.png"), animations: "disabled" });
   await page.evaluate(() => document.documentElement.classList.add("dark"));
