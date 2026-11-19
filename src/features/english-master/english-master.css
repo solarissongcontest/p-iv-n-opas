@@ -461,3 +461,9 @@
  }
  .em-app .los-book-workspace .em-lesson-detail .em-lesson-objectives{padding:17px}
 }
+
+/* V4's new shared dark-label contrast token is book-specific: German LOS!
+   uses coral; English Master retains legible English blue. */
+.dark .em-app.los-app{
+ --los-accent-text:#A8D7ED;
+}
