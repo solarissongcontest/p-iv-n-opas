@@ -306,3 +306,37 @@
  .em-app .los-book-topbar .los-back-library>span{display:none}
  .em-app .los-book-topbar .los-back-library{min-width:44px;justify-content:center}
 }
+
+/* LOS! chapter opening is now the real chapter template, not just a heading. */
+.em-app .los-book-workspace .em-los-opening-number{
+ font-size:clamp(62px,8vw,114px);letter-spacing:-.07em;white-space:nowrap;
+}
+.em-app .los-book-workspace .em-los-opening .los-opening-head{gap:clamp(20px,4vw,42px)}
+.em-app .los-book-workspace .em-los-opening .los-opening-head>div{min-width:0}
+.em-app .los-book-workspace .em-los-opening .los-opening-head h1{overflow-wrap:anywhere}
+.em-app .los-book-workspace .em-los-opening .los-opening-head p{font-size:17px;line-height:1.55}
+.em-app .los-book-workspace .em-los-opening .los-opening-bottom .los-goals{
+ margin:0;padding:23px 25px;background:var(--los-subtle)
+}
+.em-app .los-book-workspace .em-los-chapter-body{
+ padding-top:22px;padding-bottom:74px;max-width:920px;
+}
+.em-app .los-book-workspace .em-los-chapter-body .em-section{
+ border-top:1px solid var(--los-line);padding:24px 0 29px;
+}
+.em-app .los-book-workspace .em-los-chapter-body .em-section:first-child{border-top:3px solid var(--los-book-accent)}
+.em-app .los-book-workspace .em-los-chapter-body .em-section h2{
+ margin:0 0 19px;font-weight:750;font-size:clamp(22px,3vw,29px);
+}
+.em-app .los-book-workspace .em-los-chapter-body .em-related{margin:40px 0}
+.em-app .los-book-workspace .em-los-chapter-body .em-related h2{font-size:23px}
+@media(max-width:760px){
+ .em-app .los-book-workspace .em-los-opening{padding:29px 22px 35px}
+ .em-app .los-book-workspace .em-los-opening .los-opening-head{display:block;padding:15px 0 26px}
+ .em-app .los-book-workspace .em-los-opening .los-opening-number{display:block;font-size:73px;margin:0 0 12px}
+ .em-app .los-book-workspace .em-los-opening .los-opening-head h1{font-size:clamp(31px,8vw,38px)}
+ .em-app .los-book-workspace .em-los-opening .los-opening-bottom{display:block}
+ .em-app .los-book-workspace .em-los-opening .los-opening-bottom .los-goals{margin:22px 0 0;padding:18px}
+ .em-app .los-book-workspace .em-los-opening .los-chapter-links{margin-top:31px}
+ .em-app .los-book-workspace .em-los-chapter-body{padding:18px 23px 55px}
+}
