@@ -340,3 +340,38 @@
  .em-app .los-book-workspace .em-los-opening .los-chapter-links{margin-top:31px}
  .em-app .los-book-workspace .em-los-chapter-body{padding:18px 23px 55px}
 }
+
+/* Honor LOS! 1 dark-mode design tokens instead of the legacy English dashboard
+   hard-coded white surface. */
+.em-app.los-app{
+ background:var(--los-bg);color:var(--los-ink);
+ font-family:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+}
+.dark .em-app.los-app .los-book-workspace :is(.em-choices label,.em-related button,.em-unit button){
+ background:var(--los-paper);color:var(--los-ink);border-color:var(--los-line);
+}
+.dark .em-app.los-app .los-book-workspace :is(.em-choices label,.em-unit button):hover{
+ background:var(--los-subtle);
+}
+.dark .em-app.los-app .los-book-workspace .em-choices label:has(input:checked){
+ background:color-mix(in srgb,var(--los-book-accent) 20%,var(--los-paper));color:var(--los-ink);
+ border-color:var(--los-book-accent);
+}
+.dark .em-app.los-app .los-book-workspace :is(.em-paper,.em-lesson,.em-los-chapter-page) :is(.em-overline,.em-counter){
+ color:var(--los-soft);
+}
+.dark .em-app.los-app .los-book-workspace :is(.em-paper,.em-lesson,.em-los-chapter-page) :is(.em-help,.em-summary){
+ background:var(--los-subtle);color:var(--los-ink);border-color:var(--los-line);
+}
+.dark .em-app.los-app .los-book-workspace .em-feedback{
+ color:var(--los-ink);background:var(--los-subtle);
+}
+.dark .em-app.los-app .los-book-workspace :is(.em-audio-grid article,.em-scenes,.em-related button,.em-upload){
+ border-color:var(--los-line);background:var(--los-paper);color:var(--los-ink);
+}
+.dark .em-app.los-app .los-book-workspace .em-upload p{color:var(--los-soft)}
+@media(max-width:760px){
+ .em-app.los-app .los-book-main .los-book-paper{max-width:none}
+ .em-app.los-app .em-paper .em-action-grid{grid-template-columns:1fr}
+ .em-app.los-app .em-paper .em-audio-grid{grid-template-columns:1fr}
+}
