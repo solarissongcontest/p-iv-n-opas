@@ -168,7 +168,7 @@
  .em-app .los-book-sidebar.is-open{display:block}
  .em-toc-mobile-close{display:flex;align-items:center;gap:8px;width:100%;min-height:44px;border:1px solid var(--los-line);border-radius:6px;background:var(--los-subtle);padding:9px;margin-bottom:14px}
  .em-app .los-book-paper>.em-paper,.em-app .los-book-paper>.em-import{padding:25px 22px}
- .em-app .los-front.los-front-has-banner{display:flex;flex-direction:column-reverse}
+ .em-app .los-front.los-front-has-banner{display:flex;flex-direction:column}
  .em-app .los-front-copy{padding-bottom:5px}
  .em-app .los-front-banner{width:100%}
  .em-los-banner{min-height:200px}
@@ -207,11 +207,9 @@
  padding:clamp(17px,3vw,30px);background:var(--los-paper);border:1px solid var(--los-line);border-radius:12px;
 }
 .em-app .los-book-workspace .em-board-scene h3{margin:0 0 14px;font-size:clamp(20px,2.5vw,27px)}
-.em-app .los-book-workspace .em-board-scene .los-lesson-teaching-note{
- border-left-color:var(--los-book-accent);background:var(--los-subtle);border-radius:10px;
-}
+/* The teaching note intentionally inherits v4 teal guidance styling. */
 .em-app .los-book-workspace .em-board-scene .los-lesson-teaching-example{
- border-color:var(--los-line);background:var(--los-paper);color:var(--los-ink)
+ color:var(--los-ink)
 }
 .em-app .los-book-workspace .em-board-scene .los-lesson-teaching-example strong{
  white-space:pre-wrap;overflow-wrap:anywhere;font-size:var(--los-reader-text-size)
@@ -316,7 +314,7 @@
 .em-app .los-book-workspace .em-los-opening .los-opening-head h1{overflow-wrap:anywhere}
 .em-app .los-book-workspace .em-los-opening .los-opening-head p{font-size:17px;line-height:1.55}
 .em-app .los-book-workspace .em-los-opening .los-opening-bottom .los-goals{
- margin:0;padding:23px 25px;background:var(--los-subtle)
+ margin:0;padding:23px 25px
 }
 .em-app .los-book-workspace .em-los-chapter-body{
  padding-top:22px;padding-bottom:74px;max-width:920px;
@@ -374,4 +372,34 @@
  .em-app.los-app .los-book-main .los-book-paper{max-width:none}
  .em-app.los-app .em-paper .em-action-grid{grid-template-columns:1fr}
  .em-app.los-app .em-paper .em-audio-grid{grid-template-columns:1fr}
+}
+
+/* The actual LOS! Editorial Reader v4 styles are inherited from the
+   shared stylesheet. This layer only adapts its chapter picker to English. */
+.em-app .los-reader-context{min-width:0}
+.em-app .los-reader-context .los-main-breadcrumb{max-width:100%}
+.em-app .em-los-section-nav{max-width:100%}
+.em-app .em-los-section-nav .los-section-location{min-width:0}
+.em-app .em-los-section-nav .los-section-location>strong{
+ display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:28ch
+}
+.em-app .em-los-section-nav .los-section-jump{min-width:0}
+.em-app .em-los-section-nav .los-section-jump select{max-width:100%}
+.em-app .los-book-paper .los-goals{
+ background:var(--los-goal-wash);border-color:var(--los-goal-edge);
+ border-left-color:var(--los-goal-gold);
+}
+.em-app .los-book-paper .los-lesson-teaching-note,.em-app .los-book-paper .los-grammar-aside{
+ background:var(--los-note-wash);border-color:var(--los-note-edge);
+ border-left-color:var(--los-note-teal);
+}
+@media(max-width:760px){
+ .em-app .em-los-section-nav{width:calc(100% - 24px);max-width:calc(100% - 24px)}
+ .em-app .em-los-section-nav .los-section-location{max-width:32%}
+ .em-app .em-los-section-nav .los-section-location>strong{max-width:100%}
+ .em-app .em-los-section-nav .los-section-actions{min-width:0;max-width:100%}
+ .em-app .em-los-section-nav .los-section-jump{min-width:0;max-width:calc(100vw - 176px)}
+ .em-app .los-front.los-front-has-banner .los-front-copy{order:-1}
+ .em-app .los-front.los-front-has-banner .los-front-banner{order:0}
+ .em-app .los-front.los-front-has-banner .los-front-mini-cover{display:none}
 }
