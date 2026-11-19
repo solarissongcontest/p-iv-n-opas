@@ -173,3 +173,22 @@
  .los-c01-reader-intro h2{font-size:22px}
  .los-c01-reader{margin-top:9px}
 }
+
+/* Keep the two actions on one mobile row; the original small-screen CSS forced
+ * flex-direction:column and pushed German text below the first screen. */
+.los-revised-speech-controls{flex-direction:row;align-items:center;justify-content:space-between}
+.los-speech-unit-picker{margin-top:6px}
+.los-speech-unit-picker>summary{
+ display:flex;align-items:center;min-height:44px;border-radius:8px;
+ padding:7px 10px;border:1px solid var(--los-line);background:var(--los-paper);
+ color:var(--los-ink);font-size:13px;font-weight:670;cursor:pointer;
+}
+.los-speech-unit-picker[open]>summary{border-bottom-left-radius:0;border-bottom-right-radius:0}
+.los-speech-unit-picker>.los-speech-secondary-controls{padding:8px;border:1px solid var(--los-line);border-top:0;border-radius:0 0 8px 8px;background:var(--los-paper)}
+@media(max-width:480px){
+ .los-revised-speech-controls{flex-direction:row;justify-content:space-between;align-items:center;gap:5px}
+ .los-revised-speech-controls>.los-outline-button{min-width:0;padding:7px 10px;font-size:13px}
+ .los-revised-speech-options{margin-left:0}
+ .los-revised-speech-options>summary{font-size:12px;padding:7px}
+ .los-speech-unit-picker>summary{font-size:12px}
+}
