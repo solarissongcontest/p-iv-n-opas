@@ -1,7 +1,8 @@
 import type { LosChapterDraft } from "./studyState.ts";
 import { LOS1_FINAL_QUESTIONS, losFinalReadyToSubmit } from "./content/los1FinalExam.ts";
 import { losArchivedExamHistory } from "./content/los1ExamArchive.ts";
-import { getLosTeacherLesson } from "./teacher/lessonL004.ts";
+import { getLosTeacherLesson } from "./teacher/lessonRegistry.ts";
+import {teacherSessionNeedsReview} from "./teacher/engine.ts";
 
 type SkillSpec = { id:string; title:string; chapter:string; examItems: readonly number[] };
 /** Stable LOS! 1 learning objectives from LOS_BOOK_01_SPEC, not inferred CEFR levels. */
@@ -59,7 +60,8 @@ export function summarizeLos1Mastery(
   for (const chapter of [...chapterIds,"91","92","93"]) {
     for (const [lessonId,session] of Object.entries(drafts[chapter]?.teacherSessions ?? {})) {
       const lesson = getLosTeacherLesson(lessonId);
-      if (!lesson || lesson.chapterId !== chapter || session.lessonId !== lessonId || !/^L\d{3}$/.test(lessonId)) continue;
+      if (!lesson || lesson.chapterId !== chapter || session.lessonId !== lessonId || !/^L\d{3}$/.test(lessonId) ||
+        teacherSessionNeedsReview(session,lesson)) continue;
       for (const scene of lesson.scenes) {
         const role = scene.question?.evidenceRole;
         const skillId = scene.question?.skillId;
