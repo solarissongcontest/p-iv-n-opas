@@ -41,3 +41,11 @@ Kaikki yllä olevat muutokset pitää tarkistaa GitHubin Quality Gate - ja Playw
 ## Jatkovertailu
 
 Kun versio on julkaistu, hyödyllisin lisänäyttö olisi todellisten laitteiden kuvakaappauksista ja uuden opiskelijan tehtäväsuorituksista tehtävä pieni käytettävyystesti. LOS! 1:n opiskelijaa ei kuitenkaan vaadita saksankieliseksi kielentarkastajaksi eikä kehitystyön testaajaksi ennen opiskelun aloittamista.
+
+## Kuvakaappauskierroksen löydös (19.11.2026)
+
+Ensimmäisen CI-ajon 64/64 läpäissyt asettelu tuotti oikeat, täysmittaiset työpöytä- ja mobiilikuvakaappaukset GitHub Actionsin artefaktiin `los-book-browser-evidence-44555579258`. Niistä ilmeni sellainen käytettävyysongelma, jota testituloksen "PASS" ei pitänyt peittää: saksankielisen päätekstin ensimmäinen oikea repliikki jäi ensimmäisen mobiilinäytön selvästi alapuolelle, koska sen edellä oli paljon kahdentunutta teksti- ja äänityökalujen asetuskäyttöliittymää.
+
+**Tästä seurannut korjaus:** ääni- ja nopeusvalinta avautuu nyt erillisestä "Ääni ja nopeus" -valinnasta, puheenvuoro- ja lausekohtaiset kuunteluluettelot asettuvat tiiviiseen kaksisarakkeiseen yhteenvetoon (itse luettelot avautuvat koko leveydelle), ja LOS!-omien päätekstien lukijan kahdentunut lähdevaroitus/otsikko poistettiin lukupolun yläosasta. Varsinaiset lähde- ja laatutiedot säilyvät kirjan liitteissä ja tekstin lähdetiedoissa.
+
+Tämä muutos perustui **oikean renderöidyn kuvakaappauksen arviointiin**, ei pelkästään masterplaniin tai CSS:n lukemiseen. Uusi regresiotesti edellyttää, että ensimmäinen saksankielinen tekstirepliikki on käytettävissä noin yhden ylimääräisen mobiilinäyttökorkeuden sisällä sivun alusta, eikä puheäänivalinta vie tilaa oletuksena. Kyseessä on näkyvän sisällön priorisointia koskeva käyttökokemustavoite, ei universaali WCAG-numeroarvo.
