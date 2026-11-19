@@ -8,8 +8,8 @@ import {LOS1_TEACHER_CANONICAL_VERSION} from "./canonicalTeacherLessons.ts";
 export function canonicalizeReviewII(original:TeacherLesson):TeacherLesson {
  if(original.id!=="L057")return original;
  const scenes:TeacherScene[]=original.scenes.map(scene=>{
-   if(scene.id==="skill-map")return {...scene,
-     board:scene.board?.map(item=>
+   if(scene.id==="skill-map"&&scene.board)return {...scene,
+     board:scene.board.map(item=>
        item.label.startsWith("C02")?{...item,german:"Wie heißt du? / Ich heiße Aino."}:
        item.label.startsWith("C10")?{...item,german:"Das ist Mila. Sie heißt Mila."}:item)};
    if(scene.id==="transfer"&&scene.question)return {...scene,
