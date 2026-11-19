@@ -91,3 +91,15 @@
 .los-supplemental-audit>summary{cursor:pointer;padding:.65rem 0;font-weight:700}
 .los-supplemental-audit li{overflow-wrap:anywhere;margin:.8rem 0}
 .los-supplemental-audit a{color:var(--los-book-accent);text-decoration:underline}
+
+/* Audit tables remain collapsed in ordinary reading, and usable at 320px. */
+.los-quality-audit details{max-width:100%;margin:1rem 0;overflow-x:auto;}
+.los-quality-audit summary{cursor:pointer;min-height:44px;padding:.65rem 0;font-weight:650;}
+.los-quality-audit table{width:100%;min-width:0;border-collapse:collapse;table-layout:fixed;font-size:13px;}
+.los-quality-audit th,.los-quality-audit td{padding:9px 7px;border-bottom:1px solid var(--los-line);text-align:left;vertical-align:top;overflow-wrap:anywhere;}
+.los-quality-audit th{font-weight:650;color:var(--los-soft);}
+.los-quality-audit th:first-child{width:36%;}
+.los-quality-audit th:nth-child(2){width:29%;}
+.los-quality-audit th:last-child{width:35%;}
+.los-voice-diagnostics label:has(input:disabled){color:var(--los-soft);}
+.los-voice-diagnostics input:focus-visible,.los-voice-diagnostics button:focus-visible{outline:2px solid var(--los-book-accent);outline-offset:3px;}
