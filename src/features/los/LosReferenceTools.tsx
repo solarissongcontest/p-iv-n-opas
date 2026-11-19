@@ -107,8 +107,14 @@ export function LosLearningPath({ book, move }: { book: LosBookDefinition; move:
   return <section className="los-inner-page los-learning-path">
     <p className="los-eyebrow">OHJATTU LUKUJÄRJESTYS / {book.code}</p>
     <h1>Opetuspolku</h1>
-    <p className="los-page-intro">Kirjan 60 toteutettua, pääosin noin 30 minuutin oppituntia. Opetuspolku viittaa samoihin oppikirjasivuihin, eikä tee niistä erillisiä kursseja. Välikoe ja loppukoe ovat käytettävissä; äänen ja videoiden todellinen laitetestaus sekä pedagoginen lopputarkistus ovat erillisiä julkaisuportteja.</p>
-    <div className="los-path-notice"><BookOpen size={20}/><p><strong>{LOS1_EXECUTABLE_LESSONS.length}/60 oppituntia on käytettävissä.</strong> Opetuspolun oppitunnit ovat käytettävissä kaikissa kymmenessä kappaleessa sekä kertaus-, väliarviointi- ja loppuarviointijaksoissa. C08:n koko Wikibooksin kouluympäristön alkuperäiskohtaus ja C10:n Harald-haastattelu ovat nyt kirjan sisällä. Näiden kappaleiden lukemisen, kirjoittamisen ja kappaletestien oppitunnit ovat käytettävissä. Alkuperäisten audio-/videoaineistojen oikeudet, kuuntelun toimivuus, kielitason tarkistus ja julkaisuportit eivät kuitenkaan vielä ole valmiit. Erilliset EX-FINAL-loppukoe ja L060-yhteenveto ovat nyt opiskelupolussa; kummankin suoritus vaatii oikeat palautukset ja itsearvioinnit.</p></div>
+    <p className="los-page-intro">Opiskele saksaa 60 oppitunnin avulla omaan tahtiin. Yksi oppitunti kestää yleensä noin 30 minuuttia ja vie suoraan oikean oppikirjatekstin, harjoituksen tai kertauksen pariin.</p>
+    <details className="los-path-notice los-path-details">
+      <summary><BookOpen size={20} aria-hidden="true"/><span><strong>{LOS1_EXECUTABLE_LESSONS.length}/60 oppituntia käytettävissä</strong><small>Opetuspolun aineistot ja julkaisutarkistusten tila</small></span></summary>
+      <div className="los-path-details-body">
+        <p>Oppitunnit ovat käytettävissä kaikissa kymmenessä kappaleessa sekä kertaus-, väliarviointi- ja loppuarviointijaksoissa. C08:n Wikibooksin kouluympäristön alkuperäiskohtaus ja C10:n Harald-haastattelu ovat kirjan sisällä. Näiden kappaleiden lukemisen, kirjoittamisen ja kappaletestien oppitunnit ovat käytettävissä.</p>
+        <p>Alkuperäisten audio-/videoaineistojen oikeudet, kuuntelun toimivuus, kielitason tarkistus ja julkaisuportit eivät kuitenkaan vielä ole valmiit. Erilliset EX-FINAL-loppukoe ja L060-yhteenveto ovat opiskelupolussa; kummankin suoritus vaatii oikeat palautukset ja itsearvioinnit.</p>
+      </div>
+    </details>
     <LosFirstLessons selectedId={selectedLesson} onSelect={selectLesson} move={move} />
     {groups.map(group=><section key={group.section} className="los-path-group">
       <h2>{group.section}</h2>
