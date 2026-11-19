@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type CSSProperties } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { ArrowLeft, ArrowRight, BookOpen, ChevronLeft, ChevronRight, Headphones, List, Menu, Search, X } from "lucide-react";
 import { readCachedDeviceUser } from "@/lib/deviceSession";
 import { LOS_BOOKS, type LosBookDefinition, type LosChapter } from "./catalog";
@@ -8,6 +8,7 @@ import { getLosChapterSourceGate } from "./content/sourceRegistry";
 import {los1SupplementalSourceAudit} from "./los1SupplementalAudit";
 import {LosVoiceDiagnostics} from "./LosVoiceDiagnostics";
 import {LosVocabularyAudio} from "./LosVocabularyAudio";
+import {LosReaderDisplayControls,readLosReaderSettings} from "./LosReaderDisplayControls";
 import {LosSelectionAudio} from "./LosSelectionAudio";
 import {los1AudioInventory,los1IPAAudit} from "./los1QualityAudit";
 import {los1TokenIPADetail} from "./los1CourseGlossary";
@@ -37,6 +38,7 @@ import "./los-appendix.css";
 import "./los-workbook.css";
 import "./los-cloud.css";
 import "./los-backups.css";
+import "./los-design-quality.css";
 
 type LosSection = LosDestination;
 type LosLocation = { book: number | null; chapter: string | null; section: LosSection };
@@ -123,7 +125,7 @@ function SeriesView({ openBook }: { openBook: (id: number) => void }) {
         <small>{book.code} · {book.module}</small>
       </button>)}
     </div>
-    <p className="los-library-footnote">LOS! 1:n kaikki kymmenen kappaletta ja 60 ohjattua oppituntia ovat nyt opiskeltavissa oppikirjan sisällä. Alkuperäistekstit ja käytössä olevat äänilähteet näkyvät asianmukaisin lähdemerkinnöin. Erillisten äänitiedostojen tuotanto, tekstien ulkopuolinen kielentarkastus sekä oikeiden laitteiden testaus ovat edelleen avoimia. Voit silti opiskella nykyisellä julkaistulla kirjalla. Muut LOS!-sarjan kirjat ovat suunnitteluvaiheessa.</p>
+    <p className="los-library-footnote">LOS! 1 sisältää kymmenen kappaletta, 60 ohjattua oppituntia, sanastot, harjoitukset ja saksankielisen synteettisen kuuntelun. Avaa kirja ja jatka suoraan viimeisimpään oppituntiisi. Autenttiset lisämateriaalit ja niiden lähdetiedot löytyvät kirjan sisältä. Muut LOS!-sarjan kirjat ovat suunnitteluvaiheessa.</p>
   </div>;
 }
 function BookFront({ book, move }: { book: LosBookDefinition; move: (chapter: string | null, section: LosSection) => void }) {
@@ -408,18 +410,54 @@ function Appendix({ book }: { book: LosBookDefinition }) {
         </li>)}</ul>
       </details>
     </div>}
-    <div className="los-appendix-section"><h2>Lähteet ja materiaalit</h2><p>Kymmenen kappaleen LOS!:n omat Text A/B/C -opetustekstit ovat kirjan sisällä. Autenttiset ihmisten kirjoittamat lähteet ovat valinnaista lisäaineistoa; niiden käyttöoikeudet ja julkaisutilat arvioidaan erikseen. Päätekstit eivät saa autenttisuusmerkintää, jota niille ei kuulu.</p></div>
-    <div className="los-appendix-section"><h2>Opetuspolku, sanakirja ja kappaletestit</h2><p>Opetuspolku ja sanakirja löytyvät kirjan valikosta. LOS! 1:n kaikissa kymmenessä kappaleessa on rajattu automaattisesti tarkistettava alkeistesti, yhteensä 147 osatehtävää. Kymmenen kappaleen lisäksi EX-MID (25 pistettä) ja EX-FINAL (50 pistettä) ovat käytettävissä; loppukokeen alkuperäislähteisiin perustuvat kuuntelutehtävät edellyttävät kyseisten äänilähteiden toimivaa toistoa ennen palautusta; tämä ei tarkoita, että Text A–C:lle vaadittaisiin erillisiä äänitiedostoja. Kuuntelun toimivuutta ei ole vahvistettu kaikilla fyysisillä laitteilla. Sinun ei tarvitse tarkastaa saksan ääntämisen oikeellisuutta: vapaat puhe- ja kirjoitustehtävät ovat harjoituksia, eivät asiantuntijan arvioimia tai automaattisesti pisteytettyjä kielikokeita. LOS! 1:n oma välikoe sisältää 25 pisteytettävää tehtävää ja erillisen itsearvioitavan dialogin. Kappalekohtaisissa muistiinpanoissa on erillinen, salasanalla suojattu manuaalinen pilvisynkronointi, joka vaatii palvelimen käyttöönoton.</p></div>
-    <LosBackups bookId={book.id} />
   </section>;
 }
 function LosBookWorkspace({ book, location, move, goLibrary, openBook }: { book: LosBookDefinition; location: LosLocation; move: (chapter: string | null, section: LosSection) => void; goLibrary: () => void; openBook: (id: number) => void }) {
   const chapter = book.chapters.find(c => c.id === location.chapter) ?? null;
   const [tocOpen, setTocOpen] = useState(false);
+  const [readingView,setReadingView] = useState(readLosReaderSettings);
+  const tocPanelRef=useRef<HTMLElement>(null);
+  const tocTriggerRef=useRef<HTMLButtonElement>(null);
   const [tocSearch,setTocSearch] = useState("");
   const [expanded,setExpanded] = useState<Record<string,boolean>>({});
   const [focusTask,setFocusTask] = useState<string|null>(null);
-  useEffect(() => setTocOpen(false), [location]);
+  useEffect(() => {
+    if(tocOpen && window.matchMedia("(max-width:760px)").matches){
+      window.requestAnimationFrame(()=>document.getElementById("main-content")?.focus());
+    }
+    setTocOpen(false);
+    // Route changes close the mobile menu; opening it alone must not trigger closing.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location]);
+  useEffect(()=>{
+    if(!tocOpen || !window.matchMedia("(max-width:760px)").matches)return;
+    const panel=tocPanelRef.current;
+    const originalOverflow=document.body.style.overflow;
+    document.body.style.overflow="hidden";
+    const first=panel?.querySelector<HTMLElement>(".los-sidebar-close");
+    first?.focus();
+    const keyboard=(event:KeyboardEvent)=>{
+      if(event.key==="Escape"){
+        event.preventDefault();
+        setTocOpen(false);
+        tocTriggerRef.current?.focus();
+        return;
+      }
+      if(event.key!=="Tab"||!panel)return;
+      const focusables=Array.from(panel.querySelectorAll<HTMLElement>(
+        'button:not([disabled]),input:not([disabled]),a[href],summary,select:not([disabled])'
+      )).filter(el=>el.getClientRects().length>0);
+      const start=focusables[0],end=focusables.at(-1);
+      if(!start||!end)return;
+      if(event.shiftKey && (document.activeElement===start||!panel.contains(document.activeElement))){
+        event.preventDefault();end.focus();
+      }else if(!event.shiftKey && (document.activeElement===end||!panel.contains(document.activeElement))){
+        event.preventDefault();start.focus();
+      }
+    };
+    document.addEventListener("keydown",keyboard);
+    return()=>{document.removeEventListener("keydown",keyboard);document.body.style.overflow=originalOverflow;};
+  },[tocOpen]);
   useEffect(()=>{
     if(!focusTask)return;
     const timer=window.setTimeout(()=>{
@@ -439,14 +477,15 @@ function LosBookWorkspace({ book, location, move, goLibrary, openBook }: { book:
   const next = previousIndex >= 0 ? book.chapters[previousIndex + 1] : null;
   const previous = previousIndex > 0 ? book.chapters[previousIndex - 1] : null;
   const section = chapter ? location.section : ["contents", "appendix", "dictionary", "path", "search", "midterm", "review", "review-ii", "progress", "final", "summary"].includes(location.section) ? location.section : "overview";
-  return <div className="los-book-workspace" style={bookStyle(book)}>
+  return <div className="los-book-workspace" style={bookStyle(book)} data-reading-size={readingView.size} data-reading-spacing={readingView.spacing} data-reading-measure={readingView.measure}>
     <header className="los-book-topbar">
       <button className="los-back-library" onClick={goLibrary} aria-label="Takaisin kirjasarjaan"><ChevronLeft size={19} /> <span>Kirjasarja</span></button>
       <button className="los-top-title" onClick={() => move(null, "overview")}><Brand compact /><span> / {book.id} <span className="los-top-separator">·</span> {book.code}</span></button>
-      <div className="los-top-actions"><button className="los-top-search" onClick={() => move(null, "search")} aria-label="Hae oppikirjasta"><Search size={19}/></button><button className="los-top-toc" onClick={() => setTocOpen(v => !v)} aria-expanded={tocOpen} aria-controls="los-mobile-toc">{tocOpen ? <X size={19} /> : <Menu size={19} />}<span>Sisältö</span></button></div>
+      <div className="los-top-actions"><button className="los-top-search" onClick={() => move(null, "search")} aria-label="Hae oppikirjasta"><Search size={19}/></button><button ref={tocTriggerRef} className="los-top-toc" onClick={() => setTocOpen(v => !v)} aria-expanded={tocOpen} aria-controls="los-mobile-toc">{tocOpen ? <X size={19} /> : <Menu size={19} />}<span>Sisältö</span></button></div>
     </header>
     <div className="los-book-layout">
-      <aside className={`los-book-sidebar ${tocOpen ? "is-open" : ""}`} id="los-mobile-toc" aria-label="Kirjan sisällysluettelo">
+      <aside ref={tocPanelRef} className={`los-book-sidebar ${tocOpen ? "is-open" : ""}`} id="los-mobile-toc" role={tocOpen?"dialog":undefined} aria-modal={tocOpen?true:undefined} aria-label="Kirjan sisällysluettelo">
+        {tocOpen&&<button className="los-sidebar-close" type="button" onClick={()=>{setTocOpen(false);tocTriggerRef.current?.focus();}}><X size={18} aria-hidden="true"/> Sulje sisällysluettelo</button>}
         <button className="los-sidebar-book" onClick={() => move(null, "overview")}><BookCover book={book} /><span><b>LOS! {book.id}</b><small>{book.title}</small></span></button>
         <div className="los-sidebar-heading">KIRJAN SIVUT</div>
         <nav>
@@ -512,6 +551,7 @@ function LosBookWorkspace({ book, location, move, goLibrary, openBook }: { book:
       </aside>
       <main className="los-book-main" id="main-content" tabIndex={-1}>
         <div className="los-main-breadcrumb"><button onClick={() => move(null, "overview")}>LOS! {book.id}</button>{chapter ? <><ChevronRight size={12} /><button onClick={() => openChapter(chapter)}>Kappale {Number(chapter.id)}</button></> : null}{chapter && section !== "chapter" ? <><ChevronRight size={12} /><span>{section==="cards" ? "Kertauskortit" : sections.find(s => s.id === section)?.label}</span></> : null}</div>
+        {book.id===1&&<LosReaderDisplayControls value={readingView} onChange={setReadingView}/>}
         {book.id===1&&<LosSelectionAudio key={(chapter?.id??"book")+"-"+section}/>}
         {chapter && section !== "overview" && section !== "contents" && section !== "appendix" && <nav className="los-section-nav" aria-label="Kappaleen osiot">
           {sections.map(item => <button key={item.id} className={section === item.id || (section==="cards" && item.id==="vocabulary") ? "is-active" : ""} onClick={() => move(chapter.id, item.id)}>{item.label}</button>)}
@@ -555,10 +595,10 @@ function LosBookWorkspace({ book, location, move, goLibrary, openBook }: { book:
           {previous ? <button onClick={() => openChapter(previous)}><ChevronLeft size={18} /><span>Edellinen kappale<small lang="de">{previous.title}</small></span></button> : <span />}
           {next ? <button onClick={() => openChapter(next)}><span>Seuraava kappale<small lang="de">{next.title}</small></span><ChevronRight size={18} /></button> : <button onClick={() => move(null, "appendix")}>Kirjan liitteet <ChevronRight size={18} /></button>}
         </div>}
-        <footer className="los-page-footer">LOS! · {book.code} · {book.module} <span>Kappaleiden varmistettuja aineistoja täydennetään</span></footer>
+        <footer className="los-page-footer">LOS! · {book.code} · {book.module} <span>Itsenäinen opiskelu · LOPS21 · Saksa B3</span></footer>
       </main>
     </div>
-    {tocOpen && <button className="los-toc-backdrop" aria-label="Sulje sisällysluettelo" onClick={() => setTocOpen(false)} />}
+    {tocOpen && <button className="los-toc-backdrop" tabIndex={-1} aria-label="Sulje sisällysluettelo" onClick={() => {setTocOpen(false);tocTriggerRef.current?.focus();}} />}
   </div>;
 }
 export function LosBook() {

@@ -116,6 +116,9 @@ function TextSpeech({ blocks, chapterId, kind }: { blocks: readonly ReaderBlock[
       <button type="button" className="los-outline-button" onClick={isSpeaking ? stop : ()=>start()}>
         {isSpeaking ? <><Square size={15} aria-hidden="true" /> Pysäytä</> : <><Volume2 size={16} aria-hidden="true" /> Kuuntele teksti</>}
       </button>
+      <details className="los-revised-speech-options">
+        <summary>Ääni ja nopeus</summary>
+        <div className="los-revised-speech-option-fields">
       <label>Toistonopeus
         <select value={rate} onChange={event => setRate(event.target.value)} aria-label="Puhenopeus">
           <option value="0.75">0,75×</option><option value="1">1×</option><option value="1.25">1,25×</option>
@@ -143,7 +146,12 @@ function TextSpeech({ blocks, chapterId, kind }: { blocks: readonly ReaderBlock[
         setMessage(available.length?"Saksankielisiä puheääniä löytyi: "+available.length:
           "Saksankielisiä puheääniä ei löytynyt vielä. Tarkista laitteen kieliasetukset.");
       }}>Päivitä äänet</button>}
+        </div>
+      </details>
     </div>
+    <details className="los-speech-unit-picker">
+      <summary>Kuuntele osissa: lauseet ja puheenvuorot</summary>
+      <div className="los-speech-secondary-controls">
     {segments.length>1&&<details className="los-revised-speech-segments">
       <summary>Kuuntele yksittäinen {kind==="C"?"mallilause":"puheenvuoro"} ({segments.length})</summary>
       <ol>{segments.map((segment,index)=><li key={index}>
@@ -169,10 +177,12 @@ function TextSpeech({ blocks, chapterId, kind }: { blocks: readonly ReaderBlock[
         <LosVocabularyAudio word={text} kind="lause" rate={Number(rate)}/>
       </li>)}</ol>
     </details>}
+      </div>
+    </details>
     <p className="los-revised-muted" role="status">{message || (
       voiceCount>0 ?
-        "Saksankielisiä puheääniä laitteessa: "+voiceCount+". Selaimen synteettistä ääntämistä ei ole akustisesti hyväksytty." :
-        "TTS käyttää laitteen puheääniä. Saksankielisen äänen saatavuus tarkistetaan kuuntelupainikkeella."
+        "Saksankielinen puheääni käytettävissä ("+voiceCount+")." :
+        "Ääni tarkistetaan kuuntelupainiketta painettaessa."
     )}</p>
   </div>;
 }
