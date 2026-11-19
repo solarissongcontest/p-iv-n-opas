@@ -24,7 +24,7 @@ const openChapter=async(page:import("@playwright/test").Page,ch:string,section:s
  await expect(page.locator(".los-main-breadcrumb")).toContainText("Kappale "+Number(ch));
  if(section==="text-b"){
    await expect(page.locator(".los-main-breadcrumb")).toContainText("Text B");
-   await expect(page.locator(".los-section-nav button.is-active")).toHaveText("Text B");
+   await expect(page.getByRole("combobox",{name:"Valitse kappaleen osio"})).toHaveValue("text-b");
    await expect(page.locator(".los-revised-page h1").first()).toBeVisible();
  }
 };

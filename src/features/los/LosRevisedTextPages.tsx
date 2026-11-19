@@ -214,12 +214,20 @@ export function LosRevisedTextPage({ chapterId, kind }: { chapterId: string; kin
     <h1 id={"los-revised-heading-" + chapterId + kind} lang="de">{source.title}</h1>
     <p className="los-page-intro">{kind === "A" ? "Lue keskustelu ja kuuntele saksaa omaan tahtiin." : "Harjoittele tuttuja ilmauksia uudessa tilanteessa."}</p>
     <div className="los-study-layout-toggle" role="group" aria-label="Tekstin ja tehtävien asettelu">
-      <button type="button" className={!sideBySide?"is-active":""} aria-pressed={!sideBySide}
-        onClick={()=>setLayout(false)}>Kirja</button>
-      <button type="button" className={sideBySide?"is-active":""} aria-pressed={sideBySide}
-        onClick={()=>setLayout(true)} aria-controls={supportId}>Kirja + tehtävät</button>
-      <button type="button" className={readingFocus?"is-active":""} aria-pressed={readingFocus}
-        onClick={()=>setFocus(!readingFocus)}>{readingFocus?"Sulje lukutila":"Rauhallinen lukutila"}</button>
+      <label className="los-study-mode-picker">
+        <span>Näkymä</span>
+        <select aria-label="Opiskelutila" aria-controls={supportId}
+          value={readingFocus?"focus":sideBySide?"split":"book"}
+          onChange={event=>{
+            const mode=event.target.value;
+            setFocus(mode==="focus");
+            setLayout(mode==="split");
+          }}>
+          <option value="book">Kirja</option>
+          <option value="split">Kirja + tehtävät</option>
+          <option value="focus">Rauhallinen lukutila</option>
+        </select>
+      </label>
     </div>
     <div className={"los-study-layout"+(sideBySide&&!readingFocus?" is-split":"")}>
       <div className="los-study-reading">
@@ -236,10 +244,10 @@ export function LosRevisedTextPage({ chapterId, kind }: { chapterId: string; kin
           author="LOS!" sourceTitle={source.title} sourceUrl="" license="LOS!:n oma opetusteksti" licenseUrl=""
           sourceDetail="" isOwnText
         />
-        <aside className="los-revised-disclaimer" role="note">
-          <strong>LOS!:n oma opetusteksti</strong>
-          <p>Teksti ei ole ulkopuolinen autenttinen lähdeteksti. Toimituksellinen kielentarkistus on tehty tekoälyllä, ei riippumattomalla kieliasiantuntijalla. Selaimen saksankielinen TTS-ääni ei ole erillinen ihmisäänite.</p>
-        </aside>
+        <details className="los-revised-disclaimer">
+          <summary>Tietoa tekstin ja äänen alkuperästä</summary>
+          <p>LOS!:n oma opetusteksti, ei ulkopuolinen autenttinen lähdeteksti. Toimituksellinen kielentarkistus on tehty tekoälyllä, ei riippumattomalla kieliasiantuntijalla. Selaimen saksankielinen TTS-ääni ei ole erillinen ihmisäänite.</p>
+        </details>
       </div>
       <div className="los-study-questions" id={supportId} aria-label={"Text "+kind+" -tehtävät"}>
         <LosReadingExercises chapterId={chapterId} text={kind} compact={sideBySide}/>

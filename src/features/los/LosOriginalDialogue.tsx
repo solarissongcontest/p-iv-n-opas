@@ -204,7 +204,7 @@ export function LosOriginalDialogue(props: LosOriginalDialogueProps) {
       "Tallennus epäonnistui. Säilytä vastauksesi muualla ennen sivun sulkemista."}</p>
     <div className="los-c01-attribution">
       {props.isOwnText ?
-        <p><strong>LOS!:n oma opetusteksti.</strong> Teksti ei ole ulkopuolinen autenttinen lähde. Sisältöversio {version}. Vanhat autenttiset aineistot säilyvät erillisinä lisäaineistoina.</p> :
+        <p><strong>LOS!:n oma opetusteksti.</strong> Sisältöversio {version}. Tarkemmat tiedot tekstin ja äänen alkuperästä ovat tämän lukusivun lopussa.</p> :
         <p><strong>Alkuperäinen teksti:</strong> {props.author}, <a href={props.sourceUrl} target="_blank" rel="noopener noreferrer">{props.sourceTitle}</a>.
           {" "}Lisenssi <a href={props.licenseUrl} target="_blank" rel="noopener noreferrer">{props.license}</a>.
           {" "}{props.sourceDetail} Saksankielinen alkuperäisteksti on muuttamaton.
