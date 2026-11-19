@@ -59,8 +59,10 @@ test("no obsolete book question ID is a requirement and new exercises stay in cu
   for(const scene of lesson.scenes){
    // Canonical reading-bank distractors may legitimately include a different
    // person's name; they are not passages from a retired source.
+   const knownCurrentPrompt=scene.question&&(["A","B","C"] as const).some(kind=>
+     losReadingQuestions(lesson.chapterId,kind).some(q=>q.kind==="choice"&&q.prompt===scene.question?.prompt));
    const prose=JSON.stringify({title:scene.title,paragraphs:scene.paragraphs,
-     question:scene.id.startsWith("canonical-")?undefined:scene.question,
+     question:knownCurrentPrompt?undefined:scene.question,
      board:scene.board,links:scene.bookLinks});
    assert.doesNotMatch(prose,old,lesson.id+" scene "+scene.id+" still teaches retired material");
   }
