@@ -1,0 +1,89 @@
+{
+  "schema": "english-master-asset-manifest-v1",
+  "pack_schema": "em-opintopaivakirja-pack-0.8",
+  "version": "0.8",
+  "size_bytes": 4794010,
+  "sha256": "93c12350f3af23660ac7464cf4a2490987e02e26867aa300610c2583ad2ce8f6",
+  "parts": [
+    {
+      "file": "pack-part-00.bin",
+      "size": 307200,
+      "sha": "41b139920747fb4d0a1989a9eab4f1f77ead6111"
+    },
+    {
+      "file": "pack-part-01.bin",
+      "size": 307200,
+      "sha": "c688878a933f965321e51b3117110fc6c8bbb2ac"
+    },
+    {
+      "file": "pack-part-02.bin",
+      "size": 307200,
+      "sha": "8f122a62d5d0af9ad2af85fb8e908c4fec67aeea"
+    },
+    {
+      "file": "pack-part-03.bin",
+      "size": 307200,
+      "sha": "07feec251cea1def672b431d0526c7eaf1d6bb97"
+    },
+    {
+      "file": "pack-part-04.bin",
+      "size": 307200,
+      "sha": "559d766346153dcc80ef6d040c51f5c0dae2f788"
+    },
+    {
+      "file": "pack-part-05.bin",
+      "size": 307200,
+      "sha": "adf9a7e0b32066b046939ffe1f6806fd23baf7db"
+    },
+    {
+      "file": "pack-part-06.bin",
+      "size": 307200,
+      "sha": "2a590178787abe3a451de7f6d5db3fc10f3c3b58"
+    },
+    {
+      "file": "pack-part-07.bin",
+      "size": 307200,
+      "sha": "44662f710cbe4929e946b2b8d0f8ba2a75945c5d"
+    },
+    {
+      "file": "pack-part-08.bin",
+      "size": 307200,
+      "sha": "54d1c43dc84e2ddc3a535ac3c227def8257a28e6"
+    },
+    {
+      "file": "pack-part-09.bin",
+      "size": 307200,
+      "sha": "589ebb5ea2d16809164f41ff35c9b86eb7ccb9d9"
+    },
+    {
+      "file": "pack-part-10.bin",
+      "size": 307200,
+      "sha": "7f3518f7d7b731878f97f3748462f134c4a481e4"
+    },
+    {
+      "file": "pack-part-11.bin",
+      "size": 307200,
+      "sha": "48ea12e9462418155f75558b96bbac89a6062340"
+    },
+    {
+      "file": "pack-part-12.bin",
+      "size": 307200,
+      "sha": "b72907716fe13dac47030fd57443a9f963b976bc"
+    },
+    {
+      "file": "pack-part-13.bin",
+      "size": 307200,
+      "sha": "7745b098a73c4ff068e465f813d2ffaa36d30d56"
+    },
+    {
+      "file": "pack-part-14.bin",
+      "size": 307200,
+      "sha": "f4bbc805e5a2a5d105a49f67ce8c2887e68526aa"
+    },
+    {
+      "file": "pack-part-15.bin",
+      "size": 186010,
+      "sha": "1f8a88207bb33e96ff5a1c9e9993b527a9aa0f6d"
+    }
+  ]
+}
