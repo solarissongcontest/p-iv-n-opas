@@ -80,6 +80,14 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
   const [showHelp, setShowHelp] = useState(false);
   const [helpSelection, setHelpSelection] = useState<string | null>(null);
   const [replayKey, setReplayKey] = useState(0);
+  const [outlineOpen,setOutlineOpen]=useState(false);
+  useEffect(()=>{
+    const media=window.matchMedia("(min-width: 821px)");
+    const onSize=()=>setOutlineOpen(media.matches);
+    onSize();
+    media.addEventListener("change",onSize);
+    return ()=>media.removeEventListener("change",onSize);
+  },[]);
   // Reject malformed manuscripts, not merely broken React props.
   const contentValid = lesson ? validateTeacherLesson(lesson).length === 0 : false;
   const storedSession = lesson && contentValid
@@ -193,7 +201,7 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
             </button>}
             <TeacherSceneOutline scenes={lesson.scenes} currentId={scene.id}
               visitedIds={session.visitedIds} disabled={olderContentVersion}
-              onSelect={navigate}/>
+              onSelect={navigate} open={outlineOpen} onToggle={setOutlineOpen}/>
             {archivedVersions.length>0 && <details className="los-teacher-session-history">
               <summary>Aiemmat oppituntiversiot ({archivedVersions.length})</summary>
               <p>Vanhoja vastauksia ei lasketa nykyisen oppitunnin osaamisnäytöiksi.</p>
