@@ -1,0 +1,30 @@
+import {test} from "node:test";
+import assert from "node:assert/strict";
+import {los1CurrentReadinessInventory} from "../src/features/los/los1ReadinessInventory.ts";
+
+test("revised LOS1 scope is recorded without reinstating obsolete authenticity or recordings gates",()=>{
+ const a=los1CurrentReadinessInventory();
+ assert.equal(a.schema,"los1-readiness-inventory-v1");
+ assert.equal(a.policy,"canonical-teaching-texts-first-supplemental-authentic-sources-optional");
+ assert.equal(a.audioPolicy,"browser-german-tts-accepted-no-prerecorded-text-a-b-c-requirement");
+ assert.equal(a.reviewerPolicy,"systematic-editorial-review-no-external-human-gate");
+ assert.equal(a.totals.chapters,10);
+ assert.equal(a.totals.lessons,60);
+ assert.equal(new Set(a.totals.lessonIds).size,60);
+ assert.equal(a.totals.browserTtsTexts,30);
+ assert.equal(a.totals.midtermQuestions,25);
+ assert.equal(a.totals.finalQuestions,50);
+ assert.equal(a.totals.chapterTestQuestions,120);
+ assert.equal(a.totals.courseVocabulary,173);
+ assert.equal(a.totals.ipa.total,173);
+ assert.equal(a.totals.optionalAuthenticSources.registered,31);
+ assert.ok(a.chapters.every(c=>c.textA.present&&c.textB.present&&c.textC.present));
+ assert.ok(a.chapters.every(c=>c.browserSpeech.scripts===3&&c.vocabulary.count>0));
+ assert.ok(a.chapters.every(c=>c.authenticSupplementGate==="optional-separate-license-review"));
+ assert.ok(a.chapters.every(c=>c.browserSpeech.prerecordedAudioRequired===false));
+ assert.equal(a.limitations.physicalDeviceListeningVerified,false);
+ assert.equal(a.limitations.physicalTwoDeviceSyncVerified,false);
+ assert.equal(a.limitations.linguisticHumanExpertReviewClaimed,false);
+ assert.equal(a.limitations.ipaGeneratedProposalsAreCertified,false);
+ assert.deepEqual(a.structural.issues,[]);
+});

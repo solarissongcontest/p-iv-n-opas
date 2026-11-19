@@ -203,3 +203,84 @@ test("preferred German voice follows the learner across Text A, B, C and appendi
  await page.goto("/los#/1/04/text",{waitUntil:"domcontentloaded"});
  await expect(page.getByLabel("Saksan puheääni")).toHaveValue("de-DE / QA Deutsch");
 });
+
+test("every LOS! 1 vocabulary item has German speech, never an unreviewed eSpeak IPA presented as certain",async({page})=>{
+ test.setTimeout(180_000);
+ await page.addInitScript(()=>{
+  const german={name:"Deutsch QA",lang:"de-DE",localService:true};
+  const english={name:"English QA",lang:"en-US",localService:true};
+  const synthesis={
+   getVoices:()=>[english,german],
+   addEventListener:()=>{},
+   removeEventListener:()=>{},
+   cancel:()=>{},
+   speak:(utterance:{text:string;voice:{name:string};lang:string;onend?:()=>void})=>{
+    localStorage.setItem("los1.qa.vocab-spoken",JSON.stringify({
+     text:utterance.text,voice:utterance.voice?.name,lang:utterance.lang,
+    }));
+    utterance.onend?.();
+   },
+  };
+  Object.defineProperty(window,"speechSynthesis",{configurable:true,value:synthesis});
+  Object.defineProperty(window,"SpeechSynthesisUtterance",{configurable:true,value:class{
+   text:string;
+   voice:unknown=null;
+   lang="";
+   rate=1;
+   onend:()=>void=()=>{};
+   onerror:()=>void=()=>{};
+   constructor(text:string){this.text=text;}
+  }});
+ });
+ await enter(page,"01/vocabulary");
+ for(let n=1;n<=10;n++){
+  const chapter=String(n).padStart(2,"0");
+  if(n>1)await page.goto("/los#/1/"+chapter+"/vocabulary",{waitUntil:"domcontentloaded"});
+  await expect(page.locator(".los-vocabulary-page")).toBeVisible({timeout:30000});
+  const rows=page.locator(".los-word-table tbody tr");
+  const buttons=page.locator(".los-vocab-audio-button");
+  const count=await rows.count();
+  expect(count).toBeGreaterThan(5);
+  await expect(buttons).toHaveCount(count);
+  await expect(page.getByText("koneellinen ehdotus",{exact:false})).toHaveCount(0);
+  if(n===1){
+   await buttons.first().click();
+   const spoken=await page.evaluate(()=>JSON.parse(localStorage.getItem("los1.qa.vocab-spoken")??"null"));
+   expect(spoken?.lang).toBe("de-DE");
+   expect(spoken?.voice).toBe("Deutsch QA");
+   expect(spoken?.text?.length).toBeGreaterThan(0);
+  }
+ }
+});
+
+test("vocabulary speech uses the learner's available German voice preference",async({page})=>{
+ await page.addInitScript(()=>{
+  localStorage.setItem("los1.audio.preferred-german-voice.v1","de-AT / Österreich QA");
+  const synthesis={
+   getVoices:()=>[
+    {name:"Deutsch QA",lang:"de-DE",localService:true},
+    {name:"Österreich QA",lang:"de-AT",localService:true},
+   ],
+   addEventListener:()=>{},
+   removeEventListener:()=>{},
+   cancel:()=>{},
+   speak:(utterance:{voice:{name:string};lang:string;onend?:()=>void})=>{
+    localStorage.setItem("los1.qa.vocab-language",utterance.lang+"|"+utterance.voice?.name);
+    utterance.onend?.();
+   },
+  };
+  Object.defineProperty(window,"speechSynthesis",{configurable:true,value:synthesis});
+  Object.defineProperty(window,"SpeechSynthesisUtterance",{configurable:true,value:class{
+   text:string;
+   voice:unknown=null;
+   lang="";
+   rate=1;
+   onend:()=>void=()=>{};
+   onerror:()=>void=()=>{};
+   constructor(text:string){this.text=text;}
+  }});
+ });
+ await enter(page,"02/vocabulary");
+ await page.locator(".los-vocab-audio-button").first().click();
+ await expect.poll(()=>page.evaluate(()=>localStorage.getItem("los1.qa.vocab-language"))).toBe("de-AT|Österreich QA");
+});
