@@ -1,6 +1,7 @@
 import {useEffect,useMemo,useState} from "react";
 import {ArrowRight,CheckCircle2,HelpCircle} from "lucide-react";
 import type {Lesson,LessonTask} from "./EnglishMasterBook";
+import {englishTeacherStorageKey} from "./englishTeacherBackup";
 import {
   confirmTeacherActivity,emptyTeacherSession,finishTeacherSession,independentTeacherEvidence,
   markTeacherHelp,moveTeacherScene,recoverTeacherSession,revealTeacherSolution,
@@ -150,7 +151,7 @@ function TeacherReflection({scene,session,onChange,completed}:{
 }
 export function EnglishTeacherPlayer({lesson:source,ownerId,previouslyCompleted,onBack,onComplete}:Props){
   const lesson=useMemo(()=>asTeacherLesson(source),[source]);
-  const storageKey="em-teacher-core-v1-"+ownerId+"-"+lesson.id;
+  const storageKey=englishTeacherStorageKey(ownerId,lesson.id);
   const archiveKey=storageKey+"-archive";
   const [session,setSession]=useState<TeacherSession>(()=>safeReadSession(storageKey,lesson));
   const [archives,setArchives]=useState<TeacherSession[]>(()=>safeReadHistory(archiveKey,lesson.id));
