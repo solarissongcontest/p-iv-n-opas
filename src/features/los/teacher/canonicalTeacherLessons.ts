@@ -160,20 +160,20 @@ function rewriteObsoleteScene(scene:TeacherScene,chapterId:string,sequence:numbe
     return {...base,kind:"calendar",title:"Sovi tapaamisaika nykyisen oppikirjan mukaan",
       paragraphs:["Harjoittele viikonpäivää ja tasatuntia omassa kalenterimerkinnässä.",
         "Tämä ei ole vanhan äänitteen kuuntelutehtävä. Tarkista ilmaus C09:n nykyisestä Text C:stä."],
-      calendar:scene.calendar?{...scene.calendar,prompt:"Tallenna oikea viikonpäivä ja kellonaika.",
-        sourceNote:"LOS! 1:n uusi kappale 9 / nykyinen Text C. Oma kirjoitusharjoitus, ei kuunteluarvio."}:undefined,
+      ...(scene.calendar?{calendar:{...scene.calendar,prompt:"Tallenna oikea viikonpäivä ja kellonaika.",
+        sourceNote:"LOS! 1:n uusi kappale 9 / nykyinen Text C. Oma kirjoitusharjoitus, ei kuunteluarvio."}}:{}),
       bookLinks:canonicalLinks(chapterId,["C"])};
   }
   if(scene.kind==="form"){
     const sample=firstSentence(current.ab.textA);
     return {...base,kind:"form",title:"Kirjoita tietoja nykyisen tekstin tilanteeseen",
       paragraphs:intro,
-      form:scene.form?.map((field,i)=>({
+      ...(scene.form?{form:scene.form.map((field,i)=>({
         ...field,
         label:stale.test(field.label)?"Oma lause "+(i+1):field.label,
         placeholder:stale.test(field.placeholder)?"Kirjoita omin sanoin saksaksi":field.placeholder,
         sampleAnswer:stale.test(field.sampleAnswer)?sample:field.sampleAnswer,
-      })),
+      }))}:{}),
       bookLinks:canonicalLinks(chapterId,["A"])};
   }
   if(scene.kind==="activity"){
