@@ -17,7 +17,7 @@ test("editorial v4 uses one section picker and preserves real chapter destinatio
   await openReader(page);
   const section=page.getByRole("combobox",{name:"Valitse kappaleen osio"});
   await expect(section).toHaveValue("text");
-  await expect(page.locator(".los-section-nav button")).toHaveCount(2);
+  await expect(page.locator(".los-section-nav .los-section-step")).toHaveCount(2);
   await expect(page.locator(".los-book-sidebar")).toBeVisible();
   await expectNoHorizontalOverflow(page);
   await page.screenshot({path:testInfo.outputPath("los-v4-reader-desktop.png"),fullPage:true,animations:"disabled"});
@@ -32,7 +32,7 @@ test("editorial v4 mobile controls do not crowd reading or cause horizontal scro
   await page.setViewportSize({width:320,height:780});
   await openReader(page);
   await expect(page.locator(".los-book-sidebar")).toBeHidden();
-  await expect(page.locator(".los-section-nav button")).toHaveCount(2);
+  await expect(page.locator(".los-section-nav .los-section-step")).toHaveCount(2);
   await expect(page.getByRole("combobox",{name:"Valitse kappaleen osio"})).toBeVisible();
   await expect(page.locator(".los-display-settings")).toBeVisible();
   const fullWidth=await page.locator(".los-book-paper").evaluate(el=>Math.round(el.getBoundingClientRect().width));
