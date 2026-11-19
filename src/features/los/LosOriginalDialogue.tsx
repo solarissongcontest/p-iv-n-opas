@@ -134,18 +134,14 @@ export function LosOriginalDialogue(props: LosOriginalDialogueProps) {
     parseLosReaderAnnotation(raw,version).contentVersion!==version);
 
   return <div className="los-c01-reader" aria-label={props.heading}>
-    <div className="los-c01-reader-intro">
-      {props.isOwnText?
-        <p className="los-c01-quick-guide">Napauta saksankielistä sanaa nähdäksesi selityksen ja kuullaksesi ääntämisen. Voit myös korostaa tärkeät sanat.</p>:
-        <>
-          <p className="los-overline">{props.usageLabel ?? "ORIGINALTEXT · TEXT A"} · {sourceId}</p>
-          <h2>{props.heading}</h2>
-          <p>{props.guidance}</p>
-          <p className="los-c01-reader-warning"><Info size={17}/>
-            Kokonainen lähdeteksti on tuotu käyttöoikeuksien perusteella. Lopullinen kielellinen tarkistus ja laitetestaus ovat kesken.
-          </p>
-        </>}
-    </div>
+    {!props.isOwnText&&<div className="los-c01-reader-intro">
+      <p className="los-overline">{props.usageLabel ?? "ORIGINALTEXT · TEXT A"} · {sourceId}</p>
+      <h2>{props.heading}</h2>
+      <p>{props.guidance}</p>
+      <p className="los-c01-reader-warning"><Info size={17}/>
+        Kokonainen lähdeteksti on tuotu käyttöoikeuksien perusteella. Lopullinen kielellinen tarkistus ja laitetestaus ovat kesken.
+      </p>
+    </div>}
     <div className="los-c01-toolbox" aria-label="Lukijan työkalut">
       <div className="los-c01-modes" role="group" aria-label="Sanan napautuksen toiminto">
         <button type="button" aria-pressed={mode==="meaning"} className={mode==="meaning"?"is-current":""}

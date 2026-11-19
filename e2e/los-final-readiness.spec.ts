@@ -69,6 +69,8 @@ test("dictionary errors are disclosed, and optional source/audio QA have accurat
  await page.goto("/los#/1/appendix",{waitUntil:"domcontentloaded"});
  await expect(page.getByRole("heading",{name:"Kokeile saksankielistä puheääntä"})).toBeVisible();
  await expect(page.getByText("31 rekisteröityä aineistoa",{exact:false})).toBeVisible();
+ const updateDismiss=page.locator(".pwa-update-prompt button").filter({hasText:"Myöhemmin"});
+ if(await updateDismiss.isVisible())await updateDismiss.click();
  await page.getByText("Näytä jokaisen lähteen tarkka tila").click();
  await expect(page.locator(".los-supplemental-audit li")).toHaveCount(31);
 });
@@ -398,4 +400,35 @@ test("first German sentence is not buried under a tall audio settings dashboard"
  await speechSettings.locator("summary").click();
  await expect(speechSettings.getByLabel("Saksan puheääni")).toBeVisible();
  await expectNoHorizontalOverflow(page);
+});
+
+test("LOS1 contemporary design system is consistent at desktop, mobile, dark mode and zoom",async({page},testInfo)=>{
+ await page.setViewportSize({width:1440,height:900});
+ await enter(page,"01/text");
+ await expect(page.locator(".los-revised-page")).toBeVisible({timeout:30000});
+ const title=page.locator(".los-reading-page h1").first();
+ const font=await title.evaluate(el=>getComputedStyle(el).fontFamily);
+ expect(font).not.toMatch(/Georgia|Times New Roman/);
+ await expect.poll(()=>page.locator(".los-book-topbar").evaluate(el=>getComputedStyle(el).borderTopWidth)).toBe("0px");
+ await expect.poll(()=>page.locator(".los-book-paper").evaluate(el=>getComputedStyle(el).borderTopLeftRadius)).toBe("20px");
+ const textFont=await page.locator(".los-c01-words").first().evaluate(el=>getComputedStyle(el).fontFamily);
+ expect(textFont).not.toMatch(/Georgia|Times New Roman/);
+ await page.screenshot({path:testInfo.outputPath("los-contemporary-reading-desktop.png"),fullPage:true,animations:"disabled"});
+ await page.setViewportSize({width:320,height:780});
+ await expectNoHorizontalOverflow(page);
+ await expect.poll(()=>page.locator(".los-book-paper").evaluate(el=>getComputedStyle(el).borderTopLeftRadius)).toBe("0px");
+ await page.screenshot({path:testInfo.outputPath("los-contemporary-reading-mobile320.png"),fullPage:true,animations:"disabled"});
+ await page.evaluate(()=>document.documentElement.classList.add("dark"));
+ await expectNoHorizontalOverflow(page);
+ await expect.poll(()=>page.locator(".los-book-workspace").evaluate(el=>getComputedStyle(el).color)).not.toBe("rgb(32, 41, 54)");
+ await page.screenshot({path:testInfo.outputPath("los-contemporary-reading-dark.png"),fullPage:false,animations:"disabled"});
+ await page.evaluate(()=>document.documentElement.classList.remove("dark"));
+ await page.goto("/los#/1/overview",{waitUntil:"domcontentloaded"});
+ await expect(page.locator(".los-front-banner img")).toBeVisible({timeout:30000});
+ await expectNoHorizontalOverflow(page);
+ await page.screenshot({path:testInfo.outputPath("los-contemporary-book-landing-mobile.png"),fullPage:true,animations:"disabled"});
+ await page.setViewportSize({width:1440,height:900});
+ await page.reload({waitUntil:"domcontentloaded"});
+ await expect(page.locator(".los-front-banner img")).toBeVisible({timeout:30000});
+ await page.screenshot({path:testInfo.outputPath("los-contemporary-book-landing-desktop.png"),fullPage:true,animations:"disabled"});
 });
