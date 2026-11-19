@@ -101,7 +101,10 @@ test("English Master loads the real 122/192/20 content automatically and keeps i
   await page.getByRole("button", { name: "Kuuntelu", exact: true }).click();
   await expect(page.locator(".em-audio-grid article")).toHaveCount(20);
   await page.reload({ waitUntil: "domcontentloaded" });
-  await expect(page.getByRole("heading", { name: "English Master", exact: true })).toBeVisible({ timeout: 30_000 });
+  // A reload must preserve the current section, not return to the book front.
+  await expect(page).toHaveURL(/\/english-master#\/listening$/);
+  await expect(page.getByRole("heading", { name: "Kuuntelu", exact: true })).toBeVisible({ timeout: 30_000 });
+  await expect(page.locator(".em-audio-grid article")).toHaveCount(20);
   await expect(page.getByRole("heading", { name: "Ota englannin oppikirja käyttöön" })).toHaveCount(0);
 });
 
