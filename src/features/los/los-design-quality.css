@@ -967,3 +967,18 @@
  .los-section-nav .los-section-jump {width:auto;min-width:0;max-width:calc(100vw - 176px);flex:1 1 130px}
  .los-section-nav .los-section-jump select {width:100%;max-width:100%;min-width:0}
 }
+
+
+/* A reader settings popover belongs to the full chapter nav on narrow
+   devices, not an icon-sized anchor. Prevent off-screen clipping at 320px. */
+@media(max-width:760px) {
+  .los-section-nav:has(.los-display-settings[open]) {z-index:55}
+  .los-section-nav .los-display-settings {position:static}
+  .los-section-nav .los-display-settings-panel {
+    position:absolute;top:calc(100% + 8px);
+    left:0;right:0;bottom:auto;
+    width:auto;max-width:none;max-height:min(70dvh,520px);
+    margin:0;overflow-y:auto;overscroll-behavior:contain;
+    box-shadow:0 16px 36px rgba(28,36,43,.15);
+  }
+}
