@@ -108,6 +108,16 @@ function isObsolete(scene:TeacherScene):boolean {
 function rewriteObsoleteScene(scene:TeacherScene,chapterId:string,sequence:number):TeacherScene {
   const current=material(chapterId);
   if(!current)return scene;
+  // Strip obsolete source props and explanatory help rather than assigning
+  // undefined to optional fields or leaving old transcripts visible.
+  const base:TeacherScene={...scene};
+  delete base.sourceChapterId;
+  delete base.textBChapterId;
+  delete base.question;
+  delete base.board;
+  delete base.calendar;
+  delete base.help;
+  delete base.form;
   const kind:LosReadingText=scene.textBChapterId?"B":
     /text c|hilfstext/i.test(scene.title)?"C":
     /text b/i.test(scene.title)?"B":"A";
@@ -118,27 +128,25 @@ function rewriteObsoleteScene(scene:TeacherScene,chapterId:string,sequence:numbe
   ];
   if(scene.kind==="question"){
     const q=choiceQuestion(chapterId,kind,sequence)??choiceQuestion(chapterId,"A",0);
-    if(!q)return {...scene,paragraphs:intro};
-    return {...scene,kind:"question",title:"Ymmärrä nykyisen "+label+" -tekstin sisältö",
+    if(!q)return {...base,paragraphs:intro};
+    return {...base,kind:"question",title:"Ymmärrä nykyisen "+label+" -tekstin sisältö",
       paragraphs:intro,question:{...q,evidenceRole:scene.question?.evidenceRole??"practice"},
-      board:undefined,sourceChapterId:undefined,textBChapterId:undefined,
       bookLinks:canonicalLinks(chapterId,[kind])};
   }
   if(scene.kind==="board"){
-    return {...scene,title:"Näin luet nykyisiä Text A-, B- ja C -tekstejä",
+    return {...base,title:"Näin luet nykyisiä Text A-, B- ja C -tekstejä",
       paragraphs:["Seuraa uudistettujen tekstien todellisia ilmauksia. Etsi ensin tilanne ja puhujat, vasta sitten päättele sanojen merkitys."],
-      board:canonicalBoard(chapterId),sourceChapterId:undefined,textBChapterId:undefined};
+      board:canonicalBoard(chapterId)};
   }
   if(scene.kind==="reflection"){
-    return {...scene,title:"Kertaa nykyisen tekstin tärkein asia",paragraphs:[
+    return {...base,title:"Kertaa nykyisen tekstin tärkein asia",paragraphs:[
       "Kirjoita omin sanoin, mikä uusien Text A:n ja B:n välillä muuttuu ja miten Text C auttaa ymmärtämään."],
-      sourceChapterId:undefined,textBChapterId:undefined};
+      };
   }
   // Preserve old activity IDs and the existing student's work, but change
   // inaccurate original-source claims to a book-linked current-text activity.
-  return {...scene,kind:"book",title:"Lue nykyisen oppikirjan "+label,
-    phase:"Tekstin käsittely",paragraphs:intro,question:undefined,board:undefined,
-    sourceChapterId:undefined,textBChapterId:undefined,calendar:undefined,
+  return {...base,kind:"book",title:"Lue nykyisen oppikirjan "+label,
+    phase:"Tekstin käsittely",paragraphs:intro,
     bookLinks:[...canonicalLinks(chapterId,[kind]),
       {label:"Ymmärrä · nykyiset Text A/B/C -tehtävät",chapterId,section:"understand",
        instruction:"Tarkista uudet oppikirjatekstien ymmärtämistehtävät."}],
