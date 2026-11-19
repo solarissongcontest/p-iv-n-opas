@@ -1,6 +1,6 @@
 import { getDeviceOwnerId } from "../../lib/deviceSession.ts";
-import { validLosChapter, validateLosCloudDraft, draftIsEmpty } from "./cloudContract";
-import { losDraftKey, parseLosDraft, type LosChapterDraft } from "./studyState";
+import { validLosChapter, validateLosCloudDraft, draftIsEmpty } from "./cloudContract.ts";
+import { losDraftKey, parseLosDraft, type LosChapterDraft } from "./studyState.ts";
 
 export const LOS_BACKUP_FORMAT="los-book-backup-v1";
 export type LosBookBackup={
