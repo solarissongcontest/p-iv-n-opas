@@ -70,7 +70,7 @@ test("English Master opens as a first-class book route, imports one content pack
   await expect(page.getByText("Tämä on vain testin sisältöä.").first()).toBeVisible();
 
   await page.getByRole("button", { name: "Opetuspolku", exact: true }).click();
-  await expect(page.getByText("Test lesson 1")).toBeVisible();
+  await expect(page.getByText("Test lesson 1", {exact:true})).toBeVisible();
   await page.getByRole("button", { name: /Test lesson 1/ }).first().click();
   await expect(page.getByRole("heading", { name: "Ensimmäinen vaihe" })).toBeVisible();
   await page.getByRole("button", { name: /Seuraava vaihe/ }).click();
