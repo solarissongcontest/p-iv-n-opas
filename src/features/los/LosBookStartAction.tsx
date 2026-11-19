@@ -1,7 +1,7 @@
 import {ArrowRight} from "lucide-react";
 import {useLosChapterDraft} from "./studyState";
 import type {LosChapterDraft} from "./studyState";
-import {recommendLos1Resume} from "./losResumeRecommendation";
+import {recommendLosTeacherResume} from "./losTeacherResume";
 
 /** Only mounted for LOS! 1. Keeps the approved V3.3 book cover and banner. */
 export function LosBookStartAction({move}:{move:(chapter:string|null,section:"path")=>void}){
@@ -33,14 +33,15 @@ export function LosBookStartAction({move}:{move:(chapter:string|null,section:"pa
     "92":d92.draft,
     "93":d93.draft,
   };
-  const recommendation=recommendLos1Resume(drafts);
+  const recommendation=recommendLosTeacherResume(drafts);
   const label=recommendation.action==="start"?"Aloita nollasta":
     recommendation.action==="review"?"Kertaa kirja alusta":
       "Jatka oppituntia "+recommendation.lessonId;
   const open=()=>{
     try{sessionStorage.setItem("los1.selectedLesson",recommendation.lessonId);}
     catch{ /* The path still opens safely at its first lesson. */ }
-    move(null,"path");
+    if(typeof window!=="undefined")window.location.assign("/los-lessons/"+recommendation.lessonId);
+    else move(null,"path");
   };
   return <div className="los-front-resume">
     <button type="button" className="los-primary" onClick={open}>
@@ -51,7 +52,7 @@ export function LosBookStartAction({move}:{move:(chapter:string|null,section:"pa
         ?"Kaikki "+recommendation.available+" oppituntia on merkitty tehdyksi. Voit kerrata ne uudelleen."
         :recommendation.action==="start"
           ?"L001 opettaa kirjan käytön, aivan ensimmäiset saksan ilmaukset ja oppimisen työkalut."
-          :recommendation.completed+"/"+recommendation.available+" oppituntia suoritettu. Jatko avaa sinulle valitun keskeneräisen tai seuraavan tunnin."}
+          :recommendation.completed+"/"+recommendation.available+" Teacher 2.0 -oppituntia suoritettu. Jatko avaa edellisen keskeneräisen opetustilanteen tai seuraavan tunnin."}
     </p>
   </div>;
 }
