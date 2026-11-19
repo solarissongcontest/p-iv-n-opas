@@ -7,6 +7,7 @@ import {losReadingQuestions} from "./content/los1ReadingBank";
 import { getLosChapterSourceGate } from "./content/sourceRegistry";
 import {los1SupplementalSourceAudit} from "./los1SupplementalAudit";
 import {LosVoiceDiagnostics} from "./LosVoiceDiagnostics";
+import {los1AudioInventory,los1IPAAudit} from "./los1QualityAudit";
 import {los1TokenIPADetail} from "./los1CourseGlossary";
 import { LosAuthenticAudio, LosDictionary, LosIndexSearch, LosLearningPath, type LosDestination } from "./LosReferenceTools";
 import { LosChapterGrammar } from "./LosGrammarChapters";
@@ -342,10 +343,52 @@ function Vocabulary({ chapter, move, bookId }: { chapter: LosChapter; bookId:num
 }
 function Appendix({ book }: { book: LosBookDefinition }) {
   const supplements=los1SupplementalSourceAudit();
+  const audio=book.id===1?los1AudioInventory():null;
+  const ipa=book.id===1?los1IPAAudit():null;
   return <section className="los-inner-page los-appendix">
     <p className="los-eyebrow">LOS! {book.id} / LIITTEET</p>
     <h1>Kirjan liitteet</h1>
     <div className="los-appendix-section"><h2>Kirjan tiedot</h2><dl><div><dt>Moduuli</dt><dd>{book.code} · {book.module}</dd></div><div><dt>Laajuus</dt><dd>2 op</dd></div><div><dt>Oppimäärä</dt><dd>Saksa B3 · LOPS21</dd></div></dl></div>
+
+    {book.id===1&&audio&&ipa&&<div className="los-appendix-section los-quality-audit" aria-label="LOS! 1:n ääni- ja IPA-inventaario">
+      <h2>Äänitteiden ja IPA-merkintöjen valmistumistila</h2>
+      <p><strong>{audio.withSpeech}/{audio.total} tekstillä on saksankielinen puhekäsikirjoitus.</strong>
+       Koko tekstien ja repliikkien kuuntelu käyttää tällä hetkellä laitteen puhesynteesiä.
+       <strong> Ennalta tuotettuja ja akustisesti hyväksyttyjä Text A–C -äänitiedostoja: {audio.recorded}/{audio.total}.</strong>
+       Puhekäsikirjoitus ei ole sama asia kuin valmis äänite.</p>
+      <p><strong>IPA-rivejä: {ipa.total}.</strong> Toimituksellisia merkintöjä {ipa.editorial}, 
+       eSpeak-ohjelman koneellisia ehdotuksia {ipa.synthetic}, puuttuvia {ipa.missing}.
+       Toimituksellinenkaan merkintä ei tarkoita ulkopuolisen asiantuntijan hyväksyntää.</p>
+      <details>
+        <summary>Äänitysten työjono, kaikki 30 tekstiä</summary>
+        <table><thead><tr><th>Teksti</th><th>Puhejaksoja</th><th>Äänite</th></tr></thead>
+        <tbody>{audio.items.map(item=><tr key={item.id}>
+          <td>{item.id}</td><td>{item.segmentCount}</td><td>Ei hyväksyttyä äänitiedostoa</td>
+        </tr>)}</tbody></table>
+      </details>
+      <details>
+        <summary>IPA-tarkistuslista, kaikki 173 sanastoriviä</summary>
+        <table><thead><tr><th>Kappale / sana</th><th>IPA</th><th>Alkuperä</th></tr></thead>
+        <tbody>{ipa.rows.map((row,index)=><tr key={row.chapterId+"-"+index}>
+          <td>{row.chapterId} · <span lang="de">{row.word}</span></td>
+          <td>{row.ipa??"Puuttuu"}</td>
+          <td>{row.status==="editorial"?"Toimituksellinen":row.status==="espeak-candidate"?"Koneellinen ehdotus":"Puuttuu"}</td>
+        </tr>)}</tbody></table>
+      </details>
+    </div>}
+    {book.id===1&&<div className="los-appendix-section">
+      <h2>Synkronoinnin todellinen kahden laitteen koe</h2>
+      <p>Automaattinen testi ei korvaa kahta oikeaa laitetta. Tee testi kirjautuneena
+       samoilla tunnuksilla molemmilla laitteilla ja pidä tallennetuista vastauksista
+       varmuuskopio ennen ristiriitatilanteen testaamista.</p>
+      <ol>
+       <li>Kirjoita tietokoneella kappaleen C01 muistiinpanoihin yksilöllinen testiteksti ja synkronoi se.</li>
+       <li>Avaa sama kappale iPhonella, suorita synkronointi ja varmista että teksti näkyy täsmälleen.</li>
+       <li>Muokkaa tekstiä iPhonella, synkronoi ja varmista muutos tietokoneella.</li>
+       <li>Testaa erillinen konfliktitilanne kahdella eri muokkauksella. Varmista, ettei kumpikaan versio häviä.</li>
+      </ol>
+      <p>Nämä ohjeet eivät itsessään merkitse koetta hyväksytyksi. Merkitse testit hyväksytyiksi vasta todellisen suorittamisen jälkeen.</p>
+    </div>}
     {book.id===1&&<LosVoiceDiagnostics/>}
     {book.id===1&&<div className="los-appendix-section" aria-label="Autenttisten lisäaineistojen julkaisuauditointi">
       <h2>Autenttisten lisäaineistojen julkaisutilat</h2>
