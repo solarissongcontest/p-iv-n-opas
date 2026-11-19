@@ -348,3 +348,12 @@
 .los-grammar-table .los-vocab-audio-button{min-width:40px;min-height:40px;padding:.4rem}
 .los-grammar-table td{overflow-wrap:anywhere}
 @media(max-width:480px){.los-grammar-inline-speech{gap:.1rem}.los-grammar-table .los-vocab-audio-wrap{margin-inline-start:0}}
+
+/* Selection playback gives every other German sentence or word in exercises a TTS route. */
+.los-selection-audio{position:fixed;bottom:max(18px,env(safe-area-inset-bottom));right:18px;z-index:80;width:min(380px,calc(100vw - 32px));max-height:50vh;overflow:auto;padding:14px 17px;background:var(--los-subtle);color:var(--los-ink);border:1px solid var(--los-line);border-left:3px solid var(--los-book-accent);border-radius:10px;box-shadow:0 8px 28px rgba(0,0,0,.16)}
+.los-selection-audio strong{display:block;font-size:1rem}
+.los-selection-audio p{margin:.4rem 0;font-size:.84rem;line-height:1.4}
+.los-selection-audio-text{display:block;font-size:.92rem;line-height:1.45;max-height:7rem;overflow:auto;overflow-wrap:anywhere}
+.los-selection-audio-actions{display:flex;align-items:center;gap:.8rem;flex-wrap:wrap;margin-top:.5rem}
+.los-selection-audio-actions .los-outline-button{min-height:42px}
+@media(max-width:480px){.los-selection-audio{right:8px;left:8px;width:auto;bottom:max(12px,env(safe-area-inset-bottom))}}
