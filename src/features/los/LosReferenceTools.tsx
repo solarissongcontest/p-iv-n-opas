@@ -45,7 +45,7 @@ export function LosDictionary({ book, move, openBook }: { book: LosBookDefinitio
   return <section className="los-inner-page los-dictionary-page">
     <p className="los-eyebrow">WÖRTERBUCH · LOS! {book.id}</p>
     <h1>Sanakirja</h1>
-    <p className="los-page-intro">Selaa opetettavia kappalesanoja sekä uusien Text A/B -tekstien täydentäviä sanaselityksiä. Sanakirjan tekstisanasto ei automaattisesti kuulu aktiiviseen sanastotavoitteeseen. Laaja erillinen FreeDict-sanakirja löytyy tämän opetussanaston alta, kun sen aineisto on asennettu.</p>
+    <p className="los-page-intro">Hae sanoja saksaksi tai suomeksi. Kappalesanat ja tekstien täydentävät sanaselitykset löytyvät samasta hakemistosta.</p>
     <div className="los-index-options">
       <div className="los-index-tabs" role="group" aria-label="Sanakirjan laajuus">
         <button className={scope === "book" ? "is-active" : ""} aria-pressed={scope === "book"} onClick={() => setScope("book")}>Tämä kirja</button>
@@ -55,6 +55,7 @@ export function LosDictionary({ book, move, openBook }: { book: LosBookDefinitio
     </div>
     <label className="los-index-search"><Search size={19}/><span className="sr-only">Hae saksaksi tai suomeksi</span><input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Hae saksaksi tai suomeksi" autoComplete="off" /></label>
     <p className="los-index-count">{entries.length} hakusanaa</p>
+    <details className="los-dictionary-about"><summary>Mitä sanakirja sisältää?</summary><p>Tekstien täydentävät sanaselitykset eivät automaattisesti kuulu aktiiviseen sanastotavoitteeseen. Laaja erillinen FreeDict-sanakirja löytyy tämän opetussanaston alta, kun sen aineisto on asennettu.</p></details>
     {entries.length === 0 ? <p>Ei hakusanoja tällä rajauksella. Muut kirjat saavat hakusanastonsa, kun niiden sisällöt valmistuvat.</p> :
       <div className="los-index-table" role="table" aria-label="Sanakirjahakemisto">
         <div className="los-index-table-head" role="row"><span role="columnheader">Deutsch</span><span role="columnheader">Suomi</span><span role="columnheader">Lähde</span></div>
