@@ -275,3 +275,34 @@
  .em-app .los-book-workspace .em-unit .los-path-copy{max-width:none}
  .em-app .los-book-workspace .em-lesson-board .em-board-top{padding-top:12px}
 }
+
+/* LOS! 1 contents page, adapted only for English Master chapter codes. */
+.em-app .los-book-workspace .em-los-contents-part{margin:34px 0 46px;scroll-margin-top:90px}
+.em-app .los-book-workspace .em-los-contents-part>h2{
+ display:flex;align-items:baseline;justify-content:space-between;gap:15px;
+ font-size:clamp(19px,2.7vw,24px);font-weight:750;letter-spacing:-.035em;
+ padding-bottom:11px;margin:0;color:var(--los-ink);
+}
+.em-app .los-book-workspace .em-los-contents-part>h2 small{
+ font-size:12px;letter-spacing:0;white-space:nowrap;font-weight:550;color:var(--los-soft)
+}
+.em-app .los-book-workspace .em-los-contents-part .los-contents-list{margin-top:0}
+.em-app .los-book-workspace .em-los-contents-part .los-content-number{min-width:68px;font-size:clamp(19px,2.5vw,25px)}
+.em-app .los-book-workspace .em-los-contents-part .los-content-copy strong{overflow-wrap:anywhere}
+.em-app .los-book-workspace .em-los-contents-part .los-content-copy small{font-size:12px;line-height:1.55}
+.em-app .los-book-workspace .los-contents-appendix{
+ display:flex;flex-wrap:wrap;gap:12px;align-items:center
+}
+.em-app .los-book-workspace .los-contents-appendix button{display:inline-flex;align-items:center;gap:8px}
+@media(max-width:760px){
+ .em-app .los-book-topbar .los-top-title>span:last-child{display:none}
+ .em-app .los-book-topbar .los-top-title{min-width:0;max-width:100%}
+ .em-app .los-book-topbar .em-los-brand{font-size:clamp(12px,3.8vw,15px);white-space:nowrap}
+ .em-app .los-book-workspace .em-los-contents-part .los-content-number{min-width:54px;font-size:20px}
+ .em-app .los-book-workspace .em-los-contents-part>h2{display:block}
+ .em-app .los-book-workspace .em-los-contents-part>h2 small{display:block;margin-top:6px}
+}
+@media(max-width:390px){
+ .em-app .los-book-topbar .los-back-library>span{display:none}
+ .em-app .los-book-topbar .los-back-library{min-width:44px;justify-content:center}
+}
