@@ -61,9 +61,23 @@ export async function enterApp(page: Page) {
 }
 
 export async function expectNoHorizontalOverflow(page: Page) {
-  const overflow = await page.evaluate(() => ({
-    width: document.documentElement.scrollWidth,
-    viewport: window.innerWidth,
-  }));
-  expect(overflow.width).toBeLessThanOrEqual(overflow.viewport + 1);
+  const overflow = await page.evaluate(() => {
+    const width = document.documentElement.scrollWidth;
+    const viewport = window.innerWidth;
+    if (width <= viewport + 1) return {width, viewport, offenders: [] as string[]};
+    const offenders = [...document.querySelectorAll<HTMLElement>("*")]
+      .map(el => {
+        const rect = el.getBoundingClientRect();
+        const name = el.tagName.toLowerCase() + (typeof el.className === "string" && el.className
+          ? "." + el.className.trim().replace(/\s+/g, ".").slice(0,110) : "");
+        return {name, right: Math.round(rect.right), left: Math.round(rect.left), width: Math.round(rect.width)};
+      })
+      .filter(item => item.width > 0 && item.right > viewport + 1)
+      .sort((a,b) => b.right-a.right)
+      .slice(0,14)
+      .map(item => `${item.name}: left=${item.left}, right=${item.right}, width=${item.width}`);
+    return {width, viewport, offenders};
+  });
+  expect(overflow.width, "Horizontal overflow details: " + JSON.stringify(overflow))
+    .toBeLessThanOrEqual(overflow.viewport + 1);
 }
