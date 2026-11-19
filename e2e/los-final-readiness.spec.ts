@@ -82,3 +82,43 @@ test("calm reading controls have no critical accessibility failures",async({page
  const critical=results.violations.filter(v=>v.impact==="critical");
  expect(critical.map(x=>x.id+" "+x.description)).toEqual([]);
 });
+
+
+test("both real imported dictionary assets are licensed, searchable and visible in the book",async({page})=>{
+ await enter(page,"dictionary");
+ const deResponse=await page.request.get("/los-dictionary/v1/deu-fin.json");
+ const fiResponse=await page.request.get("/los-dictionary/v1/fin-deu.json");
+ expect(deResponse.ok()).toBeTruthy();
+ expect(fiResponse.ok()).toBeTruthy();
+ const de=await deResponse.json();
+ const fi=await fiResponse.json();
+ for(const [dataset,pair] of [[de,"deu-fin"],[fi,"fin-deu"]] as const){
+  expect(dataset.meta.pair).toBe(pair);
+  expect(dataset.meta.license.length).toBeGreaterThan(0);
+  expect(dataset.entries.length).toBeGreaterThan(8500);
+  expect(dataset.meta.entryCount).toBe(dataset.entries.length);
+ }
+ expect(de.entries.some((x:[string,string])=>x[0].toLocaleLowerCase("de")==="hallo")).toBeTruthy();
+ await page.getByRole("button",{name:"Saksa → suomi"}).click();
+ await page.getByPlaceholder("esimerkiksi Hallo").fill("Hallo");
+ await expect(page.locator(".los-freedict-row").first()).toContainText(/Hallo/i);
+ await page.getByRole("button",{name:"Suomi → saksa"}).click();
+ await page.getByPlaceholder("esimerkiksi tervehdys").fill("hei");
+ await expect(page.locator(".los-freedict-row").first()).toBeVisible();
+});
+
+test("all ten chapters expose exact German per-turn and C model listening controls",async({page})=>{
+ test.setTimeout(180_000);
+ await enter(page,"01/text");
+ for(const number of Array.from({length:10},(_,i)=>String(i+1).padStart(2,"0"))){
+  for(const kind of ["text","text-b","text-c"] as const){
+   await page.goto("/los#/1/"+number+"/"+kind,{waitUntil:"domcontentloaded"});
+   const selector=page.locator(".los-revised-speech-segments");
+   await expect(selector).toBeVisible({timeout:30000});
+   await selector.locator("summary").click();
+   const first=kind==="text-c"?"Kuuntele mallilause 1":"Kuuntele puheenvuoro 1";
+   await expect(selector.getByRole("button",{name:first,exact:true})).toBeVisible();
+   await expect(selector.getByRole("button",{name:first,exact:true})).toHaveCount(1);
+  }
+ }
+});

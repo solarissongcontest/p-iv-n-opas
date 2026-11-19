@@ -25,6 +25,8 @@ function TextSpeech({ blocks, chapterId, kind }: { blocks: readonly ReaderBlock[
   const [rate, setRate] = useState("1");
   const [message, setMessage] = useState("");
   const [voiceCount, setVoiceCount] = useState(0);
+  const [activeSegment, setActiveSegment] = useState<number | null>(null);
+  const segments = losSpeechSegments(blocks,chapterId,kind);
   const playbackId = useRef(0);
   useEffect(() => {
     if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
@@ -43,10 +45,11 @@ function TextSpeech({ blocks, chapterId, kind }: { blocks: readonly ReaderBlock[
     playbackId.current += 1;
     if (typeof window !== "undefined" && "speechSynthesis" in window) window.speechSynthesis.cancel();
     setIsSpeaking(false);
+    setActiveSegment(null);
     setMessage("Toisto pysäytetty.");
   };
 
-  const start = () => {
+  const start = (onlyIndex: number | null = null) => {
     if (typeof window === "undefined" || !("speechSynthesis" in window) || !("SpeechSynthesisUtterance" in window)) {
       setMessage("Tämä selain ei tue laitteen puhesynteesiä.");
       return;
@@ -58,15 +61,16 @@ function TextSpeech({ blocks, chapterId, kind }: { blocks: readonly ReaderBlock[
       setMessage("Laitteelta ei löydy saksankielistä puheääntä. Tarkista laitteen puheäänet ja avaa lukija uudelleen. Vääränkielisellä äänellä ei harjoitella ääntämistä.");
       return;
     }
-    const segments = losSpeechSegments(blocks, chapterId, kind);
-    if (!segments.length) {
+    const selected = onlyIndex === null ? segments : (segments[onlyIndex] ? [segments[onlyIndex]] : []);
+    if (!selected.length) {
       setMessage("Tässä tekstissä ei ole luettavia saksankielisiä puheenvuoroja.");
       return;
     }
     playbackId.current += 1;
     const currentPlayback = playbackId.current;
     synthesis.cancel();
-    const utterances = segments.map(segment => {
+    setActiveSegment(onlyIndex);
+    const utterances = selected.map(segment => {
       const utterance = new SpeechSynthesisUtterance(segment.text);
       utterance.lang = "de-DE";
       utterance.rate = Math.max(0.5, Math.min(2, Number(rate) * segment.rateFactor));
@@ -76,6 +80,7 @@ function TextSpeech({ blocks, chapterId, kind }: { blocks: readonly ReaderBlock[
         playbackId.current += 1;
         synthesis.cancel();
         setIsSpeaking(false);
+        setActiveSegment(null);
         setMessage("Puheentoisto epäonnistui ("+event.error+"). Tarkista laitteen saksankielinen puheääni tai kokeile uudelleen.");
       };
       return utterance;
@@ -84,6 +89,7 @@ function TextSpeech({ blocks, chapterId, kind }: { blocks: readonly ReaderBlock[
     if (last) last.onend = () => {
       if (playbackId.current !== currentPlayback) return;
       setIsSpeaking(false);
+      setActiveSegment(null);
       setMessage("Kuuntelu päättyi. Voit kuunnella tekstin uudelleen.");
     };
     setIsSpeaking(true);
@@ -95,7 +101,7 @@ function TextSpeech({ blocks, chapterId, kind }: { blocks: readonly ReaderBlock[
   return <div className="los-revised-speech">
     <div className="los-revised-speech-controls">
       <Headphones size={18} aria-hidden="true" />
-      <button type="button" className="los-outline-button" onClick={isSpeaking ? stop : start}>
+      <button type="button" className="los-outline-button" onClick={isSpeaking ? stop : ()=>start()}>
         {isSpeaking ? <><Square size={15} aria-hidden="true" /> Pysäytä</> : <><Volume2 size={16} aria-hidden="true" /> Kuuntele teksti</>}
       </button>
       <label>Toistonopeus
@@ -104,6 +110,21 @@ function TextSpeech({ blocks, chapterId, kind }: { blocks: readonly ReaderBlock[
         </select>
       </label>
     </div>
+    {segments.length>1&&<details className="los-revised-speech-segments">
+      <summary>Kuuntele yksittäinen {kind==="C"?"mallilause":"puheenvuoro"} ({segments.length})</summary>
+      <ol>{segments.map((segment,index)=><li key={index}>
+        <div className="los-revised-speech-segment-label">
+          <strong>{kind==="C"?"Malli "+(index+1):segment.speaker==="Erzähler"?"Kertoja":segment.speaker}</strong>
+          <span lang="de">{segment.text}</span>
+        </div>
+        <button type="button" className="los-outline-button" aria-label={"Kuuntele "+(kind==="C"?"mallilause":"puheenvuoro")+" "+(index+1)}
+          aria-pressed={isSpeaking&&activeSegment===index}
+          onClick={()=>isSpeaking&&activeSegment===index?stop():start(index)}>
+          {isSpeaking&&activeSegment===index?<Square size={14} aria-hidden="true"/>:<Volume2 size={16} aria-hidden="true"/>}
+          {isSpeaking&&activeSegment===index?" Pysäytä":" Kuuntele"}
+        </button>
+      </li>)}</ol>
+    </details>}
     <p className="los-revised-muted" role="status">{message || (
       voiceCount>0 ?
         "Saksankielisiä puheääniä laitteessa: "+voiceCount+". Selaimen synteettistä ääntämistä ei ole akustisesti hyväksytty." :

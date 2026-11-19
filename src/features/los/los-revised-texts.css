@@ -103,3 +103,16 @@
   .los-revised-disclaimer p{display:block;min-width:0;max-width:100%;overflow-wrap:anywhere}
   .los-section-nav{box-sizing:border-box;width:100%;max-width:100%;min-width:0;overflow-x:auto}
 }
+
+
+/* Optional per-replica listening for the twenty German readers and C support models. */
+.los-revised-speech-segments{margin:.7rem 0 1rem;border:1px solid var(--los-line);border-radius:10px;overflow:hidden}
+.los-revised-speech-segments>summary{cursor:pointer;padding:.75rem 1rem;min-height:44px;font-weight:650}
+.los-revised-speech-segments>summary:focus-visible{outline:2px solid var(--los-book-accent);outline-offset:-2px}
+.los-revised-speech-segments ol{list-style:none;padding:0;margin:0;max-height:410px;overflow:auto}
+.los-revised-speech-segments li{border-top:1px solid var(--los-line);padding:.65rem .85rem;display:flex;align-items:center;gap:1rem}
+.los-revised-speech-segment-label{flex:1;min-width:0;display:grid;gap:.2rem;line-height:1.55}
+.los-revised-speech-segment-label strong{font-size:.82rem}
+.los-revised-speech-segment-label span{overflow-wrap:anywhere}
+.los-revised-speech-segments button{min-height:44px;flex-shrink:0}
+@media(max-width:480px){.los-revised-speech-segments li{align-items:flex-start;flex-direction:column;gap:.45rem}.los-revised-speech-segments button{align-self:flex-end}}
