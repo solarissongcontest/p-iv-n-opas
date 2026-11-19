@@ -212,6 +212,7 @@ export function EnglishMasterBook() {
   const tocTriggerRef = useRef<HTMLButtonElement>(null);
   const [expandedGroup, setExpandedGroup] = useState<string | null>("G");
   const [sceneStep, setSceneStep] = useState(0);
+  const [bookSectionIndex, setBookSectionIndex] = useState(0);
   const [query, setQuery] = useState("");
   const tocSearchRef = useRef<HTMLInputElement>(null);
   const [progress, setProgress] = useState<Progress>({});
@@ -258,7 +259,7 @@ export function EnglishMasterBook() {
     document.title = "English Master · Opintopäiväkirja";
     return () => { document.title = "StudyOS"; };
   }, []);
-  useEffect(() => { setAnswer({}); setFeedback({}); setShowHelp(false); setTranscriptOpen(false); setSceneStep(0); }, [location.id, location.page]);
+  useEffect(() => { setAnswer({}); setFeedback({}); setShowHelp(false); setTranscriptOpen(false); setSceneStep(0); setBookSectionIndex(0); }, [location.id, location.page]);
   // Keep the mobile contents drawer as keyboard-accessible as the original LOS! 1.
   useEffect(() => {
     if (!tocOpen || !window.matchMedia("(max-width:760px)").matches) return;
@@ -295,6 +296,19 @@ export function EnglishMasterBook() {
   const lessons = useMemo(() => Object.values(pack?.lessons ?? {}).sort((a, b) => a.content_id.localeCompare(b.content_id, "en", { numeric: true })), [pack]);
   const currentChapter = pack?.chapters[location.id] ?? chapters[0];
   const chapterIndex = chapters.findIndex(ch => ch.content_id === currentChapter?.content_id);
+  const bookSectionChoices = [
+    { id: "opening", title: "Luvun alku", target: "em-chapter-opening" },
+    ...(currentChapter?.payload.sections ?? []).map(section => ({
+      id: section.section_id, title: section.title, target: "em-sec-" + section.section_id,
+    })),
+  ];
+  const selectedBookSection = Math.min(bookSectionIndex,bookSectionChoices.length-1);
+  const jumpToBookSection = (nextIndex: number) => {
+    const safeIndex = Math.max(0, Math.min(nextIndex,bookSectionChoices.length-1));
+    setBookSectionIndex(safeIndex);
+    const target = bookSectionChoices[safeIndex]?.target;
+    if (target) window.requestAnimationFrame(() => document.getElementById(target)?.scrollIntoView({behavior:"smooth",block:"start"}));
+  };
   const currentLesson = pack?.lessons[location.id] ?? lessons[0];
   const completed = Object.values(progress).filter(item => item.completed).length;
   const progressKey = owner ? "em-native-progress-" + owner : "";
@@ -404,7 +418,7 @@ export function EnglishMasterBook() {
                       onClick={()=>goChapter(ch.content_id)}><span className="los-sidebar-num">{ch.content_id}</span> {ch.title}</button>
                     {location.page==="book"&&currentChapter?.content_id===ch.content_id&&ch.payload.sections?.map(section=>
                       <button type="button" className="em-los-section-jump" key={section.section_id}
-                        onClick={()=>document.getElementById("em-sec-"+section.section_id)?.scrollIntoView({behavior:"smooth",block:"start"})}>
+                        onClick={()=>jumpToBookSection(bookSectionChoices.findIndex(item=>item.id===section.section_id))}>
                         {section.title}
                       </button>)}
                   </div>)}
@@ -420,11 +434,35 @@ export function EnglishMasterBook() {
           <a className="los-sidebar-exit" href="/studies">Palaa Opintopäiväkirjaan <ArrowRight size={15}/></a>
         </aside>
         <main id="main-content" className="los-book-main em-los-main" tabIndex={-1}>
-          <div className="los-main-breadcrumb">
-            <button onClick={()=>navigate("home")}>English Master</button>
-            {location.page!=="home" && <><ChevronRight size={12}/><span>{location.page==="book"?currentChapter?.title:location.page==="lesson"?currentLesson?.title:navItems.find(item=>item.id===location.page)?.label??"Sisältöpaketti"}</span></>}
+          <div className="los-reader-context">
+            <div className="los-main-breadcrumb">
+              <button onClick={()=>navigate("home")}>English Master</button>
+              {location.page!=="home" && <><ChevronRight size={12}/><span>{location.page==="book"?currentChapter?.title:location.page==="lesson"?currentLesson?.title:navItems.find(item=>item.id===location.page)?.label??"Sisältöpaketti"}</span></>}
+            </div>
           </div>
-          {pack && <LosReaderDisplayControls value={readingView} onChange={setReadingView}/>}
+          {pack && location.page==="book" && currentChapter && <nav className="los-section-nav em-los-section-nav" aria-label="Luvun osiot"
+            style={{"--los-section-fill":((selectedBookSection+1)/bookSectionChoices.length*100)+"%"} as CSSProperties}>
+            <div className="los-section-location">
+              <span className="los-section-index">LUKU {currentChapter.content_id}<span aria-hidden="true">·</span> OSIO {String(selectedBookSection+1).padStart(2,"0")} / {bookSectionChoices.length}</span>
+              <strong>{bookSectionChoices[selectedBookSection]?.title}</strong>
+            </div>
+            <div className="los-section-actions">
+              <label className="los-section-jump">
+                <span className="sr-only">Valitse luvun osio</span>
+                <select value={selectedBookSection} aria-label="Valitse luvun osio"
+                  onChange={e=>jumpToBookSection(Number(e.target.value))}>
+                  {bookSectionChoices.map((item,index)=><option key={item.id} value={index}>{item.title}</option>)}
+                </select>
+              </label>
+              <LosReaderDisplayControls value={readingView} onChange={setReadingView}/>
+              <button type="button" className="los-section-step" aria-label="Edellinen osio"
+                disabled={selectedBookSection===0} onClick={()=>jumpToBookSection(selectedBookSection-1)}><ChevronLeft size={18}/></button>
+              <button type="button" className="los-section-step" aria-label="Seuraava osio"
+                disabled={selectedBookSection===bookSectionChoices.length-1}
+                onClick={()=>jumpToBookSection(selectedBookSection+1)}><ChevronRight size={18}/></button>
+            </div>
+          </nav>}
+          {pack && location.page==="lesson" && <LosReaderDisplayControls value={readingView} onChange={setReadingView}/>}
           <div className="los-book-paper">
         {!pack ? <><ImportPanel onImported={value => { setPack(value); navigate("home"); }} />{error && <p className="em-error" role="alert">{error}</p>}</> :
           location.page === "import" ? <ImportPanel onImported={value => { setPack(value); navigate("home"); }}/> :
@@ -493,7 +531,7 @@ export function EnglishMasterBook() {
           </section> :
           location.page === "book" ? <section className="em-los-chapter-page">
             {currentChapter && <article className="em-chapter">
-              <div className="los-opening em-los-opening">
+              <div className="los-opening em-los-opening" id="em-chapter-opening">
                 <p className="los-eyebrow">{currentChapter.content_id} / {chapters.length} · ENGLISH MASTER</p>
                 <div className="los-opening-head">
                   <span className="los-opening-number em-los-opening-number">{currentChapter.content_id}</span>
@@ -515,7 +553,7 @@ export function EnglishMasterBook() {
                 </div>
                 {currentChapter.payload.sections?.length ? <nav className="los-chapter-links" aria-label="Luvun osiot">
                   {currentChapter.payload.sections.map(section=><button type="button" key={section.section_id}
-                    onClick={()=>document.getElementById("em-sec-"+section.section_id)?.scrollIntoView({behavior:"smooth",block:"start"})}>
+                    onClick={()=>jumpToBookSection(bookSectionChoices.findIndex(item=>item.id===section.section_id))}>
                     <span>{section.title}</span><ArrowRight size={17}/>
                   </button>)}
                 </nav> : null}
