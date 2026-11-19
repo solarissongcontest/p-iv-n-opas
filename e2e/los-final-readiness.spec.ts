@@ -67,7 +67,7 @@ test("dictionary errors are disclosed, and optional source/audio QA have accurat
  await page.getByPlaceholder("esimerkiksi tervehdys").fill("hei");
  await expect(page.locator(".los-freedict-row").first()).toBeVisible();
  await page.goto("/los#/1/appendix",{waitUntil:"domcontentloaded"});
- await expect(page.getByRole("heading",{name:"Tarkista saksan ääntäminen omalla laitteella"})).toBeVisible();
+ await expect(page.getByRole("heading",{name:"Kokeile saksankielistä puheääntä"})).toBeVisible();
  await expect(page.getByText("31 rekisteröityä aineistoa",{exact:false})).toBeVisible();
  await page.getByText("Näytä jokaisen lähteen tarkka tila").click();
  await expect(page.locator(".los-supplemental-audit li")).toHaveCount(31);
@@ -123,7 +123,7 @@ test("all ten chapters expose exact German per-turn and C model listening contro
  }
 });
 
-test("device voice QA cannot be self-certified before full German playback and stays voice-scoped",async({page})=>{
+test("optional German voice test tracks playback events without asking a beginner to certify pronunciation",async({page})=>{
  await page.addInitScript(()=>{
   class FakeUtterance{
    text:string;
@@ -156,20 +156,16 @@ test("device voice QA cannot be self-certified before full German playback and s
  await enter(page,"appendix");
  const diagnostics=page.locator(".los-voice-diagnostics");
  await expect(diagnostics).toBeVisible({timeout:30000});
- const checkbox=diagnostics.locator("input[type='checkbox']").first();
- await expect(checkbox).toBeDisabled();
+ await expect(diagnostics.getByText("Sinun ei tarvitse arvioida saksan ääntämisen oikeellisuutta", {exact:false})).toBeVisible();
+ await expect(diagnostics.locator("input[type='checkbox']")).toHaveCount(0);
+ await expect(diagnostics.getByText("Selaimen ilmoituksen mukaan päättyneitä näytteitä: 0/8.")).toBeVisible();
  await diagnostics.getByRole("button",{name:"Kuuntele",exact:true}).first().click();
- await expect(checkbox).toBeDisabled();
- await expect(checkbox).toBeEnabled({timeout:10000});
- await checkbox.check();
- await expect(diagnostics.getByText("Tämän laitteen ja puheäänen oma hyväksyntä: 1/8.")).toBeVisible();
+ await expect(diagnostics.getByText("Selaimen ilmoituksen mukaan päättyneitä näytteitä: 1/8.")).toBeVisible();
  await diagnostics.locator("select").selectOption({label:"QA Österreich · de-AT"});
- await expect(diagnostics.getByText("Tämän laitteen ja puheäänen oma hyväksyntä: 0/8.")).toBeVisible();
- await expect(checkbox).toBeDisabled();
- await diagnostics.locator("select").selectOption({label:"QA Deutsch · de-DE"});
- await expect(checkbox).toBeChecked();
+ await expect(diagnostics.getByText("Selaimen ilmoituksen mukaan päättyneitä näytteitä: 0/8.")).toBeVisible();
  await page.reload({waitUntil:"domcontentloaded"});
- await expect(page.locator(".los-voice-diagnostics").getByText("Tämän laitteen ja puheäänen oma hyväksyntä: 1/8.")).toBeVisible();
+ await expect(page.locator(".los-voice-diagnostics select")).toHaveValue("de-AT / QA Österreich");
+ await expect(page.locator(".los-voice-diagnostics").getByText("Selaimen ilmoituksen mukaan päättyneitä näytteitä: 0/8.")).toBeVisible();
 });
 
 test("preferred German voice follows the learner across Text A, B, C and appendix",async({page})=>{
