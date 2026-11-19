@@ -12,7 +12,15 @@ const c06Lessons: readonly TeacherLesson[] = [
   LOS1_L031_TEACHER, LOS1_L032_TEACHER, LOS1_L033_TEACHER,
   LOS1_L034_TEACHER, LOS1_L035_TEACHER,
 ];
+/** Historical authored manuscript lookup for regression tests and audit only.
+ * Never use this method to present the student's live lessons, as it contains
+ * references to former textbook editions. All UI uses getLosTeacherLesson.
+ */
+export function getOriginalLosTeacherLesson(id: string): TeacherLesson | undefined {
+  return c06Lessons.find(lesson => lesson.id === id) ?? getEarlierLesson(id);
+}
+/** Runtime always binds the original authored teaching to the current textbook. */
 export function getLosTeacherLesson(id: string): TeacherLesson | undefined {
-  const original=c06Lessons.find(lesson => lesson.id === id) ?? getEarlierLesson(id);
+  const original=getOriginalLosTeacherLesson(id);
   return original?canonicalizeLosTeacherLesson(original):undefined;
 }
