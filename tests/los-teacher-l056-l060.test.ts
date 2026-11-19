@@ -8,6 +8,7 @@ import {
   LOS1_L059_TEACHER,LOS1_L060_TEACHER,
 } from "../src/features/los/teacher/lessonL056L060.ts";
 import { getLosTeacherLesson } from "../src/features/los/teacher/lessonL004.ts";
+import {getLosTeacherLesson as getCurrentLosTeacherLesson} from "../src/features/los/teacher/lessonRegistry.ts";
 import {
   emptyTeacherSession,markTeacherHelp,moveTeacherScene,submitTeacherAnswer,
   finishTeacherSession,teacherCanFinish,independentTeacherEvidence,
@@ -115,8 +116,8 @@ test("L059 bridges the 50-choice final, ungraded production, audio evidence and 
   assert.equal(teacherCanFinish(teacher,LOS1_L059_TEACHER,{},[],undefined,true),true);
 });
 test("L060 rule-based summary separates covered, first-try, delayed and absent evidence, irrespective of 50/50 score",()=>{
-  const l04=getLosTeacherLesson("L004")!;
-  const l05=getLosTeacherLesson("L005")!;
+  const l04=getCurrentLosTeacherLesson("L004")!;
+  const l05=getCurrentLosTeacherLesson("L005")!;
   const firstScene=l04.scenes.find(s=>s.question?.skillId==="L1-INT-01"&&s.question.evidenceRole==="independent")!;
   const secondScene=l05.scenes.find(s=>s.question?.skillId==="L1-INT-01"&&s.question.evidenceRole==="independent")!;
   const first=submitTeacherAnswer(emptyTeacherSession(l04,NOW),l04,firstScene.id,right(firstScene.question!),NOW);
