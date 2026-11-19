@@ -53,6 +53,19 @@ function choiceQuestion(chapterId:string,kind:LosReadingText,index=0):TeacherQue
     genericWrong:"Katso Text "+kind+" uudelleen. Etsi täsmälleen kysytty tieto, älä valitse vain tutun näköistä sanaa."
   };
 }
+function supportExplanation(chapterId:string):string {
+  const data=material(chapterId);if(!data)return "";
+  const line=data.c.contentMarkdown.split("\\n").map(line=>line.trim())
+    .find(line=>line.length>55&&!line.startsWith("|")&&!line.startsWith("#")&&!line.startsWith("**")&&!line.startsWith("---"));
+  return chip(line??data.c.purpose);
+}
+function actualTeachingExample(chapterId:string):string {
+  const data=material(chapterId);if(!data)return "";
+  const start=data.ab.textA.blocks.find(block=>block.kind==="stage");
+  return "Teksti A:n tilanne: "+chip(start?.text??data.ab.textA.title)+
+    " Ensimmäinen puheenvuoro on: "+firstSentence(data.ab.textA)+
+    ". Mieti, mitkä sanat tunnistat jo tästä kokonaisesta lauseesta.";
+}
 function canonicalBoard(chapterId:string):TeacherBoardStep[] {
   const data=material(chapterId);if(!data)return [];
   const a=firstSentence(data.ab.textA);
@@ -78,7 +91,9 @@ function canonicalScene(chapterId:string,kind:LosReadingText):TeacherScene[] {
       paragraphs:[
         "Lue LOS! 1:n kappaleen "+Number(chapterId)+" uusi Text "+kind+". Se on oppikirjan nykyinen sisältö, ei aiempien versioiden lainattu dialogi.",
         purpose,
-        "Avaa koko teksti kirjan sisällä. Voit hyödyntää saksankielistä laiteääntä, mutta lukeminen ei yksin todista kuuntelun toteutuneen.",
+        kind==="A"||kind==="B"? "Opettajan esimerkki: "+firstSentence(kind==="A"?data.ab.textA:data.ab.textB):
+      "Text C:n opetus: "+supportExplanation(chapterId),
+    "Avaa koko teksti kirjan sisällä. Voit hyödyntää saksankielistä laiteääntä, mutta lukeminen ei yksin todista kuuntelun toteutuneen.",
       ],
       bookLinks:[...canonicalLinks(chapterId,[kind]),
         {label:"Tee Text "+kind+":n nykyiset ymmärtämistehtävät",chapterId,section:"understand",
@@ -125,6 +140,8 @@ function rewriteObsoleteScene(scene:TeacherScene,chapterId:string,sequence:numbe
   const intro=[
     "Tämä opetustilanne on päivitetty nykyisen LOS! 1:n teksteihin. Vanhan painoksen nimet, dialogit ja tehtävät eivät enää ohjaa opiskelua.",
     "Lue kappaleen "+Number(chapterId)+" "+label+" ja tunnista sen aihe, tärkeät ilmaukset ja henkilöt. Voit käyttää Text C:n tukitekstiä.",
+    actualTeachingExample(chapterId),
+    "Tukitekstin selitys: "+supportExplanation(chapterId),
   ];
   if(scene.kind==="question"){
     const q=choiceQuestion(chapterId,kind,sequence)??choiceQuestion(chapterId,"A",0);
@@ -227,6 +244,11 @@ export function canonicalizeLosTeacherLesson(original:TeacherLesson):TeacherLess
     losReadingQuestions(chapterId,kind).find(q=>q.kind==="choice")?.id).filter((id):id is string=>Boolean(id));
   else if((original.requiredCheckedIds?.length??0)>0&&!checked.length)
     checked=losReadingQuestions(chapterId,"A").filter(q=>q.kind==="choice").slice(0,2).map(q=>q.id);
+  // Avoid forcing untouched grammar or pronunciation lessons to restart.
+  // The shared engine compares content signatures as well as version labels.
+  const touched=reading||changedIndex>0||practice.length!==original.requiredPracticeIds.length||
+    checked.join("|")!==(original.requiredCheckedIds??[]).join("|");
+  if(!touched)return original;
   return {...original,
     version:LOS1_TEACHER_CANONICAL_VERSION,
     title:reading?"Lue ja ymmärrä: "+current.ab.chapterTitle:stale.test(original.title)?
