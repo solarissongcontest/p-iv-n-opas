@@ -114,7 +114,7 @@ test("L039 uses actual C07 Text B source IDs, but never fabricates a dictated na
   const textB=readFileSync("src/features/los/LosAdditionalTextB.tsx","utf8");
   assert.match(textB,/chapterId==="08".*los-editorial-note/s, "The unapproved interview is disclosed for C08");
   assert.match(textB,/source.transcriptIsExact&&source.lines.length>0/, "Unverified source transcriptions are not invented");
-  assert.match(textB,/odottaa hyväksyntää/);
+  assert.match(textB,/Videon tai äänen teknistä toimintaa ja tiedostokohtaisia oikeuksia ei ole vielä vahvistettu/);
 });
 
 test("L039 form is mandatory for written completion but never increases independent listening evidence",()=>{
