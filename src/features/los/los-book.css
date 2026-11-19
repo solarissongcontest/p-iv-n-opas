@@ -357,3 +357,11 @@
 .los-selection-audio-actions{display:flex;align-items:center;gap:.8rem;flex-wrap:wrap;margin-top:.5rem}
 .los-selection-audio-actions .los-outline-button{min-height:42px}
 @media(max-width:480px){.los-selection-audio{right:8px;left:8px;width:auto;bottom:max(12px,env(safe-area-inset-bottom))}}
+
+/* Prevent extra pronunciation controls from widening compact 4-column grammar tables. */
+@media(max-width:600px){
+ .los-grammar-page .los-grammar-table{table-layout:fixed;width:100%}
+ .los-grammar-page .los-grammar-table th,.los-grammar-page .los-grammar-table td{overflow-wrap:anywhere;word-break:normal}
+ .los-grammar-page .los-grammar-table .los-vocab-audio-wrap{display:flex;margin:.2rem 0 0}
+ .los-grammar-page .los-grammar-table .los-vocab-audio-button{min-width:40px;min-height:40px}
+}
