@@ -76,6 +76,6 @@ test("Teacher 2.0 sessions round-trip separately from legacy lesson answers",()=
  assert.deepEqual(parseTeacherSessions({L004:{...saved,scene:999}}),{});
  assert.deepEqual(parseTeacherSessions({L004:{...saved,script:"wrong"}}),{});
  const storage=readFileSync("src/features/los/studyState.ts","utf8");
- assert.match(storage,/teacherV2Sessions:parseTeacherSessions\\(input.teacherV2Sessions\\)/);
- assert.match(storage,/lessonProgress:parseLosLessonProgressMap\\(input.lessonProgress\\)/);
+ assert.ok(storage.includes("teacherV2Sessions:parseTeacherSessions(input.teacherV2Sessions)"));
+ assert.ok(storage.includes("lessonProgress:parseLosLessonProgressMap(input.lessonProgress)"));
 });
