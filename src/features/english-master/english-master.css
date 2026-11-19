@@ -403,3 +403,61 @@
  .em-app .los-front.los-front-has-banner .los-front-banner{order:0}
  .em-app .los-front.los-front-has-banner .los-front-mini-cover{display:none}
 }
+
+/* LOS! Editorial Reader v4 lesson-runner parity. The layout is shared, not
+   another dashboard card or a made-up completion claim. */
+.em-app .los-book-workspace .em-lesson-program{margin:24px 0 42px}
+.em-app .los-book-workspace .em-lesson-program>.los-lesson-program-head{padding:24px 0 22px}
+.em-app .los-book-workspace .em-lesson-program>.los-lesson-program-head h1{
+ font-size:clamp(28px,3.2vw,43px);line-height:1.13;letter-spacing:-.045em;
+ max-width:22ch;margin:14px 0 17px;color:var(--los-ink)
+}
+.em-app .los-book-workspace .em-lesson-program>.los-lesson-program-head .em-lead{
+ max-width:70ch;font-size:clamp(15px,1.5vw,18px)!important;
+ line-height:1.7;color:var(--los-ink)
+}
+.em-app .los-book-workspace .em-lesson-program>.los-lesson-program-head .los-lesson-status{
+ border:0;margin:0;padding:9px 0 0;font-size:13px;color:var(--los-soft)
+}
+.em-app .los-book-workspace .em-lesson-program>.los-lesson-program-head .los-lesson-progress{
+ margin:16px 0 3px
+}
+.em-app .los-book-workspace .em-lesson-detail{
+ padding:clamp(20px,3.5vw,36px);min-width:0
+}
+.em-app .los-book-workspace .em-lesson-detail>.em-overline{
+ margin:0 0 22px;font-size:11px!important;color:var(--los-soft)
+}
+.em-app .los-book-workspace .em-lesson-detail>.em-section{border-top:1px solid var(--los-line);padding:24px 0}
+.em-app .los-book-workspace .em-lesson-detail .em-lesson-objectives{
+ margin:6px 0 26px;padding:20px 23px
+}
+.em-app .los-book-workspace .em-lesson-detail .em-lesson-objectives h3{margin:0 0 12px}
+.em-app .los-book-workspace .em-lesson-detail .em-lesson-objectives ul{margin:0;padding-left:20px}
+.em-app .los-book-workspace .em-lesson-detail .em-lesson-objectives li{margin:7px 0;line-height:1.65}
+.em-app .los-book-workspace .em-lesson-detail>h2{
+ margin:28px 0 0;font-size:clamp(21px,2.6vw,28px)
+}
+.em-app .los-book-workspace .em-lesson-detail>.los-primary{margin-top:22px}
+.dark .em-app.los-app .em-los-brand{
+ color:#A8D7ED;
+}
+.dark .em-app.los-app .em-los-section-nav .los-section-index,
+.dark .em-app.los-app .em-los-section-nav .los-section-location>strong{
+ color:var(--los-ink);
+}
+.dark .em-app.los-app .em-los-section-nav .los-section-step,
+.dark .em-app.los-app .em-los-section-nav .los-display-settings>summary{
+ color:var(--los-ink);border-color:var(--los-line)
+}
+@media(max-width:760px){
+ .em-app .los-book-workspace .em-lesson-program{margin:18px 0 24px}
+ .em-app .los-book-workspace .em-lesson-program>.los-lesson-program-head{padding:18px 0}
+ .em-app .los-book-workspace .em-lesson-program>.los-lesson-program-head h1{
+  font-size:clamp(29px,8vw,37px);max-width:22ch;margin:12px 0 16px
+ }
+ .em-app .los-book-workspace .em-lesson-detail{
+  padding:19px 16px;border-radius:10px
+ }
+ .em-app .los-book-workspace .em-lesson-detail .em-lesson-objectives{padding:17px}
+}
