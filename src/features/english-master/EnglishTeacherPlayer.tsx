@@ -1,308 +1,317 @@
-import { useEffect, useMemo, useState } from "react";
-import { ArrowLeft, ArrowRight, BookOpen, Check, CheckCircle2, ChevronLeft, ChevronRight, HelpCircle, RotateCcw } from "lucide-react";
-import type { Lesson, LessonTask } from "./EnglishMasterBook";
+import {useEffect,useMemo,useState} from "react";
+import {ArrowRight,BookOpen,CheckCircle2,HelpCircle,RotateCcw} from "lucide-react";
+import type {Lesson,LessonTask} from "./EnglishMasterBook";
+import {
+  confirmTeacherActivity,emptyTeacherSession,finishTeacherSession,independentTeacherEvidence,
+  markTeacherHelp,moveTeacherScene,recoverTeacherSession,revealTeacherSolution,
+  setTeacherAnswerDraft,submitTeacherAnswer,teacherCompletionBlockers,teacherContentSignature,
+  teacherNextIncompleteSceneId,teacherSessionNeedsReview,toggleTeacherPause,validTeacherSession,
+  type TeacherLesson,type TeacherScene,type TeacherSession,
+} from "../los/teacher/engine.ts";
+import {
+  TeacherBoard,TeacherProgressBar,TeacherSceneNavigation,TeacherSceneOutline,
+  TeacherSceneQuestion,TeacherTopbar,
+} from "../los/teacher/Teacher2SharedUI.tsx";
 import "../los/teacher/teacher.css";
 import "./english-teacher.css";
 
 /**
- * English Master shares the actual LOS! Teacher 2.0 visual system and interaction
- * vocabulary. Its content and assessment state remain English-specific: the
- * German Teacher 2.0 engine must NEVER grade an English lesson.
+ * English Master runs the SAME LOS! Teacher 2.0 state machine and visual
+ * components. Only the authored English manuscript / book storage are adapters.
+ * It never borrows German course answers, assessment evidence or progress.
  */
-type Scene =
-  | { id: string; kind: "intro" | "summary"; title: string; phase: string; text: string }
-  | { id: string; kind: "explain"; title: string; phase: string; text: string; examples: NonNullable<NonNullable<Lesson["payload"]["explanations"]>[number]["examples"]> }
-  | { id: string; kind: "board"; title: string; phase: string; text: string; english: string; meaning: string }
-  | { id: string; kind: "task"; title: string; phase: string; task: LessonTask; number: number };
-type Verdict = { ok: boolean | null; explanation: string; checkedAt: string };
-type Session = {
-  schema: "em-teacher-ui-v1"; signature: string; sceneIndex: number;
-  visitedIds: string[]; paused: boolean;
-  answers: Record<string, string>; checks: Record<string, Verdict>;
-  attempts: Record<string, number>; boardReveal: Record<string, boolean>;
-  updatedAt: string;
+type Props={
+  lesson:Lesson;ownerId:string;previouslyCompleted:boolean;
+  onBack:()=>void;onComplete:(checked:number)=>void;
 };
-type Props = {
-  lesson: Lesson;
-  ownerId: string;
-  previouslyCompleted: boolean;
-  onBack: () => void;
-  onComplete: (checked: number) => void;
-};
+const stamp=()=>new Date().toISOString();
+const manualTask=(task:LessonTask)=>task.requires_manual_review||
+  task.format==="free_response"||
+  (task.format==="single_choice"?!task.correct_option:!task.acceptable_answers?.length);
+const taskSceneId=(index:number,manual:boolean)=>(manual?"reflection-":"question-")+index;
+const boardActivityId=(index:number)=>"board-activity-"+index;
 
-function scriptSignature(lesson: Lesson) {
-  // A small content fingerprint prevents claiming that old feedback verifies
-  // a newly edited teaching manuscript.
-  const input = JSON.stringify(lesson.payload);
-  let hash = 2166136261;
-  for (let i = 0; i < input.length; i++) {
-    hash ^= input.charCodeAt(i);
-    hash = Math.imul(hash, 16777619);
-  }
-  return lesson.content_id + ":" + (hash >>> 0).toString(16);
-}
-function buildScenes(lesson: Lesson): Scene[] {
-  const items: Scene[] = [{
-    id: "intro", kind: "intro", title: "Aloitus ja tavoitteet", phase: "ALOITUS",
-    text: lesson.payload.hook_fi ?? "Aloita oppitunnin tavoitteista ja siirry sen opetukseen.",
+function asTeacherLesson(source:Lesson):TeacherLesson {
+  const scenes:TeacherScene[]=[{
+    id:"intro",kind:"introduction",phase:"ALOITUS",title:"Aloitus ja tavoitteet",
+    paragraphs:[
+      source.payload.hook_fi??"Aloita oppitunnin tavoitteista.",
+      ...(source.payload.objectives_fi??[]).map((goal,i)=>String(i+1)+". "+goal),
+    ],
   }];
-  for (const [i,ex] of (lesson.payload.explanations ?? []).entries()) {
-    items.push({ id: "explanation-"+i, kind:"explain", title: ex.heading_fi ?? "Opetus "+(i+1),
-      phase: "OPETUS", text: ex.text_fi, examples: ex.examples ?? [] });
+  for(const [i,ex] of (source.payload.explanations??[]).entries()) {
+    scenes.push({
+      id:"explanation-"+i,kind:"explanation",phase:"OPETUS",
+      title:ex.heading_fi??"Opetus "+(i+1),
+      paragraphs:[ex.text_fi,...(ex.examples??[]).map(model=>
+        model.en+" · "+(model.meaning_fi??"")+(model.why_fi?" · "+model.why_fi:""))],
+      ...(ex.examples?.length?{board:ex.examples.map((item,j)=>({
+        label:"Esimerkki "+(j+1),german:item.en,meaning:
+          [item.meaning_fi,item.why_fi].filter(Boolean).join(" · "),
+      }))}:{}),
+    });
   }
-  for (const [i,scene] of (lesson.payload.teacher_scenes ?? []).entries()) {
-    items.push({ id:"teacher-"+i, kind:"board", phase:"OPETUSTAULU",
-      title:scene.title_fi ?? "Opetustilanne "+(i+1), text:scene.teacher_fi ?? scene.text_fi ?? "",
-      english:scene.board?.visible_en ?? "", meaning:scene.board?.teacher_fi ?? "" });
+  for(const [i,entry] of (source.payload.teacher_scenes??[]).entries()){
+    const activityId=boardActivityId(i);
+    scenes.push({
+      id:"board-"+i,kind:"board",phase:"OPETUSTAULU",
+      title:entry.title_fi??"Opetustilanne "+(i+1),
+      paragraphs:[entry.teacher_fi??entry.text_fi??"Käy esimerkki läpi ja kertaa sen idea."],
+      board:entry.board?.visible_en?[{
+        label:"Opetusesimerkki",german:entry.board.visible_en,
+        meaning:entry.board.teacher_fi??"",
+      }]:[],
+      activityId,activityLabel:"Olen käynyt opetustaulun vaiheen läpi",
+      help:entry.help_fi?[{title:"Toinen selitys",body:entry.help_fi}]:undefined,
+    });
   }
-  for (const [i,task] of (lesson.payload.tasks ?? []).entries()) {
-    items.push({ id:"task-"+task.task_id, kind:"task",phase:"HARJOITUS",
-      title:"Harjoitus "+(i+1), task, number:i+1 });
+  for(const [i,task] of (source.payload.tasks??[]).entries()){
+    const manual=manualTask(task);
+    const id=taskSceneId(i,manual);
+    if(manual){
+      scenes.push({
+        id,kind:"reflection",phase:"HARJOITUS",title:"Harjoitus "+(i+1),
+        paragraphs:[task.prompt_en??task.prompt_fi??"Kirjoita oma vastauksesi.",
+          "Tämä tehtävä arvioidaan itse. Sen tekeminen ei ole automaattinen kielitaidon osaamisnäyttö."],
+        reflection:{prompt:"Kirjoita oma vastauksesi englanniksi",
+          placeholder:"Oma vastaus englanniksi",minLength:1},
+        help:task.hint_fi?[{title:"Vihje",body:task.hint_fi}]:undefined,
+      });
+    }else{
+      scenes.push({
+        id,kind:"question",phase:"HARJOITUS",title:"Harjoitus "+(i+1),paragraphs:[],
+        question:{
+          prompt:task.prompt_en??task.prompt_fi??"Valitse tai kirjoita vastaus.",
+          type:task.format==="single_choice"?"choice":"text",
+          skillId:task.task_id,
+          evidenceRole:["independent","application","exit"].includes(task.phase??"")
+            ?task.phase as "independent"|"application"|"exit":"practice",
+          options:task.options?.map(option=>({
+            id:option.id,label:option.text,lang:"en" as const,
+            wrongFeedback:task.wrong_option_feedback_fi?.[option.id],
+          })),
+          correctOption:task.correct_option,accepted:task.acceptable_answers,
+          success:task.feedback_correct_fi??"Oikein!",
+          hint:task.hint_fi??"Palaa opetukseen, vertaa esimerkkiin ja mieti uudelleen.",
+          reteach:task.hint_fi??"Palaa edelliseen vaiheeseen ja kertaa sääntö.",
+          genericWrong:"Tarkista vastaus ja kertaa edellinen opetusvaihe.",
+        },
+      });
+    }
   }
-  items.push({ id:"summary",kind:"summary",phase:"YHTEENVETO",title:"Kertaa ja päätä oppitunti",
-    text:lesson.payload.summary_fi ?? "Palaa tavoitteisiin ja kertaa, mitä opit." });
-  return items;
-}
-function freshSession(signature: string, firstId: string): Session {
-  return { schema:"em-teacher-ui-v1",signature,sceneIndex:0,visitedIds:[firstId],
-    paused:false,answers:{},checks:{},attempts:{},boardReveal:{},updatedAt:new Date().toISOString() };
-}
-function loadSession(key: string, signature: string, firstId: string): Session {
-  if (typeof window === "undefined") return freshSession(signature,firstId);
-  try {
-    const raw = localStorage.getItem(key);
-    if (!raw) return freshSession(signature,firstId);
-    const parsed = JSON.parse(raw) as Session;
-    if (parsed.schema !== "em-teacher-ui-v1" || parsed.signature !== signature ||
-      !Number.isInteger(parsed.sceneIndex) || !parsed.visitedIds || !parsed.answers ||
-      !parsed.checks || !parsed.attempts || !parsed.boardReveal) return freshSession(signature,firstId);
-    return parsed;
-  } catch { return freshSession(signature,firstId); }
-}
-function checkAnswer(task: LessonTask, value: string): Verdict {
-  const normalized = value.trim().toLocaleLowerCase("en");
-  const manual = task.requires_manual_review || task.format === "free_response" ||
-    (task.format === "single_choice" ? !task.correct_option : !task.acceptable_answers?.length);
-  if (manual) return { ok:null,explanation:task.criteria_fi ??
-    "Vertaa vastaustasi malliin ja arvioi se itse. Automaattista hyväksyntää ei anneta.",
-    checkedAt:new Date().toISOString() };
-  const ok = task.format === "single_choice" ? value === task.correct_option :
-    (task.acceptable_answers ?? []).some(v=>v.trim().toLocaleLowerCase("en")===normalized);
-  return { ok,explanation:ok ? task.feedback_correct_fi ?? "Oikein!" :
-    task.wrong_option_feedback_fi?.[value] ?? task.hint_fi ?? "Tarkista sääntö ja yritä uudelleen.",
-    checkedAt:new Date().toISOString() };
+  scenes.push({
+    id:"summary",kind:"summary",phase:"YHTEENVETO",
+    title:"Kertaa ja päätä oppitunti",
+    paragraphs:[source.payload.summary_fi??"Kertaa tavoitteet ja tarkista, mitä harjoittelit."],
+  });
+  return {
+    id:source.content_id,bookId:1,chapterId:source.book_refs?.[0]??"G01",
+    language:"en",version:"em-0.8",
+    title:source.title,objective:source.payload.hook_fi??"Harjoittele englannin taitoja.",
+    estimatedMinutes:0,scenes,
+    requiredQuestionIds:scenes.filter(scene=>scene.question).map(scene=>scene.id),
+    requiredActivityIds:scenes.filter(scene=>scene.activityId).map(scene=>scene.activityId!),
+    requiredPracticeIds:[],
+  };
 }
 
-export function EnglishTeacherPlayer({ lesson, ownerId, previouslyCompleted, onBack, onComplete }: Props) {
-  const scenes = useMemo(()=>buildScenes(lesson),[lesson]);
-  const signature = useMemo(()=>scriptSignature(lesson),[lesson]);
-  const key = "em-teacher-v2-"+ownerId+"-"+lesson.content_id;
-  const [session,setSession] = useState<Session>(()=>loadSession(key,signature,scenes[0]!.id));
-  const [hintOpen,setHintOpen] = useState(false);
-  const [outlineOpen,setOutlineOpen] = useState(false);
+function safeReadSession(key:string,lesson:TeacherLesson):TeacherSession {
+  try{
+    const parsed:unknown=JSON.parse(localStorage.getItem(key)??"null");
+    if(validTeacherSession(parsed)&&parsed.lessonId===lesson.id)
+      return recoverTeacherSession(parsed,lesson);
+  }catch{/* A corrupted cache must not create an artificial completion. */}
+  return emptyTeacherSession(lesson,stamp());
+}
+function safeReadHistory(key:string,id:string):TeacherSession[]{
+  try{
+    const value:unknown=JSON.parse(localStorage.getItem(key)??"[]");
+    return Array.isArray(value)?value.filter(item=>
+      validTeacherSession(item)&&item.lessonId===id).slice(-8):[];
+  }catch{return [];}
+}
+function TeacherReflection({scene,session,onChange,completed}:{
+  scene:TeacherScene;session:TeacherSession;onChange:(value:string)=>void;completed:boolean;
+}){
+  if(!scene.reflection)return null;
+  const value=session.draftAnswers[scene.id]??"";
+  return <section className="los-teacher-reflection">
+    <label htmlFor={"em-teacher-reflection-"+scene.id}>{scene.reflection.prompt}</label>
+    <textarea id={"em-teacher-reflection-"+scene.id} rows={5}
+      value={value} disabled={completed} maxLength={500}
+      placeholder={scene.reflection.placeholder}
+      onChange={event=>onChange(event.target.value)} />
+    <small role="status">{value.trim().length>=scene.reflection.minLength
+      ?"Oma vastaus tallennettu. Tämä on itsearviointia, ei automaattisesti todettua osaamista."
+      :"Kirjoita vähintään "+scene.reflection.minLength+" merkki."}</small>
+  </section>;
+}
+export function EnglishTeacherPlayer({lesson:source,ownerId,previouslyCompleted,onBack,onComplete}:Props){
+  const lesson=useMemo(()=>asTeacherLesson(source),[source]);
+  const storageKey="em-teacher-core-v1-"+ownerId+"-"+lesson.id;
+  const archiveKey=storageKey+"-archive";
+  const [session,setSession]=useState<TeacherSession>(()=>safeReadSession(storageKey,lesson));
+  const [archives,setArchives]=useState<TeacherSession[]>(()=>safeReadHistory(archiveKey,lesson.id));
+  const [saved,setSaved]=useState(false);
+  const [showHelp,setShowHelp]=useState(false);
+  const [replay,setReplay]=useState(0);
+  const [outlineOpen,setOutlineOpen]=useState(false);
+  useEffect(()=>{setOutlineOpen(window.matchMedia("(min-width:821px)").matches);},[]);
   useEffect(()=>{
-    setOutlineOpen(window.matchMedia("(min-width: 821px)").matches);
-  },[]);
-  const [saveError,setSaveError] = useState(false);
-  const idx = Math.max(0,Math.min(session.sceneIndex,scenes.length-1));
-  const scene = scenes[idx]!;
-  const tasks = lesson.payload.tasks ?? [];
-  const checkedCount = tasks.filter(task=>Boolean(session.checks[task.task_id])).length;
-  const allVisited = scenes.every(item=>session.visitedIds.includes(item.id));
-  const ready = checkedCount===tasks.length && allVisited && idx===scenes.length-1;
-  const update = (modify:(old:Session)=>Session) => setSession(old=>({
-    ...modify(old),updatedAt:new Date().toISOString(),
-  }));
-  useEffect(()=>{
-    try {localStorage.setItem(key,JSON.stringify(session));setSaveError(false);}
-    catch {setSaveError(true);}
-  },[key,session]);
-  useEffect(()=>{setHintOpen(false);},[idx]);
-  const move = (index:number)=>{
-    const next=Math.max(0,Math.min(index,scenes.length-1));
-    update(old=>({...old,sceneIndex:next,
-      visitedIds:old.visitedIds.includes(scenes[next]!.id)?old.visitedIds:[...old.visitedIds,scenes[next]!.id]}));
-    window.scrollTo({top:0,behavior:"auto"});
+    try{localStorage.setItem(storageKey,JSON.stringify(session));setSaved(true);}
+    catch{setSaved(false);}
+  },[session,storageKey]);
+  const current=lesson.scenes.find(item=>item.id===session.sceneId)??lesson.scenes[0]!;
+  const position=Math.max(0,lesson.scenes.findIndex(item=>item.id===current.id));
+  const stale=teacherSessionNeedsReview(session,lesson);
+  const checkedCount=lesson.scenes.filter(scene=>scene.question&&
+    session.attempts.some(attempt=>attempt.sceneId===scene.id)).length;
+  const blockers=teacherCompletionBlockers(session,lesson,{});
+  const ready=!stale&&!session.completedAt&&saved&&blockers.length===0;
+  const nextIncomplete=teacherNextIncompleteSceneId(session,lesson,{});
+  const completed=Boolean(session.completedAt&&!stale);
+  const independentCount=independentTeacherEvidence(session,lesson);
+  useEffect(()=>{setShowHelp(false);},[session.sceneId]);
+  const update=(fn:(current:TeacherSession)=>TeacherSession)=>setSession(old=>fn(old));
+  const navigate=(id:string)=>{update(old=>moveTeacherScene(old,lesson,id,stamp()));window.scrollTo(0,0);};
+  const pause=()=>update(old=>toggleTeacherPause(old,stamp()));
+  const saveDraft=(id:string,value:string)=>update(old=>setTeacherAnswerDraft(old,id,value,stamp()));
+  const markHelp=()=>update(old=>markTeacherHelp(old,current.id,stamp()));
+  const reveal=()=>update(old=>revealTeacherSolution(old,current.id,stamp()));
+  const submit=(answer:string)=>update(old=>submitTeacherAnswer(old,lesson,current.id,answer,stamp()));
+  const confirm=()=>{if(current.activityId)update(old=>confirmTeacherActivity(old,lesson,current.activityId!,stamp()));};
+  const restart=()=>{
+    if(!stale||!saved||archives.length>=8)return;
+    const revised=[...archives,session];
+    const fresh=emptyTeacherSession(lesson,stamp());
+    try {
+      // Write archive first. If writing a new session fails, the original
+      // session remains available and was not destroyed.
+      localStorage.setItem(archiveKey,JSON.stringify(revised));
+      localStorage.setItem(storageKey,JSON.stringify(fresh));
+      setArchives(revised);setSession(fresh);setSaved(true);
+    }catch{setSaved(false);}
   };
-  const answer = (taskId:string,value:string)=>update(old=>({
-    ...old,answers:{...old.answers,[taskId]:value},
-    // Changing an answer invalidates its previous evaluation.
-    checks:Object.fromEntries(Object.entries(old.checks).filter(([id])=>id!==taskId)),
-  }));
-  const submit=(task:LessonTask,value:string)=>{
-    if (!value.trim()) return;
-    update(old=>({...old,answers:{...old.answers,[task.task_id]:value},
-      checks:{...old.checks,[task.task_id]:checkAnswer(task,value)},
-      attempts:{...old.attempts,[task.task_id]:(old.attempts[task.task_id]??0)+1}}));
-  };
-  const goBack=()=>{if(!saveError)onBack();};
   const finish=()=>{
-    if (!ready || saveError) return;
-    onComplete(checkedCount);
+    if(!ready||!saved)return;
+    const finished=finishTeacherSession(session,lesson,{},stamp());
+    if(!finished.completedAt)return;
+    try{
+      localStorage.setItem(storageKey,JSON.stringify(finished));
+      setSession(finished);
+      onComplete(checkedCount);
+    }catch{setSaved(false);}
   };
-  return <main id="main-content" className="los-app los-teacher-app em-teacher-app" tabIndex={-1}>
-    <header className="los-teacher-top">
-      <button type="button" className="los-teacher-back" onClick={goBack}><ArrowLeft size={18}/> Opetuspolku</button>
-      <div className="los-teacher-brand"><span className="los-teacher-logo">ENGLISH MASTER</span><span>Opetustila</span></div>
-      <span className="los-teacher-book">Pitkä englanti · ENA</span>
-    </header>
-    <div className="los-teacher-progress" role="progressbar" aria-label="Oppitunnin opetustilanteet"
-      aria-valuemin={0} aria-valuemax={scenes.length} aria-valuenow={idx+1}>
-      <span style={{width:((idx+1)/scenes.length*100)+"%"}}/>
-    </div>
+  const onAnswerChange=(v:string)=>saveDraft(current.id,v);
+
+  return <main className="los-app los-teacher-app em-teacher-app" id="main-content" tabIndex={-1}>
+    <TeacherTopbar brand="ENGLISH MASTER" context="Pitkä englanti · ENA" onBack={onBack}/>
+    <TeacherProgressBar value={position+1} max={lesson.scenes.length}/>
     <div className="los-teacher-layout">
       <aside className="los-teacher-sidebar">
-        <p className="los-teacher-eyebrow">OPETUSPOLKU · {lesson.content_id}</p>
+        <p className="los-teacher-eyebrow">OPETUSPOLKU · {lesson.id}</p>
         <h1>{lesson.title}</h1>
-        <p className="los-teacher-sidebar-copy">{lesson.payload.hook_fi ?? "Opetustilassa etenet aihe kerrallaan."}</p>
-        <p className="los-teacher-small">
-          {previouslyCompleted ? "Merkitty harjoitelluksi" : "Opetustilanne "+(idx+1)+"/"+scenes.length}
-          {" · "}{checkedCount}/{tasks.length} harjoitusta tarkistettu
+        <p className="los-teacher-sidebar-copy">{lesson.objective}</p>
+        <p className="los-teacher-small">{completed?"Oppitunti käyty läpi":
+          "Oppitunti "+(position+1)+"/"+lesson.scenes.length}
+          {" · "}{checkedCount}/{lesson.requiredQuestionIds.length} kysymystä vastattu
+          {" · "}{independentCount} itsenäistä oikeaa harjoitusvastausta
         </p>
-        <button className="los-teacher-pause" type="button"
-          onClick={()=>update(old=>({...old,paused:!old.paused}))}>
+        {!completed&&!stale&&<button type="button" className="los-teacher-pause" onClick={pause}>
           {session.paused?"Jatka opetusta":"Keskeytä oppitunti"}
-        </button>
-        <details className="los-teacher-outline" open={outlineOpen} onToggle={event=>setOutlineOpen(event.currentTarget.open)}>
-          <summary>Oppitunnin sisältö</summary>
-          <nav aria-label="Oppitunnin opetustilanteet">
-            {scenes.map((item,i)=><button key={item.id} type="button"
-              aria-current={i===idx?"step":undefined}
-              className={i===idx?"is-active":""}
-              onClick={()=>move(i)}>
-              <span>{session.visitedIds.includes(item.id)?<Check size={15}/>:i+1}</span>
-              <span>{item.title}</span>
-            </button>)}
-          </nav>
-        </details>
-        <p className="los-teacher-save" role="status">{saveError?
-          "Tallennus epäonnistui. Älä sulje opetustilaa ennen kuin tallennus toimii.":
-          "Opetustilanteet ja vastaukset tallentuvat tälle laitteelle."}</p>
+        </button>}
+        <TeacherSceneOutline scenes={lesson.scenes} currentId={current.id}
+          visitedIds={session.visitedIds} disabled={stale}
+          onSelect={navigate} open={outlineOpen} onToggle={setOutlineOpen}/>
+        {archives.length>0&&<details className="los-teacher-session-history">
+          <summary>Aiemmat oppituntiversiot ({archives.length})</summary>
+          <p>Vanhoista vastauksista ei muodosteta nykyisen oppitunnin osaamisnäyttöä.</p>
+          {archives.map((old,i)=><details key={i}>
+            <summary>Versio {old.contentVersion} · {old.completedAt?"suoritettu":"keskeneräinen"}</summary>
+            <p>{old.updatedAt} · {old.attempts.length} vastausyritystä.</p>
+          </details>)}
+        </details>}
+        <p className={"los-teacher-save"+(!saved?" is-error":"")} role="status">
+          {saved?"Opetustilanteet ja vastaukset tallentuvat tälle laitteelle.":
+            "Tallennus epäonnistui. Älä sulje oppituntia ennen kuin varmistat tiedot."}
+        </p>
       </aside>
-      {session.paused ? <section className="los-teacher-paused" role="status">
+      {stale?<section className="los-teacher-paused los-teacher-version-review" role="status">
+        <h2>Oppitunnin sisältö on päivittynyt</h2>
+        <p>Vanhoja vastauksia ei verrata uuden version tehtäviin eikä tulkita automaattisesti oikeiksi.</p>
+        <p>Aiemmat yritykset ja luonnokset säilyvät arkistossa. Aloita päivitetty oppitunti uutena harjoitteluna.</p>
+        <button type="button" onClick={restart} disabled={!saved||archives.length>=8}>
+          Arkistoi vanha suoritus ja aloita päivitetty oppitunti
+        </button>
+      </section>:session.paused?<section className="los-teacher-paused" role="status">
         <h2>Oppitunti keskeytetty</h2>
-        <p>Opetustilanne ja tähän mennessä tallennetut vastaukset säilyvät tällä laitteella.</p>
-        <button type="button" onClick={()=>update(old=>({...old,paused:false}))}>Jatka opetusta</button>
-      </section> : <article className="los-teacher-paper em-teacher-paper" key={scene.id}>
-        <p className="los-teacher-scene-kicker">{scene.phase} · {idx+1}/{scenes.length}</p>
-        <h2>{scene.title}</h2>
-        {scene.kind==="intro" && <>
-          <div className="los-teacher-prose"><p>{scene.text}</p></div>
-          {lesson.payload.objectives_fi?.length ? <section className="em-teacher-goals">
-            <h3>Oppitunnin tavoitteet</h3>
-            <ul>{lesson.payload.objectives_fi.map((goal,i)=><li key={i}>{goal}</li>)}</ul>
-          </section>:null}
-        </>}
-        {scene.kind==="explain" && <>
-          <div className="los-teacher-prose"><p>{scene.text}</p></div>
-          {scene.examples.length>0 && <div className="los-teacher-board" aria-label="Opetusesimerkit">
-            <p className="los-teacher-board-label">ESIMERKIT</p>
-            <div className="los-teacher-board-grid">
-              {scene.examples.map((example,i)=><div key={i} className="los-teacher-board-item">
-                <strong lang="en">{example.en}</strong>
-                {example.meaning_fi&&<small>{example.meaning_fi}</small>}
-                {example.why_fi&&<p>{example.why_fi}</p>}
-              </div>)}
-            </div>
-          </div>}
-        </>}
-        {scene.kind==="board" && <>
-          <div className="los-teacher-prose"><p>{scene.text}</p></div>
-          {scene.english && <div className="los-teacher-board">
-            <p className="los-teacher-board-label">OPETUSTAULU</p>
-            <div className="los-teacher-board-grid">
-              <div className="los-teacher-board-item">
-                <strong lang="en">{scene.english}</strong>
-                {scene.meaning && session.boardReveal[scene.id]&&<small>{scene.meaning}</small>}
-              </div>
-            </div>
-            {scene.meaning && <div className="los-teacher-board-actions">
-              <button type="button" onClick={()=>update(old=>({...old,boardReveal:{
-                ...old.boardReveal,[scene.id]:!old.boardReveal[scene.id]
-              }}))}>{session.boardReveal[scene.id]?
-                <><RotateCcw size={16}/> Piilota selitys</> :
-                <><BookOpen size={16}/> Näytä selitys</>}</button>
-            </div>}
-          </div>}
-          {lesson.payload.alternative_explanation_fi && <section className="los-teacher-help">
-            <button type="button" aria-expanded={hintOpen} onClick={()=>setHintOpen(v=>!v)}>
-              <HelpCircle size={17}/> En ymmärrä · {hintOpen?"Piilota":"Toinen selitys"}
-            </button>
-            {hintOpen && <div className="los-teacher-help-entries"><p>{lesson.payload.alternative_explanation_fi}</p></div>}
-          </section>}
-        </>}
-        {scene.kind==="task" && <section className="los-teacher-question em-teacher-question">
-          <h3 lang={scene.task.prompt_en?"en":"fi"}>{scene.task.prompt_en??scene.task.prompt_fi}</h3>
-          {scene.task.format==="single_choice" && scene.task.options?.length ?
-            <div className="los-teacher-options" role="group" aria-label="Valitse vastaus">
-              {scene.task.options.map((option,i)=><button type="button" className={
-                "los-teacher-option"+(session.answers[scene.task.task_id]===option.id?" is-selected":"")
-              } aria-pressed={session.answers[scene.task.task_id]===option.id}
-              key={option.id} onClick={()=>submit(scene.task,option.id)}>
-                <span className="los-teacher-option-letter">{option.id||String(i+1)}</span>
-                <span lang="en">{option.text}</span>
-                {session.checks[scene.task.task_id]?.ok && session.answers[scene.task.task_id]===option.id && <Check size={18}/>}
-              </button>)}
-            </div>:
-            <form className="los-teacher-form" onSubmit={event=>{
-              event.preventDefault();submit(scene.task,session.answers[scene.task.task_id]??"");
-            }}>
-              <label htmlFor={"em-teacher-answer-"+scene.number}>Kirjoita vastauksesi</label>
-              {scene.task.format==="free_response" ?
-                <textarea id={"em-teacher-answer-"+scene.number} rows={5}
-                  value={session.answers[scene.task.task_id]??""}
-                  onChange={e=>answer(scene.task.task_id,e.target.value)} maxLength={5000}
-                  placeholder="Kirjoita oma vastauksesi englanniksi"/>:
-                <div className="los-teacher-input-row"><input id={"em-teacher-answer-"+scene.number}
-                  type="text" lang="en" autoComplete="off"
-                  value={session.answers[scene.task.task_id]??""}
-                  onChange={e=>answer(scene.task.task_id,e.target.value)} maxLength={500}
-                  placeholder="Vastauksesi englanniksi"/><button type="submit" disabled={!session.answers[scene.task.task_id]?.trim()}>Tarkista</button></div>}
-              {scene.task.format==="free_response"&&<button type="submit" className="los-teacher-primary"
-                disabled={!session.answers[scene.task.task_id]?.trim()}>Tarkista itse</button>}
-            </form>}
-          {session.checks[scene.task.task_id] && <div className={"los-teacher-feedback "+
-              (session.checks[scene.task.task_id]?.ok===false?"is-wrong":"is-right")} role="status">
-              <strong>{session.checks[scene.task.task_id]?.ok===null?"Itsearviointi":
-                session.checks[scene.task.task_id]?.ok?"Oikein":"Katsotaan tätä vielä"}</strong>
-              <p>{session.checks[scene.task.task_id]?.explanation}</p>
-              {session.checks[scene.task.task_id]?.ok===null &&
-                <p>Vastausta ei ole automaattisesti hyväksytty. Arvioi kieli itse tai opettajan avulla.</p>}
-            </div>}
-          <div className="los-teacher-question-tools">
-            {scene.task.hint_fi && <><button type="button" onClick={()=>setHintOpen(v=>!v)} aria-expanded={hintOpen}>
-              <HelpCircle size={16}/> {hintOpen?"Piilota vihje":"Tarvitsen vihjeen"}
-            </button>{hintOpen&&<p className="los-teacher-hint">{scene.task.hint_fi}</p>}</>}
-            {session.checks[scene.task.task_id] && (scene.task.model_answer_en||scene.task.acceptable_answers?.length) &&
-              <details className="em-teacher-model">
-                <summary>Näytä mallivastaus</summary>
-                <p lang="en">{scene.task.model_answer_en??scene.task.acceptable_answers?.[0]}</p>
-              </details>}
-          </div>
+        <p>Opetustilanne ja vastaukset ovat tallessa. Jatka omassa tahdissasi.</p>
+        <button type="button" onClick={pause}>Jatka opetusta</button>
+      </section>:<article key={current.id+"-"+replay} className="los-teacher-paper em-teacher-paper">
+        <div className="los-teacher-scene-kicker">{current.phase} · {position+1}/{lesson.scenes.length}</div>
+        <h2>{current.title}</h2>
+        <div className="los-teacher-prose">{current.paragraphs.map((paragraph,i)=>
+          <p key={i}>{paragraph}</p>)}</div>
+        {current.board?.length&&current.kind==="board"?
+          <TeacherBoard scene={current} language="en"/>:null}
+        {current.question&&<TeacherSceneQuestion scene={current} session={session}
+          language="en" submit={submit} saveDraft={onAnswerChange}
+          requestHint={markHelp} reveal={reveal}/>}
+        {current.reflection&&<TeacherReflection scene={current} session={session}
+          onChange={onAnswerChange} completed={completed}/>}
+        {current.activityId&&<section className="los-teacher-activity">
+          <button type="button" onClick={confirm} disabled={completed}>
+            <CheckCircle2 size={18}/> {session.activityIds.includes(current.activityId)
+              ?"Harjoitteluvaihe vahvistettu":"Vahvista tämän vaiheen harjoittelu"}
+          </button>
+          <p>Vahvistus kertoo harjoittelusta. Se ei ole itsenäinen kielitaidon arviointi.</p>
         </section>}
-        {scene.kind==="summary" && <>
-          <div className="los-teacher-prose"><p>{scene.text}</p></div>
-          <div className="los-teacher-summary">
-            <h3>Oppitunnin harjoittelutilanne</h3>
-            <p>{checkedCount}/{tasks.length} harjoitusta tarkistettu.</p>
-            <p>{allVisited?"Kaikki opetustilanteet avattu.":"Kaikkia opetustilanteita ei ole vielä avattu."}</p>
-            <p>Tämä on harjoittelumerkintä, ei automaattinen todiste kielitaidosta.</p>
-          </div>
-          {!previouslyCompleted && <button className="los-teacher-primary" type="button"
-            disabled={!ready||saveError} onClick={finish}>
-            <CheckCircle2 size={17}/> Merkitse harjoitelluksi
-          </button>}
-          {!ready && <p className="los-teacher-small" role="status">
-            Käy kaikki opetustilanteet läpi ja tarkista jokainen harjoitus ennen loppumerkintää.
-          </p>}
-          {previouslyCompleted && <p className="los-teacher-done"><CheckCircle2 size={18}/> Oppitunti merkitty harjoitelluksi.</p>}
-        </>}
-        <nav className="los-teacher-navigation" aria-label="Opetustilanteiden vaihto">
-          <button type="button" disabled={idx===0} onClick={()=>move(idx-1)}><ChevronLeft size={18}/> Edellinen</button>
-          {idx<scenes.length-1?<button type="button" className="los-teacher-primary"
-            onClick={()=>move(idx+1)}>Seuraava vaihe <ChevronRight size={18}/></button>:
-            <button type="button" className="los-teacher-back" onClick={goBack}>Takaisin Opetuspolkuun <ArrowRight size={16}/></button>}
-        </nav>
+        {current.kind==="reflection"&&source.payload.tasks&&(()=>{
+          const index=Number(current.id.replace("reflection-",""));
+          const task=source.payload.tasks[index];
+          const value=session.draftAnswers[current.id]??"";
+          return task&&value.trim()?<details className="los-teacher-help">
+            <summary>Näytä malli omaan vastaukseesi vertaamista varten</summary>
+            <p lang="en">{task.model_answer_en??task.acceptable_answers?.[0]??"Vertaa omaa vastausta tehtävän arviointikriteereihin."}</p>
+            {task.criteria_fi&&<p>{task.criteria_fi}</p>}
+          </details>:null;
+        })()}
+        {(current.help?.length||source.payload.alternative_explanation_fi)&&<section className="los-teacher-help">
+          <button type="button" onClick={()=>{setShowHelp(v=>!v);markHelp();}}
+            aria-expanded={showHelp}><HelpCircle size={17}/>
+            {showHelp?"Piilota toinen selitys":"En ymmärrä · Näytä toinen selitys"}
+          </button>
+          {showHelp&&<div className="los-teacher-help-entries">
+            {current.help?.map((entry,i)=><section key={i}><h3>{entry.title}</h3><p>{entry.body}</p></section>)}
+            {source.payload.alternative_explanation_fi&&<p>{source.payload.alternative_explanation_fi}</p>}
+          </div>}
+        </section>}
+        {current.kind==="summary"&&<section className="los-teacher-summary">
+          <h3>Oppitunnin todellinen harjoittelutilanne</h3>
+          <p>{checkedCount}/{lesson.requiredQuestionIds.length} kysymyksessä vähintään yksi vastausyritys.</p>
+          <p>{independentCount} itsenäistä oikeaa vastausta harjoituksissa. Tämä ei yksin osoita kielitaidon hallintaa.</p>
+          {blockers.length>0&&<ul className="los-teacher-completion-checklist"
+            aria-label="Oppitunnin puuttuvat suoritukset">
+            {blockers.map((reason,i)=><li key={i}>{reason}</li>)}
+          </ul>}
+          {!completed&&nextIncomplete&&nextIncomplete!==current.id&&
+            <button type="button" className="los-teacher-next-incomplete"
+              onClick={()=>navigate(nextIncomplete)}>
+              Siirry seuraavaan keskeneräiseen vaiheeseen <ArrowRight size={17}/>
+            </button>}
+          {!completed?<button type="button" className="los-teacher-primary" disabled={!ready}
+            onClick={finish}>Merkitse oppitunti läpikäydyksi</button>:
+            <p className="los-teacher-done"><CheckCircle2 size={17}/>
+              Oppitunti merkitty suoritetuksi. Osaamista seurataan erikseen.</p>}
+          {previouslyCompleted&&!completed&&
+            <p className="los-teacher-small">Vanha oppitunnin harjoittelumerkintä säilyy erillisenä. Teacher 2.0:n uusi näyttö tallennetaan erikseen.</p>}
+        </section>}
+        <TeacherSceneNavigation onReplay={()=>setReplay(n=>n+1)}
+          onPrevious={()=>navigate(lesson.scenes[position-1]!.id)}
+          onNext={()=>navigate(lesson.scenes[position+1]!.id)}
+          disablePrevious={position===0}
+          last={position===lesson.scenes.length-1}
+          onReturn={onBack}/>
       </article>}
     </div>
   </main>;
