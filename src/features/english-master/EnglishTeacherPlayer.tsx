@@ -118,7 +118,7 @@ export function EnglishTeacherPlayer({ lesson, ownerId, previouslyCompleted, onB
     const next=Math.max(0,Math.min(index,scenes.length-1));
     update(old=>({...old,sceneIndex:next,
       visitedIds:old.visitedIds.includes(scenes[next].id)?old.visitedIds:[...old.visitedIds,scenes[next].id]}));
-    window.scrollTo({top:0,behavior:"instant"});
+    window.scrollTo({top:0,behavior:"auto"});
   };
   const answer = (taskId:string,value:string)=>update(old=>({
     ...old,answers:{...old.answers,[taskId]:value},
