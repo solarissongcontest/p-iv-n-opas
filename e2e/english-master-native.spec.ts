@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { gzipSync } from "node:zlib";
+import { expectNoHorizontalOverflow } from "./helpers";
 
 const owner = "00000000-0000-4000-8000-000000000195";
 async function enterLocalBook(page: import("@playwright/test").Page) {
@@ -144,4 +145,53 @@ test("English Master book shares LOS! 1 persistent text size, line spacing and m
   await expect(page.locator(".los-book-workspace")).toHaveAttribute("data-reading-size", "extra");
   await expect(page.locator(".los-book-workspace")).toHaveAttribute("data-reading-spacing", "relaxed");
   await expect(page.locator(".los-book-workspace")).toHaveAttribute("data-reading-measure", "narrow");
+});
+
+test("English Master reuses the LOS! v4 editorial layouts at 1440, 390 and 320 pixels", async ({ page }, testInfo) => {
+  await enterLocalBook(page);
+  await expect(page.locator(".los-front")).toBeVisible({ timeout: 45_000 });
+  const scenes = [
+    { slug: "front", hash: "#/home", selector: ".los-front" },
+    { slug: "contents", hash: "#/contents", selector: ".em-los-contents" },
+    { slug: "chapter", hash: "#/book/G01", selector: ".los-opening" },
+    { slug: "lessons", hash: "#/path", selector: ".los-learning-path" },
+    { slug: "lesson", hash: "#/lesson", selector: ".em-lesson" },
+  ] as const;
+
+  for (const size of [{ name: "desktop", width: 1440, height: 900 },
+    { name: "mobile390", width: 390, height: 844 },
+    { name: "mobile320", width: 320, height: 780 }] as const) {
+    await page.setViewportSize({ width: size.width, height: size.height });
+    for (const scene of scenes) {
+      await page.goto("/english-master" + scene.hash, { waitUntil: "domcontentloaded" });
+      await expect(page.locator(scene.selector).first()).toBeVisible({ timeout: 45_000 });
+      await expectNoHorizontalOverflow(page);
+      await page.screenshot({
+        path: testInfo.outputPath("english-master-v4-" + size.name + "-" + scene.slug + ".png"),
+        fullPage: false, animations: "disabled",
+      });
+    }
+  }
+
+  await page.setViewportSize({ width: 320, height: 780 });
+  await page.goto("/english-master#/book/G01", { waitUntil: "domcontentloaded" });
+  await expect(page.locator(".em-los-section-nav")).toBeVisible({ timeout: 45_000 });
+  const sectionNav = page.locator(".em-los-section-nav");
+  await expect(sectionNav.getByRole("combobox", { name: "Valitse luvun osio" })).toBeVisible();
+  await sectionNav.locator(".los-display-settings summary").click();
+  const bounds = await sectionNav.locator(".los-display-settings-panel").evaluate(el => {
+    const rect = el.getBoundingClientRect();
+    return { left: rect.left, right: rect.right, viewport: window.innerWidth };
+  });
+  expect(bounds.left).toBeGreaterThanOrEqual(0);
+  expect(bounds.right).toBeLessThanOrEqual(bounds.viewport + 1);
+  await expectNoHorizontalOverflow(page);
+
+  await page.evaluate(() => document.documentElement.classList.add("dark"));
+  await sectionNav.locator(".los-display-settings summary").click();
+  await page.screenshot({
+    path: testInfo.outputPath("english-master-v4-mobile320-dark-chapter.png"),
+    fullPage: false, animations: "disabled",
+  });
+  await expectNoHorizontalOverflow(page);
 });
