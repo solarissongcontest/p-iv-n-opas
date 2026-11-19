@@ -779,3 +779,182 @@
   .los-study-layout-toggle {margin-top:0}
   .los-c01-turn {padding-block:11px}
 }
+
+
+/* LOS! Editorial Reader v4.1 — deliberate colour and micro-detail polish.
+   Colour roles: the current book accent = position/actions; teal = teaching
+   context; amber = learning goals. Never use these as answer correctness. */
+.los-app,.los-access,.los-loading {
+  --los-coral-wash:color-mix(in srgb,var(--los-book-accent) 5%,var(--los-paper));
+  --los-coral-soft:color-mix(in srgb,var(--los-book-accent) 11%,var(--los-paper));
+  --los-coral-edge:color-mix(in srgb,var(--los-book-accent) 33%,var(--los-line));
+  --los-note-teal:#306E67;
+  --los-note-wash:#EDF7F3;
+  --los-note-edge:#8DBFB1;
+  --los-goal-gold:#966A29;
+  --los-goal-wash:#FFF7EA;
+  --los-goal-edge:#DDBB7D;
+}
+.dark .los-app,.dark .los-access,.dark .los-loading {
+  --los-note-teal:#A9DCD0;
+  --los-note-wash:#1F3435;
+  --los-note-edge:#4A847A;
+  --los-goal-gold:#F0C78C;
+  --los-goal-wash:#342D23;
+  --los-goal-edge:#8A714A;
+}
+/* A little book-colour in the book's own chrome, without a giant tinted header. */
+.los-book-topbar {position:sticky}
+.los-book-topbar::before {
+  content:"";position:absolute;left:0;top:0;width:clamp(84px,14vw,190px);
+  height:3px;background:var(--los-book-accent);border-radius:0 0 6px 0;
+  pointer-events:none;
+}
+.los-top-title:hover .los-logo {filter:saturate(1.08)}
+.los-book-sidebar nav .los-sidebar-chapter-head>button:first-child.is-active {
+  background:var(--los-coral-wash);font-weight:710;color:var(--los-ink);
+}
+.los-book-sidebar nav .los-sidebar-chapter-children>div>button.is-active {
+  position:relative;padding-left:14px;
+  background:var(--los-coral-soft);
+  font-weight:730;color:var(--los-ink);
+}
+.los-book-sidebar nav .los-sidebar-chapter-children>div>button.is-active::before {
+  content:"";position:absolute;left:3px;top:9px;bottom:9px;width:3px;
+  border-radius:4px;background:var(--los-book-accent);
+}
+.los-sidebar-chapter-children {
+  border-left-color:color-mix(in srgb,var(--los-book-accent) 14%,var(--los-line));
+}
+.los-sidebar-book {align-items:center}
+.los-sidebar-book .los-cover {box-shadow:0 5px 13px rgba(45,31,32,.13)}
+.los-sidebar-tree-search:focus-within {
+  outline:2px solid var(--los-book-accent);outline-offset:2px;border-color:var(--los-coral-edge);
+}
+.los-book-sidebar nav button:hover:not(.is-active) {background:var(--los-coral-wash)}
+/* The thin bottom stroke means section position in the chapter, never mastery. */
+.los-section-nav {
+  position:relative;isolation:isolate;
+  background:linear-gradient(100deg,var(--los-coral-wash),var(--los-paper) 43%);
+  border-color:var(--los-border-quiet);box-shadow:0 3px 13px rgba(32,38,47,.025);
+  padding-bottom:12px;
+}
+.los-section-nav::before,.los-section-nav::after {
+  content:"";position:absolute;bottom:0;left:0;height:3px;pointer-events:none;
+  border-radius:0 0 0 10px;
+}
+.los-section-nav::before {width:100%;background:var(--los-line)}
+.los-section-nav::after {
+  width:var(--los-section-fill,0%);
+  max-width:100%;background:var(--los-book-accent);
+  border-radius:0 3px 3px 10px;
+  transition:width .22s ease;
+}
+.los-section-index {color:var(--los-soft);font-size:10px;letter-spacing:.115em}
+.los-section-index span {padding-inline:4px}
+.los-section-location strong {font-weight:740;letter-spacing:-.018em}
+.los-section-jump select {border-color:var(--los-line);background:var(--los-paper)}
+.los-section-jump select:hover,.los-section-nav .los-section-step:hover:not(:disabled) {
+  border-color:var(--los-coral-edge);background:var(--los-coral-wash);
+}
+.los-section-nav .los-display-settings>summary:hover {
+  border-color:var(--los-coral-edge);background:var(--los-coral-wash);
+}
+/* One restrained chapter-label treatment, applied throughout the series. */
+.los-app .los-reading-page .los-eyebrow,
+.los-app .los-grammar-page>.los-eyebrow,
+.los-app .los-vocabulary-page>.los-eyebrow {
+  display:inline-flex;align-items:center;max-width:100%;
+  padding:4px 10px;border-radius:5px;background:var(--los-coral-wash);
+  border-left:2px solid var(--los-book-accent);color:var(--los-book-accent);
+}
+.los-app :is(.los-reading-page,.los-grammar-page,.los-vocabulary-page) h1,
+.los-app .los-front-copy h1,
+.los-app .los-opening-head h1 {
+  text-wrap:balance;
+}
+.los-reading-page .los-page-intro {color:var(--los-soft);font-weight:440}
+.los-c01-speaker {color:var(--los-note-teal);letter-spacing:.015em}
+.los-c01-turn {border-bottom-color:var(--los-border-quiet)}
+.los-c01-turn:focus-within {
+  background:var(--los-coral-wash);border-radius:6px;
+}
+.los-c01-modes button.is-current,
+.los-c01-modes button[aria-pressed="true"] {
+  background:var(--los-coral-soft);border-color:var(--los-coral-edge);
+  color:var(--los-ink);box-shadow:inset 0 -2px 0 var(--los-book-accent);
+}
+.los-c01-modes button:hover:not(.is-current) {background:var(--los-coral-wash)}
+.los-c01-token:focus-visible {outline-offset:1px}
+.los-c01-gloss {border-color:var(--los-coral-edge);box-shadow:0 8px 20px rgba(35,40,48,.045)}
+/* Examples are warm, explanatory notes are teal, goals are a light gold.
+   Not used for incorrect/correct exercise feedback. */
+.los-app .los-example,
+.los-app .los-lesson-teaching-example {
+  background:var(--los-coral-wash);border-left:3px solid var(--los-book-accent);
+  border-radius:7px;padding-inline:18px;
+}
+.los-app .los-grammar-aside,
+.los-app .los-lesson-teaching-note {
+  background:var(--los-note-wash);
+  border:1px solid var(--los-note-edge);
+  border-left:3px solid var(--los-note-teal);
+  border-radius:9px;
+}
+.los-app .los-grammar-aside>strong {color:var(--los-note-teal)}
+.los-app .los-goals,.los-app .los-opening-goals {
+  background:var(--los-goal-wash);
+  border:1px solid var(--los-goal-edge);
+  border-left:3px solid var(--los-goal-gold);
+  border-radius:9px;
+}
+.los-app .los-goals>h3,.los-app .los-opening-goals>h3 {color:var(--los-ink)}
+.los-app .los-word-table thead th:first-child {
+  color:var(--los-book-accent);border-bottom-color:var(--los-coral-edge);
+}
+.los-app .los-word-table tbody tr:hover {background:var(--los-coral-wash)}
+.los-app .los-vocabulary-tools label:focus-within {outline:2px solid var(--los-coral-edge)}
+.los-app .los-answer-list label.is-selected {
+  box-shadow:inset 3px 0 0 var(--los-book-accent);
+}
+.los-front.los-front-has-banner {
+  background:linear-gradient(110deg,var(--los-coral-wash) 0%,var(--los-paper) 56%);
+}
+.los-front-has-banner .los-front-banner img {
+  box-shadow:0 9px 26px rgba(39,29,31,.10);
+  border-radius:9px;
+}
+.los-front-copy .los-front-meta {letter-spacing:.005em}
+.los-front-links button:hover,.los-chapter-links button:hover {
+  color:var(--los-book-accent);
+}
+.los-contents-list button:hover .los-content-number {transform:translateX(2px)}
+.los-content-number {transition:transform .16s ease}
+/* A quieter highlight for the split-study frame and consistent field geometry. */
+.los-study-mode-picker select:hover {border-color:var(--los-coral-edge)}
+.los-lesson-detail {box-shadow:0 4px 18px rgba(31,37,43,.025)}
+.los-app .los-book-paper select:focus-visible {
+  border-color:var(--los-book-accent);
+}
+@media(max-width:760px) {
+  .los-book-topbar::before {width:72px;height:2px}
+  .los-section-nav {padding-bottom:9px}
+  .los-app .los-reading-page .los-eyebrow {
+    padding:3px 8px;font-size:10px;
+  }
+  .los-c01-turn:focus-within {background:transparent}
+  .los-front.los-front-has-banner {
+    background:linear-gradient(180deg,var(--los-coral-wash),var(--los-paper) 59%);
+  }
+  .los-front-has-banner .los-front-banner img {box-shadow:0 5px 17px rgba(39,29,31,.085)}
+}
+@media(prefers-reduced-motion:reduce) {
+  .los-section-nav::after,.los-content-number {transition:none}
+  .los-contents-list button:hover .los-content-number {transform:none}
+}
+@media(forced-colors:active) {
+  .los-section-nav::after,.los-book-topbar::before,
+  .los-book-sidebar nav .los-sidebar-chapter-children>div>button.is-active::before {
+    background:Highlight;
+  }
+}
