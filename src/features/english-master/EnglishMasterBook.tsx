@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState, type ChangeEvent, type CSSProperties } from "react";
-import { ArrowLeft, ArrowRight, BookOpen, BookText, CheckCircle2, ChevronLeft, ChevronRight, Download, FileUp, Headphones, Menu, PenLine, Search, X } from "lucide-react";
+import { useEffect, useMemo, useRef, useState, type ChangeEvent, type CSSProperties } from "react";
+import { ArrowRight, BookOpen, BookText, CheckCircle2, ChevronLeft, ChevronRight, Download, FileUp, Headphones, Menu, PenLine, Search, X } from "lucide-react";
 import { readCachedDeviceUser } from "@/lib/deviceSession";
 import "../los/los-book.css";
 import "../los/los-appendix.css";
@@ -208,6 +208,7 @@ export function EnglishMasterBook() {
   const [expandedGroup, setExpandedGroup] = useState<string | null>("G");
   const [sceneStep, setSceneStep] = useState(0);
   const [query, setQuery] = useState("");
+  const tocSearchRef = useRef<HTMLInputElement>(null);
   const [progress, setProgress] = useState<Progress>({});
   const [answer, setAnswer] = useState<Record<string, string>>({});
   const [feedback, setFeedback] = useState<Record<string, { ok: boolean | null; explanation: string }>>({});
@@ -323,7 +324,7 @@ export function EnglishMasterBook() {
         <a href="/studies" className="los-back-library"><ChevronLeft size={19}/><span>Opintopäiväkirja</span></a>
         <button className="los-top-title" onClick={() => navigate("home")}><strong className="em-los-brand">ENGLISH MASTER<span className="em-dot">.</span></strong><span> / 2028 <span className="los-top-separator">·</span> ENA</span></button>
         <div className="los-top-actions">
-          <button className="los-top-search" onClick={() => { navigate("book",currentChapter?.content_id ?? "G01"); setTocOpen(true); }} aria-label="Hae oppikirjasta"><Search size={19}/></button>
+          <button className="los-top-search" onClick={() => { setTocOpen(true); window.requestAnimationFrame(() => tocSearchRef.current?.focus()); }} aria-label="Hae oppikirjasta"><Search size={19}/></button>
           <button className="los-top-toc" onClick={() => setTocOpen(v => !v)} aria-expanded={tocOpen} aria-controls="em-mobile-toc" aria-label={tocOpen?"Sulje sisällysluettelo":"Avaa sisällysluettelo"}>{tocOpen ? <X size={19}/> : <Menu size={19}/>}<span>Sisältö</span></button>
         </div>
       </header>
@@ -340,7 +341,7 @@ export function EnglishMasterBook() {
               onClick={() => navigate(item.id,item.id==="book"?currentChapter?.content_id??"G01":"")}>{item.label}</button>)}
             <div className="los-sidebar-tree-controls">
               <label className="los-sidebar-tree-search"><Search size={14}/><span className="sr-only">Suodata kirjalukuja</span>
-                <input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Etsi 122 luvusta" aria-label="Etsi kirjalukuja"/>
+                <input ref={tocSearchRef} value={query} onChange={e=>setQuery(e.target.value)} placeholder="Etsi 122 luvusta" aria-label="Etsi kirjalukuja"/>
               </label>
               <div className="los-sidebar-tree-actions">
                 <button type="button" onClick={()=>setExpandedGroup("*")}>Avaa kaikki</button>
