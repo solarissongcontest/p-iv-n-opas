@@ -38,6 +38,7 @@ import "./los-appendix.css";
 import "./los-workbook.css";
 import "./los-cloud.css";
 import "./los-backups.css";
+import "./los-design-quality.css";
 
 type LosSection = LosDestination;
 type LosLocation = { book: number | null; chapter: string | null; section: LosSection };
@@ -124,7 +125,7 @@ function SeriesView({ openBook }: { openBook: (id: number) => void }) {
         <small>{book.code} · {book.module}</small>
       </button>)}
     </div>
-    <p className="los-library-footnote">LOS! 1:n kaikki kymmenen kappaletta ja 60 ohjattua oppituntia ovat nyt opiskeltavissa oppikirjan sisällä. Alkuperäistekstit ja käytössä olevat äänilähteet näkyvät asianmukaisin lähdemerkinnöin. Erillisten äänitiedostojen tuotanto, tekstien ulkopuolinen kielentarkastus sekä oikeiden laitteiden testaus ovat edelleen avoimia. Voit silti opiskella nykyisellä julkaistulla kirjalla. Muut LOS!-sarjan kirjat ovat suunnitteluvaiheessa.</p>
+    <p className="los-library-footnote">LOS! 1 sisältää kymmenen kappaletta, 60 ohjattua oppituntia, sanastot, harjoitukset ja saksankielisen synteettisen kuuntelun. Avaa kirja ja jatka suoraan viimeisimpään oppituntiisi. Autenttiset lisämateriaalit ja niiden lähdetiedot löytyvät kirjan sisältä. Muut LOS!-sarjan kirjat ovat suunnitteluvaiheessa.</p>
   </div>;
 }
 function BookFront({ book, move }: { book: LosBookDefinition; move: (chapter: string | null, section: LosSection) => void }) {
@@ -409,9 +410,6 @@ function Appendix({ book }: { book: LosBookDefinition }) {
         </li>)}</ul>
       </details>
     </div>}
-    <div className="los-appendix-section"><h2>Lähteet ja materiaalit</h2><p>Kymmenen kappaleen LOS!:n omat Text A/B/C -opetustekstit ovat kirjan sisällä. Autenttiset ihmisten kirjoittamat lähteet ovat valinnaista lisäaineistoa; niiden käyttöoikeudet ja julkaisutilat arvioidaan erikseen. Päätekstit eivät saa autenttisuusmerkintää, jota niille ei kuulu.</p></div>
-    <div className="los-appendix-section"><h2>Opetuspolku, sanakirja ja kappaletestit</h2><p>Opetuspolku ja sanakirja löytyvät kirjan valikosta. LOS! 1:n kaikissa kymmenessä kappaleessa on rajattu automaattisesti tarkistettava alkeistesti, yhteensä 147 osatehtävää. Kymmenen kappaleen lisäksi EX-MID (25 pistettä) ja EX-FINAL (50 pistettä) ovat käytettävissä; loppukokeen alkuperäislähteisiin perustuvat kuuntelutehtävät edellyttävät kyseisten äänilähteiden toimivaa toistoa ennen palautusta; tämä ei tarkoita, että Text A–C:lle vaadittaisiin erillisiä äänitiedostoja. Kuuntelun toimivuutta ei ole vahvistettu kaikilla fyysisillä laitteilla. Sinun ei tarvitse tarkastaa saksan ääntämisen oikeellisuutta: vapaat puhe- ja kirjoitustehtävät ovat harjoituksia, eivät asiantuntijan arvioimia tai automaattisesti pisteytettyjä kielikokeita. LOS! 1:n oma välikoe sisältää 25 pisteytettävää tehtävää ja erillisen itsearvioitavan dialogin. Kappalekohtaisissa muistiinpanoissa on erillinen, salasanalla suojattu manuaalinen pilvisynkronointi, joka vaatii palvelimen käyttöönoton.</p></div>
-    <LosBackups bookId={book.id} />
   </section>;
 }
 function LosBookWorkspace({ book, location, move, goLibrary, openBook }: { book: LosBookDefinition; location: LosLocation; move: (chapter: string | null, section: LosSection) => void; goLibrary: () => void; openBook: (id: number) => void }) {
@@ -597,7 +595,7 @@ function LosBookWorkspace({ book, location, move, goLibrary, openBook }: { book:
           {previous ? <button onClick={() => openChapter(previous)}><ChevronLeft size={18} /><span>Edellinen kappale<small lang="de">{previous.title}</small></span></button> : <span />}
           {next ? <button onClick={() => openChapter(next)}><span>Seuraava kappale<small lang="de">{next.title}</small></span><ChevronRight size={18} /></button> : <button onClick={() => move(null, "appendix")}>Kirjan liitteet <ChevronRight size={18} /></button>}
         </div>}
-        <footer className="los-page-footer">LOS! · {book.code} · {book.module} <span>Kappaleiden varmistettuja aineistoja täydennetään</span></footer>
+        <footer className="los-page-footer">LOS! · {book.code} · {book.module} <span>Itsenäinen opiskelu · LOPS21 · Saksa B3</span></footer>
       </main>
     </div>
     {tocOpen && <button className="los-toc-backdrop" tabIndex={-1} aria-label="Sulje sisällysluettelo" onClick={() => {setTocOpen(false);tocTriggerRef.current?.focus();}} />}
