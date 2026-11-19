@@ -1,0 +1,131 @@
+/* LOS! visual/UX review, 2026-11-19.
+ * Constraints follow independent reading/interaction heuristics (WCAG 2.2,
+ * readability, progressive disclosure) as well as the local book identity.
+ * Scoped to LOS!; no change to Opintopäiväkirja's global shell.
+ */
+.los-book-workspace{
+ --los-reader-text-size:19px;
+ --los-reader-leading:1.78;
+ --los-reader-measure:68ch;
+}
+.los-book-workspace[data-reading-size="large"]{--los-reader-text-size:22px}
+.los-book-workspace[data-reading-size="extra"]{--los-reader-text-size:24px}
+.los-book-workspace[data-reading-spacing="relaxed"]{--los-reader-leading:2}
+.los-book-workspace[data-reading-measure="narrow"]{--los-reader-measure:55ch}
+.los-book-workspace[data-reading-measure="wide"]{--los-reader-measure:76ch}
+
+/* Careful line length matters more than filling the screen at all costs.
+ * Example sentences inherit the selected reading size; buttons remain fixed touch targets. */
+.los-book-workspace .los-reading-page .los-c01-words,
+.los-book-workspace .los-reading-page .los-revised-prose,
+.los-book-workspace .los-reading-page .los-revised-line p,
+.los-book-workspace .los-revised-support-content p,
+.los-book-workspace .los-revised-support-content li,
+.los-book-workspace .los-grammar-page .los-example p,
+.los-book-workspace .los-grammar-page > p{
+ font-size:var(--los-reader-text-size);
+ line-height:var(--los-reader-leading);
+}
+.los-book-workspace .los-revised-page:not(.is-study-split),
+.los-book-workspace .los-c01-reader,
+.los-book-workspace .los-revised-dialogue{
+ max-width:min(100%,var(--los-reader-measure));
+}
+.los-book-workspace .los-reading-page .los-c01-words{font-family:Georgia,"Times New Roman",serif;letter-spacing:.004em}
+.los-book-workspace .los-grammar-page .los-example p{font-weight:650}
+
+/* Modest brand bar, visible section location and cleaner reading rhythm. */
+.los-book-topbar{border-top:3px solid var(--los-book-accent)}
+.los-book-main .los-book-paper{border-radius:2px;overflow:clip}
+.los-book-workspace .los-main-breadcrumb{flex-wrap:wrap;line-height:1.55}
+.los-book-workspace :is(h1,h2,h3,[id].los-reading-question,[id].los-workbook-question){scroll-margin-top:105px}
+.los-book-workspace .los-section-nav{scroll-padding-inline:14px;overscroll-behavior-x:contain}
+.los-book-workspace .los-section-nav button{flex:0 0 auto;min-height:44px}
+.los-book-workspace .los-book-sidebar nav button{min-height:44px}
+.los-book-workspace :is(button,a,input,select,textarea,summary):focus-visible{
+ outline:3px solid #397ace;
+ outline-offset:3px;
+}
+/* Always use the reader's own ink color for semantic selected states in dark mode. */
+.dark .los-book-workspace .los-study-layout-toggle button.is-active{color:var(--los-ink)}
+.los-book-workspace :is(.los-book-paper,.los-inner-page,.los-reading-page) {min-width:0}
+.los-book-workspace .los-book-paper :is(p,li,blockquote){overflow-wrap:break-word}
+
+/* Reader options are discoverable without another permanently visible toolbar. */
+.los-display-settings{max-width:900px;margin:0 auto 12px;padding:0 3px}
+.los-display-settings>summary{
+ display:flex;align-items:center;justify-content:center;gap:7px;
+ width:max-content;max-width:100%;margin-left:auto;min-height:44px;
+ padding:7px 12px;border:1px solid var(--los-line);border-radius:8px;
+ background:var(--los-paper);color:var(--los-ink);
+ font-size:13px;font-weight:700;cursor:pointer;list-style:none;
+}
+.los-display-settings>summary::-webkit-details-marker{display:none}
+.los-display-settings[open]>summary{border-color:var(--los-book-accent);background:var(--los-subtle)}
+.los-display-settings-panel{padding:16px 18px 14px;margin-top:7px;border:1px solid var(--los-line);border-radius:10px;background:var(--los-paper)}
+.los-display-settings-panel>p{font-size:13px;color:var(--los-soft);line-height:1.6;margin:0 0 12px}
+.los-display-settings-fields{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.los-display-settings-fields label{display:flex;flex-direction:column;gap:5px;min-width:0;font-size:13px;font-weight:700}
+.los-display-settings-fields select{
+ min-height:44px;width:100%;min-width:0;padding:8px 11px;
+ border-radius:7px;border:1px solid var(--los-line);
+ background:var(--los-paper);color:var(--los-ink);font:inherit;font-weight:500;
+}
+.los-display-reset{border:0;background:transparent;color:var(--los-ink);text-decoration:underline;text-underline-offset:3px;font-size:13px;font-weight:650;min-height:44px;margin-top:8px;padding:7px}
+
+/* Narrow mobile navigation behaves as a proper, escapable drawer, not an
+ * unlabelled fixed panel hidden from keyboard users. */
+.los-sidebar-close{display:none}
+@media(max-width:760px){
+ .los-book-sidebar.is-open{overscroll-behavior:contain;padding-bottom:max(24px,env(safe-area-inset-bottom))}
+ .los-book-sidebar.is-open .los-sidebar-close{
+  display:flex;width:100%;min-height:48px;align-items:center;gap:10px;
+  border:1px solid var(--los-line);border-radius:8px;padding:10px 13px;
+  background:var(--los-subtle);color:var(--los-ink);font-size:14px;font-weight:700;
+  margin-bottom:15px;
+ }
+ .los-book-workspace:has(.los-book-sidebar.is-open) .los-selection-audio{display:none}
+ .los-display-settings{padding:0 14px}
+ .los-display-settings-fields{grid-template-columns:1fr}
+ .los-display-settings-panel{padding:15px}
+ .los-book-workspace .los-reading-page .los-c01-words,
+ .los-book-workspace .los-reading-page .los-revised-prose,
+ .los-book-workspace .los-reading-page .los-revised-line p{
+   line-height:var(--los-reader-leading);
+ }
+ .los-book-workspace[data-reading-size="normal"]{--los-reader-text-size:18px}
+}
+@media(max-width:360px){
+ .los-display-settings>summary{font-size:12px}
+}
+@media(prefers-reduced-motion:reduce){
+ .los-book-workspace :is(button,a,summary){transition:none!important}
+}
+
+/* Split by the *actual available book width*, not the outer browser window.
+ * At medium widths a full-width reading column is more useful than squeezed
+ * side-by-side text; at large widths questions remain a stable second column.
+ */
+.los-book-workspace .los-reading-page:has(.los-revised-page.is-study-split){
+ container-name:losStudy;
+ container-type:inline-size;
+}
+@media(min-width:1400px){
+ .los-book-workspace .los-study-layout.is-split{display:flex;flex-direction:column;gap:26px}
+ .los-book-workspace .los-study-layout.is-split .los-study-questions{
+  position:static;max-height:none;overflow:visible;max-width:780px;
+ }
+}
+@container losStudy (min-width:1000px){
+ .los-book-workspace .los-study-layout.is-split{
+  display:grid;grid-template-columns:minmax(420px,1fr) minmax(340px,390px);
+  gap:28px;align-items:start;
+ }
+ .los-book-workspace .los-study-layout.is-split .los-study-reading{min-width:0;max-width:74ch}
+ .los-book-workspace .los-study-layout.is-split .los-study-questions{
+  position:sticky;top:85px;max-height:calc(100dvh - 108px);
+  overflow-y:auto;overscroll-behavior:contain;padding:16px;
+  border:1px solid var(--los-line);border-radius:12px;
+  background:var(--los-paper);
+ }
+}
