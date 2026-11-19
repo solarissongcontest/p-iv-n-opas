@@ -121,7 +121,7 @@ function SeriesView({ openBook }: { openBook: (id: number) => void }) {
         <small>{book.code} · {book.module}</small>
       </button>)}
     </div>
-    <p className="los-library-footnote">LOS! 1:n kaikki kymmenen kappaletta ja 60 ohjattua oppituntia ovat nyt opiskeltavissa oppikirjan sisällä. Alkuperäistekstit ja käytössä olevat äänilähteet näkyvät asianmukaisin lähdemerkinnöin. Lopullinen saksan kielen, äänentoiston ja tuotantojulkaisun laadunvarmistus on silti vielä kesken. Muut LOS!-sarjan kirjat ovat suunnitteluvaiheessa.</p>
+    <p className="los-library-footnote">LOS! 1:n kaikki kymmenen kappaletta ja 60 ohjattua oppituntia ovat nyt opiskeltavissa oppikirjan sisällä. Alkuperäistekstit ja käytössä olevat äänilähteet näkyvät asianmukaisin lähdemerkinnöin. Erillisten äänitiedostojen tuotanto, tekstien ulkopuolinen kielentarkastus sekä oikeiden laitteiden testaus ovat edelleen avoimia. Voit silti opiskella nykyisellä julkaistulla kirjalla. Muut LOS!-sarjan kirjat ovat suunnitteluvaiheessa.</p>
   </div>;
 }
 function BookFront({ book, move }: { book: LosBookDefinition; move: (chapter: string | null, section: LosSection) => void }) {
@@ -358,7 +358,7 @@ function Appendix({ book }: { book: LosBookDefinition }) {
        Puhekäsikirjoitus ei ole sama asia kuin valmis äänite.</p>
       <p><strong>IPA-rivejä: {ipa.total}.</strong> Toimituksellisia merkintöjä {ipa.editorial}, 
        eSpeak-ohjelman koneellisia ehdotuksia {ipa.synthetic}, puuttuvia {ipa.missing}.
-       Toimituksellinenkaan merkintä ei tarkoita ulkopuolisen asiantuntijan hyväksyntää.</p>
+       Toimituksellinenkaan merkintä ei tarkoita ulkopuolisen asiantuntijan hyväksyntää. Opiskelijan ei tarvitse osata tarkistaa IPA-merkintöjen tai saksan ääntämisen oikeellisuutta.</p>
       <details>
         <summary>Äänitysten työjono, kaikki 30 tekstiä</summary>
         <table><thead><tr><th>Teksti</th><th>Puhejaksoja</th><th>Äänite</th></tr></thead>
@@ -387,7 +387,7 @@ function Appendix({ book }: { book: LosBookDefinition }) {
        <li>Muokkaa tekstiä iPhonella, synkronoi ja varmista muutos tietokoneella.</li>
        <li>Testaa erillinen konfliktitilanne kahdella eri muokkauksella. Varmista, ettei kumpikaan versio häviä.</li>
       </ol>
-      <p>Nämä ohjeet eivät itsessään merkitse koetta hyväksytyksi. Merkitse testit hyväksytyiksi vasta todellisen suorittamisen jälkeen.</p>
+      <p>Tämä on kehityksen vapaaehtoinen tekninen tarkistuslista, ei oppilaan saksan taitoja mittaava tehtävä. Fyysisten laitteiden synkronointia ei ole tällä ohjeella todistettu.</p>
     </div>}
     {book.id===1&&<LosVoiceDiagnostics/>}
     {book.id===1&&<div className="los-appendix-section" aria-label="Autenttisten lisäaineistojen julkaisuauditointi">
@@ -404,7 +404,7 @@ function Appendix({ book }: { book: LosBookDefinition }) {
       </details>
     </div>}
     <div className="los-appendix-section"><h2>Lähteet ja materiaalit</h2><p>Kymmenen kappaleen päätekstit, avointen lähteiden sisään kirjoitetut Text B -sisällöt ja käytössä olevat äänitteet ovat kirjan lukijoissa. Lähteiden oikeus-, kielitason, kuuntelun ja laitetestien portit pysyvät erillisinä. Pelkkä sisältöön integrointi ei merkitse materiaalia lopullisesti julkaisutestattavaksi.</p></div>
-    <div className="los-appendix-section"><h2>Opetuspolku, sanakirja ja kappaletestit</h2><p>Opetuspolku ja sanakirja löytyvät kirjan valikosta. LOS! 1:n kaikissa kymmenessä kappaleessa on rajattu automaattisesti tarkistettava alkeistesti, yhteensä 147 osatehtävää. Kymmenen kappaleen lisäksi EX-MID (25 pistettä) ja EX-FINAL (50 pistettä) ovat käytettävissä; loppukokeessa oikeiden alkuperäisäänitteiden on toimittava ennen palautusta. Kuuntelun laitetestaus sekä puheen ja kirjoituksen ihmisen tekemä laadunarviointi ovat vielä erillisiä julkaisuvaatimuksia. LOS! 1:n oma välikoe sisältää 25 pisteytettävää tehtävää ja erillisen itsearvioitavan dialogin. Kappalekohtaisissa muistiinpanoissa on erillinen, salasanalla suojattu manuaalinen pilvisynkronointi, joka vaatii palvelimen käyttöönoton.</p></div>
+    <div className="los-appendix-section"><h2>Opetuspolku, sanakirja ja kappaletestit</h2><p>Opetuspolku ja sanakirja löytyvät kirjan valikosta. LOS! 1:n kaikissa kymmenessä kappaleessa on rajattu automaattisesti tarkistettava alkeistesti, yhteensä 147 osatehtävää. Kymmenen kappaleen lisäksi EX-MID (25 pistettä) ja EX-FINAL (50 pistettä) ovat käytettävissä; loppukokeessa oikeiden alkuperäisäänitteiden on toimittava ennen palautusta. Kuuntelun toimivuutta ei ole vahvistettu kaikilla fyysisillä laitteilla. Sinun ei tarvitse tarkastaa saksan ääntämisen oikeellisuutta: vapaat puhe- ja kirjoitustehtävät ovat harjoituksia, eivät asiantuntijan arvioimia tai automaattisesti pisteytettyjä kielikokeita. LOS! 1:n oma välikoe sisältää 25 pisteytettävää tehtävää ja erillisen itsearvioitavan dialogin. Kappalekohtaisissa muistiinpanoissa on erillinen, salasanalla suojattu manuaalinen pilvisynkronointi, joka vaatii palvelimen käyttöönoton.</p></div>
     <LosBackups bookId={book.id} />
   </section>;
 }
