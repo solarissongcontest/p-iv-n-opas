@@ -35,7 +35,7 @@ export type TeacherSession = {
 };
 export const TEACHER_L004_SCRIPT="L004@2.0.0" as const;
 const safeStamp=(value:unknown):value is string=>
-  typeof value==="string"&&value.length<=40&&/^\\d{4}-\\d{2}-\\d{2}T/.test(value)&&Number.isFinite(Date.parse(value));
+  typeof value==="string"&&value.length<=40&&/^\d{4}-\d{2}-\d{2}T/.test(value)&&Number.isFinite(Date.parse(value));
 export function emptyTeacherSession():TeacherSession {
   return {version:1,script:TEACHER_L004_SCRIPT,scene:0,boardStep:0,attempts:{},helpUsed:{},completedAt:null,updatedAt:""};
 }
@@ -48,7 +48,9 @@ export function parseTeacherSessions(value:unknown):Record<string,TeacherSession
     if(id!=="L004"||!raw||typeof raw!=="object"||Array.isArray(raw))continue;
     const v=raw as Partial<TeacherSession>;
     if(v.version!==1||v.script!==TEACHER_L004_SCRIPT||!Number.isInteger(v.scene)||v.scene!<0||v.scene!>20||
-       !Number.isInteger(v.boardStep)||v.boardStep!<0||v.boardStep!>20)continue;
+       !Number.isInteger(v.boardStep)||v.boardStep!<0||v.boardStep!>20||
+       !v.attempts||typeof v.attempts!=="object"||Array.isArray(v.attempts)||
+       !v.helpUsed||typeof v.helpUsed!=="object"||Array.isArray(v.helpUsed))continue;
     const attempts:Record<string,TeacherAttempt>={};
     for(const [key,item] of Object.entries(v.attempts??{}).slice(0,20)){
       if(!/^[a-z0-9-]{1,40}$/.test(key)||!item||typeof item!=="object")continue;
@@ -69,7 +71,7 @@ export function parseTeacherSessions(value:unknown):Record<string,TeacherSession
   return result;
 }
 export function normalizeGermanAnswer(text:string):string {
-  return text.trim().replace(/\\s+/g," ").replace(/[.!?]+$/g,"").trim().toLocaleLowerCase("de");
+  return text.trim().replace(/\s+/g," ").replace(/[.!?]+$/g,"").trim().toLocaleLowerCase("de");
 }
 export function checkTeacherAnswer(task:TeacherTask,answer:string):boolean{
   return task.kind==="choice"?answer===task.answer:
