@@ -113,6 +113,7 @@ test("all ten chapters expose exact German per-turn and C model listening contro
  for(const number of Array.from({length:10},(_,i)=>String(i+1).padStart(2,"0"))){
   for(const kind of ["text","text-b","text-c"] as const){
    await page.goto("/los#/1/"+number+"/"+kind,{waitUntil:"domcontentloaded"});
+   await page.locator(".los-speech-unit-picker > summary").click();
    const selector=page.locator(".los-revised-speech-segments");
    await expect(selector).toBeVisible({timeout:30000});
    await selector.locator("summary").click();
@@ -293,6 +294,7 @@ test("each of the thirty LOS1 A/B/C texts offers per-sentence speech",async({pag
   const ch=String(n).padStart(2,"0");
   for(const kind of ["text","text-b","text-c"] as const){
    await page.goto("/los#/1/"+ch+"/"+kind,{waitUntil:"domcontentloaded"});
+   await page.locator(".los-speech-unit-picker > summary").click();
    const panel=page.locator(".los-revised-speech-sentences");
    await expect(panel.locator("summary")).toBeVisible({timeout:30000});
    await panel.locator("summary").click();
@@ -385,6 +387,9 @@ test("first German sentence is not buried under a tall audio settings dashboard"
  const speechSettings=page.locator(".los-revised-speech-options");
  await expect(speechSettings.locator("summary")).toBeVisible({timeout:30000});
  await expect(speechSettings.getByLabel("Saksan puheääni")).toBeHidden();
+ const units=page.locator(".los-speech-unit-picker");
+ await expect(units.locator("summary")).toBeVisible();
+ await expect(page.locator(".los-revised-speech-sentences > summary")).toBeHidden();
  const firstTurn=page.locator(".los-revised-page .los-c01-turn").first();
  await expect(firstTurn).toBeAttached();
  const top=await firstTurn.evaluate(el=>Math.round(el.getBoundingClientRect().top));
