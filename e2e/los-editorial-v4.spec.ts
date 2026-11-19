@@ -89,3 +89,36 @@ test("editorial v4 visual inventory covers book, teaching and practice pages at 
     }
   }
 });
+
+test("vocabulary, dictionary and learning path are content-first on a narrow phone",async({page})=>{
+  await page.setViewportSize({width:390,height:844});
+  await openReader(page);
+  await page.goto("/los#/1/01/vocabulary",{waitUntil:"domcontentloaded"});
+  await expect(page.locator(".los-word-table tbody tr").first()).toBeVisible();
+  const vocabPosition=await page.evaluate(()=>{
+    const table=document.querySelector(".los-word-table")!.getBoundingClientRect();
+    const picture=document.querySelector(".los-vocab-picture-after-words")!.getBoundingClientRect();
+    return {tableTop:table.top,pictureTop:picture.top};
+  });
+  expect(vocabPosition.pictureTop).toBeGreaterThan(vocabPosition.tableTop);
+  await page.goto("/los#/1/dictionary",{waitUntil:"domcontentloaded"});
+  const row=page.locator(".los-index-entry").first();
+  await expect(row).toBeVisible();
+  await expect(row).toHaveCSS("grid-template-columns",/px/);
+  const mobileLayout=await row.evaluate(el=>{
+    const term=el.querySelector("strong")!.getBoundingClientRect();
+    const meaning=el.querySelector(":scope > span:nth-child(2)")!.getBoundingClientRect();
+    const source=el.querySelector("button")!.getBoundingClientRect();
+    return {termTop:term.top,meaningTop:meaning.top,sourceRight:source.right,viewport:innerWidth};
+  });
+  expect(mobileLayout.meaningTop).toBeGreaterThan(mobileLayout.termTop);
+  expect(mobileLayout.sourceRight).toBeLessThanOrEqual(mobileLayout.viewport+1);
+  await expectNoHorizontalOverflow(page);
+  await page.goto("/los#/1/path",{waitUntil:"domcontentloaded"});
+  const details=page.locator(".los-path-details");
+  await expect(details).toBeVisible();
+  await expect(details).not.toHaveAttribute("open",/.+/);
+  await details.locator("summary").click();
+  await expect(details.locator(".los-path-details-body")).toBeVisible();
+  await expectNoHorizontalOverflow(page);
+});
