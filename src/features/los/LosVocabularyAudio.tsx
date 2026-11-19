@@ -7,7 +7,7 @@ import {matchLosPreferredVoice,readLosPreferredVoice} from "./losVoicePreference
  * Uses only installed German voices, never silently falls back to Finnish or English.
  * This is not a prerecorded audio asset or a pronunciation certification.
  */
-export function LosVocabularyAudio({word}:{word:string}){
+export function LosVocabularyAudio({word,kind="sana",rate=0.9}:{word:string;kind?:"sana"|"lause"|"ilmaus";rate?:number}){
  const [playing,setPlaying]=useState(false);
  const [status,setStatus]=useState("");
  const utteranceRef=useRef<SpeechSynthesisUtterance|null>(null);
@@ -45,7 +45,7 @@ export function LosVocabularyAudio({word}:{word:string}){
   utteranceRef.current=utterance;
   utterance.voice=voice;
   utterance.lang=voice.lang;
-  utterance.rate=0.9;
+  utterance.rate=Math.max(0.5,Math.min(2,rate));
   utterance.onend=()=>{
    if(playbackId.current!==current)return;
    utteranceRef.current=null;
@@ -69,7 +69,7 @@ export function LosVocabularyAudio({word}:{word:string}){
  };
  return <span className="los-vocab-audio-wrap">
   <button type="button" className="los-vocab-audio-button" onClick={play}
-   aria-label={playing?"Pysäytä sanan "+word+" ääni":"Kuuntele saksaksi: "+word}
+   aria-label={playing?"Pysäytä "+(kind==="sana"?"sanan":kind==="lause"?"lauseen":"ilmauksen")+" "+word+" ääni":"Kuuntele saksaksi: "+word}
    title={playing?"Pysäytä":"Kuuntele saksaksi"}>
    {playing?<Square size={15} aria-hidden="true"/>:<Volume2 size={16} aria-hidden="true"/>}
   </button>
