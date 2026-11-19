@@ -13,11 +13,11 @@ import type {TeacherLesson,TeacherScene,TeacherQuestion,TeacherBookLink,TeacherB
  */
 export const LOS1_TEACHER_CANONICAL_VERSION="2.2.0-canonical-abc";
 const readingLessons=new Set(["L003","L008","L013","L018","L023","L032","L037","L042","L047","L052"]);
-const stale=/Franz|Jörg|Greta|Herr Weiß|Herr Schmidt|Herr Standish|Lisa Müller|Heinrich|Harald|Takashi|\bPeter\b|\bThomas\b|\bBerna\b|\bBernan\b|\bMia\b|Nicos Weg|Sport und Zeit|M-COM-0[1-9]|C\\d{2}-(?:SOURCE|MCOM02)-Q\\d{2}|Wikibooks|autenttis|alkuperäis|ihmisäänitte|ihmisen kirjoittam|kahdeksan repliik|kuuden repliik/i;
+const stale=/Franz|Jörg|Greta|Herr Weiß|Herr Schmidt|Herr Standish|Lisa Müller|Heinrich|Harald|Takashi|\bPeter\b|\bThomas\b|\bBerna\b|\bBernan\b|\bMia\b|Nicos Weg|Sport und Zeit|M-COM-0[1-9]|C\d{2}-(?:SOURCE|MCOM02)-Q\d{2}|Wikibooks|autenttis|alkuperäis|ihmisäänitte|ihmisen kirjoittam|kahdeksan repliik|kuuden repliik/i;
 const sectionFor=(kind:LosReadingText):"text"|"text-b"|"text-c"=>
   kind==="A"?"text":kind==="B"?"text-b":"text-c";
 const letters=["a","b","c","d","e","f","g","h"] as const;
-const chip=(text:string)=>text.replace(/\\*\\*/g,"").replace(/\\*/g,"").replace(/\\s+/g," ").trim();
+const chip=(text:string)=>text.replace(/\*\*/g,"").replace(/\*/g,"").replace(/\s+/g," ").trim();
 function material(chapterId:string){
   const ab=LOS1_REVISED_AB.chapters.find(c=>c.chapterId==="C"+chapterId);
   const c=LOS1_REVISED_C.chapters.find(c=>c.chapterId===chapterId);
@@ -55,7 +55,7 @@ function choiceQuestion(chapterId:string,kind:LosReadingText,index=0):TeacherQue
 }
 function supportExplanation(chapterId:string):string {
   const data=material(chapterId);if(!data)return "";
-  const line=data.c.contentMarkdown.split("\\n").map(line=>line.trim())
+  const line=data.c.contentMarkdown.split("\n").map(line=>line.trim())
     .find(line=>line.length>55&&!line.startsWith("|")&&!line.startsWith("#")&&!line.startsWith("**")&&!line.startsWith("---"));
   return chip(line??data.c.purpose);
 }
@@ -70,7 +70,7 @@ function canonicalBoard(chapterId:string):TeacherBoardStep[] {
   const data=material(chapterId);if(!data)return [];
   const a=firstSentence(data.ab.textA);
   const b=firstSentence(data.ab.textB);
-  const cMatch=data.c.contentMarkdown.match(/\\*([^*\\n]{4,90})\\*/);
+  const cMatch=data.c.contentMarkdown.match(/\*([^*\n]{4,90})\*/);
   const support=chip(cMatch?.[1]??data.c.title);
   return [
     {label:"Text A · "+data.ab.textA.title,german:a,meaning:"Poimi päätekstistä, ketkä puhuvat ja mitä tilanteessa tapahtuu."},
