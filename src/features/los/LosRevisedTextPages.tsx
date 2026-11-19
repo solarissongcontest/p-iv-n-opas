@@ -236,10 +236,10 @@ export function LosRevisedTextPage({ chapterId, kind }: { chapterId: string; kin
           author="LOS!" sourceTitle={source.title} sourceUrl="" license="LOS!:n oma opetusteksti" licenseUrl=""
           sourceDetail="" isOwnText
         />
-        <aside className="los-revised-disclaimer" role="note">
-          <strong>LOS!:n oma opetusteksti</strong>
-          <p>Teksti ei ole ulkopuolinen autenttinen lähdeteksti. Toimituksellinen kielentarkistus on tehty tekoälyllä, ei riippumattomalla kieliasiantuntijalla. Selaimen saksankielinen TTS-ääni ei ole erillinen ihmisäänite.</p>
-        </aside>
+        <details className="los-revised-disclaimer">
+          <summary>Tietoa tekstin ja äänen alkuperästä</summary>
+          <p>LOS!:n oma opetusteksti, ei ulkopuolinen autenttinen lähdeteksti. Toimituksellinen kielentarkistus on tehty tekoälyllä, ei riippumattomalla kieliasiantuntijalla. Selaimen saksankielinen TTS-ääni ei ole erillinen ihmisäänite.</p>
+        </details>
       </div>
       <div className="los-study-questions" id={supportId} aria-label={"Text "+kind+" -tehtävät"}>
         <LosReadingExercises chapterId={chapterId} text={kind} compact={sideBySide}/>
