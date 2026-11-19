@@ -45,7 +45,7 @@ test("English Master opens as a first-class book route, imports one content pack
   await expect(page.getByRole("heading", { name: "English Master", exact: true })).toBeVisible();
 
   await page.getByRole("button", { name: "Oppikirja", exact: true }).click();
-  await expect(page.getByText("How English Sentences Work")).toBeVisible();
+  await expect(page.locator(".em-chapter h2")).toHaveText("How English Sentences Work");
   await expect(page.getByText("Tämä on vain testin sisältöä.").first()).toBeVisible();
 
   await page.getByRole("button", { name: "Opetuspolku", exact: true }).click();
