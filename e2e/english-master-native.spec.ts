@@ -46,10 +46,15 @@ test("English Master opens as a first-class book route, imports one content pack
   await expect(page.locator(".los-sidebar-chapter-group")).toHaveCount(1);
   await page.reload({ waitUntil: "domcontentloaded" });
   await expect(page.getByRole("heading", { name: "English Master", exact: true })).toBeVisible();
+  await expect(page.locator(".los-book-workspace")).toHaveAttribute("data-reading-size", "large");
 
   await page.getByRole("button", { name: "Oppikirja", exact: true }).click();
   await expect(page.locator(".em-chapter h1")).toHaveText("How English Sentences Work");
   await expect(page.locator(".los-pagination")).toBeVisible();
+  // Exact LOS! reader controls are reused, not an English-only imitation.
+  await page.locator(".los-display-settings > summary").click();
+  await page.getByLabel("Tekstin koko").selectOption("large");
+  await expect(page.locator(".los-book-workspace")).toHaveAttribute("data-reading-size", "large");
   await expect(page.getByText("Tämä on vain testin sisältöä.").first()).toBeVisible();
 
   await page.getByRole("button", { name: "Opetuspolku", exact: true }).click();
@@ -86,4 +91,42 @@ test("English Master loads the real 122/192/20 content automatically and keeps i
   await page.reload({ waitUntil: "domcontentloaded" });
   await expect(page.getByRole("heading", { name: "English Master", exact: true })).toBeVisible({ timeout: 30_000 });
   await expect(page.getByRole("heading", { name: "Ota englannin oppikirja käyttöön" })).toHaveCount(0);
+});
+
+test("English Master mobile drawer mirrors LOS!: focus trap, Escape, body scroll lock and navigation", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await enterLocalBook(page);
+  await expect(page.getByRole("heading", { name: "English Master", exact: true })).toBeVisible({ timeout: 45_000 });
+  await page.getByRole("button", { name: "Avaa sisällysluettelo" }).click();
+  const drawer = page.getByRole("dialog", { name: "English Masterin sisällysluettelo" });
+  await expect(drawer).toBeVisible();
+  await expect(page.locator("body")).toHaveCSS("overflow", "hidden");
+  await expect(drawer.getByRole("button", { name: "Sulje sisällysluettelo" })).toBeFocused();
+  await page.keyboard.press("Escape");
+  await expect(drawer).toHaveCount(0);
+  await expect(page.locator("body")).not.toHaveCSS("overflow", "hidden");
+  await expect(page.getByRole("button", { name: "Avaa sisällysluettelo" })).toBeFocused();
+  await page.getByRole("button", { name: "Avaa sisällysluettelo" }).click();
+  await page.getByRole("dialog", { name: "English Masterin sisällysluettelo" })
+    .getByRole("button", { name: "Oppikirja", exact: true }).click();
+  await expect(page.locator(".em-chapter h1")).toBeVisible();
+  await expect(page.getByRole("dialog", { name: "English Masterin sisällysluettelo" })).toHaveCount(0);
+  await expect(page.locator("body")).not.toHaveCSS("overflow", "hidden");
+});
+
+test("English Master book shares LOS! 1 persistent text size, line spacing and measure controls", async ({ page }) => {
+  await enterLocalBook(page);
+  await expect(page.getByRole("heading", { name: "English Master", exact: true })).toBeVisible({ timeout: 45_000 });
+  await page.getByRole("button", { name: "Oppikirja", exact: true }).click();
+  await page.locator(".los-display-settings > summary").click();
+  await page.getByLabel("Tekstin koko").selectOption("extra");
+  await page.getByLabel("Riviväli").selectOption("relaxed");
+  await page.getByLabel("Lukurivin leveys").selectOption("narrow");
+  await expect(page.locator(".los-book-workspace")).toHaveAttribute("data-reading-size", "extra");
+  await expect(page.locator(".los-book-workspace")).toHaveAttribute("data-reading-spacing", "relaxed");
+  await expect(page.locator(".los-book-workspace")).toHaveAttribute("data-reading-measure", "narrow");
+  await page.reload({ waitUntil: "domcontentloaded" });
+  await expect(page.locator(".los-book-workspace")).toHaveAttribute("data-reading-size", "extra");
+  await expect(page.locator(".los-book-workspace")).toHaveAttribute("data-reading-spacing", "relaxed");
+  await expect(page.locator(".los-book-workspace")).toHaveAttribute("data-reading-measure", "narrow");
 });
