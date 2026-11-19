@@ -32,6 +32,8 @@ jobs:
         run: bun run e2e:install
       - name: Verify TypeScript before browser setup
         run: bun run typecheck
+      - name: Verify production build with latest LOS! v4
+        run: bun run build
       - name: Install Playwright Chromium
         run: bunx playwright install chromium
       - name: Start isolated English Master test server
