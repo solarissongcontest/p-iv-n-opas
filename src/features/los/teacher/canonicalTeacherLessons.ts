@@ -116,7 +116,8 @@ function isObsolete(scene:TeacherScene):boolean {
     ...scene.board?.map(b=>b.german+" "+b.meaning)??[],
     ...scene.bookLinks?.map(b=>b.label+" "+b.instruction)??[],
     ...scene.help?.map(h=>h.title+" "+h.body)??[],
-    ...(scene.question?[scene.question.prompt,scene.question.success,scene.question.hint,scene.question.reteach,scene.question.genericWrong,...scene.question.options?.map(o=>o.label+" "+(o.wrongFeedback??""))??[]]:[]),
+    // Current reading-bank question options are trusted current distractors, not retired manuscripts.
+    ...(scene.question&&!scene.id.startsWith("canonical-")?[scene.question.prompt,scene.question.success,scene.question.hint,scene.question.reteach,scene.question.genericWrong,...scene.question.options?.map(o=>o.label+" "+(o.wrongFeedback??""))??[]]:[]),
   ].join(" ");
   return Boolean(scene.sourceChapterId || scene.textBChapterId || stale.test(prose));
 }
