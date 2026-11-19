@@ -66,3 +66,24 @@ test("L029 verifies five current Text A/B/C reading-bank questions, never presen
  assert.deepEqual(lesson.requiredCheckedIds??[],[]);
  assert.ok(lesson.scenes.some(x=>x.bookLinks?.some(link=>link.section==="text-c")));
 });
+
+test("Review II L057 keeps current C02 and C10 characters and includes new C08/C10 support texts",()=>{
+ const original=getOriginalLosTeacherLesson("L057")!;
+ const lesson=getLosTeacherLesson("L057")!;
+ assert.equal(original.version,"2.0.0-preview.1");
+ assert.equal(lesson.version,LOS1_TEACHER_CANONICAL_VERSION);
+ assert.equal(lesson.chapterId,"92");
+ assert.deepEqual(validateTeacherLesson(lesson),[]);
+ assert.deepEqual(validateCanonicalTeacherLesson(lesson),[]);
+ const board=lesson.scenes.find(x=>x.id==="skill-map");
+ assert.ok(board?.board?.some(item=>item.german.includes("Ich heiße Aino")));
+ assert.ok(board?.board?.some(item=>item.german.includes("Sie heißt Mila")));
+ const transfer=lesson.scenes.find(x=>x.id==="transfer");
+ assert.ok(transfer?.question?.accepted?.some(line=>line.includes("Ich heiße Aino")));
+ assert.equal(transfer?.question?.accepted?.some(line=>line.includes("Mia")),false);
+ const book=lesson.scenes.find(x=>x.id==="book");
+ for(const chapter of ["08","10"])
+   assert.ok(book?.bookLinks?.some(link=>link.chapterId===chapter&&link.section==="text-c"));
+ assert.equal(lesson.externalCheck,"review-ii");
+ assert.equal(teacherSessionNeedsReview(emptyTeacherSession(original,"2026-11-18T14:00:00.000Z"),lesson),true);
+});
