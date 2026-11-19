@@ -31,6 +31,8 @@ test("Teacher 2.0 actual C01 Text C opens the current textbook in a separate tab
   await authorize(page);
   await page.goto("/los-lessons/L003",{waitUntil:"domcontentloaded"});
   await expect(page.locator(".los-teacher-paper")).toBeVisible({timeout:30_000});
+  await expect(page.locator(".los-teacher-outline")).not.toHaveAttribute("open","");
+  await page.locator(".los-teacher-outline summary").click();
   const c=page.locator(".los-teacher-sidebar nav button").filter({hasText:/Text C:/}).first();
   await expect(c).toBeVisible();
   await c.click();
@@ -54,8 +56,10 @@ test("Teacher 2.0 new texts are reachable at 320px and pause prevents accidental
   await expect(page.locator(".los-teacher-paper")).toBeVisible({timeout:30_000});
   await expectNoHorizontalOverflow(page);
   await page.screenshot({path:testInfo.outputPath("los-teacher2-original-mobile320-L008.png"),animations:"disabled"});
+  await expect(page.locator(".los-teacher-outline")).not.toHaveAttribute("open","");
   await page.getByRole("button",{name:"Keskeytä oppitunti"}).click();
   await expect(page.getByRole("heading",{name:"Oppitunti keskeytetty"})).toBeVisible();
+  await page.locator(".los-teacher-outline summary").click();
   const active=page.locator(".los-teacher-sidebar nav button[aria-current=step]");
   const oldTitle=await active.textContent();
   await page.locator(".los-teacher-sidebar nav button").last().click({force:true});
