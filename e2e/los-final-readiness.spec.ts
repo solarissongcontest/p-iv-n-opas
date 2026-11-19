@@ -107,17 +107,18 @@ test("both real imported dictionary assets are licensed, searchable and visible 
  await expect(page.locator(".los-freedict-row").first()).toBeVisible();
 });
 
-test("every A/B and C support page exposes single-line German listening controls",async({page})=>{
+test("all ten chapters expose exact German per-turn and C model listening controls",async({page})=>{
+ test.setTimeout(180_000);
  await enter(page,"01/text");
- const selector=page.locator(".los-revised-speech-segments");
- await expect(selector).toBeVisible();
- await selector.locator("summary").click();
- await expect(selector.getByRole("button",{name:"Kuuntele puheenvuoro 1"})).toBeVisible();
- await page.goto("/los#/1/01/text-b",{waitUntil:"domcontentloaded"});
- await expect(page.locator(".los-revised-speech-segments")).toBeVisible();
- await page.goto("/los#/1/01/text-c",{waitUntil:"domcontentloaded"});
- const c=page.locator(".los-revised-speech-segments");
- await expect(c).toBeVisible();
- await c.locator("summary").click();
- await expect(c.getByRole("button",{name:"Kuuntele mallilause 1"})).toBeVisible();
+ for(const number of Array.from({length:10},(_,i)=>String(i+1).padStart(2,"0"))){
+  for(const kind of ["text","text-b","text-c"] as const){
+   await page.goto("/los#/1/"+number+"/"+kind,{waitUntil:"domcontentloaded"});
+   const selector=page.locator(".los-revised-speech-segments");
+   await expect(selector).toBeVisible({timeout:30000});
+   await selector.locator("summary").click();
+   const first=kind==="text-c"?"Kuuntele mallilause 1":"Kuuntele puheenvuoro 1";
+   await expect(selector.getByRole("button",{name:first,exact:true})).toBeVisible();
+   await expect(selector.getByRole("button",{name:first,exact:true})).toHaveCount(1);
+  }
+ }
 });
