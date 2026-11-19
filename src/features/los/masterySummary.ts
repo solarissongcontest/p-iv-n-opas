@@ -1,7 +1,5 @@
 import type { LosChapterDraft } from "./studyState.ts";
-import { LOS1_FINAL_QUESTIONS, losValidSubmittedFinal,
-  LOS1_FINAL_WRITING_MODEL_OPENED, LOS1_FINAL_WRITING_ASSISTED,
-} from "./content/los1FinalExam.ts";
+import { LOS1_FINAL_QUESTIONS, losFinalReadyToSubmit } from "./content/los1FinalExam.ts";
 import { losArchivedExamHistory } from "./content/los1ExamArchive.ts";
 import { getLosTeacherLesson } from "./teacher/lessonL004.ts";
 
@@ -76,7 +74,7 @@ export function summarizeLos1Mastery(
   }
   const final = drafts["93"];
   const archive = losArchivedExamHistory(final?.practiceAnswers ?? {}, "EX-FINAL");
-  const validCurrent = Boolean(final && losValidSubmittedFinal(final));
+  const validCurrent = Boolean(final?.testSubmittedAt && losFinalReadyToSubmit(final.testAnswers));
   const lastArchived = archive.at(-1);
   // The archive stores immutable scores. Do NOT regrade historic choices against
   // today's question bank: its answer key or item-to-skill mapping may change.
@@ -118,8 +116,9 @@ export function summarizeLos1Mastery(
     ownGoal,
     exam:(validCurrent || lastArchived)?{correct:objectiveResult,total:50,attempts:archive.length+(validCurrent?1:0)}:null,
     writing:{recorded:written,assisted,modelOpened,
-      finalModelOpened:Boolean(final?.practiceAnswers[LOS1_FINAL_WRITING_MODEL_OPENED]),
-      finalAssisted:Boolean(final?.practiceAnswers[LOS1_FINAL_WRITING_ASSISTED]),
+      // The current EX-FINAL reader does not record these actions. Never infer them.
+      finalModelOpened:false,
+      finalAssisted:false,
     },
   };
 }
