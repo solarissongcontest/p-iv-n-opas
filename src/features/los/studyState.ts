@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { getDeviceOwnerId } from "@/lib/deviceSession";
+import { getDeviceOwnerId } from "../../lib/deviceSession.ts";
 import { parseLosLessonProgressMap } from "./lessonEngine.ts";
 import {parseTeacherSessions,parseTeacherSessionHistory,restartUpdatedTeacherSession,type TeacherSession,type TeacherSessionHistory,type TeacherLesson} from "./teacher/engine.ts";
 import {validateLosCloudDraft} from "./cloudContract.ts";
