@@ -36,7 +36,7 @@ type Pack = { schema: string; version: string; chapter_count: number; lesson_cou
   chapters: Record<string, Chapter>; lessons: Record<string, Lesson>;
   extras: Record<string, { title?: string; payload?: Record<string, unknown> }>;
   media: Record<string, string>; };
-type Page = "home" | "book" | "path" | "lesson" | "writing" | "listening" | "progress" | "import";
+type Page = "home" | "contents" | "book" | "path" | "lesson" | "writing" | "listening" | "progress" | "import";
 type Progress = Record<string, { completed: boolean; answered: number; updatedAt: string }>;
 const BOOK_GROUPS = [
   ["G", "Grammar Mastery"], ["V", "Vocabulary & Expression"], ["W", "Writing Academy"],
@@ -161,7 +161,7 @@ function readProgress(owner: string): Progress {
 function getLocation(): { page: Page; id: string } {
   if (typeof window === "undefined") return { page: "home", id: "" };
   const [first, second] = window.location.hash.replace(/^#\/?/, "").split("/");
-  const page = (["home", "book", "path", "lesson", "writing", "listening", "progress", "import"].includes(first ?? "")
+  const page = (["home", "contents", "book", "path", "lesson", "writing", "listening", "progress", "import"].includes(first ?? "")
     ? first : "home") as Page;
   return { page, id: decodeURIComponent(second ?? "") };
 }
@@ -350,7 +350,7 @@ export function EnglishMasterBook() {
     } catch (e) { setError(e instanceof Error ? e.message : "Varmuuskopion palautus epäonnistui."); }
   };
   const navItems: Array<{ id: Page; label: string }> = [
-    { id: "home", label: "Etusivu" }, { id: "book", label: "Oppikirja" }, { id: "path", label: "Opetuspolku" },
+    { id: "home", label: "Etusivu" }, { id: "contents", label: "Sisällysluettelo" }, { id: "book", label: "Oppikirja" }, { id: "path", label: "Opetuspolku" },
     { id: "writing", label: "Kirjoittaminen" }, { id: "listening", label: "Kuuntelu" },
     { id: "progress", label: "Oma edistyminen" },
   ];
@@ -375,7 +375,7 @@ export function EnglishMasterBook() {
           </button>
           <div className="los-sidebar-heading">KIRJAN SIVUT</div>
           <nav aria-label="English Masterin osiot">
-            {navItems.filter(item=>item.id==="home"||item.id==="book").map(item=><button key={item.id} className={location.page===item.id?"is-active":""}
+            {navItems.filter(item=>item.id==="home"||item.id==="contents"||item.id==="book").map(item=><button key={item.id} className={location.page===item.id?"is-active":""}
               onClick={() => navigate(item.id,item.id==="book"?currentChapter?.content_id??"G01":"")}>{item.label}</button>)}
             <div className="los-sidebar-tree-controls">
               <label className="los-sidebar-tree-search"><Search size={14}/><span className="sr-only">Suodata kirjalukuja</span>
@@ -456,7 +456,7 @@ export function EnglishMasterBook() {
               <p>Kirjassa yhdistyvät kielioppi, sanasto, luettu ja kuultu ymmärtäminen, kirjoittaminen sekä ohjattu harjoittelu. Kaikki kirjaluvut löytyvät vasemman reunan sisällysluettelosta.</p>
               <div className="em-stats"><span><b>122</b> kirjalukua</span><span><b>192</b> oppituntia</span><span><b>{completed}</b> harjoiteltua tuntia</span></div>
               <div className="los-front-links">
-                <button onClick={()=>goChapter(chapters[0]?.content_id??"G01")}><BookText size={18}/> Sisällysluettelo</button>
+                <button onClick={()=>navigate("contents")}><BookText size={18}/> Sisällysluettelo</button>
                 <button onClick={()=>navigate("path")}><BookOpen size={18}/> Ohjatut oppitunnit</button>
                 <button onClick={()=>navigate("writing")}><PenLine size={18}/> Kirjoittaminen</button>
                 <button onClick={()=>navigate("listening")}><Headphones size={18}/> Kuuntelu</button>
@@ -464,6 +464,33 @@ export function EnglishMasterBook() {
               <p className="em-note">Alpha 0.8: opetussisällöt ovat vielä luonnoksia. Täysmittaiset YO-harjoituskokeet eivät ole valmiit.</p>
             </div>
           </div> :
+          location.page === "contents" ? <section className="los-inner-page em-los-contents">
+            <p className="los-eyebrow">ENGLISH MASTER · LOPS21 · PITKÄ ENGLANTI</p>
+            <h1>Sisällysluettelo</h1>
+            <p className="los-page-intro">Oppikirja sisältää 122 kirjalukua kahdeksassa osassa. Avaa haluamasi luku. Kaikki tekstit ja harjoituksiin johtavat linkit ovat kirjan sisällä.</p>
+            {BOOK_GROUPS.map(([prefix,label])=>{
+              const partChapters=chapters.filter(ch=>ch.content_id.startsWith(prefix));
+              if(!partChapters.length)return null;
+              return <section key={prefix} className="em-los-contents-part">
+                <h2>{label} <small>{partChapters.length} lukua</small></h2>
+                <ol className="los-contents-list">
+                  {partChapters.map(ch=><li key={ch.content_id}>
+                    <button onClick={()=>goChapter(ch.content_id)}>
+                      <span className="los-content-number">{ch.content_id}</span>
+                      <span className="los-content-copy"><strong lang="en">{ch.title}</strong>
+                        <small>{ch.payload.objectives_fi?.[0]??"Avaa kirjaluku"}</small>
+                      </span>
+                      <ChevronRight size={20} aria-hidden="true"/>
+                    </button>
+                  </li>)}
+                </ol>
+              </section>;
+            })}
+            <div className="los-contents-appendix">
+              <button onClick={()=>navigate("path")}>Opetuspolku · 192 oppituntia <ArrowRight size={16}/></button>
+              <button onClick={()=>navigate("progress")}>Oma edistyminen <ArrowRight size={16}/></button>
+            </div>
+          </section> :
           location.page === "book" ? <section className="los-inner-page em-los-chapter-page">
             {currentChapter && <article className="em-chapter los-grammar-page">
               <p className="los-eyebrow">{currentChapter.content_id} / OPPIKIRJAN LUKU</p>
