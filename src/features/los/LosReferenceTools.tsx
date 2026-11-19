@@ -3,6 +3,7 @@ import { ArrowRight, BookOpen, ChevronRight, Headphones, Search, Volume2 } from 
 import { LOS_BOOKS, type LosBookDefinition } from "./catalog";
 import { LOS_1_LESSONS } from "./learningPath";
 import { LosFirstLessons } from "./LosFirstLessons";
+import {getLosTeacherLesson} from "./teacher/lessonRegistry.ts";
 import { LOS1_EXECUTABLE_LESSONS, isLos1ExecutableLesson } from "./guidedLessons";
 
 export type LosDestination = "overview" | "contents" | "chapter" | "text" | "understand" | "vocabulary" | "grammar" | "text-b" | "text-c" | "practice" | "apply" | "culture" | "test" | "appendix" | "dictionary" | "path" | "search" | "midterm" | "review" | "review-ii" | "cards" | "progress" | "final" | "summary" | "facsimile";
@@ -108,7 +109,8 @@ export function LosLearningPath({ book, move }: { book: LosBookDefinition; move:
   return <section className="los-inner-page los-learning-path">
     <p className="los-eyebrow">OHJATTU LUKUJÄRJESTYS / {book.code}</p>
     <h1>Opetuspolku</h1>
-    <p className="los-page-intro">Opiskele saksaa 60 oppitunnin avulla omaan tahtiin. Yksi oppitunti kestää yleensä noin 30 minuuttia ja vie suoraan oikean oppikirjatekstin, harjoituksen tai kertauksen pariin.</p>
+    <p className="los-page-intro">Opetuspolku 2.0 opettaa saksaa opetustilanne kerrallaan. Saat selityksiä, opetustaulun, harjoituksia ja palautetta omista vastauksistasi. Kaikki 60 LOS! 1:n alkuperäistä opetusmanuskriptia ovat käytettävissä.</p>
+    <div className="los-teacher-v2-launch"><p className="los-eyebrow">TEACHER EXPERIENCE 2.0 · ALKAA TÄSTÄ</p><h2>Oma saksanopettajasi oppikirjan sisällä</h2><p>Aloita ensimmäisestä opetustilanteesta tai valitse oppitunti alemmasta luettelosta. Voit keskeyttää ja jatkaa, ja kaikki tehtävien vastaukset säilyvät.</p><a className="los-primary" href="/los-lessons/L001">Aloita Opetuspolku 2.0 <ArrowRight size={17} aria-hidden="true"/></a></div>
     <details className="los-path-notice los-path-details">
       <summary><BookOpen size={20} aria-hidden="true"/><span><strong>{LOS1_EXECUTABLE_LESSONS.length}/60 oppituntia käytettävissä</strong><small>Opetuspolun aineistot ja julkaisutarkistusten tila</small></span></summary>
       <div className="los-path-details-body">
@@ -116,14 +118,14 @@ export function LosLearningPath({ book, move }: { book: LosBookDefinition; move:
         <p>Alkuperäisten audio-/videoaineistojen oikeudet, kuuntelun toimivuus, kielitason tarkistus ja julkaisuportit eivät kuitenkaan vielä ole valmiit. Erilliset EX-FINAL-loppukoe ja L060-yhteenveto ovat opiskelupolussa; kummankin suoritus vaatii oikeat palautukset ja itsearvioinnit.</p>
       </div>
     </details>
-    <LosFirstLessons selectedId={selectedLesson} onSelect={selectLesson} move={move} />
+    <details className="los-path-old-runner"><summary>Avaa aiempi ohjattu oppituntinäkymä</summary><LosFirstLessons selectedId={selectedLesson} onSelect={selectLesson} move={move} /></details>
     {groups.map(group=><section key={group.section} className="los-path-group">
       <h2>{group.section}</h2>
       <ol>
         {group.items.map(lesson=><li key={lesson.number}>
-          <button onClick={()=>{ if(isLos1ExecutableLesson("L"+String(lesson.number).padStart(3,"0"))){ selectLesson("L"+String(lesson.number).padStart(3,"0")); document.getElementById("los-lesson-runner")?.scrollIntoView({block:"start",behavior:"smooth"}); } else move(lesson.chapter,lesson.destination); }}>
+          <button onClick={()=>{ if(isLos1ExecutableLesson("L"+String(lesson.number).padStart(3,"0"))){ const id="L"+String(lesson.number).padStart(3,"0"); if(getLosTeacherLesson(id)){window.location.assign("/los-lessons/"+id);} else {selectLesson(id);document.getElementById("los-lesson-runner")?.scrollIntoView({block:"start",behavior:"smooth"});} } else move(lesson.chapter,lesson.destination); }}>
             <span className="los-path-number">{String(lesson.number).padStart(2,"0")}</span>
-            <span className="los-path-copy"><strong>{lesson.title}</strong><small>{isLos1ExecutableLesson("L"+String(lesson.number).padStart(3,"0")) ? "Avaa ohjattu oppitunti" : lesson.chapter ? `Kappale ${Number(lesson.chapter)} · Oppikirjan sisältöön (suoritus ei vielä käytössä)`  : "Suoritusjärjestelmä ei vielä käytössä"}</small></span>
+            <span className="los-path-copy"><strong>{lesson.title}</strong><small>{isLos1ExecutableLesson("L"+String(lesson.number).padStart(3,"0")) ? (getLosTeacherLesson("L"+String(lesson.number).padStart(3,"0")) ? "Avaa Opetuspolku 2.0:n opetustila" : "Avaa aiempi ohjattu oppitunti") : lesson.chapter ? `Kappale ${Number(lesson.chapter)} · Oppikirjan sisältöön (suoritus ei vielä käytössä)`  : "Suoritusjärjestelmä ei vielä käytössä"}</small></span>
             <ArrowRight size={18}/>
           </button>
         </li>)}
