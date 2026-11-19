@@ -1,10 +1,10 @@
 import {useEffect,useMemo,useState} from "react";
-import {ArrowRight,BookOpen,CheckCircle2,HelpCircle,RotateCcw} from "lucide-react";
+import {ArrowRight,CheckCircle2,HelpCircle} from "lucide-react";
 import type {Lesson,LessonTask} from "./EnglishMasterBook";
 import {
   confirmTeacherActivity,emptyTeacherSession,finishTeacherSession,independentTeacherEvidence,
   markTeacherHelp,moveTeacherScene,recoverTeacherSession,revealTeacherSolution,
-  setTeacherAnswerDraft,submitTeacherAnswer,teacherCompletionBlockers,teacherContentSignature,
+  setTeacherAnswerDraft,submitTeacherAnswer,teacherCompletionBlockers,
   teacherNextIncompleteSceneId,teacherSessionNeedsReview,toggleTeacherPause,validTeacherSession,
   type TeacherLesson,type TeacherScene,type TeacherSession,
 } from "../los/teacher/engine.ts";
@@ -173,7 +173,10 @@ export function EnglishTeacherPlayer({lesson:source,ownerId,previouslyCompleted,
   const independentCount=independentTeacherEvidence(session,lesson);
   useEffect(()=>{setShowHelp(false);},[session.sceneId]);
   const update=(fn:(current:TeacherSession)=>TeacherSession)=>setSession(old=>fn(old));
-  const navigate=(id:string)=>{update(old=>moveTeacherScene(old,lesson,id,stamp()));window.scrollTo(0,0);};
+  const navigate=(id:string)=>{update(old=>{
+    const now=stamp();
+    return moveTeacherScene(moveTeacherScene(old,lesson,current.id,now),lesson,id,now);
+  });window.scrollTo(0,0);};
   const pause=()=>update(old=>toggleTeacherPause(old,stamp()));
   const saveDraft=(id:string,value:string)=>update(old=>setTeacherAnswerDraft(old,id,value,stamp()));
   const markHelp=()=>update(old=>markTeacherHelp(old,current.id,stamp()));
