@@ -99,6 +99,10 @@ export function EnglishTeacherPlayer({ lesson, ownerId, previouslyCompleted, onB
   const key = "em-teacher-v2-"+ownerId+"-"+lesson.content_id;
   const [session,setSession] = useState<Session>(()=>loadSession(key,signature,scenes[0]!.id));
   const [hintOpen,setHintOpen] = useState(false);
+  const [outlineOpen,setOutlineOpen] = useState(false);
+  useEffect(()=>{
+    setOutlineOpen(window.matchMedia("(min-width: 821px)").matches);
+  },[]);
   const [saveError,setSaveError] = useState(false);
   const idx = Math.max(0,Math.min(session.sceneIndex,scenes.length-1));
   const scene = scenes[idx]!;
@@ -159,7 +163,7 @@ export function EnglishTeacherPlayer({ lesson, ownerId, previouslyCompleted, onB
           onClick={()=>update(old=>({...old,paused:!old.paused}))}>
           {session.paused?"Jatka opetusta":"Keskeytä oppitunti"}
         </button>
-        <details className="los-teacher-outline" open>
+        <details className="los-teacher-outline" open={outlineOpen} onToggle={event=>setOutlineOpen(event.currentTarget.open)}>
           <summary>Oppitunnin sisältö</summary>
           <nav aria-label="Oppitunnin opetustilanteet">
             {scenes.map((item,i)=><button key={item.id} type="button"
