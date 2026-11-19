@@ -1229,3 +1229,24 @@
 @media(max-width:760px) {
   .los-book-main > .los-reader-context {display:none}
 }
+
+
+/* Dark-reader contrast audit: the print red (#B7473C) works as a rule and
+   background on dark surfaces but is too dim for 10–14px body labels.
+   Keep the book's identity unchanged; use a lighter ink-only coral. */
+.dark .los-app,.dark .los-access,.dark .los-loading {
+  --los-accent-text:#F4A297;
+}
+.dark .los-app :is(.los-eyebrow,.los-overline,.los-content-number,
+  .los-question-number,.los-reading-question-index,.los-reading-counter strong) {
+  color:var(--los-accent-text);
+}
+.dark .los-app .los-reading-page .los-eyebrow,
+.dark .los-app .los-grammar-page>.los-eyebrow,
+.dark .los-app .los-vocabulary-page>.los-eyebrow,
+.dark .los-app .los-word-table thead th:first-child,
+.dark .los-app .los-dictionary-page .los-index-entry>button,
+.dark .los-app .los-index-entry button:hover,
+.dark .los-app .los-dictionary-about[open]>summary {
+  color:var(--los-accent-text);
+}
