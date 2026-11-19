@@ -8,6 +8,7 @@ import "../los/los-lessons.css";
 import { LosReaderDisplayControls, readLosReaderSettings } from "../los/LosReaderDisplayControls";
 import "./english-master.css";
 import { EnglishTeacherPlayer } from "./EnglishTeacherPlayer";
+import {collectEnglishTeacherBackup,prepareEnglishTeacherRestore} from "./englishTeacherBackup";
 
 /**
  * English Master is a first-class book route, just like LOS!.
@@ -326,24 +327,68 @@ export function EnglishMasterBook() {
     });
   };
   const exportProgress = () => {
-    const contents = JSON.stringify({ schema: "em-native-progress-1", progress, essay }, null, 2);
-    const href = URL.createObjectURL(new Blob([contents], { type: "application/json" }));
-    const link = document.createElement("a"); link.href = href; link.download = "english-master-oma-varmuuskopio.json"; link.click();
-    window.setTimeout(() => URL.revokeObjectURL(href), 1000);
-  };
-  async function importProgress(file?: File) {
-    if (!file || !owner) return;
-    try {
-      const value = JSON.parse(await file.text()) as { schema?: string; progress?: Progress; essay?: string };
-      if (value.schema !== "em-native-progress-1" || !value.progress || typeof value.progress !== "object") throw new Error("Virheellinen varmuuskopio.");
-      const verified: Progress = {};
-      for (const [id, item] of Object.entries(value.progress)) {
-        if (pack?.lessons[id] && typeof item.completed === "boolean" && Number.isInteger(item.answered) && item.answered >= 0) verified[id] = item;
-      }
-      setProgress(verified); localStorage.setItem(progressKey, JSON.stringify(verified));
-      if (typeof value.essay === "string") { setEssay(value.essay); localStorage.setItem("em-native-essay-" + owner, value.essay); }
+    if(!owner||!pack)return;
+    try{
+      const teacher=collectEnglishTeacherBackup(owner,Object.keys(pack.lessons));
+      const contents=JSON.stringify({
+        schema:"em-native-progress-1",progress,essay,...teacher,
+      },null,2);
+      const href=URL.createObjectURL(new Blob([contents],{type:"application/json"}));
+      const link=document.createElement("a");
+      link.href=href;link.download="english-master-oma-varmuuskopio.json";link.click();
+      window.setTimeout(()=>URL.revokeObjectURL(href),1000);
       setError("");
-    } catch (e) { setError(e instanceof Error ? e.message : "Varmuuskopion palautus epäonnistui."); }
+    }catch(failure){
+      setError(failure instanceof Error?failure.message:"Varmuuskopion vienti epäonnistui.");
+    }
+  };
+  async function importProgress(file?:File){
+    if(!file||!owner||!pack)return;
+    try{
+      if(file.size>15_000_000)throw new Error("Varmuuskopio on odottamattoman suuri.");
+      const value=JSON.parse(await file.text()) as {
+        schema?:string;progress?:Progress;essay?:string;
+        teacherSessions?:unknown;teacherSessionHistory?:unknown;
+      };
+      if(value.schema!=="em-native-progress-1"||!value.progress||
+        typeof value.progress!=="object"||Array.isArray(value.progress)){
+        throw new Error("Virheellinen varmuuskopio.");
+      }
+      const verified:Progress={};
+      for(const [id,item] of Object.entries(value.progress)){
+        if(pack.lessons[id]&&item&&typeof item==="object"&&
+          typeof item.completed==="boolean"&&Number.isInteger(item.answered)&&item.answered>=0&&
+          typeof item.updatedAt==="string")verified[id]=item;
+      }
+      // Validate every Teacher 2.0 session BEFORE replacing existing data.
+      const teacherWrites=prepareEnglishTeacherRestore(value,owner,Object.keys(pack.lessons));
+      const writes=[
+        {key:progressKey,value:JSON.stringify(verified)},
+        ...(typeof value.essay==="string"?[{key:"em-native-essay-"+owner,value:value.essay}]:[]),
+        ...teacherWrites,
+      ];
+      // Local storage has no transaction API. Retain the previous values and
+      // restore them if a write fails; never knowingly discard learning data.
+      const previous=writes.map(item=>({key:item.key,value:localStorage.getItem(item.key)}));
+      let applied=0;
+      try{
+        for(const item of writes){localStorage.setItem(item.key,item.value);applied++;}
+      }catch(failure){
+        for(let n=applied-1;n>=0;n--){
+          const before=previous[n]!;
+          try{
+            if(before.value===null)localStorage.removeItem(before.key);
+            else localStorage.setItem(before.key,before.value);
+          }catch{/* Keep the original error and avoid claiming a successful restore. */}
+        }
+        throw failure;
+      }
+      setProgress(verified);
+      if(typeof value.essay==="string")setEssay(value.essay);
+      setError("");
+    }catch(failure){
+      setError(failure instanceof Error?failure.message:"Varmuuskopion palautus epäonnistui.");
+    }
   };
   const navItems: Array<{ id: Page; label: string }> = [
     { id: "home", label: "Etusivu" }, { id: "contents", label: "Sisällysluettelo" }, { id: "book", label: "Oppikirja" }, { id: "path", label: "Opetuspolku" },
