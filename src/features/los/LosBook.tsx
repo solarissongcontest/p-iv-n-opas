@@ -330,7 +330,6 @@ function Vocabulary({ chapter, move, bookId }: { chapter: LosChapter; bookId:num
     <p className="los-eyebrow">WORTSCHATZ / KAPITEL {Number(chapter.id)}</p>
     <h1>Sanasto</h1>
     <p className="los-page-intro">Kappaleen opetettavat sanat ja ilmaukset. Kuuntele saksankielisellä puheäänellä painamalla kaiutinta. IPA näkyy vain erikseen toimitetuissa merkinnöissä; keskeneräisiä kone-ehdotuksia ei näytetä varmoina ohjeina.</p>
-    {bookId===1&&<Los1VisualLearning key={chapter.id} chapterId={chapter.id} placement="vocabulary"/>}
     <button type="button" className="los-outline-button" onClick={() => move(chapter.id,"cards")}>Kertaa sanastoa korteilla</button>
     <div className="los-vocabulary-tools">
       <label><Search size={17} /><span className="sr-only">Etsi sanastosta</span><input value={query} onChange={event => setQuery(event.target.value)} placeholder="Etsi sanaa…" /></label>
@@ -346,6 +345,7 @@ function Vocabulary({ chapter, move, bookId }: { chapter: LosChapter; bookId:num
       })}
     </tbody></table>
     {!words.length && <p>Sanastosta ei löytynyt hakua vastaavaa sanaa.</p>}
+    {bookId===1&& !query.trim() && <div className="los-vocab-picture-after-words">{bookId===1&&<Los1VisualLearning key={chapter.id} chapterId={chapter.id} placement="vocabulary"/>}</div>}
   </section>;
 }
 function Appendix({ book }: { book: LosBookDefinition }) {
