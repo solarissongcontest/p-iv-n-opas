@@ -19,6 +19,7 @@ import { composeLosC10Dialogues, storeLosC10Dialogues } from "./c10ApplicationBr
 import { validateTeacherLesson } from "./validateContent.ts";
 import { teacherExternalStatus } from "./externalEvidence.ts";
 import { LosMasterySummary } from "../LosMasterySummary.tsx";
+import {TeacherTopbar,TeacherProgressBar,TeacherSceneOutline,TeacherSceneNavigation,TeacherSceneQuestion,TeacherBoard} from "./Teacher2SharedUI.tsx";
 import "../los-book.css";
 import "./teacher.css";
 
@@ -27,96 +28,6 @@ const bookUrl = (lessonId: string, bookId: number, chapterId: string, section: s
   "/los?lessonReturn=" + encodeURIComponent(lessonId) + "#/" + bookId +
   (["review-ii","final","summary","midterm","review"].includes(section) ? "/" + section : "/" + chapterId + "/" + section);
 
-function SceneQuestion({ scene, session, submit, saveDraft, requestHint, reveal }: {
-  scene: TeacherScene;
-  session: TeacherSession;
-  submit: (value: string) => void;
-  saveDraft: (value: string) => void;
-  requestHint: () => void;
-  reveal: () => void;
-}) {
-  const inputRef = useRef<HTMLInputElement>(null);
-  const q = scene.question;
-  if (!q) return null;
-  const numericResponse = teacherRequiresNumericResponse(q);
-  const latest = teacherLatestAttempt(session, scene.id);
-  const attempts = session.attempts.filter(item => item.sceneId === scene.id);
-  const succeeded = attempts.some(item => item.correct);
-  const exhausted = attempts.length >= 3 && !succeeded;
-  const helped = session.helpedIds.includes(scene.id);
-  const solutionVisible = session.revealedIds.includes(scene.id);
-  const drafted = session.draftAnswers[scene.id] ?? "";
-  const inputDisabled = succeeded || exhausted || solutionVisible || Boolean(session.completedAt);
-  const insertGermanCharacter = (character: string) => {
-    if (inputDisabled || numericResponse) return;
-    const input = inputRef.current;
-    const start = input?.selectionStart ?? drafted.length;
-    const end = input?.selectionEnd ?? start;
-    const next = drafted.slice(0, start) + character + drafted.slice(end);
-    if (next.length > 500) return;
-    saveDraft(next);
-    requestAnimationFrame(() => {
-      inputRef.current?.focus();
-      inputRef.current?.setSelectionRange(start + character.length, start + character.length);
-    });
-  };
-  const solution = q.type === "choice"
-    ? q.options?.find(opt => opt.id === q.correctOption)?.label ?? ""
-    : q.accepted?.[0] ?? "";
-  return <div className="los-teacher-question">
-    <h3>{q.prompt}</h3>
-    {q.type === "choice" ? <div className="los-teacher-options" role="group" aria-label={q.prompt}>
-      {q.options?.map(option => <button key={option.id} type="button"
-        className={"los-teacher-option" + (latest?.answer === option.id ? " is-selected" : "")}
-        disabled={succeeded || exhausted || solutionVisible || Boolean(session.completedAt)} onClick={() => submit(option.id)}>
-        <span className="los-teacher-option-letter">{option.id.toUpperCase()}</span>
-        <span lang={option.lang ?? "de"}>{option.label}</span>
-        {latest?.answer === option.id && latest.correct && <Check size={18} aria-hidden="true" />}
-      </button>)}
-    </div> : <form className="los-teacher-form" onSubmit={event => {
-      event.preventDefault();
-      if (drafted.trim() && !succeeded && !exhausted && !solutionVisible) submit(drafted);
-    }}>
-      <label htmlFor="los-teacher-answer">{numericResponse ? "Vastauksesi numeroin" : "Vastauksesi saksaksi"}</label>
-      <div className="los-teacher-input-row">
-        <input ref={inputRef} id="los-teacher-answer" lang={numericResponse ? undefined : "de"}
-          inputMode={numericResponse ? "numeric" : "text"}
-          autoComplete="off" spellCheck={false}
-          value={drafted} maxLength={500} disabled={inputDisabled}
-          onChange={event => saveDraft(event.target.value)}
-          placeholder={numericResponse ? "Kirjoita numeroina..." : "Kirjoita saksaksi..."} />
-        <button type="submit" disabled={!drafted.trim() || inputDisabled}>Tarkista</button>
-      </div>
-      {!numericResponse && <div className="los-teacher-special-keys" role="group" aria-label="Saksan erikoismerkit">
-        <span>Lisää merkki</span>
-        {(["ä", "ö", "ü", "ß"] as const).map(character =>
-          <button key={character} type="button" lang="de" aria-label={"Lisää " + character}
-            disabled={inputDisabled || drafted.length >= 500}
-            onClick={() => insertGermanCharacter(character)}>{character}</button>)}
-      </div>}
-    </form>}
-    {latest && <div className={"los-teacher-feedback " + (latest.correct ? "is-right" : "is-wrong")}
-      role="status" aria-live="polite">
-      <strong>{latest.correct ? "Oikein" : "Katsotaan tätä vielä"}</strong>
-      <p>{latest.correct ? q.success : teacherWrongFeedback(scene, latest.answer)}</p>
-      {!latest.correct && attempts.length >= 2 && <p>{q.reteach}</p>}
-      {latest.correct && !latest.independent &&
-        <p>Tämä oli harjoittelussa oikein. Täysin itsenäinen näyttö arvioidaan erikseen.</p>}
-    </div>}
-    {exhausted && <p className="los-teacher-hint" role="status">
-      Kolme yritystä käytetty. Avaa mallivastaus ja jatka oppimista. Tästä ei synny itsenäisen osaamisen merkintää.
-    </p>}
-    {!succeeded && !session.completedAt && <div className="los-teacher-question-tools">
-      {!exhausted && <button type="button" onClick={requestHint}><HelpCircle size={16}/> Tarvitsen vihjeen</button>}
-      {helped && <p className="los-teacher-hint">{q.hint}</p>}
-      {attempts.length >= 2 && !solutionVisible && <button type="button" onClick={reveal}>
-        <BookOpen size={16} /> Näytä mallivastaus
-      </button>}
-      {solutionVisible && <p className="los-teacher-solution">Mallivastaus: <strong lang="de">{solution}</strong>. Voit jatkaa seuraavaan vaiheeseen; mallivastauksen avaamista ei lasketa omaksi osaamisnäytöksi.</p>}
-    </div>}
-    {succeeded && <p className="los-teacher-ready"><CheckCircle2 size={17}/> Tehtävä tarkistettu. Voit jatkaa.</p>}
-  </div>;
-}
 function TeacherSource({ scene }: { scene: TeacherScene }) {
   const original = scene.sourceChapterId ? getLosOpenDialogue(scene.sourceChapterId) : undefined;
   const textB = scene.textBChapterId === "09" ? LOS1_TEXT_B_SOURCES["09"] : undefined;
@@ -143,31 +54,6 @@ function TeacherSource({ scene }: { scene: TeacherScene }) {
       <a href="/los?lessonReturn=L049#/1/09/text-b" target="_blank" rel="noopener noreferrer">Avaa alkuperäinen Text B digikirjassa</a>
     </p>}
   </section>;
-}
-
-function TeacherBoard({ scene }: { scene: TeacherScene }) {
-  const [visible, setVisible] = useState(1);
-  const board = scene.board ?? [];
-  return <div className="los-teacher-board">
-    <div className="los-teacher-board-label">OPETUSTAULU · {Math.min(visible, board.length)}/{board.length}</div>
-    <div className="los-teacher-board-grid">
-      {board.slice(0, visible).map((item, index) => <div className="los-teacher-board-item" key={index}>
-        <span>{item.label}</span>
-        <strong lang="de">{item.german}</strong>
-        <small>{item.meaning}</small>
-      </div>)}
-    </div>
-    <div className="los-teacher-board-actions">
-      <button type="button" disabled={visible <= 1} onClick={() => setVisible(n => n - 1)}>
-        <ChevronLeft size={17}/> Edellinen
-      </button>
-      <button type="button" onClick={() => setVisible(n => n >= board.length ? 1 : n + 1)}>
-        {visible < board.length ? "Näytä seuraava" : "Aloita alusta"}
-        <RotateCcw size={16}/>
-      </button>
-      {visible < board.length && <button type="button" onClick={() => setVisible(board.length)}>Näytä kaikki</button>}
-    </div>
-  </div>;
 }
 
 // Force a fresh chapter-scoped draft on lesson or chapter changes. This keeps
@@ -281,11 +167,7 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
   };
 
     return <main id="main-content" className="los-app los-teacher-app">
-    <header className="los-teacher-top">
-      <a className="los-teacher-back" href={"/los#/" + (lesson?.bookId ?? 1) + "/path"}><ArrowLeft size={18}/> Opetuspolku</a>
-      <div className="los-teacher-brand"><span className="los-teacher-logo">LOS!</span><span>Opetustila</span></div>
-      <span className="los-teacher-book">LOS! 1 · SAB31</span>
-    </header>
+    <TeacherTopbar brand="LOS!" context="LOS! 1 · SAB31" href={"/los#/" + (lesson?.bookId ?? 1) + "/path"}/>
     {authorized === null ? <div className="los-teacher-status">Avataan oppituntia…</div> :
       !authorized ? <section className="los-teacher-status">
         <h1>Kirjaudu ensin Opintopäiväkirjaan</h1>
@@ -298,10 +180,7 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
         <a href={"/los#/" + (lesson?.bookId ?? 1) + "/path"}>Palaa Opetuspolkuun</a>
       </section> :
       <>
-        <div className="los-teacher-progress" role="progressbar" aria-label="Oppitunnin opetustilanteet"
-          aria-valuemin={0} aria-valuemax={lesson.scenes.length} aria-valuenow={sceneIndex + 1}>
-          <span style={{ width: ((sceneIndex + 1) / lesson.scenes.length * 100) + "%" }}/>
-        </div>
+        <TeacherProgressBar value={sceneIndex+1} max={lesson.scenes.length}/>
         <div className="los-teacher-layout">
           <aside className="los-teacher-sidebar">
             <p className="los-teacher-eyebrow">OPETUSPOLKU · {lesson.id}</p>
@@ -312,18 +191,9 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
             {!completed && !olderContentVersion && <button className="los-teacher-pause" type="button" onClick={togglePause}>
               {session.paused ? "Jatka opetusta" : "Keskeytä oppitunti"}
             </button>}
-            <details className="los-teacher-outline" open>
-              <summary>Oppitunnin sisältö</summary>
-              <nav aria-label="Oppitunnin opetustilanteet">
-                {lesson.scenes.map((item, i) => <button key={item.id} type="button" disabled={olderContentVersion}
-                  aria-current={scene.id === item.id ? "step" : undefined}
-                  className={scene.id === item.id ? "is-active" : ""}
-                  onClick={() => navigate(item.id)}>
-                  <span>{session.visitedIds.includes(item.id) ? <Check size={15}/> : String(i + 1)}</span>
-                  <span>{item.title}</span>
-                </button>)}
-              </nav>
-            </details>
+            <TeacherSceneOutline scenes={lesson.scenes} currentId={scene.id}
+              visitedIds={session.visitedIds} disabled={olderContentVersion}
+              onSelect={navigate}/>
             {archivedVersions.length>0 && <details className="los-teacher-session-history">
               <summary>Aiemmat oppituntiversiot ({archivedVersions.length})</summary>
               <p>Vanhoja vastauksia ei lasketa nykyisen oppitunnin osaamisnäytöiksi.</p>
@@ -417,7 +287,7 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
               disabled={completed}
               onChange={value => persist(old => setTeacherAnswerDraft(old, scene.id, value, stamp()))}
             />}
-            {scene.question && <SceneQuestion
+            {scene.question && <TeacherSceneQuestion
               scene={scene} session={session}
               submit={submit}
               saveDraft={value => persist(old => setTeacherAnswerDraft(old, scene.id, value, stamp()))}
@@ -567,19 +437,12 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
                 disabled={!available} onClick={finish}>Merkitse oppitunti läpikäydyksi</button> :
                 <p className="los-teacher-done"><CheckCircle2 size={19}/> Oppitunti merkitty suoritetuksi. Osaamista seurataan erikseen.</p>}
             </section>}
-            <div className="los-teacher-navigation">
-              <button type="button" onClick={() => setReplayKey(x => x + 1)}>Toista opetustilanne</button>
-              <button type="button" disabled={sceneIndex === 0}
-                onClick={() => navigate(lesson.scenes[sceneIndex - 1]!.id)}>
-                <ChevronLeft size={18}/> Edellinen
-              </button>
-              {sceneIndex < lesson.scenes.length - 1 &&
-                <button type="button" className="los-teacher-primary"
-                  onClick={() => navigate(lesson.scenes[sceneIndex + 1]!.id)}>
-                  Seuraava <ChevronRight size={18}/>
-                </button>}
-              {sceneIndex === lesson.scenes.length - 1 && <a href={"/los#/" + (lesson?.bookId ?? 1) + "/path"}>Takaisin Opetuspolkuun <ArrowRight size={17}/></a>}
-            </div>
+            <TeacherSceneNavigation onReplay={() => setReplayKey(x => x+1)}
+              onPrevious={() => navigate(lesson.scenes[sceneIndex-1]!.id)}
+              onNext={() => navigate(lesson.scenes[sceneIndex+1]!.id)}
+              disablePrevious={sceneIndex===0}
+              last={sceneIndex===lesson.scenes.length-1}
+              returnHref={"/los#/" + lesson.bookId + "/path"}/>
             <p className={"los-teacher-save" + (!saved ? " is-error" : "")} role="status">
               {saved ? "Opiskelutiedot tallentuvat tämän laitteen LOS-varmuuskopioon." :
                 "Tallennus epäonnistui. Älä sulje näkymää ennen kuin olet varmistanut tiedot."}
