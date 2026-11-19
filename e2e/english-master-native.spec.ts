@@ -34,6 +34,8 @@ function tinyStructuralFixture() {
 test.use({ viewport: { width: 1280, height: 800 } });
 
 test("English Master opens as a first-class book route, imports one content pack and keeps it after reload", async ({ page }) => {
+  // Test the manual offline fallback even though the production bundle auto-loads.
+  await page.route("**/english-master/content.manifest.json", route => route.fulfill({ status: 404, body: "Not found" }));
   await enterLocalBook(page);
   await expect(page.getByRole("heading", { name: "Ota englannin oppikirja käyttöön" })).toBeVisible();
   const fixture = gzipSync(Buffer.from(JSON.stringify(tinyStructuralFixture()), "utf8"));
@@ -61,4 +63,19 @@ test("English Master requires the same local device entry as LOS!", async ({ pag
   await page.goto("/english-master", { waitUntil: "domcontentloaded" });
   // In clean contexts the book displays a gate, never silently exposes private progress.
   await expect(page.getByRole("heading", { name: /English Master kuuluu Opintopäiväkirjaan/ })).toBeVisible();
+});
+
+test("English Master loads the real 122/192/20 content automatically and keeps it after reload", async ({ page }) => {
+  await enterLocalBook(page);
+  await expect(page.getByRole("heading", { name: "English Master", exact: true })).toBeVisible({ timeout: 45_000 });
+  await expect(page.getByText("122 kirjalukua")).toBeVisible();
+  await page.getByRole("button", { name: "Oppikirja", exact: true }).click();
+  await expect(page.locator(".em-book-toolbar select option")).toHaveCount(122);
+  await page.getByRole("button", { name: "Opetuspolku", exact: true }).click();
+  await expect(page.locator(".em-unit")).toHaveCount(32);
+  await page.getByRole("button", { name: "Kuuntelu", exact: true }).click();
+  await expect(page.locator(".em-audio-grid article")).toHaveCount(20);
+  await page.reload({ waitUntil: "domcontentloaded" });
+  await expect(page.getByRole("heading", { name: "English Master", exact: true })).toBeVisible({ timeout: 30_000 });
+  await expect(page.getByRole("heading", { name: "Ota englannin oppikirja käyttöön" })).toHaveCount(0);
 });
