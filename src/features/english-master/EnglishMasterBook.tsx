@@ -389,8 +389,8 @@ export function EnglishMasterBook() {
             <div className="em-chapter-pager">
               <div className="em-breadcrumb">English Master <ChevronRight size={13}/> Oppikirja <ChevronRight size={13}/> <strong>{currentChapter?.content_id}</strong></div>
               <div className="em-pager-buttons">
-                <button aria-label="Edellinen kirjaluku" disabled={chapterIndex <= 0} onClick={() => goChapter(chapters[chapterIndex - 1].content_id)}>‹</button>
-                <button aria-label="Seuraava kirjaluku" disabled={chapterIndex < 0 || chapterIndex >= chapters.length - 1} onClick={() => goChapter(chapters[chapterIndex + 1].content_id)}>›</button>
+                <button aria-label="Edellinen kirjaluku" disabled={chapterIndex <= 0} onClick={() => goChapter(chapters[chapterIndex - 1]?.content_id ?? currentChapter?.content_id ?? "G01")}>‹</button>
+                <button aria-label="Seuraava kirjaluku" disabled={chapterIndex < 0 || chapterIndex >= chapters.length - 1} onClick={() => goChapter(chapters[chapterIndex + 1]?.content_id ?? currentChapter?.content_id ?? "G01")}>›</button>
               </div>
             </div>
             <p className="em-overline">ENGLISH MASTER / OPPIKIRJA</p><h1>Oppikirja</h1>
@@ -405,8 +405,8 @@ export function EnglishMasterBook() {
               {currentChapter.payload.linked_lesson_ids?.length ? <div className="em-related"><h3>Harjoittele Opetuspolussa</h3>{currentChapter.payload.linked_lesson_ids.filter(id => pack.lessons[id]).map(id => <button key={id} onClick={() => navigate("lesson", id)}>{id} · {pack.lessons[id]?.title} <ChevronRight size={16}/></button>)}</div> : null}
             </article>}
             <div className="em-chapter-bottom">
-              <button disabled={chapterIndex <= 0} onClick={() => goChapter(chapters[chapterIndex - 1].content_id)}>‹ Edellinen luku</button>
-              <button disabled={chapterIndex < 0 || chapterIndex >= chapters.length - 1} onClick={() => goChapter(chapters[chapterIndex + 1].content_id)}>Seuraava luku <ChevronRight size={16}/></button>
+              <button disabled={chapterIndex <= 0} onClick={() => goChapter(chapters[chapterIndex - 1]?.content_id ?? currentChapter?.content_id ?? "G01")}>‹ Edellinen luku</button>
+              <button disabled={chapterIndex < 0 || chapterIndex >= chapters.length - 1} onClick={() => goChapter(chapters[chapterIndex + 1]?.content_id ?? currentChapter?.content_id ?? "G01")}>Seuraava luku <ChevronRight size={16}/></button>
             </div>
           </section> :
           location.page === "path" ? <section className="em-paper"><p className="em-overline">32 JAKSOA · 192 OPPITUNTIA</p><h1>Opetuspolku</h1><p>Valitse oppitunti. Edistyminen tallentuu tähän selaimeen, ei vielä palvelimen käyttäjätilille.</p>
