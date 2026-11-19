@@ -1196,3 +1196,28 @@
 @media(prefers-reduced-motion:reduce) {
   .los-book-workspace .los-workbook-choices label {transition:none}
 }
+
+
+/* Screenshot review: guided lesson action must be above editorial QA details. */
+.los-book-workspace .los-lesson-program-head {padding-top:21px}
+.los-lesson-program-head .los-lesson-program-lead {
+  max-width:60ch;margin-bottom:9px!important;
+  font-size:14px;line-height:1.7;color:var(--los-soft);
+}
+.los-lesson-publication-note {margin:3px 0 10px}
+.los-lesson-publication-note>summary {
+  display:inline-flex;align-items:center;gap:7px;min-height:40px;
+  color:var(--los-note-teal);font-size:12px;font-weight:700;
+  cursor:pointer;line-height:1.4;
+}
+.los-lesson-publication-note>summary::after {content:"+";font-size:16px}
+.los-lesson-publication-note[open]>summary::after {content:"−"}
+.los-lesson-publication-note p {max-width:64ch;margin:5px 0 14px!important;font-size:13px;line-height:1.65}
+.los-dictionary-about>summary::after {
+  content:"+";margin-left:6px;color:var(--los-book-accent);font-size:15px;font-weight:700;
+}
+.los-dictionary-about[open]>summary::after {content:"−"}
+@media(max-width:760px) {
+  .los-book-workspace .los-lesson-program-head {padding-top:16px}
+  .los-lesson-program-head .los-lesson-program-lead {font-size:13px;line-height:1.65}
+}
