@@ -16,7 +16,7 @@ const stamp=()=>new Date().toISOString();
  */
 export function LosTeacherPlayerV2({onBack}:{onBack:()=>void}){
   const {draft,update,saved}=useLosChapterDraft(1,"01");
-  const session=draft.teacherV2Sessions?['L004']??emptyTeacherSession();
+  const session=draft.teacherV2Sessions?.['L004']??emptyTeacherSession();
   const index=Math.min(scenes.length-1,Math.max(0,session.scene));
   const scene=scenes[index]!;
   const latest=session.attempts[scene.id];
@@ -26,7 +26,7 @@ export function LosTeacherPlayerV2({onBack}:{onBack:()=>void}){
   useEffect(()=>{setValue(session.attempts[scene.id]?.answer??"");setHelp(null);},[scene.id]);
   const persist=(fn:(current:TeacherSession)=>TeacherSession)=>{
     update(current=>{
-      const previous=current.teacherV2Sessions?['L004']??emptyTeacherSession();
+      const previous=current.teacherV2Sessions?.['L004']??emptyTeacherSession();
       return {...current,teacherV2Sessions:{...current.teacherV2Sessions,L004:fn(previous)}};
     });
   };
