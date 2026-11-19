@@ -96,8 +96,14 @@ test("English Master opens as a first-class book route, imports one content pack
   await page.getByRole("button", { name: "Vahvista tämän vaiheen harjoittelu" }).click();
   await page.getByRole("button", { name: "Seuraava", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Harjoitus 1" })).toBeVisible();
+  // The exact LOS! Teacher 2.0 engine enforces the same retry / hint policy.
+  await page.getByRole("button", { name: /I studies English\./ }).click();
+  await expect(page.locator(".los-teacher-feedback")).toContainText("Katsotaan tätä vielä");
+  await page.getByRole("button", { name: /I studies English\./ }).click();
+  await expect(page.getByRole("button", { name: "Näytä mallivastaus" })).toBeVisible();
   await page.getByRole("button", { name: /I study English\./ }).click();
   await expect(page.locator(".los-teacher-feedback")).toContainText("Oikein");
+  await expect(page.locator(".los-teacher-feedback")).toContainText("Täysin itsenäinen näyttö arvioidaan erikseen.");
   await page.getByRole("button", { name: "Seuraava", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Kertaa ja päätä oppitunti" })).toBeVisible();
   await page.getByRole("button", { name: "Merkitse oppitunti läpikäydyksi" }).click();
