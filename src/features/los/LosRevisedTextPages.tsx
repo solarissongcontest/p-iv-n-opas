@@ -179,11 +179,9 @@ function TextSpeech({ blocks, chapterId, kind }: { blocks: readonly ReaderBlock[
     </details>}
       </div>
     </details>
-    <p className="los-revised-muted" role="status">{message || (
-      voiceCount>0 ?
-        "Saksankielinen puheääni käytettävissä ("+voiceCount+")." :
-        "Ääni tarkistetaan kuuntelupainiketta painettaessa."
-    )}</p>
+    {(message||voiceCount>0)&&<p className="los-revised-muted" role="status">
+      {message||("Saksankielinen puheääni käytettävissä ("+voiceCount+").")}
+    </p>}
   </div>;
 }
 
@@ -214,7 +212,7 @@ export function LosRevisedTextPage({ chapterId, kind }: { chapterId: string; kin
   return <section className={"los-revised-page"+(sideBySide&&!readingFocus?" is-study-split":"")+(readingFocus?" is-reading-focus":"")} aria-labelledby={"los-revised-heading-" + chapterId + kind}>
     <p className="los-eyebrow">KAPPALE {chapterId} / TEXT {kind}</p>
     <h1 id={"los-revised-heading-" + chapterId + kind} lang="de">{source.title}</h1>
-    <p className="los-page-intro">{kind === "A" ? "Kappaleen uusi pääteksti. Lue ensin tilanteen kuvaus ja seuraa keskustelua." : "Toinen tekstilaji. Harjoittele kappaleen ilmauksia uudessa tilanteessa."}</p>
+    <p className="los-page-intro">{kind === "A" ? "Lue keskustelu ja kuuntele saksaa omaan tahtiin." : "Harjoittele tuttuja ilmauksia uudessa tilanteessa."}</p>
     <div className="los-study-layout-toggle" role="group" aria-label="Tekstin ja tehtävien asettelu">
       <button type="button" className={!sideBySide?"is-active":""} aria-pressed={!sideBySide}
         onClick={()=>setLayout(false)}>Kirja</button>
