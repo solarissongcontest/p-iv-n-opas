@@ -171,3 +171,37 @@ test("device voice QA cannot be self-certified before full German playback and s
  await page.reload({waitUntil:"domcontentloaded"});
  await expect(page.locator(".los-voice-diagnostics").getByText("Tämän laitteen ja puheäänen oma hyväksyntä: 1/8.")).toBeVisible();
 });
+
+test("preferred German voice follows the learner across Text A, B, C and appendix",async({page})=>{
+ await page.addInitScript(()=>{
+  const voices=[
+   {name:"QA Deutsch",lang:"de-DE",localService:true},
+   {name:"QA Österreich",lang:"de-AT",localService:true},
+  ];
+  const synthesis={
+   getVoices:()=>voices,
+   addEventListener:()=>{},
+   removeEventListener:()=>{},
+   cancel:()=>{},
+   speak:()=>{},
+  };
+  Object.defineProperty(window,"speechSynthesis",{configurable:true,value:synthesis});
+  Object.defineProperty(window,"SpeechSynthesisUtterance",{configurable:true,value:class {
+   constructor(public text:string){}
+  }});
+ });
+ await enter(page,"01/text");
+ const picker=page.getByLabel("Saksan puheääni");
+ await expect(picker).toBeVisible({timeout:30000});
+ await picker.selectOption({label:"QA Österreich · de-AT"});
+ await expect(picker).toHaveValue("de-AT / QA Österreich");
+ await page.goto("/los#/1/02/text-b",{waitUntil:"domcontentloaded"});
+ await expect(page.getByLabel("Saksan puheääni")).toHaveValue("de-AT / QA Österreich");
+ await page.goto("/los#/1/03/text-c",{waitUntil:"domcontentloaded"});
+ await expect(page.getByLabel("Saksan puheääni")).toHaveValue("de-AT / QA Österreich");
+ await page.goto("/los#/1/appendix",{waitUntil:"domcontentloaded"});
+ await expect(page.locator(".los-voice-diagnostics select")).toHaveValue("de-AT / QA Österreich");
+ await page.locator(".los-voice-diagnostics select").selectOption({label:"QA Deutsch · de-DE"});
+ await page.goto("/los#/1/04/text",{waitUntil:"domcontentloaded"});
+ await expect(page.getByLabel("Saksan puheääni")).toHaveValue("de-DE / QA Deutsch");
+});
