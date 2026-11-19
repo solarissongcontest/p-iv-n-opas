@@ -13,16 +13,29 @@
 - **Edistyminen:** laitekohtainen, käyttäjätunnisteella rajattu paikallinen progress; vienti ja palautus JSON-tiedostona.
 - **Mobiili:** omat kirjan navigointipaneelit, yksipalstainen lukija ja näppäimistökäyttö.
 
+## Automaattinen sisältöpaketti (ensimmäisen käytön tiedostovalinta poistettu)
+
+Kaikki **122 kirjalukua, 192 oppituntia ja 20 alkuperäistä synteettistä pilottiäänitettä** toimitetaan tästä samasta GitHub-repositoriosta. Binäärinen `Alpha 0.8` -paketti on jaettu 16 staattiseen osaan, jotka sijaitsevat polussa `public/english-master/pack-part-00.bin` … `pack-part-15.bin`.
+
+- `public/english-master/content.manifest.json` sisältää version, osien nimet ja koot sekä koko gzip-paketin SHA-256-tarkistussumman.
+- `/english-master` lataa osat automaattisesti ensimmäisellä verkkokäynnillä ja kokoaa niistä alkuperäisen gzip-tiedoston selaimessa.
+- Ennen käyttöä selain tarkistaa jokaisen osan koon, koko paketin 4 794 010 tavun pituuden sekä SHA-256:n. Paketti hyväksytään vasta, jos se sisältää täsmälleen 122 lukua, 192 oppituntia ja 20 äänitettä.
+- Onnistunut paketti tallennetaan IndexedDB:hen offline-käyttöä varten. Seuraavalla kerralla et tarvitse enää verkkolatausta tai manuaalista tiedostonvalintaa.
+- Jos paikallinen välimuisti on korruptoitunut, selain yrittää ladata sisällön palvelimelta uudelleen.
+- Jos verkko ei toimi eikä IndexedDB:ssä ole ehjää pakettia, käsin tuonti jää tarkoituksella hätävaraksi.
+
+Tämä korvaa aiemman ohjeen, jossa käyttäjän piti ensin ladata ja tuoda `ENGLISH_MASTER_OPINTOPAIVAKIRJA_CONTENT_PACK_0.8.json.gz`. Täysi sisältö on nyt mukana GitHub-koodissa, joten erillistä latauspalvelua tai ulkopuolista linkkiä ei käytetä.
+
 ## Sisällön käyttöönotto
 
-Ensimmäisellä käynnistyksellä kirja tarvitsee yhden sisältöpaketin:
+Aiempi käsin tuotava sisältöpaketti toimii edelleen offline-varavaihtoehtona:
 `ENGLISH_MASTER_OPINTOPAIVAKIRJA_CONTENT_PACK_0.8.json.gz`
 
 Paketti tuotetaan tästä projektissa toimitetusta alkuperäisestä Alpha 0.8:n `content/`-hakemistosta ja sen 20 omasta `app/assets/*.mp3`-äänitiedostosta. Siinä on 122 alkuperäistä lukua, 192 alkuperäistä oppituntia ja 20 mediaa.
 
-**Välitön käyttö:** avaa `/english-master` Opintopäiväkirjan valikosta ja valitse paketti yhden kerran. Se säilyy IndexedDB:ssä myös sivun päivitysten yli, jos selain sallii paikallisen tallennuksen.
+**Tavallinen käyttö:** avaa `/english-master` Opintopäiväkirjan valikosta. Paketti latautuu automaattisesti palvelimelta ja säilyy IndexedDB:ssä myös sivun päivitysten yli, jos selain sallii paikallisen tallennuksen.
 
-**Täysin automaattinen käyttö ilman tuontia:** aseta sama paketti repo- tai tuotantopalvelimen polkuun `public/english-master/content.pack.json.gz`. Lukija yrittää ladata sen automaattisesti, jos käyttäjän laitteella ei vielä ole pakettia. Pakettia ei ole lisätty tähän koodimuutokseen eikä sen tuotantojulkaisua voi väittää tehdyksi ennen todellista tiedoston asennusta.
+**Asennus tuotantoon:** Vercelin tulee julkaista kaikki `public/english-master`-hakemiston 17 tiedostoa. GitHubissa oleva aineisto ei yksin vahvista tuotantosivuston viimeisintä julkaisuversiota.
 
 Älä tarjoa äänitteitä tai tehtävien vastauksia aiempien julkaisemattomien YO-kokeiden autenttisina aineistoina. Tämä on Alpha 0.8:n luonnossisältö.
 
@@ -39,7 +52,7 @@ Paketti tuotetaan tästä projektissa toimitetusta alkuperäisestä Alpha 0.8:n 
 
 `e2e/english-master-native.spec.ts` tarkistaa laiteportin, gzip-paketin tuonnin, sisällön säilymisen latausten välissä, kirjaluvun, monivalintatehtävän, oppitunnin ja edistymistilan.
 
-Testi luo pienen synteettisen 122/192 testipaketin. **Se ei väitä suorittaneensa koko 4,57 Mt:n oikean paketin E2E-testiä.** Julkaisuun tarvitaan myös `npm run build` / TypeScript-tarkistus, Playwright-testi sekä oikean paketin smoke-testi selaimessa.
+Testi tarkistaa sekä synteettisen 122/192-manuaalituonnin että oikean 122/192/20-sisältöpaketin automaattisen latauksen. Lisäksi `tests/english-master-assets.test.ts` tarkistaa alkuperäiset 16 binääriosaa, SHA-1- ja SHA-256-tarkistussummat, gzip-purun ja aineiston lukumäärät. Julkaisuun tarvitaan myös `npm run build` / TypeScript-tarkistus sekä onnistunut Playwright-ajo.
 
 ## Seuraavat erilliset työt
 
