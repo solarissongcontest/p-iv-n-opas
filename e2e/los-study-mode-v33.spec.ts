@@ -14,18 +14,18 @@ async function enter(page:import("@playwright/test").Page){
 test("Book + exercises shows exactly one live question, preserves answers after layout switches",async({page})=>{
   await enter(page);
   await expect(page.locator(".los-revised-page .los-reading-question")).toHaveCount(8);
-  await page.getByRole("button",{name:"Kirja + tehtävät"}).click();
+  await page.getByRole("combobox",{name:"Opiskelutila"}).selectOption("split");
   await expect(page.locator(".los-study-layout")).toHaveClass(/is-split/);
   await expect(page.locator(".los-study-questions .los-reading-question")).toHaveCount(1);
   const first=page.locator("#LOS1-READ-V2-C01-A-01");
   await first.getByLabel("Saksan kurssia").check();
   await first.getByRole("button",{name:"Tarkista vastaus"}).click();
   await expect(first.locator(".los-reading-feedback")).toContainText("Oikein!");
-  await page.getByRole("button",{name:"Kirja",exact:true}).click();
+  await page.getByRole("combobox",{name:"Opiskelutila"}).selectOption("book");
   await expect(page.locator(".los-study-layout")).not.toHaveClass(/is-split/);
   await expect(page.locator(".los-revised-page .los-reading-question")).toHaveCount(8);
   await expect(page.locator("#LOS1-READ-V2-C01-A-01 .los-reading-feedback")).toContainText("Oikein!");
-  await page.getByRole("button",{name:"Kirja + tehtävät"}).click();
+  await page.getByRole("combobox",{name:"Opiskelutila"}).selectOption("split");
   await page.locator(".los-reading-compact-nav button").last().click();
   await expect(page.locator(".los-study-questions .los-reading-question")).toHaveCount(1);
   await expectNoHorizontalOverflow(page);
