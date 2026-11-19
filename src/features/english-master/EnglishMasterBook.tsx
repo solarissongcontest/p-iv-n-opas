@@ -7,13 +7,14 @@ import "../los/los-design-quality.css";
 import "../los/los-lessons.css";
 import { LosReaderDisplayControls, readLosReaderSettings } from "../los/LosReaderDisplayControls";
 import "./english-master.css";
+import { EnglishTeacherPlayer } from "./EnglishTeacherPlayer";
 
 /**
  * English Master is a first-class book route, just like LOS!.
  * The original Alpha 0.8 content is imported as DATA, never executed as HTML.
  * No cloud sync or privileged publication status is implied.
  */
-type LessonTask = {
+export type LessonTask = {
   task_id: string; phase?: string; format: "single_choice" | "short_answer" | "free_response";
   prompt_en?: string; prompt_fi?: string; options?: Array<{ id: string; text: string }>;
   correct_option?: string; acceptable_answers?: string[]; model_answer_en?: string;
@@ -26,7 +27,7 @@ type Chapter = { content_id: string; title: string; status: string; payload: {
     common_errors_fi?: string[] | string; self_check?: unknown }>;
   summary_fi?: string; linked_lesson_ids?: string[];
 }};
-type Lesson = { content_id: string; title: string; status: string; book_refs?: string[];
+export type Lesson = { content_id: string; title: string; status: string; book_refs?: string[];
   payload: { hook_fi?: string; objectives_fi?: string[]; explanations?: Array<{
     heading_fi?: string; text_fi: string; examples?: Array<{ en: string; meaning_fi?: string; why_fi?: string }> }>;
     teacher_scenes?: Array<{ scene_id?: string; id?: string; title_fi?: string; text_fi?: string; teacher_fi?: string;
@@ -211,14 +212,10 @@ export function EnglishMasterBook() {
   const tocPanelRef = useRef<HTMLElement>(null);
   const tocTriggerRef = useRef<HTMLButtonElement>(null);
   const [expandedGroup, setExpandedGroup] = useState<string | null>("G");
-  const [sceneStep, setSceneStep] = useState(0);
   const [bookSectionIndex, setBookSectionIndex] = useState(0);
   const [query, setQuery] = useState("");
   const tocSearchRef = useRef<HTMLInputElement>(null);
   const [progress, setProgress] = useState<Progress>({});
-  const [answer, setAnswer] = useState<Record<string, string>>({});
-  const [feedback, setFeedback] = useState<Record<string, { ok: boolean | null; explanation: string }>>({});
-  const [showHelp, setShowHelp] = useState(false);
   const [essay, setEssay] = useState("");
   const [assignment, setAssignment] = useState("");
   const [transcriptOpen, setTranscriptOpen] = useState(false);
@@ -259,7 +256,7 @@ export function EnglishMasterBook() {
     document.title = "English Master · Opintopäiväkirja";
     return () => { document.title = "StudyOS"; };
   }, []);
-  useEffect(() => { setAnswer({}); setFeedback({}); setShowHelp(false); setTranscriptOpen(false); setSceneStep(0); setBookSectionIndex(0); }, [location.id, location.page]);
+  useEffect(() => { setTranscriptOpen(false); setBookSectionIndex(0); }, [location.id, location.page]);
   // Keep the mobile contents drawer as keyboard-accessible as the original LOS! 1.
   useEffect(() => {
     if (!tocOpen || !window.matchMedia("(max-width:760px)").matches) return;
@@ -328,21 +325,6 @@ export function EnglishMasterBook() {
       return next;
     });
   };
-  const checkTask = (task: LessonTask) => {
-    const value = (answer[task.task_id] ?? "").trim();
-    if (!value) return;
-    if (task.requires_manual_review || task.format === "free_response") {
-      setFeedback(previous => ({ ...previous, [task.task_id]: { ok: null, explanation: task.criteria_fi ?? "Vertaa omaa vastausta malliin. Vahvista itse, toteutuuko tavoite." } }));
-    } else {
-      const ok = task.format === "single_choice"
-        ? value === task.correct_option
-        : (task.acceptable_answers ?? []).some(candidate => candidate.trim().toLocaleLowerCase() === value.toLocaleLowerCase());
-      const explanation = ok ? task.feedback_correct_fi ?? "Oikein!"
-        : task.wrong_option_feedback_fi?.[value] ?? task.hint_fi ?? "Tarkista vastaus ja vertaa teoriaan.";
-      setFeedback(previous => ({ ...previous, [task.task_id]: { ok, explanation } }));
-    }
-    if (currentLesson) markLesson(currentLesson.content_id, Object.keys(feedback).length + (feedback[task.task_id] ? 0 : 1));
-  };
   const exportProgress = () => {
     const contents = JSON.stringify({ schema: "em-native-progress-1", progress, essay }, null, 2);
     const href = URL.createObjectURL(new Blob([contents], { type: "application/json" }));
@@ -370,6 +352,14 @@ export function EnglishMasterBook() {
   ];
   if (owner === undefined || loading) return <main className="em-loading" role="status">Avataan English Masteria…</main>;
   if (!owner) return <main className="em-gate"><h1>English Master kuuluu Opintopäiväkirjaan.</h1><p>Avaa ensin Opintopäiväkirja tällä laitteella, aivan kuten LOS!-kirjaa käyttäessäsi.</p><a href="/today" className="em-primary">Avaa Opintopäiväkirja <ChevronRight size={18}/></a></main>;
+  // LOS! 1 Teacher 2.0 is a separate full-screen teaching experience. English
+  // uses that exact UI system, but its own authored lessons and independent state.
+  if (pack && location.page === "lesson" && currentLesson) return <EnglishTeacherPlayer
+    key={currentLesson.content_id} lesson={currentLesson} ownerId={owner}
+    previouslyCompleted={Boolean(progress[currentLesson.content_id]?.completed)}
+    onBack={() => navigate("path")}
+    onComplete={(checked) => {markLesson(currentLesson.content_id,checked,true);navigate("path");}}
+  />;
   return <div className="los-app em-app" style={{"--los-book-accent":"#2E617D","--los-book-tint":"#E9F2F6"} as CSSProperties}>
     <div className="los-book-workspace em-los-workspace" data-reading-size={readingView.size} data-reading-spacing={readingView.spacing} data-reading-measure={readingView.measure}>
       <header className="los-book-topbar">
@@ -589,70 +579,6 @@ export function EnglishMasterBook() {
                 </button></li>)}
               </ol></section>;
             })}
-          </section> :
-          location.page === "lesson" && currentLesson ? <section className="los-inner-page em-lesson">
-            <button className="em-textlink" onClick={() => navigate("path")}><ChevronLeft size={16}/> Opetuspolkuun</button>
-            <div className="los-lesson-program em-lesson-program">
-              <header className="los-lesson-program-head">
-                <p className="los-overline">OHJATTU OPETUS · ENGLISH MASTER</p>
-                <h1>{currentLesson.title}</h1>
-                {currentLesson.payload.hook_fi && <p className="em-lead">{currentLesson.payload.hook_fi}</p>}
-                <p className="los-lesson-status">{progress[currentLesson.content_id]?.completed ? "Oppitunti on merkitty harjoitelluksi. Voit palata siihen uudelleen." : "Oppitunti on harjoiteltavissa. Merkitse se harjoitelluksi, kun olet käynyt harjoitukset läpi."}</p>
-                <div className="los-lesson-progress" aria-label="Opetuspolun eteneminen">
-                  <strong>{completed} / 192 harjoiteltu</strong>
-                  <div role="progressbar" aria-label="Opetuspolun eteneminen" aria-valuemin={0} aria-valuemax={192} aria-valuenow={completed}>
-                    <span style={{width:(completed/192*100)+"%"}}/>
-                  </div>
-                </div>
-              </header>
-              <article className="los-lesson-detail em-lesson-detail">
-                <p className="em-overline">{currentLesson.content_id} · OPPITUNTILUONNOS</p>
-                {currentLesson.payload.objectives_fi?.length ? <aside className="los-goals em-lesson-objectives">
-                  <h3>Oppitunnin tavoitteet</h3><ul>{currentLesson.payload.objectives_fi.map((item, i) => <li key={i}>{item}</li>)}</ul>
-                </aside> : null}
-            {currentLesson.payload.explanations?.map((ex, i) => <div key={i} className="em-section"><h2>{ex.heading_fi ?? "Opetus " + (i + 1)}</h2><p>{ex.text_fi}</p>{ex.examples?.map((model, j) => <figure key={j} className="em-example"><blockquote lang="en">{model.en}</blockquote>{model.meaning_fi && <p>{model.meaning_fi}</p>}{model.why_fi && <figcaption>{model.why_fi}</figcaption>}</figure>)}</div>)}
-            {currentLesson.payload.teacher_scenes?.length ? <section className="los-lesson-program em-lesson-board" aria-label="Vaiheittainen opetustaulu">
-              <div className="los-lesson-program-head em-board-top"><p className="los-overline">OPETUSTAULU · OHJATTU OPETUS</p>
-                <p>Vaihe {sceneStep + 1} / {currentLesson.payload.teacher_scenes.length}</p>
-                <div className="los-lesson-progress" aria-label="Opetustaulun vaiheiden eteneminen">
-                  <strong>{sceneStep + 1} / {currentLesson.payload.teacher_scenes.length}</strong>
-                  <div role="progressbar" aria-label="Opetustaulun eteneminen" aria-valuemin={0}
-                    aria-valuemax={currentLesson.payload.teacher_scenes.length} aria-valuenow={sceneStep + 1}>
-                    <span style={{width:((sceneStep + 1) / currentLesson.payload.teacher_scenes.length * 100)+"%"}}/>
-                  </div>
-                </div>
-              </div>
-              {currentLesson.payload.teacher_scenes.slice(sceneStep, sceneStep + 1).map((scene, i) => <div className="los-lesson-detail em-board-scene" key={scene.scene_id ?? scene.id ?? i}>
-                <h3>{scene.title_fi ?? "Opetusvaihe " + (sceneStep + 1)}</h3>
-                <div className="los-lesson-teaching-note">
-                  <p>{scene.teacher_fi ?? scene.text_fi}</p>
-                  {scene.board?.visible_en && <div className="los-lesson-teaching-example em-board-example" lang="en"><strong>{scene.board.visible_en}</strong></div>}
-                  {scene.board?.teacher_fi && <p>{scene.board.teacher_fi}</p>}
-                </div>
-              </div>)}
-              <div className="los-lesson-step-actions em-board-controls">
-                <button disabled={sceneStep === 0} onClick={() => setSceneStep(n => Math.max(0, n - 1))}>‹ Edellinen vaihe</button>
-                <button disabled={sceneStep >= currentLesson.payload.teacher_scenes.length - 1} onClick={() => setSceneStep(n => Math.min(currentLesson.payload.teacher_scenes!.length - 1, n + 1))}>Seuraava vaihe <ChevronRight size={16}/></button>
-              </div>
-            </section> : null}
-            {currentLesson.payload.alternative_explanation_fi && <><button className="em-textlink" onClick={() => setShowHelp(!showHelp)} aria-expanded={showHelp}>En ymmärrä · {showHelp ? "Piilota" : "Näytä toinen selitys"}</button>{showHelp && <p className="em-help">{currentLesson.payload.alternative_explanation_fi}</p>}</>}
-            <h2>Harjoitukset</h2>{currentLesson.payload.tasks?.map((task, index) => {
-              const result = feedback[task.task_id];
-              return <div className="em-task los-exercise" key={task.task_id}>
-                <small>TEHTÄVÄ {index + 1} · {task.phase ?? "Harjoitus"}</small><p lang="en">{task.prompt_en ?? task.prompt_fi}</p>
-                {task.format === "single_choice" && task.options ? <div className="em-choices los-answer-list">{task.options.map(option => <label key={option.id}><input type="radio" name={task.task_id} value={option.id} checked={answer[task.task_id] === option.id} onChange={() => setAnswer(prev => ({ ...prev, [task.task_id]: option.id }))}/><span lang="en">{option.text}</span></label>)}</div> :
-                  task.format === "free_response" ? <textarea aria-label={"Vastaus tehtävään " + (index + 1)} value={answer[task.task_id] ?? ""} onChange={event => setAnswer(prev => ({ ...prev, [task.task_id]: event.target.value }))} rows={3}/> :
-                  <input aria-label={"Vastaus tehtävään " + (index + 1)} value={answer[task.task_id] ?? ""} onChange={event => setAnswer(prev => ({ ...prev, [task.task_id]: event.target.value }))} placeholder="Kirjoita vastauksesi" />}
-                <button className="em-check los-exercise-check" onClick={() => checkTask(task)} disabled={!answer[task.task_id]?.trim()}>Tarkista vastaus</button>
-                {result && <div role="status" className={"em-feedback " + (result.ok === false ? "is-wrong los-answer-wrong" : "los-answer-right")}><strong>{result.ok === null ? "Itsearviointi" : result.ok ? "Oikein!" : "Tarkista vielä"}</strong><p>{result.explanation}</p>{result.ok === null && <><p lang="en">{task.model_answer_en ?? task.acceptable_answers?.[0]}</p><p>{task.criteria_fi}</p></>}</div>}
-                {task.hint_fi && <details><summary>Vihje</summary><p>{task.hint_fi}</p></details>}
-              </div>;
-            })}
-            {currentLesson.payload.summary_fi && <p className="em-summary">{currentLesson.payload.summary_fi}</p>}
-            <button className="los-primary" onClick={() => { markLesson(currentLesson.content_id, Object.keys(feedback).length, true); navigate("path"); }}>Merkitse harjoitelluksi <CheckCircle2 size={17}/></button>
-            <p className="em-note">Harjoitelluksi merkitseminen ei tarkoita, että koko taito olisi todistetusti hallittu. Avoimien vastausten arvioinnissa käytä omaa tai opettajan arviota.</p>
-              </article>
-            </div>
           </section> :
           location.page === "writing" ? <section className="em-paper"><p className="em-overline">WRITING ACADEMY</p><h1>Kirjoittaminen</h1><p>Kirjoita englanniksi. Teksti säilyy tällä laitteella, eikä sitä lähetetä automaattisesti ChatGPT:hen.</p>
             <label className="em-field">Tehtävänanto<textarea rows={3} value={assignment} onChange={event => setAssignment(event.target.value)} placeholder="Liitä kirjoitustehtävänanto tähän"/></label>
