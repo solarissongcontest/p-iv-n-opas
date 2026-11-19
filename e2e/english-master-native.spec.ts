@@ -231,9 +231,9 @@ test("English Teacher 2.0 saves stage and drafts locally without claiming automa
   await page.getByRole("button", { name: "Jatka opetusta" }).first().click();
   await expect(page.locator(".los-teacher-paper")).toBeVisible();
   const saved = await page.evaluate(() => Object.keys(localStorage)
-    .filter(key => key.startsWith("em-teacher-v2-")));
+    .filter(key => key.startsWith("em-teacher-core-v1-") && !key.endsWith("-archive")));
   expect(saved).toHaveLength(1);
-  await expect(page.getByRole("button", { name: "Merkitse harjoitelluksi" })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Merkitse oppitunti läpikäydyksi" })).toHaveCount(0);
 });
 
 test("English Teacher 2.0 reflows on narrow mobile screens without importing German lesson content", async ({ page }, testInfo) => {
