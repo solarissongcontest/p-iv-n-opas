@@ -159,7 +159,7 @@ function TextSpeech({ blocks, chapterId, kind }: { blocks: readonly ReaderBlock[
         </button>
       </li>)}</ol>
     </details>}
-    {sentences.length>0&&<details className="los-revised-speech-segments los-revised-speech-sentences">
+    {sentences.length>0&&<details className="los-revised-speech-sentences">
       <summary>Kuuntele jokainen lause erikseen ({sentences.length})</summary>
       <ol>{sentences.map(({text,turnIndex,sentenceIndex,speaker})=><li key={turnIndex+"-"+sentenceIndex}>
         <div className="los-revised-speech-segment-label">
