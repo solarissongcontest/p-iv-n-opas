@@ -35,20 +35,23 @@ export function searchLosFreeDict(
 ):readonly {word:string;meaning:string}[]{
  const needle=query.toLocaleLowerCase(data.meta.pair==="deu-fin"?"de":"fi").trim();
  if(needle.length<2)return[];
+ const exact: {word:string;meaning:string}[]=[];
  const starts: {word:string;meaning:string}[]=[];
  const contains: {word:string;meaning:string}[]=[];
  const lemma=losFreeDictLemmaFor(query,data.meta.pair);
+ const lemmaNeedle=lemma?.toLocaleLowerCase("de");
  const lemmaMatches:{word:string;meaning:string}[]=[];
  for(const [word,meaning] of data.entries){
   const head=word.toLocaleLowerCase(data.meta.pair==="deu-fin"?"de":"fi");
   const item={word,meaning};
-  if(head.startsWith(needle))starts.push(item);
-  else if(lemma&&head===lemma.toLocaleLowerCase("de"))lemmaMatches.push(item);
+  if(head===needle)exact.push(item);
+  else if(lemmaNeedle&&head===lemmaNeedle)lemmaMatches.push(item);
+  else if(head.startsWith(needle))starts.push(item);
   else if(head.includes(needle)||meaning.toLocaleLowerCase("fi").includes(needle))
    contains.push(item);
-  if(starts.length>=limit)break;
  }
- return [...starts,...(starts.length===0?lemmaMatches:[]),...contains].slice(0,limit);
+ // Never let prefix hits hide a curated inflected-form lemma. Exact hits rank first.
+ return [...exact,...lemmaMatches,...starts,...contains].slice(0,limit);
 }
 export async function fetchLosFreeDict(pair:LosFreeDictPair,signal?:AbortSignal):Promise<LosFreeDictAsset>{
  const response=await fetch("/los-dictionary/v1/"+pair+".json",signal?{signal}:{});
