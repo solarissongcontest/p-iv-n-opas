@@ -660,7 +660,8 @@ body:has(.exam-simulation-running) .pwa-update-prompt {
 
 /* In LOS! reading pages, defer non-urgent PWA updates until the learner
    returns to another view. Keep the update available; never reload a text. */
-body:has(.los-book-workspace .los-revised-page) .pwa-update-prompt {
+body:has(.los-book-workspace .los-revised-page) .pwa-update-prompt,
+body:has(.los-teacher-app) .pwa-update-prompt {
   display:none;
 }
 
