@@ -2,15 +2,15 @@ import { TeacherTimeCalendar } from "./TeacherTimeCalendar.tsx";
 import { Los1ChapterImage } from "../Los1ChapterImage.tsx";
 import { LOS1_TEXT_B_SOURCES } from "../content/los1TextBAdditional.ts";
 import { getLosOpenDialogue } from "../content/los1OpenDialogues.ts";
-import { useEffect, useRef, useState } from "react";
-import { ArrowLeft, ArrowRight, BookOpen, Check, CheckCircle2, ChevronLeft, ChevronRight, HelpCircle, RotateCcw } from "lucide-react";
+import { useEffect, useState } from "react";
+import { ArrowRight, BookOpen, Check, CheckCircle2, HelpCircle } from "lucide-react";
 import { readCachedDeviceUser } from "@/lib/deviceSession";
 import { useLosChapterDraft, prepareLosTeacherVersionRestart } from "../studyState.ts";
 import {
   emptyTeacherSession, markTeacherHelp, confirmTeacherActivity, teacherChapterAssessmentStatus, teacherMidtermAssessmentStatus,
   finishTeacherSession, independentTeacherEvidence, moveTeacherScene, revealTeacherSolution,
-  setTeacherAnswerDraft, submitTeacherAnswer, toggleTeacherPause, teacherCanFinish, teacherCompletionBlockers, teacherNextIncompleteSceneId, teacherLatestAttempt,
-  teacherWrongFeedback, teacherBuiltNumberCount, teacherRequiresNumericResponse, recoverTeacherSession, teacherSessionNeedsReview, type TeacherScene, type TeacherSession, isCorrectCalendarEntry,
+  setTeacherAnswerDraft, submitTeacherAnswer, toggleTeacherPause, teacherCanFinish, teacherCompletionBlockers, teacherNextIncompleteSceneId,
+  teacherBuiltNumberCount, recoverTeacherSession, teacherSessionNeedsReview, type TeacherScene, type TeacherSession, isCorrectCalendarEntry,
 } from "./engine.ts";
 import { getLosTeacherLesson } from "./lessonRegistry.ts";
 import { LosTeacherNumberBuilder } from "./LosTeacherNumberBuilder.tsx";
