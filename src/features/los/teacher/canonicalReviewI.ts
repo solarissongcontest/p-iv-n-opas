@@ -27,8 +27,10 @@ function readQuestion(chapter:string,kind:LosReadingText,ordinal:number):Teacher
    id:String.fromCharCode(97+i),label,lang:"fi" as const,
    ...(i!==question.answerIndex?{wrongFeedback:"Etsi kyseinen tieto uudelleen uudesta Text "+kind+" -tekstistä."}:{})
  }));
+ const correctOption=options[question.answerIndex]?.id;
+ if(!correctOption)throw new Error("Invalid current-book question answer index");
  return {type:"choice",skillId:"L1-READ-01",evidenceRole:"practice",
-   prompt:question.prompt,options,correctOption:options[question.answerIndex]?.id,
+   prompt:question.prompt,options,correctOption,
    success:"Oikein. "+question.explanation,
    hint:"Katso nykyisestä Text "+kind+" -tekstistä kohta, jossa asia kerrotaan.",
    reteach:question.explanation+" Lähdetekstin yksityiskohta: "+question.evidence,
