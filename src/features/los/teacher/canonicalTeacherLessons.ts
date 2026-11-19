@@ -139,9 +139,47 @@ function rewriteObsoleteScene(scene:TeacherScene,chapterId:string,sequence:numbe
       board:canonicalBoard(chapterId)};
   }
   if(scene.kind==="reflection"){
-    return {...base,title:"Kertaa nykyisen tekstin tärkein asia",paragraphs:[
-      "Kirjoita omin sanoin, mikä uusien Text A:n ja B:n välillä muuttuu ja miten Text C auttaa ymmärtämään."],
-      };
+    return {...base,kind:"reflection",title:"Mitä opit nykyisistä teksteistä?",
+      paragraphs:["Pohdi omin sanoin, mikä kappaleen uusissa teksteissä oli tärkeintä. Text C auttaa kertaamaan vaikeat ilmaukset."],
+      reflection:{prompt:"Mitä opit kappaleen uusista A-, B- ja C-teksteistä?",
+        placeholder:"Kirjoita oma havaintosi. Mitkä sanat tai tilanteet jäivät mieleen?",
+        minLength:scene.reflection?.minLength??20}};
+  }
+  if(scene.kind==="summary"){
+    return {...base,kind:"summary",title:"Yhteenveto: kappaleen nykyiset tekstit",
+      paragraphs:["Tarkistit kappaleen "+Number(chapterId)+" keskeisiä ilmauksia. Nyt Text A on "+current.ab.textA.title+
+        ", Text B on "+current.ab.textB.title+" ja Text C on "+current.c.title+".",
+        "Kertaa vaikeat ilmaukset uudesta Text C:stä ja tarkista omat vastauksesi oppikirjan tehtävissä."]};
+  }
+  if(scene.kind==="introduction"||scene.kind==="explanation"){
+    return {...base,kind:scene.kind,title:scene.kind==="introduction"?"Aloitetaan nykyisen oppikirjan kanssa":"Näin luet nykyiset oppikirjatekstit",
+      paragraphs:[...intro,"Text A: "+current.ab.textA.title+". Text B: "+current.ab.textB.title+
+        ". Text C: "+current.c.title+"."]};
+  }
+  if(scene.kind==="calendar"){
+    return {...base,kind:"calendar",title:"Sovi tapaamisaika nykyisen oppikirjan mukaan",
+      paragraphs:["Harjoittele viikonpäivää ja tasatuntia omassa kalenterimerkinnässä.",
+        "Tämä ei ole vanhan äänitteen kuuntelutehtävä. Tarkista ilmaus C09:n nykyisestä Text C:stä."],
+      calendar:scene.calendar?{...scene.calendar,prompt:"Tallenna oikea viikonpäivä ja kellonaika.",
+        sourceNote:"LOS! 1:n uusi kappale 9 / nykyinen Text C. Oma kirjoitusharjoitus, ei kuunteluarvio."}:undefined,
+      bookLinks:canonicalLinks(chapterId,["C"])};
+  }
+  if(scene.kind==="form"){
+    const sample=firstSentence(current.ab.textA);
+    return {...base,kind:"form",title:"Kirjoita tietoja nykyisen tekstin tilanteeseen",
+      paragraphs:intro,
+      form:scene.form?.map((field,i)=>({
+        ...field,
+        label:stale.test(field.label)?"Oma lause "+(i+1):field.label,
+        placeholder:stale.test(field.placeholder)?"Kirjoita omin sanoin saksaksi":field.placeholder,
+        sampleAnswer:stale.test(field.sampleAnswer)?sample:field.sampleAnswer,
+      })),
+      bookLinks:canonicalLinks(chapterId,["A"])};
+  }
+  if(scene.kind==="activity"){
+    return {...base,kind:"activity",title:"Harjoittele nykyisen "+label+" -tekstin avulla",
+      paragraphs:intro,bookLinks:canonicalLinks(chapterId,[kind]),
+      ...(scene.activityId?{activityLabel:"Harjoittelin nykyisen "+label+" -tekstin avulla"}:{})};
   }
   // Preserve old activity IDs and the existing student's work, but change
   // inaccurate original-source claims to a book-linked current-text activity.
