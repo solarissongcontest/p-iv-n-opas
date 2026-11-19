@@ -91,7 +91,7 @@ function adaptL029(original:TeacherLesson):TeacherLesson{
  const intro:TeacherScene={id:"welcome",kind:"introduction",phase:"Kertaus",
    title:"Tunnista uusien keskustelujen tärkeimmät tiedot",
    paragraphs:[
-     "Tämä kertaus on sovitettu uuteen LOS! 1 -oppikirjaan. Aiemmin käytetty Franzin ja Jörgin äänite ei ole enää oppitunnin pääteksti.",
+     "Tämä kertaus on sovitettu nykyiseen LOS! 1 -oppikirjaan. Aiemman painoksen keskustelu ei ole enää oppitunnin pääteksti.",
      "Lue C01–C03:n Text A ja Text B sekä uudet Text C -tukitekstit. Vastaa viiteen nykyisen oppikirjan teksteihin perustuvaan kysymykseen.",
      "Tekstin lukeminen ja valintakysymyksiin vastaaminen harjoittavat luetunymmärtämistä, eivät varmennettua kuullunymmärtämistä."
    ]};
@@ -114,7 +114,7 @@ function adaptL029(original:TeacherLesson):TeacherLesson{
  for(let i=0;i<mapping.length;i++){
    const m=mapping[i]!;
    if(i===2)scenes.push(board);
-   scenes.push({id:m.id,kind:"question",phase:"Tekstin ymmärtäminen",
+   scenes.push({id:"canonical-review-"+m.id,kind:"question",phase:"Tekstin ymmärtäminen",
      title:"C"+m.chapter+" · Text "+m.kind+" · tarkista oma ymmärrys",
      paragraphs:["Perusta vastauksesi nykyisen C"+m.chapter+":n Text "+m.kind+" -tekstin sisältöön.",
        "Tarvittaessa voit avata tekstin ennen vastaamista. Oikea vastaus on johdettu nykyisen oppikirjan tehtäväpankista."],
@@ -131,7 +131,7 @@ function adaptL029(original:TeacherLesson):TeacherLesson{
    title:"Nykyisten keskustelujen kertaus",
    objective:"Ymmärrän C01–C03:n nykyisten Text A-, B- ja C -tekstien keskeisiä tietoja.",
    estimatedMinutes:35,scenes,
-   requiredQuestionIds:mapping.map(x=>x.id),requiredActivityIds:[],requiredPracticeIds:[]};
+   requiredQuestionIds:mapping.map(x=>"canonical-review-"+x.id),requiredActivityIds:[],requiredPracticeIds:[]};
 }
 /** Only the three review scripts whose references changed. EX-MID stays
  * bound to its separate real exam; its current submission gates are not faked.
