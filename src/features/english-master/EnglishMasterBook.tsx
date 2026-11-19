@@ -104,7 +104,7 @@ function readProgress(owner: string): Progress {
 function getLocation(): { page: Page; id: string } {
   if (typeof window === "undefined") return { page: "home", id: "" };
   const [first, second] = window.location.hash.replace(/^#\/?/, "").split("/");
-  const page = (["home", "book", "path", "lesson", "writing", "listening", "progress", "import"].includes(first)
+  const page = (["home", "book", "path", "lesson", "writing", "listening", "progress", "import"].includes(first ?? "")
     ? first : "home") as Page;
   return { page, id: decodeURIComponent(second ?? "") };
 }
@@ -292,7 +292,7 @@ export function EnglishMasterBook() {
               {currentChapter.payload.objectives_fi?.length ? <ul>{currentChapter.payload.objectives_fi.map((item, i) => <li key={i}>{item}</li>)}</ul> : null}
               {currentChapter.payload.sections?.map(section => <div key={section.section_id} className="em-section"><h3>{section.title}</h3><p>{section.theory_fi}</p>{section.worked_examples?.map((ex, i) => <figure key={i} className="em-example"><blockquote lang="en">{ex.en}</blockquote>{ex.meaning_fi && <p>{ex.meaning_fi}</p>}{ex.why_fi && <figcaption>{ex.why_fi}</figcaption>}</figure>)}{section.common_errors_fi && <p className="em-help">{Array.isArray(section.common_errors_fi) ? section.common_errors_fi.join(" ") : section.common_errors_fi}</p>}</div>)}
               {currentChapter.payload.summary_fi && <p className="em-summary">{currentChapter.payload.summary_fi}</p>}
-              {currentChapter.payload.linked_lesson_ids?.length ? <div className="em-related"><h3>Harjoittele Opetuspolussa</h3>{currentChapter.payload.linked_lesson_ids.filter(id => pack.lessons[id]).map(id => <button key={id} onClick={() => navigate("lesson", id)}>{id} · {pack.lessons[id].title} <ChevronRight size={16}/></button>)}</div> : null}
+              {currentChapter.payload.linked_lesson_ids?.length ? <div className="em-related"><h3>Harjoittele Opetuspolussa</h3>{currentChapter.payload.linked_lesson_ids.filter(id => pack.lessons[id]).map(id => <button key={id} onClick={() => navigate("lesson", id)}>{id} · {pack.lessons[id]?.title} <ChevronRight size={16}/></button>)}</div> : null}
             </article>}
           </section> :
           location.page === "path" ? <section className="em-paper"><p className="em-overline">32 JAKSOA · 192 OPPITUNTIA</p><h1>Opetuspolku</h1><p>Valitse oppitunti. Edistyminen tallentuu tähän selaimeen, ei vielä palvelimen käyttäjätilille.</p>
@@ -333,7 +333,7 @@ export function EnglishMasterBook() {
           </section> :
           location.page === "listening" ? <section className="em-paper"><p className="em-overline">LISTENING LAB</p><h1>Kuuntelu</h1><p>20 synteettistä pilottiäänitettä. Harjoitustilassa voit kuunnella uudelleen. Tästä ei muodostu virallisen YO-kokeen pistetulosta.</p>
             <div className="em-audio-grid">{Object.entries(pack.media).map(([name, uri]) => <article key={name}><strong>{humanAudio(name)}</strong><audio controls preload="none" src={uri}>Äänitettä ei voi toistaa tällä selaimella.</audio></article>)}</div>
-            {pack.extras["EM-LISTEN-L07-001.json"] && <details className="em-scenes"><summary>Opetuskäsikirjoituksen analyysi</summary><button className="em-textlink" onClick={() => setTranscriptOpen(!transcriptOpen)}>{transcriptOpen ? "Piilota litteraatti" : "Näytä litteraatti harjoittelua varten"}</button>{transcriptOpen && (pack.extras["EM-LISTEN-L07-001.json"].payload?.recording_script as Array<{ speaker: string; text_en: string }> | undefined)?.map((line, i) => <p key={i}><b>{line.speaker}:</b> <span lang="en">{line.text_en}</span></p>)}</details>}
+            {pack.extras["EM-LISTEN-L07-001.json"] && <details className="em-scenes"><summary>Opetuskäsikirjoituksen analyysi</summary><button className="em-textlink" onClick={() => setTranscriptOpen(!transcriptOpen)}>{transcriptOpen ? "Piilota litteraatti" : "Näytä litteraatti harjoittelua varten"}</button>{transcriptOpen && (pack.extras["EM-LISTEN-L07-001.json"].payload?.["recording_script"] as Array<{ speaker: string; text_en: string }> | undefined)?.map((line, i) => <p key={i}><b>{line.speaker}:</b> <span lang="en">{line.text_en}</span></p>)}</details>}
           </section> :
           location.page === "progress" ? <section className="em-paper"><p className="em-overline">YOUR LEARNING</p><h1>Oma edistyminen</h1><p><strong>{completed} / 192</strong> oppituntia merkitty harjoitelluksi tällä laitteella.</p><p>Tulokset eivät vielä synkronoidu laitteiden välillä. Varmuuskopio kannattaa tallentaa talteen ennen selaimen tietojen poistamista.</p>
             <div className="em-action-grid"><button onClick={exportProgress}><Download size={18}/> Vie opiskelun varmuuskopio</button><label className="em-import-button">Palauta varmuuskopio<input type="file" accept=".json" onChange={e => { void importProgress(e.target.files?.[0]); e.target.value = ""; }}/></label></div>
