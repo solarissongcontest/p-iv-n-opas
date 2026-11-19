@@ -389,7 +389,7 @@ test("first German sentence is not buried under a tall audio settings dashboard"
  await expect(speechSettings.getByLabel("Saksan puheääni")).toBeHidden();
  const units=page.locator(".los-speech-unit-picker");
  await expect(units.locator(":scope > summary")).toBeVisible();
- await expect(page.locator(".los-revised-speech-sentences > summary")).toBeHidden();
+ await expect(units).toHaveJSProperty("open",false);
  const firstTurn=page.locator(".los-revised-page .los-c01-turn").first();
  await expect(firstTurn).toBeAttached();
  const top=await firstTurn.evaluate(el=>Math.round(el.getBoundingClientRect().top));
