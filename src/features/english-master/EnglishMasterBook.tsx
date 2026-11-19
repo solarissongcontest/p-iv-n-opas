@@ -591,9 +591,25 @@ export function EnglishMasterBook() {
             })}
           </section> :
           location.page === "lesson" && currentLesson ? <section className="los-inner-page em-lesson">
-            <button className="em-textlink" onClick={() => navigate("path")}>← Opetuspolkuun</button><p className="em-overline">{currentLesson.content_id} · OPPITUNTILUONNOS</p><h1>{currentLesson.title}</h1>
-            {currentLesson.payload.hook_fi && <p className="em-lead">{currentLesson.payload.hook_fi}</p>}
-            {currentLesson.payload.objectives_fi?.length ? <ul>{currentLesson.payload.objectives_fi.map((item, i) => <li key={i}>{item}</li>)}</ul> : null}
+            <button className="em-textlink" onClick={() => navigate("path")}><ChevronLeft size={16}/> Opetuspolkuun</button>
+            <div className="los-lesson-program em-lesson-program">
+              <header className="los-lesson-program-head">
+                <p className="los-overline">OHJATTU OPETUS · ENGLISH MASTER</p>
+                <h1>{currentLesson.title}</h1>
+                {currentLesson.payload.hook_fi && <p className="em-lead">{currentLesson.payload.hook_fi}</p>}
+                <p className="los-lesson-status">{progress[currentLesson.content_id]?.completed ? "Oppitunti on merkitty harjoitelluksi. Voit palata siihen uudelleen." : "Oppitunti on harjoiteltavissa. Merkitse se harjoitelluksi, kun olet käynyt harjoitukset läpi."}</p>
+                <div className="los-lesson-progress" aria-label="Opetuspolun eteneminen">
+                  <strong>{completed} / 192 harjoiteltu</strong>
+                  <div role="progressbar" aria-label="Opetuspolun eteneminen" aria-valuemin={0} aria-valuemax={192} aria-valuenow={completed}>
+                    <span style={{width:(completed/192*100)+"%"}}/>
+                  </div>
+                </div>
+              </header>
+              <article className="los-lesson-detail em-lesson-detail">
+                <p className="em-overline">{currentLesson.content_id} · OPPITUNTILUONNOS</p>
+                {currentLesson.payload.objectives_fi?.length ? <aside className="los-goals em-lesson-objectives">
+                  <h3>Oppitunnin tavoitteet</h3><ul>{currentLesson.payload.objectives_fi.map((item, i) => <li key={i}>{item}</li>)}</ul>
+                </aside> : null}
             {currentLesson.payload.explanations?.map((ex, i) => <div key={i} className="em-section"><h2>{ex.heading_fi ?? "Opetus " + (i + 1)}</h2><p>{ex.text_fi}</p>{ex.examples?.map((model, j) => <figure key={j} className="em-example"><blockquote lang="en">{model.en}</blockquote>{model.meaning_fi && <p>{model.meaning_fi}</p>}{model.why_fi && <figcaption>{model.why_fi}</figcaption>}</figure>)}</div>)}
             {currentLesson.payload.teacher_scenes?.length ? <section className="los-lesson-program em-lesson-board" aria-label="Vaiheittainen opetustaulu">
               <div className="los-lesson-program-head em-board-top"><p className="los-overline">OPETUSTAULU · OHJATTU OPETUS</p>
@@ -635,6 +651,8 @@ export function EnglishMasterBook() {
             {currentLesson.payload.summary_fi && <p className="em-summary">{currentLesson.payload.summary_fi}</p>}
             <button className="los-primary" onClick={() => { markLesson(currentLesson.content_id, Object.keys(feedback).length, true); navigate("path"); }}>Merkitse harjoitelluksi <CheckCircle2 size={17}/></button>
             <p className="em-note">Harjoitelluksi merkitseminen ei tarkoita, että koko taito olisi todistetusti hallittu. Avoimien vastausten arvioinnissa käytä omaa tai opettajan arviota.</p>
+              </article>
+            </div>
           </section> :
           location.page === "writing" ? <section className="em-paper"><p className="em-overline">WRITING ACADEMY</p><h1>Kirjoittaminen</h1><p>Kirjoita englanniksi. Teksti säilyy tällä laitteella, eikä sitä lähetetä automaattisesti ChatGPT:hen.</p>
             <label className="em-field">Tehtävänanto<textarea rows={3} value={assignment} onChange={event => setAssignment(event.target.value)} placeholder="Liitä kirjoitustehtävänanto tähän"/></label>
