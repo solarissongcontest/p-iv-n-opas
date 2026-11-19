@@ -558,8 +558,6 @@ function LosBookWorkspace({ book, location, move, goLibrary, openBook }: { book:
             {chapter && <><ChevronRight size={12} aria-hidden="true"/><button type="button" onClick={() => openChapter(chapter)}>Kappale {Number(chapter.id)}</button></>}
             {chapter && section !== "chapter" && <><ChevronRight size={12} aria-hidden="true"/><span aria-current="page">{section==="cards" ? "Kertauskortit" : sections.find(s => s.id === section)?.label}</span></>}
           </div>
-          {book.id===1 && ["text","text-b","text-c","vocabulary","grammar"].includes(section) &&
-            <LosReaderDisplayControls value={readingView} onChange={setReadingView}/>}
         </div>
         {book.id===1&&<LosSelectionAudio key={(chapter?.id??"book")+"-"+section}/>}
         {chapter && <nav className="los-section-nav" aria-label="Kappaleen osiot">
@@ -574,6 +572,8 @@ function LosBookWorkspace({ book, location, move, goLibrary, openBook }: { book:
                 {sections.map(item=><option key={item.id} value={item.id}>{item.label}</option>)}
               </select>
             </label>
+            {book.id===1 && ["text","text-b","text-c","vocabulary","grammar"].includes(section) &&
+              <LosReaderDisplayControls value={readingView} onChange={setReadingView}/>}
             <button type="button" className="los-section-step" aria-label="Edellinen osio"
               disabled={selectedSectionIndex===0}
               onClick={()=>move(chapter.id,sections[Math.max(0,selectedSectionIndex-1)]!.id)}><ChevronLeft size={18}/></button>
