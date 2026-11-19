@@ -35,6 +35,10 @@ test("editorial v4 mobile controls do not crowd reading or cause horizontal scro
   await expect(page.locator(".los-section-nav button")).toHaveCount(2);
   await expect(page.getByRole("combobox",{name:"Valitse kappaleen osio"})).toBeVisible();
   await expect(page.locator(".los-display-settings")).toBeVisible();
+  const fullWidth=await page.locator(".los-book-paper").evaluate(el=>Math.round(el.getBoundingClientRect().width));
+  expect(fullWidth).toBeGreaterThanOrEqual(315);
+  const firstGermanTurnTop=await page.locator(".los-c01-turn").first().evaluate(el=>el.getBoundingClientRect().top);
+  expect(firstGermanTurnTop).toBeLessThan(780);
   await expect(page.locator(".los-revised-disclaimer p")).toBeHidden();
   await expectNoHorizontalOverflow(page);
   await page.screenshot({path:testInfo.outputPath("los-v4-reader-mobile320.png"),fullPage:true,animations:"disabled"});
