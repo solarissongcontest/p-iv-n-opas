@@ -68,6 +68,14 @@ test("no obsolete book question ID is a requirement and new exercises stay in cu
   }
  }
 });
+test("retired Harald listening media cannot block or certify the new Text A/B/C reading work",()=>{
+ const l52=getLosTeacherLesson("L052")!;
+ assert.equal(l52.mediaGate,undefined,"retired unapproved media must not gate current reading");
+ assert.ok(l52.scenes.some(scene=>scene.id==="canonical-text-c"));
+ assert.ok(!l52.title.toLowerCase().includes("harald"),"retired interview is not current book text");
+ assert.ok(l52.objective.includes("Text C"));
+});
+
 test("earlier completed lessons do not become current-version mastery or completion",()=>{
  const lesson=getLosTeacherLesson("L003")!;
  const original=emptyTeacherSession(lesson,"2026-11-19T12:00:00.000Z");
