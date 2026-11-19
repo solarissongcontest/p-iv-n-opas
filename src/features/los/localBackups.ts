@@ -1,4 +1,4 @@
-import { getDeviceOwnerId } from "@/lib/deviceSession";
+import { getDeviceOwnerId } from "../../lib/deviceSession.ts";
 import { validLosChapter, validateLosCloudDraft, draftIsEmpty } from "./cloudContract";
 import { losDraftKey, parseLosDraft, type LosChapterDraft } from "./studyState";
 
