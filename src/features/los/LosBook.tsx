@@ -7,6 +7,7 @@ import {losReadingQuestions} from "./content/los1ReadingBank";
 import { getLosChapterSourceGate } from "./content/sourceRegistry";
 import {los1SupplementalSourceAudit} from "./los1SupplementalAudit";
 import {LosVoiceDiagnostics} from "./LosVoiceDiagnostics";
+import {LosVocabularyAudio} from "./LosVocabularyAudio";
 import {los1AudioInventory,los1IPAAudit} from "./los1QualityAudit";
 import {los1TokenIPADetail} from "./los1CourseGlossary";
 import { LosAuthenticAudio, LosDictionary, LosIndexSearch, LosLearningPath, type LosDestination } from "./LosReferenceTools";
@@ -325,7 +326,7 @@ function Vocabulary({ chapter, move, bookId }: { chapter: LosChapter; bookId:num
   return <section className="los-inner-page los-vocabulary-page">
     <p className="los-eyebrow">WORTSCHATZ / KAPITEL {Number(chapter.id)}</p>
     <h1>Sanasto</h1>
-    <p className="los-page-intro">Kappaleen opetettavia sanoja ja ilmauksia. Tämä on tarkistettava ennakkoluettelo, ei vielä lopullinen sanakirjatietokanta.</p>
+    <p className="los-page-intro">Kappaleen opetettavat sanat ja ilmaukset. Kuuntele saksankielisellä puheäänellä painamalla kaiutinta. IPA näkyy vain erikseen toimitetuissa merkinnöissä; keskeneräisiä kone-ehdotuksia ei näytetä varmoina ohjeina.</p>
     {bookId===1&&<Los1VisualLearning key={chapter.id} chapterId={chapter.id} placement="vocabulary"/>}
     <button type="button" className="los-outline-button" onClick={() => move(chapter.id,"cards")}>Kertaa sanastoa korteilla</button>
     <div className="los-vocabulary-tools">
@@ -333,10 +334,13 @@ function Vocabulary({ chapter, move, bookId }: { chapter: LosChapter; bookId:num
       <button aria-pressed={!showTranslations} onClick={() => setShowTranslations(v => !v)}>{showTranslations ? "Piilota suomennokset" : "Näytä suomennokset"}</button>
     </div>
     <table className="los-word-table"><thead><tr><th>Deutsch</th><th>Suomi</th></tr></thead><tbody>
-      {words.map((parts, i) => <tr key={i}><td lang="de">{parts[0]}{bookId===1&&los1TokenIPADetail(parts[0]??"")&&
-       <small className="los-vocab-ipa" aria-label="IPA-ääntämisehdotus">{los1TokenIPADetail(parts[0]??"")?.ipa}
-        {los1TokenIPADetail(parts[0]??"")?.source==="espeak-candidate"?" · koneellinen ehdotus":""}
-       </small>}</td><td>{showTranslations ? parts[1] ?? "" : <span className="los-hidden-translation">Piilotettu</span>}</td></tr>)}
+      {words.map((parts, i) => {
+        const ipa=bookId===1?los1TokenIPADetail(parts[0]??""):null;
+        return <tr key={i}><td lang="de">{parts[0]}
+          {bookId===1&&<LosVocabularyAudio word={parts[0]??""}/>}
+          {ipa?.source==="editorial"&&<small className="los-vocab-ipa" aria-label="Toimituksellinen IPA-merkintä">{ipa.ipa}</small>}
+        </td><td>{showTranslations ? parts[1] ?? "" : <span className="los-hidden-translation">Piilotettu</span>}</td></tr>;
+      })}
     </tbody></table>
     {!words.length && <p>Sanastosta ei löytynyt hakua vastaavaa sanaa.</p>}
   </section>;
@@ -351,19 +355,19 @@ function Appendix({ book }: { book: LosBookDefinition }) {
     <div className="los-appendix-section"><h2>Kirjan tiedot</h2><dl><div><dt>Moduuli</dt><dd>{book.code} · {book.module}</dd></div><div><dt>Laajuus</dt><dd>2 op</dd></div><div><dt>Oppimäärä</dt><dd>Saksa B3 · LOPS21</dd></div></dl></div>
 
     {book.id===1&&audio&&ipa&&<div className="los-appendix-section los-quality-audit" aria-label="LOS! 1:n ääni- ja IPA-inventaario">
-      <h2>Äänitteiden ja IPA-merkintöjen valmistumistila</h2>
+      <h2>Kuuntelujen ja IPA-merkintöjen alkuperä</h2>
       <p><strong>{audio.withSpeech}/{audio.total} tekstillä on saksankielinen puhekäsikirjoitus.</strong>
        Koko tekstien ja repliikkien kuuntelu käyttää tällä hetkellä laitteen puhesynteesiä.
-       <strong> Ennalta tuotettuja ja akustisesti hyväksyttyjä Text A–C -äänitiedostoja: {audio.recorded}/{audio.total}.</strong>
-       Puhekäsikirjoitus ei ole sama asia kuin valmis äänite.</p>
+       <strong> Sovittu pääkuunteluratkaisu on laitteen saksankielinen TTS, ei erillinen äänitepaketti.</strong>
+       Erillisiä äänitiedostoja on {audio.recorded}/{audio.total}; niitä ei vaadita tämän oman oppikirjan valmistumiseen.</p>
       <p><strong>IPA-rivejä: {ipa.total}.</strong> Toimituksellisia merkintöjä {ipa.editorial}, 
        eSpeak-ohjelman koneellisia ehdotuksia {ipa.synthetic}, puuttuvia {ipa.missing}.
        Toimituksellinenkaan merkintä ei tarkoita ulkopuolisen asiantuntijan hyväksyntää. Opiskelijan ei tarvitse osata tarkistaa IPA-merkintöjen tai saksan ääntämisen oikeellisuutta.</p>
       <details>
-        <summary>Äänitysten työjono, kaikki 30 tekstiä</summary>
+        <summary>Tekstien TTS- ja tallennetun äänen tilat (30 tekstiä)</summary>
         <table><thead><tr><th>Teksti</th><th>Puhejaksoja</th><th>Äänite</th></tr></thead>
         <tbody>{audio.items.map(item=><tr key={item.id}>
-          <td>{item.id}</td><td>{item.segmentCount}</td><td>Ei hyväksyttyä äänitiedostoa</td>
+          <td>{item.id}</td><td>{item.segmentCount}</td><td>Selaimen saksankielinen puhesynteesi; ei erillistä äänitiedostoa</td>
         </tr>)}</tbody></table>
       </details>
       <details>
@@ -392,7 +396,7 @@ function Appendix({ book }: { book: LosBookDefinition }) {
     {book.id===1&&<LosVoiceDiagnostics/>}
     {book.id===1&&<div className="los-appendix-section" aria-label="Autenttisten lisäaineistojen julkaisuauditointi">
       <h2>Autenttisten lisäaineistojen julkaisutilat</h2>
-      <p>LOS!:n omat Text A–C -opetustekstit ovat erillään näistä valinnaisista ulkoisista aineistoista. Käytettävissä oleva lisäteksti ei ole automaattisesti lopullisesti hyväksytty.</p>
+      <p>LOS!:n omat Text A–C -opetustekstit ovat sovitusti päätekstit. Ulkoiset ihmisten kirjoittamat aineistot ovat valinnaisia lisämateriaaleja, eivät päätekstien tai 60 oppitunnin hyväksyntäehto.</p>
       <p><strong>{supplements.total} rekisteröityä aineistoa · {supplements.published} kaikkien julkaisuehtojen mukaan hyväksyttyä.</strong> Oikeusvarmistus yksin ei riitä kieli- ja laitetestien hyväksynnäksi.</p>
       <details className="los-supplemental-audit">
         <summary>Näytä jokaisen lähteen tarkka tila</summary>
@@ -403,8 +407,8 @@ function Appendix({ book }: { book: LosBookDefinition }) {
         </li>)}</ul>
       </details>
     </div>}
-    <div className="los-appendix-section"><h2>Lähteet ja materiaalit</h2><p>Kymmenen kappaleen päätekstit, avointen lähteiden sisään kirjoitetut Text B -sisällöt ja käytössä olevat äänitteet ovat kirjan lukijoissa. Lähteiden oikeus-, kielitason, kuuntelun ja laitetestien portit pysyvät erillisinä. Pelkkä sisältöön integrointi ei merkitse materiaalia lopullisesti julkaisutestattavaksi.</p></div>
-    <div className="los-appendix-section"><h2>Opetuspolku, sanakirja ja kappaletestit</h2><p>Opetuspolku ja sanakirja löytyvät kirjan valikosta. LOS! 1:n kaikissa kymmenessä kappaleessa on rajattu automaattisesti tarkistettava alkeistesti, yhteensä 147 osatehtävää. Kymmenen kappaleen lisäksi EX-MID (25 pistettä) ja EX-FINAL (50 pistettä) ovat käytettävissä; loppukokeessa oikeiden alkuperäisäänitteiden on toimittava ennen palautusta. Kuuntelun toimivuutta ei ole vahvistettu kaikilla fyysisillä laitteilla. Sinun ei tarvitse tarkastaa saksan ääntämisen oikeellisuutta: vapaat puhe- ja kirjoitustehtävät ovat harjoituksia, eivät asiantuntijan arvioimia tai automaattisesti pisteytettyjä kielikokeita. LOS! 1:n oma välikoe sisältää 25 pisteytettävää tehtävää ja erillisen itsearvioitavan dialogin. Kappalekohtaisissa muistiinpanoissa on erillinen, salasanalla suojattu manuaalinen pilvisynkronointi, joka vaatii palvelimen käyttöönoton.</p></div>
+    <div className="los-appendix-section"><h2>Lähteet ja materiaalit</h2><p>Kymmenen kappaleen LOS!:n omat Text A/B/C -opetustekstit ovat kirjan sisällä. Autenttiset ihmisten kirjoittamat lähteet ovat valinnaista lisäaineistoa; niiden käyttöoikeudet ja julkaisutilat arvioidaan erikseen. Päätekstit eivät saa autenttisuusmerkintää, jota niille ei kuulu.</p></div>
+    <div className="los-appendix-section"><h2>Opetuspolku, sanakirja ja kappaletestit</h2><p>Opetuspolku ja sanakirja löytyvät kirjan valikosta. LOS! 1:n kaikissa kymmenessä kappaleessa on rajattu automaattisesti tarkistettava alkeistesti, yhteensä 147 osatehtävää. Kymmenen kappaleen lisäksi EX-MID (25 pistettä) ja EX-FINAL (50 pistettä) ovat käytettävissä; loppukokeen alkuperäislähteisiin perustuvat kuuntelutehtävät edellyttävät kyseisten äänilähteiden toimivaa toistoa ennen palautusta; tämä ei tarkoita, että Text A–C:lle vaadittaisiin erillisiä äänitiedostoja. Kuuntelun toimivuutta ei ole vahvistettu kaikilla fyysisillä laitteilla. Sinun ei tarvitse tarkastaa saksan ääntämisen oikeellisuutta: vapaat puhe- ja kirjoitustehtävät ovat harjoituksia, eivät asiantuntijan arvioimia tai automaattisesti pisteytettyjä kielikokeita. LOS! 1:n oma välikoe sisältää 25 pisteytettävää tehtävää ja erillisen itsearvioitavan dialogin. Kappalekohtaisissa muistiinpanoissa on erillinen, salasanalla suojattu manuaalinen pilvisynkronointi, joka vaatii palvelimen käyttöönoton.</p></div>
     <LosBackups bookId={book.id} />
   </section>;
 }
