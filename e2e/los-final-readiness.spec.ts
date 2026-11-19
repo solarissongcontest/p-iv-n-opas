@@ -69,6 +69,8 @@ test("dictionary errors are disclosed, and optional source/audio QA have accurat
  await page.goto("/los#/1/appendix",{waitUntil:"domcontentloaded"});
  await expect(page.getByRole("heading",{name:"Kokeile saksankielistä puheääntä"})).toBeVisible();
  await expect(page.getByText("31 rekisteröityä aineistoa",{exact:false})).toBeVisible();
+ const updateDismiss=page.locator(".pwa-update-prompt button").filter({hasText:"Myöhemmin"});
+ if(await updateDismiss.isVisible())await updateDismiss.click();
  await page.getByText("Näytä jokaisen lähteen tarkka tila").click();
  await expect(page.locator(".los-supplemental-audit li")).toHaveCount(31);
 });
@@ -401,6 +403,7 @@ test("first German sentence is not buried under a tall audio settings dashboard"
 });
 
 test("LOS1 contemporary design system is consistent at desktop, mobile, dark mode and zoom",async({page},testInfo)=>{
+ await page.setViewportSize({width:1440,height:900});
  await enter(page,"01/text");
  await expect(page.locator(".los-revised-page")).toBeVisible({timeout:30000});
  const title=page.locator(".los-reading-page h1").first();
