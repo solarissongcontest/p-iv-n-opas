@@ -5,6 +5,7 @@ import { LOS1_REVISED_C } from "./content/los1RevisedC";
 import { LOS1_C_SPEECH_BLOCKS, LOS1_C_AUDIO_EXAMPLES } from "./content/los1SupportSpeech";
 import { LosReadingExercises, LosReadingUnderstanding } from "./LosReadingExercises";
 import { losGermanVoices, losSpeakerSlot, losSpeechSegments } from "./losSpeech";
+import {losVoiceIdentity,readLosPreferredVoice,saveLosPreferredVoice,matchLosPreferredVoice} from "./losVoicePreference";
 import {LosOriginalDialogue} from "./LosOriginalDialogue";
 import {los1CanonicalLines,LOS1_CANONICAL_VERSION} from "./los1Canonical";
 import {los1CourseGlossary} from "./los1CourseGlossary";
@@ -24,14 +25,16 @@ function TextSpeech({ blocks, chapterId, kind }: { blocks: readonly ReaderBlock[
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [rate, setRate] = useState("1");
   const [message, setMessage] = useState("");
-  const [voiceCount, setVoiceCount] = useState(0);
+  const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
+  const [preferredVoice,setPreferredVoice]=useState(readLosPreferredVoice);
+  const voiceCount=voices.length;
   const [activeSegment, setActiveSegment] = useState<number | null>(null);
   const segments = losSpeechSegments(blocks,chapterId,kind);
   const playbackId = useRef(0);
   useEffect(() => {
     if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
     const synthesis = window.speechSynthesis;
-    const refreshVoices = () => setVoiceCount(losGermanVoices(synthesis.getVoices()).length);
+    const refreshVoices = () => setVoices(losGermanVoices(synthesis.getVoices()));
     refreshVoices();
     synthesis.addEventListener?.("voiceschanged", refreshVoices);
     return () => {
@@ -56,7 +59,7 @@ function TextSpeech({ blocks, chapterId, kind }: { blocks: readonly ReaderBlock[
     }
     const synthesis = window.speechSynthesis;
     const voices = losGermanVoices(synthesis.getVoices());
-    setVoiceCount(voices.length);
+    setVoices(voices);
     if (!voices.length) {
       setMessage("Laitteelta ei löydy saksankielistä puheääntä. Tarkista laitteen puheäänet ja avaa lukija uudelleen. Vääränkielisellä äänellä ei harjoitella ääntämistä.");
       return;
@@ -70,11 +73,12 @@ function TextSpeech({ blocks, chapterId, kind }: { blocks: readonly ReaderBlock[
     const currentPlayback = playbackId.current;
     synthesis.cancel();
     setActiveSegment(onlyIndex);
+    const chosenVoice=matchLosPreferredVoice(voices,preferredVoice);
     const utterances = selected.map(segment => {
       const utterance = new SpeechSynthesisUtterance(segment.text);
       utterance.lang = "de-DE";
       utterance.rate = Math.max(0.5, Math.min(2, Number(rate) * segment.rateFactor));
-      utterance.voice = voices[losSpeakerSlot(segment.speaker, voices.length)] ?? voices[0] ?? null;
+      utterance.voice = chosenVoice ?? voices[losSpeakerSlot(segment.speaker, voices.length)] ?? voices[0] ?? null;
       utterance.onerror = event => {
         if (playbackId.current !== currentPlayback) return;
         playbackId.current += 1;
@@ -93,7 +97,11 @@ function TextSpeech({ blocks, chapterId, kind }: { blocks: readonly ReaderBlock[
       setMessage("Kuuntelu päättyi. Voit kuunnella tekstin uudelleen.");
     };
     setIsSpeaking(true);
-    setMessage(voices.length>1 ?
+    setMessage(chosenVoice ?
+      "Toistetaan valitulla saksankielisellä äänellä: "+chosenVoice.name+"." :
+      preferredVoice ?
+      "Aiemmin valittu puheääni ei ole tällä laitteella saatavilla. Käytetään laitteen saksankielistä ääntä." :
+      voices.length>1 ?
       "Toistetaan laitteen "+voices.length+" saksankielisellä äänellä. Henkilöillä voi olla eri ääniä laitteen valikoiman mukaan." :
       "Toistetaan laitteen saksankielisellä puheäänellä. Kaikilla henkilöillä on sama ääni.");
     utterances.forEach(utterance => synthesis.speak(utterance));
@@ -109,6 +117,28 @@ function TextSpeech({ blocks, chapterId, kind }: { blocks: readonly ReaderBlock[
           <option value="0.75">0,75×</option><option value="1">1×</option><option value="1.25">1,25×</option>
         </select>
       </label>
+      <label>Saksan puheääni
+        <select value={preferredVoice} aria-label="Saksan puheääni" onChange={event=>{
+          if(isSpeaking)stop();
+          setPreferredVoice(event.target.value);
+          const stored=saveLosPreferredVoice(event.target.value);
+          setMessage(stored?"Puheäänivalinta tallennettu tähän laitteeseen.":"Puheäänivalinta toimii nyt, mutta sitä ei voitu tallentaa.");
+        }}>
+          <option value="">Automaattinen</option>
+          {preferredVoice&&!matchLosPreferredVoice(voices,preferredVoice)&&
+            <option value={preferredVoice}>Aiemmin valittu ääni ei ole saatavilla</option>}
+          {voices.map(voice=><option key={losVoiceIdentity(voice)} value={losVoiceIdentity(voice)}>
+            {voice.name} · {voice.lang}
+          </option>)}
+        </select>
+      </label>
+      {voiceCount===0&&<button type="button" className="los-outline-button" onClick={()=>{
+        if(typeof window==="undefined"||!("speechSynthesis" in window))return;
+        const available=losGermanVoices(window.speechSynthesis.getVoices());
+        setVoices(available);
+        setMessage(available.length?"Saksankielisiä puheääniä löytyi: "+available.length:
+          "Saksankielisiä puheääniä ei löytynyt vielä. Tarkista laitteen kieliasetukset.");
+      }}>Päivitä äänet</button>}
     </div>
     {segments.length>1&&<details className="los-revised-speech-segments">
       <summary>Kuuntele yksittäinen {kind==="C"?"mallilause":"puheenvuoro"} ({segments.length})</summary>
