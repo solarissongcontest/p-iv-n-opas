@@ -143,3 +143,20 @@ test("revised-text adaptation preserves independent grammar instruction and tran
  assert.ok(c06.contrast.includes("aivan kuten suomessa"));
  assert.ok(c06.contrast.includes("haben-verbillä"));
 });
+
+test("C07 repeated-letter lesson does not claim that an archived source is in current Text A",()=>{
+ const lesson=getLosTeacherLesson("L038")!;
+ const welcome=lesson.scenes.find(s=>s.id==="welcome")!;
+ const recall=lesson.scenes.find(s=>s.id==="recall")!;
+ const table=lesson.scenes.find(s=>s.id==="table")!;
+ assert.ok(welcome.paragraphs.some(p=>p.includes("nykyiseen C07:n Text A:han")));
+ assert.equal(recall.question?.prompt,"Mitä zweimal L tarkoittaa?");
+ assert.ok(recall.question?.reteach.includes("Milla"));
+ const row=table.board?.find(item=>item.label.startsWith("4 ·"));
+ assert.equal(row?.german,"M · I · L · L · A");
+ assert.ok(row?.meaning.includes("ei lainaus"));
+ for(const scene of lesson.scenes){
+  const prose=JSON.stringify({paragraphs:scene.paragraphs,board:scene.board,question:scene.question});
+  assert.doesNotMatch(prose,/Bolliger|M-WB-02|Franzin tavaamiskeskustelu/);
+ }
+});
