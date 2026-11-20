@@ -1,5 +1,5 @@
 import {useEffect,useMemo,useState} from "react";
-import {ArrowRight,CheckCircle2,HelpCircle} from "lucide-react";
+import {ArrowRight,BookOpen,CheckCircle2,HelpCircle} from "lucide-react";
 import type {Lesson,LessonTask} from "./EnglishMasterBook";
 import {englishTeacherStorageKey} from "./englishTeacherBackup";
 import {
@@ -277,8 +277,18 @@ export function EnglishTeacherPlayer({lesson:source,ownerId,previouslyCompleted,
         <h2>{current.title}</h2>
         <div className="los-teacher-prose">{current.paragraphs.map((paragraph,i)=>
           <p key={i}>{paragraph}</p>)}</div>
-        {current.board?.length&&current.kind==="board"?
+        {current.board?.length?
           <TeacherBoard scene={current} language="en"/>:null}
+        {current.bookLinks?.length?<div className="los-teacher-book-links">
+          {current.bookLinks.map(link=><div key={link.chapterId} className="los-teacher-book-link">
+            <div><strong>{link.label}</strong><p>{link.instruction}</p></div>
+            <a href={"/english-master?lessonReturn="+encodeURIComponent(lesson.id)+"#/book/"+encodeURIComponent(link.chapterId)}
+              target="_blank" rel="noopener noreferrer">
+              <BookOpen size={17}/> Avaa kirjassa <ArrowRight size={16}/>
+            </a>
+          </div>)}
+          <p className="los-teacher-small">Kirja avautuu erilliseen välilehteen. Palattuasi oppitunti jatkuu samasta vaiheesta. Pelkkä avaaminen ei ole suoritusmerkintä.</p>
+        </div>:null}
         {current.question&&<TeacherSceneQuestion scene={current} session={session}
           language="en" submit={submit} saveDraft={onAnswerChange}
           requestHint={markHelp} reveal={reveal}/>}
