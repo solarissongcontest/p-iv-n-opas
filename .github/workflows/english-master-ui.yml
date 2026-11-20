@@ -1,0 +1,81 @@
+name: English Master LOS UI E2E
+
+on:
+  pull_request:
+    paths:
+      - "src/features/english-master/**"
+      - "src/features/los/**"
+      - "e2e/english-master-native.spec.ts"
+      - "tests/english-teacher-adapter.test.ts"
+      - ".github/workflows/english-master-ui.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: english-master-ui-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  english-master-browser:
+    name: English Master desktop and mobile UX
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      E2E_BASE_URL: http://127.0.0.1:5173
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - name: Install project dependencies
+        run: bun install --frozen-lockfile
+      - name: Install Playwright test dependencies
+        run: bun run e2e:install
+      - name: Verify TypeScript before browser setup
+        run: bun run typecheck
+      - name: Verify original LOS! Teacher 2.0 engine regressions
+        run: |
+          node --experimental-strip-types --test \
+            tests/los-teacher-engine.test.ts \
+            tests/los-teacher-pause.test.ts \
+            tests/los-teacher-assessment-roles.test.ts \
+            tests/los-teacher-legacy-compatibility.test.ts
+      - name: Audit all 192 bundled English Teacher 2.0 lesson adapters
+        run: node --experimental-strip-types --test tests/english-teacher-adapter.test.ts
+      - name: Verify production build with latest LOS! v4
+        run: bun run build
+      - name: Install Playwright Chromium
+        run: bunx playwright install chromium
+      - name: Start isolated English Master test server
+        run: |
+          bunx vite dev --host 127.0.0.1 --port 5173 > /tmp/english-master-vite.log 2>&1 &
+          echo $! > /tmp/english-master-vite.pid
+          for attempt in $(seq 1 75); do
+            if curl --fail --silent http://127.0.0.1:5173/english-master > /dev/null; then
+              echo "Vite is ready"
+              exit 0
+            fi
+            sleep 2
+          done
+          cat /tmp/english-master-vite.log
+          exit 1
+      - name: Run native-book desktop and phone-width tests
+        run: bunx playwright test e2e/english-master-native.spec.ts e2e/los-teacher-2-restored.spec.ts e2e/los-teacher-canonical-abc.spec.ts --project=desktop-chromium
+      - name: Upload English Master v4 visual QA screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: english-master-v4-visual-qa
+          path: test-results/**/*.png
+          if-no-files-found: ignore
+          retention-days: 14
+      - name: Attach traces and server log on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: english-master-browser-failure
+          path: |
+            test-results/
+            /tmp/english-master-vite.log
+          if-no-files-found: ignore
+          retention-days: 7

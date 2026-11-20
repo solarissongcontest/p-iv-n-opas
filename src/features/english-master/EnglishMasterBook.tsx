@@ -1,14 +1,22 @@
-import { useEffect, useMemo, useState, type ChangeEvent } from "react";
-import { ArrowLeft, BookOpen, BookText, CheckCircle2, ChevronRight, Download, FileUp, Headphones, Menu, PenLine, Search, X } from "lucide-react";
+import { useEffect, useMemo, useRef, useState, type ChangeEvent, type CSSProperties } from "react";
+import { ArrowRight, BookOpen, BookText, CheckCircle2, ChevronLeft, ChevronRight, Download, FileUp, Headphones, Menu, PenLine, Search, X } from "lucide-react";
 import { readCachedDeviceUser } from "@/lib/deviceSession";
+import "../los/los-book.css";
+import "../los/los-appendix.css";
+import "../los/los-design-quality.css";
+import "../los/los-lessons.css";
+import { LosReaderDisplayControls, readLosReaderSettings } from "../los/LosReaderDisplayControls";
 import "./english-master.css";
+import { EnglishTeacherPlayer } from "./EnglishTeacherPlayer";
+import { recommendEnglishTeacherResume } from "./englishTeacherResume";
+import {collectEnglishTeacherBackup,prepareEnglishTeacherRestore} from "./englishTeacherBackup";
 
 /**
  * English Master is a first-class book route, just like LOS!.
  * The original Alpha 0.8 content is imported as DATA, never executed as HTML.
  * No cloud sync or privileged publication status is implied.
  */
-type LessonTask = {
+export type LessonTask = {
   task_id: string; phase?: string; format: "single_choice" | "short_answer" | "free_response";
   prompt_en?: string; prompt_fi?: string; options?: Array<{ id: string; text: string }>;
   correct_option?: string; acceptable_answers?: string[]; model_answer_en?: string;
@@ -21,7 +29,7 @@ type Chapter = { content_id: string; title: string; status: string; payload: {
     common_errors_fi?: string[] | string; self_check?: unknown }>;
   summary_fi?: string; linked_lesson_ids?: string[];
 }};
-type Lesson = { content_id: string; title: string; status: string; book_refs?: string[];
+export type Lesson = { content_id: string; title: string; status: string; book_refs?: string[];
   payload: { hook_fi?: string; objectives_fi?: string[]; explanations?: Array<{
     heading_fi?: string; text_fi: string; examples?: Array<{ en: string; meaning_fi?: string; why_fi?: string }> }>;
     teacher_scenes?: Array<{ scene_id?: string; id?: string; title_fi?: string; text_fi?: string; teacher_fi?: string;
@@ -31,7 +39,7 @@ type Pack = { schema: string; version: string; chapter_count: number; lesson_cou
   chapters: Record<string, Chapter>; lessons: Record<string, Lesson>;
   extras: Record<string, { title?: string; payload?: Record<string, unknown> }>;
   media: Record<string, string>; };
-type Page = "home" | "book" | "path" | "lesson" | "writing" | "listening" | "progress" | "import";
+type Page = "home" | "contents" | "book" | "path" | "lesson" | "writing" | "listening" | "progress" | "import";
 type Progress = Record<string, { completed: boolean; answered: number; updatedAt: string }>;
 const BOOK_GROUPS = [
   ["G", "Grammar Mastery"], ["V", "Vocabulary & Expression"], ["W", "Writing Academy"],
@@ -156,7 +164,7 @@ function readProgress(owner: string): Progress {
 function getLocation(): { page: Page; id: string } {
   if (typeof window === "undefined") return { page: "home", id: "" };
   const [first, second] = window.location.hash.replace(/^#\/?/, "").split("/");
-  const page = (["home", "book", "path", "lesson", "writing", "listening", "progress", "import"].includes(first ?? "")
+  const page = (["home", "contents", "book", "path", "lesson", "writing", "listening", "progress", "import"].includes(first ?? "")
     ? first : "home") as Page;
   return { page, id: decodeURIComponent(second ?? "") };
 }
@@ -202,11 +210,14 @@ export function EnglishMasterBook() {
   const [error, setError] = useState("");
   const [location, setLocation] = useState(getLocation);
   const [tocOpen, setTocOpen] = useState(false);
+  const [readingView, setReadingView] = useState(readLosReaderSettings);
+  const tocPanelRef = useRef<HTMLElement>(null);
+  const tocTriggerRef = useRef<HTMLButtonElement>(null);
+  const [expandedGroup, setExpandedGroup] = useState<string | null>("G");
+  const [bookSectionIndex, setBookSectionIndex] = useState(0);
   const [query, setQuery] = useState("");
+  const tocSearchRef = useRef<HTMLInputElement>(null);
   const [progress, setProgress] = useState<Progress>({});
-  const [answer, setAnswer] = useState<Record<string, string>>({});
-  const [feedback, setFeedback] = useState<Record<string, { ok: boolean | null; explanation: string }>>({});
-  const [showHelp, setShowHelp] = useState(false);
   const [essay, setEssay] = useState("");
   const [assignment, setAssignment] = useState("");
   const [transcriptOpen, setTranscriptOpen] = useState(false);
@@ -247,19 +258,75 @@ export function EnglishMasterBook() {
     document.title = "English Master · Opintopäiväkirja";
     return () => { document.title = "StudyOS"; };
   }, []);
-  useEffect(() => { setAnswer({}); setFeedback({}); setShowHelp(false); setTranscriptOpen(false); }, [location.id, location.page]);
+  useEffect(() => { setTranscriptOpen(false); setBookSectionIndex(0); }, [location.id, location.page]);
+  // Keep the mobile contents drawer as keyboard-accessible as the original LOS! 1.
+  useEffect(() => {
+    if (!tocOpen || !window.matchMedia("(max-width:760px)").matches) return;
+    const panel = tocPanelRef.current;
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    panel?.querySelector<HTMLElement>(".los-sidebar-close")?.focus();
+    const handleKeys = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        setTocOpen(false);
+        tocTriggerRef.current?.focus();
+        return;
+      }
+      if (event.key !== "Tab" || !panel) return;
+      const candidates = Array.from(panel.querySelectorAll<HTMLElement>(
+        'button:not([disabled]),input:not([disabled]),a[href],summary,select:not([disabled])'
+      )).filter(node => node.getClientRects().length > 0);
+      const first = candidates[0], last = candidates.at(-1);
+      if (!first || !last) return;
+      if (event.shiftKey && (document.activeElement === first || !panel.contains(document.activeElement))) {
+        event.preventDefault(); last.focus();
+      } else if (!event.shiftKey && (document.activeElement === last || !panel.contains(document.activeElement))) {
+        event.preventDefault(); first.focus();
+      }
+    };
+    document.addEventListener("keydown", handleKeys);
+    return () => {
+      document.removeEventListener("keydown", handleKeys);
+      document.body.style.overflow = originalOverflow;
+    };
+  }, [tocOpen]);
   const chapters = useMemo(() => Object.values(pack?.chapters ?? {}).sort((a, b) => a.content_id.localeCompare(b.content_id, "en", { numeric: true })), [pack]);
   const lessons = useMemo(() => Object.values(pack?.lessons ?? {}).sort((a, b) => a.content_id.localeCompare(b.content_id, "en", { numeric: true })), [pack]);
+  const teacherResume=useMemo(()=>location.page==="path"&&owner
+    ?recommendEnglishTeacherResume(owner,lessons):null,
+    [owner,lessons,location.page]);
   const currentChapter = pack?.chapters[location.id] ?? chapters[0];
+  const chapterIndex = chapters.findIndex(ch => ch.content_id === currentChapter?.content_id);
+  const bookSectionChoices = [
+    { id: "opening", title: "Luvun alku", target: "em-chapter-opening" },
+    ...(currentChapter?.payload.sections ?? []).map(section => ({
+      id: section.section_id, title: section.title, target: "em-sec-" + section.section_id,
+    })),
+  ];
+  const selectedBookSection = Math.min(bookSectionIndex,bookSectionChoices.length-1);
+  const jumpToBookSection = (nextIndex: number) => {
+    const safeIndex = Math.max(0, Math.min(nextIndex,bookSectionChoices.length-1));
+    setBookSectionIndex(safeIndex);
+    const target = bookSectionChoices[safeIndex]?.target;
+    if (target) window.requestAnimationFrame(() => document.getElementById(target)?.scrollIntoView({behavior:"smooth",block:"start"}));
+  };
   const currentLesson = pack?.lessons[location.id] ?? lessons[0];
+  // LOS! Teacher 2.0 reader round-trip: only a real lesson ID can create a
+  // return action. The URL parameter never grants access or completion.
+  const returnLessonId = typeof window==="undefined" ? "" :
+    new URLSearchParams(window.location.search).get("lessonReturn") ?? "";
+  const returnLesson = pack?.lessons[returnLessonId];
   const completed = Object.values(progress).filter(item => item.completed).length;
   const progressKey = owner ? "em-native-progress-" + owner : "";
   const navigate = (page: Page, id = "") => {
+    setTocOpen(false);
     const next = "#/" + page + (id ? "/" + encodeURIComponent(id) : "");
     if (window.location.hash === next) setLocation(getLocation());
     else window.location.hash = next;
     window.scrollTo(0, 0);
   };
+  const goChapter = (id: string) => { setExpandedGroup(id.slice(0, 1)); navigate("book", id); };
   const markLesson = (id: string, answered: number, isCompleted = false) => {
     if (!owner) return;
     setProgress(previous => {
@@ -268,119 +335,327 @@ export function EnglishMasterBook() {
       return next;
     });
   };
-  const checkTask = (task: LessonTask) => {
-    const value = (answer[task.task_id] ?? "").trim();
-    if (!value) return;
-    if (task.requires_manual_review || task.format === "free_response") {
-      setFeedback(previous => ({ ...previous, [task.task_id]: { ok: null, explanation: task.criteria_fi ?? "Vertaa omaa vastausta malliin. Vahvista itse, toteutuuko tavoite." } }));
-    } else {
-      const ok = task.format === "single_choice"
-        ? value === task.correct_option
-        : (task.acceptable_answers ?? []).some(candidate => candidate.trim().toLocaleLowerCase() === value.toLocaleLowerCase());
-      const explanation = ok ? task.feedback_correct_fi ?? "Oikein!"
-        : task.wrong_option_feedback_fi?.[value] ?? task.hint_fi ?? "Tarkista vastaus ja vertaa teoriaan.";
-      setFeedback(previous => ({ ...previous, [task.task_id]: { ok, explanation } }));
-    }
-    if (currentLesson) markLesson(currentLesson.content_id, Object.keys(feedback).length + (feedback[task.task_id] ? 0 : 1));
-  };
   const exportProgress = () => {
-    const contents = JSON.stringify({ schema: "em-native-progress-1", progress, essay }, null, 2);
-    const href = URL.createObjectURL(new Blob([contents], { type: "application/json" }));
-    const link = document.createElement("a"); link.href = href; link.download = "english-master-oma-varmuuskopio.json"; link.click();
-    window.setTimeout(() => URL.revokeObjectURL(href), 1000);
-  };
-  async function importProgress(file?: File) {
-    if (!file || !owner) return;
-    try {
-      const value = JSON.parse(await file.text()) as { schema?: string; progress?: Progress; essay?: string };
-      if (value.schema !== "em-native-progress-1" || !value.progress || typeof value.progress !== "object") throw new Error("Virheellinen varmuuskopio.");
-      const verified: Progress = {};
-      for (const [id, item] of Object.entries(value.progress)) {
-        if (pack?.lessons[id] && typeof item.completed === "boolean" && Number.isInteger(item.answered) && item.answered >= 0) verified[id] = item;
-      }
-      setProgress(verified); localStorage.setItem(progressKey, JSON.stringify(verified));
-      if (typeof value.essay === "string") { setEssay(value.essay); localStorage.setItem("em-native-essay-" + owner, value.essay); }
+    if(!owner||!pack)return;
+    try{
+      const teacher=collectEnglishTeacherBackup(owner,Object.keys(pack.lessons));
+      const contents=JSON.stringify({
+        schema:"em-native-progress-1",progress,essay,...teacher,
+      },null,2);
+      const href=URL.createObjectURL(new Blob([contents],{type:"application/json"}));
+      const link=document.createElement("a");
+      link.href=href;link.download="english-master-oma-varmuuskopio.json";link.click();
+      window.setTimeout(()=>URL.revokeObjectURL(href),1000);
       setError("");
-    } catch (e) { setError(e instanceof Error ? e.message : "Varmuuskopion palautus epäonnistui."); }
+    }catch(failure){
+      setError(failure instanceof Error?failure.message:"Varmuuskopion vienti epäonnistui.");
+    }
+  };
+  async function importProgress(file?:File){
+    if(!file||!owner||!pack)return;
+    try{
+      if(file.size>15_000_000)throw new Error("Varmuuskopio on odottamattoman suuri.");
+      const value=JSON.parse(await file.text()) as {
+        schema?:string;progress?:Progress;essay?:string;
+        teacherSessions?:unknown;teacherSessionHistory?:unknown;
+      };
+      if(value.schema!=="em-native-progress-1"||!value.progress||
+        typeof value.progress!=="object"||Array.isArray(value.progress)){
+        throw new Error("Virheellinen varmuuskopio.");
+      }
+      const verified:Progress={};
+      for(const [id,item] of Object.entries(value.progress)){
+        if(pack.lessons[id]&&item&&typeof item==="object"&&
+          typeof item.completed==="boolean"&&Number.isInteger(item.answered)&&item.answered>=0&&
+          typeof item.updatedAt==="string")verified[id]=item;
+      }
+      // Validate every Teacher 2.0 session BEFORE replacing existing data.
+      const teacherWrites=prepareEnglishTeacherRestore(value,owner,Object.keys(pack.lessons));
+      const writes=[
+        {key:progressKey,value:JSON.stringify(verified)},
+        ...(typeof value.essay==="string"?[{key:"em-native-essay-"+owner,value:value.essay}]:[]),
+        ...teacherWrites,
+      ];
+      // Local storage has no transaction API. Retain the previous values and
+      // restore them if a write fails; never knowingly discard learning data.
+      const previous=writes.map(item=>({key:item.key,value:localStorage.getItem(item.key)}));
+      let applied=0;
+      try{
+        for(const item of writes){localStorage.setItem(item.key,item.value);applied++;}
+      }catch(failure){
+        for(let n=applied-1;n>=0;n--){
+          const before=previous[n]!;
+          try{
+            if(before.value===null)localStorage.removeItem(before.key);
+            else localStorage.setItem(before.key,before.value);
+          }catch{/* Keep the original error and avoid claiming a successful restore. */}
+        }
+        throw failure;
+      }
+      setProgress(verified);
+      if(typeof value.essay==="string")setEssay(value.essay);
+      setError("");
+    }catch(failure){
+      setError(failure instanceof Error?failure.message:"Varmuuskopion palautus epäonnistui.");
+    }
   };
   const navItems: Array<{ id: Page; label: string }> = [
-    { id: "home", label: "Etusivu" }, { id: "book", label: "Oppikirja" }, { id: "path", label: "Opetuspolku" },
+    { id: "home", label: "Etusivu" }, { id: "contents", label: "Sisällysluettelo" }, { id: "book", label: "Oppikirja" }, { id: "path", label: "Opetuspolku" },
     { id: "writing", label: "Kirjoittaminen" }, { id: "listening", label: "Kuuntelu" },
     { id: "progress", label: "Oma edistyminen" },
   ];
   if (owner === undefined || loading) return <main className="em-loading" role="status">Avataan English Masteria…</main>;
   if (!owner) return <main className="em-gate"><h1>English Master kuuluu Opintopäiväkirjaan.</h1><p>Avaa ensin Opintopäiväkirja tällä laitteella, aivan kuten LOS!-kirjaa käyttäessäsi.</p><a href="/today" className="em-primary">Avaa Opintopäiväkirja <ChevronRight size={18}/></a></main>;
-  return <div className="em-app">
-    <header className="em-topbar">
-      <a href="/studies" className="em-back"><ArrowLeft size={18}/> Opintopäiväkirjaan</a>
-      <strong>ENGLISH MASTER<span className="em-dot">.</span></strong>
-      <button className="em-menu-button" onClick={() => setTocOpen(!tocOpen)} aria-expanded={tocOpen} aria-label="Avaa kirjan navigaatio">{tocOpen ? <X size={21}/> : <Menu size={21}/>}</button>
-    </header>
-    <div className="em-layout">
-      <aside className={"em-side " + (tocOpen ? "is-open" : "")}>
-        <div className="em-side-title"><BookOpen size={24}/><span>English Master<small>Your Path to Laudatur</small></span></div>
-        <nav aria-label="English Masterin osiot">
-          {navItems.map(item => <button key={item.id} className={location.page === item.id || (item.id === "path" && location.page === "lesson") ? "is-active" : ""} onClick={() => navigate(item.id)}>{item.label}<ChevronRight size={15}/></button>)}
-          <button onClick={() => navigate("import")}>Sisältöpaketti <FileUp size={16}/></button>
-        </nav>
-        <div className="em-side-foot">Pitkä englanti · kevät 2028<p>Alpha 0.8 · tuotetut opetussisällöt ovat luonnoksia.</p></div>
-      </aside>
-      <main id="main-content" className="em-main" tabIndex={-1}>
-        {!pack ? <><ImportPanel onImported={value => { setPack(value); navigate("home"); }} />{error && <p className="em-error" role="alert">{error}</p>}</> :
-          location.page === "import" ? <ImportPanel onImported={value => { setPack(value); navigate("home"); }}/> :
-          location.page === "home" ? <div className="em-paper em-home">
-            <p className="em-overline">LONG ENGLISH · LOPS21 · SPRING 2028</p><h1>English Master</h1><p className="em-lead">Your Path to Laudatur</p>
-            <p>Englannin oppikirja, ohjattu Opetuspolku, itsenäiset tehtävät ja kertaaminen samassa opiskelutilassa.</p>
-            <div className="em-stats"><span><b>122</b> kirjalukua</span><span><b>192</b> oppituntia</span><span><b>{completed}</b> harjoiteltua tuntia</span></div>
-            <div className="em-action-grid">
-              <button onClick={() => navigate("path")}><BookOpen/> Jatka Opetuspolulle <ChevronRight/></button>
-              <button onClick={() => navigate("book", "G01")}><BookText/> Avaa oppikirja <ChevronRight/></button>
-              <button onClick={() => navigate("writing")}><PenLine/> Writing Academy <ChevronRight/></button>
-              <button onClick={() => navigate("listening")}><Headphones/> Listening Lab <ChevronRight/></button>
-            </div><p className="em-note">Koko luonnossisältö on käytettävissä tässä versiossa. Loppuarviointia ja aitoja täysmittaisia YO-harjoituskokeita ei ole vielä julkaistu.</p>
-          </div> :
-          location.page === "book" ? <section className="em-paper">
-            <p className="em-overline">ENGLISH MASTER / OPPIKIRJA</p><h1>Oppikirja</h1>
-            <div className="em-book-toolbar"><label><Search size={16}/> <input value={query} onChange={e => setQuery(e.target.value)} placeholder="Hae 122 luvusta" aria-label="Hae kirjaluku"/></label>
-              <select aria-label="Valitse kirjaluku" value={currentChapter?.content_id ?? ""} onChange={e => navigate("book", e.target.value)}>{BOOK_GROUPS.map(([prefix, label]) => <optgroup key={prefix} label={label}>{chapters.filter(ch => ch.content_id.startsWith(prefix)).map(ch => <option key={ch.content_id} value={ch.content_id}>{ch.content_id} · {ch.title}</option>)}</optgroup>)}</select></div>
-            {query ? <div className="em-search-results">{chapters.filter(ch => (ch.title + " " + ch.content_id).toLocaleLowerCase().includes(query.toLocaleLowerCase())).map(ch => <button key={ch.content_id} onClick={() => { setQuery(""); navigate("book", ch.content_id); }}>{ch.content_id} · {ch.title}</button>)}</div> : null}
-            {currentChapter && <article className="em-chapter">
-              <p className="em-overline">{currentChapter.content_id} · ALKUPERÄINEN LUONNOS</p><h2>{currentChapter.title}</h2>
-              {currentChapter.payload.objectives_fi?.length ? <ul>{currentChapter.payload.objectives_fi.map((item, i) => <li key={i}>{item}</li>)}</ul> : null}
-              {currentChapter.payload.sections?.map(section => <div key={section.section_id} className="em-section"><h3>{section.title}</h3><p>{section.theory_fi}</p>{section.worked_examples?.map((ex, i) => <figure key={i} className="em-example"><blockquote lang="en">{ex.en}</blockquote>{ex.meaning_fi && <p>{ex.meaning_fi}</p>}{ex.why_fi && <figcaption>{ex.why_fi}</figcaption>}</figure>)}{section.common_errors_fi && <p className="em-help">{Array.isArray(section.common_errors_fi) ? section.common_errors_fi.join(" ") : section.common_errors_fi}</p>}</div>)}
-              {currentChapter.payload.summary_fi && <p className="em-summary">{currentChapter.payload.summary_fi}</p>}
-              {currentChapter.payload.linked_lesson_ids?.length ? <div className="em-related"><h3>Harjoittele Opetuspolussa</h3>{currentChapter.payload.linked_lesson_ids.filter(id => pack.lessons[id]).map(id => <button key={id} onClick={() => navigate("lesson", id)}>{id} · {pack.lessons[id]?.title} <ChevronRight size={16}/></button>)}</div> : null}
-            </article>}
-          </section> :
-          location.page === "path" ? <section className="em-paper"><p className="em-overline">32 JAKSOA · 192 OPPITUNTIA</p><h1>Opetuspolku</h1><p>Valitse oppitunti. Edistyminen tallentuu tähän selaimeen, ei vielä palvelimen käyttäjätilille.</p>
-            {Array.from({ length: 32 }, (_, i) => "J" + String(i + 1).padStart(2, "0")).map(unit => {
-              const available = lessons.filter(lesson => lesson.content_id.includes("-" + unit + "-"));
-              return <section key={unit} className="em-unit"><h2>{unit} <small>{available.length} oppituntia</small></h2><div>{available.map(lesson => <button key={lesson.content_id} onClick={() => navigate("lesson", lesson.content_id)}><span>{progress[lesson.content_id]?.completed ? <CheckCircle2 size={17}/> : <BookOpen size={17}/>}</span><span><small>{lesson.content_id}</small><strong>{lesson.title}</strong></span><ChevronRight size={16}/></button>)}</div></section>;
-            })}
-          </section> :
-          location.page === "lesson" && currentLesson ? <section className="em-paper em-lesson">
-            <button className="em-textlink" onClick={() => navigate("path")}>← Opetuspolkuun</button><p className="em-overline">{currentLesson.content_id} · OPPITUNTILUONNOS</p><h1>{currentLesson.title}</h1>
-            {currentLesson.payload.hook_fi && <p className="em-lead">{currentLesson.payload.hook_fi}</p>}
-            {currentLesson.payload.objectives_fi?.length ? <ul>{currentLesson.payload.objectives_fi.map((item, i) => <li key={i}>{item}</li>)}</ul> : null}
-            {currentLesson.payload.explanations?.map((ex, i) => <div key={i} className="em-section"><h2>{ex.heading_fi ?? "Opetus " + (i + 1)}</h2><p>{ex.text_fi}</p>{ex.examples?.map((model, j) => <figure key={j} className="em-example"><blockquote lang="en">{model.en}</blockquote>{model.meaning_fi && <p>{model.meaning_fi}</p>}{model.why_fi && <figcaption>{model.why_fi}</figcaption>}</figure>)}</div>)}
-            {currentLesson.payload.teacher_scenes?.length ? <details className="em-scenes"><summary>Vaiheittainen opetustaulu ({currentLesson.payload.teacher_scenes.length} vaihetta)</summary>
-              {currentLesson.payload.teacher_scenes.map((scene, i) => <div className="em-scene" key={scene.scene_id ?? scene.id ?? i}><h3>{i + 1}. {scene.title_fi ?? "Opetusvaihe"}</h3><p>{scene.teacher_fi ?? scene.text_fi}</p>{scene.board?.visible_en && <pre lang="en">{scene.board.visible_en}</pre>}{scene.board?.teacher_fi && <p>{scene.board.teacher_fi}</p>}</div>)}</details> : null}
-            {currentLesson.payload.alternative_explanation_fi && <><button className="em-textlink" onClick={() => setShowHelp(!showHelp)} aria-expanded={showHelp}>En ymmärrä · {showHelp ? "Piilota" : "Näytä toinen selitys"}</button>{showHelp && <p className="em-help">{currentLesson.payload.alternative_explanation_fi}</p>}</>}
-            <h2>Harjoitukset</h2>{currentLesson.payload.tasks?.map((task, index) => {
-              const result = feedback[task.task_id];
-              return <div className="em-task" key={task.task_id}>
-                <small>TEHTÄVÄ {index + 1} · {task.phase ?? "Harjoitus"}</small><p lang="en">{task.prompt_en ?? task.prompt_fi}</p>
-                {task.format === "single_choice" && task.options ? <div className="em-choices">{task.options.map(option => <label key={option.id}><input type="radio" name={task.task_id} value={option.id} checked={answer[task.task_id] === option.id} onChange={() => setAnswer(prev => ({ ...prev, [task.task_id]: option.id }))}/><span lang="en">{option.text}</span></label>)}</div> :
-                  task.format === "free_response" ? <textarea aria-label={"Vastaus tehtävään " + (index + 1)} value={answer[task.task_id] ?? ""} onChange={event => setAnswer(prev => ({ ...prev, [task.task_id]: event.target.value }))} rows={3}/> :
-                  <input aria-label={"Vastaus tehtävään " + (index + 1)} value={answer[task.task_id] ?? ""} onChange={event => setAnswer(prev => ({ ...prev, [task.task_id]: event.target.value }))} placeholder="Kirjoita vastauksesi" />}
-                <button className="em-check" onClick={() => checkTask(task)} disabled={!answer[task.task_id]?.trim()}>Tarkista vastaus</button>
-                {result && <div role="status" className={"em-feedback " + (result.ok === false ? "is-wrong" : "")}><strong>{result.ok === null ? "Itsearviointi" : result.ok ? "Oikein!" : "Tarkista vielä"}</strong><p>{result.explanation}</p>{result.ok === null && <><p lang="en">{task.model_answer_en ?? task.acceptable_answers?.[0]}</p><p>{task.criteria_fi}</p></>}</div>}
-                {task.hint_fi && <details><summary>Vihje</summary><p>{task.hint_fi}</p></details>}
+  // LOS! 1 Teacher 2.0 is a separate full-screen teaching experience. English
+  // uses that exact UI system, but its own authored lessons and independent state.
+  if (pack && location.page === "lesson" && currentLesson) return <EnglishTeacherPlayer
+    key={currentLesson.content_id} lesson={currentLesson} ownerId={owner}
+    previouslyCompleted={Boolean(progress[currentLesson.content_id]?.completed)}
+    onBack={() => navigate("path")}
+    onComplete={(checked) => {markLesson(currentLesson.content_id,checked,true);navigate("path");}}
+  />;
+  return <div className="los-app em-app" style={{"--los-book-accent":"#2E617D","--los-book-tint":"#E9F2F6"} as CSSProperties}>
+    <div className="los-book-workspace em-los-workspace" data-reading-size={readingView.size} data-reading-spacing={readingView.spacing} data-reading-measure={readingView.measure}>
+      <header className="los-book-topbar">
+        <a href="/studies" className="los-back-library"><ChevronLeft size={19}/><span>Opintopäiväkirja</span></a>
+        <button className="los-top-title" onClick={() => navigate("home")}><strong className="em-los-brand">ENGLISH MASTER<span className="em-dot">.</span></strong><span> / 2028 <span className="los-top-separator">·</span> ENA</span></button>
+        <div className="los-top-actions">
+          <button className="los-top-search" onClick={() => { if (window.matchMedia("(max-width:760px)").matches) setTocOpen(true); window.requestAnimationFrame(() => tocSearchRef.current?.focus()); }} aria-label="Hae oppikirjasta"><Search size={19}/></button>
+          <button ref={tocTriggerRef} className="los-top-toc" onClick={() => setTocOpen(v => !v)} aria-expanded={tocOpen} aria-controls="em-mobile-toc" aria-label={tocOpen?"Sulje sisällysluettelo":"Avaa sisällysluettelo"}>{tocOpen ? <X size={19}/> : <Menu size={19}/>}<span>Sisältö</span></button>
+        </div>
+      </header>
+      <div className="los-book-layout">
+        <aside ref={tocPanelRef} id="em-mobile-toc" className={"los-book-sidebar "+(tocOpen?"is-open":"")} role={tocOpen?"dialog":undefined} aria-modal={tocOpen?true:undefined} aria-label="English Masterin sisällysluettelo">
+          {tocOpen && <button type="button" className="los-sidebar-close" onClick={() => {setTocOpen(false);tocTriggerRef.current?.focus();}}><X size={18}/> Sulje sisällysluettelo</button>}
+          <button className="los-sidebar-book" onClick={() => navigate("home")}>
+            <span className="los-cover"><span className="los-cover-fallback"><span className="los-cover-mark">EM.</span></span></span>
+            <span><b>English Master</b><small>Your Path to Laudatur</small></span>
+          </button>
+          <div className="los-sidebar-heading">KIRJAN SIVUT</div>
+          <nav aria-label="English Masterin osiot">
+            {navItems.filter(item=>item.id==="home"||item.id==="contents"||item.id==="book").map(item=><button key={item.id} className={location.page===item.id?"is-active":""}
+              onClick={() => navigate(item.id,item.id==="book"?currentChapter?.content_id??"G01":"")}>{item.label}</button>)}
+            <div className="los-sidebar-tree-controls">
+              <label className="los-sidebar-tree-search"><Search size={14}/><span className="sr-only">Suodata kirjalukuja</span>
+                <input ref={tocSearchRef} value={query} onChange={e=>setQuery(e.target.value)} placeholder="Etsi 122 luvusta" aria-label="Etsi kirjalukuja"/>
+              </label>
+              <div className="los-sidebar-tree-actions">
+                <button type="button" onClick={()=>setExpandedGroup("*")}>Avaa kaikki</button>
+                <button type="button" onClick={()=>setExpandedGroup(null)}>Sulje kaikki</button>
+              </div>
+            </div>
+            {BOOK_GROUPS.map(([prefix,label])=>{
+              const visible=chapters.filter(ch=>ch.content_id.startsWith(prefix)&&((ch.title+" "+ch.content_id).toLocaleLowerCase("fi").includes(query.trim().toLocaleLowerCase("fi"))));
+              if(!visible.length) return null;
+              const opened=Boolean(query.trim())||expandedGroup==="*"||expandedGroup===prefix;
+              return <div className="los-sidebar-chapter-group" key={prefix}>
+                <div className="los-sidebar-chapter-head">
+                  <button type="button" className={location.page==="book"&&currentChapter?.content_id.startsWith(prefix)?"is-active":""}
+                    onClick={()=>setExpandedGroup(opened?null:prefix)}><span className="los-sidebar-num">{prefix}</span><span>{label}</span></button>
+                  <button type="button" className="los-sidebar-chapter-expand" aria-expanded={opened}
+                    aria-label={(opened?"Sulje ":"Avaa ")+label} onClick={()=>setExpandedGroup(opened?null:prefix)}>{opened?"−":"+"}</button>
+                </div>
+                {opened&&<div className="los-sidebar-chapter-children" aria-label={label+" -kirjaluvut"}>
+                  {visible.map(ch=><div key={ch.content_id} className="em-los-toc-chapter">
+                    <button type="button" className={location.page==="book"&&currentChapter?.content_id===ch.content_id?"is-active":""}
+                      aria-current={location.page==="book"&&currentChapter?.content_id===ch.content_id?"page":undefined}
+                      onClick={()=>goChapter(ch.content_id)}><span className="los-sidebar-num">{ch.content_id}</span> {ch.title}</button>
+                    {location.page==="book"&&currentChapter?.content_id===ch.content_id&&ch.payload.sections?.map(section=>
+                      <button type="button" className="em-los-section-jump" key={section.section_id}
+                        onClick={()=>jumpToBookSection(bookSectionChoices.findIndex(item=>item.id===section.section_id))}>
+                        {section.title}
+                      </button>)}
+                  </div>)}
+                </div>}
               </div>;
             })}
-            {currentLesson.payload.summary_fi && <p className="em-summary">{currentLesson.payload.summary_fi}</p>}
-            <button className="em-primary" onClick={() => { markLesson(currentLesson.content_id, Object.keys(feedback).length, true); navigate("path"); }}>Merkitse harjoitelluksi <CheckCircle2 size={17}/></button>
-            <p className="em-note">Harjoitelluksi merkitseminen ei tarkoita, että koko taito olisi todistetusti hallittu. Avoimien vastausten arvioinnissa käytä omaa tai opettajan arviota.</p>
+            <div className="los-sidebar-heading">HAKEMISTOT JA HARJOITUKSET</div>
+            {navItems.filter(item=>item.id!=="home"&&item.id!=="book").map(item=>
+              <button key={item.id} className={location.page===item.id||(item.id==="path"&&location.page==="lesson")?"is-active":""}
+              onClick={()=>navigate(item.id)}>{item.label}</button>)}
+            <button onClick={()=>navigate("import")}>Sisältöpaketin hallinta</button>
+          </nav>
+          <a className="los-sidebar-exit" href="/studies">Palaa Opintopäiväkirjaan <ArrowRight size={15}/></a>
+        </aside>
+        <main id="main-content" className="los-book-main em-los-main" tabIndex={-1}>
+          <div className="los-reader-context">
+            <div className="los-main-breadcrumb">
+              <button onClick={()=>navigate("home")}>English Master</button>
+              {location.page!=="home" && <><ChevronRight size={12}/><span>{location.page==="book"?currentChapter?.title:location.page==="lesson"?currentLesson?.title:navItems.find(item=>item.id===location.page)?.label??"Sisältöpaketti"}</span></>}
+            </div>
+          </div>
+          {pack && location.page==="book" && currentChapter && <nav className="los-section-nav em-los-section-nav" aria-label="Luvun osiot"
+            style={{"--los-section-fill":((selectedBookSection+1)/bookSectionChoices.length*100)+"%"} as CSSProperties}>
+            <div className="los-section-location">
+              <span className="los-section-index">LUKU {currentChapter.content_id}<span aria-hidden="true">·</span> OSIO {String(selectedBookSection+1).padStart(2,"0")} / {bookSectionChoices.length}</span>
+              <strong>{bookSectionChoices[selectedBookSection]?.title}</strong>
+            </div>
+            <div className="los-section-actions">
+              <label className="los-section-jump">
+                <span className="sr-only">Valitse luvun osio</span>
+                <select value={selectedBookSection} aria-label="Valitse luvun osio"
+                  onChange={e=>jumpToBookSection(Number(e.target.value))}>
+                  {bookSectionChoices.map((item,index)=><option key={item.id} value={index}>{item.title}</option>)}
+                </select>
+              </label>
+              <LosReaderDisplayControls value={readingView} onChange={setReadingView}/>
+              <button type="button" className="los-section-step" aria-label="Edellinen osio"
+                disabled={selectedBookSection===0} onClick={()=>jumpToBookSection(selectedBookSection-1)}><ChevronLeft size={18}/></button>
+              <button type="button" className="los-section-step" aria-label="Seuraava osio"
+                disabled={selectedBookSection===bookSectionChoices.length-1}
+                onClick={()=>jumpToBookSection(selectedBookSection+1)}><ChevronRight size={18}/></button>
+            </div>
+          </nav>}
+          {pack && location.page==="lesson" && <LosReaderDisplayControls value={readingView} onChange={setReadingView}/>}
+          <div className="los-book-paper">
+        {!pack ? <><ImportPanel onImported={value => { setPack(value); navigate("home"); }} />{error && <p className="em-error" role="alert">{error}</p>}</> :
+          location.page === "import" ? <ImportPanel onImported={value => { setPack(value); navigate("home"); }}/> :
+          location.page === "home" ? <div className="em-home-los">
+            <div className="los-front los-front-has-banner">
+              <div className="los-front-banner">
+                <div className="em-los-banner" role="img" aria-label="English Masterin typografinen kirjabanneri">
+                  <span>LONG ENGLISH · LOPS21</span>
+                  <strong>English<br/>Master<span>.</span></strong>
+                  <small>YOUR PATH TO LAUDATUR</small>
+                </div>
+              </div>
+              <div className="los-front-copy">
+                <div className="los-front-mini-cover">
+                  <span className="los-cover"><span className="los-cover-fallback"><span className="los-cover-series">LONG ENGLISH</span><span className="los-cover-mark">EM.</span><span className="los-cover-number">28</span><span className="los-cover-title">English Master</span><span className="los-cover-foot">YOUR PATH TO LAUDATUR</span></span></span>
+                </div>
+                <p className="los-eyebrow">ENGLISH MASTER / ENA / KEVÄT 2028</p>
+                <h1>English Master</h1>
+                <div className="los-front-rule"/>
+                <p className="los-front-lead">Your Path to Laudatur</p>
+                <p className="los-front-meta">Lukion pitkä englanti · LOPS21 · kevät 2028</p>
+                <button className="los-primary" onClick={()=>navigate("path")}>Jatka Opetuspolulle <ArrowRight size={18}/></button>
+                <button className="los-text-link" onClick={()=>goChapter(chapters[0]?.content_id??"G01")}>Avaa oppikirja <ChevronRight size={17}/></button>
+              </div>
+            </div>
+            <div className="los-front-after">
+              <p className="los-eyebrow">TÄSTÄ KIRJASTA</p>
+              <h2>Englantia kohti laudaturia</h2>
+              <p>Kirjassa yhdistyvät kielioppi, sanasto, luettu ja kuultu ymmärtäminen, kirjoittaminen sekä ohjattu harjoittelu. Kaikki kirjaluvut löytyvät vasemman reunan sisällysluettelosta.</p>
+              <div className="em-stats"><span><b>122</b> kirjalukua</span><span><b>192</b> oppituntia</span><span><b>{completed}</b> harjoiteltua tuntia</span></div>
+              <div className="los-front-links">
+                <button onClick={()=>navigate("contents")}><BookText size={18}/> Sisällysluettelo</button>
+                <button onClick={()=>navigate("path")}><BookOpen size={18}/> Ohjatut oppitunnit</button>
+                <button onClick={()=>navigate("writing")}><PenLine size={18}/> Kirjoittaminen</button>
+                <button onClick={()=>navigate("listening")}><Headphones size={18}/> Kuuntelu</button>
+              </div>
+              <p className="em-note">Alpha 0.8: opetussisällöt ovat vielä luonnoksia. Täysmittaiset YO-harjoituskokeet eivät ole valmiit.</p>
+            </div>
+          </div> :
+          location.page === "contents" ? <section className="los-inner-page em-los-contents">
+            <p className="los-eyebrow">ENGLISH MASTER · LOPS21 · PITKÄ ENGLANTI</p>
+            <h1>Sisällysluettelo</h1>
+            <p className="los-page-intro">Oppikirja sisältää 122 kirjalukua kahdeksassa osassa. Avaa haluamasi luku. Kaikki tekstit ja harjoituksiin johtavat linkit ovat kirjan sisällä.</p>
+            {BOOK_GROUPS.map(([prefix,label])=>{
+              const partChapters=chapters.filter(ch=>ch.content_id.startsWith(prefix));
+              if(!partChapters.length)return null;
+              return <section key={prefix} className="em-los-contents-part">
+                <h2>{label} <small>{partChapters.length} lukua</small></h2>
+                <ol className="los-contents-list">
+                  {partChapters.map(ch=><li key={ch.content_id}>
+                    <button onClick={()=>goChapter(ch.content_id)}>
+                      <span className="los-content-number">{ch.content_id}</span>
+                      <span className="los-content-copy"><strong lang="en">{ch.title}</strong>
+                        <small>{ch.payload.objectives_fi?.[0]??"Avaa kirjaluku"}</small>
+                      </span>
+                      <ChevronRight size={20} aria-hidden="true"/>
+                    </button>
+                  </li>)}
+                </ol>
+              </section>;
+            })}
+            <div className="los-contents-appendix">
+              <button onClick={()=>navigate("path")}>Opetuspolku · 192 oppituntia <ArrowRight size={16}/></button>
+              <button onClick={()=>navigate("progress")}>Oma edistyminen <ArrowRight size={16}/></button>
+            </div>
+          </section> :
+          location.page === "book" ? <section className="em-los-chapter-page">
+            {returnLesson && <aside className="em-teacher-return" aria-label="Palaa Teacher 2.0 -oppituntiin">
+              <div><strong>Jatka opettajan kanssa</strong><p>Avattu oppitunnilta: {returnLesson.title}. Kirjan lukeminen ei automaattisesti merkitse harjoitusta suoritetuksi.</p></div>
+              <button type="button" onClick={()=>navigate("lesson",returnLesson.content_id)}>
+                Palaa oppituntiin <ArrowRight size={17}/>
+              </button>
+            </aside>}
+            {currentChapter && <article className="em-chapter">
+              <div className="los-opening em-los-opening" id="em-chapter-opening">
+                <p className="los-eyebrow">{currentChapter.content_id} / {chapters.length} · ENGLISH MASTER</p>
+                <div className="los-opening-head">
+                  <span className="los-opening-number em-los-opening-number">{currentChapter.content_id}</span>
+                  <div>
+                    <h1 lang="en">{currentChapter.title}</h1>
+                    <p>{currentChapter.payload.objectives_fi?.[0] ?? "Pitkän englannin oppikirjan luku"}</p>
+                  </div>
+                </div>
+                <div className="los-opening-bottom">
+                  <div>
+                    <p className="los-overline">TÄSSÄ LUVUSSA</p>
+                    <h2>Opettele ja harjoittele</h2>
+                    <p className="los-opening-lead">Lue luvun selitykset ja esimerkit. Avaa lopuksi aiheeseen liittyvä oppitunti, jos sellainen on liitetty tähän lukuun.</p>
+                  </div>
+                  {currentChapter.payload.objectives_fi?.length ? <aside className="los-goals">
+                    <h3>Luvun tavoitteet</h3>
+                    <ul>{currentChapter.payload.objectives_fi.map((item,i)=><li key={i}>{item}</li>)}</ul>
+                  </aside> : null}
+                </div>
+                {currentChapter.payload.sections?.length ? <nav className="los-chapter-links" aria-label="Luvun osiot">
+                  {currentChapter.payload.sections.map(section=><button type="button" key={section.section_id}
+                    onClick={()=>jumpToBookSection(bookSectionChoices.findIndex(item=>item.id===section.section_id))}>
+                    <span>{section.title}</span><ArrowRight size={17}/>
+                  </button>)}
+                </nav> : null}
+              </div>
+              <div className="los-inner-page los-grammar-page em-los-chapter-body">
+                {currentChapter.payload.sections?.map(section=><section key={section.section_id} className="em-section" id={"em-sec-"+section.section_id}>
+                  <h2>{section.title}</h2><p>{section.theory_fi}</p>
+                  {section.worked_examples?.map((ex,i)=><div key={i} className="los-example em-los-example">
+                    <p lang="en">{ex.en}</p>{ex.meaning_fi&&<span>{ex.meaning_fi}</span>}{ex.why_fi&&<small>{ex.why_fi}</small>}
+                  </div>)}
+                  {section.common_errors_fi&&<div className="los-editorial-note"><p>{Array.isArray(section.common_errors_fi)?section.common_errors_fi.join(" "):section.common_errors_fi}</p></div>}
+                </section>)}
+                {currentChapter.payload.summary_fi&&<div className="los-grammar-aside"><strong>Yhteenveto</strong><p>{currentChapter.payload.summary_fi}</p></div>}
+                {currentChapter.payload.linked_lesson_ids?.length?<div className="em-related">
+                  <h2>Harjoittele Opetuspolussa</h2>
+                  {currentChapter.payload.linked_lesson_ids.filter(id=>pack.lessons[id]).map(id=>
+                    <button key={id} onClick={()=>navigate("lesson",id)}>{id} · {pack.lessons[id]?.title}<ChevronRight size={16}/></button>)}
+                </div>:null}
+              </div>
+            </article>}
+          </section> :
+          location.page === "path" ? <section className="los-inner-page los-learning-path">
+            <p className="los-eyebrow">OHJATTU LUKUJÄRJESTYS / ENGLISH MASTER</p>
+            <h1>Opetuspolku</h1>
+            <p className="los-page-intro">32 jaksoa ja 192 suunniteltua oppituntia. Oppitunteja voi avata vapaasti. Edistyminen säilyy tällä laitteella eikä vielä synkronoidu tilille.</p>
+            {teacherResume&&<div className="em-teacher-resume">
+              <div>
+                <p className="em-overline">TEACHER 2.0 · OMA OPETUSPOLKU</p>
+                <strong>{teacherResume.action==="review"?"Kaikki oppitunnit harjoiteltu":
+                  teacherResume.action==="updated"?"Oppitunnin sisältöä on päivitetty":
+                  teacherResume.action==="continue"?"Jatka siitä, mihin jäit":
+                  "Aloita englannin opiskelu"}</strong>
+                <p>{teacherResume.title} · {teacherResume.completed}/{teacherResume.available} Teacher 2.0 -oppituntia läpikäyty
+                  {teacherResume.action==="updated"?". Vanhat vastaukset säilyvät arkistoitaviksi, mutta eivät kelpaa uuden käsikirjoituksen näytöiksi.":""}</p>
+              </div>
+              <button type="button" onClick={()=>navigate("lesson",teacherResume.lessonId)}>
+                {teacherResume.action==="review"?"Kertaa alusta":
+                  teacherResume.action==="updated"?"Tarkista päivitetty oppitunti":
+                  teacherResume.action==="continue"?"Jatka Teacher 2.0:ssa":"Aloita Teacher 2.0"}
+                <ArrowRight size={17}/>
+              </button>
+            </div>}
+            {Array.from({length:32},(_,i)=>"J"+String(i+1).padStart(2,"0")).map(unit=>{
+              const available=lessons.filter(lesson=>lesson.content_id.includes("-"+unit+"-"));
+              return <section key={unit} className="los-path-group em-unit"><h2>{unit} <small>{available.length} oppituntia</small></h2><ol>
+                {available.map((lesson,i)=><li key={lesson.content_id}><button onClick={()=>navigate("lesson",lesson.content_id)}>
+                  <span className="los-path-number">{String(i+1).padStart(2,"0")}</span>
+                  <span className="los-path-copy"><strong>{lesson.title}</strong><small>{lesson.content_id} {progress[lesson.content_id]?.completed?"· Harjoiteltu":""}</small></span>
+                  {progress[lesson.content_id]?.completed?<CheckCircle2 size={17}/>:<ChevronRight size={18}/>}
+                </button></li>)}
+              </ol></section>;
+            })}
           </section> :
           location.page === "writing" ? <section className="em-paper"><p className="em-overline">WRITING ACADEMY</p><h1>Kirjoittaminen</h1><p>Kirjoita englanniksi. Teksti säilyy tällä laitteella, eikä sitä lähetetä automaattisesti ChatGPT:hen.</p>
             <label className="em-field">Tehtävänanto<textarea rows={3} value={assignment} onChange={event => setAssignment(event.target.value)} placeholder="Liitä kirjoitustehtävänanto tähän"/></label>
@@ -397,7 +672,15 @@ export function EnglishMasterBook() {
             {error && <p className="em-error" role="alert">{error}</p>}
             <div className="em-related">{Object.entries(progress).filter(([, value]) => value.completed).sort().map(([id]) => <button key={id} onClick={() => navigate("lesson", id)}>{id} · {pack.lessons[id]?.title ?? ""}</button>)}</div>
           </section> : null}
-      </main>
+          </div>
+          {location.page==="book"&&currentChapter&&<div className="los-pagination">
+            {chapterIndex>0?<button onClick={()=>goChapter(chapters[chapterIndex-1]?.content_id??"G01")}><ChevronLeft size={18}/><span>Edellinen luku<small>{chapters[chapterIndex-1]?.title}</small></span></button>:<span/>}
+            {chapterIndex>=0&&chapterIndex<chapters.length-1?<button onClick={()=>goChapter(chapters[chapterIndex+1]?.content_id??"G01")}><span>Seuraava luku<small>{chapters[chapterIndex+1]?.title}</small></span><ChevronRight size={18}/></button>:<span/>}
+          </div>}
+          <footer className="los-page-footer">English Master · LOPS21 · pitkä englanti <span>Kevään 2028 YO-valmennus</span></footer>
+        </main>
+      </div>
+      {tocOpen&&<button className="los-toc-backdrop" aria-label="Sulje sisällysluettelo" tabIndex={-1} onClick={()=>{setTocOpen(false);tocTriggerRef.current?.focus();}}/>}
     </div>
   </div>;
 }

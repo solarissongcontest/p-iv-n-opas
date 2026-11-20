@@ -81,3 +81,449 @@
 @media(max-width:920px){.em-layout{grid-template-columns:220px minmax(0,1fr)}.em-main{padding:18px}.em-paper{padding:25px}.em-audio-grid{grid-template-columns:1fr}}
 @media(max-width:690px){.em-topbar{height:59px}.em-topbar strong{font-size:.86rem}.em-back{font-size:.72rem}.em-menu-button{display:grid;place-items:center}.em-layout{display:block}.em-side{display:none;position:fixed;top:59px;bottom:0;left:0;right:0;z-index:24;overflow:auto;box-shadow:0 5px 16px #15354218}.em-side.is-open{display:flex}.em-main{padding:12px}.em-paper{border-radius:9px;padding:20px 16px}.em-action-grid{grid-template-columns:1fr}.em-book-toolbar{grid-template-columns:1fr}.em-stats{gap:7px}.em-stats span{padding:10px;font-size:.7rem}.em-paper h1{font-size:2rem}.em-unit button strong{font-size:.88rem}}
 @media(prefers-reduced-motion:reduce){.em-app *{scroll-behavior:auto!important;transition:none!important}}
+
+/* English Master uses the actual LOS! 1 CSS and JSX shell.
+   This file only adapts the brand, English content and small screen details. */
+.em-los-workspace{--los-reader-text-size:19px;--los-reader-leading:1.78;--los-reader-measure:68ch}
+.em-los-brand{color:var(--los-book-accent);font-weight:800;letter-spacing:-.035em;font-size:16px}
+.em-app .em-dot{color:var(--los-book-accent)}
+.em-app .los-top-search{display:flex;align-items:center;justify-content:center}
+.em-app .los-book-layout{max-width:1440px}
+.em-app .los-book-paper{overflow:visible}
+.em-app .los-book-paper>.em-paper,.em-app .los-book-paper>.em-import{
+  max-width:none;margin:0;padding:55px clamp(26px,7vw,92px) 80px;
+  background:var(--los-paper);box-shadow:none;border:0;border-radius:0
+}
+
+.em-app .los-book-sidebar nav{display:flex;gap:2px;flex-direction:column}
+.em-app .los-book-sidebar nav .los-sidebar-heading{margin-top:20px}
+.em-app .los-sidebar-book .los-cover{width:46px;min-width:46px;flex:0 0 46px}
+.em-app .los-sidebar-book .los-cover-mark{font-size:19px;margin-top:35%}
+.em-app .los-sidebar-book .los-cover-fallback{padding:8%}
+.em-app .los-sidebar-book .los-cover-fallback .los-cover-series,
+.em-app .los-sidebar-book .los-cover-fallback .los-cover-title,
+.em-app .los-sidebar-book .los-cover-fallback .los-cover-number,
+.em-app .los-sidebar-book .los-cover-fallback .los-cover-foot{display:none}
+.em-app .los-sidebar-chapter-head button:first-child{flex:1;min-width:0}
+.em-app .los-sidebar-chapter-head button:first-child span:last-child{overflow-wrap:anywhere}
+.em-app .los-sidebar-chapter-children{padding:3px 0 5px}
+.em-app .los-sidebar-chapter-children .em-los-toc-chapter{display:flex;flex-direction:column;gap:0}
+.em-app .los-sidebar-chapter-children .em-los-toc-chapter>button{width:100%;display:block;overflow-wrap:anywhere;font-size:12.5px;padding:9px 12px 9px 22px;min-height:39px}
+.em-app .los-sidebar-chapter-children .em-los-toc-chapter>.em-los-section-jump{font-size:11px;padding:7px 12px 7px 40px;color:var(--los-soft)}
+.em-app .los-sidebar-chapter-children .em-los-toc-chapter>.em-los-section-jump:hover{color:var(--los-book-accent)}
+.em-toc-mobile-close{display:none}
+.em-los-banner{
+  width:100%;aspect-ratio:16/9;min-height:215px;
+  display:flex;flex-direction:column;align-items:flex-start;justify-content:center;
+  padding:clamp(22px,4vw,42px);
+  background:linear-gradient(145deg,#427D99 0%,#2E617D 58%,#16374C 100%);
+  position:relative;overflow:hidden;border-radius:7px;color:#fff;
+}
+.em-los-banner:before{content:"";width:80%;height:170%;border:1px solid #ffffff31;position:absolute;top:-40%;right:-55%;transform:rotate(32deg);border-radius:50%}
+.em-los-banner span{font-size:10px;letter-spacing:.16em;font-weight:740;opacity:.85;position:relative}
+.em-los-banner strong{font-family:Georgia,"Times New Roman",serif;font-weight:550;font-size:clamp(31px,4.1vw,66px);line-height:1.02;letter-spacing:-.045em;margin:25px 0 20px;position:relative}
+.em-los-banner strong span{font:inherit;color:#D7E7EF}
+.em-los-banner small{font-size:11px;font-weight:650;letter-spacing:.14em;position:relative}
+.em-app .los-front-mini-cover .los-cover{width:75px}
+.em-app .los-front-mini-cover .los-cover-fallback{padding:9%}
+.em-app .los-front-mini-cover .los-cover-mark{font-size:26px;margin-top:11%}
+.em-app .los-front-mini-cover .los-cover-number{font-size:42px}
+.em-app .los-front-copy .los-text-link{color:var(--los-book-accent)}
+.em-app .los-front-links button:hover{color:var(--los-book-accent)}
+.em-app .los-front-after .em-stats{margin:17px 0 20px}
+.em-app .los-front-after .em-note{max-width:740px}
+.em-app .los-inner-page.em-los-chapter-page{max-width:920px}
+
+.em-app .em-los-chapter-page .los-goals{margin:27px 0 31px}
+.em-app .em-los-chapter-page .los-grammar-page>p,
+.em-app .em-los-chapter-page .em-section>p{line-height:1.8;max-width:var(--los-reader-measure);font-size:var(--los-reader-text-size)}
+.em-app .em-los-chapter-page .em-section{border-top:1px solid var(--los-line);padding:22px 0 24px;scroll-margin-top:95px}
+.em-app .em-los-chapter-page .em-section h3{margin:0 0 16px;font-size:24px}
+.em-app .em-los-chapter-page .los-example{margin:20px 0;padding:17px 22px}
+.em-app .em-los-chapter-page .los-example p{font-size:21px;font-weight:650}
+.em-app .em-los-chapter-page .los-example span{display:block;font-size:14px;color:var(--los-soft)}
+.em-app .em-los-chapter-page .los-example small{display:block;font-size:13px;line-height:1.6;color:var(--los-soft);margin-top:7px}
+.em-app .em-los-chapter-page .los-editorial-note{margin:20px 0}
+.em-app .los-path-group.em-unit{border:0;padding:0}
+.em-app .los-path-group.em-unit h2{display:block}
+.em-app .los-path-group.em-unit ol{list-style:none;padding:0;margin:10px 0 30px}
+.em-app .los-path-group.em-unit li{list-style:none}
+.em-app .los-path-group.em-unit button{width:100%}
+.em-app .los-path-group.em-unit .los-path-number{min-width:32px;text-align:left}
+.em-app .los-path-group.em-unit .los-path-copy{min-width:0}
+.em-app .los-path-group.em-unit .los-path-copy small{display:block}
+
+.em-app .em-task{border-bottom:1px solid var(--los-line);border-top:0;padding:25px 0}
+.em-app .em-task>small{font-family:Georgia,serif;font-size:17px;letter-spacing:0;color:var(--los-book-accent)}
+.em-app .em-choices label:has(input:checked){border-color:var(--los-book-accent);background:var(--los-book-tint)}
+.em-app .em-choices input{accent-color:var(--los-book-accent)}
+.em-app .em-check{background:var(--los-paper);color:var(--los-ink);border:1px solid var(--los-book-accent)}
+.em-app .em-primary{background:var(--los-book-accent)!important;border-color:var(--los-book-accent)!important}
+.em-app .los-page-footer{margin-top:28px}
+.dark .em-app .los-book-paper>.em-paper{background:var(--los-paper);color:var(--los-ink)}
+.dark .em-app .em-los-chapter-page .em-section>p{color:var(--los-ink)}
+@media(max-width:760px){
+ .em-los-brand{font-size:14px}
+ .em-app .los-book-topbar{height:56px}
+ .em-app .los-book-sidebar.is-open{display:block}
+ .em-toc-mobile-close{display:flex;align-items:center;gap:8px;width:100%;min-height:44px;border:1px solid var(--los-line);border-radius:6px;background:var(--los-subtle);padding:9px;margin-bottom:14px}
+ .em-app .los-book-paper>.em-paper,.em-app .los-book-paper>.em-import{padding:25px 22px}
+ .em-app .los-front.los-front-has-banner{display:flex;flex-direction:column}
+ .em-app .los-front-copy{padding-bottom:5px}
+ .em-app .los-front-banner{width:100%}
+ .em-los-banner{min-height:200px}
+ .em-los-banner strong{font-size:clamp(36px,9vw,52px)}
+ .em-app .los-front-after{padding:25px}
+ .em-app .los-inner-page.em-los-chapter-page{padding:30px 23px}
+ .em-app .los-path-group.em-unit .los-path-copy{max-width:70vw}
+ .em-app .los-page-footer{flex-direction:column}
+}
+@media(prefers-reduced-motion:reduce){.em-app .los-sidebar-chapter-children button{scroll-behavior:auto}}
+
+/* Genuine LOS! 1 reading and lesson controls, English-specific type only. */
+.em-app .los-book-workspace .em-los-chapter-page h1{margin-top:12px}
+.em-app .los-book-workspace .em-los-chapter-page .em-section>p,
+.em-app .los-book-workspace .em-lesson .em-section>p{
+ font-size:var(--los-reader-text-size);line-height:var(--los-reader-leading);max-width:min(100%,var(--los-reader-measure));
+ color:var(--los-ink);
+}
+.em-app .los-book-workspace .em-lesson .em-section h2,
+.em-app .los-book-workspace .em-lesson>h2{font-size:clamp(22px,3vw,28px);font-weight:750}
+.em-app .los-book-workspace .em-lesson .em-example{background:var(--los-subtle);border-left-color:var(--los-book-accent)}
+.em-app .los-book-workspace .em-lesson .em-example blockquote{color:var(--los-ink);font-size:var(--los-reader-text-size)}
+.em-app .los-book-workspace .em-lesson .em-example figcaption,
+.em-app .los-book-workspace .em-lesson .em-example p{color:var(--los-soft)}
+.em-app .los-book-workspace .em-lesson .em-task>p{
+ max-width:min(100%,var(--los-reader-measure));font-size:var(--los-reader-text-size);line-height:var(--los-reader-leading);
+}
+.em-app .los-book-workspace .em-lesson-board{margin:30px 0 35px}
+.em-app .los-book-workspace .em-lesson-board .em-board-top{
+ display:block;padding:19px 0 10px;
+}
+.em-app .los-book-workspace .em-lesson-board .em-board-top>p:last-of-type{
+ font-size:13px;color:var(--los-soft);margin:5px 0 12px;
+}
+.em-app .los-book-workspace .em-board-scene{
+ padding:clamp(17px,3vw,30px);background:var(--los-paper);border:1px solid var(--los-line);border-radius:12px;
+}
+.em-app .los-book-workspace .em-board-scene h3{margin:0 0 14px;font-size:clamp(20px,2.5vw,27px)}
+/* The teaching note intentionally inherits v4 teal guidance styling. */
+.em-app .los-book-workspace .em-board-scene .los-lesson-teaching-example{
+ color:var(--los-ink)
+}
+.em-app .los-book-workspace .em-board-scene .los-lesson-teaching-example strong{
+ white-space:pre-wrap;overflow-wrap:anywhere;font-size:var(--los-reader-text-size)
+}
+.em-app .los-book-workspace .em-board-controls{
+ display:flex;justify-content:space-between;gap:12px;margin:15px 0 0;
+}
+.em-app .los-book-workspace .em-board-controls button{
+ display:inline-flex;align-items:center;gap:8px;justify-content:center;
+ min-height:44px;border:1px solid var(--los-line);background:var(--los-paper);
+ border-radius:8px;padding:10px 15px;color:var(--los-ink);font-size:13px;font-weight:650;
+}
+.em-app .los-book-workspace .em-board-controls button:hover:not(:disabled){border-color:var(--los-book-accent)}
+.em-app .los-book-workspace .em-board-controls button:disabled{opacity:.42;cursor:not-allowed}
+.em-app .los-book-workspace .em-task.los-exercise{padding:29px 0 36px}
+.em-app .los-book-workspace .em-task .em-choices.los-answer-list{margin-top:15px}
+.em-app .los-book-workspace .em-task .em-choices.los-answer-list label{
+ background:var(--los-paper);border:1px solid var(--los-line);border-radius:8px;color:var(--los-ink);min-height:48px;
+}
+.em-app .los-book-workspace .em-task .em-choices.los-answer-list label:has(input:checked){
+ background:var(--los-book-tint);border-color:var(--los-book-accent);color:var(--los-ink);
+}
+.em-app .los-book-workspace .em-task .em-check.los-exercise-check{
+ background:var(--los-paper);color:var(--los-ink);border:1px solid var(--los-book-accent);min-height:44px;
+}
+.em-app .los-book-workspace .em-task .em-feedback{
+ background:var(--los-subtle);color:var(--los-ink);border-radius:0;
+}
+.em-app .los-book-workspace .em-task .em-feedback.is-wrong{border-left-color:#b53e46}
+.em-app .los-book-workspace .em-unit button{
+ background:transparent;border:0;border-bottom:1px solid var(--los-line);border-radius:0;color:var(--los-ink);
+}
+.em-app .los-book-workspace .em-unit button:hover{background:var(--los-subtle)}
+.em-app .los-book-workspace .em-unit button strong{color:var(--los-ink)}
+.em-app .los-book-workspace .em-unit button small{color:var(--los-soft)}
+.em-app .los-book-workspace .em-stats span{
+ color:var(--los-soft);background:var(--los-subtle);border-color:var(--los-line);
+}
+.em-app .los-book-workspace .em-stats b{color:var(--los-book-accent)}
+.em-app .los-book-workspace .em-paper h1,
+.em-app .los-book-workspace .em-paper h2,
+.em-app .los-book-workspace .em-paper h3{color:var(--los-ink)}
+.em-app .los-book-workspace .em-paper{background:var(--los-paper);color:var(--los-ink)}
+.em-app .los-book-workspace .em-paper :is(.em-note,.em-lead){color:var(--los-soft)}
+.em-app .los-book-workspace .em-audio-grid article,
+.em-app .los-book-workspace .em-action-grid button,
+.em-app .los-book-workspace .em-import-button{
+ background:var(--los-paper);border-color:var(--los-line);color:var(--los-ink);
+}
+.em-app .los-book-workspace .em-field textarea,
+.em-app .los-book-workspace .em-task input:not([type=radio]),
+.em-app .los-book-workspace .em-task textarea{
+ color:var(--los-ink);background:var(--los-paper);border:1px solid var(--los-line);
+}
+.em-app .los-book-workspace .em-field{color:var(--los-ink)}
+.em-app .los-book-workspace .em-help{color:#554012}
+@media(max-width:760px){
+ .em-app .los-book-workspace .em-los-chapter-page{padding:30px 23px 48px}
+ .em-app .los-book-workspace .em-board-controls button{flex:1;min-width:0}
+ .em-app .los-book-workspace .em-unit .los-path-number{font-size:21px}
+ .em-app .los-book-workspace .em-unit .los-path-copy{max-width:none}
+ .em-app .los-book-workspace .em-lesson-board .em-board-top{padding-top:12px}
+}
+
+/* LOS! 1 contents page, adapted only for English Master chapter codes. */
+.em-app .los-book-workspace .em-los-contents-part{margin:34px 0 46px;scroll-margin-top:90px}
+.em-app .los-book-workspace .em-los-contents-part>h2{
+ display:flex;align-items:baseline;justify-content:space-between;gap:15px;
+ font-size:clamp(19px,2.7vw,24px);font-weight:750;letter-spacing:-.035em;
+ padding-bottom:11px;margin:0;color:var(--los-ink);
+}
+.em-app .los-book-workspace .em-los-contents-part>h2 small{
+ font-size:12px;letter-spacing:0;white-space:nowrap;font-weight:550;color:var(--los-soft)
+}
+.em-app .los-book-workspace .em-los-contents-part .los-contents-list{margin-top:0}
+.em-app .los-book-workspace .em-los-contents-part .los-content-number{min-width:68px;font-size:clamp(19px,2.5vw,25px)}
+.em-app .los-book-workspace .em-los-contents-part .los-content-copy strong{overflow-wrap:anywhere}
+.em-app .los-book-workspace .em-los-contents-part .los-content-copy small{font-size:12px;line-height:1.55}
+.em-app .los-book-workspace .los-contents-appendix{
+ display:flex;flex-wrap:wrap;gap:12px;align-items:center
+}
+.em-app .los-book-workspace .los-contents-appendix button{display:inline-flex;align-items:center;gap:8px}
+@media(max-width:760px){
+ .em-app .los-book-topbar .los-top-title>span:last-child{display:none}
+ .em-app .los-book-topbar .los-top-title{min-width:0;max-width:100%}
+ .em-app .los-book-topbar .em-los-brand{font-size:clamp(12px,3.8vw,15px);white-space:nowrap}
+ .em-app .los-book-workspace .em-los-contents-part .los-content-number{min-width:54px;font-size:20px}
+ .em-app .los-book-workspace .em-los-contents-part>h2{display:block}
+ .em-app .los-book-workspace .em-los-contents-part>h2 small{display:block;margin-top:6px}
+}
+@media(max-width:390px){
+ .em-app .los-book-topbar .los-back-library>span{display:none}
+ .em-app .los-book-topbar .los-back-library{min-width:44px;justify-content:center}
+}
+
+/* LOS! chapter opening is now the real chapter template, not just a heading. */
+.em-app .los-book-workspace .em-los-opening-number{
+ font-size:clamp(62px,8vw,114px);letter-spacing:-.07em;white-space:nowrap;
+}
+.em-app .los-book-workspace .em-los-opening .los-opening-head{gap:clamp(20px,4vw,42px)}
+.em-app .los-book-workspace .em-los-opening .los-opening-head>div{min-width:0}
+.em-app .los-book-workspace .em-los-opening .los-opening-head h1{overflow-wrap:anywhere}
+.em-app .los-book-workspace .em-los-opening .los-opening-head p{font-size:17px;line-height:1.55}
+.em-app .los-book-workspace .em-los-opening .los-opening-bottom .los-goals{
+ margin:0;padding:23px 25px
+}
+.em-app .los-book-workspace .em-los-chapter-body{
+ padding-top:22px;padding-bottom:74px;max-width:920px;
+}
+.em-app .los-book-workspace .em-los-chapter-body .em-section{
+ border-top:1px solid var(--los-line);padding:24px 0 29px;
+}
+.em-app .los-book-workspace .em-los-chapter-body .em-section:first-child{border-top:3px solid var(--los-book-accent)}
+.em-app .los-book-workspace .em-los-chapter-body .em-section h2{
+ margin:0 0 19px;font-weight:750;font-size:clamp(22px,3vw,29px);
+}
+.em-app .los-book-workspace .em-los-chapter-body .em-related{margin:40px 0}
+.em-app .los-book-workspace .em-los-chapter-body .em-related h2{font-size:23px}
+@media(max-width:760px){
+ .em-app .los-book-workspace .em-los-opening{padding:29px 22px 35px}
+ .em-app .los-book-workspace .em-los-opening .los-opening-head{display:block;padding:15px 0 26px}
+ .em-app .los-book-workspace .em-los-opening .los-opening-number{display:block;font-size:73px;margin:0 0 12px}
+ .em-app .los-book-workspace .em-los-opening .los-opening-head h1{font-size:clamp(31px,8vw,38px)}
+ .em-app .los-book-workspace .em-los-opening .los-opening-bottom{display:block}
+ .em-app .los-book-workspace .em-los-opening .los-opening-bottom .los-goals{margin:22px 0 0;padding:18px}
+ .em-app .los-book-workspace .em-los-opening .los-chapter-links{margin-top:31px}
+ .em-app .los-book-workspace .em-los-chapter-body{padding:18px 23px 55px}
+}
+
+/* Honor LOS! 1 dark-mode design tokens instead of the legacy English dashboard
+   hard-coded white surface. */
+.em-app.los-app{
+ background:var(--los-bg);color:var(--los-ink);
+ font-family:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+}
+.dark .em-app.los-app .los-book-workspace :is(.em-choices label,.em-related button,.em-unit button){
+ background:var(--los-paper);color:var(--los-ink);border-color:var(--los-line);
+}
+.dark .em-app.los-app .los-book-workspace :is(.em-choices label,.em-unit button):hover{
+ background:var(--los-subtle);
+}
+.dark .em-app.los-app .los-book-workspace .em-choices label:has(input:checked){
+ background:color-mix(in srgb,var(--los-book-accent) 20%,var(--los-paper));color:var(--los-ink);
+ border-color:var(--los-book-accent);
+}
+.dark .em-app.los-app .los-book-workspace :is(.em-paper,.em-lesson,.em-los-chapter-page) :is(.em-overline,.em-counter){
+ color:var(--los-soft);
+}
+.dark .em-app.los-app .los-book-workspace :is(.em-paper,.em-lesson,.em-los-chapter-page) :is(.em-help,.em-summary){
+ background:var(--los-subtle);color:var(--los-ink);border-color:var(--los-line);
+}
+.dark .em-app.los-app .los-book-workspace .em-feedback{
+ color:var(--los-ink);background:var(--los-subtle);
+}
+.dark .em-app.los-app .los-book-workspace :is(.em-audio-grid article,.em-scenes,.em-related button,.em-upload){
+ border-color:var(--los-line);background:var(--los-paper);color:var(--los-ink);
+}
+.dark .em-app.los-app .los-book-workspace .em-upload p{color:var(--los-soft)}
+@media(max-width:760px){
+ .em-app.los-app .los-book-main .los-book-paper{max-width:none}
+ .em-app.los-app .em-paper .em-action-grid{grid-template-columns:1fr}
+ .em-app.los-app .em-paper .em-audio-grid{grid-template-columns:1fr}
+}
+
+/* The actual LOS! Editorial Reader v4 styles are inherited from the
+   shared stylesheet. This layer only adapts its chapter picker to English. */
+.em-app .los-reader-context{min-width:0}
+.em-app .los-reader-context .los-main-breadcrumb{max-width:100%}
+.em-app .em-los-section-nav{max-width:100%}
+.em-app .em-los-section-nav .los-section-location{min-width:0}
+.em-app .em-los-section-nav .los-section-location>strong{
+ display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:28ch
+}
+.em-app .em-los-section-nav .los-section-jump{min-width:0}
+.em-app .em-los-section-nav .los-section-jump select{max-width:100%}
+.em-app .los-book-paper .los-goals{
+ background:var(--los-goal-wash);border-color:var(--los-goal-edge);
+ border-left-color:var(--los-goal-gold);
+}
+.em-app .los-book-paper .los-lesson-teaching-note,.em-app .los-book-paper .los-grammar-aside{
+ background:var(--los-note-wash);border-color:var(--los-note-edge);
+ border-left-color:var(--los-note-teal);
+}
+@media(max-width:760px){
+ .em-app .em-los-section-nav{width:calc(100% - 24px);max-width:calc(100% - 24px)}
+ .em-app .em-los-section-nav .los-section-location{max-width:32%}
+ .em-app .em-los-section-nav .los-section-location>strong{max-width:100%}
+ .em-app .em-los-section-nav .los-section-actions{min-width:0;max-width:100%}
+ .em-app .em-los-section-nav .los-section-jump{min-width:0;max-width:calc(100vw - 176px)}
+ .em-app .los-front.los-front-has-banner .los-front-copy{order:-1}
+ .em-app .los-front.los-front-has-banner .los-front-banner{order:0}
+ .em-app .los-front.los-front-has-banner .los-front-mini-cover{display:none}
+}
+
+/* LOS! Editorial Reader v4 lesson-runner parity. The layout is shared, not
+   another dashboard card or a made-up completion claim. */
+.em-app .los-book-workspace .em-lesson-program{margin:24px 0 42px}
+.em-app .los-book-workspace .em-lesson-program>.los-lesson-program-head{padding:24px 0 22px}
+.em-app .los-book-workspace .em-lesson-program>.los-lesson-program-head h1{
+ font-size:clamp(28px,3.2vw,43px);line-height:1.13;letter-spacing:-.045em;
+ max-width:22ch;margin:14px 0 17px;color:var(--los-ink)
+}
+.em-app .los-book-workspace .em-lesson-program>.los-lesson-program-head .em-lead{
+ max-width:70ch;font-size:clamp(15px,1.5vw,18px)!important;
+ line-height:1.7;color:var(--los-ink)
+}
+.em-app .los-book-workspace .em-lesson-program>.los-lesson-program-head .los-lesson-status{
+ border:0;margin:0;padding:9px 0 0;font-size:13px;color:var(--los-soft)
+}
+.em-app .los-book-workspace .em-lesson-program>.los-lesson-program-head .los-lesson-progress{
+ margin:16px 0 3px
+}
+.em-app .los-book-workspace .em-lesson-detail{
+ padding:clamp(20px,3.5vw,36px);min-width:0
+}
+.em-app .los-book-workspace .em-lesson-detail>.em-overline{
+ margin:0 0 22px;font-size:11px!important;color:var(--los-soft)
+}
+.em-app .los-book-workspace .em-lesson-detail>.em-section{border-top:1px solid var(--los-line);padding:24px 0}
+.em-app .los-book-workspace .em-lesson-detail .em-lesson-objectives{
+ margin:6px 0 26px;padding:20px 23px
+}
+.em-app .los-book-workspace .em-lesson-detail .em-lesson-objectives h3{margin:0 0 12px}
+.em-app .los-book-workspace .em-lesson-detail .em-lesson-objectives ul{margin:0;padding-left:20px}
+.em-app .los-book-workspace .em-lesson-detail .em-lesson-objectives li{margin:7px 0;line-height:1.65}
+.em-app .los-book-workspace .em-lesson-detail>h2{
+ margin:28px 0 0;font-size:clamp(21px,2.6vw,28px)
+}
+.em-app .los-book-workspace .em-lesson-detail>.los-primary{margin-top:22px}
+.dark .em-app.los-app .em-los-brand{
+ color:#A8D7ED;
+}
+.dark .em-app.los-app .em-los-section-nav .los-section-index,
+.dark .em-app.los-app .em-los-section-nav .los-section-location>strong{
+ color:var(--los-ink);
+}
+.dark .em-app.los-app .em-los-section-nav .los-section-step,
+.dark .em-app.los-app .em-los-section-nav .los-display-settings>summary{
+ color:var(--los-ink);border-color:var(--los-line)
+}
+@media(max-width:760px){
+ .em-app .los-book-workspace .em-lesson-program{margin:18px 0 24px}
+ .em-app .los-book-workspace .em-lesson-program>.los-lesson-program-head{padding:18px 0}
+ .em-app .los-book-workspace .em-lesson-program>.los-lesson-program-head h1{
+  font-size:clamp(29px,8vw,37px);max-width:22ch;margin:12px 0 16px
+ }
+ .em-app .los-book-workspace .em-lesson-detail{
+  padding:19px 16px;border-radius:10px
+ }
+ .em-app .los-book-workspace .em-lesson-detail .em-lesson-objectives{padding:17px}
+}
+
+/* V4's new shared dark-label contrast token is book-specific: German LOS!
+   uses coral; English Master retains legible English blue. */
+.dark .em-app.los-app{
+ --los-accent-text:#A8D7ED;
+}
+
+
+/* LOS! Teacher 2.0 book-to-lesson round trip. Reading a page never
+   generates practice evidence, and the CTA is only shown for a known lesson. */
+.em-app .em-teacher-return{
+ display:flex;align-items:center;justify-content:space-between;gap:18px;
+ padding:16px 20px;margin:0 0 20px;
+ border:1px solid var(--los-line);border-left:3px solid var(--los-book-accent);
+ background:var(--los-subtle,var(--los-paper));color:var(--los-ink);
+ border-radius:10px;
+}
+.em-app .em-teacher-return strong{font-size:15px;line-height:1.4}
+.em-app .em-teacher-return p{font-size:13px;line-height:1.6;margin:5px 0 0;color:var(--los-soft)}
+.em-app .em-teacher-return button{
+ display:inline-flex;align-items:center;gap:8px;
+ flex-shrink:0;border:0;border-radius:8px;
+ padding:12px 14px;background:var(--los-book-accent);color:#fff;
+ font-weight:650;font-size:13px;cursor:pointer;
+}
+.em-app .em-teacher-return button:focus-visible{
+ outline:3px solid #397ace;outline-offset:3px;
+}
+@media(max-width:760px){
+ .em-app .em-teacher-return{flex-direction:column;align-items:stretch;padding:14px 16px}
+ .em-app .em-teacher-return button{justify-content:center}
+}
+.dark .em-app .em-teacher-return button{color:#102330}
+
+
+/* LOS! Teacher 2.0 verified-session resume on the English learning path. */
+.em-app .em-teacher-resume{
+ display:flex;justify-content:space-between;align-items:center;
+ gap:24px;margin:20px 0 27px;padding:22px 24px;
+ border-radius:12px;border:1px solid var(--los-line);
+ background:var(--los-paper);color:var(--los-ink);
+ box-shadow:0 8px 22px rgb(23 36 49 / 4%);
+}
+.em-app .em-teacher-resume .em-overline{
+ margin:0 0 9px;font-size:10px;letter-spacing:.13em;
+ color:var(--los-book-accent);
+}
+.em-app .em-teacher-resume strong{display:block;font-size:19px;line-height:1.35}
+.em-app .em-teacher-resume p:not(.em-overline){
+ margin:8px 0 0;font-size:13px;line-height:1.65;color:var(--los-soft);
+}
+.em-app .em-teacher-resume button{
+ display:inline-flex;align-items:center;justify-content:center;
+ flex-shrink:0;gap:8px;padding:13px 16px;border-radius:8px;
+ font-weight:650;font-size:13px;cursor:pointer;border:0;
+ background:var(--los-book-accent);color:#fff;
+}
+.em-app .em-teacher-resume button:focus-visible{
+ outline:3px solid #397ace;outline-offset:3px;
+}
+.dark .em-app .em-teacher-resume button{color:#102330}
+@media(max-width:760px){
+ .em-app .em-teacher-resume{padding:18px;flex-direction:column;align-items:stretch}
+ .em-app .em-teacher-resume button{width:100%}
+ .em-app .em-teacher-resume strong{font-size:17px}
+}
