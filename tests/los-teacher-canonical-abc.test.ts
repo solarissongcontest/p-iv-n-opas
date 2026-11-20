@@ -118,3 +118,28 @@ test("Text C teaching boards display real German examples from the current chapt
   assert.doesNotMatch(board[2]?.german??"",/Tukiteksti:|Tervehdykset eri tilanteissa|Suomeksi/);
  }
 });
+
+test("revised-text adaptation preserves independent grammar instruction and transfer exercises",()=>{
+ const phonics=getLosTeacherLesson("L002")!;
+ const phonicsSummary=phonics.scenes.find(s=>s.id==="summary")!;
+ assert.ok(phonicsSummary.paragraphs.some(p=>p.includes("w vastaa yleensä v:tä")));
+ assert.ok(phonicsSummary.paragraphs.some(p=>p.includes("nykyistä Text A")));
+ const naming=getLosTeacherLesson("L007")!;
+ const application=naming.scenes.find(s=>s.id==="application")!;
+ assert.equal(application.kind,"question");
+ assert.equal(application.question?.skillId,"L1-INT-02");
+ assert.equal(application.question?.evidenceRole,"application");
+ assert.equal(application.question?.type,"choice");
+ assert.equal(application.question?.options?.[0]?.label,"Ich heiße Aino.");
+ assert.ok(naming.scenes.find(s=>s.id==="summary")?.paragraphs.some(p=>p.includes("nykyiset Text A-, B- ja C-tekstit")));
+ const grammar=getLosTeacherLesson("L009")!;
+ const sein=grammar.scenes.find(s=>s.id==="sein")!;
+ assert.equal(sein.kind,"explanation");
+ assert.ok(sein.paragraphs.some(p=>p.includes("ich bin ja du bist")));
+ assert.ok(sein.paragraphs.some(p=>p.includes("Sein on epäsäännöllinen verbi")));
+ assert.ok(sein.paragraphs.some(p=>p.includes("Ich bin Aino.")));
+ assert.equal(grammar.scenes.find(s=>s.id==="source")?.kind,"book");
+ const c06=losTeacherChapterTeaching("06");
+ assert.ok(c06.contrast.includes("aivan kuten suomessa"));
+ assert.ok(c06.contrast.includes("haben-verbillä"));
+});

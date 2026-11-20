@@ -218,6 +218,42 @@ function rewriteObsoleteScene(scene:TeacherScene,chapterId:string,sequence:numbe
     ...(scene.activityId?{activityLabel:"Harjoittelin uuden "+label+" -tekstin kanssa"}:{})
   };
 }
+/** Preserve independently authored teaching when only a proper name or a
+ * forward reference belongs to the retired edition. Do not turn a grammar
+ * demonstration or an application question into a reading-bank choice.
+ * Historical manuscripts remain untouched for session-history comparison. */
+function retargetIndependentTeaching(original:TeacherLesson,scene:TeacherScene):TeacherScene|null {
+  if(original.id==="L002" && scene.id==="summary") {
+    return {...scene,paragraphs:scene.paragraphs.map(p=>
+      p.includes("Franzin ja Jörgin keskustelua")
+        ?"Seuraavalla tunnilla luet C01:n nykyistä Text A -keskustelua ja vertaat sitä Text B:hen."
+        :p)};
+  }
+  if(original.id==="L007" && scene.id==="summary") {
+    return {...scene,paragraphs:scene.paragraphs.map(p=>
+      p.includes("Franzin ja Gretan koko keskusteluun")
+        ?"L008:ssa luemme C02:n nykyiset Text A-, B- ja C-tekstit ja tarkistamme niiden ymmärtämisen."
+        :p)};
+  }
+  if(original.id==="L009" && scene.id==="sein") {
+    return {...scene,paragraphs:scene.paragraphs.map(p=>p.replaceAll("Greta","Aino"))};
+  }
+  if(original.id==="L007" && scene.id==="application" && scene.question?.type==="choice") {
+    const rename=(text:string)=>text.replaceAll("Greta","Aino");
+    const q=scene.question;
+    return {...scene,
+      paragraphs:scene.paragraphs.map(rename),
+      question:{...q,
+        prompt:rename(q.prompt),success:rename(q.success),hint:rename(q.hint),
+        reteach:rename(q.reteach),genericWrong:rename(q.genericWrong),
+        options:q.options!.map(option=>({
+          ...option,label:rename(option.label),
+          ...(option.wrongFeedback?{wrongFeedback:rename(option.wrongFeedback)}:{})
+        }))
+      }};
+  }
+  return null;
+}
 export function canonicalizeLosTeacherLesson(original:TeacherLesson):TeacherLesson {
   if(original.bookId!==1||!/^0[1-9]$|^10$/.test(original.chapterId))return original;
   const chapterId=original.chapterId;
@@ -225,6 +261,8 @@ export function canonicalizeLosTeacherLesson(original:TeacherLesson):TeacherLess
   if(!current)return original;
   let changedIndex=0;
   const scenes=original.scenes.map(scene=>{
+    const preserved=retargetIndependentTeaching(original,scene);
+    if(preserved){changedIndex++;return preserved;}
     if(isObsolete(scene))return rewriteObsoleteScene(scene,chapterId,changedIndex++);
     return scene;
   });
