@@ -238,6 +238,30 @@ function retargetIndependentTeaching(original:TeacherLesson,scene:TeacherScene):
   if(original.id==="L009" && scene.id==="sein") {
     return {...scene,paragraphs:scene.paragraphs.map(p=>p.replaceAll("Greta","Aino"))};
   }
+  // A spelling example in the archived L038 manuscript belongs to an older
+  // source. Retain the useful double-letter exercise as an explicitly new,
+  // self-contained example instead of attributing Bolliger to today's Text A.
+  if(original.id==="L038" && scene.id==="welcome") {
+    return {...scene,paragraphs:scene.paragraphs.map(p=>
+      p.includes("Franzin tavaamiskeskustelun")
+        ?"L036:ssa opit kirjainten nimiä ja L037:ssa tutustuit nykyiseen C07:n Text A:han. Nyt rakennat nimiä kirjain kirjaimelta."
+        :p)};
+  }
+  if(original.id==="L038" && scene.id==="recall" && scene.question) {
+    return {...scene,
+      paragraphs:["Ajattele uutta harjoitusnimeä Milla. Siinä kaksi L-kirjainta ovat peräkkäin."],
+      question:{...scene.question,
+        success:"Oikein. Nimen Milla keskellä on kaksi peräkkäistä L-kirjainta.",
+        reteach:"Zweimal tarkoittaa kaksi kertaa. Esimerkissä Milla kirjoitetaan L-L peräkkäin.",
+      }};
+  }
+  if(original.id==="L038" && scene.id==="table" && scene.board) {
+    return {...scene,board:scene.board.map(item=>
+      item.label.startsWith("4 · Toistuva kirjain")
+        ?{...item,german:"M · I · L · L · A",
+            meaning:"Milla: nimessä on kaksi peräkkäistä L-kirjainta (zweimal L). Tämä on erillinen kirjoitusharjoitus, ei lainaus kirjan Text A:sta."}
+        :item)};
+  }
   if(original.id==="L007" && scene.id==="application" && scene.question?.type==="choice") {
     const rename=(text:string)=>text.replaceAll("Greta","Aino");
     const q=scene.question;
