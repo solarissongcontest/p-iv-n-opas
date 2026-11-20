@@ -14,13 +14,13 @@ async function enter(page:import("@playwright/test").Page,location:string){
 test("calm reading mode survives reload and preserves normal exercises",async({page})=>{
  await enter(page,"01/text");
  await expect(page.locator(".los-revised-page")).toBeVisible({timeout:30000});
- const focus=page.getByRole("button",{name:"Rauhallinen lukutila"});
- await focus.click();
+ const focus=page.getByRole("combobox",{name:"Opiskelutila"});
+ await focus.selectOption("focus");
  await expect(page.locator(".los-revised-page.is-reading-focus")).toBeVisible();
  await expect(page.locator(".los-study-questions")).toBeHidden();
  await page.reload({waitUntil:"domcontentloaded"});
  await expect(page.locator(".los-revised-page.is-reading-focus")).toBeVisible();
- await page.getByRole("button",{name:"Sulje lukutila"}).click();
+ await page.getByRole("combobox",{name:"Opiskelutila"}).selectOption("book");
  await expect(page.locator(".los-revised-page.is-reading-focus")).toHaveCount(0);
  await expect(page.locator(".los-revised-page .los-reading-question")).toHaveCount(8);
 });
@@ -45,10 +45,10 @@ test("readable at narrow phone width, 200% text, keyboard and dark mode",async({
  await expectNoHorizontalOverflow(page);
  await page.evaluate(()=>{document.documentElement.classList.add("dark");});
  await page.emulateMedia({reducedMotion:"reduce",colorScheme:"dark"});
- await expect(page.getByRole("button",{name:"Kirja + tehtävät"})).toBeVisible();
- await page.getByRole("button",{name:"Rauhallinen lukutila"}).focus();
- await expect(page.getByRole("button",{name:"Rauhallinen lukutila"})).toBeFocused();
- await page.keyboard.press("Enter");
+ await expect(page.getByRole("combobox",{name:"Opiskelutila"})).toBeVisible();
+ await page.getByRole("combobox",{name:"Opiskelutila"}).focus();
+ await expect(page.getByRole("combobox",{name:"Opiskelutila"})).toBeFocused();
+ await page.getByRole("combobox",{name:"Opiskelutila"}).selectOption("focus");
  await expect(page.locator(".los-revised-page.is-reading-focus")).toBeVisible();
  await expectNoHorizontalOverflow(page);
 });
@@ -78,7 +78,7 @@ test("dictionary errors are disclosed, and optional source/audio QA have accurat
 test("calm reading controls have no critical accessibility failures",async({page})=>{
  await enter(page,"01/text");
  await expect(page.locator(".los-revised-page")).toBeVisible({timeout:30000});
- await page.getByRole("button",{name:"Rauhallinen lukutila"}).click();
+ await page.getByRole("combobox",{name:"Opiskelutila"}).selectOption("focus");
  const results=await new AxeBuilder({page}).include(".los-revised-page")
   .withTags(["wcag2a","wcag2aa","wcag21aa"]).analyze();
  const critical=results.violations.filter(v=>v.impact==="critical");
@@ -374,7 +374,7 @@ test("desktop reader screenshot and true container-based study layout",async({pa
  await expect(page.locator(".los-revised-page")).toBeVisible({timeout:30000});
  await page.setViewportSize({width:1440,height:900});
  await page.screenshot({path:testInfo.outputPath("textbook-desktop-reading.png"),fullPage:true,animations:"disabled"});
- await page.getByRole("button",{name:"Kirja + tehtävät"}).click();
+ await page.getByRole("combobox",{name:"Opiskelutila"}).selectOption("split");
  await expect(page.locator(".los-study-layout")).toHaveClass(/is-split/);
  const layout=await page.locator(".los-study-layout").evaluate(el=>getComputedStyle(el).display);
  const available=await page.locator(".los-reading-page").evaluate(el=>el.getBoundingClientRect().width);
@@ -402,7 +402,7 @@ test("first German sentence is not buried under a tall audio settings dashboard"
  await expectNoHorizontalOverflow(page);
 });
 
-test("LOS1 contemporary design system is consistent at desktop, mobile, dark mode and zoom",async({page},testInfo)=>{
+test("LOS1 editorial v4 reading design is consistent at desktop, mobile and dark mode",async({page},testInfo)=>{
  await page.setViewportSize({width:1440,height:900});
  await enter(page,"01/text");
  await expect(page.locator(".los-revised-page")).toBeVisible({timeout:30000});
@@ -410,7 +410,7 @@ test("LOS1 contemporary design system is consistent at desktop, mobile, dark mod
  const font=await title.evaluate(el=>getComputedStyle(el).fontFamily);
  expect(font).not.toMatch(/Georgia|Times New Roman/);
  await expect.poll(()=>page.locator(".los-book-topbar").evaluate(el=>getComputedStyle(el).borderTopWidth)).toBe("0px");
- await expect.poll(()=>page.locator(".los-book-paper").evaluate(el=>getComputedStyle(el).borderTopLeftRadius)).toBe("20px");
+ await expect.poll(()=>page.locator(".los-book-paper").evaluate(el=>getComputedStyle(el).borderTopLeftRadius)).toBe("10px");
  const textFont=await page.locator(".los-c01-words").first().evaluate(el=>getComputedStyle(el).fontFamily);
  expect(textFont).not.toMatch(/Georgia|Times New Roman/);
  await page.screenshot({path:testInfo.outputPath("los-contemporary-reading-desktop.png"),fullPage:true,animations:"disabled"});

@@ -24,7 +24,7 @@ const openChapter=async(page:import("@playwright/test").Page,ch:string,section:s
  await expect(page.locator(".los-main-breadcrumb")).toContainText("Kappale "+Number(ch));
  if(section==="text-b"){
    await expect(page.locator(".los-main-breadcrumb")).toContainText("Text B");
-   await expect(page.locator(".los-section-nav button.is-active")).toHaveText("Text B");
+   await expect(page.getByRole("combobox",{name:"Valitse kappaleen osio"})).toHaveValue("text-b");
    await expect(page.locator(".los-revised-page h1").first()).toBeVisible();
  }
 };
@@ -113,40 +113,31 @@ test("C01 real original token highlight, C08 gated video and responsive exercise
 });
 
 
-test("every one of the 60 guided lessons opens from its actual chapter picker on iPhone and desktop",async({page})=>{
+test("all 60 original Teacher 2.0 lessons are listed in the primary learning path on iPhone and desktop",async({page})=>{
  await enterLocalBook(page);
  await page.goto("/los#/1/path",{waitUntil:"domcontentloaded"});
- const runner=page.locator("#los-lesson-runner");
- await expect(runner).toBeVisible();
- const sections=runner.locator(".los-lesson-chapter-picker button");
- await expect(sections).toHaveCount(13);
- const seen=new Set<string>();
- for(let i=0;i<13;i++){
-  await sections.nth(i).click();
-  const lessonButtons=runner.locator(".los-lesson-picker button");
-  const count=await lessonButtons.count();
-  expect(count).toBeGreaterThan(0);
-  for(let j=0;j<count;j++){
-   const button=lessonButtons.nth(j);
-   const title=(await button.innerText()).trim();
-   expect(title).toMatch(/^L\d{3}$/);
-   expect(seen.has(title)).toBe(false);
-   seen.add(title);
-   await button.click();
-   await expect(runner.locator(".los-lesson-detail .los-overline")).toContainText(title);
-   await expect(runner.locator(".los-lesson-steps li").first()).toBeVisible();
-   await expect(runner.locator(".los-lesson-exit")).toBeVisible();
-   await expect(runner.getByRole("button",{name:"Merkitse oppitunti suoritetuksi"})).toBeDisabled();
-  }
+ await expect(page.getByRole("heading",{name:"Oma saksanopettajasi oppikirjan sisällä"})).toBeVisible();
+ const buttons=page.locator(".los-path-group > ol > li > button");
+ await expect(buttons).toHaveCount(60);
+ for(let i=0;i<60;i++){
+  const label=await buttons.nth(i).innerText();
+  expect(label).toContain("Avaa Opetuspolku 2.0:n opetustila");
  }
- expect(seen.size).toBe(60);
- for(let n=1;n<=60;n++)expect(seen.has("L"+String(n).padStart(3,"0"))).toBe(true);
- await expect(runner.locator(".los-lesson-progress")).toContainText("0/60 suoritettu");
- await page.reload({waitUntil:"domcontentloaded"});
- await expect(page.locator("#los-lesson-runner .los-lesson-detail .los-overline")).toContainText("L060");
- await expectNoHorizontalOverflow(page);
+ // Keep the historical guided runner available but deliberately secondary.
+ await expect(page.locator("#los-lesson-runner")).toBeHidden();
+ await page.locator(".los-path-old-runner > summary").click();
+ await expect(page.locator("#los-lesson-runner")).toBeVisible();
+ await expect(page.locator("#los-lesson-runner .los-lesson-picker button").first()).toBeVisible();
+ for(const index of [0,6,16,30,40,50,59]){
+  await page.goto("/los#/1/path",{waitUntil:"domcontentloaded"});
+  await page.locator(".los-path-group > ol > li > button").nth(index).click();
+  const id="L"+String(index+1).padStart(3,"0");
+  await expect(page).toHaveURL(new RegExp("/los-lessons/"+id+"$"));
+  await expect(page.locator(".los-teacher-sidebar")).toContainText(id);
+  await expect(page.locator(".los-teacher-paper h2")).toBeVisible();
+  await expectNoHorizontalOverflow(page);
+ }
 });
-
 
 test("search finds actual C08 German source dialogue and Finnish meaning without leaving LOS!",async({page})=>{
  await enterLocalBook(page);
@@ -168,36 +159,35 @@ test("search finds actual C08 German source dialogue and Finnish meaning without
  await expectNoHorizontalOverflow(page);
 });
 
-test("book cover opens real L001 and remembers its position",async({page})=>{
+test("book cover starts real Teacher 2.0 L001 and remembers its position",async({page})=>{
  await enterLocalBook(page);
  await page.goto("/los#/1/overview");
  const start=page.getByRole("button",{name:"Aloita nollasta"});
  await expect(start).toBeVisible();
  await start.click();
- const lesson=page.locator("#los-lesson-runner .los-lesson-detail .los-overline");
- await expect(lesson).toContainText("L001");
+ await expect(page).toHaveURL(/\/los-lessons\/L001$/);
+ await expect(page.locator(".los-teacher-sidebar")).toContainText("L001");
+ await expect(page.locator(".los-teacher-paper h2")).toBeVisible();
+ const title=await page.locator(".los-teacher-paper h2").textContent();
  await page.reload();
- await expect(lesson).toContainText("L001");
+ await expect(page.locator(".los-teacher-paper h2")).toHaveText(title??"");
  await expectNoHorizontalOverflow(page);
 });
 
-test("book cover resumes next unfinished lesson after completing L001",async({page})=>{
+test("book cover resumes an unfinished Teacher 2.0 scene without using old guided completion",async({page})=>{
  await enterLocalBook(page);
- await page.goto("/los#/1/path");
- const runner=page.locator("#los-lesson-runner");
- await expect(runner).toBeVisible();
- for(let i=0;i<3;i++){
-  await runner.getByRole("button",{name:"Tein tämän vaiheen"}).first().click();
- }
- await runner.getByLabel("Napautan sanaa lukijassa.").check();
- await runner.getByRole("button",{name:"Palauta lopputarkistus"}).click();
- await runner.getByRole("button",{name:"Merkitse oppitunti suoritetuksi"}).click();
- await expect(runner).toContainText("L001 suoritettu");
  await page.goto("/los#/1/overview");
- const next=page.getByRole("button",{name:"Jatka oppituntia L002"});
+ await page.getByRole("button",{name:"Aloita nollasta"}).click();
+ await expect(page.locator(".los-teacher-sidebar")).toContainText("L001");
+ await page.locator(".los-teacher-navigation").getByRole("button",{name:/Seuraava/}).click();
+ const resumedTitle=await page.locator(".los-teacher-paper h2").textContent();
+ await page.goto("/los#/1/overview");
+ const next=page.getByRole("button",{name:"Jatka oppituntia L001"});
  await expect(next).toBeVisible();
  await next.click();
- await expect(page.locator("#los-lesson-runner .los-lesson-detail .los-overline")).toContainText("L002");
+ await expect(page).toHaveURL(/\/los-lessons\/L001$/);
+ await expect(page.locator(".los-teacher-paper h2")).toHaveText(resumedTitle??"");
+ await expectNoHorizontalOverflow(page);
 });
 
 test("C01–C10 show chapter-specific sourced photos instead of abandoned facsimile",async({page})=>{

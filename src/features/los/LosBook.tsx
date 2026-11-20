@@ -329,8 +329,7 @@ function Vocabulary({ chapter, move, bookId }: { chapter: LosChapter; bookId:num
   return <section className="los-inner-page los-vocabulary-page">
     <p className="los-eyebrow">WORTSCHATZ / KAPITEL {Number(chapter.id)}</p>
     <h1>Sanasto</h1>
-    <p className="los-page-intro">Kappaleen opetettavat sanat ja ilmaukset. Kuuntele saksankielisellä puheäänellä painamalla kaiutinta. IPA näkyy vain erikseen toimitetuissa merkinnöissä; keskeneräisiä kone-ehdotuksia ei näytetä varmoina ohjeina.</p>
-    {bookId===1&&<Los1VisualLearning key={chapter.id} chapterId={chapter.id} placement="vocabulary"/>}
+    <p className="los-page-intro">Kappaleen sanat ja ilmaukset. Kuuntele ääntämistä painamalla kaiutinta ja harjoittele muistamista piilottamalla suomennokset.</p>
     <button type="button" className="los-outline-button" onClick={() => move(chapter.id,"cards")}>Kertaa sanastoa korteilla</button>
     <div className="los-vocabulary-tools">
       <label><Search size={17} /><span className="sr-only">Etsi sanastosta</span><input value={query} onChange={event => setQuery(event.target.value)} placeholder="Etsi sanaa…" /></label>
@@ -346,6 +345,8 @@ function Vocabulary({ chapter, move, bookId }: { chapter: LosChapter; bookId:num
       })}
     </tbody></table>
     {!words.length && <p>Sanastosta ei löytynyt hakua vastaavaa sanaa.</p>}
+    <details className="los-vocab-ipa-note"><summary>Tietoa ääntämismerkinnöistä</summary><p>IPA näkyy vain erikseen toimitetuissa merkinnöissä; keskeneräisiä kone-ehdotuksia ei näytetä varmoina ohjeina. Kaiutinkuuntelu käyttää laitteen saksankielistä puheääntä.</p></details>
+    {bookId===1&& !query.trim() && <div className="los-vocab-picture-after-words">{bookId===1&&<Los1VisualLearning key={chapter.id} chapterId={chapter.id} placement="vocabulary"/>}</div>}
   </section>;
 }
 function Appendix({ book }: { book: LosBookDefinition }) {
@@ -477,6 +478,8 @@ function LosBookWorkspace({ book, location, move, goLibrary, openBook }: { book:
   const next = previousIndex >= 0 ? book.chapters[previousIndex + 1] : null;
   const previous = previousIndex > 0 ? book.chapters[previousIndex - 1] : null;
   const section = chapter ? location.section : ["contents", "appendix", "dictionary", "path", "search", "midterm", "review", "review-ii", "progress", "final", "summary"].includes(location.section) ? location.section : "overview";
+  const selectedSection = section === "cards" ? "vocabulary" : section;
+  const selectedSectionIndex = Math.max(0,sections.findIndex(item=>item.id===selectedSection));
   return <div className="los-book-workspace" style={bookStyle(book)} data-reading-size={readingView.size} data-reading-spacing={readingView.spacing} data-reading-measure={readingView.measure}>
     <header className="los-book-topbar">
       <button className="los-back-library" onClick={goLibrary} aria-label="Takaisin kirjasarjaan"><ChevronLeft size={19} /> <span>Kirjasarja</span></button>
@@ -550,11 +553,36 @@ function LosBookWorkspace({ book, location, move, goLibrary, openBook }: { book:
         <a className="los-sidebar-exit" href="/studies">Palaa Opintopäiväkirjaan <ArrowRight size={15} /></a>
       </aside>
       <main className="los-book-main" id="main-content" tabIndex={-1}>
-        <div className="los-main-breadcrumb"><button onClick={() => move(null, "overview")}>LOS! {book.id}</button>{chapter ? <><ChevronRight size={12} /><button onClick={() => openChapter(chapter)}>Kappale {Number(chapter.id)}</button></> : null}{chapter && section !== "chapter" ? <><ChevronRight size={12} /><span>{section==="cards" ? "Kertauskortit" : sections.find(s => s.id === section)?.label}</span></> : null}</div>
-        {book.id===1&&<LosReaderDisplayControls value={readingView} onChange={setReadingView}/>}
+        <div className="los-reader-context">
+          <div className="los-main-breadcrumb">
+            <button type="button" onClick={() => move(null, "overview")}>LOS! {book.id}</button>
+            {chapter && <><ChevronRight size={12} aria-hidden="true"/><button type="button" onClick={() => openChapter(chapter)}>Kappale {Number(chapter.id)}</button></>}
+            {chapter && section !== "chapter" && <><ChevronRight size={12} aria-hidden="true"/><span aria-current="page">{section==="cards" ? "Kertauskortit" : sections.find(s => s.id === section)?.label}</span></>}
+          </div>
+        </div>
         {book.id===1&&<LosSelectionAudio key={(chapter?.id??"book")+"-"+section}/>}
-        {chapter && section !== "overview" && section !== "contents" && section !== "appendix" && <nav className="los-section-nav" aria-label="Kappaleen osiot">
-          {sections.map(item => <button key={item.id} className={section === item.id || (section==="cards" && item.id==="vocabulary") ? "is-active" : ""} onClick={() => move(chapter.id, item.id)}>{item.label}</button>)}
+        {chapter && <nav className="los-section-nav" aria-label="Kappaleen osiot"
+          style={{"--los-section-fill":`${((selectedSectionIndex+1)/sections.length)*100}%`} as CSSProperties}>
+          <div className="los-section-location">
+            <span className="los-section-index">KAPPALE {chapter.id} <span aria-hidden="true">·</span> OSIO {String(selectedSectionIndex+1).padStart(2,"0")} / {sections.length}</span>
+            <strong>{section==="cards" ? "Kertauskortit" : sections[selectedSectionIndex]?.label}</strong>
+          </div>
+          <div className="los-section-actions">
+            <label className="los-section-jump">
+              <span className="sr-only">Valitse kappaleen osio</span>
+              <select value={selectedSection} aria-label="Valitse kappaleen osio" onChange={event=>move(chapter.id,event.target.value as LosSection)}>
+                {sections.map(item=><option key={item.id} value={item.id}>{item.label}</option>)}
+              </select>
+            </label>
+            {book.id===1 && ["text","text-b","text-c","vocabulary","grammar"].includes(section) &&
+              <LosReaderDisplayControls value={readingView} onChange={setReadingView}/>}
+            <button type="button" className="los-section-step" aria-label="Edellinen osio"
+              disabled={selectedSectionIndex===0}
+              onClick={()=>move(chapter.id,sections[Math.max(0,selectedSectionIndex-1)]!.id)}><ChevronLeft size={18}/></button>
+            <button type="button" className="los-section-step" aria-label="Seuraava osio"
+              disabled={selectedSectionIndex===sections.length-1}
+              onClick={()=>move(chapter.id,sections[Math.min(sections.length-1,selectedSectionIndex+1)]!.id)}><ChevronRight size={18}/></button>
+          </div>
         </nav>}
         <div className="los-book-paper">
           {!chapter && section === "overview" ? <BookFront book={book} move={move} /> :
