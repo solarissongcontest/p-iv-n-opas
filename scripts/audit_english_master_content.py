@@ -59,6 +59,15 @@ def audit(book: dict, manifest: dict) -> dict:
     metrics = Counter()
     groups = defaultdict(Counter)
     findings: list[dict[str, str]] = []
+    # The draft also has A00/A08 entry points that are native app views,
+    # not members of the 122 printed G/V/W/R/L/S/M/Y chapters.
+    reverse_refs = defaultdict(set)
+    for lesson_id, lesson in lessons.items():
+        for raw_ref in lesson.get("book_refs") or []:
+            match = re.match(r"^([GVWRLSMY][0-9]{1,3})(?=$|[/:.#-])", check_text(raw_ref), re.I)
+            if match and match.group(1).upper() in chapters:
+                reverse_refs[match.group(1).upper()].add(lesson_id)
+
 
     def add(severity: str, code: str, item_id: str, detail: str) -> None:
         findings.append({"severity": severity, "code": code, "id": item_id, "detail": detail})
@@ -105,7 +114,12 @@ def audit(book: dict, manifest: dict) -> dict:
             add("priority", "NO_CHAPTER_SELF_CHECK", chapter_id, "No authored section self-check")
         linked = payload.get("linked_lesson_ids") or []
         if not linked:
-            add("priority", "UNLINKED_CHAPTER", chapter_id, "No linked lesson ID")
+            if reverse_refs[chapter_id]:
+                metrics["chapters_linked_via_reverse_refs"] += 1
+                add("review", "MISSING_EXPLICIT_CHAPTER_LINK", chapter_id,
+                    str(len(reverse_refs[chapter_id])) + " real lesson reference(s) available for automatic navigation")
+            else:
+                add("priority", "UNLINKED_CHAPTER", chapter_id, "No explicit or reverse lesson link")
         for lesson_id in linked:
             if lesson_id not in lessons:
                 add("error", "BROKEN_CHAPTER_LESSON_LINK", chapter_id, str(lesson_id))
@@ -125,8 +139,11 @@ def audit(book: dict, manifest: dict) -> dict:
         if not refs:
             add("priority", "LESSON_WITHOUT_BOOK", lesson_id, "No textbook chapter reference")
         for ref in refs:
-            chapter_id = re.match(r"^[GVWRLSMY]\d{1,3}", check_text(ref), re.I)
-            if not chapter_id or chapter_id.group(0).upper() not in chapters:
+            if check_text(ref).upper() in {"A00", "A08"}:
+                metrics["native_onboarding_refs"] += 1
+                continue
+            chapter_id = re.match(r"^([GVWRLSMY][0-9]{1,3})(?=$|[/:.#-])", check_text(ref), re.I)
+            if not chapter_id or chapter_id.group(1).upper() not in chapters:
                 add("error", "UNKNOWN_LESSON_BOOK_REF", lesson_id, str(ref))
 
         payload = record.get("payload") or {}
