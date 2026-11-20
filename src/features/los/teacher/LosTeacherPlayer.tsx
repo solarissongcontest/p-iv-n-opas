@@ -19,7 +19,7 @@ import { composeLosC10Dialogues, storeLosC10Dialogues } from "./c10ApplicationBr
 import { validateTeacherLesson } from "./validateContent.ts";
 import { teacherExternalStatus } from "./externalEvidence.ts";
 import { LosMasterySummary } from "../LosMasterySummary.tsx";
-import {TeacherTopbar,TeacherProgressBar,TeacherSceneOutline,TeacherSceneNavigation,TeacherSceneQuestion,TeacherBoard} from "./Teacher2SharedUI.tsx";
+import {TeacherTopbar,TeacherProgressBar,TeacherSceneOutline,TeacherSceneNavigation,TeacherSceneQuestion,TeacherBoard,TeacherSceneReflection,TeacherSceneActivity} from "./Teacher2SharedUI.tsx";
 import "../los-book.css";
 import "./teacher.css";
 
@@ -321,21 +321,8 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
                 </p>;
               })}
             </div>}
-            {scene.reflection && <div className="los-teacher-reflection">
-              <label htmlFor={"los-teacher-reflection-" + scene.id}>{scene.reflection.prompt}</label>
-              <textarea id={"los-teacher-reflection-" + scene.id}
-                rows={4} maxLength={500}
-                placeholder={scene.reflection.placeholder}
-                value={session.draftAnswers[scene.id] ?? ""}
-                disabled={completed}
-                onChange={event => persist(old => setTeacherAnswerDraft(old, scene.id, event.target.value, stamp()))}
-              />
-              <small role="status">
-                {(session.draftAnswers[scene.id]?.trim().length ?? 0) >= scene.reflection.minLength
-                  ? "Tavoite tallennettu. Voit vahvistaa sen alla."
-                  : "Kirjoita vähintään " + scene.reflection.minLength + " merkkiä. Tekstisi tallentuu automaattisesti."}
-              </small>
-            </div>}
+            {scene.reflection && <TeacherSceneReflection scene={scene} session={session}
+              completed={completed} onChange={value=>persist(old=>setTeacherAnswerDraft(old,scene.id,value,stamp()))}/>}
             {lesson.id === "L054" && (scene.id === "dialogue-sie" || scene.kind === "summary") &&
               <section className="los-teacher-activity" aria-label="Siirrä kaksi keskustelua oppikirjaan">
                 <h3>Tallenna keskustelut myös oppikirjan sovellustehtävään</h3>
@@ -354,19 +341,8 @@ function LosTeacherScreen({ lessonId }: { lessonId: string }) {
                 <p>Lisää kirjassa vielä erikseen neljä lausetta kolmannesta henkilöstä.
                   Tarkista molempien keskustelujen 6–8 puheenvuoroa ja neljä esittelylausetta itse.</p>
               </section>}
-            {scene.activityId && <div className="los-teacher-activity">
-              <button type="button"
-                disabled={session.activityIds.includes(scene.activityId) || completed ||
-                  Boolean(scene.reflection && (session.draftAnswers[scene.id]?.trim().length ?? 0) < scene.reflection.minLength) ||
-                  Boolean(scene.numberBuilder && teacherBuiltNumberCount(session, scene.id) < 4) ||
-                  Boolean(scene.form && scene.form.some(field => !(session.draftAnswers[scene.id + "." + field.id]?.trim()))) ||
-                  Boolean(scene.calendar && !isCorrectCalendarEntry(scene, session.draftAnswers[scene.id] ?? ""))}
-                onClick={() => markActivity(scene.activityId!)}>
-                {session.activityIds.includes(scene.activityId) ? <CheckCircle2 size={18}/> : <Check size={18}/>}
-                {session.activityIds.includes(scene.activityId) ? "Harjoittelu vahvistettu" : scene.activityLabel}
-              </button>
-              <p>Tämä on oma vahvistuksesi, ei automaattinen kielitaidon arvio.</p>
-            </div>}
+            {scene.activityId && <TeacherSceneActivity scene={scene} session={session}
+              completed={completed} onConfirm={markActivity}/>}
             {lesson.id !== "L059" && <div className="los-teacher-help">
               <button type="button" aria-expanded={showHelp} onClick={() => { setShowHelp(v => !v); setHelpSelection(null); markHelp(); }}>
                 <HelpCircle size={18}/> En ymmärrä / haluan lisäselityksen
