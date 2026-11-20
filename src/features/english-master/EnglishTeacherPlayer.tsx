@@ -12,7 +12,7 @@ import {
 } from "../los/teacher/engine.ts";
 import {
   TeacherBoard,TeacherProgressBar,TeacherSceneNavigation,TeacherSceneOutline,
-  TeacherSceneQuestion,TeacherTopbar,
+  TeacherSceneQuestion,TeacherTopbar,TeacherSceneReflection,TeacherSceneActivity,
 } from "../los/teacher/Teacher2SharedUI.tsx";
 import "../los/teacher/teacher.css";
 import "./english-teacher.css";
@@ -41,22 +41,6 @@ function safeReadHistory(key:string,id:string):TeacherSession[]{
     return Array.isArray(value)?value.filter(item=>
       validTeacherSession(item)&&item.lessonId===id).slice(-8):[];
   }catch{return [];}
-}
-function TeacherReflection({scene,session,onChange,completed}:{
-  scene:TeacherScene;session:TeacherSession;onChange:(value:string)=>void;completed:boolean;
-}){
-  if(!scene.reflection)return null;
-  const value=session.draftAnswers[scene.id]??"";
-  return <section className="los-teacher-reflection">
-    <label htmlFor={"em-teacher-reflection-"+scene.id}>{scene.reflection.prompt}</label>
-    <textarea id={"em-teacher-reflection-"+scene.id} rows={5}
-      value={value} disabled={completed} maxLength={500}
-      placeholder={scene.reflection.placeholder}
-      onChange={event=>onChange(event.target.value)} />
-    <small role="status">{value.trim().length>=scene.reflection.minLength
-      ?"Oma vastaus tallennettu. Tämä on itsearviointia, ei automaattisesti todettua osaamista."
-      :"Kirjoita vähintään "+scene.reflection.minLength+" merkki."}</small>
-  </section>;
 }
 export function EnglishTeacherPlayer({lesson:source,ownerId,previouslyCompleted,onBack,onComplete}:Props){
   const lesson=useMemo(()=>asTeacherLesson(source),[source]);
@@ -100,7 +84,7 @@ export function EnglishTeacherPlayer({lesson:source,ownerId,previouslyCompleted,
   const markHelp=()=>update(old=>markTeacherHelp(old,current.id,stamp()));
   const reveal=()=>update(old=>revealTeacherSolution(old,current.id,stamp()));
   const submit=(answer:string)=>update(old=>submitTeacherAnswer(old,lesson,current.id,answer,stamp()));
-  const confirm=()=>{if(current.activityId)update(old=>confirmTeacherActivity(old,lesson,current.activityId!,stamp()));};
+  const confirm=(activityId:string)=>update(old=>confirmTeacherActivity(old,lesson,activityId,stamp()));
   const restart=()=>{
     if(!stale||!saved||archives.length>=8)return;
     const revised=[...archives,session];
@@ -188,15 +172,11 @@ export function EnglishTeacherPlayer({lesson:source,ownerId,previouslyCompleted,
         {current.question&&<TeacherSceneQuestion scene={current} session={session}
           language="en" submit={submit} saveDraft={onAnswerChange}
           requestHint={markHelp} reveal={reveal}/>}
-        {current.reflection&&<TeacherReflection scene={current} session={session}
-          onChange={onAnswerChange} completed={completed}/>}
-        {current.activityId&&<section className="los-teacher-activity">
-          <button type="button" onClick={confirm} disabled={completed}>
-            <CheckCircle2 size={18}/> {session.activityIds.includes(current.activityId)
-              ?"Harjoitteluvaihe vahvistettu":"Vahvista tämän vaiheen harjoittelu"}
-          </button>
-          <p>Vahvistus kertoo harjoittelusta. Se ei ole itsenäinen kielitaidon arviointi.</p>
-        </section>}
+        {current.reflection&&<TeacherSceneReflection scene={current} session={session}
+          onChange={onAnswerChange} completed={completed}
+          doneMessage="Oma vastaus tallennettu. Tämä on itsearviointia, ei automaattisesti todettua osaamista."/>}
+        {current.activityId&&<TeacherSceneActivity scene={current} session={session}
+          completed={completed} onConfirm={confirm}/>} 
         {current.kind==="reflection"&&source.payload.tasks&&(()=>{
           const index=Number(current.id.replace("reflection-",""));
           const task=source.payload.tasks[index];
