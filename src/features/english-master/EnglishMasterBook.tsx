@@ -330,6 +330,14 @@ export function EnglishMasterBook() {
     else window.location.hash = next;
     window.scrollTo(0, 0);
   };
+  const teacherReturnAction=returnLesson?<aside className="em-teacher-return" aria-label="Palaa Teacher 2.0 -oppituntiin">
+    <div><strong>Jatka opettajan kanssa</strong>
+      <p>Avattu oppitunnilta: {returnLesson.title}. Sivulla käyminen ei merkitse oppituntia automaattisesti suoritetuksi.</p>
+    </div>
+    <button type="button" onClick={()=>navigate("lesson",returnLesson.content_id)}>
+      Palaa oppituntiin <ArrowRight size={17}/>
+    </button>
+  </aside>:null;
   const goChapter = (id: string) => { setExpandedGroup(id.slice(0, 1)); navigate("book", id); };
   const markLesson = (id: string, answered: number, isCompleted = false) => {
     if (!owner) return;
@@ -515,6 +523,7 @@ export function EnglishMasterBook() {
         {!pack ? <><ImportPanel onImported={value => { setPack(value); navigate("home"); }} />{error && <p className="em-error" role="alert">{error}</p>}</> :
           location.page === "import" ? <ImportPanel onImported={value => { setPack(value); navigate("home"); }}/> :
           location.page === "home" ? <div className="em-home-los">
+            {teacherReturnAction}
             <div className="los-front los-front-has-banner">
               <div className="los-front-banner">
                 <div className="em-los-banner" role="img" aria-label="English Masterin typografinen kirjabanneri">
@@ -578,12 +587,7 @@ export function EnglishMasterBook() {
             </div>
           </section> :
           location.page === "book" ? <section className="em-los-chapter-page">
-            {returnLesson && <aside className="em-teacher-return" aria-label="Palaa Teacher 2.0 -oppituntiin">
-              <div><strong>Jatka opettajan kanssa</strong><p>Avattu oppitunnilta: {returnLesson.title}. Kirjan lukeminen ei automaattisesti merkitse harjoitusta suoritetuksi.</p></div>
-              <button type="button" onClick={()=>navigate("lesson",returnLesson.content_id)}>
-                Palaa oppituntiin <ArrowRight size={17}/>
-              </button>
-            </aside>}
+            {teacherReturnAction}
             {currentChapter && <article className="em-chapter">
               <div className="los-opening em-los-opening" id="em-chapter-opening">
                 <p className="los-eyebrow">{currentChapter.content_id} / {chapters.length} · ENGLISH MASTER</p>
@@ -630,6 +634,7 @@ export function EnglishMasterBook() {
             </article>}
           </section> :
           location.page === "path" ? <section className="los-inner-page los-learning-path">
+            {teacherReturnAction}
             <p className="los-eyebrow">OHJATTU LUKUJÄRJESTYS / ENGLISH MASTER</p>
             <h1>Opetuspolku</h1>
             <p className="los-page-intro">32 jaksoa ja 192 suunniteltua oppituntia. Oppitunteja voi avata vapaasti. Edistyminen säilyy tällä laitteella eikä vielä synkronoidu tilille.</p>
