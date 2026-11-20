@@ -33,7 +33,7 @@ export const GRAMMAR_SELF_CHECKS_G05_G07: Readonly<Record<string,readonly [Gramm
   ["She is at school.","She is at the school building.","She is at a school building."],0,
   "At school viittaa tässä institutionaaliseen koulunkäyntiin. At the school voi puolestaan tarkoittaa tiettyä koulua tai koulurakennusta, eikä eroa ratkaista pelkän paikan perusteella."],
  ["Mikä virke ilmaisee henkilön valitsemisen tehtävään tavallisella tittelirakenteella?",
-  ["They elected her the chair of the committee yesterday.","They elected her chair of the committee yesterday.","They elected her a chair of the committee yesterday."],1,
+  ["They elected she chair of the committee yesterday.","They elected her chair of the committee yesterday.","They elected her a chair of the committee yesterday."],1,
   "Elected her chair of the committee käyttää tehtävään valinnan jälkeistä artikkelitonta titteliä. Artikkeli voi esiintyä muissa konteksteissa, mutta tämä on neutraali asemaan nimittämisen rakenne."]
 ],
 "G06.1":[
@@ -79,8 +79,7 @@ export const GRAMMAR_SELF_CHECKS_G05_G07: Readonly<Record<string,readonly [Gramm
 "G07.2":[
  ["Mikä täydennys toimii itsenäisenä omistuspronominina: ”The published results are ___.”?",
   ["their","theirs","them"],1,
-  "Theirs toimii ilman seuraavaa substantiivia. Their olisi omistusmäärite esimerkiksi ilmauksessa their results, joten sitä ei voi jättää tähän yksin."]
-],
+  "Theirs toimii ilman seuraavaa substantiivia. Their olisi omistusmäärite esimerkiksi ilmauksessa their results, joten sitä ei voi jättää tähän yksin."],
  ["Mikä virke käyttää substantiivia määrittävää omistusmuotoa oikein?",
   ["Mine essay is ready.","Me essay is ready.","My essay is ready."],2,
   "My on substantiivia essay määrittävä omistusmuoto. Mine voi toimia itsenäisenä esimerkiksi lauseessa the essay is mine, mutta ei tässä ennen substantiivia."]
