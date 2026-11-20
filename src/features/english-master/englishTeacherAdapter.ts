@@ -1,5 +1,5 @@
 import type {Lesson,LessonTask} from "./EnglishMasterBook";
-import {resolveEnglishBookRef} from "./englishChapterLinks";
+import {resolveEnglishBookRef} from "./englishChapterLinks.ts";
 import type {TeacherLesson,TeacherScene} from "../los/teacher/engine.ts";
 
 /** Translate English Master Alpha 0.8 lessons into the exact shared
