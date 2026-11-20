@@ -71,8 +71,10 @@ function canonicalBoard(chapterId:string):TeacherBoardStep[] {
   const data=material(chapterId);if(!data)return [];
   const a=firstSentence(data.ab.textA);
   const b=firstSentence(data.ab.textB);
-  const cMatch=data.c.contentMarkdown.match(/\*([^*\n]{4,90})\*/);
-  const support=chip(cMatch?.[1]??data.c.title);
+  // Use an explicitly reviewed German example from the current Text C.
+  // A generic Markdown-emphasis match used to select Finnish support headings
+  // (and sometimes even intentionally incorrect spellings) as German examples.
+  const support=losTeacherChapterTeaching(chapterId).example;
   return [
     {label:"Text A · "+data.ab.textA.title,german:a,meaning:"Poimi päätekstistä, ketkä puhuvat ja mitä tilanteessa tapahtuu."},
     {label:"Text B · "+data.ab.textB.title,german:b,meaning:"Vertaa toisen tekstin tietoja ja ilmauksia päätekstiin."},
