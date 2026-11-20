@@ -308,6 +308,11 @@ export function EnglishMasterBook() {
     if (target) window.requestAnimationFrame(() => document.getElementById(target)?.scrollIntoView({behavior:"smooth",block:"start"}));
   };
   const currentLesson = pack?.lessons[location.id] ?? lessons[0];
+  // LOS! Teacher 2.0 reader round-trip: only a real lesson ID can create a
+  // return action. The URL parameter never grants access or completion.
+  const returnLessonId = typeof window==="undefined" ? "" :
+    new URLSearchParams(window.location.search).get("lessonReturn") ?? "";
+  const returnLesson = pack?.lessons[returnLessonId];
   const completed = Object.values(progress).filter(item => item.completed).length;
   const progressKey = owner ? "em-native-progress-" + owner : "";
   const navigate = (page: Page, id = "") => {
@@ -565,6 +570,12 @@ export function EnglishMasterBook() {
             </div>
           </section> :
           location.page === "book" ? <section className="em-los-chapter-page">
+            {returnLesson && <aside className="em-teacher-return" aria-label="Palaa Teacher 2.0 -oppituntiin">
+              <div><strong>Jatka opettajan kanssa</strong><p>Avattu oppitunnilta: {returnLesson.title}. Kirjan lukeminen ei automaattisesti merkitse harjoitusta suoritetuksi.</p></div>
+              <button type="button" onClick={()=>navigate("lesson",returnLesson.content_id)}>
+                Palaa oppituntiin <ArrowRight size={17}/>
+              </button>
+            </aside>}
             {currentChapter && <article className="em-chapter">
               <div className="los-opening em-los-opening" id="em-chapter-opening">
                 <p className="los-eyebrow">{currentChapter.content_id} / {chapters.length} · ENGLISH MASTER</p>
