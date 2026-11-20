@@ -5,6 +5,7 @@ on:
     paths:
       - "scripts/audit_english_master_content.py"
       - "scripts/export_english_grammar_review.py"
+      - "scripts/export_english_grammar_g05_g10.py"
       - "public/english-master/**"
       - ".github/workflows/english-master-editorial-audit.yml"
   push:
@@ -28,6 +29,8 @@ jobs:
         run: python3 scripts/audit_english_master_content.py
       - name: Export verified G01-G04 original source for editorial review
         run: python3 scripts/export_english_grammar_review.py
+      - name: Export original G05–G10 grammar chapter manuscripts and referenced lessons
+        run: python3 scripts/export_english_grammar_g05_g10.py
       - name: Upload complete inventory and review queue
         uses: actions/upload-artifact@v4
         with:
@@ -36,5 +39,6 @@ jobs:
             test-results/english-master-editorial-audit.json
             test-results/english-master-editorial-audit.md
             test-results/english-grammar-g01-g04-source.json
+            test-results/english-grammar-g05-g10-source.json
           retention-days: 30
           if-no-files-found: error
