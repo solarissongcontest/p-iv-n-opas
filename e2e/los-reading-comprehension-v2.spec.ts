@@ -59,3 +59,35 @@ test("Open responses stay self assessed and C model is not shown immediately",as
   await expect(page.locator(".los-revised-support-content details.los-revised-answer")).toHaveCount(1);
   await expect(page.locator(".los-revised-support-content details.los-revised-answer")).not.toHaveAttribute("open");
 });
+
+test("Outdated C09 reading answer is retained, flagged for review and archived on explicit re-answer",async({page})=>{
+  await enterLocalLos(page);
+  const questionId="LOS1-READ-V2-C09-A-05";
+  const key="los.local.v1.00000000-0000-4000-8000-000000000195.1.09";
+  await page.evaluate(({key,questionId})=>{
+    localStorage.setItem(key,JSON.stringify({
+      version:1,note:"",applicationDraft:"",bookmarked:false,
+      practiceAnswers:{[questionId]:"Torstai kello 16"},
+      practiceChecked:[questionId],testAnswers:{},testSubmittedAt:null,
+      selfAssessment:"",updatedAt:new Date().toISOString()
+    }));
+  },{key,questionId});
+  await page.goto("/los#/1/09/understand",{waitUntil:"domcontentloaded"});
+  const question=page.locator("#"+questionId);
+  await expect(question.locator(".los-reading-revision-note")).toContainText("Torstai kello 16");
+  await expect(question.locator(".los-reading-feedback")).toHaveCount(0);
+  await expect(question.getByRole("button",{name:"Tarkista vastaus"})).toBeDisabled();
+  await expect(page.locator(".los-reading-understanding .los-reading-exercises").first().locator(".los-reading-counter")).toContainText("0/8");
+  await question.getByLabel("Torstai kello neljä").check();
+  await expect(question.locator(".los-reading-revision-note")).toHaveCount(0);
+  await expect(question.locator(".los-reading-revision-history")).toContainText("Torstai kello 16");
+  await question.getByRole("button",{name:"Tarkista vastaus"}).click();
+  await expect(question.locator(".los-reading-feedback")).toContainText("Oikein!");
+  await page.reload({waitUntil:"domcontentloaded"});
+  await expect(question.getByLabel("Torstai kello neljä")).toBeChecked();
+  await expect(question.locator(".los-reading-revision-history")).toContainText("Torstai kello 16");
+  await expect(question.locator(".los-reading-feedback")).toContainText("Oikein!");
+  const saved=await page.evaluate(key=>JSON.parse(localStorage.getItem(key)??"{}"),key);
+  expect(saved.practiceAnswers[questionId]).toBe("Torstai kello neljä");
+  expect(saved.practiceAnswers["LOS1-READ-LEGACY-"+questionId]).toBe("Torstai kello 16");
+});

@@ -24,6 +24,10 @@
 .los-reading-written{display:grid;gap:.4rem;font-size:.82rem;color:var(--los-soft)}
 .los-reading-written textarea{font:inherit;color:var(--los-ink);font-size:.94rem;line-height:1.6;width:100%;resize:vertical;min-height:80px;box-sizing:border-box;border-radius:8px;padding:.7rem .8rem;background:var(--los-paper);border:1px solid color-mix(in srgb,var(--los-ink) 25%,transparent)}
 .los-reading-written textarea:focus-visible{outline:2px solid var(--los-book-accent);outline-offset:1px}
+.los-reading-revision-note{border-left:3px solid var(--los-book-accent);background:color-mix(in srgb,var(--los-book-accent) 7%,var(--los-paper));border-radius:4px;padding:.7rem .85rem;margin:.85rem 0 0;font-size:.88rem;line-height:1.55;color:var(--los-ink);overflow-wrap:anywhere}
+.los-reading-revision-history{margin:.8rem 0 0;color:var(--los-soft);font-size:.85rem;line-height:1.5}
+.los-reading-revision-history summary{cursor:pointer;font-weight:650;color:var(--los-ink)}
+.los-reading-revision-history p{margin:.4rem 0;overflow-wrap:anywhere}
 .los-reading-question-actions{display:flex;align-items:center;gap:.8rem;flex-wrap:wrap;margin-top:.9rem}
 .los-reading-question-actions .los-outline-button{min-height:42px}
 .los-reading-result{font-size:.82rem;font-weight:650}

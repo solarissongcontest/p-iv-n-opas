@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useLosChapterDraft } from "./studyState";
-import { losReadingQuestionCorrect, losReadingQuestions, type LosReadingItem, type LosReadingText } from "./content/los1ReadingBank";
+import { losReadingQuestionCorrect, losReadingChoiceNeedsReview, losReadingLegacyAnswerKey, losReadingQuestions, type LosReadingItem, type LosReadingText } from "./content/los1ReadingBank";
 import "./los-reading-exercises.css";
 
 const sectionNames: Record<LosReadingText,string> = {
@@ -22,17 +22,25 @@ function ReadingQuestion({ question, index, draftController }: {
 }) {
   const {draft,update,saved}=draftController;
   const answer = draft.practiceAnswers[question.id] ?? "";
-  const checked = draft.practiceChecked.includes(question.id);
+  const retiredChoice = losReadingChoiceNeedsReview(question,answer);
+  const checked = draft.practiceChecked.includes(question.id) && !retiredChoice;
   const correct = checked ? losReadingQuestionCorrect(question,answer) : null;
+  const archivedAnswer = draft.practiceAnswers[losReadingLegacyAnswerKey(question.id)];
   const changeAnswer = (value: string) => {
-    update(current => ({
-      ...current,
-      practiceAnswers: { ...current.practiceAnswers, [question.id]: value },
-      practiceChecked: current.practiceChecked.filter(id => id !== question.id),
-    }));
+    update(current => {
+      const previous = current.practiceAnswers[question.id] ?? "";
+      const archiveKey = losReadingLegacyAnswerKey(question.id);
+      const archive = losReadingChoiceNeedsReview(question,previous) && !current.practiceAnswers[archiveKey]
+        ? { [archiveKey]: previous } : {};
+      return {
+        ...current,
+        practiceAnswers: { ...current.practiceAnswers, ...archive, [question.id]: value },
+        practiceChecked: current.practiceChecked.filter(id => id !== question.id),
+      };
+    });
   };
   const checkAnswer = () => {
-    if(!answer.trim() || !saved)return;
+    if(!answer.trim() || !saved || retiredChoice)return;
     update(current=> ({
       ...current,
       practiceChecked: current.practiceChecked.includes(question.id)
@@ -59,9 +67,18 @@ function ReadingQuestion({ question, index, draftController }: {
           onChange={event=>changeAnswer(event.target.value)}/>
       </label>}
     </fieldset>
+    {retiredChoice && <p className="los-reading-revision-note" role="status">
+      <strong>Tehtävän vaihtoehdot ovat muuttuneet.</strong> Aiempi vastauksesi ”{answer}” on tallella.
+      Sitä ei arvioida vääräksi. Valitse uusi vaihtoehto, jos haluat tarkistaa tehtävän uudelleen.
+      Edellinen vastauksesi säilytetään vastausarkistossa.
+    </p>}
+    {archivedAnswer && !retiredChoice && <details className="los-reading-revision-history">
+      <summary>Katso aiemman tehtäväversion vastaus</summary>
+      <p>{archivedAnswer}</p>
+    </details>}
     <div className="los-reading-question-actions">
       <button type="button" className="los-outline-button"
-        disabled={!answer.trim() || !saved || checked} onClick={checkAnswer}>
+        disabled={!answer.trim() || !saved || checked || retiredChoice} onClick={checkAnswer}>
         {checked ? "Tarkistettu" : question.kind==="choice"?"Tarkista vastaus":"Näytä mallivastaus"}
       </button>
       {answer.trim() && checked && <span className="los-reading-result" role="status">
@@ -89,12 +106,14 @@ export function LosReadingExercises({chapterId,text,compact=false}: {chapterId:s
   const questions=losReadingQuestions(chapterId,text);
   if(!questions.length)return <p role="status">Tämän tekstin ymmärtämistehtävät puuttuvat.</p>;
   const answered=questions.filter(q=>Boolean(controller.draft.practiceAnswers[q.id]?.trim())).length;
-  const checked=questions.filter(q=>controller.draft.practiceChecked.includes(q.id)).length;
+  const isCurrentChecked=(q:LosReadingItem)=>controller.draft.practiceChecked.includes(q.id) &&
+    !losReadingChoiceNeedsReview(q,controller.draft.practiceAnswers[q.id]??"");
+  const checked=questions.filter(isCurrentChecked).length;
   const correct=questions.filter(q=>{
-    if(!controller.draft.practiceChecked.includes(q.id))return false;
+    if(!isCurrentChecked(q))return false;
     return losReadingQuestionCorrect(q,controller.draft.practiceAnswers[q.id]??"")===true;
   }).length;
-  const objectiveChecked=questions.filter(q=>q.kind==="choice"&&controller.draft.practiceChecked.includes(q.id)).length;
+  const objectiveChecked=questions.filter(q=>q.kind==="choice"&&isCurrentChecked(q)).length;
   return <section className="los-reading-exercises" aria-label={sectionNames[text]}>
     <header className="los-reading-exercises-head">
       <div>
