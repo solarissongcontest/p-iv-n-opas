@@ -256,6 +256,40 @@ test("English Master mobile drawer mirrors LOS!: focus trap, Escape, body scroll
   await expect(page.locator("body")).not.toHaveCSS("overflow", "hidden");
 });
 
+test("real G01 grammar section has original, checked practice that survives reload and can be retried",async ({page})=>{
+  await enterLocalBook(page);
+  await page.goto("/english-master#/book/G01",{waitUntil:"domcontentloaded"});
+  await expect(page.locator(".em-chapter h1")).toHaveText("How English Sentences Work",{timeout:45_000});
+  await expect(page.locator(".em-grammar-practice")).toHaveCount(4);
+  const quiz=page.locator(".em-grammar-practice").first();
+  await expect(quiz.getByRole("button",{name:"Tarkista vastaukset"})).toBeDisabled();
+  const questions=quiz.locator(".em-grammar-question");
+  await questions.nth(0).locator("input[type=radio]").nth(0).check();
+  await questions.nth(1).locator("input[type=radio]").nth(0).check();
+  await expect(quiz.getByRole("button",{name:"Tarkista vastaukset"})).toBeEnabled();
+  await quiz.getByRole("button",{name:"Tarkista vastaukset"}).click();
+  await expect(quiz.getByRole("status")).toContainText("2/2 oikein");
+  await expect(quiz.locator(".em-grammar-answer-correct")).toHaveCount(2);
+  await page.reload({waitUntil:"domcontentloaded"});
+  await expect(page.locator(".em-chapter h1")).toHaveText("How English Sentences Work");
+  await expect(page.locator(".em-grammar-practice").first().getByRole("status")).toContainText("2/2 oikein");
+  await page.locator(".em-grammar-practice").first().getByRole("button",{name:"Harjoittele uudelleen"}).click();
+  await expect(page.locator(".em-grammar-practice").first().getByRole("status")).toContainText("0/2 vastausta");
+  await expect(page.getByText("Opetuspolun osaamisnäyttöä ei myönnetä tässä.").first()).toBeVisible();
+});
+
+test("every actual G01–G04 section exposes source-matched practice at 320px without horizontal overflow",async ({page})=>{
+  await page.setViewportSize({width:320,height:780});
+  await enterLocalBook(page);
+  for(const [chapterId,count] of [["G01",4],["G02",5],["G03",5],["G04",5]] as const){
+    await page.goto("/english-master#/book/"+chapterId,{waitUntil:"domcontentloaded"});
+    await expect(page.locator(".em-chapter h1")).toBeVisible({timeout:45_000});
+    await expect(page.locator(".em-grammar-practice")).toHaveCount(count);
+    await expect(page.locator(".em-grammar-question")).toHaveCount(count*2);
+    await expectNoHorizontalOverflow(page);
+  }
+});
+
 test("English Master book shares LOS! 1 persistent text size, line spacing and measure controls", async ({ page }) => {
   await enterLocalBook(page);
   await expect(page.getByRole("heading", { name: "English Master", exact: true })).toBeVisible({ timeout: 45_000 });

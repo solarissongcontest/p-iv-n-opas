@@ -7,6 +7,7 @@ on:
       - "src/features/los/**"
       - "e2e/english-master-native.spec.ts"
       - "tests/english-teacher-adapter.test.ts"
+      - "tests/english-grammar-selfchecks.test.ts"
       - "tests/english-chapter-links.test.ts"
       - ".github/workflows/english-master-ui.yml"
   workflow_dispatch:
@@ -42,7 +43,7 @@ jobs:
             tests/los-teacher-assessment-roles.test.ts \
             tests/los-teacher-legacy-compatibility.test.ts
       - name: Audit all 192 bundled English Teacher 2.0 lesson adapters
-        run: node --experimental-strip-types --test tests/english-teacher-adapter.test.ts tests/english-chapter-links.test.ts
+        run: node --experimental-strip-types --test tests/english-teacher-adapter.test.ts tests/english-chapter-links.test.ts tests/english-grammar-selfchecks.test.ts
       - name: Verify production build with latest LOS! v4
         run: bun run build
       - name: Install Playwright Chromium
