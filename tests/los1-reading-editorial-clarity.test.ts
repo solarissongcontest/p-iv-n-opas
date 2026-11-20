@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {losReadingQuestions,losReadingQuestionCorrect,validateLos1ReadingBank} from "../src/features/los/content/los1ReadingBank.ts";
 import {LOS1_REVISED_AB} from "../src/features/los/content/los1RevisedAB.ts";
+import {LOS1_REVISED_C} from "../src/features/los/content/los1RevisedC.ts";
 
 function choice(chapter: string, text: "A" | "B" | "C", index: number) {
   const item = losReadingQuestions(chapter,text)[index];
@@ -54,4 +55,17 @@ test("editorial clarifications preserve all 150 reader IDs and source evidence c
     .flatMap(chapter=>["A","B","C"].flatMap(kind=>losReadingQuestions(chapter,kind as "A"|"B"|"C")));
   assert.equal(items.length,150);
   assert.equal(new Set(items.map(x=>x.id)).size,150);
+});
+
+test("C02 Text C points to the first actual Mein Name ist example in C03 Text B",()=>{
+  const c02=LOS1_REVISED_C.chapters.find(ch=>ch.chapterId==="02");
+  const textB02=LOS1_REVISED_AB.chapters.find(ch=>ch.chapterId==="C02");
+  const textB03=LOS1_REVISED_AB.chapters.find(ch=>ch.chapterId==="C03");
+  assert.ok(c02 && textB02 && textB03);
+  const b02=JSON.stringify(textB02.textB.blocks);
+  const b03=JSON.stringify(textB03.textB.blocks);
+  assert.doesNotMatch(b02,/Mein Name ist/);
+  assert.match(b03,/Mein Name ist/);
+  assert.match(c02.contentMarkdown,/C03:n Text B:n henkilöesittelyissä/);
+  assert.doesNotMatch(c02.contentMarkdown,/tunnistaa Text B:n viesteissä/);
 });
