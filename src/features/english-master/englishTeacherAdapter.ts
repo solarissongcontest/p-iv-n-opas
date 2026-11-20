@@ -1,4 +1,5 @@
 import type {Lesson,LessonTask} from "./EnglishMasterBook";
+import {resolveEnglishBookRef} from "./englishChapterLinks";
 import type {TeacherLesson,TeacherScene} from "../los/teacher/engine.ts";
 
 /** Translate English Master Alpha 0.8 lessons into the exact shared
@@ -46,15 +47,18 @@ export function asTeacherLesson(source:Lesson):TeacherLesson {
     });
   }
   const chapterIds=[...new Set((source.book_refs??[])
-    .map(ref=>ref.match(/^([GVWRLSMY][0-9]{1,3})(?=$|[/:.#-])/i)?.[1]?.toUpperCase())
+    .map(resolveEnglishBookRef)
     .filter((ref):ref is string=>Boolean(ref)))];
   if(chapterIds.length){
     scenes.push({
       id:"textbook",kind:"book",phase:"OPPIKIRJA",title:"Avaa aihe oppikirjassa",
       paragraphs:["Lue oppikirjan esimerkit ja palaa sitten tähän oppituntiin."],
       bookLinks:chapterIds.map(chapterId=>({
-        label:chapterId+" · English Master",chapterId,section:"opening",
-        instruction:"Lue teoria ja esimerkit ennen harjoituksia.",
+        label:chapterId==="A00"?"A00 · Aloitus":chapterId==="A08"?"A08 · Opetuspolku":chapterId+" · English Master",
+        chapterId,section:"opening",
+        instruction:chapterId==="A00"?"Tutustu kirjan aloitussivuun.":
+          chapterId==="A08"?"Tutustu Opetuspolkuun ja oppituntien järjestykseen.":
+          "Lue teoria ja esimerkit ennen harjoituksia.",
       })),
     });
   }
