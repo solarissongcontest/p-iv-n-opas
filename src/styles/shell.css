@@ -456,11 +456,11 @@
 
 html.dark,
 html.dark body {
-  background-color: #0f1012 !important;
+  background-color: #111310 !important;
 }
 
 html.dark .app-mobile-header {
-  background: color-mix(in oklab, #0f1012 86%, transparent);
+  background: color-mix(in oklab, #111310 86%, transparent);
 }
 
 @supports (padding: max(0px)) {

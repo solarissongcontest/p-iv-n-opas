@@ -12,6 +12,7 @@
   --studyos-danger: #9e3f37;
   --studyos-header-h: 58px;
   --studyos-mobile-dock-h: 72px;
+  --studyos-top-safe-area: env(safe-area-inset-top, 0px);
 }
 
 .dark {
@@ -353,6 +354,14 @@
 
 @media (max-width: 767px) {
   :root { --studyos-header-h: 52px; }
+  /* The iOS translucent PWA status bar overlays the web view.
+     Keep the entire safe area inside the sticky header so its controls
+     remain below the Dynamic Island and its backdrop reaches the screen top. */
+  .studyos-systembar {
+    box-sizing: border-box;
+    height: calc(var(--studyos-header-h) + var(--studyos-top-safe-area));
+    padding-top: var(--studyos-top-safe-area);
+  }
   .studyos-systembar-inner { padding: 0 14px; }
   .studyos-brand-name, .studyos-primary-nav, .studyos-command, .studyos-log-action, .studyos-current-context { display: none; }
   .studyos-systembar-spacer { flex: 1; }
