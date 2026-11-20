@@ -5,7 +5,7 @@ import type {GrammarSelfCheckItem} from "./englishGrammarSelfChecks.ts";
  */
 export const GRAMMAR_SELF_CHECKS_G05_G07: Readonly<Record<string,readonly [GrammarSelfCheckItem,GrammarSelfCheckItem]>>={
 "G05.1":[
- ["Valitse artikkeli ääntämisen perusteella: ”She applied to ___ university in Scotland.”",
+ ["Yliopisto mainitaan ensimmäistä kertaa eikä lukija tunne sitä. Valitse artikkeli: ”She applied to ___ university in Scotland.”",
   ["an university","a university","the university"],1,
   "University alkaa /juː/-äänteellä eli konsonanttiäänteellä. Siksi ensimmäisestä maininnasta käytetään a-artikkelia, vaikka sana alkaa kirjoitettuna u-kirjaimella."],
  ["Mikä virke esittelee ammatin ja käyttää oikeaa artikkelia?",
