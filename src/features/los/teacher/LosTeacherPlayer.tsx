@@ -3,14 +3,14 @@ import { Los1ChapterImage } from "../Los1ChapterImage.tsx";
 import { LOS1_TEXT_B_SOURCES } from "../content/los1TextBAdditional.ts";
 import { getLosOpenDialogue } from "../content/los1OpenDialogues.ts";
 import { useEffect, useState } from "react";
-import { ArrowRight, BookOpen, Check, CheckCircle2, HelpCircle } from "lucide-react";
+import { ArrowRight, BookOpen, CheckCircle2, HelpCircle } from "lucide-react";
 import { readCachedDeviceUser } from "@/lib/deviceSession";
 import { useLosChapterDraft, prepareLosTeacherVersionRestart } from "../studyState.ts";
 import {
   emptyTeacherSession, markTeacherHelp, confirmTeacherActivity, teacherChapterAssessmentStatus, teacherMidtermAssessmentStatus,
   finishTeacherSession, independentTeacherEvidence, moveTeacherScene, revealTeacherSolution,
   setTeacherAnswerDraft, submitTeacherAnswer, toggleTeacherPause, teacherCanFinish, teacherCompletionBlockers, teacherNextIncompleteSceneId,
-  teacherBuiltNumberCount, recoverTeacherSession, teacherSessionNeedsReview, type TeacherScene, type TeacherSession, isCorrectCalendarEntry,
+  teacherBuiltNumberCount, recoverTeacherSession, teacherSessionNeedsReview, type TeacherScene, type TeacherSession,
 } from "./engine.ts";
 import { getLosTeacherLesson } from "./lessonRegistry.ts";
 import { LosTeacherNumberBuilder } from "./LosTeacherNumberBuilder.tsx";
