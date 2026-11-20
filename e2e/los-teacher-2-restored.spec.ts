@@ -79,9 +79,17 @@ test("Teacher 2.0 hides non-urgent PWA updates rather than obscuring German inst
   await page.evaluate(()=>{
     const banner=document.createElement("div");
     banner.className="pwa-update-prompt";
+    banner.id="teacher-pwa-update-test";
     banner.textContent="Uusi versio on valmis";
     document.body.appendChild(banner);
   });
-  await expect(page.locator(".pwa-update-prompt")).toHaveCSS("display","none");
+  // An actual service-worker update prompt may already exist in the DOM.
+  // Verify our injected fixture and ALL existing prompts are hidden instead
+  // of using a single-match locator that fails whenever there are two.
+  await expect(page.locator("#teacher-pwa-update-test")).toHaveCSS("display","none");
+  const prompts=page.locator(".pwa-update-prompt");
+  for(const prompt of await prompts.all()){
+    await expect(prompt).toHaveCSS("display","none");
+  }
   await expect(page.locator(".los-teacher-paper")).toBeVisible();
 });
