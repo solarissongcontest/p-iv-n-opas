@@ -53,8 +53,20 @@ export function losReadingQuestions(chapterId: string, text: LosReadingText): re
   return LOS1_READING_BANK[chapterId]?.[text] ?? [];
 }
 
+/** A historical choice may still be saved under the stable question ID after
+ * options are edited. Never reinterpret that old answer as a wrong attempt. */
+export function losReadingChoiceNeedsReview(question: LosReadingItem, response: string): boolean {
+  return question.kind === "choice" && response.trim().length > 0 && !question.options.includes(response);
+}
+
+/** Preserve the original answer after an explicit new selection. This stays
+ * inside the existing chapter-draft practiceAnswers and JSON backup. */
+export function losReadingLegacyAnswerKey(questionId: string): string {
+  return "LOS1-READ-LEGACY-" + questionId;
+}
+
 export function losReadingQuestionCorrect(question: LosReadingItem, response: string): boolean | null {
-  if (question.kind === "open") return null; // An unverified written answer is not autograded.
+  if (question.kind === "open" || losReadingChoiceNeedsReview(question,response)) return null;
   return question.options[question.answerIndex] === response;
 }
 
