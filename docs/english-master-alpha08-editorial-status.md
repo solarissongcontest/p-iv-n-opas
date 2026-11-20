@@ -48,7 +48,22 @@ Alkuperäinen Alpha 0.8 -gzip-sisältöpaketti säilyy muuttumattomana. Sen 20 k
 - Näin 20 alkuperäisdatan itsearviointipuutteesta **4 kirjalukua on nyt toiminnallisesti täydennetty**. Jäljellä on 16 kirjalukua, joissa ei vielä ole vastaavaa toimituksellisesti kirjoitettua täydennystä.
 - Uudet tehtävät ovat projektissa kirjoitettua alkuperäistä sisältöä, eivät julkaisemattomien tai nykyisten YO-kokeiden autenttisia tehtäviä.
 
-**Jatkotyö:** G05–G10 sekä G13–G14 ovat seuraavat vahvistetut puuttuvat kirjaluvut. Loput puutelistasta tulee lukea aina uusimmasta automaattisesta raportista; sitä ei pidä päätellä pelkästä osittaisesta otoksesta.
+**Tilannetieto 20.11.2026:** G05–G10 on nyt täydennetty, joten tämän aiemman G01–G04-vaiheen jälkeinen 16 luvun puutelista on päivitetty G05–G10-osiossa. Päätelmät on erotettava alkuperäisen lähdepaketin ja sovelluksen lisäsisältöjen välillä.
+
+## G05–G10:n lähdelähtöiset itsearvioinnit (20.11.2026)
+
+Alkuperäiset G05–G10-lukujen täydet teoriat, 28 alaosion otsikot ja esimerkit avattiin **oikeasta SHA-256-varmennetusta** Alpha 0.8 -paketista. Jokaisen alaosion kaksi uutta harjoitusta perustuvat sen todelliseen aiheeseen. Alkuperäisiä gzip-osia tai niiden `draft`-tilaa ei muutettu.
+
+- G05 Articles (4 alaosiota, 8 tehtävää): ensimmäinen maininta, määräisyys, yleistävä nolla-artikkeli, instituutiot ja tehtävään valinta.
+- G06 Determiners & Quantifiers (4, 8): some/any, määrän sävy, each/every/either/neither, all/whole.
+- G07 Personal, Possessive & Reflexive Pronouns (5, 10): subjekti ja objekti, omistusmuodot, refleksiivit, vastavuoroisuus ja viittaussuhteet.
+- G08 Indefinite & Negative Pronouns (4, 8): somebody/nobody, another/other, either/neither ja kielteisen ilmauksen ala.
+- G09 Relative Clauses I (5, 10): korrelaatti, who/which/that, whose, määrittävät ja lisätietoa antavat relatiivit, objektirelatiivin poisjättö.
+- G10 Relative Clauses II (6, 12): paikkarelatiivit, the ... of which, osajoukkoilmaukset, preposition sijoittaminen, vapaat relatiivit ja pitkän virkkeen pääväite.
+
+**Yhteensä:** G05–G10: 6 kirjalukua, 28 oikeaa alaosiota ja **56 uutta tehtävää**. G01–G10: 10 kirjalukua, 47 alaosiota ja **94 tehtävää**. Nämä näkyvät suoraan kirjan teoriaosuuksissa alkuperäisen LOS! v4 -lukijan kautta; sama käyttäjäkohtainen tallennus, tarkistus ja uusintayritys toimivat uusissa alaosioissa. Tehtävistä ei kirjata automaattista Teacher 2.0 -osaamisnäyttöä.
+
+**Tarkistuksen kaksi lukua on pidettävä erillään:** Alkuperäisen paketin automaattinen auditointi löytää edelleen 20 lukua ilman lähdedatan `self_check`-kenttää. Niistä **10 luvun harjoitukset on nyt toimitettu sovelluksen erilliseen sisältökerrokseen**. Toimituksellista täydennystä puuttuu vielä 10 luvusta: **G13, G14, G15, G16, G17, G18, G19, G31, R02 ja R03**. Nämä tunnisteet on tarkistettu alkuperäisen paketin auditointiraportista. Kyse ei ole siitä, että nämä luvut puuttuisivat kokonaan, vaan niiltä puuttuu vielä vastaava lisätty itsearviointi.
 
 ## Julkaisua ei päätellä rakenteesta
 
@@ -61,7 +76,7 @@ Ne **eivät** vielä osoita, että englannin kielioppi, esimerkit, oikeat ja vä
 
 ## Seuraavan sisältötuotannon järjestys
 
-1. **G01–G04:** tarkista jokaisen alaluvun nykyiset tehtävät ja kirjoita puuttuvat, tarkoituksenmukaiset itsearviointitehtävät erillisine hyväksyttyine vastauksineen.
+1. **G13–G19, G31, R02–R03:** käy läpi jäljellä olevat 10 itsearviointia vailla olevaa lukua, lisää omat tehtävät oikeisiin alaosioihin ja varmista yksiselitteiset vastausavaimet.
 2. **G11–G16:** käy lyhyet teorialuvut läpi sääntö, merkitys, poikkeus, vähintään kaksi todellista työstettyä esimerkkiä ja siirtotehtävä -tasolla.
 3. **J03-tuntijakso:** laajenna 14 lyhyttä loppuyhteenvetoa niin, että opiskelija näkee mitä harjoiteltiin ja mitä ei vielä osoitettu.
 4. **Lukeminen, kuunteleminen ja kirjoittaminen:** tee YTL-tyyppisille materiaaleille aineistokohtainen oikeellisuus- ja palautetarkistus. Valmistele todelliset audioassetit erillisenä toimituseränä.
