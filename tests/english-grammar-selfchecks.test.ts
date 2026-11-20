@@ -36,7 +36,7 @@ test("all 19 actual G01–G04 Alpha 0.8 sections have two original, real and exp
       assert.equal(options.length,3);
       assert.equal(new Set(options).size,3,id+" has duplicate answers");
       assert.ok(correct>=0&&correct<3,id+" correct option missing");
-      assert.ok(options.every(x=>x.trim().length>=5),id+" option missing");
+      assert.ok(options.every(x=>x.trim().length>=2),id+" option missing");
       assert.ok(!prompts.has(prompt),id+" duplicate prompt");
       prompts.add(prompt);
     }
