@@ -1,5 +1,5 @@
 import type { Lesson } from "./EnglishMasterBook";
-import { asTeacherLesson } from "./EnglishTeacherPlayer";
+import { asTeacherLesson } from "./englishTeacherAdapter";
 import { englishTeacherStorageKey } from "./englishTeacherBackup";
 import { teacherSessionNeedsReview, validTeacherSession } from "../los/teacher/engine.ts";
 
