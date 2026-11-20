@@ -494,3 +494,36 @@
  .em-app .em-teacher-return button{justify-content:center}
 }
 .dark .em-app .em-teacher-return button{color:#102330}
+
+
+/* LOS! Teacher 2.0 verified-session resume on the English learning path. */
+.em-app .em-teacher-resume{
+ display:flex;justify-content:space-between;align-items:center;
+ gap:24px;margin:20px 0 27px;padding:22px 24px;
+ border-radius:12px;border:1px solid var(--los-line);
+ background:var(--los-paper);color:var(--los-ink);
+ box-shadow:0 8px 22px rgb(23 36 49 / 4%);
+}
+.em-app .em-teacher-resume .em-overline{
+ margin:0 0 9px;font-size:10px;letter-spacing:.13em;
+ color:var(--los-book-accent);
+}
+.em-app .em-teacher-resume strong{display:block;font-size:19px;line-height:1.35}
+.em-app .em-teacher-resume p:not(.em-overline){
+ margin:8px 0 0;font-size:13px;line-height:1.65;color:var(--los-soft);
+}
+.em-app .em-teacher-resume button{
+ display:inline-flex;align-items:center;justify-content:center;
+ flex-shrink:0;gap:8px;padding:13px 16px;border-radius:8px;
+ font-weight:650;font-size:13px;cursor:pointer;border:0;
+ background:var(--los-book-accent);color:#fff;
+}
+.em-app .em-teacher-resume button:focus-visible{
+ outline:3px solid #397ace;outline-offset:3px;
+}
+.dark .em-app .em-teacher-resume button{color:#102330}
+@media(max-width:760px){
+ .em-app .em-teacher-resume{padding:18px;flex-direction:column;align-items:stretch}
+ .em-app .em-teacher-resume button{width:100%}
+ .em-app .em-teacher-resume strong{font-size:17px}
+}
