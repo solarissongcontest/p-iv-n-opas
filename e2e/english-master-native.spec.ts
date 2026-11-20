@@ -176,6 +176,41 @@ test("English Master loads the real 122/192/20 content automatically and keeps i
   await expect(page.getByRole("heading", { name: "Ota englannin oppikirja käyttöön" })).toHaveCount(0);
 });
 
+
+test("the FIRST and LAST real English Master lessons run the actual Teacher 2.0 interface and survive reload", async ({page})=>{
+  await enterLocalBook(page);
+  await expect(page.locator(".los-front")).toBeVisible({timeout:45_000});
+  await page.goto("/english-master#/path",{waitUntil:"domcontentloaded"});
+  await expect(page.locator(".em-unit")).toHaveCount(32);
+
+  const first=page.locator(".em-unit").first().locator("li button").first();
+  const firstTitle=await first.locator(".los-path-copy strong").textContent();
+  await first.click();
+  await expect(page.locator(".em-teacher-app")).toBeVisible();
+  await expect(page.locator(".los-teacher-sidebar h1")).toHaveText(firstTitle!);
+  await expect(page.locator(".los-teacher-outline nav button").first()).toBeVisible();
+  await expect(page.getByRole("button",{name:"Keskeytä oppitunti"})).toBeVisible();
+  await page.getByRole("button",{name:"Seuraava",exact:true}).click();
+  const firstStep=await page.locator(".los-teacher-paper h2").textContent();
+  await page.reload({waitUntil:"domcontentloaded"});
+  await expect(page.locator(".los-teacher-paper h2")).toHaveText(firstStep!);
+  await expectNoHorizontalOverflow(page);
+
+  await page.setViewportSize({width:320,height:780});
+  await page.goto("/english-master#/path",{waitUntil:"domcontentloaded"});
+  const last=page.locator(".em-unit").last().locator("li button").last();
+  const lastTitle=await last.locator(".los-path-copy strong").textContent();
+  await last.click();
+  await expect(page.locator(".em-teacher-app")).toBeVisible();
+  await expect(page.locator(".los-teacher-sidebar h1")).toHaveText(lastTitle!);
+  await expect(page.locator(".los-teacher-paper")).toBeVisible();
+  await expectNoHorizontalOverflow(page);
+  await page.reload({waitUntil:"domcontentloaded"});
+  await expect(page.locator(".los-teacher-paper")).toBeVisible();
+  await expect(page.getByRole("progressbar",{name:"Oppitunnin opetustilanteet"})).toBeVisible();
+  await expectNoHorizontalOverflow(page);
+});
+
 test("English Master mobile drawer mirrors LOS!: focus trap, Escape, body scroll lock and navigation", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await enterLocalBook(page);
