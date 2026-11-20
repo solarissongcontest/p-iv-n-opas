@@ -9,6 +9,7 @@ import { LosReaderDisplayControls, readLosReaderSettings } from "../los/LosReade
 import "./english-master.css";
 import { EnglishTeacherPlayer } from "./EnglishTeacherPlayer";
 import { recommendEnglishTeacherResume } from "./englishTeacherResume";
+import {relatedEnglishLessonIds} from "./englishChapterLinks";
 import {collectEnglishTeacherBackup,prepareEnglishTeacherRestore} from "./englishTeacherBackup";
 
 /**
@@ -297,6 +298,9 @@ export function EnglishMasterBook() {
     ?recommendEnglishTeacherResume(owner,lessons):null,
     [owner,lessons,location.page]);
   const currentChapter = pack?.chapters[location.id] ?? chapters[0];
+  const relatedLessonIds=useMemo(()=>currentChapter
+    ?relatedEnglishLessonIds(currentChapter.content_id,currentChapter.payload.linked_lesson_ids??[],lessons)
+    :[],[currentChapter,lessons]);
   const chapterIndex = chapters.findIndex(ch => ch.content_id === currentChapter?.content_id);
   const bookSectionChoices = [
     { id: "opening", title: "Luvun alku", target: "em-chapter-opening" },
@@ -617,9 +621,9 @@ export function EnglishMasterBook() {
                   {section.common_errors_fi&&<div className="los-editorial-note"><p>{Array.isArray(section.common_errors_fi)?section.common_errors_fi.join(" "):section.common_errors_fi}</p></div>}
                 </section>)}
                 {currentChapter.payload.summary_fi&&<div className="los-grammar-aside"><strong>Yhteenveto</strong><p>{currentChapter.payload.summary_fi}</p></div>}
-                {currentChapter.payload.linked_lesson_ids?.length?<div className="em-related">
+                {relatedLessonIds.length>0?<div className="em-related">
                   <h2>Harjoittele Opetuspolussa</h2>
-                  {currentChapter.payload.linked_lesson_ids.filter(id=>pack.lessons[id]).map(id=>
+                  {relatedLessonIds.map(id=>
                     <button key={id} onClick={()=>navigate("lesson",id)}>{id} · {pack.lessons[id]?.title}<ChevronRight size={16}/></button>)}
                 </div>:null}
               </div>
