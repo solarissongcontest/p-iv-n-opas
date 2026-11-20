@@ -219,8 +219,8 @@ test("real introductory A00/A08 teacher references open native pages and return 
   await page.locator(".los-teacher-outline nav").getByRole("button",{name:"Avaa aihe oppikirjassa"}).click();
   const chapterLinks=page.locator(".los-teacher-book-links a");
   await expect(chapterLinks).toHaveCount(2);
-  await expect(chapterLinks.nth(0)).toHaveAttribute("href",/lessonReturn=EM-LP-J01-L01#\\/home$/);
-  await expect(chapterLinks.nth(1)).toHaveAttribute("href",/lessonReturn=EM-LP-J01-L01#\\/path$/);
+  await expect(chapterLinks.nth(0)).toHaveAttribute("href",/lessonReturn=EM-LP-J01-L01#\/home$/);
+  await expect(chapterLinks.nth(1)).toHaveAttribute("href",/lessonReturn=EM-LP-J01-L01#\/path$/);
   for(const index of [0,1]){
     const pop=page.waitForEvent("popup");
     await chapterLinks.nth(index).click();
