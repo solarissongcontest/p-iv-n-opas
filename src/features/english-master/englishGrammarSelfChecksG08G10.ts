@@ -96,8 +96,7 @@ export const GRAMMAR_SELF_CHECKS_G08_G10: Readonly<Record<string,readonly [Gramm
 "G10.3":[
  ["Osa tutkijoista oli työskennellyt ulkomailla. Mikä tarkka pilkullinen osajoukkorelatiivi sopii?",
   ["The researchers, three of whom had worked abroad, spoke.","The researchers, three of which had worked abroad, spoke.","The researchers, three of that had worked abroad, spoke."],0,
-  "Three of whom kertoo kolmesta ihmisestä suuren tutkijajoukon osana. Muodollinen whom viittaa henkilöihin; which viittaisi asioihin."]
-],
+  "Three of whom kertoo kolmesta ihmisestä suuren tutkijajoukon osana. Muodollinen whom viittaa henkilöihin; which viittaisi asioihin."],
  ["Useimmat tutkimuksista olivat epäselviä. Mikä partitiivirelatiivi viittaa tutkimuksiin asioina?",
   ["The studies, most of whom were inconclusive, were reviewed.","The studies, most of that were inconclusive, were reviewed.","The studies, most of which were inconclusive, were reviewed."],2,
   "Most of which rajaa suurimman osan aiemmin mainituista studies-kohteista. Which viittaa asioihin, ja pilkullisessa rakenteessa that ei korvaa sitä."]
