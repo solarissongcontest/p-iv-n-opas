@@ -20,9 +20,9 @@ export function recommendEnglishTeacherResume(
   const finished=new Set<string>();
   const active:Array<{id:string;title:string;time:number;updated:boolean}>=[];
   for(const lesson of lessons){
-    const raw=localStorage.getItem(englishTeacherStorageKey(ownerId,lesson.content_id));
-    if(!raw)continue;
     try{
+      const raw=localStorage.getItem(englishTeacherStorageKey(ownerId,lesson.content_id));
+      if(!raw)continue;
       const session:unknown=JSON.parse(raw);
       if(!validTeacherSession(session)||session.lessonId!==lesson.content_id)continue;
       const outdated=teacherSessionNeedsReview(session,asTeacherLesson(lesson));
