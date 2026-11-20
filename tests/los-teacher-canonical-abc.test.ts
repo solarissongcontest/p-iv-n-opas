@@ -104,3 +104,17 @@ test("all 10 rewritten topics teach concrete German instead of exposing edition-
       lesson.id+" "+scene.id+" should teach the language instead of the product change history");
  }
 });
+
+test("Text C teaching boards display real German examples from the current chapter",()=>{
+ for(let n=1;n<=10;n++){
+  const chapterId=String(n).padStart(2,"0");
+  const teaching=losTeacherChapterTeaching(chapterId);
+  const textC=LOS1_REVISED_C.chapters.find(ch=>ch.chapterId===chapterId);
+  assert.ok(textC?.contentMarkdown.includes(teaching.example),"C"+chapterId+" example must be in Text C");
+  const lesson=getLosTeacherLesson(readingIds[n-1]!)!;
+  const board=lesson.scenes.find(scene=>scene.id==="canonical-intro")?.board;
+  assert.ok(board&&board.length===3,lesson.id+" requires A, B and C teaching-board steps");
+  assert.equal(board[2]?.german,teaching.example,lesson.id+" Text C must show German, not a Finnish support heading");
+  assert.doesNotMatch(board[2]?.german??"",/Tukiteksti:|Tervehdykset eri tilanteissa|Suomeksi/);
+ }
+});
