@@ -89,13 +89,13 @@ test("English Master opens as a first-class book route, imports one content pack
   await expect(page.getByRole("heading", { name: "Sääntö" })).toBeVisible();
   await page.getByRole("button", { name: "Seuraava", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Ensimmäinen vaihe" })).toBeVisible();
-  await page.getByRole("button", { name: "Vahvista tämän vaiheen harjoittelu" }).click();
+  await page.getByRole("button", { name: "Olen käynyt opetustaulun vaiheen läpi" }).click();
   await page.reload({ waitUntil: "domcontentloaded" });
   await expect(page.getByRole("heading", { name: "Ensimmäinen vaihe" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Harjoittelu vahvistettu" })).toBeVisible();
   await page.getByRole("button", { name: "Seuraava", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Toinen vaihe" })).toBeVisible();
-  await page.getByRole("button", { name: "Vahvista tämän vaiheen harjoittelu" }).click();
+  await page.getByRole("button", { name: "Olen käynyt opetustaulun vaiheen läpi" }).click();
   await page.getByRole("button", { name: "Seuraava", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Avaa aihe oppikirjassa" })).toBeVisible();
   const textbookLink=page.getByRole("link",{name:/Avaa kirjassa/});
