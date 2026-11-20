@@ -1,6 +1,6 @@
 import {useRef, useState} from "react";
 import {ArrowLeft,ArrowRight,BookOpen,Check,CheckCircle2,ChevronLeft,ChevronRight,HelpCircle,RotateCcw} from "lucide-react";
-import {teacherLatestAttempt,teacherRequiresNumericResponse,teacherWrongFeedback,type TeacherScene,type TeacherSession} from "./engine.ts";
+import {teacherBuiltNumberCount,isCorrectCalendarEntry,teacherLatestAttempt,teacherRequiresNumericResponse,teacherWrongFeedback,type TeacherScene,type TeacherSession} from "./engine.ts";
 
 export function TeacherSceneQuestion({ scene, session, submit, saveDraft, requestHint, reveal, language = "de" }: {
   scene: TeacherScene;
@@ -185,5 +185,51 @@ export function TeacherSceneNavigation({ onReplay, onPrevious, onNext, onReturn,
       onClick={onNext}>Seuraava <ChevronRight size={18}/></button>}
     {last && (returnHref ? <a href={returnHref}>Takaisin Opetuspolkuun <ArrowRight size={17}/></a> :
       <button type="button" onClick={onReturn}>Takaisin Opetuspolkuun <ArrowRight size={17}/></button>)}
+  </div>;
+}
+
+
+/** The same controlled reflective-writing field in LOS! and English Master.
+ * Written work is recorded, never automatically evaluated for language skill.
+ */
+export function TeacherSceneReflection({scene,session,completed,onChange,doneMessage}:{
+  scene:TeacherScene;session:TeacherSession;completed:boolean;
+  onChange:(value:string)=>void;doneMessage?:string;
+}){
+  if(!scene.reflection)return null;
+  const field=scene.reflection;
+  const value=session.draftAnswers[scene.id]??"";
+  return <div className="los-teacher-reflection">
+    <label htmlFor={"los-teacher-reflection-"+scene.id}>{field.prompt}</label>
+    <textarea id={"los-teacher-reflection-"+scene.id} rows={4} maxLength={500}
+      placeholder={field.placeholder} value={value} disabled={completed}
+      onChange={event=>onChange(event.target.value)}/>
+    <small role="status">{value.trim().length>=field.minLength
+      ?doneMessage??"Tavoite tallennettu. Voit vahvistaa sen alla."
+      :"Kirjoita vähintään "+field.minLength+" merkkiä. Tekstisi tallentuu automaattisesti."}</small>
+  </div>;
+}
+
+/** Shared LOS! Teacher 2.0 activity confirmation. All manuscript prerequisites
+ * are checked in the same component; confirmation is not language mastery.
+ */
+export function TeacherSceneActivity({scene,session,completed,onConfirm,doneLabel}:{
+  scene:TeacherScene;session:TeacherSession;completed:boolean;
+  onConfirm:(activityId:string)=>void;doneLabel?:string;
+}){
+  if(!scene.activityId)return null;
+  const activityId=scene.activityId;
+  const confirmed=session.activityIds.includes(activityId);
+  const disabled=confirmed||completed||
+    Boolean(scene.reflection&&(session.draftAnswers[scene.id]?.trim().length??0)<scene.reflection.minLength)||
+    Boolean(scene.numberBuilder&&teacherBuiltNumberCount(session,scene.id)<4)||
+    Boolean(scene.form&&scene.form.some(field=>!session.draftAnswers[scene.id+"."+field.id]?.trim()))||
+    Boolean(scene.calendar&&!isCorrectCalendarEntry(scene,session.draftAnswers[scene.id]??""));
+  return <div className="los-teacher-activity">
+    <button type="button" disabled={disabled} onClick={()=>onConfirm(activityId)}>
+      {confirmed?<CheckCircle2 size={18}/>:<Check size={18}/>}
+      {confirmed?(doneLabel??"Harjoittelu vahvistettu"):scene.activityLabel}
+    </button>
+    <p>Tämä on oma vahvistuksesi, ei automaattinen kielitaidon arvio.</p>
   </div>;
 }
