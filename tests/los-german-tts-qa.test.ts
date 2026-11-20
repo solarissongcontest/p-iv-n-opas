@@ -39,6 +39,20 @@ test("German letter chains are spoken letter-by-letter, but normal words are unc
   assert.ok(b.some(line=>line.text.includes("A, I, N, O")));
 });
 
+test("C07 Text C keeps spelling TTS optional and separates letter names without promising acoustic approval",()=>{
+  const chapter=LOS1_REVISED_C.chapters.find(ch=>ch.chapterId==="07");
+  assert.ok(chapter);
+  assert.match(chapter.contentMarkdown,/Jos laitteellasi on saksankielinen puheääni/);
+  assert.match(chapter.contentMarkdown,/puhesynteesin todellista ääntämistä ei ole hyväksytty/);
+  assert.doesNotMatch(chapter.contentMarkdown,/kuuntele aakkosäänite erikseen/i);
+  const speech=losSpeechSegments(LOS1_C_SPEECH_BLOCKS["07"]??[],"07","C");
+  assert.ok(speech.some(line=>line.text==="A, I, N, O"));
+  assert.ok(speech.some(line=>line.text==="L, A, I, N, E"));
+  assert.ok(speech.some(line=>line.text==="B, E, C, K"));
+  assert.ok(speech.some(line=>line.text==="Bitte langsam!"));
+  assert.ok(speech.every(line=>line.rateFactor===1));
+});
+
 test("C08 TTS explicitly slows the teacher's response after a slow-down request",()=>{
   const ch=LOS1_REVISED_AB.chapters.find(ch=>ch.chapterId==="C08");
   assert.ok(ch);
