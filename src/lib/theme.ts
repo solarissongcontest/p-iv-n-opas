@@ -1,5 +1,5 @@
-export const LIGHT_THEME_COLOR = "#f7f7f7";
-export const DARK_THEME_COLOR = "#0f1012";
+export const LIGHT_THEME_COLOR = "#f5f4f0";
+export const DARK_THEME_COLOR = "#111310";
 
 export function applyTheme(dark: boolean) {
   if (typeof document === "undefined") return;
