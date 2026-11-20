@@ -211,6 +211,30 @@ test("the FIRST and LAST real English Master lessons run the actual Teacher 2.0 
   await expectNoHorizontalOverflow(page);
 });
 
+test("real introductory A00/A08 teacher references open native pages and return without completion", async ({page})=>{
+  await enterLocalBook(page);
+  await expect(page.locator(".los-front")).toBeVisible({timeout:45_000});
+  await page.goto("/english-master#/lesson/EM-LP-J01-L01",{waitUntil:"domcontentloaded"});
+  await expect(page.locator(".em-teacher-app")).toBeVisible();
+  await page.locator(".los-teacher-outline nav").getByRole("button",{name:"Avaa aihe oppikirjassa"}).click();
+  const chapterLinks=page.locator(".los-teacher-book-links a");
+  await expect(chapterLinks).toHaveCount(2);
+  await expect(chapterLinks.nth(0)).toHaveAttribute("href",/lessonReturn=EM-LP-J01-L01#\\/home$/);
+  await expect(chapterLinks.nth(1)).toHaveAttribute("href",/lessonReturn=EM-LP-J01-L01#\\/path$/);
+  for(const index of [0,1]){
+    const pop=page.waitForEvent("popup");
+    await chapterLinks.nth(index).click();
+    const reader=await pop;
+    await expect(reader.locator(".em-teacher-return")).toBeVisible();
+    await expect(reader.locator(".em-teacher-return")).toContainText("Sivulla käyminen ei merkitse oppituntia");
+    await reader.getByRole("button",{name:"Palaa oppituntiin"}).click();
+    await expect(reader.locator(".em-teacher-app")).toBeVisible();
+    await expect(reader.getByRole("heading",{name:"Avaa aihe oppikirjassa"})).toBeVisible();
+    await reader.close();
+  }
+  await expect(page.getByRole("heading",{name:"Avaa aihe oppikirjassa"})).toBeVisible();
+});
+
 test("English Master mobile drawer mirrors LOS!: focus trap, Escape, body scroll lock and navigation", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await enterLocalBook(page);
