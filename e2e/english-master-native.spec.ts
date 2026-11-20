@@ -278,16 +278,43 @@ test("real G01 grammar section has original, checked practice that survives relo
   await expect(page.getByText("Opetuspolun osaamisnäyttöä ei myönnetä tässä.").first()).toBeVisible();
 });
 
-test("every actual G01–G04 section exposes source-matched practice at 320px without horizontal overflow",async ({page})=>{
+test("all actual G01–G10 sections expose source-matched practice at 320px without overflow",async ({page})=>{
   await page.setViewportSize({width:320,height:780});
   await enterLocalBook(page);
-  for(const [chapterId,count] of [["G01",4],["G02",5],["G03",5],["G04",5]] as const){
+  for(const [chapterId,count] of [["G01",4],["G02",5],["G03",5],["G04",5],
+    ["G05",4],["G06",4],["G07",5],["G08",4],["G09",5],["G10",6]] as const){
     await page.goto("/english-master#/book/"+chapterId,{waitUntil:"domcontentloaded"});
     await expect(page.locator(".em-chapter h1")).toBeVisible({timeout:45_000});
     await expect(page.locator(".em-grammar-practice")).toHaveCount(count);
     await expect(page.locator(".em-grammar-question")).toHaveCount(count*2);
     await expectNoHorizontalOverflow(page);
   }
+});
+
+test("advanced G09/G10 relative-clause practice shows corrective feedback and preserves owner-scoped attempts",async ({page})=>{
+  await enterLocalBook(page);
+  await page.goto("/english-master#/book/G09",{waitUntil:"domcontentloaded"});
+  await expect(page.locator(".em-chapter h1")).toContainText("Relative Clauses I",{timeout:45_000});
+  const quiz=page.locator(".em-grammar-practice").nth(3);
+  await expect(quiz.locator(".em-grammar-question")).toHaveCount(2);
+  // G09.4 contrasts defining and non-defining relative clauses.
+  await quiz.locator(".em-grammar-question").nth(0).locator("input[type=radio]").nth(0).check();
+  await quiz.locator(".em-grammar-question").nth(1).locator("input[type=radio]").nth(0).check();
+  await quiz.getByRole("button",{name:"Tarkista vastaukset"}).click();
+  await expect(quiz.getByRole("status")).toContainText("0/2 oikein");
+  await expect(quiz.locator(".em-grammar-answer-review")).toHaveCount(2);
+  await page.reload({waitUntil:"domcontentloaded"});
+  await expect(page.locator(".em-grammar-practice").nth(3).getByRole("status")).toContainText("0/2 oikein");
+  await page.locator(".em-grammar-practice").nth(3).getByRole("button",{name:"Harjoittele uudelleen"}).click();
+  const again=page.locator(".em-grammar-practice").nth(3);
+  await again.locator(".em-grammar-question").nth(0).locator("input[type=radio]").nth(1).check();
+  await again.locator(".em-grammar-question").nth(1).locator("input[type=radio]").nth(2).check();
+  await again.getByRole("button",{name:"Tarkista vastaukset"}).click();
+  await expect(again.getByRole("status")).toContainText("2/2 oikein");
+  await page.goto("/english-master#/book/G10",{waitUntil:"domcontentloaded"});
+  await expect(page.locator(".em-grammar-practice")).toHaveCount(6);
+  await expect(page.locator(".em-grammar-practice").nth(2)).toContainText("some of whom");
+  await expect(page.locator(".em-grammar-practice").nth(3)).toContainText("preposition");
 });
 
 test("English Master book shares LOS! 1 persistent text size, line spacing and measure controls", async ({ page }) => {
