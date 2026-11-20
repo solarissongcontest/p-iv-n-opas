@@ -14,7 +14,9 @@ import type {TeacherLesson,TeacherScene,TeacherQuestion,TeacherBookLink,TeacherB
  */
 export const LOS1_TEACHER_CANONICAL_VERSION="2.2.0-canonical-abc";
 const readingLessons=new Set(["L003","L008","L013","L018","L023","L032","L037","L042","L047","L052"]);
-const stale=/Franz|Jörg|Greta|Herr Weiß|Herr Schmidt|Herr Standish|Lisa Müller|Heinrich|Harald|Takashi|\bPeter\b|\bThomas\b|\bBerna\b|\bBernan\b|\bMia\b|Nicos Weg|Sport und Zeit|M-COM-0[1-9]|C\d{2}-(?:SOURCE|MCOM02)-Q\d{2}|Wikibooks|autenttis|alkuperäis|ihmisäänitte|ihmisen kirjoittam|kahdeksan repliik|kuuden repliik/i;
+// Standalone student names such as Mia are valid grammar examples and must not
+// trigger replacement of an entire authored teaching board or writing task.
+const stale=/Franz|Jörg|Greta|Herr Weiß|Herr Schmidt|Herr Standish|Lisa Müller|Heinrich|Harald|Takashi|\bPeter\b|\bThomas\b|\bBerna\b|\bBernan\b|Nicos Weg|Sport und Zeit|M-COM-0[1-9]|C\d{2}-(?:SOURCE|MCOM02)-Q\d{2}|Wikibooks|autenttis|alkuperäis|ihmisäänitte|ihmisen kirjoittam|kahdeksan repliik|kuuden repliik/i;
 const sectionFor=(kind:LosReadingText):"text"|"text-b"|"text-c"=>
   kind==="A"?"text":kind==="B"?"text-b":"text-c";
 const letters=["a","b","c","d","e","f","g","h"] as const;
