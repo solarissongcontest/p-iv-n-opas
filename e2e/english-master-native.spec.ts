@@ -313,7 +313,7 @@ test("advanced G09/G10 relative-clause practice shows corrective feedback and pr
   await expect(again.getByRole("status")).toContainText("2/2 oikein");
   await page.goto("/english-master#/book/G10",{waitUntil:"domcontentloaded"});
   await expect(page.locator(".em-grammar-practice")).toHaveCount(6);
-  await expect(page.locator(".em-grammar-practice").nth(2)).toContainText("some of whom");
+  await expect(page.locator(".em-grammar-practice").nth(2)).toContainText("three of whom");
   await expect(page.locator(".em-grammar-practice").nth(3)).toContainText("preposition");
 });
 
