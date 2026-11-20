@@ -467,3 +467,30 @@
 .dark .em-app.los-app{
  --los-accent-text:#A8D7ED;
 }
+
+
+/* LOS! Teacher 2.0 book-to-lesson round trip. Reading a page never
+   generates practice evidence, and the CTA is only shown for a known lesson. */
+.em-app .em-teacher-return{
+ display:flex;align-items:center;justify-content:space-between;gap:18px;
+ padding:16px 20px;margin:0 0 20px;
+ border:1px solid var(--los-line);border-left:3px solid var(--los-book-accent);
+ background:var(--los-subtle,var(--los-paper));color:var(--los-ink);
+ border-radius:10px;
+}
+.em-app .em-teacher-return strong{font-size:15px;line-height:1.4}
+.em-app .em-teacher-return p{font-size:13px;line-height:1.6;margin:5px 0 0;color:var(--los-soft)}
+.em-app .em-teacher-return button{
+ display:inline-flex;align-items:center;gap:8px;
+ flex-shrink:0;border:0;border-radius:8px;
+ padding:12px 14px;background:var(--los-book-accent);color:#fff;
+ font-weight:650;font-size:13px;cursor:pointer;
+}
+.em-app .em-teacher-return button:focus-visible{
+ outline:3px solid #397ace;outline-offset:3px;
+}
+@media(max-width:760px){
+ .em-app .em-teacher-return{flex-direction:column;align-items:stretch;padding:14px 16px}
+ .em-app .em-teacher-return button{justify-content:center}
+}
+.dark .em-app .em-teacher-return button{color:#102330}
