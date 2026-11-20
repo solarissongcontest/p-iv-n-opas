@@ -2,6 +2,7 @@ import {useEffect,useMemo,useState} from "react";
 import {ArrowRight,BookOpen,CheckCircle2,HelpCircle} from "lucide-react";
 import type {Lesson} from "./EnglishMasterBook";
 import {asTeacherLesson} from "./englishTeacherAdapter";
+import {englishReaderHashForRef} from "./englishChapterLinks";
 import {englishTeacherStorageKey} from "./englishTeacherBackup";
 import {
   confirmTeacherActivity,emptyTeacherSession,finishTeacherSession,independentTeacherEvidence,
@@ -163,7 +164,7 @@ export function EnglishTeacherPlayer({lesson:source,ownerId,previouslyCompleted,
         {current.bookLinks?.length?<div className="los-teacher-book-links">
           {current.bookLinks.map(link=><div key={link.chapterId} className="los-teacher-book-link">
             <div><strong>{link.label}</strong><p>{link.instruction}</p></div>
-            <a href={"/english-master?lessonReturn="+encodeURIComponent(lesson.id)+"#/book/"+encodeURIComponent(link.chapterId)}
+            <a href={"/english-master?lessonReturn="+encodeURIComponent(lesson.id)+englishReaderHashForRef(link.chapterId)}
               target="_blank" rel="noopener noreferrer">
               <BookOpen size={17}/> Avaa kirjassa <ArrowRight size={16}/>
             </a>
