@@ -73,7 +73,8 @@ test("English Master opens as a first-class book route, imports one content pack
 
   await page.getByRole("button", { name: "Opetuspolku", exact: true }).click();
   await expect(page.getByText("Test lesson 1", {exact:true})).toBeVisible();
-  await page.getByRole("button", { name: /Test lesson 1/ }).first().click();
+  await expect(page.locator(".em-teacher-resume")).toContainText("0/192");
+  await page.getByRole("button", { name: "Aloita Teacher 2.0", exact: true }).click();
   await expect(page.locator(".em-teacher-app")).toBeVisible();
   await expect(page.locator(".los-teacher-layout")).toBeVisible();
   await expect(page.locator(".los-teacher-paper")).toBeVisible();
@@ -297,4 +298,24 @@ test("English Teacher 2.0 reflows on narrow mobile screens without importing Ger
   await page.evaluate(() => document.documentElement.classList.add("dark"));
   await expectNoHorizontalOverflow(page);
   await page.screenshot({ path: testInfo.outputPath("english-master-teacher-2-mobile320-dark.png"), animations: "disabled" });
+});
+
+test("English Teacher 2.0 resume chooses the actual unfinished shared-engine session", async ({page})=>{
+  await enterLocalBook(page);
+  await expect(page.locator(".los-front")).toBeVisible({timeout:45_000});
+  await page.goto("/english-master#/path",{waitUntil:"domcontentloaded"});
+  await expect(page.locator(".em-teacher-resume")).toContainText("0/192");
+  const start=page.getByRole("button",{name:"Aloita Teacher 2.0",exact:true});
+  await expect(start).toBeVisible();
+  await start.click();
+  await expect(page.locator(".em-teacher-app")).toBeVisible();
+  await page.getByRole("button",{name:"Seuraava",exact:true}).click();
+  const current=await page.locator(".los-teacher-paper h2").textContent();
+  expect(current).toBeTruthy();
+  await page.locator(".los-teacher-back").click();
+  await expect(page.locator(".em-teacher-resume")).toContainText("Jatka siitä, mihin jäit");
+  await page.getByRole("button",{name:"Jatka Teacher 2.0:ssa"}).click();
+  await expect(page.locator(".los-teacher-paper h2")).toHaveText(current!);
+  await expect(page.locator(".los-teacher-save")).not.toContainText("Tallennus epäonnistui");
+  await expectNoHorizontalOverflow(page);
 });
