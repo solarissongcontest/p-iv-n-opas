@@ -467,9 +467,14 @@ test("C08 options provide Finnish or German language metadata for accessible pro
     assert.ok(scene.question.options.every(option=>option.lang==="de"),
       lessonId+"/"+sceneId+" is a German-language dialogue");
   }
+  // The options now live in the actual shared Teacher 2.0 scene component,
+  // used by both the German and English player.
   const player=readFileSync("src/features/los/teacher/LosTeacherPlayer.tsx","utf8");
-  assert.ok(player.includes('<span lang={option.lang ?? "de"}>{option.label}</span>'));
-  assert.ok(!player.includes('<span lang="de">{option.label}</span>'));
+  const shared=readFileSync("src/features/los/teacher/Teacher2SharedUI.tsx","utf8");
+  assert.ok(player.includes("<TeacherSceneQuestion"));
+  assert.ok(shared.includes('language = "de"'));
+  assert.ok(shared.includes('<span lang={option.lang ?? language}>{option.label}</span>'));
+  assert.ok(!shared.includes('<span lang="de">{option.label}</span>'));
 });
 
 
