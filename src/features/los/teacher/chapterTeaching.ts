@@ -45,7 +45,7 @@ const topics:Readonly<Record<string,LosChapterTeaching>>={
     goal:"Opit kysymään ikää ja kertomaan sen saksaksi.",
     example:"Ich bin siebzehn Jahre alt",
     rule:"Wie alt bist du? tarkoittaa Kuinka vanha olet? Voit vastata Ich bin siebzehn Jahre alt.",
-    contrast:"Ikä kerrotaan saksaksi sein-verbillä: Ich bin ..., eikä suomen rakenteen sanatarkalla käännöksellä.",
+    contrast:"Saksassa ikä ilmaistaan sein-verbillä aivan kuten suomessa olla-verbillä: Ich bin siebzehn Jahre alt. Älä korvaa bin-muotoa haben-verbillä (ich habe).",
     apply:"Kerro oma ikäsi kokonaisena saksankielisenä lauseena. Harjoittele sen jälkeen ikäkysymys."
   },
   "07":{
