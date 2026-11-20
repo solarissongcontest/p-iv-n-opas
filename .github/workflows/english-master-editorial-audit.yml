@@ -1,0 +1,36 @@
+name: English Master Editorial Content Inventory
+
+on:
+  pull_request:
+    paths:
+      - "scripts/audit_english_master_content.py"
+      - "public/english-master/**"
+      - ".github/workflows/english-master-editorial-audit.yml"
+  push:
+    branches: [main]
+    paths:
+      - "scripts/audit_english_master_content.py"
+      - "public/english-master/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  editorial-audit:
+    name: Audit real Alpha 0.8 lesson and chapter content
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify the signed-off content pack and measure editorial gaps
+        run: python3 scripts/audit_english_master_content.py
+      - name: Upload complete inventory and review queue
+        uses: actions/upload-artifact@v4
+        with:
+          name: english-master-editorial-inventory
+          path: |
+            test-results/english-master-editorial-audit.json
+            test-results/english-master-editorial-audit.md
+          retention-days: 30
+          if-no-files-found: error
