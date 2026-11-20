@@ -9,6 +9,7 @@ import { LosReaderDisplayControls, readLosReaderSettings } from "../los/LosReade
 import "./english-master.css";
 import { EnglishTeacherPlayer } from "./EnglishTeacherPlayer";
 import { recommendEnglishTeacherResume } from "./englishTeacherResume";
+import {relatedEnglishLessonIds} from "./englishChapterLinks";
 import {collectEnglishTeacherBackup,prepareEnglishTeacherRestore} from "./englishTeacherBackup";
 
 /**
@@ -297,6 +298,9 @@ export function EnglishMasterBook() {
     ?recommendEnglishTeacherResume(owner,lessons):null,
     [owner,lessons,location.page]);
   const currentChapter = pack?.chapters[location.id] ?? chapters[0];
+  const relatedLessonIds=useMemo(()=>currentChapter
+    ?relatedEnglishLessonIds(currentChapter.content_id,currentChapter.payload.linked_lesson_ids??[],lessons)
+    :[],[currentChapter,lessons]);
   const chapterIndex = chapters.findIndex(ch => ch.content_id === currentChapter?.content_id);
   const bookSectionChoices = [
     { id: "opening", title: "Luvun alku", target: "em-chapter-opening" },
@@ -326,6 +330,14 @@ export function EnglishMasterBook() {
     else window.location.hash = next;
     window.scrollTo(0, 0);
   };
+  const teacherReturnAction=returnLesson?<aside className="em-teacher-return" aria-label="Palaa Teacher 2.0 -oppituntiin">
+    <div><strong>Jatka opettajan kanssa</strong>
+      <p>Avattu oppitunnilta: {returnLesson.title}. Sivulla käyminen ei merkitse oppituntia automaattisesti suoritetuksi.</p>
+    </div>
+    <button type="button" onClick={()=>navigate("lesson",returnLesson.content_id)}>
+      Palaa oppituntiin <ArrowRight size={17}/>
+    </button>
+  </aside>:null;
   const goChapter = (id: string) => { setExpandedGroup(id.slice(0, 1)); navigate("book", id); };
   const markLesson = (id: string, answered: number, isCompleted = false) => {
     if (!owner) return;
@@ -511,6 +523,7 @@ export function EnglishMasterBook() {
         {!pack ? <><ImportPanel onImported={value => { setPack(value); navigate("home"); }} />{error && <p className="em-error" role="alert">{error}</p>}</> :
           location.page === "import" ? <ImportPanel onImported={value => { setPack(value); navigate("home"); }}/> :
           location.page === "home" ? <div className="em-home-los">
+            {teacherReturnAction}
             <div className="los-front los-front-has-banner">
               <div className="los-front-banner">
                 <div className="em-los-banner" role="img" aria-label="English Masterin typografinen kirjabanneri">
@@ -574,12 +587,7 @@ export function EnglishMasterBook() {
             </div>
           </section> :
           location.page === "book" ? <section className="em-los-chapter-page">
-            {returnLesson && <aside className="em-teacher-return" aria-label="Palaa Teacher 2.0 -oppituntiin">
-              <div><strong>Jatka opettajan kanssa</strong><p>Avattu oppitunnilta: {returnLesson.title}. Kirjan lukeminen ei automaattisesti merkitse harjoitusta suoritetuksi.</p></div>
-              <button type="button" onClick={()=>navigate("lesson",returnLesson.content_id)}>
-                Palaa oppituntiin <ArrowRight size={17}/>
-              </button>
-            </aside>}
+            {teacherReturnAction}
             {currentChapter && <article className="em-chapter">
               <div className="los-opening em-los-opening" id="em-chapter-opening">
                 <p className="los-eyebrow">{currentChapter.content_id} / {chapters.length} · ENGLISH MASTER</p>
@@ -617,15 +625,16 @@ export function EnglishMasterBook() {
                   {section.common_errors_fi&&<div className="los-editorial-note"><p>{Array.isArray(section.common_errors_fi)?section.common_errors_fi.join(" "):section.common_errors_fi}</p></div>}
                 </section>)}
                 {currentChapter.payload.summary_fi&&<div className="los-grammar-aside"><strong>Yhteenveto</strong><p>{currentChapter.payload.summary_fi}</p></div>}
-                {currentChapter.payload.linked_lesson_ids?.length?<div className="em-related">
+                {relatedLessonIds.length>0?<div className="em-related">
                   <h2>Harjoittele Opetuspolussa</h2>
-                  {currentChapter.payload.linked_lesson_ids.filter(id=>pack.lessons[id]).map(id=>
+                  {relatedLessonIds.map(id=>
                     <button key={id} onClick={()=>navigate("lesson",id)}>{id} · {pack.lessons[id]?.title}<ChevronRight size={16}/></button>)}
                 </div>:null}
               </div>
             </article>}
           </section> :
           location.page === "path" ? <section className="los-inner-page los-learning-path">
+            {teacherReturnAction}
             <p className="los-eyebrow">OHJATTU LUKUJÄRJESTYS / ENGLISH MASTER</p>
             <h1>Opetuspolku</h1>
             <p className="los-page-intro">32 jaksoa ja 192 suunniteltua oppituntia. Oppitunteja voi avata vapaasti. Edistyminen säilyy tällä laitteella eikä vielä synkronoidu tilille.</p>

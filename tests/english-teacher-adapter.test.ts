@@ -55,7 +55,9 @@ test("all 192 real English Master manuscripts convert safely into LOS! Teacher 2
         fail.push(source.content_id+": unchecked short answer "+scene.id);
     }
     for(const link of lesson.scenes.flatMap(scene=>scene.bookLinks??[])){
-      if(!payload.chapters[link.chapterId])
+      // A00/A08 are the two real native onboarding views, not printed
+      // chapters. All other links must exist in the 122-chapter source pack.
+      if(!payload.chapters[link.chapterId]&&!["A00","A08"].includes(link.chapterId))
         fail.push(source.content_id+": unknown chapter link "+link.chapterId);
     }
     const fresh=emptyTeacherSession(lesson,now);
