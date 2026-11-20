@@ -99,7 +99,7 @@ test("English Master opens as a first-class book route, imports one content pack
   await expect(page.getByRole("heading", { name: "Avaa aihe oppikirjassa" })).toBeVisible();
   const textbookLink=page.getByRole("link",{name:/Avaa kirjassa/});
   await expect(textbookLink).toHaveAttribute("target","_blank");
-  await expect(textbookLink).toHaveAttribute("href",/lessonReturn=EM-LP-J01-L001#\\/book\\/G01/);
+  await expect(textbookLink).toHaveAttribute("href",/lessonReturn=EM-LP-J01-L001#\/book\/G01/);
   const popupPromise=page.waitForEvent("popup");
   await textbookLink.click();
   const reader=await popupPromise;
