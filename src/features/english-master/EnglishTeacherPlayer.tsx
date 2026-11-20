@@ -108,6 +108,7 @@ export function EnglishTeacherPlayer({lesson:source,ownerId,previouslyCompleted,
     }catch{setSaved(false);}
   };
   const onAnswerChange=(v:string)=>saveDraft(current.id,v);
+  const paused=session.paused;
 
   return <main className="los-app los-teacher-app em-teacher-app" id="main-content" tabIndex={-1}>
     <TeacherTopbar brand="ENGLISH MASTER" context="Pitkä englanti · ENA" onBack={onBack}/>
@@ -148,7 +149,7 @@ export function EnglishTeacherPlayer({lesson:source,ownerId,previouslyCompleted,
         <button type="button" onClick={restart} disabled={!saved||archives.length>=8}>
           Arkistoi vanha suoritus ja aloita päivitetty oppitunti
         </button>
-      </section>:session.paused?<section className="los-teacher-paused" role="status">
+      </section>:paused?<section className="los-teacher-paused" role="status">
         <h2>Oppitunti keskeytetty</h2>
         <p>Opetustilanne ja vastaukset ovat tallessa. Jatka omassa tahdissasi.</p>
         <button type="button" onClick={pause}>Jatka opetusta</button>
