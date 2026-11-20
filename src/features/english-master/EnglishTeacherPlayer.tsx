@@ -66,6 +66,19 @@ function asTeacherLesson(source:Lesson):TeacherLesson {
       ...(entry.help_fi?{help:[{title:"Toinen selitys",body:entry.help_fi}]}:{}),
     });
   }
+  const chapterIds=[...new Set((source.book_refs??[])
+    .map(ref=>ref.match(/^G[0-9]{1,3}/i)?.[0]?.toUpperCase())
+    .filter((ref):ref is string=>Boolean(ref)))];
+  if(chapterIds.length){
+    scenes.push({
+      id:"textbook",kind:"book",phase:"OPPIKIRJA",title:"Avaa aihe oppikirjassa",
+      paragraphs:["Lue oppikirjan esimerkit ja palaa sitten tähän oppituntiin."],
+      bookLinks:chapterIds.map(chapterId=>({
+        label:chapterId+" · English Master",chapterId,section:"opening",
+        instruction:"Lue teoria ja esimerkit ennen harjoituksia.",
+      })),
+    });
+  }
   for(const [i,task] of (source.payload.tasks??[]).entries()){
     const manual=manualTask(task);
     const id=taskSceneId(i,manual);
