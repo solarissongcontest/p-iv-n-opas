@@ -18,10 +18,13 @@ const pack=JSON.parse(gunzipSync(zip).toString("utf8")) as {
   chapters:Record<string,{title:string;payload:{sections:Array<{section_id:string;title:string;theory_fi:string;self_check?:unknown}>}}>;
 };
 
-test("all 19 actual G01–G04 Alpha 0.8 sections have two original, real and explanatory self-check questions",()=>{
+test("all 47 actual G01–G10 Alpha 0.8 subsections have two original, real and explanatory self-check questions",()=>{
   assert.equal(createHash("sha256").update(zip).digest("hex"),manifest.sha256);
-  const sectionIds=["G01","G02","G03","G04"].flatMap(id=>pack.chapters[id]?.payload.sections.map(x=>x.section_id)??[]);
-  assert.equal(sectionIds.length,19);
+  const chapterIds=Array.from({length:10},(_,index)=>"G"+String(index+1).padStart(2,"0"));
+  const sectionIds=chapterIds.flatMap(id=>pack.chapters[id]?.payload.sections.map(x=>x.section_id)??[]);
+  assert.equal(sectionIds.length,47,"Only the real 19+28 subsections may have supplemental practice");
+  assert.equal(Object.keys(GRAMMAR_SELF_CHECKS).length,47);
+  assert.equal(sectionIds.length*2,94);
   assert.deepEqual(Object.keys(GRAMMAR_SELF_CHECKS).sort(),[...sectionIds].sort(),
     "No chapter subsection may be silently skipped, invented or orphaned");
   for(const id of sectionIds){
@@ -44,6 +47,28 @@ test("all 19 actual G01–G04 Alpha 0.8 sections have two original, real and exp
     assert.equal(gradeGrammarSelfCheck(tasks,[null,null]).answered,0);
     assert.equal(gradeGrammarSelfCheck(tasks,tasks.map(x=>x[2])).correct,2);
     assert.equal(gradeGrammarSelfCheck(tasks,[2,2]).total,2);
+  }
+});
+
+test("G05–G10 grammar checks respect genuinely distinct interpretation and formal usage",()=>{
+  const checks=[
+    ["G05.1",0,"a university"],
+    ["G05.2",0,"The notebook was expensive."],
+    ["G06.1",0,"Would you like some tea?"],
+    ["G06.3",1,"Neither option is suitable."],
+    ["G07.4",0,"The colleagues encouraged each other."],
+    ["G08.4",0,"At least one person did not support the proposal."],
+    ["G09.3",0,"The building whose roof was damaged was repaired."],
+    ["G09.4",1,"Helsinki, which is the capital of Finland, lies on the coast."],
+    ["G10.3",0,"The researchers, three of whom had worked abroad, spoke."],
+    ["G10.4",1,"The colleague I spoke to replied."],
+    ["G10.5",0,"What she discovered surprised us."],
+    ["G10.6",1,"The scientists revised the method."],
+  ] as const;
+  for(const [section,index,expected] of checks){
+    const item=GRAMMAR_SELF_CHECKS[section][index];
+    assert.equal(item[1][item[2]],expected,section+" requires the correct contextual answer");
+    assert.equal(gradeGrammarSelfCheck([item],[item[2]]).correct,1);
   }
 });
 

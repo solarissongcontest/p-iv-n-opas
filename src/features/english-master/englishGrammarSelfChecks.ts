@@ -1,4 +1,7 @@
-/** Original supplementary practice for the actual G01–G04 Alpha 0.8 grammar
+import {GRAMMAR_SELF_CHECKS_G05_G07} from "./englishGrammarSelfChecksG05G07.ts";
+import {GRAMMAR_SELF_CHECKS_G08_G10} from "./englishGrammarSelfChecksG08G10.ts";
+
+/** Original supplementary practice for the actual G01–G10 Alpha 0.8 grammar
  * chapters. Grounded in their SHA-256-verified source sections.
  * Not derived from an official matriculation examination or other textbook.
  * These items are separate from Teacher 2.0 mastery and never complete a lesson.
@@ -160,7 +163,9 @@ export const GRAMMAR_SELF_CHECKS:Readonly<Record<string,readonly [GrammarSelfChe
   ["Mitä ”papers” tarkoittaa virkkeessä ”She published two papers”?",
    ["Two research articles.","Two pieces of luggage.","A large amount of paper material."],0,
    "A paper voi tarkoittaa tutkimusartikkelia, jolloin papers on laskettava monikko. Merkitys ratkaisee laskettavuuden."]
-]
+],
+  ...GRAMMAR_SELF_CHECKS_G05_G07,
+  ...GRAMMAR_SELF_CHECKS_G08_G10,
 };
 
 export function gradeGrammarSelfCheck(items:readonly GrammarSelfCheckItem[], selections:readonly (number|null)[]):{
