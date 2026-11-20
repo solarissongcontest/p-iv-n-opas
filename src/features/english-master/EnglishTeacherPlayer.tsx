@@ -32,7 +32,7 @@ const manualTask=(task:LessonTask)=>task.requires_manual_review||
 const taskSceneId=(index:number,manual:boolean)=>(manual?"reflection-":"question-")+index;
 const boardActivityId=(index:number)=>"board-activity-"+index;
 
-function asTeacherLesson(source:Lesson):TeacherLesson {
+export function asTeacherLesson(source:Lesson):TeacherLesson {
   const scenes:TeacherScene[]=[{
     id:"intro",kind:"introduction",phase:"ALOITUS",title:"Aloitus ja tavoitteet",
     paragraphs:[
