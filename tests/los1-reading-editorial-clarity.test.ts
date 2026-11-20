@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import {losReadingQuestions,losReadingQuestionCorrect,validateLos1ReadingBank} from "../src/features/los/content/los1ReadingBank.ts";
+import {losReadingQuestions,losReadingQuestionCorrect,losReadingChoiceNeedsReview,losReadingLegacyAnswerKey,validateLos1ReadingBank} from "../src/features/los/content/los1ReadingBank.ts";
 import {LOS1_REVISED_AB} from "../src/features/los/content/los1RevisedAB.ts";
 import {LOS1_REVISED_C} from "../src/features/los/content/los1RevisedC.ts";
 
@@ -68,4 +68,29 @@ test("C02 Text C points to the first actual Mein Name ist example in C03 Text B"
   assert.match(b03,/Mein Name ist/);
   assert.match(c02.contentMarkdown,/C03:n Text B:n henkilöesittelyissä/);
   assert.doesNotMatch(c02.contentMarkdown,/tunnistaa Text B:n viesteissä/);
+});
+
+test("Legacy reading choices remain reviewable without being marked wrong",()=>{
+  const q=choice("09","A",4);
+  assert.equal(q.id,"LOS1-READ-V2-C09-A-05");
+  for(const previous of ["Torstai kello 16","Keskiviikko kello 15","Tiistai kello 14"]){
+    assert.equal(losReadingChoiceNeedsReview(q,previous),true);
+    assert.equal(losReadingQuestionCorrect(q,previous),null);
+  }
+  assert.equal(losReadingChoiceNeedsReview(q,""),false);
+  assert.equal(losReadingChoiceNeedsReview(q,"Torstai kello neljä"),false);
+  assert.equal(losReadingQuestionCorrect(q,"Torstai kello neljä"),true);
+  assert.equal(losReadingQuestionCorrect(q,"Tiistai kello kaksi"),false);
+  assert.equal(losReadingLegacyAnswerKey(q.id),"LOS1-READ-LEGACY-LOS1-READ-V2-C09-A-05");
+});
+
+test("Unmodified choices and open tasks retain their established grading rules",()=>{
+  const normal=choice("01","A",0);
+  assert.equal(losReadingChoiceNeedsReview(normal,"Saksan kurssia"),false);
+  assert.equal(losReadingQuestionCorrect(normal,"Saksan kurssia"),true);
+  assert.equal(losReadingQuestionCorrect(normal,"Junaa"),false);
+  const writing=losReadingQuestions("09","A").find(q=>q.kind==="open");
+  assert.ok(writing);
+  assert.equal(losReadingChoiceNeedsReview(writing,"Oma vastaus"),false);
+  assert.equal(losReadingQuestionCorrect(writing,"Oma vastaus"),null);
 });
