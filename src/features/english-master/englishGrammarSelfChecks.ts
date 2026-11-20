@@ -133,7 +133,7 @@ export const GRAMMAR_SELF_CHECKS:Readonly<Record<string,readonly [GrammarSelfChe
   ["Miten ilmaiset kaksi erillistä tietoa yleiskielisesti?",
    ["two informations","two pieces of information","two information"],1,
    "Information on yleiskielessä laskematon. Pieces of information tekee erilliset tiedot laskettaviksi."],
-  ["Mikä virke on oikein matkatavaroista?",
+  ["Mikä virke kuvaa matkatavaroiden painoa tavallisessa yleiskielessä?",
    ["The luggage are heavy.","The luggage is heavy.","The luggages are heavy."],1,
    "Luggage on tavallisessa matkatavaroiden merkityksessä laskematon ja saa yksiköllisen is-verbin."]
 ],
@@ -146,7 +146,7 @@ export const GRAMMAR_SELF_CHECKS:Readonly<Record<string,readonly [GrammarSelfChe
    "A few ilmaisee pientä mutta olemassa olevaa määrää. Few ilman artikkelia korostaa vaihtoehtojen niukkuutta."]
 ],
 "G04.4":[
-  ["Mikä on oikein yleiskielessä?",
+  ["Kun evidence tarkoittaa tutkimusnäyttöä, mikä virke on neutraalia yleiskieltä?",
    ["The evidence are limited.","The evidence is limited.","The evidences are limited."],1,
    "Evidence on tässä laskematon ja saa yksiköllisen is-muodon. Muotoa evidences ei pidetä tavallisena neutraalina monikkona."],
   ["Mikä on oikein, vaikka sana päättyy s-kirjaimeen?",
