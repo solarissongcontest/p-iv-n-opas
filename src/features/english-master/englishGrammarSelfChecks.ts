@@ -168,8 +168,8 @@ export function gradeGrammarSelfCheck(items:readonly GrammarSelfCheckItem[], sel
 }{
   return {
     total:items.length,
-    answered:items.filter((_,index)=>Number.isInteger(selections[index])&&
-      (selections[index]??-1)>=0&&(selections[index]??-1)<items[index][1].length).length,
+    answered:items.filter((item,index)=>Number.isInteger(selections[index])&&
+      (selections[index]??-1)>=0&&(selections[index]??-1)<item[1].length).length,
     correct:items.filter((item,index)=>selections[index]===item[2]).length
   };
 }
