@@ -8,6 +8,7 @@ import "../los/los-lessons.css";
 import { LosReaderDisplayControls, readLosReaderSettings } from "../los/LosReaderDisplayControls";
 import "./english-master.css";
 import { EnglishTeacherPlayer } from "./EnglishTeacherPlayer";
+import { recommendEnglishTeacherResume } from "./englishTeacherResume";
 import {collectEnglishTeacherBackup,prepareEnglishTeacherRestore} from "./englishTeacherBackup";
 
 /**
@@ -292,6 +293,9 @@ export function EnglishMasterBook() {
   }, [tocOpen]);
   const chapters = useMemo(() => Object.values(pack?.chapters ?? {}).sort((a, b) => a.content_id.localeCompare(b.content_id, "en", { numeric: true })), [pack]);
   const lessons = useMemo(() => Object.values(pack?.lessons ?? {}).sort((a, b) => a.content_id.localeCompare(b.content_id, "en", { numeric: true })), [pack]);
+  const teacherResume=useMemo(()=>location.page==="path"&&owner
+    ?recommendEnglishTeacherResume(owner,lessons):null,
+    [owner,lessons,location.page]);
   const currentChapter = pack?.chapters[location.id] ?? chapters[0];
   const chapterIndex = chapters.findIndex(ch => ch.content_id === currentChapter?.content_id);
   const bookSectionChoices = [
@@ -625,6 +629,23 @@ export function EnglishMasterBook() {
             <p className="los-eyebrow">OHJATTU LUKUJÄRJESTYS / ENGLISH MASTER</p>
             <h1>Opetuspolku</h1>
             <p className="los-page-intro">32 jaksoa ja 192 suunniteltua oppituntia. Oppitunteja voi avata vapaasti. Edistyminen säilyy tällä laitteella eikä vielä synkronoidu tilille.</p>
+            {teacherResume&&<div className="em-teacher-resume">
+              <div>
+                <p className="em-overline">TEACHER 2.0 · OMA OPETUSPOLKU</p>
+                <strong>{teacherResume.action==="review"?"Kaikki oppitunnit harjoiteltu":
+                  teacherResume.action==="updated"?"Oppitunnin sisältöä on päivitetty":
+                  teacherResume.action==="continue"?"Jatka siitä, mihin jäit":
+                  "Aloita englannin opiskelu"}</strong>
+                <p>{teacherResume.title} · {teacherResume.completed}/{teacherResume.available} Teacher 2.0 -oppituntia läpikäyty
+                  {teacherResume.action==="updated"?". Vanhat vastaukset säilyvät arkistoitaviksi, mutta eivät kelpaa uuden käsikirjoituksen näytöiksi.":""}</p>
+              </div>
+              <button type="button" onClick={()=>navigate("lesson",teacherResume.lessonId)}>
+                {teacherResume.action==="review"?"Kertaa alusta":
+                  teacherResume.action==="updated"?"Tarkista päivitetty oppitunti":
+                  teacherResume.action==="continue"?"Jatka Teacher 2.0:ssa":"Aloita Teacher 2.0"}
+                <ArrowRight size={17}/>
+              </button>
+            </div>}
             {Array.from({length:32},(_,i)=>"J"+String(i+1).padStart(2,"0")).map(unit=>{
               const available=lessons.filter(lesson=>lesson.content_id.includes("-"+unit+"-"));
               return <section key={unit} className="los-path-group em-unit"><h2>{unit} <small>{available.length} oppituntia</small></h2><ol>
