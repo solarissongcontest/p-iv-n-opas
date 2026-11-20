@@ -36,6 +36,20 @@ Tarkistus purkaa koko vahvistetun SHA-256-paketin. Numerot eivät perustu keinot
 
 A00 ja A08 **eivät ole virheellisiä 122 luvun viitteitä**. Ne ovat suunnitelman aloitus- ja opetuspolkukohteita. Sovellus avaa niiden osalta suoraan olemassa olevat aloitus- ja Opetuspolku-näkymät. A01–A07-sisältöjä ei ole rakennettu keksityiksi kirjaluvuiksi.
 
+## G01–G04 itsearviointitäydennys (20.11.2026)
+
+Alkuperäinen Alpha 0.8 -gzip-sisältöpaketti säilyy muuttumattomana. Sen 20 kirjaluvusta edelleen puuttuu alkuperäisessä datassa alaosioiden `self_check`, joten SHA-256:lla varmennettu toimituksellinen auditointi raportoi edelleen 20 alkuperäisdatan puutetta. Tämä on tarkoituksellista eikä tarkoita, etteikö sovelluksessa voisi nyt harjoitella.
+
+**Uusi erillinen toimituksellinen täydennys:**
+- G01–G04: **4 kirjalukua, 19 alaosiota ja 38 tarkistettavaa omaa itsearviointitehtävää**.
+- Jokaisessa alaosiossa on kaksi uutta kontekstisidonnaista kysymystä, kolme vastausvaihtoehtoa sekä selittävä palaute.
+- Vastausvalinnat ja tarkistetut tulokset tallennetaan käyttäjäkohtaisesti laitteen localStorageen versioidulla avaimella. Pilvisynkronointi tai tämän täydennyksen vienti vanhoihin varmuuskopioihin ei vielä ole toteutettu.
+- Täydennykset näkyvät suoraan alkuperäisessä LOS! v4 -tyylisessä kirjalukijassa. Ne **eivät** muuta 192 Teacher 2.0 -oppitunnin suoritusvaatimuksia tai todista kielitaidon hallintaa.
+- Näin 20 alkuperäisdatan itsearviointipuutteesta **4 kirjalukua on nyt toiminnallisesti täydennetty**. Jäljellä on 16 kirjalukua, joissa ei vielä ole vastaavaa toimituksellisesti kirjoitettua täydennystä.
+- Uudet tehtävät ovat projektissa kirjoitettua alkuperäistä sisältöä, eivät julkaisemattomien tai nykyisten YO-kokeiden autenttisia tehtäviä.
+
+**Jatkotyö:** G05–G10 sekä G13–G14 ovat seuraavat vahvistetut puuttuvat kirjaluvut. Loput puutelistasta tulee lukea aina uusimmasta automaattisesta raportista; sitä ei pidä päätellä pelkästä osittaisesta otoksesta.
+
 ## Julkaisua ei päätellä rakenteesta
 
 Koodi ja automaattinen rakennevalidointi voivat varmistaa, että:
