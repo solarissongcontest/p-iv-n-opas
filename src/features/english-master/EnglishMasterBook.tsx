@@ -10,6 +10,8 @@ import "./english-master.css";
 import { EnglishTeacherPlayer } from "./EnglishTeacherPlayer";
 import { recommendEnglishTeacherResume } from "./englishTeacherResume";
 import {relatedEnglishLessonIds} from "./englishChapterLinks";
+import {EnglishGrammarSelfCheck} from "./EnglishGrammarSelfCheck";
+import {GRAMMAR_SELF_CHECKS} from "./englishGrammarSelfChecks.ts";
 import {collectEnglishTeacherBackup,prepareEnglishTeacherRestore} from "./englishTeacherBackup";
 
 /**
@@ -623,6 +625,9 @@ export function EnglishMasterBook() {
                     <p lang="en">{ex.en}</p>{ex.meaning_fi&&<span>{ex.meaning_fi}</span>}{ex.why_fi&&<small>{ex.why_fi}</small>}
                   </div>)}
                   {section.common_errors_fi&&<div className="los-editorial-note"><p>{Array.isArray(section.common_errors_fi)?section.common_errors_fi.join(" "):section.common_errors_fi}</p></div>}
+                  {GRAMMAR_SELF_CHECKS[section.section_id]&&
+                    <EnglishGrammarSelfCheck sectionId={section.section_id} owner={owner}/>}
+
                 </section>)}
                 {currentChapter.payload.summary_fi&&<div className="los-grammar-aside"><strong>Yhteenveto</strong><p>{currentChapter.payload.summary_fi}</p></div>}
                 {relatedLessonIds.length>0?<div className="em-related">
