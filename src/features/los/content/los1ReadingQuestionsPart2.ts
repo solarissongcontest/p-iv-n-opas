@@ -640,7 +640,7 @@ export const LOS1_READING_QUESTIONS_PART2 = {
       },
       {
         "kind": "choice",
-        "prompt": "Mitä Aino sanoo tehdessään virheitä ymmärtämisessä?",
+        "prompt": "Miten Aino suhtautuu siihen, ettei ymmärrä aina kaikkea?",
         "options": [
           "Se on ongelma",
           "Se ei haittaa",
@@ -748,15 +748,15 @@ export const LOS1_READING_QUESTIONS_PART2 = {
       },
       {
         "kind": "choice",
-        "prompt": "Mikä lopullinen tapaamisaika on?",
+        "prompt": "Mille päivälle ja kellonajalle tapaaminen lopulta sovitaan?",
         "options": [
-          "Keskiviikko kello 15",
-          "Torstai kello 16",
-          "Tiistai kello 14"
+          "Keskiviikko kello kolme",
+          "Torstai kello neljä",
+          "Tiistai kello kaksi"
         ],
         "answerIndex": 1,
         "evidence": "Donnerstag, vier Uhr.",
-        "explanation": "Torstai kello neljä.",
+        "explanation": "Torstaina kello neljältä. Pelkkä vier Uhr ei yksin vahvista, onko kyse kello 4.00 vai 16.00.",
         "skill": "detail"
       },
       {
@@ -813,7 +813,7 @@ export const LOS1_READING_QUESTIONS_PART2 = {
       },
       {
         "kind": "choice",
-        "prompt": "Mikä viikonpäivä on vapaa?",
+        "prompt": "Mikä vaihtoehdoissa mainituista päivistä on merkitty vapaaksi?",
         "options": [
           "Mittwoch",
           "Donnerstag",
@@ -821,7 +821,7 @@ export const LOS1_READING_QUESTIONS_PART2 = {
         ],
         "answerIndex": 2,
         "evidence": "Sonntag: frei",
-        "explanation": "Sunnuntain kohdalla lukee frei.",
+        "explanation": "Sunnuntain kohdalla lukee frei. Myös lauantai on kalenterissa vapaa.",
         "skill": "detail"
       },
       {
