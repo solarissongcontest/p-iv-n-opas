@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - feat/los1-teacher-stack-qa-20261113
+      - feat/los1-teacher-stack-archive-20261113
 
 permissions:
   contents: read
@@ -57,9 +58,11 @@ jobs:
       - run: bun run typecheck
       - run: bun run test
       - run: bun run build
-
       - name: Install Playwright and accessibility tooling
         run: bun run e2e:install
+      # Dependencies are now available. Parse specs before installing browsers.
+      - name: Parse merged Teacher browser suites before browser installation
+        run: bunx playwright test e2e/los-full-book.spec.ts e2e/los-teacher-integrated-stack.spec.ts e2e/los-teacher-review-midterm.spec.ts e2e/los-c07-teacher.spec.ts e2e/los-c10-teacher.spec.ts --list --project=desktop-chromium
       - name: Install desktop Chromium and iPhone WebKit
         run: bunx playwright install --with-deps chromium webkit
       - name: Start locally merged LOS preview
@@ -77,9 +80,57 @@ jobs:
       - name: Open every merged LOS Teacher lesson in desktop and iPhone browser
         run: bunx playwright test e2e/los-teacher-integrated-stack.spec.ts --project=desktop-chromium --project=iphone-webkit
       - name: Digital textbook and original 60-lesson browser regression
-        run: bunx playwright test e2e/los-full-book.spec.ts --project=desktop-chromium --project=iphone-webkit
+        run: bunx playwright test e2e/los-full-book.spec.ts --project=desktop-chromium --project=iphone-webkit --fully-parallel --workers=4
       - name: Midterm, C07 and C10 interactive browser regressions
         run: bunx playwright test e2e/los-teacher-review-midterm.spec.ts e2e/los-c07-teacher.spec.ts e2e/los-c10-teacher.spec.ts --project=desktop-chromium --project=iphone-webkit
+      # The tested code exists only in this disposable runner. Archive the exact
+      # post-merge tree for reviewers without publishing or moving any branch.
+      - name: Package non-published merged Teacher source snapshot
+        if: success()
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Never claim HEAD matches the tested workspace when generated
+          # conflict resolutions were accidentally left uncommitted.
+          if ! git diff --quiet || ! git diff --cached --quiet; then
+            git status --short
+            echo "::error::Merged Teacher source contains uncommitted tracked changes; cannot archive HEAD as the tested source."
+            exit 1
+          fi
+          mkdir -p /tmp/los-teacher-merge-review
+          git archive --format=tar HEAD | gzip -n -9 > /tmp/los-teacher-merge-review/merged-source.tar.gz
+          (cd /tmp/los-teacher-merge-review && sha256sum merged-source.tar.gz > SHA256SUMS && sha256sum --check SHA256SUMS)
+          {
+            echo "LOS! 1 Teacher 2.0 · CI-only integrated preview"
+            echo "NOT a published build, pedagogical approval or production release."
+            echo "Workflow branch: ${GITHUB_REF_NAME}"
+            echo "Workflow run: ${GITHUB_RUN_ID}"
+            echo "Tested temporary merge commit: $(git rev-parse HEAD)"
+            echo "Tested temporary merge tree: $(git rev-parse HEAD^{tree})"
+            echo "Compressed source checksum: see SHA256SUMS"
+            echo ""
+            echo "Merged commit parents and summary:"
+            git log --format="%H %P %s" -n 16
+          } > /tmp/los-teacher-merge-review/PROVENANCE.txt
+          test -s /tmp/los-teacher-merge-review/merged-source.tar.gz
+          test -s /tmp/los-teacher-merge-review/PROVENANCE.txt
+          test -s /tmp/los-teacher-merge-review/SHA256SUMS
+      - name: Upload tested Teacher source for manual review
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: los-teacher-stack-merged-preview
+          path: /tmp/los-teacher-merge-review/
+          if-no-files-found: error
+          retention-days: 7
+      - name: Show final merged full-book test structure if CI fails
+        if: failure()
+        shell: bash
+        run: |
+          echo "Integration test source tail, for debugging merge-resolver mistakes:"
+          if [ -f e2e/los-full-book.spec.ts ]; then
+            nl -ba e2e/los-full-book.spec.ts | tail -n 110
+          fi
       - name: Preserve merged Teacher browser failures
         if: always()
         uses: actions/upload-artifact@v4
